@@ -143,8 +143,6 @@ function ZO_QuestJournal_Gamepad:Initialize(control)
         end,
     }
 
-    --Quest tracker depends on this data for finding the next quest to focus.
-    self:RefreshQuestMasterList()
     self.listDirty = true
 
     ZO_QuestJournal_Shared.Initialize(self, control)
@@ -190,7 +188,6 @@ function ZO_QuestJournal_Gamepad:SwitchActiveList(listDescriptor)
         if listDescriptor == QUEST_LIST then
             if self.listDirty then
                 self:RefreshQuestCount()
-                self:RefreshQuestMasterList()
                 self:RefreshQuestList()
             end
 
@@ -260,7 +257,7 @@ function ZO_QuestJournal_Gamepad:GetQuestDataString()
             repeatableText = GetString(SI_GAMEPAD_QUEST_JOURNAL_REPEATABLE_TEXT)
         end
 
-		instanceDisplayTypeText = self:GetTooltipText(questData.questType, questData.displayType, questData.questIndex)
+        instanceDisplayTypeText = self:GetTooltipText(questData.questType, questData.displayType, questData.questIndex)
     end
 
     return repeatableText, instanceDisplayTypeText
@@ -532,13 +529,12 @@ function ZO_QuestJournal_Gamepad:RefreshOptionsList()
     self.options = options
 end
 
-function ZO_QuestJournal_Gamepad:RefreshQuestMasterList()
-    self.questMasterList = QUEST_JOURNAL_MANAGER:GetQuestListData()
-
+function ZO_QuestJournal_Gamepad:OnQuestsUpdated()
     -- If we're showing the options list, make sure we still have the quest that we're viewing options for
     if self.currentListType == OPTIONS_LIST then
         local hasQuest = false
-        for i, quest in ipairs(self.questMasterList) do
+        local questList = QUEST_JOURNAL_MANAGER:GetQuestList()
+        for i, quest in ipairs(questList) do
             if quest.questIndex == self:GetSelectedQuestIndex() then
                 hasQuest = true
             end
@@ -549,13 +545,16 @@ function ZO_QuestJournal_Gamepad:RefreshQuestMasterList()
             self:SwitchActiveList(QUEST_LIST)
         end
     end
+
+    ZO_QuestJournal_Shared.OnQuestsUpdated(self)
 end
 
 function ZO_QuestJournal_Gamepad:RefreshQuestList()
     self.questList:Clear()
 
     local lastCategoryName
-    for i, quest in ipairs(self.questMasterList) do
+    local masterQuestList = QUEST_JOURNAL_MANAGER:GetQuestList()
+    for i, quest in ipairs(masterQuestList) do
         local entry = ZO_GamepadEntryData:New(quest.name, self:GetIconTexture(quest.questType, quest.displayType))
         entry:SetDataSource(quest)
         entry:SetIconTintOnSelection(true)
@@ -576,17 +575,6 @@ function ZO_QuestJournal_Gamepad:RefreshQuestList()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
 end
 
-function ZO_QuestJournal_Gamepad:GetNextSortedQuestForQuestIndex(questIndex)
-    if self.questMasterList then
-        for i, quest in ipairs(self.questMasterList) do
-            if quest.questIndex == questIndex then
-                local nextQuest = (i == #self.questMasterList) and 1 or (i + 1)
-                return self.questMasterList[nextQuest].questIndex
-            end
-        end
-    end
-end
-
 function ZO_QuestJournal_Gamepad:FocusQuestWithIndex(index)
     self:FireCallbacks("QuestSelected", index)
     -- The quest tracker performs focus logic on quest/remove/update, only force focus if the player has clicked on the quest through the journal UI
@@ -595,7 +583,6 @@ function ZO_QuestJournal_Gamepad:FocusQuestWithIndex(index)
         FOCUSED_QUEST_TRACKER:ForceAssist(index)
     end
 
-    self:RefreshQuestMasterList()
     self:RefreshQuestList()
 end
 

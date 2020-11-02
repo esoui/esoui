@@ -835,7 +835,7 @@ end
 
 do
     -- if this triggers, need to add new trait information to this arbitrary sort order
-    internalassert(ITEM_TRAIT_INFORMATION_MAX_VALUE == 4)
+    internalassert(ITEM_TRAIT_INFORMATION_MAX_VALUE == 5)
 
     local ITEM_TRAIT_INFORMATION_SORT_ORDER =
     {
@@ -843,7 +843,8 @@ do
         [ITEM_TRAIT_INFORMATION_NONE] = 1,
         [ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED] = 2,
         [ITEM_TRAIT_INFORMATION_RETRAITED] = 3,
-        [ITEM_TRAIT_INFORMATION_ORNATE] = 4,
+        [ITEM_TRAIT_INFORMATION_RECONSTRUCTED] = 4,
+        [ITEM_TRAIT_INFORMATION_ORNATE] = 5,
     }
 
     function ZO_GetItemTraitInformation_SortOrder(traitInfo)
@@ -853,7 +854,7 @@ end
 
 do
     -- if this triggers, need to add new sell information to this arbitrary sort order
-    internalassert(ITEM_SELL_INFORMATION_MAX_VALUE == 4)
+    internalassert(ITEM_SELL_INFORMATION_MAX_VALUE == 5)
 
     local ITEM_SELL_INFORMATION_SORT_ORDER =
     {
@@ -861,7 +862,8 @@ do
         [ITEM_SELL_INFORMATION_NONE] = 1,
         [ITEM_SELL_INFORMATION_CAN_BE_RESEARCHED] = 2,
         [ITEM_SELL_INFORMATION_INTRICATE] = 3,
-        [ITEM_SELL_INFORMATION_CANNOT_SELL] = 4,
+        [ITEM_SELL_INFORMATION_RECONSTRUCTED] = 4,
+        [ITEM_SELL_INFORMATION_CANNOT_SELL] = 5,
     }
 
     function ZO_GetItemSellInformationCustomSortOrder(sellInformation)

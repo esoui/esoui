@@ -183,14 +183,16 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeGridListPanel()
     self.gridListPanelList = ZO_SingleTemplateGridScrollList_Gamepad:New(gridListPanel, ZO_GRID_SCROLL_LIST_AUTOFILL)
 
     local function OutfitStyleGridEntrySetup(control, data, list)
-        ZO_DefaultGridEntrySetup(control, data, list)
-
-        if data.iconDesaturation == 1 or data.isEmptyCell then
+        if data.isEmptyCell then
             control:SetAlpha(0.4)
         else
             control:SetAlpha(1)
+            if control.icon then
+                ZO_SetDefaultIconSilhouette(control.icon, not data.clearAction and data:IsLocked())
+            end
         end
 
+        ZO_DefaultGridEntrySetup(control, data, list)
         ZO_Restyle_Station_Gamepad_SetOutfitEntryBorder(control, data, self.slotManipulator, self.pendingLoopAnimationPool)
     end
 

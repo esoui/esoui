@@ -23,9 +23,9 @@ end
 ZO_VoiceChatChannelsGamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ZO_VoiceChatChannelsGamepad:New(...)
-	local object = ZO_Object.New(self)
-	object:Initialize(...)
-	return object
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
 end
 
 function ZO_VoiceChatChannelsGamepad:Initialize(control)
@@ -63,16 +63,20 @@ function ZO_VoiceChatChannelsGamepad:InitializeHeaders()
         KEYBIND_STRIP:AddKeybindButtonGroup(self.historyKeybinds)
     end
 
-    local channelsHeader = {
+    local channelsHeader =
+    {
         text = GetString(SI_GAMEPAD_VOICECHAT_CHANNELS_TITLE),
         callback = OnTabChangedToChannels,
     }
-    local historyHeader = {
+    local historyHeader =
+    {
         text = GetString(SI_GAMEPAD_VOICECHAT_HISTORY_TITLE),
         callback = OnTabChangedToHistory,
     }
-    self.headerData = {
-        tabBarEntries = {
+    self.headerData =
+    {
+        tabBarEntries =
+        {
             channelsHeader,
             historyHeader,
         },
@@ -135,7 +139,7 @@ local function PopulateChannelsHelper(list, channel, headerText)
 
     if headerText then
         newEntry:SetHeader(headerText)
-	    list:AddEntryWithHeader("ZO_VoiceChatChannelsEntryGamepad", newEntry)
+        list:AddEntryWithHeader("ZO_VoiceChatChannelsEntryGamepad", newEntry)
     else
         list:AddEntry("ZO_VoiceChatChannelsEntryGamepad", newEntry)
     end
@@ -151,12 +155,12 @@ function ZO_VoiceChatChannelsGamepad:PopulateChannels()
     end
 
     --Group
-	if groupData then
+    if groupData then
         local header = not mainHeaderAdded and GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_MAIN_HEADER)
         PopulateChannelsHelper(self.list, groupData, header)
-	end
+    end
 
-	--Guild Channels
+    --Guild Channels
     for guildId, guildData in pairs(guildData) do
         --Collect into sorted list
         local rooms = {}
@@ -165,8 +169,7 @@ function ZO_VoiceChatChannelsGamepad:PopulateChannels()
         end
         table.sort(rooms, ComparatorGuildRoomEntries)
 
-        for i = 1, #rooms do
-            local roomData = rooms[i]
+        for i, roomData in ipairs(rooms) do
             local header = i == 1 and guildData.header or nil
             PopulateChannelsHelper(self.list, roomData, header)
         end
@@ -209,8 +212,7 @@ function ZO_VoiceChatChannelsGamepad:PopulateHistory()
         end
         table.sort(rooms, ComparatorGuildRoomEntries)
 
-        for i = 1, #rooms do
-            local room = rooms[i]
+        for i, room in ipairs(rooms) do
             PopulateHistoryHelper(self.list, room.historyData, room.fullName, room)
         end
     end
@@ -261,10 +263,10 @@ end
 function ZO_VoiceChatChannelsGamepad:SetupList(list)
     self.list = list
     list:AddDataTemplate("ZO_VoiceChatChannelsEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-	list:AddDataTemplateWithHeader("ZO_VoiceChatChannelsEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplateWithHeader("ZO_VoiceChatChannelsEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
     list:AddDataTemplate("ZO_VoiceChatHistoryEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-	list:AddDataTemplateWithHeader("ZO_VoiceChatHistoryEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplateWithHeader("ZO_VoiceChatHistoryEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
     self.currentList = LIST_CHANNELS
 end
@@ -304,7 +306,8 @@ do
         return VOICE_CHAT_MANAGER:AreRequestsAllowed()
     end
     function ZO_VoiceChatChannelsGamepad:InitializeKeybindStripDescriptors()
-        local joinOrActivateChannelKeybind = {
+        local joinOrActivateChannelKeybind =
+        {
             name =
                 function()
                     local channel = self.list:GetTargetData().channel
@@ -336,7 +339,8 @@ do
                 end,
             enabled = RequestDelayEnabled,
         }
-        local leaveChannelKeybind = {
+        local leaveChannelKeybind =
+        {
             name = GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_LEAVE_CHANNEL),
             keybind = "UI_SHORTCUT_SECONDARY",
             callback =
@@ -360,7 +364,8 @@ do
                 end,
             enabled = RequestDelayEnabled,
         }
-        local showParticipantsKeybind = {
+        local showParticipantsKeybind =
+        {
             name = GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_PARTICIPANT_OPTIONS),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback =
@@ -390,7 +395,8 @@ do
                 end,
         }
 
-        self.channelKeybinds = {
+        self.channelKeybinds =
+        {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
             --These are inserted as numerically indiced entries
             joinOrActivateChannelKeybind,

@@ -191,8 +191,13 @@ function ZO_CurrencyControl_FormatCurrency(amount, useShortFormat, obfuscateAmou
     end
 end
 
+function ZO_CurrencyControl_FormatAndLocalizeCurrency(...)
+    local formattedCurrency = ZO_CurrencyControl_FormatCurrency(...)
+    return ZO_FastFormatDecimalNumber(formattedCurrency)
+end
+
 function ZO_CurrencyControl_FormatCurrencyAndAppendIcon(amount, useShortFormat, currencyType, isGamepad, obfuscateAmount)
-    local formattedCurrency = ZO_CurrencyControl_FormatCurrency(amount, useShortFormat, obfuscateAmount)
+    local formattedCurrency = ZO_CurrencyControl_FormatAndLocalizeCurrency(amount, useShortFormat, obfuscateAmount)
 
     local iconMarkup
     local iconSize
@@ -331,13 +336,11 @@ function ZO_CurrencyControl_SetCurrency(self, options)
                 iconMarkup = zo_iconFormat(currencyTexture, iconSize, iconSize)
             end
 
-            local delimitedAmount = ZO_CurrencyControl_FormatCurrency(currencyData.amount, options.useShortFormat, currencyData.obfuscateAmount)
-            local formattedAmount = ZO_FastFormatDecimalNumber(delimitedAmount)
+            local formattedAmount = ZO_CurrencyControl_FormatAndLocalizeCurrency(currencyData.amount, options.useShortFormat, currencyData.obfuscateAmount)
 
             if not currencyData.obfuscateAmount then
                 if currencyData.currencyCapAmount then
-                    local delimitedCap = ZO_CurrencyControl_FormatCurrency(currencyData.currencyCapAmount, options.useShortFormat)
-                    local formattedCap = ZO_FastFormatDecimalNumber(delimitedCap)
+                    local formattedCap = ZO_CurrencyControl_FormatAndLocalizeCurrency(currencyData.currencyCapAmount, options.useShortFormat)
                     formattedAmount = formattedAmount .. "/" .. formattedCap
                 end
             end
@@ -499,21 +502,25 @@ local function GetCurrencyIconMarkup(currencyType, isGamepad, iconInheritColor)
     end
 end
 
---The return of this function is intended to be formatted into another string
+--The return of this function is intended to be already localized in terms of delimiters.  Do NOT pass the result into a <<f:1>> formatter, or the delimiters will be wrong.
 -- extraOptions is a table of additional options to modify how the currency is formatted
 --     showCap - if set to true, the formatted currency amount will also show the currency cap in the format amount/cap if there is a cap
 --     currencyLocation - used with showCap to specify the currency location to pull the cap from
 --     color - specify a color to be used for the currency amount instead of the default currency color
 --     iconInheritColor - will allow the currency icon to inherit the color of the label it's displayed in
+--     obfuscateAmount - will not show the passed in currency amount, but will instead show SI_CURRENCY_OBFUSCATE_VALUE
+--     useShortFormat - will abbreviate the number if it's above the CURRENCY_NO_ABBREVIATION_THRESHOLD
 function ZO_Currency_Format(currencyAmount, currencyType, formatType, isGamepad, extraOptions)
     local formattedAmount
     if currencyAmount then
-        formattedAmount = ZO_CurrencyControl_FormatCurrency(currencyAmount)
+        local useShortFormat = extraOptions and extraOptions.useShortFormat or nil
+        local obfuscateAmount = extraOptions and extraOptions.obfuscateAmount or nil
+        formattedAmount = ZO_CurrencyControl_FormatAndLocalizeCurrency(currencyAmount, useShortFormat, obfuscateAmount)
         if extraOptions and extraOptions.showCap then
             local currencyLocation = extraOptions.currencyLocation
             if IsCurrencyCapped(currencyType, currencyLocation) then
                 local maxPossible = GetMaxPossibleCurrency(currencyType, currencyLocation)
-                local formattedCap = ZO_CurrencyControl_FormatCurrency(maxPossible)
+                local formattedCap = ZO_CurrencyControl_FormatAndLocalizeCurrency(maxPossible)
                 formattedAmount = formattedAmount .. "/" .. formattedCap
             end
         end
@@ -534,12 +541,7 @@ function ZO_Currency_Format(currencyAmount, currencyType, formatType, isGamepad,
         return string.format("(%s)", formattedAmount)
     elseif formatType == ZO_CURRENCY_FORMAT_AMOUNT_ICON then
         local iconMarkup = GetCurrencyIconMarkup(currencyType, isGamepad, iconInheritColor)
-        local color
-        if extraOptions and extraOptions.color then
-            color = extraOptions.color
-        else
-            color = GetCurrencyColor(currencyType, isGamepad)
-        end
+        local color = extraOptions and extraOptions.color or GetCurrencyColor(currencyType, isGamepad)
         return string.format("%s|u0:6%%:currency:|u%s", color:Colorize(formattedAmount), iconMarkup)
     elseif formatType == ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON then
         local iconMarkup = GetCurrencyIconMarkup(currencyType, isGamepad, iconInheritColor)
@@ -555,12 +557,7 @@ function ZO_Currency_Format(currencyAmount, currencyType, formatType, isGamepad,
         return string.format("|u0:6%%:currency:%s|u%s", currencyName, iconMarkup)
     elseif formatType == ZO_CURRENCY_FORMAT_STRIKETHROUGH_AMOUNT_ICON then
         local iconMarkup = GetCurrencyIconMarkup(currencyType, isGamepad, iconInheritColor)
-        local color
-        if extraOptions and extraOptions.color then
-            color = extraOptions.color
-        else
-            color = GetCurrencyColor(currencyType, isGamepad)
-        end
+        local color = extraOptions and extraOptions.color or GetCurrencyColor(currencyType, isGamepad)
         local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
         return string.format("%s|u0:6%%:currency:|u%s", color:Colorize(strikethroughAmountString), iconMarkup)
     end
@@ -582,6 +579,11 @@ end
 
 function ZO_Currency_GetAmountLabel(currencyType)
     return g_currenciesData[currencyType].amountLabel
+end
+
+function ZO_Currency_GetPlatformColor(currencyType)
+    local isGamepad = IsInGamepadPreferredMode()
+    return GetCurrencyColor(currencyType, isGamepad)
 end
 
 function ZO_Currency_TryShowThresholdDialog(storeItemIndex, quantity, itemData)

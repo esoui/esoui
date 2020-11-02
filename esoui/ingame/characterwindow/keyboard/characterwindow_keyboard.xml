@@ -46,19 +46,22 @@
             </OnInitialized>
 
             <Controls>
-                <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_CHARACTER_EQUIP_TITLE">
-                    <Anchor point="TOPLEFT" offsetX="14" offsetY="26" />
-                </Label>
+                <Control name="$(parent)HeaderSection" hidden="true">
+                    <Anchor point="TOPLEFT" />
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_CHARACTER_EQUIP_TITLE">
+                            <Anchor point="TOPLEFT" offsetX="14" offsetY="26" />
+                        </Label>
 
-                <Texture name="$(parent)ApparelSection" inherits="ZO_CharacterSheetDivider">
-                    <Anchor point="TOPLEFT" offsetY="63" />
-                    <OnInitialized>
-                        self:GetNamedChild("Text"):SetText(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL))
-                    </OnInitialized>
-                </Texture>
+                        <Texture name="$(parent)Divider" textureFile="EsoUI/Art/CharacterWindow/characterWindow_leftSide_divider.dds">
+                            <Dimensions x="256" y="4" />
+                            <Anchor point="TOPLEFT" offsetY="63" />
+                        </Texture>
+                    </Controls>
+                </Control>
 
-                <Label name="$(parent)ApparelHidden" font="ZoFontHeader" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ApparelSectionText" relativePoint="TOPRIGHT" offsetX="5" />
+                <Label name="$(parent)ApparelSectionText" font="ZoFontHeader" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderSectionDivider" relativePoint="BOTTOMLEFT" offsetX="14" offsetY="5" />
                 </Label>
 
                 <Button name="$(parent)EquipmentSlotsHead" inherits="ZO_InventoryEquippedSlot">
@@ -157,7 +160,7 @@
         </TopLevelControl>
 
         <TopLevelControl name="ZO_CharacterWindowStats" mouseEnabled="true" hidden="true">
-            <Anchor point="TOPLEFT" relativeTo="ZO_CharacterApparelSection" relativePoint="TOPRIGHT" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_CharacterHeaderSectionDivider" relativePoint="TOPRIGHT" />
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_Character" relativePoint="BOTTOMRIGHT" offsetX="20"/>
             <Dimensions x="298" />
             <OnInitialized>

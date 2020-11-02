@@ -671,6 +671,14 @@ function ZO_Restyle_Station_Gamepad:SetupList(list)
 end
 
 function ZO_Restyle_Station_Gamepad:InitializeOptionsDialog()
+    local function OnReleaseDialog(dialog)
+        if dialog.dropdowns then
+            for i, dropdown in pairs(dialog.dropdowns) do
+                dropdown:Deactivate()
+            end
+        end
+        dialog.dropdowns = nil
+    end
     ZO_Dialogs_RegisterCustomDialog("GAMEPAD_RESTYLE_STATION_OPTIONS",
     {
         gamepadInfo =
@@ -684,6 +692,7 @@ function ZO_Restyle_Station_Gamepad:InitializeOptionsDialog()
         setup = function(dialog, allActions)
             local parametricList = dialog.info.parametricList
             ZO_ClearNumericallyIndexedTable(parametricList)
+            dialog.dropdowns = {}
 
             for i, action in ipairs(allActions) do
                 local entryData = ZO_GamepadEntryData:New(action.text)
@@ -726,17 +735,7 @@ function ZO_Restyle_Station_Gamepad:InitializeOptionsDialog()
                 end,
             },
         },
-        noChoiceCallback = function(dialog)
-            local parametricList = dialog.info.parametricList
-            for i, entry in ipairs(parametricList) do
-                if entry.entryData.action.isDropdown then
-                    local control = dialog.entryList:GetControlFromData(entry.entryData)
-                    if control then
-                        control.dropdown:Deactivate()
-                    end
-                end
-            end
-        end
+        noChoiceCallback = OnReleaseDialog,
     })
 end
 
@@ -805,6 +804,7 @@ do
                 setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                     ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
                     control.dropdown:SetSortsItems(false)
+                    table.insert(data.dialog.dropdowns, control.dropdown)
                     self:UpdateDyeSortingDropdownOptions(control.dropdown)
                 end,
                 callback = function(dialog)
@@ -826,8 +826,8 @@ function ZO_Restyle_Station_Gamepad:UpdateDyeSortingDropdownOptions(dropdown)
         ZO_DYEING_MANAGER:SetSortStyle(style)
     end
 
-    dropdown:AddItem(ZO_ComboBox:CreateItemEntry(GetString(SI_DYEING_SORT_BY_RARITY), function() SelectNewSort(ZO_DYEING_SORT_STYLE_RARITY) end), ZO_COMBOBOX_SUPRESS_UPDATE)
-    dropdown:AddItem(ZO_ComboBox:CreateItemEntry(GetString(SI_DYEING_SORT_BY_HUE), function() SelectNewSort(ZO_DYEING_SORT_STYLE_HUE) end), ZO_COMBOBOX_SUPRESS_UPDATE)
+    dropdown:AddItem(ZO_ComboBox:CreateItemEntry(GetString(SI_DYEING_SORT_BY_RARITY), function() SelectNewSort(ZO_DYEING_SORT_STYLE_RARITY) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
+    dropdown:AddItem(ZO_ComboBox:CreateItemEntry(GetString(SI_DYEING_SORT_BY_HUE), function() SelectNewSort(ZO_DYEING_SORT_STYLE_HUE) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
 
     dropdown:UpdateItems()
 

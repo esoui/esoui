@@ -532,7 +532,7 @@ end
 
 function ZO_GameStartup_Gamepad:SetPsnFreeTrialEnded(psnFreeTrialEnded)
     if psnFreeTrialEnded then
-        internalassert(GetUIPlatform() == UI_PLATFORM_PS4, "ingame free trial ended dialog only supported for playstation")
+        internalassert(ZO_IsPlaystationPlatform(), "ingame free trial ended dialog only supported for playstation")
     end
     self.psnFreeTrialEnded = psnFreeTrialEnded
 end

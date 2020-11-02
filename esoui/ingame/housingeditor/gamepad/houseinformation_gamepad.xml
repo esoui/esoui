@@ -84,6 +84,20 @@
                                 </Texture>
                             </Controls>
                         </Control>
+
+                        <Control name="$(parent)IndividualPermissions" inherits="ZO_HousingFurnitureBrowser_Gamepad_Row" >
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CurrentVisitorsRow" relativePoint="BOTTOMLEFT" offsetY="40" />
+                            <Controls>
+                                <Label name="$(parent)Name" override="true" text="SI_PERMISSION_USER_GROUP_INDIVIDUAL_TOTAL_HEADER" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)GuildPermissions" inherits="ZO_HousingFurnitureBrowser_Gamepad_Row" >
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)IndividualPermissions" relativePoint="BOTTOMLEFT" offsetY="15" />
+                            <Controls>
+                                <Label name="$(parent)Name" override="true" text="SI_PERMISSION_USER_GROUP_GUILD_TOTAL_HEADER" />
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Control>
             </Controls>

@@ -2030,6 +2030,35 @@ ESO_Dialogs["GROUP_LEAVE_DIALOG"] =
     }
 }
 
+ESO_Dialogs["INSTANCE_LEAVE_DIALOG"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_GROUP_MENU_LEAVE_INSTANCE_DIALOG_TITLE,
+    },
+    mainText =
+    {
+        text = SI_GROUP_MENU_LEAVE_INSTANCE_DIALOG_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                ExitInstanceImmediately()
+            end,
+        },
+
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    }
+}
+
 ESO_Dialogs["LFG_LEAVE_QUEUE_CONFIRMATION"] =
 {
     gamepadInfo =
@@ -2205,17 +2234,16 @@ ESO_Dialogs["GAMERCARD_UNAVAILABLE"] =
     },
     title = 
     {
-        text = GetUIPlatform() == UI_PLATFORM_PS4 and SI_GAMEPAD_PSN_PROFILE_UNAVAILABLE_DIALOG_TITLE or
+        text = ZO_IsPlaystationPlatform() and SI_GAMEPAD_PSN_PROFILE_UNAVAILABLE_DIALOG_TITLE or
                SI_GAMEPAD_GAMERCARD_UNAVAILABLE_DIALOG_TITLE,
     },
-    mainText = 
+    mainText =
     {
-        text = GetUIPlatform() == UI_PLATFORM_PS4 and SI_GAMEPAD_PSN_PROFILE_UNAVAILABLE_DIALOG_BODY or
+        text = ZO_IsPlaystationPlatform() and SI_GAMEPAD_PSN_PROFILE_UNAVAILABLE_DIALOG_BODY or
                SI_GAMEPAD_GAMERCARD_UNAVAILABLE_DIALOG_BODY,
     },
     buttons =
     {
-        [1] =
         {
             text = SI_OK,
         }
@@ -2824,6 +2852,36 @@ ESO_Dialogs["CONFIRM_EQUIP_ITEM"] =
             callback = function(dialog)
                             dialog.data.onAcceptCallback()
                        end,
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["CONFIRM_BIND_ITEM"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_DIALOG_CONFIRM_BINDING_ITEM_TITLE,
+    },
+    mainText =
+    {
+        text = SI_DIALOG_CONFIRM_BIND_ITEM_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                dialog.data.onAcceptCallback()
+            end,
             clickSound = SOUNDS.DIALOG_ACCEPT,
         },
         {

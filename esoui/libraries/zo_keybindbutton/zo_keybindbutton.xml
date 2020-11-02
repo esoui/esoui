@@ -49,6 +49,12 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_KeybindButton_Gamepad" inherits="ZO_KeybindButton" virtual="true">
+            <OnInitialized name="ZO_KeybindButton_Gamepad">
+                ApplyTemplateToControl(self, "ZO_KeybindButton_Gamepad_Template")
+            </OnInitialized>
+        </Control>
+        
         <Control name="ZO_KeybindButton_LabelAligned" inherits="ZO_KeybindButton" virtual="true">
             <DimensionConstraints minY="35" maxY="35" />
 

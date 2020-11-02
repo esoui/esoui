@@ -43,13 +43,13 @@ function ZO_MarketCurrency_Gamepad:Hide()
 end
 
 function ZO_MarketCurrency_Gamepad:OnCrownsUpdated(currentCurrency, difference)
-    local crownAmount = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatGamepad(CURT_CROWNS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+    local crownAmount = ZO_Currency_FormatGamepad(CURT_CROWNS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
     self.crownAmountControl:SetText(crownAmount)
     self:FireCallbacks("OnCurrencyUpdated")
 end
 
 function ZO_MarketCurrency_Gamepad:OnCrownGemsUpdated(currentCurrency, difference, reason)
-    local gemAmount = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatGamepad(CURT_CROWN_GEMS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+    local gemAmount = ZO_Currency_FormatGamepad(CURT_CROWN_GEMS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
     self.gemAmountControl:SetText(gemAmount)
     self:FireCallbacks("OnCurrencyUpdated")
 end

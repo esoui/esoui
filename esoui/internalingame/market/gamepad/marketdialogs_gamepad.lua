@@ -16,6 +16,8 @@ local DIALOG_FLOW =
     [FLOW_FAILED] = "GAMEPAD_MARKET_PURCHASE_FAILED",
 }
 
+local SELECT_HOUSE_TEMPLATE_DIALOG = "GAMEPAD_MARKET_PURCHASE_HOUSE_TEMPLATE_SELECTION"
+
 ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS =
 {
     showTooltips = false,
@@ -30,53 +32,58 @@ ZO_GAMEPAD_MARKET_PURCHASE_SCENE_NAME = "gamepad_market_purchase"
 
 local function GetAvailableCurrencyHeaderData(marketCurrencyType)
     return {
-                value = function(control)
-                    ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), GetPlayerMarketCurrency(marketCurrencyType), ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS)
-                    return true
-                end,
-                header = GetString(SI_GAMEPAD_MARKET_FUNDS_LABEL),
-            }
+        value = function(control)
+            ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), GetPlayerMarketCurrency(marketCurrencyType), ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS)
+            return true
+        end,
+        header = GetString(SI_GAMEPAD_MARKET_FUNDS_LABEL),
+    }
 end
 
-local function GetProductCostHeaderData(cost, marketCurrencyType, hasEsoPlusCost)
-
-    return  {
-                value = function(control)
-                    local displayOptions
-                    if hasEsoPlusCost then
-                        displayOptions =
-                        {
-                            iconInheritColor = true,
-                            color = ZO_DEFAULT_TEXT,
-                            strikethroughCurrencyAmount = true,
-                        }
-                    end
-                    ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
-                    return true
-                end,
-                header = function(control)
-                    if hasEsoPlusCost then
-                        return GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_NORMAL_COST_LABEL)
-                    else
-                        return GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_COST_LABEL)
-                    end
-                end,
-            }
+local g_dialogDiscountPercentParentControl = nil
+local function GetProductCostHeaderData(cost, marketCurrencyType, hasEsoPlusCost, discountPercent, updateDiscountPercentParentControl)
+    return {
+        value = function(control)
+            local displayOptions
+            if hasEsoPlusCost or discountPercent ~= nil then
+                displayOptions =
+                {
+                    iconInheritColor = true,
+                    color = ZO_DEFAULT_TEXT,
+                    strikethroughCurrencyAmount = true,
+                }
+            end
+            ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
+            if not hasEsoPlusCost and updateDiscountPercentParentControl then
+                g_dialogDiscountPercentParentControl = control
+            end
+            return true
+        end,
+        header = function(control)
+            if hasEsoPlusCost then
+                return GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_NORMAL_COST_LABEL)
+            elseif discountPercent ~= nil then
+                return ""
+            else
+                return GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_COST_LABEL)
+            end
+        end,
+    }
 end
 
 local function GetProductEsoPlusCostHeaderData(cost, marketCurrencyType)
-    return  {
-                value = function(control)
-                    local displayOptions =
-                    {
-                        iconInheritColor = true,
-                        color = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
-                    }
-                    ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
-                    return true
-                end,
-                header = GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_ESO_PLUS_COST_LABEL),
+    return {
+        value = function(control)
+            local displayOptions =
+            {
+                iconInheritColor = true,
+                color = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
             }
+            ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
+            return true
+        end,
+        header = GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_ESO_PLUS_COST_LABEL),
+    }
 end
 
 ZO_GamepadMarketPurchaseManager = ZO_Object:Subclass()
@@ -118,6 +125,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] = 
     {
+        canQueue = true,
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -152,6 +160,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS"] =
     {
+        canQueue = true,
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -184,6 +193,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS"] =
     {
+        canQueue = true,
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -224,6 +234,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD"] =
     {
+        canQueue = true,
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -261,6 +272,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_NOT_ALLOWED"] =
     {
+        canQueue = true,
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -294,6 +306,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVENTORY"] =
     {
+        canQueue = true,
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -327,6 +340,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT"] =
     {
+        canQueue = true,
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -364,11 +378,18 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         mainText =
         {
             text = function()
-                local stackCount = self.marketProductData:GetStackCount()
-                if stackCount > 1 then
-                    return zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, self.itemName, stackCount)
+                local houseId = GetMarketProductHouseId(self.marketProductData.marketProductId)
+                if houseId > 0 then
+                    local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+                    local houseDisplayName = GetCollectibleName(houseCollectibleId)
+                    return ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_FORMATTER, houseDisplayName, self.itemName))
                 else
-                    return zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, self.itemName)
+                    local stackCount = self.marketProductData:GetStackCount()
+                    if stackCount > 1 then
+                        return zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, self.itemName, stackCount)
+                    else
+                        return zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, self.itemName)
+                    end
                 end
             end
         },
@@ -376,6 +397,11 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         parametricList = {}, --we'll generate the entries on setup
         blockDialogReleaseOnPress = true, -- We need to manually control when we release so we can use the select keybind to activate entries
         mustChoose = true,
+        finishedCallback = function()
+            if g_dialogDiscountPercentControl then
+                g_dialogDiscountPercentControl:SetHidden(true)
+            end
+        end,
         buttons =
         {
             -- Select Button
@@ -402,9 +428,8 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                     elseif targetData.messageEntry and targetControl then
                         targetControl.editBoxControl:TakeFocus()
                     elseif targetData.recipientNameEntry and targetControl then
-                        local platform = GetUIPlatform()
-                        if platform == UI_PLATFORM_PS4 then
-                            --On PS4 the primary action opens the first party dialog to get a playstation id since it can select any player on PS4
+                        if ZO_IsPlaystationPlatform() then
+                            --On PlayStation the primary action opens the first party dialog to get a playstation id since it can select any player
                             local function OnUserChosen(hasResult, displayName, consoleId)
                                 if hasResult then
                                     targetControl.editBoxControl:SetText(displayName)
@@ -425,14 +450,14 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL,
                 callback = function(dialog)
-                                -- release the dialog first to avoid issue where the parametric list can refresh
-                                -- but EndPurchase will wipe out important state, like self.marketProductData
-                                ZO_Dialogs_ReleaseDialogOnButtonPress(DIALOG_FLOW[FLOW_CONFIRMATION])
+                    -- release the dialog first to avoid issue where the parametric list can refresh
+                    -- but EndPurchase will wipe out important state, like self.marketProductData
+                    ZO_Dialogs_ReleaseDialogOnButtonPress(DIALOG_FLOW[FLOW_CONFIRMATION])
 
-                                OnMarketEndPurchase()
-                                local NOT_NO_CHOICE_CALLBACK = false
-                                self:EndPurchase(NOT_NO_CHOICE_CALLBACK)
-                           end,
+                    OnMarketEndPurchase()
+                    local NOT_NO_CHOICE_CALLBACK = false
+                    self:EndPurchase(NOT_NO_CHOICE_CALLBACK)
+                end,
             },
             --Confirm
             {
@@ -461,10 +486,10 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                     end
                 end,
                 callback =  function(dialog)
-                                OnMarketEndPurchase(self.marketProductData:GetId())
-                                ZO_Dialogs_ReleaseDialogOnButtonPress(DIALOG_FLOW[FLOW_CONFIRMATION])
-                                self:SetFlowPosition(FLOW_PURCHASING)
-                            end,
+                    OnMarketEndPurchase(self.marketProductData:GetId())
+                    ZO_Dialogs_ReleaseDialogOnButtonPress(DIALOG_FLOW[FLOW_CONFIRMATION])
+                    self:SetFlowPosition(FLOW_PURCHASING)
+                end,
             },
             --Xbox Choose Friend/Random note
             {
@@ -503,7 +528,6 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     }
 
     ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_CONFIRMATION], confirmationDialogInfo)
-
 
     local CURRENCY_ICON_SIZE = 32
     ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_CONFIRMATION_ESO_PLUS],
@@ -613,16 +637,24 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         {
             text = "",
         },
-        loading = 
+        loading =
         {
             text =  function()
-                        local stackCount = self.marketProductData:GetStackCount()
-                        if stackCount > 1 then
-                            return zo_strformat(SI_MARKET_PURCHASING_TEXT_WITH_QUANTITY, self.itemName, stackCount)
-                        else
-                            return zo_strformat(SI_MARKET_PURCHASING_TEXT, self.itemName)
-                        end
-                    end,
+                local color = GetItemQualityColor(GetMarketProductDisplayQuality(self.marketProductData.marketProductId))
+                local stackCount = self.marketProductData:GetStackCount()
+                if stackCount > 1 then
+                    return zo_strformat(SI_MARKET_PURCHASING_TEXT_WITH_QUANTITY, color:Colorize(self.itemName), stackCount)
+                else
+                    local itemName = self.itemName
+                    local houseId = GetMarketProductHouseId(self.marketProductData.marketProductId)
+                    if houseId > 0 then
+                        local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+                        local houseDisplayName = GetCollectibleName(houseCollectibleId)
+                        itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, houseDisplayName, self.itemName)
+                    end
+                    return zo_strformat(SI_MARKET_PURCHASING_TEXT, color:Colorize(itemName))
+                end
+            end,
         },
         canQueue = true,
         mustChoose = true,
@@ -668,25 +700,36 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         mainText =
         {
             text = function(dialog)
-                local stackCount = self.marketProductData:GetStackCount()
+                local marketProductData = self.marketProductData
+                local marketProductId = marketProductData:GetId()
+                local stackCount = marketProductData:GetStackCount()
+                local itemName = self.itemName
+                local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
+                local houseId = GetMarketProductHouseId(marketProductId)
+                if houseId > 0 then
+                    local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+                    local houseDisplayName = GetCollectibleName(houseCollectibleId)
+                    itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, houseDisplayName, self.itemName)
+                end
+
                 if self.isGift then
                     if stackCount > 1 then
-                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, stackCount, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
+                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
                     else
-                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, self.itemName, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
+                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, color:Colorize(itemName), ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
                     end
                 else
                     local mainText
                     if self.useProductInfo then
-                        mainText = zo_strformat(self.useProductInfo.transactionCompleteText, self.itemName, stackCount)
+                        mainText = zo_strformat(self.useProductInfo.transactionCompleteText, color:Colorize(itemName), stackCount)
                     else
                         if stackCount > 1 then
-                            mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, stackCount)
+                            mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount)
                         else
                             if not self.isGift and self.marketProductData:GetNumAttachedCollectibles() > 0 then
-                                mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, self.itemName)
+                                mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, color:Colorize(itemName))
                             else
-                                mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, self.itemName)
+                                mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, color:Colorize(itemName))
                             end
                         end
                     end
@@ -798,39 +841,228 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             }
         },
     })
+
+    ZO_Dialogs_RegisterCustomDialog(SELECT_HOUSE_TEMPLATE_DIALOG,
+    {
+        setup = function(...) self:MarketSelectHouseTemplateDialogSetup(...) end,
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        },
+        title =
+        {
+            text = SI_MARKET_SELECT_HOUSE_TEMPLATE_TITLE,
+        },
+        mainText =
+        {
+            text = function(dialog)
+                local houseId = GetMarketProductHouseId(self.marketProductData.marketProductId)
+                if houseId > 0 then
+                    local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+                    local houseDisplayName = GetCollectibleName(houseCollectibleId)
+                    return zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, ZO_SELECTED_TEXT:Colorize(houseDisplayName))
+                else
+                    internalassert(false, string.format("MarketProduct (%s) is not a house and should not be passed into house template selection dialog.", tostring(self.marketProductData.marketProductId) or "nil"))
+                end
+            end
+        },
+        canQueue = true,
+        parametricList = {}, --we'll generate the entries on setup
+        blockDialogReleaseOnPress = true, -- We need to manually control when we release so we can use the select keybind to activate entries
+        mustChoose = true,
+        finishedCallback = function()
+            if g_dialogDiscountPercentControl then
+                g_dialogDiscountPercentControl:SetHidden(true)
+            end
+        end,
+        buttons =
+        {
+            -- Select Button
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = GetString(SI_GAMEPAD_SELECT_OPTION),
+                callback = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    local targetControl = dialog.entryList:GetTargetControl()
+                    if targetData.dropdownEntry then
+                        local dropdown = targetControl.dropdown
+                        dropdown:Activate()
+                    end
+                end,
+            },
+            --Back
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL,
+                callback = function(dialog)
+                    -- release the dialog first to avoid issue where the parametric list can refresh
+                    -- but EndPurchase will wipe out important state, like self.marketProductData
+                    ZO_Dialogs_ReleaseDialogOnButtonPress(SELECT_HOUSE_TEMPLATE_DIALOG)
+
+                    -- if we have pushed the purchase scene, then we need to hide it
+                    SCENE_MANAGER:Hide(ZO_GAMEPAD_MARKET_PURCHASE_SCENE_NAME)
+
+                    self:ResetState()
+                end,
+            },
+            --Confirm
+            {
+                keybind = "DIALOG_SECONDARY",
+                text = SI_MARKET_SELECT_HOUSE_TEMPLATE_REVIEW_PURCHASE,
+                clickSound = SOUNDS.DIALOG_ACCEPT,
+                callback =  function(dialog)
+                    -- release the dialog first to avoid issue where the parametric list can refresh
+                    -- but EndPurchase will wipe out important state, like self.marketProductData
+                    ZO_Dialogs_ReleaseDialogOnButtonPress(SELECT_HOUSE_TEMPLATE_DIALOG)
+
+                    if self.purchaseParams then
+                        local selectedTemplateData = self:GetSelectedHouseTemplateMarketProductData()
+                        local marketProductData = ZO_MarketProductData:New(selectedTemplateData.marketProductId)
+                        if self.isGift then
+                            self:BeginGiftPurchase(marketProductData, self.purchaseParams.isPurchaseFromIngame, self.purchaseParams.onPurchaseSuccessCallback, self.purchaseParams.onPurchaseEndCallback)
+                        else
+                            self:BeginPurchase(marketProductData, self.purchaseParams.isPurchaseFromIngame, self.purchaseParams.onPurchaseSuccessCallback, self.purchaseParams.onPurchaseEndCallback)
+                        end
+                    end
+                end,
+            },
+        },
+    })
 end
 
-function ZO_GamepadMarketPurchaseManager:GetMarketProductPricingHeaderData()
-    local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = self.marketProductData:GetMarketProductPricingByPresentation()
-    local hasNormalCost = cost ~= nil
+function ZO_GamepadMarketPurchaseManager:GetSelectedHouseTemplateMarketProductData()
+    if self.houseSelectionInfo.isHouseMarketProduct then
+        for index, data in pairs(self.houseSelectionInfo.houseTemplateDataList) do
+            local houseTemplateData = self.houseSelectionInfo.houseTemplateDataList[index]
+            local currencyType, marketData = next(houseTemplateData.marketPurchaseOptions)
+            if not self.houseSelectionInfo.selectedTemplateId and index == self.houseSelectionInfo.defaultHouseTemplateIndex or self.houseSelectionInfo.selectedTemplateId and marketData and marketData.houseTemplateId == self.houseSelectionInfo.selectedTemplateId then
+                return marketData
+            end
+        end
+    end
 
+    return nil
+end
+
+function ZO_GamepadMarketPurchaseManager:GetMarketProductPricingHeaderData(updateDiscountPercentParentControl)
+    local priceData
+    if self.houseSelectionInfo and self.houseSelectionInfo.isHouseMarketProduct then
+        local selectedMarketData = self:GetSelectedHouseTemplateMarketProductData()
+        priceData =
+        {
+            currencyType = selectedMarketData and selectedMarketData.currencyType,
+            cost = selectedMarketData and selectedMarketData.cost,
+            costAfterDiscount = selectedMarketData and selectedMarketData.costAfterDiscount,
+            discountPercent = selectedMarketData and selectedMarketData.discountPercent,
+            esoPlusCost = selectedMarketData and selectedMarketData.esoPlusCost,
+        }
+    else
+        local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = self.marketProductData:GetMarketProductPricingByPresentation()
+
+        priceData =
+        {
+            currencyType = currencyType,
+            cost = cost,
+            costAfterDiscount = costAfterDiscount,
+            discountPercent = discountPercent,
+            esoPlusCost = esoPlusCost,
+        }
+    end
+
+    local hasNormalCost = priceData.cost ~= nil
     local hasEsoPlusCost
     if self.isGift then
         hasEsoPlusCost = false -- gifts aren't eligible for ESO Plus pricing
     else
-        hasEsoPlusCost = esoPlusCost ~= nil and IsEligibleForEsoPlusPricing()
+        hasEsoPlusCost = priceData.esoPlusCost ~= nil and IsEligibleForEsoPlusPricing()
     end
 
-    local data1 = GetAvailableCurrencyHeaderData(currencyType)
+    local data1 = GetAvailableCurrencyHeaderData(priceData.currencyType)
 
     local data2
     local data3
     if hasNormalCost then
-        data2 = GetProductCostHeaderData(costAfterDiscount, currencyType, hasEsoPlusCost)
-        if hasEsoPlusCost then
-            data3 = GetProductEsoPlusCostHeaderData(esoPlusCost, currencyType)
+        if not hasEsoPlusCost and priceData.discountPercent > 0 then
+            data2 = GetProductCostHeaderData(priceData.cost, priceData.currencyType, hasEsoPlusCost, priceData.discountPercent, updateDiscountPercentParentControl)
+            data3 = GetProductCostHeaderData(priceData.costAfterDiscount, priceData.currencyType, hasEsoPlusCost)
+        else
+            data2 = GetProductCostHeaderData(priceData.costAfterDiscount, priceData.currencyType, hasEsoPlusCost)
+            if hasEsoPlusCost then
+                data3 = GetProductEsoPlusCostHeaderData(priceData.esoPlusCost, priceData.currencyType)
+            end
         end
     elseif hasEsoPlusCost then
-        data2 = GetProductEsoPlusCostHeaderData(esoPlusCost, currencyType)
+        data2 = GetProductEsoPlusCostHeaderData(priceData.esoPlusCost, priceData.currencyType)
     end
 
     return data1, data2, data3
 end
 
+local g_dialogDiscountPercentControl = nil
+function ZO_GamepadMarketPurchaseManager:UpdateDiscountPercentDisplay(discountPercent)
+    if g_dialogDiscountPercentParentControl and discountPercent and discountPercent > 0 then
+        if g_dialogDiscountPercentControl then
+            g_dialogDiscountPercentControl:SetParent(g_dialogDiscountPercentParentControl)
+        else
+            g_dialogDiscountPercentControl = CreateControlFromVirtual("ZO_MarketDialogDiscountPercent", g_dialogDiscountPercentParentControl, "ZO_MarketTextCallout_Gamepad")
+            g_dialogDiscountPercentControl:SetFont("ZoFontGamepad42")
+            local backgroundControl = g_dialogDiscountPercentControl:GetNamedChild("Background")
+            local r, g, b = ZO_MARKET_PRODUCT_ON_SALE_COLOR:UnpackRGB()
+            local TEXT_CALLOUT_BACKGROUND_ALPHA = 0.9
+            backgroundControl:GetNamedChild("Center"):SetColor(r, g, b, TEXT_CALLOUT_BACKGROUND_ALPHA)
+            backgroundControl:GetNamedChild("Left"):SetColor(r, g, b, TEXT_CALLOUT_BACKGROUND_ALPHA)
+            backgroundControl:GetNamedChild("Right"):SetColor(r, g, b, TEXT_CALLOUT_BACKGROUND_ALPHA)
+        end
+
+        g_dialogDiscountPercentControl:ClearAnchors()
+        g_dialogDiscountPercentControl:SetAnchor(RIGHT, g_dialogDiscountPercentParentControl, LEFT, -20, 0)
+
+        local discountPercentText = zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, discountPercent)
+        g_dialogDiscountPercentControl:SetText(discountPercentText)
+        g_dialogDiscountPercentControl:SetHidden(false)
+    else
+        if g_dialogDiscountPercentControl then
+            g_dialogDiscountPercentControl:SetHidden(true)
+        end
+    end
+end
+
 function ZO_GamepadMarketPurchaseManager:MarketPurchaseConfirmationDialogSetup(dialog)
     self:BuildMarketPurchaseConfirmationDialogEntries(dialog)
 
-    local data1, data2, data3 = self:GetMarketProductPricingHeaderData()
+    g_dialogDiscountPercentParentControl = nil
+    local UPDATE_DISCOUNT_PERCENT_PARENT = true
+    local data1, data2, data3 = self:GetMarketProductPricingHeaderData(UPDATE_DISCOUNT_PERCENT_PARENT)
+
+    local displayData =
+    {
+        data1 = data1,
+        data2 = data2,
+        data3 = data3,
+    }
+    local DONT_LIMIT_NUM_ENTRIES = nil
+    dialog.setupFunc(dialog, DONT_LIMIT_NUM_ENTRIES, displayData)
+
+    local discountPercent = select(4, GetMarketProductPricingByPresentation(self.marketProductData:GetId()))
+    self:UpdateDiscountPercentDisplay(discountPercent)
+end
+
+function ZO_GamepadMarketPurchaseManager:MarketSelectHouseTemplateDialogSetup(dialog)
+    local marketProductId = self.marketProductData:GetId()
+    local isHouseMarketProduct, houseTemplateDataList, defaultHouseTemplateIndex = ZO_MarketProduct_GetMarketProductHouseTemplateDataList(marketProductId, function(...) return { GetActiveMarketProductListingsForHouseTemplate(...) } end)
+
+    self.houseSelectionInfo =
+    {
+        isHouseMarketProduct = isHouseMarketProduct,
+        houseTemplateDataList = houseTemplateDataList,
+        defaultHouseTemplateIndex = defaultHouseTemplateIndex,
+    }
+
+    self:BuildMarketSelectHouseTemplateDialogEntries(dialog)
+
+    g_dialogDiscountPercentParentControl = nil
+    local UPDATED_DISCOUNT_PERCENT_PARENT = true
+    local data1, data2, data3 = self:GetMarketProductPricingHeaderData(UPDATED_DISCOUNT_PERCENT_PARENT)
 
     local displayData =
     {
@@ -853,6 +1085,7 @@ do
                 local dropdown = control.dropdown
                 dropdown:SetSortsItems(false)
                 dropdown:ClearItems()
+
                 local function SetAsGift(isGift)
                     if isGift ~= self.isGift then
                         self.isGift = isGift
@@ -868,6 +1101,9 @@ do
                             data3 = data3,
                         }
                         ZO_GenericGamepadDialog_RefreshHeaderData(dialog, headerData)
+
+                        GAMEPAD_TOOLTIPS:LayoutMarketProductListing(GAMEPAD_LEFT_DIALOG_TOOLTIP, self.marketProductData:GetId(), self.marketProductData:GetPresentationIndex())
+                        ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
                     end
                 end
 
@@ -899,8 +1135,8 @@ do
                         local timeLeftString = ZO_FormatTime(lastTimeLeftS, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
                         local tooltipText = zo_strformat(SI_MARKET_GIFTING_GRACE_PERIOD_TOOLTIP, timeLeftString)
 
-                        GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, tooltipText)
-                        ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
+                         GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, tooltipText)
+                         ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
                     end
                 end
 
@@ -934,11 +1170,90 @@ do
                 end)
 
                 dropdown:RegisterCallback("OnItemDeselected", function(itemControl, itemData)
-                    ZO_GenericGamepadDialog_HideTooltip(parametricDialog)
+                    GAMEPAD_TOOLTIPS:LayoutMarketProductListing(GAMEPAD_LEFT_DIALOG_TOOLTIP, self.marketProductData:GetId(), self.marketProductData:GetPresentationIndex())
+                    ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
                 end)
+
+                GAMEPAD_TOOLTIPS:LayoutMarketProductListing(GAMEPAD_LEFT_DIALOG_TOOLTIP, self.marketProductData:GetId(), self.marketProductData:GetPresentationIndex())
+                ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
             end
         end
         return chooseAsGiftDropdownEntryData
+    end
+end
+
+do
+    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+    local selectHouseTemplateDropdownEntryData
+    function ZO_GamepadMarketPurchaseManager:GetOrCreateSelectHouseTemplateDropdownEntryData()
+        if selectHouseTemplateDropdownEntryData == nil then
+            selectHouseTemplateDropdownEntryData = ZO_GamepadEntryData:New()
+            selectHouseTemplateDropdownEntryData.dropdownEntry = true
+            selectHouseTemplateDropdownEntryData.setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
+                local dropdown = control.dropdown
+                dropdown:SetSortsItems(false)
+                dropdown:ClearItems()
+
+                local function SetSelectedTemplateId(templateId)
+                    if self.houseSelectionInfo.selectedTemplateId ~= templateId then
+                        self.houseSelectionInfo.selectedTemplateId = templateId
+                        local dialog = selectHouseTemplateDropdownEntryData.dialog
+                        self:BuildMarketSelectHouseTemplateDialogEntries(dialog)
+                        ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(dialog)
+
+                        local data1, data2, data3 = self:GetMarketProductPricingHeaderData()
+                        local headerData =
+                        {
+                            data1 = data1,
+                            data2 = data2,
+                            data3 = data3,
+                        }
+                        ZO_GenericGamepadDialog_RefreshHeaderData(dialog, headerData)
+                    end
+                end
+
+                local selectedHouseTemplateEntryData
+                for index, houseTemplateData in ipairs(self.houseSelectionInfo.houseTemplateDataList) do
+                    local currencyType, marketData = next(houseTemplateData.marketPurchaseOptions)
+                    if houseTemplateData.name and marketData and (self.isGift and marketData.isGiftable) or (not self.isGift and not marketData.isHouseOwned) then
+                        local formattedName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_TEMPLATE_NAME_FORMAT, houseTemplateData.name)
+                        local entry = dropdown:CreateItemEntry(formattedName, function() SetSelectedTemplateId(marketData.houseTemplateId) end)
+                        entry.data = houseTemplateData
+
+                        if not self.houseSelectionInfo.selectedTemplateId and index == self.houseSelectionInfo.defaultHouseTemplateIndex or self.houseSelectionInfo.selectedTemplateId == marketData.houseTemplateId then
+                            selectedHouseTemplateEntryData = entry
+                        end
+
+                        dropdown:AddItem(entry)
+                    end
+                end
+
+                dropdown:UpdateItems()
+                local IGNORE_CALLBACK = true
+                if selectedHouseTemplateEntryData then
+                    dropdown:TrySelectItemByData(selectedHouseTemplateEntryData, IGNORE_CALLBACK)
+                else
+                    if dropdown:GetNumItems() > 0 then
+                        dropdown:SelectItemByIndex(1)
+                    end
+                end
+
+                local selectedData = dropdown:GetSelectedItemData()
+                if selectedData and selectedData.data and selectedData.data.marketPurchaseOptions then
+                    local selectedIndex, houseData = next(selectedData.data.marketPurchaseOptions)
+                    if houseData then
+                        GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_LEFT_DIALOG_TOOLTIP, GetString(SI_HOUSE_INFORMATION_TITLE))
+                        GAMEPAD_TOOLTIPS:LayoutHouseTemplateTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, houseData.houseId, houseData.houseTemplateId)
+                        ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
+
+                        self:UpdateDiscountPercentDisplay(selectedData.discountPercent)
+                    else
+                        ZO_GenericGamepadDialog_HideTooltip(parametricDialog)
+                    end
+                end
+            end
+        end
+        return selectHouseTemplateDropdownEntryData
     end
 end
 
@@ -1001,31 +1316,45 @@ function ZO_GamepadMarketPurchaseManager:BuildMarketPurchaseConfirmationDialogEn
     ZO_ClearNumericallyIndexedTable(parametricListEntries)
 
     local chooseAsGiftDropdown =
-        {
-            header = GetString(SI_MARKET_CONFIRM_PURCHASE_RECIPIENT_SELECTOR_HEADER),
-            template = "ZO_GamepadDropdownItem",
-            entryData = self:GetOrCreateChooseAsGiftDropdownEntryData(),
-        }
+    {
+        header = GetString(SI_MARKET_CONFIRM_PURCHASE_RECIPIENT_SELECTOR_HEADER),
+        template = "ZO_GamepadDropdownItem",
+        entryData = self:GetOrCreateChooseAsGiftDropdownEntryData(),
+    }
 
     table.insert(parametricListEntries, chooseAsGiftDropdown)
 
     if self.isGift then
         local recipientNameEntry =
-            {
-                template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
-                entryData = self:GetOrCreateRecipientNameEntryData(),
-            }
+        {
+            template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
+            entryData = self:GetOrCreateRecipientNameEntryData(),
+        }
 
         table.insert(parametricListEntries, recipientNameEntry)
 
         local giftMessageEntry =
-            {
-                template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem_Multiline",
-                entryData = self:GetOrCreateGiftMessageEntryData(),
-            }
+        {
+            template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem_Multiline",
+            entryData = self:GetOrCreateGiftMessageEntryData(),
+        }
 
         table.insert(parametricListEntries, giftMessageEntry)
     end
+end
+
+function ZO_GamepadMarketPurchaseManager:BuildMarketSelectHouseTemplateDialogEntries(dialog)
+    local parametricListEntries = dialog.info.parametricList
+    ZO_ClearNumericallyIndexedTable(parametricListEntries)
+
+    local selectHouseTemplateDropdown =
+    {
+        header = GetString(SI_MARKET_SELECT_HOUSE_TEMPLATE_LABEL),
+        template = "ZO_GamepadDropdownItem",
+        entryData = self:GetOrCreateSelectHouseTemplateDropdownEntryData(),
+    }
+
+    table.insert(parametricListEntries, selectHouseTemplateDropdown)
 end
 
 function ZO_GamepadMarketPurchaseManager:MarketPurchaseConfirmationFreeTrialDialogSetup(dialog)
@@ -1057,8 +1386,21 @@ do
     end
 
     function ZO_GamepadMarketPurchaseManager:BeginPurchase(marketProductData, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
-        self:BeginPurchaseBase(marketProductData, AS_PURCHASE, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
-        self:StartPurchaseFlow(GetPurchaseErrorInfo)
+        if ZO_MarketProduct_IsHouseCollectible(marketProductData:GetId()) then
+            self.marketProductData = marketProductData
+            self.purchaseParams =
+            {
+                marketProductData = marketProductData,
+                isPurchaseFromIngame = isPurchaseFromIngame,
+                onPurchaseSuccessCallback = onPurchaseSuccessCallback,
+                onPurchaseEndCallback = onPurchaseEndCallback
+            }
+            self.isGift = AS_PURCHASE
+            self:ShowHouseTemplateSelectionDialog(SELECT_HOUSE_TEMPLATE_DIALOG)
+        else
+            self:BeginPurchaseBase(marketProductData, AS_PURCHASE, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
+            self:StartPurchaseFlow(GetPurchaseErrorInfo)
+        end
     end
 end
 
@@ -1069,8 +1411,21 @@ do
     end
 
     function ZO_GamepadMarketPurchaseManager:BeginGiftPurchase(marketProductData, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
-        self:BeginPurchaseBase(marketProductData, AS_GIFT, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
-        self:StartPurchaseFlow(GetGiftErrorInfo)
+        if ZO_MarketProduct_IsHouseCollectible(marketProductData:GetId()) then
+            self.marketProductData = marketProductData
+            self.purchaseParams =
+            {
+                marketProductData = marketProductData,
+                isPurchaseFromIngame = isPurchaseFromIngame,
+                onPurchaseSuccessCallback = onPurchaseSuccessCallback,
+                onPurchaseEndCallback = onPurchaseEndCallback
+            }
+            self.isGift = AS_GIFT
+            self:ShowHouseTemplateSelectionDialog(SELECT_HOUSE_TEMPLATE_DIALOG)
+        else
+            self:BeginPurchaseBase(marketProductData, AS_GIFT, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
+            self:StartPurchaseFlow(GetGiftErrorInfo)
+        end
     end
 end
 
@@ -1140,6 +1495,8 @@ function ZO_GamepadMarketPurchaseManager:ResetState()
     self.isGift = false
     self.giftMessage = nil
     self.recipientDisplayName = nil
+    self.houseSelectionInfo = nil
+    self.purchaseParams = nil
 end
 
 function ZO_GamepadMarketPurchaseManager:SetFlowPosition(position, dialogData, dialogParams)
@@ -1149,7 +1506,11 @@ function ZO_GamepadMarketPurchaseManager:SetFlowPosition(position, dialogData, d
 
     if position == FLOW_UNLOCKED then
         local name = self.marketProductData:GetDisplayName()
-        dialogParams = {titleParams = {name}, mainTextParams = {ZO_SELECTED_TEXT:Colorize(name)}}
+        dialogParams =
+        {
+            titleParams = { name },
+            mainTextParams = { ZO_SELECTED_TEXT:Colorize(name) }
+        }
     end
 
     self:ShowFlowDialog(dialogName, dialogData, dialogParams)
@@ -1169,11 +1530,33 @@ function ZO_GamepadMarketPurchaseManager:ShowFlowDialog(dialogName, dialogData, 
 
     if shouldPushScene then
         SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_PURCHASE_SCENE_NAME)
-        self.queuedDialogInfo = {
-                                    dialogName = dialogName,
-                                    dialogData = dialogData,
-                                    dialogParams = dialogParams,
-                                }
+        self.queuedDialogInfo =
+        {
+            dialogName = dialogName,
+            dialogData = dialogData,
+            dialogParams = dialogParams,
+        }
+    else
+        ZO_Dialogs_ShowGamepadDialog(dialogName, dialogData, dialogParams)
+    end
+end
+
+function ZO_GamepadMarketPurchaseManager:ShowHouseTemplateSelectionDialog(dialogName, dialogData, dialogParams)
+    local shouldPushScene
+    if SCENE_MANAGER:IsShowing(ZO_GAMEPAD_MARKET_PURCHASE_SCENE_NAME) then
+        shouldPushScene = false
+    else
+        shouldPushScene = true
+    end
+
+    if shouldPushScene then
+        SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_PURCHASE_SCENE_NAME)
+        self.queuedDialogInfo =
+        {
+            dialogName = dialogName,
+            dialogData = dialogData,
+            dialogParams = dialogParams,
+        }
     else
         ZO_Dialogs_ShowGamepadDialog(dialogName, dialogData, dialogParams)
     end

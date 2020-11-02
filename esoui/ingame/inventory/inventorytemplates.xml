@@ -57,17 +57,99 @@
 
             </Controls>
         </Control>
-        
+
+       <Backdrop name="ZO_InventorySearchTemplate" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
+            <Controls>
+                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                    <OnInitialized>
+                        ZO_EditDefaultText_Initialize(self, GetString(SI_ITEM_FILTER_BY_TEXT))
+                    </OnInitialized>
+
+                    <OnTextChanged>
+                        ZO_EditDefaultText_OnTextChanged(self)
+                    </OnTextChanged>
+
+                    <OnEscape>
+                        ZO_PlayerInventory_EndSearch(self)
+                    </OnEscape>
+
+                    <OnEnter>
+                        ZO_PlayerInventory_OnSearchEnterKeyPressed(self)
+                    </OnEnter>
+                </EditBox>
+            </Controls>
+        </Backdrop>
+
+        <Control name="ZO_InventoryFilterTabTemplate" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
+            <OnMouseEnter>
+                ZO_PlayerInventory_FilterButtonOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_PlayerInventory_FilterButtonOnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Flash" alpha="0" textureFile="EsoUI/Art/Miscellaneous/icon_highlight_pulse.dds" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="-20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_InventoryFilterSubTabTemplate" inherits="ZO_InventoryFilterTabTemplate" virtual="true">
+            <Dimensions x="16" y="16" />
+        </Control>
+
         <Control name="ZO_InventoryTabs" inherits="ZO_MenuBarTemplate" virtual="true">
             <OnInitialized>
                 ZO_MenuBar_OnInitialized(self)
                 local filterBarData =
                 {
                     initialButtonAnchorPoint = RIGHT,
-                    buttonTemplate = "ZO_InventoryFilterTab",
+                    buttonTemplate = "ZO_InventoryFilterTabTemplate",
                     normalSize = 40,
                     downSize = 51,
                     buttonPadding = -5,
+                    animationDuration = 180,
+                }
+                ZO_MenuBar_SetData(self, filterBarData)
+            </OnInitialized>
+            <Anchor point="TOPRIGHT" offsetX="-33" offsetY="14" />
+            <Controls>
+                <Label name="$(parent)Active" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontHeader2" verticalAlignment="CENTER" horizontalAlignment="RIGHT" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontHeader2",
+                            },
+                            {
+                                font = "ZoFontHeader",
+                            },
+                            {
+                                font = "ZoFontGameSmall",
+                            }
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                    <Dimensions y="64" />
+                    <Anchor point="LEFT" relativeTo="$(grandparent)" offsetX="-10" constrains="X"/>
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_InventorySubTabs" inherits="ZO_MenuBarTemplate" virtual="true">
+            <OnInitialized>
+                ZO_MenuBar_OnInitialized(self)
+                local filterBarData =
+                {
+                    initialButtonAnchorPoint = RIGHT,
+                    buttonTemplate = "ZO_InventoryFilterSubTabTemplate",
+                    normalSize = 30,
+                    downSize = 40,
+                    buttonPadding = -12,
                     animationDuration = 180,
                 }
                 ZO_MenuBar_SetData(self, filterBarData)

@@ -234,7 +234,7 @@ function ZO_CharacterCreate_Manager.GetOptionRestrictionString(restrictionReason
     if restrictionReason ~= CHARACTER_CREATE_OPTION_RESTRICTION_REASON_NONE then
         local restrictionString = GetString("SI_CHARACTERCREATEOPTIONRESTRICTIONREASON", restrictionReason)
         if restrictingCollectible ~= 0 then
-            restrictionString = zo_strformat(restrictionString, GetCollectibleName(restrictingCollectible), GetCollectibleCategoryName(restrictingCollectible))
+            restrictionString = zo_strformat(restrictionString, GetCollectibleName(restrictingCollectible), GetCollectibleCategoryNameByCollectibleId(restrictingCollectible))
         else
             internalassert(false, "A collectible must be added to this entitlement restricted class/race def.")
         end

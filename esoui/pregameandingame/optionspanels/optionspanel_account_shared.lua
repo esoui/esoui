@@ -5,11 +5,6 @@
 -------------------------
 -- Utility Functions
 -------------------------
-local g_platform = GetUIPlatform()
-
-local function IsConsolePlatform()
-    return g_platform == UI_PLATFORM_PS4 or g_platform == UI_PLATFORM_XBOX
-end
 
 local g_serviceType = GetPlatformServiceType()
 
@@ -17,13 +12,13 @@ function ZO_OptionsPanel_IsAccountManagementAvailable()
     if g_serviceType == PLATFORM_SERVICE_TYPE_DMM then
         return false
     end
-    return IsConsolePlatform() or IsInUI("pregame")
+    return ZO_IsConsolePlatform() or IsInUI("pregame")
 end
 
 local function HasActivatedEmail()
     if IsInUI("pregame") then
         return HasActivatedEmailInPregame()
-    elseif IsConsolePlatform() then
+    elseif ZO_IsConsolePlatform() then
         return HasActivatedEmailOnConsole()
     else
         return false
@@ -31,7 +26,7 @@ local function HasActivatedEmail()
 end
 
 function ZO_OptionsPanel_GetAccountEmail()
-    if IsInUI("pregame") or IsConsolePlatform() then
+    if IsInUI("pregame") or ZO_IsConsolePlatform() then
         return GetSecureSetting(SETTING_TYPE_ACCOUNT, ACCOUNT_SETTING_ACCOUNT_EMAIL)
     else
         return ""

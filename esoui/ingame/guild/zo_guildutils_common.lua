@@ -82,7 +82,7 @@ function ZO_UpdateGuildStatusDropdown(dropdown)
         local statusTexture = GetPlayerStatusIcon(i)
         local text = zo_strformat(SI_GAMEPAD_GUILD_STATUS_SELECTOR_FORMAT, statusTexture, GetString("SI_PLAYERSTATUS", i))
         local entry = ZO_ComboBox:CreateItemEntry(text, GuildStatusSelect)
-        dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+        dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
 
     dropdown:UpdateItems()

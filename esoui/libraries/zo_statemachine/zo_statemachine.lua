@@ -463,7 +463,7 @@ function ZO_StateMachine_Base:AddEdge(edgeName, fromState, toState, optionalEdge
     if type(toState) == "string" then
         toState = self:GetStateByName(toState)
     end
-    local template = optionalStateTemplate or ZO_StateMachine_Edge
+    local template = optionalEdgeTemplate or ZO_StateMachine_Edge
 
     local edge = template:New(fromState, toState, ...)
     self.edges[edgeName] = edge

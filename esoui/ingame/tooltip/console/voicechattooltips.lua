@@ -1,7 +1,4 @@
 function ZO_Tooltip:LayoutVoiceChatChannel(channelData)
-    local name = channelData.name
-    local description = channelData.description
-
     --Title
     local headerSection = self:AcquireSection(self:GetStyle("voiceChatBodyHeader"))
     headerSection:AddLine(channelData.name, self:GetStyle("title"))
@@ -9,7 +6,7 @@ function ZO_Tooltip:LayoutVoiceChatChannel(channelData)
 
     --Body
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
-    bodySection:AddLine(description, self:GetStyle("bodyDescription"))
+    bodySection:AddLine(channelData.description, self:GetStyle("bodyDescription"))
     self:AddSection(bodySection)
 end
 
@@ -88,10 +85,9 @@ function ZO_Tooltip:LayoutVoiceChatParticipants(channelData, participantDataList
         local reputationSection = self:AcquireSection(self:GetStyle("bodySection"))
 
         local badRepText
-        local platform = GetUIPlatform()
-        if platform == UI_PLATFORM_PS4 then
+        if ZO_IsPlaystationPlatform() then
             badRepText = GetString(SI_GAMEPAD_VOICECHAT_PARTICIPANTS_REPUTATION_RESTRICTION_PS4)
-        elseif platform == UI_PLATFORM_XBOX then
+        elseif GetUIPlatform() == UI_PLATFORM_XBOX then
             badRepText = GetString(SI_GAMEPAD_VOICECHAT_PARTICIPANTS_REPUTATION_RESTRICTION_XB1)
         end
         reputationSection:AddLine(badRepText, self:GetStyle("voiceChatGamepadReputation"))
@@ -100,8 +96,7 @@ function ZO_Tooltip:LayoutVoiceChatParticipants(channelData, participantDataList
     end
 
     --Participants
-    for i = 1, #participantDataList do
-        local speakerData = participantDataList[i]
+    for i, speakerData in ipairs(participantDataList) do
         local displayName = speakerData.displayName
         local speakStatus = speakerData.speakStatus
 

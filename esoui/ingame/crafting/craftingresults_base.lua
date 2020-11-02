@@ -1,3 +1,9 @@
+ZO_CRAFTING_RESULT_TYPE =
+{
+    ITEM = 1,
+    CURRENCY = 2,
+}
+
 local g_forceCenterResultsText = false
 
 function ZO_CraftingResults_Base_PlayPulse(control)
@@ -35,6 +41,12 @@ function ZO_CraftingResults_Base:Initialize(control, showInGamepadPreferredModeO
 
     control:RegisterForEvent(EVENT_RETRAIT_RESPONSE, function(eventCode, ...) self:OnRetraitCompleted(...) end)
     control:AddFilterForEvent(EVENT_RETRAIT_RESPONSE, REGISTER_FILTER_IS_IN_GAMEPAD_PREFERRED_MODE, showInGamepadPreferredModeOnly)
+
+    control:RegisterForEvent(EVENT_RECONSTRUCT_STARTED, function(eventCode, ...) self:OnReconstructStarted(...) end)
+    control:AddFilterForEvent(EVENT_RECONSTRUCT_STARTED, REGISTER_FILTER_IS_IN_GAMEPAD_PREFERRED_MODE, showInGamepadPreferredModeOnly)
+
+    control:RegisterForEvent(EVENT_RECONSTRUCT_RESPONSE, function(eventCode, ...) self:OnReconstructCompleted(...) end)
+    control:AddFilterForEvent(EVENT_RECONSTRUCT_RESPONSE, REGISTER_FILTER_IS_IN_GAMEPAD_PREFERRED_MODE, showInGamepadPreferredModeOnly)
 
     self.enchantSoundPlayer = ZO_QueuedSoundPlayer:New()
     self.enchantSoundPlayer:SetFinishedAllSoundsCallback(function() self:OnAllEnchantSoundsFinished() end)
@@ -197,8 +209,13 @@ function ZO_CraftingResults_Base:OnCraftStarted(craftingType)
 end
 
 function ZO_CraftingResults_Base:OnRetraitStarted()
-    local playStopTooltipAnimation = true
-    self:StartCraftProcess(playStopTooltipAnimation)
+    local PLAY_STOP_TOOLTIP_ANIMATION = true
+    self:StartCraftProcess(PLAY_STOP_TOOLTIP_ANIMATION)
+end
+
+function ZO_CraftingResults_Base:OnReconstructStarted()
+    local PLAY_STOP_TOOLTIP_ANIMATION = true
+    self:StartCraftProcess(PLAY_STOP_TOOLTIP_ANIMATION)
 end
 
 function ZO_CraftingResults_Base:PlayTooltipAnimation(isFailure, isExceptionalResult, craftingType)
@@ -271,6 +288,12 @@ function ZO_CraftingResults_Base:OnRetraitCompleted(result)
     self:CompleteCraftProcess(craftFailed, EXCEPTIONAL_RESULT)
 end
 
+function ZO_CraftingResults_Base:OnReconstructCompleted(result)
+    local craftFailed = result ~= RECONSTRUCT_RESPONSE_SUCCESS
+    local EXCEPTIONAL_RESULT = true
+    self:CompleteCraftProcess(craftFailed, EXCEPTIONAL_RESULT)
+end
+
 function ZO_CraftingResults_Base:OnAllEnchantSoundsFinished()
     if not self.craftingProcessCompleted then
         if self.processCompletedArguments then
@@ -288,19 +311,6 @@ function ZO_CraftingResults_Base:OnTooltipAnimationStopped(craftingType)
     if self.tooltipAnimationCompleted == false then
         self.tooltipAnimationCompleted = true
         self:CheckCraftProcessCompleted(craftingType)
-    end
-end
-
-local function GetBoosterItemTypeForCraftingType()
-    local craftingType = GetCraftingInteractionType()
-    if craftingType == CRAFTING_TYPE_BLACKSMITHING then
-        return ITEMTYPE_BLACKSMITHING_BOOSTER
-    elseif craftingType == CRAFTING_TYPE_CLOTHIER then
-        return ITEMTYPE_CLOTHIER_BOOSTER
-    elseif craftingType == CRAFTING_TYPE_WOODWORKING then
-        return ITEMTYPE_WOODWORKING_BOOSTER
-    elseif craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
-        return ITEMTYPE_JEWELRYCRAFTING_BOOSTER
     end
 end
 
@@ -332,7 +342,8 @@ end
 local function DidLastCraftGainBooster(numItemsGained)
     local smithingObject = ZO_Smithing_GetActiveObject()
     if smithingObject and smithingObject:IsExtracting() then
-        local boosterItemType = GetBoosterItemTypeForCraftingType()
+        local craftingType = GetCraftingInteractionType()
+        local boosterItemType = ZO_CraftingUtils_GetBoosterItemType(craftingType)
         for i = 1, numItemsGained do
             local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemType = GetLastCraftingResultItemInfo(i)
             if itemType == boosterItemType then
@@ -380,13 +391,14 @@ do
                 self:DisplayDiscoveredTraits()
             end
 
+            local numResultCurrencies = GetNumLastCraftingResultCurrencies()
             local numItemsGained, penaltyApplied = GetNumLastCraftingResultItemsAndPenalty()
 
             if penaltyApplied then
                 TriggerTutorial(TUTORIAL_TRIGGER_DECONSTRUCTION_LEVEL_PENALTY)
             end
 
-            if numItemsGained == 0 then
+            if numItemsGained == 0 and numResultCurrencies == 0 then
                 if craftingType == CRAFTING_TYPE_ALCHEMY then
                     -- Crafted inert potion
                     ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
@@ -408,18 +420,22 @@ do
             else
                 local shouldDisplayMessages = self:ShouldDisplayMessages()
                 local finalItemSoundCategory = ITEM_SOUND_CATEGORY_NONE
-
+                local resultIndex = 0
                 local resultItems = {}
                 for i = 1, numItemsGained do
                     local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemType, itemStyle, displayQuality, itemSoundCategory, itemInstanceId = GetLastCraftingResultItemInfo(i)
+
                     -- Don't save messages if we can't display them immediately
                     if shouldDisplayMessages then
+                        resultIndex = resultIndex + 1
                         table.insert(resultItems,
                         {
-                            resultIndex = i,
+                            resultType = ZO_CRAFTING_RESULT_TYPE.ITEM,
+                            resultIndex = resultIndex,
                             name = name,
                             icon = icon,
                             stack = stack,
+                            color = GetItemQualityColor(displayQuality),
                             sellPrice = sellPrice,
                             meetsUsageRequirement = meetsUsageRequirement,
                             equipType = equipType,
@@ -440,9 +456,30 @@ do
                 end
 
                 table.sort(resultItems, CompareCraftingResultItems)
+                for _, resultItem in ipairs(resultItems) do
+                    self:DisplayCraftingResult(resultItem)
+                end
 
-                for _, result in ipairs(resultItems) do
-                    self:DisplayCraftingResult(result)
+                if numResultCurrencies ~= 0 and shouldDisplayMessages then
+                    -- Append any resulting currencies after any resulting items.
+                    for currencyIndex = 1, numResultCurrencies do
+                        resultIndex = resultIndex + 1
+                        local currencyType, currencyAmount = GetLastCraftingResultCurrencyInfo(currencyIndex)
+                        local IS_SINGULAR = true
+                        local IS_NOT_UPPERCASE = false
+                        local currencyName = GetCurrencyName(currencyType, IS_SINGULAR, IS_NOT_UPPERCASE)
+                        local resultData =
+                        {
+                            resultType = ZO_CRAFTING_RESULT_TYPE.CURRENCY,
+                            resultIndex = resultIndex,
+                            currencyType = currencyType,
+                            name = currencyName,
+                            icon = ZO_Currency_GetPlatformCurrencyIcon(currencyType),
+                            stack = currencyAmount,
+                            color = ZO_Currency_GetPlatformColor(currencyType),
+                        }
+                        self:DisplayCraftingResult(resultData)
+                    end
                 end
 
                 local gainedBooster = DidLastCraftGainBooster(numItemsGained)
@@ -472,7 +509,7 @@ do
 end
 
 function ZO_CraftingResults_Base:ForceCompleteCraftProcess()
-    if self:IsCraftInProgress() then
+    if not (self.craftingProcessCompleted and self.tooltipAnimationCompleted) then
         self.craftingProcessCompleted = true
         self.tooltipAnimationCompleted = true
         CALLBACK_MANAGER:FireCallbacks("CraftingAnimationsStopped")
@@ -487,8 +524,24 @@ function ZO_CraftingResults_Base:HasEntries()
     return false
 end
 
-function ZO_CraftingResults_Base:IsActive()
-    assert(false, "You must override the IsActive function when inheriting from ZO_CraftingResults_Base")
+function ZO_CraftingResults_Base:AreCraftingResultsEqual(left, right)
+    local resultType = left.resultType
+    if resultType ~= right.resultType then
+        return false
+    end
+
+    if resultType == ZO_CRAFTING_RESULT_TYPE.ITEM then
+        return left.itemInstanceId == right.itemInstanceId
+    elseif resultType == ZO_CRAFTING_RESULT_TYPE.CURRENCY then
+        return left.currencyType == right.currencyType
+    else
+        internalassert(false, "No equality has been defined for crafting result type %d.", resultType)
+        return false
+    end
+end
+
+function ZO_CraftingResults_Base:DisplayCraftingResult()
+    assert(false, "You must override the DisplayCraftingResult function when inheriting from ZO_CraftingResults_Base")
 end
 
 function ZO_CraftingResults_Base:DisplayDiscoveredTraits()
@@ -499,10 +552,14 @@ function ZO_CraftingResults_Base:DisplayTranslatedRunes()
     assert(false, "You must override the DisplayTranslatedRunes function when inheriting from ZO_CraftingResults_Base")
 end
 
-function ZO_CraftingResults_Base:ShouldDisplayMessages()
-    assert(false, "You must override the ShouldDisplayMessages function when inheriting from ZO_CraftingResults_Base")
-end
-
 function ZO_CraftingResults_Base:FadeAll()
     assert(false, "You must override the FadeAll function when inheriting from ZO_CraftingResults_Base")
+end
+
+function ZO_CraftingResults_Base:IsActive()
+    assert(false, "You must override the IsActive function when inheriting from ZO_CraftingResults_Base")
+end
+
+function ZO_CraftingResults_Base:ShouldDisplayMessages()
+    assert(false, "You must override the ShouldDisplayMessages function when inheriting from ZO_CraftingResults_Base")
 end

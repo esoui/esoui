@@ -106,7 +106,7 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
         end
 
         local function AddEntry(entry)
-            dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
             if savedValue == entry.categoryEnumValue then
                 savedDropdownIndex = currentDropdownIndex
             end

@@ -1,17 +1,17 @@
 ZO_InteractScene_Mixin = {}
 
-function ZO_InteractScene_Mixin:InitializeInteractScene(name, sceneManager, interactionInfo)
-    interactionInfo.OnInteractionCanceled = interactionInfo.OnInteractionCanceled or function(cancelContext)
+function ZO_InteractScene_Mixin:InitializeInteractInfo(interactionInfo)
+    interactionInfo.OnInteractionCanceled = interactionInfo.OnInteractionCanceled or function()
         if self:IsShowing() then
             -- If the interact ended for reasons outside of our control, this scenes state is essentially no longer valid so we need to abort come back in anyway
-            SCENE_MANAGER:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
+            self.sceneManager:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
         end
     end
 
     self.interactionInfo = interactionInfo
 end
 
-function ZO_InteractScene_Mixin:GetInteractionInfo(sceneManager, interactionInfo)
+function ZO_InteractScene_Mixin:GetInteractionInfo()
     return self.interactionInfo
 end
 
@@ -33,7 +33,7 @@ end
 function ZO_InteractScene_Mixin:OnSceneHidden()
     local endInteraction = true
 
-    local nextScene = SCENE_MANAGER:GetNextScene()
+    local nextScene = self.sceneManager:GetNextScene()
     if nextScene then
         if nextScene.GetInteractionInfo ~= nil then
             local nextSceneInteractionInfo = nextScene:GetInteractionInfo()
@@ -80,7 +80,7 @@ end
 function ZO_InteractScene:Initialize(name, sceneManager, interactionInfo)
     ZO_Scene.Initialize(self, name, sceneManager)
 
-    self:InitializeInteractScene(name, sceneManager, interactionInfo)
+    self:InitializeInteractInfo(interactionInfo)
 end
 
 function ZO_InteractScene:SetState(newState)
@@ -105,7 +105,7 @@ end
 function ZO_RemoteInteractScene:Initialize(name, sceneManager, interactionInfo)
     ZO_RemoteScene.Initialize(self, name, sceneManager)
 
-    self:InitializeInteractScene(name, sceneManager, interactionInfo)
+    self:InitializeInteractInfo(interactionInfo)
 end
 
 function ZO_RemoteInteractScene:SetState(newState)

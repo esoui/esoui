@@ -189,13 +189,31 @@
                             <Anchor point="TOPLEFT" />
                             <Anchor point="TOPRIGHT" />
                             <Controls>
-                                <Label name="$(parent)MainText" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"  >
+                                <Label name="$(parent)MainText" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                                     <Anchor point="TOPLEFT" />
                                     <Anchor point="TOPRIGHT" />
                                 </Label>
-                                <Label name="$(parent)WarningText" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED"  >
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MainText" relativePoint="BOTTOMLEFT" offsetY="30" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MainText" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                                <Label name="$(parent)SubText" font="ZoFontGamepadCondensed27" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MainText" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MainText" relativePoint="BOTTOMRIGHT" />
+                                </Label>
+                                <Label name="$(parent)WarningText" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubText" relativePoint="BOTTOMLEFT" offsetY="30" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubText" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                                    <OnInitialized>
+                                        local fonts =
+                                        {
+                                            {
+                                                font = "ZoFontGamepadCondensed42",
+                                                lineLimit = 2,
+                                            },
+                                            {
+                                                font = "ZoFontGamepadCondensed34",
+                                                lineLimit = 2,
+                                            },
+                                        }
+                                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                                    </OnInitialized>
                                 </Label>
                             </Controls>
                         </Control>

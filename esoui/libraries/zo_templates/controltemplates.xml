@@ -2,12 +2,26 @@
     <Controls>
         <Control name="ZO_PropagateMouseOverBehavior" mouseEnabled="true" virtual="true">
             <OnMouseEnter name="ZO_PropagateMouseOverBehavior">
-                ZO_PropagateHandler(self:GetParent(), "OnMouseEnter")
+                ZO_PropagateHandlerToParent("OnMouseEnter", ...)
             </OnMouseEnter>
 
             <OnMouseExit name="ZO_PropagateMouseOverBehavior">
-                ZO_PropagateHandler(self:GetParent(), "OnMouseExit")
+                ZO_PropagateHandlerToParent("OnMouseExit", ...)
             </OnMouseExit>
+        </Control>
+
+        <Control name="ZO_PropagateMouseButtonBehavior" mouseEnabled="true" virtual="true">
+            <OnMouseDoubleClick name="ZO_PropagateMouseButtonBehavior">
+                ZO_PropagateHandlerToParent("OnMouseDoubleClick", ...)
+            </OnMouseDoubleClick>
+
+            <OnMouseUp name="ZO_PropagateMouseButtonBehavior">
+                ZO_PropagateHandlerToParent("OnMouseUp", ...)
+            </OnMouseUp>
+
+            <OnMouseDown name="ZO_PropagateMouseButtonBehavior">
+                ZO_PropagateHandlerToParent("OnMouseDown", ...)
+            </OnMouseDown>
         </Control>
     </Controls>
 </GuiXml>

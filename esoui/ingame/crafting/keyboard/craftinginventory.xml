@@ -18,6 +18,12 @@
             <OnMouseDoubleClick>
                 -- override to disable double click action
             </OnMouseDoubleClick>
+            <Controls>
+                <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\advisor_trackedPin_icon.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" level="3" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="10" offsetY="0"/>
+                </Texture>
+            </Controls>
         </Control>
 
         <Control name="ZO_CraftingInventoryTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
@@ -30,6 +36,24 @@
             </OnMouseExit>
         </Control>
 
+        <Control name="ZO_CraftingInventoryFilterTab" inherits="ZO_InventoryFilterTabTemplate" virtual="true">
+            <OnInitialized name="ZO_CraftingInventoryFilterTab">
+                self.questPin = self:GetNamedChild("QuestPin")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\advisor_trackedPin_icon.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" level="3" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPRIGHT" offsetX="15" offsetY="-10" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_CraftingInventoryTabs" inherits="ZO_InventoryTabs" virtual="true">
+            <OnInitialized>
+                ZO_CraftingInventoryTabs_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+
         <Control name="ZO_CraftingInventoryTemplate" virtual="true" mouseEnabled="true">
             <Dimensions x="565" />
             <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
@@ -39,7 +63,7 @@
                 self.owner:OnShow()
             </OnEffectivelyShown>
             <Controls>
-                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+                <Control name="$(parent)Tabs" inherits="ZO_CraftingInventoryTabs"/>
 
                 <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
 

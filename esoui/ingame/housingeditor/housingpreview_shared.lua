@@ -125,10 +125,10 @@ do
 
         local currentlyPreviewedItemEntryIndex
         for i, data in ipairs(templateData) do
-            local localizedName = zo_strformat(SI_HOUSE_TEMPLATE_NAME_FORMAT, data.name)
-            local entry = comboBox:CreateItemEntry(localizedName, OnFilterChanged)
+            local formattedName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_TEMPLATE_NAME_FORMAT, data.name)
+            local entry = comboBox:CreateItemEntry(formattedName, OnFilterChanged)
             entry.data = data
-            comboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            comboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
             if data.houseTemplateId == currentlyPreviewedTemplateId then
                 currentlyPreviewedItemEntryIndex = i
             end
@@ -211,7 +211,7 @@ do
 
             local previousPriceLabel = buttonControl:GetNamedChild("PreviousPrice")
             if onSale then
-                local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(price))
+                local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, price)
                 local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
                 previousPriceLabel:SetText(strikethroughAmountString)
                 previousPriceLabel:ClearAnchors()

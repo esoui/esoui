@@ -9,6 +9,7 @@ end
 function ZO_WorldMapQuestBreadcrumbs:Initialize()
     self.taskIdToConditionData = {}
     self.conditionDataToPosition = {}
+    self.activeQuests = {}
 
     EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_POSITION_REQUEST_COMPLETE, function(_, ...) self:OnQuestPositionRequestComplete(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(_, ...) self:OnQuestConditionInfoChanged(...) end)
@@ -30,31 +31,24 @@ function ZO_WorldMapQuestBreadcrumbs:GetSteps(questIndex)
 end
 
 function ZO_WorldMapQuestBreadcrumbs:GetNumQuestStepsWithPositions(questIndex)
-    local questTable = self.conditionDataToPosition[questIndex]
-    if questTable then
-        return NonContiguousCount(questTable)
-    end
-    return 0
+    local stepsTable = self:GetSteps(questIndex)
+    return stepsTable and NonContiguousCount(stepsTable) or 0
+end
+
+function ZO_WorldMapQuestBreadcrumbs:GetQuestConditionPositions(questIndex, stepIndex)
+    local stepsTable = self:GetSteps(questIndex)
+    return stepsTable and stepsTable[stepIndex] or nil
 end
 
 function ZO_WorldMapQuestBreadcrumbs:GetNumQuestConditionPositions(questIndex, stepIndex)
-    local questTable = self.conditionDataToPosition[questIndex]
-    if questTable then
-        local stepTable = questTable[stepIndex]
-        if stepTable then
-            return NonContiguousCount(stepTable)
-        end
-    end
+    local positionsTable = self:GetQuestConditionPositions(questIndex, stepIndex)
+    -- For backwards compatibility we return nil (instead of 0) for empty tables.
+    return positionsTable and NonContiguousCount(positionsTable) or nil
 end
 
 function ZO_WorldMapQuestBreadcrumbs:GetQuestConditionPosition(questIndex, stepIndex, conditionIndex)
-    local questTable = self.conditionDataToPosition[questIndex]
-    if questTable then
-        local stepTable = questTable[stepIndex]
-        if stepTable then
-            return stepTable[conditionIndex]
-        end
-    end
+    local positionsTable = self:GetQuestConditionPositions(questIndex, stepIndex)
+    return positionsTable and positionsTable[conditionIndex] or nil
 end
 
 function ZO_WorldMapQuestBreadcrumbs:RequestConditionPosition(questIndex, stepIndex, conditionIndex)
@@ -73,109 +67,120 @@ function ZO_WorldMapQuestBreadcrumbs:RequestConditionPosition(questIndex, stepIn
 end
 
 function ZO_WorldMapQuestBreadcrumbs:RefreshQuest(questIndex)
-    local removedQuest = false
-    for taskId, conditionData in pairs(self.taskIdToConditionData) do
-        if conditionData.questIndex == questIndex then
-            CancelRequestJournalQuestConditionAssistance(taskId)
-            self.taskIdToConditionData[taskId] = nil
-            removedQuest = true
-        end
-    end
+    self:RemoveQuest(questIndex)
 
-    if self.conditionDataToPosition[questIndex] then
-        self.conditionDataToPosition[questIndex] = nil
-        removedQuest = true
-    end
-
-    if removedQuest  then
-        self:FireCallbacks("QuestRemoved", questIndex)
-    end
-
-    local hadConditionPosition = false
-    if(GetJournalQuestIsComplete(questIndex)) then
-        local taskId = self:RequestConditionPosition(questIndex, QUEST_MAIN_STEP_INDEX, 1)
-        hadConditionPosition = taskId ~= nil
+    if GetJournalQuestIsComplete(questIndex) then
+        self:RequestConditionPosition(questIndex, QUEST_MAIN_STEP_INDEX, 1)
     else
-        for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(questIndex) do
-            for conditionIndex = 1, GetJournalQuestNumConditions(questIndex, stepIndex) do
+        -- Request the position of all quest conditions that are incomplete and have not failed.
+        local numSteps = GetJournalQuestNumSteps(questIndex)
+        for stepIndex = QUEST_MAIN_STEP_INDEX, numSteps do
+            local numConditions = GetJournalQuestNumConditions(questIndex, stepIndex)
+            for conditionIndex = 1, numConditions do
                 local _, _, isFailCondition, isComplete, _, isVisible = GetJournalQuestConditionValues(questIndex, stepIndex, conditionIndex)
-                if(not (isFailCondition or isComplete) and isVisible) then
-                    local taskId = self:RequestConditionPosition(questIndex, stepIndex, conditionIndex)
-                    hadConditionPosition = hadConditionPosition or (taskId ~= nil)
+                if isVisible and not (isFailCondition or isComplete) then
+                    self:RequestConditionPosition(questIndex, stepIndex, conditionIndex)
                 end
             end
         end
     end
 
-    if not hadConditionPosition then
+    self:AddQuest(questIndex)
+end
+
+function ZO_WorldMapQuestBreadcrumbs:RefreshAllQuests()
+    self:CancelAllPendingTasks()
+    for questIndex in pairs(self.activeQuests) do
+        self:RemoveQuest(questIndex)
+    end
+
+    for questIndex = 1, MAX_JOURNAL_QUESTS do
+        if IsValidQuestIndex(questIndex) then
+            self:RefreshQuest(questIndex)
+        end
+    end
+end
+
+function ZO_WorldMapQuestBreadcrumbs:CancelAllPendingTasks()
+    for taskId, conditionData in pairs(self.taskIdToConditionData) do
+        CancelRequestJournalQuestConditionAssistance(taskId)
+        self.taskIdToConditionData[taskId] = nil
+    end
+    self.conditionDataToPosition = {}
+end
+
+function ZO_WorldMapQuestBreadcrumbs:CancelPendingTasksForQuest(questIndex)
+    for taskId, conditionData in pairs(self.taskIdToConditionData) do
+        if conditionData.questIndex == questIndex then
+            CancelRequestJournalQuestConditionAssistance(taskId)
+            self.taskIdToConditionData[taskId] = nil
+        end
+    end
+    self.conditionDataToPosition[questIndex] = nil
+end
+
+function ZO_WorldMapQuestBreadcrumbs:DoesQuestHavePendingTasks(questIndex)
+    for taskId, conditionData in pairs(self.taskIdToConditionData) do
+        if conditionData.questIndex == questIndex then
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_WorldMapQuestBreadcrumbs:IsQuestActive(questIndex)
+    return self.activeQuests[questIndex] == true
+end
+
+function ZO_WorldMapQuestBreadcrumbs:AddQuestConditionPosition(conditionData, positionData)
+    local questIndex, stepIndex, conditionIndex = conditionData.questIndex, conditionData.stepIndex, conditionData.conditionIndex
+
+    local questTable = self.conditionDataToPosition[questIndex]
+    if not questTable then
+        questTable = {}
+        self.conditionDataToPosition[questIndex] = questTable
+    end
+
+    local stepTable = questTable[stepIndex]
+    if not stepTable then
+        stepTable = {}
+        questTable[stepIndex] = stepTable
+    end
+    stepTable[conditionIndex] = positionData
+end
+
+function ZO_WorldMapQuestBreadcrumbs:AddQuest(questIndex)
+    if not self:IsQuestActive(questIndex) and not self:DoesQuestHavePendingTasks(questIndex) then
+        self.activeQuests[questIndex] = true
         self:FireCallbacks("QuestAvailable", questIndex)
     end
 end
 
-function ZO_WorldMapQuestBreadcrumbs:RefreshAllQuests()
-    local removedQuests = {}
-    
-    for taskId, conditionData in pairs(self.taskIdToConditionData) do
-        CancelRequestJournalQuestConditionAssistance(taskId)
-        removedQuests[conditionData.questIndex] = true
-    end
-
-    for questIndex, questData in pairs(self.conditionDataToPosition) do
-        removedQuests[questIndex] = true
-    end
-
-    self.taskIdToConditionData = {}
-    self.conditionDataToPosition = {}
-
-    for questIndex, _ in pairs(removedQuests) do
+function ZO_WorldMapQuestBreadcrumbs:RemoveQuest(questIndex)
+    self:CancelPendingTasksForQuest(questIndex)
+    if self.activeQuests[questIndex] then
+        self.activeQuests[questIndex] = nil
         self:FireCallbacks("QuestRemoved", questIndex)
-    end
-
-    for i = 1, MAX_JOURNAL_QUESTS do
-        if IsValidQuestIndex(i) then
-            self:RefreshQuest(i)
-        end
     end
 end
 
 --Events
 
 function ZO_WorldMapQuestBreadcrumbs:OnQuestPositionRequestComplete(taskId, pinType, xLoc, yLoc, areaRadius, insideCurrentMapWorld, isBreadcrumb)
-    local positionData =
-    {
-        pinType = pinType,
-        xLoc = xLoc,
-        yLoc = yLoc,
-        areaRadius = areaRadius,
-        insideCurrentMapWorld = insideCurrentMapWorld,
-        isBreadcrumb = isBreadcrumb,
-    }
-
     local conditionData = self.taskIdToConditionData[taskId]
     if conditionData then
         self.taskIdToConditionData[taskId] = nil
-        local questIndex, stepIndex, conditionIndex = conditionData.questIndex, conditionData.stepIndex, conditionData.conditionIndex
-        if not self.conditionDataToPosition[questIndex] then
-            self.conditionDataToPosition[questIndex] = {}
-        end
-        local questTable = self.conditionDataToPosition[questIndex]
-        if not questTable[stepIndex] then
-            questTable[stepIndex] = {}
-        end
-        local stepTable = questTable[stepIndex]
-        stepTable[conditionIndex] = positionData
-
-        local allQuestConditionsDone = true
-        for searchTaskId, searchConditionData in pairs(self.taskIdToConditionData) do
-            if searchConditionData.questIndex == questIndex then
-                allQuestConditionsDone = false
-                break
-            end
-        end
-
-        if allQuestConditionsDone then
-            self:FireCallbacks("QuestAvailable", questIndex)
-        end
+        local positionData =
+        {
+            pinType = pinType,
+            xLoc = xLoc,
+            yLoc = yLoc,
+            areaRadius = areaRadius,
+            insideCurrentMapWorld = insideCurrentMapWorld,
+            isBreadcrumb = isBreadcrumb,
+        }
+        self:AddQuestConditionPosition(conditionData, positionData)
+        self:AddQuest(conditionData.questIndex)
     end
 end
 
@@ -188,14 +193,7 @@ function ZO_WorldMapQuestBreadcrumbs:OnQuestConditionInfoChanged(questIndex, que
 end
 
 function ZO_WorldMapQuestBreadcrumbs:OnQuestRemoved(isCompleted, questIndex)
-    for taskId, conditionData in pairs(self.taskIdToConditionData) do
-        if conditionData.questIndex == questIndex then
-            CancelRequestJournalQuestConditionAssistance(taskId)
-            self.taskIdToConditionData[taskId] = nil
-        end
-    end    
-    self.conditionDataToPosition[questIndex] = nil
-    self:FireCallbacks("QuestRemoved", questIndex)
+    self:RemoveQuest(questIndex)
 end
 
 function ZO_WorldMapQuestBreadcrumbs:OnQuestAdded(questIndex)

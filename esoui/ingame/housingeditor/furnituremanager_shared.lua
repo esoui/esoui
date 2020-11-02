@@ -60,18 +60,18 @@ function ZO_SharedFurnitureManager:Initialize()
     self.inProgressPlaceableFurnitureTextFilterTaskIds = { }
     self.completePlaceableFurnitureTextFilterTaskIds = { }
     self.placeableTextFilter = ""
-	self.isPlaceableFiltered = false
+    self.isPlaceableFiltered = false
 
     self.retrievableFurnitureCategoryTreeData = ZO_RootFurnitureCategory:New("retrievable")
     self.retrievableFurniture = {}
     self.retrievableTextFilter = ""
-	self.isRetrievableFiltered = false
+    self.isRetrievableFiltered = false
 
     self.marketProductCategoryTreeData = ZO_RootFurnitureCategory:New("market")
     self.marketProducts = {}
     self.marketProductIdToMarketProduct = {}
     self.marketProductTextFilter = ""
-	self.isMarketFiltered = false
+    self.isMarketFiltered = false
 
     self.pathableFurnitureCategoryTreeData = ZO_RootFurnitureCategory:New("pathable")
 
@@ -126,7 +126,7 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
             self.placeableFurnitureCategoryTreeData:SortCategoriesRecursive()
 
             local function IsFurniturePathable(furniture)
-                return HousingEditorCanCollectibleBePathed(furniture.collectibleId)
+                return furniture:IsPathable()
             end
             self:BuildCategoryTreeData(self.pathableFurnitureCategoryTreeData, collectibleFurnitureCache, FURNITURE_THEME_TYPE_ALL, IsFurniturePathable)
             self.pathableFurnitureCategoryTreeData:SortCategoriesRecursive()
@@ -510,6 +510,12 @@ do
     end
 
     function ZO_SharedFurnitureManager:RemoveFurnitureFromCategory(categoryTreeData, furniture)
+        local isPathableFurnitureCategory = categoryTreeData == self.pathableFurnitureCategoryTreeData
+        if isPathableFurnitureCategory and not furniture:IsPathable() then
+            -- this furniture could not have been added to the pathableFurnitureCategory, so no point trying to remove
+            return
+        end
+
         local categoryId, subcategoryId = furniture:GetCategoryInfo()
         if categoryId and categoryId > 0 then
             local categoryData = categoryTreeData:GetSubcategory(categoryId)
@@ -530,22 +536,22 @@ do
             end
 
             if couldntFindExpectedCategory then
-				local isFiltered = (categoryTreeData == self.placeableFurnitureCategoryTreeData and self.isPlaceableFiltered)
-								or (categoryTreeData == self.retrievableFurnitureCategoryTreeData and self.isRetrievableFiltered)
-								or (categoryTreeData == self.marketProductCategoryTreeData and self.isMarketFiltered)
-                local isSpecialTree = categoryTreeData == self.pathableFurnitureCategoryTreeData
-
-                -- special trees will have specific subsets of furniture and we expect them to not have furniture in them at times
-                if not isSpecialTree then
-				    -- Only assert if the category or subcategory genuinely does not exist or if there is no filter currently being applied to the relevant category tree.
-	                if not isFiltered or not GetFurnitureCategoryInfo(categoryId) or not GetFurnitureCategoryInfo(subcategoryId) then
-					    internalassert(false, string.format("Removing non-existent furniture from %s.", categoryTreeData:GetRootCategoryName()))
-				    end
+                -- some trees will have specific subsets of furniture and we expect them to not have furniture in them at times
+                if not isPathableFurnitureCategory then
+                    local isFiltered = (categoryTreeData == self.placeableFurnitureCategoryTreeData and self.isPlaceableFiltered)
+                                or (categoryTreeData == self.retrievableFurnitureCategoryTreeData and self.isRetrievableFiltered)
+                                or (categoryTreeData == self.marketProductCategoryTreeData and self.isMarketFiltered)
+                    -- Only assert if the category or subcategory genuinely does not exist or if there is no filter currently being applied to the relevant category tree.
+                    if not isFiltered or not GetFurnitureCategoryInfo(categoryId) or not GetFurnitureCategoryInfo(subcategoryId) then
+                        internalassert(false, string.format("Removing non-existent furniture from %s.", categoryTreeData:GetRootCategoryName()))
+                    end
                 end
             end
         else
             local categoryData = categoryTreeData:GetSubcategory(ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY)
-            categoryData:RemoveEntry(furniture)
+            if internalassert(categoryData ~= nil, string.format("Uncategorized furniture has no 'needs categorization' category. Furniture is likely missing furniture data. Furniture name: %s", furniture:GetRawName())) then
+                categoryData:RemoveEntry(furniture)
+            end
         end
     end
 
@@ -956,7 +962,7 @@ function ZO_SharedFurnitureManager:RequestApplyPlaceableTextFilterToData()
         
     --If we have filter text than create the tasks
     if self:CanFilterByText(self.placeableTextFilter) then
-		self.isPlaceableFiltered = true
+        self.isPlaceableFiltered = true
 
         --Inventory Items
         local itemTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, self.placeableTextFilter)
@@ -984,7 +990,7 @@ function ZO_SharedFurnitureManager:RequestApplyPlaceableTextFilterToData()
         StartBackgroundListFilter(collectibleTaskId)
     --If we have no search text then everything passes, so set everything to true now.
     else
-		self.isPlaceableFiltered = false
+        self.isPlaceableFiltered = false
 
         --Inventory Items
         for bagId, slots in pairs(self.placeableFurniture[ZO_PLACEABLE_TYPE_ITEM]) do
@@ -1013,7 +1019,7 @@ function ZO_SharedFurnitureManager:RequestApplyRetrievableTextFilterToData()
 
     --If we have filter text than create the task
     if self:CanFilterByText(self.retrievableTextFilter) then
-		self.isRetrievableFiltered = true
+        self.isRetrievableFiltered = true
 
         local furnitureTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_FURNITURE_ID, self.retrievableTextFilter)
         self.inProgressRetrievableFurnitureTextFilterTaskId = furnitureTaskId
@@ -1026,7 +1032,7 @@ function ZO_SharedFurnitureManager:RequestApplyRetrievableTextFilterToData()
         StartBackgroundListFilter(furnitureTaskId)
     --If we have no search text then everything passes, so set everything to true now.
     else
-		self.isRetrievableFiltered = false
+        self.isRetrievableFiltered = false
 
         for _, furnitureData in pairs(self.retrievableFurniture) do
             furnitureData:SetPassesTextFilter(true)
@@ -1045,7 +1051,7 @@ function ZO_SharedFurnitureManager:RequestApplyMarketProductTextFilterToData()
 
     --If we have filter text than create the task
     if self:CanFilterByText(self.marketProductTextFilter) then
-		self.isMarketFiltered = true
+        self.isMarketFiltered = true
 
         local marketProductTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_MARKET_PRODUCT_ID, self.marketProductTextFilter)
         self.inProgressMarketProductTextFilterTaskId = marketProductTaskId
@@ -1061,7 +1067,7 @@ function ZO_SharedFurnitureManager:RequestApplyMarketProductTextFilterToData()
         StartBackgroundListFilter(marketProductTaskId)
     --If we have no search text then everything passes, so set everything to true now.
     else
-		self.isMarketFiltered = false
+        self.isMarketFiltered = false
 
         for i, marketProductData in ipairs(self.marketProducts) do
             marketProductData:SetPassesTextFilter(true)

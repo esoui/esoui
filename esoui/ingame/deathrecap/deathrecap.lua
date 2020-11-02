@@ -251,7 +251,7 @@ function DeathRecap:SetupAttacks()
         
         iconControl:SetTexture(attackInfo.attackIcon)
         attackNameControl:SetText(zo_strformat(SI_DEATH_RECAP_ATTACK_NAME, attackInfo.attackName))
-        damageControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(attackInfo.attackDamage)))
+        damageControl:SetText(zo_strformat(SI_NUMBER_FORMAT, attackInfo.attackDamage))
             
         iconControl:SetAlpha(startAlpha)
         attackControl:GetNamedChild("Text"):SetAlpha(startAlpha)

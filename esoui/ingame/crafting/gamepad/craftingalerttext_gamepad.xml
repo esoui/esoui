@@ -1,0 +1,14 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_CraftingAlertLineGamepad" horizontalAlignment="RIGHT" font="ZoFontGamepad34" modifyTextType="UPPERCASE" virtual="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_CraftAdvisor_Gamepad_TopLevel" relativePoint="BOTTOMRIGHT"/>
+        </Label>
+
+        <TopLevelControl name="ZO_CraftingAlertTextNotificationGamepad" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_CraftAdvisor_Gamepad_TopLevel" relativePoint="BOTTOMRIGHT" offsetX="7" offsetY="30" />
+            <OnInitialized>
+                ZO_CraftingAlertTextGamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

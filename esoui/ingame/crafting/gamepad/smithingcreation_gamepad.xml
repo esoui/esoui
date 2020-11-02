@@ -94,7 +94,7 @@
         <Control name="ZO_GamepadSmithingCreationFloatingContent" virtual="true">
             <Controls>
                 <Control name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip_Gamepad" hidden="true">
-                    <Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="LEFT" offsetX="ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_2_SHOWN" offsetY="ZO_GAMEPAD_PANEL_FLOATING_CENTER_OFFSET_Y"/>
+                    <Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="LEFT" offsetX="ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_SHOWN" offsetY="ZO_GAMEPAD_PANEL_FLOATING_CENTER_OFFSET_Y"/>
                     <OnInitialized>
                         ZO_GamepadCraftingUtils_CraftingTooltip_Gamepad_Initialize(self, ZO_GamepadCraftingUtils_CraftingTooltip_StandardFloatingCenterScreenResizeHandler)
                     </OnInitialized>

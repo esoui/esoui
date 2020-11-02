@@ -569,61 +569,26 @@ function ZO_CraftingUtils_ConnectTreeToCraftingProcess(tree)
     ConnectStandardObjectToCraftingProcess(tree)
 end
 
-do
-    internalassert(GetNumSmithingTraitItems() == 34, "Update when a new craftable trait type is made")
-    local CRAFTABLE_TRAIT_TYPES = 
-    {
-        ITEM_TRAIT_TYPE_NONE,
-
-        ITEM_TRAIT_TYPE_WEAPON_POWERED,
-        ITEM_TRAIT_TYPE_WEAPON_CHARGED,
-        ITEM_TRAIT_TYPE_WEAPON_PRECISE,
-        ITEM_TRAIT_TYPE_WEAPON_INFUSED,
-        ITEM_TRAIT_TYPE_WEAPON_DEFENDING,
-        ITEM_TRAIT_TYPE_WEAPON_TRAINING,
-        ITEM_TRAIT_TYPE_WEAPON_SHARPENED,
-        ITEM_TRAIT_TYPE_WEAPON_DECISIVE,
-        ITEM_TRAIT_TYPE_WEAPON_NIRNHONED,
-
-        ITEM_TRAIT_TYPE_ARMOR_STURDY,
-        ITEM_TRAIT_TYPE_ARMOR_IMPENETRABLE,
-        ITEM_TRAIT_TYPE_ARMOR_REINFORCED,
-        ITEM_TRAIT_TYPE_ARMOR_WELL_FITTED,
-        ITEM_TRAIT_TYPE_ARMOR_TRAINING,
-        ITEM_TRAIT_TYPE_ARMOR_INFUSED,
-        ITEM_TRAIT_TYPE_ARMOR_PROSPEROUS,
-        ITEM_TRAIT_TYPE_ARMOR_DIVINES,
-        ITEM_TRAIT_TYPE_ARMOR_NIRNHONED,
-
-        ITEM_TRAIT_TYPE_JEWELRY_ARCANE,
-        ITEM_TRAIT_TYPE_JEWELRY_HEALTHY,
-        ITEM_TRAIT_TYPE_JEWELRY_ROBUST,
-        ITEM_TRAIT_TYPE_JEWELRY_TRIUNE,
-        ITEM_TRAIT_TYPE_JEWELRY_INFUSED,
-        ITEM_TRAIT_TYPE_JEWELRY_PROTECTIVE,
-        ITEM_TRAIT_TYPE_JEWELRY_SWIFT,
-        ITEM_TRAIT_TYPE_JEWELRY_HARMONY,
-        ITEM_TRAIT_TYPE_JEWELRY_BLOODTHIRSTY,
-    }
-
-    function ZO_CraftingUtils_GetSmithingTraitItemInfo()
-        local traits = {}
-        for _, traitType in ipairs(CRAFTABLE_TRAIT_TYPES) do
-            local traitIndex = traitType + 1
-            local _, name, icon, sellPrice, meetsUsageRequirement, itemStyle, quality = GetSmithingTraitItemInfo(traitIndex)
+function ZO_CraftingUtils_GetSmithingTraitItemInfo()
+    local traits = {}
+    for traitType = ITEM_TRAIT_TYPE_ITERATION_BEGIN, ITEM_TRAIT_TYPE_ITERATION_END do
+        local traitIndex = traitType + 1
+        local _, name, icon, sellPrice, meetsUsageRequirement, itemStyle, quality = GetSmithingTraitItemInfo(traitIndex)
+        local hasTrait = traitType ~= ITEM_TRAIT_TYPE_NONE
+        if name ~= "" or not hasTrait then
             table.insert(traits, {
                 type = traitType,
                 index = traitIndex,
                 name = name,
-                icon = icon,
+                icon = hasTrait and icon or "EsoUI/Art/Crafting/crafting_smithing_noTrait.dds",
                 sellPrice = sellPrice,
                 meetsUsageRequirement = meetsUsageRequirement,
                 itemStyle = itemStyle,
                 quality = quality,
             })
         end
-        return traits
     end
+    return traits
 end
 
 do
@@ -762,5 +727,19 @@ for key,value in pairs(ZO_CRAFTING_TOOLTIP_STYLES) do
 
     if key ~= "topSection" then
         value["layoutPrimaryDirectionCentered"] = true
+    end
+end
+
+do
+    local CRAFTING_TYPE_TO_BOOSTER_ITEM_TYPE =
+    {
+        [CRAFTING_TYPE_BLACKSMITHING] = ITEMTYPE_BLACKSMITHING_BOOSTER,
+        [CRAFTING_TYPE_CLOTHIER] = ITEMTYPE_CLOTHIER_BOOSTER,
+        [CRAFTING_TYPE_WOODWORKING] = ITEMTYPE_WOODWORKING_BOOSTER,
+        [CRAFTING_TYPE_JEWELRYCRAFTING] = ITEMTYPE_JEWELRYCRAFTING_BOOSTER,
+    }
+
+    function ZO_CraftingUtils_GetBoosterItemType(craftingType)
+        return CRAFTING_TYPE_TO_BOOSTER_ITEM_TYPE[craftingType]
     end
 end

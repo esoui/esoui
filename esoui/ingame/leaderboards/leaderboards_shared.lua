@@ -311,7 +311,7 @@ do
         local includeAllFilter = INCLUDE_ALL_FILTER[leaderboardType]
         if includeAllFilter then
             local entry = ZO_ComboBox:CreateItemEntry(GetString(SI_LEADERBOARDS_FILTER_ALL_CLASSES), changedCallback)
-            dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
             currentIndex = currentIndex + 1
         end
 
@@ -323,7 +323,7 @@ do
                 local className = zo_strformat(SI_CLASS_NAME, GetClassName(GENDER_MALE, classId))
                 local entry = ZO_ComboBox:CreateItemEntry(className, changedCallback)
                 entry.classId = classId
-                dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
                 currentIndex = currentIndex + 1
                 if desiredClass and desiredClass == classId then
                     defaultIndex = currentIndex

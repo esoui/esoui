@@ -27,8 +27,6 @@ function ZO_QuestJournal_Keyboard:Initialize(control)
     self.questInfoContainer = control:GetNamedChild("QuestInfoContainer")
     self.questStepContainer = control:GetNamedChild("QuestStepContainer")
 
-    self:RefreshQuestMasterList()
-
     ZO_QuestJournal_Shared.Initialize(self, control)
             
     --Quest tracker depends on this data for finding the next quest to focus.
@@ -263,19 +261,7 @@ function ZO_QuestJournal_Keyboard:RefreshQuestCount()
     self.questCount:SetText(zo_strformat(SI_QUEST_CURRENT_MAX, GetNumJournalQuests(), MAX_JOURNAL_QUESTS))
 end
 
-function ZO_QuestJournal_Keyboard:RefreshQuestMasterList()
-    local quests, categories, seenCategories = QUEST_JOURNAL_MANAGER:GetQuestListData()
-    self.questMasterList = {
-        quests = quests,
-        categories = categories,
-        seenCategories = seenCategories,
-    }
-end
-
 function ZO_QuestJournal_Keyboard:RefreshQuestList()
-    local quests = self.questMasterList.quests
-    local categories = self.questMasterList.categories
-
     self.questIndexToTreeNode = {}
 
     ClearTooltip(InformationTooltip)
@@ -285,16 +271,17 @@ function ZO_QuestJournal_Keyboard:RefreshQuestList()
 
     local categoryNodes = {}
 
-    for i = 1, #categories do
-        local categoryInfo = categories[i]
+    local categories = QUEST_JOURNAL_MANAGER:GetQuestCategories()
+    for i, categoryInfo in ipairs(categories) do
         categoryNodes[categoryInfo.name] = self.navigationTree:AddNode("ZO_QuestJournalHeader", categoryInfo.name)
     end
 
     local firstNode
     local lastNode
     local assistedNode
-    for i = 1, #quests do
-        local questInfo = quests[i]
+
+    local questList = QUEST_JOURNAL_MANAGER:GetQuestList()
+    for i, questInfo in ipairs(questList) do
         local parent = categoryNodes[questInfo.categoryName]
         local questNode = self.navigationTree:AddNode("ZO_QuestJournalNavigationEntry", questInfo, parent)
         firstNode = firstNode or questNode
@@ -304,7 +291,7 @@ function ZO_QuestJournal_Keyboard:RefreshQuestList()
             lastNode.nextNode = questNode
         end
 
-        if i == #quests then
+        if i == #questList then
             questNode.nextNode = firstNode
         end
 
@@ -377,7 +364,6 @@ function ZO_QuestJournal_Keyboard:RefreshDetails()
     self.optionalStepTextBulletList:Clear()
     self.hintTextBulletList:Clear()
 
-    local questIndex = questData.questIndex
     local questStrings = self.questStrings
     ZO_ClearNumericallyIndexedTable(questStrings)
 
@@ -424,18 +410,6 @@ function ZO_QuestJournal_Keyboard:RefreshDetails()
             self.optionalStepTextBulletList:AddLine(questStrings[i])
         end
         ZO_ClearNumericallyIndexedTable(questStrings) 
-    end
-end
-
-function ZO_QuestJournal_Keyboard:GetNextSortedQuestForQuestIndex(questIndex)
-    if self.questMasterList and self.questMasterList.quests then
-        local quests = self.questMasterList.quests
-        for i, quest in ipairs(quests) do
-            if quest.questIndex == questIndex then
-                local nextQuest = (i == #quests) and 1 or (i + 1)
-                return quests[nextQuest].questIndex
-            end
-        end
     end
 end
 

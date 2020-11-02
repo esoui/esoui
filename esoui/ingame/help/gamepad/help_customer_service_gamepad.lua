@@ -319,7 +319,7 @@ function ZO_Help_Customer_Service_Gamepad:BuildDropdownList(dropdown, data)
     dropdown:ClearItems()
 
     for index, item in ipairs(data.list) do
-        dropdown:AddItem(ZO_ComboBox:CreateItemEntry(item.name, function() self:DropdownItemCallback(index, data.fieldType, item.id) end), ZO_COMBOBOX_SUPRESS_UPDATE)
+        dropdown:AddItem(ZO_ComboBox:CreateItemEntry(item.name, function() self:DropdownItemCallback(index, data.fieldType, item.id) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
 
     dropdown:UpdateItems()

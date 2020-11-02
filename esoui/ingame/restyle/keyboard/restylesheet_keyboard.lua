@@ -223,8 +223,7 @@ function ZO_RestyleSlot_OutfitStyle:OnIconMouseUp(button, upInside)
             if collectibleData then
                 if IsChatSystemAvailableForCurrentPlatform() then
                     --Link in chat
-                    local link = GetCollectibleLink(collectibleData:GetId(), LINK_STYLE_BRACKETS)
-                    AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link)) end)
+                    AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(GetCollectibleLink(collectibleData:GetId(), LINK_STYLE_BRACKETS)) end)
                 end
 
                 if collectibleData:IsLocked() and collectibleData:IsPurchasable() then

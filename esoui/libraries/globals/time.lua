@@ -170,7 +170,7 @@ do
             if data.value == selectedValue then
                 selectedEntry = entry
             end
-            comboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            comboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
 
         local IGNORE_CALLBACK = true

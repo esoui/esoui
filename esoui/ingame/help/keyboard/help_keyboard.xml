@@ -26,7 +26,7 @@
                     <Controls>
                         <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
                             <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_HELP_ENTER_KEYWORD))
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_ENTER_KEYWORD_SEARCH_EDIT_DEFAULT))
                             </OnInitialized>
                             <OnTextChanged>
                                 ZO_EditDefaultText_OnTextChanged(self)

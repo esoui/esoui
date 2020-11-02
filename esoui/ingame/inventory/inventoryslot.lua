@@ -140,7 +140,7 @@ function ZO_ItemSlot_SetupSlotBase(slotControl, stackCount, iconFile, meetsUsage
     slotControl.stackCount = stackCount
     local stackCountLabel = GetControl(slotControl, "StackCount")
     if stackCount > 1 or slotControl.alwaysShowStackCount then
-        stackCountLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)))
+        stackCountLabel:SetText(ZO_AbbreviateAndLocalizeNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
     else
         stackCountLabel:SetText("")
     end
@@ -971,12 +971,13 @@ local function CanBuyMultiple(inventorySlot)
 end
 
 local function CanEquipItem(inventorySlot)
-    local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    if bag ~= BAG_WORN then
-        local equipType = select(6, GetItemInfo(bag, index))
-        return equipType ~= EQUIP_TYPE_INVALID
+    if not IsSlotLocked(inventorySlot) then
+        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if bag ~= BAG_WORN then
+            local equipType = select(6, GetItemInfo(bag, index))
+            return equipType ~= EQUIP_TYPE_INVALID
+        end
     end
-
     return false
 end
 
@@ -1121,6 +1122,18 @@ end
 
 local function TryStartSkillRespec(inventorySlot)
     TryUseItem(inventorySlot)
+end
+
+local function TryBindItem(bagId, slotIndex)
+    local function OnAcceptCallback()
+        BindItem(bagId, slotIndex)
+    end
+
+    if ZO_InventorySlot_WillItemBecomeBoundOnEquip(bagId, slotIndex) then
+        local itemDisplayQuality = GetItemDisplayQuality(bagId, slotIndex)
+        local itemDisplayQualityColor = GetItemQualityColor(itemDisplayQuality)
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_BIND_ITEM", { onAcceptCallback = OnAcceptCallback }, { mainTextParams = { itemDisplayQualityColor:Colorize(GetItemName(bagId, slotIndex)) } })
+    end
 end
 
 local function TryBuyMultiple(inventorySlot)
@@ -1590,312 +1603,329 @@ local renameActions =
 
 local actionHandlers =
 {
-    ["use"] =   function(inventorySlot, slotActions)
-                    DiscoverSlotActionFromType(useActions, inventorySlot, slotActions)
-                end,
+    ["use"] = function(inventorySlot, slotActions)
+        DiscoverSlotActionFromType(useActions, inventorySlot, slotActions)
+    end,
 
-    ["mail_attach"] =   function(inventorySlot, slotActions)
-                            if IsSendingMail() and not IsItemAlreadyAttachedToMail(inventorySlot) then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_MAIL_ATTACH, function() TryMailItem(inventorySlot) end, "primary")
-                            end
-                        end,
+    ["mail_attach"] = function(inventorySlot, slotActions)
+        if IsSendingMail() and not IsItemAlreadyAttachedToMail(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_MAIL_ATTACH, function() TryMailItem(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["mail_detach"] =   function(inventorySlot, slotActions)
-                            if IsSendingMail() and IsItemAlreadyAttachedToMail(inventorySlot) then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_MAIL_DETACH, function() RemoveQueuedAttachment(inventorySlot) end, "primary")
-                            end
-                        end,
+    ["mail_detach"] = function(inventorySlot, slotActions)
+        if IsSendingMail() and IsItemAlreadyAttachedToMail(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_MAIL_DETACH, function() RemoveQueuedAttachment(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["bank_deposit"]=   function(inventorySlot, slotActions)
-                            if IsBankOpen() then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_DEPOSIT, function() TryBankItem(inventorySlot) end, "primary")
-                            end
-                        end,
+    ["bank_deposit"] = function(inventorySlot, slotActions)
+        if IsBankOpen() then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_DEPOSIT, function() TryBankItem(inventorySlot) end, "primary")
+        end
+    end,
 
     ["bank_withdraw"] = function(inventorySlot, slotActions)
-                            if IsBankOpen() then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_WITHDRAW, function() TryBankItem(inventorySlot) end, "primary")
-                            end
-                        end,
+        if IsBankOpen() then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_WITHDRAW, function() TryBankItem(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["guild_bank_deposit"] =    function(inventorySlot, slotActions)
-                                    if(GetSelectedGuildBankId()) then
-                                        slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_DEPOSIT,  function()
-                                                                                                    local bag, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                                                                                    TryGuildBankDepositItem(bag, slotIndex)
-                                                                                                end, "primary")
-                                    end
-                                end,
+    ["guild_bank_deposit"] = function(inventorySlot, slotActions)
+        if GetSelectedGuildBankId() then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_DEPOSIT,  function()
+                local bag, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                TryGuildBankDepositItem(bag, slotIndex)
+            end, "primary")
+        end
+    end,
 
-    ["guild_bank_withdraw"] =   function(inventorySlot, slotActions)
-                                    if(GetSelectedGuildBankId()) then
-                                        slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_WITHDRAW, function()
-                                                                                                    local _, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                                                                                    TryGuildBankWithdrawItem(slotIndex)
-                                                                                                end, "primary")
-                                    end
-                                end,
+    ["guild_bank_withdraw"] = function(inventorySlot, slotActions)
+        if GetSelectedGuildBankId() then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_WITHDRAW, function()
+                local _, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                TryGuildBankWithdrawItem(slotIndex)
+            end, "primary")
+        end
+    end,
 
     ["trade_add"] = function(inventorySlot, slotActions)
-                        if TRADE_WINDOW:IsTrading() and CanTradeItem(inventorySlot) and not IsItemAlreadyBeingTraded(inventorySlot) then
-                            slotActions:AddSlotAction(SI_ITEM_ACTION_TRADE_ADD, function() TryTradeItem(inventorySlot) end, "primary")
-                        end
-                    end,
+        if TRADE_WINDOW:IsTrading() and CanTradeItem(inventorySlot) and not IsItemAlreadyBeingTraded(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_TRADE_ADD, function() TryTradeItem(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["trade_remove"] =  function(inventorySlot, slotActions)
-                            if TRADE_WINDOW:IsTrading() and IsItemAlreadyBeingTraded(inventorySlot) then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_TRADE_REMOVE, function() TryRemoveFromTrade(inventorySlot) end, "primary")
-                            end
-                        end,
+    ["trade_remove"] = function(inventorySlot, slotActions)
+        if TRADE_WINDOW:IsTrading() and IsItemAlreadyBeingTraded(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_TRADE_REMOVE, function() TryRemoveFromTrade(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["sell"] =  function(inventorySlot, slotActions)
-                    if(CanSellItem(inventorySlot)) then
-                        slotActions:AddSlotAction(SI_ITEM_ACTION_SELL, function() TrySellItem(inventorySlot) end, "primary")
-                    end
-                end,
+    ["sell"] = function(inventorySlot, slotActions)
+        if CanSellItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_SELL, function() TrySellItem(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["launder"] =  function(inventorySlot, slotActions)
-                    if(CanLaunderItem()) then
-                        slotActions:AddSlotAction(SI_ITEM_ACTION_LAUNDER, function() TryLaunderItem(inventorySlot) end, "primary")
-                    end
-                end,
+    ["launder"] = function(inventorySlot, slotActions)
+        if CanLaunderItem() then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_LAUNDER, function() TryLaunderItem(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["buy"] =   function(inventorySlot, slotActions)
-                    if not inventorySlot.locked then
-                        slotActions:AddSlotAction(SI_ITEM_ACTION_BUY, function() BuyItemFromStore(inventorySlot) end, "primary")
-                    end
-                end,
+    ["buy"] = function(inventorySlot, slotActions)
+        if not inventorySlot.locked then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_BUY, function() BuyItemFromStore(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["buy_multiple"] =  function(inventorySlot, slotActions)
-                            if CanBuyMultiple(inventorySlot) then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_BUY_MULTIPLE, function() TryBuyMultiple(inventorySlot) end, "secondary")
-                            end
-                        end,
+    ["buy_multiple"] = function(inventorySlot, slotActions)
+        if CanBuyMultiple(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_BUY_MULTIPLE, function() TryBuyMultiple(inventorySlot) end, "secondary")
+        end
+    end,
 
-    ["buyback"] =   function(inventorySlot, slotActions)
-                        slotActions:AddSlotAction(SI_ITEM_ACTION_BUYBACK, function() BuybackItem(inventorySlot.index) end, "primary")
-                    end,
+    ["buyback"] = function(inventorySlot, slotActions)
+        slotActions:AddSlotAction(SI_ITEM_ACTION_BUYBACK, function() BuybackItem(inventorySlot.index) end, "primary")
+    end,
 
     ["equip"] = function(inventorySlot, slotActions)
-                    if(CanEquipItem(inventorySlot)) then
-                        slotActions:AddSlotAction(SI_ITEM_ACTION_EQUIP, function() TryEquipItem(inventorySlot) end, "primary", nil, {visibleWhenDead = false})
-                    end
-                end,
+        if CanEquipItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_EQUIP, function() TryEquipItem(inventorySlot) end, "primary", nil, {visibleWhenDead = false})
+        end
+    end,
 
     ["gamepad_equip"] = function(inventorySlot, slotActions)
-                            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                            if GAMEPAD_INVENTORY_ROOT_SCENE:IsShowing() and IsEquipable(bag, index) and CanEquipItem(inventorySlot) then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_EQUIP, function() GAMEPAD_INVENTORY:TryEquipItem(inventorySlot) end, "primary")
-                            end
-                        end,
+        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if GAMEPAD_INVENTORY_ROOT_SCENE:IsShowing() and IsEquipable(bag, index) and CanEquipItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_EQUIP, function() GAMEPAD_INVENTORY:TryEquipItem(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["unequip"] =   function(inventorySlot, slotActions)
-                        if(CanUnequipItem(inventorySlot)) then
-                            slotActions:AddSlotAction(SI_ITEM_ACTION_UNEQUIP, function() TryUnequipItem(inventorySlot) end, "primary")
-                        end
-                    end,
+    ["unequip"] = function(inventorySlot, slotActions)
+        if CanUnequipItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_UNEQUIP, function() TryUnequipItem(inventorySlot) end, "primary")
+        end
+    end,
 
     ["take_loot"] = function(inventorySlot, slotActions)
-                        slotActions:AddSlotAction(SI_ITEM_ACTION_LOOT_TAKE, function() TakeLoot(inventorySlot) end, "primary", function() return false end)
-                    end,
+        slotActions:AddSlotAction(SI_ITEM_ACTION_LOOT_TAKE, function() TakeLoot(inventorySlot) end, "primary", function() return false end)
+    end,
 
-    ["destroy"] =   function(inventorySlot, slotActions)
-                        if(ZO_InventorySlot_CanDestroyItem(inventorySlot)) then
-                            slotActions:AddSlotAction(SI_ITEM_ACTION_DESTROY, function() ZO_InventorySlot_InitiateDestroyItem(inventorySlot) end, "secondary")
-                        end
-                    end,
+    ["destroy"] = function(inventorySlot, slotActions)
+        if not IsSlotLocked(inventorySlot) and ZO_InventorySlot_CanDestroyItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_DESTROY, function() ZO_InventorySlot_InitiateDestroyItem(inventorySlot) end, "secondary")
+        end
+    end,
 
-    ["split_stack"] =   function(inventorySlot, slotActions)
-                            if(ZO_InventorySlot_CanSplitItemStack(inventorySlot)) then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_SPLIT_STACK, function() ZO_InventorySlot_TrySplitStack(inventorySlot) end, "secondary")
-                            end
-                        end,
+    ["split_stack"] = function(inventorySlot, slotActions)
+        if ZO_InventorySlot_CanSplitItemStack(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_SPLIT_STACK, function() ZO_InventorySlot_TrySplitStack(inventorySlot) end, "secondary")
+        end
+    end,
 
-    ["enchant"] =   function(inventorySlot, slotActions)
-                            if(CanEnchantItem(inventorySlot)) then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_ENCHANT, function() TryEnchantItem(inventorySlot) end, "keybind1")
-                            end
-                        end,
+    ["enchant"] = function(inventorySlot, slotActions)
+        if CanEnchantItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_ENCHANT, function() TryEnchantItem(inventorySlot) end, "keybind1")
+        end
+    end,
 
-    ["charge"] =   function(inventorySlot, slotActions)
-                            if(CanChargeItem(inventorySlot)) then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_CHARGE, function() TryChargingItem(inventorySlot) end, "keybind2")
-                            end
-                        end,
+    ["charge"] = function(inventorySlot, slotActions)
+        if CanChargeItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_CHARGE, function() TryChargingItem(inventorySlot) end, "keybind2")
+        end
+    end,
 
-    ["kit_repair"] =   function(inventorySlot, slotActions)
-                            if(CanKitRepairItem(inventorySlot)) then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_REPAIR, function() TryKitRepairItem(inventorySlot) end, "keybind2")
-                            end
-                        end,
-    ["link_to_chat"] =  function(inventorySlot, slotActions)
-                            if ZO_InventorySlot_GetStackCount(inventorySlot) > 0 or ZO_ItemSlot_GetAlwaysShowStackCount(inventorySlot) then
-                                DiscoverSlotActionFromType(linkHelperActions, inventorySlot, slotActions, "link_to_chat")
-                            end
-                        end,
-    ["report_item"] =  function(inventorySlot, slotActions)
-                            if ZO_InventorySlot_GetStackCount(inventorySlot) > 0 or ZO_ItemSlot_GetAlwaysShowStackCount(inventorySlot) then
-                                DiscoverSlotActionFromType(linkHelperActions, inventorySlot, slotActions, "report_item")
-                            end
-                        end,
-    ["mark_as_locked"] =  function(inventorySlot, slotActions)
-                            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                            if not IsSlotLocked(inventorySlot) and CanItemBePlayerLocked(bag, index) and not IsItemPlayerLocked(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsItemAlreadySlottedToCraft(inventorySlot) then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_MARK_AS_LOCKED, function() MarkAsPlayerLockedHelper(bag, index, true) end, "secondary")
-                            end
-                        end,
+    ["kit_repair"] = function(inventorySlot, slotActions)
+        if CanKitRepairItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_REPAIR, function() TryKitRepairItem(inventorySlot) end, "keybind2")
+        end
+    end,
 
-    ["unmark_as_locked"] =  function(inventorySlot, slotActions)
-                                local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                if not IsSlotLocked(inventorySlot) and CanItemBePlayerLocked(bag, index) and IsItemPlayerLocked(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() then
-                                    slotActions:AddSlotAction(SI_ITEM_ACTION_UNMARK_AS_LOCKED, function() MarkAsPlayerLockedHelper(bag, index, false) end, "secondary")
-                                end
-                            end,
+    ["link_to_chat"] = function(inventorySlot, slotActions)
+        if ZO_InventorySlot_GetStackCount(inventorySlot) > 0 or ZO_ItemSlot_GetAlwaysShowStackCount(inventorySlot) then
+            DiscoverSlotActionFromType(linkHelperActions, inventorySlot, slotActions, "link_to_chat")
+        end
+    end,
 
-    ["mark_as_junk"] =  function(inventorySlot, slotActions)
-                            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                            if not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and not IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_MARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, true) end, "secondary")
-                            end
-                        end,
+    ["report_item"] = function(inventorySlot, slotActions)
+        if ZO_InventorySlot_GetStackCount(inventorySlot) > 0 or ZO_ItemSlot_GetAlwaysShowStackCount(inventorySlot) then
+            DiscoverSlotActionFromType(linkHelperActions, inventorySlot, slotActions, "report_item")
+        end
+    end,
 
-    ["unmark_as_junk"] =    function(inventorySlot, slotActions)
-                                local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                if not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
-                                    slotActions:AddSlotAction(SI_ITEM_ACTION_UNMARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, false) end, "secondary")
-                                end
-                            end,
+    ["mark_as_locked"] = function(inventorySlot, slotActions)
+        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if not IsSlotLocked(inventorySlot) and CanItemBePlayerLocked(bag, index) and not IsItemPlayerLocked(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsItemAlreadySlottedToCraft(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_MARK_AS_LOCKED, function() MarkAsPlayerLockedHelper(bag, index, true) end, "secondary")
+        end
+    end,
 
-    ["quickslot"] =     function(inventorySlot, slotActions)
-                            DiscoverSlotActionFromType(quickslotActions, inventorySlot, slotActions)
-                        end,
+    ["unmark_as_locked"] = function(inventorySlot, slotActions)
+        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if not IsSlotLocked(inventorySlot) and CanItemBePlayerLocked(bag, index) and IsItemPlayerLocked(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_UNMARK_AS_LOCKED, function() MarkAsPlayerLockedHelper(bag, index, false) end, "secondary")
+        end
+    end,
+
+    ["mark_as_junk"] = function(inventorySlot, slotActions)
+        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and not IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_MARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, true) end, "secondary")
+        end
+    end,
+
+    ["unmark_as_junk"] = function(inventorySlot, slotActions)
+        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_UNMARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, false) end, "secondary")
+        end
+    end,
+
+    ["quickslot"] = function(inventorySlot, slotActions)
+        DiscoverSlotActionFromType(quickslotActions, inventorySlot, slotActions)
+    end,
 
     ["trading_house_post"] = function(inventorySlot, slotActions)
-                                if(TRADING_HOUSE_SEARCH:IsAtTradingHouse() and not IsItemAlreadyBeingPosted(inventorySlot)) then
-                                    slotActions:AddSlotAction(SI_TRADING_HOUSE_ADD_ITEM_TO_LISTING, function() TryInitiatingItemPost(inventorySlot) end, "primary")
-                                end
-                            end,
+        if TRADING_HOUSE_SEARCH:IsAtTradingHouse() and not IsItemAlreadyBeingPosted(inventorySlot) then
+            slotActions:AddSlotAction(SI_TRADING_HOUSE_ADD_ITEM_TO_LISTING, function() TryInitiatingItemPost(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["trading_house_search_from_sell"] =    function(inventorySlot, slotActions)
-                                                if TRADING_HOUSE_SEARCH:IsAtTradingHouse() then
-                                                    slotActions:AddSlotAction(SI_TRADING_HOUSE_SEARCH_FROM_ITEM, function()
-                                                        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                                        local itemLink = GetItemLink(bag, index)
-                                                        TRADING_HOUSE:SearchForItemLink(itemLink)
-                                                    end, "keybind3")
-                                                 end
-                                            end,
+    ["trading_house_search_from_sell"] = function(inventorySlot, slotActions)
+        if TRADING_HOUSE_SEARCH:IsAtTradingHouse() then
+            slotActions:AddSlotAction(SI_TRADING_HOUSE_SEARCH_FROM_ITEM, function()
+                local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                local itemLink = GetItemLink(bag, index)
+                TRADING_HOUSE:SearchForItemLink(itemLink)
+            end, "keybind3")
+        end
+    end,
 
     ["trading_house_search_from_results"] = function(inventorySlot, slotActions)
-                                                 if TRADING_HOUSE_SEARCH:IsAtTradingHouse() then
-                                                    slotActions:AddSlotAction(SI_TRADING_HOUSE_SEARCH_FROM_ITEM, function()
-                                                        local resultIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
-                                                        local itemLink = GetTradingHouseSearchResultItemLink(resultIndex)
-                                                        TRADING_HOUSE:SearchForItemLink(itemLink)
-                                                    end, "primary")
-                                                 end
-                                            end,
+        if TRADING_HOUSE_SEARCH:IsAtTradingHouse() then
+            slotActions:AddSlotAction(SI_TRADING_HOUSE_SEARCH_FROM_ITEM, function()
+                local resultIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
+                local itemLink = GetTradingHouseSearchResultItemLink(resultIndex)
+                TRADING_HOUSE:SearchForItemLink(itemLink)
+            end, "primary")
+        end
+    end,
 
     ["trading_house_search_from_listings"] = function(inventorySlot, slotActions)
-                                                 if TRADING_HOUSE_SEARCH:IsAtTradingHouse() then
-                                                    slotActions:AddSlotAction(SI_TRADING_HOUSE_SEARCH_FROM_ITEM, function()
-                                                        local listingIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
-                                                        local itemLink = GetTradingHouseListingItemLink(listingIndex)
-                                                        TRADING_HOUSE:SearchForItemLink(itemLink)
-                                                    end, "primary")
-                                                 end
-                                            end,
+        if TRADING_HOUSE_SEARCH:IsAtTradingHouse() then
+            slotActions:AddSlotAction(SI_TRADING_HOUSE_SEARCH_FROM_ITEM, function()
+                local listingIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
+                local itemLink = GetTradingHouseListingItemLink(listingIndex)
+                TRADING_HOUSE:SearchForItemLink(itemLink)
+            end, "primary")
+        end
+    end,
 
     ["trading_house_remove_pending_post"] = function(inventorySlot, slotActions)
-                                                if(TRADING_HOUSE_SEARCH:IsAtTradingHouse() and IsItemAlreadyBeingPosted(inventorySlot)) then
-                                                    slotActions:AddSlotAction(SI_TRADING_HOUSE_REMOVE_PENDING_POST, function() ClearItemPost(inventorySlot) end, "primary")
-                                                end
-                                            end,
+        if TRADING_HOUSE_SEARCH:IsAtTradingHouse() and IsItemAlreadyBeingPosted(inventorySlot) then
+            slotActions:AddSlotAction(SI_TRADING_HOUSE_REMOVE_PENDING_POST, function() ClearItemPost(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["trading_house_buy_item"] =    function(inventorySlot, slotActions)
-                                        if(TRADING_HOUSE:CanBuyItem(inventorySlot)) then
-                                            slotActions:AddSlotAction(SI_TRADING_HOUSE_BUY_ITEM, function() TryBuyingTradingHouseItem(inventorySlot) end, "primary")
-                                        end
-                                    end,
+    ["trading_house_buy_item"] = function(inventorySlot, slotActions)
+        if TRADING_HOUSE:CanBuyItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_TRADING_HOUSE_BUY_ITEM, function() TryBuyingTradingHouseItem(inventorySlot) end, "primary")
+        end
+    end,
 
-    ["trading_house_cancel_listing"] =  function(inventorySlot, slotActions)
-                                            slotActions:AddSlotAction(SI_TRADING_HOUSE_CANCEL_LISTING, function() TryCancellingTradingHouseListing(inventorySlot) end, "secondary")
-                                        end,
+    ["trading_house_cancel_listing"] = function(inventorySlot, slotActions)
+        slotActions:AddSlotAction(SI_TRADING_HOUSE_CANCEL_LISTING, function() TryCancellingTradingHouseListing(inventorySlot) end, "secondary")
+    end,
 
     ["convert_to_imperial_style"] =     function(inventorySlot, slotActions)
-                                            local imperialStyleId = GetImperialStyleId()
-                                            if CanConvertToStyle(inventorySlot, imperialStyleId) then
-                                                local imperialStyleName = GetItemStyleName(imperialStyleId)
-                                                slotActions:AddSlotAction(SI_ITEM_ACTION_CONVERT_TO_IMPERIAL_STYLE, function() ZO_Dialogs_ShowPlatformDialog("CONVERT_STYLE_MOVED", nil, { mainTextParams = { imperialStyleName }, titleParams = { imperialStyleName } }) end, "secondary")
-                                            end
-                                        end,
+        local imperialStyleId = GetImperialStyleId()
+        if CanConvertToStyle(inventorySlot, imperialStyleId) then
+            local imperialStyleName = GetItemStyleName(imperialStyleId)
+            slotActions:AddSlotAction(SI_ITEM_ACTION_CONVERT_TO_IMPERIAL_STYLE, function() ZO_Dialogs_ShowPlatformDialog("CONVERT_STYLE_MOVED", nil, { mainTextParams = { imperialStyleName }, titleParams = { imperialStyleName } }) end, "secondary")
+        end
+    end,
 
-    ["convert_to_morag_tong_style"] =     function(inventorySlot, slotActions)
-                                            local moragTongStyleId = GetMoragTongStyleId()
-                                            if CanConvertToStyle(inventorySlot, moragTongStyleId) then
-                                                local moragStyleName = GetItemStyleName(moragTongStyleId)
-                                                slotActions:AddSlotAction(SI_ITEM_ACTION_CONVERT_TO_MORAG_TONG_STYLE, function() ZO_Dialogs_ShowPlatformDialog("CONVERT_STYLE_MOVED", nil, { mainTextParams = { moragStyleName }, titleParams = { moragStyleName } }) end, "secondary")
-                                            end
-                                        end,
+    ["convert_to_morag_tong_style"] = function(inventorySlot, slotActions)
+        local moragTongStyleId = GetMoragTongStyleId()
+        if CanConvertToStyle(inventorySlot, moragTongStyleId) then
+            local moragStyleName = GetItemStyleName(moragTongStyleId)
+            slotActions:AddSlotAction(SI_ITEM_ACTION_CONVERT_TO_MORAG_TONG_STYLE, function() ZO_Dialogs_ShowPlatformDialog("CONVERT_STYLE_MOVED", nil, { mainTextParams = { moragStyleName }, titleParams = { moragStyleName } }) end, "secondary")
+        end
+    end,
 
-    ["vendor_repair"] =     function(inventorySlot, slotActions)
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_REPAIR, function() TryVendorRepairItem(inventorySlot) end, "primary")
-                            end,
+    ["vendor_repair"] = function(inventorySlot, slotActions)
+        slotActions:AddSlotAction(SI_ITEM_ACTION_REPAIR, function() TryVendorRepairItem(inventorySlot) end, "primary")
+    end,
                                 
-    ["add_to_craft"] =      function(inventorySlot, slotActions)
-                                if not IsItemAlreadySlottedToCraft(inventorySlot) and CanItemBeAddedToCraft(inventorySlot) then
-                                    slotActions:AddSlotAction(SI_ITEM_ACTION_ADD_TO_CRAFT, function() TryAddItemToCraft(inventorySlot) end, "primary", IsCraftingActionVisible)
-                                end
-                            end,
+    ["add_to_craft"] = function(inventorySlot, slotActions)
+        if not IsItemAlreadySlottedToCraft(inventorySlot) and CanItemBeAddedToCraft(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_ADD_TO_CRAFT, function() TryAddItemToCraft(inventorySlot) end, "primary", IsCraftingActionVisible)
+        end
+    end,
                             
     ["remove_from_craft"] = function(inventorySlot, slotActions)
-                                local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                if bag and slot and IsItemAlreadySlottedToCraft(inventorySlot) then
-                                    slotActions:AddSlotAction(SI_ITEM_ACTION_REMOVE_FROM_CRAFT, function() TryRemoveItemFromCraft(inventorySlot) end, "primary", IsCraftingActionVisible)
-                                end
-                            end,
+        local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if bag and slot and IsItemAlreadySlottedToCraft(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_REMOVE_FROM_CRAFT, function() TryRemoveItemFromCraft(inventorySlot) end, "primary", IsCraftingActionVisible)
+        end
+    end,
 
     ["remove_all_from_craft"] = function(inventorySlot, slotActions)
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_REMOVE_FROM_CRAFT, TryRemoveAllFromCraft, "primary")
-                            end,
+        slotActions:AddSlotAction(SI_ITEM_ACTION_REMOVE_FROM_CRAFT, TryRemoveAllFromCraft, "primary")
+    end,
 
     ["buy_guild_specific_item"] = function(inventorySlot, slotActions)
-                                if(TRADING_HOUSE:CanBuyItem(inventorySlot)) then
-                                    slotActions:AddSlotAction(SI_TRADING_HOUSE_BUY_ITEM, function() TryBuyingGuildSpecificItem(inventorySlot) end, "primary")
-                                end
-                            end,
+        if TRADING_HOUSE:CanBuyItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_TRADING_HOUSE_BUY_ITEM, function() TryBuyingGuildSpecificItem(inventorySlot) end, "primary")
+        end
+    end,
 
     ["rename"] = function(inventorySlot, slotActions)
-                     DiscoverSlotActionFromType(renameActions, inventorySlot, slotActions)
-                 end,
+        DiscoverSlotActionFromType(renameActions, inventorySlot, slotActions)
+    end,
+
     ["move_to_inventory"] = function(inventorySlot, slotActions)
-                                slotActions:AddSlotAction(SI_ITEM_ACTION_REMOVE_ITEMS_FROM_CRAFT_BAG, function() TryMoveToInventory(inventorySlot) end, "primary")
-                            end,
+        slotActions:AddSlotAction(SI_ITEM_ACTION_REMOVE_ITEMS_FROM_CRAFT_BAG, function() TryMoveToInventory(inventorySlot) end, "primary")
+    end,
+
     ["move_to_craft_bag"] = function(inventorySlot, slotActions)
-                                local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                if CanMoveToCraftBag(bagId, slotIndex) then
-                                    slotActions:AddSlotAction(SI_ITEM_ACTION_ADD_ITEMS_TO_CRAFT_BAG, function() TryMoveToCraftBag(bagId, slotIndex) end, "secondary")
-                                end
-                            end,
+        local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if CanMoveToCraftBag(bagId, slotIndex) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_ADD_ITEMS_TO_CRAFT_BAG, function() TryMoveToCraftBag(bagId, slotIndex) end, "secondary")
+        end
+    end,
+
     ["preview_dye_stamp"] = function(inventorySlot, slotActions)
-                                local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                if GetItemType(bag, slot) == ITEMTYPE_DYE_STAMP and IsCharacterPreviewingAvailable() then
-                                    slotActions:AddSlotAction(SI_ITEM_ACTION_PREVIEW_DYE_STAMP, function() TryPreviewDyeStamp(inventorySlot) end, "primary")
-                                end
-                            end,
+        local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if GetItemType(bag, slot) == ITEMTYPE_DYE_STAMP and IsCharacterPreviewingAvailable() then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_PREVIEW_DYE_STAMP, function() TryPreviewDyeStamp(inventorySlot) end, "primary")
+        end
+    end,
+
     ["show_map_keep_recall"] = function(inventorySlot, slotActions)
-                                local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                if GetItemUseType(bag, slot) == ITEM_USE_TYPE_KEEP_RECALL_STONE then
-                                    slotActions:AddSlotAction(SI_ITEM_ACTION_SHOW_MAP, function() TryShowRecallMap(inventorySlot) end, "primary")
-                                end
-                            end,
+        local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if GetItemUseType(bag, slot) == ITEM_USE_TYPE_KEEP_RECALL_STONE then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_SHOW_MAP, function() TryShowRecallMap(inventorySlot) end, "primary")
+        end
+    end,
+
     ["start_skill_respec"] = function(inventorySlot, slotActions)
-                                local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                local itemUseType = GetItemUseType(bag, slot)
-                                if itemUseType == ITEM_USE_TYPE_SKILL_RESPEC or itemUseType == ITEM_USE_TYPE_MORPH_RESPEC then
-                                    slotActions:AddSlotAction(SI_ITEM_ACTION_START_SKILL_RESPEC, function() TryStartSkillRespec(inventorySlot) end, "primary")
-                                end
-                            end,
+        local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        local itemUseType = GetItemUseType(bag, slot)
+        if itemUseType == ITEM_USE_TYPE_SKILL_RESPEC or itemUseType == ITEM_USE_TYPE_MORPH_RESPEC then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_START_SKILL_RESPEC, function() TryStartSkillRespec(inventorySlot) end, "primary")
+        end
+    end,
+
+    ["bind"] =  function(inventorySlot, slotActions)
+        if not IsSlotLocked(inventorySlot) then
+            local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            if ZO_InventorySlot_WillItemBecomeBoundOnEquip(bagId, slotIndex) then
+                slotActions:AddSlotAction(SI_ITEM_ACTION_BIND, function() TryBindItem(bagId, slotIndex) end, "secondary", nil, {visibleWhenDead = false})
+            end
+        end
+    end,
 }
 
 local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
@@ -1905,14 +1935,14 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 local potentialActionsForSlotType =
 {
     [SLOT_TYPE_QUEST_ITEM] =                           { "quickslot", "use", "link_to_chat" },
-    [SLOT_TYPE_ITEM] =                                 { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall","start_skill_respec", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
-    [SLOT_TYPE_EQUIPMENT] =                            { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_ITEM] =                                 { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall","start_skill_respec", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_EQUIPMENT] =                            { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                             { "trade_remove", "link_to_chat", "report_item" },
     [SLOT_TYPE_THEIR_TRADE] =                          NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_STORE_BUY] =                            { "buy", "buy_multiple", "link_to_chat", "report_item" },
     [SLOT_TYPE_STORE_BUYBACK] =                        { "buyback", "link_to_chat", "report_item" },
     [SLOT_TYPE_BUY_MULTIPLE] =                         NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_BANK_ITEM] =                            { "bank_withdraw", "split_stack", "mark_as_locked", "unmark_as_locked", "link_to_chat", "mark_as_junk", "unmark_as_junk", "report_item" },
+    [SLOT_TYPE_BANK_ITEM] =                            { "bank_withdraw", "split_stack", "mark_as_locked", "unmark_as_locked", "bind", "link_to_chat", "mark_as_junk", "unmark_as_junk", "report_item" },
     [SLOT_TYPE_GUILD_BANK_ITEM] =                      { "guild_bank_withdraw", "link_to_chat", "report_item" },
     [SLOT_TYPE_MAIL_QUEUED_ATTACHMENT] =               { "mail_detach", "link_to_chat", "report_item" },
     [SLOT_TYPE_MAIL_ATTACHMENT] =                      NON_INTERACTABLE_ITEM_ACTIONS,
@@ -1932,7 +1962,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_SMITHING_BOOSTER] =                     NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_DYEABLE_EQUIPMENT] =                    NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_GUILD_SPECIFIC_ITEM] =                  { "buy_guild_specific_item", "link_to_chat" },
-    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =               { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "start_skill_respec", "show_map_keep_recall", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =               { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "start_skill_respec", "show_map_keep_recall", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =                { "quickslot", "use", "rename", "link_to_chat" },
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                       { "move_to_inventory", "use", "link_to_chat", "report_item" },
     [SLOT_TYPE_PENDING_RETRAIT_ITEM] =                 { "remove_from_craft", "link_to_chat", "report_item" },
@@ -2676,10 +2706,10 @@ local InventoryDragStart =
             if not ZO_CraftingUtils_IsPerformingCraftProcess() then
                 local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
                 if bag and index then
-                    if ZO_RETRAIT_STATION_KEYBOARD then
+                    if ZO_RETRAIT_KEYBOARD then
                         local keyboardRetraitSceneName = SYSTEMS:GetKeyboardRootScene("retrait"):GetName()
                         if SCENE_MANAGER:IsShowing(keyboardRetraitSceneName) then
-                            ZO_RETRAIT_STATION_KEYBOARD:RemoveItemFromCraft(bag, index)
+                            ZO_RETRAIT_KEYBOARD:RemoveItemFromCraft(bag, index)
                             PickupInventoryItem(bag, index)
                         end
                     end
@@ -2830,10 +2860,10 @@ local InventoryReceiveDrag =
                 local bagId, slotIndex = GetCursorBagId(), GetCursorSlotIndex()
                 if bagId and slotIndex then
                     ClearCursor()
-                    if ZO_RETRAIT_STATION_KEYBOARD then
+                    if ZO_RETRAIT_KEYBOARD then
                         local keyboardRetraitSceneName = SYSTEMS:GetKeyboardRootScene("retrait"):GetName()
                         if SCENE_MANAGER:IsShowing(keyboardRetraitSceneName) then
-                            ZO_RETRAIT_STATION_KEYBOARD:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
+                            ZO_RETRAIT_KEYBOARD:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
                         end
                     end
                     return true
@@ -2877,6 +2907,8 @@ function ZO_InventorySlot_TraitInfo_OnMouseEnter(control)
         InformationTooltip:AddLine(zo_strformat(SI_INVENTORY_TRAIT_STATUS_TOOLTIP, traitName, ZO_SELECTED_TEXT:Colorize(traitInformationString)), "", ZO_NORMAL_TEXT:UnpackRGB())
         if traitInformation == ITEM_TRAIT_INFORMATION_RETRAITED then
             InformationTooltip:AddLine(GetString(SI_INVENTORY_TRAIT_STATUS_RETRAITED_NOT_RESEARCHABLE), "", ZO_NORMAL_TEXT:UnpackRGB())
+        elseif traitInformation == ITEM_TRAIT_INFORMATION_RECONSTRUCTED then
+            InformationTooltip:AddLine(GetString(SI_INVENTORY_TRAIT_STATUS_RECONSTRUCTED_NOT_RESEARCHABLE), "", ZO_NORMAL_TEXT:UnpackRGB())
         end
     end
 end

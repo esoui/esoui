@@ -128,7 +128,7 @@ function zo_strtrim(str)
 end
 
 do
-    -- Before passing to a formatting function, use english separators. zo_strformat() and ZO_FastFormatDecimalNumber() will automatically replace these separators with language-appropriate ones.
+    -- Before passing to a formatting function, use english separators. zo_strformat() (with a <<f:1>> or <<F:1>>) and ZO_FastFormatDecimalNumber() will automatically replace these separators with language-appropriate ones.
     local ENGLISH_DIGIT_GROUP_REPLACER = ","
     local ENGLISH_DIGIT_GROUP_DECIMAL_REPLACER = "."
     local DIGIT_GROUP_REPLACER_THRESHOLD = zo_pow(10, GetDigitGroupingSize())

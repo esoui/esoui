@@ -8,13 +8,7 @@ ZO_CAMPAIGN_EMPEROR_NAME_HEADER_WIDTH = 265
 ZO_CAMPAIGN_EMPEROR_ALLIANCE_WIDTH = 85
 ZO_CAMPAIGN_EMPEROR_POINTS_WIDTH = 130
 
-local CampaignEmperor = ZO_Object.MultiSubclass(CampaignEmperor_Shared, ZO_SortFilterList)
-
-function CampaignEmperor:New(control)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(control)
-    return manager
-end
+local CampaignEmperor = ZO_InitializingObject:MultiSubclass(CampaignEmperor_Shared, ZO_SortFilterList)
 
 function CampaignEmperor:Initialize(control)
     ZO_SortFilterList.InitializeSortFilterList(self, control)

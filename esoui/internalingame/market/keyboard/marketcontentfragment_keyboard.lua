@@ -71,7 +71,7 @@ function ZO_MarketContentFragment_Keyboard:ShowMarketProductContents(marketProdu
     self.contentHeader:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, marketProductData:GetDisplayName()))
 
     local marketCurrencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = marketProductData:GetMarketProductPricingByPresentation()
-    local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), costAfterDiscount, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+    local currencyString = ZO_Currency_FormatKeyboard(ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), costAfterDiscount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
     self.cost:SetText(currencyString)
 
     local numChildren = marketProductData:GetNumChildren()

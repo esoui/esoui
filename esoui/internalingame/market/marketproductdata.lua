@@ -138,7 +138,7 @@ function ZO_MarketProductData:IsPurchaseLocked()
 end
 
 function ZO_MarketProductData:CanBePurchased()
-    return not (self:IsPurchaseLocked() or self:IsHouseCollectible() or self:IsPromo())
+    return not (self:IsPurchaseLocked() or self:IsPromo())
 end
 
 function ZO_MarketProductData:HasActivationRequirement()

@@ -51,5 +51,36 @@
             <Anchor point="TOP" offsetY="-13"/>
             <TextureCoords left="0" top="0" right="0.76171875" bottom=".625" />
         </Texture>
+
+        <Control name="ZO_CraftingModeButton" inherits="ZO_MenuBarTooltipButton" virtual="true">
+            <OnInitialized name="ZO_CraftingModeButton">
+                self.questPin = self:GetNamedChild("QuestPin")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\advisor_trackedPin_icon.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" level="3" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPRIGHT" offsetX="15" offsetY="-10" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_CraftingModeTabs" inherits="ZO_LabelButtonBar" virtual="true">
+            <OnInitialized>
+                ZO_CraftingModeTabs_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="ZO_CraftingModeMenu" virtual="true">
+            <Dimensions y="ZO_SCENE_MENU_HEIGHT" />
+            <Controls>
+                <Control name="$(parent)Bar" inherits="ZO_CraftingModeTabs">
+                    <Anchor point="TOPRIGHT" />
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_WideHorizontalDivider">
+                    <Anchor point="BOTTOM" offsetX="27" offsetY="4" />
+                </Control>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

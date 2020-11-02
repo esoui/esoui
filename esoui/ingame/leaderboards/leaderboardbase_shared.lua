@@ -39,14 +39,6 @@ function ZO_LeaderboardBase_Shared:OnSubtypeSelected(subType)
     self.selectedSubType = subType
 end
 
-function ZO_LeaderboardBase_Shared:TryAddKeybind()
-    if self.keybind then
-        KEYBIND_STRIP:AddKeybindButton(self.keybind)
-    end
-end
-
-function ZO_LeaderboardBase_Shared:TryRemoveKeybind()
-    if self.keybind then
-        KEYBIND_STRIP:RemoveKeybindButton(self.keybind)
-    end
+function ZO_LeaderboardBase_Shared:GetKeybind()
+    return self.keybind
 end

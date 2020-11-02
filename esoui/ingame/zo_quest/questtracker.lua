@@ -472,7 +472,7 @@ function ZO_Tracker:AssistNext(ignoreSceneRestriction)
         else
             --if we are showing one quest now, find the next one to show ordered by the order they appear in the quest journal
             if self.assistedData then
-                local nextQuestIndex = SYSTEMS:GetObject("questJournal"):GetNextSortedQuestForQuestIndex(self.assistedData.arg1)
+                local nextQuestIndex = QUEST_JOURNAL_MANAGER:GetNextSortedQuestForQuestIndex(self.assistedData.arg1)
                 if nextQuestIndex then
                     if self:BeginTracking(TRACK_TYPE_QUEST, nextQuestIndex) then
                         CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")

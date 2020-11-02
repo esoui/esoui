@@ -43,9 +43,25 @@
                                 <Button name="$(parent)ChangePathingStateOff" inherits="ZO_LabeledRadioButton">
                                     <Anchor point="LEFT" relativeTo="$(parent)ChangePathingStateOnLabel" relativePoint="RIGHT" offsetX="30" />
                                 </Button>
+
+                                <Label name="$(parent)ChangeConformToGroundTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChangePathingStateOn" relativePoint="BOTTOMLEFT" offsetY="20" />
+
+                                    <OnInitialized>
+                                        self.data = ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA[ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_CONFORM_TO_GROUND]
+                                    </OnInitialized>
+                                </Label>
+
+                                <Button name="$(parent)ChangeConformToGroundOn" inherits="ZO_LabeledRadioButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChangeConformToGroundTitle" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                </Button>
+
+                                <Button name="$(parent)ChangeConformToGroundOff" inherits="ZO_LabeledRadioButton">
+                                    <Anchor point="LEFT" relativeTo="$(parent)ChangeConformToGroundOnLabel" relativePoint="RIGHT" offsetX="30" />
+                                </Button>
                                 
                                 <Label name="$(parent)ChangePathTypeTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChangePathingStateOn" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChangeConformToGroundOn" relativePoint="BOTTOMLEFT" offsetY="20" />
 
                                     <OnInitialized>
                                         self.data = ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA[ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATH_TYPE]

@@ -1,4 +1,4 @@
-local MailSend = ZO_Object:New()
+local MailSend = ZO_Object:Subclass()
 
 function MailSend:New(control)
     local manager = ZO_Object.New(self)

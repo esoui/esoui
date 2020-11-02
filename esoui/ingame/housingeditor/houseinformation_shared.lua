@@ -18,6 +18,7 @@ function ZO_HouseInformation_Shared:Initialize(control, fragment, rowTemplate, c
                                                  if newState == SCENE_SHOWING then
                                                      self:UpdateHouseInformation()
                                                      self:UpdateHousePopulation()
+                                                     self:UpdatePermissions()
                                                      self:UpdateLimits()
                                                  end
                                              end)
@@ -40,10 +41,17 @@ function ZO_HouseInformation_Shared:Initialize(control, fragment, rowTemplate, c
         end
     end
 
+    local function RefreshHousePermissions(eventId, userGroup)
+        if fragment:IsShowing() then
+            self:UpdatePermissions(userGroup)
+        end
+    end
+
     control:RegisterForEvent(EVENT_HOUSING_FURNITURE_PLACED, RefreshItemLimits)
     control:RegisterForEvent(EVENT_HOUSING_FURNITURE_REMOVED, RefreshItemLimits)
     control:RegisterForEvent(EVENT_HOUSING_PRIMARY_RESIDENCE_SET, RefreshHouseInformation)
     control:RegisterForEvent(EVENT_HOUSING_POPULATION_CHANGED, RefreshHousePopulation)
+    control:RegisterForEvent(EVENT_HOUSING_PERMISSIONS_CHANGED, RefreshHousePermissions)
 end
 
 do
@@ -61,6 +69,8 @@ do
         self.infoSection = SetupRow(self.control, "InfoSection")
         self.primaryResidenceRow = SetupRow(self.control, "PrimaryResidenceRow")
         self.currentVisitorsRow = SetupRow(self.control, "CurrentVisitorsRow")
+        self.individualPermissionsRow = SetupRow(self.control, "IndividualPermissions")
+        self.guildPermissionsRow = SetupRow(self.control, "GuildPermissions")
         self.overPopulationWarning = self.currentVisitorsRow:GetNamedChild("Help")
     
         local furnishingLimits = self.infoSection:GetNamedChild("FurnishingLimits")
@@ -109,6 +119,20 @@ function ZO_HouseInformation_Shared:UpdateHousePopulation(population)
     
     local overpopulated = currentPopulation > maxPopulation
     self.overPopulationWarning:SetHidden(not overpopulated)
+end
+
+function ZO_HouseInformation_Shared:UpdatePermissions(userGroup)
+    if userGroup == HOUSE_PERMISSION_USER_GROUP_INDIVIDUAL or userGroup == nil then
+        local numIndividualPermissions = GetNumHousingPermissions(GetCurrentZoneHouseId(), HOUSE_PERMISSION_USER_GROUP_INDIVIDUAL)
+        local textColor = numIndividualPermissions >= HOUSING_MAX_INDIVIDUAL_USER_GROUP_ENTRIES and ZO_ERROR_COLOR or ZO_SELECTED_TEXT
+        self.individualPermissionsRow.valueLabel:SetText(textColor:Colorize(zo_strformat(SI_HOUSING_NUM_PERMISSIONS_FORMAT, numIndividualPermissions, HOUSING_MAX_INDIVIDUAL_USER_GROUP_ENTRIES)))
+    end
+
+    if userGroup == HOUSE_PERMISSION_USER_GROUP_GUILD or userGroup == nil then
+        local numGuildPermissions = GetNumHousingPermissions(GetCurrentZoneHouseId(), HOUSE_PERMISSION_USER_GROUP_GUILD)
+        textColor = numGuildPermissions >= HOUSING_MAX_GUILD_USER_GROUP_ENTRIES and ZO_ERROR_COLOR or ZO_SELECTED_TEXT
+        self.guildPermissionsRow.valueLabel:SetText(textColor:Colorize(zo_strformat(SI_HOUSING_NUM_PERMISSIONS_FORMAT, numGuildPermissions, HOUSING_MAX_GUILD_USER_GROUP_ENTRIES)))
+    end
 end
 
 do

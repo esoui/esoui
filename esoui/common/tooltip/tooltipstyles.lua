@@ -356,6 +356,10 @@ ZO_TOOLTIP_STYLES =
     {
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
+    itemSetCollection = 
+    {
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
     stolen = 
     {
         fontColorField = GENERAL_COLOR_RED,
@@ -1442,6 +1446,11 @@ ZO_TOOLTIP_STYLES =
         fontColorField = GENERAL_COLOR_WHITE,
         fontSize = "$(GP_42)",
     },
+    furnishingInfoNote =
+    {
+        fontSize = "$(GP_34)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
     itemSetSeparatorSection =
     {
         customSpacing = 20,
@@ -1508,6 +1517,33 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
         fontFace = "$(GAMEPAD_LIGHT_FONT)",
+    },
+
+    --Gamepad House Template Tooltip
+    houseTemplateMainSection =
+    {
+        widthPercent = 100,
+        childSpacing = 5,
+        paddingTop = 40,
+    },
+    houseTemplateStatValuePair =
+    {
+        height = 40,
+        widthPercent = 98,
+    },
+    houseTemplateStatValuePairStat =
+    {
+        fontSize = "$(GP_27)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+    houseTemplateStatValuePairValue = 
+    {
+        fontSize = "$(GP_34)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        horizontalAlignment = TEXT_ALIGN_RIGHT,
+        fontColorField = GENERAL_COLOR_WHITE,
     },
 }
 

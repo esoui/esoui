@@ -60,7 +60,7 @@ function HelpSubmitFeedback_Keyboard:InitializeComboBoxes()
         if fieldData.universallyAddEnum then
             local entry = ZO_ComboBox:CreateItemEntry(GetString(fieldData.enumStringPrefix, fieldData.universallyAddEnum), callback)
             entry.index = fieldData.universallyAddEnum
-            comboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            comboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
 
         local iterationEntries = {}
@@ -75,7 +75,7 @@ function HelpSubmitFeedback_Keyboard:InitializeComboBoxes()
         end
 
         for _, entry in ipairs(iterationEntries) do
-            comboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            comboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
 
         comboBox:SelectItemByIndex(1)

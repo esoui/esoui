@@ -130,7 +130,7 @@ function ZO_GamepadSocialListPanel:InitializeDropdownFilter()
         local statusTexture = GetGamepadPlayerStatusIcon(i)
         local text = zo_strformat(SI_GAMEPAD_GUILD_STATUS_SELECTOR_FORMAT, statusTexture, GetString("SI_PLAYERSTATUS", i))
         local entry = ZO_ComboBox:CreateItemEntry(text, StatusSelect)
-        self.filterDropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+        self.filterDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
 
     local function CachedStatusUpdate(_, currentFrameTimeSeconds)

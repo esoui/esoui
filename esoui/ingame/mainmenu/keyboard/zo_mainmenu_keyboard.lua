@@ -35,10 +35,10 @@ ZO_CATEGORY_LAYOUT_INFO =
             membershipControl:SetText(esoPlusString)
             remainingCrownsControl:SetHidden(false)
             local currentCrownBalance = GetPlayerCrowns()
-            remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(currentCrownBalance)))
+            remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, currentCrownBalance))
             button:RegisterForEvent(EVENT_CROWN_UPDATE, function(currencyAmount)
                 local playerCrownBalance = GetPlayerCrowns()
-                remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(playerCrownBalance)))
+                remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, playerCrownBalance))
             end)
         end,
         onResetCallback = function(button)
@@ -214,7 +214,8 @@ ZO_CATEGORY_LAYOUT_INFO =
         highlight = "EsoUI/Art/MainMenu/menuBar_collections_over.dds",
 
         indicators = function()
-            if ZO_COLLECTIBLE_DATA_MANAGER and ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewCollectibles() then
+            if (ZO_COLLECTIBLE_DATA_MANAGER and ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewCollectibles()) or
+                (ITEM_SET_COLLECTIONS_DATA_MANAGER and ITEM_SET_COLLECTIONS_DATA_MANAGER:HasAnyNewPieces()) then
                 return { ZO_KEYBOARD_NEW_ICON }
             end
         end,

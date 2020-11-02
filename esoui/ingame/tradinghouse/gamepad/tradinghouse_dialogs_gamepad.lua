@@ -14,7 +14,7 @@ function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(itemData, dial
     local itemNameWithQuantity = nameColor:Colorize(zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, itemName, stackCount))
     local title = itemNameWithQuantity
     if iconFile then
-        local iconMarkup = zo_iconFormat(iconFile, 55, 55)
+        local iconMarkup = zo_iconFormat(iconFile, ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_FULL_SIZE_DIMENSION, ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_FULL_SIZE_DIMENSION)
         title = string.format("%s %s", iconMarkup, itemNameWithQuantity)
     end
 

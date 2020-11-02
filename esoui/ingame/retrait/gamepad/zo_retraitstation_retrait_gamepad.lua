@@ -7,8 +7,8 @@ end
 function ZO_RetraitStation_Retrait_Gamepad:Initialize(control, interactScene)
     ZO_RetraitStation_Retrait_Base.Initialize(self, control, "retrait_gamepad")
 
-     local fragment = ZO_FadeSceneFragment:New(control)
-    interactScene:AddFragment(fragment)
+    GAMEPAD_RETRAIT_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    interactScene:AddFragment(GAMEPAD_RETRAIT_FRAGMENT)
 
     interactScene:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then

@@ -31,12 +31,12 @@ function ZO_QuestJournal_Shared:Initialize(control)
     self:RefreshQuestCount()
     self:InitializeScenes()
 
-    control:RegisterForEvent(EVENT_QUEST_ADDED, function() self:OnQuestsUpdated() end)
-    control:RegisterForEvent(EVENT_QUEST_REMOVED, function() self:OnQuestsUpdated() end)
-    control:RegisterForEvent(EVENT_QUEST_LIST_UPDATED, function() self:OnQuestsUpdated() end)
+    QUEST_JOURNAL_MANAGER:RegisterCallback("QuestListUpdated", function() self:OnQuestsUpdated() end)
+
     control:RegisterForEvent(EVENT_QUEST_ADVANCED, function(eventCode, questIndex) self:OnQuestAdvanced(questIndex) end)
     control:RegisterForEvent(EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(eventCode, ...) self:OnQuestConditionInfoChanged(...) end)
     control:RegisterForEvent(EVENT_LEVEL_UPDATE, function(eventCode, unitTag) self:OnLevelUpdated(unitTag) end)
+    control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
 end
 
 local function QuestJournal_Shared_RegisterDataInTable(table, questType, instanceDisplayType, data)
@@ -124,12 +124,10 @@ function ZO_QuestJournal_Shared:RegisterTooltips()
 end
 
 function ZO_QuestJournal_Shared:OnLevelUpdated(unitTag)
-    if (unitTag == "player") then
-        if self.control:IsHidden() then
-            self.listDirty = true
-        else
-            self:RefreshQuestList()
-        end
+    if self.control:IsHidden() then
+        self.listDirty = true
+    else
+        self:RefreshQuestList()
     end
 end
 
@@ -140,7 +138,7 @@ function ZO_QuestJournal_Shared:BuildTextForStepVisibility(questIndex, visibilit
         local stepJournalText, visibility, _, stepOverrideText, _ = GetJournalQuestStepInfo(questIndex, stepIndex)
 
         if visibility == visibilityType then
-            if(stepJournalText ~= "") then
+            if stepJournalText ~= "" then
                 table.insert(questStrings, zo_strformat(SI_QUEST_JOURNAL_TEXT, stepJournalText))
             end
             
@@ -180,12 +178,7 @@ function ZO_QuestJournal_Shared:RefreshQuestCount()
     -- This function is overridden by sub-classes.
 end
 
-function ZO_QuestJournal_Shared:RefreshQuestMasterList()
-    -- Override if necesary
-end
-
 function ZO_QuestJournal_Shared:OnQuestsUpdated()
-    self:RefreshQuestMasterList()
     if self.control:IsHidden() then
         self.listDirty = true
     else
@@ -210,7 +203,11 @@ end
 
 function ZO_QuestJournal_Shared:ShowOnMap()
    local selectedQuestIndex = self:GetSelectedQuestIndex()
-   if(selectedQuestIndex) then
+   if selectedQuestIndex then
         ZO_WorldMap_ShowQuestOnMap(selectedQuestIndex)
     end
+end
+
+function ZO_QuestJournal_Shared:GetNextSortedQuestForQuestIndex(questIndex)
+    return QUEST_JOURNAL_MANAGER:GetNextSortedQuestForQuestIndex(questIndex)
 end

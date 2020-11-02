@@ -11,14 +11,23 @@ end
 function ZO_RetraitStation_Retrait_Keyboard:Initialize(control, owner)
     ZO_RetraitStation_Retrait_Base.Initialize(self, control)
     self.owner = owner
+    SYSTEMS:RegisterKeyboardObject("retrait", self)
+
+    self.fragment = ZO_SimpleSceneFragment:New(control)
+    RETRAIT_STATION_RETRAIT_FRAGMENT = self.fragment
+    self.fragment:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:HandleDirtyEvent()
+            self:RemoveItemFromRetrait()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            ZO_InventorySlot_RemoveMouseOverKeybinds()
+        end
+    end)
 
     self:InitializeSlots()
-
     self.resultTooltip = self.control:GetNamedChild("ResultTooltip")
-
     self.traitContainer = self.control:GetNamedChild("TraitContainer")
     self.traitList = self.traitContainer:GetNamedChild("List")
-
     ZO_ScrollList_Initialize(self.traitList)
 
     local function SetupTraitRow(...)
@@ -36,7 +45,6 @@ function ZO_RetraitStation_Retrait_Keyboard:Initialize(control, owner)
     ZO_ScrollList_EnableHighlight(self.traitList, "ZO_TallListHighlight")
     ZO_ScrollList_EnableSelection(self.traitList, "ZO_TallListSelectedHighlight", function(...) self:OnTraitSelectionChanged(...) end)
     ZO_ScrollList_SetDeselectOnReselect(self.traitList, false)
-
     self.traitListData = ZO_ScrollList_GetDataList(self.traitList)
 end
 
@@ -58,9 +66,51 @@ function ZO_RetraitStation_Retrait_Keyboard:InitializeSlots()
     self.awaitingLabel = slotContainer:GetNamedChild("AwaitingLabel")
     self:RefreshCostSlot()
 
-    self.slotAnimation = ZO_CraftingCreateSlotAnimation:New("retrait_keyboard_root", function() return not self.control:IsHidden() end)
+    self.slotAnimation = ZO_CraftingCreateSlotAnimation:New("retrait_keyboard_root", function() return self:IsShowing() end)
     self.slotAnimation:AddSlot(self.retraitSlot)
     self.slotAnimation:AddSlot(self.retraitCostSlot)
+end
+
+function ZO_RetraitStation_Retrait_Keyboard:InitializeKeybindStripDescriptors()
+    self.keybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+        -- Clear selections
+        {
+            name = GetString(SI_CRAFTING_CLEAR_SELECTIONS),
+            keybind = "UI_SHORTCUT_NEGATIVE",
+            callback = function()
+                self:SetRetraitSlotItem()
+            end,
+            visible = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasItemSlotted()
+            end,
+        },
+
+        -- Perform craft
+        {
+            name = GetString(SI_RETRAIT_STATION_PERFORM_RETRAIT),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            callback = function()
+                self:PerformRetrait()
+            end,
+            enabled = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasValidSelections()
+            end,
+            visible = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasItemSlotted()
+            end,
+        },
+    }
+end
+
+function ZO_RetraitStation_Retrait_Keyboard:IsShowing()
+    return self.fragment:IsShowing()
+end
+
+function ZO_RetraitStation_Retrait_Keyboard:GetKeybindDescriptor()
+    return self.keybindStripDescriptor
 end
 
 function ZO_RetraitStation_Retrait_Keyboard:UpdateKeybinds()
@@ -510,15 +560,15 @@ end
 -- Global XML functions
 
 function ZO_RetraitStation_Retrait_Keyboard_OnTraitRowMouseEnter(control)
-    ZO_RETRAIT_STATION_KEYBOARD:GetRetraitObject():OnTraitRowMouseEnter(control)
+    ZO_RETRAIT_KEYBOARD:OnTraitRowMouseEnter(control)
 end
 
 function ZO_RetraitStation_Retrait_Keyboard_OnTraitRowMouseExit(control)
-    ZO_RETRAIT_STATION_KEYBOARD:GetRetraitObject():OnTraitRowMouseExit(control)
+    ZO_RETRAIT_KEYBOARD:OnTraitRowMouseExit(control)
 end
 
 function ZO_RetraitStation_Retrait_Keyboard_OnTraitRowMouseUp(control, button, upInside)
-    ZO_RETRAIT_STATION_KEYBOARD:GetRetraitObject():OnTraitRowMouseUp(control, button, upInside)
+    ZO_RETRAIT_KEYBOARD:OnTraitRowMouseUp(control, button, upInside)
 end
 
 function ZO_RetraitStation_Retrait_Keyboard_OnRetraitCostSlotMouseEnter(control)

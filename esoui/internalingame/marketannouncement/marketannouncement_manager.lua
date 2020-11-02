@@ -56,22 +56,23 @@ function MarketAnnouncement_Manager:Initialize()
                 local hasDiscount = discountPercent > 0 or self:HasHouseDiscount(productData)
                 local hasActivationRequirement = productData:HasActivationRequirement()
                 local announceSortOrder = productData:GetAnnounceSortOrder()
-                local productInfo = {
-                                        productData = productData,
-                                        -- for sorting
-                                        isLimitedTime = isLimitedTime,
-                                        timeLeft = isLimitedTime and productData:GetLTOTimeLeftInSeconds() or 0,
-                                        isNew = productData:IsNew(),
-                                        name = productData:GetDisplayName(),
-                                        containsDLC = productData:ContainsDLC(),
-                                        isPromo = productData:IsPromo(),
-                                        isOnSale = hasDiscount,
-                                        onSaleTimeLeft = isSaleTime and productData:GetSaleTimeLeftInSeconds() or 0,
-                                        stackCount = productData:GetStackCount(),
-                                        isDeprioritized = isDeprioritized,
-                                        hasActivationRequirement = hasActivationRequirement,
-                                        announceSortOrder = announceSortOrder,
-                                    }
+                local productInfo =
+                {
+                    productData = productData,
+                    -- for sorting
+                    isLimitedTime = isLimitedTime,
+                    timeLeft = isLimitedTime and productData:GetLTOTimeLeftInSeconds() or 0,
+                    isNew = productData:IsNew(),
+                    name = productData:GetDisplayName(),
+                    containsDLC = productData:ContainsDLC(),
+                    isPromo = productData:IsPromo(),
+                    isOnSale = hasDiscount,
+                    onSaleTimeLeft = isSaleTime and productData:GetSaleTimeLeftInSeconds() or 0,
+                    stackCount = productData:GetStackCount(),
+                    isDeprioritized = isDeprioritized,
+                    hasActivationRequirement = hasActivationRequirement,
+                    announceSortOrder = announceSortOrder,
+                }
 
                 table.insert(self.productInfoTable, productInfo)
             end
@@ -108,7 +109,8 @@ end
 function MarketAnnouncement_Manager:HasHouseDiscount(productData)
     if productData:IsHouseCollectible() then
         local houseDiscountPercent = select(4, ZO_MarketProduct_GetDefaultHousingTemplatePricingInfo(productData:GetId(), function(...) return self:GetMarketProductListingsForHouseTemplate(...) end))
-        return houseDiscountPercent > 0
+        -- houseDiscountPercent could come back as nil if there is no market listing currently available for the market product
+        return houseDiscountPercent and houseDiscountPercent > 0 or false
     end
     return false
 end

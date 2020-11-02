@@ -1,4 +1,3 @@
-
 ZO_RetraitStation_Retrait_Base = ZO_Object:Subclass()
 
 function ZO_RetraitStation_Retrait_Base:New(...)
@@ -15,6 +14,19 @@ function ZO_RetraitStation_Retrait_Base:Initialize(control)
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function(...) self:OnRetraitAnimationsStarted(...) end)
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function(...) self:OnRetraitAnimationsStopped(...) end)
+    ZO_RETRAIT_STATION_MANAGER:RegisterCallback("OnRetraitDirtyEvent", function(...) self:HandleDirtyEvent(...) end)
+end
+
+function ZO_RetraitStation_Retrait_Base:InitializeInventory()
+    -- To be overridden
+end
+
+function ZO_RetraitStation_Retrait_Base:InitializeKeybindStripDescriptors()
+    -- To be overridden
+end
+
+function ZO_RetraitStation_Retrait_Base:IsShowing()
+    return not self.control:IsHidden()
 end
 
 function ZO_RetraitStation_Retrait_Base:ShowRetraitDialog(bagId, slotIndex, selectedTrait)
@@ -37,7 +49,6 @@ function ZO_RetraitStation_Retrait_Base:ShowRetraitDialog(bagId, slotIndex, sele
     local itemDisplayQualityColor = GetItemQualityColor(itemDisplayQuality)
     local itemName = itemDisplayQualityColor:Colorize(GetItemName(bagId, slotIndex))
     local traitName = ZO_SELECTED_TEXT:Colorize(GetString("SI_ITEMTRAITTYPE", selectedTrait))
-
     local retraitCost, retraitCurrency, retraitCurrencyLocation = GetItemRetraitCost()
     local formattedRetraitCost = ZO_Currency_FormatPlatform(retraitCurrency, retraitCost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON)
 
@@ -58,33 +69,21 @@ function ZO_RetraitStation_Retrait_Base:UpdateRequireResearchTooltipString(bagId
     self.requiredResearchTooltipString = zo_strformat(SI_RETRAIT_STATION_MUST_RESEARCH_TRAIT, tradeskillName)
 end
 
-function ZO_RetraitStation_Retrait_Base:InitializeInventory()
-    -- To be overridden
-end
-
-function ZO_RetraitStation_Retrait_Base:InitializeKeybindStripDescriptors()
-    -- To be overridden
-end
-
 function ZO_RetraitStation_Retrait_Base:HandleDirtyEvent()
-    if self.control:IsHidden() then
-        self.dirty = true
-    else
+    if self:IsShowing() then
         self:Refresh()
+        self.dirty = false
+    else
+        self.dirty = true
     end
 end
 
 function ZO_RetraitStation_Retrait_Base:Refresh()
-    self.dirty = false
     -- To be overridden
 end
 
 function ZO_RetraitStation_Retrait_Base:OnRetraitResult(result)
     -- To be overridden
-end
-
-function ZO_RetraitStation_Retrait_Base:IsShowing()
-    return not self.control:IsHidden()
 end
 
 function ZO_RetraitStation_Retrait_Base:OnRetraitAnimationsStarted()

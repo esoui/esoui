@@ -128,6 +128,20 @@ function ZO_GroupList_Keyboard:InitializeKeybindDescriptors()
                 return self.groupSize and self.groupSize > 0
             end
         },
+
+        -- Leave Instance
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+            name = GetString(SI_GROUP_MENU_LEAVE_INSTANCE_KEYBIND),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+        
+            callback = function()
+                ZO_Dialogs_ShowDialog("INSTANCE_LEAVE_DIALOG")
+            end,
+
+            visible = CanExitInstanceImmediately
+        },
     }
 end
 

@@ -1,0 +1,74 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_ReconstructHeading_Gamepad" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" modifyTextType="UPPERCASE" virtual="true" />
+
+        <Label name="ZO_ReconstructSubheading_Gamepad" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" modifyTextType="UPPERCASE" virtual="true" />
+
+        <Label name="ZO_ReconstructSublabel_Gamepad" font="ZoFontGamepad22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <TopLevelControl name="ZO_RetraitStation_Reconstruct_GamepadTopLevel" inherits="ZO_ItemSetsBook_Gamepad_Base">
+            <Controls>
+                <Control name="$(parent)Options" hidden="true" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MaskContainerHeaderContainer" relativePoint="BOTTOMLEFT" offsetY="15" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MaskContainerHeaderContainer" relativePoint="BOTTOMRIGHT" offsetY="15" />
+
+                    <Controls>
+                        <Control name="$(parent)Header" inherits="ZO_GamepadDisplayEntryTemplateLowercase34">
+                            <Anchor point="TOPLEFT" />
+                        </Control>
+
+                        <Control name="$(parent)TraitList" inherits="ZO_GamepadSmithingHorizontalListTemplate">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                            <Dimensions y="265" />
+
+                            <Controls>
+                                <Label name="$(parent)SelectedLabel" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
+
+                                <Label name="$(parent)ExtraInfoLabel" override="true" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ERROR" text="SI_SMITHING_TRAIT_MUST_BE_RESEARCHED" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)QualityList" inherits="ZO_GamepadSmithingHorizontalListTemplate">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TraitList" relativePoint="BOTTOMLEFT" offsetY="15" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TraitList" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                            <Dimensions y="265" />
+
+                            <Controls>
+                                <Label name="$(parent)ExtraInfoLabel" override="true" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ERROR" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Cost" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Summary" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>
+                                <Label name="$(parent)Heading" inherits="ZO_ReconstructHeading_Gamepad" text="SI_ITEM_RECONSTRUCTION_TOTAL_COST">
+                                    <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT" />
+                                    <Anchor point="TOPRIGHT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT" />
+                                </Label>
+
+                                <Control name="$(parent)Currency" inherits="ZO_GamepadDisplayEntryTemplateLowercase34">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Heading" relativePoint="BOTTOMLEFT" offsetY="30" />
+                                </Control>
+
+                                <Control name="$(parent)Materials">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Currency" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Currency" relativePoint="BOTTOMRIGHT" />
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip_Gamepad ZO_GamepadGrid_NavQuadrant_2_Anchors" hidden="true">
+                    <OnInitialized>
+                        ZO_GamepadCraftingUtils_CraftingTooltip_Gamepad_Initialize(self)
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

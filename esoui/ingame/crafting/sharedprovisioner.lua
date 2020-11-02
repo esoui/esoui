@@ -36,6 +36,7 @@ function ZO_SharedProvisioner:Initialize(control)
 
     self.control = control
     self.resultTooltip = self.control:GetNamedChild("Tooltip")
+    self.questRecipes = {}
 
     self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType, isCraftingSameAsPrevious)
         if not isCraftingSameAsPrevious then
@@ -93,6 +94,26 @@ function ZO_SharedProvisioner:Initialize(control)
         end,
         interactTypes = { INTERACTION_CRAFT },
     }
+
+    CRAFT_ADVISOR_MANAGER:RegisterCallback("QuestInformationUpdated", function(updatedQuestSelection) 
+        self.questRecipes = updatedQuestSelection.recipeItemIds
+        self.questRecipeLists = {}
+        self.questCategories = {}
+        local craftingInteractionType = GetCraftingInteractionType()
+        local recipeLists = PROVISIONER_MANAGER:GetRecipeListData(craftingInteractionType)
+        --Locate any recipes that match the current quest recipes
+        for listIndex, recipeList in pairs(recipeLists) do
+            for _, recipe in ipairs(recipeList.recipes) do
+                --If we have a match, then mark the list and category as having a quest in it
+                if self.questRecipes and self.questRecipes[recipe.resultItemId] then
+                    self.questRecipeLists[recipe.recipeListIndex] = true
+                    self.questCategories[recipe.specialIngredientType] = true
+                end
+            end
+        end
+        self:DirtyRecipeList()
+        self:UpdateQuestPins()
+    end)
 end
 
 function ZO_SharedProvisioner:CreateInteractScene(sceneName)
@@ -128,6 +149,10 @@ function ZO_SharedProvisioner:GetRecipeData()
     -- meant to be overridden
 end
 
+function ZO_SharedProvisioner:UpdateQuestPins()
+    --meant to be overridden
+end
+
 function ZO_SharedProvisioner:GetRecipeIndices()
     local recipeData = self:GetRecipeData()
     if recipeData then
@@ -155,7 +180,7 @@ function ZO_SharedProvisioner:PassesQualityLevelReq(qualityReq)
     end
 end
 
-function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, shouldRequireIngredients, maxIterationsForIngredients, shouldRequireSkills, tradeskillsLevelReqs, qualityReq, craftingInteractionType, requiredCraftingStationType)
+function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, shouldRequireIngredients, maxIterationsForIngredients, shouldRequireSkills, tradeskillsLevelReqs, qualityReq, craftingInteractionType, requiredCraftingStationType, shouldFilterQuests, resultItemId)
     if craftingInteractionType ~= requiredCraftingStationType then
         return false
     end
@@ -172,6 +197,12 @@ function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, should
 
     if shouldRequireSkills then
         if not self:PassesTradeskillLevelReqs(tradeskillsLevelReqs) or not self:PassesQualityLevelReq(qualityReq) then
+            return false
+        end
+    end
+
+    if shouldFilterQuests then
+        if not self.questRecipes[resultItemId] then
             return false
         end
     end

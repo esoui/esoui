@@ -504,11 +504,11 @@ end
 do
     local USE_LOWERCASE_NUMBER_SUFFIXES = false
     function ZO_LootHistory_Shared.GetStackCountStringFromData(data)
-        return zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(data.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+        return ZO_AbbreviateAndLocalizeNumber(data.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
     end
 
     function ZO_LootHistory_Shared.GetValueStringFromData(data)
-        return zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(data.value, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+        return ZO_AbbreviateAndLocalizeNumber(data.value, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
     end
 end
 

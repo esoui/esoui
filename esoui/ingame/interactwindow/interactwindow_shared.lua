@@ -441,7 +441,7 @@ local function SetupBasicReward(control, name, stackSize, icon, meetsUsageRequir
     end
 
     if stackSize > 1 then
-        local stackSizeString = zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackSize, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+        local stackSizeString = ZO_AbbreviateAndLocalizeNumber(stackSize, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
         stackControl:SetText(stackSizeString)
         stackControl:SetHidden(false)
     else

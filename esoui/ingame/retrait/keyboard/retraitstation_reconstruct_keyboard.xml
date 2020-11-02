@@ -1,0 +1,278 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_ReconstructItemQualityAlphaAnimation">
+            <Animations>
+                <AlphaAnimation duration="160" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ReconstructItemQualityScaleAnimation">
+            <Animations>
+                <ScaleAnimation duration="160" startScale="1" endScale="1.35">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Label name="ZO_ReconstructItemQualityLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
+
+        <Texture name="ZO_ReconstructItemQualityTexture" mouseEnabled="true" virtual="true">
+            <Controls>
+                <Texture name="$(parent)MouseOverGlowTexture" blendMode="ADD" level="1" />
+
+                <Texture name="$(parent)SelectionGlowTexture" blendMode="ADD" level="2" />
+
+                <Texture name="$(parent)ReagentTexture" hidden="true" level="3">
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="-2" offsetY="-4" />
+                    <Dimensions x="52" y="52"/>
+
+                    <Controls>
+                        <Label name="$(parent)QuantityLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" inheritScale="false">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="2"/>
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)QualityLabel" inherits="ZO_ReconstructItemQualityLabel" level="4" />
+            </Controls>
+        </Texture>
+
+        <Control name="ZO_RetraitStation_ReconstructPanel" virtual="true">
+            <Controls>
+                <Control name="$(parent)Options" hidden="true">
+                    <AnchorFill />
+
+                    <Controls>
+                        <Control name="$(parent)BackContainer">
+                            <Anchor point="TOPLEFT" offsetX="10" />
+                            <Anchor point="BOTTOMLEFT" offsetX="10" />
+                            <Dimensions x="238" />
+
+                            <Controls>
+                                <Control name="$(parent)BackLabel" inherits="ZO_IconHeader" level="1">
+                                    <Anchor point="TOPLEFT" offsetX="20" offsetY="82" />
+
+                                    <Controls>
+                                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Buttons/large_leftArrow_down.dds" override="true">
+                                            <Controls>
+                                                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Buttons/large_leftArrow_over.dds" override="true" />
+                                            </Controls>
+                                        </Texture>
+
+                                        <Label name="$(parent)Text" text="SI_ITEM_RECONSTRUCTION_BACK" override="true" />
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Heading">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BackContainer" relativePoint="TOPRIGHT" offsetX="15" />
+                            <Anchor point="RIGHT" constrains="X" />
+                            <Dimensions y="120" />
+
+                            <Controls>
+                                <Label name="$(parent)ItemName" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS">
+                                    <Anchor point="CENTER" offsetX="ZO_RECONSTRUCTION_ITEM_NAME_OFFSET_X" />
+                                    <DimensionConstraints maxX="400" />
+                                </Label>
+
+                                <Texture name="$(parent)ItemIcon">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)ItemName" relativePoint="LEFT" offsetX="-10" />
+                                    <Dimensions x="ZO_ITEM_SET_COLLECTION_PIECE_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_ITEM_SET_COLLECTION_PIECE_TILE_KEYBOARD_ICON_DIMENSIONS" />
+                                </Texture>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)TraitList" inherits="ZO_SmithingHorizontalListTemplate">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Heading" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Heading" relativePoint="BOTTOMRIGHT" />
+                            <Dimensions y="140" />
+
+                            <Controls>
+                                <Label name="$(parent)Title" override="true" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_SMITHING_HEADER_TRAIT">
+                                    <Anchor point="TOPLEFT" offsetX="70" offsetY="8" />
+                                </Label>
+
+                                <Label name="$(parent)ExtraInfoLabel" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ERROR" horizontalAlignment="CENTER" maxLineCount="1" text="SI_SMITHING_TRAIT_MUST_BE_RESEARCHED" wrapMode="ELLIPSIS" hidden="true" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)ImprovementList">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TraitList" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TraitList" relativePoint="BOTTOMRIGHT" />
+                            <Dimensions y="180" />
+
+                            <Controls>
+                                <Control name="$(parent)Divider" inherits="ZO_WideHorizontalDivider">
+                                    <Anchor point="TOP" />
+                                </Control>
+
+                                <Label name="$(parent)TitleLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_SMITHING_TAB_IMPROVEMENT">
+                                    <Anchor point="TOPLEFT" offsetX="70" offsetY="8" />
+                                </Label>
+
+                                <Control name="$(parent)Tiers">
+                                    <Anchor point="TOP" offsetY="60" />
+                                    <Dimensions x="452" y="64" />
+
+                                    <Controls>
+                                        <Texture name="$(parent)QualityTexture1" inherits="ZO_ReconstructItemQualityTexture" textureFile="EsoUI/Art/Crafting/reconstruction_temper_normal.dds">
+                                            <Anchor point="LEFT" />
+                                            <Dimensions x="57" y="64" />
+                                            <TextureCoords right="0.4453" />
+
+                                            <Controls>
+                                                <Texture name="$(parent)MouseOverGlowTexture" override="true" textureFile="EsoUI/Art/Crafting/reconstruction_temperGlow_normal.dds">
+                                                    <Anchor point="CENTER" offsetX="-1" />
+                                                    <Dimensions x="71" y="64" />
+                                                    <TextureCoords right="0.5625" />
+                                                </Texture>
+
+                                                <Texture name="$(parent)SelectionGlowTexture" override="true" textureFile="EsoUI/Art/Crafting/reconstruction_temperGlow_normal.dds">
+                                                    <Anchor point="CENTER" offsetX="-1" />
+                                                    <Dimensions x="71" y="64" />
+                                                    <TextureCoords right="0.5625" />
+                                                </Texture>
+
+                                                <Label name="$(parent)QualityLabel" override="true" inherits="ZO_ReconstructItemQualityLabel">
+                                                    <Anchor point="TOP" relativePoint="BOTTOMLEFT" offsetX="5" />
+                                                </Label>
+                                            </Controls>
+                                        </Texture>
+
+                                        <Texture name="$(parent)QualityTexture2" inherits="ZO_ReconstructItemQualityTexture" textureFile="EsoUI/Art/Crafting/reconstruction_temper_fine.dds">
+                                            <Anchor point="LEFT" relativeTo="$(parent)QualityTexture1" relativePoint="RIGHT" />
+                                            <Dimensions x="113" y="64" />
+                                            <TextureCoords right="0.8828" />
+
+                                            <Controls>
+                                                <Texture name="$(parent)MouseOverGlowTexture" override="true" textureFile="EsoUI/Art/Crafting/reconstruction_temperGlow_fine.dds">
+                                                    <Anchor point="CENTER" />
+                                                    <Dimensions x="128" y="64" />
+                                                </Texture>
+
+                                                <Texture name="$(parent)SelectionGlowTexture" override="true" textureFile="EsoUI/Art/Crafting/reconstruction_temperGlow_fine.dds">
+                                                    <Anchor point="CENTER" />
+                                                    <Dimensions x="128" y="64" />
+                                                </Texture>
+
+                                                <Label name="$(parent)QualityLabel" override="true" inherits="ZO_ReconstructItemQualityLabel">
+                                                    <Anchor point="BOTTOM" relativePoint="TOP" offsetX="-9" offsetY="-5" />
+                                                </Label>
+                                            </Controls>
+                                        </Texture>
+
+                                        <Texture name="$(parent)QualityTexture3" inherits="ZO_ReconstructItemQualityTexture" textureFile="EsoUI/Art/Crafting/reconstruction_temper_superior.dds">
+                                            <Anchor point="LEFT" relativeTo="$(parent)QualityTexture2" relativePoint="RIGHT" />
+                                            <Dimensions x="115" y="64" />
+                                            <TextureCoords right="0.8984" />
+
+                                            <Controls>
+                                                <Texture name="$(parent)MouseOverGlowTexture" override="true" textureFile="EsoUI/Art/Crafting/reconstruction_temperGlow_superior.dds">
+                                                    <Anchor point="CENTER" offsetX="1" />
+                                                    <Dimensions x="128" y="64" />
+                                                </Texture>
+
+                                                <Texture name="$(parent)SelectionGlowTexture" override="true" textureFile="EsoUI/Art/Crafting/reconstruction_temperGlow_superior.dds">
+                                                    <Anchor point="CENTER" offsetX="1" />
+                                                    <Dimensions x="128" y="64" />
+                                                </Texture>
+
+                                                <Label name="$(parent)QualityLabel" override="true" inherits="ZO_ReconstructItemQualityLabel">
+                                                    <Anchor point="TOP" relativePoint="BOTTOM" offsetX="-10" />
+                                                </Label>
+                                            </Controls>
+                                        </Texture>
+
+                                        <Texture name="$(parent)QualityTexture4" inherits="ZO_ReconstructItemQualityTexture" textureFile="EsoUI/Art/Crafting/reconstruction_temper_epic.dds">
+                                            <Anchor point="LEFT" relativeTo="$(parent)QualityTexture3" relativePoint="RIGHT" />
+                                            <Dimensions x="112" y="64" />
+                                            <TextureCoords right="0.875" />
+
+                                            <Controls>
+                                                <Texture name="$(parent)MouseOverGlowTexture" override="true" textureFile="EsoUI/Art/Crafting/reconstruction_temperGlow_epic.dds">
+                                                    <Anchor point="CENTER" offsetX="1" />
+                                                    <Dimensions x="127" y="64" />
+                                                </Texture>
+
+                                                <Texture name="$(parent)SelectionGlowTexture" override="true" textureFile="EsoUI/Art/Crafting/reconstruction_temperGlow_epic.dds">
+                                                    <Anchor point="CENTER" offsetX="1" />
+                                                    <Dimensions x="127" y="64" />
+                                                </Texture>
+
+                                                <Label name="$(parent)QualityLabel" override="true" inherits="ZO_ReconstructItemQualityLabel">
+                                                    <Anchor point="BOTTOM" relativePoint="TOP" offsetX="-15" offsetY="-5" />
+                                                </Label>
+                                            </Controls>
+                                        </Texture>
+
+                                        <Texture name="$(parent)QualityTexture5" inherits="ZO_ReconstructItemQualityTexture" textureFile="EsoUI/Art/Crafting/reconstruction_temper_legendary.dds">
+                                            <Anchor point="LEFT" relativeTo="$(parent)QualityTexture4" relativePoint="RIGHT" />
+                                            <Dimensions x="55" y="64" />
+                                            <TextureCoords right="0.4296" />
+
+                                            <Controls>
+                                                <Texture name="$(parent)MouseOverGlowTexture" override="true" textureFile="EsoUI/Art/Crafting/reconstruction_temperGlow_legendary.dds">
+                                                    <Anchor point="CENTER" offsetX="1" />
+                                                    <Dimensions x="70" y="64" />
+                                                    <TextureCoords right="0.5469" />
+                                                </Texture>
+
+                                                <Texture name="$(parent)SelectionGlowTexture" override="true" textureFile="EsoUI/Art/Crafting/reconstruction_temperGlow_legendary.dds">
+                                                    <Anchor point="CENTER" offsetX="1" />
+                                                    <Dimensions x="70" y="64" />
+                                                    <TextureCoords right="0.5469" />
+                                                </Texture>
+
+                                                <Label name="$(parent)QualityLabel" override="true" inherits="ZO_ReconstructItemQualityLabel">
+                                                    <Anchor point="TOP" relativePoint="BOTTOMRIGHT" offsetX="-5" />
+                                                </Label>
+                                            </Controls>
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)CostList" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ImprovementList" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ImprovementList" relativePoint="BOTTOMRIGHT" />
+
+                            <Controls>
+                                <Control name="$(parent)Divider" inherits="ZO_WideHorizontalDivider">
+                                    <Anchor point="TOP" />
+                                </Control>
+
+                                <Label name="$(parent)TitleLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ITEM_RECONSTRUCTION_COST_HEADER">
+                                    <Anchor point="TOPLEFT" offsetX="70" offsetY="8" />
+                                    <Anchor point="TOPRIGHT" offsetX="-110" offsetY="8" />
+                                </Label>
+
+                                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleLabel" relativePoint="BOTTOMLEFT" offsetX="40" offsetY="17" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleLabel" relativePoint="BOTTOMRIGHT" offsetY="17" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Center">
+                            <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="-25" />
+                            <Anchor point="RIGHT" relativePoint="LEFT" constrains="X" />
+                        </Control>
+
+                        <Tooltip name="$(parent)PreviewTooltip" inherits="ZO_CraftingTooltip">
+                            <Anchor point="CENTER" relativeTo="$(parent)Center" />
+                        </Tooltip>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

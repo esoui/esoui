@@ -77,10 +77,22 @@ end
 function ZO_WorldMapQuestsData_Singleton.ShouldMapShowQuestsInList()
     local mapType = GetMapType()
     --We don't want to track any quests when we are showing these high map levels
-    if mapType == MAPTYPE_WORLD or mapType == MAPTYPE_COSMIC or mapType == MAPTYPE_ALLIANCE then
+    if mapType >= MAPTYPE_WORLD then
         return false
     end
     return true
+end
+
+function ZO_WorldMapQuestsData_Singleton.IsQuestInCurrentMapNormalizedBounds(questSteps)
+    for stepIndex, questConditions in pairs(questSteps) do
+        for conditionIndex, conditionData in pairs(questConditions) do
+            if conditionData.xLoc >= 0 and conditionData.xLoc <= 1 and conditionData.yLoc >= 0 and conditionData.yLoc <= 1 and conditionData.insideCurrentMapWorld then
+                return true
+            end
+        end
+    end
+
+    return false
 end
 
 function ZO_WorldMapQuestsData_Singleton:OnQuestAvailable(questIndex)
@@ -89,22 +101,14 @@ function ZO_WorldMapQuestsData_Singleton:OnQuestAvailable(questIndex)
     end
         
     if self:GetQuestMasterListIndex(questIndex) then
-        -- We already have this quest in the list
+        -- We already have this quest in the list.
         return
     end
 
-    local questSteps = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
     local shouldAddQuest
+    local questSteps = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
     if questSteps then
-        shouldAddQuest = false
-        for stepIndex, questConditions in pairs(questSteps) do
-            for conditionIndex, conditionData in pairs(questConditions) do
-                if conditionData.xLoc >= 0 and conditionData.xLoc <= 1 and conditionData.yLoc >= 0 and conditionData.yLoc <= 1 and conditionData.insideCurrentMapWorld then
-                    shouldAddQuest = true
-                    break
-                end
-            end
-        end
+        shouldAddQuest = ZO_WorldMapQuestsData_Singleton.IsQuestInCurrentMapNormalizedBounds(questSteps)
     else
         shouldAddQuest = IsJournalQuestInCurrentMapZone(questIndex)
     end

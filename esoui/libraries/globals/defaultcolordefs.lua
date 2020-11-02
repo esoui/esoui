@@ -182,6 +182,19 @@ end
 
 do
     local itemColors = {}
+    local INCREASE_AMOUNT = 0.15
+    function GetBrightItemQualityColor(quality)
+        if not itemColors[quality] then
+            local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
+            r, g, b = zo_saturate(r + INCREASE_AMOUNT), zo_saturate(g + INCREASE_AMOUNT), zo_saturate(b + INCREASE_AMOUNT)
+            itemColors[quality] = ZO_ColorDef:New(r, g, b)
+        end
+        return itemColors[quality]
+    end
+end
+
+do
+    local itemColors = {}
     function GetItemQualityColor(displayQuality)
         if not itemColors[displayQuality] then
             itemColors[displayQuality] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
@@ -196,7 +209,7 @@ do
     function GetDimItemQualityColor(quality)
         if not itemColors[quality] then
             local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
-            r, g, b = zo_saturate(r - REDUCE_AMOUNT), zo_saturate(g - REDUCE_AMOUNT), zo_saturate(b - REDUCE_AMOUNT)    
+            r, g, b = zo_saturate(r - REDUCE_AMOUNT), zo_saturate(g - REDUCE_AMOUNT), zo_saturate(b - REDUCE_AMOUNT)
             itemColors[quality] = ZO_ColorDef:New(r, g, b)
         end
         return itemColors[quality]
@@ -303,17 +316,52 @@ ZO_TRADE_BOP_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM
 ZO_SKILLS_ADVISOR_ADVISED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_SKILLS_ADVISOR, SKILLS_ADVISOR_COLOR_ADVISED))
 ZO_SKILLS_ADVISOR_NOT_ADVISED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_SKILLS_ADVISOR, SKILLS_ADVISOR_COLOR_NOT_ADVISED))
 
-ZO_LOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE =
+ZO_SILHOUETTE_ICON_COLOR = ZO_ColorDef:New(0.25, 0.25, 0.25, 1)
+ZO_SILHOUETTE_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE =
 {
     [TEX_SAMPLE_PROCESSING_RGB] = 0.3,
-    [TEX_SAMPLE_PROCESSING_ALPHA_AS_RGB] = 0.3,
+    [TEX_SAMPLE_PROCESSING_ALPHA_AS_RGB] = 1,
+}
+ZO_SILHOUETTE_ICON_ATTRIBUTES =
+{
+    iconColor = ZO_SILHOUETTE_ICON_COLOR,
+    iconDesaturation = 1,
+    iconSamplingTable = ZO_SILHOUETTE_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE,
 }
 
-ZO_UNLOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE =
+ZO_NO_SILHOUETTE_ICON_COLOR = ZO_ColorDef:New(1, 1, 1, 1)
+ZO_NO_SILHOUETTE_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE =
 {
-    [TEX_SAMPLE_PROCESSING_RGB] = 1.0,
-    [TEX_SAMPLE_PROCESSING_ALPHA_AS_RGB] = 0.0,
+    [TEX_SAMPLE_PROCESSING_RGB] = 1,
+    [TEX_SAMPLE_PROCESSING_ALPHA_AS_RGB] = 0,
 }
+ZO_NO_SILHOUETTE_ICON_ATTRIBUTES =
+{
+    iconColor = ZO_NO_SILHOUETTE_ICON_COLOR,
+    iconDesaturation = 0,
+    iconSamplingTable = ZO_NO_SILHOUETTE_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE,
+}
+
+function ZO_SetDefaultIconSilhouette(textureControl, isSilhouette)
+    local attributes = isSilhouette and ZO_SILHOUETTE_ICON_ATTRIBUTES or ZO_NO_SILHOUETTE_ICON_ATTRIBUTES
+    ZO_SetIconAttributes(textureControl, attributes)
+end
+
+function ZO_SetIconAttributes(textureControl, attributes)
+    if attributes.iconColor then
+        textureControl:SetColor(attributes.iconColor:UnpackRGBA())
+    end
+
+    if attributes.iconDesaturation then
+        textureControl:SetDesaturation(attributes.iconDesaturation)
+    end
+
+    if attributes.iconSamplingTable then
+        for samplingType, samplingWeight in pairs(attributes.iconSamplingTable) do
+            textureControl:SetTextureSampleProcessingWeight(samplingType, samplingWeight)
+        end
+    end
+end
 
 --------------------------------------
 --Gamepad Colors

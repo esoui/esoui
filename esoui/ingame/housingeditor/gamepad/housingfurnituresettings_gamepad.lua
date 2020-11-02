@@ -108,6 +108,18 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
             visible = function()
                           return self.activePanel ~= nil
                       end,
+            enabled = function()
+                if self.activePanel == self.visitorList or self.activePanel == self.banList then
+                    local numPermissions = self:GetNumIndividualPermissions(GetCurrentZoneHouseId())
+                    local hasPermissionSlots = HOUSING_MAX_INDIVIDUAL_USER_GROUP_ENTRIES > numPermissions
+                    return hasPermissionSlots, GetString(SI_PERMISSION_ERROR_CANT_ADD_NEW_INDIVIDUAL)
+                elseif self.activePanel == self.guildVisitorList or self.activePanel == self.guildBanList then
+                    local numPermissions = self:GetNumGuildPermissions(GetCurrentZoneHouseId())
+                    local hasPermissionSlots = HOUSING_MAX_GUILD_USER_GROUP_ENTRIES > numPermissions
+                    return hasPermissionSlots, GetString(SI_PERMISSION_ERROR_CANT_ADD_NEW_GUILD)
+                end
+                return false
+            end,
             callback = function()
                 local data = { activePanel = self.activePanel, currentHouse = GetCurrentZoneHouseId() }
                 if self.activePanel == self.visitorList then
@@ -700,10 +712,9 @@ do
         visible = function(dialog)
             local data = dialog.entryList:GetTargetData()
             if data and data.control and data.control.editBoxControl then
-                local platform = GetUIPlatform()
-                if platform == UI_PLATFORM_PS4 then
+                if ZO_IsPlaystationPlatform() then
                     return true
-                elseif platform == UI_PLATFORM_XBOX then
+                elseif GetUIPlatform() == UI_PLATFORM_XBOX then
                     if GetNumberConsoleFriends() > 0 then
                         return true
                     end

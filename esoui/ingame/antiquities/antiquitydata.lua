@@ -152,17 +152,11 @@ function ZO_Antiquity:GetIcon()
     return self.icon
 end
 
-function ZO_Antiquity:GetLeadExpirationStatus()
-    local nearExpiration = false
-    local timeRemainingText
-    if self:HasLead() and self.leadExpirationTimeS then
-        local leadTimeRemainingS = self.leadExpirationTimeS - GetFrameTimeSeconds()
-        if leadTimeRemainingS > 0 then
-            nearExpiration = (leadTimeRemainingS / ZO_ONE_DAY_IN_SECONDS) <= ZO_LEAD_EXPIRATION_WARNING_DAYS
-            timeRemainingText = ZO_FormatTimeLargestTwo(leadTimeRemainingS, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_HIDE_ZEROES)
-        end
+function ZO_Antiquity:GetLeadTimeRemainingS()
+    if self:HasLead() then
+        return self.leadExpirationTimeS - GetFrameTimeSeconds()
     end
-    return nearExpiration, timeRemainingText
+    return 0
 end
 
 function ZO_Antiquity:RequiresLead()

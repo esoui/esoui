@@ -1,14 +1,17 @@
-function ZO_ControllerDisconnect_Initialize(self)
-    CONTROLLER_DISCONNECT_FRAGMENT = ZO_FadeSceneFragment:New(self)
+function ZO_ControllerDisconnect_Initialize(control)
+    CONTROLLER_DISCONNECT_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
-	local headerData = {}
-	local header = self:GetNamedChild("HeaderContainer").header
-	headerData.titleTextAlignment = TEXT_ALIGN_CENTER
-	headerData.titleText = GetString(SI_GAMEPAD_DISCONNECTED_TITLE)
-	ZO_GamepadGenericHeader_Initialize(header)
-	ZO_GamepadGenericHeader_Refresh(header, headerData)
+    local headerData =
+    {
+        titleTextAlignment = TEXT_ALIGN_CENTER,
+        titleText = GetString(SI_GAMEPAD_DISCONNECTED_TITLE),
+    }
 
-    self:GetNamedChild("InteractKeybind"):SetText(zo_strformat(SI_GAMEPAD_DISCONNECTED_CONTINUE_TEXT, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)))
+    local header = control:GetNamedChild("HeaderContainer").header
+    ZO_GamepadGenericHeader_Initialize(header)
+    ZO_GamepadGenericHeader_Refresh(header, headerData)
+
+    control:GetNamedChild("InteractKeybind"):SetText(zo_strformat(SI_GAMEPAD_DISCONNECTED_CONTINUE_TEXT, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)))
 end
 
 function ZO_ControllerDisconnect_ShowPopup()
@@ -19,8 +22,8 @@ function ZO_ControllerDisconnect_ShowPopup()
     end
 
     local message
-    if GetUIPlatform() == UI_PLATFORM_PS4 then 
-        message = GetString(SI_GAMEPAD_DISCONNECTED_PS4_TEXT)
+    if ZO_IsPlaystationPlatform() then 
+        message = GetString(SI_GAMEPAD_DISCONNECTED_PLAYSTATION_TEXT)
     else
         message = GetString(SI_GAMEPAD_DISCONNECTED_XBOX_TEXT)
     end

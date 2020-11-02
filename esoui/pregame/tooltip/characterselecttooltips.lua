@@ -14,7 +14,7 @@ function ZO_Tooltip:LayoutServiceTokenTooltip(tokenType)
     if tokenType == SERVICE_TOKEN_ALLIANCE_CHANGE then
         local anyRaceCollectibleId = GetAnyRaceAnyAllianceCollectibleId()
         local collectibleName = GetCollectibleName(anyRaceCollectibleId)
-        local categoryName = GetCollectibleCategoryName(anyRaceCollectibleId)
+        local categoryName = GetCollectibleCategoryNameByCollectibleId(anyRaceCollectibleId)
         local tokensAvailableText = zo_strformat(SI_SERVICE_TOOLTIP_REQUIRES_COLLECTIBLE_TO_USE, collectibleName, categoryName)
 
         local meetsRequirementTextStyle

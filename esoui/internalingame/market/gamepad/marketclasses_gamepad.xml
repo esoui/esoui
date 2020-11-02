@@ -1,6 +1,7 @@
 ﻿<GuiXml>
     <Controls>
         <Control name="ZO_Gamepad_MarketProductTemplate" inherits="ZO_LargeSingleMarketProduct_BaseTemplate" hidden="true" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_WIDTH" y ="ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_HEIGHT" />
             <OnInitialized>
                 ZO_MarketProductGamepad_OnInitialized(self)
             </OnInitialized>
@@ -32,7 +33,7 @@
 
                 <Label name="$(parent)EsoPlusDeal" override="true" font="ZoFontGamepadBold27" />
 
-                <Label name="$(parent)TextCallout" override="true" font="ZoMarketGamepadCalloutFont" />
+                <Label name="$(parent)TextCallout" override="true" />
 
                 <Label name="$(parent)BundledProducts" override="true" font="ZoFontGamepad34">
                     <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-10"/>

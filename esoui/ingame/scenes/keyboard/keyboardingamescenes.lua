@@ -210,17 +210,14 @@ SMITHING_SCENE:AddFragment(SMITHING_FRAGMENT)
 SMITHING_SCENE:AddFragment(CRAFTING_RESULTS_FRAGMENT)
 SMITHING_SCENE:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
 SMITHING_SCENE:AddFragment(ZO_WindowSoundFragment:New(SOUNDS.SMITHING_OPENED, SOUNDS.SMITHING_CLOSED))
-SMITHING_SCENE:AddFragmentGroup(FRAGMENT_GROUP.READ_ONLY_EQUIPPED_ITEMS)
 SMITHING_SCENE:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
+SMITHING_SCENE:AddFragment(CRAFT_ADVISOR_FRAGMENT)
 
 -----------------------
 --Retrait Scene
 -----------------------
 
 KEYBOARD_RETRAIT_ROOT_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
-KEYBOARD_RETRAIT_ROOT_SCENE:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
-KEYBOARD_RETRAIT_ROOT_SCENE:AddFragmentGroup(FRAGMENT_GROUP.READ_ONLY_EQUIPPED_ITEMS)
-KEYBOARD_RETRAIT_ROOT_SCENE:AddFragment(CRAFTING_RESULTS_FRAGMENT)
 KEYBOARD_RETRAIT_ROOT_SCENE:AddFragment(INTERACT_WINDOW_SOUNDS)
 
 ----------------
@@ -424,6 +421,21 @@ ZO_OUTFIT_STYLES_BOOK_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
 ZO_OUTFIT_STYLES_BOOK_SCENE:AddFragment(COLLECTIONS_WINDOW_SOUNDS)
 ZO_OUTFIT_STYLES_BOOK_SCENE:AddFragment(TITLE_FRAGMENT)
 ZO_OUTFIT_STYLES_BOOK_SCENE:AddFragment(COLLECTIONS_TITLE_FRAGMENT)
+
+------------------------
+--Item Sets Book Scene--
+------------------------
+
+ITEM_SETS_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+ITEM_SETS_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL_MEDIUM_LEFT_PANEL)
+ITEM_SETS_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+ITEM_SETS_BOOK_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_ITEM_SETS_BOOK)
+ITEM_SETS_BOOK_SCENE:AddFragment(ITEM_SETS_BOOK_FRAGMENT)
+ITEM_SETS_BOOK_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+ITEM_SETS_BOOK_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+ITEM_SETS_BOOK_SCENE:AddFragment(COLLECTIONS_WINDOW_SOUNDS)
+ITEM_SETS_BOOK_SCENE:AddFragment(TITLE_FRAGMENT)
+ITEM_SETS_BOOK_SCENE:AddFragment(COLLECTIONS_TITLE_FRAGMENT)
 
 -------------------
 --Notifications
@@ -687,6 +699,7 @@ inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURR
 inventoryScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
 inventoryScene:AddFragment(WIDE_LEFT_PANEL_BG_FRAGMENT)
 inventoryScene:AddFragment(CHARACTER_WINDOW_FRAGMENT)
+inventoryScene:AddFragment(CHARACTER_WINDOW_HEADER_FRAGMENT)
 inventoryScene:AddFragment(CHARACTER_WINDOW_STATS_FRAGMENT)
 inventoryScene:AddFragment(INVENTORY_MENU_FRAGMENT)
 inventoryScene:AddFragment(FRAME_EMOTE_FRAGMENT_INVENTORY)
@@ -1034,8 +1047,21 @@ do
                 return StatusIconForSpecializedCategory(COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES)
             end,
         },
+        {
+            categoryName = SI_ITEM_SETS_BOOK_TITLE,
+            descriptor = "itemSetsBook",
+            normal = "EsoUI/Art/Collections/collections_tabIcon_itemSets_up.dds",
+            pressed = "EsoUI/Art/Collections/collections_tabIcon_itemSets_down.dds",
+            highlight = "EsoUI/Art/Collections/collections_tabIcon_itemSets_over.dds",
+            statusIcon = function()
+                if ITEM_SET_COLLECTIONS_DATA_MANAGER:HasAnyNewPieces() then
+                    return ZO_KEYBOARD_NEW_ICON
+                end
+                return nil
+            end,
+        },
     }
-    SCENE_MANAGER:AddSceneGroup("collectionsSceneGroup", ZO_SceneGroup:New("collectionsBook", "dlcBook", "housingBook", "outfitStylesBook"))
+    SCENE_MANAGER:AddSceneGroup("collectionsSceneGroup", ZO_SceneGroup:New("collectionsBook", "dlcBook", "housingBook", "outfitStylesBook", "itemSetsBook"))
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_COLLECTIONS, "collectionsSceneGroup", iconData)
 end
 

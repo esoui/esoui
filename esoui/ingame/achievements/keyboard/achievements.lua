@@ -1273,7 +1273,7 @@ function Achievements:OnAchievementUpdated(achievementId)
         local data = self.categoryTree:GetSelectedData()
         if data then
             local selectedCategoryIndex, selectedSubCategoryIndex = self:GetCategoryIndicesFromData(data)
-            local categoryIndex, subCategoryIndex = GetCategoryInfoFromAchievementId(achievementId)
+            local categoryIndex, subCategoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(achievementId)
             -- Only update if the achievement is in the category you're currently viewing
             -- An achievement can only be in one category, and switching categories does a full refresh anyway
             if categoryIndex == selectedCategoryIndex and subCategoryIndex == selectedSubCategoryIndex then
@@ -1281,7 +1281,7 @@ function Achievements:OnAchievementUpdated(achievementId)
                 -- it's possible we need to remove it from the list, so we'll just rebuild the whole list
                 local dontRebuildContentList = ZO_ShouldShowAchievement(self.categoryFilter.filterType, achievementId)
                 self:UpdateCategoryLabels(data, SAVE_EXPANDED, dontRebuildContentList)
-                if dontRebuildContentList then
+                if dontRebuildContentList and ACHIEVEMENTS_MANAGER:IsInSearchResults(categoryIndex, subCategoryIndex, achievementIndex) then
                     local baseAchievementId = self:GetBaseAchievementId(achievementId)
 
                     -- Must use base here because in a line, all of the remaining achievements get an update,

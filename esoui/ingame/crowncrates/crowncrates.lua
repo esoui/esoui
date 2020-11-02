@@ -546,7 +546,7 @@ function ZO_CrownCrates.ComputeSlotCenterUIPositionY(slotHeightUI, slotHeightOff
 end
 
 function ZO_CrownCrates:UpdateGemsLabel(amount)
-    self.crownGemsAvailableQuantity.gemsLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(amount)))
+    self.crownGemsAvailableQuantity.gemsLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, amount))
 end
 
 function ZO_CrownCrates:UpdateCrownGemsQuantity()

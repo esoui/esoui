@@ -112,6 +112,33 @@ function ZO_HousingPathSettings_Gamepad:InitializeLists()
         end
     end
 
+    local function SetupConformToGroundControl(control, data, selected, reselectingDuringRebuild, enabled, active)
+        local function OnToggled()
+            ZO_GamepadCheckBoxTemplate_OnClicked(control)
+            HousingEditorToggleSelectedFurniturePathConformToGround()
+        end
+
+        data.text = GetString(data.generalInfo.text)
+        data.callbackLabel = GetString(SI_GAMEPAD_TOGGLE_OPTION)
+        data.callback = OnToggled
+        ZO_GamepadCheckBoxTemplate_Setup(control, data, selected, reselectingDuringRebuild, enabled, active)
+
+        if HousingEditorGetSelectedFurniturePathConformToGround() then
+            ZO_CheckButton_SetChecked(control.checkBox)
+        else
+            ZO_CheckButton_SetUnchecked(control.checkBox)
+        end
+    end
+
+    
+    local function SetupCheckboxControl(control, data, selected, reselectingDuringRebuild, enabled, active)
+        if data.index == ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATHING_STATE then
+            SetupPathStateControl(control, data, selected, reselectingDuringRebuild, enabled, active)
+        else
+            SetupConformToGroundControl(control, data, selected, reselectingDuringRebuild, enabled, active)
+        end
+    end
+
     local function SetupPathTypeControl(control, data, selected, reselectingDuringRebuild, enabled, active)
         local label = control:GetNamedChild("Name")
         local color = selected and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
@@ -163,7 +190,7 @@ function ZO_HousingPathSettings_Gamepad:InitializeLists()
 
     self.mainList = self:GetMainList()
     self.mainList:AddDataTemplate("ZO_GamepadFullWidthLabelEntryTemplate", SetupChangeCollectibleControl)
-    self.mainList:AddDataTemplate("ZO_CheckBoxTemplate_Gamepad", SetupPathStateControl, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.mainList:AddDataTemplate("ZO_CheckBoxTemplate_Gamepad", SetupCheckboxControl, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.mainList:AddDataTemplate("ZO_GamepadHorizontalListRow", SetupPathTypeControl, ZO_GamepadMenuEntryTemplateParametricListFunction)    
 
     self.changeObjectList = self:AddList("changeObject")

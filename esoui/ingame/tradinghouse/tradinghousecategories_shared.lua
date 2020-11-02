@@ -252,7 +252,7 @@ function ZO_TradingHouseCategory_Params:AddFeatureKeys(...)
 end
 
 function ZO_TradingHouseCategory_Params:FeatureKeyIterator()
-    return ZO_NumericallyIndexedTableIterator(self.featureKeys)
+    return ipairs(self.featureKeys)
 end
 
 function ZO_TradingHouseCategory_Params:FeatureKeyReverseIterator()
@@ -262,70 +262,6 @@ end
 function ZO_TradingHouseCategory_Params:GetSubcategoryIndexForKey(subcategoryKey)
     return self.subcategoryIndexForKey[subcategoryKey]
 end
-
-------------------------
--- Search Header Data --
-------------------------
-
-internalassert(TRADING_HOUSE_CATEGORY_HEADER_MAX_VALUE == 8, "Update header data")
-
-ZO_TRADING_HOUSE_HEADER_ICONS =
-{
-    [TRADING_HOUSE_CATEGORY_HEADER_ALL_ITEMS] =
-    {
-        up = "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds",
-        down = "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds",
-        over = "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds",
-    },
-    [TRADING_HOUSE_CATEGORY_HEADER_WEAPONS] =
-    {
-        up = "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds",
-        down = "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds",
-        over = "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds",
-    },
-    [TRADING_HOUSE_CATEGORY_HEADER_APPAREL] =
-    {
-        up = "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds",
-        down = "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds",
-        over = "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds",
-    },
-    [TRADING_HOUSE_CATEGORY_HEADER_CONSUMABLES] =
-    {
-        up = "EsoUI/Art/Inventory/inventory_tabIcon_consumables_up.dds",
-        down = "EsoUI/Art/Inventory/inventory_tabIcon_consumables_down.dds",
-        over = "EsoUI/Art/Inventory/inventory_tabIcon_consumables_over.dds",
-    },
-    [TRADING_HOUSE_CATEGORY_HEADER_MATERIALS] =
-    {
-        up = "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds",
-        down = "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds",
-        over = "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds",
-    },
-    [TRADING_HOUSE_CATEGORY_HEADER_GLYPHS] =
-    {
-        up = "EsoUI/Art/TradingHouse/Tradinghouse_Glyphs_Trio_Up.dds",
-        down = "EsoUI/Art/TradingHouse/Tradinghouse_Glyphs_Trio_Down.dds",
-        over = "EsoUI/Art/TradingHouse/Tradinghouse_Glyphs_Trio_Over.dds",
-    },
-    [TRADING_HOUSE_CATEGORY_HEADER_FURNISHINGS] =
-    {
-        up = "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_up.dds",
-        down = "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_down.dds",
-        over = "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_over.dds",
-    },
-    [TRADING_HOUSE_CATEGORY_HEADER_MISC] =
-    {
-        up = "EsoUI/Art/Inventory/inventory_tabIcon_misc_up.dds",
-        down = "EsoUI/Art/Inventory/inventory_tabIcon_misc_down.dds",
-        over = "EsoUI/Art/Inventory/inventory_tabIcon_misc_over.dds",
-    },
-    [TRADING_HOUSE_CATEGORY_HEADER_JEWELRY] =
-    {
-        up = "EsoUI/Art/Crafting/jewelry_tabIcon_icon_up.dds",
-        down = "EsoUI/Art/Crafting/jewelry_tabIcon_down.dds",
-        over = "EsoUI/Art/Crafting/jewelry_tabIcon_icon_over.dds",
-    },
-}
 
 -----------------------------
 -- Search Category Helpers --
@@ -341,17 +277,9 @@ local function AddCategory(key)
     return categoryParams
 end
 
-local ALL_TAB_ICONS =
-{
-    up = "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds",
-    down = "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds",
-    over = "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds",
-    disabled = "EsoUI/Art/Inventory/inventory_tabIcon_all_disabled.dds",
-}
-
 local function AddAllSubcategory(params, allItemsString, value)
     allItemsString = allItemsString or GetString(SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_ALL)
-    params:AddSubcategory("AllSubcategories", allItemsString, ALL_TAB_ICONS, value)
+    params:AddSubcategory("AllSubcategories", allItemsString, ZO_ItemFilterUtils.GetItemTypeDisplayCategoryFilterIcons(ITEM_TYPE_DISPLAY_CATEGORY_ALL), value)
 end
 
 local function AddEnumSubcategories(categoryParams, subcategoryParams)
@@ -402,110 +330,24 @@ end
 local AddAllWeaponsCategory
 local AddWeaponCategory
 do
-    internalassert(WEAPON_CONFIG_TYPE_MAX_VALUE == 11, "Update weapons in trading house")
+    internalassert(EQUIPMENT_FILTER_TYPE_MAX_VALUE == 11, "Update weapons in trading house")
     internalassert(WEAPONTYPE_MAX_VALUE == 15, "Update weapons in trading house")
     local ICONS_FOR_WEAPON_TYPE =
     {
-        [WEAPONTYPE_AXE] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Axe_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Axe_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Axe_Over.dds",
-        },
-        [WEAPONTYPE_HAMMER] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Mace_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Mace_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Mace_Over.dds",
-        },
-        [WEAPONTYPE_SWORD] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Sword_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Sword_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Sword_Over.dds",
-        },
-        [WEAPONTYPE_DAGGER] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Dagger_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Dagger_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Dagger_Over.dds",
-        },
-        [WEAPONTYPE_TWO_HANDED_AXE] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Axe_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Axe_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Axe_Over.dds",
-        },
-        [WEAPONTYPE_TWO_HANDED_HAMMER] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Mace_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Mace_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Mace_Over.dds",
-        },
-        [WEAPONTYPE_TWO_HANDED_SWORD] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Sword_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Sword_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Sword_Over.dds",
-        },
-        [WEAPONTYPE_FIRE_STAFF] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Flame_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Flame_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Flame_Over.dds",
-        },
-        [WEAPONTYPE_FROST_STAFF] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Frost_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Frost_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Frost_Over.dds",
-        },
-        [WEAPONTYPE_LIGHTNING_STAFF] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Lightning_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Lightning_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Lightning_Over.dds",
-        },
+        [WEAPONTYPE_AXE] = ZO_ItemFilterUtils.GetWeaponTypeFilterIcons(WEAPONTYPE_AXE),
+        [WEAPONTYPE_HAMMER] = ZO_ItemFilterUtils.GetWeaponTypeFilterIcons(WEAPONTYPE_HAMMER),
+        [WEAPONTYPE_SWORD] = ZO_ItemFilterUtils.GetWeaponTypeFilterIcons(WEAPONTYPE_SWORD),
+        [WEAPONTYPE_DAGGER] = ZO_ItemFilterUtils.GetWeaponTypeFilterIcons(WEAPONTYPE_DAGGER),
+        [WEAPONTYPE_TWO_HANDED_AXE] = ZO_ItemFilterUtils.GetWeaponTypeFilterIcons(WEAPONTYPE_TWO_HANDED_AXE),
+        [WEAPONTYPE_TWO_HANDED_HAMMER] = ZO_ItemFilterUtils.GetWeaponTypeFilterIcons(WEAPONTYPE_TWO_HANDED_HAMMER),
+        [WEAPONTYPE_TWO_HANDED_SWORD] = ZO_ItemFilterUtils.GetWeaponTypeFilterIcons(WEAPONTYPE_TWO_HANDED_SWORD),
+        [WEAPONTYPE_FIRE_STAFF] = ZO_ItemFilterUtils.GetWeaponTypeFilterIcons(WEAPONTYPE_FIRE_STAFF),
+        [WEAPONTYPE_FROST_STAFF] = ZO_ItemFilterUtils.GetWeaponTypeFilterIcons(WEAPONTYPE_FROST_STAFF),
+        [WEAPONTYPE_LIGHTNING_STAFF] = ZO_ItemFilterUtils.GetWeaponTypeFilterIcons(WEAPONTYPE_LIGHTNING_STAFF),
         -- WEAPONTYPE_BOW and WEAPONTYPE_HEALING_STAFF do not have subcategories, so they do not need subcategory icons
     }
 
-    local WEAPON_TYPES_FOR_CONFIG =
-    {
-        [WEAPON_CONFIG_TYPE_ONE_HANDED] =
-        {
-            WEAPONTYPE_AXE,
-            WEAPONTYPE_HAMMER,
-            WEAPONTYPE_SWORD,
-            WEAPONTYPE_DAGGER,
-        },
-        [WEAPON_CONFIG_TYPE_TWO_HANDED] =
-        {
-            WEAPONTYPE_TWO_HANDED_AXE,
-            WEAPONTYPE_TWO_HANDED_HAMMER,
-            WEAPONTYPE_TWO_HANDED_SWORD,
-        },
-        [WEAPON_CONFIG_TYPE_BOW] =
-        {
-            WEAPONTYPE_BOW,
-        },
-        [WEAPON_CONFIG_TYPE_DESTRO_STAFF] =
-        {
-            WEAPONTYPE_FIRE_STAFF,
-            WEAPONTYPE_FROST_STAFF,
-            WEAPONTYPE_LIGHTNING_STAFF,
-        },
-        [WEAPON_CONFIG_TYPE_RESTO_STAFF] =
-        {
-            WEAPONTYPE_HEALING_STAFF,
-        },
-    }
-
-    local EVERY_VALID_WEAPON_TYPE = {}
-    for _, weaponTypeList in pairs(WEAPON_TYPES_FOR_CONFIG) do
-        for _, weaponType in ipairs(weaponTypeList) do
-            table.insert(EVERY_VALID_WEAPON_TYPE, weaponType)
-        end
-    end
+    local EVERY_VALID_WEAPON_TYPE = ZO_ItemFilterUtils.GetAllWeaponTypesInEquipmentFilterTypes()
 
     local function ApplyAllWeaponsToSearch(search)
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, ITEMTYPE_WEAPON)
@@ -517,7 +359,7 @@ do
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_WEAPON, weaponType)
     end
 
-    function AddAllWeaponsCategory(weaponConfigType)
+    function AddAllWeaponsCategory(equipmentFilterType)
         local categoryParams = AddCategory("AllWeapons")
         categoryParams:SetName(GetString("SI_TRADINGHOUSECATEGORYHEADER_ALLCATEGORIES", TRADING_HOUSE_CATEGORY_HEADER_WEAPONS))
         categoryParams:SetHeader(TRADING_HOUSE_CATEGORY_HEADER_WEAPONS)
@@ -528,11 +370,11 @@ do
         AddAllSubcategory(categoryParams)
     end
 
-    function AddWeaponCategory(weaponConfigType)
-        local weaponTypes = WEAPON_TYPES_FOR_CONFIG[weaponConfigType]
+    function AddWeaponCategory(equipmentFilterType)
+        local weaponTypes = ZO_ItemFilterUtils.GetWeaponTypesByEquipmentFilterType(equipmentFilterType)
 
-        local categoryParams = AddCategory(string.format("Weapons%d", weaponConfigType))
-        categoryParams:SetName(GetString("SI_WEAPONCONFIGTYPE", weaponConfigType))
+        local categoryParams = AddCategory(string.format("Weapons%d", equipmentFilterType))
+        categoryParams:SetName(GetString("SI_EQUIPMENTFILTERTYPE", equipmentFilterType))
         categoryParams:SetHeader(TRADING_HOUSE_CATEGORY_HEADER_WEAPONS)
 
         local SUBCATEGORY_ENUM_KEY_PREFIX = "WeaponType"
@@ -541,7 +383,7 @@ do
             local weaponType = GetItemLinkWeaponType(itemLink)
             for _, searchWeaponType in ipairs(weaponTypes) do
                 if weaponType == searchWeaponType then
-                    return true, SUBCATEGORY_ENUM_KEY_PREFIX..weaponType
+                    return true, SUBCATEGORY_ENUM_KEY_PREFIX .. weaponType
                 end
             end
             return false
@@ -561,50 +403,15 @@ end
 local AddAllApparelCategory, AddArmorCategory, AddShieldCategory
 do
     internalassert(ARMORTYPE_MAX_VALUE == 3, "Do you need to update the trading house?")
-    local ICONS_FOR_ARMOR_EQUIP_TYPE = 
+    local ICONS_FOR_ARMOR_EQUIP_TYPE =
     {
-        [EQUIP_TYPE_CHEST] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Chest_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Chest_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Chest_Over.dds",
-        },
-        [EQUIP_TYPE_FEET] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Feet_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Feet_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Feet_Over.dds",
-        },
-        [EQUIP_TYPE_HAND] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Hands_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Hands_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Hands_Over.dds",
-        },
-        [EQUIP_TYPE_HEAD] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Head_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Head_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Head_Over.dds",
-        },
-        [EQUIP_TYPE_LEGS] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Legs_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Legs_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Legs_Over.dds",
-        },
-        [EQUIP_TYPE_SHOULDERS] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Shoulders_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Shoulders_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Shoulders_Over.dds",
-        },
-        [EQUIP_TYPE_WAIST] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Waist_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Waist_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Waist_Over.dds",
-        },
+        [EQUIP_TYPE_CHEST] = ZO_ItemFilterUtils.GetEquipTypeFilterIcons(EQUIP_TYPE_CHEST),
+        [EQUIP_TYPE_FEET] = ZO_ItemFilterUtils.GetEquipTypeFilterIcons(EQUIP_TYPE_FEET),
+        [EQUIP_TYPE_HAND] = ZO_ItemFilterUtils.GetEquipTypeFilterIcons(EQUIP_TYPE_HAND),
+        [EQUIP_TYPE_HEAD] = ZO_ItemFilterUtils.GetEquipTypeFilterIcons(EQUIP_TYPE_HEAD),
+        [EQUIP_TYPE_LEGS] = ZO_ItemFilterUtils.GetEquipTypeFilterIcons(EQUIP_TYPE_LEGS),
+        [EQUIP_TYPE_SHOULDERS] = ZO_ItemFilterUtils.GetEquipTypeFilterIcons(EQUIP_TYPE_SHOULDERS),
+        [EQUIP_TYPE_WAIST] = ZO_ItemFilterUtils.GetEquipTypeFilterIcons(EQUIP_TYPE_WAIST),
     }
 
     local ARMOR_EQUIP_TYPES =
@@ -706,18 +513,8 @@ local AddJewelryCategory
 do
     local ICONS_FOR_JEWELRY_EQUIP_TYPE = 
     {
-        [EQUIP_TYPE_NECK] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Accessories_Necklace_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Accessories_Necklace_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Accessories_Necklace_Over.dds",
-        },
-        [EQUIP_TYPE_RING] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Accessories_Ring_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Accessories_Ring_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Accessories_Ring_Over.dds",
-        },
+        [EQUIP_TYPE_NECK] = ZO_ItemFilterUtils.GetEquipTypeFilterIcons(EQUIP_TYPE_NECK),
+        [EQUIP_TYPE_RING] = ZO_ItemFilterUtils.GetEquipTypeFilterIcons(EQUIP_TYPE_RING),
     }
 
     local JEWELRY_EQUIP_TYPES =
@@ -833,84 +630,19 @@ do
 
     local ICONS_FOR_CONSUMABLE_SPECIALIZED_ITEM_TYPE =
     {
-        [SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD] =
-        {
-            up = "EsoUI/Art/Crafting/provisioner_indexIcon_meat_up.dds",
-            down = "EsoUI/Art/Crafting/provisioner_indexIcon_meat_down.dds",
-            over = "EsoUI/Art/Crafting/provisioner_indexIcon_meat_over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK] =
-        {
-            up = "EsoUI/Art/Crafting/provisioner_indexIcon_beer_up.dds",
-            down = "EsoUI/Art/Crafting/provisioner_indexIcon_beer_down.dds",
-            over = "EsoUI/Art/Crafting/provisioner_indexIcon_beer_over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_RECIPE_BLACKSMITHING_DIAGRAM_FURNISHING] =
-        {
-            up = "EsoUI/Art/Crafting/diagrams_tabIcon_up.dds",
-            down = "EsoUI/Art/Crafting/diagrams_tabIcon_down.dds",
-            over = "EsoUI/Art/Crafting/diagrams_tabIcon_over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_RECIPE_CLOTHIER_PATTERN_FURNISHING] =
-        {
-            up = "EsoUI/Art/Crafting/patterns_tabIcon_up.dds",
-            down = "EsoUI/Art/Crafting/patterns_tabIcon_down.dds",
-            over = "EsoUI/Art/Crafting/patterns_tabIcon_over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_RECIPE_ENCHANTING_SCHEMATIC_FURNISHING] =
-        {
-            up = "EsoUI/Art/Crafting/schematics_tabIcon_up.dds",
-            down = "EsoUI/Art/Crafting/schematics_tabIcon_down.dds",
-            over = "EsoUI/Art/Crafting/schematics_tabIcon_over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_RECIPE_ALCHEMY_FORMULA_FURNISHING] =
-        {
-            up = "EsoUI/Art/Crafting/formulae_tabIcon_up.dds",
-            down = "EsoUI/Art/Crafting/formulae_tabIcon_down.dds",
-            over = "EsoUI/Art/Crafting/formulae_tabIcon_over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_DESIGN_FURNISHING] =
-        {
-            up = "EsoUI/Art/Crafting/designs_tabIcon_up.dds",
-            down = "EsoUI/Art/Crafting/designs_tabIcon_down.dds",
-            over = "EsoUI/Art/Crafting/designs_tabIcon_over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_RECIPE_WOODWORKING_BLUEPRINT_FURNISHING] =
-        {
-            up = "EsoUI/Art/Crafting/blueprints_tabIcon_up.dds",
-            down = "EsoUI/Art/Crafting/blueprints_tabIcon_down.dds",
-            over = "EsoUI/Art/Crafting/blueprints_tabIcon_over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_RECIPE_JEWELRYCRAFTING_SKETCH_FURNISHING] =
-        {
-            up = "EsoUI/Art/Crafting/sketches_tabIcon_up.dds",
-            down = "EsoUI/Art/Crafting/sketches_tabIcon_down.dds",
-            over = "EsoUI/Art/Crafting/sketches_tabIcon_over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_CHAPTER] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Racial_Style_Motif_Chapter_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Racial_Style_Motif_Chapter_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Racial_Style_Motif_Chapter_Over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_BOOK] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Racial_Style_Motif_Book_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Racial_Style_Motif_Book_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Racial_Style_Motif_Book_Over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_MASTER_WRIT] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Master_Writ_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Master_Writ_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Master_Writ_Over.dds",
-        },
-        [SPECIALIZED_ITEMTYPE_HOLIDAY_WRIT] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Holiday_Writ_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Holiday_Writ_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Holiday_Writ_Over.dds",
-        },
+        [SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD),
+        [SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK),
+        [SPECIALIZED_ITEMTYPE_RECIPE_BLACKSMITHING_DIAGRAM_FURNISHING] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_BLACKSMITHING_DIAGRAM_FURNISHING),
+        [SPECIALIZED_ITEMTYPE_RECIPE_CLOTHIER_PATTERN_FURNISHING] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_CLOTHIER_PATTERN_FURNISHING),
+        [SPECIALIZED_ITEMTYPE_RECIPE_ENCHANTING_SCHEMATIC_FURNISHING] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_ENCHANTING_SCHEMATIC_FURNISHING),
+        [SPECIALIZED_ITEMTYPE_RECIPE_ALCHEMY_FORMULA_FURNISHING] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_ALCHEMY_FORMULA_FURNISHING),
+        [SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_DESIGN_FURNISHING] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_DESIGN_FURNISHING),
+        [SPECIALIZED_ITEMTYPE_RECIPE_WOODWORKING_BLUEPRINT_FURNISHING] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_WOODWORKING_BLUEPRINT_FURNISHING),
+        [SPECIALIZED_ITEMTYPE_RECIPE_JEWELRYCRAFTING_SKETCH_FURNISHING] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_JEWELRYCRAFTING_SKETCH_FURNISHING),
+        [SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_CHAPTER] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_CHAPTER),
+        [SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_BOOK] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_BOOK),
+        [SPECIALIZED_ITEMTYPE_MASTER_WRIT] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_MASTER_WRIT),
+        [SPECIALIZED_ITEMTYPE_HOLIDAY_WRIT] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_HOLIDAY_WRIT),
     }
 
     function AddConsumableCategory(mainItemType, ...)
@@ -1033,197 +765,31 @@ do
     internalassert(CRAFTING_TYPE_MAX_VALUE == 7, "Add new tradeskill to trading house")
     local ICONS_FOR_TRADESKILL_ITEM_TYPES =
     {
-        [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Blacksmithing_Rawmats_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Blacksmithing_Rawmats_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Blacksmithing_Rawmats_Over.dds",
-        },
-        [ITEMTYPE_BLACKSMITHING_MATERIAL] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Blacksmithing_Mats_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Blacksmithing_Mats_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Blacksmithing_Mats_Over.dds",
-        },
-        [ITEMTYPE_BLACKSMITHING_BOOSTER] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Blacksmithing_Temper_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Blacksmithing_Temper_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Blacksmithing_Temper_Over.dds",
-        },
-        [ITEMTYPE_CLOTHIER_RAW_MATERIAL] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Tailoring_Rawmats_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Tailoring_Rawmats_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Tailoring_Rawmats_Over.dds",
-        },
-        [ITEMTYPE_CLOTHIER_MATERIAL] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Tailoring_Mats_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Tailoring_Mats_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Tailoring_Mats_Over.dds",
-        },
-        [ITEMTYPE_CLOTHIER_BOOSTER] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Tailoring_Tannin_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Tailoring_Tannin_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Tailoring_Tannin_Over.dds",
-        },
-        [ITEMTYPE_WOODWORKING_RAW_MATERIAL] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Woodworking_Rawmats_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Woodworking_Rawmats_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Woodworking_Rawmats_Over.dds",
-        },
-        [ITEMTYPE_WOODWORKING_MATERIAL] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Woodworking_Mats_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Woodworking_Mats_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Woodworking_Mats_Over.dds",
-        },
-        [ITEMTYPE_WOODWORKING_BOOSTER] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Woodworking_Resin_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Woodworking_Resin_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Woodworking_Resin_Over.dds",
-        },
-        [ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Rawmats_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Rawmats_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Rawmats_Over.dds",
-        },
-        [ITEMTYPE_JEWELRYCRAFTING_MATERIAL] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Mats_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Mats_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Mats_Over.dds",
-        },
-        [ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Rawplating_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Rawplating_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Rawplating_Over.dds",
-        },
-        [ITEMTYPE_JEWELRYCRAFTING_BOOSTER] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Plating_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Plating_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Jewelrymaking_Plating_Over.dds",
-        },
-        [ITEMTYPE_ENCHANTING_RUNE_POTENCY] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Enchanting_Potency_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Enchanting_Potency_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Enchanting_Potency_Over.dds",
-        },
-        [ITEMTYPE_ENCHANTING_RUNE_ASPECT] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Enchanting_Aspect_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Enchanting_Aspect_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Enchanting_Aspect_Over.dds",
-        },
-        [ITEMTYPE_ENCHANTING_RUNE_ESSENCE] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Enchanting_Essence_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Enchanting_Essence_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Enchanting_Essence_Over.dds",
-        },
-        [ITEMTYPE_POTION_BASE] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Potions_Potionsolvent_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Potions_Potionsolvent_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Potions_Potionsolvent_Over.dds",
-        },
-        [ITEMTYPE_POISON_BASE] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Potions_Poisonsolvent_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Potions_Poisonsolvent_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Potions_Poisonsolvent_Over.dds",
-        },
-        [ITEMTYPE_REAGENT] =
-        {
-            up = "EsoUI/Art/Crafting/alchemy_tabIcon_reagent_up.dds",
-            down = "EsoUI/Art/Crafting/alchemy_tabIcon_reagent_down.dds",
-            over = "EsoUI/Art/Crafting/alchemy_tabIcon_reagent_over.dds",
-        },
-        [ITEMTYPE_RAW_MATERIAL] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Style_RawMats_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Style_RawMats_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Style_RawMats_Over.dds",
-        },
-        [ITEMTYPE_STYLE_MATERIAL] =
-        {
-            up = "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_styleMaterial_up.dds",
-            down = "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_styleMaterial_down.dds",
-            over = "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_styleMaterial_over.dds",
-        },
-        [ITEMTYPE_WEAPON_TRAIT] =
-        {
-            up = "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds",
-            down = "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds",
-            over = "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds",
-        },
-        [ITEMTYPE_ARMOR_TRAIT] =
-        {
-            up = "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds",
-            down = "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds",
-            over = "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds",
-        },
-        [ITEMTYPE_JEWELRY_RAW_TRAIT] =
-        {
-            up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Style_RawMats_Up.dds",
-            down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Style_RawMats_Down.dds",
-            over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Style_RawMats_Over.dds",
-        },
-        [ITEMTYPE_JEWELRY_TRAIT] =
-        {
-            up = "EsoUI/Art/Crafting/jewelry_tabIcon_icon_up.dds",
-            down = "EsoUI/Art/Crafting/jewelry_tabIcon_down.dds",
-            over = "EsoUI/Art/Crafting/jewelry_tabIcon_icon_over.dds",
-        },
-    }
-
-    local ITEMTYPES_FOR_TRADESKILL =
-    {
-        [CRAFTING_TYPE_BLACKSMITHING] =
-        {
-            ITEMTYPE_BLACKSMITHING_RAW_MATERIAL,
-            ITEMTYPE_BLACKSMITHING_MATERIAL,
-            ITEMTYPE_BLACKSMITHING_BOOSTER,
-        },
-        [CRAFTING_TYPE_CLOTHIER] =
-        {
-            ITEMTYPE_CLOTHIER_RAW_MATERIAL,
-            ITEMTYPE_CLOTHIER_MATERIAL,
-            ITEMTYPE_CLOTHIER_BOOSTER,
-        },
-        [CRAFTING_TYPE_WOODWORKING] =
-        {
-            ITEMTYPE_WOODWORKING_RAW_MATERIAL,
-            ITEMTYPE_WOODWORKING_MATERIAL,
-            ITEMTYPE_WOODWORKING_BOOSTER,
-        },
-        [CRAFTING_TYPE_JEWELRYCRAFTING] =
-        {
-            ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL,
-            ITEMTYPE_JEWELRYCRAFTING_MATERIAL,
-            ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER,
-            ITEMTYPE_JEWELRYCRAFTING_BOOSTER,
-        },
-        [CRAFTING_TYPE_ENCHANTING] =
-        {
-            ITEMTYPE_ENCHANTING_RUNE_POTENCY,
-            ITEMTYPE_ENCHANTING_RUNE_ESSENCE,
-            ITEMTYPE_ENCHANTING_RUNE_ASPECT,
-        },
-        [CRAFTING_TYPE_ALCHEMY] =
-        {
-            ITEMTYPE_POISON_BASE,
-            ITEMTYPE_POTION_BASE,
-            ITEMTYPE_REAGENT,
-        },
+        [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_BLACKSMITHING_RAW_MATERIAL),
+        [ITEMTYPE_BLACKSMITHING_MATERIAL] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_BLACKSMITHING_MATERIAL),
+        [ITEMTYPE_BLACKSMITHING_BOOSTER] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_BLACKSMITHING_BOOSTER),
+        [ITEMTYPE_CLOTHIER_RAW_MATERIAL] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_CLOTHIER_RAW_MATERIAL),
+        [ITEMTYPE_CLOTHIER_MATERIAL] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_CLOTHIER_MATERIAL),
+        [ITEMTYPE_CLOTHIER_BOOSTER] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_CLOTHIER_BOOSTER),
+        [ITEMTYPE_WOODWORKING_RAW_MATERIAL] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_WOODWORKING_RAW_MATERIAL),
+        [ITEMTYPE_WOODWORKING_MATERIAL] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_WOODWORKING_MATERIAL),
+        [ITEMTYPE_WOODWORKING_BOOSTER] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_WOODWORKING_BOOSTER),
+        [ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL),
+        [ITEMTYPE_JEWELRYCRAFTING_MATERIAL] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_JEWELRYCRAFTING_MATERIAL),
+        [ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER),
+        [ITEMTYPE_JEWELRYCRAFTING_BOOSTER] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_JEWELRYCRAFTING_BOOSTER),
+        [ITEMTYPE_ENCHANTING_RUNE_POTENCY] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_ENCHANTING_RUNE_POTENCY),
+        [ITEMTYPE_ENCHANTING_RUNE_ASPECT] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_ENCHANTING_RUNE_ASPECT),
+        [ITEMTYPE_ENCHANTING_RUNE_ESSENCE] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_ENCHANTING_RUNE_ESSENCE),
+        [ITEMTYPE_POTION_BASE] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_POTION_BASE),
+        [ITEMTYPE_POISON_BASE] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_POISON_BASE),
+        [ITEMTYPE_REAGENT] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_REAGENT),
+        [ITEMTYPE_RAW_MATERIAL] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_RAW_MATERIAL),
+        [ITEMTYPE_STYLE_MATERIAL] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_STYLE_MATERIAL),
+        [ITEMTYPE_WEAPON_TRAIT] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_WEAPON_TRAIT),
+        [ITEMTYPE_ARMOR_TRAIT] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_ARMOR_TRAIT),
+        [ITEMTYPE_JEWELRY_RAW_TRAIT] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_JEWELRY_RAW_TRAIT),
+        [ITEMTYPE_JEWELRY_TRAIT] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_JEWELRY_TRAIT),
     }
 
     -- Used to make material item types "behave" as the same itemtype, to stay selected when browsing through materials, etc.
@@ -1255,7 +821,7 @@ do
 
     function AddTradeMaterialCategory(tradeskillType)
         local tradeskillName = GetCraftingSkillName(tradeskillType)
-        local itemTypes = internalassert(ITEMTYPES_FOR_TRADESKILL[tradeskillType], tradeskillName)
+        local itemTypes = ZO_ItemFilterUtils.GetItemTypesByCraftingType(tradeskillType)
 
         local categoryParams = AddCategory(string.format("TradeMaterial%d", tradeskillType))
 
@@ -1293,35 +859,13 @@ do
     {
         {
             name = GetString(SI_TRADING_HOUSE_BROWSE_PROVISIONING_FOOD_INGREDIENTS),
-            value =
-            {
-                SPECIALIZED_ITEMTYPE_INGREDIENT_MEAT,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_VEGETABLE,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_FRUIT,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE,
-            },
-            icons =
-            {
-                up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Provisioning_Food_Up.dds",
-                down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Provisioning_Food_Down.dds",
-                over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Provisioning_Food_Over.dds",
-            },
+            value = ZO_ItemFilterUtils.GetSpecializedItemTypesByItemTypeDisplayCategory(ITEM_TYPE_DISPLAY_CATEGORY_FOOD_INGREDIENT),
+            icons = ZO_ItemFilterUtils.GetItemTypeDisplayCategoryFilterIcons(ITEM_TYPE_DISPLAY_CATEGORY_FOOD_INGREDIENT),
         },
         {
             name = GetString(SI_TRADING_HOUSE_BROWSE_PROVISIONING_DRINK_INGREDIENTS),
-            value =
-            {
-                SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_TEA,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE,
-            },
-            icons =
-            {
-                up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Provisioning_Drink_Up.dds",
-                down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Provisioning_Drink_Down.dds",
-                over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Provisioning_Drink_Over.dds",
-            },
+            value = ZO_ItemFilterUtils.GetSpecializedItemTypesByItemTypeDisplayCategory(ITEM_TYPE_DISPLAY_CATEGORY_DRINK_INGREDIENT),
+            icons = ZO_ItemFilterUtils.GetItemTypeDisplayCategoryFilterIcons(ITEM_TYPE_DISPLAY_CATEGORY_DRINK_INGREDIENT),
         },
         {
             name = GetString(SI_TRADING_HOUSE_BROWSE_PROVISIONING_RARE_INGREDIENTS),
@@ -1329,12 +873,7 @@ do
             {
                 SPECIALIZED_ITEMTYPE_INGREDIENT_RARE,
             },
-            icons =
-            {
-                up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Provisioning_Rare_Up.dds",
-                down = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Provisioning_Rare_Down.dds",
-                over = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Provisioning_Rare_Over.dds",
-            },
+            icons = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_INGREDIENT_RARE),
         },
     }
 
@@ -1610,42 +1149,22 @@ do
         {
             name = GetString("SI_SPECIALIZEDITEMTYPE", SPECIALIZED_ITEMTYPE_TROPHY_TREASURE_MAP),
             value = { SPECIALIZED_ITEMTYPE_TROPHY_TREASURE_MAP },
-            icons =
-            {
-                up = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Treasure_Map_Up.dds",
-                down = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Treasure_Map_Down.dds",
-                over = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Treasure_Map_Over.dds",
-            },
+            icons = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_TROPHY_TREASURE_MAP),
         },
         {
             name = GetString("SI_SPECIALIZEDITEMTYPE", SPECIALIZED_ITEMTYPE_TROPHY_RECIPE_FRAGMENT),
             value = { SPECIALIZED_ITEMTYPE_TROPHY_RECIPE_FRAGMENT },
-            icons =
-            {
-                up = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Recipe_Fragment_Up.dds",
-                down = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Recipe_Fragment_Down.dds",
-                over = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Recipe_Fragment_Over.dds",
-            },
+            icons = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_TROPHY_RECIPE_FRAGMENT),
         },
         {
             name = GetString("SI_SPECIALIZEDITEMTYPE", SPECIALIZED_ITEMTYPE_TROPHY_SCROLL),
             value = { SPECIALIZED_ITEMTYPE_TROPHY_SCROLL },
-            icons =
-            {
-                up = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Scroll_Up.dds",
-                down = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Scroll_Down.dds",
-                over = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Scroll_Over.dds",
-            },
+            icons = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_TROPHY_SCROLL),
         },
         {
             name = GetString("SI_SPECIALIZEDITEMTYPE", SPECIALIZED_ITEMTYPE_TROPHY_RUNEBOX_FRAGMENT),
             value = { SPECIALIZED_ITEMTYPE_TROPHY_RUNEBOX_FRAGMENT },
-            icons =
-            {
-                up = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Runebox_Fragment_Up.dds",
-                down = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Runebox_Fragment_Down.dds",
-                over = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Runebox_Fragment_Over.dds",
-            },
+            icons = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_TROPHY_RUNEBOX_FRAGMENT),
         },
         {
             name = GetString(SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_OTHER_TROPHY_TYPES),
@@ -1661,12 +1180,7 @@ do
                 SPECIALIZED_ITEMTYPE_TROPHY_UPGRADE_FRAGMENT,
                 SPECIALIZED_ITEMTYPE_TROPHY_DUNGEON_BUFF_INGREDIENT,
             },
-            icons =
-            {
-                up = "EsoUI/Art/TradingHouse/Tradinghouse_Other_Trophy_Types_Up.dds",
-                down = "EsoUI/Art/TradingHouse/Tradinghouse_Other_Trophy_Types_Down.dds",
-                over = "EsoUI/Art/TradingHouse/Tradinghouse_Other_Trophy_Types_Over.dds",
-            },
+            icons = ZO_ItemFilterUtils.GetItemTypeDisplayCategoryFilterIcons(ITEM_TYPE_DISPLAY_CATEGORY_TROPHY),
         },
     }
 
@@ -1751,11 +1265,11 @@ AddAllItemsCategory()
 
 -- Weapon
 AddAllWeaponsCategory()
-AddWeaponCategory(WEAPON_CONFIG_TYPE_ONE_HANDED)
-AddWeaponCategory(WEAPON_CONFIG_TYPE_TWO_HANDED)
-AddWeaponCategory(WEAPON_CONFIG_TYPE_BOW)
-AddWeaponCategory(WEAPON_CONFIG_TYPE_DESTRO_STAFF)
-AddWeaponCategory(WEAPON_CONFIG_TYPE_RESTO_STAFF)
+AddWeaponCategory(EQUIPMENT_FILTER_TYPE_ONE_HANDED)
+AddWeaponCategory(EQUIPMENT_FILTER_TYPE_TWO_HANDED)
+AddWeaponCategory(EQUIPMENT_FILTER_TYPE_BOW)
+AddWeaponCategory(EQUIPMENT_FILTER_TYPE_DESTRO_STAFF)
+AddWeaponCategory(EQUIPMENT_FILTER_TYPE_RESTO_STAFF)
 
 -- Apparel
 AddAllApparelCategory()

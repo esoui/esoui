@@ -52,7 +52,7 @@ function ZO_DailyLoginRewards_Base:Initialize(control)
             local isRewardClaimed = IsDailyLoginRewardInCurrentMonthClaimed(data.day)
 
             if data.quantity > 1 then
-                control.quantityLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(data.quantity)))
+                control.quantityLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, data.quantity))
                 control.quantityLabel:SetHidden(isRewardClaimed)
             else
                 control.quantityLabel:SetHidden(true)

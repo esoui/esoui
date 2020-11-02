@@ -851,6 +851,20 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_DynamicWidthSceneMenu" virtual="true">
+            <Dimensions y="ZO_SCENE_MENU_HEIGHT"/>
+            <Controls>
+                <Control name="$(parent)Bar" inherits="ZO_LabelButtonBar">
+                    <Anchor point="TOPRIGHT" offsetY="0"/>
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="BOTTOMLEFT" offsetX="15" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="4" />
+                </Control>
+            </Controls>
+        </Control>
+
         <Texture name="ZO_RandomizedMunge" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" addressMode="WRAP" virtual="true">
             <OnInitialized>
                 local horizontalStart = math.random()

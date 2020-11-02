@@ -55,11 +55,11 @@ do
         end
     end
 
-    local function AreItemsEqual(oldLines, newLines)
+    function ZO_CraftingResults_Gamepad:AreCraftingResultLinesEqual(oldLines, newLines)
         -- all old lines must be checked against all new lines, as they can show up in any order
         for _, oldLine in ipairs(oldLines) do
             for _, newLine in ipairs(newLines) do
-                if oldLine.itemInstanceId and oldLine.itemInstanceId == newLine.itemInstanceId then
+                if self:AreCraftingResultsEqual(oldLine, newLine) then
                     return true
                 end
             end
@@ -72,15 +72,14 @@ do
         return (oldHeader.text == newHeader.text)
     end
 
-    local function EqualitySetup(fadingControlBuffer, oldEntry, newEntry)
+    function ZO_CraftingResults_Gamepad:EqualitySetup(fadingControlBuffer, oldEntry, newEntry)
         -- unfortunately all we know is that something matched, but we don't know which did...find the matches again
         for _, oldLine in ipairs(oldEntry.lines) do
             for _, newLine in ipairs(newEntry.lines) do
-                if oldLine.itemInstanceId and (oldLine.itemInstanceId == newLine.itemInstanceId) then
+                if self:AreCraftingResultsEqual(oldLine, newLine) then
                     -- match!  play animation, add to stack count / set stack text to new amount
                     local lineControl = ZO_FadingControlBuffer_GetLineControl(oldLine)
                     ZO_CraftingResults_Base_PlayPulse(lineControl)
-
                     oldLine.stack = oldLine.stack + newLine.stack
                     lineControl:GetNamedChild("StackCount"):SetText(oldLine.stack)
 
@@ -90,19 +89,18 @@ do
         end
     end
 
-
     function ZO_CraftingResults_Gamepad:InitializeResultBuffer()
         local templateData =
         {
             setup = Setup,
-            equalityCheck = AreItemsEqual,
-            equalitySetup = EqualitySetup,
+            equalityCheck = function(...) return self:AreCraftingResultLinesEqual(...) end,
+            equalitySetup = function(...) self:EqualitySetup(...) end,
             headerTemplateName = "ZO_GamepadCraftingResultsHeaderTemplate",
             headerSetup = SetupHeader,
             headerEqualityCheck = AreHeadersEqual,
             displayOlderLinesFirst = true,
         }
-        ZO_AlertAddTemplate_Gamepad(GAMEPAD_CRAFTING_RESULTS_TEMPLATE, templateData)
+        ZO_CraftingAlertAddTemplate_Gamepad(GAMEPAD_CRAFTING_RESULTS_TEMPLATE, templateData)
     end
 end
 
@@ -117,11 +115,10 @@ do
         ["gamepad_smithing_deconstruct"] = true,
         ["gamepad_smithing_refine"] = true,
     }
-    function ZO_CraftingResults_Gamepad:DisplayCraftingResult(itemInfo)
+    function ZO_CraftingResults_Gamepad:DisplayCraftingResult(resultData)
         local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
-
         local headerTextId
-        if ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        if ZO_RETRAIT_STATION_MANAGER:IsRetraitFragmentShowing() then
             headerTextId = SI_GAMEPAD_RETRAIT_COMPLETED_RESULT_HEADER
         elseif currentSceneName and IS_DECONSTRUCTION_SCENE_NAME[currentSceneName] then
             headerTextId = SI_GAMEPAD_CRAFTING_DECONSTRUCTED_ITEM
@@ -129,8 +126,9 @@ do
             headerTextId = SI_GAMEPAD_CRAFTING_COMPLETED_ITEM
         end
 
-        -- itemInfo.quality is deprecated, included here for addon backwards compatibility
-        local displayQuality = itemInfo.displayQuality or itemInfo.quality
+        local resultEntryData = ZO_EntryData:New(resultData)
+        resultEntryData.text = zo_strformat(SI_TOOLTIP_ITEM_NAME, resultData.name)
+
         local displayData =
         {
             header =
@@ -139,30 +137,20 @@ do
             },
             lines =
             {
-                {
-                    text = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemInfo.name),
-                    icon = itemInfo.icon,
-                    stack = itemInfo.stack,
-                    color = GetItemQualityColor(displayQuality),
-                    meetsUsageRequirement = itemInfo.meetsUsageRequirement,
-                    displayQuality = displayQuality,
-                    -- quality is deprecated, included here for addon backwards compatibility
-                    quality = displayQuality,
-                    itemInstanceId = itemInfo.itemInstanceId,
-                }
+                resultEntryData
             }
         }
-
-        ZO_AlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, nil, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)
+        local DEFAULT_SOUND_ID = nil
+        ZO_CraftingAlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, DEFAULT_SOUND_ID, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)
     end
 end
 
 function ZO_CraftingResults_Gamepad:ClearAll()
-    ZO_AlertClearAll_Gamepad()
+    ZO_CraftingAlertClearAll_Gamepad()
 end
 
 function ZO_CraftingResults_Gamepad:FadeAll()
-    ZO_AlertFadeAll_Gamepad()
+    ZO_CraftingAlertFadeAll_Gamepad()
 end
 
 function ZO_CraftingResults_Gamepad:DisplayDiscoveryHelper(titleString, numDiscoveries, lastLearnedDiscoveryFn)
@@ -185,7 +173,7 @@ function ZO_CraftingResults_Gamepad:DisplayDiscoveryHelper(titleString, numDisco
         table.insert(displayData.lines, { text = lineText, icon = icon })
     end
 
-    ZO_AlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, nil, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)
+    ZO_CraftingAlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, nil, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)
 end
 
 function ZO_CraftingResults_Gamepad:DisplayDiscoveredTraits()

@@ -120,7 +120,7 @@ do
 
         local amountControl = GetControl(control, "Amount")
         FORMAT_EXTRA_OPTIONS.currencyLocation = GetCurrencyPlayerStoredLocation(data.currencyType)
-        amountControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(data.currencyType, data.amount, ZO_CURRENCY_FORMAT_AMOUNT_ICON, FORMAT_EXTRA_OPTIONS)))
+        amountControl:SetText(ZO_Currency_FormatKeyboard(data.currencyType, data.amount, ZO_CURRENCY_FORMAT_AMOUNT_ICON, FORMAT_EXTRA_OPTIONS))
     end
 end
 

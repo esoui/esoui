@@ -2,7 +2,8 @@
 function ZO_VoiceChat_GetChannelDataFromName(channelName)
     local channelType, guildId, guildRoomNumber = VoiceChatGetChannelInfo(channelName)
 
-    local channelData = {
+    local channelData =
+    {
         channelType = channelType,
         guildId = guildId, --this value is invalid when retrieved for a guild channel that is no longer available
         guildRoomNumber = guildRoomNumber
@@ -20,33 +21,36 @@ VOICE_CHAT_OFFICERS_ROOM_NUMBER = 0 --The guild channel # we use to represent th
 VOICE_CHAT_ICON_MUTED_PLAYER = "EsoUI/Art/VOIP/Gamepad/gp_VOIP_muted.dds"
 VOICE_CHAT_ICON_LISTENING_CHANNEL = "EsoUI/Art/VOIP/Gamepad/gp_VOIP_listening.dds"
 
-
 --------------------------------------------------------------------------------
 -- VoiceChat History Data
 --      Helper class for saving and sorting the speaker history of each channel.
 --------------------------------------------------------------------------------
+
 local HISTORY_ENTRY_LIMIT = 15
 
 
 local HistoryData = ZO_Object:Subclass()
 
-function HistoryData:New()
-    local obj = ZO_Object.New(self)
+function HistoryData:New(...)
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
+end
 
-    obj.list = {} --entries toward the end of the list are considered newer
-    obj.map = {}
-
-    return obj
+function HistoryData:Initialize()
+    self.list = {} --entries toward the end of the list are considered newer
+    self.displayNameToEntry = {}
 end
 
 function HistoryData:UpdateUser(displayName)
-    local newEntry = {
+    local newEntry =
+    {
         displayName = displayName,
         lastTimeSpoken = GetFrameTimeMilliseconds(),
         isMuted = false,
     }
 
-    if self.map[displayName] then
+    if self.displayNameToEntry[displayName] then
         self:RemoveUser(displayName)
     end
     
@@ -55,45 +59,37 @@ function HistoryData:UpdateUser(displayName)
     --Maintain max size
     if #self.list > HISTORY_ENTRY_LIMIT then
         local data = self.list[1]
-        self.map[data.displayName] = nil
+        self.displayNameToEntry[data.displayName] = nil
         table.remove(self.list, 1)
     end
 
-    self.map[displayName] = newEntry
+    self.displayNameToEntry[displayName] = newEntry
 end
 
-function HistoryData:UpdateUserMute(displayName, isMuted)
-    if self.map[displayName] then
-        self.map[displayName].isMuted = isMuted
-    end
-end
-
-function HistoryData:UpdateMutes(mutedUsers)
-    for i = 1, #self.list do
-        local speakerData = self.list[i]
+function HistoryData:UpdateMutedUsers(mutedUsers)
+    for i, speakerData in ipairs(self.list) do
         speakerData.isMuted = mutedUsers[speakerData.displayName]
     end
 end
 
 function HistoryData:RemoveUser(displayName)
-    for i = 1, #self.list do
-        if self.list[i].displayName == displayName then
+    for i, speakerData in ipairs(self.list) do
+        if speakerData.displayName == displayName then
             table.remove(self.list, i)
             break
         end
     end
 
-    self.map[displayName] = nil
+    self.displayNameToEntry[displayName] = nil
 end
-
-
 
 --------------------------------------------------------------------------------
 -- VoiceChat Participants Data
 --      Helper class for saving and sorting the participants of each channel.
 --------------------------------------------------------------------------------
 
-local SORT_KEYS = {
+local SORT_KEYS =
+{
     displayName = {}
 }
 local SORT_BY_OCCURRENCE = true
@@ -106,24 +102,33 @@ end
 
 local ParticipantsData = ZO_Object:Subclass()
 
-function ParticipantsData:New(sortByOccurrence)
-    local obj = ZO_Object.New(self)
+function ParticipantsData:New(...)
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
+end
 
-    obj.list = {}
-    obj.map = {}
-    obj.sortByOccurrence = sortByOccurrence --when true, newer entries occur first in the list
-
-    return obj
+function ParticipantsData:Initialize(sortByOccurrence)
+    self.list = {}
+    self.displayNameToEntry = {}
+    self.sortByOccurrence = sortByOccurrence --when true, newer entries occur first in the list
 end
 
 function ParticipantsData:AddOrUpdateParticipant(displayName, speakStatus, isMuted)
-    if self.map[displayName] then
+    if self.displayNameToEntry[displayName] then
         self:UpdateParticipantStatus(displayName, speakStatus, isMuted)
         return
     end
 
-    table.insert(self.list, 1, {displayName = displayName, speakStatus = speakStatus, isMuted = isMuted})
-    self.map[displayName] = self.list[1]
+    local newEntry =
+    {
+        displayName = displayName,
+        speakStatus = speakStatus,
+        isMuted = isMuted,
+    }
+
+    table.insert(self.list, 1, newEntry)
+    self.displayNameToEntry[displayName] = newEntry
 
     if not self.sortByOccurrence then
         table.sort(self.list, SortParticipantEntries)
@@ -131,22 +136,20 @@ function ParticipantsData:AddOrUpdateParticipant(displayName, speakStatus, isMut
 end
 
 function ParticipantsData:RemoveParticipant(displayName)
-    for i = 1, #self.list do
-        if self.list[i].displayName == displayName then
-            table.remove(self.list, i)
-            self.map[displayName] = nil
-            break
-        end
+    local foundIndex = self:GetParticipantIndex(displayName)
+    if foundIndex then
+        table.remove(self.list, foundIndex)
+        self.displayNameToEntry[displayName] = nil
     end
 end
 
 function ParticipantsData:GetParticipant(displayName)
-    return self.map[displayName]
+    return self.displayNameToEntry[displayName]
 end
 
 function ParticipantsData:GetParticipantIndex(displayName)
-    for i = 1, #self.list do
-        if self.list[i].displayName == displayName then
+    for i, speakerData in ipairs(self.list) do
+        if speakerData.displayName == displayName then
             return i
         end
     end
@@ -182,23 +185,16 @@ function ParticipantsData:UpdateParticipantStatus(displayName, speakStatus, isMu
     end
 end
 
-function ParticipantsData:UpdateMutes(mutedUsers)
-    for i = 1, #self.list do
-        local speakerData = self.list[i]
+function ParticipantsData:UpdateMutedUsers(mutedUsers)
+    for i, speakerData in ipairs(self.list) do
         speakerData.isMuted = mutedUsers[speakerData.displayName]
     end
 end
 
-function ParticipantsData:Size()
-    return #self.list
-end
-
 function ParticipantsData:ClearParticipants()
     self.list = {}
-    self.map = {}
+    self.displayNameToEntry = {}
 end
-
-
 
 --------------------------------------------------------------------------------
 --Voice Chat Manager
@@ -238,30 +234,34 @@ function ZO_VoiceChat_Manager:Initialize()
         end
     end
     
-    self.channelData = {
-        [VOICE_CHANNEL_AREA] = {
+    self.channelData =
+    {
+        [VOICE_CHANNEL_AREA] =
+        {
             channelType = VOICE_CHANNEL_AREA,
             guildId = 0,
             guildRoomNumber = 0,
-	        name = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_AREA),
+            name = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_AREA),
             description = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_DESCRIPTION_AREA),
             historyData = HistoryData:New(),
             hasBadReputation = DoesLocalPlayerHaveBadReputation(),
         },
-        [VOICE_CHANNEL_GROUP] = {
+        [VOICE_CHANNEL_GROUP] =
+        {
             channelType = VOICE_CHANNEL_GROUP,
             guildId = 0,
-	        guildRoomNumber = 0,
-	        name = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_GROUP),
+            guildRoomNumber = 0,
+            name = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_GROUP),
             description = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_DESCRIPTION_GROUP),
             historyData = HistoryData:New(),
         },
         [VOICE_CHANNEL_GUILD] = {}, --populates during channel retrieval
-        [VOICE_CHANNEL_BATTLEGROUP] = {
+        [VOICE_CHANNEL_BATTLEGROUP] =
+        {
             channelType = VOICE_CHANNEL_BATTLEGROUP,
             guildId = 0,
-	        guildRoomNumber = 0,
-	        name = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_GROUP),
+            guildRoomNumber = 0,
+            name = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_GROUP),
             description = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_DESCRIPTION_GROUP),
             historyData = HistoryData:New(),
         },
@@ -274,14 +274,16 @@ function ZO_VoiceChat_Manager:Initialize()
     --a local cache so we can id guilds for certain channel events.
     self.guildChannelsToIds = {}
 
-    self.participantsData = {}
-    self.participantsData[VOICE_CHANNEL_AREA] = ParticipantsData:New(SORT_BY_OCCURRENCE)
-    self.participantsData[VOICE_CHANNEL_GROUP] = ParticipantsData:New(DONT_SORT_BY_OCCURRENCE)
-    self.participantsData[VOICE_CHANNEL_GUILD] = {} --populates during channel retrieval
-    self.participantsData[VOICE_CHANNEL_BATTLEGROUP] = ParticipantsData:New(DONT_SORT_BY_OCCURRENCE)
+    self.participantsData =
+    {
+        [VOICE_CHANNEL_AREA] = ParticipantsData:New(SORT_BY_OCCURRENCE),
+        [VOICE_CHANNEL_GROUP] = ParticipantsData:New(DONT_SORT_BY_OCCURRENCE),
+        [VOICE_CHANNEL_GUILD] = {}, --populates during channel retrieval
+        [VOICE_CHANNEL_BATTLEGROUP] = ParticipantsData:New(DONT_SORT_BY_OCCURRENCE),
+    }
 
     self.mutedUsers = {}
-    self:UpdateMutes()
+    self:UpdateMutedUsers()
 
     self.activeChannel = nil --a channel we're joined to and transmitting on
     self.passiveChannel = nil --a channel we're joined to, but only listening to
@@ -300,16 +302,14 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
     local function DoLoginJoinsDefault()
         local areaChannel = self.channelData[VOICE_CHANNEL_AREA]
         local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
-		local bgChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
+        local bgChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
 
         if bgChannel.isAvailable then
             self:SetDesiredActiveChannel(bgChannel)
             self:SetDesiredPassiveChannel(areaChannel)
-
-		elseif groupChannel.isAvailable then
+        elseif groupChannel.isAvailable then
             self:SetDesiredActiveChannel(groupChannel)
             self:SetDesiredPassiveChannel(areaChannel)
-            
         elseif NonContiguousCount(self.channelData[VOICE_CHANNEL_GUILD]) > 0 then
             --Join the first iterated guild room
             for guildId, guildData in pairs(self.channelData[VOICE_CHANNEL_GUILD]) do
@@ -369,7 +369,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         --saved vars, or even worse than that, if we try to change channels when there are no saved vars yet (before addon loaded) it will error. So we hold onto this group channel join until
         --we've set the initial desired channels from saved vars.
         if self.localPlayerJoinedGroupBeforeLoginJoins then
-            self.localPlayerJoinedGroupBeforeLoginJoins = nil
+            self.localPlayerJoinedGroupBeforeLoginJoins = false
             if IsUnitGrouped("player") then
                 local bestGroupChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
                 if not bestGroupChannel.isAvailable then
@@ -392,13 +392,13 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
             self:SetDesiredPassiveChannel(nil)
         end
     end
-    
+
     local function TryClearPassiveChannel(channel)
         if self.passiveChannel == channel then
             self.passiveChannel = nil
         end
     end
-    
+
     local function TryClearActiveChannel(channel)
         if self.activeChannel == channel then
             self.activeChannel = nil
@@ -406,17 +406,18 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
     end
 
     --Event Handlers
-    local function OnAddOnLoaded(name)
+    local function OnAddOnLoaded(event, name)
         if name == "ZO_Ingame" then
             --Load the preferred channel settings
-            local defaultSettings = {
+            local defaultSettings =
+            {
                 isFirstRun = true,
                 desiredActiveChannel = {},
                 desiredPassiveChannel = {},
             }
             self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "VoiceChat", defaultSettings)
             EVENT_MANAGER:UnregisterForEvent("ZO_VoiceChat_OnAddOnLoaded", EVENT_ADD_ON_LOADED)
-            
+
             --We wait to request the list of channels until after we've loaded settings
             VoiceChatGetChannels()
         end
@@ -435,17 +436,17 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         --Special case for handling the group being destroyed while zoning.
         if not IsUnitGrouped("player") then
             local bgChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
-			if bgChannel.isAvailable then
-				self:ClearAndSwapChannel(bgChannel)
-			end
+            if bgChannel.isAvailable then
+                self:ClearAndSwapChannel(bgChannel)
+            end
 
             local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
             self:ClearAndSwapChannel(groupChannel)
         end
     end
-    
-    local function OnGroupMemberJoined(rawCharacterName)
-        if(GetRawUnitName("player") == rawCharacterName) then
+
+    local function OnGroupMemberJoined(event, characterName, displayName, isLocalPlayer)
+        if isLocalPlayer then
             --Changing channels before we have initialized our desired channels from saved vars is dangerous because we will end up swapping back out of the group channel when we do the init from
             --saved vars, or even worse than that, if we try to change channels when there are no saved vars yet (before addon loaded) it will error. So we hold onto this group channel join until
             --we've set the initial desired channels from saved vars.
@@ -461,7 +462,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         end
     end
 
-    local function OnGroupMemberLeft(characterName, reason, isLocalPlayer, isLeader)
+    local function OnGroupMemberLeft(event, characterName, reason, isLocalPlayer, isLeader)
         if isLocalPlayer then
             --Changing channels before we have initialized our desired channels from saved vars is dangerous because we will end up swapping back out of the group channel when we do the init from
             --saved vars, or even worse than that, if we try to change channels when there are no saved vars yet (before addon loaded) it will error. So we hold onto this group channel join until
@@ -470,12 +471,12 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
                 local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
                 self:ClearAndSwapChannel(groupChannel)
             else
-                self.localPlayerJoinedGroupBeforeLoginJoins = nil
+                self.localPlayerJoinedGroupBeforeLoginJoins = false
             end
         end
     end
 
-    local function OnSelfJoinedGuild(guildId, displayName)
+    local function OnSelfJoinedGuild(event, guildId, displayName)
         --We should only automatically join this guild's channel if we're not already in a group or guild channel
         local desiredActiveChannel = self.desiredActiveChannel
         if desiredActiveChannel then
@@ -484,6 +485,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
                 return
             end
         end
+
         local desiredPassiveChannel = self.desiredPassiveChannel
         if desiredPassiveChannel then
             local channelType = desiredPassiveChannel.channelType
@@ -504,7 +506,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         end
     end
 
-    local function OnSelfLeftGuild(guildId, displayName)
+    local function OnSelfLeftGuild(event, guildId, displayName)
         if self.desiredActiveChannel and self.desiredActiveChannel.guildId == guildId then
             SwapOnLosingActiveGuildChannel()
         elseif self.desiredPassiveChannel and self.desiredPassiveChannel.guildId == guildId then
@@ -516,7 +518,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         self:RefreshGuildChannelIds()
     end
 
-    local function OnGuildRankChanged(guildId, rankIndex)
+    local function OnGuildRankChanged(event, guildId, rankIndex)
         --We can lose permission to access a channel while in it. Leave the channel when this occurs.
         local desiredActiveChannel = self.desiredActiveChannel
         local desiredPassiveChannel = self.desiredPassiveChannel
@@ -548,22 +550,22 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         end
     end
 
-    local function OnGuildMemberRankChanged(guildId, displayName, rankIndex)
+    local function OnGuildMemberRankChanged(event, guildId, displayName, rankIndex)
         if ZO_VoiceChat_IsNameLocalPlayers(displayName) then
             OnGuildRankChanged(guildId, rankIndex)
         end
     end
 
     --Voice Channel Event Handlers
-    local function OnVoiceChannelJoined(channelName)
+    local function OnVoiceChannelJoined(event, channelName)
         local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
         if not self:DoesChannelExist(channelData) then
             return
         end
-        local channel = self:GetChannel(channelData)
 
+        local channel = self:GetChannel(channelData)
         channel.isJoined = true
-        
+
         if self.desiredPassiveChannel == channel then
             self.passiveChannel = channel
         end
@@ -572,9 +574,9 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         self:FireCallbacks("ChannelsUpdate")
     end
 
-    local function OnVoiceChannelLeft(channelName)
+    local function OnVoiceChannelLeft(event, channelName)
         local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
-        
+
         --The guild id in the channel data is invalid for this event, so use the cache
         if channelData.channelType == VOICE_CHANNEL_GUILD then
             channelData.guildId = self.guildChannelsToIds[channelName]
@@ -585,7 +587,6 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         end
 
         local channel = self:GetChannel(channelData)
-
         channel.isJoined = false
         channel.isTransmitting = false
 
@@ -596,7 +597,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         self:FireCallbacks("ParticipantsUpdate")
     end
 
-    local function OnVoiceChannelAvailable(channelName, isMuted, isJoined, isTransmitting)
+    local function OnVoiceChannelAvailable(event, channelName, isMuted, isJoined, isTransmitting)
         local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
         local channelType = channelData.channelType
 
@@ -605,16 +606,14 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         if channelType == VOICE_CHANNEL_NONE then
             return
         elseif channelType == VOICE_CHANNEL_BATTLEGROUP then
+            local currentGroupChannel = self.channelData[VOICE_CHANNEL_GROUP]
+            if currentGroupChannel.isAvailable then
+                TryClearPassiveChannel(currentGroupChannel)
+                TryClearActiveChannel(currentGroupChannel)
+            end
 
-			local currentGroupChannel = self.channelData[VOICE_CHANNEL_GROUP]
-			if currentGroupChannel.isAvailable then
-				TryClearPassiveChannel(currentGroupChannel)
-				TryClearActiveChannel(currentGroupChannel)
-			end
-
-			self:SetAndSwapDesiredActiveChannel(self:GetChannel(channelData))
-
-		elseif channelType == VOICE_CHANNEL_GUILD then
+            self:SetAndSwapDesiredActiveChannel(self:GetChannel(channelData))
+        elseif channelType == VOICE_CHANNEL_GUILD then
             local guildId = channelData.guildId
             local guildRoomNumber = channelData.guildRoomNumber
             self:AddGuildChannelRoom(channelName, guildId, guildRoomNumber)
@@ -624,7 +623,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
             --Check if we tried to join the channel from the guild join event, but needed to wait
             --for this channel available event.
             if self.autoJoiningGuildButNotAvailable then
-                self.autoJoiningGuildButNotAvailable = nil
+                self.autoJoiningGuildButNotAvailable = false
                 self:SetAndSwapDesiredActiveChannel(self:GetChannel(channelData))
             end
         end
@@ -650,7 +649,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         self:FireCallbacks("ChannelsUpdate")
     end
 
-    local function OnVoiceChannelUnavailable(channelName)
+    local function OnVoiceChannelUnavailable(event, channelName)
         local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
 
         --The guild id in the channel data is invalid for this event, so use the cache
@@ -661,7 +660,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
                 return
             end
         end
-		
+
         local channel = self:GetChannel(channelData)
         channel.isAvailable = false
         channel.isJoined = false
@@ -669,36 +668,36 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
 
         TryClearPassiveChannel(channel)
         TryClearActiveChannel(channel)
-        
+
         if channel.channelType == VOICE_CHANNEL_GUILD then
             self:RemoveGuildChannelRoom(channel.channelName, channel.guildId, channel.guildRoomNumber)
             self.guildIdsDirty = true
         end
 
-		if channelData.channelType == VOICE_CHANNEL_BATTLEGROUP then
-			local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
-			if groupChannel.isAvailable then
-				self:SetAndSwapDesiredActiveChannel(groupChannel)
-			else
-				local areaChannel = self.channelData[VOICE_CHANNEL_AREA]
-				if areaChannel.isAvailable then
-					self:SetAndSwapDesiredActiveChannel(areaChannel)
-				end
-			end
-		end
+        if channelData.channelType == VOICE_CHANNEL_BATTLEGROUP then
+            local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
+            if groupChannel.isAvailable then
+                self:SetAndSwapDesiredActiveChannel(groupChannel)
+            else
+                local areaChannel = self.channelData[VOICE_CHANNEL_AREA]
+                if areaChannel.isAvailable then
+                    self:SetAndSwapDesiredActiveChannel(areaChannel)
+                end
+            end
+        end
 
         self:FireCallbacks("ChannelsUpdate")
     end
 
-    local function OnVoiceTransmitChannelChanged(channelName)
+    local function OnVoiceTransmitChannelChanged(event, channelName)
         local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
         if not self:DoesChannelExist(channelData) then
             return
         end
-        local channel = self:GetChannel(channelData)
 
+        local channel = self:GetChannel(channelData)
         channel.isTransmitting = true
-        
+
         --Mark the old active channel as passive
         if self.activeChannel then
             self.activeChannel.isTransmitting = false
@@ -714,7 +713,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
     end
 
     --Voice Participant Event Handlers
-    local function OnVoiceUserJoinedChannel(channelName, displayName, characterName, isSpeaking)
+    local function OnVoiceUserJoinedChannel(event, channelName, displayName, characterName, isSpeaking)
         local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
         if not self:DoesChannelExist(channelData) then
             return
@@ -728,7 +727,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         self:FireCallbacks("ParticipantsUpdate")
     end
 
-    local function OnVoiceUserLeftChannel(channelName, displayName)
+    local function OnVoiceUserLeftChannel(event, channelName, displayName)
         local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
         
         --The guild id in the channel data is invalid for this event, so use the cache
@@ -746,7 +745,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         self:FireCallbacks("ParticipantsUpdate")
     end
 
-    local function OnVoiceUserSpeaking(channelName, displayName, characterName, speaking)
+    local function OnVoiceUserSpeaking(event, channelName, displayName, characterName, speaking)
         local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
 
         --Speak events can occur before the channels are mapped
@@ -768,35 +767,35 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
     end
 
     local function OnVoiceMuteListUpdated()
-        self:UpdateMutes()
+        self:UpdateMutedUsers()
 
         self:FireCallbacks("ParticipantsUpdate")
         self:FireCallbacks("MuteUpdate")
     end
 
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnAddOnLoaded", EVENT_ADD_ON_LOADED, function(event, ...) OnAddOnLoaded(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnPlayerActivated", EVENT_PLAYER_ACTIVATED, function(event, ...) OnPlayerActivated(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnGroupMemberJoined", EVENT_GROUP_MEMBER_JOINED, function(event, ...) OnGroupMemberJoined(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnGroupMemberLeft", EVENT_GROUP_MEMBER_LEFT, function(event, ...) OnGroupMemberLeft(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_GROUP_MEMBER_LEFT, OnGroupMemberLeft)
 
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnSelfJoinedGuild", EVENT_GUILD_SELF_JOINED_GUILD, function(event, ...) OnSelfJoinedGuild(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnSelfLeftGuild", EVENT_GUILD_SELF_LEFT_GUILD, function(event, ...) OnSelfLeftGuild(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnGuildDataLoaded", EVENT_GUILD_DATA_LOADED, function(event, ...) OnGuildDataLoaded(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnGuildRankChanged", EVENT_GUILD_RANK_CHANGED, function(event, ...) OnGuildRankChanged(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnGuildMemberRankChanged", EVENT_GUILD_MEMBER_RANK_CHANGED, function(event, ...) OnGuildMemberRankChanged(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_GUILD_SELF_JOINED_GUILD, OnSelfJoinedGuild)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_GUILD_SELF_LEFT_GUILD, OnSelfLeftGuild)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_GUILD_DATA_LOADED, OnGuildDataLoaded)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_GUILD_RANK_CHANGED, OnGuildRankChanged)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_GUILD_MEMBER_RANK_CHANGED, OnGuildMemberRankChanged)
 
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnVoiceChannelJoined", EVENT_VOICE_CHANNEL_JOINED, function(eventCode, ...) OnVoiceChannelJoined(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnVoiceChannelLeft", EVENT_VOICE_CHANNEL_LEFT, function(eventCode, ...) OnVoiceChannelLeft(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnVoiceChannelAvailable", EVENT_VOICE_CHANNEL_AVAILABLE, function(eventCode, ...) OnVoiceChannelAvailable(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnVoiceChannelUnavailable", EVENT_VOICE_CHANNEL_UNAVAILABLE, function(eventCode, ...) OnVoiceChannelUnavailable(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_CHANNEL_JOINED, OnVoiceChannelJoined)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_CHANNEL_LEFT, OnVoiceChannelLeft)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_CHANNEL_AVAILABLE, OnVoiceChannelAvailable)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_CHANNEL_UNAVAILABLE, OnVoiceChannelUnavailable)
 
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnVoiceTransmitChannelChanged", EVENT_VOICE_TRANSMIT_CHANNEL_CHANGED, function(eventCode, ...) OnVoiceTransmitChannelChanged(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_TRANSMIT_CHANNEL_CHANGED, OnVoiceTransmitChannelChanged)
 
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnVoiceUserJoinedChannel", EVENT_VOICE_USER_JOINED_CHANNEL, function(eventCode, ...) OnVoiceUserJoinedChannel(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnVoiceUserLeftChannel", EVENT_VOICE_USER_LEFT_CHANNEL, function(eventCode, ...) OnVoiceUserLeftChannel(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnVoiceUserSpeaking", EVENT_VOICE_USER_SPEAKING, function(eventCode, ...) OnVoiceUserSpeaking(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_OnVoiceMuteListUpdated", EVENT_VOICE_MUTE_LIST_UPDATED, function(eventCode, ...) OnVoiceMuteListUpdated(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_USER_JOINED_CHANNEL, OnVoiceUserJoinedChannel)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_USER_LEFT_CHANNEL, OnVoiceUserLeftChannel)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_USER_SPEAKING, OnVoiceUserSpeaking)
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_MUTE_LIST_UPDATED, OnVoiceMuteListUpdated)
 end
 
 function ZO_VoiceChat_Manager:JoinChannel(channel)
@@ -818,7 +817,7 @@ function ZO_VoiceChat_Manager:LeaveChannel(channel)
     self:StartRequestDelay()
 end
 
-function ZO_VoiceChat_Manager:UpdateMutes()
+function ZO_VoiceChat_Manager:UpdateMutedUsers()
     local mutedUsers = {}
 
     local numMutedUsers = VoiceChatGetNumberMutedPlayers()
@@ -832,11 +831,11 @@ function ZO_VoiceChat_Manager:UpdateMutes()
         if channelType == VOICE_CHANNEL_GUILD then
             for _, guildData in pairs(participantData) do
                 for _, roomData in pairs(guildData) do
-                    roomData:UpdateMutes(mutedUsers)
+                    roomData:UpdateMutedUsers(mutedUsers)
                 end
             end
         else
-            participantData:UpdateMutes(mutedUsers)
+            participantData:UpdateMutedUsers(mutedUsers)
         end
     end
 
@@ -845,11 +844,11 @@ function ZO_VoiceChat_Manager:UpdateMutes()
         if channelType == VOICE_CHANNEL_GUILD then
             for _, guildData in pairs(channelData) do
                 for _, roomData in pairs(guildData.rooms) do
-                    roomData.historyData:UpdateMutes(mutedUsers)
+                    roomData.historyData:UpdateMutedUsers(mutedUsers)
                 end
             end
         else
-            channelData.historyData:UpdateMutes(mutedUsers)
+            channelData.historyData:UpdateMutedUsers(mutedUsers)
         end
     end
 
@@ -886,13 +885,13 @@ function ZO_VoiceChat_Manager:OnUpdate()
     elseif desiredActiveChannel.isAvailable and desiredActiveChannel ~= activeChannel then
         --Enforce not being able to be active and passive in two non-Area channels
         if desiredActiveChannel ~= passiveChannel and desiredActiveChannel.channelType ~= VOICE_CHANNEL_AREA then
-			if activeChannel and activeChannel.channelType ~= VOICE_CHANNEL_AREA then
-				self:LeaveChannel(activeChannel)
-				return
-			elseif passiveChannel and passiveChannel.channelType ~= VOICE_CHANNEL_AREA then
-				self:LeaveChannel(passiveChannel)
-				return
-			end
+            if activeChannel and activeChannel.channelType ~= VOICE_CHANNEL_AREA then
+                self:LeaveChannel(activeChannel)
+                return
+            elseif passiveChannel and passiveChannel.channelType ~= VOICE_CHANNEL_AREA then
+                self:LeaveChannel(passiveChannel)
+                return
+            end
         end
 
         local skipDelay = desiredActiveChannel == passiveChannel --we don't need to delay the next request if we're already joined to the channel
@@ -941,7 +940,8 @@ function ZO_VoiceChat_Manager:AddGuildChannelRoom(channelName, guildId, guildRoo
         description = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_DESCRIPTION_GUILD)
     end
 
-    guildChannels[guildId].rooms[guildRoomNumber] = {
+    guildChannels[guildId].rooms[guildRoomNumber] =
+    {
         channelType = VOICE_CHANNEL_GUILD,
         channelName = channelName,
         guildId = guildId,
@@ -954,7 +954,7 @@ function ZO_VoiceChat_Manager:AddGuildChannelRoom(channelName, guildId, guildRoo
     }
     self.participantsData[VOICE_CHANNEL_GUILD][guildId][guildRoomNumber] = ParticipantsData:New(DONT_SORT_BY_OCCURRENCE)
 
-	self.guildChannelsToIds[channelName] = guildId
+    self.guildChannelsToIds[channelName] = guildId
 end
 
 function ZO_VoiceChat_Manager:RemoveGuildChannelRoom(channelName, guildId, guildRoomNumber)
@@ -973,7 +973,7 @@ function ZO_VoiceChat_Manager:RemoveGuildChannelRoom(channelName, guildId, guild
         end
     end
 
-	self.guildChannelsToIds[channelName] = nil
+    self.guildChannelsToIds[channelName] = nil
 end
 
 function ZO_VoiceChat_Manager:RefreshGuildChannelIds()
@@ -1030,7 +1030,8 @@ function ZO_VoiceChat_Manager:SetDesiredPassiveChannel(channel)
 
     --Update saved settings
     if channel then
-        self.savedVars.desiredPassiveChannel = {
+        self.savedVars.desiredPassiveChannel =
+        {
             channelType = channel.channelType,
             guildName = channel.guildName, --we have to use the name and not the id since the id changes
             guildRoomNumber = channel.guildRoomNumber,
@@ -1049,7 +1050,8 @@ function ZO_VoiceChat_Manager:SetDesiredActiveChannel(channel)
 
     --Update saved settings
     if channel then
-        self.savedVars.desiredActiveChannel = {
+        self.savedVars.desiredActiveChannel =
+        {
             channelType = channel.channelType,
             guildName = channel.guildName, --we have to use the name and not the id since the id changes
             guildRoomNumber = channel.guildRoomNumber,
@@ -1057,7 +1059,7 @@ function ZO_VoiceChat_Manager:SetDesiredActiveChannel(channel)
     else
         self.savedVars.desiredActiveChannel = {}
     end
-    
+
     --The desired channels are often changed in pairs. Delay to prevent double-saving.
     self.saveSettingsCount = self.saveSettingsCount + 1
     zo_callLater(self.saveSettingsFunction, SAVE_SETTINGS_DELAY)
@@ -1103,14 +1105,14 @@ function ZO_VoiceChat_Manager:GetChannelData()
         areaData = areaChannel
     end
 
-	local bgChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
-	if bgChannel.isAvailable then
-		groupData = bgChannel
-	else
-		local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
-		if groupChannel.isAvailable then
-			groupData = groupChannel
-		end
+    local bgChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
+    if bgChannel.isAvailable then
+        groupData = bgChannel
+    else
+        local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
+        if groupChannel.isAvailable then
+            groupData = groupChannel
+        end
     end
 
     local guildData = self.channelData[VOICE_CHANNEL_GUILD]
@@ -1171,8 +1173,8 @@ function ZO_VoiceChat_Manager:GetDesiredActiveChannelType()
     return nil
 end
 
-
 --Globals
+
 VOICE_CHAT_MANAGER = ZO_VoiceChat_Manager:New()
 
 do

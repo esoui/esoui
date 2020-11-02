@@ -37,7 +37,7 @@ function ZO_Tooltip:LayoutGuildApplicationDetails(applicationData)
     -- Player Achievement Points
     statValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))
     statValuePair:SetStat(GetString(SI_GAMEPAD_ACHIEVEMENTS_POINTS_LABEL), self:GetStyle("statValuePairStat"))
-    statValuePair:SetValue(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(applicationData.achievementPoints)), self:GetStyle("socialStatsValue"))
+    statValuePair:SetValue(zo_strformat(SI_NUMBER_FORMAT, applicationData.achievementPoints), self:GetStyle("socialStatsValue"))
     statsSection:AddStatValuePair(statValuePair)
 
     self:AddSection(statsSection)

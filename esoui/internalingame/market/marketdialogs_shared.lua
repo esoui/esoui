@@ -25,7 +25,7 @@ function ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(productData)
             local currencyType = ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
             local esoPlusSavings = costAfterDiscount - esoPlusCost
             if esoPlusSavings > 0 then
-                local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, esoPlusSavings, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+                local currencyString = ZO_Currency_FormatKeyboard(currencyType, esoPlusSavings, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
                 return zo_strformat(SI_MARKET_PURCHASE_SUCCESS_ESO_PLUS_SAVINGS_TEXT, currencyString)
             end
         end

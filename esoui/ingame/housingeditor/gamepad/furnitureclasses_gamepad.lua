@@ -82,7 +82,7 @@ function ZO_HousingFurnitureList_Gamepad:Initialize(owner)
         control.label:SetDimensions(ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT - PRICE_LABEL_PADDING_X - priceWidth)
 
         if furnitureObject.onSale then
-            local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(furnitureObject.cost))
+            local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, furnitureObject.cost)
             local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
             control.previousPriceLabel:SetText(strikethroughAmountString)
         end

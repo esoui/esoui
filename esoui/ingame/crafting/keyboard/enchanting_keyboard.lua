@@ -33,6 +33,9 @@ function ZO_Enchanting:InitializeEnchantingScenes()
     ENCHANTING_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:OnModeUpdated()
+            if CRAFT_ADVISOR_MANAGER:HasActiveWrits() then
+                SCENE_MANAGER:AddFragmentGroup(WRIT_ADVISOR_KEYBOARD_FRAGMENT_GROUP)
+            end
         elseif newState == SCENE_HIDDEN then
             ZO_InventorySlot_RemoveMouseOverKeybinds()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -40,6 +43,7 @@ function ZO_Enchanting:InitializeEnchantingScenes()
             self.inventory:HandleDirtyEvent()
 
             CRAFTING_RESULTS:SetCraftingTooltip(nil)
+            SCENE_MANAGER:RemoveFragmentGroup(WRIT_ADVISOR_KEYBOARD_FRAGMENT_GROUP)
         end
     end)
 end
@@ -74,7 +78,7 @@ function ZO_Enchanting:InitializeModes()
         "EsoUI/Art/Crafting/smithing_tabIcon_creation_over.dds",
         "EsoUI/Art/Crafting/smithing_tabIcon_creation_disabled.dds"
     )
-    ZO_MenuBar_AddButton(self.modeBar, creationTab)
+    self.creationButton = ZO_MenuBar_AddButton(self.modeBar, creationTab)
 
     local extractionTab = CreateButtonData(
         SI_ENCHANTING_EXTRACTION, 
@@ -92,7 +96,7 @@ function ZO_Enchanting:InitializeModes()
         recipeCraftingSystemNameStringId,
         ENCHANTING_MODE_RECIPES,
         GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem))
-    ZO_MenuBar_AddButton(self.modeBar, recipeTab)
+    self.recipeButton = ZO_MenuBar_AddButton(self.modeBar, recipeTab)
 
     ZO_MenuBar_SelectDescriptor(self.modeBar, ENCHANTING_MODE_CREATION)
     ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.modeBar)
@@ -322,6 +326,23 @@ function ZO_Enchanting:OnModeUpdated()
     end
 end
 
+function ZO_Enchanting:UpdateQuestPins(questRunes, hasRecipes)
+    if self.creationButton then
+        local shouldHide = true
+
+        --The questRunes table has nil for all values if any of the runes are unknown
+        --Therefore, checking any of them for nil would be sufficient, it doesn't have to be potency
+        if questRunes.potency then
+            shouldHide = not DoesPlayerHaveRunesForEnchanting(questRunes.aspect, questRunes.essence, questRunes.potency)
+        end
+        self.creationButton.questPin:SetHidden(shouldHide)
+    end
+
+    if self.recipeButton then
+        self.recipeButton.questPin:SetHidden(not hasRecipes)
+    end
+end
+
 function ZO_Enchanting:UpdateTooltip()
     if self:IsCraftable() then
         self.resultTooltip:SetHidden(false)
@@ -375,12 +396,71 @@ function ZO_EnchantingInventory:Initialize(owner, control, ...)
     self.owner = owner
     self.filterType = NO_FILTER
 
+    self.questFilterCheckButton = control:GetNamedChild("QuestItemsOnly")
+    self.filterDivider = control:GetNamedChild("ButtonDivider")
+    self.sortByControl = control:GetNamedChild("SortBy")
+
+    local function OnAddOnLoaded(event, name)
+        if name == "ZO_Ingame" then
+            self:SetupSavedVars()
+            self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+
     local SET_HIDDEN = true
     self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true, sellInformationSortOrder = true, }, SET_HIDDEN)
+    self:InitializeFilters()
 end
 
+function ZO_EnchantingInventory:AddListDataTypes()
+   local defaultSetup = self:GetDefaultTemplateSetupFunction()
+   local function RuneSetup(rowControl, data)
+        defaultSetup(rowControl, data)
+        --Do we want to show the quest pin?
+        local itemId = GetItemId(data.bagId, data.slotIndex)
+        local questPin = rowControl:GetNamedChild("QuestPin")
+        if self.questRunes.potency == itemId or self.questRunes.essence == itemId or self.questRunes.aspect == itemId then
+            local hasRunes = DoesPlayerHaveRunesForEnchanting(self.questRunes.aspect, self.questRunes.essence, self.questRunes.potency)
+            questPin:SetHidden(not hasRunes)
+        else
+            questPin:SetHidden(true)
+        end
+    end
+    ZO_ScrollList_AddDataType(self.list, self:GetScrollDataType(), "ZO_CraftingInventoryComponentRow", 52, RuneSetup, nil, nil, ZO_InventorySlot_OnPoolReset)
+end
+
+function ZO_EnchantingInventory:InitializeFilters()
+    local function OnFilterChanged()
+        self.savedVars.questsOnlyChecked = ZO_CheckButton_IsChecked(self.questFilterCheckButton)
+        self:HandleDirtyEvent()
+    end
+
+    ZO_CheckButton_SetToggleFunction(self.questFilterCheckButton, OnFilterChanged)
+    ZO_CheckButton_SetLabelText(self.questFilterCheckButton, GetString(SI_SMITHING_IS_QUEST_ITEM))
+
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() 
+        ZO_CheckButton_SetCheckState(self.questFilterCheckButton, self.savedVars.questsOnlyChecked)
+    end)
+
+    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.questFilterCheckButton)
+end
+
+function ZO_EnchantingInventory:SetupSavedVars()
+    local defaults =
+    {
+        questsOnlyChecked = false,
+    }
+    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "EnchantingCreation", defaults)
+    ZO_CheckButton_SetCheckState(self.questFilterCheckButton, self.savedVars.questsOnlyChecked)
+end
 
 function ZO_EnchantingInventory:ChangeMode(enchantingMode)
+    local DEFAULT_RELATIVE_POINT = nil
+    local DEFAULT_RELATIVE_TO = nil
+    local DEFAULT_OFFSET_X = nil
+    local DEFAULT_OFFSET_Y = 63
     if enchantingMode == ENCHANTING_MODE_CREATION then
         self:SetFilters{
             self:CreateNewTabFilterData(ENCHANTING_RUNE_ASPECT, GetString("SI_ENCHANTINGRUNECLASSIFICATION", ENCHANTING_RUNE_ASPECT), "EsoUI/Art/Crafting/enchantment_tabIcon_aspect_up.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_aspect_down.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_aspect_over.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_aspect_disabled.dds"),
@@ -389,11 +469,20 @@ function ZO_EnchantingInventory:ChangeMode(enchantingMode)
             self:CreateNewTabFilterData(NO_FILTER, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL), "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_disabled.dds"),
         }
         self:SetActiveFilterByDescriptor(self.filterType)
+        self.filterDivider:SetHidden(false)
+        self.questFilterCheckButton:SetHidden(false)
+        self.sortByControl:ClearAnchors()
+        local OFFSET_X = -13
+        self.sortByControl:SetAnchor(TOPLEFT, self.filterDivider, BOTTOMLEFT, OFFSET_X)
     elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
         self:SetFilters{
             self:CreateNewTabFilterData(NO_FILTER, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL), "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_disabled.dds"),
         }
         self:SetActiveFilterByDescriptor(NO_FILTER)
+        self.filterDivider:SetHidden(true)
+        self.questFilterCheckButton:SetHidden(true)
+        self.sortByControl:ClearAnchors()
+        self.sortByControl:SetAnchor(TOPRIGHT, DEFAULT_RELATIVE_POINT, DEFAULT_RELATIVE_TO, DEFAULT_OFFSET_X, DEFAULT_OFFSET_Y)
     end
 end
 
@@ -433,8 +522,25 @@ function ZO_EnchantingInventory:Refresh(data)
     end
     local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Enchanting_IsEnchantingItem, ZO_Enchanting_DoesEnchantingItemPassFilter, filterType, data)
     self.owner:OnInventoryUpdate(validItemIds)
-
+    self.owner:UpdateQuestPins(self.questRunes, self.hasRecipesForQuest)
     self:SetNoItemLabelHidden(#data > 0)
+end
+
+function ZO_EnchantingInventory:EnumerateInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data)
+    local list = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, predicate)
+    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, predicate, list)
+    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_CRAFT_BAG, predicate, list)
+
+    ZO_ClearTable(self.itemCounts)
+
+    for itemId, itemInfo in pairs(list) do
+        if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType, self.savedVars.questsOnlyChecked, self.questRunes) then
+            self:AddItemData(itemInfo.bag, itemInfo.index, itemInfo.stack, self:GetScrollDataType(itemInfo.bag, itemInfo.index), data, self.customDataGetFunction)
+        end
+        self.itemCounts[itemId] = itemInfo.stack
+    end
+
+    return list
 end
 
 function ZO_EnchantingInventory:ShowAppropriateSlotDropCallouts(bagId, slotIndex)
@@ -470,4 +576,13 @@ end
 
 function ZO_Enchanting_Initialize(control)
     ENCHANTING = ZO_Enchanting:New(control)
+end
+
+function ZO_Enchanting_IsQuestItemOnMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
+    SetTooltipText(InformationTooltip, GetString(SI_CRAFTING_IS_QUEST_ITEM_TOOLTIP))
+end
+
+function ZO_Enchanting_FilterOnMouseExit(control)
+    ClearTooltip(InformationTooltip)
 end

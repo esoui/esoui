@@ -1,4 +1,5 @@
 local GAMEPAD_SMITHING_EXTRACTION_FILTER_INCLUDE_BANKED = 1
+local GAMEPAD_SMITHING_EXTRACTION_CRAFTING_QUEST_OFFSET_X = 1315 
 
 local g_filters =
 {
@@ -22,6 +23,7 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
     self.panelControl = panelControl
     self.floatingControl = floatingControl
     local slotContainer = floatingControl:GetNamedChild("SlotContainer")
+    self.slotContainer = slotContainer
     ZO_SharedSmithingExtraction.Initialize(self, slotContainer:GetNamedChild("ExtractionSlot"), nil, owner, isRefinementOnly)
 
     self.tooltip = floatingControl:GetNamedChild("Tooltip")
@@ -79,6 +81,13 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
             KEYBIND_STRIP:RemoveDefaultExit()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             self.inventory:Activate()
+
+            self.slotContainer:ClearAnchors()
+            if CRAFT_ADVISOR_MANAGER:HasActiveWrits() then
+                self.slotContainer:SetAnchor(BOTTOM, GuiRoot, BOTTOMLEFT, GAMEPAD_SMITHING_EXTRACTION_CRAFTING_QUEST_OFFSET_X, ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_BOTTOM_OFFSET)
+            else
+                self.slotContainer:SetAnchor(BOTTOM, GuiRoot, BOTTOMLEFT, ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_2_SHOWN, ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_BOTTOM_OFFSET)
+            end
 
             local tabBarEntries = {}
 
@@ -168,6 +177,15 @@ function ZO_GamepadSmithingExtraction:InitializeInventory(isRefinementOnly)
             data.meetsUsageRequirement = data.stackCount >= GetRequiredSmithingRefinementStackSize()
         end
         ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, self.extractionSlot:ContainsBagAndSlot(data.bagId, data.slotIndex))
+        if self:GetFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS then
+            data.hasCraftingQuestPin = self:CanRefineToQuestItem(bagId, slotIndex)
+            --If there is an override status indicator icon, we need to explicitly add the quest pin here
+            if data.overrideStatusIndicatorIcons and data.hasCraftingQuestPin then
+                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"}
+            end
+        else
+            data.hasCraftingQuestPin = false
+        end
     end
     )
 end
@@ -180,6 +198,15 @@ end
 function ZO_GamepadSmithingExtraction:UpdateSelection()
     for _, data in pairs(self.inventory.list.dataList) do
         ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, self.extractionSlot:ContainsBagAndSlot(data.bagId, data.slotIndex))
+        if self:GetFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS then
+            data.hasCraftingQuestPin = self:CanRefineToQuestItem(data.bagId, data.slotIndex)
+            --If there is an override status indicator icon, we need to explicitly add the quest pin here
+            if data.overrideStatusIndicatorIcons and data.hasCraftingQuestPin then
+                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"}
+            end
+        else
+            data.hasCraftingQuestPin = false
+        end
     end
 
     self:RefreshTooltip()
@@ -449,7 +476,7 @@ function ZO_GamepadExtractionInventory:Initialize(owner, control, isRefinementOn
                                                         if slotData.traitInformation == ITEM_TRAIT_INFORMATION_ORNATE then
                                                             local traitType = GetItemTrait(slotData.bagId, slotData.slotIndex)
                                                             slotData.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTRAITTYPE", traitType))
-                                                        elseif slotData.traitInformation == ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED or slotData.traitInformation == ITEM_TRAIT_INFORMATION_RETRAITED then
+                                                        elseif slotData.traitInformation == ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED or slotData.traitInformation == ITEM_TRAIT_INFORMATION_RETRAITED or slotData.traitInformation == ITEM_TRAIT_INFORMATION_RECONSTRUCTED then
                                                             slotData.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTRAITINFORMATION", slotData.traitInformation))
                                                         else
                                                             --If it is not ornate or trait related then use no header. We take advantage of the fact that empty string sorts to the top to order this.

@@ -1670,6 +1670,8 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
     }
 
     -- Types that if they were to happen while scrying for an antiquity

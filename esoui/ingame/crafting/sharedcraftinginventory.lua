@@ -12,6 +12,9 @@ function ZO_SharedCraftingInventory:Initialize(control, slotType, connectInfoFn,
     self.control.owner = self
     self.baseSlotType = slotType
     self.itemCounts = {}
+    self.questRunes = {}
+    self.alchemyQuestInfo = {}
+    self.improvementQuestInfo = {}
 
     self:InitializeList()
 
@@ -33,6 +36,14 @@ function ZO_SharedCraftingInventory:Initialize(control, slotType, connectInfoFn,
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", OnCraftingAnimationStateChanged)
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", OnCraftingAnimationStateChanged)
+
+    CRAFT_ADVISOR_MANAGER:RegisterCallback("QuestInformationUpdated", function(updatedQuestInfo) 
+        self.questRunes = updatedQuestInfo.runeIds
+        self.alchemyQuestInfo = updatedQuestInfo.alchemyInfo
+        self.improvementQuestInfo = updatedQuestInfo.improvementInfo
+        self.hasRecipesForQuest = updatedQuestInfo.hasRecipesForQuest
+        self:HandleDirtyEvent()
+    end)
 
 end
 

@@ -1,9 +1,6 @@
 local PARTIAL_PIN_ALPHA = .2
 local FULL_PIN_ALPHA = 1
 
-local DEFAULT_VIBRATION_PS4 = 0.25
-local DEFAULT_VIBRATION_XB1 = 0.05
-
 local NORMAL_TEXTURE = "EsoUI/Art/Lockpicking/pins.dds"
 local SET_TEXTURE = "EsoUI/Art/Lockpicking/pins_set.dds"
 
@@ -39,7 +36,7 @@ function ZO_Lockpick:Initialize(control)
     self.lockpickBreakLeft = control:GetNamedChild("LockpickBreakLeft")
     self.lockpickBreakRight = control:GetNamedChild("LockpickBreakRight")
 
-    self.defaultVibration = GetUIPlatform() == UI_PLATFORM_PS4 and DEFAULT_VIBRATION_PS4 or DEFAULT_VIBRATION_XB1
+    self.defaultVibration = GetLockpickingDefaultGamepadVibration()
 
     self:CreateKeybindStripDescriptor()
 
@@ -272,9 +269,6 @@ do
 end
 
 do
-    local ADDITIONAL_LOOSENESS_FACTOR = math.pi / 190
-    local FREQUENCY_MOD = 300
-    local STRESS_ADJUSTED_FREQUENCY_MOD = 90
     local function CalculateSettingChamberStress()
         local stress = (GetSettingChamberStress())
         return math.sin(GetFrameTimeMilliseconds() * .05) * stress * .035

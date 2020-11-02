@@ -4,6 +4,17 @@ a system and want ensure backward compatibility for addons.  Just alias the old 
 and inherit any controls you change in a newly commented section.
 --]]
 
+-- Adds aliases to source object for the specified methods of target object.
+local function AddMethodAliases(sourceObject, targetObject, methodNameList)
+    for _, methodName in ipairs(methodNameList) do
+        internalassert(sourceObject[methodName] == nil, string.format("Method '%s' of sourceObject already exists.", methodName))
+        internalassert(type(targetObject[methodName]) == "function", string.format("Method '%s' of targetObject does not exist.", methodName))
+
+        sourceObject[methodName] = function(originalSelf, ...)
+            return targetObject[methodName](targetObject, ...)
+        end
+    end
+end
 
 --ZO_MoneyInput Changes to ZO_CurrencyInput
 MONEY_INPUT = CURRENCY_INPUT
@@ -34,6 +45,18 @@ PLAYER_DIFFICULTY_LEVEL_THIRD_ALLIANCE = CADWELL_PROGRESSION_LEVEL_GOLD
 
 -- Player Inventory List Control
 ZO_PlayerInventoryBackpack = ZO_PlayerInventoryList
+
+ZO_PlayerInventorySearch = ZO_PlayerInventorySearchFiltersTextSearch
+ZO_PlayerBankSearch = ZO_PlayerBankSearchFiltersTextSearch
+ZO_HouseBankSearch = ZO_HouseBankSearchFiltersTextSearch
+ZO_GuildBankSearch = ZO_GuildBankSearchFiltersTextSearch
+ZO_CraftBagSearch = ZO_CraftBagSearchFiltersTextSearch
+
+ZO_PlayerInventorySearchBox = ZO_PlayerInventorySearchFiltersTextSearchBox
+ZO_PlayerBankSearchBox = ZO_PlayerBankSearchFiltersTextSearchBox
+ZO_HouseBankSearchBox = ZO_HouseBankSearchFiltersTextSearchBox
+ZO_GuildBankSearchBox = ZO_GuildBankSearchFiltersTextSearchBox
+ZO_CraftBagSearchBox = ZO_CraftBagSearchFiltersTextSearchBox
 
 --Raid function rename
 GetRaidReviveCounterInfo = GetRaidReviveCountersRemaining
@@ -513,6 +536,13 @@ function ZO_WorldMap_AreStickyPinsEnabledForPinGroup(pinGroup)
     return WORLD_MAP_MANAGER:AreStickyPinsEnabledForPinGroup(pinGroup)
 end
 
+function GetMapInfo(mapIndex)
+    local name, mapType, mapContentType, zoneIndex, description = GetMapInfoByIndex(mapIndex)
+    -- The initial function GetMapInfo treated a luaIndex like an Id. As a result the index was off by one
+    -- To keep this backward compatible function consistent with the previous behavior we have to offset it by one
+    return name, mapType, mapContentType, zoneIndex - 1, description
+end
+
 --
 -- End map related aliases
 --
@@ -861,6 +891,10 @@ function ZO_SharedInteraction:EndInteraction()
     self:SwitchInteraction()
 end
 
+function ZO_InteractScene_Mixin:InitializeInteractScene(_, _, interactionInfo)
+    self:InitializeInteractInfo(interactionInfo)
+end
+
 -- ZO_HelpManager was really specifically keyboard help, naming to meet standards because we need an actual manager now
 ZO_HelpManager = ZO_Help_Keyboard
 -- Renamed event to be more consistent with our naming conventions
@@ -869,3 +903,36 @@ EVENT_HELP_SHOW_SPECIFIC_PAGE = EVENT_SHOW_SPECIFIC_HELP_PAGE
 function ResetHousingEditorTrackedFurnitureId()
     ResetHousingEditorTrackedFurnitureOrNode()
 end
+
+-- ZO_RetraitStation_Base refactor.
+do
+    local ALIAS_METHODS =
+    {
+        "IsItemAlreadySlottedToCraft",
+        "CanItemBeAddedToCraft",
+        "AddItemToCraft",
+        "RemoveItemFromCraft",
+        "OnRetraitResult",
+        "HandleDirtyEvent",
+    }
+    AddMethodAliases(ZO_RETRAIT_STATION_KEYBOARD, ZO_RETRAIT_KEYBOARD, ALIAS_METHODS)
+end
+
+ZO_COMBOBOX_SUPRESS_UPDATE = ZO_COMBOBOX_SUPPRESS_UPDATE
+
+GetCollectibleCategoryName = GetCollectibleCategoryNameByCollectibleId
+
+-- No longer let the leaderboardObject do the adding and removing directly itself, in case the leaderboard object is no longer around when we need to remove it (ESO-596810)
+function ZO_LeaderboardBase_Shared:TryAddKeybind()
+    if self.keybind then
+        KEYBIND_STRIP:AddKeybindButton(self.keybind)
+    end
+end
+
+function ZO_LeaderboardBase_Shared:TryRemoveKeybind()
+    if self.keybind then
+        KEYBIND_STRIP:RemoveKeybindButton(self.keybind)
+    end
+end
+
+ZO_RETRAIT_STATION_KEYBOARD.retraitPanel = ZO_RETRAIT_KEYBOARD

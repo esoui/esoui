@@ -74,7 +74,7 @@ function ZO_ShowConsoleAddFriendDialogFromUserListSelector()
 end
 
 function ZO_DoesConsoleSupportTargetedIgnore()
-    return GetUIPlatform() == UI_PLATFORM_PS4
+    return ZO_IsPlaystationPlatform()
 end
 
 --[[Invite to Group Utils]]--

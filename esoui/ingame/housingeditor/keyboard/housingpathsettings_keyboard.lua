@@ -101,6 +101,10 @@ function ZO_HousingPathSettingsMenu_Keyboard:ShowPathTypeTooltip(control)
     --TODO: show tooltip
 end
 
+function ZO_HousingPathSettingsMenu_Keyboard:ShowConformToGroundTooltip(control)
+    --TODO: show tooltip
+end
+
 -- Path Settings Panel
 ----------------------
 ZO_HousingPathSettings_Keyboard = ZO_HousingBrowserList:Subclass()
@@ -168,6 +172,27 @@ function ZO_HousingPathSettings_Keyboard:InitializeSettingsPanel()
         end
     end)
 
+    self.conformToGroundOnButton = self.generalOptionsPanel:GetNamedChild("ChangeConformToGroundOn")
+    local onButtonLabel = self.conformToGroundOnButton:GetNamedChild("Label")
+    onButtonLabel:SetText(GetString("SI_FURNITUREPATHSTATE", HOUSING_FURNITURE_PATH_STATE_ON))
+    self.conformToGroundOnButton.conformToGround = true
+
+    self.conformToGroundOffButton = self.generalOptionsPanel:GetNamedChild("ChangeConformToGroundOff")
+    local offButtonLabel = self.conformToGroundOffButton:GetNamedChild("Label")
+    offButtonLabel:SetText(GetString("SI_FURNITUREPATHSTATE", HOUSING_FURNITURE_PATH_STATE_OFF))
+    self.conformToGroundOffButton.conformToGround = false
+
+    self.conformToGroundRadioButtonGroup = ZO_RadioButtonGroup:New()
+    self.conformToGroundRadioButtonGroup:Add(self.conformToGroundOnButton)
+    self.conformToGroundRadioButtonGroup:Add(self.conformToGroundOffButton)
+    self.conformToGroundRadioButtonGroup:SetSelectionChangedCallback(function(radioButtonGroup, newControl, previousControl)
+        if newControl.conformToGround ~= self.currentConformToGround then
+            self.currentConformToGround = newControl.conformToGround
+            local result = HousingEditorToggleSelectedFurniturePathConformToGround()
+            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+        end
+    end)
+
     self.changePathingStateDropDown = self.generalOptionsPanel:GetNamedChild("ChangePathTypeDropDown")
     self:BuildPathTypeSettings(self.changePathingStateDropDown)
 end
@@ -175,6 +200,7 @@ end
 function ZO_HousingPathSettings_Keyboard:SetupTitleText()
     self:SetTitleTextFromData("ChangeCollectibleTitle")
     self:SetTitleTextFromData("ChangePathingStateTitle")
+    self:SetTitleTextFromData("ChangeConformToGroundTitle")
     self:SetTitleTextFromData("ChangePathTypeTitle")
 end
 
@@ -193,10 +219,15 @@ function ZO_HousingPathSettings_Keyboard:UpdatePathSettings()
     self:UpdateButtonSettings(self.changeCollectibleSetting)
     self.changeCollectibleButton:SetEnabled(true)
 
-    self.currentPathState = HousingEditorGetSelectedFurniturePathState(self.owner.targetFurnitureId)
+    self.currentPathState = HousingEditorGetSelectedFurniturePathState()
+    self.currentConformToGround = HousingEditorGetSelectedFurniturePathConformToGround()
     self.selectedPathState = self.currentPathState
+    
     local selectedRadioButton = self.currentPathState == HOUSING_FURNITURE_PATH_STATE_ON and self.pathingStateOnButton or self.pathingStateOffButton
     self.radioButtonGroup:SetClickedButton(selectedRadioButton)
+    
+    local selectedConformToGroundRadioButton = self.currentConformToGround and self.conformToGroundOnButton or self.conformToGroundOffButton
+    self.conformToGroundRadioButtonGroup:SetClickedButton(selectedConformToGroundRadioButton)
 
     self.currentFollowType = HousingEditorGetSelectedFurniturePathFollowType()
     self.selectedFollowType = self.currentFollowType

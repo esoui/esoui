@@ -33,6 +33,7 @@ function ZO_Provisioner:Initialize(control)
 
         self.resultTooltip:SetHandler("OnMouseUp", OnTooltipMouseUp)
         self.resultTooltip:GetNamedChild("Icon"):SetHandler("OnMouseUp", OnTooltipMouseUp)
+        self.currentTabs = {}
     end
 
     self.multiCraftContainer = self.control:GetNamedChild("MultiCraftContainer")
@@ -57,12 +58,14 @@ function ZO_Provisioner:Initialize(control)
             {
                 haveIngredientsChecked = true,
                 haveSkillsChecked = true,
+                questsOnlyChecked = false,
             }
 
-            self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "Provisioner", defaults)
+            self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 2, "Provisioner", defaults)
 
             ZO_CheckButton_SetCheckState(self.haveIngredientsCheckBox, self.savedVars.haveIngredientsChecked)
             ZO_CheckButton_SetCheckState(self.haveSkillsCheckBox, self.savedVars.haveSkillsChecked)
+            ZO_CheckButton_SetCheckState(self.isQuestItemCheckbox, self.savedVars.questsOnlyChecked)
             self:DirtyRecipeList()
             
             self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
@@ -93,6 +96,12 @@ function ZO_Provisioner:Initialize(control)
         if newState == SCENE_SHOWING then
             self:ConfigureFromSettings(ZO_Provisioner.PROVISIONING_SETTINGS)
             TriggerTutorial(TUTORIAL_TRIGGER_PROVISIONING_OPENED)
+
+            if CRAFT_ADVISOR_MANAGER:HasActiveWrits() then
+                SCENE_MANAGER:AddFragmentGroup(WRIT_ADVISOR_KEYBOARD_FRAGMENT_GROUP)
+            end
+        elseif newState == SCENE_HIDDEN then
+            SCENE_MANAGER:RemoveFragmentGroup(WRIT_ADVISOR_KEYBOARD_FRAGMENT_GROUP)
         end
     end)
 
@@ -158,8 +167,9 @@ function ZO_Provisioner:ConfigureFromSettings(settings)
         selectedTabLabel:SetFont(settings.selectedTabLabelFont)
         selectedTabLabel:SetAnchor(RIGHT, nil, LEFT, -25, settings.selectedTabLabelOffsetY)
         ZO_MenuBar_ClearButtons(self.tabs)
+        ZO_ClearTable(self.currentTabs)
         for _, tab in ipairs(settings.tabs) do
-            ZO_MenuBar_AddButton(self.tabs, tab)
+            table.insert(self.currentTabs, ZO_MenuBar_AddButton(self.tabs, tab))
         end
         ZO_MenuBar_SelectDescriptor(self.tabs, settings.tabs[1].descriptor)
     end
@@ -169,6 +179,7 @@ function ZO_Provisioner:EmbedInCraftingScene()
     self:ConfigureFromSettings(ZO_Provisioner.EMBEDDED_SETTINGS)
     SCENE_MANAGER:AddFragment(PROVISIONER_FRAGMENT)
     self:DirtyRecipeList()
+    self:UpdateQuestPins()
 end
 
 function ZO_Provisioner:RemoveFromCraftingScene()
@@ -197,6 +208,7 @@ function ZO_Provisioner:OnTabFilterChanged(filterData)
     if self.savedVars then
         ZO_CheckButton_SetCheckState(self.haveIngredientsCheckBox, self.savedVars.haveIngredientsChecked)
         ZO_CheckButton_SetCheckState(self.haveSkillsCheckBox, self.savedVars.haveSkillsChecked)
+        ZO_CheckButton_SetCheckState(self.isQuestItemCheckbox, self.savedVars.questsOnlyChecked)
     end
     self:ResetMultiCraftNumIterations()
     self:DirtyRecipeList()
@@ -205,21 +217,31 @@ end
 function ZO_Provisioner:InitializeFilters()
     self.haveIngredientsCheckBox = self.control:GetNamedChild("HaveIngredients")
     self.haveSkillsCheckBox = self.control:GetNamedChild("HaveSkills")
+    self.isQuestItemCheckbox = self.control:GetNamedChild("IsQuestItem")
 
     local function OnFilterChanged()
         self.savedVars.haveIngredientsChecked = ZO_CheckButton_IsChecked(self.haveIngredientsCheckBox)
         self.savedVars.haveSkillsChecked = ZO_CheckButton_IsChecked(self.haveSkillsCheckBox)
+        self.savedVars.questsOnlyChecked = ZO_CheckButton_IsChecked(self.isQuestItemCheckbox)
         self:DirtyRecipeList()
     end
 
     ZO_CheckButton_SetToggleFunction(self.haveIngredientsCheckBox, OnFilterChanged)
     ZO_CheckButton_SetToggleFunction(self.haveSkillsCheckBox, OnFilterChanged)
+    ZO_CheckButton_SetToggleFunction(self.isQuestItemCheckbox, OnFilterChanged)
 
     ZO_CheckButton_SetLabelText(self.haveIngredientsCheckBox, GetString(SI_PROVISIONER_HAVE_INGREDIENTS))
+
+    local FILTER_SPACING = 20
+    self.haveSkillsCheckBox:SetAnchor(LEFT, self.haveIngredientsCheckBox.label, RIGHT, FILTER_SPACING, 0)
     ZO_CheckButton_SetLabelText(self.haveSkillsCheckBox, GetString(SI_PROVISIONER_HAVE_SKILLS))
+
+    self.isQuestItemCheckbox:SetAnchor(LEFT, self.haveSkillsCheckBox.label, RIGHT, FILTER_SPACING, 0)
+    ZO_CheckButton_SetLabelText(self.isQuestItemCheckbox, GetString(SI_SMITHING_IS_QUEST_ITEM))
 
     ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.haveIngredientsCheckBox)
     ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.haveSkillsCheckBox)
+    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.isQuestItemCheckbox)
 end
 
 function ZO_Provisioner:InitializeKeybindStripDescriptors()
@@ -271,12 +293,14 @@ end
 
 function ZO_Provisioner:InitializeRecipeTree()
     local navigationContainer = self.control:GetNamedChild("NavigationContainer")
-    self.recipeTree = ZO_Tree:New(navigationContainer:GetNamedChild("ScrollChild"), 60, -10, 535)
+    self.recipeTree = ZO_Tree:New(navigationContainer:GetNamedChild("ScrollChild"), 74, -10, 535)
 
     local function TreeHeaderSetup(node, control, data, open, userRequested, enabled)
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         control.text:SetDimensionConstraints(0, 0, 260, 0)
         control.text:SetText(data.name)
+        local shouldHide = self.questRecipeLists[data.recipeListIndex] ~= true
+        control.questPin:SetHidden(shouldHide)
 
         if not enabled then
             control.icon:SetDesaturation(1)
@@ -296,13 +320,16 @@ function ZO_Provisioner:InitializeRecipeTree()
     local function TreeHeaderEquality(left, right)
         return left.recipeListIndex == right.recipeListIndex
     end
-    self.recipeTree:AddTemplate("ZO_IconHeader", TreeHeaderSetup, nil, TreeHeaderEquality, nil, 0)
+    self.recipeTree:AddTemplate("ZO_ProvisionerNavigationHeader", TreeHeaderSetup, nil, TreeHeaderEquality, nil, 0)
 
     local function TreeEntrySetup(node, control, data, open, userRequested, enabled)
         control.data = data
         control.meetsLevelReq = self:PassesTradeskillLevelReqs(data.tradeskillsLevelReqs)
         control.meetsQualityReq = self:PassesQualityLevelReq(data.qualityReq)
         control.enabled = enabled
+
+        local shouldHideQuestPin = self.questRecipes[data.resultItemId] ~= true
+        control.questPin:SetHidden(shouldHideQuestPin)
 
         if data.maxIterationsForIngredients > 0 and enabled then
             control:SetText(zo_strformat(SI_PROVISIONER_RECIPE_NAME_COUNT, data.name, data.maxIterationsForIngredients))
@@ -377,6 +404,7 @@ function ZO_Provisioner:RefreshRecipeList()
     local hasRecipesWithFilter = false
     local requireIngredients = ZO_CheckButton_IsChecked(self.haveIngredientsCheckBox)
     local requireSkills = ZO_CheckButton_IsChecked(self.haveSkillsCheckBox)
+    local requireQuests = ZO_CheckButton_IsChecked(self.isQuestItemCheckbox)
     local craftingInteractionType = GetCraftingInteractionType()
 
     local recipeLists = PROVISIONER_MANAGER:GetRecipeListData(craftingInteractionType)
@@ -385,8 +413,8 @@ function ZO_Provisioner:RefreshRecipeList()
         for _, recipe in ipairs(recipeList.recipes) do
             if recipe.requiredCraftingStationType == craftingInteractionType and self.filterType == recipe.specialIngredientType then
                 knowAnyRecipesInTab = true
-                if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType) then
-                    parent = parent or self.recipeTree:AddNode("ZO_IconHeader", {
+                if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType, requireQuests, recipe.resultItemId) then
+                    parent = parent or self.recipeTree:AddNode("ZO_ProvisionerNavigationHeader", {
                         recipeListIndex = recipeList.recipeListIndex,
                         name = recipeList.recipeListName,
                         upIcon = recipeList.upIcon,
@@ -411,12 +439,14 @@ function ZO_Provisioner:RefreshRecipeList()
             self.noRecipesLabel:SetText(GetString(SI_PROVISIONER_NO_RECIPES))
             ZO_CheckButton_SetChecked(self.haveIngredientsCheckBox)
             ZO_CheckButton_SetChecked(self.haveSkillsCheckBox)
+            ZO_CheckButton_SetUnchecked(self.isQuestItemCheckbox)
         end
         self:RefreshRecipeDetails()
     end
 
     ZO_CheckButton_SetEnableState(self.haveIngredientsCheckBox, knowAnyRecipesInTab)
     ZO_CheckButton_SetEnableState(self.haveSkillsCheckBox, knowAnyRecipesInTab)
+    ZO_CheckButton_SetEnableState(self.isQuestItemCheckbox, knowAnyRecipesInTab)
 end
 
 function ZO_Provisioner:GetRecipeData()
@@ -484,6 +514,16 @@ function ZO_Provisioner:RefreshRecipeDetails()
 
     self:UpdateMultiCraft()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
+end
+
+function ZO_Provisioner:UpdateQuestPins()
+    --Determine whether or not we need quest pins on each tab
+    for _, tab in ipairs(self.currentTabs) do
+        local data = tab.m_object.m_buttonData
+
+        local shouldHide = self.questCategories[data.descriptor] ~= true
+        tab.questPin:SetHidden(shouldHide)
+    end
 end
 
 function ZO_Provisioner:TogglePreviewMode()
@@ -633,6 +673,25 @@ function ZO_Provisioner_Initialize(control)
     PROVISIONER = ZO_Provisioner:New(control)
 end
 
+function ZO_Provisioner_HaveIngredientsOnMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
+    SetTooltipText(InformationTooltip, GetString(SI_CRAFTING_HAVE_INGREDIENTS_TOOLTIP))
+end
+
+function ZO_Provisioner_HaveSkillsOnMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
+    SetTooltipText(InformationTooltip, GetString(SI_CRAFTING_HAVE_SKILLS_TOOLTIP))
+end
+
+function ZO_Provisioner_IsQuestItemOnMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
+    SetTooltipText(InformationTooltip, GetString(SI_CRAFTING_IS_QUEST_ITEM_TOOLTIP))
+end
+
+function ZO_Provisioner_FilterOnMouseExit(control)
+    ClearTooltip(InformationTooltip)
+end
+
 function ZO_ProvisionerRow_GetTextColor(self)
     if not self.enabled then
         return GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED)
@@ -671,4 +730,17 @@ end
 function ZO_ProvisionerNavigationEntry_OnMouseExit(self)
     ZO_SelectableLabel_OnMouseExit(self)
     ClearTooltip(InformationTooltip)
+end
+
+function ZO_ProvisionerTabs_OnInitialized(control)
+    ZO_MenuBar_OnInitialized(control)
+    local barData =
+    {
+        buttonPadding = 20,
+        normalSize = 51,
+        downSize = 64,
+        animationDuration = DEFAULT_SCENE_TRANSITION_TIME,
+        buttonTemplate = "ZO_ProvisionerTabButton",
+    }
+    ZO_MenuBar_SetData(control, barData)
 end

@@ -94,7 +94,7 @@ do
 end
 
 function ZO_ZoneStories_Manager:ZoneListIterator()
-    return ZO_NumericallyIndexedTableIterator(self.zoneList)
+    return ipairs(self.zoneList)
 end
 
 function ZO_ZoneStories_Manager:GetZoneData(zoneId)

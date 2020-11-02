@@ -104,10 +104,20 @@
                             </Controls>
                         </Texture>
 
-                        <Label name="$(parent)ItemName" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Dimensions x="300" />
+                        <Control name="$(parent)ItemText" resizeToFitDescendents="true">
                             <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
-                        </Label>
+
+                            <Controls>
+                                <Label name="$(parent)ItemName" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="TOPLEFT" />
+                                    <Dimensions x="300" />
+                                </Label>
+
+                                <Label name="$(parent)ItemDetail" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ItemName" relativePoint="BOTTOMLEFT" />
+                                </Label>
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Control>
 
@@ -124,6 +134,25 @@
                 <Control name="$(parent)CostContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMLEFT" offsetY="30" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                    <Controls>
+                        <Label name="$(parent)PreviousCost" inherits="ZO_CurrencyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
+                            <Anchor point="RIGHT" relativeTo="$(parent)CurrencyAmount" relativePoint="LEFT" offsetX="-10" />
+                        </Label>
+
+                        <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Keyboard" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_PRODUCT_BACKGROUND_BRIGHTNESS">
+                            <Anchor point="RIGHT" relativeTo="$(parent)PreviousCost" relativePoint="LEFT" offsetX="-20" />
+                            <Controls>
+                                <Control name="$(parent)Background" override="true">
+                                    <Dimensions y="32"/>
+                                    <Controls>
+                                        <Texture name="$(parent)Center" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
+                                        <Texture name="$(parent)Left" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
+                                        <Texture name="$(parent)Right" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Label>
+                    </Controls>
                 </Control>
 
                 <Control name="$(parent)EsoPlusCostContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard" hidden="true">
@@ -165,6 +194,134 @@
                 <Texture name="$(parent)ModalUnderlay" override="true" alpha="0" />
             </Controls>
         </TopLevelControl>
-        
+
+        <Control name="ZO_DialogLabelValueContainer_Keyboard" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                self.labelControl = self:GetNamedChild("Label")
+                self.valueControl = self:GetNamedChild("Value")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Label name="$(parent)Value" font="ZoFontGame">
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_MarketPurchaseHouseTemplateSelectDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_MarketPurchaseHouseTemplateSelectDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)ItemContainer" inherits="ZO_DialogContentAnchors">
+                    <Dimensions y="64"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon" level="3">
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="64" y="64"/>
+                            <Controls>
+                                <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false" hidden="true">
+                                    <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
+                                </Label>
+                            </Controls>
+                        </Texture>
+
+                        <Control name="$(parent)ItemText" resizeToFitDescendents="true">
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
+                            <Dimensions x="300" />
+
+                            <Controls>
+                                <Label name="$(parent)ItemName" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="TOPLEFT" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)HouseTemplateSelectionHeader" text="SI_MARKET_SELECT_HOUSE_TEMPLATE_LABEL" font="ZoFontGameBold" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ItemContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ItemContainer" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                </Label>
+
+                <Control name="$(parent)ComboBox" inherits="ZO_ComboBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HouseTemplateSelectionHeader" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)HouseTemplateSelectionHeader" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
+
+                <Control name="$(parent)BalanceContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ComboBox" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ComboBox" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <Controls>
+                        <Label name="$(parent)CurrencyLabel" override="true" text="SI_MARKET_CONFIRM_PURCHASE_CURRENT_BALANCE_LABEL">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)CostContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMLEFT" offsetY="30" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                    <Controls>
+                        <Label name="$(parent)PreviousCost" inherits="ZO_CurrencyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
+                            <Anchor point="RIGHT" relativeTo="$(parent)CurrencyAmount" relativePoint="LEFT" offsetX="-10" />
+                        </Label>
+
+                        <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Keyboard" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_PRODUCT_BACKGROUND_BRIGHTNESS">
+                            <Anchor point="RIGHT" relativeTo="$(parent)PreviousCost" relativePoint="LEFT" offsetX="-20" />
+                            <Controls>
+                                <Control name="$(parent)Background" override="true">
+                                    <Dimensions y="32"/>
+                                    <Controls>
+                                        <Texture name="$(parent)Center" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
+                                        <Texture name="$(parent)Left" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
+                                        <Texture name="$(parent)Right" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)EsoPlusCostContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)CurrencyLabel" override="true" text="SI_MARKET_CONFIRM_PURCHASE_ESO_PLUS_COST_LABEL" />
+
+                        <Label name="$(parent)CurrencyAmount" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ESO_PLUS" />
+                    </Controls>
+                </Control>
+
+                <!-- House Details -->
+                <Control name="$(parent)LocationContainer" inherits="ZO_DialogLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CostContainer" relativePoint="BOTTOMLEFT" offsetY="50" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CostContainer" relativePoint="BOTTOMRIGHT" offsetY="50" />
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" text="SI_MARKET_PRODUCT_HOUSING_LOCATION_LABEL">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)HouseTypeContainer" inherits="ZO_DialogLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LocationContainer" relativePoint="BOTTOMLEFT" offsetY="30" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)LocationContainer" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" text="SI_MARKET_PRODUCT_HOUSING_HOUSE_TYPE_LABEL">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)EsoPlusNote" font="ZoFontGame" text="SI_MARKET_HOUSE_INFO_ESO_PLUS_TEXT" />
+
+                <!-- have to make buttons for a custom dialog -->
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

@@ -100,7 +100,7 @@ function CreateLinkAccount_Keyboard:PopulateCountryDropdown()
             entry.countryName = countryName
             entry.countryCode = countryCode
             entry.megaServer = megaServer
-            self.countryComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            self.countryComboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
 
         if numCountries == 1 then

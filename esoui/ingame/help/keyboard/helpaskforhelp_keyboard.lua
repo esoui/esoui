@@ -131,7 +131,7 @@ function HelpAskForHelp_Keyboard:InitializeComboBoxes()
             if name ~= nil then
                 local entry = ZO_ComboBox:CreateItemEntry(name, OnCategoryChanged)
                 entry.index = i
-                self.helpCategoryComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                self.helpCategoryComboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
             end
         end
     end

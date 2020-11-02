@@ -15,6 +15,8 @@ local ASSISTED_TEXTURE = "EsoUI/Art/Journal/Gamepad/gp_trackedQuestIcon.dds"
 local SPEAKER_TEXTURE = "EsoUI/Art/VOIP/Gamepad/gp_VOIP_speaking.dds"
 local SELECTED_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 local TRACKED_ANTIQUITY_TEXTURE = "EsoUI/Art/Antiquities/Gamepad/gp_trackedAntiquityIcon.dds"
+local CRAFTING_QUEST_PIN_TEXTURE = "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"
+local CRAFTING_QUEST_DISABLED_PIN_TEXTURE = "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon_disabled.dds"
 
 local NORMAL_FONT_SELECTED = "ZoFontGamepad42"
 local NORMAL_FONT_UNSELECTED = "ZoFontGamepad34"
@@ -296,7 +298,7 @@ local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, subStatusIc
             if stackCountLabel then
                 local stackCount = data.stackCount
                 if stackCount and stackCount > 1 then
-                    stackCountLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)))
+                    stackCountLabel:SetText(ZO_AbbreviateAndLocalizeNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
                 else
                     stackCountLabel:SetText("")
                 end
@@ -421,6 +423,12 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
 
         if data.isTrackedAntiquity then
             statusIndicator:AddIcon(TRACKED_ANTIQUITY_TEXTURE)
+        end
+
+        if data.hasCraftingQuestPin then
+            statusIndicator:AddIcon(CRAFTING_QUEST_PIN_TEXTURE)
+        elseif data.hasCraftingQuestPinDisabled then
+            statusIndicator:AddIcon(CRAFTING_QUEST_DISABLED_PIN_TEXTURE)
         end
 
         statusIndicator:Show()

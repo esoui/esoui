@@ -4,11 +4,13 @@
 
 local GAMEPAD_RETRAIT_ROOT_SCENE_NAME = "retrait_gamepad_root"
 local GAMEPAD_RETRAIT_SCENE_NAME = "retrait_gamepad"
+local GAMEPAD_RECONSTRUCT_SCENE_NAME = "reconstruct_gamepad"
 
 local MODE_TO_SCENE_NAME =
 {
     [ZO_RETRAIT_MODE_ROOT] = GAMEPAD_RETRAIT_ROOT_SCENE_NAME,
     [ZO_RETRAIT_MODE_RETRAIT] = GAMEPAD_RETRAIT_SCENE_NAME,
+    [ZO_RETRAIT_MODE_RECONSTRUCT] = GAMEPAD_RECONSTRUCT_SCENE_NAME,
 }
 
 ZO_RetraitStation_Gamepad = ZO_RetraitStation_Base:Subclass()
@@ -28,14 +30,17 @@ function ZO_RetraitStation_Gamepad:Initialize(control)
     self.interactScene:AddFragment(fragment)
 
     SYSTEMS:RegisterGamepadRootScene("retrait", self.interactScene)
-    SYSTEMS:RegisterGamepadObject("retrait", self)
+    SYSTEMS:RegisterGamepadObject("retrait", self) -- TODO: Move this and all its mode function below into retrait gamepad class
 
     GAMEPAD_RETRAIT_SCENE = ZO_InteractScene:New(GAMEPAD_RETRAIT_SCENE_NAME, SCENE_MANAGER, self.retraitStationInteraction)
     GAMEPAD_RETRAIT_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
     local gamepadRetraitModeTopLevel = CreateControlFromVirtual("ZO_RetraitStation_RetraitMode_Gamepad", GuiRoot, "ZO_RetraitStation_Retrait_GamepadTopLevel")
     ZO_RETRAIT_STATION_RETRAIT_GAMEPAD = ZO_RetraitStation_Retrait_Gamepad:New(gamepadRetraitModeTopLevel, GAMEPAD_RETRAIT_SCENE)
-
     ZO_RETRAIT_STATION_MANAGER:RegisterRetraitScene(GAMEPAD_RETRAIT_SCENE_NAME)
+
+    GAMEPAD_RECONSTRUCT_SCENE = ZO_InteractScene:New(GAMEPAD_RECONSTRUCT_SCENE_NAME, SCENE_MANAGER, self.retraitStationInteraction)
+    GAMEPAD_RECONSTRUCT_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
+    ZO_RETRAIT_STATION_RECONSTRUCT_GAMEPAD = ZO_RetraitStation_Reconstruct_Gamepad:New(ZO_RetraitStation_Reconstruct_GamepadTopLevel, GAMEPAD_RECONSTRUCT_SCENE)
 
     self:InitializeModeList()
     self:InitializeKeybindStripDescriptors()
@@ -95,8 +100,10 @@ function ZO_RetraitStation_Gamepad:InitializeModeList()
     self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
     local retraitModeEntry = self:CreateModeEntry(SI_RETRAIT_STATION_RETRAIT_MODE, ZO_RETRAIT_MODE_RETRAIT, "EsoUI/Art/Crafting/Gamepad/gp_retrait_tabIcon.dds")
-
     self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", retraitModeEntry)
+    local reconstructModeEntry = self:CreateModeEntry(SI_RETRAIT_STATION_RECONSTRUCT_MODE, ZO_RETRAIT_MODE_RECONSTRUCT, "EsoUI/Art/Crafting/Gamepad/gp_reconstruct_tabIcon.dds")
+    self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", reconstructModeEntry)
+
     self.modeList:Commit()
 end
 

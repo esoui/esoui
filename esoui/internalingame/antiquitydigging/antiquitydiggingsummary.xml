@@ -723,7 +723,6 @@
             <Controls>
                 <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_NEW_CODEX_ENTRY">
                     <Dimensions x="1150"/>
-                    <Anchor point="BOTTOM" relativePoint="CENTER" offsetY="-275"/>
                 </Label>
             </Controls>
         </Control>

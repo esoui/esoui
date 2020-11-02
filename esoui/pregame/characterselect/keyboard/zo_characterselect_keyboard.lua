@@ -728,7 +728,7 @@ function ServiceTokenIndicator:OnMouseEnter()
     local requiredCollectibleId = self:GetRequiredCollectibleId()
     if requiredCollectibleId ~= 0 then
         local collectibleName = GetCollectibleName(requiredCollectibleId)
-        local categoryName = GetCollectibleCategoryName(requiredCollectibleId)
+        local categoryName = GetCollectibleCategoryNameByCollectibleId(requiredCollectibleId)
         local requiredCollectibleText = zo_strformat(SI_SERVICE_TOOLTIP_REQUIRES_COLLECTIBLE_TO_USE, collectibleName, categoryName)
 
         local meetsRequirementTextStyle

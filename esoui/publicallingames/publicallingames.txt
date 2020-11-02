@@ -65,5 +65,5 @@ EsoUI\PublicAllIngames\Tile\Keyboard\DailyRewardsTile_Keyboard.xml
 EsoUI\PublicAllIngames\Tile\Gamepad\DailyRewardsTile_Gamepad.lua
 EsoUI\PublicAllIngames\Tile\Gamepad\DailyRewardsTile_Gamepad.xml
 
-EsoUI\PublicAllIngames\Antiquities\AntiqtuityLoreDocument_Manager.lua
-EsoUI\PublicAllIngames\Antiquities\AntiqtuityLoreDocument_Manager.xml
+EsoUI\PublicAllIngames\Antiquities\AntiquityLoreDocument_Manager.lua
+EsoUI\PublicAllIngames\Antiquities\AntiquityLoreDocument_Manager.xml

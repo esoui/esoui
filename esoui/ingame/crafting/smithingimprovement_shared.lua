@@ -32,6 +32,10 @@ function ZO_SharedSmithingImprovement:InitializeBoosterRows()
         row.fromLabel = self.boosterContainer:GetNamedChild(from)
         row.toLabel = self.boosterContainer:GetNamedChild(to)
 
+        if row.toLabel then
+            row.questPin = row.toLabel:GetNamedChild("QuestPin")
+        end
+
         row.fadeAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("SmithingImprovementBoosterFade", row)
 
         row.iconTexture = row:GetNamedChild("Icon")

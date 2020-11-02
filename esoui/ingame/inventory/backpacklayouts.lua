@@ -7,13 +7,14 @@ local DEFAULT_BACKPACK_LAYOUT_DATA =
 {
     inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
     width = 565,
-    backpackOffsetY = 96,
+    backpackOffsetY = 136,
     inventoryTopOffsetY = -20,
     inventoryBottomOffsetY = -30,
-    sortByOffsetY = 63,
-    emptyLabelOffsetY = 100,
+    sortByOffsetY = 103,
+    emptyLabelOffsetY = 200,
     sortByHeaderWidth = 576,
     sortByNameWidth = 241,
+    useSearchBar = true,
     hideBankInfo = true,
     hideCurrencyInfo = false,
 }
@@ -67,7 +68,7 @@ BACKPACK_BANK_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
     {
         inventoryTopOffsetY = DEFAULT_INVENTORY_TOP_OFFSET_Y,
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-        hiddenFilters = { [ITEMFILTERTYPE_QUEST] = true },
+        hiddenFilters = { [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = true },
         additionalFilter = function (slot)
             return (not slot.stolen)
         end,
@@ -81,9 +82,9 @@ BACKPACK_GUILD_BANK_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
     {
         inventoryTopOffsetY = DEFAULT_INVENTORY_TOP_OFFSET_Y,
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-        hiddenFilters = { [ITEMFILTERTYPE_QUEST] = true },
+        hiddenFilters = { [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = true },
         additionalFilter = function (slot)
-            return (not slot.stolen) and (not slot.isPlayerLocked)
+            return not (slot.stolen or slot.isPlayerLocked or slot.isBoPTradeable or IsItemBound(slot.bagId, slot.slotIndex))
         end,
         hideBankInfo = false,
     })
@@ -95,8 +96,7 @@ BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         backpackOffsetY = 140,
         sortByOffsetY = 110,
         emptyLabelOffsetY = 140,
-        useSearchBar = true,
-        hiddenFilters = { [ITEMFILTERTYPE_QUEST] = true, [ITEMFILTERTYPE_JUNK] = true },
+        hiddenFilters = { [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = true, [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = true },
         additionalFilter = function(slot)
             return IsItemSellableOnTradingHouse(slot.bagId, slot.slotIndex)
         end,
@@ -107,7 +107,7 @@ BACKPACK_MAIL_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         inventoryTopOffsetY = 50,
         inventoryBottomOffsetY = -60,
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-        hiddenFilters = { [ITEMFILTERTYPE_QUEST] = true },
+        hiddenFilters = { [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = true },
         additionalFilter = function (slot)
             return (not IsItemBound(slot.bagId, slot.slotIndex)) and (not slot.stolen) and (not slot.isPlayerLocked) and (not IsItemBoPAndTradeable(slot.bagId, slot.slotIndex))
         end,
@@ -118,11 +118,12 @@ BACKPACK_PLAYER_TRADE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         inventoryTopOffsetY = 50,
         inventoryBottomOffsetY = -60,
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-        hiddenFilters = { [ITEMFILTERTYPE_QUEST] = true },
+        hiddenFilters = { [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = true },
         additionalFilter = function (slot)
             return TRADE_WINDOW:CanTradeItem(slot)
         end,
         waitUntilInventoryOpensToClearNewStatus = true,
+        alwaysReapplyLayout = true,
     })
 
 BACKPACK_STORE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
@@ -130,7 +131,7 @@ BACKPACK_STORE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         inventoryTopOffsetY = DEFAULT_INVENTORY_TOP_OFFSET_Y,
         inventoryBottomOffsetY = -30,
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-        hiddenFilters = { [ITEMFILTERTYPE_QUEST] = true },
+        hiddenFilters = { [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = true },
         additionalFilter = function (slot)
             return (not slot.stolen) and (not slot.isPlayerLocked)
         end,
@@ -142,7 +143,7 @@ BACKPACK_FENCE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         inventoryTopOffsetY = DEFAULT_INVENTORY_TOP_OFFSET_Y,
         inventoryBottomOffsetY = -30,
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-        hiddenFilters = { [ITEMFILTERTYPE_QUEST] = true },
+        hiddenFilters = { [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = true },
         additionalFilter = function (slot)
             return slot.stolen and slot.stackSellPrice > 0
         end,
@@ -154,7 +155,7 @@ BACKPACK_LAUNDER_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         inventoryTopOffsetY = DEFAULT_INVENTORY_TOP_OFFSET_Y,
         inventoryBottomOffsetY = -30,
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-        hiddenFilters = { [ITEMFILTERTYPE_QUEST] = true },
+        hiddenFilters = { [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = true },
         additionalFilter = function (slot)
             return slot.stolen
         end,

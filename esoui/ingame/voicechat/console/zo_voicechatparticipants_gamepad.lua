@@ -9,9 +9,9 @@
 ZO_VoiceChatParticipantsGamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ZO_VoiceChatParticipantsGamepad:New(...)
-	local object = ZO_Object.New(self)
-	object:Initialize(...)
-	return object
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
 end
 
 function ZO_VoiceChatParticipantsGamepad:Initialize(control)
@@ -29,7 +29,8 @@ function ZO_VoiceChatParticipantsGamepad:Initialize(control)
 end
 
 function ZO_VoiceChatParticipantsGamepad:InitializeHeader()
-    local headerData = {
+    local headerData =
+    {
         titleText = GetString(SI_GAMEPAD_VOICECHAT_PARTICIPANT_OPTIONS_TITLE)
     }
     ZO_GamepadGenericHeader_Refresh(self.header, headerData)
@@ -81,14 +82,9 @@ function ZO_VoiceChatParticipantsGamepad:OnShowing()
     self:PerformUpdate()
 end
 
-do
-    local function RequestDelayEnabled()
-        return VOICE_CHAT_MANAGER:AreRequestsAllowed()
-    end
-    function ZO_VoiceChatParticipantsGamepad:InitializeKeybindStripDescriptors()
-        self.keybindStripDescriptor = {} --ZO_VoiceChatSocialOptions_Gamepad will add the social keybinds
-        ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
-    end
+function ZO_VoiceChatParticipantsGamepad:InitializeKeybindStripDescriptors()
+    self.keybindStripDescriptor = {} --ZO_VoiceChatSocialOptions_Gamepad will add the social keybinds
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 end
 
 function ZO_VoiceChatParticipantsGamepad:PerformUpdate()
@@ -97,14 +93,14 @@ function ZO_VoiceChatParticipantsGamepad:PerformUpdate()
 
     local channel = self.channel
     if not channel then
+        self.list:Commit()
         return
     end
 
     local participantDataList = VOICE_CHAT_MANAGER:GetParticipantDataList(channel)
 
     --Populate list
-    for i = 1, #participantDataList do
-        local speakerData = participantDataList[i]
+    for i, speakerData in ipairs(participantDataList) do
         local displayName = speakerData.displayName
         if not ZO_VoiceChat_IsNameLocalPlayers(displayName) then
             local newEntry = ZO_GamepadEntryData:New(ZO_FormatUserFacingDisplayName(displayName), speakerData.isMuted and VOICE_CHAT_ICON_MUTED_PLAYER)
@@ -114,7 +110,6 @@ function ZO_VoiceChatParticipantsGamepad:PerformUpdate()
             self.list:AddEntry("ZO_VoiceChatParticipantsEntryGamepad", newEntry)
         end
     end
-    
 
     self.list:Commit()
 end

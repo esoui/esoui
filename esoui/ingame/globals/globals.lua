@@ -80,13 +80,14 @@ function ZO_GetJumpOrInteractDownAction()
 end
 
 function ZO_FormatResourceBarCurrentAndMax(current, maximum, overrideSetting)
-local returnValue = ""
+    local returnValue = ""
 
     local percent = 0
     if maximum ~= 0 then
         percent = (current/maximum) * 100
         if percent < 10 then
             percent = ZO_CommaDelimitDecimalNumber(zo_roundToNearest(percent, .1))
+            percent = ZO_FastFormatDecimalNumber(percent)
         else
             percent = zo_round(percent)
         end
@@ -95,11 +96,11 @@ local returnValue = ""
     local USE_LOWERCASE_NUMBER_SUFFIXES = false
     local setting = overrideSetting or tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS))
     if setting == RESOURCE_NUMBERS_SETTING_NUMBER_ONLY then
-        returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITHOUT_PERCENT, ZO_AbbreviateNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+        returnValue = ZO_AbbreviateAndLocalizeNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
     elseif setting == RESOURCE_NUMBERS_SETTING_PERCENT_ONLY then
-        returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITHOUT_PERCENT, percent)
+        returnValue = percent
     elseif setting == RESOURCE_NUMBERS_SETTING_NUMBER_AND_PERCENT then
-        returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITH_PERCENT, ZO_AbbreviateNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES), percent)
+        returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITH_PERCENT, ZO_AbbreviateAndLocalizeNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES), percent)
     end
 
     return returnValue

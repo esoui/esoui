@@ -144,7 +144,7 @@ function ZO_ZoneStories_Keyboard:BuildZonesList()
             defaultEntry.name = zo_iconTextFormat("EsoUI/Art/MapPins/UI-WorldMapPlayerPip.dds", 16, 16, defaultEntry.data.name)
         end
 
-        self.zoneSelectorComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+        self.zoneSelectorComboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
 
     local IGNORE_CALLBACK = false

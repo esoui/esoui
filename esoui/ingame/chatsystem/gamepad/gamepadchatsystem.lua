@@ -149,6 +149,7 @@ function ZO_GamepadChatSystem:Initialize(control)
     SharedChatSystem.Initialize(self, control, CONSOLE_SETTINGS)
 
     self.chatBubble = control:GetNamedChild("ChatBubble")
+    self.editControl = control:GetNamedChild("TextEntryEditBox")
     self.newChatFadeAnim = ZO_AlphaAnimation:New(self.chatBubble)
 
     self.fadeTextEntry = ZO_AlphaAnimation:New(self.textEntry:GetControl())
@@ -160,8 +161,8 @@ function ZO_GamepadChatSystem:Initialize(control)
     if IsChatSystemAvailableForCurrentPlatform() then
         -- timer handling
         local function OnUpdate()
-            -- do not fade if the virtual keyboard is open
-            if not IsVirtualKeyboardOnScreen() then
+            -- do not fade if the user is actively editing text
+            if not IsVirtualKeyboardOnScreen() and not self.editControl:HasFocus() then
                 if g_expirationTime and (not self.isMinimized or (self.isMinimized and not self:IsWindowPinned())) then
                     if GetFrameTimeSeconds() > g_expirationTime then
                         g_expirationTime = nil

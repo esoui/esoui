@@ -27,6 +27,11 @@ local MENU_CROWN_STORE_ENTRIES =
     GIFT_INVENTORY      = 5,
     REDEEM_CODE         = 6,
 }
+local MENU_COLLECTIONS_ENTRIES =
+{
+    COLLECTIONS         = 1,
+    ITEM_SETS           = 2,
+}
 local MENU_JOURNAL_ENTRIES =
 {
     QUESTS              = 1,
@@ -48,6 +53,15 @@ local MENU_SOCIAL_ENTRIES =
     MAIL        = 8,
 }
 
+local function IsAnySubMenuNewCallback(entryData)
+    for entryIndex, entry in ipairs(entryData.subMenu) do
+        if entry:IsNew() then
+            return true
+        end
+    end
+    return false
+end
+
 local MENU_ENTRY_DATA =
 {
     [MENU_MAIN_ENTRIES.CROWN_STORE] =
@@ -58,14 +72,7 @@ local MENU_ENTRY_DATA =
         header = zo_iconTextFormatNoSpace("EsoUI/Art/Market/Gamepad/gp_ESOPlus_Chalice_GOLD_64.dds", 32, 32, ZO_MARKET_PRODUCT_ESO_PLUS_COLOR:Colorize(GetString(SI_ESO_PLUS_TITLE))),
         postPadding = 70,
         showHeader = function() return IsESOPlusSubscriber() end,
-        isNewCallback = function(entryData)
-            for entryIndex, entry in ipairs(entryData.subMenu) do
-                if entry:IsNew() then
-                    return true
-                end
-            end
-            return false
-        end,
+        isNewCallback = IsAnySubMenuNewCallback,
         subMenu =
         {
             [MENU_CROWN_STORE_ENTRIES.CROWN_STORE] =
@@ -135,10 +142,7 @@ local MENU_ENTRY_DATA =
                 scene = "codeRedemptionGamepad",
                 name = GetString(SI_MAIN_MENU_REDEEM_CODE),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_redeemCode.dds",
-                isVisibleCallback = function()
-                    local serviceType = GetPlatformServiceType()
-                    return serviceType ~= PLATFORM_SERVICE_TYPE_DMM
-                end,
+                isVisibleCallback = DoesPlatformSupportCodeRedemption,
             },
         },
     },
@@ -172,12 +176,32 @@ local MENU_ENTRY_DATA =
     },
     [MENU_MAIN_ENTRIES.COLLECTIONS] =
     {
-        scene = "gamepadCollectionsBook",
+        customTemplate = "ZO_GamepadMenuEntryTemplateWithArrow",
         name = GetString(SI_MAIN_MENU_COLLECTIONS),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
-        isNewCallback = function()
-            return ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewCollectibles()
-        end,
+        isNewCallback = IsAnySubMenuNewCallback,
+        subMenu =
+        {
+            [MENU_COLLECTIONS_ENTRIES.COLLECTIONS] =
+            {
+                scene = "gamepadCollectionsBook",
+                name = GetString(SI_MAIN_MENU_COLLECTIONS),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
+                header = GetString(SI_MAIN_MENU_COLLECTIONS),
+                isNewCallback = function()
+                    return ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewCollectibles()
+                end,
+            },
+            [MENU_COLLECTIONS_ENTRIES.ITEM_SETS] =
+            {
+                scene = "gamepadItemSetsBook",
+                name = GetString(SI_ITEM_SETS_BOOK_TITLE),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_itemSetCollections.dds",
+                isNewCallback = function()
+                    return ITEM_SET_COLLECTIONS_DATA_MANAGER:HasAnyNewPieces()
+                end,
+            },
+        }
     },
     [MENU_MAIN_ENTRIES.INVENTORY] =
     {
@@ -251,9 +275,7 @@ local MENU_ENTRY_DATA =
         customTemplate = "ZO_GamepadMenuEntryTemplateWithArrow",
         name = GetString(SI_MAIN_MENU_JOURNAL),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_journal.dds",
-        isNewCallback = function()
-            return ANTIQUITY_DATA_MANAGER and ANTIQUITY_DATA_MANAGER:HasNewLead()
-        end,
+        isNewCallback = IsAnySubMenuNewCallback,
         subMenu =
         {
             [MENU_JOURNAL_ENTRIES.QUESTS] =
@@ -306,9 +328,7 @@ local MENU_ENTRY_DATA =
         customTemplate = "ZO_GamepadMenuEntryTemplateWithArrow",
         name = GetString(SI_MAIN_MENU_SOCIAL),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_multiplayer.dds",
-        isNewCallback = function()
-            return HasUnreadMail()
-        end,
+        isNewCallback = IsAnySubMenuNewCallback,
         subMenu =
         {
             [MENU_SOCIAL_ENTRIES.VOICE_CHAT] =
@@ -409,7 +429,7 @@ CATEGORY_TO_ENTRY_DATA =
     [MENU_CATEGORY_MARKET]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_STORE].subMenu[MENU_CROWN_STORE_ENTRIES.CROWN_STORE],
     [MENU_CATEGORY_CROWN_CRATES]    = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_STORE].subMenu[MENU_CROWN_STORE_ENTRIES.CROWN_CRATES],
     [MENU_CATEGORY_GIFT_INVENTORY]  = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_STORE].subMenu[MENU_CROWN_STORE_ENTRIES.GIFT_INVENTORY],
-    [MENU_CATEGORY_COLLECTIONS]     = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.COLLECTIONS],
+    [MENU_CATEGORY_COLLECTIONS]     = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.COLLECTIONS].subMenu[MENU_COLLECTIONS_ENTRIES.COLLECTIONS],
     [MENU_CATEGORY_INVENTORY]       = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.INVENTORY],
     [MENU_CATEGORY_CHARACTER]       = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CHARACTER],
     [MENU_CATEGORY_SKILLS]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.SKILLS],
@@ -593,7 +613,7 @@ do
         balanceLabel:SetText(GetString(SI_GAMEPAD_MAIN_MENU_MARKET_BALANCE_TITLE))
 
         local remainingCrownsLabel = control:GetNamedChild("RemainingCrowns")
-        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(GetPlayerCrowns()))
+        local currencyString = zo_strformat(SI_NUMBER_FORMAT, GetPlayerCrowns())
         remainingCrownsLabel:SetText(currencyString)
 
         local color = data:GetNameColor(selected)

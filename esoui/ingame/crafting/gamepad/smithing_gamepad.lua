@@ -95,6 +95,8 @@ function ZO_Smithing_Gamepad:Initialize(control)
 
             self:RefreshModeList(craftingType)
 
+            self.resetUIs = self.resetUIs or self.oldCraftingType ~= craftingType
+
             self.refinementPanel:SetCraftingType(craftingType, self.oldCraftingType, self.resetUIs)
             self.creationPanel:SetCraftingType(craftingType, self.oldCraftingType, self.resetUIs)
             self.improvementPanel:SetCraftingType(craftingType, self.oldCraftingType, self.resetUIs)

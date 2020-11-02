@@ -138,9 +138,18 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
-    controlName = "Options_Video_Reflection_Quality",
+    controlName = "Options_Video_Screenspace_Water_Reflection_Quality",
     settingType = SETTING_TYPE_GRAPHICS,
-    settingId = GRAPHICS_SETTING_REFLECTION_QUALITY,
+    settingId = GRAPHICS_SETTING_SCREENSPACE_WATER_REFLECTION_QUALITY,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+    template = "ZO_Options_Video_Dropdown_IncludeApplyScreenWarning",
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_Planar_Water_Reflection_Quality",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_PLANAR_WATER_REFLECTION_QUALITY,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
     template = "ZO_Options_Video_Dropdown_IncludeApplyScreenWarning",
     indentLevel = 1,
@@ -189,17 +198,17 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
-    controlName = "Options_Video_Bloom",
+    controlName = "Options_Video_Depth_Of_Field_Mode",
     settingType = SETTING_TYPE_GRAPHICS,
-    settingId = GRAPHICS_SETTING_BLOOM,
+    settingId = GRAPHICS_SETTING_DEPTH_OF_FIELD_MODE,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
     indentLevel = 1,
 })
 
 panelBuilder:AddSetting({
-    controlName = "Options_Video_Depth_Of_Field",
+    controlName = "Options_Video_Bloom",
     settingType = SETTING_TYPE_GRAPHICS,
-    settingId = GRAPHICS_SETTING_DEPTH_OF_FIELD,
+    settingId = GRAPHICS_SETTING_BLOOM,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
     indentLevel = 1,
 })

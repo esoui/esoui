@@ -6,7 +6,6 @@ ZO_PLAYER_CONSOLE_INFO_REQUEST_BLOCK = true
 ZO_PLAYER_CONSOLE_INFO_REQUEST_DONT_BLOCK = false
 
 local REQUEST_ID = "id"
-local REQUEST_GAMERCARD_PERMISSION = "gamercardPermission"
 local REQUEST_TEXT_VALIDATION = "textValidation"
 
 function PlayerConsoleInfoRequestManager:New(...)
@@ -27,8 +26,8 @@ function PlayerConsoleInfoRequestManager:Initialize()
 end
 
 function PlayerConsoleInfoRequestManager:OnResumeFromSuspend()
-	local NO_RESULT = false
-	self:OnSelectFromUserListDialogResult(NO_RESULT)
+    local NO_RESULT = false
+    self:OnSelectFromUserListDialogResult(NO_RESULT)
 end
 
 ZO_ID_REQUEST_TYPE_ACCOUNT_ID = "accountId"
@@ -99,8 +98,8 @@ function PlayerConsoleInfoRequestManager:RequestIdFromCharacterName(characterNam
 end
 
 function PlayerConsoleInfoRequestManager:RequestIdFromDisplayName(displayName, block, callback)
-    if GetUIPlatform() == UI_PLATFORM_PS4 then
-        --PS4 doesn't have a console id so we can just return 0 for it immediately
+    if ZO_IsPlaystationPlatform() then
+        --PlayStation doesn't have a console id so we can just return 0 for it immediately
         callback(true, displayName, 0)
     else
         self:RequestId(ZO_ID_REQUEST_TYPE_DISPLAY_NAME, block, callback, displayName)
@@ -108,10 +107,9 @@ function PlayerConsoleInfoRequestManager:RequestIdFromDisplayName(displayName, b
 end
 
 function PlayerConsoleInfoRequestManager:RequestIdFromDisplayNameOrFallbackType(displayName, block, fallbackRequestType, callback, ...)
-    local platform = GetUIPlatform()
-    if platform == UI_PLATFORM_PS4 then
+    if ZO_IsPlaystationPlatform() then
         callback(true, displayName, 0)
-    elseif platform == UI_PLATFORM_XBOX then
+    elseif GetUIPlatform() == UI_PLATFORM_XBOX then
         self:RequestId(fallbackRequestType, block, callback, ...)
     end
 end

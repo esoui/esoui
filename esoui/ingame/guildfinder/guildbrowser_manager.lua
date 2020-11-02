@@ -265,7 +265,7 @@ function ZO_GuildBrowser_Manager:ClearCurrentFoundGuilds()
 end
 
 function ZO_GuildBrowser_Manager:CurrentFoundGuildsListIterator()
-    return ZO_NumericallyIndexedTableIterator(self.currentFoundGuilds)
+    return ipairs(self.currentFoundGuilds)
 end
 
 function ZO_GuildBrowser_Manager:GetCurrentApplicationsList()

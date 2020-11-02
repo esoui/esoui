@@ -308,3 +308,14 @@ function ZO_ScaleAndRotateTextureCoords(control, angle, originX, originY, scaleX
     control:SetVertexUV(VERTEX_POINTS_BOTTOMLEFT, originX + bottomLeftX, originY + bottomLeftY)
     control:SetVertexUV(VERTEX_POINTS_BOTTOMRIGHT, originX + bottomRightX, originY + bottomRightY)
 end
+
+function ZO_MaskIterator(iterationBegin, iterationEnd)
+    local iter = iterationBegin
+    return function()
+        if iter <= iterationEnd then
+            local ret = iter
+            iter = BitLShift(iter, 1)
+            return ret
+        end
+    end
+end

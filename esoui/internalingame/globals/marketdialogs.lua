@@ -15,6 +15,7 @@ end
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] = 
 {
     finishedCallback = LogPurchaseClose,
+    canQueue = true,
     title =
     {
         text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
@@ -44,6 +45,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] =
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS"] =
 {
     finishedCallback = LogPurchaseClose,
+    canQueue = true,
     title =
     {
         text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
@@ -77,6 +79,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS"] =
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS"] =
 {
     finishedCallback = LogPurchaseClose,
+    canQueue = true,
     title =
     {
         text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
@@ -104,6 +107,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS"] =
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_NOT_ALLOWED"] =
 {
     finishedCallback = LogPurchaseClose,
+    canQueue = true,
     title =
     {
         text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
@@ -134,6 +138,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD"] =
     updateFn = function(dialog)
         ZO_MarketDialogs_Shared_UpdateGiftingGracePeriodTimer(dialog)
     end,
+    canQueue = true,
     title =
     {
         text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
@@ -161,6 +166,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD"] =
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVENTORY"] =
 {
     finishedCallback = LogPurchaseClose,
+    canQueue = true,
     title =
     {
         text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
@@ -188,6 +194,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVE
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT"] =
 {
     finishedCallback = LogPurchaseClose,
+    canQueue = true,
     title =
     {
         text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
@@ -264,22 +271,57 @@ local function MarketPurchaseConfirmationDialogSetupGiftingControls(dialog, data
     dialog:GetNamedChild("NoteEdit"):SetText(data.note or "")
 end
 
+local TEXT_CALLOUT_BACKGROUND_ALPHA = 0.9
 local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data)
-    local marketCurrencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = data.marketProductData:GetMarketProductPricingByPresentation()
-    local currencyType = ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
+    local marketPurchaseData
+    if data.marketProductData then
+        local marketCurrencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = data.marketProductData:GetMarketProductPricingByPresentation()
+        marketPurchaseData =
+        {
+            marketCurrencyType = marketCurrencyType,
+            cost = cost,
+            costAfterDiscount = costAfterDiscount,
+            discountPercent = discountPercent,
+            esoPlusCost = esoPlusCost,
+        }
+    elseif data.marketPurchaseOptions then
+        local currencyType, options = next(data.marketPurchaseOptions)
+        marketPurchaseData = options
+        marketPurchaseData.marketCurrencyType = currencyType
+    end
 
-    local hasCost = cost ~= nil
+    local currencyType = ZO_Currency_MarketCurrencyToUICurrency(marketPurchaseData.marketCurrencyType)
+
+    local hasCost = marketPurchaseData.cost ~= nil
     local hasEsoPlusCost
     if data.isGift then
         hasEsoPlusCost = false -- gifts aren't eligible for ESO Plus pricing
     else
-        hasEsoPlusCost = esoPlusCost ~= nil and IsEligibleForEsoPlusPricing()
+        hasEsoPlusCost = marketPurchaseData.esoPlusCost ~= nil and IsEligibleForEsoPlusPricing()
     end
 
     if hasCost then
         local extraOptions = nil
         local currencyFormat
         local costAmountLabel = dialog.costContainer.currencyAmount
+        local previousCostLabel = dialog.costContainer.previousCost
+        local textCalloutLabel = dialog.costContainer.textCallout
+
+        -- layout the previous cost
+        if not hasEsoPlusCost and marketPurchaseData.discountPercent > 0 and marketPurchaseData.costAfterDiscount ~= 0 then
+            local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, marketPurchaseData.cost)
+            local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
+            previousCostLabel:SetText(strikethroughAmountString)
+            previousCostLabel:SetHidden(false)
+
+            local discountPercentText = zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, marketPurchaseData.discountPercent)
+            textCalloutLabel:SetText(discountPercentText)
+            textCalloutLabel:SetHidden(false)
+        else
+            previousCostLabel:SetHidden(true)
+            textCalloutLabel:SetHidden(true)
+        end
+
         if hasEsoPlusCost then
             extraOptions =
             {
@@ -293,7 +335,7 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
             costAmountLabel:SetColor(ZO_HIGHLIGHT_TEXT:UnpackRGB())
             currencyFormat = ZO_CURRENCY_FORMAT_AMOUNT_ICON
         end
-        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, costAfterDiscount, currencyFormat, extraOptions))
+        local currencyString = ZO_Currency_FormatKeyboard(currencyType, marketPurchaseData.costAfterDiscount, currencyFormat, extraOptions)
         costAmountLabel:SetText(currencyString)
 
         local labelString
@@ -313,7 +355,7 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
             color = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
             iconInheritColor = marketCurrencyType ~= MKCT_CROWN_GEMS,
         }
-        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, esoPlusCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON, extraOptions))
+        local currencyString = ZO_Currency_FormatKeyboard(currencyType, marketPurchaseData.esoPlusCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON, extraOptions)
 
         local costAmountLabel = dialog.esoPlusCostContainer.currencyAmount
         costAmountLabel:SetText(currencyString)
@@ -325,9 +367,49 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
     end
     dialog.esoPlusCostContainer:SetHidden(not hasEsoPlusCost)
 
-    local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, GetPlayerMarketCurrency(marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+    local currencyString = ZO_Currency_FormatKeyboard(currencyType, GetPlayerMarketCurrency(marketPurchaseData.marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
     local currentBalanceAmountLabel = dialog.balanceContainer.currencyAmount
     currentBalanceAmountLabel:SetText(currencyString)
+end
+
+local function MarketPurchaseSelectTemplateDialogSetupHouseInfoControls(dialog, data)
+    local index, templateData = next(data.marketPurchaseOptions)
+    if templateData then
+        local houseZoneId = GetHouseFoundInZoneId(templateData.houseId)
+        local houseZoneName = GetZoneNameById(houseZoneId)
+        local houseCategory = GetHouseCategoryType(templateData.houseId)
+        local houseCategoryName = GetString("SI_HOUSECATEGORYTYPE", houseCategory)
+
+        local hasEsoPlusCost
+        if data.isGift then
+            hasEsoPlusCost = false -- gifts aren't eligible for ESO Plus pricing
+        else
+            hasEsoPlusCost = templateData.esoPlusCost ~= nil and IsEligibleForEsoPlusPricing()
+        end
+
+        dialog.locationContainer:ClearAnchors()
+        local controlToAnchorCostContainerTo
+        if hasEsoPlusCost then
+            controlToAnchorCostContainerTo = dialog.esoPlusCostContainer
+        else
+            controlToAnchorCostContainerTo = templateData.cost ~= nil and dialog.costContainer or dialog.balanceContainer
+        end
+
+        dialog.locationContainer:SetAnchor(TOPLEFT, controlToAnchorCostContainerTo, BOTTOMLEFT, 0, 50)
+        dialog.locationContainer:SetAnchor(TOPRIGHT, controlToAnchorCostContainerTo, BOTTOMRIGHT, 0, 50)
+
+        local locationValueLabel = dialog.locationContainer.valueControl
+        locationValueLabel:SetText(zo_strformat(SI_ZONE_NAME, houseZoneName))
+
+        local houseTypeValueLabel = dialog.houseTypeContainer.valueControl
+        houseTypeValueLabel:SetText(zo_strformat(SI_HOUSE_TYPE_FORMATTER, houseCategoryName))
+
+        for furnishingLimitType = HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_BEGIN, HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_END do
+            local initialFurnishingCount, furnishingLimit = GetHouseTemplateBaseFurnishingCountInfo(templateData.houseTemplateId, furnishingLimitType)
+            dialog:GetNamedChild("HouseInfo" .. furnishingLimitType).labelControl:SetText(zo_strformat(SI_MARKET_SELECT_HOUSE_TEMPLATE_INFO_FORMATTER, GetString("SI_HOUSINGFURNISHINGLIMITTYPE", furnishingLimitType)))
+            dialog:GetNamedChild("HouseInfo" .. furnishingLimitType).valueControl:SetText(zo_strformat(SI_HOUSE_INFORMATION_COUNT_FORMAT, initialFurnishingCount, furnishingLimit))
+        end
+    end
 end
 
 local function UpdateConfirmRestrictions(dialogControl)
@@ -464,7 +546,18 @@ local function MarketPurchaseConfirmationDialogSetup(dialog, data)
     data.itemName = marketProductData:GetColorizedDisplayName()
 
     local itemContainerControl = dialog:GetNamedChild("ItemContainer")
-    itemContainerControl:GetNamedChild("ItemName"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, data.itemName))
+    local itemContainerTextContainer = itemContainerControl:GetNamedChild("ItemText")
+
+    local houseId = GetMarketProductHouseId(data.marketProductData.marketProductId)
+    if houseId > 0 then
+        local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+        local houseDisplayName = GetCollectibleName(houseCollectibleId)
+        itemContainerTextContainer:GetNamedChild("ItemName"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, houseDisplayName))
+        itemContainerTextContainer:GetNamedChild("ItemDetail"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, data.itemName))
+    else
+        itemContainerTextContainer:GetNamedChild("ItemName"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, data.itemName))
+        itemContainerTextContainer:GetNamedChild("ItemDetail"):SetText("")
+    end
 
     local iconTextureControl = itemContainerControl:GetNamedChild("Icon")
     local icon = marketProductData:GetIcon()
@@ -500,6 +593,8 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
 
     control.balanceContainer = control:GetNamedChild("BalanceContainer")
     control.costContainer = control:GetNamedChild("CostContainer")
+    control.costContainer.previousCost = control.costContainer:GetNamedChild("PreviousCost")
+    control.costContainer.textCallout = control.costContainer:GetNamedChild("TextCallout")
     control.esoPlusCostContainer = control:GetNamedChild("EsoPlusCostContainer")
 
     local function OnRadioButtonSelectionChanged(buttonGroup, selectedButton, previousButton)
@@ -583,6 +678,154 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
     )
 end
 
+local function MarketPurchaseHouseTemplateSelectDialogSetup(dialog, data)
+    local marketProductData = data.marketProductData
+    local marketProductId = marketProductData:GetId()
+    local isHouseMarketProduct, houseTemplateDataList, defaultHouseTemplateIndex = ZO_MarketProduct_GetMarketProductHouseTemplateDataList(marketProductId, function(...) return { GetActiveMarketProductListingsForHouseTemplate(...) } end)
+
+    -- Setup House Collectible Name
+    local itemContainerControl = dialog:GetNamedChild("ItemContainer")
+    local itemContainerTextContainer = itemContainerControl:GetNamedChild("ItemText")
+    local itemNameLabel = itemContainerTextContainer:GetNamedChild("ItemName")
+
+    if isHouseMarketProduct then
+        local houseId = GetMarketProductHouseId(marketProductId)
+        local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+        local houseDisplayName = GetCollectibleName(houseCollectibleId)
+        itemNameLabel:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, houseDisplayName))
+    else
+        internalassert(false, "Market Product is not a house")
+    end
+
+    -- Setup House Collectible Icon
+    local iconTextureControl = itemContainerControl:GetNamedChild("Icon")
+    local icon = marketProductData:GetIcon()
+    iconTextureControl:SetTexture(icon)
+
+    -- Populate House Template Dropdown
+    local function OnTemplateChanged(comboBox, entryText, entry)
+        local currencyType
+        local marketCurrencyType
+        if entry and entry.data then
+            local key, value = next(entry.data.marketPurchaseOptions)
+            currencyType = ZO_Currency_MarketCurrencyToUICurrency(key)
+            marketCurrencyType = key
+
+            local currencyString = ZO_Currency_FormatKeyboard(currencyType, GetPlayerMarketCurrency(marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            local currentBalanceAmountLabel = dialog.balanceContainer.currencyAmount
+            currentBalanceAmountLabel:SetText(currencyString)
+
+            MarketPurchaseConfirmationDialogSetupPricingControls(dialog, comboBox:GetSelectedItemData().data)
+            MarketPurchaseSelectTemplateDialogSetupHouseInfoControls(dialog, comboBox:GetSelectedItemData().data)
+        end
+    end
+
+    local comboBox = dialog.comboBox
+
+    comboBox:ClearItems()
+
+    local defaultTemplateListIndex
+    for index, houseTemplateData in pairs(houseTemplateDataList) do
+        local currencyType, marketData = next(houseTemplateData.marketPurchaseOptions)
+        if houseTemplateData.name and marketData and (data.isGift and marketData.isGiftable) or (not data.isGift and not marketData.isHouseOwned) then
+            local formattedName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_TEMPLATE_NAME_FORMAT, houseTemplateData.name)
+            local entry = comboBox:CreateItemEntry(formattedName, OnTemplateChanged)
+            entry.data = houseTemplateData
+            comboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
+
+            if index == defaultHouseTemplateIndex then
+                defaultTemplateListIndex = comboBox:GetNumItems()
+            end
+        end
+    end
+
+    if defaultTemplateListIndex then
+        comboBox:SelectItemByIndex(defaultTemplateListIndex)
+    else
+        comboBox:SelectFirstItem()
+    end
+
+    MarketPurchaseConfirmationDialogSetupPricingControls(dialog, comboBox:GetSelectedItemData().data)
+
+    MarketPurchaseSelectTemplateDialogSetupHouseInfoControls(dialog, comboBox:GetSelectedItemData().data)
+end
+
+function ZO_MarketPurchaseHouseTemplateSelectDialog_OnInitialized(control)
+    control.templateComboBoxControl = control:GetNamedChild("ComboBox")
+    control.comboBox = ZO_ComboBox:New(control.templateComboBoxControl)
+
+    control.balanceContainer = control:GetNamedChild("BalanceContainer")
+    control.costContainer = control:GetNamedChild("CostContainer")
+    control.costContainer.previousCost = control.costContainer:GetNamedChild("PreviousCost")
+    control.costContainer.textCallout = control.costContainer:GetNamedChild("TextCallout")
+    control.esoPlusCostContainer = control:GetNamedChild("EsoPlusCostContainer")
+
+    control.locationContainer = control:GetNamedChild("LocationContainer")
+    control.houseTypeContainer = control:GetNamedChild("HouseTypeContainer")
+
+    local locationLabel = control.locationContainer:GetNamedChild("Label")
+    locationLabel:SetText(zo_strformat(SI_MARKET_SELECT_HOUSE_TEMPLATE_INFO_FORMATTER, GetString(SI_MARKET_PRODUCT_HOUSING_LOCATION_LABEL)))
+
+    local houseTypeLabel = control.houseTypeContainer:GetNamedChild("Label")
+    houseTypeLabel:SetText(zo_strformat(SI_MARKET_SELECT_HOUSE_TEMPLATE_INFO_FORMATTER, GetString(SI_MARKET_PRODUCT_HOUSING_HOUSE_TYPE_LABEL)))
+
+    local anchorControl = control.houseTypeContainer
+    local offsetY = 50
+    for furnishingLimitType = HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_BEGIN, HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_END do
+        local infoControl = CreateControlFromVirtual("$(parent)HouseInfo", control, "ZO_DialogLabelValueContainer_Keyboard", furnishingLimitType)
+
+        infoControl:ClearAnchors()
+        infoControl:SetAnchor(TOPLEFT, anchorControl, BOTTOMLEFT, 0, offsetY)
+        infoControl:SetAnchor(TOPRIGHT, anchorControl, BOTTOMRIGHT, 0, offsetY)
+
+        anchorControl = infoControl
+        offsetY = 30
+    end
+
+    local esoPlusNoteLabel = control:GetNamedChild("EsoPlusNote")
+    esoPlusNoteLabel:ClearAnchors()
+    esoPlusNoteLabel:SetAnchor(TOP, anchorControl, BOTTOM, 0, offsetY)
+
+    ZO_Dialogs_RegisterCustomDialog(
+        "MARKET_PURCHASE_HOUSE_TEMPLATE_SELECTION",
+        {
+            customControl = control,
+            setup = MarketPurchaseHouseTemplateSelectDialogSetup,
+            title =
+            {
+                text = SI_MARKET_SELECT_HOUSE_TEMPLATE_TITLE,
+            },
+            canQueue = true,
+            buttons =
+            {
+                {
+                    control = control:GetNamedChild("Confirm"),
+                    text = SI_MARKET_SELECT_HOUSE_TEMPLATE_REVIEW_PURCHASE,
+                    callback =  function(dialog, data)
+                        local selectedData = dialog.comboBox:GetSelectedItemData().data
+                        local currencyType, marketData = next(selectedData.marketPurchaseOptions)
+                        if marketData then
+                            local marketProductData = ZO_MarketProductData:New(marketData.marketProductId)
+                            if dialog.data.isGift then
+                                ZO_Market_Keyboard:GiftMarketProduct(marketProductData)
+                            else
+                                ZO_Market_Keyboard:PurchaseMarketProduct(marketProductData)
+                            end
+                        end
+                    end,
+                },
+                {
+                    control = control:GetNamedChild("Cancel"),
+                    text = SI_DIALOG_EXIT,
+                },
+            },
+            finishedCallback = function(dialog)
+                ClearTooltipImmediately(InformationTooltip)
+            end,
+        }
+    )
+end
+
 local function OnMarketPurchaseResult(data, result, tutorialTrigger, wasGift)
     EVENT_MANAGER:UnregisterForEvent("MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT)
     data.result = result
@@ -621,13 +864,22 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
             titleText = GetString(SI_TRANSACTION_COMPLETE_TITLE)
 
             local marketProductData = data.marketProductData
+            local marketProductId = marketProductData:GetId()
             local stackCount = marketProductData:GetStackCount()
+            local itemName = data.itemName
+            local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
+            local houseId = GetMarketProductHouseId(marketProductId)
+            if houseId > 0 then
+                local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+                local houseDisplayName = GetCollectibleName(houseCollectibleId)
+                itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, houseDisplayName, data.itemName)
+            end
 
             if data.wasGift then
                 if stackCount > 1 then
-                    mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, data.itemName, stackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
+                    mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
                 else
-                    mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, data.itemName, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
+                    mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, color:Colorize(itemName), ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
                 end
             else
                 local useProductInfo = ZO_Market_Shared.GetUseProductInfo(marketProductData)
@@ -635,7 +887,7 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
                     if useProductInfo.transactionCompleteTitleText then
                         titleText = useProductInfo.transactionCompleteTitleText
                     end
-                    mainText = zo_strformat(useProductInfo.transactionCompleteText, data.itemName, stackCount)
+                    mainText = zo_strformat(useProductInfo.transactionCompleteText, color:Colorize(itemName), stackCount)
 
                     local useProductControl = dialog:GetNamedChild("UseProduct")
                     useProductControl:SetHidden(useProductInfo.visible and not useProductInfo.visible())
@@ -643,11 +895,11 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
                     useProductControl:SetText(useProductInfo.buttonText)
                 else
                     if stackCount > 1 then
-                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, data.itemName, stackCount)
+                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount)
                     elseif marketProductData:GetNumAttachedCollectibles() > 0 then
-                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, data.itemName)
+                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, color:Colorize(itemName))
                     else
-                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, data.itemName)
+                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, color:Colorize(itemName))
                     end
                 end
 

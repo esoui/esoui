@@ -12,7 +12,8 @@ function ZO_AbstractGridScrollList:Initialize(control)
     self.list = self.container:GetNamedChild("List")
     ZO_ScrollList_AddResizeOnScreenResize(self.list)
     self.scrollbar = self.list:GetNamedChild("ScrollBar")
-    self.currentHeaderName = nil
+    self.currentHeaderName = nil -- Maintaining backwards compatability
+    self.currentHeaderData = nil
     self.nextOperationId = 1
     self.indentAmount = 0
     self.headerPrePadding = 0
@@ -69,19 +70,28 @@ function ZO_AbstractGridScrollList:AddEntryTemplate(templateName, width, height,
     return nil
 end
 
+function ZO_AbstractGridScrollList:SetEntryTemplateVisibilityFunction(templateName, visiblityFunction)
+    local operationId = self.templateOperationIds[templateName]
+    if operationId then
+        ZO_ScrollList_SetVisibilityFunction(self.list, operationId, visiblityFunction)
+    end
+end
+
 function ZO_AbstractGridScrollList:AddEntry(data, templateName)
     local operationId = self.templateOperationIds[templateName]
     if operationId then
-        local gridHeaderName = data.gridHeaderName
-        if self.currentHeaderName ~= gridHeaderName then
+        local gridHeaderData = data.gridHeaderName or data.gridHeaderData
+        if self.currentHeaderData ~= gridHeaderData then
             local scrollData = ZO_ScrollList_GetDataList(self.list)
-            if self.currentHeaderName or #scrollData > 0 then
+            if self.currentHeaderData or #scrollData > 0 then
                 ZO_ScrollList_AddOperation(self.list, ZO_SCROLL_LIST_OPERATION_LINE_BREAK, { lineBreakAmount = self.headerPrePadding })
             end
-            self.currentHeaderName = gridHeaderName
-            if self.currentHeaderName and self.currentHeaderName ~= "" then
+            self.currentHeaderData = gridHeaderData
+            self.currentHeaderName = gridHeaderData -- Maintaining backwards compatability
+            if self.currentHeaderData and self.currentHeaderData ~= "" then
                 local headerOperationId = self.templateOperationIds[data.gridHeaderTemplate]
-                ZO_ScrollList_AddOperation(self.list, headerOperationId, { header = gridHeaderName, data = data })
+                -- data is only being kept for theoretical addon compat. There's no reason to have the entry data in the header operation, and no one should use it.
+                ZO_ScrollList_AddOperation(self.list, headerOperationId, { header = gridHeaderData, data = data}) 
                 if self.headerPostPadding > 0 then
                     ZO_ScrollList_AddOperation(self.list, ZO_SCROLL_LIST_OPERATION_LINE_BREAK, { lineBreakAmount = self.headerPostPadding, indentX = self.indentAmount })
                 end
@@ -92,6 +102,13 @@ function ZO_AbstractGridScrollList:AddEntry(data, templateName)
 end
 
 function ZO_AbstractGridScrollList:CommitGridList()
+    ZO_ScrollList_Commit(self.list)
+end
+
+function ZO_AbstractGridScrollList:RecalculateVisibleEntries()
+    -- At present determining which entries are visible is done in the commit
+    -- But use a different function signature so we don't do any other behavior that might come with a call to CommitGridList in the future.
+    -- CommitGridList is generally understood to be used after you add/remove entries from the list
     ZO_ScrollList_Commit(self.list)
 end
 
@@ -116,7 +133,8 @@ end
 
 function ZO_AbstractGridScrollList:ClearGridList(retainScrollPosition)
     ZO_ScrollList_Clear(self.list)
-    self.currentHeaderName = nil
+    self.currentHeaderName = nil -- Maintaining backwards compatability
+    self.currentHeaderData = nil
     if not retainScrollPosition then
         ZO_Scroll_ResetToTop(self.list)
     end
@@ -181,6 +199,10 @@ function ZO_DefaultGridEntrySetup(control, data, list)
 
     local icon = control.icon
 
+    if data.iconColor then
+        icon:SetColor(data.iconColor:UnpackRGBA())
+    end
+
     if data.iconDesaturation then
         icon:SetDesaturation(data.iconDesaturation)
     end
@@ -191,7 +213,7 @@ function ZO_DefaultGridEntrySetup(control, data, list)
         end
     end
 
-    local iconFile = data.iconFile or data.icon
+    local iconFile = data.iconFile or data.icon or (data.GetIcon and data:GetIcon())
     if iconFile then
         icon:SetTexture(iconFile)
         icon:SetHidden(false)
@@ -216,4 +238,8 @@ do
     function ZO_GridEntry_SetIconScaledUpInstantly(control, scaledUp)
         ZO_GridEntry_SetIconScaledUp(control, scaledUp, true)
     end
+end
+
+function ZO_AbstractGridScrollList:GetSelectedData()
+    return ZO_ScrollList_GetSelectedData(self.list)
 end

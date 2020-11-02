@@ -167,10 +167,11 @@ do
             local canQueueIndividual, canQueueGroup = self:CanQueueForCampaign(campaignData)
             if canQueueIndividual and canQueueGroup then
                 if IsInGamepadPreferredMode() then
-                    ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_QUEUE_DIALOG, {campaignData = campaignData}, {mainTextParams = {campaignData.name}})
+                    local campaignRulesetTypeString = GetString("SI_CAMPAIGNRULESETTYPE", campaignData.rulesetType)
+                    ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_QUEUE_DIALOG, {campaignData = campaignData}, {mainTextParams = {campaignRulesetTypeString, campaignData.name}})
                     return
                 else
-                    ZO_Dialogs_ShowDialog("CAMPAIGN_QUEUE", {campaignData = campaignData}, {mainTextParams = {campaignData.name}})
+                    ZO_Dialogs_ShowDialog("CAMPAIGN_QUEUE", {campaignData = campaignData})
                     return
                 end
             elseif canQueueIndividual then

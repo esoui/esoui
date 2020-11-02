@@ -1,0 +1,31 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CraftAdvisor_Keyboard_TopLevel" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="-20" offsetY="-15"/>
+
+            <OnInitialized>
+                ZO_CraftAdvisor_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)SelectionTabBar" inherits="ZO_MenuBarTemplate">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="-18" />
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="15" offsetY="2" />
+                        </Label>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Divider" inherits="ZO_LeftPanel_HorizontalDivider">
+                    <Anchor point="TOPLEFT" offsetY="24" />
+                    <Anchor point="RIGHT" relativePoint="RIGHT" offsetX="-20" constrains="X" />
+                </Control>
+                <Label name="$(parent)SelectedTab" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_CRAFT_ADVISOR_WRITS_TITLE" hidden="true">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Divider" relativePoint="TOPLEFT" offsetX="30" offsetY="-5" />
+                    <Anchor point="LEFT" relativeTo="$(parent)SelectionTabBar" relativePoint="RIGHT" constrains="X" offsetX="15"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

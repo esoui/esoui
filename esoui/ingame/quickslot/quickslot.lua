@@ -19,15 +19,22 @@ function ZO_QuickslotManager:New(container)
     local manager = ZO_Object.New(self)
 
     manager.container = container
-    manager.money = GetControl(container, "InfoBarMoney")
+    manager.money = container:GetNamedChild("InfoBarMoney")
 
-    manager.activeTab = GetControl(container, "TabsActive")
-    manager.freeSlotsLabel = GetControl(container, "InfoBarFreeSlots")
+    manager.activeTab = container:GetNamedChild("TabsActive")
+    manager.freeSlotsLabel = container:GetNamedChild("InfoBarFreeSlots")
 
-    manager.list = GetControl(container, "List")
+    manager.list = container:GetNamedChild("List")
     ZO_ScrollList_AddDataType(manager.list, DATA_TYPE_QUICKSLOT_ITEM, "ZO_PlayerInventorySlot", LIST_ENTRY_HEIGHT, function(control, data) manager:SetUpQuickSlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
     ZO_ScrollList_AddDataType(manager.list, DATA_TYPE_COLLECTIBLE_ITEM, "ZO_CollectionsSlot", LIST_ENTRY_HEIGHT, function(control, data) manager:SetUpCollectionSlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
     ZO_ScrollList_AddDataType(manager.list, DATA_TYPE_QUICKSLOT_QUEST_ITEM, "ZO_PlayerInventorySlot", LIST_ENTRY_HEIGHT, function(control, data) manager:SetUpQuestItemSlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
+
+    manager.searchBox = container:GetNamedChild("SearchFiltersTextSearchBox");
+    manager.quickSlotSearch = ZO_StringSearch:New(ZO_TEXT_SEARCH_CACHE_DATA)
+    manager.quickSlotSearch:AddProcessor(ZO_TEXT_SEARCH_TYPE_INVENTORY, ZO_ItemFilterUtils.TextSearchProcessInventoryItem)
+    manager.quickSlotSearch:AddProcessor(ZO_TEXT_SEARCH_TYPE_QUEST_ITEM, ZO_ItemFilterUtils.TextSearchProcessQuestItem)
+    manager.quickSlotSearch:AddProcessor(ZO_TEXT_SEARCH_TYPE_QUEST_TOOL, ZO_ItemFilterUtils.TextSearchProcessQuestTool)
+    manager.quickSlotSearch:AddProcessor(ZO_TEXT_SEARCH_TYPE_COLLECTIBLE, ZO_ItemFilterUtils.TextSearchProcessCollectible)
 
     manager.sortHeadersControl = container:GetNamedChild("SortBy")
     manager.sortHeaders = ZO_SortHeaderGroup:New(manager.sortHeadersControl, true)
@@ -35,7 +42,7 @@ function ZO_QuickslotManager:New(container)
     manager.circle = ZO_QuickSlotCircle
     manager.quickSlots = {}
 
-    manager.tabs = GetControl(container, "Tabs")
+    manager.tabs = container:GetNamedChild("Tabs")
 
     manager.quickslotFilters = {}
 
@@ -114,7 +121,7 @@ function ZO_QuickslotManager:New(container)
 
     local function HandleActionSlotPickup(slotType, sourceSlot, itemId, itemQualityId, itemRequiredLevel, itemInstanceData)
         local metEquipRequirements = true -- This was already in a slot, chances are you're not going to fail equip requirements...
-        local isItem = (slotType == ACTION_TYPE_ITEM)
+        local isItem = slotType == ACTION_TYPE_ITEM
 
         if isItem then
             for slotNum, quickSlot in pairs(manager.quickSlots) do
@@ -405,12 +412,16 @@ function ZO_QuickslotManager:ChangeFilter(filterData)
     self.sortHeaders:SetHeaderHiddenForKey("age", isNotItemFilter)
 end
 
+function ZO_QuickslotManager:IsItemInTextSearch(itemData)
+    return self.quickSlotSearch:IsMatch(self.cachedSearchText, itemData.searchData)
+end
+
 function ZO_QuickslotManager:ShouldAddItemToList(itemData)
-    return ZO_IsElementInNumericallyIndexedTable(itemData.filterData, ITEMFILTERTYPE_QUICKSLOT)
+    return ZO_IsElementInNumericallyIndexedTable(itemData.filterData, ITEMFILTERTYPE_QUICKSLOT) and self:IsItemInTextSearch(itemData)
 end
 
 function ZO_QuickslotManager:ShouldAddQuestItemToList(questItemData)
-    return ZO_IsElementInNumericallyIndexedTable(questItemData.filterData, ITEMFILTERTYPE_QUEST_QUICKSLOT)
+    return ZO_IsElementInNumericallyIndexedTable(questItemData.filterData, ITEMFILTERTYPE_QUEST_QUICKSLOT) and self:IsItemInTextSearch(questItemData)
 end
 
 local sortKeys =
@@ -453,6 +464,8 @@ function ZO_QuickslotManager:UpdateList()
     ZO_ScrollList_Clear(self.list)
     ZO_ScrollList_ResetToTop(self.list)
 
+    self.cachedSearchText = self.searchBox:GetText()
+
     local currentFilterType = self.currentFilter.descriptor
     if currentFilterType == ITEMFILTERTYPE_ALL then
         self:AppendItemData(scrollData)
@@ -466,6 +479,8 @@ function ZO_QuickslotManager:UpdateList()
     elseif currentFilterType == ITEMFILTERTYPE_QUEST_QUICKSLOT then
         self:AppendQuestItemData(scrollData)
     end
+
+    self.cachedSearchText = nil
 
     self:ApplySort()
     self:ValidateOrClearAllQuickslots()
@@ -497,7 +512,15 @@ function ZO_QuickslotManager:AppendItemData(scrollData)
                 stolen = IsItemStolen(BAG_BACKPACK, slotIndex),
                 name = slotData.name or zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(BAG_BACKPACK, slotIndex)),
                 isGemmable = slotData.isGemmable,
+                searchData =
+                {
+                    type = ZO_TEXT_SEARCH_TYPE_INVENTORY,
+                    bagId = BAG_BACKPACK,
+                    slotIndex = slotIndex,
+                },
             }
+
+            self.quickSlotSearch.Insert(itemData.searchData)
 
             if self:ShouldAddItemToList(itemData) then
                 table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_QUICKSLOT_ITEM, itemData))
@@ -515,7 +538,17 @@ function ZO_QuickslotManager:AppendCollectiblesData(scrollData, collectibleCateg
     end
 
     for i, collectibleData in ipairs(dataObjects) do
-        table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_COLLECTIBLE_ITEM, collectibleData))
+        collectibleData.searchData =
+        {
+            type = ZO_TEXT_SEARCH_TYPE_COLLECTIBLE,
+            collectibleId = collectibleData.collectibleId,
+        },
+
+        self.quickSlotSearch.Insert(collectibleData.searchData)
+
+        if self:IsItemInTextSearch(collectibleData) then
+            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_COLLECTIBLE_ITEM, collectibleData))
+        end
     end
 end
 
@@ -523,6 +556,28 @@ function ZO_QuickslotManager:AppendQuestItemData(scrollData)
     local questCache = SHARED_INVENTORY:GenerateFullQuestCache()
     for questIndex, questItems in pairs(questCache) do
         for questItemId, questItemData in pairs(questItems) do
+            if questItemData.toolIndex then
+                questItemData.searchData =
+                {
+                    type = ZO_TEXT_SEARCH_TYPE_QUEST_TOOL,
+                    questIndex = questItemData.questIndex,
+                    toolIndex = questItemData.toolIndex,
+                    index = questItemData.slotIndex,
+                }
+            else
+                questItemData.searchData =
+                {
+                    type = ZO_TEXT_SEARCH_TYPE_QUEST_ITEM,
+                    questIndex = questItemData.questIndex,
+                    stepIndex = questItemData.stepIndex,
+                    conditionIndex = questItemData.conditionIndex,
+                    toolIndex = questItemData.toolIndex,
+                    index = questItemData.slotIndex,
+                }
+            end
+
+            self.quickSlotSearch.Insert(questItemData.searchData)
+
             if self:ShouldAddQuestItemToList(questItemData) then
                 table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_QUICKSLOT_QUEST_ITEM, questItemData))
             end
@@ -667,6 +722,10 @@ end
 -------------------
 -- Global functions
 -------------------
+
+function ZO_QuickSlot_OnSearchTextChanged(editBox)
+    QUICKSLOT_WINDOW:UpdateList()
+end
 
 function ZO_QuickSlot_FilterButtonOnMouseEnter(self)
     ZO_MenuBarButtonTemplate_OnMouseEnter(self)

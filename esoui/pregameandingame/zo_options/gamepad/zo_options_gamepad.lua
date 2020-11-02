@@ -517,7 +517,7 @@ function ZO_GamepadOptions:InitializeGamepadInfoPanel()
 end
 
 do
-    local GAMEPAD_TYPE_HAS_SOUTHERN_LEFT_STICK = ZO_CreateSetFromArguments(GAMEPAD_TYPE_PS4, GAMEPAD_TYPE_PS4_NO_TOUCHPAD, GAMEPAD_TYPE_HERON, GAMEPAD_TYPE_SWITCH)
+    local GAMEPAD_TYPE_HAS_SOUTHERN_LEFT_STICK = ZO_CreateSetFromArguments(GAMEPAD_TYPE_PS4, GAMEPAD_TYPE_PS4_NO_TOUCHPAD, GAMEPAD_TYPE_PS5, GAMEPAD_TYPE_HERON, GAMEPAD_TYPE_SWITCH)
     local GAMEPAD_TYPE_HAS_SWAPPED_FACE_BUTTONS = ZO_CreateSetFromArguments(GAMEPAD_TYPE_SWITCH)
     function ZO_GamepadOptions:RefreshGamepadInfoPanel()
         if not self:HasInfoPanel() then return end --no infopanel in pregame
@@ -525,9 +525,13 @@ do
         local control = self.control:GetNamedChild("InfoPanel")
 
         control:GetNamedChild("Gamepad"):SetTexture(GetGamepadVisualReferenceArt())
-        
-        local mostRecentGamepadType = GetMostRecentGamepadType()
-        local backKeyCode = GetUIPlatform() == UI_PLATFORM_PS4 and KEY_GAMEPAD_TOUCHPAD_PRESSED or KEY_GAMEPAD_BACK
+
+        local backKeyCode
+        if ZO_IsPlaystationPlatform() then
+            backKeyCode = KEY_GAMEPAD_TOUCHPAD_PRESSED
+        else
+            backKeyCode = KEY_GAMEPAD_BACK
+        end
         self.keyCodeToLabelGroupControl = 
         {
             [KEY_GAMEPAD_BUTTON_1] = control:GetNamedChild("Right6"),
@@ -548,6 +552,7 @@ do
             [backKeyCode] = control:GetNamedChild("TopLeft"),
         }
 
+        local mostRecentGamepadType = GetMostRecentGamepadType()
         if GAMEPAD_TYPE_HAS_SOUTHERN_LEFT_STICK[mostRecentGamepadType] then
             -- swap dpad and left stick
             self.keyCodeToLabelGroupControl[KEY_GAMEPAD_LEFT_STICK] = control:GetNamedChild("BottomLeft")
@@ -869,11 +874,6 @@ function ZO_GamepadOptions:LoadAllDefaults()
             self:LoadPanelDefaults(settings)
         end
         self:RefreshOptionsList()
-    end
-
-    if self.currentCategory == SETTING_PANEL_VIDEO or self:IsAtRoot() then
-        -- reset the screen adjustments
-        SetOverscanOffsets(0, 0, 0, 0)
     end
 
     ZO_SavePlayerConsoleProfile()

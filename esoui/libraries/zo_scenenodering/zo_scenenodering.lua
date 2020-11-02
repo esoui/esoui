@@ -34,6 +34,13 @@ function ZO_SceneNodeRing:SetNodePadding(node, radians)
     end
 end
 
+function ZO_SceneNodeRing:SetAllNodesPadding(radians)
+    for i, node in ipairs(self.ringNodes) do
+        node.ringPadding = radians
+    end
+    self.nodePositionsDirty = true
+end
+
 function ZO_SceneNodeRing:RefreshNodePositions()
     if self.nodePositionsDirty then
         self.nodePositionsDirty = false
@@ -58,6 +65,7 @@ function ZO_SceneNodeRing:RefreshNodePositions()
 end
 
 function ZO_SceneNodeRing:AddNode(node)
+    node:SetParent(self.rootNode)
     node.ringPadding = 0
     table.insert(self.ringNodes, node)
     self.nodePositionsDirty = true
@@ -114,6 +122,10 @@ function ZO_SceneNodeRing:GetPreviousNode(node)
     end
 end
 
+function ZO_SceneNodeRing:NodeIterator(filterFunctions)
+    return ZO_FilteredNumericallyIndexedTableIterator(self.ringNodes, filterFunctions)
+end
+
 function ZO_SceneNodeRing:GetAngularVelocity()
     return self.angularVelocity
 end
@@ -123,5 +135,5 @@ function ZO_SceneNodeRing:Update(delta)
         self:RefreshNodePositions()
         self.currentAngle = self.currentAngle + self.angularVelocity * delta
         self.rootNode:SetRotation(self.currentAngle)
-    end    
+    end
 end

@@ -233,8 +233,8 @@ function ZO_RewardsManager:GetCurrencyEntryInfo(rewardId, quantity, parentChoice
     local IS_PLURAL = false
     local IS_UPPER = false
     local formattedName = zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER))
-    local formattedNameWithStackKeyboard = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
-    local formattedNameWithStackGamepad = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatGamepad(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
+    local formattedNameWithStackKeyboard = ZO_Currency_FormatKeyboard(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+    local formattedNameWithStackGamepad = ZO_Currency_FormatGamepad(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
 
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
     rewardData:SetFormattedName(formattedName)

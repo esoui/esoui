@@ -1,0 +1,40 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_ItemSetCollectionPieceTile_Keyboard_MouseOverIconAnimation">
+            <Animations>
+                <ScaleAnimation duration="125" startScale="1" endScale="1.23"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Label name="ZO_ItemSetCollectionPieceTileDefaultLabel" font="ZoFontWindowSubtitle" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" verticalAlignment="CENTER" virtual="true" />
+
+        <Control name="ZO_ItemSetCollectionPieceTile_Keyboard_Control" inherits="ZO_ContextualActionsTile_Control ZO_ContextualActionsTile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_ITEM_SET_COLLECTION_PIECE_TILE_KEYBOARD_DIMENSIONS" y="ZO_ITEM_SET_COLLECTION_PIECE_TILE_KEYBOARD_DIMENSIONS" />
+
+            <OnInitialized>
+                ZO_ItemSetCollectionPieceTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true" level="3" hidden="true" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <Dimensions x="ZO_ITEM_SET_COLLECTION_PIECE_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_ITEM_SET_COLLECTION_PIECE_TILE_KEYBOARD_ICON_DIMENSIONS"/>
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)Highlight" override="true" textureFile="EsoUI/Art/Restyle/Keyboard/outfitSlot_hoverBackground.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom="1"/>
+                </Texture>
+
+                <Texture name="$(parent)Status" inherits="ZO_MultiIcon" level="4">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                </Texture>
+
+                <Label name="$(parent)Title" override="true" hidden="true" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

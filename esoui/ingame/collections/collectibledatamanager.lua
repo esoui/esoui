@@ -908,27 +908,27 @@ end
 function ZO_CollectibleCategoryData:BuildData(categoryIndex, subcategoryIndex)
     self.categoryIndex, self.subcategoryIndex = categoryIndex, subcategoryIndex
     self.categoryId = GetCollectibleCategoryId(categoryIndex, subcategoryIndex)
-    
+
+    self.name = GetCollectibleCategoryNameByCategoryId(self.categoryId)
     self.keyboardNormalIcon, self.keyboardPressedIcon, self.keyboardMousedOverIcon, self.disabledIcon = GetCollectibleCategoryKeyboardIcons(categoryIndex, subcategoryIndex)
     self.gamepadIcon = GetCollectibleCategoryGamepadIcon(categoryIndex, subcategoryIndex)
 
     if self.isTopLevelCategory then
-        self.name, self.numSubcategories, self.numCollectibles = GetCollectibleCategoryInfo(categoryIndex)
-
-        for loopSubcategoryIndex = 1, self:GetNumSubcategories() do
+        local numSubcategories = GetNumSubcategoriesInCollectibleCategory(categoryIndex)
+        for loopSubcategoryIndex = 1, numSubcategories do
             local subcategoryData = self.subcategoryObjectPool:AcquireObject()
             subcategoryData:BuildData(categoryIndex, loopSubcategoryIndex)
             table.insert(self.orderedSubcategories, subcategoryData)
         end
     else
-        self.name, self.numCollectibles = GetCollectibleSubCategoryInfo(categoryIndex, subcategoryIndex)
         self.numSubcategories = 0
     end
 
     self.categorySpecialization = GetCollectibleCategorySpecialization(categoryIndex)
     self.specializedSortedCollectibles = self:CreateSpecializedSortedCollectiblesTable()
 
-    for collectibleIndex = 1, self.numCollectibles do
+    local numCollectibles = GetNumCollectiblesInCollectibleCategory(categoryIndex, subcategoryIndex)
+    for collectibleIndex = 1, numCollectibles do
         local collectibleData = self.collectibleObjectPool:AcquireObject()
         collectibleData:BuildData(self, collectibleIndex)
         table.insert(self.orderedCollectibles, collectibleData)
@@ -969,7 +969,7 @@ function ZO_CollectibleCategoryData:GetGamepadIcon()
 end
 
 function ZO_CollectibleCategoryData:GetNumSubcategories()
-    return self.numSubcategories
+    return #self.orderedSubcategories
 end
 
 function ZO_CollectibleCategoryData:GetSubcategoryData(subcategoryIndex)
@@ -1147,7 +1147,7 @@ function ZO_CollectibleDataManager:Initialize()
 end
 
 function ZO_CollectibleDataManager:OnCollectibleUpdated(collectibleId)
-    local collectibleData = self.collectibleIdToDataMap[collectibleId]
+    local collectibleData = self:GetCollectibleDataById(collectibleId)
     if collectibleData then
         collectibleData:Refresh()
         self:FireCallbacks("OnCollectibleUpdated", collectibleId)
@@ -1159,7 +1159,19 @@ end
 
 -- Begin Collection Update Functions --
 
+function ZO_CollectibleDataManager:MarkCollectionDirty()
+    self.isCollectionDirty = true
+end
+
+function ZO_CollectibleDataManager:CleanCollection()
+    if self.isCollectionDirty then
+        self:RebuildCollection()
+    end
+end
+
 function ZO_CollectibleDataManager:RebuildCollection()
+    self.isCollectionDirty = false
+
     ZO_ClearTable(self.collectibleIdToDataMap)
     ZO_ClearTable(self.collectibleCategoryIdToDataMap)
 
@@ -1196,7 +1208,7 @@ do
     function ZO_CollectibleDataManager:OnCollectionUpdated()
         local collectiblesByNewUnlockState = {}
 
-        for _, collectibleData in pairs(self.collectibleIdToDataMap) do
+        for _, collectibleData in self:CollectibleIterator() do
             ProcessCollectibleDataForUnlockStateChange(collectibleData, collectiblesByNewUnlockState)
         end
 
@@ -1206,7 +1218,7 @@ do
     function ZO_CollectibleDataManager:OnESOPlusFreeTrialStatusChanged()
         local collectiblesByNewUnlockState = {}
 
-        for _, collectibleData in pairs(self.collectibleIdToDataMap) do
+        for _, collectibleData in self:CollectibleIterator() do
             ProcessCollectibleDataForUnlockStateChange(collectibleData, collectiblesByNewUnlockState)
         end
 
@@ -1224,7 +1236,7 @@ do
     function ZO_CollectibleDataManager:OnCollectiblesUnlockStateChanged()
         local collectiblesByNewUnlockState = {}
         for collectibleId in GetNextDirtyUnlockStateCollectibleIdIter do
-            local collectibleData = self.collectibleIdToDataMap[collectibleId]
+            local collectibleData = self:GetCollectibleDataById(collectibleId)
             if collectibleData then
                 ProcessCollectibleDataForUnlockStateChange(collectibleData, collectiblesByNewUnlockState)
             else
@@ -1238,7 +1250,7 @@ do
 
     function ZO_CollectibleDataManager:OnCollectibleBlacklistUpdated()
         for collectibleId in GetNextDirtyBlacklistCollectibleIdIter do
-            local collectibleData = self.collectibleIdToDataMap[collectibleId]
+            local collectibleData = self:GetCollectibleDataById(collectibleId)
             if collectibleData then
                 collectibleData:Refresh()
             end
@@ -1268,7 +1280,7 @@ end
 -- End Collection Update Functions --
 
 function ZO_CollectibleDataManager:OnCollectibleNewStatusCleared(collectibleId)
-    local collectibleData = self.collectibleIdToDataMap[collectibleId]
+    local collectibleData = self:GetCollectibleDataById(collectibleId)
     if collectibleData then
         collectibleData:SetNew(false)
         self:FireCallbacks("OnCollectibleNewStatusCleared", collectibleId)
@@ -1279,7 +1291,7 @@ function ZO_CollectibleDataManager:OnCollectibleNewStatusCleared(collectibleId)
 end
 
 function ZO_CollectibleDataManager:OnCollectibleCategoryNewStatusCleared(categoryId)
-    local categoryData = self.collectibleCategoryIdToDataMap[categoryId]
+    local categoryData = self:GetCategoryDataById(categoryId)
     if categoryData then
         for _, collectibleData in categoryData:CollectibleIterator({ ZO_CollectibleData.IsNew }) do
             collectibleData:SetNew(false)
@@ -1290,7 +1302,7 @@ end
 
 
 function ZO_CollectibleDataManager:OnCollectibleNotificationNew(collectibleId, notificationId)
-    local collectibleData = self.collectibleIdToDataMap[collectibleId]
+    local collectibleData = self:GetCollectibleDataById(collectibleId)
     if collectibleData then
         collectibleData:SetNotificationId(notificationId)
         self:FireCallbacks("OnCollectibleNotificationNew", notificationId, collectibleId)
@@ -1301,7 +1313,7 @@ function ZO_CollectibleDataManager:OnCollectibleNotificationNew(collectibleId, n
 end
 
 function ZO_CollectibleDataManager:OnCollectibleNotificationRemoved(notificationId, collectibleId)
-    local collectibleData = self.collectibleIdToDataMap[collectibleId]
+    local collectibleData = self:GetCollectibleDataById(collectibleId)
     if collectibleData then
         collectibleData:SetNotificationId(nil)
         self:FireCallbacks("OnCollectibleNotificationRemoved", notificationId, collectibleId)
@@ -1329,7 +1341,7 @@ end
 function ZO_CollectibleDataManager:MapNotifications()
     for index = 1, GetNumCollectibleNotifications() do
         local notificationId, collectibleId = GetCollectibleNotificationInfo(index)
-        local collectibleData = self.collectibleIdToDataMap[collectibleId]
+        local collectibleData = self:GetCollectibleDataById(collectibleId)
         if collectibleData then
             collectibleData:SetNotificationId(notificationId)
         else
@@ -1340,6 +1352,7 @@ function ZO_CollectibleDataManager:MapNotifications()
 end
 
 function ZO_CollectibleDataManager:GetCollectibleDataById(collectibleId)
+    self:CleanCollection()
     return self.collectibleIdToDataMap[collectibleId]
 end
 
@@ -1351,11 +1364,17 @@ function ZO_CollectibleDataManager:GetCollectibleDataByIndicies(categoryIndex, s
     return nil
 end
 
+function ZO_CollectibleDataManager:CollectibleIterator(collectibleFilterFunctions)
+    self:CleanCollection()
+    return ZO_FilteredNonContiguousTableIterator(self.collectibleIdToDataMap, collectibleFilterFunctions)
+end
+
 function ZO_CollectibleDataManager:MapCollectibleData(collectibleData)
     self.collectibleIdToDataMap[collectibleData:GetId()] = collectibleData
 end
 
 function ZO_CollectibleDataManager:GetCategoryDataById(categoryId)
+    self:CleanCollection()
     return self.collectibleCategoryIdToDataMap[categoryId]
 end
 
@@ -1364,6 +1383,7 @@ function ZO_CollectibleDataManager:MapCategoryData(categoryData)
 end
 
 function ZO_CollectibleDataManager:GetCategoryDataByIndicies(categoryIndex, subcategoryIndex)
+    self:CleanCollection()
     local categoryData = self.categoryObjectPool:GetActiveObject(categoryIndex)
     if categoryData and subcategoryIndex then
         return categoryData:GetSubcategoryData(subcategoryIndex)
@@ -1372,11 +1392,12 @@ function ZO_CollectibleDataManager:GetCategoryDataByIndicies(categoryIndex, subc
 end
 
 function ZO_CollectibleDataManager:GetNumCategories()
+    self:CleanCollection()
     return self.categoryObjectPool:GetActiveObjectCount()
 end
 
-
 function ZO_CollectibleDataManager:CategoryIterator(categoryFilterFunctions)
+    self:CleanCollection()
     -- This only works because we use the categoryObjectPool like a numerically indexed table
     return ZO_FilteredNumericallyIndexedTableIterator(self.categoryObjectPool:GetActiveObjects(), categoryFilterFunctions)
 end

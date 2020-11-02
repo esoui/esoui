@@ -101,5 +101,4 @@ EsoUI\Common\ZO_IMECandidates\PC\ZO_IMECandidates.xml
 EsoUI\Common\MarketTemplates\MarketTemplates_Shared.xml
 EsoUI\Common\MarketTemplates\ChapterUpgradeTemplates_Shared.lua
 EsoUI\Common\MarketTemplates\ChapterUpgradeTemplates_Shared.xml
-EsoUI\Common\MarketTemplates\Keyboard\MarketTemplates_Keyboard.xml
 EsoUI\Common\MarketTemplates\Gamepad\MarketTemplates_Gamepad.xml

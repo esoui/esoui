@@ -70,12 +70,16 @@ function ZO_Tree:GetTreeNodeByData(data)
     return self:GetTreeNodeInTreeByData(data, self.rootNode)
 end
 
-function ZO_Tree:GetTreeNodeInTreeByData(data, rootNode)
-    if rootNode then
-        if rootNode.data == data then
-            return rootNode
+function ZO_Tree:GetTreeNodeInTreeByData(data, branchNode)
+    if branchNode then
+        if branchNode.equalityFunction then
+            if branchNode.equalityFunction(branchNode.data, data) then
+                return branchNode
+            end
+        elseif branchNode.data == data then
+            return branchNode
         end
-        local currentChildren = rootNode:GetChildren()
+        local currentChildren = branchNode:GetChildren()
         if currentChildren then
             for _, currentChild in ipairs(currentChildren) do
                 local foundNode = self:GetTreeNodeInTreeByData(data, currentChild)
@@ -245,9 +249,11 @@ function ZO_Tree:IsEnabled()
     return self.enabled
 end
 
-function ZO_Tree:RefreshVisible()
-    local USER_REQUESTED = true
-    self.rootNode:RefreshVisible(USER_REQUESTED)
+function ZO_Tree:RefreshVisible(userRequested)
+    if userRequested == nil then
+        userRequested = true
+    end
+    self.rootNode:RefreshVisible(userRequested)
 end
 
 --Computes the offset of the bottom of the control at the end of the path from the scroll child top

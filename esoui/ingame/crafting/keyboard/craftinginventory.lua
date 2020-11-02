@@ -344,3 +344,17 @@ function ZO_CraftingInventoryComponentRow_OnMouseUp(control, button, upInside)
         end
     end
 end
+
+function ZO_CraftingInventoryTabs_OnInitialized(control)
+    ZO_MenuBar_OnInitialized(control)
+    local filterBarData =
+    {
+        initialButtonAnchorPoint = RIGHT,
+        buttonTemplate = "ZO_CraftingInventoryFilterTab",
+        normalSize = 40,
+        downSize = 51,
+        buttonPadding = -5,
+        animationDuration = 180,
+    }
+    ZO_MenuBar_SetData(control, filterBarData)
+end

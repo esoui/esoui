@@ -109,7 +109,7 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
         slotControl.stackCount = select(2, GetItemInfo(BAG_WORN, slotId))
         if slotControl.stackCount > 1 then
             local USE_LOWERCASE_NUMBER_SUFFIXES = false
-            stackCountLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(slotControl.stackCount, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES)))
+            stackCountLabel:SetText(ZO_AbbreviateAndLocalizeNumber(slotControl.stackCount, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES))
         else
             stackCountLabel:SetText("")
         end
@@ -358,8 +358,13 @@ function ZO_Character_Initialize(control)
     ZO_Character:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
     OnActiveWeaponPairChanged(nil, GetActiveWeaponPairInfo())
 
-    local apparelHiddenLabel = control:GetNamedChild("ApparelHidden")
-    apparelHiddenLabel:SetText(ZO_SELECTED_TEXT:Colorize(GetString(SI_HIDDEN_GENERAL)))
+    local apparelText = control:GetNamedChild("ApparelSectionText")
+    local isApparelHidden = IsEquipSlotVisualCategoryHidden(EQUIP_SLOT_VISUAL_CATEGORY_APPAREL)
+    local apparelString = isApparelHidden and GetString(SI_CHARACTER_EQUIP_APPAREL_HIDDEN) or GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL)
+    apparelText:SetText(apparelString)
+
+    local headerSection = control:GetNamedChild("HeaderSection")
+    CHARACTER_WINDOW_HEADER_FRAGMENT = ZO_SimpleSceneFragment:New(headerSection)
 
     OnUnitCreated(nil, "player")
 end

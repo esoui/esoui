@@ -26,3 +26,7 @@ end
 function ZO_GridSquareEntryData_Shared:SetIconSampleProcessingWeightTable(typeToWeightTable)
     self.textureSampleProcessingWeights = typeToWeightTable
 end
+
+function ZO_GridSquareEntryData_Shared:SetIconColor(color)
+    self.iconColor = color
+end

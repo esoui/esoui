@@ -226,7 +226,7 @@ do
 
         self.modeSelectorDropdown:ClearItems()
 
-        self.modeSelectorDropdown:AddItem(self.equipmentGearModeEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
+        self.modeSelectorDropdown:AddItem(self.equipmentGearModeEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
         local function SetSelectedOutfit(entry)
             local outfitManipulator = entry.outfitManipulator
@@ -266,14 +266,14 @@ do
             local entry = ZO_ComboBox:CreateItemEntry(outfitManipulator:GetOutfitName(), TrySetSelectedOutfit)
             entry.outfitManipulator = outfitManipulator
             entry.selectFunction = SetSelectedOutfit
-            self.modeSelectorDropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            self.modeSelectorDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
             if autoSelectIndex == outfitIndex then
                 defaultEntry = entry
             end
         end
 
         if numOutfits < MAX_OUTFIT_UNLOCKS then
-            self.modeSelectorDropdown:AddItem(self.purchaseAdditionalOutfitsEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            self.modeSelectorDropdown:AddItem(self.purchaseAdditionalOutfitsEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
 
         self.modeSelectorDropdown:UpdateItems()
@@ -287,7 +287,7 @@ end
 function ZO_RestyleSheetWindow_Keyboard:PopulateCollectiblesModeDropdown()
     self.modeSelectorDropdown:ClearItems()
 
-    self.modeSelectorDropdown:AddItem(self.collectiblesModeEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
+    self.modeSelectorDropdown:AddItem(self.collectiblesModeEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     
     self.modeSelectorDropdown:UpdateItems()
     self.modeSelectorDropdown:SelectFirstItem()

@@ -274,17 +274,31 @@ local ZO_OptionsPanel_Video_ControlData =
             mustPushApply = true,
             exists = ZO_IsPCUI,
         },
-        --Options_Video_Reflection_Quality
-        [GRAPHICS_SETTING_REFLECTION_QUALITY] =
+        --Options_Video_Screenspace_Water_Reflection_Quality
+        [GRAPHICS_SETTING_SCREENSPACE_WATER_REFLECTION_QUALITY] =
         {
             controlType = OPTIONS_FINITE_LIST,
             system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_REFLECTION_QUALITY,
+            settingId = GRAPHICS_SETTING_SCREENSPACE_WATER_REFLECTION_QUALITY,
             panel = SETTING_PANEL_VIDEO,
-            text = SI_GRAPHICS_OPTIONS_VIDEO_REFLECTION_QUALITY,
-            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_REFLECTION_QUALITY_TOOLTIP,
-            valid = {REFLECTION_QUALITY_OFF, REFLECTION_QUALITY_LOW, REFLECTION_QUALITY_MEDIUM, REFLECTION_QUALITY_HIGH},
-            valueStringPrefix = "SI_REFLECTIONQUALITY",
+            text = SI_GRAPHICS_OPTIONS_VIDEO_SCREENSPACE_WATER_REFLECTION_QUALITY,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_SCREENSPACE_WATER_REFLECTION_QUALITY_TOOLTIP,
+            valid = {SCREENSPACE_WATER_REFLECTION_QUALITY_OFF, SCREENSPACE_WATER_REFLECTION_QUALITY_LOW, SCREENSPACE_WATER_REFLECTION_QUALITY_MEDIUM, SCREENSPACE_WATER_REFLECTION_QUALITY_HIGH, SCREENSPACE_WATER_REFLECTION_QUALITY_ULTRA},
+            valueStringPrefix = "SI_SCREENSPACEWATERREFLECTIONQUALITY",
+            mustPushApply = true,
+            exists = ZO_IsPCUI,
+        },
+        --Options_Video_Planar_Water_Reflection_Quality
+        [GRAPHICS_SETTING_PLANAR_WATER_REFLECTION_QUALITY] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_PLANAR_WATER_REFLECTION_QUALITY,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_PLANAR_WATER_REFLECTION_QUALITY,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_PLANAR_WATER_REFLECTION_QUALITY_TOOLTIP,
+            valid = {PLANAR_WATER_REFLECTION_QUALITY_OFF, PLANAR_WATER_REFLECTION_QUALITY_MEDIUM, PLANAR_WATER_REFLECTION_QUALITY_HIGH},
+            valueStringPrefix = "SI_PLANARWATERREFLECTIONQUALITY",
             mustPushApply = true,
             exists = ZO_IsPCUI,
         },
@@ -366,6 +380,23 @@ local ZO_OptionsPanel_Video_ControlData =
             valueStringPrefix = "SI_CLUTTERQUALITY",
             exists = ZO_IsPCUI,
         },
+        --Options_Video_Depth_Of_Field_Mode
+        [GRAPHICS_SETTING_DEPTH_OF_FIELD_MODE] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_DEPTH_OF_FIELD_MODE,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_DEPTH_OF_FIELD_MODE,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_DEPTH_OF_FIELD_MODE_TOOLTIP,
+            
+            valid = IsMacUI()
+                    and {DEPTH_OF_FIELD_MODE_OFF, DEPTH_OF_FIELD_MODE_SIMPLE, DEPTH_OF_FIELD_MODE_SMOOTH}
+                    or {DEPTH_OF_FIELD_MODE_OFF, DEPTH_OF_FIELD_MODE_SIMPLE, DEPTH_OF_FIELD_MODE_SMOOTH, DEPTH_OF_FIELD_MODE_CIRCULAR},
+            
+            valueStringPrefix = "SI_DEPTHOFFIELDMODE",
+            exists = ZO_IsPCUI,
+        },
         --Options_Video_Bloom
         [GRAPHICS_SETTING_BLOOM] =
         {
@@ -375,17 +406,6 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_BLOOM,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_BLOOM_TOOLTIP,
-            exists = ZO_IsPCUI,
-        },
-        --Options_Video_Depth_Of_Field
-        [GRAPHICS_SETTING_DEPTH_OF_FIELD] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_DEPTH_OF_FIELD,
-            panel = SETTING_PANEL_VIDEO,
-            text = SI_GRAPHICS_OPTIONS_VIDEO_DEPTH_OF_FIELD,
-            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_DEPTH_OF_FIELD_TOOLTIP,
             exists = ZO_IsPCUI,
         },
         --Options_Video_Distortion
@@ -523,13 +543,16 @@ local ZO_OptionsPanel_Video_ControlData =
             text = SI_SETTING_SHOW_SCREEN_ADJUST,
             exists = ZO_IsConsoleOrHeronUI,
             gamepadIsEnabledCallback = function() 
-                                            -- only allow resizing once the previous one has been completed.
-                                            return not IsGUIResizing()
-                                        end,
+                -- only allow resizing once the previous one has been completed.
+                return not IsGUIResizing()
+            end,
             disabledText = SI_SETTING_SHOW_SCREEN_ADJUST_DISABLED,
             callback = function()
-                            SCENE_MANAGER:Push("screenAdjust")
-                        end,
+                SCENE_MANAGER:Push("screenAdjust")
+            end,
+            customResetToDefaultsFunction = function()
+                SetOverscanOffsets(0, 0, 0, 0)
+            end
         },
 
         [OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST] =

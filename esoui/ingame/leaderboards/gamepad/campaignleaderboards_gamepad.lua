@@ -41,16 +41,16 @@ function ZO_LeaderboardCampaignSelector_Gamepad:NeedsData()
 end
 
 function ZO_LeaderboardCampaignSelector_Gamepad:RefreshQueryTypes()
-    if not self.selectedQueryType then
-        if self:IsHomeSelectable() then
+    if self.selectedQueryType and self:IsSelectedQueryStillValid() then
+        if self.selectedQueryType == HOME_TAB.queryType then
             self:OnQueryTypeChanged(HOME_TAB)
-        elseif self:IsLocalSelectable() then
+        else
             self:OnQueryTypeChanged(LOCAL_TAB)
         end
     else
-        if self.selectedQueryType == HOME_TAB.queryType then
+        if self:IsHomeSelectable() then
             self:OnQueryTypeChanged(HOME_TAB)
-        elseif GetCurrentCampaignId() ~= 0 and self.selectedQueryType == LOCAL_TAB.queryType then
+        elseif self:IsLocalSelectable() then
             self:OnQueryTypeChanged(LOCAL_TAB)
         end
     end
@@ -58,12 +58,17 @@ end
 
 function ZO_LeaderboardCampaignSelector_Gamepad:OnQueryTypeChanged(tabData)
     ZO_LeaderboardCampaignSelector_Shared.OnQueryTypeChanged(self, tabData)
-    self:SetActiveCampaign(GetCampaignName(self:GetCampaignId()), tabData)
     self.selectedTabData = tabData
+    self:SetActiveCampaign()
 end
 
-function ZO_LeaderboardCampaignSelector_Gamepad:SetActiveCampaign(campaignName, tabData)
-    GAMEPAD_LEADERBOARDS:SetActiveCampaign(campaignName, tabData.icon)
+function ZO_LeaderboardCampaignSelector_Gamepad:SetActiveCampaign()
+    if self.selectedTabData then
+        GAMEPAD_LEADERBOARDS:SetActiveCampaign(GetCampaignName(self:GetCampaignId()), self.selectedTabData.icon)
+    else
+        local NO_NAME, NO_ICON
+        GAMEPAD_LEADERBOARDS:SetActiveCampaign(NO_NAME, NO_ICON)
+    end
 end
 
 -----------------
@@ -139,7 +144,7 @@ function ZO_CampaignLeaderboardsManager_Gamepad:RefreshHeaderTimer()
 end
 
 function ZO_CampaignLeaderboardsManager_Gamepad:SetActiveCampaign()
-    self.selector:SetActiveCampaign(GetCampaignName(self.selector:GetCampaignId()), self.selector.selectedTabData)
+    self.selector:SetActiveCampaign()
 end
 
 function ZO_CampaignLeaderboardsManager_Gamepad:InitializeKeybindStripDescriptor()

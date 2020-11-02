@@ -98,3 +98,23 @@ function ZO_LootHistory_Gamepad_OnInitialized(control)
     LOOT_HISTORY_GAMEPAD = ZO_LootHistory_Gamepad:New(control)
     SYSTEMS:RegisterGamepadObject(ZO_LOOT_HISTORY_NAME, LOOT_HISTORY_GAMEPAD)
 end
+
+function ZO_LootHistory_GamepadEntry_OnInitialized(control)
+    local fonts =
+    {
+        {
+            font = "ZoFontGamepad25",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontGamepad22",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontGamepad20",
+            lineLimit = 1,
+            dontUseForAdjusting = true,
+        },
+    }
+    ZO_FontAdjustingWrapLabel_OnInitialized(control:GetNamedChild("IconOverlayText"), fonts, TEXT_WRAP_MODE_TRUNCATE)
+end

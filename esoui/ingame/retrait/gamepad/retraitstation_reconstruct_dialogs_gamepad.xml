@@ -1,0 +1,31 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ConfirmItemReconstructionDialog_Gamepad" inherits="ZO_GenericGamepadDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_ConfirmItemReconstruction_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Item" inherits="ZO_GamepadDisplayEntryTemplateLowercase34">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" />
+                </Control>
+
+                <Control name="$(parent)Container" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Item" relativePoint="BOTTOMLEFT" offsetY="35" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" />
+
+                    <Controls>
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <Controls>
+                                <Label name="$(parent)SummaryDescriptionLabel" font="ZoFontGamepadCondensed34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_RETRAIT_STATION_CONFIRM_ITEM_RECONSTRUCTION_DESCRIPTION">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

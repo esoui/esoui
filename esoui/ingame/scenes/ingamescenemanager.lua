@@ -569,6 +569,11 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
             EndPendingInteraction()
             return
         end
+
+        if HousingEditorIsLocalPlayerInPairedFurnitureInteraction() then
+            HousingEditorEndLocalPlayerPairedFurnitureInteraction()
+            return
+        end
     end    
 
     if self:IsLockedInUIMode() then

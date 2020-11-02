@@ -93,7 +93,7 @@ function ZO_GuildBrowser_Gamepad:SetupList(list)
         for i = GUILD_FOCUS_ATTRIBUTE_VALUE_TRADING, GUILD_FOCUS_ATTRIBUTE_VALUE_ITERATION_END do
             local entry = ZO_ComboBox:CreateItemEntry(GetString("SI_GUILDFOCUSATTRIBUTEVALUE", i), SelectFocus)
             entry.focus = i
-            dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
 
         dropdown:UpdateItems()
@@ -635,14 +635,14 @@ function ZO_GuildBrowser_Gamepad:InitializeFiltersDialog()
         dialog:setupFunc()
     end
 
-    local onHiddenCallback = function()
+    local OnHidingCallback = function()
         self:RefreshSearchFilters()
         if self.currentGuildListFocus then
             GUILD_BROWSER_MANAGER:ExecuteSearch()
         end
     end
 
-    local noChoiceCallback = function(dialog)
+    local NoChoiceCallback = function(dialog)
         for i, dropdown in pairs(self.dialogDropdowns) do
             dropdown:Deactivate()
         end
@@ -854,8 +854,8 @@ function ZO_GuildBrowser_Gamepad:InitializeFiltersDialog()
 
             resetFilterButton,
         },
-        OnHiddenCallback = onHiddenCallback,
-        noChoiceCallback = noChoiceCallback,
+        onHidingCallback = OnHidingCallback,
+        noChoiceCallback = NoChoiceCallback,
     })
 end
 

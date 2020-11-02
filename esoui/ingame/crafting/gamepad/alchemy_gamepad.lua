@@ -284,6 +284,20 @@ function ZO_GamepadAlchemy:InitializeKeybindStripDescriptors()
                 return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections()
             end,
         },
+        -- Toggle quest filter
+        {
+            name = function() return self.inventory:ShouldFilterQuests() and GetString(SI_SMITHING_IS_QUEST_ITEM) or GetString(SI_GAMEPAD_ALCHEMY_ALL_MATERIALS) end,
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            gamepadOrder = 1030,
+            callback = function()
+                self.inventory:ToggleQuestFilter()
+                self.inventory:PerformFullRefresh()
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
+            end,
+            enabled = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess()
+            end,
+        },
     }
 
     ZO_GamepadCraftingUtils_AddGenericCraftingBackKeybindsToDescriptor(self.mainKeybindStripDescriptor)
@@ -442,6 +456,14 @@ function ZO_GamepadAlchemyInventory:Initialize(owner, control, ...)
     self.owner = owner
     self.filterType = NO_FILTER
 
+    local function OnAddOnLoaded(event, name)
+        if name == "ZO_Ingame" then
+            self:SetupSavedVars()
+            self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+        end
+    end
+    self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+
     self:SetNoItemLabelText(GetString(SI_ALCHEMY_NO_SOLVENTS_OR_REAGENTS))
 
     self:SetCustomSort(function(bagId, slotIndex)
@@ -462,6 +484,22 @@ function ZO_GamepadAlchemyInventory:Initialize(owner, control, ...)
     end)
 end
 
+function ZO_GamepadAlchemyInventory:SetupSavedVars()
+    local defaults = 
+    {
+        shouldFilterQuests = false,
+    }
+    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "GamepadAlchemyCreation", defaults)
+end
+
+function ZO_GamepadAlchemyInventory:ToggleQuestFilter()
+    self.savedVars.shouldFilterQuests = not self.savedVars.shouldFilterQuests
+end
+
+function ZO_GamepadAlchemyInventory:ShouldFilterQuests()
+    return self.savedVars.shouldFilterQuests
+end
+
 function ZO_GamepadAlchemyInventory:GetList()
     return self.list
 end
@@ -472,6 +510,28 @@ end
 
 function ZO_GamepadAlchemyInventory:AddListDataTypes()
     local function SetupSolventListEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
+
+        local itemId = GetItemId(data.bagId, data.slotIndex)
+        local pinState = self.owner:GetPinStateForItem(itemId, self.alchemyQuestInfo, ZO_ALCHEMY_DATA_TYPE_SOLVENT)
+        if pinState == ZO_ALCHEMY_PIN_STATE_VALID then
+           data.hasCraftingQuestPinDisabled = false
+           data.hasCraftingQuestPin = true  
+        elseif pinState == ZO_ALCHEMY_PIN_STATE_INVALID then
+           data.hasCraftingQuestPinDisabled = true
+           data.hasCraftingQuestPin = false  
+        else
+           data.hasCraftingQuestPinDisabled = false
+           data.hasCraftingQuestPin = false  
+        end
+
+        --If there is an override status indicator icon, we need to explicitly add the quest pin here
+        if data.overrideStatusIndicatorIcons and pinState ~= ZO_ALCHEMY_PIN_STATE_HIDDEN then
+            if pinState == ZO_ALCHEMY_PIN_STATE_INVALID then
+                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon_disabled.dds"}
+            elseif pinState == ZO_ALCHEMY_PIN_STATE_VALID then
+                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"}
+            end
+        end
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
 
         local descriptionLabel = control.descriptionLabel
@@ -537,6 +597,28 @@ function ZO_GamepadAlchemyInventory:AddListDataTypes()
     end
 
     local function SetupReagentListEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
+        local itemId = GetItemId(data.bagId, data.slotIndex)
+
+        local pinState = self.owner:GetPinStateForItem(itemId, self.alchemyQuestInfo, ZO_ALCHEMY_DATA_TYPE_REAGENT)
+        if pinState == ZO_ALCHEMY_PIN_STATE_VALID then
+           data.hasCraftingQuestPinDisabled = false
+           data.hasCraftingQuestPin = true  
+        elseif pinState == ZO_ALCHEMY_PIN_STATE_INVALID then
+           data.hasCraftingQuestPinDisabled = true
+           data.hasCraftingQuestPin = false  
+        else
+           data.hasCraftingQuestPinDisabled = false
+           data.hasCraftingQuestPin = false  
+        end
+
+        --If there is an override status indicator icon, we need to explicitly add the quest pin here
+        if data.overrideStatusIndicatorIcons and pinState ~= ZO_ALCHEMY_PIN_STATE_HIDDEN then
+            if pinState == ZO_ALCHEMY_PIN_STATE_INVALID then
+                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon_disabled.dds"}
+            elseif pinState == ZO_ALCHEMY_PIN_STATE_VALID then
+                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"}
+            end
+        end
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
 
         control.selectedItems:SetHidden(not selected)
@@ -570,7 +652,43 @@ function ZO_GamepadAlchemyInventory:Refresh(data)
     local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Alchemy_IsAlchemyItem, ZO_Alchemy_DoesAlchemyItemPassFilter, self.filterType, data)
     self.owner:OnInventoryUpdate(validItemIds)
 
+    if self.savedVars.shouldFilterQuests and not self.alchemyQuestInfo.hasDesiredPotion then
+        if CRAFT_ADVISOR_MANAGER:HasActiveWrits() then
+            if self.alchemyQuestInfo.isMasterWrit and not ZO_Alchemy_IsThirdAlchemySlotUnlocked() then
+                self:SetNoItemLabelText(GetString(SI_GAMEPAD_ALCHEMY_REQUIRES_THIRD_SLOT_MESSAGE))
+            else
+                self:SetNoItemLabelText(GetString(SI_GAMEPAD_ALCHEMY_MISSING_OR_UNKNOWN_MESSAGE))
+            end
+        else
+            self:SetNoItemLabelText(GetString(SI_ALCHEMY_NO_SOLVENTS_OR_REAGENTS))
+        end
+    else
+        self:SetNoItemLabelText(GetString(SI_ALCHEMY_NO_SOLVENTS_OR_REAGENTS))
+    end
+
     ZO_GamepadCraftingUtils_RefreshGenericHeader(self.owner)
+end
+
+function ZO_GamepadAlchemyInventory:EnumerateInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data)
+    local list = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, predicate)
+    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, predicate, list)
+    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_CRAFT_BAG, predicate, list)
+
+    self.owner:UpdatePotentialQuestItems(list, self.alchemyQuestInfo)
+
+    ZO_ClearTable(self.itemCounts)
+
+    local filteredDataTable = {}
+    for itemId, itemInfo in pairs(list) do
+        if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType, self.savedVars.shouldFilterQuests, self.owner.questItems) then
+            filteredDataTable[#filteredDataTable + 1] = self:GenerateCraftingInventoryEntryData(itemInfo.bag, itemInfo.index, itemInfo.stack)
+        end
+        self.itemCounts[itemId] = itemInfo.stack
+    end
+
+    self:AddFilteredDataToList(filteredDataTable)
+
+    return list
 end
 
 function ZO_GamepadAlchemyInventory:ShowAppropriateSlotDropCallouts(bagId, slotIndex)

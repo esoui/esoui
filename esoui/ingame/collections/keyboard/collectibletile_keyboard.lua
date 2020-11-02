@@ -152,8 +152,7 @@ function ZO_CollectibleTile_Keyboard:ShowMenu()
 
         if IsChatSystemAvailableForCurrentPlatform() then
             --Link in chat
-            local link = GetCollectibleLink(collectibleId, LINK_STYLE_BRACKETS)
-            AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link)) end)
+            AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(GetCollectibleLink(collectibleId, LINK_STYLE_BRACKETS)) end)
         end
 
         --Rename
@@ -311,13 +310,12 @@ function ZO_CollectibleTile_Keyboard:LayoutPlatform(data)
     iconTexture:SetTexture(iconFile)
         
     local desaturation = (collectibleData:IsLocked() or collectibleData:IsBlocked()) and 1 or 0
-    iconTexture:SetDesaturation(desaturation)
     self:GetHighlightControl():SetDesaturation(desaturation)
 
-    local textureSampleProcessingWeightTable = collectibleData:IsUnlocked() and ZO_UNLOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE or ZO_LOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE
-    for type, weight in pairs(textureSampleProcessingWeightTable) do
-        iconTexture:SetTextureSampleProcessingWeight(type, weight)
-    end
+    local isLocked = collectibleData:IsLocked()
+    ZO_SetDefaultIconSilhouette(iconTexture, isLocked)
+    iconTexture:SetDesaturation(desaturation)
+
     iconTexture:SetHidden(false)
 
     -- Status

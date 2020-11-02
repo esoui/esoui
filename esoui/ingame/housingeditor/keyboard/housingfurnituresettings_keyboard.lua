@@ -112,6 +112,19 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeKeybindStrip()
                 end
             end,
 
+            enabled = function()
+                if self.activePanel == self.visitorsOptionsPanel or self.activePanel == self.banListOptionsPanel then
+                    local numPermissions = self:GetNumIndividualPermissions(GetCurrentZoneHouseId())
+                    local hasPermissionSlots = HOUSING_MAX_INDIVIDUAL_USER_GROUP_ENTRIES > numPermissions
+                    return hasPermissionSlots, GetString(SI_PERMISSION_ERROR_CANT_ADD_NEW_INDIVIDUAL)
+                elseif self.activePanel == self.guildVisitorsOptionsPanel or self.activePanel == self.guildBanListOptionsPanel then
+                    local numPermissions = self:GetNumGuildPermissions(GetCurrentZoneHouseId())
+                    local hasPermissionSlots = HOUSING_MAX_GUILD_USER_GROUP_ENTRIES > numPermissions
+                    return hasPermissionSlots, GetString(SI_PERMISSION_ERROR_CANT_ADD_NEW_GUILD)
+                end
+                return false
+            end,
+
             visible = function()
                 return self.activePanel ~= self.generalOptionsPanel
             end

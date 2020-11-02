@@ -126,6 +126,7 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             KEYBIND_STRIP:RemoveDefaultExit()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             self:SetInventoryActive(true)
+            SCENE_MANAGER:AddFragment(GAMEPAD_CRAFT_ADVISOR_FRAGMENT)
 
             -- LB / RB handling for switching filters on improvement screen
             local tabBarEntries = {}
@@ -179,6 +180,7 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             self:ClearBoosterRowHighlight()
 
             self.owner:SetEnableSkillBar(false)
+            SCENE_MANAGER:RemoveFragment(GAMEPAD_CRAFT_ADVISOR_FRAGMENT)
 
             self.spinner:Deactivate()
         end
@@ -260,6 +262,13 @@ function ZO_GamepadSmithingImprovement:InitializeInventory()
     self.inventory = ZO_GamepadImprovementInventory:New(self, self.inventoryControl, SLOT_TYPE_CRAFTING_COMPONENT)
 
     self.inventory:SetCustomExtraData(function(bagId, slotIndex, data)
+        local itemId = GetItemId(bagId, slotIndex)
+        local improvementQuestInfo = self.inventory.improvementQuestInfo
+        local shouldShowQuestPin = false
+        if itemId == improvementQuestInfo.desiredItemId and itemId ~= nil then
+            shouldShowQuestPin = DoesItemMatchSmithingMaterialTraitAndStyle(bagId, slotIndex, improvementQuestInfo.desiredMaterial, improvementQuestInfo.desiredTrait, improvementQuestInfo.desiredStyle) and (data.functionalQuality < improvementQuestInfo.desiredQuality)
+        end
+        data.hasCraftingQuestPin = shouldShowQuestPin
         data:SetIgnoreTraitInformation(true)
     end)
 end
@@ -293,6 +302,7 @@ function ZO_GamepadSmithingImprovement:AddItemToCraft(bagId, slotIndex)
     self:UpdateSelection()
 
     if self.selectedItem then
+        SCENE_MANAGER:RemoveFragment(GAMEPAD_CRAFT_ADVISOR_FRAGMENT)
         self.sourceTooltip.scrollTooltip:ResetToTop()
         self.sourceTooltip:ClearAnchors()
         local offsetX = 21
@@ -327,6 +337,7 @@ function ZO_GamepadSmithingImprovement:RemoveItemFromCraft()
     self.sourceTooltip:SetAnchor(CENTER, self.qualityBridge, CENTER)
 
     self.slotContainer:SetHidden(true)
+    SCENE_MANAGER:AddFragment(GAMEPAD_CRAFT_ADVISOR_FRAGMENT)
 
     if not self.selectedItem then
         self.sourceTooltip.tip:ClearLines()
@@ -459,8 +470,13 @@ function ZO_GamepadSmithingImprovement:OnSlotChanged()
     self.inventory:HandleVisibleDirtyEvent()
 end
 
-function ZO_GamepadSmithingImprovement:HighlightBoosterRow(rowToHighlight)
+function ZO_GamepadSmithingImprovement:HighlightBoosterRow(rowToHighlight, hasQuestPin)
+    local improvementQuestInfo = self.inventory.improvementQuestInfo
     for _, row in ipairs(self.rows) do
+        if row.questPin ~= nil then
+            local shouldShowQuestPin = hasQuestPin and row.functionalQuality == improvementQuestInfo.desiredQuality
+            row.questPin:SetHidden(not shouldShowQuestPin)
+        end
         if row ~= rowToHighlight then
             row.iconTexture:SetAlpha(.5)
             row.iconTexture:SetDesaturation(1)
@@ -477,9 +493,11 @@ end
 
 function ZO_GamepadSmithingImprovement:ClearBoosterRowHighlight()
     for _, row in ipairs(self.rows) do
+        if row.questPin then
+            row.questPin:SetHidden(true)
+        end
         row.iconTexture:SetAlpha(1)
         row.iconTexture:SetDesaturation(0)
-
         local colorToUse = (row.currentStack == 0) and ZO_ERROR_COLOR or ZO_SELECTED_TEXT
         row.stackLabel:SetColor(colorToUse:UnpackRGBA())
     end
@@ -489,7 +507,7 @@ function ZO_GamepadSmithingImprovement:ColorizeText(qualityRow)
     -- there seems to be an edge case where if you start and quit the screen very quickly, you can select a new inventory item but the rows have been destroyed, causing an assert
     if qualityRow ~= nil then
         if self.improvementSlot:HasItem() then
-            self:HighlightBoosterRow(qualityRow)
+            self:HighlightBoosterRow(qualityRow, self.selectedItem.hasCraftingQuestPin)
             -- qualityRow.quality is deprecated, included here for addon backwards compatibility
             local displayQuality = qualityRow.displayQuality or qualityRow.quality
             local qualityColor = GetItemQualityColor(displayQuality)

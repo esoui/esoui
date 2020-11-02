@@ -61,7 +61,7 @@ end
 function ZO_MapLocationsData_Singleton:RefreshLocationList()
     local mapData = {}
     for i = 1, GetNumMaps() do
-        local mapName, mapType, mapContentType, zoneId, description = GetMapInfo(i)
+        local mapName, mapType, mapContentType, zoneIndex, description = GetMapInfoByIndex(i)
         mapData[#mapData + 1] = { locationName = ZO_CachedStrFormat(SI_ZONE_NAME, mapName), description = description, index = i }
     end
 

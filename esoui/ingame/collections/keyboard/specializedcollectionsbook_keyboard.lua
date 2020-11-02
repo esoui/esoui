@@ -60,7 +60,6 @@ function ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_UnlockState:Initi
         collectibles = self.lockedList,
     })
 
-    self.owner.control:RegisterForEvent(EVENT_COLLECTIBLE_DATA_CHANGED, function() self:BuildData() end)
     self:BuildData()
 end
 

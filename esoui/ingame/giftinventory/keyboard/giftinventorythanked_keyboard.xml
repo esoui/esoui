@@ -24,7 +24,7 @@
                     <Anchor point="CENTER" relativeTo="$(parent)New" relativePoint="RIGHT" offsetX="40"/>
                 </Texture>
                 <Label name="$(parent)StackCount" inherits="ZO_GiftInventoryCategory_Keyboard_StackCountLabel"/>
-                <Label name="$(parent)Name" inherits="ZO_GiftInventoryCategory_Keyboard_TooltipIfTruncatedLabel" font="ZoFontWinH4" maxLineCount="1">
+                <Label name="$(parent)Name" inherits="ZO_GiftInventoryCategory_Keyboard_TooltipIfTruncatedLabel" font="ZoFontWinH4" maxLineCount="2">
                     <Dimensions x="205"/>
                     <Anchor point="LEFT" relativeTo="$(parent)New" relativePoint="RIGHT" offsetX="80"/>
                 </Label>

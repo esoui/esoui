@@ -168,15 +168,18 @@ function ZO_GamepadCollectionsBook:InitializeGridListPanel()
     local function OutfitStyleGridEntrySetup(control, data, list)
         ZO_DefaultGridEntrySetup(control, data, list)
 
-        if data.iconDesaturation == 1 or data.isEmptyCell then
-            control:SetAlpha(0.4)
-        else
-            control:SetAlpha(1)
-        end
-
         self:RefreshGridEntryMultiIcon(control, data)
         -- TODO: find a way to share this with the generic get border function
         control.borderBackground:SetEdgeTexture("EsoUI/Art/Tooltips/Gamepad/gp_toolTip_edge_16.dds", ZO_GAMEPAD_OUTFIT_GRID_ENTRY_BORDER_EDGE_WIDTH, ZO_GAMEPAD_OUTFIT_GRID_ENTRY_BORDER_EDGE_HEIGHT)
+
+        if data.isEmptyCell then
+            control:SetAlpha(0.4)
+        else
+            control:SetAlpha(1)
+            if control.icon then
+                ZO_SetDefaultIconSilhouette(control.icon, data:IsLocked())
+            end
+        end
     end
 
     local HIDE_CALLBACK = nil
@@ -210,6 +213,7 @@ function ZO_GamepadCollectionsBook:SetupList(list)
         data:SetNew(collectibleData:IsNew())
         data:SetEnabled(not collectibleData:IsBlocked())
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+        ZO_SetDefaultIconSilhouette(control.icon, collectibleData:IsLocked())
     end
 
     list:AddDataTemplate("ZO_GamepadCollectibleEntryTemplate", CollectibleEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction)

@@ -24,6 +24,20 @@
             </Controls>
         </Button>
 
+        <Control name="ZO_Provisioner_GamepadItemSubEntryTemplate" inherits="ZO_GamepadItemSubEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.questPin = self:GetNamedChild("QuestPin")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\Gamepad\gp_advisor_trackedPin_icon.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" level="3" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-2"/>
+                </Texture>
+            </Controls>
+        </Control>
+
         <TopLevelControl name="ZO_GamepadProvisionerTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true" />
 
         <TopLevelControl name="ZO_GamepadProvisionerTopLevel" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">

@@ -41,13 +41,22 @@ function ZO_Enchanting_IsInCreationMode()
     return false
 end
 
-function ZO_Enchanting_DoesEnchantingItemPassFilter(bagId, slotIndex, filterType)
+function ZO_Enchanting_DoesEnchantingItemPassFilter(bagId, slotIndex, filterType, questFilterChecked, questRunes)
     local usedInCraftingType, craftingSubItemType, runeType = GetItemCraftingInfo(bagId, slotIndex)
 
     if filterType == EXTRACTION_FILTER then
         return craftingSubItemType == ITEMTYPE_GLYPH_WEAPON or craftingSubItemType == ITEMTYPE_GLYPH_ARMOR or craftingSubItemType == ITEMTYPE_GLYPH_JEWELRY
     elseif filterType == NO_FILTER or filterType == runeType then
-        return runeType == ENCHANTING_RUNE_ASPECT or runeType == ENCHANTING_RUNE_ESSENCE or runeType == ENCHANTING_RUNE_POTENCY
+        if questFilterChecked then
+            local itemId = GetItemId(bagId, slotIndex)
+            if questRunes.potency == itemId or questRunes.essence == itemId or questRunes.aspect == itemId then
+                return DoesPlayerHaveRunesForEnchanting(questRunes.aspect, questRunes.essence, questRunes.potency)
+            else
+                return false
+            end
+        else
+            return runeType == ENCHANTING_RUNE_ASPECT or runeType == ENCHANTING_RUNE_ESSENCE or runeType == ENCHANTING_RUNE_POTENCY
+        end
     end
 
     return false
@@ -496,6 +505,15 @@ function ZO_SharedEnchantRuneSlot:Initialize(owner, control, emptyTexture, dropC
     self.pendingRemoveSound = removeSound
 
     self.runeType = runeType
+end
+
+function ZO_SharedEnchantRuneSlot:Refresh()
+    ZO_CraftingSlotBase.Refresh(self)
+    if self.nameLabel then
+        if #self.items == 0 then
+            self.nameLabel:SetHidden(true)
+        end
+    end
 end
 
 function ZO_SharedEnchantRuneSlot:SetItem(bagId, slotIndex)
