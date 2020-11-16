@@ -235,7 +235,7 @@ function ZO_ItemSetsBook_Keyboard:InitializeCategories()
 
     local function BaseTreeHeaderSetup(node, control, categoryData, open)
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
-        control.text:SetText(categoryData:GetName())
+        control.text:SetText(categoryData:GetFormattedName())
         BaseTreeHeaderIconSetup(control, categoryData, open)
     end
 
@@ -266,7 +266,7 @@ function ZO_ItemSetsBook_Keyboard:InitializeCategories()
 
     local function TreeEntrySetup(node, control, categoryData, open)
         control:SetSelected(node.selected)
-        control:SetText(categoryData:GetName())
+        control:SetText(categoryData:GetFormattedName())
         UpdateCategoryStatusIcon(control, categoryData)
     end
 

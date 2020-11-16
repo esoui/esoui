@@ -36,6 +36,8 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
     self.useTriggers = (useTriggers ~= false) -- nil => true
     self.template = template or DEFAULT_TEMPLATE
 
+    self.currentSortType = ITEM_LIST_SORT_TYPE_CATEGORY
+
     if type(inventoryType) == "table" then
         self.inventoryTypes = inventoryType
     else
@@ -46,9 +48,9 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
         self.dataByBagAndSlotIndex[bagId] = {}
     end
 
-    local function VendorEntryTemplateSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
+    local function VendorEntryTemplateSetup(entryControl, data, selected, selectedDuringRebuild, enabled, activated)
         ZO_Inventory_BindSlot(data, slotType, data.slotIndex, data.bagId)
-        ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
+        ZO_SharedGamepadEntry_OnSetup(entryControl, data, selected, selectedDuringRebuild, enabled, activated)
     end
 
     self.list = ZO_GamepadVerticalParametricScrollList:New(self.control)

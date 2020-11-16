@@ -429,6 +429,10 @@ function ZO_ItemSetCollectionCategoryData:GetName()
     return GetItemSetCollectionCategoryName(self.categoryId)
 end
 
+function ZO_ItemSetCollectionCategoryData:GetFormattedName()
+    return zo_strformat(SI_ITEM_SET_CATEGORY_NAME_FORMATTER, self:GetName())
+end
+
 function ZO_ItemSetCollectionCategoryData:GetKeyboardIcons()
     return GetItemSetCollectionCategoryKeyboardIcons(self.categoryId)
 end

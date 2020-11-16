@@ -492,7 +492,10 @@ end
 
 function ZO_RetraitStation_Reconstruct_Gamepad:CanReconstruct()
     local selectedData = self.gridListPanelList:GetSelectedData()
-    return selectedData and selectedData:IsUnlocked() or false
+    if selectedData and not selectedData.isEmptyCell then
+        return selectedData:IsUnlocked()
+    end
+    return false
 end
 
 function ZO_RetraitStation_Reconstruct_Gamepad:ShowReconstructOptions()

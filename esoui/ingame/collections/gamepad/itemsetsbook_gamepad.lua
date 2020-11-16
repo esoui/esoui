@@ -98,11 +98,11 @@ function ZO_ItemSetsBook_Gamepad_Base:BuildSubcategoryList(parentCategoryData)
 
     subcategoryList:Clear()
 
-    subcategoryListDescriptor.titleText = parentCategoryData:GetName()
+    subcategoryListDescriptor.titleText = parentCategoryData:GetFormattedName()
 
     -- Add the category entries
     for subcategoryIndex, subcategoryData in parentCategoryData:SubcategoryIterator(self.categoryFilters) do
-        local entryData = ZO_GamepadEntryData:New(subcategoryData:GetName())
+        local entryData = ZO_GamepadEntryData:New(subcategoryData:GetFormattedName())
         entryData:SetDataSource(subcategoryData)
         entryData:SetIconTintOnSelection(true)
 
@@ -370,7 +370,7 @@ function ZO_ItemSetsBook_Gamepad_Base:RefreshCategories()
     categoryList:Clear()
 
     for _, topLevelCategoryData in ITEM_SET_COLLECTIONS_DATA_MANAGER:TopLevelItemSetCollectionCategoryIterator(self.categoryFilters) do
-        local categoryName = topLevelCategoryData:GetName()
+        local categoryName = topLevelCategoryData:GetFormattedName()
         local gamepadIcon = topLevelCategoryData:GetGamepadIcon()
 
         local entryData = ZO_GamepadEntryData:New(categoryName, gamepadIcon)
