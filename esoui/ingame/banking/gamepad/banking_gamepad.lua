@@ -111,6 +111,12 @@ do
             end
 
             local slots = self:GenerateSlotTable()
+
+            -- Sort slots accordingly before constructing list, necessary to prevent duplicate headers
+            if self.list.sortFunction then
+                table.sort(slots, self.list.sortFunction)
+            end
+
             local currentBestCategoryName = nil
             for i, itemData in ipairs(slots) do
                 local passesTextFilter = itemData.passesTextFilter == nil or itemData.passesTextFilter

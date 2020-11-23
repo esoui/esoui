@@ -249,8 +249,10 @@ function ZO_AntiquityDataManager:OnAntiquityShowCodexEntry(antiquityId)
             ANTIQUITY_LORE_GAMEPAD:ShowAntiquityOrSet(antiquityData, DONT_PUSH)
         end
     else
+        local categoryId = GetAntiquityCategoryId(antiquityId)
+        ANTIQUITY_JOURNAL_KEYBOARD:ShowCategory(categoryId)
         ANTIQUITY_LORE_KEYBOARD:ShowAntiquity(antiquityId)
-    end 
+    end
 end
 
 function ZO_AntiquityDataManager:RefreshAll()

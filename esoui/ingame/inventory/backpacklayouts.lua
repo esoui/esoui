@@ -48,6 +48,7 @@ function ZO_BackpackLayoutFragment:Show()
 end
 
 function ZO_BackpackLayoutFragment:Hide()
+    PLAYER_INVENTORY:ApplyBackpackLayout(DEFAULT_BACKPACK_LAYOUT_DATA)
     self:OnHidden()
 end
 
