@@ -5413,7 +5413,7 @@ SafeAddString(SI_ITEM_ALREADY_CHARGED, "この武器は最大限に充填済み�
 SafeAddString(SI_ITEM_CONDITION_PERCENT, "<<1>>%", 0)
 SafeAddString(SI_ITEM_DESCRIPTION_UNIVERSAL_STYLE, "このアイテムは、既知のスタイル全てで代わりのスタイル素材となる。", 1)
 SafeAddString(SI_ITEM_FILTER_BY_TEXT, "調べる", 1)
-SafeAddString(SI_ITEM_FORMAT_STR_ADD_SET_COLLECTION_PIECE, "固定するとセットコレクションに追加される。", 0)
+SafeAddString(SI_ITEM_FORMAT_STR_ADD_SET_COLLECTION_PIECE, "入手するとセットコレクションに追加される。", 0)
 SafeAddString(SI_ITEM_FORMAT_STR_ADD_TO_COLLECTION, "使用するとコレクションに追加される", 0)
 SafeAddString(SI_ITEM_FORMAT_STR_ALREADY_IN_COLLECTION, "すでにコレクションにある", 0)
 SafeAddString(SI_ITEM_FORMAT_STR_ALREADY_OWN_COMBINATION_RESULT, "この断片を使用したコレクションを所持しています。", 0)
