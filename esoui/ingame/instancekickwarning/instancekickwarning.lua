@@ -91,15 +91,27 @@ function ZO_InstanceKickWarning:OnInstanceKickTimeUpdate(timeRemaining, totalTim
     end
 end
 
-function ZO_InstanceKickWarning:SetHidden(hidden)
-    self.control:SetHidden(hidden)
+-- There are two instance kick controls, and the order they update their visibility may be arbitrary
+-- Starting value is set to 1 due to Dead using Hidden Reasons, and therefore being set to shown by default to force a RefreshVisibility
+local g_showingCount = 1
 
-    if hidden then
-        RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_INSTANCE_KICK_WARNING))
-    else 
-        PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_INSTANCE_KICK_WARNING))
+function ZO_InstanceKickWarning:SetHidden(hidden)
+    if hidden ~= self.control:IsHidden() then
+        self.control:SetHidden(hidden)
+        if hidden then
+            g_showingCount = g_showingCount - 1
+            if g_showingCount == 0 then
+                RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_INSTANCE_KICK_WARNING))
+            end
+        else
+            if g_showingCount == 0 then
+                PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_INSTANCE_KICK_WARNING))
+            end
+            g_showingCount = g_showingCount + 1
+        end
     end
 end
+
 
 -- ZO_InstanceKickWarning_Alive...Used when the player is alive (in shared info area)
 

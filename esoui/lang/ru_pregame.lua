@@ -1591,7 +1591,7 @@ SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY, "Активный мон
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, "Монитор <<1>>", 0)
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_TOOLTIP, "Позволяет выбрать устройство, на котором будет отображаться игра.", 0)
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_AMBIENT_OCCLUSION_TYPE, "Затенение", 0)
-SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_AMBIENT_OCCLUSION_TYPE_TOOLTIP, "Улучшает точность теней и освещения, учитывая при расчете объекты, преграждающие свет. HBAO расходует больше ресурсов, чем SSAO, но дает более реалистичный результат. Отключение этой настройки может повысить производительность.", 1)
+SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_AMBIENT_OCCLUSION_TYPE_TOOLTIP, "Улучшает точность теней и освещения, учитывая при расчете объекты, преграждающие свет. LSAO расходует больше всего ресурсов, но дает самый реалистичный результат. HBAO расходует больше ресурсов, но дает более реалистичный результат, чем SSAO. Отключение этой настройки может повысить производительность.", 1)
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_ANTI_ALIASING, "Сглаживание", 0)
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_ANTI_ALIASING_TOOLTIP, "Сглаживает края предметов в игровом мире. Отключение этой настройки может повысить производительность за счет снижения сглаженности краев предметов.", 0)
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_BLOOM, "Свечение", 0)
