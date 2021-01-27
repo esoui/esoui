@@ -65,6 +65,10 @@ do
         return pin:GetLocationIcon()
     end
 
+    local function GetWorldEventPOIPinTexture(pin)
+        return pin:GetWorldEventPOIIcon()
+    end
+
     local function GetFastTravelPinTextures(pin)
         return pin:GetFastTravelIcons()
     end
@@ -263,6 +267,7 @@ do
         [MAP_PIN_TYPE_POI_SEEN]                                     = { level = 46, size = CONSTANTS.POI_PIN_SIZE, texture = GetPOIPinTexture, tint = GetPOIPinTint, insetX = 5, insetY = 10},
         [MAP_PIN_TYPE_POI_COMPLETE]                                 = { level = 45, size = CONSTANTS.POI_PIN_SIZE, texture = GetPOIPinTexture, tint = GetPOIPinTint, insetX = 5, insetY = 10},
         [MAP_PIN_TYPE_LOCATION]                                     = { level = 45, size = CONSTANTS.MAP_LOCATION_PIN_SIZE, texture = GetLocationPinTexture},
+        [MAP_PIN_TYPE_WORLD_EVENT_POI_ACTIVE]                       = { level = 44, size = CONSTANTS.POI_PIN_SIZE, texture = GetWorldEventPOIPinTexture, isAnimated = true, framesWide = 16, framesHigh = 1, framesPerSecond = 12 },
         [MAP_PIN_TYPE_FORWARD_CAMP_ACCESSIBLE]                      = { level = 40, size = CONSTANTS.KEEP_PIN_ACCESSIBLE_SIZE, texture = "EsoUI/Art/MapPins/AvA_cemetary_linked_backdrop.dds"},
         [MAP_PIN_TYPE_KEEP_GRAVEYARD_ACCESSIBLE]                    = { level = 40, size = CONSTANTS.KEEP_PIN_ACCESSIBLE_SIZE, texture = "EsoUI/Art/MapPins/AvA_keep_linked_backdrop.dds"},
         [MAP_PIN_TYPE_IMPERIAL_DISTRICT_GRAVEYARD_ACCESSIBLE]       = { level = 40, size = CONSTANTS.KEEP_PIN_ACCESSIBLE_SIZE, texture = "EsoUI/Art/MapPins/AvA_imperialDistrict_glow.dds"},
@@ -588,6 +593,11 @@ ZO_MapPin.WORLD_EVENT_UNIT_PIN_TYPES =
     [MAP_PIN_TYPE_DRAGON_COMBAT_WEAK] = true,
     [MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY] = true,
     [MAP_PIN_TYPE_DRAGON_IDLE_WEAK] = true,
+}
+
+ZO_MapPin.WORLD_EVENT_POI_PIN_TYPES =
+{
+    [MAP_PIN_TYPE_WORLD_EVENT_POI_ACTIVE] = true,
 }
 
 ZO_MapPin.SUGGESTION_PIN_TYPES =
@@ -1354,6 +1364,18 @@ local TOWN_PIN_LMB =
     HIDE_KEEP_INFO_BIND,
 }
 
+local function GetTravelPinGamepadButtonText(pinDatas)
+    if #pinDatas == 1 then
+        if pinDatas[1].pin:IsLockedByLinkedCollectible() then
+            return pinDatas[1].pin:GetLockedByLinkedCollectibleInteractString()
+        else
+            return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_TRAVEL)
+        end
+    else
+        return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_CHOOSE_DESTINATION)
+    end
+end
+
 local WAYSHRINE_LMB =
 {
     --Recall
@@ -1363,21 +1385,18 @@ local WAYSHRINE_LMB =
                 return pin:GetLockedByLinkedCollectibleInteractString()
             else
                 local nodeIndex = pin:GetFastTravelNodeIndex()
-                local _, recallLocationName, _, _, _, _, poiType = GetFastTravelNodeInfo(nodeIndex)
-                local nodeIsHousePreview = poiType == POI_TYPE_HOUSE and not HasCompletedFastTravelNodePOI(nodeIndex)
-                if nodeIsHousePreview then
-                    return zo_strformat(SI_WORLD_MAP_ACTION_PREVIEW_HOUSE, recallLocationName)
-                else
-                    return zo_strformat(SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE, recallLocationName)
-                end
+                local _, recallLocationName = GetFastTravelNodeInfo(nodeIndex)
+                return zo_strformat(SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE, recallLocationName)
             end
         end,
+
         show = function(pin)
             local nodeIndex = pin:GetFastTravelNodeIndex()
-            return nodeIndex ~= nil and ZO_Map_GetFastTravelNode() == nil and 
+            return nodeIndex ~= nil and GetFastTravelNodeHouseId(nodeIndex) == 0 and ZO_Map_GetFastTravelNode() == nil and 
                     not IsInCampaign() and not GetFastTravelNodeOutboundOnlyInfo(nodeIndex) and
                     CanLeaveCurrentLocationViaTeleport() and not IsUnitDead("player")
         end,
+        
         callback = function(pin)
             if pin:IsLockedByLinkedCollectible() then
                 if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
@@ -1389,9 +1408,10 @@ local WAYSHRINE_LMB =
                     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
                 end
             else
-                local nodeIndex = pin:GetFastTravelNodeIndex()
                 ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
                 ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
+                ZO_Dialogs_ReleaseDialog("TRAVEL_TO_HOUSE_CONFIRM")
+                local nodeIndex = pin:GetFastTravelNodeIndex()
                 local name = select(2, GetFastTravelNodeInfo(nodeIndex))
                 local _, premiumTimeLeft = GetRecallCooldown()
                 if premiumTimeLeft == 0 then
@@ -1401,18 +1421,10 @@ local WAYSHRINE_LMB =
                 end
             end
         end,
-        gamepadName = function(pinDatas)
-            if #pinDatas == 1 then
-                if pinDatas[1].pin:IsLockedByLinkedCollectible() then
-                    return pinDatas[1].pin:GetLockedByLinkedCollectibleInteractString()
-                else
-                    return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_TRAVEL)
-                end
-            else
-                return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_CHOOSE_DESTINATION)
-            end
-        end,
+
+        gamepadName = GetTravelPinGamepadButtonText,
     },
+
     --Fast Travel
     {
         name = function(pin)
@@ -1420,19 +1432,16 @@ local WAYSHRINE_LMB =
                 return pin:GetLockedByLinkedCollectibleInteractString()
             else
                 local nodeIndex = pin:GetFastTravelNodeIndex()
-                local _, travelLocationName, _, _, _, _, poiType = GetFastTravelNodeInfo(nodeIndex)
-                local nodeIsHousePreview = poiType == POI_TYPE_HOUSE and not HasCompletedFastTravelNodePOI(nodeIndex)
-                if nodeIsHousePreview then
-                    return zo_strformat(SI_WORLD_MAP_ACTION_PREVIEW_HOUSE, travelLocationName)
-                else
-                    return zo_strformat(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE, travelLocationName)
-                end
+                local _, travelLocationName = GetFastTravelNodeInfo(nodeIndex)
+                return zo_strformat(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE, travelLocationName)
             end
         end,
+
         show = function(pin)
             local nodeIndex = pin:GetFastTravelNodeIndex()
-            return nodeIndex and ZO_Map_GetFastTravelNode() and not GetFastTravelNodeOutboundOnlyInfo(nodeIndex)
+            return nodeIndex and GetFastTravelNodeHouseId(nodeIndex) == 0 and ZO_Map_GetFastTravelNode() and not GetFastTravelNodeOutboundOnlyInfo(nodeIndex)
         end,
+
         callback = function(pin)
             if pin:IsLockedByLinkedCollectible() then
                 if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
@@ -1444,25 +1453,104 @@ local WAYSHRINE_LMB =
                     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
                 end
             else
-                local nodeIndex = pin:GetFastTravelNodeIndex()
                 ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
                 ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
+                ZO_Dialogs_ReleaseDialog("TRAVEL_TO_HOUSE_CONFIRM")
+                local nodeIndex = pin:GetFastTravelNodeIndex()
                 local name = select(2, GetFastTravelNodeInfo(nodeIndex))
                 ZO_Dialogs_ShowPlatformDialog("FAST_TRAVEL_CONFIRM", {nodeIndex = nodeIndex}, {mainTextParams = {name}})
             end
         end,
-        gamepadName = function(pinDatas)
-            if #pinDatas == 1 then
-                if pinDatas[1].pin:IsLockedByLinkedCollectible() then
-                    return pinDatas[1].pin:GetLockedByLinkedCollectibleInteractString()
+
+        gamepadName = GetTravelPinGamepadButtonText,
+    },
+
+    --House
+    {
+        show = function(pin)
+            local nodeIndex = pin:GetFastTravelNodeIndex()
+            if nodeIndex and GetFastTravelNodeHouseId(nodeIndex) ~= 0 then
+                if ZO_Map_GetFastTravelNode() then
+                    return true
                 else
-                    return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_TRAVEL)
+                    return CanLeaveCurrentLocationViaTeleport() and not IsInCampaign() and not IsUnitDead("player")
                 end
-            else
-                return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_CHOOSE_DESTINATION)
             end
+            return false
         end,
-    }
+
+        GetDynamicHandlers = function(pin)
+            local nodeIndex = pin:GetFastTravelNodeIndex()
+            local _, travelLocationName = GetFastTravelNodeInfo(nodeIndex)
+            local houseId = GetFastTravelNodeHouseId(nodeIndex)
+            local isPreview = not HasCompletedFastTravelNodePOI(nodeIndex)
+
+            local handlers = {}
+            local primaryHandler =
+            {
+                name = function(pin)
+                    if isPreview then
+                        return zo_strformat(SI_WORLD_MAP_ACTION_PREVIEW_HOUSE, travelLocationName)
+                    else
+                        return zo_strformat(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE, travelLocationName)
+                    end
+                end,
+
+                callback = function(pin)
+                    ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
+                    ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
+                    ZO_Dialogs_ReleaseDialog("TRAVEL_TO_HOUSE_CONFIRM")
+                    local nodeIndex = pin:GetFastTravelNodeIndex()
+                    local name = select(2, GetFastTravelNodeInfo(nodeIndex))
+                    ZO_Dialogs_ShowPlatformDialog("TRAVEL_TO_HOUSE_CONFIRM", { houseId = houseId, travelOutside = false }, { mainTextParams = { name } })
+                end,
+
+                gamepadName = GetTravelPinGamepadButtonText,
+
+                gamepadPinActionGroup = ZO_WORLD_MAP_GAMEPAD_PIN_ACTION_GROUP_FAST_TRAVEL,
+
+                gamepadChoiceOverrideName = function(pin)
+                    if isPreview then
+                        return zo_strformat(SI_WORLD_MAP_ACTION_PREVIEW_HOUSE, travelLocationName)
+                    else
+                        return zo_strformat(SI_GAMEPAD_WORLD_MAP_TRAVEL_TO_HOUSE_INSIDE, travelLocationName)
+                    end
+                end,
+            }
+
+            table.insert(handlers, primaryHandler)
+
+            if not isPreview then
+                local secondaryHandler =
+                {
+                    name = function(pin)
+                        return zo_strformat(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE, travelLocationName)
+                    end,
+
+                    callback = function(pin)
+                        ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
+                        ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
+                        ZO_Dialogs_ReleaseDialog("TRAVEL_TO_HOUSE_CONFIRM")
+                        local nodeIndex = pin:GetFastTravelNodeIndex()
+                        local name = select(2, GetFastTravelNodeInfo(nodeIndex))
+                        ZO_Dialogs_ShowPlatformDialog("TRAVEL_TO_HOUSE_CONFIRM", { houseId = houseId, travelOutside = true }, { mainTextParams = { name } })
+                    end,
+
+                    gamepadName = GetTravelPinGamepadButtonText,
+
+                    gamepadPinActionGroup = ZO_WORLD_MAP_GAMEPAD_PIN_ACTION_GROUP_FAST_TRAVEL,
+
+                    gamepadChoiceOverrideName = function(pin)
+                        return zo_strformat(SI_GAMEPAD_WORLD_MAP_TRAVEL_TO_HOUSE_OUTSIDE, travelLocationName)
+                    end,
+                }
+
+                table.insert(handlers, secondaryHandler)
+            end
+
+            return handlers
+        end,
+    },
 }
 
 local FORWARD_CAMP_LMB =
@@ -1671,6 +1759,7 @@ do
         self.highlightControl = control:GetNamedChild("Highlight")
         self.backgroundControl = control:GetNamedChild("Background")
         self.labelControl = control:GetNamedChild("Label")
+        self.scaleModifier = 1
 
         ZO_AlphaAnimation:New(self.highlightControl)
         self:ResetAnimation(ZO_MapPin.ANIM_CONSTANTS.RESET_ANIM_HIDE_CONTROL)
@@ -1740,6 +1829,10 @@ function ZO_MapPin.CreateZoneStoryTag(zoneId, zoneCompletionType, activityId, ic
     local tag = { zoneId, zoneCompletionType, activityId, icon }
     tag.isZoneStory = true
     return tag
+end
+
+function ZO_MapPin.CreateWorldEventPOIPinTag(worldEventInstanceId, zoneIndex, poiIndex)
+    return { worldEventInstanceId, zoneIndex, poiIndex }
 end
 
 function ZO_MapPin.CreateWorldEventUnitPinTag(worldEventInstanceId, unitTag)
@@ -1919,6 +2012,10 @@ end
 
 function ZO_MapPin:IsRestrictedLink()
     return ZO_MapPin.AVA_RESTRICTED_LINK_PIN_TYPES[self.m_PinType]
+end
+
+function ZO_MapPin:IsWorldEventPOIPin()
+   return ZO_MapPin.WORLD_EVENT_POI_PIN_TYPES[self.m_PinType] 
 end
 
 function ZO_MapPin:IsWorldEventUnitPin()
@@ -2121,6 +2218,8 @@ end
 function ZO_MapPin:GetPOIIndex()
     if self:IsPOI() or self.m_PinType == MAP_PIN_TYPE_POI_SUGGESTED then
         return self.m_PinTag[2]
+    elseif self:IsWorldEventPOIPin() then
+        return self.m_PinTag[3]
     end
 
     -- an invalid POI index that isn't nil, in case something actually decides to pass a nil
@@ -2131,6 +2230,8 @@ end
 function ZO_MapPin:GetPOIZoneIndex()
     if self:IsPOI() or self.m_PinType == MAP_PIN_TYPE_POI_SUGGESTED then
         return self.m_PinTag[1]
+    elseif self:IsWorldEventPOIPin() then
+        return self.m_PinTag[2]
     end
 
     -- an invalid POI index that isn't nil, in case something actually decides to pass a nil
@@ -2163,6 +2264,22 @@ end
 function ZO_MapPin:GetLocationIcon()
     if self.m_PinType == MAP_PIN_TYPE_LOCATION then
         return self.m_PinTag[2]
+    end
+
+    -- Empty icon string
+    return ""
+end
+
+function ZO_MapPin:GetWorldEventPOIIcon()
+    if self.m_PinType == MAP_PIN_TYPE_WORLD_EVENT_POI_ACTIVE then
+        local zoneIndex = self:GetPOIZoneIndex()
+        local poiIndex = self:GetPOIIndex()
+        local poiPinType = select(3, GetPOIMapInfo(zoneIndex, poiIndex))
+        if poiPinType == MAP_PIN_TYPE_POI_COMPLETE then
+            return "EsoUI/Art/MapPins/worldEvent_poi_active_complete.dds"
+        elseif poiPinType == MAP_PIN_TYPE_POI_SEEN then
+            return "EsoUI/Art/MapPins/worldEvent_poi_active_incomplete.dds"
+        end
     end
 
     -- Empty icon string
@@ -2359,7 +2476,7 @@ function ZO_MapPin:GetZoneStoryActivityId()
 end
 
 function ZO_MapPin:GetWorldEventInstanceId()
-    if self:IsWorldEventUnitPin() then
+    if self:IsWorldEventUnitPin() or self:IsWorldEventPOIPin() then
         return self.m_PinTag[1]
     end
 end
@@ -2524,6 +2641,7 @@ do
     end
 
     function ZO_MapPin:SetData(pinType, pinTag)
+        self:ClearData()
         self.m_PinType = pinType
         self.m_PinTag = pinTag
 
@@ -2584,17 +2702,22 @@ do
                 self.backgroundControl:SetColor(1, 1, 1, 1)
             end
         end
+        self:BuildDependencies()
     end
 end
 
 function ZO_MapPin:ClearData()
+    self:CleanUpDependencies()
     self.m_PinType = nil
     self.m_PinTag = nil
 end
 
-function ZO_MapPin:ResetScale()
+function ZO_MapPin:ResetScale(maintainScaleModifier)
     self.targetScale = nil
-    self.m_Control:SetScale(1)
+    if not maintainScaleModifier then
+        self.scaleModifier = 1
+    end
+    self.m_Control:SetScale(1 * self.scaleModifier)
     self.m_Control:SetHandler("OnUpdate", nil)
     if self.scaleChildren then
         for childPin, _ in pairs(self.scaleChildren) do
@@ -2722,9 +2845,9 @@ function ZO_MapPin:SetTargetScale(targetScale)
         self.targetScale = targetScale
 
         self.m_Control:SetHandler("OnUpdate", function(control)
-            local newScale = zo_deltaNormalizedLerp(control:GetScale(), self.targetScale, 0.17)
+            local newScale = zo_deltaNormalizedLerp(control:GetScale(), self.targetScale * self.scaleModifier, 0.17)
             if zo_abs(newScale - self.targetScale) < 0.01 then
-                control:SetScale(self.targetScale)
+                control:SetScale(self.targetScale * self.scaleModifier)
                 self.targetScale = nil
                 control:SetHandler("OnUpdate", nil)
             else
@@ -2760,6 +2883,38 @@ end
 function ZO_MapPin:ClearScaleChildren()
     if self.scaleChildren then
         ZO_ClearTable(self.scaleChildren)
+    end
+end
+
+function ZO_MapPin:BuildDependencies()
+    if self:IsWorldEventPOIPin() then
+        local zoneIndex = self:GetPOIZoneIndex()
+        local poiIndex = self:GetPOIIndex()
+        local associatedPOIPin = ZO_WorldMap_GetPinManager():FindPin("poi", zoneIndex, poiIndex)
+        if associatedPOIPin then
+            associatedPOIPin:SetScaleModifier(0.75)
+        end
+    end
+end
+
+function ZO_MapPin:CleanUpDependencies()
+    if self:IsWorldEventPOIPin() then
+        local zoneIndex = self:GetPOIZoneIndex()
+        local poiIndex = self:GetPOIIndex()
+        local associatedPOIPin = ZO_WorldMap_GetPinManager():FindPin("poi", zoneIndex, poiIndex)
+        if associatedPOIPin then
+            associatedPOIPin:SetScaleModifier(1)
+        end
+    end
+end
+
+function ZO_MapPin:SetScaleModifier(modifier)
+    modifier = modifier or 1
+    if modifier ~= self.scaleModifier then
+        local originalScale = self.m_Control:GetScale() / self.scaleModifier
+        local newScale = originalScale * modifier
+        self.scaleModifier = modifier
+        self.m_Control:SetScale(newScale)
     end
 end
 

@@ -40,7 +40,7 @@ function ZO_IconHeader_Setup(control, open, enabled, disableScaling, updateSizeF
     control.enabled = enabled
     control.allowIconScaling = not disableScaling
 
-    if not control.icon.animation then
+    if not control.icon.animation and control.allowIconScaling then
         control.icon.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual(control.animationTemplate, control.icon)
     end
 
@@ -92,4 +92,46 @@ end
 
 function ZO_IconHeader_SetMaxLines(self, maxLines)
     self.text:SetHeight(self.text:GetFontHeight() * maxLines + 1)
+end
+
+-- Simple Arrow Icon Header
+do
+    local function OnMouseEnter(control)
+        ZO_SelectableLabel_OnMouseEnter(control.text)
+        control.iconHighlight:SetHidden(false)
+    end
+
+    local function OnMouseExit(control)
+        ZO_SelectableLabel_OnMouseExit(control.text)
+        control.iconHighlight:SetHidden(true)
+    end
+
+    local function OnMouseUp(control, upInside)
+        ZO_TreeHeader_OnMouseUp(control, upInside)
+    end
+    
+    local OPEN_TEXTURE = "EsoUI/Art/Buttons/tree_open_up.dds"
+    local CLOSED_TEXTURE = "EsoUI/Art/Buttons/tree_closed_up.dds"
+    local OPEN_OVER_TEXTURE = "EsoUI/Art/Buttons/tree_open_over.dds"
+    local CLOSED_OVER_TEXTURE = "EsoUI/Art/Buttons/tree_closed_over.dds"
+
+    local function SimpleArrowSetup(control, name, open)
+        control.text:SetText(name)
+
+        control.icon:SetTexture(open and OPEN_TEXTURE or CLOSED_TEXTURE)
+        control.iconHighlight:SetTexture(open and OPEN_OVER_TEXTURE or CLOSED_OVER_TEXTURE)
+
+        control.text:SetSelected(open)
+    end
+
+    function ZO_SimpleArrowIconHeader_OnInitialized(self)
+        self.icon = self:GetNamedChild("Icon")
+        self.iconHighlight = self.icon:GetNamedChild("Highlight")
+        self.text = self:GetNamedChild("Text")
+
+        self.OnMouseEnter = OnMouseEnter
+        self.OnMouseExit = OnMouseExit
+        self.OnMouseUp = OnMouseUp
+        self.SimpleArrowSetup = SimpleArrowSetup
+    end
 end

@@ -51,6 +51,7 @@ ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE =
     [NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA] = "ZO_GamepadNotificationsNewDailyLoginRewardRow",
     [NOTIFICATIONS_GUILD_NEW_APPLICATIONS] = "ZO_GamepadNotificationsGuildNewApplicationsRow",
     [NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA] = "ZO_GamepadNotificationsMarketProductUnlockedRow",
+    [NOTIFICATIONS_POINTS_RESET_DATA] = "ZO_GamepadNotificationsPointsResetRow",
 }
 
 -- Provider Overrides
@@ -438,6 +439,22 @@ function ZO_GamepadMarketProductUnlockedProvider:ShowMoreInfo(entryData)
     end
 end
 
+-- ZO_GamepadPointsResetProvider
+------------------------------------------
+
+ZO_GamepadPointsResetProvider = ZO_PointsResetProvider:Subclass()
+
+function ZO_GamepadPointsResetProvider:Accept(data)
+    ZO_PointsResetProvider.Accept(self, data)
+    if data.respecType == RESPEC_TYPE_ATTRIBUTES then
+        MAIN_MENU_GAMEPAD:ShowScene("gamepad_stats_root")
+    elseif data.respecType == RESPEC_TYPE_SKILLS then
+        MAIN_MENU_GAMEPAD:ShowScene("gamepad_skills_root")
+    elseif data.respecType == RESPEC_TYPE_CHAMPION then
+        MAIN_MENU_GAMEPAD:ShowScene("gamepad_championPerks_root")
+    end
+end
+
 --Notification Manager
 -------------------------
 
@@ -501,6 +518,7 @@ function ZO_GamepadNotificationManager:SetupList(list)
         ["ZO_GamepadNotificationsNewDailyLoginRewardRow"] = SetupRequest,
         ["ZO_GamepadNotificationsGuildNewApplicationsRow"] = SetupRequest,
         ["ZO_GamepadNotificationsMarketProductUnlockedRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsPointsResetRow"] = SetupRequest,
     }
 
     for template, setupCallback in pairs(TEMPLATE_TO_SETUP) do
@@ -529,7 +547,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_GroupElectionProvider:New(self),
         ZO_GamepadTradeInviteProvider:New(self),
         ZO_GamepadQuestShareProvider:New(self),
-        ZO_PointsResetProvider:New(self, "gamepad"),
+        ZO_GamepadPointsResetProvider:New(self),
         ZO_GamepadPledgeOfMaraProvider:New(self),
         ZO_GamepadAgentChatRequestProvider:New(self),
         ZO_GamepadLeaderboardRaidProvider:New(self),
@@ -848,8 +866,13 @@ function ZO_GamepadNotificationManager:SetupWaiting(control, entryData, selected
 end
 
 function ZO_GamepadNotificationManager:SetupBaseRow(control, data, selected)
-    data.acceptText = control.acceptText
-    data.declineText = control.declineText
+    if data.acceptText == nil then
+        data.acceptText = control.acceptText
+    end
+
+    if data.declineText == nil then
+        data.declineText = control.declineText
+    end
 end
 
 --Global XML

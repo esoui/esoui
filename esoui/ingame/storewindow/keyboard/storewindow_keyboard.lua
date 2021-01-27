@@ -26,6 +26,7 @@ function ZO_StoreManager:Initialize(control)
 
     STORE_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
+    local INVENTORY_TYPE_LIST = { INVENTORY_BACKPACK }
     STORE_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
                                                     if newState == SCENE_FRAGMENT_SHOWING then
                                                         self:RefreshCurrency()
@@ -40,7 +41,6 @@ function ZO_StoreManager:Initialize(control)
                                                         if ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() then
                                                             self:TogglePreviewMode()
                                                         end
-
                                                         if self.windowMode == ZO_STORE_WINDOW_MODE_STABLE then
                                                             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                                                         end
@@ -96,7 +96,7 @@ function ZO_StoreManager:Initialize(control)
     self.buyMultipleSpinner:RegisterCallback("OnValueChanged", function() self:RefreshBuyMultiple() end)
 
     self.list = GetControl(control, "List")
-    ZO_ScrollList_AddDataType(self.list, DATA_TYPE_STORE_ITEM, "ZO_StoreEntrySlot", 52, function(control, data) self:SetUpBuySlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
+    ZO_ScrollList_AddDataType(self.list, DATA_TYPE_STORE_ITEM, "ZO_StoreEntrySlot", 52, function(currentControl, data) self:SetUpBuySlot(currentControl, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
 
     self.landingArea = GetControl(self.list, "SellToVendorArea")
 
@@ -180,12 +180,18 @@ function ZO_StoreManager:Initialize(control)
 
     local function ShowStoreWindow()
         if not IsInGamepadPreferredMode() then
+            PLAYER_INVENTORY:SetContextForInventories("storeTextSearch", INVENTORY_TYPE_LIST)
+            TEXT_SEARCH_MANAGER:ActivateTextSearch("storeTextSearch")
             SCENE_MANAGER:Show("store")
         end
     end
 
     local function CloseStoreWindow()
         if not IsInGamepadPreferredMode() then
+            TEXT_SEARCH_MANAGER:DeactivateTextSearch("storeTextSearch")
+            local REMOVE_CONTEXT = nil
+            PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
+
             -- Ensure that all dialogs related to the store also close when interaction ends
             ZO_Dialogs_ReleaseDialog("REPAIR_ALL")
             ZO_Dialogs_ReleaseDialog("BUY_MULTIPLE")
@@ -315,7 +321,7 @@ function ZO_StoreManager:InitializeTabs()
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
         {
             name = GetString(SI_ITEM_ACTION_STACK_ALL),
-            keybind = "UI_SHORTCUT_STACK_ALL",
+            keybind = "UI_SHORTCUT_QUINARY",
             callback = function()
                 StackBag(BAG_BACKPACK)
             end,
@@ -511,7 +517,7 @@ function ZO_StoreManager:RefreshCurrency()
     self.currency2Display:SetHidden(true)
     self.currency2Display.isInUse = false
 
-    for i, currencyType in ipairs(self.storeUsedCurrencies) do
+    for _, currencyType in ipairs(self.storeUsedCurrencies) do
         if currencyType ~= CURT_MONEY then
             local playerHeldCurrencyAmount = GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))
             self:SetCurrencyControl(currencyType, playerHeldCurrencyAmount, ZO_KEYBOARD_CURRENCY_OPTIONS)
@@ -605,7 +611,7 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
         else
             -- data.quality is deprecated, included here for addon backwards compatibility
             local displayQuality = data.displayQuality or data.quality
-            local qualityColor = nil
+            local qualityColor
             if data.entryType == STORE_ENTRY_TYPE_ANTIQUITY_LEAD then
                 qualityColor = GetAntiquityQualityColor(displayQuality)
             else
@@ -722,7 +728,7 @@ end
 -------------------
 
 local function GetStoreEntryIndexForPreviewFromSlot(storeEntrySlot)
-    local inventorySlot, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(storeEntrySlot)
+    local inventorySlot = ZO_InventorySlot_GetInventorySlotComponents(storeEntrySlot)
 
     local slotType = ZO_InventorySlot_GetType(inventorySlot)
     if slotType == SLOT_TYPE_STORE_BUY then

@@ -139,11 +139,13 @@ function ZO_ItemPreviewListHelper_Shared:SetPreviewIndex(previewIndex)
     if self:IsValidPreviewIndex(previewIndex) and self.previewData ~= previewData then
         self.previewIndex = previewIndex
         self.previewData = previewData
+        local previewObject = self:GetPreviewObject()
 
+        previewObject:ClearPreviewCollection()
         if type(previewData) == "table" then
-            self:GetPreviewObject():SharedPreviewSetup(self.previewType, unpack(previewData))
+            previewObject:SharedPreviewSetup(self.previewType, unpack(previewData))
         else
-            self:GetPreviewObject():SharedPreviewSetup(self.previewType, previewData)
+            previewObject:SharedPreviewSetup(self.previewType, previewData)
         end
 
         self:FireCallbacks("OnPreviewChanged", previewData)

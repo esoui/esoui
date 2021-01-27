@@ -8,8 +8,8 @@ ZO_TRADING_HOUSE_INTERACTION =
 {
     type = "TradingHouse",
     OnInteractSwitch = function()
-        internalassert(false, "OnInteractSwitch is being called.") 
-        SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):CloseTradingHouse() 
+        internalassert(false, "OnInteractSwitch is being called.")
+        SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):CloseTradingHouse()
     end,
     interactTypes = { INTERACTION_TRADINGHOUSE },
 }
@@ -76,16 +76,10 @@ function ZO_TradingHouse_CalculateItemSuggestedPostPrice(bagId, slotIndex)
 end
 
 --[[ 
-    Trading House Singleton 
+    Trading House Singleton
 --]]
 
-ZO_TradingHouse_Singleton = ZO_Object:Subclass()
-
-function ZO_TradingHouse_Singleton:New(...)
-    local tradingHouse = ZO_Object.New(self)
-    tradingHouse:Initialize(...)
-    return tradingHouse
-end
+ZO_TradingHouse_Singleton = ZO_InitializingObject:Subclass()
 
 function ZO_TradingHouse_Singleton:Initialize()
     local function OnTradingHouseOpen()
@@ -104,6 +98,22 @@ function ZO_TradingHouse_Singleton:Initialize()
 
     EVENT_MANAGER:RegisterForEvent(ZO_TRADING_HOUSE_SYSTEM_NAME, EVENT_OPEN_TRADING_HOUSE, function() OnTradingHouseOpen() end)
     EVENT_MANAGER:RegisterForEvent(ZO_TRADING_HOUSE_SYSTEM_NAME, EVENT_CLOSE_TRADING_HOUSE, function() OnCloseTradingHouse() end)
+
+    local guildTraderFilterTargetDescriptor =
+    {
+        [BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT] =
+        {
+            searchFilterList =
+            {
+                BACKGROUND_LIST_FILTER_TYPE_NAME,
+            },
+            primaryKeys =
+            {
+                BAG_BACKPACK,
+            }
+        },
+    }
+    TEXT_SEARCH_MANAGER:SetupContextTextSearch("guildTraderTextSearch", guildTraderFilterTargetDescriptor)
 end
 
 ZO_TRADING_HOUSE_SINGLETON = ZO_TradingHouse_Singleton:New()
@@ -112,13 +122,7 @@ ZO_TRADING_HOUSE_SINGLETON = ZO_TradingHouse_Singleton:New()
     TradingHouseShared
 --]]
 
-ZO_TradingHouse_Shared = ZO_CallbackObject:Subclass()
-
-function ZO_TradingHouse_Shared:New(...)
-    local tradingHouse = ZO_CallbackObject.New(self)
-    tradingHouse:Initialize(...)
-    return tradingHouse
-end
+ZO_TradingHouse_Shared = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_TradingHouse_Shared:Initialize(control)
     self.control = control

@@ -88,21 +88,20 @@
                 <Button name="$(parent)Slot" inherits="ZO_Skills_AbilitySlot">
                     <Anchor point="LEFT" offsetX="117" />
                     
-                    <MouseButton button="1" enabled="true" />
-                    <MouseButton button="2" enabled="true" />
+                    <MouseButton button="RIGHT" enabled="true" />
 
                     <OnDragStart>
-                        if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                        if button == MOUSE_BUTTON_INDEX_LEFT then
                             ZO_Skills_AbilitySlot_OnDragStart(self)
                         end
                     </OnDragStart>
                     <OnMouseDoubleClick>
-                        if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                        if button == MOUSE_BUTTON_INDEX_LEFT then
                             ZO_Skills_AbilitySlot_OnDoubleClick(self)
                         end
                     </OnMouseDoubleClick>
                     <OnClicked>
-                        if(button == MOUSE_BUTTON_INDEX_RIGHT) then
+                        if button == MOUSE_BUTTON_INDEX_RIGHT then
                             ZO_Skills_AbilitySlot_OnClick(self)
                         end
                     </OnClicked>

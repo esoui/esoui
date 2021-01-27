@@ -24,27 +24,27 @@ end
 
 local function HideCODMessage(control)
     control.codNotice:SetHidden(true)
-        
+
     control.addressLabel:ClearAnchors()
     control.addressLabel:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
 end
 
 local function SetupMoney(control, codFee, attachedMoney)
-    local hasAttachedMoney = (attachedMoney > 0)
-    local hasCod = (codFee > 0)
+    local hasAttachedMoney = attachedMoney > 0
+    local hasCod = codFee > 0
 
     if hasAttachedMoney then
         HideCODMessage(control)
 
         control.moneyLabel:SetText(GetString(SI_MAIL_READ_SENT_GOLD_LABEL))
-        
+
         ZO_CurrencyControl_SetSimpleCurrency(control.moneyValue, CURT_MONEY, attachedMoney, control.attachedMoneyOptions)
         control.moneyValue:SetHidden(false)
         control.moneyNone:SetHidden(true)
 
     elseif hasCod then
         local notEnoughMoney = (not control.outbox) and (codFee > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
-            
+
         ZO_CurrencyControl_SetSimpleCurrency(control.moneyValue, CURT_MONEY, codFee, control.codMoneyOptions, nil, notEnoughMoney)
 
         if control.outbox then
@@ -190,29 +190,28 @@ end
 -- Mail Header
 INBOX_TAB_INDEX = 1
 SEND_TAB_INDEX = 2
-local MailManager_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
-
-function MailManager_Gamepad:New(...)
-    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
-end
+local MailManager_Gamepad = ZO_Gamepad_ParametricList_BagsSearch_Screen:Subclass()
 
 function MailManager_Gamepad:Initialize(control)
     -- Scene Setup.
     MAIL_MANAGER_GAMEPAD_SCENE = ZO_RemoteScene:New("mailManagerGamepad", SCENE_MANAGER)
 
     local DONT_ACTIVATE_ON_SHOW = false
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, DONT_ACTIVATE_ON_SHOW, MAIL_MANAGER_GAMEPAD_SCENE)
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, DONT_ACTIVATE_ON_SHOW, MAIL_MANAGER_GAMEPAD_SCENE)
 
     self.inbox = ZO_MailInbox_Gamepad:New(control)
     self.send = ZO_MailSend_Gamepad:New(control)
 
+    self:SetTextSearchEntryHidden(true)
+
     self.deferredKeybindStripDescriptor = false
     CALLBACK_MANAGER:RegisterCallback("OnGamepadDialogHidden", function()
-            if self.deferredKeybindStripDescriptor ~= false then
-                self:SwitchToKeybind(self.deferredKeybindStripDescriptor)
-            end
+        if self.deferredKeybindStripDescriptor ~= false then
+            self:SwitchToKeybind(self.deferredKeybindStripDescriptor)
         end
-    )
+    end)
+
+    self:SetTextSearchContext("mailTextSearch")
 end
 
 function MailManager_Gamepad:OnStateChanged(oldState, newState)
@@ -226,7 +225,7 @@ function MailManager_Gamepad:OnStateChanged(oldState, newState)
             self.initialTabIndex = nil
             ZO_GamepadGenericHeader_SetActiveTabIndex(self.header, tabIndex)
 
-            if(tabIndex == INBOX_TAB_INDEX) then
+            if tabIndex == INBOX_TAB_INDEX then
                 self.inbox.isLoading = true
                 self.inbox:EnterLoading()
             end
@@ -236,6 +235,26 @@ function MailManager_Gamepad:OnStateChanged(oldState, newState)
         self:SwitchToHeader(nil)
         self:SwitchToKeybind(nil)
         self:SwitchToFragment(nil)
+    end
+end
+
+function MailManager_Gamepad:ActivateTextSearch()
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.ActivateTextSearch(self)
+    self:SetTextSearchEntryHidden(false)
+end
+
+function MailManager_Gamepad:DeactivateTextSearch()
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.DeactivateTextSearch(self)
+    self:SetTextSearchEntryHidden(true)
+end
+
+function MailManager_Gamepad:SetOnBackButtonCallback(callback)
+    self.onBackButtonCallback = callback
+end
+
+function MailManager_Gamepad:OnBackButtonClicked()
+    if self.onBackButtonCallback then
+        self.onBackButtonCallback()
     end
 end
 
@@ -253,40 +272,40 @@ function MailManager_Gamepad:SwitchToFragment(fragment)
 end
 
 function MailManager_Gamepad:PerformDeferredInitialization()
-    if self.initialized then return end
+    if self.initialized then
+        return
+    end
     self.initialized = true
 
     -- Header
-    self.tabBarEntries = {
-                {
-                    text = function()
-                        local inboxTitle = nil
+    self.tabBarEntries =
+    {
+        {
+            text = function()
+                if IsLocalMailboxFull() then
+                    return zo_strformat(SI_GAMEPAD_MAIL_INBOX_WINDOW_TITLE, GetString(SI_WINDOW_TITLE_INBOX_MAIL), GetString(SI_GAMEPAD_MAIL_INBOX_FULL))
+                elseif GetNumUnreadMail() > 0 then
+                    return zo_strformat(SI_GAMEPAD_MAIL_INBOX_WINDOW_TITLE, GetString(SI_WINDOW_TITLE_INBOX_MAIL), GetNumUnreadMail())
+                else
+                    return GetString(SI_WINDOW_TITLE_INBOX_MAIL)
+                end
+            end,
+            callback = function()
+                self:SwitchToFragment(GAMEPAD_MAIL_INBOX_FRAGMENT)
+            end,
+        },
+        {
+            text = GetString(SI_WINDOW_TITLE_SEND_MAIL),
+            callback = function()
+                self:SwitchToFragment(GAMEPAD_MAIL_SEND_FRAGMENT)
+            end,
+        },
+    }
 
-                        if IsLocalMailboxFull() then
-                            inboxTitle = zo_strformat(SI_GAMEPAD_MAIL_INBOX_WINDOW_TITLE, GetString(SI_WINDOW_TITLE_INBOX_MAIL), GetString(SI_GAMEPAD_MAIL_INBOX_FULL))
-                        elseif GetNumUnreadMail() > 0 then
-                            inboxTitle = zo_strformat(SI_GAMEPAD_MAIL_INBOX_WINDOW_TITLE, GetString(SI_WINDOW_TITLE_INBOX_MAIL), GetNumUnreadMail())
-                        else
-                            inboxTitle = GetString(SI_WINDOW_TITLE_INBOX_MAIL)
-                        end
-
-                        return inboxTitle
-                    end,
-                    callback = function()
-                        self:SwitchToFragment(GAMEPAD_MAIL_INBOX_FRAGMENT)
-                    end,
-                },
-                {
-                    text = GetString(SI_WINDOW_TITLE_SEND_MAIL),
-                    callback = function()
-                        self:SwitchToFragment(GAMEPAD_MAIL_SEND_FRAGMENT)
-                    end,
-                },
-            }
-
-    self.baseHeaderData = {
-                tabBarEntries = self.tabBarEntries,
-            }
+    self.baseHeaderData =
+    {
+        tabBarEntries = self.tabBarEntries,
+    }
 
     self:InitializeControls()
 end

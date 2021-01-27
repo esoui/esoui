@@ -848,6 +848,43 @@ ESO_Dialogs["RECALL_CONFIRM"] =
     end,
 }
 
+ESO_Dialogs["TRAVEL_TO_HOUSE_CONFIRM"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_PROMPT_TITLE_FAST_TRAVEL_CONFIRM,
+    },
+    mainText = 
+    {
+        text = function(dialog)
+            if dialog.data.travelOutside then
+                return SI_TRAVEL_TO_HOUSE_OUTSIDE_DIALOG_MAIN_TEXT
+            else
+                return SI_TRAVEL_TO_HOUSE_INSIDE_DIALOG_MAIN_TEXT
+            end
+        end,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback = function(dialog)
+                local data = dialog.data
+                RequestJumpToHouse(data.houseId, data.travelOutside)
+                SCENE_MANAGER:ShowBaseScene()
+            end,
+        },        
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
 ESO_Dialogs["ADD_IGNORE"] =
 {
     title =
@@ -2225,6 +2262,68 @@ ESO_Dialogs["COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE"] =
     }
 }
 
+ESO_Dialogs["GAMEPAD_TRAVEL_TO_HOUSE_OPTIONS_DIALOG"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+    },
+
+    title =
+    {
+        text = SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE,
+    },
+
+    setup = function(dialog)
+        dialog:setupFunc()
+    end,
+
+    parametricList =
+    {
+        {
+            template = "ZO_GamepadMenuEntryTemplate",
+            templateData =
+            {
+                text = GetString(SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE_INSIDE),
+                setup = ZO_SharedGamepadEntry_OnSetup,
+                callback = function(dialog)
+                    local TRAVEL_INSIDE = false
+                    RequestJumpToHouse(dialog.data:GetReferenceId(), TRAVEL_INSIDE)
+                    SCENE_MANAGER:ShowBaseScene()
+                end,
+            },
+        },
+        {
+            template = "ZO_GamepadMenuEntryTemplate",
+            templateData =
+            {
+                text = GetString(SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE_OUTSIDE),
+                setup = ZO_SharedGamepadEntry_OnSetup,
+                callback = function(dialog)
+                    local TRAVEL_OUTSIDE = true
+                    RequestJumpToHouse(dialog.data:GetReferenceId(), TRAVEL_OUTSIDE)
+                    SCENE_MANAGER:ShowBaseScene()
+                end,
+            },
+        },
+    },
+
+    buttons =
+    {
+        {
+            text = SI_GAMEPAD_SELECT_OPTION,
+            callback =  function(dialog)
+                local data = dialog.entryList:GetTargetData()
+                data.callback(dialog)
+            end,
+        },
+
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    }
+}
+
 ESO_Dialogs["GAMERCARD_UNAVAILABLE"] =
 {
     canQueue = true,
@@ -2426,7 +2525,6 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_SUBMIT_TICKET_ERROR_DIALOG"] =
     buttons =
     {
         {
-            keybind = "DIALOG_PRIMARY",
             text = SI_CUSTOMER_SERVICE_OPEN_WEB_BROWSER,
             visible = function()
                 return not IsConsoleUI() and not IsHeronUI()
@@ -2436,7 +2534,6 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_SUBMIT_TICKET_ERROR_DIALOG"] =
             end,
         },
         {
-            keybind = "DIALOG_NEGATIVE",
             text = SI_DIALOG_EXIT,
         },
     },
@@ -2643,7 +2740,6 @@ ESO_Dialogs["COLLECTIBLE_REQUIREMENT_FAILED"] =
                     ShowMarketAndSearch(searchTerm, openSource)
                 end
             end,
-            clickSound = SOUNDS.DIALOG_ACCEPT,
         },
         {
             text = SI_DIALOG_EXIT,
@@ -2736,7 +2832,6 @@ ESO_Dialogs["PROMPT_FOR_LFM_REQUEST"] =
                             local ACCEPT = true
                             ZO_ACTIVITY_FINDER_ROOT_MANAGER:HandleLFMPromptResponse(ACCEPT)
                        end,
-            clickSound = SOUNDS.DIALOG_ACCEPT,
         },
         {
             text = SI_NOTIFICATIONS_REQUEST_DECLINE,
@@ -2792,7 +2887,6 @@ ESO_Dialogs["DYE_STAMP_CONFIRM_USE"] =
             callback = function(dialog)
                             dialog.data.onAcceptCallback()
                        end,
-            clickSound = SOUNDS.DIALOG_ACCEPT,
         },
         {
             text = SI_DIALOG_CANCEL,
@@ -2822,7 +2916,6 @@ ESO_Dialogs["CONFIRM_MODIFY_TRADE_BOP"] =
             callback = function(dialog)
                             dialog.data.onAcceptCallback()
                        end,
-            clickSound = SOUNDS.DIALOG_ACCEPT,
         },
         {
             text = SI_DIALOG_CANCEL,
@@ -2852,7 +2945,6 @@ ESO_Dialogs["CONFIRM_EQUIP_ITEM"] =
             callback = function(dialog)
                             dialog.data.onAcceptCallback()
                        end,
-            clickSound = SOUNDS.DIALOG_ACCEPT,
         },
         {
             text = SI_DIALOG_CANCEL,
@@ -2882,7 +2974,6 @@ ESO_Dialogs["CONFIRM_BIND_ITEM"] =
             callback = function(dialog)
                 dialog.data.onAcceptCallback()
             end,
-            clickSound = SOUNDS.DIALOG_ACCEPT,
         },
         {
             text = SI_DIALOG_CANCEL,
@@ -2931,6 +3022,7 @@ do
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+            allowRightStickPassThrough = true,
         },
         title =
         {
@@ -2961,59 +3053,56 @@ do
     }
 end
 
-do
-    ESO_Dialogs["GAMEPAD_CRAFTING_OPTIONS_DIALOG"] =
+ESO_Dialogs["GAMEPAD_CRAFTING_OPTIONS_DIALOG"] =
+{
+    gamepadInfo =
     {
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
-        },
+        dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        allowRightStickPassThrough = true,
+    },
 
-        setup = function(dialog, data)
-            dialog.entryList:SetOnTargetDataChangedCallback(function(owner, targetData)
-                if targetData.onSelected ~= nil then
-                    targetData.onSelected()
-                end
-            end)
-            dialog.info.parametricList = data.parametricList
-            dialog:setupFunc()
-
-            local targetData = dialog.entryList:GetTargetData()
+    setup = function(dialog, data)
+        dialog.entryList:SetOnTargetDataChangedCallback(function(owner, targetData)
             if targetData.onSelected ~= nil then
                 targetData.onSelected()
             end
-        end,
-        onHidingCallback = function(dialog)
-            if dialog.data.finishedCallback then
-                dialog.data.finishedCallback()
-            end
-        end,
-        title =
-        {
-            text = SI_GAMEPAD_OPTIONS_MENU,
-        },
-        blockDialogReleaseOnPress = true,
-        buttons =	
-        {
-            {
-                keybind = "DIALOG_PRIMARY",
-                text = SI_GAMEPAD_SELECT_OPTION,
-                callback  = function(dialog)
-                    local targetData = dialog.entryList:GetTargetData()
-                    targetData.callback(dialog)
-                end
-            },
+        end)
+        dialog.info.parametricList = data.parametricList
+        dialog:setupFunc()
 
-            {
-                keybind = "DIALOG_NEGATIVE",
-                text = SI_GAMEPAD_BACK_OPTION,
-                callback =  function(dialog)
-                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_CRAFTING_OPTIONS_DIALOG")
-                end
-            },
+        local targetData = dialog.entryList:GetTargetData()
+        if targetData.onSelected ~= nil then
+            targetData.onSelected()
+        end
+    end,
+    onHidingCallback = function(dialog)
+        if dialog.data.finishedCallback then
+            dialog.data.finishedCallback()
+        end
+    end,
+    title =
+    {
+        text = SI_GAMEPAD_OPTIONS_MENU,
+    },
+    blockDialogReleaseOnPress = true,
+    buttons =	
+    {
+        {
+            text = SI_GAMEPAD_SELECT_OPTION,
+            callback  = function(dialog)
+                local targetData = dialog.entryList:GetTargetData()
+                targetData.callback(dialog)
+            end
         },
-    }
-end
+
+        {
+            text = SI_GAMEPAD_BACK_OPTION,
+            callback =  function(dialog)
+                ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_CRAFTING_OPTIONS_DIALOG")
+            end
+        },
+    },
+}
 
 ESO_Dialogs["EXTRACT_ALL_PROMPT"] =
 {

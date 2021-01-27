@@ -192,11 +192,7 @@ function ActionButton:HandleSlotChanged()
         setupSlotHandler(self, slotId)
     end
 
-    if self.showingCooldown then
-        ZO_ContextualActionBar_RemoveReference()
-    end
-    self.showingCooldown = false
-
+    self:SetShowCooldown(false)
     self:UpdateState()
 
     local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
@@ -329,40 +325,36 @@ function ActionButton:UpdateUsable()
     end
     
     local useDesaturation = isShowingCooldown and not self.useFailure or stackEmpty
-    
     if usable ~= self.usable or useDesaturation ~= self.useDesaturation then
         self.usable = usable
         self.useDesaturation = useDesaturation
-
         ZO_ActionSlot_SetUnusable(self.icon, not usable, useDesaturation)
     end
 end
 
-function ActionButton:SetCooldownIconAnchors(inCooldown)
-    self.icon:ClearAnchors()
-    local isGamepad = IsInGamepadPreferredMode()
-    self.cooldownEdge:SetHidden(not isGamepad or not inCooldown)
-
-    if isGamepad then
-        if inCooldown then
-            self.icon:SetAnchor(BOTTOMLEFT, self.flipCard)
-            self.icon:SetAnchor(BOTTOMRIGHT, self.flipCard)
+function ActionButton:SetShowCooldown(showCooldown)
+    if showCooldown ~= self.showingCooldown then
+        if showCooldown then
+            ZO_ContextualActionBar_AddReference()
         else
-            self.icon:SetAnchor(CENTER, self.flipCard)
+            ZO_ContextualActionBar_RemoveReference()
         end
-    else
-        self.icon:SetAnchor(TOPLEFT, self.flipCard)
-        self.icon:SetAnchor(BOTTOMRIGHT, self.flipCard)
+
+        self.showingCooldown = showCooldown
+        self:SetCooldownEdgeState(showCooldown)
     end
 end
 
-function ActionButton:SetCooldownHeight(percentComplete)
+function ActionButton:SetCooldownEdgeState(inCooldown)
+    self.cooldownEdge:SetHidden(not IsInGamepadPreferredMode() or not inCooldown)
+end
+
+function ActionButton:SetCooldownPercentComplete(percentComplete)
     local percent = percentComplete or 1 -- Can get here from several places before percentComplete has been set (]forcereload)
-    local height = zo_ceil(ZO_GAMEPAD_ACTION_BUTTON_SIZE * percent)
-    local textureCoord = 1 - height / ZO_GAMEPAD_ACTION_BUTTON_SIZE
-    self.icon:SetHeight(height)
-    self.icon:SetTextureCoords(0, 1, textureCoord, 1)
-    self.cooldownIcon:SetTextureCoords(0, 1, 0, textureCoord)
+    local iconWidth, iconHeight = self.icon:GetDimensions()
+    local offsetY = (1 - percent) * iconHeight
+    self.cooldownEdge:SetSimpleAnchor(self.icon, 0, offsetY)
+    self.cooldownEdge:SetWidth(iconWidth)
 end
 
 function ActionButton:RefreshCooldown()
@@ -370,7 +362,8 @@ function ActionButton:RefreshCooldown()
     local percentComplete = (1 - remain/duration)
 
     if IsInGamepadPreferredMode() then
-        self:SetCooldownHeight(percentComplete)
+        self:SetCooldownPercentComplete(percentComplete)
+        self:UpdateUsable()
     end
 
     self.icon.percentComplete = percentComplete
@@ -384,22 +377,19 @@ function ActionButton:UpdateCooldown(options)
     local slotType = GetSlotType(slotnum)
     local showGlobalCooldownForCollectible = global and slotType == ACTION_TYPE_COLLECTIBLE and globalSlotType == ACTION_TYPE_COLLECTIBLE
     local showCooldown = isInCooldown and (g_showGlobalCooldown or not global or showGlobalCooldownForCollectible)
-
-    self.cooldown:SetHidden(not showCooldown)
-
     local updateChromaQuickslot = slotType ~= ACTION_TYPE_ABILITY and ZO_RZCHROMA_EFFECTS
+    self.cooldown:SetHidden(not showCooldown)
 
     if showCooldown then
         self.cooldown:StartCooldown(remain, duration, CD_TYPE_RADIAL, nil, NO_LEADING_EDGE)
+
         if self.cooldownCompleteAnim.animation then
             self.cooldownCompleteAnim.animation:GetTimeline():PlayInstantlyToStart()
         end
 
         if IsInGamepadPreferredMode() then
-            if not self.itemQtyFailure then
-                self.icon:SetDesaturation(0)
-            end
             self.cooldown:SetHidden(true)
+
             if not self.showingCooldown then
                 self:SetNeedsAnimationParameterUpdate(true)
                 self:PlayAbilityUsedBounce()
@@ -409,6 +399,7 @@ function ActionButton:UpdateCooldown(options)
         end
 
         self.slot:SetHandler("OnUpdate", function() self:RefreshCooldown() end)
+
         if updateChromaQuickslot then
             ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect("ACTION_BUTTON_9")
         end
@@ -440,19 +431,18 @@ function ActionButton:UpdateCooldown(options)
     end
 
     if showCooldown ~= self.showingCooldown then
-        self.showingCooldown = showCooldown
-
-        if self.showingCooldown then
-            ZO_ContextualActionBar_AddReference()
-        else
-            ZO_ContextualActionBar_RemoveReference()
-        end
-
+        self:SetShowCooldown(showCooldown)
         self:UpdateActivationHighlight()
+
         if IsInGamepadPreferredMode() then
-            self:SetCooldownHeight(self.icon.percentComplete)
+            self:SetCooldownPercentComplete(self.icon.percentComplete)
         end
-        self:SetCooldownIconAnchors(showCooldown)
+    end
+
+    if showCooldown or self.itemQtyFailure then
+        self.icon:SetDesaturation(1)
+    else
+        self.icon:SetDesaturation(0)
     end
 
     local textColor = showCooldown and INTERFACE_TEXT_COLOR_FAILED or INTERFACE_TEXT_COLOR_SELECTED
@@ -500,18 +490,14 @@ function ActionButton:ApplyStyle(template)
         decoration:SetHidden(isGamepad)
     end
 
-    local slotnum = self:GetSlot()
-    local slotType = GetSlotType(slotnum)
-
-    local cooldownHeight = 1
-
     if self.showingCooldown then 
         self.cooldown:SetHidden(isGamepad)
 
         if isGamepad then
+            local slotnum = self:GetSlot()
             local remain = GetSlotCooldownInfo(slotnum)
             self:PlayAbilityUsedBounce(BOUNCE_DURATION_MS + remain)
-            cooldownHeight = self.icon.percentComplete
+
             if not self.itemQtyFailure then
                 self.icon:SetDesaturation(0)
             end
@@ -522,6 +508,7 @@ function ActionButton:ApplyStyle(template)
         self:ResetBounceAnimation()
     end
 
+    self:SetCooldownEdgeState(self.showingCooldown)
     self:UpdateUsable()
 end
 
@@ -529,27 +516,11 @@ function ActionButton:ApplyAnchor(target, offsetX)
     self.slot:SetAnchor(LEFT, target, RIGHT, offsetX, 0)
 end
 
-local function OnStartFlipAnimation(button)
-    if IsInGamepadPreferredMode() and button:GetSlot() ~= ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
-        button.icon:ClearAnchors()
-        button.icon:SetAnchor(TOPLEFT, button.flipCard)
-        button.icon:SetAnchor(BOTTOMRIGHT, button.flipCard)
-    end
-end
-
-local function OnStopFlipAnimation(button)
-    if IsInGamepadPreferredMode() and button:GetSlot() ~= ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
-        button.icon:ClearAnchors()
-        button.icon:SetAnchor(CENTER, button.flipCard)
-    end
-end
-
 function ActionButton:SetupFlipAnimation(OnStopHandlerFirst, OnStopHandlerLast)
     local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("HotbarSwapAnimation", self.flipCard)
     timeline:GetFirstAnimation():SetHandler("OnStop", function(animation) OnStopHandlerFirst(animation, self) end)
     timeline:GetLastAnimation():SetHandler("OnStop", function(animation) OnStopHandlerLast(animation, self) end)
-    timeline:SetHandler("OnPlay", function() OnStartFlipAnimation(self) end)
-    timeline:SetHandler("OnStop", function() OnStopFlipAnimation(self) end)
+    timeline:SetHandler("OnPlay", function() self:SetShowCooldown(false) end)
     self.hotbarSwapAnimation = timeline
 
     self:ApplyFlipAnimationStyle()

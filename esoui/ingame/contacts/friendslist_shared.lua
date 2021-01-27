@@ -63,11 +63,24 @@ function ZO_FriendsList:GetNumOnline()
 end
 
 function ZO_FriendsList:SetupEntry(control, data, selected)
-    ZO_SocialList_SharedSocialSetup(control, data, selected)
+    if not ZO_IsPlaystationPlatform() then
+        ZO_SocialList_SharedSocialSetup(control, data, selected)
 
-    local note = GetControl(control, "Note")
-    if note then
-        note:SetHidden(data.note == "")
+        local noteControl = control:GetNamedChild("Note")
+        if noteControl then
+            noteControl:SetHidden(data.note == "")
+        end
+    else
+        local displayNameLabel = control:GetNamedChild("DisplayName")
+        if displayNameLabel then
+            displayNameLabel:SetText(ZO_FormatUserFacingDisplayName(data.displayName))
+        end
+
+        local statusIconControl = control:GetNamedChild("StatusIcon")
+        if statusIconControl then
+            local textureFunctions = ZO_SocialList_GetPlatformTextureFunctions()
+            statusIconControl:SetTexture(textureFunctions.playerStatusIcon(data.status))
+        end
     end
 end
 
@@ -123,7 +136,7 @@ function ZO_FriendsList:BuildMasterList()
     self.numOnlineFriends = 0
     local numFriends = GetNumFriends()
 
-    for i=1, numFriends do
+    for i = 1, numFriends do
         local displayName, note, status, secsSinceLogoff = GetFriendInfo(i)
 
         local online = status ~= PLAYER_STATUS_OFFLINE
@@ -141,8 +154,7 @@ function ZO_FriendsList:BuildMasterList()
 end
 
 function ZO_FriendsList:FindDataByDisplayName(displayName)
-    for i = 1, #self.masterList do
-        local data = self.masterList[i]
+    for i, data in ipairs(self.masterList) do
         if data.displayName == displayName then
             return data, i
         end

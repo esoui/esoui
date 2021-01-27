@@ -89,9 +89,8 @@ end
 
 function ActivityFinderRoot_Gamepad:SetupList(list)
     local function CategoryEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        local activityFinderObject = data.data.activityFinderObject
-        local isLocked = activityFinderObject and (activityFinderObject:GetLevelLockInfo() or activityFinderObject:GetNumLocations() == 0)
-        isLocked = isLocked or (data.data.isZoneStories and ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil)
+        local categoryData = data.data
+        local isLocked = self:IsCategoryLocked(categoryData)
         enabled = enabled and not isLocked
         data.enabled = enabled
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -242,11 +241,38 @@ end
 
 function ActivityFinderRoot_Gamepad:SelectCategory(categoryData)
     local list = self:GetMainList()
-    for i=1, list:GetNumEntries() do
+    for i = 1, list:GetNumEntries() do
         if categoryData.gamepadData.name == list:GetEntryData(i).data.name then
             list:SetSelectedIndex(i)
             break
         end
+    end
+end
+
+function ActivityFinderRoot_Gamepad:IsCategoryLocked(gamepadCategoryData)
+    local activityFinderObject = gamepadCategoryData.activityFinderObject
+    if activityFinderObject then
+        return activityFinderObject:GetLevelLockInfo() or activityFinderObject:GetNumLocations() == 0
+    elseif gamepadCategoryData.isZoneStories then
+        return ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil
+    end
+    return false
+end
+
+function ActivityFinderRoot_Gamepad:ShowCategory(categoryData)
+    local gamepadCategoryData = categoryData.gamepadData
+    local locked = self:IsCategoryLocked(gamepadCategoryData)
+    if not locked then
+        if not SCENE_MANAGER:IsShowing(gamepadCategoryData.sceneName) then
+            MAIN_MENU_GAMEPAD:SelectMenuEntry(ZO_MENU_MAIN_ENTRIES.ACTIVITY_FINDER)
+            SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME, gamepadCategoryData.sceneName)
+        end
+    else
+        if not SCENE_MANAGER:IsShowing(ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME) then
+            MAIN_MENU_GAMEPAD:SelectMenuEntry(ZO_MENU_MAIN_ENTRIES.ACTIVITY_FINDER)
+            SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME)
+        end
+        self:SelectCategory(categoryData)
     end
 end
 

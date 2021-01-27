@@ -1,12 +1,6 @@
-ZO_Repair = ZO_Object:Subclass()
+ZO_Repair = ZO_InitializingObject:Subclass()
 
 local DATA_TYPE_REPAIR_ITEM = 1
-
-function ZO_Repair:New(...)
-    local repair = ZO_Object.New(self)
-    repair:Initialize(...)
-    return repair
-end
 
 function ZO_Repair:Initialize(control)
     self.control = control
@@ -34,7 +28,7 @@ end
 function ZO_Repair:InitializeFilterBar()
     local menuBarData =
     {
-        initialButtonAnchorPoint = RIGHT, 
+        initialButtonAnchorPoint = RIGHT,
         buttonTemplate = "ZO_StoreTab", 
         normalSize = 51,
         downSize = 64,
@@ -76,6 +70,23 @@ function ZO_Repair:InitializeSortHeader()
     self.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
     self.sortHeaders:AddHeadersFromContainer()
     self.sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
+
+    self.searchBox = self.control:GetNamedChild("SearchFiltersTextSearchBox")
+
+    local function OnTextSearchTextChanged(editBox)
+        ZO_EditDefaultText_OnTextChanged(editBox)
+        TEXT_SEARCH_MANAGER:SetSearchText("storeTextSearch", editBox:GetText())
+    end
+
+    self.searchBox:SetHandler("OnTextChanged", OnTextSearchTextChanged)
+
+    local SUPPRESS_TEXT_CHANGED_CALLBACK = true
+    local function OnListTextFilterComplete()
+        self.searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("storeTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
+        self:RefreshAll()
+    end
+
+    TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", OnListTextFilterComplete)
 end
 
 function ZO_Repair:InitializeEvents()
@@ -113,30 +124,31 @@ end
 
 do
     local function GatherDamagedEquipmentFromBag(bagId, dataTable)
-        local bagSlots = GetBagSize(bagId)
-        for slotIndex = 0, bagSlots - 1 do
-            local condition = GetItemCondition(bagId, slotIndex)
-            if condition < 100 and not IsItemStolen(bagId, slotIndex) then
-                local icon, stackCount, _, _, _, _, _, functionalQuality, displayQuality = GetItemInfo(bagId, slotIndex)
-                if stackCount > 0 then
-                    local repairCost = GetItemRepairCost(bagId, slotIndex)
-                    if repairCost > 0 then
-                        local name = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bagId, slotIndex))
-                        local data =
-                        {
-                            bagId = bagId,
-                            slotIndex = slotIndex,
-                            name = name,
-                            icon = icon,
-                            stackCount = stackCount,
-                            functionalQuality = functionalQuality,
-                            displayQuality = displayQuality,
-                            -- quality is deprecated, included here for addon backwards compatibility
-                            quality = displayQuality,
-                            condition = condition,
-                            repairCost = repairCost
-                        }
-                        dataTable[#dataTable + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_REPAIR_ITEM, data)
+        for slotIndex in ZO_IterateBagSlots(bagId) do
+            if TEXT_SEARCH_MANAGER:IsItemInSearchTextResults("storeTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, slotIndex) then
+                local condition = GetItemCondition(bagId, slotIndex)
+                if condition < 100 and not IsItemStolen(bagId, slotIndex) then
+                    local icon, stackCount, _, _, _, _, _, functionalQuality, displayQuality = GetItemInfo(bagId, slotIndex)
+                    if stackCount > 0 then
+                        local repairCost = GetItemRepairCost(bagId, slotIndex)
+                        if repairCost > 0 then
+                            local name = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bagId, slotIndex))
+                            local data =
+                            {
+                                bagId = bagId,
+                                slotIndex = slotIndex,
+                                name = name,
+                                icon = icon,
+                                stackCount = stackCount,
+                                functionalQuality = functionalQuality,
+                                displayQuality = displayQuality,
+                                -- quality is deprecated, included here for addon backwards compatibility
+                                quality = displayQuality,
+                                condition = condition,
+                                repairCost = repairCost
+                            }
+                            dataTable[#dataTable + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_REPAIR_ITEM, data)
+                        end
                     end
                 end
             end
@@ -144,15 +156,17 @@ do
     end
 
     function ZO_Repair:UpdateList()
-        ZO_ScrollList_Clear(self.list)
-        ZO_ScrollList_ResetToTop(self.list)
+        if not self.control:IsControlHidden() then
+            ZO_ScrollList_Clear(self.list)
+            ZO_ScrollList_ResetToTop(self.list)
 
-        local scrollData = ZO_ScrollList_GetDataList(self.list)
+            local scrollData = ZO_ScrollList_GetDataList(self.list)
 
-        GatherDamagedEquipmentFromBag(BAG_WORN, scrollData)
-        GatherDamagedEquipmentFromBag(BAG_BACKPACK, scrollData)
+            GatherDamagedEquipmentFromBag(BAG_WORN, scrollData)
+            GatherDamagedEquipmentFromBag(BAG_BACKPACK, scrollData)
 
-        self:ApplySort()
+            self:ApplySort()
+        end
     end
 end
 
@@ -206,6 +220,7 @@ do
 end
 
 function ZO_Repair:OnShown()
+    self.searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("storeTextSearch"))
     self:UpdateList()
     self:UpdateMoney()
     self:UpdateFreeSlots()

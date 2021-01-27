@@ -58,10 +58,17 @@ function ZO_SceneNodeRing:RefreshNodePositions()
             local nextNodeIndex = i % #self.ringNodes + 1
             local nextNode = self.ringNodes[nextNodeIndex]
             node:SetX(self.radius)
-            node:SetRotation(currentAngle)
+            node:SetRotation(-currentAngle)
             currentAngle = currentAngle + nodeArcSize + node.ringPadding + nextNode.ringPadding
         end
     end
+end
+
+function ZO_SceneNodeRing:ClearNodes()
+    for _, node in ipairs(self.ringNodes) do
+        self.sceneGraph:RemoveNode(node)
+    end
+    ZO_ClearNumericallyIndexedTable(self.ringNodes)
 end
 
 function ZO_SceneNodeRing:AddNode(node)

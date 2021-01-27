@@ -1347,6 +1347,7 @@ function ZO_WorldMapPins:New(parentControl)
         ["restrictedLink"] = {},
         ["suggestion"] = {},
         ["worldEventUnit"] = {},
+        ["worldEventPOI"] = {},
         ["antiquityDigSite"] = {},
     }
 
@@ -1596,6 +1597,8 @@ function ZO_WorldMapPins:CreatePin(pinType, pinTag, xLoc, yLoc, radius, borderIn
         self:MapPinLookupToPinKey("suggestion", pinType, pinTag, pinKey)
     elseif pin:IsWorldEventUnitPin() then
         self:MapPinLookupToPinKey("worldEventUnit", pin:GetWorldEventInstanceId(), pin:GetUnitTag(), pinKey)
+    elseif pin:IsWorldEventPOIPin() then
+        self:MapPinLookupToPinKey("worldEventPOI", pin:GetWorldEventInstanceId(), pinTag, pinKey)
     elseif pin:IsAntiquityDigSitePin() then
         self:MapPinLookupToPinKey("antiquityDigSite", pinType, pinTag, pinKey)
     else
@@ -3558,6 +3561,8 @@ do
     end
 end
 
+local RefreshSinglePOI
+
 do
     local function GetNextWorldEventInstanceIdIter(state, var1)
         return GetNextWorldEventInstanceId(var1)
@@ -3568,28 +3573,41 @@ do
             return
         end
 
-        local numUnits = GetNumWorldEventInstanceUnits(worldEventInstanceId)
-        for i = 1, numUnits do
-            local unitTag = GetWorldEventInstanceUnitTag(worldEventInstanceId, i)
-            local pinType = GetWorldEventInstanceUnitPinType(worldEventInstanceId, unitTag)
-            if pinType ~= MAP_PIN_TYPE_INVALID then
-                local xLoc, yLoc, _, isInCurrentMap = GetMapPlayerPosition(unitTag)
-                if isInCurrentMap then
-                    local tag = ZO_MapPin.CreateWorldEventUnitPinTag(worldEventInstanceId, unitTag)
-                    g_mapPinManager:CreatePin(pinType, tag, xLoc, yLoc)
+        local context = GetWorldEventLocationContext(worldEventInstanceId)
+
+        if context == WORLD_EVENT_LOCATION_CONTEXT_UNIT then
+            local numUnits = GetNumWorldEventInstanceUnits(worldEventInstanceId)
+            for i = 1, numUnits do
+                local unitTag = GetWorldEventInstanceUnitTag(worldEventInstanceId, i)
+                local pinType = GetWorldEventInstanceUnitPinType(worldEventInstanceId, unitTag)
+                if pinType ~= MAP_PIN_TYPE_INVALID then
+                    local xLoc, yLoc, _, isInCurrentMap = GetMapPlayerPosition(unitTag)
+                    if isInCurrentMap then
+                        local tag = ZO_MapPin.CreateWorldEventUnitPinTag(worldEventInstanceId, unitTag)
+                        g_mapPinManager:CreatePin(pinType, tag, xLoc, yLoc)
+                    end
                 end
+            end
+        elseif context == WORLD_EVENT_LOCATION_CONTEXT_POINT_OF_INTEREST then
+            local zoneIndex, poiIndex = GetWorldEventPOIInfo(worldEventInstanceId)
+            local xLoc, zLoc,_,_, isShownInCurrentMap,_, isDiscovered, isNearby = GetPOIMapInfo(zoneIndex, poiIndex)
+
+            if isShownInCurrentMap and (isDiscovered or isNearby) then
+                RefreshSinglePOI(zoneIndex, poiIndex)
             end
         end
     end
 
     function ZO_WorldMap_RefreshWorldEvent(worldEventInstanceId)
         g_mapPinManager:RemovePins("worldEventUnit", worldEventInstanceId)
+        g_mapPinManager:RemovePins("worldEventPOI", worldEventInstanceId)
 
         AddWorldEvent(worldEventInstanceId)
     end
 
     function ZO_WorldMap_RefreshWorldEvents()
         g_mapPinManager:RemovePins("worldEventUnit")
+        g_mapPinManager:RemovePins("worldEventPOI")
 
         for worldEventInstanceId in GetNextWorldEventInstanceIdIter do
             AddWorldEvent(worldEventInstanceId)
@@ -3761,12 +3779,25 @@ local function CreateSinglePOIPin(zoneIndex, poiIndex)
 
             local tag = ZO_MapPin.CreatePOIPinTag(zoneIndex, poiIndex, icon, linkedCollectibleIsLocked)
             g_mapPinManager:CreatePin(poiPinType, tag, xLoc, zLoc)
+
+            local worldEventInstanceId = GetPOIWorldEventInstanceId(zoneIndex, poiIndex)
+
+            if worldEventInstanceId ~= 0 then
+                local worldEventTag = ZO_MapPin.CreateWorldEventPOIPinTag(worldEventInstanceId, zoneIndex, poiIndex)
+                -- TODO: May need to add handling for additional event states
+                g_mapPinManager:CreatePin(MAP_PIN_TYPE_WORLD_EVENT_POI_ACTIVE, worldEventTag, xLoc, zLoc)
+            end
         end
     end
 end
 
-local function RefreshSinglePOI(zoneIndex, poiIndex)
+RefreshSinglePOI = function(zoneIndex, poiIndex)
     g_mapPinManager:RemovePins("poi", zoneIndex, poiIndex)
+
+    local worldEventInstanceId = GetPOIWorldEventInstanceId(zoneIndex, poiIndex)
+    if worldEventInstanceId ~= 0 then
+        g_mapPinManager:RemovePins("worldEventPOI", worldEventInstanceId)
+    end
 
     if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_OBJECTIVES) then
         CreateSinglePOIPin(zoneIndex, poiIndex)
@@ -3775,6 +3806,7 @@ end
 
 function ZO_WorldMap_RefreshAllPOIs()
     g_mapPinManager:RemovePins("poi")
+    g_mapPinManager:RemovePins("worldEventPOI")
     if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_OBJECTIVES) then
         local zoneIndex = GetCurrentMapZoneIndex()
         for i = 1, GetNumPOIs(zoneIndex) do
@@ -5135,6 +5167,10 @@ function ZO_WorldMap_HandlersContain(pinDatas, types)
 end
 
 function ZO_WorldMap_GetGamepadPinActionGroupForHandler(handler)
+    if handler.gamepadPinActionGroup then
+        return handler.gamepadPinActionGroup
+    end
+
     for gamepadPinActionGroup, handlers in ipairs(ZO_WORLD_MAP_GAMEPAD_PIN_ACTION_GROUP_TYPE_TO_HANDLERS) do
         for _, searchHandler in ipairs(handlers) do
             if searchHandler == handler then
@@ -6253,10 +6289,18 @@ function ZO_WorldMapManager:ShowAntiquityOnMap(antiquityId)
             changedMap = true
         end
     elseif antiquityData:HasDiscoveredDigSites() then
+        local numInProgressAntiquities = GetNumInProgressAntiquities()
+        local antiquityId = antiquityData:GetId()
+
         -- If no associated zone map get the first dig site and try to show its map
-        local firstDigSiteId = GetInProgressAntiquityDigSiteId(antiquityData:GetId(), 1)
-        if SetMapToDigSitePosition(firstDigSiteId) == SET_MAP_RESULT_MAP_CHANGED then
-            changedMap = true
+        for antiquityIndex = 1, numInProgressAntiquities do
+            if GetInProgressAntiquityId(antiquityIndex) == antiquityId then
+                local firstDigSiteId = GetInProgressAntiquityDigSiteId(antiquityIndex, 1)
+                if SetMapToDigSitePosition(firstDigSiteId) == SET_MAP_RESULT_MAP_CHANGED then
+                    changedMap = true
+                end
+                break
+            end
         end
     else
         -- just set the map to the player's current map

@@ -46,6 +46,7 @@ EsoUI\Common\Gamepad\ZO_GamepadEntryData.lua
 
 EsoUI\Common\Gamepad\ZO_GamepadGrid.lua
 
+EsoUI\Common\Gamepad\ZO_TextSearch_Header_Gamepad.lua
 EsoUI\Common\Gamepad\ZO_GamepadParametricScrollListScreen.lua
 EsoUI\Common\Gamepad\ZO_GamepadParametricScrollListScreen.xml
 EsoUI\Common\Gamepad\ZO_GamepadMultiFocusParametricScrollListScreen.lua

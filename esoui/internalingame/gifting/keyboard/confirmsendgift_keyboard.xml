@@ -68,8 +68,9 @@
                     <Anchor point="RIGHT" relativeTo="$(parent)NoteRandomText" relativePoint="RIGHT" constrains="X"/>
 
                     <Controls>
-                        <Label name="$(parent)GiftName" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontWinH2" maxLineCount="2">
+                        <Label name="$(parent)GiftName" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontWinH2" maxLineCount="1">
                             <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" />
                         </Label>
 
                         <Label name="$(parent)GiftDetail" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">

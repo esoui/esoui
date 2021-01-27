@@ -113,9 +113,13 @@ function ZO_SharedInteraction:InitializeSharedEvents()
         self:FinalizeChatterOptions(2)
     end
 
-    local function OnChatterBegin(_, chatterOptionCount)
-        self:InitializeInteractWindow(GetChatterGreeting())
-        self:UpdateChatterOptions(chatterOptionCount, HIDE_BACK_TO_TOC_OPTION)
+    local function OnChatterBegin(_, chatterOptionCount, debugSource)
+        -- Catching a rogue event coming down that causes a UI error when a bad option count is passed down.  Root cause still unknown, this will just suppress the error.
+        -- ESO-692130
+        if internalassert(chatterOptionCount <= MAX_CHATTER_OPTIONS, string.format("Tried to begin a chatter from source type %d with %d chatter options, which is invalid. Please notify a UI engineer.", debugSource, chatterOptionCount)) then
+            self:InitializeInteractWindow(GetChatterGreeting())
+            self:UpdateChatterOptions(chatterOptionCount, HIDE_BACK_TO_TOC_OPTION)
+        end
     end
 
     local function OnChatterEnd()

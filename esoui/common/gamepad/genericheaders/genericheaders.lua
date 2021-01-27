@@ -113,36 +113,42 @@ local SCREEN_HEADER_ANCHORS =
 {
     [ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE] =
     {
-        [DATA1HEADER]   = {Anchor:New(BOTTOMLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y),     Anchor:New(BOTTOMRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y)},
-        [DATA1]         = {Anchor:New(BOTTOMRIGHT, DATA1HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA1HEADER]   = { Anchor:New(BOTTOMLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y),
+                            Anchor:New(BOTTOMRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y) },
+        [DATA1]         = { Anchor:New(BOTTOMRIGHT, DATA1HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA2HEADER]   = {Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y),    Anchor:New(BOTTOMRIGHT, DATA1HEADER, BOTTOMRIGHT, 0, ROW_OFFSET_Y)},
-        [DATA2]         = {Anchor:New(BOTTOMRIGHT, DATA2HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA2HEADER]   = { Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA1HEADER, BOTTOMRIGHT, 0, ROW_OFFSET_Y) },
+        [DATA2]         = { Anchor:New(BOTTOMRIGHT, DATA2HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA3HEADER]   = {Anchor:New(BOTTOMLEFT, DATA2HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y),    Anchor:New(BOTTOMRIGHT, DATA2HEADER, BOTTOMRIGHT, 0, ROW_OFFSET_Y)},
-        [DATA3]         = {Anchor:New(BOTTOMRIGHT, DATA3HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA3HEADER]   = { Anchor:New(BOTTOMLEFT, DATA2HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA2HEADER, BOTTOMRIGHT, 0, ROW_OFFSET_Y) },
+        [DATA3]         = { Anchor:New(BOTTOMRIGHT, DATA3HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA4HEADER]   = {Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y),    Anchor:New(BOTTOMRIGHT, DATA3HEADER, BOTTOMRIGHT, 0, ROW_OFFSET_Y)},
-        [DATA4]         = {Anchor:New(BOTTOMRIGHT, DATA4HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA4HEADER]   = { Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA3HEADER, BOTTOMRIGHT, 0, ROW_OFFSET_Y) },
+        [DATA4]         = { Anchor:New(BOTTOMRIGHT, DATA4HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [MESSAGE]       = {Anchor:New(TOPLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y),    Anchor:New(TOPRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y)},
+        [MESSAGE]       = { Anchor:New(TOPLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y),
+                            Anchor:New(TOPRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y) },
     },
 
     [ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_TOGETHER] =
     {
-        [DATA1HEADER]   = {Anchor:New(BOTTOMLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y)},
-        [DATA1]         = {Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA1HEADER]   = { Anchor:New(BOTTOMLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y) },
+        [DATA1]         = { Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA2]         = {Anchor:New(BOTTOMRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y + GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
-        [DATA2HEADER]   = {Anchor:New(BOTTOMRIGHT, DATA2, BOTTOMLEFT, -DATA_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA2]         = { Anchor:New(BOTTOMRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y + GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
+        [DATA2HEADER]   = { Anchor:New(BOTTOMRIGHT, DATA2, BOTTOMLEFT, -DATA_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA3HEADER]   = {Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y)},
-        [DATA3]         = {Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA3HEADER]   = { Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y) },
+        [DATA3]         = { Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA4]         = {Anchor:New(BOTTOMRIGHT, DATA2, BOTTOMRIGHT, 0, ROW_OFFSET_Y + GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
-        [DATA4HEADER]   = {Anchor:New(BOTTOMRIGHT, DATA4, BOTTOMLEFT, -DATA_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA4]         = { Anchor:New(BOTTOMRIGHT, DATA2, BOTTOMRIGHT, 0, ROW_OFFSET_Y + GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
+        [DATA4HEADER]   = { Anchor:New(BOTTOMRIGHT, DATA4, BOTTOMLEFT, -DATA_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [MESSAGE]       = {Anchor:New(TOPLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y),    Anchor:New(TOPRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y)},
+        [MESSAGE]       = { Anchor:New(TOPLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y),
+                            Anchor:New(TOPRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y) },
     },
 }
 
@@ -160,16 +166,23 @@ local SCREEN_HEADER_OVERLAP_ANCHORS =
     
     [ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE] =
     {
-        [DATA1]         = {Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y), Anchor:New(BOTTOMRIGHT, DATA1HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y)},
+        [DATA1]         = { Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA1HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y) },
 
-        [DATA2HEADER]   = {Anchor:New(BOTTOMLEFT, DATA1, BOTTOMLEFT, 0, HEADER_OVERLAP_ROW_OFFSET_Y),    Anchor:New(BOTTOMRIGHT, DATA1, BOTTOMRIGHT, 0, HEADER_OVERLAP_ROW_OFFSET_Y)},
-        [DATA2]         = {Anchor:New(BOTTOMLEFT, DATA2HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y), Anchor:New(BOTTOMRIGHT, DATA2HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y)},
+        [DATA2HEADER]   = { Anchor:New(BOTTOMLEFT, DATA1, BOTTOMLEFT, 0, HEADER_OVERLAP_ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA1, BOTTOMRIGHT, 0, HEADER_OVERLAP_ROW_OFFSET_Y) },
+        [DATA2]         = { Anchor:New(BOTTOMLEFT, DATA2HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA2HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y) },
 
-        [DATA3HEADER]   = {Anchor:New(BOTTOMLEFT, DATA2, BOTTOMLEFT, 0, HEADER_OVERLAP_ROW_OFFSET_Y),    Anchor:New(BOTTOMRIGHT, DATA2, BOTTOMRIGHT, 0, HEADER_OVERLAP_ROW_OFFSET_Y)},
-        [DATA3]         = {Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y), Anchor:New(BOTTOMRIGHT, DATA3HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y)},
+        [DATA3HEADER]   = { Anchor:New(BOTTOMLEFT, DATA2, BOTTOMLEFT, 0, HEADER_OVERLAP_ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA2, BOTTOMRIGHT, 0, HEADER_OVERLAP_ROW_OFFSET_Y) },
+        [DATA3]         = { Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA3HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y) },
 
-        [DATA4HEADER]   = {Anchor:New(BOTTOMLEFT, DATA3, BOTTOMLEFT, 0, HEADER_OVERLAP_ROW_OFFSET_Y),    Anchor:New(BOTTOMRIGHT, DATA3, BOTTOMRIGHT, 0, HEADER_OVERLAP_ROW_OFFSET_Y)},
-        [DATA4]         = {Anchor:New(BOTTOMLEFT, DATA4HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y), Anchor:New(BOTTOMRIGHT, DATA4HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y)},
+        [DATA4HEADER]   = { Anchor:New(BOTTOMLEFT, DATA3, BOTTOMLEFT, 0, HEADER_OVERLAP_ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA3, BOTTOMRIGHT, 0, HEADER_OVERLAP_ROW_OFFSET_Y) },
+        [DATA4]         = { Anchor:New(BOTTOMLEFT, DATA4HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA4HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y) },
     },
 }
 
@@ -177,47 +190,51 @@ local CONTENT_HEADER_ANCHORS =
 {
     [ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE] =
     {
-        [DATA1HEADER]   = {Anchor:New(BOTTOMLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y),   Anchor:New(BOTTOMRIGHT, CENTER_BASELINE, BOTTOMLEFT)},
-        [DATA1]         = {Anchor:New(BOTTOMRIGHT, DATA1HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA1HEADER]   = { Anchor:New(BOTTOMLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y),
+                            Anchor:New(BOTTOMRIGHT, CENTER_BASELINE, BOTTOMLEFT) },
+        [DATA1]         = { Anchor:New(BOTTOMRIGHT, DATA1HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA2HEADER]   = {Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y),       Anchor:New(BOTTOMRIGHT, DATA1HEADER, BOTTOMRIGHT, 0, ROW_OFFSET_Y)},
-        [DATA2]         = {Anchor:New(BOTTOMRIGHT, DATA2HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA2HEADER]   = { Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA1HEADER, BOTTOMRIGHT, 0, ROW_OFFSET_Y) },
+        [DATA2]         = { Anchor:New(BOTTOMRIGHT, DATA2HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA3HEADER]   = {Anchor:New(BOTTOMLEFT, CENTER_BASELINE, BOTTOMRIGHT),                Anchor:New(BOTTOMRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y)},
-        [DATA3]         = {Anchor:New(BOTTOMRIGHT, DATA3HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA3HEADER]   = { Anchor:New(BOTTOMLEFT, CENTER_BASELINE, BOTTOMRIGHT),
+                            Anchor:New(BOTTOMRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y) },
+        [DATA3]         = { Anchor:New(BOTTOMRIGHT, DATA3HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA4HEADER]   = {Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y),       Anchor:New(BOTTOMRIGHT, DATA3HEADER, BOTTOMRIGHT, 0, ROW_OFFSET_Y)},
-        [DATA4]         = {Anchor:New(BOTTOMRIGHT, DATA4HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA4HEADER]   = { Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMLEFT, 0, ROW_OFFSET_Y),
+                            Anchor:New(BOTTOMRIGHT, DATA3HEADER, BOTTOMRIGHT, 0, ROW_OFFSET_Y) },
+        [DATA4]         = { Anchor:New(BOTTOMRIGHT, DATA4HEADER, BOTTOMRIGHT, 0, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
     },
 
     [ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_TOGETHER] =
     {
-        [DATA1HEADER]   = {Anchor:New(BOTTOMLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y)},
-        [DATA1]         = {Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA1HEADER]   = { Anchor:New(BOTTOMLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y) },
+        [DATA1]         = { Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA2]         = {Anchor:New(BOTTOMRIGHT, CENTER_BASELINE, BOTTOMLEFT, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
-        [DATA2HEADER]   = {Anchor:New(BOTTOMRIGHT, DATA2, BOTTOMLEFT, -DATA_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA2]         = { Anchor:New(BOTTOMRIGHT, CENTER_BASELINE, BOTTOMLEFT, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
+        [DATA2HEADER]   = { Anchor:New(BOTTOMRIGHT, DATA2, BOTTOMLEFT, -DATA_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA3HEADER]   = {Anchor:New(BOTTOMLEFT, CENTER_BASELINE, BOTTOMRIGHT)},
-        [DATA3]         = {Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA3HEADER]   = { Anchor:New(BOTTOMLEFT, CENTER_BASELINE, BOTTOMRIGHT) },
+        [DATA3]         = { Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA4]         = {Anchor:New(BOTTOMRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y + GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
-        [DATA4HEADER]   = {Anchor:New(BOTTOMRIGHT, DATA4, BOTTOMLEFT, -DATA_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA4]         = { Anchor:New(BOTTOMRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y + GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
+        [DATA4HEADER]   = { Anchor:New(BOTTOMRIGHT, DATA4, BOTTOMLEFT, -DATA_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
     },
 
     [ZO_GAMEPAD_HEADER_LAYOUTS.CONTENT_HEADER_DATA_PAIRS_LINKED] =
     {
-        [DATA1HEADER]   = {Anchor:New(BOTTOMLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y)},
-        [DATA1]         = {Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA1HEADER]   = { Anchor:New(BOTTOMLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y) },
+        [DATA1]         = { Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA2HEADER]   = {Anchor:New(BOTTOMLEFT, DATA1, BOTTOMRIGHT, HEADER_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
-        [DATA2]         = {Anchor:New(BOTTOMLEFT, DATA2HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA2HEADER]   = { Anchor:New(BOTTOMLEFT, DATA1, BOTTOMRIGHT, HEADER_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
+        [DATA2]         = { Anchor:New(BOTTOMLEFT, DATA2HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA3HEADER]   = {Anchor:New(BOTTOMLEFT, DATA2, BOTTOMRIGHT, HEADER_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
-        [DATA3]         = {Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA3HEADER]   = { Anchor:New(BOTTOMLEFT, DATA2, BOTTOMRIGHT, HEADER_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
+        [DATA3]         = { Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
 
-        [DATA4HEADER]   = {Anchor:New(BOTTOMLEFT, DATA3, BOTTOMRIGHT, HEADER_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
-        [DATA4]         = {Anchor:New(BOTTOMLEFT, DATA4HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
+        [DATA4HEADER]   = { Anchor:New(BOTTOMLEFT, DATA3, BOTTOMRIGHT, HEADER_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY) },
+        [DATA4]         = { Anchor:New(BOTTOMLEFT, DATA4HEADER, BOTTOMRIGHT, DATA_OFFSET_X, GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
     },
 }
 
@@ -287,6 +304,11 @@ end
 
 function ZO_GamepadGenericHeader_GetChildControl(control, controlId)
     return control.controls[controlId]
+end
+
+function ZO_GamepadGenericHeader_SetHeaderFocusControl(control, headerFocusControl, headerFocus)
+    control.headerFocusControl = headerFocusControl
+    control.headerFocus = headerFocus
 end
 
 local function ApplyAnchorToControl(control, anchor, targets)
@@ -397,7 +419,7 @@ local function ContentHeaderDataPairsLinkedReflow(control)
     ReflowContentHeaderDataPairIfNecessary(control, DATA4, DATA4HEADER)
 end
 
-local SCREEN_HEADER_REFLOW_FUNCS = 
+local SCREEN_HEADER_REFLOW_FUNCS =
 {
     [ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE] = ScreenHeaderDataPairsSeparateReflow,
 }
@@ -415,7 +437,7 @@ local function ReflowLayout(control)
 end
 
 local function ProcessData(control, data)
-    if(control == nil) then
+    if control == nil then
         return false
     end
 
@@ -438,10 +460,33 @@ local function SetAnchorOffsetY(control, index, offsetY)
     end
 end
 
-local function SetAnchorTarget(control, index, target)
-    local isValid, point, _, relPoint, offsetX, offsetY = control:GetAnchor(index)
-    if isValid then
-        control:SetAnchor(point, target, relPoint, offsetX, offsetY)
+local function AdjustHeaderFocusControlAnchors(control, refreshResults)
+    if control.headerFocusControl then
+        -- Test each anchor target set to see if any one of the controls in that set is in use.
+        -- The idea here is to anchor the message control to the last label/data row that is in use.
+        local anchorTargetSets = MESSAGE_ANCHOR_TARGETS[control.layout]
+        local previousTarget
+        for _, anchorTargets in ipairs(anchorTargetSets) do
+            for _, target in ipairs(anchorTargets) do
+                if refreshResults[target] ~= false then
+                    previousTarget = target
+                    break
+                end
+            end
+        end
+
+        local anchorToControl
+        if previousTarget then
+            anchorToControl = control.controls[previousTarget]
+        elseif control.tabBar and control.tabBar.control then
+            anchorToControl = control.tabBar.control
+        end
+
+
+        control.headerFocusControl:ClearAnchors()
+        if anchorToControl then
+            control.headerFocusControl:SetAnchor(TOPLEFT, anchorToControl, BOTTOMLEFT, 0, 0)
+        end
     end
 end
 
@@ -453,11 +498,16 @@ local function AdjustMessageAnchors(control, refreshResults)
         local anchorTargetSets = MESSAGE_ANCHOR_TARGETS[control.layout]
         for _, anchorTargets in ipairs(anchorTargetSets) do
             for _, target in ipairs(anchorTargets) do
-                if (refreshResults[target] ~= false) then
+                if refreshResults[target] ~= false then
                     additionalOffsetY = additionalOffsetY + ROW_OFFSET_Y
                     break
                 end
             end
+        end
+
+        -- If there is a head control anchor it under the last data element.
+        if control.headerFocusControl then
+            additionalOffsetY = additionalOffsetY + ROW_OFFSET_Y
         end
 
         -- Apply the offset calculated above to the message control's anchors.
@@ -471,11 +521,11 @@ end
 local g_refreshResults = {}
 
 local function SetAlignment(control, alignment, defaultAlignment)
-    if(control == nil) then
+    if control == nil then
         return
     end
 
-    if(alignment == nil) then
+    if alignment == nil then
         alignment = defaultAlignment
     end
 
@@ -501,10 +551,25 @@ function ZO_GamepadGenericHeader_RefreshData(control, data)
     SetAlignment(controls[MESSAGE], data.messageTextAlignment, TEXT_ALIGN_CENTER)
 
     ReflowLayout(control)
+    AdjustHeaderFocusControlAnchors(control, g_refreshResults)
     AdjustMessageAnchors(control, g_refreshResults)
 end
 
 local function TabBar_OnDataChanged(control, newData, oldData, reselectingDuringRebuild)
+    -- Deactivate header ancestor of tabBar control that is passed in
+    -- ei. apply to header at ZO_GamepadInventoryTopLevel from ZO_GamepadInventoryTopLevelMaskContainerHeaderContainerHeaderTabBar
+    local parentControl = control.control
+    repeat
+        local ownerObject = parentControl.owner
+        if ownerObject then
+            if ownerObject:IsHeaderActive() then
+                ownerObject:ExitHeader()
+            end
+            break
+        end
+        parentControl = parentControl:GetParent()
+    until not parentControl:GetParent()
+
     if newData.callback then
         newData.callback()
     end
@@ -514,7 +579,7 @@ function ZO_GamepadGenericHeader_Refresh(control, data, blockTabBarCallbacks)
     ZO_GamepadGenericHeader_RefreshData(control, data)
 
     if control.tabBar then
-        if(blockTabBarCallbacks) then
+        if blockTabBarCallbacks then
             control.tabBar:RemoveOnSelectedDataChangedCallback(TabBar_OnDataChanged)
         else
             control.tabBar:SetOnSelectedDataChangedCallback(TabBar_OnDataChanged)
@@ -550,38 +615,38 @@ function ZO_GamepadGenericHeader_Refresh(control, data, blockTabBarCallbacks)
         dividerSimpleControl:SetHidden(pipsEnabled)
         control.tabBar:SetPipsEnabled(pipsEnabled, pipsControl)
 
-        if(blockTabBarCallbacks) then
+        if blockTabBarCallbacks then
             control.tabBar:SetOnSelectedDataChangedCallback(TabBar_OnDataChanged)
         end
     end
 end
 
 function ZO_GamepadGenericHeader_Activate(control)
-    if(control.tabBar) then
+    if control.tabBar then
         control.tabBar:Activate()
     end
 end
 
 function ZO_GamepadGenericHeader_Deactivate(control)
-    if(control.tabBar) then
+    if control.tabBar then
         control.tabBar:Deactivate()
     end
 end
 
 function ZO_GamepadGenericHeader_SetActiveTabIndex(control, tabIndex, allowEvenIfDisabled)
-    if(control.tabBar) then
+    if control.tabBar then
         control.tabBar:SetSelectedIndex(tabIndex, allowEvenIfDisabled)
     end
 end
 
 function ZO_GamepadGenericHeader_SetTabBarPlaySoundFunction(control, fn)
-    if(control.tabBar) then
+    if control.tabBar then
         control.tabBar:SetPlaySoundFunction(fn)
     end
 end
 
 function ZO_GamepadGenericHeader_SetPipsEnabled(control, enabled)
-    if(control.tabBar) then
+    if control.tabBar then
         control.tabBar:SetPipsEnabled(enabled)
     end
 end

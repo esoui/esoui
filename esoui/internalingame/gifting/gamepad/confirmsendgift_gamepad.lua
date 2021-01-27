@@ -171,7 +171,7 @@ do
                         local sendingData =
                         {
                             giftId = data.giftId,
-                            itemName = data.formattedMainText,
+                            itemName = data.itemName,
                             stackCount = GetMarketProductStackCount(marketProductId),
                             recipientDisplayName = data.recipientDisplayName,
                             giftMessage = data.giftMessage,
@@ -215,7 +215,6 @@ do
                 end,
             },
         },
-        
 
         noChoiceCallback = function(dialog)
             ZO_Dialogs_ReleaseDialogOnButtonPress("CONFIRM_SEND_GIFT_GAMEPAD")
@@ -230,6 +229,7 @@ EVENT_MANAGER:RegisterForEvent("ZoConfirmSendGiftGamepad", EVENT_CONFIRM_SEND_GI
     if IsInGamepadPreferredMode() then
         local mainText
         local subText
+        local itemName
         local marketProductId = GetGiftMarketProductId(giftId)
         local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
         local houseId = GetMarketProductHouseId(marketProductId)
@@ -238,6 +238,7 @@ EVENT_MANAGER:RegisterForEvent("ZoConfirmSendGiftGamepad", EVENT_CONFIRM_SEND_GI
             local houseDisplayName = GetCollectibleName(houseCollectibleId)
             mainText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, ZO_SELECTED_TEXT:Colorize(houseDisplayName))
             subText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, color:Colorize(GetMarketProductDisplayName(marketProductId)))
+            itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, ZO_SELECTED_TEXT:Colorize(houseDisplayName), color:Colorize(GetMarketProductDisplayName(marketProductId)))
         else
             local marketProductData = ZO_MarketProductData:New(marketProductId)
             local stackCount = marketProductData:GetStackCount()
@@ -246,8 +247,9 @@ EVENT_MANAGER:RegisterForEvent("ZoConfirmSendGiftGamepad", EVENT_CONFIRM_SEND_GI
             else
                 mainText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, color:Colorize(GetMarketProductDisplayName(marketProductId)))
             end
+            itemName = mainText
         end
-        ZO_Dialogs_ShowGamepadDialog("CONFIRM_SEND_GIFT_GAMEPAD", { giftId = giftId, formattedMainText = mainText, formattedSubText = subText })
+        ZO_Dialogs_ShowGamepadDialog("CONFIRM_SEND_GIFT_GAMEPAD", { giftId = giftId, formattedMainText = mainText, formattedSubText = subText, itemName = itemName })
     end
 end)
 
@@ -260,7 +262,8 @@ do
             -- To prevent a jarring transition when switching, we're going to delay the release of the dialog.
             -- This means we guarantee the loading dialog will be around for at least LOADING_DELAY_MS
             zo_callLater(function()
-                local sendResultData = {
+                local sendResultData =
+                {
                     sendResult = result,
                     giftId = giftId,
                     recipientDisplayName = data.recipientDisplayName,
@@ -270,6 +273,12 @@ do
                     sendResultData.itemName = data.itemName
                     sendResultData.stackCount = data.stackCount
                     ZO_Dialogs_ShowGamepadDialog("GIFT_SENT_SUCCESS_GAMEPAD", sendResultData)
+                elseif result == GIFT_ACTION_RESULT_COLLECTIBLE_PARTIALLY_OWNED then
+                    local dialogParams =
+                    {
+                        titleParams = { data.itemName },
+                    }
+                    ZO_Dialogs_ShowGamepadDialog("GIFT_SEND_PARTIAL_BUNDLE_CONFIRMATION_GAMEPAD", sendResultData, dialogParams)
                 else
                     sendResultData.giftMessage = data.giftMessage
                     ZO_Dialogs_ShowGamepadDialog("GIFT_SENDING_FAILED_GAMEPAD", sendResultData)
@@ -281,7 +290,11 @@ do
     local function GiftSendingDialogSetup(dialog, data)
         dialog:setupFunc()
 
-        ResendGift(data.giftId, data.giftMessage, data.recipientDisplayName)
+        if data.shouldSendPartiallyOwnedGift then
+            RespondToSendPartiallyOwnedGift(true)
+        else
+            ResendGift(data.giftId, data.giftMessage, data.recipientDisplayName)
+        end
         EVENT_MANAGER:RegisterForEvent("GAMEPAD_GIFT_SENDING", EVENT_GIFT_ACTION_RESULT, function(eventId, ...) OnGiftActionResult(dialog.data, ...) end)
     end
 
@@ -328,16 +341,7 @@ do
         {
             text = function(dialog)
                 local data = dialog.data
-                local itemName = data.itemName
-                local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
-                local houseId = GetMarketProductHouseId(marketProductId)
-                if houseId > 0 then
-                    local houseCollectibleId = GetCollectibleIdForHouse(houseId)
-                    local houseDisplayName = GetCollectibleName(houseCollectibleId)
-                    itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, houseDisplayName, data.itemName)
-                end
-
-                return zo_strformat(SI_GIFT_SENT_TEXT,  color:Colorize(itemName), ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
+                return zo_strformat(SI_GIFT_SENT_TEXT, data.itemName, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
             end
         },
         canQueue = true,
@@ -375,7 +379,8 @@ do
         },
         canQueue = true,
         mustChoose = true,
-        buttons = {
+        buttons =
+        {
             {
                 text = function(dialog)
                     if ZO_ConfirmSendGift_Shared_ShouldRestartGiftFlow(dialog.data.sendResult) then
@@ -398,6 +403,56 @@ do
                     end
                 end,
                 keybind = "DIALOG_NEGATIVE"
+            }
+        },
+    })
+
+    ZO_Dialogs_RegisterCustomDialog("GIFT_SEND_PARTIAL_BUNDLE_CONFIRMATION_GAMEPAD",
+    {
+        setup = function(dialog)
+            dialog:setupFunc(dialog.data)
+        end,
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+        title =
+        {
+            text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
+        },
+        mainText =
+        {
+            text = SI_MARKET_GIFTING_RESEND_BUNDLE_PARTS_OWNED_TEXT
+        },
+        canQueue = true,
+        mustChoose = true,
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_MARKET_PURCHASE_ERROR_CONTINUE,
+                callback = function(dialog)
+                    local data = dialog.data
+                    local marketProductId = GetGiftMarketProductId(data.giftId)
+
+                    local sendingData =
+                    {
+                        giftId = data.giftId,
+                        itemName = ZO_SELECTED_TEXT:Colorize(GetMarketProductDisplayName(marketProductId)),
+                        stackCount = GetMarketProductStackCount(marketProductId),
+                        recipientDisplayName = data.recipientDisplayName,
+                        shouldSendPartiallyOwnedGift = true,
+                    }
+                    ZO_Dialogs_ShowGamepadDialog("GIFT_SENDING_GAMEPAD", sendingData)
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_EXIT,
+                callback = function(dialog)
+                    RespondToSendPartiallyOwnedGift(false)
+                    FinishResendingGift(dialog.data.giftId)
+                end,
             }
         },
     })

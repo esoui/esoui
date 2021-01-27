@@ -26,6 +26,7 @@ function ZO_KeyboardOptions:Initialize(control)
                                                         control:GetNamedChild("ApplyButton"):SetHidden(true)
                                                         PushActionLayerByName("OptionsWindow")
                                                     elseif newState == SCENE_FRAGMENT_HIDING then
+                                                        SetCameraOptionsPreviewModeEnabled(false, CAMERA_OPTIONS_PREVIEW_NONE)
                                                         RemoveActionLayerByName("OptionsWindow")
                                                         self:SaveCachedSettings()
                                                     elseif newState == SCENE_FRAGMENT_HIDDEN then

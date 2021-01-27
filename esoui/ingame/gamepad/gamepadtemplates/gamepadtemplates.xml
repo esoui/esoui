@@ -118,6 +118,13 @@
                 <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" hidden="true"/>
             </Controls>
         </Control>
+
+        <!-- Champion Skill Related Scroll List Templates -->
+        <Control name="ZO_GamepadChampionSkillEntryTemplate" inherits="ZO_GamepadMenuEntryTemplateLowercase34" virtual="true">
+            <Controls>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+            </Controls>
+        </Control>
         
         <!-- Guild Selection Related Templates -->
         <Control name="ZO_GamepadSubMenuEntryWithStatusTemplate" inherits="ZO_GamepadSubMenuEntryTemplate" virtual="true">

@@ -100,7 +100,27 @@ end
 function HousingBook_Keyboard:RequestJumpToCurrentHouse()
     local collectibleData = self.navigationTree:GetSelectedData()
     if collectibleData then
-        RequestJumpToHouse(collectibleData:GetReferenceId())
+        local houseId = collectibleData:GetReferenceId()
+        if collectibleData:IsLocked() then
+            -- Preview, behavior will always be inside
+            RequestJumpToHouse(houseId)
+            SCENE_MANAGER:ShowBaseScene()
+        else
+            ClearMenu()
+
+            AddMenuItem(GetString(SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE_INSIDE), function()
+                local TRAVEL_INSIDE = false
+                RequestJumpToHouse(houseId, TRAVEL_INSIDE)
+                SCENE_MANAGER:ShowBaseScene()
+            end)
+            AddMenuItem(GetString(SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), function()
+                local TRAVEL_OUTSIDE = true
+                RequestJumpToHouse(houseId, TRAVEL_OUTSIDE)
+                SCENE_MANAGER:ShowBaseScene()
+            end)
+
+            ShowMenu(self.travelToHouseButton)
+        end
     end
 end
 
@@ -114,7 +134,6 @@ end
 
 function ZO_HousingBook_Keyboard_OnRequestJumpToHouseClicked(control)
     HOUSING_BOOK_KEYBOARD:RequestJumpToCurrentHouse()
-    SCENE_MANAGER:ShowBaseScene()
 end
 
 function ZO_HousingBook_Keyboard_OnChangNicknameClicked(control)

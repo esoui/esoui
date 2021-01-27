@@ -60,27 +60,6 @@
             </OnMouseExit>
         </Control>
 
-        <!-- This control is being inherited into SearchFilters and the search operations are now tied to TextSearch within this control rather than at the top level of the inventory -->
-        <Control name="ZO_QuickSlotSubFiltersWithSearch" resizeToFitDescendents="true" virtual="true">
-            <Controls>
-                <Backdrop name="$(parent)TextSearch" inherits="ZO_InventorySearchTemplate">
-                    <Anchor point="TOPRIGHT" />
-                    <Dimensions x="170" />
-                    <Controls>
-                        <EditBox name="$(parent)Box" override="true">
-                            <OnTextChanged name="Quickslot">
-                                ZO_QuickSlot_OnSearchTextChanged(self)
-                            </OnTextChanged>
-                        </EditBox>
-                    </Controls>
-                </Backdrop>
-
-                <Control name="$(parent)SubTabs" inherits="ZO_InventorySubTabs">
-                    <Anchor point="RIGHT" relativeTo="$(parent)TextSearch" relativePoint="LEFT" offsetX="-12"/>
-                </Control>
-            </Controls>
-        </Control>
-
         <TopLevelControl name="ZO_QuickSlotCircle" mouseEnabled="true" hidden="true">
             <Dimensions x="300" y="300" />
             <Anchor point="CENTER" relativeTo="GuiRoot" offsetX="-20" offsetY="-100" />
@@ -107,15 +86,8 @@
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)SearchFilters" inherits="ZO_QuickSlotSubFiltersWithSearch">
-                    <Anchor point="RIGHT" relativeTo="$(parent)Tabs" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT" />
-                </Control>
-
-                <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
-                </Control>
+                <Control name="$(parent)SearchFilters" override="true" hidden="false" />
+                <Control name="$(parent)SearchDivider" override="true" hidden="false" />
 
                 <!-- Sort Headers -->
                 <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">

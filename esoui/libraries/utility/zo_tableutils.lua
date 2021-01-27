@@ -246,6 +246,16 @@ function ZO_IndexOfElementInNumericallyIndexedTable(table, element)
     return nil
 end
 
+function ZO_RemoveFirstElementFromNumericallyIndexedTable(t, element)
+    for index, value in ipairs(t) do
+        if value == element then
+            table.remove(t, index)
+            return true
+        end
+    end
+    return false
+end
+
 function ZO_TableRandomInsert(t, element)
     table.insert(t, zo_random(#t + 1), element)
 end

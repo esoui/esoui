@@ -155,7 +155,6 @@ function ZO_CraftAdvisorManager:RefreshQuestMasterList()
     self:FireCallbacks("QuestMasterListUpdated", self.questMasterList)
 end
 
---TODO: Support crafting types other than enchanting
 function ZO_CraftAdvisorManager:GetMissingMessage(conditionInfo, currentCount, maxCount)
     --If we have already met the condition requirements, we no longer care about what components we have
     if currentCount < maxCount then

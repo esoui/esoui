@@ -15,7 +15,7 @@ function ZO_GamepadStoreBuyback:Initialize(scene)
             self:UnregisterEvents()
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
         end
-	end)
+    end)
 
     self:InitializeKeybindStrip()
     self:CreateModeData(SI_STORE_MODE_BUY_BACK, ZO_MODE_STORE_BUY_BACK, "EsoUI/Art/Vendor/vendor_tabIcon_buyBack_up.dds", fragment, self.keybindStripDescriptor)
@@ -24,41 +24,53 @@ end
 
 function ZO_GamepadStoreBuyback:RegisterEvents()
     local OnCurrencyChanged = function()
-	    self.list:RefreshVisible()
-	end
+        self.list:RefreshVisible()
+    end
 
     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, OnCurrencyChanged)
     self.control:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, OnCurrencyChanged)
 
     local OnBuyBackUpdated = function()
-	    self.list:UpdateList()
+        TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, BAG_BUYBACK)
+        self.isCurrentSelectionDirty = true
     end
 
-	self.control:RegisterForEvent(EVENT_UPDATE_BUYBACK, OnBuyBackUpdated)
+    self.control:RegisterForEvent(EVENT_UPDATE_BUYBACK, OnBuyBackUpdated)
 end
 
 function ZO_GamepadStoreBuyback:UnregisterEvents()
     self.control:UnregisterForEvent(EVENT_MONEY_UPDATE)
     self.control:UnregisterForEvent(EVENT_ALLIANCE_POINT_UPDATE)
-	self.control:UnregisterForEvent(EVENT_UPDATE_BUYBACK)
+    self.control:UnregisterForEvent(EVENT_UPDATE_BUYBACK)
 end
 
 function ZO_GamepadStoreBuyback:InitializeKeybindStrip()
     -- Buy-Back screen keybind
-	self.keybindStripDescriptor = {
+    self.keybindStripDescriptor =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
-		STORE_WINDOW_GAMEPAD:GetRepairAllKeybind(),
+        STORE_WINDOW_GAMEPAD:GetRepairAllKeybind(),
     }
     ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.keybindStripDescriptor,
                                                       GAME_NAVIGATION_TYPE_BUTTON,
                                                       function() self:ConfirmBuyBack() end,
                                                       GetString(SI_ITEM_ACTION_BUYBACK),
                                                       function() return GetNumBuybackItems() > 0 end,
-													  function() return self:CanBuyBack() end
-												    )
+                                                      function() return self:CanBuyBack() end
+                                                    )
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 
-	ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.list)
+    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.list)
+end
+
+function ZO_GamepadStoreBuyback:AddKeybinds()
+    if not KEYBIND_STRIP:HasKeybindButtonGroup(self.keybindStripDescriptor) then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+end
+
+function ZO_GamepadStoreBuyback:RemoveKeybinds()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_GamepadStoreBuyback:ConfirmBuyBack()

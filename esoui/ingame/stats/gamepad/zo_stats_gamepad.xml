@@ -105,6 +105,47 @@
             <Anchor point="TOPLEFT" relativeTo="ZO_GamepadStatsTopLevelRightPaneHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="ZO_GamepadStatsTopLevelRightPaneHeaderContainer" relativePoint="BOTTOMRIGHT" />
         </Control>
+
+        <Control name="ZO_AdvancedAttributes_CategoryHeader_Template_Gamepad" virtual="true">
+            <Dimensions x="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_HEADER_WIDTH" y="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT" />
+            <OnInitialized>
+                self.nameLabel = self:GetNamedChild("NameLabel")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)NameLabel" font="ZoFontGamepad27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE">
+                    <Anchor point="LEFT" offsetX="5"/>
+                    <Dimensions y="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AdvancedAttributes_GridEntry_Template_Gamepad" virtual="true">
+            <Dimensions x="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_WIDTH" y="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT" />
+            <OnInitialized>
+                self.nameLabel = self:GetNamedChild("NameLabel")
+                self.valueLabel = self:GetNamedChild("ValueLabel")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)ValueLabel" font="ZoFontGamepad34" verticalAlignment="BOTTOM" horizontalAlignment="RIGHT">
+                    <Anchor point="RIGHT" offsetX="-5"/>
+                </Label>
+                <Label name="$(parent)NameLabel" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" verticalAlignment="BOTTOM" maxLineCount="1" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" offsetX="5"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)ValueLabel" relativePoint="LEFT" offsetX="-10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AdvancedAttributes_GridEntryFlat_Template_Gamepad" inherits="ZO_AdvancedAttributes_GridEntry_Template_Gamepad" virtual="true" >
+            <Controls>
+                <Label name="$(parent)NameLabel" override="true" text="SI_STATS_ADVANCED_VALUE_TYPE_FLAT" />
+            </Controls>
+        </Control>
+        <Control name="ZO_AdvancedAttributes_GridEntryPercent_Template_Gamepad" inherits="ZO_AdvancedAttributes_GridEntry_Template_Gamepad" virtual="true" >
+            <Controls>
+                <Label name="$(parent)NameLabel" override="true" text="SI_STATS_ADVANCED_VALUE_TYPE_PERCENT" />
+            </Controls>
+        </Control>
     </Controls>
     
     <Controls>
@@ -173,6 +214,11 @@
 
                                 <Control name="$(parent)AttributesPanel" hidden="true">
                                     <AnchorFill/>
+                                </Control>
+
+                                <Control name="$(parent)AdvancedAttributesPanel" inherits="ZO_GridScrollList_NotAnchored_Gamepad" hidden="true">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="BOTTOMRIGHT" offsetY="-15" />
                                 </Control>
                                 
                                 <Control name="$(parent)CharacterStatsPanel" hidden="true">

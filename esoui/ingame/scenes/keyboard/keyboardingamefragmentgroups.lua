@@ -23,6 +23,12 @@ HELP_TUTORIALS_KEYBOARD_FRAGMENT_GROUP_BASE =
     HELP_WINDOW_SOUNDS,
 }
 
+ADVANCED_STATS_FRAGMENT_GROUP =
+{
+    ADVANCED_STATS_FRAGMENT, 
+    RIGHT_BG_FRAGMENT
+}
+
 local helpModalUnderlayFragment = ZO_SimpleSceneFragment:New(HelpOverlayModal)
 helpModalUnderlayFragment:RegisterCallback("StateChange", function(oldState, newState)
     local wasVisible = oldState ~= SCENE_FRAGMENT_HIDDEN

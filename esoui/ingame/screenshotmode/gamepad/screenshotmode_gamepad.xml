@@ -6,6 +6,9 @@
             </OnInitialized>
             <AnchorFill/>
             <Controls>
+                <Control name="$(parent)ToggleNameplatesButton" inherits="ZO_KeybindButton">
+                    <Anchor point="BOTTOM" offsetY="-150"/>
+                </Control>
                 <Control name="$(parent)ExitButton" inherits="ZO_KeybindButton">
                     <Anchor point="BOTTOM" offsetY="-100"/>
                 </Control>

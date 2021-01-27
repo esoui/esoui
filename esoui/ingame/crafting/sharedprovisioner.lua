@@ -212,6 +212,7 @@ end
 
 function ZO_SharedProvisioner:PreviewRecipe(recipeData)
     if self:CanPreviewRecipe(recipeData) then
+        SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
         SYSTEMS:GetObject("itemPreview"):PreviewProvisionerItemAsFurniture(recipeData.recipeListIndex, recipeData.recipeIndex)
     end
 end

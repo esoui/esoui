@@ -1416,6 +1416,10 @@ function ZO_Scrying:Initialize(control)
         if self.triggeredTutorial then
             self.triggeredTutorial = false
             self:RefreshInputState()
+            if self.waitingOnTutorialToEndGame then
+                self:TryCompleteScrying()
+                self.waitingOnTutorialToEndGame = false
+            end
         end
     end)
 
@@ -1545,6 +1549,12 @@ function ZO_Scrying:TryCompleteScrying()
 
     if SCRYING_HEX_ANIMATION_PROVIDER:AreBlockingAnimationsPlaying() then
         -- wait until existing animations are complete
+        return
+    end
+
+    if self.triggeredTutorial then
+        -- Wait until the user closes the tutorial
+        self.waitingOnTutorialToEndGame = true
         return
     end
 

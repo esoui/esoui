@@ -48,7 +48,7 @@ function SimpleLogoSplash_ShowWithTexture(textureFile)
 end
 
 function SimpleLogoSplash_AttemptHide()
-    if IsConsoleUI() or ZO_Pregame_HasPlayedVideos() then
+    if ZO_Pregame_CanSkipVideos() then
         SCENE_MANAGER:Hide("simpleLogoSplash")
     end
 end

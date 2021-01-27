@@ -200,12 +200,42 @@ function ZO_EsoPlusOffers_Keyboard:ShouldAddSearchResult(categoryIndex, subcateg
     return false
 end
 
+-- This function will append the ZO_MarketProductData it finds to the marketProductPresentations table as its output if it's not a duplicate
+function ZO_EsoPlusOffers_Keyboard:GetMarketProductPresentations(categoryIndex, subcategoryIndex, index, marketProductPresentations)
+    if index >= 1 then
+        if self:HasValidSearchString() then
+            if NonContiguousCount(self.searchResults) == 0 then
+                return
+            end
+
+            local effectiveSubcategoryIndex = subcategoryIndex or "root"
+            if not self.searchResults[categoryIndex][effectiveSubcategoryIndex][index] then
+                index = index - 1
+                return self:GetMarketProductPresentations(categoryIndex, subcategoryIndex, index, marketProductPresentations)
+            end
+        end
+
+        local id, presentationIndex = GetMarketProductPresentationIds(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex, index)
+        if self:ShouldAddMarketProductPresentation(id, presentationIndex) then
+            if not self.marketProductPresentationsIdMap[id] then
+                local productData = ZO_MarketProductData:New(id, presentationIndex)
+                table.insert(marketProductPresentations, productData)
+                self.marketProductPresentationsIdMap[id] = true
+            end
+        end
+
+        index = index - 1
+        return self:GetMarketProductPresentations(categoryIndex, subcategoryIndex, index, marketProductPresentations)
+    end
+end
+
 -- End ZO_Market_Keyboard overrides
 
 function ZO_EsoPlusOffers_Keyboard:BuildEsoPlusMarketProductList(data)
     local marketProductPresentations = {}
     local disableLTOGrouping = false
     local categoryIndex = data.categoryIndex
+    self.marketProductPresentationsIdMap = {}
     if categoryIndex then
         self:GetCategoryMarketProductPresentations(categoryIndex, marketProductPresentations)
         disableLTOGrouping = IsLTODisabledForMarketProductCategory(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex)

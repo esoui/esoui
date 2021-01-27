@@ -2,6 +2,7 @@ ZO_CRAFTING_RESULT_TYPE =
 {
     ITEM = 1,
     CURRENCY = 2,
+    KNOWLEDGE = 3,
 }
 
 local g_forceCenterResultsText = false
@@ -534,6 +535,9 @@ function ZO_CraftingResults_Base:AreCraftingResultsEqual(left, right)
         return left.itemInstanceId == right.itemInstanceId
     elseif resultType == ZO_CRAFTING_RESULT_TYPE.CURRENCY then
         return left.currencyType == right.currencyType
+    elseif resultType == ZO_CRAFTING_RESULT_TYPE.KNOWLEDGE then
+        --Knowledge will never be the same, as you can only learn a trait or translation once
+        return false
     else
         internalassert(false, "No equality has been defined for crafting result type %d.", resultType)
         return false

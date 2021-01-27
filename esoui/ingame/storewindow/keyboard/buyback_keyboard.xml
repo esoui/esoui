@@ -13,8 +13,12 @@
             </OnEffectivelyShown>
 
             <Controls>
+                <Control name="$(parent)SearchFilters" override="true" hidden="false" />
+                <Control name="$(parent)SearchDivider" override="true" hidden="false" />
+
                 <!-- Sort Headers -->
                 <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchDivider" relativePoint="BOTTOMRIGHT" />
                     <Controls>
                         <Control name="$(parent)Name" inherits="ZO_SortHeader">
                             <Dimensions x="290" y="20" />
@@ -31,7 +35,12 @@
                             </OnInitialized>
                         </Control>
                     </Controls>
-                </Control>                
+                </Control>
+
+                <Control name="$(parent)List" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

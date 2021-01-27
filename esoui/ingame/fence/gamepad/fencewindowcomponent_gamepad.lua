@@ -13,6 +13,8 @@ function ZO_GamepadFenceComponent:Initialize(mode, title)
     ZO_GamepadStoreListComponent.Initialize(self, STORE_WINDOW_GAMEPAD, mode, title)
     self.mode = mode
 
+    self:SetSearchContext("fenceTextSearch")
+
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:RegisterEvents()
@@ -97,6 +99,16 @@ function ZO_GamepadFenceComponent:InitializeKeybindStrip(forwardText)
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.confirmKeybindStripDescriptor,
                                                     GAME_NAVIGATION_TYPE_BUTTON,
                                                     function() self:UnselectItem() end)
+end
+
+function ZO_GamepadFenceComponent:AddKeybinds()
+    if not KEYBIND_STRIP:HasKeybindButtonGroup(self.keybindStripDescriptor) then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+end
+
+function ZO_GamepadFenceComponent:RemoveKeybinds()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 -----------------

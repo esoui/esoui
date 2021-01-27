@@ -100,12 +100,12 @@ function ZO_Fence_Manager:GetNumTransactionsRemaining(mode)
 end
 
 function ZO_Fence_Manager:HasBonusToSellingStolenItems()
-    local hagglingSkillLevel = GetNonCombatBonus(NON_COMBAT_BONUS_HAGGLING)
+    local hagglingSkillLevel = self:GetHagglingBonus()
     return hagglingSkillLevel > 0
 end
 
 function ZO_Fence_Manager:GetHagglingBonus()
-    return GetNonCombatBonus(NON_COMBAT_BONUS_HAGGLING)
+    return GetNonCombatBonus(NON_COMBAT_BONUS_FENCE_HAGGLING)
 end
 
 --[[

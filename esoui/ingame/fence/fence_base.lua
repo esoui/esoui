@@ -2,13 +2,7 @@
 ---- Lifecycle
 --]]
 
-ZO_Fence_Base = ZO_Object:Subclass()
-
-function ZO_Fence_Base:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_Fence_Base = ZO_InitializingObject:Subclass()
 
 function ZO_Fence_Base:Initialize(control)
     -- Initialize control

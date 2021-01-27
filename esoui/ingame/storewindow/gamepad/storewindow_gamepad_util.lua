@@ -156,11 +156,11 @@ local function RepairSortFunc(data1, data2)
      return ZO_TableOrderingFunction(data1, data2, "name", REPAIR_ITEMS_SORT_KEYS, ZO_SORT_ORDER_UP)
 end
 
-local function GetBuyItems()
+local function GetBuyItems(searchContext)
     local items = ZO_StoreManager_GetStoreItems()
 
     --- Gamepad versions have extra data / differently named values in templates
-    for i, itemData in ipairs(items) do
+    for _, itemData in ipairs(items) do
         itemData.pressedIcon = itemData.icon
         itemData.stackCount = itemData.stack
         itemData.sellPrice = itemData.price
@@ -184,13 +184,13 @@ local function GetBuyItems()
     return items
 end
 
-local function GetSellItems()
+local function GetSellItems(searchContext)
     local items = SHARED_INVENTORY:GenerateFullSlotData(nil, BAG_WORN, BAG_BACKPACK)
     local unequippedItems = {}
 
     --- Setup sort filter
-    for i, itemData in ipairs(items) do
-        if itemData.bagId ~= BAG_WORN and not itemData.stolen and not itemData.isPlayerLocked then
+    for _, itemData in ipairs(items) do
+        if itemData.bagId ~= BAG_WORN and not itemData.stolen and not itemData.isPlayerLocked  and searchContext and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex) then
             itemData.isEquipped = false
             itemData.meetsRequirementsToBuy = true
             itemData.meetsRequirementsToEquip = itemData.meetsUsageRequirements
@@ -205,80 +205,84 @@ local function GetSellItems()
     return unequippedItems
 end
 
-local function GetBuybackItems()
+local function GetBuybackItems(searchContext)
     local items = {}
     for entryIndex = 1, GetNumBuybackItems() do
-        local icon, name, stackCount, price, functionalQuality, meetsRequirementsToEquip, displayQuality = GetBuybackItemInfo(entryIndex)
-        if stackCount > 0 then
-            local itemLink = GetBuybackItemLink(entryIndex)
-            local itemType = GetItemLinkItemType(itemLink)
-            local equipType = GetItemLinkEquipType(itemLink)
-            local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
-            local sellInformation = GetItemLinkSellInformation(itemLink)
-            local totalPrice = price * stackCount
-            local buybackData =
-            {
-                slotIndex = entryIndex,
-                icon = icon,
-                name = zo_strformat(SI_TOOLTIP_ITEM_NAME, name),
-                stackCount = stackCount,
-                price = price,
-                sellPrice = totalPrice,
-                functionalQuality = functionalQuality,
-                displayQuality = displayQuality,
-                -- self.quality is deprecated, included here for addon backwards compatibility
-                quality = displayQuality,
-                meetsRequirementsToBuy = true,
-                meetsRequirementsToEquip = meetsRequirementsToEquip,
-                stackBuyPrice = totalPrice,
-                itemLink = itemLink,
-                itemType = itemType,
-                equipType = equipType,
-                filterData = { GetItemLinkFilterTypeInfo(itemLink) },
-                traitInformation = traitInformation,
-                itemTrait = GetItemLinkTraitInfo(itemLink),
-                traitInformationSortOrder = ZO_GetItemTraitInformation_SortOrder(traitInformation),
-                sellInformation = sellInformation,
-                sellInformationSortOrder = ZO_GetItemSellInformationCustomSortOrder(sellInformation),
-            }
-            buybackData.storeGroup = GetItemStoreGroup(buybackData)
-            buybackData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(buybackData)
+        if searchContext and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, BAG_BUYBACK, entryIndex) then
+            local icon, name, stackCount, price, functionalQuality, meetsRequirementsToEquip, displayQuality = GetBuybackItemInfo(entryIndex)
+            if stackCount > 0 then
+                local itemLink = GetBuybackItemLink(entryIndex)
+                local itemType = GetItemLinkItemType(itemLink)
+                local equipType = GetItemLinkEquipType(itemLink)
+                local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
+                local sellInformation = GetItemLinkSellInformation(itemLink)
+                local totalPrice = price * stackCount
+                local buybackData =
+                {
+                    slotIndex = entryIndex,
+                    icon = icon,
+                    name = zo_strformat(SI_TOOLTIP_ITEM_NAME, name),
+                    stackCount = stackCount,
+                    price = price,
+                    sellPrice = totalPrice,
+                    functionalQuality = functionalQuality,
+                    displayQuality = displayQuality,
+                    -- self.quality is deprecated, included here for addon backwards compatibility
+                    quality = displayQuality,
+                    meetsRequirementsToBuy = true,
+                    meetsRequirementsToEquip = meetsRequirementsToEquip,
+                    stackBuyPrice = totalPrice,
+                    itemLink = itemLink,
+                    itemType = itemType,
+                    equipType = equipType,
+                    filterData = { GetItemLinkFilterTypeInfo(itemLink) },
+                    traitInformation = traitInformation,
+                    itemTrait = GetItemLinkTraitInfo(itemLink),
+                    traitInformationSortOrder = ZO_GetItemTraitInformation_SortOrder(traitInformation),
+                    sellInformation = sellInformation,
+                    sellInformationSortOrder = ZO_GetItemSellInformationCustomSortOrder(sellInformation),
+                }
+                buybackData.storeGroup = GetItemStoreGroup(buybackData)
+                buybackData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(buybackData)
 
-            table.insert(items, buybackData)
+                table.insert(items, buybackData)
+            end
         end
     end
 
     return items
 end
 
-local function GatherDamagedEquipmentFromBag(bagId, itemTable)
+local function GatherDamagedEquipmentFromBag(searchContext, bagId, itemTable)
     local bagSlots = GetBagSize(bagId)
-    for slotIndex=0, bagSlots - 1 do
-        local condition = GetItemCondition(bagId, slotIndex)
-        if condition < 100 and not IsItemStolen(bagId, slotIndex) then
-            local _, stackCount = GetItemInfo(bagId, slotIndex)
-            if stackCount > 0 then
-                local repairCost = GetItemRepairCost(bagId, slotIndex)
-                if repairCost > 0 then
-                    local damagedItem = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
-                    damagedItem.condition = condition
-                    damagedItem.repairCost = repairCost
-                    damagedItem.invalidPrice = repairCost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
-                    damagedItem.isEquippedInCurrentCategory = damagedItem.bagId == BAG_WORN
-                    damagedItem.storeGroup = GetItemStoreGroup(damagedItem)
-                    damagedItem.bestGamepadItemCategoryName = GetBestItemCategoryDescription(damagedItem)
-                    table.insert(itemTable, damagedItem)
+    for slotIndex = 0, bagSlots - 1 do
+        if searchContext and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, slotIndex) then
+            local condition = GetItemCondition(bagId, slotIndex)
+            if condition < 100 and not IsItemStolen(bagId, slotIndex) then
+                local _, stackCount = GetItemInfo(bagId, slotIndex)
+                if stackCount > 0 then
+                    local repairCost = GetItemRepairCost(bagId, slotIndex)
+                    if repairCost > 0 then
+                        local damagedItem = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
+                        damagedItem.condition = condition
+                        damagedItem.repairCost = repairCost
+                        damagedItem.invalidPrice = repairCost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+                        damagedItem.isEquippedInCurrentCategory = damagedItem.bagId == BAG_WORN
+                        damagedItem.storeGroup = GetItemStoreGroup(damagedItem)
+                        damagedItem.bestGamepadItemCategoryName = GetBestItemCategoryDescription(damagedItem)
+                        table.insert(itemTable, damagedItem)
+                    end
                 end
             end
         end
     end
 end
 
-local function GetRepairItems()
+local function GetRepairItems(searchContext)
     local items = {}
 
-    GatherDamagedEquipmentFromBag(BAG_WORN, items)
-    GatherDamagedEquipmentFromBag(BAG_BACKPACK, items)
+    GatherDamagedEquipmentFromBag(searchContext, BAG_WORN, items)
+    GatherDamagedEquipmentFromBag(searchContext, BAG_BACKPACK, items)
 
     return items
 end
@@ -300,7 +304,7 @@ local function GetStolenItems(optFilterFunction, ...)
     local unequippedItems = {}
 
     --- Setup sort filter
-    for i, itemData in ipairs(items) do
+    for _, itemData in ipairs(items) do
         itemData.isEquipped = false
         itemData.meetsRequirementsToBuy = true
         itemData.meetsRequirementsToEquip = itemData.meetsUsageRequirements
@@ -312,20 +316,30 @@ local function GetStolenItems(optFilterFunction, ...)
     return unequippedItems
 end
 
-local function GetStolenSellItems()
-    -- can't sell stolen things from BAG_WORN so just check BACKPACK
-    return GetStolenItems(IsItemStolenAndSellable, BAG_BACKPACK)
+local function IsStolenItemSellable(itemData)
+    return itemData.sellPrice > 0
 end
 
-local function GetLaunderItems()
-    local NO_ADDED_FILTER = nil
-    return GetStolenItems(NO_ADDED_FILTER, BAG_WORN, BAG_BACKPACK)
+local function GetStolenSellItems(searchContext)
+    local function TextSearchFilterFunction(itemData)
+        return IsStolenItemSellable(itemData) and searchContext and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
+    end
+    -- can't sell stolen things from BAG_WORN so just check BACKPACK
+    return GetStolenItems(TextSearchFilterFunction, BAG_BACKPACK)
+end
+
+local function GetLaunderItems(searchContext)
+    local function TextSearchFilterFunction(itemData)
+        return searchContext and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
+    end
+
+    return GetStolenItems(TextSearchFilterFunction, BAG_WORN, BAG_BACKPACK)
 end
 
 local TRAIN_ORDER = { RIDING_TRAIN_SPEED, RIDING_TRAIN_STAMINA, RIDING_TRAIN_CARRYING_CAPACITY }
 local function GetStableItems()
     local items = {}
-    
+
     local timeUntilCanBeTrained = GetTimeUntilCanBeTrained()
     local canBeTrained = timeUntilCanBeTrained == 0 and STABLE_MANAGER:CanAffordTraining()
     local header = GetString(SI_STATS_RIDING_SKILL)
@@ -333,7 +347,7 @@ local function GetStableItems()
         local trainingType = TRAIN_ORDER[i]
         local bonus, maxBonus = STABLE_MANAGER:GetStats(trainingType)
 
-        local extraData = 
+        local extraData =
         {
             trainingType = trainingType,
             bonus = bonus,
@@ -372,10 +386,12 @@ local MODE_TO_UPDATE_FUNC = {
 
 ZO_GamepadStoreList = ZO_GamepadVerticalParametricScrollList:Subclass()
 
-function ZO_GamepadStoreList:New(control, mode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction)
-    local object = ZO_GamepadVerticalParametricScrollList.New(self, control)
-    object:SetMode(mode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction)
-    return object
+function ZO_GamepadStoreList:Initialize(control, mode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction)
+    self:SetMode(mode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction)
+end
+
+function ZO_GamepadStoreList:SetSearchContext(context)
+    self.searchContext = context
 end
 
 local function VendorEntryHeaderTemplateSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
@@ -396,7 +412,7 @@ end
 function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOverride)
     local currentBestCategoryName = nil
 
-    for i, itemData in ipairs(items) do
+    for _, itemData in ipairs(items) do
         local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
 
         --This is only used by stables
@@ -423,13 +439,13 @@ function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOver
             self:AddEntry(self.template, entry)
         end
     end
-    
+
     self:Commit()
 end
 
 function ZO_GamepadStoreList:UpdateList()
     self:Clear()
-    local items = self.updateFunc()
+    local items = self.updateFunc(self.searchContext)
     if self.sortFunc then
         table.sort(items, self.sortFunc)
     end

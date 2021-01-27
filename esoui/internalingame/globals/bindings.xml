@@ -40,6 +40,10 @@
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
+            <Action name="UI_SHORTCUT_QUINARY">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
             <Action name="UI_SHORTCUT_NEGATIVE">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>

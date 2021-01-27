@@ -191,6 +191,73 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVE
     },
 }
 
+ESO_Dialogs["MARKET_CROWN_STORE_GIFT_PARTIALLY_OWNED_KEYBOARD"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
+    },
+    mainText =
+    {
+        text = SI_MARKET_GIFTING_BUNDLE_PARTS_OWNED_TEXT
+    },
+    buttons =
+    {
+        {
+            text = SI_MARKET_PURCHASE_ERROR_CONTINUE,
+            callback = function(dialog)
+                RespondToSendPartiallyOwnedGift(true)
+
+                local data = dialog.data
+                ZO_Dialogs_ShowDialog("MARKET_PURCHASING", {itemName = data.itemName, marketProductData = data.marketProductData, recipientDisplayName = data.recipientDisplayName })
+            end,
+            keybind = "DIALOG_PRIMARY",
+        },
+        {
+            text = SI_DIALOG_EXIT,
+            callback = function(dialog)
+                RespondToSendPartiallyOwnedGift(false)
+            end,
+            keybind = "DIALOG_NEGATIVE",
+        },
+    },
+}
+
+ESO_Dialogs["RESEND_GIFT_PARTIALLY_OWNED_KEYBOARD"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
+    },
+    mainText =
+    {
+        text = SI_MARKET_GIFTING_RESEND_BUNDLE_PARTS_OWNED_TEXT
+    },
+    buttons =
+    {
+        {
+            text = SI_MARKET_PURCHASE_ERROR_CONTINUE,
+            callback = function(dialog)
+                RespondToSendPartiallyOwnedGift(true)
+
+                local data = dialog.data
+                ZO_Dialogs_ShowDialog("GIFT_SENDING_KEYBOARD", data)
+            end,
+            keybind = "DIALOG_PRIMARY",
+        },
+        {
+            text = SI_DIALOG_EXIT,
+            callback = function(dialog)
+                RespondToSendPartiallyOwnedGift(false)
+            end,
+            keybind = "DIALOG_NEGATIVE",
+        },
+    },
+}
+
+
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT"] =
 {
     finishedCallback = LogPurchaseClose,
@@ -727,7 +794,7 @@ local function MarketPurchaseHouseTemplateSelectDialogSetup(dialog, data)
     local defaultTemplateListIndex
     for index, houseTemplateData in pairs(houseTemplateDataList) do
         local currencyType, marketData = next(houseTemplateData.marketPurchaseOptions)
-        if houseTemplateData.name and marketData and (data.isGift and marketData.isGiftable) or (not data.isGift and not marketData.isHouseOwned) then
+        if houseTemplateData.name and marketData and ((data.isGift and marketData.isGiftable) or (not data.isGift and not marketData.isHouseOwned)) then
             local formattedName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_TEMPLATE_NAME_FORMAT, houseTemplateData.name)
             local entry = comboBox:CreateItemEntry(formattedName, OnTemplateChanged)
             entry.data = houseTemplateData
@@ -739,15 +806,16 @@ local function MarketPurchaseHouseTemplateSelectDialogSetup(dialog, data)
         end
     end
 
-    if defaultTemplateListIndex then
-        comboBox:SelectItemByIndex(defaultTemplateListIndex)
-    else
-        comboBox:SelectFirstItem()
+    if comboBox:GetNumItems() > 0 then
+        if defaultTemplateListIndex then
+            comboBox:SelectItemByIndex(defaultTemplateListIndex)
+        else
+            comboBox:SelectFirstItem()
+        end
+
+        MarketPurchaseConfirmationDialogSetupPricingControls(dialog, comboBox:GetSelectedItemData().data)
+        MarketPurchaseSelectTemplateDialogSetupHouseInfoControls(dialog, comboBox:GetSelectedItemData().data)
     end
-
-    MarketPurchaseConfirmationDialogSetupPricingControls(dialog, comboBox:GetSelectedItemData().data)
-
-    MarketPurchaseSelectTemplateDialogSetupHouseInfoControls(dialog, comboBox:GetSelectedItemData().data)
 end
 
 function ZO_MarketPurchaseHouseTemplateSelectDialog_OnInitialized(control)
@@ -830,6 +898,16 @@ local function OnMarketPurchaseResult(data, result, tutorialTrigger, wasGift)
     EVENT_MANAGER:UnregisterForEvent("MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT)
     data.result = result
     data.wasGift = wasGift
+
+    if result == MARKET_PURCHASE_RESULT_GIFT_COLLECTIBLE_PARTIALLY_OWNED then
+        local displayName = data.marketProductData:GetDisplayName()
+        local dialogParams =
+        {
+            titleParams = { displayName },
+        }
+        ZO_Dialogs_ReleaseAllDialogsOfName("MARKET_PURCHASING")
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_GIFT_PARTIALLY_OWNED_KEYBOARD", data, dialogParams)
+    end
 
     if not wasGift then
         if tutorialTrigger ~= TUTORIAL_TRIGGER_NONE then
@@ -925,7 +1003,7 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
         ZO_Dialogs_UpdateDialogMainText(dialog, { text = mainText, align = TEXT_ALIGN_CENTER })
 
         local confirmButtonControl = dialog:GetNamedChild("Confirm")
-        confirmButtonControl:SetText(confirmText) 
+        confirmButtonControl:SetText(confirmText)
         confirmButtonControl:SetHidden(false)
 
         ZO_Dialogs_SetDialogLoadingIcon(dialog:GetNamedChild("Loading"), dialog:GetNamedChild("Text"), HIDE_LOADING_ICON)
@@ -968,43 +1046,43 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
             mustChoose = true,
             buttons =
             {
-                -- Use Product 
+                -- Use Product
                 {
-                    control =   self:GetNamedChild("UseProduct"),
-                    keybind =   "DIALOG_RESET",
-                    callback =  function(dialog)
-                                    ZO_Market_Shared.GoToUseProductLocation(dialog.data.marketProductData)
-                                end,
+                    control = self:GetNamedChild("UseProduct"),
+                    keybind = "DIALOG_RESET",
+                    callback = function(dialog)
+                        ZO_Market_Shared.GoToUseProductLocation(dialog.data.marketProductData)
+                    end,
                 },
                 {
                     control = self:GetNamedChild("Confirm"),
                     text = SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL,
                     keybind = "DIALOG_PRIMARY",
                     callback = function(dialog)
-                                   local data = dialog.data
-                                   if ZO_MarketDialogs_Shared_ShouldRestartGiftFlow(data.result) then
-                                       local restartData =
-                                       {
-                                           isGift = true,
-                                           marketProductData = data.marketProductData,
-                                           recipientDisplayName = data.recipientDisplayName,
-                                           note = data.note,
-                                       }
-                                       ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", restartData)
-                                       return
-                                   end
-                                   LogPurchaseClose(dialog)
-                                   if data.wasGift == false then
-                                       -- Show tutorials from a purchased item first before showing the consumable tutorial
-                                       if data.tutorialTrigger then
-                                           MARKET:ShowTutorial(data.tutorialTrigger)
-                                       end
+                        local data = dialog.data
+                        if ZO_MarketDialogs_Shared_ShouldRestartGiftFlow(data.result) then
+                            local restartData =
+                            {
+                                isGift = true,
+                                marketProductData = data.marketProductData,
+                                recipientDisplayName = data.recipientDisplayName,
+                                note = data.note,
+                            }
+                            ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", restartData)
+                            return
+                        end
+                        LogPurchaseClose(dialog)
+                        if data.wasGift == false then
+                            -- Show tutorials from a purchased item first before showing the consumable tutorial
+                            if data.tutorialTrigger then
+                                MARKET:ShowTutorial(data.tutorialTrigger)
+                            end
 
-                                       if data.result == MARKET_PURCHASE_RESULT_SUCCESS and data.marketProductData:ContainsConsumables() then
-                                           MARKET:ShowTutorial(TUTORIAL_TRIGGER_CROWN_CONSUMABLE_PURCHASED)
-                                       end
-                                   end
-                               end,
+                            if data.result == MARKET_PURCHASE_RESULT_SUCCESS and data.marketProductData:ContainsConsumables() then
+                                MARKET:ShowTutorial(TUTORIAL_TRIGGER_CROWN_CONSUMABLE_PURCHASED)
+                            end
+                        end
+                    end,
                 },
             },
         }

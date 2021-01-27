@@ -12,8 +12,8 @@
                     <AnchorFill/>
                 </Control>
 
-                <Label name="$(parent)VariationLabel" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" level="2" hidden="true">
-                    <Dimensions x="350"/>
+                <Label name="$(parent)VariationLabel" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" level="2" maxLineCount="2" wrapMode="ELLIPSIS" hidden="true">
+                    <DimensionConstraints maxX="350" minX="200"/>
                     <Anchor point="BOTTOM" offsetY="-10" />
                 </Label>
 

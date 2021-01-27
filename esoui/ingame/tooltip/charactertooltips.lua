@@ -43,3 +43,25 @@ function ZO_Tooltip:LayoutAttributeTooltip(statType)
         self:AddSection(bodySection)
     end
 end
+
+function ZO_Tooltip:LayoutAdvancedAttributeTooltip(statData)
+    --First, add the name of the stat
+    local headerSection = self:AcquireSection(self:GetStyle("title"))
+    headerSection:AddLine(zo_strformat(SI_STAT_NAME_FORMAT, statData.displayName))
+    self:AddSection(headerSection)
+
+    --If we have a description, add it
+    if statData.description then
+        local bodySection = self:AcquireSection(self:GetStyle("attributeBody"))
+        bodySection:AddLine(zo_strformat(statData.description))
+        self:AddSection(bodySection)
+    end
+
+    --If we need to show a flat value at the bottom of the tooltip, do that
+    if statData.flatValue then
+        local bodySection = self:AcquireSection(self:GetStyle("attributeBody"))
+        local flatValueText = ZO_WHITE:Colorize(statData.flatValue)
+        bodySection:AddLine(zo_strformat(SI_STAT_RATING_TOOLTIP_FORMAT, statData.displayName, flatValueText))
+        self:AddSection(bodySection)
+    end
+end

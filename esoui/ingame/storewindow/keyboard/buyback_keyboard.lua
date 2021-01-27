@@ -1,12 +1,6 @@
-local BuyBack = ZO_Object:Subclass()
+local BuyBack = ZO_InitializingObject:Subclass()
 
 local DATA_TYPE_BUY_BACK_ITEM = 1
-
-function BuyBack:New(...)
-    local buyBack = ZO_Object.New(self)
-    buyBack:Initialize(...)
-    return buyBack
-end
 
 function BuyBack:Initialize(control)
     self.control = control
@@ -34,8 +28,8 @@ end
 function BuyBack:InitializeFilterBar()
     local menuBarData =
     {
-        initialButtonAnchorPoint = RIGHT, 
-        buttonTemplate = "ZO_StoreTab", 
+        initialButtonAnchorPoint = RIGHT,
+        buttonTemplate = "ZO_StoreTab",
         normalSize = 51,
         downSize = 64,
         buttonPadding = -15,
@@ -76,6 +70,23 @@ function BuyBack:InitializeSortHeader()
     self.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
     self.sortHeaders:AddHeadersFromContainer()
     self.sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
+
+    self.searchBox = self.control:GetNamedChild("SearchFiltersTextSearchBox")
+
+    local function OnTextSearchTextChanged(editBox)
+        ZO_EditDefaultText_OnTextChanged(editBox)
+        TEXT_SEARCH_MANAGER:SetSearchText("storeTextSearch", editBox:GetText())
+    end
+
+    self.searchBox:SetHandler("OnTextChanged", OnTextSearchTextChanged)
+
+    local SUPPRESS_TEXT_CHANGED_CALLBACK = true
+    local function OnListTextFilterComplete()
+        self.searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("storeTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
+        self:UpdateList()
+    end
+
+    TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", OnListTextFilterComplete)
 end
 
 function BuyBack:InitializeEvents()
@@ -101,16 +112,16 @@ function BuyBack:InitializeEvents()
     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, OnMoneyUpdate)
     self.control:RegisterForEvent(EVENT_UPDATE_BUYBACK, RefreshList)
     self.control:RegisterForEvent(EVENT_BUYBACK_RECEIPT, function(eventId, itemName, itemQuantity, money, itemSoundCategory)
-        if(itemSoundCategory == ITEM_SOUND_CATEGORY_NONE) then
-            -- Fall back sound if there was no other sound to play            
+        if itemSoundCategory == ITEM_SOUND_CATEGORY_NONE then
+            -- Fall back sound if there was no other sound to play
             PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
         else
-            PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_ACQUIRE)  
+            PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_ACQUIRE)
         end
     end)
 end
 
-function BuyBack:UpdateMoney()        
+function BuyBack:UpdateMoney()
     if not self.control:IsControlHidden() then
         self.currentMoney = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
         ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, self.currentMoney, ZO_KEYBOARD_CURRENCY_OPTIONS)
@@ -129,34 +140,38 @@ function BuyBack:UpdateFreeSlots()
 end
 
 function BuyBack:UpdateList()
-    ZO_ScrollList_Clear(self.list)
-    ZO_ScrollList_ResetToTop(self.list)
+    if not self.control:IsControlHidden() then
+        ZO_ScrollList_Clear(self.list)
+        ZO_ScrollList_ResetToTop(self.list)
 
-    local scrollData = ZO_ScrollList_GetDataList(self.list)
+        local scrollData = ZO_ScrollList_GetDataList(self.list)
 
-    for entryIndex = 1, GetNumBuybackItems() do
-        local icon, name, stack, price, functionalQuality, meetsRequirements, displayQuality = GetBuybackItemInfo(entryIndex)
-        if stack > 0 then
-            local buybackData =
-            {
-                slotIndex = entryIndex,
-                icon = icon,
-                name = name,
-                stack = stack,
-                price = price,
-                functionalQuality = functionalQuality,
-                displayQuality = displayQuality,
-                -- quality is deprecated, included here for addon backwards compatibility
-                quality = displayQuality,
-                meetsRequirements = meetsRequirements,
-                stackBuyPrice = stack * price,
-            }
+        for entryIndex = 1, GetNumBuybackItems() do
+            if TEXT_SEARCH_MANAGER:IsItemInSearchTextResults("storeTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, BAG_BUYBACK, entryIndex) then
+                local icon, name, stack, price, functionalQuality, meetsRequirements, displayQuality = GetBuybackItemInfo(entryIndex)
+                if stack > 0 then
+                    local buybackData =
+                    {
+                        slotIndex = entryIndex,
+                        icon = icon,
+                        name = name,
+                        stack = stack,
+                        price = price,
+                        functionalQuality = functionalQuality,
+                        displayQuality = displayQuality,
+                        -- quality is deprecated, included here for addon backwards compatibility
+                        quality = displayQuality,
+                        meetsRequirements = meetsRequirements,
+                        stackBuyPrice = stack * price,
+                    }
 
-            scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_BUY_BACK_ITEM, buybackData)
+                    scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_BUY_BACK_ITEM, buybackData)
+                end
+            end
         end
-    end
 
-    self:ApplySort()
+        self:ApplySort()
+    end
 end
 
 local ITEM_BUY_CURRENCY_OPTIONS =
@@ -169,8 +184,6 @@ local ITEM_BUY_CURRENCY_OPTIONS =
 function BuyBack:SetupBuyBackSlot(control, data)
     local statusControl = GetControl(control, "Status")
     local slotControl = GetControl(control, "Button")
-    local iconControl = GetControl(control, "ButtonIcon")
-    local quantityControl = GetControl(control, "ButtonStackCount")
     local nameControl = GetControl(control, "Name")
     local priceControl = GetControl(control, "SellPrice")
 
@@ -200,7 +213,7 @@ end
 do
     local sortKeys =
     {
-        name = { },
+        name = {},
         stackBuyPrice = { tiebreaker = "name", isNumeric = true },
     }
     function BuyBack:ApplySort()
@@ -215,6 +228,7 @@ do
 end
 
 function BuyBack:OnShown()
+    self.searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("storeTextSearch"))
     self:UpdateMoney()
     self:UpdateList()
     self:UpdateFreeSlots()

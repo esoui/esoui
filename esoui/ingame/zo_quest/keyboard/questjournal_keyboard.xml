@@ -31,41 +31,6 @@
             </Controls>
         </Label>
 
-        <Control name="ZO_QuestJournalHeader" inherits="ZO_IconHeader" mouseEnabled="true" virtual="true">
-            <OnInitialized>
-                ZO_QuestJournalHeader_OnInitialized(self)
-            </OnInitialized>
-
-            <OnMouseUp>
-                self:OnMouseUp(upInside)
-            </OnMouseUp>
-
-            <OnMouseEnter>
-                self:OnMouseEnter()
-            </OnMouseEnter>
-
-            <OnMouseExit>
-                self:OnMouseExit()
-            </OnMouseExit>
-
-            <Controls>
-                <Texture name="$(parent)Icon" scale="1" override="true" resizeToFitFile="true" />
-                <Label name="$(parent)Text" override="true">
-                    <OnMouseUp>
-                        self:GetParent():OnMouseUp(upInside)
-                    </OnMouseUp>
-
-                    <OnMouseEnter>
-                        self:GetParent():OnMouseEnter()
-                    </OnMouseEnter>
-
-                    <OnMouseExit>
-                        self:GetParent():OnMouseExit()
-                    </OnMouseExit>
-                </Label>
-            </Controls>
-        </Control>
-
         <Label name="ZO_QuestJournal_DetailText" inherits="ZO_QuestJournal_DetailControl" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
         <Label name="ZO_QuestJournal_StepText" inherits="ZO_QuestJournal_StepControl" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
 

@@ -194,17 +194,21 @@ function ZO_Spinner:GetStep()
     return self.step
 end
 
-function ZO_Spinner:SetMinMax(min, max)
+function ZO_Spinner:SetValueMinAndMax(value, min, max)
     min = min or 0
     max = max or math.huge
-    if self.min ~= min or self.max ~= max then
+
+    if min ~= self.min or max ~= self.max or value ~= self.value then
         self.min = min
         self.max = max
-
-        if not self:SetValue(self.value) then
+        if not self:SetValue(value) then
             self:UpdateButtons()
         end
     end
+end
+
+function ZO_Spinner:SetMinMax(min, max)
+    self:SetValueMinAndMax(self.value, min, max)
 end
 
 function ZO_Spinner:GetMin()
@@ -296,6 +300,12 @@ function ZO_Spinner:SetValue(value, forceSet)
         end
     end
     return false
+end
+
+function ZO_Spinner:AddToMouseInputGroup(inputGroup, inputType)
+    inputGroup:Add(self.control, inputType)
+    inputGroup:Add(self.increaseButton, inputType)
+    inputGroup:Add(self.decreaseButton, inputType)
 end
 
 function ZO_Spinner:UpdateDisplay()

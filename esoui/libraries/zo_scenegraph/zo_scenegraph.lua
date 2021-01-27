@@ -12,7 +12,7 @@ function ZO_SceneGraph:Initialize(canvasControl, debugModeEnabled)
     canvasControl:SetHandler("OnUpdate", function() self:OnUpdate() end)
     self.debugModeEnabled = debugModeEnabled
     self.debugTextureId = 1
-    self.dirty = false
+    self.needsRender = false
     self.cameraNode = self:CreateNode("camera")
     self.cameraZ = -1
 end
@@ -84,12 +84,28 @@ function ZO_SceneGraph:CreateNode(name)
     local node = ZO_SceneGraphNode:New(self, name)
 
     if self.debugModeEnabled then
-        self:AddDebugTexture(node)
+        self:AddDebugTextureToNode(node)
     end
 
     self.nodes[name] = node
 
     return node
+end
+
+function ZO_SceneGraph:RemoveNode(node)
+    -- after this point, this node will no longer participate in rendering, the node should eventually be garbage collected.
+    -- it's important that you nil out references in application code too to achieve this.
+    -- child controls do not hold references to their scene node, so they will
+    -- also become "free-floating". Likewise, it's your responsibility to reuse
+    -- those controls to not leak memory.
+    node:SetParent(nil)
+    self.nodes[node:GetName()] = nil
+    local children = node:GetChildren()
+    if children then
+        for _, childNode in ipairs(children) do
+            self:RemoveNode(childNode)
+        end
+    end
 end
 
 function ZO_SceneGraph:AddDebugTextureToNode(node)
@@ -100,36 +116,39 @@ function ZO_SceneGraph:AddDebugTextureToNode(node)
     debugTexture:SetDimensions(20, 20)
     debugTexture:SetColor(0.7, 0.7, 1, 1)
     debugTexture:SetPixelRoundingEnabled(false)
-    node:AddControl(debugTexture, 0, 0, 0)
+    node:AddTexture(debugTexture, 0, 0, 0)
 end
 
 function ZO_SceneGraph:OnSceneNodeDirty()
-    self.dirty = true
+    self.needsRender = true
 end
 
 function ZO_SceneGraph:OnUpdate()
-    if self.dirty then
-        self.dirty = false
+    if self.needsRender then
+        self.needsRender = false
         self:Render()
     end
 end
 
-function ZO_SceneGraph:Render(node, dirtyUpstream)
-    if node == nil then
-        node = self.cameraNode
-    end
-
-    local dirty = node:IsDirty()
-    if dirty or dirtyUpstream then
-        node:BuildWorldViewMatrix()
-        node:Render()
-    end
-
-    local children = node:GetChildren()
-    if children ~= nil then
-        for i = 1, #children do
-            local child = children[i]
-            self:Render(child, dirty or dirtyUpstream)
+do
+    local function RenderNode(node, dirtyUpstream)
+        local dirty = dirtyUpstream or node:IsDirty()
+        if dirty then
+            node:BuildWorldViewMatrix()
+            node:Render()
         end
+
+        local children = node:GetChildren()
+        if children ~= nil then
+            for i = 1, #children do
+                local child = children[i]
+                RenderNode(child, dirty)
+            end
+        end
+    end
+
+    function ZO_SceneGraph:Render()
+        local NOT_DIRTY_UPSTREAM = false
+        RenderNode(self.cameraNode, NOT_DIRTY_UPSTREAM)
     end
 end

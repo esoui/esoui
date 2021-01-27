@@ -918,22 +918,29 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_CHAMPION_POINT_GAINED] = function(pointDelta)
     -- adding one so that we are starting from the first gained point instead of the starting champion points
     local endingPoints = GetPlayerChampionPointsEarned()
     local startingPoints = endingPoints - pointDelta + 1
-    local championPointsByType = { 0, 0, 0 }
+    local championPointsByType = 
+    {
+        [CHAMPION_DISCIPLINE_TYPE_WORLD] = 0,
+        [CHAMPION_DISCIPLINE_TYPE_COMBAT] = 0,
+        [CHAMPION_DISCIPLINE_TYPE_CONDITIONING] = 0,
+    }
 
     while startingPoints <= endingPoints do
-        local pointType = GetChampionPointAttributeForRank(startingPoints)
+        local pointType = GetChampionPointPoolForRank(startingPoints)
         championPointsByType[pointType] = championPointsByType[pointType] + 1
         startingPoints = startingPoints + 1
     end
 
-    local secondLine = ""
-    for pointType,amount in pairs(championPointsByType) do
+    local pointsLines = {}
+    for pointType, amount in pairs(championPointsByType) do
         if amount > 0 then
-            local icon = GetChampionPointAttributeHUDIcon(pointType)
-            local constellationGroupName = ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(pointType)
-            secondLine = secondLine .. zo_strformat(SI_CHAMPION_POINT_TYPE, amount, icon, constellationGroupName) .. "\n"
+            local disciplineData = CHAMPION_DATA_MANAGER:FindChampionDisciplineDataByType(pointType)
+            local icon = disciplineData:GetHUDIcon()
+            local disciplineName = disciplineData:GetRawName()
+            table.insert(pointsLines, zo_strformat(SI_CHAMPION_POINT_TYPE, amount, icon, disciplineName))
         end
     end
+    local secondLine = table.concat(pointsLines, "\n")
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CHAMPION_POINT_GAINED)
     messageParams:SetText(zo_strformat(SI_CHAMPION_POINT_EARNED, pointDelta), secondLine)
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CHAMPION_POINT_GAINED)
@@ -960,16 +967,9 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_INVENTORY_BANK_CAPACITY_CHANGED] = function(p
     end
 end
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_ATTRIBUTE_FORCE_RESPEC] = function(note)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_FORCE_RESPEC] = function(respecType)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-    messageParams:SetText(GetString(SI_ATTRIBUTE_FORCE_RESPEC_TITLE), zo_strformat(SI_ATTRIBUTE_FORCE_RESPEC_PROMPT, note))
-    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
-    return messageParams
-end
-
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_FORCE_RESPEC] = function(note)
-    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-    messageParams:SetText(GetString(SI_SKILLS_FORCE_RESPEC_TITLE), zo_strformat(SI_SKILLS_FORCE_RESPEC_PROMPT, note))
+    messageParams:SetText(GetString("SI_RESPECTYPE_POINTSRESETTITLE", respecType), GetString("SI_RESPECTYPE", respecType))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
     return messageParams
 end

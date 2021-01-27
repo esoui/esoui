@@ -1,37 +1,91 @@
 <GuiXml>
     <Controls>
-        <Button name="ZO_MailInboxAttachmentSlot" virtual="true" inherits="ZO_InventorySlot">
+        <Button name="ZO_MailInboxAttachmentSlot" inherits="ZO_InventorySlot" virtual="true">
             <Dimensions x="48" y="48" />
         </Button>
-        
-        <Label name="ZO_MailInboxLabel" font="ZoFontGame" wrapMode="ELLIPSIS" virtual="true"/>
-        <Control name="ZO_MailEmptyInboxRow" virtual="true">
-            <Dimensions y="50"/>
-            <Controls>
-                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
-            </Controls>
+
+        <Control name="ZO_MailInboxHeader" inherits="ZO_StatusSimpleArrowIconHeader" virtual="true">
+            <OnInitialized name="ZO_MailInboxHeader">
+                local textLabel = self:GetNamedChild("Text")
+                local fonts =
+                {
+                    {
+                        font = "ZoFontHeader3",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontHeader2",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontHeader1",
+                        lineLimit = 1,
+                        dontUseForAdjusting = true,
+                    },
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(textLabel, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+            </OnInitialized>
         </Control>
+        
+        <Texture name="ZO_MailInboxRowBg" inherits="ZO_ThinListBgStrip" excludeFromResizeToFitExtents="true" virtual="true">
+            <ClearAnchors />
+            <Dimensions x="ZO_MAIL_INDBOX_KEYBOARD_NODE_WDITH" y="ZO_MAIL_INDBOX_KEYBOARD_NODE_HEIGHT" />
+        </Texture>
+        
         <Control name="ZO_MailInboxRow" mouseEnabled="true" virtual="true">
-            <Dimensions y="50"/>
+            <Dimensions x="ZO_MAIL_INDBOX_KEYBOARD_NODE_INDENTED_WDITH" y="ZO_MAIL_INDBOX_KEYBOARD_NODE_HEIGHT" />
+            
+            <OnInitialized>
+                ZO_MailInboxRow_OnInitialized(self)
+            </OnInitialized>
+            
             <OnMouseEnter>
                 ZO_MailInboxRow_OnMouseEnter(self)
             </OnMouseEnter>
+            
             <OnMouseExit>
                 ZO_MailInboxRow_OnMouseExit(self)
             </OnMouseExit>
+            
             <OnMouseUp>
-                ZO_MailInboxRow_OnMouseUp(self, button, upInside)
+                ZO_TreeEntry_OnMouseUp(self, upInside)
             </OnMouseUp>
+            
             <Controls>
-                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
                 <Texture name="$(parent)Icon" inherits="ZO_MultiIcon">
                     <Anchor point="LEFT"/>
                     <Dimensions x="32" y="32"/>
                 </Texture>
-                <Label name="$(parent)Subject" inherits="ZO_MailInboxLabel">
+                
+                <Control name="$(parent)TextContainer" resizeToFitDescendents="true">
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="9"/>
                     <Anchor point="RIGHT"/>
-                    <DimensionConstraints maxY="45"/>
+                    
+                    <Controls>
+                        <Label name="$(parent)Subject" font="ZoFontGame" maxLineCount="1">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+                        
+                        <Label name="$(parent)Expiration" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ERROR" wrapMode="ELLIPSIS" maxLineCount="1" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subject" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subject" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_MailInboxEmptyRow" virtual="true">
+            <Dimensions x="ZO_MAIL_INDBOX_KEYBOARD_NODE_INDENTED_WDITH" y="ZO_MAIL_INDBOX_KEYBOARD_NODE_HEIGHT" />
+            <OnInitialized>
+                self.textLabel = self:GetNamedChild("Text")
+            </OnInitialized>
+                    
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontGame" maxLineCount="2" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
+                    <Anchor point="LEFT" offsetX="41" />
+                    <Anchor point="RIGHT" />
                 </Label>
             </Controls>
         </Control>
@@ -64,15 +118,12 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Unread" relativePoint="BOTTOMLEFT" offsetX="5" offsetY="4"/>
                     <Dimensions x="350"/>
                 </Label>
-                
-                <Control name="$(parent)List" inherits="ZO_ScrollList">
-                    <Dimensions x="350" y="600"/>
-                    <Anchor point="TOPLEFT" offsetX="16" offsetY="90"/>
-                </Control>
 
-                <Label name="$(parent)Empty" font="ZoFontGame" text="SI_MAIL_INBOX_EMPTY" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" hidden="true">
-                    <Anchor point="TOP" relativeTo="$(parent)List" offsetY="15"/>
-                </Label>
+                <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="ZO_MAIL_INDBOX_KEYBOARD_TREE_WDITH" />
+                    <Anchor point="TOPLEFT" offsetX="-17" offsetY="90"/>
+                    <Anchor point="BOTTOMLEFT" offsetX="-17" />
+                </Control>
 
                 <Control name="$(parent)Message" hidden="true">
                     <Anchor point="TOPLEFT" offsetX="410" offsetY="5"/>

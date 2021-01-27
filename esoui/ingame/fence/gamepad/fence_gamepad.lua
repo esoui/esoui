@@ -4,10 +4,6 @@
 
 ZO_Fence_Gamepad = ZO_Fence_Base:Subclass()
 
-function ZO_Fence_Gamepad:New(...)
-    return ZO_Fence_Base.New(self, ...)
-end
-
 function ZO_Fence_Gamepad:Initialize(control)
     self.sceneName = GAMEPAD_STORE_SCENE_NAME
 
@@ -41,10 +37,14 @@ function ZO_Fence_Gamepad:OnOpened(enableSell, enableLaunder)
             table.insert(componentTable, ZO_MODE_STORE_LAUNDER)
         end
 
-        STORE_WINDOW_GAMEPAD:SetActiveComponents(componentTable)
+        STORE_WINDOW_GAMEPAD:SetActiveComponents(componentTable, "fenceTextSearch")
 
         SCENE_MANAGER:Show(self.sceneName)
     end
+end
+
+function ZO_Fence_Gamepad:OnClosed()
+    TEXT_SEARCH_MANAGER:DeactivateTextSearch("fenceTextSearch")
 end
 
 function ZO_Fence_Gamepad:OnSellSuccess()

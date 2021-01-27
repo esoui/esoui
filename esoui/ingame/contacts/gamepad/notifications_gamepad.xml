@@ -145,6 +145,14 @@
             </OnInitialized>
         </Control>
 
+        <Control name="ZO_GamepadNotificationsPointsResetRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
+            </OnInitialized>
+        </Control>
+
         <TopLevelControl name="ZO_GamepadNotifications" hidden="true" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_GamepadNotifications_OnInitialized(self)

@@ -58,8 +58,7 @@
                 <Button name="$(parent)Ability" inherits="ZO_CampaignBonuses_AbilitySlot">
                     <Anchor point="LEFT" offsetX="95" />
 
-                    <MouseButton button="1" enabled="false" />
-                    <MouseButton button="2" enabled="false" />
+                    <MouseButton button="LEFT" enabled="false" />
                 </Button>
 
                 <Label name="$(parent)Name" inherits="ZO_CampaignBonusesRowLabel">

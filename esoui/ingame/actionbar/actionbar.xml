@@ -105,10 +105,9 @@
 
                 <Texture name="$(parent)Icon">
                     <Dimensions x="ZO_GAMEPAD_ACTION_BUTTON_SIZE" y="ZO_GAMEPAD_ACTION_BUTTON_SIZE" />
-                    <Anchor point="CENTER" relativeTo="$(parent)FlipCard" />
                 </Texture>
                         
-                <Texture name="$(parent)CooldownIcon" hidden="false" />
+                <Texture name="$(parent)CooldownIcon" hidden="true" />
 
                 <Label name="$(parent)ButtonText" font="ZoFontGamepad18">
                     <!-- Setting the width back to 0 makes it use the suggested width based on the text rendering -->
@@ -149,8 +148,6 @@
                 <Texture name="$(parent)CooldownCompleteAnimation" inherits="ZO_ActionButton_FlipCardControl" textureFile="EsoUI/Art/ActionBar/coolDown_completeEFX.dds" blendMode="ADD" tier="HIGH" hidden="true" />
                 <Texture name="$(parent)CooldownEdge" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_QuickslotFill.dds" level="2" hidden="true">
                     <Dimensions y="8" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Icon" />
                 </Texture>
 
                 <Label name="$(parent)ButtonText" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" tier="HIGH" verticalAlignment="TOP" />

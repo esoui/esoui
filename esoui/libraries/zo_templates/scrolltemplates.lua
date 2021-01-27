@@ -15,6 +15,7 @@ local NO_DATA_CONTROL = nil
 local RESELECTING_DURING_REBUILD = true
 local NOT_RESELECTING_DURING_REBUILD = false
 local ANIMATE_INSTANTLY = true
+local DONT_ANIMATE_INSTANTLY = false
 
 ZO_SCROLL_LIST_OPERATION_ADVANCE_CURSOR = "advance_cursor"
 ZO_SCROLL_LIST_OPERATION_LINE_BREAK = "line_break"
@@ -521,8 +522,11 @@ function ZO_Scroll_SetScrollToRealOffsetAccountingForGradients(self, finalTotalH
         finalVerticalOffset = finalVerticalOffset - topGradientHeight * 0.5
     end
     finalVerticalOffset = zo_clamp(finalVerticalOffset, 0, finalVerticalExtents)
-    local DONT_ANIMATE_INSTANTLY = false
-    SetScrollOffset(self, finalVerticalOffset, DONT_ANIMATE_INSTANTLY, durationMS)
+    if durationMS == 0 then
+        SetScrollOffset(self, finalVerticalOffset, ANIMATE_INSTANTLY)
+    else
+        SetScrollOffset(self, finalVerticalOffset, DONT_ANIMATE_INSTANTLY, durationMS)
+    end
 end
 
 --Scroll update functions
@@ -1266,7 +1270,6 @@ local function RemoveAnimationOnControl(control, animationFieldName, animateInst
 end
 
 local function HighlightControl(self, control)
-    local DONT_ANIMATE_INSTANTLY = false
     PlayAnimationOnControl(control, self.highlightTemplate, "HighlightAnimation", DONT_ANIMATE_INSTANTLY, self.overrideHighlightEndAlpha)
 
     self.highlightedControl = control

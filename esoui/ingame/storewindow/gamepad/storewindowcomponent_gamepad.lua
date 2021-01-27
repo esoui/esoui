@@ -1,18 +1,16 @@
 --Gamepad Store Component
 ---------------------------
 
-ZO_GamepadStoreComponent = ZO_Object:Subclass()
-
-function ZO_GamepadStoreComponent:New(...)
-    local component = ZO_Object.New(self)
-    component:Initialize(...)
-    return component
-end
+ZO_GamepadStoreComponent = ZO_InitializingObject:Subclass()
 
 function ZO_GamepadStoreComponent:Initialize(control, storeMode, tabText)
     self.control = control
     self.storeMode = storeMode
     self.tabText = tabText
+end
+
+function ZO_GamepadStoreComponent:SetSearchContext(context)
+    self.searchContext = context
 end
 
 function ZO_GamepadStoreComponent:Refresh()
@@ -25,7 +23,7 @@ end
 
 function ZO_GamepadStoreComponent:Show()
     SCENE_MANAGER:AddFragment(self.fragment)
-    if self.keybindStripDescriptor then
+    if self.keybindStripDescriptor and not STORE_WINDOW_GAMEPAD:IsHeaderActive() then
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     end
 end
@@ -62,19 +60,41 @@ ZO_STORE_FORCE_VALID_PRICE = true
 
 ZO_GamepadStoreListComponent = ZO_GamepadStoreComponent:Subclass()
 
-function ZO_GamepadStoreListComponent:New(...)
-    return ZO_GamepadStoreComponent.New(self, ...)
-end
-
 function ZO_GamepadStoreListComponent:Initialize(scene, storeMode, tabText, overrideTemplate, overrideHeaderTemplateSetupFunction)
+    self:SetSearchContext("storeTextSearch")
     self.list = self:CreateItemList(scene, storeMode, overrideTemplate, overrideHeaderTemplateSetupFunction)
+    self.list:SetSearchContext(self.searchContext)
     self.list:UpdateList()
     local control = self.list:GetControl()
     ZO_GamepadStoreComponent.Initialize(self, control, storeMode, tabText)
 end
 
+function ZO_GamepadStoreListComponent:SetSearchContext(context)
+    ZO_GamepadStoreComponent.SetSearchContext(self, context)
+    if self.list then
+        self.list:SetSearchContext(context)
+    end
+end
+
 function ZO_GamepadStoreListComponent:Refresh()
     self.list:UpdateList()
+
+    if self.isCurrentSelectionDirty then
+        if self.list:IsEmpty() then
+            STORE_WINDOW_GAMEPAD:RequestEnterHeader()
+        else
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+        self.isCurrentSelectionDirty = nil
+    end
+end
+
+function ZO_GamepadStoreListComponent:AddKeybinds()
+    assert(false) -- To be overriden
+end
+
+function ZO_GamepadStoreListComponent:RemoveKeybinds()
+    assert(false) -- To be overriden
 end
 
 function ZO_GamepadStoreListComponent:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
@@ -121,9 +141,11 @@ function ZO_GamepadStoreListComponent:CreateItemList(scene, storeMode, overrideT
     ZO_GamepadStoreList.SetMode(list, storeMode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction)
     list.AddItems = ZO_GamepadStoreList.AddItems
     list.UpdateList = ZO_GamepadStoreList.UpdateList
+    list.SetSearchContext = ZO_GamepadStoreList.SetSearchContext
+    list:SetDirectionalInputEnabled(false)
 
-    list:SetOnSelectedDataChangedCallback(function(list, selectedData)
-        if list:IsActive() then
+    list:SetOnSelectedDataChangedCallback(function(currentList, selectedData)
+        if currentList:IsActive() then
             self:OnSelectedItemChanged(selectedData)
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindButton)
         end

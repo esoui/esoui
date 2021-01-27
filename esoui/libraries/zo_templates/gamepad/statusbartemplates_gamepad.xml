@@ -270,5 +270,63 @@
                 <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium" />
             </Controls>
         </Control>
+
+        <Control name="ZO_StableTrainingBar_Gamepad" inherits="ZO_StableAttributeBar" virtual="true">
+            <OnInitialized>
+                ZO_StableTrainingBar_Gamepad:Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Value" override="true" font="ZoFontGamepad34"/>
+                <Control name="$(parent)StatusBar" override="true">
+                    <Controls>
+                        <StatusBar name="$(parent)Bar" inherits="ZO_GamepadArrowStatusBarWithBGMedium">
+                            <Anchor point="LEFT"/>
+                            <Anchor point="RIGHT" offsetX="-10"/>
+                            <OnInitialized>
+                                self.gloss = self:GetNamedChild("Gloss")
+                            </OnInitialized>
+                        </StatusBar>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Texture name="ZO_ChampionSkillBarNotch_Gamepad" layer="OVERLAY" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_frame.dds" virtual="true">
+            <Dimensions x="5" />
+            <!-- mirrored on X axis-->
+            <TextureCoords left="0.90625" top="0.3125" right="0.6875" bottom="0.625" />
+        </Texture>
+
+        <Control name="ZO_ChampionSkillBar_Gamepad" virtual="true">
+            <Dimensions y="22"/> <!-- width set dynamically -->
+            <OnInitialized>
+                zo_mixin(self, ZO_ChampionSkillBar_Gamepad)
+                self:Initialize()
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)MinResult" horizontalAlignment="RIGHT" font="ZoFontGamepad34">
+                    <Dimensions x="15" /> <!-- only need space for 1 digit atm -->
+                    <Anchor point="LEFT" />
+                </Label>
+                <Label name="$(parent)MaxResult" horizontalAlignment="LEFT" font="ZoFontGamepad34">
+                    <Dimensions x="50" />
+                    <Anchor point="RIGHT" />
+                </Label>
+                <Scroll name="$(parent)Mask">
+                    <!-- Anchors set dynamically -->
+                    <Controls>
+                        <StatusBar name="$(parent)Bar" inherits="ZO_GamepadStatusBarMedium">
+                            <Dimensions y="22" />
+                            <Anchor point="LEFT" relativeTo="$(grandparent)MinResult" relativePoint="RIGHT" offsetX="10" />
+                            <Anchor point="RIGHT" relativeTo="$(grandparent)MaxResult" relativePoint="LEFT" offsetX="-10" />
+                        </StatusBar>
+                    </Controls>
+                </Scroll>
+                <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MaskBar" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)MaskBar" />
+                </Control>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

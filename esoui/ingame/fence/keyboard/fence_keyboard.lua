@@ -20,11 +20,11 @@ function ZO_Fence_Keyboard:Initialize(control)
 
     -- Create scene
     FENCE_SCENE = ZO_InteractScene:New("fence_keyboard", SCENE_MANAGER, STORE_INTERACTION)
-    FENCE_SCENE:RegisterCallback("StateChange",   
+    FENCE_SCENE:RegisterCallback("StateChange",
         function(oldState, newState)
-            if(newState == SCENE_SHOWING) then
+            if newState == SCENE_SHOWING then
                 self.modeBar:SelectFragment(SI_STORE_MODE_SELL)
-            elseif(newState == SCENE_HIDDEN) then
+            elseif newState == SCENE_HIDDEN then
                 self.mode = nil
                 ZO_InventorySlot_RemoveMouseOverKeybinds()
                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -36,7 +36,7 @@ function ZO_Fence_Keyboard:Initialize(control)
     self:InitializeModeBar()
 
     local lastUpdateSeconds = 0
-    local function OnUpdate(control, currentFrameTimeSeconds)
+    local function OnUpdate(currentControl, currentFrameTimeSeconds)
         if currentFrameTimeSeconds - lastUpdateSeconds > 1 then
             self:RefreshFooter()
             lastUpdateSeconds = currentFrameTimeSeconds
@@ -60,7 +60,9 @@ function ZO_Fence_Keyboard:InitializeModeBar(enableSell, enableLaunder)
             clickSound = clickSound,
             callback = function()
                 TriggerTutorial(tutorialTrigger)
-                if (additionalCallback) then additionalCallback() end
+                if additionalCallback then
+                    additionalCallback()
+                end
             end
         }
     end
@@ -70,7 +72,7 @@ function ZO_Fence_Keyboard:InitializeModeBar(enableSell, enableLaunder)
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
         {
             name = GetString(SI_ITEM_ACTION_STACK_ALL),
-            keybind = "UI_SHORTCUT_STACK_ALL",
+            keybind = "UI_SHORTCUT_QUINARY",
             callback = function()
                 StackBag(BAG_BACKPACK)
             end,
@@ -106,20 +108,28 @@ end
 ---- Callbacks
 --]]
 
-function ZO_Fence_Keyboard:OnOpened(enableSell, enableLaunder)
-    if not IsInGamepadPreferredMode() then
-        self:InitializeModeBar(enableSell, enableLaunder)
-        self.mode = enableSell and ZO_MODE_STORE_SELL_STOLEN or ZO_MODE_STORE_LAUNDER
-		SCENE_MANAGER:Show("fence_keyboard")
-	end
-end
+do
+    local INVENTORY_TYPE_LIST = { INVENTORY_BACKPACK }
+    function ZO_Fence_Keyboard:OnOpened(enableSell, enableLaunder)
+        if not IsInGamepadPreferredMode() then
+            PLAYER_INVENTORY:SetContextForInventories("fenceTextSearch", INVENTORY_TYPE_LIST)
+            TEXT_SEARCH_MANAGER:ActivateTextSearch("fenceTextSearch")
+            self:InitializeModeBar(enableSell, enableLaunder)
+            self.mode = enableSell and ZO_MODE_STORE_SELL_STOLEN or ZO_MODE_STORE_LAUNDER
+            SCENE_MANAGER:Show("fence_keyboard")
+        end
+    end
 
-function ZO_Fence_Keyboard:OnClosed()
-    SCENE_MANAGER:Hide("fence_keyboard")
-    ZO_Dialogs_ReleaseDialog("CANT_BUYBACK_FROM_FENCE")
-    ZO_PlayerInventorySortByPriceName:SetText(GetString(SI_INVENTORY_SORT_TYPE_PRICE))
-    ZO_PlayerInventoryInfoBarAltFreeSlots:SetHidden(true)
-    ZO_PlayerInventoryInfoBarAltMoney:SetHidden(true)
+    function ZO_Fence_Keyboard:OnClosed()
+        TEXT_SEARCH_MANAGER:DeactivateTextSearch("fenceTextSearch")
+        local REMOVE_CONTEXT = nil
+        PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
+        SCENE_MANAGER:Hide("fence_keyboard")
+        ZO_Dialogs_ReleaseDialog("CANT_BUYBACK_FROM_FENCE")
+        ZO_PlayerInventorySortByPriceName:SetText(GetString(SI_INVENTORY_SORT_TYPE_PRICE))
+        ZO_PlayerInventoryInfoBarAltFreeSlots:SetHidden(true)
+        ZO_PlayerInventoryInfoBarAltMoney:SetHidden(true)
+    end
 end
 
 function ZO_Fence_Keyboard:OnFenceStateUpdated(totalSells, sellsUsed, totalLaunders, laundersUsed)
@@ -152,7 +162,7 @@ function ZO_Fence_Keyboard:OnEnterLaunder(totalLaunders, laundersUsed)
     self:UpdateTransactionLabel(totalLaunders, laundersUsed, SI_FENCE_LAUNDER_LIMIT, SI_FENCE_LAUNDER_LIMIT_REACHED)
 
     local function ColorCost(control, data, scrollList)
-        priceControl = control:GetNamedChild("SellPrice")
+        local priceControl = control:GetNamedChild("SellPrice")
         ZO_CurrencyControl_SetCurrencyData(priceControl, CURT_MONEY, data.stackLaunderPrice, CURRENCY_DONT_SHOW_ALL, (GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) < data.stackLaunderPrice))
         ZO_CurrencyControl_SetCurrency(priceControl, ZO_KEYBOARD_CURRENCY_OPTIONS)
     end

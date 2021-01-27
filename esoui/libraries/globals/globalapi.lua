@@ -1,5 +1,7 @@
 -- Cached versions of the lua library functions
 
+ZO_TWO_PI = math.pi * 2
+
 zo_strlower         = LocaleAwareToLower
 zo_strupper         = LocaleAwareToUpper
 
@@ -139,7 +141,7 @@ function zo_frameDeltaNormalizedForTargetFramerate()
 end
 
 function zo_deltaNormalizedLerp(from, to, amount)
-    return zo_lerp(from, to, zo_min(zo_frameDeltaNormalizedForTargetFramerate() * amount, 1.0))
+    return zo_lerp(from, to, 1 - math.pow(1 - amount, GetFrameDeltaNormalizedForTargetFramerate()))
 end
 
 function zo_percentBetween(startValue, endValue, value)

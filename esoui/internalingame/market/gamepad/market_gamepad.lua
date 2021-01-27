@@ -1050,10 +1050,11 @@ do
             freeTrialTile:SetPurchaseCheckFunction(IsOnESOPlusFreeTrial)
             freeTrialTile:Show()
 
-            local entryInfo = {
-                            object = freeTrialTile,
-                            control = freeTrialTile:GetControl(),
-                        }
+            local entryInfo =
+            {
+                object = freeTrialTile,
+                control = freeTrialTile:GetControl(),
+            }
             table.insert(esoPlusMembershipTiles, entryInfo)
         end
 
@@ -1077,10 +1078,11 @@ do
         membershipInfoTile:SetPurchaseCheckFunction(IsFullEsoPlusMember)
         membershipInfoTile:Show()
 
-        local entryInfo = {
-                        object = membershipInfoTile,
-                        control = membershipInfoTile:GetControl(),
-                    }
+        local entryInfo =
+        {
+            object = membershipInfoTile,
+            control = membershipInfoTile:GetControl(),
+        }
         table.insert(esoPlusMembershipTiles, entryInfo)
 
         local numCategories = GetNumMarketProductCategories(MARKET_DISPLAY_GROUP_CROWN_STORE)
@@ -1096,14 +1098,34 @@ do
                         local marketProductPresentations = { self:GetCategoryProductIds(categoryIndex, subcategoryIndex, DoesMarketProductHaveEsoPlusPrice) }
 
                         for index, productData in ipairs(marketProductPresentations) do
-                            local marketProduct = self.currentCategoryMarketProductPool:AcquireObject()
-                            marketProduct:Show(productData)
-
+                            local shouldAddProduct = true
                             if productData:IsLimitedTimeProduct() then
-                                self:AddMarketProductEntryToLabeledGroupTable(self.limitedTimedOfferProducts, marketProduct)
+                                for index, value in ipairs(self.limitedTimedOfferProducts) do
+                                    if value.object.productData and value.object.productData:GetId() == productData:GetId() then
+                                        shouldAddProduct = false
+                                        break
+                                    end
+                                end
+                                if shouldAddProduct then
+                                    local marketProduct = self.currentCategoryMarketProductPool:AcquireObject()
+                                    marketProduct:Show(productData)
+                                    self:AddMarketProductEntryToLabeledGroupTable(self.limitedTimedOfferProducts, marketProduct)
+                                end
                             elseif productData:IsFeatured() then
-                                self:AddMarketProductEntryToLabeledGroupTable(self.featuredProducts, marketProduct)
+                                for index, value in ipairs(self.featuredProducts) do
+                                    if value.object.productData and value.object.productData:GetId() == productData:GetId() then
+                                        shouldAddProduct = false
+                                        break
+                                    end
+                                end
+                                if shouldAddProduct then
+                                    local marketProduct = self.currentCategoryMarketProductPool:AcquireObject()
+                                    marketProduct:Show(productData)
+                                    self:AddMarketProductEntryToLabeledGroupTable(self.featuredProducts, marketProduct)
+                                end
                             else
+                                local marketProduct = self.currentCategoryMarketProductPool:AcquireObject()
+                                marketProduct:Show(productData)
                                 self:AddMarketProductEntryToLabeledGroupTable(self:FindOrCreateCategoryLabeledGroupTable(categoryIndex, formattedBaseName), marketProduct)
                             end
                         end
@@ -1117,16 +1139,16 @@ do
 
         local labeledGroupTables =
         {
-            {name = GetString(SI_MARKET_ESO_PLUS_MEMBERSHIP_CATEGORY), marketProducts = esoPlusMembershipTiles},
-            {name = GetString(SI_MARKET_LIMITED_TIME_OFFER_CATEGORY), marketProducts = self.limitedTimedOfferProducts},
-            {name = GetString(SI_MARKET_FEATURED_CATEGORY), marketProducts = self.featuredProducts},
+            { name = GetString(SI_MARKET_ESO_PLUS_MEMBERSHIP_CATEGORY), marketProducts = esoPlusMembershipTiles },
+            { name = GetString(SI_MARKET_LIMITED_TIME_OFFER_CATEGORY), marketProducts = self.limitedTimedOfferProducts },
+            { name = GetString(SI_MARKET_FEATURED_CATEGORY), marketProducts = self.featuredProducts },
         }
 
         local sortedCategoryGroupTables = CreateSortedSubcategoryList(self.categoryLabeledGroupTableMap)
         for index, groupTableInfo in ipairs(sortedCategoryGroupTables) do
             local groupTable = groupTableInfo.groupTable
             self:SortMarketProductLabeledGroupTable(groupTable)
-            table.insert(labeledGroupTables, {name = groupTableInfo.displayName, marketProducts = groupTable})
+            table.insert(labeledGroupTables, { name = groupTableInfo.displayName, marketProducts = groupTable })
         end
 
         self:LayoutMarketProducts(labeledGroupTables)

@@ -3,7 +3,6 @@ local DATA_TYPE_COLLECTIBLE_ITEM = 2
 local DATA_TYPE_QUICKSLOT_QUEST_ITEM = 3
 
 local PLAY_ANIMATION = true
-local NO_ANIMATION = false
 
 local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
 
@@ -13,54 +12,102 @@ local LIST_ENTRY_HEIGHT = 52
 --Quickslot Manager
 -------------------
 
-ZO_QuickslotManager = ZO_Object:Subclass()
+ZO_QuickslotManager = ZO_InitializingObject:Subclass()
 
-function ZO_QuickslotManager:New(container)
-    local manager = ZO_Object.New(self)
+function ZO_QuickslotManager:Initialize(container)
+    self.container = container
+    self.money = container:GetNamedChild("InfoBarMoney")
 
-    manager.container = container
-    manager.money = container:GetNamedChild("InfoBarMoney")
+    self.activeTab = container:GetNamedChild("TabsActive")
+    self.freeSlotsLabel = container:GetNamedChild("InfoBarFreeSlots")
 
-    manager.activeTab = container:GetNamedChild("TabsActive")
-    manager.freeSlotsLabel = container:GetNamedChild("InfoBarFreeSlots")
+    self.list = container:GetNamedChild("List")
+    ZO_ScrollList_AddDataType(self.list, DATA_TYPE_QUICKSLOT_ITEM, "ZO_PlayerInventorySlot", LIST_ENTRY_HEIGHT, function(control, data) self:SetUpQuickSlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
+    ZO_ScrollList_AddDataType(self.list, DATA_TYPE_COLLECTIBLE_ITEM, "ZO_CollectionsSlot", LIST_ENTRY_HEIGHT, function(control, data) self:SetUpCollectionSlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
+    ZO_ScrollList_AddDataType(self.list, DATA_TYPE_QUICKSLOT_QUEST_ITEM, "ZO_PlayerInventorySlot", LIST_ENTRY_HEIGHT, function(control, data) self:SetUpQuestItemSlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
 
-    manager.list = container:GetNamedChild("List")
-    ZO_ScrollList_AddDataType(manager.list, DATA_TYPE_QUICKSLOT_ITEM, "ZO_PlayerInventorySlot", LIST_ENTRY_HEIGHT, function(control, data) manager:SetUpQuickSlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
-    ZO_ScrollList_AddDataType(manager.list, DATA_TYPE_COLLECTIBLE_ITEM, "ZO_CollectionsSlot", LIST_ENTRY_HEIGHT, function(control, data) manager:SetUpCollectionSlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
-    ZO_ScrollList_AddDataType(manager.list, DATA_TYPE_QUICKSLOT_QUEST_ITEM, "ZO_PlayerInventorySlot", LIST_ENTRY_HEIGHT, function(control, data) manager:SetUpQuestItemSlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
+    local quickslotFilterTargetDescriptor =
+    {
+        [BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT] =
+        {
+            searchFilterList =
+            {
+                BACKGROUND_LIST_FILTER_TYPE_NAME,
+            },
+            primaryKeys =
+            {
+                BAG_BACKPACK,
+            }
+        },
+        [BACKGROUND_LIST_FILTER_TARGET_QUEST_ITEM_ID] =
+        {
+            searchFilterList =
+            {
+                BACKGROUND_LIST_FILTER_TYPE_NAME,
+            },
+            primaryKeys = ZO_FilterTargetDescriptor_GetQuestItemIdList,
+        },
+        [BACKGROUND_LIST_FILTER_TARGET_COLLECTIBLE_ID] =
+        {
+            searchFilterList =
+            {
+                BACKGROUND_LIST_FILTER_TYPE_NAME,
+            },
+            primaryKeys = function()
+                local collectibleIdList = {}
+                local NO_CATEGORY_FILTERS = nil
+                local dataList = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects(NO_CATEGORY_FILTERS, { ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable })
+                for _, data in ipairs(dataList) do
+                    table.insert(collectibleIdList, data.collectibleId)
+                end
+                return collectibleIdList
+            end,
+        },
+    }
+    TEXT_SEARCH_MANAGER:SetupContextTextSearch("quickslotTextSearch", quickslotFilterTargetDescriptor)
 
-    manager.searchBox = container:GetNamedChild("SearchFiltersTextSearchBox");
-    manager.quickSlotSearch = ZO_StringSearch:New(ZO_TEXT_SEARCH_CACHE_DATA)
-    manager.quickSlotSearch:AddProcessor(ZO_TEXT_SEARCH_TYPE_INVENTORY, ZO_ItemFilterUtils.TextSearchProcessInventoryItem)
-    manager.quickSlotSearch:AddProcessor(ZO_TEXT_SEARCH_TYPE_QUEST_ITEM, ZO_ItemFilterUtils.TextSearchProcessQuestItem)
-    manager.quickSlotSearch:AddProcessor(ZO_TEXT_SEARCH_TYPE_QUEST_TOOL, ZO_ItemFilterUtils.TextSearchProcessQuestTool)
-    manager.quickSlotSearch:AddProcessor(ZO_TEXT_SEARCH_TYPE_COLLECTIBLE, ZO_ItemFilterUtils.TextSearchProcessCollectible)
+    self.searchBox = container:GetNamedChild("SearchFiltersTextSearchBox");
 
-    manager.sortHeadersControl = container:GetNamedChild("SortBy")
-    manager.sortHeaders = ZO_SortHeaderGroup:New(manager.sortHeadersControl, true)
+    local function OnTextSearchTextChanged(editBox)
+        ZO_EditDefaultText_OnTextChanged(editBox)
+        TEXT_SEARCH_MANAGER:SetSearchText("quickslotTextSearch", editBox:GetText())
+    end
 
-    manager.circle = ZO_QuickSlotCircle
-    manager.quickSlots = {}
+    self.searchBox:SetHandler("OnTextChanged", OnTextSearchTextChanged)
 
-    manager.tabs = container:GetNamedChild("Tabs")
+    local SUPPRESS_TEXT_CHANGED_CALLBACK = true
+    local function OnListTextFilterComplete()
+        self.searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("quickslotTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
+        self:UpdateList()
+    end
 
-    manager.quickslotFilters = {}
+    TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", OnListTextFilterComplete)
 
-    manager:InsertCollectibleCategories()
+    self.sortHeadersControl = container:GetNamedChild("SortBy")
+    self.sortHeaders = ZO_SortHeaderGroup:New(self.sortHeadersControl, true)
 
-    table.insert(manager.quickslotFilters, manager:CreateNewTabFilterData(ITEMFILTERTYPE_QUEST_QUICKSLOT,
+    self.circle = ZO_QuickSlotCircle
+    self.quickSlots = {}
+
+    self.tabs = container:GetNamedChild("Tabs")
+
+    self.quickslotFilters = {}
+
+    self:InsertCollectibleCategories()
+
+    table.insert(self.quickslotFilters, self:CreateNewTabFilterData(ITEMFILTERTYPE_QUEST_QUICKSLOT,
                           GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUEST_QUICKSLOT),
                           "EsoUI/Art/Inventory/inventory_tabIcon_quest_up.dds",
                           "EsoUI/Art/Inventory/inventory_tabIcon_quest_down.dds",
                           "EsoUI/Art/Inventory/inventory_tabIcon_quest_over.dds"))
 
-    table.insert(manager.quickslotFilters, manager:CreateNewTabFilterData(ITEMFILTERTYPE_QUICKSLOT,
+    table.insert(self.quickslotFilters, self:CreateNewTabFilterData(ITEMFILTERTYPE_QUICKSLOT,
                           GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUICKSLOT),
                           "EsoUI/Art/Inventory/inventory_tabIcon_items_up.dds",
                           "EsoUI/Art/Inventory/inventory_tabIcon_items_down.dds",
                           "EsoUI/Art/Inventory/inventory_tabIcon_items_over.dds"))
 
-    table.insert(manager.quickslotFilters, manager:CreateNewTabFilterData(ITEMFILTERTYPE_ALL,
+    table.insert(self.quickslotFilters, self:CreateNewTabFilterData(ITEMFILTERTYPE_ALL,
                           GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL),
                           "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds",
                           "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds",
@@ -76,47 +123,47 @@ function ZO_QuickslotManager:New(container)
         animationDuration = 180,
     }
 
-    ZO_MenuBar_SetData(manager.tabs, menuBarData)
+    ZO_MenuBar_SetData(self.tabs, menuBarData)
 
-    for _, data in ipairs(manager.quickslotFilters) do
-        ZO_MenuBar_AddButton(manager.tabs, data)
+    for _, data in ipairs(self.quickslotFilters) do
+        ZO_MenuBar_AddButton(self.tabs, data)
     end
 
-    ZO_MenuBar_SelectDescriptor(manager.tabs, ITEMFILTERTYPE_QUICKSLOT)
+    ZO_MenuBar_SelectDescriptor(self.tabs, ITEMFILTERTYPE_QUICKSLOT)
 
     local function OnSortHeaderClicked(key, order)
-        manager.currentFilter.sortKey = key
-        manager.currentFilter.sortOrder = order
-        manager:ApplySort()
+        self.currentFilter.sortKey = key
+        self.currentFilter.sortOrder = order
+        self:ApplySort()
     end
 
-    manager.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
-    manager.sortHeaders:AddHeadersFromContainer()
-    manager.sortHeaders:SelectHeaderByKey("name")
+    self.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
+    self.sortHeaders:AddHeadersFromContainer()
+    self.sortHeaders:SelectHeaderByKey("name")
 
     local function RefreshQuickslotWindow()
         if not container:IsHidden() then
-            manager:UpdateList()
-            manager:UpdateFreeSlots()
+            self:UpdateList()
+            self:UpdateFreeSlots()
         end
     end
 
     local function OnMoneyUpdated(eventCode, newMoney, oldMoney, reason)
-        manager:RefreshCurrency(newMoney)
+        self:RefreshCurrency(newMoney)
     end
 
     local function OnQuickSlotUpdated(eventCode, physicalSlot)
-        manager:DoQuickSlotUpdate(physicalSlot, PLAY_ANIMATION)
+        self:DoQuickSlotUpdate(physicalSlot, PLAY_ANIMATION)
     end
 
     local function UpdateAllQuickSlots(eventCode)
-        for physicalSlot in pairs(manager.quickSlots) do
-            manager:DoQuickSlotUpdate(physicalSlot)
+        for physicalSlot in pairs(self.quickSlots) do
+            self:DoQuickSlotUpdate(physicalSlot)
         end
     end
 
     local function HandleInventorySlotPickup(bagId, slotId)
-        manager:ShowAppropriateQuickSlotDropCallouts(bagId, slotId)
+        self:ShowAppropriateQuickSlotDropCallouts(bagId, slotId)
     end
 
     local function HandleActionSlotPickup(slotType, sourceSlot, itemId, itemQualityId, itemRequiredLevel, itemInstanceData)
@@ -124,29 +171,29 @@ function ZO_QuickslotManager:New(container)
         local isItem = slotType == ACTION_TYPE_ITEM
 
         if isItem then
-            for slotNum, quickSlot in pairs(manager.quickSlots) do
+            for slotNum, quickSlot in pairs(self.quickSlots) do
                 local validInSlot = IsValidItemForSlotByItemInfo(itemId, itemQualityId, itemRequiredLevel, itemInstanceData, slotNum)
                 if validInSlot then
-                    manager:ShowSlotDropCallout(quickSlot:GetNamedChild("DropCallout"), metEquipRequirements)
+                    self:ShowSlotDropCallout(quickSlot:GetNamedChild("DropCallout"), metEquipRequirements)
                 end
             end
         end
     end
 
     local function HandleCollectibleSlotPickup(collectibleId)
-        for slotNum, quickSlot in pairs(manager.quickSlots) do
+        for slotNum, quickSlot in pairs(self.quickSlots) do
             local validInSlot = IsValidCollectibleForSlot(collectibleId, slotNum)
             if validInSlot then
-                manager:ShowSlotDropCallout(quickSlot:GetNamedChild("DropCallout"), true)
+                self:ShowSlotDropCallout(quickSlot:GetNamedChild("DropCallout"), true)
             end
         end
     end
 
     local function HandleQuestItemSlotPickup(questItemId)
-        for actionSlotIndex, quickSlot in pairs(manager.quickSlots) do
+        for actionSlotIndex, quickSlot in pairs(self.quickSlots) do
             local validInSlot = IsValidQuestItemForSlot(questItemId, actionSlotIndex)
             if validInSlot then
-                manager:ShowSlotDropCallout(quickSlot:GetNamedChild("DropCallout"), true)
+                self:ShowSlotDropCallout(quickSlot:GetNamedChild("DropCallout"), true)
             end
         end
     end
@@ -164,20 +211,20 @@ function ZO_QuickslotManager:New(container)
     end
 
     local function HandleCursorCleared()
-        manager:HideAllQuickSlotDropCallouts()
+        self:HideAllQuickSlotDropCallouts()
     end
 
-    manager:RefreshCurrency(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
+    self:RefreshCurrency(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
 
-    manager:CreateQuickSlots()
+    self:CreateQuickSlots()
     UpdateAllQuickSlots()
 
     local function HandleInventoryChanged()
-        for slotNum, quickslot in pairs(manager.quickSlots) do
+        for slotNum, quickslot in pairs(self.quickSlots) do
             local slotType = GetSlotType(slotNum)
             if slotType == ACTION_TYPE_ITEM then
                 local itemCount = GetSlotItemCount(slotNum)
-                manager:SetupQuickslotCount(quickslot, itemCount)
+                self:SetupQuickslotCount(quickslot, itemCount)
             end
         end
 
@@ -185,13 +232,13 @@ function ZO_QuickslotManager:New(container)
     end
 
     local function RefreshSlotLocked(slotIndex, locked)
-        local scrollData = ZO_ScrollList_GetDataList(manager.list)
+        local scrollData = ZO_ScrollList_GetDataList(self.list)
         for i = 1, #scrollData do
             local dataEntry = scrollData[i]
             local data = dataEntry.data
             if data.slotIndex == slotIndex then
                 data.locked = locked
-                ZO_ScrollList_RefreshVisible(manager.list)
+                ZO_ScrollList_RefreshVisible(self.list)
                 break
             end
         end
@@ -210,7 +257,7 @@ function ZO_QuickslotManager:New(container)
     end
 
     local function HandleCooldownUpdates()
-        ZO_ScrollList_RefreshVisible(manager.list, nil, ZO_InventorySlot_UpdateCooldowns)
+        ZO_ScrollList_RefreshVisible(self.list, nil, ZO_InventorySlot_UpdateCooldowns)
     end
 
     ZO_QuickSlot:RegisterForEvent(EVENT_MONEY_UPDATE, OnMoneyUpdated)
@@ -225,26 +272,29 @@ function ZO_QuickslotManager:New(container)
     ZO_QuickSlot:RegisterForEvent(EVENT_INVENTORY_SLOT_UNLOCKED, HandleInventorySlotUnlocked)
     ZO_QuickSlot:RegisterForEvent(EVENT_ACTION_UPDATE_COOLDOWNS, HandleCooldownUpdates)
 
-    manager:InitializeKeybindDescriptor()
+    self:InitializeKeybindDescriptor()
 
-    manager.quickSlotState = false
+    self.quickSlotState = false
 
     QUICKSLOT_FRAGMENT = ZO_FadeSceneFragment:New(ZO_QuickSlot)
     QUICKSLOT_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
                                                             if newState == SCENE_FRAGMENT_SHOWN then
-                                                                manager:UpdateList()
-                                                                manager:UpdateFreeSlots()
+                                                                TEXT_SEARCH_MANAGER:ActivateTextSearch("quickslotTextSearch")
+                                                                self:UpdateList()
+                                                                self:UpdateFreeSlots()
+                                                            elseif newState == SCENE_FRAGMENT_HIDDEN then
+                                                                TEXT_SEARCH_MANAGER:DeactivateTextSearch("quickslotTextSearch")
                                                             end
                                                         end)
 
     QUICKSLOT_CIRCLE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_QuickSlotCircle)
     QUICKSLOT_CIRCLE_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
                                                             if newState == SCENE_FRAGMENT_SHOWN then
-                                                                manager.quickSlotState = true
+                                                                self.quickSlotState = true
                                                             elseif newState == SCENE_FRAGMENT_HIDDEN then
-                                                                manager.quickSlotState = false
+                                                                self.quickSlotState = false
                                                                 -- ensure our keybinds are removed since OnMouseExitQuickSlot may come late
-                                                                KEYBIND_STRIP:RemoveKeybindButtonGroup(manager.keybindStripDescriptor)
+                                                                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                                                             end
                                                         end)
 
@@ -253,8 +303,6 @@ function ZO_QuickslotManager:New(container)
 
     SHARED_INVENTORY:RegisterCallback("FullQuestUpdate", RefreshQuickslotWindow)
     SHARED_INVENTORY:RegisterCallback("SingleQuestUpdate", RefreshQuickslotWindow)
-
-    return manager
 end
 
 function ZO_QuickslotManager:AreQuickSlotsShowing()
@@ -333,9 +381,9 @@ end
 function ZO_QuickslotManager:DoQuickSlotUpdate(physicalSlot, animationOption)
     local quickSlot = self.quickSlots[physicalSlot]
     if quickSlot then
-        local slotType = GetSlotType(physicalSlot)
+        local physicalSlotType = GetSlotType(physicalSlot)
 
-        if slotType == ACTION_TYPE_NOTHING then
+        if physicalSlotType == ACTION_TYPE_NOTHING then
             ZO_ActionSlot_SetupSlot(quickSlot.icon, quickSlot.button, EMPTY_QUICKSLOT_TEXTURE)
             self:SetupQuickslotCount(quickSlot)
         else
@@ -412,16 +460,12 @@ function ZO_QuickslotManager:ChangeFilter(filterData)
     self.sortHeaders:SetHeaderHiddenForKey("age", isNotItemFilter)
 end
 
-function ZO_QuickslotManager:IsItemInTextSearch(itemData)
-    return self.quickSlotSearch:IsMatch(self.cachedSearchText, itemData.searchData)
-end
-
 function ZO_QuickslotManager:ShouldAddItemToList(itemData)
-    return ZO_IsElementInNumericallyIndexedTable(itemData.filterData, ITEMFILTERTYPE_QUICKSLOT) and self:IsItemInTextSearch(itemData)
+    return ZO_IsElementInNumericallyIndexedTable(itemData.filterData, ITEMFILTERTYPE_QUICKSLOT) and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults("quickslotTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
 end
 
 function ZO_QuickslotManager:ShouldAddQuestItemToList(questItemData)
-    return ZO_IsElementInNumericallyIndexedTable(questItemData.filterData, ITEMFILTERTYPE_QUEST_QUICKSLOT) and self:IsItemInTextSearch(questItemData)
+    return ZO_IsElementInNumericallyIndexedTable(questItemData.filterData, ITEMFILTERTYPE_QUEST_QUICKSLOT) and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults("quickslotTextSearch", BACKGROUND_LIST_FILTER_TARGET_QUEST_ITEM_ID, questItemData.questItemId)
 end
 
 local sortKeys =
@@ -463,8 +507,6 @@ function ZO_QuickslotManager:UpdateList()
     local scrollData = ZO_ScrollList_GetDataList(self.list)
     ZO_ScrollList_Clear(self.list)
     ZO_ScrollList_ResetToTop(self.list)
-
-    self.cachedSearchText = self.searchBox:GetText()
 
     local currentFilterType = self.currentFilter.descriptor
     if currentFilterType == ITEMFILTERTYPE_ALL then
@@ -520,8 +562,6 @@ function ZO_QuickslotManager:AppendItemData(scrollData)
                 },
             }
 
-            self.quickSlotSearch.Insert(itemData.searchData)
-
             if self:ShouldAddItemToList(itemData) then
                 table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_QUICKSLOT_ITEM, itemData))
             end
@@ -537,16 +577,14 @@ function ZO_QuickslotManager:AppendCollectiblesData(scrollData, collectibleCateg
         dataObjects = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects({ ZO_CollectibleCategoryData.IsStandardCategory }, { ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable })
     end
 
-    for i, collectibleData in ipairs(dataObjects) do
+    for _, collectibleData in ipairs(dataObjects) do
         collectibleData.searchData =
         {
             type = ZO_TEXT_SEARCH_TYPE_COLLECTIBLE,
             collectibleId = collectibleData.collectibleId,
-        },
+        }
 
-        self.quickSlotSearch.Insert(collectibleData.searchData)
-
-        if self:IsItemInTextSearch(collectibleData) then
+        if TEXT_SEARCH_MANAGER:IsItemInSearchTextResults("quickslotTextSearch", BACKGROUND_LIST_FILTER_TARGET_COLLECTIBLE_ID, collectibleData.collectibleId) then
             table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_COLLECTIBLE_ITEM, collectibleData))
         end
     end
@@ -554,8 +592,8 @@ end
 
 function ZO_QuickslotManager:AppendQuestItemData(scrollData)
     local questCache = SHARED_INVENTORY:GenerateFullQuestCache()
-    for questIndex, questItems in pairs(questCache) do
-        for questItemId, questItemData in pairs(questItems) do
+    for _, questItems in pairs(questCache) do
+        for _, questItemData in pairs(questItems) do
             if questItemData.toolIndex then
                 questItemData.searchData =
                 {
@@ -575,8 +613,6 @@ function ZO_QuickslotManager:AppendQuestItemData(scrollData)
                     index = questItemData.slotIndex,
                 }
             end
-
-            self.quickSlotSearch.Insert(questItemData.searchData)
 
             if self:ShouldAddQuestItemToList(questItemData) then
                 table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_QUICKSLOT_QUEST_ITEM, questItemData))
@@ -722,10 +758,6 @@ end
 -------------------
 -- Global functions
 -------------------
-
-function ZO_QuickSlot_OnSearchTextChanged(editBox)
-    QUICKSLOT_WINDOW:UpdateList()
-end
 
 function ZO_QuickSlot_FilterButtonOnMouseEnter(self)
     ZO_MenuBarButtonTemplate_OnMouseEnter(self)

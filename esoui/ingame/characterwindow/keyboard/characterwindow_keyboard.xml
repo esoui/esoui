@@ -162,7 +162,7 @@
         <TopLevelControl name="ZO_CharacterWindowStats" mouseEnabled="true" hidden="true">
             <Anchor point="TOPLEFT" relativeTo="ZO_CharacterHeaderSectionDivider" relativePoint="TOPRIGHT" />
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_Character" relativePoint="BOTTOMRIGHT" offsetX="20"/>
-            <Dimensions x="298" />
+            <Dimensions x="303" />
             <OnInitialized>
                 ZO_CharacterWindowStats_Initialize(self)
             </OnInitialized>

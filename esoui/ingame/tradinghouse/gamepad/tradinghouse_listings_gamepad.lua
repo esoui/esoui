@@ -126,13 +126,10 @@ function ZO_GamepadTradingHouse_Listings:ShowCancelListingConfirmation(selectedD
     ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(selectedData, "TRADING_HOUSE_CONFIRM_REMOVE_LISTING", selectedData.purchasePrice, selectedData.icon)
 end
 
--- Overriden functions
-
-local SORT_ARROW_UP = "EsoUI/Art/Miscellaneous/list_sortUp.dds"
-local SORT_ARROW_DOWN = "EsoUI/Art/Miscellaneous/list_sortDown.dds"
-
+-- Overridden functions
 function ZO_GamepadTradingHouse_Listings:InitializeKeybindStripDescriptors()
-    self.keybindStripDescriptor = {
+    self.keybindStripDescriptor =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
             name = GetString(SI_GAMEPAD_TRADING_HOUSE_LISTING_REMOVE),
@@ -146,7 +143,6 @@ function ZO_GamepadTradingHouse_Listings:InitializeKeybindStripDescriptors()
                 return postedItem ~= nil
             end,
         },
-
         {
             name = GetString(SI_TRADING_HOUSE_SEARCH_FROM_ITEM),
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -163,11 +159,10 @@ function ZO_GamepadTradingHouse_Listings:InitializeKeybindStripDescriptors()
                 TRADING_HOUSE_GAMEPAD:SearchForItemLink(postedItem.itemLink)
             end,
         },
-
         {
             name = function()
                 local sortTypeText = GetString("SI_TRADINGHOUSELISTINGSORTTYPE", self.currentSortType)
-                local sortIconPath = self.currentSortOrder == ZO_SORT_ORDER_UP and SORT_ARROW_UP or SORT_ARROW_DOWN
+                local sortIconPath = self.currentSortOrder == ZO_SORT_ORDER_UP and ZO_ICON_SORT_ARROW_UP or ZO_ICON_SORT_ARROW_DOWN
                 local sortIconText = zo_iconFormat(sortIconPath, 16, 16)
                 return zo_strformat(SI_GAMEPAD_TRADING_HOUSE_SORT_TIME_PRICE_TOGGLE, sortTypeText, sortIconText)
             end,

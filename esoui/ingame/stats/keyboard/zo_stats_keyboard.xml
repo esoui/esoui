@@ -59,13 +59,23 @@
         </Control>
 
         <Control name="ZO_StatsRow" virtual="true">
-            <Dimensions x="607" y="20"/>
+            <Dimensions x="607" y="24"/>
             <Controls>
                 <Control name="$(parent)Stat1" inherits="ZO_StatsEntry">
                     <Anchor point="LEFT"/>
                 </Control>
                 <Control name="$(parent)Stat2" inherits="ZO_StatsEntry">
                     <Anchor point="RIGHT"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AdvancedStatsDividerEntry" virtual="true">
+            <Dimensions x="295" y="25"/>
+            <Controls>
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" />
                 </Control>
             </Controls>
         </Control>
@@ -314,6 +324,10 @@
         </Control>
 
         <Control name="ZO_StatsActiveEffects" virtual="true" resizeToFitDescendents="true"/>
+
+        <Button name="ZO_AdvancedStatsButton" inherits="ZO_DefaultButton" text="SI_STATS_ADVANCED_ATTRIBUTES" virtual="true">
+            <Dimensions x="220"/>
+        </Button>
         
         <TopLevelControl name="ZO_StatsPanel" inherits="ZO_StatsFootPrint" mouseEnabled="true" hidden="true">
             <OnInitialized>
@@ -364,6 +378,42 @@
                 <Label name="$(parent)AttributesPointerBoxContents" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" text="SI_STATS_SPEND_ATTRIBUTE_POINTS_MESSAGE" horizontalAlignment="CENTER" >
                     <Dimensions x="290"/>
                 </Label>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_AdvancedStatsPanel" mouseEnabled="true" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_StatsPanel" relativePoint="TOPLEFT" />
+            <Dimensions x="295" y="750"/>
+            
+            <OnInitialized>
+                ZO_AdvancedStats_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)AdvancedTitleSection">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                    <Dimensions y="40"/>
+                    <Controls>
+                        <Label name="$(parent)Name" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_STATS_ADVANCED_ATTRIBUTES">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider" >
+                    <Anchor point="TOPLEFT" offsetY="35"/>
+                    <Anchor point="RIGHT" offsetX="-10" constrains="X" />
+                </Control>
+
+                <Control name="$(parent)AdvancedStatList" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AdvancedTitleSection" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="BOTTOMRIGHT" offsetY="-50" />
+                </Control>
+
+                <Control name="$(parent)Close" inherits="ZO_KeybindButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AdvancedStatList" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

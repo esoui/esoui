@@ -70,7 +70,7 @@ end
 
 function ZO_ScrollTooltip_Gamepad:OnScrollExtentsChanged(scroll, horizontalExtents, verticalExtents)
     -- If our height is > 0, and our scroll child is bigger than self (which means it would have to scroll to fit)...
-    self.canScroll = verticalExtents > 0 and self:GetHeight() < self.scrollChild:GetHeight()
+    self.canScroll = verticalExtents > 0 and self:GetHeight() < self.scrollChild:GetHeight() and not zo_floatsAreEqual(self:GetHeight(), self.scrollChild:GetHeight())
     self.scrollIndicator:SetHidden(not self.canScroll)
 
     ZO_UpdateScrollFade(self.useFadeGradient, self.scroll, ZO_SCROLL_DIRECTION_VERTICAL, ZO_GetScrollMaxFadeGradientSize(self))
@@ -121,14 +121,12 @@ function ZO_ScrollTooltip_Gamepad:LayoutTradeItem(tradeType, tradeIndex)
 end
 
 do
-    local RESIZE_UPDATE_SENSITIVITY_LIMIT = .0001
-
     local ANCHORS_TO_BACKGROUND = true
 
     local function ResizingUpdateLoop(control)
         local contentHeight = control.scrollTooltip.scrollChild:GetHeight()
         
-        if zo_abs(contentHeight - control.lastContentHeight) > RESIZE_UPDATE_SENSITIVITY_LIMIT or control.forceResizeUpdate then
+        if not zo_floatsAreEqual(contentHeight, control.lastContentHeight) or control.forceResizeUpdate then
             control.lastContentHeight = contentHeight
             local totalHeight = contentHeight + ZO_GAMEPAD_FLOATING_SCROLL_TOOLTIP_TOP_ICON_PADDING_Y * 2
             control:SetHeight(totalHeight)

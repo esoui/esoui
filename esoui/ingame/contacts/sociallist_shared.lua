@@ -11,29 +11,29 @@ function ZO_SocialList_GetRowColors(data, selected)
 end
 
 function ZO_SocialList_ColorRow(control, data, displayNameTextColor, iconColor, otherTextColor)
-    local displayName = control:GetNamedChild("DisplayName")
-    displayName:SetColor(displayNameTextColor:UnpackRGBA())
+    local displayNameControl = control:GetNamedChild("DisplayName")
+    displayNameControl:SetColor(displayNameTextColor:UnpackRGBA())
 
     if data.hasCharacter then
-        local character = control:GetNamedChild("CharacterName")
-        if character then
-            character:SetColor(otherTextColor:UnpackRGBA())
+        local characterNameLabel = control:GetNamedChild("CharacterName")
+        if characterNameLabel then
+            characterNameLabel:SetColor(otherTextColor:UnpackRGBA())
         end
 
-        local zone = control:GetNamedChild("Zone")
-        zone:SetColor(otherTextColor:UnpackRGBA())
+        local zoneLabel = control:GetNamedChild("Zone")
+        zoneLabel:SetColor(otherTextColor:UnpackRGBA())
 
-        local champion = control:GetNamedChild("Champion")
-        champion:SetColor(iconColor:UnpackRGBA())
+        local championIconControl = control:GetNamedChild("Champion")
+        championIconControl:SetColor(iconColor:UnpackRGBA())
 
-        local level = control:GetNamedChild("Level")
-        level:SetColor(otherTextColor:UnpackRGBA())
+        local levelLabel = control:GetNamedChild("Level")
+        levelLabel:SetColor(otherTextColor:UnpackRGBA())
 
-        local alliance = control:GetNamedChild("AllianceIcon")
-        alliance:SetColor(iconColor:UnpackRGBA())
+        local allianceIconControl = control:GetNamedChild("AllianceIcon")
+        allianceIconControl:SetColor(iconColor:UnpackRGBA())
 
-        local class = control:GetNamedChild("ClassIcon")
-        class:SetColor(iconColor:UnpackRGBA())
+        local classIconControl = control:GetNamedChild("ClassIcon")
+        classIconControl:SetColor(iconColor:UnpackRGBA())
     end
 end
 
@@ -60,72 +60,81 @@ local GAMEPAD_FUNCTIONS =
     classIcon = GetGamepadClassIcon,
 }
 
+function ZO_SocialList_GetPlatformTextureFunctions()
+    return IsInGamepadPreferredMode() and GAMEPAD_FUNCTIONS or KEYBOARD_FUNCTIONS
+end
+
 function ZO_SocialList_SharedSocialSetup(control, data, selected)
-    local textureFunctions = IsInGamepadPreferredMode() and GAMEPAD_FUNCTIONS or KEYBOARD_FUNCTIONS
+    local textureFunctions = ZO_SocialList_GetPlatformTextureFunctions()
 
-    local displayName = control:GetNamedChild("DisplayName")
-    local characterName = control:GetNamedChild("CharacterName")
-    local status = control:GetNamedChild("StatusIcon")
-    local zone = control:GetNamedChild("Zone")
-    local class = control:GetNamedChild("ClassIcon")
-    local alliance = control:GetNamedChild("AllianceIcon")
-    local heronUserInfoTexture = control:GetNamedChild("HeronUserInfoIcon")
-    local level = control:GetNamedChild("Level")
-    local champion = control:GetNamedChild("Champion")
-
-    if displayName then
-        displayName:SetText(ZO_FormatUserFacingDisplayName(data.displayName))
+    local displayNameLabel = control:GetNamedChild("DisplayName")
+    if displayNameLabel then
+        displayNameLabel:SetText(ZO_FormatUserFacingDisplayName(data.displayName))
     end
 
-    if heronUserInfoTexture then
-        heronUserInfoTexture:SetHidden(not data.isHeronUser)
+    local heronUserInfoTextureControl = control:GetNamedChild("HeronUserInfoIcon")
+    if heronUserInfoTextureControl then
+        heronUserInfoTextureControl:SetHidden(not data.isHeronUser)
     end
 
-    if status then
-        status:SetTexture(textureFunctions.playerStatusIcon(data.status))
+    local statusIconControl = control:GetNamedChild("StatusIcon")
+    if statusIconControl then
+        statusIconControl:SetTexture(textureFunctions.playerStatusIcon(data.status))
     end
 
     local hideCharacterFields = not data.hasCharacter or (zo_strlen(data.characterName) <= 0)
-    if characterName then
+
+    local characterNameLabel = control:GetNamedChild("CharacterName")
+    if characterNameLabel then
         if not hideCharacterFields then
-            characterName:SetText(ZO_FormatUserFacingCharacterName(data.characterName))
+            characterNameLabel:SetText(ZO_FormatUserFacingCharacterName(data.characterName))
         else
-            characterName:SetText("")
+            characterNameLabel:SetText("")
         end
     end
-    zone:SetHidden(hideCharacterFields)
-    class:SetHidden(hideCharacterFields)
-    if alliance then
-        alliance:SetHidden(hideCharacterFields)
+
+    local zoneLabel = control:GetNamedChild("Zone")
+    zoneLabel:SetHidden(hideCharacterFields)
+
+    local classIconControl = control:GetNamedChild("ClassIcon")
+    classIconControl:SetHidden(hideCharacterFields)
+
+    local allianceIconControl = control:GetNamedChild("AllianceIcon")
+    if allianceIconControl then
+        allianceIconControl:SetHidden(hideCharacterFields)
     end
-    level:SetHidden(hideCharacterFields)
-    champion:SetHidden(hideCharacterFields)
+
+    local levelLabel = control:GetNamedChild("Level")
+    levelLabel:SetHidden(hideCharacterFields)
+
+    local championIconControl = control:GetNamedChild("Champion")
+    championIconControl:SetHidden(hideCharacterFields)
 
     if data.hasCharacter then
-        zone:SetText(data.formattedZone)
+        zoneLabel:SetText(data.formattedZone)
 
-        level:SetText(GetLevelOrChampionPointsStringNoIcon(data.level, data.championPoints))
+        levelLabel:SetText(GetLevelOrChampionPointsStringNoIcon(data.level, data.championPoints))
 
         if data.championPoints and data.championPoints > 0 then
-            champion:SetTexture(textureFunctions.championPointsIcon())
+            championIconControl:SetTexture(textureFunctions.championPointsIcon())
         else
-            champion:SetHidden(true)
+            championIconControl:SetHidden(true)
         end
 
-        if alliance then
+        if allianceIconControl then
             local allianceTexture = textureFunctions.allianceIcon(data.alliance)
             if allianceTexture then
-                alliance:SetTexture(allianceTexture)
+                allianceIconControl:SetTexture(allianceTexture)
             else
-                alliance:SetHidden(true)
+                allianceIconControl:SetHidden(true)
             end
         end
 
         local classTexture = textureFunctions.classIcon(data.class)
         if classTexture  then
-            class:SetTexture(classTexture)
+            classIconControl:SetTexture(classTexture)
         else
-            class:SetHidden(true)
+            classIconControl:SetHidden(true)
         end
     end
 end

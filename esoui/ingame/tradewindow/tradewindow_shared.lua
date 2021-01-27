@@ -1,5 +1,5 @@
 --Shared Trade Window Prototype
-ZO_SharedTradeWindow = ZO_Object:Subclass()
+ZO_SharedTradeWindow = ZO_InitializingObject:Subclass()
 
 --
 --Event Handlers and Helpers
@@ -43,7 +43,7 @@ end
 
 --Either we accepted their offer or they accepted ours
 local function OnTradeWindowInviteAccepted(self, eventCode)
-    if(not IsLooting()) then
+    if not IsLooting() then
         ShowTradeWindow(self)
     else
         self.waitingForLootWindow = true;
@@ -100,7 +100,7 @@ local function OnPlayerDead(self, eventCode, who)
 end
 
 --terminate the trade window
-local function FinishTrade()    
+local function FinishTrade()
     TRADE_WINDOW.state = TRADE_STATE_IDLE
     SYSTEMS:HideScene("trade")
 end
@@ -162,15 +162,8 @@ end
 --Trade Manager functions
 --
 
---Shared Trade Window Constructor
-function ZO_SharedTradeWindow:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
-
 function ZO_SharedTradeWindow:Initialize(control)
-    self.confirm = 
+    self.confirm =
     {
         [TRADE_ME] = TRADE_CONFIRM_EDIT,
         [TRADE_THEM] = TRADE_CONFIRM_EDIT,
@@ -185,9 +178,26 @@ function ZO_SharedTradeWindow:Initialize(control)
     self:InitializeSharedEvents()
 
     self.waitingForLootWindow = false
+
+    local tradeFilterTargetDescriptor =
+    {
+        [BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT] =
+        {
+            searchFilterList =
+            {
+                BACKGROUND_LIST_FILTER_TYPE_NAME,
+            },
+            primaryKeys =
+            {
+                BAG_BACKPACK,
+            }
+        },
+    }
+    TEXT_SEARCH_MANAGER:SetupContextTextSearch("tradeTextSearch", tradeFilterTargetDescriptor)
 end
 
-local EventCallbacks = {
+local EventCallbacks =
+{
     [EVENT_TRADE_INVITE_CONSIDERING] = OnTradeWindowInviteConsidering,
     [EVENT_TRADE_INVITE_WAITING] = OnTradeWindowInviteWaiting,
     [EVENT_TRADE_INVITE_DECLINED] = OnTradeWindowInviteDeclined,
@@ -212,7 +222,7 @@ local function ContextFilter(object, callback)
     return function(...)
         local target = SYSTEMS:GetObject("trade")
 
-        if (target == object) then
+        if  target == object then
             callback(object, ...)
         end
     end
@@ -229,8 +239,8 @@ function ZO_SharedTradeWindow:IsTrading()
 end
 
 function ZO_SharedTradeWindow:IsReady()
-    if(self:IsTrading()) then
-        return (self.confirm[TRADE_ME] == TRADE_CONFIRM_ACCEPT)
+    if self:IsTrading() then
+        return self.confirm[TRADE_ME] == TRADE_CONFIRM_ACCEPT
     end
 
     return false
@@ -240,14 +250,14 @@ function ZO_SharedTradeWindow:FindMyNextAvailableSlot()
     for i = 1, TRADE_NUM_SLOTS do
         local _, _, stackCount, _ = GetTradeItemInfo(TRADE_ME, i)
 
-        if(stackCount == 0) then
+        if stackCount == 0 then
             return i
         end
     end
 end
 
 function ZO_SharedTradeWindow:CanTradeItem(bagId, slot)
-    if(self:IsTrading()) then
+    if self:IsTrading() then
         return not IsItemBound(bagId, slot) and self:FindMyNextAvailableSlot() ~= nil
     end
 end
@@ -282,13 +292,13 @@ end
 
 local function OnConfirmationDelayUpdate(control)
     local self = control.object
-    if(self:IsModifyConfirmationLevelEnabled()) then
+    if self:IsModifyConfirmationLevelEnabled() then
         self:SetConfirmationDelay(0)
     end
 end
 
 function ZO_SharedTradeWindow:SetConfirmationDelay(delay)
-    if(delay > 0) then
+    if delay > 0 then
         self.m_reenableTime = GetFrameTimeMilliseconds() + TRADE_DELAY_TIME
         self.control:SetHandler("OnUpdate", OnConfirmationDelayUpdate)
     else
@@ -310,7 +320,7 @@ function ZO_SharedTradeWindow:UpdateConfirmationView(whoID, newLevel)
 
     --call each transfer function between the states
     --ascending
-    if(newLevel > currentLevel) then
+    if newLevel > currentLevel then
         for i = currentLevel, newLevel-1 do
             local changeFunc = self.confirmChangeFunctions[whoID][i][i+1]
             if(changeFunc) then
@@ -318,13 +328,12 @@ function ZO_SharedTradeWindow:UpdateConfirmationView(whoID, newLevel)
             end
         end
     --descending
-    elseif(newLevel < currentLevel) then
+    elseif newLevel < currentLevel then
         for i = currentLevel,newLevel+1, -1  do
             local changeFunc = self.confirmChangeFunctions[whoID][i][i-1]
-            if(changeFunc) then
+            if changeFunc then
                 changeFunc()
             end
         end
     end
 end
-

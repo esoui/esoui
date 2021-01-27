@@ -431,7 +431,7 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializePreview()
             local tradingHouseIndex = ZO_Inventory_GetSlotIndex(self.previewItemData)
             local previewIndex = ZO_IndexOfElementInNumericallyIndexedTable(self.previewListEntries, tradingHouseIndex)
             local DONT_WRAP = true
-            ITEM_PREVIEW_LIST_HELPER_GAMEPAD:PreviewList(ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_AS_FURNITURE, self.previewListEntries, previewIndex, DONT_WRAP)
+            ITEM_PREVIEW_LIST_HELPER_GAMEPAD:PreviewList(ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT, self.previewListEntries, previewIndex, DONT_WRAP)
         elseif newState == SCENE_HIDDEN then
             self.previewItemData = nil
             ITEM_PREVIEW_GAMEPAD:SetInteractionCameraPreviewEnabled(false, FRAME_TARGET_CENTERED_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_2_3_FURNITURE_ITEM_PREVIEW_OPTIONS_FRAGMENT)
@@ -454,7 +454,7 @@ end
 
 function ZO_GamepadTradingHouse_BrowseResults:CanPreviewTradingHouseItem(data)
     if data and not data.isGuildSpecificItem then
-        return ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(data.itemLink)
+        return CanItemLinkBePreviewed(data.itemLink)
     end
 
     return false

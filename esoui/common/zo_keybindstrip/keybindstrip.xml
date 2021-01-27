@@ -33,14 +33,12 @@
         </TopLevelControl>
 
         <TopLevelControl name="ZO_KeybindStripGamepadBackground" hidden="true">
-            <Dimensions y="110" />
+            <Dimensions y="ZO_GAMEPAD_KEYBIND_STRIP_BACKGROUND_HEIGHT" />
             <Anchor point="BOTTOMLEFT" />
             <Anchor point="BOTTOMRIGHT" />
             <Controls>
                 <Texture name="$(parent)Texture" textureFile="EsoUI/Art/Windows/Gamepad/gp_hintbar.dds" >
-                    <Dimensions y="128" />
-                    <Anchor point="BOTTOMLEFT" />
-                    <Anchor point="BOTTOMRIGHT"/>
+                    <AnchorFill />
 
                     <TextureCoords left="0" right="0.9375" top="0" bottom="1" />
                 </Texture>

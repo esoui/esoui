@@ -92,24 +92,13 @@ end
 function ZO_QuestJournal_Keyboard:InitializeQuestList()
     self.navigationTree = ZO_Tree:New(self.control:GetNamedChild("NavigationContainerScrollChild"), 60, -10, 300)
 
-    local openTexture = "EsoUI/Art/Buttons/tree_open_up.dds"
-    local closedTexture = "EsoUI/Art/Buttons/tree_closed_up.dds"
-    local overOpenTexture = "EsoUI/Art/Buttons/tree_open_over.dds"
-    local overClosedTexture = "EsoUI/Art/Buttons/tree_closed_over.dds"
-
     local function TreeHeaderSetup(node, control, name, open)
-        control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
-        control.text:SetText(name)
-
-        control.icon:SetTexture(open and openTexture or closedTexture)
-        control.iconHighlight:SetTexture(open and overOpenTexture or overClosedTexture)
-
-        control.text:SetSelected(open)
+        control:SimpleArrowSetup(name, open)
 
         ZO_IconHeader_UpdateSize(control)
     end
 
-    self.navigationTree:AddTemplate("ZO_QuestJournalHeader", TreeHeaderSetup, nil, nil, nil, 0)
+    self.navigationTree:AddTemplate("ZO_SimpleArrowIconHeader", TreeHeaderSetup, nil, nil, nil, 0)
 
     local function TreeEntrySetup(node, control, data, open)
         control:SetText(data.name)
@@ -273,7 +262,7 @@ function ZO_QuestJournal_Keyboard:RefreshQuestList()
 
     local categories = QUEST_JOURNAL_MANAGER:GetQuestCategories()
     for i, categoryInfo in ipairs(categories) do
-        categoryNodes[categoryInfo.name] = self.navigationTree:AddNode("ZO_QuestJournalHeader", categoryInfo.name)
+        categoryNodes[categoryInfo.name] = self.navigationTree:AddNode("ZO_SimpleArrowIconHeader", categoryInfo.name)
     end
 
     local firstNode
@@ -414,32 +403,6 @@ function ZO_QuestJournal_Keyboard:RefreshDetails()
 end
 
 --XML Handlers
-
-do
-    local function OnMouseEnter(control)
-        ZO_SelectableLabel_OnMouseEnter(control.text)
-        control.iconHighlight:SetHidden(false)
-    end
-
-    local function OnMouseExit(control)
-        ZO_SelectableLabel_OnMouseExit(control.text)
-        control.iconHighlight:SetHidden(true)
-    end
-
-    local function OnMouseUp(control, upInside)
-        ZO_TreeHeader_OnMouseUp(control, upInside)
-    end
-
-    function ZO_QuestJournalHeader_OnInitialized(self)
-        self.icon = self:GetNamedChild("Icon")
-        self.iconHighlight = self.icon:GetNamedChild("Highlight")
-        self.text = self:GetNamedChild("Text")
-
-        self.OnMouseEnter = OnMouseEnter
-        self.OnMouseExit = OnMouseExit
-        self.OnMouseUp = OnMouseUp
-    end
-end
 
 function ZO_QuestJournalNavigationEntry_GetTextColor(self)
     if self.selected then

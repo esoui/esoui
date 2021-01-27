@@ -15,6 +15,7 @@ NOTIFICATIONS_GIFTING_UNLOCKED_DATA = 14
 NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA = 15
 NOTIFICATIONS_GUILD_NEW_APPLICATIONS = 16
 NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA = 17
+NOTIFICATIONS_POINTS_RESET_DATA = 18
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
@@ -595,14 +596,6 @@ ZO_PointsResetProvider = ZO_NotificationProvider:Subclass()
 ZO_PointsResetProvider_CallbackObject = ZO_CallbackObject:Subclass()
 
 do
-    local CALLBACK_POINT_RESET_ATTRIBUTE_FORCE_RESPEC = "EventPointResetAttributeForceRespec"
-    local CALLBACK_POINT_RESET_SKILL_FORCE_RESPEC = "EventPointResetSkillForceRespec"
-    local CALLBACK_POINT_RESET_ATTRIBUTE_DECLINED = "EventPointResetAttributeDeclined"
-    local CALLBACK_POINT_RESET_SKILL_DECLINED = "EventPointResetSkillDeclined"
-
-    local POINT_TYPE_ATTRIBUTE = 1
-    local POINT_TYPE_SKILL = 2
-
     -- ZO_PointsResetProvider_CallbackObject functions --
     -----------------------------------------------------
     function ZO_PointsResetProvider_CallbackObject:New()
@@ -612,39 +605,24 @@ do
     end
 
     function ZO_PointsResetProvider_CallbackObject:Initialize()
-        self.showAttributesReset = false
-        self.showSkillsReset = false
+        self.respecsShown = {}
 
-        local ZO_POINT_RESET_PROVIDER_NAME = "points reset provider"
+        local function OnEventForceRespec(_, respecType)
+            self.respecsShown[respecType] = true
+            self:FireCallbacks("EventPointReset")
+        end
 
-        EVENT_MANAGER:RegisterForEvent(ZO_POINT_RESET_PROVIDER_NAME, EVENT_ATTRIBUTE_FORCE_RESPEC, function() 
-                                                                                                            self.showAttributesReset = true
-                                                                                                            self:FireCallbacks(CALLBACK_POINT_RESET_ATTRIBUTE_FORCE_RESPEC)
-                                                                                                        end
-                                                                                                        )
-        EVENT_MANAGER:RegisterForEvent(ZO_POINT_RESET_PROVIDER_NAME, EVENT_SKILL_FORCE_RESPEC, function() 
-                                                                                                        self.showSkillsReset = true
-                                                                                                        self:FireCallbacks(CALLBACK_POINT_RESET_SKILL_FORCE_RESPEC)
-                                                                                                    end
-                                                                                                    )
+        EVENT_MANAGER:RegisterForEvent("PointsRespecProvider", EVENT_FORCE_RESPEC, OnEventForceRespec)
     end
 
-    function ZO_PointsResetProvider_CallbackObject:GetAttributesReset()
-        return self.showAttributesReset
+    function ZO_PointsResetProvider_CallbackObject:Accept(respecType)
+        self.respecsShown[respecType] = false
+        self:FireCallbacks("EventPointResetAccepted")
     end
 
-    function ZO_PointsResetProvider_CallbackObject:GetSkillsReset()
-        return self.showSkillsReset
-    end
-
-    function ZO_PointsResetProvider_CallbackObject:DeclineAttributesReset()
-        self.showAttributesReset = false
-        self:FireCallbacks(CALLBACK_POINT_RESET_ATTRIBUTE_DECLINED)
-    end
-
-    function ZO_PointsResetProvider_CallbackObject:DeclineSkillsReset()
-        self.showSkillsReset = false
-        self:FireCallbacks(CALLBACK_POINT_RESET_SKILL_DECLINED)
+    function ZO_PointsResetProvider_CallbackObject:Decline(respecType)
+        self.respecsShown[respecType] = false
+        self:FireCallbacks("EventPointResetDeclined")
     end
 
 
@@ -653,58 +631,46 @@ do
 
     -- ZO_PointsResetProvider functions --
     --------------------------------------
-    function ZO_PointsResetProvider:New(notificationManager, name)
+    function ZO_PointsResetProvider:New(notificationManager)
         local provider = ZO_NotificationProvider.New(self, notificationManager)
 
         local function updatePointsResetList() 
             provider:PushUpdateToNotificationManager() 
         end
 
-        pointResetCallbackObject:RegisterCallback(CALLBACK_POINT_RESET_ATTRIBUTE_DECLINED, updatePointsResetList)
-        pointResetCallbackObject:RegisterCallback(CALLBACK_POINT_RESET_ATTRIBUTE_FORCE_RESPEC, updatePointsResetList)
-
-        pointResetCallbackObject:RegisterCallback(CALLBACK_POINT_RESET_SKILL_FORCE_RESPEC, updatePointsResetList)
-        pointResetCallbackObject:RegisterCallback(CALLBACK_POINT_RESET_SKILL_DECLINED, updatePointsResetList)
+        pointResetCallbackObject:RegisterCallback("EventPointReset", updatePointsResetList)
+        pointResetCallbackObject:RegisterCallback("EventPointResetAccepted", updatePointsResetList)
+        pointResetCallbackObject:RegisterCallback("EventPointResetDeclined", updatePointsResetList)
 
         return provider
     end
 
     function ZO_PointsResetProvider:BuildNotificationList()
         ZO_ClearNumericallyIndexedTable(self.list)
-    
-        if pointResetCallbackObject:GetSkillsReset() then
-            table.insert(self.list,
-                            {
-                                dataType = NOTIFICATIONS_ALERT_DATA,
-                                notificationType = NOTIFICATION_TYPE_POINTS_RESET,
-                                message = GetString(SI_NOTIFICATIONS_POINTS_RESET_SKILLS),
-                                shortDisplayText = GetString(SI_SKILLS_FORCE_RESPEC_TITLE),
-                                pointType = POINT_TYPE_SKILL,
-                                secsSinceRequest = ZO_NormalizeSecondsSince(0),
-                            }
-                        )
-        end
 
-        if pointResetCallbackObject:GetAttributesReset() then
-            table.insert(self.list,
-                            {
-                                dataType = NOTIFICATIONS_ALERT_DATA,
-                                notificationType = NOTIFICATION_TYPE_POINTS_RESET,
-                                message = GetString(SI_NOTIFICATIONS_POINTS_RESET_ATTRIBUTES),
-                                shortDisplayText = GetString(SI_ATTRIBUTE_FORCE_RESPEC_TITLE),
-                                pointType = POINT_TYPE_ATTRIBUTE,
-                                secsSinceRequest = ZO_NormalizeSecondsSince(0),
-                            }
-                        )
+        for respecType, isShown in pairs(pointResetCallbackObject.respecsShown) do
+            if isShown then
+                table.insert(self.list,
+                    {
+                        dataType = NOTIFICATIONS_POINTS_RESET_DATA,
+                        notificationType = NOTIFICATION_TYPE_POINTS_RESET,
+                        message = GetString("SI_RESPECTYPE_NOTIFICATIONPOINTSRESET", respecType),
+                        shortDisplayText = GetString("SI_RESPECTYPE_POINTSRESETTITLE", respecType),
+                        respecType = respecType,
+                        secsSinceRequest = ZO_NormalizeSecondsSince(0),
+                        acceptText = GetString("SI_RESPECTYPE_NOTIFICATIONOPENBUTTON", respecType),
+                    }
+                )
+            end
         end
     end
 
     function ZO_PointsResetProvider:Decline(data)
-        if data.pointType == POINT_TYPE_ATTRIBUTE then
-            pointResetCallbackObject:DeclineAttributesReset()
-        elseif data.pointType == POINT_TYPE_SKILL then
-            pointResetCallbackObject:DeclineSkillsReset()
-        end
+        pointResetCallbackObject:Decline(data.respecType)
+    end
+
+    function ZO_PointsResetProvider:Accept(data)
+        pointResetCallbackObject:Accept(data.respecType)
     end
 
 end

@@ -1318,11 +1318,6 @@ function ZO_ItemFilterUtils.GetItemTypeDisplayCategoryByItemFilterType(itemFilte
     end
 end
 
--- TODO: See if this is still used
-function ZO_ItemFilterUtils.GetItemTypesByItemTypeDisplayCategory(itemTypeDisplayCategory)
-    return ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[itemTypeDisplayCategory]
-end
-
 function ZO_ItemFilterUtils.GetItemTypesByCraftingType(craftingType)
     local itemTypeDisplayCategory = CRAFTING_TYPE_ITEM_TYPE_DISPLAY_CATEGORY[craftingType]
     return ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[itemTypeDisplayCategory]
@@ -1439,7 +1434,7 @@ do
     function ZO_ItemFilterUtils.GetItemTypeFilterDisplayInfo(itemTypeFilter)
         local filterString = GetString("SI_ITEMTYPE", itemTypeFilter)
 
-        if filterString == "" then
+        if filterString == "" or itemTypeFilter == ITEMTYPE_NONE then
             filterString = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL)
         end
 
@@ -1500,17 +1495,54 @@ function ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, 
     end
 end
 
+function ZO_ItemFilterUtils.IsItemLinkInItemTypeDisplayCategoryAndSubcategory(itemLink, itemTypeDisplayCategory, itemTypeSubCategory)
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+        return true
+    end
+
+    if not ZO_ItemFilterUtils.IsItemLinkFilterDataInItemTypeDisplayCategory(itemLink, itemTypeDisplayCategory) then
+        return false
+    end
+
+    local itemTypeDisplayCategoryFilterInfoType = ITEM_TYPE_DISPLAY_CATEGORY_FILTER_INFO_TYPE[itemTypeDisplayCategory]
+
+    if itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY then
+        return ZO_ItemFilterUtils.IsItemLinkInItemTypeDisplayCategory(itemLink, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_EQUIPMENT_FILTER_TYPE then
+        return ZO_ItemFilterUtils.IsItemLinkInEquipmentFilterType(itemLink, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_ITEM_TYPE then
+        return ZO_ItemFilterUtils.IsItemLinkInItemType(itemLink, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_CONSUMABLE_TYPE then
+        return ZO_ItemFilterUtils.IsItemLinkInConsumableSubcategory(itemLink, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_SPECIALIZED_ITEM_TYPE then
+        return ZO_ItemFilterUtils.IsItemLinkInSpecializedItemType(itemLink, itemTypeDisplayCategory, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_MISCELLANEOUS_TYPE then
+        return ZO_ItemFilterUtils.IsItemLinkInMiscellaneousSubcategory(itemLink, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_PROVISIONING_TYPE then
+        return ZO_ItemFilterUtils.IsItemLinkInProvisioningSubcategory(itemLink, itemTypeSubCategory)
+    end
+end
+
 function ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeDisplayCategory)
     if slot.isJunk then
         return itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_JUNK
     end
 
+    return ZO_ItemFilterUtils.IsFilterDataInItemTypeDisplayCategory(slot.filterData, itemTypeDisplayCategory)
+end
+
+function ZO_ItemFilterUtils.IsItemLinkFilterDataInItemTypeDisplayCategory(itemLink, itemTypeDisplayCategory)
+    local filterData = { GetItemLinkFilterTypeInfo(itemLink) }
+    return ZO_ItemFilterUtils.IsFilterDataInItemTypeDisplayCategory(filterData, itemTypeDisplayCategory)
+end
+
+function ZO_ItemFilterUtils.IsFilterDataInItemTypeDisplayCategory(filterData, itemTypeDisplayCategory)
     if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
         return true
     end
 
     local filter = ITEM_TYPE_DISPLAY_CATEGORY_ITEMFILTERTYPE[itemTypeDisplayCategory]
-    if ZO_IsElementInNumericallyIndexedTable(slot.filterData, filter) then
+    if ZO_IsElementInNumericallyIndexedTable(filterData, filter) then
         return true
     end
 
@@ -1532,6 +1564,21 @@ function ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategory(slot, itemTypeDispla
     end
 
     local itemType = GetItemType(slot.bagId, slot.slotIndex)
+    local itemTypes = ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[itemTypeDisplayCategory]
+
+    if itemTypes and ZO_IsElementInNumericallyIndexedTable(itemTypes, itemType) then
+        return true
+    end
+
+    return false
+end
+
+function ZO_ItemFilterUtils.IsItemLinkInItemTypeDisplayCategory(itemLink, itemTypeDisplayCategory)
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+        return true
+    end
+
+    local itemType = GetItemLinkItemType(itemLink)
     local itemTypes = ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[itemTypeDisplayCategory]
 
     if itemTypes and ZO_IsElementInNumericallyIndexedTable(itemTypes, itemType) then
@@ -1573,6 +1620,37 @@ function ZO_ItemFilterUtils.IsSlotInConsumableSubcategory(slot, itemTypeDisplayC
     return false
 end
 
+function ZO_ItemFilterUtils.IsItemLinkInConsumableSubcategory(itemLink, itemTypeDisplayCategory)
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+        return true
+    end
+
+    local itemType = GetItemLinkItemType(itemLink)
+    local itemTypes = ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[itemTypeDisplayCategory]
+
+    if ZO_IsElementInNumericallyIndexedTable(itemTypes, itemType) then
+        return true
+    end
+
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_CROWN_ITEM then
+        local isCrownStoreItem = IsItemLinkFromCrownStore(itemLink)
+        local isCrownCrateItem = IsItemLinkFromCrownCrate(itemLink)
+        return isCrownStoreItem or isCrownCrateItem
+    elseif itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS then
+        local consumableTypes = ITEM_TYPE_DISPLAY_CATEGORY_SUBCATEGORY_TYPES[ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE]
+        for consumableItemTypeDisplayCategoryIndex, consumableItemTypeDisplayCategory in pairs(consumableTypes) do
+            local consumableItemTypes = ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[consumableItemTypeDisplayCategory]
+            if consumableItemTypes and ZO_IsElementInNumericallyIndexedTable(consumableItemTypes, itemType) then
+                return false
+            end
+        end
+
+        return true
+    end
+
+    return false
+end
+
 -- Returns true if slot is of the type passed in
 function ZO_ItemFilterUtils.IsSlotInItemType(slot, itemType)
     if itemType == ITEMTYPE_NONE then
@@ -1589,6 +1667,21 @@ function ZO_ItemFilterUtils.IsSlotInSpecializedItemType(slot, itemTypeDisplayCat
     end
 
     local _, specializedItemType = GetItemType(slot.bagId, slot.slotIndex)
+    local specializedItemTypes = ITEM_TYPE_DISPLAY_CATEGORY_SPECIALIZED_ITEM_TYPES[itemTypeDisplayCategory]
+
+    if specializedItemTypes and ZO_IsElementInNumericallyIndexedTable(specializedItemTypes, specializedItemType) then
+        return specializedItemTypeFilter == specializedItemType or specializedItemTypeFilter == SPECIALIZED_ITEMTYPE_NONE
+    end
+
+    return false
+end
+
+function ZO_ItemFilterUtils.IsItemLinkInSpecializedItemType(itemLink, itemTypeDisplayCategory, specializedItemTypeFilter)
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+        return true
+    end
+
+    local _, specializedItemType = GetItemLinkItemType(itemLink)
     local specializedItemTypes = ITEM_TYPE_DISPLAY_CATEGORY_SPECIALIZED_ITEM_TYPES[itemTypeDisplayCategory]
 
     if specializedItemTypes and ZO_IsElementInNumericallyIndexedTable(specializedItemTypes, specializedItemType) then
@@ -1625,6 +1718,33 @@ function ZO_ItemFilterUtils.IsSlotInMiscellaneousSubcategory(slot, itemTypeDispl
     return false
 end
 
+function ZO_ItemFilterUtils.IsItemLinkInMiscellaneousSubcategory(itemLink, itemTypeDisplayCategory)
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+        return true
+    end
+
+    local itemType = GetItemLinkItemType(itemLink)
+    local itemTypes = ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[itemTypeDisplayCategory]
+
+    if ZO_IsElementInNumericallyIndexedTable(itemTypes, itemType) then
+        return true
+    end
+
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS then
+        local miscTypes = ITEM_TYPE_DISPLAY_CATEGORY_SUBCATEGORY_TYPES[ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS]
+        for miscItemTypeDisplayCategoryIndex, miscItemTypeDisplayCategory in pairs(miscTypes) do
+            local miscItemTypes = ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[miscItemTypeDisplayCategory]
+            if miscItemTypes and ZO_IsElementInNumericallyIndexedTable(miscItemTypes, itemType) then
+                return false
+            end
+        end
+
+        return true
+    end
+
+    return false
+end
+
 -- Returns true if slot is not a crafting type
 function ZO_ItemFilterUtils.IsSlotInProvisioningSubcategory(slot, itemTypeDisplayCategory)
     if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
@@ -1632,6 +1752,24 @@ function ZO_ItemFilterUtils.IsSlotInProvisioningSubcategory(slot, itemTypeDispla
     end
 
     local itemType, specializedItemType = GetItemType(slot.bagId, slot.slotIndex)
+    local itemTypeDisplayCategoryItemTypes = ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[itemTypeDisplayCategory]
+    local itemTypeDisplayCategorySpecializedItemTypes = ITEM_TYPE_DISPLAY_CATEGORY_SPECIALIZED_ITEM_TYPES[itemTypeDisplayCategory]
+
+    if itemTypeDisplayCategoryItemTypes then
+        return ZO_IsElementInNumericallyIndexedTable(itemTypeDisplayCategoryItemTypes, itemType)
+    elseif itemTypeDisplayCategorySpecializedItemTypes then
+        return ZO_IsElementInNumericallyIndexedTable(itemTypeDisplayCategorySpecializedItemTypes, specializedItemType)
+    end
+
+    return false
+end
+
+function ZO_ItemFilterUtils.IsItemLinkInProvisioningSubcategory(itemLink, itemTypeDisplayCategory)
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+        return true
+    end
+
+    local itemType, specializedItemType = GetItemLinkItemType(itemLink)
     local itemTypeDisplayCategoryItemTypes = ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[itemTypeDisplayCategory]
     local itemTypeDisplayCategorySpecializedItemTypes = ITEM_TYPE_DISPLAY_CATEGORY_SPECIALIZED_ITEM_TYPES[itemTypeDisplayCategory]
 

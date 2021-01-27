@@ -162,8 +162,10 @@ function ZO_MarketProductBase:IsGiftable()
 
         for index, houseTemplateData in pairs(houseTemplateDataList) do
             local currencyType, marketData = next(houseTemplateData.marketPurchaseOptions)
-            local houseTemplateMarketProductData = ZO_MarketProductData:New(marketData.marketProductId, marketData.presentationIndex)
-            isGiftable = isGiftable or houseTemplateMarketProductData:IsGiftable()
+            if marketData then
+                local houseTemplateMarketProductData = ZO_MarketProductData:New(marketData.marketProductId, marketData.presentationIndex)
+                isGiftable = isGiftable or houseTemplateMarketProductData:IsGiftable()
+            end
         end
         return isGiftable
     end

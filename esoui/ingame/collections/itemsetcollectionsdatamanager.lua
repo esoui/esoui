@@ -261,10 +261,7 @@ function ZO_ItemSetCollectionsDataManager:OnCollectionCategoryNewStatusCleared(i
 end
 
 function ZO_ItemSetCollectionsDataManager:HasAnyNewPieces()
-    for _ in self:TopLevelItemSetCollectionCategoryIterator({ ZO_ItemSetCollectionCategoryData.HasAnyNewPieces }) do
-        return true
-    end
-    return false
+    return DoesItemSetCollectionsHaveAnyNewPieces()
 end
 
 function ZO_ItemSetCollectionsDataManager:GetSearchResultsVersion()

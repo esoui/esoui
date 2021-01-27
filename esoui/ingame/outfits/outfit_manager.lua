@@ -203,14 +203,15 @@ function ZO_OutfitSlotManipulator:GetCollectibleDataAssociations(collectibleData
 end
 
 function ZO_OutfitSlotManipulator:UpdatePreview(refreshImmediately)
-    local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
-    if previewCollectionId ~= 0 then
-        if self:IsAnyChangePending() then
-            local primaryDyeId, secondaryDyeId, accentDyeId = self:GetPendingDyeData()
-            AddOutfitSlotPreviewElementToPreviewCollection(previewCollectionId, self.outfitSlotIndex, self.pendingCollectibleId, self.pendingItemMaterialIndex, primaryDyeId, secondaryDyeId, accentDyeId, refreshImmediately)
-        else
-            ClearOutfitSlotPreviewElementFromPreviewCollection(previewCollectionId, self.outfitSlotIndex, refreshImmediately)
-        end
+    if self:IsAnyChangePending() then
+        local primaryDyeId, secondaryDyeId, accentDyeId = self:GetPendingDyeData()
+        AddOutfitSlotPreviewElementToPreviewCollection(self.outfitSlotIndex, self.pendingCollectibleId, self.pendingItemMaterialIndex, primaryDyeId, secondaryDyeId, accentDyeId)
+    else
+        ClearOutfitSlotPreviewElementFromPreviewCollection(self.outfitSlotIndex)
+    end
+
+    if refreshImmediately then
+        ApplyChangesToPreviewCollectionShown()
     end
 end
 
@@ -424,7 +425,7 @@ do
             end
 
             if hasChanged then
-                RefreshPreviewCollectionShown()
+                ApplyChangesToPreviewCollectionShown()
                 self:OnSlotPendingDataChanged()
             end
         end
@@ -450,7 +451,7 @@ do
             end
         end
         PlaySound(SOUNDS.DYEING_RANDOMIZE_DYES)
-        RefreshPreviewCollectionShown()
+        ApplyChangesToPreviewCollectionShown()
         self:OnSlotPendingDataChanged()
     end
 end
@@ -459,23 +460,20 @@ do
     local DONT_REFRESH_IF_SHOWN = false
 
     function ZO_OutfitManipulator:UpdatePreviews()
-        local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
-        if previewCollectionId ~= 0 then
-            for outfitSlot, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
-                if WEAPON_SLOTS[outfitSlot] then
-                    if outfitSlotManipulator:IsAnyChangePending() then
-                        outfitSlotManipulator:UpdatePreview(DONT_REFRESH_IF_SHOWN)
-                    else
-                        ClearOutfitSlotPreviewElementFromPreviewCollection(previewCollectionId, outfitSlot, DONT_REFRESH_IF_SHOWN)
-                    end
-                else
-                    -- Armor is simple
+        for outfitSlot, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
+            if WEAPON_SLOTS[outfitSlot] then
+                if outfitSlotManipulator:IsAnyChangePending() then
                     outfitSlotManipulator:UpdatePreview(DONT_REFRESH_IF_SHOWN)
+                else
+                    ClearOutfitSlotPreviewElementFromPreviewCollection(outfitSlot)
                 end
+            else
+                -- Armor is simple
+                outfitSlotManipulator:UpdatePreview(DONT_REFRESH_IF_SHOWN)
             end
-
-            RefreshPreviewCollectionShown()
         end
+
+        ApplyChangesToPreviewCollectionShown()
     end
 end
 
@@ -645,13 +643,12 @@ function Outfit_Manager:Initialize()
         end
     end
 
-    local REFRESH_IF_SHOWN = true
-
     local function OnOutfitChangeRespone(eventCode, outfitChangeResponse, outfitIndex)
         if outfitChangeResponse == APPLY_OUTFIT_CHANGES_RESULT_SUCCESS then
             self:RefreshOutfitSlotData(outfitIndex)
             self:OnOutfitPendingDataChanged(outfitIndex)
-            ClearAllOutfitSlotPreviewElementsFromPreviewCollection(SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId(), REFRESH_IF_SHOWN)
+            ClearAllOutfitSlotPreviewElementsFromPreviewCollection()
+            ApplyChangesToPreviewCollectionShown()
         end
     end
 

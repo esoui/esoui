@@ -1,13 +1,4 @@
-ZO_CallbackObject = ZO_Object:Subclass()
-
-function ZO_CallbackObject:New()
-    local newObject = ZO_Object.New(self)
-
-    newObject.fireCallbackDepth = 0
-    newObject.dirtyEvents = {}
-
-    return newObject
-end
+local ZO_CallbackObjectMixin = {}
 
 local CALLBACK_INDEX = 1
 local ARGUMENT_INDEX = 2
@@ -15,7 +6,7 @@ local DELETED_INDEX = 3
 
 --Registers a callback to be executed when eventName is triggered.
 --You may optionally specify an argument to be passed to the callback.
-function ZO_CallbackObject:RegisterCallback(eventName, callback, arg)
+function ZO_CallbackObjectMixin:RegisterCallback(eventName, callback, arg)
     if not eventName or not callback then
         return
     end
@@ -49,7 +40,7 @@ function ZO_CallbackObject:RegisterCallback(eventName, callback, arg)
     table.insert(registry, { callback, arg, false })
 end
 
-function ZO_CallbackObject:UnregisterCallback(eventName, callback)
+function ZO_CallbackObjectMixin:UnregisterCallback(eventName, callback)
     if not self.callbackRegistry then
         return
     end
@@ -69,7 +60,7 @@ function ZO_CallbackObject:UnregisterCallback(eventName, callback)
     end
 end
 
-function ZO_CallbackObject:UnregisterAllCallbacks(eventName)
+function ZO_CallbackObjectMixin:UnregisterAllCallbacks(eventName)
     if not self.callbackRegistry then
         return
     end
@@ -90,7 +81,7 @@ end
 --Executes all callbacks registered on this object with this event name
 --Accepts the event name, and a list of arguments to be passed to the callbacks
 --The return value is from the callbacks, the most recently registered non-nil non-false callback return value is returned
-function ZO_CallbackObject:FireCallbacks(eventName, ...)
+function ZO_CallbackObjectMixin:FireCallbacks(eventName, ...)
     local result = nil
 
     if not self.callbackRegistry or not eventName then
@@ -99,7 +90,7 @@ function ZO_CallbackObject:FireCallbacks(eventName, ...)
 
     local registry = self.callbackRegistry[eventName]
     if registry then
-        self.fireCallbackDepth = self.fireCallbackDepth + 1
+        self.fireCallbackDepth = self:GetFireCallbackDepth() + 1
 
         local callbackInfoIndex = 1
         while callbackInfoIndex <= #registry do
@@ -120,7 +111,7 @@ function ZO_CallbackObject:FireCallbacks(eventName, ...)
             callbackInfoIndex = callbackInfoIndex + 1
         end
 
-        self.fireCallbackDepth = self.fireCallbackDepth - 1
+        self.fireCallbackDepth = self:GetFireCallbackDepth() - 1
 
         self:Clean()
     end
@@ -128,14 +119,15 @@ function ZO_CallbackObject:FireCallbacks(eventName, ...)
     return result
 end
 
-function ZO_CallbackObject:Clean(eventName)
+function ZO_CallbackObjectMixin:Clean(eventName)
+    local dirtyEvents = self:GetDirtyEvents()
     if eventName then
-        self.dirtyEvents[#self.dirtyEvents + 1] = eventName
+        dirtyEvents[#dirtyEvents + 1] = eventName
     end
 
-    if self.fireCallbackDepth == 0 then
-        while #self.dirtyEvents > 0 do
-            local eventName = self.dirtyEvents[#self.dirtyEvents]
+    if self:GetFireCallbackDepth() == 0 then
+        while #dirtyEvents > 0 do
+            local eventName = dirtyEvents[#dirtyEvents]
             local registry = self.callbackRegistry[eventName]
             if registry then
                 local callbackInfoIndex = 1
@@ -151,15 +143,36 @@ function ZO_CallbackObject:Clean(eventName)
                     self.callbackRegistry[eventName] = nil
                 end
             end
-            self.dirtyEvents[#self.dirtyEvents] = nil
+            dirtyEvents[#dirtyEvents] = nil
         end
     end
 end
 
-function ZO_CallbackObject:ClearCallbackRegistry()
+function ZO_CallbackObjectMixin:ClearCallbackRegistry()
     if self.callbackRegistry then
         for eventName, _ in pairs(self.callbackRegistry) do
             self:UnregisterAllCallbacks(eventName)
         end
     end
 end
+
+function ZO_CallbackObjectMixin:GetFireCallbackDepth()
+    return self.fireCallbackDepth or 0
+end
+
+function ZO_CallbackObjectMixin:GetDirtyEvents()
+    if not self.dirtyEvents then
+        self.dirtyEvents = {}
+    end
+    return self.dirtyEvents
+end
+
+ZO_CallbackObject = {}
+zo_mixin(ZO_CallbackObject, ZO_Object)
+zo_mixin(ZO_CallbackObject, ZO_CallbackObjectMixin)
+ZO_CallbackObject.__index = ZO_CallbackObject
+
+ZO_InitializingCallbackObject = {}
+zo_mixin(ZO_InitializingCallbackObject, ZO_InitializingObject)
+zo_mixin(ZO_InitializingCallbackObject, ZO_CallbackObjectMixin)
+ZO_InitializingCallbackObject.__index = ZO_InitializingCallbackObject

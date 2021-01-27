@@ -28,10 +28,12 @@ end
 
 function ZO_SceneGraphNode:SetParent(parent)
     if self.parent then
-        self.parent:OnChildRemoved(parent)
+        self.parent:OnChildRemoved(self)
     end
     self.parent = parent
-    self.parent:OnChildAdded(self)
+    if self.parent then
+        self.parent:OnChildAdded(self)
+    end
     self:SetDirty(true)
 end
 
@@ -146,6 +148,10 @@ function ZO_SceneGraphNode:AcquireResultMatrix()
     return self.resultMatrix
 end
 
+function ZO_SceneGraphNode:GetWorldViewMatrix()
+    return self.worldViewMatrix
+end
+
 function ZO_SceneGraphNode:BuildWorldViewMatrix()
     local resultMatrix : Matrix33
     self.finalRotation = self.rotation
@@ -224,53 +230,86 @@ local ANCHOR_TO_NORMALIZED_Y =
     [BOTTOMRIGHT] = 1,
 }
 
+local DRAW_LEVEL_BASE = 10000
+local Z_TO_DRAW_LEVEL_FACTOR = 100 -- draw levels are integers, so this is effectively 2 digits of precision
+local function ComputeDrawLevel(z)
+    return DRAW_LEVEL_BASE - z * Z_TO_DRAW_LEVEL_FACTOR
+end
+
 function ZO_SceneGraphNode:Render()
     local customScale = GetUICustomScale()
-    if self.controls then
-        local worldViewMatrix : Matrix33 = self.worldViewMatrix
-        for i, control in ipairs(self.controls) do
-            local distanceFromCamera = self.finalTranslateZ + self.controlZ[i] - self.sceneGraph:GetCameraZ()
+    local worldViewMatrix : Matrix33 = self.worldViewMatrix
+    local cameraPositionZ = self.sceneGraph:GetCameraZ()
+
+    if self.textures then
+        for _, textureControl in ipairs(self.textures) do
+            local positionZ = textureControl.sceneZ
+            local distanceFromCamera = self.finalTranslateZ + positionZ - cameraPositionZ
             if distanceFromCamera > 0 then
-                local depthScale = 1 / distanceFromCamera
-                local positionX = self.controlX[i]
-                local positionY = self.controlY[i]
+                local depthScale = 1 / (distanceFromCamera * customScale)
+                local positionX = textureControl.sceneX
+                local positionY = textureControl.sceneY
 
                 local finalX, finalY = zo_matrixTransformPoint(worldViewMatrix, positionX, positionY)
 
                 finalX = finalX * depthScale
                 finalY = finalY * depthScale
 
-                finalX = finalX / customScale
-                finalY = finalY / customScale
+                local anchorPoint = textureControl.sceneAnchorPoint
+                textureControl:SetAnchor(anchorPoint, nil, CENTER, finalX, finalY)
+                textureControl:SetScale(self.finalScale * depthScale * textureControl.sceneScale)
+                textureControl:SetDrawLevel(ComputeDrawLevel(self.finalTranslateZ + positionZ))
+                textureControl:SetHidden(textureControl.sceneHidden)
 
-                local anchorPoint = self.controlAnchorPoint[i]
-                control:SetAnchor(anchorPoint, nil, CENTER, finalX, finalY)
-                if self.finalRotation ~= 0 and self.controlUseRotation[i] then
-                    control:SetTextureRotation(self.finalRotation, ANCHOR_TO_NORMALIZED_X[anchorPoint], ANCHOR_TO_NORMALIZED_Y[anchorPoint])
+                if self.finalRotation ~= 0 and textureControl.sceneUseRotation then
+                    textureControl:SetTextureRotation(self.finalRotation, ANCHOR_TO_NORMALIZED_X[anchorPoint], ANCHOR_TO_NORMALIZED_Y[anchorPoint])
                 else
-                    control:SetTextureRotation(0)
+                    textureControl:SetTextureRotation(0)
                 end
-                control:SetScale((self.finalScale * depthScale * self.controlScale[i]) / customScale)
-                control:SetDrawLevel(self:ComputeDrawLevel(self.finalTranslateZ + self.controlZ[i]))
-                control:SetHidden(self.controlHidden[i])
             else
-                control:SetHidden(true)
+                textureControl:SetHidden(true)
+            end
+        end
+    end
+
+    if self.composites then
+        for _, compositeControl in ipairs(self.composites) do
+            local positionZ = compositeControl.sceneZ
+            local distanceFromCamera = self.finalTranslateZ + positionZ - cameraPositionZ
+            if distanceFromCamera > 0 then
+                local depthScale = 1 / (distanceFromCamera * customScale)
+                local positionX = compositeControl.sceneX
+                local positionY = compositeControl.sceneY
+
+                local finalX, finalY = zo_matrixTransformPoint(worldViewMatrix, positionX, positionY)
+
+                finalX = finalX * depthScale
+                finalY = finalY * depthScale
+
+                compositeControl:SetAnchor(compositeControl.sceneAnchorPoint, nil, CENTER, finalX, finalY)
+                compositeControl:SetScale(self.finalScale * depthScale * compositeControl.sceneScale)
+                compositeControl:SetDrawLevel(ComputeDrawLevel(self.finalTranslateZ + positionZ))
+                compositeControl:SetHidden(compositeControl.sceneHidden)
+            else
+                compositeControl:SetHidden(true)
             end
         end
     end
 
     if self.lines then
-        for _, line in ipairs(self.lines) do
-            local distanceFromCamera = self.finalTranslateZ + line.sceneZ - self.sceneGraph:GetCameraZ()
+        for _, lineControl in ipairs(self.lines) do
+            local distanceFromCamera = self.finalTranslateZ + lineControl.sceneZ - cameraPositionZ
             if distanceFromCamera > 0 then
-                local thickness = self.finalScale * line.sceneThickness / distanceFromCamera / customScale
-                line:SetThickness(thickness)
-                line:SetDrawLevel(self:ComputeDrawLevel(self.finalTranslateZ + line.sceneZ))
+                local thickness = self.finalScale * lineControl.sceneThickness / distanceFromCamera / customScale
+                lineControl:SetThickness(thickness)
+                lineControl:SetDrawLevel(ComputeDrawLevel(self.finalTranslateZ + lineControl.sceneZ))
+                lineControl:SetHidden(lineControl.sceneHidden)
             else
-                line:SetHidden(true)
+                lineControl:SetHidden(true)
             end
         end
     end
+    self.dirty = false
 end
 
 function ZO_SceneGraphNode:TransformPoint(inputPointX, inputPointY, referencePlaneZ)
@@ -294,9 +333,7 @@ function ZO_SceneGraphNode:TransformPoint(inputPointX, inputPointY, referencePla
     inputY = inputY / customScale
 
     local canvasCenterX, canvasCenterY = self.sceneGraph:GetCanvasControl():GetCenter()
-    local inputX, inputY = screenPointX + canvasCenterX, screenPointY + canvasCenterY
-
-    return inputX, inputY
+    return inputX + canvasCenterX, inputY + canvasCenterY
 end
 
 function ZO_SceneGraphNode:InvertPoint(screenPointX, screenPointY, referencePlaneZ)
@@ -328,6 +365,16 @@ function ZO_SceneGraphNode:InvertPoint(screenPointX, screenPointY, referencePlan
     return inputX, inputY
 end
 
+function ZO_SceneGraphNode:GetWorldSpaceCoordinates(inputPointX, inputPointY, inputPointZ)
+    local worldViewMatrix : Matrix33 = self.worldViewMatrix
+    local cameraSpaceX, cameraSpaceY = zo_matrixTransformPoint(self.worldViewMatrix, inputPointX, inputPointY)
+    local inverseViewMatrix : Matrix33 = self:AcquireWorkingMatrix()
+    zo_invertMatrix33(self.sceneGraph:GetCameraNode():GetWorldViewMatrix(), inverseViewMatrix)
+    local worldSpaceX, worldSpaceY = zo_matrixTransformPoint(inverseViewMatrix, cameraSpaceX, cameraSpaceY)
+    local worldSpaceZ = self.finalTranslateZ + inputPointZ
+    return worldSpaceX, worldSpaceY, worldSpaceZ
+end
+
 function ZO_SceneGraphNode:OnChildAdded(child)
     if self.children == nil then
         self.children = {}
@@ -337,16 +384,16 @@ end
 
 function ZO_SceneGraphNode:OnChildRemoved(child)
     if self.children then
-        local childIndex = ZO_IndexOfElementInNumericallyIndexedTable(self.children, child)
-        table.remove(self.children, childIndex)
+        ZO_RemoveFirstElementFromNumericallyIndexedTable(self.children, child)
     end
 end
 
-function ZO_SceneGraphNode:ComputeDrawLevel(z)
-    return 10000 - z * 100
-end
-
 function ZO_SceneGraphNode:AddLine(lineControl, startControl, endControl, z)
+    if not self.lines then
+        self.lines = {}
+    end
+    table.insert(self.lines, lineControl)
+
     -- It's assumed that startControl and endControl are part of the
     -- scenegraph. The line is fixed to draw in between those two control points.
     lineControl.sceneZ = z
@@ -354,110 +401,95 @@ function ZO_SceneGraphNode:AddLine(lineControl, startControl, endControl, z)
     lineControl:ClearAnchors()
     lineControl:SetAnchor(TOPLEFT, startControl, CENTER)
     lineControl:SetAnchor(BOTTOMRIGHT, endControl, CENTER)
-    if not self.lines then
-        self.lines = {}
+end
+
+function ZO_SceneGraphNode:SetLineThickness(lineControl, thickness)
+    lineControl.sceneThickness = thickness
+    self:SetDirty(true)
+end
+
+function ZO_SceneGraphNode:AddTextureComposite(compositeControl, x, y, z)
+    if not self.composites then
+        self.composites = {}
     end
-    table.insert(self.lines, lineControl)
+    table.insert(self.composites, compositeControl)
+
+    compositeControl.sceneX = x
+    compositeControl.sceneY = y
+    compositeControl.sceneZ = z
+    compositeControl.sceneScale = 1
+    compositeControl.sceneHidden = false
+    compositeControl.sceneAnchorPoint = CENTER
 end
 
--- TODO: rename to AddTexture?
-function ZO_SceneGraphNode:AddControl(control, x, y, z)
-    if x and y and z then
-        if not self.controls then
-            self.controls = {}
-            self.controlX = {}
-            self.controlY = {}
-            self.controlZ = {}
-            self.controlScale = {}
-            self.controlHidden = {}
-            self.controlAnchorPoint = {}
-            self.controlUseRotation = {}
-        end
-        table.insert(self.controls, control)
-        table.insert(self.controlX, x)
-        table.insert(self.controlY, y)
-        table.insert(self.controlZ, z)
-        table.insert(self.controlScale, 1)
-        table.insert(self.controlHidden, false)
-        table.insert(self.controlAnchorPoint, CENTER)
-        table.insert(self.controlUseRotation, true)
-        self:SetDirty(true)
-        self:RefreshControlIndices()
+function ZO_SceneGraphNode:RemoveTextureComposite(compositeControl)
+    ZO_RemoveFirstElementFromNumericallyIndexedTable(self.composites, compositeControl)
+end
+
+function ZO_SceneGraphNode:AddTexture(textureControl, x, y, z)
+    if not self.textures then
+        self.textures = {}
     end
+    table.insert(self.textures, textureControl)
+
+    textureControl.sceneX = x
+    textureControl.sceneY = y
+    textureControl.sceneZ = z
+    textureControl.sceneScale = 1
+    textureControl.sceneHidden = false
+    textureControl.sceneAnchorPoint = CENTER
+    textureControl.sceneUseRotation = true
 end
 
-local function RemoveFromTables(index, ...)
-    for i = 1, select("#", ...) do
-        local tableToRemoveFrom = select(i, ...)
-        local numElements = #tableToRemoveFrom
-        tableToRemoveFrom[index] = tableToRemoveFrom[numElements]
-        tableToRemoveFrom[numElements] = nil
+function ZO_SceneGraphNode:RemoveTexture(textureControl)
+    ZO_RemoveFirstElementFromNumericallyIndexedTable(self.textures, textureControl)
+end
+
+function ZO_SceneGraphNode:ClearControls()
+    if self.textures then
+        ZO_ClearNumericallyIndexedTable(self.textures)
     end
-end
 
-function ZO_SceneGraphNode:RemoveControl(control)
-    local controlIndex = self:GetControlIndex(control)
-    if controlIndex then
-        RemoveFromTables(controlIndex, self.controls, self.controlX, self.controlY, self.controlZ, self.controlScale, self.controlHidden, self.controlAnchorPoint, self.controlUseRotation)
-        self:RefreshControlIndices()
+    if self.composites then
+        ZO_ClearNumericallyIndexedTable(self.composites)
     end
-end
 
-function ZO_SceneGraphNode:GetControlIndex(control)
-    return control.index
-end
-
-function ZO_SceneGraphNode:RefreshControlIndices()
-    for i, currentControl in ipairs(self.controls) do
-        currentControl.index = i
+    if self.lines then
+        ZO_ClearNumericallyIndexedTable(self.lines)
     end
-end
-
-function ZO_SceneGraphNode:GetControl(i)
-    return self.controls[i]
 end
 
 function ZO_SceneGraphNode:SetControlPosition(control, x, y, z)
-    local index = self:GetControlIndex(control)
-    self.controlX[index] = x
-    self.controlY[index] = y
-    self.controlZ[index] = z
+    control.sceneX = x
+    control.sceneY = y
+    control.sceneZ = z
     self:SetDirty(true)
 end
 
 function ZO_SceneGraphNode:SetControlHidden(control, hidden)
-    local index = self:GetControlIndex(control)
-    if self.controlHidden[index] ~= hidden then
-        self.controlHidden[index] = hidden
+    if control.sceneHidden ~= hidden then
+        control.sceneHidden = hidden
         self:SetDirty(true)
     end
 end
 
 function ZO_SceneGraphNode:SetControlScale(control, scale)
-    local index = self:GetControlIndex(control)
-    if self.controlScale[index] ~= scale then
-        self.controlScale[index] = scale
+    if control.sceneScale ~= scale then
+        control.sceneScale = scale
         self:SetDirty(true)
     end
-end
-
-function ZO_SceneGraphNode:GetControlScale(control, scale)
-    local index = self:GetControlIndex(control)
-    return self.controlScale[index]
 end
 
 function ZO_SceneGraphNode:SetControlAnchorPoint(control, anchorPoint)
-    local index = self:GetControlIndex(control)
-    if self.controlAnchorPoint[index] ~= anchorPoint then
-        self.controlAnchorPoint[index] = anchorPoint
+    if control.sceneAnchorPoint ~= anchorPoint then
+        control.sceneAnchorPoint = anchorPoint
         self:SetDirty(true)
     end
 end
 
-function ZO_SceneGraphNode:SetControlUseRotation(control, useRotation)
-    local index = self:GetControlIndex(control)
-    if self.controlUseRotation[index] ~= useRotation then
-        self.controlUseRotation[index] = useRotation
+function ZO_SceneGraphNode:SetTextureUseRotation(textureControl, useRotation)
+    if textureControl.sceneUseRotation ~= useRotation then
+        textureControl.sceneUseRotation = useRotation
         self:SetDirty(true)
     end
 end

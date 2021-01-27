@@ -1,0 +1,39 @@
+<GuiXml>
+    <Controls>
+        <TextureComposite name="ZO_ChampionStarVisuals" virtual="true" shape="CIRCLE" pixelRoundingEnabled="false" blendMode="ADD" />
+
+        <TextureComposite name="ZO_ChampionStar" virtual="true" inherits="ZO_ChampionStarVisuals" mouseEnabled="true">
+            <OnMouseEnter>
+                ZO_ChampionStar_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_ChampionStar_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_ChampionStar_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <OnMouseWheel>
+                ZO_ChampionStar_OnMouseWheel(self, delta)
+            </OnMouseWheel>
+            <OnDragStart>
+                ZO_ChampionStar_OnDragStart(self, button)
+            </OnDragStart>
+        </TextureComposite>
+
+        <Control name="ZO_ChampionStarEditor" virtual="true" inherits="ZO_Spinner" hidden="true">
+            <OnInitialized>
+                ZO_KeyControl_OnInitialized(self:GetNamedChild("Decrease"))
+                ZO_KeyControl_OnInitialized(self:GetNamedChild("Increase"))
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Display" font="ZoFontGamepad34" override="true"/>
+                <Button name="$(parent)Decrease" override="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Display" relativePoint="LEFT" offsetX="10" />
+                </Button>
+                <Button name="$(parent)Increase" override="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Display" relativePoint="RIGHT" offsetX="-10" />
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

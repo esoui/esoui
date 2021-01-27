@@ -52,7 +52,11 @@ EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.lua
 
 EsoUI\Ingame\Gamepad\GamepadGamercard.lua
 
+EsoUI\Ingame\Utility\TextSearchManager.lua
+
 EsoUI\Ingame\Inventory\ItemFilterUtils.lua
+
+EsoUI\Ingame\Inventory\Gamepad\ZO_GamepadParametricScrollList_BagsSearch_Screen.lua
 
 EsoUI\Ingame\Inventory\Gamepad\InventoryUtils_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\InventoryList_Gamepad.lua
@@ -372,8 +376,6 @@ EsoUI\Ingame\UnitAttributeVisualizer\Modules\Possession.lua
 EsoUI\Ingame\UnitAttributeVisualizer\Modules\Possession.xml
 EsoUI\Ingame\UnitAttributeVisualizer\Modules\PowerShield.lua
 EsoUI\Ingame\UnitAttributeVisualizer\Modules\PowerShield.xml
-EsoUI\Ingame\UnitAttributeVisualizer\Modules\Trauma.lua
-EsoUI\Ingame\UnitAttributeVisualizer\Modules\Trauma.xml
 
 EsoUI\Ingame\Compass\CompassFrame.lua
 EsoUI\Ingame\Compass\CompassFrame.xml
@@ -562,7 +564,6 @@ EsoUI\Ingame\Restyle\Gamepad\Outfit_Slots_Panel_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.xml
 EsoUI\Ingame\Restyle\Gamepad\Restyle_Station_Gamepad.lua
-EsoUI\Ingame\Restyle\Gamepad\Restyle_Staging_Equipment_Gamepad.lua
 EsoUI\Ingame\Restyle\Gamepad\Restyle_Gamepad.xml
 
 
@@ -774,7 +775,6 @@ EsoUI\Ingame\Crafting\Gamepad\GamepadProvisioner.lua
 EsoUI\Ingame\Crafting\Gamepad\GamepadProvisioner.xml
 
 EsoUI\Ingame\Crafting\SharedEnchanting.lua
-EsoUI\Ingame\Crafting\SharedEnchanting.xml
 EsoUI\Ingame\Crafting\Keyboard\Enchanting_Keyboard.lua
 EsoUI\Ingame\Crafting\Keyboard\Enchanting_Keyboard.xml
 EsoUI\Ingame\Crafting\Gamepad\Enchanting_Gamepad.lua
@@ -836,6 +836,8 @@ EsoUI\Ingame\Inventory\Gamepad\BuySpaceCommon_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\BuySpaceCommon_Gamepad.xml
 EsoUI\Ingame\Inventory\Gamepad\BuyBagSpace_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\BuyBagSpace_Gamepad.xml
+
+EsoUI\Ingame\Banking\Banking_Shared.lua
 
 EsoUI\Ingame\Banking\Gamepad\BankingCommon_Gamepad.lua
 EsoUI\Ingame\Banking\Gamepad\Banking_Gamepad.lua
@@ -1178,12 +1180,16 @@ EsoUI\Ingame\DeathRecap\DeathRecap.xml
 
 EsoUI\Ingame\FloatingMarkers\FloatingMarkers.lua
 
-EsoUI\Ingame\ChampionPerks\ChampionStar.lua
-EsoUI\Ingame\ChampionPerks\ChampionStar.xml
-EsoUI\Ingame\ChampionPerks\ChampionConstellation.lua
-EsoUI\Ingame\ChampionPerks\ChampionConstellation.xml
-EsoUI\Ingame\ChampionPerks\ChampionPerks.lua
-EsoUI\Ingame\ChampionPerks\ChampionPerks.xml
+EsoUI\Ingame\Champion\ChampionDataManager.lua
+EsoUI\Ingame\Champion\ChampionStarVisuals.lua
+EsoUI\Ingame\Champion\ChampionStar.lua
+EsoUI\Ingame\Champion\ChampionStar.xml
+EsoUI\Ingame\Champion\ChampionConstellation.lua
+EsoUI\Ingame\Champion\ChampionConstellation.xml
+EsoUI\Ingame\Champion\ChampionAssignableActionBar.lua
+EsoUI\Ingame\Champion\ChampionAssignableActionBar.xml
+EsoUI\Ingame\Champion\Champion.lua
+EsoUI\Ingame\Champion\Champion.xml
 
 EsoUI\Ingame\UICombatOverlay\UICombatOverlay.lua
 EsoUI\Ingame\UICombatOverlay\UICombatOverlay.xml

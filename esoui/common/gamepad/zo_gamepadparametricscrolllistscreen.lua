@@ -15,13 +15,7 @@ To trigger updates, self:Update() should be called, rather than directly self:Pe
 
 Finally, self:OnStateChanged should be called as the primary state-changed callback of the screen.
 ]]--
-ZO_Gamepad_ParametricList_Screen = ZO_Object:Subclass()
-
-function ZO_Gamepad_ParametricList_Screen:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_Gamepad_ParametricList_Screen = ZO_InitializingObject:Subclass()
 
 --[[
 Initialize the parametric list screen.
@@ -75,7 +69,7 @@ function ZO_Gamepad_ParametricList_Screen:SetListsUseTriggerKeybinds(addListTrig
     self.addListTriggerKeybinds = addListTriggerKeybinds
     self.listTriggerHeaderComparator = optionalHeaderComparator
 
-    if(not addListTriggerKeybinds) then
+    if not addListTriggerKeybinds then
         self:TryRemoveListTriggers()
     end
 end
@@ -85,11 +79,11 @@ end
 ---------------------
 
 function ZO_Gamepad_ParametricList_Screen:GetListFragment(list)
-    if(type(list) == "string") then
+    if type(list) == "string" then
         list = self:GetList(list)
     end
 
-    if(list ~= nil) then
+    if list ~= nil then
         return list._fragment
     end
 end
@@ -103,23 +97,23 @@ function ZO_Gamepad_ParametricList_Screen:GetHeaderContainer()
 end
 
 function ZO_Gamepad_ParametricList_Screen:ActivateCurrentList()
-    if(self._currentList ~= nil) then
+    if self._currentList ~= nil then
         self:TryAddListTriggers()
         self._currentList:Activate()
     end
 end
 
 function ZO_Gamepad_ParametricList_Screen:DeactivateCurrentList()
-    if(self._currentList ~= nil) then
+    if self._currentList ~= nil then
         self._currentList:Deactivate()
         self:TryRemoveListTriggers()
     end
 end
 
 function ZO_Gamepad_ParametricList_Screen:EnableCurrentList()
-    if(self._currentList ~= nil) then
+    if self._currentList ~= nil then
         local currentFragment = self:GetListFragment(self._currentList)
-        if(currentFragment) then
+        if currentFragment then
             SCENE_MANAGER:AddFragment(currentFragment)
         end
         self:TryAddListTriggers()
@@ -127,15 +121,17 @@ function ZO_Gamepad_ParametricList_Screen:EnableCurrentList()
             self._currentList:SetDirectionalInputEnabled(false)
             DIRECTIONAL_INPUT:Activate(self, self.control)
         end
-        self._currentList:Activate()
+        if not self:IsHeaderActive() then
+            self._currentList:Activate()
+        end
     end
 end
 
 function ZO_Gamepad_ParametricList_Screen:DisableCurrentList()
-    if(self._currentList ~= nil) then
+    if self._currentList ~= nil then
         self._currentList:Deactivate()
         local currentFragment = self:GetListFragment(self._currentList)
-        if(currentFragment) then
+        if currentFragment then
             SCENE_MANAGER:RemoveFragment(currentFragment)
         end
         self:TryRemoveListTriggers()
@@ -147,11 +143,11 @@ function ZO_Gamepad_ParametricList_Screen:DisableCurrentList()
 end
 
 function ZO_Gamepad_ParametricList_Screen:SetCurrentList(list)
-    if(type(list) == "string") then
+    if type(list) == "string" then
         list = self:GetList(list)
     end
 
-    if(self._currentList ~= list) then
+    if self._currentList ~= list then
         self:DisableCurrentList()
         self._currentList = list
     end
@@ -164,7 +160,7 @@ function ZO_Gamepad_ParametricList_Screen:GetCurrentList()
 end
 
 function ZO_Gamepad_ParametricList_Screen:IsCurrentList(list)
-    if(type(list) == "string") then
+    if type(list) == "string" then
         list = self:GetList(list)
     end
 
@@ -213,7 +209,7 @@ end
 function ZO_Gamepad_ParametricList_Screen:CreateListFragment(name, hideControl)
     local list = self.lists[name]
     local containerControl = list:GetControl():GetParent()
-    
+
     if hideControl ~= nil then
         containerControl:SetHidden(hideControl)
     end
@@ -225,8 +221,12 @@ function ZO_Gamepad_ParametricList_Screen:CreateListFragment(name, hideControl)
 end
 
 function ZO_Gamepad_ParametricList_Screen:SetScene(scene)
-    if self.scene then -- Make sure we don't register multiple callbacks
+    -- Make sure we don't register multiple callbacks
+    if self.scene then
         self.scene:UnregisterCallback("StateChange", self.onStateChangedCallback)
+    elseif self.parentFragment then
+        self.parentFragment:UnregisterCallback("StateChange", self.onStateChangedCallback)
+        self.parentFragment = nil
     end
 
     if scene then
@@ -239,7 +239,59 @@ function ZO_Gamepad_ParametricList_Screen:SetScene(scene)
     self.scene = scene
 end
 
+-- instead of associating this screen with a scene, you can instead associate
+-- it with a fragment. This parent fragment will behave like the scene would;
+-- you can hide it and show it to hide and show the list screen.
+function ZO_Gamepad_ParametricList_Screen:SetParentFragment(parentFragment)
+    -- Make sure we don't register multiple callbacks
+    if self.scene then
+        self.scene:UnregisterCallback("StateChange", self.onStateChangedCallback)
+        self.scene = nil
+    elseif self.parentFragment then
+        self.parentFragment:UnregisterCallback("StateChange", self.onStateChangedCallback)
+    end
+
+    if parentFragment then
+        self.onStateChangedCallback = function(...)
+            self:OnStateChanged(...)
+        end
+        parentFragment:RegisterCallback("StateChange", self.onStateChangedCallback)
+    end
+
+    self.parentFragment = parentFragment
+end
+
 -- Header functions --
+
+function ZO_Gamepad_ParametricList_Screen:AddSearch(textSearchKeybindStripDescriptor, onTextSearchTextChangedCallback)
+    self.textSearchKeybindStripDescriptor = textSearchKeybindStripDescriptor
+    self.textSearchHeaderControl = CreateControlFromVirtual("$(parent)SearchContainer", self.header, "ZO_Gamepad_TextSearch_HeaderEditbox")
+    self.textSearchHeaderFocus = ZO_TextSearch_Header_Gamepad:New(self.textSearchHeaderControl, onTextSearchTextChangedCallback)
+    self:SetupHeaderFocus(self.textSearchHeaderFocus)
+
+    ZO_GamepadGenericHeader_SetHeaderFocusControl(self.header, self.textSearchHeaderControl)
+end
+
+function ZO_Gamepad_ParametricList_Screen:IsTextSearchEntryHidden()
+    if self.textSearchHeaderControl then
+        return self.textSearchHeaderControl:IsHidden()
+    end
+
+    return true
+end
+
+function ZO_Gamepad_ParametricList_Screen:SetTextSearchEntryHidden(isHidden)
+    if self.textSearchHeaderControl then
+        self.textSearchHeaderControl:SetHidden(isHidden)
+    end
+end
+
+function ZO_Gamepad_ParametricList_Screen:SetTextSearchFocused(isFocused)
+    -- Only perform if we have a text search and the text search is active
+    if self.textSearchHeaderFocus and self:IsHeaderActive() then
+        self.textSearchHeaderFocus:SetFocused(isFocused)
+    end
+end
 
 function ZO_Gamepad_ParametricList_Screen:SetupHeaderFocus(headerFocus)
     if self.headerFocus then
@@ -250,8 +302,16 @@ function ZO_Gamepad_ParametricList_Screen:SetupHeaderFocus(headerFocus)
     self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
 end
 
+function ZO_Gamepad_ParametricList_Screen:IsHeaderActive()
+    return self.headerFocus and self.headerFocus:IsActive()
+end
+
 function ZO_Gamepad_ParametricList_Screen:RequestEnterHeader()
     if not self.headerFocus or self.headerFocus:IsActive() then
+        return
+    end
+
+    if self.textSearchHeaderFocus and self:IsTextSearchEntryHidden() then
         return
     end
 
@@ -270,10 +330,22 @@ function ZO_Gamepad_ParametricList_Screen:RequestLeaveHeader()
 
     if self:CanLeaveHeader() then
         self.headerFocus:Deactivate()
-        self._currentList:Activate()
-        self:RefreshKeybinds()
         self:OnLeaveHeader()
+        if self._currentList then
+            self._currentList:Activate()
+        end
+        self:RefreshKeybinds()
     end
+end
+
+function ZO_Gamepad_ParametricList_Screen:ExitHeader()
+    if not self.headerFocus then
+        return
+    end
+
+    self.headerFocus:Deactivate()
+    self:OnLeaveHeader()
+    self:RefreshKeybinds()
 end
 
 function ZO_Gamepad_ParametricList_Screen:CanEnterHeader()
@@ -281,15 +353,39 @@ function ZO_Gamepad_ParametricList_Screen:CanEnterHeader()
 end
 
 function ZO_Gamepad_ParametricList_Screen:CanLeaveHeader()
-    return self._currentList:GetNumItems() > 0 -- override function for implementation specific functionality
+    return not self._currentList or self._currentList:GetNumItems() > 0 -- override function for implementation specific functionality
 end
 
 function ZO_Gamepad_ParametricList_Screen:OnEnterHeader()
     -- override function for implementation specific functionality
+
+    -- Swap keybinds to text search keybinds if there is a text search
+    if self.textSearchHeaderFocus then
+        if self.keybindStripDescriptor then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+
+        if self.textSearchKeybindStripDescriptor then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
+        end
+    end
 end
 
 function ZO_Gamepad_ParametricList_Screen:OnLeaveHeader()
     -- override function for implementation specific functionality
+
+    -- Swap keybinds from text search keybinds if there is a text search
+    if self.textSearchHeaderFocus then
+        self:SetTextSearchFocused(false)
+
+        if self.textSearchKeybindStripDescriptor then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
+        end
+
+        if self.keybindStripDescriptor then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end
 end
 
 function ZO_Gamepad_ParametricList_Screen:UpdateDirectionalInput()
@@ -297,11 +393,11 @@ function ZO_Gamepad_ParametricList_Screen:UpdateDirectionalInput()
     if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
         if self.headerFocus:IsActive() then
             self:RequestLeaveHeader()
-        else
+        elseif self._currentList then
             self._currentList:MoveNext()
         end
     elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-        if self._currentList.selectedIndex ~= 1 then
+        if self._currentList and self._currentList:GetSelectedIndex() ~= 1 then
             self._currentList:MovePrevious()
         else
             self:RequestEnterHeader()
@@ -311,7 +407,7 @@ end
 
 -- A function which should be called as the StateChanged callback for the scene.
 function ZO_Gamepad_ParametricList_Screen:OnStateChanged(oldState, newState)
-    if newState == SCENE_SHOWING or newState == SCENE_GROUP_SHOWING then
+    if newState == SCENE_SHOWING or newState == SCENE_GROUP_SHOWING or newState == SCENE_FRAGMENT_SHOWING then
         self:PerformDeferredInitialize()
         if self.keybindStripDescriptor then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
@@ -323,22 +419,24 @@ function ZO_Gamepad_ParametricList_Screen:OnStateChanged(oldState, newState)
         
         SCENE_MANAGER:AddFragment(self.headerFragment)
         self:OnShowing()
-    elseif newState == SCENE_HIDING then
-        if self.keybindStripDescriptor then
+    elseif newState == SCENE_SHOWN or newState == SCENE_GROUP_SHOWN or newState == SCENE_FRAGMENT_SHOWN then
+        self:OnShow()
+    elseif newState == SCENE_HIDING or newState == SCENE_GROUP_HIDING or newState == SCENE_FRAGMENT_HIDING then
+        if newState ~= SCENE_GROUP_HIDING and self.keybindStripDescriptor then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         end
+        self:HideFragmentsIfNeeded()
         self:OnHiding()
-    elseif newState == SCENE_HIDDEN or newState == SCENE_GROUP_HIDDEN then
+    elseif newState == SCENE_HIDDEN or newState == SCENE_GROUP_HIDDEN or newState == SCENE_FRAGMENT_HIDDEN then
         if newState == SCENE_GROUP_HIDDEN and self.keybindStripDescriptor then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         end
+
         if DIRECTIONAL_INPUT:IsListening(self) then
             DIRECTIONAL_INPUT:Deactivate(self)
         end
         self:Deactivate()
         self:OnHide()
-    elseif newState == SCENE_SHOWN or newState == SCENE_GROUP_SHOWN then
-        self:OnShow()
     end
 end
 
@@ -358,7 +456,9 @@ end
 
 -- A function that can be called from (or as) the header's tabBar callback.
 function ZO_Gamepad_ParametricList_Screen:OnTabBarCategoryChanged(selectedData)
-    if self.scene and SCENE_MANAGER:IsShowing(self.scene.name) then
+    local isSceneShowing = self.scene ~= nil and SCENE_MANAGER:IsShowing(self.scene.name)
+    local isParentFragmentShowing = self.parentFragment ~= nil and self.parentFragment:IsShowing()
+    if isSceneShowing or isParentFragmentShowing then
         if self.currentFragment then
             SCENE_MANAGER:RemoveFragment(self.currentFragment)
         end
@@ -396,6 +496,9 @@ end
 
 -- A function, which may be overridden in a sub-class, and is called whenever the item list's select is changed.
 function ZO_Gamepad_ParametricList_Screen:OnSelectionChanged(list, selectedData, oldSelectedData)
+    if self:IsHeaderActive() and self._currentList then
+        self._currentList:Deactivate()
+    end
 end
 
 -- A function, which may be overridden in a sub-class, and is called whenever the item list's target data is changed.
@@ -475,6 +578,8 @@ function ZO_Gamepad_ParametricList_Screen:OnHide()
     if self.headerFocus and DIRECTIONAL_INPUT:IsListening(self) then
         DIRECTIONAL_INPUT:Deactivate(self)
     end
+
+    self:ExitHeader()
 end
 
 --[[ ----------- ]]
@@ -516,6 +621,23 @@ function ZO_Gamepad_ParametricList_Screen:CreateAndSetupList(control, callbackPa
     end
 
     return list
+end
+
+function ZO_Gamepad_ParametricList_Screen:HideFragmentsIfNeeded()
+    if self.parentFragment then
+        -- In the normal case (1 screen == 1 scene), the scene will
+        -- automatically hide all temporary fragments for us. If we are
+        -- parented to a fragment instead; we don't get that behavior for free, so
+        -- instead we'll manually remove fragments here.
+        if self.currentFragment then
+            SCENE_MANAGER:RemoveFragment(self.currentFragment)
+        end
+        local currentListFragment = self:GetListFragment(self._currentList)
+        if currentListFragment then
+            SCENE_MANAGER:RemoveFragment(currentListFragment)
+        end
+       SCENE_MANAGER:RemoveFragment(self.headerFragment) 
+    end
 end
 
 --Update Cooldown Manger

@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_Constellation" pixelRoundingEnabled="false" blendMode="ADD" textureFile="EsoUI\Art\Champion\champion_constellations.dds" virtual="true" />
+        <Texture name="ZO_ConstellationGlow" pixelRoundingEnabled="false" blendMode="ADD" textureFile="EsoUI\Art\Champion\champion_constellations_glow.dds" virtual="true" />
+        <Texture name="ZO_ConstellationMouseOver" pixelRoundingEnabled="false" blendMode="ADD" textureFile="EsoUI\Art\Champion\champion_constellations_mouseover.dds" virtual="true" />
+        <Texture name="ZO_Cluster" pixelRoundingEnabled="false" blendMode="ADD" alpha="0" virtual="true" />
+
+        <!-- TODO: champion 2, placeholder assets -->
+        <Texture name="ZO_ConstellationCursor_Gamepad" hidden="true" layer="OVERLAY" textureFile="EsoUI/Art/WorldMap/map_centerReticle.dds" virtual="true"/>
+        <Line name="ZO_ChampionStarLink" textureFile="EsoUI/Art/Champion/champion_star_link.dds" virtual="true"/>
+
+        <!-- Set each of these virtual textures to a concrete texture on load so their texture files are loaded into memory -->
+        <Texture name="ZO_ChampionConstellationPreloadTextures" hidden="true" inherits="ZO_Constellation"/>
+    </Controls>
+</GuiXml>

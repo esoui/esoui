@@ -69,10 +69,6 @@
                         ZO_EditDefaultText_OnTextChanged(self)
                     </OnTextChanged>
 
-                    <OnEscape>
-                        ZO_PlayerInventory_EndSearch(self)
-                    </OnEscape>
-
                     <OnEnter>
                         ZO_PlayerInventory_OnSearchEnterKeyPressed(self)
                     </OnEnter>
@@ -177,7 +173,7 @@
             <Anchor point="TOPRIGHT" offsetY="96"/>
             <Anchor point="BOTTOMRIGHT" />
         </Control>
-        
+
         <TopLevelControl name="ZO_InventoryTemplate" mouseEnabled="true" hidden="true" virtual="true">
             <Dimensions x="565" />
             <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-20" />
@@ -187,6 +183,16 @@
                 <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
 
                 <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
+
+                <Control name="$(parent)SearchFilters" inherits="ZO_InventorySubFiltersWithSearch" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Tabs" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT" />
+                </Control>
+
+                <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
 
                 <Control name="$(parent)List" inherits="ZO_InventoryList"/>
 

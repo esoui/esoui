@@ -336,6 +336,12 @@
             </OnInitialized>
         </Control>
 
+        <Control name="ZO_NotificationsPointsResetRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
+            <OnInitialized>
+                self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
+            </OnInitialized>
+        </Control>
+
         <TopLevelControl name="ZO_Notifications" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_Notifications_OnInitialized(self)

@@ -122,5 +122,54 @@
                 self.SetSelected = ZO_IconHeader_Setup
             </OnInitialized>
         </Control>
+
+        <Control name="ZO_SimpleArrowIconHeader" inherits="ZO_IconHeader" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                ZO_SimpleArrowIconHeader_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseUp>
+                self:OnMouseUp(upInside)
+            </OnMouseUp>
+
+            <OnMouseEnter>
+                self:OnMouseEnter()
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self:OnMouseExit()
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Icon" scale="1" override="true" resizeToFitFile="true" />
+
+                <Label name="$(parent)Text" override="true" modifyTextType="UPPERCASE">
+                    <OnMouseUp>
+                        ZO_PropagateHandlerToParent("OnMouseUp", ...)
+                    </OnMouseUp>
+
+                    <OnMouseEnter>
+                        ZO_PropagateHandlerToParent("OnMouseEnter", ...)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_PropagateHandlerToParent("OnMouseExit", ...)
+                    </OnMouseExit>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_StatusSimpleArrowIconHeader" inherits="ZO_SimpleArrowIconHeader" virtual="true">
+            <Controls>
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/>
+                </Texture>
+
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)StatusIcon" relativePoint="RIGHT" offsetX="16" />
+                </Texture>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

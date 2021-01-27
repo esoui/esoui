@@ -1547,12 +1547,10 @@ do
                 self.nextPrecisionPositionOrOrientationUpdateMS = frameTimeMS + PRECISION_POSITION_OR_ORIENTATION_UPDATE_INTERVAL_MS
 
                 if self:IsPrecisionPlacementMoveMode() then
-                    local xText = string.format("%d", x)
-                    local yText = string.format("%d", y)
-                    local zText = string.format("%d", z)
-                    local positionText = GetString(SI_HOUSING_EDITOR_CURRENT_FURNITURE_POSITION)
-
-                    positionText = string.gsub(string.gsub(string.gsub(positionText, "<<1>>", xText), "<<2>>", yText), "<<3>>", zText)
+                    local xText = ZO_FastFormatDecimalNumber(ZO_CommaDelimitNumber(x))
+                    local yText = ZO_FastFormatDecimalNumber(ZO_CommaDelimitNumber(y))
+                    local zText = ZO_FastFormatDecimalNumber(ZO_CommaDelimitNumber(z))
+                    local positionText = string.format(GetString(SI_HOUSING_EDITOR_CURRENT_FURNITURE_POSITION), xText, yText, zText)
                     self.precisionPositionLabel:SetText(positionText)
                 elseif self:IsPrecisionPlacementRotationMode() then
                     pitch = math.deg(pitch or 0) % 360
@@ -1561,13 +1559,11 @@ do
                     if pitch > 359.94 then pitch = 0 end
                     if yaw > 359.94 then yaw = 0 end
                     if roll > 359.94 then roll = 0 end
-
-                    local pitchText = string.format("%.1f", pitch)
-                    local yawText = string.format("%.1f", yaw)
-                    local rollText = string.format("%.1f", roll)
-                    local orientationText = GetString(SI_HOUSING_EDITOR_CURRENT_FURNITURE_ORIENTATION)
-
-                    orientationText = string.gsub(string.gsub(string.gsub(orientationText, "<<1>>", yawText), "<<2>>", pitchText), "<<3>>", rollText)
+                    
+                    local pitchText = ZO_FastFormatDecimalNumber(string.format("%.1f", pitch))
+                    local yawText = ZO_FastFormatDecimalNumber(string.format("%.1f", yaw))
+                    local rollText = ZO_FastFormatDecimalNumber(string.format("%.1f", roll))
+                    local orientationText = string.format(GetString(SI_HOUSING_EDITOR_CURRENT_FURNITURE_ORIENTATION), yawText, pitchText, rollText)
                     self.precisionOrientationLabel:SetText(orientationText)
                 end
 
@@ -2390,7 +2386,7 @@ do
             {
                 name = function()
                             if IsInGamepadPreferredMode() then
-                                return zo_strformat(SI_HOUSING_EDITOR_PRECISION_ROTATE_UNITS, ZO_CommaDelimitDecimalNumber(zo_roundToNearest(math.deg(HousingEditorGetPrecisionRotateUnits()), 0.01)))
+                                return zo_strformat(SI_HOUSING_EDITOR_PRECISION_ROTATE_UNITS, ZO_FastFormatDecimalNumber(ZO_CommaDelimitDecimalNumber(zo_roundToNearest(math.deg(HousingEditorGetPrecisionRotateUnits()), 0.01))))
                             else
                                 return GetString(SI_HOUSING_EDITOR_CURSOR_MODE)
                             end
@@ -2410,7 +2406,7 @@ do
             --Quaternary (Cycle Rotation Units)
             {
                 name = function()
-                    return zo_strformat(SI_HOUSING_EDITOR_PRECISION_ROTATE_UNITS, ZO_CommaDelimitDecimalNumber(zo_roundToNearest(math.deg(HousingEditorGetPrecisionRotateUnits()), 0.01)))
+                    return zo_strformat(SI_HOUSING_EDITOR_PRECISION_ROTATE_UNITS, ZO_FastFormatDecimalNumber(ZO_CommaDelimitDecimalNumber(zo_roundToNearest(math.deg(HousingEditorGetPrecisionRotateUnits()), 0.01))))
                 end,
                 keybind = "HOUSING_EDITOR_QUATERNARY_ACTION",
                 visible = function()

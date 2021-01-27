@@ -335,6 +335,7 @@ function ZO_DailyLoginRewards_Gamepad:OnPreviewShown()
 end
 
 function ZO_DailyLoginRewards_Gamepad:UpdatePreview(rewardData)
+    SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
     SYSTEMS:GetObject("itemPreview"):PreviewReward(rewardData:GetRewardId())
     self:RefreshTooltip(rewardData)
 end

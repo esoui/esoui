@@ -3,7 +3,7 @@ local MAX_READ_ATTACHMENTS = MAIL_MAX_ATTACHED_ITEMS + 1
 
 local SYSTEM_MAIL_ICON = "EsoUI/Art/Mail/Gamepad/gp_mailMenu_mailType_system.dds"
 local CUSTOMERSERVICE_MAIL_ICON = "EsoUI/Art/Mail/Gamepad/gp_mailMenu_mailType_CS.dds"
-
+local EXPIRATION_IMMINENT_ICON = "EsoUI/Art/Miscellaneous/timerRed_64.dds"
 local EMPTY_ATTACHMENT_ICON = nil
 
 local ZO_GAME_REPRESENTATIVE_TEXT_UNSELECTED = ZO_GAME_REPRESENTATIVE_TEXT:Lerp(ZO_DISABLED_TEXT, 0.5)
@@ -610,6 +610,9 @@ local function UpdateMailIcons(mailData, entryData)
     elseif mailData.fromCS then
         entryData:AddIcon(CUSTOMERSERVICE_MAIL_ICON)
     end
+    if mailData:IsExpirationImminent() then
+        entryData:AddIcon(EXPIRATION_IMMINENT_ICON)
+    end
 end
 
 function ZO_MailInbox_Gamepad:UpdateMailColors()
@@ -664,7 +667,11 @@ function ZO_MailInbox_Gamepad:RefreshMailList()
         entryData:SetNameColors(selectedColor, unselectedColor)
         entryData:SetSubLabelColors(selectedColor, unselectedColor)
         entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_MAIL_INBOX_RECEIVED_TEXT, mailData:GetReceivedText()))
-        entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_MAIL_INBOX_EXPIRES_TEXT, mailData:GetExpiresText()))
+        local expiresText = zo_strformat(SI_MAIL_INBOX_EXPIRES_TEXT, mailData:GetExpiresText())
+        if mailData:IsExpirationImminent() then
+            expiresText = ZO_ERROR_COLOR:Colorize(expiresText)
+        end
+        entryData:AddSubLabel(expiresText)
 
         local safeIdKey = zo_getSafeId64Key(mailId)
         self.mailDataById[safeIdKey] = mailData

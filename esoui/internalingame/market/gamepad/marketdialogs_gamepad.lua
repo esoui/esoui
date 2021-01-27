@@ -3,8 +3,10 @@ local FLOW_WARNING = 1
 local FLOW_CONFIRMATION = 2
 local FLOW_CONFIRMATION_ESO_PLUS = 3
 local FLOW_PURCHASING = 4
-local FLOW_SUCCESS = 5
-local FLOW_FAILED = 6
+local FLOW_CONFIRMATION_PARTIAL_BUNDLE = 5
+local FLOW_SUCCESS = 6
+local FLOW_FAILED = 7
+
 
 local DIALOG_FLOW =
 {
@@ -12,6 +14,7 @@ local DIALOG_FLOW =
     [FLOW_CONFIRMATION] = "GAMEPAD_MARKET_PURCHASE_CONFIRMATION",
     [FLOW_CONFIRMATION_ESO_PLUS] = "GAMEPAD_MARKET_FREE_TRIAL_PURCHASE_CONFIRMATION",
     [FLOW_PURCHASING] = "GAMEPAD_MARKET_PURCHASING",
+    [FLOW_CONFIRMATION_PARTIAL_BUNDLE] = "GAMEPAD_MARKET_PARTIAL_BUNDLE_CONFIRMATION",
     [FLOW_SUCCESS] = "GAMEPAD_MARKET_PURCHASE_SUCCESS",
     [FLOW_FAILED] = "GAMEPAD_MARKET_PURCHASE_FAILED",
 }
@@ -149,13 +152,12 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 callback = EndPurchase
             },
         },
-
         finishedCallback = function()
-                                if not self.doMoveToNextFlowPosition then
-                                    OnMarketEndPurchase()
-                                end
-                                self:MoveToNextFlowPosition()
-                           end
+            if not self.doMoveToNextFlowPosition then
+                OnMarketEndPurchase()
+            end
+            self:MoveToNextFlowPosition()
+        end,
     }
 
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS"] =
@@ -353,15 +355,18 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         {
             text = SI_MARKET_PURCHASE_ERROR_TEXT_FORMATTER
         },
-        buttons = { defaultMarketBackButton },
+        buttons =
+        {
+            defaultMarketBackButton
+        },
         noChoiceCallback = EndPurchaseNoChoice,
-        finishedCallback =  function()
-                                OnMarketEndPurchase()
-                                self:EndPurchaseFromErrorDialog()
-                            end,
+        finishedCallback = function()
+            OnMarketEndPurchase()
+            self:EndPurchaseFromErrorDialog()
+        end,
         setup = function(dialog, ...)
-                    dialog.setupFunc(dialog, ...)
-                end,
+            dialog.setupFunc(dialog, ...)
+        end,
     }
 
     local confirmationDialogInfo =
@@ -543,11 +548,11 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         mainText =
         {
-            text =  function(dialog)
-                        local endTimeString = self.marketProductData:GetEndTimeString()
-                        local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS, CURRENCY_ICON_SIZE)
-                        return zo_strformat(SI_MARKET_PURCHASE_FREE_TRIAL_TEXT, endTimeString, currencyIcon)
-                    end,
+            text = function(dialog)
+                local endTimeString = self.marketProductData:GetEndTimeString()
+                local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS, CURRENCY_ICON_SIZE)
+                return zo_strformat(SI_MARKET_PURCHASE_FREE_TRIAL_TEXT, endTimeString, currencyIcon)
+            end,
         },
         canQueue = true,
         buttons =
@@ -556,24 +561,24 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL,
                 callback = function(dialog)
-                                OnMarketEndPurchase()
-                                local NOT_NO_CHOICE_CALLBACK = false
-                                self:EndPurchase(NOT_NO_CHOICE_CALLBACK)
-                           end,
+                    OnMarketEndPurchase()
+                    local NOT_NO_CHOICE_CALLBACK = false
+                    self:EndPurchase(NOT_NO_CHOICE_CALLBACK)
+                end,
             },
             {
                 keybind = "DIALOG_SECONDARY",
                 text = SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT,
-                callback =  function(dialog)
-                                OnMarketEndPurchase(self.marketProductData:GetId())
-                                self.doMoveToNextFlowPosition = true
-                            end,
+                callback = function(dialog)
+                    OnMarketEndPurchase(self.marketProductData:GetId())
+                    self.doMoveToNextFlowPosition = true
+                end,
             },
         },
         mustChoose = true,
-        finishedCallback =  function(dialog)
-                                self:MoveToNextFlowPosition()
-                            end,
+        finishedCallback = function(dialog)
+            self:MoveToNextFlowPosition()
+        end,
     })
 
     local LOADING_DELAY_MS = 500 -- delay is in milliseconds
@@ -602,6 +607,14 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             ZO_Dialogs_ReleaseDialogOnButtonPress(DIALOG_FLOW[FLOW_PURCHASING])
             if purchaseSucceeded then
                 self:SetFlowPosition(FLOW_SUCCESS)
+            elseif result == MARKET_PURCHASE_RESULT_GIFT_COLLECTIBLE_PARTIALLY_OWNED then
+                local displayName = self.marketProductData:GetDisplayName()
+                local dialogData = {}
+                local dialogParams =
+                {
+                    titleParams = { ZO_SELECTED_TEXT:Colorize(displayName) },
+                }
+                self:SetFlowPosition(FLOW_CONFIRMATION_PARTIAL_BUNDLE, dialogData, dialogParams)
             else
                 local dialogData =
                 {
@@ -615,10 +628,14 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     local function MarketPurchasingDialogSetup(dialog, data)
         dialog:setupFunc()
         EVENT_MANAGER:RegisterForEvent("GAMEPAD_MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(dialog, ...) end)
-        if not self.isGift then
-            self.marketProductData:RequestPurchase()
+        if data.shouldSendPartiallyOwnedGift then
+            RespondToSendPartiallyOwnedGift(true)
         else
-            self.marketProductData:RequestPurchaseAsGift(self.giftMessage, self.recipientDisplayName)
+            if not self.isGift then
+                self.marketProductData:RequestPurchase()
+            else
+                self.marketProductData:RequestPurchaseAsGift(self.giftMessage, self.recipientDisplayName)
+            end
         end
     end
 
@@ -687,15 +704,15 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         title =
         {
-            text =  function()
-                        if self.useProductInfo then
-                            if self.useProductInfo.transactionCompleteTitleText then
-                                return self.useProductInfo.transactionCompleteTitleText
-                            end
-                        end
+            text = function()
+                if self.useProductInfo then
+                    if self.useProductInfo.transactionCompleteTitleText then
+                        return self.useProductInfo.transactionCompleteTitleText
+                    end
+                end
 
-                        return GetString(SI_TRANSACTION_COMPLETE_TITLE)
-                    end,
+                return GetString(SI_TRANSACTION_COMPLETE_TITLE)
+            end,
         },
         mainText =
         {
@@ -750,13 +767,13 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         {
             {
                 keybind = "DIALOG_NEGATIVE",
-                text =  function()
-                            if self.purchaseFromIngame then
-                                return GetString(SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL)
-                            else
-                                return GetString(SI_MARKET_BACK_TO_STORE_KEYBIND_LABEL)
-                            end
-                        end,
+                text = function()
+                    if self.purchaseFromIngame then
+                        return GetString(SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL)
+                    else
+                        return GetString(SI_MARKET_BACK_TO_STORE_KEYBIND_LABEL)
+                    end
+                end,
                 callback = EndPurchase,
             },
             {
@@ -821,7 +838,8 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         canQueue = true,
         mustChoose = true,
-        buttons = {
+        buttons =
+        {
             {
                 text = function(dialog)
                     if ZO_MarketDialogs_Shared_ShouldRestartGiftFlow(dialog.data.purchaseResult) then
@@ -839,6 +857,43 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 end,
                 keybind = "DIALOG_NEGATIVE"
             }
+        },
+    })
+
+    ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_CONFIRMATION_PARTIAL_BUNDLE],
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+        title =
+        {
+            text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
+        },
+        mainText =
+        {
+            text = SI_MARKET_GIFTING_BUNDLE_PARTS_OWNED_TEXT
+        },
+        canQueue = true,
+        mustChoose = true,
+        buttons =
+        {
+            {
+                text = SI_MARKET_PURCHASE_ERROR_CONTINUE,
+                callback = function(dialog)
+                    self.doMoveToNextFlowPosition = true
+                    self:MoveToNextFlowPosition({ shouldSendPartiallyOwnedGift = true })
+                end,
+                keybind = "DIALOG_PRIMARY",
+            },
+            {
+                text = SI_DIALOG_EXIT,
+                callback = function(dialog)
+                    RespondToSendPartiallyOwnedGift(false)
+                    self:EndPurchase()
+                end,
+                keybind = "DIALOG_NEGATIVE",
+            },
         },
     })
 
@@ -1568,12 +1623,13 @@ do
         [FLOW_WARNING] = FLOW_CONFIRMATION,
         [FLOW_CONFIRMATION] = FLOW_PURCHASING,
         [FLOW_CONFIRMATION_ESO_PLUS] = FLOW_PURCHASING,
+        [FLOW_CONFIRMATION_PARTIAL_BUNDLE] = FLOW_PURCHASING,
         [FLOW_PURCHASING] = FLOW_SUCCESS,
     }
-    function ZO_GamepadMarketPurchaseManager:MoveToNextFlowPosition()
+    function ZO_GamepadMarketPurchaseManager:MoveToNextFlowPosition(dialogData)
         if self.doMoveToNextFlowPosition then
             local nextPosition = FLOW_MAPPING[self.flowPosition] or self.flowPosition + 1
-            self:SetFlowPosition(nextPosition)
+            self:SetFlowPosition(nextPosition, dialogData)
             self.doMoveToNextFlowPosition = false
         end
     end

@@ -3,8 +3,6 @@ ZO_SortHeaderGroup.HEADER_CLICKED = "HeaderClicked"
 ZO_SortHeaderGroup.SUPPRESS_CALLBACKS = true
 ZO_SortHeaderGroup.FORCE_RESELECT = true
 
-local SORT_ARROW_UP = "EsoUI/Art/Miscellaneous/list_sortUp.dds"
-local SORT_ARROW_DOWN = "EsoUI/Art/Miscellaneous/list_sortDown.dds"
 local SORT_ARROW_OFFSET_X = 2
 
 function ZO_SortHeaderGroup:New(headerContainer, showArrows)
@@ -69,9 +67,9 @@ local function UpdateArrowTexture(arrow, sortOrder)
     arrow:SetHidden(false)
 
     if sortOrder == ZO_SORT_ORDER_UP then
-        arrow:SetTexture(SORT_ARROW_UP)
+        arrow:SetTexture(ZO_ICON_SORT_ARROW_UP)
     else
-        arrow:SetTexture(SORT_ARROW_DOWN)
+        arrow:SetTexture(ZO_ICON_SORT_ARROW_DOWN)
     end
 end
 

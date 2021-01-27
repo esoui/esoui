@@ -10,7 +10,7 @@ local REQUESTING_GOLD = "request"
 local function GetItemAttachedIndex(bagId, slotIndex)
     for i = 1, MAIL_MAX_ATTACHED_ITEMS do
         local queuedBagId, queuedSlotIndex = GetQueuedItemAttachmentInfo(i)
-        if (queuedBagId == bagId) and (queuedSlotIndex == slotIndex) then
+        if queuedBagId == bagId and queuedSlotIndex == slotIndex then
             return i
         end
     end
@@ -74,13 +74,7 @@ local function GetDefaultAddresseeText()
 end
 
 -- The main class.
-ZO_MailSend_Gamepad = ZO_Object:Subclass()
-
-function ZO_MailSend_Gamepad:New(...)
-    local mailSend = ZO_Object.New(self)
-    mailSend:Initialize(...)
-    return mailSend
-end
+ZO_MailSend_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_MailSend_Gamepad:Initialize(control)
     self.control = control
@@ -91,13 +85,14 @@ end
 function ZO_MailSend_Gamepad:OnShowing()
     self:PerformDeferredInitialization()
 
-    self.inventoryList:RefreshList()
+    local TRIGGER_CALLBACK = true
+    self.inventoryList:RefreshList(TRIGGER_CALLBACK)
     self:PopulateMainList()
     self:ConnectShownEvents()
 
     self:EnterOutbox()
     self:UpdateMoneyAttachment()
-    ZO_MailSendShared_RestorePendingMail(self)
+    ZO_MailSend_Shared.RestorePendingMail(self)
 
     if self.initialContact then
         self.mailView:Display(nil, nil, self.initialContact)
@@ -156,7 +151,7 @@ function ZO_MailSend_Gamepad:InitializeFragment()
                 self.pendingMailChanged = nil
             end
         elseif newState == SCENE_FRAGMENT_HIDDEN then
-            ZO_MailSendShared_SavePendingMail()
+            ZO_MailSend_Shared.SavePendingMail()
             self:OnHidden()
         end
     end)
@@ -286,30 +281,30 @@ function ZO_MailSend_Gamepad:InitializeKeybindDescriptors()
             name = GetString(SI_GAMEPAD_MAIL_SEND_ACCEPT_MONEY),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                            if self.goldMode == ATTACHING_GOLD then
-                                QueueCOD(0)
-                                QueueMoneyAttachment(self.goldSlider:GetValue())
-                            elseif self.goldMode == REQUESTING_GOLD then
-                                QueueMoneyAttachment(0)
-                                QueueCOD(self.goldSlider:GetValue())
-                            end
-                            PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
-                            self:UpdatePostageMoney()
-                            self:EnterOutbox()
-                            local targetControl = self.mainList:GetTargetControl()
-                            targetControl:SetHidden(false)
-                       end,
+                if self.goldMode == ATTACHING_GOLD then
+                    QueueCOD(0)
+                    QueueMoneyAttachment(self.goldSlider:GetValue())
+                elseif self.goldMode == REQUESTING_GOLD then
+                    QueueMoneyAttachment(0)
+                    QueueCOD(self.goldSlider:GetValue())
+                end
+                PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
+                self:UpdatePostageMoney()
+                self:EnterOutbox()
+                local targetControl = self.mainList:GetTargetControl()
+                targetControl:SetHidden(false)
+            end,
             visible = function() return self.goldSlider:GetValue() <= self.goldSlider:GetMaxValue() end,
         },
 
         -- Cancel
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
-                            self.mainList:WhenInactiveSetTargetControlHidden(true)
-                            self:UpdateMoneyAttachment()
-                            self:EnterOutbox()
-                       end),
+            self.mainList:WhenInactiveSetTargetControlHidden(true)
+            self:UpdateMoneyAttachment()
+            self:EnterOutbox()
+        end),
     }
-    
+
     -- Contacts List
     self.contactsKeybindDescriptor =
     {
@@ -320,85 +315,90 @@ function ZO_MailSend_Gamepad:InitializeKeybindDescriptors()
             name = GetString(SI_GAMEPAD_MAIL_SEND_ACCEPT_MONEY),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                            self:EnterOutbox()
-                            local selectedItem = self.contactsList:GetTargetData()
-                            if selectedItem.actionFunction then
-                                selectedItem.actionFunction(selectedItem)
-                            end
+                self:EnterOutbox()
+                local selectedItem = self.contactsList:GetTargetData()
+                if selectedItem.actionFunction then
+                    selectedItem.actionFunction(selectedItem)
+                end
                             
-                       end,
+            end,
         },
 
         -- Cancel
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
-                            self:UpdateMoneyAttachment()
-                            self:EnterOutbox()
-                       end),
+            self:UpdateMoneyAttachment()
+            self:EnterOutbox()
+        end),
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.contactsKeybindDescriptor, self.contactsList)
 
     -- Inventory
-    self.inventoryKeybindDescriptor = 
+    self.inventoryKeybindDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
         -- Add to Mail/Remove from Mail
         {
             name = function()
-                        local selectedItem = self.inventoryList:GetTargetData()
-                        if IsItemAttached(selectedItem.bagId, selectedItem.slotIndex) then
-                            return GetString(SI_GAMEPAD_MAIL_SEND_DETACH_ITEM)
-                        else
-                            return GetString(SI_GAMEPAD_MAIL_SEND_ATTACH_ITEM)
-                        end
-                    end,
+                local selectedItem = self.inventoryList:GetTargetData()
+                if IsItemAttached(selectedItem.bagId, selectedItem.slotIndex) then
+                    return GetString(SI_GAMEPAD_MAIL_SEND_DETACH_ITEM)
+                else
+                    return GetString(SI_GAMEPAD_MAIL_SEND_ATTACH_ITEM)
+                end
+            end,
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                        local selectedItem = self.inventoryList:GetTargetData()
-                        local bagId = selectedItem.bagId
-                        local slotIndex = selectedItem.slotIndex
-                        local attachedSlotIndex = GetItemAttachedIndex(bagId, slotIndex)
-                        if attachedSlotIndex then -- Item is attached, detach it.
-                            RemoveQueuedAttachment(attachedSlotIndex)
-                            local soundCategory = GetItemSoundCategory(bagId, slotIndex)
-                            PlayItemSound(soundCategory, ITEM_SOUND_ACTION_UNEQUIP)
-                        else -- Item is not attached, attach it.
-                            attachedSlotIndex = GetNextOpenAttachIndex()
-                            if attachedSlotIndex then
-                                QueueItemAttachment(bagId, slotIndex, attachedSlotIndex)
-                                local soundCategory = GetItemSoundCategory(bagId, slotIndex)
-                                PlayItemSound(soundCategory, ITEM_SOUND_ACTION_EQUIP)
-                            end
-                        end
-                    end,
+                local selectedItem = self.inventoryList:GetTargetData()
+                local bagId = selectedItem.bagId
+                local slotIndex = selectedItem.slotIndex
+                local attachedSlotIndex = GetItemAttachedIndex(bagId, slotIndex)
+                if attachedSlotIndex then -- Item is attached, detach it.
+                    RemoveQueuedAttachment(attachedSlotIndex)
+                    local soundCategory = GetItemSoundCategory(bagId, slotIndex)
+                    PlayItemSound(soundCategory, ITEM_SOUND_ACTION_UNEQUIP)
+                else -- Item is not attached, attach it.
+                    attachedSlotIndex = GetNextOpenAttachIndex()
+                    if attachedSlotIndex then
+                        QueueItemAttachment(bagId, slotIndex, attachedSlotIndex)
+                        local soundCategory = GetItemSoundCategory(bagId, slotIndex)
+                        PlayItemSound(soundCategory, ITEM_SOUND_ACTION_EQUIP)
+                    end
+                end
+            end,
             visible = function()
-                        local selectedItem = self.inventoryList:GetTargetData()
-                        if not selectedItem then
-                            return false
-                        end
-                        local bagId = selectedItem.bagId
-                        local slotIndex = selectedItem.slotIndex
+                local selectedItem = self.inventoryList:GetTargetData()
+                if not selectedItem then
+                    return false
+                end
 
-                        if IsItemAttached(bagId, slotIndex) then
-                            return true -- Can always remove an attached item.
-                        end
+                local bagId = selectedItem.bagId
+                local slotIndex = selectedItem.slotIndex
 
-                        local attachedSlotIndex = GetNextOpenAttachIndex()
-                        if not attachedSlotIndex then
-                            return false
-                        end
+                if IsItemAttached(bagId, slotIndex) then
+                    return true -- Can always remove an attached item.
+                end
 
-                        local canAttach = CanQueueItemAttachment(bagId, slotIndex, attachedSlotIndex)
-                        return canAttach
-                   end,
+                local attachedSlotIndex = GetNextOpenAttachIndex()
+                if not attachedSlotIndex then
+                    return false
+                end
+
+                local canAttach = CanQueueItemAttachment(bagId, slotIndex, attachedSlotIndex)
+                return canAttach
+            end,
         },
 
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
-                            self:UpdatePostageMoney()
-                            self:EnterOutbox()
-                       end),
+            self:OnInventoryListBackButtonClicked()
+        end),
     }
+end
+
+function ZO_MailSend_Gamepad:OnInventoryListBackButtonClicked()
+    self:UpdatePostageMoney()
+    self:EnterOutbox()
 end
 
 local function UpdatePlayerGold(control)
@@ -412,23 +412,25 @@ local function UpdatePostage(control)
 end
 
 function ZO_MailSend_Gamepad:InitializeHeader()
-    self.mainHeaderData = {
-            data1HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_PLAYER_GOLD),
-            data1Text = UpdatePlayerGold,
+    self.mainHeaderData =
+    {
+        data1HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_PLAYER_GOLD),
+        data1Text = UpdatePlayerGold,
 
-            data2HeaderText = GetString(SI_GAMEPAD_MAIL_SEND_POSTAGE_LABEL),
-            data2Text = UpdatePostage,
+        data2HeaderText = GetString(SI_GAMEPAD_MAIL_SEND_POSTAGE_LABEL),
+        data2Text = UpdatePostage,
 
-            tabBarEntries = MAIL_MANAGER_GAMEPAD.tabBarEntries,
-        }
+        tabBarEntries = MAIL_MANAGER_GAMEPAD.tabBarEntries,
+    }
 
-    self.setFieldHeaderData = {
-            data1HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_PLAYER_GOLD),
-            data1Text = UpdatePlayerGold,
+    self.setFieldHeaderData =
+    {
+        data1HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_PLAYER_GOLD),
+        data1Text = UpdatePlayerGold,
 
-            data2HeaderText = GetString(SI_GAMEPAD_MAIL_SEND_POSTAGE_LABEL),
-            data2Text = UpdatePostage,
-        }
+        data2HeaderText = GetString(SI_GAMEPAD_MAIL_SEND_POSTAGE_LABEL),
+        data2Text = UpdatePostage,
+    }
 end
 
 local function InventorySetupFunction(entryData)
@@ -444,9 +446,22 @@ end
 
 local SETUP_LOCALLY = true
 function ZO_MailSend_Gamepad:InitializeInventoryList()
-    self.inventoryList = MAIL_MANAGER_GAMEPAD:AddList("Inventory", SETUP_LOCALLY, ZO_GamepadInventoryList, BAG_BACKPACK, SLOT_TYPE_ITEM, function(...) self:InventorySelectionChanged(...) end, InventorySetupFunction)
-    self.inventoryList:SetItemFilterFunction(ItemFilterFunction)
+    local function OnRefreshList(list)
+        if list:GetNumItems() == 0 then
+            MAIL_MANAGER_GAMEPAD:RequestEnterHeader()
+        else
+            MAIL_MANAGER_GAMEPAD:RequestLeaveHeader()
+        end
+    end
 
+    self.inventoryList = MAIL_MANAGER_GAMEPAD:AddList("Inventory", SETUP_LOCALLY, ZO_GamepadInventoryList, BAG_BACKPACK, SLOT_TYPE_ITEM, function(...) self:InventorySelectionChanged(...) end, InventorySetupFunction)
+    self.inventoryList:SetOnRefreshListCallback(OnRefreshList)
+    self.inventoryList:SetSearchContext("mailTextSearch")
+    self.inventoryList:SetItemFilterFunction(ItemFilterFunction)
+    self.inventoryList:SetNoItemText(GetString(SI_GAMEPAD_INVENTORY_EMPTY))
+
+    MAIL_MANAGER_GAMEPAD:SetOnBackButtonCallback(function() self:OnInventoryListBackButtonClicked() end)
+    MAIL_MANAGER_GAMEPAD:SetTextSearchEntryHidden(true)
     self.inventoryListControl = self.inventoryList:GetControl()
 end
 
@@ -511,17 +526,17 @@ function ZO_MailSend_Gamepad:PopulateMainList()
     self:AddMainListEntry(GetString(SI_MAIL_SEND_ATTACH_MONEY), GetString(SI_GAMEPAD_MAIL_SEND_GOLD_HEADER), SEND_GOLD_ICON, function() self:ShowSliderControl(ATTACHING_GOLD, GetQueuedMoneyAttachment(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)) end)
     self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_COD), nil, REQUEST_GOLD_ICON, function() self:ShowSliderControl(REQUESTING_GOLD, GetQueuedCOD(), MAX_PLAYER_CURRENCY) end)
 
-    self.mailView.subjectEdit.edit:SetHandler("OnFocusLost", function(editBox) 
+    self.mailView.subjectEdit.edit:SetHandler("OnFocusLost", function(editBox)
                                                                     RefreshKeybind()
-                                                                    ZO_GamepadEditBox_FocusLost(editBox) 
+                                                                    ZO_GamepadEditBox_FocusLost(editBox)
                                                              end)
-    self.mailView.addressEdit.edit:SetHandler("OnFocusLost", function(editBox) 
+    self.mailView.addressEdit.edit:SetHandler("OnFocusLost", function(editBox)
                                                                     RefreshKeybind()
-                                                                    ZO_GamepadEditBox_FocusLost(editBox) 
+                                                                    ZO_GamepadEditBox_FocusLost(editBox)
                                                              end)
-    self.mailView.bodyEdit.edit:SetHandler("OnFocusLost", function(editBox) 
+    self.mailView.bodyEdit.edit:SetHandler("OnFocusLost", function(editBox)
                                                                     RefreshKeybind()
-                                                                    ZO_GamepadEditBox_FocusLost(editBox) 
+                                                                    ZO_GamepadEditBox_FocusLost(editBox)
                                                              end)
 
     if not self.inventoryList:IsEmpty() then
@@ -598,7 +613,7 @@ function ZO_MailSend_Gamepad:Reset()
     if (not self.inventoryListControl:IsHidden()) or (not self.goldSliderControl:IsHidden()) or (not self.contactsListControl:IsHidden()) then
         PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
     end
-        
+
     self.goldSliderControl:SetHidden(true)
     self.mainList:WhenInactiveSetTargetControlHidden(false)
 
@@ -609,6 +624,8 @@ function ZO_MailSend_Gamepad:Reset()
 
     self.goldMode = nil
     self.inSendMode = false
+
+    MAIL_MANAGER_GAMEPAD:RequestLeaveHeader()
 end
 
 function ZO_MailSend_Gamepad:SwitchToSendTab()
@@ -622,6 +639,7 @@ function ZO_MailSend_Gamepad:EnterSending()
     MAIL_MANAGER_GAMEPAD:SwitchToKeybind(nil) -- Remove keybinds as they are invaild when sending.
     self.loadingLabel:SetText(GetString(SI_GAMEPAD_MAIL_SEND_SENDING))
     self.loadingBox:SetHidden(false)
+    MAIL_MANAGER_GAMEPAD:DeactivateTextSearch()
     MAIL_MANAGER_GAMEPAD:SetCurrentList(nil)
 end
 
@@ -632,6 +650,7 @@ function ZO_MailSend_Gamepad:EnterOutbox()
         self:EnterSending()
     else
         self:SwitchToSendTab()
+        MAIL_MANAGER_GAMEPAD:DeactivateTextSearch()
         MAIL_MANAGER_GAMEPAD:SetCurrentList(self.mainList)
         MAIL_MANAGER_GAMEPAD:SwitchToKeybind(self.mainKeybindDescriptor)
     end
@@ -664,6 +683,7 @@ function ZO_MailSend_Gamepad:EnterContactsList()
     self.setFieldHeaderData.titleText = RECIPIENT_HEADER_TEXT
     MAIL_MANAGER_GAMEPAD:SwitchToHeader(self.setFieldHeaderData)
     MAIL_MANAGER_GAMEPAD:SwitchToKeybind(self.contactsKeybindDescriptor)
+    MAIL_MANAGER_GAMEPAD:DeactivateTextSearch()
     MAIL_MANAGER_GAMEPAD:SetCurrentList(self.contactsList)
 
     PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
@@ -691,18 +711,22 @@ function ZO_MailSend_Gamepad:EnterInventoryList()
 
     self.setFieldHeaderData.titleText = ATTACHMENT_HEADER_TEXT
     MAIL_MANAGER_GAMEPAD:SwitchToHeader(self.setFieldHeaderData)
-
     MAIL_MANAGER_GAMEPAD:SwitchToKeybind(self.inventoryKeybindDescriptor)
     MAIL_MANAGER_GAMEPAD:SetCurrentList(self.inventoryList)
+    MAIL_MANAGER_GAMEPAD:ActivateTextSearch()
+
+    if self.inventoryList and self.inventoryList:GetNumItems() == 0 then
+        MAIL_MANAGER_GAMEPAD:RequestEnterHeader()
+    end
 
     PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
 end
 
-function ZO_MailSend_Gamepad:InventorySelectionChanged(list, inventoryData)
+function ZO_MailSend_Gamepad:InventorySelectionChanged(list, selectedData)
     if MAIL_MANAGER_GAMEPAD:GetCurrentList() == self.inventoryList then
         GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
-        if inventoryData then
-            GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, inventoryData.bagId, inventoryData.slotIndex)
+        if selectedData then
+            GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, selectedData.bagId, selectedData.slotIndex)
         end
         MAIL_MANAGER_GAMEPAD:RefreshKeybind()
     end
@@ -725,7 +749,7 @@ function ZO_MailSend_Gamepad:UpdateMoneyAttachment()
 end
 
 function ZO_MailSend_Gamepad:IsAttachingItems()
-    return (not self.sendControl:IsHidden())
+    return not self.sendControl:IsHidden()
 end
 
 function ZO_MailSend_Gamepad:UpdatePostageMoney()
@@ -733,7 +757,7 @@ function ZO_MailSend_Gamepad:UpdatePostageMoney()
 end
 
 function ZO_MailSend_Gamepad:OnMailAttachmentAdded(attachSlot)
-    local bagId, slotIndex, icon, stack = GetQueuedItemAttachmentInfo(attachSlot)
+    local _, _, icon, stack = GetQueuedItemAttachmentInfo(attachSlot)
     self.mailView:SetAttachment(attachSlot, stack, icon)
     self:UpdatePostageMoney()
     MAIL_MANAGER_GAMEPAD:RefreshKeybind()

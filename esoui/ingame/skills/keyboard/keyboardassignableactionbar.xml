@@ -69,8 +69,7 @@
                 <Button name="$(parent)Button" mouseOverBlendMode="ADD">
                     <AnchorFill />
 
-                    <MouseButton button="1" enabled="true" />
-                    <MouseButton button="2" enabled="true" />
+                    <MouseButton button="RIGHT" enabled="true" />
 
                     <Textures mouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds" />
                     

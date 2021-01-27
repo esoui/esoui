@@ -27,12 +27,37 @@ function FriendsList_Gamepad:Initialize(control, rowTemplate)
 
     GAMEPAD_FRIENDS_LIST_SCENE = ZO_Scene:New("gamepad_friends", SCENE_MANAGER)
     GAMEPAD_FRIENDS_LIST_SCENE:AddFragment(self:GetListFragment())
+
+    if GetUIPlatform() == UI_PLATFORM_PS5 then
+        EVENT_MANAGER:RegisterForEvent("FriendsList_Gamepad", EVENT_FRIEND_CHARACTER_INFO_RECEIVED, function(eventId, ...) self:OnFriendCharacterInfoReceived(...) end)
+    end
+end
+
+function FriendsList_Gamepad:OnFriendCharacterInfoReceived(displayName, hasCharacter, characterName, zoneName, class, alliance, level, championPoints)
+    if not hasCharacter or not ZO_Dialogs_IsShowing("GAMEPAD_SOCIAL_OPTIONS_DIALOG") then
+        return
+    end
+
+    local entryData = self:GetSelectedData()
+    if not entryData then
+        return
+    end
+
+    if entryData.displayName == displayName then
+        local gender = GetGenderFromNameDescriptor(characterName)
+        local formattedZonename = ZO_CachedStrFormat(SI_ZONE_NAME, zoneName)
+        local formattedAllianceName = ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(alliance))
+
+        local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+        ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
+        GAMEPAD_TOOLTIPS:LayoutFriend(GAMEPAD_LEFT_DIALOG_TOOLTIP, ZO_FormatUserFacingDisplayName(entryData.displayName), characterName, class, gender, level, championPoints, formattedAllianceName, formattedZonename, not entryData.online, entryData.secsSinceLogoff, entryData.timeStamp)
+    end
 end
 
 function FriendsList_Gamepad:GetAddKeybind()
     local platform = GetUIPlatform()
     if platform ~= UI_PLATFORM_XBOX then
-        local keybind  =
+        local keybind =
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
@@ -41,8 +66,7 @@ function FriendsList_Gamepad:GetAddKeybind()
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
-                local platform = GetUIPlatform()
-                if platform == UI_PLATFORM_PC or platform == UI_PLATFORM_HERON then
+                if ZO_IsPCOrHeronUI() then
                     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_ADD_FRIEND_DIALOG")
                 else
                     ZO_ShowConsoleAddFriendDialogFromUserListSelector()
@@ -54,7 +78,10 @@ function FriendsList_Gamepad:GetAddKeybind()
 end
 
 function FriendsList_Gamepad:LayoutTooltip(tooltipManager, tooltip, data)
-    tooltipManager:LayoutFriend(tooltip, ZO_FormatUserFacingDisplayName(data.displayName), data.characterName, data.class, data.gender, data.level, data.championPoints, data.formattedAllianceName, data.formattedZone, not data.online, data.secsSinceLogoff, data.timeStamp, data.heronName)
+    -- PlayStation will not show a tooltip here, we will show the tooltip if the player opens the social options dialog
+    if not ZO_IsPlaystationPlatform() then
+        tooltipManager:LayoutFriend(tooltip, ZO_FormatUserFacingDisplayName(data.displayName), data.characterName, data.class, data.gender, data.level, data.championPoints, data.formattedAllianceName, data.formattedZone, not data.online, data.secsSinceLogoff, data.timeStamp, data.heronName)
+    end
 end
 
 function FriendsList_Gamepad:OnNumOnlineChanged()
@@ -79,10 +106,16 @@ function FriendsList_Gamepad:OnShowing()
     ZO_GamepadSocialListPanel.OnShowing(self)
 end
 
+function FriendsList_Gamepad:OnHidden()
+    if IsConsoleUI() then
+        EVENT_MANAGER:UnregisterForUpdate("FriendsListConsoleRefresh")
+    end
+end
+
 function FriendsList_Gamepad:CommitScrollList()
     ZO_GamepadSocialListPanel.CommitScrollList(self)
 
-    --This just sets the empty text, the visibility of the empty text is contorlled by SortFilterList when the filtered list is empty
+    --This just sets the empty text, the visibility of the empty text is controlled by SortFilterList when the filtered list is empty
     --The text is reset by GamepadInteractiveSortFilterList.CommitScrollList where it sets the text to No Friends or Filter Returned None as appropriate and this overrides it if the players are offline
     if #self.masterList > 0 then
         if self:GetCurrentSearch() == "" and GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE) then
@@ -91,9 +124,15 @@ function FriendsList_Gamepad:CommitScrollList()
     end
 end
 
-function FriendsList_Gamepad:OnHidden()
-    if IsConsoleUI() then
-        EVENT_MANAGER:UnregisterForUpdate("FriendsListConsoleRefresh")
+-- Overriding version from ZO_GamepadSocialListPanel
+function FriendsList_Gamepad:ColorRow(control, data, selected)
+    if not ZO_IsPlaystationPlatform() then
+        ZO_GamepadSocialListPanel.ColorRow(self, control, data, selected)
+    else
+        local textColor = self:GetRowColors(data, selected)
+
+        local displayNameControl = control:GetNamedChild("DisplayName")
+        displayNameControl:SetColor(textColor:UnpackRGBA())
     end
 end
 
@@ -117,18 +156,47 @@ function FriendsList_Gamepad:BuildOptionsList()
     self:AddInviteToGuildOptionTemplates()
 end
 
-function ZO_FriendsList_Gamepad_OnInitialized(self)
+-- Overriding from ZO_SocialOptionsDialogGamepad
+function FriendsList_Gamepad:GetDialogData()
+    local data = ZO_SocialOptionsDialogGamepad.GetDialogData(self)
+    if ZO_IsPlaystationPlatform() then
+        data.setupFunction = function(dialog)
+            local entryData = self:GetSelectedData()
+            if entryData.online then
+                local platform = GetUIPlatform()
+                if platform == UI_PLATFORM_PS4 then
+                    ZO_GenericGamepadDialog_ShowTooltip(dialog)
+                    GAMEPAD_TOOLTIPS:LayoutFriend(GAMEPAD_LEFT_DIALOG_TOOLTIP, ZO_FormatUserFacingDisplayName(entryData.displayName), entryData.characterName, entryData.class, entryData.gender, entryData.level, entryData.championPoints, entryData.formattedAllianceName, entryData.formattedZone, not entryData.online, entryData.secsSinceLogoff, entryData.timeStamp, entryData.heronName)
+                elseif platform == UI_PLATFORM_PS5 then
+                    RequestCharacterDataForFriend(entryData.displayName)
+                else
+                    internalassert(false, "Unhandled platform in FriendsList_Gamepad:GetDialogData()")
+                end
+            end
+        end
+    end
+    return data
+end
+
+---
+-- Global XML Function
+---
+
+function ZO_FriendsList_Gamepad_OnInitialized(control)
     -- Set up columns before initializing panel
     local rowTemplate
     local headersTemplate
     if IsHeronUI() then
         rowTemplate = "ZO_GamepadFriendsListRow_Heron"
         headersTemplate = "ZO_GamepadFriendsListHeaders_Heron"
+    elseif ZO_IsPlaystationPlatform() then
+        rowTemplate = "ZO_GamepadFriendsListRow_Playstation"
+        headersTemplate = "ZO_GamepadFriendsListHeaders_Playstation"
     else
         rowTemplate = "ZO_GamepadFriendsListRow"
         headersTemplate = "ZO_GamepadFriendsListHeaders"
     end
-    ApplyTemplateToControl(self:GetNamedChild("ContainerHeaders"), headersTemplate)
+    ApplyTemplateToControl(control:GetNamedChild("ContainerHeaders"), headersTemplate)
 
-    ZO_FRIENDS_LIST_GAMEPAD = FriendsList_Gamepad:New(self, rowTemplate)
+    ZO_FRIENDS_LIST_GAMEPAD = FriendsList_Gamepad:New(control, rowTemplate)
 end

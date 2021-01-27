@@ -8,8 +8,8 @@
             <Anchor point="RIGHT"/>
         </Label>
 
-        <Control name="ZO_StatsEntry" virtual="true" mouseEnabled="true">
-            <Dimensions x="295" y="20" />
+        <Control name="ZO_StatsEntry" mouseEnabled="true" virtual="true">
+            <Dimensions x="295" y="24" />
             <OnInitialized>
                 self.name = self:GetNamedChild("Name")
                 self.value = self:GetNamedChild("Value")
@@ -33,6 +33,64 @@
                 <Label name="$(parent)ComparisonValue" hidden="true" inherits="ZO_StatsRowValue">
                     <Anchor point="RIGHT" offsetX="-20" />
                 </Label>
+            </Controls>
+        </Control>
+    
+        <Control name="ZO_AdvancedStatsEntry" mouseEnabled="true" virtual="true">
+            <Dimensions y="24" />
+            <OnInitialized>
+                self.nameLabel = self:GetNamedChild("Name")
+                self.valueLabel = self:GetNamedChild("Value")
+            </OnInitialized>
+             <OnMouseEnter>
+                ZO_AdvancedStatsEntry_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_AdvancedStatsEntry_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Label name="$(parent)Value" inherits="ZO_StatsRowValue">
+                    <Anchor point="RIGHT" offsetX="-20" />
+                </Label>
+                <Label name="$(parent)Name" inherits="ZO_StatsRowName" wrapMode="ELLIPSIS" maxLineCount="1">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-30" />
+                </Label>
+            </Controls>
+        </Control>
+    
+        <Control name="ZO_AdvancedStatsMultiEntry" mouseEnabled="true" virtual="true">
+            <Dimensions y="72" />
+            <OnInitialized>
+                self.nameLabel = self:GetNamedChild("Name")
+                self.statFlatControl = self:GetNamedChild("StatFlat")
+                self.statPercentControl = self:GetNamedChild("StatPercent")
+            </OnInitialized>
+            <OnMouseEnter>
+                ZO_AdvancedStatsEntry_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_AdvancedStatsEntry_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                </Label>
+                <Control name="$(parent)StatFlat" inherits="ZO_AdvancedStatsEntry">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="20"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" />
+                    <Controls>
+                        <Label name="$(parent)Name" override="true" text="SI_STATS_ADVANCED_VALUE_TYPE_FLAT" />
+                    </Controls>
+                </Control>
+                <Control name="$(parent)StatPercent" inherits="ZO_AdvancedStatsEntry">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)StatFlat" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)StatFlat" relativePoint="BOTTOMRIGHT"/>
+                    <Controls>
+                        <Label name="$(parent)Name" override="true" text="SI_STATS_ADVANCED_VALUE_TYPE_PERCENT" />
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
     </Controls>

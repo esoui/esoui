@@ -175,7 +175,7 @@ ZO_CATEGORY_LAYOUT_INFO =
                 if CHAMPION_PERKS:IsChampionSystemNew() then
                     table.insert(indicators, ZO_KEYBOARD_NEW_ICON)
                 end
-                if CHAMPION_PERKS:HasAnySpendableUnspentPoints() then
+                if CHAMPION_DATA_MANAGER:HasAnySavedUnspentPoints() then
                     table.insert(indicators, "EsoUI/Art/MainMenu/menuBar_pointsToSpend.dds")
                 end
                 return indicators
