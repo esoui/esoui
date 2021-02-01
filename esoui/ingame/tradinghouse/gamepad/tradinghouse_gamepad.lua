@@ -480,7 +480,9 @@ function ZO_GamepadTradingHouse:InitializeEvents()
             self:SelectCurrentListInHeader()
             self:RefreshGuildNameFooter()
             self:RegisterForSceneEvents()
-
+            if self:IsInSellMode() then
+                DIRECTIONAL_INPUT:Activate(self, self.control)
+            end
             self.currentListObject:Show()
             ZO_GamepadGenericHeader_Activate(self.header)
         elseif newState == SCENE_HIDING then

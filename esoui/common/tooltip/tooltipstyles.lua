@@ -823,6 +823,7 @@ ZO_TOOLTIP_STYLES =
     {
         width = 380,
         statusBarTemplate = "ZO_GamepadArrowStatusBarWithBGMedium",
+        statusBarTemplateOverrideName = "ArrowBar",
         customSpacing = 4,
         statusBarGradientColors = ZO_SKILL_XP_BAR_GRADIENT_COLORS,
     },
