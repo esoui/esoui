@@ -577,13 +577,37 @@ ZO_ChampionStarEditor = ZO_InitializingObject:Subclass()
 
 function ZO_ChampionStarEditor:Initialize(pool)
     self.control = ZO_ObjectPool_CreateControl("ZO_ChampionStarEditor", pool, CHAMPION_PERKS:GetChampionCanvas())
+    self.fadeIn = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ChampionStarEditorFade", self.control)
     local DEFAULT_MIN = nil
     local DEFAULT_MAX = nil
     local DEFAULT_INPUT_MODE = nil
     local DEFAULT_SPINNER_MODE = nil
     local ACCELERATION_TIME_MS = 50
     self.pointsSpinner = ZO_Spinner:New(self.control, DEFAULT_MIN, DEFAULT_MAX, DEFAULT_INPUT_MODE, DEFAULT_SPINNER_MODE, ACCELERATION_TIME_MS)
-    self.pointsSpinner:SetSounds(SOUNDS.CHAMPION_SPINNER_UP, SOUNDS.CHAMPION_SPINNER_DOWN)
+    self.pointsSpinner:SetPlaySoundFunction(function(spinner, currentValue, oldValue)
+        local championSkillData = self.star:GetChampionSkillData()
+        local currentJumpPoint = championSkillData:GetJumpPointForValue(currentValue)
+        local oldJumpPoint = championSkillData:GetJumpPointForValue(oldValue)
+        local isUnlocked = championSkillData:WouldBeUnlockedNodeAtValue(currentValue)
+        local wasUnlocked = championSkillData:WouldBeUnlockedNodeAtValue(oldValue)
+        if currentValue > oldValue then
+            if not wasUnlocked and isUnlocked then
+                PlaySound(SOUNDS.CHAMPION_STAR_UNLOCKED)
+            elseif championSkillData:HasJumpPoints() and currentJumpPoint > oldJumpPoint then
+                PlaySound(SOUNDS.CHAMPION_STAR_STAGE_UP)
+            else
+                PlaySound(SOUNDS.CHAMPION_SPINNER_UP)
+            end
+        else
+            if wasUnlocked and not isUnlocked then
+                PlaySound(SOUNDS.CHAMPION_STAR_LOCKED)
+            elseif championSkillData:HasJumpPoints() and currentJumpPoint < oldJumpPoint then
+                PlaySound(SOUNDS.CHAMPION_STAR_STAGE_DOWN)
+            else
+                PlaySound(SOUNDS.CHAMPION_SPINNER_DOWN)
+            end
+        end
+    end)
     self.pointsSpinner:RegisterCallback("OnValueChanged", function(newValue)
         if self:IsAttached() and self.star:IsSkillStar() then
             self.star:GetChampionSkillData():SetNumPendingPoints(newValue)
@@ -629,6 +653,7 @@ function ZO_ChampionStarEditor:AttachToStar(selectedStar)
         self.pointsSpinner:SetButtonsHidden(true)
     end
     self.control:SetHidden(false)
+    self.fadeIn:PlayFromStart()
 
     local parentControl = self.star:GetTexture()
     self.control:ClearAnchors()
@@ -655,6 +680,7 @@ function ZO_ChampionStarEditor:Release()
         starTexture.mouseInputGroup:RemoveAll(ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
     end
     self.control:SetHidden(true)
+    self.fadeIn:PlayInstantlyToStart()
     self.star = nil
 end
 

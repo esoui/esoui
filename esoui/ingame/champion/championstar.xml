@@ -1,4 +1,11 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_ChampionStarEditorFade">
+            <Animations>
+                <AlphaAnimation duration="100" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
     <Controls>
         <TextureComposite name="ZO_ChampionStarVisuals" virtual="true" shape="CIRCLE" pixelRoundingEnabled="false" blendMode="ADD" />
 

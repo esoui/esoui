@@ -2644,7 +2644,7 @@ EsoStrings =
     "Racial", -- SI_SKILLTYPE7
     "Tradeskill", -- SI_SKILLTYPE8
     "Champion", -- SI_SKILLTYPE9
-    "Your racial passive abilities have been refunded; you will need to go set them again.", -- SI_RESPECTYPE0
+    "Your skill points have been refunded; you will need to go set them again.", -- SI_RESPECTYPE0
     "Your skill points have been refunded; you will need to go set them again.", -- SI_RESPECTYPE_NOTIFICATIONPOINTSRESET0
     "Open Skills", -- SI_RESPECTYPE_NOTIFICATIONOPENBUTTON0
     "Skills Reset", -- SI_RESPECTYPE_POINTSRESETTITLE0
@@ -9390,6 +9390,7 @@ SafeAddVersion(SI_OUTFITSLOT28, 1)
 SafeAddVersion(SI_OUTFITSLOT29, 1)
 SafeAddVersion(SI_SKILLTYPE4, 1)
 SafeAddVersion(SI_SKILLTYPE6, 1)
+SafeAddVersion(SI_RESPECTYPE0, 1)
 SafeAddVersion(SI_RESPECRESULT3, 1)
 SafeAddVersion(SI_RESPECRESULT5, 1)
 SafeAddVersion(SI_RESPECRESULT6, 1)

@@ -260,24 +260,7 @@ function ZO_ChampionCluster:IsActive()
     return self.active
 end
 
-do
-    local LINK_UNLOCKED_ALPHA = 1
-    local LINK_LOCKED_ALPHA = 0.25
-    local LINK_ZOOMED_OUT_LOCKED_ALPHA = 0.05
-    local LINK_ZOOMED_OUT_UNLOCKED_ALPHA = 0.25
-    local function RefreshLinkList(links, alphaMultiplier)
-        local lockedAlpha = CHAMPION_PERKS:HasChosenConstellation() and LINK_LOCKED_ALPHA or LINK_ZOOMED_OUT_LOCKED_ALPHA
-        local unlockedAlpha = CHAMPION_PERKS:HasChosenConstellation() and LINK_UNLOCKED_ALPHA or LINK_ZOOMED_OUT_UNLOCKED_ALPHA
-        for _, linkControl in ipairs(links) do
-            if linkControl.championSkillData1:WouldBeUnlockedNode() or linkControl.championSkillData2:WouldBeUnlockedNode() then
-                linkControl:SetAlpha(unlockedAlpha * alphaMultiplier)
-            else
-                linkControl:SetAlpha(lockedAlpha * alphaMultiplier)
-            end
-        end
-    end
-
-    function ZO_ChampionCluster:RefreshState()
+function ZO_ChampionCluster:RefreshState()
         if self.hidden then
             -- will automatically refresh on showing
             return
@@ -286,25 +269,34 @@ do
         for _, star in ipairs(self.stars) do
             star:RefreshState()
         end
-    end
+end
 
-    function ZO_ChampionCluster:RefreshStarLinks(alphaMultiplier)
-        if self.links then
-            RefreshLinkList(self.links, alphaMultiplier)
-        end
-    end
-
-    function ZO_ChampionCluster:SetActive(active, instantly)
+function ZO_ChampionCluster:SetActive(active, instantly)
         if self.active ~= active then
             self.active = active
             for _, star in ipairs(self.stars) do
                 star:SetActive(active, instantly)
             end
         end
+end
+
+do
+    local LINK_UNLOCKED_ALPHA = 0.9
+    local LINK_LOCKED_ALPHA = 0.3
+    function ZO_ChampionCluster:UpdateLinkVisuals(alphaMultiplier)
+        if self.links then
+            for _, linkControl in ipairs(self.links) do
+                if linkControl.championSkillData1:WouldBeUnlockedNode() or linkControl.championSkillData2:WouldBeUnlockedNode() then
+                    linkControl:SetAlpha(LINK_UNLOCKED_ALPHA * alphaMultiplier)
+                else
+                    linkControl:SetAlpha(LINK_LOCKED_ALPHA * alphaMultiplier)
+                end
+    end
+        end
     end
 end
 
-function ZO_ChampionCluster:UpdateVisuals(timeSecs, newStarAlpha)
+function ZO_ChampionCluster:UpdateVisuals(timeSecs, newStarAlpha, newLinkAlpha)
     if self.hidden then
         return
     end
@@ -313,7 +305,7 @@ function ZO_ChampionCluster:UpdateVisuals(timeSecs, newStarAlpha)
         star:UpdateVisuals(timeSecs, newStarAlpha)
     end
 
-    self:RefreshStarLinks(newStarAlpha)
+    self:UpdateLinkVisuals(newLinkAlpha)
 
     if self.backgroundTexture then
         self.backgroundTexture:SetAlpha(newStarAlpha)
@@ -386,6 +378,7 @@ function ZO_ChampionConstellation:Initialize(championDisciplineData, sceneGraph)
 
     self.rootClusterStarAlphaInterpolator = ZO_LerpInterpolator:New(1)
     self.childClusterStarAlphaInterpolator = ZO_LerpInterpolator:New(1)
+    self.linkAlphaInterpolator = ZO_LerpInterpolator:New(1)
     self:RegisterForEvents()
 end
 
@@ -431,18 +424,17 @@ end
 function ZO_ChampionConstellation:SetVisualInfo(visualInfo)
     self.rootClusterStarAlphaInterpolator:SetFluxParams(visualInfo.starAlpha)
     self.childClusterStarAlphaInterpolator:SetFluxParams(visualInfo.childStarAlpha)
-    self.ringAnchor1:SetVisualInfo(visualInfo)
-    self.ringAnchor2:SetVisualInfo(visualInfo)
+    self.linkAlphaInterpolator:SetFluxParams(visualInfo.linkAlpha)
 end
 
 function ZO_ChampionConstellation:UpdateVisuals(timeSecs, frameDeltaSecs)
-    self.ringAnchor1:UpdateVisuals(timeSecs, frameDeltaSecs)
-    self.ringAnchor2:UpdateVisuals(timeSecs, frameDeltaSecs)
     local newRootStarAlpha = self.rootClusterStarAlphaInterpolator:Update(timeSecs, frameDeltaSecs)
     local newClusterStarAlpha = self.childClusterStarAlphaInterpolator:Update(timeSecs, frameDeltaSecs)
-    self.rootCluster:UpdateVisuals(timeSecs, newRootStarAlpha)
+    local linkAlpha = self.linkAlphaInterpolator:Update(timeSecs, frameDeltaSecs)
+    self.rootCluster:UpdateVisuals(timeSecs, newRootStarAlpha, linkAlpha * newRootStarAlpha)
+    local clusterLinkAlpha = linkAlpha * newClusterStarAlpha
     for _, childCluster in pairs(self.clustersByClusterData) do
-        childCluster:UpdateVisuals(timeSecs, newClusterStarAlpha)
+        childCluster:UpdateVisuals(timeSecs, newClusterStarAlpha, clusterLinkAlpha)
     end
 end
 

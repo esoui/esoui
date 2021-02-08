@@ -512,7 +512,7 @@ function ChampionPerks:InitializeKeybindStrips()
             visible = function()
                 return CHAMPION_DATA_MANAGER:HasPointsToClear() or self:HasUnsavedChanges()
             end,
-            sound = SOUNDS.CHAMPION_PENDING_POINTS_CLEARED
+            sound = SOUNDS.CHAMPION_PENDING_POINTS_CLEARED,
         }
     }
 
@@ -1057,6 +1057,7 @@ function ChampionPerks:InitializeStateMachine()
             end
             zoomInClusterAnimation.targetCameraZ = IsInGamepadPreferredMode() and ZO_CHAMPION_GAMEPAD_ZOOMED_IN_CLUSTER_CAMERA_Z or ZO_CHAMPION_KEYBOARD_ZOOMED_IN_CLUSTER_CAMERA_Z 
             self:SetAnimation(zoomInClusterAnimation)
+            PlaySound(SOUNDS.CHAMPION_ZOOM_IN)
         end)
         state:RegisterCallback("OnDeactivated", function()
             self.chosenConstellation:ChangeCurrentCluster(self.nextTargetClusterData)
@@ -1085,6 +1086,7 @@ function ChampionPerks:InitializeStateMachine()
             end
             zoomOutClusterAnimation.targetCameraZ = IsInGamepadPreferredMode() and ZO_CHAMPION_GAMEPAD_ZOOMED_IN_CAMERA_Z or ZO_CHAMPION_KEYBOARD_ZOOMED_IN_CAMERA_Z 
             self:SetAnimation(zoomOutClusterAnimation)
+            PlaySound(SOUNDS.CHAMPION_ZOOM_OUT)
         end)
         state:RegisterCallback("OnDeactivated", function()
             if IsInGamepadPreferredMode() then
@@ -1962,7 +1964,55 @@ function ChampionPerks:UpdateDirectionalInput()
     end
 end
 
-local VISUALS =
+local CONSTELLATION_VISUALS =
+{
+    ZOOMED_OUT =
+    {
+        starAlpha =
+        {
+            base = 0.3,
+        },
+    },
+    ZOOMED_OUT_SELECTED =
+    {
+        starAlpha =
+        {
+            base = 1,
+        },
+    },
+    ZOOMED_OUT_SELECTED_ZOOMING_IN =
+    {
+        starAlpha =
+        {
+            base = 1,
+        },        
+        childStarAlpha =
+        {
+            base = 0,
+        },
+    },
+    ZOOMED_IN_CLUSTER =
+    {
+        starAlpha =
+        {
+            base = 0,
+        },        
+        childStarAlpha =
+        {
+            base = 1,
+        },
+    },
+    ZOOMED_IN_CHOSEN = { },
+    ZOOMED_IN_NOT_SHOWN =
+    {
+        starAlpha =
+        {
+            base = 0.3,
+        },
+    },
+}
+
+local RING_ANCHOR_VISUALS =
 {
     ZOOMED_OUT =
     {
@@ -1976,10 +2026,10 @@ local VISUALS =
             fluxMax = 0.1,
             fluxPeriodSeconds = 3,
         },
-        starAlpha =
+        linkAlpha =
         {
-            base = 0.3,
-        },
+            base = 0.2,
+        }
     },
     ZOOMED_OUT_SELECTED =
     {
@@ -1993,10 +2043,10 @@ local VISUALS =
             fluxMax = 0.8,
             fluxPeriodSeconds = 3,
         },
-        starAlpha =
+        linkAlpha =
         {
-            base = 1,
-        },
+            base = 0.2,
+        }
     },
     ZOOMED_OUT_SELECTED_ZOOMING_IN =
     {
@@ -2010,14 +2060,10 @@ local VISUALS =
         {
             base = 0.7,
         },
-        starAlpha =
+        linkAlpha =
         {
             base = 1,
-        },        
-        childStarAlpha =
-        {
-            base = 0,
-        },
+        }
     },
     ZOOMED_IN_CLUSTER =
     {
@@ -2029,14 +2075,12 @@ local VISUALS =
         {
             base = 0,
         },
-        starAlpha =
+        linkAlpha =
         {
-            base = 0,
-        },        
-        childStarAlpha =
-        {
-            base = 1,
-        },
+            fluxMin = 0.8,
+            fluxMax = 1,
+            fluxPeriodSeconds = 6,
+        }
     },
     ZOOMED_IN_CHOSEN =
     {
@@ -2050,6 +2094,12 @@ local VISUALS =
         {
             base = 0.7,
         },
+        linkAlpha =
+        {
+            fluxMin = 0.6,
+            fluxMax = 1,
+            fluxPeriodSeconds = 4,
+        }
     },
     ZOOMED_IN_NOT_SHOWN =
     {
@@ -2063,10 +2113,10 @@ local VISUALS =
         {
             base = 0.7,
         },
-        starAlpha =
+        linkAlpha =
         {
-            base = 0.3,
-        },
+            base = 0.4,
+        }
     },
 }
 
@@ -2089,27 +2139,27 @@ function ChampionPerks:OnUpdate(timeSecs)
     self:UpdateAnimations(frameDeltaSecs)
 
     --Visual State
-    for i, constellation in ipairs(self.constellations) do
+    for _, constellation in ipairs(self.constellations) do
         local visualInfo
         if self.chosenConstellation then
             if constellation == self.chosenConstellation then
                 if self.chosenConstellation.currentCluster:IsRootCluster() then
-                    visualInfo = VISUALS.ZOOMED_IN_CHOSEN                    
+                    visualInfo = CONSTELLATION_VISUALS.ZOOMED_IN_CHOSEN
                 else
-                    visualInfo = VISUALS.ZOOMED_IN_CLUSTER
+                    visualInfo = CONSTELLATION_VISUALS.ZOOMED_IN_CLUSTER
                 end
             else
-                visualInfo = VISUALS.ZOOMED_IN_NOT_SHOWN
+                visualInfo = CONSTELLATION_VISUALS.ZOOMED_IN_NOT_SHOWN
             end
         else
             if constellation == self.selectedConstellation then
                 if self.stateMachine:IsCurrentState("CONSTELLATION_IN") then
-                    visualInfo = VISUALS.ZOOMED_OUT_SELECTED_ZOOMING_IN
+                    visualInfo = CONSTELLATION_VISUALS.ZOOMED_OUT_SELECTED_ZOOMING_IN
                 else
-                    visualInfo = VISUALS.ZOOMED_OUT_SELECTED
+                    visualInfo = CONSTELLATION_VISUALS.ZOOMED_OUT_SELECTED
                 end
             else
-                visualInfo = VISUALS.ZOOMED_OUT
+                visualInfo = CONSTELLATION_VISUALS.ZOOMED_OUT
             end
         end
 
@@ -2118,7 +2168,40 @@ function ChampionPerks:OnUpdate(timeSecs)
         else
             constellation:SetVisualInfo(visualInfo)
         end
-        constellation:UpdateVisuals(timeSecs)
+        constellation:UpdateVisuals(timeSecs, frameDeltaSecs)
+    end
+
+    for _, ringAnchor in ipairs(self.ringAnchors) do
+        local ringNode = ringAnchor:GetNode()
+        local visualInfo
+        if self.chosenConstellation then
+            if ringNode == self.chosenRingNode then
+                if self.chosenConstellation.currentCluster:IsRootCluster() then
+                    visualInfo = RING_ANCHOR_VISUALS.ZOOMED_IN_CHOSEN
+                else
+                    visualInfo = RING_ANCHOR_VISUALS.ZOOMED_IN_CLUSTER
+                end
+            else
+                visualInfo = RING_ANCHOR_VISUALS.ZOOMED_IN_NOT_SHOWN
+            end
+        else
+            if ringNode == self.selectedRingNode then
+                if self.stateMachine:IsCurrentState("CONSTELLATION_IN") then
+                    visualInfo = RING_ANCHOR_VISUALS.ZOOMED_OUT_SELECTED_ZOOMING_IN
+                else
+                    visualInfo = RING_ANCHOR_VISUALS.ZOOMED_OUT_SELECTED
+                end
+            else
+                visualInfo = RING_ANCHOR_VISUALS.ZOOMED_OUT
+            end
+        end
+
+        if self.animationVisualInfo then
+            ringAnchor:SetVisualInfo(self.animationVisualInfo)
+        else
+            ringAnchor:SetVisualInfo(visualInfo)
+        end
+        ringAnchor:UpdateVisuals(timeSecs, frameDeltaSecs)
     end
 
     --Cloud Rotation

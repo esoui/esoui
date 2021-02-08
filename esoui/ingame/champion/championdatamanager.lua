@@ -113,6 +113,10 @@ function ZO_ChampionSkillData:WouldBeUnlockedNode()
     return WouldChampionSkillNodeBeUnlocked(self.championSkillId, self:GetNumPendingPoints())
 end
 
+function ZO_ChampionSkillData:WouldBeUnlockedNodeAtValue(pendingPoints)
+    return WouldChampionSkillNodeBeUnlocked(self.championSkillId, pendingPoints)
+end
+
 function ZO_ChampionSkillData:CanBePurchased()
     if self:IsRootNode() or self:WouldBeUnlockedNode() then
         return true
@@ -216,6 +220,22 @@ function ZO_ChampionSkillData:GetPreviousJumpPoint(pointValue)
     end
 
     return zo_max(min, pointValue - 1)
+end
+
+function ZO_ChampionSkillData:GetJumpPointForValue(pointValue)
+    if self:HasJumpPoints() then
+        local jumpPoints = self:GetJumpPoints()
+        local lastJumpPoint = 0
+        for _, jumpPoint in ipairs(jumpPoints) do
+            if jumpPoint > pointValue then
+                return lastJumpPoint
+            end
+            lastJumpPoint = jumpPoint
+        end
+        return lastJumpPoint
+    end
+
+    return pointValue
 end
 
 function ZO_ChampionSkillData:SetClusterDataInternal(championClusterData)
