@@ -34,6 +34,10 @@ zo_randomseed       = math.randomseed
 zo_random           = math.random
 zo_insecureNext     = InsecureNext
 
+function zo_randomDecimalRange(min, max)
+    return zo_lerp(min, max, zo_random())
+end
+
 function zo_insecurePairs(t)
     return zo_insecureNext, t, nil
 end

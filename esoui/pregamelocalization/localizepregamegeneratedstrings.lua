@@ -4399,7 +4399,7 @@ EsoStrings =
     "<<1>>", -- SI_CHARACTER_SELECT_LEVEL_VALUE
     "<<1>><<2>>", -- SI_CHARACTER_SELECT_LEVEL_CHAMPION
     "Join ESO Plus", -- SI_ESO_PLUS_JOIN_TEXT
-    "© 2015 ZeniMax Media Inc. The Elder Scrolls® Online: Tamriel Unlimited™ developed by ZeniMax Online Studios LLC, a ZeniMax Media company. ZeniMax, The Elder Scrolls, ESO, ESO Plus, Tamriel Unlimited, Bethesda, Bethesda Softworks and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the US and/or other countries. Uses Havok™: ©Copyright 1999-2010. Havok.com, Inc. (and its Licensors), All Rights Reserved. See www.havok.com for details. Uses Bink Video. Copyright ©1997-2020 by RAD Game Tools, Inc. All Rights Reserved. Uses Granny Animation. Copyright ©1999-2020 by RAD Game Tools, Inc. All Rights Reserved. Uses Oodle © 2008-2020 by RAD Game Tools, Inc. All Rights Reserved. Powered by Lingoona ® Grammar Engine © Lingoona GmbH 2009-2020. Acapela Text-To-Speech from Acapela Group. All Rights Reserved.", -- SI_SPLASH_SCREEN_COPYRIGHT
+    "© 2015 ZeniMax Media Inc. The Elder Scrolls® Online: Tamriel Unlimited™ developed by ZeniMax Online Studios LLC, a ZeniMax Media company. ZeniMax, The Elder Scrolls, ESO, ESO Plus, Tamriel Unlimited, Bethesda, Bethesda Softworks and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the US and/or other countries. Uses Havok™: ©Copyright 1999-2010. Havok.com, Inc. (and its Licensors), All Rights Reserved. See www.havok.com for details. Uses Bink Video. Copyright ©1997-2021 by RAD Game Tools, Inc. All Rights Reserved. Uses Granny Animation. Copyright ©1999-2021 by RAD Game Tools, Inc. All Rights Reserved. Uses Oodle © 2008-2021 by RAD Game Tools, Inc. All Rights Reserved. Powered by Lingoona ® Grammar Engine © Lingoona GmbH 2009-2021. Acapela Text-To-Speech from Acapela Group. All Rights Reserved.", -- SI_SPLASH_SCREEN_COPYRIGHT
     "Skip The Tutorial", -- SI_PROMPT_TITLE_SKIP_TUTORIAL
     "You have played through a tutorial with a previous character.\n\nYou may choose to play through it again with <<1>>, or skip it.", -- SI_PROMPT_BODY_SKIP_TUTORIAL
     "Play", -- SI_PROMPT_PLAY_TUTORIAL_BUTTON
@@ -9834,7 +9834,7 @@ SafeAddVersion(SI_FREE_TRIAL_PURCHASE_KEYBIND, 1)
 SafeAddVersion(SI_FREE_TRIAL_PURCHASE_DIALOG_HEADER, 1)
 SafeAddVersion(SI_FREE_TRIAL_PURCHASE_DIALOG_BODY, 2)
 SafeAddVersion(SI_EXTRA_INFO_SERVICE_TOKENS_HEADER, 1)
-SafeAddVersion(SI_SPLASH_SCREEN_COPYRIGHT, 5)
+SafeAddVersion(SI_SPLASH_SCREEN_COPYRIGHT, 6)
 SafeAddVersion(SI_PROMPT_TITLE_SKIP_TUTORIAL, 1)
 SafeAddVersion(SI_PROMPT_BODY_SKIP_TUTORIAL, 1)
 SafeAddVersion(SI_LEGAL_DECLINE_PROMPT, 2)

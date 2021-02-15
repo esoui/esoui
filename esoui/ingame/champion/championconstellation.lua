@@ -282,16 +282,32 @@ end
 
 do
     local LINK_UNLOCKED_ALPHA = 0.9
+    local LINK_UNLOCKED_FOCUSED_ALPHA = 1.0
     local LINK_LOCKED_ALPHA = 0.3
+    local LINK_LOCKED_FOCUSED_ALPHA = 0.6
     function ZO_ChampionCluster:UpdateLinkVisuals(alphaMultiplier)
+        local selectedStar = CHAMPION_PERKS:GetSelectedStar()
+        local selectedStarData = nil
+
+        if selectedStar then
+            if selectedStar:IsClusterPortalStar() then
+                selectedStarData = selectedStar:GetRootChampionSkillData()
+            else
+                selectedStarData = selectedStar:GetChampionSkillData()
+            end
+        end
+
         if self.links then
             for _, linkControl in ipairs(self.links) do
+                local isFocused = linkControl.championSkillData1 == selectedStarData or linkControl.championSkillData2 == selectedStarData
+                local lockedAlpha = isFocused and LINK_LOCKED_FOCUSED_ALPHA or LINK_LOCKED_ALPHA
+                local unlockedAlpha = isFocused and LINK_UNLOCKED_FOCUSED_ALPHA or LINK_UNLOCKED_ALPHA
                 if linkControl.championSkillData1:WouldBeUnlockedNode() or linkControl.championSkillData2:WouldBeUnlockedNode() then
-                    linkControl:SetAlpha(LINK_UNLOCKED_ALPHA * alphaMultiplier)
+                    linkControl:SetAlpha(unlockedAlpha * alphaMultiplier)
                 else
-                    linkControl:SetAlpha(LINK_LOCKED_ALPHA * alphaMultiplier)
+                    linkControl:SetAlpha(lockedAlpha * alphaMultiplier)
                 end
-    end
+            end
         end
     end
 end

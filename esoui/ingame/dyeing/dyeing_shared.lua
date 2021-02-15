@@ -331,10 +331,10 @@ do
     local MUNGE_END_TEXCOORD_Y = 1.0
 
     local function PickRandomMunge(swatchControl)
-        local left = zo_lerp(MUNGE_START_TEXCOORD_X, MUNGE_END_TEXCOORD_X - MUNGE_WIDTH_TEX_COORD, zo_random())
+        local left = zo_randomDecimalRange(MUNGE_START_TEXCOORD_X, MUNGE_END_TEXCOORD_X - MUNGE_WIDTH_TEX_COORD)
         local right = left + MUNGE_WIDTH_TEX_COORD
 
-        local top = zo_lerp(MUNGE_START_TEXCOORD_Y, MUNGE_END_TEXCOORD_Y - MUNGE_HEIGHT_TEX_COORD, zo_random())
+        local top = zo_randomDecimalRange(MUNGE_START_TEXCOORD_Y, MUNGE_END_TEXCOORD_Y - MUNGE_HEIGHT_TEX_COORD)
         local bottom = top + MUNGE_HEIGHT_TEX_COORD
         swatchControl:SetTextureCoords(ZO_DYEING_MUNGE_INDEX, left, right, top, bottom)
     end
