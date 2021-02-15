@@ -60,7 +60,8 @@ end
 
 function ChapterUpgrade_Gamepad:UpgradeButtonClicked()
     local IS_STANDARD_EDITION = false
-    ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION, CHAPTER_UPGRADE_SOURCE_PREGAME)
+    local SHOW_LOGOUT_WARNING = true
+    ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION, CHAPTER_UPGRADE_SOURCE_PREGAME, SHOW_LOGOUT_WARNING)
 end
 
 function ChapterUpgrade_Gamepad:EnterCodeButtonClicked()

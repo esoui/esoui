@@ -116,6 +116,7 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
     mainText =
     {
         text = function(dialog)
+            local mainText
             if dialog.data.isPreRelease then
                 if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_STEAM then
                     return SI_OPEN_CHAPTER_PREPURCHASE_STEAM
@@ -128,14 +129,20 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
                 end
             else
                 if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_STEAM then
-                    return SI_OPEN_CHAPTER_UPGRADE_STEAM
+                    mainText = SI_OPEN_CHAPTER_UPGRADE_STEAM
                 elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
-                    return SI_OPEN_CHAPTER_UPGRADE_HERON
+                    mainText = SI_OPEN_CHAPTER_UPGRADE_HERON
                 elseif DoesPlatformStoreUseExternalLinks() then
-                    return zo_strformat(SI_OPEN_CHAPTER_UPGRADE_WEB, ZO_GetPlatformStoreName())
+                    mainText = zo_strformat(SI_OPEN_CHAPTER_UPGRADE_WEB, ZO_GetPlatformStoreName())
                 else
-                    return zo_strformat(SI_OPEN_CHAPTER_UPGRADE, ZO_GetPlatformStoreName())
+                    mainText = zo_strformat(SI_OPEN_CHAPTER_UPGRADE, ZO_GetPlatformStoreName())
                 end
+
+                if dialog.data.showLogoutWarning then
+                    mainText = string.format("%s\n\n%s", mainText, ZO_ORANGE:Colorize(GetString(SI_OPEN_CHAPTER_UPGRADE_LOG_OUT_WARNING)))
+                end
+
+                return mainText
             end
         end,
     },
@@ -164,12 +171,25 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
     },
 }
 
-function ZO_ShowChapterUpgradePlatformDialog(isCollectorsEdition, chapterUpgradeSource)
-    local data = { chapterId = GetCurrentChapterUpgradeId(), isPreRelease = false, isCollectorsEdition = isCollectorsEdition, chapterUpgradeSource = chapterUpgradeSource }
+function ZO_ShowChapterUpgradePlatformDialog(isCollectorsEdition, chapterUpgradeSource, showLogoutWarning)
+    local data =
+    {
+        chapterId = GetCurrentChapterUpgradeId(),
+        isPreRelease = false,
+        isCollectorsEdition = isCollectorsEdition,
+        chapterUpgradeSource = chapterUpgradeSource,
+        showLogoutWarning = showLogoutWarning,
+    }
     ZO_Dialogs_ShowPlatformDialog("CHAPTER_UPGRADE_STORE", data)
 end
 
 function ZO_ShowChapterPrepurchasePlatformDialog(chapterId, isCollectorsEdition, chapterUpgradeSource)
-    local data = { chapterId = chapterId, isPreRelease = true, isCollectorsEdition = isCollectorsEdition, chapterUpgradeSource = chapterUpgradeSource}
+    local data =
+    {
+        chapterId = chapterId,
+        isPreRelease = true,
+        isCollectorsEdition = isCollectorsEdition,
+        chapterUpgradeSource = chapterUpgradeSource,
+    }
     ZO_Dialogs_ShowPlatformDialog("CHAPTER_UPGRADE_STORE", data)
 end
