@@ -365,8 +365,8 @@ function ZO_ChampionAssignableActionBarSlot:Refresh()
     local backgroundTexture
     if self.championSkillData then
         local disciplineType = self.championSkillData:GetChampionDisciplineData():GetType()
-        local NOT_PENDING = false
-        self.starVisuals:Setup(ZO_CHAMPION_STAR_VISUAL_TYPE.SLOTTABLE, ZO_CHAMPION_STAR_STATE.PURCHASED, NOT_PENDING, disciplineType)
+        local NOT_SLOTTED = false -- should only be visually slotted in world
+        self.starVisuals:Setup(ZO_CHAMPION_STAR_VISUAL_TYPE.SLOTTABLE, ZO_CHAMPION_STAR_STATE.PURCHASED, disciplineType, NOT_SLOTTED)
         self.starControl:SetHidden(false)
         backgroundTexture = self.textures.slotted
     else

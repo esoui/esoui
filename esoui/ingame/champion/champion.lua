@@ -91,6 +91,11 @@ function ChampionPerks:Initialize(control)
 
     self.clusterBackgroundControlPool = ZO_ControlPool:New("ZO_Cluster", self.canvasControl, "Cluster")
 
+    self.starConfirmedTextureControlPool = ZO_ControlPool:New("ZO_ChampionStarConfirmAnimationTexture", self.canvasControl, "StarConfirmed")
+    self.starConfirmedTextureControlPool:SetCustomFactoryBehavior(function(control)
+        control.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ChampionStarConfirmAnimation", control)
+    end)
+
     self.inactiveAlert = self.control:GetNamedChild("InactiveAlert")
 
     self.keyboardConstellationViewControl = self.control:GetNamedChild("KeyboardConstellationView")
@@ -616,9 +621,11 @@ function ChampionPerks:InitializeKeybindStrips()
             end,
             callback = function(up)
                 if up and self.currentChangingEditor then
+                    -- release
                     self.currentChangingEditor:StopChangingPoints()
                     self.currentChangingEditor = nil
-                else
+                elseif not up then
+                    -- press
                     -- saving editor to an independent variable so we can
                     -- always stop, even if the editor stops being selected while
                     -- the keybind is still being held
@@ -640,9 +647,11 @@ function ChampionPerks:InitializeKeybindStrips()
             end,
             callback = function(up)
                 if up and self.currentChangingEditor then
+                    -- release
                     self.currentChangingEditor:StopChangingPoints()
                     self.currentChangingEditor = nil
-                else
+                elseif not up then
+                    -- press
                     -- saving editor to an independent variable so we can
                     -- always stop, even if the editor stops being selected while
                     -- the keybind is still being held
@@ -1183,7 +1192,10 @@ function ChampionPerks:RegisterEvents()
     end)
 
     self.championBar:RegisterCallback("SlotChanged", function(slotAssigned)
-        self.refreshGroup:MarkDirty("KeybindStrip")
+        -- we need to refresh the star that has been slotted and the star that
+        -- has been unslotted. we don't have an easy way to express that so we'll
+        -- just refresh everything
+        self.refreshGroup:MarkDirty("AllData")
     end)
 
     self.championBar:RegisterCallback("GamepadFocusChanged", function()
@@ -1235,6 +1247,17 @@ end
 function ChampionPerks:ReleaseStarTexture(starTexture)
     self.starTextureControlPool:ReleaseObject(starTexture.key)
     starTexture.key = nil
+end
+
+function ChampionPerks:AcquireStarConfirmedTexture()
+    local starConfirmedTexture, linkKey = self.starConfirmedTextureControlPool:AcquireObject()
+    starConfirmedTexture.key = linkKey
+    return starConfirmedTexture
+end
+
+function ChampionPerks:ReleaseStarConfirmedTexture(starConfirmedTexture)
+    self.starConfirmedTextureControlPool:ReleaseObject(starConfirmedTexture.key)
+    starConfirmedTexture.key = nil
 end
 
 function ChampionPerks:AcquireClusterTexture()
@@ -1453,6 +1476,8 @@ function ChampionPerks:SpendPendingPoints()
 end
 
 function ChampionPerks:SpendPointsConfirmed(respecNeeded)
+    -- save off changed stars so we can animate them after the change is applied
+    self:PrepareStarConfirmAnimation()
     SendChampionPurchaseRequest()
     local confirmationSound
     if respecNeeded then
@@ -1520,32 +1545,40 @@ end
 
 ZO_CHAMPION_STAR_CONFIRMATION_DELAY_MS = 50
 
-local function SortConfirmStars(starA, starB)
-    return CHAMPION_PERKS:SortConfirmStars(starA, starB)
-end
 
-function ChampionPerks:SortConfirmStars(starA, starB)
-    local aScore = 0
-    local bScore = 0
+local function SortConfirmStars(left, right)
+    local chosenConstellation = CHAMPION_PERKS:GetChosenConstellation()
+    local isLeftConstellationChosen = left:GetConstellation() == chosenConstellation
+    local isRightConstellationChosen = right:GetConstellation() == chosenConstellation
     --Show animations for the shown constellation first
-    if self.chosenConstellation then
-        local aShownScore = starA:GetConstellation() == self.chosenConstellation and 10 or 0
-        local bShownScore = starB:GetConstellation() == self.chosenConstellation and 10 or 0
-        aScore = aScore + aShownScore
-        bScore = bScore + bShownScore
+    if isLeftConstellationChosen ~= isRightConstellationChosen then
+        return isLeftConstellationChosen
     end
 
-    return aScore > bScore
+    local leftDisciplineIndex, leftSkillIndex
+    if left:IsSkillStar() then
+        leftDisciplineIndex, leftSkillIndex = left:GetChampionSkillData():GetSkillIndices()
+    else
+        leftDisciplineIndex, leftSkillIndex = left:GetRootChampionSkillData():GetSkillIndices()
+    end
+
+    local rightDisciplineIndex, rightSkillIndex
+    if right:IsSkillStar() then
+        rightDisciplineIndex, rightSkillIndex = right:GetChampionSkillData():GetSkillIndices()
+    else
+        rightDisciplineIndex, rightSkillIndex = right:GetRootChampionSkillData():GetSkillIndices()
+    end
+
+    -- taking advantage of the fact that discipline indices are pre-sorted left-to-right in the top level view
+    if leftDisciplineIndex ~= rightDisciplineIndex then
+        return leftDisciplineIndex < rightDisciplineIndex
+    end
+
+    -- taking advantage of the fact that skill indices are pre-sorted by their depth-first location in the skill tree
+    return leftSkillIndex < rightSkillIndex
 end
 
-function ChampionPerks:PlayStarConfirmAnimations()
-    for _, star in ipairs(self.starsToAnimateForConfirm) do
-        star:SetStateLocked(false)
-    end
-
-    self.nextConfirmAnimationTime = (GetGameTimeMilliseconds() + ZO_CHAMPION_STAR_CONFIRMATION_DELAY_MS) / 1000
-    self.firstStarConfirm = true
-
+function ChampionPerks:PrepareStarConfirmAnimation()
     ZO_ClearNumericallyIndexedTable(self.starsToAnimateForConfirm)
     for _, constellation in ipairs(self.constellations) do
         constellation:CollectStarsToAnimateForConfirm(self.starsToAnimateForConfirm)
@@ -1553,14 +1586,17 @@ function ChampionPerks:PlayStarConfirmAnimations()
 
     table.sort(self.starsToAnimateForConfirm, SortConfirmStars)
 
-    for _, star in ipairs(self.starsToAnimateForConfirm) do
-        star:SetStateLocked(true)
-    end
-
     if not self.confirmCameraTimeline then
         self.confirmCameraTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ChampionConfirmCameraAnimation")
         self.confirmCameraPrepTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ChampionConfirmCameraPrepAnimation")
     end
+    self.confirmAnimationPlaying = false
+end
+
+function ChampionPerks:StartStarConfirmAnimation()
+    self.nextConfirmAnimationTime = (GetGameTimeMilliseconds() + ZO_CHAMPION_STAR_CONFIRMATION_DELAY_MS) / 1000
+    self.firstStarConfirm = true
+    self.confirmAnimationPlaying = true
 end
 
 local CAMERA_SHAKE_MAGNITUDE_X = 1.5
@@ -2237,14 +2273,21 @@ function ChampionPerks:OnUpdate(timeSecs)
     end
 
     --Star Confirm Animations
-    if #self.starsToAnimateForConfirm > 0 and timeSecs > self.nextConfirmAnimationTime then
-        self.nextConfirmAnimationTime = timeSecs + CONFIRM_ANIMATION_SPACING
-        local star = table.remove(self.starsToAnimateForConfirm, 1)
-        star:PlayPurchaseConfirmAnimation()
-        if self.firstStarConfirm then
-            self.firstStarConfirm = false
-            self.confirmCameraPrepTimeline:PlayFromStart()
-            self.confirmCameraTimeline:PlayFromStart()
+    if self.confirmAnimationPlaying then
+        if timeSecs > self.nextConfirmAnimationTime then
+            self.nextConfirmAnimationTime = timeSecs + CONFIRM_ANIMATION_SPACING
+            local star = table.remove(self.starsToAnimateForConfirm, 1)
+            if star then
+                star:PlayPurchaseConfirmAnimation()
+            end
+            if self.firstStarConfirm then
+                self.firstStarConfirm = false
+                self.confirmCameraPrepTimeline:PlayFromStart()
+                self.confirmCameraTimeline:PlayFromStart()
+            end
+            if #self.starsToAnimateForConfirm == 0 then
+                self.confirmAnimationPlaying = false
+            end
         end
     end
 end
@@ -2300,8 +2343,7 @@ function ChampionPerks:OnChampionPurchaseResult(result)
     self.awaitingSpendPointsResponse = false
 
     if result == CHAMPION_PURCHASE_SUCCESS then
-        --depends on the pending points and respec mode not being reset yet
-        self:PlayStarConfirmAnimations()
+        self:StartStarConfirmAnimation()
     end
 
     self.isInRespecMode = false

@@ -333,13 +333,13 @@ function ZO_ChampionCluster:CollectStarsToAnimateForConfirm(starsToAnimateForCon
         return
     end
     for _, star in ipairs(self.stars) do
-        local hasChanges
+        local championSkillData
         if star:IsClusterPortalStar() then
-            hasChanges = star:GetRootChampionSkillData():HasUnsavedChanges()
+            championSkillData = star:GetRootChampionSkillData()
         else
-            hasChanges = star:GetChampionSkillData():HasUnsavedChanges()
+            championSkillData = star:GetChampionSkillData()
         end
-        if hasChanges then
+        if championSkillData:HasUnsavedChanges() and championSkillData:WouldBeUnlockedNode() then
             table.insert(starsToAnimateForConfirm, star)
         end
     end

@@ -118,14 +118,11 @@ STAR_LAYERS_BY_TYPE_AND_STATE[ZO_CHAMPION_STAR_VISUAL_TYPE.NORMAL] =
     {
         NORMAL_STAR_LAYERS.crossFlare,
         NORMAL_STAR_LAYERS.starburst,
-        NORMAL_STAR_LAYERS.rimlight1,
     },
     [ZO_CHAMPION_STAR_STATE.PURCHASED] =
     {
         NORMAL_STAR_LAYERS.crossFlare,
         NORMAL_STAR_LAYERS.starburst,
-        NORMAL_STAR_LAYERS.rimlight1,
-        NORMAL_STAR_LAYERS.rimlight2,
         NORMAL_STAR_LAYERS.atmoGlow,
     },
 }
@@ -358,6 +355,33 @@ local SLOTTABLE_STAR_LAYERS =
             },
         },
     },
+    worldSlotted =
+    {
+        texCoords = { 0.5, 0.75, 0.5, 0.625 },
+        setup = function(control, layerIndex)
+            control:SetSurfaceScale(layerIndex, 0.35)
+        end,
+        useAlphaBlendMode = true,
+        interpolators = {},
+    },
+    combatSlotted =
+    {
+        texCoords = { 0.25, 0.5, 0.5, 0.625 },
+        setup = function(control, layerIndex)
+            control:SetSurfaceScale(layerIndex, 0.35)
+        end,
+        useAlphaBlendMode = true,
+        interpolators = {},
+    },
+    conditioningSlotted =
+    {
+        texCoords = { 0.75, 1, 0.5, 0.625 },
+        setup = function(control, layerIndex)
+            control:SetSurfaceScale(layerIndex, 0.35)
+        end,
+        useAlphaBlendMode = true,
+        interpolators = {},
+    },
 }
 
 STAR_LAYERS_BY_TYPE_AND_STATE[ZO_CHAMPION_STAR_VISUAL_TYPE.SLOTTABLE] =
@@ -373,8 +397,6 @@ STAR_LAYERS_BY_TYPE_AND_STATE[ZO_CHAMPION_STAR_VISUAL_TYPE.SLOTTABLE] =
     {
         SLOTTABLE_STAR_LAYERS.brightener,
         SLOTTABLE_STAR_LAYERS.rimlightCrescent,
-        SLOTTABLE_STAR_LAYERS.bigRimLight,
-        SLOTTABLE_STAR_LAYERS.crossFlare,
         SLOTTABLE_STAR_LAYERS.starburstBig,
         SLOTTABLE_STAR_LAYERS.atmoGlow,
     },
@@ -408,6 +430,22 @@ local SLOTTTABLE_STAR_EXTRA_LAYERS_BY_DISCIPLINE =
         SLOTTABLE_STAR_LAYERS.conditioningHorizontalLensFlare,
         SLOTTABLE_STAR_LAYERS.conditioningLensFlare,
         SLOTTABLE_STAR_LAYERS.conditioningStarburst,
+    },
+}
+
+local SLOTTED_STAR_LAYERS_BY_DISCIPLINE =
+{
+    [CHAMPION_DISCIPLINE_TYPE_WORLD] =
+    {
+        SLOTTABLE_STAR_LAYERS.worldSlotted,
+    },
+    [CHAMPION_DISCIPLINE_TYPE_COMBAT] =
+    {
+        SLOTTABLE_STAR_LAYERS.combatSlotted,
+    },
+    [CHAMPION_DISCIPLINE_TYPE_CONDITIONING] =
+    {
+        SLOTTABLE_STAR_LAYERS.conditioningSlotted,
     },
 }
 
@@ -631,7 +669,6 @@ STAR_LAYERS_BY_TYPE_AND_STATE[ZO_CHAMPION_STAR_VISUAL_TYPE.CLUSTER] =
     },
 }
 
-
 ---------------------------
 -- Champion Star Visuals --
 ---------------------------
@@ -646,19 +683,33 @@ ZO_ChampionStarVisuals = ZO_InitializingObject:Subclass()
 
 function ZO_ChampionStarVisuals:Initialize(textureCompositeControl)
     self.control = textureCompositeControl
+    self.alphaTextures = textureCompositeControl:GetNamedChild("AlphaTextures")
     self.interpolators = {}
 end
 
-function ZO_ChampionStarVisuals:Setup(visualType, state, hasPendingChanges, disciplineType)
+function ZO_ChampionStarVisuals:Setup(visualType, state, disciplineType, isSlotted)
+    if self.visualType == visualType and self.state == state and self.disciplineType == disciplineType and self.isSlotted == isSlotted then
+        -- no change
+        return
+    end
     ZO_ClearNumericallyIndexedTable(self.interpolators)
-    self.control:ClearAllSurfaces()
 
+    self.control:ClearAllSurfaces()
     self.control:SetTexture(STAR_TEXTURES_BY_TYPE[visualType])
+    self.alphaTextures:ClearAllSurfaces()
+    self.alphaTextures:SetTexture(STAR_TEXTURES_BY_TYPE[visualType])
 
     if visualType == ZO_CHAMPION_STAR_VISUAL_TYPE.SLOTTABLE and disciplineType then
         local layers = SLOTTTABLE_STAR_EXTRA_LAYERS_BY_DISCIPLINE[disciplineType]
         for _, layer in ipairs(layers) do
             self:AddLayer(layer)
+        end
+
+        if isSlotted then
+            local layers = SLOTTED_STAR_LAYERS_BY_DISCIPLINE[disciplineType]
+            for _, layer in ipairs(layers) do
+                self:AddLayer(layer)
+            end
         end
     end
 
@@ -666,15 +717,23 @@ function ZO_ChampionStarVisuals:Setup(visualType, state, hasPendingChanges, disc
     for _, layer in ipairs(layers) do
         self:AddLayer(layer)
     end
+    self.visualType = visualType
+    self.state = state
+    self.disciplineType = disciplineType
+    self.isSlotted = isSlotted
 end
 
 local INSTANT_APPROACH = 1
 function ZO_ChampionStarVisuals:AddLayer(layer)
-    local layerIndex = self.control:AddSurface(unpack(layer.texCoords))
+    local control = layer.useAlphaBlendMode and self.alphaTextures or self.control
+    local layerIndex = control:AddSurface(unpack(layer.texCoords))
+    if layer.setup then
+        layer.setup(control, layerIndex)
+    end
     for _, interpolatorInfo in ipairs(layer.interpolators) do
         local interpolator = ZO_LerpInterpolator:New()
         interpolator:SetApproachFactor(INSTANT_APPROACH)
-        interpolator:SetUpdateHandler(interpolatorInfo.parameterFactory(self.control, layerIndex))
+        interpolator:SetUpdateHandler(interpolatorInfo.parameterFactory(control, layerIndex))
         interpolator:SetFluxParams(interpolatorInfo.fluxParams)
         table.insert(self.interpolators, interpolator)
     end

@@ -63,7 +63,6 @@ function ZO_ChampionStar:Initialize(constellation, parentCluster)
 
     self.depth = parentCluster:IsRootCluster() and ZO_CHAMPION_STAR_DEPTH or ZO_CHAMPION_CLUSTER_STAR_DEPTH
     self.state = nil
-    self.stateLocked = false
 
     self.starScaleInterpolator = ZO_LerpInterpolator:New(1)
 
@@ -171,37 +170,24 @@ function ZO_ChampionStar:GetTexture()
     return self.texture
 end
 
--- this is _not_ setting the state to LOCKED. this is preventing the state from
--- changing while this is true.
-function ZO_ChampionStar:SetStateLocked(locked)
-    if locked ~= self.stateLocked then
-        self.stateLocked = locked
-        if not locked then
-            self:RefreshState()
-        end
-    end
-end
-
 function ZO_ChampionStar:RefreshStateFromSkillData(championSkillData)
-    if not self.stateLocked then
-        local disciplineData = championSkillData:GetChampionDisciplineData()
-        if championSkillData:WouldBePurchased() then
-            self.state = ZO_CHAMPION_STAR_STATE.PURCHASED
-        elseif championSkillData:GetNumPendingPoints() > 0 or ((disciplineData:HasAnySavedUnspentPoints() or CHAMPION_PERKS:IsInRespecMode()) and championSkillData:CanBePurchased()) then
-            self.state = ZO_CHAMPION_STAR_STATE.AVAILABLE
-        else
+    local disciplineData = championSkillData:GetChampionDisciplineData()
+    if championSkillData:WouldBePurchased() then
+        self.state = ZO_CHAMPION_STAR_STATE.PURCHASED
+    elseif championSkillData:GetNumPendingPoints() > 0 or ((disciplineData:HasAnySavedUnspentPoints() or CHAMPION_PERKS:IsInRespecMode()) and championSkillData:CanBePurchased()) then
+        self.state = ZO_CHAMPION_STAR_STATE.AVAILABLE
+    else
+        self.state = ZO_CHAMPION_STAR_STATE.LOCKED
+    end
+
+    if not self.active then
+        if self.state == ZO_CHAMPION_STAR_STATE.AVAILABLE then
             self.state = ZO_CHAMPION_STAR_STATE.LOCKED
         end
-
-        if not self.active then
-            if self.state == ZO_CHAMPION_STAR_STATE.AVAILABLE then
-                self.state = ZO_CHAMPION_STAR_STATE.LOCKED
-            end
-        end
-
-        self:RefreshTexture()
-        self:RefreshEditor()
     end
+
+    self:RefreshTexture()
+    self:RefreshEditor()
 end
 
 function ZO_ChampionStar:RefreshTexture()
@@ -389,12 +375,12 @@ function ZO_ChampionSkillStar:RefreshTexture()
 
     local state = self.state or ZO_CHAMPION_STAR_STATE.LOCKED
     local type = self.championSkillData:GetType()
-    local hasPendingChanges = self.championSkillData:HasUnsavedChanges()
     if type == CHAMPION_SKILL_TYPE_NORMAL then
-        self.visuals:Setup(ZO_CHAMPION_STAR_VISUAL_TYPE.NORMAL, state, hasPendingChanges)
+        self.visuals:Setup(ZO_CHAMPION_STAR_VISUAL_TYPE.NORMAL, state)
     elseif type == CHAMPION_SKILL_TYPE_NORMAL_SLOTTABLE or type == CHAMPION_SKILL_TYPE_STAT_POOL_SLOTTABLE then
         local disciplineType = self.championSkillData:GetChampionDisciplineData():GetType()
-        self.visuals:Setup(ZO_CHAMPION_STAR_VISUAL_TYPE.SLOTTABLE, state, hasPendingChanges, disciplineType)
+        local isSlotted = CHAMPION_PERKS:IsChampionSkillDataSlotted(self.championSkillData)
+        self.visuals:Setup(ZO_CHAMPION_STAR_VISUAL_TYPE.SLOTTABLE, state, disciplineType, isSlotted)
     else
         internalassert(false, "missing star visuals")
     end
@@ -503,7 +489,7 @@ function ZO_ChampionClusterPortalStar:RefreshTexture()
     end
 
     local state = self.state or ZO_CHAMPION_STAR_STATE.LOCKED
-    self.visuals:Setup(ZO_CHAMPION_STAR_VISUAL_TYPE.CLUSTER, state, self.championClusterData:DoChildrenHaveUnsavedChanges())
+    self.visuals:Setup(ZO_CHAMPION_STAR_VISUAL_TYPE.CLUSTER, state)
 
     local size = STAR_CONTROL_SIZES_FOR_STATE[state]
     self.texture:SetDimensions(self.sceneNode:ComputeSizeForDepth(size, size, self.depth, ZO_CHAMPION_REFERENCE_CAMERA_Z))
@@ -772,9 +758,15 @@ function ZO_ChampionStarEditor:OnMouseWheel(delta)
 end
 
 function ZO_ChampionStar:PlayPurchaseConfirmAnimation()
-    -- TODO: Champion 2, confirm animation
-    -- don't forget to do this on complete instead
-    self:SetStateLocked(false)
+    local STAR_ONE_SHOT_ANIMATION_SIZE = 30
+    local confirmedTexture = CHAMPION_PERKS:AcquireStarConfirmedTexture()
+    self.sceneNode:AddTexture(confirmedTexture, self.x, self.y, self.depth)
+    confirmedTexture:SetDimensions(self.sceneNode:ComputeSizeForDepth(STAR_ONE_SHOT_ANIMATION_SIZE, STAR_ONE_SHOT_ANIMATION_SIZE, self.depth, ZO_CHAMPION_REFERENCE_CAMERA_Z))
+    confirmedTexture.timeline:SetHandler("OnStop", function()
+        self.sceneNode:RemoveTexture(confirmedTexture)
+        CHAMPION_PERKS:ReleaseStarConfirmedTexture(confirmedTexture)
+    end)
+    confirmedTexture.timeline:PlayFromStart()
 end
 
 --Global XML Handlers

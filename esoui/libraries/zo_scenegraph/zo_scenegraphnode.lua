@@ -230,7 +230,7 @@ local ANCHOR_TO_NORMALIZED_Y =
     [BOTTOMRIGHT] = 1,
 }
 
-local DRAW_LEVEL_BASE = 10000
+local DRAW_LEVEL_BASE = ZO_ABOVE_SCENEGRAPH_DRAW_LEVEL
 local Z_TO_DRAW_LEVEL_FACTOR = 100 -- draw levels are integers, so this is effectively 2 digits of precision
 local function ComputeDrawLevel(z)
     return DRAW_LEVEL_BASE - z * Z_TO_DRAW_LEVEL_FACTOR
@@ -401,6 +401,7 @@ function ZO_SceneGraphNode:AddLine(lineControl, startControl, endControl, z)
     lineControl:ClearAnchors()
     lineControl:SetAnchor(TOPLEFT, startControl, CENTER)
     lineControl:SetAnchor(BOTTOMRIGHT, endControl, CENTER)
+    self:SetDirty(true)
 end
 
 function ZO_SceneGraphNode:SetLineThickness(lineControl, thickness)
@@ -420,6 +421,7 @@ function ZO_SceneGraphNode:AddTextureComposite(compositeControl, x, y, z)
     compositeControl.sceneScale = 1
     compositeControl.sceneHidden = false
     compositeControl.sceneAnchorPoint = CENTER
+    self:SetDirty(true)
 end
 
 function ZO_SceneGraphNode:RemoveTextureComposite(compositeControl)
@@ -439,6 +441,7 @@ function ZO_SceneGraphNode:AddTexture(textureControl, x, y, z)
     textureControl.sceneHidden = false
     textureControl.sceneAnchorPoint = CENTER
     textureControl.sceneUseRotation = true
+    self:SetDirty(true)
 end
 
 function ZO_SceneGraphNode:RemoveTexture(textureControl)

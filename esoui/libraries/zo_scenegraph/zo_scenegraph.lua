@@ -1,3 +1,5 @@
+ZO_ABOVE_SCENEGRAPH_DRAW_LEVEL = 100000
+
 ZO_SceneGraph = ZO_Object:Subclass()
 
 function ZO_SceneGraph:New(...)
