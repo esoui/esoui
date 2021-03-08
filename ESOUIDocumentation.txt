@@ -2961,7 +2961,9 @@ h5. AdvancedStatDisplayType
 * ADVANCED_STAT_DISPLAY_TYPE_GENERIC_DAMAGE
 * ADVANCED_STAT_DISPLAY_TYPE_GENERIC_RESIST
 * ADVANCED_STAT_DISPLAY_TYPE_HEALING_DONE
+* ADVANCED_STAT_DISPLAY_TYPE_HEALING_DONE_BONUSES
 * ADVANCED_STAT_DISPLAY_TYPE_HEALING_TAKEN
+* ADVANCED_STAT_DISPLAY_TYPE_HEALING_TAKEN_BONUSES
 * ADVANCED_STAT_DISPLAY_TYPE_MAGIC_DAMAGE
 * ADVANCED_STAT_DISPLAY_TYPE_MAGIC_RESIST
 * ADVANCED_STAT_DISPLAY_TYPE_MONSTER_KILL_XP
@@ -7939,6 +7941,12 @@ h5. ControlHandlerOrder
 * CONTROL_HANDLER_ORDER_AFTER
 * CONTROL_HANDLER_ORDER_BEFORE
 * CONTROL_HANDLER_ORDER_NONE
+
+
+h5. ControlMaskMode
+* CONTROL_MASK_MODE_BASIC
+* CONTROL_MASK_MODE_NONE
+* CONTROL_MASK_MODE_THRESHOLD
 
 
 h5. ControlOrientation
@@ -18664,6 +18672,8 @@ Objects that inherit behavior from *Control*
 
 * ClearAnchors *protected-attributes* ()
 
+* ClearClips()
+
 * Convert3DLocalOrientationToWorldOrientation(*number* _localPitch_, *number* _localYaw_, *number* _localRoll_)
 ** _Returns:_ *number* _worldPitch_, *number* _worldYaw_, *number* _worldRoll_
 
@@ -18755,6 +18765,9 @@ Objects that inherit behavior from *Control*
 * GetExcludeFromResizeToFitExtents()
 ** _Returns:_ *bool* _excludes_
 
+* GetFadeGradient(*luaindex* _gradientIndex_)
+** _Returns:_ *number* _normalX_, *number* _normalY_, *number* _gradientLength_
+
 * GetHandler(*string* _handlerName_, *string* _name_)
 ** _Returns:_ *function* _functionRef_
 
@@ -18775,6 +18788,12 @@ Objects that inherit behavior from *Control*
 
 * GetLeft()
 ** _Returns:_ *number* _left_
+
+* GetMaskThresholdThickness()
+** _Returns:_ *number* _normalizedThickness_
+
+* GetMaskThresholdZeroAlphaEdge()
+** _Returns:_ *number* _normalizedEdge_
 
 * GetName()
 ** _Returns:_ *string* _name_
@@ -18862,6 +18881,10 @@ Objects that inherit behavior from *Control*
 
 * SetAnchorFill *protected-attributes* (*object* _anchorTargetControl_)
 
+* SetAutoRectClipChildren(*bool* _autoRectClipChildren_)
+
+* SetCircularClip(*number* _centerX_, *number* _centerY_, *number* _radius_)
+
 * SetClampedToScreen(*bool* _clamped_)
 
 * SetClampedToScreenInsets(*number* _left_, *number* _top_, *number* _right_, *number* _bottom_)
@@ -18877,6 +18900,8 @@ Objects that inherit behavior from *Control*
 * SetDrawTier *protected-attributes* (*integer* _tier_)
 
 * SetExcludeFromResizeToFitExtents *protected-attributes* (*bool* _exclude_)
+
+* SetFadeGradient(*luaindex* _gradientIndex_, *number* _normalX_, *number* _normalY_, *number* _gradientLength_)
 
 * SetHandler(*string* _handlerName_, *function* _functionRef_, *string* _name_, *[ControlHandlerOrder|#ControlHandlerOrder]* _controlHandlerOrder_, *string* _targetName_)
 
@@ -18894,11 +18919,23 @@ Objects that inherit behavior from *Control*
 
 * SetKeyboardEnabled *protected-attributes* (*bool* _enabled_)
 
+* SetMaskMode(*[ControlMaskMode|#ControlMaskMode]* _maskMode_)
+
+* SetMaskTexture(*string* _fileName_)
+
+* SetMaskTextureReleaseOption(*[ReleaseReferenceOptions|#ReleaseReferenceOptions]* _releaseOption_)
+
+* SetMaskThresholdThickness(*number* _normalizedThickness_)
+
+* SetMaskThresholdZeroAlphaEdge(*number* _normalizedEdge_)
+
 * SetMouseEnabled *protected-attributes* (*bool* _enabled_)
 
 * SetMovable(*bool* _isMovable_)
 
 * SetParent *protected-attributes* (*object* _newParent_)
+
+* SetRectangularClip(*number* _left_, *number* _top_, *number* _right_, *number* _bottom_)
 
 * SetResizeHandleSize(*number* _handleSize_)
 
@@ -19306,9 +19343,6 @@ h3. PolygonControl
 h3. RootWindow
 
 h3. ScrollControl
-* GetFadeGradient(*luaindex* _gradientIndex_)
-** _Returns:_ *number* _normalX_, *number* _normalY_, *number* _gradientLength_
-
 * GetScrollExtents()
 ** _Returns:_ *number* _horizontal_, *number* _vertical_
 
@@ -19316,8 +19350,6 @@ h3. ScrollControl
 ** _Returns:_ *number* _horizontal_, *number* _vertical_
 
 * RestoreToExtents(*integer* _duration_)
-
-* SetFadeGradient(*luaindex* _gradientIndex_, *number* _normalX_, *number* _normalY_, *number* _gradientLength_)
 
 * SetHorizontalScroll(*number* _offset_)
 
@@ -19489,7 +19521,7 @@ h3. TextBufferControl
 
 h3. TextureCompositeControl
 * AddSurface(*number* _left_, *number* _right_, *number* _top_, *number* _bottom_)
-** _Returns:_ *integer* _surfaceIndex_
+** _Returns:_ *luaindex* _surfaceIndex_
 
 * ClearAllSurfaces()
 
@@ -20788,6 +20820,7 @@ h4. Attributes:
 * applyAlpha *bool*
 * applyToChildControlName *string*
 * autoAdjustTextureCoords *bool*
+* autoRectClipChildren *bool*
 * barAlignment *[BarAlignment|#BarAlignment]*
 * blendMode *[TextureBlendMode|#TextureBlendMode]*
 * cellsHigh *integer*
@@ -20857,6 +20890,11 @@ h4. Attributes:
 * lineSpacing *integer*
 * linkEnabled *bool*
 * loopCount *string*
+* maskMode *[ControlMaskMode|#ControlMaskMode]*
+* maskTextureFile *string*
+* maskTextureFileReleaseOption *[ReleaseReferenceOptions|#ReleaseReferenceOptions]*
+* maskThresholdNormalizedThickness *number*
+* maskThresholdNormalizedZeroAlphaEdge *number*
 * maxHistoryLines *integer*
 * maxInputCharacters *integer*
 * maxLineCount *integer*
@@ -21075,6 +21113,11 @@ h5. CenterTextureCoords
 * _attribute:_ *number* _top_
 * _attribute:_ *number* _bottom_
 
+h5. CircularClip
+* _attribute:_ *number* _centerX_
+* _attribute:_ *number* _centerY_
+* _attribute:_ *number* _radius_
+
 h5. ClampedToScreenInsets
 * _attribute:_ *number* _left_
 * _attribute:_ *number* _top_
@@ -21082,6 +21125,8 @@ h5. ClampedToScreenInsets
 * _attribute:_ *number* _bottom_
 
 h5. ClearAnchors
+
+h5. ClearClips
 
 h5. ColorAnimation
 * [Inherits: AnimationBase|#AnimationBase]
@@ -21129,11 +21174,14 @@ h5. Control
 * _attribute:_ *[ControlAccessControl|#ControlAccessControl]* _accessControl_
 * [Child: Anchor|#Anchor]
 * [Child: AnchorFill|#AnchorFill]
+* [Child: CircularClip|#CircularClip]
 * [Child: ClampedToScreenInsets|#ClampedToScreenInsets]
 * [Child: ClearAnchors|#ClearAnchors]
+* [Child: ClearClips|#ClearClips]
 * [Child: Controls|#Controls]
 * [Child: DimensionConstraints|#DimensionConstraints]
 * [Child: Dimensions|#Dimensions]
+* [Child: FadeGradient|#FadeGradient]
 * [Child: HitInsets|#HitInsets]
 * [Child: OnChar|#OnChar]
 * [Child: OnDragStart|#OnDragStart]
@@ -21160,8 +21208,10 @@ h5. Control
 * [Child: OnResizedToFit|#OnResizedToFit]
 * [Child: OnShow|#OnShow]
 * [Child: OnUpdate|#OnUpdate]
+* [Child: RectangularClip|#RectangularClip]
 * [Child: ResizeToFitPadding|#ResizeToFitPadding]
 * [Child: alpha|#Attributes]
+* [Child: autoRectClipChildren|#Attributes]
 * [Child: clampedToScreen|#Attributes]
 * [Child: excludeFromResizeToFitExtents|#Attributes]
 * [Child: hidden|#Attributes]
@@ -21172,6 +21222,11 @@ h5. Control
 * [Child: keyboardEnabled|#Attributes]
 * [Child: layer|#Attributes]
 * [Child: level|#Attributes]
+* [Child: maskMode|#Attributes]
+* [Child: maskTextureFile|#Attributes]
+* [Child: maskTextureFileReleaseOption|#Attributes]
+* [Child: maskThresholdNormalizedThickness|#Attributes]
+* [Child: maskThresholdNormalizedZeroAlphaEdge|#Attributes]
 * [Child: mouseEnabled|#Attributes]
 * [Child: movable|#Attributes]
 * [Child: resizeHandleSize|#Attributes]
@@ -21691,6 +21746,12 @@ h5. RadialCooldownGradient
 * _attribute:_ *number* _startAlpha_
 * _attribute:_ *number* _angularDistance_
 
+h5. RectangularClip
+* _attribute:_ *number* _left_
+* _attribute:_ *number* _top_
+* _attribute:_ *number* _right_
+* _attribute:_ *number* _bottom_
+
 h5. ResizeToFitPadding
 * _attribute:_ *number* _width_
 * _attribute:_ *number* _height_
@@ -21711,7 +21772,6 @@ h5. ScaleAnimation
 
 h5. Scroll
 * [Inherits: Control|#Control]
-* [Child: FadeGradient|#FadeGradient]
 * [Child: OnScrollExtentsChanged|#OnScrollExtentsChanged]
 * [Child: OnScrollOffsetChanged|#OnScrollOffsetChanged]
 
