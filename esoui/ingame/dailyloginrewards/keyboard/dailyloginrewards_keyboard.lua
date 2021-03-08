@@ -57,6 +57,7 @@ function ZO_DailyLoginRewards_Keyboard:InitializeKeybindStripDescriptors()
             name = GetString(SI_DAILY_LOGIN_REWARDS_PREVIEW_KEYBIND),
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function()
+                SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
                 SYSTEMS:GetObject("itemPreview"):PreviewReward(self.mouseOverData:GetRewardId())
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end,

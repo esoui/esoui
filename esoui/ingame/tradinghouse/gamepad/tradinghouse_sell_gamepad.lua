@@ -89,19 +89,33 @@ function ZO_GamepadTradingHouse_Sell:InitializeList()
         self:OnSelectionChanged(...)
     end
 
+    local function OnRefreshList(list)
+        if list:GetNumItems() == 0 then
+            TRADING_HOUSE_GAMEPAD:RequestEnterHeader()
+        else
+            TRADING_HOUSE_GAMEPAD:RequestLeaveHeader()
+        end
+    end
+
     local USE_TRIGGERS = true
     local SORT_FUNCTION = nil
     local CATEGORIZATION_FUNCTION = nil
     local ENTRY_SETUP_CALLBACK = nil
 
-    self.itemList = ZO_GamepadInventoryList:New(self.listControl, BAG_BACKPACK, SLOT_TYPE_ITEM, OnSelectionChanged, ENTRY_SETUP_CALLBACK, 
+    self.itemList = ZO_GamepadInventoryList:New(self.listControl, BAG_BACKPACK, SLOT_TYPE_ITEM, OnSelectionChanged, ENTRY_SETUP_CALLBACK,
                                                     CATEGORIZATION_FUNCTION, SORT_FUNCTION, USE_TRIGGERS, "ZO_TradingHouse_ItemListRow_Gamepad", SellItemSetupFunction)
-
-    self.itemList:SetItemFilterFunction(function(slot) 
+    self.itemList:SetOnRefreshListCallback(OnRefreshList)
+    self.itemList:SetSearchContext("guildTraderTextSearch")
+    self.itemList:SetDirectionalInputEnabled(false)
+    self.itemList:SetItemFilterFunction(function(slot)
         return IsItemSellableOnTradingHouse(slot.bagId, slot.slotIndex)
     end)
     local parametricList = self.itemList:GetParametricList()
     parametricList:SetAlignToScreenCenter(true)
+end
+
+function ZO_GamepadTradingHouse_Sell:UpdateList()
+    self.itemList:RefreshList()
 end
 
 function ZO_GamepadTradingHouse_Sell:OnShowing()
@@ -113,7 +127,8 @@ function ZO_GamepadTradingHouse_Sell:OnShown()
 end
 
 function ZO_GamepadTradingHouse_Sell:InitializeKeybindStripDescriptors()
-    self.keybindStripDescriptor = {
+    self.keybindStripDescriptor =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
             name = function()

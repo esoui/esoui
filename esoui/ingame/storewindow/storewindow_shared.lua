@@ -16,17 +16,54 @@ STORE_INTERACTION =
     interactTypes = { INTERACTION_VENDOR, INTERACTION_STABLE },
 }
 
--- Shared object
-ZO_SharedStoreManager = ZO_Object:Subclass()
+ZO_STORE_MODE_HAS_TEXT_SEARCH =
+{
+    [ZO_MODE_STORE_BUY_BACK] = true,
+    [ZO_MODE_STORE_SELL] = true,
+    [ZO_MODE_STORE_REPAIR] = true,
+    [ZO_MODE_STORE_SELL_STOLEN] = true,
+    [ZO_MODE_STORE_LAUNDER] = true,
+}
 
-function ZO_SharedStoreManager:New(...)
-    local obj = ZO_Object.New(self)
-    obj:Initialize(...)
-    return obj
-end
+-- Shared object
+ZO_SharedStoreManager = ZO_InitializingObject:Subclass()
 
 function ZO_SharedStoreManager:Initialize(control)
     self.control = control
+
+    local storeFilterTargetDescriptor =
+    {
+        [BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT] =
+        {
+            searchFilterList =
+            {
+                BACKGROUND_LIST_FILTER_TYPE_NAME,
+            },
+            primaryKeys =
+            {
+                BAG_BACKPACK,
+                BAG_BUYBACK,
+                BAG_WORN,
+            }
+        },
+    }
+    TEXT_SEARCH_MANAGER:SetupContextTextSearch("storeTextSearch", storeFilterTargetDescriptor)
+
+    local fenceFilterTargetDescriptor =
+    {
+        [BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT] =
+        {
+            searchFilterList =
+            {
+                BACKGROUND_LIST_FILTER_TYPE_NAME,
+            },
+            primaryKeys =
+            {
+                BAG_BACKPACK,
+            }
+        },
+    }
+    TEXT_SEARCH_MANAGER:SetupContextTextSearch("fenceTextSearch", fenceFilterTargetDescriptor)
 end
 
 function ZO_SharedStoreManager:InitializeStore()
@@ -182,45 +219,37 @@ function ZO_StoreManager_DoPreviewAction(action, storeEntryIndex)
     local entryType = select(14, GetStoreEntryInfo(storeEntryIndex))
     local itemPreview = SYSTEMS:GetObject("itemPreview")
 
-    local itemLink
-    local collectibleId
     if entryType == STORE_ENTRY_TYPE_ITEM then
-        itemLink = GetStoreItemLink(storeEntryIndex)
-        local containerCollectibleId = GetItemLinkContainerCollectibleId(itemLink)
-        if containerCollectibleId ~= 0 then
-            collectibleId = containerCollectibleId
-            itemLink = nil
-        end 
-    elseif entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
-        collectibleId = GetStoreCollectibleInfo(storeEntryIndex)
-    end
-
-    if itemLink then
-        if ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink) then
+        local itemLink = GetStoreItemLink(storeEntryIndex)
+        if CanItemLinkBePreviewed(itemLink) then
             if action == ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE then
                 return true
             elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then
-                itemPreview:PreviewStoreEntryAsFurniture(storeEntryIndex)
+                itemPreview:ClearPreviewCollection()
+                itemPreview:PreviewStoreEntry(storeEntryIndex)
             end
         end 
-    elseif collectibleId then
+    elseif entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
+        local collectibleId = GetStoreCollectibleInfo(storeEntryIndex)
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
         if collectibleData  then
             if collectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE then
                 if action == ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE then
                     return true
                 elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then
+                    itemPreview:ClearPreviewCollection()
                     itemPreview:PreviewOutfit(ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex())
                     local NO_DYE = 0
-                    local REFRESH_IMMEDIATELY = true
                     local outfitSlot = ZO_OUTFIT_MANAGER:GetPreferredOutfitSlotForStyle(collectibleData)
-                    itemPreview:AddOutfitSlotPreviewElement(outfitSlot, collectibleId, ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX, NO_DYE, NO_DYE, NO_DYE, REFRESH_IMMEDIATELY)
+                    AddOutfitSlotPreviewElementToPreviewCollection(outfitSlot, collectibleId, ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX, NO_DYE, NO_DYE, NO_DYE)
+                    ApplyChangesToPreviewCollectionShown()
                 end
             elseif GetCollectibleFurnitureDataId(collectibleId) ~= 0 then
                 if action == ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE then
                     return true
                 elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then
-                    itemPreview:PreviewStoreEntryAsFurniture(storeEntryIndex)
+                    itemPreview:ClearPreviewCollection()
+                    itemPreview:PreviewStoreEntry(storeEntryIndex)
                 end
             end
         end

@@ -205,45 +205,6 @@ do
     end
 end
 
-do
-    local POINTS_ATTRIBUTE_ICON =
-    {
-        [ATTRIBUTE_HEALTH] = "EsoUI/Art/Champion/champion_points_health_icon.dds",
-        [ATTRIBUTE_MAGICKA] = "EsoUI/Art/Champion/champion_points_magicka_icon.dds",
-        [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon.dds",
-    }
-
-    function GetChampionPointAttributeIcon(attribute)
-        return POINTS_ATTRIBUTE_ICON[attribute]
-    end
-end
-
-do
-    local POINTS_ATTRIBUTE_HUD_ICON =
-    {
-        [ATTRIBUTE_HEALTH] = "EsoUI/Art/Champion/champion_points_health_icon-HUD.dds",
-        [ATTRIBUTE_MAGICKA] = "EsoUI/Art/Champion/champion_points_magicka_icon-HUD.dds",
-        [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon-HUD.dds",
-    }
-
-    function GetChampionPointAttributeHUDIcon(attribute)
-        return POINTS_ATTRIBUTE_HUD_ICON[attribute]
-    end
-end
-
-do
-    local POINTS_ATTRIBUTE_ACTIVE_ICON =
-    {
-        [ATTRIBUTE_HEALTH] = "EsoUI/Art/Champion/champion_points_health_icon_active.dds",
-        [ATTRIBUTE_MAGICKA] = "EsoUI/Art/Champion/champion_points_magicka_icon_active.dds",
-        [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon_active.dds",
-    }
-
-    function GetChampionPointAttributeActiveIcon(attribute)
-        return POINTS_ATTRIBUTE_ACTIVE_ICON[attribute]
-    end
-end
-
 -- Veteran --
 do
     local VETERAN_ICON = "EsoUI/Art/UnitFrames/target_veteranRank_icon.dds"
@@ -502,5 +463,6 @@ ZO_TIMER_ICON_64 = "EsoUI/Art/Miscellaneous/timer_64.dds"
 ZO_KEYBOARD_LOCKED_ICON = "EsoUI/Art/Miscellaneous/status_locked.dds"
 ZO_GAMEPAD_LOCKED_ICON_32 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds"
 ZO_KEYBOARD_IS_EQUIPPED_ICON = "EsoUI/Art/Inventory/inventory_icon_equipped.dds"
+ZO_GAMEPAD_IS_EQUIPPED_ICON = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 ZO_CHECK_ICON = "EsoUI/Art/Miscellaneous/check_icon_32.dds"
 ZO_GAMEPAD_HERON_NAME_ICON = "EsoUI/Art/Miscellaneous/Gamepad/gp_heronNameIcon.dds"

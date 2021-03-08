@@ -103,7 +103,8 @@ function ZO_BuffDebuffStyleObject:UpdateContainer(containerObject)
 
         for i = 1, GetNumBuffs(unitTag) do
             local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, _, castByPlayer = GetUnitBuffInfo(unitTag, i)
-            local permanent = IsAbilityPermanent(abilityId)
+            local duration = timeEnding - timeStarted
+            local permanent = duration == 0
 
             if IsVisible(containerObject, effectType, timeStarted, timeEnding, permanent, castByPlayer) then
                 local data =
@@ -120,7 +121,7 @@ function ZO_BuffDebuffStyleObject:UpdateContainer(containerObject)
                     statusEffectType = statusEffectType,
                     abilityId = abilityId,
                     uid = uid,
-                    duration = timeEnding - timeStarted,
+                    duration = duration,
                     castByPlayer = castByPlayer,
                     permanent = permanent,
                     isArtificial = false,

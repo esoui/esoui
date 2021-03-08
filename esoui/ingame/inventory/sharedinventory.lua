@@ -1,12 +1,6 @@
 ZO_TRADE_BOP_ICON = "EsoUI/Art/Inventory/inventory_Tradable_icon.dds"
 
-ZO_SharedInventoryManager = ZO_CallbackObject:Subclass()
-
-function ZO_SharedInventoryManager:New(...)
-    local sharedInventoryManager = ZO_CallbackObject.New(self)
-    sharedInventoryManager:Initialize(...)
-    return sharedInventoryManager
-end
+ZO_SharedInventoryManager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_SharedInventoryManager:Initialize()
     local namespace = tostring(self)
@@ -25,11 +19,11 @@ function ZO_SharedInventoryManager:Initialize()
             -- Combinations play an animation on success, hide UI so the player can see it
             SCENE_MANAGER:SetInUIMode(false)
         end
-    end 
+    end
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_ITEM_COMBINATION_RESULT, OnItemCombinationResult)
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_FENCE, function() 
-        self:RefreshInventory(BAG_BACKPACK) 
+        self:RefreshInventory(BAG_BACKPACK)
         self:RefreshInventory(BAG_WORN)
     end)
 
@@ -113,7 +107,7 @@ function ZO_SharedInventoryManager:Initialize()
 
             if updateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then 
                 local effectivenessReduced = IsArmorEffectivenessReduced(bagId, slotIndex)
-                if effectivenessReduced then 
+                if effectivenessReduced then
                     TriggerTutorial(TUTORIAL_TRIGGER_DAMAGED_EQUIPMENT_REDUCING_EFFECTIVENESS)
                 end
             end
@@ -183,10 +177,10 @@ function ZO_SharedInventoryManager:Initialize()
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_QUEST_REMOVED, OnQuestRemoved)
 
     local function OnMoneyUpdated(eventCode, newMoney, oldMoney, reason)
-        local wasInitialize = (reason == CURRENCY_CHANGE_REASON_PLAYER_INIT)
-        local wasItemPurchased = (reason == CURRENCY_CHANGE_REASON_VENDOR) and (newMoney < oldMoney)
+        local wasInitialize = reason == CURRENCY_CHANGE_REASON_PLAYER_INIT
+        local wasItemPurchased = reason == CURRENCY_CHANGE_REASON_VENDOR and newMoney < oldMoney
 
-        if(not (wasItemPurchased or wasInitialize)) then
+        if not (wasItemPurchased or wasInitialize) then
             PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
         end
     end
@@ -198,8 +192,8 @@ function ZO_SharedInventoryManager:Initialize()
                                  changeReason == CURRENCY_CHANGE_REASON_DEATH or
                                  changeReason == CURRENCY_CHANGE_REASON_BANK_FEE or
                                  (changeReason == CURRENCY_CHANGE_REASON_VENDOR and newTelvarStones < oldTelvarStones)
-            
-        if(not isExcludedReason) then
+
+        if not isExcludedReason then
             PlaySound(SOUNDS.TELVAR_TRANSACT)
         end
     end
@@ -209,12 +203,44 @@ function ZO_SharedInventoryManager:Initialize()
 
     local function OnSmithingTraitResearch()
         self:RefreshAllTraitInformation()
-    end 
+    end
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_SMITHING_TRAIT_RESEARCH_CANCELED, OnSmithingTraitResearch)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_SMITHING_TRAIT_RESEARCH_STARTED, OnSmithingTraitResearch)
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_PLAYER_ACTIVATED, OnFullInventoryUpdated)
+
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_NON_COMBAT_BONUS_CHANGED, function(event, nonCombatBonusType)
+        if nonCombatBonusType == NON_COMBAT_BONUS_MERCHANT_HAGGLING then
+            OnFullInventoryUpdated()
+        end
+    end)
+
+    local inventoryFilterTargetDescriptor =
+    {
+        [BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT] =
+        {
+            searchFilterList =
+            {
+                BACKGROUND_LIST_FILTER_TYPE_NAME,
+            },
+            primaryKeys =
+            {
+                BAG_WORN,
+                BAG_BACKPACK,
+                BAG_VIRTUAL,
+            }
+        },
+        [BACKGROUND_LIST_FILTER_TARGET_QUEST_ITEM_ID] =
+        {
+            searchFilterList =
+            {
+                BACKGROUND_LIST_FILTER_TYPE_NAME,
+            },
+            primaryKeys = ZO_FilterTargetDescriptor_GetQuestItemIdList,
+        },
+    }
+    TEXT_SEARCH_MANAGER:SetupContextTextSearch("playerInventoryTextSearch", inventoryFilterTargetDescriptor)
 
     self:RegisterForConfirmUseItemEvents(namespace)
 
@@ -277,7 +303,7 @@ function ZO_SharedInventoryManager:GenerateFullSlotData(optFilterFunction, ...)
         local bagId = select(i, ...)
         local bagCache = self:GetOrCreateBagCache(bagId)
 
-        for slotIndex, itemData in pairs(bagCache) do
+        for _, itemData in pairs(bagCache) do
             if not optFilterFunction or optFilterFunction(itemData) then
                 filteredItems[#filteredItems + 1] = itemData
             end
@@ -304,7 +330,7 @@ function ZO_SharedInventoryManager:IsFilteredSlotDataEmpty(optFilterFunction, ..
         local bagId = select(i, ...)
         local bagCache = self:GetOrCreateBagCache(bagId)
 
-        for slotIndex, itemData in pairs(bagCache) do
+        for _, itemData in pairs(bagCache) do
             if not optFilterFunction or optFilterFunction(itemData) then
                 return false
             end
@@ -360,10 +386,13 @@ function ZO_SharedInventoryManager:RefreshBagTraitInformation(bagId)
             local existingData = bagCache[slotIndex]
             if existingData then
                 local newItemTraitInformation = GetItemTraitInformation(bagId, slotIndex)
-                if existingData.traitInformation ~= newItemTraitInformation then
+                local newItemSellInformation = GetItemSellInformation(bagId, slotIndex)
+                if existingData.traitInformation ~= newItemTraitInformation or existingData.sellInformation ~= newItemSellInformation then
                     local previousSlotData = self:GetPreviousSlotDataInternal(bagId, slotIndex)
                     existingData.traitInformation = newItemTraitInformation
                     existingData.traitInformationSortOrder = ZO_GetItemTraitInformation_SortOrder(existingData.traitInformation)
+                    existingData.sellInformation = newItemSellInformation
+                    existingData.sellInformationSortOrder = ZO_GetItemSellInformationCustomSortOrder(existingData.sellInformation)
                     self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex, previousSlotData)
                 end
             end
@@ -379,7 +408,7 @@ function ZO_SharedInventoryManager:AreAnyItemsNew(optFilterFunction, currentFilt
         local bagId = select(i, ...)
         local bagCache = self:GetOrCreateBagCache(bagId)
 
-        for slotIndex, itemData in pairs(bagCache) do
+        for _, itemData in pairs(bagCache) do
             if itemData.brandNew and (not optFilterFunction or optFilterFunction(itemData, currentFilter)) then
                 return true
             end
@@ -764,8 +793,10 @@ ZO_INVENTORY_STAT_GROUPS =
     {
         STAT_SPELL_POWER,
         STAT_SPELL_CRITICAL,
+        STAT_SPELL_PENETRATION,
         STAT_POWER,
         STAT_CRITICAL_STRIKE,
+        STAT_PHYSICAL_PENETRATION,
     },
     {
         STAT_SPELL_RESIST,

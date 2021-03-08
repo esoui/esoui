@@ -42,25 +42,19 @@ local function IsButtonEnabled(dialog, localizedString, textEntryValue)
     return isEnabled
 end
 
-local function GetDefaultExampleText()
-    return IsConsoleUI() and GetString(SI_REQUEST_NAME_DEFAULT_TEXT_CONSOLE) or GetString(SI_REQUEST_NAME_DEFAULT_TEXT)
-end
-
 -------------------
 -- ZO_GamepadSocialDialogs object
 -------------------
 
-local ZO_GamepadSocialDialogs = ZO_Object:Subclass()
+local ZO_GamepadSocialDialogs = ZO_InitializingObject:Subclass()
 
-function ZO_GamepadSocialDialogs:New()
-    local object = ZO_Object.New(self)
-    object:InitializeSocialOptionsDialog()
-    object:InitializeEditNoteDialog()
-    object:InitializeAddFriendDialog()
-    object:InitializeAddIgnoreDialog()
-    object:InitializeInviteMemberDialog()
-    object:InitializeGroupInviteDialog()
-    return object   
+function ZO_GamepadSocialDialogs:Initialize()
+    self:InitializeSocialOptionsDialog()
+    self:InitializeEditNoteDialog()
+    self:InitializeAddFriendDialog()
+    self:InitializeAddIgnoreDialog()
+    self:InitializeInviteMemberDialog()
+    self:InitializeGroupInviteDialog()
 end
 
 -------------------
@@ -74,13 +68,17 @@ function ZO_GamepadSocialDialogs:InitializeSocialOptionsDialog()
 
     ZO_Dialogs_RegisterCustomDialog(dialogName,
     {
-        gamepadInfo = 
+        gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
-
         setup = function(dialog)
-            dialog.info.parametricList = dialog.data.parametricList
+            local data = dialog.data
+            if data.setupFunction then
+                data.setupFunction(dialog)
+            end
+
+            dialog.info.parametricList = data.parametricList
             finishedCallback = nil
             dialog:setupFunc()
         end,
@@ -89,7 +87,6 @@ function ZO_GamepadSocialDialogs:InitializeSocialOptionsDialog()
                 finishedCallback()
             end
         end,
-
         title =
         {
             text = SI_GAMEPAD_CONTACTS_OPTIONS_TITLE,

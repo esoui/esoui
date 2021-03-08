@@ -21,13 +21,21 @@ end
 function ZO_SocialOptionsDialogGamepad:ShowOptionsDialog()
     local parametricList = {}
     self:PopulateOptionsList(parametricList)
-    local data = {
-        parametricList = parametricList,
-    }
+    local data = self:GetDialogData()
     --Saving the displayName and online state of the person the dialog is being opened for.
     self.dialogData.displayName = self.socialData.displayName
     self.dialogData.online = self.socialData.online
     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_OPTIONS_DIALOG", data)
+end
+
+function ZO_SocialOptionsDialogGamepad:GetDialogData()
+    local parametricList = {}
+    self:PopulateOptionsList(parametricList)
+    local data =
+    {
+        parametricList = parametricList,
+    }
+    return data
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildOptionsList()

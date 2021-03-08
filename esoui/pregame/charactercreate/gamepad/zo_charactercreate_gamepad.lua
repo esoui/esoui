@@ -139,7 +139,7 @@ function ZO_CharacterCreate_Gamepad:Initialize(...)
                 local genderDecoratedCharacterName = ZO_SELECTED_TEXT:Colorize(GetGrammarDecoratedName(self.characterName, CharacterCreateGetGender(characterMode)))
                 ZO_Dialogs_ShowGamepadDialog(SKIP_TUTORIAL_GAMEPAD_DIALOG, { characterName = self.characterName }, {mainTextParams = { genderDecoratedCharacterName }})
             else
-                ZO_CharacterCreate_Gamepad_DoCreate(self.characterStartLocation, self.characterCreateOption)
+                self:CreateCharacter(self.characterStartLocation, self.characterCreateOption)
             end
         else
             local errorReason = GetString("SI_CHARACTERCREATEEDITERROR", CHARACTER_CREATE_EDIT_ERROR_INVALID_NAME)
@@ -154,12 +154,21 @@ function ZO_CharacterCreate_Gamepad:Initialize(...)
             dialogName = CHARACTER_CREATE_GAMEPAD_DIALOG,
             dialogTitle = SI_CREATE_CHARACTER_GAMEPAD_FINISH_TITLE,
             dialogMainText = "",
-            onBack = function() 
+            onBack = function()
                 if self.focusControl then
                     self.focusControl:EnableFocus(true)
                 end
             end,
             onFinish = function(dialog)
+                -- In the normal flow we expect the focusControl to be re-enabled by another dialog
+                -- or that we create the character and log in removing the need.
+                -- However if the console name validation request times out there is no flow where the 
+                -- control is re-focused. So refocus here just in case and any dialog that does show will
+                -- eat the left stick input so we shouldn't have any issues there.
+                if self.focusControl then
+                    self.focusControl:EnableFocus(true)
+                end
+
                 local characterName = dialog.selectedName
                 self.characterName = characterName
 
@@ -312,9 +321,13 @@ function ZO_CharacterCreate_Gamepad:OnStateChanged(oldState, newState)
         self.isCreating = false
 
         ZO_GamepadGenericHeader_Deactivate(self.header)
+        if self.focusControl then
+            self.focusControl:EnableFocus(false)
+        end
         GAMEPAD_BUCKET_MANAGER:Deactivate()
     end
 end
+
 
 function ZO_CharacterCreate_Gamepad:InitializeSkipTutorialDialog()
     ZO_Dialogs_RegisterCustomDialog(SKIP_TUTORIAL_GAMEPAD_DIALOG,
@@ -379,7 +392,9 @@ function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
             ethereal = not (self.focusControl and self.focusControl.showKeybind),
 
             callback = function()
-                ZO_CharacterCreate_Gamepad_OnPrimaryButtonPressed()
+                if self.focusControl ~= nil and self.focusControl.OnPrimaryButtonPressed then
+                    self.focusControl:OnPrimaryButtonPressed()
+                end
             end,
         },
         {
@@ -389,7 +404,7 @@ function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
             callback = function()
                 if ZO_CHARACTERCREATE_MANAGER:GetCharacterMode() == CHARACTER_MODE_CREATION then
                     PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
-                    ZO_CharacterCreate_Gamepad_ShowFinishScreen()
+                    self:ShowFinishCharacterCreationDialog()
                 else
                     self:SaveCharacterChanges()
                 end
@@ -1247,6 +1262,13 @@ function ZO_CharacterCreate_Gamepad:InitializeTemplatesDialog()
     ZO_Dialogs_RegisterCustomDialog("CHARACTER_CREATE_TEMPLATE_SELECT", dialogDescription)
 end
 
+function ZO_CharacterCreate_Gamepad:ShowFinishCharacterCreationDialog()
+    self.isCreating = false
+    self.focusControl:EnableFocus(false)
+
+    ZO_Dialogs_ShowGamepadDialog(CHARACTER_CREATE_GAMEPAD_DIALOG)
+end
+
 function ZO_CharacterCreate_Gamepad:CreateCharacter(startLocation, createOption)
     if not self.isCreating then
         self.isCreating = true
@@ -1255,21 +1277,22 @@ function ZO_CharacterCreate_Gamepad:CreateCharacter(startLocation, createOption)
 end
 
 do
-    -- Lore Info Controls
-
     local CREATE_LORE_INFO_CONTROLS =
     {
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE] = {
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE] =
+        {
             "AllianceIcon",
             "AllianceName",
             "AllianceDescription",
         },
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE] = {
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE] =
+        {
             "RaceIcon",
             "RaceName",
             "RaceDescription",
         },
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS] = {
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS] =
+        {
             "ClassIcon",
             "ClassName",
             "ClassDescription",
@@ -1310,14 +1333,6 @@ end
 function ZO_CharacterCreate_Gamepad:HideInformationTooltip()
     SCENE_MANAGER:RemoveFragment(CHARACTER_CREATE_GAMEPAD_INFORMATION_TOOLTIP_FRAGMENT)
     SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT)
-end
-
--- XML Handlers and global functions
-
-function ZO_CharacterCreate_Gamepad_RandomizeAppearance(randomizeType)
-    if g_randomizeAppearanceEnabled then
-        GAMEPAD_BUCKET_MANAGER:RandomizeAppearance(randomizeType)
-    end
 end
 
 function ZO_CharacterCreate_Gamepad:ContainerOnUpdate()
@@ -1413,12 +1428,16 @@ function ZO_CharacterCreate_Gamepad:InitializeForCharacterCreate()
     self.genderSlider:Update()
 end
 
+-- XML Handlers and global functions
+
+function ZO_CharacterCreate_Gamepad_RandomizeAppearance(randomizeType)
+    if g_randomizeAppearanceEnabled then
+        GAMEPAD_BUCKET_MANAGER:RandomizeAppearance(randomizeType)
+    end
+end
 
 function ZO_CharacterCreate_Gamepad_ShowFinishScreen()
-    GAMEPAD_BUCKET_MANAGER.isCreating = false
-    GAMEPAD_CHARACTER_CREATE_MANAGER.focusControl:EnableFocus(false)
-
-    ZO_Dialogs_ShowGamepadDialog(CHARACTER_CREATE_GAMEPAD_DIALOG)
+    GAMEPAD_CHARACTER_CREATE_MANAGER:ShowFinishCharacterCreationDialog()
 end
 
 function ZO_CharacterCreate_Gamepad_Initialize(control)
@@ -1427,16 +1446,6 @@ function ZO_CharacterCreate_Gamepad_Initialize(control)
 
     local containerBuckets = control:GetNamedChild("ContainerInnerBuckets")
     GAMEPAD_BUCKET_MANAGER = ZO_CharacterCreateBucketManager_Gamepad:New(containerBuckets)
-end
-
-function ZO_CharacterCreate_Gamepad_OnPrimaryButtonPressed()
-    if GAMEPAD_CHARACTER_CREATE_MANAGER.focusControl ~= nil and GAMEPAD_CHARACTER_CREATE_MANAGER.focusControl.OnPrimaryButtonPressed then
-        GAMEPAD_CHARACTER_CREATE_MANAGER.focusControl:OnPrimaryButtonPressed()
-    end
-end
-
-function ZO_CharacterCreate_Gamepad_DoCreate(startLocation, createOption)
-    GAMEPAD_CHARACTER_CREATE_MANAGER:CreateCharacter(startLocation, createOption)
 end
 
 function ZO_CharacterCreate_Gamepad_CancelSkipDialogue()

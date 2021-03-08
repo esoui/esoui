@@ -75,9 +75,7 @@ end
 
 function ZO_Outfit_Slots_Panel_Gamepad:OnUpdate(currentFrameTimeSeconds)
     if self.nextPreviewTimeS and self.nextPreviewTimeS <= currentFrameTimeSeconds then
-        local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
-
-        if self:HasActiveFocus() and previewCollectionId ~= 0 then
+        if self:HasActiveFocus() then
             local currentlySelectedOutfitData = self.gridListPanelList:GetSelectedData()
             if currentlySelectedOutfitData then
                 local slotManipulator = self.slotManipulator
@@ -89,7 +87,8 @@ function ZO_Outfit_Slots_Panel_Gamepad:OnUpdate(currentFrameTimeSeconds)
                 elseif currentlySelectedOutfitData.clearAction then
                     local NO_OUTFIT_COLLECTIBLE = 0
                     local NO_ITEM_MATERIAL = nil
-                    AddOutfitSlotPreviewElementToPreviewCollection(previewCollectionId, slotManipulator:GetOutfitSlotIndex(), NO_OUTFIT_COLLECTIBLE, NO_ITEM_MATERIAL, primaryDye, secondaryDye, accentDye, REFRESH_PREVIEW_INSTANTLY)
+                    AddOutfitSlotPreviewElementToPreviewCollection(slotManipulator:GetOutfitSlotIndex(), NO_OUTFIT_COLLECTIBLE, NO_ITEM_MATERIAL, primaryDye, secondaryDye, accentDye)
+                    ApplyChangesToPreviewCollectionShown()
                     self.nextPreviewTimeS = nil
                     return
                 end
@@ -103,7 +102,8 @@ function ZO_Outfit_Slots_Panel_Gamepad:OnUpdate(currentFrameTimeSeconds)
                     materialIndex = slotManipulator:GetCurrentItemMaterialIndex()
                 end
 
-                AddOutfitSlotPreviewElementToPreviewCollection(previewCollectionId, slotManipulator:GetOutfitSlotIndex(), collectibleId, materialIndex, primaryDye, secondaryDye, accentDye, REFRESH_PREVIEW_INSTANTLY)
+                AddOutfitSlotPreviewElementToPreviewCollection(slotManipulator:GetOutfitSlotIndex(), collectibleId, materialIndex, primaryDye, secondaryDye, accentDye)
+                ApplyChangesToPreviewCollectionShown()
             end
         end
 
@@ -310,13 +310,11 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeItemMaterialDialog()
         end,
         parametricList = {}, -- Generated Dynamically
         parametricListOnSelectionChangedCallback = function(dialog, list, newSelectedData, oldSelectedData)
-            local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
-            if previewCollectionId ~= 0 then
-                local data = dialog.data
-                local slotManipulator = data.slotManipulator
-                local primaryDye, secondaryDye, accentDye = slotManipulator:GetPendingDyeData()
-                AddOutfitSlotPreviewElementToPreviewCollection(previewCollectionId, slotManipulator:GetOutfitSlotIndex(), data.selectedData:GetId(), newSelectedData.materialIndex, primaryDye, secondaryDye, accentDye, REFRESH_PREVIEW_INSTANTLY)
-            end
+            local data = dialog.data
+            local slotManipulator = data.slotManipulator
+            local primaryDye, secondaryDye, accentDye = slotManipulator:GetPendingDyeData()
+            AddOutfitSlotPreviewElementToPreviewCollection(slotManipulator:GetOutfitSlotIndex(), data.selectedData:GetId(), newSelectedData.materialIndex, primaryDye, secondaryDye, accentDye)
+            ApplyChangesToPreviewCollectionShown()
         end,
         blockDialogReleaseOnPress = true,
         buttons = 

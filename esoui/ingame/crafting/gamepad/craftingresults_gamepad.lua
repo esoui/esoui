@@ -170,7 +170,7 @@ function ZO_CraftingResults_Gamepad:DisplayDiscoveryHelper(titleString, numDisco
 
         local lineText = zo_strformat(SI_GAMEPAD_ITEM_TRAITS_LEARNED, discoveryName, colorizedItem)
 
-        table.insert(displayData.lines, { text = lineText, icon = icon })
+        table.insert(displayData.lines, { text = lineText, icon = icon, resultType = ZO_CRAFTING_RESULT_TYPE.KNOWLEDGE })
     end
 
     ZO_CraftingAlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, nil, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)

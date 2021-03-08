@@ -29,8 +29,8 @@ EsoUI\Pregame\Tooltip\CharacterSelectTooltips.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.xml
 
-EsoUI\Pregame\PregameAnimatedBackground\Gamepad\GreymoorBackground.lua
-EsoUI\Pregame\PregameAnimatedBackground\Gamepad\GreymoorBackground.xml
+EsoUI\Pregame\PregameAnimatedBackground\Gamepad\BadlandsBackground.lua
+EsoUI\Pregame\PregameAnimatedBackground\Gamepad\BadlandsBackground.xml
 
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginManager.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginTemplates.xml

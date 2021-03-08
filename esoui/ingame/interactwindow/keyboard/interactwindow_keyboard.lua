@@ -1,4 +1,3 @@
-local MAX_CHATTER_OPTIONS = 10 -- keep this updated with the keybinds
 local CHATTER_OPTION_INDENT = 30
 
 local REWARD_STRIDE = 3

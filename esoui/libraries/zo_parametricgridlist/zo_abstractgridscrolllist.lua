@@ -184,6 +184,10 @@ function ZO_AbstractGridScrollList:ResetToTop()
     ZO_Scroll_ResetToTop(self.list)
 end
 
+function ZO_AbstractGridScrollList:AddLineBreak(lineBreakAmount)
+    ZO_ScrollList_AddOperation(self.list, ZO_SCROLL_LIST_OPERATION_LINE_BREAK, { lineBreakAmount = lineBreakAmount })
+end
+
 ----------------------
 -- Global functions --
 ----------------------

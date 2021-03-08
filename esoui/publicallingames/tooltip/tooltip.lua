@@ -380,3 +380,81 @@ function ZO_SkillTooltip_OnAddGameData(tooltipControl, gameDataType, ...)
         ZO_Tooltip_OnAddGameData(tooltipControl, gameDataType, ...)
     end
 end
+
+-- Champion Skill Tooltip
+
+local function SetTooltipChampionSkillProgression(tooltipControl, championSkillId, pendingPoints)
+    local championSkillData = CHAMPION_DATA_MANAGER:GetChampionSkillData(championSkillId)
+
+    local min = 0
+    local max = championSkillData:GetMaxPossiblePoints()
+    tooltipControl.progressionStatusBar:SetMinMax(min, max)
+    tooltipControl.progressionStatusBar:SetValue(pendingPoints)
+
+    tooltipControl.minResultLabel:SetText(min)
+    tooltipControl.maxResultLabel:SetText(max)
+
+    tooltipControl:AddControl(tooltipControl.progressionControl)
+    tooltipControl.progressionControl:SetAnchor(TOP)
+    tooltipControl.progressionControl:SetHidden(false)
+
+    -- only calculate offsets after the control has been resized
+    local maskValue = nil
+    if championSkillData:HasJumpPoints() then
+        local jumpPoints = championSkillData:GetJumpPoints()
+        for _, jumpPoint in ipairs(jumpPoints) do
+            if maskValue == nil and jumpPoint >= pendingPoints then
+                -- first jump point above or at pending points, store it as the mask point
+                maskValue = jumpPoint
+            end
+
+            if jumpPoint > min and jumpPoint < max then
+                local offsetX = tooltipControl.progressionStatusBar:CalculateSizeWithoutLeadingEdgeForValue(jumpPoint)
+                local notchControl = tooltipControl.notchPool:AcquireObject()
+                notchControl:SetAnchor(TOP, tooltipControl.progressionStatusBar, TOPLEFT, offsetX)
+                notchControl:SetAnchor(BOTTOM, tooltipControl.progressionStatusBar, BOTTOMLEFT, offsetX)
+            end
+        end
+    else
+        maskValue = max
+    end
+
+    if maskValue ~= max then
+        -- set mask to notch position
+        local maskOffsetX = tooltipControl.progressionStatusBar:CalculateSizeWithoutLeadingEdgeForValue(maskValue)
+        tooltipControl.progressionBarMask:SetAnchor(TOPLEFT, tooltipControl.progressionStatusBar, TOPLEFT)
+        tooltipControl.progressionBarMask:SetAnchor(BOTTOMRIGHT, tooltipControl.progressionStatusBar, BOTTOMLEFT, maskOffsetX)
+    else
+        -- set mask to end of bar
+        tooltipControl.progressionBarMask:SetAnchor(TOPLEFT, tooltipControl.progressionStatusBar, TOPLEFT)
+        tooltipControl.progressionBarMask:SetAnchor(BOTTOMRIGHT, tooltipControl.progressionStatusBar, BOTTOMRIGHT)
+    end
+end
+
+local function ClearTooltipChampionSkillProgression(tooltipControl)
+    tooltipControl.notchPool:ReleaseAllObjects()
+    tooltipControl.progressionControl:SetHidden(true)
+end
+
+function ZO_ChampionSkillTooltip_Initialize(tooltipControl)
+    tooltipControl.progressionControl = tooltipControl:GetNamedChild("Progression")
+    tooltipControl.progressionBarMask = tooltipControl.progressionControl:GetNamedChild("Mask")
+    tooltipControl.progressionStatusBar = tooltipControl.progressionBarMask:GetNamedChild("Bar")
+    tooltipControl.notchPool = ZO_ControlPool:New("ZO_ChampionSkillStatusBarNotch", tooltipControl.progressionControl:GetNamedChild("Overlay"), "Notch")
+    tooltipControl.minResultLabel = tooltipControl.progressionControl:GetNamedChild("MinResult")
+    tooltipControl.maxResultLabel = tooltipControl.progressionControl:GetNamedChild("MaxResult")
+    ZO_StatusBar_SetGradientColor(tooltipControl.progressionStatusBar, ZO_XP_BAR_GRADIENT_COLORS)
+end
+
+function ZO_ChampionSkillTooltip_Cleared(tooltipControl)
+    ClearTooltipChampionSkillProgression(tooltipControl)
+    ZO_Tooltip_OnCleared(tooltipControl)
+end
+
+function ZO_ChampionSkillTooltip_OnAddGameData(tooltipControl, gameDataType, ...)
+    if gameDataType == TOOLTIP_GAME_DATA_CHAMPION_PROGRESSION then
+        SetTooltipChampionSkillProgression(tooltipControl, ...)
+    else
+        ZO_Tooltip_OnAddGameData(tooltipControl, gameDataType, ...)
+    end
+end

@@ -475,8 +475,13 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             callback = function()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData:IsHouse() then
-                    RequestJumpToHouse(collectibleData:GetReferenceId())
-                    SCENE_MANAGER:ShowBaseScene()
+                    if collectibleData:IsLocked() then
+                        -- Preview, behavior will always be inside
+                        RequestJumpToHouse(collectibleData:GetReferenceId())
+                        SCENE_MANAGER:ShowBaseScene()
+                    else
+                        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_TRAVEL_TO_HOUSE_OPTIONS_DIALOG", collectibleData)
+                    end
                 else
                     collectibleData:Use()
                 end
@@ -698,7 +703,7 @@ function ZO_GamepadCollectionsBook:ShowList(list, dontUpdateTitle)
             self:StartPreviewFromBase()
         else
             ITEM_PREVIEW_GAMEPAD:ResetOutfitPreview()
-            RefreshPreviewCollectionShown()
+            ApplyChangesToPreviewCollectionShown()
         end
     end
 
@@ -1098,62 +1103,54 @@ function ZO_GamepadCollectionsBook:ExitGridList()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.subcategoryKeybindStripDescriptor)
 end
 
-do
-    local DONT_REFRESH_IMMEDIATELY = false
-    local REFRESH_IMMEDIATELY = true
+function ZO_GamepadCollectionsBook:ClearAllCurrentSlotPreviews()
+    for outfitSlot, _ in pairs(self.currentSlotPreviews) do
+        ClearOutfitSlotPreviewElementFromPreviewCollection(outfitSlot)
+    end
+    ApplyChangesToPreviewCollectionShown()
+    ZO_ClearTable(self.currentSlotPreviews)
+    self.gridListPanelList:RefreshGridList()
+end
 
-    function ZO_GamepadCollectionsBook:ClearAllCurrentSlotPreviews()
-        local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
-        for outfitSlot, _ in pairs(self.currentSlotPreviews) do
-            ClearOutfitSlotPreviewElementFromPreviewCollection(previewCollectionId, outfitSlot, DONT_REFRESH_IMMEDIATELY)
+function ZO_GamepadCollectionsBook:TogglePreviewSelectedOutfitStyle()
+    local itemMaterialIndex = ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX
+
+    local currentlySelectedCollectibleData = self.gridListPanelList:GetSelectedData()
+    if currentlySelectedCollectibleData and not currentlySelectedCollectibleData.isEmptyCell then
+        local preferredOutfitSlot = ZO_OUTFIT_MANAGER:GetPreferredOutfitSlotForStyle(currentlySelectedCollectibleData)
+        if self:IsPreviewingOutfitStyle(currentlySelectedCollectibleData, itemMaterialIndex, preferredOutfitSlot) then
+            ClearOutfitSlotPreviewElementFromPreviewCollection(preferredOutfitSlot)
+            self.currentSlotPreviews[preferredOutfitSlot] = nil
+        else
+            local primaryDye, secondaryDye, accentDye = 0, 0, 0
+            local currentOutfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentOutfitIndex()
+            if currentOutfitIndex then
+                local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentOutfitIndex)
+                local slotManipulator = outfitManipulator:GetSlotManipulator(preferredOutfitSlot)
+                if slotManipulator then
+                    primaryDye, secondaryDye, accentDye = slotManipulator:GetPendingDyeData()
+                end
+            else
+                local equipSlot = GetEquipSlotForOutfitSlot(preferredOutfitSlot)
+                if CanEquippedItemBeShownInOutfitSlot(equipSlot, preferredOutfitSlot) then
+                    primaryDye, secondaryDye, accentDye = GetPendingSlotDyes(RESTYLE_MODE_EQUIPMENT, ZO_RESTYLE_DEFAULT_SET_INDEX, equipSlot)
+                end
+            end
+
+            local collectibleId = currentlySelectedCollectibleData:GetId()
+            self.currentSlotPreviews[preferredOutfitSlot] = 
+            {
+                collectibleId = collectibleId,
+                itemMaterialIndex = itemMaterialIndex,
+            }
+
+            AddOutfitSlotPreviewElementToPreviewCollection(preferredOutfitSlot, collectibleId, itemMaterialIndex, primaryDye, secondaryDye, accentDye)
+            ApplyChangesToPreviewCollectionShown()
         end
-        RefreshPreviewCollectionShown()
-        ZO_ClearTable(self.currentSlotPreviews)
         self.gridListPanelList:RefreshGridList()
     end
 
-    function ZO_GamepadCollectionsBook:TogglePreviewSelectedOutfitStyle()
-        local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
-        local itemMaterialIndex = ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX
-
-        if previewCollectionId ~= 0 then
-            local currentlySelectedCollectibleData = self.gridListPanelList:GetSelectedData()
-            if currentlySelectedCollectibleData and not currentlySelectedCollectibleData.isEmptyCell then
-                local preferredOutfitSlot = ZO_OUTFIT_MANAGER:GetPreferredOutfitSlotForStyle(currentlySelectedCollectibleData)
-                if self:IsPreviewingOutfitStyle(currentlySelectedCollectibleData, itemMaterialIndex, preferredOutfitSlot) then
-                    ClearOutfitSlotPreviewElementFromPreviewCollection(previewCollectionId, preferredOutfitSlot, REFRESH_IMMEDIATELY)
-                    self.currentSlotPreviews[preferredOutfitSlot] = nil
-                else
-                    local primaryDye, secondaryDye, accentDye = 0, 0, 0
-                    local currentOutfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentOutfitIndex()
-                    if currentOutfitIndex then
-                        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentOutfitIndex)
-                        local slotManipulator = outfitManipulator:GetSlotManipulator(preferredOutfitSlot)
-                        if slotManipulator then
-                            primaryDye, secondaryDye, accentDye = slotManipulator:GetPendingDyeData()
-                        end
-                    else
-                        local equipSlot = GetEquipSlotForOutfitSlot(preferredOutfitSlot)
-                        if CanEquippedItemBeShownInOutfitSlot(equipSlot, preferredOutfitSlot) then
-                            primaryDye, secondaryDye, accentDye = GetPendingSlotDyes(RESTYLE_MODE_EQUIPMENT, ZO_RESTYLE_DEFAULT_SET_INDEX, equipSlot)
-                        end
-                    end
-
-                    local collectibleId = currentlySelectedCollectibleData:GetId()
-                    self.currentSlotPreviews[preferredOutfitSlot] = 
-                    {
-                        collectibleId = collectibleId,
-                        itemMaterialIndex = itemMaterialIndex,
-                    }
-
-                    AddOutfitSlotPreviewElementToPreviewCollection(previewCollectionId, preferredOutfitSlot, collectibleId, itemMaterialIndex, primaryDye, secondaryDye, accentDye, REFRESH_IMMEDIATELY)
-                end
-                self.gridListPanelList:RefreshGridList()
-            end
-        end
-
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.gridKeybindStripDescriptor)
-    end
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.gridKeybindStripDescriptor)
 end
 
 function ZO_GamepadCollectionsBook:HasAnyCurrentSlotPreviews() 

@@ -1,37 +1,41 @@
 -- Definitions
 local ATTACH_GOLD_ICON = "EsoUI/Art/TradeWindow/Gamepad/gp_tradeAddGold.dds"
 local ADD_ATTACHMENT_ICON = "EsoUI/Art/TradeWindow/Gamepad/gp_tradeAddItem.dds"
-local EMPTY_ATTACHMENT_ICON = "EsoUI/Art/TradeWindow/Gamepad/gp_tradeEmptyItem.dds"
 
 local TRADE_ITEM_ENTRY_TEMPLATE = "ZO_GamepadItemSubEntryTemplate"
 
 local ATTACH_GOLD_TEXT = GetString(SI_GAMEPAD_TRADE_ATTACH_GOLD)
 local ATTACH_ITEMS_TEXT = GetString(SI_GAMEPAD_TRADE_ATTACH_ITEMS)
-local EMPTY_SLOT_TEXT = GetString(SI_GAMEPAD_TRADE_EMPTY_SLOT)
 
 --These functions handle updating the UI as we go between confimation states.
 --An entry [A][B] holds the function that can move the UI from confirm state A to confirm state B.
 local ConfirmChangeFunctions =
 {
-    [TRADE_ME] = {
-        [TRADE_CONFIRM_EDIT] = {
+    [TRADE_ME] =
+    {
+        [TRADE_CONFIRM_EDIT] =
+        {
             [TRADE_CONFIRM_ACCEPT] = function()
                 GAMEPAD_TRADE:EnterConfirmation(TRADE_ME)
             end
         },
-        [TRADE_CONFIRM_ACCEPT] = {
+        [TRADE_CONFIRM_ACCEPT] =
+        {
             [TRADE_CONFIRM_EDIT] = function()
                 GAMEPAD_TRADE:ExitConfirmation(TRADE_ME)
             end,
         }
     },
-    [TRADE_THEM] = {
-        [TRADE_CONFIRM_EDIT] = {
+    [TRADE_THEM] =
+    {
+        [TRADE_CONFIRM_EDIT] =
+        {
             [TRADE_CONFIRM_ACCEPT] = function()
                 GAMEPAD_TRADE:EnterConfirmation(TRADE_THEM)
             end
         },
-        [TRADE_CONFIRM_ACCEPT] = {
+        [TRADE_CONFIRM_ACCEPT] =
+        {
             [TRADE_CONFIRM_EDIT] = function()
                 GAMEPAD_TRADE:ExitConfirmation(TRADE_THEM)
             end,
@@ -46,7 +50,7 @@ local VIEW_INVENTORY = 2
 -----------------
 -- Initialization
 -----------------
-ZO_GamepadTradeWindow = ZO_Object.MultiSubclass(ZO_SharedTradeWindow, ZO_Gamepad_ParametricList_Screen)
+ZO_GamepadTradeWindow = ZO_Object.MultiSubclass(ZO_SharedTradeWindow, ZO_Gamepad_ParametricList_BagsSearch_Screen)
 
 function ZO_GamepadTradeWindow:New(control)
     local tradeWindow = ZO_Object.New(self)
@@ -58,8 +62,10 @@ function ZO_GamepadTradeWindow:Initialize(control)
     self.tradeScene = ZO_Scene:New("gamepadTrade", SCENE_MANAGER)
 
     local DONT_ACTIVATE_ON_SHOW = false
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, DONT_ACTIVATE_ON_SHOW, self.tradeScene)
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, DONT_ACTIVATE_ON_SHOW, self.tradeScene)
     ZO_SharedTradeWindow.Initialize(self, self.control)
+
+    self:SetTextSearchContext("tradeTextSearch")
 end
 
 function ZO_GamepadTradeWindow:PerformDeferredInitialization()
@@ -106,13 +112,23 @@ function ZO_GamepadTradeWindow:InitializeOfferLists()
     self.activeListType = TRADE_ME
 end
 
+function ZO_GamepadTradeWindow:ActivateTextSearch()
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.ActivateTextSearch(self)
+    self:SetTextSearchEntryHidden(false)
+end
+
+function ZO_GamepadTradeWindow:DeactivateTextSearch()
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.DeactivateTextSearch(self)
+    self:SetTextSearchEntryHidden(true)
+end
+
 do
     local function SetupList(list)
         list:AddDataTemplate(TRADE_ITEM_ENTRY_TEMPLATE, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     end
 
     function ZO_GamepadTradeWindow:SetupOfferList(tradetype)
-        local list = nil
+        local list
         if tradetype == TRADE_ME then
             list = self:AddList("MyOffer", SetupList)
         else
@@ -122,7 +138,7 @@ do
             list = ZO_GamepadVerticalItemParametricScrollList:New(self.theirControls:GetNamedChild("Mask"):GetNamedChild("Container"):GetNamedChild("List"))
             SetupList(list)
             list:SetAlignToScreenCenter(true)
-            list:SetOnSelectedDataChangedCallback(function(list, selectedData) self:OnSelectionChanged(list, selectedData) end)
+            list:SetOnSelectedDataChangedCallback(function(currentList, selectedData) self:OnSelectionChanged(currentList, selectedData) end)
         end
 
         list:SetNoItemText(GetString(SI_GAMEPAD_TRADE_NO_ITEMS_OFFERED))
@@ -132,17 +148,43 @@ do
     end
 end
 
+function ZO_GamepadTradeWindow:OnUpdatedSearchResults()
+    local list = self:GetCurrentList()
+    if list == self.inventoryList then
+        list:RefreshList()
+    end
+end
+
 do
     local function ItemFilter(itemData)
         return TRADE_WINDOW:CanTradeItem(itemData) and not ZO_IsItemCurrentlyOfferedForTrade(itemData.bagId, itemData.slotIndex)
     end
 
     function ZO_GamepadTradeWindow:InitializeInventoryList()
+        local function OnSelectionChanged(_, selectedData)
+            self:InventorySelectionChanged(selectedData)
+        end
+
+        local function InventorySetupFunction(entryData)
+            entryData.isTradeItem = ZO_IsItemCurrentlyOfferedForTrade(entryData.bagId, entryData.slotIndex)
+        end
+
+        local function OnRefreshList(list)
+            if list:GetNumItems() == 0 then
+                self:RequestEnterHeader()
+                list:SetNoItemText(GetString(SI_INVENTORY_ERROR_FILTER_EMPTY))
+            else
+                self:RequestLeaveHeader()
+                list:SetNoItemText(GetString(SI_GAMEPAD_INVENTORY_EMPTY))
+            end
+        end
+
+        self:SetTextSearchEntryHidden(true)
+
         local SETUP_LOCALLY = true
-        self.inventoryList = self:AddList("Inventory", SETUP_LOCALLY, ZO_GamepadInventoryList, BAG_BACKPACK, SLOT_TYPE_ITEM, 
-                                            function(_, selectedData) 
-                                                self:InventorySelectionChanged(selectedData) 
-                                            end, InventorySetupFunction)
+        self.inventoryList = self:AddList("Inventory", SETUP_LOCALLY, ZO_GamepadInventoryList, BAG_BACKPACK, SLOT_TYPE_ITEM, OnSelectionChanged, InventorySetupFunction)
+        self.inventoryList:SetOnRefreshListCallback(OnRefreshList)
+        self.inventoryList:SetSearchContext(self.searchContext)
         self.inventoryList:SetItemFilterFunction(ItemFilter)
         self.inventoryList:SetNoItemText(GetString(SI_GAMEPAD_INVENTORY_EMPTY))
     end
@@ -169,7 +211,7 @@ function ZO_GamepadTradeWindow:InitializeHeaders()
     myHeader.dividerSimple = myHeader:GetNamedChild("DividerSimple")
     myHeader.dividerAccent = myHeader:GetNamedChild("DividerAccent")
 
-    self.headers = 
+    self.headers =
     {
         [TRADE_THEM] = theirHeader,
         [TRADE_ME] = myHeader,
@@ -181,17 +223,6 @@ end
 ---------
 --Updates
 ---------
-function ZO_GamepadTradeWindow:UpdateDirectionalInput()
-    local list = self.lists[self.activeListType]
-    local move = self.listMovementController:CheckMovement()
-
-    -- Pass the movement to the correct list
-    if move == MOVEMENT_CONTROLLER_MOVE_NEXT then
-        list:MoveNext()
-    elseif move == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-        list:MovePrevious()
-    end
-end
 
 function ZO_GamepadTradeWindow:RefreshCanSwitchFocus()
     local canSwitch = self.view ~= VIEW_INVENTORY and self.listTradeItemCount[TRADE_THEM] and self.listTradeItemCount[TRADE_THEM] > 0
@@ -206,8 +237,8 @@ function ZO_GamepadTradeWindow:RefreshCanSwitchFocus()
 end
 
 function ZO_GamepadTradeWindow:SetOfferFocus(listType)
-    if self.activeListType == listType or (not self.canSwitchFocus and listType == TRADE_THEM) then 
-        return 
+    if self.activeListType == listType or (not self.canSwitchFocus and listType == TRADE_THEM) then
+        return
     end
 
     if listType == TRADE_ME then
@@ -263,11 +294,15 @@ do
 
         if self.offeredMoney[TRADE_THEM] and self.offeredMoney[TRADE_THEM] > 0 then
             theirGoldHeader = GetString(SI_GAMEPAD_TRADE_OFFERED_GOLD)
-            theirGoldValue = function(control) return self:UpdateGoldOfferValue(control, TRADE_THEM) end
+            theirGoldValue = function(control)
+                return self:UpdateGoldOfferValue(control, TRADE_THEM)
+            end
         end
 
-        self.headerData = {
-            [TRADE_ME] = {
+        self.headerData =
+        {
+            [TRADE_ME] =
+            {
                 titleText = myTitle,
 
                 data1HeaderText = GetString(SI_GAMEPAD_TRADE_INVENTORY),
@@ -277,9 +312,12 @@ do
                 data2Text = UpdatePlayerGold,
 
                 data3HeaderText = GetString(SI_GAMEPAD_TRADE_OFFERED_GOLD),
-                data3Text = function(control) return self:UpdateGoldOfferValue(control, TRADE_ME) end,
+                data3Text = function(control)
+                    return self:UpdateGoldOfferValue(control, TRADE_ME)
+                end,
             },
-            [TRADE_THEM] = {
+            [TRADE_THEM] =
+            {
                 titleText = theirTitle,
 
                 data1HeaderText = theirGoldHeader,
@@ -292,13 +330,9 @@ do
     end
 end
 
-local function InventorySetupFunction(entryData)
-    entryData.isTradeItem = ZO_IsItemCurrentlyOfferedForTrade(entryData.bagId, entryData.slotIndex)
-end
-
 function ZO_GamepadTradeWindow:InventorySelectionChanged(inventoryData)
     if self.view == VIEW_OFFER then return end
-    
+
     if inventoryData then
         self.bagId = inventoryData.bagId
         self.slotIndex = inventoryData.slotIndex
@@ -368,7 +402,7 @@ function ZO_GamepadTradeWindow:RefreshTooltips()
 end
 
 function ZO_GamepadTradeWindow:RefreshOfferList(tradetype, list)
-    local list = list or self.lists[tradetype]
+    list = list or self.lists[tradetype]
     local isMyEdit = tradetype == TRADE_ME and self.confirm[tradetype] == TRADE_CONFIRM_EDIT
 
     local lastSelectedIndex = list.selectedIndex or 1
@@ -382,23 +416,22 @@ function ZO_GamepadTradeWindow:RefreshOfferList(tradetype, list)
     end
     
     if isMyEdit then
-        local actionFunction = function() 
-                                    if(IsUnitDead("player")) then
-                                        ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_DEAD)
-                                    else
-                                        self:ShowGoldSliderControl(self.offeredMoney[TRADE_ME] or 0, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
-                                    end
-                               end
+        local actionFunction = function()
+            if IsUnitDead("player") then
+                ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_DEAD)
+            else
+                self:ShowGoldSliderControl(self.offeredMoney[TRADE_ME] or 0, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
+            end
+        end
         self:AddOfferListEntry(list, ATTACH_GOLD_TEXT, ATTACH_GOLD_ICON, actionFunction, MODIFY_TEXT_TYPE_UPPERCASE)
     end
-    
+
     local function SwitchToInventory(tradeIndex)
         PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
         self:SwitchView(VIEW_INVENTORY)
         self.desiredTradeIndex = tradeIndex
     end
 
-    local first = true
     self.listTradeItemCount[tradetype] = 0
     for i = 1, TRADE_NUM_SLOTS do
         local itemLink = GetTradeItemLink(tradetype, i, LINK_STYLE_DEFAULT)
@@ -433,12 +466,12 @@ function ZO_GamepadTradeWindow:RefreshOfferList(tradetype, list)
             local text = ATTACH_ITEMS_TEXT
             local icon = ADD_ATTACHMENT_ICON
             local action =  function()
-                                if(IsUnitDead("player")) then
-                                    ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_DEAD)
-                                else
-                                    SwitchToInventory(i)
-                                end
-                             end
+                if IsUnitDead("player") then
+                    ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_DEAD)
+                else
+                    SwitchToInventory(i)
+                end
+            end
             self:AddOfferListEntry(list, text, icon, action, MODIFY_TEXT_TYPE_UPPERCASE)
         end
     end
@@ -485,7 +518,7 @@ function ZO_GamepadTradeWindow:ExitConfirmation(tradetype)
     else
         GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:ClearHighlight()
     end
-    
+
     self:RefreshOfferList(tradetype)
 
     self:SetConfirmationDelay(TRADE_DELAY_TIME)
@@ -497,7 +530,8 @@ function ZO_GamepadTradeWindow:PrepareWindowForNewTrade()
 end
 
 function ZO_GamepadTradeWindow:BeginTrade()
-    self.inventoryList:RefreshList()
+    local TRIGGER_CALLBACK = true
+    self.inventoryList:RefreshList(TRIGGER_CALLBACK)
 
     self:RefreshOfferList(TRADE_ME)
     self:RefreshOfferList(TRADE_THEM)
@@ -509,9 +543,17 @@ function ZO_GamepadTradeWindow:SwitchView(view)
     self.view = view
 
     if view == VIEW_INVENTORY then
+        self:ActivateTextSearch()
         self:SwitchToKeybind(self.keybindStripDescriptorInventory)  -- inventoryControl adds conflicting keybinds so this must be done first
         self:SetCurrentList(self.inventoryList)
+        if self.inventoryList.list:IsEmpty() then
+            self:RequestEnterHeader()
+        end
     else --- VIEW_OFFER
+        self:DeactivateTextSearch()
+        if self:IsHeaderActive() then
+            self:ExitHeader()
+        end
         self:SetCurrentList(self.lists[TRADE_ME])
         self.lists[TRADE_ME]:RefreshVisible()
 
@@ -656,9 +698,9 @@ function ZO_GamepadTradeWindow:InitializeKeybindDescriptor()
         -- Edit Trade
         {
             keybind = "UI_SHORTCUT_PRIMARY",
-            
-            name = GetString(SI_GAMEPAD_TRADE_ADD),
-
+            name = function()
+                return GetString(SI_GAMEPAD_TRADE_ADD)
+            end,
             callback = function()
                 TradeAddItem(self.bagId, self.slotIndex, self.desiredTradeIndex)
                 LeaveInventory()
@@ -730,8 +772,15 @@ function ZO_GamepadTradeWindow:InitializeKeybindDescriptor()
     self.keybindStripDescriptor = self.keybindStripDescriptorOffer
 end
 
+function ZO_GamepadTradeWindow:OnBackButtonClicked()
+    self:RequestLeaveHeader()
+    PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+    self:SwitchView(VIEW_OFFER)
+    self.desiredTradeIndex = nil
+end
+
 function ZO_GamepadTradeWindow:OnStateChanged(oldState, newState)
-    if(newState == SCENE_SHOWING) then
+    if newState == SCENE_SHOWING then
         self:PerformDeferredInitialization()
         KEYBIND_STRIP:RemoveDefaultExit()
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
@@ -740,7 +789,7 @@ function ZO_GamepadTradeWindow:OnStateChanged(oldState, newState)
         self:SetCurrentList(self.lists[TRADE_ME])
         GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:ClearFocus()
         self:BeginTrade()
-    elseif(newState == SCENE_HIDDEN) then
+    elseif newState == SCENE_HIDDEN then
         self.goldSlider:Deactivate()
         self.goldSliderControl:SetHidden(true)
         self:DisableCurrentList()
@@ -764,7 +813,7 @@ end
 function ZO_GamepadTradeWindow:OnTradeWindowItemAdded(eventCode, who, tradeSlot, itemSoundCategory)
     self:RefreshOfferList(who)
 
-    if (who == TRADE_ME) then
+    if who == TRADE_ME then
         self.inventoryList:RefreshList()
         self:RefreshKeybind()
     end
@@ -776,7 +825,7 @@ end
 function ZO_GamepadTradeWindow:OnTradeWindowItemRemoved(eventCode, who, tradeSlot, itemSoundCategory)
     self:RefreshOfferList(who)
 
-    if (who == TRADE_ME) then
+    if who == TRADE_ME then
         self.inventoryList:RefreshList()
         self:RefreshKeybind()
     end

@@ -520,6 +520,10 @@
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
+            <Action name="UI_SHORTCUT_QUINARY">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
             <Action name="UI_SHORTCUT_NEGATIVE">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
@@ -534,10 +538,6 @@
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
             <Action name="UI_SHORTCUT_SHOW_QUEST_ON_MAP">
-                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
-                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
-            </Action>
-            <Action name="UI_SHORTCUT_STACK_ALL">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
@@ -1113,6 +1113,11 @@
             <Action name="SCREENSHOT_MODE_SHOW_UI_2" hideAction="true" rebindable="false">
                 <Down>
                     SCREENSHOT_MODE_GAMEPAD:ShowUIKeybind()
+                </Down>
+            </Action>
+            <Action name="SCREENSHOT_MODE_TOGGLE_NAMEPLATES" hideAction="true" rebindable="false">
+                <Down>
+                    SCREENSHOT_MODE_GAMEPAD:ToggleNameplatesKeybind()
                 </Down>
             </Action>
         </Category>

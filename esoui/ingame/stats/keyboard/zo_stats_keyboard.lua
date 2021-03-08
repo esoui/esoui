@@ -88,6 +88,8 @@ function ZO_Stats:OnShowing()
         ZO_LEVEL_UP_REWARDS_MANAGER:RegisterCallback("OnLevelUpRewardsUpdated", UpdateLevelUpRewards)
 
         self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
+
+        STATS_SCENE:AddFragment(STATS_BG_FRAGMENT)
     end
 
     self:UpdateSpendablePoints()
@@ -128,6 +130,18 @@ function ZO_Stats:OnUpdate()
         self:UpdateSpendAttributePointsTip(SHOW_HIDE_INSTANT)
     end
 
+    local isAdvancedStatsShowing = ADVANCED_STATS_FRAGMENT:IsShowing()
+    if isAdvancedStatsShowing ~= self.isAdvancedStatsShowing then
+        self.isAdvancedStatsShowing = isAdvancedStatsShowing
+        if self.isAdvancedStatsShowing then
+            --If we are now showing the advanced stats, we need to hide the tooltip immediately
+            self:UpdateSpendAttributePointsTip(SHOW_HIDE_INSTANT)
+        else
+            --If we are now hiding the advanced stats, the tooltip has enough time to play the full fade in animation
+            self:UpdateSpendAttributePointsTip(SHOW_HIDE_ANIMATED)
+        end
+    end
+
     local isPreviewingAvailable = IsCharacterPreviewingAvailable()
     if self.previewAvailable ~= isPreviewingAvailable then
         self.previewAvailable = isPreviewingAvailable
@@ -163,6 +177,18 @@ function ZO_Stats:InitializeKeybindButtons()
                 local helpCategoryIndex, helpIndex = GetLevelUpHelpIndicesForLevel(ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardLevel())
                 HELP:ShowSpecificHelp(helpCategoryIndex, helpIndex)
             end,
+        },
+        -- Close advanced stats
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Close Advanced Stats",
+            ethereal = true,
+            keybind = "UI_SHORTCUT_NEGATIVE",
+            callback = function()             
+                STATS_SCENE:RemoveFragmentGroup(ADVANCED_STATS_FRAGMENT_GROUP)
+                STATS_SCENE:AddFragment(STATS_BG_FRAGMENT) 
+            end,
+            enabled = function() return ADVANCED_STATS_FRAGMENT:IsShowing() end,
         },
     }
 
@@ -316,7 +342,9 @@ function ZO_Stats:CreateAttributesSection()
 
     self.attributesHeaderTitle.text = { GetString(SI_STATS_ATTRIBUTES), GetString(SI_STATS_ATTRIBUTES_LEVEL_UP) }
     self.attributesHeaderTitleTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AttributesHeaderCrossFade", self.attributesHeaderTitle)
-    self:UpdateAttributesHeader()
+
+    local FORCE_UPDATE = true
+    self:UpdateAttributesHeader(FORCE_UPDATE)
 
     self:SetNextControlPadding(20)
 
@@ -336,10 +364,24 @@ function ZO_Stats:CreateAttributesSection()
     self:AddStatRow(STAT_SPELL_POWER, STAT_POWER)
     self:SetNextControlPadding(0)
     self:AddStatRow(STAT_SPELL_CRITICAL, STAT_CRITICAL_STRIKE)
+    self:SetNextControlPadding(0)
+    self:AddStatRow(STAT_SPELL_PENETRATION, STAT_PHYSICAL_PENETRATION)
     self:SetNextControlPadding(20)
     self:AddStatRow(STAT_SPELL_RESIST, STAT_PHYSICAL_RESIST)
     self:SetNextControlPadding(0)
     self:AddStatRow(STAT_CRITICAL_RESISTANCE)
+    self:SetNextControlPadding(20)
+    local advancedStatsButton = self:CreateControlFromVirtual("AdvancedStatsButton", "ZO_AdvancedStatsButton")
+    advancedStatsButton:SetHandler("OnClicked", function() 
+        if ADVANCED_STATS_FRAGMENT:IsShowing() then
+            STATS_SCENE:RemoveFragmentGroup(ADVANCED_STATS_FRAGMENT_GROUP)
+            STATS_SCENE:AddFragment(STATS_BG_FRAGMENT)
+        else
+            STATS_SCENE:RemoveFragment(STATS_BG_FRAGMENT)
+            STATS_SCENE:AddFragmentGroup(ADVANCED_STATS_FRAGMENT_GROUP)
+        end
+    end)
+    self:SetNextControlPadding(0)
 end
 
 do
@@ -431,7 +473,7 @@ function ZO_Stats:UpdateSpendablePoints()
     end
 end
 
-function ZO_Stats:UpdateAttributesHeader()
+function ZO_Stats:UpdateAttributesHeader(forceUpdate)
     local totalSpendablePoints = self:GetTotalSpendablePoints()
 
     if self.attributesHeaderTitle ~= nil and totalSpendablePoints ~= nil then
@@ -439,7 +481,7 @@ function ZO_Stats:UpdateAttributesHeader()
         local attributesHeaderTitle = self.attributesHeaderTitle
         local attributesHeaderTitleTimeline = self.attributesHeaderTitleTimeline
         local isAnimating = attributesHeaderTitleTimeline:IsPlaying()
-        if shouldAnimate ~= isAnimating then
+        if forceUpdate or shouldAnimate ~= isAnimating then
             if shouldAnimate then
                 attributesHeaderTitle.textIndex = 1
                 attributesHeaderTitle:SetText(attributesHeaderTitle.text[1])
@@ -457,7 +499,7 @@ function ZO_Stats:UpdateSpendAttributePointsTip(showHideMethod)
     local skipAnimation = showHideMethod == SHOW_HIDE_INSTANT
     local totalSpendablePoints = self:GetTotalSpendablePoints()
     if self.attributesHeaderTitle ~= nil and totalSpendablePoints ~= nil and STATS_SCENE:IsShowing() then
-        if totalSpendablePoints > 0 and self.isAttributesHeaderTitleInScrollBounds then
+        if totalSpendablePoints > 0 and self.isAttributesHeaderTitleInScrollBounds and not self.isAdvancedStatsShowing then
             if not self.attributesPointerBox then
                 self.attributesPointerBox = POINTER_BOXES:Acquire()
                 self.attributesPointerBox:SetContentsControl(self.control:GetNamedChild("AttributesPointerBoxContents"))
@@ -779,6 +821,178 @@ function ZO_Stats:UpdateLevelUpRewards()
     end
 end
 
+ZO_AdvancedStats_Keyboard = ZO_InitializingObject:Subclass()
+
+local DATA_ENTRY_TYPE_STAT = 1
+local DATA_ENTRY_TYPE_DIVIDER = 2
+local DATA_ENTRY_TYPE_HEADER = 3
+local DATA_ENTRY_TYPE_MULTI_STAT = 4
+
+function ZO_AdvancedStats_Keyboard:Initialize(control)
+    self.control = control
+    self:InitializeList()
+
+    local closeButtonDescriptor =
+    {
+        name = GetString(SI_STATS_CLOSE_ADVANCED_ATTRIBUTES),
+        keybind = "UI_SHORTCUT_NEGATIVE",
+        callback = function()
+            STATS_SCENE:RemoveFragmentGroup(ADVANCED_STATS_FRAGMENT_GROUP)
+            STATS_SCENE:AddFragment(STATS_BG_FRAGMENT)
+        end,
+    }
+    self.closeKeybindButton = self.control:GetNamedChild("Close")
+    self.closeKeybindButton:SetKeybindButtonDescriptor(closeButtonDescriptor)
+
+    ADVANCED_STATS_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    
+    ADVANCED_STATS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            if self.dirty then
+                ZO_ScrollList_RefreshVisible(self.list)
+                self.dirty = false 
+            end
+        end
+    end)
+
+    self:SetupAdvancedStats()
+    EVENT_MANAGER:RegisterForEvent("ZO_AdvancedStats_Keyboard", EVENT_STATS_UPDATED, function() 
+        if ADVANCED_STATS_FRAGMENT:IsShowing() then
+            ZO_ScrollList_RefreshVisible(self.list) 
+            self.dirty = false
+        else
+            self.dirty = true
+        end
+    end)
+    EVENT_MANAGER:AddFilterForEvent("ZO_AdvancedStats_Keyboard", EVENT_STATS_UPDATED, REGISTER_FILTER_UNIT_TAG, "player")
+end
+
+function ZO_AdvancedStats_Keyboard:InitializeList()
+    self.list = self.control:GetNamedChild("AdvancedStatList")
+
+    local function SetupStatEntry(control, data)
+         control.nameLabel:SetText(zo_strformat(SI_STAT_NAME_FORMAT, data.displayName))
+         local _, flatValue, percentValue = GetAdvancedStatValue(data.statType)
+
+         if data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT then
+            control.valueLabel:SetText(flatValue)
+         elseif data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT or data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
+            control.valueLabel:SetText(zo_strformat(SI_STAT_VALUE_PERCENT, percentValue))
+            if data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
+                data.flatValue = flatValue
+            end
+         else
+            control.valueLabel:SetText("")
+            internalassert(false, "Invalid advanced stat format type.")
+         end
+         control.statData = data
+    end
+
+    local function SetupStatMultiEntry(control, data)
+        control.nameLabel:SetText(zo_strformat(SI_STAT_NAME_FORMAT, data.displayName))
+        local _, flatValue, percentValue = GetAdvancedStatValue(data.statType)
+       
+        local flatData =
+        {
+            displayName = data.displayName,
+            description = data.flatDescription,
+        }
+
+        local percentData =
+        {
+            displayName = data.displayName,
+            description = data.percentDescription,
+        }
+
+        control.statFlatControl.valueLabel:SetText(flatValue)
+        control.statPercentControl.valueLabel:SetText(zo_strformat(SI_STAT_VALUE_PERCENT, percentValue))
+        control.statFlatControl.statData = flatData
+        control.statPercentControl.statData = percentData
+        control.statData = data
+    end
+
+    local function SetupStatHeaderEntry(control, data)
+        control:SetText(data.name)
+    end
+
+    ZO_ScrollList_AddDataType(self.list, DATA_ENTRY_TYPE_STAT, "ZO_AdvancedStatsEntry", 24, SetupStatEntry)
+    ZO_ScrollList_AddDataType(self.list, DATA_ENTRY_TYPE_DIVIDER, "ZO_AdvancedStatsDividerEntry", 25)
+    ZO_ScrollList_AddDataType(self.list, DATA_ENTRY_TYPE_HEADER, "ZO_StatsHeader", 30, SetupStatHeaderEntry)
+    ZO_ScrollList_AddDataType(self.list, DATA_ENTRY_TYPE_MULTI_STAT, "ZO_AdvancedStatsMultiEntry", 72, SetupStatMultiEntry)
+end
+
+function ZO_AdvancedStats_Keyboard:SetupAdvancedStats()
+    ZO_ScrollList_Clear(self.list)
+    local scrollData = ZO_ScrollList_GetDataList(self.list)
+
+    --First, grab the stat data from the def
+    local advancedStatData = {}
+    local numCategories = GetNumAdvancedStatCategories()
+    for categoryIndex = 1, numCategories do
+        local categoryId = GetAdvancedStatsCategoryId(categoryIndex)
+        local displayName, numStats = GetAdvancedStatCategoryInfo(categoryId)
+
+        local categoryData = 
+        {
+            header = displayName,
+            stats = {},
+        }
+
+        for statIndex = 1, numStats do
+            local statType, statDisplayName, description, flatValueDescription, percentValueDescription = GetAdvancedStatInfo(categoryId, statIndex)
+
+            --We need the format type ahead of time so we know what type of control to create for this stat
+            --We don't bother with the flat and percent values returned here, as they get refreshed every time we set up the control
+            --The stat format type never changes, so it is safe to get it here
+            local statFormatType = GetAdvancedStatValue(statType)
+
+            local statData =
+            {
+                statType = statType, --Used to calculate the value of the stat
+                displayName = statDisplayName, --The name shown to the users for the stat
+                description = description, --The description used in the tooltip
+                flatDescription = flatValueDescription, --The description used for the flat value tooltip when the stat is split into both flat and percent
+                percentDescription = percentValueDescription, --The description used for the percent value tooltip when the stat is split into both flat and percent
+                formatType = statFormatType, --How are we formatting this stat?
+            }
+            table.insert(categoryData.stats, statData)
+        end
+
+        table.insert(advancedStatData, categoryData)
+    end
+
+    --Now, set up the actual list of stats based on the data we just grabbed
+    local previousCategory = nil
+    for _, statCategory in ipairs(advancedStatData) do
+
+        --We want to have a divider between every category
+        if previousCategory then
+            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_ENTRY_TYPE_DIVIDER, {}))
+        end
+        previousCategory = statCategory
+
+        --Only add a header if one has been provided
+        if statCategory.header and statCategory.header ~= "" then
+            local headerData = 
+            {
+                name = statCategory.header
+            }
+            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_ENTRY_TYPE_HEADER, headerData))
+        end
+
+        --Add each stat in this category
+        for _, statEntry in ipairs(statCategory.stats) do
+            if statEntry.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_AND_PERCENT then
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_ENTRY_TYPE_MULTI_STAT, statEntry))
+            else
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_ENTRY_TYPE_STAT, statEntry))
+            end
+        end
+    end
+
+    ZO_ScrollList_Commit(self.list)
+end
+
 --
 --[[ XML Handlers ]]--
 --
@@ -856,4 +1070,10 @@ end
 
 function ZO_Stats_BountyDisplay_Initialize(control)
     STATS_BOUNTY_DISPLAY = ZO_BountyDisplay:New(control, false)
+end
+
+-- Advanced stats
+
+function ZO_AdvancedStats_Keyboard_OnInitialized(control)
+    ZO_ADVANCED_STATS_WINDOW = ZO_AdvancedStats_Keyboard:New(control)
 end

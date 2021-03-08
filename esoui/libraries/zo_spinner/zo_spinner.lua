@@ -17,6 +17,14 @@ local function ClampInt(value, min, max, step)
     return zo_clamp(value, min, max)
 end
 
+local function DefaultSpinnerPlaySound(spinner, currentValue, oldValue)
+    if currentValue > oldValue then
+        PlaySound(SOUNDS.SPINNER_UP)
+    else
+        PlaySound(SOUNDS.SPINNER_DOWN)
+    end
+end
+
 function ZO_Spinner:New(...)
     local spinner = ZO_CallbackObject.New(self)
     spinner:Initialize(...)
@@ -52,8 +60,7 @@ function ZO_Spinner:Initialize(control, min, max, isGamepad, spinnerMode, accele
     self.value = math.huge
     self:SetMinMax(min, max)
 
-    self.spinnerUpSound = SOUNDS.SPINNER_UP
-    self.spinnerDownSound = SOUNDS.SPINNER_DOWN
+    self.onPlaySoundFunction = DefaultSpinnerPlaySound
 
     self.accelerationTime = accelerationTime or DEFAULT_ACCELERATION_TIME_MS
 end
@@ -194,17 +201,21 @@ function ZO_Spinner:GetStep()
     return self.step
 end
 
-function ZO_Spinner:SetMinMax(min, max)
+function ZO_Spinner:SetValueMinAndMax(value, min, max)
     min = min or 0
     max = max or math.huge
-    if self.min ~= min or self.max ~= max then
+
+    if min ~= self.min or max ~= self.max or value ~= self.value then
         self.min = min
         self.max = max
-
-        if not self:SetValue(self.value) then
+        if not self:SetValue(value) then
             self:UpdateButtons()
         end
     end
+end
+
+function ZO_Spinner:SetMinMax(min, max)
+    self:SetValueMinAndMax(self.value, min, max)
 end
 
 function ZO_Spinner:GetMin()
@@ -298,6 +309,12 @@ function ZO_Spinner:SetValue(value, forceSet)
     return false
 end
 
+function ZO_Spinner:AddToMouseInputGroup(inputGroup, inputType)
+    inputGroup:Add(self.control, inputType)
+    inputGroup:Add(self.increaseButton, inputType)
+    inputGroup:Add(self.decreaseButton, inputType)
+end
+
 function ZO_Spinner:UpdateDisplay()
     if self.display then
         local valueText
@@ -329,17 +346,14 @@ end
 
 function ZO_Spinner:ModifyValue(change)
     if self.value then
+        local oldValue = self.value
         local targetValue = self.value + change * self.step
         if self.validValuesFunction then
             targetValue = self.validValuesFunction(self.value, change * self.step)
         end
 
-        if(self:SetValue(targetValue)) then
-            if(change > 0) then
-                PlaySound(self.spinnerUpSound)
-            else
-                PlaySound(self.spinnerDownSound)
-            end
+        if self:SetValue(targetValue)  then
+            self.onPlaySoundFunction(self, self.value, oldValue)
         end
     end
 end
@@ -354,7 +368,6 @@ function ZO_Spinner:SetButtonsHidden(hideButtons)
     self:UpdateButtons()
 end
 
-function ZO_Spinner:SetSounds(upSound, downSound)
-    self.spinnerUpSound = upSound
-    self.spinnerDownSound = downSound
+function ZO_Spinner:SetPlaySoundFunction(onPlaySoundFunction)
+    self.onPlaySoundFunction = onPlaySoundFunction
 end

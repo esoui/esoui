@@ -27,6 +27,6 @@ function QuickslotActionButton:ApplyStyle(template)
         cooldownPercent = self.icon.percentComplete
     end
 
-    self:SetCooldownHeight(cooldownPercent)
-    self:SetCooldownIconAnchors(self.showingCooldown)
+    self:SetCooldownPercentComplete(cooldownPercent)
+    self:SetCooldownEdgeState(self.showingCooldown)
 end

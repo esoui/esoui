@@ -17,7 +17,7 @@ local VIEWABLE_HOTBAR_CATEGORY_SET =
 }
 
 -- These bars can be edited, and the server will persist those edits
-internalassert(NUM_ASSIGNABLE_HOTBARS == 4, "Update hotbars")
+internalassert(NUM_ASSIGNABLE_HOTBARS == 5, "Update hotbars")
 local ASSIGNABLE_HOTBAR_CATEGORY_SET =
 {
     [HOTBAR_CATEGORY_PRIMARY] = true,
@@ -367,8 +367,7 @@ function ZO_ActionBarAssignmentManager_Hotbar:New(...)
     return object
 end
 
-local SKILL_BAR_SLOTS_START = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1
-local SKILL_BAR_SLOTS_STOP = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
+local SKILL_BAR_SLOTS_START, SKILL_BAR_SLOTS_STOP = GetAssignableAbilityBarStartAndEndSlots()
 function ZO_ActionBarAssignmentManager_Hotbar:Initialize(hotbarCategory)
     self.hotbarCategory = hotbarCategory
     self.isInCycle = false

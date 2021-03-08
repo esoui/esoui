@@ -1,6 +1,6 @@
 ZO_MENU_ENTRIES = {}
 
-local MENU_MAIN_ENTRIES =
+ZO_MENU_MAIN_ENTRIES =
 {
     CROWN_STORE     = 1,
     ANNOUNCEMENTS   = 2,
@@ -18,6 +18,9 @@ local MENU_MAIN_ENTRIES =
     OPTIONS         = 14,
     LOG_OUT         = 15,
 }
+
+local MENU_MAIN_ENTRIES = ZO_MENU_MAIN_ENTRIES
+
 local MENU_CROWN_STORE_ENTRIES =
 {
     CROWN_STORE         = 1,
@@ -248,8 +251,8 @@ local MENU_ENTRY_DATA =
             return IsChampionSystemUnlocked()
         end,
         canLevel = function()
-            if CHAMPION_PERKS then
-                return CHAMPION_PERKS:HasAnySpendableUnspentPoints()
+            if CHAMPION_DATA_MANAGER then
+                return CHAMPION_DATA_MANAGER:HasAnySavedUnspentPoints()
             end
         end,
     },
@@ -1000,11 +1003,14 @@ function ZO_MainMenuManager_Gamepad:ShowAntiquityInJournal(antiquityData)
     self:ShowAntiquityJournal()
 end
 
+function ZO_MainMenuManager_Gamepad:SelectMenuEntry(menuEntry)
+    self.mainList:SetSelectedIndexWithoutAnimation(self.mainMenuEntryToListIndex[menuEntry])
+end
+
 function ZO_MainMenuManager_Gamepad:ShowZoneStoriesEntry(createFullStack)
-    local activityFinderSceneName = ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME
     local zoneStoriesSceneName = "zoneStoriesGamepad"
 
-    self.mainList:SetSelectedIndexWithoutAnimation(self.mainMenuEntryToListIndex[MENU_MAIN_ENTRIES.ACTIVITY_FINDER])
+    self:SelectMenuEntry(MENU_MAIN_ENTRIES.ACTIVITY_FINDER)
     local mainList = ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:GetMainList()
     for i = 1, mainList:GetNumEntries() do
         local entryData = mainList:GetEntryData(i)
@@ -1015,7 +1021,7 @@ function ZO_MainMenuManager_Gamepad:ShowZoneStoriesEntry(createFullStack)
     end
 
     if createFullStack then
-       SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", activityFinderSceneName, zoneStoriesSceneName)
+       SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME, zoneStoriesSceneName)
     else
         SCENE_MANAGER:Push(zoneStoriesSceneName)
     end

@@ -1,6 +1,7 @@
 local PlayerConsoleInfoRequestManager = ZO_Object:Subclass()
 
 local REQUEST_TIMEOUT_MS = 4000
+local TEXT_VALIDATION_OVERRIDE_REQUEST_TIMEOUT_MS = 30000
 
 ZO_PLAYER_CONSOLE_INFO_REQUEST_BLOCK = true
 ZO_PLAYER_CONSOLE_INFO_REQUEST_DONT_BLOCK = false
@@ -128,6 +129,8 @@ function PlayerConsoleInfoRequestManager:RequestTextValidation(text, callback)
         {
             validationKey = RequestConsoleTextValidation(text),
             callback = callback,
+            -- Prospero sometimes has slow text validation calls lasting up to 15 seconds, so we give these a bit more time
+            overrideTimeoutMS = TEXT_VALIDATION_OVERRIDE_REQUEST_TIMEOUT_MS
         }
         self:AddPendingRequest(REQUEST_TEXT_VALIDATION, data, ZO_PLAYER_CONSOLE_INFO_REQUEST_DONT_BLOCK, callback)
     else
@@ -144,7 +147,9 @@ function PlayerConsoleInfoRequestManager:RequestNameValidation(name, callback)
         local data =
         {
             validationKey = RequestConsoleTextValidation(name),
-            blockingDialogName = "WAIT_FOR_CONSOLE_NAME_VALIDATION"
+            blockingDialogName = "WAIT_FOR_CONSOLE_NAME_VALIDATION",
+            -- Prospero sometimes has slow text validation calls lasting up to 15 seconds, so we give these a bit more time
+            overrideTimeoutMS = TEXT_VALIDATION_OVERRIDE_REQUEST_TIMEOUT_MS
         }
         self:AddPendingRequest(REQUEST_TEXT_VALIDATION, data, ZO_PLAYER_CONSOLE_INFO_REQUEST_BLOCK, callback)
         else
@@ -189,7 +194,11 @@ function PlayerConsoleInfoRequestManager:OnUpdate()
     local now = GetFrameTimeMilliseconds()
     while i <= #self.pendingRequests do
         local pendingRequest = self.pendingRequests[i]
-        if now - pendingRequest.requestMadeAtMS > REQUEST_TIMEOUT_MS then
+        local timeoutMS = REQUEST_TIMEOUT_MS
+        if pendingRequest.overrideTimeoutMS then
+            timeoutMS = pendingRequest.overrideTimeoutMS
+        end
+        if now - pendingRequest.requestMadeAtMS > timeoutMS then
             self:CheckCloseBlockingDialog(pendingRequest)
             table.remove(self.pendingRequests, i)
         else

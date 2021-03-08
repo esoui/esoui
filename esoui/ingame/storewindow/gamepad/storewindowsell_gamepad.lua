@@ -1,9 +1,5 @@
 ZO_GamepadStoreSell = ZO_GamepadStoreListComponent:Subclass()
 
-function ZO_GamepadStoreSell:New(...)
-    return ZO_GamepadStoreListComponent.New(self, ...)
-end
-
 function ZO_GamepadStoreSell:Initialize(scene)
     ZO_GamepadStoreListComponent.Initialize(self, scene, ZO_MODE_STORE_SELL, GetString(SI_STORE_MODE_SELL))
 
@@ -46,8 +42,10 @@ function ZO_GamepadStoreSell:RegisterEvents()
                     end
                 end
             end
-            
-            self.list:UpdateList()
+
+            TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId)
+
+            self.isCurrentSelectionDirty = true
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         end
     end
@@ -63,7 +61,7 @@ end
 
 function ZO_GamepadStoreSell:InitializeKeybindStrip()
     local repairAllKeybind = STORE_WINDOW_GAMEPAD:GetRepairAllKeybind()
-    local stackBagKeybind = 
+    local stackBagKeybind =
     {
         keybind = "UI_SHORTCUT_LEFT_STICK",
         name = GetString(SI_ITEM_ACTION_STACK_ALL),
@@ -73,7 +71,8 @@ function ZO_GamepadStoreSell:InitializeKeybindStrip()
     }
 
     -- sell screen keybind
-    self.keybindStripDescriptor = {
+    self.keybindStripDescriptor =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         repairAllKeybind,
         stackBagKeybind,
@@ -132,6 +131,19 @@ function ZO_GamepadStoreSell:ConfirmSell()
             SellInventoryItem(bag, index, 1)
         end
     end
+end
+
+function ZO_GamepadStoreSell:AddKeybinds()
+    if self.confirmationMode and not KEYBIND_STRIP:HasKeybindButtonGroup(self.confirmKeybindStripDescriptor) then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.confirmKeybindStripDescriptor)
+    elseif not KEYBIND_STRIP:HasKeybindButtonGroup(self.keybindStripDescriptor) then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+end
+
+function ZO_GamepadStoreSell:RemoveKeybinds()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.confirmKeybindStripDescriptor)
 end
 
 do

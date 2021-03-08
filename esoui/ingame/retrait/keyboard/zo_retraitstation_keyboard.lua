@@ -92,7 +92,12 @@ function ZO_RetraitStation_Keyboard:OnInteractSceneShowing()
     end
 
     self.tabs:UpdateButtons()
-    self.tabs:SelectFragment(self.retraitTab.categoryName)
+
+    if self.mode == ZO_RETRAIT_MODE_RECONSTRUCT then
+        self.tabs:SelectFragment(self.reconstructTab.categoryName)
+    else
+        self.tabs:SelectFragment(self.retraitTab.categoryName)
+    end
 end
 
 function ZO_RetraitStation_Keyboard:OnInteractSceneHiding()

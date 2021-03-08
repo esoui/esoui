@@ -54,7 +54,7 @@ function CopyrightLogosSplash_Initialize(self)
 end
 
 function CopyrightLogosSplash_AttemptHide()
-    if IsConsoleUI() or ZO_Pregame_HasPlayedVideos() then
+    if ZO_Pregame_CanSkipVideos() then
         SCENE_MANAGER:Hide("copyrightLogosSplash")
     end
 end

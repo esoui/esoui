@@ -1,4 +1,4 @@
-ZO_KeybindStrip = ZO_Object:Subclass()
+ZO_KeybindStrip = ZO_InitializingObject:Subclass()
 
 KEYBIND_STRIP_ALIGN_LEFT = 1
 KEYBIND_STRIP_ALIGN_CENTER = 2
@@ -7,21 +7,17 @@ KEYBIND_STRIP_ALIGN_RIGHT = 3
 KEYBIND_STRIP_DISABLED_ALERT = "alert"
 KEYBIND_STRIP_DISABLED_DIALOG = "dialog"
 
-function ZO_KeybindStrip:New(...)
-    local keybindStrip = ZO_Object.New(self)
-    keybindStrip:Initialize(...)
-    return keybindStrip
-end
-
 local DOWN = false
 local UP = true
 function ZO_KeybindStrip:Initialize(control, keybindButtonTemplate, styleInfo)
     self.control = control
     self.centerParent = control:GetNamedChild("CenterParent") or control
     self.keybinds = {}
+    self.keybindsByGamepadPreferredKeybind = {}
     self.keybindGroups = {}
     self.cooldownKeybinds = {}
     self.keybindStateStack = {}
+    self.keybindButtons = {}
 
     self:SetStyle(styleInfo)
 
@@ -59,10 +55,6 @@ function ZO_KeybindStrip:Initialize(control, keybindButtonTemplate, styleInfo)
     end
     
     self.keybindButtonPool = ZO_ObjectPool:New(CreateButton, Reset)
-
-    self.centerButtons = nil
-    self.leftButtons = nil
-    self.rightButtons = nil
 
     local function UpdateBindingLabels()
         for keybind, buttonOrEtherealDescriptor in pairs(self.keybinds) do
@@ -311,6 +303,7 @@ local descriptor = {
     order = 100 -- or a function that returns the relative ordering within the alignment, where a lower number is anchored first (right to left for left alignment, left to right for center and right), default is 0 - buttons with the same order are ordered by insertion
     name = "Exit", -- or function that returns a name
     keybind = "UI_SHORTCUT_PRIMARY",
+    gamepadPreferredKeybind = "UI_SHORTCUT_NEGATIVE", -- optional, only use in the case that you want to reuse a button between keyboard and gamepad, but want them to have different bindings.
     customKeybindControl = nil, -- control or a function that returns a control to display instead of the normal keybind label
     callback = function(up) DoSomething() end, -- First and only parameter is whether its a key up or down, ups will only be sent if handlesKeyUp flag is set
     visible = function(descriptor) return IsUsePossible(descriptor.something) end, -- An optional predicate, if present returning true indicates that this descriptor is visible, otherwise it is not
@@ -338,7 +331,13 @@ do
             local existingSceneName = existingDescriptor.addedForSceneName or ""
             local existingDescriptorIdentifier = GetKeybindDescriptorDebugIdentifier(existingDescriptor)
             local newDescriptorIdentifier = GetKeybindDescriptorDebugIdentifier(keybindButtonDescriptor)
-            local assertMessage = string.format("Duplicate Keybind: %s. Before: %s (%s). After: %s (%s).", keybindButtonDescriptor.keybind, existingSceneName, existingDescriptorIdentifier, currentSceneName, newDescriptorIdentifier)
+            local keybindIdentifier
+            if keybindButtonDescriptor.gamepadPreferredKeybind then
+                keybindIdentifier = string.format("%s or %s", keybindButtonDescriptor.keybind, keybindButtonDescriptor.gamepadPreferredKeybind)
+            else
+                keybindIdentifier = keybindButtonDescriptor.keybind
+            end
+            local assertMessage = string.format("Duplicate Keybind: %s. Before: %s (%s). After: %s (%s).", keybindIdentifier, existingSceneName, existingDescriptorIdentifier, currentSceneName, newDescriptorIdentifier)
 
             -- Asserting here usually means that a key is already bound (typically because someone forgot to remove a keybinding).
             internalassert(false, assertMessage)
@@ -353,6 +352,14 @@ do
         end
         state.individualButtons[keybindButtonDescriptor.keybind] = keybindButtonDescriptor
         keybindButtonDescriptor.addedForSceneName = currentSceneName
+    end
+
+    function ZO_KeybindStrip:RegisterKeybindButtonOrEtherealDescriptorInternal(buttonOrEtherealDescriptor)
+        local descriptor = GetDescriptorFromButton(buttonOrEtherealDescriptor)
+        self.keybinds[descriptor.keybind] = buttonOrEtherealDescriptor
+        if descriptor.gamepadPreferredKeybind then
+            self.keybindsByGamepadPreferredKeybind[descriptor.gamepadPreferredKeybind] = buttonOrEtherealDescriptor
+        end
     end
 
     function ZO_KeybindStrip:AddKeybindButton(keybindButtonDescriptor, stateIndex)
@@ -374,10 +381,24 @@ do
             self:HandleDuplicateAddKeybind(existingButtonOrEtherealDescriptor, keybindButtonDescriptor, state, stateIndex, currentSceneName)
         end
 
+        if keybindButtonDescriptor.gamepadPreferredKeybind then
+            local existingButtonOrEtherealDescriptor = self.keybindsByGamepadPreferredKeybind[keybindButtonDescriptor.gamepadPreferredKeybind]
+            if existingButtonOrEtherealDescriptor then
+                self:HandleDuplicateAddKeybind(existingButtonOrEtherealDescriptor, keybindButtonDescriptor, state, stateIndex, currentSceneName)
+            end
+            -- edge case: if a keybind registers only using the normal pathway, but
+            -- we shadow it here, there is no way to press that keybind. so let's
+            -- prevent that using the normal duplicate keybind handling
+            local existingButtonOrEtherealDescriptor = self.keybinds[keybindButtonDescriptor.gamepadPreferredKeybind]
+            if existingButtonOrEtherealDescriptor and GetDescriptorFromButton(existingButtonOrEtherealDescriptor).gamepadPreferredKeybind == nil then
+                self:HandleDuplicateAddKeybind(existingButtonOrEtherealDescriptor, keybindButtonDescriptor, state, stateIndex, currentSceneName)
+            end
+        end
+
         keybindButtonDescriptor.addedForSceneName = currentSceneName
 
         if keybindButtonDescriptor.ethereal then
-            self.keybinds[keybindButtonDescriptor.keybind] = keybindButtonDescriptor
+            self:RegisterKeybindButtonOrEtherealDescriptorInternal(keybindButtonDescriptor)
         else
             local button, key = self.keybindButtonPool:AcquireObject()
             button.keybindButtonDescriptor = keybindButtonDescriptor
@@ -386,14 +407,14 @@ do
             self.insertionId = (self.insertionId or 0) + 1
             button.insertionOrder = self.insertionId
 
-            self.keybinds[keybindButtonDescriptor.keybind] = button
+            self:RegisterKeybindButtonOrEtherealDescriptorInternal(button)
 
             if not self.batchUpdating then
                 -- clear this out in case it was previously in a group
                 keybindButtonDescriptor.keybindButtonGroupDescriptor = nil
             end
 
-            self:AddButtonToAnchors(button)
+            table.insert(self.keybindButtons, button)
 
             if not self.batchUpdating then
                 self:SetUpButton(button)
@@ -420,6 +441,9 @@ function ZO_KeybindStrip:RemoveKeybindButton(keybindButtonDescriptor, stateIndex
     local buttonOrEtherealDescriptor = self.keybinds[keybindButtonDescriptor.keybind]     
     if buttonOrEtherealDescriptor and CompareKeybindButtonDescriptor(buttonOrEtherealDescriptor.keybindButtonDescriptor, keybindButtonDescriptor) then
         self.keybinds[keybindButtonDescriptor.keybind] = nil
+        if keybindButtonDescriptor.gamepadPreferredKeybind then
+            self.keybindsByGamepadPreferredKeybind[keybindButtonDescriptor.gamepadPreferredKeybind] = nil
+        end
 
         keybindButtonDescriptor.addedForSceneName = nil
 
@@ -433,9 +457,10 @@ function ZO_KeybindStrip:RemoveKeybindButton(keybindButtonDescriptor, stateIndex
         end
 
         if type(buttonOrEtherealDescriptor) == "userdata" then
-            self.keybindButtonPool:ReleaseObject(buttonOrEtherealDescriptor.key)
-
-            self:RemoveButtonFromAnchors(buttonOrEtherealDescriptor)
+            local button = buttonOrEtherealDescriptor
+            self.keybindButtonPool:ReleaseObject(button.key)
+            local buttonIndex = ZO_IndexOfElementInNumericallyIndexedTable(self.keybindButtons, button)
+            table.remove(self.keybindButtons, buttonIndex)
 
             if not self.batchUpdating then
                 self:UpdateAnchors()
@@ -451,23 +476,23 @@ function ZO_KeybindStrip:UpdateKeybindButton(keybindButtonDescriptor, stateIndex
     end
 
     local buttonOrEtherealDescriptor = self.keybinds[keybindButtonDescriptor.keybind]
-    if buttonOrEtherealDescriptor then
-        if type(buttonOrEtherealDescriptor) == "userdata" then
-            if buttonOrEtherealDescriptor.keybindButtonDescriptor == keybindButtonDescriptor then
-                local UPDATE_ONLY = true
-                self:SetUpButton(buttonOrEtherealDescriptor, UPDATE_ONLY)
-                if not self.batchUpdating then
-                    self:UpdateAnchors()
-                end
-            else
-                self:RemoveKeybindButton(buttonOrEtherealDescriptor.keybindButtonDescriptor)
-                self:AddKeybindButton(keybindButtonDescriptor)
+    if type(buttonOrEtherealDescriptor) == "userdata" then
+        local existingButton = buttonOrEtherealDescriptor
+        if existingButton.keybindButtonDescriptor == keybindButtonDescriptor then
+            local UPDATE_ONLY = true
+            self:SetUpButton(existingButton, UPDATE_ONLY)
+            if not self.batchUpdating then
+                self:UpdateAnchors()
             end
         else
-            if keybindButtonDescriptor ~= buttonOrEtherealDescriptor then
-                self:RemoveKeybindButton(buttonOrEtherealDescriptor)
-                self:AddKeybindButton(keybindButtonDescriptor)
-            end
+            self:RemoveKeybindButton(existingButton.keybindButtonDescriptor)
+            self:AddKeybindButton(keybindButtonDescriptor)
+        end
+    elseif buttonOrEtherealDescriptor then
+        local existingButtonDescriptor = buttonOrEtherealDescriptor
+        if keybindButtonDescriptor ~= existingButtonDescriptor then
+            self:RemoveKeybindButton(existingButtonDescriptor)
+            self:AddKeybindButton(keybindButtonDescriptor)
         end
     end
 end
@@ -626,9 +651,19 @@ function ZO_KeybindStrip:FilterSceneHiding(keybindButtonDescriptor)
     return true
 end
 
+function ZO_KeybindStrip:GetButtonOrEtherealDescriptorForKeybind(keybind)
+    if IsInGamepadPreferredMode() then
+        -- in the case of duplicates, prefer the gamepad key
+        return self.keybindsByGamepadPreferredKeybind[keybind] or self.keybinds[keybind]
+    else
+        -- in the case of duplicates, prefer the keyboard key
+        return self.keybinds[keybind] or self.keybindsByGamepadPreferredKeybind[keybind]
+    end
+end
+
 function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
     if not self.control:IsHidden() then
-        local buttonOrEtherealDescriptor = self.keybinds[keybind]
+        local buttonOrEtherealDescriptor = self:GetButtonOrEtherealDescriptorForKeybind(keybind)
         if buttonOrEtherealDescriptor and (not buttonOrEtherealDescriptor.IsControlHidden or not buttonOrEtherealDescriptor:IsControlHidden()) then
             local keybindButtonDescriptor = GetDescriptorFromButton(buttonOrEtherealDescriptor)
             local enabled, disabledAlertText, disabledAlertType = GetValueFromRawOrFunction(keybindButtonDescriptor, "enabled")
@@ -640,11 +675,11 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
                 local keybindHandled = nil
                 if self:FilterSceneHiding(keybindButtonDescriptor) then
                     if keybindButtonDescriptor.callback then
-                        local sound = keybindButtonDescriptor.sound
                         ClearMenu()
                         keybindHandled = keybindButtonDescriptor.callback(DOWN)
                         keybindButtonDescriptor.handledDown = true
 
+                        local sound = GetValueFromRawOrFunction(keybindButtonDescriptor, "sound")
                         if sound then
                             PlaySound(sound)
                         end
@@ -669,7 +704,7 @@ end
 
 function ZO_KeybindStrip:TryHandlingKeybindUp(keybind)
     if not self.control:IsHidden() then
-        local buttonOrEtherealDescriptor = self.keybinds[keybind]
+        local buttonOrEtherealDescriptor = self:GetButtonOrEtherealDescriptorForKeybind(keybind)
         if buttonOrEtherealDescriptor and (not buttonOrEtherealDescriptor.IsControlHidden or not buttonOrEtherealDescriptor:IsControlHidden()) then
             local keybindButtonDescriptor = GetDescriptorFromButton(buttonOrEtherealDescriptor)
             local enabled = GetValueFromRawOrFunction(buttonOrEtherealDescriptor, "enabled")
@@ -820,24 +855,6 @@ function ZO_KeybindStrip:SetOnStyleChangedCallback(onStyleChanged)
 end
 
 -- implementation functions below
-function ZO_KeybindStrip:RemoveButtonFromAnchors(button)
-    local keybindButtonDescriptor = button.keybindButtonDescriptor
-    local anchorTable = self:GetAnchorTableFromAlignment(keybindButtonDescriptor.alignment or keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonDescriptor.keybindButtonGroupDescriptor.alignment)
-
-    for i=1, #anchorTable do
-        if anchorTable[i] == button then
-            table.remove(anchorTable, i)
-            break
-        end
-    end
-end
-
-function ZO_KeybindStrip:AddButtonToAnchors(button)
-    local keybindButtonDescriptor = button.keybindButtonDescriptor
-    local anchorTable = self:GetAnchorTableFromAlignment(keybindButtonDescriptor.alignment or keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonDescriptor.keybindButtonGroupDescriptor.alignment)
-    anchorTable[#anchorTable + 1] = button
-end
-
 function ZO_KeybindStrip:SetupButtonStyle(button, styleInfo)
     if styleInfo then
         if styleInfo.nameFont then
@@ -863,20 +880,6 @@ function ZO_KeybindStrip:SetupButtonStyle(button, styleInfo)
         return styleInfo.alwaysPreferGamepadMode
     end
     return nil
-end
-
-function ZO_KeybindStrip:GetAnchorTableFromAlignment(alignment)
-    if alignment == KEYBIND_STRIP_ALIGN_LEFT then
-        self.leftButtons = self.leftButtons or {}
-        return self.leftButtons
-    end
-    if alignment == KEYBIND_STRIP_ALIGN_CENTER then
-        self.centerButtons = self.centerButtons or {}
-        return self.centerButtons
-    end
-
-    self.rightButtons = self.rightButtons or {}
-    return self.rightButtons
 end
 
 do
@@ -980,30 +983,47 @@ do
         return leftOrder < rightOrder
     end
 
-    local GAMEPAD_BUTTON_ORDER = {
-            UI_SHORTCUT_EXIT = 0,
-            UI_SHORTCUT_PRIMARY = 1,
-            UI_SHORTCUT_NEGATIVE = 2,
-            UI_SHORTCUT_SECONDARY = 3,
-            UI_SHORTCUT_TERTIARY = 4,
-            UI_SHORTCUT_QUATERNARY = 5,
-            UI_SHORTCUT_LEFT_STICK = 6,
-            UI_SHORTCUT_RIGHT_STICK = 7,
-            UI_SHORTCUT_LEFT_TRIGGER = 8,
-            UI_SHORTCUT_RIGHT_TRIGGER = 9,
+    local GAMEPAD_BUTTON_ORDER =
+    {
+        UI_SHORTCUT_EXIT = 0,
+        UI_SHORTCUT_PRIMARY = 1,
+        UI_SHORTCUT_NEGATIVE = 2,
+        UI_SHORTCUT_SECONDARY = 3,
+        UI_SHORTCUT_TERTIARY = 4,
+        UI_SHORTCUT_QUATERNARY = 5,
+        UI_SHORTCUT_QUINARY = 6,
+        UI_SHORTCUT_LEFT_STICK = 7,
+        UI_SHORTCUT_RIGHT_STICK = 8,
+        UI_SHORTCUT_LEFT_TRIGGER = 9,
+        UI_SHORTCUT_RIGHT_TRIGGER = 10,
 
-            DIALOG_PRIMARY = 1,
-            DIALOG_NEGATIVE = 2,
-            DIALOG_SECONDARY = 3,
-            DIALOG_TERTIARY = 4,
-            DIALOG_RESET = 5,
-        }
+        DIALOG_PRIMARY = 1,
+        DIALOG_NEGATIVE = 2,
+        DIALOG_SECONDARY = 3,
+        DIALOG_TERTIARY = 4,
+        DIALOG_RESET = 5,
+    }
+    local function GetGamepadOrderFromKeybindDescriptor(keybindDescriptor)
+        local order = GetValueFromRawOrFunction(keybindDescriptor, "gamepadOrder")
+        if order then
+            return order
+        end
+        order = GAMEPAD_BUTTON_ORDER[keybindDescriptor.gamepadPreferredKeybind or keybindDescriptor.keybind]
+        if order then
+            return order
+        end
+        order = GetValueFromRawOrFunction(keybindDescriptor, "order")
+        if order then
+            return order
+        end
+        return 0
+    end
     local function GamepadSort(buttonLeft, buttonRight)
         local leftKeybindDescriptor = buttonLeft.keybindButtonDescriptor
         local rightKeybindDescriptor = buttonRight.keybindButtonDescriptor
 
-        local leftOrder = GetValueFromRawOrFunction(leftKeybindDescriptor, "gamepadOrder") or GAMEPAD_BUTTON_ORDER[GetValueFromRawOrFunction(leftKeybindDescriptor, "keybind")] or GetValueFromRawOrFunction(leftKeybindDescriptor, "order") or 0
-        local rightOrder = GetValueFromRawOrFunction(rightKeybindDescriptor, "gamepadOrder") or GAMEPAD_BUTTON_ORDER[GetValueFromRawOrFunction(rightKeybindDescriptor, "keybind")] or GetValueFromRawOrFunction(rightKeybindDescriptor, "order") or 0
+        local leftOrder = GetGamepadOrderFromKeybindDescriptor(leftKeybindDescriptor)
+        local rightOrder = GetGamepadOrderFromKeybindDescriptor(rightKeybindDescriptor)
 
         if leftOrder == rightOrder then
             return buttonLeft.insertionOrder < buttonRight.insertionOrder
@@ -1012,41 +1032,36 @@ do
     end
 
     function ZO_KeybindStrip:UpdateAnchorsInternal(anchorTable, parent, initialConstrainXAnchor, initialConstrainYAnchor, subsequentAnchor)
-        if anchorTable and #anchorTable > 0 then
-            if IsInGamepadPreferredMode() then
-                table.sort(anchorTable, GamepadSort)
-            else
-                table.sort(anchorTable, KeyboardSort)
-            end
-            for i, button in ipairs(anchorTable) do
-                button:ClearAnchors()
-            end
-
-            local prevButton
-            for i, button in ipairs(anchorTable) do
-                local isVisible = IsVisible(button.keybindButtonDescriptor)
-                local wasVisible = not button:IsHidden()
-                if isVisible and not wasVisible then
-                    local UPDATE_ONLY = true
-                    self:SetUpButton(button, UPDATE_ONLY)
-                end
-
-                if isVisible then
-                    button:SetParent(parent)
-                    if prevButton then
-                        subsequentAnchor:SetTarget(prevButton)
-                        subsequentAnchor:AddToControl(button)
-                    else
-                        initialConstrainXAnchor:AddToControl(button)
-                        initialConstrainYAnchor:AddToControl(button)
-                    end
-                    prevButton = button
-                end
-            end
-
-            return anchorTable
+        if IsInGamepadPreferredMode() then
+            table.sort(anchorTable, GamepadSort)
+        else
+            table.sort(anchorTable, KeyboardSort)
         end
-        return nil
+        for i, button in ipairs(anchorTable) do
+            button:ClearAnchors()
+        end
+
+        local prevButton
+        for i, button in ipairs(anchorTable) do
+            local isVisible = IsVisible(button.keybindButtonDescriptor)
+            local wasVisible = not button:IsHidden()
+            if isVisible and not wasVisible then
+                local UPDATE_ONLY = true
+                self:SetUpButton(button, UPDATE_ONLY)
+            end
+
+            if isVisible then
+                button:SetParent(parent)
+                if prevButton then
+                    subsequentAnchor:SetTarget(prevButton)
+                    subsequentAnchor:AddToControl(button)
+                else
+                    initialConstrainXAnchor:AddToControl(button)
+                    initialConstrainYAnchor:AddToControl(button)
+                end
+                prevButton = button
+            end
+        end
     end
 
     function ZO_KeybindStrip:UpdateAnchors()
@@ -1067,6 +1082,18 @@ do
         firstAnchor:AddToControl(self.control)
         secondAnchor:AddToControl(self.control)
 
+        -- collect button alignments
+        local buttonsByAlignment =
+        {
+            [KEYBIND_STRIP_ALIGN_LEFT] = {},
+            [KEYBIND_STRIP_ALIGN_CENTER] = {},
+            [KEYBIND_STRIP_ALIGN_RIGHT] = {},
+        }
+        for _, button in ipairs(self.keybindButtons) do
+            local alignment = GetValueFromRawOrFunction(button.keybindButtonDescriptor, "alignment") or KEYBIND_STRIP_ALIGN_RIGHT
+            table.insert(buttonsByAlignment[alignment], button)
+        end
+
         -- layout the KEYBIND_STRIP_ALIGN_LEFT buttons
         local leftAnchorRelativeToControl = hasCustomStyle and self.styleInfo.leftAnchorRelativeToControl or nil
         local leftAnchorRelativePoint = hasCustomStyle and self.styleInfo.leftAnchorRelativePoint or LEFT
@@ -1075,7 +1102,7 @@ do
         local leftInitialConstrainYAnchor = ZO_Anchor:New(LEFT, nil, LEFT, 0, 0, ANCHOR_CONSTRAINS_Y)
         local leftSubsequentAnchor = ZO_Anchor:New(LEFT, nil, RIGHT)
 
-        self.leftButtons = self:UpdateAnchorsInternal(self.leftButtons, self.control, leftInitialConstrainXAnchor, leftInitialConstrainYAnchor, leftSubsequentAnchor)
+        self:UpdateAnchorsInternal(buttonsByAlignment[KEYBIND_STRIP_ALIGN_LEFT], self.control, leftInitialConstrainXAnchor, leftInitialConstrainYAnchor, leftSubsequentAnchor)
 
         -- layout the KEYBIND_STRIP_ALIGN_RIGHT buttons
         local rightAnchorRelativeToControl = hasCustomStyle and self.styleInfo.rightAnchorRelativeToControl or nil
@@ -1085,7 +1112,7 @@ do
         local rightInitialConstrainYAnchor = ZO_Anchor:New(RIGHT, nil, RIGHT, 0, 0, ANCHOR_CONSTRAINS_Y)
         local rightSubsequentAnchor = ZO_Anchor:New(RIGHT, nil, LEFT)
 
-        self.rightButtons = self:UpdateAnchorsInternal(self.rightButtons, self.control, rightInitialConstrainXAnchor, rightInitialConstrainYAnchor, rightSubsequentAnchor)
+        self:UpdateAnchorsInternal(buttonsByAlignment[KEYBIND_STRIP_ALIGN_RIGHT], self.control, rightInitialConstrainXAnchor, rightInitialConstrainYAnchor, rightSubsequentAnchor)
 
         -- layout the KEYBIND_STRIP_ALIGN_CENTER buttons
         local centerAnchorOffsetX = hasCustomStyle and self.styleInfo.centerAnchorOffset or 0
@@ -1093,6 +1120,6 @@ do
         local centerInitialConstrainYAnchor = ZO_Anchor:New(LEFT, nil, LEFT, 0, 0, ANCHOR_CONSTRAINS_Y)
         local centerSubsequentAnchor = ZO_Anchor:New(LEFT, nil, RIGHT)
 
-        self.centerButtons = self:UpdateAnchorsInternal(self.centerButtons, self.centerParent, centerInitialConstrainXAnchor, centerInitialConstrainYAnchor, centerSubsequentAnchor)
+        self:UpdateAnchorsInternal(buttonsByAlignment[KEYBIND_STRIP_ALIGN_CENTER], self.centerParent, centerInitialConstrainXAnchor, centerInitialConstrainYAnchor, centerSubsequentAnchor)
     end
 end

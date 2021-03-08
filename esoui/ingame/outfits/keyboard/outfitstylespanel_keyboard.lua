@@ -196,19 +196,15 @@ function ZO_OutfitStylesPanel_Keyboard:HasAnyCurrentSlotPreviews()
     return NonContiguousCount(self.currentSlotPreviews) > 0
 end
 
-do
-    local DONT_REFRESH_IMMEDIATELY = false
 
-    function ZO_OutfitStylesPanel_Keyboard:ClearAllCurrentSlotPreviews()
-        local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
-        for outfitSlot, _ in pairs(self.currentSlotPreviews) do
-            ClearOutfitSlotPreviewElementFromPreviewCollection(previewCollectionId, outfitSlot, DONT_REFRESH_IMMEDIATELY)
-        end
-        RefreshPreviewCollectionShown()
-        ZO_ClearTable(self.currentSlotPreviews)
-        self:FireCallbacks("PreviewSlotsChanged")
-        self.gridListPanelList:RefreshGridList()
+function ZO_OutfitStylesPanel_Keyboard:ClearAllCurrentSlotPreviews()
+    for outfitSlot, _ in pairs(self.currentSlotPreviews) do
+        ClearOutfitSlotPreviewElementFromPreviewCollection(outfitSlot)
     end
+    ApplyChangesToPreviewCollectionShown()
+    ZO_ClearTable(self.currentSlotPreviews)
+    self:FireCallbacks("PreviewSlotsChanged")
+    self.gridListPanelList:RefreshGridList()
 end
 
 do
@@ -471,16 +467,13 @@ function ZO_OutfitStylesPanel_Keyboard:IsPreviewingOutfitStyle(collectibleData, 
     return false
 end
 
-local REFRESH_IMMEDIATELY = true
-
 function ZO_OutfitStylesPanel_Keyboard:TogglePreviewOutfitStyle(collectibleData, itemMaterialIndex, preferredOutfitSlot)
     preferredOutfitSlot = preferredOutfitSlot or ZO_OUTFIT_MANAGER:GetPreferredOutfitSlotForStyle(collectibleData)
 
     if preferredOutfitSlot and IsCharacterPreviewingAvailable() then
-        local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
-
         if self:IsPreviewingOutfitStyle(collectibleData, itemMaterialIndex, preferredOutfitSlot) then
-            ClearOutfitSlotPreviewElementFromPreviewCollection(previewCollectionId, preferredOutfitSlot, REFRESH_IMMEDIATELY)
+            ClearOutfitSlotPreviewElementFromPreviewCollection(preferredOutfitSlot)
+            ApplyChangesToPreviewCollectionShown()
             self.currentSlotPreviews[preferredOutfitSlot] = nil
             self:FireCallbacks("PreviewSlotsChanged")
             self.gridListPanelList:RefreshGridList()
@@ -502,7 +495,8 @@ function ZO_OutfitStylesPanel_Keyboard:TogglePreviewOutfitStyle(collectibleData,
             
         itemMaterialIndex = itemMaterialIndex or ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX
         local collectibleId = collectibleData.clearAction and 0 or collectibleData:GetId()
-        AddOutfitSlotPreviewElementToPreviewCollection(previewCollectionId, preferredOutfitSlot, collectibleId, itemMaterialIndex, primaryDyeId, secondaryDyeId, accentDyeId, REFRESH_IMMEDIATELY)
+        AddOutfitSlotPreviewElementToPreviewCollection(preferredOutfitSlot, collectibleId, itemMaterialIndex, primaryDyeId, secondaryDyeId, accentDyeId)
+        ApplyChangesToPreviewCollectionShown()
         self.currentSlotPreviews[preferredOutfitSlot] = 
         {
             collectibleId = collectibleId,

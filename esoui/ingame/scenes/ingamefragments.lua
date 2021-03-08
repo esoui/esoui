@@ -16,12 +16,14 @@ function ZO_FramePlayerFragment:Show()
     SetFrameLocalPlayerInGameCamera(true)
     --Restart the framing if we changed regions (player was recreated) and framing is active. 
     EVENT_MANAGER:RegisterForEvent("ZO_FramePlayerFragment", EVENT_PLAYER_ACTIVATED, function() SetFrameLocalPlayerInGameCamera(true) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_FramePlayerFragment", EVENT_LOCAL_PLAYER_MODEL_REBUILT, function() RequestReframeLocalPlayerInGameCamera() end)
     self:OnShown()
 end
 
 function ZO_FramePlayerFragment:Hide()
     SetFrameLocalPlayerInGameCamera(false)
     EVENT_MANAGER:UnregisterForEvent("ZO_FramePlayerFragment", EVENT_PLAYER_ACTIVATED)
+    EVENT_MANAGER:UnregisterForEvent("ZO_FramePlayerFragment", EVENT_LOCAL_PLAYER_MODEL_REBUILT)
     self:OnHidden()
 end
 
@@ -789,6 +791,31 @@ end
 SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_NONE)
 
 CHAMPION_UI_MUSIC_FRAGMENT = ZO_UIMusicFragment:New(OVERRIDE_MUSIC_MODE_CHAMPION)
+
+----------------------------------------
+-- Show Queued UI System Fragment
+----------------------------------------
+
+local ShowQueuedUISystemFragment = ZO_SceneFragment:Subclass()
+
+function ShowQueuedUISystemFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function ShowQueuedUISystemFragment:Show()
+    self:OnShown()
+end
+
+function ShowQueuedUISystemFragment:Hide()
+    self:OnHidden()
+    if SCENE_MANAGER:IsShowingNext(SCENE_MANAGER:GetHUDSceneName()) then
+        ZO_UI_SYSTEM_MANAGER:TryOpenQueuedUISystem()
+    else
+        ZO_UI_SYSTEM_MANAGER:ClearQueuedUISystem()
+    end
+end
+
+SHOW_QUEUED_UI_SYSTEM_FRAGMENT = ShowQueuedUISystemFragment:New()
 
 --------------------------------------
 --General Fragment Declarations

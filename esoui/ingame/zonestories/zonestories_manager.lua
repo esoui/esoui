@@ -19,13 +19,7 @@ ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST =
     ZONE_COMPLETION_TYPE_MAGES_GUILD_BOOKS,
 }
 
-ZO_ZoneStories_Manager = ZO_CallbackObject:Subclass()
-
-function ZO_ZoneStories_Manager:New(...)
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize(...)
-    return manager
-end
+ZO_ZoneStories_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_ZoneStories_Manager:Initialize()
     self.zoneList = {}
@@ -45,12 +39,10 @@ end
 function ZO_ZoneStories_Manager:ShowZoneStoriesScene(zoneId)
     zoneId = zoneId or self.GetDefaultZoneSelection()
     if IsInGamepadPreferredMode() then
-        local CREATE_FULL_STACK = true
-        SYSTEMS:GetObject("mainMenu"):ShowZoneStoriesEntry(CREATE_FULL_STACK)
+        ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(self.GetCategoryData())
         ZONE_STORIES_GAMEPAD:SetSelectedByZoneId(zoneId)
     else
-        SYSTEMS:GetObject("mainMenu"):ShowScene("groupMenuKeyboard")
-        GROUP_MENU_KEYBOARD:SetCategoryOnShow(ZONE_STORIES_FRAGMENT)
+        GROUP_MENU_KEYBOARD:ShowCategory(ZONE_STORIES_FRAGMENT)
         ZONE_STORIES_KEYBOARD:SetSelectedByZoneId(zoneId)
     end
 end
@@ -99,6 +91,37 @@ end
 
 function ZO_ZoneStories_Manager:GetZoneData(zoneId)
     return self.zoneMap[zoneId]
+end
+
+do
+    local CATEGORY_DATA = 
+    {
+        keyboardData =
+        {
+            name = GetString(SI_ACTIVITY_FINDER_CATEGORY_ZONE_STORIES),
+            normalIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_up.dds",
+            pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_down.dds",
+            mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_over.dds",
+            isZoneStories = true,
+        },
+
+        gamepadData =
+        {
+            name = GetString(SI_ACTIVITY_FINDER_CATEGORY_ZONE_STORIES),
+            menuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_zoneStories.dds",
+            sceneName = "zoneStoriesGamepad",
+            tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_ZONE_STORIES),
+            isZoneStories = true,
+            GetHelpIndices = function()
+                return GetZoneStoriesHelpIndices()
+            end,
+        },
+        priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.ZONE_STORIES,
+    }
+
+    function ZO_ZoneStories_Manager.GetCategoryData()
+        return CATEGORY_DATA
+    end
 end
 
 function ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(zoneId, completionType)

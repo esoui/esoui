@@ -207,7 +207,7 @@ function PlayerInventoryMenuBar:Initialize(control)
     -- Stack all
     local stackAllKeybind = {
         name = GetString(SI_ITEM_ACTION_STACK_ALL),
-        keybind = "UI_SHORTCUT_STACK_ALL",
+        keybind = "UI_SHORTCUT_QUINARY",
         visible =   function()
                         return PLAYER_INVENTORY:IsShowingBackpack()
                     end,
@@ -240,10 +240,20 @@ function PlayerInventoryMenuBar:Initialize(control)
 
         -- Destroy All Junk
         {
-            name = GetString(SI_DESTROY_ALL_JUNK_KEYBIND_TEXT),
+            name = function()
+                        if IsCurrentlyPreviewing() then
+                            return GetString(SI_PREVIEW_CLEAR_INVENTORY_PREVIEW)
+                        else 
+                            return GetString(SI_DESTROY_ALL_JUNK_KEYBIND_TEXT)
+                        end
+                   end,
             keybind = "UI_SHORTCUT_NEGATIVE",
 
             visible =   function()
+                            if IsCurrentlyPreviewing() then
+                                return true
+                            end
+
                             local inventory = PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK]
                             local currentFilter = inventory.currentFilter
                             if type(currentFilter) ~= "function" and currentFilter == ITEMFILTERTYPE_JUNK then
@@ -252,7 +262,13 @@ function PlayerInventoryMenuBar:Initialize(control)
                         end,
 
             callback =  function()
-                            ZO_Dialogs_ShowDialog("DESTROY_ALL_JUNK")
+                            if IsCurrentlyPreviewing() then
+                                SYSTEMS:GetObject("itemPreview"):EndCurrentPreview()
+                                ApplyChangesToPreviewCollectionShown()
+                                self:UpdateInventoryKeybinds()
+                            else
+                                ZO_Dialogs_ShowDialog("DESTROY_ALL_JUNK")
+                            end
                         end,
         },
         quickslotToggleKeybind,
@@ -321,7 +337,7 @@ function VendorInventoryMenuBar:Initialize(control)
     -- Stack all
     local stackAllKeybind = {
         name = GetString(SI_ITEM_ACTION_STACK_ALL),
-        keybind = "UI_SHORTCUT_STACK_ALL",
+        keybind = "UI_SHORTCUT_QUINARY",
         visible =   function()
                         return PLAYER_INVENTORY:IsShowingBackpack()
                     end,

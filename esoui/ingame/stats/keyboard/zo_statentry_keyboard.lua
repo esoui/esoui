@@ -47,10 +47,10 @@ function ZO_StatEntry_Keyboard:GetDisplayValue(targetValue)
     local value = targetValue or self:GetValue()
     local statType = self.statType
 
-    if(statType == STAT_CRITICAL_STRIKE or statType == STAT_SPELL_CRITICAL) then
+    if statType == STAT_CRITICAL_STRIKE or statType == STAT_SPELL_CRITICAL then
         return zo_strformat(SI_STAT_VALUE_PERCENT, GetCriticalStrikeChance(value))
     else
-        return value
+        return tostring(value)
     end
 end
 
@@ -136,5 +136,23 @@ function ZO_StatsEntry_OnMouseEnter(control)
 end
 
 function ZO_StatsEntry_OnMouseExit(control)
+    ClearTooltip(InformationTooltip)
+end
+
+function ZO_AdvancedStatsEntry_OnMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, RIGHT, -5)
+    InformationTooltip:AddLine(zo_strformat(SI_STAT_NAME_FORMAT, control.statData.displayName), "", ZO_NORMAL_TEXT:UnpackRGBA())
+
+    if control.statData.description then
+        InformationTooltip:AddLine(zo_strformat(control.statData.description))
+    end
+
+    if control.statData.flatValue then
+        local flatValueText = ZO_SELECTED_TEXT:Colorize(control.statData.flatValue)
+        InformationTooltip:AddLine(zo_strformat(SI_STAT_RATING_TOOLTIP_FORMAT, control.statData.displayName, flatValueText), "", ZO_NORMAL_TEXT:UnpackRGBA())
+    end
+end
+
+function ZO_AdvancedStatsEntry_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
 end

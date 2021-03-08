@@ -33,8 +33,8 @@ function ZO_GamepadStoreRepair:RegisterEvents()
     self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdated)
 
     local OnCurrencyChanged = function()
-	    self.list:RefreshVisible()
-	end
+        self.list:RefreshVisible()
+    end
 
     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, OnCurrencyChanged)
     self.control:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, OnCurrencyChanged)
@@ -64,6 +64,16 @@ function ZO_GamepadStoreRepair:InitializeKeybindStrip()
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.list)
+end
+
+function ZO_GamepadStoreRepair:AddKeybinds()
+    if not KEYBIND_STRIP:HasKeybindButtonGroup(self.keybindStripDescriptor) then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+end
+
+function ZO_GamepadStoreRepair:RemoveKeybinds()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_GamepadStoreRepair:CanRepair()

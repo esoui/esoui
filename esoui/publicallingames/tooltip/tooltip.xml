@@ -9,9 +9,12 @@
     
     <Controls>
         <!--
-            There is only one Tooltip top level window for the entire screen.
-            It's dimensions/position is really unimportant, the children will all be laid out correctly.
-            This does mean that ALL tooltips will draw together in a batch though.
+            In our lua code, we work directly with instances of tooltips created here.
+            Each tooltip, including new tooltips, should exist in their own top level using a PascalCase name matching this format:
+               <my type>TooltipTopLevel
+            and then the instance of your tooltip that you will directly manipulate can be named
+               <my type>Tooltip
+            From there you can reference that tooltip directly, and use it functions like InitializeTooltip.
         -->
 
         <Control name="ZO_TooltipMoneyLine" virtual="true">
@@ -280,6 +283,68 @@
 
                     <Controls>
                         <StatusBar name="$(parent)Progression" inherits="SkillTooltipProgressionBar" hidden="true" />
+                    </Controls>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <Texture name="ZO_ChampionSkillStatusBarNotch" layer="OVERLAY" textureFile="EsoUI/Art/Miscellaneous/verticalDivider_64.dds" virtual="true">
+            <Dimensions x="12" />
+        </Texture>
+
+        <Label name="ZO_ChampionSkillTooltipResultLabel" font="ZoFontWinH5"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
+
+        <TopLevelControl name="ChampionSkillTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="ChampionSkillTooltip" inherits="ZO_BaseTooltip">
+                    <ResizeToFitPadding width="32" height="40"/>
+                    <DimensionConstraints minX="384" maxX="384" />
+                    <ClampedToScreenInsets top="-105" bottom="65" />
+                    <OnInitialized>
+                        ZO_ChampionSkillTooltip_Initialize(self)
+                    </OnInitialized>
+
+                    <OnCleared>
+                        ZO_ChampionSkillTooltip_Cleared(self)
+                    </OnCleared>
+
+                    <OnAddGameData>
+                        ZO_ChampionSkillTooltip_OnAddGameData(...)
+                    </OnAddGameData>
+
+                    <Controls>
+                        <Control name="$(parent)Progression">
+                            <Dimensions x="352" y="20" />
+                            <Controls>
+                                <Label name="$(parent)MinResult" horizontalAlignment="RIGHT" inherits="ZO_ChampionSkillTooltipResultLabel">
+                                    <Dimensions x="35" />
+                                    <Anchor point="LEFT" />
+                                </Label>
+                                <Label name="$(parent)MaxResult" horizontalAlignment="LEFT" inherits="ZO_ChampionSkillTooltipResultLabel">
+                                    <Dimensions x="35" />
+                                    <Anchor point="RIGHT" />
+                                </Label>
+                                <Control name="$(parent)BG" inherits="ZO_ArrowStatusBarBG">
+                                    <Dimensions y="20" />
+                                    <Anchor point="LEFT" relativeTo="$(parent)MinResult" relativePoint="RIGHT" offsetX="5" />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)MaxResult" relativePoint="LEFT" offsetX="-5" />
+                                </Control>
+                                <Scroll name="$(parent)Mask">
+                                    <!-- anchors set dynamically -->
+                                    <Controls>
+                                        <StatusBar name="$(parent)Bar" inherits="ZO_ArrowStatusBar">
+                                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)BG" />
+                                            <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)BG" />
+                                        </StatusBar>
+                                    </Controls>
+                                </Scroll>
+
+                                <Control name="$(parent)Overlay" inherits="ZO_ArrowStatusBarOverlay">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)BG" />
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BG" />
+                                </Control>
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Tooltip>
             </Controls>

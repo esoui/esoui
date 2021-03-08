@@ -10,8 +10,8 @@
             <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="20" offsetY="18"/>
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontWinH1">
-                    <Dimensions x="470" />
                     <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_MainMenuCategoryBarButton1Membership" relativePoint="TOPLEFT" />
                     <OnInitialized>
                         local fonts =
                         {

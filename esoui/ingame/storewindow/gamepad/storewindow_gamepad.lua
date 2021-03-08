@@ -1,41 +1,10 @@
 GAMEPAD_STORE_SCENE_NAME = "gamepad_store"
 
-ZO_GamepadStoreManager = ZO_Object.MultiSubclass(ZO_SharedStoreManager, ZO_Gamepad_ParametricList_Screen)
+ZO_GamepadStoreManager = ZO_Object.MultiSubclass(ZO_SharedStoreManager, ZO_Gamepad_ParametricList_BagsSearch_Screen)
 
 function ZO_GamepadStoreManager:New(...)
     return ZO_SharedStoreManager.New(self, ...)
 end
-
-local function OnOpenStore()
-    if IsInGamepadPreferredMode() then
-        local componentTable = {}
-
-        if not IsStoreEmpty() then
-            table.insert(componentTable, ZO_MODE_STORE_BUY)
-        end
-
-        table.insert(componentTable, ZO_MODE_STORE_SELL)
-        table.insert(componentTable, ZO_MODE_STORE_BUY_BACK)
-
-        if CanStoreRepair() then
-            table.insert(componentTable, ZO_MODE_STORE_REPAIR)
-        end
-
-        STORE_WINDOW_GAMEPAD:SetActiveComponents(componentTable)
-        SCENE_MANAGER:Show(GAMEPAD_STORE_SCENE_NAME)
-    end
-end
-
-local function OnCloseStore()
-    if IsInGamepadPreferredMode() then
-        -- Ensure that all dialogs related to the store close on interaction end
-        ZO_Dialogs_ReleaseDialog("REPAIR_ALL")
-
-        SCENE_MANAGER:Hide(GAMEPAD_STORE_SCENE_NAME)
-    end
-end
-
-local DONT_ACTIVATE_LIST_ON_SHOW = false
 
 function ZO_GamepadStoreManager:Initialize(control)
     ZO_SharedStoreManager.Initialize(self, control)
@@ -44,10 +13,42 @@ function ZO_GamepadStoreManager:Initialize(control)
 
     GAMEPAD_VENDOR_SCENE = ZO_InteractScene:New(self.sceneName, SCENE_MANAGER, STORE_INTERACTION)
 
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, DONT_ACTIVATE_LIST_ON_SHOW, GAMEPAD_VENDOR_SCENE)
+    local DONT_ACTIVATE_LIST_ON_SHOW = false
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, DONT_ACTIVATE_LIST_ON_SHOW, GAMEPAD_VENDOR_SCENE)
 
     self.spinner = control:GetNamedChild("SpinnerContainer")
     self.spinner:InitializeSpinner()
+
+    local function OnOpenStore()
+        if IsInGamepadPreferredMode() then
+            local componentTable = {}
+
+            if not IsStoreEmpty() then
+                table.insert(componentTable, ZO_MODE_STORE_BUY)
+            end
+
+            table.insert(componentTable, ZO_MODE_STORE_SELL)
+            table.insert(componentTable, ZO_MODE_STORE_BUY_BACK)
+
+            if CanStoreRepair() then
+                table.insert(componentTable, ZO_MODE_STORE_REPAIR)
+            end
+
+            STORE_WINDOW_GAMEPAD:SetActiveComponents(componentTable, "storeTextSearch")
+            SCENE_MANAGER:Show(GAMEPAD_STORE_SCENE_NAME)
+        end
+    end
+
+    local function OnCloseStore()
+        if IsInGamepadPreferredMode() then
+            -- Ensure that all dialogs related to the store close on interaction end
+            ZO_Dialogs_ReleaseDialog("REPAIR_ALL")
+
+            self:DeactivateTextSearch()
+
+            SCENE_MANAGER:Hide(GAMEPAD_STORE_SCENE_NAME)
+        end
+    end
 
     self.control:RegisterForEvent(EVENT_OPEN_STORE, OnOpenStore)
     self.control:RegisterForEvent(EVENT_CLOSE_STORE, OnCloseStore)
@@ -148,11 +149,63 @@ function ZO_GamepadStoreManager:GetCurrentMode()
     return self.activeComponent and self.activeComponent:GetStoreMode() or nil
 end
 
-function ZO_GamepadStoreManager:SetActiveComponents(componentTable)
+function ZO_GamepadStoreManager:ActivateActiveComponent()
+    if self.activeComponent then
+        self.activeComponent:AddKeybinds()
+        self:ActivateCurrentList()
+    end
+end
+
+function ZO_GamepadStoreManager:DeactivateActiveComponent()
+    if self.activeComponent then
+        self:DeactivateCurrentList()
+        self.activeComponent:RemoveKeybinds()
+    end
+end
+
+function ZO_GamepadStoreManager:RequestEnterHeader()
+    if not self.headerFocus or self.headerFocus:IsActive() then
+        return
+    end
+
+    if self.textSearchHeaderFocus and self:IsTextSearchEntryHidden() then
+        return
+    end
+
+    if self:CanEnterHeader() then
+        self:DeactivateActiveComponent()
+        self.headerFocus:Activate()
+        self:RefreshKeybinds()
+        self:OnEnterHeader()
+    end
+end
+
+function ZO_GamepadStoreManager:RequestLeaveHeader()
+    if not self.headerFocus or not self.headerFocus:IsActive() then
+        return
+    end
+
+    if self:CanLeaveHeader() then
+        self.headerFocus:Deactivate()
+        self:OnLeaveHeader()
+        self:RefreshKeybinds()
+        self:ActivateActiveComponent()
+    end
+end
+
+function ZO_GamepadStoreManager:SetActiveComponents(componentTable, searchContext)
     self.activeComponents = {}
-    for index, componentMode in ipairs(componentTable) do
+    self.searchContext = searchContext
+    self:ActivateTextSearch()
+    for _, componentMode in ipairs(componentTable) do
         local component = self.components[componentMode]
+        component:SetSearchContext(searchContext)
         component:Refresh()
+        if ZO_STORE_MODE_HAS_TEXT_SEARCH[component:GetStoreMode()] then
+            component.list:SetOnHitBeginningOfListCallback(function()
+                self:RequestEnterHeader(self)
+            end)
+        end
         table.insert(self.activeComponents, component)
     end
     self:RebuildHeaderTabs()
@@ -162,8 +215,16 @@ function ZO_GamepadStoreManager:AddComponent(component)
     self.components[component:GetStoreMode()] = component
 end
 
+function ZO_GamepadStoreManager:OnUpdatedSearchResults()
+    local activeComponent = self:GetActiveComponent()
+    if activeComponent and ZO_STORE_MODE_HAS_TEXT_SEARCH[activeComponent:GetStoreMode()] then
+        activeComponent:Refresh()
+    end
+end
+
 function ZO_GamepadStoreManager:OnStateChanged(oldState, newState)
-    if newState == SCENE_SHOWING then
+    if newState == SCENE_SHOWING then 
+        self:OnShowing(self)
         self:InitializeStore()
         self:SetMode(self.deferredStartingMode or self.activeComponents[1]:GetStoreMode())
         self.deferredStartingMode = nil
@@ -174,6 +235,7 @@ function ZO_GamepadStoreManager:OnStateChanged(oldState, newState)
     elseif newState == SCENE_HIDDEN then
         GAMEPAD_TOOLTIPS:Reset(GAMEPAD_RIGHT_TOOLTIP)
         GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
+        self:OnHide()
         ZO_GamepadGenericHeader_Deactivate(self.header)
     end
 end
@@ -193,7 +255,7 @@ function ZO_GamepadStoreManager:SetQuantitySpinnerActive(activate, list, ignoreI
         ZO_GamepadGenericHeader_Deactivate(self.header)
 
         list:RefreshVisible()
-        list:SetDirectionalInputEnabled(false)
+        DIRECTIONAL_INPUT:Deactivate(self)
         self.spinner:AttachToTargetListEntry(list)
         self.spinner:SetIgnoreInvalidCost(ignoreInvalidCost)
     else
@@ -201,7 +263,7 @@ function ZO_GamepadStoreManager:SetQuantitySpinnerActive(activate, list, ignoreI
         ZO_GamepadGenericHeader_Activate(self.header)
 
         list:RefreshVisible()
-        list:SetDirectionalInputEnabled(true)
+        DIRECTIONAL_INPUT:Activate(self, self.control)
     end
 end
 
@@ -210,41 +272,43 @@ function ZO_GamepadStoreManager:GetRepairAllKeybind()
 end
 
 function ZO_GamepadStoreManager:InitializeKeybindStrip()
-    self.repairAllKeybind = {
-            name = function()
-                local cost = GetRepairAllCost()
-                if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= cost then
-                    return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON))
-                end
-                return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON))
-            end,
-            keybind = "UI_SHORTCUT_SECONDARY",
-            visible = function() return CanStoreRepair() and GetRepairAllCost() > 0 end,
-            enabled = function() 
-                if GetRepairAllCost() <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
-                    return true
-                else
-                    return false, GetString(SI_REPAIR_ALL_CANNOT_AFFORD)
-                end
-            end,
-            callback = function()
-                local cost = GetRepairAllCost()
-                if cost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
-                    self:FailedRepairMessageBox()
-                else
-                    local dialogData = {
-                        cost = cost,
-                        declineCallback = function()
-                                              self.numberItemsRepairing = 0
-                                              self.isRepairingAll = false
-                                          end,
-                    }
+    self.repairAllKeybind =
+    {
+        name = function()
+            local cost = GetRepairAllCost()
+            if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= cost then
+                return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON))
+            end
+            return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON))
+        end,
+        keybind = "UI_SHORTCUT_SECONDARY",
+        visible = function() return CanStoreRepair() and GetRepairAllCost() > 0 end,
+        enabled = function()
+            if GetRepairAllCost() <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
+                return true
+            else
+                return false, GetString(SI_REPAIR_ALL_CANNOT_AFFORD)
+            end
+        end,
+        callback = function()
+            local cost = GetRepairAllCost()
+            if cost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
+                self:FailedRepairMessageBox()
+            else
+                local dialogData =
+                {
+                    cost = cost,
+                    declineCallback = function()
+                        self.numberItemsRepairing = 0
+                        self.isRepairingAll = false
+                    end,
+                }
 
-                    self.isRepairingAll = true
-                    self.numberItemsRepairing = self.components[ZO_MODE_STORE_REPAIR]:GetNumRepairItems()
-                    ZO_Dialogs_ShowGamepadDialog("REPAIR_ALL", dialogData)
-                end
-            end,
+                self.isRepairingAll = true
+                self.numberItemsRepairing = self.components[ZO_MODE_STORE_REPAIR]:GetNumRepairItems()
+                ZO_Dialogs_ShowGamepadDialog("REPAIR_ALL", dialogData)
+            end
+        end,
     }
 end
 
@@ -254,7 +318,7 @@ function ZO_GamepadStoreManager:RebuildHeaderTabs()
             self:ShowComponent(component)
         end
     end
-    
+
     local function OnActivatedChanged(list, activated)
         if activated then
             local component = self.activeComponents[list:GetSelectedIndex()]
@@ -276,8 +340,8 @@ function ZO_GamepadStoreManager:RebuildHeaderTabs()
             callback = function() OnCategoryChanged(component) end,
         })
     end
-    
-    self.headerData = 
+
+    self.headerData =
     {
         tabBarEntries = tabsTable,
         activatedCallback = function(...) OnActivatedChanged(...) end,
@@ -289,6 +353,14 @@ function ZO_GamepadStoreManager:ShowComponent(component)
     if SCENE_MANAGER:IsShowing(self.sceneName) then
         self:HideActiveComponent()
         self.activeComponent = component
+        self:SetCurrentList(self.activeComponent.list)
+
+        local hasTextSearchHeader = ZO_STORE_MODE_HAS_TEXT_SEARCH[self.activeComponent:GetStoreMode()]
+        self:SetTextSearchEntryHidden(not hasTextSearchHeader)
+        if hasTextSearchHeader and self.activeComponent.list and self.activeComponent.list:GetNumItems() == 0 then
+            self:RequestEnterHeader()
+        end
+
         component:Show()
         self:RefreshHeaderData()
     end
@@ -345,7 +417,8 @@ do
     end
 
     local function CreateCurrencyHeaderData(currencyType)
-        local currencyHeaderData = {
+        local currencyHeaderData =
+        {
             headerText = ZO_Currency_GetAmountLabel(currencyType),
             text = function(control)
                 ZO_CurrencyControl_SetSimpleCurrency(control, currencyType, GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType)), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
@@ -358,25 +431,25 @@ do
     local CAPACITY_HEADER_DATA =
     {
         headerText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
-        text = UpdateCapacityString
+        text = UpdateCapacityString,
     }
 
     local GOLD_HEADER_DATA =
     {
         headerText = ZO_Currency_GetAmountLabel(CURT_MONEY),
-        text = UpdateGold
+        text = UpdateGold,
     }
 
     local RIDING_TRAINING_COST_HEADER_DATA =
     {
         headerText = GetString(SI_GAMEPAD_STABLE_TRAINING_COST_HEADER),
-        text = UpdateRidingTrainingCost
+        text = UpdateRidingTrainingCost,
     }
 
     local LAUNDER_TRANSACTION_HEADER_DATA =
     {
         headerText = GetTransactionLabelString,
-        text = GetTransactionValueString
+        text = GetTransactionValueString,
     }
 
     local g_pendingHeaderData = {}
@@ -412,7 +485,7 @@ do
             local MAX_ALTERNATE_CURRENCIES = 2
             local alternateCurrenciesUsed = 0
 
-            for i, currencyType in ipairs(self.storeUsedCurrencies) do
+            for _, currencyType in ipairs(self.storeUsedCurrencies) do
                 if currencyType ~= CURT_MONEY then
                     local headerData = CreateCurrencyHeaderData(currencyType)
                     table.insert(g_pendingHeaderData, headerData)
@@ -561,6 +634,7 @@ function ZO_GamepadStoreManager:Show()
 end
 
 function ZO_GamepadStoreManager:Hide()
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.OnHide()
     SCENE_MANAGER:Hide(self.sceneName)
 end
 

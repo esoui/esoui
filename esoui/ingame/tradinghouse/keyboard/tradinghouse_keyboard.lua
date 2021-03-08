@@ -4,11 +4,6 @@
 
 local ZO_TradingHouseManager = ZO_TradingHouse_Shared:Subclass()
 
-function ZO_TradingHouseManager:New(...)
-    local manager = ZO_TradingHouse_Shared.New(self, ...)
-    return manager
-end
-
 function ZO_TradingHouseManager:Initialize(control)
     ZO_TradingHouse_Shared.Initialize(self, control)
     self.initialized = false
@@ -17,22 +12,30 @@ function ZO_TradingHouseManager:Initialize(control)
     SYSTEMS:RegisterKeyboardRootScene(ZO_TRADING_HOUSE_SYSTEM_NAME, TRADING_HOUSE_SCENE)
 end
 
-function ZO_TradingHouseManager:InitializeScene()
-    local function SceneStateChange(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:UpdateFragments()
-        elseif newState == SCENE_HIDING then
-            SetPendingItemPost(BAG_BACKPACK, 0, 0)
-            ClearMenu()
-            ZO_InventorySlot_RemoveMouseOverKeybinds()
-        elseif newState == SCENE_HIDDEN then
-            self:ClearSearchResults()
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-            self.keybindStripDescriptor = nil
+do
+    local INVENTORY_TYPE_LIST = { INVENTORY_BACKPACK }
+    function ZO_TradingHouseManager:InitializeScene()
+        local function SceneStateChange(oldState, newState)
+            if newState == SCENE_SHOWING then
+                PLAYER_INVENTORY:SetContextForInventories("guildTraderTextSearch", INVENTORY_TYPE_LIST)
+                TEXT_SEARCH_MANAGER:ActivateTextSearch("guildTraderTextSearch")
+                self:UpdateFragments()
+            elseif newState == SCENE_HIDING then
+                SetPendingItemPost(BAG_BACKPACK, 0, 0)
+                ClearMenu()
+                ZO_InventorySlot_RemoveMouseOverKeybinds()
+            elseif newState == SCENE_HIDDEN then
+                TEXT_SEARCH_MANAGER:DeactivateTextSearch("guildTraderTextSearch")
+                local REMOVE_CONTEXT = nil
+                PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
+                self:ClearSearchResults()
+                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+                self.keybindStripDescriptor = nil
+            end
         end
-    end
 
-    TRADING_HOUSE_SCENE:RegisterCallback("StateChange", SceneStateChange)
+        TRADING_HOUSE_SCENE:RegisterCallback("StateChange", SceneStateChange)
+    end
 end
 
 function ZO_TradingHouseManager:InitializeEvents()
@@ -703,7 +706,7 @@ end
 
 function ZO_TradingHouseManager:SetupPendingPost()
     if self.pendingItemSlot then
-        local icon, stackCount, sellPrice = GetItemInfo(BAG_BACKPACK, self.pendingItemSlot)
+        local icon, stackCount = GetItemInfo(BAG_BACKPACK, self.pendingItemSlot)
         ZO_Inventory_BindSlot(self.pendingItem, SLOT_TYPE_TRADING_HOUSE_POST_ITEM, self.pendingItemSlot, BAG_BACKPACK)
         ZO_ItemSlot_SetupSlot(self.pendingItem, stackCount, icon)
         self.pendingItemName:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(BAG_BACKPACK, self.pendingItemSlot)))
@@ -947,7 +950,8 @@ function ZO_TradingHouseManager:PreviewSearchResult(tradingHouseIndex)
         self:TogglePreviewMode()
     end
 
-    ITEM_PREVIEW_KEYBOARD:PreviewTradingHouseSearchResultAsFurniture(tradingHouseIndex)
+    ITEM_PREVIEW_KEYBOARD:ClearPreviewCollection()
+    ITEM_PREVIEW_KEYBOARD:PreviewTradingHouseSearchResult(tradingHouseIndex)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
@@ -1268,13 +1272,13 @@ ZO_TRADING_HOUSE_SEARCH_RESULT_UNIT_PRICE_WIDTH = 120
 ZO_TRADING_HOUSE_SEARCH_RESULT_PRICE_WIDTH = 130
 
 local function GetTradingHouseIndexForPreviewFromSlot(storeEntrySlot)
-    local inventorySlot, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(storeEntrySlot)
+    local inventorySlot = ZO_InventorySlot_GetInventorySlotComponents(storeEntrySlot)
 
     local slotType = ZO_InventorySlot_GetType(inventorySlot)
     if slotType == SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT then
         local tradingHouseIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
         local itemLink = GetTradingHouseSearchResultItemLink(tradingHouseIndex)
-        if ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink) then
+        if CanItemLinkBePreviewed(itemLink) then
             return tradingHouseIndex
         end
     end
@@ -1315,7 +1319,7 @@ function ZO_TradingHouse_OnSearchResultMouseExit(searchResultSlot)
 end
 
 function ZO_TradingHouse_SearchResult_TraitInfo_OnMouseEnter(control)
-    local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
+    local _, listPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
     ZO_InventorySlot_SetHighlightHidden(listPart, false)
 
     local slotData = control:GetParent().dataEntry.data
@@ -1336,7 +1340,7 @@ end
 
 function ZO_TradingHouse_SearchResult_TraitInfo_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
-    local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
+    local _, listPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
     ZO_InventorySlot_SetHighlightHidden(listPart, true)
 end
 

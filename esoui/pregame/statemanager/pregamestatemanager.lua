@@ -1,10 +1,10 @@
-function ZO_Pregame_HasPlayedVideos()
-    return GetCVar("HasPlayedPregameVideo") ~= "0"
+function ZO_Pregame_CanSkipVideos()
+    return GetCVar("HasPlayedPregameVideo") ~= "0" or ZO_IsConsoleOrHeronUI()
 end
 
 function ZO_Pregame_ShouldSkipVideos()
     -- only skip if the cvar is set, _and_ the player has seen the videos at least once
-    return GetCVar("SkipPregameVideos") ~= "0" and ZO_Pregame_HasPlayedVideos()
+    return GetCVar("SkipPregameVideos") ~= "0" and ZO_Pregame_CanSkipVideos()
 end
 
 ZO_PREGAME_CHARACTER_COUNT = 0
@@ -307,12 +307,7 @@ local g_sharedPregameStates =
 
         OnEnter = function()
             -- If you haven't played the videos, you can't skip them until they finish...
-            local skipMode
-            if IsConsoleUI() then
-                skipMode = VIDEO_SKIP_MODE_ALLOW_SKIP
-            else
-                skipMode = ZO_Pregame_HasPlayedVideos() and VIDEO_SKIP_MODE_ALLOW_SKIP or VIDEO_SKIP_MODE_NO_SKIP
-            end
+            local skipMode = ZO_Pregame_CanSkipVideos() and VIDEO_SKIP_MODE_ALLOW_SKIP or VIDEO_SKIP_MODE_NO_SKIP
 
             -- TODO: Determine if these videos need localization or subtitles...
             SetVideoCancelAllOnCancelAny(false)
@@ -374,7 +369,7 @@ local g_sharedPregameStates =
         end,
 
         OnEnter = function()
-            local skipMode = ZO_Pregame_HasPlayedVideos() and VIDEO_SKIP_MODE_ALLOW_SKIP or VIDEO_SKIP_MODE_NO_SKIP
+            local skipMode = ZO_Pregame_CanSkipVideos() and VIDEO_SKIP_MODE_ALLOW_SKIP or VIDEO_SKIP_MODE_NO_SKIP
             ZO_PlayVideoAndAdvance(PlayVideo, "Video/jp_DMM_logo.bik", QUEUE_VIDEO, skipMode)
         end,
 

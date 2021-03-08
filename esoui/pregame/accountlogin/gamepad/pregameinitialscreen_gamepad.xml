@@ -1,6 +1,12 @@
 <GuiXml>
     <Animations>
-        <AnimationTimeline name="ZO_PregameInitialScreen_FadeAnimation">
+        <AnimationTimeline name="ZO_PregameInitialScreen_AnimatedBackgroundAnimation">
+            <Animations>
+                <CustomAnimation duration="2000" />
+            </Animations>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="ZO_PregameInitialScreen_PressTextFadeAnimation">
             <Animations>
                 <AlphaAnimation duration="1000" startAlpha="0" endAlpha="1">
                     <EasingFunction>
@@ -19,22 +25,6 @@
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)Logo" alpha="0" resizeToFitDescendents="true">
-                    <Anchor point="CENTER" offsetY="-249"/>
-
-                    <Controls>
-                        <Texture name="$(parent)Title" textureFile="EsoUI/Art/Login/Gamepad/consoleLogoGreymoor.dds">
-                            <Dimensions x="498" y="121"/>
-                            <TextureCoords left="0" right="0.552734375" top="0" bottom="0.9453125"/>
-                            <Anchor point="TOPLEFT" />
-                        </Texture>
-                        <!--<Texture name="$(parent)Ouroboros" textureFile="EsoUI/Art/Login/Gamepad/consoleOuroborosSummerset.dds">
-                            <Dimensions x="512" y="512"/>
-                            <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="-30"/>
-                        </Texture>-->
-                    </Controls>
-                </Control>
-
                 <Label name="$(parent)PressText" alpha="0" modifyTextType="UPPERCASE" font="ZoFontGamepad34" horizontalAlignment="CENTER">
                     <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-45" />
                 </Label>

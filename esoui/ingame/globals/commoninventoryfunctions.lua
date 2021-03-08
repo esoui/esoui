@@ -8,11 +8,19 @@ function ZO_GetNextBagSlotIndex(bagId, slotIndex)
             return 0
         end
 
-        local bagSlots = GetBagSize(bagId)
-        if slotIndex < (bagSlots - 1) then
-            return slotIndex + 1
+        local bagSlots
+        if bagId == BAG_BUYBACK then
+            bagSlots = GetNumBuybackItems()
         else
-            return nil
+            bagSlots = GetBagSize(bagId)
+        end
+
+        if bagSlots then
+            if slotIndex < (bagSlots - 1) then
+                return slotIndex + 1
+            else
+                return nil
+            end
         end
     end
 end
@@ -42,7 +50,13 @@ do
         elseif bagId == BAG_VIRTUAL then
             return GetNextSlotForVirtualBag, nil, nil
         else
-            local lastSlotIndex = GetBagSize(bagId) - 1
+            local lastSlotIndex
+            if bagId == BAG_BUYBACK then
+                lastSlotIndex = GetNumBuybackItems() - 1
+            else
+                lastSlotIndex = GetBagSize(bagId) - 1
+            end
+
             return GetNextSlotForSizedBag, lastSlotIndex, -1 -- start at -1, so the first iteration is 0
         end
     end

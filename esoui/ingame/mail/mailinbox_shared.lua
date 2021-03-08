@@ -31,7 +31,9 @@ end
 
 local function GetExpiresText(self)
     if not self.expiresText then
-        if self.expiresInDays > 0  then
+        if not self.expiresInDays then
+            self.expiresText = GetString(SI_MAIL_READ_NO_EXPIRATION)
+        elseif self.expiresInDays > 0  then
             self.expiresText = zo_strformat(SI_MAIL_READ_EXPIRES_LABEL, self.expiresInDays)
         else
             self.expiresText = GetString(SI_MAIL_READ_EXPIRES_LESS_THAN_ONE_DAY)
@@ -45,6 +47,10 @@ local function GetReceivedText(self)
         self.receivedText = ZO_FormatDurationAgo(self.secsSinceReceived)
     end
     return self.receivedText
+end
+
+local function IsExpirationImminent(self)
+    return self.expiresInDays and self.expiresInDays <= 3
 end
 
 function ZO_MailInboxShared_PopulateMailData(dataTable, mailId)
@@ -62,11 +68,13 @@ function ZO_MailInboxShared_PopulateMailData(dataTable, mailId)
     dataTable.secsSinceReceived = secsSinceReceived
     dataTable.fromSystem = fromSystem
     dataTable.fromCS = fromCS
+    dataTable.isFromPlayer = not (fromSystem or fromCS)
     dataTable.priority = fromCS and 1 or 2
     dataTable.GetFormattedSubject = GetFormattedSubject
     dataTable.GetExpiresText = GetExpiresText
     dataTable.GetReceivedText = GetReceivedText
     dataTable.isReadInfoReady = IsReadMailInfoReady(mailId)
+    dataTable.IsExpirationImminent = IsExpirationImminent
 end
 
 function ZO_GetNextMailIdIter(state, var1)
@@ -98,7 +106,11 @@ function ZO_MailInboxShared_UpdateInbox(mailData, fromControl, subjectControl, e
     subjectControl:SetText(mailData:GetFormattedSubject())
 
     if expiresControl then
-        expiresControl:SetText(mailData:GetExpiresText())
+        local expiresText = mailData:GetExpiresText()
+        if mailData:IsExpirationImminent() then
+            expiresText = ZO_ERROR_COLOR:Colorize(expiresText)
+        end
+        expiresControl:SetText(expiresText)
     end
 
     if receivedControl then

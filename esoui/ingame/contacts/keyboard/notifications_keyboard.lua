@@ -292,6 +292,22 @@ function ZO_KeyboardMarketProductUnlockedProvider:HideMessageTooltip(entryData, 
     ZO_TooltipIfTruncatedLabel_OnMouseExit(control)
 end
 
+-- ZO_KeyboardPointsResetProvider
+-------------------------------------------
+
+ZO_KeyboardPointsResetProvider = ZO_PointsResetProvider:Subclass()
+
+function ZO_KeyboardPointsResetProvider:Accept(data)
+    ZO_PointsResetProvider.Accept(self, data)
+    if data.respecType == RESPEC_TYPE_ATTRIBUTES then
+        MAIN_MENU_KEYBOARD:ShowScene("stats")
+    elseif data.respecType == RESPEC_TYPE_SKILLS then
+        MAIN_MENU_KEYBOARD:ShowScene("skills")
+    elseif data.respecType == RESPEC_TYPE_CHAMPION then
+        MAIN_MENU_KEYBOARD:ShowScene("championPerks")
+    end
+end
+
 --Notification Manager
 -------------------------
 
@@ -328,6 +344,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA, "ZO_NotificationsNewDailyLoginRewardRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GUILD_NEW_APPLICATIONS, "ZO_NotificationsGuildNewApplicationsRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA, "ZO_NotificationsMarketProductUnlockedRow", 50, SetupRequestWithMoreInfoRow)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_POINTS_RESET_DATA, "ZO_NotificationsPointsResetRow", 50, SetupRequest)
     ZO_ScrollList_EnableHighlight(self.sortFilterList.list, "ZO_ThinListHighlight")
 
     self.totalNumNotifications = 0
@@ -345,7 +362,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_GroupElectionProvider:New(self),
         ZO_TradeInviteProvider:New(self),
         ZO_QuestShareProvider:New(self),
-        ZO_PointsResetProvider:New(self, "keyboard"),
+        ZO_KeyboardPointsResetProvider:New(self),
         ZO_PledgeOfMaraProvider:New(self),
         ZO_KeyboardAgentChatRequestProvider:New(self),
         ZO_KeyboardLeaderboardRaidProvider:New(self),
@@ -536,6 +553,14 @@ function ZO_KeyboardNotificationManager:SetupBaseRow(control, data)
     control.notificationType = notificationType
     control.index = data.index
 
+    if data.acceptText then
+        control.acceptText = data.acceptText
+    end
+
+    if data.declineText then
+        control.declineText = data.declineText
+    end
+
     GetControl(control, "Icon"):SetTexture(ZO_KEYBOARD_NOTIFICATION_ICONS[notificationType])
     GetControl(control, "Type"):SetText(zo_strformat(SI_NOTIFICATIONS_TYPE_FORMATTER, GetString("SI_NOTIFICATIONTYPE", notificationType)))
 end
@@ -546,8 +571,7 @@ function ZO_KeyboardNotificationManager:SetupTwoButtonRow(control, data)
 end
 
 function ZO_KeyboardNotificationManager:SetupRequest(control, data)
-    self:SetupBaseRow(control, data)
-    self:SetupMessage(control:GetNamedChild("Message"), data)
+    self:SetupTwoButtonRow(control, data)
     self:SetupNote(control, data)
 end
 

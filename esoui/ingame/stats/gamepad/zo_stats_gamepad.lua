@@ -1,3 +1,11 @@
+
+ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_WIDTH = 350
+ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT = 40
+ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_HEADER_WIDTH = 700
+ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_X = 40
+ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_Y = 0
+ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_SECTION_SPACING = 40
+
 --Attribute Spinner
 
 local ZO_AttributeSpinner_Gamepad = ZO_AttributeSpinner_Shared:Subclass()
@@ -177,6 +185,7 @@ local GAMEPAD_STATS_DISPLAY_MODE =
     OUTFIT = 5,
     LEVEL_UP_REWARDS = 6,
     UPCOMING_LEVEL_UP_REWARDS = 7,
+    ADVANCED_ATTRIBUTES = 8,
 }
 
 ZO_GamepadStats = ZO_Object.MultiSubclass(ZO_Stats_Common, ZO_Gamepad_ParametricList_Screen)
@@ -226,6 +235,10 @@ function ZO_GamepadStats:Initialize(control)
 
             if self.attributeTooltips then
                 self.attributeTooltips:Deactivate()
+            end
+
+            if self.advancedAttributesGridList then
+                self:ExitAdvancedGridList()
             end
 
             self:UnregisterForEvents()
@@ -307,17 +320,15 @@ function ZO_GamepadStats:OnShowing()
 end
 
 function ZO_GamepadStats:ActivateMainList()
-    if not self.mainList:IsActive() then
-        self.mainList:Activate()
-
+    if self:IsCurrentList(self.mainList) and not self.mainList:IsActive() then
+        self:ActivateCurrentList()
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     end
 end
 
 function ZO_GamepadStats:DeactivateMainList()
-    if self.mainList:IsActive() then
-
-        self.mainList:Deactivate()
+    if self:IsCurrentList(self.mainList) and self.mainList:IsActive() then
+        self:DeactivateCurrentList()
 
         local selectedControl = self.mainList:GetSelectedControl()
         if selectedControl and selectedControl.pointLimitedSpinner then
@@ -407,6 +418,7 @@ function ZO_GamepadStats:PerformDeferredInitializationRoot()
 
     self:InitializeCharacterPanel()
     self:InitializeAttributesPanel()
+    self:InitializeAdvancedAttributesPanel()
     self:InitializeCharacterEffects()
 
     self:InitializeHeader()
@@ -475,7 +487,7 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                         return selectedData.canClickOff
                     end
                     return false
-                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES then
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ADVANCED_ATTRIBUTES then
                     return true
                 end
                 return false
@@ -484,6 +496,9 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.EFFECTS then
                     local selectedData = self.mainList:GetTargetData()
                     CancelBuff(selectedData.buffSlot)
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ADVANCED_ATTRIBUTES then
+                    self:DeactivateMainList()
+                    self:EnterAdvancedGridList()
                 else
                     self:ActivateViewAttributes()
                 end
@@ -492,6 +507,12 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
     }
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
+
+    self.advancedStatsKeybindStripDescriptor = {}
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.advancedStatsKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
+        self:ExitAdvancedGridList() 
+        self:ActivateMainList()
+    end)
 end
 
 function ZO_GamepadStats:SetAddedPoints(attributeType, addedPoints)
@@ -528,6 +549,7 @@ function ZO_GamepadStats:UpdateScreenVisibility()
     local isCharacterHidden = true
     local isEffectsHidden = true
     local showUpcomingRewards = false
+    local isAdvancedAttributesHidden = true
 
     if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.CHARACTER then
         isCharacterHidden = false
@@ -544,14 +566,18 @@ function ZO_GamepadStats:UpdateScreenVisibility()
         self:RefreshAttributesPanel()
     elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.UPCOMING_LEVEL_UP_REWARDS then
         showUpcomingRewards = true
+    elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ADVANCED_ATTRIBUTES then
+        isAdvancedAttributesHidden = false
+        self:RefreshAdvancedAttributesPanel()
     end
 
     self.characterStatsPanel:SetHidden(isCharacterHidden)
     self.attributesPanel:SetHidden(isAttributesHidden)
     self.equipmentBonus:SetHidden(isAttributesHidden)
     self.characterEffects:SetHidden(isEffectsHidden)
+    self.advancedAttributesPanel:SetHidden(isAdvancedAttributesHidden)
 
-    local hideQuadrant2_3Background = isAttributesHidden and isCharacterHidden and isEffectsHidden
+    local hideQuadrant2_3Background = isAttributesHidden and isCharacterHidden and isEffectsHidden and isAdvancedAttributesHidden
     if hideQuadrant2_3Background then
         GAMEPAD_STATS_ROOT_SCENE:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         GAMEPAD_STATS_ROOT_SCENE:RemoveFragment(GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT)
@@ -591,6 +617,16 @@ end
 
 function ZO_GamepadStats:UpdateSpendablePoints()
     self:SetAvailablePoints(self:GetTotalSpendablePoints() - self:GetNumPointsAdded())
+end
+
+function ZO_GamepadStats:EnterAdvancedGridList()
+    self.advancedAttributesGridList:Activate()
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.advancedStatsKeybindStripDescriptor)
+end
+
+function ZO_GamepadStats:ExitAdvancedGridList()
+    self.advancedAttributesGridList:Deactivate()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.advancedStatsKeybindStripDescriptor)
 end
 
 --------------------------
@@ -711,10 +747,14 @@ do
         self.titleEntry.statsObject = self
         self.titleEntry:SetHeader(GetString(SI_STATS_TITLE))
 
+        --Advanced Stats Entry
+        self.advancedStatsEntry = ZO_GamepadEntryData:New(GetString(SI_STATS_ADVANCED_ATTRIBUTES))
+        self.advancedStatsEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.ADVANCED_ATTRIBUTES
+        self.advancedStatsEntry:SetHeader(GetString(SI_STATS_CHARACTER))
+
         --Character Entry
         self.characterEntry = ZO_GamepadEntryData:New(GetString(SI_STAT_GAMEPAD_CHARACTER_SHEET_DESCRIPTION))
         self.characterEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.CHARACTER
-        self.characterEntry:SetHeader(GetString(SI_STATS_CHARACTER))
 
         local function CanSpendAttributePoints()
             return GetAttributeUnspentPoints() > 0
@@ -821,7 +861,8 @@ do
         end
 
         -- Character Info
-        self.mainList:AddEntryWithHeader("ZO_GamepadMenuEntryTemplate", self.characterEntry)
+        self.mainList:AddEntryWithHeader("ZO_GamepadMenuEntryTemplate", self.advancedStatsEntry)
+        self.mainList:AddEntry("ZO_GamepadMenuEntryTemplate", self.characterEntry)
 
         -- Active Effects--
         self.numActiveEffects = 0
@@ -1048,6 +1089,10 @@ do
                 STAT_SPELL_CRITICAL, 
                 STAT_CRITICAL_STRIKE,
             },
+            {
+                STAT_SPELL_PENETRATION,
+                STAT_PHYSICAL_PENETRATION,
+            },
         },
         {
             {   
@@ -1137,6 +1182,166 @@ function ZO_GamepadStats:RefreshAttributesPanel()
     self:RefreshContentHeader(GetString(SI_STATS_ATTRIBUTES))
 end
 
+function ZO_GamepadStats:InitializeAdvancedAttributesPanel()
+    self.advancedAttributesPanel = self.infoPanel:GetNamedChild("AdvancedAttributesPanel")
+    self.advancedAttributesGridList = ZO_GridScrollList_Gamepad:New(self.advancedAttributesPanel)
+
+    local function SetupStatEntry(control, data, list)
+         control.nameLabel:SetText(zo_strformat(SI_STAT_NAME_FORMAT, data.displayName))
+         local _, flatValue, percentValue = GetAdvancedStatValue(data.statType)
+
+         if data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT then
+            control.valueLabel:SetText(flatValue)
+         elseif data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT or data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
+            control.valueLabel:SetText(zo_strformat(SI_STAT_VALUE_PERCENT, percentValue))
+            if data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
+                data.flatValue = flatValue
+            end
+         else
+            control.valueLabel:SetText("")
+            internalassert(false, "Invalid advanced stat format type.")
+         end
+         control.statData = data
+    end
+
+    local function SetupFlatValueEntry(control, data, list)
+        local _, flatValue = GetAdvancedStatValue(data.statType)
+        control.valueLabel:SetText(flatValue)
+    end
+
+    local function SetupPercentValueEntry(control, data, list)
+        local _, _, percentValue = GetAdvancedStatValue(data.statType)
+        control.valueLabel:SetText(zo_strformat(SI_STAT_VALUE_PERCENT, percentValue))
+    end
+
+    local function SetupHeaderEntry(control, data, list)
+        control.nameLabel:SetText(zo_strformat(SI_STAT_NAME_FORMAT, data.displayName))
+    end
+
+    --When nil is passed in for the reset function, ZO_ObjectPool_DefaultResetControl is what will get called
+    local DEFAULT_RESET_ENTRY = nil
+    local NO_HIDE_CALLBACK = nil
+    self.advancedAttributesGridList:AddEntryTemplate("ZO_AdvancedAttributes_GridEntry_Template_Gamepad", ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_WIDTH, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT, SetupStatEntry, NO_HIDE_CALLBACK, DEFAULT_RESET_ENTRY, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_X, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_Y)
+    self.advancedAttributesGridList:AddEntryTemplate("ZO_AdvancedAttributes_CategoryHeader_Template_Gamepad", ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_HEADER_WIDTH, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT, SetupHeaderEntry, NO_HIDE_CALLBACK, DEFAULT_RESET_ENTRY, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_X, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_Y)
+    self.advancedAttributesGridList:AddEntryTemplate("ZO_AdvancedAttributes_GridEntryFlat_Template_Gamepad", ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_WIDTH, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT, SetupFlatValueEntry, NO_HIDE_CALLBACK, DEFAULT_RESET_ENTRY, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_X, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_Y)
+    self.advancedAttributesGridList:AddEntryTemplate("ZO_AdvancedAttributes_GridEntryPercent_Template_Gamepad", ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_WIDTH, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT, SetupPercentValueEntry, NO_HIDE_CALLBACK, DEFAULT_RESET_ENTRY, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_X, ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_Y)
+    self.advancedAttributesGridList:RegisterCallback("SelectedDataChanged", function(...) self:OnAdvancedAttributeSelectionChanged(...) end )
+
+    self:SetupAdvancedStats()
+
+    --Update Info
+    self.nextAdvancedAttributeRefreshSeconds = 0
+
+    local function OnAdvancedAttributesUpdate(_, currentFrameTimeSeconds)
+        if self.nextAdvancedAttributeRefreshSeconds < currentFrameTimeSeconds then
+            self:RefreshAdvancedAttributesPanel()
+        end    
+    end
+    self.advancedAttributesPanel:SetHandler("OnUpdate", OnAdvancedAttributesUpdate)
+end
+
+function ZO_GamepadStats:SetupAdvancedStats()
+    --Make sure the grid list is empty before populating it
+    self.advancedAttributesGridList:ClearGridList()
+
+    --First, grab the stat data from the def
+    local advancedStatData = {}
+    local numCategories = GetNumAdvancedStatCategories()
+    for categoryIndex = 1, numCategories do
+        local categoryId = GetAdvancedStatsCategoryId(categoryIndex)
+        local displayName, numStats = GetAdvancedStatCategoryInfo(categoryId)
+
+        local categoryData = 
+        {
+            header = displayName, --This field is not used on gamepad, but keeping it here in case we choose to show it later
+            stats = {},
+        }
+
+        for statIndex = 1, numStats do
+            local statType, statDisplayName, description, flatValueDescription, percentValueDescription = GetAdvancedStatInfo(categoryId, statIndex)
+
+            --We need the format type ahead of time so we know what type of control(s) to create for this stat
+            --We don't bother with the flat and percent values returned here, as they get refreshed every time we set up the control
+            --The stat format type never changes, so it is safe to get it here
+            local statFormatType = GetAdvancedStatValue(statType)
+
+            local statData =
+            {
+                statType = statType, --Used to calculate the value of the stat
+                displayName = statDisplayName, --The name shown to the users for the stat
+                description = description, --The description used in the tooltip window
+                flatDescription = flatValueDescription, --The description used for the flat value tooltip window when the stat is split into both flat and percent
+                percentDescription = percentValueDescription, --The description used for the percent value tooltip window when the stat is split into both flat and percent
+                formatType = statFormatType, --How are we formatting this stat?
+            }
+            table.insert(categoryData.stats, statData)
+        end
+
+        table.insert(advancedStatData, categoryData)
+    end
+
+    --Now, set up the actual list of stats based on the data we just grabbed
+    for categoryIndex, statCategory in ipairs(advancedStatData) do
+        --We want to have spacing between every category
+        if categoryIndex > 1 then
+            self.advancedAttributesGridList:AddLineBreak(ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_SECTION_SPACING)
+        end
+
+        local previousStatFormatType = nil
+
+        --Add each stat in this category
+        for statIndex, statEntry in ipairs(statCategory.stats) do
+            if statEntry.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_AND_PERCENT then
+                --Make sure this isn't the first entry of the category, otherwise we will have double spacing
+                if statIndex > 1 then
+                    self.advancedAttributesGridList:AddLineBreak(ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_SECTION_SPACING)
+                end
+
+                --Multi value stats need 3 entries: the header, the flat value, and the percent value
+                local categoryEntryData = ZO_GridSquareEntryData_Shared:New(statEntry)
+                local flatEntryData = ZO_GridSquareEntryData_Shared:New(statEntry)
+                local percentEntryData = ZO_GridSquareEntryData_Shared:New(statEntry)
+
+                --Overwrite the flat entry and percent entry descriptions with the more specific ones
+                flatEntryData.description = statEntry.flatDescription
+                percentEntryData.description = statEntry.percentDescription
+
+                --Add the entries
+                self.advancedAttributesGridList:AddEntry(categoryEntryData, "ZO_AdvancedAttributes_CategoryHeader_Template_Gamepad")
+                self.advancedAttributesGridList:AddEntry(flatEntryData, "ZO_AdvancedAttributes_GridEntryFlat_Template_Gamepad")
+                self.advancedAttributesGridList:AddEntry(percentEntryData, "ZO_AdvancedAttributes_GridEntryPercent_Template_Gamepad")
+            else
+                if previousStatFormatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_AND_PERCENT then
+                    self.advancedAttributesGridList:AddLineBreak(ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_SECTION_SPACING)
+                end
+                self.advancedAttributesGridList:AddEntry(statEntry, "ZO_AdvancedAttributes_GridEntry_Template_Gamepad")
+            end
+
+            previousStatFormatType = statEntry.formatType
+        end
+    end
+
+    self.advancedAttributesGridList:CommitGridList()
+end
+
+function ZO_GamepadStats:RefreshAdvancedAttributesPanel()
+    self.nextAdvancedAttributeRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
+    self.advancedAttributesGridList:RefreshGridList()
+    self:RefreshContentHeader(GetString(SI_STATS_ADVANCED_ATTRIBUTES))
+end
+
+function ZO_GamepadStats:OnAdvancedAttributeSelectionChanged(oldData, newData)
+    --If we don't have new data this means we no longer have anything selected, so we want to hide the tooltip completely
+    if not newData then
+        local DO_NOT_RETAIN_FRAGMENT = false
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP, DO_NOT_RETAIN_FRAGMENT)
+    else
+        local RETAIN_FRAGMENT = true;
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP, RETAIN_FRAGMENT)
+        GAMEPAD_TOOLTIPS:LayoutAdvancedAttributeTooltip(GAMEPAD_RIGHT_TOOLTIP, newData)
+    end
+end
+
 function ZO_GamepadStats:RefreshCharacterPanel()
     self.nextCharacterRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
 
@@ -1203,7 +1408,7 @@ function ZO_GamepadStats:RefreshCharacterPanel()
         currentXP = 1
         hideEnlightenment = true
         self.experienceProgress:SetText(GetString(SI_EXPERIENCE_LIMIT_REACHED))
-        ZO_StatusBar_SetGradientColor(self.experienceBarControl, ZO_CP_BAR_GRADIENT_COLORS[GetChampionPointAttributeForRank(currentLevel)])
+        ZO_StatusBar_SetGradientColor(self.experienceBarControl, ZO_CP_BAR_GRADIENT_COLORS[GetChampionPointPoolForRank(currentLevel)])
     else
         local percentageXP = zo_floor(currentXP / totalXP * 100)
         self.experienceProgress:SetText(zo_strformat(SI_EXPERIENCE_CURRENT_MAX_PERCENT, ZO_CommaDelimitNumber(currentXP), ZO_CommaDelimitNumber(totalXP), percentageXP))
@@ -1216,7 +1421,7 @@ function ZO_GamepadStats:RefreshCharacterPanel()
         if GetNumChampionXPInChampionPoint(currentLevel) ~= nil then
             currentLevel = currentLevel + 1
         end
-        local nextPoint = GetChampionPointAttributeForRank(currentLevel)
+        local nextPointPoolType = GetChampionPointPoolForRank(currentLevel)
         if totalXP then
             local poolSize = self:GetEnlightenedPool()
             self.enlightenedBarControl:SetHidden(false)
@@ -1232,8 +1437,8 @@ function ZO_GamepadStats:RefreshCharacterPanel()
             self.enlightenmentText:SetHidden(false)
             self.enlightenmentText:SetText(GetString(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP_MAXED))
         end
-        ZO_StatusBar_SetGradientColor(self.experienceBarControl, ZO_CP_BAR_GRADIENT_COLORS[nextPoint])
-        ZO_StatusBar_SetGradientColor(self.experienceBarControl:GetNamedChild("EnlightenedBar"), ZO_CP_BAR_GRADIENT_COLORS[nextPoint])
+        ZO_StatusBar_SetGradientColor(self.experienceBarControl, ZO_CP_BAR_GRADIENT_COLORS[nextPointPoolType])
+        ZO_StatusBar_SetGradientColor(self.experienceBarControl:GetNamedChild("EnlightenedBar"), ZO_CP_BAR_GRADIENT_COLORS[nextPointPoolType])
     else
         self.enlightenedBarControl:SetHidden(true)
     end

@@ -48,7 +48,7 @@ function PregameInitialScreen_Gamepad:Initialize(control)
 
             -- Reset fade in animations
             self.fadeMode = nil
-            self.esoLogoAnimation:PlayInstantlyToStart()
+            self.esoAnimatedBackgroundAnimation:PlayInstantlyToStart()
             self.pressTextAnimation:PlayInstantlyToStart()
 
             KEYBIND_STRIP:RemoveDefaultExit()
@@ -59,7 +59,7 @@ function PregameInitialScreen_Gamepad:Initialize(control)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.currentKeybindStripDescriptor)
         elseif newState == SCENE_SHOWN then
             self.fadeMode = LOGO_FADE_IN
-            self.esoLogoAnimation:PlayFromStart()
+            self.esoAnimatedBackgroundAnimation:PlayFromStart()
 
             if IsErrorQueuedFromIngame() then
                 ZO_Pregame_DisplayServerDisconnectedError()
@@ -88,10 +88,10 @@ function PregameInitialScreen_Gamepad:PerformDeferredInitialization()
     -- Note: the line of text says "Press <<primary button icon>> To Start" but we're still going to handle other input buttons
     pressTextLabel:SetText(zo_strformat(SI_GAMEPAD_PREGAME_PRESS_BUTTON, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)))
 
-    self.esoLogoAnimation = GetAnimationManager():CreateTimelineFromVirtual("ZO_PregameInitialScreen_FadeAnimation", esoLogoControl)
-    self.pressTextAnimation = GetAnimationManager():CreateTimelineFromVirtual("ZO_PregameInitialScreen_FadeAnimation", pressTextLabel)
+    self.esoAnimatedBackgroundAnimation = GetAnimationManager():CreateTimelineFromVirtual("ZO_PregameInitialScreen_AnimatedBackgroundAnimation", esoLogoControl)
+    self.pressTextAnimation = GetAnimationManager():CreateTimelineFromVirtual("ZO_PregameInitialScreen_PressTextFadeAnimation", pressTextLabel)
 
-    self.esoLogoAnimation:SetHandler("OnStop", function()
+    self.esoAnimatedBackgroundAnimation:SetHandler("OnStop", function()
         if self.fadeMode == LOGO_FADE_IN then
             self.fadeMode = LOGO_WAIT_FOR_BUTTON
             self:PlayPressAnyButtonAnimationFromStart()
@@ -119,7 +119,7 @@ function PregameInitialScreen_Gamepad:PerformDeferredInitialization()
         if GetCVar("QuickLaunch") == "1" and isSuccess == true then
             --Fast fadeout the logo and get us into game if we're quick launching.
             self.fadeMode = LOGO_FADING_OUT;
-            self.esoLogoAnimation:PlayInstantlyToEnd()
+            self.esoAnimatedBackgroundAnimation:PlayInstantlyToEnd()
         else
             if SCENE_MANAGER:IsShowing("PregameInitialScreen_Gamepad") then
                 if isSuccess == true then
@@ -247,12 +247,12 @@ function PregameInitialScreen_Gamepad:RefreshScreen()
     elseif self.fadeMode == LOGO_FADING_OUT then
         self:PlayPressAnyButtonAnimationFromStart()
         self.fadeMode = LOGO_FADE_IN
-        self.esoLogoAnimation:PlayInstantlyToEnd()
+        self.esoAnimatedBackgroundAnimation:PlayInstantlyToEnd()
     end
 end
 
 function PregameInitialScreen_Gamepad:Hide()
-    self.esoLogoAnimation:PlayFromEnd()
+    self.esoAnimatedBackgroundAnimation:PlayFromEnd()
 end
 
 function PregameInitialScreen_Gamepad:ClearError()

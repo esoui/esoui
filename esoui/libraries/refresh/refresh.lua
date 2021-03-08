@@ -1,10 +1,8 @@
-ZO_Refresh = ZO_Object:Subclass()
+ZO_Refresh = ZO_InitializingObject:Subclass()
 
-function ZO_Refresh:New()
-    local object = ZO_Object.New(self)
-    object.refreshGroups = {}
-    object.currentlyRefreshing = false
-    return object
+function ZO_Refresh:Initialize()
+    self.refreshGroups = {}
+    self.currentlyRefreshing = false
 end
 
 function ZO_Refresh:AddRefreshGroup(refreshGroup, data)
@@ -77,13 +75,7 @@ end
 
 --Represents a set of nested refresh operations. Each refresh operation should do what the one below it did plus some additional work. The main usecase for this is rebuilding an entire list from scratch vs. just refreshing visible controls.
 
-ZO_OrderedRefreshGroupManager = ZO_Object:Subclass()
-
-function ZO_OrderedRefreshGroupManager:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_OrderedRefreshGroupManager = ZO_InitializingObject:Subclass()
 
 function ZO_OrderedRefreshGroupManager:Initialize()
     self.groupsWaitingForPerFrameClean = {}
@@ -114,18 +106,11 @@ end
 ORDERED_REFRESH_GROUP_MANAGER = ZO_OrderedRefreshGroupManager:New()
 
 
-ZO_OrderedRefreshGroup = ZO_Object:Subclass()
+ZO_OrderedRefreshGroup = ZO_InitializingObject:Subclass()
 
 ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_IMMEDIATELY = "immediately"
 ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME = "perFrame"
 ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_NEVER = "never"
-
-
-function ZO_OrderedRefreshGroup:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
 
 function ZO_OrderedRefreshGroup:Initialize(autoCleanMode)
     self.activeOrActiveFunction = true

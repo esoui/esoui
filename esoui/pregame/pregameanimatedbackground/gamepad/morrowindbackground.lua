@@ -250,7 +250,7 @@ function Cloud:Initialize(sceneGraph, rootNode)
     self.node:SetParent(rootNode)
 
     self.textureControl = CreateControlFromVirtual("Cloud", self.sceneGraph:GetCanvasControl(), "ZO_MorrowindBackgroundCloud", Cloud.id)
-    self.node:AddControl(self.textureControl, 0, 0, 0)
+    self.node:AddTexture(self.textureControl, 0, 0, 0)
 
     Cloud.id = Cloud.id + 1
 end
@@ -381,19 +381,19 @@ function MorrowindBackground:BuildSceneGraph()
 
     self.groundNode = self.sceneGraph:CreateNode("ground")
     self.groundNode:SetParent(self.rootNode)
-    self.groundNode:AddControl(self.groundTexture, 0, 0, GROUND_DEPTH)
+    self.groundNode:AddTexture(self.groundTexture, 0, 0, GROUND_DEPTH)
 
     self.groundNode2 = self.sceneGraph:CreateNode("ground2")
     self.groundNode2:SetParent(self.rootNode)
-    self.groundNode2:AddControl(self.groundTexture2, 0, 0, GROUND_DEPTH - 0.001)
+    self.groundNode2:AddTexture(self.groundTexture2, 0, 0, GROUND_DEPTH - 0.001)
 
     self.smokeNode1 = self.sceneGraph:CreateNode("smoke1")
     self.smokeNode1:SetParent(self.rootNode)
-    self.smokeNode1:AddControl(self.smokeTexture1, 0, 0, SMOKE_DEPTH)
+    self.smokeNode1:AddTexture(self.smokeTexture1, 0, 0, SMOKE_DEPTH)
 
     self.smokeNode2 = self.sceneGraph:CreateNode("smoke2")
     self.smokeNode2:SetParent(self.rootNode)
-    self.smokeNode2:AddControl(self.smokeTexture2, 0, 0, SMOKE_DEPTH)
+    self.smokeNode2:AddTexture(self.smokeTexture2, 0, 0, SMOKE_DEPTH)
 
     self.particleSystems = {}
     self.clouds = {}

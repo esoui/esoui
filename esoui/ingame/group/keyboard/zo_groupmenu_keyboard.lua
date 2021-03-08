@@ -135,6 +135,16 @@ function GroupMenu_Keyboard:SetCurrentCategory(categoryFragment)
     end
 end
 
+function GroupMenu_Keyboard:ShowCategory(categoryFragment)
+    if KEYBOARD_GROUP_MENU_SCENE:IsShowing() then
+        self:SetCurrentCategory(categoryFragment)
+    else
+        self:SetCategoryOnShow(categoryFragment)
+        MAIN_MENU_KEYBOARD:RefreshCategoryBar()
+        MAIN_MENU_KEYBOARD:ShowScene("groupMenuKeyboard")
+    end
+end
+
 do
     local LOCK_TEXTURE = zo_iconFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", "100%", "100%")
     local CHAMPION_ICON = zo_iconFormat(GetChampionPointsIcon(), "100%", "100%")

@@ -1,10 +1,4 @@
-ZO_Outfit_Selector_Header_Focus_Gamepad = ZO_CallbackObject:Subclass()
-
-function ZO_Outfit_Selector_Header_Focus_Gamepad:New(...)
-    local header = ZO_Object.New(self)
-    header:Initialize(...)
-    return header
-end
+ZO_Outfit_Selector_Header_Focus_Gamepad = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_Outfit_Selector_Header_Focus_Gamepad:Initialize(control)
     self.control = control

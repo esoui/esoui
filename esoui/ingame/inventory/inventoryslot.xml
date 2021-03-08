@@ -49,7 +49,7 @@
         </Button>
 
         <Button name="ZO_ItemSlot" inherits="ZO_ItemSlot_Shared ZO_InventorySlotBehavior_Keyboard" mouseOverBlendMode="ADD" virtual="true">
-            <MouseButton button="2" enabled="true" />
+            <MouseButton button="RIGHT" enabled="true" />
             <Textures
                 mouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
                 pressedMouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds"

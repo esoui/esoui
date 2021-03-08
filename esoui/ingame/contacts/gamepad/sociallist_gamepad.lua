@@ -38,7 +38,6 @@ end
 
 function ZO_GamepadSocialListPanel:ClearTooltip()
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-    GAMEPAD_TOOLTIPS:HideBg(GAMEPAD_RIGHT_TOOLTIP)
 end
 
 function ZO_GamepadSocialListPanel:RefreshTooltip()
@@ -47,7 +46,6 @@ function ZO_GamepadSocialListPanel:RefreshTooltip()
     if data and (zo_strlen(data.characterName) > 0) then
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
         self:LayoutTooltip(GAMEPAD_TOOLTIPS, GAMEPAD_RIGHT_TOOLTIP, data)
-        GAMEPAD_TOOLTIPS:ShowBg(GAMEPAD_RIGHT_TOOLTIP)
     else
         self:ClearTooltip()
     end

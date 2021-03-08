@@ -128,8 +128,13 @@ do
                 headerType = pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER and HEADER_TYPES.HEADER_UPGRADE_CHAPTER or HEADER_TYPES.HEADER_CROWN_STORE
             end
             local name, icon = GetTravelPinNodeInfo(pin)
+            if handler.gamepadChoiceOverrideName then
+                name = handler.gamepadChoiceOverrideName(pin)
+            else
+                name = zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name)
+            end
 
-            local entryData = self:CreatePinEntryData(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name), icon, pin, handler)
+            local entryData = self:CreatePinEntryData(name, icon, pin, handler)
             if not TravelPinEnabledFunction(entryData) then
                 entryData:SetIconTint(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
             end

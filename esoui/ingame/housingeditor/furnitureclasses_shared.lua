@@ -161,7 +161,9 @@ function ZO_PlaceableFurnitureItem:RefreshInfo(bagId, slotIndex)
 end
 
 function ZO_PlaceableFurnitureItem:Preview()
-    SYSTEMS:GetObject("itemPreview"):PreviewInventoryItemAsFurniture(self.bagId, self.slotIndex)
+    SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
+    SYSTEMS:GetObject("itemPreview"):PreviewInventoryItem(self.bagId, self.slotIndex)
+    ApplyChangesToPreviewCollectionShown()
 end
 
 function ZO_PlaceableFurnitureItem:SelectForPlacement()
@@ -219,7 +221,7 @@ function ZO_PlaceableFurnitureItem:IsPreviewable()
 end
 
 function ZO_PlaceableFurnitureItem:IsBeingPreviewed()
-    return IsCurrentlyPreviewingInventoryItemAsFurniture(self.bagId, self.slotIndex)
+    return IsCurrentlyPreviewingInventoryItem(self.bagId, self.slotIndex)
 end
 
 function ZO_PlaceableFurnitureItem:GetDisplayQuality()
@@ -277,11 +279,13 @@ function ZO_PlaceableFurnitureCollectible:IsPreviewable()
 end
 
 function ZO_PlaceableFurnitureCollectible:IsBeingPreviewed()
-    return IsCurrentlyPreviewingCollectibleAsFurniture(self.collectibleId)
+    return IsCurrentlyPreviewingFurnitureCollectible(self.collectibleId)
 end
 
 function ZO_PlaceableFurnitureCollectible:Preview()
+    SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
     SYSTEMS:GetObject("itemPreview"):PreviewCollectibleAsFurniture(self.collectibleId)
+    ApplyChangesToPreviewCollectionShown()
 end
 
 function ZO_PlaceableFurnitureCollectible:IsPathable()
@@ -378,6 +382,7 @@ function ZO_RetrievableFurniture:IsBeingPreviewed()
 end
 
 function ZO_RetrievableFurniture:Preview()
+    SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
     SYSTEMS:GetObject("itemPreview"):PreviewPlacedFurniture(self.retrievableFurnitureId)
 end
 
@@ -469,6 +474,7 @@ function ZO_HousingMarketProduct:GetMarketProductId()
 end
 
 function ZO_HousingMarketProduct:Preview()
+    SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
     SYSTEMS:GetObject("itemPreview"):PreviewFurnitureMarketProduct(self.marketProductId)
 end
 

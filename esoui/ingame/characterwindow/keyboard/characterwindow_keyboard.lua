@@ -369,8 +369,9 @@ function ZO_Character_Initialize(control)
     OnUnitCreated(nil, "player")
 end
 
-local DEFAULT_STAT_SPACING = 5
-local STAT_GROUP_SPACING = 25
+local DEFAULT_STAT_SPACING = 0
+local STAT_GROUP_SPACING = 20
+local STAT_GROUP_OFFSET_X = 10
 
 local CHARACTER_STAT_CONTROLS = {}
 
@@ -382,8 +383,12 @@ function ZO_CharacterWindowStats_Initialize(control)
         for _, stat in ipairs(statGroup) do
             local statControl = CreateControlFromVirtual("$(parent)StatEntry", parentControl, "ZO_StatsEntry", stat)
             CHARACTER_STAT_CONTROLS[stat] = statControl
-            local relativeAnchorSide = (lastControl == nil) and TOP or BOTTOM
-            statControl:SetAnchor(TOP, lastControl, relativeAnchorSide, 0, nextPaddingY)
+
+            if lastControl then
+                statControl:SetAnchor(TOP, lastControl, BOTTOM, 0, nextPaddingY)
+            else
+                statControl:SetAnchor(TOP, lastControl, TOP, STAT_GROUP_OFFSET_X, nextPaddingY)
+            end
 
             local statEntry = ZO_StatEntry_Keyboard:New(statControl, stat)
             statEntry.tooltipAnchorSide = LEFT

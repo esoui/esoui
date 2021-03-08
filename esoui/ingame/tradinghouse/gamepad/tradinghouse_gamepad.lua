@@ -6,11 +6,6 @@ local GAMEPAD_TRADING_HOUSE_SCENE_NAME = "gamepad_trading_house"
 
 ZO_GamepadTradingHouse = ZO_TradingHouse_Shared:Subclass()
 
-function ZO_GamepadTradingHouse:New(...)
-    local tradingHouse = ZO_TradingHouse_Shared.New(self, ...)
-    return tradingHouse
-end
-
 function ZO_GamepadTradingHouse:Initialize(control)
     ZO_TradingHouse_Shared.Initialize(self, control)
     self.isInitialized = false
@@ -35,9 +30,46 @@ function ZO_GamepadTradingHouse:InitializeLists()
     ZO_TradingHouse_Listings_Gamepad_OnInitialize(listContainer:GetNamedChild("Listings"))
 end
 
+function ZO_GamepadTradingHouse:GetTextSearchText()
+    if self.textSearchHeaderFocus then
+        return self.textSearchHeaderFocus:GetText()
+    end
+
+    return ""
+end
+
+function ZO_GamepadTradingHouse:OnBackButtonClicked()
+    -- Default back functionality, override this function for different behaviour
+    SCENE_MANAGER:HideCurrentScene()
+end
+
 function ZO_GamepadTradingHouse:InitializeHeader()
     self.header = self.control:GetNamedChild("Mask"):GetNamedChild("HeaderContainer"):GetNamedChild("Header")
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
+
+    self.textSearchKeybindStripDescriptor =
+    {
+        {
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            keybind = "UI_SHORTCUT_PRIMARY",
+            name = function()
+                return GetString(SI_GAMEPAD_SELECT_OPTION)
+            end,
+            callback = function()
+                self:SetTextSearchFocused(true)
+            end,
+        },
+    }
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.textSearchKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
+        self:OnBackButtonClicked()
+    end)
+
+    local function OnTextSearchTextChanged(editBox)
+        ZO_EditDefaultText_OnTextChanged(editBox)
+        TEXT_SEARCH_MANAGER:SetSearchText("guildTraderTextSearch", editBox:GetText())
+    end
+
+    self:AddSearch(self.textSearchKeybindStripDescriptor, OnTextSearchTextChanged)
 
     local function UpdateGold(control)
         ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
@@ -48,7 +80,8 @@ function ZO_GamepadTradingHouse:InitializeHeader()
         return zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
     end
 
-    self.tabsTable = {
+    self.tabsTable =
+    {
         --[ZO_TRADING_HOUSE_MODE_BROWSE]
         {
             text = GetString(SI_TRADING_HOUSE_MODE_BROWSE),
@@ -72,7 +105,8 @@ function ZO_GamepadTradingHouse:InitializeHeader()
         },
     }
 
-    self.tabHeaderData = {
+    self.tabHeaderData =
+    {
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_BANK_AVAILABLE_FUNDS),
         data1Text = UpdateGold,
 
@@ -82,7 +116,8 @@ function ZO_GamepadTradingHouse:InitializeHeader()
         tabBarEntries = self.tabsTable
     }
 
-    self.noTabHeaderData = {
+    self.noTabHeaderData =
+    {
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_BANK_AVAILABLE_FUNDS),
         data1Text = UpdateGold,
 
@@ -95,12 +130,185 @@ function ZO_GamepadTradingHouse:InitializeHeader()
     ZO_GamepadGenericHeader_Refresh(self.header, self.tabHeaderData)
 end
 
+-- Header functions: For Sell only --
+
+function ZO_GamepadTradingHouse:AddSearch(textSearchKeybindStripDescriptor, onTextSearchTextChangedCallback)
+    self.textSearchKeybindStripDescriptor = textSearchKeybindStripDescriptor
+    self.textSearchHeaderControl = CreateControlFromVirtual("$(parent)SearchContainer", self.header, "ZO_Gamepad_TextSearch_HeaderEditbox")
+    self.textSearchHeaderFocus = ZO_TextSearch_Header_Gamepad:New(self.textSearchHeaderControl, onTextSearchTextChangedCallback)
+    self:SetupHeaderFocus(self.textSearchHeaderFocus)
+
+    ZO_GamepadGenericHeader_SetHeaderFocusControl(self.header, self.textSearchHeaderControl)
+end
+
+function ZO_GamepadTradingHouse:IsTextSearchEntryHidden()
+    if self.textSearchHeaderControl then
+        return self.textSearchHeaderControl:IsHidden()
+    end
+
+    return true
+end
+
+function ZO_GamepadTradingHouse:UpdateSearchText()
+    if self.textSearchHeaderFocus then
+        self.textSearchHeaderFocus:UpdateTextForContext("guildTraderTextSearch")
+    end
+end
+
+function ZO_GamepadTradingHouse:ActivateTextSearch()
+    self:UpdateSearchText()
+
+    local function OnTextSearchResults()
+        local list = self.currentListObject
+        if list then
+            list:UpdateList()
+        end
+    end
+    self.onTextSearchResults = OnTextSearchResults
+
+    TEXT_SEARCH_MANAGER:ActivateTextSearch("guildTraderTextSearch")
+    TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", OnTextSearchResults)
+    self:SetTextSearchEntryHidden(false)
+end
+
+function ZO_GamepadTradingHouse:DeactivateTextSearch()
+    TEXT_SEARCH_MANAGER:DeactivateTextSearch("guildTraderTextSearch")
+    TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onTextSearchResults)
+    self:SetTextSearchEntryHidden(true)
+end
+
+function ZO_GamepadTradingHouse:SetTextSearchEntryHidden(isHidden)
+    if self.textSearchHeaderControl then
+        self.textSearchHeaderControl:SetHidden(isHidden)
+    end
+end
+
+function ZO_GamepadTradingHouse:SetTextSearchFocused(isFocused)
+    -- Only perform if we have a text search and the text search is active
+    if self.textSearchHeaderFocus and self:IsHeaderActive() then
+        self.textSearchHeaderFocus:SetFocused(isFocused)
+    end
+end
+
+function ZO_GamepadTradingHouse:SetupHeaderFocus(headerFocus)
+    if self.headerFocus then
+        assert(false) -- only support one headerFocus ever
+    end
+
+    self.headerFocus = headerFocus
+    self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
+end
+
+function ZO_GamepadTradingHouse:IsHeaderActive()
+    return self.headerFocus and self.headerFocus:IsActive()
+end
+
+function ZO_GamepadTradingHouse:RequestEnterHeader()
+    if not self.headerFocus or self.headerFocus:IsActive() then
+        return
+    end
+
+    if self.textSearchHeaderFocus and self:IsTextSearchEntryHidden() then
+        return
+    end
+
+    if self:CanEnterHeader() then
+        self.currentListObject:Deactivate()
+        self.headerFocus:Activate()
+        self:OnEnterHeader()
+    end
+end
+
+function ZO_GamepadTradingHouse:RequestLeaveHeader()
+    if not self.headerFocus or not self.headerFocus:IsActive() then
+        return
+    end
+
+    if self:CanLeaveHeader() then
+        self.headerFocus:Deactivate()
+        self:OnLeaveHeader()
+        if self.currentListObject then
+            self.currentListObject:Activate()
+        end
+    end
+end
+
+function ZO_GamepadTradingHouse:ExitHeader()
+    if not self.headerFocus then
+        return
+    end
+
+    self.headerFocus:Deactivate()
+    self:OnLeaveHeader()
+end
+
+function ZO_GamepadTradingHouse:CanEnterHeader()
+    return true -- override function for implementation specific functionality
+end
+
+function ZO_GamepadTradingHouse:CanLeaveHeader()
+    return not self.currentListObject or self.currentListObject.itemList:GetNumItems() > 0 -- override function for implementation specific functionality
+end
+
+function ZO_GamepadTradingHouse:OnEnterHeader()
+    -- override function for implementation specific functionality
+
+    -- Swap keybinds to text search keybinds if there is a text search
+    if self.textSearchHeaderFocus then
+        if self.keybindStripDescriptor then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+
+        if self.textSearchKeybindStripDescriptor then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
+        end
+    end
+end
+
+function ZO_GamepadTradingHouse:OnLeaveHeader()
+    -- override function for implementation specific functionality
+
+    -- Swap keybinds from text search keybinds if there is a text search
+    if self.textSearchHeaderFocus then
+        self:SetTextSearchFocused(false)
+
+        if self.textSearchKeybindStripDescriptor then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
+        end
+
+        if self.keybindStripDescriptor then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end
+end
+
+function ZO_GamepadTradingHouse:UpdateDirectionalInput()
+    local result = self.movementController:CheckMovement()
+    if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
+        if self.headerFocus:IsActive() then
+            self:RequestLeaveHeader()
+        elseif self.currentListObject.itemList then
+            self.currentListObject.itemList:MoveNext()
+        end
+    elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
+        if self.currentListObject.itemList and self.currentListObject.itemList:GetSelectedIndex() ~= 1 then
+            self.currentListObject.itemList:MovePrevious()
+        else
+            self:RequestEnterHeader()
+        end
+    end
+end
+
 function ZO_GamepadTradingHouse:SelectHeaderTab(tradingHouseMode)
     ZO_GamepadGenericHeader_SetActiveTabIndex(self.header, tradingHouseMode)
 end
 
 function ZO_GamepadTradingHouse:SetCurrentListObject(listObject)
-    if listObject == self.currentListObject then return end
+    if listObject == self.currentListObject then
+        return
+    end
+
+    self:RequestLeaveHeader()
 
     local mode = listObject:GetTradingHouseMode()
     if mode then
@@ -118,6 +326,18 @@ function ZO_GamepadTradingHouse:SetCurrentListObject(listObject)
 
         listObject:Show()
         self:RefreshHeader()
+    end
+
+    local isInSellMode = self:IsInSellMode()
+    if isInSellMode and self.currentListObject then
+        self:ActivateTextSearch()
+        self.currentListObject.itemList.list:SetOnHitBeginningOfListCallback(function()
+            self:RequestEnterHeader(self)
+        end)
+        DIRECTIONAL_INPUT:Activate(self, self.control)
+    else
+        self:DeactivateTextSearch()
+        DIRECTIONAL_INPUT:Deactivate(self)
     end
 end
 
@@ -260,13 +480,20 @@ function ZO_GamepadTradingHouse:InitializeEvents()
             self:SelectCurrentListInHeader()
             self:RefreshGuildNameFooter()
             self:RegisterForSceneEvents()
-
+            if self:IsInSellMode() then
+                DIRECTIONAL_INPUT:Activate(self, self.control)
+            end
             self.currentListObject:Show()
             ZO_GamepadGenericHeader_Activate(self.header)
+        elseif newState == SCENE_HIDING then
+            ZO_GamepadGenericHeader_Deactivate(self.header)
         elseif newState == SCENE_HIDDEN then
+            if self:IsInSellMode() then
+                DIRECTIONAL_INPUT:Deactivate(self)
+            end
+
             self:UnregisterForSceneEvents()
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
-            ZO_GamepadGenericHeader_Deactivate(self.header)
             self.currentListObject:Hide()
         end
     end)

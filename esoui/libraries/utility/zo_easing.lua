@@ -86,3 +86,20 @@ do
         return (exp(P * progress) - 1) / DIVISOR
     end
 end
+
+-- progress values must have at least two values in it:
+-- {0, 1} generates a line from 0 to 1
+-- {0, 1, 0} generates a line from 0 to 1 (at progress=0.5) back to 0
+function ZO_GenerateLinearPiecewiseEase(progressValues)
+    if not internalassert(#progressValues >= 2, "piecewise ease needs at least two values to ease between") then
+        return ZO_LinearEase
+    end
+    local inBetweenSize = 1 / (#progressValues - 1)
+    return function(progress)
+        local nextIndex = math.max(2, math.ceil(progress / inBetweenSize) + 1)
+        local nextValue = progressValues[nextIndex]
+        local previousValue = progressValues[nextIndex - 1]
+        local percentBetweenValues = (progress % inBetweenSize) / inBetweenSize 
+        return zo_lerp(previousValue, nextValue, percentBetweenValues)
+    end
+end

@@ -191,31 +191,31 @@ function CPBarType:Initialize(barTypeClass, barTypeId, ...)
 end
 
 -- The champion bar shows the progress for the next point that you will gain, if you're maxed, just leave it at the last point earned.
-function CPBarType:GetShownAttribute(overrideLevel)
+function CPBarType:GetShownType(overrideLevel)
     local level = overrideLevel or self.lastLevel
     if self:GetLevelSize(level) ~= nil then
         level = level + 1
     end
-    return GetChampionPointAttributeForRank(level)
+    return GetChampionPointPoolForRank(level)
 end
 
 function CPBarType:GetBarGradient(specificLevel)
-    return ZO_CP_BAR_GRADIENT_COLORS[self:GetShownAttribute(specificLevel)]
+    return ZO_CP_BAR_GRADIENT_COLORS[self:GetShownType(specificLevel)]
 end
 
 function CPBarType:GetBarGlow(specificLevel)
-    return self.barGlowColor[self:GetShownAttribute(specificLevel)]
+    return self.barGlowColor[self:GetShownType(specificLevel)]
 end
 
-local CHAMPION_ATTRIBUTE_HUD_ICONS = 
+local CHAMPION_TYPE_HUD_ICONS = 
 {
-    [ATTRIBUTE_HEALTH] = "EsoUI/Art/Champion/champion_points_health_icon-HUD-32.dds",
-    [ATTRIBUTE_MAGICKA] = "EsoUI/Art/Champion/champion_points_magicka_icon-HUD-32.dds",
-    [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon-HUD-32.dds",
+    [CHAMPION_DISCIPLINE_TYPE_WORLD] = "EsoUI/Art/Champion/champion_points_stamina_icon-HUD-32.dds",
+    [CHAMPION_DISCIPLINE_TYPE_COMBAT] = "EsoUI/Art/Champion/champion_points_magicka_icon-HUD-32.dds",
+    [CHAMPION_DISCIPLINE_TYPE_CONDITIONING] = "EsoUI/Art/Champion/champion_points_health_icon-HUD-32.dds",
 }
 
 function CPBarType:GetIcon(overrideLevel)
-    return CHAMPION_ATTRIBUTE_HUD_ICONS[self:GetShownAttribute(overrideLevel)]
+    return CHAMPION_TYPE_HUD_ICONS[self:GetShownType(overrideLevel)]
 end
 
 function CPBarType:GetEnlightenedPool()
@@ -243,8 +243,6 @@ function CPBarType:GetEnlightenedTooltip()
     local levelSize = self:GetLevelSize(level)
     if levelSize then
         local poolSize = self:GetEnlightenedPool()
-        local nextPoint = GetChampionPointAttributeForRank(level + 1)
-        local pointName = ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(nextPoint)
         return zo_strformat(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP, ZO_CommaDelimitNumber(poolSize))
     else
         return GetString(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP_MAXED)

@@ -1,53 +1,52 @@
-local MailSend = ZO_Object:Subclass()
+local MailSend = ZO_InitializingObject:Subclass()
 
-function MailSend:New(control)
-    local manager = ZO_Object.New(self)
-    MAIL_SEND = manager
-    manager.control = control
-    
+function MailSend:Initialize(control)
+    self.control = control
+
     local editControlGroup = ZO_EditControlGroup:New()
 
-    manager.sendMoneyMode = true
-        
-    manager.to = control:GetNamedChild("ToField")
-    manager.autoComplete = ZO_AutoComplete:New(manager.to, { AUTO_COMPLETE_FLAG_ALL }, { AUTO_COMPLETE_FLAG_GUILD_NAMES }, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)
-    editControlGroup:AddEditControl(manager.to, manager.autoComplete)
-    ZO_EditDefaultText_Initialize(manager.to, GetString(SI_REQUEST_NAME_DEFAULT_TEXT))
-        
-    manager.subject = control:GetNamedChild("SubjectField")
-    manager.subject:SetMaxInputChars(MAIL_MAX_SUBJECT_CHARACTERS)
-    editControlGroup:AddEditControl(manager.subject)
-    ZO_EditDefaultText_Initialize(manager.subject, GetString(SI_MAIL_SUBJECT_DEFAULT_TEXT))
-        
-    manager.body = control:GetNamedChild("BodyField")
-    manager.body:SetMaxInputChars(MAIL_MAX_BODY_CHARACTERS)
-    editControlGroup:AddEditControl(manager.body)
+    self.sendMoneyMode = true
 
-    manager.attachMoneyRadioButton = control:GetNamedChild("AttachRadio")
-    manager.codRadioButton = control:GetNamedChild("CoDRadio")
-    manager.radioButtonGroup = ZO_RadioButtonGroup:New()
-    manager.radioButtonGroup:Add(manager.attachMoneyRadioButton)
-    manager.radioButtonGroup:Add(manager.codRadioButton)
-    manager.radioButtonGroup:SetClickedButton(manager.attachMoneyRadioButton)
-        
-    manager.postageCurrency = control:GetNamedChild("PostageCurrency")
-    manager.sendCurrency = control:GetNamedChild("SendCurrency")
-    manager.title = control:GetParent():GetNamedChild("Title")
+    self.to = control:GetNamedChild("ToField")
+    self.autoComplete = ZO_AutoComplete:New(self.to, { AUTO_COMPLETE_FLAG_ALL }, { AUTO_COMPLETE_FLAG_GUILD_NAMES }, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)
+    editControlGroup:AddEditControl(self.to, self.autoComplete)
+    ZO_EditDefaultText_Initialize(self.to, GetString(SI_REQUEST_NAME_DEFAULT_TEXT))
+
+    self.subject = control:GetNamedChild("SubjectField")
+    self.subject:SetMaxInputChars(MAIL_MAX_SUBJECT_CHARACTERS)
+    editControlGroup:AddEditControl(self.subject)
+    ZO_EditDefaultText_Initialize(self.subject, GetString(SI_MAIL_SUBJECT_DEFAULT_TEXT))
+
+    self.body = control:GetNamedChild("BodyField")
+    self.body:SetMaxInputChars(MAIL_MAX_BODY_CHARACTERS)
+    editControlGroup:AddEditControl(self.body)
+
+    self.attachMoneyRadioButton = control:GetNamedChild("AttachRadio")
+    self.codRadioButton = control:GetNamedChild("CoDRadio")
+    self.radioButtonGroup = ZO_RadioButtonGroup:New()
+    self.radioButtonGroup:Add(self.attachMoneyRadioButton)
+    self.radioButtonGroup:Add(self.codRadioButton)
+    self.radioButtonGroup:SetClickedButton(self.attachMoneyRadioButton)
+
+    self.postageCurrency = control:GetNamedChild("PostageCurrency")
+    self.sendCurrency = control:GetNamedChild("SendCurrency")
+    self.title = control:GetParent():GetNamedChild("Title")
 
     local function ChangeMoneyCallback(moneyInput, money)
-        manager:AttachMoney(moneyInput, money)
+        self:AttachMoney(moneyInput, money)
     end
-    ZO_DefaultCurrencyInputField_Initialize(manager.sendCurrency, ChangeMoneyCallback)
-    ZO_DefaultCurrencyInputField_SetUsePlayerCurrencyAsMax(manager.sendCurrency, true)
-        
-    manager:InitializeKeybindDescriptors()
-    manager:CreateAttachmentSlots()
-    manager:ClearFields()
+    ZO_DefaultCurrencyInputField_Initialize(self.sendCurrency, ChangeMoneyCallback)
+    ZO_DefaultCurrencyInputField_SetUsePlayerCurrencyAsMax(self.sendCurrency, true)
 
-    local MoneyEvents = {
-        [EVENT_MAIL_COD_CHANGED] = function() manager:UpdateCOD() end,
-        [EVENT_MAIL_ATTACHED_MONEY_CHANGED] = function() manager:UpdateMoneyAttachment() end,
-        [EVENT_MONEY_UPDATE] = function() manager:OnMoneyUpdate() end, 
+    self:InitializeKeybindDescriptors()
+    self:CreateAttachmentSlots()
+    self:ClearFields()
+
+    local MoneyEvents =
+    {
+        [EVENT_MAIL_COD_CHANGED] = function() self:UpdateCOD() end,
+        [EVENT_MAIL_ATTACHED_MONEY_CHANGED] = function() self:UpdateMoneyAttachment() end,
+        [EVENT_MONEY_UPDATE] = function() self:OnMoneyUpdate() end,
     }
 
     local function ConnectMoneyEvents()
@@ -62,29 +61,33 @@ function MailSend:New(control)
         end
     end
 
+    local INVENTORY_TYPE_LIST = { INVENTORY_BACKPACK }
     MAIL_SEND_SCENE = ZO_Scene:New("mailSend", SCENE_MANAGER)
     MAIL_SEND_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_SHOWING) then
+        if newState == SCENE_SHOWING then
+            PLAYER_INVENTORY:SetContextForInventories("mailTextSearch", INVENTORY_TYPE_LIST)
+            TEXT_SEARCH_MANAGER:ActivateTextSearch("mailTextSearch")
             ConnectMoneyEvents()
-            KEYBIND_STRIP:AddKeybindButtonGroup(manager.staticKeybindStripDescriptor)
-            ZO_MailSendShared_RestorePendingMail(manager)
-        elseif(newState == SCENE_SHOWN) then
-            if(manager.pendingMailChanged) then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.staticKeybindStripDescriptor)
+            ZO_MailSend_Shared.RestorePendingMail(self)
+        elseif newState == SCENE_SHOWN then
+            if self.pendingMailChanged then
                 ZO_Dialogs_ShowDialog("MAIL_ATTACHMENTS_CHANGED")
-                manager.pendingMailChanged = nil
-            end        
-        elseif(newState == SCENE_HIDDEN) then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(manager.staticKeybindStripDescriptor)
-            ZO_MailSendShared_SavePendingMail()
+                self.pendingMailChanged = nil
+            end
+        elseif newState == SCENE_HIDDEN then
+            TEXT_SEARCH_MANAGER:DeactivateTextSearch("mailTextSearch")
+            local REMOVE_CONTEXT = nil
+            PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.staticKeybindStripDescriptor)
+            ZO_MailSend_Shared.SavePendingMail()
             DisconnectMoneyEvents()
         end
     end)
 
-    control:RegisterForEvent(EVENT_MAIL_SEND_SUCCESS, function() manager:OnMailSendSuccess() end)
-    control:RegisterForEvent(EVENT_MAIL_ATTACHMENT_ADDED, function(_, attachSlot) manager:OnMailAttachmentAdded(attachSlot) end)
-    control:RegisterForEvent(EVENT_MAIL_ATTACHMENT_REMOVED, function(_, attachSlot) manager:OnMailAttachmentRemoved(attachSlot) end)
-
-    return manager
+    control:RegisterForEvent(EVENT_MAIL_SEND_SUCCESS, function() self:OnMailSendSuccess() end)
+    control:RegisterForEvent(EVENT_MAIL_ATTACHMENT_ADDED, function(_, attachSlot) self:OnMailAttachmentAdded(attachSlot) end)
+    control:RegisterForEvent(EVENT_MAIL_ATTACHMENT_REMOVED, function(_, attachSlot) self:OnMailAttachmentRemoved(attachSlot) end)
 end
 
 --Global API
@@ -106,7 +109,6 @@ function MailSend:InitializeKeybindDescriptors()
         {
             name = GetString(SI_MAIL_SEND_CLEAR),
             keybind = "UI_SHORTCUT_NEGATIVE",
-        
             callback = function()
                 ZO_Dialogs_ShowDialog("CONFIRM_CLEAR_MAIL_COMPOSE", { callback = function() self:ClearFields() end })
             end,
@@ -116,7 +118,6 @@ function MailSend:InitializeKeybindDescriptors()
         {
             name = GetString(SI_MAIL_SEND_SEND),
             keybind = "UI_SHORTCUT_SECONDARY",
-        
             callback = function()
                 self:Send()
             end,
@@ -136,18 +137,17 @@ function MailSend:CreateAttachmentSlots()
         else
             slot:SetAnchor(TOPLEFT, parent, TOPLEFT, 0, 0)
         end
-        
+
         slot.id = i
-        
         slot.icon = slot:GetNamedChild("ItemIcon")
-     
+
         ZO_Inventory_BindSlot(slot, SLOT_TYPE_MAIL_QUEUED_ATTACHMENT, i)
-        ZO_Inventory_SetupSlot(slot, 0, ZO_MAIL_EMPTY_SLOT_TEXTURE) 
+        ZO_Inventory_SetupSlot(slot, 0, ZO_MAIL_EMPTY_SLOT_TEXTURE)
 
         self.attachmentSlots[i] = slot
 
         previous = slot
-    end    
+    end
 end
 
 function MailSend:IsHidden()
@@ -168,14 +168,14 @@ function MailSend:ClearFields()
 end
 
 function MailSend:UpdateMoneyAttachment()
-    if(self.sendMoneyMode) then
+    if self.sendMoneyMode then
         ZO_DefaultCurrencyInputField_SetCurrencyAmount(self.sendCurrency, GetQueuedMoneyAttachment())
         self:UpdatePostageMoney()
     end
 end
 
 function MailSend:UpdateCOD()
-    if(not self.sendMoneyMode) then
+    if not self.sendMoneyMode then
         ZO_DefaultCurrencyInputField_SetCurrencyAmount(self.sendCurrency, GetQueuedCOD())
     end
     self:UpdatePostageMoney()
@@ -191,7 +191,7 @@ function MailSend:SetSendMoneyMode(sendMoneyMode)
         self.sendMoneyMode = sendMoneyMode
         ZO_DefaultCurrencyInputField_SetCurrencyAmount(self.sendCurrency, 0)
         ZO_DefaultCurrencyInputField_SetUsePlayerCurrencyAsMax(self.sendCurrency, sendMoneyMode)
-        if(sendMoneyMode) then
+        if sendMoneyMode then
             QueueMoneyAttachment(ZO_DefaultCurrencyInputField_GetCurrency(self.sendCurrency))
         else
             QueueCOD(ZO_DefaultCurrencyInputField_GetCurrency(self.sendCurrency))
@@ -220,13 +220,13 @@ end
 function MailSend:SetReply(to, subject)
     self.to:SetText(to or "")
     self.body:SetText("")
-    if(subject and subject ~= "") then
+    if subject and subject ~= "" then
         self.subject:SetText(zo_strformat(SI_MAIL_REPLY_SUBJECT, subject))
         self.body:TakeFocus()
     else
         self.subject:SetText("")
         self.subject:TakeFocus()
-    end   
+    end
 end
 
 --Events
@@ -236,17 +236,17 @@ function MailSend:OnMoneyUpdate()
 end
 
 function MailSend:OnMailSendSuccess()
-	PlaySound(SOUNDS.MAIL_SENT)
+    PlaySound(SOUNDS.MAIL_SENT)
     self:ClearFields()
-end	
+end
 
 function MailSend:OnMailAttachmentAdded(attachSlot)
-    ZO_MailSendShared_AddAttachedItem(attachSlot, self.attachmentSlots[attachSlot])
+    ZO_MailSend_Shared.AddAttachedItem(attachSlot, self.attachmentSlots[attachSlot])
     self:UpdatePostageMoney()
 end
 
 function MailSend:OnMailAttachmentRemoved(attachSlot)
-    ZO_MailSendShared_RemoveAttachedItem(attachSlot, self.attachmentSlots[attachSlot])
+    ZO_MailSend_Shared.RemoveAttachedItem(attachSlot, self.attachmentSlots[attachSlot])
     self:UpdatePostageMoney()
 end
 
@@ -270,13 +270,17 @@ end
 --Global XML
 
 function ZO_MailSend_SetMoneyAttachmentMode()
-    MAIL_SEND:SetMoneyAttachmentMode()
+    if MAIL_SEND then
+        MAIL_SEND:SetMoneyAttachmentMode()
+    end
 end
 
 function ZO_MailSend_SetCoDMode()
-    MAIL_SEND:SetCoDMode()
+    if MAIL_SEND then
+        MAIL_SEND:SetCoDMode()
+    end
 end
 
 function ZO_MailSend_OnInitialized(self)
-    MailSend:New(self)
+    MAIL_SEND = MailSend:New(self)
 end

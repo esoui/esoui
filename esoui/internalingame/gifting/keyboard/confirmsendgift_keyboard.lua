@@ -145,6 +145,15 @@ local function OnGiftSendingUpdate(dialog, currentTimeInSeconds)
         data.loadingDelayTimeMS = timeInMilliseconds + LOADING_DELAY_MS
     end
 
+    local itemName = GetMarketProductDisplayName(data.marketProductId)
+    local color = GetItemQualityColor(GetMarketProductDisplayQuality(data.marketProductId))
+    local houseId = GetMarketProductHouseId(data.marketProductId)
+    if houseId > 0 then
+        local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+        local houseDisplayName = GetCollectibleName(houseCollectibleId)
+        itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, houseDisplayName, itemName)
+    end
+
     if result ~= nil and data.currentState ~= GIFTING_STATE_RESULT then
         data.currentState = GIFTING_STATE_RESULT
 
@@ -152,16 +161,7 @@ local function OnGiftSendingUpdate(dialog, currentTimeInSeconds)
         if result == GIFT_ACTION_RESULT_SUCCESS then
             titleText = GetString(SI_TRANSACTION_COMPLETE_TITLE)
 
-            local itemName = GetMarketProductDisplayName(data.marketProductId)
             local stackCount = GetMarketProductStackCount(data.marketProductId)
-            local color = GetItemQualityColor(GetMarketProductDisplayQuality(data.marketProductId))
-            local houseId = GetMarketProductHouseId(data.marketProductId)
-            if houseId > 0 then
-                local houseCollectibleId = GetCollectibleIdForHouse(houseId)
-                local houseDisplayName = GetCollectibleName(houseCollectibleId)
-                itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, houseDisplayName, itemName)
-            end
-
             if stackCount > 1 then
                 mainText = zo_strformat(SI_GIFT_SENT_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
             else
@@ -183,7 +183,7 @@ local function OnGiftSendingUpdate(dialog, currentTimeInSeconds)
         ZO_Dialogs_UpdateDialogMainText(dialog, { text = mainText, align = TEXT_ALIGN_CENTER })
 
         local confirmButtonControl = dialog:GetNamedChild("Confirm")
-        confirmButtonControl:SetText(confirmText) 
+        confirmButtonControl:SetText(confirmText)
         confirmButtonControl:SetHidden(false)
 
         ZO_Dialogs_SetDialogLoadingIcon(dialog:GetNamedChild("Loading"), dialog:GetNamedChild("Text"), HIDE_LOADING_ICON)
@@ -191,8 +191,7 @@ local function OnGiftSendingUpdate(dialog, currentTimeInSeconds)
         -- Only present the waiting state after a fixed delay, to avoid very short transitions between waiting and result
         data.currentState = GIFTING_STATE_WAITING
 
-        local itemName = GetMarketProductDisplayName(data.marketProductId)
-        ZO_Dialogs_UpdateDialogMainText(dialog, { text = zo_strformat(SI_GIFT_SENDING_TEXT, itemName), TEXT_ALIGN_CENTER })
+        ZO_Dialogs_UpdateDialogMainText(dialog, { text = zo_strformat(SI_GIFT_SENDING_TEXT, color:Colorize(itemName)), TEXT_ALIGN_CENTER })
         ZO_Dialogs_SetDialogLoadingIcon(dialog:GetNamedChild("Loading"), dialog:GetNamedChild("Text"), SHOW_LOADING_ICON)
     end
 end
@@ -201,6 +200,17 @@ local function OnGiftActionResult(data, action, result, giftId)
     if internalassert(giftId == data.giftId) then
         data.result = result
         EVENT_MANAGER:UnregisterForEvent("ZO_GiftSendingDialog_Keyboard_OnGiftActionResult", EVENT_GIFT_ACTION_RESULT)
+    end
+
+    if result == GIFT_ACTION_RESULT_COLLECTIBLE_PARTIALLY_OWNED then
+        local marketProductData = ZO_MarketProductData:New(data.marketProductId)
+        local displayName = marketProductData:GetDisplayName()
+        local dialogParams =
+        {
+            titleParams = { displayName },
+        }
+        ZO_Dialogs_ReleaseAllDialogsOfName("GIFT_SENDING_KEYBOARD")
+        ZO_Dialogs_ShowDialog("RESEND_GIFT_PARTIALLY_OWNED_KEYBOARD", data, dialogParams)
     end
 end
 

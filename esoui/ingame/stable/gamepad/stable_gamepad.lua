@@ -28,7 +28,7 @@ function ZO_Stable_Gamepad:Initialize(control)
     end)
 
     self:InitializeKeybindStrip()
-    self:CreateModeData(SI_STABLE_STABLES_TAB, ZO_MODE_STORE_STABLE, "EsoUI/Art/Vendor/tabIcon_mounts_up.dds", fragment, self.keybindStripDescriptor)
+    self:CreateModeData(SI_STABLE_STABLES_TAB, ZO_MODE_STORE_STABLE, "EsoUI/Art/Vendor/tabIcon_mounts_up.dds", self.fragment, self.keybindStripDescriptor)
 end
 
 function ZO_Stable_Gamepad:InitializeControls()
@@ -97,13 +97,12 @@ function ZO_Stable_Gamepad:TrainSelected()
     end
 end
 
-local FORCE_VALUE = true
 function ZO_Stable_Gamepad:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
     local trainingData = data.trainingData
 
     data.isSkillTrainable = trainingData.isSkillTrainable
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-    
+
     self:SetupRow(control, trainingData.trainingType)
     local bonusLabelFormat = SI_MOUNT_ATTRIBUTE_SIMPLE_FORMAT
     if trainingData.trainingType == RIDING_TRAIN_SPEED then
@@ -127,8 +126,8 @@ end
 
 function ZO_Stable_Gamepad:SetHidden(hidden)
     if not hidden and STABLE_GAMEPAD then
-        local componentTable = {ZO_MODE_STORE_BUY, ZO_MODE_STORE_STABLE}
-        STORE_WINDOW_GAMEPAD:SetActiveComponents(componentTable)
+        local componentTable = { ZO_MODE_STORE_BUY, ZO_MODE_STORE_STABLE }
+        STORE_WINDOW_GAMEPAD:SetActiveComponents(componentTable, "storeTextSearch")
         if HasMountSkin() then
             STORE_WINDOW_GAMEPAD:SetDeferredStartingMode(ZO_MODE_STORE_STABLE)
         end

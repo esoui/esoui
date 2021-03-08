@@ -226,7 +226,7 @@ end
 --startTimeS can be in the past
 function ZO_SceneGraphParticle:Start(parentControl, startTimeS, nowS)
     ZO_Particle.Start(self, parentControl, startTimeS, nowS)
-    self.parentNode:AddControl(self.textureControl, 0, 0, 0)
+    self.parentNode:AddTexture(self.textureControl, 0, 0, 0)
 
     --Scene graph nodes make use of the control scale for their own purposes so these have to calculate it into the size
     self.widthFromParamters, self.heightFromParameters = self:GetDimensionsFromParameters()
@@ -248,7 +248,7 @@ end
 
 function ZO_SceneGraphParticle:Stop()
     if self.textureControl then
-        self.parentNode:RemoveControl(self.textureControl)
+        self.parentNode:RemoveTexture(self.textureControl)
     end
     ZO_Particle.Stop(self)
 end

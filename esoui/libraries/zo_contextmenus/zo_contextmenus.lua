@@ -197,7 +197,7 @@ function ShowMenu(owner, initialRefCount, menuType)
     -- Keep the height the same as it was...
     for k, v in pairs(ZO_Menu.items) do
         -- HACK: See note below about storing the height...
-        v.item:SetDimensions(ZO_Menu.width, v.item.storedHeight)
+        v.item:SetDimensions(ZO_Menu.width - ZO_Menu.menuPad, v.item.storedHeight)
     end
     
     if ZO_Menu.menuType ~= menuType then

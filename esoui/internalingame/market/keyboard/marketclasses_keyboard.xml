@@ -40,7 +40,7 @@
         <Button name="ZO_MarketProductIconTemplate_Keyboard" mouseOverBlendMode="ADD" virtual="true">
             <Dimensions x="64" y="64" />
 
-            <MouseButton button="MOUSE_BUTTON_INDEX_RIGHT" enabled="true" />
+            <MouseButton button="RIGHT" enabled="true" />
 
             <OnMouseEnter>
                 ZO_MarketProductIcon_OnMouseEnter(self)

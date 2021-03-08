@@ -794,6 +794,13 @@ local function TryPreviewDyeStamp(inventorySlot)
     SYSTEMS:PushScene("dyeStampConfirmation")
 end
 
+local function TryPreviewItem(bag, slot)
+    SYSTEMS:GetObject("itemPreview"):PreviewInventoryItem(bag, slot)
+    if not IsInGamepadPreferredMode() then
+        INVENTORY_MENU_BAR:UpdateInventoryKeybinds()
+    end
+end
+
 -- If called on an item inventory slot, returns the index of the attachment slot that's holding it, or nil if it's not attached.
 local function GetQueuedItemAttachmentSlotIndex(inventorySlot)
     local bag, attachmentIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
@@ -1580,7 +1587,7 @@ local function QuestItemQuickslotAction(slot, slotActions)
     ApplySimpleQuickslotAction(slotActions, ACTION_TYPE_QUEST_ITEM, questItemId)
 end
 
-internalassert(ACTION_TYPE_MAX_VALUE == 11, "Update quickslot actions")
+internalassert(ACTION_TYPE_MAX_VALUE == 10, "Update quickslot actions")
 local quickslotActions =
 {
     [SLOT_TYPE_ITEM] = ItemQuickslotAction,
@@ -1926,6 +1933,14 @@ local actionHandlers =
             end
         end
     end,
+
+     ["preview"] = function(inventorySlot, slotActions)
+        local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        local itemPreview = SYSTEMS:GetObject("itemPreview")
+        if itemPreview:GetFragment():IsShowing() and not IsInGamepadPreferredMode() and CanInventoryItemBePreviewed(bag, slot) and IsCharacterPreviewingAvailable() then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_PREVIEW, function() TryPreviewItem(bag, slot) end, "keybind1")
+        end
+    end,
 }
 
 local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
@@ -1935,7 +1950,7 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 local potentialActionsForSlotType =
 {
     [SLOT_TYPE_QUEST_ITEM] =                           { "quickslot", "use", "link_to_chat" },
-    [SLOT_TYPE_ITEM] =                                 { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall","start_skill_respec", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_ITEM] =                                 { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall", "start_skill_respec", "split_stack", "enchant", "preview", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_EQUIPMENT] =                            { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                             { "trade_remove", "link_to_chat", "report_item" },
     [SLOT_TYPE_THEIR_TRADE] =                          NON_INTERACTABLE_ITEM_ACTIONS,

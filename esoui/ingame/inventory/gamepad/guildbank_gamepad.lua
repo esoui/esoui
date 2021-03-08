@@ -1,34 +1,7 @@
-local GUILD_BANK_SEARCH_SORT_PRIMARY_KEY =
-{
-    [ITEM_LIST_SORT_TYPE_CATEGORY] = "bestGamepadItemCategoryName",
-    [ITEM_LIST_SORT_TYPE_ITEM_NAME] = "name",
-    [ITEM_LIST_SORT_TYPE_ITEM_QUALITY] = "displayQuality",
-    [ITEM_LIST_SORT_TYPE_STACK_COUNT] = "stackCount",
-    [ITEM_LIST_SORT_TYPE_VALUE] = "sellPrice",
-}
-
-local GUILD_BANK_SEARCH_FILTERS =
-{
-    ITEMFILTERTYPE_WEAPONS,
-    ITEMFILTERTYPE_ARMOR,
-    ITEMFILTERTYPE_JEWELRY,
-    ITEMFILTERTYPE_CONSUMABLE,
-    ITEMFILTERTYPE_CRAFTING,
-    ITEMFILTERTYPE_FURNISHING,
-    ITEMFILTERTYPE_MISCELLANEOUS,
-}
-
-local SORT_ARROW_UP = "EsoUI/Art/Miscellaneous/list_sortUp.dds"
-local SORT_ARROW_DOWN = "EsoUI/Art/Miscellaneous/list_sortDown.dds"
-
 -------------------------------------
 -- Gamepad Guild Bank Inventory List
 -------------------------------------
 ZO_GamepadGuildBankInventoryList = ZO_GamepadBankCommonInventoryList:Subclass()
-
-function ZO_GamepadGuildBankInventoryList:New(...)
-    return ZO_GamepadBankCommonInventoryList.New(self, ...)
-end
 
 function ZO_GamepadGuildBankInventoryList:Initialize(...)
     ZO_GamepadBankCommonInventoryList.Initialize(self, ...)
@@ -44,14 +17,6 @@ function ZO_GamepadGuildBankInventoryList:Initialize(...)
     self.goldTransferEntryData = entryData
 end
 
-function ZO_GamepadGuildBankInventoryList:HasSelectableHeaderEntry()
-    return false -- Overridden by classes with selectable headers (ie. Text Search)
-end
-
-function ZO_GamepadGuildBankInventoryList:AddPlaceholderEntry()
-    -- To be overridden
-end
-
 do
     local NO_DEPOSIT_PERMISSIONS_STRING = zo_strformat(SI_GAMEPAD_GUILD_BANK_NO_DEPOSIT_PERMISSIONS, GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_BANK_DEPOSIT))
     local NO_WITHDRAW_PERMISSIONS_STRING = GetString(SI_GAMEPAD_GUILD_BANK_NO_WITHDRAW_PERMISSIONS)
@@ -63,7 +28,7 @@ do
             return true
         end
 
-        for filterDataIndex, filterData in ipairs(itemData.filterData) do
+        for _, filterData in ipairs(itemData.filterData) do
             if filterCategories[filterData] then
                 return true
             end
@@ -72,7 +37,7 @@ do
         return false
     end
 
-    function ZO_GamepadGuildBankInventoryList:RefreshList()
+    function ZO_GamepadGuildBankInventoryList:RefreshList(shouldTriggerRefreshListCallback)
         if self.control:IsHidden() then
             self.isDirty = true
             return
@@ -80,7 +45,6 @@ do
 
         local guildId = GetSelectedGuildBankId()
         local shouldShowList = false
-        local hasSelectableHeaderEntry = self:HasSelectableHeaderEntry()
 
         -- Assume we have all these privileges unless otherwise specified.
         local guildHasDepositPrivilege = true
@@ -133,11 +97,7 @@ do
 
         local slots = nil
         if shouldShowList then
-           slots = self:GenerateSlotTable()
-        end
-
-        if not ZO_IsTableEmpty(slots) and hasSelectableHeaderEntry then
-            self:AddPlaceholderEntry()
+            slots = self:GenerateSlotTable()
         end
 
         local shouldAddDepositWithdrawEntry = (self:IsInWithdrawMode() and playerCanWithdrawGold) or (self:IsInDepositMode() and guildHasDepositPrivilege)
@@ -147,14 +107,14 @@ do
         end
 
         if shouldShowList then
-            for i, bagId in ipairs(self.inventoryTypes) do
+            for _, bagId in ipairs(self.inventoryTypes) do
                 self.dataByBagAndSlotIndex[bagId] = {}
             end
 
             local template = self.template
             local currentBestCategoryName = nil
-            for i, itemData in ipairs(slots) do
-                local passesTextFilter = itemData.passesTextFilter == nil or itemData.passesTextFilter
+            for _, itemData in ipairs(slots) do
+                local passesTextFilter = TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
                 local passesCategoryFilter = IsInFilteredCategories(self.filterCategories, itemData)
                 if passesTextFilter and passesCategoryFilter then
                     local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
@@ -173,13 +133,13 @@ do
             end
         end
 
-        if hasSelectableHeaderEntry then
-            self.list:SetDefaultSelectedIndex(2) -- Select withdraw currency rather than placeholder
-        end
-
         self.list:Commit()
 
         self.isDirty = false
+
+        if shouldTriggerRefreshListCallback and self.onRefreshListCallback then
+            self.onRefreshListCallback(self.list)
+        end
     end
 end
 
@@ -208,10 +168,6 @@ local GAMEPAD_GUILD_BANK_SCENE_NAME = "gamepad_guild_bank"
 
 ZO_GuildBank_Gamepad = ZO_BankingCommon_Gamepad:Subclass()
 
-function ZO_GuildBank_Gamepad:New(...)
-    return ZO_BankingCommon_Gamepad.New(self, ...)
-end
-
 function ZO_GuildBank_Gamepad:Initialize(control)
     self.withdrawLoadingControlShown = false
 
@@ -224,234 +180,22 @@ function ZO_GuildBank_Gamepad:Initialize(control)
 
     local function OnOpenGuildBank()
         if IsInGamepadPreferredMode() then
+            self:ActivateTextSearch()
             SCENE_MANAGER:Show(GAMEPAD_GUILD_BANK_SCENE_NAME)
         end
     end
 
     self.control:RegisterForEvent(EVENT_OPEN_GUILD_BANK, OnOpenGuildBank)
-    self.control:RegisterForEvent(EVENT_BACKGROUND_LIST_FILTER_COMPLETE, function(eventId, ...) self:OnBackgroundListFilterComplete(...) end)
 
-    self:InitializeFiltersDialog()
+    self:SetTextSearchContext("guildBankTextSearch")
 end
 
-function ZO_GuildBank_Gamepad:GetCurrentSortParams()
-    local sortKey = GUILD_BANK_SEARCH_SORT_PRIMARY_KEY[self.withdrawList.currentSortType]
-    local sortOptions =
-    {
-        bestGamepadItemCategoryName = { tiebreaker = "name" },
-        displayQuality = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
-        stackCount = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
-        sellPrice = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
-        name = { tiebreaker = "requiredLevel" },
-        requiredLevel = { tiebreaker = "requiredChampionPoints", isNumeric = true },
-        requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
-        iconFile = { tiebreaker = "uniqueId" },
-        uniqueId = { isId64 = true },
-    }
-    local sortOrder = self.withdrawList.currentSortOrder
-    return sortKey, sortOptions, sortOrder
-end
-
-function ZO_GuildBank_Gamepad:InitializeFiltersDialog()
-    local function OnReleaseDialog(dialog)
-        if dialog.dropdowns then
-            for i, dropdown in pairs(dialog.dropdowns) do
-                dropdown:Deactivate()
-            end
-        end
-        dialog.dropdowns = nil
+function ZO_GuildBank_Gamepad:ActivateTextSearch()
+    if self.searchContext then
+        -- Reset the search string to force a search again since the guild bank slots get rebuild each show.
+        TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, BAG_GUILDBANK)
+        ZO_Gamepad_ParametricList_BagsSearch_Screen.ActivateTextSearch(self)
     end
-
-    ZO_Dialogs_RegisterCustomDialog("GAMEPAD_GUILD_BANK_SEARCH_FILTERS",
-    {
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
-        },
-        setup =  function(dialog)
-            ZO_GenericGamepadDialog_RefreshText(dialog, GetString(SI_GAMEPAD_GUILD_BROWSER_FILTERS_DIALOG_HEADER))
-            dialog.dropdowns = {}
-            dialog.selectedSortType = dialog.selectedSortType or ITEM_LIST_SORT_TYPE_ITERATION_BEGIN
-            dialog:setupFunc()
-        end,
-        parametricList =
-        {
-            {
-                header = GetString(SI_GAMEPAD_BANK_SORT_TYPE_HEADER),
-                template = "ZO_GamepadDropdownItem",
-                templateData =
-                {
-                    setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
-                        local dropdown = control.dropdown
-                        table.insert(data.dialog.dropdowns, dropdown)
-
-                        dropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
-                        dropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
-                        dropdown:SetSelectedItemTextColor(selected)
-
-                        dropdown:SetSortsItems(false)
-                        dropdown:ClearItems()
-
-                        local function OnSelectedCallback(dropdown, entryText, entry)
-                            self.withdrawList.currentSortType = entry.sortType
-                        end
-
-                        for i = ITEM_LIST_SORT_TYPE_ITERATION_BEGIN, ITEM_LIST_SORT_TYPE_ITERATION_END do
-                            local entryText = ZO_CachedStrFormat(SI_GAMEPAD_BANK_FILTER_ENTRY_FORMATTER, GetString("SI_ITEMLISTSORTTYPE", i))
-                            local newEntry = control.dropdown:CreateItemEntry(entryText, OnSelectedCallback)
-                            newEntry.sortType = i
-                            control.dropdown:AddItem(newEntry)
-                        end
-
-                        dropdown:UpdateItems()
-
-                        control.dropdown:SelectItemByIndex(self.withdrawList.currentSortType)
-                    end,
-                    callback = function(dialog)
-                        local targetData = dialog.entryList:GetTargetData()
-                        local targetControl = dialog.entryList:GetTargetControl()
-                        targetControl.dropdown:Activate()
-                    end,
-                },
-            },
-            {
-                header = GetString(SI_GAMEPAD_BANK_SORT_ORDER_HEADER),
-                template = "ZO_GamepadDropdownItem",
-                templateData =
-                {
-                    setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
-                        local dropdown = control.dropdown
-                        table.insert(data.dialog.dropdowns, dropdown)
-
-                        dropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
-                        dropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
-                        dropdown:SetSelectedItemTextColor(selected)
-
-                        dropdown:SetSortsItems(false)
-                        dropdown:ClearItems()
-
-                        local function OnSelectedCallback(dropdown, entryText, entry)
-                            self.withdrawList.currentSortOrder = entry.sortOrder
-                            self.withdrawList.currentSortOrderIndex = entry.index
-                        end
-
-                        local sortUpEntry = control.dropdown:CreateItemEntry(GetString(SI_GAMEPAD_BANK_SORT_ORDER_UP_TEXT), OnSelectedCallback)
-                        sortUpEntry.sortOrder = ZO_SORT_ORDER_UP
-                        sortUpEntry.index = 1
-                        control.dropdown:AddItem(sortUpEntry)
-
-                        local sortDownEntry = control.dropdown:CreateItemEntry(GetString(SI_GAMEPAD_BANK_SORT_ORDER_DOWN_TEXT), OnSelectedCallback)
-                        sortDownEntry.sortOrder = ZO_SORT_ORDER_DOWN
-                        sortDownEntry.index = 2
-                        control.dropdown:AddItem(sortDownEntry)
-
-                        dropdown:UpdateItems()
-
-                        control.dropdown:SelectItemByIndex(self.withdrawList.currentSortOrderIndex)
-                    end,
-                    callback = function(dialog)
-                        local targetData = dialog.entryList:GetTargetData()
-                        local targetControl = dialog.entryList:GetTargetControl()
-                        targetControl.dropdown:Activate()
-                    end,
-                },
-            },
-            {
-                header = GetString(SI_GAMEPAD_BANK_FILTER_HEADER),
-                template = "ZO_GamepadMultiSelectionDropdownItem",
-                templateData =
-                {
-                    setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
-                        local dropdown = control.dropdown
-                        table.insert(data.dialog.dropdowns, dropdown)
-
-                        dropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
-                        dropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
-                        dropdown:SetSelectedItemTextColor(selected)
-
-                        dropdown:SetSortsItems(false)
-                        dropdown:SetNoSelectionText(GetString(SI_GAMEPAD_BANK_FILTER_DEFAULT_TEXT))
-                        dropdown:SetMultiSelectionTextFormatter(GetString(SI_GAMEPAD_BANK_FILTER_DROPDOWN_TEXT))
-
-                        local dropdownData = ZO_MultiSelection_ComboBox_Data_Gamepad:New()
-                        dropdownData:Clear()
-
-                        for i, filterType in pairs(GUILD_BANK_SEARCH_FILTERS) do
-                            local newEntry = ZO_ComboBox_Base:CreateItemEntry(ZO_CachedStrFormat(SI_GAMEPAD_BANK_FILTER_ENTRY_FORMATTER, GetString("SI_ITEMFILTERTYPE", filterType)))
-                            newEntry.category = filterType
-                            newEntry.callback = function(control, name, item, isSelected)
-                                if isSelected then
-                                    self.withdrawList.filterCategories[item.category] = item.category
-                                else
-                                    self.withdrawList.filterCategories[item.category] = nil
-                                end
-                            end
-
-                            dropdownData:AddItem(newEntry)
-                            if self.withdrawList.filterCategories[filterType] then
-                                dropdownData:ToggleItemSelected(newEntry)
-                            end
-                        end
-                        dropdown:LoadData(dropdownData)
-                    end,
-                    callback = function(dialog)
-                        local targetData = dialog.entryList:GetTargetData()
-                        local targetControl = dialog.entryList:GetTargetControl()
-                        targetControl.dropdown:Activate()
-                    end,
-                },
-            },
-        },
-        blockDialogReleaseOnPress = true,
-        buttons =
-        {
-            {
-                keybind = "DIALOG_PRIMARY",
-                text = SI_GAMEPAD_SELECT_OPTION,
-                callback = function(dialog)
-                    local targetData = dialog.entryList:GetTargetData()
-                    if targetData and targetData.callback then
-                        targetData.callback(dialog)
-                    end
-                end,
-            },
-            {
-                keybind = "DIALOG_NEGATIVE",
-                text = SI_DIALOG_CANCEL,
-                callback =  function(dialog)
-                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_GUILD_BANK_SEARCH_FILTERS")
-                    self.withdrawList:RefreshList()
-                end,
-            },
-            {
-                keybind = "DIALOG_RESET",
-                text = SI_GUILD_BROWSER_RESET_FILTERS_KEYBIND,
-                enabled = function(dialog)
-                    return not self:AreFiltersSetToDefault()
-                end,
-                callback = function(dialog)
-                    self:ResetFilters()
-                    dialog.info.setup(dialog)
-                end,
-            },
-        },
-        onHidingCallback = OnReleaseDialog,
-        noChoiceCallback = OnReleaseDialog,
-    })
-end
-
-function ZO_GuildBank_Gamepad:ResetFilters()
-    self.withdrawList.filterCategories = {}
-    self.withdrawList.currentSortType = ITEM_LIST_SORT_TYPE_CATEGORY
-    self.withdrawList.currentSortOrder = ZO_SORT_ORDER_UP
-    self.withdrawList.currentSortOrderIndex = 1
-end
-
-function ZO_GuildBank_Gamepad:AreFiltersSetToDefault()
-    return ZO_IsTableEmpty(filterCategories) and
-        self.withdrawList.currentSortType == ITEM_LIST_SORT_TYPE_CATEGORY and
-        self.withdrawList.currentSortOrder == ZO_SORT_ORDER_UP and
-        self.withdrawList.currentSortOrderIndex == 1
 end
 
 function ZO_GuildBank_Gamepad:OnSceneShowing()
@@ -460,33 +204,47 @@ function ZO_GuildBank_Gamepad:OnSceneShowing()
     TriggerTutorial(TUTORIAL_TRIGGER_GUILD_BANK_OPENED)
 end
 
+function ZO_GuildBank_Gamepad:SetCurrentKeybindDescriptor(descriptor)
+    self:RemoveKeybinds()
+    ZO_BankingCommon_Gamepad.SetCurrentKeybindDescriptor(self, descriptor)
+    self:RefreshKeybinds()
+end
+
 function ZO_GuildBank_Gamepad:AddKeybinds()
-    KEYBIND_STRIP:AddKeybindButtonGroup(self.currentKeybindStripDescriptor)
+    if self.currentKeybindStripDescriptor then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.currentKeybindStripDescriptor)
+    end
 end
 
 function ZO_GuildBank_Gamepad:RemoveKeybinds()
-    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindStripDescriptor)
+    if self.currentKeybindStripDescriptor then
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindStripDescriptor)
+    end
 end
 
-function ZO_GuildBank_Gamepad:OnTargetChangedCallback(targetData, oldTargetData)
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindStripDescriptor)
-
-    if oldTargetData and oldTargetData.isTextSearchEntry then
-        if self.headerTextFilterEditBox:HasFocus() then
-            self.headerTextFilterEditBox:LoseFocus()
-        end
-        self:UnhighlightSearch()
+function ZO_GuildBank_Gamepad:UpdateKeybinds()
+    if self.currentKeybindStripDescriptor then
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindStripDescriptor)
     end
+end
 
-    if targetData and targetData.isTextSearchEntry then
-        self:HighlightSearch()
+function ZO_GuildBank_Gamepad:RefreshKeybinds()
+    if self:GetCurrentList() and self:GetCurrentList():IsActive() and not self:IsHeaderActive() then
+        if not KEYBIND_STRIP:HasKeybindButtonGroup(self.currentKeybindStripDescriptor) then
+            self:AddKeybinds()
+        else
+            self:UpdateKeybinds()
+        end
+    else
+        self:RemoveKeybinds()
     end
 end
 
 function ZO_GuildBank_Gamepad:OnWithdrawDepositStateChanged(oldState, newState)
     if newState == SCENE_SHOWING then
-        self:UpdateGuildBankList()
-        self.depositList:RefreshList()
+        local TRIGGER_CALLBACK = true
+        self:UpdateGuildBankList(TRIGGER_CALLBACK)
+        self.depositList:RefreshList(TRIGGER_CALLBACK)
     elseif newState == SCENE_SHOWN then
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     end
@@ -504,11 +262,16 @@ function ZO_GuildBank_Gamepad:SetWithdrawLoadingControlShown(shouldShowLoading)
             --parametric list screen. So we handle the problem by not showing the withdraw list if the fragment is hiding. We wait until it is hidden to do that in the fragment's state change callback. 
             self.withdrawList:GetControl():SetHidden(not shouldShowWithdrawList)
         end
+
+        if shouldShowWithdrawList and self:CanLeaveHeader() then
+            self:RequestLeaveHeader()
+        end
     end
 end
 
 function ZO_GuildBank_Gamepad:CreateEventTable()
     local function OnCloseGuildBank()
+        self:DeactivateTextSearch()
         SCENE_MANAGER:Hide(GAMEPAD_GUILD_BANK_SCENE_NAME)
 
         self.loadingGuildBank = false
@@ -530,6 +293,7 @@ function ZO_GuildBank_Gamepad:CreateEventTable()
     end
 
     local function OnInventoryUpdated(eventId, bagId, slotIndex, _, itemSoundCategory)
+        self:MarkDirtyByBagId(bagId)
         self:RefreshHeaderData()
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindStripDescriptor)
         self:LayoutBankingEntryTooltip(self:GetTargetData())
@@ -549,7 +313,8 @@ function ZO_GuildBank_Gamepad:CreateEventTable()
     local function OnGuildBankReady()
         self.loadingGuildBank = false
         self:SetWithdrawLoadingControlShown(false)
-        self.depositList:RefreshList()
+        local UPDATE_SELECTION = true
+        self.depositList:RefreshList(UPDATE_SELECTION)
         if GAMEPAD_GUILD_BANK_SCENE:IsShowing() then
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindStripDescriptor)
         end
@@ -561,9 +326,9 @@ function ZO_GuildBank_Gamepad:CreateEventTable()
     end
 
     local function RefreshLists()
-        self.depositList:RefreshList()
-        self.withdrawList:RefreshList()
-        self:UpdateTextSearchEntry()
+        local TRIGGER_CALLBACK = true
+        self.depositList:RefreshList(TRIGGER_CALLBACK)
+        self.withdrawList:RefreshList(TRIGGER_CALLBACK)
     end
 
     local function AlertAndRefreshHeader(currencyType, currentCurrency, oldCurrency, reason)
@@ -660,50 +425,18 @@ function ZO_GuildBank_Gamepad:UnregisterForEvents()
     self:GetListFragment(self.depositList):UnregisterCallback("StateChange", self.OnWithdrawDepositStateChanged)
 end
 
-do
-    local ENTRY_ORDER_TEXT_SEARCH = 1
-    local ENTRY_ORDER_CURRENCY = 2
-    local ENTRY_ORDER_OTHER = 3
-    function ZO_GuildBank_Gamepad:OnDeferredInitialization()
-        ZO_SharedInventory_SelectAccessibleGuildBank()
+function ZO_GuildBank_Gamepad:OnDeferredInitialization()
+    ZO_SharedInventory_SelectAccessibleGuildBank()
 
-        SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", function()
-            self:RequestApplySearchTextFilterToData()
-            self:RefreshGuildBank()
-        end)
+    SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", function()
+        self:MarkDirtyByBagId(BAG_BACKPACK)
+        self:MarkDirtyByBagId(BAG_GUILDBANK)
+        self:RefreshGuildBank()
+    end)
 
-        self:ResetFilters()
-
-        self.withdrawList.list:SetSortFunction(function(left, right)
-            local leftOrder = ENTRY_ORDER_OTHER
-            if left.isTextSearchEntry then
-                leftOrder = ENTRY_ORDER_TEXT_SEARCH
-            elseif left.currencyType then
-                leftOrder = ENTRY_ORDER_CURRENCY
-            end
-
-            local rightOrder = ENTRY_ORDER_OTHER
-            if right.isTextSearchEntry then
-                rightOrder = ENTRY_ORDER_TEXT_SEARCH
-            elseif right.currencyType then
-                rightOrder = ENTRY_ORDER_CURRENCY
-            end
-
-            if leftOrder < rightOrder then
-                return true
-            elseif leftOrder > rightOrder then
-                return false
-            elseif leftOrder == ENTRY_ORDER_OTHER then
-                return ZO_TableOrderingFunction(left, right, self:GetCurrentSortParams())
-            else
-                return false
-            end
-        end)
-
-        if self.loadingGuildBank then
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
-            self:SetWithdrawLoadingControlShown(true)
-        end
+    if self.loadingGuildBank then
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        self:SetWithdrawLoadingControlShown(true)
     end
 end
 
@@ -720,9 +453,22 @@ do
             self:OnTargetChanged(...)
         end
 
+        local function OnRefreshList(list)
+            if list:GetNumItems() == 0 then
+                self:RequestEnterHeader()
+            else
+                self:RequestLeaveHeader()
+                if not list:IsActive() then
+                    list:Activate()
+                end
+            end
+        end
+
         local SETUP_LIST_LOCALLY = true
         local NO_ON_SELECTED_DATA_CHANGED_CALLBACK = nil
         local withdrawList = self:AddList("withdraw", SETUP_LIST_LOCALLY, ZO_GamepadGuildBankInventoryList, BANKING_GAMEPAD_MODE_WITHDRAW, self.bankedBags, SLOT_TYPE_GUILD_BANK_ITEM, NO_ON_SELECTED_DATA_CHANGED_CALLBACK, nil, nil, nil, nil, nil, ZO_SharedGamepadEntry_OnSetup)
+        withdrawList:SetOnRefreshListCallback(OnRefreshList)
+        withdrawList:SetSearchContext(self.searchContext)
         withdrawList:SetOnTargetDataChangedCallback(OnTargetDataChangedCallback)
         self:SetWithdrawList(withdrawList)
         local withdrawListFragment = self:GetListFragment("withdraw")
@@ -731,7 +477,6 @@ do
                 --The parametric list screen does not call OnTargetChanged when changing the current list which means anything that updates off of the current
                 --selection is out of date. So we run OnTargetChanged when a list shows to remedy this.
                 self:OnTargetChanged(self:GetCurrentList(), self:GetTargetData())
-                self:RequestApplySearchTextFilterToData()
             end
             --See SetWithdrawLoadingControlShown for more info
             if newState ~= SCENE_FRAGMENT_HIDING then
@@ -739,30 +484,14 @@ do
             end
         end)
 
-        withdrawList.HasSelectableHeaderEntry = function()
-            return self.headerTextFilterEditBox ~= nil
-        end
-
-        withdrawList.AddPlaceholderEntry = function()
-            local entryData = ZO_GamepadEntryData:New("")
-            entryData.isTextSearchEntry = true
-
-            withdrawList.list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
-        end
-
         local withdrawListControl = withdrawList:GetControl()
         local withdrawContainerControl = withdrawListControl:GetParent()
         self.withdrawLoadingControl = CreateControlFromVirtual("$(parent)Loading", withdrawContainerControl, "ZO_GamepadCenteredLoadingIconAndLabelTemplate")
         self.withdrawLoadingControl:GetNamedChild("ContainerText"):SetText(GetString(SI_INVENTORY_RETRIEVING_ITEMS))
 
-        withdrawList.list:SetOnHitBeginningOfListCallback(function()
-            local selectedData = withdrawList:GetTargetData()
-            if self:IsInWithdrawMode() and selectedData.currencyType ~= nil then
-                self.headerTextFilterEditBox:TakeFocus()
-            end
-        end)
-
         local depositList = self:AddList("deposit", SETUP_LIST_LOCALLY, ZO_GamepadGuildBankInventoryList, BANKING_GAMEPAD_MODE_DEPOSIT, self.carriedBag, SLOT_TYPE_ITEM, NO_ON_SELECTED_DATA_CHANGED_CALLBACK, nil, nil, nil, nil, nil, ZO_SharedGamepadEntry_OnSetup)
+        depositList:SetOnRefreshListCallback(OnRefreshList)
+        depositList:SetSearchContext(self.searchContext)
         depositList:SetOnTargetDataChangedCallback(OnTargetDataChangedCallback)
         depositList:SetItemFilterFunction(DepositItemFilter)
         self:SetDepositList(depositList)
@@ -837,8 +566,11 @@ local function GetCurrentDataType(list)
 end
 
 function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
-    local switchActiveGuildKeybind =
+    ZO_BankingCommon_Gamepad.InitializeKeybindStripDescriptors(self)
+
+    self.switchActiveGuildKeybind =
     {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
         keybind = "UI_SHORTCUT_TERTIARY",
         name = GetString(SI_TRADING_HOUSE_GUILD_LABEL),
         callback = function()
@@ -855,16 +587,10 @@ function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
         {
             keybind = "UI_SHORTCUT_PRIMARY",
             name = function()
-                local targetData = self:GetTargetData()
-                if targetData and targetData.isTextSearchEntry then
-                    return GetString(SI_GAMEPAD_SELECT_OPTION)
-                else
-                    return GetString(SI_BANK_WITHDRAW_BIND)
-                end
+                return GetString(SI_BANK_WITHDRAW_BIND)
             end,
             enabled = function()
-                local targetData = self:GetTargetData()
-                return self:CanWithdraw() or (targetData and targetData.isTextSearchEntry)
+                return self:CanWithdraw()
             end,
             visible = function()
                 local currentDataType = GetCurrentDataType(self.withdrawList)
@@ -873,23 +599,15 @@ function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
                 elseif currentDataType == CURRENT_DATA_TYPE_ITEM_DATA then
                     return CanUseBank(GUILD_PERMISSION_BANK_WITHDRAW) and GetNumBagUsedSlots(BAG_GUILDBANK) > 0
                 end
-
-                local targetData = self:GetTargetData()
-                return targetData and targetData.isTextSearchEntry
             end,
             callback = function()
-                local targetData = self:GetTargetData()
-                if targetData.isTextSearchEntry then
-                    self.headerTextFilterEditBox:TakeFocus()
-                else
-                    self:ConfirmWithdrawal()
-                end
+                self:ConfirmWithdrawal()
             end,
         },
         {
             keybind = "UI_SHORTCUT_LEFT_STICK",
             name = function()
-                local sortIconPath = self.withdrawList.currentSortOrder == ZO_SORT_ORDER_UP and SORT_ARROW_UP or SORT_ARROW_DOWN
+                local sortIconPath = self.withdrawList.currentSortOrder == ZO_ICON_SORT_ARROW_UP and SORT_ARROW_UP or ZO_ICON_SORT_ARROW_DOWN
                 local sortIconText = zo_iconFormat(sortIconPath, 16, 16)
                 if ZO_IsTableEmpty(self.withdrawList.filterCategories) then
                     return zo_strformat(GetString(SI_GAMEPAD_BANK_FILTER_KEYBIND), GetString("SI_ITEMLISTSORTTYPE", self.withdrawList.currentSortType), sortIconText)
@@ -898,18 +616,13 @@ function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
                 end
             end,
             callback = function()
-                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_GUILD_BANK_SEARCH_FILTERS")
+                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_BANK_SEARCH_FILTERS", { bankObject = self })
             end
         },
-        switchActiveGuildKeybind,
+        self.switchActiveGuildKeybind,
     })
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.withdrawKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
-        local targetData = self:GetTargetData()
-        if targetData and targetData.isTextSearchEntry then
-            self:UnhighlightSearch()
-            self.withdrawList:MoveNext()
-        end
         SCENE_MANAGER:HideCurrentScene()
     end)
 
@@ -918,7 +631,9 @@ function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
             keybind = "UI_SHORTCUT_PRIMARY",
-            name =  GetString(SI_BANK_DEPOSIT_BIND),
+            name = function()
+                return GetString(SI_BANK_DEPOSIT_BIND)
+            end,
             enabled = function()
                 return self:CanDeposit()
             end,
@@ -929,11 +644,12 @@ function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
                 elseif currentDataType == CURRENT_DATA_TYPE_ITEM_DATA then
                     return not self.loadingGuildBank and CanUseBank(GUILD_PERMISSION_BANK_DEPOSIT) and GetNumBagUsedSlots(BAG_BACKPACK) > 0 and DoesGuildHavePrivilege(GetSelectedGuildBankId(), GUILD_PRIVILEGE_BANK_DEPOSIT)
                 end
-                return false
             end,
-            callback =  function() self:ConfirmDeposit() end
+            callback = function()
+                self:ConfirmDeposit()
+            end
         },
-        switchActiveGuildKeybind,
+        self.switchActiveGuildKeybind,
     })
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.depositKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
@@ -1041,135 +757,40 @@ function ZO_GuildBank_Gamepad:WithdrawFunds(currencyType, amount)
 end
 
 function ZO_GuildBank_Gamepad:OnCategoryChangedCallback(selectedData)
+    ZO_BankingCommon_Gamepad.OnCategoryChangedCallback(self, selectedData)
+
     if self.loadingGuildBank and selectedData.mode == BANKING_GAMEPAD_MODE_WITHDRAW then
         self:SetSelectedInventoryData(nil)
     end
-
-    self:UpdateTextSearchEntry()
 end
 
 function ZO_GuildBank_Gamepad:InitializeHeader()
     ZO_BankingCommon_Gamepad.InitializeHeader(self)
 
-    local headerContainer = self:GetHeaderContainer()
-    self.headerTextFilterControl = headerContainer:GetNamedChild("Filter")
-    self.headerTextFilterEditBox = self.headerTextFilterControl:GetNamedChild("SearchEdit")
-    self.headerTextFilterHighlight = self.headerTextFilterControl:GetNamedChild("Highlight")
-    self.headerTextFilterIcon = self.headerTextFilterControl:GetNamedChild("Icon")
-    self.headerBGTexture = self.headerTextFilterControl:GetNamedChild("BG")
-
-    self.headerTextFilterEditBox:SetHandler("OnTextChanged", function(editBox)
-        ZO_EditDefaultText_OnTextChanged(editBox)
-        local text = editBox:GetText()
-        if text ~= self.searchTextFilter then
-            self.searchTextFilter = text
-            self:RequestApplySearchTextFilterToData()
-        end
-    end)
-
     ZO_GUILD_NAME_FOOTER_FRAGMENT:SetGuildName(GetGuildName(GetSelectedGuildBankId()))
 end
 
-function ZO_GuildBank_Gamepad:HighlightSearch()
-    self.headerTextFilterHighlight:SetHidden(false)
-    self.headerTextFilterIcon:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-    self.headerBGTexture:SetHidden(false)
-end
+function ZO_GuildBank_Gamepad:OnEnterHeader()
+    ZO_Gamepad_ParametricList_Screen.OnEnterHeader(self)
 
-function ZO_GuildBank_Gamepad:UnhighlightSearch()
-    self.headerTextFilterHighlight:SetHidden(true)
-    self.headerTextFilterIcon:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
-    self.headerBGTexture:SetHidden(true)
-end
-
-function ZO_GuildBank_Gamepad:CanFilterByText(text)
-    -- Very broad searches have bad performance implications: The search itself is asynchronous (and snappy), but updating UI to reflect the search is not
-    return ZoUTF8StringLength(text) >= 2
-end
-
-function ZO_GuildBank_Gamepad:RequestApplySearchTextFilterToData()
-    --Cancel any in progress filtering so we can do a new one
-    if self.inProgressSearchTextFilterTaskId then
-        DestroyBackgroundListFilter(self.inProgressSearchTextFilterTaskId)
-    end
-
-    --If we have filter text than create the tasks
-    if self:CanFilterByText(self.searchTextFilter) then
-        self.isSearchFiltered = true
-
-        --Inventory Items
-        local itemTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, self.searchTextFilter)
-        self.inProgressSearchTextFilterTaskId = itemTaskId
-        AddBackgroundListFilterType(itemTaskId, BACKGROUND_LIST_FILTER_TYPE_NAME)
-        local slots = self.withdrawList:GenerateSlotTable()
-        for i, itemData in ipairs(slots) do
-            itemData.passesTextFilter = false
-            AddBackgroundListFilterEntry(itemTaskId, itemData.bagId, itemData.slotIndex)
-        end
-
-        StartBackgroundListFilter(itemTaskId)
-    else
-        self.isSearchFiltered = false
-
-        local slots = self.withdrawList:GenerateSlotTable()
-        for i, itemData in ipairs(slots) do
-            itemData.passesTextFilter = true
-        end
-
-        self.withdrawList:RefreshList()
-        self:UpdateTextSearchEntry()
+    if self.textSearchHeaderFocus then
+        KEYBIND_STRIP:AddKeybindButton(self.switchActiveGuildKeybind)
     end
 end
 
-function ZO_GuildBank_Gamepad:UpdateTextSearchEntry()
-    if self.headerTextFilterControl then
-        if self:IsInWithdrawMode() then
-            -- Don't show search if there is not search placeholder entry
-            local showSearch = false
-            for index = 1, self.withdrawList.list:GetNumEntries() do
-                local data = self.withdrawList.list:GetEntryData(index)
-                if data.isTextSearchEntry then
-                    showSearch = true
-                    break
-                end
-            end
+function ZO_GuildBank_Gamepad:OnLeaveHeader()
+    ZO_Gamepad_ParametricList_Screen.OnLeaveHeader(self)
 
-            self.headerTextFilterControl:SetHidden(not showSearch)
-        else
-            self.headerTextFilterControl:SetHidden(true)
-        end
+    if self.textSearchHeaderFocus then
+        KEYBIND_STRIP:RemoveKeybindButton(self.switchActiveGuildKeybind)
     end
 end
 
-function ZO_GuildBank_Gamepad:TryMarkSearchBackgroundListFilterComplete(taskId)
-    if self.inProgressSearchTextFilterTaskId == taskId then
-        self.inProgressSearchTextFilterTaskId = nil
-        self.completeSearchTextFilterTaskId = taskId
-        return true
-    end
-    return false
-end
+function ZO_GuildBank_Gamepad:ExitHeader()
+    ZO_Gamepad_ParametricList_Screen.ExitHeader(self)
 
-function ZO_GuildBank_Gamepad:OnBackgroundListFilterComplete(taskId)
-    if self.inProgressSearchTextFilterTaskId == taskId then
-        --Mark that it was completed.
-        self:TryMarkSearchBackgroundListFilterComplete(taskId)
-
-        local itemTaskId = self.completeSearchTextFilterTaskId
-        local slots = self.withdrawList:GenerateSlotTable()
-        for i, itemData in ipairs(slots) do
-            for i = 1, GetNumBackgroundListFilterResults(itemTaskId) do
-                local bagId, slotIndex = GetBackgroundListFilterResult(itemTaskId, i)
-                if itemData.bagId == bagId and itemData.slotIndex == slotIndex then
-                    itemData.passesTextFilter = true
-                end
-            end
-        end
-
-        DestroyBackgroundListFilter(itemTaskId)
-
-        self.withdrawList:RefreshList()
-        self:UpdateTextSearchEntry()
+    if self.textSearchHeaderFocus then
+        KEYBIND_STRIP:RemoveKeybindButton(self.switchActiveGuildKeybind)
     end
 end
 
@@ -1195,9 +816,8 @@ function ZO_GuildBank_Gamepad:OnRefreshHeaderData()
     ZO_GUILD_NAME_FOOTER_FRAGMENT:SetGuildName(GetGuildName(GetSelectedGuildBankId()))
 end
 
-function ZO_GuildBank_Gamepad:UpdateGuildBankList()
-    self.withdrawList:RefreshList()
-    self:UpdateTextSearchEntry()
+function ZO_GuildBank_Gamepad:UpdateGuildBankList(shouldTriggerRefreshCallback)
+    self.withdrawList:RefreshList(shouldTriggerRefreshCallback)
 end
 
 function ZO_GuildBank_Gamepad:SetSelectedInventoryData(_, inventoryData)

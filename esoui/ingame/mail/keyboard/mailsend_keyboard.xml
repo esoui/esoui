@@ -53,7 +53,7 @@
                     <Anchor point="LEFT" relativeTo="$(parent)AttachRadio" relativePoint="RIGHT" offsetX="8" />
 
                     <OnMouseUp>
-                        if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                        if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
                             ZO_MailSend_SetMoneyAttachmentMode()
                         end
                     </OnMouseUp>

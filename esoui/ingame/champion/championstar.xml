@@ -1,0 +1,69 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_ChampionStarConfirmAnimation">
+            <Animations>
+                <TextureAnimation cellsWide="8" cellsHigh="4" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_ChampionStarEditorFade">
+            <Animations>
+                <AlphaAnimation duration="100" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Texture name="ZO_ChampionStarConfirmAnimationTexture" pixelRoundingEnabled="false" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Champion/champion_star_committed.dds" virtual="true" >
+             <TextureCoords left="0" right="0.125" top="0" bottom="0.25"/>
+        </Texture>
+
+        <TextureComposite name="ZO_ChampionStarVisuals" shape="CIRCLE" pixelRoundingEnabled="false" blendMode="ADD" virtual="true">
+            <Controls>
+                <!--
+                    defining an alpha textures draw level for the situation where this is used inside of the scene graph:
+                    since draw levels are not inherited from the parent
+                    texture; a level will be set on the parent texture but not
+                    this texture. to make sure this is still visible we're just
+                    giving it a level that will put it above any scene graph
+                    element
+                -->
+                <TextureComposite name="$(parent)AlphaTextures" pixelRoundingEnabled="false" level="ZO_ABOVE_SCENEGRAPH_DRAW_LEVEL">
+                    <AnchorFill />
+                </TextureComposite>
+            </Controls>
+        </TextureComposite>
+
+        <TextureComposite name="ZO_ChampionStar" inherits="ZO_ChampionStarVisuals" mouseEnabled="true" virtual="true" >
+            <OnMouseEnter>
+                ZO_ChampionStar_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_ChampionStar_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_ChampionStar_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <OnMouseWheel>
+                ZO_ChampionStar_OnMouseWheel(self, delta)
+            </OnMouseWheel>
+            <OnDragStart>
+                ZO_ChampionStar_OnDragStart(self, button)
+            </OnDragStart>
+        </TextureComposite>
+
+        <Control name="ZO_ChampionStarEditor" inherits="ZO_Spinner" hidden="true" virtual="true" >
+            <OnInitialized>
+                ZO_KeyControl_OnInitialized(self:GetNamedChild("Decrease"))
+                ZO_KeyControl_OnInitialized(self:GetNamedChild("Increase"))
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Display" font="ZoFontGamepad34" override="true"/>
+                <Button name="$(parent)Decrease" override="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Display" relativePoint="LEFT" offsetX="10" />
+                </Button>
+                <Button name="$(parent)Increase" override="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Display" relativePoint="RIGHT" offsetX="-10" />
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

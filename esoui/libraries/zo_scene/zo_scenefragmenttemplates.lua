@@ -586,7 +586,7 @@ function ZO_HUDFadeSceneFragment:Show(customShowDuration)
     local animation = self:GetAnimation()
     local alphaAnimation = animation:GetFirstAnimation()
     local duration = customShowDuration or self.showDuration 
-    if(animation:IsPlaying()) then
+    if animation:IsPlaying() then
         --set the show duration
         local progress = animation:GetFullProgress()
         animation:Stop()
@@ -597,7 +597,7 @@ function ZO_HUDFadeSceneFragment:Show(customShowDuration)
         animation:SetProgress(progress)
         animation:PlayForward()
     else
-        if(self.control:IsHidden()) then
+        if self.control:IsControlHidden() then
             --play from start at show duration
             self.control:SetHidden(false)
             animation:SetHandler("OnStop", self.animationOnStop)
@@ -611,7 +611,7 @@ function ZO_HUDFadeSceneFragment:Hide(customHideDuration)
     local animation = self:GetAnimation()
     local alphaAnimation = animation:GetFirstAnimation()
     local duration = customHideDuration or self.hideDuration
-    if(animation:IsPlaying()) then
+    if animation:IsPlaying() then
         --set the hide duration
         local progress = animation:GetFullProgress()
         animation:Stop()
@@ -622,13 +622,13 @@ function ZO_HUDFadeSceneFragment:Hide(customHideDuration)
         animation:SetProgress(progress)
         animation:PlayBackward()
     else
-        if(not self.control:IsHidden()) then
+        animation:SetHandler("OnStop", self.animationReverseOnStop)
+        if self.control:IsControlHidden() then
+            animation:PlayInstantlyToStart()
+        else
             --play from end at hide duration
-            animation:SetHandler("OnStop", self.animationReverseOnStop)
             alphaAnimation:SetDuration(duration)
             animation:PlayFromEnd()
-        else
-            self:OnHidden()
         end
     end
 end

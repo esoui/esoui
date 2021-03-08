@@ -517,6 +517,7 @@ function ZO_GamepadOptions:InitializeGamepadInfoPanel()
 end
 
 do
+    internalassert(GAMEPAD_TYPE_MAX_VALUE == 7, "Make sure every gamepad type is properly handled in ZO_GamepadOptions:RefreshGamepadInfoPanel()")
     local GAMEPAD_TYPE_HAS_SOUTHERN_LEFT_STICK = ZO_CreateSetFromArguments(GAMEPAD_TYPE_PS4, GAMEPAD_TYPE_PS4_NO_TOUCHPAD, GAMEPAD_TYPE_PS5, GAMEPAD_TYPE_HERON, GAMEPAD_TYPE_SWITCH)
     local GAMEPAD_TYPE_HAS_SWAPPED_FACE_BUTTONS = ZO_CreateSetFromArguments(GAMEPAD_TYPE_SWITCH)
     function ZO_GamepadOptions:RefreshGamepadInfoPanel()

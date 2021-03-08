@@ -671,6 +671,12 @@
                                     removedAnimation="CompassPinOut"
                                     drawLevelOffsetBase="22"
                     />
+                    <!-- TODO: This will need to be handled when we add support for world event states in the Compass-->
+                    <CompassPinType name="WORLD_EVENT_POI_ACTIVE"
+                                    maxDistanceM="225"
+                                    removedAnimation="CompassPinOut"
+                                    drawLevelOffsetBase="23"/>
+                    />
                     <CompassPinType name="ANTIQUITY_DIG_SITE"
                                     pinTexture="$(COMPASS_PATH)antiquity_digSite_icon.dds"
                                     maxDistanceM="225"

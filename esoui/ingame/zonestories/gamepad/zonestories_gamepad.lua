@@ -74,26 +74,18 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
     local infoContainerControl = rightPane:GetNamedChild("InfoContainer")
     ZO_ZoneStories_Shared.Initialize(self, control, infoContainerControl, templateData)
 
-    self.headerData = {
+    self.headerData =
+    {
         titleText = GetString(SI_ACTIVITY_FINDER_CATEGORY_ZONE_STORIES),
     }
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 
     self.tooltipSelectedIndex = COMPLETION_ACTIVITY_DESCRIPTION_TOOLTIP_INDEX
 
-    local categoryData = {
-        name = GetString(SI_ACTIVITY_FINDER_CATEGORY_ZONE_STORIES),
-        menuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_zoneStories.dds",
-        sceneName = sceneName,
-        tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_ZONE_STORIES),
-        isZoneStories = true,
-        GetHelpIndices = function()
-            return GetZoneStoriesHelpIndices()
-        end,
-    }
-
     -- Adds Zone Stories to category list in Activity Finder
-    ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:AddCategory(categoryData, ZO_ACTIVITY_FINDER_SORT_PRIORITY.ZONE_STORIES)
+    local categoryData = ZONE_STORIES_MANAGER.GetCategoryData()
+    local gamepadCategoryData = categoryData.gamepadData
+    ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:AddCategory(gamepadCategoryData, categoryData.priority)
 
     GAMEPAD_ZONE_STORIES_SCENE:RegisterCallback("StateChange", function(oldState, newState)
                                                             if newState == SCENE_SHOWING then

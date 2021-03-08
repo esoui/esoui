@@ -4,15 +4,10 @@ ZO_TRADINGHOUSE_TIMELEFT_GAMEPAD_OFFSET_Y = 40
 -- Base List
 ------------------
 
-ZO_GamepadTradingHouse_BaseList = ZO_Object:Subclass()
-
-function ZO_GamepadTradingHouse_BaseList:New(...)
-    local list = ZO_Object.New(self)
-    list:Initialize(...)
-    return list
-end
+ZO_GamepadTradingHouse_BaseList = ZO_InitializingObject:Subclass()
 
 function ZO_GamepadTradingHouse_BaseList:Initialize()
+    ZO_InitializingObject.Initialize()
     self.eventCallbacks = {}
     self:InitializeEvents()
 end
@@ -123,10 +118,6 @@ end
 
 ZO_GamepadTradingHouse_ItemList = ZO_GamepadTradingHouse_BaseList:Subclass()
 
-function ZO_GamepadTradingHouse_ItemList:New(...)
-    return ZO_GamepadTradingHouse_BaseList.New(self, ...)
-end
-
 function ZO_GamepadTradingHouse_ItemList:Initialize(control)
     self.control = control
     control.owner = self
@@ -153,9 +144,14 @@ function ZO_GamepadTradingHouse_ItemList:InitializeFragment()
             self:OnShowing()
         elseif newState == SCENE_FRAGMENT_SHOWN then
             self:OnShown()
+
+            if self.itemList:GetNumItems() == 0 then
+                TRADING_HOUSE_GAMEPAD:RequestEnterHeader()
+            end
         elseif newState == SCENE_FRAGMENT_HIDING then
             self:OnHiding()
             self:Deactivate()
+            TRADING_HOUSE_GAMEPAD:ExitHeader()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             self:OnHidden()
         end
@@ -185,7 +181,7 @@ end
 function ZO_GamepadTradingHouse_ItemList:OnUnlockedForInput()
     self.listControl:SetHidden(false)
     if not self.control:IsHidden() then
-        self.itemList:Activate() 
+        self.itemList:Activate()
         self:UpdateKeybind()
     end
 end
@@ -196,7 +192,7 @@ function ZO_GamepadTradingHouse_ItemList:Deactivate()
 end
 
 function ZO_GamepadTradingHouse_ItemList:Activate()
-    self.itemList:Activate() 
+    self.itemList:Activate()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 end
 

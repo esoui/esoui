@@ -129,12 +129,16 @@ function ZO_Tree:SetOpenAnimation(animationTemplate)
 end
 
 function ZO_Tree:GetOpenAnimationDuration()
-    if not self.openAnimationDurationMS then
-        local timeline, key = self.openAnimationPool:AcquireObject()
-        self.openAnimationDurationMS = timeline:GetDuration()
-        self.openAnimationPool:ReleaseObject(key)
+    if self:IsAnimated() then
+        if not self.openAnimationDurationMS then
+            local timeline, key = self.openAnimationPool:AcquireObject()
+            self.openAnimationDurationMS = timeline:GetDuration()
+            self.openAnimationPool:ReleaseObject(key)
+        end
+        return self.openAnimationDurationMS
+    else
+        return 0
     end
-    return self.openAnimationDurationMS
 end
 
 function ZO_Tree:SetExclusive(exclusive)
@@ -220,7 +224,7 @@ local function ReopenNodes(tree, currentNodeOfPreviousTree, currentNodeOfCurrent
     end
 end
 
-function ZO_Tree:Commit(nodeToSelect)
+function ZO_Tree:Commit(nodeToSelect, bringParentIntoView)
     if self.previousRoot then
         local currentNodeOfPreviousTree = self.previousRoot
         local currentNodeOfCurrentTree = self.rootNode
@@ -228,7 +232,8 @@ function ZO_Tree:Commit(nodeToSelect)
     end
 
     if nodeToSelect ~= nil and nodeToSelect:IsEnabled() then
-        self:SelectNode(nodeToSelect)
+        local NOT_REBUILDING = false
+        self:SelectNode(nodeToSelect, NOT_REBUILDING, bringParentIntoView)
     elseif self.exclusive then
         self:SelectAnything()
     end
@@ -891,6 +896,30 @@ function ZO_TreeNode:GetPreviousSiblingNode(includeDisabledNodes)
                 adjacentNode = siblingNode
             end
         end
+    end
+end
+
+function ZO_TreeNode:GetNextOrPreviousSiblingNode(includeDisabledNodes)
+    if self.parentNode then
+        local siblingNodes = self.parentNode.children
+        local hasPassedCurrentNode = false
+        local previousNode = nil
+
+        for index, siblingNode in ipairs(siblingNodes) do
+            if hasPassedCurrentNode then
+                if includeDisabledNodes or siblingNode:IsEnabled() then
+                    return siblingNode
+                end
+            else
+                if siblingNode == self then
+                    hasPassedCurrentNode = true
+                elseif includeDisabledNodes or siblingNode:IsEnabled() then
+                    previousNode = siblingNode
+                end
+            end
+        end
+
+        return previousNode
     end
 end
 

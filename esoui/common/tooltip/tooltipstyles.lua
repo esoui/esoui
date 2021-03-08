@@ -229,6 +229,14 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 80,
         statusBarGradientColors = ZO_XP_BAR_GRADIENT_COLORS,
     },
+    championSkillBar =
+    {
+        statusBarTemplate = "ZO_ChampionSkillBar_Gamepad",
+        statusBarTemplateOverrideName = "ChampionSkillBar",
+        customSpacing = 40,
+        widthPercent = 100,
+        statusBarGradientColors = ZO_XP_BAR_GRADIENT_COLORS,
+    },
     enchantDiff = 
     {
         customSpacing = 30,
@@ -815,6 +823,7 @@ ZO_TOOLTIP_STYLES =
     {
         width = 380,
         statusBarTemplate = "ZO_GamepadArrowStatusBarWithBGMedium",
+        statusBarTemplateOverrideName = "ArrowBar",
         customSpacing = 4,
         statusBarGradientColors = ZO_SKILL_XP_BAR_GRADIENT_COLORS,
     },
@@ -1191,29 +1200,6 @@ ZO_TOOLTIP_STYLES =
         fontColorField = GENERAL_COLOR_WHITE,
     },
     -- Gamepad Champion Screen
-    attributeTitleSection =
-    {
-        fontSize = "$(GP_48)",
-        fontFace = "$(GAMEPAD_BOLD_FONT)",
-        uppercase = true,
-        childSpacing = 20,
-        fontColorField = GENERAL_COLOR_OFF_WHITE,
-        layoutPrimaryDirection = "left",
-        layoutSecondaryDirection = "down",
-        layoutPrimaryDirectionCentered = true,
-        widthPercent = 100,
-    },
-    attributeTitle =
-    {
-        horizontalAlignment = TEXT_ALIGN_CENTER,
-        layoutPrimaryDirectionCentered = true,
-    },
-    attributeIcon = 
-    {
-        width = 48,
-        height = 48,
-        layoutPrimaryDirectionCentered = true,
-    },
     championTitleSection =
     {
         customSpacing = 15,
@@ -1224,6 +1210,14 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         horizontalAlignment = TEXT_ALIGN_CENTER,
     },
+    championTopSection =
+    {
+        widthPercent = 100,
+        childSpacing = 1,
+        fontSize = "$(GP_27)",
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
     dividerLine =
     {
         textureCoordinateLeft = 0.25,
@@ -1233,34 +1227,12 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         height = 8,
     },
-    championPointsSection =
-    {
-        customSpacing = 5,
-        widthPercent = 100,
-        layoutPrimaryDirection = "right",
-        layoutSecondaryDirection = "up",
-    },
-    pointsHeader =
-    {
-        fontSize = "$(GP_27)",
-        uppercase = true,
-        widthPercent = 60,
-        horizontalAlignment = TEXT_ALIGN_LEFT,
-        fontColorField = GENERAL_COLOR_OFF_WHITE,
-    },
-    pointsValue =
-    {
-        fontSize = "$(GP_42)",
-        widthPercent = 40,
-        horizontalAlignment = TEXT_ALIGN_RIGHT,
-        fontColorField = GENERAL_COLOR_WHITE,
-    },
-    championBodySection =
+    championClusterBodySection =
     {
         customSpacing = 15,
         horizontalAlignment = TEXT_ALIGN_CENTER,
+        fontColorField = GENERAL_COLOR_WHITE,
     },
-    
     itemComparisonStatSection = 
     {
         customSpacing = 25,

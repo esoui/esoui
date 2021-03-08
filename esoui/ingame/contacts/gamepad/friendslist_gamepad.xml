@@ -70,6 +70,20 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_GamepadFriendsListRow_Playstation" inherits="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
+            <Controls>
+                <Control name="$(parent)Status" inherits="ZO_GamepadInteractiveSortFilterListIcon">
+                    <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_STATUS_WIDTH" />
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                </Control>
+
+                <Label name="$(parent)DisplayName" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_USER_FACING_NAME_WIDTH"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Status" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Label>
+            </Controls>
+        </Control>
+
         <Control name="ZO_GamepadFriendsListHeaders_Heron" virtual="true">
             <Controls>
                 <Control name="$(parent)Status" inherits="ZO_GamepadInteractiveFilterHeader">
@@ -158,6 +172,26 @@
 
                 <Control name="$(parent)Zone" override="true">
                     <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_ZONE_WIDTH" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadFriendsListHeaders_Playstation" virtual="true">
+            <Controls>
+                <Control name="$(parent)Status" inherits="ZO_GamepadInteractiveFilterHeader">
+                    <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_STATUS_WIDTH" />
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+                    <OnInitialized>
+                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_STATUS), "status", TEXT_ALIGN_CENTER)
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)DisplayName" inherits="ZO_GamepadInteractiveFilterHeader">
+                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_USER_FACING_NAME_WIDTH" />
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Status" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                    <OnInitialized>
+                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "displayName", TEXT_ALIGN_LEFT)
+                    </OnInitialized>
                 </Control>
             </Controls>
         </Control>

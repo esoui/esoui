@@ -18,13 +18,6 @@
                 <Backdrop name="$(parent)TextSearch" inherits="ZO_InventorySearchTemplate">
                     <Anchor point="TOPRIGHT" />
                     <Dimensions x="170" />
-                    <Controls>
-                        <EditBox name="$(parent)Box" override="true">
-                            <OnTextChanged name="Inventory">
-                                ZO_PlayerInventory_OnSearchTextChanged(self)
-                            </OnTextChanged>
-                        </EditBox>
-                    </Controls>
                 </Backdrop>
 
                 <Control name="$(parent)SubTabs" inherits="ZO_InventorySubTabs">

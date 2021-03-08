@@ -93,10 +93,6 @@ function ZO_ItemPreviewType:GetVariationName(variationIndex)
     return ""
 end
 
-function ZO_ItemPreviewType:ManagesPreviewCollection()
-    return false
-end
-
 -- Market Product Preview
 
 ZO_ItemPreviewType_MarketProduct = ZO_ItemPreviewType:Subclass()
@@ -136,37 +132,6 @@ ZO_ItemPreviewType_FurnitureMarketProduct = ZO_ItemPreviewType_MarketProduct:Sub
 function ZO_ItemPreviewType_FurnitureMarketProduct:Apply(variationIndex)
     PreviewFurnitureMarketProduct(self.marketProductId, variationIndex)
 end
-
--- Inventory Item As Furniture
-
-ZO_ItemPreviewType_InventoryItemAsFurniture = ZO_ItemPreviewType:Subclass()
-
-function ZO_ItemPreviewType_InventoryItemAsFurniture:SetStaticParameters(bag, slot)
-    self.bag = bag
-    self.slot = slot
-end
-
-function ZO_ItemPreviewType_InventoryItemAsFurniture:ResetStaticParameters()
-    self.bag = 0
-    self.slot = 0
-end
-
-function ZO_ItemPreviewType_InventoryItemAsFurniture:HasStaticParameters(bag, slot)
-    return self.bag == bag and self.slot == slot
-end
-
-function ZO_ItemPreviewType_InventoryItemAsFurniture:Apply(variationIndex)
-    PreviewInventoryItemAsFurniture(self.bag, self.slot, variationIndex)
-end
-
-function ZO_ItemPreviewType_InventoryItemAsFurniture:GetNumVariations()
-    return GetNumInventoryItemAsFurniturePreviewVariations(self.bag, self.slot)
-end
-
-function ZO_ItemPreviewType_InventoryItemAsFurniture:GetVariationName(variationIndex)
-    return GetInventoryItemAsFurniturePreviewVariationDisplayName(self.bag, self.slot, variationIndex)
-end
-
 
 -- Collectible As Furniture
 
@@ -254,62 +219,33 @@ function ZO_ItemPreviewType_ProvisionerItemAsFurniture:GetVariationName(variatio
     return GetProvisionerItemAsFurniturePreviewVariationDisplayName(self.recipeListIndex, self.recipeIndex, variationIndex)
 end
 
---Trading House Search Result As Furniture
+--Trading House Search Result
 
-ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture = ZO_ItemPreviewType:Subclass()
+ZO_ItemPreviewType_TradingHouseSearchResult = ZO_ItemPreviewType:Subclass()
 
-function ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:SetStaticParameters(tradingHouseIndex)
+function ZO_ItemPreviewType_TradingHouseSearchResult:SetStaticParameters(tradingHouseIndex)
     self.tradingHouseIndex = tradingHouseIndex
 end
 
-function ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:ResetStaticParameters()
+function ZO_ItemPreviewType_TradingHouseSearchResult:ResetStaticParameters()
     self.tradingHouseIndex = 0
 end
 
-function ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:HasStaticParameters(tradingHouseIndex)
+function ZO_ItemPreviewType_TradingHouseSearchResult:HasStaticParameters(tradingHouseIndex)
     return self.tradingHouseIndex == tradingHouseIndex
 end
 
-function ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:Apply(variationIndex)
-    PreviewTradingHouseSearchResultItemAsFurniture(self.tradingHouseIndex, variationIndex)
+function ZO_ItemPreviewType_TradingHouseSearchResult:Apply(variationIndex)
+    PreviewTradingHouseSearchResultItem(self.tradingHouseIndex, variationIndex)
 end
 
-function ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:GetNumVariations()
-    return GetNumTradingHouseSearchResultItemAsFurniturePreviewVariations(self.tradingHouseIndex)
+function ZO_ItemPreviewType_TradingHouseSearchResult:GetNumVariations()
+    return GetNumTradingHouseSearchResultItemPreviewVariations(self.tradingHouseIndex)
 end
 
-function ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:GetVariationName(variationIndex)
-    return GetTradingHouseSearchResultItemAsFurniturePreviewVariationDisplayName(self.tradingHouseIndex, variationIndex)
+function ZO_ItemPreviewType_TradingHouseSearchResult:GetVariationName(variationIndex)
+    return GetTradingHouseSearchResultItemPreviewVariationDisplayName(self.tradingHouseIndex, variationIndex)
 end
-
---Trading House Search Result Item Link As Furniture
-
-ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture = ZO_ItemPreviewType:Subclass()
-
-function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:SetStaticParameters(itemLink)
-    self.itemLink = itemLink
-end
-
-function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:ResetStaticParameters()
-    self.itemLink = nil
-end
-
-function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:HasStaticParameters(itemLink)
-    return self.itemLink == itemLink
-end
-
-function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:Apply(variationIndex)
-    PreviewTradingHouseSearchResultItemLinkAsFurniture(self.itemLink, variationIndex)
-end
-
-function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:GetNumVariations()
-    return GetNumTradingHouseSearchResultItemLinkAsFurniturePreviewVariations(self.itemLink)
-end
-
-function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:GetVariationName(variationIndex)
-    return GetTradingHouseSearchResultItemLinkAsFurniturePreviewVariationDisplayName(self.itemLink, variationIndex)
-end
-
 
 -- Store
 
@@ -339,34 +275,6 @@ function ZO_ItemPreviewType_StoreEntry:GetVariationName(variationIndex)
     return GetStoreEntryPreviewVariationDisplayName(self.storeEntryIndex, variationIndex)
 end
 
--- Store Furniture
-
-ZO_ItemPreviewType_StoreEntryAsFurniture = ZO_ItemPreviewType:Subclass()
-
-function ZO_ItemPreviewType_StoreEntryAsFurniture:SetStaticParameters(storeEntryIndex)
-    self.storeEntryIndex = storeEntryIndex
-end
-
-function ZO_ItemPreviewType_StoreEntryAsFurniture:ResetStaticParameters()
-    self.storeEntryIndex = 0
-end
-
-function ZO_ItemPreviewType_StoreEntryAsFurniture:HasStaticParameters(storeEntryIndex)
-    return self.storeEntryIndex == storeEntryIndex
-end
-
-function ZO_ItemPreviewType_StoreEntryAsFurniture:Apply(variationIndex)
-    PreviewStoreEntryAsFurniture(self.storeEntryIndex, variationIndex)
-end
-
-function ZO_ItemPreviewType_StoreEntryAsFurniture:GetNumVariations()
-    return GetNumStoreEntryAsFurniturePreviewVariations(self.storeEntryIndex)
-end
-
-function ZO_ItemPreviewType_StoreEntryAsFurniture:GetVariationName(variationIndex)
-    return GetStoreEntryAsFurniturePreviewVariationDisplayName(self.storeEntryIndex, variationIndex)
-end
-
 -- Outfit
 
 ZO_ItemPreviewType_Outfit = ZO_ItemPreviewType:Subclass()
@@ -384,18 +292,13 @@ function ZO_ItemPreviewType_Outfit:HasStaticParameters(outfitIndex)
 end
 
 function ZO_ItemPreviewType_Outfit:Apply()
-    local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
     if self.outfitIndex then
-        SetPreviewingOutfitIndexInPreviewCollection(previewCollectionId, self.outfitIndex)
+        SetPreviewingOutfitIndexInPreviewCollection(self.outfitIndex)
     else
-        SetPreviewingUnequippedOutfitInPreviewCollection(previewCollectionId)
+        SetPreviewingUnequippedOutfitInPreviewCollection()
     end
 
-    RefreshPreviewCollectionShown()
-end
-
-function ZO_ItemPreviewType_Outfit:ManagesPreviewCollection()
-    return true
+    ApplyChangesToPreviewCollectionShown()
 end
 
 -- Reward
@@ -426,22 +329,49 @@ function ZO_ItemPreviewType_Reward:Apply(variationIndex)
     PreviewReward(self.rewardId, variationIndex)
 end
 
+-- Inventory Item
+ZO_ItemPreviewType_InventoryItem = ZO_ItemPreviewType:Subclass()
+
+function ZO_ItemPreviewType_InventoryItem:SetStaticParameters(bag, slot)
+    self.bag = bag
+    self.slot = slot
+end
+
+function ZO_ItemPreviewType_InventoryItem:ResetStaticParameters()
+    self.bag = 0
+    self.slot = 0
+end
+
+function ZO_ItemPreviewType_InventoryItem:HasStaticParameters(bag, slot)
+    return self.bag == bag and self.slot == slot
+end
+
+function ZO_ItemPreviewType_InventoryItem:Apply(variationIndex)
+    PreviewInventoryItem(self.bag, self.slot, variationIndex)
+end
+
+function ZO_ItemPreviewType_InventoryItem:GetNumVariations()
+    return GetNumInventoryItemPreviewVariations(self.bag, self.slot)
+end
+
+function ZO_ItemPreviewType_InventoryItem:GetVariationName(variationIndex)
+    return GetInventoryItemPreviewVariationDisplayName(self.bag, self.slot, variationIndex)
+end
+
 --
 --[[ Item Preview]]--
 --
 
 ZO_ITEM_PREVIEW_MARKET_PRODUCT = 1
-ZO_ITEM_PREVIEW_INVENTORY_ITEM_AS_FURNITURE = 2
-ZO_ITEM_PREVIEW_COLLECTIBLE_AS_FURNITURE = 3
-ZO_ITEM_PREVIEW_PLACED_FURNITURE = 4
-ZO_ITEM_PREVIEW_PROVISIONER_ITEM_AS_FURNITURE = 5
-ZO_ITEM_PREVIEW_FURNITURE_MARKET_PRODUCT = 6
-ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_AS_FURNITURE = 7
-ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_ITEM_LINK_AS_FURNITURE = 8
-ZO_ITEM_PREVIEW_STORE_ENTRY = 9
-ZO_ITEM_PREVIEW_STORE_ENTRY_AS_FURNITURE = 10
-ZO_ITEM_PREVIEW_OUTFIT = 11
-ZO_ITEM_PREVIEW_REWARD = 12
+ZO_ITEM_PREVIEW_COLLECTIBLE_AS_FURNITURE = 2
+ZO_ITEM_PREVIEW_PLACED_FURNITURE = 3
+ZO_ITEM_PREVIEW_PROVISIONER_ITEM_AS_FURNITURE = 4
+ZO_ITEM_PREVIEW_FURNITURE_MARKET_PRODUCT = 5
+ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT = 6
+ZO_ITEM_PREVIEW_STORE_ENTRY = 7
+ZO_ITEM_PREVIEW_OUTFIT = 8
+ZO_ITEM_PREVIEW_REWARD = 9
+ZO_ITEM_PREVIEW_INVENTORY_ITEM = 10
 
 ZO_ITEM_PREVIEW_WAIT_TIME_MS = 500
 
@@ -468,23 +398,20 @@ function ZO_ItemPreview_Shared:Initialize(control)
     {
         [ZO_ITEM_PREVIEW_MARKET_PRODUCT] = ZO_ItemPreviewType_MarketProduct:New(),
         [ZO_ITEM_PREVIEW_COLLECTIBLE_AS_FURNITURE] = ZO_ItemPreviewType_CollectibleAsFurniture:New(),
-        [ZO_ITEM_PREVIEW_INVENTORY_ITEM_AS_FURNITURE] = ZO_ItemPreviewType_InventoryItemAsFurniture:New(),
         [ZO_ITEM_PREVIEW_PLACED_FURNITURE] = ZO_ItemPreviewType_PlacedFurniture:New(),
         [ZO_ITEM_PREVIEW_PROVISIONER_ITEM_AS_FURNITURE] = ZO_ItemPreviewType_ProvisionerItemAsFurniture:New(),
         [ZO_ITEM_PREVIEW_FURNITURE_MARKET_PRODUCT] = ZO_ItemPreviewType_FurnitureMarketProduct:New(),
-        [ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_AS_FURNITURE] = ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:New(),
-        [ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_ITEM_LINK_AS_FURNITURE] = ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:New(),
+        [ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT] = ZO_ItemPreviewType_TradingHouseSearchResult:New(),
         [ZO_ITEM_PREVIEW_STORE_ENTRY] = ZO_ItemPreviewType_StoreEntry:New(),
-        [ZO_ITEM_PREVIEW_STORE_ENTRY_AS_FURNITURE] = ZO_ItemPreviewType_StoreEntryAsFurniture:New(),
         [ZO_ITEM_PREVIEW_OUTFIT] = ZO_ItemPreviewType_Outfit:New(),
         [ZO_ITEM_PREVIEW_REWARD] = ZO_ItemPreviewType_Reward:New(),
+        [ZO_ITEM_PREVIEW_INVENTORY_ITEM] = ZO_ItemPreviewType_InventoryItem:New(),
     }
 
     self.forcePreparePreview = true
     self:SetHorizontalPaddings(0, 0)
     self:SetDynamicFramingConsumedSpace(0, 0)
     self:SetPreviewInEmptyWorld(false)
-    self.previewCollectionId = 0
 
     self.OnScreenResized = function()
         self:RefreshDynamicFramingOpening()
@@ -572,15 +499,10 @@ function ZO_ItemPreview_Shared:OnPreviewHidden()
     EVENT_MANAGER:UnregisterForUpdate("ZO_ItemPreview_Shared")
     EVENT_MANAGER:UnregisterForEvent("ZO_ItemPreview_Shared", EVENT_SCREEN_RESIZED)
 
-    self:EndCurrentPreview()
-
     SetInteractionUsingInteractCamera(true)
-   
-   if self.previewCollectionId then
-        RemovePreviewCollection(self.previewCollectionId)
-        self.previewCollectionId = 0
-   end
 
+    -- Order matters here
+    self:EndCurrentPreview()
     DisablePreviewMode()
     self.enabledPreview = false
 
@@ -612,6 +534,14 @@ function ZO_ItemPreview_Shared:EndCurrentPreview()
     EndCurrentItemPreview()
 
     self:FireCallbacks("EndCurrentPreview")
+end
+
+function ZO_ItemPreview_Shared:ClearPreviewCollection()
+    self:ResetCurrentPreviewObject()
+
+    ClearCurrentItemPreviewCollection()
+
+    self:FireCallbacks("ClearPreviewCollection")
 end
 
 function ZO_ItemPreview_Shared:RefreshState()
@@ -675,20 +605,12 @@ function ZO_ItemPreview_Shared:IsCurrentlyPreviewing(previewType, ...)
            and self.previewVariationIndex == 1
 end
 
-function ZO_ItemPreview_Shared:AddOutfitSlotPreviewElement(outfitSlot, collectibleId, itemMaterialIndex, primaryDye, secondaryDye, accentDye, refreshImmediately)
-    AddOutfitSlotPreviewElementToPreviewCollection(self.previewCollectionId, outfitSlot, collectibleId, itemMaterialIndex, primaryDye, secondaryDye, accentDye, refreshImmediately)
-end
-
 function ZO_ItemPreview_Shared:PreviewMarketProduct(marketProductId)
     self:SharedPreviewSetup(ZO_ITEM_PREVIEW_MARKET_PRODUCT, marketProductId)
 end
 
 function ZO_ItemPreview_Shared:PreviewFurnitureMarketProduct(marketProductId)
     self:SharedPreviewSetup(ZO_ITEM_PREVIEW_FURNITURE_MARKET_PRODUCT, marketProductId)
-end
-
-function ZO_ItemPreview_Shared:PreviewInventoryItemAsFurniture(bag, slot)
-    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_INVENTORY_ITEM_AS_FURNITURE, bag, slot)
 end
 
 function ZO_ItemPreview_Shared:PreviewCollectibleAsFurniture(collectibleId)
@@ -703,20 +625,12 @@ function ZO_ItemPreview_Shared:PreviewProvisionerItemAsFurniture(recipeListIndex
     self:SharedPreviewSetup(ZO_ITEM_PREVIEW_PROVISIONER_ITEM_AS_FURNITURE, recipeListIndex, recipeIndex)
 end
 
-function ZO_ItemPreview_Shared:PreviewTradingHouseSearchResultAsFurniture(tradingHouseIndex)
-    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_AS_FURNITURE, tradingHouseIndex)
-end
-
-function ZO_ItemPreview_Shared:PreviewTradingHouseSearchResultItemLinkAsFurniture(itemLink)
-    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_ITEM_LINK_AS_FURNITURE, itemLink)
+function ZO_ItemPreview_Shared:PreviewTradingHouseSearchResult(tradingHouseIndex)
+    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT, tradingHouseIndex)
 end
 
 function ZO_ItemPreview_Shared:PreviewStoreEntry(storeEntryIndex)
     self:SharedPreviewSetup(ZO_ITEM_PREVIEW_STORE_ENTRY, storeEntryIndex)
-end
-
-function ZO_ItemPreview_Shared:PreviewStoreEntryAsFurniture(storeEntryIndex)
-    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_STORE_ENTRY_AS_FURNITURE, storeEntryIndex)
 end
 
 function ZO_ItemPreview_Shared:PreviewOutfit(outfitIndex)
@@ -734,12 +648,16 @@ end
 function ZO_ItemPreview_Shared:ResetOutfitPreview()
     if self.currentPreviewType == ZO_ITEM_PREVIEW_OUTFIT then
         self:ResetCurrentPreviewObject()
-        ClearPreviewingOutfitIndexInPreviewCollection(self.previewCollectionId)
+        ClearPreviewingOutfitIndexInPreviewCollection()
     end
 end
 
 function ZO_ItemPreview_Shared:PreviewReward(rewardId)
     self:SharedPreviewSetup(ZO_ITEM_PREVIEW_REWARD, rewardId)
+end
+
+function ZO_ItemPreview_Shared:PreviewInventoryItem(bagId, slotIndex)
+    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_INVENTORY_ITEM, bagId, slotIndex)
 end
 
 function ZO_ItemPreview_Shared:ApplyOrBuffer()
@@ -756,16 +674,9 @@ end
 
 function ZO_ItemPreview_Shared:Apply()
     self.previewAtMS = nil
-    if self.previewCollectionId ~= 0 then
-        RemovePreviewCollection(self.previewCollectionId)
-        self.previewCollectionId = 0
-    end
-    if self.currentPreviewTypeObject:ManagesPreviewCollection() then
-        self.previewCollectionId = AddPreviewCollection()
-        SetPreviewCollectionShown(self.previewCollectionId, true)
-    end
     self.currentPreviewTypeObject:Apply(self.previewVariationIndex)
     self.lastSetChangeTime = GetFrameTimeMilliseconds()
+    ApplyChangesToPreviewCollectionShown()
     PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)
 end
 
@@ -830,10 +741,6 @@ end
 function ZO_ItemPreview_Shared:SetPreviewInEmptyWorld(previewInEmptyWorld)
     self.previewInEmptyWorld = previewInEmptyWorld
     self:RefreshPreviewInEmptyWorld()
-end
-
-function ZO_ItemPreview_Shared:GetPreviewCollectionId()
-    return self.previewCollectionId
 end
 
 do

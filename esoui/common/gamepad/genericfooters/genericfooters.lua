@@ -103,6 +103,14 @@ function GenericFooter:Refresh(data)
     ProcessData(controls[DATA3HEADER], data.data3HeaderText, controls[DATA3], -ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING - loadingIcon3Offset, data.data3HeaderColor)
 end
 
+function GenericFooter:GetChildControl(index)
+    if self.controls then
+        return self.controls[index]
+    end
+
+    return nil
+end
+
 function ZO_GenericFooter_Gamepad_OnInitialized(self)
     GAMEPAD_GENERIC_FOOTER = GenericFooter:New(self)
 end

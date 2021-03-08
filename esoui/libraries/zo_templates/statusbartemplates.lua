@@ -15,7 +15,6 @@ end
 FORCE_INIT_SMOOTH_STATUS_BAR = true
 
 do
-    local g_updatingBars = {}
     local g_animationPool
     local DEFAULT_ANIMATION_TIME_MS = 500
 
@@ -267,8 +266,8 @@ function ZO_StableTrainingBar_Gamepad:SetValueFormatString(valueFormat)
     self.valueFormat = valueFormat
 end
 
-local FORCE_VALUE = true
 function ZO_StableTrainingBar_Gamepad:SetValue(value)
+    local FORCE_VALUE = true
     ZO_StatusBar_SmoothTransition(self.bar, value, self.max, FORCE_VALUE)
 
     if self.valueFormat then
@@ -277,5 +276,62 @@ function ZO_StableTrainingBar_Gamepad:SetValue(value)
 end
 
 function ZO_StableTrainingBar_Gamepad:SetGradientColors(...)
+    self.bar:SetGradientColors(...)
+end
+
+--[[
+    Champion Skill Status Bar Mix In
+--]]
+
+ZO_ChampionSkillBar_Gamepad = {}
+
+function ZO_ChampionSkillBar_Gamepad:Initialize()
+    self.mask = self:GetNamedChild("Mask")
+    self.bar = self.mask:GetNamedChild("Bar")
+    self.notchPool = ZO_ControlPool:New("ZO_ChampionSkillBarNotch_Gamepad", self:GetNamedChild("Overlay"), "Notch")
+    self.minResultLabel = self:GetNamedChild("MinResult")
+    self.maxResultLabel = self:GetNamedChild("MaxResult")
+    self.min, self.max = 0, 0
+end
+
+function ZO_ChampionSkillBar_Gamepad:Reset()
+    self.notchPool:ReleaseAllObjects()
+end
+
+function ZO_ChampionSkillBar_Gamepad:SetMinMax(min, max)
+    self.min, self.max = min, max
+    self.bar:SetMinMax(min, max)
+end
+
+function ZO_ChampionSkillBar_Gamepad:SetMinMaxText(minText, maxText)
+    self.minResultLabel:SetText(minText)
+    self.maxResultLabel:SetText(maxText)
+end
+
+function ZO_ChampionSkillBar_Gamepad:SetValue(value)
+    local FORCE_VALUE = true
+    ZO_StatusBar_SmoothTransition(self.bar, value, self.max, FORCE_VALUE)
+end
+
+function ZO_ChampionSkillBar_Gamepad:AddNotch(value)
+    local offsetX = self.bar:CalculateSizeWithoutLeadingEdgeForValue(value)
+    local notchControl = self.notchPool:AcquireObject()
+    local PADDING_Y = 5
+    notchControl:SetAnchor(TOP, self.bar, TOPLEFT, offsetX, PADDING_Y)
+    notchControl:SetAnchor(BOTTOM, self.bar, BOTTOMLEFT, offsetX, -PADDING_Y)
+end
+
+function ZO_ChampionSkillBar_Gamepad:SetMaskValue(value)
+    if value ~= self.max then
+        local maskOffsetX = self.bar:CalculateSizeWithoutLeadingEdgeForValue(value)
+        self.mask:SetAnchor(TOPLEFT, self.bar, TOPLEFT)
+        self.mask:SetAnchor(BOTTOMRIGHT, self.bar, BOTTOMLEFT, maskOffsetX)
+    else
+        self.mask:SetAnchor(TOPLEFT, self.bar, TOPLEFT)
+        self.mask:SetAnchor(BOTTOMRIGHT, self.bar, BOTTOMRIGHT)
+    end
+end
+
+function ZO_ChampionSkillBar_Gamepad:SetGradientColors(...)
     self.bar:SetGradientColors(...)
 end

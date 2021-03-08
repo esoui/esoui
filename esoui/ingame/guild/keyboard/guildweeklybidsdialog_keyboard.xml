@@ -29,7 +29,7 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Title" override="true">
-                    <Dimensions x="700"/>
+                    <Dimensions x="750"/>
                 </Label>
                 <Label name="$(parent)WeeklyBids" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" horizontalAlignment="CENTER"/>
                 <Label name="$(parent)Instructions" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_GUILD_WEEKLY_BIDS_INSTRUCTIONS">

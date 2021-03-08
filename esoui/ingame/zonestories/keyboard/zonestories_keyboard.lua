@@ -72,17 +72,12 @@ function ZO_ZoneStories_Keyboard:Initialize(control)
         end
     end)
 
-    local categoryData = {
-        name = GetString(SI_ACTIVITY_FINDER_CATEGORY_ZONE_STORIES),
-        categoryFragment = ZONE_STORIES_FRAGMENT,
-        normalIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_up.dds",
-        pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_down.dds",
-        mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_over.dds",
-        isZoneStories = true,
-    }
+    local categoryData = ZONE_STORIES_MANAGER.GetCategoryData()
+    local keyboardCategoryData = categoryData.keyboardData
+    keyboardCategoryData.categoryFragment = ZONE_STORIES_FRAGMENT
 
     -- Add to category list in Activity Finder
-    GROUP_MENU_KEYBOARD:AddCategory(categoryData, ZO_ACTIVITY_FINDER_SORT_PRIORITY.ZONE_STORIES)
+    GROUP_MENU_KEYBOARD:AddCategory(keyboardCategoryData, categoryData.priority)
 end
 
 function ZO_ZoneStories_Keyboard:InitializeZonesList()
