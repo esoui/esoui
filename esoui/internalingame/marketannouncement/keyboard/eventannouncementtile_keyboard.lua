@@ -34,7 +34,11 @@ function ZO_EventAnnouncementTile_Keyboard:Layout(data)
     ZO_EventAnnouncementTile.Layout(self, data)
 
     self:SetActionCallback(function()
-         ZO_KEYBOARD_MARKET_ANNOUNCEMENT:DoOpenMarketBehaviorForMarketProductId(self.data.marketProductId)
+        if self.data.marketProductId ~= 0 then
+            ZO_KEYBOARD_MARKET_ANNOUNCEMENT:DoOpenMarketBehaviorForMarketProductId(self.data.marketProductId)
+        else
+            SYSTEMS:GetObject(ZO_MARKET_NAME):RequestShowMarket(MARKET_OPEN_OPERATION_ANNOUNCEMENT, OPEN_MARKET_BEHAVIOR_SHOW_FEATURED_CATEGORY)
+        end
     end)
 end
 

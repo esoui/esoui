@@ -188,6 +188,9 @@ end
 function ZO_MarketAnnouncement_Shared:OnMarketAnnouncementViewCrownStoreKeybind()
     local targetData = self.carousel:GetSelectedData()
     local marketProductId = targetData.marketProduct:GetId()
+
+    internalassert(marketProductId ~= 0, string.format("Announcement Crown Store Keybind for %s has a market product id: 0", targetData.marketProduct:GetMarketProductDisplayName()))
+
     self:DoOpenMarketBehaviorForMarketProductId(marketProductId)
 end
 

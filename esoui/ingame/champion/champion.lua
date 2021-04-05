@@ -133,18 +133,18 @@ function ChampionPerks:Initialize(control)
             TriggerTutorial(TUTORIAL_TRIGGER_CHAMPION_UI_SHOWN)
         elseif newState == SCENE_HIDING then
             SetShouldRenderWorld(true)
-        elseif newState == SCENE_HIDDEN then
-            if self:HasUnsavedChanges() and GetChampionPurchaseAvailability() == CHAMPION_PURCHASE_SUCCESS then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString(SI_CHAMPION_UNSAVED_CHANGES_EXIT_ALERT))
-            end
-            self:ResetToInactive()
-            
-            self.control:UnregisterForEvent(EVENT_POWER_UPDATE)
-            self.lastHealthValue = nil
 
+            self:ResetToInactive()
             KEYBIND_STRIP:PopKeybindGroupState()
             self.keybindState = KEYBIND_STATES.NONE
             self.keybindStripId = nil
+
+            self.control:UnregisterForEvent(EVENT_POWER_UPDATE)
+            self.lastHealthValue = nil  
+        elseif newState == SCENE_HIDDEN then
+            if self:HasUnsavedChanges() and GetChampionPurchaseAvailability() == CHAMPION_PURCHASE_SUCCESS then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString(SI_CHAMPION_UNSAVED_CHANGES_EXIT_ALERT))
+            end        
         end
     end
 
@@ -1017,6 +1017,12 @@ function ChampionPerks:InitializeStateMachine()
             PlaySound(SOUNDS.CHAMPION_ZOOM_OUT)
             self:SetAnimation(zoomOutAnimation)
 
+            if self.currentChangingEditor then
+                -- release
+                self.currentChangingEditor:StopChangingPoints()
+                self.currentChangingEditor = nil
+            end
+
             self.refreshGroup:MarkDirty("AllData")
         end)
     end
@@ -1037,6 +1043,12 @@ function ChampionPerks:InitializeStateMachine()
             self.nextTargetNode.constellation:PlayOnCycledToSound()
             self:SetAnimation(zoomedInCycleAnimation)
             self.nextTargetNode = nil
+
+           if self.currentChangingEditor then
+                -- release
+                self.currentChangingEditor:StopChangingPoints()
+                self.currentChangingEditor = nil
+           end
         end)
     end
 
@@ -1096,6 +1108,12 @@ function ChampionPerks:InitializeStateMachine()
             zoomOutClusterAnimation.targetCameraZ = IsInGamepadPreferredMode() and ZO_CHAMPION_GAMEPAD_ZOOMED_IN_CAMERA_Z or ZO_CHAMPION_KEYBOARD_ZOOMED_IN_CAMERA_Z 
             self:SetAnimation(zoomOutClusterAnimation)
             PlaySound(SOUNDS.CHAMPION_ZOOM_OUT)
+
+           if self.currentChangingEditor then
+                -- release
+                self.currentChangingEditor:StopChangingPoints()
+                self.currentChangingEditor = nil
+           end
         end)
         state:RegisterCallback("OnDeactivated", function()
             if IsInGamepadPreferredMode() then
@@ -1728,6 +1746,11 @@ function ChampionPerks:RefreshCameraPosition()
 end
 
 function ChampionPerks:ResetToInactive()
+    if self.currentChangingEditor then
+        -- release
+        self.currentChangingEditor:StopChangingPoints()
+        self.currentChangingEditor = nil
+    end
     self:CompleteAnimation()
     GAMEPAD_CHAMPION_QUICK_MENU:Hide()
     self.championBar:GetGamepadEditor():UnfocusBar()
@@ -2340,10 +2363,12 @@ function ChampionPerks:OnUnspentChampionPointsChanged()
 end
 
 function ChampionPerks:OnChampionPurchaseResult(result)
-    self.awaitingSpendPointsResponse = false
+    if self.awaitingSpendPointsResponse then
+        self.awaitingSpendPointsResponse = false
 
-    if result == CHAMPION_PURCHASE_SUCCESS then
-        self:StartStarConfirmAnimation()
+        if result == CHAMPION_PURCHASE_SUCCESS then
+            self:StartStarConfirmAnimation()
+        end
     end
 
     self.isInRespecMode = false

@@ -180,6 +180,9 @@ end
 
 function ZO_Market_Shared:OnShowMarketProduct(marketProductId)
     SCENE_MANAGER:Show("show_market")
+
+    internalassert(marketProductId ~= 0, string.format("OnShowMarketProduct called with market product id: 0"))
+
     self:RequestShowMarketProduct(marketProductId)
 end
 
@@ -638,7 +641,7 @@ function ZO_Market_Shared:ShowMarket(show)
 end
 
 function ZO_Market_Shared:SetQueuedMarketProductId(marketProductId)
-    self.queuedMarketProductId = marketProductId
+    self.queuedMarketProductId = marketProductId ~= 0 and marketProductId or nil
 end
 
 function ZO_Market_Shared:ClearQueuedMarketProductId()
