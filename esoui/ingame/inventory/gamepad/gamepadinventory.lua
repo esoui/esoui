@@ -161,10 +161,10 @@ function ZO_GamepadInventory:OnStateChanged(oldState, newState)
         self:Deactivate()
         self:DeactivateHeader()
         self:ClearActiveKeybinds()
-    elseif newState == SCENE_HIDDEN then
+
         --clear the currentListType so we can refresh it when we re-enter
         self:SwitchActiveList(nil)
-
+    elseif newState == SCENE_HIDDEN then
         self.listWaitingOnDestroyRequest = nil
         self:TryClearNewStatusOnHidden()
 
@@ -524,9 +524,9 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
         {
             alignment = function()
                 if IsQuickSlotEnabled() then
-                    return KEYBIND_STRIP_ALIGN_RIGHT
-                elseif IsCompareModeEnabled() then
                     return KEYBIND_STRIP_ALIGN_LEFT
+                elseif IsCompareModeEnabled() then
+                    return KEYBIND_STRIP_ALIGN_RIGHT
                 end
             end,
             name = function()

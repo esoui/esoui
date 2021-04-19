@@ -201,7 +201,6 @@ function ZO_GamepadTradeWindow:AddOfferListEntry(list, text, icon, callback, mod
 end
 
 function ZO_GamepadTradeWindow:InitializeHeaders()
-    
     local theirHeader = self.theirControls:GetNamedChild("Mask"):GetNamedChild("HeaderContainer"):GetNamedChild("Header")
     theirHeader.dividerSimple = theirHeader:GetNamedChild("DividerSimple")
     theirHeader.dividerAccent = theirHeader:GetNamedChild("DividerAccent")
@@ -223,6 +222,37 @@ end
 ---------
 --Updates
 ---------
+function ZO_GamepadTradeWindow:UpdateDirectionalInput()
+    local list = self.lists[self.activeListType]
+    local result = self.listMovementController:CheckMovement()
+
+    -- Pass the movement to the correct list
+    if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
+        if self.activeListType == TRADE_ME then
+            if self.headerFocus:IsActive() then
+                self:RequestLeaveHeader()
+            elseif self._currentList then
+                self._currentList:MoveNext()
+            end
+        else
+            if list then
+                list:MoveNext()
+            end
+        end
+    elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
+        if self.activeListType == TRADE_ME then
+            if self._currentList and self._currentList:GetSelectedIndex() ~= 1 then
+                self._currentList:MovePrevious()
+            else
+                self:RequestEnterHeader()
+            end
+        else
+            if list then
+                list:MovePrevious()
+            end
+        end
+    end
+end
 
 function ZO_GamepadTradeWindow:RefreshCanSwitchFocus()
     local canSwitch = self.view ~= VIEW_INVENTORY and self.listTradeItemCount[TRADE_THEM] and self.listTradeItemCount[TRADE_THEM] > 0
