@@ -70,8 +70,45 @@ function ZO_UISystemManager:Initialize()
 
     EVENT_MANAGER:RegisterForEvent("UISystemManager", EVENT_OPEN_UI_SYSTEM, OnRequestOpenUISystem)
 
+    local function OnPlayerActivated()
+        self:OnPlayerActivated()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("UISystemManager", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+
+    local function OnMarketAnnouncementUpdated(eventId, ...)
+        self:OnMarketAnnouncementUpdated(...)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("EVENT_MARKET_ANNOUNCEMENT_UPDATED", EVENT_MARKET_ANNOUNCEMENT_UPDATED, OnMarketAnnouncementUpdated)
+
     self.queuedUISystem = nil
     self.queuedParams = {}
+    self.waitingForAnnouncements = true
+end
+
+function ZO_UISystemManager:OnPlayerActivated()
+    if TRIAL_ACCOUNT_SPLASH_DIALOG:ShouldShowSplash() then
+        TRIAL_ACCOUNT_SPLASH_DIALOG:ShowSplash()
+        -- We only want to show one popup and trial dialog takes priority
+        FlagMarketAnnouncementSeen()
+    elseif not HasShownMarketAnnouncement() then
+        RequestMarketAnnouncement()
+    end
+
+    self.waitingForAnnouncements = not HasShownMarketAnnouncement()
+
+    self:TryOpenQueuedUISystem()
+end
+
+function ZO_UISystemManager:OnMarketAnnouncementUpdated(shouldShow, isLocked)
+    self.waitingForAnnouncements = false
+
+    if shouldShow and not (HasShownMarketAnnouncement() or SCENE_MANAGER:IsShowing("marketAnnouncement")) then
+        SCENE_MANAGER:Show("marketAnnouncement")
+    else
+        self:TryOpenQueuedUISystem()
+    end
 end
 
 function ZO_UISystemManager:SetQueuedUISystem(system, ...)
@@ -85,7 +122,7 @@ function ZO_UISystemManager:ClearQueuedUISystem()
 end
 
 function ZO_UISystemManager:CanOpenUISystem()
-    return not SCENE_MANAGER:IsShowing("marketAnnouncement")
+    return IsPlayerActivated() and not (self.waitingForAnnouncements or SCENE_MANAGER:IsShowing("marketAnnouncement"))
 end
 
 function ZO_UISystemManager:RequestOpenUISystem(system, ...)

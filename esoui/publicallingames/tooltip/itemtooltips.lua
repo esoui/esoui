@@ -45,6 +45,10 @@ function ZO_Tooltip:AddTypeSlotUniqueLine(itemLink, itemType, section, text1, te
         section:AddLine(GetString(SI_ITEM_FORMAT_STR_UNIQUE_EQUIPPED))
     end
 
+    if GetItemLinkActorCategory(itemLink) == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+        section:AddLine(GetString(SI_ITEM_FORMAT_STR_COMPANION))
+    end
+
     local lineText
     local itemStyle = GetItemLinkItemStyle(itemLink)
     local showInTooltip = GetItemLinkShowItemStyleInTooltip(itemLink)
@@ -731,7 +735,6 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
 
     self:UpdateGamepadBorderDisplay(itemLink)
 
-    local isFurniture = IsItemLinkPlaceableFurniture(itemLink)
     local enchantDiffMode
     if extraData then
         enchantDiffMode = extraData.enchantDiffMode
@@ -754,6 +757,7 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
     self:AddCollectibleOwnedText(itemLink)
     -- We don't want crafted furniture to show who made it, since it will get cleared once placed in a house
     -- TODO: If we implement saving the creator name, add back in LayoutItemCreator call (ESO-495280)
+    local isFurniture = IsItemLinkPlaceableFurniture(itemLink)
     if not isFurniture then
         self:AddCreator(itemLink, creatorName)
     end
@@ -1621,6 +1625,34 @@ function ZO_Tooltip:LayoutBagItem(bagId, slotIndex, showCombinedCount, extraData
     return self:LayoutItemWithStackCount(itemLink, equipped, GetItemCreatorName(bagId, slotIndex), DONT_FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, stackCount, equipSlot, showPlayerLocked, tradeBoPData, extraData)
 end
 
+function ZO_LayoutItemLinkEquippedComparison(tooltipType, itemLink, showSecondSlot)
+    local equipSlot1, equipSlot2 = GetItemLinkEquippedComparisonEquipSlots(itemLink)
+    local showEquipSlot = showSecondSlot and equipSlot2 or equipSlot1
+    if showEquipSlot ~= EQUIP_SLOT_NONE then
+        local actorCategory = GetItemLinkActorCategory(itemLink)
+        local wornBag = GetWornBagForGameplayActorCategory(actorCategory)
+        if GAMEPAD_TOOLTIPS:LayoutBagItem(tooltipType, wornBag, showEquipSlot) then
+            ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, showEquipSlot, actorCategory)
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_LayoutBagItemEquippedComparison(tooltipType, bagId, slotIndex, showSecondSlot)
+    local equipSlot1, equipSlot2 = GetItemEquippedComparisonEquipSlots(bagId, slotIndex)
+    local showEquipSlot = showSecondSlot and equipSlot2 or equipSlot1
+    if showEquipSlot ~= EQUIP_SLOT_NONE then
+        local actorCategory = GetItemActorCategory(bagId, slotIndex)
+        local wornBag = GetWornBagForGameplayActorCategory(actorCategory)
+        if GAMEPAD_TOOLTIPS:LayoutBagItem(tooltipType, wornBag, showEquipSlot) then
+            ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, showEquipSlot, actorCategory)
+            return true
+        end
+    end
+    return false
+end
+
 function ZO_Tooltip:LayoutTradeItem(who, tradeIndex)
     local itemLink = GetTradeItemLink(who, tradeIndex, LINK_STYLE_DEFAULT)
     local equipped = false
@@ -1892,14 +1924,12 @@ function ZO_Tooltip:LayoutUnknownRetraitTrait(traitName, requiredResearchString)
 end
 
 function ZO_Tooltip:LayoutFurnishingLimitType(itemLink)
-    if GetCurrentZoneHouseId() ~= 0 then
-        local furnishingLimitTypeSection = self:AcquireSection(self:GetStyle("furnishingLimitTypeSection"))
-        furnishingLimitTypeSection:AddLine(GetString(SI_TOOLTIP_FURNISHING_LIMIT_TYPE), self:GetStyle("furnishingLimitTypeTitle"))
+    local furnishingLimitTypeSection = self:AcquireSection(self:GetStyle("furnishingLimitTypeSection"))
+    furnishingLimitTypeSection:AddLine(GetString(SI_TOOLTIP_FURNISHING_LIMIT_TYPE), self:GetStyle("furnishingLimitTypeTitle"))
 
-        local furnishingLimitType = GetItemLinkFurnishingLimitType(itemLink)
-        local furnishingLimitName = GetString("SI_HOUSINGFURNISHINGLIMITTYPE", furnishingLimitType)
-        furnishingLimitTypeSection:AddLine(furnishingLimitName, self:GetStyle("furnishingLimitTypeDescription"))
+    local furnishingLimitType = GetItemLinkFurnishingLimitType(itemLink)
+    local furnishingLimitName = GetString("SI_HOUSINGFURNISHINGLIMITTYPE", furnishingLimitType)
+    furnishingLimitTypeSection:AddLine(furnishingLimitName, self:GetStyle("furnishingLimitTypeDescription"))
 
-        self:AddSection(furnishingLimitTypeSection)
-    end
+    self:AddSection(furnishingLimitTypeSection)
 end

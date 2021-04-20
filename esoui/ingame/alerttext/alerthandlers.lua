@@ -251,6 +251,10 @@ local AlertHandlers = {
         return ERROR, zo_strformat(GetString("SI_MOUNTFAILUREREASON", reason), arg1), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
+    [EVENT_COMPANION_ULTIMATE_FAILURE] = function(reason, companionName)
+        return ERROR, zo_strformat(GetString("SI_COMPANIONULTIMATEFAILUREREASON", reason), companionName), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
     [EVENT_STORE_FAILURE] = function(reason, errorStringId)
         return ERROR, ZO_StoreManager_GetRequiredToBuyErrorText(reason, errorStringId), SOUNDS.GENERAL_ALERT_ERROR
     end,
@@ -279,12 +283,25 @@ local AlertHandlers = {
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
         if response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER and response ~= GROUP_INVITE_RESPONSE_IGNORED then
             if ShouldShowGroupErrorInAlert(response) then
-                local nameToUse = ZO_GetPrimaryPlayerName(displayName, characterName)
-                if nameToUse == "" then
-                    nameToUse = ZO_GetSecondaryPlayerName(displayName, characterName)
+                local nameToUse
+                if response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED_CANT_JOIN then
+                    -- GROUP_INVITE_RESPONSE_ALREADY_GROUPED_CANT_JOIN is unique as it sends the inviter character name in characterName instead of the invitee
+                    -- This is so we can show who invited us in the alert
+                    nameToUse = characterName
+                else
+                    nameToUse = ZO_GetPrimaryPlayerName(displayName, characterName)
+                    if nameToUse == "" then
+                        nameToUse = ZO_GetSecondaryPlayerName(displayName, characterName)
+                    end
                 end
 
-                local alertMessage = nameToUse ~= "" and zo_strformat(GetString("SI_GROUPINVITERESPONSE", response), nameToUse) or GetString(SI_PLAYER_BUSY)
+                local alertMessage
+                -- GROUP_INVITE_RESPONSE_REQUEST_FAIL_ALREADY_GROUPED_GENERIC and GROUP_INVITE_RESPONSE_PLATFORM_INVITE_NOT_SENT are specifically used in cases when there are no names available
+                if nameToUse ~= "" or response == GROUP_INVITE_RESPONSE_REQUEST_FAIL_ALREADY_GROUPED_GENERIC or response == GROUP_INVITE_RESPONSE_PLATFORM_INVITE_NOT_SENT then
+                    alertMessage = zo_strformat(GetString("SI_GROUPINVITERESPONSE", response), nameToUse)
+                else
+                    alertMessage = GetString(SI_PLAYER_BUSY)
+                end
 
                 return ALERT, alertMessage, SOUNDS.GENERAL_ALERT_ERROR
             end
@@ -947,19 +964,19 @@ local AlertHandlers = {
         return ALERT, GetString(SI_ALERT_LOCKPICK_FAILED)
     end,
 
-    [EVENT_OUTFIT_RENAME_RESPONSE] = function(result, outfitIndex)
+    [EVENT_OUTFIT_RENAME_RESPONSE] = function(result, actorCategory, outfitIndex)
         if not (result == SET_OUTFIT_NAME_RESULT_SUCCESS or result == SET_OUTFIT_NAME_RESULT_NO_CHANGE) then
             return UI_ALERT_CATEGORY_ERROR, GetString("SI_SETOUTFITNAMERESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 
-    [EVENT_OUTFIT_CHANGE_RESPONSE] = function(result)
+    [EVENT_OUTFIT_CHANGE_RESPONSE] = function(result, actorCategory, outfitIndex)
         if result ~= APPLY_OUTFIT_CHANGES_RESULT_SUCCESS then
             return UI_ALERT_CATEGORY_ERROR, GetString("SI_APPLYOUTFITCHANGESRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 
-    [EVENT_OUTFIT_EQUIP_RESPONSE] = function(result)
+    [EVENT_OUTFIT_EQUIP_RESPONSE] = function(actorCategory, result)
         if result ~= EQUIP_OUTFIT_RESULT_SUCCESS then
             return UI_ALERT_CATEGORY_ERROR, GetString("SI_EQUIPOUTFITRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
@@ -1058,6 +1075,10 @@ local AlertHandlers = {
             return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
+   
+    [EVENT_COMPANION_WARNING] = function(warningType, companionId)
+        return ALERT, zo_strformat(GetString("SI_COMPANIONWARNINGTYPE", warningType), GetCompanionName(companionId))
+    end,
 }
 
 ZO_AntiquityScryingResultsToAlert =
@@ -1102,6 +1123,12 @@ AlertHandlers[EVENT_CLIENT_INTERACT_RESULT] = function(result, interactTargetNam
     end
 end
 
+if GetUIPlatform() == UI_PLATFORM_PS5 then
+    AlertHandlers[EVENT_CONSOLE_ACTIVITY_REVIEW_AVAILABLE] = function()
+        return ALERT, GetString(SI_NOTIFICATIONS_REVIEW_ACTIVITY_ALERT)
+    end
+end
+
 function ZO_AlertText_GetHandlers()
     return AlertHandlers
 end
@@ -1109,7 +1136,7 @@ end
 if not playerName then
     local function OnUnitCreated(eventCode, tag)
         if tag == "player" then
-            playerName = GetRawUnitName(unitTag)
+            playerName = GetRawUnitName(tag)
         end
     end
     EVENT_MANAGER:RegisterForEvent("AlertHandlers_ON_UNIT_CREATED", EVENT_UNIT_CREATED, OnUnitCreated)

@@ -1,13 +1,7 @@
 --Splash Dialog
 ---------------
 
-local TrialAccountSplashDialog = ZO_Object:Subclass()
-
-function TrialAccountSplashDialog:New(...)
-    local trialDialog = ZO_Object.New(self)
-    trialDialog:Initialize(...)
-    return trialDialog
-end
+local TrialAccountSplashDialog = ZO_InitializingObject:Subclass()
 
 function TrialAccountSplashDialog:Initialize(control)
     self.control = control
@@ -19,14 +13,13 @@ function TrialAccountSplashDialog:Initialize(control)
         self:RemoveSplash()
     end
 
-    self.dialogInfo = 
+    self.dialogInfo =
     {
         customControl = control,
         title = {},
         noChoiceCallback = CloseDialog,
         buttons =
         {
-            [1] =
             {
                 control = control:GetNamedChild("Cancel"),
                 text = SI_DIALOG_EXIT,
@@ -52,18 +45,17 @@ function TrialAccountSplashDialog:Initialize(control)
             title =
             {
                 text = function()
-                           return self.title
-                       end,
+                    return self.title
+                end,
             },
-            mainText = 
+            mainText =
             {
                 text = function()
-                           return self.description
-                       end,
+                    return self.description
+                end,
             },
             buttons =
             {
-                [1] =
                 {
                     --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
                     name = "Free Trial Close Dialog 1",
@@ -72,7 +64,6 @@ function TrialAccountSplashDialog:Initialize(control)
                     clickSound = SOUNDS.DIALOG_ACCEPT,
                     callback =  CloseDialog,
                 },
-                [2] =
                 {
                     --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
                     name = "Free Trial Close Dialog 2",
@@ -93,30 +84,66 @@ function TrialAccountSplashDialog:Initialize(control)
         self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
     end
 
-    local function OnPlayerActivated()
-        if self.seenVersion < self.version then
-            if IsInGamepadPreferredMode() then
-                ZO_Dialogs_ShowGamepadDialog("TRIAL_ACCOUNT_SPLASH_GAMEPAD")
-            else
-                self.dialogInfo.title.text = self.title
-                self.dialogDescription:SetText(self.description)
-                local descriptionWidth, descriptionHeight = self.dialogDescription:GetTextDimensions()
-                local contentHeight = descriptionHeight + 6
-                self.dialogPane:SetHeight(contentHeight)
-                self.dialogScrollChild:SetHeight(contentHeight)
-                ZO_Dialogs_ShowDialog("TRIAL_ACCOUNT_SPLASH_KEYBOARD")
-            end
-        end
-    end
-
     control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
-    control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+end
+
+function TrialAccountSplashDialog:HasPlayerSeenCurrentVersion()
+    return self.seenVersion >= self.version
+end
+
+function TrialAccountSplashDialog:ShouldShowSplash()
+    return not self:HasPlayerSeenCurrentVersion()
+end
+
+function TrialAccountSplashDialog:ShowSplash()
+    if IsInGamepadPreferredMode() then
+        ZO_Dialogs_ShowGamepadDialog("TRIAL_ACCOUNT_SPLASH_GAMEPAD")
+    else
+        self.dialogInfo.title.text = self.title
+        self.dialogDescription:SetText(self.description)
+        local descriptionHeight = self.dialogDescription:GetTextHeight()
+        local contentHeight = descriptionHeight + 6
+        self.dialogPane:SetHeight(contentHeight)
+        self.dialogScrollChild:SetHeight(contentHeight)
+        ZO_Dialogs_ShowDialog("TRIAL_ACCOUNT_SPLASH_KEYBOARD")
+    end
 end
 
 function TrialAccountSplashDialog:RemoveSplash()
     self.seenVersion = self.version
     ZO_TrialAccount_SetSeenVersion(self.accountTypeId, self.seenVersion)
     ZO_SavePlayerConsoleProfile()
+end
+
+----
+-- Global functions
+----
+
+do
+    local SETTING_FORMAT = "TrialAccountType%iSeenVersion"
+
+    function ZO_TrialAccount_GetInfo()
+        local accountTypeId, title, description, currentVersion = GetTrialInfo()
+        local seenVersion = 0
+        if accountTypeId > 0 then
+            local settingName = string.format(SETTING_FORMAT, accountTypeId)
+            seenVersion = GetCVar(settingName)
+
+            --If the setting has not been created in GameSettings.xml, we must add it if we want to be able to see the pop-up
+            --Otherwise we just pretend like we've seen it
+            if seenVersion == "" then
+                seenVersion = currentVersion
+            else
+                seenVersion = tonumber(seenVersion)
+            end
+        end
+        return accountTypeId, title, description, currentVersion, seenVersion
+    end
+
+    function ZO_TrialAccount_SetSeenVersion(accountTypeId, seenVersion)
+        local settingName = string.format(SETTING_FORMAT, accountTypeId)
+        SetCVar(settingName, seenVersion)
+    end
 end
 
 function ZO_TrialAccountSplashDialog_OnInitialized(control)

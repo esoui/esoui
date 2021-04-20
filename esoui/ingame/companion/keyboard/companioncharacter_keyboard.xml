@@ -1,0 +1,26 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_CompanionCharacter_Keyboard_TreeCategory" inherits="ZO_StatusIconChildlessHeader" virtual="true">
+            <Controls>
+
+                <Label name="$(parent)Text" override="true" modifyTextType="UPPERCASE">
+                    <DimensionConstraints maxX="ZO_COMPANION_CHARACTER_KEYBOARD_TREE_LABEL_WIDTH"/>
+                </Label>
+            </Controls>
+        </Label>
+
+        <TopLevelControl name="ZO_CompanionCharacter_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_CompanionCharacter_Keyboard_TopLevel_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)NavigationContainer">
+                    <Dimensions x="ZO_COMPANION_CHARACTER_KEYBOARD_TREE_WIDTH"/>
+                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="77" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-28" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

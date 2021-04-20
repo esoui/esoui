@@ -60,7 +60,9 @@ end
 
 function ZO_AntiquityJournalGamepad:InitializeControl(control)
     ANTIQUITY_JOURNAL_SCENE_GAMEPAD = ZO_Scene:New("gamepad_antiquity_journal", SCENE_MANAGER)
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_DO_NOT_CREATE_TAB_BAR, ZO_ACTIVATE_ON_SHOW, ANTIQUITY_JOURNAL_SCENE_GAMEPAD)
+
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_DO_NOT_CREATE_TAB_BAR, ACTIVATE_ON_SHOW, ANTIQUITY_JOURNAL_SCENE_GAMEPAD)
 
     ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(ZO_AntiquityJournal_FooterBar_Gamepad)
     ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT.footerBarName = ZO_AntiquityJournal_FooterBar_Gamepad:GetNamedChild("Name")

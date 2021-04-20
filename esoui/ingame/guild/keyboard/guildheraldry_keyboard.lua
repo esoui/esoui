@@ -96,7 +96,7 @@ function ZO_GuildHeraldryManager_Keyboard:Initialize(control)
     GUILD_HERALDRY_SCENE:SetHideSceneConfirmationCallback(function(...) self:OnConfirmHideScene(...) end)
 
     self.control:RegisterForEvent(EVENT_HERALDRY_CUSTOMIZATION_START, function(eventCode)
-        if not IsInGamepadPreferredMode() then
+        if not IsInGamepadPreferredMode() and GUILD_HERALDRY_SCENE:IsShowing() then
             self.initialized = true
             self:SetSelectedHeraldryIndices()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)

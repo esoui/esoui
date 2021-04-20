@@ -1,36 +1,43 @@
-local GroupMenu_Keyboard = ZO_Object:Subclass()
+ZO_GROUP_MENU_KEYBOARD_TREE_WIDTH = 300
+-- 75 is the inset from the multiIcon plus the icon and spacing from ZO_IconHeader
+local scrollBarOffset = 16
+ZO_GROUP_MENU_KEYBOARD_TREE_LABEL_WIDTH = ZO_GROUP_MENU_KEYBOARD_TREE_WIDTH - 75 - scrollBarOffset
+ZO_GROUP_MENU_KEYBOARD_TREE_SUBCATEGORY_INDENT = 75
+ZO_GROUP_MENU_KEYBOARD_TREE_SUBCATEGORY_LABEL_WIDTH = ZO_GROUP_MENU_KEYBOARD_TREE_WIDTH - ZO_GROUP_MENU_KEYBOARD_TREE_SUBCATEGORY_INDENT - scrollBarOffset
 
-function GroupMenu_Keyboard:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+local GroupMenu_Keyboard = ZO_InitializingObject:Subclass()
 
 function GroupMenu_Keyboard:Initialize(control)
     self.control = control
-
     self.headerControl = self.control:GetNamedChild("Header")
     self.categoriesControl = self.control:GetNamedChild("Categories")
 
     self:InitializeCategories()
 
+    local function OnStateChange(oldState, newState)
+        if newState == SCENE_SHOWING  then
+            KEYBIND_STRIP:AddKeybindButton(self.keybindStripDescriptor)
+
+            if self.currentCategoryFragment then
+                SCENE_MANAGER:AddFragment(self.currentCategoryFragment)
+            end
+
+            PREFERRED_ROLES:RefreshRoles()
+
+            if self.categoryFragmentToShow then
+                self:SetCurrentCategory(self.categoryFragmentToShow)
+                self.categoryFragmentToShow = nil
+            end
+        elseif newState == SCENE_HIDING then
+            KEYBIND_STRIP:RemoveKeybindButton(self.keybindStripDescriptor)
+        end
+    end
+
     KEYBOARD_GROUP_MENU_SCENE = ZO_Scene:New("groupMenuKeyboard", SCENE_MANAGER)
-    KEYBOARD_GROUP_MENU_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
-                                                            if newState == SCENE_SHOWING  then
-                                                                KEYBIND_STRIP:AddKeybindButton(self.keybindStripDescriptor)
-                                                                if self.currentCategoryFragment then
-                                                                    SCENE_MANAGER:AddFragment(self.currentCategoryFragment)
-                                                                end
-                                                                PREFERRED_ROLES:RefreshRoles()
-                                                                if self.categoryFragmentToShow then
-                                                                    self:SetCurrentCategory(self.categoryFragmentToShow)
-                                                                    self.categoryFragmentToShow = nil
-                                                                end
-                                                            elseif newState == SCENE_HIDING then
-                                                                KEYBIND_STRIP:RemoveKeybindButton(self.keybindStripDescriptor)
-                                                            end
-                                                        end)
+    KEYBOARD_GROUP_MENU_SCENE:RegisterCallback("StateChange", OnStateChange)
+
     self:InitializeKeybindDescriptors()
+
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateGroupStatus", function(...) self:OnUpdateGroupStatus(...) end)
 
     local function RefreshCategories()
@@ -42,38 +49,52 @@ function GroupMenu_Keyboard:Initialize(control)
 end
 
 function GroupMenu_Keyboard:InitializeCategories()
-    self.navigationTree = ZO_Tree:New(self.categoriesControl:GetNamedChild("ScrollChild"), 60, -10, 260)
+    self.navigationTree = ZO_Tree:New(self.categoriesControl:GetNamedChild("ScrollChild"), 60, -10, ZO_GROUP_MENU_KEYBOARD_TREE_WIDTH)
     self.categoryFragmentToNodeLookup = {}
     self.nodeList = {}
 
-    local function BaseIconSetup(control, data, open)
-        local iconTexture = open and data.pressedIcon or data.normalIcon
-        local mouseoverTexture = data.mouseoverIcon
+    local function RefreshNode(control, categoryData, open, enabled)
+        if control.icon then
+            local iconTexture = open and categoryData.pressedIcon or categoryData.normalIcon
+            control.icon:SetTexture(iconTexture)
+            control.iconHighlight:SetTexture(categoryData.mouseoverIcon)
 
-        control.icon:SetTexture(iconTexture)
-        control.iconHighlight:SetTexture(mouseoverTexture)
+            ZO_IconHeader_Setup(control, open, enabled)
+        end
     end
 
-    local function TreeIconEntrySetup(node, control, data, open)
-        local selected = node.selected
-        BaseIconSetup(control, data, selected)
-
+    local function SetupNode(node, control, categoryData, open)
+        control.text:SetText(categoryData.name)
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
-        control.text:SetText(data.name)
-        control:SetSelected(selected)
 
-        local isLocked = data.activityFinderObject and (data.activityFinderObject:GetLevelLockInfo() or data.activityFinderObject:GetNumLocations() == 0)
-        isLocked = isLocked or (data.isZoneStories and ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil)
+        local disabled = false
+        if categoryData then
+            disabled = categoryData.activityFinderObject and (categoryData.activityFinderObject:GetLevelLockInfo() or categoryData.activityFinderObject:GetNumLocations() == 0) or false
+            disabled = disabled or (categoryData.isZoneStories and ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil) or false
+        end
 
-        node:SetEnabled(not isLocked)
-        ZO_IconHeader_Setup(control, selected, not isLocked)
+        local selected = node.selected or open
+        RefreshNode(control, categoryData, selected, not disabled)
     end
 
-    local function TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
+    local function SetupParentNode(node, control, categoryData, open, userRequested)
+        SetupNode(node, control, categoryData, open)
+
+        if open and userRequested then
+            self.navigationTree:SelectFirstChild(node)
+        end
+    end
+
+    local function SetupChildNode(node, control, categoryData, open)
+        control:SetSelected(false)
+        control:SetText(categoryData.name)
+    end
+
+    local function OnNodeSelected(control, categoryData, selected, reselectingDuringRebuild)
         control:SetSelected(selected)
 
-         if selected then
-            if data.activityFinderObject then
+        if selected then
+            if categoryData.activityFinderObject then
                 ZO_ACTIVITY_FINDER_ROOT_MANAGER:ClearSelections()
             end
 
@@ -82,18 +103,23 @@ function GroupMenu_Keyboard:InitializeCategories()
                     SCENE_MANAGER:RemoveFragment(self.currentCategoryFragment)
                 end
 
-                SCENE_MANAGER:AddFragment(data.categoryFragment)
+                -- Order matters:
+                if categoryData.onTreeEntrySelected then
+                    categoryData.onTreeEntrySelected()
+                end
+                SCENE_MANAGER:AddFragment(categoryData.categoryFragment)
             end
 
-            self.currentCategoryFragment = data.categoryFragment
+            self.currentCategoryFragment = categoryData.categoryFragment
         end
 
-        BaseIconSetup(control, data, selected)
-        ZO_IconHeader_Setup(control, selected, control.node:IsEnabled())
+        RefreshNode(control, categoryData, selected, control.enabled)
     end
 
-    self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_CategoryHeader", TreeIconEntrySetup, TreeEntryOnSelected)
-
+    local CHILD_SPACING = 0
+    self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_StatusIconHeader", SetupParentNode, nil, nil, ZO_GROUP_MENU_KEYBOARD_TREE_SUBCATEGORY_INDENT, CHILD_SPACING)
+    self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_StatusIconChildlessHeader", SetupNode, OnNodeSelected)
+    self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_Subcategory", SetupChildNode, OnNodeSelected)
     self.navigationTree:SetExclusive(true)
     self.navigationTree:SetOpenAnimation("ZO_TreeOpenAnimation")
 end
@@ -187,49 +213,65 @@ do
     end
 end
 
-function GroupMenu_Keyboard:AddCategory(data, priority)
-
+do
     local function PrioritySort(item1, item2)
-        if not item1.priority and not item2.priority then
-            return item1.data.name < item2.data.name
-        end
-
-        if item1.priority and not item2.priority then
-            return true
-        end
-
-        if not item1.priority and item2.priority then
-            return false
-        end
-
-        return item1.priority < item2.priority
-    end
-
-    self.navigationTree:Reset()
-
-    local nodeData = 
-    {
-        priority = priority,
-        data = data,
-    }
-
-    table.insert(self.nodeList, nodeData)
-    table.sort(self.nodeList, PrioritySort)
-
-    for i, curNodeData in ipairs(self.nodeList) do
-        local node = self.navigationTree:AddNode("ZO_GroupMenuKeyboard_CategoryHeader", curNodeData.data)
-        self.categoryFragmentToNodeLookup[curNodeData.data.categoryFragment] = node
-
-        if curNodeData.data.activityFinderObject then
-            node.control.OnMouseEnter = function(control) self:OnActivityCategoryMouseEnter(control, curNodeData.data) end
-        end
-
-        if curNodeData.data.isZoneStories then
-            node.control.OnMouseEnter = function(control) self:OnZoneStoriesCategoryMouseEnter(control, curNodeData.data) end
+        local priority1, priority2 = item1.priority, item2.priority
+        if priority1 == priority2 then
+            return item1.name < item2.name
+        elseif priority1 and priority2 then
+            return priority1 < priority2
+        else
+            return priority1 ~= nil
         end
     end
 
-    self.navigationTree:Commit()
+    function GroupMenu_Keyboard:AddCategoryTreeNode(nodeData, parentNode)
+        local nodeTemplate
+        if parentNode then
+            nodeTemplate = "ZO_GroupMenuKeyboard_Subcategory"
+        elseif nodeData.children then
+            nodeTemplate = "ZO_GroupMenuKeyboard_StatusIconHeader"
+        else
+            nodeTemplate = "ZO_GroupMenuKeyboard_StatusIconChildlessHeader"
+        end
+
+        local node = self.navigationTree:AddNode(nodeTemplate, nodeData, parentNode)
+        if nodeData.categoryFragment then
+            local existingFragmentNode = self.categoryFragmentToNodeLookup[nodeData.categoryFragment]
+            if not existingFragmentNode or existingFragmentNode:GetData().priority > nodeData.priority then
+                self.categoryFragmentToNodeLookup[nodeData.categoryFragment] = node
+            end
+        end
+
+        if nodeData.activityFinderObject then
+            node.control.OnMouseEnter = function(control) self:OnActivityCategoryMouseEnter(control, nodeData) end
+        elseif nodeData.isZoneStories then
+            node.control.OnMouseEnter = function(control) self:OnZoneStoriesCategoryMouseEnter(control, nodeData) end
+        end
+
+        return node
+    end
+
+    function GroupMenu_Keyboard:AddCategoryTreeNodes(nodeDataList, parentNode)
+        table.sort(nodeDataList, PrioritySort)
+
+        for index, nodeData in ipairs(nodeDataList) do
+            local node = self:AddCategoryTreeNode(nodeData, parentNode)
+
+            if nodeData.children then
+                self:AddCategoryTreeNodes(nodeData.children, node)
+            end
+        end
+    end
+
+    function GroupMenu_Keyboard:AddCategory(data)
+        self.navigationTree:Reset()
+
+        table.insert(self.nodeList, data)
+        self:AddCategoryTreeNodes(self.nodeList)
+
+        self.navigationTree:Commit()
+    end
 end
 
 function GroupMenu_Keyboard:RefreshCategories()

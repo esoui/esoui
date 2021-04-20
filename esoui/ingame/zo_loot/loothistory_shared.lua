@@ -8,15 +8,21 @@ LOOT_ENTRY_TYPE_SKILL_EXPERIENCE = 7
 LOOT_ENTRY_TYPE_CROWN_CRATE = 8
 LOOT_ENTRY_TYPE_KEEP_REWARD = 9
 LOOT_ENTRY_TYPE_ANTIQUITY_LEAD = 10
+LOOT_ENTRY_TYPE_COMPANION_EXPERIENCE = 11
+LOOT_ENTRY_TYPE_COMPANION_RAPPORT = 12
 
 LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
 LOOT_LEADERBOARD_SCORE_ICON = "EsoUI/Art/Icons/Battleground_Score.dds"
+LOOT_RAPPORT_INCREASE_ICON = "EsoUI/Art/HUD/lootHistory_icon_rapportIncrease.dds"
+LOOT_RAPPORT_DECREASE_ICON = "EsoUI/Art/HUD/lootHistory_icon_rapportDecrease.dds"
 
 ZO_LOOT_HISTORY_DISPLAY_TYPE_CRAFT_BAG = "craftBag"
 ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN = "stolen"
 ZO_LOOT_HISTORY_DISPLAY_TYPE_COLLECTIONS = "collections"
 ZO_LOOT_HISTORY_DISPLAY_TYPE_ANTIQUITIES = "antiquities"
 ZO_LOOT_HISTORY_DISPLAY_TYPE_CROWN_CRATE = "crownCrate"
+
+local USE_LOWERCASE_NUMBER_SUFFIXES = false
 
 --
 --[[ ZO_LootHistory_Shared ]]--
@@ -79,6 +85,12 @@ do
         else
             control.backgroundHighlight:SetHidden(true)
         end
+
+        if data.backgroundColor then
+            control.background:SetColor(data.backgroundColor:UnpackRGB())
+        else
+            control.background:SetColor(ZO_BLACK:UnpackRGB())
+        end
     end
 
     local function AreEntriesEqual(entry1, entry2)
@@ -110,6 +122,10 @@ do
             return false -- special info, cannot be merged
         elseif data1EntryType == LOOT_ENTRY_TYPE_ANTIQUITY_LEAD then
             return false -- leads don't stack
+        elseif data1EntryType == LOOT_ENTRY_TYPE_COMPANION_EXPERIENCE then
+            return data1.companionId == data2.companionId
+        elseif data1EntryType == LOOT_ENTRY_TYPE_COMPANION_RAPPORT then
+            return false --Rapport updates are always on their own line
         else
             return true
         end
@@ -120,8 +136,16 @@ do
         local currentEntryData = currentEntry.lines[1]
         local newEntryData = newEntry.lines[1]
         local control = currentEntryData.control
-
-        if currentEntryData.entryType ~= LOOT_ENTRY_TYPE_MEDAL and currentEntryData.entryType ~= LOOT_ENTRY_TYPE_SCORE then
+        
+        if currentEntryData.entryType == LOOT_ENTRY_TYPE_COMPANION_EXPERIENCE then
+            currentEntryData.gainedXp = currentEntryData.gainedXp + newEntryData.gainedXp
+            local formattedXpAdded = ZO_AbbreviateAndLocalizeNumber(currentEntryData.gainedXp, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
+            currentEntryData.text = zo_strformat(SI_LOOT_HISTORY_COMPANION_EXPERIENCE_GAIN_FORMATTER, formattedXpAdded, currentEntryData.companionName)
+            if control then
+                SetupEntryText(control, currentEntryData)
+                ZO_CraftingResults_Base_PlayPulse(control.icon)
+            end
+        elseif currentEntryData.entryType ~= LOOT_ENTRY_TYPE_MEDAL and currentEntryData.entryType ~= LOOT_ENTRY_TYPE_SCORE then
             currentEntryData.stackCount = currentEntryData.stackCount + newEntryData.stackCount
             if control and control.iconOverlayText then
                 SetupEntryText(control, currentEntryData)
@@ -367,6 +391,52 @@ function ZO_LootHistory_Shared:AddAntiquityLeadEntry(antiquityId)
     end
 end
 
+do
+    local COMPANION_NAME_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_UNIT_REACTION_COLOR, UNIT_REACTION_COLOR_COMPANION))
+    function ZO_LootHistory_Shared:AddCompanionXpEntry(companionId, xpAdded)
+        local collectibleId = GetCompanionCollectibleId(companionId)
+        local formattedXpAdded = ZO_AbbreviateAndLocalizeNumber(xpAdded, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
+        local colorizedCompanionName = COMPANION_NAME_COLOR:Colorize(GetCompanionName(companionId))
+        local lootData =
+        {
+            text = zo_strformat(SI_LOOT_HISTORY_COMPANION_EXPERIENCE_GAIN_FORMATTER, formattedXpAdded, colorizedCompanionName),
+            icon = GetCollectibleIcon(collectibleId),
+            stackCount = 1,
+            color = ZO_SELECTED_TEXT,
+            companionId = companionId,
+            companionName = colorizedCompanionName,
+            gainedXp = xpAdded,
+            entryType = LOOT_ENTRY_TYPE_COMPANION_EXPERIENCE,
+            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+        }
+        local lootEntry = self:CreateLootEntry(lootData)
+        lootEntry.isPersistent = true
+        self:InsertOrQueue(lootEntry)
+    end
+
+    local RAPPORT_INCREASE_BACKGROUND_COLOR = ZO_ColorDef:New("102d0b")
+    local RAPPORT_DECREASE_BACKGROUND_COLOR = ZO_ColorDef:New("3f0a0a")
+    function ZO_LootHistory_Shared:AddCompanionRapportEntry(companionId, isIncrease)
+        local rapportFormatter = isIncrease and SI_LOOT_HISTORY_COMPANION_RAPPORT_GAIN_FORMATTER or SI_LOOT_HISTORY_COMPANION_RAPPORT_LOSS_FORMATTER
+        local colorizedCompanionName = COMPANION_NAME_COLOR:Colorize(GetCompanionName(companionId))
+        local lootData =
+        {
+            text = zo_strformat(rapportFormatter, colorizedCompanionName),
+            icon = isIncrease and LOOT_RAPPORT_INCREASE_ICON or LOOT_RAPPORT_DECREASE_ICON,
+            color = ZO_SELECTED_TEXT,
+            backgroundColor = isIncrease and RAPPORT_INCREASE_BACKGROUND_COLOR or RAPPORT_DECREASE_BACKGROUND_COLOR,
+            companionId = companionId,
+            companionName = colorizedCompanionName,
+            entryType = LOOT_ENTRY_TYPE_COMPANION_RAPPORT,
+            showIconOverlayText = false,
+        }
+        local lootEntry = self:CreateLootEntry(lootData)
+        lootEntry.isPersistent = true
+        self:InsertOrQueue(lootEntry)
+    end
+end
+
 function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual, isStolen)
     if self:CanShowItemsInHistory() then
         local itemName
@@ -501,8 +571,20 @@ function ZO_LootHistory_Shared:OnAntiquityLeadAcquired(antiquityId)
     self:AddAntiquityLeadEntry(antiquityId)
 end
 
+function ZO_LootHistory_Shared:OnCompanionExperienceGainUpdate(companionId, level, previousXP, currentXP)
+    local gainedXP = currentXP - previousXP
+    if gainedXP > 0 then
+        self:AddCompanionXpEntry(companionId, gainedXP)
+    end
+end
+
+function ZO_LootHistory_Shared:OnCompanionRapportUpdate(companionId, previousRapport, currentRapport)
+    if currentRapport ~= previousRapport then
+        self:AddCompanionRapportEntry(companionId, currentRapport > previousRapport)
+    end
+end
+
 do
-    local USE_LOWERCASE_NUMBER_SUFFIXES = false
     function ZO_LootHistory_Shared.GetStackCountStringFromData(data)
         return ZO_AbbreviateAndLocalizeNumber(data.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
     end

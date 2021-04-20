@@ -17,7 +17,8 @@ end
 function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors()
     ZO_HousingFurnitureList_Gamepad.InitializeKeybindStripDescriptors(self)
 
-    self:AddFurnitureListKeybind({    
+    self:AddFurnitureListKeybind({
+        order = 0,
         name =  GetString(SI_HOUSING_EDITOR_MODIFY),
         keybind = "UI_SHORTCUT_PRIMARY",
         callback =  function() 
@@ -32,6 +33,22 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
     })
 
     self:AddFurnitureListKeybind({    
+        order = 1,
+        name =  GetString(SI_HOUSING_EDITOR_PRECISION_EDIT),
+        keybind = "HOUSING_EDITOR_SENARY_ACTION",
+        callback =  function()
+                        local targetData = self.furnitureList.list:GetTargetData()
+                        if targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+                            ZO_HousingFurnitureBrowser_Base.SelectNodeForPrecisionEdit(targetData.furnitureObject)
+                        else
+                            ZO_HousingFurnitureBrowser_Base.SelectFurnitureForPrecisionEdit(targetData.furnitureObject)
+                        end
+                        SCENE_MANAGER:HideCurrentScene()
+                    end,
+    })
+
+    self:AddFurnitureListKeybind({    
+        order = 4,
         name =  function()
                     local targetData = self.furnitureList.list:GetTargetData()
                     if targetData and targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
@@ -52,6 +69,7 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
     })
 
     self:AddFurnitureListKeybind({
+        order = 6,
         name = GetString(SI_WORLD_MAP_ACTION_SET_PLAYER_WAYPOINT),
         keybind = "UI_SHORTCUT_RIGHT_STICK",
         callback = function()
@@ -69,9 +87,9 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
     })
 
     self:AddFurnitureListKeybind({
+        order = 5,
         name =  GetString(SI_HOUSING_FURNITURE_SET_STARTING_NODE),
         keybind = "UI_SHORTCUT_QUATERNARY",
-        order = 50,
         callback =  function() 
                         local targetData = self.furnitureList.list:GetTargetData()
                         ZO_HousingFurnitureBrowser_Base.SetAsStartingNode(targetData.furnitureObject)

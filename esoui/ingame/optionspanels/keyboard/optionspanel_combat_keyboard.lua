@@ -11,6 +11,22 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Combat_ShowActionBarTimers",
+    settingType = SETTING_TYPE_UI,
+    settingId = UI_SETTING_SHOW_ACTION_BAR_TIMERS,
+    header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Combat_ShowActionBarBackRow",
+    settingType = SETTING_TYPE_UI,
+    settingId = UI_SETTING_SHOW_ACTION_BAR_BACK_ROW,
+    header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Combat_ShowResourceBars",
     settingType = SETTING_TYPE_UI,
     settingId = UI_SETTING_SHOW_RESOURCE_BARS,

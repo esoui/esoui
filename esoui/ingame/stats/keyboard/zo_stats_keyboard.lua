@@ -57,7 +57,8 @@ function ZO_Stats:OnShowing()
         self.scrollChild = self.scroll:GetNamedChild("ScrollChild")
         self.attributeControls = {}
         self.statEntries = {}
-        self.pendingEquipOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
+        self.actorCategory = GAMEPLAY_ACTOR_CATEGORY_PLAYER
+        self.pendingEquipOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(self.actorCategory)
 
         self:SetUpTitleSection()
 
@@ -110,11 +111,11 @@ function ZO_Stats:OnHiding()
         self.isAttributesHeaderTitleInScrollBounds = nil
     end
 
-    if self.pendingEquipOutfitIndex ~= ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex() then
+    if self.pendingEquipOutfitIndex ~= ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(self.actorCategory) then
         if self.pendingEquipOutfitIndex then
-            ZO_OUTFIT_MANAGER:EquipOutfit(self.pendingEquipOutfitIndex)
+            ZO_OUTFIT_MANAGER:EquipOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER, self.pendingEquipOutfitIndex)
         else
-            UnequipOutfit()
+            ZO_OUTFIT_MANAGER:UnequipOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
         end
     end
 end
@@ -242,7 +243,7 @@ function ZO_Stats:SetEquipmentBonusTooltip()
     InformationTooltip:AddVerticalPadding(10)
 
     if self.equipmentBonus.value < EQUIPMENT_BONUS_SUPERIOR and self.equipmentBonus.lowestEquipSlot ~= EQUIP_SLOT_NONE then
-        local equipSlotHasItem = select(2, GetEquippedItemInfo(self.equipmentBonus.lowestEquipSlot))
+        local equipSlotHasItem = GetWornItemInfo(BAG_WORN, self.equipmentBonus.lowestEquipSlot)
         local lowestItemText
         if equipSlotHasItem then
             local lowestItemLink = GetItemLink(BAG_WORN, self.equipmentBonus.lowestEquipSlot)
@@ -288,7 +289,7 @@ function ZO_Stats:CreateBackgroundSection()
     outfitDropdown:SetSortsItems(false)
 
     local function UpdateEquippedOutfit()
-        self.pendingEquipOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
+        self.pendingEquipOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(self.actorCategory)
         self:UpdateOutfitDropdownSelection(outfitDropdown)
     end
 
@@ -389,7 +390,7 @@ do
     local UNEQUIP_OUTFIT = nil
 
     function ZO_Stats:UpdateOutfitDropdownSelection(dropdown)
-        local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
+        local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(self.actorCategory)
         local itemEntries = dropdown:GetItems()
         for i, entry in ipairs(itemEntries) do
             if equippedOutfitIndex == entry.outfitIndex then
@@ -404,12 +405,12 @@ do
 
         local function OnUnequipOutfitSelected()
             self.pendingEquipOutfitIndex = UNEQUIP_OUTFIT
-            ITEM_PREVIEW_KEYBOARD:PreviewUnequipOutfit()
+            ITEM_PREVIEW_KEYBOARD:PreviewUnequipOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
         end
     
         local function OnOutfitEntrySelected(_, _, entry)
             self.pendingEquipOutfitIndex = entry.outfitIndex
-            ITEM_PREVIEW_KEYBOARD:PreviewOutfit(entry.outfitIndex)
+            ITEM_PREVIEW_KEYBOARD:PreviewOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER, entry.outfitIndex)
         end
 
         local function OnUnlockNewOutfitsSelected(comboBox, name, entry, selectionChanged, oldEntry)
@@ -420,12 +421,12 @@ do
         local unequippedOutfitEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), OnUnequipOutfitSelected)
         dropdown:AddItem(unequippedOutfitEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
-        local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
+        local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(self.actorCategory)
         local defaultEntry = unequippedOutfitEntry
 
-        local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits()
+        local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits(self.actorCategory)
         for outfitIndex = 1, numOutfits do
-            local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
+            local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(self.actorCategory, outfitIndex)
             local entry = ZO_ComboBox:CreateItemEntry(outfitManipulator:GetOutfitName(), OnOutfitEntrySelected)
             entry.outfitIndex = outfitIndex
             dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
@@ -439,7 +440,8 @@ do
         end
 
         dropdown:UpdateItems()
-        dropdown:SelectItem(defaultEntry)
+        local IGNORE_CALLBACKS = true
+        dropdown:SelectItem(defaultEntry, IGNORE_CALLBACKS)
     end
 end
 

@@ -1,10 +1,68 @@
 ZO_GamepadSkills = ZO_Gamepad_ParametricList_Screen:Subclass()
 
+ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE = 1
+ZO_SKILL_ABILITY_DISPLAY_VIEW = 2
 
 ZO_GAMEPAD_SKILLS_SKILL_LIST_BROWSE_MODE = 1
-ZO_GAMEPAD_SKILLS_BUILD_PLANNER_ASSIGN_MODE = 2
-ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE = 3
-ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE = 4
+ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE = 2
+ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE = 3
+
+-------------------------------
+-- Gamepad Skills quick menu --
+-------------------------------
+
+-- This is used by the action bar to display and select from any current slottable skill, across multiple skill lines
+ZO_GamepadAssignableActionBar_PlayerQuickMenu = ZO_GamepadAssignableActionBar_QuickMenu_Base:Subclass()
+
+function ZO_GamepadAssignableActionBar_PlayerQuickMenu:SetupListTemplates()
+    local function MenuAbilityEntryTemplateSetup(control, skillEntry, selected, reselectingDuringRebuild, enabled, activated)ZO_GamepadSkillEntryTemplate_SetEntryInfoFromAllocator(skillEntry)
+        ZO_GamepadSkillEntryTemplate_SetEntryInfoFromAllocator(skillEntry)
+        ZO_SharedGamepadEntry_OnSetup(control, skillEntry, selected, reselectingDuringRebuild, enabled, activated)
+        ZO_GamepadSkillEntryTemplate_Setup(control, skillEntry, selected, activated, ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE)
+    end
+
+    local function MenuEntryHeaderTemplateSetup(control, skillEntry, selected, selectedDuringRebuild, enabled, activated)
+        control.header:SetText(skillEntry:GetHeader())
+        local skillData = skillEntry.skillData
+        control.skillRankHeader:SetText(skillData:GetSkillLineData():GetCurrentRank())
+    end
+
+    self.list:AddDataTemplate("ZO_GamepadSimpleAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsSkillEqual)
+    self.list:AddDataTemplateWithHeader("ZO_GamepadSimpleAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsSkillEqual, "ZO_GamepadSimpleAbilityEntryHeaderTemplate", MenuEntryHeaderTemplateSetup)
+end
+
+do
+    local function IsSkillPurchased(skillData)
+        return skillData:GetPointAllocator():IsPurchased()
+    end
+    local function IsSkillNormalActive(skillData)
+        return skillData:IsActive() and not skillData:IsUltimate()
+    end
+    local function IsSkillUltimate(skillData)
+        return skillData:IsUltimate()
+    end
+    function ZO_GamepadAssignableActionBar_PlayerQuickMenu:ForEachSlottableSkill(visitor)
+        local skillLineFilters = { ZO_SkillLineData.IsAvailable }
+        if ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarCategory() == HOTBAR_CATEGORY_WEREWOLF then
+            table.insert(skillLineFilters, ZO_SkillLineData.IsWerewolf)
+        end
+
+        local shouldShowUltimateSkills = self.assignableActionBar:IsUltimateSelected()
+        local skillDataFilters = { IsSkillPurchased, shouldShowUltimateSkills and IsSkillUltimate or IsSkillNormalActive }
+
+        for _, skillTypeData in SKILLS_DATA_MANAGER:SkillTypeIterator() do
+            for _, skillLineData in skillTypeData:SkillLineIterator(skillLineFilters) do
+                for _, skillData in skillLineData:SkillIterator(skillDataFilters) do
+                    visitor(skillTypeData, skillLineData, skillData)
+                end
+            end
+        end
+    end
+end
+
+--------------------
+-- Gamepad Skills --
+--------------------
 
 function ZO_GamepadSkills:New(...)
     local gamepadSkills = ZO_Gamepad_ParametricList_Screen.New(self, ...)
@@ -135,46 +193,6 @@ function ZO_GamepadSkills:Initialize(control)
         end
     end)
 
-    local ALWAYS_ANIMATE = true
-    GAMEPAD_SKILLS_BUILD_PLANNER_FRAGMENT = ZO_FadeSceneFragment:New(self.control:GetNamedChild("BuildPlannerContainer"), ALWAYS_ANIMATE)
-    GAMEPAD_SKILLS_BUILD_PLANNER_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING then
-            self.modeBeforeBuildPlannerShow = self.mode
-            if self.modeBeforeBuildPlannerShow == ZO_GAMEPAD_SKILLS_SKILL_LIST_BROWSE_MODE then
-                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.categoryKeybindStripDescriptor)
-            elseif self.modeBeforeBuildPlannerShow == ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE then
-                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
-            end
-
-            self:SetMode(ZO_GAMEPAD_SKILLS_BUILD_PLANNER_ASSIGN_MODE)
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.buildPlannerKeybindStripDescriptor)
-            self.buildPlannerListRefreshGroup:TryClean()
-        elseif newState == SCENE_FRAGMENT_HIDING then
-            self.assignableActionBar:ClearTargetSkill()
-
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
-            self.buildPlannerList:Deactivate()
-
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.buildPlannerKeybindStripDescriptor)
-         
-            if self.modeBeforeBuildPlannerShow == ZO_GAMEPAD_SKILLS_SKILL_LIST_BROWSE_MODE then
-                KEYBIND_STRIP:AddKeybindButtonGroup(self.categoryKeybindStripDescriptor)
-            elseif self.modeBeforeBuildPlannerShow == ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE then
-                KEYBIND_STRIP:AddKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
-            end
-            self:SetMode(self.modeBeforeBuildPlannerShow)
-            self.modeBeforeBuildPlannerShow = nil
-        end
-    end)
-
-    GAMEPAD_SKILLS_LINE_PREVIEW_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadSkillsLinePreview)
-    GAMEPAD_SKILLS_LINE_PREVIEW_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING then
-            self.lineFilterPreviewListRefreshGroup:MarkDirty("List")
-            self.lineFilterPreviewListRefreshGroup:TryClean()
-        end
-    end)
-
     GAMEPAD_SKILLS_SCENE_GROUP = ZO_SceneGroup:New("gamepad_skills_root", "gamepad_skills_line_filter")
     GAMEPAD_SKILLS_SCENE_GROUP:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_GROUP_SHOWING then
@@ -195,8 +213,6 @@ function ZO_GamepadSkills:Initialize(control)
     self:AddSkillsAdvisorDescriptor(self.categoryKeybindStripDescriptor)
     self.lineFilterKeybindStripDescriptor = { alignment = KEYBIND_STRIP_ALIGN_LEFT }
     self:AddWeaponSwapDescriptor(self.lineFilterKeybindStripDescriptor)
-    self.buildPlannerKeybindStripDescriptor = {}
-    self:AddWeaponSwapDescriptor(self.buildPlannerKeybindStripDescriptor)
 end
 
 function ZO_GamepadSkills.OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
@@ -234,73 +250,20 @@ function ZO_GamepadSkills:PerformDeferredInitialization()
     self:InitializeAssignableActionBar()
     self:InitializeCategoryList()
     self:InitializeLineFilterList()
-    self:InitializeLineFilterPreviewList()
     self:InitializeMorphDialog()
     self:InitializePurchaseAndUpgradeDialog()
     self:InitializeAttributeDialog()
     self:InitializeRespecConfirmationGoldDialog()
     self:InitializeConfirmClearAllDialog()
-    self:InitializeBuildPlanner()
+    self:InitializeQuickMenu()
     self:InitializeCategoryKeybindStrip()
     self:InitializeLineFilterKeybindStrip()
-    self:InitializeBuildPlannerKeybindStrip()
 
     self:InitializeRefreshGroups()
     self:InitializeEvents()
 
     self:RefreshPointsDisplay()
     self:RefreshRespecModeBindingsDisplay()
-end
-
-local ACTION_NONE = 1
-local ACTION_PURCHASE = 2
-local ACTION_SELL = 3
-local ACTION_INCREASE_RANK = 4
-local ACTION_DECREASE_RANK = 5
-local ACTION_MORPH = 6
-local ACTION_UNMORPH = 7
-local ACTION_REMORPH = 8
-
-local POINT_ACTION_TEXTURES =
-{
-    [ACTION_PURCHASE] = "EsoUI/Art/Progression/Gamepad/gp_purchase.dds",
-    [ACTION_SELL] = "EsoUI/Art/Buttons/Gamepad/gp_minus.dds",
-    [ACTION_INCREASE_RANK] = "EsoUI/Art/Progression/Gamepad/gp_purchase.dds",
-    [ACTION_DECREASE_RANK] = "EsoUI/Art/Buttons/Gamepad/gp_minus.dds",
-    [ACTION_MORPH] = "EsoUI/Art/Progression/Gamepad/gp_morph.dds",
-    [ACTION_UNMORPH] = "EsoUI/Art/Buttons/Gamepad/gp_minus.dds",
-    [ACTION_REMORPH] = "EsoUI/Art/Progression/Gamepad/gp_remorph.dds",
-}
-
-local function GetIncreaseSkillAction(skillData)
-    local skillPointAllocator = skillData:GetPointAllocator()
-    if skillPointAllocator:CanPurchase() then
-        return ACTION_PURCHASE
-    elseif skillPointAllocator:CanMorph() then
-        local skillProgressionData = skillPointAllocator:GetProgressionData()
-        if skillProgressionData:IsMorph() then
-            return ACTION_REMORPH
-        else
-            return ACTION_MORPH
-        end
-    elseif skillPointAllocator:CanIncreaseRank() then
-        return ACTION_INCREASE_RANK
-    else
-        return ACTION_NONE
-    end
-end
-
-local function GetDecreaseSkillAction(skillData)
-    local skillPointAllocator = skillData:GetPointAllocator()
-    if skillPointAllocator:CanSell() then
-        return ACTION_SELL
-    elseif skillPointAllocator:CanUnmorph() then
-        return ACTION_UNMORPH
-    elseif skillPointAllocator:CanDecreaseRank() then
-        return ACTION_DECREASE_RANK
-    else
-        return ACTION_NONE
-    end
 end
 
 function ZO_GamepadSkills:InitializeHeader()
@@ -398,7 +361,7 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
             if self.assignableActionBar:IsActive() then
                 self:DeactivateCurrentList()
                 self.selectedTooltipRefreshGroup:MarkDirty("Full")
-                SCENE_MANAGER:AddFragment(GAMEPAD_SKILLS_BUILD_PLANNER_FRAGMENT)
+                self.quickMenu:Show()
                 PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
             elseif targetData and targetData.isSkillsAdvisor then
                 self:DeactivateCurrentList()
@@ -451,7 +414,7 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
 end
 
 function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
-    local function EnableWhileNotActionBarLocked()
+    local function IsActionBarEditable()
         local lockedReason = GetActionBarLockedReason()
         if lockedReason == ACTION_BAR_LOCKED_REASON_COMBAT then
             return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT)
@@ -490,7 +453,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             end
         end,
 
-        enabled = EnableWhileNotActionBarLocked,
+        enabled = IsActionBarEditable,
 
         callback = function()
             --This is confirm when respecing and assign otherwise
@@ -512,10 +475,10 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
 
     local function IncreaseSkillKeybindName()
         local skillEntry = self.lineFilterList:GetTargetData()
-        local actionType = GetIncreaseSkillAction(skillEntry.skillData)
-        if actionType == ACTION_PURCHASE or actionType == ACTION_INCREASE_RANK then
+        local actionType = skillEntry.skillData:GetPointAllocator():GetIncreaseSkillAction()
+        if actionType == ZO_SKILL_POINT_ACTION.PURCHASE or actionType == ZO_SKILL_POINT_ACTION.INCREASE_RANK then
             return GetString(SI_GAMEPAD_SKILLS_PURCHASE)
-        elseif actionType == ACTION_MORPH or actionType == ACTION_REMORPH then
+        elseif actionType == ZO_SKILL_POINT_ACTION.MORPH or actionType == ZO_SKILL_POINT_ACTION.REMORPH then
             return GetString(SI_GAMEPAD_SKILLS_MORPH)
         end
     end
@@ -523,7 +486,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
     local function IncreaseSkillKeybindVisible()
         local skillEntry = self.lineFilterList:GetTargetData()
         if skillEntry then
-            return GetIncreaseSkillAction(skillEntry.skillData) ~= ACTION_NONE
+            return skillEntry.skillData:GetPointAllocator():GetIncreaseSkillAction() ~= ZO_SKILL_POINT_ACTION.NONE
         else
             return false
         end
@@ -534,12 +497,12 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
         local skillData = skillEntry.skillData
         local skillProgressionData = skillData:GetPointAllocatorProgressionData()
 
-        local actionType = GetIncreaseSkillAction(skillData)
+        local actionType = skillData:GetPointAllocator():GetIncreaseSkillAction()
         local availablePoints = GetAvailableSkillPoints()
 
         local name = skillProgressionData:GetFormattedNameWithRank()
 
-        if actionType == ACTION_PURCHASE then
+        if actionType == ZO_SKILL_POINT_ACTION.PURCHASE then
             if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeConfirmOnPurchase() then
                 local labelData = { titleParams = { availablePoints }, mainTextParams = { name } }
                 local dialogData = { purchaseSkillProgressionData = skillProgressionData, }
@@ -548,7 +511,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             else
                 skillData:GetPointAllocator():Purchase()
             end
-        elseif actionType == ACTION_INCREASE_RANK then
+        elseif actionType == ZO_SKILL_POINT_ACTION.INCREASE_RANK then
             if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeConfirmOnIncreaseRank() then
                 local labelData = { titleParams = { availablePoints }, mainTextParams = { name } }
                 local dialogData = { currentSkillProgressionData = skillProgressionData }
@@ -557,7 +520,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             else
                 skillData:GetPointAllocator():IncreaseRank()
             end
-        elseif actionType == ACTION_MORPH or actionType == ACTION_REMORPH then
+        elseif actionType == ZO_SKILL_POINT_ACTION.MORPH or actionType == ZO_SKILL_POINT_ACTION.REMORPH then
             local morphSkillData = skillProgressionData:GetSkillData()
             local baseMorphSkillProgressionData = morphSkillData:GetMorphData(MORPH_SLOT_BASE)
             local mainTextData = { titleParams = { availablePoints } }
@@ -572,11 +535,11 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
         local skillEntry = self.lineFilterList:GetTargetData()
         if skillEntry then
             local skillData = skillEntry.skillData
-            local actionType = GetDecreaseSkillAction(skillData)
-            if actionType ~= ACTION_NONE then
+            local skillPointAllocator = skillData:GetPointAllocator()
+            local actionType = skillPointAllocator:GetDecreaseSkillAction()
+            if actionType ~= ZO_SKILL_POINT_ACTION.NONE then
                 return true
             elseif SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_MORPHS_ONLY and skillData:IsActive() then
-                local skillPointAllocator = skillData:GetPointAllocator()
                 if skillPointAllocator:IsPurchased() and skillPointAllocator:GetMorphSlot() == MORPH_SLOT_BASE and not skillPointAllocator:CanSell() then
                     return false, GetString(SI_SKILL_RESPEC_MORPHS_ONLY_CANNOT_SELL_BASE_ABILITY)
                 end
@@ -590,13 +553,13 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
         local skillData = skillEntry.skillData
         local skillPointAllocator = skillData:GetPointAllocator()
 
-        local actionType = GetDecreaseSkillAction(skillData)
+        local actionType = skillPointAllocator:GetDecreaseSkillAction()
 
-        if actionType == ACTION_SELL then
+        if actionType == ZO_SKILL_POINT_ACTION.SELL then
             skillPointAllocator:Sell()
-        elseif actionType == ACTION_DECREASE_RANK then
+        elseif actionType == ZO_SKILL_POINT_ACTION.DECREASE_RANK then
             skillPointAllocator:DecreaseRank()
-        elseif actionType == ACTION_UNMORPH then
+        elseif actionType == ZO_SKILL_POINT_ACTION.UNMORPH then
             skillPointAllocator:Unmorph()
         end
     end
@@ -606,8 +569,8 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
     {
         name = function()
             local skillEntry = self.lineFilterList:GetTargetData()
-            local action = GetDecreaseSkillAction(skillEntry.skillData)
-            return zo_iconFormat(POINT_ACTION_TEXTURES[action], "100%", "100%")
+            local action = skillEntry.skillData:GetPointAllocator():GetDecreaseSkillAction()
+            return zo_iconFormat(ZO_Skills_GetGamepadSkillPointActionIcon(action), "100%", "100%")
         end,
 
         keybind = "UI_SHORTCUT_LEFT_SHOULDER",
@@ -628,8 +591,8 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
     {
         name = function()
             local skillEntry = self.lineFilterList:GetTargetData()
-            local action = GetIncreaseSkillAction(skillEntry.skillData)
-            return zo_iconFormat(POINT_ACTION_TEXTURES[action], "100%", "100%")
+            local action = skillEntry.skillData:GetPointAllocator():GetIncreaseSkillAction()
+            return zo_iconFormat(ZO_Skills_GetGamepadSkillPointActionIcon(action), "100%", "100%")
         end,
 
         keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
@@ -668,7 +631,20 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             end
         end,
 
-        enabled = EnableWhileNotActionBarLocked,
+        enabled = function()
+            local canEdit, lockText = IsActionBarEditable()
+            if not canEdit then
+                return false, lockText
+            end
+            if self.assignableActionBar:IsActive() then
+                local slotIndex = self.assignableActionBar:GetSelectedSlotIndex()
+                local result = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():GetExpectedSlotEditResult(slotIndex)
+                if result ~= HOT_BAR_RESULT_SUCCESS then
+                    return false, GetString("SI_HOTBARRESULT", result)
+                end
+            end
+            return true
+        end,
 
         callback = function()
             if self.mode == ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE then
@@ -681,7 +657,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
                 --Don't set mode back to ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE til OnAbilityFinalizedCallback says everything worked
             elseif self.assignableActionBar:IsActive() then
                 self:DeactivateCurrentList()
-                SCENE_MANAGER:AddFragment(GAMEPAD_SKILLS_BUILD_PLANNER_FRAGMENT)
+                self.quickMenu:Show()
                 PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
             else
                 IncreaseSkillKeybindCallback()
@@ -701,22 +677,6 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
         end
     end)
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.lineFilterKeybindStripDescriptor, self.lineFilterList, IsEntryHeader)
-end
-
-function ZO_GamepadSkills:InitializeBuildPlannerKeybindStrip()
-    ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.buildPlannerKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON,
-        function() --callback
-            self:AssignSelectedBuildPlannerAbility()
-        end,
-        GetString(SI_GAMEPAD_SKILLS_ASSIGN) --name
-    )
-    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.buildPlannerKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, 
-        function()
-            SCENE_MANAGER:RemoveFragment(GAMEPAD_SKILLS_BUILD_PLANNER_FRAGMENT)
-            PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-        end)
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.buildPlannerKeybindStripDescriptor, self.buildPlannerList)
 end
 
 function ZO_GamepadSkills:AddWeaponSwapDescriptor(descriptor)
@@ -755,39 +715,15 @@ function ZO_GamepadSkills:AddSkillsAdvisorDescriptor(descriptor)
 end
 
 function ZO_GamepadSkills:InitializeAssignableActionBar()
-    local actionBarControl = CreateControlFromVirtual("$(parent)AssignableActionBar", self.header, "ZO_GamepadSkillsActionBarTemplate")
-    local Y_OFFSET = 60
-    actionBarControl:SetAnchor(TOP, self.header:GetNamedChild("Message"), BOTTOM, 0, Y_OFFSET)
-    --Bg is child of Toplevel so it isn't cut off by scroll mask.
+    local actionBarControl = self.header:GetNamedChild("AssignableActionBar")
     local actionBarBg = self.control:GetNamedChild("Bg")
     actionBarBg:SetAnchor(TOPLEFT, actionBarControl, TOPLEFT, 0, -12)
     actionBarBg:SetAnchor(BOTTOMRIGHT, actionBarControl, BOTTOMRIGHT, 0, 30)
 
     self.assignableActionBar = ZO_AssignableActionBar:New(actionBarControl)
-    self.assignableActionBar:SetOnAbilityFinalizedCallback(function()
-        if self.mode == ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE then
-            self.assignableActionBar:ClearTargetSkill()
-            self:SetMode(ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE)
-        end
-    end)
-
     self:SetupHeaderFocus(self.assignableActionBar)
 
-    local function OnSelectedActionBarButtonChanged(actionBar, didSlotTypeChange)
-        self.selectedTooltipRefreshGroup:MarkDirty("Full")
-        if actionBar:GetSelectedSlotIndex() then
-            self.assignableActionBarSelectedIndex = actionBar:GetSelectedSlotIndex()
-        end
-        if self.mode == ZO_GAMEPAD_SKILLS_BUILD_PLANNER_ASSIGN_MODE then
-            if didSlotTypeChange then
-                self.buildPlannerListRefreshGroup:MarkDirty("List")
-            end
-        end
-    end
-
-    self.assignableActionBar:SetOnSelectedDataChangedCallback(OnSelectedActionBarButtonChanged)
-
-    self.actionBarAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("GamepadSkillsSingleAssignActionBarAnimation")
+    self.actionBarAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_GamepadSkillsActionBarFocusAnimation")
 
     self.actionBarAnimation:GetAnimation(1):SetAnimatedControl(actionBarControl)
     self.actionBarAnimation:GetAnimation(2):SetAnimatedControl(actionBarBg)
@@ -799,11 +735,7 @@ function ZO_GamepadSkills:ActivateAssignableActionBarFromList()
     --Only activate the action bar if it is showing. You could start moving toward it being selected and then close the window
     --before selection happens, then the selection happens when the window is closed an the bar activates (ESO-490544).
     if not self.assignableActionBar:GetControl():IsHidden() then
-        if self.assignableActionBarSelectedIndex then
-            self.assignableActionBar:SelectButton(self.assignableActionBarSelectedIndex)
-        else
-            self.assignableActionBar:SelectFirstNormalButton()
-        end
+        self.assignableActionBar:SelectMostRecentlySelectedButton()
         self.assignableActionBar:Activate()
     end
 end
@@ -823,7 +755,7 @@ end
 function ZO_GamepadSkills:UpdateKeybinds()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.categoryKeybindStripDescriptor)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.buildPlannerKeybindStripDescriptor)
+    self.quickMenu:RefreshKeybinds()
 end
 
 function ZO_GamepadSkills:InitializeCategoryList()
@@ -835,7 +767,7 @@ function ZO_GamepadSkills:InitializeCategoryList()
             data:SetText(skillLineData:GetFormattedNameWithNumPointsAllocated())
         else
             data:SetText(skillLineData:GetFormattedName())
-        end        
+        end
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
         ZO_GamepadSkillLineEntryTemplate_Setup(control, data, selected)
         if selected then
@@ -869,29 +801,7 @@ function ZO_GamepadSkills:InitializeCategoryList()
 end
 
 local function MenuAbilityEntryTemplateSetup(control, skillEntry, selected, reselectingDuringRebuild, enabled, activated)
-    local skillData = skillEntry.skillData
-    
-    --Derive the progression specific info from the point allocator progression. This is done here so we can just do a RefreshVisible when the point allocator changes.
-    local skillPointAllocator = skillData:GetPointAllocator()
-    local skillProgressionData = skillPointAllocator:GetProgressionData()
-    local name 
-    if skillData:IsPassive() then
-        if skillData:GetNumRanks() > 1 then
-            name = skillProgressionData:GetFormattedNameWithUpgradeLevels(SI_GAMEPAD_ABILITY_NAME_AND_UPGRADE_LEVELS)
-        else
-            name = skillProgressionData:GetFormattedName()
-        end
-    else
-        name = skillProgressionData:GetFormattedNameWithRank()
-    end
-    skillEntry:SetText(name)
-    skillEntry:ClearIcons()
-    skillEntry:AddIcon(skillProgressionData:GetIcon())
-    if skillEntry.isPreview then
-        local color = skillPointAllocator:IsPurchased() and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
-        skillEntry:SetNameColors(color, color)
-    end
-
+    ZO_GamepadSkillEntryTemplate_SetEntryInfoFromAllocator(skillEntry)
     ZO_SharedGamepadEntry_OnSetup(control, skillEntry, selected, reselectingDuringRebuild, enabled, activated)
     ZO_GamepadSkillEntryTemplate_Setup(control, skillEntry, selected, activated, ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE)
 end
@@ -919,55 +829,22 @@ function ZO_GamepadSkills:InitializeLineFilterList()
     self.lineFilterRespecBindingsControl = lineFilterRespecBindingsControl
 end
 
-function ZO_GamepadSkills:InitializeLineFilterPreviewList()
-    local lineFilterPreviewContainer = ZO_GamepadSkillsLinePreview:GetNamedChild("ScrollContainer")
-    local lineFilterPreviewList = ZO_ParametricScrollList:New(lineFilterPreviewContainer:GetNamedChild("List"), PARAMETRIC_SCROLL_LIST_VERTICAL)
-    lineFilterPreviewList:SetHeaderPadding(GAMEPAD_HEADER_DEFAULT_PADDING, 0)
-    lineFilterPreviewList:SetUniversalPostPadding(5)
-    lineFilterPreviewList:SetSelectedItemOffsets(0, 0)
-    lineFilterPreviewList:SetAlignToScreenCenter(true)
-    lineFilterPreviewList:SetGradient(1, 0)
-    lineFilterPreviewList:SetGradient(2, 0)
-    
-    -- this isn't a list that we will interact with and selecting entries on it
-    -- causes sounds effects to play (and we select entries in the list in RefreshLineFilterList)
-    lineFilterPreviewList:SetSoundEnabled(false)
-
-    lineFilterPreviewList:AddDataTemplate("ZO_GamepadSingleLineAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, nil, IsSkillEqual)
-    lineFilterPreviewList:AddDataTemplateWithHeader("ZO_GamepadSingleLineAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, nil, IsSkillEqual, "ZO_GamepadMenuEntryHeaderTemplate")
-
-    self.lineFilterPreviewList = lineFilterPreviewList
-end
-
 local function MenuEntryHeaderTemplateSetup(control, skillEntry, selected, selectedDuringRebuild, enabled, activated)
     control.header:SetText(skillEntry:GetHeader())
     local skillData = skillEntry.skillData
     control.skillRankHeader:SetText(skillData:GetSkillLineData():GetCurrentRank())
 end
 
-function ZO_GamepadSkills:InitializeBuildPlanner()
-    local buildPlannerControl = self.control:GetNamedChild("BuildPlanner"):GetNamedChild("Container"):GetNamedChild("List")
-
-    self.buildPlannerList = ZO_GamepadVerticalParametricScrollList:New(buildPlannerControl)
-    self.buildPlannerList:SetAlignToScreenCenter(true)
-    self.buildPlannerList:SetHandleDynamicViewProperties(true)
-
-    self.buildPlannerList:SetNoItemText(GetString(SI_GAMEPAD_SKILLS_NO_ABILITIES))
-
-    self.buildPlannerList:AddDataTemplate("ZO_GamepadSimpleAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsSkillEqual)
-    self.buildPlannerList:AddDataTemplateWithHeader("ZO_GamepadSimpleAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsSkillEqual, "ZO_GamepadSimpleAbilityEntryHeaderTemplate", MenuEntryHeaderTemplateSetup)
-
-    local function RefreshSelectedTooltip()
-        self.selectedTooltipRefreshGroup:MarkDirty("Full")
-    end
-
-    self.buildPlannerList:SetOnSelectedDataChangedCallback(RefreshSelectedTooltip)
+function ZO_GamepadSkills:InitializeQuickMenu()
+    local quickMenuControl = self.control:GetNamedChild("QuickMenu")
+    self.quickMenu = ZO_GamepadAssignableActionBar_PlayerQuickMenu:New(quickMenuControl, self.assignableActionBar)
 
     local X_OFFSET = 30
     local Y_OFFSET = 15
-    buildPlannerControl:ClearAnchors()
-    buildPlannerControl:SetAnchor(TOPLEFT, self.header, BOTTOMLEFT, -X_OFFSET, Y_OFFSET)
-    buildPlannerControl:SetAnchor(BOTTOMRIGHT, buildPlannerControl:GetParent(), BOTTOMRIGHT, X_OFFSET, 0)
+    local quickMenuList = self.quickMenu:GetListControl()
+    quickMenuList:ClearAnchors()
+    quickMenuList:SetAnchor(TOPLEFT, self.header, BOTTOMLEFT, -X_OFFSET, Y_OFFSET)
+    quickMenuList:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT, X_OFFSET, 0)
 end
 
 function ZO_GamepadSkills:InitializeRefreshGroups()
@@ -1000,32 +877,18 @@ function ZO_GamepadSkills:InitializeRefreshGroups()
     end)
     self.lineFilterListRefreshGroup = lineFilterListRefreshGroup
 
-    --Line Filter Preview List
-    local lineFilterPreviewListRefreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
-    lineFilterPreviewListRefreshGroup:AddDirtyState("List", function()
-        self:RefreshLineFilterList(true)
-    end)
-    lineFilterPreviewListRefreshGroup:AddDirtyState("Visible", function()
-        self.lineFilterPreviewList:RefreshVisible()
-    end)
-    lineFilterPreviewListRefreshGroup:SetActive(function()
-        return GAMEPAD_SKILLS_LINE_PREVIEW_FRAGMENT:IsShowing()
-    end)
-    self.lineFilterPreviewListRefreshGroup = lineFilterPreviewListRefreshGroup
-
     --Build Planner List
-    local buildPlannerListRefreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
-    buildPlannerListRefreshGroup:AddDirtyState("List", function()
-        self:RefreshBuildPlannerList()
+    local quickMenuRefreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
+    quickMenuRefreshGroup:AddDirtyState("List", function()
+        self.quickMenu:RefreshList()
     end)
-    buildPlannerListRefreshGroup:AddDirtyState("Visible", function()
-        self.buildPlannerList:RefreshVisible()
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.buildPlannerKeybindStripDescriptor)
+    quickMenuRefreshGroup:AddDirtyState("Visible", function()
+        self.quickMenu:RefreshVisible()
     end)
-    buildPlannerListRefreshGroup:SetActive(function()
-        return GAMEPAD_SKILLS_BUILD_PLANNER_FRAGMENT:IsShowing()
+    quickMenuRefreshGroup:SetActive(function()
+        return self.quickMenu:IsShowing()
     end)
-    self.buildPlannerListRefreshGroup = buildPlannerListRefreshGroup
+    self.quickMenuRefreshGroup = quickMenuRefreshGroup
 
     --Selected Tooltip
     local selectedTooltipRefreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
@@ -1041,16 +904,14 @@ function ZO_GamepadSkills:InitializeEvents()
     --Systems that could need a refresh:
     --categoryList (RefreshCategoryList)
     --lineFilterList (RefreshLineFilterList(false))
-    --lineFilterPreviewList (RefreshLineFilterList(true))
-    --buildPlannerList (RefreshBuildPlannerList)
+    --buildPlannerList (RefreshQuickMenuList)
     --Selected Tooltip (RefreshSelectedTooltip)
     --Points Display (RefreshPointsDisplay)
 
     local function FullRebuild()
         self.categoryListRefreshGroup:MarkDirty("List")
         self.lineFilterListRefreshGroup:MarkDirty("List")
-        self.lineFilterPreviewListRefreshGroup:MarkDirty("List")
-        self.buildPlannerListRefreshGroup:MarkDirty("List")
+        self.quickMenuRefreshGroup:MarkDirty("List")
         self:RefreshPointsDisplay()
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
     end
@@ -1060,10 +921,8 @@ function ZO_GamepadSkills:InitializeEvents()
         self.categoryListRefreshGroup:MarkDirty("Visible")
         --For the locked/unlocked display on a skill
         self.lineFilterListRefreshGroup:MarkDirty("Visible", skillLineData)
-        --For the locked/unlocked display on a skill
-        self.lineFilterPreviewListRefreshGroup:MarkDirty("Visible", skillLineData)
         --For the skill line rank in the header of each section
-        self.buildPlannerListRefreshGroup:MarkDirty("Visible")
+        self.quickMenuRefreshGroup:MarkDirty("Visible")
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
     end
 
@@ -1071,7 +930,7 @@ function ZO_GamepadSkills:InitializeEvents()
         --To add the new skill line to the list
         self.categoryListRefreshGroup:MarkDirty("List")
         --To add the skills in the new skill line to the combined planner list
-        self.buildPlannerListRefreshGroup:MarkDirty("List")
+        self.quickMenuRefreshGroup:MarkDirty("List")
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
     end
 
@@ -1080,9 +939,7 @@ function ZO_GamepadSkills:InitializeEvents()
         --For the name of an active skill entry
         self.lineFilterListRefreshGroup:MarkDirty("Visible", skillLineData)
         --For the name of an active skill entry
-        self.lineFilterPreviewListRefreshGroup:MarkDirty("Visible", skillLineData)
-        --For the name of an active skill entry
-        self.buildPlannerListRefreshGroup:MarkDirty("Visible")
+        self.quickMenuRefreshGroup:MarkDirty("Visible")
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
     end
 
@@ -1092,10 +949,8 @@ function ZO_GamepadSkills:InitializeEvents()
         self.categoryListRefreshGroup:MarkDirty("Visible")
         --For the purchased state and name of skills
         self.lineFilterListRefreshGroup:MarkDirty("Visible", skillLineData)
-        --For the purchased state and name of skills
-        self.lineFilterPreviewListRefreshGroup:MarkDirty("Visible", skillLineData)
         --To add or remove skills from the combined planner list
-        self.buildPlannerListRefreshGroup:MarkDirty("List")
+        self.quickMenuRefreshGroup:MarkDirty("List")
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
     end
 
@@ -1105,8 +960,6 @@ function ZO_GamepadSkills:InitializeEvents()
         self.categoryListRefreshGroup:MarkDirty("Visible")
         --For the name of skills
         self.lineFilterListRefreshGroup:MarkDirty("Visible", skillLineData)
-        --For the name of skills
-        self.lineFilterPreviewListRefreshGroup:MarkDirty("Visible", skillLineData)
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
     end
 
@@ -1116,10 +969,8 @@ function ZO_GamepadSkills:InitializeEvents()
         self.categoryListRefreshGroup:MarkDirty("Visible")
         --For the purchased state and name of skills
         self.lineFilterListRefreshGroup:MarkDirty("Visible", skillLineData)
-        --For the purchased state and name of skills
-        self.lineFilterPreviewListRefreshGroup:MarkDirty("Visible", skillLineData)
         --To add or remove skills from the combined planner list
-        self.buildPlannerListRefreshGroup:MarkDirty("List")
+        self.quickMenuRefreshGroup:MarkDirty("List")
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
     end
 
@@ -1128,8 +979,6 @@ function ZO_GamepadSkills:InitializeEvents()
         self.categoryListRefreshGroup:MarkDirty("Visible")
         --For the point spending action icons
         self.lineFilterListRefreshGroup:MarkDirty("Visible")
-        --For the point spending action icons
-        self.lineFilterPreviewListRefreshGroup:MarkDirty("Visible")
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
         self:RefreshPointsDisplay()
     end
@@ -1139,10 +988,8 @@ function ZO_GamepadSkills:InitializeEvents()
         self.categoryListRefreshGroup:MarkDirty("Visible")
         --For the purchased state and name of skills
         self.lineFilterListRefreshGroup:MarkDirty("Visible")
-        --For the purchased state and name of skills
-        self.lineFilterPreviewListRefreshGroup:MarkDirty("Visible")
         --To add or remove skills from the combined planner list
-        self.buildPlannerListRefreshGroup:MarkDirty("List")
+        self.quickMenuRefreshGroup:MarkDirty("List")
         --For the number of used skill points changing
         self:RefreshPointsDisplay()
         --To show or hide the respec mode bindings
@@ -1153,8 +1000,6 @@ function ZO_GamepadSkills:InitializeEvents()
     end
 
     local function OnCurrentHotbarUpdated()
-        --To add or remove skills from the combined planner list to match hotbar-specific rules
-        self.buildPlannerListRefreshGroup:MarkDirty("List")
         --To refresh tooltip if an action slot is selected
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
     end
@@ -1177,7 +1022,6 @@ function ZO_GamepadSkills:InitializeEvents()
         if not self.control:IsHidden() then
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.categoryKeybindStripDescriptor)
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.buildPlannerKeybindStripDescriptor)
         end
     end
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("HotbarSwapVisibleStateChanged", OnHotbarSwapVisibleStateChanged)
@@ -1192,6 +1036,20 @@ function ZO_GamepadSkills:InitializeEvents()
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
     end
     self.control:RegisterForEvent(EVENT_ACTION_BAR_LOCKED_REASON_CHANGED, OnPurchaseLockStateChanged)
+
+    --action bar
+    local function OnAbilityFinalized()
+        if self.mode == ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE then
+            self.assignableActionBar:ClearTargetSkill()
+            self:SetMode(ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE)
+        end
+    end
+    self.assignableActionBar:RegisterCallback("AbilityFinalized", OnAbilityFinalized)
+
+    local function OnSelectedActionBarButtonChanged(selectedSlotIndex, didSlotTypeChange)
+        self.selectedTooltipRefreshGroup:MarkDirty("Full")
+    end
+    self.assignableActionBar:RegisterCallback("SelectedButtonChanged", OnSelectedActionBarButtonChanged)
 end
 
 function ZO_GamepadSkills:TryClearSkillUpdatedStatus()
@@ -1222,17 +1080,21 @@ function ZO_GamepadSkills:TrySetClearNewSkillLineFlag(callId)
     end
 end
 
-function ZO_GamepadSkills:RefreshCategoryList()
-    self.categoryList:Clear()
+do
+    local function IsSkillLineAvailableOrAdvised(skillLineData)
+        return skillLineData:IsAvailable() or skillLineData:IsAdvised()
+    end
+    local SKILL_LINE_FILTERS = { IsSkillLineAvailableOrAdvised }
+    function ZO_GamepadSkills:RefreshCategoryList()
+        self.categoryList:Clear()
 
-    local skillsAdvisorEntryData = ZO_GamepadEntryData:New(zo_strformat(SI_SKILLS_ENTRY_NAME_FORMAT, GetString(SI_SKILLS_ADVISOR_TITLE)))
-    skillsAdvisorEntryData.isSkillsAdvisor = true
-    self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", skillsAdvisorEntryData)
+        local skillsAdvisorEntryData = ZO_GamepadEntryData:New(zo_strformat(SI_SKILLS_ENTRY_NAME_FORMAT, GetString(SI_SKILLS_ADVISOR_TITLE)))
+        skillsAdvisorEntryData.isSkillsAdvisor = true
+        self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", skillsAdvisorEntryData)
 
-    for _, skillTypeData in SKILLS_DATA_MANAGER:SkillTypeIterator() do
-        local isHeader = true
-        for _, skillLineData in skillTypeData:SkillLineIterator() do
-            if skillLineData:IsAvailable() or skillLineData:IsAdvised() then
+        for _, skillTypeData in SKILLS_DATA_MANAGER:SkillTypeIterator() do
+            local isHeader = true
+            for _, skillLineData in skillTypeData:SkillLineIterator(SKILL_LINE_FILTERS) do
                 local function IsSkillLineNew()
                     return skillLineData:IsSkillLineOrAbilitiesNew()
                 end
@@ -1251,24 +1113,24 @@ function ZO_GamepadSkills:RefreshCategoryList()
                 isHeader = false
             end
         end
-    end
-    self.categoryList:Commit()
+        self.categoryList:Commit()
 
-    local selectSkillData = ZO_GAMEPAD_SKILLS_ADVISOR_SUGGESTIONS_WINDOW:GetSelectSkillData()
-    if selectSkillData then 
-        local categoryEntryIndex = self:GetSkillLineEntryIndex(selectSkillData:GetSkillLineData())
-        if categoryEntryIndex then 
-            self.categoryList:SetSelectedIndexWithoutAnimation(categoryEntryIndex)
+        local selectSkillData = ZO_GAMEPAD_SKILLS_ADVISOR_SUGGESTIONS_WINDOW:GetSelectSkillData()
+        if selectSkillData then 
+            local categoryEntryIndex = self:GetSkillLineEntryIndex(selectSkillData:GetSkillLineData())
+            if categoryEntryIndex then 
+                self.categoryList:SetSelectedIndexWithoutAnimation(categoryEntryIndex)
+            end
+            ZO_GAMEPAD_SKILLS_ADVISOR_SUGGESTIONS_WINDOW:SetSelectSkillData(nil)
         end
-        ZO_GAMEPAD_SKILLS_ADVISOR_SUGGESTIONS_WINDOW:SetSelectSkillData(nil)
     end
 end
 
 do
     local g_ShownHeaderTexts = {}
 
-    function ZO_GamepadSkills:RefreshLineFilterList(refreshPreviewList)
-        local list = refreshPreviewList and self.lineFilterPreviewList or self.lineFilterList
+    function ZO_GamepadSkills:RefreshLineFilterList()
+        local list = self.lineFilterList
         list:Clear()
         ZO_ClearTable(g_ShownHeaderTexts)
 
@@ -1281,79 +1143,20 @@ do
         for _, skillData in skillLineData:SkillIterator() do
             local skillEntry = ZO_GamepadEntryData:New()
 
-            if refreshPreviewList then
-                skillEntry.isPreview = true
-            end
-
             skillEntry:SetFontScaleOnSelection(false)
             skillEntry.skillData = skillData
 
             local headerText = skillData:GetHeaderText()
-            if not refreshPreviewList and not g_ShownHeaderTexts[headerText] then                
+            if not g_ShownHeaderTexts[headerText] then
                 skillEntry:SetHeader(headerText)
-                if refreshPreviewList then
-                    list:AddEntry("ZO_GamepadSingleLineAbilityEntryTemplateWithHeader", skillEntry)
-                else
-                    list:AddEntry("ZO_GamepadAbilityEntryTemplateWithHeader", skillEntry)
-                end
+                list:AddEntry("ZO_GamepadAbilityEntryTemplateWithHeader", skillEntry)
                 g_ShownHeaderTexts[headerText] = true
             else
-                if refreshPreviewList then
-                    list:AddEntry("ZO_GamepadSingleLineAbilityEntryTemplate", skillEntry)
-                else
-                    list:AddEntry("ZO_GamepadAbilityEntryTemplate", skillEntry)
-                end
+                list:AddEntry("ZO_GamepadAbilityEntryTemplate", skillEntry)
             end
         end
 
         list:Commit()
-
-        if refreshPreviewList then
-            -- attempt to vertically center the preview list so that all abilities in the skill line should be visible
-            list:SetSelectedIndexWithoutAnimation(zo_floor(#list.dataList / 2) + 1)
-        end
-    end
-end
-
-do
-    local SkillDataFilters = 
-    {
-        function(skillData)
-            return skillData:GetPointAllocator():IsPurchased() and skillData:IsActive()
-        end,
-    }
-
-    function ZO_GamepadSkills:RefreshBuildPlannerList()
-        self.buildPlannerList:Clear()
-
-        local skillLineFilters = { ZO_SkillLineData.IsAvailable }
-        if ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarCategory() == HOTBAR_CATEGORY_WEREWOLF then
-            table.insert(skillLineFilters, ZO_SkillLineData.IsWerewolf)
-        end
-
-        for _, skillTypeData in SKILLS_DATA_MANAGER:SkillTypeIterator() do
-            for _, skillLineData in skillTypeData:SkillLineIterator(skillLineFilters) do
-                local newSkillLine = true
-                for _, skillData in skillLineData:SkillIterator(SkillDataFilters) do
-                    if self.assignableActionBar:IsUltimateSelected() == skillData:IsUltimate() then
-                        local skillEntry = ZO_GamepadEntryData:New()
-                        skillEntry:SetFontScaleOnSelection(false)
-                        skillEntry.skillData = skillData
-
-                        if newSkillLine then
-                            skillEntry:SetHeader(skillLineData:GetFormattedName())
-                            self.buildPlannerList:AddEntry("ZO_GamepadSimpleAbilityEntryTemplateWithHeader", skillEntry)
-                        else
-                            self.buildPlannerList:AddEntry("ZO_GamepadSimpleAbilityEntryTemplate", skillEntry)
-                        end
-
-                        newSkillLine = false
-                    end
-                end
-            end
-        end
-
-        self.buildPlannerList:Commit()
     end
 end
 
@@ -1951,11 +1754,11 @@ function ZO_GamepadSkills:RefreshSelectedTooltip()
     end
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     SCENE_MANAGER:RemoveFragment(SKILLS_ADVISOR_SUGGESTIONS_GAMEPAD_FRAGMENT)
-    SCENE_MANAGER:RemoveFragment(GAMEPAD_SKILLS_LINE_PREVIEW_FRAGMENT)
-
     SCENE_MANAGER:AddFragment(GAMEPAD_LEFT_TOOLTIP_BACKGROUND_FRAGMENT)
 
-    if self.mode == ZO_GAMEPAD_SKILLS_SKILL_LIST_BROWSE_MODE then
+    if self.quickMenu:IsShowing() then
+        self.quickMenu:RefreshTooltip()
+    elseif self.mode == ZO_GAMEPAD_SKILLS_SKILL_LIST_BROWSE_MODE then
         local selectedData = self.categoryList:GetTargetData()
         if selectedData and self.assignableActionBar:IsActive() then
             self.assignableActionBar:LayoutOrClearSlotTooltip(GAMEPAD_LEFT_TOOLTIP)
@@ -1972,21 +1775,8 @@ function ZO_GamepadSkills:RefreshSelectedTooltip()
             end
         elseif selectedData then 
             local skillLineData = selectedData.skillLineData
-            if skillLineData:IsAvailable() then
-                SCENE_MANAGER:AddFragment(GAMEPAD_SKILLS_LINE_PREVIEW_FRAGMENT)
-            elseif skillLineData:IsAdvised() then
-                GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, skillLineData:GetFormattedName(), skillLineData:GetUnlockText())
-            end
+            GAMEPAD_TOOLTIPS:LayoutSkillLinePreview(GAMEPAD_LEFT_TOOLTIP, skillLineData)
         end
-    elseif self.mode == ZO_GAMEPAD_SKILLS_BUILD_PLANNER_ASSIGN_MODE then
-        local skillEntry = self.buildPlannerList:GetTargetData()
-        if skillEntry then
-            self.assignableActionBar:LayoutAssignableSkillLineAbilityTooltip(GAMEPAD_LEFT_TOOLTIP, skillEntry.skillData)
-        else
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
-        end
-
-        self.assignableActionBar:LayoutOrClearSlotTooltip(GAMEPAD_RIGHT_TOOLTIP)
     else
         local skillEntry = self.lineFilterList:GetTargetData()
         if skillEntry and not self.assignableActionBar:IsActive() then
@@ -2018,9 +1808,6 @@ function ZO_GamepadSkills:SetMode(mode)
         else
             self:SetCurrentList(self.categoryList)
         end
-    elseif self.mode == ZO_GAMEPAD_SKILLS_BUILD_PLANNER_ASSIGN_MODE then
-        self.buildPlannerList:Activate()
-        self.buildPlannerListRefreshGroup:MarkDirty("List")
     elseif self.mode == ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE then
         if self:IsCurrentList(self.lineFilterList) then
             if not self.assignableActionBar:IsActive() then
@@ -2033,13 +1820,6 @@ function ZO_GamepadSkills:SetMode(mode)
     elseif self.mode == ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE then
         self:DisableCurrentList()
         self.lineFilterListRefreshGroup:MarkDirty("Visible") -- The action bar reuses line filter list keybinds, so refresh those
-    end
-end
-
-function ZO_GamepadSkills:AssignSelectedBuildPlannerAbility()
-    local skillEntry = self.buildPlannerList:GetTargetData()
-    if skillEntry then
-        self.assignableActionBar:AssignSkill(skillEntry.skillData)
     end
 end
 
@@ -2056,222 +1836,6 @@ function ZO_GamepadSkills_OnInitialize(control)
 end
 
 --[[ Skill Templates ]]--
-
-function ZO_GamepadSkillLineXpBar_Setup(skillLineData, xpBar, nameControl, noWrap)
-    local formattedName = skillLineData:GetFormattedName()
-    local advised = skillLineData:IsAdvised()
-
-    local lastXP, nextXP, currentXP = skillLineData:GetRankXPValues() 
-    if advised then
-        local RANK_NOT_SHOWN = 1
-        local CURRENT_XP_NOT_SHOWN = 0
-        ZO_SkillInfoXPBar_SetValue(xpBar, RANK_NOT_SHOWN, lastXP, nextXP, CURRENT_XP_NOT_SHOWN, noWrap)
-    else
-        local skillLineRank = skillLineData:GetCurrentRank()
-        ZO_SkillInfoXPBar_SetValue(xpBar, skillLineRank, lastXP, nextXP, currentXP, noWrap)
-    end
-    if nameControl then
-        nameControl:SetText(formattedName)
-    end
-end
-
-function ZO_GamepadSkillLineEntryTemplate_Setup(control, skillLineEntry, selected, activated)
-    local skillLineData = skillLineEntry.skillLineData
-    local isTheSame = control.barContainer.xpBar.skillLineData == skillLineData
-    if not isTheSame then
-        control.barContainer.xpBar.skillLineData = skillLineData
-        control.barContainer.xpBar:Reset()
-    end
-
-    ZO_GamepadSkillLineXpBar_Setup(skillLineData, control.barContainer.xpBar, nil, not isTheSame)
-
-    control.barContainer:SetHidden(not selected)
-end
-
-function ZO_GamepadSkillLineEntryTemplate_OnLevelChanged(xpBar, rank)
-    xpBar:GetControl():GetParent().rank:SetText(rank)
-end
-
-function ZO_GamepadSkillEntryTemplate_Setup(control, skillEntry, selected, activated, displayView)
-    --Some skill entries want to target a specific progression data (such as the morph dialog showing two specific morphs). Otherwise they use the skill progression that matches the current point spending.
-    local skillData = skillEntry.skillData or skillEntry.skillProgressionData:GetSkillData()
-    local skillProgressionData = skillEntry.skillProgressionData or skillData:GetPointAllocatorProgressionData()
-    local skillPointAllocator = skillData:GetPointAllocator()
-    local isUnlocked = skillProgressionData:IsUnlocked()
-    local isMorph = skillData:IsActive() and skillProgressionData:IsMorph()
-    local isPurchased = skillPointAllocator:IsPurchased()
-    local isInSkillBuild = skillProgressionData:IsAdvised()
-
-    --Icon
-    local iconTexture = control.icon
-    if displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE then
-        if isPurchased then
-            iconTexture:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
-        else
-            iconTexture:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
-        end
-    end
-
-    local DOUBLE_FRAME_THICKNESS = 9
-    local SINGLE_FRAME_THICKNESS = 5
-    --Circle Frame (Passive)
-    local circleFrameTexture = control.circleFrame
-    if circleFrameTexture then
-        if skillData:IsPassive() then
-            circleFrameTexture:SetHidden(false)
-            local frameOffsetFromIcon
-            if isInSkillBuild then
-                frameOffsetFromIcon = DOUBLE_FRAME_THICKNESS
-                circleFrameTexture:SetTexture("EsoUI/Art/SkillsAdvisor/gamepad/gp_passiveDoubleFrame_64.dds")
-            else
-                frameOffsetFromIcon = SINGLE_FRAME_THICKNESS
-                circleFrameTexture:SetTexture("EsoUI/Art/Miscellaneous/Gamepad/gp_passiveFrame_64.dds")
-            end
-            circleFrameTexture:ClearAnchors()
-            circleFrameTexture:SetAnchor(TOPLEFT, iconTexture, TOPLEFT, -frameOffsetFromIcon, -frameOffsetFromIcon)
-            circleFrameTexture:SetAnchor(BOTTOMRIGHT, iconTexture, BOTTOMRIGHT, frameOffsetFromIcon, frameOffsetFromIcon)
-        else
-            control.circleFrame:SetHidden(true)
-        end
-    end
-
-    --Edge Frame (Active)
-    local SKILLS_ADVISOR_ACTIVE_DOUBLE_FRAME_WIDTH = 128
-    local SKILLS_ADVISOR_ACTIVE_DOUBLE_FRAME_HEIGHT = 16
-    local edgeFrameBackdrop = control.edgeFrame
-    if skillData:IsActive() then
-        edgeFrameBackdrop:SetHidden(false)
-        local frameOffsetFromIcon
-        if isInSkillBuild then 
-            frameOffsetFromIcon = DOUBLE_FRAME_THICKNESS
-            edgeFrameBackdrop:SetEdgeTexture("EsoUI/Art/SkillsAdvisor/gamepad/edgeDoubleframeGamepadBorder.dds", SKILLS_ADVISOR_ACTIVE_DOUBLE_FRAME_WIDTH, SKILLS_ADVISOR_ACTIVE_DOUBLE_FRAME_HEIGHT)
-        else
-            frameOffsetFromIcon = SINGLE_FRAME_THICKNESS
-            edgeFrameBackdrop:SetEdgeTexture("EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds", SKILLS_ADVISOR_ACTIVE_DOUBLE_FRAME_WIDTH, SKILLS_ADVISOR_ACTIVE_DOUBLE_FRAME_HEIGHT)
-        end
-        edgeFrameBackdrop:SetAnchor(TOPLEFT, iconTexture, TOPLEFT, -frameOffsetFromIcon, -frameOffsetFromIcon)
-        edgeFrameBackdrop:SetAnchor(BOTTOMRIGHT, iconTexture, BOTTOMRIGHT, frameOffsetFromIcon, frameOffsetFromIcon)
-    else
-        edgeFrameBackdrop:SetHidden(true)
-    end
-
-    --Label Color
-    if displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE then
-        if not skillEntry.isPreview and isPurchased then
-            control.label:SetColor((selected and PURCHASED_COLOR or PURCHASED_UNSELECTED_COLOR):UnpackRGBA())
-        end
-    else
-        control.label:SetColor(PURCHASED_COLOR:UnpackRGBA())
-    end    
-
-    --Lock Icon
-    if control.lock then
-        control.lock:SetHidden(isUnlocked)
-    end
-
-    local leftIndicator = control.leftIndicator
-    local rightIndicator = control.rightIndicator
-    local increaseMultiIcon
-    local decreaseMultiIcon
-    local hasIndicators = leftIndicator ~= nil
-    if hasIndicators then
-        increaseMultiIcon = SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() and rightIndicator or leftIndicator
-        decreaseMultiIcon = increaseMultiIcon == rightIndicator and leftIndicator or rightIndicator
-        leftIndicator:ClearIcons()
-        rightIndicator:ClearIcons()
-
-        --Increase (Morph, Purchase, Increase Rank) Icon
-        if displayView == ZO_SKILL_ABILITY_DISPLAY_VIEW then
-            if isMorph then
-                increaseMultiIcon:AddIcon(POINT_ACTION_TEXTURES[ACTION_MORPH])
-            end
-        else
-            if skillPointAllocator:CanPurchase() then
-                increaseMultiIcon:AddIcon(POINT_ACTION_TEXTURES[ACTION_PURCHASE])
-            elseif skillPointAllocator:CanMorph() then
-                if isMorph then
-                    increaseMultiIcon:AddIcon(POINT_ACTION_TEXTURES[ACTION_REMORPH])
-                else
-                    increaseMultiIcon:AddIcon(POINT_ACTION_TEXTURES[ACTION_MORPH])
-                end
-            elseif skillPointAllocator:CanIncreaseRank() then
-                increaseMultiIcon:AddIcon(POINT_ACTION_TEXTURES[ACTION_PURCHASE])
-            end
-        end
-
-        --New Indicator
-        if displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE then
-            if skillData:HasUpdatedStatus() then
-                control.leftIndicator:AddIcon("EsoUI/Art/Inventory/newItem_icon.dds")
-            end
-        end
-    end
-    
-    local labelWidth = 289
-    if displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE then
-        --Decrease (Unmorph, Sell, Decrease Rank)
-        if hasIndicators then
-            local decreaseTextureFile
-            decreaseMultiIcon:ClearIcons()
-
-            if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowDecrease() then                
-                if skillPointAllocator:CanSell() then
-                    decreaseTextureFile = POINT_ACTION_TEXTURES[ACTION_SELL]
-                elseif skillPointAllocator:CanUnmorph() then
-                    decreaseTextureFile = POINT_ACTION_TEXTURES[ACTION_UNMORPH]
-                elseif skillPointAllocator:CanDecreaseRank() then
-                    decreaseTextureFile = POINT_ACTION_TEXTURES[ACTION_DECREASE_RANK]
-                end
-
-                --Always carve out space for the decrease icon even if it isn't active so the name doesn't dance around as it appears and disappears
-                labelWidth = labelWidth - 40
-            end
-            
-            if decreaseTextureFile then
-                decreaseMultiIcon:AddIcon(decreaseTextureFile)
-            end
-        end
-
-        --Current Binding Text
-        if control.keybind then
-            local hasBinding = false
-
-            --The spot where the keybind goes is occupied by the decrease button in the respec modes
-            if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY and skillData:IsActive() then
-                local slot = skillData:GetSlotOnCurrentHotbar()
-                if slot then
-                    hasBinding = true
-                    local bindingText = ZO_Keybindings_GetHighestPriorityBindingStringFromAction("GAMEPAD_ACTION_BUTTON_".. slot, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, true)                    
-                    local layerIndex, categoryIndex, actionIndex = GetActionIndicesFromName("GAMEPAD_ACTION_BUTTON_".. slot)
-                    if layerIndex then
-                        local key = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, 1)
-                        if IsKeyCodeChordKey(key) then 
-                            labelWidth = labelWidth - 90   --width minus double keybind width (RB+LB)
-                        else
-                            labelWidth = labelWidth - 50   --width minus single keybind
-                        end
-                    end
-                    control.keybind:SetText(bindingText)
-                end
-            end
-
-            if hasBinding then
-                control.keybind:SetHidden(false)
-            else
-                control.keybind:SetHidden(true)
-                control.keybind:SetText("") --resizes rect for when control is reused and hidden since other controls depend on it's width
-            end
-        end                
-    end
-
-    if hasIndicators then
-        leftIndicator:Show()
-        rightIndicator:Show()
-    end
-
-    --Size the label to allow space for the keybind and decrease icon
-    control.label:SetWidth(labelWidth)
-end
 
 function ZO_GamepadSkills_RespecBindingsBinding_OnInitialized(self, binding)
     ZO_KeybindButtonTemplate_OnInitialized(self)

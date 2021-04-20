@@ -250,6 +250,8 @@ do
     local OVERRIDING_SCENE_NAMES =
     {
         ["market"] = true,
+        ["endeavorSealStoreSceneKeyboard"] = true,
+        ["gamepad_endeavor_seal_market_pre_scene"] = true,
         ["gamepad_market_pre_scene"] = true,
         ["gamepad_market"] = true,
         ["gamepad_market_preview"] = true,

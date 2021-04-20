@@ -19,7 +19,7 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
                 </Label>
               
-                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds" override="true">
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop_white.dds" override="true">
                     <TextureCoords left="0" right="1" top="0" bottom=".78125" />
                     <Anchor point="TOPLEFT" offsetX="-50"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="50"/>

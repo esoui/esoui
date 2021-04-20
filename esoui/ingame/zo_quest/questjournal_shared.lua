@@ -35,6 +35,7 @@ function ZO_QuestJournal_Shared:Initialize(control)
 
     control:RegisterForEvent(EVENT_QUEST_ADVANCED, function(eventCode, questIndex) self:OnQuestAdvanced(questIndex) end)
     control:RegisterForEvent(EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(eventCode, ...) self:OnQuestConditionInfoChanged(...) end)
+    control:RegisterForEvent(EVENT_QUEST_CONDITION_OVERRIDE_TEXT_CHANGED, function(eventCode, index) self:OnQuestConditionInfoChanged(index) end)
     control:RegisterForEvent(EVENT_LEVEL_UPDATE, function(eventCode, unitTag) self:OnLevelUpdated(unitTag) end)
     control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
 end

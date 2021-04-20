@@ -105,31 +105,36 @@ function zo_saturate(value)
 end
 
 function zo_round(value)
-    return zo_floor(value + .5)
+    return (value > 0) and zo_floor(value + 0.5) or zo_ceil(value - 0.5)
 end
 
-function zo_roundToZero(value)
-    if value > 0 then
-        return zo_ceil(value - .5)
-    else
-        return zo_floor(value + .5)
-    end
-end
-
-function zo_roundToEven(value)
-    local floorvalue = zo_floor(value)
-    if floorvalue % 2 == 0 then
-        return floorvalue
-    else
-        return floorvalue + 1
-    end
-end
-
-function zo_roundToNearest(value, nearest)
-    if nearest == 0 then
+function zo_roundToZero(value, precision)
+    if precision == 0 then
         return value
     end
-    return zo_roundToZero(value / nearest) * nearest
+    precision = precision or 1
+    local roundFunction = (value > 0) and zo_floor or zo_ceil
+    return roundFunction(value * (1 / precision)) * precision
+end
+
+function zo_roundToEven(value, precision)
+    if precision == 0 then
+        return value
+    end
+    precision = precision or 1
+    local floorValue = zo_floor(value * (1 / precision))
+    if floorValue % 2 == 0 then
+        return floorValue * precision
+    else
+        return (floorValue + 1) * precision
+    end
+end
+
+function zo_roundToNearest(value, precision)
+    if precision == 0 then
+        return value
+    end
+    return zo_round(value * (1 / precision)) * precision
 end
 
 function zo_strjoin(separator, ...)

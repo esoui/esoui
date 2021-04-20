@@ -65,7 +65,7 @@ function ZO_DailyLoginRewards_Base:Initialize(control)
 
             local currentRewardIndex = ZO_DAILYLOGINREWARDS_MANAGER:GetDailyLoginRewardIndex()
 
-            local iconFile = data.iconFile or data.icon
+            local iconFile = data.iconFile or data:GetPlatformLootIcon()
             if iconFile then
                 iconTexture:SetTexture(iconFile)
                 if data.day > GetNumClaimableDailyLoginRewardsInCurrentMonth() then

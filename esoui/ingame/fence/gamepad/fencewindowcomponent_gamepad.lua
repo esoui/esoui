@@ -18,7 +18,8 @@ function ZO_GamepadFenceComponent:Initialize(mode, title)
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:RegisterEvents()
-            self.list:UpdateList()
+            self.isCurrentSelectionDirty = true
+            self:Refresh()
             self:RefreshFooter()
             self:ShowFenceBar()
         elseif newState == SCENE_HIDING then
@@ -32,13 +33,15 @@ end
 
 function ZO_GamepadFenceComponent:RegisterEvents()
     local function OnInventoryFullUpdate()
-        self.list:UpdateList()
+        self.isCurrentSelectionDirty = true
+        self:Refresh()
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
 
     local function OnInventorySingleSlotUpdate(eventId, bagId, slotId, isNewItem, itemSoundCategory, updateReason)
         if updateReason == INVENTORY_UPDATE_REASON_DEFAULT then
-            self.list:UpdateList()
+            self.isCurrentSelectionDirty = true
+            self:Refresh()
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         end
     end

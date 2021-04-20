@@ -36,6 +36,11 @@ function ZO_Market_Keyboard:Initialize(control, sceneName)
 
     self.nextPreviewChangeTime = 0
 
+    self.shownCurrencyTypeBalances = {}
+
+    self:SetMarketProductFilterTypes({})
+    self:SetNewMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_NEW})
+
     self.control:SetHandler("OnUpdate", function(control, currentTime) self:OnUpdate(currentTime) end)
 
     -- MarketProductIcon Pool
@@ -367,7 +372,7 @@ function ZO_Market_Keyboard:InitializeCategories()
             end
 
             if not self:IsSearching() then
-                OnMarketCategorySelected(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex)
+                OnMarketCategorySelected(self:GetDisplayGroup(), categoryIndex, subcategoryIndex, self.suppressMarketCategoryTutorials)
             end
         end
     end
@@ -685,31 +690,50 @@ do
 
         local NO_PARENT_CATEGORY = nil
         local parent = AddCategory(lookup, tree, nodeTemplate, NO_PARENT_CATEGORY, categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, categoryType, REAL_SUBCATEGORY, HIDE_GEM_ICON, showNewIcon)
-
+        local displayGroup = self:GetDisplayGroup()
         if hasSearchResults then
+            -- ShouldAddSearchResult handles the check for filtered products in the categories, so we only need to worry about checking for filtered products
             if searchResultsWithChildren and self.searchResults[categoryIndex]["root"] then
-                local categoryHasNewProductsFunction = function() return DoesMarketProductCategoryContainNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex) end
-                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, FAKE_SUBCATEGORY, HIDE_GEM_ICON, categoryHasNewProductsFunction)
+                local function DoesCategoryContainNewProducts()
+                    local NO_SUBCATEGORY = nil
+                    return self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
+                end
+
+                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, FAKE_SUBCATEGORY, HIDE_GEM_ICON, DoesCategoryContainNewProducts)
             end
 
             for subcategoryIndex, data in pairs(self.searchResults[categoryIndex]) do
                 if subcategoryIndex ~= "root" then
-                    local subCategoryName, _, showGemIcon = GetMarketProductSubCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex)
-                    local subcategoryHasNewProductsFunction = function() return DoesMarketProductCategoryContainNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex) end
-                    AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, subcategoryIndex, subCategoryName, NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, REAL_SUBCATEGORY, showGemIcon, subcategoryHasNewProductsFunction)
+                    local subCategoryName, _, showGemIcon = GetMarketProductSubCategoryInfo(displayGroup, categoryIndex, subcategoryIndex)
+                    local function DoesCategoryContainNewProducts()
+                        return self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, subcategoryIndex, self.newMarketProductFilterTypes)
+                    end
+
+                    showGemIcon = showGemIcon and self.showCategoryCrownGemIcons
+                    AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, subcategoryIndex, subCategoryName, NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, REAL_SUBCATEGORY, showGemIcon, DoesCategoryContainNewProducts)
                 end
             end
         elseif hasChildren then
-            local numMarketProducts = select(3, GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex))
-            if numMarketProducts > 0 then
-                local categoryHasNewProductsFunction = function() return DoesMarketProductCategoryContainNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex) end
-                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, FAKE_SUBCATEGORY, HIDE_GEM_ICON, categoryHasNewProductsFunction)
+            local NO_SUBCATEGORY = nil
+            if self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.marketProductFilterTypes) then
+                local function DoesCategoryContainNewProducts()
+                    local NO_SUBCATEGORY = nil
+                    return self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
+                end
+
+                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, FAKE_SUBCATEGORY, HIDE_GEM_ICON, DoesCategoryContainNewProducts)
             end
 
-            for i = 1, numSubCategories do
-                local subCategoryName, _, showGemIcon = GetMarketProductSubCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, i)
-                local subcategoryHasNewProductsFunction = function() return DoesMarketProductCategoryContainNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, i) end
-                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, i, subCategoryName, NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, REAL_SUBCATEGORY, showGemIcon, subcategoryHasNewProductsFunction)
+            for subcategoryIndex = 1, numSubCategories do
+                if self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, subcategoryIndex, self.marketProductFilterTypes) then
+                    local subCategoryName, _, showGemIcon = GetMarketProductSubCategoryInfo(displayGroup, categoryIndex, subcategoryIndex)
+                    local function DoesCategoryContainNewProducts()
+                        return self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, subcategoryIndex, self.newMarketProductFilterTypes)
+                    end
+
+                    showGemIcon = showGemIcon and self.showCategoryCrownGemIcons
+                    AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, subcategoryIndex, subCategoryName, NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, REAL_SUBCATEGORY, showGemIcon, DoesCategoryContainNewProducts)
+                end
             end
         end
 
@@ -729,8 +753,7 @@ do
 end
 
 function ZO_Market_Keyboard:BuildFeaturedMarketProductList()
-    local numFeaturedMarketProducts = GetNumFeaturedMarketProducts()
-    local marketProductPresentations = { self:GetFeaturedProductPresentations(numFeaturedMarketProducts) }
+    local marketProductPresentations = self:GetFeaturedProductPresentations()
     self:LayoutMarketProducts(marketProductPresentations)
 end
 
@@ -745,14 +768,14 @@ function ZO_Market_Keyboard:BuildMarketProductList(data)
 
     local numMarketProducts
     if finalSubcategoryIndex then
-        numMarketProducts = select(2, GetMarketProductSubCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex))
+        numMarketProducts = select(2, GetMarketProductSubCategoryInfo(self:GetDisplayGroup(), categoryIndex, subcategoryIndex))
     else
-        numMarketProducts = select(3, GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex))
+        numMarketProducts = select(3, GetMarketProductCategoryInfo(self:GetDisplayGroup(), categoryIndex))
     end
 
     local marketProductPresentations = {}
     self:GetMarketProductPresentations(categoryIndex, finalSubcategoryIndex, numMarketProducts, marketProductPresentations)
-    local disableLTOGrouping = IsLTODisabledForMarketProductCategory(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, finalSubcategoryIndex)
+    local disableLTOGrouping = IsLTODisabledForMarketProductCategory(self:GetDisplayGroup(), categoryIndex, finalSubcategoryIndex)
     self:LayoutMarketProducts(marketProductPresentations, disableLTOGrouping)
 end
 
@@ -771,7 +794,7 @@ function ZO_Market_Keyboard:GetMarketProductPresentations(categoryIndex, subcate
             end
         end
 
-        local id, presentationIndex = GetMarketProductPresentationIds(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex, index)
+        local id, presentationIndex = GetMarketProductPresentationIds(self:GetDisplayGroup(), categoryIndex, subcategoryIndex, index)
         if self:ShouldAddMarketProductPresentation(id, presentationIndex) then
             local productData = ZO_MarketProductData:New(id, presentationIndex)
             table.insert(marketProductPresentations, productData)
@@ -801,6 +824,16 @@ function ZO_Market_Keyboard:AddLabeledGroupTable(labeledGroupName, labeledGroupT
         productInfo.gridHeaderName = labeledGroupName
         self.productGridList:AddEntry(productInfo, productInfo.templateName)
     end
+end
+
+function ZO_Market_Keyboard:ShouldAddSearchResult(categoryIndex, subcategoryIndex, productIndex)
+    -- if we wouldn't add it to our view normally, don't add it to our search results
+    local id, presentationIndex = GetMarketProductPresentationIds(self:GetDisplayGroup(), categoryIndex, subcategoryIndex, productIndex)
+    return self:ShouldAddMarketProductPresentation(id, presentationIndex)
+end
+
+function ZO_Market_Keyboard:ShouldAddMarketProductPresentation(id, presentationIndex)
+    return self:DoesMarketProductMatchAnyFilter(id, presentationIndex, self.marketProductFilterTypes)
 end
 
 function ZO_Market_Keyboard:ShouldAddMarketProduct(filterType, id)
@@ -893,6 +926,42 @@ function ZO_Market_Keyboard:LayoutMarketProducts(marketProductPresentations, dis
     -- once we finish building the grid, we should try to scroll to the queued market product if any
     -- since we probably queued it because we have to change categories (and therefor rebuild the grid)
     self:TryScrollToQueuedMarketProduct()
+end
+
+function ZO_Market_Keyboard:SetShownCurrencyTypeBalances(...)
+    self.shownCurrencyTypeBalances = {...}
+    local isCrownGemCurrencyTypeShown = ZO_IsElementInNumericallyIndexedTable(self.shownCurrencyTypeBalances, MKCT_CROWN_GEMS)
+    self.showCategoryCrownGemIcons = isCrownGemCurrencyTypeShown
+    -- We only want to display the Crown Crate-related tutorial in the context of a
+    -- store that displays products available for purchase using Crown Gems.
+    self.suppressMarketCategoryTutorials = not isCrownGemCurrencyTypeShown
+end
+
+-- Accepts an array of MARKET_PRODUCT_FILTER_TYPE masks.
+function ZO_Market_Keyboard:SetMarketProductFilterTypes(typeList)
+    self.marketProductFilterTypes = typeList
+end
+
+function ZO_Market_Keyboard:GetMarketProductFilterTypes()
+    return self.marketProductFilterTypes
+end
+
+-- Accepts an array of MARKET_PRODUCT_FILTER_TYPE masks.
+function ZO_Market_Keyboard:SetNewMarketProductFilterTypes(typeList)
+    self.newMarketProductFilterTypes = typeList
+end
+
+function ZO_Market_Keyboard:GetNewMarketProductFilterTypes()
+    return self.newMarketProductFilterTypes
+end
+
+-- Accepts a MARKET_PRODUCT_FILTER_TYPE mask.
+function ZO_Market_Keyboard:SetFeaturedMarketProductFiltersMask(filterType)
+    self.featuredMarketProductFiltersMask = filterType
+end
+
+function ZO_Market_Keyboard:GetFeaturedMarketProductFiltersMask()
+    return self.featuredMarketProductFiltersMask
 end
 
 function ZO_Market_Keyboard:ShowMarket(showMarket)
@@ -1106,7 +1175,7 @@ end
 
 function ZO_Market_Keyboard:RequestShowCategoryById(categoryId)
     if self.marketScene:IsShowing() and self.marketState == MARKET_STATE_OPEN then
-        local categoryIndex, subcategoryIndex = GetCategoryIndicesFromMarketProductCategoryId(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryId)
+        local categoryIndex, subcategoryIndex = GetCategoryIndicesFromMarketProductCategoryId(self:GetDisplayGroup(), categoryId)
         self:RequestShowCategory(categoryIndex, subcategoryIndex)
         self:ClearQueuedCategoryId()
     else
@@ -1166,7 +1235,11 @@ end
 function ZO_Market_Keyboard:OnShowing()
     ZO_Market_Shared.OnShowing(self)
     ITEM_PREVIEW_KEYBOARD:RegisterCallback("RefreshActions", self.refreshActionsCallback)
-    UpdateMarketDisplayGroup(MARKET_DISPLAY_GROUP_CROWN_STORE)
+    UpdateMarketDisplayGroup(self:GetDisplayGroup())
+
+    if self.shownCurrencyTypeBalances then
+        MARKET_CURRENCY_KEYBOARD:SetVisibleMarketCurrencyTypes(self.shownCurrencyTypeBalances)
+    end
 end
 
 function ZO_Market_Keyboard:OnShown()
@@ -1290,10 +1363,6 @@ end
 
 function ZO_Market_Keyboard:PerformCustomPreview()
     -- Optional Override
-end
-
-function ZO_Market_Keyboard:ShouldAddMarketProductPresentation(id, presentationIndex)
-    return true
 end
 
 --

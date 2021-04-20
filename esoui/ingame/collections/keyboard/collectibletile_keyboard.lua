@@ -2,7 +2,7 @@ ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X = 175
 ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y = 125
 ZO_COLLECTIBLE_TILE_KEYBOARD_ICON_DIMENSIONS = 52
 
-local g_mouseOverIconAnimationProvider = ZO_ReversibleAnimationProvider:New("ZO_CollectibleTile_Keyboard_MouseOverIconAnimation")
+ZO_CollectibleTile_Keyboard_MouseOverIconAnimationProvider = ZO_ReversibleAnimationProvider:New("ZO_CollectibleTile_Keyboard_MouseOverIconAnimation")
 
 -- Primary logic class must be subclassed after the platform class so that platform specific functions will have priority over the logic class functionality
 ZO_CollectibleTile_Keyboard = ZO_Object.MultiSubclass(ZO_ContextualActionsTile_Keyboard, ZO_ContextualActionsTile)
@@ -36,7 +36,7 @@ function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
     -- won't have finished initializing those until after InitializePlatform is called
     ZO_ContextualActionsTile_Keyboard.PostInitializePlatform(self)
 
-    table.insert(self.keybindStripDescriptor, 
+    table.insert(self.keybindStripDescriptor,
     {
         keybind = "UI_SHORTCUT_PRIMARY",
 
@@ -45,15 +45,15 @@ function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
         end,
 
         callback = function()
-            self.collectibleData:Use()
+            self.collectibleData:Use(self:GetActorCategory())
         end,
 
         visible = function()
-            return self.collectibleData and self.collectibleData:IsUsable() and self:GetPrimaryInteractionStringId() ~= nil
+            return self.collectibleData and self.collectibleData:IsUsable(self:GetActorCategory()) and self:GetPrimaryInteractionStringId() ~= nil
         end,
     })
 
-    table.insert(self.keybindStripDescriptor, 
+    table.insert(self.keybindStripDescriptor,
     {
         keybind = "UI_SHORTCUT_SECONDARY",
 
@@ -72,6 +72,10 @@ function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
 end
 
 -- End ZO_ContextualActionsTile_Keyboard Overrides --
+
+function ZO_CollectibleTile_Keyboard:GetActorCategory()
+    return self.actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+end
 
 function ZO_CollectibleTile_Keyboard:OnUpdate()
     if self.collectibleData and self.isCooldownActive then
@@ -99,8 +103,10 @@ function ZO_CollectibleTile_Keyboard:RefreshMouseoverVisuals()
         ClearTooltip(ItemTooltip)
         local offsetX = self.control:GetParent():GetLeft() - self.control:GetLeft() - 5
         InitializeTooltip(ItemTooltip, self.control, RIGHT, offsetX, 0, LEFT)
-        local SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON = true, true, true
-        ItemTooltip:SetCollectible(self.collectibleData:GetId(), SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON)
+        local SHOW_NICKNAME = true
+        local SHOW_PURCHASABLE_HINT = true
+        local SHOW_BLOCK_REASON = true
+        ItemTooltip:SetCollectible(self.collectibleData:GetId(), SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON, self:GetActorCategory())
 
         -- Tags
         if self.collectibleData:IsPurchasable() then
@@ -114,25 +120,10 @@ function ZO_CollectibleTile_Keyboard:RefreshMouseoverVisuals()
 end
 
 function ZO_CollectibleTile_Keyboard:GetPrimaryInteractionStringId()
-    local stringId
-    local collectibleData = self.collectibleData
-
-    if collectibleData:IsActive() then
-        if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_VANITY_PET) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT) then
-            stringId = SI_COLLECTIBLE_ACTION_DISMISS
-        else
-            stringId = SI_COLLECTIBLE_ACTION_PUT_AWAY
-        end
-    elseif self.isCooldownActive ~= true and not collectibleData:IsBlocked() then
-        if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MEMENTO) then
-            stringId = SI_COLLECTIBLE_ACTION_USE
-        elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT) then
-            stringId = SI_COLLECTIBLE_ACTION_COMBINE
-        else
-            stringId = SI_COLLECTIBLE_ACTION_SET_ACTIVE
-        end
+    if self.isCooldownActive ~= true and not self.collectibleData:IsBlocked() then
+        return self.collectibleData:GetPrimaryInteractionStringId(self:GetActorCategory())
     end
-    return stringId
+    return nil
 end
 
 function ZO_CollectibleTile_Keyboard:ShowMenu()
@@ -141,10 +132,10 @@ function ZO_CollectibleTile_Keyboard:ShowMenu()
         ClearMenu()
 
         --Use
-        if collectibleData:IsUsable() then
+        if collectibleData:IsUsable(self:GetActorCategory()) then
             local stringId = self:GetPrimaryInteractionStringId()
             if stringId then
-                AddMenuItem(GetString(stringId), function() collectibleData:Use() end)
+                AddMenuItem(GetString(stringId), function() collectibleData:Use(self:GetActorCategory()) end)
             end
         end
 
@@ -200,7 +191,7 @@ function ZO_CollectibleTile_Keyboard:UpdateCooldownEffect()
     self.cooldownIcon:SetHeight(height)
     self.cooldownIcon:SetTextureCoords(0, 1, textureCoord, 1)
 
-    if not self.collectibleData:IsActive() then
+    if not self.collectibleData:IsActive(self:GetActorCategory()) then
         local secondsRemaining = cooldown / 1000
         self.cooldownTimeLabel:SetText(ZO_FormatTimeAsDecimalWhenBelowThreshold(secondsRemaining))
     else
@@ -213,7 +204,7 @@ function ZO_CollectibleTile_Keyboard:OnUpdateCooldowns()
         self:MarkDirty()
     else
         local collectibleData = self.collectibleData
-        if collectibleData and collectibleData:IsUsable() then
+        if collectibleData and collectibleData:IsUsable(self:GetActorCategory()) then
             local remaining, duration = GetCollectibleCooldownAndDuration(collectibleData:GetId())
             if remaining > 0 and duration > 0 then
                 self.cooldownDuration = duration
@@ -239,6 +230,7 @@ end
 function ZO_CollectibleTile_Keyboard:Reset()
     self.collectibleId = nil
     self.collectibleData = nil
+    self.actorCategory = nil
 
     self:SetCanFocus(false)
     local INSTANT = true
@@ -285,9 +277,9 @@ function ZO_CollectibleTile_Keyboard:SetHighlightHidden(hidden, instant)
     ZO_ContextualActionsTile.SetHighlightHidden(self, hidden, instant)
 
     if hidden or self.isCooldownActive then
-        g_mouseOverIconAnimationProvider:PlayBackward(self:GetIconTexture(), instant)
+        ZO_CollectibleTile_Keyboard_MouseOverIconAnimationProvider:PlayBackward(self:GetIconTexture(), instant)
     else
-        g_mouseOverIconAnimationProvider:PlayForward(self:GetIconTexture(), instant)
+        ZO_CollectibleTile_Keyboard_MouseOverIconAnimationProvider:PlayForward(self:GetIconTexture(), instant)
     end
 end
 
@@ -299,6 +291,7 @@ function ZO_CollectibleTile_Keyboard:LayoutPlatform(data)
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(data.collectibleId)
     internalassert(collectibleData ~= nil)
     self.collectibleData = collectibleData
+    self.actorCategory = data.actorCategory
     self:SetCanFocus(true)
 
     -- Title
@@ -323,7 +316,7 @@ function ZO_CollectibleTile_Keyboard:LayoutPlatform(data)
     statusMultiIcon:ClearIcons()
 
     if collectibleData:IsUnlocked() then
-        if collectibleData:IsActive() then
+        if collectibleData:IsActive(self:GetActorCategory()) then
             statusMultiIcon:AddIcon(ZO_CHECK_ICON)
 
             if collectibleData:WouldBeHidden() then
@@ -358,8 +351,8 @@ end
 function ZO_CollectibleTile_Keyboard:OnMouseDoubleClick(button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         local collectibleData = self.collectibleData
-        if collectibleData and collectibleData:IsUsable() then
-            collectibleData:Use()
+        if collectibleData and collectibleData:IsUsable(self:GetActorCategory()) then
+            collectibleData:Use(self:GetActorCategory())
         end
     end
 end

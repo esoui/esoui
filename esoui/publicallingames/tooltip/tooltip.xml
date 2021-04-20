@@ -164,8 +164,25 @@
                     <AnchorFill />
                 </Texture>
 
-                <Label name="$(parent)Text" font="ZoFontGameBold" color="000000" modifyTextType="UPPERCASE" styleColor="FFFFFFCC">
+                <Label name="$(parent)Text" horizontalAlignment="CENTER" verticalAlignment="CENTER" modifyTextType="UPPERCASE" color="000000" styleColor="FFFFFFCC">
+                    <Dimensions x="200" y="32" />
                     <Anchor point="CENTER" offsetY="3" />
+
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontWinT1",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontWinT2",
+                                lineLimit = 1,
+                                dontUseForAdjusting = true,
+                            },
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
                 </Label>
             </Controls>
         </Control>

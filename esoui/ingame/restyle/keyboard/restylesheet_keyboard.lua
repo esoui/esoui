@@ -8,13 +8,7 @@ ZO_RESTYLE_SHEET_CONTAINER =
 -- Restyle Slot Base --
 -----------------------
 
-ZO_RestyleSlot_Base = ZO_Object:Subclass()
-
-function ZO_RestyleSlot_Base:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_RestyleSlot_Base = ZO_InitializingObject:Subclass()
 
 ZO_RESTYLE_SLOT_WIDTH = 136
 ZO_RESTYLE_SLOT_HEIGHT = 63
@@ -102,10 +96,6 @@ end
 
 ZO_RestyleSlot_Equipment = ZO_RestyleSlot_Base:Subclass()
 
-function ZO_RestyleSlot_Equipment:New(...)
-    return ZO_RestyleSlot_Base.New(self, ...)
-end
-
 function ZO_RestyleSlot_Equipment:OnIconMouseEnter()
     ZO_InventorySlot_OnMouseEnter(self.itemSlotControl)
 end
@@ -128,18 +118,18 @@ end
 
 ZO_RestyleSlot_Collectible = ZO_RestyleSlot_Base:Subclass()
 
-function ZO_RestyleSlot_Collectible:New(...)
-    return ZO_RestyleSlot_Base.New(self, ...)
-end
-
 do
-    local SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON = true, true, true
+    local SHOW_NICKNAME = true
+    local SHOW_PURCHASABLE_HINT = true
+    local SHOW_BLOCK_REASON = true
 
     function ZO_RestyleSlot_Collectible:OnIconMouseEnter()
         local collectibleId = self.restyleSlotData:GetId()
         if collectibleId > 0 then
             InitializeTooltip(ItemTooltip, self.itemSlotControl, LEFT, 5, 0, RIGHT)
-            ItemTooltip:SetCollectible(collectibleId, SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON)
+
+            local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self:GetRestyleSlotData().restyleMode)
+            ItemTooltip:SetCollectible(collectibleId, SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON, actorCategory)
         else
             InitializeTooltip(InformationTooltip, self.itemSlotControl, LEFT, 5, 0, RIGHT)
             SetTooltipText(InformationTooltip, zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_COLLECTIBLECATEGORYTYPE", self.restyleSlotData:GetRestyleSlotType())))
@@ -157,10 +147,6 @@ end
 -------------------------------
 
 ZO_RestyleSlot_OutfitStyle = ZO_RestyleSlot_Base:Subclass()
-
-function ZO_RestyleSlot_OutfitStyle:New(...)
-    return ZO_RestyleSlot_Base.New(self, ...)
-end
 
 function ZO_RestyleSlot_OutfitStyle:Initialize(...)
     ZO_RestyleSlot_Base.Initialize(self, ...)
@@ -188,13 +174,17 @@ function ZO_RestyleSlot_OutfitStyle:GetControlTemplate()
 end
 
 do
-    local SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON = true, true, true
+    local SHOW_NICKNAME = true
+    local SHOW_PURCHASABLE_HINT = true
+    local SHOW_BLOCK_REASON = true
 
     function ZO_RestyleSlot_OutfitStyle:OnIconMouseEnter()
         local collectibleData = self.restyleSlotData:GetPendingCollectibleData()
         if collectibleData then
             InitializeTooltip(ItemTooltip, self.itemSlotControl, LEFT, 5, 0, RIGHT)
-            ItemTooltip:SetCollectible(collectibleData:GetId(), SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON)
+
+            local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self:GetRestyleSlotData().restyleMode)
+            ItemTooltip:SetCollectible(collectibleData:GetId(), SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON, actorCategory)
         else
             InitializeTooltip(InformationTooltip, self.itemSlotControl, LEFT, 5, 0, RIGHT)
             SetTooltipText(InformationTooltip, zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_OUTFITSLOT", self.restyleSlotData:GetRestyleSlotType())))
@@ -211,7 +201,6 @@ end
 
 function ZO_RestyleSlot_OutfitStyle:OnIconMouseUp(button, upInside)
     if upInside then
-
         if button == MOUSE_BUTTON_INDEX_LEFT then
             if not self:HandlePlaceCursorCollectible() then
                 ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:NavigateToCollectibleCategoryFromRestyleSlotData(self.restyleSlotData)
@@ -295,7 +284,7 @@ do
         if ZO_RestyleCanApplyChanges() and button == MOUSE_BUTTON_INDEX_LEFT then
             local collectibleData = self.restyleSlotData:GetPendingCollectibleData()
             if collectibleData then
-                local entryData = 
+                local entryData =
                 {
                     control = self.control,
                     data = collectibleData,
@@ -314,7 +303,7 @@ function ZO_RestyleSlot_OutfitStyle:HandlePlaceCursorCollectible()
         if collectibleId then
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
             if collectibleData then
-                local entryData = 
+                local entryData =
                 {
                     control = self.control,
                     data = collectibleData,
@@ -338,7 +327,8 @@ function ZO_RestyleSlot_OutfitStyle:RefreshVisible()
     local restyleSlotType = self.restyleSlotData:GetRestyleSlotType()
 
     if ZO_OUTFIT_MANAGER:IsOutfitSlotWeapon(restyleSlotType) then
-        local isEquipped = ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyHeld(restyleSlotType)
+        local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleSlotData.restyleMode)
+        local isEquipped = ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyHeld(restyleSlotType, actorCategory)
         self.control:SetHidden(not isEquipped)
     end
 end
@@ -347,13 +337,7 @@ end
 -- Restyle Slots Sheet --
 -------------------------
 
-ZO_RestyleSlotsSheet = ZO_Object:Subclass()
-
-function ZO_RestyleSlotsSheet:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_RestyleSlotsSheet = ZO_InitializingObject:Subclass()
 
 function ZO_RestyleSlotsSheet:Initialize(parentContainer, slotGridData)
     local control = CreateControlFromVirtual("$(grandparent)" .. self:GetControlShortName(), parentContainer, self:GetTemplate())
@@ -366,7 +350,7 @@ function ZO_RestyleSlotsSheet:Initialize(parentContainer, slotGridData)
         [ZO_RESTYLE_SHEET_CONTAINER.SECONDARY] = control:GetNamedChild("SecondaryHeader"),
     }
 
-    self.slotContainers = 
+    self.slotContainers =
     {
         [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] = control:GetNamedChild("PrimarySlots"),
         [ZO_RESTYLE_SHEET_CONTAINER.SECONDARY] = control:GetNamedChild("SecondarySlots"),
@@ -642,10 +626,6 @@ end
 
 ZO_RestyleEquipmentSlotsSheet = ZO_RestyleSlotsSheet:Subclass()
 
-function ZO_RestyleEquipmentSlotsSheet:New(...)
-    return ZO_RestyleSlotsSheet.New(self, ...)
-end
-
 function ZO_RestyleEquipmentSlotsSheet:RegisterForEvents()
     local function MarkViewDirty()
         self:MarkViewDirty()
@@ -726,10 +706,6 @@ function ZO_RestyleCollectibleSlotsSheet:RegisterForEvents()
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
 end
 
-function ZO_RestyleCollectibleSlotsSheet:New(...)
-    return ZO_RestyleSlotsSheet.New(self, ...)
-end
-
 function ZO_RestyleCollectibleSlotsSheet:GetRestyleMode()
     return RESTYLE_MODE_COLLECTIBLE
 end
@@ -748,10 +724,6 @@ end
 
 ZO_RestyleOutfitSlotsSheet = ZO_RestyleSlotsSheet:Subclass()
 
-function ZO_RestyleOutfitSlotsSheet:New(...)
-    return ZO_RestyleSlotsSheet.New(self, ...)
-end
-
 do
     local STACK_COUNT = 1
     local PENDING_ANIMATION_INSET = 0
@@ -767,7 +739,7 @@ do
 
             control.iconTexture:SetTexture(icon)
 
-            local pendingCollectibleId = slotManipulator:GetPendingCollectibleId()
+            local pendingCollectibleId = slotManipulator and slotManipulator:GetPendingCollectibleId() or 0
             local shownCollectibleIsNotCurrentlyEquipped = pendingCollectibleId == 0 or pendingCollectibleId ~= slotManipulator:GetCurrentCollectibleId()
             control.equippedGlow:SetHidden(shownCollectibleIsNotCurrentlyEquipped)
 
@@ -782,8 +754,8 @@ do
                 end
             end
             control.dragCallout:SetHidden(hideDraggableSlotCallout)
-            
-            if slotManipulator:IsSlotDataChangePending() then
+
+            if slotManipulator and slotManipulator:IsSlotDataChangePending() then
                 local pendingCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(pendingCollectibleId)
                 local isLocked = pendingCollectibleData and pendingCollectibleData:IsLocked()
                 ZO_Restyle_ApplyPendingLoopAnimationToControl(control, self:GetPendingLoopAnimationPool(), PENDING_ANIMATION_INSET, isLocked)
@@ -829,8 +801,8 @@ function ZO_RestyleOutfitSlotsSheet:RegisterForEvents()
         self:MarkViewDirty()
     end
 
-    local function OnPendingDataChanged(outfitIndex, slotIndex)
-        local outfitManipulator = outfitIndex and ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
+    local function OnPendingDataChanged(actorCategory, outfitIndex, slotIndex)
+        local outfitManipulator = outfitIndex and ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, outfitIndex)
         local outfitSlotManipulator = outfitManipulator and slotIndex and outfitManipulator:GetSlotManipulator(slotIndex)
         local restyleSlotData = outfitSlotManipulator and outfitSlotManipulator:GetRestyleSlotData()
         self:MarkViewDirty(restyleSlotData)
@@ -929,7 +901,7 @@ do
 
     function ZO_RestyleOutfitSlotsSheet:RefreshCost()
         local slotsCost, flatCost = self.currentOutfitManipulator:GetAllCostsForPendingChanges()
-        
+
         -- Slot based cost
         local slotsCostText = GetCostText(CURT_MONEY, slotsCost)
 
@@ -954,6 +926,122 @@ function ZO_RestyleOutfitSlotsSheet:UniformRandomize()
     else
         ZO_RestyleSlotsSheet.UniformRandomize(self)
     end
+end
+
+-----------------------------
+-- Companion Equipment Restyle Sheet --
+-----------------------------
+
+ZO_RestyleCompanionEquipmentSlotsSheet = ZO_RestyleEquipmentSlotsSheet:Subclass()
+
+function ZO_RestyleCompanionEquipmentSlotsSheet:Initialize(...)
+    ZO_RestyleEquipmentSlotsSheet.Initialize(self, ...)
+
+    local ALWAYS_HIDE = true
+    ZO_WeaponSwap_SetPermanentlyHidden(self.control:GetNamedChild("SecondaryWeaponSwap"), ALWAYS_HIDE)
+end
+
+function ZO_RestyleCompanionEquipmentSlotsSheet:RegisterForEvents()
+    local function MarkViewDirty()
+        self:MarkViewDirty()
+    end
+
+    self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, MarkViewDirty)
+    self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, MarkViewDirty)
+    self.control:AddFilterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_COMPANION_WORN)
+    self.control:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, MarkViewDirty)
+end
+
+function ZO_RestyleCompanionEquipmentSlotsSheet:GetRestyleMode()
+    return RESTYLE_MODE_COMPANION_EQUIPMENT
+end
+
+function ZO_RestyleCompanionEquipmentSlotsSheet:GetControlShortName()
+    return "CompanionEquipmentSheet"
+end
+
+function ZO_RestyleCompanionEquipmentSlotsSheet:RefreshView()
+    ZO_RestyleSlotsSheet.RefreshView(self)
+
+    self.headers[ZO_RESTYLE_SHEET_CONTAINER.SECONDARY]:SetText(GetString(SI_RESTYLE_SHEET_EQUIPMENT_WEAPONS_SET_1))
+end
+
+-------------------------------------
+-- Companion Outfit Style Restyle Slot Sheet --
+-------------------------------------
+
+ZO_RestyleCompanionOutfitSlotsSheet = ZO_RestyleOutfitSlotsSheet:Subclass()
+
+function ZO_RestyleCompanionOutfitSlotsSheet:Initialize(...)
+    ZO_RestyleOutfitSlotsSheet.Initialize(self, ...)
+
+    local ALWAYS_HIDE = true
+    ZO_WeaponSwap_SetPermanentlyHidden(self.control:GetNamedChild("SecondaryWeaponSwap"), ALWAYS_HIDE)
+end
+
+function ZO_RestyleCompanionOutfitSlotsSheet:RegisterForEvents()
+    local function MarkViewDirty()
+        self:MarkViewDirty()
+    end
+
+    local function HandleCursorPickup(eventCode, cursorType, ...)
+        if cursorType == MOUSE_CONTENT_COLLECTIBLE and ZO_RESTYLE_SCENE:IsShowing() then
+            local collectibleId = GetCursorCollectibleId()
+            if collectibleId then
+                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                if collectibleData:IsOutfitStyle() then
+                    self.eligibleDragSlots = { GetEligibleOutfitSlotsForCollectible(collectibleId) }
+                    self:MarkViewDirty()
+                end
+            end
+        end
+    end
+
+    local function HandleCursorDropped()
+        self.eligibleDragSlots = nil
+        self:MarkViewDirty()
+    end
+
+    local function OnPendingDataChanged(actorCategory, outfitIndex, slotIndex)
+        local outfitManipulator = outfitIndex and ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, outfitIndex)
+        local outfitSlotManipulator = outfitManipulator and slotIndex and outfitManipulator:GetSlotManipulator(slotIndex)
+        local restyleSlotData = outfitSlotManipulator and outfitSlotManipulator:GetRestyleSlotData()
+        self:MarkViewDirty(restyleSlotData)
+    end
+
+    ZO_OUTFIT_MANAGER:RegisterCallback("PendingDataChanged", OnPendingDataChanged)
+    self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, MarkViewDirty)
+    self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, MarkViewDirty)
+    self.control:AddFilterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_COMPANION_WORN)
+    self.control:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, MarkViewDirty)
+    self.control:RegisterForEvent(EVENT_CURSOR_PICKUP, HandleCursorPickup)
+    self.control:RegisterForEvent(EVENT_CURSOR_DROPPED, HandleCursorDropped)
+end
+
+function ZO_RestyleCompanionOutfitSlotsSheet:GetTemplate()
+    return "ZO_RestyleOutfitStylesSlotsSheet_Keyboard"
+end
+
+function ZO_RestyleCompanionOutfitSlotsSheet:GetRestyleMode()
+    return RESTYLE_MODE_COMPANION_OUTFIT
+end
+
+function ZO_RestyleCompanionOutfitSlotsSheet:GetControlShortName()
+    return "CompanionOutfitStylesSheet"
+end
+
+-------------------------------------
+-- Companion Collectible Style Restyle Slot Sheet --
+-------------------------------------
+
+ZO_RestyleCompanionCollectibleSlotsSheet = ZO_RestyleCollectibleSlotsSheet:Subclass()
+
+function ZO_RestyleCompanionCollectibleSlotsSheet:GetRestyleMode()
+    return RESTYLE_MODE_COMPANION_COLLECTIBLE
+end
+
+function ZO_RestyleCompanionCollectibleSlotsSheet:GetControlShortName()
+    return "CompanionCollectibleStylesSheet"
 end
 
 do

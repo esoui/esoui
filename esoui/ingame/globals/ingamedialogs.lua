@@ -3760,10 +3760,11 @@ ESO_Dialogs["RENAME_OUFIT"] =
             callback = function(dialog)
                 local inputText = ZO_Dialogs_GetEditBoxText(dialog)
                 if inputText and inputText ~= "" then
-                    local violations = {IsValidOutfitName(inputText)}
+                    local violations = { IsValidOutfitName(inputText) }
                     if #violations == 0 then
+                        local actorCategory = dialog.data.actorCategory
                         local outfitIndex = dialog.data.outfitIndex
-                        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
+                        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, outfitIndex)
                         outfitManipulator:SetOutfitName(inputText)
                         ZO_Dialogs_ReleaseDialog("RENAME_OUFIT")
                     end

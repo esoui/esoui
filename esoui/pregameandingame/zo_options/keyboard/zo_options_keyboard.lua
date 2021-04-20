@@ -3,10 +3,6 @@ PANEL_TYPE_CONTROLS = 2
 
 ZO_KeyboardOptions = ZO_SharedOptions:Subclass()
 
-function ZO_KeyboardOptions:New(...)
-    return ZO_SharedOptions.New(self, ...)
-end
-
 function ZO_KeyboardOptions:Initialize(control)
     ZO_SharedOptions.Initialize(self)
 
@@ -302,6 +298,10 @@ function ZO_KeyboardOptions:ApplySettings(control)
 
     -- Update the panel settings with the new values (may have changed if they are tied to another setting that changed...e.g. ui scale)
     self:UpdateAllPanelOptions(SAVE_CURRENT_VALUES)
+end
+
+function ZO_KeyboardOptions:EnableApplyButton()
+    self.control:GetNamedChild("ApplyButton"):SetHidden(false)
 end
 
 function ZO_KeyboardOptions:LoadAllDefaults()

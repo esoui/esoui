@@ -351,6 +351,7 @@ SOUNDS = {
     SKILL_LINE_LEVELED_UP           = "SkillLine_Leveled",
     ENLIGHTENED_STATE_GAINED        = "EnlightenedState_Gained",
     ENLIGHTENED_STATE_LOST          = "EnlightenedState_Lost",
+    COMPANION_ACTIVE_SKILL_UNLOCKED = "CompanionActiveSkillUnlocked",
 
     -- Experience/Champion Point sounds
     OVERLAND_BOSS_KILL              = "Overland_Boss_Kill",

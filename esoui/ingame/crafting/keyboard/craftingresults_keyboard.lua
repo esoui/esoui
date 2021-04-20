@@ -246,6 +246,15 @@ do
             equalitySetup = EntryEqualitySetup,
         }
         self.notifier:AddTemplate(CRAFTING_RESULTS_TEMPLATE, templateData)
+
+        local function OnLastControlReleased()
+            if self.isCurrentlyRegisteredWithCSAs then
+                --Tell CSA to release handle
+                self.isCurrentlyRegisteredWithCSAs = false
+                CENTER_SCREEN_ANNOUNCE:ReleaseExternalHandle()
+            end
+        end
+        self.notifier:RegisterCallback("LastControlReleased", OnLastControlReleased)
     end
 end
 
@@ -253,7 +262,27 @@ function ZO_CraftingResults_Keyboard:IsActive()
     return not IsInGamepadPreferredMode()
 end
 
+function ZO_CraftingResults_Keyboard:ResumeCraftingResults()
+    if self.isCurrentlyRegisteredWithCSAs then
+        self.notifier:SetHoldDisplayingEntries(false)
+        return true
+    else
+        return false
+    end
+end
+
 function ZO_CraftingResults_Keyboard:DisplayCraftingResult(resultData)
+    if not self.isCurrentlyRegisteredWithCSAs then
+        self.isCurrentlyRegisteredWithCSAs = true
+        self.notifier:SetHoldDisplayingEntries(true)
+
+        --Hook the crafting results into the CSA system
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_EXTERNAL_HANDLE)
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CRAFTING_RESULTS)
+        messageParams:SetExternalHandleCallback(function() return self:ResumeCraftingResults() end)
+        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+    end
+
     local resultEntryData = ZO_EntryData:New(resultData)
     -- Alias for backwards compatibility:
     resultEntryData.entryColor = resultData.color
@@ -298,7 +327,19 @@ function ZO_CraftingResults_Keyboard:DisplayTranslatedRunes()
 end
 
 function ZO_CraftingResults_Keyboard:ShouldDisplayMessages()
-    return not CENTER_SCREEN_ANNOUNCE:HasAnyActiveLines()
+    return true
+end
+
+function ZO_CraftingResults_Keyboard:OnHidden()
+    self:ForceCompleteCraftProcess()
+    self:ClearAll()
+
+    --If the crafting results were already registered with the CSA system, we need to make sure we properly release everything
+    if self.isCurrentlyRegisteredWithCSAs then
+        self.notifier:SetHoldDisplayingEntries(false)
+        self.isCurrentlyRegisteredWithCSAs = false
+        CENTER_SCREEN_ANNOUNCE:ReleaseExternalHandle()
+    end
 end
 
 function ZO_CraftingResults_Keyboard_Initialize(control)
@@ -308,8 +349,7 @@ function ZO_CraftingResults_Keyboard_Initialize(control)
     CRAFTING_RESULTS_FRAGMENT = ZO_FadeSceneFragment:New(control)
     CRAFTING_RESULTS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_HIDDEN then
-            CRAFTING_RESULTS:ForceCompleteCraftProcess()
-            CRAFTING_RESULTS:ClearAll()
+            CRAFTING_RESULTS:OnHidden()
         end
     end)
 end

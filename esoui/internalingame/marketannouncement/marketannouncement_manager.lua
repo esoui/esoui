@@ -2,13 +2,7 @@
 -- MarketAnnouncement_Manager
 ----
 
-local MarketAnnouncement_Manager = ZO_CallbackObject:Subclass()
-
-function MarketAnnouncement_Manager:New(...)
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize(...)
-    return manager
-end
+local MarketAnnouncement_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function MarketAnnouncement_Manager:Initialize()
     EVENT_MANAGER:RegisterForEvent("MarketAnnouncement_Manager", EVENT_PLAYER_ACTIVATED, function() self:OnPlayerActivated() end)
@@ -38,8 +32,8 @@ function MarketAnnouncement_Manager:Initialize()
         return ZO_TableOrderingFunction(entry1, entry2, "isDeprioritized", MARKET_PRODUCT_SORT_KEYS, ZO_SORT_ORDER_UP)
     end
 
-    function OnMarketAnnouncementDataUpdated(eventId, aShouldShow, aIsLocked)
-        self.isLocked = aIsLocked
+    function OnMarketAnnouncementDataUpdated(eventId, shouldShow, isLocked)
+        self.isLocked = isLocked
         self.productInfoTable = {}
 
         local numAnnouncementProducts = GetNumMarketAnnouncementProducts()
@@ -81,11 +75,6 @@ function MarketAnnouncement_Manager:Initialize()
         end
 
         self:FireCallbacks("OnMarketAnnouncementDataUpdated")
-        if aShouldShow then
-            if not self.scene:IsShowing() and not HasShownMarketAnnouncement() then
-                SCENE_MANAGER:Show("marketAnnouncement")
-            end
-        end
     end
 
     function OnEventAnnouncementsUpdated()
@@ -117,16 +106,6 @@ end
 
 function MarketAnnouncement_Manager:OnPlayerActivated()
     self:PopulateEventAnnouncements()
-
-    -- Attempt to show on region change if announcement has not yet been shown today for this character
-    if not HasShownMarketAnnouncement() then
-        local currentTrialVersion, seenTrialVersion = select(4, ZO_TrialAccount_GetInfo())
-        if seenTrialVersion < currentTrialVersion then
-            FlagMarketAnnouncementSeen() --We only want to show one popup per session if possible, and trial dialog takes priority
-        else
-            RequestMarketAnnouncement()
-        end
-    end
 end
 
 function MarketAnnouncement_Manager:OnStateChanged(oldState, newState)

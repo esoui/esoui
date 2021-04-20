@@ -1349,6 +1349,7 @@ function ZO_WorldMapPins:New(parentControl)
         ["worldEventUnit"] = {},
         ["worldEventPOI"] = {},
         ["antiquityDigSite"] = {},
+        ["companion"] = {},
     }
 
     mapPins.nextCustomPinType = MAP_PIN_TYPE_INVALID
@@ -1601,6 +1602,8 @@ function ZO_WorldMapPins:CreatePin(pinType, pinTag, xLoc, yLoc, radius, borderIn
         self:MapPinLookupToPinKey("worldEventPOI", pin:GetWorldEventInstanceId(), pinTag, pinKey)
     elseif pin:IsAntiquityDigSitePin() then
         self:MapPinLookupToPinKey("antiquityDigSite", pinType, pinTag, pinKey)
+    elseif pin:IsCompanion() then
+        self:MapPinLookupToPinKey("companion", pinType, pinTag, pinKey)
     else
         local customPinData = self.customPins[pinType]
         if customPinData then
@@ -2125,6 +2128,13 @@ local function UpdatePlayerPin()
     end
 end
 
+local function UpdateCompanionPins()
+    local companionPin = g_mapPinManager:FindPin("companion")
+    if companionPin then
+        local xLoc, yLoc = GetMapPlayerPosition(companionPin:GetUnitTag())
+        companionPin:SetLocation(xLoc, yLoc)
+    end
+end
 
 
 local UpdateMovingPins
@@ -2134,6 +2144,7 @@ do
     function UpdateMovingPins()
         UpdatePlayerPin()
         UpdateGroupPins()
+        UpdateCompanionPins()
 
         for _, pin in ipairs(g_objectiveMovingPins) do
             local pinType, currentX, currentY = GetObjectivePinInfo(pin:GetObjectiveKeepId(), pin:GetObjectiveObjectiveId(), pin:GetBattlegroundContext())
@@ -3558,6 +3569,16 @@ do
 
     function ZO_WorldMap_DoesMapHideWorldEventPins()
         return MAPS_WITHOUT_WORLD_EVENT_PINS[GetMapType()]
+    end
+
+    local MAPS_WITHOUT_COMPANION_PINS =
+    {
+        [MAPTYPE_WORLD] = true,
+        [MAPTYPE_COSMIC] = true,
+    }
+
+    function ZO_WorldMap_DoesMapHideCompanionPins()
+        return MAPS_WITHOUT_COMPANION_PINS[GetMapType()]
     end
 end
 
@@ -5473,6 +5494,13 @@ function ZO_WorldMapManager:RegisterForEvents()
     ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityDigSitesUpdated", RefreshAntiquityDigSites)
     self.control:RegisterForEvent(EVENT_ANTIQUITY_TRACKING_UPDATE, RefreshAntiquityDigSites)
 
+    local function RefreshCompanionPins()
+        self:RefreshCompanionPins()
+    end
+
+    self.control:RegisterForEvent(EVENT_COMPANION_ACTIVATED, RefreshCompanionPins)
+    self.control:RegisterForEvent(EVENT_COMPANION_DEACTIVATED, RefreshCompanionPins)
+
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
         self:OnWorldMapChanged()
     end)
@@ -6318,6 +6346,27 @@ end
 -- End Antiquity Dig Site Functions
 --
 
+--
+-- Companion Functions
+--
+
+function ZO_WorldMapManager:RefreshCompanionPins()
+    g_mapPinManager:RemovePins("companion")
+    if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_COMPANIONS) and HasActiveCompanion() and not ZO_WorldMap_DoesMapHideCompanionPins() then
+        local x, y, _, isInCurrentMap = GetMapPlayerPosition("companion")
+        if isInCurrentMap then
+            local companionPin = g_mapPinManager:CreatePin(MAP_PIN_TYPE_ACTIVE_COMPANION, "companion")
+            if companionPin then
+                companionPin:SetLocation(x, y)
+            end
+        end
+    end
+end
+
+--
+-- End Companion Functions
+--
+
 function ZO_WorldMapManager:AssignPointerBoxToPin(pin)
     if POINTER_BOXES and pin then
         local shortDescription = pin:GetShortDescription()
@@ -6357,6 +6406,7 @@ end
 function ZO_WorldMapManager:RefreshAll()
     self:RefreshSuggestionPins()
     self:RefreshAllAntiquityDigSites()
+    self:RefreshCompanionPins()
 end
 
 function ZO_WorldMapManager:IsPreventingMapNavigation()

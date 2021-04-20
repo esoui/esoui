@@ -24,8 +24,8 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
                 self:Retrieve(mostRecentlySelectedData)
             end,
             enabled = function()
-                local hasMostRecentlySelectedData = self:GetMostRecentlySelectedData() ~= nil
-                if not hasMostRecentlySelectedData then
+                local isSelectionEmpty = self:GetMostRecentlySelectedData() == nil
+                if isSelectionEmpty then
                     return false, GetString(SI_HOUSING_BROWSER_MUST_CHOOSE_TO_MODIFY)
                 end
                 return true
@@ -50,8 +50,8 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
                 end
             end,
             enabled = function()
-                local hasMostRecentlySelectedData = self:GetMostRecentlySelectedData() ~= nil
-                if not hasMostRecentlySelectedData then
+                local isSelectionEmpty = self:GetMostRecentlySelectedData() == nil
+                if isSelectionEmpty then
                     return false, GetString(SI_HOUSING_BROWSER_MUST_CHOOSE_TO_PUT_AWAY)
                 end
                 return true
@@ -66,12 +66,27 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
             end,
             enabled = function()
                 local recentlySelectedData = self:GetMostRecentlySelectedData()
-                local hasMostRecentlySelectedData = recentlySelectedData ~= nil
-                if not hasMostRecentlySelectedData then
+                local isSelectionEmpty = recentlySelectedData == nil
+                if isSelectionEmpty then
                     return false, GetString(SI_HOUSING_BROWSER_MUST_CHOOSE_TO_SET_PLAYER_WAYPOINT)
                 end
                 local dataType = recentlySelectedData:GetDataType()
                 return dataType == ZO_RECALLABLE_HOUSING_DATA_TYPE or dataType == ZO_HOUSING_PATH_NODE_DATA_TYPE
+            end
+        },
+        {
+            name = GetString(SI_HOUSING_EDITOR_PRECISION_EDIT),
+            keybind = "UI_SHORTCUT_QUINARY",
+            callback = function()
+                local mostRecentlySelectedData = self:GetMostRecentlySelectedData()
+                self:PrecisionEdit(mostRecentlySelectedData)
+            end,
+            enabled = function()
+                local isSelectionEmpty = self:GetMostRecentlySelectedData() == nil
+                if isSelectionEmpty then
+                    return false, GetString(SI_HOUSING_BROWSER_MUST_CHOOSE_TO_MODIFY)
+                end
+                return true
             end
         },
         {
@@ -128,6 +143,15 @@ function ZO_HousingFurnitureRetrieval_Keyboard:Retrieve(data)
         ZO_HousingFurnitureBrowser_Base.SelectNodeForReplacement(data)
     else
         ZO_HousingFurnitureBrowser_Base.SelectFurnitureForReplacement(data)
+    end
+    SCENE_MANAGER:HideCurrentScene()
+end
+
+function ZO_HousingFurnitureRetrieval_Keyboard:PrecisionEdit(data)
+    if data:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+        ZO_HousingFurnitureBrowser_Base.SelectNodeForPrecisionEdit(data)
+    else
+        ZO_HousingFurnitureBrowser_Base.SelectFurnitureForPrecisionEdit(data)
     end
     SCENE_MANAGER:HideCurrentScene()
 end

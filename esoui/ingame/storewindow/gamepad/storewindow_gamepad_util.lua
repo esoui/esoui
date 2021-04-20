@@ -398,15 +398,16 @@ local function VendorEntryHeaderTemplateSetup(control, data, selected, selectedD
     control:SetText(data.bestGamepadItemCategoryName)
 end
 
-function ZO_GamepadStoreList:SetMode(mode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction)
+function ZO_GamepadStoreList:SetMode(mode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction, templatePrefix, headerPrefix)
     self.storeMode = mode
     self.updateFunc = MODE_TO_UPDATE_FUNC[mode].updateFunc
     self.sortFunc = MODE_TO_UPDATE_FUNC[mode].sortFunc
     self.template = overrideTemplate or "ZO_GamepadPricedVendorItemEntryTemplate"
     local headerTemplateSetupFunction = overrideHeaderTemplateSetupFunction or VendorEntryHeaderTemplateSetup
 
-    self:AddDataTemplate(self.template, setupFunction, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    self:AddDataTemplateWithHeader(self.template, setupFunction, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate", headerTemplateSetupFunction)
+    local DEFAULT_EQUALITY_FUNCTION = nil
+    self:AddDataTemplate(self.template, setupFunction, ZO_GamepadMenuEntryTemplateParametricListFunction, DEFAULT_EQUALITY_FUNCTION, templatePrefix)
+    self:AddDataTemplateWithHeader(self.template, setupFunction, ZO_GamepadMenuEntryTemplateParametricListFunction, DEFAULT_EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate", headerTemplateSetupFunction, headerPrefix)
 end
 
 function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOverride)

@@ -1,3 +1,5 @@
+ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT = 50
+
 local EVENT_NAMESPACE = "KeyboardNotifications"
 
 ZO_KEYBOARD_NOTIFICATION_ICONS =
@@ -29,6 +31,7 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GUILD_NEW_APPLICATIONS] = "EsoUI/Art/Notifications/notificationIcon_guild.dds",
     [NOTIFICATION_TYPE_PLAYER_APPLICATIONS] = "EsoUI/Art/Notifications/notificationIcon_guild.dds",
     [NOTIFICATION_TYPE_MARKET_PRODUCT_AVAILABLE] = "EsoUI/Art/Notifications/notificationIcon_crownStore.dds",
+    [NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
 }
 
 -- Provider Overrides
@@ -327,24 +330,25 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         self:SetupRequestWithMoreInfoRow(...)
     end
 
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_REQUEST_DATA, "ZO_NotificationsRequestRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_YES_NO_DATA, "ZO_NotificationsYesNoRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_WAITING_DATA, "ZO_NotificationsWaitingRow", 50, function(control, data) self:SetupWaiting(control, data) end)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LEADERBOARD_DATA, "ZO_NotificationsLeaderboardRow", 50, function(control, data) self:SetupTwoButtonRow(control, data) end)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ALERT_DATA, "ZO_NotificationsAlertRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_COLLECTIBLE_DATA, "ZO_NotificationsCollectibleRow", 50, SetupRequestWithMoreInfoRow)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_READY_CHECK_DATA, "ZO_NotificationsLFGReadyCheckRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA, "ZO_NotificationsLFGFindReplacementRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA, "ZO_NotificationsEsoPlusSubscriptionRow", 50, SetupRequestWithMoreInfoRow)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RECEIVED_DATA, "ZO_NotificationsGiftReceivedRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RETURNED_DATA, "ZO_NotificationsGiftReturnedRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_CLAIMED_DATA, "ZO_NotificationsGiftClaimedRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA, "ZO_NotificationsOpenCrownStoreRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_UNLOCKED_DATA, "ZO_NotificationsOpenCrownStoreRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA, "ZO_NotificationsNewDailyLoginRewardRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GUILD_NEW_APPLICATIONS, "ZO_NotificationsGuildNewApplicationsRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA, "ZO_NotificationsMarketProductUnlockedRow", 50, SetupRequestWithMoreInfoRow)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_POINTS_RESET_DATA, "ZO_NotificationsPointsResetRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_REQUEST_DATA, "ZO_NotificationsRequestRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_YES_NO_DATA, "ZO_NotificationsYesNoRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_WAITING_DATA, "ZO_NotificationsWaitingRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, function(control, data) self:SetupWaiting(control, data) end)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LEADERBOARD_DATA, "ZO_NotificationsLeaderboardRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, function(control, data) self:SetupTwoButtonRow(control, data) end)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ALERT_DATA, "ZO_NotificationsAlertRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_COLLECTIBLE_DATA, "ZO_NotificationsCollectibleRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequestWithMoreInfoRow)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_READY_CHECK_DATA, "ZO_NotificationsLFGReadyCheckRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA, "ZO_NotificationsLFGFindReplacementRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA, "ZO_NotificationsEsoPlusSubscriptionRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequestWithMoreInfoRow)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RECEIVED_DATA, "ZO_NotificationsGiftReceivedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RETURNED_DATA, "ZO_NotificationsGiftReturnedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_CLAIMED_DATA, "ZO_NotificationsGiftClaimedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA, "ZO_NotificationsOpenCrownStoreRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_UNLOCKED_DATA, "ZO_NotificationsOpenCrownStoreRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA, "ZO_NotificationsNewDailyLoginRewardRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GUILD_NEW_APPLICATIONS, "ZO_NotificationsGuildNewApplicationsRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA, "ZO_NotificationsMarketProductUnlockedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequestWithMoreInfoRow)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_POINTS_RESET_DATA, "ZO_NotificationsPointsResetRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ACTIVITY_REVIEW_DATA, "ZO_NotificationsActivityReviewRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_EnableHighlight(self.sortFilterList.list, "ZO_ThinListHighlight")
 
     self.totalNumNotifications = 0
@@ -378,6 +382,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_KeyboardGuildNewApplicationsProvider:New(self),
         ZO_PlayerApplicationsProvider:New(self),
         ZO_KeyboardMarketProductUnlockedProvider:New(self),
+        ZO_OutOfDateAddonsProvider:New(self),
     }
 
     self.sortFilterList:SetEmptyText(GetString(SI_NO_NOTIFICATIONS_MESSAGE))

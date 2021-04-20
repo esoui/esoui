@@ -45,6 +45,24 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_GRAPHICS_MODE_PS5,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_GRAPHICS_MODE_XBSS,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_GRAPHICS_MODE_XBSX,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
         },

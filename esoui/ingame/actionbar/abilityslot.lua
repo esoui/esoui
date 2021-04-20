@@ -5,7 +5,7 @@ ABILITY_SLOT_TYPE_QUICKSLOT = 2
 
 local USE_BASE_ABILITY = true
 
-function ZO_ActionSlot_SetupSlot(iconControl, buttonControl, icon, normalFrame, downFrame, cooldownIconControl)
+function ZO_ActionSlot_SetupSlot(iconControl, buttonControl, icon, normalFrame, downFrame, cooldownIconControl, mouseOverTexture)
     iconControl:SetHidden(false)
     iconControl:SetTexture(icon)
 
@@ -13,14 +13,22 @@ function ZO_ActionSlot_SetupSlot(iconControl, buttonControl, icon, normalFrame, 
         cooldownIconControl:SetTexture(icon)
     end
 
+    if mouseOverTexture then
+        buttonControl:SetMouseOverTexture(mouseOverTexture)
+    end
+
     buttonControl:SetNormalTexture(normalFrame)
     buttonControl:SetPressedTexture(downFrame)
 end
 
-function ZO_ActionSlot_ClearSlot(iconControl, buttonControl, normalFrame, downFrame, cooldownIconControl)
+function ZO_ActionSlot_ClearSlot(iconControl, buttonControl, normalFrame, downFrame, cooldownIconControl, mouseOverTexture)
     iconControl:SetHidden(true)
     if cooldownIconControl then
         cooldownIconControl:SetHidden(true)
+    end
+
+    if mouseOverTexture then
+        buttonControl:SetMouseOverTexture(mouseOverTexture)
     end
     buttonControl:SetNormalTexture(normalFrame)
     buttonControl:SetPressedTexture(downFrame)
@@ -72,11 +80,13 @@ local function TryPickupAction(abilitySlot)
         return false
     end
 
-    local button = ZO_ActionBar_GetButton(abilitySlot.slotNum)
-    if button then
-        local slotNum = button:GetSlot()
-        ZO_ActionBar_AttemptPickup(slotNum)
-        return true
+    if not abilitySlot.hotbarCategory or abilitySlot.hotbarCategory ~= HOTBAR_CATEGORY_COMPANION then
+        local button = ZO_ActionBar_GetButton(abilitySlot.slotNum)
+        if button then
+            local slotNum = button:GetSlot()
+            ZO_ActionBar_AttemptPickup(slotNum)
+            return true
+        end
     end
 end
 
@@ -97,15 +107,17 @@ local function ClearAbilitySlot(slotNum)
 end
 
 local function TryShowActionMenu(abilitySlot)
-    local button = ZO_ActionBar_GetButton(abilitySlot.slotNum)
-    if button then
-        local slotNum = button:GetSlot()
-        if IsSlotUsed(slotNum) and not IsSlotLocked(slotNum)
-        then
-            ClearMenu()
-            AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function() ClearAbilitySlot(slotNum) end)
-            ShowMenu(abilitySlot)
-            return true
+    if not abilitySlot.hotbarCategory or abilitySlot.hotbarCategory ~= HOTBAR_CATEGORY_COMPANION then
+        local button = ZO_ActionBar_GetButton(abilitySlot.slotNum)
+        if button then
+            local slotNum = button:GetSlot()
+            if IsSlotUsed(slotNum) and not IsSlotLocked(slotNum)
+            then
+                ClearMenu()
+                AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function() ClearAbilitySlot(slotNum) end)
+                ShowMenu(abilitySlot)
+                return true
+            end
         end
     end
 end
@@ -266,10 +278,11 @@ local function SetTooltipToActionBarSlot(tooltip, slot)
 end
 
 local function TryShowActionBarTooltip(abilitySlot)
-    local button = ZO_ActionBar_GetButton(abilitySlot.slotNum)
+    local button = ZO_ActionBar_GetButton(abilitySlot.slotNum, abilitySlot.hotbarCategory)
     if button then
         local actionSlotIndex = button:GetSlot()
-        local slotData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():GetSlotData(actionSlotIndex)
+        local hotbar = abilitySlot.hotbarCategory and ACTION_BAR_ASSIGNMENT_MANAGER:GetHotbar(abilitySlot.hotbarCategory) or ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
+        local slotData = hotbar:GetSlotData(actionSlotIndex)
         if slotData then
             -- This is an ability, use the slotData tooltip
             if abilitySlot.activeTooltip then

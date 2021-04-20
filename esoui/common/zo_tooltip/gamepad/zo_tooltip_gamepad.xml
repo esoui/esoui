@@ -181,6 +181,27 @@
                         <Control name="$(parent)Darkener" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template" />
                     </Controls>
                 </Control>
+
+                <Control name="$(parent)Quadrant_2_3_Tooltip" inherits="ZO_GamepadTooltipTemplate ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true"/>
+
+                <Control name="$(parent)Quadrant_2_3_TooltipBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_2_3_Background_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Quadrant_2_3_HeaderContainer" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)ContentContainer" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Quadrant_2_3_TooltipDarkBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_2_3_Background_Template" />
+                        <Control name="$(parent)Darkener" inherits="ZO_SharedGamepadNavQuadrant_2_3_Background_Template" />
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

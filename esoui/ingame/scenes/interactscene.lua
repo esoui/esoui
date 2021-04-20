@@ -19,10 +19,12 @@ function ZO_InteractScene_Mixin:SetInteractionInfo(interactionInfo)
     self.interactionInfo = interactionInfo
 end
 
-function ZO_InteractScene_Mixin:OnRemovedFromQueue()
+function ZO_InteractScene_Mixin:OnRemovedFromQueue(newNextScene)
     if not INTERACT_WINDOW:IsInteracting(self.interactionInfo) then
         RemoveActionLayerByName("SceneChangeInterceptLayer")
-        INTERACT_WINDOW:TerminateClientInteraction(self.interactionInfo)
+        if not newNextScene.GetInteractionInfo or newNextScene:GetInteractionInfo() ~= self.interactionInfo then
+            INTERACT_WINDOW:TerminateClientInteraction(self.interactionInfo)
+        end
     end
 end
 

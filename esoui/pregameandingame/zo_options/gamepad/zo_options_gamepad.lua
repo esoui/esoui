@@ -2,12 +2,6 @@ local SETTING_PANEL_GAMEPAD_CATEGORIES_ROOT = -1
 
 ZO_GamepadOptions = ZO_Object.MultiSubclass(ZO_SharedOptions, ZO_Gamepad_ParametricList_Screen)
 
-function ZO_GamepadOptions:New(...)
-    local options = ZO_Object.New(self)
-    options:Initialize(...)
-    return options
-end
-
 function ZO_GamepadOptions:Initialize(control)
     ZO_SharedOptions.Initialize(self)
     local DONT_ACTIVATE_ON_SHOW = false
@@ -16,6 +10,7 @@ function ZO_GamepadOptions:Initialize(control)
 
     self.isGamepadOptions = true
     self.currentCategory = SETTING_PANEL_GAMEPAD_CATEGORIES_ROOT
+    self.settingsNeedApply = false
 
     local function OnDeferredSettingRequestCompleted(eventId, system, settingId, success, result)
         if GAMEPAD_OPTIONS_FRAGMENT:IsShowing() and not self:AreDeferredSettingsForPanelLoading(self.currentCategory) then
@@ -53,6 +48,8 @@ function ZO_GamepadOptions:InitializeScenes()
     GAMEPAD_OPTIONS_PANEL_SCENE = ZO_Scene:New("gamepad_options_panel", SCENE_MANAGER)
     GAMEPAD_OPTIONS_PANEL_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
+            RefreshSettings()
+            self.settingsNeedApply = false
             if ZO_SharedOptions.DoesPanelDisableShareFeatures(self.currentCategory) and DoesPlatformSupportDisablingShareFeatures() then
                 DisableShareFeatures()
             end
@@ -198,6 +195,15 @@ do
                 visible = function() return not categoriesWithoutDefaults[self.currentCategory] end,
                 callback = function()
                     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_OPTIONS_RESET_TO_DEFAULTS")
+                end,
+            },
+            {
+                alignment = KEYBIND_STRIP_ALIGN_LEFT,
+                name = GetString(SI_APPLY),
+                keybind = "UI_SHORTCUT_TERTIARY",
+                visible = function() return not self:IsAtRoot() and self.settingsNeedApply end,
+                callback = function()
+                    self:ApplySettings()
                 end,
             },
         }
@@ -862,6 +868,19 @@ function ZO_GamepadOptions:LoadPanelDefaults(panelSettings)
         local NO_CONTROL = nil
         ZO_SharedOptions.LoadDefaults(self, NO_CONTROL, data)
     end
+end
+
+
+function ZO_GamepadOptions:ApplySettings(control)
+    ApplySettings()
+
+    self.settingsNeedApply = false
+    self:RefreshKeybinds()
+end
+
+function ZO_GamepadOptions:EnableApplyButton()
+    self.settingsNeedApply = true
+    self:RefreshKeybinds()
 end
 
 function ZO_GamepadOptions:LoadAllDefaults()

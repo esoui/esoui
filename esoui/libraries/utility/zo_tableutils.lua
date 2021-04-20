@@ -205,6 +205,16 @@ function ZO_IsTableEmpty(table)
     return not table or next(table) == nil
 end
 
+-- Returns true if running the iterator once did not return a value. this modifies the iterator.
+function ZO_IsIteratorEmpty(iteratorFunction, invariantState, controlValue)
+    local nextControlValue = iteratorFunction(invariantState, controlValue)
+    if nextControlValue == nil then
+        return true
+    end
+    return false
+end
+
+
 -- The dest table is mutable and will take in the values of all subsequent tables.  It must be initialized.
 function ZO_CombineNumericallyIndexedTables(dest, ...)
     local counter = #dest

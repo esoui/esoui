@@ -16,9 +16,18 @@ function ZO_RewardData:SetQuantity(quantity)
     self.quantity = quantity
 end
 
+function ZO_RewardData:SetAbbreviatedQuantity(abbreviatedQuantity)
+    self.abbreviatedQuantity = abbreviatedQuantity
+end
+
 function ZO_RewardData:SetIcon(icon, gamepadIcon)
     self.icon = icon
     self.gamepadIcon = gamepadIcon
+end
+
+function ZO_RewardData:SetLootIcon(icon, gamepadIcon)
+    self.lootIcon = icon
+    self.gamepadLootIcon = gamepadIcon
 end
 
 function ZO_RewardData:SetFormattedName(formattedName)
@@ -32,6 +41,10 @@ end
 
 function ZO_RewardData:SetChoiceIndex(choiceIndex)
     self.choiceIndex = choiceIndex
+end
+
+function ZO_RewardData:SetItemLink(itemLink)
+    self.itemLink = itemLink
 end
 
 function ZO_RewardData:SetItemFunctionalQuality(itemFunctionalQuality)
@@ -50,6 +63,10 @@ end
 
 function ZO_RewardData:SetEquipSlot(equipSlot)
     self.equipSlot = equipSlot
+end
+
+function ZO_RewardData:SetSkillLineId(skillLineId)
+    self.skillLineId = skillLineId
 end
 
 function ZO_RewardData:SetChoices(rewardChoices)
@@ -82,6 +99,10 @@ function ZO_RewardData:GetCurrencyType()
     return self.currencyType
 end
 
+function ZO_RewardData:GetItemLink()
+    return self.itemLink
+end
+
 function ZO_RewardData:GetItemFunctionalQuality()
     -- self.quality is deprecated, included here for addon backwards compatibility
     return self.functionalQuality or self.quality or ITEM_FUNCTIONAL_QUALITY_NORMAL
@@ -90,6 +111,10 @@ end
 function ZO_RewardData:GetItemDisplayQuality()
     -- self.quality is deprecated, included here for addon backwards compatibility
     return self.displayQuality or self.quality or ITEM_DISPLAY_QUALITY_NORMAL
+end
+
+function ZO_RewardData:GetSkillLineId()
+    return self.skillLineId
 end
 
 function ZO_RewardData:GetKeyboardIcon()
@@ -101,8 +126,38 @@ function ZO_RewardData:GetGamepadIcon()
     return self.gamepadIcon or self.icon
 end
 
+function ZO_RewardData:GetPlatformIcon()
+    if IsInGamepadPreferredMode() then
+        return self:GetGamepadIcon()
+    else
+        return self:GetKeyboardIcon()
+    end
+end
+
+function ZO_RewardData:GetKeyboardLootIcon()
+    return self.lootIcon or self:GetKeyboardIcon()
+end
+
+function ZO_RewardData:GetGamepadLootIcon()
+    -- If no gamepadLootIcon is used, lootIcon is used for both.
+    -- If neither exist we fall back to regular non-loot icon behavior
+    return self.gamepadLootIcon or self.lootIcon or self:GetGamepadIcon()
+end
+
+function ZO_RewardData:GetPlatformLootIcon()
+    if IsInGamepadPreferredMode() then
+        return self:GetGamepadLootIcon()
+    else
+        return self:GetKeyboardLootIcon()
+    end
+end
+
 function ZO_RewardData:GetQuantity()
     return self.quantity or 1
+end
+
+function ZO_RewardData:GetAbbreviatedQuantity()
+    return self.abbreviatedQuantity or self:GetQuantity()
 end
 
 function ZO_RewardData:GetRewardId()
@@ -198,6 +253,10 @@ function ZO_RewardsManager:GetInfoForReward(rewardId, quantity, parentChoice, va
         rewardData = self:GetChoiceEntryInfo(rewardId, parentChoice, validationFunction, isSelectedChoiceFunction)
     elseif entryType == REWARD_ENTRY_TYPE_INSTANT_UNLOCK then
         rewardData = self:GetInstantUnlockEntryInfo(rewardId, parentChoice)
+    elseif entryType == REWARD_ENTRY_TYPE_EXPERIENCE then
+        rewardData = self:GetExperienceEntryInfo(rewardId, quantity, parentChoice)
+    elseif entryType == REWARD_ENTRY_TYPE_SKILL_LINE_EXPERIENCE then
+        rewardData = self:GetSkillLineExperienceEntryInfo(rewardId, quantity, parentChoice)
     end
 
     if rewardData then
@@ -233,12 +292,13 @@ function ZO_RewardsManager:GetCurrencyEntryInfo(rewardId, quantity, parentChoice
     local IS_PLURAL = false
     local IS_UPPER = false
     local formattedName = zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER))
-    local formattedNameWithStackKeyboard = ZO_Currency_FormatKeyboard(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
-    local formattedNameWithStackGamepad = ZO_Currency_FormatGamepad(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+    local formattedNameWithStackKeyboard = zo_strformat(SI_CURRENCY_NAME_FORMAT, ZO_Currency_FormatKeyboard(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
+    local formattedNameWithStackGamepad = zo_strformat(SI_CURRENCY_NAME_FORMAT, ZO_Currency_FormatGamepad(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
 
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
     rewardData:SetFormattedName(formattedName)
-    rewardData:SetIcon(GetCurrencyLootKeyboardIcon(currencyType), GetCurrencyLootGamepadIcon(currencyType))
+    rewardData:SetIcon(GetCurrencyKeyboardIcon(currencyType), GetCurrencyGamepadIcon(currencyType))
+    rewardData:SetLootIcon(GetCurrencyLootKeyboardIcon(currencyType), GetCurrencyLootGamepadIcon(currencyType))
     rewardData:SetFormattedNameWithStack(formattedNameWithStackKeyboard, formattedNameWithStackGamepad)
     rewardData:SetQuantity(quantity)
     rewardData:SetCurrencyInfo(currencyType)
@@ -254,9 +314,10 @@ function ZO_RewardsManager:GetItemEntryInfo(rewardId, quantity, parentChoice)
     local itemDisplayQuality = GetItemLinkDisplayQuality(itemLink)
     local icon = GetItemLinkIcon(itemLink)
     local equipType = GetItemLinkEquipType(itemLink)
-    local equipSlot = ZO_Character_GetEquipSlotForEquipType(equipType)
+    local equipSlot = GetItemLinkComparisonEquipSlots(equipType)
 
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    rewardData:SetItemLink(itemLink)
     rewardData:SetFormattedName(zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName))
     rewardData:SetIcon(icon)
     rewardData:SetItemFunctionalQuality(itemFunctionalQuality)
@@ -298,6 +359,44 @@ function ZO_RewardsManager:GetInstantUnlockEntryInfo(rewardId, parentChoice)
     rewardData:SetIcon(icon)
     rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
     
+    return rewardData
+end
+
+function ZO_RewardsManager:GetExperienceEntryInfo(rewardId, quantity, parentChoice)
+    local displayName = GetString(SI_REWARDS_EXPERIENCE)
+    local abbreviatedQuantity = ZO_AbbreviateAndLocalizeNumber(quantity, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
+    local commaDelimitedQuantity = ZO_FastFormatDecimalNumber(ZO_CommaDelimitNumber(quantity))
+    local formattedNameWithStack = zo_strformat(SI_REWARDS_FORMAT_REWARD_WITH_AMOUNT, displayName, ZO_SELECTED_TEXT:Colorize(commaDelimitedQuantity))
+
+    local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    rewardData:SetFormattedName(displayName)
+    rewardData:SetFormattedNameWithStack(formattedNameWithStack)
+    rewardData:SetIcon("EsoUI/Art/Icons/Icon_Experience.dds")
+    rewardData:SetQuantity(quantity)
+    rewardData:SetAbbreviatedQuantity(abbreviatedQuantity)
+    rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
+    
+    return rewardData
+end
+
+function ZO_RewardsManager:GetSkillLineExperienceEntryInfo(rewardId, quantity, parentChoice)
+    local skillLineId = GetSkillLineExperienceRewardSkillLineId(rewardId)
+    local icon = GetSkillLineDetailedIconById(skillLineId)
+    local displayName = GetSkillLineNameById(skillLineId)
+    local formattedDisplayName = zo_strformat(SI_REWARDS_FORMAT_SKILL_LINE_EXPERIENCE, displayName)
+    local abbreviatedQuantity = ZO_AbbreviateAndLocalizeNumber(quantity, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
+    local commaDelimitedQuantity = ZO_FastFormatDecimalNumber(ZO_CommaDelimitNumber(quantity))
+    local formattedNameWithStack = zo_strformat(SI_REWARDS_FORMAT_SKILL_LINE_EXPERIENCE_WITH_AMOUNT, displayName, ZO_SELECTED_TEXT:Colorize(commaDelimitedQuantity))
+
+    local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    rewardData:SetSkillLineId(skillLineId)
+    rewardData:SetFormattedName(formattedDisplayName)
+    rewardData:SetFormattedNameWithStack(formattedNameWithStack)
+    rewardData:SetIcon(icon)
+    rewardData:SetQuantity(quantity)
+    rewardData:SetAbbreviatedQuantity(abbreviatedQuantity)
+    rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
+
     return rewardData
 end
 

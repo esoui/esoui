@@ -4,19 +4,19 @@
 
 --Category data --
 
-ZO_RestyleCategoryData = ZO_Object:Subclass()
+ZO_RestyleCategoryData = ZO_InitializingObject:Subclass()
 
-function ZO_RestyleCategoryData:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
-function ZO_RestyleCategoryData:Initialize(allowsDyeing, specializedCollectibleCategory, specializedCollectibleCategoryEnabled, derivesCollectibleCategoriesFromSlots)
+function ZO_RestyleCategoryData:Initialize(restyleMode, allowsDyeing, specializedCollectibleCategory, specializedCollectibleCategoryEnabled, derivesCollectibleCategoriesFromSlots, omittedRestyleSlotTypes)
+    self.restyleMode = restyleMode
     self.allowsDyeing = allowsDyeing
     self.specializedCollectibleCategory = specializedCollectibleCategory
     self.specializedCollectibleCategoryEnabled = specializedCollectibleCategoryEnabled
     self.derivesCollectibleCategoriesFromSlots = derivesCollectibleCategoriesFromSlots
+    self.omittedRestyleSlotTypes = omittedRestyleSlotTypes
+end
+
+function ZO_RestyleCategoryData:GetRestyleMode()
+    return self.restyleMode
 end
 
 function ZO_RestyleCategoryData:SetAllowsDyeing(allowsDyeing)
@@ -51,15 +51,16 @@ function ZO_RestyleCategoryData:DerivesCollectibleCategoriesFromSlots()
     return self.derivesCollectibleCategoriesFromSlots
 end
 
+function ZO_RestyleCategoryData:IsOmittedRestyleSlotType(restyleSlotType)
+    if self.omittedRestyleSlotTypes then
+        return ZO_IsElementInNumericallyIndexedTable(self.omittedRestyleSlotTypes, restyleSlotType)
+    end
+    return false
+end
+
 -- Panel --
 
-ZO_RestyleCommon_Keyboard = ZO_Object:Subclass()
-
-function ZO_RestyleCommon_Keyboard:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_RestyleCommon_Keyboard = ZO_InitializingObject:Subclass()
 
 function ZO_RestyleCommon_Keyboard:Initialize(control)
     self.control = control
@@ -233,6 +234,11 @@ function ZO_RestyleCommon_Keyboard:BuildCategories()
 
     if restyleCategoryData:AllowsDyeing() then
         self:AddDyeCategory()
+    elseif restyleCategoryData:GetRestyleMode() == RESTYLE_MODE_COMPANION_EQUIPMENT then
+        local DISABLE_DYES = true
+        self:AddDyeCategory(DISABLE_DYES)
+        SCENE_MANAGER:RemoveFragment(KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT)
+        SCENE_MANAGER:RemoveFragment(KEYBOARD_DYEING_FRAGMENT)
     end
 
     if restyleCategoryData:GetSpecializedCollectibleCategory() then
@@ -244,7 +250,7 @@ function ZO_RestyleCommon_Keyboard:BuildCategories()
     end
 
     local autoSelectNode = nil
-    if restyleCategoryData:GetSpecializedCollectibleCategory() and not restyleCategoryData:IsSpecializedCollectibleCategoryEnabled() then
+    if restyleCategoryData:AllowsDyeing() and restyleCategoryData:GetSpecializedCollectibleCategory() and not restyleCategoryData:IsSpecializedCollectibleCategoryEnabled() then
         autoSelectNode = self.dyeCategoryNode
     end
 
@@ -277,23 +283,41 @@ function ZO_RestyleCommon_Keyboard:InitializeSearch()
     end
 end
 
+function ZO_RestyleCommon_Keyboard.UpdateAnchors(control, hasSubTabs)
+    control:ClearAnchors()
+    if hasSubTabs then
+        control:SetHeight(620)
+        control:SetAnchor(RIGHT, nil, nil, -10, 55)
+    else
+        control:SetHeight(670)
+        control:SetAnchor(RIGHT, nil, nil, -10, 30)
+    end
+end
+
 function ZO_RestyleCommon_Keyboard:RefreshCategoryContent()
     if self.fragment:IsShowing() then
         local categoryData = self.categoryTree:GetSelectedData()
-        local referenceData = categoryData.referenceData
-        if referenceData.isDyesCategory then
-            if KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT:IsShowing() then
-                ZO_OUTFIT_STYLES_PANEL_KEYBOARD:UnregisterCallback("MouseTargetChanged", self.updateKeybindCallback)
-                SCENE_MANAGER:RemoveFragment(KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT)
+        if categoryData then
+            local referenceData = categoryData.referenceData
+            if referenceData.isDyesCategory then
+                if KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT:IsShowing() then
+                    ZO_OUTFIT_STYLES_PANEL_KEYBOARD:UnregisterCallback("MouseTargetChanged", self.updateKeybindCallback)
+                    SCENE_MANAGER:RemoveFragment(KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT)
+                end
+                self.UpdateAnchors(ZO_DYEING_KEYBOARD.control, self.currentSubTabDescriptor)
+                SCENE_MANAGER:AddFragment(KEYBOARD_DYEING_FRAGMENT)
+            else
+                ZO_OUTFIT_STYLES_PANEL_KEYBOARD:SetCategoryReferenceData(referenceData)
+                SCENE_MANAGER:RemoveFragment(KEYBOARD_DYEING_FRAGMENT)
+                if not KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT:IsShowing() then
+                    self.UpdateAnchors(ZO_OUTFIT_STYLES_PANEL_KEYBOARD.control, self.currentSubTabDescriptor)
+                    SCENE_MANAGER:AddFragment(KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT)
+                    ZO_OUTFIT_STYLES_PANEL_KEYBOARD:RegisterCallback("MouseTargetChanged", self.updateKeybindCallback)
+                end
             end
-            SCENE_MANAGER:AddFragment(KEYBOARD_DYEING_FRAGMENT)
         else
-            ZO_OUTFIT_STYLES_PANEL_KEYBOARD:SetCategoryReferenceData(referenceData)
+            SCENE_MANAGER:RemoveFragment(KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT)
             SCENE_MANAGER:RemoveFragment(KEYBOARD_DYEING_FRAGMENT)
-            if not KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT:IsShowing() then
-                SCENE_MANAGER:AddFragment(KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT)
-                ZO_OUTFIT_STYLES_PANEL_KEYBOARD:RegisterCallback("MouseTargetChanged", self.updateKeybindCallback)
-            end
         end
         self:UpdateKeybind()
     end
@@ -306,13 +330,13 @@ function ZO_RestyleCommon_Keyboard:ClearNewStatusFromPreviousCategory(referenceD
 end
 
 function ZO_RestyleCommon_Keyboard:AddCategory(nodeTemplate, parent, name, referenceData, normalIcon, pressedIcon, mouseoverIcon, disabledIcon, enabled)
-    local entryData = 
+    local entryData =
     {
-        referenceData = referenceData, 
+        referenceData = referenceData,
         name = name,
         parentData = parent and parent.data or nil,
-        normalIcon = normalIcon, 
-        pressedIcon = pressedIcon, 
+        normalIcon = normalIcon,
+        pressedIcon = pressedIcon,
         mouseoverIcon = mouseoverIcon,
         disabledIcon = disabledIcon,
         enabled = enabled,
@@ -362,8 +386,8 @@ do
 
     local DYE_REFERENCE_DATA = { isDyesCategory = true }
 
-    function ZO_RestyleCommon_Keyboard:AddDyeCategory(attemptReselectReferenceData)
-        self.dyeCategoryNode = self:AddCategory("ZO_StatusIconChildlessHeader", NO_PARENT, GetString(SI_RESTYLE_DYES_CATEGORY_NAME), DYE_REFERENCE_DATA, "EsoUI/Art/Dye/dyes_categoryIcon_up.dds", "EsoUI/Art/Dye/dyes_categoryIcon_down.dds", "EsoUI/Art/Dye/dyes_categoryIcon_over.dds")
+    function ZO_RestyleCommon_Keyboard:AddDyeCategory(isDisabled)
+        self.dyeCategoryNode = self:AddCategory("ZO_StatusIconChildlessHeader", NO_PARENT, GetString(SI_RESTYLE_DYES_CATEGORY_NAME), DYE_REFERENCE_DATA, "EsoUI/Art/Dye/dyes_categoryIcon_up.dds", "EsoUI/Art/Dye/dyes_categoryIcon_down.dds", "EsoUI/Art/Dye/dyes_categoryIcon_over.dds", "EsoUI/Art/Dye/dyes_categoryIcon_disabled.dds", not isDisabled)
     end
 end
 
@@ -385,8 +409,8 @@ function ZO_RestyleCommon_Keyboard:AddSlotCollectibleCategories()
 
     if specializedCollectibleCategory == COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES then
         local CategoryEnabledCallback = nil
-
-        if not ZO_OUTFIT_MANAGER:HasWeaponsCurrentlyHeldToOverride() then
+        local actorCategory = self.currentSubTabDescriptor and self.currentSubTabDescriptor.actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+        if not ZO_OUTFIT_MANAGER:HasWeaponsCurrentlyHeldToOverride(actorCategory) then
             -- If no weapon is equipped, show the weapons category, but disable it
             local weaponCategoryId = GetOutfitSlotDataCollectibleCategoryId(OUTFIT_SLOT_WEAPON_MAIN_HAND)
             local weaponSubcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataById(weaponCategoryId)
@@ -403,15 +427,15 @@ function ZO_RestyleCommon_Keyboard:AddSlotCollectibleCategories()
         if restyleCategoryData:IsSpecializedCollectibleCategoryEnabled() then
             for outfitSlot = OUTFIT_SLOT_ITERATION_BEGIN, OUTFIT_SLOT_ITERATION_END do
                 local isArmor = ZO_OUTFIT_MANAGER:IsOutfitSlotArmor(outfitSlot)
-                local isEquippedWeapon = ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyHeld(outfitSlot)
-                if isArmor or isEquippedWeapon then
+                local isEquippedWeapon = ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyHeld(outfitSlot, actorCategory)
+                if (isArmor or isEquippedWeapon) and not restyleCategoryData:IsOmittedRestyleSlotType(outfitSlot) then
                     local subcategoryId = GetOutfitSlotDataCollectibleCategoryId(outfitSlot)
                     local subcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataById(subcategoryId)
                     local categoryData = subcategoryData and subcategoryData:GetParentData()
                     local categoryNode = categoryData and categoryDataNodes[categoryData]
                     if categoryNode then
                         local restyleSlotData = self.restyleSlotDataMetaPool:AcquireObject()
-                        restyleSlotData:SetRestyleMode(RESTYLE_MODE_OUTFIT)
+                        restyleSlotData:SetRestyleMode(restyleCategoryData.restyleMode)
                         restyleSlotData:SetRestyleSlotType(outfitSlot)
                         AddSubcategory(restyleSlotData, categoryNode)
                     end
@@ -580,11 +604,11 @@ function ZO_RestyleCommon_Keyboard:RemoveKeybinds()
 end
 
 function ZO_RestyleCommon_Keyboard:InitializeModeData()
-    -- To be overriden
+    -- To be overridden
 end
 
 function ZO_RestyleCommon_Keyboard:GetRestyleCategoryData()
-    assert(false) -- Must be overriden
+    assert(false) -- Must be overridden
 end
 
 function ZO_RestyleCommon_Keyboard:GetFragment()

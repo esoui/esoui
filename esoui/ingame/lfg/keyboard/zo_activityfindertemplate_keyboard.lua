@@ -118,7 +118,7 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeFragment()
     self.fragment:RegisterCallback("StateChange", OnStateChange)
     self.categoryData.categoryFragment = self.fragment
 
-    GROUP_MENU_KEYBOARD:AddCategory(self.categoryData, self.categoryPriority)
+    GROUP_MENU_KEYBOARD:AddCategory(self.categoryData)
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:RegisterEvents()

@@ -11,7 +11,7 @@ function ZO_Stable_Gamepad:New(...)
 end
 
 function ZO_Stable_Gamepad:Initialize(control)
-    ZO_GamepadStoreListComponent.Initialize(self, STORE_WINDOW_GAMEPAD, ZO_MODE_STORE_STABLE, GetString(SI_STABLE_STABLES_TAB), "ZO_StableTrainingRow_Gamepad", ZO_ParametricScrollList_DefaultMenuEntryWithHeaderSetup)
+    ZO_GamepadStoreListComponent.Initialize(self, STORE_WINDOW_GAMEPAD, ZO_MODE_STORE_STABLE, GetString(SI_STABLE_STABLES_TAB), "ZO_StableTrainingRow_Gamepad", ZO_ParametricScrollList_DefaultMenuEntryWithHeaderSetup, "StableRow", "StableRowHeader")
     ZO_Stable_Base.Initialize(self, control, GAMEPAD_STORE_SCENE_NAME)
 
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)

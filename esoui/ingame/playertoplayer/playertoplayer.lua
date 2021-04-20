@@ -1,4 +1,5 @@
 local P2P_UNIT_TAG = "reticleoverplayer"
+local P2C_UNIT_TAG = "reticleovercompanion"
 
 local INTERACT_TYPE_AGENT_CHAT_REQUEST = 1
 local INTERACT_TYPE_RITUAL_OF_MARA = 2
@@ -1413,24 +1414,28 @@ function ZO_PlayerToPlayer:RemoveEntryFromIncomingQueueTable(index)
     return incomingEntry
 end
 
-function ZO_PlayerToPlayer:SetTargetIdentification()
-    self.currentTargetCharacterNameRaw = GetRawUnitName(P2P_UNIT_TAG)
+function ZO_PlayerToPlayer:SetTargetIdentification(unitTag)
+    self.currentTargetCharacterNameRaw = GetRawUnitName(unitTag)
     self.currentTargetCharacterName = zo_strformat(SI_PLAYER_TO_PLAYER_TARGET, self.currentTargetCharacterNameRaw)
-    self.currentTargetDisplayName = GetUnitDisplayName(P2P_UNIT_TAG)
+    self.currentTargetDisplayName = GetUnitDisplayName(unitTag)
 end
 
 local RAID_LIFE_ICON_MARKUP = "|t32:32:EsoUI/Art/Trials/VitalityDepletion.dds|t"
-function ZO_PlayerToPlayer:TryShowingResurrectLabel()
-    if IsUnitResurrectableByPlayer(P2P_UNIT_TAG) then
-        self:SetTargetIdentification()
+function ZO_PlayerToPlayer:TryShowingResurrectLabel(unitTag)
+    if IsUnitResurrectableByPlayer(unitTag) then
+        self:SetTargetIdentification(unitTag)
 
         self.resurrectable = true
 
         self.targetLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-        self.targetLabel:SetText(ZO_GetPrimaryPlayerNameWithSecondary(self.currentTargetDisplayName, self.currentTargetCharacterName))
+        if unitTag == P2C_UNIT_TAG then
+            self.targetLabel:SetText(GetUnitName(unitTag))
+        else
+            self.targetLabel:SetText(ZO_GetPrimaryPlayerNameWithSecondary(self.currentTargetDisplayName, self.currentTargetCharacterName))
+        end
 
-        self.isBeingResurrected = IsUnitBeingResurrected(P2P_UNIT_TAG)
-        self.hasResurrectPending = DoesUnitHaveResurrectPending(P2P_UNIT_TAG)
+        self.isBeingResurrected = IsUnitBeingResurrected(unitTag)
+        self.hasResurrectPending = DoesUnitHaveResurrectPending(unitTag)
         if self.isBeingResurrected or self.hasResurrectPending then
             self.pendingResurrectInfo:SetHidden(false)
             if self.isBeingResurrected then
@@ -1442,7 +1447,7 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel()
             self.pendingResurrectInfo:SetHidden(true)
             self.actionKeybindButton:SetHidden(false)
 
-            local targetLevel = GetUnitEffectiveLevel(P2P_UNIT_TAG)
+            local targetLevel = GetUnitEffectiveLevel(unitTag)
             local _, _, stackCount = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, targetLevel)
             local soulGemSuccess, coloredFilledText, coloredSoulGemIconMarkup = ZO_Death_GetResurrectSoulGemText(targetLevel)
 
@@ -1473,7 +1478,7 @@ function ZO_PlayerToPlayer:TryShowingStandardInteractLabel()
 
     if CanUnitTrade(P2P_UNIT_TAG) then
         self.resurrectable = false
-        self:SetTargetIdentification()
+        self:SetTargetIdentification(P2P_UNIT_TAG)
 
         local isIgnored = IsUnitIgnored(P2P_UNIT_TAG)
         local interactLabel = isIgnored and GetPlatformIgnoredString() or SI_PLAYER_TO_PLAYER_TARGET
@@ -1582,6 +1587,12 @@ function ZO_PlayerToPlayer:IsReticleTargetInteractable()
        and AreUnitsCurrentlyAllied("player", P2P_UNIT_TAG)
 end
 
+function ZO_PlayerToPlayer:IsReticleTargetCompanionInteractable()
+    return DoesUnitExist(P2C_UNIT_TAG)
+       and IsUnitOnline(P2C_UNIT_TAG)
+       and AreUnitsCurrentlyAllied("player", P2C_UNIT_TAG)
+end
+
 local notificationsKeybindLayerName = GetString(SI_KEYBINDINGS_LAYER_NOTIFICATIONS)
 
 function ZO_PlayerToPlayer:OnUpdate()
@@ -1621,11 +1632,12 @@ function ZO_PlayerToPlayer:OnUpdate()
 
         local hideSelf, hideTargetLabel
         local isReticleTargetInteractable = self:IsReticleTargetInteractable()
+        local isReticleTargetCompanionInteractable = self:IsReticleTargetCompanionInteractable()
         if ZO_Dialogs_IsShowing("PTP_TIMED_RESPONSE_PROMPT") then
             -- Dialogs are prioritized above interact labels, so we don't accidentally show the same p2p notification that a dialog is currently showing
             hideSelf = true
             hideTargetLabel = true
-        elseif self:TryShowingResurrectLabel() and isReticleTargetInteractable then
+        elseif self:TryShowingResurrectLabel(P2P_UNIT_TAG) and isReticleTargetInteractable then
             -- TryShowingResurrectLabel has to be checked first to set the state of the pendingResurrectInfo label
             hideSelf = false
             hideTargetLabel = false
@@ -1635,6 +1647,9 @@ function ZO_PlayerToPlayer:OnUpdate()
         elseif not self.isInteracting and isReticleTargetInteractable and self:TryShowingStandardInteractLabel() then
             hideSelf = not self:ShouldShowPromptAfterDelay()
             hideTargetLabel = hideSelf
+        elseif self:TryShowingResurrectLabel(P2C_UNIT_TAG) and isReticleTargetCompanionInteractable then
+            hideSelf = false
+            hideTargetLabel = false
         elseif self.isInteracting then
             hideSelf = false
             hideTargetLabel = true
@@ -1916,7 +1931,7 @@ do
         if isInGroup then
             local mountedState, isRidingGroupMount, hasFreePassengerSlot = GetTargetMountedStateInfo(currentTargetCharacterNameRaw)
             local isPassengerForTarget = IsGroupMountPassengerForTarget(currentTargetCharacterNameRaw)
-            local groupMountEnabled = (mountedState == PLAYER_MOUNTED_STATE_MOUNT_RIDER and isRidingGroupMount and (not IsMounted() or isPassengerForTarget))
+            local groupMountEnabled = (mountedState == MOUNTED_STATE_MOUNT_RIDER and isRidingGroupMount and (not IsMounted() or isPassengerForTarget))
             local function MountOption() UseMountAsPassenger(currentTargetCharacterNameRaw) end
             local optionToShow = isPassengerForTarget and SI_PLAYER_TO_PLAYER_DISMOUNT or SI_PLAYER_TO_PLAYER_RIDE_MOUNT
             self:AddMenuEntry(GetString(optionToShow), platformIcons[optionToShow], groupMountEnabled, MountOption)  

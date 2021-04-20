@@ -32,7 +32,9 @@ EsoUI\Ingame\Tooltip\AvATooltips.lua
 EsoUI\Ingame\Tooltip\CadwellsTooltips.lua
 EsoUI\Ingame\Tooltip\ChampionTooltips.lua
 EsoUI\Ingame\Tooltip\CharacterTooltips.lua
+EsoUI\Ingame\Tooltip\CompanionTooltips.lua
 EsoUI\Ingame\Tooltip\CrownCrateTooltips.lua
+EsoUI\Ingame\Tooltip\TimedActivityTooltips.lua
 EsoUI\Ingame\Tooltip\GiftTooltips.lua
 EsoUI\Ingame\Tooltip\GroupTooltips.lua
 EsoUI\Ingame\Tooltip\GuildKioskTooltips.lua
@@ -80,7 +82,11 @@ EsoUI\Ingame\Collections\ItemSetCollectionsData.lua
 EsoUI\Ingame\Collections\ItemSetCollectionsDataManager.lua
 EsoUI\Ingame\Collections\ItemSetCollectionsManager.lua
 
+EsoUI\Ingame\Skills\SkillsData_Base.lua
+EsoUI\Ingame\Skills\PlayerSkillsData.lua
+EsoUI\Ingame\Skills\CompanionSkillsData.lua
 EsoUI\Ingame\Skills\SkillsDataManager.lua
+EsoUI\Ingame\Skills\CompanionSkillsDataManager.lua
 EsoUI\Ingame\Skills\SkillsAndActionBarManager.lua
 EsoUI\Ingame\Skills\SkillPointAllocationManager.lua
 EsoUI\Ingame\Skills\ActionBarAssignmentManager.lua
@@ -138,6 +144,7 @@ EsoUI\Ingame\Group\Keyboard\ZO_GroupList_Keyboard.lua
 EsoUI\Ingame\Group\Keyboard\ZO_GroupList_Keyboard.xml
 EsoUI\Ingame\TopBar\TopBar.xml
 
+; Load manager prior to other activity components in order to ensure proper initialization.
 EsoUI\Ingame\ZoneStories\ZoneStories_Manager.lua
 
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityQueueData_Gamepad.lua
@@ -218,6 +225,8 @@ EsoUI\Ingame\Inventory\Gamepad\ConfirmCollectibleEvolutionDialog_Gamepad.xml
 
 EsoUI\Ingame\Collections\Keyboard\CollectibleTile_Keyboard.lua
 EsoUI\Ingame\Collections\Keyboard\CollectibleTile_Keyboard.xml
+EsoUI\Ingame\Collections\Keyboard\CollectibleSetDefaultTile_Keyboard.lua
+EsoUI\Ingame\Collections\Keyboard\CollectibleSetDefaultTile_Keyboard.xml
 
 EsoUI\Ingame\Collections\CollectionsBook_Manager.lua
 EsoUI\Ingame\Collections\Keyboard\CollectionsBook.lua
@@ -339,6 +348,7 @@ EsoUI\Ingame\Quickslot\Gamepad\QuickslotRadial_Gamepad.xml
 EsoUI\Ingame\ActionBar\AbilitySlot.lua
 EsoUI\Ingame\ActionBar\AbilitySlot.xml
 EsoUI\Ingame\ActionBar\ActionButton.lua
+EsoUI\Ingame\ActionBar\ActionButton.xml
 EsoUI\Ingame\ActionBar\QuickslotActionButton.lua
 EsoUI\Ingame\ActionBar\ActionBar.lua
 EsoUI\Ingame\ActionBar\ActionBar.xml
@@ -559,11 +569,11 @@ EsoUI\Ingame\Restyle\Keyboard\RestyleStation_Keyboard.lua
 EsoUI\Ingame\Restyle\Keyboard\RestyleStation_Keyboard.xml
 EsoUI\Ingame\Restyle\Gamepad\Restyle_Gamepad.lua
 EsoUI\Ingame\Restyle\Gamepad\Outfit_Selector_Gamepad.lua
-EsoUI\Ingame\Restyle\Gamepad\Restyle_Station_Helper_Panel_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\RestyleStation_HelperPanel_Gamepad.lua
 EsoUI\Ingame\Restyle\Gamepad\Outfit_Slots_Panel_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.xml
-EsoUI\Ingame\Restyle\Gamepad\Restyle_Station_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\RestyleStation_Gamepad.lua
 EsoUI\Ingame\Restyle\Gamepad\Restyle_Gamepad.xml
 
 
@@ -632,13 +642,18 @@ EsoUI\Ingame\Tutorial\Tutorial.lua
 EsoUI\Ingame\Tutorial\Tutorial.xml
 
 EsoUI\Ingame\SkillsAdvisor\SkillsAdvisor_Manager.lua
-EsoUI\Ingame\Skills\SharedSkills.lua
-EsoUI\Ingame\Skills\SharedSkills.xml
+EsoUI\Ingame\Skills\SkillsComponents_Shared.lua
+EsoUI\Ingame\Skills\SkillsComponents_Shared.xml
+EsoUI\Ingame\Skills\Keyboard\SkillsComponents_Keyboard.lua
+EsoUI\Ingame\Skills\Keyboard\SkillsComponents_Keyboard.xml
 EsoUI\Ingame\Skills\Keyboard\KeyboardAssignableActionBar.lua
 EsoUI\Ingame\Skills\Keyboard\KeyboardAssignableActionBar.xml
 EsoUI\Ingame\Skills\Keyboard\ZO_Skills.lua
 EsoUI\Ingame\Skills\Keyboard\ZO_Skills.xml
+EsoUI\Ingame\Skills\Gamepad\SkillsComponents_Gamepad.lua
+EsoUI\Ingame\Skills\Gamepad\SkillsComponents_Gamepad.xml
 EsoUI\Ingame\Skills\Gamepad\GamepadAssignableActionBar.lua
+EsoUI\Ingame\Skills\Gamepad\GamepadAssignableActionBar.xml
 EsoUI\Ingame\Skills\Gamepad\GamepadSkills.lua
 EsoUI\Ingame\Skills\Gamepad\GamepadSkills.xml
 
@@ -1428,6 +1443,43 @@ EsoUI\Ingame\AntiquityDigging\AntiquityDigging.xml
 
 EsoUI\Ingame\Scrying\IngameScrying.lua
 EsoUI\Ingame\Scrying\IngameScrying.xml
+
+EsoUI\Ingame\Companion\Companion_Manager.lua
+
+EsoUI\Ingame\Companion\Keyboard\CompanionProgressBar_Keyboard.lua
+EsoUI\Ingame\Companion\Keyboard\CompanionProgressBar_Keyboard.xml
+EsoUI\Ingame\Companion\Keyboard\CompanionCharacter_Keyboard.lua
+EsoUI\Ingame\Companion\Keyboard\CompanionCharacter_Keyboard.xml
+EsoUI\Ingame\Companion\Keyboard\CompanionOverview_Keyboard.lua
+EsoUI\Ingame\Companion\Keyboard\CompanionOverview_Keyboard.xml
+EsoUI\Ingame\Companion\Keyboard\CompanionEquipment_Keyboard.lua
+EsoUI\Ingame\Companion\Keyboard\CompanionEquipment_Keyboard.xml
+EsoUI\Ingame\Companion\Keyboard\CompanionSkills_Keyboard.lua
+EsoUI\Ingame\Companion\Keyboard\CompanionSkills_Keyboard.xml
+EsoUI\Ingame\Companion\Keyboard\CompanionCollectionBook_Keyboard.lua
+EsoUI\Ingame\Companion\Keyboard\CompanionCollectionBook_Keyboard.xml
+EsoUI\Ingame\Companion\Keyboard\CompanionCharacterWindow_Keyboard.lua
+EsoUI\Ingame\Companion\Keyboard\CompanionCharacterWindow_Keyboard.xml
+EsoUI\Ingame\Companion\Keyboard\Companion_Keyboard.lua
+EsoUI\Ingame\Companion\Keyboard\Companion_Keyboard.xml
+
+EsoUI\Ingame\Companion\Gamepad\CompanionFooter_Gamepad.lua
+EsoUI\Ingame\Companion\Gamepad\CompanionFooter_Gamepad.xml
+EsoUI\Ingame\Companion\Gamepad\CompanionEquipment_Gamepad.lua
+EsoUI\Ingame\Companion\Gamepad\CompanionEquipment_Gamepad.xml
+EsoUI\Ingame\Companion\Gamepad\CompanionSkills_Gamepad.lua
+EsoUI\Ingame\Companion\Gamepad\CompanionSkills_Gamepad.xml
+EsoUI\Ingame\Companion\Gamepad\CompanionCollectionBook_Gamepad.lua
+EsoUI\Ingame\Companion\Gamepad\CompanionCollectionBook_Gamepad.xml
+EsoUI\Ingame\Companion\Gamepad\Companion_Gamepad.lua
+EsoUI\Ingame\Companion\Gamepad\Companion_Gamepad.xml
+
+EsoUI\Ingame\TimedActivities\TimedActivities_Manager.lua
+EsoUI\Ingame\TimedActivities\TimedActivities_Shared.lua
+EsoUI\Ingame\TimedActivities\Gamepad\TimedActivities_Gamepad.lua
+EsoUI\Ingame\TimedActivities\Gamepad\TimedActivities_Gamepad.xml
+EsoUI\Ingame\TimedActivities\Keyboard\TimedActivities_Keyboard.lua
+EsoUI\Ingame\TimedActivities\Keyboard\TimedActivities_Keyboard.xml
 
 ; Subtitles needs to be loaded after PlayerToPlayer so it can anchor off of it
 EsoUI\Ingame\Subtitles\Subtitles.lua

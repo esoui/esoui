@@ -1,0 +1,29 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CollectibleSetDefaultTile_Keyboard_Control" inherits="ZO_ContextualActionsTile_Control ZO_ContextualActionsTile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X" y="ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y" />
+
+            <OnInitialized>
+                ZO_CollectibleSetDefaultTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true" level="3" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <Dimensions x="ZO_COLLECTIBLE_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_COLLECTIBLE_TILE_KEYBOARD_ICON_DIMENSIONS"/>
+                    <Anchor point="CENTER" offsetY="41" relativePoint="TOP"/>
+                </Texture>
+
+                <Label name="$(parent)Title" override="true" inherits="ZO_CollectibleTileDefaultLabel">
+                    <Dimensions y="54" />
+                    <Anchor point="BOTTOMLEFT"  offsetX="7" offsetY="-2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-2" />
+                </Label>
+
+                <Texture name="$(parent)Status" inherits="ZO_MultiIcon" level="3">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

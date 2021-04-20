@@ -14,17 +14,23 @@ local VIEWABLE_HOTBAR_CATEGORY_SET =
     [HOTBAR_CATEGORY_WEREWOLF] = true,
     [HOTBAR_CATEGORY_TEMPORARY] = true,
     [HOTBAR_CATEGORY_DAEDRIC_ARTIFACT] = true,
+    [HOTBAR_CATEGORY_COMPANION] = true,
 }
 
 -- These bars can be edited, and the server will persist those edits
-internalassert(NUM_ASSIGNABLE_HOTBARS == 5, "Update hotbars")
+internalassert(NUM_ASSIGNABLE_HOTBARS == 6, "Update hotbars")
 local ASSIGNABLE_HOTBAR_CATEGORY_SET =
 {
     [HOTBAR_CATEGORY_PRIMARY] = true,
     [HOTBAR_CATEGORY_BACKUP] = true,
     [HOTBAR_CATEGORY_OVERLOAD] = true,
     [HOTBAR_CATEGORY_WEREWOLF] = true,
+    [HOTBAR_CATEGORY_COMPANION] = true,
 }
+
+-- These bars apply to the player, and hold player skills
+local ASSIGNABLE_PLAYER_HOTBAR_CATEGORY_SET = ZO_ShallowTableCopy(ASSIGNABLE_HOTBAR_CATEGORY_SET)
+ASSIGNABLE_PLAYER_HOTBAR_CATEGORY_SET[HOTBAR_CATEGORY_COMPANION] = nil
 
 -- These bars have an associated weapon pair with them
 local WEAPON_PAIR_HOTBAR_CATEGORY_SET = {}
@@ -38,11 +44,19 @@ local HOTBAR_CYCLE_ORDER =
 {
     HOTBAR_CATEGORY_PRIMARY,
     HOTBAR_CATEGORY_BACKUP,
+    HOTBAR_CATEGORY_COMPANION,
     HOTBAR_CATEGORY_OVERLOAD,
     HOTBAR_CATEGORY_WEREWOLF,
     HOTBAR_CATEGORY_TEMPORARY,
     HOTBAR_CATEGORY_DAEDRIC_ARTIFACT,
 }
+
+-- these enums are 0-indexed for historical reasons, while the API that action bars actually use are 1-indexed.
+-- we'll just convert them here instead of breaking addons that use the old indexes (which were already broken, anyways)
+local SKILL_BAR_FIRST_NORMAL_SLOT_INDEX = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1
+local SKILL_BAR_LAST_NORMAL_SLOT_INDEX = ACTION_BAR_ULTIMATE_SLOT_INDEX
+local SKILL_BAR_ULTIMATE_SLOT_INDEX = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
+local SKILL_BAR_START_SLOT_INDEX, SKILL_BAR_END_SLOT_INDEX = GetAssignableAbilityBarStartAndEndSlots()
 --------------------------------
 -- Slottable Action Interface --
 --------------------------------
@@ -56,20 +70,11 @@ local HOTBAR_CYCLE_ORDER =
     This does not include quickslots, which aren't shown and have their own handling someplace else.
 ]]--
 ZO_SLOTTABLE_ACTION_TYPE_EMPTY = 1
-ZO_SLOTTABLE_ACTION_TYPE_SKILL = 2
+ZO_SLOTTABLE_ACTION_TYPE_PLAYER_SKILL = 2
 ZO_SLOTTABLE_ACTION_TYPE_ABILITY = 3
+ZO_SLOTTABLE_ACTION_TYPE_COMPANION_SKILL = 4
 
-ZO_BaseSlottableAction = ZO_Object:Subclass()
-
-function ZO_BaseSlottableAction:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
-function ZO_BaseSlottableAction:Initialize()
-    -- Can be overriden
-end
+ZO_BaseSlottableAction = ZO_InitializingObject:Subclass()
 
 function ZO_BaseSlottableAction:GetSlottableActionType()
     assert(false, "override me")
@@ -130,6 +135,14 @@ function ZO_BaseSlottableAction:IsWerewolf()
     return false
 end
 
+function ZO_BaseSlottableAction:GetPlayerSkillData()
+    return nil
+end
+
+function ZO_BaseSlottableAction:GetCompanionSkillData()
+    return nil
+end
+
 ------------------
 -- Empty Action --
 ------------------
@@ -138,10 +151,6 @@ end
     The empty action has no state, it's always action ID 0. To use it, use the ZO_EMPTY_SLOTTABLE_ACTION singleton instead of the class.
 ]]--
 ZO_EmptySlottableAction = ZO_BaseSlottableAction:Subclass()
-
-function ZO_EmptySlottableAction:New(...)
-    return ZO_BaseSlottableAction.New(self, ...)
-end
 
 function ZO_EmptySlottableAction:GetSlottableActionType()
     return ZO_SLOTTABLE_ACTION_TYPE_EMPTY
@@ -197,46 +206,46 @@ end
 
 ZO_EMPTY_SLOTTABLE_ACTION = ZO_EmptySlottableAction:New()
 
-----------------------
--- Slottable Skills --
-----------------------
+-----------------------------
+-- Slottable Player Skills --
+-----------------------------
 
-ZO_SlottableSkill = ZO_BaseSlottableAction:Subclass()
+ZO_SlottablePlayerSkill = ZO_BaseSlottableAction:Subclass()
 
-function ZO_SlottableSkill:New(...)
-    return ZO_BaseSlottableAction.New(self, ...)
-end
-
-function ZO_SlottableSkill:Initialize(skillData, hotbarCategory)
-    assert(skillData ~= nil, "SlottableSkill requires a linked skillData, got nil")
+function ZO_SlottablePlayerSkill:Initialize(skillData, hotbarCategory)
+    assert(skillData ~= nil, "SlottablePlayerSkill requires a linked skillData, got nil")
     assert(skillData:IsPassive() == false, "Only actives/ultimates are slottable")
-    assert(hotbarCategory, "SlottableSkill requires a hotbarCategory, got nil")
+    assert(hotbarCategory, "SlottablePlayerSkill requires a hotbarCategory, got nil")
     self.skillData = skillData
     self.hotbarCategory = hotbarCategory -- used for visualization purposes, has no effect on things like equality or the resulting message
 end
 
-function ZO_SlottableSkill:GetSlottableActionType()
-    return ZO_SLOTTABLE_ACTION_TYPE_SKILL
+function ZO_SlottablePlayerSkill:GetPlayerSkillData()
+    return self.skillData
 end
 
-function ZO_SlottableSkill:GetActionId()
+function ZO_SlottablePlayerSkill:GetSlottableActionType()
+    return ZO_SLOTTABLE_ACTION_TYPE_PLAYER_SKILL
+end
+
+function ZO_SlottablePlayerSkill:GetActionId()
     local skillProgressionData = self.skillData:GetPointAllocatorProgressionData()
     return skillProgressionData:GetAbilityId()
 end
 
-function ZO_SlottableSkill:GetActionType()
+function ZO_SlottablePlayerSkill:GetActionType()
     return ACTION_TYPE_ABILITY
 end
 
-function ZO_SlottableSkill:EqualsSlot(otherSlottableAction)
-    return otherSlottableAction ~= nil and otherSlottableAction:GetSlottableActionType() == ZO_SLOTTABLE_ACTION_TYPE_SKILL and self.skillData == otherSlottableAction.skillData
+function ZO_SlottablePlayerSkill:EqualsSlot(otherSlottableAction)
+    return otherSlottableAction ~= nil and otherSlottableAction:GetSlottableActionType() == self:GetSlottableActionType() and self.skillData == otherSlottableAction.skillData
 end
 
-function ZO_SlottableSkill:EqualsSkillData(skillData)
+function ZO_SlottablePlayerSkill:EqualsSkillData(skillData)
     return skillData == self.skillData
 end
 
-function ZO_SlottableSkill:GetEffectiveAbilityId()
+function ZO_SlottablePlayerSkill:GetEffectiveAbilityId()
     local skillProgressionData = self.skillData:GetPointAllocatorProgressionData()
     local rootAbilityId = skillProgressionData:GetAbilityId()
     if skillProgressionData:IsChainingAbility() then
@@ -246,28 +255,28 @@ function ZO_SlottableSkill:GetEffectiveAbilityId()
     end
 end
 
-function ZO_SlottableSkill:GetIcon()
+function ZO_SlottablePlayerSkill:GetIcon()
     return GetAbilityIcon(self:GetEffectiveAbilityId())
 end
 
-function ZO_SlottableSkill:IsUsable()
+function ZO_SlottablePlayerSkill:IsUsable()
     return CanAbilityBeUsedFromHotbar(self:GetEffectiveAbilityId(), self.hotbarCategory)
 end
 
-function ZO_SlottableSkill:IsStillValid()
+function ZO_SlottablePlayerSkill:IsStillValid()
     -- We should invalidate skills that have been refunded
     return self.skillData:GetPointAllocator():IsPurchased()
 end
 
-function ZO_SlottableSkill:LayoutGamepadTooltip(tooltipType)
+function ZO_SlottablePlayerSkill:LayoutGamepadTooltip(tooltipType)
     GAMEPAD_TOOLTIPS:LayoutAbilityWithSkillProgressionData(tooltipType, self:GetEffectiveAbilityId(), self.skillData:GetPointAllocatorProgressionData())
 end
 
-function ZO_SlottableSkill:GetKeyboardTooltipControl()
+function ZO_SlottablePlayerSkill:GetKeyboardTooltipControl()
     return SkillTooltip
 end
 
-function ZO_SlottableSkill:SetKeyboardTooltip(tooltipControl)
+function ZO_SlottablePlayerSkill:SetKeyboardTooltip(tooltipControl)
     local DONT_SHOW_SKILL_POINT_COST = false
     local DONT_SHOW_UPGRADE_TEXT = false
     local DONT_SHOW_ADVISED = false
@@ -276,13 +285,84 @@ function ZO_SlottableSkill:SetKeyboardTooltip(tooltipControl)
     self.skillData:GetPointAllocatorProgressionData():SetKeyboardTooltip(tooltipControl, DONT_SHOW_SKILL_POINT_COST, DONT_SHOW_UPGRADE_TEXT, DONT_SHOW_ADVISED, DONT_SHOW_BAD_MORPH, NO_OVERRIDE_RANK, self:GetEffectiveAbilityId())
 end
 
-function ZO_SlottableSkill:TryCursorPickup()
-    PickupAbilityBySkillLine(self.skillData:GetIndices())
-    return true
+function ZO_SlottablePlayerSkill:TryCursorPickup()
+    return self.skillData:GetPointAllocatorProgressionData():TryPickup()
 end
 
-function ZO_SlottableSkill:IsWerewolf()
+function ZO_SlottablePlayerSkill:IsWerewolf()
     return self.skillData:GetSkillLineData():IsWerewolf()
+end
+
+--------------------------------
+-- Slottable Companion Skills --
+--------------------------------
+
+ZO_SlottableCompanionSkill = ZO_BaseSlottableAction:Subclass()
+
+function ZO_SlottableCompanionSkill:Initialize(skillData, hotbarCategory)
+    assert(skillData ~= nil, "SlottableCompanionSkill requires a linked skillData, got nil")
+    assert(skillData:IsPassive() == false, "Only actives/ultimates are slottable")
+    assert(hotbarCategory, "SlottableCompanionSkill requires a hotbarCategory, got nil")
+    self.skillData = skillData
+    self.hotbarCategory = hotbarCategory -- used for visualization purposes, has no effect on things like equality or the resulting message
+end
+
+function ZO_SlottableCompanionSkill:GetCompanionSkillData()
+    return self.skillData
+end
+
+function ZO_SlottableCompanionSkill:GetSlottableActionType()
+    return ZO_SLOTTABLE_ACTION_TYPE_COMPANION_SKILL
+end
+
+function ZO_SlottableCompanionSkill:GetActionId()
+    local skillProgressionData = self.skillData:GetPointAllocatorProgressionData()
+    return skillProgressionData:GetAbilityId()
+end
+
+function ZO_SlottableCompanionSkill:GetActionType()
+    return ACTION_TYPE_ABILITY
+end
+
+function ZO_SlottableCompanionSkill:EqualsSlot(otherSlottableAction)
+    return otherSlottableAction ~= nil and otherSlottableAction:GetSlottableActionType() == self:GetSlottableActionType() and self.skillData == otherSlottableAction.skillData
+end
+
+function ZO_SlottableCompanionSkill:EqualsSkillData(skillData)
+    return skillData == self.skillData
+end
+
+function ZO_SlottableCompanionSkill:GetEffectiveAbilityId()
+    return self.skillData:GetAbilityId()
+end
+
+function ZO_SlottableCompanionSkill:GetIcon()
+    return GetAbilityIcon(self:GetEffectiveAbilityId())
+end
+
+function ZO_SlottableCompanionSkill:IsUsable()
+    return CanAbilityBeUsedFromHotbar(self:GetEffectiveAbilityId(), self.hotbarCategory)
+end
+
+function ZO_SlottableCompanionSkill:IsStillValid()
+    -- We should invalidate skills that have been refunded
+    return self.skillData:GetPointAllocator():IsPurchased()
+end
+
+function ZO_SlottableCompanionSkill:LayoutGamepadTooltip(tooltipType)
+    GAMEPAD_TOOLTIPS:LayoutCompanionSkillProgression(tooltipType, self.skillData:GetPointAllocatorProgressionData())
+end
+
+function ZO_SlottableCompanionSkill:GetKeyboardTooltipControl()
+    return SkillTooltip
+end
+
+function ZO_SlottableCompanionSkill:SetKeyboardTooltip(tooltipControl)
+    self.skillData:GetPointAllocatorProgressionData():SetKeyboardTooltip(tooltipControl)
+end
+
+function ZO_SlottableCompanionSkill:TryCursorPickup()
+    return self.skillData:GetCurrentProgressionData():TryPickup()
 end
 
 -----------------------
@@ -294,10 +374,6 @@ end
 ]]--
 
 ZO_SlottableAbility = ZO_BaseSlottableAction:Subclass()
-
-function ZO_SlottableAbility:New(...)
-    return ZO_BaseSlottableAction.New(self, ...)
-end
 
 function ZO_SlottableAbility:Initialize(abilityId)
     assert(abilityId ~= nil, "ZO_SlottableAbility requires an abilityId")
@@ -359,22 +435,16 @@ end
     Hotbar objects model the subset of a server side hotbar that matters for the skills window: We only care about the 5 active slots and the one ultimate slot, and we only store SlottableActions.
 ]]--
 
-ZO_ActionBarAssignmentManager_Hotbar = ZO_Object:Subclass()
+ZO_ActionBarAssignmentManager_Hotbar = ZO_InitializingObject:Subclass()
 
-function ZO_ActionBarAssignmentManager_Hotbar:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
-local SKILL_BAR_SLOTS_START, SKILL_BAR_SLOTS_STOP = GetAssignableAbilityBarStartAndEndSlots()
 function ZO_ActionBarAssignmentManager_Hotbar:Initialize(hotbarCategory)
     self.hotbarCategory = hotbarCategory
     self.isInCycle = false
     self.slots = {}
+    self.newSlotsById = {}
 
     self.overrideSlotSkillDatas = {}
-    for actionSlotIndex = SKILL_BAR_SLOTS_START, SKILL_BAR_SLOTS_STOP do
+    for actionSlotIndex = SKILL_BAR_START_SLOT_INDEX, SKILL_BAR_END_SLOT_INDEX do
         local progressionId = GetSkillProgressionIdForHotbarSlotOverrideRule(actionSlotIndex, hotbarCategory)
         if progressionId ~= 0 then
             self.overrideSlotSkillDatas[actionSlotIndex] = SKILLS_DATA_MANAGER:GetSkillDataByProgressionId(progressionId)
@@ -385,20 +455,20 @@ end
 function ZO_ActionBarAssignmentManager_Hotbar:Reset()
     ZO_ClearTable(self.slots)
 
-    for actionSlotIndex = SKILL_BAR_SLOTS_START, SKILL_BAR_SLOTS_STOP do
+    for actionSlotIndex = SKILL_BAR_START_SLOT_INDEX, SKILL_BAR_END_SLOT_INDEX do
         self:ResetSlot(actionSlotIndex)
     end
 end
 
 function ZO_ActionBarAssignmentManager_Hotbar:ResetSlot(actionSlotIndex)
-    if actionSlotIndex < SKILL_BAR_SLOTS_START or actionSlotIndex > SKILL_BAR_SLOTS_STOP then
+    if actionSlotIndex < SKILL_BAR_START_SLOT_INDEX or actionSlotIndex > SKILL_BAR_END_SLOT_INDEX then
         -- We can't assign skills to this actionSlotIndex
         return
     end
 
     local overrideSkillData = self:GetOverrideSkillDataForSlot(actionSlotIndex)
     if overrideSkillData then
-        self.slots[actionSlotIndex] = ZO_SlottableSkill:New(overrideSkillData, self.hotbarCategory)
+        self.slots[actionSlotIndex] = ZO_SlottablePlayerSkill:New(overrideSkillData, self.hotbarCategory)
         return
     end
 
@@ -406,11 +476,26 @@ function ZO_ActionBarAssignmentManager_Hotbar:ResetSlot(actionSlotIndex)
     local actionType = GetSlotType(actionSlotIndex, self.hotbarCategory)
     if actionType == ACTION_TYPE_ABILITY then
         local abilityId = GetSlotBoundId(actionSlotIndex, self.hotbarCategory)
-        local progressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
-        if progressionData then
-            self.slots[actionSlotIndex] = ZO_SlottableSkill:New(progressionData:GetSkillData(), self.hotbarCategory)
-        elseif not ASSIGNABLE_HOTBAR_CATEGORY_SET[self.hotbarCategory] then
+
+        if self.hotbarCategory == HOTBAR_CATEGORY_COMPANION then
+            local companionSkillData = COMPANION_SKILLS_DATA_MANAGER:GetSkillDataByAbilityId(abilityId)
+            if companionSkillData then
+                self.slots[actionSlotIndex] = ZO_SlottableCompanionSkill:New(companionSkillData, self.hotbarCategory)
+                return
+            else
+                internalassert(false, string.format("Attempted to place non-companion ability %d on companion bar; does the companion skill manager know about this ability?", abilityId))
+            end
+        end
+
+        local playerSkillProgressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
+        if playerSkillProgressionData then
+            self.slots[actionSlotIndex] = ZO_SlottablePlayerSkill:New(playerSkillProgressionData:GetSkillData(), self.hotbarCategory)
+            return
+        end
+
+        if not ASSIGNABLE_HOTBAR_CATEGORY_SET[self.hotbarCategory] then
             self.slots[actionSlotIndex] = ZO_SlottableAbility:New(abilityId)
+            return
         end
     end
 end
@@ -448,13 +533,25 @@ function ZO_ActionBarAssignmentManager_Hotbar:DoesSlotHavePendingChanges(actionS
     return pendingActionType ~= actionType or pendingActionId ~= actionId
 end
 
+function ZO_ActionBarAssignmentManager_Hotbar:IsSlotLocked(actionSlotIndex)
+    return IsActionSlotLocked(actionSlotIndex, self.hotbarCategory)
+end
+
+function ZO_ActionBarAssignmentManager_Hotbar:GetSlotUnlockText(actionSlotIndex)
+    return GetActionSlotUnlockText(actionSlotIndex, self.hotbarCategory)
+end
+
 function ZO_ActionBarAssignmentManager_Hotbar:IsEditable()
     return ASSIGNABLE_HOTBAR_CATEGORY_SET[self.hotbarCategory] == true -- coerce to bool
 end
 
-function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedClearSlotResult(actionSlotIndex)
+function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedSlotEditResult(actionSlotIndex)
     if not self:IsEditable() then
         return HOT_BAR_RESULT_CANNOT_EDIT_HOTBAR
+    end
+
+    if self:IsSlotLocked(actionSlotIndex) then
+        return HOT_BAR_RESULT_SLOT_LOCKED
     end
 
     if self:GetOverrideSkillDataForSlot(actionSlotIndex) then
@@ -469,18 +566,18 @@ function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedClearSlotResult(actionS
 end
 
 function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedSkillSlotResult(actionSlotIndex, skillData)
-    local isWerewolfBar = self.hotbarCategory == HOTBAR_CATEGORY_WEREWOLF
-    local isWerewolfSkill = skillData:GetSkillLineData():IsWerewolf()
-    if isWerewolfBar and not isWerewolfSkill then
-        return HOT_BAR_RESULT_CANNOT_USE_WHILE_WEREWOLF
+    local editResult = self:GetExpectedSlotEditResult(actionSlotIndex)
+    if editResult ~= HOT_BAR_RESULT_SUCCESS then
+        return editResult
     end
 
-    if not self:IsEditable() then
-        return HOT_BAR_RESULT_CANNOT_EDIT_HOTBAR
-    end
-
-    if self:GetOverrideSkillDataForSlot(actionSlotIndex) then
-        return HOT_BAR_RESULT_CANNOT_EDIT_SLOT
+    local isPlayerSkill = skillData:IsPlayerSkill()
+    if isPlayerSkill then
+        local isWerewolfBar = self.hotbarCategory == HOTBAR_CATEGORY_WEREWOLF
+        local isWerewolfSkill = skillData:GetSkillLineData():IsWerewolf()
+        if isWerewolfBar and not isWerewolfSkill then
+            return HOT_BAR_RESULT_CANNOT_USE_WHILE_WEREWOLF
+        end
     end
 
     local isUltimateSlot = ACTION_BAR_ASSIGNMENT_MANAGER:IsUltimateSlot(actionSlotIndex)
@@ -490,14 +587,6 @@ function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedSkillSlotResult(actionS
         else
             return HOT_BAR_RESULT_IS_NOT_NORMAL
         end
-    end
-
-    if not skillData:GetPointAllocator():IsPurchased() then
-        return HOT_BAR_RESULT_ABILITY_NOT_KNOWN
-    end
-
-    if GetActionBarLockedReason() == ACTION_BAR_LOCKED_REASON_COMBAT then
-        return HOT_BAR_RESULT_NO_COMBAT_SWAP
     end
 
     return HOT_BAR_RESULT_SUCCESS
@@ -511,7 +600,7 @@ do
             return
         end
 
-        local expectedResult = self:GetExpectedClearSlotResult(actionSlotIndex, skillData)
+        local expectedResult = self:GetExpectedSlotEditResult(actionSlotIndex)
         if expectedResult ~= HOT_BAR_RESULT_SUCCESS then
             ZO_AlertEvent(EVENT_HOT_BAR_RESULT, expectedResult)
             return false
@@ -542,9 +631,30 @@ do
             self:ClearSlot(oldactionSlotIndex)
         end
 
-        self.slots[actionSlotIndex] = ZO_SlottableSkill:New(skillData, self.hotbarCategory)
+        if skillData:IsCompanionSkill() then
+            self.slots[actionSlotIndex] = ZO_SlottableCompanionSkill:New(skillData, self.hotbarCategory)
+        elseif skillData:IsPlayerSkill() then
+            self.slots[actionSlotIndex] = ZO_SlottablePlayerSkill:New(skillData, self.hotbarCategory)
+        else
+            internalassert(false, "unimplemented action slot type")
+        end
         ACTION_BAR_ASSIGNMENT_MANAGER:FireCallbacks("SlotUpdated", self.hotbarCategory, actionSlotIndex, IS_CHANGED_BY_PLAYER)
         return true
+    end
+
+    function ZO_ActionBarAssignmentManager_Hotbar:AssignSkillToSlotByAbilityId(actionSlotIndex, abilityId)
+        local playerSkillProgressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
+        if playerSkillProgressionData then
+            return self:AssignSkillToSlot(actionSlotIndex, playerSkillProgressionData:GetSkillData())
+        end
+
+        local companionSkillData = COMPANION_SKILLS_DATA_MANAGER:GetSkillDataByAbilityId(abilityId)
+        if companionSkillData then
+            return self:AssignSkillToSlot(actionSlotIndex, companionSkillData)
+        end
+
+        internalassert(false, "unimplemented action slot type")
+        return false
     end
 end
 
@@ -556,16 +666,13 @@ function ZO_ActionBarAssignmentManager_Hotbar:FindEmptySlotForSkill(skillData)
 
     if skillData:IsUltimate() then
         -- This is an ultimate, it can only be slotted in one place
-        local ULTIMATE_SLOT_ID = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
-        if self:GetSlotData(ULTIMATE_SLOT_ID):IsEmpty() then
-            return ULTIMATE_SLOT_ID
+        if self:GetSlotData(SKILL_BAR_ULTIMATE_SLOT_INDEX):IsEmpty() and not self:IsSlotLocked(SKILL_BAR_ULTIMATE_SLOT_INDEX) then
+            return SKILL_BAR_ULTIMATE_SLOT_INDEX
         end
     else
         -- This is a normal active, slot it in the first empty slot
-        local NORMAL_BAR_SLOTS_START = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1
-        local NORMAL_BAR_SLOTS_STOP = ACTION_BAR_ULTIMATE_SLOT_INDEX
-        for actionSlotIndex = NORMAL_BAR_SLOTS_START, NORMAL_BAR_SLOTS_STOP do 
-            if self:GetSlotData(actionSlotIndex):IsEmpty() then
+        for actionSlotIndex = SKILL_BAR_FIRST_NORMAL_SLOT_INDEX, SKILL_BAR_LAST_NORMAL_SLOT_INDEX do 
+            if self:GetSlotData(actionSlotIndex):IsEmpty() and not self:IsSlotLocked(actionSlotIndex) then
                 return actionSlotIndex
             end
         end
@@ -603,27 +710,37 @@ function ZO_ActionBarAssignmentManager_Hotbar:DisableInCycle()
     end
 end
 
+function ZO_ActionBarAssignmentManager_Hotbar:MarkSlotNewInternal(slotIndex)
+    self.newSlotsById[slotIndex] = true
+end
+
+function ZO_ActionBarAssignmentManager_Hotbar:ClearSlotNew(slotIndex)
+    self.newSlotsById[slotIndex] = false
+    local IS_CHANGED_BY_PLAYER = true
+    ACTION_BAR_ASSIGNMENT_MANAGER:FireCallbacks("SlotUpdated", self.hotbarCategory, slotIndex, IS_CHANGED_BY_PLAYER)
+end
+
+function ZO_ActionBarAssignmentManager_Hotbar:IsSlotNew(slotIndex)
+    return self.newSlotsById[slotIndex] == true -- coerce to bool
+end
+
 -----------------------------------
 -- Action Bar Assignment Manager --
 -----------------------------------
 
-ZO_ActionBarAssignmentManager = ZO_CallbackObject:Subclass()
-
-function ZO_ActionBarAssignmentManager:New(...)
-    ACTION_BAR_ASSIGNMENT_MANAGER = ZO_CallbackObject.New(self)
-    ACTION_BAR_ASSIGNMENT_MANAGER:Initialize(...)
-    return ACTION_BAR_ASSIGNMENT_MANAGER
-end
+ZO_ActionBarAssignmentManager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_ActionBarAssignmentManager:Initialize()
+    ACTION_BAR_ASSIGNMENT_MANAGER = self
     self.hotbars = {}
     for hotbarCategory in pairs(VIEWABLE_HOTBAR_CATEGORY_SET) do
         self.hotbars[hotbarCategory] = ZO_ActionBarAssignmentManager_Hotbar:New(hotbarCategory)
         self.hotbars[hotbarCategory]:Reset()
     end
-    self:ResetCurrentHotbarToActiveBar()
+    self:ResetCurrentHotbarToActiveBarInternal()
 
     self.numHotbarsInCycle = 0
+    self.overrideHotbarCategory = nil
     self:GetHotbar(HOTBAR_CATEGORY_PRIMARY):EnableInCycle()
     self:UpdateBackupBarStateInCycle()
 
@@ -634,16 +751,19 @@ end
 
 function ZO_ActionBarAssignmentManager:RegisterForEvents()
     -- Action slot events
-    local function OnActionSlotUpdated(_, actionSlotIndex)
-        local hotbar = self:GetHotbar(self.playerActiveHotbarCategory)
+    local function OnHotbarSlotUpdated(_, actionSlotIndex, hotbarCategory, justUnlocked)
+        local hotbar = self:GetHotbar(hotbarCategory)
         hotbar:ResetSlot(actionSlotIndex)
-        self:FireCallbacks("SlotUpdated", self.playerActiveHotbarCategory, actionSlotIndex)
+        if justUnlocked then
+            hotbar:MarkSlotNewInternal(actionSlotIndex)
+        end
+        self:FireCallbacks("SlotUpdated", hotbarCategory, actionSlotIndex)
     end
-    EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_ACTION_SLOT_UPDATED, OnActionSlotUpdated)
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_HOTBAR_SLOT_UPDATED, OnHotbarSlotUpdated)
 
     local function OnActiveHotbarUpdated(_, didActiveHotbarChange, shouldUpdateSlotAssignments)
         local oldHotbarCategory = self.currentHotbarCategory
-        self:ResetCurrentHotbarToActiveBar()
+        self:ResetCurrentHotbarToActiveBarInternal()
         if shouldUpdateSlotAssignments then
             self:GetCurrentHotbar():Reset()
         end
@@ -655,8 +775,12 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
         self:ResetAllHotbars()
     end
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, ResetAllHotbars)
-    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", ResetAllHotbars)
-    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", ResetAllHotbars)
+
+    local function ResetPlayerHotbars()
+        self:ResetPlayerHotbars()
+    end
+    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", ResetPlayerHotbars)
+    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", ResetPlayerHotbars)
 
     local function OnSkillsDataFullUpdate()
         -- Current morph may have changed, refresh visuals
@@ -729,29 +853,27 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
     SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("OnSkillsCleared", OnSkillsCleared)
 
     -- weapon swapping unlocked state events
-    local function OnUnitCreated(_, unitTag)
-        if unitTag == "player" then
-            self:UpdateBackupBarStateInCycle()
-        end
+    local function OnPlayerUnitCreated(_, unitTag)
+        self:UpdateBackupBarStateInCycle()
     end
-    EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_UNIT_CREATED, OnUnitCreated)
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_UNIT_CREATED, OnPlayerUnitCreated)
+    EVENT_MANAGER:AddFilterForEvent("ZO_ActionBarAssignmentManager", EVENT_UNIT_CREATED, REGISTER_FILTER_UNIT_TAG, "player")
 
-    local function OnLevelUpdate(_, unitTag, level)
-        if unitTag == "player" then
-            self:UpdateBackupBarStateInCycle()
-        end
+    local function OnPlayerLevelUpdate(_, unitTag, level)
+        self:UpdateBackupBarStateInCycle()
     end
-    EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_LEVEL_UPDATE, OnLevelUpdate)
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_LEVEL_UPDATE, OnPlayerLevelUpdate)
+    EVENT_MANAGER:AddFilterForEvent("ZO_ActionBarAssignmentManager", EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
 
     local function OnPlayerActivated()
-        self:ResetCurrentHotbarToActiveBar()
-        self:ResetAllHotbars()
+        self:ResetCurrentHotbarToActiveBarInternal()
+        self:ResetPlayerHotbars()
         self:UpdateBackupBarStateInCycle()
     end
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 end
 
-function ZO_ActionBarAssignmentManager:ResetCurrentHotbarToActiveBar()
+function ZO_ActionBarAssignmentManager:ResetCurrentHotbarToActiveBarInternal()
     local playerActiveHotbarCategory = GetActiveHotbarCategory()
     self.playerActiveHotbarCategory = playerActiveHotbarCategory
     if VIEWABLE_HOTBAR_CATEGORY_SET[playerActiveHotbarCategory] then
@@ -760,10 +882,30 @@ function ZO_ActionBarAssignmentManager:ResetCurrentHotbarToActiveBar()
     self.shouldUpdateWeaponSwapState = false
 end
 
-function ZO_ActionBarAssignmentManager:ResetAllHotbars()
-    for _, hotbar in pairs(self.hotbars) do
-        hotbar:Reset()
+function ZO_ActionBarAssignmentManager:ResetCurrentHotbarToActiveBar()
+    local oldHotbarCategory = self.currentHotbarCategory
+    self:ResetCurrentHotbarToActiveBarInternal()
+    self:FireCallbacks("CurrentHotbarUpdated", self.currentHotbarCategory, oldHotbarCategory)
+end
+
+function ZO_ActionBarAssignmentManager:ResetPlayerHotbarsInternal()
+    for hotbarCategory, _ in pairs(ASSIGNABLE_PLAYER_HOTBAR_CATEGORY_SET) do
+        self.hotbars[hotbarCategory]:Reset()
     end
+end
+
+function ZO_ActionBarAssignmentManager:ResetCompanionHotbarsInternal()
+    self.hotbars[HOTBAR_CATEGORY_COMPANION]:Reset()
+end
+
+function ZO_ActionBarAssignmentManager:ResetPlayerHotbars()
+    self:ResetPlayerHotbarsInternal()
+    self:FireCallbacks("CurrentHotbarUpdated", self.currentHotbarCategory, self.currentHotbarCategory)
+end
+
+function ZO_ActionBarAssignmentManager:ResetAllHotbars()
+    self:ResetPlayerHotbarsInternal()
+    self:ResetCompanionHotbarsInternal()
     self:FireCallbacks("CurrentHotbarUpdated", self.currentHotbarCategory, self.currentHotbarCategory)
 end
 
@@ -844,9 +986,7 @@ end
 
 function ZO_ActionBarAssignmentManager:CancelPendingWeaponSwap()
     if self.shouldUpdateWeaponSwapState then
-        local oldHotbarCategory = self.currentHotbarCategory
         self:ResetCurrentHotbarToActiveBar()
-        self:FireCallbacks("CurrentHotbarUpdated", self.currentHotbarCategory, oldHotbarCategory)
     end
 end
 
@@ -868,9 +1008,7 @@ function ZO_ActionBarAssignmentManager:DisableAndSwitchOffHotbarInCycle(hotbarCa
     self:GetHotbar(hotbarCategory):DisableInCycle()
 
     if hotbarCategory == self.currentHotbarCategory then
-        -- category is stale, switch to the active hotbar
         self:ResetCurrentHotbarToActiveBar()
-        self:FireCallbacks("CurrentHotbarUpdated", self.currentHotbarCategory, hotbarCategory)
     end
 end
 
@@ -886,7 +1024,7 @@ end
 
 function ZO_ActionBarAssignmentManager:IsWerewolfUltimateSlottedOnAnyWeaponBar()
     for hotbarCategory in pairs(WEAPON_PAIR_HOTBAR_CATEGORY_SET) do
-        local ultimateSlotData = self:GetHotbar(hotbarCategory):GetSlotData(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
+        local ultimateSlotData = self:GetHotbar(hotbarCategory):GetSlotData(ACTION_BAR_ULTIMATE_SLOT_INDEX)
         if ultimateSlotData:IsWerewolf() then
             return true
         end
@@ -905,8 +1043,19 @@ function ZO_ActionBarAssignmentManager:UpdateWerewolfBarStateInCycle(selectedSki
     end
 end
 
+function ZO_ActionBarAssignmentManager:SetHotbarCycleOverride(overrideHotbarCategory)
+    if self.overrideHotbarCategory ~= overrideHotbarCategory then
+        self.overrideHotbarCategory = overrideHotbarCategory
+        if overrideHotbarCategory then
+            self:SetCurrentHotbar(overrideHotbarCategory)
+        else
+            self:ResetCurrentHotbarToActiveBar()
+        end
+    end
+end
+
 function ZO_ActionBarAssignmentManager:ShouldShowHotbarSwap()
-    return self.numHotbarsInCycle > 1
+    return self.numHotbarsInCycle > 1 and self.overrideHotbarCategory == nil
 end
 
 function ZO_ActionBarAssignmentManager:CanCycleHotbars()
@@ -956,7 +1105,35 @@ function ZO_ActionBarAssignmentManager:SetCurrentHotbar(hotbarCategory)
 end
 
 function ZO_ActionBarAssignmentManager:IsUltimateSlot(actionSlotIndex)
-    return actionSlotIndex == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
+    return actionSlotIndex == SKILL_BAR_ULTIMATE_SLOT_INDEX
+end
+
+function ZO_ActionBarAssignmentManager:GetActionNameForSlot(actionSlotIndex, hotbarCategory, isGamepadPreferred)
+    local isCompanionBar = hotbarCategory == HOTBAR_CATEGORY_COMPANION
+    if isCompanionBar then
+        if self:IsUltimateSlot(actionSlotIndex) then
+           return "COMMAND_PET"
+       else
+           -- use Automatic Cast priority instead
+           return nil
+       end
+    else
+       if isGamepadPreferred then
+           return string.format("GAMEPAD_ACTION_BUTTON_%d", actionSlotIndex)
+       else
+           return string.format("ACTION_BUTTON_%d", actionSlotIndex)
+       end 
+    end
+end
+
+function ZO_ActionBarAssignmentManager:GetAutomaticCastPriorityForSlot(actionSlotIndex, hotbarCategory)
+    -- Normal companion skills are automatically cast by their companion, from left to right
+    local isCompanionBar = hotbarCategory == HOTBAR_CATEGORY_COMPANION
+    if isCompanionBar and not self:IsUltimateSlot(actionSlotIndex) then
+        -- first slot is 1, continuing from left to right
+        return actionSlotIndex - SKILL_BAR_FIRST_NORMAL_SLOT_INDEX + 1
+    end
+    return nil
 end
 
 function ZO_ActionBarAssignmentManager:TryToSlotNewSkill(skillData)

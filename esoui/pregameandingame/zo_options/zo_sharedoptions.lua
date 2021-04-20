@@ -4,13 +4,7 @@ ZO_SharedOptions_SettingsData  = {}
 SETTING_TYPE_CUSTOM = 5000 --this must be bigger than EsoGameDataEnums::cSettingSystemTypeSize
 internalassert(SETTING_TYPE_CUSTOM > (SETTING_TYPE_MAX_VALUE + 1))
 
-ZO_SharedOptions = ZO_Object:Subclass()
-
-function ZO_SharedOptions:New(...)
-    local sharedOptions = ZO_Object.New(self)
-    sharedOptions:Initialize(...)
-    return sharedOptions
-end
+ZO_SharedOptions = ZO_InitializingObject:Subclass()
 
 function ZO_SharedOptions:Initialize()
     self.controlTable = {}
@@ -172,8 +166,16 @@ function ZO_SharedOptions.AddTableToSystem(panel, system, table)
     end
 end
 
+function ZO_SharedOptions:ApplySettings(control)
+    -- optional override
+end
+
+function ZO_SharedOptions:EnableApplyButton()
+    -- optional override
+end
+
 function ZO_SharedOptions.GetColorOptionHighlight()
-    -- override in derived classes
+    -- optional override
 end
 
 do

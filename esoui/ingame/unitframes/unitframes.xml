@@ -55,6 +55,30 @@
             </Controls>
         </StatusBar>
 
+        <StatusBar name="ZO_CompanionUnitFrameStatus" virtual="true">
+            <OnInitialized>
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+
+            <Controls>
+                <StatusBar name="$(parent)Gloss"/>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_CompanionUnitFrameStatus_Keyboard_Template" inherits="ZO_ArrowStatusBarWithBG" virtual="true">
+            <Controls>
+                <Control name="$(parent)BG" hidden="false" />
+                <Control name="$(parent)Overlay" hidden="false" />
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_CompanionUnitFrameStatus_Gamepad_Template" inherits="ZO_DefaultStatusBar" virtual="true">
+            <Controls>
+                <Control name="$(parent)BG" hidden="true" />
+                <Control name="$(parent)Overlay" hidden="true" />
+            </Controls>
+        </StatusBar>
+
         <Label name="ZO_UnitFrameBarText" virtual="true" />
         <Label name="ZO_UnitFrameBarText_Keyboard_Template" font="ZoFontGameOutline" modifyTextType="NONE" virtual="true" />
         <Label name="ZO_UnitFrameBarText_Gamepad_Template" font="ZoFontGamepad18" modifyTextType="UPPERCASE" virtual="true" />
@@ -227,6 +251,125 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_CompanionGroupUnitFrame_Keyboard_Template" mouseEnabled="false" virtual="true">
+            <Dimensions x="ZO_KEYBOARD_GROUP_COMPANION_FRAME_WIDTH" y="ZO_KEYBOARD_GROUP_COMPANION_FRAME_HEIGHT" />
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH5" wrapMode="TRUNCATE" />
+                <Label name="$(parent)Status" font="ZoFontWinH5" modifyTextType="NONE" />
+                <Control name="$(parent)Background1">
+                    <Anchor point="TOPLEFT"/>
+                    <Controls>
+                        <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitFrames/unitframe_group_withCompanion.dds">
+                            <TextureCoords left="0" right="0.5625" top="0" bottom="1" />
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="256" y="128" />
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)Background2" hidden="true" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CompanionGroupUnitFrame_Gamepad_Template" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_GROUP_COMPANION_FRAME_WIDTH" y="ZO_GAMEPAD_GROUP_COMPANION_FRAME_HEIGHT" />
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepad27" wrapMode="ELLIPSIS" />
+                <Label name="$(parent)Status" inherits="ZO_UnitFrameBarText_Gamepad_Template" />
+                <Control name="$(parent)Background1">
+                    <Dimensions x="123" y="12" />
+                    <Anchor point="TOPLEFT" offsetX="-2" offsetY="95" />
+                    <Controls>
+                        <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitFrames/Gamepad/gp_RaidMeter.dds" color="000000">
+                            <TextureCoords left="0" right="1" top="0.25" bottom="0.75" />
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)Background2" hidden="false" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CompanionGroupUnitFrame" inherits="ZO_NamedUnitFrame" virtual="true">
+            <Controls>
+                <Label name="$(parent)Status" hidden="true" />
+                <Control name="$(parent)Background1">
+                    <Anchor point="TOPLEFT"/>
+                    <Controls>
+                        <Texture name="$(parent)Left" />
+                        <Texture name="$(parent)Right" hidden="true" />
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)Background2" textureFile="EsoUI/Art/HUD/Gamepad/LootHistoryBG.dds">
+                    <Dimensions x="256" y="200" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="-9"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CompanionUnitFrame_Keyboard_Template" virtual="true">
+            <Dimensions x="ZO_KEYBOARD_COMPANION_FRAME_WIDTH" y="ZO_KEYBOARD_COMPANION_FRAME_HEIGHT" />
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGameBold" wrapMode="TRUNCATE" />
+                <Label name="$(parent)Status" inherits="ZO_UnitFrameBarText_Keyboard_Template" />
+                <Control name="$(parent)Background1">
+                    <Anchor point="TOPLEFT"/>
+                    <Controls>
+                        <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitFrames/unitframe_group_left.dds">
+                            <TextureCoords left="0" right="1" top="0" bottom="1" />
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="256" y="128" />
+                        </Texture>
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/UnitFrames/unitframe_group_right.dds" hidden="false">
+                            <TextureCoords left="0" right="1" top="0" bottom="1" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+                            <Dimensions x="32" y="128"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)Background2" hidden="true" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CompanionUnitFrame_Gamepad_Template" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_COMPANION_FRAME_WIDTH" y="ZO_GAMEPAD_COMPANION_FRAME_HEIGHT" />
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepad34" wrapMode="ELLIPSIS" />
+                <Label name="$(parent)Status" inherits="ZO_UnitFrameBarText_Gamepad_Template" />
+                <Control name="$(parent)Background1">
+                    <Dimensions x="163" y="12" />
+                    <Anchor point="TOPLEFT" offsetX="-2" offsetY="43" />
+                    <Controls>
+                        <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitFrames/Gamepad/gp_RaidMeter.dds" color="000000">
+                            <TextureCoords left="0" right="1" top="0.25" bottom="0.75" />
+                            <AnchorFill />
+                        </Texture>
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/UnitFrames/Gamepad/gp_RaidMeter.dds" hidden="true">
+                            <TextureCoords left="0" right="1" top="0.25" bottom="0.75" />
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)Background2" hidden="false" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CompanionUnitFrame" inherits="ZO_NamedUnitFrame" virtual="true">
+            <Controls>
+                <Label name="$(parent)Status" hidden="true" />
+                <Control name="$(parent)Background1">
+                    <Anchor point="TOPLEFT"/>
+                    <Controls>
+                        <Texture name="$(parent)Left" />
+                        <Texture name="$(parent)Right" />
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)Background2" textureFile="EsoUI/Art/HUD/Gamepad/LootHistoryBG.dds">
+                    <Dimensions x="256" y="90" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="-9"/>
+                </Texture>
+            </Controls>
+        </Control>
+
         <Control name="ZO_RaidUnitFrame_Keyboard_Template" virtual="true">
             <Dimensions x="ZO_KEYBOARD_RAID_FRAME_WIDTH" y="ZO_KEYBOARD_RAID_FRAME_HEIGHT" />
             <Controls>
@@ -248,6 +391,41 @@
         </Control>
 
         <Control name="ZO_RaidUnitFrame" inherits="ZO_NamedUnitFrame" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)BG">
+                    <AnchorFill />
+                    <Edge file="EsoUI/Art/Tooltips/UI-Border.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Center file="EsoUI/Art/Tooltips/UI-TooltipCenter.dds" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+                <Texture name="$(parent)Background" color="000000" alpha="0.8">
+                    <AnchorFill />
+                </Texture>
+                <Label name="$(parent)Status" hidden="true" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CompanionRaidUnitFrame_Keyboard_Template" virtual="true">
+            <Dimensions x="ZO_KEYBOARD_RAID_FRAME_WIDTH" y="ZO_KEYBOARD_RAID_FRAME_HEIGHT" />
+            <Controls>
+                <Backdrop name="$(parent)BG" hidden="false" />
+                <Texture name="$(parent)Background" hidden="true" />
+                <Label name="$(parent)Name" font="ZoFontGameBold" wrapMode="TRUNCATE" />
+                <Label name="$(parent)Status" inherits="ZO_UnitFrameBarText_Keyboard_Template" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CompanionRaidUnitFrame_Gamepad_Template" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_RAID_FRAME_WIDTH" y="ZO_GAMEPAD_RAID_FRAME_HEIGHT" />
+            <Controls>
+                <Backdrop name="$(parent)BG" hidden="true" />
+                <Texture name="$(parent)Background" hidden="false" />
+                <Label name="$(parent)Name" font="ZoFontGamepad20" wrapMode="ELLIPSIS" />
+                <Label name="$(parent)Status" inherits="ZO_UnitFrameBarText_Gamepad_Template" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CompanionRaidUnitFrame" inherits="ZO_NamedUnitFrame" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)BG">
                     <AnchorFill />
@@ -463,7 +641,7 @@
         </Control>
 
         <TopLevelControl name="ZO_UnitFrames" allowBringToTop="false">
-            <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="5" offsetY="5" />
+            <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
 
             <OnInitialized>
                 ZO_UnitFrames_Initialize()

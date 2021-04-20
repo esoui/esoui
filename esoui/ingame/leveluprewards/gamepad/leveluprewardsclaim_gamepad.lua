@@ -179,9 +179,9 @@ function ZO_LevelUpRewardsClaim_Gamepad:OnSelectionChanged(list, selectedData, o
             if rewardType then
                 GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_LEFT_TOOLTIP, selectedData)
                 if rewardType == REWARD_ENTRY_TYPE_ITEM then
-                    local equipSlot = selectedData:GetEquipSlot()
-                    if equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, equipSlot) then
-                        ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, equipSlot)
+                    local itemLink = selectedData:GetItemLink()
+                    if itemLink then
+                        ZO_LayoutItemLinkEquippedComparison(GAMEPAD_RIGHT_TOOLTIP, itemLink)
                     end
                 end
             elseif selectedData:IsAdditionalUnlock() then
@@ -199,7 +199,7 @@ end
 
 function ZO_LevelUpRewardsClaim_Gamepad:CreateRewardEntry(rewardEntryData)
     local name = ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardNameFromRewardData(rewardEntryData)
-    local icon = rewardEntryData:GetGamepadIcon()
+    local icon = rewardEntryData:GetGamepadLootIcon()
     local entryData = ZO_GamepadEntryData:New(name, icon)
     entryData:SetStackCount(rewardEntryData:GetQuantity())
     entryData:SetNameColors(entryData:GetColorsBasedOnQuality(rewardEntryData:GetItemDisplayQuality()))

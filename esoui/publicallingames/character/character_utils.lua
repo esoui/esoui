@@ -45,17 +45,18 @@ function ZO_Character_DoesEquipSlotUseEquipType(equipSlot, equipType)
     return false
 end
 
-function ZO_Character_GetEquipSlotForEquipType(equipType)
+function ZO_Character_GetEquipSlotForEquipType(equipType, optionalWornBagId)
     local equipSlot = nil
+    optionalWornBagId = optionalWornBagId or BAG_WORN
 
-    for i, testSlot in ZO_Character_EnumerateOrderedEquipSlots() do
+    for _, testSlot in ZO_Character_EnumerateOrderedEquipSlots(optionalWornBagId) do
         local locked = IsLockedWeaponSlot(testSlot)
-        local isEquipped = HasItemInSlot(BAG_WORN, testSlot)
-	    local isCorrectSlot = ZO_Character_DoesEquipSlotUseEquipType(testSlot, equipType)
+        local isEquipped = HasItemInSlot(optionalWornBagId, testSlot)
+        local isCorrectSlot = ZO_Character_DoesEquipSlotUseEquipType(testSlot, equipType)
         if not locked and isEquipped and isCorrectSlot then
-		    equipSlot = testSlot
-		    break
-	    end
+            equipSlot = testSlot
+            break
+        end
     end
 
     return equipSlot
@@ -88,8 +89,34 @@ local ORDERED_EQUIP_TYPES =
     EQUIP_SLOT_RING2,
 }
 
-function ZO_Character_EnumerateOrderedEquipSlots()
-    return ipairs(ORDERED_EQUIP_TYPES)
+local COMPANION_ORDERED_EQUIP_TYPES =
+{
+    EQUIP_SLOT_MAIN_HAND,
+    EQUIP_SLOT_OFF_HAND,
+
+    EQUIP_SLOT_HEAD,
+    EQUIP_SLOT_CHEST,
+    EQUIP_SLOT_SHOULDERS,
+
+    EQUIP_SLOT_WAIST,
+    EQUIP_SLOT_HAND,
+
+    EQUIP_SLOT_LEGS,
+    EQUIP_SLOT_FEET,
+
+    EQUIP_SLOT_COSTUME,
+
+    EQUIP_SLOT_NECK,
+    EQUIP_SLOT_RING1,
+    EQUIP_SLOT_RING2,
+}
+
+function ZO_Character_EnumerateOrderedEquipSlots(bagId)
+    if bagId == BAG_COMPANION_WORN then
+        return ipairs(COMPANION_ORDERED_EQUIP_TYPES)
+    else
+        return ipairs(ORDERED_EQUIP_TYPES)
+    end
 end
 
 local EQUIP_SLOT_TO_EQUIP_SLOT_VISUAL_CATEGORY =

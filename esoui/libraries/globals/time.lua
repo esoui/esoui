@@ -10,12 +10,13 @@ ZO_ONE_DAY_IN_MINUTES = ZO_ONE_DAY_IN_HOURS * ZO_ONE_HOUR_IN_MINUTES -- = 1440
 ZO_ONE_SECOND_IN_MILLISECONDS = 1000
 ZO_ONE_MINUTE_IN_MILLISECONDS = ZO_ONE_MINUTE_IN_SECONDS * ZO_ONE_SECOND_IN_MILLISECONDS -- = 60000
 ZO_ONE_HOUR_IN_MILLISECONDS = ZO_ONE_HOUR_IN_MINUTES * ZO_ONE_MINUTE_IN_MILLISECONDS -- = 3600000
+ZO_ONE_DAY_IN_MILLISECONDS = ZO_ONE_DAY_IN_HOURS * ZO_ONE_HOUR_IN_MILLISECONDS -- = 86400000
 
 function ZO_FormatTime(seconds, formatStyle, precision, direction)
    return FormatTimeSeconds(seconds, formatStyle, precision, direction or TIME_FORMAT_DIRECTION_NONE)
 end
 
-function ZO_FormatTimeMilliseconds(milliseconds, formatType, precisionType, direction)   
+function ZO_FormatTimeMilliseconds(milliseconds, formatType, precisionType, direction)
     return FormatTimeMilliseconds(milliseconds, formatType, precisionType, direction or TIME_FORMAT_DIRECTION_NONE)
 end
 
@@ -49,10 +50,12 @@ function ZO_FormatRelativeTimeStamp(timestamp, precisionType)
     return ZO_FormatTimeMilliseconds(timestamp, TIME_FORMAT_STYLE_RELATIVE_TIMESTAMP, precisionType or TIME_FORMAT_PRECISION_TENTHS)
 end
 
-function ZO_FormatTimeAsDecimalWhenBelowThreshold(seconds, secondsThreshold)
+function ZO_FormatTimeAsDecimalWhenBelowThreshold(seconds, secondsThreshold, overThresholdTimeFormatOverride)
     secondsThreshold = secondsThreshold or 10
     if seconds < secondsThreshold then
         return ZO_FormatTime(seconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_SHOW_TENTHS_SECS, TIME_FORMAT_PRECISION_TENTHS, TIME_FORMAT_DIRECTION_DESCENDING)
+    elseif overThresholdTimeFormatOverride then
+        return ZO_FormatTime(seconds, overThresholdTimeFormatOverride, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
     else
         return ZO_FormatTimeLargestTwo(seconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
     end

@@ -145,6 +145,7 @@ function ZO_PvEWorldMapFilterPanel_Shared:BuildControls()
     self:AddPinFilterCheckBox(MAP_FILTER_WAYSHRINES, ZO_WorldMap_RefreshWayshrines)
     self:AddPinFilterCheckBox(MAP_FILTER_GROUP_MEMBERS, ZO_WorldMap_RefreshGroupPins)
     self:AddPinFilterCheckBox(MAP_FILTER_DIG_SITES, function() WORLD_MAP_MANAGER:RefreshAllAntiquityDigSites() end)
+    self:AddPinFilterCheckBox(MAP_FILTER_COMPANIONS, function() WORLD_MAP_MANAGER:RefreshCompanionPins() end)
 
     self:PostBuildControls()
 end

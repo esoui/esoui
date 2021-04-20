@@ -46,7 +46,7 @@ function DLCBook_Keyboard:RefreshDetails()
         self.unlockStatusControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", collectibleData:GetUnlockState()))
 
         local isLocked = collectibleData:IsLocked()
-        local isActive = collectibleData:IsActive()
+        local isActive = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
         local isNotOwned = not collectibleData:IsOwned()
 
         local questAcceptLabelStringId = isActive and SI_DLC_BOOK_QUEST_STATUS_ACCEPTED or SI_DLC_BOOK_QUEST_STATUS_NOT_ACCEPTED
@@ -90,7 +90,7 @@ end
 
 function DLCBook_Keyboard:UseSelectedDLC()
     local collectibleData = self.navigationTree:GetSelectedData()
-    collectibleData:Use()
+    collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
 end
 
 function DLCBook_Keyboard:SearchSelectedDLCInStore()

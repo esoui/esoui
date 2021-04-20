@@ -44,7 +44,7 @@
                     </OnInitialized>
                 </Label>
 
-                <Texture name="$(parent)Bg" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                <Texture name="$(parent)Bg" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop_white.dds">
                     <TextureCoords left="0.8" right="0" top="0" bottom=".78125" />
                     <Controls>
                         <Texture name="$(parent)Highlight" override="true">

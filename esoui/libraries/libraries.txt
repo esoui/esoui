@@ -95,6 +95,7 @@ EsoUI\Libraries\ZO_TimerBar\ZO_TimerBar.xml
 EsoUI\Libraries\ZO_MenuBar\ZO_MenuBar.lua
 EsoUI\Libraries\ZO_MenuBar\ZO_MenuBar.xml
 EsoUI\Libraries\ZO_MenuBar\ZO_SceneFragmentBar.lua
+EsoUI\Libraries\ZO_MenuBar\ZO_SceneGroupBar.lua
 
 EsoUI\Libraries\ZO_TrianglePicker\ZO_TrianglePicker.lua
 EsoUI\Libraries\ZO_TrianglePicker\ZO_TrianglePicker.xml

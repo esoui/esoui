@@ -1,10 +1,4 @@
-ZO_RestyleSheetWindow_Keyboard = ZO_CallbackObject:Subclass()
-
-function ZO_RestyleSheetWindow_Keyboard:New(...)
-    local object = ZO_CallbackObject.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_RestyleSheetWindow_Keyboard = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_RestyleSheetWindow_Keyboard:Initialize(control)
     self.control = control
@@ -16,23 +10,30 @@ function ZO_RestyleSheetWindow_Keyboard:Initialize(control)
     self:InitializeEquipmentSheet()
     self:InitializeCollectibleSheet()
     self:InitializeOutfitStylesSheet()
+    self:InitializeCompanionEquipmentSheet()
+    self:InitializeCompanionCollectibleSheet()
+    self:InitializeCompanionOutfitStylesSheet()
 
     self.currentSheet = self.equipmentSheet
-    
+
     self.outfitSelectorTutorialAnchor = ZO_Anchor:New(LEFT, self.modeSelectorDropdownControl, RIGHT, 10, 0)
 
     self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
 
-	local function OnRefreshOutfitName(outfitIndex)
-        if self.currentSheet ~= self.collectiblesSheet then
-            local KEEP_CURRENT_SELECTION = true
+    local function OnRefreshOutfitName(actorCategory, outfitIndex)
+        local KEEP_CURRENT_SELECTION = true
+        if self.currentSheet == self.equipmentSheet or self.currentSheet == self.outfitStylesSheet then
             self:PopulateEquipmentModeDropdown(KEEP_CURRENT_SELECTION)
         end
     end
 
     local function UpdateEquippedOutfit()
-        if self.currentSheet ~= self.collectiblesSheet then
-            self:PopulateEquipmentModeDropdown()
+        if self.currentSheet ~= self.collectiblesSheet and self.currentSheet ~= self.companionCollectiblesSheet then
+            if self.currentSheet == self.equipmentSheet or self.currentSheet == self.outfitStylesSheet then
+                self:PopulateEquipmentModeDropdown()
+            elseif self.currentSheet == self.companionEquipmentSheet or self.currentSheet == self.companionOutfitStylesSheet then
+                self:PopulateCompanionOutfitsModeDropdown()
+            end
         end
     end
 
@@ -58,7 +59,7 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeModeSelector()
     self.modeSelectorDropdownControl = modeSelector:GetNamedChild("Dropdown")
     self.modeSelectorDropdown = ZO_ComboBox_ObjectFromContainer(self.modeSelectorDropdownControl)
     self.modeSelectorDropdown:SetSortsItems(false)
-    
+
     self.modeSelectorDropdown:SetPreshowDropdownCallback(function()
         TUTORIAL_SYSTEM:RemoveTutorialByTrigger(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN)
     end)
@@ -69,7 +70,15 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeModeSelector()
         self:DisplaySheet(self.equipmentSheet)
         ZO_OUTFIT_STYLES_PANEL_KEYBOARD:SetCurrentOutfitManipulator(UNEQUIP_OUTFIT)
         self.pendingEquipOutfitManipulator = UNEQUIP_OUTFIT
-        ITEM_PREVIEW_KEYBOARD:PreviewUnequipOutfit()
+        ITEM_PREVIEW_KEYBOARD:PreviewUnequipOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+        self:FireCallbacks("ModeSelectorDropdownChanged")
+    end
+
+    self.setCompanionEquipmentGearSelectedFunction = function()
+        self:DisplaySheet(self.companionEquipmentSheet)
+        ZO_OUTFIT_STYLES_PANEL_KEYBOARD:SetCurrentOutfitManipulator(UNEQUIP_OUTFIT)
+        self.pendingEquipOutfitManipulator = UNEQUIP_OUTFIT
+        ITEM_PREVIEW_KEYBOARD:PreviewUnequipOutfit(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
         self:FireCallbacks("ModeSelectorDropdownChanged")
     end
 
@@ -89,14 +98,30 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeModeSelector()
         end
     end
 
+    local function TrySetCompanionEquipmentGearSelected(_, _, entry, selectionChanged, oldEntry)
+        if selectionChanged then
+            if self:AreChangesPending() then
+                local function Decline()
+                    self.modeSelectorDropdown:SelectItem(oldEntry, IGNORE_CALLBACK)
+                end
+
+                self:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_OUTFIT_ON_CHANGE", self.setCompanionEquipmentGearSelectedFunction, Decline)
+            else
+                self.setCompanionEquipmentGearSelectedFunction()
+            end
+        end
+    end
+
     self.equipmentGearModeEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), TrySetEquipmentGearSelected)
     self.equipmentGearModeEntry.selectFunction = self.setEquipmentGearSelectedFunction
     self.collectiblesModeEntry = ZO_ComboBox:CreateItemEntry("", function()
-        if self.currentSheet ~= self.collectiblesSheet then
-            self:EquipSelectedOutfit()
-            ITEM_PREVIEW_KEYBOARD:ResetOutfitPreview()
-        end
         self:DisplaySheet(self.collectiblesSheet)
+    end)
+
+    self.companionEquipmentGearModeEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), TrySetCompanionEquipmentGearSelected)
+    self.companionEquipmentGearModeEntry.selectFunction = self.setCompanionEquipmentGearSelectedFunction
+    self.companionCollectiblesModeEntry = ZO_ComboBox:CreateItemEntry("", function()
+        self:DisplaySheet(self.companionCollectiblesSheet)
     end)
 
     local function OnPurchaseAdditionalOutfitsEntry(_, _, entry, selectionChanged, oldEntry)
@@ -134,14 +159,14 @@ end
 function ZO_RestyleSheetWindow_Keyboard:InitializeEquipmentSheet()
     local slotGridData =
     {
-        [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] = 
+        [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] =
         {
             [EQUIP_SLOT_HEAD] = { row = 1, column = 1, controlName = "Head" },
             [EQUIP_SLOT_SHOULDERS] = { row = 2, column = 1, controlName = "Shoulders" }, [EQUIP_SLOT_CHEST] = { row = 2, column = 2, controlName = "Chest" },
             [EQUIP_SLOT_HAND] = { row = 3, column = 1, controlName = "Hand" }, [EQUIP_SLOT_WAIST] = { row = 3, column = 2, controlName = "Waist" },
             [EQUIP_SLOT_LEGS] = { row = 4, column = 1, controlName = "Legs" }, [EQUIP_SLOT_FEET] = { row = 4, column = 2, controlName = "Feet" },
         },
-        [ZO_RESTYLE_SHEET_CONTAINER.SECONDARY] = 
+        [ZO_RESTYLE_SHEET_CONTAINER.SECONDARY] =
         {
             -- Switches with Shield on show based on ActiveWeaponPair
             [EQUIP_SLOT_OFF_HAND] = { row = 1, column = 2, controlName = "Shield" },
@@ -154,7 +179,7 @@ end
 function ZO_RestyleSheetWindow_Keyboard:InitializeCollectibleSheet()
     local slotGridData =
     {
-        [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] = 
+        [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] =
         {
             [COLLECTIBLE_CATEGORY_TYPE_HAT] = { row = 1, column = 1, controlName = "Hat" }, [COLLECTIBLE_CATEGORY_TYPE_COSTUME] = { row = 1, column = 2, controlName = "Costume" },
         },
@@ -165,14 +190,14 @@ end
 function ZO_RestyleSheetWindow_Keyboard:InitializeOutfitStylesSheet()
     local slotGridData =
     {
-        [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] = 
+        [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] =
         {
             [OUTFIT_SLOT_HEAD] = { row = 1, column = 1, controlName = "Head" },
             [OUTFIT_SLOT_SHOULDERS] = { row = 2, column = 1, controlName = "Shoulders" }, [OUTFIT_SLOT_CHEST] = { row = 2, column = 2, controlName = "Chest" },
             [OUTFIT_SLOT_HANDS] = { row = 3, column = 1, controlName = "Hands" }, [OUTFIT_SLOT_WAIST] = { row = 3, column = 2, controlName = "Waist" },
             [OUTFIT_SLOT_LEGS] = { row = 4, column = 1, controlName = "Legs" }, [OUTFIT_SLOT_FEET] = { row = 4, column = 2, controlName = "Feet" },
         },
-        [ZO_RESTYLE_SHEET_CONTAINER.SECONDARY] = 
+        [ZO_RESTYLE_SHEET_CONTAINER.SECONDARY] =
         {
             -- Switches with Shield on show based on ActiveWeaponPair and equipped weapon type
             [OUTFIT_SLOT_WEAPON_TWO_HANDED] = { row = 1, column = 1, controlName = "TwoHanded" }, [OUTFIT_SLOT_SHIELD] = { row = 1, column = 2, controlName = "Shield" },
@@ -189,6 +214,56 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeOutfitStylesSheet()
     self.outfitStylesSheet = self:InitializeSheet(ZO_RestyleOutfitSlotsSheet, slotGridData)
 end
 
+function ZO_RestyleSheetWindow_Keyboard:InitializeCompanionEquipmentSheet()
+    local slotGridData =
+    {
+        [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] =
+        {
+            [EQUIP_SLOT_SHOULDERS] = { row = 2, column = 1, controlName = "Shoulders" }, [EQUIP_SLOT_CHEST] = { row = 2, column = 2, controlName = "Chest" },
+            [EQUIP_SLOT_HAND] = { row = 3, column = 1, controlName = "Hand" }, [EQUIP_SLOT_WAIST] = { row = 3, column = 2, controlName = "Waist" },
+            [EQUIP_SLOT_LEGS] = { row = 4, column = 1, controlName = "Legs" }, [EQUIP_SLOT_FEET] = { row = 4, column = 2, controlName = "Feet" },
+        },
+        [ZO_RESTYLE_SHEET_CONTAINER.SECONDARY] =
+        {
+            -- Switches with Shield on show based on ActiveWeaponPair
+            [EQUIP_SLOT_OFF_HAND] = { row = 1, column = 2, controlName = "Shield" },
+        }
+    }
+    self.companionEquipmentSheet = self:InitializeSheet(ZO_RestyleCompanionEquipmentSlotsSheet, slotGridData)
+end
+
+function ZO_RestyleSheetWindow_Keyboard:InitializeCompanionCollectibleSheet()
+    local slotGridData =
+    {
+        [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] =
+        {
+            [COLLECTIBLE_CATEGORY_TYPE_COSTUME] = { row = 1, column = 2, controlName = "Costume" },
+        },
+    }
+    self.companionCollectiblesSheet = self:InitializeSheet(ZO_RestyleCompanionCollectibleSlotsSheet, slotGridData)
+end
+
+function ZO_RestyleSheetWindow_Keyboard:InitializeCompanionOutfitStylesSheet()
+    local slotGridData =
+    {
+        [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] =
+        {
+            [OUTFIT_SLOT_SHOULDERS] = { row = 2, column = 1, controlName = "Shoulders" }, [OUTFIT_SLOT_CHEST] = { row = 2, column = 2, controlName = "Chest" },
+            [OUTFIT_SLOT_HANDS] = { row = 3, column = 1, controlName = "Hands" }, [OUTFIT_SLOT_WAIST] = { row = 3, column = 2, controlName = "Waist" },
+            [OUTFIT_SLOT_LEGS] = { row = 4, column = 1, controlName = "Legs" }, [OUTFIT_SLOT_FEET] = { row = 4, column = 2, controlName = "Feet" },
+        },
+        [ZO_RESTYLE_SHEET_CONTAINER.SECONDARY] =
+        {
+            -- Switches with Shield on show based on ActiveWeaponPair and equipped weapon type
+            [OUTFIT_SLOT_WEAPON_TWO_HANDED] = { row = 1, column = 1, controlName = "TwoHanded" }, [OUTFIT_SLOT_SHIELD] = { row = 1, column = 2, controlName = "Shield" },
+            [OUTFIT_SLOT_WEAPON_MAIN_HAND] = { row = 1, column = 1, controlName = "MainHand" }, [OUTFIT_SLOT_WEAPON_OFF_HAND] = { row = 1, column = 2, controlName = "OffHand" },
+            [OUTFIT_SLOT_WEAPON_BOW] = { row = 1, column = 1, controlName = "Bow" },
+            [OUTFIT_SLOT_WEAPON_STAFF] = { row = 1, column = 1, controlName = "Staff" },
+        },
+    }
+    self.companionOutfitStylesSheet = self:InitializeSheet(ZO_RestyleCompanionOutfitSlotsSheet, slotGridData)
+end
+
 function ZO_RestyleSheetWindow_Keyboard:OnShowing()
     TUTORIAL_SYSTEM:RegisterTriggerLayoutInfo(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN, self.control, ZO_RESTYLE_SHEET_WINDOW_FRAGMENT, self.outfitSelectorTutorialAnchor)
 
@@ -200,7 +275,7 @@ function ZO_RestyleSheetWindow_Keyboard:BeginRestyling()
 end
 
 function ZO_RestyleSheetWindow_Keyboard:OnHiding()
-    local currentEquippedIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
+    local currentEquippedIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.currentSheet:GetRestyleMode()))
     if (not self.pendingEquipOutfitManipulator and currentEquippedIndex) or (self.pendingEquipOutfitManipulator and self.pendingEquipOutfitManipulator:GetOutfitIndex() ~= currentEquippedIndex) then
         self:EquipSelectedOutfit()
     end
@@ -214,13 +289,20 @@ do
     local IGNORE_CALLBACK = true
 
     function ZO_RestyleSheetWindow_Keyboard:PopulateEquipmentModeDropdown(keepCurrentSelection)
+        if self.currentSheet ~= self.equipmentSheet and self.currentSheet ~= self.outfitStylesSheet then
+            self:EquipSelectedOutfit()
+            ITEM_PREVIEW_KEYBOARD:ResetOutfitPreview()
+        end
+
         self.modeSelectorHeader:SetText(GetString(SI_RESTYLE_SHEET_SELECT_OUTFIT_HEADER))
 
+        local actorCategory = GAMEPLAY_ACTOR_CATEGORY_PLAYER
         local reselectOutfitIndex = nil
         if keepCurrentSelection then
             local selectedData = self.modeSelectorDropdown:GetSelectedItemData()
             if selectedData and selectedData.outfitManipulator then
                 reselectOutfitIndex = selectedData.outfitManipulator:GetOutfitIndex()
+                actorCategory = selectedData.outfitManipulator:GetActorCategory()
             end
         end
 
@@ -234,7 +316,7 @@ do
             ZO_OUTFIT_STYLES_PANEL_KEYBOARD:SetCurrentOutfitManipulator(outfitManipulator)
             self.pendingEquipOutfitManipulator = outfitManipulator
             self:DisplaySheet(self.outfitStylesSheet)
-            ITEM_PREVIEW_KEYBOARD:PreviewOutfit(outfitManipulator:GetOutfitIndex())
+            ITEM_PREVIEW_KEYBOARD:PreviewOutfit(outfitManipulator:GetActorCategory(), outfitManipulator:GetOutfitIndex())
             self:FireCallbacks("ModeSelectorDropdownChanged")
         end
 
@@ -256,13 +338,13 @@ do
             end
         end
 
-        local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
+        local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(actorCategory)
         local defaultEntry = self.equipmentGearModeEntry
 
         local autoSelectIndex = keepCurrentSelection and reselectOutfitIndex or equippedOutfitIndex
-        local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits()
+        local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits(actorCategory)
         for outfitIndex = 1, numOutfits do
-            local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
+            local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, outfitIndex)
             local entry = ZO_ComboBox:CreateItemEntry(outfitManipulator:GetOutfitName(), TrySetSelectedOutfit)
             entry.outfitManipulator = outfitManipulator
             entry.selectFunction = SetSelectedOutfit
@@ -285,12 +367,111 @@ do
 end
 
 function ZO_RestyleSheetWindow_Keyboard:PopulateCollectiblesModeDropdown()
+    if self.currentSheet ~= self.collectiblesSheet or self.currentSheet ~= self.companionCollectiblesSheet then
+        self:EquipSelectedOutfit()
+        ITEM_PREVIEW_KEYBOARD:ResetOutfitPreview()
+    end
+
     self.modeSelectorDropdown:ClearItems()
 
     self.modeSelectorDropdown:AddItem(self.collectiblesModeEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
-    
+
     self.modeSelectorDropdown:UpdateItems()
     self.modeSelectorDropdown:SelectFirstItem()
+
+    ITEM_PREVIEW_KEYBOARD:ClearPreviewCollection();
+    ApplyChangesToPreviewCollectionShown();
+
+    self:OnUpdateModeSelectorDropdown()
+end
+
+function ZO_RestyleSheetWindow_Keyboard:PopulateCompanionOutfitsModeDropdown()
+    if self.currentSheet ~= self.companionEquipmentSheet and self.currentSheet ~= self.companionOutfitStylesSheet then
+        self:EquipSelectedOutfit()
+        ITEM_PREVIEW_KEYBOARD:ResetOutfitPreview()
+    end
+
+    self.modeSelectorHeader:SetText(GetString(SI_RESTYLE_SHEET_SELECT_OUTFIT_HEADER))
+
+    local actorCategory = GAMEPLAY_ACTOR_CATEGORY_COMPANION
+    local reselectOutfitIndex = nil
+    if keepCurrentSelection then
+        local selectedData = self.modeSelectorDropdown:GetSelectedItemData()
+        if selectedData and selectedData.outfitManipulator then
+            reselectOutfitIndex = selectedData.outfitManipulator:GetOutfitIndex()
+            actorCategory = selectedData.outfitManipulator:GetActorCategory()
+        end
+    end
+
+    self.modeSelectorDropdown:ClearItems()
+
+    self.modeSelectorDropdown:AddItem(self.companionEquipmentGearModeEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
+
+    local function SetSelectedOutfit(entry)
+        local outfitManipulator = entry.outfitManipulator
+        self.companionOutfitStylesSheet:SetOutfitManipulator(outfitManipulator)
+        ZO_OUTFIT_STYLES_PANEL_KEYBOARD:SetCurrentOutfitManipulator(outfitManipulator)
+        self.pendingEquipOutfitManipulator = outfitManipulator
+        self:DisplaySheet(self.companionOutfitStylesSheet)
+        ITEM_PREVIEW_KEYBOARD:PreviewOutfit(outfitManipulator:GetActorCategory(), outfitManipulator:GetOutfitIndex())
+        self:FireCallbacks("ModeSelectorDropdownChanged")
+    end
+
+    local function TrySetSelectedOutfit(_, _, entry, selectionChanged, oldEntry)
+        if selectionChanged then
+            if self:AreChangesPending() then
+                local function Confirm()
+                    SetSelectedOutfit(entry)
+                end
+
+                local function Decline()
+                    self.modeSelectorDropdown:SelectItem(oldEntry, IGNORE_CALLBACK)
+                end
+
+                self:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_OUTFIT_ON_CHANGE", Confirm, Decline)
+            else
+                SetSelectedOutfit(entry)
+            end
+        end
+    end
+    local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(actorCategory)
+    local defaultEntry = self.companionEquipmentGearModeEntry
+
+    local autoSelectIndex = keepCurrentSelection and reselectOutfitIndex or equippedOutfitIndex
+    local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+    for outfitIndex = 1, numOutfits do
+        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, outfitIndex)
+        local entry = ZO_ComboBox:CreateItemEntry(outfitManipulator:GetOutfitName(), TrySetSelectedOutfit)
+        entry.outfitManipulator = outfitManipulator
+        entry.selectFunction = SetSelectedOutfit
+        self.modeSelectorDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
+        if autoSelectIndex == outfitIndex then
+            defaultEntry = entry
+        end
+    end
+
+    self.modeSelectorDropdown:UpdateItems()
+    self.modeSelectorDropdown:SelectItem(defaultEntry, true)
+    defaultEntry.selectFunction(defaultEntry)
+
+    self:OnUpdateModeSelectorDropdown()
+end
+
+function ZO_RestyleSheetWindow_Keyboard:PopulateCompanionCollectiblesModeDropdown()
+    if self.currentSheet ~= self.collectiblesSheet or self.currentSheet ~= self.companionCollectiblesSheet then
+        self:EquipSelectedOutfit()
+        ITEM_PREVIEW_KEYBOARD:ResetOutfitPreview()
+    end
+
+    self.modeSelectorDropdown:ClearItems()
+
+    self.modeSelectorDropdown:AddItem(self.companionCollectiblesModeEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
+
+    self.modeSelectorDropdown:UpdateItems()
+    self.modeSelectorDropdown:SelectFirstItem()
+
+    ITEM_PREVIEW_KEYBOARD:ClearPreviewCollection();
+    ApplyChangesToPreviewCollectionShown();
 
     self:OnUpdateModeSelectorDropdown()
 end
@@ -423,9 +604,12 @@ end
 
 function ZO_RestyleSheetWindow_Keyboard:EquipSelectedOutfit()
     if self.pendingEquipOutfitManipulator then
-        ZO_OUTFIT_MANAGER:EquipOutfit(self.pendingEquipOutfitManipulator:GetOutfitIndex())
+        ZO_OUTFIT_MANAGER:EquipOutfit(self.pendingEquipOutfitManipulator:GetActorCategory(), self.pendingEquipOutfitManipulator:GetOutfitIndex())
     else
-        UnequipOutfit()
+        local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.currentSheet:GetRestyleMode())
+        if actorCategory then
+            ZO_OUTFIT_MANAGER:UnequipOutfit(actorCategory)
+        end
     end
 end
 

@@ -99,7 +99,7 @@
                 </AlphaAnimation>
                 <AnimationTimeline delay="700" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
                     <Animations>
-                        <CustomAnimation duration="-1" />
+                        <CustomAnimation duration="10000" />
                     </Animations>
                 </AnimationTimeline>
             </Animations>
@@ -694,6 +694,16 @@
                                     farAlphaDistanceM="85"
                                     farScaleDistanceM="200"
                                     drawLevelOffsetBase="24"
+                    />
+                    <CompassPinType name="ACTIVE_COMPANION"
+                                    pinTexture="$(COMPASS_PATH)activeCompanion.dds"
+                                    layer="OVERLAY"
+                                    maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE"
+                                    closeAlpha="1.0"
+                                    farAlpha="0.75"
+                                    farAlphaDistanceM="85"
+                                    farScaleDistanceM="200"
+                                    drawLevelOffsetBase="25"
                     />
                     <CompassPinType name="BGPIN_FLAG_FIRE_DRAKES"
                                     pinTexture="$(COMPASS_PATH)compass_BG_flag_orange.dds"

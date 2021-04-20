@@ -138,7 +138,9 @@ end
 
 function ZO_OutfitStylesPanel_Keyboard:RegisterEvents()
     local function RefreshVisible()
-        self:RefreshVisible()
+        if self.fragment:IsShowing() then
+            self:RefreshVisible()
+        end
     end
 
     local function RefreshMultiIcon(control, data, selected)
@@ -164,14 +166,14 @@ function ZO_OutfitStylesPanel_Keyboard:RegisterEvents()
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", OnCollectibleNewStatusCleared)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleCategoryNewStatusCleared", OnCollectibleCategoryNewStatusCleared)
 
-    local function OnOutfitPendingDataChanegd(outfitIndex)
+    local function OnOutfitPendingDataChanged(actorCategory, outfitIndex)
         if self.currentOutfitManipulator and self.currentOutfitManipulator:GetOutfitIndex() == outfitIndex then
             self.pendingLoopAnimationPool:ReleaseAllObjects()
             self.gridListPanelList:RefreshGridList()
         end
     end
 
-    ZO_OUTFIT_MANAGER:RegisterCallback("PendingDataChanged", OnOutfitPendingDataChanegd)
+    ZO_OUTFIT_MANAGER:RegisterCallback("PendingDataChanged", OnOutfitPendingDataChanged)
 end
 
 function ZO_OutfitStylesPanel_Keyboard:GetFragment()
@@ -487,8 +489,9 @@ function ZO_OutfitStylesPanel_Keyboard:TogglePreviewOutfitStyle(collectibleData,
             local slotManipulator = self.currentOutfitManipulator:GetSlotManipulator(preferredOutfitSlot)
             primaryDyeId, secondaryDyeId, accentDyeId = slotManipulator:GetPendingDyeData()
         else
+            local actorCategory = self.restyleSlotData and ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleSlotData.restyleMode) or GAMEPLAY_ACTOR_CATEGORY_PLAYER
             local equipSlot = GetEquipSlotForOutfitSlot(preferredOutfitSlot)
-            if CanEquippedItemBeShownInOutfitSlot(equipSlot, preferredOutfitSlot) then
+            if CanEquippedItemBeShownInOutfitSlot(actorCategory, equipSlot, preferredOutfitSlot) then
                 primaryDyeId, secondaryDyeId, accentDyeId = GetPendingSlotDyes(RESTYLE_MODE_EQUIPMENT, ZO_RESTYLE_DEFAULT_SET_INDEX, equipSlot)
             end
         end
@@ -613,7 +616,8 @@ do
                 local formattedApplyCost = zo_strformat(SI_TOOLTIP_COLLECTIBLE_OUTFIT_STYLE_APPLICATION_COST_KEYBOARD_NO_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, applyCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
                 ItemTooltip:AddLine(formattedApplyCost, "ZoFontWinH4", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
             else
-                ItemTooltip:SetCollectible(collectibleData.collectibleId, SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON)
+                local actorCategory = self.restyleSlotData and ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleSlotData.restyleMode) or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+                ItemTooltip:SetCollectible(collectibleData.collectibleId, SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON, actorCategory)
             end
             self.mouseOverEntryData = control.dataEntry
         end

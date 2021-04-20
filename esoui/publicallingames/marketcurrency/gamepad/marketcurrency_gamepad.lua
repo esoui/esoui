@@ -9,12 +9,6 @@ local MARKET_BUY_CROWNS_BUTTON =
     callback = ZO_ShowBuyCrownsPlatformDialog,
 }
 
-function ZO_MarketCurrency_Gamepad:New(...)
-    local marketCurrency = ZO_CallbackObject.New(self)
-    marketCurrency:Initialize(...)
-    return marketCurrency
-end
-
 function ZO_MarketCurrency_Gamepad:Initialize(control)
     ZO_MarketCurrency_Shared.Initialize(self, control)
 
@@ -22,16 +16,15 @@ function ZO_MarketCurrency_Gamepad:Initialize(control)
 end
 
 function ZO_MarketCurrency_Gamepad:InitializeControls()
-    self.crownAmountControl = self.control:GetNamedChild("CrownsAmount")
-    self.gemAmountControl = self.control:GetNamedChild("GemsAmount")
-end
+    self.currencyControls = {}
+    for index, data in ipairs(self.marketCurrencyTypes) do
+        local marketCurrencyType = data.marketCurrencyType
+        local control = CreateControlFromVirtual("$(parent)Currency"..tostring(index), self.control, "ZO_MarketCurrencyLabel_Gamepad")
+        self.currencyControls[marketCurrencyType] = control
 
-function ZO_MarketCurrency_Gamepad:GetBuyCrownsKeybind(keybind)
-    local keybindInfo = ZO_ShallowTableCopy(MARKET_BUY_CROWNS_BUTTON)
-    if keybind then
-        keybindInfo.keybind = keybind
+        control:GetNamedChild("Label"):SetText(ZO_Currency_GetAmountLabel(data.currencyType))
+        control:SetHandler("OnEffectivelyShown", function() self:OnMarketCurrencyUpdated(marketCurrencyType) end)
     end
-    return keybindInfo
 end
 
 function ZO_MarketCurrency_Gamepad:Show()
@@ -42,16 +35,12 @@ function ZO_MarketCurrency_Gamepad:Hide()
     self.control:SetHidden(true)
 end
 
-function ZO_MarketCurrency_Gamepad:OnCrownsUpdated(currentCurrency, difference)
-    local crownAmount = ZO_Currency_FormatGamepad(CURT_CROWNS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
-    self.crownAmountControl:SetText(crownAmount)
-    self:FireCallbacks("OnCurrencyUpdated")
-end
-
-function ZO_MarketCurrency_Gamepad:OnCrownGemsUpdated(currentCurrency, difference, reason)
-    local gemAmount = ZO_Currency_FormatGamepad(CURT_CROWN_GEMS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
-    self.gemAmountControl:SetText(gemAmount)
-    self:FireCallbacks("OnCurrencyUpdated")
+function ZO_MarketCurrency_Gamepad:GetBuyCrownsKeybind(keybind)
+    local keybindInfo = ZO_ShallowTableCopy(MARKET_BUY_CROWNS_BUTTON)
+    if keybind then
+        keybindInfo.keybind = keybind
+    end
+    return keybindInfo
 end
 
 function ZO_MarketCurrency_Gamepad:ModifyKeybindStripStyleForCurrency(originalStyle)
@@ -60,6 +49,36 @@ function ZO_MarketCurrency_Gamepad:ModifyKeybindStripStyleForCurrency(originalSt
     style.rightAnchorRelativePoint = LEFT
     style.rightAnchorOffset = 0
     return style
+end
+
+function ZO_MarketCurrency_Gamepad:OnMarketCurrencyTypeVisibilityUpdated()
+    local previousControl
+    for index, data in ipairs(self.marketCurrencyTypes) do
+        local control = self.currencyControls[data.marketCurrencyType]
+        local visible = self:IsMarketCurrencyTypeVisible(data.marketCurrencyType)
+        if visible then
+            if previousControl then
+                control:SetAnchor(BOTTOMRIGHT, previousControl, BOTTOMLEFT, -10)
+            else
+                control:SetAnchor(BOTTOMRIGHT)
+            end
+            previousControl = control
+        end
+
+        control:SetHidden(not visible)
+    end
+end
+
+function ZO_MarketCurrency_Gamepad:OnMarketCurrencyUpdated(marketCurrencyType)
+    local control = self.currencyControls[marketCurrencyType]
+    if not control:IsControlHidden() then
+        local currencyData = self.marketCurrencyTypeMap[marketCurrencyType]
+        local currencyAmount = GetPlayerMarketCurrency(marketCurrencyType)
+        local currencyString = ZO_Currency_FormatGamepad(currencyData.currencyType, currencyAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+        control:GetNamedChild("Amount"):SetText(currencyString)
+    end
+
+    self:FireCallbacks("OnCurrencyUpdated")
 end
 
 function ZO_MarketCurrency_Gamepad_OnInitialized(control)

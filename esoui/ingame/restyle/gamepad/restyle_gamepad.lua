@@ -30,6 +30,7 @@ function ZO_Restyle_Gamepad:Initialize(control)
     GAMEPAD_RESTYLE_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:SetMode(RESTYLE_MODE_SELECTION)
+            self.modeList:RefreshVisible()
             self.modeList:Activate()
             local currentlySelectedData = self.modeList:GetTargetData()
             self:UpdateOptionLeftTooltip(currentlySelectedData.mode)
@@ -60,8 +61,12 @@ function ZO_Restyle_Gamepad:GetMode()
 end
 
 local function ZO_RestyleGamepadRootEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
+    if data.mode == RESTYLE_MODE_COMPANION_EQUIPMENT or data.mode == RESTYLE_MODE_COMPANION_COLLECTIBLE then
+        enabled = enabled and HasActiveCompanion()
+    end
+    data.enabled = enabled
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-    if data.mode == RESTYLE_MODE_COLLECTIBLE and not CanUseCollectibleDyeing() then
+    if (data.mode == RESTYLE_MODE_COLLECTIBLE or data.mode == RESTYLE_MODE_COMPANION_COLLECTIBLE) and not CanUseCollectibleDyeing() then
         if selected then
             control.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
         else
@@ -94,6 +99,8 @@ function ZO_Restyle_Gamepad:InitializeModeList()
     self.modeList:Clear()
     AddEntry(SI_DYEING_DYE_EQUIPMENT_TAB, RESTYLE_MODE_EQUIPMENT, "EsoUI/Art/Restyle/Gamepad/gp_dyes_tabIcon_outfitStyleDye.dds", "gamepad_restyle_station")
     AddEntry(SI_DYEING_DYE_COLLECTIBLE_TAB, RESTYLE_MODE_COLLECTIBLE, "EsoUI/Art/Dye/Gamepad/dye_tabIcon_costumeDye.dds", "gamepad_restyle_station")
+    AddEntry(SI_GAMEPAD_DYEING_COMPANION_EQUIPMENT_TAB, RESTYLE_MODE_COMPANION_EQUIPMENT, "EsoUI/Art/Restyle/Gamepad/gp_dyes_tabIcon_companionOutfitStyleDye.dds", "gamepad_restyle_station")
+    AddEntry(SI_GAMEPAD_DYEING_COMPANION_COLLECTIBLE_TAB, RESTYLE_MODE_COMPANION_COLLECTIBLE, "EsoUI/Art/Dye/Gamepad/dye_tabIcon_companionCostumeDye.dds", "gamepad_restyle_station")
     self.modeList:Commit()
 end
 
@@ -113,6 +120,21 @@ function ZO_Restyle_Gamepad:UpdateOptionLeftTooltip(restyleMode)
         GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_DYEING_DYE_COLLECTIBLE_TAB), descriptionOne, descriptionTwo)
     elseif restyleMode == RESTYLE_MODE_OUTFIT then
         GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_DYEING_DYE_OUTFIT_STYLES_TAB), GetString(SI_GAMEPAD_RESTYLE_OUTFITS_DESCRIPTION))
+    elseif restyleMode == RESTYLE_MODE_COMPANION_EQUIPMENT then
+        GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_DYEING_COMPANION_EQUIPMENT_TAB), GetString(SI_GAMEPAD_DYEING_COMPANION_EQUIPMENT_TAB_DESCRIPTION))
+    elseif restyleMode == RESTYLE_MODE_COMPANION_COLLECTIBLE then
+        local descriptionOne
+        local descriptionTwo
+        if HasActiveCompanion() and CanUseCollectibleDyeing() then
+            descriptionOne = ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_ESO_PLUS_STATUS_UNLOCKED))
+            descriptionTwo = GetString(SI_GAMEPAD_DYEING_COMPANION_COLLECTIBLE_TAB_DESCRIPTION_UNLOCKED)
+        else
+            descriptionOne = ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_ESO_PLUS_STATUS_LOCKED))
+            descriptionTwo = GetString(SI_GAMEPAD_DYEING_COMPANION_COLLECTIBLE_TAB_DESCRIPTION_LOCKED)
+        end
+        GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_DYEING_COMPANION_COLLECTIBLE_TAB), descriptionOne, descriptionTwo)
+    elseif restyleMode == RESTYLE_MODE_COMPANION_OUTFIT then
+        GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_DYEING_DYE_OUTFIT_STYLES_TAB), GetString(SI_GAMEPAD_RESTYLE_OUTFITS_DESCRIPTION))
     end
 end
 
@@ -123,27 +145,39 @@ function ZO_Restyle_Gamepad:InitializeKeybindStripDescriptorsRoot()
         {
             keybind = "UI_SHORTCUT_PRIMARY",
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
             name = function()
                 return GetString(SI_GAMEPAD_SELECT_OPTION)
             end,
-        
             callback = function()
                 local targetData = self.modeList:GetTargetData()
                 local targetMode = targetData.mode
-                if targetMode == RESTYLE_MODE_EQUIPMENT then
-                    local outfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentOutfitIndex()
+                if targetMode == RESTYLE_MODE_EQUIPMENT or targetMode == RESTYLE_MODE_COMPANION_EQUIPMENT then
+                    local expectedActorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(targetMode)
+                    local actorCategory, outfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentActorCategoryAndIndex()
+                    if not actorCategory or actorCategory ~= expectedActorCategory then
+                        ZO_OUTFITS_SELECTOR_GAMEPAD:SetCurrentActorCategory(expectedActorCategory)
+                        actorCategory, outfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentActorCategoryAndIndex()
+                    end
                     if outfitIndex then
-                        targetMode = RESTYLE_MODE_OUTFIT
+                        ZO_OUTFITS_SELECTOR_GAMEPAD:SetCurrentActorCategory(actorCategory)
+                        targetMode = ZO_OUTFIT_MANAGER.GetRestyleModeByActorCategory(actorCategory)
                     end
                 end
                 self:SetMode(targetMode)
                 ZO_RESTYLE_STATION_GAMEPAD:Update()
                 SCENE_MANAGER:Push(targetData.sceneName)
             end,
+            enabled = function()
+                local targetData = self.modeList:GetTargetData()
+                local targetMode = targetData.mode
+                if targetMode == RESTYLE_MODE_COMPANION_EQUIPMENT or targetMode == RESTYLE_MODE_COMPANION_COLLECTIBLE then
+                    return HasActiveCompanion()
+                end
+                return true
+            end,
             visible = function()
                 local targetData = self.modeList:GetTargetData()
-                if targetData.mode == RESTYLE_MODE_COLLECTIBLE then
+                if targetData.mode == RESTYLE_MODE_COLLECTIBLE or targetData.mode == RESTYLE_MODE_COMPANION_COLLECTIBLE then
                     return CanUseCollectibleDyeing()
                 end
                 return true

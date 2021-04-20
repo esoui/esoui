@@ -78,7 +78,7 @@ function ZO_OutfitStylesBook_Keyboard:InitializeKeybindStripDescriptors()
             callback = function()
                 local currentSheet = ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:GetCurrentSheet()
                 local outfitManipulator = currentSheet:GetCurrentOutfitManipulator()
-                ZO_Dialogs_ShowDialog("RENAME_OUFIT", { outfitIndex = outfitManipulator:GetOutfitIndex() }, { initialEditText = outfitManipulator:GetOutfitName() })
+                ZO_Dialogs_ShowDialog("RENAME_OUFIT", { actorCategory = outfitManipulator:GetActorCategory(), outfitIndex = outfitManipulator:GetOutfitIndex() }, { initialEditText = outfitManipulator:GetOutfitName() })
             end,
         },
     }
@@ -119,11 +119,19 @@ end
 do
     local DISALLOW_DYEING = false
     local SPECIALIZED_COLLECTIBLE_CATEGORY_ENABLED = true
-    local DERIVES_COLLECTIBLE_CATEGORIES_FROM_SLOTS = false
-    local RESTYLE_CATEGORY_DATA = ZO_RestyleCategoryData:New(DISALLOW_DYEING, COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES, SPECIALIZED_COLLECTIBLE_CATEGORY_ENABLED, DERIVES_COLLECTIBLE_CATEGORIES_FROM_SLOTS)
+    local DONT_DERIVE_COLLECTIBLE_CATEGORIES_FROM_SLOTS = false
+    local RESTYLE_CATEGORY_DATA = ZO_RestyleCategoryData:New(RESTYLE_MODE_OUTFIT, DISALLOW_DYEING, COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES, SPECIALIZED_COLLECTIBLE_CATEGORY_ENABLED, DONT_DERIVE_COLLECTIBLE_CATEGORIES_FROM_SLOTS)
+    local RESTYLE_COMPANION_CATEGORY_DATA = ZO_RestyleCategoryData:New(RESTYLE_MODE_COMPANION_OUTFIT, DISALLOW_DYEING, COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES, SPECIALIZED_COLLECTIBLE_CATEGORY_ENABLED, DONT_DERIVE_COLLECTIBLE_CATEGORIES_FROM_SLOTS)
 
     function ZO_OutfitStylesBook_Keyboard:GetRestyleCategoryData()
-        return RESTYLE_CATEGORY_DATA
+        local currentSheet = ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:GetCurrentSheet()
+        local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(currentSheet:GetRestyleMode())
+        if actorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER then
+            return RESTYLE_CATEGORY_DATA
+        elseif actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+            return RESTYLE_COMPANION_CATEGORY_DATA
+        end
+        return nil
     end
 end
 

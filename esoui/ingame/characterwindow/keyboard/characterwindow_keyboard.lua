@@ -13,11 +13,6 @@ end
 local slots = nil
 local heldSlotLinkage = nil
 
-local function GetEquippedItemType(slotId)
-    local _, _, _, _, _, equipType = GetItemInfo(BAG_WORN, slotId)
-    return equipType
-end
-
 local function InitializeSlots()
     slots =
     {
@@ -47,10 +42,10 @@ local function InitializeSlots()
         [EQUIP_SLOT_OFF_HAND] =
         {
             pullFromConditionFn =   function()
-                return GetEquippedItemType(EQUIP_SLOT_MAIN_HAND) == EQUIP_TYPE_TWO_HAND
+                return GetItemEquipType(BAG_WORN, EQUIP_SLOT_MAIN_HAND) == EQUIP_TYPE_TWO_HAND
             end,
             pullFromFn =    function()
-                local iconFile, slotHasItem, _, _, _, locked = GetEquippedItemInfo(EQUIP_SLOT_MAIN_HAND)
+                local slotHasItem, iconFile, _, _, locked = GetWornItemInfo(BAG_WORN, EQUIP_SLOT_MAIN_HAND)
                 return iconFile, slotHasItem, locked
             end,
         },
@@ -58,10 +53,10 @@ local function InitializeSlots()
         [EQUIP_SLOT_BACKUP_OFF] =
         {
             pullFromConditionFn =   function()
-                return GetEquippedItemType(EQUIP_SLOT_BACKUP_MAIN) == EQUIP_TYPE_TWO_HAND 
+                return GetItemEquipType(BAG_WORN, EQUIP_SLOT_BACKUP_MAIN) == EQUIP_TYPE_TWO_HAND 
             end,
             pullFromFn =    function()
-                local iconFile, slotHasItem, _, _, _, locked = GetEquippedItemInfo(EQUIP_SLOT_BACKUP_MAIN)
+                local slotHasItem, iconFile, _, _, locked = GetWornItemInfo(BAG_WORN, EQUIP_SLOT_BACKUP_MAIN)
                 return iconFile, slotHasItem, locked
             end,
         },
@@ -79,13 +74,14 @@ local NO_ANIMATION = false
 
 local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFromLinkedFn)
     local iconControl = slotControl:GetNamedChild("Icon")
-    local iconFile, slotHasItem, locked
+    local slotHasItem, iconFile, locked
 
     if copyFromLinkedFn then
         iconFile, slotHasItem, locked = copyFromLinkedFn()
     else
+        -- make _ local so it doesn't leak globally
         local _
-        iconFile, slotHasItem, _, _, _, locked = GetEquippedItemInfo(slotId)
+        slotHasItem, iconFile, _, _, locked = GetWornItemInfo(BAG_WORN, slotId)
     end
 
     local disabled = ((slotId == EQUIP_SLOT_BACKUP_MAIN) or (slotId == EQUIP_SLOT_BACKUP_OFF) or (slotId == EQUIP_SLOT_BACKUP_POISON)) and GetUnitLevel("player") < GetWeaponSwapUnlockedLevel()
@@ -330,9 +326,6 @@ function ZO_Character_Initialize(control)
     ZO_Character:RegisterForEvent(EVENT_PLAYER_ALIVE, OnPlayerAlive)
     ZO_Character:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 
-    CALLBACK_MANAGER:RegisterCallback("BackpackFullUpdate", OnBackpackFullUpdate)
-    CALLBACK_MANAGER:RegisterCallback("BackpackSlotUpdate", OnBackpackSlotUpdate)
-
     local function OnActiveWeaponPairChanged(event, activeWeaponPair)
         local unlockLevel = GetWeaponSwapUnlockedLevel()
         local playerLevel = GetUnitLevel("player")
@@ -359,7 +352,7 @@ function ZO_Character_Initialize(control)
     OnActiveWeaponPairChanged(nil, GetActiveWeaponPairInfo())
 
     local apparelText = control:GetNamedChild("ApparelSectionText")
-    local isApparelHidden = IsEquipSlotVisualCategoryHidden(EQUIP_SLOT_VISUAL_CATEGORY_APPAREL)
+    local isApparelHidden = IsEquipSlotVisualCategoryHidden(EQUIP_SLOT_VISUAL_CATEGORY_APPAREL, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     local apparelString = isApparelHidden and GetString(SI_CHARACTER_EQUIP_APPAREL_HIDDEN) or GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL)
     apparelText:SetText(apparelString)
 
@@ -377,7 +370,7 @@ local CHARACTER_STAT_CONTROLS = {}
 
 function ZO_CharacterWindowStats_Initialize(control)
     local parentControl = control:GetNamedChild("ScrollScrollChild")
-    local lastControl
+    local lastControl = nil
     local nextPaddingY = 0
     for _, statGroup in ipairs(ZO_INVENTORY_STAT_GROUPS) do
         for _, stat in ipairs(statGroup) do

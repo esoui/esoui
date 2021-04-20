@@ -1,10 +1,4 @@
 do
-    local NO_CATEGORY_NAME = nil
-    local NO_NICKNAME = nil
-    local BLANK_HINT = ""
-    local HIDE_VISUAL_LAYER_INFO = false
-    local NO_COOLDOWN = nil
-    local HIDE_BLOCK_REASON = false
     local NOT_EQUIPPED = false
     local NO_CREATOR_NAME = nil
     local FORCE_FULL_DURABILITY = true
@@ -15,9 +9,12 @@ do
         -- For some market product types we can just use other tooltip layouts
         if rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
             local collectibleId = GetCollectibleRewardCollectibleId(rewardId)
-            local name, description, icon, _, _, isPurchasable, _, categoryType, hint = GetCollectibleInfo(collectibleId)
-            local DEPRECATED_ARG
-            self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, isPurchasable, description, BLANK_HINT, DEPRECATED_ARG, categoryType, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+            local params =
+            {
+                collectibleId = collectibleId,
+                showIfPurchasable = true,
+            }
+            self:LayoutCollectibleWithParams(params)
             return
         elseif rewardType == REWARD_ENTRY_TYPE_ITEM then
             local stackCount = amount

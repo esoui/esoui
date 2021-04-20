@@ -18,11 +18,11 @@ do
     local DAMAGE_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_dps_down_no_glow_64.dds", 40, 40)
     local g_roleIconTable = {}
 
-    function ZO_Tooltip:AddAbilityStats(abilityId, overrideActiveRank)
+    function ZO_Tooltip:AddAbilityStats(abilityId, overrideActiveRank, overrideCasterUnitTag)
         local statsSection = self:AcquireSection(self:GetStyle("abilityStatsSection"))
 
         --Cast Time
-        local channeled, castTime, channelTime = GetAbilityCastInfo(abilityId, overrideActiveRank)
+        local channeled, castTime, channelTime = GetAbilityCastInfo(abilityId, overrideActiveRank, overrideCasterUnitTag)
         local castTimePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
         if channeled then
             castTimePair:SetStat(GetString(SI_ABILITY_TOOLTIP_CHANNEL_TIME_LABEL), self:GetStyle("statValuePairStat"))
@@ -34,7 +34,7 @@ do
         statsSection:AddStatValuePair(castTimePair)
 
         --Target
-        local targetDescription = GetAbilityTargetDescription(abilityId, overrideActiveRank)
+        local targetDescription = GetAbilityTargetDescription(abilityId, overrideActiveRank, overrideCasterUnitTag)
         if targetDescription then
             local targetPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             targetPair:SetStat(GetString(SI_ABILITY_TOOLTIP_TARGET_TYPE_LABEL), self:GetStyle("statValuePairStat"))
@@ -43,7 +43,7 @@ do
         end
 
         --Range
-        local minRangeCM, maxRangeCM = GetAbilityRange(abilityId, overrideActiveRank)
+        local minRangeCM, maxRangeCM = GetAbilityRange(abilityId, overrideActiveRank, overrideCasterUnitTag)
         if maxRangeCM > 0 then
             local rangePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             rangePair:SetStat(GetString(SI_ABILITY_TOOLTIP_RANGE_LABEL), self:GetStyle("statValuePairStat"))
@@ -56,7 +56,7 @@ do
         end
 
         --Radius/Distance
-        local radiusCM = GetAbilityRadius(abilityId, overrideActiveRank)
+        local radiusCM = GetAbilityRadius(abilityId, overrideActiveRank, overrideCasterUnitTag)
         local angleDistanceCM = GetAbilityAngleDistance(abilityId)
         if radiusCM > 0 then
             local radiusDistancePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
@@ -78,13 +78,22 @@ do
             durationPair:SetValue(GetString(SI_ABILITY_TOOLTIP_TOGGLE_DURATION), self:GetStyle("abilityStatValuePairValue"))
             statsSection:AddStatValuePair(durationPair)
         else
-            local durationMS = GetAbilityDuration(abilityId, overrideActiveRank)
+            local durationMS = GetAbilityDuration(abilityId, overrideActiveRank, overrideCasterUnitTag)
             if durationMS > 0 then
                 local durationPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
                 durationPair:SetStat(GetString(SI_ABILITY_TOOLTIP_DURATION_LABEL), self:GetStyle("statValuePairStat"))
                 durationPair:SetValue(ZO_FormatTimeMilliseconds(durationMS, TIME_FORMAT_STYLE_DURATION, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("abilityStatValuePairValue"))
                 statsSection:AddStatValuePair(durationPair)
             end
+        end
+
+        --Cooldown
+        local cooldownMS = GetAbilityCooldown(abilityId, overrideCasterUnitTag)
+        if cooldownMS > 0 then
+            local cooldownPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+            cooldownPair:SetStat(GetString(SI_ABILITY_TOOLTIP_COOLDOWN), self:GetStyle("statValuePairStat"))
+            cooldownPair:SetValue(ZO_FormatTimeMilliseconds(cooldownMS, TIME_FORMAT_STYLE_DURATION, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("abilityStatValuePairValue"))
+            statsSection:AddStatValuePair(cooldownPair)
         end
 
         --Cost
@@ -153,9 +162,10 @@ do
     end
 end
 
-function ZO_Tooltip:AddAbilityDescription(abilityId, overrideDescription)
-    local descriptionHeader = GetAbilityDescriptionHeader(abilityId)
-    local description = overrideDescription or GetAbilityDescription(abilityId)
+function ZO_Tooltip:AddAbilityDescription(abilityId, overrideDescription, overrideCasterUnitTag)
+    local descriptionHeader = GetAbilityDescriptionHeader(abilityId, overrideCasterUnitTag)
+    local NO_OVERRIDE_RANK = nil
+    local description = overrideDescription or GetAbilityDescription(abilityId, NO_OVERRIDE_RANK, overrideCasterUnitTag)
     if descriptionHeader ~= "" or description ~= "" then
         local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
         if descriptionHeader ~= "" then

@@ -51,5 +51,6 @@ end
 
 --If this setting is enabled, start the profiler so addons can profile their loading.
 if GetCVar("StartLuaProfilingOnUILoad") == "1" then
+    SetCVar("StartLuaProfilingOnUILoad", "0")
     StartScriptProfiler()
 end

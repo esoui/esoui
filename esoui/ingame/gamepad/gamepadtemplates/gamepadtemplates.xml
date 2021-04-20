@@ -220,6 +220,37 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_GamepadSkillLinePreview_AbilityEntry" virtual="true">
+            <OnInitialized>
+                ZO_GamepadSkillLinePreview_AbilityEntry_OnInitialized(self)
+            </OnInitialized>
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="50"/>
+            <Controls>
+                <Backdrop name="$(parent)EdgeFrame" tier="HIGH" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" centerColor="00000000" pixelRoundingEnabled="false" />
+                <Texture name="$(parent)Icon" inherits="ZO_GamepadSkillsEntryIcon" hidden="false"/>
+                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds" tier="HIGH" pixelRoundingEnabled="false">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                </Texture>
+                <Texture name="$(parent)CircleFrame" tier="HIGH" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_passiveFrame_44.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Label name="$(parent)Label">
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
+                    <Dimensions x="290"/>
+                </Label>
+
+                <Texture name="$(parent)LeftIndicator" inherits="ZO_MultiIcon" pixelRoundingEnabled="false" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="20" />
+                </Texture>
+
+                <Label name="$(parent)Keybind" tier="HIGH" font="ZoFontGamepad18" verticalAlignment="CENTER">
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+
         <Control name="ZO_GamepadSimpleAbilityEntryTemplate" inherits="ZO_GamepadSubMenuEntryTemplate ZO_GamepadSimpleAbilityEntryTemplateBase" virtual="true" override="true">
             <Controls>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadSkillsEntryIcon"  override="true"/>

@@ -42,16 +42,6 @@ do
     end
 end
 
-ZO_MARKET_CURRENCY_TO_UI_CURRENCY =
-{
-    [MKCT_CROWNS] = CURT_CROWNS,
-    [MKCT_CROWN_GEMS] = CURT_CROWN_GEMS,
-}
-
-function ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
-    return ZO_MARKET_CURRENCY_TO_UI_CURRENCY[marketCurrencyType]
-end
-
 local ICON_PADDING = 4
 local MULTI_CURRENCY_PADDING = 8 -- the amount of space between each currency type in a control
 

@@ -1,12 +1,9 @@
-ZO_AbstractGridScrollList = ZO_CallbackObject:Subclass()
+ZO_GRID_SCROLL_LIST_AUTOFILL = true
+ZO_GRID_SCROLL_LIST_DONT_AUTOFILL = false
 
-function ZO_AbstractGridScrollList:New(...)
-    local list = ZO_CallbackObject.New(self)
-    list:Initialize(...)
-    return list
-end
+ZO_AbstractGridScrollList = ZO_InitializingCallbackObject:Subclass()
 
-function ZO_AbstractGridScrollList:Initialize(control)
+function ZO_AbstractGridScrollList:Initialize(control, autofillRows)
     self.control = control
     self.container = control:GetNamedChild("Container")
     self.list = self.container:GetNamedChild("List")
@@ -19,6 +16,8 @@ function ZO_AbstractGridScrollList:Initialize(control)
     self.headerPrePadding = 0
     self.headerPostPadding = 0
     self.templateOperationIds = {}
+    self.autoFillRows = autofillRows or false
+    self.controlsAddedSinceLastFill = 0
 end
 
 function ZO_AbstractGridScrollList:SetHeaderPrePadding(prePadding)
@@ -64,6 +63,17 @@ function ZO_AbstractGridScrollList:AddEntryTemplate(templateName, width, height,
 
         self.nextOperationId = self.nextOperationId + 1
         self.templateOperationIds[templateName] = operationId
+
+        if self.autoFillRows then
+            local listWidth = self.list:GetWidth()
+            local numCellsPerRow = zo_floor(listWidth / (width + spacingX))
+            if self.numCellsPerRow then
+                assert(self.numCellsPerRow == numCellsPerRow, "AuoFillRows is only supported when the number of cells per row is consistent regardless of the entry templates used.")
+            else
+                self.numCellsPerRow = numCellsPerRow
+            end
+        end
+
         return operationId
     end
 
@@ -77,6 +87,10 @@ function ZO_AbstractGridScrollList:SetEntryTemplateVisibilityFunction(templateNa
     end
 end
 
+function ZO_AbstractGridScrollList:SetAutoFillEntryTemplate(templateName)
+    self.autoFillRowsOperationId = self.templateOperationIds[templateName]
+end
+
 function ZO_AbstractGridScrollList:AddEntry(data, templateName)
     local operationId = self.templateOperationIds[templateName]
     if operationId then
@@ -84,6 +98,8 @@ function ZO_AbstractGridScrollList:AddEntry(data, templateName)
         if self.currentHeaderData ~= gridHeaderData then
             local scrollData = ZO_ScrollList_GetDataList(self.list)
             if self.currentHeaderData or #scrollData > 0 then
+                -- we're starting a new section, so first make sure to fill out the last row of the previous section
+                self:FillRowWithEmptyCells(self.currentHeaderData)
                 ZO_ScrollList_AddOperation(self.list, ZO_SCROLL_LIST_OPERATION_LINE_BREAK, { lineBreakAmount = self.headerPrePadding })
             end
             self.currentHeaderData = gridHeaderData
@@ -98,10 +114,27 @@ function ZO_AbstractGridScrollList:AddEntry(data, templateName)
             end
         end
         ZO_ScrollList_AddOperation(self.list, operationId, data)
+        self.controlsAddedSinceLastFill = self.controlsAddedSinceLastFill + 1
     end
 end
 
+function ZO_AbstractGridScrollList:FillRowWithEmptyCells(gridHeaderData)
+    if self.autoFillRows and self.autoFillRowsOperationId then
+        local numMissingCells = self.numCellsPerRow - zo_mod(self.controlsAddedSinceLastFill, self.numCellsPerRow)
+        if numMissingCells ~= self.numCellsPerRow then -- the row was full, don't need to add any empty cells
+            for i = 1, numMissingCells do
+                ZO_ScrollList_AddOperation(self.list, self.autoFillRowsOperationId, { gridHeaderData = gridHeaderData, isEmptyCell = true })
+            end
+        end
+    end
+    self.controlsAddedSinceLastFill = 0
+end
+
 function ZO_AbstractGridScrollList:CommitGridList()
+    local scrollData = ZO_ScrollList_GetDataList(self.list)
+    if #scrollData > 0 then -- only try to fill in a row if there exists a row to fill in
+        self:FillRowWithEmptyCells(self.currentHeaderData)
+    end
     ZO_ScrollList_Commit(self.list)
 end
 

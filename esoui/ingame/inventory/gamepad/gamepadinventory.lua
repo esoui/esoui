@@ -58,6 +58,10 @@ function ZO_GamepadInventory:Initialize(control)
     control:SetHandler("OnUpdate", OnUpdate)
 
     self:SetTextSearchContext("playerInventoryTextSearch")
+
+    -- Initialize needed bags
+    SHARED_INVENTORY:GetOrCreateBagCache(BAG_BACKPACK)
+    SHARED_INVENTORY:GetOrCreateBagCache(BAG_WORN)
 end
 
 function ZO_GamepadInventory:OnDeferredInitialize()
@@ -104,11 +108,11 @@ function ZO_GamepadInventory:OnDeferredInitialize()
     self.control:RegisterForEvent(EVENT_PLAYER_DEAD, RefreshSelectedData)
     self.control:RegisterForEvent(EVENT_PLAYER_REINCARNATED, RefreshSelectedData)
 
-    local function OnInventoryUpdated(bagId)
+    local function OnInventoryUpdated(bagId, slotIndex, previousSlotData, isLastUpdateForMessage)
         self:MarkDirty()
-        local currentList = self:GetCurrentList()
         if self.scene:IsShowing() then
             -- we only want to update immediately if we are in the gamepad inventory scene
+            local currentList = self:GetCurrentList()
             if currentList == self.categoryList then
                 self:RefreshCategoryList()
             elseif currentList == self.itemList then
@@ -118,7 +122,7 @@ function ZO_GamepadInventory:OnDeferredInitialize()
             end
             RefreshSelectedData() --dialog will refresh selected when it hides, so only do it if it's not showing
             self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
-            self:MarkDirtyByBagId(bagId)
+            self:MarkDirtyByBagId(bagId, not isLastUpdateForMessage)
         end
     end
 
@@ -551,7 +555,7 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                 elseif IsCompareModeEnabled() then
                     local targetCategoryData = self.categoryList:GetTargetData()
                     if targetCategoryData then
-                        local equipSlotHasItem = select(2, GetEquippedItemInfo(targetCategoryData.equipSlot))
+                        local equipSlotHasItem = GetWornItemInfo(BAG_WORN, targetCategoryData.equipSlot)
                         return equipSlotHasItem
                     end
                 end
@@ -620,8 +624,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
             disabledDuringSceneHiding = true,
             visible =   function()
                             if not IsCurrentlyPreviewing() then
-                               local targetData = self.itemList:GetTargetData()
-                               return targetData ~= nil and CanInventoryItemBePreviewed(targetData.bagId, targetData.slotIndex) and IsCharacterPreviewingAvailable()
+                                local targetData = self.itemList:GetTargetData()
+                                return self:CanEntryDataBePreviewed(targetData) and IsCharacterPreviewingAvailable()
                             end
 
                             return true
@@ -699,7 +703,7 @@ end
 
 function ZO_GamepadInventory:OnTargetChanged(list, targetData, oldTargetData)
     if IsCurrentlyPreviewing() then
-        if targetData and CanInventoryItemBePreviewed(targetData.bagId, targetData.slotIndex) then
+        if self:CanEntryDataBePreviewed(targetData) then
             self:PreviewInventoryItem(targetData.bagId, targetData.slotIndex)
         end
     end
@@ -716,7 +720,26 @@ end
 function ZO_GamepadInventory:RequestLeaveHeader()
     ZO_Gamepad_ParametricList_BagsSearch_Screen.RequestLeaveHeader(self)
 
-    self:RefreshItemActions()
+    local targetData
+    local actionMode = self.actionMode
+    if actionMode == ITEM_LIST_ACTION_MODE then
+        targetData = self.itemList:GetTargetData()
+
+        if self:GetCurrentList() and self:GetCurrentList():IsActive() then
+            self:SetSelectedInventoryData(targetData)
+        end
+    elseif actionMode == CRAFT_BAG_ACTION_MODE then
+        targetData = self.craftBagList:GetTargetData()
+
+        if self:GetCurrentList() and self:GetCurrentList():IsActive() then
+            self:SetSelectedInventoryData(targetData)
+        end
+    else -- CATEGORY_ITEM_ACTION_MODE
+        targetData = self:GenerateItemSlotData(self.categoryList:GetTargetData())
+    end
+
+    self:SetSelectedItemUniqueId(targetData)
+    self:RefreshKeybinds()
 end
 
 function ZO_GamepadInventory:InitializeItemActions()
@@ -791,7 +814,7 @@ function ZO_GamepadInventory:UpdateCategoryLeftTooltip(selectedData)
     if not selectedData then return end
 
     if selectedData.equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, BAG_WORN, selectedData.equipSlot) then
-        local isHidden, highestPriorityVisualLayerThatIsShowing = WouldEquipmentBeHidden(selectedData.equipSlot or EQUIP_SLOT_NONE)
+        local isHidden, highestPriorityVisualLayerThatIsShowing = WouldEquipmentBeHidden(selectedData.equipSlot or EQUIP_SLOT_NONE, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
 
         if isHidden then
             GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER), nil, ZO_SELECTED_TEXT:Colorize(GetHiddenByStringForVisualLayer(highestPriorityVisualLayerThatIsShowing)))
@@ -808,12 +831,12 @@ function ZO_GamepadInventory:UpdateCategoryLeftTooltip(selectedData)
     end
 end
 
-local function SetupCategoryList(list)
-    list:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    list:AddDataTemplateWithHeader("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
-end
-
 function ZO_GamepadInventory:InitializeCategoryList()
+    local function SetupCategoryList(list)
+        list:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+        list:AddDataTemplateWithHeader("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    end
+
     self.categoryList = self:AddList("Category", SetupCategoryList)
     self.categoryList:SetNoItemText(GetString(SI_GAMEPAD_INVENTORY_EMPTY))
 
@@ -920,6 +943,9 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry)
         -- Furnishing
         self:AddFilteredBackpackCategoryIfPopulated(ITEMFILTERTYPE_FURNISHING, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_furnishings.dds")
 
+        -- Companion Items
+        self:AddFilteredBackpackCategoryIfPopulated(ITEMFILTERTYPE_COMPANION, "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_companionItems.dds")
+
         -- Quest Items
         do
             local questCache = SHARED_INVENTORY:GenerateFullQuestCache()
@@ -949,7 +975,7 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry)
             local isListEmpty = self:IsItemListEmpty(equipSlot, nil)
             if not locked and not isListEmpty then
                 local name = zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_EQUIPSLOT", equipSlot))
-                local iconFile, slotHasItem = GetEquippedItemInfo(equipSlot)
+                local slotHasItem, iconFile  = GetWornItemInfo(BAG_WORN, equipSlot)
                 if not slotHasItem then
                     iconFile = nil
                 end
@@ -1129,6 +1155,10 @@ function ZO_GamepadInventory:GetItemDataFilterComparator(filteredEquipSlot, nonE
             return false
         end
 
+        if itemData.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+            return nonEquipableFilterType == ITEMFILTERTYPE_COMPANION
+        end
+
         if filteredEquipSlot then
             return ZO_Character_DoesEquipSlotUseEquipType(filteredEquipSlot, itemData.equipType)
         end
@@ -1136,7 +1166,7 @@ function ZO_GamepadInventory:GetItemDataFilterComparator(filteredEquipSlot, nonE
         if nonEquipableFilterType then
             return ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, nonEquipableFilterType)
         end
-        
+
         return ZO_InventoryUtils_DoesNewItemMatchSupplies(itemData)
     end
 end
@@ -1196,7 +1226,7 @@ function ZO_GamepadInventory:RefreshItemList(selectDefaultEntry)
                 entryData.isEquippedInCurrentCategory = itemData.slotIndex == filteredEquipSlot
                 entryData.isEquippedInAnotherCategory = itemData.slotIndex ~= filteredEquipSlot
 
-                entryData.isHiddenByWardrobe = WouldEquipmentBeHidden(itemData.slotIndex or EQUIP_SLOT_NONE)
+                entryData.isHiddenByWardrobe = WouldEquipmentBeHidden(itemData.slotIndex or EQUIP_SLOT_NONE, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
             elseif isQuestItemFilter then
                 local slotIndex = FindActionSlotMatchingSimpleAction(ACTION_TYPE_QUEST_ITEM, itemData.questItemId)
                 entryData.isEquippedInCurrentCategory = slotIndex ~= nil
@@ -1473,23 +1503,26 @@ function ZO_GamepadInventory:TrySetClearNewFlag(callId)
 end
 
 function ZO_GamepadInventory:UpdateRightTooltip()
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     local targetCategoryData = self.categoryList:GetTargetData()
-    if targetCategoryData and targetCategoryData.equipSlot then
+    if targetCategoryData then
         local selectedItemData = self.currentlySelectedData
-        local equipSlotHasItem = select(2, GetEquippedItemInfo(targetCategoryData.equipSlot))
-        if selectedItemData and (not equipSlotHasItem or self.savedVars.useStatComparisonTooltip) then
-            GAMEPAD_TOOLTIPS:LayoutItemStatComparison(GAMEPAD_RIGHT_TOOLTIP, selectedItemData.bagId, selectedItemData.slotIndex, targetCategoryData.equipSlot)
-            GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_RIGHT_TOOLTIP, GetString(SI_GAMEPAD_INVENTORY_ITEM_COMPARE_TOOLTIP_TITLE))
-        elseif GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, targetCategoryData.equipSlot) then
-            self:UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, targetCategoryData.equipSlot)
+        if targetCategoryData.equipSlot then
+            local equipSlotHasItem = GetWornItemInfo(BAG_WORN, targetCategoryData.equipSlot)
+            if selectedItemData and (not equipSlotHasItem or self.savedVars.useStatComparisonTooltip) then
+                GAMEPAD_TOOLTIPS:LayoutItemStatComparison(GAMEPAD_RIGHT_TOOLTIP, selectedItemData.bagId, selectedItemData.slotIndex, targetCategoryData.equipSlot)
+                GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_RIGHT_TOOLTIP, GetString(SI_GAMEPAD_INVENTORY_ITEM_COMPARE_TOOLTIP_TITLE))
+            elseif GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, targetCategoryData.equipSlot) then
+                self:UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, targetCategoryData.equipSlot)
+            end
+        elseif selectedItemData and targetCategoryData.filterType == ITEMFILTERTYPE_COMPANION then
+            ZO_LayoutBagItemEquippedComparison(GAMEPAD_RIGHT_TOOLTIP, selectedItemData.bagId, selectedItemData.slotIndex)
         end
-    else
-        GAMEPAD_TOOLTIPS:ClearStatusLabel(GAMEPAD_RIGHT_TOOLTIP)
     end
 end
 
 function ZO_GamepadInventory:UpdateTooltipEquippedIndicatorText(tooltipType, equipSlot)
-    ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, equipSlot)
+    ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, equipSlot, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
 end
 
 function ZO_GamepadInventory:Select()
@@ -1529,6 +1562,22 @@ function ZO_GamepadInventory:ShowActions()
     ZO_Dialogs_ShowPlatformDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG, dialogData)
     self:TryClearNewStatus()
     self:GetCurrentList():RefreshVisible()
+end
+
+function ZO_GamepadInventory:CanEntryDataBePreviewed(data)
+    if data then
+        if data.slotType == SLOT_TYPE_QUEST_ITEM then
+            return false
+        end
+
+        local itemActorCategory = GetItemActorCategory(data.bagId, data.slotIndex)
+        if itemActorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION and GetInteractionType() ~= INTERACTION_COMPANION_MENU then
+            return false
+        end
+        return CanInventoryItemBePreviewed(data.bagId, data.slotIndex)
+    end
+
+    return false
 end
 
 function ZO_GamepadInventory:PreviewInventoryItem(bagId, slotIndex)

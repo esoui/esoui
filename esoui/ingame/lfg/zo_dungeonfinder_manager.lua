@@ -2,20 +2,20 @@ local categoryData =
 {
     keyboardData =
     {
+        priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.DUNGEONS,
         name = GetString(SI_ACTIVITY_FINDER_CATEGORY_DUNGEON_FINDER),
         normalIcon = "EsoUI/Art/LFG/LFG_indexIcon_dungeon_up.dds",
         pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_dungeon_down.dds",
         mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_dungeon_over.dds",
     },
-
     gamepadData =
     {
+        priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.DUNGEONS,
         name = GetString(SI_ACTIVITY_FINDER_CATEGORY_DUNGEON_FINDER),
         menuIcon = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_Dungeon.dds",
         sceneName = "gamepadDungeonFinder",
         tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_DUNGEON_FINDER),
     },
-    priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.DUNGEONS
 }
 
 local DungeonFinder_Manager = ZO_ActivityFinderTemplate_Manager:Subclass()

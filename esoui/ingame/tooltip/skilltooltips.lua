@@ -246,3 +246,69 @@ do
         self:AddSection(descriptionSection)
     end
 end
+
+function ZO_Tooltip:LayoutCompanionSkillProgression(skillProgressionData)
+    local abilityId = skillProgressionData:GetAbilityId()
+
+    local headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
+    --Unlocks at rank X
+    if not skillProgressionData:IsUnlocked() then
+        local skillData = skillProgressionData:GetSkillData()
+        local skillLineData = skillData:GetSkillLineData()
+        local skillLineName = skillLineData:GetName()
+        local lineRankNeededToUnlock = skillData:GetSkillLineRankRequired()
+        headerSection:AddLine(zo_strformat(SI_ABILITY_UNLOCKED_AT, skillLineName, lineRankNeededToUnlock), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+    end
+    self:AddSectionEvenIfEmpty(headerSection)
+
+    local formattedAbilityName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(abilityId))
+    self:AddLine(formattedAbilityName, self:GetStyle("title"))
+
+    local NO_OVERRIDE_RANK = nil
+    if not IsAbilityPassive(abilityId) then
+        self:AddAbilityStats(abilityId, NO_OVERRIDE_RANK, "companion")
+    end
+    local NO_OVERRIDE_DESCRIPTION = nil
+    self:AddAbilityDescription(abilityId, NO_OVERRIDE_DESCRIPTION, "companion")
+end
+
+function ZO_Tooltip:LayoutSkillLinePreview(skillLineData)
+    if skillLineData:IsAvailable() then
+        local skillsSection = self:AcquireSection(self:GetStyle("skillLinePreviewBodySection"))
+        local lastHeader = nil
+        for _, skillData in skillLineData:SkillIterator() do
+            local currentHeader = skillData:GetHeaderText()
+            if lastHeader ~= currentHeader then
+                local headerSection = self:AcquireSection(self:GetStyle("skillLineEntryHeaderSection"))
+                headerSection:AddLine(currentHeader, self:GetStyle("skillLineEntryHeader"))
+                skillsSection:AddSection(headerSection)
+                lastHeader = currentHeader
+            end
+            local rowControl = self:AcquireCustomControl(self:GetStyle("skillLineEntryRow"))
+            ZO_GamepadSkillEntryPreviewRow_Setup(rowControl, skillData)
+            skillsSection:AddCustomControl(rowControl)
+        end
+        self:AddSection(skillsSection)
+    elseif skillLineData:IsAdvised() then
+        self:LayoutTitleAndMultiSectionDescriptionTooltip(skillLineData:GetFormattedName(), skillLineData:GetUnlockText())
+    end
+end
+
+do
+    local COMPANION_SKILLS_FILTER =
+    {
+        function(actionSlotData)
+            return actionSlotData:GetSlottableActionType() == ZO_SLOTTABLE_ACTION_TYPE_COMPANION_SKILL
+        end,
+    }
+    function ZO_Tooltip:LayoutEquippedCompanionSkillsPreview()
+        local skillSection = self:AcquireSection(self:GetStyle("bodySection"))
+        local hotbar = ACTION_BAR_ASSIGNMENT_MANAGER:GetHotbar(HOTBAR_CATEGORY_COMPANION)
+        for slotIndex, slotData in hotbar:SlotIterator(COMPANION_SKILLS_FILTER) do
+            local rowControl = self:AcquireCustomControl(self:GetStyle("skillLineEntryRow"))
+            ZO_GamepadSkillEntryPreviewRow_Setup(rowControl, slotData:GetCompanionSkillData())
+            skillSection:AddCustomControl(rowControl)
+        end
+        self:AddSection(skillSection)
+    end
+end

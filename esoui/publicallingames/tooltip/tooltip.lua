@@ -139,15 +139,15 @@ end
 
 do
     local function CouldSlotHaveMultipleItems(equipSlot)
-        return equipSlot == EQUIP_SLOT_RING1 
-            or equipSlot == EQUIP_SLOT_RING2 
+        return equipSlot == EQUIP_SLOT_RING1
+            or equipSlot == EQUIP_SLOT_RING2
             or equipSlot == EQUIP_SLOT_MAIN_HAND
             or equipSlot == EQUIP_SLOT_OFF_HAND
             or equipSlot == EQUIP_SLOT_BACKUP_MAIN
             or equipSlot == EQUIP_SLOT_BACKUP_OFF
     end
 
-    function ZO_ItemTooltip_SetEquippedInfo(tooltipControl, equipSlot)
+    function ZO_ItemTooltip_SetEquippedInfo(tooltipControl, equipSlot, actorCategory)
         local equippedInfo = tooltipControl:GetNamedChild("EquippedInfo")
         if equippedInfo then
             equippedInfo:SetHidden(false)
@@ -155,7 +155,11 @@ do
             if CouldSlotHaveMultipleItems(equipSlot) then
                 text:SetText(zo_strformat(SI_ITEM_FORMAT_STR_EQUIPPED_SLOT, GetString("SI_EQUIPSLOT", equipSlot)))
             else
-                text:SetText(GetString(SI_ITEM_FORMAT_STR_EQUIPPED))
+                local equippedStringId = SI_ITEM_FORMAT_STR_EQUIPPED
+                if actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+                    equippedStringId = SI_ITEM_FORMAT_STR_EQUIPPED_COMPANION
+                end
+                text:SetText(GetString(equippedStringId))
             end
         end
     end

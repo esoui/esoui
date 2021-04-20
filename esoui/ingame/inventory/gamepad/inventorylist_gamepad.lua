@@ -26,7 +26,6 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
     self.categorizationFunction = categorizationFunction
     self.sortFunction = sortFunction
     self.dataByBagAndSlotIndex = {}
-    self.isDirty = true
     self.useTriggers = useTriggers ~= false -- nil => true
     self.template = template or DEFAULT_TEMPLATE
 
@@ -66,10 +65,7 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
     end
 
     local function OnEffectivelyShown()
-        if self.isDirty then
-            local TRIGGER_CALLBACK = true
-            self:RefreshList(TRIGGER_CALLBACK)
-        elseif self.selectedDataCallback then
+        if self.selectedDataCallback then
             self.selectedDataCallback(self.list, self.list:GetTargetData())
         end
         -- Don't activate on show in case there is another element that is intended to be active (ie. when the list is empty and the header should be selected instead)
@@ -77,7 +73,8 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
 
     local function OnEffectivelyHidden()
         GAMEPAD_INVENTORY:TryClearNewStatusOnHidden()
-        self:Deactivate()
+        -- To ensure the list isn't left greyed-out once we've entered due to factors such as pending animations that would
+        -- cause an effective hidden state, no longer calling self:Deactivate() here. Expecting managing classes to handle this.
     end
 
     local function OnInventoryUpdated(bagId)
@@ -118,6 +115,21 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
 
     self:SetOnSelectedDataChangedCallback(SelectionChangedCallback)
 
+    self.refresh = ZO_Refresh:New()
+    self.refresh:AddRefreshGroup("list",
+    {
+        RefreshAll = function()
+            self:OnRefreshList(self.shouldTriggerRefreshCallback)
+            self.shouldTriggerRefreshCallback = nil
+        end,
+    })
+
+    local function OnUpdate()
+        self.list:OnUpdate()
+        self.refresh:UpdateRefreshGroups()
+    end
+    
+    self.control:SetHandler("OnUpdate", OnUpdate)
     self.control:SetHandler("OnEffectivelyShown", OnEffectivelyShown)
     self.control:SetHandler("OnEffectivelyHidden", OnEffectivelyHidden)
 
@@ -456,12 +468,11 @@ do
      Otherwise, clears and fully refreshes the list.
     ]]--
     function ZO_GamepadInventoryList:RefreshList(shouldTriggerRefreshListCallback)
-        if self.control:IsHidden() then
-            self.isDirty = true
-            return
-        end
-        self.isDirty = false
+        self.shouldTriggerRefreshCallback = self.shouldTriggerRefreshCallback or shouldTriggerRefreshListCallback
+        self.refresh:RefreshAll("list")
+    end
 
+    function ZO_GamepadInventoryList:OnRefreshList(shouldTriggerRefreshListCallback)
         self.list:Clear()
 
         for _, bagId in ipairs(self.inventoryTypes) do

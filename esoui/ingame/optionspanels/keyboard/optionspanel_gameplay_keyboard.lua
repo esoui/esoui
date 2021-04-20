@@ -10,6 +10,41 @@ panelBuilder:AddSetting({
     header = SI_GAMEPLAY_OPTIONS_GENERAL,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_HidePolymorphHelm",
+    settingType = SETTING_TYPE_IN_WORLD,
+    settingId = IN_WORLD_UI_SETTING_HIDE_POLYMORPH_HELM,
+    header = SI_GAMEPLAY_OPTIONS_GENERAL,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_HideMountStaminaUpgrade",
+    settingType = SETTING_TYPE_IN_WORLD,
+    settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_STAMINA_UPGRADE,
+    header = SI_GAMEPLAY_OPTIONS_GENERAL,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_HideMountSpeedUpgrade",
+    settingType = SETTING_TYPE_IN_WORLD,
+    settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_SPEED_UPGRADE,
+    header = SI_GAMEPLAY_OPTIONS_GENERAL,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_HideMountInventoryUpgrade",
+    settingType = SETTING_TYPE_IN_WORLD,
+    settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_INVENTORY_UPGRADE,
+    header = SI_GAMEPLAY_OPTIONS_GENERAL,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_CompanionReactions",
+    settingType = SETTING_TYPE_IN_WORLD,
+    settingId = IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY,
+    header = SI_GAMEPLAY_OPTIONS_GENERAL,
+})
+
 -------------------------
 -- Gameplay -> Combat  --
 -------------------------
@@ -111,6 +146,13 @@ panelBuilder:AddSetting({
     header = SI_AUDIO_OPTIONS_COMBAT,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_AllowCompanionAutoUltimate",
+    settingType = SETTING_TYPE_COMBAT,
+    settingId = COMBAT_SETTING_ALLOW_COMPANION_AUTO_ULTIMATE,
+    header = SI_AUDIO_OPTIONS_COMBAT,
+})
+
 -------------------------
 -- Gameplay -> Gamepad --
 -------------------------
@@ -165,35 +207,6 @@ panelBuilder:AddSetting({
     controlName = "Options_Gameplay_LootHistory",
     settingType = SETTING_TYPE_LOOT,
     settingId = LOOT_SETTING_LOOT_HISTORY,
-    header = SI_GAMEPLAY_OPTIONS_ITEMS,
-})
-
--- TODO: hmm these aren't item options :thonking:
-panelBuilder:AddSetting({
-    controlName = "Options_Gameplay_HidePolymorphHelm",
-    settingType = SETTING_TYPE_IN_WORLD,
-    settingId = IN_WORLD_UI_SETTING_HIDE_POLYMORPH_HELM,
-    header = SI_GAMEPLAY_OPTIONS_ITEMS,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Gameplay_HideMountStaminaUpgrade",
-    settingType = SETTING_TYPE_IN_WORLD,
-    settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_STAMINA_UPGRADE,
-    header = SI_GAMEPLAY_OPTIONS_ITEMS,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Gameplay_HideMountSpeedUpgrade",
-    settingType = SETTING_TYPE_IN_WORLD,
-    settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_SPEED_UPGRADE,
-    header = SI_GAMEPLAY_OPTIONS_ITEMS,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Gameplay_HideMountInventoryUpgrade",
-    settingType = SETTING_TYPE_IN_WORLD,
-    settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_INVENTORY_UPGRADE,
     header = SI_GAMEPLAY_OPTIONS_ITEMS,
 })
 

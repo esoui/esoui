@@ -1,0 +1,20 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_Companion_KeyboardTopLevel" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_Companion_Keyboard_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)MenuHeader" inherits="ZO_SceneMenu">
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-36" />
+                    <Controls>
+                        <Control name="$(parent)Divider" override="true" hidden="true" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

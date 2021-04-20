@@ -11,6 +11,20 @@ function ZO_Gamepad_ParametricList_BagsSearch_Screen:Initialize(...)
     end
 
     self:AddSearch(self.textSearchKeybindStripDescriptor, OnTextSearchTextChanged)
+
+    -- Due to addition of text search, navigation of the list is now handled by the screen as opposed to the list itself.
+    -- As such, Update handler is needed to update the current list.
+    self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
+end
+
+function ZO_Gamepad_ParametricList_BagsSearch_Screen:OnUpdate()
+    local list = self:GetCurrentList()
+    if list then
+        local listObject = list.list
+        if listObject then
+            listObject:OnUpdate()
+        end
+    end
 end
 
 function ZO_Gamepad_ParametricList_BagsSearch_Screen:OnUpdatedSearchResults()
@@ -40,8 +54,10 @@ function ZO_Gamepad_ParametricList_BagsSearch_Screen:InitializeKeybindStripDescr
 end
 
 function ZO_Gamepad_ParametricList_BagsSearch_Screen:PerformUpdate()
-    self.dirty = false
-    self:OnUpdatedSearchResults()
+    if self.dirty then
+        self.dirty = false
+        self:OnUpdatedSearchResults()
+    end
 end
 
 function ZO_Gamepad_ParametricList_BagsSearch_Screen:OnBackButtonClicked()
@@ -80,6 +96,7 @@ function ZO_Gamepad_ParametricList_BagsSearch_Screen:ActivateTextSearch()
         self:UpdateSearchText()
 
         local function OnTextSearchResults()
+            self.dirty = true
             self:Update()
         end
         self.onTextSearchResults = OnTextSearchResults
@@ -92,7 +109,7 @@ end
 function ZO_Gamepad_ParametricList_BagsSearch_Screen:DeactivateTextSearch()
     if self.searchContext then
         TEXT_SEARCH_MANAGER:DeactivateTextSearch(self.searchContext)
-        TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", self.onTextSearchResults)
+        TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onTextSearchResults)
     end
 end
 
@@ -102,6 +119,6 @@ function ZO_Gamepad_ParametricList_BagsSearch_Screen:SetSearchText()
     end
 end
 
-function ZO_Gamepad_ParametricList_BagsSearch_Screen:MarkDirtyByBagId(bagId)
-    TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId)
+function ZO_Gamepad_ParametricList_BagsSearch_Screen:MarkDirtyByBagId(bagId, shouldSuppressSearchUpdate)
+    TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, shouldSuppressSearchUpdate)
 end

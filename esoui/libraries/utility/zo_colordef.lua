@@ -1,34 +1,15 @@
--- Utility functions for ColorDef...
-local function ConvertHTMLColorToFloatValues(htmlColor) -- This function is not fast, it was copied from an internal dev utility.
-    local htmlColorLen = string.len(htmlColor)
-    local a, r, g, b
-    
-    if(htmlColorLen == 8)
-    then
-        a, r, g, b = tonumber("0x"..string.sub(htmlColor, 1, 2)) / 255, tonumber("0x"..string.sub(htmlColor, 3, 4)) / 255, tonumber("0x"..string.sub(htmlColor, 5, 6)) / 255, tonumber("0x"..string.sub(htmlColor, 7, 8)) / 255
-    elseif(htmlColorLen == 6)
-    then
-        a, r, g, b = 1, tonumber("0x"..string.sub(htmlColor, 1, 2)) / 255, tonumber("0x"..string.sub(htmlColor, 3, 4)) / 255, tonumber("0x"..string.sub(htmlColor, 5, 6)) / 255
-    end
-    
-    if(a)
-    then
-        return a, r, g, b
-    end
-end
-
 -- ColorDef implementation
 
 ZO_ColorDef = ZO_Object:Subclass()
 
 function ZO_ColorDef:New(r, g, b, a)
     local c = ZO_Object.New(self)
-    
-    if(type(r) == "string") then            
-        c.a, c.r, c.g, c.b = ConvertHTMLColorToFloatValues(r)
-    elseif(type(r) == "table") then
-		local otherColorDef = r
-		c.r = otherColorDef.r or 1
+
+    if type(r) == "string" then
+        c.r, c.g, c.b, c.a = self.HexToFloats(r)
+    elseif type(r) == "table" then
+        local otherColorDef = r
+        c.r = otherColorDef.r or 1
         c.g = otherColorDef.g or 1
         c.b = otherColorDef.b or 1
         c.a = otherColorDef.a or 1
@@ -44,29 +25,6 @@ end
 
 function ZO_ColorDef.FromInterfaceColor(colorType, fieldValue)
     return ZO_ColorDef:New(GetInterfaceColor(colorType, fieldValue))
-end
-
-do
-    local function ConsumeRightmostChannel(value)
-        local channel = value % 256
-        channel = channel / 255
-        value = zo_floor(value / 256)
-        return channel, value
-    end
-
-    function ZO_ColorDef.FromARGBHexadecimal(ARGBHexadecimal)
-        if #ARGBHexadecimal == 8 then
-            local value = tonumber(ARGBHexadecimal, 16)
-            if value then
-                local a, r, g, b
-                b, value = ConsumeRightmostChannel(value)
-                g, value = ConsumeRightmostChannel(value)
-                r, value = ConsumeRightmostChannel(value)
-                a, value = ConsumeRightmostChannel(value)
-                return ZO_ColorDef:New(r, g, b, a)
-            end
-        end
-    end
 end
 
 function ZO_ColorDef:UnpackRGB()
@@ -106,15 +64,11 @@ function ZO_ColorDef:Clone()
 end
 
 function ZO_ColorDef:ToHex()
-	return string.format("%.2x%.2x%.2x", zo_round(self.r * 255), zo_round(self.g * 255), zo_round(self.b * 255))
+    return self.FloatsToHex(self.r, self.g, self.b, 1)
 end
 
-function ZO_ColorDef:ToARGBHexadecimal()
-    return ZO_ColorDef.ToARGBHexadecimal(self.r, self.g, self.b, self.a)
-end
-
-function ZO_ColorDef.ToARGBHexadecimal(r, g, b, a)
-    return string.format("%.2x%.2x%.2x%.2x", zo_round(a * 255), zo_round(r * 255), zo_round(g * 255), zo_round(b * 255))
+function ZO_ColorDef:ToARGBHex()
+    return self.FloatsToHex(self.r, self.g, self.b, self.a)
 end
 
 function ZO_ColorDef:Colorize(text)
@@ -137,4 +91,76 @@ end
 
 function ZO_ColorDef:ToHSV()
     return ConvertRGBToHSV(self.r, self.g, self.b)
+end
+
+-- Utility functions for ColorDef...
+-- Some of these functions are not fast, they were copied from an internal dev utility.
+-- RGBA values are values from 0 - 255
+-- Float values are values from 0 - 1
+-- Hex values are either 6 (RRGGBB) or 8 (AARRGGBB) character hexideciaml strings (e.g.: 0fc355, bb0fc355)
+
+local g_colorDef = ZO_ColorDef
+
+function ZO_ColorDef.RGBAToFloats(r, g, b, a)
+    return r / 255, g / 255, b / 255, a / 255
+end
+
+function ZO_ColorDef.FloatsToRGBA(r, g, b, a)
+    return zo_round(r * 255), zo_round(g * 255), zo_round(b * 255), zo_round(a * 255)
+end
+
+function ZO_ColorDef.RGBAToStrings(r, g, b, a)
+    return string.format("%d", r), string.format("%d", g), string.format("%d", b), string.format("%d", a)
+end
+
+function ZO_ColorDef.FloatsToStrings(r, g, b, a)
+    return string.format("%.3f", r), string.format("%.3f", g), string.format("%.3f", b), string.format("%.3f", a)
+end
+
+function ZO_ColorDef.RGBAToHex(r, g, b, a)
+    if a == 255 then
+        return string.format("%02x%02x%02x", r, g, b)
+    else
+        return string.format("%02x%02x%02x%02x", a, r, g, b)
+    end
+end
+
+function ZO_ColorDef.FloatsToHex(r, g, b, a)
+    r, g, b, a = g_colorDef.FloatsToRGBA(r, g, b, a)
+    return g_colorDef.RGBAToHex(r, g, b, a)
+end
+
+do
+    local function ConsumeRightmostChannel(value)
+        local channel = value % 256
+        value = zo_floor(value / 256)
+        return channel, value
+    end
+
+    function ZO_ColorDef.HexToRGBA(hexColor)
+        local hexColorLen = #hexColor
+        if hexColorLen >= 6 then
+            local value = tonumber(hexColor, 16)
+            if value then
+                local r, g, b, a
+                b, value = ConsumeRightmostChannel(value)
+                g, value = ConsumeRightmostChannel(value)
+                r, value = ConsumeRightmostChannel(value)
+                if hexColorLen >= 8 then
+                    a = ConsumeRightmostChannel(value)
+                else
+                    a = 255
+                end
+
+                return r, g, b, a
+            end
+        end
+    end
+
+    function ZO_ColorDef.HexToFloats(hexColor)
+        local r, g, b, a = g_colorDef.HexToRGBA(hexColor)
+        if r then
+            return g_colorDef.RGBAToFloats(r, g, b, a)
+        end
+    end
 end

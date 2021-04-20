@@ -336,7 +336,7 @@ end
 do
     local function AddChapterUpgradeEntry(list, chapterUpgradeData)
         local entryData = ZO_GamepadEntryData:New(chapterUpgradeData:GetFormattedName(), chapterUpgradeData:GetCollectibleIcon())
-        if chapterUpgradeData:IsNew() then
+        if chapterUpgradeData:IsNew() and not chapterUpgradeData:IsOwned() then
             entryData:SetNew(true)
         end
         entryData:SetDataSource(chapterUpgradeData)

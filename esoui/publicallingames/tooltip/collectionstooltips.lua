@@ -1,9 +1,20 @@
 do
     local DEPRECATED_ARG = nil
 
-    function ZO_Tooltip:LayoutCollectibleFromData(collectibleData, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
+    function ZO_Tooltip:LayoutCollectibleFromData(collectibleData, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason, actorCategory)
         if collectibleData then
-            self:LayoutCollectible(collectibleData:GetId(), DEPRECATED_ARG, collectibleData:GetName(), collectibleData:GetNickname(), collectibleData:IsPurchasable(), collectibleData:GetDescription(), collectibleData:GetHint(), DEPRECATED_ARG, collectibleData:GetCategoryType(), showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
+            local params =
+            {
+                collectibleId = collectibleData:GetId(),
+                showNickname = true,
+                showIfPurchasable = true,
+                showHint = true,
+                showVisualLayerInfo = showVisualLayerInfo,
+                cooldownSecondsRemaining = cooldownSecondsRemaining,
+                showBlockReason = showBlockReason,
+                actorCategory = actorCategory,
+            }
+            self:LayoutCollectibleWithParams(params)
         end
     end
 end
@@ -25,10 +36,14 @@ end
 do
     local PURCHASED_TEXT = GetString(SI_COLLECTIBLE_TOOLTIP_PURCHASABLE)
     local COOLDOWN_TEXT = GetString(SI_GAMEPAD_TOOLTIP_COOLDOWN_HEADER)
-    local QUALITY_NORMAL = nil
 
-    function ZO_Tooltip:LayoutCollectible(collectibleId, deprecatedCollectionName, collectibleName, collectibleNickname, isPurchasable, description, hint, deprecatedArg, categoryType, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
-        local isActive = IsCollectibleActive(collectibleId)
+    -- Required Params: collectibleId
+    -- Optional Params: showNickname, showIfPurchasable, showHint, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason, actorCategory
+    function ZO_Tooltip:LayoutCollectibleWithParams(params)
+        local collectibleId = params.collectibleId
+        local categoryType = GetCollectibleCategoryType(collectibleId)
+        local actorCategory = params.actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+        local isActive = IsCollectibleActive(collectibleId, actorCategory)
 
         --things added to the collection top section stack downward
         local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
@@ -41,12 +56,12 @@ do
         end
         local unlockState = GetCollectibleUnlockStateById(collectibleId)
         topSection:AddLine(GetString("SI_COLLECTIBLEUNLOCKSTATE", unlockState))
-            
-        if showVisualLayerInfo then
-            local isOutfitStylePresentInEffectivelyEquippedOutfit = categoryType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE and IsCollectiblePresentInEffectivelyEquippedOutfit(collectibleId)
+
+        if params.showVisualLayerInfo then
+            local isOutfitStylePresentInEffectivelyEquippedOutfit = categoryType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE and IsCollectiblePresentInEffectivelyEquippedOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER, collectibleId)
 
             if isActive or isOutfitStylePresentInEffectivelyEquippedOutfit then
-                local visualLayerHidden, highestPriorityVisualLayerThatIsShowing = WouldCollectibleBeHidden(collectibleId)
+                local visualLayerHidden, highestPriorityVisualLayerThatIsShowing = WouldCollectibleBeHidden(collectibleId, actorCategory)
                 if visualLayerHidden then
                     topSection:AddLine(ZO_SELECTED_TEXT:Colorize(GetHiddenByStringForVisualLayer(highestPriorityVisualLayerThatIsShowing)))
                 end
@@ -55,24 +70,27 @@ do
 
         self:AddSection(topSection)
 
-        local formattedName = ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleName)
-        self:AddLine(formattedName, QUALITY_NORMAL, self:GetStyle("title"))
-    
+        local formattedName = ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, GetCollectibleName(collectibleId))
+        self:AddLine(formattedName, self:GetStyle("title"))
+
         local headerSection = self:AcquireSection(self:GetStyle("bodyHeader"))
 
-        if collectibleNickname and collectibleNickname ~= "" then
-            formattedName = ZO_CachedStrFormat(SI_TOOLTIP_COLLECTIBLE_NICKNAME, collectibleNickname)
-            headerSection:AddLine(formattedName, QUALITY_NORMAL, self:GetStyle("bodyHeader"))
+        if params.showNickname then
+            local collectibleNickname = GetCollectibleNickname(collectibleId)
+            if collectibleNickname ~= "" then
+                formattedName = ZO_CachedStrFormat(SI_TOOLTIP_COLLECTIBLE_NICKNAME, collectibleNickname)
+                headerSection:AddLine(formattedName, self:GetStyle("bodyHeader"))
+            end
         end
 
         self:AddSection(headerSection)
 
-        if cooldownSecondsRemaining and cooldownSecondsRemaining > 0 then
+        if params.cooldownSecondsRemaining and params.cooldownSecondsRemaining > 0 then
             local cooldownSection = self:AcquireSection(self:GetStyle("collectionsStatsSection"))
             local cooldownPair = cooldownSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             cooldownPair:SetStat(COOLDOWN_TEXT, self:GetStyle("collectionsTopSection"))
         
-            local secondsRemainingString = ZO_FormatTimeLargestTwo(cooldownSecondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+            local secondsRemainingString = ZO_FormatTimeLargestTwo(params.cooldownSecondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
             cooldownPair:SetValue(secondsRemainingString, self:GetStyle("collectionsStatsValue"))
             cooldownSection:AddStatValuePair(cooldownPair)
             self:AddSection(cooldownSection)
@@ -80,8 +98,9 @@ do
 
         local bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
         local descriptionStyle = self:GetStyle("bodyDescription")
-
-        if description then
+        
+        local description = GetCollectibleDescription(collectibleId)
+        if description ~= "" then
             local formattedDescription = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, description)
             bodySection:AddLine(formattedDescription, descriptionStyle)
         end
@@ -94,13 +113,19 @@ do
             end
         end
 
-        if isPurchasable then 
+        if params.showIfPurchasable and IsCollectiblePurchasable(collectibleId) then
             bodySection:AddLine(PURCHASED_TEXT, descriptionStyle)
         end
 
-        if hint and hint ~= "" then
-            local formattedHint = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, hint)
-            bodySection:AddLine(formattedHint, descriptionStyle)
+        if params.showHint then
+            local hint = GetCollectibleHint(collectibleId)
+            if categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE and hint == "" then
+                hint = GetString(SI_HOUSING_BOOK_AVAILABLE_FOR_PURCHASE)
+            end
+            if hint ~= "" then
+                local formattedHint = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, hint)
+                bodySection:AddLine(formattedHint, descriptionStyle)
+            end
         end
 
         if categoryType == COLLECTIBLE_CATEGORY_TYPE_PERSONALITY then
@@ -144,15 +169,16 @@ do
             statValuePair:SetValue(applyCostString, descriptionStyle, self:GetStyle("currencyStatValuePairValue"))
             bodySection:AddStatValuePair(statValuePair)
         elseif  categoryType == COLLECTIBLE_CATEGORY_TYPE_POLYMORPH then
-            if isActive and showVisualLayerInfo then
+            if isActive and params.showVisualLayerInfo then
                 bodySection:AddLine(GetString(SI_POLYMORPH_CAN_HIDE_WARNING), descriptionStyle, self:GetStyle("collectionsPolymorphOverrideWarningStyle"))
             end
         elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT then
             local combinationId = GetCollectibleReferenceId(collectibleId)
             local baseCollectibleId = GetCombinationFirstNonFragmentCollectibleComponentId(combinationId)
             if baseCollectibleId ~= 0 then
-                local text = self:GetRequiredCollectibleText(baseCollectibleId)
-                if text ~= "" then
+                local baseCollectibleName = GetCollectibleName(baseCollectibleId)
+                if baseCollectibleName ~= "" then
+                    local text = zo_strformat(SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM, baseCollectibleName, GetCollectibleCategoryNameByCollectibleId(baseCollectibleId))
                     local colorStyle = IsCollectibleUnlocked(baseCollectibleId) and self:GetStyle("succeeded") or self:GetStyle("failed")
                     bodySection:AddLine(text, descriptionStyle, colorStyle)
                 end
@@ -184,7 +210,7 @@ do
 
         self:AddCollectibleTags(collectibleId)
 
-        if GetCurrentZoneHouseId() ~= 0 and IsCollectibleCategoryPlaceableFurniture(categoryType) then
+        if IsCollectibleCategoryPlaceableFurniture(categoryType) then
             local furnishingLimitTypeSection = self:AcquireSection(self:GetStyle("furnishingLimitTypeSection"))
             furnishingLimitTypeSection:AddLine(GetString(SI_TOOLTIP_FURNISHING_LIMIT_TYPE), self:GetStyle("furnishingLimitTypeTitle"))
 
@@ -199,7 +225,7 @@ do
 
         if failsRestriction then
             bodySection:AddLine(GetString(SI_COLLECTIBLE_TOOLTIP_NOT_USABLE_BY_CHARACTER), descriptionStyle, self:GetStyle("failed"))
-        elseif showBlockReason then
+        elseif params.showBlockReason then
             local usageBlockReason = GetCollectibleBlockReason(collectibleId)
             if usageBlockReason ~= COLLECTIBLE_USAGE_BLOCK_REASON_NOT_BLOCKED then
                 local formattedBlockReason = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", usageBlockReason))
@@ -211,6 +237,17 @@ do
     end
 end
 
+function ZO_Tooltip:LayoutSetDefaultCollectibleFromData(setDefaultCollectibleData, actorCategory)
+    local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
+    topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", setDefaultCollectibleData:GetCategoryTypeToSetDefault()))
+    self:AddSection(topSection)
+
+    self:AddLine(setDefaultCollectibleData:GetName(), self:GetStyle("title"))
+
+    local bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
+    bodySection:AddLine(setDefaultCollectibleData:GetDescription(actorCategory), self:GetStyle("bodyDescription"))
+    self:AddSection(bodySection)
+end
 
 function ZO_Tooltip:AddCollectibleTags(collectibleId)
     local numTags = GetNumCollectibleTags(collectibleId)

@@ -1,0 +1,76 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TimedActivityReward_Gamepad" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
+
+            <OnInitialized>
+                self.amountLabel = self:GetNamedChild("Amount")
+                self.iconTexture = self:GetNamedChild("Icon")
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Amount" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="LEFT" />
+                </Label>
+
+                <Texture name="$(parent)Icon">
+                    <Anchor point="LEFT" relativeTo="$(parent)Amount" relativePoint="RIGHT" offsetX="2" />
+                    <Dimensions x="32" y="32" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_TimedActivityRow_Gamepad" virtual="true">
+            <Dimensions y="ZO_TIMED_ACTIVITY_DATA_ROW_HEIGHT_GAMEPAD" />
+
+            <OnInitialized>
+                ZO_TimedActivityRow_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad45">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="10" />
+                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="10" />
+                </Label>
+
+                <Label name="$(parent)RewardHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE" text="SI_TIMED_ACTIVITIES_REWARD_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="8" />
+                </Label>
+
+                <Control name="$(parent)RewardContainer">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RewardHeader" relativePoint="BOTTOMRIGHT" offsetX="15" />
+                    <Anchor point="RIGHT" offsetX="-10" constrains="X" />
+                </Control>
+
+                <StatusBar name="$(parent)ProgressBar" inherits="ZO_GamepadArrowProgressBarWithBGMedium">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RewardHeader" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)RewardContainer" constrains="X" />
+                </StatusBar>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_TimedActivitiesTopLevel_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_TimedActivities_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Activities" inherits="ZO_AnchoredToQuadrant_2_3_Background">
+                    <Controls>
+                        <Label name="$(parent)TimeRemainingHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadBold34" modifyTextType="UPPERCASE" text="SI_TIMED_ACTIVITIES_ACTIVITY_TIME_REMAINING_HEADER">
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="30" offsetY="100" />
+                        </Label>
+
+                        <Label name="$(parent)TimeRemaining" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_VALUE" font="ZoFontGamepad42">
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-40" offsetY="100" />
+                        </Label>
+
+                        <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
+                            <Anchor point="TOPLEFT" offsetX="20" offsetY="124" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-15" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

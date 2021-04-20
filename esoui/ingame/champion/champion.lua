@@ -161,7 +161,7 @@ function ChampionPerks:Initialize(control)
         SharedStateChangeCallback(oldState, newState)
         if newState == SCENE_SHOWING then
             DIRECTIONAL_INPUT:Activate(self, control)
-        elseif newState == SCENE_HIDDEN then
+        elseif newState == SCENE_HIDING then
             DIRECTIONAL_INPUT:Deactivate(self)
             self.gamepadStarTooltip.scrollTooltip:ClearLines()
             self.gamepadCursor:UpdateVisibility()
@@ -763,7 +763,12 @@ function ChampionPerks:AddKeybindStrips()
     end
 end
 
-function ChampionPerks:RefreshKeybinds()
+function ChampionPerks:RefreshKeybinds()   
+    --If we don't have a keybind strip id we shouldn't be manipulating the keybind strip, so just return early
+    if not self.keybindStripId then
+        return
+    end
+
     local nextState
     if GAMEPAD_CHAMPION_QUICK_MENU:IsShowing() then
         nextState = KEYBIND_STATES.QUICK_MENU
@@ -1852,7 +1857,7 @@ function ChampionPerks:UpdateAnimations(frameDeltaSecs)
                 
                  self.animationVisualInfo = 
                  {
-                    glowAlpha =
+                    constellationZoomedInBackgroundAlpha =
                     {
                         fluxMin = 0.6,
                         fluxMax = 1.0,
@@ -2079,7 +2084,7 @@ local RING_ANCHOR_VISUALS =
         {
             base = 0.5
         },
-        constellationGlowAlpha =
+        constellationZoomedInBackgroundAlpha =
         {
             fluxMin = 0.0,
             fluxMax = 0.1,
@@ -2115,7 +2120,7 @@ local RING_ANCHOR_VISUALS =
             fluxMax = 0.2,
             fluxPeriodSeconds = 3,
         },
-        constellationGlowAlpha =
+        constellationZoomedInBackgroundAlpha =
         {
             base = 0.7,
         },
@@ -2130,7 +2135,7 @@ local RING_ANCHOR_VISUALS =
         {
             base = 0,
         },
-        constellationGlowAlpha =
+        constellationZoomedInBackgroundAlpha =
         {
             base = 0,
         },
@@ -2149,7 +2154,7 @@ local RING_ANCHOR_VISUALS =
             fluxMax = 0.3,
             fluxPeriodSeconds = 6,
         },
-        constellationGlowAlpha =
+        constellationZoomedInBackgroundAlpha =
         {
             base = 0.7,
         },
@@ -2168,7 +2173,7 @@ local RING_ANCHOR_VISUALS =
             fluxMax = 0.2,
             fluxPeriodSeconds = 3,
         },
-        constellationGlowAlpha =
+        constellationZoomedInBackgroundAlpha =
         {
             base = 0.7,
         },

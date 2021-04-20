@@ -50,6 +50,7 @@ function PregameInitialScreen_Gamepad:Initialize(control)
             self.fadeMode = nil
             self.esoAnimatedBackgroundAnimation:PlayInstantlyToStart()
             self.pressTextAnimation:PlayInstantlyToStart()
+            self.pressAnyPromptFadingIn = false
 
             KEYBIND_STRIP:RemoveDefaultExit()
             self.currentKeybindStripDescriptor = self.pressAnyKeybindsDescriptor
@@ -69,6 +70,8 @@ function PregameInitialScreen_Gamepad:Initialize(control)
             PregameStateManager_ClearError()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
+            self.continueDesired = false
+            self.continueAllowed = false
         end
     end)
 end
@@ -213,20 +216,30 @@ end
 
 function PregameInitialScreen_Gamepad:ContinueFunction()
     if self.continueAllowed then
+        WriteToInterfaceLog(string.format("PregameInitialScreen_Gamepad:ContinueFunction Continue allowed. Fade mode: %s", self.fadeMode or "nil"))
         --clear out existing errors
         if not self:IsShowingVerificationError() then
             PREGAME_INITIAL_SCREEN_GAMEPAD:ClearError()
             self.pressTextAnimation:PlayFromEnd()
         end
 
-        --remove keybindings and message to prevent spamming
         if IsConsoleUI() and not ZO_IsForceConsoleOrHeronFlow() then
-            PregameSelectProfile()
+            if not PregameHasProfileSelected() then
+                WriteToInterfaceLog(string.format("PregameInitialScreen_Gamepad:ContinueFunction Selecting profile"))
+                PregameSelectProfile()
+            else
+                -- If we already have a profile selected, we won't get an event callback from calling PregameSelectProfile
+                -- but we also don't need to wait and can just proceed
+                WriteToInterfaceLog(string.format("PregameInitialScreen_Gamepad:ContinueFunction Profile already selected"))
+                self:OnProfileLoginSuccess()
+            end
         else
             self:OnProfileLoginSuccess()
         end
         self.continueAllowed = false
+        self.continueDesired = false
     else
+        WriteToInterfaceLog(string.format("PregameInitialScreen_Gamepad:ContinueFunction Unable to continue at this time. Fade mode: %s", self.fadeMode or "nil"))
         if self.pressAnyPromptFadingIn then
             self.continueDesired = true
         end
@@ -234,7 +247,8 @@ function PregameInitialScreen_Gamepad:ContinueFunction()
 end
 
 function PregameInitialScreen_Gamepad:FinishUp()
-    if self.fadeMode == LOGO_WAIT_FOR_BUTTON then
+    WriteToInterfaceLog(string.format("PregameInitialScreen_Gamepad:FinishUp Is ready to push start: %s", self:IsReadyToPushStart() and "true" or "false"))
+    if self:IsReadyToPushStart() then
         self.fadeMode = LOGO_FADING_OUT
         PlaySound(SOUNDS.CONSOLE_GAME_ENTER)
         self:Hide()
@@ -242,10 +256,12 @@ function PregameInitialScreen_Gamepad:FinishUp()
 end
 
 function PregameInitialScreen_Gamepad:RefreshScreen()
+    WriteToInterfaceLog(string.format("PregameInitialScreen_Gamepad:RefreshScreen Fade mode: %s", self.fadeMode or "nil"))
     if self.fadeMode == LOGO_WAIT_FOR_BUTTON then
         self:PlayPressAnyButtonAnimationFromStart()
     elseif self.fadeMode == LOGO_FADING_OUT then
-        self:PlayPressAnyButtonAnimationFromStart()
+        self.pressTextAnimation:PlayInstantlyToStart()
+        self.pressAnyPromptFadingIn = false
         self.fadeMode = LOGO_FADE_IN
         self.esoAnimatedBackgroundAnimation:PlayInstantlyToEnd()
     end
@@ -261,6 +277,7 @@ function PregameInitialScreen_Gamepad:ClearError()
 end
 
 function PregameInitialScreen_Gamepad:ShowError(errorTitle, errorMessage)
+    WriteToInterfaceLog(string.format("PregameInitialScreen_Gamepad:ShowError ErrorMessage: %s Fade mode: %s", errorMessage or "nil", self.fadeMode or "nil"))
     self:PerformDeferredInitialization()
     self:RefreshScreen()
 

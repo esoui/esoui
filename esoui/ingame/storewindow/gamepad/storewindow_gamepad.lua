@@ -223,9 +223,10 @@ function ZO_GamepadStoreManager:OnUpdatedSearchResults()
 end
 
 function ZO_GamepadStoreManager:OnStateChanged(oldState, newState)
-    if newState == SCENE_SHOWING then 
+    if newState == SCENE_SHOWING then
         self:OnShowing(self)
         self:InitializeStore()
+    elseif newState == SCENE_SHOWN then
         self:SetMode(self.deferredStartingMode or self.activeComponents[1]:GetStoreMode())
         self.deferredStartingMode = nil
         ZO_GamepadGenericHeader_Activate(self.header)
@@ -526,8 +527,6 @@ do
 end
 
 function ZO_GamepadStoreManager:UpdateRightTooltip(list, mode)
-    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
-
     local selectedData = list:GetTargetData()
 
     local itemLink = nil
@@ -541,17 +540,7 @@ function ZO_GamepadStoreManager:UpdateRightTooltip(list, mode)
         end
     end
 
-    if not itemLink then
-        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-        return
-    end
-
-    local equipType = GetItemLinkEquipType(itemLink)
-    local equipSlot = ZO_Character_GetEquipSlotForEquipType(equipType)
-
-    if equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, equipSlot) then 
-        ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, equipSlot)
-    else
+    if not (itemLink and ZO_LayoutItemLinkEquippedComparison(GAMEPAD_RIGHT_TOOLTIP, itemLink)) then
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     end
 end
@@ -594,7 +583,7 @@ function ZO_GamepadStoreManager:FailedRepairMessageBox(reason)
 end
 
 do
-    internalassert(CURT_MAX_VALUE == 10, "Check if new currency has a store failure")
+    internalassert(CURT_MAX_VALUE == 11, "Check if new currency has a store failure")
     local STORE_FAILURE_FOR_CURRENCY_TYPE =
     {
         [CURT_ALLIANCE_POINTS] = STORE_FAILURE_NOT_ENOUGH_ALLIANCE_POINTS,

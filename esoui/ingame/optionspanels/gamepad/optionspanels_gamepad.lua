@@ -24,6 +24,24 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_GRAPHICS_MODE_PS5,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_GRAPHICS_MODE_XBSS,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_GRAPHICS_MODE_XBSX,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_FULLSCREEN,
             header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
         },
@@ -148,6 +166,31 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_HIDE_POLYMORPH_HELM,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_STAMINA_UPGRADE,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_SPEED_UPGRADE,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_INVENTORY_UPGRADE,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_COMBAT,
             settingId = COMBAT_SETTING_MONSTER_TELLS_ENABLED,
             header = SI_AUDIO_OPTIONS_COMBAT,
@@ -199,29 +242,9 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_HIDE_POLYMORPH_HELM,
-            header = SI_GAMEPLAY_OPTIONS_ITEMS,
-        },
-        {
-            panel = SETTING_PANEL_GAMEPLAY,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_STAMINA_UPGRADE,
-        },
-        {
-            panel = SETTING_PANEL_GAMEPLAY,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_SPEED_UPGRADE,
-        },
-        {
-            panel = SETTING_PANEL_GAMEPLAY,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_INVENTORY_UPGRADE,
-        },
-        {
-            panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_LOOT,
             settingId = LOOT_SETTING_AOE_LOOT,
+            header = SI_GAMEPLAY_OPTIONS_ITEMS,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
@@ -263,6 +286,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_TUTORIAL,
             settingId = OPTIONS_CUSTOM_SETTING_RESET_TUTORIALS,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_ALLOW_COMPANION_AUTO_ULTIMATE,
         },
     },
     [SETTING_PANEL_AUDIO] =
@@ -551,6 +579,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_INTERFACE,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_COMPASS_ACTIVE_QUESTS,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_COMPASS_COMPANION,
         },
         {
             panel = SETTING_PANEL_INTERFACE,
@@ -849,6 +882,18 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_COMBAT,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_ACTION_BAR,
+            header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_ACTION_BAR_TIMERS,
+            header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_ACTION_BAR_BACK_ROW,
             header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
         },
         {

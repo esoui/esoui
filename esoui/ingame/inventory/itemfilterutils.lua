@@ -44,6 +44,12 @@ local ITEM_TYPE_DISPLAY_CATEGORY_ICONS =
         down = "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_down.dds",
         over = "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_over.dds",
     },
+    [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] =
+    {
+        up = "EsoUI/Art/Inventory/inventory_tabIcon_companion_up.dds",
+        down = "EsoUI/Art/Inventory/inventory_tabIcon_companion_down.dds",
+        over = "EsoUI/Art/Inventory/inventory_tabIcon_companion_over.dds",
+    },
     [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] =
     {
         up = "EsoUI/Art/Inventory/inventory_tabIcon_misc_up.dds",
@@ -699,6 +705,13 @@ local ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES =
     {
         ITEMTYPE_ARMOR,
     },
+    [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] =
+    {
+        ITEM_TYPE_DISPLAY_CATEGORY_ALL,
+        ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,
+        ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
+        ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
+    },
     [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] =
     {
         ITEMTYPE_FOOD,
@@ -1019,6 +1032,7 @@ local ITEM_TYPE_DISPLAY_CATEGORY_FILTER_INFO_TYPE =
     [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = FILTER_INFO_TYPE_CONSUMABLE_TYPE,
     [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY,
     [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = FILTER_INFO_TYPE_SPECIALIZED_ITEM_TYPE,
+    [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY,
     [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = FILTER_INFO_TYPE_MISCELLANEOUS_TYPE,
     [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY,
     [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY,
@@ -1099,6 +1113,13 @@ local ITEM_TYPE_DISPLAY_CATEGORY_SUBCATEGORY_TYPES =
         SPECIALIZED_ITEMTYPE_FURNISHING_SEATING,
         SPECIALIZED_ITEMTYPE_FURNISHING_CRAFTING_STATION,
         SPECIALIZED_ITEMTYPE_FURNISHING_TARGET_DUMMY,
+    },
+    [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] =
+    {
+        ITEM_TYPE_DISPLAY_CATEGORY_ALL,
+        ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,
+        ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
+        ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] =
     {
@@ -1472,6 +1493,12 @@ function ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, 
         return true
     end
 
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_COMPANION then
+        return ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeSubCategory)
+    elseif slot.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+        return false
+    end
+
     if not ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeDisplayCategory) then
         return false
     end
@@ -1526,6 +1553,10 @@ end
 function ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeDisplayCategory)
     if slot.isJunk then
         return itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_JUNK
+    end
+
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_COMPANION then
+        return slot.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION
     end
 
     return ZO_ItemFilterUtils.IsFilterDataInItemTypeDisplayCategory(slot.filterData, itemTypeDisplayCategory)

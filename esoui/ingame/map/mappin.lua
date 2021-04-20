@@ -96,6 +96,7 @@ do
         [MAP_PIN_TYPE_PLAYER_WAYPOINT]                              = { level = 160, minSize = 32, texture = "EsoUI/Art/MapPins/UI_Worldmap_pin_customDestination.dds" },
         [MAP_PIN_TYPE_GROUP_LEADER]                                 = { level = 151, size = 32, texture = GetGroupPinTexture },
         [MAP_PIN_TYPE_GROUP]                                        = { level = 150, size = 32, texture = GetGroupPinTexture },
+        [MAP_PIN_TYPE_ACTIVE_COMPANION]                             = { level = 150, size = 32, texture = "EsoUI/Art/MapPins/activeCompanion_pin.dds" },
         [MAP_PIN_TYPE_DRAGON_COMBAT_HEALTHY]                        = { level = 147, size = 64, texture = "EsoUI/Art/MapPins/Dragon_Fly_Combat.dds", isAnimated = true, framesWide = 16, framesHigh = 1, framesPerSecond = 12 },
         [MAP_PIN_TYPE_DRAGON_COMBAT_WEAK]                           = { level = 147, size = 64, texture = "EsoUI/Art/MapPins/Dragon_Fly_Combat_Damaged.dds", isAnimated = true, framesWide = 16, framesHigh = 1, framesPerSecond = 12 },
         [MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY]                          = { level = 147, size = 64, texture = "EsoUI/Art/MapPins/Dragon_Fly.dds" },
@@ -299,6 +300,7 @@ ZO_MapPin.UNIT_PIN_TYPES =
     [MAP_PIN_TYPE_PLAYER] = true,
     [MAP_PIN_TYPE_GROUP] = true,
     [MAP_PIN_TYPE_GROUP_LEADER] = true,
+    [MAP_PIN_TYPE_ACTIVE_COMPANION] = true,
 }
 
 ZO_MapPin.GROUP_PIN_TYPES =
@@ -852,6 +854,15 @@ do
             categoryId = ZO_MapPin.PIN_ORDERS.PLAYERS,
             entryName = GetUnitNameFromPin,
         },
+        COMPANION_PIN =
+        {
+            creator = function(pin)
+                ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION):AppendUnitName(pin:GetUnitTag())
+            end,
+            tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION,
+            categoryId = ZO_MapPin.PIN_ORDERS.PLAYERS,
+            entryName = GetUnitNameFromPin,
+        },
         QUEST_CONDITION =
         {
             creator = function(pin)
@@ -1193,6 +1204,7 @@ do
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_ALDMERI]      =   SHARED_TOOLTIP_CREATORS.DAEDRIC_ARTIFACT,
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_EBONHEART]    =   SHARED_TOOLTIP_CREATORS.DAEDRIC_ARTIFACT,
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_DAGGERFALL]   =   SHARED_TOOLTIP_CREATORS.DAEDRIC_ARTIFACT,
+        [MAP_PIN_TYPE_ACTIVE_COMPANION]                             =   SHARED_TOOLTIP_CREATORS.COMPANION_PIN,
     }
 end
 
@@ -2024,6 +2036,10 @@ end
 
 function ZO_MapPin:IsAntiquityDigSitePin()
    return self.m_PinType == MAP_PIN_TYPE_ANTIQUITY_DIG_SITE or self.m_PinType == MAP_PIN_TYPE_TRACKED_ANTIQUITY_DIG_SITE
+end
+
+function ZO_MapPin:IsCompanion()
+    return self.m_PinType == MAP_PIN_TYPE_ACTIVE_COMPANION
 end
 
 function ZO_MapPin:IsZoneStory()

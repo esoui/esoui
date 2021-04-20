@@ -24,11 +24,12 @@ local MENU_MAIN_ENTRIES = ZO_MENU_MAIN_ENTRIES
 local MENU_CROWN_STORE_ENTRIES =
 {
     CROWN_STORE         = 1,
-    DAILY_LOGIN_REWARDS = 2,
-    CROWN_CRATES        = 3,
-    CHAPTERS            = 4,
-    GIFT_INVENTORY      = 5,
-    REDEEM_CODE         = 6,
+    ENDEAVOR_SEAL_STORE = 2,
+    DAILY_LOGIN_REWARDS = 3,
+    CROWN_CRATES        = 4,
+    CHAPTERS            = 5,
+    GIFT_INVENTORY      = 6,
+    REDEEM_CODE         = 7,
 }
 local MENU_COLLECTIONS_ENTRIES =
 {
@@ -84,6 +85,13 @@ local MENU_ENTRY_DATA =
                 sceneGroup = "gamepad_market_scenegroup",
                 name = GetString(SI_GAMEPAD_MAIN_MENU_CROWN_STORE_ENTRY),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_PlayerMenu_icon_store.dds",
+            },
+            [MENU_CROWN_STORE_ENTRIES.ENDEAVOR_SEAL_STORE] =
+            {
+                scene = "gamepad_endeavor_seal_market_pre_scene",
+                sceneGroup = "gamepad_market_scenegroup",
+                name = GetString(SI_GAMEPAD_MAIN_MENU_ENDEAVOR_SEAL_MARKET_ENTRY),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_PlayerMenu_icon_sealStore.dds",
             },
             [MENU_CROWN_STORE_ENTRIES.DAILY_LOGIN_REWARDS] =
             {
@@ -234,7 +242,7 @@ local MENU_ENTRY_DATA =
             return GetAvailableSkillPoints() > 0
         end,
         isNewCallback =  function()
-            return SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER:AreAnySkillLinesOrAbilitiesNew()
+            return SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER:AreAnyPlayerSkillLinesOrAbilitiesNew()
         end,
     },
     [MENU_MAIN_ENTRIES.CHAMPION] =
@@ -616,7 +624,7 @@ do
         balanceLabel:SetText(GetString(SI_GAMEPAD_MAIN_MENU_MARKET_BALANCE_TITLE))
 
         local remainingCrownsLabel = control:GetNamedChild("RemainingCrowns")
-        local currencyString = zo_strformat(SI_NUMBER_FORMAT, GetPlayerCrowns())
+        local currencyString = zo_strformat(SI_NUMBER_FORMAT, GetPlayerMarketCurrency(MKCT_CROWNS))
         remainingCrownsLabel:SetText(currencyString)
 
         local color = data:GetNameColor(selected)

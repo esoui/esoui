@@ -253,7 +253,7 @@ function ZO_CrownCratesCard:Initialize(control, owner)
     local function ActivateCollectibleCallback()
         if not self.activateCollectibleAreaControl:IsHidden() then
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.rewardReferenceDataId)
-            collectibleData:Use()
+            collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
         end
     end
     self.activateCollectibleKeybindControl:SetCallback(ActivateCollectibleCallback)
@@ -418,7 +418,7 @@ function ZO_CrownCratesCard:ApplyStyle(style)
     self.activateCollectibleKeybindControl:SetupStyle(style.activateCollectibleKeybindStyle)
     --Switching between upper and title case requires setting the string again
     self.activateCollectibleKeybindControl:SetText(GetString(SI_COLLECTIBLE_ACTION_SET_ACTIVE))
-    self.formattedGemIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWN_GEMS), "100%")
+    self.formattedGemIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(GetCurrencyTypeFromMarketCurrencyType(MKCT_CROWN_GEMS), "100%")
     self.gemGainFonts = style.gemGainFonts
 end
 
@@ -1166,8 +1166,8 @@ do
     function ZO_CrownCratesCard:CanActivateCollectible()
         if self.rewardProductType == MARKET_PRODUCT_TYPE_COLLECTIBLE and not self:IsGemified() then
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.rewardReferenceDataId)
-            if collectibleData:IsUsable() and collectibleData:IsValidForPlayer() and not collectibleData:IsBlocked() then
-                return not (collectibleData:IsActive() or DISALLOWED_EQUIPPABLE_COLLECTIBLE_TYPES[collectibleData:GetCategoryType()])
+            if collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) and collectibleData:IsValidForPlayer() and not collectibleData:IsBlocked() then
+                return not (collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) or DISALLOWED_EQUIPPABLE_COLLECTIBLE_TYPES[collectibleData:GetCategoryType()])
             end
         end
         return false
@@ -1284,7 +1284,7 @@ function ZO_CrownCratesPackOpening:InitializeKeybinds()
             local card = self:GetSelectedCard()
             if card and card:IsRevealed() and card:CanActivateCollectible() then
                 local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(card.rewardReferenceDataId)
-                collectibleData:Use()
+                collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
             end
         end,
         ethereal = true,

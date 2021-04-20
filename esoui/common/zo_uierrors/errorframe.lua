@@ -15,7 +15,8 @@ function ZO_ErrorFrame:Initialize(control)
     self.textEditControl = control:GetNamedChild("TextEdit")
     self.titleControl = control:GetNamedChild("Title")
     self.dismissControl = control:GetNamedChild("Dismiss")
-    self.dismissIcon = self.dismissControl:GetNamedChild("GamepadIcon")
+    self.dismissKeybind = self.dismissControl:GetNamedChild("Keybind")
+    self.dismissKeybind:SetKeybind("UI_SHORTCUT_PRIMARY")
     self.moreInfoButton = control:GetNamedChild("MoreInfo")
     ZO_CheckButton_SetToggleFunction(self.moreInfoButton, function()
         self.moreInfo = not self.moreInfo
@@ -35,30 +36,15 @@ function ZO_ErrorFrame:Initialize(control)
     EVENT_MANAGER:RegisterForEvent("ErrorFrame", EVENT_LUA_ERROR, function(eventCode, ...) self:OnUIError(...) end)
 end
 
-local KEYBOARD_STYLES = {
-                            textEditTemplate = "ZO_ErrorFrameTextEdit_Keyboard_Template",
-                            titleTemplate = "ZO_ErrorFrameTitle_Keyboard_Template",
-                            dismissTemplate = "ZO_ErrorFrameDismiss_Keyboard_Template",
-                            hideDismissIcon = true,
-                        }
-
-local GAMEPAD_STYLES =  {
-                            textEditTemplate = "ZO_ErrorFrameTextEdit_Gamepad_Template",
-                            titleTemplate = "ZO_ErrorFrameTitle_Gamepad_Template",
-                            dismissTemplate = "ZO_ErrorFrameDismiss_Gamepad_Template",
-                            hideDismissIcon = false,
-                        }
-
-function ZO_ErrorFrame:UpdatePlatformStyles(styleTable)
-    ApplyTemplateToControl(self.textEditControl, styleTable.textEditTemplate)
-    ApplyTemplateToControl(self.titleControl, styleTable.titleTemplate)
-    ApplyTemplateToControl(self.dismissControl, styleTable.dismissTemplate)
-
-    self.dismissIcon:SetHidden(styleTable.hideDismissIcon)
+function ZO_ErrorFrame:UpdatePlatformStyles()
+    ApplyTemplateToControl(self.textEditControl, ZO_GetPlatformTemplate("ZO_ErrorFrameTextEdit"))
+    ApplyTemplateToControl(self.titleControl, ZO_GetPlatformTemplate("ZO_ErrorFrameTitle"))
+    ApplyTemplateToControl(self.dismissControl, ZO_GetPlatformTemplate("ZO_ErrorFrameDismiss"))
+    ApplyTemplateToControl(self.dismissKeybind, ZO_GetPlatformTemplate("ZO_KeybindButton"))
 end
 
 function ZO_ErrorFrame:InitializePlatformStyles()
-    ZO_PlatformStyle:New(function(...) self:UpdatePlatformStyles(...) end, KEYBOARD_STYLES, GAMEPAD_STYLES)
+    ZO_PlatformStyle:New(function(...) self:UpdatePlatformStyles(...) end)
 end
 
 function ZO_ErrorFrame:GetNextQueuedError()

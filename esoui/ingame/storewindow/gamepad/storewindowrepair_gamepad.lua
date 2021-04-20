@@ -24,7 +24,8 @@ end
 function ZO_GamepadStoreRepair:RegisterEvents()
     local OnInventoryUpdated = function(eventId, bagId, slotId, isNewItem, soundCategory, reason)
         if reason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then
-            self.list:UpdateList()
+            self.isCurrentSelectionDirty = true
+            self:Refresh()
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         end
     end
@@ -49,7 +50,8 @@ end
 
 function ZO_GamepadStoreRepair:InitializeKeybindStrip()
     -- Repair screen keybind
-    self.keybindStripDescriptor = {
+    self.keybindStripDescriptor =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         STORE_WINDOW_GAMEPAD:GetRepairAllKeybind()
     }

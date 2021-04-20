@@ -1,4 +1,30 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_KeyboardAssignableActionBarNewIndicator_Idle" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation duration="1000" startAlpha="0.75" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInOutZeroToOneToZero(progress)
+                    </EasingFunction>
+                    <OnPlay>
+                        animatingControl:SetHidden(false)
+                    </OnPlay>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_KeyboardAssignableActionBarNewIndicator_Fadeout">
+            <Animations>
+                <AlphaAnimation duration="400" endAlpha="0">
+                    <OnPlay>
+                        self:SetStartAlpha(animatingControl:GetAlpha())
+                    </OnPlay>
+                    <OnStop>
+                        animatingControl:SetHidden(true)
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
     <Controls>
         <Control name="ZO_KeyboardAssignableActionBar" virtual="true" allowBringToTop="false" layer="OVERLAY" level="1">
             <Dimensions x="483" y="70"/>
@@ -98,6 +124,24 @@
                     <Anchor point="CENTER" />
                     <Dimensions x="47" y="47" />
                 </Control>
+
+                <Texture name="$(parent)NewIndicator" hidden="true" layer="OVERLAY" textureFile="EsoUI/Art/ActionBar/abilityFrame64_glow.dds">
+                    <!-- Not currently affected by the flipcard animation. As
+                        this is only used by the companions system, this isn't an
+                        issue, but if this were expanded to a system with multiple
+                        bars this should be revisited. -->
+                    <Anchor point="CENTER" />
+                    <Dimensions x="64" y="64" />
+                </Texture>
+
+                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Progression/progression_crafting_locked_up.dds" level="2">
+                    <!-- Not currently affected by the flipcard animation. As
+                        this is only used by the companions system, this isn't an
+                        issue, but if this were expanded to a system with multiple
+                        bars this should be revisited. -->
+                    <Anchor point="CENTER" />
+                    <Dimensions x="40" y="40" />
+                </Texture>
 
                 <Texture name="$(parent)Icon" inherits="ZO_AssignableActionButton_Keyboard_FlipCardControl" level="1" />
 

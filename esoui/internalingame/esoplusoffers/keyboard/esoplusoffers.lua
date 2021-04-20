@@ -8,6 +8,11 @@ end
 function ZO_EsoPlusOffers_Keyboard:Initialize(control, sceneName)
     ZO_Market_Keyboard.Initialize(self, control, sceneName)
 
+    self:SetDisplayGroup(MARKET_DISPLAY_GROUP_CROWN_STORE)
+    self:SetFeaturedMarketProductFiltersMask(MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS)
+    self:SetMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS})
+    self:SetNewMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_NEW + MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS})
+    self:SetShownCurrencyTypeBalances(MKCT_CROWNS, MKCT_CROWN_GEMS, MKCT_ENDEAVOR_SEALS)
     self:InitializeEsoPlusCategory()
 end
 
@@ -67,10 +72,12 @@ function ZO_EsoPlusOffers_Keyboard:AddTopLevelCategories()
 
     local esoPlusOfferSubcategories = {}
     local hasAnyNewEsoPlusProducts = false
-    local numMarketCategories = GetNumMarketProductCategories(MARKET_DISPLAY_GROUP_CROWN_STORE)
+    local displayGroup = self:GetDisplayGroup()
+    local numMarketCategories = GetNumMarketProductCategories(displayGroup)
     for categoryIndex = 1, numMarketCategories do
-        if self:DoesCategoryOrSubcategoriesContainEsoPlusMarketProducts(categoryIndex) then
-            local containsNewMarketProducts = DoesMarketProductCategoryOrSubcategoriesContainNewEsoPlusMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex)
+        local NO_SUBCATEGORY = nil
+        if self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.marketProductFilterTypes) then
+            local containsNewMarketProducts = self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
             hasAnyNewEsoPlusProducts = hasAnyNewEsoPlusProducts or containsNewMarketProducts
             local categoryInfo =
             {
@@ -97,7 +104,7 @@ function ZO_EsoPlusOffers_Keyboard:AddTopLevelCategories()
         -- subcategories
         for index, categoryInfo in ipairs(esoPlusOfferSubcategories) do
             local categoryIndex = categoryInfo.categoryIndex
-            local categoryName = GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex)
+            local categoryName = GetMarketProductCategoryInfo(displayGroup, categoryIndex)
             self:AddCustomSubcategory(esoPlusOffersNode, categoryIndex, categoryName, ZO_MARKET_CATEGORY_TYPE_ESO_PLUS_OFFERS, categoryInfo.containsNewMarketProducts)
         end
     end
@@ -185,50 +192,6 @@ function ZO_EsoPlusOffers_Keyboard:HideCustomTopLevelCategories()
     self.subscriptionPage:SetHidden(true)
 end
 
-function ZO_EsoPlusOffers_Keyboard:ShouldAddMarketProductPresentation(id, presentationIndex)
-    local marketCurrencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = GetMarketProductPricingByPresentation(id, presentationIndex)
-    return esoPlusCost ~= nil
-end
-
-function ZO_EsoPlusOffers_Keyboard:ShouldAddSearchResult(categoryIndex, subcategoryIndex, productIndex)
-    -- if we wouldn't add it to our view normally, don't add it to our search results
-    if DoesMarketProductCategoryOrSubcategoriesContainEsoPlusMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex) then
-        local id, presentationIndex = GetMarketProductPresentationIds(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex, productIndex)
-        return self:ShouldAddMarketProductPresentation(id, presentationIndex)
-    end
-
-    return false
-end
-
--- This function will append the ZO_MarketProductData it finds to the marketProductPresentations table as its output if it's not a duplicate
-function ZO_EsoPlusOffers_Keyboard:GetMarketProductPresentations(categoryIndex, subcategoryIndex, index, marketProductPresentations)
-    if index >= 1 then
-        if self:HasValidSearchString() then
-            if NonContiguousCount(self.searchResults) == 0 then
-                return
-            end
-
-            local effectiveSubcategoryIndex = subcategoryIndex or "root"
-            if not self.searchResults[categoryIndex][effectiveSubcategoryIndex][index] then
-                index = index - 1
-                return self:GetMarketProductPresentations(categoryIndex, subcategoryIndex, index, marketProductPresentations)
-            end
-        end
-
-        local id, presentationIndex = GetMarketProductPresentationIds(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex, index)
-        if self:ShouldAddMarketProductPresentation(id, presentationIndex) then
-            if not self.marketProductPresentationsIdMap[id] then
-                local productData = ZO_MarketProductData:New(id, presentationIndex)
-                table.insert(marketProductPresentations, productData)
-                self.marketProductPresentationsIdMap[id] = true
-            end
-        end
-
-        index = index - 1
-        return self:GetMarketProductPresentations(categoryIndex, subcategoryIndex, index, marketProductPresentations)
-    end
-end
-
 -- End ZO_Market_Keyboard overrides
 
 function ZO_EsoPlusOffers_Keyboard:BuildEsoPlusMarketProductList(data)
@@ -238,9 +201,9 @@ function ZO_EsoPlusOffers_Keyboard:BuildEsoPlusMarketProductList(data)
     self.marketProductPresentationsIdMap = {}
     if categoryIndex then
         self:GetCategoryMarketProductPresentations(categoryIndex, marketProductPresentations)
-        disableLTOGrouping = IsLTODisabledForMarketProductCategory(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex)
+        disableLTOGrouping = IsLTODisabledForMarketProductCategory(self:GetDisplayGroup(), categoryIndex)
     else -- no category index means this is the all subcategory
-        local numMarketCategories = GetNumMarketProductCategories(MARKET_DISPLAY_GROUP_CROWN_STORE)
+        local numMarketCategories = GetNumMarketProductCategories(self:GetDisplayGroup())
         for marketCategoryIndex = 1, numMarketCategories do
             if self:DoesCategoryOrSubcategoriesContainEsoPlusMarketProducts(marketCategoryIndex) then
                 self:GetCategoryMarketProductPresentations(marketCategoryIndex, marketProductPresentations)
@@ -252,22 +215,23 @@ function ZO_EsoPlusOffers_Keyboard:BuildEsoPlusMarketProductList(data)
 end
 
 function ZO_EsoPlusOffers_Keyboard:GetCategoryMarketProductPresentations(categoryIndex, marketProductPresentations)
-    local numSubcategories, numMarketProducts = select(2, GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex))
+    local displayGroup = self:GetDisplayGroup()
+    local numSubcategories, numMarketProducts = select(2, GetMarketProductCategoryInfo(displayGroup, categoryIndex))
     if not self:HasValidSearchString() or self.searchResults[categoryIndex]["root"] then
-        local NO_SUBCATEGORY_INDEX = nil
-        self:GetMarketProductPresentations(categoryIndex, NO_SUBCATEGORY_INDEX, numMarketProducts, marketProductPresentations)
+        local NO_SUBCATEGORY = nil
+        self:GetMarketProductPresentations(categoryIndex, NO_SUBCATEGORY, numMarketProducts, marketProductPresentations)
     end
 
     for subcategoryIndex = 1, numSubcategories do
         if self:DoesCategoryOrSubcategoriesContainEsoPlusMarketProducts(categoryIndex, subcategoryIndex) then
-            local numSubcategoryMarketProducts = select(2, GetMarketProductSubCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex))
+            local numSubcategoryMarketProducts = select(2, GetMarketProductSubCategoryInfo(displayGroup, categoryIndex, subcategoryIndex))
             self:GetMarketProductPresentations(categoryIndex, subcategoryIndex, numSubcategoryMarketProducts, marketProductPresentations)
         end
     end
 end
 
 function ZO_EsoPlusOffers_Keyboard:DoesCategoryOrSubcategoriesContainEsoPlusMarketProducts(categoryIndex, subcategoryIndex)
-    if DoesMarketProductCategoryOrSubcategoriesContainEsoPlusMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex) then
+    if self:DoesCategoryOrSubcategoriesContainFilteredProducts(self:GetDisplayGroup(), categoryIndex, subcategoryIndex, self.marketProductFilterTypes) then
         if self:HasValidSearchString() then
             local categoryResults = self.searchResults[categoryIndex]
             if categoryResults ~= nil then

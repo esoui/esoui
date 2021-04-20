@@ -15,7 +15,9 @@ function ZO_AntiquityLoreGamepad:InitializeControls(control)
     self.loreEntryControlData = {}
 
     ANTIQUITY_LORE_SCENE_GAMEPAD = ZO_Scene:New("gamepad_antiquity_lore", SCENE_MANAGER)
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_DO_NOT_CREATE_TAB_BAR, ZO_ACTIVATE_ON_SHOW, ANTIQUITY_LORE_SCENE_GAMEPAD)
+
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_DO_NOT_CREATE_TAB_BAR, ACTIVATE_ON_SHOW, ANTIQUITY_LORE_SCENE_GAMEPAD)
 
     self.fragment = ZO_SimpleSceneFragment:New(self.control)
     ZO_ANTIQUITY_LORE_GAMEPAD_FRAGMENT = self.fragment

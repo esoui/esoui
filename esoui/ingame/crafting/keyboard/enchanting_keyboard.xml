@@ -17,7 +17,7 @@
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)SkillInfo" inherits="ZO_SkillsSkillHeader">
+                <Control name="$(parent)SkillInfo" inherits="ZO_Skills_SkillLineInfo_Keyboard">
                     <Anchor point="TOPLEFT" offsetX="12" offsetY="5" />
                 </Control>
 

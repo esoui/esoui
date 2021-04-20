@@ -224,7 +224,7 @@ function ZO_GamepadGuildRosterManager:BuildOptionsList()
     end
     self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildLeaveGuildOption, SelectedIndexIsPlayerIndex)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption, ZO_SocialOptionsDialogGamepad.ShouldAddWhisperOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.ShouldAddInviteToGroupOptionAndIsSelectedDataLoggedIn)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.ShouldAddInviteToGroupOptionAndCanSelectedDataBeInvited)
 
     local function BuildTravelToGuildPlayerOption()
         if self.socialData.rankId ~= DEFAULT_INVITED_RANK then

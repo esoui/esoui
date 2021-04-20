@@ -78,3 +78,11 @@ STATS_OUTFIT_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     dynamicFramingConsumedHeight = 300,
     forcePreparePreview = false,
 })
+
+COMPANION_MENU_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = 200,
+    paddingRight = 950,
+    dynamicFramingConsumedWidth = 1050,
+    dynamicFramingConsumedHeight = 300,
+    forcePreparePreview = false,
+})

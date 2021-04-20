@@ -1,0 +1,30 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_Companion_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_Companion_Gamepad_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Scroll name="$(parent)Mask" override="true">
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)Header" override="true">
+                                            <Controls>
+                                                <Control name="$(parent)OutfitSelector" inherits="ZO_OutfitSelector_List_Header">
+                                                    <Anchor point="TOP" relativeTo="$(parent)DividerSimple" relativePoint="BOTTOM" offsetY="25" />
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

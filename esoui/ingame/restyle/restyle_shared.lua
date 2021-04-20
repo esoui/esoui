@@ -19,8 +19,11 @@ do
             icon = ZO_Restyle_GetEmptySlotTexture(restyleSlotData)
         end
 
+        local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleSlotData:GetRestyleMode())
+        local bagId = GetWornBagForGameplayActorCategory(actorCategory)
+
         if restyleSlotData:IsEquipment() then
-            ZO_Inventory_BindSlot(control, SLOT_TYPE_DYEABLE_EQUIPMENT, restyleSlotData:GetRestyleSlotType(), BAG_WORN)
+            ZO_Inventory_BindSlot(control, SLOT_TYPE_DYEABLE_EQUIPMENT, restyleSlotData:GetRestyleSlotType(), bagId)
         end
 
         control.restyleSlotData = restyleSlotData
@@ -70,6 +73,37 @@ do
             [OUTFIT_SLOT_WEAPON_STAFF_BACKUP] = "EsoUI/Art/Dye/outfitSlot_staff.dds",
             [OUTFIT_SLOT_WEAPON_BOW_BACKUP] = "EsoUI/Art/Dye/outfitSlot_bow.dds",
             [OUTFIT_SLOT_SHIELD_BACKUP] = "EsoUI/Art/Dye/outfitSlot_shield.dds",
+        },
+        [RESTYLE_MODE_COMPANION_EQUIPMENT] =
+        {
+            [EQUIP_SLOT_HEAD] = "EsoUI/Art/CharacterWindow/gearSlot_head.dds",
+            [EQUIP_SLOT_CHEST] = "EsoUI/Art/CharacterWindow/gearSlot_chest.dds",
+            [EQUIP_SLOT_SHOULDERS] = "EsoUI/Art/CharacterWindow/gearSlot_shoulders.dds",
+            [EQUIP_SLOT_OFF_HAND] = "EsoUI/Art/CharacterWindow/gearSlot_offHand.dds",
+            [EQUIP_SLOT_WAIST] = "EsoUI/Art/CharacterWindow/gearSlot_belt.dds",
+            [EQUIP_SLOT_LEGS] = "EsoUI/Art/CharacterWindow/gearSlot_legs.dds",
+            [EQUIP_SLOT_FEET] = "EsoUI/Art/CharacterWindow/gearSlot_feet.dds",
+            [EQUIP_SLOT_HAND] = "EsoUI/Art/CharacterWindow/gearSlot_hands.dds",
+        },
+        [RESTYLE_MODE_COMPANION_COLLECTIBLE] =
+        {
+            [COLLECTIBLE_CATEGORY_TYPE_COSTUME] = "EsoUI/Art/Dye/dye_costume.dds",
+        },
+        [RESTYLE_MODE_COMPANION_OUTFIT] =
+        {
+            [OUTFIT_SLOT_HEAD] = "EsoUI/Art/CharacterWindow/gearSlot_head.dds",
+            [OUTFIT_SLOT_CHEST] = "EsoUI/Art/CharacterWindow/gearSlot_chest.dds",
+            [OUTFIT_SLOT_SHOULDERS] = "EsoUI/Art/CharacterWindow/gearSlot_shoulders.dds",
+            [OUTFIT_SLOT_WAIST] = "EsoUI/Art/CharacterWindow/gearSlot_belt.dds",
+            [OUTFIT_SLOT_LEGS] = "EsoUI/Art/CharacterWindow/gearSlot_legs.dds",
+            [OUTFIT_SLOT_FEET] = "EsoUI/Art/CharacterWindow/gearSlot_feet.dds",
+            [OUTFIT_SLOT_HANDS] = "EsoUI/Art/CharacterWindow/gearSlot_hands.dds",
+            [OUTFIT_SLOT_WEAPON_MAIN_HAND] = "EsoUI/Art/Dye/outfitSlot_mainHand.dds",
+            [OUTFIT_SLOT_WEAPON_OFF_HAND] = "EsoUI/Art/Dye/outfitSlot_offHand.dds",
+            [OUTFIT_SLOT_WEAPON_TWO_HANDED] = "EsoUI/Art/Dye/outfitSlot_twoHanded.dds",
+            [OUTFIT_SLOT_WEAPON_STAFF] = "EsoUI/Art/Dye/outfitSlot_staff.dds",
+            [OUTFIT_SLOT_WEAPON_BOW] = "EsoUI/Art/Dye/outfitSlot_bow.dds",
+            [OUTFIT_SLOT_SHIELD] = "EsoUI/Art/Dye/outfitSlot_shield.dds",
         },
     }
 
@@ -182,13 +216,7 @@ end
 --This allows us to pass the slot data around easily and call the LuaToC apis without needing so many params
 --These object should do nothing more complicated than allow a throughway to APIs for a given set of slot parameters
 
-ZO_RestyleSlotData = ZO_Object:Subclass()
-
-function ZO_RestyleSlotData:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_RestyleSlotData = ZO_InitializingObject:Subclass()
 
 function ZO_RestyleSlotData:Copy(other)
     local object = ZO_Object.New(self)
@@ -259,7 +287,7 @@ function ZO_RestyleSlotData:AreDyeChannelsDyeable()
     if self:IsOutfitSlot() then
         local outfitSlotManipulator = ZO_OUTFIT_MANAGER:GetOutfitSlotManipulatorFromRestyleSlotData(self)
         local collectibleId = outfitSlotManipulator:GetPendingCollectibleId()
-        return AreDyeChannelsDyeableForOutfitSlotData(self.restyleSlotType, collectibleId)
+        return AreDyeChannelsDyeableForOutfitSlotData(outfitSlotManipulator.owner:GetActorCategory(), self.restyleSlotType, collectibleId)
     else
         return AreRestyleSlotDyeChannelsDyeable(self.restyleMode, self.restyleSetIndex, self.restyleSlotType)
     end
@@ -287,6 +315,7 @@ function ZO_RestyleSlotData:SetPendingDyes(primaryDyeId, secondaryDyeId, accentD
         end
     end
     SetPendingSlotDyes(self.restyleMode, self.restyleSetIndex, self.restyleSlotType, unpack(desiredDyes))
+    ApplyChangesToPreviewCollectionShown()
 end
 
 function ZO_RestyleSlotData:CleanPendingDyes()
@@ -332,22 +361,23 @@ function ZO_RestyleSlotData:ShouldBeHidden()
     local restyleSlotType = self.restyleSlotType
     if self:IsOutfitSlot() then
         if ZO_OUTFIT_MANAGER:IsOutfitSlotWeapon(restyleSlotType) then
-            return not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyEquipped(restyleSlotType)
+            local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleMode)
+            return not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyEquipped(restyleSlotType, actorCategory)
         end
     end
     return false
 end
 
 function ZO_RestyleSlotData:IsEquipment()
-    return self.restyleMode == RESTYLE_MODE_EQUIPMENT
+    return self.restyleMode == RESTYLE_MODE_EQUIPMENT or self.restyleMode == RESTYLE_MODE_COMPANION_EQUIPMENT
 end
 
 function ZO_RestyleSlotData:IsCollectible()
-    return self.restyleMode == RESTYLE_MODE_COLLECTIBLE
+    return self.restyleMode == RESTYLE_MODE_COLLECTIBLE or self.restyleMode == RESTYLE_MODE_COMPANION_COLLECTIBLE
 end
 
 function ZO_RestyleSlotData:IsOutfitSlot()
-    return self.restyleMode == RESTYLE_MODE_OUTFIT
+    return self.restyleMode == RESTYLE_MODE_OUTFIT or self.restyleMode == RESTYLE_MODE_COMPANION_OUTFIT
 end
 
 function ZO_RestyleSlotData:IsOutfitStyle()
@@ -405,6 +435,9 @@ do
         [RESTYLE_MODE_EQUIPMENT] = "SI_EQUIPSLOT",
         [RESTYLE_MODE_COLLECTIBLE] = "SI_COLLECTIBLECATEGORYTYPE",
         [RESTYLE_MODE_OUTFIT] = "SI_OUTFITSLOT",
+        [RESTYLE_MODE_COMPANION_EQUIPMENT] = "SI_EQUIPSLOT",
+        [RESTYLE_MODE_COMPANION_COLLECTIBLE] = "SI_COLLECTIBLECATEGORYTYPE",
+        [RESTYLE_MODE_COMPANION_OUTFIT] = "SI_OUTFITSLOT",
     }
 
     function ZO_RestyleSlotData:GetDefaultDescriptor()

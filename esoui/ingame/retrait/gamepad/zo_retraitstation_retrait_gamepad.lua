@@ -528,7 +528,7 @@ function ZO_Retrait_Inventory_Gamepad:Initialize(owner, control, ...)
                         end)
     self:SetCustomBestItemCategoryNameFunction(function(slotData)
                                                     if slotData.bagId == BAG_WORN then
-                                                        local equipSlot = ZO_Character_GetEquipSlotForEquipType(slotData.equipType)
+                                                        local equipSlot = GetItemComparisonEquipSlots(slotData.bagId, slotData.slotIndex)
                                                         local visualCategory = ZO_Character_GetEquipSlotVisualCategory(equipSlot)
                                                         slotData.bestItemCategoryName = zo_strformat(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM, GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory))
                                                     else

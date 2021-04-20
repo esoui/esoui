@@ -3,6 +3,7 @@ local QUEST_BULLET_ICON = "EsoUI/Art/Miscellaneous/Gamepad/gp_bullet.dds"
 local GROUP_LEADER_ICON = "EsoUI/Art/Compass/groupLeader.dds"
 local CURRENT_PLAYER_ICON = "EsoUI/Art/Icons/mapKey/mapKey_player.dds"
 local GROUP_MEMBER_ICON = "EsoUI/Art/Icons/mapKey/mapKey_groupMember.dds"
+local COMPANION_ICON = "EsoUI/Art/MapPins/activeCompanion_pin.dds"
 
 local TOOLTIP_MONEY_FORMAT
 
@@ -79,12 +80,15 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendUnitName(unitTag)
     local icon
     local isGrouped = IsUnitGrouped(unitTag)
     local isPlayer = unitTag == "player"
+    local isCompanion = unitTag == "companion"
     if isGrouped and IsUnitGroupLeader(unitTag) then
         icon = GROUP_LEADER_ICON
     elseif isPlayer then
         icon = CURRENT_PLAYER_ICON
     elseif isGrouped then
         icon = GROUP_MEMBER_ICON
+    elseif isCompanion then
+        icon = COMPANION_ICON
     end
 
     local colorStyle
@@ -94,7 +98,7 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendUnitName(unitTag)
         colorStyle =
         {
             fontColorType = INTERFACE_COLOR_TYPE_UNIT_REACTION_COLOR,
-            fontColorField = GetUnitReactionColor(unitTag),
+            fontColorField = GetUnitReactionColorType(unitTag),
         }
     end
 

@@ -199,6 +199,7 @@ end
 function DeathRecap:RefreshUnitFrameVisibility()
     if(UNIT_FRAMES) then
         UNIT_FRAMES:SetFrameHiddenForReason("reticleover", "deathRecap", not DEATH_RECAP_FRAGMENT:IsHidden())
+        UNIT_FRAMES:SetFrameHiddenForReason("companion", "deathRecap", not DEATH_RECAP_FRAGMENT:IsHidden())
         UNIT_FRAMES:SetGroupAndRaidFramesHiddenForReason("deathRecap", not DEATH_RECAP_FRAGMENT:IsHidden())
     end
 end

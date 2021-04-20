@@ -36,6 +36,8 @@ function ZO_BuffDebuff_ContainerObject:Initialize(control, buffControlPool, unit
     self.buffPool = self:CreateMetaPool(control:GetNamedChild("Container1"), buffControlPool)
     self.debuffPool = self:CreateMetaPool(control:GetNamedChild("Container2"), buffControlPool)
     self.fadeTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_BuffDebuff_FadeAnimation", control)
+    self.fadeTimeline:SetHandler("OnStop", function() self:RefreshContainerVisibility() end)
+    self.fadeTimeline:SetHandler("OnPlay", function() self:RefreshContainerVisibility() end)
 
     self.settings =
     {
@@ -130,8 +132,7 @@ function ZO_BuffDebuff_ContainerObject:Update()
 
     self.styleObject:UpdateContainer(self)
 
-    buffPool.container:SetHidden(not buffPool:HasActiveObjects())
-    debuffPool.container:SetHidden(not debuffPool:HasActiveObjects())
+    self:RefreshContainerVisibility()
     self.isDirty = false
 end
 
@@ -145,6 +146,12 @@ function ZO_BuffDebuff_ContainerObject:UpdateContextualFading()
         end
         self.isContextuallyShown = shouldContextuallyShow
     end
+end
+
+function ZO_BuffDebuff_ContainerObject:RefreshContainerVisibility()
+    local shouldContextuallyShow = self:ShouldContextuallyShow()
+    self.buffPool.container:SetHidden(not self.buffPool:HasActiveObjects() or not shouldContextuallyShow)
+    self.debuffPool.container:SetHidden(not self.debuffPool:HasActiveObjects() or not shouldContextuallyShow)
 end
 
 function ZO_BuffDebuff_ContainerObject:UpdateTime()

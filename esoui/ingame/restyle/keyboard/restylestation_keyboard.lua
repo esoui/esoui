@@ -3,15 +3,19 @@
 ---------------------
 
 local ALLOWS_DYEING = true
+local DISALLOW_DYEING = false
 local SPECIALIZED_COLLECTIBLE_CATEGORY_ENABLED = true
 local SPECIALIZED_COLLECTIBLE_CATEGORY_DISABLED = false
 local DERIVES_COLLECTIBLE_CATEGORIES_FROM_SLOTS = true
 
 local RESTYLE_MODE_CATEGORY_DATA =
 {
-    [RESTYLE_MODE_EQUIPMENT] = ZO_RestyleCategoryData:New(ALLOWS_DYEING, COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES, SPECIALIZED_COLLECTIBLE_CATEGORY_DISABLED, DERIVES_COLLECTIBLE_CATEGORIES_FROM_SLOTS),
-    [RESTYLE_MODE_COLLECTIBLE] = ZO_RestyleCategoryData:New(ALLOWS_DYEING),
-    [RESTYLE_MODE_OUTFIT] = ZO_RestyleCategoryData:New(ALLOWS_DYEING, COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES, SPECIALIZED_COLLECTIBLE_CATEGORY_ENABLED, DERIVES_COLLECTIBLE_CATEGORIES_FROM_SLOTS),
+    [RESTYLE_MODE_EQUIPMENT] = ZO_RestyleCategoryData:New(RESTYLE_MODE_EQUIPMENT, ALLOWS_DYEING, COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES, SPECIALIZED_COLLECTIBLE_CATEGORY_DISABLED, DERIVES_COLLECTIBLE_CATEGORIES_FROM_SLOTS),
+    [RESTYLE_MODE_COLLECTIBLE] = ZO_RestyleCategoryData:New(RESTYLE_MODE_COLLECTIBLE, ALLOWS_DYEING),
+    [RESTYLE_MODE_OUTFIT] = ZO_RestyleCategoryData:New(RESTYLE_MODE_OUTFIT, ALLOWS_DYEING, COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES, SPECIALIZED_COLLECTIBLE_CATEGORY_ENABLED, DERIVES_COLLECTIBLE_CATEGORIES_FROM_SLOTS),
+    [RESTYLE_MODE_COMPANION_EQUIPMENT] = ZO_RestyleCategoryData:New(RESTYLE_MODE_COMPANION_EQUIPMENT, DISALLOW_DYEING, COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES, SPECIALIZED_COLLECTIBLE_CATEGORY_DISABLED, DERIVES_COLLECTIBLE_CATEGORIES_FROM_SLOTS, { EQUIP_SLOT_HEAD }),
+    [RESTYLE_MODE_COMPANION_OUTFIT] = ZO_RestyleCategoryData:New(RESTYLE_MODE_COMPANION_OUTFIT, ALLOWS_DYEING, COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES, SPECIALIZED_COLLECTIBLE_CATEGORY_ENABLED, DERIVES_COLLECTIBLE_CATEGORIES_FROM_SLOTS, { EQUIP_SLOT_HEAD }),
+    [RESTYLE_MODE_COMPANION_COLLECTIBLE] = ZO_RestyleCategoryData:New(RESTYLE_MODE_COMPANION_COLLECTIBLE, ALLOWS_DYEING),
 }
 
 ZO_RestyleStation_Keyboard = ZO_RestyleCommon_Keyboard:Subclass()
@@ -22,12 +26,26 @@ end
 
 function ZO_RestyleStation_Keyboard:Initialize(control)
     ZO_RestyleCommon_Keyboard.Initialize(self, control)
-    
+
     ZO_RESTYLE_SCENE = ZO_InteractScene:New("restyle_station_keyboard", SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
     SYSTEMS:RegisterKeyboardRootScene("restyle", ZO_RESTYLE_SCENE)
     RESTYLE_FRAGMENT = self:GetFragment()
 
+    self.noContentLabel = self.control:GetNamedChild("NoStylesLabel")
+
     self:InitializeTabs()
+
+    self.updateKeybindCallback = function()
+        if self.currentTabDescriptor == self.equipmentTabDescriptor then
+            if self.currentSubTabDescriptor == self.playerSubTabDescriptor then
+                self.noContentLabel:SetHidden(true)
+            elseif self.currentSubTabDescriptor == self.companionSubTabDescriptor then
+                local currentSheet = self:GetCurrentSheet()
+                self.noContentLabel:SetHidden(currentSheet:GetRestyleMode() ~= RESTYLE_MODE_COMPANION_EQUIPMENT)
+            end
+        end
+        self:UpdateKeybind()
+    end
 
     self.onBlockingSceneActivatedCallback = function()
         self:AttemptExit()
@@ -46,15 +64,30 @@ function ZO_RestyleStation_Keyboard:OnShowing()
     MAIN_MENU_MANAGER:SetBlockingScene("restyle_station_keyboard", self.onBlockingSceneActivatedCallback)
 
     ZO_RestyleCommon_Keyboard.OnShowing(self)
+
+    ZO_MenuBar_UpdateButtons(self.subTabs)
+
+    if not HasActiveCompanion() and self.currentSubTabDescriptor == self.companionSubTabDescriptor then
+        local RESELECT_IF_SELECTED = true
+        self:SelectSubTabDescriptor(self.playerSubTabDescriptor, RESELECT_IF_SELECTED)
+        if self.currentTabDescriptor == self.equipmentTabDescriptor then
+            ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:PopulateEquipmentModeDropdown()
+        elseif self.currentTabDescriptor == self.collectiblesTabDescriptor then
+            ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:PopulateCollectiblesModeDropdown()
+        end
+    end
 end
 
 function ZO_RestyleStation_Keyboard:OnShown()
     local currentMode = self:GetRestyleMode()
-    if currentMode == RESTYLE_MODE_OUTFIT or currentMode == RESTYLE_MODE_EQUIPMENT then
+    if currentMode == RESTYLE_MODE_EQUIPMENT or
+        currentMode == RESTYLE_MODE_OUTFIT or
+        currentMode == RESTYLE_MODE_COMPANION_EQUIPMENT or
+        currentMode == RESTYLE_MODE_COMPANION_OUTFIT then
         TriggerTutorial(TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN)
     end
 
-    if currentMode == RESTYLE_MODE_OUTFIT then
+    if currentMode == RESTYLE_MODE_OUTFIT or currentMode == RESTYLE_MODE_COMPANION_OUTFIT then
         local outfitManipulator = self:GetCurrentSheet():GetCurrentOutfitManipulator()
         outfitManipulator:UpdatePreviews()
     end
@@ -67,9 +100,18 @@ function ZO_RestyleStation_Keyboard:OnHidden()
 end
 
 function ZO_RestyleStation_Keyboard:OnTabFilterChanged(tabData)
-    self.activeTab:SetText(GetString(tabData.activeTabText))
-    self.currentTabDescriptor = tabData.descriptor
+    if tabData.descriptor.isSubTab then
+        self.currentSubTabDescriptor = tabData.descriptor
+        self.activeSubTab:SetText(GetString(tabData.activeTabText))
+    else
+        self.currentTabDescriptor = tabData.descriptor
+        self.activeTab:SetText(GetString(tabData.activeTabText))
+    end
     tabData.descriptor.modeDropdownPopulationCallback()
+
+    if not tabData.descriptor.isSubTab then
+        self.currentSubTabDescriptor.modeDropdownPopulationCallback()
+    end
 end
 
 function ZO_RestyleStation_Keyboard:OnSheetChanged(newSheet, oldSheet)
@@ -100,6 +142,7 @@ function ZO_RestyleStation_Keyboard:InitializeTabs()
     self.tabs = self.control:GetNamedChild("Tabs")
     self.activeTab = self.control:GetNamedChild("TabsLabel")
     self.currentTabDescriptor = nil
+    self.currentSubTabDescriptor = nil
 
     local DEFAULT_TOOLTIP_FUNCTION = nil
     local ALWAYS_SHOW_TOOLTIP = true
@@ -108,16 +151,21 @@ function ZO_RestyleStation_Keyboard:InitializeTabs()
         self:HandleTabChange(tabData)
     end
 
-    self.equipmentTabDescriptor = 
+    local function ResetSubTab()
+        local RESELECT_IF_SELECTED = true
+        self:SelectSubTabDescriptor(self.currentSubTabDescriptor, RESELECT_IF_SELECTED)
+    end
+
+    self.equipmentTabDescriptor =
     {
-        modeDropdownPopulationCallback = function() ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:PopulateEquipmentModeDropdown() end,
+        modeDropdownPopulationCallback = ResetSubTab,
         activeTabText = GetString(SI_DYEING_DYE_EQUIPMENT_TAB),
     }
-    local equipmentTabData = ZO_MenuBar_GenerateButtonTabData(SI_DYEING_DYE_EQUIPMENT_TAB, self.equipmentTabDescriptor, "EsoUI/Art/Dye/dyes_tabIcon_dye_up.dds", "EsoUI/Art/Dye/dyes_tabIcon_dye_down.dds", "EsoUI/Art/Dye/dyes_tabIcon_dye_over.dds", "EsoUI/Art/Dye/dyes_tabIcon_dye_disabled.dds", DEFAULT_TOOLTIP_FUNCTION, ALWAYS_SHOW_TOOLTIP, PlayerDrivenCallback)
+    local equipmentTabData = ZO_MenuBar_GenerateButtonTabData(SI_DYEING_DYE_EQUIPMENT_TAB, self.equipmentTabDescriptor, "EsoUI/Art/Dye/dyes_tabIcon_dye_up.dds", "EsoUI/Art/Dye/dyes_tabIcon_dye_down.dds", "EsoUI/Art/Dye/dyes_tabIcon_dye_over.dds", "EsoUI/Art/Dye/dyes_tabIcon_dye_disabled.dds", function(...) self:LayoutEquipmentAppearanceTooltip(...) end, ALWAYS_SHOW_TOOLTIP, PlayerDrivenCallback)
 
-    self.collectiblesTabDescriptor = 
+    self.collectiblesTabDescriptor =
     {
-        modeDropdownPopulationCallback = function() ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:PopulateCollectiblesModeDropdown() end,
+        modeDropdownPopulationCallback = ResetSubTab,
         activeTabText = GetString(SI_DYEING_DYE_COLLECTIBLE_TAB),
     }
     local collectiblesTabData = ZO_MenuBar_GenerateButtonTabData(SI_DYEING_DYE_COLLECTIBLE_TAB, self.collectiblesTabDescriptor, "EsoUI/Art/Dye/dyes_tabIcon_costumeDye_up.dds", "EsoUI/Art/Dye/dyes_tabIcon_costumeDye_down.dds", "EsoUI/Art/Dye/dyes_tabIcon_costumeDye_over.dds", "EsoUI/Art/Dye/dyes_tabIcon_costumeDye_disabled.dds", function(...) self:LayoutCollectionAppearanceTooltip(...) end, ALWAYS_SHOW_TOOLTIP, PlayerDrivenCallback)
@@ -126,6 +174,56 @@ function ZO_RestyleStation_Keyboard:InitializeTabs()
     ZO_MenuBar_AddButton(self.tabs, collectiblesTabData)
 
     self:SelectTabDescriptor(self.equipmentTabDescriptor)
+
+    -- Sub Tabs
+    self.subTabs = self.control:GetNamedChild("SubTabs")
+    self.activeSubTab = self.control:GetNamedChild("SubTabsLabel")
+
+    local function OnSubTabSelected()
+        if self.currentTabDescriptor == self.equipmentTabDescriptor then
+            if self.currentSubTabDescriptor == self.playerSubTabDescriptor then
+                self.noContentLabel:SetHidden(true)
+                ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:PopulateEquipmentModeDropdown()
+            elseif self.currentSubTabDescriptor == self.companionSubTabDescriptor then
+                local currentSheet = self:GetCurrentSheet()
+                self.noContentLabel:SetHidden(currentSheet:GetRestyleMode() ~= RESTYLE_MODE_COMPANION_EQUIPMENT)
+                ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:PopulateCompanionOutfitsModeDropdown()
+            end
+        elseif self.currentTabDescriptor == self.collectiblesTabDescriptor then
+            self.noContentLabel:SetHidden(true)
+            if self.currentSubTabDescriptor == self.playerSubTabDescriptor then
+                ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:PopulateCollectiblesModeDropdown()
+            elseif self.currentSubTabDescriptor == self.companionSubTabDescriptor then
+                ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:PopulateCompanionCollectiblesModeDropdown()
+            end
+        end
+    end
+
+    self.playerSubTabDescriptor =
+    {
+        modeDropdownPopulationCallback = OnSubTabSelected,
+        activeTabText = GetString(SI_OUTFIT_PLAYER_SUB_TAB),
+        actorCategory = GAMEPLAY_ACTOR_CATEGORY_PLAYER,
+        isSubTab = true,
+    }
+    local playerSubTabData = ZO_MenuBar_GenerateButtonTabData(SI_OUTFIT_PLAYER_SUB_TAB, self.playerSubTabDescriptor, "EsoUI/Art/Dye/dyes_tabIcon_player_up.dds", "EsoUI/Art/Dye/dyes_tabIcon_player_down.dds", "EsoUI/Art/Dye/dyes_tabIcon_player_over.dds", "EsoUI/Art/Dye/dyes_tabIcon_player_disabled.dds", DEFAULT_TOOLTIP_FUNCTION, ALWAYS_SHOW_TOOLTIP, PlayerDrivenCallback)
+
+    self.companionSubTabDescriptor =
+    {
+        modeDropdownPopulationCallback = OnSubTabSelected,
+        activeTabText = GetString(SI_OUTFIT_COMPANION_SUB_TAB),
+        actorCategory = GAMEPLAY_ACTOR_CATEGORY_COMPANION,
+        isSubTab = true,
+    }
+    local companionSubTabData = ZO_MenuBar_GenerateButtonTabData(SI_OUTFIT_COMPANION_SUB_TAB, self.companionSubTabDescriptor, "EsoUI/Art/Dye/dyes_tabIcon_companion_up.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_down.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_over.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_disabled.dds", DEFAULT_TOOLTIP_FUNCTION, ALWAYS_SHOW_TOOLTIP, PlayerDrivenCallback)
+    companionSubTabData.enabled = function()
+        return HasActiveCompanion()
+    end
+
+    ZO_MenuBar_AddButton(self.subTabs, playerSubTabData)
+    ZO_MenuBar_AddButton(self.subTabs, companionSubTabData)
+
+    self:SelectSubTabDescriptor(self.playerSubTabDescriptor)
 end
 
 function ZO_RestyleStation_Keyboard:RegisterForEvents()
@@ -172,6 +270,7 @@ function ZO_RestyleStation_Keyboard:InitializeModeData()
     end
 
     self.currentTabDescriptor.modeDropdownPopulationCallback()
+    self.currentSubTabDescriptor.modeDropdownPopulationCallback()
 end
 
 function ZO_RestyleStation_Keyboard:SelectTabDescriptor(tabDescriptor)
@@ -179,6 +278,29 @@ function ZO_RestyleStation_Keyboard:SelectTabDescriptor(tabDescriptor)
         ZO_MenuBar_SelectDescriptor(self.tabs, tabDescriptor)
         self.activeTab:SetText(tabDescriptor.activeTabText)
         self.currentTabDescriptor = tabDescriptor
+    end
+end
+
+function ZO_RestyleStation_Keyboard:SelectSubTabDescriptor(subTabDescriptor, reselectIfSelected)
+    if reselectIfSelected or subTabDescriptor ~= self.currentSubTabDescriptor then
+        local DONT_SKIP_ANIMATION = false
+        ZO_MenuBar_SelectDescriptor(self.subTabs, subTabDescriptor, DONT_SKIP_ANIMATION, reselectIfSelected)
+        self.activeSubTab:SetText(subTabDescriptor.activeTabText)
+        self.currentSubTabDescriptor = subTabDescriptor
+    end
+end
+
+function ZO_RestyleStation_Keyboard:LayoutEquipmentAppearanceTooltip(tooltip)
+    local title = GetString(SI_DYEING_DYE_EQUIPMENT_TAB)
+    local description = GetString(SI_DYEING_EQUIPMENT_TAB_DESCRIPTION)
+
+    SetTooltipText(tooltip, title)
+    local r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
+    tooltip:AddLine(description, "", r, g, b)
+
+    if not HasActiveCompanion() then
+        local requirements = GetString(SI_DYEING_EQUIPMENT_TAB_REQUIREMENTS)
+        tooltip:AddLine(requirement, "", r, g, b)
     end
 end
 
@@ -208,17 +330,13 @@ function ZO_RestyleStation_Keyboard:InitializeKeybindStripDescriptors()
         -- Apply dye
         {
             name = GetString(SI_DYEING_COMMIT),
-
             keybind = "UI_SHORTCUT_SECONDARY",
-
-            visible = function() 
+            visible = function()
                 return ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:AreChangesPending()
             end,
-
             enabled = function()
                 return ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:CanApplyChanges()
             end,
-
             callback = function() self:CommitSelection() end,
         },
 
@@ -228,8 +346,12 @@ function ZO_RestyleStation_Keyboard:InitializeKeybindStripDescriptors()
                 return self:GetCurrentSheet():GetRandomizeKeybindText()
             end,
             keybind = "UI_SHORTCUT_TERTIARY",
-
-            callback = function() self:GetCurrentSheet():UniformRandomize() end,
+            visible = function()
+                return self:GetRestyleMode() ~= RESTYLE_MODE_COMPANION_EQUIPMENT
+            end,
+            callback = function()
+                self:GetCurrentSheet():UniformRandomize()
+            end,
         },
 
         -- Undo
@@ -247,19 +369,18 @@ function ZO_RestyleStation_Keyboard:InitializeKeybindStripDescriptors()
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
             name = GetString(SI_EXIT_BUTTON),
             keybind = "UI_SHORTCUT_EXIT",
-            callback = function() 
-                            local exitDestinationData =
-                            {
-                                showBaseScene = true,
-                            }
-                            self:AttemptExit(exitDestinationData) 
-                       end,
+            callback = function()
+                local exitDestinationData =
+                {
+                    showBaseScene = true,
+                }
+                self:AttemptExit(exitDestinationData) 
+            end,
         },
 
         -- Equip/Unequip
         {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-
             name = function()
                 if ZO_OUTFIT_STYLES_PANEL_KEYBOARD:GetMouseOverEntryData() then
                     return GetString(SI_OUTFIT_STYLE_EQUIP_BIND)
@@ -267,14 +388,13 @@ function ZO_RestyleStation_Keyboard:InitializeKeybindStripDescriptors()
                     return GetString(SI_OUTFIT_SLOT_UNDO_ACTION)
                 end
             end,
-
             keybind = "UI_SHORTCUT_PRIMARY",
-
             visible = function()
                 if ZO_OUTFIT_STYLES_PANEL_KEYBOARD:GetMouseOverEntryData() then
                     return true
                 end
-                if self:GetRestyleMode() == RESTYLE_MODE_OUTFIT then
+                local restyleMode = self:GetRestyleMode()
+                if restyleMode == RESTYLE_MODE_OUTFIT or restyleMode == RESTYLE_MODE_COMPANION_OUTFIT then
                     local restyleSlotData = self:GetCurrentSheet():GetMouseOverData()
                     if restyleSlotData then
                         local slotManipulator = ZO_OUTFIT_MANAGER:GetOutfitSlotManipulatorFromRestyleSlotData(restyleSlotData)
@@ -283,7 +403,6 @@ function ZO_RestyleStation_Keyboard:InitializeKeybindStripDescriptors()
                 end
                 return false
             end,
-
             callback = function()
                 if ZO_OUTFIT_STYLES_PANEL_KEYBOARD:GetMouseOverEntryData() then
                     ZO_OUTFIT_STYLES_PANEL_KEYBOARD:OnRestyleOutfitStyleEntrySelected(ZO_OUTFIT_STYLES_PANEL_KEYBOARD:GetMouseOverEntryData(), INITIAL_CONTEXT_MENU_REF_COUNT)
@@ -298,19 +417,16 @@ function ZO_RestyleStation_Keyboard:InitializeKeybindStripDescriptors()
         -- Change outfit name
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
             keybind = "UI_SHORTCUT_QUATERNARY",
-
             name = GetString(SI_OUTFIT_CHANGE_NAME),
-
             visible = function()
-                return self:GetRestyleMode() == RESTYLE_MODE_OUTFIT
+                local restyleMode = self:GetRestyleMode()
+                return restyleMode == RESTYLE_MODE_OUTFIT
             end,
-
             callback = function()
                 local currentSheet = self:GetCurrentSheet()
                 local outfitManipulator = currentSheet:GetCurrentOutfitManipulator()
-                ZO_Dialogs_ShowDialog("RENAME_OUFIT", { outfitIndex = outfitManipulator:GetOutfitIndex() }, { initialEditText = outfitManipulator:GetOutfitName() })
+                ZO_Dialogs_ShowDialog("RENAME_OUFIT", { actorCategory = outfitManipulator:GetActorCategory(), outfitIndex = outfitManipulator:GetOutfitIndex() }, { initialEditText = outfitManipulator:GetOutfitName() })
             end,
         },
     }
@@ -320,19 +436,31 @@ function ZO_RestyleStation_Keyboard:OnPendingDyesChanged(restyleSlotData)
     --Do anything dye specific here
     self:OnPendingDataChanged(restyleSlotData)
     if not restyleSlotData then
-        if self:GetRestyleMode() == RESTYLE_MODE_OUTFIT then
+        local restyleMode = self:GetRestyleMode()
+        if restyleMode == RESTYLE_MODE_OUTFIT or restyleMode == RESTYLE_MODE_COMPANION_OUTFIT then
             local outfitManipulator = self:GetCurrentSheet():GetCurrentOutfitManipulator()
             outfitManipulator:UpdatePreviews()
+        else
+            ApplyChangesToPreviewCollectionShown()
         end
     elseif restyleSlotData:IsOutfitSlot() then
         local outfitSlotManipulator = ZO_OUTFIT_MANAGER:GetOutfitSlotManipulatorFromRestyleSlotData(restyleSlotData)
-        outfitSlotManipulator:UpdatePreview()
+        local refreshImmediately = true
+        outfitSlotManipulator:UpdatePreview(refreshImmediately)
     end
 end
 
 function ZO_RestyleStation_Keyboard:OnPendingDataChanged(restyleSlotData)
     local currentSheet = self:GetCurrentSheet()
     currentSheet:MarkViewDirty(restyleSlotData)
+
+    if currentSheet:GetRestyleMode() == RESTYLE_MODE_COLLECTIBLE then
+        local companionSheet = ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:GetSheetByMode(RESTYLE_MODE_COMPANION_COLLECTIBLE)
+        companionSheet:MarkViewDirty()
+    elseif currentSheet:GetRestyleMode() == RESTYLE_MODE_COMPANION_COLLECTIBLE then
+        local collectibleSheet = ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:GetSheetByMode(RESTYLE_MODE_COLLECTIBLE)
+        collectibleSheet:MarkViewDirty()
+    end
 end
 
 -- Optionally pass in a table with destination data
@@ -364,7 +492,8 @@ function ZO_RestyleStation_Keyboard:ConfirmExit()
     local exitDestinationData = self.exitDestinationData
     local preservePendingChanges = exitDestinationData and exitDestinationData.preservePendingChanges or false
 
-    if self:GetRestyleMode() == RESTYLE_MODE_OUTFIT then
+    local restyleMode = self:GetRestyleMode()
+    if restyleMode == RESTYLE_MODE_OUTFIT or restyleMode == RESTYLE_MODE_COMPANION_OUTFIT then
        local outfitManipulator = self:GetCurrentSheet():GetCurrentOutfitManipulator()
        outfitManipulator:SetMarkedForPreservation(preservePendingChanges)
     end
@@ -404,7 +533,7 @@ end
 
 function ZO_RestyleStation_Keyboard:ConfirmCommitSelection()
     if not self:GetCurrentSheet():HandleCommitSelection() then
-        ApplyPendingDyes()
+        ApplyPendingDyes(self:GetCurrentSheet():GetRestyleMode())
         InitializePendingDyes()
         self:OnPendingDyesChanged()
     end
@@ -497,7 +626,7 @@ do
                     text =      function() self:GetConfirmButtonText() end,
                     keybind =   "DIALOG_PRIMARY",
                     callback =  function() self:Confirm() end,
-                },  
+                },
                 {
                     control =   contentsControl:GetNamedChild("Cancel"),
                     text =      SI_DIALOG_CANCEL,

@@ -1,6 +1,6 @@
 ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX = 1
 
-local WEAPON_SLOTS = 
+local WEAPON_SLOTS =
 {
     [OUTFIT_SLOT_WEAPON_MAIN_HAND] = true,
     [OUTFIT_SLOT_WEAPON_OFF_HAND] = true,
@@ -20,24 +20,26 @@ local WEAPON_SLOTS =
 -- Outfit Slot Manipulator --
 -----------------------------
 
-ZO_OutfitSlotManipulator = ZO_Object:Subclass()
-
-function ZO_OutfitSlotManipulator:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_OutfitSlotManipulator = ZO_InitializingObject:Subclass()
 
 function ZO_OutfitSlotManipulator:Initialize(owner, outfitSlotIndex)
     self.owner = owner
     self.outfitSlotIndex = outfitSlotIndex
-    self.restyleSlotData = ZO_RestyleSlotData:New(RESTYLE_MODE_OUTFIT, owner:GetOutfitIndex(), outfitSlotIndex)
+
+    local restyleMode
+    if owner:GetActorCategory() == GAMEPLAY_ACTOR_CATEGORY_PLAYER then
+        restyleMode = RESTYLE_MODE_OUTFIT
+    elseif owner:GetActorCategory() == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+        restyleMode = RESTYLE_MODE_COMPANION_OUTFIT
+    end
+
+    self.restyleSlotData = ZO_RestyleSlotData:New(restyleMode, owner:GetOutfitIndex(), outfitSlotIndex)
 
     self:RefreshData()
 end
 
 function ZO_OutfitSlotManipulator:RefreshData()
-    self.currentCollectibleId, self.currentItemMaterialIndex = GetOutfitSlotInfo(self.owner:GetOutfitIndex(), self.outfitSlotIndex)
+    self.currentCollectibleId, self.currentItemMaterialIndex = GetOutfitSlotInfo(self.owner:GetActorCategory(), self.owner:GetOutfitIndex(), self.outfitSlotIndex)
     self.pendingCollectibleId, self.pendingItemMaterialIndex = self.currentCollectibleId, self.currentItemMaterialIndex
 end
 
@@ -171,7 +173,7 @@ end
 
 function ZO_OutfitSlotManipulator:GetPendingChangeCost()
     if self:IsAnyChangePending() then
-        return GetApplyCostForIndividualOutfitSlot(self.owner:GetOutfitIndex(), self.outfitSlotIndex, self.pendingCollectibleId, self:GetNumPendingDyeChanges())
+        return GetApplyCostForIndividualOutfitSlot(self.owner:GetActorCategory(), self.owner:GetOutfitIndex(), self.outfitSlotIndex, self.pendingCollectibleId, self:GetNumPendingDyeChanges())
     else
         return 0
     end
@@ -184,9 +186,11 @@ function ZO_OutfitSlotManipulator:GetSlotAppropriateIcon()
     elseif self:IsSlotDataChangePending() then
         return ZO_Restyle_GetOutfitSlotClearTexture(self.outfitSlotIndex)
     else
+        local actorCategory = self.owner:GetActorCategory()
+        local bagId = GetWornBagForGameplayActorCategory(actorCategory)
         local equipSlot = GetEquipSlotForOutfitSlot(self.outfitSlotIndex)
-        if CanEquippedItemBeShownInOutfitSlot(equipSlot, self.outfitSlotIndex) then
-            local icon = GetItemInfo(BAG_WORN, equipSlot)
+        if CanEquippedItemBeShownInOutfitSlot(actorCategory, equipSlot, self.outfitSlotIndex) then
+            local icon = GetItemInfo(bagId, equipSlot)
             return icon
         end
     end
@@ -331,15 +335,10 @@ end
 -- Outfit Manipulator --
 ------------------------
 
-ZO_OutfitManipulator = ZO_CallbackObject:Subclass()
+ZO_OutfitManipulator = ZO_InitializingCallbackObject:Subclass()
 
-function ZO_OutfitManipulator:New(...)
-    local object = ZO_CallbackObject.New(self)
-    object:Initialize(...)
-    return object
-end
-
-function ZO_OutfitManipulator:Initialize(outfitIndex)
+function ZO_OutfitManipulator:Initialize(actorCategory, outfitIndex)
+    self.actorCategory = actorCategory
     self.outfitIndex = outfitIndex
     self.outfitSlotManipulators = {}
 
@@ -348,7 +347,7 @@ function ZO_OutfitManipulator:Initialize(outfitIndex)
 end
 
 function ZO_OutfitManipulator:RefreshName()
-    local outfitName = GetOutfitName(self.outfitIndex)
+    local outfitName = GetOutfitName(self.actorCategory, self.outfitIndex)
     if outfitName == "" then
         outfitName = zo_strformat(SI_OUTFIT_NO_NICKNAME_FORMAT, self.outfitIndex)
     end
@@ -366,6 +365,10 @@ function ZO_OutfitManipulator:RefreshSlotData()
     end
 end
 
+function ZO_OutfitManipulator:GetActorCategory()
+    return self.actorCategory
+end
+
 function ZO_OutfitManipulator:GetOutfitIndex()
     return self.outfitIndex
 end
@@ -376,7 +379,7 @@ end
 
 function ZO_OutfitManipulator:SetOutfitName(newName)
     if self.outfitName ~= newName then
-        RenameOutfit(self:GetOutfitIndex(), newName)
+        RenameOutfit(self:GetActorCategory(), self:GetOutfitIndex(), newName)
     end
 end
 
@@ -396,7 +399,7 @@ function ZO_OutfitManipulator:GetTotalSlotCostsForPendingChanges()
 
     local totalCost = 0
     if #pendingData > 0 then
-        totalCost = GetTotalApplyCostForOutfitSlots(self:GetOutfitIndex(), unpack(pendingData))
+        totalCost = GetTotalApplyCostForOutfitSlots(self:GetActorCategory(), self:GetOutfitIndex(), unpack(pendingData))
     end
 
     return totalCost
@@ -434,7 +437,7 @@ do
     function ZO_OutfitManipulator:OnCollectibleBlacklistUpdated()
         local hasChanged = false
         for _, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
-            local slotCleared = outfitSlotManipulator:OnCollectibleBlacklistUpdated(SUPPRESS_FIRE_CALLBACKS) 
+            local slotCleared = outfitSlotManipulator:OnCollectibleBlacklistUpdated(SUPPRESS_FIRE_CALLBACKS)
             hasChanged = hasChanged or slotCleared
         end
 
@@ -565,7 +568,7 @@ function ZO_OutfitManipulator:SendOutfitChangeRequest(useFlatCurrency)
     end
 
     if #argumentsTable > 0 then
-        SendOutfitChangeRequest(useFlatCurrency, self.outfitIndex, unpack(argumentsTable))
+        SendOutfitChangeRequest(useFlatCurrency, self:GetActorCategory(), self:GetOutfitIndex(), unpack(argumentsTable))
     end
 end
 
@@ -624,37 +627,32 @@ end
 -- Outfit Manager Singleton --
 ------------------------------
 
-local Outfit_Manager = ZO_CallbackObject:Subclass()
-
-function Outfit_Manager:New(...)
-    local object = ZO_CallbackObject.New(self)
-    object:Initialize(...)
-    return object
-end
+local Outfit_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function Outfit_Manager:Initialize()
     self.outfits = {}
+    self.companionOutfits = {}
+    self.equippedOutfitIndices = {}
     self:RefreshOutfits()
-    self:RefreshEquippedOutfitIndex()
 
-    local function OnOutfitEquipResponse(eventCode, equipOutfitResult)
+    local function OnOutfitEquipResponse(eventCode, actorCategory, equipOutfitResult)
         if equipOutfitResult == EQUIP_OUTFIT_RESULT_SUCCESS then
-            self:RefreshEquippedOutfitIndex()
+            self:RefreshEquippedOutfitIndex(actorCategory)
         end
     end
 
-    local function OnOutfitChangeRespone(eventCode, outfitChangeResponse, outfitIndex)
+    local function OnOutfitChangeResponse(eventCode, outfitChangeResponse, actorCategory, outfitIndex)
         if outfitChangeResponse == APPLY_OUTFIT_CHANGES_RESULT_SUCCESS then
-            self:RefreshOutfitSlotData(outfitIndex)
-            self:OnOutfitPendingDataChanged(outfitIndex)
+            self:RefreshOutfitSlotData(actorCategory, outfitIndex)
+            self:OnOutfitPendingDataChanged(actorCategory, outfitIndex)
             ClearAllOutfitSlotPreviewElementsFromPreviewCollection()
             ApplyChangesToPreviewCollectionShown()
         end
     end
 
-    local function OnOutfitRenameResponse(eventCode, outfitRenameResponse, outfitIndex)
+    local function OnOutfitRenameResponse(eventCode, outfitRenameResponse, actorCategory, outfitIndex)
         if outfitRenameResponse == SET_OUTFIT_NAME_RESULT_SUCCESS then
-            self:RefreshOutfitName(outfitIndex)
+            self:RefreshOutfitName(actorCategory, outfitIndex)
         end
     end
 
@@ -669,7 +667,7 @@ function Outfit_Manager:Initialize()
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
     EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_OUTFIT_EQUIP_RESPONSE, OnOutfitEquipResponse)
     EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_OUTFITS_INITIALIZED, function() self:RefreshOutfits() end)
-    EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_OUTFIT_CHANGE_RESPONSE, OnOutfitChangeRespone)
+    EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_OUTFIT_CHANGE_RESPONSE, OnOutfitChangeResponse)
     EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_OUTFIT_RENAME_RESPONSE, OnOutfitRenameResponse)
 
     local function OnAddOnLoaded(event, name)
@@ -683,19 +681,43 @@ function Outfit_Manager:Initialize()
     EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 end
 
-function Outfit_Manager:RefreshOutfitSlotData(outfitIndex)
-    local outfitManipulator = self.outfits[outfitIndex]
-    if outfitManipulator then
-        outfitManipulator:RefreshSlotData()
-        self:FireCallbacks("RefreshOutfit", outfitIndex)
+function Outfit_Manager.GetActorCategoryByRestyleMode(restyleMode)
+    if restyleMode == RESTYLE_MODE_EQUIPMENT or restyleMode == RESTYLE_MODE_OUTFIT then
+        return GAMEPLAY_ACTOR_CATEGORY_PLAYER
+    elseif restyleMode == RESTYLE_MODE_COMPANION_EQUIPMENT or restyleMode == RESTYLE_MODE_COMPANION_OUTFIT then
+        return GAMEPLAY_ACTOR_CATEGORY_COMPANION
+    end
+    return nil
+end
+
+function Outfit_Manager.GetRestyleModeByActorCategory(actorCategory)
+    if actorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER then
+        return RESTYLE_MODE_OUTFIT
+    elseif actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+        return RESTYLE_MODE_COMPANION_OUTFIT
+    end
+    return nil
+end
+
+function Outfit_Manager:RefreshOutfitSlotData(actorCategory, outfitIndex)
+    local outfits = self:GetOutfitsByActorCategory(actorCategory)
+    if outfits then
+        local outfitManipulator = outfits[outfitIndex]
+        if outfitManipulator then
+            outfitManipulator:RefreshSlotData()
+            self:FireCallbacks("RefreshOutfit", actorCategory, outfitIndex)
+        end
     end
 end
 
-function Outfit_Manager:RefreshOutfitName(outfitIndex)
-    local outfitManipulator = self.outfits[outfitIndex]
-    if outfitManipulator then
-        outfitManipulator:RefreshName()
-        self:FireCallbacks("RefreshOutfitName", outfitIndex)
+function Outfit_Manager:RefreshOutfitName(actorCategory, outfitIndex)
+    local outfits = self:GetOutfitsByActorCategory(actorCategory)
+    if outfits then
+        local outfitManipulator = outfits[outfitIndex]
+        if outfitManipulator then
+            outfitManipulator:RefreshName()
+            self:FireCallbacks("RefreshOutfitName", actorCategory, outfitIndex)
+        end
     end
 end
 
@@ -703,71 +725,106 @@ do
     local SUPPRESS_BROADCAST = true
 
     function Outfit_Manager:RefreshOutfits()
-        for outfitIndex = 1, GetNumUnlockedOutfits() do
-            self:RefreshOutfit(outfitIndex, SUPPRESS_BROADCAST)
+        for actorCategory = GAMEPLAY_ACTOR_CATEGORY_ITERATION_BEGIN, GAMEPLAY_ACTOR_CATEGORY_ITERATION_END do
+            self:RefreshEquippedOutfitIndex(actorCategory)
+        end
+        for outfitIndex = 1, GetNumUnlockedOutfits(GAMEPLAY_ACTOR_CATEGORY_PLAYER) do
+            self:RefreshOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER, outfitIndex, SUPPRESS_BROADCAST)
+        end
+        for companionOutfitIndex = 1, GetNumUnlockedOutfits(GAMEPLAY_ACTOR_CATEGORY_COMPANION) do
+            self:RefreshOutfit(GAMEPLAY_ACTOR_CATEGORY_COMPANION, companionOutfitIndex, SUPPRESS_BROADCAST)
         end
         self:FireCallbacks("RefreshOutfits")
     end
 end
 
-function Outfit_Manager:RefreshOutfit(outfitIndex, suppressBroadcast)
-    local outfitManipulator = self.outfits[outfitIndex]
-    if outfitManipulator then
-        outfitManipulator:RefreshName()
-        outfitManipulator:RefreshSlotData()
-    else
-        outfitManipulator = ZO_OutfitManipulator:New(outfitIndex)
-        table.insert(self.outfits, outfitManipulator)
-        outfitManipulator:RegisterCallback("PendingDataChanged", function(outfitSlotIndex) self:OnOutfitPendingDataChanged(outfitIndex, outfitSlotIndex) end)
+function Outfit_Manager:GetOutfitsByActorCategory(actorCategory)
+    if actorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER then
+        return self.outfits
+    elseif actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+        return self.companionOutfits
+    end
+    return nil
+end
+
+function Outfit_Manager:RefreshOutfit(actorCategory, outfitIndex, suppressBroadcast)
+    local outfits = self:GetOutfitsByActorCategory(actorCategory)
+    if outfits then
+        local outfitManipulator = outfits[outfitIndex]
+        if outfitManipulator then
+            outfitManipulator:RefreshName()
+            outfitManipulator:RefreshSlotData()
+        else
+            outfitManipulator = ZO_OutfitManipulator:New(actorCategory, outfitIndex)
+            table.insert(outfits, outfitManipulator)
+            outfitManipulator:RegisterCallback("PendingDataChanged", function(outfitSlotIndex) self:OnOutfitPendingDataChanged(actorCategory, outfitIndex, outfitSlotIndex) end)
+        end
     end
 
     if not suppressBroadcast then
-        self:FireCallbacks("RefreshOutfit", outfitIndex)
+        self:FireCallbacks("RefreshOutfit", actorCategory, outfitIndex)
     end
 end
 
-function Outfit_Manager:OnOutfitPendingDataChanged(outfitIndex, outfitSlotIndex)
-    self:FireCallbacks("PendingDataChanged", outfitIndex, outfitSlotIndex)
+function Outfit_Manager:OnOutfitPendingDataChanged(actorCategory, outfitIndex, outfitSlotIndex)
+    self:FireCallbacks("PendingDataChanged", actorCategory, outfitIndex, outfitSlotIndex)
 end
 
-function Outfit_Manager:RefreshEquippedOutfitIndex()
-    local equippedOutfitIndex = GetEquippedOutfitIndex()
-    if self.equippedOutfitIndex ~= equippedOutfitIndex then
-        local previousManipulator = self:GetOutfitManipulator(self.equippedOutfitIndex)
+function Outfit_Manager:RefreshEquippedOutfitIndex(actorCategory)
+    local equippedOutfitIndex = GetEquippedOutfitIndex(actorCategory)
+    if self.equippedOutfitIndices[actorCategory] ~= equippedOutfitIndex then
+        local previousManipulator = self:GetOutfitManipulator(actorCategory, self.equippedOutfitIndices[actorCategory])
         if previousManipulator and previousManipulator:IsMarkedForPreservation() then
             previousManipulator:SetMarkedForPreservation(false)
             previousManipulator:ClearPendingChanges(true)
         end
-        self.equippedOutfitIndex = equippedOutfitIndex
+        self.equippedOutfitIndices[actorCategory] = equippedOutfitIndex
         self:FireCallbacks("RefreshEquippedOutfitIndex")
     end
 end
 
-function Outfit_Manager:GetOutfitManipulator(outfitIndex)
-    return self.outfits[outfitIndex]
+function Outfit_Manager:GetOutfitManipulator(actorCategory, outfitIndex)
+    local outfits = self:GetOutfitsByActorCategory(actorCategory)
+    return outfits[outfitIndex]
 end
 
-function Outfit_Manager:GetEquippedOutfitIndex()
-    return self.equippedOutfitIndex
+function Outfit_Manager:GetEquippedOutfitIndex(actorCategory)
+    return self.equippedOutfitIndices[actorCategory]
 end
 
-function Outfit_Manager:GetNumOutfits()
-    return #self.outfits
-end
-
-function Outfit_Manager:EquipOutfit(outfitIndex)
-    if self.equippedOutfitIndex ~= outfitIndex then
-        EquipOutfit(outfitIndex)
-        self:RefreshEquippedOutfitIndex()
+function Outfit_Manager:GetNumOutfits(actorCategory)
+    if actorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER then
+        return #self.outfits
+    elseif actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+        return #self.companionOutfits
     end
+    return nil
+end
+
+function Outfit_Manager:EquipOutfit(actorCategory, outfitIndex)
+    local outfits = self:GetOutfitsByActorCategory(actorCategory)
+    if self.equippedOutfitIndices[actorCategory] ~= outfitIndex then
+        EquipOutfit(actorCategory, outfitIndex)
+        self:RefreshEquippedOutfitIndex(actorCategory)
+    end
+end
+
+function Outfit_Manager:UnequipOutfit(actorCategory)
+    UnequipOutfit(actorCategory)
+    self:RefreshEquippedOutfitIndex(actorCategory)
 end
 
 function Outfit_Manager:GetOutfitSlotManipulatorFromRestyleSlotData(restyleSlotData)
-    local restyleMode, restyleSetIndex, restyleSlotType = restyleSlotData:GetData()
-    local outfitManipulator = self.outfits[restyleSetIndex]
-    if outfitManipulator then
-        return outfitManipulator:GetSlotManipulator(restyleSlotType)
+    if restyleSlotData:IsOutfitSlot() then
+        local restyleMode, restyleSetIndex, restyleSlotType = restyleSlotData:GetData()
+        local actorCategory = self.GetActorCategoryByRestyleMode(restyleMode)
+        local outfits = self:GetOutfitsByActorCategory(actorCategory)
+        local outfitManipulator = outfits and outfits[restyleSetIndex]
+        if outfitManipulator then
+            return outfitManipulator:GetSlotManipulator(restyleSlotType)
+        end
     end
+    return nil
 end
 
 function Outfit_Manager:IsOutfitSlotWeapon(outfitSlot)
@@ -775,7 +832,7 @@ function Outfit_Manager:IsOutfitSlotWeapon(outfitSlot)
 end
 
 do
-    local ARMOR_SLOTS = 
+    local ARMOR_SLOTS =
     {
         [OUTFIT_SLOT_HEAD] = true,
         [OUTFIT_SLOT_CHEST] = true,
@@ -792,7 +849,7 @@ do
 end
 
 do
-    local MAIN_WEAPONS = 
+    local MAIN_WEAPONS =
     {
         [OUTFIT_SLOT_WEAPON_MAIN_HAND] = true,
         [OUTFIT_SLOT_WEAPON_OFF_HAND] = true,
@@ -802,7 +859,7 @@ do
         [OUTFIT_SLOT_SHIELD] = true,
     }
 
-    local BACKUP_WEAPONS = 
+    local BACKUP_WEAPONS =
     {
         [OUTFIT_SLOT_WEAPON_MAIN_HAND_BACKUP] = true,
         [OUTFIT_SLOT_WEAPON_OFF_HAND_BACKUP] = true,
@@ -821,16 +878,16 @@ do
         end
     end
 
-    function Outfit_Manager:IsWeaponOutfitSlotCurrentlyHeld(outfitSlot)
+    function Outfit_Manager:IsWeaponOutfitSlotCurrentlyHeld(outfitSlot, actorCategory)
         if self:IsWeaponOutfitSlotActive(outfitSlot) then
-            local mainHandOutfitSlot, offHandOutfitSlot = GetOutfitSlotsForCurrentlyHeldWeapons()
+            local mainHandOutfitSlot, offHandOutfitSlot = GetOutfitSlotsForCurrentlyHeldWeapons(actorCategory)
             return outfitSlot == mainHandOutfitSlot or outfitSlot == offHandOutfitSlot
         end
     end
 
-    function Outfit_Manager:IsWeaponOutfitSlotCurrentlyEquipped(outfitSlot)
-        local mainHandOutfitSlot, offHandOutfitSlot, backupMainHandOutfitSlot, backupOffHandOutfitSlot = GetOutfitSlotsForEquippedWeapons()
-        return outfitSlot == mainHandOutfitSlot 
+    function Outfit_Manager:IsWeaponOutfitSlotCurrentlyEquipped(outfitSlot, actorCategory)
+        local mainHandOutfitSlot, offHandOutfitSlot, backupMainHandOutfitSlot, backupOffHandOutfitSlot = GetOutfitSlotsForEquippedWeapons(actorCategory)
+        return outfitSlot == mainHandOutfitSlot
                 or outfitSlot == offHandOutfitSlot
                 or outfitSlot == backupMainHandOutfitSlot
                 or outfitSlot == backupOffHandOutfitSlot
@@ -845,8 +902,8 @@ do
     end
 end
 
-function Outfit_Manager:HasWeaponsCurrentlyHeldToOverride()
-    local mainHandOutfitSlot, offHandOutfitSlot = GetOutfitSlotsForCurrentlyHeldWeapons()
+function Outfit_Manager:HasWeaponsCurrentlyHeldToOverride(actorCategory)
+    local mainHandOutfitSlot, offHandOutfitSlot = GetOutfitSlotsForCurrentlyHeldWeapons(actorCategory)
     return mainHandOutfitSlot ~= nil or offHandOutfitSlot ~= nil
 end
 

@@ -183,6 +183,16 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             valid = {QUICK_CAST_GROUND_ABILITIES_CHOICE_ON, QUICK_CAST_GROUND_ABILITIES_CHOICE_AUTOMATIC, QUICK_CAST_GROUND_ABILITIES_CHOICE_OFF,},
             valueStringPrefix = "SI_QUICKCASTGROUNDABILITIESCHOICE",
         },
+        --Options_Gameplay_AllowCompanionAutoUltimate
+        [COMBAT_SETTING_ALLOW_COMPANION_AUTO_ULTIMATE] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_ALLOW_COMPANION_AUTO_ULTIMATE,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_INTERFACE_OPTIONS_COMBAT_ALLOW_COMPANION_AUTO_ULTIMATE,
+            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_ALLOW_COMPANION_AUTO_ULTIMATE,
+        },
     },
 
     --Loot
@@ -343,6 +353,19 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             panel = SETTING_PANEL_GAMEPLAY,
             text = SI_INTERFACE_OPTIONS_FOOT_INVERSE_KINEMATICS,
             tooltipText = SI_INTERFACE_OPTIONS_FOOT_INVERSE_KINEMATICS_TOOLTIP,
+        },
+
+        --Options_Gameplay_CompanionReactions
+        [IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_IN_WORLD,
+            panel = SETTING_PANEL_GAMEPLAY,
+            settingId = IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY,
+            text = SI_INTERFACE_OPTIONS_COMPANION_REACTIONS,
+            tooltipText = SI_INTERFACE_OPTIONS_COMPANION_REACTIONS_TOOLTIP,
+            valid = { COMPANION_REACTION_FREQUENCY_RATE_LOW, COMPANION_REACTION_FREQUENCY_RATE_NORMAL, COMPANION_REACTION_FREQUENCY_RATE_HIGH, },
+            valueStringPrefix = "SI_COMPANIONREACTIONFREQUENCYRATE",
         },
     },
 

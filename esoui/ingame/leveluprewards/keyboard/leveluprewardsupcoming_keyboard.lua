@@ -55,7 +55,7 @@ function ZO_LevelUpRewardsUpcoming_Keyboard:LayoutReward(rewardControl, data)
         rewardControl.nameControl:SetColor(r, g, b, 1)
     end
 
-    local icon = data:GetKeyboardIcon()
+    local icon = data:GetKeyboardLootIcon()
     if icon then
         rewardControl.iconControl:SetTexture(icon)
         rewardControl.iconControl:SetHidden(false)

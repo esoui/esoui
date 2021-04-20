@@ -141,3 +141,27 @@ end
 function ZO_GamepadLabeledQuantitySpinnerContainerTemplate_Initialize(control)
     zo_mixin(control, ZO_GamepadQuantitySpinner)
 end
+
+function ZO_GamepadSkillLinePreview_AbilityEntry_OnInitialized(control)
+    control.label = control:GetNamedChild("Label")
+    control.icon = control:GetNamedChild("Icon")
+    control.leftIndicator = control:GetNamedChild("LeftIndicator")
+    control.circleFrame = control:GetNamedChild("CircleFrame")
+    control.edgeFrame = control:GetNamedChild("EdgeFrame")
+    control.lock = control:GetNamedChild("Lock")
+    control.keybind = control:GetNamedChild("Keybind")
+    local fonts =
+    {
+        {
+            font = "ZoFontGamepad34",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontGamepad27",
+            lineLimit = 1,
+            dontUseForAdjusting = true,
+        },
+    }
+    ZO_FontAdjustingWrapLabel_OnInitialized(control.label, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+end
+

@@ -1,12 +1,19 @@
 <GuiXml>
     <Animations>
         <!-- ZO_MoneyInput changes to ZO_CurrencyInput -->
-        <AnimationTimeline name="MoneyInputPulse" inherits="CurrencyInputPulse" />            
+        <AnimationTimeline name="MoneyInputPulse" inherits="CurrencyInputPulse" />
         <AnimationTimeline name="MoneyInputBadInput" inherits="CurrencyInputBadInput" />
+        <!-- Companion skills refactor -->
+        <AnimationTimeline name="GamepadSkillsSingleAssignActionBarAnimation" inherits="ZO_GamepadSkillsActionBarFocusAnimation" />
     </Animations>
     
     <Controls>
         <!-- ZO_MoneyInput changes to ZO_CurrencyInput -->
         <Backdrop name="ZO_DefaultMoneyInputField" inherits="ZO_DefaultCurrencyInputField" virtual="true" />
+        <!-- Companion skills refactor -->
+        <Control name="ZO_SkillsSkillHeader" inherits="ZO_Skills_SkillLineInfo_Keyboard" virtual="true" />
+        <Control name="GamepadSkillsSimpleActionButtonTemplate" inherits="ZO_GamepadSkillsActionButtonNoKeybind" virtual="true" />
+        <Control name="GamepadSkillsActionButtonTemplate" inherits="ZO_GamepadSkillsActionButton" virtual="true" />
+        <Control name="GamepadSkillsActionBarTemplate" inherits="ZO_GamepadSkillsPlayerActionBar" virtual="true" />
 	</Controls>
 </GuiXml>

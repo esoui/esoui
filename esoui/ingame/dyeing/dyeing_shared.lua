@@ -1,19 +1,21 @@
 do
-    local DYEABLE_SLOTS = 
+    local DYEABLE_SLOTS =
     {
         [RESTYLE_MODE_EQUIPMENT] = {},
         [RESTYLE_MODE_COLLECTIBLE] = {},
         [RESTYLE_MODE_OUTFIT] = {},
+        [RESTYLE_MODE_COMPANION_COLLECTIBLE] = {},
+        [RESTYLE_MODE_COMPANION_OUTFIT] = {},
     }
 
-    local DYEABLE_SORT_ORDER_OVERRIDE = 
+    local DYEABLE_SORT_ORDER_OVERRIDE =
     {
         [RESTYLE_MODE_EQUIPMENT] =
         {
             [EQUIP_SLOT_OFF_HAND] = 100,
             [EQUIP_SLOT_BACKUP_OFF] = 100,
         },
-        [RESTYLE_MODE_OUTFIT] = 
+        [RESTYLE_MODE_OUTFIT] =
         {
             [OUTFIT_SLOT_WEAPON_OFF_HAND] = 100,
             [OUTFIT_SLOT_WEAPON_OFF_HAND_BACKUP] = 100,
@@ -51,18 +53,23 @@ do
         IterateDyeableSlotData(RESTYLE_MODE_EQUIPMENT, EQUIP_SLOT_ITERATION_BEGIN, EQUIP_SLOT_ITERATION_END)
         IterateDyeableSlotData(RESTYLE_MODE_COLLECTIBLE, COLLECTIBLE_CATEGORY_TYPE_ITERATION_BEGIN, COLLECTIBLE_CATEGORY_TYPE_ITERATION_END)
         IterateDyeableSlotData(RESTYLE_MODE_OUTFIT, OUTFIT_SLOT_ITERATION_BEGIN, OUTFIT_SLOT_ITERATION_END)
+        IterateDyeableSlotData(RESTYLE_MODE_COMPANION_COLLECTIBLE, COLLECTIBLE_CATEGORY_TYPE_ITERATION_BEGIN, COLLECTIBLE_CATEGORY_TYPE_ITERATION_END)
+        IterateDyeableSlotData(RESTYLE_MODE_COMPANION_OUTFIT, OUTFIT_SLOT_ITERATION_BEGIN, OUTFIT_SLOT_ITERATION_END)
     end
 
     function ZO_Dyeing_GetSlotsForRestyleSet(restyleMode, restyleSetIndex)
         local cachedSlots = DYEABLE_SLOTS[restyleMode]
-        for _, restyleSlotData in pairs(cachedSlots) do
-            -- This is a static cache for lookup/iteration purposes, so we don't have to redo complex checks and table allocation, but it's shared across all sets for a mode
-            -- If one is already the right set, they're all already the right set
-            if restyleSlotData:GetRestyleSetIndex() == restyleSetIndex then
-                break
-            end
+        -- Companion Equipment mode is not allowed to dye so the diable slots may be nil
+        if cachedSlots then
+            for _, restyleSlotData in pairs(cachedSlots) do
+                -- This is a static cache for lookup/iteration purposes, so we don't have to redo complex checks and table allocation, but it's shared across all sets for a mode
+                -- If one is already the right set, they're all already the right set
+                if restyleSlotData:GetRestyleSetIndex() == restyleSetIndex then
+                    break
+                end
 
-            restyleSlotData:SetRestyleSetIndex(restyleSetIndex)
+                restyleSlotData:SetRestyleSetIndex(restyleSetIndex)
+            end
         end
 
         return cachedSlots
@@ -259,9 +266,12 @@ end
 
 function ZO_Dyeing_AreTherePendingDyes(restyleMode, restyleSetIndex)
     local slots = ZO_Dyeing_GetSlotsForRestyleSet(restyleMode, restyleSetIndex)
-    for i, dyeableSlotData in ipairs(slots) do
-        if dyeableSlotData:AreTherePendingDyeChanges() then
-            return true
+    -- Companion Equipment mode is not allowed to dye so the diable slots may be nil
+    if slots then
+        for i, dyeableSlotData in ipairs(slots) do
+            if dyeableSlotData:AreTherePendingDyeChanges() then
+                return true
+            end
         end
     end
     return false

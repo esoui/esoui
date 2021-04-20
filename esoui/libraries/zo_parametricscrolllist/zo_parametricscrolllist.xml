@@ -2,13 +2,7 @@
     <Controls>
         <Control name="ZO_VerticalParametricScrollListTemplate" mouseEnabled="true" virtual="true">
             <OnMouseWheel>
-                if self.scrollList.active then
-                    if delta > 0 then
-                        self.scrollList:MovePrevious()
-                    else
-                        self.scrollList:MoveNext()
-                    end
-                end
+                ZO_ParametricScrollList_OnMouseWheel(self, delta)
             </OnMouseWheel>
 
             <Controls>
@@ -16,7 +10,7 @@
                     <AnchorFill />
                     <FadeGradient x1="0" y1="1" size1="ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE" x2="0" y2="-1" size2="ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE" />
                 </Scroll>
-                
+
                 <Control name="$(parent)ListScreenCenterIsAlongTop">
                     <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT" />
                     <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" />
@@ -37,13 +31,7 @@
 
         <Control name="ZO_HorizontalParametricScrollListTemplate" mouseEnabled="true" virtual="true">
             <OnMouseWheel>
-                if self.scrollList.active then
-                    if delta > 0 then
-                        self.scrollList:MoveNext()
-                    else
-                        self.scrollList:MovePrevious()
-                    end
-                end
+                ZO_ParametricScrollList_OnMouseWheel(self, delta)
             </OnMouseWheel>
 
             <Controls>

@@ -1,0 +1,42 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CompanionSkills_Panel_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_CompanionSkills_Keyboard_OnInitialize(self)
+            </OnInitialized>
+            <Controls>
+                <!-- Left side: Skill lines tree -->
+                <Control name="$(parent)SkillLinesContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="330"/>
+                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="72" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-55" />
+                </Control>
+
+                <!-- Right Side: skill line info, skill list, action bar -->
+                
+                <Control name="$(parent)SkillLineInfo" inherits="ZO_Skills_SkillLineInfo_Keyboard">
+                    <Anchor point="TOP" offsetY="-5" constrains="Y" />
+                    <Anchor point="LEFT" relativeTo="$(parent)SkillLinesContainer" relativePoint="RIGHT" offsetX="45" constrains="X" />
+                </Control>
+
+                <Control name="$(parent)SkillList" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SkillLineInfo" relativePoint="BOTTOMLEFT" offsetX="-45" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-33" offsetY="-55" />
+                </Control>
+
+                <Control name="$(parent)SkillLineAdvisedOverlay" inherits="ZO_Skills_SkillLineAdvisedOverlay">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SkillList" relativePoint="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SkillList" relativePoint="BOTTOMRIGHT"/>
+                </Control>
+
+                <Control name="$(parent)AssignableActionBar" inherits="ZO_KeyboardAssignableActionBar">
+                    <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetX="-40" offsetY="30" />
+                </Control>
+
+                <Label name="$(parent)PriorityHeader" text="SI_COMPANION_BAR_ABILITY_PRIORITY" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)AssignableActionBar" relativePoint="TOP" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>
