@@ -57,6 +57,8 @@ function ZO_CompanionOverview_Keyboard:Initialize(control)
                     ZO_OUTFIT_MANAGER:UnequipOutfit(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
                 end
             end
+            ITEM_PREVIEW_KEYBOARD:ClearPreviewCollection()
+            ApplyChangesToPreviewCollectionShown()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             ACTION_BAR_ASSIGNMENT_MANAGER:SetHotbarCycleOverride(nil)
         end

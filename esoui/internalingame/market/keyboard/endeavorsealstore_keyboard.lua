@@ -34,6 +34,9 @@ end
 -- Begin ZO_Market_Keyboard overrides
 
 function ZO_EndeavorSealStore_Keyboard:AddTopLevelCategories()
+    self:ClearMarketProducts()
+
+    local shownCategories = false
     if not self:HasValidSearchString() then
         local displayGroup = self:GetDisplayGroup()
 
@@ -46,6 +49,7 @@ function ZO_EndeavorSealStore_Keyboard:AddTopLevelCategories()
             self:AddCustomTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, GetString(SI_MARKET_FEATURED_CATEGORY), NO_SUBCATEGORY, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_FEATURED, function()
                 return self:HasNewFeaturedMarketProducts()
             end)
+            shownCategories = true
         end
 
         local numCategories = GetNumMarketProductCategories(displayGroup)
@@ -56,6 +60,7 @@ function ZO_EndeavorSealStore_Keyboard:AddTopLevelCategories()
                 self:AddMarketProductTopLevelCategory(categoryIndex, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, function()
                     return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
                 end)
+                shownCategories = true
             end
         end
     else
@@ -64,8 +69,11 @@ function ZO_EndeavorSealStore_Keyboard:AddTopLevelCategories()
             self:AddMarketProductTopLevelCategory(categoryIndex, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, function()
                 return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
             end)
+            shownCategories = true
         end
     end
+
+    self:SetIsMarketEmpty(not shownCategories)
 end
 
 -- End ZO_Market_Keyboard overrides

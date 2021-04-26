@@ -352,12 +352,17 @@ do
         local systemMailNodeData = self.systemMailNodeData
         ZO_ClearTable(playerMailNodeData.unreadData)
         ZO_ClearTable(systemMailNodeData.unreadData)
+        
+        local currentReadMailData = nil
 
         -- Accumulate data
         for mailId in ZO_GetNextMailIdIter do
             local mailData = {}
             ZO_MailInboxShared_PopulateMailData(mailData, mailId)
             table.insert(masterList, mailData)
+            if self.mailId and not currentReadMailData and AreId64sEqual(self.mailId, mailId) then
+                currentReadMailData = mailData
+            end
 
             if mailData.isFromPlayer then
                 table.insert(playerList, mailData)
@@ -442,6 +447,12 @@ do
 
         local DONT_BRING_PARENT_INTO_VIEW = false
         tree:Commit(autoSelectNode, DONT_BRING_PARENT_INTO_VIEW)
+
+        -- ESO-714031: Edge case where the mail you had been reading when the menu closed may be gone due to expiration when you come back
+        -- But the system doesn't end and re-read mail you were already reading when continually opening and closing the menu, for effeciency
+        if self.mailId and not currentReadMailData then
+            self:EndRead()
+        end
 
         self.fullLabel:SetHidden(not IsLocalMailboxFull())
     end

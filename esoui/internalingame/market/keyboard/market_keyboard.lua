@@ -1039,7 +1039,7 @@ end
 
 function ZO_Market_Keyboard:OnMarketUpdate()
     if TREE_UNDERLAY_FRAGMENT then
-        if self:GetState() == MARKET_STATE_OPEN then
+        if self:GetState() == MARKET_STATE_OPEN and not self:IsMarketEmpty() then
             self.marketScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
         else
             self.marketScene:RemoveFragment(TREE_UNDERLAY_FRAGMENT)

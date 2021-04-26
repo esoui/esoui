@@ -452,9 +452,12 @@ function ZO_ActionBarAssignmentManager_Hotbar:Initialize(hotbarCategory)
     end
 end
 
-function ZO_ActionBarAssignmentManager_Hotbar:Reset()
+function ZO_ActionBarAssignmentManager_Hotbar:Clear()
     ZO_ClearTable(self.slots)
+end
 
+function ZO_ActionBarAssignmentManager_Hotbar:Reset()
+    self:Clear()
     for actionSlotIndex = SKILL_BAR_START_SLOT_INDEX, SKILL_BAR_END_SLOT_INDEX do
         self:ResetSlot(actionSlotIndex)
     end
@@ -867,10 +870,22 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
 
     local function OnPlayerActivated()
         self:ResetCurrentHotbarToActiveBarInternal()
-        self:ResetPlayerHotbars()
+        if HasActiveCompanion() and COMPANION_SKILLS_DATA_MANAGER:IsDataReady() then
+            self:ResetAllHotbars()
+        else
+            -- We do not have companion skills data at this time, let's skip the companion bar until we do
+            self:ResetPlayerHotbars()
+        end
         self:UpdateBackupBarStateInCycle()
     end
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+
+    local function OnPlayerDeactivated()
+        -- the companion may or may not be resummoned after a jump or load
+        -- screen, let's clear out the data so we can refill it afterward.
+        self.hotbars[HOTBAR_CATEGORY_COMPANION]:Clear()
+    end
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_PLAYER_DEACTIVATED, OnPlayerDeactivated)
 end
 
 function ZO_ActionBarAssignmentManager:ResetCurrentHotbarToActiveBarInternal()

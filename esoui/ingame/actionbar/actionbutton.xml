@@ -316,42 +316,42 @@
         </Control>
 
         <Control name="ZO_ActionBarTimer_BackBarSlot_Keyboard_Template" virtual="true">
-            <Dimensions x="36" y="48" />
+            <Dimensions x="40" y="56" />
             <Controls>
                 <StatusBar name="$(parent)ActionTimerStatusBar" inherits="ZO_DefaultStatusBar" pixelRoundingEnabled="false">
-                    <Dimensions y="4" />
+                    <Dimensions y="6" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Frame" relativePoint="TOPLEFT" offsetX="3" offsetY="3" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Frame" relativePoint="TOPRIGHT" offsetX="-3" offsetY="3" />
                 </StatusBar>
                 
                 <Texture name="$(parent)Icon">
-                    <Dimensions x="34" y="34" />
+                    <Dimensions x="38" y="38" />
                     <Anchor point="CENTER" />
                 </Texture>
 
                 <Texture name="$(parent)Frame">
-                    <Dimensions x="36" y="48" />
+                    <Dimensions x="40" y="56" />
                     <Anchor point="CENTER" />
-                    <TextureCoords left="0" right="0.5625" top="0" bottom="0.75" />
+                    <TextureCoords left="0" right="0.625" top="0" bottom="0.875" />
                 </Texture>
 
                 <Texture name="$(parent)BG" textureFile="EsoUI/Art/ActionBar/backrow_abilityFrame_BLANK.dds">
-                    <Dimensions x="36" y="48" />
-                    <TextureCoords left="0" right="0.5625" top="0" bottom="0.75" />
+                    <Dimensions x="40" y="56" />
+                    <TextureCoords left="0" right="0.625" top="0" bottom="0.875" />
                 </Texture>
 
                 <Texture name="$(parent)Overlay" textureFile="EsoUI/Art/ActionBar/backrow_abilityFrame_overlay.dds">
-                    <Dimensions x="36" y="48" />
-                    <TextureCoords left="0" right="0.5625" top="0" bottom="0.75" />
+                    <Dimensions x="40" y="56" />
+                    <TextureCoords left="0" right="0.625" top="0" bottom="0.875" />
                 </Texture>
             </Controls>
         </Control>
 
         <Control name="ZO_ActionBarTimer_BackBarSlot_Gamepad_Template" virtual="true" override="true">
-            <Dimensions x="48" y="60" />
+            <Dimensions x="52" y="68" />
             <Controls>
                 <StatusBar name="$(parent)ActionTimerStatusBar" inherits="ZO_GamepadStatusBarMedium" pixelRoundingEnabled="false">
-                    <Dimensions y="6" />
+                    <Dimensions y="8" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Frame" relativePoint="TOPLEFT" offsetX="4" offsetY="3" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Frame" relativePoint="TOPRIGHT" offsetX="-4" offsetY="3" />
                     <!-- Overriding and leaving LeadingEdge blank to avoid having right-side taper -->
@@ -359,24 +359,24 @@
                 </StatusBar>
                 
                 <Texture name="$(parent)Icon">
-                    <Dimensions x="40" y="40" />
+                    <Dimensions x="44" y="44" />
                     <Anchor point="CENTER" />
                 </Texture>
                 
                 <Texture name="$(parent)Frame">
-                    <Dimensions x="48" y="60" />
+                    <Dimensions x="52" y="68" />
                     <Anchor point="CENTER" />
-                    <TextureCoords left="0" right="0.75" top="0" bottom="0.9375" />
+                    <TextureCoords left="0" right="0.8125" top="0" bottom="1.0625" />
                 </Texture>
 
                 <Texture name="$(parent)BG" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_backrow_abilityFrame_BLANK.dds">
-                    <Dimensions x="48" y="60" />
-                    <TextureCoords left="0" right="0.75" top="0" bottom="0.9375" />
+                    <Dimensions x="52" y="68" />
+                    <TextureCoords left="0" right="0.8125" top="0" bottom="1.0625" />
                 </Texture>
                 
                 <Texture name="$(parent)Overlay" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_backrow_abilityFrame_overlay.dds">
-                    <Dimensions x="48" y="60" />
-                    <TextureCoords left="0" right="0.75" top="0" bottom="0.9375" />
+                    <Dimensions x="52" y="68" />
+                    <TextureCoords left="0" right="0.8125" top="0" bottom="1.0625" />
                 </Texture>
             </Controls>
         </Control>

@@ -157,6 +157,7 @@ end
 local ZO_TimedActivities_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_TimedActivities_Manager:Initialize()
+    self.availableActivityTypes = {}
     self.activitiesData = {}
 
     self.activityTypeLimitData = {}
@@ -172,6 +173,16 @@ function ZO_TimedActivities_Manager:Initialize()
     self:RegisterEvents()
 end
 
+function ZO_TimedActivities_Manager:RefreshAvailability()
+    local isSystemAvailable = IsTimedActivitySystemAvailable()
+
+    for activityType = TIMED_ACTIVITY_TYPE_MIN_VALUE, TIMED_ACTIVITY_TYPE_MAX_VALUE do
+        self.availableActivityTypes[activityType] = isSystemAvailable and self:GetNumTimedActivities(activityType) > 0
+    end
+
+    self:FireCallbacks("OnRefreshAvailability", self.availableActivityTypes)
+end
+
 function ZO_TimedActivities_Manager:RefreshMasterList()
     ZO_ClearNumericallyIndexedTable(self.activitiesData)
 
@@ -182,6 +193,7 @@ function ZO_TimedActivities_Manager:RefreshMasterList()
     end
 
     self:RefreshTimedActivityTypeLimitData()
+    self:RefreshAvailability()
     self:FireCallbacks("OnActivitiesUpdated")
 end
 
@@ -189,6 +201,7 @@ function ZO_TimedActivities_Manager:RefreshSingleMasterListItem(index)
     self.activitiesData[index] = ZO_TimedActivityData:New(index)
 
     self:RefreshTimedActivityTypeLimitData()
+    self:RefreshAvailability()
     self:FireCallbacks("OnActivityUpdated", index)
 end
 
@@ -201,9 +214,14 @@ function ZO_TimedActivities_Manager:RegisterEvents()
         self:RefreshSingleMasterListItem(index)
     end
 
+    local function OnSystemStatusUpdated()
+        self:RefreshAvailability()
+    end
+
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_PLAYER_ACTIVATED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITIES_UPDATED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, OnActivityUpdated)
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_SYSTEM_STATUS_UPDATED, OnSystemStatusUpdated)
 end
 
 function ZO_TimedActivities_Manager:ActivitiesIterator(filterFunctions)
@@ -237,6 +255,16 @@ function ZO_TimedActivities_Manager:GetTimedActivityTypeTimeRemainingSeconds(tim
     end
 
     return minimumTimeRemainingS or 0
+end
+
+function ZO_TimedActivities_Manager:GetNumTimedActivities(activityType)
+    local numActivities = 0
+    for _, timedActivity in self:ActivitiesIterator() do
+        if timedActivity:GetType() == activityType then
+            numActivities = numActivities + 1
+        end
+    end
+    return numActivities
 end
 
 function ZO_TimedActivities_Manager:RefreshTimedActivityTypeLimitData()

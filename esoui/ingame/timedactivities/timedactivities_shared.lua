@@ -9,10 +9,16 @@ function ZO_TimedActivities_Shared:Initialize(control)
     self:InitializeRefreshGroups()
     self:InitializeActivityFinderCategory()
 
+    local function OnRefreshAvailability(availableActivityTypes)
+        self.availableActivityTypes = availableActivityTypes
+        self:RefreshAvailability()
+    end
+
     local function OnActivitiesUpdated()
         self:MarkDirty()
     end
 
+    TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnRefreshAvailability", OnRefreshAvailability)
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivitiesUpdated", OnActivitiesUpdated)
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivityUpdated", OnActivitiesUpdated)
 end
@@ -46,6 +52,10 @@ function ZO_TimedActivities_Shared:InitializeRefreshGroups()
     end, "Refresh")
 end
 
+function ZO_TimedActivities_Shared:IsActivityTypeAvailable(activityType)
+    return self.availableActivityTypes[activityType]
+end
+
 function ZO_TimedActivities_Shared:GetCurrentActivityType()
     return self.currentActivityType
 end
@@ -75,6 +85,10 @@ function ZO_TimedActivities_Shared:MarkDirty()
 end
 
 function ZO_TimedActivities_Shared:Refresh()
+    assert(false) -- Must be overridden
+end
+
+function ZO_TimedActivities_Shared:RefreshAvailability()
     assert(false) -- Must be overridden
 end
 

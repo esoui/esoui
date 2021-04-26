@@ -13,6 +13,7 @@ function ZO_TimedActivities_Gamepad:Initialize(control)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_DO_NOT_CREATE_TAB_BAR, ACTIVATE_ON_SHOW, TIMED_ACTIVITIES_SCENE_GAMEPAD)
     ZO_TimedActivities_Shared.Initialize(self, control)
 
+    self.emptyControl = self.control:GetNamedChild("Empty")
     self.activitiesControl = self.control:GetNamedChild("Activities")
     self.activitiesList = ZO_TimedActivitiesList_Gamepad:New(self.activitiesControl)
     self:SetCurrentActivityType(TIMED_ACTIVITY_TYPE_DAILY)
@@ -118,8 +119,21 @@ function ZO_TimedActivities_Gamepad:Refresh()
     end
 
     self.activitiesList:RefreshList(currentActivityType, activitiesList)
+    self:RefreshAvailability()
     self:RefreshCurrentActivityInfo()
     ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
+end
+
+function ZO_TimedActivities_Gamepad:RefreshAvailability()
+    local activityType = self:GetCurrentActivityType()
+    local isAvailable = self:IsActivityTypeAvailable(activityType)
+    if not isAvailable then
+        local activityTypeName = GetString("SI_TIMEDACTIVITYTYPE", activityType)
+        self.emptyControl:GetNamedChild("Message"):SetText(zo_strformat(SI_TIMED_ACTIVITIES_EMPTY_LIST, activityTypeName))
+    end
+
+    self.emptyControl:SetHidden(isAvailable)
+    self.activitiesControl:SetHidden(not isAvailable)
 end
 
 function ZO_TimedActivities_Gamepad:OnHidden()
@@ -250,7 +264,16 @@ function ZO_TimedActivitiesList_Gamepad:SetupActivityRow(control, data)
         progressPercent = progress / maxProgress
     end
     control.progressStatusBar:SetValue(progressPercent)
-    control.progressLabel:SetText(zo_strformat(SI_TIMED_ACTIVITIES_ACTIVITY_COMPLETION_VALUES, progress, maxProgress))
+
+    if progressPercent < 1 then
+        local progressString = zo_strformat(SI_TIMED_ACTIVITIES_ACTIVITY_COMPLETION_VALUES, progress, maxProgress)
+        control.progressLabel:SetText(progressString)
+        control.progressLabel:SetHidden(false)
+        control.completeIcon:SetHidden(true)
+    else
+        control.progressLabel:SetHidden(true)
+        control.completeIcon:SetHidden(false)
+    end
 
     local completed = self.isAtActivityLimit or control.data:IsCompleted()
     control:SetAlpha(completed and COMPLETE_ACTIVITY_ALPHA or INCOMPLETE_ACTIVITY_ALPHA)
@@ -345,4 +368,5 @@ function ZO_TimedActivityRow_Gamepad_OnInitialized(control)
     control.progressStatusBar = control:GetNamedChild("ProgressBar")
     ZO_StatusBar_InitializeDefaultColors(control.progressStatusBar)
     control.progressLabel = control.progressStatusBar:GetNamedChild("Progress")
+    control.completeIcon = control:GetNamedChild("CompleteIcon")
 end

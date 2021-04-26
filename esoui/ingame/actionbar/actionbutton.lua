@@ -287,7 +287,11 @@ function ActionButton:UpdateTimer()
         if self.endTimeMS > GetFrameTimeMilliseconds() and self.showTimer then
             local remainingEffectTimeMS = self.endTimeMS - GetFrameTimeMilliseconds()
             local value = remainingEffectTimeMS / 1000
-            self.timerText:SetText(ZO_FormatTimeAsDecimalWhenBelowThreshold(value, MINIMUM_TIMER_DECIMAL_VALUE, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT))
+            
+            local SHOW_UNIT_OVER_THRESHOLD_S = ZO_ONE_MINUTE_IN_SECONDS
+            local SHOW_DECIMAL_UNDER_THRESHOLD_S = ZO_EFFECT_EXPIRATION_IMMINENCE_THRESHOLD_S
+            local timeLeftString = ZO_FormatTimeShowUnitOverThresholdShowDecimalUnderThreshold(value, SHOW_UNIT_OVER_THRESHOLD_S, SHOW_DECIMAL_UNDER_THRESHOLD_S, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT)
+            self.timerText:SetText(timeLeftString)
         else
             self.endTimeMS = nil
             self.timerText:SetHidden(true)
@@ -760,11 +764,17 @@ function ActionButton:StopUltimateReadyAnimations()
     end
 end
 
-function ActionButton:PlayUltimateReadyAnimations(ultimateReadyBurstTexture, ultimateReadyLoopTexture)
+function ActionButton:PlayUltimateReadyAnimations(ultimateReadyBurstTexture, ultimateReadyLoopTexture, setProgressNoAnim)
+    local isCompanionUltimate = self.button.hotbarCategory == HOTBAR_CATEGORY_COMPANION
+    local ultimateSound = isCompanionUltimate and SOUNDS.ABILITY_COMPANION_ULTIMATE_READY or SOUNDS.ABILITY_ULTIMATE_READY
     if not self.ultimateReadyBurstTimeline then
         self.ultimateReadyBurstTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("UltimateReadyBurst", ultimateReadyBurstTexture)
         self.ultimateReadyLoopTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("UltimateReadyLoop", ultimateReadyLoopTexture)
-        self.ultimateReadyBurstTimeline:SetHandler("OnPlay", function() PlaySound(SOUNDS.ABILITY_ULTIMATE_READY) end)
+        self.ultimateReadyBurstTimeline:SetHandler("OnPlay", function() 
+            if not self.suppressUltimateSound then
+                PlaySound(ultimateSound)
+            end
+        end)
 
         local function OnStop(timeline)
             if timeline:GetProgress() == 1.0 then
@@ -775,6 +785,8 @@ function ActionButton:PlayUltimateReadyAnimations(ultimateReadyBurstTexture, ult
         end
         self.ultimateReadyBurstTimeline:SetHandler("OnStop", function(timeline) OnStop(timeline) end)
     end
+
+    self.suppressUltimateSound = setProgressNoAnim and isCompanionUltimate
 
     local addChromaEffect = false
     if not g_activeWeaponSwapInProgress then
@@ -872,7 +884,7 @@ function ActionButton:SetUltimateMeter(ultimateCount, setProgressNoAnim)
 
             -- Set fill bar to full
             self:PlayUltimateFillAnimation(ultimateFillLeftTexture, ultimateFillRightTexture, 1, setProgressNoAnim)
-            self:PlayUltimateReadyAnimations(ultimateReadyBurstTexture, ultimateReadyLoopTexture)
+            self:PlayUltimateReadyAnimations(ultimateReadyBurstTexture, ultimateReadyLoopTexture, setProgressNoAnim)
         else
             --stop animation
             ultimateReadyBurstTexture:SetHidden(true)
@@ -969,25 +981,28 @@ end
 function ZO_ActionBarTimer:SetFillBar(timeRemainingMS, durationMS)
     self.endTimeMS = GetFrameTimeMilliseconds() + timeRemainingMS
     self.durationMS = durationMS
-    if self.endTimeMS and self.durationMS and self.showBackRowSlot then
-        self.slot:SetHidden(false)
-    end
 
-    self.slot:SetHandler("OnUpdate", function() self:UpdateFillBar() end, "FillBarUpdate")
+    self:UpdateFillBar()
+    if self:HasValidDuration() then
+        self.slot:SetHidden(false)
+        self.slot:SetHandler("OnUpdate", function() self:UpdateFillBar() end, "FillBarUpdate")
+    end
 end
 
 function ZO_ActionBarTimer:UpdateFillBar()
-    if self.endTimeMS and self.durationMS then
-        if self.endTimeMS >= GetFrameTimeMilliseconds() and self.showBackRowSlot then
-            local interval = (self.endTimeMS - GetFrameTimeMilliseconds()) / self.durationMS
-            self.fillStatusBar:SetValue(interval)
-        else
-            self.endTimeMS = nil
-            self.fillStatusBar:SetValue(0)
-            self.slot:SetHandler("OnUpdate", nil, "FillBarUpdate")
-            self.slot:SetHidden(true)
-        end
+    if self:HasValidDuration() then
+        local interval = (self.endTimeMS - GetFrameTimeMilliseconds()) / self.durationMS
+        self.fillStatusBar:SetValue(interval)
+    else
+        self.endTimeMS = nil
+        self.fillStatusBar:SetValue(0)
+        self.slot:SetHidden(true)
+        self.slot:SetHandler("OnUpdate", nil, "FillBarUpdate")
     end
+end
+
+function ZO_ActionBarTimer:HasValidDuration()
+    return self.showBackRowSlot and self.durationMS and self.durationMS ~= 0 and self.endTimeMS and self.endTimeMS >= GetFrameTimeMilliseconds()
 end
 
 function ZO_ActionBarTimer:HandleSlotChanged(barType)

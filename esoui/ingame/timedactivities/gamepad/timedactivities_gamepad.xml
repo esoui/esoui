@@ -1,7 +1,6 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_TimedActivityReward_Gamepad" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
-
             <OnInitialized>
                 self.amountLabel = self:GetNamedChild("Amount")
                 self.iconTexture = self:GetNamedChild("Icon")
@@ -45,15 +44,29 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)RewardHeader" relativePoint="BOTTOMLEFT" />
                     <Anchor point="RIGHT" relativeTo="$(parent)RewardContainer" constrains="X" />
                 </StatusBar>
+
+                <Texture name="$(parent)CompleteIcon" hidden="true" inheritAlpha="false" layer="OVERLAY" textureFile="EsoUI/Art/Miscellaneous/check_icon_32.dds" tier="HIGH">
+                    <Anchor point="CENTER" relativeTo="$(parent)ProgressBar" />
+                    <Dimensions x="48" y="48" />
+                </Texture>
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_TimedActivitiesTopLevel_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+        <TopLevelControl name="ZO_TimedActivitiesGamepad" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
             <OnInitialized>
                 ZO_TimedActivities_Gamepad_OnInitialized(self)
             </OnInitialized>
 
             <Controls>
+                <Control name="$(parent)Empty" inherits="ZO_AnchoredToQuadrant_2_3_Background" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)Message" font="ZoFontGamepadCondensed34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="40" offsetY="150" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-50" offsetY="150" />
+                        </Label>
+                    </Controls>
+                </Control>
+
                 <Control name="$(parent)Activities" inherits="ZO_AnchoredToQuadrant_2_3_Background">
                     <Controls>
                         <Label name="$(parent)TimeRemainingHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadBold34" modifyTextType="UPPERCASE" text="SI_TIMED_ACTIVITIES_ACTIVITY_TIME_REMAINING_HEADER">

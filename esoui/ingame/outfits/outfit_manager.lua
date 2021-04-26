@@ -869,9 +869,9 @@ do
         [OUTFIT_SLOT_SHIELD_BACKUP] = true,
     }
 
-    function Outfit_Manager:IsWeaponOutfitSlotActive(outfitSlot)
+    function Outfit_Manager:IsWeaponOutfitSlotActive(outfitSlot, actorCategory)
         local activeWeaponPair = GetActiveWeaponPairInfo()
-        if activeWeaponPair == ACTIVE_WEAPON_PAIR_MAIN then
+        if activeWeaponPair == ACTIVE_WEAPON_PAIR_MAIN or actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
             return MAIN_WEAPONS[outfitSlot]
         else
             return BACKUP_WEAPONS[outfitSlot]
@@ -879,7 +879,7 @@ do
     end
 
     function Outfit_Manager:IsWeaponOutfitSlotCurrentlyHeld(outfitSlot, actorCategory)
-        if self:IsWeaponOutfitSlotActive(outfitSlot) then
+        if self:IsWeaponOutfitSlotActive(outfitSlot, actorCategory) then
             local mainHandOutfitSlot, offHandOutfitSlot = GetOutfitSlotsForCurrentlyHeldWeapons(actorCategory)
             return outfitSlot == mainHandOutfitSlot or outfitSlot == offHandOutfitSlot
         end

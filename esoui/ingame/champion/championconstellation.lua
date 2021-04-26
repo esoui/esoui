@@ -127,7 +127,7 @@ function ZO_ChampionCluster:Initialize(constellation, sceneGraph, championCluste
         self.backgroundTexture:SetDimensions(clusterComputedWidth, clusterComputedHeight)
 
         --Calculate the x and y coordinates of the background so that it is centered on the root star
-        local nx, ny = championClusterData:GetRootChampionSkillData():GetPosition()
+        local nx, ny = championClusterData:GetRootChampionSkillData():GetPositionNoClusterOffset()
         local x, y = ZO_Champion_ConvertNormalizedCoordinatesToNodeOffset(nx, ny)
         self.node:AddTexture(self.backgroundTexture, x, y, ZO_CHAMPION_CLUSTER_DEPTH)
     end

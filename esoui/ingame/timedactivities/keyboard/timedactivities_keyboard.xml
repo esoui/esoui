@@ -62,44 +62,60 @@
                     <Anchor point="RIGHT" relativeTo="$(parent)RewardContainer" constrains="X" />
                     <Dimensions y="20" />
                 </StatusBar>
+
+                <Texture name="$(parent)CompleteIcon" hidden="true" inheritAlpha="false" layer="OVERLAY" textureFile="EsoUI/Art/Miscellaneous/check_icon_32.dds" tier="HIGH">
+                    <Anchor point="CENTER" relativeTo="$(parent)ProgressBar" />
+                    <Dimensions x="32" y="32" />
+                </Texture>
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_TimedActivitiesTopLevel_Keyboard" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true">
+        <TopLevelControl name="ZO_TimedActivitiesKeyboard" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true">
             <OnInitialized>
                 ZO_TimedActivities_Keyboard_OnInitialize(self)
             </OnInitialized>
 
             <Controls>
-                <Label name="$(parent)ExpirationHeader" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" offsetY="-30" />
+                <Label name="$(parent)EmptyMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" offsetY="60" />
+                    <Anchor point="TOPRIGHT" offsetX="-30" offsetY="60" />
                 </Label>
 
-                <Label name="$(parent)LimitHeader" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPRIGHT" offsetX="-30" offsetY="-30" />
-                </Label>
-
-                <Label name="$(parent)ActivityHeader" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_TIMED_ACTIVITIES_ACTIVITY_HEADER">
-                    <Anchor point="LEFT" relativeTo="$(parent)ExpirationHeader" constrains="X" />
-                    <Anchor point="TOP" relativeTo="ZO_GroupMenu_KeyboardHeader" offsetY="4" constrains="Y" />
-                </Label>
-
-                <Label name="$(parent)RewardHeader" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_TIMED_ACTIVITIES_REWARD_HEADER">
-                    <Anchor point="RIGHT" relativeTo="$(parent)LimitHeader" constrains="X" />
-                    <Anchor point="TOP" relativeTo="ZO_GroupMenu_KeyboardHeader" offsetY="4" constrains="Y" />
-                </Label>
-
-                <Scroll name="$(parent)Activities" inherits="ZO_ScrollContainer">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ActivityHeader" relativePoint="BOTTOMLEFT" offsetY="50" />
-                    <Anchor point="BOTTOMRIGHT" />
+                <Control name="$(parent)List">
+                    <AnchorFill />
 
                     <Controls>
-                        <Control name="$(parent)ScrollChild" override="true">
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="TOPRIGHT" />
-                        </Control>
+                        <Label name="$(parent)ExpirationHeader" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" offsetY="-30" />
+                        </Label>
+
+                        <Label name="$(parent)LimitHeader" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPRIGHT" offsetX="-30" offsetY="-30" />
+                        </Label>
+
+                        <Label name="$(parent)ActivityHeader" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_TIMED_ACTIVITIES_ACTIVITY_HEADER">
+                            <Anchor point="LEFT" relativeTo="$(parent)ExpirationHeader" constrains="X" />
+                            <Anchor point="TOP" relativeTo="ZO_GroupMenu_KeyboardHeader" offsetY="4" constrains="Y" />
+                        </Label>
+
+                        <Label name="$(parent)RewardHeader" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_TIMED_ACTIVITIES_REWARD_HEADER">
+                            <Anchor point="RIGHT" relativeTo="$(parent)LimitHeader" constrains="X" />
+                            <Anchor point="TOP" relativeTo="ZO_GroupMenu_KeyboardHeader" offsetY="4" constrains="Y" />
+                        </Label>
+
+                        <Scroll name="$(parent)Activities" inherits="ZO_ScrollContainer">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ActivityHeader" relativePoint="BOTTOMLEFT" offsetY="50" />
+                            <Anchor point="BOTTOMRIGHT" />
+
+                            <Controls>
+                                <Control name="$(parent)ScrollChild" override="true">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                </Control>
+                            </Controls>
+                        </Scroll>
                     </Controls>
-                </Scroll>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

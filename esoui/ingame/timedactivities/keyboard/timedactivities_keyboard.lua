@@ -1,6 +1,6 @@
 ZO_TimedActivities_Keyboard = ZO_TimedActivities_Shared:Subclass()
 
-local COMPLETE_ACTIVITY_ALPHA = 0.5
+local COMPLETE_ACTIVITY_ALPHA = 0.4
 local INCOMPLETE_ACTIVITY_ALPHA = 1
 
 function ZO_TimedActivities_Keyboard:RefreshCurrentActivityInfo()
@@ -39,7 +39,16 @@ function ZO_TimedActivities_Keyboard:AddActivityRow(activityData)
         progressPercent = progress / maxProgress
     end
     activityRow.progressStatusBar:SetValue(progressPercent)
-    activityRow.progressStatusBarLabel:SetText(zo_strformat(SI_TIMED_ACTIVITIES_ACTIVITY_COMPLETION_VALUES, progress, maxProgress))
+
+    if progressPercent < 1 then
+        local progressString = zo_strformat(SI_TIMED_ACTIVITIES_ACTIVITY_COMPLETION_VALUES, progress, maxProgress)
+        activityRow.progressStatusBarLabel:SetText(progressString)
+        activityRow.progressStatusBarLabel:SetHidden(false)
+        activityRow.completeIcon:SetHidden(true)
+    else
+        activityRow.progressStatusBarLabel:SetHidden(true)
+        activityRow.completeIcon:SetHidden(false)
+    end
 
     local completed = self.isAtActivityLimit or activityData:IsCompleted()
     activityRow:SetAlpha(completed and COMPLETE_ACTIVITY_ALPHA or INCOMPLETE_ACTIVITY_ALPHA)
@@ -73,10 +82,12 @@ end
 -----
 
 function ZO_TimedActivities_Keyboard:InitializeControls()
-    self.activitiesScroll = self.control:GetNamedChild("Activities")
+    self.emptyMessage = self.control:GetNamedChild("EmptyMessage")
+    self.listControl = self.control:GetNamedChild("List")
+    self.activitiesScroll = self.listControl:GetNamedChild("Activities")
     self.activitiesScrollChild = self.activitiesScroll:GetNamedChild("ScrollChild")
-    self.expirationHeader = self.control:GetNamedChild("ExpirationHeader")
-    self.limitHeader = self.control:GetNamedChild("LimitHeader")
+    self.expirationHeader = self.listControl:GetNamedChild("ExpirationHeader")
+    self.limitHeader = self.listControl:GetNamedChild("LimitHeader")
 
     self.activityRowPool = ZO_ControlPool:New("ZO_TimedActivityRow_Keyboard", self.activitiesScrollChild, "ActivityRow")
     self.activityRewardPool = ZO_ControlPool:New("ZO_TimedActivityReward_Keyboard", self.activitiesScrollChild, "ActivityReward")
@@ -145,7 +156,20 @@ function ZO_TimedActivities_Keyboard:Refresh()
         self:AddActivityRow(activityData)
     end
 
+    self:RefreshAvailability()
     self:RefreshCurrentActivityInfo()
+end
+
+function ZO_TimedActivities_Keyboard:RefreshAvailability()
+    local activityType = self:GetCurrentActivityType()
+    local isAvailable = self:IsActivityTypeAvailable(activityType)
+    if not isAvailable then
+        local activityTypeName = GetString("SI_TIMEDACTIVITYTYPE", activityType)
+        self.emptyMessage:SetText(zo_strformat(SI_TIMED_ACTIVITIES_EMPTY_LIST, activityTypeName))
+    end
+
+    self.emptyMessage:SetHidden(isAvailable)
+    self.listControl:SetHidden(not isAvailable)
 end
 
 function ZO_TimedActivities_Keyboard:OnHidden()
@@ -176,4 +200,5 @@ function ZO_TimedActivityRow_Keyboard_OnInitialize(control)
     control.progressStatusBar = control:GetNamedChild("ProgressBar")
     ZO_StatusBar_InitializeDefaultColors( control.progressStatusBar )
     control.progressStatusBarLabel = control.progressStatusBar:GetNamedChild("Progress")
+    control.completeIcon = control:GetNamedChild("CompleteIcon")
 end

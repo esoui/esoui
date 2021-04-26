@@ -1188,7 +1188,7 @@ end
 
 function ZO_CollectibleCategoryData:HasAnyCompanionUsableCollectibles()
     for _, collectibleData in ipairs(self.orderedCollectibles) do
-        if collectibleData:IsCollectibleCategoryCompanionUsable() then
+        if collectibleData:IsCollectibleCategoryCompanionUsable() and collectibleData:IsCollectibleAvailableToCompanion() then
             return true
         end
     end

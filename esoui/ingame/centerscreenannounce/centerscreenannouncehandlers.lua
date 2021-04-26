@@ -1172,9 +1172,9 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_SCRYING_RESULT] = function(result)
     end
 end
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED] = function(timedActivityId, progress, complete)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED] = function(timedActivityIndex, previousProgress, currentProgress, complete)
     if complete then
-        local activityData = ZO_TimedActivityData:New(timedActivityId)
+        local activityData = ZO_TimedActivityData:New(timedActivityIndex)
         if activityData then
             local activityName = activityData:GetName()
             if activityName ~= "" then
@@ -1187,6 +1187,19 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED] = function(t
                 return messageParams
             end
         end
+    end
+end
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_TIMED_ACTIVITY_TYPE_PROGRESS_UPDATED] = function(activityType, previousNumComplete, currentNumComplete, complete)
+    if complete then
+        local activityTypeName = GetString("SI_TIMEDACTIVITYTYPE", activityType)
+        local _, maxNumActivities = TIMED_ACTIVITIES_MANAGER:GetTimedActivityTypeLimitInfo(activityType)
+        local messageTitle = zo_strformat(SI_TIMED_ACTIVITY_TYPE_COMPLETED_CSA, currentNumComplete, maxNumActivities, activityTypeName)
+        local messageSubheading = GetString("SI_TIMEDACTIVITYTYPE_FOLLOWUPHINT", activityType)
+
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_COMPLETED)
+        messageParams:SetText(messageTitle, messageSubheading)
+        return messageParams
     end
 end
 

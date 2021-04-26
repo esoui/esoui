@@ -1076,8 +1076,8 @@ local AlertHandlers = {
         end
     end,
    
-    [EVENT_COMPANION_WARNING] = function(warningType, companionId)
-        return ALERT, zo_strformat(GetString("SI_COMPANIONWARNINGTYPE", warningType), GetCompanionName(companionId))
+    [EVENT_COMPANION_SUMMON_RESULT] = function(summonResult, companionId)
+        return ALERT, zo_strformat(GetString("SI_COMPANIONSUMMONRESULT", summonResult), GetCompanionName(companionId))
     end,
 }
 

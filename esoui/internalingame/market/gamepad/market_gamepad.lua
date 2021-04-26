@@ -157,24 +157,27 @@ function GamepadMarket:ClearLabeledGroups()
 end
 
 function GamepadMarket:ApplyMarketTemplate(template)
-    self:SetDisplayGroup(template.displayGroup)
+    if self.marketTemplate ~= template then
+        self:SetDisplayGroup(template.displayGroup)
 
-    self.marketTemplate = template
-    self.preSceneName = template.preSceneName
+        self.marketTemplate = template
+        self.preSceneName = template.preSceneName
 
-    self.shownCurrencyTypeBalances = template.shownCurrencyTypeBalances
-    self.showFeaturedProducts = template.showFeaturedProducts
-    self.showEsoPlusOffers = template.showEsoPlusOffers
+        self.shownCurrencyTypeBalances = template.shownCurrencyTypeBalances
+        self.showFeaturedProducts = template.showFeaturedProducts
+        self.showEsoPlusOffers = template.showEsoPlusOffers
 
-    self.featuredMarketProductFiltersMask = template.featuredMarketProductFiltersMask
-    self.esoPlusOfferFilterTypes = template.esoPlusOfferFilterTypes
-    self.newEsoPlusOfferFilterTypes = template.newEsoPlusOfferFilterTypes
-    self.marketProductFilterTypes = template.marketProductFilterTypes
-    self.newMarketProductFilterTypes = template.newMarketProductFilterTypes
+        self.featuredMarketProductFiltersMask = template.featuredMarketProductFiltersMask
+        self.esoPlusOfferFilterTypes = template.esoPlusOfferFilterTypes
+        self.newEsoPlusOfferFilterTypes = template.newEsoPlusOfferFilterTypes
+        self.marketProductFilterTypes = template.marketProductFilterTypes
+        self.newMarketProductFilterTypes = template.newMarketProductFilterTypes
 
-    self.marketOpenedTutorialTriggerType = template.marketOpenedTutorialTriggerType
+        self.marketOpenedTutorialTriggerType = template.marketOpenedTutorialTriggerType
 
-    self:RefreshMarketCurrencyTypeBalances()
+        self:FlagMarketCategoriesForRefresh()
+        self:RefreshMarketCurrencyTypeBalances()
+    end
 end
 
 function GamepadMarket:SetupSceneGroupCallback()
@@ -990,10 +993,11 @@ function GamepadMarket:BuildMarketProductList(data)
 
         -- iterate over all of the subcategories in this category to display all of their market products
         -- starting at 0 since that will indicate to GetCategoryProductIds that we also want the products under the parent category itself
-        for subcategoryIndex = 0, data.numSubcategories do
+        for i = 0, data.numSubcategories do
+            local subCategoryData = data.subCategories[i]
+            local subcategoryIndex = subCategoryData and subCategoryData.categoryIndex or 0
             local marketProductPresentations = { self:GetCategoryProductIds(parentCategoryIndex, subcategoryIndex) }
 
-            local subCategoryData = data.subCategories[subcategoryIndex]
             for index, productData in ipairs(marketProductPresentations) do
                 local marketProduct = self.currentCategoryMarketProductPool:AcquireObject()
                 marketProduct:Show(productData)
@@ -1145,7 +1149,7 @@ end
 
 function GamepadMarket:FindOrCreateSubCategoryLabeledGroupTable(subcategoryIndex, displayName)
     if not self.subcategoryLabeledGroupTableMap[subcategoryIndex] then
-        self.subcategoryLabeledGroupTableMap[subcategoryIndex] = { displayName = displayName, groupTable = {}}
+        self.subcategoryLabeledGroupTableMap[subcategoryIndex] = {displayName = displayName, groupTable = {}}
     end
 
     return self.subcategoryLabeledGroupTableMap[subcategoryIndex].groupTable
@@ -1153,7 +1157,7 @@ end
 
 function GamepadMarket:FindOrCreateCategoryLabeledGroupTable(categoryIndex, displayName)
     if not self.categoryLabeledGroupTableMap[categoryIndex] then
-        self.categoryLabeledGroupTableMap[categoryIndex] = { displayName = displayName, groupTable = {}}
+        self.categoryLabeledGroupTableMap[categoryIndex] = {displayName = displayName, groupTable = {}}
     end
 
     return self.categoryLabeledGroupTableMap[categoryIndex].groupTable

@@ -20,7 +20,7 @@ function ZO_Companion_Gamepad:Initialize(control)
         end
     end)
 
-    COMPANION_ROOT_GAMEPAD_SCENE = ZO_InteractScene:New("companionRootGamepad", SCENE_MANAGER, ZO_COMPANION_MANAGER:GetInteraction())
+    COMPANION_ROOT_GAMEPAD_SCENE = ZO_COMPANION_MANAGER:CreateInteractScene("companionRootGamepad")
     COMPANION_ROOT_GAMEPAD_SCENE:AddFragment(COMPANION_GAMEPAD_FRAGMENT)
 
     local ACTIVATE_ON_SHOW = true
@@ -34,7 +34,7 @@ function ZO_Companion_Gamepad:Initialize(control)
 
     control:RegisterForEvent(EVENT_OPEN_COMPANION_MENU, OnOpenCompanionMenu)
 
-    GAMEPAD_COMPANION_OUTFITS_SELECTION_SCENE = ZO_InteractScene:New("gamepad_companion_outfits_selection", SCENE_MANAGER, ZO_COMPANION_MANAGER:GetInteraction())
+    GAMEPAD_COMPANION_OUTFITS_SELECTION_SCENE = ZO_COMPANION_MANAGER:CreateInteractScene("gamepad_companion_outfits_selection")
     GAMEPAD_COMPANION_OUTFITS_SELECTION_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
 
     local function OnCompanionInfoChanged()

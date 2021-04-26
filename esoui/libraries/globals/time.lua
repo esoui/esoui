@@ -61,6 +61,21 @@ function ZO_FormatTimeAsDecimalWhenBelowThreshold(seconds, secondsThreshold, ove
     end
 end
 
+function ZO_FormatTimeShowUnitOverThresholdShowDecimalUnderThreshold(seconds, showUnitOverThresholdS, showDecimalUnderThresholdS, overThresholdTimeFormatOverride)
+    assert(showDecimalUnderThresholdS < showUnitOverThresholdS, "Decimal threshold must be less than no unit threshold")
+    showUnitOverThresholdS = showUnitOverThresholdS or ZO_ONE_MINUTE_IN_SECONDS
+    showDecimalUnderThresholdS = showDecimalUnderThresholdS or 10
+    if seconds < showDecimalUnderThresholdS then
+        return string.format("%.1f", seconds)
+    elseif seconds < showUnitOverThresholdS then
+        return string.format("%d", zo_decimalsplit(seconds))
+    elseif overThresholdTimeFormatOverride then
+        return ZO_FormatTime(seconds, overThresholdTimeFormatOverride, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
+    else
+        return ZO_FormatTimeLargestTwo(seconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+    end
+end
+
 local CLOCK_FORMAT = (GetCVar("Language.2") == "en") and TIME_FORMAT_PRECISION_TWELVE_HOUR or TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR
 
 function ZO_FormatClockTime()

@@ -270,9 +270,24 @@ function ZO_Market_Shared:EndCurrentPreview()
     self:RefreshActions()
 end
 
+function ZO_Market_Shared:IsMarketEmpty()
+    return self.isMarketEmpty
+end
+
+function ZO_Market_Shared:SetIsMarketEmpty(empty)
+    self.isMarketEmpty = empty
+end
+
 function ZO_Market_Shared:OnMarketOpen()
+    self:SetIsMarketEmpty(false)
     self:BuildCategories()
-    self:ShowMarket(true)
+
+    if self:IsMarketEmpty() then
+        self:ShowMarket(false)
+        self:OnMarketLocked()
+    else
+        self:ShowMarket(true)
+    end
 end
 
 function ZO_Market_Shared:OnCategorySelected(data)

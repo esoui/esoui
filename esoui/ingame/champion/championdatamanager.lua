@@ -31,6 +31,16 @@ function ZO_ChampionSkillData:GetAbilityId()
 end
 
 function ZO_ChampionSkillData:GetPosition()
+    if self:IsClusterRoot() then
+        local positionX, positionY = GetChampionSkillPosition(self.championSkillId)
+        local offsetX, offsetY = GetChampionClusterRootOffset(self.championSkillId)
+        return positionX + offsetX, positionY + offsetY
+    else
+        return GetChampionSkillPosition(self.championSkillId)
+    end
+end
+
+function ZO_ChampionSkillData:GetPositionNoClusterOffset()
     return GetChampionSkillPosition(self.championSkillId)
 end
 

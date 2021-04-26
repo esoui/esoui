@@ -1030,6 +1030,14 @@ function ZO_RestyleCompanionOutfitSlotsSheet:GetControlShortName()
     return "CompanionOutfitStylesSheet"
 end
 
+function ZO_RestyleCompanionOutfitSlotsSheet:RefreshView()
+    ZO_RestyleSlotsSheet.RefreshView(self)
+
+    self.headers[ZO_RESTYLE_SHEET_CONTAINER.SECONDARY]:SetText(GetString(SI_RESTYLE_SHEET_EQUIPMENT_WEAPONS_SET_1))
+
+    self.noWeaponsLabel:SetHidden(ZO_OUTFIT_MANAGER:HasWeaponsCurrentlyHeldToOverride())
+end
+
 -------------------------------------
 -- Companion Collectible Style Restyle Slot Sheet --
 -------------------------------------

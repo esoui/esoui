@@ -6,7 +6,7 @@ ZO_CompanionSkills_Keyboard = ZO_InitializingObject:Subclass()
 function ZO_CompanionSkills_Keyboard:Initialize(control)
     self.control = control
 
-    self.scene = ZO_InteractScene:New("companionSkillsKeyboard", SCENE_MANAGER, ZO_COMPANION_MANAGER:GetInteraction())
+    self.scene = ZO_COMPANION_MANAGER:CreateInteractScene("companionSkillsKeyboard")
     self.scene:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self.skillLinesTreeRefreshGroup:TryClean()

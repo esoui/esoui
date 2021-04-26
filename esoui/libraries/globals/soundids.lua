@@ -373,14 +373,15 @@ SOUNDS = {
     GUILD_ROSTER_PROMOTE            = "GuildRoster_Promote",
 
     --Ability slotting sounds
-    ABILITY_SLOT_MENU_OPEN          = "Ability_Slot_Menu_Open",
-    ABILITY_SLOTTED                 = "Ability_Slotted",
-    ABILITY_SLOT_CLEARED            = "Ability_Unslotted",
-    ABILITY_MORPH_AVAILABLE         = "Ability_MorphAvailable",
-    ABILITY_RANK_UP                 = "Ability_RankedUp",
-    ABILITY_PICKED_UP               = "Ability_Picked_Up",
-    ABILITY_ULTIMATE_READY          = "Ability_Ultimate_Ready_Sound",
-    ABILITY_SYNERGY_READY           = "Ability_Synergy_Ready_Sound",
+    ABILITY_SLOT_MENU_OPEN              = "Ability_Slot_Menu_Open",
+    ABILITY_SLOTTED                     = "Ability_Slotted",
+    ABILITY_SLOT_CLEARED                = "Ability_Unslotted",
+    ABILITY_MORPH_AVAILABLE             = "Ability_MorphAvailable",
+    ABILITY_RANK_UP                     = "Ability_RankedUp",
+    ABILITY_PICKED_UP                   = "Ability_Picked_Up",
+    ABILITY_ULTIMATE_READY              = "Ability_Ultimate_Ready_Sound",
+    ABILITY_COMPANION_ULTIMATE_READY    = "Ability_Companion_Ultimate_Ready_Sound",
+    ABILITY_SYNERGY_READY               = "Ability_Synergy_Ready_Sound",
 
     --Skill point allocation
     SKILL_PURCHASED                     = "Ability_SkillPurchased",
