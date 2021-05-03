@@ -647,6 +647,8 @@ do
                 local collectibleCategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataById(categoryId)
                 if collectibleCategoryData:IsSubcategory() then
                     self:UpdateCategoryStatusIcon(anyMatchingCategoryNode:GetParent())
+                    MAIN_MENU_KEYBOARD:RefreshCategoryBar()
+                    MAIN_MENU_KEYBOARD:UpdateSceneGroupButtons("collectionsSceneGroup")
                 end
             end
         end

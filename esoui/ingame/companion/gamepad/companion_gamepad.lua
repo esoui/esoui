@@ -13,6 +13,7 @@ function ZO_Companion_Gamepad:Initialize(control)
             --Manually call OnTargetChanged to ensure the proper logic is run when opening the screen
             local list = self:GetMainList()
             local targetData = list:GetTargetData()
+            self:RefreshList()
             self:RefreshTargetTooltip(list, targetData)
             self:RefreshHeader()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
@@ -25,6 +26,9 @@ function ZO_Companion_Gamepad:Initialize(control)
 
     local ACTIVATE_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, COMPANION_ROOT_GAMEPAD_SCENE)
+
+    local list = self:GetMainList()
+    list:AddDataTemplate("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
     local function OnOpenCompanionMenu()
         if IsInGamepadPreferredMode() then
@@ -48,6 +52,15 @@ function ZO_Companion_Gamepad:Initialize(control)
 
     EVENT_MANAGER:RegisterForEvent("ZO_Companion_Gamepad", EVENT_COMPANION_EXPERIENCE_GAIN, OnCompanionInfoChanged)
     EVENT_MANAGER:RegisterForEvent("ZO_Companion_Gamepad", EVENT_COMPANION_RAPPORT_UPDATE, OnCompanionInfoChanged)
+
+    local function OnRefreshList()
+        if COMPANION_GAMEPAD_FRAGMENT:IsShowing() then
+            self:RefreshList()
+        end
+    end
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnRefreshList)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnRefreshList)
 end
 
 function ZO_Companion_Gamepad:OnDeferredInitialize()
@@ -103,11 +116,7 @@ function ZO_Companion_Gamepad:InitializeKeybindStripDescriptors()
 end
 
 function ZO_Companion_Gamepad:InitializeList()
-
-    local list = self:GetMainList()
-    list:Clear()
-
-    local menuData =
+    self.menuData =
     {
         {
             icon = "EsoUI/Art/Companion/Gamepad/gp_companion_icon_overview.dds",
@@ -137,18 +146,28 @@ function ZO_Companion_Gamepad:InitializeList()
         {
             icon = "EsoUI/Art/Companion/Gamepad/gp_companion_icon_collections.dds",
             name = SI_COMPANION_MENU_COLLECTIONS_TITLE,
-            scene = "companionCollectionBookGamepad"
+            scene = "companionCollectionBookGamepad",
+            isNewCallback = function()
+                return ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewCompanionCollectibles()
+            end,
         },
     }
 
-    for _, data in ipairs(menuData) do
-        local entryData = ZO_GamepadEntryData:New(GetString(data.name), data.icon)
+    self:RefreshList()
+end
+
+function ZO_Companion_Gamepad:RefreshList()
+    local list = self:GetMainList()
+    list:Clear()
+
+    for _, data in ipairs(self.menuData) do
+        local entryData = ZO_GamepadEntryData:New(GetString(data.name), data.icon, nil, nil, data.isNewCallback)
         entryData.sceneName = data.scene
         entryData.tooltipFunction = data.tooltipFunction
         entryData.tooltipHeaderData = data.tooltipHeaderData
         entryData:SetIconTintOnSelection(true)
         entryData:SetIconDisabledTintOnSelection(true)
-        list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+        list:AddEntry("ZO_GamepadNewMenuEntryTemplate", entryData)
     end
 
     list:Commit()
@@ -166,7 +185,7 @@ end
 
 function ZO_Companion_Gamepad:RefreshTargetTooltip(list, selectedData)
     self:ResetTooltips()
-    if selectedData.tooltipFunction then
+    if selectedData and selectedData.tooltipFunction then
         if selectedData.tooltipHeaderData then
             GAMEPAD_TOOLTIPS:ShowGenericHeader(GAMEPAD_QUAD_2_3_TOOLTIP, selectedData.tooltipHeaderData)
         end

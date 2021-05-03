@@ -154,6 +154,12 @@ local errorCodeToStateChange =
     [GLOBAL_ERROR_CODE_LOBBY_CHARACTER_LOCKED] = "CharacterSelect_FromIngame",
     [GLOBAL_ERROR_CODE_LOBBY_CHARACTER_RENAME_NEEDED] = "CharacterSelect_FromIngame",
     [GLOBAL_ERROR_CODE_LOBBY_TRANSFER_FAILED] = "CharacterSelect_FromIngame",
+    [GLOBAL_ERROR_CODE_DBW_TRANSFER_FAILED_0] = "CharacterSelect_FromIngame",
+    [GLOBAL_ERROR_CODE_DBW_TRANSFER_FAILED_1] = "CharacterSelect_FromIngame",
+    [GLOBAL_ERROR_CODE_DBW_TRANSFER_FAILED_2] = "CharacterSelect_FromIngame",
+    [GLOBAL_ERROR_CODE_DBW_TRANSFER_FAILED_3] = "CharacterSelect_FromIngame",
+    [GLOBAL_ERROR_CODE_DBW_TRANSFER_FAILED_4] = "CharacterSelect_FromIngame",
+    [GLOBAL_ERROR_CODE_DBW_TRANSFER_FAILED_5] = "CharacterSelect_FromIngame",
     [GLOBAL_ERROR_CODE_LOBBY_CHAR_STILL_IN_GAME] = "CharacterSelect_FromIngame",
 }
 

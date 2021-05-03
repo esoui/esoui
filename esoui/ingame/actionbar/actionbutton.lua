@@ -1057,11 +1057,9 @@ function ZO_ActionBarTimer:SetupBackRowSlot(slotId, barType)
     local shown = isValidBarType and GetSlotType(slotId, barType) ~= ACTION_TYPE_NOTHING and self.active and self.showBackRowSlot
     self.slot:SetHidden(not shown)
 
-    if shown then
+    if shown and self.iconTexture then
         local slotIcon = GetSlotTexture(slotId, barType)
-        if self.iconTexture then
-            self.iconTexture:SetTexture(slotIcon)
-        end
+        self.iconTexture:SetTexture(slotIcon)
     end
 end
 

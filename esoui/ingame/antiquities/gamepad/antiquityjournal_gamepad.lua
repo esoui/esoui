@@ -1407,7 +1407,7 @@ function ZO_AntiquityJournalListGamepad:OnAntiquitySetFragmentSelectionChanged(o
                 end
             end
 
-            newData:ClearNewLead()
+            newData.dataSource:ClearNewLead()
         end
 
         GAMEPAD_TOOLTIPS:LayoutAntiquitySetFragment(GAMEPAD_RIGHT_TOOLTIP, newData:GetId())
@@ -1475,7 +1475,9 @@ function ZO_AntiquityJournalListGamepad:SetupAntiquitySetRow(control, data)
         local function OnSetupAntiquitySetFragment(...)
             self:SetupAntiquitySetFragmentIcon(...)
         end
+
         control.antiquitiesScrollList:AddEntryTemplate("ZO_AntiquityJournalAntiquityFragmentIconTexture_Gamepad", TEMPLATE_DIMENSIONS, TEMPLATE_DIMENSIONS, OnSetupAntiquitySetFragment, NO_HIDE_CALLBACK, ZO_ObjectPool_DefaultResetControl, ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD, DO_NOT_CENTER_ENTRIES)
+        control.antiquitiesScrollList:SetEntryTemplateEqualityFunction("ZO_AntiquityJournalAntiquityFragmentIconTexture_Gamepad", AntiquityOrSetEqualityFunction)
         control.antiquitiesScrollList:RegisterCallback("SelectedDataChanged", function(...) self:OnAntiquitySetFragmentSelectionChanged(...) end )
     end
 
@@ -1671,5 +1673,5 @@ function ZO_AntiquityJournalAntiquitySetRowGamepad_OnInitialized(control)
     control.progressLabel = control.progressContainer:GetNamedChild("Progress")
     control.contentContainer = control:GetNamedChild("ContentContainer")
     control.antiquitiesRecoveredLabel = control.contentContainer:GetNamedChild("AntiquitiesRecoveredLabel")
-    control.antiquitiesListControl = control.contentContainer:GetNamedChild("AntiquitiesGridList")
+    control.antiquitiesListControl = control.contentContainer:GetNamedChild("GridList")
 end

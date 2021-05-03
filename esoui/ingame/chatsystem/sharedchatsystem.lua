@@ -1980,6 +1980,15 @@ ZO_CHAT_BLOCKING_SCENE_NAMES =
     ["gamepad_market_preview"] = true,
 }
 
+function SharedChatSystem:DoesCurrentSceneBlockChat()
+    local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
+    if currentSceneName and ZO_CHAT_BLOCKING_SCENE_NAMES[currentSceneName] then
+        return true
+    end
+
+    return false
+end
+
 function SharedChatSystem:StartTextEntry(text, channel, target, dontShowHUDWindow)
     --Don't allow text entry to start if the ingame gui is hidden. This fixes an issue where users could no longer enter text if "]" or "/" were pressed while the ingame gui was hidden.
     if GetGuiHidden("ingame") then
@@ -1987,8 +1996,7 @@ function SharedChatSystem:StartTextEntry(text, channel, target, dontShowHUDWindo
     end
 
     if IsPlayerActivated() then
-        local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
-        if currentSceneName and ZO_CHAT_BLOCKING_SCENE_NAMES[currentSceneName] then
+        if self:DoesCurrentSceneBlockChat() then
             return
         end
 

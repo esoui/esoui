@@ -319,7 +319,8 @@ local GAMEPAD_CONSTANTS =
 {
     abilitySlotOffsetX = 10,
     ultimateSlotOffsetX = 65,
-    companionUltimateSlotOffsetX = 45,
+    quickslotOffsetXFromCompanionUltimate = 45,
+    quickslotOffsetXFromFirstSlot = 5,
     backRowSlotOffsetY = -17,
     backRowUltimateSlotOffsetY = -30,
     anchor = ZO_Anchor:New(BOTTOM, GuiRoot, BOTTOM, 0, -25),
@@ -327,6 +328,7 @@ local GAMEPAD_CONSTANTS =
     showNormalBindingTextOnUltimate = false,
     showKeybindBG = false,
     showWeaponSwapButton = false,
+    weaponSwapOffsetX = 61,
     weaponSwapOffsetY = 4,
 
 }
@@ -335,7 +337,8 @@ local KEYBOARD_CONSTANTS =
 {
     abilitySlotOffsetX = 2,
     ultimateSlotOffsetX = 62,
-    companionUltimateSlotOffsetX = 12,
+    quickslotOffsetXFromCompanionUltimate = 18,
+    quickslotOffsetXFromFirstSlot = 5,
     backRowSlotOffsetY = -17,
     backRowUltimateSlotOffsetY = -20,
     anchor = ZO_Anchor:New(BOTTOM, GuiRoot, BOTTOM, 0, 0),
@@ -343,6 +346,7 @@ local KEYBOARD_CONSTANTS =
     showNormalBindingTextOnUltimate = true,
     showKeybindBG = true,
     showWeaponSwapButton = true,
+    weaponSwapOffsetX = 59,
     weaponSwapOffsetY = -4,
 }
 
@@ -355,21 +359,24 @@ function ZO_ActionBar_GetAnchor()
     return constants.anchor
 end
 
+function ShouldShowCompanionUltimateButton()
+    return DoesUnitExist("companion") and HasActiveCompanion()
+end
+
 local function SetCompanionAnchors()
-    g_quickslotButton.slot:SetAnchor(RIGHT, ZO_ActionBar1WeaponSwap, LEFT, -5, 0)
-    
-    if not DoesUnitExist("companion") or not HasActiveCompanion() then
-        g_companionUltimateButton:SetEnabled(false)
-        g_keybindBG:SetDimensions(512, 64)
-        g_keybindBG:SetAnchor(BOTTOM, nil, nil, 0, 0)
-    else
+    local IS_QUICKSLOT_ANCHORED_LEFT = true
+    if ShouldShowCompanionUltimateButton() then
         g_companionUltimateButton:SetEnabled(true)
         g_keybindBG:SetDimensions(580, 64)
         g_keybindBG:SetAnchor(BOTTOM, nil, nil, -34, 0)
-
-        if IsInGamepadPreferredMode() then
-            g_quickslotButton.slot:SetAnchor(RIGHT, ZO_ActionBar_GetButton(ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1).slot, LEFT, -25, 0)
-        end
+        local xOffset = GetPlatformConstants().quickslotOffsetXFromCompanionUltimate
+        g_quickslotButton:ApplyAnchor(ZO_ActionBar_GetButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1, HOTBAR_CATEGORY_COMPANION).slot, xOffset, IS_QUICKSLOT_ANCHORED_LEFT)
+    else
+        g_companionUltimateButton:SetEnabled(false)
+        g_keybindBG:SetDimensions(512, 64)
+        g_keybindBG:SetAnchor(BOTTOM, nil, nil, 0, 0)
+        local xOffset = GetPlatformConstants().quickslotOffsetXFromFirstSlot
+        g_quickslotButton:ApplyAnchor(ZO_ActionBar1WeaponSwap, xOffset, IS_QUICKSLOT_ANCHORED_LEFT)
     end
 end
 
@@ -392,8 +399,10 @@ local function ApplyStyle(style)
             if physicalSlot > ACTION_BAR_FIRST_NORMAL_SLOT_INDEX and physicalSlot < ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + ACTION_BAR_SLOTS_PER_PAGE then
                 local anchorTarget = lastButton and lastButton.slot
                 if not lastButton then
-                    local yOffset = GetPlatformConstants().weaponSwapOffsetY
-                    ZO_ActionBar1WeaponSwap:SetAnchor(TOPLEFT, nil, TOPLEFT, 55, yOffset)
+                    local platformConstants = GetPlatformConstants()
+                    local xOffset = platformConstants.weaponSwapOffsetX
+                    local yOffset = platformConstants.weaponSwapOffsetY
+                    ZO_ActionBar1WeaponSwap:SetAnchor(TOPLEFT, nil, TOPLEFT, xOffset, yOffset)
                     anchorTarget = ZO_ActionBar1WeaponSwap
                 end
                 button:ApplyAnchor(anchorTarget, style.abilitySlotOffsetX)
@@ -419,7 +428,7 @@ local function ApplyStyle(style)
                 g_companionUltimateButton:ApplyStyle(ZO_GetPlatformTemplate("ZO_UltimateActionButton"))
                 g_companionUltimateButton:SetShowBindingText(style.showNormalBindingTextOnUltimate)
                 local IS_ANCHORED_LEFT = true
-                g_companionUltimateButton:ApplyAnchor(g_quickslotButton.slot, style.companionUltimateSlotOffsetX, IS_ANCHORED_LEFT)
+                g_companionUltimateButton:ApplyAnchor(g_actionBarButtons[ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1].slot, style.ultimateSlotOffsetX, IS_ANCHORED_LEFT)
                 g_companionUltimateButton:UpdateUltimateMeter()
                 SetCompanionAnchors()
             end
@@ -434,8 +443,11 @@ function ZO_ActionBar_OnInitialized(control)
     g_keybindBG = control:GetNamedChild("KeybindBG")
 
     local weaponSwap = control:GetNamedChild("WeaponSwap")
-    local yOffset = GetPlatformConstants().weaponSwapOffsetY
-    weaponSwap:SetAnchor(TOPLEFT, nil, TOPLEFT, 55, yOffset)
+    local platformConstants = GetPlatformConstants()
+    local xOffset = platformConstants.weaponSwapOffsetX
+    local yOffset = platformConstants.weaponSwapOffsetY
+
+    weaponSwap:SetAnchor(TOPLEFT, nil, TOPLEFT, xOffset, yOffset)
 
     local MAIN_BAR_STYLE =
     {
@@ -596,6 +608,9 @@ function ZO_ActionBar_OnInitialized(control)
             UpdateAllSlots()
         end
     end
+
+    local FORCE_INITIAL_HOTBAR_UPDATE = true
+    OnActiveHotbarUpdated(_, FORCE_INITIAL_HOTBAR_UPDATE)
 
     local function OnAllHotbarsUpdated(event)
         g_activeWeaponSwapInProgress = false

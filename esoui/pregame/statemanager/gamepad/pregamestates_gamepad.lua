@@ -249,7 +249,15 @@ local pregameStates =
     ["CharacterSelect"] =
     {
         OnEnter = function()
-            Pregame_ShowScene("gamepadCharacterSelect")
+            if SCENE_MANAGER:IsShowing("gamepadCharacterSelect") then
+                -- If the scene is already showing when trying to enter character select it probably means we were
+                -- disconnected form the server after selecting a character.
+                ZO_Dialogs_ReleaseAllDialogsExcept("HANDLE_ERROR", "HANDLE_ERROR_WITH_HELP")
+                local ACTIVATE_VIEWPORT = true
+                ZO_CharacterSelect_Gamepad_ReturnToCharacterList(ACTIVATE_VIEWPORT)
+            else
+                Pregame_ShowScene("gamepadCharacterSelect")
+            end
         end,
 
         OnExit = function()

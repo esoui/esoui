@@ -138,6 +138,8 @@ end
 
 function ZO_HUDEquipmentStatus:Initialize(control)
     self.control = control
+    local quickslotButton = ZO_ActionBar_GetButton(ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1)
+    self.control:SetAnchor(RIGHT, quickslotButton.slot, LEFT, -10, 0)
     self.indicators = {}
     self.indicators[WEAPON_INDICATOR] = HUDIndicator:New(GetControl(self.control, WEAPON_INDICATOR), ZO_HUDEquipmentStatus.WEAPON_INDICATOR_DATA)
     self.indicators[ARMOR_INDICATOR] = HUDIndicator:New(GetControl(self.control, ARMOR_INDICATOR), ZO_HUDEquipmentStatus.ARMOR_INDICATOR_DATA)
@@ -153,6 +155,7 @@ function ZO_HUDEquipmentStatus:Initialize(control)
 
     local function OnWeaponSwitch()
         self.indicators[WEAPON_INDICATOR]:Refresh()
+        self:AdjustWidth()
     end
 
     SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", OnInventorySingleSlotUpdate)
@@ -188,10 +191,23 @@ function ZO_HUDEquipmentStatus:UpdateAllIndicators()
     for _, indicator in pairs(self.indicators) do
         indicator:Refresh()
     end
+    self:AdjustWidth()
 end
 
 function ZO_HUDEquipmentStatus:ApplyPlatformStyle(styleTable)
     ApplyTemplateToControl(self.control, styleTable.template)
+    self:AdjustWidth()
+end
+
+function ZO_HUDEquipmentStatus:AdjustWidth()
+    local width = 0
+    for _, indicator in pairs(self.indicators) do
+        local indicatorControl = indicator.control
+        if not indicatorControl:IsControlHidden() then
+            width = width + indicatorControl:GetWidth()
+        end
+    end
+    self.control:SetWidth(width)
 end
 
 --Global XML

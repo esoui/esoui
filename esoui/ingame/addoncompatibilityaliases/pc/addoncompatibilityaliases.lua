@@ -966,7 +966,7 @@ ZO_Restyle_Station_Gamepad_TopLevel = ZO_RestyleStation_Gamepad_TopLevel
 -- skills companion refactor
 local function ConvertToSkillLineId(method)
     return function(skillType, skillLineIndex, ...)
-        local skillLineId = GetPlayerSkillLineId(skillType, skillLineIndex)
+        local skillLineId = GetSkillLineId(skillType, skillLineIndex)
         return method(skillLineId, ...)
     end
 end

@@ -17,6 +17,10 @@ function ZO_CompanionCollectionBook_Gamepad:Initialize(control)
 
     self.currentSlotPreviews = {}
 
+    self.trySetClearNewFlagCallback = function(callId)
+        self:TrySetClearNewFlag(callId)
+    end
+
     self:InitializeHeader()
     self:InitializeKeybindStripDescriptors()
     self:InitializeCategoryLists()

@@ -44,9 +44,10 @@ function DLCBook_Keyboard:RefreshDetails()
 
     if collectibleData then
         self.unlockStatusControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", collectibleData:GetUnlockState()))
+        local questState = collectibleData:GetCollectibleAssociatedQuestState()
 
         local isLocked = collectibleData:IsLocked()
-        local isActive = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+        local isActive = questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_ACCEPTED or questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_COMPLETED
         local isNotOwned = not collectibleData:IsOwned()
 
         local questAcceptLabelStringId = isActive and SI_DLC_BOOK_QUEST_STATUS_ACCEPTED or SI_DLC_BOOK_QUEST_STATUS_NOT_ACCEPTED
@@ -79,7 +80,7 @@ function DLCBook_Keyboard:RefreshDetails()
             questDescriptionControl:SetHidden(true)
         end
 
-        local questAcceptButtonStringId = isActive and SI_DLC_BOOK_ACTION_QUEST_ACCEPTED or SI_DLC_BOOK_ACTION_ACCEPT_QUEST
+        local questAcceptButtonStringId = isActive and SI_DLC_BOOK_ACTION_QUEST_ACCEPTED or SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
         self.questAcceptButton:SetText(GetString(questAcceptButtonStringId))
         self.questAcceptButton:SetEnabled(not (isLocked or isActive))
         self.unlockPermanentlyButton:SetHidden(not canUnlockOnStore)

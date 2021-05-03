@@ -531,6 +531,8 @@ EsoUI\Ingame\Mail\Gamepad\MailSend_Gamepad.xml
 EsoUI\Ingame\Mail\Gamepad\MailManager_Gamepad.lua
 EsoUI\Ingame\Mail\Gamepad\MailManager_Gamepad.xml
 
+EsoUI\Ingame\Companion\Companion_Manager.lua
+
 EsoUI\Ingame\Restyle\Restyle_Manager.lua
 EsoUI\Ingame\Restyle\Restyle_Shared.lua
 EsoUI\Ingame\Restyle\Restyle_Shared.xml
@@ -1443,8 +1445,6 @@ EsoUI\Ingame\AntiquityDigging\AntiquityDigging.xml
 
 EsoUI\Ingame\Scrying\IngameScrying.lua
 EsoUI\Ingame\Scrying\IngameScrying.xml
-
-EsoUI\Ingame\Companion\Companion_Manager.lua
 
 EsoUI\Ingame\Companion\Keyboard\CompanionProgressBar_Keyboard.lua
 EsoUI\Ingame\Companion\Keyboard\CompanionProgressBar_Keyboard.xml

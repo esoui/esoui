@@ -208,6 +208,12 @@ do
 
         self:AddSection(restrictionsSection)
 
+        if not IsCollectibleAvailableToActorCategory(collectibleId, GAMEPLAY_ACTOR_CATEGORY_COMPANION) then
+            bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
+            bodySection:AddLine(GetString(SI_COLLECTIBLE_TOOLTIP_NOT_USABLE_BY_COMPANION), descriptionStyle)
+            self:AddSection(bodySection)
+        end
+
         self:AddCollectibleTags(collectibleId)
 
         if IsCollectibleCategoryPlaceableFurniture(categoryType) then
@@ -222,6 +228,28 @@ do
         end
 
         bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
+
+        if categoryType == COLLECTIBLE_CATEGORY_TYPE_COMPANION then
+            local questState = GetCollectibleAssociatedQuestState(collectibleId)
+            if questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_INACTIVE or questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_ACCEPTED then
+                --If we get here, we are going to be showing a specialized error message
+                --This means we don't want to show the fails restriction or block reason in the tooltip
+                failsRestriction = false
+                params.showBlockReason = false
+
+                local companionId = GetCollectibleReferenceId(collectibleId)
+                local introQuestId = GetCompanionIntroQuestId(companionId)
+                local zoneId = GetQuestZoneId(introQuestId)
+                local zoneCollectibleId = GetCollectibleIdForZone(GetZoneIndex(zoneId))
+                if zoneCollectibleId > 0 and not IsCollectibleUnlocked(zoneCollectibleId) then
+                    local formattedBlockReason = zo_strformat(SI_COLLECTIBLE_TOOLTIP_COMPANION_BLOCKED_BY_QUEST_AND_DLC, GetQuestName(introQuestId), GetZoneNameById(zoneId), GetString("SI_COLLECTIBLECATEGORYTYPE", GetCollectibleCategoryType(zoneCollectibleId)))
+                    bodySection:AddLine(formattedBlockReason, descriptionStyle, self:GetStyle("failed"))
+                else
+                    local formattedBlockReason = zo_strformat(SI_COLLECTIBLE_TOOLTIP_COMPANION_BLOCKED_BY_QUEST, GetQuestName(introQuestId))
+                    bodySection:AddLine(formattedBlockReason, descriptionStyle, self:GetStyle("failed"))
+                end
+            end
+        end
 
         if failsRestriction then
             bodySection:AddLine(GetString(SI_COLLECTIBLE_TOOLTIP_NOT_USABLE_BY_CHARACTER), descriptionStyle, self:GetStyle("failed"))

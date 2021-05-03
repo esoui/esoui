@@ -491,6 +491,7 @@ function ZO_RestyleSheetWindow_Keyboard:OnUpdateModeSelectorDropdown()
 end
 
 function ZO_RestyleSheetWindow_Keyboard:DisplaySheet(newSheet)
+    local isPreviewUpdated = false
     if self.currentSheet ~= newSheet then
         if self.currentSheet then
             SCENE_MANAGER:RemoveFragment(self.currentSheet:GetFragment())
@@ -499,13 +500,22 @@ function ZO_RestyleSheetWindow_Keyboard:DisplaySheet(newSheet)
         local oldSheet = self.currentSheet
         self.currentSheet = newSheet
 
+        if newSheet then
+            -- make sure the current sheet has the latest dye data for its slots
+            SetRestylePreviewMode(newSheet:GetRestyleMode())
+            isPreviewUpdated = true
+        end
+
         self:FireCallbacks("SheetChanged", newSheet, oldSheet)
     end
 
     if newSheet then
+        if not isPreviewUpdated then
+            -- make sure the current sheet has the latest dye data for its slots
+            SetRestylePreviewMode(newSheet:GetRestyleMode())
+        end
+
         SCENE_MANAGER:AddFragment(newSheet:GetFragment())
-        -- make sure the current sheet has the latest dye data for its slots
-        SetRestylePreviewMode(newSheet:GetRestyleMode())
 
         if self.pendingEquipOutfitManipulator and self.pendingEquipOutfitManipulator:IsMarkedForPreservation() then
             local interactType = GetInteractionType()

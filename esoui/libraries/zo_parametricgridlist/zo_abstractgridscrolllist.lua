@@ -68,7 +68,7 @@ function ZO_AbstractGridScrollList:AddEntryTemplate(templateName, width, height,
             local listWidth = self.list:GetWidth()
             local numCellsPerRow = zo_floor(listWidth / (width + spacingX))
             if self.numCellsPerRow then
-                assert(self.numCellsPerRow == numCellsPerRow, "AuoFillRows is only supported when the number of cells per row is consistent regardless of the entry templates used.")
+                assert(self.numCellsPerRow == numCellsPerRow, "AutoFillRows is only supported when the number of cells per row is consistent regardless of the entry templates used.")
             else
                 self.numCellsPerRow = numCellsPerRow
             end
@@ -84,6 +84,13 @@ function ZO_AbstractGridScrollList:SetEntryTemplateVisibilityFunction(templateNa
     local operationId = self.templateOperationIds[templateName]
     if operationId then
         ZO_ScrollList_SetVisibilityFunction(self.list, operationId, visiblityFunction)
+    end
+end
+
+function ZO_AbstractGridScrollList:SetEntryTemplateEqualityFunction(templateName, equalityFunction)
+    local operationId = self.templateOperationIds[templateName]
+    if operationId then
+        ZO_ScrollList_SetEqualityFunction(self.list, operationId, equalityFunction)
     end
 end
 

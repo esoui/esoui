@@ -269,10 +269,10 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
         if listDescriptor == INVENTORY_CATEGORY_LIST then
             self:OnInventoryShown()
 
-            self:SetActiveKeybinds(self.categoryListKeybindStripDescriptor)
-
-            self:RefreshCategoryList(selectDefaultEntry)
+            --ESO-714374: Order matters as we need to set the current list to CategoryList before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
             self:SetCurrentList(self.categoryList)
+            self:RefreshCategoryList(selectDefaultEntry)
+            self:SetActiveKeybinds(self.categoryListKeybindStripDescriptor)
 
             self:SetSelectedItemUniqueId(self:GenerateItemSlotData(self.categoryList:GetTargetData()))
             self.actionMode = CATEGORY_ITEM_ACTION_MODE

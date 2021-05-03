@@ -67,7 +67,7 @@ function ZO_RestyleStation_Keyboard:OnShowing()
 
     ZO_MenuBar_UpdateButtons(self.subTabs)
 
-    if not HasActiveCompanion() and self.currentSubTabDescriptor == self.companionSubTabDescriptor then
+    if not ZO_HasActiveOrBlockedCompanion() and self.currentSubTabDescriptor == self.companionSubTabDescriptor then
         local RESELECT_IF_SELECTED = true
         self:SelectSubTabDescriptor(self.playerSubTabDescriptor, RESELECT_IF_SELECTED)
         if self.currentTabDescriptor == self.equipmentTabDescriptor then
@@ -217,7 +217,7 @@ function ZO_RestyleStation_Keyboard:InitializeTabs()
     }
     local companionSubTabData = ZO_MenuBar_GenerateButtonTabData(SI_OUTFIT_COMPANION_SUB_TAB, self.companionSubTabDescriptor, "EsoUI/Art/Dye/dyes_tabIcon_companion_up.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_down.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_over.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_disabled.dds", DEFAULT_TOOLTIP_FUNCTION, ALWAYS_SHOW_TOOLTIP, PlayerDrivenCallback)
     companionSubTabData.enabled = function()
-        return HasActiveCompanion()
+        return ZO_HasActiveOrBlockedCompanion()
     end
 
     ZO_MenuBar_AddButton(self.subTabs, playerSubTabData)
@@ -298,7 +298,7 @@ function ZO_RestyleStation_Keyboard:LayoutEquipmentAppearanceTooltip(tooltip)
     local r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
     tooltip:AddLine(description, "", r, g, b)
 
-    if not HasActiveCompanion() then
+    if not ZO_HasActiveOrBlockedCompanion() then
         local requirements = GetString(SI_DYEING_EQUIPMENT_TAB_REQUIREMENTS)
         tooltip:AddLine(requirement, "", r, g, b)
     end

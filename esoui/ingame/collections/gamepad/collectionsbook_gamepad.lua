@@ -453,13 +453,15 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 local collectibleData = self:GetCurrentTargetData()
                 local nameStringId
                 if collectibleData:IsStory() then
-                    nameStringId = SI_DLC_BOOK_ACTION_ACCEPT_QUEST
+                    nameStringId = SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
                 elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MEMENTO) then
                     nameStringId = SI_COLLECTIBLE_ACTION_USE
                 elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT) then
                     nameStringId = SI_COLLECTIBLE_ACTION_COMBINE
                 elseif collectibleData:IsHouse() then
                     nameStringId = collectibleData:IsUnlocked() and SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE or SI_HOUSING_BOOK_ACTION_PREVIEW_HOUSE
+                elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMPANION) and collectibleData:GetCollectibleAssociatedQuestState() == COLLECTIBLE_ASSOCIATED_QUEST_STATE_INACTIVE then
+                    nameStringId = SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
                 elseif collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
                     if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_VANITY_PET) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMPANION) then
                         nameStringId = SI_COLLECTIBLE_ACTION_DISMISS
@@ -511,7 +513,8 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     elseif remainingMs > 0 then
                         return false, GetString(SI_COLLECTIONS_COOLDOWN_ERROR)
                     elseif collectibleData:IsBlocked() then
-                        return false, GetString(SI_COLLECTIONS_BLOCKED_ERROR)
+                        local blockReason = GetCollectibleBlockReason(collectibleData:GetId())
+                        return false, zo_strformat(GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", blockReason))
                     else
                         return true
                     end
@@ -901,8 +904,13 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
     entryData:SetDataSource(collectibleData)
     entryData:SetCooldownIcon(collectibleData:GetIcon())
 
-    entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-    
+    if collectibleData:IsStory() then
+        local questState = collectibleData:GetCollectibleAssociatedQuestState()
+        entryData.isEquippedInCurrentCategory = questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_ACCEPTED or questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_COMPLETED
+    else
+        entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+    end
+
     entryData:SetIsHiddenByWardrobe(collectibleData:IsVisualLayerHidden(GAMEPLAY_ACTOR_CATEGORY_PLAYER))
 
     ZO_UpdateCollectibleEntryDataIconVisuals(entryData)
@@ -1006,8 +1014,10 @@ function ZO_GamepadCollectionsBook:RefreshDLCTooltip(collectibleData)
     infoPanel.descriptionControl:SetText(collectibleData:GetDescription())
     infoPanel.unlockStatusControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", collectibleData:GetUnlockState()))
 
+    local questState = collectibleData:GetCollectibleAssociatedQuestState()
+
     local isUnlocked = collectibleData:IsUnlocked()
-    local isActive = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+    local isActive = questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_ACCEPTED or questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_COMPLETED
 
     local questAcceptLabelStringId = isActive and SI_DLC_BOOK_QUEST_STATUS_ACCEPTED or SI_DLC_BOOK_QUEST_STATUS_NOT_ACCEPTED
     local questName = collectibleData:GetQuestName()

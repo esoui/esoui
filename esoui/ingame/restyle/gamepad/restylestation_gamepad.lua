@@ -1463,7 +1463,9 @@ function ZO_RestyleStation_Gamepad:AttemptExit()
 
     if self:DoesCurrentOutfitHaveChanges() then
         local function OnConfirmExit()
-            ZO_OUTFIT_MANAGER:EquipOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER, self.currentOutfitManipulator:GetOutfitIndex())
+            local restyleMode = RESTYLE_GAMEPAD:GetMode()
+            local actoryCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleMode)
+            ZO_OUTFIT_MANAGER:EquipOutfit(actoryCategory, self.currentOutfitManipulator:GetOutfitIndex())
             self.currentOutfitManipulator:ClearPendingChanges()
             GAMEPAD_RESTYLE_STATION_SCENE:AcceptHideScene()
         end
@@ -1506,10 +1508,11 @@ end
 function ZO_RestyleStation_Gamepad:ExitWithoutSave()
     local restyleMode = RESTYLE_GAMEPAD:GetMode()
     if restyleMode ~= RESTYLE_MODE_COLLECTIBLE and restyleMode ~= RESTYLE_MODE_COMPANION_COLLECTIBLE  then
+        local actoryCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleMode)
         if self.currentOutfitManipulator then
-            ZO_OUTFIT_MANAGER:EquipOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER, self.currentOutfitManipulator:GetOutfitIndex())
+            ZO_OUTFIT_MANAGER:EquipOutfit(actoryCategory, self.currentOutfitManipulator:GetOutfitIndex())
         else
-            ZO_OUTFIT_MANAGER:UnequipOutfit(ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleMode))
+            ZO_OUTFIT_MANAGER:UnequipOutfit(actoryCategory)
         end
     end
 end

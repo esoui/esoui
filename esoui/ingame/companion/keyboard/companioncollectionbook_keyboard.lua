@@ -265,7 +265,7 @@ end
 
 function ZO_CompanionCollectionBook_Keyboard:UpdateCategoryStatus(categoryNode)
     local categoryData = categoryNode.data
-    
+
     if categoryData:IsSubcategory() then
         self:UpdateCategoryStatusIcon(categoryNode:GetParent())
     end
@@ -313,7 +313,7 @@ function ZO_CompanionCollectionBook_Keyboard:UpdateCategoryStatusIcon(categoryNo
 
     categoryControl.statusIcon:ClearIcons()
 
-    if categoryData:HasAnyNewCollectibles() then
+    if categoryData:HasAnyNewCompanionCollectibles() then
         categoryControl.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
     end
 
@@ -392,6 +392,8 @@ end
 
 function ZO_CompanionCollectionBook_Keyboard:UpdateCollectionLater()
     self.refreshGroups:RefreshAll("FullUpdate")
+
+    COMPANION_KEYBOARD:UpdateSceneGroupButtons("companionSceneGroup")
 end
 
 function ZO_CompanionCollectionBook_Keyboard:UpdateCollection()
@@ -405,6 +407,8 @@ end
 
 function ZO_CompanionCollectionBook_Keyboard:OnCollectibleUpdated(collectibleId)
     self.refreshGroups:RefreshSingle("CollectibleUpdated", collectibleId)
+
+    COMPANION_KEYBOARD:UpdateSceneGroupButtons("companionSceneGroup")
 end
 
 function ZO_CompanionCollectionBook_Keyboard:UpdateCollectible(collectibleId)
@@ -452,6 +456,8 @@ end
 
 function ZO_CompanionCollectionBook_Keyboard:OnCollectibleStatusUpdated(collectibleId)
     self.refreshGroups:RefreshSingle("CollectibleUpdated", collectibleId)
+
+    COMPANION_KEYBOARD:UpdateSceneGroupButtons("companionSceneGroup")
 end
 
 function ZO_CompanionCollectionBook_Keyboard:OnCollectibleNewStatusCleared(collectibleId)

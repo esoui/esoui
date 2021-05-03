@@ -71,3 +71,7 @@ function ZO_Companion_Manager:GetActiveCompanionPassivePerkAbilityId()
 end
 
 ZO_COMPANION_MANAGER = ZO_Companion_Manager:New()
+
+function ZO_HasActiveOrBlockedCompanion()
+    return HasActiveCompanion() or HasBlockedCompanion()
+end

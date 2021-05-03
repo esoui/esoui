@@ -62,7 +62,7 @@ end
 
 local function ZO_RestyleGamepadRootEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
     if data.mode == RESTYLE_MODE_COMPANION_EQUIPMENT or data.mode == RESTYLE_MODE_COMPANION_COLLECTIBLE then
-        enabled = enabled and HasActiveCompanion()
+        enabled = enabled and ZO_HasActiveOrBlockedCompanion()
     end
     data.enabled = enabled
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
@@ -125,7 +125,7 @@ function ZO_Restyle_Gamepad:UpdateOptionLeftTooltip(restyleMode)
     elseif restyleMode == RESTYLE_MODE_COMPANION_COLLECTIBLE then
         local descriptionOne
         local descriptionTwo
-        if HasActiveCompanion() and CanUseCollectibleDyeing() then
+        if ZO_HasActiveOrBlockedCompanion() and CanUseCollectibleDyeing() then
             descriptionOne = ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_ESO_PLUS_STATUS_UNLOCKED))
             descriptionTwo = GetString(SI_GAMEPAD_DYEING_COMPANION_COLLECTIBLE_TAB_DESCRIPTION_UNLOCKED)
         else
@@ -171,7 +171,7 @@ function ZO_Restyle_Gamepad:InitializeKeybindStripDescriptorsRoot()
                 local targetData = self.modeList:GetTargetData()
                 local targetMode = targetData.mode
                 if targetMode == RESTYLE_MODE_COMPANION_EQUIPMENT or targetMode == RESTYLE_MODE_COMPANION_COLLECTIBLE then
-                    return HasActiveCompanion()
+                    return ZO_HasActiveOrBlockedCompanion()
                 end
                 return true
             end,

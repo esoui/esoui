@@ -193,6 +193,7 @@ function ZO_CollectibleData:Refresh()
     self.isSlottable = IsCollectibleSlottable(collectibleId)
     self.cachedNameWithNickname = nil
     self.isBlacklisted = IsCollectibleBlacklisted(collectibleId)
+    self.questState = GetCollectibleAssociatedQuestState(collectibleId)
 
     local categoryData = self:GetCategoryData()
     if categoryData then
@@ -315,6 +316,10 @@ end
 
 function ZO_CollectibleData:IsCategoryType(categoryType)
     return self.categoryType == categoryType
+end
+
+function ZO_CollectibleData:GetCollectibleAssociatedQuestState()
+    return self.questState
 end
 
 do
@@ -530,6 +535,15 @@ function ZO_CollectibleData:GetPrimaryInteractionStringId(actorCategory)
             return SI_COLLECTIBLE_ACTION_USE
         elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT then
             return SI_COLLECTIBLE_ACTION_COMBINE
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_COMPANION then
+            local activeState = self:GetCollectibleAssociatedQuestState()
+            if activeState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_INACTIVE then
+                return SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
+            elseif activeState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_ACCEPTED then
+                return nil
+            else
+                return SI_COLLECTIBLE_ACTION_SET_ACTIVE
+            end               
         else
             return SI_COLLECTIBLE_ACTION_SET_ACTIVE
         end
@@ -1144,6 +1158,22 @@ function ZO_CollectibleCategoryData:HasAnyNewCollectibles()
     return false
 end
 
+function ZO_CollectibleCategoryData:HasAnyNewCompanionCollectibles()
+    if NonContiguousCount(self.newCollectibleIdsCache) > 0 and self:HasAnyCompanionUsableCollectibles() then
+        return true
+    end
+
+    if self.isTopLevelCategory then
+        for _, subcategoryData in ipairs(self.orderedSubcategories) do
+            if subcategoryData:HasAnyNewCompanionCollectibles() then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 function ZO_CollectibleCategoryData:UpdateNewCache(collectibleData)
     local collectibleId = collectibleData:GetId()
     local isNew = collectibleData:IsNew()
@@ -1549,6 +1579,15 @@ end
 function ZO_CollectibleDataManager:HasAnyNewCollectibles()
     for _, categoryData in self:CategoryIterator() do
         if categoryData:HasAnyNewCollectibles() then
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_CollectibleDataManager:HasAnyNewCompanionCollectibles()
+    for _, categoryData in self:CategoryIterator() do
+        if categoryData:HasAnyNewCompanionCollectibles() then
             return true
         end
     end

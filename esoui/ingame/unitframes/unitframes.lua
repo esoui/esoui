@@ -77,8 +77,8 @@ local GAMEPAD_CONSTANTS =
 {
     GROUP_LEADER_ICON = "EsoUI/Art/UnitFrames/Gamepad/gp_Group_Leader.dds",
 
-    GROUP_FRAMES_PER_COLUMN = 12,
-    NUM_COLUMNS = GROUP_SIZE_MAX / 12,
+    GROUP_FRAMES_PER_COLUMN = 6,
+    NUM_COLUMNS = GROUP_SIZE_MAX / 6, --The denominator should be the same value as GROUP_FRAMES_PER_COLUMN
 
     GROUP_STRIDE = 3,
 
@@ -2380,20 +2380,43 @@ local function RegisterForEvents()
         CreateLocalCompanion()
     end
 
+    local INACTIVE_COMPANION_STATES =
+    {
+        [COMPANION_STATE_INACTIVE] = true,
+        [COMPANION_STATE_BLOCKED_PERMANENT] = true,
+        [COMPANION_STATE_BLOCKED_TEMPORARY] = true,
+        [COMPANION_STATE_HIDDEN] = true,
+        [COMPANION_STATE_INITIALIZING] = true,
+    }
+
+    local PENDING_COMPANION_STATES = 
+    {
+        [COMPANION_STATE_PENDING] = true,
+        [COMPANION_STATE_INITIALIZED_PENDING] = true,
+    }
+
+    local ACTIVE_COMPANION_STATES =
+    {
+        [COMPANION_STATE_ACTIVE] = true,
+    }
+
+    --If this triggers, we will want to make sure the new state is handled in the OnCompanionStateChanged function
+    internalassert(COMPANION_STATE_MAX_VALUE == 7, "A new companion state has been added. Please add it to one of the state tables.")
+
     local function OnCompanionStateChanged(eventCode, newState, oldState)
-        if newState == COMPANION_STATE_INACTIVE then
+        if INACTIVE_COMPANION_STATES[newState] then
             --If we are going straight from pending to inactive, we need to manually mark the player unit as having changed since this won't trigger the normal UNIT_DESTROYED event
-            if oldState == COMPANION_STATE_PENDING and IsUnitGrouped("player") then
+            if PENDING_COMPANION_STATES[oldState] and IsUnitGrouped("player") then
                 ReportUnitChanged(GetLocalPlayerGroupUnitTag())
             end
             RefreshLocalCompanion()
-        elseif newState == COMPANION_STATE_PENDING then
+        elseif PENDING_COMPANION_STATES[newState] then
             if IsUnitGrouped("player") then
                 ReportUnitChanged(GetLocalPlayerGroupUnitTag())
             end
             UnitFrames:DisableLocalCompanionFrame()
             CreateLocalCompanion()
-        elseif newState == COMPANION_STATE_ACTIVE then
+        elseif ACTIVE_COMPANION_STATES[newState] then
             --We only need to handle the local companion frame here, as the group frames are handled with the UNIT_CREATED event
             UnitFrames:DisableLocalCompanionFrame()
             CreateLocalCompanion()
