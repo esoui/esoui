@@ -628,7 +628,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     local function MarketPurchasingDialogSetup(dialog, data)
         dialog:setupFunc()
         EVENT_MANAGER:RegisterForEvent("GAMEPAD_MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(dialog, ...) end)
-        if data.shouldSendPartiallyOwnedGift then
+        if data and data.shouldSendPartiallyOwnedGift then
             RespondToSendPartiallyOwnedGift(true)
         else
             if not self.isGift then
