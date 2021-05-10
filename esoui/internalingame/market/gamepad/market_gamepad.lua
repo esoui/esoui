@@ -4,6 +4,10 @@ ZO_GAMEPAD_MARKET_LOCKED_SCENE_NAME = "gamepad_market_locked"
 ZO_GAMEPAD_MARKET_PRE_SCENE_NAME = "gamepad_market_pre_scene"
 ZO_GAMEPAD_ENDEAVOR_SEAL_MARKET_PRE_SCENE_NAME = "gamepad_endeavor_seal_market_pre_scene"
 
+local TERTIARY_OPTION_NONE = 0
+local TERTIARY_OPTION_BUY_CROWNS = 1
+local TERTIARY_OPTION_OPEN_ENDEAVORS = 2
+
 ZO_GAMEPAD_MARKET_TEMPLATES =
 {
     CROWN_STORE =
@@ -53,6 +57,7 @@ ZO_GAMEPAD_MARKET_TEMPLATES =
         },
         showEsoPlusOffers = true,
         showFeaturedProducts = true,
+        tertiaryOption = TERTIARY_OPTION_BUY_CROWNS,
     },
     SEAL_STORE =
     {
@@ -87,6 +92,7 @@ ZO_GAMEPAD_MARKET_TEMPLATES =
         },
         showEsoPlusOffers = true,
         showFeaturedProducts = true,
+        tertiaryOption = TERTIARY_OPTION_OPEN_ENDEAVORS,
         marketOpenedTutorialTriggerType = TUTORIAL_TRIGGER_SEAL_MARKET_OPENED,
      },
 }
@@ -97,13 +103,30 @@ local GAMEPAD_MARKET_LABELED_GROUP_LABEL_TEMPLATE = "ZO_GamepadMarket_GroupLabel
 local LABELED_GROUP_PADDING = 110 --padding from bottom of one group to the top of the next
 local LABELED_GROUP_LABEL_PADDING = -10 --padding from the top of a group to the bottom of it's header
 
-local MARKET_BUY_CROWNS_BUTTON =
+local MARKET_TERTIARY_BUTTON_DESCRIPTOR =
 {
     alignment = KEYBIND_STRIP_ALIGN_RIGHT,
     gamepadOrder = 1,
-    name = GetString(SI_MARKET_BUY_CROWNS),
+    visible = function()
+        return ZO_GAMEPAD_MARKET:GetTertiaryOption() ~= TERTIARY_OPTION_NONE
+    end,
+    name = function()
+        local tertiaryOption = ZO_GAMEPAD_MARKET:GetTertiaryOption()
+        if tertiaryOption == TERTIARY_OPTION_BUY_CROWNS then
+            return GetString(SI_MARKET_BUY_CROWNS)
+        elseif tertiaryOption == TERTIARY_OPTION_OPEN_ENDEAVORS then
+            return GetString(SI_ACTIVITY_FINDER_OPEN_ENDEAVORS)
+        end
+    end,
     keybind = "UI_SHORTCUT_TERTIARY",
-    callback = ZO_ShowBuyCrownsPlatformDialog,
+    callback = function()
+        local tertiaryOption = ZO_GAMEPAD_MARKET:GetTertiaryOption()
+        if tertiaryOption == TERTIARY_OPTION_BUY_CROWNS then
+            ZO_ShowBuyCrownsPlatformDialog()
+        elseif tertiaryOption == TERTIARY_OPTION_OPEN_ENDEAVORS then
+            RequestOpenTimedActivities()
+        end
+    end,
 }
 
 local g_activeMarketScreen = nil
@@ -175,9 +198,15 @@ function GamepadMarket:ApplyMarketTemplate(template)
 
         self.marketOpenedTutorialTriggerType = template.marketOpenedTutorialTriggerType
 
+        self.tertiaryOption = template.tertiaryOption
+
         self:FlagMarketCategoriesForRefresh()
         self:RefreshMarketCurrencyTypeBalances()
     end
+end
+
+function GamepadMarket:GetTertiaryOption()
+    return self.tertiaryOption
 end
 
 function GamepadMarket:SetupSceneGroupCallback()
@@ -553,7 +582,7 @@ function GamepadMarket:InitializeKeybindDescriptors()
                 end
             end,
         },
-        MARKET_BUY_CROWNS_BUTTON,
+        MARKET_TERTIARY_BUTTON_DESCRIPTOR,
         KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor(),
     }
 end
@@ -895,9 +924,8 @@ do
 
                     local displayGroup = self:GetDisplayGroup()
                     local numMarketCategories = GetNumMarketProductCategories(displayGroup)
-                    local NO_SUBCATEGORY = nil
                     for categoryIndex = 1, numMarketCategories do
-                        if self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newEsoPlusOfferFilterTypes) then
+                        if self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.newEsoPlusOfferFilterTypes) then
                             return true
                         end
                     end
@@ -917,12 +945,11 @@ do
 
             local displayGroup = self:GetDisplayGroup()
             local numCategories = GetNumMarketProductCategories(displayGroup)
-            local NO_SUBCATEGORY = nil
             for categoryIndex = 1, numCategories do
-                if self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.marketProductFilterTypes) then
+                if self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.marketProductFilterTypes) then
                     local name, numSubcategories = GetMarketProductCategoryInfo(displayGroup, categoryIndex)
                     self:AddTopLevelCategory(categoryIndex, GetNextTabIndex(), name, numSubcategories, ZO_MARKET_CATEGORY_TYPE_NONE, function()
-                        return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
+                        return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.newMarketProductFilterTypes)
                     end)
                 end
             end
@@ -1043,8 +1070,7 @@ end
 function GamepadMarket:GetCategoryProductIds(categoryIndex, subcategoryIndex, productFilterFunction, ...)
     if subcategoryIndex == 0 then
         local numMarketProducts = select(3, GetMarketProductCategoryInfo(self:GetDisplayGroup(), categoryIndex))
-        local NO_SUBCATEGORY = nil
-        return self:GetMarketProductPresentations(categoryIndex, NO_SUBCATEGORY, numMarketProducts, productFilterFunction, ...)
+        return self:GetMarketProductPresentations(categoryIndex, ZO_NO_MARKET_SUBCATEGORY, numMarketProducts, productFilterFunction, ...)
     else
         local numMarketProducts = select(2, GetMarketProductSubCategoryInfo(self:GetDisplayGroup(), categoryIndex, subcategoryIndex))
         return self:GetMarketProductPresentations(categoryIndex, subcategoryIndex, numMarketProducts, productFilterFunction, ...)
@@ -1267,9 +1293,8 @@ do
 
         local displayGroup = self:GetDisplayGroup()
         local numCategories = GetNumMarketProductCategories(displayGroup)
-        local NO_SUBCATEGORY = nil
         for categoryIndex = 1, numCategories do
-            if self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.esoPlusOfferFilterTypes) then
+            if self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.esoPlusOfferFilterTypes) then
                 local categoryName, numSubcategories = GetMarketProductCategoryInfo(displayGroup, categoryIndex)
                 local formattedBaseName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, categoryName)
 
@@ -1760,7 +1785,7 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
                     end
                 end,
             },
-            MARKET_BUY_CROWNS_BUTTON,
+            MARKET_TERTIARY_BUTTON_DESCRIPTOR,
             KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor()
         }
 

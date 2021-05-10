@@ -1258,6 +1258,7 @@ do
             activeTabControl:SetText(formattedTabText)
         end
 
+        local currentFilterType = inventory.currentFilter
         if not filterTab.isSubFilter then
             local menuBar = inventory.subFilterBar
             if menuBar then
@@ -1270,8 +1271,8 @@ do
                 ZO_MenuBar_ClearButtons(menuBar)
 
                 if inventory.subFilters then
-                    if inventory.subFilters[inventory.currentFilter] then
-                       for _, data in ipairs(inventory.subFilters[inventory.currentFilter]) do
+                    if inventory.subFilters[currentFilterType] then
+                       for _, data in ipairs(inventory.subFilters[currentFilterType]) do
                             data.control = ZO_MenuBar_AddButton(menuBar, data)
                         end
 
@@ -1279,11 +1280,12 @@ do
                     end
                 end
             end
-        elseif self.flashingSlot and ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(self.flashingSlot, inventory.currentFilter, filterTab.filterType) then
-            local currentFilter = inventory.currentFilter
-            for _, subFilter in pairs(inventory.subFilters[currentFilter]) do
-                if ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(self.flashingSlot, currentFilter, subFilter.filterType) then
-                    self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
+        elseif #self.flashingSlots > 0 then
+            for _, flashingSlot in ipairs(self.flashingSlots) do
+                for _, subFilter in pairs(inventory.subFilters[currentFilterType]) do
+                    if ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(flashingSlot, currentFilterType, subFilter.filterType) and ZO_IndexOfElementInNumericallyIndexedTable(inventory.backingBags, flashingSlot.bagId) then
+                        self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
+                    end
                 end
             end
         end
@@ -1454,25 +1456,24 @@ end
 
 function ZO_InventoryManager:SetupCategoryFlashAnimation()
     self.categoryFlashAnimationTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_Inventory_NewItemCategory_FlashAnimation")
+    self.flashingSlots = {}
     self.listeningControls = {}
 
     local function OnStop()
-        self.flashingSlot = nil
+        self.flashingSlots = {}
         self.listeningControls = {}
     end
     self.categoryFlashAnimationTimeline:SetHandler("OnStop", OnStop)
 end
 
 function ZO_InventoryManager:AddCategoryFlashAnimationControl(control)
-    table.insert(self.listeningControls, control)
+    local controlName = control:GetName()
+    self.listeningControls[controlName] = control
 end
 
 function ZO_InventoryManager:RemoveCategoryFlashAnimationControl(control)
-    local removeIndex = ZO_IndexOfElementInNumericallyIndexedTable(self.listeningControls, control)
-
-    if removeIndex then
-        table.remove(self.listeningControls, removeIndex)
-    end
+    local controlName = control:GetName()
+    self.listeningControls[controlName] = nil
 end
 
 do
@@ -1490,7 +1491,7 @@ do
             currentAlpha = FLASH_ANIMATION_MAX_ALPHA - alphaDelta
         end
 
-        for _, control in ipairs(self.listeningControls) do
+        for _, control in pairs(self.listeningControls) do
             control:SetAlpha(currentAlpha)
         end
     end
@@ -1501,13 +1502,17 @@ function ZO_InventoryManager:PlayItemAddedAlert(slot, inventory)
         return
     end
 
+    local isSlotAdded = false
     for _, tabFilter in pairs(inventory.tabFilters) do
         if slot.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
             if tabFilter.filterType == ITEM_TYPE_DISPLAY_CATEGORY_COMPANION then
                 self:AddCategoryFlashAnimationControl(tabFilter.control:GetNamedChild("Flash"))
                 if not self.categoryFlashAnimationTimeline:IsPlaying() then
                     self.categoryFlashAnimationTimeline:PlayFromStart()
-                    self.flashingSlot = slot
+                end
+                if not isSlotAdded then
+                    table.insert(self.flashingSlots, slot)
+                    slotAdded = true
                 end
             end
         else
@@ -1517,7 +1522,10 @@ function ZO_InventoryManager:PlayItemAddedAlert(slot, inventory)
                     self:AddCategoryFlashAnimationControl(tabFilter.control:GetNamedChild("Flash"))
                     if not self.categoryFlashAnimationTimeline:IsPlaying() then
                         self.categoryFlashAnimationTimeline:PlayFromStart()
-                        self.flashingSlot = slot
+                    end
+                    if not isSlotAdded then
+                        table.insert(self.flashingSlots, slot)
+                        slotAdded = true
                     end
                     break
                 end
@@ -1531,7 +1539,10 @@ function ZO_InventoryManager:PlayItemAddedAlert(slot, inventory)
             self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
             if not self.categoryFlashAnimationTimeline:IsPlaying() then
                 self.categoryFlashAnimationTimeline:PlayFromStart()
-                self.flashingSlot = slot
+            end
+            if not isSlotAdded then
+                table.insert(self.flashingSlots, slot)
+                slotAdded = true
             end
         end
     end

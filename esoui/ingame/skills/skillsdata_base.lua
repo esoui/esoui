@@ -335,11 +335,6 @@ function ZO_SkillLineData_Base:AnySkillHasUpdatedStatus()
     assert(false)
 end
 
-function ZO_SkillLineData_Base:GetCombatActorCategory()
-    -- TODO: use GameplayActorCategory instead
-    assert(false)
-end
-
 -- optional methods (can be overidden)
 function ZO_SkillLineData_Base:IsPlayerSkillLine()
     return false
@@ -379,9 +374,9 @@ function ZO_SkillLineData_Base:SetNew(isNew)
     end
 end
 
-function ZO_SkillLineData_Base:TryMarkNew(newState)
+function ZO_SkillLineData_Base:TryMarkNew(isNew)
     if self.canMarkNew then
-        self.isNew = newState
+        self:SetNew(isNew)
     end
 end
 
@@ -400,7 +395,7 @@ function ZO_SkillLineData_Base:OnSkillDataUpdateStatusChanged(skillData)
 end
 
 function ZO_SkillLineData_Base:AnySkillHasUpdatedStatus()
-    return NonContiguousCount(self.skillsWithUpdatesCache) > 0
+    return not ZO_IsTableEmpty(self.skillsWithUpdatesCache)
 end
 
 -- helpers
@@ -515,14 +510,14 @@ function ZO_SkillTypeData:SkillLineIterator(skillLineFilterFunctions)
 end
 
 function ZO_SkillTypeData:AreAnySkillLinesNew()
-    for _, skillLineData in self:SkillLineIterator({ ZO_SkillLineData.IsNew }) do
+    for _, skillLineData in self:SkillLineIterator({ ZO_SkillLineData_Base.IsNew }) do
         return true
     end
     return false
 end
 
 function ZO_SkillTypeData:AreAnySkillLinesOrAbilitiesNew()
-    for _, skillLineData in self:SkillLineIterator({ ZO_SkillLineData.IsSkillLineOrAbilitiesNew } ) do
+    for _, skillLineData in self:SkillLineIterator({ ZO_SkillLineData_Base.IsSkillLineOrAbilitiesNew } ) do
         return true
     end
     return false

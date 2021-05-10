@@ -98,7 +98,7 @@ function ZO_SharedInventoryManager:Initialize()
             PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_SLOT)
         end
 
-        if updateReason == INVENTORY_UPDATE_REASON_DEFAULT and (bagId == BAG_WORN or bagId == BAG_COMPANION_WORN) then
+        if updateReason == INVENTORY_UPDATE_REASON_DEFAULT and (bagId == BAG_WORN or (bagId == BAG_COMPANION_WORN and HasActiveCompanion())) then
             local slotHasItem = GetWornItemInfo(bagId, slotIndex)
             if slotHasItem then
                 PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_EQUIP)

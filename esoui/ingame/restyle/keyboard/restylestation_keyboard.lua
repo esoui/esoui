@@ -129,6 +129,7 @@ function ZO_RestyleStation_Keyboard:HandleTabChange(tabData)
 
         local function Decline()
             ZO_MenuBar_SelectDescriptor(self.tabs, self.currentTabDescriptor)
+            ZO_MenuBar_SelectDescriptor(self.subTabs, self.currentSubTabDescriptor)
             self.pendingTabData = nil
         end
 
@@ -215,7 +216,9 @@ function ZO_RestyleStation_Keyboard:InitializeTabs()
         actorCategory = GAMEPLAY_ACTOR_CATEGORY_COMPANION,
         isSubTab = true,
     }
-    local companionSubTabData = ZO_MenuBar_GenerateButtonTabData(SI_OUTFIT_COMPANION_SUB_TAB, self.companionSubTabDescriptor, "EsoUI/Art/Dye/dyes_tabIcon_companion_up.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_down.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_over.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_disabled.dds", DEFAULT_TOOLTIP_FUNCTION, ALWAYS_SHOW_TOOLTIP, PlayerDrivenCallback)
+
+
+    local companionSubTabData = ZO_MenuBar_GenerateButtonTabData(SI_OUTFIT_COMPANION_SUB_TAB, self.companionSubTabDescriptor, "EsoUI/Art/Dye/dyes_tabIcon_companion_up.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_down.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_over.dds", "EsoUI/Art/Dye/dyes_tabIcon_companion_disabled.dds", function(...) self:LayoutCompanionTabTooltip(...) end, ALWAYS_SHOW_TOOLTIP, PlayerDrivenCallback)
     companionSubTabData.enabled = function()
         return ZO_HasActiveOrBlockedCompanion()
     end
@@ -232,6 +235,8 @@ function ZO_RestyleStation_Keyboard:RegisterForEvents()
     ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:RegisterCallback("SheetChanged", self.onSheetChangedCallback)
     ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:RegisterCallback("DyeSlotClicked", self.onDyeSlotClickedCallback)
     ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:RegisterCallback("ModeSelectorDropdownChanged", self.updateKeybindCallback)
+
+    EVENT_MANAGER:RegisterForEvent("ZO_RestyleStation", EVENT_ACTIVE_COMPANION_STATE_CHANGED, function() ZO_MenuBar_UpdateButtons(self.subTabs) end)
 end
 
 function ZO_RestyleStation_Keyboard:UnregisterForEvents()
@@ -318,6 +323,17 @@ function ZO_RestyleStation_Keyboard:LayoutCollectionAppearanceTooltip(tooltip)
     SetTooltipText(tooltip, title)
     local r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
     tooltip:AddLine(description, "", r, g, b)
+end
+
+function ZO_RestyleStation_Keyboard:LayoutCompanionTabTooltip(tooltip)
+    local title = GetString(SI_OUTFIT_COMPANION_SUB_TAB)
+
+    SetTooltipText(tooltip, title)
+    if not ZO_HasActiveOrBlockedCompanion() then
+        local description = GetString(SI_OUTFIT_COMPANION_DISABLED_DESCRIPTION)
+        local r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
+        tooltip:AddLine(description, "", r, g, b)
+    end
 end
 
 function ZO_RestyleStation_Keyboard:InitializeKeybindStripDescriptors()

@@ -385,7 +385,3 @@ end
 function ZO_CompanionSkillLineData:IsCompanionSkillLine()
     return true
 end
-
-function ZO_CompanionSkillLineData:GetCombatActorCategory()
-    return GAMEPLAY_ACTOR_CATEGORY_COMPANION
-end

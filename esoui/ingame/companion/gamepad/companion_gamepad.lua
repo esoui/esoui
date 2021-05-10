@@ -132,7 +132,10 @@ function ZO_Companion_Gamepad:InitializeList()
         {
             icon = "EsoUI/Art/Companion/Gamepad/gp_companion_icon_inventory.dds",
             name = SI_COMPANION_MENU_EQUIPMENT_TITLE,
-            scene = "companionEquipmentGamepad"
+            scene = "companionEquipmentGamepad",
+            isNewCallback = function()
+                return SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchFilterType, ITEMFILTERTYPE_COMPANION, BAG_BACKPACK)
+            end,
         },
         {
             icon = "EsoUI/Art/Companion/Gamepad/gp_companion_icon_skills.dds",
@@ -142,6 +145,16 @@ function ZO_Companion_Gamepad:InitializeList()
                 GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_COMPANION_EQUIPPED_SKILLS))
                 GAMEPAD_TOOLTIPS:LayoutEquippedCompanionSkillsPreview(GAMEPAD_LEFT_TOOLTIP)
             end,
+            isNewCallback = function()
+                if COMPANION_SKILLS_DATA_MANAGER:AreAnySkillLinesNew() then
+                    return true
+                end
+                local companionHotbar = ACTION_BAR_ASSIGNMENT_MANAGER:GetHotbar(HOTBAR_CATEGORY_COMPANION)
+                if companionHotbar:AreAnySlotsNew() then
+                    return true
+                end
+                return false
+            end
         },
         {
             icon = "EsoUI/Art/Companion/Gamepad/gp_companion_icon_collections.dds",

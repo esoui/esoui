@@ -1,3 +1,7 @@
+ZO_MARKET_CURRENCY_BUTTON_TYPE_NONE = 0
+ZO_MARKET_CURRENCY_BUTTON_TYPE_BUY_CROWNS = 1
+ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_ENDEAVORS = 2
+
 ZO_MarketCurrency_Keyboard = ZO_MarketCurrency_Shared:Subclass()
 
 function ZO_MarketCurrency_Keyboard:Initialize(control)
@@ -9,6 +13,7 @@ end
 function ZO_MarketCurrency_Keyboard:InitializeControls()
     self.container = self.control:GetNamedChild("Container")
     self.buyCrownsButton = self.container:GetNamedChild("BuyCrowns")
+    self.endeavorsButton = self.container:GetNamedChild("Endeavors")
 
     self.currencyControls = {}
     for index, data in ipairs(self.marketCurrencyTypes) do
@@ -24,6 +29,11 @@ function ZO_MarketCurrency_Keyboard:InitializeControls()
         control:SetHandler("OnMouseExit", function(...) self:OnCurrencyLabelMouseExit(...) end, "tooltip")
         control:SetHandler("OnEffectivelyShown", function() self:OnMarketCurrencyUpdated(marketCurrencyType) end)
     end
+end
+
+function ZO_MarketCurrency_Keyboard:ShowMarketCurrencyButtonType(buttonType)
+    self.buyCrownsButton:SetHidden(buttonType ~= ZO_MARKET_CURRENCY_BUTTON_TYPE_BUY_CROWNS)
+    self.endeavorsButton:SetHidden(buttonType ~= ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_ENDEAVORS)
 end
 
 function ZO_MarketCurrency_Keyboard:OnMarketCurrencyTypeVisibilityUpdated()

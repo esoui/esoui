@@ -1,6 +1,10 @@
 --Global voice chat related functions and data
 function ZO_VoiceChat_GetChannelDataFromName(channelName)
-    local channelType, guildId, guildRoomNumber = VoiceChatGetChannelInfo(channelName)
+    local channelType, primaryId, guildRoomNumber = VoiceChatGetChannelInfo(channelName)
+    local guildId
+    if channelType == VOICE_CHANNEL_GUILD then
+        guildId = primaryId
+    end
 
     local channelData =
     {
@@ -625,9 +629,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
 
             self:SetAndSwapDesiredActiveChannel(self:GetChannel(channelData))
         elseif channelType == VOICE_CHANNEL_GUILD then
-            local guildId = channelData.guildId
-            local guildRoomNumber = channelData.guildRoomNumber
-            self:AddGuildChannelRoom(channelName, guildId, guildRoomNumber)
+            self:AddGuildChannelRoom(channelName, channelData)
 
             self.guildIdsDirty = true
 
@@ -942,9 +944,10 @@ function ZO_VoiceChat_Manager:OnUpdate()
     end
 end
 
-function ZO_VoiceChat_Manager:AddGuildChannelRoom(channelName, guildId, guildRoomNumber)
-    local guildServerId = GetGuildId(guildId)
-    local guildName = GetGuildName(guildServerId)
+function ZO_VoiceChat_Manager:AddGuildChannelRoom(channelName, channelData)
+    local guildId = channelData.guildId
+    local guildRoomNumber = channelData.guildRoomNumber
+    local guildName = GetGuildName(guildId)
 
     local guildChannels = self.channelData[VOICE_CHANNEL_GUILD]
     if not guildChannels[guildId] then
@@ -1014,7 +1017,10 @@ function ZO_VoiceChat_Manager:RefreshGuildChannelIds()
     for oldGuildId, guildData in pairs(guildChannels) do
         local newGuildId
         for roomNumber, roomData in pairs(guildData.rooms) do
-            newGuildId = newGuildId or select(2, VoiceChatGetChannelInfo(roomData.channelName))
+            if not newGuildId then
+                local channelData = ZO_VoiceChat_GetChannelDataFromName(roomData.channelName)
+                newGuildId = channelData.guildId
+            end
             roomData.guildId = newGuildId
             self.guildChannelsToIds[roomData.channelName] = newGuildId
         end

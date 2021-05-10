@@ -137,9 +137,13 @@
                     <Anchor point="TOP" relativePoint="BOTTOM" offsetY="1" />
                 </Label>
 
+                <Label name="$(parent)StackCountText" font="ZoFontGameBold" color="DCD822">
+                    <Dimensions x="50" y="18"/>
+                    <Anchor point="CENTER" relativePoint="CENTER" offsetX="15" offsetY="-15"/>
+                </Label>
                 <Label name="$(parent)TimerText" font="ZoFontGameBold" color="DCD822">
                     <Dimensions x="50" y="18"/>
-                    <Anchor point="CENTER" relativePoint="CENTER" offsetY="-3"/>
+                    <Anchor point="CENTER" relativePoint="CENTER" offsetY="7"/>
                 </Label>
                 <Texture name="$(parent)TimerOverlay" textureFile="EsoUI/Art/ActionBar/abilityCooldownInsert.dds" />
                 
@@ -168,9 +172,13 @@
                     <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-6" />
                 </Label>
 
+                <Label name="$(parent)StackCountText" font="ZoFontGamepad27" color="DCD822">
+                    <Dimensions x="0" y="25"/>
+                    <Anchor point="CENTER" relativePoint="CENTER" offsetX="23" offsetY="-20"/>
+                </Label>
                 <Label name="$(parent)TimerText" font="ZoFontGamepad27" color="DCD822">
                     <Dimensions x="0" y="25"/>
-                    <Anchor point="CENTER" relativePoint="CENTER" offsetY="-4"/>
+                    <Anchor point="CENTER" relativePoint="CENTER" offsetY="6"/>
                 </Label>
 
                 <Texture name="$(parent)TimerOverlay" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_abilityCooldownInsert.dds">
@@ -214,7 +222,8 @@
 
                 <Label name="$(parent)ButtonText" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" tier="HIGH" verticalAlignment="TOP" />
 
-                <Label name="$(parent)TimerText" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" tier="HIGH" verticalAlignment="CENTER" />
+                <Label name="$(parent)StackCountText" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" verticalAlignment="CENTER" tier="HIGH" />
+                <Label name="$(parent)TimerText" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" verticalAlignment="CENTER" tier="HIGH" />
                 <Texture name="$(parent)TimerOverlay" inherits="ZO_ActionButton_FlipCardControl" level="3" hidden="true"/>
                 
                 <Label name="$(parent)CountText" tier="HIGH">

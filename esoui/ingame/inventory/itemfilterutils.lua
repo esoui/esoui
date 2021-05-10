@@ -1522,6 +1522,38 @@ function ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, 
     end
 end
 
+function ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcategory(slot, itemTypeDisplayCategory, itemTypeSubCategory)
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+        return true
+    end
+
+    if slot.actorCategory ~= GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+        return false
+    end
+
+    if not ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeDisplayCategory) then
+        return false
+    end
+
+    local itemTypeDisplayCategoryFilterInfoType = ITEM_TYPE_DISPLAY_CATEGORY_FILTER_INFO_TYPE[itemTypeDisplayCategory]
+
+    if itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY then
+        return ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategory(slot, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_EQUIPMENT_FILTER_TYPE then
+        return ZO_ItemFilterUtils.IsSlotInEquipmentFilterType(slot, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_ITEM_TYPE then
+        return ZO_ItemFilterUtils.IsSlotInItemType(slot, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_CONSUMABLE_TYPE then
+        return ZO_ItemFilterUtils.IsSlotInConsumableSubcategory(slot, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_SPECIALIZED_ITEM_TYPE then
+        return ZO_ItemFilterUtils.IsSlotInSpecializedItemType(slot, itemTypeDisplayCategory, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_MISCELLANEOUS_TYPE then
+        return ZO_ItemFilterUtils.IsSlotInMiscellaneousSubcategory(slot, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_PROVISIONING_TYPE then
+        return ZO_ItemFilterUtils.IsSlotInProvisioningSubcategory(slot, itemTypeSubCategory)
+    end
+end
+
 function ZO_ItemFilterUtils.IsItemLinkInItemTypeDisplayCategoryAndSubcategory(itemLink, itemTypeDisplayCategory, itemTypeSubCategory)
     if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
         return true

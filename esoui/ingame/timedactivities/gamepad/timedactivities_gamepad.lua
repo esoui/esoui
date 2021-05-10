@@ -79,6 +79,16 @@ function ZO_TimedActivities_Gamepad:InitializeControls()
             end,
             sound = SOUNDS.GAMEPAD_MENU_BACKWARD,
         },
+        -- Seals of Endeavor Store
+        {
+            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            keybind = "UI_SHORTCUT_TERTIARY",
+            name = GetString(SI_TIMED_ACTIVITIES_OPEN_SEALS_STORE),
+            callback = function()
+                ZO_ShowSealStore()
+            end,
+            sound = SOUNDS.GAMEPAD_MENU_FORWARD,
+        },
     }
     self:SetListsUseTriggerKeybinds(true)
 end
@@ -88,15 +98,24 @@ function ZO_TimedActivities_Gamepad:InitializeActivityFinderCategory()
     self.scene:AddFragment(self.sceneFragment)
 
     local primaryCurrencyType = TIMED_ACTIVITIES_MANAGER.GetPrimaryTimedActivitiesCurrencyType()
-    local gamepadData =
+    self.categoryData =
     {
-        priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.TIMED_ACTIVITIES,
-        name = GetString(SI_ACTIVITY_FINDER_CATEGORY_TIMED_ACTIVITIES),
-        menuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_timedActivities.dds",
-        sceneName = "TimedActivitiesGamepad",
-        tooltipDescription = zo_strformat(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_TIMED_ACTIVITIES, GetCurrencyName(primaryCurrencyType), GetString(SI_GAMEPAD_MAIN_MENU_ENDEAVOR_SEAL_MARKET_ENTRY)),
+        gamepadData =
+        {
+            priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.TIMED_ACTIVITIES,
+            name = GetString(SI_ACTIVITY_FINDER_CATEGORY_TIMED_ACTIVITIES),
+            menuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_timedActivities.dds",
+            sceneName = "TimedActivitiesGamepad",
+            tooltipDescription = zo_strformat(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_TIMED_ACTIVITIES, GetCurrencyName(primaryCurrencyType), GetString(SI_GAMEPAD_MAIN_MENU_ENDEAVOR_SEAL_MARKET_ENTRY)),
+        },
     }
+
+    local gamepadData = self.categoryData.gamepadData
     ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:AddCategory(gamepadData, gamepadData.priority)
+end
+
+function ZO_TimedActivities_Gamepad:GetCategoryData()
+    return self.categoryData
 end
 
 function ZO_TimedActivities_Gamepad:RefreshCurrentActivityInfo()

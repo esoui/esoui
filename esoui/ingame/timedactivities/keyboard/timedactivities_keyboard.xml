@@ -105,7 +105,7 @@
 
                         <Scroll name="$(parent)Activities" inherits="ZO_ScrollContainer">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)ActivityHeader" relativePoint="BOTTOMLEFT" offsetY="50" />
-                            <Anchor point="BOTTOMRIGHT" />
+                            <Anchor point="BOTTOMRIGHT" offsetY="-40" />
 
                             <Controls>
                                 <Control name="$(parent)ScrollChild" override="true">
@@ -116,6 +116,15 @@
                         </Scroll>
                     </Controls>
                 </Control>
+
+                <Button name="$(parent)StoreButton" inherits="ZO_DefaultButton" text="SI_TIMED_ACTIVITIES_OPEN_SEALS_STORE">
+                    <Anchor point="BOTTOM" />
+                    <Dimensions x="250" />
+
+                    <OnClicked>
+                        ZO_ShowSealStore()
+                    </OnClicked>
+                </Button>
             </Controls>
         </TopLevelControl>
     </Controls>

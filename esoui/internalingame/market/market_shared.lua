@@ -12,6 +12,8 @@ ZO_MARKET_ESO_PLUS_CATEGORY_INDEX = -1
 ZO_MARKET_CHAPTER_UPGRADE_CATEGORY_INDEX = -2
 ZO_MARKET_ESO_PLUS_OFFERS_CATEGORY_INDEX = -3
 
+ZO_NO_MARKET_SUBCATEGORY = nil
+
 --
 --[[ Market Shared ]]--
 --
@@ -684,15 +686,14 @@ function ZO_Market_Shared:ClearLabeledGroups()
 end
 
 do
-    local NO_SUBCATEGORY = nil
     function ZO_Market_Shared:GetCategoryDataForMarketProduct(productId)
         local displayGroup = self:GetDisplayGroup()
         for categoryIndex = 1, GetNumMarketProductCategories(displayGroup) do
             local _, numSubCategories, numMarketProducts = GetMarketProductCategoryInfo(displayGroup, categoryIndex)
             for marketProductIndex = 1, numMarketProducts do
-                local id = GetMarketProductPresentationIds(displayGroup, categoryIndex, NO_SUBCATEGORY, marketProductIndex)
+                local id = GetMarketProductPresentationIds(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, marketProductIndex)
                 if id == productId then
-                    return self:GetCategoryData(categoryIndex, NO_SUBCATEGORY)
+                    return self:GetCategoryData(categoryIndex, ZO_NO_MARKET_SUBCATEGORY)
                 end
             end
             for subcategoryIndex = 1, numSubCategories do

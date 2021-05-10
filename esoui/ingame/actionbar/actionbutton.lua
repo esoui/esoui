@@ -44,6 +44,7 @@ function ActionButton:Initialize(slotNum, buttonType, parent, controlTemplate, h
     self.buttonText = slotControl:GetNamedChild("ButtonText")
     self.countText = slotControl:GetNamedChild("CountText")
 
+    self.stackCountText = slotControl:GetNamedChild("StackCountText")
     self.timerText = slotControl:GetNamedChild("TimerText")
     self.timerOverlay = slotControl:GetNamedChild("TimerOverlay")
     self.cooldown = slotControl:GetNamedChild("Cooldown")
@@ -275,10 +276,25 @@ function ActionButton:UpdateState()
     self:UpdateCooldown(FORCE_SUPPRESS_COOLDOWN_SOUND)
 end
 
+function ActionButton:SetStackCount(stackCount)
+    if stackCount > 0 and self.showTimer then
+        self.stackCountText:SetHidden(false)
+        self.stackCountText:SetText(stackCount)
+    else
+        self.stackCountText:SetHidden(true)
+    end
+end
+
 function ActionButton:SetTimer(durationMS)
     self.endTimeMS = GetFrameTimeMilliseconds() + durationMS
     self.timerText:SetHidden(false)
-    self.timerOverlay:SetHidden(false)
+    local actionType = GetSlotType(self:GetSlot(), self.button.hotbarCategory) 
+    local abilityId = GetSlotBoundId(self:GetSlot(), self.button.hotbarCategory)
+    if actionType == ACTION_TYPE_ABILITY and ShouldAbilityShowAsUsableWithDuration(abilityId) then
+        self.timerOverlay:SetHidden(true)
+    else
+        self.timerOverlay:SetHidden(false)
+    end
     self.slot:SetHandler("OnUpdate", function() self:UpdateTimer() end, "TimerUpdate")
 end
 
@@ -659,6 +675,7 @@ end
 
 function ActionButton:SetupTimerSwapAnimation()
     self.timerSwapAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("TimerSwapAnimation", self.timerText)
+    self.stackCountSwapAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("TimerSwapAnimation", self.stackCountText)
 end
 
 do

@@ -755,10 +755,6 @@ function ZO_SkillLineData:IsPlayerSkillLine()
     return true
 end
 
-function ZO_SkillLineData:GetCombatActorCategory()
-    return GAMEPLAY_ACTOR_CATEGORY_PLAYER
-end
-
 function ZO_SkillLineData:IsWerewolf()
     return self.isWerewolf
 end

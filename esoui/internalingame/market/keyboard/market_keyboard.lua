@@ -23,6 +23,8 @@ function ZO_Market_Keyboard:Initialize(control, sceneName)
     self.messageLabel = self.control:GetNamedChild("MessageLabel")
     self.messageLoadingIcon = self.control:GetNamedChild("MessageLoadingIcon")
 
+    self:SetMarketCurrencyButtonType(ZO_MARKET_CURRENCY_BUTTON_TYPE_BUY_CROWNS)
+
     -- Crown Store Contents
     self.contentsControl = control:GetNamedChild("Contents")
     self.contentFragment = ZO_SimpleSceneFragment:New(self.contentsControl)
@@ -668,7 +670,13 @@ do
     local FAKE_SUBCATEGORY = true
     local HIDE_GEM_ICON = false
     local NO_ICON = nil
+    -- Returns the category or nil in the event that the category has no products (directly or via subcategories) visible to this market.
     function ZO_Market_Keyboard:AddMarketProductTopLevelCategory(categoryIndex, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, categoryType, showNewIcon)
+        local displayGroup = self:GetDisplayGroup()
+        if not self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.marketProductFilterTypes) then
+            return nil
+        end
+
         local tree = self.categoryTree
         local lookup = self.nodeLookupData
 
@@ -690,13 +698,11 @@ do
 
         local NO_PARENT_CATEGORY = nil
         local parent = AddCategory(lookup, tree, nodeTemplate, NO_PARENT_CATEGORY, categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, categoryType, REAL_SUBCATEGORY, HIDE_GEM_ICON, showNewIcon)
-        local displayGroup = self:GetDisplayGroup()
         if hasSearchResults then
             -- ShouldAddSearchResult handles the check for filtered products in the categories, so we only need to worry about checking for filtered products
             if searchResultsWithChildren and self.searchResults[categoryIndex]["root"] then
                 local function DoesCategoryContainNewProducts()
-                    local NO_SUBCATEGORY = nil
-                    return self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
+                    return self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.newMarketProductFilterTypes)
                 end
 
                 AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, FAKE_SUBCATEGORY, HIDE_GEM_ICON, DoesCategoryContainNewProducts)
@@ -714,11 +720,9 @@ do
                 end
             end
         elseif hasChildren then
-            local NO_SUBCATEGORY = nil
-            if self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.marketProductFilterTypes) then
+            if self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.marketProductFilterTypes) then
                 local function DoesCategoryContainNewProducts()
-                    local NO_SUBCATEGORY = nil
-                    return self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
+                    return self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.newMarketProductFilterTypes)
                 end
 
                 AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, FAKE_SUBCATEGORY, HIDE_GEM_ICON, DoesCategoryContainNewProducts)
@@ -1232,13 +1236,19 @@ do
     end
 end
 
+function ZO_Market_Keyboard:SetMarketCurrencyButtonType(buttonType)
+    self.marketCurrencyButtonType = buttonType
+end
+
 function ZO_Market_Keyboard:OnShowing()
     ZO_Market_Shared.OnShowing(self)
     ITEM_PREVIEW_KEYBOARD:RegisterCallback("RefreshActions", self.refreshActionsCallback)
     UpdateMarketDisplayGroup(self:GetDisplayGroup())
 
     if self.shownCurrencyTypeBalances then
-        MARKET_CURRENCY_KEYBOARD:SetVisibleMarketCurrencyTypes(self.shownCurrencyTypeBalances)
+        local currencyControl = MARKET_CURRENCY_KEYBOARD
+        currencyControl:SetVisibleMarketCurrencyTypes(self.shownCurrencyTypeBalances)
+        currencyControl:ShowMarketCurrencyButtonType(self.marketCurrencyButtonType)
     end
 end
 

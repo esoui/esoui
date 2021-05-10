@@ -242,6 +242,11 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_ALLOW_COMPANION_AUTO_ULTIMATE,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_LOOT,
             settingId = LOOT_SETTING_AOE_LOOT,
             header = SI_GAMEPLAY_OPTIONS_ITEMS,
@@ -286,11 +291,6 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_TUTORIAL,
             settingId = OPTIONS_CUSTOM_SETTING_RESET_TUTORIALS,
-        },
-        {
-            panel = SETTING_PANEL_GAMEPLAY,
-            system = SETTING_TYPE_COMBAT,
-            settingId = COMBAT_SETTING_ALLOW_COMPANION_AUTO_ULTIMATE,
         },
     },
     [SETTING_PANEL_AUDIO] =

@@ -967,4 +967,7 @@ SOUNDS = {
     ANTIQUITIES_FANFARE_FRAGMENT_DISCOVERED_FINAL = "Antiquities_Digging_Fragments_Found_All",
     ANTIQUITIES_FANFARE_COMPLETED = "Antiquities_Digging_Antiquity_Completed",
     ANTIQUITIES_FANFARE_FAILURE = "Antiquities_Digging_Failure",
+
+    -- Endeavors
+    ENDEAVOR_COMPLETED                     = "Endeavor_Complete",
 }

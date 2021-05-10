@@ -96,6 +96,7 @@ end
 
 function ZO_CrownStore_Keyboard:AddTopLevelCategories()
     local displayGroup = self:GetDisplayGroup()
+    local isEmpty = true
     if not self:HasValidSearchString() then
         -- featured items category
         if self:DoesFeaturedMarketProductExist() then
@@ -106,6 +107,8 @@ function ZO_CrownStore_Keyboard:AddTopLevelCategories()
             self:AddCustomTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, GetString(SI_MARKET_FEATURED_CATEGORY), NO_SUBCATEGORIES, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_FEATURED, function()
                 return self:HasNewFeaturedMarketProducts()
             end)
+
+            isEmpty = false
         end
 
         -- chapter upgrade category + subcategories
@@ -121,31 +124,36 @@ function ZO_CrownStore_Keyboard:AddTopLevelCategories()
             end
 
             local chaptersNode = self:AddCustomTopLevelCategory(ZO_MARKET_CHAPTER_UPGRADE_CATEGORY_INDEX, GetString(SI_MAIN_MENU_CHAPTERS), numChapters, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE, AreAnyNew)
-
             for index = 1, numChapters do
                 local chapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetChapterUpgradeDataByIndex(index)
                 local isNew = chapterUpgradeData:IsNew() and not chapterUpgradeData:IsOwned()
                 areAnyNew = areAnyNew or isNew
                 self:AddCustomSubcategory(chaptersNode, chapterUpgradeData:GetChapterUpgradeId(), chapterUpgradeData:GetName(), ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE, isNew)
             end
+
+            isEmpty = false
         end
 
         for i = 1, GetNumMarketProductCategories(displayGroup) do
             local name, numSubCategories, numMarketProducts, normalIcon, pressedIcon, mouseoverIcon = GetMarketProductCategoryInfo(displayGroup, i)
-            self:AddMarketProductTopLevelCategory(i, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, function()
-                local NO_SUBCATEGORY = nil
-                return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, i, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
-            end)
+            if self:AddMarketProductTopLevelCategory(i, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, function()
+                return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, i, ZO_NO_MARKET_SUBCATEGORY, self.newMarketProductFilterTypes)
+            end) then
+                isEmpty = false
+            end
         end
     else
         for categoryIndex, data in pairs(self.searchResults) do
             local name, numSubCategories, numMarketProducts, normalIcon, pressedIcon, mouseoverIcon = GetMarketProductCategoryInfo(displayGroup, categoryIndex)
             self:AddMarketProductTopLevelCategory(categoryIndex, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, function()
-                local NO_SUBCATEGORY = nil
-                return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
+                return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.newMarketProductFilterTypes)
             end)
         end
+
+        isEmpty = false
     end
+
+    self:SetIsMarketEmpty(isEmpty)
 end
 
 function ZO_CrownStore_Keyboard:DisplayCategory(data)

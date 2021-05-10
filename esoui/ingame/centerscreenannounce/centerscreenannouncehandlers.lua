@@ -1182,7 +1182,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED] = function(t
                 local activityTypeName = GetString("SI_TIMEDACTIVITYTYPE", activityType)
                 local activityCompletionType = zo_strformat(SI_TIMED_ACTIVITY_COMPLETED_CSA, activityTypeName)
 
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_COMPLETED)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ENDEAVOR_COMPLETED)
                 messageParams:SetText(activityCompletionType, activityName)
                 return messageParams
             end
@@ -1197,7 +1197,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_TIMED_ACTIVITY_TYPE_PROGRESS_UPDATED] = funct
         local messageTitle = zo_strformat(SI_TIMED_ACTIVITY_TYPE_COMPLETED_CSA, currentNumComplete, maxNumActivities, activityTypeName)
         local messageSubheading = GetString("SI_TIMEDACTIVITYTYPE_FOLLOWUPHINT", activityType)
 
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_COMPLETED)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
         messageParams:SetText(messageTitle, messageSubheading)
         return messageParams
     end

@@ -125,14 +125,16 @@ function ZO_Restyle_Gamepad:UpdateOptionLeftTooltip(restyleMode)
     elseif restyleMode == RESTYLE_MODE_COMPANION_COLLECTIBLE then
         local descriptionOne
         local descriptionTwo
+        local descriptionThree
         if ZO_HasActiveOrBlockedCompanion() and CanUseCollectibleDyeing() then
             descriptionOne = ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_ESO_PLUS_STATUS_UNLOCKED))
             descriptionTwo = GetString(SI_GAMEPAD_DYEING_COMPANION_COLLECTIBLE_TAB_DESCRIPTION_UNLOCKED)
         else
             descriptionOne = ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_ESO_PLUS_STATUS_LOCKED))
             descriptionTwo = GetString(SI_GAMEPAD_DYEING_COMPANION_COLLECTIBLE_TAB_DESCRIPTION_LOCKED)
+            descriptionThree = GetString(SI_OUTFIT_COMPANION_DISABLED_DESCRIPTION)
         end
-        GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_DYEING_COMPANION_COLLECTIBLE_TAB), descriptionOne, descriptionTwo)
+        GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_DYEING_COMPANION_COLLECTIBLE_TAB), descriptionOne, descriptionTwo, descriptionThree)
     elseif restyleMode == RESTYLE_MODE_COMPANION_OUTFIT then
         GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_DYEING_DYE_OUTFIT_STYLES_TAB), GetString(SI_GAMEPAD_RESTYLE_OUTFITS_DESCRIPTION))
     end

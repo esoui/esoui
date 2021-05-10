@@ -6,7 +6,7 @@ If you're a Zenimax Media Inc. representative and have any objection to any of t
 
 This repo is also available at http://www.esoui.com/downloads/info1213-ESOUI-TheElderScrollsOnlinesourcecode.html
 
-**Last update: 7.0.2 (API 100035) on 03 May 2021.**
+**Last update: 7.0.3 (API 100035) on 10 May 2021.**
 
 *Join ESOUI Dev Community on Gitter :*
 

@@ -144,6 +144,13 @@ function ZO_CompanionSkillsDataManager:IsDataReady()
     return self.isDataReady
 end
 
+function ZO_CompanionSkillsDataManager:AreAnySkillLinesNew()
+    for _, skillTypeData in self:SkillTypeIterator({ ZO_SkillTypeData.AreAnySkillLinesNew } ) do
+        return true
+    end
+    return false
+end
+
 function ZO_CompanionSkillsDataManager:GetSkillTypeData(skillType)
     return self.skillTypeObjectPool:GetActiveObject(skillType)
 end

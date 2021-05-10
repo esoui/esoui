@@ -718,13 +718,19 @@ function ZO_ActionBarAssignmentManager_Hotbar:MarkSlotNewInternal(slotIndex)
 end
 
 function ZO_ActionBarAssignmentManager_Hotbar:ClearSlotNew(slotIndex)
-    self.newSlotsById[slotIndex] = false
-    local IS_CHANGED_BY_PLAYER = true
-    ACTION_BAR_ASSIGNMENT_MANAGER:FireCallbacks("SlotUpdated", self.hotbarCategory, slotIndex, IS_CHANGED_BY_PLAYER)
+    if self.newSlotsById[slotIndex] then
+        self.newSlotsById[slotIndex] = nil
+        local IS_CHANGED_BY_PLAYER = true
+        ACTION_BAR_ASSIGNMENT_MANAGER:FireCallbacks("SlotNewStatusChanged", self.hotbarCategory, slotIndex)
+    end
 end
 
 function ZO_ActionBarAssignmentManager_Hotbar:IsSlotNew(slotIndex)
     return self.newSlotsById[slotIndex] == true -- coerce to bool
+end
+
+function ZO_ActionBarAssignmentManager_Hotbar:AreAnySlotsNew()
+    return not ZO_IsTableEmpty(self.newSlotsById) 
 end
 
 -----------------------------------
@@ -759,6 +765,7 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
         hotbar:ResetSlot(actionSlotIndex)
         if justUnlocked then
             hotbar:MarkSlotNewInternal(actionSlotIndex)
+            self:FireCallbacks("SlotNewStatusChanged", hotbarCategory, actionSlotIndex)
         end
         self:FireCallbacks("SlotUpdated", hotbarCategory, actionSlotIndex)
     end
@@ -891,7 +898,7 @@ end
 function ZO_ActionBarAssignmentManager:ResetCurrentHotbarToActiveBarInternal()
     local playerActiveHotbarCategory = GetActiveHotbarCategory()
     self.playerActiveHotbarCategory = playerActiveHotbarCategory
-    if VIEWABLE_HOTBAR_CATEGORY_SET[playerActiveHotbarCategory] then
+    if VIEWABLE_HOTBAR_CATEGORY_SET[playerActiveHotbarCategory] and self.overrideHotbarCategory == nil then
         self.currentHotbarCategory = playerActiveHotbarCategory
     end
     self.shouldUpdateWeaponSwapState = false

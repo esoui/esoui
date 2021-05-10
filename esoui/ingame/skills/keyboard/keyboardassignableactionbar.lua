@@ -32,6 +32,7 @@ function ZO_KeyboardAssignableActionBar:Initialize(control)
         end
     end
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotUpdated", OnSlotUpdated)
+    ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotNewStatusChanged", OnSlotUpdated)
 
     local function OnCurrentHotbarUpdated(hotbarCategory, oldHotbarCategory)
         if not ACTION_BAR_ASSIGNMENT_MANAGER:IsHotbarSwapAnimationPlaying() then

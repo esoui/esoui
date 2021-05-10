@@ -222,6 +222,7 @@ function ZO_TimedActivities_Manager:RegisterEvents()
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITIES_UPDATED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, OnActivityUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_SYSTEM_STATUS_UPDATED, OnSystemStatusUpdated)
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_OPEN_TIMED_ACTIVITIES, ZO_ShowTimedActivities)
 end
 
 function ZO_TimedActivities_Manager:ActivitiesIterator(filterFunctions)
@@ -288,6 +289,22 @@ end
 function ZO_TimedActivities_Manager:IsAtTimedActivityTypeLimit(activityType)
     local numActivitiesCompleted, activityLimit = self:GetTimedActivityTypeLimitInfo(activityType)
     return numActivitiesCompleted >= activityLimit
+end
+
+function ZO_ShowTimedActivities()
+    if IsInGamepadPreferredMode() then
+        ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(TIMED_ACTIVITIES_GAMEPAD:GetCategoryData())
+    else
+        GROUP_MENU_KEYBOARD:ShowCategory(TIMED_ACTIVITIES_FRAGMENT)
+    end
+end
+
+function ZO_ShowSealStore()
+    if IsInGamepadPreferredMode() then
+        SYSTEMS:GetObject("mainMenu"):SelectMenuEntryAndSubEntry(ZO_MENU_MAIN_ENTRIES.CROWN_STORE, ZO_MENU_CROWN_STORE_ENTRIES.ENDEAVOR_SEAL_STORE, "gamepad_endeavor_seal_market_pre_scene")
+    else
+        SYSTEMS:GetObject("mainMenu"):ShowSceneGroup("marketSceneGroup", "endeavorSealStoreSceneKeyboard")
+    end
 end
 
 TIMED_ACTIVITIES_MANAGER = ZO_TimedActivities_Manager:New()

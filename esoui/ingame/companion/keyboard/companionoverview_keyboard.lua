@@ -106,12 +106,16 @@ function ZO_CompanionOverview_Keyboard:UpdateOutfitDropdownOutfits()
 
     local function OnUnequipOutfitSelected()
         self.pendingEquipOutfitIndex = UNEQUIP_OUTFIT
-        ITEM_PREVIEW_KEYBOARD:PreviewUnequipOutfit(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+        if HasActiveCompanion() and COMPANION_OVERVIEW_KEYBOARD_FRAGMENT:IsShowing() then
+            ITEM_PREVIEW_KEYBOARD:PreviewUnequipOutfit(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+        end
     end
     
     local function OnOutfitEntrySelected(_, _, entry)
         self.pendingEquipOutfitIndex = entry.outfitIndex
-        ITEM_PREVIEW_KEYBOARD:PreviewOutfit(GAMEPLAY_ACTOR_CATEGORY_COMPANION, entry.outfitIndex)
+        if HasActiveCompanion() and COMPANION_OVERVIEW_KEYBOARD_FRAGMENT:IsShowing() then
+            ITEM_PREVIEW_KEYBOARD:PreviewOutfit(GAMEPLAY_ACTOR_CATEGORY_COMPANION, entry.outfitIndex)
+        end
     end
 
     local unequippedOutfitEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), OnUnequipOutfitSelected)

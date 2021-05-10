@@ -83,6 +83,7 @@ function ZO_CompanionSkills_Gamepad:OnDeferredInitialize()
     self:InitializeSkillLinesList()
     self:InitializeSkillsList()
     self:InitializeQuickMenu()
+    self:ResetSkillLineNewStatus()
     self:RegisterForEvents()
 end
 
@@ -182,6 +183,51 @@ function ZO_CompanionSkills_Gamepad:RefreshFooter()
     end
 end
 
+function ZO_CompanionSkills_Gamepad:TryClearSkillLineNewStatus()
+    if self.clearSkillLineStatusOnSelectionChanged then
+        self.clearSkillLineStatusOnSelectionChanged = false
+        self.clearSkillLineNewStatusSkillLineData:ClearNew()
+        self.skillLineListRefreshGroup:MarkDirty("Visible")
+    end
+end
+
+function ZO_CompanionSkills_Gamepad:ResetSkillLineNewStatus()
+    self:TryClearSkillLineNewStatus()
+    self.clearSkillLineNewStatusCallId = nil
+    self.clearSkillLineNewStatusSkillLineData = nil
+end
+
+function ZO_CompanionSkills_Gamepad:TrySetClearNewSkillLineFlag(callId)
+    if self.clearSkillLineNewStatusCallId == callId then
+        self.clearSkillLineStatusOnSelectionChanged = true
+    end
+end
+
+local TIME_NEW_PERSISTS_WHILE_SELECTED = 1000
+function ZO_CompanionSkills_Gamepad:CheckSkillLineNewStatus()
+    self:TryClearSkillLineNewStatus()
+
+    local selectedSkillLineData = self:GetSelectedSkillLineData()
+    if selectedSkillLineData then
+        if selectedSkillLineData:IsSkillLineOrAbilitiesNew() then
+            -- mark the current skill line, so we can clear it after it clears the persist time
+            self.clearSkillLineNewStatusSkillLineData = selectedSkillLineData
+            local function MarkSkillLineReadyToClear(callId)
+                if self.clearSkillLineNewStatusCallId == callId then
+                    self.clearSkillLineStatusOnSelectionChanged = true
+                end
+            end
+            self.clearSkillLineNewStatusCallId = zo_callLater(MarkSkillLineReadyToClear, TIME_NEW_PERSISTS_WHILE_SELECTED)
+        else
+            -- cancel last pending clear, if it has not yet fired
+            self.clearSkillLineNewStatusCallId = nil
+        end
+    else
+        -- cancel last pending clear, if it has not yet fired
+        self.clearSkillLineNewStatusCallId = nil
+    end
+end
+
 -- skill lines
 function ZO_CompanionSkills_Gamepad:InitializeSkillLinesList()
     local function SkillLineEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
@@ -210,6 +256,8 @@ function ZO_CompanionSkills_Gamepad:InitializeSkillLinesList()
         self:RefreshTooltip()
         self:RefreshKeybinds()
         self:RefreshFooter()
+
+        self:CheckSkillLineNewStatus()
     end
     skillLineList:SetOnSelectedDataChangedCallback(OnSelectedSkillLineChanged)
 
@@ -564,6 +612,7 @@ function ZO_CompanionSkills_Gamepad:OnHide()
     end
 
     self:HideCurrentListDescriptor()
+    self:ResetSkillLineNewStatus()
     ACTION_BAR_ASSIGNMENT_MANAGER:SetHotbarCycleOverride(nil)
 end
 

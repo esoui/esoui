@@ -31,6 +31,9 @@ local MENU_CROWN_STORE_ENTRIES =
     GIFT_INVENTORY      = 6,
     REDEEM_CODE         = 7,
 }
+
+ZO_MENU_CROWN_STORE_ENTRIES = MENU_CROWN_STORE_ENTRIES
+
 local MENU_COLLECTIONS_ENTRIES =
 {
     COLLECTIONS         = 1,
@@ -986,19 +989,11 @@ function ZO_MainMenuManager_Gamepad:AttemptShowBaseScene()
 end
 
 function ZO_MainMenuManager_Gamepad:ShowDailyLoginRewardsEntry()
-    self.mainList:SetSelectedIndexWithoutAnimation(self.mainMenuEntryToListIndex[MENU_MAIN_ENTRIES.CROWN_STORE])
-    local entry = self.mainList:GetTargetData()
-    self:RefreshSubList(entry)
-    self.subList:SetSelectedIndexWithoutAnimation(self.subMenuEntryToListIndex[MENU_CROWN_STORE_ENTRIES.DAILY_LOGIN_REWARDS])
-    SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu")
+    self:SelectMenuEntryAndSubEntry(MENU_MAIN_ENTRIES.CROWN_STORE, MENU_CROWN_STORE_ENTRIES.DAILY_LOGIN_REWARDS)
 end
 
 function ZO_MainMenuManager_Gamepad:ShowAntiquityJournal()
-    self.mainList:SetSelectedIndexWithoutAnimation(self.mainMenuEntryToListIndex[MENU_MAIN_ENTRIES.JOURNAL])
-    local entry = self.mainList:GetTargetData()
-    self:RefreshSubList(entry)
-    self.subList:SetSelectedIndexWithoutAnimation(self.subMenuEntryToListIndex[MENU_JOURNAL_ENTRIES.ANTIQUITIES])
-    SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu", "gamepad_antiquity_journal")
+    self:SelectMenuEntryAndSubEntry(MENU_MAIN_ENTRIES.JOURNAL, MENU_JOURNAL_ENTRIES.ANTIQUITIES, "gamepad_antiquity_journal")
 end
 
 function ZO_MainMenuManager_Gamepad:ShowScryableAntiquities()
@@ -1015,6 +1010,18 @@ function ZO_MainMenuManager_Gamepad:SelectMenuEntry(menuEntry)
     self.mainList:SetSelectedIndexWithoutAnimation(self.mainMenuEntryToListIndex[menuEntry])
 end
 
+function ZO_MainMenuManager_Gamepad:SelectMenuEntryAndSubEntry(menuEntry, menuSubEntry, sceneName)
+    self:SelectMenuEntry(menuEntry)
+    local entry = self.mainList:GetTargetData()
+    self:RefreshSubList(entry)
+    self.subList:SetSelectedIndexWithoutAnimation(self.subMenuEntryToListIndex[menuSubEntry])
+    if sceneName then
+        SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu", sceneName)
+    else
+        SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu")
+    end
+end
+
 function ZO_MainMenuManager_Gamepad:ShowZoneStoriesEntry(createFullStack)
     local zoneStoriesSceneName = "zoneStoriesGamepad"
 
@@ -1029,7 +1036,7 @@ function ZO_MainMenuManager_Gamepad:ShowZoneStoriesEntry(createFullStack)
     end
 
     if createFullStack then
-       SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME, zoneStoriesSceneName)
+        SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME, zoneStoriesSceneName)
     else
         SCENE_MANAGER:Push(zoneStoriesSceneName)
     end

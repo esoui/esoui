@@ -39,6 +39,15 @@
                                 </Texture>
                             </Controls>
                         </Button>
+
+                        <Button name="$(parent)Endeavors" inherits="ZO_DefaultButton" hidden="true" text="SI_ACTIVITY_FINDER_OPEN_ENDEAVORS">
+                            <Anchor point="BOTTOMLEFT" />
+                            <Dimensions x="200" />
+
+                            <OnClicked>
+                                RequestOpenTimedActivities()
+                            </OnClicked>
+                        </Button>
                     </Controls>
                 </Control>
             </Controls>

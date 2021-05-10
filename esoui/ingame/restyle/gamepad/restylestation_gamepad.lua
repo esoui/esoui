@@ -79,8 +79,10 @@ do
             local outfitSlot = targetData.outfitSlot
             local areWeaponsSheathed = ArePlayerWeaponsSheathed()
 
+            local restyleMode = RESTYLE_GAMEPAD:GetMode()
+            local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleMode)
             if ZO_OUTFIT_MANAGER:IsOutfitSlotWeapon(outfitSlot) then
-                if not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotActive(outfitSlot) then
+                if not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotActive(outfitSlot, actorCategory) then
                     if not self.weaponSwapDisabled and GetUnitLevel("player") >= GetWeaponSwapUnlockedLevel() then
                         OnWeaponSwap()
                         -- Weapon swapping automatically unsheathes
@@ -184,6 +186,9 @@ function ZO_RestyleStation_Gamepad:OnFragmentHidden()
     if not ArePlayerWeaponsSheathed() then
         TogglePlayerWield()
     end
+
+    ITEM_PREVIEW_KEYBOARD:ClearPreviewCollection()
+    ApplyChangesToPreviewCollectionShown()
 end
 
 function ZO_RestyleStation_Gamepad:OnDeferredInitialize()
@@ -1072,6 +1077,8 @@ function ZO_RestyleStation_Gamepad:UpdateOutfitPreview()
     if restyleMode == RESTYLE_MODE_COLLECTIBLE or restyleMode == RESTYLE_MODE_COMPANION_COLLECTIBLE then
         return
     end
+
+    ITEM_PREVIEW_GAMEPAD:ResetOutfitPreview()
 
     if self.currentOutfitManipulator then
         ITEM_PREVIEW_GAMEPAD:PreviewOutfit(self.currentOutfitManipulator:GetActorCategory(), self.currentOutfitManipulator:GetOutfitIndex())

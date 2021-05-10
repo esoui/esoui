@@ -20,7 +20,15 @@ function ZO_CompanionCharacter_Keyboard:Initialize(control)
     COMPANION_CHARACTER_KEYBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
     self.currentNavigationFragment = nil
+    self.categoryNodes = {}
     self:InitializeNavigationTree()
+
+    local function RefreshCategoryStatusIcons()
+        self:RefreshCategoryStatusIcons()
+    end
+    SHARED_INVENTORY:RegisterCallback("SlotAdded", RefreshCategoryStatusIcons)
+    SHARED_INVENTORY:RegisterCallback("SlotRemoved", RefreshCategoryStatusIcons)
+    SHARED_INVENTORY:RegisterCallback("SlotUpdated", RefreshCategoryStatusIcons)
 end
 
 function ZO_CompanionCharacter_Keyboard:InitializeNavigationTree()
@@ -40,6 +48,7 @@ function ZO_CompanionCharacter_Keyboard:InitializeNavigationTree()
         local mouseoverTexture = entryData.mouseoverIcon
         control.iconHighlight:SetTexture(mouseoverTexture)
 
+        self:UpdateCategoryNodeStatusIcon(node)
         ZO_IconHeader_Setup(control, open, entryData.unlocked)
     end
 
@@ -55,8 +64,39 @@ function ZO_CompanionCharacter_Keyboard:InitializeNavigationTree()
     self.navigationTree:AddTemplate("ZO_CompanionCharacter_Keyboard_TreeCategory", TreeCategoryEntrySetup, OnTreeCategorySelected)
 end
 
+function ZO_CompanionCharacter_Keyboard:RefreshCategoryStatusIcons()
+    if self.scene:IsShowing() then
+        for _, categoryNode in pairs(self.categoryNodes) do
+            self:UpdateCategoryNodeStatusIcon(categoryNode)
+        end
+    end
+end
+
+function ZO_CompanionCharacter_Keyboard:UpdateCategoryNodeStatusIcon(categoryNode)
+    if categoryNode then
+        local categoryControl = categoryNode.control
+        if not categoryControl.statusIcon then
+            categoryControl.statusIcon = categoryControl:GetNamedChild("StatusIcon")
+        end
+        categoryControl.statusIcon:ClearIcons()
+        local categoryData = categoryNode.data
+        local statusIcon = nil
+        if type(categoryData.statusIcon) == "function" then
+            statusIcon = categoryData.statusIcon()
+        else
+            statusIcon = categoryData.statusIcon
+        end
+
+        if statusIcon then
+            categoryControl.statusIcon:AddIcon(statusIcon)
+        end
+        categoryControl.statusIcon:Show()
+    end
+end
+
 function ZO_CompanionCharacter_Keyboard:BuildNavigationTree()
     self.navigationTree:Reset()
+    ZO_ClearTable(self.categoryNodes)
     local NAVIGATION_ENTRY_DATA =
     {
         {
@@ -72,11 +112,18 @@ function ZO_CompanionCharacter_Keyboard:BuildNavigationTree()
             normalIcon = "EsoUI/Art/Companion/Keyboard/companion_inventory_up.dds",
             pressedIcon = "EsoUI/Art/Companion/Keyboard/companion_inventory_down.dds",
             mouseoverIcon = "EsoUI/Art/Companion/Keyboard/companion_inventory_over.dds",
+            statusIcon = function()
+                if SHARED_INVENTORY and SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchFilterType, ITEMFILTERTYPE_COMPANION, BAG_BACKPACK) then
+                    return ZO_KEYBOARD_NEW_ICON
+                end
+                return nil
+            end,
         },
     }
 
     for _, entryData in ipairs(NAVIGATION_ENTRY_DATA) do
-        self.navigationTree:AddNode("ZO_CompanionCharacter_Keyboard_TreeCategory", entryData)
+        local treeNode = self.navigationTree:AddNode("ZO_CompanionCharacter_Keyboard_TreeCategory", entryData)
+        self.categoryNodes[entryData] = treeNode
     end
 
     self.navigationTree:Commit()

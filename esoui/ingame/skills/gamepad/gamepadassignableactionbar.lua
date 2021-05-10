@@ -26,6 +26,7 @@ function ZO_AssignableActionBar:Initialize(control)
     }
     
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotUpdated", function(...) self:OnSlotUpdated(...) end)
+    ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotNewStatusChanged", function(...) self:OnSlotUpdated(...) end)
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("CurrentHotbarUpdated", function(...) self:OnCurrentHotbarUpdated(...) end)
 end
 
@@ -506,12 +507,6 @@ function ZO_GamepadAssignableActionBar_QuickMenu_Base:Initialize(control, assign
         end)
     ZO_Gamepad_AddListTriggerKeybindDescriptors(keybindStrip, self.list)
     self.keybindStrip = keybindStrip
-
-    local function OnSlotAssignmentsChanged()
-        self.list:RefreshVisible()
-    end
-    ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotUpdated", OnSlotAssignmentsChanged)
-    ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("CurrentHotbarUpdated", OnSlotAssignmentsChanged)
 
     local function OnHotbarSwapVisibleStateChanged()
         if self:IsShowing() then

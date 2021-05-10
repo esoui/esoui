@@ -9,6 +9,7 @@ function ZO_EndeavorSealStore_Keyboard:Initialize(control, sceneName)
 
     self.marketOpenedTutorialTriggerType = TUTORIAL_TRIGGER_SEAL_MARKET_OPENED
     self:SetDisplayGroup(MARKET_DISPLAY_GROUP_CROWN_STORE)
+    self:SetMarketCurrencyButtonType(ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_ENDEAVORS)
     self:SetFeaturedMarketProductFiltersMask(MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS)
     self:SetMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS})
     self:SetNewMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_NEW + MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS})
@@ -19,8 +20,7 @@ function ZO_EndeavorSealStore_Keyboard:GetCategoryMarketProductPresentations(cat
     local displayGroup = self:GetDisplayGroup()
     local numSubcategories, numMarketProducts = select(2, GetMarketProductCategoryInfo(displayGroup, categoryIndex))
     if not self:HasValidSearchString() or self.searchResults[categoryIndex]["root"] then
-        local NO_SUBCATEGORY = nil
-        self:GetMarketProductPresentations(categoryIndex, NO_SUBCATEGORY, numMarketProducts, marketProductPresentations)
+        self:GetMarketProductPresentations(categoryIndex, ZO_NO_MARKET_SUBCATEGORY, numMarketProducts, marketProductPresentations)
     end
 
     for subcategoryIndex = 1, numSubcategories do
@@ -36,44 +36,45 @@ end
 function ZO_EndeavorSealStore_Keyboard:AddTopLevelCategories()
     self:ClearMarketProducts()
 
-    local shownCategories = false
+    local displayGroup = self:GetDisplayGroup()
+    local isEmpty = true
     if not self:HasValidSearchString() then
-        local displayGroup = self:GetDisplayGroup()
-
         -- featured items category
         if self:DoesFeaturedMarketProductExist() then
             local normalIcon = "esoui/art/treeicons/achievements_indexicon_summary_up.dds"
             local pressedIcon = "esoui/art/treeicons/achievements_indexicon_summary_down.dds"
             local mouseoverIcon = "esoui/art/treeicons/achievements_indexicon_summary_over.dds"
-            local NO_SUBCATEGORY = 0
-            self:AddCustomTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, GetString(SI_MARKET_FEATURED_CATEGORY), NO_SUBCATEGORY, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_FEATURED, function()
+            local NO_SUBCATEGORIES = 0
+            self:AddCustomTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, GetString(SI_MARKET_FEATURED_CATEGORY), NO_SUBCATEGORIES, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_FEATURED, function()
                 return self:HasNewFeaturedMarketProducts()
             end)
-            shownCategories = true
+
+            isEmpty = false
         end
 
         local numCategories = GetNumMarketProductCategories(displayGroup)
-        local NO_SUBCATEGORY = nil
         for categoryIndex = 1, numCategories do
-            if self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.marketProductFilterTypes) then
+            if self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.marketProductFilterTypes) then
                 local name, numSubCategories, numMarketProducts, normalIcon, pressedIcon, mouseoverIcon = GetMarketProductCategoryInfo(displayGroup, categoryIndex)
-                self:AddMarketProductTopLevelCategory(categoryIndex, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, function()
-                    return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
-                end)
-                shownCategories = true
+                if self:AddMarketProductTopLevelCategory(categoryIndex, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, function()
+                    return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.newMarketProductFilterTypes)
+                end) then
+                    isEmpty = false
+                end
             end
         end
     else
         for categoryIndex, data in pairs(self.searchResults) do
             local name, numSubCategories, numMarketProducts, normalIcon, pressedIcon, mouseoverIcon = GetMarketProductCategoryInfo(displayGroup, categoryIndex)
             self:AddMarketProductTopLevelCategory(categoryIndex, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, function()
-                return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, NO_SUBCATEGORY, self.newMarketProductFilterTypes)
+                return self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.newMarketProductFilterTypes)
             end)
-            shownCategories = true
         end
+
+        isEmpty = false
     end
 
-    self:SetIsMarketEmpty(not shownCategories)
+    self:SetIsMarketEmpty(isEmpty)
 end
 
 -- End ZO_Market_Keyboard overrides
