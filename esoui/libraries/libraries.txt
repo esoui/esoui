@@ -20,6 +20,7 @@ EsoUI\Libraries\Utility\ZO_CategoryManager.lua
 EsoUI\Libraries\Utility\ZO_RadioButtonGroup.lua
 EsoUI\Libraries\Utility\ZO_TabButtonGroup.lua
 EsoUI\Libraries\Utility\ZO_EditControlGroup.lua
+EsoUI\Libraries\Utility\ZO_LabelUtils.lua
 EsoUI\Libraries\Utility\ZO_ListBox.lua
 EsoUI\Libraries\Utility\ZO_AlphaAnimation.lua
 EsoUI\Libraries\Utility\ZO_CircularBuffer.lua

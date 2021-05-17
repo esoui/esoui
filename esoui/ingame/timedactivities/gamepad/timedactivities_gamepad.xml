@@ -19,16 +19,14 @@
         </Control>
         
         <Control name="ZO_TimedActivityRow_Gamepad" virtual="true">
-            <Dimensions y="ZO_TIMED_ACTIVITY_DATA_ROW_HEIGHT_GAMEPAD" />
-
             <OnInitialized>
                 ZO_TimedActivityRow_Gamepad_OnInitialized(self)
             </OnInitialized>
 
             <Controls>
-                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad45">
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad45" maxLineCount="1">
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="10" />
-                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="10" />
+                    <Dimensions x="ZO_TIMED_ACTIVITY_DATA_ROW_NAME_WIDTH_GAMEPAD" />
                 </Label>
 
                 <Label name="$(parent)RewardHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE" text="SI_TIMED_ACTIVITIES_REWARD_HEADER">
@@ -49,6 +47,42 @@
                     <Anchor point="CENTER" relativeTo="$(parent)ProgressBar" />
                     <Dimensions x="48" y="48" />
                 </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TimedActivityRow1_Gamepad" inherits="ZO_TimedActivityRow_Gamepad" virtual="true">
+            <Dimensions y="ZO_TIMED_ACTIVITY_DATA_ROW_1_HEIGHT_GAMEPAD" />
+        </Control>
+
+        <Control name="ZO_TimedActivityRow2_Gamepad" inherits="ZO_TimedActivityRow_Gamepad" virtual="true">
+            <Dimensions y="ZO_TIMED_ACTIVITY_DATA_ROW_2_HEIGHT_GAMEPAD" />
+
+            <Controls>
+                <Label name="$(parent)Name" override="true" maxLineCount="2" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TimedActivityRow3_Gamepad" inherits="ZO_TimedActivityRow_Gamepad" virtual="true">
+            <Dimensions y="ZO_TIMED_ACTIVITY_DATA_ROW_3_HEIGHT_GAMEPAD" />
+
+            <Controls>
+                <Label name="$(parent)Name" override="true" maxLineCount="3" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TimedActivityRow4_Gamepad" inherits="ZO_TimedActivityRow_Gamepad" virtual="true">
+            <Dimensions y="ZO_TIMED_ACTIVITY_DATA_ROW_4_HEIGHT_GAMEPAD" />
+
+            <Controls>
+                <Label name="$(parent)Name" override="true" maxLineCount="4" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TimedActivityRow5_Gamepad" inherits="ZO_TimedActivityRow_Gamepad" virtual="true">
+            <Dimensions y="ZO_TIMED_ACTIVITY_DATA_ROW_5_HEIGHT_GAMEPAD" />
+
+            <Controls>
+                <Label name="$(parent)Name" override="true" maxLineCount="5" />
             </Controls>
         </Control>
 

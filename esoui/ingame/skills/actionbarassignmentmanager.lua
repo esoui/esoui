@@ -761,13 +761,15 @@ end
 function ZO_ActionBarAssignmentManager:RegisterForEvents()
     -- Action slot events
     local function OnHotbarSlotUpdated(_, actionSlotIndex, hotbarCategory, justUnlocked)
-        local hotbar = self:GetHotbar(hotbarCategory)
-        hotbar:ResetSlot(actionSlotIndex)
-        if justUnlocked then
-            hotbar:MarkSlotNewInternal(actionSlotIndex)
-            self:FireCallbacks("SlotNewStatusChanged", hotbarCategory, actionSlotIndex)
+        if VIEWABLE_HOTBAR_CATEGORY_SET[hotbarCategory] then
+            local hotbar = self:GetHotbar(hotbarCategory)
+            hotbar:ResetSlot(actionSlotIndex)
+            if justUnlocked then
+                hotbar:MarkSlotNewInternal(actionSlotIndex)
+                self:FireCallbacks("SlotNewStatusChanged", hotbarCategory, actionSlotIndex)
+            end
+            self:FireCallbacks("SlotUpdated", hotbarCategory, actionSlotIndex)
         end
-        self:FireCallbacks("SlotUpdated", hotbarCategory, actionSlotIndex)
     end
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_HOTBAR_SLOT_UPDATED, OnHotbarSlotUpdated)
 
@@ -804,15 +806,17 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_WEAPON_PAIR_LOCK_CHANGED, UpdateWeaponSwapState)
 
     local function HandleSlotChangeRequested(_, abilityId, actionSlotIndex, hotbarCategory)
-        local hotbar = self:GetHotbar(hotbarCategory)
-        if abilityId == 0 then
-            if hotbar:ClearSlot(actionSlotIndex) then
-                PlaySound(SOUNDS.ABILITY_SLOT_CLEARED)
-            end
-        else
-            local progressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
-            if progressionData and hotbar:AssignSkillToSlot(actionSlotIndex, progressionData:GetSkillData())then
-                PlaySound(SOUNDS.ABILITY_SLOTTED)
+        if VIEWABLE_HOTBAR_CATEGORY_SET[hotbarCategory] then
+            local hotbar = self:GetHotbar(hotbarCategory)
+            if abilityId == 0 then
+                if hotbar:ClearSlot(actionSlotIndex) then
+                    PlaySound(SOUNDS.ABILITY_SLOT_CLEARED)
+                end
+            else
+                local progressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
+                if progressionData and hotbar:AssignSkillToSlot(actionSlotIndex, progressionData:GetSkillData())then
+                    PlaySound(SOUNDS.ABILITY_SLOTTED)
+                end
             end
         end
     end

@@ -103,12 +103,6 @@ function ZO_VoiceChatChannelsGamepad:InitializeEvents()
         self:UpdateKeybinds()
     end)
     VOICE_CHAT_MANAGER:RegisterCallback("MuteUpdate", function() self:Update() end)
-    VOICE_CHAT_MANAGER:RegisterCallback("RequestsAllowed", function() self:UpdateKeybinds() end)
-    VOICE_CHAT_MANAGER:RegisterCallback("RequestsDisabled", function()
-        local SHOULD_PERSIST = true
-        KEYBIND_STRIP:TriggerCooldown(self.joinOrActivateChannelKeybind, VOICE_CHAT_REQUEST_DELAY, nil, SHOULD_PERSIST)
-        KEYBIND_STRIP:TriggerCooldown(self.leaveChannelKeybind, VOICE_CHAT_REQUEST_DELAY, nil, SHOULD_PERSIST)
-    end)
 
     --Event callbacks for playing sounds specifically while on this scene
     local function OnVoiceChannelJoined()
@@ -302,97 +296,92 @@ function ZO_VoiceChatChannelsGamepad:OnSelectionChanged(list, selectedData, oldS
 end
 
 do
-    local function RequestDelayEnabled()
-        return VOICE_CHAT_MANAGER:AreRequestsAllowed()
-    end
     function ZO_VoiceChatChannelsGamepad:InitializeKeybindStripDescriptors()
         local joinOrActivateChannelKeybind =
         {
-            name =
-                function()
-                    local channel = self.list:GetTargetData().channel
-                    if channel.isJoined then
-                        return GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_ENABLE_VOICE)
-                    else
-                        return GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_JOIN_CHANNEL)
-                    end
-                end,
+            name = function()
+                local channel = self.list:GetTargetData().channel
+                if not channel.isJoined then
+                    return GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_JOIN_CHANNEL)
+                elseif not channel.isTransmitting then
+                    return GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_ENABLE_MIC)
+                else
+                    return GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_DISABLE_MIC)
+                end
+            end,
             keybind = "UI_SHORTCUT_PRIMARY",
-            callback =
-                function()
-                    local channel = self.list:GetTargetData().channel
-                    VOICE_CHAT_MANAGER:SetAndSwapDesiredActiveChannel(channel)
-                end,
-            visible =
-                function()
-                    if self.currentList ~= LIST_CHANNELS then
-                        return false
-                    end
+            callback = function()
+                local channel = self.list:GetTargetData().channel
+                if not channel.isJoined then
+                    VOICE_CHAT_MANAGER:JoinChannel(channel)
+                elseif not channel.isTransmitting then
+                    VOICE_CHAT_MANAGER:TransmitChannel(channel)
+                else
+                    VOICE_CHAT_MANAGER:StopTransmitting()
+                end
+            end,
+            visible = function()
+                if self.currentList ~= LIST_CHANNELS then
+                    return false
+                end
     
-                    local entry = self.list:GetTargetData()
-                    if not entry then
-                        return false
-                    end
+                local entry = self.list:GetTargetData()
+                if not entry then
+                    return false
+                end
     
-                    local channel = entry.channel
-                    return not channel.isTransmitting
-                end,
-            enabled = RequestDelayEnabled,
+                return true
+            end,
         }
         local leaveChannelKeybind =
         {
             name = GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_LEAVE_CHANNEL),
             keybind = "UI_SHORTCUT_SECONDARY",
-            callback =
-                function()
-                    local channel = self.list:GetTargetData().channel
-                    VOICE_CHAT_MANAGER:ClearAndSwapChannel(channel)
-                end,
-            visible =
-                function()
-                    if self.currentList ~= LIST_CHANNELS then
-                        return false
-                    end
+            callback = function()
+                local channel = self.list:GetTargetData().channel
+                VOICE_CHAT_MANAGER:LeaveChannel(channel)
+            end,
+            visible = function()
+                if self.currentList ~= LIST_CHANNELS then
+                    return false
+                end
     
-                    local entry = self.list:GetTargetData()
-                    if not entry then
-                        return false
-                    end
+                local entry = self.list:GetTargetData()
+                if not entry then
+                    return false
+                end
     
-                    local channel = entry.channel
-                    return channel.isJoined
-                end,
-            enabled = RequestDelayEnabled,
+                local channel = entry.channel
+                return channel.isJoined
+            end,
         }
         local showParticipantsKeybind =
         {
             name = GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_PARTICIPANT_OPTIONS),
             keybind = "UI_SHORTCUT_TERTIARY",
-            callback =
-                function()
-                    local channel = self.list:GetTargetData().channel
-                    VOICE_CHAT_PARTICIPANTS_GAMEPAD:SetChannel(channel)
-                    SCENE_MANAGER:Push("gamepad_voice_chat_participants")
-                end,
-            visible =
-                function()
-                    if self.currentList ~= LIST_CHANNELS then
-                        return false
-                    end
+            callback = function()
+                local channel = self.list:GetTargetData().channel
+                VOICE_CHAT_PARTICIPANTS_GAMEPAD:SetChannel(channel)
+                SCENE_MANAGER:Push("gamepad_voice_chat_participants")
+            end,
+            visible = function()
+                if self.currentList ~= LIST_CHANNELS then
+                    return false
+                end
     
-                    local entry = self.list:GetTargetData()
-                    if not entry then
-                        return false
-                    end
+                local entry = self.list:GetTargetData()
+                if not entry then
+                    return false
+                end
 
-                    local channel = entry.channel
-                    if not channel.isJoined then
-                        return false
-                    end
+                local channel = entry.channel
+                if not channel.isJoined then
+                    return false
+                end
     
-                    local participantDataList = VOICE_CHAT_MANAGER:GetParticipantDataList(channel)
-                    return #participantDataList > 1 --we don't show the local player, so we need at least 1 other player
-                end,
+                local participantDataList = VOICE_CHAT_MANAGER:GetParticipantDataList(channel)
+                return #participantDataList > 1 --we don't show the local player, so we need at least 1 other player
+            end,
         }
 
         self.channelKeybinds =

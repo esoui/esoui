@@ -797,6 +797,7 @@ SafeAddString(SI_COMPANIONSUMMONRESULT18, "Cannot summon companions while you ar
 SafeAddString(SI_COMPANIONSUMMONRESULT19, "Summoning your companion has temporarily deactivated your non-combat pet.", 0)
 SafeAddString(SI_COMPANIONSUMMONRESULT2, "<<1>> was unsummoned to make room for another player. They will join you when there is room in your group.", 0)
 SafeAddString(SI_COMPANIONSUMMONRESULT20, "<<1>> was unsummoned because companions have been temporarily disabled.", 0)
+SafeAddString(SI_COMPANIONSUMMONRESULT21, "<<1>> was unsummoned to make room for your non-combat pet. They will join you when there is room.", 0)
 SafeAddString(SI_COMPANIONSUMMONRESULT3, "<<1>> has rejoined your group now that a player has left to make room for them.", 0)
 SafeAddString(SI_COMPANIONSUMMONRESULT4, "<<1>> is waiting at the ready to join your group when room is available.", 0)
 SafeAddString(SI_COMPANIONSUMMONRESULT5, "<<1>> has tried to join your journey but they were not expected.", 0)

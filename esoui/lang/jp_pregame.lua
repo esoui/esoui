@@ -797,6 +797,7 @@ SafeAddString(SI_COMPANIONSUMMONRESULT18, "ワールドボスとの戦闘中は�
 SafeAddString(SI_COMPANIONSUMMONRESULT19, "コンパニオンを召喚したため非戦闘ペットを呼べなくなりました。", 0)
 SafeAddString(SI_COMPANIONSUMMONRESULT2, "<<1>>は他のプレイヤーのために召喚されませんでした。グループに空きができしだい参加します。", 0)
 SafeAddString(SI_COMPANIONSUMMONRESULT20, "コンパニオンが一時的に無効になっているため<<1>>を召喚できませんでした。", 0)
+SafeAddString(SI_COMPANIONSUMMONRESULT21, "<<1>>はペットのために召喚されませんでした。空きができしだい参加します。", 0)
 SafeAddString(SI_COMPANIONSUMMONRESULT3, "<<1>>は他のプレイヤーが抜けたのでグループに再度参加しました。", 0)
 SafeAddString(SI_COMPANIONSUMMONRESULT4, "空きができしだいグループに参加できるように<<1>>は待機中です。", 0)
 SafeAddString(SI_COMPANIONSUMMONRESULT5, "<<1>>は冒険に参加しようとしましたが、求められていたコンパニオンではありません。", 0)

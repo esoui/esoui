@@ -1,6 +1,15 @@
-ZO_TIMED_ACTIVITY_DATA_ROW_HEIGHT_GAMEPAD = 148
+ZO_TIMED_ACTIVITY_DATA_ROW_1_HEIGHT_GAMEPAD = 148
+ZO_TIMED_ACTIVITY_DATA_ROW_2_HEIGHT_GAMEPAD = 202
+ZO_TIMED_ACTIVITY_DATA_ROW_3_HEIGHT_GAMEPAD = 256
+ZO_TIMED_ACTIVITY_DATA_ROW_4_HEIGHT_GAMEPAD = 310
+ZO_TIMED_ACTIVITY_DATA_ROW_5_HEIGHT_GAMEPAD = 364
+ZO_TIMED_ACTIVITY_DATA_ROW_NAME_WIDTH_GAMEPAD = 777
 
-local TIMED_ACTIVITY_ROW_DATA = 1
+local TIMED_ACTIVITY_ROW_DATA_1 = 1
+local TIMED_ACTIVITY_ROW_DATA_2 = 2
+local TIMED_ACTIVITY_ROW_DATA_3 = 3
+local TIMED_ACTIVITY_ROW_DATA_4 = 4
+local TIMED_ACTIVITY_ROW_DATA_5 = 5
 
 local COMPLETE_ACTIVITY_ALPHA = 0.5
 local INCOMPLETE_ACTIVITY_ALPHA = 1
@@ -238,13 +247,21 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
 
     local NO_HIDE_CALLBACK = nil
     local DEFAULT_SELECT_SOUND = nil
-    ZO_ScrollList_AddDataType(self.listControl, TIMED_ACTIVITY_ROW_DATA, "ZO_TimedActivityRow_Gamepad", ZO_TIMED_ACTIVITY_DATA_ROW_HEIGHT_GAMEPAD, SetupActivityRow, NO_HIDE_CALLBACK, DEFAULT_SELECT_SOUND, ResetActivityRow)
+    ZO_ScrollList_AddDataType(self.listControl, TIMED_ACTIVITY_ROW_DATA_1, "ZO_TimedActivityRow1_Gamepad", ZO_TIMED_ACTIVITY_DATA_ROW_1_HEIGHT_GAMEPAD, SetupActivityRow, NO_HIDE_CALLBACK, DEFAULT_SELECT_SOUND, ResetActivityRow)
+    ZO_ScrollList_AddDataType(self.listControl, TIMED_ACTIVITY_ROW_DATA_2, "ZO_TimedActivityRow2_Gamepad", ZO_TIMED_ACTIVITY_DATA_ROW_2_HEIGHT_GAMEPAD, SetupActivityRow, NO_HIDE_CALLBACK, DEFAULT_SELECT_SOUND, ResetActivityRow)
+    ZO_ScrollList_AddDataType(self.listControl, TIMED_ACTIVITY_ROW_DATA_3, "ZO_TimedActivityRow3_Gamepad", ZO_TIMED_ACTIVITY_DATA_ROW_3_HEIGHT_GAMEPAD, SetupActivityRow, NO_HIDE_CALLBACK, DEFAULT_SELECT_SOUND, ResetActivityRow)
+    ZO_ScrollList_AddDataType(self.listControl, TIMED_ACTIVITY_ROW_DATA_4, "ZO_TimedActivityRow4_Gamepad", ZO_TIMED_ACTIVITY_DATA_ROW_4_HEIGHT_GAMEPAD, SetupActivityRow, NO_HIDE_CALLBACK, DEFAULT_SELECT_SOUND, ResetActivityRow)
+    ZO_ScrollList_AddDataType(self.listControl, TIMED_ACTIVITY_ROW_DATA_5, "ZO_TimedActivityRow5_Gamepad", ZO_TIMED_ACTIVITY_DATA_ROW_5_HEIGHT_GAMEPAD, SetupActivityRow, NO_HIDE_CALLBACK, DEFAULT_SELECT_SOUND, ResetActivityRow)
 
     local function AreActivityRowsEqual(left, right)
         return left:GetId() == right:GetId()
     end
 
-    ZO_ScrollList_SetEqualityFunction(self.listControl, TIMED_ACTIVITY_ROW_DATA, AreActivityRowsEqual)
+    ZO_ScrollList_SetEqualityFunction(self.listControl, TIMED_ACTIVITY_ROW_DATA_1, AreActivityRowsEqual)
+    ZO_ScrollList_SetEqualityFunction(self.listControl, TIMED_ACTIVITY_ROW_DATA_2, AreActivityRowsEqual)
+    ZO_ScrollList_SetEqualityFunction(self.listControl, TIMED_ACTIVITY_ROW_DATA_3, AreActivityRowsEqual)
+    ZO_ScrollList_SetEqualityFunction(self.listControl, TIMED_ACTIVITY_ROW_DATA_4, AreActivityRowsEqual)
+    ZO_ScrollList_SetEqualityFunction(self.listControl, TIMED_ACTIVITY_ROW_DATA_5, AreActivityRowsEqual)
 
     self.keybindStripDescriptor =
     {
@@ -334,7 +351,21 @@ function ZO_TimedActivitiesList_Gamepad:RefreshList(currentActivityType, activit
     local listData = ZO_ScrollList_GetDataList(listControl)
     for index, activityData in ipairs(activitiesList) do
         local entryData = ZO_EntryData:New(activityData)
-        table.insert(listData, ZO_ScrollList_CreateDataEntry(TIMED_ACTIVITY_ROW_DATA, entryData))
+        local activityName = activityData:GetName()
+        local numActivityNameLines = ZO_LabelUtils_GetNumLines(activityName, "ZoFontGamepad45", ZO_TIMED_ACTIVITY_DATA_ROW_NAME_WIDTH_GAMEPAD)
+
+        local dataType = TIMED_ACTIVITY_ROW_DATA_1
+        if numActivityNameLines == 2 then
+            dataType = TIMED_ACTIVITY_ROW_DATA_2
+        elseif numActivityNameLines == 3 then
+            dataType = TIMED_ACTIVITY_ROW_DATA_3
+        elseif numActivityNameLines == 4 then
+            dataType = TIMED_ACTIVITY_ROW_DATA_4
+        elseif numActivityNameLines == 5 then
+            dataType = TIMED_ACTIVITY_ROW_DATA_5
+        end
+
+        table.insert(listData, ZO_ScrollList_CreateDataEntry(dataType, entryData))
     end
 
     self:CommitScrollList()

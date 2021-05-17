@@ -1165,7 +1165,7 @@ EsoStrings =
     "Silver", -- SI_CADWELLPROGRESSIONLEVEL1
     "Gold", -- SI_CADWELLPROGRESSIONLEVEL2
     "The Elder Scrolls Online PC/MAC Store", -- SI_PLATFORMSTORELABEL0
-    "PlayStation®Store", -- SI_PLATFORMSTORELABEL1
+    "PlayStation™Store", -- SI_PLATFORMSTORELABEL1
     "Xbox Store", -- SI_PLATFORMSTORELABEL2
     "DMM Store", -- SI_PLATFORMSTORELABEL3
     "Steam® store", -- SI_PLATFORMSTORELABEL4
@@ -3075,7 +3075,7 @@ EsoStrings =
     "Required credentials are missing, please relaunch the game from the launcher.", -- SI_LOGINAUTHERROR5000
     "Incompatible client version. Please update your client and try again.", -- SI_LOGINAUTHERROR5008
     "Incorrect token, please relaunch the game from the launcher.", -- SI_LOGINAUTHERROR17001
-    "Sony Entertainment Network", -- SI_PLATFORMSERVICETYPE1
+    "PlayStation™Network", -- SI_PLATFORMSERVICETYPE1
     "Xbox Live", -- SI_PLATFORMSERVICETYPE2
     "DMM", -- SI_PLATFORMSERVICETYPE3
     "Steam", -- SI_PLATFORMSERVICETYPE4
@@ -3591,7 +3591,7 @@ EsoStrings =
     "Error <<1>>\nAccount migration has failed.", -- SI_GLOBALERRORCODE339
     "Error <<1>>\nTimeout while waiting for character list.", -- SI_GLOBALERRORCODE400
     "Error <<1>>\nData version does not match the client version. Please make sure the game is fully up to date.", -- SI_GLOBALERRORCODE500
-    "You must be logged into a Sony Entertainment Network account to play ESO", -- SI_LOGOUTERROR2
+    "You must be logged into an account for PlayStation™Network to play ESO", -- SI_LOGOUTERROR2
     "You must be logged into a Xbox Live account to play ESO", -- SI_LOGOUTERROR3
     "Unable to connect to Xbox Live. Please make sure you have a valid internet connection.", -- SI_LOGOUTERROR4
     "ESO servers are down for maintenance. Please try again later or visit <<1>> for more information", -- SI_LOGOUTERROR5
@@ -3601,11 +3601,11 @@ EsoStrings =
     "Selected user profile age does not meet the requirements for playing this game.", -- SI_PROFILELOGINERROR2
     "Selected user profile is a guest account.", -- SI_PROFILELOGINERROR3
     "You do not currently have network connectivity. This title requires Xbox Live and a network connection.", -- SI_PROFILELOGINERROR4
-    "You do not currently have network connectivity. This title requires a Sony Entertainment Network Account and a network connection.", -- SI_PROFILELOGINERROR5
+    "You do not currently have network connectivity. This title requires an account for PlayStation™Network and a network connection.", -- SI_PROFILELOGINERROR5
     "The Xbox Live Account selected does not have Multiplayer privileges. Please select another account, or update your permissions.", -- SI_PROFILELOGINERROR6
     "A user profile was not selected.", -- SI_PROFILELOGINERROR7
-    "The Sony Entertainment Network account selected does not have realtime multiplayer privileges. Please select another account, or update your permissions.", -- SI_PROFILELOGINERROR8
-    "Selected Sony Entertainment Network sub-account does not have access to user-generated content.", -- SI_PROFILELOGINERROR9
+    "The selected account for PlayStation™Network does not have realtime multiplayer privileges. Please select another account, or update your permissions.", -- SI_PROFILELOGINERROR8
+    "Selected sub-account for PlayStation™Network does not have access to user-generated content.", -- SI_PROFILELOGINERROR9
     "Patch required. Please download and apply to access online features.", -- SI_PROFILELOGINERROR10
     "The Xbox Live Account selected does not have user-generated content privileges. Please select another account, or update your permissions.", -- SI_PROFILELOGINERROR11
     "There is not enough free space to create save data. Please free up additional space.", -- SI_PROFILELOGINERROR12
@@ -4493,7 +4493,7 @@ EsoStrings =
     "Buy Now", -- SI_FREE_TRIAL_PURCHASE_KEYBIND
     "Purchase |c76BCC3The Elder Scrolls Online|r", -- SI_FREE_TRIAL_PURCHASE_DIALOG_HEADER
     "This link will open the <<1>> page for |c76BCC3The Elder Scrolls Online: Tamriel Unlimited|r.\n\nPurchase the game to continue your adventure right where you left off!", -- SI_FREE_TRIAL_PURCHASE_DIALOG_BODY
-    "PlayStation®Store", -- SI_FREE_TRIAL_PLATFORM_STORE_PS4
+    "PlayStation™Store", -- SI_FREE_TRIAL_PLATFORM_STORE_PS4
     "Service Tokens", -- SI_EXTRA_INFO_SERVICE_TOKENS_HEADER
     "No characters are eligible for this token.", -- SI_SERVICE_NO_ELIGIBLE_CHARACTERS
     "Use", -- SI_SERVICE_USE_SERVICE_KEYBIND
@@ -9506,6 +9506,7 @@ SafeAddVersion(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES704, 1)
 SafeAddVersion(SI_CUSTOMERSERVICEASKFORHELPCATEGORIES2, 1)
 SafeAddVersion(SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES1, 1)
 SafeAddVersion(SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES2, 1)
+SafeAddVersion(SI_PLATFORMSTORELABEL1, 1)
 SafeAddVersion(SI_CHARACTERCREATEOPTIONRESTRICTIONREASON1, 1)
 SafeAddVersion(SI_CHARACTERCREATEOPTIONRESTRICTIONREASON2, 1)
 SafeAddVersion(SI_CLIENTINTERACTRESULT20, 2)
@@ -9838,7 +9839,7 @@ SafeAddVersion(SI_LOGINAUTHERROR4, 1)
 SafeAddVersion(SI_LOGINAUTHERROR13000, 1)
 SafeAddVersion(SI_LOGINAUTHERROR14000, 1)
 SafeAddVersion(SI_LOGINAUTHERROR14002, 1)
-SafeAddVersion(SI_PLATFORMSERVICETYPE1, 1)
+SafeAddVersion(SI_PLATFORMSERVICETYPE1, 2)
 SafeAddVersion(SI_REDEEMCODERESULT5, 2)
 SafeAddVersion(SI_REDEEMCODERESULT7, 1)
 SafeAddVersion(SI_REDEEMCODERESULT8, 1)
@@ -9939,16 +9940,16 @@ SafeAddVersion(SI_PLEDGEOFMARARESULT1, 1)
 SafeAddVersion(SI_PLEDGEOFMARARESULT3, 1)
 SafeAddVersion(SI_PLEDGEOFMARARESULT4, 1)
 SafeAddVersion(SI_TRADEACTIONRESULT66, 1)
-SafeAddVersion(SI_LOGOUTERROR2, 1)
+SafeAddVersion(SI_LOGOUTERROR2, 2)
 SafeAddVersion(SI_LOGOUTERROR6, 1)
 SafeAddVersion(SI_PROFILELOGINERROR2, 2)
 SafeAddVersion(SI_PROFILELOGINERROR3, 2)
 SafeAddVersion(SI_PROFILELOGINERROR4, 2)
-SafeAddVersion(SI_PROFILELOGINERROR5, 3)
+SafeAddVersion(SI_PROFILELOGINERROR5, 4)
 SafeAddVersion(SI_PROFILELOGINERROR6, 2)
 SafeAddVersion(SI_PROFILELOGINERROR7, 2)
-SafeAddVersion(SI_PROFILELOGINERROR8, 3)
-SafeAddVersion(SI_PROFILELOGINERROR9, 3)
+SafeAddVersion(SI_PROFILELOGINERROR8, 4)
+SafeAddVersion(SI_PROFILELOGINERROR9, 4)
 SafeAddVersion(SI_PROFILELOGINERROR10, 2)
 SafeAddVersion(SI_PROFILELOGINERROR11, 2)
 SafeAddVersion(SI_JUMPRESULT4, 1)
@@ -10082,6 +10083,7 @@ SafeAddVersion(SI_FREE_TRIAL_MENU_ENTRY_PURCHASE, 1)
 SafeAddVersion(SI_FREE_TRIAL_PURCHASE_KEYBIND, 1)
 SafeAddVersion(SI_FREE_TRIAL_PURCHASE_DIALOG_HEADER, 1)
 SafeAddVersion(SI_FREE_TRIAL_PURCHASE_DIALOG_BODY, 2)
+SafeAddVersion(SI_FREE_TRIAL_PLATFORM_STORE_PS4, 1)
 SafeAddVersion(SI_EXTRA_INFO_SERVICE_TOKENS_HEADER, 1)
 SafeAddVersion(SI_SPLASH_SCREEN_COPYRIGHT, 7)
 SafeAddVersion(SI_PROMPT_TITLE_SKIP_TUTORIAL, 1)
