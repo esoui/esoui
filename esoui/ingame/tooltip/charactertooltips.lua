@@ -13,7 +13,7 @@ function ZO_Tooltip:LayoutEquipmentBonusTooltip(equipmentBonus, lowestEquipSlot)
 
     if equipmentBonus < EQUIPMENT_BONUS_SUPERIOR then
         local lowestPieceSection = self:AcquireSection(self:GetStyle("attributeBody"))
-        local equipSlotHasItem = select(2, GetEquippedItemInfo(lowestEquipSlot))
+        local equipSlotHasItem = GetWornItemInfo(BAG_WORN, lowestEquipSlot)
         local lowestEquipItemText
         if equipSlotHasItem then
             local lowestEquipItemLink = GetItemLink(BAG_WORN, lowestEquipSlot)

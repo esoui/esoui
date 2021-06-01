@@ -31,6 +31,7 @@ ZO_TextSearchManager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_TextSearchManager:Initialize()
     self.contextSearches = {}
+    self.pendingContextSearches = {}
 
     local function OnTextSearchFilterComplete(eventId, ...)
         self:OnBackgroundListFilterComplete(...)
@@ -129,7 +130,7 @@ function ZO_TextSearchManager:SetSearchText(context, searchText)
     end
 end
 
-function ZO_TextSearchManager:MarkDirtyByFilterTargetAndPrimaryKey(filterTarget, primaryKey)
+function ZO_TextSearchManager:MarkDirtyByFilterTargetAndPrimaryKey(filterTarget, primaryKey, shouldSuppressSearchUpdate)
     for context, contextSearch in pairs(self.contextSearches) do
         local filterTargetData = contextSearch.filterTargetDescriptors[filterTarget]
         if filterTargetData then
@@ -141,7 +142,7 @@ function ZO_TextSearchManager:MarkDirtyByFilterTargetAndPrimaryKey(filterTarget,
             for _, key in ipairs(primaryKeys) do
                 if key == primaryKey then
                     contextSearch.isDirty = true
-                    self:CleanSearch(context)
+                    self:CleanSearch(context, shouldSuppressSearchUpdate)
                     break
                 end
             end
@@ -149,15 +150,30 @@ function ZO_TextSearchManager:MarkDirtyByFilterTargetAndPrimaryKey(filterTarget,
     end
 end
 
-function ZO_TextSearchManager:CleanSearch(context)
+function ZO_TextSearchManager:CleanSearch(context, shouldSuppressSearchUpdate)
     local contextSearch = self.contextSearches[context]
     if not contextSearch then
         return
     end
 
     if contextSearch.isDirty and self:IsActiveTextSearch(context) then
-        self:ExecuteSearch(context)
+        if not shouldSuppressSearchUpdate then
+            self:ExecuteSearch(context)
+        else
+            self.pendingContextSearches[context] = true
+        end
     end
+end
+
+function ZO_TextSearchManager:ClearPendingContextSearches()
+    self.pendingContextSearches = {}
+end
+
+function ZO_TextSearchManager:ExecutePendingContextSearches()
+    for context, _ in pairs(self.pendingContextSearches) do
+         self:ExecuteSearch(context)
+    end
+    self:ClearPendingContextSearches()
 end
 
 function ZO_TextSearchManager:ExecuteSearch(context)

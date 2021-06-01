@@ -193,12 +193,12 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeGridListPanel()
         end
 
         ZO_DefaultGridEntrySetup(control, data, list)
-        ZO_Restyle_Station_Gamepad_SetOutfitEntryBorder(control, data, self.slotManipulator, self.pendingLoopAnimationPool)
+        ZO_RestyleStation_Gamepad_SetOutfitEntryBorder(control, data, self.slotManipulator, self.pendingLoopAnimationPool)
     end
 
     local function OutfitStyleGridEntryReset(control)
         ZO_ObjectPool_DefaultResetControl(control)
-        ZO_Restyle_Station_Gamepad_CleanupAnimationOnControl(control, self.pendingLoopAnimationPool)
+        ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control, self.pendingLoopAnimationPool)
     end
 
     local HIDE_CALLBACK = nil
@@ -467,11 +467,11 @@ function ZO_Outfit_Slots_Panel_Gamepad:RefreshList()
 end
 
 function ZO_Outfit_Slots_Panel_Gamepad:UpdateCurrentOutfitIndex()
-    local currentEditingIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentOutfitIndex()
+    local currentActorCategory, currentEditingIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentActorCategoryAndIndex()
     if not currentEditingIndex then
          self:SetOutfitManipulator(nil)
     else
-        self:SetOutfitManipulator(ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentEditingIndex))
+        self:SetOutfitManipulator(ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentActorCategory, currentEditingIndex))
     end
 end
 
@@ -539,7 +539,8 @@ function ZO_Outfit_Slots_Panel_Gamepad:RefreshTooltip(selectedData)
             local SHOW_VISUAL_LAYER_INFO = true
             local SHOW_BLOCK_REASON = true
             local TIME_REMAINING_S = nil
-            GAMEPAD_TOOLTIPS:LayoutCollectibleFromData(GAMEPAD_QUAD1_TOOLTIP, selectedData, SHOW_VISUAL_LAYER_INFO, TIME_REMAINING_S, SHOW_BLOCK_REASON)
+            local actorCategory = self.currentOutfitManipulator and self.currentOutfitManipulator:GetActorCategory() or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+            GAMEPAD_TOOLTIPS:LayoutCollectibleFromData(GAMEPAD_QUAD1_TOOLTIP, selectedData, SHOW_VISUAL_LAYER_INFO, TIME_REMAINING_S, SHOW_BLOCK_REASON, actorCategory)
         end
     end
 end
@@ -573,7 +574,7 @@ end
 
 do
     local PENDING_ANIMATION_INSET = -1
-    function ZO_Restyle_Station_Gamepad_SetOutfitEntryBorder(control, data, slotManipulator, pendingPool)
+    function ZO_RestyleStation_Gamepad_SetOutfitEntryBorder(control, data, slotManipulator, pendingPool)
         local edgeTexture
         local isCurrent
         local isPending
@@ -594,14 +595,14 @@ do
         end
 
         if not isPending then
-            ZO_Restyle_Station_Gamepad_CleanupAnimationOnControl(control, pendingPool)
+            ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control, pendingPool)
         end
 
         control.borderBackground:SetEdgeTexture(edgeTexture, ZO_GAMEPAD_OUTFIT_GRID_ENTRY_BORDER_EDGE_WIDTH, ZO_GAMEPAD_OUTFIT_GRID_ENTRY_BORDER_EDGE_HEIGHT)
     end
 end
 
-function ZO_Restyle_Station_Gamepad_CleanupAnimationOnControl(control, pendingPool)
+function ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control, pendingPool)
     if control.icon.pendingLoopAnimationKey then
         pendingPool:ReleaseObject(control.icon.pendingLoopAnimationKey)
     end

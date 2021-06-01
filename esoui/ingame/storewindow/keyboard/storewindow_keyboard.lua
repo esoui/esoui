@@ -230,7 +230,7 @@ function ZO_StoreManager:Initialize(control)
 
     local function HandleCursorPickup(eventCode, cursorType)
         if cursorType == MOUSE_CONTENT_INVENTORY_ITEM then
-            ZO_InventoryLandingArea_SetHidden(self.landingArea, false, SI_INVENTORY_LANDING_AREA_SELL_ITEM)
+            ZO_InventoryLandingArea_SetHidden(self.landingArea, false)
         end
     end
 

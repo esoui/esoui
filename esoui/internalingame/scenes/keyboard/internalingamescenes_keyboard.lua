@@ -13,6 +13,21 @@ marketScene:AddFragment(KEYBIND_STRIP_FADE_FRAGMENT)
 marketScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
 marketScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
 
+----------------------------
+--Endeavor Seals Store Scene
+----------------------------
+
+local endeavorSealStoreScene = SCENE_MANAGER:GetScene("endeavorSealStoreSceneKeyboard")
+-- the preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment
+-- which is part of ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP
+endeavorSealStoreScene:AddFragment(MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+endeavorSealStoreScene:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP)
+
+endeavorSealStoreScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
+endeavorSealStoreScene:AddFragment(KEYBIND_STRIP_FADE_FRAGMENT)
+endeavorSealStoreScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
+endeavorSealStoreScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
+
 -------------------
 --Eso Plus Offers Scene
 -------------------

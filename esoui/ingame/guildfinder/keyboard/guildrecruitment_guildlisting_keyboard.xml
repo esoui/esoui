@@ -8,7 +8,7 @@
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_GuildRecruitment_GuildListing_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
+        <TopLevelControl name="ZO_GuildListing_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_GuildRecruitment_GuildListing_Keyboard_OnInitialized(self)
             </OnInitialized>

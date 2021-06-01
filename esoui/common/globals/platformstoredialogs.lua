@@ -116,7 +116,6 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
     mainText =
     {
         text = function(dialog)
-            local mainText
             if dialog.data.isPreRelease then
                 if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_STEAM then
                     return SI_OPEN_CHAPTER_PREPURCHASE_STEAM
@@ -128,10 +127,11 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
                     return zo_strformat(SI_OPEN_CHAPTER_PREPURCHASE, ZO_GetPlatformStoreName())
                 end
             else
+                local mainText
                 if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_STEAM then
-                    mainText = SI_OPEN_CHAPTER_UPGRADE_STEAM
+                    mainText = GetString(SI_OPEN_CHAPTER_UPGRADE_STEAM)
                 elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
-                    mainText = SI_OPEN_CHAPTER_UPGRADE_HERON
+                    mainText = GetString(SI_OPEN_CHAPTER_UPGRADE_HERON)
                 elseif DoesPlatformStoreUseExternalLinks() then
                     mainText = zo_strformat(SI_OPEN_CHAPTER_UPGRADE_WEB, ZO_GetPlatformStoreName())
                 else

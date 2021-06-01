@@ -1281,10 +1281,7 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
     CHARACTER_SELECT_RENAME_ERROR_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CharacterSelect_GamepadRenameError, ALWAYS_ANIMATE)
     GAMEPAD_CHARACTER_SELECT_SCENE = ZO_Scene:New("gamepadCharacterSelect", SCENE_MANAGER)
     GAMEPAD_CHARACTER_SELECT_SCENE:AddFragment(CHARACTER_SELECT_GAMEPAD_FRAGMENT)
-    GAMEPAD_CHARACTER_SELECT_SCENE:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
     GAMEPAD_CHARACTER_SELECT_SCENE:AddFragment(CHARACTER_SELECT_PROFILE_GAMEPAD_FRAGMENT)
-
-    self.control = GAMEPAD_CHARACTER_SELECT_SCENE
 
     CHARACTER_SELECT_CHARACTERS_GAMEPAD_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_CharacterSelect_GamepadMaskCharacters)
 
@@ -1322,8 +1319,6 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
         local FORCE_ANIMATION = false
         self.characterList:SetSelectedIndexWithoutAnimation(listIndex, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION)
     end)
-
-    self.control:AddFragment(KEYBIND_STRIP_GAMEPAD_BACKDROP_FRAGMENT)
 
     local function OnRenameResult(success)
         if success then

@@ -159,9 +159,9 @@ function ZO_InventoryUtils_DoesNewItemMatchSupplies(itemData)
             and not ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, ITEMFILTERTYPE_FURNISHING)
 end
 
-function ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, equipSlot)
-	local isHidden, highestPriorityVisualLayerThatIsShowing = WouldEquipmentBeHidden(equipSlot or EQUIP_SLOT_NONE)
-	local equipSlotText = ""
+function ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, equipSlot, actorCategory)
+    local isHidden, highestPriorityVisualLayerThatIsShowing = WouldEquipmentBeHidden(equipSlot or EQUIP_SLOT_NONE, actorCategory)
+    local equipSlotText = ""
 
     if equipSlot == EQUIP_SLOT_MAIN_HAND then
         equipSlotText = GetString(SI_GAMEPAD_EQUIPPED_MAIN_HAND_ITEM_HEADER)
@@ -171,11 +171,16 @@ function ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, equip
         equipSlotText = GetString(SI_GAMEPAD_EQUIPPED_OFF_HAND_ITEM_HEADER)
     elseif equipSlot == EQUIP_SLOT_BACKUP_OFF then
         equipSlotText = GetString(SI_GAMEPAD_EQUIPPED_BACKUP_OFF_ITEM_HEADER)
-	end
+    end
 
-	if isHidden then
-		GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER), equipSlotText, ZO_SELECTED_TEXT:Colorize(GetHiddenByStringForVisualLayer(highestPriorityVisualLayerThatIsShowing)))
-	else
-		GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER), equipSlotText)
-	end
+    local equippedStringId = SI_GAMEPAD_EQUIPPED_ITEM_HEADER
+    if actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+        equippedStringId = SI_GAMEPAD_EQUIPPED_COMPANION_ITEM_HEADER
+    end
+
+    if isHidden then
+        GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(equippedStringId), equipSlotText, ZO_SELECTED_TEXT:Colorize(GetHiddenByStringForVisualLayer(highestPriorityVisualLayerThatIsShowing)))
+    else
+        GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(equippedStringId), equipSlotText)
+    end
 end

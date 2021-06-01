@@ -101,6 +101,7 @@ function ZO_HousingFurnitureProducts_Gamepad:OnShowing()
     ZO_HousingFurnitureList_Gamepad.OnShowing(self)
 
     UpdateMarketDisplayGroup(MARKET_DISPLAY_GROUP_HOUSE_EDITOR)
+    MARKET_CURRENCY_GAMEPAD:SetVisibleMarketCurrencyTypes({MKCT_CROWNS, MKCT_CROWN_GEMS})
     MARKET_CURRENCY_GAMEPAD:Show()
     local currencyStyle = MARKET_CURRENCY_GAMEPAD:ModifyKeybindStripStyleForCurrency(KEYBIND_STRIP_GAMEPAD_STYLE)
     KEYBIND_STRIP:SetStyle(currencyStyle)

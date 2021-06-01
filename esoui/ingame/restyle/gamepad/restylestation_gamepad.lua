@@ -4,13 +4,25 @@ local ACTION_DYES = 2
 
 local OUTFIT_SWATCH_SLOT_ANCHOR_PADDING = 2
 
-ZO_Restyle_Station_Gamepad = ZO_Gamepad_MultiFocus_ParametricList_Screen:Subclass()
+local RESTYLE_MODE_OMITTED_SLOT_TYPES =
+{
+    [RESTYLE_MODE_COMPANION_OUTFIT] =
+    {
+        [EQUIP_SLOT_HEAD] = true,
+    },
+    [RESTYLE_MODE_COMPANION_COLLECTIBLE] =
+    {
+        [COLLECTIBLE_CATEGORY_TYPE_HAT] = true,
+    },
+}
 
-function ZO_Restyle_Station_Gamepad:New(...)
+ZO_RestyleStation_Gamepad = ZO_Gamepad_MultiFocus_ParametricList_Screen:Subclass()
+
+function ZO_RestyleStation_Gamepad:New(...)
     return ZO_Gamepad_MultiFocus_ParametricList_Screen.New(self, ...)
 end
 
-function ZO_Restyle_Station_Gamepad:Initialize(control)
+function ZO_RestyleStation_Gamepad:Initialize(control)
     self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_Outfit_LoopAnimation_Pool)
     self.actionMode = ACTION_NONE
 
@@ -22,7 +34,6 @@ function ZO_Restyle_Station_Gamepad:Initialize(control)
     self:InitializeOptionsDialog()
     self:InitializeConfirmationDialog()
 
-    local activeWeaponPair
     activeWeaponPair, self.weaponSwapDisabled = GetActiveWeaponPairInfo()
 
     GAMEPAD_RESTYLE_STATION_FRAGMENT = ZO_FadeSceneFragment:New(control)
@@ -35,7 +46,11 @@ function ZO_Restyle_Station_Gamepad:Initialize(control)
     end)
     GAMEPAD_RESTYLE_STATION_SCENE:SetHideSceneConfirmationCallback(function(...) self:OnConfirmHideScene(...) end)
 
-    local function OnOutfitPendingDataChanged(outfitIndex, slotIndex)
+    self.parametricListArea.CanBeSelected = function()
+        return RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COMPANION_EQUIPMENT
+    end
+
+    local function OnOutfitPendingDataChanged(actorCategory, outfitIndex, slotIndex)
         if not slotIndex and GAMEPAD_RESTYLE_STATION_SCENE:IsShowing() then
             self:Update()
         else
@@ -47,6 +62,8 @@ function ZO_Restyle_Station_Gamepad:Initialize(control)
         self.weaponSwapDisabled = disabled
     end
 
+    self:GetMainList():SetNoItemText(GetString(SI_OUTFIT_COMPANION_NO_OUTFIT_DESCRIPTION))
+
     ZO_OUTFIT_MANAGER:RegisterCallback("PendingDataChanged", OnOutfitPendingDataChanged)
     control:RegisterForEvent(EVENT_CURRENCY_UPDATE, function(eventId, ...) self:OnCurrencyChanged(...) end)
     control:RegisterForEvent(EVENT_WEAPON_PAIR_LOCK_CHANGED, OnWeaponPairLockedChanged)
@@ -55,15 +72,17 @@ function ZO_Restyle_Station_Gamepad:Initialize(control)
 end
 
 do
-    local NEXT_WEAPON_STATE_EVALUATE_TIME_S = .25
-    function ZO_Restyle_Station_Gamepad:OnUpdate(currentFrameTimeSeconds)
+    local NEXT_WEAPON_STATE_EVALUATE_TIME_S = 0.25
+    function ZO_RestyleStation_Gamepad:OnUpdate(currentFrameTimeSeconds)
         local targetData = self.outfitSlotList:GetTargetData()
         if targetData then
             local outfitSlot = targetData.outfitSlot
             local areWeaponsSheathed = ArePlayerWeaponsSheathed()
 
+            local restyleMode = RESTYLE_GAMEPAD:GetMode()
+            local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleMode)
             if ZO_OUTFIT_MANAGER:IsOutfitSlotWeapon(outfitSlot) then
-                if not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotActive(outfitSlot) then
+                if not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotActive(outfitSlot, actorCategory) then
                     if not self.weaponSwapDisabled and GetUnitLevel("player") >= GetWeaponSwapUnlockedLevel() then
                         OnWeaponSwap()
                         -- Weapon swapping automatically unsheathes
@@ -87,7 +106,7 @@ do
     end
 end
 
-function ZO_Restyle_Station_Gamepad:OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
+function ZO_RestyleStation_Gamepad:OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
     if bypassHideSceneConfirmationReason == nil then
         self:AttemptExit()
     else
@@ -95,19 +114,19 @@ function ZO_Restyle_Station_Gamepad:OnConfirmHideScene(scene, nextSceneName, byp
     end
 end
 
-function ZO_Restyle_Station_Gamepad:OnShowing()
+function ZO_RestyleStation_Gamepad:OnShowing()
     self:UpdateCurrentOutfitIndex()
     KEYBIND_STRIP:RemoveDefaultExit()
 
-    -- Always start on the list
-    if not self:IsCurrentFocusArea(self.parametricListArea) then
+    -- Always start on the list if not companion equipment
+    if not self:IsCurrentFocusArea(self.parametricListArea) and RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COMPANION_EQUIPMENT then
         self.currentFocalArea = self.parametricListArea
     end
 
     ZO_Gamepad_MultiFocus_ParametricList_Screen.OnShowing(self)
 end
 
-function ZO_Restyle_Station_Gamepad:OnHide()
+function ZO_RestyleStation_Gamepad:OnHide()
     ZO_Gamepad_MultiFocus_ParametricList_Screen.OnHide(self)
 
     local selectedControl = self.outfitSlotList:GetSelectedControl()
@@ -129,7 +148,7 @@ function ZO_Restyle_Station_Gamepad:OnHide()
     KEYBIND_STRIP:RestoreDefaultExit()
 end
 
-function ZO_Restyle_Station_Gamepad:OnFragmentShowing()
+function ZO_RestyleStation_Gamepad:OnFragmentShowing()
     self:UpdateOutfitPreview()
 
     if self.currentOutfitManipulator then
@@ -154,7 +173,7 @@ function ZO_Restyle_Station_Gamepad:OnFragmentShowing()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:OnFragmentHidden()
+function ZO_RestyleStation_Gamepad:OnFragmentHidden()
     self.outfitsPanel:OnHide()
     self.dyeingPanel:OnHide()
 
@@ -167,9 +186,12 @@ function ZO_Restyle_Station_Gamepad:OnFragmentHidden()
     if not ArePlayerWeaponsSheathed() then
         TogglePlayerWield()
     end
+
+    ITEM_PREVIEW_GAMEPAD:ClearPreviewCollection()
+    ApplyChangesToPreviewCollectionShown()
 end
 
-function ZO_Restyle_Station_Gamepad:OnDeferredInitialize()
+function ZO_RestyleStation_Gamepad:OnDeferredInitialize()
     ZO_Gamepad_MultiFocus_ParametricList_Screen.OnDeferredInitialize(self)
 
     self:InitializeOutfitsPanel()
@@ -180,7 +202,7 @@ function ZO_Restyle_Station_Gamepad:OnDeferredInitialize()
 
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
-    local stylesHeaderData = 
+    local stylesHeaderData =
     {
         text = GetString(SI_GAMEPAD_DYEING_EQUIPMENT_ACTION_STYLES),
         callback = function() self:SwitchToAction(ACTION_STYLES) end,
@@ -191,16 +213,19 @@ function ZO_Restyle_Station_Gamepad:OnDeferredInitialize()
     {
         text = GetString(SI_GAMEPAD_DYEING_EQUIPMENT_ACTION_DYES),
         callback = function() self:SwitchToAction(ACTION_DYES) end,
-        canSelect = true
+        canSelect = true,
+        visible = function()
+            return RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COMPANION_EQUIPMENT
+        end,
     }
 
-    self.outfitHeaderData = 
-    {	
+    self.outfitHeaderData =
+    {
         tabBarEntries =
         {
             stylesHeaderData,
             dyesHeaderData
-        }
+        },
     }
 
     self.defaultHeaderData =
@@ -227,47 +252,51 @@ function ZO_Restyle_Station_Gamepad:OnDeferredInitialize()
     self:UpdateCurrentOutfitIndex()
 end
 
-function ZO_Restyle_Station_Gamepad:CreateApplyKeybind(multiFocusArea)
+function ZO_RestyleStation_Gamepad:CreateApplyKeybind(multiFocusArea)
     return
     {
         name = function()
-                    if self.currentOutfitManipulator then
-                        local slotsCost, flatCost = self.currentOutfitManipulator:GetAllCostsForPendingChanges()
-                        if slotsCost > 0 then
-                            local IS_GAMEPAD = true
-                            local USE_SHORT_FORMAT = false
-                            local formattedSlotsCurrency = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(slotsCost, USE_SHORT_FORMAT, CURT_MONEY, IS_GAMEPAD)
-                            local formattedFlatCurrency = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(flatCost, USE_SHORT_FORMAT, CURT_STYLE_STONES, IS_GAMEPAD)
-                            return zo_strformat(SI_OUTFIT_COMMIT_SELECTION, formattedSlotsCurrency, formattedFlatCurrency)
-                        end
-                    end
+            if self.currentOutfitManipulator then
+                local slotsCost, flatCost = self.currentOutfitManipulator:GetAllCostsForPendingChanges()
+                if slotsCost > 0 then
+                    local IS_GAMEPAD = true
+                    local USE_SHORT_FORMAT = false
+                    local formattedSlotsCurrency = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(slotsCost, USE_SHORT_FORMAT, CURT_MONEY, IS_GAMEPAD)
+                    local formattedFlatCurrency = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(flatCost, USE_SHORT_FORMAT, CURT_STYLE_STONES, IS_GAMEPAD)
+                    return zo_strformat(SI_OUTFIT_COMMIT_SELECTION, formattedSlotsCurrency, formattedFlatCurrency)
+                end
+            end
 
-                    return GetString(SI_DYEING_COMMIT)
-                end,
+            return GetString(SI_DYEING_COMMIT)
+        end,
         keybind = "UI_SHORTCUT_SECONDARY",
-        callback = function() 
-                      self:CommitSelection()
-                      multiFocusArea:UpdateActiveFocusKeybinds()
-                   end,
-        visible = function() return self:DoesHaveChanges() end,
-        enabled = function() return self:CanApplyChanges() end,
+        callback = function()
+            self:CommitSelection()
+            multiFocusArea:UpdateActiveFocusKeybinds()
+        end,
+        visible = function()
+            return self:DoesHaveChanges()
+        end,
+        enabled = function()
+            return self:CanApplyChanges()
+        end,
     }
 end
 
-function ZO_Restyle_Station_Gamepad:CreateUndoKeybind(multiFocusArea)
+function ZO_RestyleStation_Gamepad:CreateUndoKeybind(multiFocusArea)
     return
     {
         name = GetString(SI_DYEING_UNDO),
         keybind = "UI_SHORTCUT_LEFT_STICK",
         visible = function() return self:DoesHaveChanges() end,
-        callback = function() 
-                       self:ShowUndoPendingChangesDialog()
-                       multiFocusArea:UpdateActiveFocusKeybinds()
-                   end,
+        callback = function()
+            self:ShowUndoPendingChangesDialog()
+            multiFocusArea:UpdateActiveFocusKeybinds()
+        end,
     }
 end
 
-function ZO_Restyle_Station_Gamepad:CreateRandomizeKeybind(multiFocusArea)
+function ZO_RestyleStation_Gamepad:CreateRandomizeKeybind(multiFocusArea)
     return
     {
         name = function()
@@ -278,15 +307,17 @@ function ZO_Restyle_Station_Gamepad:CreateRandomizeKeybind(multiFocusArea)
             end
         end,
         keybind = "UI_SHORTCUT_RIGHT_STICK",
-        visible = function() return not (self.actionMode == ACTION_STYLES and RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_EQUIPMENT) end,
-        callback = function() 
-                       self:RandomizeSelection() 
-                       multiFocusArea:UpdateActiveFocusKeybinds()
-                   end,
+        visible = function()
+            return not (self.actionMode == ACTION_STYLES and RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_EQUIPMENT and RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_COMPANION_EQUIPMENT)
+        end,
+        callback = function()
+            self:RandomizeSelection() 
+            multiFocusArea:UpdateActiveFocusKeybinds()
+        end,
     }
 end
 
-function ZO_Restyle_Station_Gamepad:CreateOptionsKeybind()
+function ZO_RestyleStation_Gamepad:CreateOptionsKeybind()
     return
     {
         name = GetString(SI_GAMEPAD_DYEING_OPTIONS),
@@ -296,7 +327,7 @@ function ZO_Restyle_Station_Gamepad:CreateOptionsKeybind()
     }
 end
 
-function ZO_Restyle_Station_Gamepad:InitializeKeybindStripDescriptors()
+function ZO_RestyleStation_Gamepad:InitializeKeybindStripDescriptors()
     local function MultiFocusBack()
         if self.actionMode == ACTION_DYES then
             self:ActivateCurrentSelection()
@@ -409,13 +440,13 @@ function ZO_Restyle_Station_Gamepad:InitializeKeybindStripDescriptors()
     }
 end
 
-function ZO_Restyle_Station_Gamepad:InitializeOutfitsPanel()
+function ZO_RestyleStation_Gamepad:InitializeOutfitsPanel()
     self.outfitsPanel = ZO_OUTFITS_PANEL_GAMEPAD
     self.outfitsPanelFragmentGroup = { GAMEPAD_OUTFITS_GRID_LIST_PANEL_FRAGMENT, GAMEPAD_OUTFITS_GRID_LIST_FRAGMENT, GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT }
     self.outfitsPanel:RegisterCallback("PanelSelectionEnd", function(...) self:OnPanelSelectionEnd(...) end)
 end
 
-function ZO_Restyle_Station_Gamepad:InitializeDyesPanel()
+function ZO_RestyleStation_Gamepad:InitializeDyesPanel()
     self.dyeingPanel = ZO_DYEING_PANEL_GAMEPAD
     self.dyeingPanelFragmentGroup = { GAMEPAD_DYEING_SLOTS_PANEL_FRAGMENT, GAMEPAD_DYES_GRID_LIST_FRAGMENT, GAMEPAD_DYE_TOOLS_GRID_LIST_FRAGMENT, GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT }
     self.dyeingPanel:RegisterCallback("PanelSelectionEnd", function(...) self:OnPanelSelectionEnd(...) end)
@@ -440,7 +471,7 @@ function ZO_Restyle_Station_Gamepad:InitializeDyesPanel()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:InitializeColorPresetControls()
+function ZO_RestyleStation_Gamepad:InitializeColorPresetControls()
     self.savedPresetsControl = self.header:GetNamedChild("SavedPresets")
     self.savedPresetsControl.highlight = self.savedPresetsControl:GetNamedChild("SharedHighlight")
     self.savedSets = {}
@@ -463,7 +494,7 @@ function ZO_Restyle_Station_Gamepad:InitializeColorPresetControls()
         table.insert(self.savedSets, newControl)
 
         self:RefreshSavedSet(i)
-        local entry = 
+        local entry =
         {
             control = newControl,
             highlight = newControl:GetNamedChild("Highlight"),
@@ -472,7 +503,7 @@ function ZO_Restyle_Station_Gamepad:InitializeColorPresetControls()
 
         for _, dyeChannelControl in ipairs(newControl.dyeControls) do
             dyeChannelControl.channelHighlight = dyeChannelControl:GetNamedChild("Highlight")
-            local entry = 
+            entry =
             {
                 control = dyeChannelControl,
                 highlight = dyeChannelControl.channelHighlight,
@@ -516,10 +547,10 @@ end
 local GamepadMultiFocusArea_OutfitSelector = ZO_GamepadMultiFocusArea_Base:Subclass()
 
 function GamepadMultiFocusArea_OutfitSelector:CanBeSelected()
-    return RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COLLECTIBLE
+    return RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COLLECTIBLE and RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COMPANION_COLLECTIBLE
 end
 
-function ZO_Restyle_Station_Gamepad:InitializeFoci()
+function ZO_RestyleStation_Gamepad:InitializeFoci()
     local function SetActivateCallback()
         if self:ShouldShowAllDyeFoci() then
             self.activeSavedSetsFocus = self.savedSetDyeAllChannelFocus
@@ -561,7 +592,7 @@ function ZO_Restyle_Station_Gamepad:InitializeFoci()
     self.outfitSelectorNameLabel:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
 end
 
-function ZO_Restyle_Station_Gamepad:InitializeChangedDyeControlPool()
+function ZO_RestyleStation_Gamepad:InitializeChangedDyeControlPool()
     self.dyeChangedControlPool = ZO_ControlPool:New("ZO_DyeingChangedHighlight_Gamepad", GuiRoot, "DyeSlotChanged_Gamepad")
 
     local function CustomResetFunction(control)
@@ -571,7 +602,7 @@ function ZO_Restyle_Station_Gamepad:InitializeChangedDyeControlPool()
     self.dyeChangedControlPool:SetCustomResetBehavior(CustomResetFunction)
 end
 
-function ZO_Restyle_Station_Gamepad:UpdateDyeSlotChangedOnControl(control, hasChanged)
+function ZO_RestyleStation_Gamepad:UpdateDyeSlotChangedOnControl(control, hasChanged)
     if control.dyeChangedControlKey and not hasChanged then
         self.dyeChangedControlPool:ReleaseObject(control.dyeChangedControlKey)
         control.dyeChangedControlKey = nil
@@ -588,7 +619,7 @@ function ZO_Restyle_Station_Gamepad:UpdateDyeSlotChangedOnControl(control, hasCh
     end
 end
 
-function ZO_Restyle_Station_Gamepad:SetupList(list)
+function ZO_RestyleStation_Gamepad:SetupList(list)
     self.outfitSlotList = list
 
     local function SetupSlotEntry(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -643,10 +674,10 @@ function ZO_Restyle_Station_Gamepad:SetupList(list)
         local appropriateCollectibleId = slotManipulator:GetPendingCollectibleId()
         if appropriateCollectibleId > 0 then
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(appropriateCollectibleId)
-            ZO_Restyle_Station_Gamepad_SetOutfitEntryBorder(control, collectibleData, slotManipulator, self.pendingLoopAnimationPool)
+            ZO_RestyleStation_Gamepad_SetOutfitEntryBorder(control, collectibleData, slotManipulator, self.pendingLoopAnimationPool)
             control.borderBackground:SetHidden(false)
         else
-            ZO_Restyle_Station_Gamepad_CleanupAnimationOnControl(control, self.pendingLoopAnimationPool)
+            ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control, self.pendingLoopAnimationPool)
             control.borderBackground:SetHidden(true)
         end
     end
@@ -658,7 +689,7 @@ function ZO_Restyle_Station_Gamepad:SetupList(list)
 
     local function ResetOutfitSlotEntry(control)
         ResetSlotEntry(control)
-        ZO_Restyle_Station_Gamepad_CleanupAnimationOnControl(control, self.pendingLoopAnimationPool)
+        ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control, self.pendingLoopAnimationPool)
     end
 
     list:SetAlignToScreenCenter(true)
@@ -667,13 +698,13 @@ function ZO_Restyle_Station_Gamepad:SetupList(list)
     list:AddDataTemplate("ZO_RestyleSlot_EntryTemplate_Gamepad", SetupSlotEntry, ZO_GamepadMenuEntryTemplateParametricListFunction, EQUALITY_FUNCTION, CONTROL_POOL_PREFIX, ResetSlotEntry)
     list:AddDataTemplate("ZO_OutfitSlot_EntryTemplate_Gamepad", SetupOutfitSlotEntry, ZO_GamepadMenuEntryTemplateParametricListFunction, EQUALITY_FUNCTION, CONTROL_POOL_PREFIX, ResetOutfitSlotEntry)
     list:AddDataTemplateWithHeader("ZO_OutfitSlot_EntryTemplate_Gamepad", SetupOutfitSlotEntry, ZO_GamepadMenuEntryTemplateParametricListFunction, EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate", HEADER_SETUP_FUNCTION, CONTROL_POOL_PREFIX, ResetOutfitSlotEntry)
-    list:SetOnSelectedDataChangedCallback(function(list, selectedData, oldData) self:OnSlotChanged(oldData, selectedData) end)
+    list:SetOnSelectedDataChangedCallback(function(callbackList, selectedData, oldData) self:OnSlotChanged(oldData, selectedData) end)
 end
 
-function ZO_Restyle_Station_Gamepad:InitializeOptionsDialog()
+function ZO_RestyleStation_Gamepad:InitializeOptionsDialog()
     local function OnReleaseDialog(dialog)
         if dialog.dropdowns then
-            for i, dropdown in pairs(dialog.dropdowns) do
+            for _, dropdown in pairs(dialog.dropdowns) do
                 dropdown:Deactivate()
             end
         end
@@ -694,7 +725,7 @@ function ZO_Restyle_Station_Gamepad:InitializeOptionsDialog()
             ZO_ClearNumericallyIndexedTable(parametricList)
             dialog.dropdowns = {}
 
-            for i, action in ipairs(allActions) do
+            for _, action in ipairs(allActions) do
                 local entryData = ZO_GamepadEntryData:New(action.text)
                 entryData.action = action
                 entryData.setup = action.setup or ZO_SharedGamepadEntry_OnSetup
@@ -715,7 +746,7 @@ function ZO_Restyle_Station_Gamepad:InitializeOptionsDialog()
         parametricList = {}, -- Generated Dynamically
         
         blockDialogReleaseOnPress = true,
-        buttons = 
+        buttons =
         {
             {
                 keybind = "DIALOG_PRIMARY",
@@ -739,7 +770,7 @@ function ZO_Restyle_Station_Gamepad:InitializeOptionsDialog()
     })
 end
 
-function ZO_Restyle_Station_Gamepad:CreateOptionActionDataClear(slotManipulator)
+function ZO_RestyleStation_Gamepad:CreateOptionActionDataClear(slotManipulator)
     return
     {
         template = "ZO_GamepadItemEntryTemplate",
@@ -753,7 +784,7 @@ function ZO_Restyle_Station_Gamepad:CreateOptionActionDataClear(slotManipulator)
     }
 end
 
-function ZO_Restyle_Station_Gamepad:CreateOptionActionDataUndo(slotManipulator)
+function ZO_RestyleStation_Gamepad:CreateOptionActionDataUndo(slotManipulator)
     return
     {
         template = "ZO_GamepadItemEntryTemplate",
@@ -767,7 +798,7 @@ function ZO_Restyle_Station_Gamepad:CreateOptionActionDataUndo(slotManipulator)
     }
 end
 
-function ZO_Restyle_Station_Gamepad:CreateOptionActionDataHide(slotManipulator, hiddenCollectibleId)
+function ZO_RestyleStation_Gamepad:CreateOptionActionDataHide(slotManipulator, hiddenCollectibleId)
     return
     {
         template = "ZO_GamepadItemEntryTemplate",
@@ -781,7 +812,7 @@ function ZO_Restyle_Station_Gamepad:CreateOptionActionDataHide(slotManipulator, 
     }
 end
 
-function ZO_Restyle_Station_Gamepad:CreateOptionActionDataChangeMaterial(slotManipulator, collectibleData)
+function ZO_RestyleStation_Gamepad:CreateOptionActionDataChangeMaterial(slotManipulator, collectibleData)
     return
     {
         template = "ZO_GamepadItemEntryTemplate",
@@ -795,7 +826,7 @@ end
 
 do
     local DYE_SORTING_DROPDOWN_ACTION_DATA
-    function ZO_Restyle_Station_Gamepad:CreateOptionActionDataDyeSortingDropdown()
+    function ZO_RestyleStation_Gamepad:CreateOptionActionDataDyeSortingDropdown()
         if not DYE_SORTING_DROPDOWN_ACTION_DATA then
             DYE_SORTING_DROPDOWN_ACTION_DATA = 
             {
@@ -819,7 +850,7 @@ do
     end
 end
 
-function ZO_Restyle_Station_Gamepad:UpdateDyeSortingDropdownOptions(dropdown)
+function ZO_RestyleStation_Gamepad:UpdateDyeSortingDropdownOptions(dropdown)
     dropdown:ClearItems()
 
     local function SelectNewSort(style)
@@ -840,7 +871,7 @@ function ZO_Restyle_Station_Gamepad:UpdateDyeSortingDropdownOptions(dropdown)
 end
 
 
-function ZO_Restyle_Station_Gamepad:CreateOptionActionDataDyeingShowLocked(optionalCallback)
+function ZO_RestyleStation_Gamepad:CreateOptionActionDataDyeingShowLocked(optionalCallback)
     return
     {
         template = "ZO_CheckBoxTemplate_Gamepad",
@@ -864,7 +895,7 @@ function ZO_Restyle_Station_Gamepad:CreateOptionActionDataDyeingShowLocked(optio
     }
 end
 
-function ZO_Restyle_Station_Gamepad:CreateOptionActionDataOutfitStylesShowLocked(optionalCallback)
+function ZO_RestyleStation_Gamepad:CreateOptionActionDataOutfitStylesShowLocked(optionalCallback)
     return
     {
         template = "ZO_CheckBoxTemplate_Gamepad",
@@ -888,7 +919,7 @@ function ZO_Restyle_Station_Gamepad:CreateOptionActionDataOutfitStylesShowLocked
     }
 end
 
-function ZO_Restyle_Station_Gamepad:CreateOptionsDialogActions()
+function ZO_RestyleStation_Gamepad:CreateOptionsDialogActions()
     local actionsTable = {}
 
     if self.actionMode == ACTION_STYLES then
@@ -937,7 +968,7 @@ function ZO_Restyle_Station_Gamepad:CreateOptionsDialogActions()
     return actionsTable
 end
 
-function ZO_Restyle_Station_Gamepad:UpdateOutfitsPanel()
+function ZO_RestyleStation_Gamepad:UpdateOutfitsPanel()
     local currentlySelectedData = self.outfitSlotList:GetTargetData()
     if currentlySelectedData then
         local slotManipulator = currentlySelectedData.slotManipulator
@@ -951,7 +982,7 @@ function ZO_Restyle_Station_Gamepad:UpdateOutfitsPanel()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:UpdateCurrentActionFragmentGroup()
+function ZO_RestyleStation_Gamepad:UpdateCurrentActionFragmentGroup()
     if self.actionMode == ACTION_STYLES and (self:IsCurrentFocusArea(self.outfitSelectorHeaderFocus) or RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_EQUIPMENT) then
         SCENE_MANAGER:RemoveFragmentGroup(self:GetActionFragmentGroup(self.actionMode))
     else
@@ -959,30 +990,30 @@ function ZO_Restyle_Station_Gamepad:UpdateCurrentActionFragmentGroup()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:PerformUpdate()
+function ZO_RestyleStation_Gamepad:PerformUpdate()
     self.outfitSlotList:Clear()
 
     local restyleMode = RESTYLE_GAMEPAD:GetMode()
-    
-    if restyleMode == RESTYLE_MODE_OUTFIT then
+    if restyleMode == RESTYLE_MODE_OUTFIT or restyleMode == RESTYLE_MODE_COMPANION_OUTFIT then
         local foundMainWeapons = false
         local foundBackupWeapons = false
-        local mainHandOutfitSlot, offHandOutfitSlot, backupMainHandOutfitSlot, backupOffHandOutfitSlot = GetOutfitSlotsForEquippedWeapons()
+        local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleMode)
+        local mainHandOutfitSlot, offHandOutfitSlot, backupMainHandOutfitSlot, backupOffHandOutfitSlot = GetOutfitSlotsForEquippedWeapons(actorCategory)
         for outfitSlotIndex = OUTFIT_SLOT_ITERATION_BEGIN, OUTFIT_SLOT_ITERATION_END do
             local isArmor = ZO_OUTFIT_MANAGER:IsOutfitSlotArmor(outfitSlotIndex)
             local isEquippedWeapon = not isArmor and (mainHandOutfitSlot == outfitSlotIndex
                                      or offHandOutfitSlot == outfitSlotIndex
                                      or backupMainHandOutfitSlot == outfitSlotIndex
                                      or backupOffHandOutfitSlot == outfitSlotIndex)
+            local isOmittedSlotType = RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode] and RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode][outfitSlotIndex]
 
-            if isArmor or isEquippedWeapon then
+            if (isArmor or isEquippedWeapon) and not isOmittedSlotType then
                 local slotManipulator = self.currentOutfitManipulator:GetSlotManipulator(outfitSlotIndex)
                 local appropriateCollectibleId = slotManipulator:GetPendingCollectibleId()
                 local isWeaponSlotMain = ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotMain(outfitSlotIndex)
                 local isWeaponSlotBackup = ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotBackup(outfitSlotIndex)
 
                 local name = zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_OUTFITSLOT", outfitSlotIndex))
-                
                 local icon = slotManipulator:GetSlotAppropriateIcon()
 
                 local data = ZO_GamepadEntryData:New(name, icon)
@@ -1006,13 +1037,17 @@ function ZO_Restyle_Station_Gamepad:PerformUpdate()
         end
     else
         local slotsByMode = ZO_Dyeing_GetSlotsForRestyleSet(restyleMode, ZO_RESTYLE_DEFAULT_SET_INDEX)
-        for _, dyeableSlotData in ipairs(slotsByMode) do
-            if not dyeableSlotData:ShouldBeHidden() then
-                local name = zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, dyeableSlotData:GetDefaultDescriptor())
-                local data = ZO_GamepadEntryData:New(name, dyeableSlotData:GetIcon())
-                data.restyleIndex = dyeableSlotData:GetRestyleSlotType()
-                data.restyleSlotData = ZO_RestyleSlotData:Copy(dyeableSlotData)
-                self.outfitSlotList:AddEntry("ZO_RestyleSlot_EntryTemplate_Gamepad", data)
+        -- Companion Equipment mode is not allowed to dye so the dyeable slots may be nil
+        if slotsByMode then
+            for _, dyeableSlotData in ipairs(slotsByMode) do
+                local isOmittedSlotType = RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode] and RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode][dyeableSlotData:GetRestyleSlotType()]
+                if not dyeableSlotData:ShouldBeHidden() and not isOmittedSlotType then
+                    local name = zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, dyeableSlotData:GetDefaultDescriptor())
+                    local data = ZO_GamepadEntryData:New(name, dyeableSlotData:GetIcon())
+                    data.restyleIndex = dyeableSlotData:GetRestyleSlotType()
+                    data.restyleSlotData = ZO_RestyleSlotData:Copy(dyeableSlotData)
+                    self.outfitSlotList:AddEntry("ZO_RestyleSlot_EntryTemplate_Gamepad", data)
+                end
             end
         end
     end
@@ -1022,40 +1057,50 @@ function ZO_Restyle_Station_Gamepad:PerformUpdate()
     self.dirty = false
 end
 
-function ZO_Restyle_Station_Gamepad:UpdateCurrentOutfitIndex()
-    if RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_COLLECTIBLE then
+function ZO_RestyleStation_Gamepad:UpdateCurrentOutfitIndex()
+    if RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_COLLECTIBLE or RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_COMPANION_COLLECTIBLE then
         self.currentOutfitManipulator = nil
         return
     end
 
-    local currentEditingIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentOutfitIndex()
+    local currentEditingActorCategory, currentEditingIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentActorCategoryAndIndex()
     if not currentEditingIndex then
-        self:SetOutfitManipulator(nil)
+        self:SetOutfitManipulator(nil, currentEditingActorCategory)
     else
-        self:SetOutfitManipulator(ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentEditingIndex))
+        ZO_OUTFITS_SELECTOR_GAMEPAD:SetCurrentActorCategory(currentEditingActorCategory)
+        self:SetOutfitManipulator(ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentEditingActorCategory, currentEditingIndex), currentEditingActorCategory)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:UpdateOutfitPreview()
-    if RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_COLLECTIBLE then
+function ZO_RestyleStation_Gamepad:UpdateOutfitPreview()
+    local restyleMode = RESTYLE_GAMEPAD:GetMode()
+    if restyleMode == RESTYLE_MODE_COLLECTIBLE or restyleMode == RESTYLE_MODE_COMPANION_COLLECTIBLE then
         return
     end
 
+    ITEM_PREVIEW_GAMEPAD:ResetOutfitPreview()
+
     if self.currentOutfitManipulator then
-        ITEM_PREVIEW_GAMEPAD:PreviewOutfit(self.currentOutfitManipulator:GetOutfitIndex())
+        ITEM_PREVIEW_GAMEPAD:PreviewOutfit(self.currentOutfitManipulator:GetActorCategory(), self.currentOutfitManipulator:GetOutfitIndex())
     else
-        ITEM_PREVIEW_GAMEPAD:PreviewUnequipOutfit()
+        ITEM_PREVIEW_GAMEPAD:PreviewUnequipOutfit(ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleMode))
     end
 end
 
-function ZO_Restyle_Station_Gamepad:RefreshHeader()
-    if RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COLLECTIBLE then
+function ZO_RestyleStation_Gamepad:RefreshHeader()
+    local restyleMode = RESTYLE_GAMEPAD:GetMode()
+    if restyleMode ~= RESTYLE_MODE_COLLECTIBLE and restyleMode ~= RESTYLE_MODE_COMPANION_COLLECTIBLE then
         ZO_GamepadGenericHeader_Refresh(self.header, self.outfitHeaderData)
+
+        if self.outfitSlotList:GetNumItems() == 0 then
+            self.outfitSlotList:Deactivate()
+            self:ActivateFocusArea(self.outfitSelectorHeaderFocus)
+        end
     else
         ZO_GamepadGenericHeader_Refresh(self.header, self.defaultHeaderData)
     end
 
-    self.outfitSelectorControl:SetHidden(RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_COLLECTIBLE)
+    self.outfitSelectorControl:SetHidden(restyleMode == RESTYLE_MODE_COLLECTIBLE or restyleMode == RESTYLE_MODE_COMPANION_COLLECTIBLE)
 
     if self.currentOutfitManipulator then
         self.outfitSelectorNameLabel:SetText(self.currentOutfitManipulator:GetOutfitName())
@@ -1064,15 +1109,16 @@ function ZO_Restyle_Station_Gamepad:RefreshHeader()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:RefreshFooter()
-    if RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_OUTFIT then
+function ZO_RestyleStation_Gamepad:RefreshFooter()
+    local currentMode = RESTYLE_GAMEPAD:GetMode()
+    if currentMode == RESTYLE_MODE_OUTFIT or currentMode == RESTYLE_MODE_COMPANION_OUTFIT then
         GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
     else
         GAMEPAD_GENERIC_FOOTER:Refresh({})
     end
 end
 
-function ZO_Restyle_Station_Gamepad:RefreshSavedSet(dyeSetIndex)
+function ZO_RestyleStation_Gamepad:RefreshSavedSet(dyeSetIndex)
     local savedSetSwatch = self.savedSets[dyeSetIndex]
     local savedSetDyes = { GetSavedDyeSetDyes(dyeSetIndex) }
     for dyeChannel, dyeControl in ipairs(savedSetSwatch.dyeControls) do
@@ -1081,13 +1127,13 @@ function ZO_Restyle_Station_Gamepad:RefreshSavedSet(dyeSetIndex)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:RefreshSavedSets()
+function ZO_RestyleStation_Gamepad:RefreshSavedSets()
     for dyeSetIndex = 1, GetNumSavedDyeSets() do
         self:RefreshSavedSet(dyeSetIndex)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:RefreshSavedSetHighlight()
+function ZO_RestyleStation_Gamepad:RefreshSavedSetHighlight()
     if self:ShouldShowSelectedDyeSet() then
         ZO_Dyeing_Gamepad_SavedSet_Highlight(self.savedPresetsControl, self.savedSets[self.dyeingPanel:GetSelectedSavedSetIndex()])
     else
@@ -1095,13 +1141,13 @@ function ZO_Restyle_Station_Gamepad:RefreshSavedSetHighlight()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:GetSelectedSavedSetIndex()
+function ZO_RestyleStation_Gamepad:GetSelectedSavedSetIndex()
     local INCLUDE_SAVED_FOCUS = true
     local selectedSavedSet = self.savedSetFocus:GetFocusItem(INCLUDE_SAVED_FOCUS)
     return selectedSavedSet and selectedSavedSet.control.savedSetIndex
 end
 
-function ZO_Restyle_Station_Gamepad:SwitchToAction(action)
+function ZO_RestyleStation_Gamepad:SwitchToAction(action)
     if self.actionMode ~= action then
         local previousActionPanel = self:GetActionPanel(self.actionMode)
         if self.actionMode ~= ACTION_NONE then
@@ -1145,7 +1191,7 @@ function ZO_Restyle_Station_Gamepad:SwitchToAction(action)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:GetActionPanel(action)
+function ZO_RestyleStation_Gamepad:GetActionPanel(action)
     if action == ACTION_STYLES then
         return self.outfitsPanel
     elseif action == ACTION_DYES then
@@ -1153,7 +1199,7 @@ function ZO_Restyle_Station_Gamepad:GetActionPanel(action)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:GetActionFragmentGroup(action)
+function ZO_RestyleStation_Gamepad:GetActionFragmentGroup(action)
     if action == ACTION_STYLES then
         return self.outfitsPanelFragmentGroup
     elseif action == ACTION_DYES then
@@ -1161,7 +1207,7 @@ function ZO_Restyle_Station_Gamepad:GetActionFragmentGroup(action)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:HandleSelectAction()
+function ZO_RestyleStation_Gamepad:HandleSelectAction()
     if self.actionMode == ACTION_DYES then
         local selectedControl = self.outfitSlotList:GetSelectedControl()
         local dyeChannelIndex
@@ -1192,7 +1238,7 @@ do
         return zo_floor((index - 1) / 3) + 1
     end
 
-    function ZO_Restyle_Station_Gamepad:HandleSelectSavedSetAction()
+    function ZO_RestyleStation_Gamepad:HandleSelectSavedSetAction()
         if self:ShouldShowSelectedDyeSet() then
             self.dyeingPanel:SetSelectedSavedSetIndex(self.savedSetFocus:GetFocus(true))
             self:RefreshSavedSetHighlight()
@@ -1206,7 +1252,7 @@ do
         end
     end
 
-    function ZO_Restyle_Station_Gamepad:HandleUseSetAction()
+    function ZO_RestyleStation_Gamepad:HandleUseSetAction()
         local savedSetChannelIndex = self.activeSavedSetsFocus:GetFocus(true)
         local trueSetIndex = GetTrueSetIndex(savedSetChannelIndex)
 
@@ -1216,7 +1262,7 @@ do
     end
 end
 
-function ZO_Restyle_Station_Gamepad:OnSlotChanged(oldData, selectedData)
+function ZO_RestyleStation_Gamepad:OnSlotChanged(oldData, selectedData)
     if self.actionMode == ACTION_STYLES then
         self:UpdateOutfitsPanel()
     elseif self.actionMode == ACTION_DYES then
@@ -1250,7 +1296,7 @@ function ZO_Restyle_Station_Gamepad:OnSlotChanged(oldData, selectedData)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:OnListAreaDeactivate()
+function ZO_RestyleStation_Gamepad:OnListAreaDeactivate()
     if self.actionMode == ACTION_STYLES then
         self:UpdateOutfitsPanel()
     elseif self.actionMode == ACTION_DYES then
@@ -1262,7 +1308,7 @@ function ZO_Restyle_Station_Gamepad:OnListAreaDeactivate()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:OnListAreaActivate()
+function ZO_RestyleStation_Gamepad:OnListAreaActivate()
     if self.actionMode == ACTION_STYLES then
         self:UpdateOutfitsPanel()
     elseif self.actionMode == ACTION_DYES then
@@ -1274,13 +1320,13 @@ function ZO_Restyle_Station_Gamepad:OnListAreaActivate()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:OnFocusChanged()
+function ZO_RestyleStation_Gamepad:OnFocusChanged()
     self:UpdateCurrentActionFragmentGroup()
 end
 
-function ZO_Restyle_Station_Gamepad:OnPanelSelectionEnd(helperPanel)
+function ZO_RestyleStation_Gamepad:OnPanelSelectionEnd(helperPanel)
     if self.actionMode == ACTION_DYES then
-        if RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COLLECTIBLE then
+        if RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COLLECTIBLE and RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COMPANION_COLLECTIBLE then
             self.header.tabBar:MovePrevious()
         else
             SCENE_MANAGER:HideCurrentScene()
@@ -1291,7 +1337,7 @@ function ZO_Restyle_Station_Gamepad:OnPanelSelectionEnd(helperPanel)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:OnDyeToolSelected()
+function ZO_RestyleStation_Gamepad:OnDyeToolSelected()
     local activeTool = self.dyeingPanel:GetActiveDyeTool()
     self:GetMainList():RefreshVisible()
     if not activeTool:HasSwatchSelection() then
@@ -1301,25 +1347,27 @@ function ZO_Restyle_Station_Gamepad:OnDyeToolSelected()
     self:RefreshSavedSetHighlight()
 end
 
-function ZO_Restyle_Station_Gamepad:OnPendingDyesChanged(restyleSlotData)
-    if restyleSlotData then
-        local slotManipulator = ZO_OUTFIT_MANAGER:GetOutfitSlotManipulatorFromRestyleSlotData(restyleSlotData)
-        slotManipulator:UpdatePreview()
-    else
+function ZO_RestyleStation_Gamepad:OnPendingDyesChanged(restyleSlotData)
+    if not restyleSlotData then
         if self.currentOutfitManipulator then
             self.currentOutfitManipulator:UpdatePreviews()
+        else
+            ApplyChangesToPreviewCollectionShown()
         end
+    elseif restyleSlotData:IsOutfitSlot() then
+        local slotManipulator = ZO_OUTFIT_MANAGER:GetOutfitSlotManipulatorFromRestyleSlotData(restyleSlotData)
+        slotManipulator:UpdatePreview()
     end
     self:GetMainList():RefreshVisible()
     self:UpdateActiveFocusKeybinds()
 end
 
-function ZO_Restyle_Station_Gamepad:OnDyeSelected()
+function ZO_RestyleStation_Gamepad:OnDyeSelected()
     self:DeactivateCurrentSelection()
     self:UpdateActiveFocusKeybinds()
 end
 
-function ZO_Restyle_Station_Gamepad:OnSavedSetSlotChanged(dyeSetIndex)
+function ZO_RestyleStation_Gamepad:OnSavedSetSlotChanged(dyeSetIndex)
     if dyeSetIndex then
         self:RefreshSavedSet(dyeSetIndex)
     else
@@ -1327,7 +1375,7 @@ function ZO_Restyle_Station_Gamepad:OnSavedSetSlotChanged(dyeSetIndex)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:ActivateRelevantDyeFoci()
+function ZO_RestyleStation_Gamepad:ActivateRelevantDyeFoci()
     if self:ShouldShowAllDyeFoci() then
         self.dyeAllFocus:Activate()
     elseif not self:ShouldShowSelectedDyeSet() then
@@ -1339,7 +1387,7 @@ function ZO_Restyle_Station_Gamepad:ActivateRelevantDyeFoci()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:DeactivateRelevantDyeFoci()
+function ZO_RestyleStation_Gamepad:DeactivateRelevantDyeFoci()
     if self:ShouldShowAllDyeFoci() then
         self.dyeAllFocus:Deactivate()
     elseif not self:ShouldShowSelectedDyeSet() then
@@ -1348,17 +1396,17 @@ function ZO_Restyle_Station_Gamepad:DeactivateRelevantDyeFoci()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:ShouldShowAllDyeFoci()
+function ZO_RestyleStation_Gamepad:ShouldShowAllDyeFoci()
     local activeTool = self.dyeingPanel:GetActiveDyeTool()
     return activeTool:GetCursorType() == MOUSE_CURSOR_FILL and self.actionMode == ACTION_DYES
 end
 
-function ZO_Restyle_Station_Gamepad:ShouldShowSelectedDyeSet()
+function ZO_RestyleStation_Gamepad:ShouldShowSelectedDyeSet()
     local activeTool = self.dyeingPanel:GetActiveDyeTool()
     return activeTool:GetCursorType() == MOUSE_CURSOR_FILL_MULTIPLE and self.actionMode == ACTION_DYES
 end
 
-function ZO_Restyle_Station_Gamepad:CanApplySelectedDyeSet()
+function ZO_RestyleStation_Gamepad:CanApplySelectedDyeSet()
     if not self:ShouldShowSelectedDyeSet() then
         return false
     end
@@ -1369,7 +1417,7 @@ function ZO_Restyle_Station_Gamepad:CanApplySelectedDyeSet()
     return isPrimaryChannelDyeable or isSecondaryChannelDyeable or isAccentChannelDyeable
 end
 
-function ZO_Restyle_Station_Gamepad:HighlightAllFociByChannel(dyeChannel)
+function ZO_RestyleStation_Gamepad:HighlightAllFociByChannel(dyeChannel)
     for control, visible in pairs(self.outfitSlotList:GetAllVisibleControls()) do
         local data = self.outfitSlotList:GetDataForDataIndex(control.dataIndex)
         if data.restyleSlotData:IsDataDyeable() then
@@ -1378,13 +1426,13 @@ function ZO_Restyle_Station_Gamepad:HighlightAllFociByChannel(dyeChannel)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:ResetHighlightAllFoci()
+function ZO_RestyleStation_Gamepad:ResetHighlightAllFoci()
     for control, visible in pairs(self.outfitSlotList:GetAllVisibleControls()) do
         ZO_Dyeing_Gamepad_OutfitSwatchSlot_Reset_Highlight(control)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:OnCurrencyChanged(currencyType, currencyLocation, newAmount, oldAmount, reason)
+function ZO_RestyleStation_Gamepad:OnCurrencyChanged(currencyType, currencyLocation, newAmount, oldAmount, reason)
     if currencyType == CURT_STYLE_STONES or currencyType == CURT_MONEY then
         if SCENE_MANAGER:IsShowing(self.scene.name) then
             self:RefreshFooter()
@@ -1394,21 +1442,26 @@ function ZO_Restyle_Station_Gamepad:OnCurrencyChanged(currencyType, currencyLoca
     end
 end
 
-function ZO_Restyle_Station_Gamepad:SetOutfitManipulator(newManipulator)
+function ZO_RestyleStation_Gamepad:SetOutfitManipulator(newManipulator, actorCategory)
     if self.currentOutfitManipulator ~= newManipulator then
         self.currentOutfitManipulator = newManipulator
 
         if newManipulator then
-            RESTYLE_GAMEPAD:SetMode(RESTYLE_MODE_OUTFIT)
+            local restyleMode = ZO_OUTFIT_MANAGER.GetRestyleModeByActorCategory(actorCategory)
+            RESTYLE_GAMEPAD:SetMode(restyleMode)
         else
-            RESTYLE_GAMEPAD:SetMode(RESTYLE_MODE_EQUIPMENT)
+            if actorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER then
+                RESTYLE_GAMEPAD:SetMode(RESTYLE_MODE_EQUIPMENT)
+            elseif actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+                RESTYLE_GAMEPAD:SetMode(RESTYLE_MODE_COMPANION_EQUIPMENT)
+            end
         end
 
         self:PerformUpdate()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:AttemptExit()
+function ZO_RestyleStation_Gamepad:AttemptExit()
     local currentMode = RESTYLE_GAMEPAD:GetMode()
     local setIndex = ZO_RESTYLE_DEFAULT_SET_INDEX
     if self.currentOutfitManipulator then
@@ -1417,7 +1470,9 @@ function ZO_Restyle_Station_Gamepad:AttemptExit()
 
     if self:DoesCurrentOutfitHaveChanges() then
         local function OnConfirmExit()
-            ZO_OUTFIT_MANAGER:EquipOutfit(self.currentOutfitManipulator:GetOutfitIndex())
+            local restyleMode = RESTYLE_GAMEPAD:GetMode()
+            local actoryCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleMode)
+            ZO_OUTFIT_MANAGER:EquipOutfit(actoryCategory, self.currentOutfitManipulator:GetOutfitIndex())
             self.currentOutfitManipulator:ClearPendingChanges()
             GAMEPAD_RESTYLE_STATION_SCENE:AcceptHideScene()
         end
@@ -1457,17 +1512,19 @@ function ZO_Restyle_Station_Gamepad:AttemptExit()
     GAMEPAD_RESTYLE_STATION_SCENE:AcceptHideScene()
 end
 
-function ZO_Restyle_Station_Gamepad:ExitWithoutSave()
-    if RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COLLECTIBLE then
+function ZO_RestyleStation_Gamepad:ExitWithoutSave()
+    local restyleMode = RESTYLE_GAMEPAD:GetMode()
+    if restyleMode ~= RESTYLE_MODE_COLLECTIBLE and restyleMode ~= RESTYLE_MODE_COMPANION_COLLECTIBLE  then
+        local actoryCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleMode)
         if self.currentOutfitManipulator then
-            ZO_OUTFIT_MANAGER:EquipOutfit(self.currentOutfitManipulator:GetOutfitIndex())
+            ZO_OUTFIT_MANAGER:EquipOutfit(actoryCategory, self.currentOutfitManipulator:GetOutfitIndex())
         else
-            UnequipOutfit()
+            ZO_OUTFIT_MANAGER:UnequipOutfit(actoryCategory)
         end
     end
 end
 
-function ZO_Restyle_Station_Gamepad:ActivateCurrentSelection()
+function ZO_RestyleStation_Gamepad:ActivateCurrentSelection()
     local selectedControl = self.outfitSlotList:GetSelectedControl()
     if selectedControl then
         selectedControl.dyeSelectorFocus:Deactivate()
@@ -1479,7 +1536,7 @@ function ZO_Restyle_Station_Gamepad:ActivateCurrentSelection()
     currentPanel:Activate()
 end
 
-function ZO_Restyle_Station_Gamepad:DeactivateCurrentSelection()
+function ZO_RestyleStation_Gamepad:DeactivateCurrentSelection()
     local currentPanel = self:GetActionPanel(self.actionMode)
     currentPanel:Deactivate()
     ZO_GamepadOnDefaultActivatedChanged(self.savedPresetsControl, true)
@@ -1487,9 +1544,9 @@ function ZO_Restyle_Station_Gamepad:DeactivateCurrentSelection()
     ZO_GamepadGenericHeader_Activate(self.header)
 end
 
-function ZO_Restyle_Station_Gamepad:CommitSelection()
+function ZO_RestyleStation_Gamepad:CommitSelection()
     local currentMode = RESTYLE_GAMEPAD:GetMode()
-    if currentMode == RESTYLE_MODE_OUTFIT then
+    if currentMode == RESTYLE_MODE_OUTFIT or currentMode == RESTYLE_MODE_COMPANION_OUTFIT then
         local slotCosts = self.currentOutfitManipulator:GetTotalSlotCostsForPendingChanges()
         if slotCosts > 0 then
             ZO_Dialogs_ShowGamepadDialog("GAMEPAD_RESTYLE_STATION_CONFIRM_APPLY", { outfitManipulator = self.currentOutfitManipulator })
@@ -1505,43 +1562,43 @@ function ZO_Restyle_Station_Gamepad:CommitSelection()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:CompleteDyeChanges()
-    ApplyPendingDyes()
+function ZO_RestyleStation_Gamepad:CompleteDyeChanges()
+    ApplyPendingDyes(RESTYLE_GAMEPAD:GetMode())
     InitializePendingDyes()
     self:OnPendingDyesChanged()
 end
 
-function ZO_Restyle_Station_Gamepad:DoesHaveChanges()
+function ZO_RestyleStation_Gamepad:DoesHaveChanges()
     local currentMode = RESTYLE_GAMEPAD:GetMode()
-    if currentMode == RESTYLE_MODE_OUTFIT then
+    if currentMode == RESTYLE_MODE_OUTFIT or currentMode == RESTYLE_MODE_COMPANION_OUTFIT then
         return self:DoesCurrentOutfitHaveChanges()
     else
         return ZO_Dyeing_AreTherePendingDyes(RESTYLE_GAMEPAD:GetMode(), ZO_RESTYLE_DEFAULT_SET_INDEX)
     end
 end
 
-function ZO_Restyle_Station_Gamepad:CanApplyChanges()
+function ZO_RestyleStation_Gamepad:CanApplyChanges()
     local currentMode = RESTYLE_GAMEPAD:GetMode()
-    if currentMode == RESTYLE_MODE_OUTFIT then
+    if currentMode == RESTYLE_MODE_OUTFIT or currentMode == RESTYLE_MODE_COMPANION_OUTFIT then
         return self:CanCurrentOutfitApplyChanges()
     else
         return true
     end
 end
 
-function ZO_Restyle_Station_Gamepad:DoesCurrentOutfitHaveChanges()
+function ZO_RestyleStation_Gamepad:DoesCurrentOutfitHaveChanges()
     return self.currentOutfitManipulator and self.currentOutfitManipulator:IsAnyChangePending()
 end
 
-function ZO_Restyle_Station_Gamepad:CanCurrentOutfitApplyChanges()
+function ZO_RestyleStation_Gamepad:CanCurrentOutfitApplyChanges()
     return self.currentOutfitManipulator and self.currentOutfitManipulator:CanApplyChanges()
 end
 
-function ZO_Restyle_Station_Gamepad:ShowUndoPendingChangesDialog()
+function ZO_RestyleStation_Gamepad:ShowUndoPendingChangesDialog()
     ZO_Dialogs_ShowGamepadDialog("CONFIRM_REVERT_OUTFIT_CHANGES", { confirmCallback = function() self:UndoPendingChanges() end})
 end
 
-function ZO_Restyle_Station_Gamepad:UndoPendingChanges()
+function ZO_RestyleStation_Gamepad:UndoPendingChanges()
     InitializePendingDyes()
     if self.currentOutfitManipulator then
         self.currentOutfitManipulator:ClearPendingChanges()
@@ -1556,7 +1613,7 @@ function ZO_Restyle_Station_Gamepad:UndoPendingChanges()
     self:OnPendingDyesChanged()
 end
 
-function ZO_Restyle_Station_Gamepad:RandomizeSelection()
+function ZO_RestyleStation_Gamepad:RandomizeSelection()
     if self.actionMode == ACTION_STYLES then
         if self.currentOutfitManipulator then
             self.currentOutfitManipulator:RandomizeStyleData()
@@ -1572,7 +1629,7 @@ function ZO_Restyle_Station_Gamepad:RandomizeSelection()
     end
 end
 
-function ZO_Restyle_Station_Gamepad:ShowOutfitSelection()
+function ZO_RestyleStation_Gamepad:ShowOutfitSelection()
     if self:DoesCurrentOutfitHaveChanges() then
         ZO_Dialogs_ShowGamepadDialog("CONFIRM_REVERT_OUTFIT_ON_CHANGE", { confirmCallback = function() self.currentOutfitManipulator:ClearPendingChanges() SCENE_MANAGER:Push("gamepad_outfits_selection") end})
     else
@@ -1581,7 +1638,7 @@ function ZO_Restyle_Station_Gamepad:ShowOutfitSelection()
 end
 
 -- Confimation Dialog --
-function ZO_Restyle_Station_Gamepad:InitializeConfirmationDialog()
+function ZO_RestyleStation_Gamepad:InitializeConfirmationDialog()
     local IS_SINGULAR = true
     local IS_UPPER = true
     local NORMAL_FONT_SELECTED = "ZoFontGamepad42"
@@ -1672,7 +1729,7 @@ function ZO_Restyle_Station_Gamepad:InitializeConfirmationDialog()
                                                         end
                                                     end,
         blockDialogReleaseOnPress = true,
-        buttons = 
+        buttons =
         {
             {
                 onShowCooldown = 2000,
@@ -1717,18 +1774,18 @@ end
 
 -- XML Functions --
 
-function ZO_Restyle_Station_OnInitialize(control)
-    ZO_RESTYLE_STATION_GAMEPAD = ZO_Restyle_Station_Gamepad:New(control)
+function ZO_RestyleStation_OnInitialize(control)
+    ZO_RESTYLE_STATION_GAMEPAD = ZO_RestyleStation_Gamepad:New(control)
     SYSTEMS:RegisterGamepadObject("restyle_station", ZO_RESTYLE_STATION_GAMEPAD)
 end
 
 function ZO_RestyleSlot_EntryTemplate_Gamepad_OnInitialize(control)
     ZO_SharedGamepadEntry_OnInitialized(control)
     -- Height of these controls needs to account for the dye slots underneath the text
-    control.GetHeight = function(control)
-        local height = control.label:GetTextHeight()
-        if not control.slotDyes:IsHidden() then
-            height = height + control.slotDyes:GetHeight()
+    control.GetHeight = function(heightControl)
+        local height = heightControl.label:GetTextHeight()
+        if not heightControl.slotDyes:IsHidden() then
+            height = height + heightControl.slotDyes:GetHeight()
         end
 
         return height
@@ -1749,15 +1806,15 @@ function ZO_RestyleSlot_EntryTemplate_Gamepad_OnInitialize(control)
         control.dyeSelectorFocus:AddEntry(entry)
     end
 
-    control.Activate = function(control, ...)
-                control.dyeSelectorFocus:SetFocusByIndex(1)
-                control.dyeSelectorFocus:Activate(...)
-            end
+    control.Activate = function(activateControl, ...)
+        activateControl.dyeSelectorFocus:SetFocusByIndex(1)
+        activateControl.dyeSelectorFocus:Activate(...)
+    end
 
-    control.Deactivate = function(control, ...)
-                control.dyeSelectorFocus:Deactivate(...)
-            end
-    
+    control.Deactivate = function(deactivateControl, ...)
+        deactivateControl.dyeSelectorFocus:Deactivate(...)
+    end
+
     local function OnSelectionChanged(entry)
         if entry then
             ZO_Dyeing_Gamepad_OutfitSwatchSlot_Highlight_Only(control, entry.dyeChannel)

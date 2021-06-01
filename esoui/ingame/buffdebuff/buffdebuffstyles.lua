@@ -1,6 +1,6 @@
 ZO_BUFF_DEBUFF_LONG_EFFECT_DURATION_SECONDS = 60
 
-local BLINK_THRESHOLD_S = 2
+ZO_EFFECT_EXPIRATION_IMMINENCE_THRESHOLD_S = 2
 
 local function GetBuffBorderTexture()
     return IsInGamepadPreferredMode() and "EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame_buff.dds" or "EsoUI/Art/ActionBar/abilityFrame_buff.dds"
@@ -149,7 +149,7 @@ local function UpdateDuration(buffDebuffControl, currentTime)
     durationLabel:SetHidden(not showDuration)
     if showDuration then
         local timeRemainingS = data.timeEnding - currentTime
-        if buffDebuffControl.blinkAnimation and timeRemainingS <= BLINK_THRESHOLD_S then
+        if buffDebuffControl.blinkAnimation and timeRemainingS <= ZO_EFFECT_EXPIRATION_IMMINENCE_THRESHOLD_S then
             if not buffDebuffControl.blinkAnimation:IsPlaying() then
                 buffDebuffControl.blinkAnimation:PlayFromStart()
             end
@@ -163,14 +163,9 @@ local function UpdateDuration(buffDebuffControl, currentTime)
             end
         end
 
-        local timeLeftString
-        if timeRemainingS >= ZO_ONE_MINUTE_IN_SECONDS then
-            timeLeftString = ZO_FormatTime(timeRemainingS, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
-        elseif timeRemainingS <= 0 then
-            timeLeftString = 0
-        else
-            timeLeftString = zo_decimalsplit(timeRemainingS)
-        end
+        local SHOW_UNIT_OVER_THRESHOLD_S = ZO_ONE_MINUTE_IN_SECONDS
+        local SHOW_DECIMAL_UNDER_THRESHOLD_S = 0
+        local timeLeftString = ZO_FormatTimeShowUnitOverThresholdShowDecimalUnderThreshold(timeRemainingS, SHOW_UNIT_OVER_THRESHOLD_S, SHOW_DECIMAL_UNDER_THRESHOLD_S, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT)
 
         durationLabel:SetText(timeLeftString)
     end

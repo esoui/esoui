@@ -190,10 +190,10 @@ end
 
 function ZO_SharedInteraction:CloseChatterAndDismissAssistant()
     self:CloseChatter()
-    local activeAssistantId = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT)
+    local activeAssistantId = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     if activeAssistantId ~= 0 then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(activeAssistantId)
-        collectibleData:Use()
+        collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     end
 end
 
@@ -409,9 +409,9 @@ function ZO_SharedInteraction:PopulateChatterOptions(optionCount, backToTOCOptio
     if(farewell == "") then farewell = GetString(SI_GOODBYE) end
     optionCount = optionCount + 1
     self:PopulateChatterOption(optionCount, function() self:CloseChatter() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
-    
+
     if IsInteractingWithMyAssistant() then
-        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT))
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT, GAMEPLAY_ACTOR_CATEGORY_PLAYER))
         farewell = zo_strformat(SI_INTERACT_OPTION_DISMISS_ASSISTANT, collectibleData:GetName())
         optionCount = optionCount + 1
         self:PopulateChatterOption(optionCount, function() self:CloseChatterAndDismissAssistant() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
@@ -595,7 +595,7 @@ end
 function ZO_SharedInteraction:TryGetMaxCurrencyWarningText(rewardType, rewardAmount)
     local currencyType = currencyRewardToCurrencyType[rewardType]
     if currencyType and (GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) + rewardAmount >= MAX_PLAYER_CURRENCY) then
-        return zo_strformat(SI_QUEST_REWARD_MAX_CURRENCY_ERROR, GetString("SI_CURRENCYTYPE", currencyType))
+        return zo_strformat(SI_QUEST_REWARD_MAX_CURRENCY_ERROR, GetCurrencyName(currencyType))
     end        
 end
 

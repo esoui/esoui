@@ -77,22 +77,21 @@ function ZO_BankingCommon_Gamepad:Initialize(control, bankScene)
     self:InitializeFiltersDialog()
 end
 
+local SORT_OPTIONS =
+{
+    bestGamepadItemCategoryName = { tiebreaker = "name" },
+    displayQuality = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+    stackCount = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+    sellPrice = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+    name = { tiebreaker = "requiredLevel" },
+    requiredLevel = { tiebreaker = "requiredChampionPoints", isNumeric = true },
+    requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
+    iconFile = { tiebreaker = "uniqueId" },
+    uniqueId = { isId64 = true },
+}
+
 function ZO_BankingCommon_Gamepad:GetCurrentSortParams()
-    local sortKey = BANK_SEARCH_SORT_PRIMARY_KEY[self.withdrawList.currentSortType]
-    local sortOptions =
-    {
-        bestGamepadItemCategoryName = { tiebreaker = "name" },
-        displayQuality = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
-        stackCount = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
-        sellPrice = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
-        name = { tiebreaker = "requiredLevel" },
-        requiredLevel = { tiebreaker = "requiredChampionPoints", isNumeric = true },
-        requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
-        iconFile = { tiebreaker = "uniqueId" },
-        uniqueId = { isId64 = true },
-    }
-    local sortOrder = self.withdrawList.currentSortOrder
-    return sortKey, sortOptions, sortOrder
+    return BANK_SEARCH_SORT_PRIMARY_KEY[self.withdrawList.currentSortType], SORT_OPTIONS, self.withdrawList.currentSortOrder
 end
 
 function ZO_BankingCommon_Gamepad:InitializeFiltersDialog()
@@ -741,8 +740,10 @@ end
 
 function ZO_BankingCommon_Gamepad:LayoutBankingEntryTooltip(inventoryData)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
+    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
     if inventoryData and inventoryData.bagId then
         GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, inventoryData.bagId, inventoryData.slotIndex)
+        ZO_LayoutBagItemEquippedComparison(GAMEPAD_RIGHT_TOOLTIP, inventoryData.bagId, inventoryData.slotIndex)
     end
 end
 

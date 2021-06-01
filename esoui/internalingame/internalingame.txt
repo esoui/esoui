@@ -41,6 +41,8 @@ EsoUI\InternalIngame\Market\Keyboard\Market_Keyboard.lua
 EsoUI\InternalIngame\Market\Keyboard\Market_Keyboard.xml
 EsoUI\InternalIngame\Market\Keyboard\CrownStore_Keyboard.lua
 EsoUI\InternalIngame\Market\Keyboard\CrownStore_Keyboard.xml
+EsoUI\InternalIngame\Market\Keyboard\EndeavorSealStore_Keyboard.lua
+EsoUI\InternalIngame\Market\Keyboard\EndeavorSealStore_Keyboard.xml
 EsoUI\InternalIngame\EsoPlusOffers\Keyboard\EsoPlusOffers.lua
 EsoUI\InternalIngame\EsoPlusOffers\Keyboard\EsoPlusOffers.xml
 

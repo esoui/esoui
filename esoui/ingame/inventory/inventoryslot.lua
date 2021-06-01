@@ -367,14 +367,19 @@ local function IsSendingMail()
 end
 
 local function CanUseSecondaryActionOnSlot(inventorySlot)
-    return inventorySlot
-           and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() 
+    if not inventorySlot then
+        return false
+    end
+
+    local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+    return not QUICKSLOT_WINDOW:AreQuickSlotsShowing()
            and not (TRADING_HOUSE_SEARCH and TRADING_HOUSE_SEARCH:IsAtTradingHouse())
            and not (ZO_Store_IsShopping and ZO_Store_IsShopping())
-           and not IsSendingMail() 
+           and not IsSendingMail()
            and not (TRADE_WINDOW and TRADE_WINDOW:IsTrading())
            and not IsBankOpen()
            and not IsGuildBankOpen()
+           and not (GetItemActorCategory(bag, index) == GAMEPLAY_ACTOR_CATEGORY_COMPANION)
 end
 
 local function CanUseItemQuestItem(inventorySlot)
@@ -980,8 +985,12 @@ end
 local function CanEquipItem(inventorySlot)
     if not IsSlotLocked(inventorySlot) then
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        if bag ~= BAG_WORN then
-            local equipType = select(6, GetItemInfo(bag, index))
+        if bag ~= BAG_WORN and bag ~= BAG_COMPANION_WORN then
+            local itemActorCategory = GetItemActorCategory(bag, index)
+            if itemActorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION and GetInteractionType() ~= INTERACTION_COMPANION_MENU then
+                return false
+            end
+            local equipType = GetItemEquipType(bag, index)
             return equipType ~= EQUIP_TYPE_INVALID
         end
     end
@@ -994,7 +1003,8 @@ local function TryEquipItem(inventorySlot)
         local equipSucceeds, possibleError = IsEquipable(bag, index)
         if equipSucceeds then
             ClearCursor()
-            EquipItem(bag, index)
+            local wornBag = GetItemActorCategory(bag, index) == GAMEPLAY_ACTOR_CATEGORY_PLAYER and BAG_WORN or BAG_COMPANION_WORN
+            RequestEquipItem(bag, index, wornBag)
             return true
         end
 
@@ -1012,7 +1022,7 @@ end
 
 local function CanUnequipItem(inventorySlot)
     local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    if bag == BAG_WORN then
+    if bag == BAG_WORN or bag == BAG_COMPANION_WORN then
         local _, stackCount = GetItemInfo(bag, slot)
         return stackCount > 0
     end
@@ -1020,12 +1030,12 @@ local function CanUnequipItem(inventorySlot)
 end
 
 local function TryUnequipItem(inventorySlot)
-    local equipSlot = ZO_Inventory_GetSlotIndex(inventorySlot)
-    UnequipItem(equipSlot)
+    local bag, equipSlot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+    RequestUnequipItem(bag, equipSlot)
 end
 
 local function TryPickupQuestItem(inventorySlot)
-    if(inventorySlot.questIndex) then
+    if inventorySlot.questIndex then
         if inventorySlot.toolIndex then
             PickupQuestTool(inventorySlot.questIndex, inventorySlot.toolIndex)
         else
@@ -1363,7 +1373,7 @@ local useActions =
                                             if category == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
                                                 textEnum = SI_COLLECTIBLE_ACTION_USE
                                             elseif inventorySlot.active then
-                                                if category == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or category == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET then
+                                                if category == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or category == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET or category == COLLECTIBLE_CATEGORY_TYPE_COMPANION then
                                                     textEnum = SI_COLLECTIBLE_ACTION_DISMISS
                                                 else
                                                     textEnum = SI_COLLECTIBLE_ACTION_PUT_AWAY
@@ -1374,7 +1384,7 @@ local useActions =
 
                                             local useCollectibleCallback = function()
                                                 local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(inventorySlot.collectibleId)
-                                                collectibleData:Use()
+                                                collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                                             end
 
                                             slotActions:AddSlotAction(textEnum, useCollectibleCallback, "primary", nil, {visibleWhenDead = false})
@@ -1704,8 +1714,17 @@ local actionHandlers =
 
     ["gamepad_equip"] = function(inventorySlot, slotActions)
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        if GAMEPAD_INVENTORY_ROOT_SCENE:IsShowing() and IsEquipable(bag, index) and CanEquipItem(inventorySlot) then
-            slotActions:AddSlotAction(SI_ITEM_ACTION_EQUIP, function() GAMEPAD_INVENTORY:TryEquipItem(inventorySlot) end, "primary")
+        local itemActorCategory = GetItemActorCategory(bag, index)
+        local playerSceneShown = itemActorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER and GAMEPAD_INVENTORY_ROOT_SCENE:IsShowing()
+        local companionSceneShown = itemActorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION and COMPANION_EQUIPMENT_GAMEPAD_SCENE:IsShowing()
+        if (playerSceneShown or companionSceneShown) and IsEquipable(bag, index) and CanEquipItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_EQUIP, function()
+                if playerSceneShown then
+                    GAMEPAD_INVENTORY:TryEquipItem(inventorySlot)
+                else
+                    COMPANION_EQUIPMENT_GAMEPAD:TryEquipItem(inventorySlot)
+                end
+            end, "primary")
         end
     end,
 
@@ -1777,7 +1796,8 @@ local actionHandlers =
 
     ["mark_as_junk"] = function(inventorySlot, slotActions)
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        if not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and not IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
+        local actorCategory = GetItemActorCategory(bag, index)
+        if actorCategory ~= GAMEPLAY_ACTOR_CATEGORY_COMPANION and not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and not IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
             slotActions:AddSlotAction(SI_ITEM_ACTION_MARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, true) end, "secondary")
         end
     end,
@@ -1935,10 +1955,15 @@ local actionHandlers =
     end,
 
      ["preview"] = function(inventorySlot, slotActions)
-        local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        local itemActorCategory = GetItemActorCategory(bag, index)
+        -- Companion preview is not yet supported
+         if itemActorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+            return false
+        end
         local itemPreview = SYSTEMS:GetObject("itemPreview")
-        if itemPreview:GetFragment():IsShowing() and not IsInGamepadPreferredMode() and CanInventoryItemBePreviewed(bag, slot) and IsCharacterPreviewingAvailable() then
-            slotActions:AddSlotAction(SI_ITEM_ACTION_PREVIEW, function() TryPreviewItem(bag, slot) end, "keybind1")
+        if itemPreview:GetFragment():IsShowing() and not IsInGamepadPreferredMode() and CanInventoryItemBePreviewed(bag, index) and IsCharacterPreviewingAvailable() then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_PREVIEW, function() TryPreviewItem(bag, index) end, "keybind1")
         end
     end,
 }
@@ -2084,35 +2109,50 @@ local InventoryEnter =
     [SLOT_TYPE_ITEM] =
     {
         function(inventorySlot)
-            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-            ItemTooltip:SetBagItem(bag, index)
-            return true, ItemTooltip
+            local data = ZO_Inventory_GetSlotDataForInventoryControl(inventorySlot)
+            if data then
+                local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                ItemTooltip:SetBagItem(bag, index)
+                return true, ItemTooltip
+            else
+                return false, ItemTooltip
+            end
         end
     },
     [SLOT_TYPE_BANK_ITEM] =
     {
         function(inventorySlot)
-            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-            ItemTooltip:SetBagItem(bag, index)
-            return true, ItemTooltip
+            local data = ZO_Inventory_GetSlotDataForInventoryControl(inventorySlot)
+            if data then
+                local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                ItemTooltip:SetBagItem(bag, index)
+                return true, ItemTooltip
+            else
+                return false, ItemTooltip
+            end
         end
     },
     [SLOT_TYPE_GUILD_BANK_ITEM] =
     {
         function(inventorySlot)
-            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-            ItemTooltip:SetBagItem(bag, index)
-            return true, ItemTooltip
+            local data = ZO_Inventory_GetSlotDataForInventoryControl(inventorySlot)
+            if data then
+                local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                ItemTooltip:SetBagItem(bag, index)
+                return true, ItemTooltip
+            else
+                return false, ItemTooltip
+            end
         end
     },
     [SLOT_TYPE_EQUIPMENT] =
     {
         function(inventorySlot)
-            local _, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-            local _, isEquipped = GetEquippedItemInfo(index)
+            local wornBag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            local isEquipped = GetWornItemInfo(wornBag, index)
 
             if isEquipped then
-                ItemTooltip:SetWornItem(index)
+                ItemTooltip:SetWornItem(index, wornBag)
                 return true, ItemTooltip
             else
                 SetTooltipText(InformationTooltip, zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_EQUIPSLOT", index)))
@@ -2336,11 +2376,11 @@ local InventoryEnter =
     [SLOT_TYPE_DYEABLE_EQUIPMENT] =
     {
         function(inventorySlot)
-            local _, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-            local _, isEquipped = GetEquippedItemInfo(index)
+            local wornBag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            local isEquipped = GetWornItemInfo(wornBag, index)
 
             if isEquipped then
-                ItemTooltip:SetWornItem(index)
+                ItemTooltip:SetWornItem(index, wornBag)
                 return true, ItemTooltip
             else
                 SetTooltipText(InformationTooltip, zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_EQUIPSLOT", index)))
@@ -2600,8 +2640,8 @@ local InventoryDragStart =
     {
         function(inventorySlot)
             if not ZO_Character_IsReadOnly() then
-                local index = ZO_Inventory_GetSlotIndex(inventorySlot)
-                PickupEquippedItem(index)
+                local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                PickupEquippedItem(index, bag)
                 return true
             end
         end

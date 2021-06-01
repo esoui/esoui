@@ -76,7 +76,7 @@ function ZO_HousingFurnitureList_Gamepad:Initialize(owner)
 
         local furnitureObject = data.furnitureObject
 
-        ZO_CurrencyControl_SetSimpleCurrency(control.priceLabel, ZO_Currency_MarketCurrencyToUICurrency(furnitureObject.currencyType), furnitureObject.costAfterDiscount, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL)
+        ZO_CurrencyControl_SetSimpleCurrency(control.priceLabel, GetCurrencyTypeFromMarketCurrencyType(furnitureObject.currencyType), furnitureObject.costAfterDiscount, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL)
         
         local priceWidth = control.priceLabel:GetTextWidth()
         control.label:SetDimensions(ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT - PRICE_LABEL_PADDING_X - priceWidth)

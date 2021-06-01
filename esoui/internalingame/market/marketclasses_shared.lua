@@ -343,7 +343,7 @@ function ZO_MarketProductBase:SetupPricingDisplay()
 
             local INHERIT_ICON_COLOR = true
             local CURRENCY_ICON_SIZE = "100%"
-            local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(self.currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
+            local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(GetCurrencyTypeFromMarketCurrencyType(self.currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
             local currencyString = string.format(priceFormat, zo_strformat(SI_NUMBER_FORMAT, self.costAfterDiscount), currencyIcon)
             control.cost:SetText(currencyString)
         else
@@ -363,7 +363,7 @@ function ZO_MarketProductBase:SetupPricingDisplay()
         if not self:IsFreeForEsoPlus() then
             local INHERIT_ICON_COLOR = true
             local CURRENCY_ICON_SIZE = "100%"
-            local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(self.currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
+            local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(GetCurrencyTypeFromMarketCurrencyType(self.currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
 
             -- the keyboard Crown Gem icon is purple, so we shouldn't try to recolor it with gold colors
             if self.currencyType == MKCT_CROWN_GEMS and not IsInGamepadPreferredMode() then

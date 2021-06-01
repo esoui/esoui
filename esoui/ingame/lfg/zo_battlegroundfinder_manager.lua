@@ -2,20 +2,20 @@ local categoryData =
 {
     keyboardData =
     {
+        priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.BATTLEGROUNDS,
         name = GetString(SI_ACTIVITY_FINDER_CATEGORY_BATTLEGROUNDS),
         normalIcon = "EsoUI/Art/LFG/LFG_indexIcon_battlegrounds_up.dds",
         pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_battlegrounds_down.dds",
         mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_battlegrounds_over.dds",
     },
-
     gamepadData =
     {
+        priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.BATTLEGROUNDS,
         name = GetString(SI_ACTIVITY_FINDER_CATEGORY_BATTLEGROUNDS),
         menuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_battlegrounds.dds",
         sceneName = "gamepadBattlegroundFinder",
         tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_BATTLEGROUNDS),
     },
-    priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.BATTLEGROUNDS
 }
 
 local BattlegroundFinder_Manager = ZO_ActivityFinderTemplate_Manager:Subclass()

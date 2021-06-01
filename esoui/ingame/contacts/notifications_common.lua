@@ -16,6 +16,7 @@ NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA = 15
 NOTIFICATIONS_GUILD_NEW_APPLICATIONS = 16
 NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA = 17
 NOTIFICATIONS_POINTS_RESET_DATA = 18
+NOTIFICATIONS_ACTIVITY_REVIEW_DATA = 19
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
@@ -957,9 +958,13 @@ function ZO_LFGUpdateProvider:New(notificationManager)
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED)
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW)
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_REMOVED)
+    if GetUIPlatform() == UI_PLATFORM_PS5 then
+        provider:RegisterUpdateEvent(EVENT_CONSOLE_ACTIVITY_REVIEW_AVAILABLE)
+        provider:RegisterUpdateEvent(EVENT_CONSOLE_ACTIVITY_REVIEW_CLEARED)
+    end
 
     provider:BuildNotificationList()
-    
+
     return provider
 end
 
@@ -985,6 +990,15 @@ function ZO_LFGUpdateProvider:BuildNotificationList()
             {
                 activityId = activityId,
                 activityName = activityName,
+            }
+        )
+    end
+
+    if GetUIPlatform() == UI_PLATFORM_PS5 and HasReviewableConsoleActivity() then
+        local consoleActivityType = GetReviewableConsoleActivityType()
+        self:AddReviewConsoleActivityNotification(
+            {
+                consoleActivityType = consoleActivityType,
             }
         )
     end
@@ -1025,7 +1039,8 @@ function ZO_LFGUpdateProvider:AddReadyCheckNotification(data)
 end
 
 function ZO_LFGUpdateProvider:AddFindReplacementNotification(data)
-    local newListEntry = {
+    local newListEntry =
+    {
         notificationType = NOTIFICATION_TYPE_LFG,
         dataType = NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA,
         shortDisplayText = data.activityName,
@@ -1041,11 +1056,32 @@ function ZO_LFGUpdateProvider:AddFindReplacementNotification(data)
     table.insert(self.list, newListEntry)
 end
 
+function ZO_LFGUpdateProvider:AddReviewConsoleActivityNotification(data)
+    local shortName = GetString(SI_NOTIFICATIONS_REVIEW_ACTIVITY)
+    local newListEntry =
+    {
+        notificationType = NOTIFICATION_TYPE_LFG,
+        dataType = NOTIFICATIONS_ACTIVITY_REVIEW_DATA,
+        shortDisplayText = shortName,
+        data = data,
+
+        message = zo_strformat(SI_NOTIFICATIONS_REVIEW_ACTIVITY_MESSAGE, GetString("SI_CONSOLEACTIVITYTYPE", data.consoleActivityType)),
+
+        --For sorting
+        displayName = shortName,
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
+    }
+
+    table.insert(self.list, newListEntry)
+end
+
 function ZO_LFGUpdateProvider:Accept(entryData)
     if entryData.dataType == NOTIFICATIONS_LFG_READY_CHECK_DATA then
         AcceptLFGReadyCheckNotification()
     elseif entryData.dataType == NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA then
         AcceptActivityFindReplacementNotification()
+    elseif entryData.dataType == NOTIFICATIONS_ACTIVITY_REVIEW_DATA then
+        RequestReviewConsoleActivity()
     end
 end
 
@@ -1054,6 +1090,8 @@ function ZO_LFGUpdateProvider:Decline(entryData)
         DeclineLFGReadyCheckNotification()
     elseif entryData.dataType == NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA then
         DeclineActivityFindReplacementNotification()
+    elseif entryData.dataType == NOTIFICATIONS_ACTIVITY_REVIEW_DATA then
+        ClearReviewableConsoleActivity()
     end
 end
 
@@ -1592,7 +1630,7 @@ function ZO_MarketProductUnlockedProvider:AddNotification(firstMarketProductId, 
         message = message,
         moreInfo = hasMoreInfo,
 
-        marketProductId = marketProductId,
+        marketProductId = firstMarketProductId,
         helpCategoryIndex = helpCategoryIndex,
         helpIndex = helpIndex,
 
@@ -1614,6 +1652,32 @@ end
 
 function ZO_MarketProductUnlockedProvider:Decline(entryData)
     ClearMarketProductUnlockNotifications()
+end
+
+-- Out of Date Addons Provider
+------------------------------
+
+ZO_OutOfDateAddonsProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_OutOfDateAddonsProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    if GetAddOnManager():ShouldWarnOutOfDateAddOns() then
+        table.insert(self.list,
+        {
+            dataType = NOTIFICATIONS_ALERT_DATA,
+            notificationType = NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS,
+            shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS),
+            message = GetString(SI_NOTIFICATIONS_OUT_OF_DATE_ADDONS_MESSAGE),
+            note = GetString(SI_NOTIFICATIONS_OUT_OF_DATE_ADDONS_NOTE),
+            secsSinceRequest = ZO_NormalizeSecondsSince(0),
+        })
+    end
+end
+
+function ZO_OutOfDateAddonsProvider:Decline(data)
+    GetAddOnManager():ClearWarnOutOfDateAddOns()
+    self.notificationManager:RefreshNotificationList()
 end
 
 -- Sort List

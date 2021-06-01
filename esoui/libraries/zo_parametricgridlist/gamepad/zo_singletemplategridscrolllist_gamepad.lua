@@ -26,7 +26,7 @@ function ZO_SingleTemplateGridScrollList_Gamepad:New(...)
     return ZO_AbstractSingleTemplateGridScrollList.New(self, ...)
 end
 
-function ZO_SingleTemplateGridScrollList_Gamepad:Initialize(control, fillRowWithEmptyCells, selectionTemplate)
-    ZO_AbstractSingleTemplateGridScrollList.Initialize(self, control, fillRowWithEmptyCells)
+function ZO_SingleTemplateGridScrollList_Gamepad:Initialize(control, autofillRows, selectionTemplate)
+    ZO_AbstractSingleTemplateGridScrollList.Initialize(self, control, autofillRows)
     ZO_AbstractGridScrollList_Gamepad.Initialize(self, control, selectionTemplate)
 end

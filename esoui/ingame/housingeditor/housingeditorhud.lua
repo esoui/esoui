@@ -1839,9 +1839,7 @@ do
                             ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
                             if result == HOUSING_REQUEST_RESULT_SUCCESS then
                                 PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
-                                return true
                             end
-                            return false --if not successful return false so you can jump in editor with a gamepad
                         end,
             -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
             enabled = function()

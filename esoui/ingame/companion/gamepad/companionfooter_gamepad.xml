@@ -1,0 +1,75 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GamepadCompanionProgressBarDataLabel" inherits="ZO_GamepadHeaderDataTextTemplate" virtual="true">
+            <OnInitialized>
+                local fonts =
+                {
+                    {
+                        font = "ZoFontGamepad42",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontGamepad36",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontGamepad34",
+                        lineLimit = 1,
+                        dontUseForAdjusting = true,
+                    },
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+            </OnInitialized>
+        </Label>
+        
+        <TopLevelControl name="ZO_CompanionFooter_Gamepad_TopLevel" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
+            <AnchorFill/>
+            <OnInitialized>
+                ZO_CompanionFooter_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)LevelBarContainer">
+                    <Dimensions x="305" y="50" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-98" offsetY="-53"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon">
+                            <Dimensions x="50" y="50" />
+                            <Anchor point="TOPLEFT" />
+                        </Texture>
+
+                        <Label name="$(parent)Level" font="ZoFontGamepad42">
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" />
+                        </Label>
+
+                        <StatusBar name="$(parent)Bar" tier="MEDIUM" inherits="ZO_GamepadStatusBarMedium">
+                            <Dimensions y="22" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Level" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="-6" />
+                            <Anchor point="RIGHT" constrains="X"/>
+                            <Controls>
+                                <Control name="$(parent)BG" inherits="ZO_GamepadArrowStatusBarBGMedium" tier="LOW"/>
+                                <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium" />
+                            </Controls>
+                        </StatusBar>
+
+                        <Label name="$(parent)LevelType" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:ZO_NORMAL_TEXT" modifyTextType="UPPERCASE" text="SI_COMPANION_LEVEL_LABEL">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT" offsetX="1" offsetY="7"/>
+                        </Label>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)CompanionName" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)LevelBarContainer" relativePoint="BOTTOMLEFT" offsetX="0"/>
+                    <Controls>
+                        <Label name="$(parent)Value" inherits="ZO_GamepadCompanionProgressBarDataLabel">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-12" />
+                            <DimensionConstraints maxX="300" />
+                        </Label>
+
+                        <Label name="$(parent)Header" text="SI_GAMEPAD_COMPANION_FOOTER_NAME_LABEL" inherits="ZO_GamepadHeaderLabelTextTemplate">
+                            <AnchorToBaseline relativeToLabel="$(parent)Value" side="LEFT" offsetX="-10"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

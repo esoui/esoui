@@ -31,6 +31,16 @@ function ZO_ChampionSkillData:GetAbilityId()
 end
 
 function ZO_ChampionSkillData:GetPosition()
+    if self:IsClusterRoot() then
+        local positionX, positionY = GetChampionSkillPosition(self.championSkillId)
+        local offsetX, offsetY = GetChampionClusterRootOffset(self.championSkillId)
+        return positionX + offsetX, positionY + offsetY
+    else
+        return GetChampionSkillPosition(self.championSkillId)
+    end
+end
+
+function ZO_ChampionSkillData:GetPositionNoClusterOffset()
     return GetChampionSkillPosition(self.championSkillId)
 end
 
@@ -376,16 +386,16 @@ function ZO_ChampionDisciplineData:GetFormattedName()
     return ZO_CachedStrFormat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, self:GetRawName())
 end
 
-function ZO_ChampionDisciplineData:GetBackgroundTexture()
-    return GetChampionDisciplineBackgroundTexture(self.disciplineId)
+function ZO_ChampionDisciplineData:GetBackgroundZoomedOutTexture()
+    return GetChampionDisciplineZoomedOutBackground(self.disciplineId)
 end
 
-function ZO_ChampionDisciplineData:GetBackgroundGlowTexture()
-    return GetChampionDisciplineBackgroundGlowTexture(self.disciplineId)
+function ZO_ChampionDisciplineData:GetBackgroundZoomedInTexture()
+    return GetChampionDisciplineZoomedInBackground(self.disciplineId)
 end
 
-function ZO_ChampionDisciplineData:GetBackgroundSelectedTexture()
-    return GetChampionDisciplineBackgroundSelectedTexture(self.disciplineId)
+function ZO_ChampionDisciplineData:GetBackgroundSelectedZoomedOutTexture()
+    return GetChampionDisciplineSelectedZoomedOutOverlay(self.disciplineId)
 end
 
 function ZO_ChampionDisciplineData:GetType()

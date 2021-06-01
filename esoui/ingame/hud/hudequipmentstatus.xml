@@ -10,8 +10,7 @@
         </Texture>
         
         <Control name="ZO_HUDEquipmentStatus_Keyboard_Template" virtual="true">
-            <Anchor point="BOTTOM" offsetX="-310" offsetY="-16"/>
-            <Dimensions x="80" y="40"/>
+            <Dimensions y="40"/>
             <Controls>
                 <Texture name="$(parent)WeaponIndicator" textureFile="EsoUI/Art/HUD/broken_weapon.dds">
                     <Dimensions x="40" y="40"/>
@@ -23,8 +22,7 @@
         </Control>
         
         <Control name="ZO_HUDEquipmentStatus_Gamepad_Template" virtual="true">
-            <Anchor point="BOTTOM" offsetX="-380" offsetY="-22"/>
-            <Dimensions x="96" y="48"/>
+            <Dimensions y="48"/>
             <Controls>
                 <Texture name="$(parent)WeaponIndicator" textureFile="EsoUI/Art/HUD/Gamepad/gp_broken_weapon.dds">
                     <Dimensions x="48" y="48"/>
@@ -44,7 +42,7 @@
                     <Anchor point="TOPLEFT" />
                 </Texture>
                 <Texture name="$(parent)ArmorIndicator" inherits="ZO_HUDEquipmentStatus_Indicator">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)WeaponIndicator" relativePoint="TOPRIGHT" />
+                    <Anchor point="TOPRIGHT" />
                 </Texture>
             </Controls>
         </TopLevelControl>

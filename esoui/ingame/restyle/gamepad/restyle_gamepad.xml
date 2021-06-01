@@ -182,9 +182,10 @@
             </Controls>
         </TopLevelControl>
 
-        <TopLevelControl name="ZO_RestyleStation_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+        <!-- Using the name fragment TopLevel will cause a child control name to exceed the character limit so abbreviated to TL -->
+        <TopLevelControl name="ZO_RestyleStation_Gamepad_TL" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
             <OnInitialized>
-                ZO_Restyle_Station_OnInitialize(self)
+                ZO_RestyleStation_OnInitialize(self)
             </OnInitialized>
 
             <Controls>
@@ -210,10 +211,6 @@
                                             </Controls>
                                         </Control>
                                     </Controls>
-                                </Control>
-
-                                <Control name="$(parent)RootList" inherits="ZO_VerticalParametricScrollListTemplate">
-                                    <AnchorFill/>
                                 </Control>
                             </Controls>
                         </Control>

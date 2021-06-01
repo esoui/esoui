@@ -226,6 +226,8 @@ function ZO_GamepadStats:Initialize(control)
             if GetAttributeUnspentPoints() > 0 then
                 TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED_AND_ATTRIBUTE_POINTS_UNSPENT)
             end
+
+            ZO_OUTFITS_SELECTOR_GAMEPAD:SetCurrentActorCategory(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
         elseif newState == SCENE_HIDDEN then
             self:DeactivateMainList()
 
@@ -690,9 +692,9 @@ end
 function ZO_GamepadStats:RefreshHeader()
     self.headerData.data1Text = tostring(self:GetAvailablePoints())
 
-    local currentlyEquippedOutfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentOutfitIndex()
+    local currentActorCategory, currentlyEquippedOutfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentActorCategoryAndIndex()
     if currentlyEquippedOutfitIndex then
-        local currentOutfit = ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentlyEquippedOutfitIndex)
+        local currentOutfit = ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentActorCategory, currentlyEquippedOutfitIndex)
         self.outfitSelectorNameLabel:SetText(currentOutfit:GetOutfitName())
     else
         self.outfitSelectorNameLabel:SetText(GetString(SI_NO_OUTFIT_EQUIP_ENTRY))

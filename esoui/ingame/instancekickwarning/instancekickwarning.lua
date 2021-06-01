@@ -98,16 +98,20 @@ local g_showingCount = 1
 function ZO_InstanceKickWarning:SetHidden(hidden)
     if hidden ~= self.control:IsHidden() then
         self.control:SetHidden(hidden)
-        if hidden then
-            g_showingCount = g_showingCount - 1
-            if g_showingCount == 0 then
-                RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_INSTANCE_KICK_WARNING))
-            end
-        else
+
+        local showKeybind = not hidden and CanExitInstanceImmediately()
+        if showKeybind then
+            self.keybindButton:SetHidden(false)
             if g_showingCount == 0 then
                 PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_INSTANCE_KICK_WARNING))
             end
             g_showingCount = g_showingCount + 1
+        else
+            self.keybindButton:SetHidden(true)
+            g_showingCount = g_showingCount - 1
+            if g_showingCount == 0 then
+                RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_INSTANCE_KICK_WARNING))
+            end
         end
     end
 end

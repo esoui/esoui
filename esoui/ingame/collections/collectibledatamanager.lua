@@ -14,20 +14,80 @@ ZO_COLLECTION_UPDATE_TYPE =
     BLACKLIST_CHANGED = 4,
 }
 
+----------------------------------
+-- Set Default Collectible Data --
+----------------------------------
+
+ZO_SetDefaultCollectibleData = ZO_InitializingObject:Subclass()
+
+function ZO_SetDefaultCollectibleData:Initialize(categoryTypeToSetDefault)
+    self.categoryTypeToSetDefault = categoryTypeToSetDefault
+end
+
+function ZO_SetDefaultCollectibleData.IsSetDefaultData()
+    return true
+end
+
+function ZO_SetDefaultCollectibleData:GetCategoryTypeToSetDefault()
+    return self.categoryTypeToSetDefault
+end
+
+function ZO_SetDefaultCollectibleData:GetName()
+    return ZO_CachedStrFormat(SI_SET_DEFAULT_COLLECTIBLE_NAME_FORMAT, GetString("SI_COLLECTIBLECATEGORYTYPE", self:GetCategoryTypeToSetDefault()))
+end
+
+do
+    local DESCRIPTION_FORMATTERS =
+    {
+        [GAMEPLAY_ACTOR_CATEGORY_COMPANION] = SI_COMPANION_SET_DEFAULT_COLLECTIBLE_DESCRIPTION_FORMAT,
+    }
+
+    function ZO_SetDefaultCollectibleData:GetDescription(actorCategory)
+        local descriptionFormatter = DESCRIPTION_FORMATTERS[actorCategory]
+        if descriptionFormatter then
+            return ZO_CachedStrFormat(descriptionFormatter, GetString("SI_COLLECTIBLECATEGORYTYPE", self:GetCategoryTypeToSetDefault()))
+        end
+        return nil
+    end
+end
+
+do
+    local COLLECTIBLE_CATEGORY_TYPE_DEFAULT_ICONS =
+    {
+        [COLLECTIBLE_CATEGORY_TYPE_MOUNT] = "EsoUI/Art/Collections/Default/collections_default_mount.dds",
+    }
+
+    function ZO_SetDefaultCollectibleData:GetIcon()
+        return COLLECTIBLE_CATEGORY_TYPE_DEFAULT_ICONS[self.categoryTypeToSetDefault]
+    end
+end
+
+function ZO_SetDefaultCollectibleData:IsActive(actorCategory)
+    return IsCollectibleCategoryTypeSetToDefault(self.categoryTypeToSetDefault, actorCategory)
+end
+
+function ZO_SetDefaultCollectibleData:Use(actorCategory)
+    SetCollectibleCategoryTypeToDefault(self.categoryTypeToSetDefault, actorCategory)
+end
+
+function ZO_SetDefaultCollectibleData:GetPrimaryInteractionStringId(actorCategory)
+    -- Function signature mirrors the one on ZO_CollectibleData,
+    -- but right now there's no support for anything other than Set Active variants
+    return SI_COLLECTIBLE_ACTION_SET_ACTIVE
+end
+
 ----------------------
 -- Collectible Data --
 ----------------------
 
-ZO_CollectibleData = ZO_Object:Subclass()
-
-function ZO_CollectibleData:New(...)
-    local object = ZO_Object:New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_CollectibleData = ZO_InitializingObject:Subclass()
 
 function ZO_CollectibleData:Initialize()
-    -- Nothing to initialize, for now
+    self.isActiveByActorCategory = {}
+end
+
+function ZO_CollectibleData.IsSetDefaultData()
+    return false
 end
 
 function ZO_CollectibleData:Reset()
@@ -123,7 +183,9 @@ end
 function ZO_CollectibleData:Refresh()
     local collectibleId = self.collectibleId
     local previousUnlockState = self.unlockState
-    self.isActive = IsCollectibleActive(collectibleId)
+    for actorCategory = GAMEPLAY_ACTOR_CATEGORY_ITERATION_BEGIN, GAMEPLAY_ACTOR_CATEGORY_ITERATION_END do
+        self.isActiveByActorCategory[actorCategory] = IsCollectibleActive(collectibleId, actorCategory)
+    end
     self.nickname = GetCollectibleNickname(collectibleId)
     self.unlockState = GetCollectibleUnlockStateById(collectibleId)
     self:SetNew(IsCollectibleNew(collectibleId))
@@ -131,6 +193,7 @@ function ZO_CollectibleData:Refresh()
     self.isSlottable = IsCollectibleSlottable(collectibleId)
     self.cachedNameWithNickname = nil
     self.isBlacklisted = IsCollectibleBlacklisted(collectibleId)
+    self.questState = GetCollectibleAssociatedQuestState(collectibleId)
 
     local categoryData = self:GetCategoryData()
     if categoryData then
@@ -226,8 +289,9 @@ function ZO_CollectibleData:IsPurchasable()
     return IsCollectiblePurchasable(self.collectibleId)
 end
 
-function ZO_CollectibleData:IsActive()
-    return self.isActive
+function ZO_CollectibleData:IsActive(actorCategory)
+    local actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+    return self.isActiveByActorCategory[actorCategory]
 end
 
 function ZO_CollectibleData:IsBlacklisted()
@@ -252,6 +316,10 @@ end
 
 function ZO_CollectibleData:IsCategoryType(categoryType)
     return self.categoryType == categoryType
+end
+
+function ZO_CollectibleData:GetCollectibleAssociatedQuestState()
+    return self.questState
 end
 
 do
@@ -406,11 +474,28 @@ function ZO_CollectibleData:IsBlocked()
     return IsCollectibleBlocked(self.collectibleId)
 end
 
-function ZO_CollectibleData:IsUsable()
-    return IsCollectibleUsable(self.collectibleId)
+function ZO_CollectibleData:IsCollectibleAvailableToActorCategory(aActorCategory)
+    return IsCollectibleAvailableToActorCategory(self.collectibleId, aActorCategory)
 end
 
-function ZO_CollectibleData:Use()
+function ZO_CollectibleData:IsCollectibleAvailableToCompanion()
+    return self:IsCollectibleAvailableToActorCategory(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+end
+
+function ZO_CollectibleData:IsCollectibleCategoryUsable(actorCategory)
+    return IsCollectibleCategoryUsable(self.categoryType, actorCategory)
+end
+
+function ZO_CollectibleData:IsCollectibleCategoryCompanionUsable()
+    return self:IsCollectibleCategoryUsable(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+end
+
+function ZO_CollectibleData:IsUsable(actorCategory)
+    local actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+    return IsCollectibleUsable(self.collectibleId, actorCategory)
+end
+
+function ZO_CollectibleData:Use(actorCategory)
     -- combination fragment collectibles can consume collectibles on use
     -- so we want to show a confirmation dialog if it consumes a non-fragment collectible
     if self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT) then
@@ -422,7 +507,7 @@ function ZO_CollectibleData:Use()
         local baseCollectibleId = GetCombinationFirstNonFragmentCollectibleComponentId(self.referenceId)
         if baseCollectibleId ~= 0 then
             local function AcceptCombinationCallback()
-                UseCollectible(self.collectibleId)
+                UseCollectible(self.collectibleId, actorCategory)
             end
 
             local function DeclineCombinationCallback()
@@ -434,7 +519,35 @@ function ZO_CollectibleData:Use()
         end
     end
 
-    UseCollectible(self.collectibleId)
+    UseCollectible(self.collectibleId, actorCategory)
+end
+
+function ZO_CollectibleData:GetPrimaryInteractionStringId(actorCategory)
+    local categoryType = self.categoryType
+    if self:IsActive(actorCategory) then
+        if categoryType == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET or categoryType == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or categoryType == COLLECTIBLE_CATEGORY_TYPE_COMPANION then
+            return SI_COLLECTIBLE_ACTION_DISMISS
+        else
+            return SI_COLLECTIBLE_ACTION_PUT_AWAY
+        end
+    else
+        if categoryType == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
+            return SI_COLLECTIBLE_ACTION_USE
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT then
+            return SI_COLLECTIBLE_ACTION_COMBINE
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_COMPANION then
+            local activeState = self:GetCollectibleAssociatedQuestState()
+            if activeState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_INACTIVE then
+                return SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
+            elseif activeState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_ACCEPTED then
+                return nil
+            else
+                return SI_COLLECTIBLE_ACTION_SET_ACTIVE
+            end               
+        else
+            return SI_COLLECTIBLE_ACTION_SET_ACTIVE
+        end
+    end
 end
 
 function ZO_CollectibleData:IsPlaceableFurniture()
@@ -449,16 +562,16 @@ function ZO_CollectibleData:HasVisualAppearence()
     return self.hasVisualAppearence
 end
 
-function ZO_CollectibleData:WouldBeHidden()
-    return WouldCollectibleBeHidden(self.collectibleId)
+function ZO_CollectibleData:WouldBeHidden(actorCategory)
+    return WouldCollectibleBeHidden(self.collectibleId, actorCategory)
 end
 
-function ZO_CollectibleData:IsVisualLayerHidden()
-    return self.hasVisualAppearence and self:IsActive() and self:WouldBeHidden()
+function ZO_CollectibleData:IsVisualLayerHidden(actorCategory)
+    return self.hasVisualAppearence and self:IsActive(actorCategory) and self:WouldBeHidden(actorCategory)
 end
 
-function ZO_CollectibleData:IsVisualLayerShowing()
-    return self.hasVisualAppearence and self:IsActive() and not self:WouldBeHidden()
+function ZO_CollectibleData:IsVisualLayerShowing(actorCategory)
+    return self.hasVisualAppearence and self:IsActive(actorCategory) and not self:WouldBeHidden(actorCategory)
 end
 
 function ZO_CollectibleData:GetNotificationId()
@@ -1045,6 +1158,22 @@ function ZO_CollectibleCategoryData:HasAnyNewCollectibles()
     return false
 end
 
+function ZO_CollectibleCategoryData:HasAnyNewCompanionCollectibles()
+    if NonContiguousCount(self.newCollectibleIdsCache) > 0 and self:HasAnyCompanionUsableCollectibles() then
+        return true
+    end
+
+    if self.isTopLevelCategory then
+        for _, subcategoryData in ipairs(self.orderedSubcategories) do
+            if subcategoryData:HasAnyNewCompanionCollectibles() then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 function ZO_CollectibleCategoryData:UpdateNewCache(collectibleData)
     local collectibleId = collectibleData:GetId()
     local isNew = collectibleData:IsNew()
@@ -1087,21 +1216,58 @@ function ZO_CollectibleCategoryData:HasShownCollectiblesInCollection()
     return false
 end
 
+function ZO_CollectibleCategoryData:HasAnyCompanionUsableCollectibles()
+    for _, collectibleData in ipairs(self.orderedCollectibles) do
+        if collectibleData:IsCollectibleCategoryCompanionUsable() and collectibleData:IsCollectibleAvailableToCompanion() then
+            return true
+        end
+    end
+
+    if self.isTopLevelCategory then
+        for _, subcategoryData in ipairs(self.orderedSubcategories) do
+            if subcategoryData:HasAnyCompanionUsableCollectibles() then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function ZO_CollectibleCategoryData:GetCollectibleCategoryTypesInCategory()
+    if not self.collectibleCategoryTypesInCategory then
+        local collectibleCategoryTypesInCategory = {}
+        for _, collectibleData in self:CollectibleIterator() do
+            collectibleCategoryTypesInCategory[collectibleData:GetCategoryType()] = true
+        end
+
+        if self.isTopLevelCategory then
+            for _, subcategoryData in self:SubcategoryIterator() do
+                local collectibleCategoryTypesInSubcategory = subcategoryData:GetCollectibleCategoryTypesInCategory()
+                for categoryType in pairs(collectibleCategoryTypesInSubcategory) do
+                    collectibleCategoryTypesInCategory[categoryType] = true
+                end
+            end
+        end
+
+        self.collectibleCategoryTypesInCategory = collectibleCategoryTypesInCategory
+    end
+
+    return self.collectibleCategoryTypesInCategory
+end
+
 ------------------
 -- Data Manager --
 ------------------
 
-ZO_CollectibleDataManager = ZO_CallbackObject:Subclass()
-
-function ZO_CollectibleDataManager:New(...)
-    ZO_COLLECTIBLE_DATA_MANAGER = ZO_CallbackObject.New(self)
-    ZO_COLLECTIBLE_DATA_MANAGER:Initialize(...)
-    return ZO_COLLECTIBLE_DATA_MANAGER
-end
+ZO_CollectibleDataManager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_CollectibleDataManager:Initialize()
     self.collectibleIdToDataMap = {}
     self.collectibleCategoryIdToDataMap = {}
+    self.collectibleCategoryTypeToSetDefaultCollectibleDataMap = {}
+
+    ZO_COLLECTIBLE_DATA_MANAGER = self
 
     local function CreateCategoryData()
         return ZO_CollectibleCategoryData:New(self.collectibleObjectPool, self.subcategoryObjectPool)
@@ -1118,7 +1284,7 @@ function ZO_CollectibleDataManager:Initialize()
     local function ResetData(data)
         data:Reset()
     end
-    
+
     self.categoryObjectPool = ZO_ObjectPool:New(CreateCategoryData, ResetData)
     self.subcategoryObjectPool = ZO_ObjectPool:New(CreateSubcategoryData, ResetData)
     self.collectibleObjectPool = ZO_ObjectPool:New(CreateCollectibleData, ResetData)
@@ -1419,6 +1585,15 @@ function ZO_CollectibleDataManager:HasAnyNewCollectibles()
     return false
 end
 
+function ZO_CollectibleDataManager:HasAnyNewCompanionCollectibles()
+    for _, categoryData in self:CategoryIterator() do
+        if categoryData:HasAnyNewCompanionCollectibles() then
+            return true
+        end
+    end
+    return false
+end
+
 function ZO_CollectibleDataManager:HasAnyUnlockedCollectibles()
     for _, categoryData in self:CategoryIterator() do
         if categoryData:HasAnyUnlockedCollectibles() then
@@ -1426,6 +1601,15 @@ function ZO_CollectibleDataManager:HasAnyUnlockedCollectibles()
         end
     end
     return false
+end
+
+function ZO_CollectibleDataManager:GetSetDefaultCollectibleData(categoryTypeToSetDefault, actorCategory)
+    local setDefaultCollectibleData = self.collectibleCategoryTypeToSetDefaultCollectibleDataMap[categoryTypeToSetDefault]
+    if not setDefaultCollectibleData and DoesCollectibleCategoryTypeHaveDefault(categoryTypeToSetDefault, actorCategory) then
+        setDefaultCollectibleData = ZO_SetDefaultCollectibleData:New(categoryTypeToSetDefault)
+        self.collectibleCategoryTypeToSetDefaultCollectibleDataMap[categoryTypeToSetDefault] = setDefaultCollectibleData
+    end
+    return setDefaultCollectibleData
 end
 
 ZO_CollectibleDataManager:New()

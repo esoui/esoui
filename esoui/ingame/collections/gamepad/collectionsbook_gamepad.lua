@@ -20,27 +20,27 @@ function ZO_GamepadCollectionsBook:Initialize(control)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_COLLECTIONS_BOOK_SCENE)
     self:SetListsUseTriggerKeybinds(true)
     self.isPreviewAvailable = true
-    
+
     self.categoryList =
-        {
-            list = self:GetMainList(),
-            keybind = self.categoryKeybindStripDescriptor,
-            titleText = GetString(SI_MAIN_MENU_COLLECTIONS),
-        }
+    {
+        list = self:GetMainList(),
+        keybind = self.categoryKeybindStripDescriptor,
+        titleText = GetString(SI_MAIN_MENU_COLLECTIONS),
+    }
 
     self.subcategoryList =
-        {
-            list = self:AddList("SubCategory"),
-            keybind = self.subcategoryKeybindStripDescriptor,
-            -- The title text will be updated to the name of the collections category
-        }
+    {
+        list = self:AddList("SubCategory"),
+        keybind = self.subcategoryKeybindStripDescriptor,
+        -- The title text will be updated to the name of the collections category
+    }
 
     self.collectionList =
-        {
-            list = self:AddList("Collection"),
-            keybind = self.collectionKeybindStripDescriptor,
-            -- The title text will be updated to the name of the collections category/subcategory
-        }
+    {
+        list = self:AddList("Collection"),
+        keybind = self.collectionKeybindStripDescriptor,
+        -- The title text will be updated to the name of the collections category/subcategory
+    }
 
     self.updateList = {}
 
@@ -118,20 +118,20 @@ end
 function ZO_GamepadCollectionsBook:InitializeHousingPanel()
     local housingPanel = self.control:GetNamedChild("HousingPanel")
     housingPanel.backgroundControl = housingPanel:GetNamedChild("Background")
-    
+
     local container = housingPanel:GetNamedChild("Container")
     housingPanel.collectedStatusLabel = container:GetNamedChild("UnlockStatusLabel")
     housingPanel.nameLabel = container:GetNamedChild("Name")
     housingPanel.nicknameLabel = container:GetNamedChild("Nickname")
     housingPanel.locationLabel = container:GetNamedChild("LocationValue")
     housingPanel.houseTypeLabel = container:GetNamedChild("HouseTypeValue")
-    
+
     local scrollContainer = container:GetNamedChild("ScrollSection"):GetNamedChild("ScrollChild")
     housingPanel.descriptionLabel = scrollContainer:GetNamedChild("Description")
     housingPanel.primaryResidenceHeaderLabel  = scrollContainer:GetNamedChild("PrimaryResidenceHeader")
     housingPanel.primaryResidenceValueLabel = scrollContainer:GetNamedChild("PrimaryResidenceValue")
     housingPanel.hintLabel = scrollContainer:GetNamedChild("Hint")
-    
+
     self.housingPanelControl = housingPanel
 end
 
@@ -284,9 +284,9 @@ function ZO_GamepadCollectionsBook:RefreshHeader()
         end
     end
 
-    local currentlyEquippedOutfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentOutfitIndex()
+    local actorCategory, currentlyEquippedOutfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentActorCategoryAndIndex()
     if currentlyEquippedOutfitIndex then
-        local currentOutfit = ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentlyEquippedOutfitIndex)
+        local currentOutfit = ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, currentlyEquippedOutfitIndex)
         self.outfitSelectorNameLabel:SetText(currentOutfit:GetOutfitName())
     else
         self.outfitSelectorNameLabel:SetText(GetString(SI_NO_OUTFIT_EQUIP_ENTRY))
@@ -390,9 +390,9 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
     }
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.subcategoryKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
-                                                                                                                            self:ClearAllCurrentSlotPreviews()
-                                                                                                                            self:ShowList(self.categoryList) 
-                                                                                                                        end)
+        self:ClearAllCurrentSlotPreviews()
+        self:ShowList(self.categoryList)
+    end)
 
     local function ClearPreviewGrid()
         self:ClearAllCurrentSlotPreviews()
@@ -453,15 +453,17 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 local collectibleData = self:GetCurrentTargetData()
                 local nameStringId
                 if collectibleData:IsStory() then
-                    nameStringId = SI_DLC_BOOK_ACTION_ACCEPT_QUEST
+                    nameStringId = SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
                 elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MEMENTO) then
                     nameStringId = SI_COLLECTIBLE_ACTION_USE
                 elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT) then
                     nameStringId = SI_COLLECTIBLE_ACTION_COMBINE
                 elseif collectibleData:IsHouse() then
                     nameStringId = collectibleData:IsUnlocked() and SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE or SI_HOUSING_BOOK_ACTION_PREVIEW_HOUSE
-                elseif collectibleData:IsActive() then
-                    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_VANITY_PET) then
+                elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMPANION) and collectibleData:GetCollectibleAssociatedQuestState() == COLLECTIBLE_ASSOCIATED_QUEST_STATE_INACTIVE then
+                    nameStringId = SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
+                elseif collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+                    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_VANITY_PET) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMPANION) then
                         nameStringId = SI_COLLECTIBLE_ACTION_DISMISS
                     else
                         nameStringId = SI_COLLECTIBLE_ACTION_PUT_AWAY
@@ -483,7 +485,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                         ZO_Dialogs_ShowGamepadDialog("GAMEPAD_TRAVEL_TO_HOUSE_OPTIONS_DIALOG", collectibleData)
                     end
                 else
-                    collectibleData:Use()
+                    collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                 end
             end,
             visible = function()
@@ -492,7 +494,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     if collectibleData:IsHouse() then
                         return true
                     else
-                        return collectibleData:IsUsable()
+                        return collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                     end
                 else
                     return false
@@ -506,12 +508,13 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     return CanJumpToHouseFromCurrentLocation(), cannotJumpString
                 else -- IsUsable
                     local remainingMs = GetCollectibleCooldownAndDuration(collectibleData:GetId())
-                    if collectibleData:IsActive() then
+                    if collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
                         return true
                     elseif remainingMs > 0 then
                         return false, GetString(SI_COLLECTIONS_COOLDOWN_ERROR)
                     elseif collectibleData:IsBlocked() then
-                        return false, GetString(SI_COLLECTIONS_BLOCKED_ERROR)
+                        local blockReason = GetCollectibleBlockReason(collectibleData:GetId())
+                        return false, zo_strformat(GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", blockReason))
                     else
                         return true
                     end
@@ -583,7 +586,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 {
                     collectibleId = collectibleData:GetId(),
                     name = collectibleData:GetNickname(),
-                    active = collectibleData:IsActive(),
+                    active = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER),
                 }
                 ZO_Dialogs_ShowGamepadDialog(GAMEPAD_COLLECTIONS_ACTIONS_DIALOG_NAME, dialogData)
             end,
@@ -837,7 +840,7 @@ function ZO_GamepadCollectionsBook:BuildSubcategoryList(categoryData)
     -- Add the categories entries
     for subcategoryIndex, subcategoryData in categoryData:SubcategoryIterator({ZO_CollectibleCategoryData.HasShownCollectiblesInCollection}) do
         local formattedSubcategoryName = subcategoryData:GetFormattedName()
-        
+
         local entryData = ZO_GamepadEntryData:New(formattedSubcategoryName)
         entryData:SetDataSource(subcategoryData)
         entryData:SetIconTintOnSelection(true)
@@ -889,7 +892,7 @@ function ZO_GamepadCollectionsBook:UpdateCollectionListVisualLayer()
     local list = self.collectionList.list
     for i = 1, list:GetNumItems() do
         local collectibleData = list:GetDataForDataIndex(i)
-        collectibleData:SetIsHiddenByWardrobe(collectibleData:IsVisualLayerHidden())
+        collectibleData:SetIsHiddenByWardrobe(collectibleData:IsVisualLayerHidden(GAMEPLAY_ACTOR_CATEGORY_PLAYER))
     end
     self:RefreshRightPanel(self.collectionList.list:GetTargetData())
 end
@@ -901,9 +904,14 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
     entryData:SetDataSource(collectibleData)
     entryData:SetCooldownIcon(collectibleData:GetIcon())
 
-    entryData.isEquippedInCurrentCategory = collectibleData:IsActive()
-    
-    entryData:SetIsHiddenByWardrobe(collectibleData:IsVisualLayerHidden())
+    if collectibleData:IsStory() then
+        local questState = collectibleData:GetCollectibleAssociatedQuestState()
+        entryData.isEquippedInCurrentCategory = questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_ACCEPTED or questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_COMPLETED
+    else
+        entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+    end
+
+    entryData:SetIsHiddenByWardrobe(collectibleData:IsVisualLayerHidden(GAMEPLAY_ACTOR_CATEGORY_PLAYER))
 
     ZO_UpdateCollectibleEntryDataIconVisuals(entryData)
 
@@ -1005,14 +1013,16 @@ function ZO_GamepadCollectionsBook:RefreshDLCTooltip(collectibleData)
     infoPanel.nameControl:SetText(collectibleData:GetFormattedName())
     infoPanel.descriptionControl:SetText(collectibleData:GetDescription())
     infoPanel.unlockStatusControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", collectibleData:GetUnlockState()))
-    
+
+    local questState = collectibleData:GetCollectibleAssociatedQuestState()
+
     local isUnlocked = collectibleData:IsUnlocked()
-    local isActive = collectibleData:IsActive()
+    local isActive = questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_ACCEPTED or questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_COMPLETED
 
     local questAcceptLabelStringId = isActive and SI_DLC_BOOK_QUEST_STATUS_ACCEPTED or SI_DLC_BOOK_QUEST_STATUS_NOT_ACCEPTED
     local questName = collectibleData:GetQuestName()
     infoPanel.questStatusControl:SetText(zo_strformat(SI_GAMEPAD_DLC_BOOK_QUEST_STATUS_INFO, questName, GetString(questAcceptLabelStringId)))
-    
+
     local showsQuest = isUnlocked and not isActive
     local questAcceptIndicator = infoPanel.questAcceptIndicator
     local questAcceptDescription = infoPanel.questAcceptDescription
@@ -1020,7 +1030,7 @@ function ZO_GamepadCollectionsBook:RefreshDLCTooltip(collectibleData)
     if showsQuest then
         questAcceptIndicator:SetText(GetString(SI_COLLECTIONS_QUEST_AVAILABLE))
         questAcceptIndicator:SetHidden(false)
-        
+
         questAcceptDescription:SetText(collectibleData:GetQuestDescription())
         questAcceptDescription:SetHidden(false)
     elseif not isUnlocked then
@@ -1123,16 +1133,16 @@ function ZO_GamepadCollectionsBook:TogglePreviewSelectedOutfitStyle()
             self.currentSlotPreviews[preferredOutfitSlot] = nil
         else
             local primaryDye, secondaryDye, accentDye = 0, 0, 0
-            local currentOutfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentOutfitIndex()
+            local actorCategory, currentOutfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentActorCategoryAndIndex()
             if currentOutfitIndex then
-                local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentOutfitIndex)
+                local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, currentOutfitIndex)
                 local slotManipulator = outfitManipulator:GetSlotManipulator(preferredOutfitSlot)
                 if slotManipulator then
                     primaryDye, secondaryDye, accentDye = slotManipulator:GetPendingDyeData()
                 end
             else
                 local equipSlot = GetEquipSlotForOutfitSlot(preferredOutfitSlot)
-                if CanEquippedItemBeShownInOutfitSlot(equipSlot, preferredOutfitSlot) then
+                if CanEquippedItemBeShownInOutfitSlot(GAMEPLAY_ACTOR_CATEGORY_PLAYER, equipSlot, preferredOutfitSlot) then
                     primaryDye, secondaryDye, accentDye = GetPendingSlotDyes(RESTYLE_MODE_EQUIPMENT, ZO_RESTYLE_DEFAULT_SET_INDEX, equipSlot)
                 end
             end
@@ -1197,11 +1207,12 @@ function ZO_GamepadCollectionsBook:OnGridListSelectedDataChanged(previousData, n
 end
 
 function ZO_GamepadCollectionsBook:StartPreviewFromBase()
-    local currentOutfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentOutfitIndex()
+    ZO_OUTFITS_SELECTOR_GAMEPAD:SetCurrentActorCategory(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+    local _, currentOutfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentActorCategoryAndIndex()
     if currentOutfitIndex then
-        ITEM_PREVIEW_GAMEPAD:PreviewOutfit(currentOutfitIndex)
+        ITEM_PREVIEW_GAMEPAD:PreviewOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER, currentOutfitIndex)
     else
-        ITEM_PREVIEW_GAMEPAD:PreviewUnequipOutfit()
+        ITEM_PREVIEW_GAMEPAD:PreviewUnequipOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     end
 end
 

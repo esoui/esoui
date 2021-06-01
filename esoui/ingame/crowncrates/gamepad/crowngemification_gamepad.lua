@@ -23,7 +23,7 @@ function ZO_CrownGemification_Gamepad:Initialize(owner, gemificationSlot)
     }
     ZO_CrownGemification_Shared.Initialize(self, self.fragment, gemificationSlot, backKeybindStripDescriptor)
 
-    self.formattedGemIcon = ZO_Currency_GetGamepadFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWN_GEMS), "100%")
+    self.formattedGemIcon = ZO_Currency_GetGamepadFormattedCurrencyIcon(GetCurrencyTypeFromMarketCurrencyType(MKCT_CROWN_GEMS), "100%")
 
     self:InitializeHeader()
     self:InitializeList()

@@ -40,23 +40,9 @@ function ZO_AddOnManager:Initialize(control, allowReload)
     self.characterDropdown = ZO_ComboBox:New(GetControl(self.control, "CharacterSelectDropdown"))
     self.characterDropdown:SetSortsItems(false)
 
-    local function OnLoadOutOfDateAddonsClicked(checkButton, isChecked)
-        AddOnManager:SetLoadOutOfDateAddOns(isChecked)
-
-        self.isDirty = true
-
-        self:RefreshMultiButton()
-        self:RefreshData()
-    end
-
-    local loadOutOfDateCheck = self.control:GetNamedChild("LoadOutOfDateAddOns")
-    ZO_CheckButton_SetToggleFunction(loadOutOfDateCheck, OnLoadOutOfDateAddonsClicked)
-    ZO_CheckButton_SetCheckState(loadOutOfDateCheck, AddOnManager:GetLoadOutOfDateAddOns())
-
     local function OnAddOnEulaHidden()
         local hasAgreed = HasAgreedToEULA(EULA_TYPE_ADDON_EULA)
         self.characterDropdown:SetEnabled(hasAgreed)
-        ZO_CheckButton_SetEnableState(loadOutOfDateCheck, hasAgreed)
 
         self.isDirty = true
 
@@ -111,23 +97,11 @@ function ZO_AddOnManager:GetRowSetupFunction()
     local function SetupNotes(state, data)
         local stateText = ""
 
-        if self.isAllFilterSelected then
-            if data.isOutOfDate then
-                if AddOnManager:GetLoadOutOfDateAddOns() then
-                    stateText = GetString("SI_ADDONLOADSTATE", ADDON_STATE_VERSION_MISMATCH)
-                else
-                    stateText = ZO_ERROR_COLOR:Colorize(GetString("SI_ADDONLOADSTATE", ADDON_STATE_VERSION_MISMATCH))
-                end
-            end
-        else
-            if data.isOutOfDate then
-                if AddOnManager:GetLoadOutOfDateAddOns() then
-                    stateText = GetString("SI_ADDONLOADSTATE", ADDON_STATE_VERSION_MISMATCH)
-                else
-                    stateText = ZO_ERROR_COLOR:Colorize(GetString("SI_ADDONLOADSTATE", ADDON_STATE_VERSION_MISMATCH))
-                end
-            end
+        if data.isOutOfDate then
+            stateText = GetString("SI_ADDONLOADSTATE", ADDON_STATE_VERSION_MISMATCH)
+        end
 
+        if not self.isAllFilterSelected then
             if data.hasDependencyError then
                 if stateText == "" then
                     stateText = ZO_ERROR_COLOR:Colorize(GetString("SI_ADDONLOADSTATE", ADDON_STATE_DEPENDENCIES_DISABLED))
@@ -205,7 +179,7 @@ function ZO_AddOnManager:GetRowSetupFunction()
             dependencies:SetText("")
         end
 
-        local isEnabled = HasAgreedToEULA(EULA_TYPE_ADDON_EULA) and (not data.isOutOfDate or AddOnManager:GetLoadOutOfDateAddOns())
+        local isEnabled = HasAgreedToEULA(EULA_TYPE_ADDON_EULA)
 
         if self.isAllFilterSelected then
             local allEnabled, allDisabled

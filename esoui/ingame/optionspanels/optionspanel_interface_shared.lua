@@ -199,6 +199,16 @@ local ZO_OptionsPanel_Interface_ControlData =
             text = SI_ARMOR_INDICATOR,
             tooltipText = SI_ARMOR_INDICATOR_SETTINGS_TOOLTIP,
         },
+        --Options_Interface_CompassCompanion
+        [UI_SETTING_COMPASS_COMPANION] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_COMPASS_COMPANION,
+            panel = SETTING_PANEL_INTERFACE,
+            text = SI_INTERFACE_OPTIONS_COMPASS_COMPANION,
+            tooltipText = SI_INTERFACE_OPTIONS_COMPASS_COMPANION_TOOLTIP,
+        },
     },
 
     --Chat bubbles

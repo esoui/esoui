@@ -18,7 +18,7 @@ function ZO_SingleTemplateGridScrollList_Keyboard:New(...)
     return ZO_AbstractSingleTemplateGridScrollList.New(self, ...)
 end
 
-function ZO_SingleTemplateGridScrollList_Keyboard:Initialize(control, fillRowWithEmptyCells)
-    ZO_AbstractSingleTemplateGridScrollList.Initialize(self, control, fillRowWithEmptyCells)
+function ZO_SingleTemplateGridScrollList_Keyboard:Initialize(control, autofillRows)
+    ZO_AbstractSingleTemplateGridScrollList.Initialize(self, control, autofillRows)
     ZO_AbstractGridScrollList_Keyboard.Initialize(self, control)
 end

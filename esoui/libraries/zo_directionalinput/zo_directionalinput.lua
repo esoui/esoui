@@ -148,11 +148,11 @@ end
 -- Continuous updates, this loop will stop once it encounters something that only handles digital inputs
 -- The order that objects are activated affects how this works
 function DirectionalInput:OnUpdate()
-
     self.updating = true
     for i = 1, NUM_INPUT_DEVICES do
         self.inputDeviceConsumed[i] = false
     end
+    self.inputDeviceConsumed[ZO_DI_LEFT_STICK] = WasGamepadLeftStickConsumedByOverlay()
 
     local deltaS = 0
     local nowS = GetFrameTimeSeconds()

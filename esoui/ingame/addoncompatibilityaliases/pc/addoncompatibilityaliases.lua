@@ -955,3 +955,65 @@ IsCurrentlyPreviewingCollectibleAsFurniture = IsCurrentlyPreviewingPlacedFurnitu
 IsCurrentlyPreviewingInventoryItemAsFurniture = IsCurrentlyPreviewingInventoryItem
 GetNumTradingHouseSearchResultItemAsFurniturePreviewVariations = GetNumTradingHouseSearchResultItemPreviewVariations
 GetTradingHouseSearchResultItemAsFurniturePreviewVariationDisplayName = GetTradingHouseSearchResultItemPreviewVariationDisplayName
+
+-- Outfits Naming Update
+ZO_Restyle_Station_Gamepad = ZO_RestyleStation_Gamepad
+ZO_Restyle_Station_Gamepad_SetOutfitEntryBorder = ZO_RestyleStation_Gamepad_SetOutfitEntryBorder
+ZO_Restyle_Station_Gamepad_CleanupAnimationOnControl = ZO_RestyleStation_Gamepad_CleanupAnimationOnControl
+ZO_Restyle_Station_OnInitialize = ZO_RestyleStation_OnInitialize
+ZO_Restyle_Station_Gamepad_TopLevel = ZO_RestyleStation_Gamepad_TopLevel
+
+-- skills companion refactor
+local function ConvertToSkillLineId(method)
+    return function(skillType, skillLineIndex, ...)
+        local skillLineId = GetSkillLineId(skillType, skillLineIndex)
+        return method(skillLineId, ...)
+    end
+end
+GetSkillLineName = ConvertToSkillLineId(GetSkillLineNameById)
+GetSkillLineUnlockText = ConvertToSkillLineId(GetSkillLineUnlockTextById)
+GetSkillLineAnnouncementIcon = ConvertToSkillLineId(GetSkillLineAnnouncementIconById)
+IsWerewolfSkillLine = ConvertToSkillLineId(IsWerewolfSkillLineById)
+GetSkillLineCraftingGrowthType = ConvertToSkillLineId(GetSkillLineCraftingGrowthTypeById)
+
+ZO_SLOTTABLE_ACTION_TYPE_SKILL = ZO_SLOTTABLE_ACTION_TYPE_PLAYER_SKILL
+ZO_SlottableSkill = ZO_SlottablePlayerSkill
+
+ZO_ColorDef.ToARGBHexadecimal = ZO_ColorDef.FloatsToHex
+ZO_ColorDef.FromARGBHexadecimal = function(hexColor)
+    return ZO_ColorDef:New(hexColor)
+end
+
+function EquipItem(bagId, slotIndex, equipSlot)
+    RequestEquipItem(bagId, slotIndex, BAG_WORN, equipSlot)
+end
+
+function UnequipItem(equipSlot)
+    RequestUnequipItem(BAG_WORN, equipSlot)
+end
+
+ZO_Currency_MarketCurrencyToUICurrency = GetCurrencyTypeFromMarketCurrencyType
+
+-- Item Comparison --
+
+function GetComparisonEquipSlotsFromItemLink(itemLink)
+    local equipSlot1, equipSlot2 = GetItemLinkComparisonEquipSlots(itemLink)
+    if equipSlot1 == EQUIP_SLOT_NONE then
+        equipSlot1 = nil
+    end
+    if equipSlot2 == EQUIP_SLOT_NONE then
+        equipSlot2 = nil
+    end
+    return equipSlot1, equipSlot2
+end
+
+function GetComparisonEquipSlotsFromBagItem(bagId, slotIndex)
+    local equipSlot1, equipSlot2 = GetItemComparisonEquipSlots(bagId, slotIndex)
+    if equipSlot1 == EQUIP_SLOT_NONE then
+        equipSlot1 = nil
+    end
+    if equipSlot2 == EQUIP_SLOT_NONE then
+        equipSlot2 = nil
+    end
+    return equipSlot1, equipSlot2
+end

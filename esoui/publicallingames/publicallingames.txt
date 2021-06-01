@@ -46,8 +46,6 @@ EsoUI\PublicAllIngames\MarketCurrency\Keyboard\MarketCurrency_Keyboard.xml
 EsoUI\PublicAllIngames\MarketCurrency\Gamepad\MarketCurrency_Gamepad.lua
 EsoUI\PublicAllIngames\MarketCurrency\Gamepad\MarketCurrency_Gamepad.xml
 
-EsoUI\PublicAllIngames\TrialAccount\TrialAccount_IngameShared.lua
-
 EsoUI\PublicAllIngames\ChapterUpgrade\ChapterUpgrade_Manager.lua
 
 EsoUI\PublicAllIngames\Scenes\PublicAllIngameFragments.lua

@@ -33,12 +33,12 @@ end
 local dropHandlers =
 {
     ["inventory"] = function(landingArea, cursorType)
-                        PlaceCursorInInventory(landingArea.bagId, cursorType)
-                    end,
+        PlaceCursorInInventory(landingArea.bagId, cursorType)
+    end,
 
-    ["store"] =     function(landingArea, cursorType)
-                        PlaceInStoreWindow()
-                    end,
+    ["store"] = function(landingArea, cursorType)
+        PlaceInStoreWindow()
+    end,
 }
 
 -- Allow calling from external systems (the inventory system will once again begin using this
@@ -55,33 +55,25 @@ function ZO_InventoryLandingArea_DropCursorInBag(bagId)
     PlaceCursorInInventory(bagId, GetCursorContentType())
 end
 
-function ZO_InventoryLandingArea_SetHidden(landingArea, hidden, hintTextStringId)
+function ZO_InventoryLandingArea_SetHidden(landingArea, hidden)
     landingArea:SetHidden(hidden)
+
     if not hidden then
         -- It's assumed that landing areas are children of a ZO_ScrollListContents control that hold ZO_ListInventorySlots
         -- which is how the offsets are determined when there are icons present in the list.
         -- The right offset is determined from the scrollbar.
         local scrollList = landingArea:GetParent():GetParent()
         landingArea:ClearAnchors()
-        local iconOffset = 0
 
-        if ZO_ScrollList_HasVisibleData(scrollList) then
-            -- Don't adjust for icon offset for now, just allow the landing area to take up the full area of the window
-            -- iconOffset = landingArea.iconOffset
-        end
-
-        landingArea:SetAnchor(TOPLEFT, scrollList, TOPLEFT, iconOffset, 0)
+        landingArea:SetAnchor(TOPLEFT, scrollList, TOPLEFT, 0, 0)
         landingArea:SetAnchor(BOTTOMRIGHT, scrollList, BOTTOMRIGHT, 0, 0)
-
-        landingArea.hintTextStringId = hintTextStringId
     end
 end
 
-function ZO_InventoryLandingArea_Initialize(landingArea, descriptor, bagId, customOffset)
+function ZO_InventoryLandingArea_Initialize(landingArea, descriptor, bagId)
     local newParent = landingArea:GetParent():GetNamedChild("Contents")
     landingArea:SetParent(newParent)
 
     landingArea.bagId = bagId
     landingArea.descriptor = descriptor
-    landingArea.iconOffset = customOffset or 50
 end

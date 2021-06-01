@@ -13,17 +13,6 @@
                     ZO_InventoryLandingArea_DropCursor(self)
                 end
             </OnMouseUp>
-
-            <Controls>
-                <Backdrop name="$(parent)BG" hidden="true">
-                    <AnchorFill />
-
-                    <Edge file="EsoUI/Art/Miscellaneous/insetHighlight_edge.dds" edgeFileWidth="128" edgeFileHeight="16" />
-                    <Center file="EsoUI/Art/Miscellaneous/insetHighlight_center.dds" />
-
-                    <Insets left="4" top="4" right="-4" bottom="-4" />
-                </Backdrop>
-            </Controls>
         </Control>
     </Controls>
 </GuiXml>

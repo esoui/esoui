@@ -316,7 +316,7 @@ function ZO_CollectionsBook:UpdateCategoryStatusIcon(categoryNode)
 
     local collectiblesData = GetCollectiblesDataFromCategory(categoryData)
     for _, collectibleData in ipairs(collectiblesData) do
-        if collectibleData:IsVisualLayerShowing() then
+        if collectibleData:IsVisualLayerShowing(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
             categoryControl.statusIcon:AddIcon(VISIBLE_ICON)
             break
         end

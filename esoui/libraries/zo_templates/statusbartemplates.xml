@@ -199,5 +199,43 @@
                 </Control>
             </Controls>
         </Control>
+
+        <Control name="ZO_SlidingStatusBar" inherits="ZO_PlayerAttributeContainer" virtual="true">
+            <Controls>
+                <Control name="$(parent)BgContainer" inherits="ZO_PlayerAttributeBgContainer">
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Texture name="$(parent)BgLeft" inherits="ZO_PlayerAttributeBgLeftArrow" />                      
+                        <Texture name="$(parent)BgRight" inherits="ZO_PlayerAttributeBgRightArrow" />                       
+                        <Texture name="$(parent)BgCenter" inherits="ZO_PlayerAttributeBgCenter" />
+                    </Controls>
+                </Control>
+
+                <StatusBar name="$(parent)BarLeft" inherits="ZO_PlayerAttributeStatusBar" barAlignment="REVERSE">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativePoint="CENTER" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" barAlignment="REVERSE" />
+                    </Controls>
+                </StatusBar>
+                
+                <StatusBar name="$(parent)BarRight" inherits="ZO_PlayerAttributeStatusBar">
+                    <Anchor point="RIGHT" />
+                    <Anchor point="LEFT" relativePoint="CENTER" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" />
+                    </Controls>
+                </StatusBar>
+
+                <Texture name="$(parent)FrameLeft" inherits="ZO_PlayerAttributeFrameLeftArrow" />               
+                <Texture name="$(parent)FrameRight" inherits="ZO_PlayerAttributeFrameRightArrow" />               
+                <Texture name="$(parent)FrameCenter" inherits="ZO_PlayerAttributeFrameCenter" />
+
+                <Texture name="$(parent)ValuePointer">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOP" relativeTo="$(parent)FrameCenter" relativePoint="BOTTOMLEFT" />
+                </Texture>
+            </Controls>
+        </Control>    
     </Controls>
 </GuiXml>

@@ -216,7 +216,7 @@
                             <Anchor point="TOPLEFT" />
                         </Label>
 
-                        <Control name="$(parent)AntiquitiesGridList" inherits="ZO_GridScrollList_Gamepad">
+                        <Control name="$(parent)GridList" inherits="ZO_GridScrollList_Gamepad">
                             <Anchor point="TOPLEFT" offsetX="-40" offsetY="39" />
                             <DimensionConstraints minX="720" maxX="720" minY="60" maxY="180" />
                         </Control>
@@ -241,7 +241,7 @@
             <Dimensions y="ZO_ANTIQUITY_SET_4_DATA_ROW_HEIGHT_GAMEPAD" />
         </Control>
 
-        <TopLevelControl name="ZO_AntiquityJournalListTopLevel_Gamepad" inherits="ZO_AnchoredToQuadrant_2_3_Background" hidden="true">
+        <TopLevelControl name="ZO_AntiquityJournalList_Gamepad" inherits="ZO_AnchoredToQuadrant_2_3_Background" hidden="true">
             <OnInitialized>
                 ZO_AntiquityJournalListGamepad_OnInitialized(self)
             </OnInitialized>

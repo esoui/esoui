@@ -1,0 +1,82 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_CompanionEquipment_Keyboard_NewItemCategory_FlashAnimation" playbackType="PING_PONG" loopCount="11">
+            <Animations>
+                <CustomAnimation duration="700">
+                    <UpdateFunction>
+                        ZO_CompanionEquipment_Keyboard_NewItemCategory_FlashAnimation_OnUpdate(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <TopLevelControl name="ZO_CompanionEquipment_Panel_Keyboard" inherits="ZO_InventoryTemplate" hidden="true">
+            <Dimensions x="565" y="690" />
+            <Anchor point="RIGHT" offsetY="32" />
+            
+            <OnInitialized>
+                ZO_CompanionEquipment_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)SearchFilters" override="true" hidden="false" />
+                <Control name="$(parent)SearchDivider" override="true" hidden="false" />
+
+                <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" text="SI_INVENTORY_ERROR_FILTER_EMPTY" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="TOPLEFT" offsetX="50" offsetY="180"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="BOTTOMRIGHT" offsetX="-50" offsetY="-50" />
+                </Label>
+
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchDivider" relativePoint="BOTTOMRIGHT" />
+                    <Controls>
+                        <Control name="$(parent)New" inherits="ZO_SortHeaderIcon">
+                            <Dimensions x="16" y="32" />
+                            <Anchor point="LEFT" offsetX="8"/>
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeaderIcon(self,
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_neutral.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds",
+                                "statusSortOrder",
+                                ZO_SORT_ORDER_DOWN)
+
+                                ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_STATUS), BOTTOMRIGHT, 0, 32)
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Dimensions x="241" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)New" relativePoint="RIGHT" offsetX="88" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Price" inherits="ZO_SortHeader">
+                            <Dimensions x="70" y="20" />
+                            <Anchor point="RIGHT" offsetX="-21" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)List" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <Controls>
+                        <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
+                            <OnInitialized>
+                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_BACKPACK)
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -18,7 +18,7 @@ local g_currentStateName = nil
 local g_currentStateData = nil
 local g_previousState = nil
 
-local loadingUpdates = false
+local g_loadingUpdates = false
 
 -- We don't want to show the video or the chapter upsell when we're logging out, only when we're logging in
 local shouldTryToPlayChapterOpeningCinematic = false
@@ -94,8 +94,7 @@ local g_sharedPregameStates =
     ["WaitForGameDataLoaded"] =
     {
         ShouldAdvance = function()
-            local loaded, total = GetDataLoadStatus()
-            return loaded == total
+            return IsSystemLoaded(LOADING_SYSTEM_GAME_DATA)
         end,
 
         OnEnter = function()
@@ -312,9 +311,9 @@ local g_sharedPregameStates =
             -- TODO: Determine if these videos need localization or subtitles...
             SetVideoCancelAllOnCancelAny(false)
 
-            PlayVideo("Video/Bethesda_logo.bik", QUEUE_VIDEO, skipMode)
+            PlayVideo("Video/Bethesda_logo.bk2", QUEUE_VIDEO, skipMode)
 
-            ZO_PlayVideoAndAdvance(PlayVideo, "Video/ZOS_logo.bik", QUEUE_VIDEO, skipMode)
+            ZO_PlayVideoAndAdvance(PlayVideo, "Video/ZOS_logo.bk2", QUEUE_VIDEO, skipMode)
         end,
 
         GetStateTransitionData = function()
@@ -370,7 +369,7 @@ local g_sharedPregameStates =
 
         OnEnter = function()
             local skipMode = ZO_Pregame_CanSkipVideos() and VIDEO_SKIP_MODE_ALLOW_SKIP or VIDEO_SKIP_MODE_NO_SKIP
-            ZO_PlayVideoAndAdvance(PlayVideo, "Video/jp_DMM_logo.bik", QUEUE_VIDEO, skipMode)
+            ZO_PlayVideoAndAdvance(PlayVideo, "Video/jp_DMM_logo.bk2", QUEUE_VIDEO, skipMode)
         end,
 
         GetStateTransitionData = function()
@@ -521,6 +520,12 @@ local function OnCharacterListReceived(_, characterCount, maxCharacters, mostRec
         -- This could happen when we rename or delete a character
         if PregameStateManager_GetCurrentState() ~= "CharacterSelect" then
             PregameStateManager_SetState("WaitForGameDataLoaded")
+            -- If the data isn't fully loaded make sure we're registered for loading updates for things
+            -- that depend on the "PregameFullyLoaded" callback.
+            -- This can happen when we are returning to character select after being disconnected from the server
+            if not PregameIsFullyLoaded() then
+                RegisterForLoadingUpdates()
+            end
         elseif characterCount == 0 then
             -- However, if we delete our last character then we need to switch to CharacterCreate
             -- so we can create a new character. We also want to avoid CharacterCreateFadeIn since
@@ -550,11 +555,11 @@ end
 local initialStateOverrideFn --= SetupUIReloadAfterLogin -- normally this is nil, it can be set to a custom function to allow the reload to drop into a desired state
 
 function UnregisterForLoadingUpdates()
-    if loadingUpdates then
+    if g_loadingUpdates then
         EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_AREA_LOAD_STARTED)
         EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_SUBSYSTEM_LOAD_COMPLETE)
         EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_LUA_ERROR)
-        loadingUpdates = false
+        g_loadingUpdates = false
     end
 end
 
@@ -630,11 +635,11 @@ local function OnLuaErrorWhileLoading(_)
 end
 
 function RegisterForLoadingUpdates()
-    if not loadingUpdates then
+    if not g_loadingUpdates then
         EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_AREA_LOAD_STARTED, OnAreaLoadStarted)
         EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SUBSYSTEM_LOAD_COMPLETE, OnSubsystemLoadComplete)
         EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_LUA_ERROR, OnLuaErrorWhileLoading)
-        loadingUpdates = true
+        g_loadingUpdates = true
     end
 end
 
@@ -719,7 +724,7 @@ function ZO_Pregame_DisplayServerDisconnectedError()
     local errorString
     local errorStringFormat
 
-    if logoutError ~= LOGOUT_ERROR_NO_ERROR and logoutError ~= LOGOUT_ERROR_UNKNOWN_ERROR then
+    if logoutError ~= LOGOUT_ERROR_NO_ERROR and logoutError ~= LOGOUT_ERROR_UNKNOWN_ERROR and logoutError ~= LOGOUT_ERROR_TRANSFER_FAILED then
         errorStringFormat = GetString("SI_LOGOUTERROR", logoutError)
 
         if errorStringFormat ~= ""  then
@@ -742,10 +747,20 @@ function ZO_Pregame_DisplayServerDisconnectedError()
         end
     end
 
+    local shouldReenterLoginState = true
+    if logoutError == LOGOUT_ERROR_TRANSFER_FAILED then
+        shouldReenterLoginState = false
+    end
+
     if IsInGamepadPreferredMode() then
-        PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(nil, errorString)
+        if shouldReenterLoginState then
+            -- Showing the error here also sets the state to AccountLogin
+            PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(nil, errorString)
+        end
     else
-        PregameStateManager_ReenterLoginState()
+        if shouldReenterLoginState then
+            PregameStateManager_ReenterLoginState()
+        end
 
         ZO_Dialogs_ShowDialog("HANDLE_ERROR", nil, {mainTextParams = {errorString}})
     end

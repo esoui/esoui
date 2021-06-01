@@ -19,6 +19,16 @@ ZO_TOOLTIP_STYLES =
         fontColorField = GENERAL_COLOR_GREY,
         fontStyle = "soft-shadow-thick",
     },
+    quadrant_2_3_Tooltip =
+    {
+        width = ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH,
+        paddingLeft = 0,
+        paddingRight = 0,
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontColorType = INTERFACE_COLOR_TYPE_GAMEPAD_TOOLTIP,
+        fontColorField = GENERAL_COLOR_GREY,
+        fontStyle = "soft-shadow-thick",
+    },
     title =
     {
         fontSize = "$(GP_42)",
@@ -234,6 +244,44 @@ ZO_TOOLTIP_STYLES =
         statusBarTemplate = "ZO_ChampionSkillBar_Gamepad",
         statusBarTemplateOverrideName = "ChampionSkillBar",
         customSpacing = 40,
+        widthPercent = 100,
+        statusBarGradientColors = ZO_XP_BAR_GRADIENT_COLORS,
+    },
+    companionRapportBar =
+    {
+        controlTemplate = "ZO_SlidingStatusBar",
+        controlTemplateOverrideName = "rapportBar",
+        widthPercent = 90,
+    },
+    skillLinePreviewBodySection =
+    {
+        childSpacing = 10,
+        widthPercent = 100,
+    },
+    skillLineEntryHeaderSection =
+    {
+        paddingLeft = ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT,
+    },
+    skillLineEntryHeader =
+    {
+        fontFace = "$(GAMEPAD_BOLD_FONT)",
+        fontSize = "$(GP_22)",
+        fontStyle = "soft-shadow-thick",
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        height = 24,
+    },
+    skillLineEntryRow =
+    {
+        controlTemplate = "ZO_GamepadSkillLinePreview_AbilityEntry",
+        controlTemplateOverrideName = "skillLineEntry",
+        widthPercent = 100,
+    },
+    companionXpBar =
+    {
+        statusBarTemplate = "ZO_GamepadPlayerProgressBarTemplate",
+        statusBarTemplateOverrideName = "CompanionXpBar",
+        height = 30,
         widthPercent = 100,
         statusBarGradientColors = ZO_XP_BAR_GRADIENT_COLORS,
     },
@@ -1516,6 +1564,63 @@ ZO_TOOLTIP_STYLES =
         fontFace = "$(GAMEPAD_LIGHT_FONT)",
         horizontalAlignment = TEXT_ALIGN_RIGHT,
         fontColorField = GENERAL_COLOR_WHITE,
+    },
+
+    --Companion Tooltips
+    companionXpProgressSection =
+    {
+        layoutPrimaryDirection = "right",
+        layoutSecondaryDirection = "down",
+        statValuePairSpacing = 6,
+        childSpacing = 10,
+        childSecondarySpacing = 3,
+        widthPercent = 100,
+    },
+    companionOverviewStatValueSection =
+    {
+        paddingTop = 30,
+        layoutPrimaryDirection = "right",
+        layoutSecondaryDirection = "down",
+        statValuePairSpacing = 6,
+        childSpacing = 10,
+        childSecondarySpacing = 3,
+        widthPercent = 100,
+    },
+    companionOverviewBodySection =
+    {
+        paddingTop = 10,
+        childSpacing = 10,
+        widthPercent = 100,
+    },
+    companionOverviewDescription =
+    {
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_34)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+    companionRapportBarSection =
+    {
+        paddingTop = 30,
+        paddingBottom = 30,
+        layoutPrimaryDirection = "right",
+        layoutSecondaryDirection = "down",
+        widthPercent = 100,
+    },
+    companionRapportTexture = 
+    {
+        width = 32,
+        height = 32
+    },
+    timedActivityRewardHeader =
+    {
+        fontSize = "$(GP_27)",
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+    timedActivityReward =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+        fontSize = "$(GP_42)",
     },
 }
 

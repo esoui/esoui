@@ -1,3 +1,15 @@
+ZO_SKILL_POINT_ACTION =
+{
+    NONE = 1,
+    PURCHASE = 2,
+    SELL = 3,
+    INCREASE_RANK = 4,
+    DECREASE_RANK = 5,
+    MORPH = 6,
+    UNMORPH = 7,
+    REMORPH = 8,
+}
+
 local BROADCAST = true
 local DONT_BROADCAST = false
 
@@ -338,6 +350,35 @@ function ZO_SkillPointAllocator:Maxout(ignoreCallbacks)
         return true
     end
     return false
+end
+
+function ZO_SkillPointAllocator:GetIncreaseSkillAction()
+    if self:CanPurchase() then
+        return ZO_SKILL_POINT_ACTION.PURCHASE
+    elseif self:CanMorph() then
+        local skillProgressionData = self:GetProgressionData()
+        if skillProgressionData:IsMorph() then
+            return ZO_SKILL_POINT_ACTION.REMORPH
+        else
+            return ZO_SKILL_POINT_ACTION.MORPH
+        end
+    elseif self:CanIncreaseRank() then
+        return ZO_SKILL_POINT_ACTION.INCREASE_RANK
+    else
+        return ZO_SKILL_POINT_ACTION.NONE
+    end
+end
+
+function ZO_SkillPointAllocator:GetDecreaseSkillAction()
+    if self:CanSell() then
+        return ZO_SKILL_POINT_ACTION.SELL
+    elseif self:CanUnmorph() then
+        return ZO_SKILL_POINT_ACTION.UNMORPH
+    elseif self:CanDecreaseRank() then
+        return ZO_SKILL_POINT_ACTION.DECREASE_RANK
+    else
+        return ZO_SKILL_POINT_ACTION.NONE
+    end
 end
 
 -- Utility --

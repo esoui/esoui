@@ -1,15 +1,28 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_GroupMenuKeyboard_CategoryHeader" inherits="ZO_IconChildlessHeader" virtual="true">
+        <Control name="ZO_GroupMenuKeyboard_StatusIconHeader" inherits="ZO_StatusIconHeader" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" override="true">
-                    <DimensionConstraints maxX="200"/>
+                    <DimensionConstraints maxX="ZO_GROUP_MENU_KEYBOARD_TREE_LABEL_WIDTH" />
                 </Label>
             </Controls>
         </Control>
 
-        <Button name="ZO_PreferredRolesButton"  inherits="ZO_RadioButton" virtual="true">
+        <Control name="ZO_GroupMenuKeyboard_StatusIconChildlessHeader" inherits="ZO_StatusIconChildlessHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="ZO_GROUP_MENU_KEYBOARD_TREE_LABEL_WIDTH" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_GroupMenuKeyboard_Subcategory" inherits="ZO_TreeStatusLabelSubCategory" maxLineCount="2" newLineIndent="10" virtual="true">
+            <DimensionConstraints maxX="ZO_GROUP_MENU_KEYBOARD_TREE_SUBCATEGORY_LABEL_WIDTH"/>
+        </Label>
+
+        <Button name="ZO_PreferredRolesButton" inherits="ZO_RadioButton" virtual="true">
             <Dimensions x="48" y="48"/>
+
             <OnMouseEnter>
                 ZO_PreferredRolesButton_OnMouseEnter(self)
             </OnMouseEnter>
@@ -42,9 +55,9 @@
                 </Control>
                 
                 <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
-                    <Dimensions x="275" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RolesCategoriesDivider" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="10" />
-                    <Anchor point="BOTTOMLEFT" offsetX="-10" />
+                    <Dimensions x="ZO_GROUP_MENU_KEYBOARD_TREE_WIDTH" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RolesCategoriesDivider" relativePoint="BOTTOMLEFT" offsetX="-28" offsetY="10" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-28" />
                 </Control>
             </Controls>
         </TopLevelControl>

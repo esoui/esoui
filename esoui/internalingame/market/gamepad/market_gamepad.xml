@@ -123,5 +123,34 @@
             </Controls>
         </TopLevelControl>
 
+        <TopLevelControl name="ZO_GamepadEndeavorSealMarket_PreScene" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors" hidden="true" >
+            <OnInitialized>
+                ZO_GamepadEndeavorSealMarket_PreScene_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)FullPane" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+
+                    <Controls>
+                        <Control name="$(parent)Container" resizeToFitDescendents="true">
+                            <Anchor point="CENTER" offsetY="-150"/>
+                            <Controls>
+                                <Label name="$(parent)LoadingText" inherits="ZO_GamepadScreenHeaderMessageTextTemplate" horizontalAlignment="LEFT" text="SI_GAMEPAD_MARKET_PRESCENE_LOADING">
+                                    <Anchor point="TOPRIGHT" />
+                                </Label>
+                                
+                                <Control name="$(parent)LoadingIcon" inherits="ZO_LoadingIcon_Gamepad">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)LoadingText" relativePoint="LEFT" offsetX="-10"/>
+                                    <Dimensions x="128" y="128"/>
+                                </Control>
+                            </Controls>
+
+                        </Control>
+                    </Controls>
+
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
     </Controls>
 </GuiXml>

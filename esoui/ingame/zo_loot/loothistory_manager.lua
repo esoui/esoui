@@ -107,6 +107,18 @@ function LootHistory_Manager:Initialize()
         end
     end
 
+    local function OnCompanionExperienceGainUpdate(...)
+        if CanAddLootEntry() then
+            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnCompanionExperienceGainUpdate(...)
+        end
+    end
+
+    local function OnCompanionRapportUpdate(...)
+        if CanAddLootEntry() then
+            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnCompanionRapportUpdate(...)
+        end
+    end
+
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function(eventId, ...) OnInventorySlotUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CURRENCY_UPDATE, function(eventId, ...) OnCurrencyUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_EXPERIENCE_GAIN, function(eventId, ...) OnExperienceGainUpdate(...) end)
@@ -117,6 +129,8 @@ function LootHistory_Manager:Initialize()
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationNew", function(...) OnNewCollectibleReceived(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_SKILL_XP_UPDATE, function(eventId, ...) OnSkillExperienceUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_ANTIQUITY_LEAD_ACQUIRED, function(eventId, ...) OnAntiquityLeadAcquired(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_COMPANION_EXPERIENCE_GAIN, function(eventId, ...) OnCompanionExperienceGainUpdate(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_COMPANION_RAPPORT_UPDATE, function(eventId, ...) OnCompanionRapportUpdate(...) end)
 end
 
 ZO_LOOT_HISTORY_MANAGER = LootHistory_Manager:New()

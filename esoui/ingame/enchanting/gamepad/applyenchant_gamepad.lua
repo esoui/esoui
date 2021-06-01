@@ -67,7 +67,7 @@ function ZO_ApplyEnchant_Gamepad:InitializeDefaultTooltip(tooltip)
         GAMEPAD_TOOLTIPS:LayoutBagItem(tooltip, self.itemBag, self.itemIndex)
 
         if self.itemBag == BAG_WORN then
-            ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltip, self.itemIndex)
+            ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltip, self.itemIndex, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
         else
             GAMEPAD_TOOLTIPS:ClearStatusLabel(tooltip)
         end

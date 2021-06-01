@@ -131,15 +131,10 @@
                     <Controls>
                         <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
                             <OnInitialized>
-                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_BACKPACK, 70)
+                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_BACKPACK)
                             </OnInitialized>
                         </Control>
                     </Controls>
-                </Control>
-
-                <Control name="$(parent)Quest" inherits="ZO_ScrollList" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)List" />
                 </Control>
 
                 <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">
@@ -193,7 +188,7 @@
                     <Controls>
                         <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
                             <OnInitialized>
-                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_BANK, 70)
+                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_BANK)
                             </OnInitialized>
                         </Control>
                     </Controls>
@@ -302,7 +297,7 @@
                     <Controls>
                         <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
                             <OnInitialized>
-                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_BANK, 70)
+                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_BANK)
                             </OnInitialized>
                         </Control>
                     </Controls>
@@ -359,7 +354,7 @@
                     <Controls>
                         <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
                             <OnInitialized>
-                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_GUILDBANK, 70)
+                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_GUILDBANK)
                             </OnInitialized>
                         </Control>
 
@@ -391,11 +386,6 @@
             <Dimensions x="565" />
             <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-20" />
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
-            
-            <!-- This OnInitialized needs to be in the last declared inventory toplevel so that the xml is loaded before running the Lua -->
-            <OnInitialized>
-                ZO_PlayerInventory_Initialize()
-            </OnInitialized>
 
             <Controls>
                 <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
@@ -429,10 +419,55 @@
                     <Controls>
                         <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
                             <OnInitialized>
-                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_VIRTUAL, 70)
+                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_VIRTUAL)
                             </OnInitialized>
                         </Control>
                     </Controls>
+                </Control>
+
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_QuestItems" hidden="true" mouseEnabled="true">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+
+            <!-- This OnInitialized needs to be in the last declared inventory toplevel so that the xml is loaded before running the Lua -->
+            <OnInitialized>
+                ZO_PlayerInventory_Initialize()
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
+
+                <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
+
+                <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="TOPLEFT" offsetX="50" offsetY="180"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="BOTTOMRIGHT" offsetX="-50" offsetY="-50" />
+                </Label>
+
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
+                    <Controls>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Dimensions x="241" y="20" />
+                            <Anchor point="LEFT" offsetX="51" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" />
                 </Control>
 
                 <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">

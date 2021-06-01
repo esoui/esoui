@@ -39,7 +39,7 @@ local function HandleTabSwitch(tabData)
 end
 
 -- Item List Sort management
-local sortKeys =
+local SORT_KEYS =
 {
     slotIndex = { isNumeric = true },
     stackCount = { tiebreaker = "slotIndex", isNumeric = true },
@@ -55,7 +55,7 @@ local sortKeys =
 }
 
 function ZO_Inventory_GetDefaultHeaderSortKeys()
-    return sortKeys
+    return SORT_KEYS
 end
 
 -- Item List Display management
@@ -256,7 +256,7 @@ function ZO_InventoryManager:Initialize(control)
     -- Need to define these in reverse order than how you want to display them
     local BACKPACK_FILTER_KEYS =
     {
-        ITEM_TYPE_DISPLAY_CATEGORY_JUNK, ITEM_TYPE_DISPLAY_CATEGORY_QUEST, ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS, ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING, ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING,
+        ITEM_TYPE_DISPLAY_CATEGORY_JUNK, ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS, ITEM_TYPE_DISPLAY_CATEGORY_COMPANION, ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING, ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING,
         ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE, ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY, ITEM_TYPE_DISPLAY_CATEGORY_ARMOR, ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS, ITEM_TYPE_DISPLAY_CATEGORY_ALL,
     }
 
@@ -265,10 +265,6 @@ function ZO_InventoryManager:Initialize(control)
         local filterData = ZO_ItemFilterUtils.GetItemTypeDisplayCategoryFilterDisplayInfo(key)
 
         local inventoryType = INVENTORY_BACKPACK
-        if filterData.filterType == ITEM_TYPE_DISPLAY_CATEGORY_QUEST then
-            inventoryType = INVENTORY_QUEST_ITEM
-        end
-
         local filter = CreateNewTabFilterData(filterData.filterType, inventoryType, filterData.filterString, filterData.icons.up, filterData.icons.down, filterData.icons.over, filterData.hideColumnTable, filterData.hideTabFunction)
         table.insert(BACKPACK_FILTERS, filter)
     end
@@ -286,7 +282,7 @@ function ZO_InventoryManager:Initialize(control)
 
     local BANK_FILTER_KEYS =
     {
-        ITEM_TYPE_DISPLAY_CATEGORY_JUNK, ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS, ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING, ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING,
+        ITEM_TYPE_DISPLAY_CATEGORY_JUNK, ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS, ITEM_TYPE_DISPLAY_CATEGORY_COMPANION, ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING, ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING,
         ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE, ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY, ITEM_TYPE_DISPLAY_CATEGORY_ARMOR, ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS, ITEM_TYPE_DISPLAY_CATEGORY_ALL
     }
 
@@ -296,7 +292,7 @@ function ZO_InventoryManager:Initialize(control)
 
     local GUILD_BANK_FILTER_KEYS =
     {
-        ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS, ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING, ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE,
+        ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS, ITEM_TYPE_DISPLAY_CATEGORY_COMPANION, ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING, ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE,
         ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY, ITEM_TYPE_DISPLAY_CATEGORY_ARMOR, ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS, ITEM_TYPE_DISPLAY_CATEGORY_ALL
     }
 
@@ -317,10 +313,6 @@ function ZO_InventoryManager:Initialize(control)
             searchFilters[filterId] = {}
 
             local currentInventoryType = inventoryType
-            if filterId == ITEM_TYPE_DISPLAY_CATEGORY_QUEST then
-                currentInventoryType = INVENTORY_QUEST_ITEM
-            end
-
             local searchFilterAtId = searchFilters[filterId]
             for _, subfilterKey in ipairs(subFilters) do
                 local filterData = ZO_ItemFilterUtils.GetSearchFilterData(filterId, subfilterKey)
@@ -369,14 +361,14 @@ function ZO_InventoryManager:Initialize(control)
             SPECIALIZED_ITEMTYPE_FURNISHING_ORNAMENTAL, SPECIALIZED_ITEMTYPE_FURNISHING_SEATING, SPECIALIZED_ITEMTYPE_FURNISHING_LIGHT,
             SPECIALIZED_ITEMTYPE_FURNISHING_TARGET_DUMMY, SPECIALIZED_ITEMTYPE_FURNISHING_CRAFTING_STATION, SPECIALIZED_ITEMTYPE_NONE,
         },
+        [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] =
+        {
+            ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY, ITEM_TYPE_DISPLAY_CATEGORY_ARMOR, ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS, ITEM_TYPE_DISPLAY_CATEGORY_ALL,
+        },
         [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] =
         {
             ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS, ITEM_TYPE_DISPLAY_CATEGORY_TRASH, ITEM_TYPE_DISPLAY_CATEGORY_LURE, ITEM_TYPE_DISPLAY_CATEGORY_TROPHY, ITEM_TYPE_DISPLAY_CATEGORY_TOOL,
             ITEM_TYPE_DISPLAY_CATEGORY_SIEGE, ITEM_TYPE_DISPLAY_CATEGORY_SOUL_GEM, ITEM_TYPE_DISPLAY_CATEGORY_GLYPH, ITEM_TYPE_DISPLAY_CATEGORY_APPEARANCE, ITEM_TYPE_DISPLAY_CATEGORY_ALL,
-        },
-        [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] =
-        {
-            ITEM_TYPE_DISPLAY_CATEGORY_ALL,
         },
         [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] =
         {
@@ -400,6 +392,7 @@ function ZO_InventoryManager:Initialize(control)
         },
         [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING],
         [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING],
+        [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_COMPANION],
         [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS],
         [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_JUNK],
     }
@@ -416,6 +409,7 @@ function ZO_InventoryManager:Initialize(control)
         [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = BANK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE],
         [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = BANK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING],
         [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = BANK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING],
+        [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = BANK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_COMPANION],
         [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = BANK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS],
     }
 
@@ -521,17 +515,14 @@ function ZO_InventoryManager:Initialize(control)
         {
             slots = {},
             slotType = SLOT_TYPE_QUEST_ITEM,
-            listView = ZO_PlayerInventoryQuest,
+            listView = ZO_QuestItemsList,
             listDataType = INVENTORY_DATA_TYPE_QUEST,
             listSetupCallback = SetupQuestRow,
             listHiddenCallback = OnInventoryItemRowHidden,
             currentFilter = ITEM_TYPE_DISPLAY_CATEGORY_ALL,
             currentSortKey = "name",
             currentSortOrder = ZO_SORT_ORDER_UP,
-            tabFilters = BACKPACK_FILTERS,
-            subFilters = BACKPACK_SEARCH_FILTERS,
-            filterBar = ZO_PlayerInventoryTabs,
-            subFilterBar = ZO_PlayerInventorySearchFiltersSubTabs,
+            filterBar = ZO_QuestItemsTabs,
             rowTemplate = "ZO_PlayerInventorySlot",
             hiddenColumns = ZO_QUEST_ITEMS_HIDDEN_COLUMNS,
         },
@@ -649,6 +640,7 @@ function ZO_InventoryManager:Initialize(control)
     self:InitializeHeaderSort(INVENTORY_HOUSE_BANK, inventories[INVENTORY_HOUSE_BANK], ZO_HouseBankSortBy)
     self:InitializeHeaderSort(INVENTORY_GUILD_BANK, inventories[INVENTORY_GUILD_BANK], ZO_GuildBankSortBy)
     self:InitializeHeaderSort(INVENTORY_CRAFT_BAG, inventories[INVENTORY_CRAFT_BAG], ZO_CraftBagSortBy)
+    self:InitializeHeaderSort(INVENTORY_QUEST_ITEM, inventories[INVENTORY_QUEST_ITEM], ZO_QuestItemsSortBy)
 
     self.inventories = inventories
     self.searchToInventoryType = {}
@@ -688,13 +680,9 @@ function ZO_InventoryManager:Initialize(control)
             end
 
             local UPDATE_EVEN_IF_HIDDEN = true
-            if self.isListDirty[INVENTORY_BACKPACK] or self.isListDirty[INVENTORY_QUEST_ITEM] then
+            if self.isListDirty[INVENTORY_BACKPACK] then
                 if TEXT_SEARCH_MANAGER:IsFilterTargetInContext(self.inventories[INVENTORY_BACKPACK].currentContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT) then
                     self:UpdateList(INVENTORY_BACKPACK, UPDATE_EVEN_IF_HIDDEN)
-                end
-
-                if TEXT_SEARCH_MANAGER:IsFilterTargetInContext(self.inventories[INVENTORY_QUEST_ITEM].currentContext, BACKGROUND_LIST_FILTER_TARGET_QUEST_ITEM_ID) then
-                    self:UpdateList(INVENTORY_QUEST_ITEM, UPDATE_EVEN_IF_HIDDEN)
                 end
             end
             self:RefreshMoney()
@@ -713,17 +701,17 @@ function ZO_InventoryManager:Initialize(control)
         end
     end)
 
-    SHARED_INVENTORY:RegisterCallback("SlotAdded", function(bagId, slotIndex, newSlotData)
+    SHARED_INVENTORY:RegisterCallback("SlotAdded", function(bagId, slotIndex, newSlotData, suppressItemAlert)
         local inventory = self.bagToInventoryType[bagId]
         if inventory then
-            self:OnInventoryItemAdded(inventory, bagId, slotIndex, newSlotData)
+            self:OnInventoryItemAdded(inventory, bagId, slotIndex, newSlotData, suppressItemAlert)
         end
     end)
 
-    SHARED_INVENTORY:RegisterCallback("SlotRemoved", function(bagId, slotIndex, oldSlotData)
+    SHARED_INVENTORY:RegisterCallback("SlotRemoved", function(bagId, slotIndex, oldSlotData, suppressItemAlert)
         local inventory = self.bagToInventoryType[bagId]
         if inventory then
-            self:OnInventoryItemRemoved(inventory, bagId, slotIndex, oldSlotData)
+            self:OnInventoryItemRemoved(inventory, bagId, slotIndex, oldSlotData, suppressItemAlert)
         end
     end)
 
@@ -741,6 +729,7 @@ function ZO_InventoryManager:Initialize(control)
     self:CreateHouseBankScene()
     self:CreateGuildBankScene()
     self:CreateCraftBagFragment()
+    self:CreateQuestItemsFragment()
 
     self:RegisterForEvents(control)
 end
@@ -803,17 +792,16 @@ end
 
 function ZO_InventoryManager:ActivateInventorySearch()
     TEXT_SEARCH_MANAGER:ActivateTextSearch("playerInventoryTextSearch")
-    self:SetContextForInventories("playerInventoryTextSearch", { INVENTORY_BACKPACK, INVENTORY_QUEST_ITEM, INVENTORY_CRAFT_BAG })
+    self:SetContextForInventories("playerInventoryTextSearch", { INVENTORY_BACKPACK, INVENTORY_CRAFT_BAG })
 
-    local SUPPRESS_TEXT_CHANGED_CALLBACK = true
-    self.inventories[INVENTORY_BACKPACK].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("playerInventoryTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
-    self.inventories[INVENTORY_CRAFT_BAG].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("playerInventoryTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
+    local inventorySearchText = TEXT_SEARCH_MANAGER:GetSearchText("playerInventoryTextSearch")
+    self.inventories[INVENTORY_BACKPACK].searchBox:SetText(inventorySearchText)
+    self.inventories[INVENTORY_CRAFT_BAG].searchBox:SetText(inventorySearchText)
 end
 
 function ZO_InventoryManager:DeactivateInventorySearch()
     TEXT_SEARCH_MANAGER:DeactivateTextSearch("playerInventoryTextSearch")
     self.inventories[INVENTORY_BACKPACK].currentContext = nil
-    self.inventories[INVENTORY_QUEST_ITEM].currentContext = nil
     TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
 end
 
@@ -821,9 +809,9 @@ function ZO_InventoryManager:ActivateBankSearch()
     TEXT_SEARCH_MANAGER:ActivateTextSearch("playerBankTextSearch")
     self:SetContextForInventories("playerBankTextSearch", { INVENTORY_BACKPACK, INVENTORY_BANK })
 
-    local SUPPRESS_TEXT_CHANGED_CALLBACK = true
-    self.inventories[INVENTORY_BACKPACK].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("playerBankTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
-    self.inventories[INVENTORY_BANK].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("playerBankTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
+    local bankSearchText = TEXT_SEARCH_MANAGER:GetSearchText("playerBankTextSearch")
+    self.inventories[INVENTORY_BACKPACK].searchBox:SetText(bankSearchText)
+    self.inventories[INVENTORY_BANK].searchBox:SetText(bankSearchText)
 end
 
 function ZO_InventoryManager:DeactivateBankSearch()
@@ -838,8 +826,9 @@ function ZO_InventoryManager:ActivateHouseBankSearch()
     self:SetContextForInventories("houseBankTextSearch", { INVENTORY_BACKPACK, INVENTORY_HOUSE_BANK })
 
     local SUPPRESS_TEXT_CHANGED_CALLBACK = true
-    self.inventories[INVENTORY_BACKPACK].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("houseBankTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
-    self.inventories[INVENTORY_HOUSE_BANK].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("houseBankTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
+    local houseBankSearchText = TEXT_SEARCH_MANAGER:GetSearchText("houseBankTextSearch")
+    self.inventories[INVENTORY_BACKPACK].searchBox:SetText(houseBankSearchText)
+    self.inventories[INVENTORY_HOUSE_BANK].searchBox:SetText(houseBankSearchText)
 end
 
 function ZO_InventoryManager:DeactivateHouseBankSearch()
@@ -855,8 +844,9 @@ function ZO_InventoryManager:ActivateGuildBankSearch()
     TEXT_SEARCH_MANAGER:ActivateTextSearch("guildBankTextSearch")
     self:SetContextForInventories("guildBankTextSearch", { INVENTORY_BACKPACK, INVENTORY_GUILD_BANK })
 
-    self.inventories[INVENTORY_BACKPACK].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("guildBankTextSearch"))
-    self.inventories[INVENTORY_GUILD_BANK].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("guildBankTextSearch"))
+    local guildBankSearchText = TEXT_SEARCH_MANAGER:GetSearchText("guildBankTextSearch")
+    self.inventories[INVENTORY_BACKPACK].searchBox:SetText(guildBankSearchText)
+    self.inventories[INVENTORY_GUILD_BANK].searchBox:SetText(guildBankSearchText)
 end
 
 function ZO_InventoryManager:DeactivateGuildBankSearch()
@@ -927,12 +917,12 @@ do
 
     local function HandleCursorPickup(eventCode, cursorType, unused1, unused2, unused3, unused4, unused5, unused6, itemSoundCategory)
         if cursorType == MOUSE_CONTENT_INVENTORY_ITEM or cursorType == MOUSE_CONTENT_EQUIPPED_ITEM or cursorType == MOUSE_CONTENT_QUEST_ITEM then
-            ZO_InventoryLandingArea_SetHidden(ZO_PlayerBankBackpackLandingArea, false, SI_INVENTORY_LANDING_AREA_MOVE_TO_BANK)
-            ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false, SI_INVENTORY_LANDING_AREA_MOVE_TO_BACKPACK)
+            ZO_InventoryLandingArea_SetHidden(ZO_PlayerBankBackpackLandingArea, false)
+            ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false)
         elseif cursorType == MOUSE_CONTENT_STORE_ITEM then
-            ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false, SI_INVENTORY_LANDING_AREA_BUY_ITEM)
+            ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false)
         elseif cursorType == MOUSE_CONTENT_STORE_BUYBACK_ITEM then
-            ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false, SI_INVENTORY_LANDING_AREA_BUYBACK_ITEM)
+            ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false)
         end
 
         PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_PICKUP)
@@ -1142,6 +1132,11 @@ do
         control:RegisterForEvent(EVENT_LEVEL_UPDATE, RefreshAllInventoryOverlays)
         control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
         control:RegisterForEvent(EVENT_CHAMPION_POINT_GAINED, RefreshAllInventoryOverlays)
+        -- This is not ideal, but currently event filters only allow for 1 unit tag
+        EVENT_MANAGER:RegisterForEvent("InventoryCompanionLevelUpdate", EVENT_LEVEL_UPDATE, RefreshAllInventoryOverlays)
+        EVENT_MANAGER:AddFilterForEvent("InventoryCompanionLevelUpdate", EVENT_LEVEL_UPDATE, "companion")
+        control:RegisterForEvent(EVENT_COMPANION_ACTIVATED, RefreshAllInventoryOverlays)
+        control:RegisterForEvent(EVENT_COMPANION_DEACTIVATED, RefreshAllInventoryOverlays)
     end
 end
 
@@ -1193,6 +1188,8 @@ function ZO_InventoryManager:ApplySort(inventoryType)
         inventory = self.inventories[INVENTORY_GUILD_BANK]
     elseif inventoryType == INVENTORY_CRAFT_BAG then
         inventory = self.inventories[INVENTORY_CRAFT_BAG]
+    elseif inventoryType == INVENTORY_QUEST_ITEM then
+        inventory = self.inventories[INVENTORY_QUEST_ITEM]
     else
         -- Use normal inventory by default (instead of the quest item inventory for example)
         inventory = self.inventories[self.selectedTabType]
@@ -1203,7 +1200,7 @@ function ZO_InventoryManager:ApplySort(inventoryType)
 
     if inventory.sortFn == nil then
         inventory.sortFn = function(entry1, entry2)
-            return ZO_TableOrderingFunction(entry1.data, entry2.data, inventory.currentSortKey, sortKeys, inventory.currentSortOrder)
+            return ZO_TableOrderingFunction(entry1.data, entry2.data, inventory.currentSortKey, SORT_KEYS, inventory.currentSortOrder)
         end
     end
 
@@ -1211,15 +1208,13 @@ function ZO_InventoryManager:ApplySort(inventoryType)
     ZO_ScrollList_Commit(list)
 end
 
--- Utility function to basically remap quest_item inventory to the backpack inventory because the backpack inventory
--- is what stores all the display-type data.
+-- Deprecated function remaining for addon support.
 function ZO_InventoryManager:GetDisplayInventoryTable(inventoryType)
-    inventoryType = (inventoryType == INVENTORY_QUEST_ITEM) and INVENTORY_BACKPACK or inventoryType
     return self.inventories[inventoryType]
 end
 
 function ZO_InventoryManager:GetTabFilterInfo(inventoryType, tabControl)
-    local inventory = self:GetDisplayInventoryTable(inventoryType)
+    local inventory = self.inventories[inventoryType]
     local filterData = inventory.tabFilters[tabControl] or tabControl -- the or tabControl is for the new style, because the data table is just passed in here
 
     return filterData.filterType, filterData.activeTabText, filterData.hiddenColumns
@@ -1232,20 +1227,6 @@ do
     end
 
     function ZO_InventoryManager:ChangeFilter(filterTab)
-        -- special case inventory list hiding based on selecting quest inventory
-        -- bank filters don't mess with the visibility of the regular inventory
-        if not filterTab.isSubFilter and filterTab.descriptor == ITEM_TYPE_DISPLAY_CATEGORY_QUEST then
-            ZO_PlayerInventoryList:SetHidden(true)
-            ZO_PlayerInventoryQuest:SetHidden(false)
-            self.selectedTabType = INVENTORY_QUEST_ITEM
-        end
-
-        if filterTab.inventoryType == INVENTORY_BACKPACK then
-            ZO_PlayerInventoryList:SetHidden(false)
-            ZO_PlayerInventoryQuest:SetHidden(true)
-            self.selectedTabType = INVENTORY_BACKPACK
-        end
-
         local inventoryType = filterTab.inventoryType
         local inventory = self.inventories[inventoryType]
 
@@ -1271,12 +1252,13 @@ do
             formattedTabText = activeTabText
         end
 
-        local displayInventory = self:GetDisplayInventoryTable(inventoryType)
+        local displayInventory = self.inventories[inventoryType]
         local activeTabControl = displayInventory.activeTab
         if activeTabControl then
             activeTabControl:SetText(formattedTabText)
         end
 
+        local currentFilterType = inventory.currentFilter
         if not filterTab.isSubFilter then
             local menuBar = inventory.subFilterBar
             if menuBar then
@@ -1289,8 +1271,8 @@ do
                 ZO_MenuBar_ClearButtons(menuBar)
 
                 if inventory.subFilters then
-                    if inventory.subFilters[inventory.currentFilter] then
-                       for _, data in ipairs(inventory.subFilters[inventory.currentFilter]) do
+                    if inventory.subFilters[currentFilterType] then
+                       for _, data in ipairs(inventory.subFilters[currentFilterType]) do
                             data.control = ZO_MenuBar_AddButton(menuBar, data)
                         end
 
@@ -1298,11 +1280,12 @@ do
                     end
                 end
             end
-        elseif self.flashingSlot and ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(self.flashingSlot, inventory.currentFilter, filterTab.filterType) then
-            local currentFilter = inventory.currentFilter
-            for _, subFilter in pairs(inventory.subFilters[currentFilter]) do
-                if ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(self.flashingSlot, currentFilter, subFilter.filterType) then
-                    self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
+        elseif #self.flashingSlots > 0 then
+            for _, flashingSlot in ipairs(self.flashingSlots) do
+                for _, subFilter in pairs(inventory.subFilters[currentFilterType]) do
+                    if ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(flashingSlot, currentFilterType, subFilter.filterType) and ZO_IndexOfElementInNumericallyIndexedTable(inventory.backingBags, flashingSlot.bagId) then
+                        self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
+                    end
                 end
             end
         end
@@ -1381,10 +1364,6 @@ end
 function ZO_InventoryManager:ToggleSortOrder(sortButton, inventoryType)
     local inventory = self.inventories[inventoryType]
     inventory.currentSortOrder = not inventory.currentSortOrder
-
-    if inventoryType == INVENTORY_BACKPACK then
-        self.inventories[INVENTORY_QUEST_ITEM].currentSortOrder = inventory.currentSortOrder
-    end
 
     self:UpdateSortOrderButtonTextures(sortButton, inventoryType)
     self:ApplySort(inventoryType)
@@ -1477,25 +1456,24 @@ end
 
 function ZO_InventoryManager:SetupCategoryFlashAnimation()
     self.categoryFlashAnimationTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_Inventory_NewItemCategory_FlashAnimation")
+    self.flashingSlots = {}
     self.listeningControls = {}
 
     local function OnStop()
-        self.flashingSlot = nil
+        self.flashingSlots = {}
         self.listeningControls = {}
     end
     self.categoryFlashAnimationTimeline:SetHandler("OnStop", OnStop)
 end
 
 function ZO_InventoryManager:AddCategoryFlashAnimationControl(control)
-    table.insert(self.listeningControls, control)
+    local controlName = control:GetName()
+    self.listeningControls[controlName] = control
 end
 
 function ZO_InventoryManager:RemoveCategoryFlashAnimationControl(control)
-    local removeIndex = ZO_IndexOfElementInNumericallyIndexedTable(self.listeningControls, control)
-
-    if removeIndex then
-        table.remove(self.listeningControls, removeIndex)
-    end
+    local controlName = control:GetName()
+    self.listeningControls[controlName] = nil
 end
 
 do
@@ -1513,7 +1491,7 @@ do
             currentAlpha = FLASH_ANIMATION_MAX_ALPHA - alphaDelta
         end
 
-        for _, control in ipairs(self.listeningControls) do
+        for _, control in pairs(self.listeningControls) do
             control:SetAlpha(currentAlpha)
         end
     end
@@ -1524,16 +1502,33 @@ function ZO_InventoryManager:PlayItemAddedAlert(slot, inventory)
         return
     end
 
+    local isSlotAdded = false
     for _, tabFilter in pairs(inventory.tabFilters) do
-        for _, data in ipairs(slot.filterData) do
-            local filterItemTypeDisplayCategory = ZO_ItemFilterUtils.GetItemTypeDisplayCategoryByItemFilterType(data)
-            if filterItemTypeDisplayCategory == tabFilter.filterType or tabFilter.filterType == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+        if slot.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+            if tabFilter.filterType == ITEM_TYPE_DISPLAY_CATEGORY_COMPANION then
                 self:AddCategoryFlashAnimationControl(tabFilter.control:GetNamedChild("Flash"))
                 if not self.categoryFlashAnimationTimeline:IsPlaying() then
                     self.categoryFlashAnimationTimeline:PlayFromStart()
-                    self.flashingSlot = slot
                 end
-                break
+                if not isSlotAdded then
+                    table.insert(self.flashingSlots, slot)
+                    slotAdded = true
+                end
+            end
+        else
+            for _, data in ipairs(slot.filterData) do
+                local filterItemTypeDisplayCategory = ZO_ItemFilterUtils.GetItemTypeDisplayCategoryByItemFilterType(data)
+                if filterItemTypeDisplayCategory == tabFilter.filterType or tabFilter.filterType == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+                    self:AddCategoryFlashAnimationControl(tabFilter.control:GetNamedChild("Flash"))
+                    if not self.categoryFlashAnimationTimeline:IsPlaying() then
+                        self.categoryFlashAnimationTimeline:PlayFromStart()
+                    end
+                    if not isSlotAdded then
+                        table.insert(self.flashingSlots, slot)
+                        slotAdded = true
+                    end
+                    break
+                end
             end
         end
     end
@@ -1544,7 +1539,10 @@ function ZO_InventoryManager:PlayItemAddedAlert(slot, inventory)
             self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
             if not self.categoryFlashAnimationTimeline:IsPlaying() then
                 self.categoryFlashAnimationTimeline:PlayFromStart()
-                self.flashingSlot = slot
+            end
+            if not isSlotAdded then
+                table.insert(self.flashingSlots, slot)
+                slotAdded = true
             end
         end
     end
@@ -1552,7 +1550,7 @@ end
 
 function ZO_InventoryManager:UpdateApparelSection()
     if ZO_CharacterApparelSectionText then
-        local isApparelHidden = IsEquipSlotVisualCategoryHidden(EQUIP_SLOT_VISUAL_CATEGORY_APPAREL)
+        local isApparelHidden = IsEquipSlotVisualCategoryHidden(EQUIP_SLOT_VISUAL_CATEGORY_APPAREL, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
         local apparelString = isApparelHidden and GetString(SI_CHARACTER_EQUIP_APPAREL_HIDDEN) or GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL)
         ZO_CharacterApparelSectionText:SetText(apparelString)
     end
@@ -1601,11 +1599,11 @@ function ZO_InventoryManager:GetNumSlots(inventoryType, excludeUnavailable)
     return usedSlots, bagSize
 end
 
-function ZO_InventoryManager:OnInventoryItemRemoved(inventoryType, bagId, slotIndex, oldSlotData)
-    TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId)
+function ZO_InventoryManager:OnInventoryItemRemoved(inventoryType, bagId, slotIndex, oldSlotData, suppressItemAlert)
+    TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, suppressItemAlert)
 end
 
-function ZO_InventoryManager:OnInventoryItemAdded(inventoryType, bagId, slotIndex, newSlotData)
+function ZO_InventoryManager:OnInventoryItemAdded(inventoryType, bagId, slotIndex, newSlotData, suppressItemAlert)
     local inventory = self.inventories[inventoryType]
     newSlotData.searchData =
     {
@@ -1616,7 +1614,7 @@ function ZO_InventoryManager:OnInventoryItemAdded(inventoryType, bagId, slotInde
 
     newSlotData.inventory = inventory
 
-    TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId)
+    TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, suppressItemAlert or self.suppressItemAddedAlert)
 
     -- play a brief flash animation on all the filter tabs that match this item's filterTypes
     if newSlotData.brandNew then
@@ -1747,8 +1745,6 @@ function ZO_InventoryManager:UpdateList(inventoryType, updateEvenIfHidden)
                 end
             end
 
-            self.cachedSearchText = nil
-
             self:ApplySort(inventoryType)
 
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.bankWithdrawTabKeybindButtonGroup)
@@ -1790,6 +1786,7 @@ function ZO_InventoryManager:RefreshAllInventorySlots(inventoryType)
         self:EmptyInventory(inventory)
 
         self.suppressItemAddedAlert = true
+        TEXT_SEARCH_MANAGER:ClearPendingContextSearches()
 
         for _, bagId in ipairs(inventory.backingBags) do
             for slotIndex in ZO_IterateBagSlots(bagId) do
@@ -1804,6 +1801,7 @@ function ZO_InventoryManager:RefreshAllInventorySlots(inventoryType)
         self:LayoutInventoryItems(inventoryType)
 
         self.suppressItemAddedAlert = nil
+        TEXT_SEARCH_MANAGER:ExecutePendingContextSearches()
     end
 end
 
@@ -2080,6 +2078,10 @@ function ZO_InventoryManager:ApplyBackpackLayout(layoutData)
 
     local inventory = self.inventories[INVENTORY_BACKPACK]
     inventory.additionalFilter = layoutData.additionalFilter
+
+    local craftBag = self.inventories[INVENTORY_CRAFT_BAG]
+    craftBag.additionalFilter = layoutData.additionalFilter
+
     local menuBar = inventory.filterBar
 
     ZO_MenuBar_ClearButtons(menuBar)
@@ -2683,6 +2685,10 @@ function ZO_InventoryManager:CreateGuildBankScene()
     GUILD_BANK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildBank)
     GUILD_BANK_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
                                                             if newState == SCENE_SHOWING then
+                                                                if self.inventories[INVENTORY_GUILD_BANK].searchBox then
+                                                                    self.inventories[INVENTORY_GUILD_BANK].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText(self.inventories[INVENTORY_GUILD_BANK].currentContext))
+                                                                end
+
                                                                 self:RefreshMoney()
                                                                 self:UpdateFreeSlots(INVENTORY_GUILD_BANK)
 
@@ -2820,6 +2826,7 @@ function ZO_InventoryManager:RefreshAllGuildBankItems()
     self:EmptyInventory(inventory)
 
     self.suppressItemAddedAlert = true
+    TEXT_SEARCH_MANAGER:ClearPendingContextSearches()
 
     --Add items
     for _, bagId in ipairs(inventory.backingBags) do
@@ -2833,6 +2840,7 @@ function ZO_InventoryManager:RefreshAllGuildBankItems()
     self:UpdateFreeSlots(INVENTORY_BACKPACK)
 
     self.suppressItemAddedAlert = nil
+    TEXT_SEARCH_MANAGER:ExecutePendingContextSearches()
 end
 
 function ZO_InventoryManager:ClearAllGuildBankItems()
@@ -2912,12 +2920,14 @@ function ZO_InventoryManager:UpdateEmptyBagLabel(inventoryType, isEmptyList)
     if inventory then
         -- Quest items are both an inventory list and a backpack tab, we only want to update their label now if we are looking at that tab
         local label
-        if inventoryType == INVENTORY_BACKPACK or (inventoryType == INVENTORY_QUEST_ITEM and self.selectedTabType == INVENTORY_QUEST_ITEM) then
+        if inventoryType == INVENTORY_BACKPACK then
             label = ZO_PlayerInventory:GetNamedChild("Empty")
         elseif inventoryType == INVENTORY_CRAFT_BAG then
             label = ZO_CraftBag:GetNamedChild("Empty")
         elseif inventoryType == INVENTORY_GUILD_BANK then
             label = ZO_GuildBank:GetNamedChild("Empty")
+        elseif inventoryType == INVENTORY_QUEST_ITEM then
+            label = ZO_QuestItems:GetNamedChild("Empty")
         end
 
         if label then
@@ -2970,6 +2980,25 @@ function ZO_InventoryManager:CreateCraftBagFragment()
     end
 
     CRAFT_BAG_FRAGMENT:RegisterCallback("StateChange", OnStateChange)
+end
+
+function ZO_InventoryManager:CreateQuestItemsFragment()
+    QUEST_ITEMS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_QuestItems)
+
+    local UPDATE_EVEN_IF_HIDDEN = true
+    local function OnStateChange(oldState, newState)
+        if newState == SCENE_SHOWING then
+            if self.isListDirty[INVENTORY_QUEST_ITEM] then
+                self:UpdateList(INVENTORY_QUEST_ITEM, UPDATE_EVEN_IF_HIDDEN)
+            end
+            self:UpdateApparelSection()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            ZO_InventorySlot_RemoveMouseOverKeybinds()
+            self:ClearNewStatusOnItemsThePlayerHasSeen(INVENTORY_QUEST_ITEM)
+        end
+    end
+
+    QUEST_ITEMS_FRAGMENT:RegisterCallback("StateChange", OnStateChange)
 end
 
 ------------

@@ -112,7 +112,7 @@ function ZO_GuildBrowser_Gamepad:SetupList(list)
     end
 
     list:AddDataTemplate("ZO_GamepadSubMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    list:AddDataTemplateWithHeader("ZO_Gamepad_Dropdown_Item_Indented", BrowseGuildsDropdownSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplateWithHeader("ZO_Gamepad_Dropdown_Item_Indented", BrowseGuildsDropdownSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate", nil, "DropdownEntry")
 end
 
 function ZO_GuildBrowser_Gamepad:InitializeKeybindStripDescriptors()

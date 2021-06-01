@@ -1,0 +1,46 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CompanionProgressBarTemplate" virtual="true">
+            <Dimensions y="50" />
+            <Anchor point="TOPLEFT" />
+            <Anchor point="RIGHT" constrains="X" />
+            <Controls>
+                <Texture name="$(parent)Icon" level="1" pixelRoundingEnabled="true">
+                    <Dimensions x="50" y="50" />
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+
+                <Label name="$(parent)Level" font="ZoFontCallout2">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" />
+                </Label>
+
+                <StatusBar name="$(parent)Bar" inherits="ZO_ArrowStatusBarWithBG" mouseEnabled="true">
+                    <Dimensions y="20" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Level" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="-12" />
+                    <Anchor point="RIGHT" constrains="X" />
+                    <OnMouseEnter>
+                        self.progressBar:OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        self.progressBar:OnMouseExit(self)
+                    </OnMouseExit>
+                </StatusBar>
+
+                <Label name="$(parent)LevelType" font="ZoFontHeader2" modifyTextType="UPPERCASE" text="SI_COMPANION_LEVEL_LABEL">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT" offsetX="2" offsetY="3" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_CompanionProgress_Keyboard_TopLevel" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
+            <Dimensions x="375" y="56" />
+            <Anchor point="TOPLEFT" offsetX="15" offsetY="10"/>
+            <OnInitialized>
+                ZO_CompanionProgress_Keyboard_OnInitialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)ProgressBar" inherits="ZO_CompanionProgressBarTemplate" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

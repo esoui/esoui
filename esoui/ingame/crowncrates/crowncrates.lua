@@ -550,7 +550,7 @@ function ZO_CrownCrates:UpdateGemsLabel(amount)
 end
 
 function ZO_CrownCrates:UpdateCrownGemsQuantity()
-    local currentCrownGems = GetPlayerCrownGems()
+    local currentCrownGems = GetPlayerMarketCurrency(MKCT_CROWN_GEMS)
     self:UpdateGemsLabel(currentCrownGems)
     self.currentCrownGems = currentCrownGems
 end

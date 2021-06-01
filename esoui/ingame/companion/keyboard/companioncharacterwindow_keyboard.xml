@@ -1,0 +1,101 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CompanionCharacterWindow_Keyboard_TopLevel" mouseEnabled="true" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedWideLeftPanelBackground" offsetY="-40" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedWideLeftPanelBackground" offsetY="-30" />
+            <Dimensions x="190" />
+
+            <OnInitialized>
+                ZO_CompanionCharacterWindow_Keyboard_TopLevel_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_CHARACTER_EQUIP_TITLE">
+                    <Anchor point="TOPLEFT" offsetX="14" offsetY="26" />
+                </Label>
+
+                <Texture name="$(parent)HeaderDivider" textureFile="EsoUI/Art/CharacterWindow/characterWindow_leftSide_divider.dds">
+                    <Dimensions x="256" y="4" />
+                    <Anchor point="TOPLEFT" offsetY="63" />
+                </Texture>
+
+                <Label name="$(parent)ApparelSectionText" font="ZoFontHeader" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderDivider" relativePoint="BOTTOMLEFT" offsetX="14" offsetY="5" />
+                </Label>
+
+                <Button name="$(parent)EquipmentSlotsHead" inherits="ZO_InventoryEquippedSlot">
+                    <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="87" offsetY="100" />
+                </Button>
+
+                <Texture name="$(parent)PaperDoll">
+                    <Dimensions x="64" y="256" />
+                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsHead" relativePoint="BOTTOM" offsetY="6" />
+                </Texture>
+                
+                <!-- left side -->
+                <Button name="$(parent)EquipmentSlotsShoulder" inherits="ZO_InventoryEquippedSlot">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="156" />
+                </Button>
+                
+                <Button name="$(parent)EquipmentSlotsGlove" inherits="ZO_InventoryEquippedSlot">
+                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsShoulder" relativePoint="BOTTOM" offsetY="10" />
+                </Button>
+                
+                <Button name="$(parent)EquipmentSlotsLeg" inherits="ZO_InventoryEquippedSlot">
+                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsGlove" relativePoint="BOTTOM" offsetY="10" />
+                </Button>
+
+                <!-- right side -->
+                <Button name="$(parent)EquipmentSlotsChest" inherits="ZO_InventoryEquippedSlot">
+                    <Anchor point="TOPLEFT" offsetX="124" offsetY="156" />
+                </Button>
+                
+                <Button name="$(parent)EquipmentSlotsBelt" inherits="ZO_InventoryEquippedSlot">
+                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsChest" relativePoint="BOTTOM" offsetY="10" />
+                </Button>
+                
+                <Button name="$(parent)EquipmentSlotsFoot" inherits="ZO_InventoryEquippedSlot">
+                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsBelt" relativePoint="BOTTOM" offsetY="10" />
+                </Button>
+
+                <!-- Accessories -->
+                <Texture name="$(parent)AccessoriesSection" inherits="ZO_CharacterSheetDivider">
+                    <Anchor point="TOPLEFT" offsetY="314" />
+                    <OnInitialized>
+                        self:GetNamedChild("Text"):SetText(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_ACCESSORIES))
+                    </OnInitialized>
+                </Texture>
+
+                <Button name="$(parent)EquipmentSlotsNeck" inherits="ZO_InventoryEquippedSlot">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="345" />
+                </Button>
+                
+                <Button name="$(parent)EquipmentSlotsRing1" inherits="ZO_InventoryEquippedSlot">
+                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsNeck" relativePoint="RIGHT" offsetX="4" />
+                </Button>
+                
+                <Button name="$(parent)EquipmentSlotsRing2" inherits="ZO_InventoryEquippedSlot">
+                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsRing1" relativePoint="RIGHT" offsetX="4" />
+                </Button>
+
+                <!-- Weapons -->
+                <Texture name="$(parent)WeaponsSection" inherits="ZO_CharacterSheetDivider">
+                    <Anchor point="TOPLEFT" offsetY="400" />
+                    
+                    <OnInitialized>
+                        self:GetNamedChild("Text"):SetText(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_WEAPONS))
+                    </OnInitialized>
+                </Texture>
+
+                <Button name="$(parent)EquipmentSlotsMainHand" inherits="ZO_InventoryWeaponSlot">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="432" />
+                </Button>
+                
+                <Button name="$(parent)EquipmentSlotsOffHand" inherits="ZO_InventoryWeaponSlot" >
+                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsMainHand" relativePoint="RIGHT" offsetX="10" />
+                </Button>
+            </Controls>
+        </TopLevelControl>
+
+    </Controls>
+</GuiXml>

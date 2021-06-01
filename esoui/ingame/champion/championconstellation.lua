@@ -19,12 +19,12 @@ ZO_ChampionConstellationRingAnchor = ZO_InitializingObject:Subclass()
 function ZO_ChampionConstellationRingAnchor:Initialize(sceneGraph, anchorIndex)
     self.anchorIndex = anchorIndex
     local canvasControl = CHAMPION_PERKS:GetChampionCanvas()
-    self.constellationTexture = CreateControlFromVirtual("$(parent)Constellation", canvasControl, "ZO_Constellation", anchorIndex)
-    self.constellationGlowTexture = CreateControlFromVirtual("$(parent)ConstellationGlow", canvasControl, "ZO_ConstellationGlow", anchorIndex)
+    self.constellationZoomedOutTexture = CreateControlFromVirtual("$(parent)Constellation", canvasControl, "ZO_Constellation", anchorIndex)
+    self.constellationZoomedInTexture = CreateControlFromVirtual("$(parent)ConstellationZoomedIn", canvasControl, "ZO_ConstellationZoomedIn", anchorIndex)
     self.constellationSelectedTexture = CreateControlFromVirtual("$(parent)ConstellationMouseOver", canvasControl, "ZO_ConstellationMouseOver", anchorIndex)
 
     self.baseTextureAlphaInterpolator = ZO_LerpInterpolator:New(1)
-    self.glowTextureAlphaInterpolator = ZO_LerpInterpolator:New(0)
+    self.zoomedInTextureAlphaInterpolator = ZO_LerpInterpolator:New(0)
     self.selectedTextureAlphaInterpolator = ZO_LerpInterpolator:New(0)
 
     self.ringNode = sceneGraph:CreateNode(string.format("constellationRing%d", self.anchorIndex))
@@ -58,19 +58,19 @@ function ZO_ChampionConstellationRingAnchor:SetConstellation(constellation)
     local bottom =  (centerY + halfHeight) * normalizeFactorY
 
     self.rotatedNode:ClearControls()
-    self.constellationTexture:SetTexture(disciplineData:GetBackgroundTexture())
-    self.constellationTexture:SetDimensions(constellationComputedWidth, constellationComputedHeight)
-    self.constellationTexture:SetTextureCoords(left, right, top, bottom)
-    self.rotatedNode:AddTexture(self.constellationTexture, 0, 0, ZO_CHAMPION_CONSTELLATION_DEPTH)
-    self.rotatedNode:SetControlAnchorPoint(self.constellationTexture, BOTTOM)
+    self.constellationZoomedOutTexture:SetTexture(disciplineData:GetBackgroundZoomedOutTexture())
+    self.constellationZoomedOutTexture:SetDimensions(constellationComputedWidth, constellationComputedHeight)
+    self.constellationZoomedOutTexture:SetTextureCoords(left, right, top, bottom)
+    self.rotatedNode:AddTexture(self.constellationZoomedOutTexture, 0, 0, ZO_CHAMPION_CONSTELLATION_DEPTH)
+    self.rotatedNode:SetControlAnchorPoint(self.constellationZoomedOutTexture, BOTTOM)
 
-    self.constellationGlowTexture:SetTexture(disciplineData:GetBackgroundGlowTexture())
-    self.constellationGlowTexture:SetDimensions(constellationComputedWidth, constellationComputedHeight)
-    self.constellationGlowTexture:SetTextureCoords(left, right, top, bottom)
-    self.rotatedNode:AddTexture(self.constellationGlowTexture, 0, 0, ZO_CHAMPION_CONSTELLATION_DEPTH)
-    self.rotatedNode:SetControlAnchorPoint(self.constellationGlowTexture, BOTTOM)
+    self.constellationZoomedInTexture:SetTexture(disciplineData:GetBackgroundZoomedInTexture())
+    self.constellationZoomedInTexture:SetDimensions(constellationComputedWidth, constellationComputedHeight)
+    self.constellationZoomedInTexture:SetTextureCoords(left, right, top, bottom)
+    self.rotatedNode:AddTexture(self.constellationZoomedInTexture, 0, 0, ZO_CHAMPION_CONSTELLATION_DEPTH)
+    self.rotatedNode:SetControlAnchorPoint(self.constellationZoomedInTexture, BOTTOM)
 
-    self.constellationSelectedTexture:SetTexture(disciplineData:GetBackgroundSelectedTexture())
+    self.constellationSelectedTexture:SetTexture(disciplineData:GetBackgroundSelectedZoomedOutTexture())
     self.constellationSelectedTexture:SetDimensions(constellationComputedWidth, constellationComputedHeight)
     self.constellationSelectedTexture:SetTextureCoords(left, right, top, bottom)
     self.rotatedNode:AddTexture(self.constellationSelectedTexture, 0, 0, ZO_CHAMPION_CONSTELLATION_DEPTH)
@@ -87,16 +87,16 @@ end
 
 function ZO_ChampionConstellationRingAnchor:SetVisualInfo(visualInfo)
     self.baseTextureAlphaInterpolator:SetFluxParams(visualInfo.constellationBaseAlpha)
-    self.glowTextureAlphaInterpolator:SetFluxParams(visualInfo.constellationGlowAlpha)
+    self.zoomedInTextureAlphaInterpolator:SetFluxParams(visualInfo.constellationZoomedInBackgroundAlpha)
     self.selectedTextureAlphaInterpolator:SetFluxParams(visualInfo.constellationSelectedAlpha)
 end
 
 function ZO_ChampionConstellationRingAnchor:UpdateVisuals(timeSecs, frameDeltaSecs)
     local newConstellationAlpha = self.baseTextureAlphaInterpolator:Update(timeSecs, frameDeltaSecs)
-    self.constellationTexture:SetAlpha(newConstellationAlpha)
+    self.constellationZoomedOutTexture:SetAlpha(newConstellationAlpha)
 
-    local newGlowAlpha = self.glowTextureAlphaInterpolator:Update(timeSecs, frameDeltaSecs)
-    self.constellationGlowTexture:SetAlpha(newGlowAlpha)
+    local newGlowAlpha = self.zoomedInTextureAlphaInterpolator:Update(timeSecs, frameDeltaSecs)
+    self.constellationZoomedInTexture:SetAlpha(newGlowAlpha)
 
     local newSelectedAlpha = self.selectedTextureAlphaInterpolator:Update(timeSecs, frameDeltaSecs)
     self.constellationSelectedTexture:SetAlpha(newSelectedAlpha)
@@ -127,7 +127,7 @@ function ZO_ChampionCluster:Initialize(constellation, sceneGraph, championCluste
         self.backgroundTexture:SetDimensions(clusterComputedWidth, clusterComputedHeight)
 
         --Calculate the x and y coordinates of the background so that it is centered on the root star
-        local nx, ny = championClusterData:GetRootChampionSkillData():GetPosition()
+        local nx, ny = championClusterData:GetRootChampionSkillData():GetPositionNoClusterOffset()
         local x, y = ZO_Champion_ConvertNormalizedCoordinatesToNodeOffset(nx, ny)
         self.node:AddTexture(self.backgroundTexture, x, y, ZO_CHAMPION_CLUSTER_DEPTH)
     end

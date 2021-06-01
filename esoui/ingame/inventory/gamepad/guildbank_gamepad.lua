@@ -37,12 +37,7 @@ do
         return false
     end
 
-    function ZO_GamepadGuildBankInventoryList:RefreshList(shouldTriggerRefreshListCallback)
-        if self.control:IsHidden() then
-            self.isDirty = true
-            return
-        end
-
+    function ZO_GamepadGuildBankInventoryList:OnRefreshList(shouldTriggerRefreshListCallback)
         local guildId = GetSelectedGuildBankId()
         local shouldShowList = false
 
@@ -134,8 +129,6 @@ do
         end
 
         self.list:Commit()
-
-        self.isDirty = false
 
         if shouldTriggerRefreshListCallback and self.onRefreshListCallback then
             self.onRefreshListCallback(self.list)

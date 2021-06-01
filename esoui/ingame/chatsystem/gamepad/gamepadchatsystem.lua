@@ -276,6 +276,12 @@ function ZO_GamepadChatSystem:StartTextEntry(text, channel, target, dontShowHUDW
         return
     end
 
+    -- if we are in a scene that's blocking chat, we don't want to activate the chat whatsoever
+    -- this fixes issues where the chat is showing, but not active, when we enter a scene that blocks chat
+    if self:DoesCurrentSceneBlockChat() then
+        return
+    end
+
     if not dontShowHUDWindow then
         --As a convenience, auto enable the HUD if the user uses any shortcut to start chatting in the HUD
         SetSetting(SETTING_TYPE_UI, UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED, "true")

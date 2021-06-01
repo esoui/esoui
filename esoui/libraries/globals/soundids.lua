@@ -351,6 +351,7 @@ SOUNDS = {
     SKILL_LINE_LEVELED_UP           = "SkillLine_Leveled",
     ENLIGHTENED_STATE_GAINED        = "EnlightenedState_Gained",
     ENLIGHTENED_STATE_LOST          = "EnlightenedState_Lost",
+    COMPANION_ACTIVE_SKILL_UNLOCKED = "CompanionActiveSkillUnlocked",
 
     -- Experience/Champion Point sounds
     OVERLAND_BOSS_KILL              = "Overland_Boss_Kill",
@@ -372,14 +373,15 @@ SOUNDS = {
     GUILD_ROSTER_PROMOTE            = "GuildRoster_Promote",
 
     --Ability slotting sounds
-    ABILITY_SLOT_MENU_OPEN          = "Ability_Slot_Menu_Open",
-    ABILITY_SLOTTED                 = "Ability_Slotted",
-    ABILITY_SLOT_CLEARED            = "Ability_Unslotted",
-    ABILITY_MORPH_AVAILABLE         = "Ability_MorphAvailable",
-    ABILITY_RANK_UP                 = "Ability_RankedUp",
-    ABILITY_PICKED_UP               = "Ability_Picked_Up",
-    ABILITY_ULTIMATE_READY          = "Ability_Ultimate_Ready_Sound",
-    ABILITY_SYNERGY_READY           = "Ability_Synergy_Ready_Sound",
+    ABILITY_SLOT_MENU_OPEN              = "Ability_Slot_Menu_Open",
+    ABILITY_SLOTTED                     = "Ability_Slotted",
+    ABILITY_SLOT_CLEARED                = "Ability_Unslotted",
+    ABILITY_MORPH_AVAILABLE             = "Ability_MorphAvailable",
+    ABILITY_RANK_UP                     = "Ability_RankedUp",
+    ABILITY_PICKED_UP                   = "Ability_Picked_Up",
+    ABILITY_ULTIMATE_READY              = "Ability_Ultimate_Ready_Sound",
+    ABILITY_COMPANION_ULTIMATE_READY    = "Ability_Companion_Ultimate_Ready_Sound",
+    ABILITY_SYNERGY_READY               = "Ability_Synergy_Ready_Sound",
 
     --Skill point allocation
     SKILL_PURCHASED                     = "Ability_SkillPurchased",
@@ -965,4 +967,7 @@ SOUNDS = {
     ANTIQUITIES_FANFARE_FRAGMENT_DISCOVERED_FINAL = "Antiquities_Digging_Fragments_Found_All",
     ANTIQUITIES_FANFARE_COMPLETED = "Antiquities_Digging_Antiquity_Completed",
     ANTIQUITIES_FANFARE_FAILURE = "Antiquities_Digging_Failure",
+
+    -- Endeavors
+    ENDEAVOR_COMPLETED                     = "Endeavor_Complete",
 }

@@ -126,7 +126,7 @@ end
 
 function ZO_ItemSetsBook_Shared:OnPieceNewStatusCleared(itemSetCollectionPieceData)
     local itemSetCollectionCategoryData = itemSetCollectionPieceData:GetItemSetCollectionData():GetCategoryData()
-    self:RefreshCategoryNewStatus(itemSetCollectionCategoryData) -- TODO: Profile to see if it's worth trying to refresh a single entry in the grid
+    self:RefreshCategoryNewStatus(itemSetCollectionCategoryData)
 end
 
 function ZO_ItemSetsBook_Shared:OnCollectionNewStatusCleared(itemSetCollectionData)

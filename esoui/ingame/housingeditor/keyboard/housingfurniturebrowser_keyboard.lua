@@ -33,6 +33,7 @@ function ZO_HousingFurnitureBrowser_Keyboard:Initialize(control)
     KEYBOARD_HOUSING_FURNITURE_BROWSER_SCENE = ZO_Scene:New(HOUSING_FURNITURE_KEYBOARD_SCENE_NAME, SCENE_MANAGER)
     KEYBOARD_HOUSING_FURNITURE_BROWSER_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
+            MARKET_CURRENCY_KEYBOARD:SetVisibleMarketCurrencyTypes({MKCT_CROWNS, MKCT_CROWN_GEMS})
             self:OnDeferredInitialization()
             self:OnShowing()
         elseif newState == SCENE_HIDING then

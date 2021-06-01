@@ -16,30 +16,17 @@ do
     local BUNDLE_HEADER = GetString(SI_MARKET_PRODUCT_TOOLTIP_BUNDLE)
     local DLC_HEADER = GetString(SI_MARKET_PRODUCT_TOOLTIP_DLC)
 
-    local NO_CATEGORY_NAME = nil
-    local NO_NICKNAME = nil
-    local HIDE_VISUAL_LAYER_INFO = false
-    local NO_COOLDOWN = nil
-    local HIDE_BLOCK_REASON = false
-
     function ZO_Tooltip:LayoutMarketProduct(productId, showCollectiblePurchasableHint)
         local productType = GetMarketProductType(productId)
         -- For some market product types we can just use other tooltip layouts
         if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-            local collectibleId, _, name, type, description, _, isPurchasable, hint = GetMarketProductCollectibleInfo(productId)
-            local showAsPurchasable
-            if not showCollectiblePurchasableHint then
-                showAsPurchasable = false
-            else
-                showAsPurchasable = isPurchasable
-            end
-
-            if type == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
-                hint = nil
-            end
-
-            local DEPRECATED_ARG = nil
-            self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, showAsPurchasable, description, hint, DEPRECATED_ARG, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+            local params =
+            {
+                collectibleId = GetMarketProductCollectibleInfo(productId),
+                showIfPurchasable = showCollectiblePurchasableHint,
+                showHint = type ~= COLLECTIBLE_CATEGORY_TYPE_HOUSE,
+            }
+            self:LayoutCollectibleWithParams(params)
         elseif productType == MARKET_PRODUCT_TYPE_ITEM then
             local itemLink = GetMarketProductItemLink(productId)
             local stackCount = GetMarketProductStackCount(productId)
@@ -246,7 +233,7 @@ do
                 currentUnlock = GetCurrentCharacterSlotsUpgrade()
                 maxUnlock = GetMaxCharacterSlotsUpgrade()
             elseif instantUnlockType == INSTANT_UNLOCK_OUTFIT then
-                currentUnlock = GetNumUnlockedOutfits()
+                currentUnlock = GetNumUnlockedOutfits(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                 maxUnlock = MAX_OUTFIT_UNLOCKS
             end
 

@@ -341,6 +341,26 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_EXPERIENCE_GAIN] = function(reason, level, pr
     end
 end
 
+local COMPANION_NAME_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_UNIT_REACTION_COLOR, UNIT_REACTION_COLOR_COMPANION))
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_COMPANION_EXPERIENCE_GAIN] = function(companionId, previousLevel, previousExperience, currentExperience)
+    local currentLevel = GetActiveCompanionLevelForExperiencePoints(currentExperience, previousLevel)
+    if currentLevel > previousLevel then
+        local secondaryTextLines = {}
+        local collectibleIcon = GetCollectibleIcon(GetCompanionCollectibleId(companionId))
+        table.insert(secondaryTextLines, zo_strformat(SI_COMPANION_LEVEL_UP_NAME_CSA, zo_iconFormat(collectibleIcon, "100%", "100%"), COMPANION_NAME_COLOR:Colorize(GetCompanionName(companionId))))
+        local previousNumSlots = GetCompanionNumSlotsUnlockedForLevel(previousLevel)
+        local currentNumSlots = GetCompanionNumSlotsUnlockedForLevel(currentLevel)
+        if currentNumSlots > previousNumSlots then
+            table.insert(secondaryTextLines, GetString(SI_COMPANION_ACTION_SLOT_UNLOCKED_NOTIFICATION))
+        end
+
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.LEVEL_UP)
+        messageParams:SetText(GetString(SI_COMPANION_LEVEL_UP_NOTIFICATION), table.concat(secondaryTextLines, "\n"))
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LEVEL_GAIN)
+        return messageParams
+    end
+end
+
 local function GetCurrentChampionPointsBarParams(triggeringEvent)
     local championPoints = GetPlayerChampionPointsEarned()
     local currentChampionXP = GetPlayerChampionXP()
@@ -1072,9 +1092,9 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED] = functio
     return messageParams
 end
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_OUTFIT_CHANGE_RESPONSE] = function(result, outfitIndex)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_OUTFIT_CHANGE_RESPONSE] = function(result, actorCategory, outfitIndex)
     if result == APPLY_OUTFIT_CHANGES_RESULT_SUCCESS then
-        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
+        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, outfitIndex)
         if outfitManipulator then
             local outfitName = outfitManipulator:GetOutfitName()
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.OUTFIT_CHANGES_APPLIED)
@@ -1091,7 +1111,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_DAILY_LOGIN_REWARDS_CLAIMED] = function()
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.DAILY_LOGIN_REWARDS_CLAIM_ANNOUNCEMENT)
     local secondaryText = claimedDailyLoginReward:GetQuantity() > 1 and claimedDailyLoginReward:GetFormattedNameWithStack() or claimedDailyLoginReward:GetFormattedName()
     messageParams:SetText(GetString(SI_DAILY_LOGIN_REWARDS_CLAIMED_ANNOUNCEMENT), secondaryText)
-    messageParams:SetIconData(claimedDailyLoginReward:GetKeyboardIcon())
+    messageParams:SetIconData(claimedDailyLoginReward:GetPlatformLootIcon())
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DAILY_LOGIN_REWARD_CLAIMED)
     return messageParams
 end
@@ -1152,6 +1172,37 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_SCRYING_RESULT] = function(result)
     end
 end
 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED] = function(timedActivityIndex, previousProgress, currentProgress, complete)
+    if complete then
+        local activityData = ZO_TimedActivityData:New(timedActivityIndex)
+        if activityData then
+            local activityName = activityData:GetName()
+            if activityName ~= "" then
+                local activityType = activityData:GetType()
+                local activityTypeName = GetString("SI_TIMEDACTIVITYTYPE", activityType)
+                local activityCompletionType = zo_strformat(SI_TIMED_ACTIVITY_COMPLETED_CSA, activityTypeName)
+
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ENDEAVOR_COMPLETED)
+                messageParams:SetText(activityCompletionType, activityName)
+                return messageParams
+            end
+        end
+    end
+end
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_TIMED_ACTIVITY_TYPE_PROGRESS_UPDATED] = function(activityType, previousNumComplete, currentNumComplete, complete)
+    if complete then
+        local activityTypeName = GetString("SI_TIMEDACTIVITYTYPE", activityType)
+        local _, maxNumActivities = TIMED_ACTIVITIES_MANAGER:GetTimedActivityTypeLimitInfo(activityType)
+        local messageTitle = zo_strformat(SI_TIMED_ACTIVITY_TYPE_COMPLETED_CSA, currentNumComplete, maxNumActivities, activityTypeName)
+        local messageSubheading = GetString("SI_TIMEDACTIVITYTYPE_FOLLOWUPHINT", activityType)
+
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        messageParams:SetText(messageTitle, messageSubheading)
+        return messageParams
+    end
+end
+
 function ZO_CenterScreenAnnounce_GetEventHandlers()
     return CENTER_SCREEN_EVENT_HANDLERS
 end
@@ -1206,13 +1257,14 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_MINUTE_WARNING)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_LEVEL_GAIN)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_TIMED_ACTIVITY_COMPLETED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ACTIVITY_COMPLETE)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DUEL_FINISHED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DUEL_NEAR_BOUNDARY)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DUEL_COUNTDOWN)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
-
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_CRAFTING_RESULTS)
     -- Higher-priority events
 
     -- Miscellaneous event handlers
@@ -1384,6 +1436,36 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.SKILL_LINE_ADDED)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_LINE_ADDED)
                 messageParams:SetText(zo_strformat(SI_SKILL_LINE_ADDED, announceIcon, skillLineData:GetName()))
+                return messageParams
+            end
+        end,
+    },
+    {
+        callbackManager = COMPANION_SKILLS_DATA_MANAGER,
+        callbackRegistration = "SkillLineAdded",
+        callbackFunction = function(skillLineData)
+            if skillLineData:IsAvailable() then
+                local skillTypeData = skillLineData:GetSkillTypeData()
+                local announceIcon = zo_iconFormat(skillTypeData:GetAnnounceIcon(), 32, 32)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.SKILL_LINE_ADDED)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COMPANION_SKILL_LINE_ADDED)
+                messageParams:SetText(zo_strformat(SI_COMPANION_SKILL_LINE_ADDED, announceIcon, skillLineData:GetName()))
+                return messageParams
+            end
+        end,
+    },
+
+    {
+        callbackManager = COMPANION_SKILLS_DATA_MANAGER,
+        callbackRegistration = "CompanionSkillUpdateStatusChanged",
+        callbackFunction = function(companionSkillData)
+            if companionSkillData:HasUpdatedStatus() and companionSkillData:IsPurchased() and companionSkillData:IsActive() then
+                local progressionData = companionSkillData:GetPointAllocatorProgressionData()
+
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COMPANION_ACTIVE_SKILL_UNLOCKED)
+                messageParams:SetText(GetString(SI_COMPANION_ACTIVE_SKILL_UNLOCKED_CSA), progressionData:GetFormattedName())
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COMPANION_ACTIVE_SKILL_UNLOCKED)
+                messageParams:SetIconData(progressionData:GetIcon())
                 return messageParams
             end
         end,

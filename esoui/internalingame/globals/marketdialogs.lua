@@ -357,7 +357,7 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
         marketPurchaseData.marketCurrencyType = currencyType
     end
 
-    local currencyType = ZO_Currency_MarketCurrencyToUICurrency(marketPurchaseData.marketCurrencyType)
+    local currencyType = GetCurrencyTypeFromMarketCurrencyType(marketPurchaseData.marketCurrencyType)
 
     local hasCost = marketPurchaseData.cost ~= nil
     local hasEsoPlusCost
@@ -775,7 +775,7 @@ local function MarketPurchaseHouseTemplateSelectDialogSetup(dialog, data)
         local marketCurrencyType
         if entry and entry.data then
             local key, value = next(entry.data.marketPurchaseOptions)
-            currencyType = ZO_Currency_MarketCurrencyToUICurrency(key)
+            currencyType = GetCurrencyTypeFromMarketCurrencyType(key)
             marketCurrencyType = key
 
             local currencyString = ZO_Currency_FormatKeyboard(currencyType, GetPlayerMarketCurrency(marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
@@ -1073,13 +1073,15 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
                         end
                         LogPurchaseClose(dialog)
                         if data.wasGift == false then
+                            local activeMarket = ZO_MARKET_MANAGER:GetActiveMarket()
+
                             -- Show tutorials from a purchased item first before showing the consumable tutorial
                             if data.tutorialTrigger then
-                                MARKET:ShowTutorial(data.tutorialTrigger)
+                                activeMarket:ShowTutorial(data.tutorialTrigger)
                             end
 
                             if data.result == MARKET_PURCHASE_RESULT_SUCCESS and data.marketProductData:ContainsConsumables() then
-                                MARKET:ShowTutorial(TUTORIAL_TRIGGER_CROWN_CONSUMABLE_PURCHASED)
+                                activeMarket:ShowTutorial(TUTORIAL_TRIGGER_CROWN_CONSUMABLE_PURCHASED)
                             end
                         end
                     end,

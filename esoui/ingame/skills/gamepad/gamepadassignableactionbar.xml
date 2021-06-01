@@ -1,0 +1,178 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_GamepadSkillsActionBarFocusAnimation">
+            <Animations>
+                <!-- translate bar to center of list -->
+                <TranslateAnimation duration="200" deltaX="0" deltaY="210" anchorIndex="3">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+
+                <!-- fade background in -->
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_GamepadAssignableActionBarNewIndicator_Idle" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation duration="1000" startAlpha="0.75" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInOutZeroToOneToZero(progress)
+                    </EasingFunction>
+                    <OnPlay>
+                        animatingControl:SetHidden(false)
+                    </OnPlay>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_GamepadAssignableActionBarNewIndicator_Fadeout">
+            <Animations>
+                <AlphaAnimation duration="400" endAlpha="0">
+                    <OnPlay>
+                        self:SetStartAlpha(animatingControl:GetAlpha())
+                    </OnPlay>
+                    <OnStop>
+                        animatingControl:SetHidden(true)
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_GamepadSkillsActionButtonNoKeybind" tier="MEDIUM" virtual="true">
+            <Dimensions x="40" y="40" />
+
+            <Controls>
+                <Texture name="$(parent)Icon" pixelRoundingEnabled="false" level="1">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Miscellaneous/status_locked.dds" pixelRoundingEnabled="false" level="2">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPLEFT" offsetX="8" offsetY="8" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="-8" offsetY="-8" />
+                </Texture>
+
+                <Texture name="$(parent)NewIndicator" hidden="true" pixelRoundingEnabled="false" layer="OVERLAY" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame_glow.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-20" offsetY="-20" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="20" offsetY="20" />
+                </Texture>
+
+                <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame" tier="LOW" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSkillsActionButton" inherits="ZO_GamepadSkillsActionButtonNoKeybind" virtual="true">
+            <Dimensions x="40" y="40" />
+            <Controls>
+                <Label name="$(parent)KeybindLabel" font="ZoFontGamepad18" alpha="1" layer="OVERLAY" tier="HIGH" pixelRoundingEnabled="false">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Icon" relativePoint="TOP" offsetY="10"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSkillsActionButtonBottomKeybind" inherits="ZO_GamepadSkillsActionButton" virtual="true">
+            <Controls>
+                <Label name="$(parent)KeybindLabel" override="true">
+                    <ClearAnchors />
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="10"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSkillsActionButtonCompanionUltimate" inherits="ZO_GamepadSkillsActionButton" virtual="true">
+            <!-- This keybind label is higher up than normal to compensate for
+            the LS+RS keybind being larger than the label itself. Visually this
+            should look similar to the alignment of the player ultimate with
+            LB+RB -->
+            <Controls>
+                <Label name="$(parent)KeybindLabel" override="true" >
+                    <ClearAnchors />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Icon" relativePoint="TOP" offsetY="4"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSkillsActionBarTemplate" virtual="true">
+            <!-- This container needs to be large enough to contain the buttons without them popping out the bottom -->
+            <Dimensions x="466" y="106" />
+            <Controls>
+                <Control name="$(parent)Button1">
+                    <!-- This button needs to be offset from the bottom so that when it is selected it doesn't grow outside the container -->
+                    <Anchor point="BOTTOMLEFT" offsetX="54" offsetY="-14"/>
+                </Control>
+
+                <Control name="$(parent)Button2">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button1" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)Button3">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button2" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)Button4">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button3" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)Button5">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button4" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)UltimateButton">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button5" relativePoint="RIGHT" offsetX="38"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSkillsPlayerActionBar" inherits="ZO_GamepadSkillsActionBarTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" modifyTextType="UPPERCASE" inherits="ZO_GamepadMenuEntryHeaderTemplate">
+                    <Anchor point="TOP"/>
+                </Label>
+
+                <Control name="$(parent)Button1" override="true" inherits="ZO_GamepadSkillsActionButton" />
+                <Control name="$(parent)Button2" override="true" inherits="ZO_GamepadSkillsActionButton" />
+                <Control name="$(parent)Button3" override="true" inherits="ZO_GamepadSkillsActionButton" />
+                <Control name="$(parent)Button4" override="true" inherits="ZO_GamepadSkillsActionButton" />
+                <Control name="$(parent)Button5" override="true" inherits="ZO_GamepadSkillsActionButton" />
+                <Control name="$(parent)UltimateButton" override="true" inherits="ZO_GamepadSkillsActionButton" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSkillsCompanionActionBar" inherits="ZO_GamepadSkillsActionBarTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)PriorityHeader" text="SI_COMPANION_BAR_ABILITY_PRIORITY" modifyTextType="UPPERCASE" inherits="ZO_GamepadMenuEntryHeaderTemplate">
+                    <Anchor point="TOP"/>
+                </Label>
+
+                <Control name="$(parent)Button1" override="true" inherits="ZO_GamepadSkillsActionButtonBottomKeybind" />
+                <Control name="$(parent)Button2" override="true" inherits="ZO_GamepadSkillsActionButtonBottomKeybind" />
+                <Control name="$(parent)Button3" override="true" inherits="ZO_GamepadSkillsActionButtonBottomKeybind" />
+                <Control name="$(parent)Button4" override="true" inherits="ZO_GamepadSkillsActionButtonBottomKeybind" />
+                <Control name="$(parent)Button5" override="true" inherits="ZO_GamepadSkillsActionButtonBottomKeybind" />
+                <Control name="$(parent)UltimateButton" override="true" inherits="ZO_GamepadSkillsActionButtonCompanionUltimate" />
+            </Controls>
+        </Control>
+
+        <Scroll name="ZO_GamepadSkillsActionBar_QuickMenu" virtual="true">
+            <Anchor point="TOPLEFT" offsetY="-6" />
+            <Anchor point="BOTTOMRIGHT" />
+            <Controls>
+                <Control name="$(parent)Container" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                            <Controls>
+                                <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop_Gamepad"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Scroll>
+
+    </Controls>
+</GuiXml>

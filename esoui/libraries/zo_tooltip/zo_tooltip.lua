@@ -298,13 +298,34 @@ end
 ZO_TooltipStatusBar = {}
 
 function ZO_TooltipStatusBar:ApplyStyles()
+    local height = self:GetHeightProperty(unpack(self.styles))
+    if height then
+        self:SetHeight(height)
+    end
+
     local width = self:GetWidthProperty(unpack(self.styles))
-    if(width) then
+    if width then
         self:SetWidth(width)
     end
     local gradientColors = self:GetProperty("statusBarGradientColors")
-    if(gradientColors) then
+    if gradientColors then
         ZO_StatusBar_SetGradientColor(self, gradientColors)
+    end
+end
+
+--Tooltip Custom Control
+
+ZO_TooltipCustomControl = {}
+
+function ZO_TooltipCustomControl:ApplyStyles()
+    local height = self:GetHeightProperty(unpack(self.styles))
+    if height then
+        self:SetHeight(height)
+    end
+
+    local width = self:GetWidthProperty(unpack(self.styles))
+    if width then
+        self:SetWidth(width)
     end
 end
 
@@ -376,7 +397,7 @@ function ZO_TooltipSection:Initialize(parent)
         self.hasInitialized = true
     end
 
-    self.statusBarPools = {}
+    self.customControlPools = {}
 end
 
 --Style Application
@@ -493,7 +514,7 @@ function ZO_TooltipSection:Reset()
     self.sectionPool:ReleaseAllObjects()
     self.statValuePairPool:ReleaseAllObjects()
     self.statValueSliderPool:ReleaseAllObjects()
-    for _, pool in pairs(self.statusBarPools) do
+    for _, pool in pairs(self.customControlPools) do
         pool:ReleaseAllObjects()
     end
 end
@@ -698,10 +719,10 @@ function ZO_TooltipSection:AddLine(text, ...)
             self:FormatLabel(label, text, ...)
         end
 
-    self:AddCustom(customFunction, ...)
+    self:AddCustomLabel(customFunction, ...)
 end
 
-function ZO_TooltipSection:AddCustom(customFunction, ...)
+function ZO_TooltipSection:AddCustomLabel(customFunction, ...)
     local label = self.labelPool:AcquireObject()
 
     customFunction(label, ...)
@@ -745,7 +766,7 @@ function ZO_TooltipSection:AddSimpleCurrency(currencyType, amount, options, show
             end
         end
 
-    self:AddCustom(customFunction, ...)
+    self:AddCustomLabel(customFunction, ...)
 end
 
 function ZO_TooltipSection:BasicTextureSetup(texture, ...)
@@ -877,14 +898,14 @@ end
 
 function ZO_TooltipSection:AcquireStatusBar(...)
     local template = self:GetProperty("statusBarTemplate", ...)
-    local pool = self.statusBarPools[template]
-    if(not pool) then
+    local pool = self.customControlPools[template]
+    if not pool then
         pool = ZO_ControlPool:New(template, self.contentsControl, self:GetProperty("statusBarTemplateOverrideName", ...))
         pool:SetCustomFactoryBehavior(function(control)
             zo_mixin(control, ZO_TooltipStyledObject, ZO_TooltipStatusBar)
             control:Initialize(self)
         end)
-        self.statusBarPools[template] = pool
+        self.customControlPools[template] = pool
     end
     local bar = pool:AcquireObject()
     bar:SetStyles(...)
@@ -893,6 +914,26 @@ end
 
 function ZO_TooltipSection:AddStatusBar(statusBar)
     self:AddDimensionedControl(statusBar)
+end
+
+function ZO_TooltipSection:AcquireCustomControl(...)
+    local template = self:GetProperty("controlTemplate", ...)
+    local pool = self.customControlPools[template]
+    if not pool then
+        pool = ZO_ControlPool:New(template, self.contentsControl, self:GetProperty("controlTemplateOverrideName", ...))
+        pool:SetCustomFactoryBehavior(function(control)
+            zo_mixin(control, ZO_TooltipStyledObject, ZO_TooltipCustomControl)
+            control:Initialize(self)
+        end)
+        self.customControlPools[template] = pool
+    end
+    local styledControl = pool:AcquireObject()
+    styledControl:SetStyles(...)
+    return styledControl
+end
+
+function ZO_TooltipSection:AddCustomControl(control)
+    self:AddDimensionedControl(control)
 end
 
 --Tooltip

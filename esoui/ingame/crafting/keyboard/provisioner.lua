@@ -33,8 +33,8 @@ function ZO_Provisioner:Initialize(control)
 
         self.resultTooltip:SetHandler("OnMouseUp", OnTooltipMouseUp)
         self.resultTooltip:GetNamedChild("Icon"):SetHandler("OnMouseUp", OnTooltipMouseUp)
-        self.currentTabs = {}
     end
+    self.currentTabs = {}
 
     self.multiCraftContainer = self.control:GetNamedChild("MultiCraftContainer")
     self.multiCraftSpinner = ZO_MultiCraftSpinner:New(self.multiCraftContainer:GetNamedChild("Spinner"))

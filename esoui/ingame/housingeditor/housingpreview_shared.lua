@@ -303,7 +303,7 @@ do
             if entryData.marketPurchaseOptions then
                 for marketCurrencyType, purchaseData in pairs(entryData.marketPurchaseOptions) do
                     local marketControl = self.marketPurchaseOptionControlsByCurrencyType[marketCurrencyType]
-                    local currencyType = ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
+                    local currencyType = GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType)
                     --Currently there are no requirement failures for market options, but there could be in the future, and here is where we would handle them
                     self:SetupPurchaseOptionControl(marketControl, currencyType, CURRENCY_LOCATION_ACCOUNT, purchaseData.cost, purchaseData.costAfterDiscount, purchaseData.discountPercent, NO_ERROR, function(...) return self:GetMarketProductSaleRemainingTime(...) end)
                     marketControl.button.purchaseData = purchaseData

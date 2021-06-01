@@ -151,7 +151,7 @@ do
 
         -- format the price with the currency icon
         -- done this way so we can easily change the color of the string
-        local currencyIcon = ZO_Currency_GetKeyboardFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
+        local currencyIcon = ZO_Currency_GetKeyboardFormattedCurrencyIcon(GetCurrencyTypeFromMarketCurrencyType(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
         local currencyString = string.format("%s %s", zo_strformat(SI_NUMBER_FORMAT, costAfterDiscount), currencyIcon)
 
         rowControl.cost:SetText(currencyString)

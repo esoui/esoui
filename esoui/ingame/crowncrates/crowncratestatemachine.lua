@@ -95,7 +95,7 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
             keybind = "UI_SHORTCUT_TERTIARY",
             name = function()
-                local gemIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWN_GEMS), "100%")
+                local gemIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(GetCurrencyTypeFromMarketCurrencyType(MKCT_CROWN_GEMS), "100%")
                 return gemIcon..GetString(SI_GEMIFICATION_TITLE)
             end,
             gamepadOrder = 10000,

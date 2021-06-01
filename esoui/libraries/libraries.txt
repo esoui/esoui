@@ -20,6 +20,7 @@ EsoUI\Libraries\Utility\ZO_CategoryManager.lua
 EsoUI\Libraries\Utility\ZO_RadioButtonGroup.lua
 EsoUI\Libraries\Utility\ZO_TabButtonGroup.lua
 EsoUI\Libraries\Utility\ZO_EditControlGroup.lua
+EsoUI\Libraries\Utility\ZO_LabelUtils.lua
 EsoUI\Libraries\Utility\ZO_ListBox.lua
 EsoUI\Libraries\Utility\ZO_AlphaAnimation.lua
 EsoUI\Libraries\Utility\ZO_CircularBuffer.lua
@@ -95,6 +96,7 @@ EsoUI\Libraries\ZO_TimerBar\ZO_TimerBar.xml
 EsoUI\Libraries\ZO_MenuBar\ZO_MenuBar.lua
 EsoUI\Libraries\ZO_MenuBar\ZO_MenuBar.xml
 EsoUI\Libraries\ZO_MenuBar\ZO_SceneFragmentBar.lua
+EsoUI\Libraries\ZO_MenuBar\ZO_SceneGroupBar.lua
 
 EsoUI\Libraries\ZO_TrianglePicker\ZO_TrianglePicker.lua
 EsoUI\Libraries\ZO_TrianglePicker\ZO_TrianglePicker.xml

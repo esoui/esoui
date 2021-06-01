@@ -219,15 +219,15 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_PRESETS,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_PRESETS_TOOLTIP,
-            exists = ZO_IsPCUI,
 
             valid = IsMinSpecMachine() 
                     and {GRAPHICS_PRESETS_MINIMUM, GRAPHICS_PRESETS_LOW, GRAPHICS_PRESETS_MEDIUM, GRAPHICS_PRESETS_CUSTOM}
-                    or {GRAPHICS_PRESETS_MINIMUM, GRAPHICS_PRESETS_LOW, GRAPHICS_PRESETS_MEDIUM, GRAPHICS_PRESETS_HIGH, GRAPHICS_PRESETS_ULTRA, GRAPHICS_PRESETS_CUSTOM},
+                    or {GRAPHICS_PRESETS_MINIMUM, GRAPHICS_PRESETS_LOW, GRAPHICS_PRESETS_MEDIUM, GRAPHICS_PRESETS_HIGH, GRAPHICS_PRESETS_ULTRA, GRAPHICS_PRESETS_MAXIMUM, GRAPHICS_PRESETS_CUSTOM},
 
             valueStringPrefix = "SI_GRAPHICSPRESETS",
             mustReloadSettings = true,
             mustPushApply = true,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Texture_Resolution
         [GRAPHICS_SETTING_MIP_LOAD_SKIP_LEVELS] =
@@ -238,7 +238,6 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_TEXTURE_RES,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_TEXTURE_RES_TOOLTIP,
-            exists = ZO_IsPCUI,
 
             valid = IsMinSpecMachine() 
                     and {TEX_RES_CHOICE_LOW, TEX_RES_CHOICE_MEDIUM}
@@ -246,6 +245,7 @@ local ZO_OptionsPanel_Video_ControlData =
 
             valueStringPrefix = "SI_TEXTURERESOLUTIONCHOICE",
             mustPushApply = true,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Sub_Sampling
         [GRAPHICS_SETTING_SUB_SAMPLING] =
@@ -361,10 +361,13 @@ local ZO_OptionsPanel_Video_ControlData =
             settingId = GRAPHICS_SETTING_AMBIENT_OCCLUSION_TYPE,
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_AMBIENT_OCCLUSION_TYPE,
-            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_AMBIENT_OCCLUSION_TYPE_TOOLTIP,
-            valid = {AMBIENT_OCCLUSION_TYPE_NONE, AMBIENT_OCCLUSION_TYPE_SSAO, AMBIENT_OCCLUSION_TYPE_HBAO},
+            tooltipText = IsMacUI()
+                    and SI_GRAPHICS_OPTIONS_VIDEO_MAC_AMBIENT_OCCLUSION_TYPE_TOOLTIP
+                    or SI_GRAPHICS_OPTIONS_VIDEO_WINDOWS_AMBIENT_OCCLUSION_TYPE_TOOLTIP,
+            valid = IsMacUI()
+                    and {AMBIENT_OCCLUSION_TYPE_NONE, AMBIENT_OCCLUSION_TYPE_SSAO, AMBIENT_OCCLUSION_TYPE_HBAO}
+                    or {AMBIENT_OCCLUSION_TYPE_NONE, AMBIENT_OCCLUSION_TYPE_SSAO, AMBIENT_OCCLUSION_TYPE_HBAO, AMBIENT_OCCLUSION_TYPE_LSAO, AMBIENT_OCCLUSION_TYPE_SSGI},
             valueStringPrefix = "SI_AMBIENTOCCLUSIONTYPE",
-            mustPushApply = true,
             exists = ZO_IsPCUI,
         },
         --Options_Video_Clutter_2D_Quality
@@ -437,10 +440,50 @@ local ZO_OptionsPanel_Video_ControlData =
             settingId = GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY,
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY,
-            tooltipText = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY_TOOLTIP,
+            tooltipText = GetTooltipStringForRenderQualitySetting(),
             --valid = dynamically determined based on the system below,
             valueStringPrefix = "SI_CONSOLEENHANCEDRENDERQUALITY",
+            mustPushApply = GetUIPlatform() == UI_PLATFORM_XBOX,
             exists = ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting,
+        },
+        [GRAPHICS_SETTING_GRAPHICS_MODE_PS5] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_GRAPHICS_MODE_PS5,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY,
+            tooltipText = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY_TOOLTIP_PS5,
+            valid = { GRAPHICS_MODE_FIDELITY, GRAPHICS_MODE_PERFORMANCE },
+            valueStringPrefix = "SI_GRAPHICSMODE",
+            mustPushApply = false,
+            exists = GetUIPlatform() == UI_PLATFORM_PS5
+        },
+        [GRAPHICS_SETTING_GRAPHICS_MODE_XBSS] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_GRAPHICS_MODE_XBSS,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY,
+            tooltipText = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY_TOOLTIP_XBSS,
+            valid = { GRAPHICS_MODE_FIDELITY, GRAPHICS_MODE_PERFORMANCE },
+            valueStringPrefix = "SI_GRAPHICSMODE",
+            mustPushApply = true,
+            exists = DoesPlatformSupportGraphicSetting(GRAPHICS_SETTING_GRAPHICS_MODE_XBSS)
+        },
+        [GRAPHICS_SETTING_GRAPHICS_MODE_XBSX] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_GRAPHICS_MODE_XBSX,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY,
+            tooltipText = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY_TOOLTIP_XBSX,
+            valid = { GRAPHICS_MODE_FIDELITY, GRAPHICS_MODE_PERFORMANCE },
+            valueStringPrefix = "SI_GRAPHICSMODE",
+            mustPushApply = true,
+            exists = DoesPlatformSupportGraphicSetting(GRAPHICS_SETTING_GRAPHICS_MODE_XBSX)
         },
         [GRAPHICS_SETTING_HDR_BRIGHTNESS] =
         {

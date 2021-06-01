@@ -4,39 +4,23 @@
             <Controls>
                 <Label name="$(parent)Amount" font="ZoFontGamepad42" inherits="ZO_GamepadHeaderDataTextTemplate">
                     <Anchor point="BOTTOMRIGHT" />
-                    <Dimensions y="42"/>
+                    <Dimensions y="42" />
                 </Label>
             
                 <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate">
-                    <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Amount" offsetX="-10"/>
-                    <Dimensions y="27"/>
+                    <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Amount" offsetX="-10" />
+                    <Dimensions y="27" />
                 </Label>
             </Controls>
         </Control>
 
         <TopLevelControl name="ZO_MarketCurrency_Gamepad_TopLevel" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" verticalAlignment="BOTTOM" hidden="true">
-            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-64"/>
-            <Dimensions y="42"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-64" />
+            <Dimensions y="42" />
 
             <OnInitialized>
                 ZO_MarketCurrency_Gamepad_OnInitialized(self)
             </OnInitialized>
-
-            <Controls>
-                <Control name="$(parent)Crowns" inherits="ZO_MarketCurrencyLabel_Gamepad">
-                    <OnInitialized>
-                        self:GetNamedChild("Label"):SetText(ZO_Currency_GetAmountLabel(CURT_CROWNS))
-                    </OnInitialized>
-                    <Anchor point="BOTTOMRIGHT"/>
-                </Control>
-
-                <Control name="$(parent)Gems" inherits="ZO_MarketCurrencyLabel_Gamepad">
-                    <OnInitialized>
-                        self:GetNamedChild("Label"):SetText(ZO_Currency_GetAmountLabel(CURT_CROWN_GEMS))
-                    </OnInitialized>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Crowns" relativePoint="BOTTOMLEFT" offsetX="-10" />
-                </Control>
-            </Controls>
         </TopLevelControl>
     </Controls>
 </GuiXml>

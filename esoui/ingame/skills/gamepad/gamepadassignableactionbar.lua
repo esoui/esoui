@@ -4,13 +4,7 @@
     without changing the real action bar.
 ]]--
 
-ZO_AssignableActionBar = ZO_Object:Subclass()
-
-function ZO_AssignableActionBar:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_AssignableActionBar = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_AssignableActionBar:Initialize(control)
     self.control = control
@@ -18,6 +12,7 @@ function ZO_AssignableActionBar:Initialize(control)
     self.headerLabel = control:GetNamedChild("Header")
     self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     self.selectedButtonIndex = nil
+    self.mostRecentlySelectedActionSlotIndex = nil
 
     self.buttons =
     {
@@ -27,10 +22,11 @@ function ZO_AssignableActionBar:Initialize(control)
         ZO_GamepadAssignableActionBarButton:New(self.control:GetNamedChild("Button4"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 4),
         ZO_GamepadAssignableActionBarButton:New(self.control:GetNamedChild("Button5"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 5),
 
-        ZO_GamepadAssignableActionBarButton:New(self.control:GetNamedChild("Button6"), ACTION_BAR_ULTIMATE_SLOT_INDEX + 1),
+        ZO_GamepadAssignableActionBarButton:New(self.control:GetNamedChild("UltimateButton"), ACTION_BAR_ULTIMATE_SLOT_INDEX + 1),
     }
     
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotUpdated", function(...) self:OnSlotUpdated(...) end)
+    ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotNewStatusChanged", function(...) self:OnSlotUpdated(...) end)
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("CurrentHotbarUpdated", function(...) self:OnCurrentHotbarUpdated(...) end)
 end
 
@@ -72,8 +68,10 @@ function ZO_AssignableActionBar:RefreshAllButtons()
 end
 
 function ZO_AssignableActionBar:RefreshHeaderLabel()
-    local hotbarName = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarName()
-    self.headerLabel:SetText(hotbarName)
+    if self.headerLabel then
+        local hotbarName = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarName()
+        self.headerLabel:SetText(hotbarName)
+    end
 end
 
 function ZO_AssignableActionBar.ConvertButtonIndexToActionSlotIndex(buttonIndex)
@@ -105,14 +103,6 @@ function ZO_AssignableActionBar:SetHighlightAll(highlightAll)
     for i, button in ipairs(self.buttons) do
         button:SetSelected(highlightAll, self.interpolator)
     end
-end
-
-function ZO_AssignableActionBar:SetOnSelectedDataChangedCallback(onSelectedDataChangedCallback)
-    self.onSelectedDataChangedCallback = onSelectedDataChangedCallback
-end
-
-function ZO_AssignableActionBar:SetOnAbilityFinalizedCallback(onAbilityFinalizedCallback)
-    self.onAbilityFinalizedCallback = onAbilityFinalizedCallback
 end
 
 function ZO_AssignableActionBar:IsUltimateSelected()
@@ -176,10 +166,11 @@ function ZO_AssignableActionBar:SelectButton(actionSlotIndex)
             newIsUltimate = newSelected:IsUltimateSlot()
         end
 
-        if self.onSelectedDataChangedCallback then
-            self.onSelectedDataChangedCallback(self, oldWasUltimate ~= newIsUltimate)
+        local buttonTypeChanged = oldWasUltimate ~= newIsUltimate
+        self:FireCallbacks("SelectedButtonChanged", actionSlotIndex, buttonTypeChanged)
+        if actionSlotIndex then
+            self.mostRecentlySelectedActionSlotIndex = actionSlotIndex
         end
-
         return true
     end
 
@@ -194,6 +185,14 @@ function ZO_AssignableActionBar:SelectFirstUltimateButton()
     return self:SelectButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
 end
 
+function ZO_AssignableActionBar:SelectMostRecentlySelectedButton()
+    if self.mostRecentlySelectedActionSlotIndex then
+        self:SelectButton(self.mostRecentlySelectedActionSlotIndex)
+    else
+        self:SelectFirstNormalButton() -- pick a button to start out with
+    end
+end
+
 function ZO_AssignableActionBar:DeselectButtons()
     return self:SelectButton(nil)
 end
@@ -203,9 +202,7 @@ function ZO_AssignableActionBar:AssignSkill(skillData)
     local selectedButton = self.buttons[self.selectedButtonIndex]
     if selectedButton then
         selectedButton:AssignSkill(skillData)
-        if self.onAbilityFinalizedCallback then
-            self.onAbilityFinalizedCallback()
-        end
+        self:FireCallbacks("AbilityFinalized")
     end
 end
 
@@ -234,13 +231,15 @@ function ZO_AssignableActionBar:AssignTargetSkill()
     self:ClearTargetSkill()
 end
 
+function ZO_AssignableActionBar:IsAssigningTargetSkill()
+    return self.targetSkill ~= nil
+end
+
 function ZO_AssignableActionBar:ClearAbility()
     local selectedButton = self.buttons[self.selectedButtonIndex]
     if selectedButton then
         selectedButton:ClearSlot()
-        if self.onAbilityFinalizedCallback then
-            self.onAbilityFinalizedCallback()
-        end
+        self:FireCallbacks("AbilityFinalized")
     end
 end
 
@@ -262,10 +261,15 @@ local function SetupTooltipStatusLabel(tooltipType, actionSlotIndex)
 end
 
 function ZO_AssignableActionBar:LayoutOrClearSlotTooltip(tooltipType)
-    local selectedButton = self.buttons[self.selectedButtonIndex]
-    if selectedButton then
+    local hotbar = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
+    local selectedActionSlotIndex = self:GetSelectedSlotIndex()
+    if hotbar:IsSlotLocked(selectedActionSlotIndex) then
+        local description = ZO_ERROR_COLOR:Colorize(hotbar:GetSlotUnlockText(selectedActionSlotIndex))
+        GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(tooltipType, GetString(SI_ACTION_BAR_SLOT_LOCKED_HEADER), description)
+    elseif self.buttons[self.selectedButtonIndex] then
+        local selectedButton = self.buttons[self.selectedButtonIndex]
         local slotData = selectedButton:GetSlotData()
-        SetupTooltipStatusLabel(tooltipType, selectedButton:GetSlotIndex())
+        SetupTooltipStatusLabel(tooltipType, selectedActionSlotIndex)
         slotData:LayoutGamepadTooltip(tooltipType)
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(tooltipType)
@@ -282,34 +286,33 @@ function ZO_AssignableActionBar:LayoutAssignableSkillLineAbilityTooltip(tooltipT
             break
         end
     end 
-    GAMEPAD_TOOLTIPS:LayoutSkillProgression(tooltipType, skillProgressionData)
+    if skillData:IsPlayerSkill() then
+        GAMEPAD_TOOLTIPS:LayoutSkillProgression(tooltipType, skillProgressionData)
+    elseif skillData:IsCompanionSkill() then
+        GAMEPAD_TOOLTIPS:LayoutCompanionSkillProgression(GAMEPAD_LEFT_TOOLTIP, skillProgressionData)
+    end
 end
 
 function ZO_AssignableActionBar:IsActive()
     return self.active
 end
 
-ZO_GamepadAssignableActionBarButton = ZO_Object:Subclass()
-
-function ZO_GamepadAssignableActionBarButton:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_GamepadAssignableActionBarButton = ZO_InitializingObject:Subclass()
 
 function ZO_GamepadAssignableActionBarButton:Initialize(control, actionSlotIndex)
     self.control = control
     self.icon = control:GetNamedChild("Icon")
+    self.lock = control:GetNamedChild("Lock")
+    self.newIndicator = control:GetNamedChild("NewIndicator")
+    self.newIndicatorIdle = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_GamepadAssignableActionBarNewIndicator_Idle", self.newIndicator)
+    self.newIndicatorFadeout = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_GamepadAssignableActionBarNewIndicator_Fadeout", self.newIndicator)
     self.highlight = control:GetNamedChild("Highlight")
     self.keybindLabel = control:GetNamedChild("KeybindLabel")
     self.frame = control:GetNamedChild("Frame")
 
-    if self.keybindLabel then
-        local HIDE_UNBOUND = false
-        ZO_Keybindings_RegisterLabelForBindingUpdate(self.keybindLabel, "GAMEPAD_ACTION_BUTTON_" .. actionSlotIndex, HIDE_UNBOUND)
-    end
-
     self.actionSlotIndex = actionSlotIndex
+    self.actionName = nil
+    self.isSlotNew = false
 end
 
 function ZO_GamepadAssignableActionBarButton:GetSlotIndex()
@@ -347,6 +350,10 @@ function ZO_GamepadAssignableActionBarButton:SetSelected(selected, interpolator)
         local color = selected and ZO_SELECTED_TEXT or ZO_NORMAL_TEXT
         self.frame:SetEdgeColor(color:UnpackRGBA())
     end
+
+    if selected then
+        self:ClearNewIndicator()
+    end
 end
 
 function ZO_GamepadAssignableActionBarButton:Refresh()
@@ -358,16 +365,232 @@ function ZO_GamepadAssignableActionBarButton:Refresh()
     else
         self.icon:SetHidden(true)
     end
+
+    local hotbarData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
+    self.lock:SetHidden(not hotbarData:IsSlotLocked(self.actionSlotIndex))
+    local isNew = hotbarData:IsSlotNew(self.actionSlotIndex)
+    if isNew ~= self.isSlotNew then
+        self.isSlotNew = isNew
+        if isNew then
+            self.newIndicatorFadeout:Stop()
+            self.newIndicatorIdle:PlayFromStart()
+        else
+            self.newIndicatorIdle:Stop()
+            self.newIndicatorFadeout:PlayFromStart()
+        end
+    end
+
+    if self.keybindLabel then
+        local currentHotbarCategory = hotbarData:GetHotbarCategory()
+        local GAMEPAD_MODE = true
+        local actionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetActionNameForSlot(self.actionSlotIndex, currentHotbarCategory, GAMEPAD_MODE)
+        local actionPriority = ACTION_BAR_ASSIGNMENT_MANAGER:GetAutomaticCastPriorityForSlot(self.actionSlotIndex, currentHotbarCategory)
+        if actionName ~= self.actionName or actionPriority ~= self.actionPriority then
+            ZO_Keybindings_UnregisterLabelForBindingUpdate(self.keybindLabel)
+            if actionName then
+                local HIDE_UNBOUND = false
+                ZO_Keybindings_RegisterLabelForBindingUpdate(self.keybindLabel, actionName, HIDE_UNBOUND)
+            elseif actionPriority then
+                self.keybindLabel:SetText(tostring(actionPriority))
+            else
+                self.keybindLabel:SetText("")
+            end
+            self.actionName = actionName
+            self.actionPriority = actionPriority
+        end
+    end
+end
+
+function ZO_GamepadAssignableActionBarButton:ClearNewIndicator()
+    ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():ClearSlotNew(self.actionSlotIndex)
 end
 
 function ZO_GamepadAssignableActionBarButton:ClearSlot()
     if ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():ClearSlot(self.actionSlotIndex) then
+        self:ClearNewIndicator()
         PlaySound(SOUNDS.ABILITY_SLOT_CLEARED)
     end
 end
 
 function ZO_GamepadAssignableActionBarButton:AssignSkill(skillData)
     if ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():AssignSkillToSlot(self.actionSlotIndex, skillData) then
+        self:ClearNewIndicator()
         PlaySound(SOUNDS.ABILITY_SLOTTED)
     end
 end
+
+ZO_GamepadAssignableActionBar_QuickMenu_Base = ZO_InitializingCallbackObject:Subclass()
+
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:SetupListTemplates()
+    assert(false, "should be overridden")
+end
+
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:ForEachSlottableSkill(visitor)
+    assert(false, "should be overridden")
+end
+
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:Initialize(control, assignableActionBar)
+    self.control = control
+    self.assignableActionBar = assignableActionBar
+
+    self.fragment = ZO_FadeSceneFragment:New(self.control:GetNamedChild("Container"), ALWAYS_ANIMATE)
+    self.fragment:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self.keybindStripId = KEYBIND_STRIP:PushKeybindGroupState()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStrip, self.keybindStripId)
+            self.list:Activate()
+            self:RefreshList()
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            self.assignableActionBar:ClearTargetSkill()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self.list:Deactivate()
+            KEYBIND_STRIP:PopKeybindGroupState()
+            self.keybindStripId = nil
+        end
+    end)
+
+    local listControl = self.control:GetNamedChild("ContainerList")
+    self.list = ZO_GamepadVerticalParametricScrollList:New(listControl)
+    self.list:SetAlignToScreenCenter(true)
+    self.list:SetHandleDynamicViewProperties(true)
+
+    self.list:SetNoItemText(GetString(SI_GAMEPAD_SKILLS_NO_ABILITIES))
+
+    self:SetupListTemplates()
+
+    local function RefreshSelectedTooltip()
+        self:RefreshTooltip()
+    end
+
+    self.list:SetOnSelectedDataChangedCallback(RefreshSelectedTooltip)
+
+    local keybindStrip =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        {
+            name = GetString(SI_GAMEPAD_SKILLS_ASSIGN),
+
+            keybind = "UI_SHORTCUT_PRIMARY",
+
+            enabled = function()
+                local slotIndex = self.assignableActionBar:GetSelectedSlotIndex()
+                local result = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():GetExpectedSlotEditResult(slotIndex)
+                if result ~= HOT_BAR_RESULT_SUCCESS then
+                    return false, GetString("SI_HOTBARRESULT", result)
+                end
+                return true
+            end,
+
+            callback = function()
+                self:PerformAssignment()
+            end,
+        },
+        {
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            name = GetString(SI_BINDING_NAME_SPECIAL_MOVE_WEAPON_SWAP),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            visible = function()
+                return ACTION_BAR_ASSIGNMENT_MANAGER:ShouldShowHotbarSwap()
+            end,
+            enabled = function()
+                return ACTION_BAR_ASSIGNMENT_MANAGER:CanCycleHotbars()
+            end,
+            callback = function()
+                ACTION_BAR_ASSIGNMENT_MANAGER:CycleCurrentHotbar()
+            end,
+        }
+    }
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(keybindStrip, GAME_NAVIGATION_TYPE_BUTTON, 
+        function()
+            SCENE_MANAGER:RemoveFragment(self.fragment)
+            PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+        end)
+    ZO_Gamepad_AddListTriggerKeybindDescriptors(keybindStrip, self.list)
+    self.keybindStrip = keybindStrip
+
+    local function OnHotbarSwapVisibleStateChanged()
+        if self:IsShowing() then
+            self:RefreshKeybinds()
+        end
+    end
+    ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("HotbarSwapVisibleStateChanged", OnHotbarSwapVisibleStateChanged)
+
+    local function OnSlotAssignmentsChanged()
+        self.list:RefreshVisible()
+    end
+    ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotUpdated", OnSlotAssignmentsChanged)
+    ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("CurrentHotbarUpdated", OnSlotAssignmentsChanged)
+
+    local function OnSelectedButtonChanged(slotIndex, didSlotTypeChange)
+        if self:IsShowing() then
+            if didSlotTypeChange then
+                self:RefreshList()
+            end
+            self:RefreshTooltip()
+        end
+    end
+    self.assignableActionBar:RegisterCallback("SelectedButtonChanged", OnSelectedButtonChanged)
+end
+
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:GetListControl()
+    return self.control:GetNamedChild("ContainerList")
+end
+
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:Show()
+    internalassert(self.assignableActionBar:IsActive(), "The action bar must be active for the quick menu to work")
+    SCENE_MANAGER:AddFragment(self.fragment)
+end
+
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:Hide()
+    -- because the action bar is assumed active, we do not need to activate any lists in the parent skills object
+    SCENE_MANAGER:RemoveFragment(self.fragment)
+end
+
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:IsShowing()
+    return self.fragment:IsShowing()
+end
+
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:RefreshList()
+    self.list:Clear()
+
+    local lastSkillLineData = nil
+    self:ForEachSlottableSkill(function(skillTypeData, skillLineData, skillData)
+        local skillEntry = ZO_GamepadEntryData:New()
+        skillEntry:SetFontScaleOnSelection(false)
+        skillEntry.skillData = skillData
+
+        if skillLineData ~= lastSkillLineData then
+            skillEntry:SetHeader(skillLineData:GetFormattedName())
+            self.list:AddEntry("ZO_GamepadSimpleAbilityEntryTemplateWithHeader", skillEntry)
+        else
+            self.list:AddEntry("ZO_GamepadSimpleAbilityEntryTemplate", skillEntry)
+        end
+
+        lastSkillLineData = skillLineData
+    end)
+
+    self.list:Commit()
+end
+
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:RefreshTooltip()
+    local skillEntry = self.list:GetTargetData()
+    if skillEntry then
+        self.assignableActionBar:LayoutAssignableSkillLineAbilityTooltip(GAMEPAD_LEFT_TOOLTIP, skillEntry.skillData)
+    else
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    end
+
+    self.assignableActionBar:LayoutOrClearSlotTooltip(GAMEPAD_RIGHT_TOOLTIP)
+end
+
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:RefreshKeybinds()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStrip)
+end
+
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:PerformAssignment()
+    local skillEntry = self.list:GetTargetData()
+    if skillEntry then
+        self.assignableActionBar:AssignSkill(skillEntry.skillData)
+    end
+end
+

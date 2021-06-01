@@ -1,60 +1,75 @@
-ZO_MarketCurrency_Keyboard = ZO_MarketCurrency_Shared:Subclass()
+ZO_MARKET_CURRENCY_BUTTON_TYPE_NONE = 0
+ZO_MARKET_CURRENCY_BUTTON_TYPE_BUY_CROWNS = 1
+ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_ENDEAVORS = 2
 
-function ZO_MarketCurrency_Keyboard:New(...)
-    return ZO_MarketCurrency_Shared.New(self,...)
-end
+ZO_MarketCurrency_Keyboard = ZO_MarketCurrency_Shared:Subclass()
 
 function ZO_MarketCurrency_Keyboard:Initialize(control)
     ZO_MarketCurrency_Shared.Initialize(self, control)
-    
+
     MARKET_CURRENCY_KEYBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
 end
 
 function ZO_MarketCurrency_Keyboard:InitializeControls()
-    local currencyContainer = self.control:GetNamedChild("Container")
-    self.crownsContainer = currencyContainer:GetNamedChild("Crowns")
-    self.crownsCurrencyLabel = self.crownsContainer:GetNamedChild("CurrencyValue")
+    self.container = self.control:GetNamedChild("Container")
+    self.buyCrownsButton = self.container:GetNamedChild("BuyCrowns")
+    self.endeavorsButton = self.container:GetNamedChild("Endeavors")
 
-    local crownsContainerWidth = self.crownsContainer:GetWidth()
-    local crownsNameWidth = self.crownsContainer:GetNamedChild("CurrencyName"):GetWidth()
-    self.crownsCurrencyLabel:SetWidth(crownsContainerWidth - crownsNameWidth)
+    self.currencyControls = {}
+    for index, data in ipairs(self.marketCurrencyTypes) do
+        local marketCurrencyType = data.marketCurrencyType
+        local control = CreateControlFromVirtual("$(parent)Currency"..tostring(index), self.container, "ZO_MarketCurrencyLabel_Keyboard")
+        self.currencyControls[marketCurrencyType] = control
 
-    self.gemsContainer = currencyContainer:GetNamedChild("Gems")
-    self.gemsCurrencyLabel = self.gemsContainer:GetNamedChild("CurrencyValue")
+        local controlLabel = control:GetNamedChild("Label")
+        controlLabel:SetText(ZO_Currency_GetAmountLabel(data.currencyType))
+        control:GetNamedChild("Amount"):SetWidth(control:GetWidth() - controlLabel:GetWidth())
 
-    local gemsContainerWidth = self.gemsContainer:GetWidth()
-    local gemsNameWidth = self.gemsContainer:GetNamedChild("CurrencyName"):GetWidth()
-    self.gemsCurrencyLabel:SetWidth(gemsContainerWidth - gemsNameWidth)
-end
-
-do
-    local CURRENCY_ICON_SIZE = "100%"
-
-    function ZO_MarketCurrency_Keyboard:OnCrownsUpdated(currentCurrency, difference)
-        local currencyString = ZO_Currency_FormatKeyboard(CURT_CROWNS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
-        self.crownsCurrencyLabel:SetText(currencyString)
-    end
-
-    function ZO_MarketCurrency_Keyboard:OnCrownGemsUpdated(currentCurrency, difference, reason)
-        local currencyString = ZO_Currency_FormatKeyboard(CURT_CROWN_GEMS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
-        self.gemsCurrencyLabel:SetText(currencyString)
+        control:SetHandler("OnMouseEnter", function(...) self:OnCurrencyLabelMouseEnter(data.tooltip, ...) end, "tooltip")
+        control:SetHandler("OnMouseExit", function(...) self:OnCurrencyLabelMouseExit(...) end, "tooltip")
+        control:SetHandler("OnEffectivelyShown", function() self:OnMarketCurrencyUpdated(marketCurrencyType) end)
     end
 end
 
-function ZO_MarketCurrency_Keyboard:OnMouseEnterCurrencyLabel(control, currencyType)
+function ZO_MarketCurrency_Keyboard:ShowMarketCurrencyButtonType(buttonType)
+    self.buyCrownsButton:SetHidden(buttonType ~= ZO_MARKET_CURRENCY_BUTTON_TYPE_BUY_CROWNS)
+    self.endeavorsButton:SetHidden(buttonType ~= ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_ENDEAVORS)
+end
+
+function ZO_MarketCurrency_Keyboard:OnMarketCurrencyTypeVisibilityUpdated()
+    local previousControl
+    for _, data in ipairs(self.marketCurrencyTypes) do
+        local control = self.currencyControls[data.marketCurrencyType]
+        local visible = self:IsMarketCurrencyTypeVisible(data.marketCurrencyType)
+        if visible then
+            if previousControl then
+                control:SetAnchor(BOTTOM, previousControl, TOP, 0, -5)
+            else
+                control:SetAnchor(BOTTOM, self.buyCrownsButton, TOP, 20, -20)
+            end
+            previousControl = control
+        end
+
+        control:SetHidden(not visible)
+    end
+end
+
+function ZO_MarketCurrency_Keyboard:OnMarketCurrencyUpdated(marketCurrencyType)
+    local control = self.currencyControls[marketCurrencyType]
+    if not control:IsControlHidden() then
+        local currencyData = self.marketCurrencyTypeMap[marketCurrencyType]
+        local currencyAmount = GetPlayerMarketCurrency(marketCurrencyType)
+        local currencyString = ZO_Currency_FormatKeyboard(currencyData.currencyType, currencyAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+        control:GetNamedChild("Amount"):SetText(currencyString)
+    end
+end
+
+function ZO_MarketCurrency_Keyboard:OnCurrencyLabelMouseEnter(tooltip, control)
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -2)
-
-    local currencyTooltip
-    if currencyType == MKCT_CROWNS then
-        currencyTooltip = GetString(SI_MARKET_CROWNS_TOOLTIP)
-    elseif currencyType == MKCT_CROWN_GEMS then
-        currencyTooltip = GetString(SI_MARKET_CROWN_GEMS_TOOLTIP)
-    end
-
-    SetTooltipText(InformationTooltip, currencyTooltip)
+    SetTooltipText(InformationTooltip, tooltip)
 end
 
-function ZO_MarketCurrency_Keyboard:OnMouseExitCurrencyLabel(control)
+function ZO_MarketCurrency_Keyboard:OnCurrencyLabelMouseExit(control)
     ClearTooltip(InformationTooltip)
 end
 
@@ -62,14 +77,6 @@ end
 
 function ZO_MarketCurrency_Keyboard_OnInitialized(control)
     MARKET_CURRENCY_KEYBOARD = ZO_MarketCurrency_Keyboard:New(control)
-end
-
-function ZO_MarketCurrency_OnMouseEnter(...)
-    MARKET_CURRENCY_KEYBOARD:OnMouseEnterCurrencyLabel(...)
-end
-
-function ZO_MarketCurrency_OnMouseExit(...)
-   MARKET_CURRENCY_KEYBOARD:OnMouseExitCurrencyLabel(...)
 end
 
 function ZO_MarketCurrencyBuyCrowns_OnClicked(...)

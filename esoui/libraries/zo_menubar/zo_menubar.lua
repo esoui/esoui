@@ -422,7 +422,9 @@ function MenuBar:UpdateButtons(forceSelection)
 
         local isVisible = IsVisible(buttonData)
         buttonControl:SetHidden(not isVisible)
-        self:SetDescriptorEnabled(buttonData.descriptor, IsEnabled(buttonData))
+        if buttonData.enabled ~= nil then
+            self:SetDescriptorEnabled(buttonData.descriptor, IsEnabled(buttonData))
+        end
 
         if isVisible then
             if lastDivider and lastDividerPadding then

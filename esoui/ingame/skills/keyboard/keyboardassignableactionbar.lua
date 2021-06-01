@@ -4,27 +4,22 @@
     without changing the "real" action bar.
 ]]--
 
-ZO_KeyboardAssignableActionBar = ZO_Object:Subclass()
-
-function ZO_KeyboardAssignableActionBar:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_KeyboardAssignableActionBar = ZO_InitializingObject:Subclass()
 
 function ZO_KeyboardAssignableActionBar:Initialize(control)
     self.control = control
+    self.areHotbarEditsEnabled = true
 
     self.hotbarSwap = ZO_KeyboardAssignableActionBarHotbarSwap:New(self.control:GetNamedChild("HotbarSwap"))
     self.buttons =
     {
-       ZO_KeyboardAssignableActionBarButton:New(self.control:GetNamedChild("Button1"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1),
-       ZO_KeyboardAssignableActionBarButton:New(self.control:GetNamedChild("Button2"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 2),
-       ZO_KeyboardAssignableActionBarButton:New(self.control:GetNamedChild("Button3"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 3),
-       ZO_KeyboardAssignableActionBarButton:New(self.control:GetNamedChild("Button4"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 4),
-       ZO_KeyboardAssignableActionBarButton:New(self.control:GetNamedChild("Button5"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 5),
+       ZO_KeyboardAssignableActionBarButton:New(self, self.control:GetNamedChild("Button1"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1),
+       ZO_KeyboardAssignableActionBarButton:New(self, self.control:GetNamedChild("Button2"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 2),
+       ZO_KeyboardAssignableActionBarButton:New(self, self.control:GetNamedChild("Button3"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 3),
+       ZO_KeyboardAssignableActionBarButton:New(self, self.control:GetNamedChild("Button4"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 4),
+       ZO_KeyboardAssignableActionBarButton:New(self, self.control:GetNamedChild("Button5"), ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 5),
 
-       ZO_KeyboardAssignableActionBarButton:New(self.control:GetNamedChild("Button6"), ACTION_BAR_ULTIMATE_SLOT_INDEX + 1),
+       ZO_KeyboardAssignableActionBarButton:New(self, self.control:GetNamedChild("Button6"), ACTION_BAR_ULTIMATE_SLOT_INDEX + 1),
     }
     self:SetupHotbarSwapAnimationComplete()
 
@@ -37,6 +32,7 @@ function ZO_KeyboardAssignableActionBar:Initialize(control)
         end
     end
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotUpdated", OnSlotUpdated)
+    ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotNewStatusChanged", OnSlotUpdated)
 
     local function OnCurrentHotbarUpdated(hotbarCategory, oldHotbarCategory)
         if not ACTION_BAR_ASSIGNMENT_MANAGER:IsHotbarSwapAnimationPlaying() then
@@ -72,6 +68,14 @@ function ZO_KeyboardAssignableActionBar:Initialize(control)
         self:HideDropCallouts()
     end
     EVENT_MANAGER:RegisterForEvent("KeyboardAssignableActionBar", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+end
+
+function ZO_KeyboardAssignableActionBar:SetHotbarEditsEnabled(areHotbarEditsEnabled)
+    self.areHotbarEditsEnabled = areHotbarEditsEnabled
+end
+
+function ZO_KeyboardAssignableActionBar:AreHotbarEditsEnabled()
+    return self.areHotbarEditsEnabled
 end
 
 function ZO_KeyboardAssignableActionBar:GetHotbarSwap()
@@ -121,31 +125,32 @@ local ACTION_BUTTON_BORDERS =
 {
     normal = "EsoUI/Art/ActionBar/abilityFrame64_up.dds",
     mouseDown = "EsoUI/Art/ActionBar/abilityFrame64_down.dds",
+    mouseOver = "EsoUI/Art/ActionBar/actionBar_mouseOver.dds",
 }
 
-ZO_KeyboardAssignableActionBarButton = ZO_Object:Subclass()
+ZO_KeyboardAssignableActionBarButton = ZO_InitializingObject:Subclass()
 
-function ZO_KeyboardAssignableActionBarButton:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
-function ZO_KeyboardAssignableActionBarButton:Initialize(control, slotId)
+function ZO_KeyboardAssignableActionBarButton:Initialize(hotbar, control, slotId)
+    self.hotbar = hotbar
     self.slotId = slotId
     self.isMousedOver = false
+    self.isSlotNew = false
+    self.actionName = nil
+    self.actionPriority = nil
 
     self.icon = control:GetNamedChild("Icon")
+    self.lock = control:GetNamedChild("Lock")
+
+    self.newIndicator = control:GetNamedChild("NewIndicator")
+    self.newIndicatorIdle = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_KeyboardAssignableActionBarNewIndicator_Idle", self.newIndicator)
+    self.newIndicatorFadeout = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_KeyboardAssignableActionBarNewIndicator_Fadeout", self.newIndicator)
 
     self.button = control:GetNamedChild("Button")
     self.button.owner = self
 
     self.dropCallout = control:GetNamedChild("DropCallout")
 
-    local buttonTextLabel = control:GetNamedChild("ButtonText")
-    local keybindName = string.format("ACTION_BUTTON_%d", slotId)
-    local HIDE_UNBOUND = false
-    ZO_Keybindings_RegisterLabelForBindingUpdate(buttonTextLabel, keybindName, HIDE_UNBOUND)
+    self.buttonText = control:GetNamedChild("ButtonText")
 
     self:SetupHotbarSwapAnimation(control:GetNamedChild("FlipCard"))
 
@@ -172,32 +177,78 @@ function ZO_KeyboardAssignableActionBarButton:SetupHotbarSwapAnimation(flipCard)
 end
 
 function ZO_KeyboardAssignableActionBarButton:Refresh()
-    local hotbar = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
-    local slotData = hotbar:GetSlotData(self.slotId)
+    local hotbarData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
+    local slotData = hotbarData:GetSlotData(self.slotId)
     local iconTexture = slotData:GetIcon()
+    local mouseDownFrameTexture = self.hotbar:AreHotbarEditsEnabled() and ACTION_BUTTON_BORDERS.mouseDown or ACTION_BUTTON_BORDERS.normal -- do not indicate pressed if it won't do anything
+    local mouseOverFrameTexture = self.hotbar:AreHotbarEditsEnabled() and ACTION_BUTTON_BORDERS.mouseOver or "" -- do not indicate mouse over if we can't actually click it
     if iconTexture then
-        ZO_ActionSlot_SetupSlot(self.icon, self.button, iconTexture, ACTION_BUTTON_BORDERS.normal, ACTION_BUTTON_BORDERS.mouseDown)
+        ZO_ActionSlot_SetupSlot(self.icon, self.button, iconTexture, ACTION_BUTTON_BORDERS.normal, mouseDownFrameTexture, nil, mouseOverFrameTexture)
     else
-        ZO_ActionSlot_ClearSlot(self.icon, self.button, ACTION_BUTTON_BORDERS.normal, ACTION_BUTTON_BORDERS.mouseDown)
+        ZO_ActionSlot_ClearSlot(self.icon, self.button, ACTION_BUTTON_BORDERS.normal, mouseDownFrameTexture, nil, mouseOverFrameTexture)
+    end
+
+    self.lock:SetHidden(not hotbarData:IsSlotLocked(self.slotId))
+    local isNew = hotbarData:IsSlotNew(self.slotId)
+    if isNew ~= self.isSlotNew then
+        self.isSlotNew = isNew
+        if isNew then
+            self.newIndicatorFadeout:Stop()
+            self.newIndicatorIdle:PlayFromStart()
+        else
+            self.newIndicatorIdle:Stop()
+            self.newIndicatorFadeout:PlayFromStart()
+        end
     end
 
     local DONT_DESATURATE = false
     ZO_ActionSlot_SetUnusable(self.icon, not slotData:IsUsable(), DONT_DESATURATE)
+
+    local KEYBOARD_MODE = false
+    local actionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetActionNameForSlot(self.slotId, hotbarData:GetHotbarCategory(), KEYBOARD_MODE)
+    local actionPriority = ACTION_BAR_ASSIGNMENT_MANAGER:GetAutomaticCastPriorityForSlot(self.slotId, hotbarData:GetHotbarCategory())
+    if actionName ~= self.actionName or actionPriority ~= self.actionPriority then
+        ZO_Keybindings_UnregisterLabelForBindingUpdate(self.buttonText)
+        if actionName then
+            local HIDE_UNBOUND = false
+            ZO_Keybindings_RegisterLabelForBindingUpdate(self.buttonText, actionName, HIDE_UNBOUND)
+        elseif actionPriority then
+            self.buttonText:SetText(tostring(actionPriority))
+        else
+            self.buttonText:SetText("")
+        end
+        self.actionName = actionName
+        self.actionPriority = actionPriority
+    end
 
     if self.isMousedOver then
         self:ShowTooltip()
     end
 end
 
+function ZO_KeyboardAssignableActionBarButton:ClearNewIndicator()
+    ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():ClearSlotNew(self.slotId)
+end
+
 function ZO_KeyboardAssignableActionBarButton:ShowTooltip()
     self:HideTooltip() -- Hide the old tooltip unconditionally, it may be a different tooltip control
 
-    local slotData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():GetSlotData(self.slotId)
-    local tooltip = slotData:GetKeyboardTooltipControl()
-    if tooltip then
-        InitializeTooltip(tooltip, self.button, BOTTOM, 0, -5, TOP)
-        slotData:SetKeyboardTooltip(tooltip)
-        self.lastTooltip = tooltip
+    local hotbarData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
+    if hotbarData:IsSlotLocked(self.slotId) then
+        InitializeTooltip(InformationTooltip, self.button, BOTTOM, 0, -5, TOP)
+        local DEFAULT_FONT = ""
+        InformationTooltip:AddLine(GetString(SI_ACTION_BAR_SLOT_LOCKED_HEADER), "ZoFontHeader", ZO_SELECTED_TEXT:UnpackRGBA())
+        ZO_Tooltip_AddDivider(InformationTooltip)
+        InformationTooltip:AddLine(hotbarData:GetSlotUnlockText(self.slotId), DEFAULT_FONT, ZO_ERROR_COLOR:UnpackRGBA())
+        self.lastTooltip = InformationTooltip
+    else
+        local slotData = hotbarData:GetSlotData(self.slotId)
+        local tooltip = slotData:GetKeyboardTooltipControl()
+        if tooltip then
+            InitializeTooltip(tooltip, self.button, BOTTOM, 0, -5, TOP)
+            slotData:SetKeyboardTooltip(tooltip)
+            self.lastTooltip = tooltip
+        end
     end
 end
 
@@ -223,23 +274,29 @@ function ZO_KeyboardAssignableActionBarButton:HideDropCallout()
 end
 
 function ZO_KeyboardAssignableActionBarButton:TryCursorPickup()
-    if GetCursorContentType() == MOUSE_CONTENT_EMPTY then
-        local hotbar = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
-        local slotData = hotbar:GetSlotData(self.slotId)
-        if slotData then
-            slotData:TryCursorPickup()
-            hotbar:ClearSlot(self.slotId)
+    if self.hotbar:AreHotbarEditsEnabled() then
+        if GetCursorContentType() == MOUSE_CONTENT_EMPTY then
+            local hotbarData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
+            local slotData = hotbarData:GetSlotData(self.slotId)
+            if slotData then
+                slotData:TryCursorPickup()
+                hotbarData:ClearSlot(self.slotId)
+            end
         end
     end
 end
 
 function ZO_KeyboardAssignableActionBarButton:TryCursorPlace()
+    if not self.hotbar:AreHotbarEditsEnabled() then
+        return
+    end
+
     if GetCursorContentType() == MOUSE_CONTENT_EMPTY then
         return
     end
 
-    local hotbar = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
-    local oldSlotData = hotbar:GetSlotData(self.slotId)
+    local hotbarData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
+    local oldSlotData = hotbarData:GetSlotData(self.slotId)
     if oldSlotData == nil then
         -- invalid slot
         return
@@ -250,8 +307,7 @@ function ZO_KeyboardAssignableActionBarButton:TryCursorPlace()
         return
     end
 
-    local progressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
-    if progressionData and hotbar:AssignSkillToSlot(self.slotId, progressionData:GetSkillData()) then
+    if hotbarData:AssignSkillToSlotByAbilityId(self.slotId, abilityId) then
         ClearCursor()
         oldSlotData:TryCursorPickup()
         PlaySound(SOUNDS.ABILITY_SLOTTED)
@@ -259,13 +315,16 @@ function ZO_KeyboardAssignableActionBarButton:TryCursorPlace()
 end
 
 function ZO_KeyboardAssignableActionBarButton:ShowActionMenu()
-    local hotbar = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
-    local slotData = hotbar:GetSlotData(self.slotId)
+    if not self.hotbar:AreHotbarEditsEnabled() then
+        return
+    end 
+    local hotbarData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
+    local slotData = hotbarData:GetSlotData(self.slotId)
 
     if slotData and not slotData:IsEmpty() then
         ClearMenu()
         AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function()
-            if hotbar:ClearSlot(self.slotId) then
+            if hotbarData:ClearSlot(self.slotId) then
                 PlaySound(SOUNDS.ABILITY_SLOT_CLEARED)
             end
         end)
@@ -273,13 +332,7 @@ function ZO_KeyboardAssignableActionBarButton:ShowActionMenu()
     end
 end
 
-ZO_KeyboardAssignableActionBarHotbarSwap = ZO_Object:Subclass()
-
-function ZO_KeyboardAssignableActionBarHotbarSwap:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_KeyboardAssignableActionBarHotbarSwap = ZO_InitializingObject:Subclass()
 
 function ZO_KeyboardAssignableActionBarHotbarSwap:Initialize(control)
     self.control = control
@@ -369,6 +422,7 @@ end
 function ZO_KeyboardAssignableActionBarButton_OnMouseExit(control)
     control.owner.isMousedOver = false
     control.owner:HideTooltip()
+    control.owner:ClearNewIndicator()
 end
 
 function ZO_KeyboardAssignableActionBarButton_OnMouseClicked(control, buttonId)

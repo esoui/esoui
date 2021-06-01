@@ -285,7 +285,6 @@
                     </Controls>
                 </Control>
 
-                <!-- TODO: champion 2, temp art -->
                 <Texture name="$(parent)GamepadCursor" hidden="true" tier="HIGH" clampedToScreen="true" textureFile="EsoUI/Art/WorldMap/map_centerReticle.dds">
                     <ClampedToScreenInsets bottom="ZO_GAMEPAD_KEYBIND_STRIP_BACKGROUND_HEIGHT" />
                     <Dimensions x="32" y="32" />

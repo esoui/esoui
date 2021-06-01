@@ -40,7 +40,6 @@ function ZO_HUDTelvarMeter:Initialize(control)
         currencyOptions = 
         {
             showTooltips = true,
-            customTooltip = SI_CURRENCYTYPE3,
             isGamepad = false,
             font = "ZoFontGameLargeBold",
             iconSide = RIGHT,

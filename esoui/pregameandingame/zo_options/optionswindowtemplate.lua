@@ -122,8 +122,6 @@ local deactivateOptionControl =
 }
 
 local function UpdateOptionControlState(control, updateTable, stateType)
-    local data = control.data
-
     local controlType = GetControlType(control)
     local updateFn = updateTable[controlType]
     if updateFn then updateFn(control) end
@@ -151,9 +149,9 @@ local function UpdateOptionControlState(control, updateTable, stateType)
     control.state = stateType
 end
 
-local function CheckEnableApplyButton(oldValue, currentValue)
+local function CheckEnableApplyButton(control, oldValue, currentValue)
     if oldValue ~= currentValue then
-        GetControl(ZO_OptionsWindow, "ApplyButton"):SetHidden(false)
+        control.optionsManager:EnableApplyButton()
     end
 end
 
@@ -223,11 +221,17 @@ end
 
 local function OptionsScrollListSelectionChanged(selectedData, oldData, reselectingDuringRebuild)
     if oldData ~= nil and reselectingDuringRebuild ~= true then
-        local value = selectedData.value
         local control = selectedData.parentControl
+        local oldValue = GetSettingFromControl(control)
+
+        local value = selectedData.value
         SetSettingFromControl(control, value)
 
         local optionsData = control.data
+        if optionsData.mustPushApply then
+            CheckEnableApplyButton(control, oldValue, value)
+        end
+
         local callback = optionsData.scrollListChangedCallback
         if callback then
             callback(selectedData, oldData)
@@ -403,9 +407,8 @@ local updateControlFromSettings =
                             end,
 
     [OPTIONS_COLOR] =       function(control)
-                                local data = control.data
                                 local currentChoice = GetSettingFromControl(control)
-                                local color = ZO_ColorDef.FromARGBHexadecimal(currentChoice)
+                                local color = ZO_ColorDef:New(currentChoice)
                                 if color then
                                     control:GetNamedChild("Color"):SetColor(color:UnpackRGB())
                                 end
@@ -504,7 +507,7 @@ local function OptionsDropdown_SelectChoice(control, index)
             CALLBACK_MANAGER:FireCallbacks(data.events[value])
         end
 
-        CheckEnableApplyButton(oldValueString, valueString)
+        CheckEnableApplyButton(control, oldValueString, valueString)
     else
         ZO_Options_UpdateOption(control)
     end
@@ -541,7 +544,7 @@ local function OptionsCheckBox_SelectChoice(control, boxIsChecked)
             CALLBACK_MANAGER:FireCallbacks(data.events[boxIsChecked])
         end
 
-        CheckEnableApplyButton(oldValue, value)
+        CheckEnableApplyButton(control, oldValue, value)
     else
         ZO_Options_UpdateOption(control)
     end
@@ -568,7 +571,7 @@ local function OptionsSlider_SelectChoice(control, value, eventReason)
     SetSettingFromControl(control, formattedValueString)
     if data.mustPushApply then
         GetControl(control, "Slider"):SetValue(formattedValue)
-        CheckEnableApplyButton(oldValueString, formattedValueString)
+        CheckEnableApplyButton(control, oldValueString, formattedValueString)
     else
         ZO_Options_UpdateOption(control)
     end
@@ -714,7 +717,6 @@ local function CheckBoxToggleFunction(checkBoxControl, boxIsChecked)
 end
 
 function ZO_Options_SetupCheckBox(control)
-    local data = control.data
     local checkBoxControl = GetControl(control, "Checkbox")
     ZO_CheckButton_SetToggleFunction(checkBoxControl, CheckBoxToggleFunction)
 end
@@ -755,11 +757,11 @@ function ZO_Options_ColorOnClicked(control)
     local data = control.data
     if ZO_Options_IsOptionActive(control) then
         local currentChoice = GetSettingFromControl(control)
-        local color = ZO_ColorDef.FromARGBHexadecimal(currentChoice)
+        local color = ZO_ColorDef:New(currentChoice)
         if color then
             local function OnColorSet(r, g, b)
                 control:GetNamedChild("Color"):SetColor(r, g, b)
-                local ARGBHexadecimal = ZO_ColorDef.ToARGBHexadecimal(r, g, b, 1)
+                local ARGBHexadecimal = ZO_ColorDef.FloatsToHex(r, g, b, 1)
                 SetSetting(data.system, data.settingId, ARGBHexadecimal)
             end
             SYSTEMS:GetObject("colorPicker"):Show(OnColorSet, color:UnpackRGB())
@@ -774,7 +776,6 @@ do
     }
 
     function ZO_Options_Social_ChatColorOnClicked(control)
-        local data = control.data
         if ZO_Options_IsOptionActive(control) then
             local data = control.data
             if data then

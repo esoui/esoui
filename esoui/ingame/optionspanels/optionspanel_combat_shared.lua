@@ -1,3 +1,29 @@
+-- Ability Bar settings helper function
+
+local function AreAbilityBarsEnabled()
+    return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR)) ~= ACTION_BAR_SETTING_CHOICE_OFF
+end
+
+local function AreAbilityBarTimersEnabled()
+    return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS)) ~= 0
+end
+
+local function IsAbilityBarBackRowEnabled()
+    return AreAbilityBarsEnabled() and AreAbilityBarTimersEnabled()
+end
+
+local function OnAbilityBarsEnabledChanged(control)
+    ZO_SetControlActiveFromPredicate(control, AreAbilityBarsEnabled)
+end
+
+local function OnAbilityBarTimersEnabledChanged(control)
+    ZO_SetControlActiveFromPredicate(control, AreAbilityBarTimersEnabled)
+end
+
+local function OnAbilityBarBackRowEnabledChanged(control)
+    ZO_SetControlActiveFromPredicate(control, IsAbilityBarBackRowEnabled)
+end
+
 -- SCT settings helper functions
 
 local function IsSCTEnabled()
@@ -112,8 +138,41 @@ local ZO_OptionsPanel_Combat_ControlData =
             tooltipText = SI_INTERFACE_OPTIONS_ACTION_BAR_TOOLTIP,
             valid = {ACTION_BAR_SETTING_CHOICE_OFF, ACTION_BAR_SETTING_CHOICE_AUTOMATIC, ACTION_BAR_SETTING_CHOICE_ON,},
             valueStringPrefix = "SI_ACTIONBARSETTINGCHOICE",
+            events = {[ACTION_BAR_SETTING_CHOICE_OFF] = "OnAbilityBarsEnabledChanged", [ACTION_BAR_SETTING_CHOICE_AUTOMATIC] = "OnAbilityBarsEnabledChanged", [ACTION_BAR_SETTING_CHOICE_ON] = "OnAbilityBarsEnabledChanged"},
+            gamepadHasEnabledDependencies = true,
         },
-        --Options_Interface_ShowActionBar
+        [UI_SETTING_SHOW_ACTION_BAR_TIMERS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            panel = SETTING_PANEL_COMBAT,
+            settingId = UI_SETTING_SHOW_ACTION_BAR_TIMERS,
+            text = SI_INTERFACE_OPTIONS_ACTION_BAR_TIMERS,
+            tooltipText = SI_INTERFACE_OPTIONS_ACTION_BAR_TIMERS_TOOLTIP,
+            eventCallbacks =
+            {
+                ["OnAbilityBarsEnabledChanged"] = OnAbilityBarsEnabledChanged,
+            },
+            gamepadIsEnabledCallback = AreAbilityBarsEnabled,
+            events = {[false] = "OnAbilityBarTimersEnabledChanged", [true] = "OnAbilityBarTimersEnabledChanged"},
+            gamepadHasEnabledDependencies = true,
+        },
+        [UI_SETTING_SHOW_ACTION_BAR_BACK_ROW] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            panel = SETTING_PANEL_COMBAT,
+            settingId = UI_SETTING_SHOW_ACTION_BAR_BACK_ROW,
+            text = SI_INTERFACE_OPTIONS_ACTION_BAR_BACK_ROW,
+            tooltipText = SI_INTERFACE_OPTIONS_ACTION_BAR_BACK_ROW_TOOLTIP,
+            eventCallbacks =
+            {
+                ["OnAbilityBarsEnabledChanged"] = OnAbilityBarBackRowEnabledChanged,
+                ["OnAbilityBarTimersEnabledChanged"] = OnAbilityBarBackRowEnabledChanged,
+            },
+            gamepadIsEnabledCallback = IsAbilityBarBackRowEnabled,
+        },
+        --Options_Interface_ShowResourceBars
         [UI_SETTING_SHOW_RESOURCE_BARS] =
         {
             controlType = OPTIONS_FINITE_LIST,

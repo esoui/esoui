@@ -19,6 +19,14 @@
                 <Control name="$(parent)Tabs" inherits="ZO_LabelButtonBar">
                     <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-40" offsetY="-10" />
                 </Control>
+
+                <Control name="$(parent)SubTabs" inherits="ZO_LabelButtonBar">
+                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-40" offsetY="10" />
+                </Control>
+
+                <Label name="$(parent)NoStylesLabel" font="ZoFontWinH4" text="SI_OUTFIT_COMPANION_NO_OUTFIT_DESCRIPTION" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="25" offsetY="25" />
+                </Label>
             </Controls>
         </TopLevelControl>
 

@@ -337,6 +337,26 @@ marketScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 marketScene:AddFragment(TITLE_FRAGMENT)
 marketScene:AddFragment(CROWN_STORE_TITLE_FRAGMENT)
 
+----------------------------
+--Endeavor Seals Store Scene
+----------------------------
+
+local endeavorSealStoreScene = ZO_RemoteScene:New("endeavorSealStoreSceneKeyboard", SCENE_MANAGER)
+endeavorSealStoreScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+endeavorSealStoreScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_STRIP)
+endeavorSealStoreScene:AddFragment(MARKET_KEYBIND_STRIP_FRAGMENT)
+endeavorSealStoreScene:AddFragment(KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT)
+endeavorSealStoreScene:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+endeavorSealStoreScene:AddFragment(FRAME_PLAYER_FRAGMENT)
+endeavorSealStoreScene:AddFragment(RIGHT_BG_FRAGMENT)
+endeavorSealStoreScene:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_STORE)
+endeavorSealStoreScene:AddFragment(STOP_MOVEMENT_FRAGMENT)
+endeavorSealStoreScene:AddFragment(MARKET_WINDOW_SOUNDS)
+endeavorSealStoreScene:AddFragment(PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT)
+endeavorSealStoreScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+endeavorSealStoreScene:AddFragment(TITLE_FRAGMENT)
+endeavorSealStoreScene:AddFragment(CROWN_STORE_TITLE_FRAGMENT)
+
 ------------------------
 -- Daily Login Rewards
 ------------------------
@@ -904,6 +924,56 @@ pathSettingsScene:AddFragment(HOUSING_PATH_SETTINGS_TITLE_FRAGMENT)
 pathSettingsScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 pathSettingsScene:AddFragment(STOP_MOVEMENT_FRAGMENT)
 
+------------------------
+-- Companion Character Scene
+------------------------
+
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(COMPANION_PROGRESS_BAR_FRAGMENT)
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_FRAGMENT)
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(TITLE_FRAGMENT)
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(COMPANION_MENU_PREVIEW_OPTIONS_FRAGMENT)
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(COMPANION_TITLE_FRAGMENT)
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(COMPANION_KEYBOARD_FRAGMENT)
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(COMPANION_CHARACTER_KEYBOARD_FRAGMENT)
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(COMPANION_CHARACTER_WINDOW_FRAGMENT)
+COMPANION_CHARACTER_KEYBOARD_SCENE:AddFragment(THIN_LEFT_PANEL_BG_FRAGMENT)
+
+------------------------
+-- Companion Skills Scene
+------------------------
+
+COMPANION_SKILLS_KEYBOARD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+COMPANION_SKILLS_KEYBOARD_SCENE:AddFragment(COMPANION_PROGRESS_BAR_FRAGMENT)
+COMPANION_SKILLS_KEYBOARD_SCENE:AddFragment(FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_FRAGMENT)
+COMPANION_SKILLS_KEYBOARD_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+COMPANION_SKILLS_KEYBOARD_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+-- ESO-712835: Add a preview fragment to skills to solve the loss of focus upon the companion object when navigating between a screen with previewing and one without.
+COMPANION_SKILLS_KEYBOARD_SCENE:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+COMPANION_SKILLS_KEYBOARD_SCENE:AddFragment(TITLE_FRAGMENT)
+COMPANION_SKILLS_KEYBOARD_SCENE:AddFragment(COMPANION_TITLE_FRAGMENT)
+COMPANION_SKILLS_KEYBOARD_SCENE:AddFragment(COMPANION_KEYBOARD_FRAGMENT)
+COMPANION_SKILLS_KEYBOARD_SCENE:AddFragment(COMPANION_SKILLS_KEYBOARD_FRAGMENT)
+
+------------------------
+-- Companion Collection Book Scene
+------------------------
+
+COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE:AddFragment(COMPANION_PROGRESS_BAR_FRAGMENT)
+COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE:AddFragment(FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_FRAGMENT)
+COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE:AddFragment(TITLE_FRAGMENT)
+COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE:AddFragment(COMPANION_MENU_PREVIEW_OPTIONS_FRAGMENT)
+COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE:AddFragment(COMPANION_TITLE_FRAGMENT)
+COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE:AddFragment(COMPANION_KEYBOARD_FRAGMENT)
+COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE:AddFragment(COMPANION_COLLECTION_BOOK_KEYBOARD_FRAGMENT)
+
 -------------------
 --Main Menu
 -------------------
@@ -924,6 +994,13 @@ do
                 normal = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_up.dds",
                 pressed = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_down.dds",
                 highlight = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_over.dds",
+            },
+            {
+                categoryName = SI_CROWN_STORE_MENU_SEALS_STORE_LABEL,
+                descriptor = "endeavorSealStoreSceneKeyboard",
+                normal = "EsoUI/Art/Market/Keyboard/tabIcon_sealsStore_up.dds",
+                pressed = "EsoUI/Art/Market/Keyboard/tabIcon_sealsStore_down.dds",
+                highlight = "EsoUI/Art/Market/Keyboard/tabIcon_sealsStore_over.dds",
             },
             {
                 categoryName = SI_CROWN_STORE_MENU_ESO_PLUS_LABEL,
@@ -960,7 +1037,7 @@ do
             },
         }
 
-    SCENE_MANAGER:AddSceneGroup("marketSceneGroup", ZO_SceneGroup:New("market", "esoPlusOffersSceneKeyboard", "dailyLoginRewards", "giftInventoryKeyboard"))
+    SCENE_MANAGER:AddSceneGroup("marketSceneGroup", ZO_SceneGroup:New("market", "endeavorSealStoreSceneKeyboard", "esoPlusOffersSceneKeyboard", "dailyLoginRewards", "giftInventoryKeyboard"))
     local NO_PREFERRED_SCENE_FUNCTION = nil
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_MARKET, "marketSceneGroup", iconData, NO_PREFERRED_SCENE_FUNCTION, TUTORIAL_TRIGGER_CROWN_STORE_TABS_SHOWN)
 end

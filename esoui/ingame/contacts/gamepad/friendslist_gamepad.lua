@@ -28,7 +28,7 @@ function FriendsList_Gamepad:Initialize(control, rowTemplate)
     GAMEPAD_FRIENDS_LIST_SCENE = ZO_Scene:New("gamepad_friends", SCENE_MANAGER)
     GAMEPAD_FRIENDS_LIST_SCENE:AddFragment(self:GetListFragment())
 
-    if GetUIPlatform() == UI_PLATFORM_PS5 then
+    if ZO_IsPlaystationPlatform() then
         EVENT_MANAGER:RegisterForEvent("FriendsList_Gamepad", EVENT_FRIEND_CHARACTER_INFO_RECEIVED, function(eventId, ...) self:OnFriendCharacterInfoReceived(...) end)
     end
 end
@@ -139,7 +139,7 @@ end
 function FriendsList_Gamepad:BuildOptionsList()
     local groupId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption, ZO_SocialOptionsDialogGamepad.ShouldAddWhisperOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.ShouldAddInviteToGroupOptionAndIsSelectedDataLoggedIn)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.ShouldAddInviteToGroupOptionAndCanSelectedDataBeInvited)
 
     local function BuildTravelToFriendPlayerOption()
         return self:BuildTravelToPlayerOption(JumpToFriend)
@@ -149,7 +149,6 @@ function FriendsList_Gamepad:BuildOptionsList()
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildVisitPlayerHouseOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGameOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildRemoveFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddRemoveFriendOption)
 
@@ -163,15 +162,7 @@ function FriendsList_Gamepad:GetDialogData()
         data.setupFunction = function(dialog)
             local entryData = self:GetSelectedData()
             if entryData.online then
-                local platform = GetUIPlatform()
-                if platform == UI_PLATFORM_PS4 then
-                    ZO_GenericGamepadDialog_ShowTooltip(dialog)
-                    GAMEPAD_TOOLTIPS:LayoutFriend(GAMEPAD_LEFT_DIALOG_TOOLTIP, ZO_FormatUserFacingDisplayName(entryData.displayName), entryData.characterName, entryData.class, entryData.gender, entryData.level, entryData.championPoints, entryData.formattedAllianceName, entryData.formattedZone, not entryData.online, entryData.secsSinceLogoff, entryData.timeStamp, entryData.heronName)
-                elseif platform == UI_PLATFORM_PS5 then
-                    RequestCharacterDataForFriend(entryData.displayName)
-                else
-                    internalassert(false, "Unhandled platform in FriendsList_Gamepad:GetDialogData()")
-                end
+                RequestCharacterDataForFriend(entryData.displayName)
             end
         end
     end

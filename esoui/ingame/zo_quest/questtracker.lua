@@ -310,6 +310,7 @@ function ZO_Tracker:Initialize(trackerPanel, trackerControl)
             trackerPanel:RegisterForEvent(EVENT_ZONE_STORY_QUEST_ACTIVITY_TRACKED, OnZoneStoryQuestActivityTracked)
 
             trackerPanel:RegisterForEvent(EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(_, index) self:OnQuestConditionUpdated(index) end)
+            trackerPanel:RegisterForEvent(EVENT_QUEST_CONDITION_OVERRIDE_TEXT_CHANGED, function(_, index) self:OnQuestConditionUpdated(index) end)
             trackerPanel:RegisterForEvent(EVENT_QUEST_ADVANCED, function(_, questIndex, questName, isPushed, isComplete, mainStepChanged) self:OnQuestAdvanced(questIndex, questName, isPushed, isComplete, mainStepChanged) end)
             trackerPanel:RegisterForEvent(EVENT_QUEST_ADDED, function(_, questIndex) self:OnQuestAdded(questIndex) end)
             trackerPanel:RegisterForEvent(EVENT_QUEST_REMOVED, function(_, completed, questIndex, questName, zoneIndex, poiIndex, questID) self:OnQuestRemoved(questIndex, completed, questID) end)

@@ -60,9 +60,9 @@ ZO_STORE_FORCE_VALID_PRICE = true
 
 ZO_GamepadStoreListComponent = ZO_GamepadStoreComponent:Subclass()
 
-function ZO_GamepadStoreListComponent:Initialize(scene, storeMode, tabText, overrideTemplate, overrideHeaderTemplateSetupFunction)
+function ZO_GamepadStoreListComponent:Initialize(scene, storeMode, tabText, overrideTemplate, overrideHeaderTemplateSetupFunction, templateControlPrefix, templateWithHeaderControlPrefix)
     self:SetSearchContext("storeTextSearch")
-    self.list = self:CreateItemList(scene, storeMode, overrideTemplate, overrideHeaderTemplateSetupFunction)
+    self.list = self:CreateItemList(scene, storeMode, overrideTemplate, overrideHeaderTemplateSetupFunction, templateControlPrefix, templateWithHeaderControlPrefix)
     self.list:SetSearchContext(self.searchContext)
     self.list:UpdateList()
     local control = self.list:GetControl()
@@ -131,14 +131,14 @@ function ZO_GamepadStoreListComponent:OnSelectedItemChanged(data)
 
 end
 
-function ZO_GamepadStoreListComponent:CreateItemList(scene, storeMode, overrideTemplate, overrideHeaderTemplateSetupFunction)
+function ZO_GamepadStoreListComponent:CreateItemList(scene, storeMode, overrideTemplate, overrideHeaderTemplateSetupFunction, templateControlPrefix, templateWithHeaderControlPrefix)
     local setupFunction = function(...) self:SetupEntry(...) end
     local listName = string.format("StoreMode%d", storeMode)
 
     local SETUP_LIST_LOCALLY = true
     local list = scene:AddList(listName, SETUP_LIST_LOCALLY)
     self.fragment = scene:GetListFragment(listName)
-    ZO_GamepadStoreList.SetMode(list, storeMode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction)
+    ZO_GamepadStoreList.SetMode(list, storeMode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction, templateControlPrefix, templateWithHeaderControlPrefix)
     list.AddItems = ZO_GamepadStoreList.AddItems
     list.UpdateList = ZO_GamepadStoreList.UpdateList
     list.SetSearchContext = ZO_GamepadStoreList.SetSearchContext

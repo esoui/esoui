@@ -188,7 +188,7 @@ function ZO_StoreManager_IsInventoryStoreMode(mode)
     return DOES_STORE_MODE_REPRESENT_INVENTORY[mode]
 end
 
-internalassert(CURT_MAX_VALUE == 10, "Check if new currency requires unique transaction sound hook")
+internalassert(CURT_MAX_VALUE == 11, "Check if new currency requires unique transaction sound hook")
 local CURRENCY_TYPE_TO_SOUND_ID =
 {
     [CURT_TELVAR_STONES] = SOUNDS.TELVAR_TRANSACT,
@@ -238,7 +238,7 @@ function ZO_StoreManager_DoPreviewAction(action, storeEntryIndex)
                     return true
                 elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then
                     itemPreview:ClearPreviewCollection()
-                    itemPreview:PreviewOutfit(ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex())
+                    itemPreview:PreviewOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER, ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex())
                     local NO_DYE = 0
                     local outfitSlot = ZO_OUTFIT_MANAGER:GetPreferredOutfitSlotForStyle(collectibleData)
                     AddOutfitSlotPreviewElementToPreviewCollection(outfitSlot, collectibleId, ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX, NO_DYE, NO_DYE, NO_DYE)

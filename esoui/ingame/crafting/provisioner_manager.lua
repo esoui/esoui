@@ -127,11 +127,16 @@ do
         end
     end
 
+    local function RecipeComparator(left, right)
+        return left.name < right.name
+    end
+
     function ZO_ProvisionerManager:BuildRecipeListData(currentCraftingStation)
         self.recipeLists = {}
 
         for recipeListIndex = 1, GetNumRecipeLists() do
             local recipeListName, numRecipes, upIcon, downIcon, overIcon, _, recipeListCreateSound = GetRecipeListInfo(recipeListIndex)
+            local recipeList = self.recipeLists[recipeListIndex]
             for recipeIndex in IterateKnownRecipes(recipeListIndex, currentCraftingStation) do
                 local _, recipeName, numIngredients, _, qualityReq, specialIngredientType, requiredCraftingStationType, itemId = GetRecipeInfo(recipeListIndex, recipeIndex)
                 local _, resultIcon = GetRecipeResultItemInfo(recipeListIndex, recipeIndex)
@@ -170,7 +175,6 @@ do
                     resultItemId = itemId,
                 }
 
-                local recipeList = self.recipeLists[recipeListIndex]
                 if not recipeList then
                     recipeList =
                     {
@@ -185,6 +189,10 @@ do
                 end
 
                 table.insert(recipeList.recipes, recipe)
+            end
+
+            if recipeList then
+                table.sort(recipeList.recipes, RecipeComparator)
             end
         end
     end

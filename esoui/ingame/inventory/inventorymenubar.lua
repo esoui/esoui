@@ -1,6 +1,7 @@
 INVENTORY_MENU_INVENTORY_BUTTON = "inventory"
 INVENTORY_MENU_CRAFT_BAG_BUTTON = "craftBag"
 INVENTORY_MENU_WALLET_BUTTON = "wallet"
+INVENTORY_MENU_QUEST_ITEMS_BUTTON = "quest"
 INVENTORY_MENU_QUICKSLOT_BUTTON = "quickslot"
 
 ZO_InventoryMenuBar = ZO_Object:Subclass()
@@ -135,6 +136,11 @@ do
                                                     "EsoUI/Art/Bank/bank_tabIcon_gold_over.dds",
                                                     SOUNDS.QUICKSLOT_CLOSE,
                                                     onButtonClicked)
+        self.questButtonData = CreateButtonData("EsoUI/Art/Inventory/inventory_tabIcon_quest_up.dds",
+                                                    "EsoUI/Art/Inventory/inventory_tabIcon_quest_down.dds",
+                                                    "EsoUI/Art/Inventory/inventory_tabIcon_quest_over.dds",
+                                                    SOUNDS.QUICKSLOT_CLOSE,
+                                                    onButtonClicked)
         self.quickslotsButtonData = CreateButtonData("EsoUI/Art/Inventory/inventory_tabIcon_quickslot_up.dds",
                                                     "EsoUI/Art/Inventory/inventory_tabIcon_quickslot_down.dds",
                                                     "EsoUI/Art/Inventory/inventory_tabIcon_quickslot_over.dds",
@@ -150,6 +156,8 @@ function ZO_InventoryMenuBar:AddTab(tabType, keybinds, additionalFragment)
         self.modeBar:Add(SI_INVENTORY_MODE_CRAFT_BAG, { CRAFT_BAG_FRAGMENT, additionalFragment }, self.craftBagButtonData, keybinds)
     elseif tabType == INVENTORY_MENU_WALLET_BUTTON then
         self.modeBar:Add(SI_INVENTORY_MODE_CURRENCY, { WALLET_FRAGMENT, additionalFragment }, self.currencyButtonData, keybinds)
+    elseif tabType == INVENTORY_MENU_QUEST_ITEMS_BUTTON then
+        self.modeBar:Add(SI_INVENTORY_MODE_QUEST_ITEMS, { QUEST_ITEMS_FRAGMENT, additionalFragment }, self.questButtonData, keybinds)
     elseif tabType == INVENTORY_MENU_QUICKSLOT_BUTTON then
         self.modeBar:Add(SI_INVENTORY_MODE_QUICKSLOTS, { QUICKSLOT_FRAGMENT, QUICKSLOT_CIRCLE_FRAGMENT, additionalFragment }, self.quickslotsButtonData, keybinds)
     end
@@ -194,7 +202,8 @@ function PlayerInventoryMenuBar:Initialize(control)
     SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", function() self:UpdateInventoryKeybinds() end)
 
     -- Quickslot toggle button
-    local quickslotToggleKeybind = {
+    local quickslotToggleKeybind =
+    {
         --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
         name = "Toggle Quickslots",
         keybind = "UI_SHORTCUT_QUICK_SLOTS",
@@ -205,7 +214,8 @@ function PlayerInventoryMenuBar:Initialize(control)
     }
 
     -- Stack all
-    local stackAllKeybind = {
+    local stackAllKeybind =
+    {
         name = GetString(SI_ITEM_ACTION_STACK_ALL),
         keybind = "UI_SHORTCUT_QUINARY",
         visible =   function()
@@ -217,7 +227,8 @@ function PlayerInventoryMenuBar:Initialize(control)
     }
 
     -- Stow all materials to craft bag
-    local stowMaterialsKeybind = {
+    local stowMaterialsKeybind =
+    {
         name = GetString(SI_ITEM_ACTION_STOW_MATERIALS),
         keybind = "UI_SHORTCUT_QUATERNARY",
         visible =   function()
@@ -235,7 +246,8 @@ function PlayerInventoryMenuBar:Initialize(control)
         stackAllKeybind,
     }
 
-    local keybindButtons = {
+    local keybindButtons =
+    {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
 
         -- Destroy All Junk
@@ -279,6 +291,7 @@ function PlayerInventoryMenuBar:Initialize(control)
     self:AddTab(INVENTORY_MENU_INVENTORY_BUTTON, keybindButtons, BACKPACK_MENU_BAR_LAYOUT_FRAGMENT)
     self:AddTab(INVENTORY_MENU_CRAFT_BAG_BUTTON, nil, BACKPACK_MENU_BAR_LAYOUT_FRAGMENT)
     self:AddTab(INVENTORY_MENU_WALLET_BUTTON)
+    self:AddTab(INVENTORY_MENU_QUEST_ITEMS_BUTTON, nil, BACKPACK_MENU_BAR_LAYOUT_FRAGMENT)
     self:AddTab(INVENTORY_MENU_QUICKSLOT_BUTTON, quickslotToggleKeybindButtons)
 
     self.modeBar:SetStartingFragment(SI_INVENTORY_MODE_ITEMS)
@@ -325,17 +338,18 @@ end
 
 function VendorInventoryMenuBar:Initialize(control)
     local menuBarData =
-        {
-            buttonPadding = 10,
-            normalSize = 48,
-            downSize = 51,
-            animationDuration = DEFAULT_SCENE_TRANSITION_TIME,
-            buttonTemplate = "ZO_MenuBarTooltipButton",
-        }
+    {
+        buttonPadding = 10,
+        normalSize = 48,
+        downSize = 51,
+        animationDuration = DEFAULT_SCENE_TRANSITION_TIME,
+        buttonTemplate = "ZO_MenuBarTooltipButton",
+    }
     ZO_InventoryMenuBar.Initialize(self, control, menuBarData)
 
     -- Stack all
-    local stackAllKeybind = {
+    local stackAllKeybind =
+    {
         name = GetString(SI_ITEM_ACTION_STACK_ALL),
         keybind = "UI_SHORTCUT_QUINARY",
         visible =   function()
@@ -346,7 +360,8 @@ function VendorInventoryMenuBar:Initialize(control)
         end,
     }
 
-    local keybindButtons = {
+    local keybindButtons =
+    {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
         stackAllKeybind,
     }

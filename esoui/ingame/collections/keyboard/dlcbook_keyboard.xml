@@ -35,7 +35,7 @@
                         <Control name="$(parent)DLCInteractButtons" resizeToFitDescendents="true">
                             <Anchor point="BOTTOM" offsetY="-20" />
                             <Controls>
-                                <Button name="$(parent)QuestAccept" inherits="ZO_DefaultButton" text="SI_DLC_BOOK_ACTION_ACCEPT_QUEST">
+                                <Button name="$(parent)QuestAccept" inherits="ZO_DefaultButton" text="SI_COLLECTIBLE_ACTION_ACCEPT_QUEST">
                                     <Dimensions x="200" />
                                     <Anchor point="BOTTOMLEFT" />
 

@@ -22,7 +22,7 @@ end
 
 function ZO_LevelUpRewardsUpcoming_Gamepad:LayoutReward(data, rewardContainer, previousControl)
     local rewardControl = self:AcquireRewardControl()
-    local icon = data:GetGamepadIcon()
+    local icon = data:GetGamepadLootIcon()
     if icon then
         rewardControl.iconControl:SetTexture(icon)
         rewardControl.iconControl:SetHidden(false)

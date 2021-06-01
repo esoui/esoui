@@ -52,24 +52,20 @@ end
 
 -- ZO_Outfit_Selector_Gamepad --
 
-ZO_Outfit_Selector_Gamepad = ZO_Object:Subclass()
-
-function ZO_Outfit_Selector_Gamepad:New(...)
-    local selector = ZO_Object.New(self)
-    selector:Initialize(...)
-    return selector
-end
+ZO_Outfit_Selector_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_Outfit_Selector_Gamepad:Initialize(control)
     self.control = control
-    
-    local function OnRefreshOutfitName(outfitIndex)
+
+    local function OnRefreshOutfitName(actorCategory, outfitIndex)
         self:UpdateOutfitList()
     end
 
     GAMEPAD_OUTFITS_SELECTION_SCENE = ZO_InteractScene:New("gamepad_outfits_selection", SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
     GAMEPAD_OUTFITS_SELECTION_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
-    GAMEPAD_OUTFITS_SELECTION_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+
+    GAMEPAD_OUTFITS_SELECTOR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Outfits_Selector_Gamepad)
+    GAMEPAD_OUTFITS_SELECTOR_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:PerformDeferredInitialization()
             ITEM_PREVIEW_GAMEPAD:ResetOutfitPreview()
@@ -87,6 +83,7 @@ function ZO_Outfit_Selector_Gamepad:Initialize(control)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 
             ZO_OUTFIT_MANAGER:RegisterCallback("RefreshOutfitName", OnRefreshOutfitName)
+            self:PreviewOutfit(self.currentActorCategory, self.currentOutfitIndex)
         elseif newState == SCENE_HIDDEN then
             ZO_OUTFIT_MANAGER:UnregisterCallback("RefreshOutfitName", OnRefreshOutfitName)
             self.outfitSelectorList:Deactivate()
@@ -95,21 +92,15 @@ function ZO_Outfit_Selector_Gamepad:Initialize(control)
             KEYBIND_STRIP:RestoreDefaultExit()
 
             if self.currentOutfitIndex then
-                ZO_OUTFIT_MANAGER:EquipOutfit(self.currentOutfitIndex)
+                ZO_OUTFIT_MANAGER:EquipOutfit(self.currentActorCategory, self.currentOutfitIndex)
             else
-                UnequipOutfit()
+                ZO_OUTFIT_MANAGER:UnequipOutfit(self.currentActorCategory)
             end
         end
     end)
 
-    GAMEPAD_OUTFITS_SELECTOR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Outfits_Selector_Gamepad)
-    GAMEPAD_OUTFITS_SELECTOR_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:PreviewOutfit(self.currentOutfitIndex)
-        end
-    end)
-
-    self.currentOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
+    self.currentActorCategory = GAMEPLAY_ACTOR_CATEGORY_PLAYER
+    self.currentOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(self.currentActorCategory)
     ZO_OUTFIT_MANAGER:RegisterCallback("RefreshEquippedOutfitIndex", function() self:UpdateCurrentOutfitIndex() end)
     EVENT_MANAGER:RegisterForEvent("gamepad_outfits_selection", EVENT_CURRENCY_UPDATE, function(eventId, ...) self:OnCurrencyChanged(...) end)
 end
@@ -154,8 +145,8 @@ function ZO_Outfit_Selector_Gamepad:PerformDeferredInitialization()
 
     local IS_PLURAL = false
     local IS_UPPER = false
-    self.headerData = 
-    { 
+    self.headerData =
+    {
         titleText = GetString(SI_GAMEPAD_OUTFITS_SELECTOR_HEADER),
 
         data1HeaderText = zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(CURT_STYLE_STONES, IS_PLURAL, IS_UPPER)),
@@ -171,12 +162,12 @@ function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
             self.selectedName = name
             self.nameViolations = { IsValidOutfitName(self.selectedName) }
             self.noViolations = #self.nameViolations == 0
-            
+
             if not self.noViolations then
                 local HIDE_UNVIOLATED_RULES = true
                 local violationString = ZO_ValidNameInstructions_GetViolationString(self.selectedName, self.nameViolations, HIDE_UNVIOLATED_RULES)
             
-                local headerData = 
+                local headerData =
                 {
                     titleText = GetString(SI_INVALID_NAME_DIALOG_TITLE),
                     messageText = violationString,
@@ -195,7 +186,7 @@ function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
     ZO_Dialogs_RegisterCustomDialog("GAMEPAD_RENAME_OUFIT",
     {
         canQueue = true,
-        gamepadInfo = 
+        gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
@@ -208,7 +199,7 @@ function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
         {
             text = SI_OUTFIT_RENAME_TITLE,
         },
-        mainText = 
+        mainText =
         {
             text = SI_OUTFIT_RENAME_DESCRIPTION,
         },
@@ -217,7 +208,7 @@ function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
             -- user name
             {
                 template = "ZO_GamepadTextFieldItem",
-                templateData = 
+                templateData =
                 {
                     nameField = true,
                     textChangedCallback = function(control)
@@ -237,7 +228,6 @@ function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
                         end
                     end,
                 },
-                
             },
         },
         blockDialogReleaseOnPress = true,
@@ -247,31 +237,30 @@ function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
                 keybind = "DIALOG_PRIMARY",
                 text = SI_GAMEPAD_SELECT_OPTION,
                 callback =  function(dialog)
-                                local data = dialog.entryList:GetTargetData()
-                                data.control.editBoxControl:TakeFocus()
-                            end,
+                    local data = dialog.entryList:GetTargetData()
+                    data.control.editBoxControl:TakeFocus()
+                end,
             },
             {
                 keybind = "DIALOG_SECONDARY",
                 text = SI_GAMEPAD_COLLECTIONS_SAVE_NAME_OPTION,
                 callback =  function(dialog)
-                                local outfitIndex = dialog.data.outfitIndex
-                                local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
-                                outfitManipulator:SetOutfitName(self.selectedName)
-                                ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RENAME_OUFIT")
-                            end,
+                    local outfitIndex = dialog.data.outfitIndex
+                    local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(GAMEPLAY_ACTOR_CATEGORY_PLAYER, outfitIndex)
+                    outfitManipulator:SetOutfitName(self.selectedName)
+                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RENAME_OUFIT")
+                end,
                 visible = function()
                     return self.noViolations
                 end,
                 clickSound = SOUNDS.DIALOG_ACCEPT,
             },
-
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_DIALOG_CANCEL,
                 callback =  function(dialog)
-                                ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RENAME_OUFIT")
-                            end,
+                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RENAME_OUFIT")
+                end,
             },
         }
     })
@@ -297,15 +286,15 @@ function ZO_Outfit_Selector_Gamepad:InitializeKeybindDescriptors()
         {
             name = GetString(SI_OUTFIT_CHANGE_NAME),
             keybind = "UI_SHORTCUT_TERTIARY",
-            callback = function() 
-                          local currentlySelectedData = self.outfitSelectorList:GetTargetData()
-                          local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentlySelectedData.outfitIndex)
-                          ZO_Dialogs_ShowGamepadDialog("GAMEPAD_RENAME_OUFIT", { outfitIndex = currentlySelectedData.outfitIndex, name = outfitManipulator:GetOutfitName() }) 
-                       end,
-            visible = function() 
-                         local currentlySelectedData = self.outfitSelectorList:GetTargetData()
-                         return not (currentlySelectedData.noOutfitEntry or currentlySelectedData.newOutfitEntry) 
-                      end,
+            callback = function()
+                local currentlySelectedData = self.outfitSelectorList:GetTargetData()
+                local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(GAMEPLAY_ACTOR_CATEGORY_PLAYER, currentlySelectedData.outfitIndex)
+                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_RENAME_OUFIT", { outfitIndex = currentlySelectedData.outfitIndex, name = outfitManipulator:GetOutfitName() }) 
+            end,
+            visible = function()
+                local currentlySelectedData = self.outfitSelectorList:GetTargetData()
+                return not (self.currentActorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION or currentlySelectedData.noOutfitEntry or currentlySelectedData.newOutfitEntry)
+            end,
         },
     }
 end
@@ -315,17 +304,18 @@ function ZO_Outfit_Selector_Gamepad:UseCurrentSelection()
     if currentlySelectedData.newOutfitEntry then
         ShowMarketAndSearch("", MARKET_OPEN_OPERATION_UNLOCK_NEW_OUTFIT)
     elseif currentlySelectedData.outfitIndex ~= self.currentOutfitIndex then
-        self:PreviewOutfit(currentlySelectedData.outfitIndex)
+        self:PreviewOutfit(currentlySelectedData.actorCategory, currentlySelectedData.outfitIndex)
+        self.currentActorCategory = currentlySelectedData.actorCategory
         self.currentOutfitIndex = currentlySelectedData.outfitIndex
         self:UpdateOutfitList()
     end
 end
 
-function ZO_Outfit_Selector_Gamepad:PreviewOutfit(outfitIndex)
+function ZO_Outfit_Selector_Gamepad:PreviewOutfit(actorCategory, outfitIndex)
     if outfitIndex then
-        ITEM_PREVIEW_GAMEPAD:PreviewOutfit(outfitIndex)
+        ITEM_PREVIEW_GAMEPAD:PreviewOutfit(actorCategory, outfitIndex)
     else
-        ITEM_PREVIEW_GAMEPAD:PreviewUnequipOutfit()
+        ITEM_PREVIEW_GAMEPAD:PreviewUnequipOutfit(actorCategory)
     end
 end
 
@@ -335,27 +325,30 @@ function ZO_Outfit_Selector_Gamepad:UpdateOutfitList()
     -- No Outfit Entry
     local data = ZO_GamepadEntryData:New(GetString(SI_NO_OUTFIT_EQUIP_ENTRY))
     data.noOutfitEntry = true
+    data.actorCategory = self.currentActorCategory
     self.outfitSelectorList:AddEntry("ZO_OutfitSelector_CheckBoxTemplate_Gamepad", data)
 
-    local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits()
+    local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits(self.currentActorCategory)
     for i = 1, numOutfits do
-        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(i)
+        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(self.currentActorCategory, i)
 
         local data = ZO_GamepadEntryData:New(outfitManipulator:GetOutfitName())
+        data.actorCategory = self.currentActorCategory
         data.outfitIndex = i
-        local isHidden, highestPriorityVisualLayerThatIsShowing = WouldOutfitBeHidden(i)
+        local isHidden, highestPriorityVisualLayerThatIsShowing = WouldOutfitBeHidden(i, data.actorCategory)
         data.isHiddenByVisualLayer = isHidden
         data.hiddenVisualLayer = highestPriorityVisualLayerThatIsShowing
         if i == 1 then
-            data:SetHeader(zo_strformat(SI_GAMEPAD_OUTFITS_SELECTOR_ENTRY_HEADER, numOutfits, MAX_OUTFIT_UNLOCKS))
+            local maxOutfits = self.currentActorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION and MAX_COMPANION_OUTFITS or MAX_OUTFIT_UNLOCKS 
+            data:SetHeader(zo_strformat(SI_GAMEPAD_OUTFITS_SELECTOR_ENTRY_HEADER, numOutfits, maxOutfits))
             self.outfitSelectorList:AddEntryWithHeader("ZO_OutfitSelector_CheckBoxTemplate_Gamepad", data)
         else
             self.outfitSelectorList:AddEntry("ZO_OutfitSelector_CheckBoxTemplate_Gamepad", data)
         end
     end
 
-    -- Unlock New Outfit Entry
-    if numOutfits < MAX_OUTFIT_UNLOCKS then
+    -- Unlock New Outfit Entry only if in player outfit mode
+    if self.currentActorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER and numOutfits < MAX_OUTFIT_UNLOCKS then
         local data = ZO_GamepadEntryData:New(GetString(SI_UNLOCK_NEW_OUTFIT_EQUIP_ENTRY), "EsoUI/Art/currency/gamepad/gp_crowns.dds")
         data.newOutfitEntry = true
         self.outfitSelectorList:AddEntry("ZO_GamepadItemEntryTemplate", data)
@@ -381,15 +374,22 @@ function ZO_Outfit_Selector_Gamepad:OnCurrencyChanged(currencyType, currencyLoca
 end
 
 function ZO_Outfit_Selector_Gamepad:UpdateCurrentOutfitIndex()
-    self.currentOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
+    self.currentOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(self.currentActorCategory)
 end
 
 function ZO_Outfit_Selector_Gamepad:RefreshHeader()
     ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 end
 
-function ZO_Outfit_Selector_Gamepad:GetCurrentOutfitIndex()
-    return self.currentOutfitIndex
+function ZO_Outfit_Selector_Gamepad:SetCurrentActorCategory(actorCategory)
+    if self.currentActorCategory ~= actorCategory then
+        self.currentActorCategory = actorCategory
+        self:UpdateCurrentOutfitIndex()
+    end
+end
+
+function ZO_Outfit_Selector_Gamepad:GetCurrentActorCategoryAndIndex()
+    return self.currentActorCategory, self.currentOutfitIndex
 end
 
 -- XML functions --

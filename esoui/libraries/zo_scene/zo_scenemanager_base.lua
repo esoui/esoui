@@ -270,7 +270,7 @@ function ZO_SceneManager_Base:IsShowingBaseSceneNext()
 end
 
 function ZO_SceneManager_Base:OnNextSceneRemovedFromQueue(oldNextScene, newNextScene)
-    oldNextScene:OnRemovedFromQueue()
+    oldNextScene:OnRemovedFromQueue(newNextScene)
 end
 
 function ZO_SceneManager_Base:GetPreviousSceneName()
@@ -285,12 +285,26 @@ function ZO_SceneManager_Base:OnSceneStateChange(scene, oldState, newState)
     if scene == self:GetCurrentScene() then
         if oldState == SCENE_HIDING and newState == SCENE_HIDDEN then
             self:OnSceneStateHidden(scene)
+        elseif newState == SCENE_HIDING then
+            self:OnSceneStateHiding(scene)
         elseif newState == SCENE_SHOWN then
             self:OnSceneStateShown(scene)
         end
     end
     self:TriggerCallWhens(scene:GetName(), newState)
     self:FireCallbacks("SceneStateChanged", scene, oldState, newState)
+end
+
+function ZO_SceneManager_Base:OnSceneStateHiding(scene)
+    local lastSceneGroup = scene:GetSceneGroup()
+    local nextSceneGroup
+    if self.nextScene then
+        nextSceneGroup = self.nextScene:GetSceneGroup()
+    end
+
+    if lastSceneGroup ~= nextSceneGroup and lastSceneGroup ~= nil then
+        lastSceneGroup:SetState(SCENE_GROUP_HIDING)
+    end
 end
 
 function ZO_SceneManager_Base:OnSceneStateHidden(scene)

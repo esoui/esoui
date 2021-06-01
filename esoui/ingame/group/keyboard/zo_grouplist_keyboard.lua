@@ -62,15 +62,16 @@ function ZO_GroupList_Keyboard:Initialize(control)
     self.inactiveColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED))
     GROUP_LIST_MANAGER:AddList(self)
 
-    local data = 
+    local groupCategoryData = 
     {
+        priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.GROUP,
         name = GetString(SI_MAIN_MENU_GROUP),
         categoryFragment = GROUP_LIST_FRAGMENT,
         normalIcon = "EsoUI/Art/LFG/LFG_indexIcon_group_up.dds",
         pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_group_down.dds",
         mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_group_over.dds",
     }
-    GROUP_MENU_KEYBOARD:AddCategory(data, ZO_ACTIVITY_FINDER_SORT_PRIORITY.GROUP)
+    GROUP_MENU_KEYBOARD:AddCategory(groupCategoryData)
 end
 
 function ZO_GroupList_Keyboard:InitializeKeybindDescriptors()

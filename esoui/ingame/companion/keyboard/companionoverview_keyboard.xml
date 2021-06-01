@@ -1,0 +1,125 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CompanionOverview_Panel_Keyboard" hidden="true">
+            <Dimensions x="615" y="690" />
+            <Anchor point="RIGHT" offsetY="32" />       
+            <OnInitialized>
+                ZO_CompanionOverview_Keyboard_OnInitialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)LevelProgress" inherits="ZO_CompanionProgressBarTemplate">
+                    <Anchor point="TOPLEFT" offsetY="32" />
+                    <Anchor point="RIGHT" offsetX="-60" constrains="X" />
+                </Control>
+
+                <Control name="$(parent)Outfit" level="1">
+                    <Dimensions y="24" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LevelProgress" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="RIGHT" offsetX="-60" constrains="X" />
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_OUTFIT_SELECTOR_TITLE">
+                            <Anchor point="LEFT" />
+                        </Label>
+
+                        <Control name="$(parent)Dropdown" inherits="ZO_ScrollableComboBox">
+                            <Dimensions x="300" />
+                            <Anchor point="RIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+                
+                <Label name="$(parent)SkillsLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_COMPANION_BAR_ABILITY_PRIORITY">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Outfit" relativePoint="BOTTOMLEFT" offsetY="10" /> 
+                </Label>
+                
+                <Control name="$(parent)ReadOnlyActionBar" inherits="ZO_KeyboardAssignableActionBar" layer="CONTROLS" level="0">
+                    <!-- the action bar has a left side label used for hotbar
+                         swap that will never be used in the companion screen. To
+                         compensate for this unused empty space, we're using a
+                         negative offset that bleeds slightly into the left
+                         side tree -->
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsLabel" relativePoint="BOTTOMLEFT" offsetX="-21"/>
+                </Control>
+                
+                <Control name="$(parent)PassivePerk" mouseEnabled="true">
+                    <Dimensions y="24" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsLabel" relativePoint="BOTTOMLEFT" offsetY="85" />
+                    <Anchor point="RIGHT" offsetX="-60" constrains="X" />
+                    <OnMouseEnter>
+                        ZO_CompanionOverview_Keyboard_PassivePerk_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CompanionOverview_Keyboard_PassivePerk_OnMouseExit(self)
+                    </OnMouseExit>
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_COMPANION_OVERVIEW_PERK">
+                            <Anchor point="LEFT" />
+                        </Label>
+                        
+                        <Label name="$(parent)Value" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="RIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>              
+                
+                
+                <Control name="$(parent)RapportContainer" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PassivePerk" relativePoint="BOTTOMLEFT" offsetY="15" />
+                    <Anchor point="RIGHT" constrains="X" />
+                    <Controls>
+                        <Control name="$(parent)Divider" inherits="ZO_WideHorizontalDivider">
+                            <Anchor point="TOPLEFT" />
+                        </Control>
+                        
+                        <Label name="$(parent)Header" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_COMPANION_OVERVIEW_RAPPORT">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                        
+                        <Control name="$(parent)Progress">
+                            <Dimensions y="56" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="RIGHT" offsetX="-60" constrains="X" />
+                            <Controls>
+                                <Texture name="$(parent)IconLeft" textureFile="EsoUI/Art/HUD/lootHistory_icon_rapportDecrease.dds">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="TOPLEFT" />
+                                </Texture>
+                                
+                                <Texture name="$(parent)IconRight" textureFile="EsoUI/Art/HUD/lootHistory_icon_rapportIncrease.dds">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="TOPRIGHT" />
+                                </Texture>
+                                
+                                <Control name="$(parent)Bar" inherits="ZO_SlidingStatusBar">
+                                    <Dimensions y="23" />
+                                    <Anchor point="LEFT" relativeTo="$(parent)IconLeft" relativePoint="RIGHT" />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)IconRight" relativePoint="LEFT" />
+                                </Control>
+                            </Controls>
+                        </Control>
+                        
+                        <Control name="$(parent)Status">
+                            <Dimensions y="24" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Progress" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Progress" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                            <Controls>
+                                <Label name="$(parent)Title" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_COMPANION_RAPPORT_STATUS">
+                                    <Anchor point="LEFT" />
+                                </Label>
+
+                                <Label name="$(parent)Value" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="RIGHT" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                        
+                        <Label name="$(parent)Description" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLOR:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Status" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Status" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                        </Label>         
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

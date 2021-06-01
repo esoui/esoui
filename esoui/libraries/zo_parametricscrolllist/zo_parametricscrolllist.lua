@@ -19,15 +19,9 @@ ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR =
     MATCH_OR_RESET_TO_DEFAULT = 4,
 }
 
-ZO_ParametricScrollList = ZO_CallbackObject:Subclass()
+ZO_ParametricScrollList = ZO_InitializingCallbackObject:Subclass()
 
 --[[ Public  API ]]--
-function ZO_ParametricScrollList:New(...)
-    local scrollList = ZO_CallbackObject.New(self)
-    scrollList:Initialize(...)
-    return scrollList
-end
-
 PARAMETRIC_SCROLL_LIST_VERTICAL = true
 PARAMETRIC_SCROLL_LIST_HORIZONTAL = false
 ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE = 150
@@ -37,9 +31,9 @@ function ZO_ParametricScrollList:Initialize(control, mode, onActivatedChangedFun
     self.control = control
     control.scrollList = self
     self.scrollControl = control:GetNamedChild("Scroll")
-    
+
     local screenCenterControl = control:GetNamedChild("ListScreenCenterIsAlongTop")
-    if(screenCenterControl) then
+    if screenCenterControl then
         self.alignToScreenCenterAnchor = screenCenterControl:GetNamedChild("ListScreenCenter")
     end
 
@@ -1466,6 +1460,16 @@ function ZO_ParametricScrollList:WhenInactiveSetTargetControlHidden(hidden)
         targetControl:SetHidden(hidden)
         if targetControl.headerControl then
             targetControl.headerControl:SetHidden(hidden)
+        end
+    end
+end
+
+function ZO_ParametricScrollList_OnMouseWheel(control, delta)
+    if control.scrollList.active then
+        if delta > 0 then
+            control.scrollList:MovePrevious()
+        else
+            control.scrollList:MoveNext()
         end
     end
 end

@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_EndeavorSealStoreTopLevel_Keyboard" inherits="ZO_MarketTemplate">
+            <OnInitialized>
+                ZO_EndeavorSealStore_Keyboard_OnInitialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

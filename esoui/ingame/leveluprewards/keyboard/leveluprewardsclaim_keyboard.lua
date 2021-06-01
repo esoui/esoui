@@ -90,7 +90,7 @@ function ZO_LevelUpRewardsClaim_Keyboard:SetupRewardRow(rowControl, data)
         rowControl.nameControl:SetColor(r, g, b, 1)
     end
 
-    local icon = data:GetKeyboardIcon()
+    local icon = data:GetKeyboardLootIcon()
     if icon then
         rowControl.iconControl:SetTexture(icon)
     end

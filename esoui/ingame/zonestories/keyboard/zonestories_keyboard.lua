@@ -77,7 +77,7 @@ function ZO_ZoneStories_Keyboard:Initialize(control)
     keyboardCategoryData.categoryFragment = ZONE_STORIES_FRAGMENT
 
     -- Add to category list in Activity Finder
-    GROUP_MENU_KEYBOARD:AddCategory(keyboardCategoryData, categoryData.priority)
+    GROUP_MENU_KEYBOARD:AddCategory(keyboardCategoryData)
 end
 
 function ZO_ZoneStories_Keyboard:InitializeZonesList()

@@ -407,7 +407,6 @@ end
 
 -- Do not call this directly, instead call self.categoryContentRefreshGroup:MarkDirty("All")
 function ZO_ItemSetsBook_Keyboard:RefreshCategoryContent()
-    -- TODO: Implement filters
     local itemSetCollectionCategoryData = self:GetSelectedCategory()
     if itemSetCollectionCategoryData then
         self.categoryContentContainer:SetHidden(false)

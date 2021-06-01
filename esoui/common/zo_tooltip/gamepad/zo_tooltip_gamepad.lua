@@ -52,6 +52,7 @@ GAMEPAD_MOVABLE_TOOLTIP = "GAMEPAD_MOVABLE_TOOLTIP"
 GAMEPAD_LEFT_DIALOG_TOOLTIP = "GAMEPAD_LEFT_DIALOG_TOOLTIP"
 GAMEPAD_QUAD3_TOOLTIP = "GAMEPAD_QUAD3_TOOLTIP"
 GAMEPAD_QUAD1_TOOLTIP = "GAMEPAD_QUAD1_TOOLTIP"
+GAMEPAD_QUAD_2_3_TOOLTIP = "GAMEPAD_QUAD_2_3_TOOLTIP"
 
 GAMEPAD_TOOLTIP_NORMAL_BG = 1
 GAMEPAD_TOOLTIP_DARK_BG = 2
@@ -76,9 +77,10 @@ function ZO_GamepadTooltip:Initialize(control, dialogControl)
     self:InitializeTooltip(GAMEPAD_QUAD3_TOOLTIP, self.control, "Quadrant3", AUTO_SHOW_BG, RIGHT)
     self:InitializeTooltip(GAMEPAD_QUAD1_TOOLTIP, self.control, "Quadrant1", AUTO_SHOW_BG, RIGHT)
     self:InitializeTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, self.dialogControl, "Left", AUTO_SHOW_BG, RIGHT)
+    self:InitializeTooltip(GAMEPAD_QUAD_2_3_TOOLTIP, self.control, "Quadrant_2_3_", AUTO_SHOW_BG, RIGHT, "quadrant_2_3_Tooltip")
 end
 
-function ZO_GamepadTooltip:InitializeTooltip(tooltipType, baseControl, prefix, autoShowBg, scrollIndicatorSide)
+function ZO_GamepadTooltip:InitializeTooltip(tooltipType, baseControl, prefix, autoShowBg, scrollIndicatorSide, style)
     local control = baseControl:GetNamedChild(prefix.."Tooltip")
     local bgControl = baseControl:GetNamedChild(prefix.."TooltipBg")
     local darkBgControl = baseControl:GetNamedChild(prefix.."TooltipDarkBg")
@@ -131,6 +133,7 @@ function ZO_GamepadTooltip:InitializeTooltip(tooltipType, baseControl, prefix, a
         bgType = GAMEPAD_TOOLTIP_NORMAL_BG,
         resetScroll = true,
         scrollIndicatorSide = scrollIndicatorSide,
+        style = style,
     }
 
     self:SetScrollIndicatorSide(tooltipType, scrollIndicatorSide)
@@ -299,7 +302,7 @@ function ZO_GamepadTooltip:GetAndInitializeTooltipContainerTip(tooltipType)
         local tooltipContainerTip = tooltipContainer.tip
         if tooltipContainerTip.initialized == false then
             tooltipContainerTip.initialized = true
-            ZO_ScrollTooltip_Gamepad:Initialize(tooltipContainerTip, ZO_TOOLTIP_STYLES)
+            ZO_ScrollTooltip_Gamepad:Initialize(tooltipContainerTip, ZO_TOOLTIP_STYLES, self:GetTooltipInfo(tooltipType).style)
             tooltipContainerTip.tooltip.gamepadTooltipContainerBorderControl = tooltipContainer.gamepadTooltipContainerBorderControl
         end
         return tooltipContainerTip

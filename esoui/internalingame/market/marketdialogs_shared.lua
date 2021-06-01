@@ -22,7 +22,7 @@ function ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(productData)
     if IsEligibleForEsoPlusPricing() then
         local marketCurrencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = productData:GetMarketProductPricingByPresentation()
         if esoPlusCost ~= nil and costAfterDiscount ~= nil then
-            local currencyType = ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
+            local currencyType = GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType)
             local esoPlusSavings = costAfterDiscount - esoPlusCost
             if esoPlusSavings > 0 then
                 local currencyString = ZO_Currency_FormatKeyboard(currencyType, esoPlusSavings, ZO_CURRENCY_FORMAT_AMOUNT_ICON)

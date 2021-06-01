@@ -82,8 +82,10 @@ function BuyBack:InitializeSortHeader()
 
     local SUPPRESS_TEXT_CHANGED_CALLBACK = true
     local function OnListTextFilterComplete()
-        self.searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("storeTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
-        self:UpdateList()
+        if BUY_BACK_FRAGMENT:IsShowing() then
+            self.searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("storeTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
+            self:UpdateList()
+        end
     end
 
     TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", OnListTextFilterComplete)

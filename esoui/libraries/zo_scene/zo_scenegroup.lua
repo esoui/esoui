@@ -1,5 +1,6 @@
 SCENE_GROUP_SHOWING = "scene_group_showing"
 SCENE_GROUP_SHOWN = "scene_group_shown"
+SCENE_GROUP_HIDING = "scene_group_hiding"
 SCENE_GROUP_HIDDEN = "scene_group_hidden"
 
 ZO_SceneGroup = ZO_CallbackObject:Subclass()

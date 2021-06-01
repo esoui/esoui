@@ -38,6 +38,9 @@ end
 function ZO_IconHeader_Setup(control, open, enabled, disableScaling, updateSizeFunction)
     enabled = enabled == nil or enabled
     control.enabled = enabled
+    if control.node then
+        control.node.enabled = enabled
+    end
     control.allowIconScaling = not disableScaling
 
     if not control.icon.animation and control.allowIconScaling then

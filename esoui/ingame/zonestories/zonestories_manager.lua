@@ -98,6 +98,7 @@ do
     {
         keyboardData =
         {
+            priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.ZONE_STORIES,
             name = GetString(SI_ACTIVITY_FINDER_CATEGORY_ZONE_STORIES),
             normalIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_up.dds",
             pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_down.dds",
@@ -107,6 +108,7 @@ do
 
         gamepadData =
         {
+            priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.ZONE_STORIES,
             name = GetString(SI_ACTIVITY_FINDER_CATEGORY_ZONE_STORIES),
             menuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_zoneStories.dds",
             sceneName = "zoneStoriesGamepad",
@@ -116,7 +118,6 @@ do
                 return GetZoneStoriesHelpIndices()
             end,
         },
-        priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.ZONE_STORIES,
     }
 
     function ZO_ZoneStories_Manager.GetCategoryData()

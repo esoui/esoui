@@ -76,23 +76,29 @@ function ZO_SkillsAdvisor_Suggestions_Keyboard:SetupHeadingLabel(control, data)
     textControl:SetText(data.text)
 end
 
-function ZO_SkillsAdvisor_Suggestions_Keyboard:SetupAbilityEntry(ability, skillProgressionData)
+function ZO_SkillsAdvisor_Suggestions_Keyboard:SetupAbilityEntry(control, skillProgressionData)
     local skillData = skillProgressionData:GetSkillData()
     local isPassive = skillData:IsPassive()
 
-    local detailedName = (isPassive and skillData:GetNumRanks() > 1) and skillProgressionData:GetFormattedNameWithRank() or skillProgressionData:GetFormattedName()
-    ability.nameLabel:SetText(detailedName)
-    ability.nameLabel:SetColor(PURCHASED_COLOR:UnpackRGBA())
-    ability.lock:SetHidden(skillProgressionData:IsUnlocked())
-    ability.skillProgressionData = skillProgressionData
+    control.skillProgressionData = skillProgressionData
+    control.slot.skillProgressionData = skillProgressionData
 
-    local morphControl = ability:GetNamedChild("Morph")
+    -- slot
+    ZO_Skills_SetKeyboardAbilityButtonTextures(control.slot)
+    control.slotIcon:SetTexture(skillProgressionData:GetIcon())
+    control.slotLock:SetHidden(skillProgressionData:IsUnlocked())
+    local morphControl = control:GetNamedChild("Morph")
     morphControl:SetHidden(isPassive or not skillProgressionData:IsMorph())
 
-    local slot = ability.slot
-    slot.skillProgressionData = skillProgressionData
-    slot.icon:SetTexture(skillProgressionData:GetIcon())
-    ZO_Skills_SetKeyboardAbilityButtonTextures(slot)
+    -- name
+    local detailedName
+    if isPassive and skillData:GetNumRanks() > 1 then
+        detailedName = skillProgressionData:GetFormattedNameWithRank()
+    else
+        detailedName = skillProgressionData:GetFormattedName()
+    end
+    control.nameLabel:SetText(detailedName)
+    control.nameLabel:SetColor(PURCHASED_COLOR:UnpackRGBA())
 end
 
 function ZO_SkillsAdvisor_Suggestions_Keyboard:OnReadyToHandleClickAction()

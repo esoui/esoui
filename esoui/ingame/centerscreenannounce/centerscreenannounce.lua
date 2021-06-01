@@ -173,6 +173,14 @@ function ZO_CenterScreenMessageParams:GetBarParams()
     return self.barParams
 end
 
+function ZO_CenterScreenMessageParams:SetExternalHandleCallback(callback)
+    self.externalHandleCallback = callback
+end
+
+function ZO_CenterScreenMessageParams:GetExternalHandleCallback()
+    return self.externalHandleCallback
+end
+
 function ZO_CenterScreenMessageParams:SetLifespanMS(lifespanMS)
     self.lifespanMS = lifespanMS
 end
@@ -890,7 +898,7 @@ do
     function CenterScreenAnnounce:OnCenterScreenEvent(eventId, ...)
         if eventHandlers[eventId] then
             if queueableEventHandlers[eventId] then
-                local timeNowSeconds = GetFrameTimeMilliseconds() / 1000 
+                local timeNowSeconds = GetFrameTimeSeconds()
                 local waitingQueueData = CENTER_SCREEN_ANNOUNCE:GetWaitingQueueEventData(eventId)
                 if waitingQueueData then
                     local conditions = queueableEventHandlers[eventId].conditionParameters or {}
@@ -943,6 +951,7 @@ do
             [CSA_LINE_TYPE_COUNTDOWN] = {},
         }
         self.hasActiveLevelBar = false
+        self.isWaitingOnExternalHandle = false
 
         self.smallLineContainer = control:GetNamedChild("SmallLineContainer")
         self.majorLineContainer = control:GetNamedChild("MajorLineContainer")
@@ -1178,7 +1187,7 @@ do
             return false
         end
 
-        if SYSTEMS:GetObject("craftingResults"):HasEntries() then
+        if self.isWaitingOnExternalHandle then
             return false
         end
 
@@ -1613,6 +1622,9 @@ local setupFunctions =
         return largeMessageLine
     end,
 
+    [CSA_CATEGORY_EXTERNAL_HANDLE] = function(self, messageParams)
+        return nil
+    end,
 }
 
 function CenterScreenAnnounce:CallExpiringCallback(announcementLine)
@@ -1672,50 +1684,53 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_CRAFTING_RESULTS] = true,
     }
 
     -- Types that if they were to happen while scrying for an antiquity
     -- will be stored and shown after the scrying game is over
     local ALLOWED_QUEUE_TYPES_WHILE_SCRYING =
     {
-        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIG_SITES_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_SCRYING_RESULT] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TIMED_ACTIVITY_COMPLETED] = true,
     }
 
     -- Types that if they were to happen while digging for an antiquity
     -- will be stored and shown after the digging game is over
     local ALLOWED_QUEUE_TYPES_WHILE_ANTIQUITIES_DIGGING =
     {
-        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TIMED_ACTIVITY_COMPLETED] = true,
     }
 
     function CenterScreenAnnounce:AddMessageWithParams(messageParams)
@@ -1728,7 +1743,14 @@ do
             local csaType = messageParams:GetCSAType()
             local isAvAEvent = messageParams:IsAvAEvent()
             local barParams = messageParams:GetBarParams()
+            local externalHandleCallback = messageParams:GetExternalHandleCallback()
+
             if category == CSA_CATEGORY_NO_TEXT and barParams == nil then
+                self.messageParamsPool:ReleaseObject(messageParams.key)
+                return
+            end
+
+            if category == CSA_CATEGORY_EXTERNAL_HANDLE and externalHandleCallback == nil then
                 self.messageParamsPool:ReleaseObject(messageParams.key)
                 return
             end
@@ -1805,7 +1827,7 @@ function CenterScreenAnnounce:QueueMessage(messageParams)
     end
     
     local waitOffset = shouldQueueImmediately and NO_WAIT_INTERVAL_SECONDS or WAIT_INTERVAL_SECONDS
-    local timeNowSeconds = GetFrameTimeMilliseconds() / 1000
+    local timeNowSeconds = GetFrameTimeSeconds()
     self.nextUpdateTimeSeconds = timeNowSeconds + waitOffset
 
     messageParams:SetQueuedOrder(self.nextQueueIndex)
@@ -1832,6 +1854,13 @@ function CenterScreenAnnounce:DisplayMessage(messageParams)
         -- Countdown events play their sound at the end of the countdown
         if category ~= CSA_CATEGORY_COUNTDOWN_TEXT then
             messageParams:PlaySound()
+        end
+
+        local externalHandleCallback = messageParams:GetExternalHandleCallback()
+        if category == CSA_CATEGORY_EXTERNAL_HANDLE and externalHandleCallback then
+            --The external handle callback should return true if we need to wait to be notified before moving on
+            --It will return false if we want to continue immediately
+            self.isWaitingOnExternalHandle = externalHandleCallback()
         end
 
         local barParams = messageParams:GetBarParams()
@@ -1883,6 +1912,10 @@ function CenterScreenAnnounce:ResumeAnnouncementByType(csaType)
     if self.suppressAnnouncements and self.suppressAnnouncements[csaType] then
         self.suppressAnnouncements[csaType] = self.suppressAnnouncements[csaType] - 1
     end
+end
+
+function CenterScreenAnnounce:ReleaseExternalHandle()
+    self.isWaitingOnExternalHandle = false
 end
 
 function CenterScreenAnnounce:CanShowAvAEvent()

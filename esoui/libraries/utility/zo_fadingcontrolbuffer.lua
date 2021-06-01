@@ -13,14 +13,7 @@ function ZO_FadingControlBuffer_GetLineControl(line)
     return line._control
 end
 
-ZO_FadingControlBuffer = ZO_Object:Subclass()
-
---[[ Public API ]]--
-function ZO_FadingControlBuffer:New(...)
-    local fadingControlBuffer = ZO_Object.New(self)
-    fadingControlBuffer:Initialize(...)
-    return fadingControlBuffer
-end
+ZO_FadingControlBuffer = ZO_InitializingCallbackObject:Subclass()
 
 local HOLD_TIMES = { 6000, 4000, 2000 }
 
@@ -299,6 +292,9 @@ function ZO_FadingControlBuffer:ReleaseControl(alertControl)
 
     self:TryCondenseBuffer()
     self:DisplayNextQueuedEntry()
+    if not self:HasQueuedEntry() and not self:HasEntries() then
+        self:FireCallbacks("LastControlReleased")
+    end
 end
 
 function ZO_FadingControlBuffer:CalcHeightOfEntryAfterPrepending(entryControl, newLines)

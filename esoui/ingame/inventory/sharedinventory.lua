@@ -45,6 +45,7 @@ function ZO_SharedInventoryManager:Initialize()
             for bag = BAG_HOUSE_BANK_ONE, BAG_HOUSE_BANK_TEN do
                 self:RefreshInventory(bag)
             end
+            self:RefreshInventory(BAG_COMPANION_WORN)
         end,
         RefreshSingle = function(...)
             self:RefreshSingleSlot(...)
@@ -73,7 +74,7 @@ function ZO_SharedInventoryManager:Initialize()
         self.refresh:UpdateRefreshGroups()
     end
 
-    local function OnInventorySlotUpdated(eventCode, bagId, slotIndex, isNewItem, itemSoundCategory, updateReason)
+    local function OnInventorySlotUpdated(eventCode, bagId, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange, repairedByCharacterName, repairedByDisplayName, isLastUpdateForMessage)
         if updateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then
             local newCondition = GetItemCondition(bagId, slotIndex)
             if newCondition == 100 then
@@ -83,8 +84,11 @@ function ZO_SharedInventoryManager:Initialize()
 
         local previousSlotData = self:GetPreviousSlotDataInternal(bagId, slotIndex)
 
-        self.refresh:RefreshSingle("inventory", bagId, slotIndex, isNewItem, itemSoundCategory, updateReason)
-        self.refresh:UpdateRefreshGroups()
+        self.refresh:RefreshSingle("inventory", bagId, slotIndex, isNewItem, itemSoundCategory, updateReason, isLastUpdateForMessage)
+
+        if isLastUpdateForMessage then
+            self.refresh:UpdateRefreshGroups()
+        end
 
         if bagId == BAG_BACKPACK or bagId == BAG_VIRTUAL then
             if isNewItem and GetCraftingInteractionType() == CRAFTING_TYPE_INVALID and not SYSTEMS:IsShowing("crownCrate") then
@@ -94,26 +98,21 @@ function ZO_SharedInventoryManager:Initialize()
             PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_SLOT)
         end
 
-        if bagId == BAG_WORN and eventCode == EVENT_INVENTORY_SINGLE_SLOT_UPDATE then
-            local _, slotHasItem = GetEquippedItemInfo(slotIndex)
-
-            if updateReason == INVENTORY_UPDATE_REASON_DEFAULT then
-                if slotHasItem then
-                    PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_EQUIP)
-                else
-                    PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_UNEQUIP)
-                end
+        if updateReason == INVENTORY_UPDATE_REASON_DEFAULT and (bagId == BAG_WORN or (bagId == BAG_COMPANION_WORN and HasActiveCompanion())) then
+            local slotHasItem = GetWornItemInfo(bagId, slotIndex)
+            if slotHasItem then
+                PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_EQUIP)
+            else
+                PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_UNEQUIP)
             end
-
-            if updateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then 
-                local effectivenessReduced = IsArmorEffectivenessReduced(bagId, slotIndex)
-                if effectivenessReduced then
-                    TriggerTutorial(TUTORIAL_TRIGGER_DAMAGED_EQUIPMENT_REDUCING_EFFECTIVENESS)
-                end
+        elseif updateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE and bagId == BAG_WORN then
+            local effectivenessReduced = IsArmorEffectivenessReduced(bagId, slotIndex)
+            if effectivenessReduced then
+                TriggerTutorial(TUTORIAL_TRIGGER_DAMAGED_EQUIPMENT_REDUCING_EFFECTIVENESS)
             end
         end
 
-        self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex, previousSlotData)
+        self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex, previousSlotData, isLastUpdateForMessage)
     end
 
     local function RefreshInventoryOnGuildChange()
@@ -138,16 +137,21 @@ function ZO_SharedInventoryManager:Initialize()
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_ITEMS_READY, OnGuildBankUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_OPEN_ERROR, OnGuildBankUpdated)
 
-    local function OnGuildBankInventorySlotUpdated(eventCode, slotIndex, updatedByLocalPlayer, itemSoundCategory)
+    local function OnGuildBankInventorySlotUpdated(eventCode, slotIndex, updatedByLocalPlayer, itemSoundCategory, isLastUpdateForMessage)
         local previousSlotData = self:GetPreviousSlotDataInternal(BAG_GUILDBANK, slotIndex)
-        self.refresh:RefreshSingle("inventory", BAG_GUILDBANK, slotIndex)
-        self.refresh:UpdateRefreshGroups()
+        local NO_UPDATE_REASON = nil
+        local NOT_NEW_ITEM = nil
+        self.refresh:RefreshSingle("inventory", BAG_GUILDBANK, slotIndex, NOT_NEW_ITEM, itemSoundCategory, NO_UPDATE_REASON, isLastUpdateForMessage)
+
+        if isLastUpdateForMessage then
+            self.refresh:UpdateRefreshGroups()
+        end
 
         if updatedByLocalPlayer and GetInteractionType() == INTERACTION_GUILDBANK then
             PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_SLOT)
         end
 
-        self:FireCallbacks("SingleSlotInventoryUpdate", BAG_GUILDBANK, slotIndex, previousSlotData)
+        self:FireCallbacks("SingleSlotInventoryUpdate", BAG_GUILDBANK, slotIndex, previousSlotData, isLastUpdateForMessage)
     end
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_ITEM_ADDED, OnGuildBankInventorySlotUpdated)
@@ -287,10 +291,10 @@ function ZO_SharedInventoryManager:RefreshInventory(bagId)
     end
 end
 
-function ZO_SharedInventoryManager:RefreshSingleSlot(bagId, slotIndex, isNewItem, itemSoundCategory, updateReason)
+function ZO_SharedInventoryManager:RefreshSingleSlot(bagId, slotIndex, isNewItem, itemSoundCategory, updateReason, isLastUpdateForMessage)
     if self:HasBagCache(bagId) then
         local bagCache = self:GetBagCache(bagId)
-        self:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex, isNewItem)
+        self:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex, isNewItem, isLastUpdateForMessage)
     end 
 end
 
@@ -500,7 +504,9 @@ function ZO_SharedInventoryManager:PerformFullUpdateOnBagCache(bagId)
     local bagCache = self:GetBagCache(bagId)
 
     for slotIndex in ZO_IterateBagSlots(bagId) do
-        self:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex)
+        local NOT_NEW_ITEM = false
+        local IS_LAST_UPDATE = true
+        self:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex, NOT_NEW_ITEM, IS_LAST_UPDATE)
     end
 
     self:FireCallbacks("FullInventoryUpdate", bagId)
@@ -512,20 +518,21 @@ local SHARED_INVENTORY_SLOT_RESULT_UPDATED = 3
 local SHARED_INVENTORY_SLOT_RESULT_NO_CHANGE = 4
 local SHARED_INVENTORY_SLOT_RESULT_REMOVE_AND_ADD = 5
 
-function ZO_SharedInventoryManager:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex, isNewItem)
+function ZO_SharedInventoryManager:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex, isNewItem, isLastUpdateForMessage)
     local existingSlotData = bagCache[slotIndex]
     local slotData, result = self:CreateOrUpdateSlotData(existingSlotData, bagId, slotIndex, isNewItem)
     bagCache[slotIndex] = slotData
 
+    local suppressItemUpdate = not isLastUpdateForMessage
     if result == SHARED_INVENTORY_SLOT_RESULT_REMOVED then
-        self:FireCallbacks("SlotRemoved", bagId, slotIndex, existingSlotData)
+        self:FireCallbacks("SlotRemoved", bagId, slotIndex, existingSlotData, suppressItemUpdate)
     elseif result == SHARED_INVENTORY_SLOT_RESULT_ADDED then
-        self:FireCallbacks("SlotAdded", bagId, slotIndex, slotData)
+        self:FireCallbacks("SlotAdded", bagId, slotIndex, slotData, suppressItemUpdate)
     elseif result == SHARED_INVENTORY_SLOT_RESULT_UPDATED then
-        self:FireCallbacks("SlotUpdated", bagId, slotIndex, slotData)
+        self:FireCallbacks("SlotUpdated", bagId, slotIndex, slotData, suppressItemUpdate)
     elseif result == SHARED_INVENTORY_SLOT_RESULT_REMOVE_AND_ADD then
-        self:FireCallbacks("SlotRemoved", bagId, slotIndex, existingSlotData)
-        self:FireCallbacks("SlotAdded", bagId, slotIndex, slotData)
+        self:FireCallbacks("SlotRemoved", bagId, slotIndex, existingSlotData, suppressItemUpdate)
+        self:FireCallbacks("SlotAdded", bagId, slotIndex, slotData, suppressItemUpdate)
     end
 end
 
@@ -552,7 +559,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     local hadItemInSlotBefore = false
     local wasSameItemInSlotBefore = false
     local hasItemInSlotNow = stackCount > 0
-    local newItemInstanceId = hasItemInSlotNow and GetItemInstanceId(bagId, slotIndex) or nil
+    local newUniqueId = hasItemInSlotNow and GetItemUniqueId(bagId, slotIndex) or nil
 
     local slot = existingSlotData
 
@@ -562,7 +569,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
         end
     else
         hadItemInSlotBefore = slot.stackCount > 0
-        wasSameItemInSlotBefore = hadItemInSlotBefore and hasItemInSlotNow and slot.itemInstanceId == newItemInstanceId
+        wasSameItemInSlotBefore = hadItemInSlotBefore and hasItemInSlotNow and slot.uniqueId == newUniqueId
     end
 
     if not hasItemInSlotNow then
@@ -607,7 +614,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.isBoPTradeable = IsItemBoPAndTradeable(bagId, slotIndex)
     slot.isJunk = IsItemJunk(bagId, slotIndex)
     slot.statValue = GetItemStatValue(bagId, slotIndex) or 0
-    slot.itemInstanceId = newItemInstanceId
+    slot.itemInstanceId = GetItemInstanceId(bagId, slotIndex) or nil
     slot.brandNew = isNewItem
     slot.stolen = IsItemStolen(bagId, slotIndex)
     slot.filterData = { GetItemFilterTypeInfo(bagId, slotIndex) }
@@ -617,6 +624,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.traitInformationSortOrder = ZO_GetItemTraitInformation_SortOrder(slot.traitInformation)
     slot.sellInformation = GetItemSellInformation(bagId, slotIndex)
     slot.sellInformationSortOrder = ZO_GetItemSellInformationCustomSortOrder(slot.sellInformation)
+    slot.actorCategory = GetItemActorCategory(bagId, slotIndex)
 
     local isFromCrownCrate = IsItemFromCrownCrate(bagId, slotIndex)
     slot.isGemmable = false

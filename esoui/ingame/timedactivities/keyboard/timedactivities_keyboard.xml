@@ -1,0 +1,131 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TimedActivityReward_Keyboard" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
+            <ResizeToFitPadding width="10" />
+            
+            <OnInitialized>
+                self.amountLabel = self:GetNamedChild("Amount")
+                self.iconTexture = self:GetNamedChild("Icon")
+            </OnInitialized>
+
+            <OnMouseEnter>
+                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -5)
+                SetTooltipText(InformationTooltip, self.rewardData:GetFormattedNameWithStack())
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
+            
+            <Controls>
+                <Label name="$(parent)Amount" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="LEFT" offsetX="10" />
+                </Label>
+
+                <Texture name="$(parent)Icon">
+                    <Anchor point="LEFT" relativeTo="$(parent)Amount" relativePoint="RIGHT" offsetX="2" />
+                    <Dimensions x="25" y="25" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_TimedActivityRow_Keyboard" mouseEnabled="true" resizeToFitDescendents="true" virtual="true">
+            <ResizeToFitPadding height="25" />
+
+            <OnInitialized>
+                ZO_TimedActivityRow_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                InitializeTooltip(InformationTooltip)
+                ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self)
+                SetTooltipText(InformationTooltip, self.activityDescription)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
+
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_TooltipIfTruncatedLabel ZO_PropagateMouseOverBehavior" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" offsetX="-200" offsetY="5" />
+                </Label>
+
+                <Control name="$(parent)RewardContainer">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="3" />
+                    <Anchor point="RIGHT" offsetX="-10" constrains="X" />
+                </Control>
+
+                <StatusBar name="$(parent)ProgressBar" inherits="ZO_ArrowProgressBarWithBG">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)RewardContainer" constrains="X" />
+                    <Dimensions y="20" />
+                </StatusBar>
+
+                <Texture name="$(parent)CompleteIcon" hidden="true" inheritAlpha="false" layer="OVERLAY" textureFile="EsoUI/Art/Miscellaneous/check_icon_32.dds" tier="HIGH">
+                    <Anchor point="CENTER" relativeTo="$(parent)ProgressBar" />
+                    <Dimensions x="32" y="32" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_TimedActivitiesKeyboard" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true">
+            <OnInitialized>
+                ZO_TimedActivities_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)EmptyMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" offsetY="60" />
+                    <Anchor point="TOPRIGHT" offsetX="-30" offsetY="60" />
+                </Label>
+
+                <Control name="$(parent)List">
+                    <AnchorFill />
+
+                    <Controls>
+                        <Label name="$(parent)ExpirationHeader" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" offsetY="-30" />
+                        </Label>
+
+                        <Label name="$(parent)LimitHeader" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPRIGHT" offsetX="-30" offsetY="-30" />
+                        </Label>
+
+                        <Label name="$(parent)ActivityHeader" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_TIMED_ACTIVITIES_ACTIVITY_HEADER">
+                            <Anchor point="LEFT" relativeTo="$(parent)ExpirationHeader" constrains="X" />
+                            <Anchor point="TOP" relativeTo="ZO_GroupMenu_KeyboardHeader" offsetY="4" constrains="Y" />
+                        </Label>
+
+                        <Label name="$(parent)RewardHeader" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_TIMED_ACTIVITIES_REWARD_HEADER">
+                            <Anchor point="RIGHT" relativeTo="$(parent)LimitHeader" constrains="X" />
+                            <Anchor point="TOP" relativeTo="ZO_GroupMenu_KeyboardHeader" offsetY="4" constrains="Y" />
+                        </Label>
+
+                        <Scroll name="$(parent)Activities" inherits="ZO_ScrollContainer">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ActivityHeader" relativePoint="BOTTOMLEFT" offsetY="50" />
+                            <Anchor point="BOTTOMRIGHT" offsetY="-40" />
+
+                            <Controls>
+                                <Control name="$(parent)ScrollChild" override="true">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                </Control>
+                            </Controls>
+                        </Scroll>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)StoreButton" inherits="ZO_DefaultButton" text="SI_TIMED_ACTIVITIES_OPEN_SEALS_STORE">
+                    <Anchor point="BOTTOM" />
+                    <Dimensions x="250" />
+
+                    <OnClicked>
+                        ZO_ShowSealStore()
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

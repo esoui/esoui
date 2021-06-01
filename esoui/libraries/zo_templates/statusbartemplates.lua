@@ -149,7 +149,7 @@ function ZO_WrappingStatusBar:SetAnimationTime(time)
     self.customAnimationTime = time
 end
 
-function ZO_WrappingStatusBar:SetValue(level, value, max, noWrap)
+function ZO_WrappingStatusBar:SetValue(level, value, max, noWrap, animateInstantly)
     if noWrap == nil then
         noWrap = false
     end
@@ -174,6 +174,8 @@ function ZO_WrappingStatusBar:SetValue(level, value, max, noWrap)
             self.onLevelChangedCallback(self, self.level)
         end
     end
+
+    forceInit = forceInit or animateInstantly
 
     if self.pendingLevels and not forceInit and not noWrap then
         self.pendingValue = value
@@ -334,4 +336,103 @@ end
 
 function ZO_ChampionSkillBar_Gamepad:SetGradientColors(...)
     self.bar:SetGradientColors(...)
+end
+
+--[[
+    Sliding Status Bar
+]]--
+ZO_SlidingStatusBar = ZO_InitializingObject:Subclass()
+
+local DEFAULT_MIN_VALUE = 0
+local DEFAULT_MAX_VALUE = 1
+
+local SLIDING_STATUS_BAR_INDICATOR_LAYOUTS =
+{
+    keyboard = 
+    { 
+        icon = "EsoUI/Art/Miscellaneous/slidingStatusBar_indicator.dds",
+        offsetY = 0,
+    },
+    gamepad = 
+    {
+        icon = "EsoUI/Art/Buttons/Gamepad/gp_upArrow.dds",
+        offsetY = -15,
+    },
+}
+
+function ZO_SlidingStatusBar:Initialize(control)
+    self.control = control
+    self.statusBarLeft = control:GetNamedChild("BarLeft")
+    self.statusBarRight = control:GetNamedChild("BarRight")
+    self.backgroundContainer = control:GetNamedChild("BgContainer")
+    self.valueIndicator = control:GetNamedChild("ValuePointer")
+    self.valueIndicatorRelativeControl = control:GetNamedChild("FrameCenter")
+
+    self.min = DEFAULT_MIN_VALUE
+    self.max = DEFAULT_MAX_VALUE
+    self.value = DEFAULT_MIN_VALUE
+
+    self:ApplyStyle()
+
+    control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:ApplyStyle() end)
+end
+
+function ZO_SlidingStatusBar:ApplyStyle()
+    ApplyTemplateToControl(self.backgroundContainer:GetNamedChild("BgLeft"), ZO_GetPlatformTemplate("ZO_PlayerAttributeBgLeftArrow"))
+    ApplyTemplateToControl(self.backgroundContainer:GetNamedChild("BgRight"), ZO_GetPlatformTemplate("ZO_PlayerAttributeBgRightArrow"))
+    ApplyTemplateToControl(self.backgroundContainer:GetNamedChild("BgCenter"), ZO_GetPlatformTemplate("ZO_PlayerAttributeBgCenter"))
+
+    ApplyTemplateToControl(self.control:GetNamedChild("FrameLeft"), ZO_GetPlatformTemplate("ZO_PlayerAttributeFrameLeftArrow"))
+    ApplyTemplateToControl(self.control:GetNamedChild("FrameRight"), ZO_GetPlatformTemplate("ZO_PlayerAttributeFrameRightArrow"))
+    ApplyTemplateToControl(self.control:GetNamedChild("FrameCenter"), ZO_GetPlatformTemplate("ZO_PlayerAttributeFrameCenter"))
+
+    ApplyTemplateToControl(self.statusBarRight, ZO_GetPlatformTemplate("ZO_PlayerAttributeStatusBar"))
+    ApplyTemplateToControl(self.statusBarRight, ZO_GetPlatformTemplate("ZO_PlayerAttributeHealthBarAnchorRight"))
+    ApplyTemplateToControl(self.statusBarRight:GetNamedChild("Gloss"), ZO_GetPlatformTemplate("ZO_PlayerAttributeStatusBarGloss"))
+    ApplyTemplateToControl(self.statusBarLeft, ZO_GetPlatformTemplate("ZO_PlayerAttributeStatusBar"))
+    ApplyTemplateToControl(self.statusBarLeft, ZO_GetPlatformTemplate("ZO_PlayerAttributeHealthBarAnchorLeft"))
+    ApplyTemplateToControl(self.statusBarLeft:GetNamedChild("Gloss"), ZO_GetPlatformTemplate("ZO_PlayerAttributeStatusBarGloss"))
+
+    local indicatorLayout = IsInGamepadPreferredMode() and SLIDING_STATUS_BAR_INDICATOR_LAYOUTS.gamepad or SLIDING_STATUS_BAR_INDICATOR_LAYOUTS.keyboard
+
+    self.valueIndicator:SetTexture(indicatorLayout.icon)
+    self.indicatorOffsetY = indicatorLayout.offsetY
+
+    local FORCE_REFRESH = true
+    self:SetValue(self.value, FORCE_REFRESH)
+end
+
+function ZO_SlidingStatusBar:SetGradientColors(startColor, endColor, middleColor)
+    --If a middle color has been given, we need to set the gradient up a little differently
+    if middleColor then
+        ZO_StatusBar_SetGradientColor(self.statusBarLeft, {middleColor, startColor})
+        ZO_StatusBar_SetGradientColor(self.statusBarRight, {middleColor, endColor})
+    else
+        ZO_StatusBar_SetGradientColor(self.statusBarLeft, {startColor, endColor})
+        ZO_StatusBar_SetGradientColor(self.statusBarRight, {startColor, endColor})
+    end
+end
+
+function ZO_SlidingStatusBar:SetMinMax(minValue, maxValue)
+    if minValue < maxValue and (minValue ~= self.min or maxValue ~= self.max) then
+        self.min = minValue
+        self.max = maxValue
+        --Either the minimum or the maximum has changed, so we need to reapply the value in case it is no longer within bounds
+        local FORCE_REFRESH = true
+        self:SetValue(self.value, FORCE_REFRESH)
+    end
+end
+
+function ZO_SlidingStatusBar:SetValue(value, forceRefresh)
+    --First clamp the value between the minimum and maximum
+    local clampedValue = zo_clamp(value, self.min, self.max)
+    if clampedValue ~= self.value or forceRefresh then
+        self.value = clampedValue
+        --How far between the min and the max is the value?
+        local percentProgress = zo_percentBetween(self.min, self.max, clampedValue)
+        --Determine the x offset of the value indicator based on the percent progress calculated above
+        local sliderOffsetX = zo_lerp(0, self.valueIndicatorRelativeControl:GetWidth(), percentProgress)
+        self.valueIndicator:ClearAnchors()
+        self.valueIndicator:SetAnchor(TOP, self.valueIndicatorRelativeControl, BOTTOMLEFT, sliderOffsetX, self.indicatorOffsetY)
+    end
 end

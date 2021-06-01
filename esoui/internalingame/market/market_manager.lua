@@ -82,10 +82,6 @@ function Market_Manager:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_REQUEST_CROWN_GEM_TUTORIAL, OnRequestCrownGemTutorial)
 end
 
-function Market_Manager:RequestOpenMarket()
-    OpenMarket(MARKET_DISPLAY_GROUP_CROWN_STORE)
-end
-
 function Market_Manager:InitializePlatformErrors()
     local consoleStoreName
     local platformServiceType = GetPlatformServiceType()
@@ -96,6 +92,20 @@ function Market_Manager:InitializePlatformErrors()
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_STEAM, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS))
     else -- _ZOS and _DMM
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_WEB, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), ZO_GetPlatformStoreName())
+    end
+end
+
+function Market_Manager:GetActiveMarket()
+    return self.activeMarket or SYSTEMS:GetObject(ZO_MARKET_NAME)
+end
+
+function Market_Manager:SetActiveMarket(market)
+    self.activeMarket = market
+end
+
+function Market_Manager:OnActiveMarketHidden(market)
+    if market == self.activeMarket then
+        self.activeMarket = nil
     end
 end
 
@@ -111,7 +121,7 @@ function Market_Manager:AddMarketProductPurchaseWarningStringsToTable(marketProd
 end
 
 do
-    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 36, "Update market error flow to handle new purchase result")
+    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 38, "Update market error flow to handle new purchase result")
     local IS_SIMPLE_MARKET_PURCHASE_ERROR = 
     {
         [MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK] = true,
@@ -124,6 +134,7 @@ do
         [MARKET_PURCHASE_RESULT_ALREADY_HAVE_QUEST] = true,
         [MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_QUEST] = true,
         [MARKET_PURCHASE_RESULT_CANNOT_GRANT_QUEST] = true,
+        [MARKET_PURCHASE_RESULT_NOT_ENOUGH_ENDEAVOR_SEALS] = true,
     }
     function Market_Manager:GetMarketProductPurchaseErrorInfo(marketProductData)
         local expectedPurchaseResult = marketProductData:CouldPurchase()

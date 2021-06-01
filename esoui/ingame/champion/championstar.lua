@@ -463,7 +463,7 @@ ZO_ChampionClusterPortalStar = ZO_ChampionStar:Subclass()
 function ZO_ChampionClusterPortalStar:Initialize(championClusterData, constellation, parentCluster)
     ZO_ChampionStar.Initialize(self, constellation, parentCluster)
     self.championClusterData = championClusterData
-    self:SetNormalizedCoordinates(self:GetRootChampionSkillData():GetPosition())
+    self:SetNormalizedCoordinates(self:GetRootChampionSkillData():GetPositionNoClusterOffset())
 end
 
 function ZO_ChampionClusterPortalStar:IsClusterPortalStar()

@@ -607,7 +607,7 @@ function ZO_GamepadImprovementInventory:Initialize(owner, control, ...)
     self:SetCustomSort(function(bagId, slotIndex) return bagId end) -- sort equipped items (BAG_WORN) to the top of the list
     self:SetCustomBestItemCategoryNameFunction(function(slotData)                                                
                                                     if slotData.bagId == BAG_WORN then
-                                                        local equipSlot = ZO_Character_GetEquipSlotForEquipType(slotData.equipType)
+                                                        local equipSlot = GetItemComparisonEquipSlots(slotData.bagId, slotData.slotIndex)
                                                         local visualCategory = ZO_Character_GetEquipSlotVisualCategory(equipSlot)
                                                         slotData.bestItemCategoryName = zo_strformat(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM, GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory))
                                                     else

@@ -486,6 +486,7 @@ function ZO_GamepadTradingHouse:InitializeEvents()
             self.currentListObject:Show()
             ZO_GamepadGenericHeader_Activate(self.header)
         elseif newState == SCENE_HIDING then
+            self:DeactivateTextSearch()
             ZO_GamepadGenericHeader_Deactivate(self.header)
         elseif newState == SCENE_HIDDEN then
             if self:IsInSellMode() then

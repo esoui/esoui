@@ -12,6 +12,8 @@ ZO_MARKET_ESO_PLUS_CATEGORY_INDEX = -1
 ZO_MARKET_CHAPTER_UPGRADE_CATEGORY_INDEX = -2
 ZO_MARKET_ESO_PLUS_OFFERS_CATEGORY_INDEX = -3
 
+ZO_NO_MARKET_SUBCATEGORY = nil
+
 --
 --[[ Market Shared ]]--
 --
@@ -67,11 +69,11 @@ function ZO_Market_Shared:RegisterForMarketSingletonCallbacks()
 end
 
 function ZO_Market_Shared:OnInitialInteraction()
-    ZO_MARKET_MANAGER:RequestOpenMarket()
+    OpenMarket(self:GetDisplayGroup())
     SetSecureRenderModeEnabled(true)
 
     -- ensure that we are in the correct state
-    local marketState = GetMarketState(MARKET_DISPLAY_GROUP_CROWN_STORE)
+    local marketState = GetMarketState(self:GetDisplayGroup())
     if self.marketState ~= marketState then
         self:UpdateMarket(marketState)
     elseif marketState == MARKET_STATE_OPEN then
@@ -113,7 +115,7 @@ function ZO_Market_Shared:ResetCategoryData()
 end
 
 function ZO_Market_Shared:OnMarketStateUpdated(displayGroup, marketState)
-    if displayGroup == MARKET_DISPLAY_GROUP_CROWN_STORE then
+    if displayGroup == self:GetDisplayGroup() then
         if marketState == MARKET_STATE_LOCKED or marketState == MARKET_STATE_UPDATING then
             self:FlagMarketCategoriesForRefresh()
         end
@@ -126,7 +128,7 @@ function ZO_Market_Shared:OnMarketStateUpdated(displayGroup, marketState)
 end
 
 function ZO_Market_Shared:OnMarketProductAvailabilityUpdated(displayGroup)
-    if displayGroup == MARKET_DISPLAY_GROUP_CROWN_STORE then
+    if displayGroup == self:GetDisplayGroup() then
         if self:IsShowing() then
             self:BuildCategories()
         else
@@ -244,7 +246,7 @@ function ZO_Market_Shared:RequestShowMarket(openSource, openBehavior, additional
 end
 
 function ZO_Market_Shared:UpdateMarket(marketState)
-    self.marketState = marketState or GetMarketState(MARKET_DISPLAY_GROUP_CROWN_STORE)
+    self.marketState = marketState or GetMarketState(self:GetDisplayGroup())
 
     if self.marketState == MARKET_STATE_OPEN then
         self:OnMarketOpen()
@@ -270,9 +272,24 @@ function ZO_Market_Shared:EndCurrentPreview()
     self:RefreshActions()
 end
 
+function ZO_Market_Shared:IsMarketEmpty()
+    return self.isMarketEmpty
+end
+
+function ZO_Market_Shared:SetIsMarketEmpty(empty)
+    self.isMarketEmpty = empty
+end
+
 function ZO_Market_Shared:OnMarketOpen()
+    self:SetIsMarketEmpty(false)
     self:BuildCategories()
-    self:ShowMarket(true)
+
+    if self:IsMarketEmpty() then
+        self:ShowMarket(false)
+        self:OnMarketLocked()
+    else
+        self:ShowMarket(true)
+    end
 end
 
 function ZO_Market_Shared:OnCategorySelected(data)
@@ -350,15 +367,69 @@ do
     end
 end
 
--- ... is a list of MarketProductData
-function ZO_Market_Shared:GetFeaturedProductPresentations(index, ...)
-    if index >= 1 then
-        local id = GetFeaturedMarketProductId(index)
-        local productData = ZO_MarketProductData:New(id, ZO_FEATURED_PRESENTATION_INDEX)
-        index = index - 1
-        return self:GetFeaturedProductPresentations(index, productData, ...)
+function ZO_Market_Shared:HasNewFeaturedMarketProducts()
+    local REQUIRED_FILTER_TYPES = MARKET_PRODUCT_FILTER_TYPE_FEATURED + MARKET_PRODUCT_FILTER_TYPE_NEW
+    return DoesFilteredMarketProductExist(self:GetDisplayGroup(), REQUIRED_FILTER_TYPES, self.featuredMarketProductFiltersMask)
+end
+
+function ZO_Market_Shared:DoesFeaturedMarketProductExist()
+    return DoesFilteredMarketProductExist(self:GetDisplayGroup(), MARKET_PRODUCT_FILTER_TYPE_FEATURED, self.featuredMarketProductFiltersMask)
+end
+
+function ZO_Market_Shared:GetFeaturedProductPresentations()
+    local products = {}
+    local displayGroup = self:GetDisplayGroup()
+    local NO_PRODUCT_ID = nil
+    local NO_ALL_FILTER_TYPE = nil
+    for productId, presentationIndex in ZO_GetNextFilteredMarketProductIterFunction(displayGroup, MARKET_PRODUCT_FILTER_TYPE_FEATURED, self.featuredMarketProductFiltersMask) do
+        local productData = ZO_MarketProductData:New(productId, presentationIndex)
+        table.insert(products, productData)
     end
-    return ...
+
+    return products
+end
+
+-- filterTypeList is an array of MARKET_PRODUCT_FILTER_TYPE flag combinations
+function ZO_Market_Shared:DoesMarketProductMatchAnyFilter(id, presentationIndex, filterTypeList)
+    if filterTypeList and #filterTypeList > 0 then
+        for _, filterType in ipairs(filterTypeList) do
+            if DoesMarketProductMatchFilter(id, presentationIndex, filterType) then
+                return true
+            end
+        end
+        return false
+    else
+        local NO_FILTER = 0
+        return DoesMarketProductMatchFilter(id, presentationIndex, NO_FILTER)
+    end
+end
+
+function ZO_Market_Shared:DoesCategoryContainFilteredProducts(displayGroup, topLevelIndex, categoryIndex, filterTypeList)
+    if filterTypeList and #filterTypeList > 0 then
+        for _, filterType in ipairs(filterTypeList) do
+            if DoesMarketProductCategoryContainFilteredProducts(displayGroup, topLevelIndex, categoryIndex, filterType) then
+                return true
+            end
+        end
+        return false
+    else
+        local NO_FILTER = 0
+        return DoesMarketProductCategoryContainFilteredProducts(displayGroup, topLevelIndex, categoryIndex, NO_FILTER)
+    end
+end
+
+function ZO_Market_Shared:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, topLevelIndex, categoryIndex, filterTypeList)
+    if filterTypeList and #filterTypeList > 0 then
+        for _, filterType in ipairs(filterTypeList) do
+            if DoesMarketProductCategoryOrSubcategoriesContainFilteredProducts(displayGroup, topLevelIndex, categoryIndex, filterType) then
+                return true
+            end
+        end
+        return false
+    else
+        local NO_FILTER = 0
+        return DoesMarketProductCategoryOrSubcategoriesContainFilteredProducts(displayGroup, topLevelIndex, categoryIndex, NO_FILTER)
+    end
 end
 
 do
@@ -575,8 +646,6 @@ function ZO_Market_Shared:ShowTutorial(tutorial)
 end
 
 function ZO_Market_Shared:OnShowing()
-    self:UpdateMarketCurrencies()
-
     if self.queuedSearchString then
         self:RequestShowMarketWithSearchString(self.queuedSearchString)
     end
@@ -584,11 +653,19 @@ end
 
 function ZO_Market_Shared:OnShown()
     if self.marketState == MARKET_STATE_OPEN then
-        self:ShowTutorial(TUTORIAL_TRIGGER_MARKET_OPENED)
+        ZO_MARKET_MANAGER:SetActiveMarket(self)
+
+        if self.marketOpenedTutorialTriggerType then
+            self:ShowTutorial(self.marketOpenedTutorialTriggerType)
+        else
+            self:ShowTutorial(TUTORIAL_TRIGGER_MARKET_OPENED)
+        end
     end
 end
 
 function ZO_Market_Shared:OnHiding()
+    ZO_MARKET_MANAGER:OnActiveMarketHidden(self)
+
     --clear the current tutorial when hiding so we don't push an extra action layer
     self.currentTutorial = nil
 
@@ -609,20 +686,20 @@ function ZO_Market_Shared:ClearLabeledGroups()
 end
 
 do
-    local NO_SUBCATEGORY = nil
     function ZO_Market_Shared:GetCategoryDataForMarketProduct(productId)
-        for categoryIndex = 1, GetNumMarketProductCategories(MARKET_DISPLAY_GROUP_CROWN_STORE) do
-            local _, numSubCategories, numMarketProducts = GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex)
+        local displayGroup = self:GetDisplayGroup()
+        for categoryIndex = 1, GetNumMarketProductCategories(displayGroup) do
+            local _, numSubCategories, numMarketProducts = GetMarketProductCategoryInfo(displayGroup, categoryIndex)
             for marketProductIndex = 1, numMarketProducts do
-                local id = GetMarketProductPresentationIds(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, NO_SUBCATEGORY, marketProductIndex)
+                local id = GetMarketProductPresentationIds(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, marketProductIndex)
                 if id == productId then
-                    return self:GetCategoryData(categoryIndex, NO_SUBCATEGORY)
+                    return self:GetCategoryData(categoryIndex, ZO_NO_MARKET_SUBCATEGORY)
                 end
             end
             for subcategoryIndex = 1, numSubCategories do
-                local _, numSubCategoryMarketProducts = GetMarketProductSubCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex)
+                local _, numSubCategoryMarketProducts = GetMarketProductSubCategoryInfo(displayGroup, categoryIndex, subcategoryIndex)
                 for marketProductIndex = 1, numSubCategoryMarketProducts do
-                    local id = GetMarketProductPresentationIds(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex, marketProductIndex)
+                    local id = GetMarketProductPresentationIds(displayGroup, categoryIndex, subcategoryIndex, marketProductIndex)
                     if id == productId then
                         return self:GetCategoryData(categoryIndex, subcategoryIndex)
                     end
@@ -686,11 +763,6 @@ function ZO_Market_Shared:ProcessQueuedNavigation()
     end
 end
 
-function ZO_Market_Shared:UpdateMarketCurrencies()
-    self:UpdateCrownBalance(GetPlayerCrowns())
-    self:UpdateCrownGemBalance(GetPlayerCrownGems())
-end
-
 function ZO_Market_Shared.PreviewMarketProduct(previewObject, marketProductId)
     local previewInEmptyWorld = false
     local furnitureId = GetMarketProductFurnitureDataId(marketProductId)
@@ -703,13 +775,15 @@ function ZO_Market_Shared.PreviewMarketProduct(previewObject, marketProductId)
     previewObject:PreviewMarketProduct(marketProductId)
 end
 
+function ZO_Market_Shared:GetDisplayGroup()
+    return self.displayGroup
+end
+
+function ZO_Market_Shared:SetDisplayGroup(displayGroup)
+    self.displayGroup = displayGroup
+end
+
 --[[ Functions to be overridden ]]--
-
-function ZO_Market_Shared:UpdateCrownBalance(amount)
-end
-
-function ZO_Market_Shared:UpdateCrownGemBalance(amount)
-end
 
 function ZO_Market_Shared:InitializeKeybindDescriptors()
 end
@@ -804,7 +878,7 @@ end
 function ZO_Market_Shared:SearchStart(searchString)
     if searchString ~= self.searchString then
         self.searchString = searchString
-        self.searchTaskId = StartMarketProductSearch(MARKET_DISPLAY_GROUP_CROWN_STORE, searchString)
+        self.searchTaskId = StartMarketProductSearch(self:GetDisplayGroup(), searchString)
         self.isSearching = self.searchTaskId ~= nil
         if not self.isSearching then
             -- the search never started (probably because we use too short of a search string)
@@ -828,24 +902,35 @@ end
 function ZO_Market_Shared:UpdateSearchResults()
     self:ClearSearchResults()
 
+    local searchResults = self.searchResults
     local numResults = GetNumMarketProductSearchResults()
-    for i = 1, numResults do
-        local categoryIndex, subcategoryIndex, productIndex = GetMarketProductSearchResult(i)
+    for resultIndex = 1, numResults do
+        local categoryIndex, subcategoryIndex, productIndex = GetMarketProductSearchResult(resultIndex)
         if self:ShouldAddSearchResult(categoryIndex, subcategoryIndex, productIndex) then
-            if not self.searchResults[categoryIndex] then
-                self.searchResults[categoryIndex] = {}
+            local categoryResults = searchResults[categoryIndex]
+            if not categoryResults then
+                categoryResults = {}
+                searchResults[categoryIndex] = categoryResults
             end
 
-            local effectiveSubCategory = subcategoryIndex or "root"
-            if not self.searchResults[categoryIndex][effectiveSubCategory] then
-                self.searchResults[categoryIndex][effectiveSubCategory] = {}
+            local effectiveSubcategory = subcategoryIndex or "root"
+            local subcategoryResults = categoryResults[effectiveSubcategory]
+            if not subcategoryResults then
+                subcategoryResults = {}
+                categoryResults[effectiveSubcategory] = subcategoryResults
             end
 
-            self.searchResults[categoryIndex][effectiveSubCategory][productIndex] = true
+            subcategoryResults[productIndex] = true
         end
     end
 end
 
 function ZO_Market_Shared:ShouldAddSearchResult(categoryIndex, subcategoryIndex, productIndex)
     return true
+end
+
+function ZO_GetNextFilteredMarketProductIterFunction(displayGroup, matchAllFilterTypes, matchAnyFilterTypes)
+    return function(_, lastProductId)
+        return GetNextFilteredMarketProduct(lastProductId, displayGroup, matchAllFilterTypes, matchAnyFilterTypes)
+    end
 end

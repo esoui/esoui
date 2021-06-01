@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GamepadSkillsFooter" inherits="ZO_GamepadXPBarFooter" virtual="true">
+            <OnInitialized>
+                ZO_Skills_SkillLineInfo_Shared_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

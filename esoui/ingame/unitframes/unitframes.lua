@@ -8,20 +8,25 @@ ZO_UNIT_FRAME_BAR_TEXT_MODE_SHOWN = 2
 local FORCE_INIT = true
 
 local GROUP_UNIT_FRAME = "ZO_GroupUnitFrame"
+local COMPANION_UNIT_FRAME = "ZO_CompanionUnitFrame"
 local RAID_UNIT_FRAME = "ZO_RaidUnitFrame"
+local COMPANION_RAID_UNIT_FRAME = "ZO_CompanionRaidUnitFrame"
 local TARGET_UNIT_FRAME = "ZO_TargetUnitFrame"
-
-local untrackedBarTypes =
-{
-
-}
+local COMPANION_GROUP_UNIT_FRAME = "ZO_CompanionGroupUnitFrame"
 
 local NUM_SUBGROUPS = GROUP_SIZE_MAX / SMALL_GROUP_SIZE_THRESHOLD
+local COMPANION_HEALTH_GRADIENT = { ZO_ColorDef:New("00484F"), ZO_ColorDef:New("278F7B"), }
+local COMPANION_HEALTH_GRADIENT_LOSS = ZO_ColorDef:New("621018")
+local COMPANION_HEALTH_GRADIENT_GAIN = ZO_ColorDef:New("D0FFBC")
 
 ZO_KEYBOARD_GROUP_FRAME_WIDTH = 288
 ZO_KEYBOARD_GROUP_FRAME_HEIGHT = 80
 ZO_KEYBOARD_RAID_FRAME_WIDTH = 96
-ZO_KEYBOARD_RAID_FRAME_HEIGHT = 40
+ZO_KEYBOARD_RAID_FRAME_HEIGHT = 45
+ZO_KEYBOARD_COMPANION_FRAME_WIDTH = 288
+ZO_KEYBOARD_COMPANION_FRAME_HEIGHT = 80
+ZO_KEYBOARD_GROUP_COMPANION_FRAME_WIDTH = 288
+ZO_KEYBOARD_GROUP_COMPANION_FRAME_HEIGHT = 110
 
 local KEYBOARD_CONSTANTS =
 {
@@ -40,6 +45,9 @@ local KEYBOARD_CONSTANTS =
 
     GROUP_FRAME_SIZE_X = ZO_KEYBOARD_GROUP_FRAME_WIDTH,
     GROUP_FRAME_SIZE_Y = ZO_KEYBOARD_GROUP_FRAME_HEIGHT,
+
+    GROUP_COMPANION_FRAME_SIZE_X = ZO_KEYBOARD_GROUP_COMPANION_FRAME_WIDTH,
+    GROUP_COMPANION_FRAME_SIZE_Y = ZO_KEYBOARD_GROUP_COMPANION_FRAME_HEIGHT,
 
     GROUP_FRAME_PAD_X = 2,
     GROUP_FRAME_PAD_Y = 0,
@@ -60,13 +68,17 @@ ZO_GAMEPAD_GROUP_FRAME_WIDTH = 160
 ZO_GAMEPAD_GROUP_FRAME_HEIGHT = 70
 ZO_GAMEPAD_RAID_FRAME_WIDTH = 175
 ZO_GAMEPAD_RAID_FRAME_HEIGHT = 40
+ZO_GAMEPAD_COMPANION_FRAME_WIDTH = 160
+ZO_GAMEPAD_COMPANION_FRAME_HEIGHT = 70
+ZO_GAMEPAD_GROUP_COMPANION_FRAME_WIDTH = 160
+ZO_GAMEPAD_GROUP_COMPANION_FRAME_HEIGHT = 130
 
 local GAMEPAD_CONSTANTS =
 {
     GROUP_LEADER_ICON = "EsoUI/Art/UnitFrames/Gamepad/gp_Group_Leader.dds",
 
-    GROUP_FRAMES_PER_COLUMN = 12,
-    NUM_COLUMNS = GROUP_SIZE_MAX / 12,
+    GROUP_FRAMES_PER_COLUMN = 6,
+    NUM_COLUMNS = GROUP_SIZE_MAX / 6, --The denominator should be the same value as GROUP_FRAMES_PER_COLUMN
 
     GROUP_STRIDE = 3,
 
@@ -78,6 +90,9 @@ local GAMEPAD_CONSTANTS =
 
     GROUP_FRAME_SIZE_X = ZO_GAMEPAD_GROUP_FRAME_WIDTH,
     GROUP_FRAME_SIZE_Y = ZO_GAMEPAD_GROUP_FRAME_HEIGHT,
+    
+    GROUP_COMPANION_FRAME_SIZE_X = ZO_GAMEPAD_GROUP_COMPANION_FRAME_WIDTH,
+    GROUP_COMPANION_FRAME_SIZE_Y = ZO_GAMEPAD_GROUP_COMPANION_FRAME_HEIGHT,
 
     GROUP_FRAME_PAD_X = 2,
     GROUP_FRAME_PAD_Y = 9,
@@ -105,6 +120,9 @@ local function CalculateDynamicPlatformConstants()
         constants.GROUP_FRAME_OFFSET_X = constants.GROUP_FRAME_SIZE_X + constants.GROUP_FRAME_PAD_X
         constants.GROUP_FRAME_OFFSET_Y = constants.GROUP_FRAME_SIZE_Y + constants.GROUP_FRAME_PAD_Y
 
+        constants.GROUP_COMPANION_FRAME_OFFSET_X = constants.GROUP_COMPANION_FRAME_SIZE_X + constants.GROUP_FRAME_PAD_X
+        constants.GROUP_COMPANION_FRAME_OFFSET_Y = constants.GROUP_COMPANION_FRAME_SIZE_Y + constants.GROUP_FRAME_PAD_Y
+
         constants.RAID_FRAME_OFFSET_X = constants.RAID_FRAME_SIZE_X + constants.RAID_FRAME_PAD_X
         constants.RAID_FRAME_OFFSET_Y = constants.RAID_FRAME_SIZE_Y + constants.RAID_FRAME_PAD_Y
 
@@ -127,14 +145,14 @@ local UNIT_CHANGED = true
 
 local groupFrameAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, 0, 0)
 
-local function GetGroupFrameAnchor(groupIndex, groupSize)
+local function GetGroupFrameAnchor(groupIndex, groupSize, previousFrame, previousCompanionFrame)
     local constants = GetPlatformConstants()
 
     groupSize = groupSize or GetGroupSize()
     local column = zo_floor((groupIndex - 1) / constants.GROUP_FRAMES_PER_COLUMN)
     local row = zo_mod(groupIndex - 1, constants.GROUP_FRAMES_PER_COLUMN)
 
-    if(groupSize > SMALL_GROUP_SIZE_THRESHOLD) then
+    if groupSize > SMALL_GROUP_SIZE_THRESHOLD then
         if IsInGamepadPreferredMode() then
             column = zo_mod(groupIndex - 1, constants.NUM_COLUMNS)
             row = zo_floor((groupIndex - 1) / 2)
@@ -143,8 +161,18 @@ local function GetGroupFrameAnchor(groupIndex, groupSize)
         groupFrameAnchor:SetOffsets(0, row * constants.RAID_FRAME_OFFSET_Y)
         return groupFrameAnchor
     else
+        --The Y offset for this anchor should be the total y offset of the previous frame + the size of the previous frame
+        local previousOffsetY = 0
+        local previousSizeY = 0
+        if previousFrame then
+            previousOffsetY = previousFrame.offsetY
+        end
+
+        if previousCompanionFrame then
+            previousSizeY = (previousCompanionFrame.hasTarget or previousCompanionFrame.hasPendingTarget) and constants.GROUP_COMPANION_FRAME_OFFSET_Y or constants.GROUP_FRAME_OFFSET_Y
+        end
         groupFrameAnchor:SetTarget(ZO_SmallGroupAnchorFrame)
-        groupFrameAnchor:SetOffsets(0, row * constants.GROUP_FRAME_OFFSET_Y)
+        groupFrameAnchor:SetOffsets(0, previousOffsetY + previousSizeY)
         return groupFrameAnchor
     end
 end
@@ -195,11 +223,13 @@ function UnitFramesManager:New()
 
     unitFrames.groupFrames = {}
     unitFrames.raidFrames = {}
+    unitFrames.companionRaidFrames = {}
     unitFrames.staticFrames = {}
     unitFrames.groupSize = GetGroupSize()
     unitFrames.targetOfTargetEnabled = true
     unitFrames.groupAndRaidHiddenReasons = ZO_HiddenReasons:New()
     unitFrames.firstDirtyGroupIndex = nil
+    unitFrames:UpdateCompanionGroupSize()
 
     return unitFrames
 end
@@ -214,17 +244,19 @@ function UnitFramesManager:ApplyVisualStyle()
     ApplyVisualStyleToAllFrames(self.staticFrames)
     ApplyVisualStyleToAllFrames(self.groupFrames)
     ApplyVisualStyleToAllFrames(self.raidFrames)
+    ApplyVisualStyleToAllFrames(self.companionRaidFrames)
 end
 
 function UnitFramesManager:GetUnitFrameLookupTable(unitTag)
     if unitTag then
         local isGroupTag = ZO_Group_IsGroupUnitTag(unitTag)
+        local isCompanionTag = IsGroupCompanionUnitTag(unitTag)
 
-        if isGroupTag then
+        if isGroupTag or isCompanionTag then
             if self.groupSize <= SMALL_GROUP_SIZE_THRESHOLD then
                 return self.groupFrames
             else
-                return self.raidFrames
+                return isCompanionTag and self.companionRaidFrames or self.raidFrames
             end
         end
     end
@@ -269,6 +301,14 @@ function UnitFramesManager:SetGroupSize(groupSize)
     self.groupSize = groupSize or GetGroupSize()
 end
 
+function UnitFramesManager:UpdateCompanionGroupSize()
+    self.companionGroupSize = GetNumCompanionsInGroup()
+end
+
+function UnitFramesManager:GetCompanionGroupSize()
+    return self.companionGroupSize
+end
+
 function UnitFramesManager:GetFirstDirtyGroupIndex()
     return self.firstDirtyGroupIndex
 end
@@ -289,6 +329,12 @@ function UnitFramesManager:ClearDirty()
     self.firstDirtyGroupIndex = nil
 end
 
+function UnitFramesManager:DisableCompanionRaidFrames()
+    for _, unitFrame in pairs(self.companionRaidFrames) do
+        unitFrame:SetHiddenForReason("disabled", true)
+    end
+end
+
 function UnitFramesManager:DisableGroupAndRaidFrames()
     -- Disable the raid frames
     for _, unitFrame in pairs(self.raidFrames) do
@@ -299,6 +345,15 @@ function UnitFramesManager:DisableGroupAndRaidFrames()
     for _, unitFrame in pairs(self.groupFrames) do
         unitFrame:SetHiddenForReason("disabled", true)
     end
+
+    self:DisableCompanionRaidFrames()
+end
+
+function UnitFramesManager:DisableLocalCompanionFrame()
+    local companionFrame = self:GetFrame("companion")
+    if companionFrame then
+        companionFrame:SetHiddenForReason("disabled", true)
+    end
 end
 
 function UnitFramesManager:SetGroupAndRaidFramesHiddenForReason(reason, hidden)
@@ -308,23 +363,16 @@ end
 
 function UnitFramesManager:UpdateGroupAnchorFrames()
     -- Only the raid frame anchors need updates for now and it's only for whether or not the group name labels are showing and which one is highlighted
-    if(self.groupSize <= SMALL_GROUP_SIZE_THRESHOLD or self.groupAndRaidHiddenReasons:IsHidden()) then
+    if self.groupSize <= SMALL_GROUP_SIZE_THRESHOLD or self.groupAndRaidHiddenReasons:IsHidden() then
         -- Small groups never show the raid frame anchors
         for subgroupIndex = 1, NUM_SUBGROUPS do
             GetControl("ZO_LargeGroupAnchorFrame"..subgroupIndex):SetHidden(true)
         end
     else
+        local groupSizeWithCompanions = self.groupSize + self.companionGroupSize
         for subgroupIndex = 1, NUM_SUBGROUPS do
-            local frameIsHidden = true -- Label starts out hidden...
-            for groupMemberIndex = 1, SMALL_GROUP_SIZE_THRESHOLD do
-                local unitTag = GetGroupUnitTagByIndex(((subgroupIndex - 1) * SMALL_GROUP_SIZE_THRESHOLD) + groupMemberIndex)
-                if unitTag then
-                    frameIsHidden = false
-                    if AreUnitsEqual("player", unitTag) then
-                        break -- Found a reason to show the label, and determined if this is the local player's subgroup, so bail out
-                    end
-                end
-            end
+            local subgroupThreshold = (subgroupIndex - 1) * SMALL_GROUP_SIZE_THRESHOLD
+            local frameIsHidden = groupSizeWithCompanions <= subgroupThreshold
 
             local anchorFrame = GetControl("ZO_LargeGroupAnchorFrame"..subgroupIndex)
             anchorFrame:SetHidden(frameIsHidden)
@@ -337,7 +385,7 @@ function UnitFramesManager:IsTargetOfTargetEnabled()
 end
 
 function UnitFramesManager:SetEnableTargetOfTarget(enableFlag)
-    if(enableFlag ~= self.targetOfTargetEnabled) then
+    if enableFlag ~= self.targetOfTargetEnabled then
         self.targetOfTargetEnabled = enableFlag
         CALLBACK_MANAGER:FireCallbacks("TargetOfTargetEnabledChanged", enableFlag)
     end
@@ -393,7 +441,7 @@ local UNITFRAME_BAR_STYLES =
             keyboard =
             {
                 template = "ZO_UnitFrameStatus",
-                barHeight = 34,
+                barHeight = 39,
                 barWidth = 90,
                 barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 2, 2) },
             },
@@ -404,6 +452,69 @@ local UNITFRAME_BAR_STYLES =
                 barHeight = ZO_GAMEPAD_RAID_FRAME_HEIGHT - 2,
                 barWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 2,
                 barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 1, 1) },
+            },
+        },
+    },
+    [COMPANION_RAID_UNIT_FRAME] =
+    {
+        [POWERTYPE_HEALTH] =
+        {
+            keyboard =
+            {
+                template = "ZO_UnitFrameStatus",
+                barHeight = 39,
+                barWidth = 90,
+                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 2, 2) },
+            },
+
+            gamepad =
+            {
+                template = "ZO_UnitFrameStatus",
+                barHeight = ZO_GAMEPAD_RAID_FRAME_HEIGHT - 2,
+                barWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 2,
+                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 1, 1) },
+            },
+        },
+    },
+    [COMPANION_UNIT_FRAME] =
+    {
+        [POWERTYPE_HEALTH] =
+        {
+            keyboard =
+            {
+                template = "ZO_CompanionUnitFrameStatus",
+                barHeight = 9,
+                barWidth = 170,
+                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 36, 42) },
+            },
+
+            gamepad =
+            {
+                template = "ZO_CompanionUnitFrameStatus",
+                barHeight = 8,
+                barWidth = ZO_GAMEPAD_COMPANION_FRAME_WIDTH,
+                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, 45) },
+            },
+        },
+    },
+    [COMPANION_GROUP_UNIT_FRAME] =
+    {
+        [POWERTYPE_HEALTH] =
+        {
+            keyboard =
+            {
+                template = "ZO_CompanionUnitFrameStatus",
+                barHeight = 9,
+                barWidth = 120,
+                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 36, 82) },
+            },
+
+            gamepad =
+            {
+                template = "ZO_CompanionUnitFrameStatus",
+                barHeight = 8,
+                barWidth = 120,
+                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, 97) },
             },
         },
     },
@@ -614,13 +725,21 @@ function UnitFrameBar:SetMouseInside(inside)
     end
 end
 
-function UnitFrameBar:SetColor(barType)
-    local gradient = ZO_POWER_BAR_GRADIENT_COLORS[barType]
-
+function UnitFrameBar:SetColor(barType, overrideGradient, overrideLoss, overrideGain)
+    local gradient = overrideGradient or ZO_POWER_BAR_GRADIENT_COLORS[barType]
     for i = 1, #self.barControls do
         ZO_StatusBar_SetGradientColor(self.barControls[i], gradient)
-        self.barControls[i]:SetFadeOutLossColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_OUT, barType))
-        self.barControls[i]:SetFadeOutGainColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_IN, barType))
+        if overrideLoss then
+            self.barControls[i]:SetFadeOutLossColor(overrideLoss:UnpackRGBA())
+        else
+            self.barControls[i]:SetFadeOutLossColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_OUT, barType))
+        end
+
+        if overrideGain then
+            self.barControls[i]:SetFadeOutGainColor(overrideGain:UnpackRGBA())
+        else
+            self.barControls[i]:SetFadeOutGainColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_IN, barType))
+        end
     end
 end
 
@@ -635,11 +754,11 @@ function UnitFrameBar:SetAlpha(alpha)
         self.barControls[i]:SetAlpha(alpha)
     end
 
-    if(self.leftText) then
+    if self.leftText then
         self.leftText:SetAlpha(alpha)
     end
 
-    if(self.rightText) then
+    if self.rightText then
         self.rightText:SetAlpha(alpha)
     end
 end
@@ -728,11 +847,79 @@ local UNITFRAME_LAYOUT_DATA =
         },
     },
 
+    [COMPANION_RAID_UNIT_FRAME] =
+    {
+        keyboard =
+        {
+            highPriorityBuffHighlight =
+            {
+                left = { texture = "EsoUI/Art/UnitFrames/unitframe_raid_outline_left.dds", width = 64, height = 64, },
+                right = { texture = "EsoUI/Art/UnitFrames/unitframe_raid_outline_right.dds", width = 32, height = 64, },
+                icon = { width = 14, height = 14, customAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 76, 15) },
+            },
+
+            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 5, 4),
+            nameWidth = 86,
+
+            statusData = { anchor1 = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 5, 20), anchor2 = ZO_Anchor:New(TOPRIGHT, nil, TOPRIGHT, -4, 20), height = 15, },
+        },
+
+        gamepad =
+        {
+            highPriorityBuffHighlight =
+            {
+                left = { texture = "EsoUI/Art/UnitFrames/unitframe_raid_outline_left.dds", width = 54, height = 44, },
+                right = { texture = "EsoUI/Art/UnitFrames/unitframe_raid_outline_right.dds", width = 32, height = 44, },
+                icon = { width = 14, height = 14, customAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 66, 7) },
+            },
+
+            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 6, 2),
+            nameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 6,
+        },
+    },
+
     [TARGET_UNIT_FRAME] =
     {
         neverHideStatusBar = true,
         showStatusInName = true,
         captionControlName = "Caption",
+    },
+
+    [COMPANION_UNIT_FRAME] =
+    {
+        keyboard =
+        {
+            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 35, 19),
+            nameWidth = 215,
+            nameWrapMode = TEXT_WRAP_MODE_ELLIPSIS,
+            statusData = { anchor1 = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 36, 42), anchor2 = ZO_Anchor:New(TOPRIGHT, nil, TOPRIGHT, -140, 42), height = 0, },
+        },
+
+        gamepad =
+        {
+            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, 1),
+            nameWidth = 306,
+            nameWrapMode = TEXT_WRAP_MODE_ELLIPSIS,
+            statusData = { anchor1 = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, 0), anchor2 = ZO_Anchor:New(TOPRIGHT, nil, TOPRIGHT, 0, 35), height = 0, },
+        },
+    },
+    [COMPANION_GROUP_UNIT_FRAME] =
+    {
+        keyboard =
+        {
+            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 35, 59),
+            nameWidth = 215,
+            nameWrapMode = TEXT_WRAP_MODE_ELLIPSIS,
+            statusData = { anchor1 = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 36, 82), anchor2 = ZO_Anchor:New(TOPRIGHT, nil, TOPRIGHT, -140, 82), height = 0, },
+        },
+
+        gamepad =
+        {
+            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, 66),
+            nameWidth = 306,
+            nameWrapMode = TEXT_WRAP_MODE_ELLIPSIS,
+            statusData = { anchor1 = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, 60), anchor2 = ZO_Anchor:New(TOPRIGHT, nil, TOPRIGHT, 0, 88), height = 0, },
+        },
     },
 }
 
@@ -749,15 +936,15 @@ local FORCE_SHOW = true
 local PREVENT_SHOW = false
 
 local function SetUnitFrameTexture(frame, styleData, showOption)
-    if(frame and styleData) then
+    if frame and styleData then
         frame:SetTexture(styleData.texture)
         frame:SetDimensions(styleData.width, styleData.height)
 
-        if(styleData.customAnchor) then
+        if styleData.customAnchor then
             styleData.customAnchor:Set(frame)
         end
 
-        if(showOption == FORCE_SHOW) then
+        if showOption == FORCE_SHOW then
             frame:SetHidden(false) -- never toggles, this is the only chance this frame has of being shown
         end
     end
@@ -775,10 +962,10 @@ local function LayoutUnitFrameStatus(statusLabel, statusData)
 end
 
 local function LayoutUnitFrameName(nameLabel, layoutData, indented)
-    if(nameLabel and layoutData) then
-        if(layoutData.nameAnchor and not indented) then
+    if nameLabel and layoutData then
+        if layoutData.nameAnchor and not indented then
             layoutData.nameAnchor:Set(nameLabel)
-        elseif(layoutData.indentedNameAnchor and indented) then
+        elseif layoutData.indentedNameAnchor and indented then
             layoutData.indentedNameAnchor:Set(nameLabel)
         end
 
@@ -786,7 +973,7 @@ local function LayoutUnitFrameName(nameLabel, layoutData, indented)
 
         local nameWidth = layoutData.nameWidth or 0
 
-        if(indented) then
+        if indented then
             nameLabel:SetWidth(layoutData.indentedNameWidth or nameWidth)
         else
             nameLabel:SetWidth(nameWidth)
@@ -796,10 +983,10 @@ end
 
 local function DoUnitFrameLayout(unitFrame, style)
     local layoutData = GetPlatformLayoutData(style)
-    if(layoutData) then
+    if layoutData then
         unitFrame.neverHideStatusBar = layoutData.neverHideStatusBar
 
-        if(layoutData.highPriorityBuffHighlight) then
+        if layoutData.highPriorityBuffHighlight then
             SetUnitFrameTexture(GetControl(unitFrame.frame, "HighPriorityBuffHighlight"), layoutData.highPriorityBuffHighlight.left, PREVENT_SHOW)
             SetUnitFrameTexture(GetControl(unitFrame.frame, "HighPriorityBuffHighlightRight"), layoutData.highPriorityBuffHighlight.right, PREVENT_SHOW)
             SetUnitFrameTexture(GetControl(unitFrame.frame, "HighPriorityBuffHighlightIcon"), layoutData.highPriorityBuffHighlight.icon, PREVENT_SHOW)
@@ -824,12 +1011,12 @@ function UnitFrame:New(unitTag, anchors, barTextMode, style, templateName)
     local baseWindowName = templateName..unitTag
     local parent = ZO_UnitFrames
 
-    if ZO_Group_IsGroupUnitTag(unitTag) then
+    if ZO_Group_IsGroupUnitTag(unitTag) or IsGroupCompanionUnitTag(unitTag) or unitTag == "companion" then
         parent = ZO_UnitFramesGroups
     end
 
     local layoutData = GetPlatformLayoutData(style)
-    if(not layoutData) then
+    if not layoutData then
         return
     end
 
@@ -869,7 +1056,12 @@ function UnitFrame:New(unitTag, anchors, barTextMode, style, templateName)
     newFrame.barTextMode = barTextMode
 
     newFrame.healthBar = UnitFrameBar:New(baseWindowName.."Hp", newFrame.frame, barTextMode, style, POWERTYPE_HEALTH)
-    newFrame.healthBar:SetColor(POWERTYPE_HEALTH)
+
+    if style == COMPANION_RAID_UNIT_FRAME then
+        newFrame.healthBar:SetColor(POWERTYPE_HEALTH, COMPANION_HEALTH_GRADIENT, COMPANION_HEALTH_GRADIENT_LOSS, COMPANION_HEALTH_GRADIENT_GAIN)
+    else
+        newFrame.healthBar:SetColor(POWERTYPE_HEALTH)
+    end
 
     newFrame.resourceBars = {}
     newFrame.resourceBars[POWERTYPE_HEALTH] = newFrame.healthBar
@@ -890,9 +1082,8 @@ function UnitFrame:ApplyVisualStyle()
     local frameTemplate = ZO_GetPlatformTemplate(self.templateName)
     ApplyTemplateToControl(self.frame, frameTemplate)
 
-    local isLeader = IsUnitGroupLeader(self.unitTag)
     local isOnline = IsUnitOnline(self.unitTag)
-    self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag), isOnline, isLeader)
+    self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag))
     self:UpdateDifficulty()
 
     local healthBar = self.healthBar
@@ -959,8 +1150,9 @@ end
 
 function UnitFrame:SetAnchor(anchors)
     self.frame:ClearAnchors()
+    self.offsetY = anchors:GetOffsetY()
 
-    if(type(anchors) == "table" and #anchors >= 2) then
+    if type(anchors) == "table" and #anchors >= 2 then
         anchors[1]:Set(self.frame)
         anchors[2]:AddToControl(self.frame)
     else
@@ -973,20 +1165,21 @@ function UnitFrame:SetBuffTracker(buffTracker)
 end
 
 function UnitFrame:SetHiddenForReason(reason, hidden)
-    if(self.hiddenReasons:SetHiddenForReason(reason, hidden)) then
+    if self.hiddenReasons:SetHiddenForReason(reason, hidden) then
         local INSTANT = true
         self:RefreshVisible(INSTANT)
     end
 end
 
-function UnitFrame:SetHasTarget(hasTarget)
+function UnitFrame:SetHasTarget(hasTarget, hasPendingTarget)
     self.hasTarget = hasTarget
+    self.hasPendingTarget = hasPendingTarget
     local ANIMATED = false
     self:RefreshVisible(ANIMATED)
 end
 
 function UnitFrame:ComputeHidden()
-    if not self.hasTarget then
+    if not self.hasTarget and not self.hasPendingTarget then
         return true
     end
 
@@ -1054,19 +1247,50 @@ function UnitFrame:RefreshControls()
                 self:UpdatePowerBar(i, powerType, cur, max, FORCE_INIT)
             end
 
-            self:UpdateStatus(IsUnitDead(self.unitTag), IsUnitOnline(self.unitTag))
+            --Since we have a target, there is nothing pending
+            local NOT_PENDING = false
+            self:UpdateStatus(IsUnitDead(self.unitTag), IsUnitOnline(self.unitTag), NOT_PENDING)
+            self:UpdateBackground()
             self:UpdateRank()
             self:UpdateAssignment()
             self:UpdateDifficulty()
-            self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag), IsUnitOnline(self.unitTag), IsUnitGroupLeader(self.unitTag))
+            self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag))
+        elseif self.hasPendingTarget then
+            self:UpdateName()
+
+            --Since there is technically no unit yet, we need to pretend there is one that is not dead and is online
+            local IS_ONLINE = true
+            local NOT_DEAD = false
+
+            --Large groups will behave differently than small groups when a companion is pending
+            if self.style == COMPANION_RAID_UNIT_FRAME then
+                --Since we don't want large group frames to show any status text, pretend we aren't pending
+                local IS_NOT_PENDING = false
+                local NOT_NEARBY = false
+                self:UpdateStatus(NOT_DEAD, IS_ONLINE, IS_NOT_PENDING)
+                self:DoAlphaUpdate(NOT_NEARBY)
+            else
+                local IS_NEARBY = true
+                self:UpdateStatus(NOT_DEAD, IS_ONLINE, self.hasPendingTarget)
+                self:DoAlphaUpdate(IS_NEARBY)
+            end
         end
     end
 end
 
 function UnitFrame:RefreshUnit(unitChanged)
     local validTarget = DoesUnitExist(self.unitTag)
+    local hasPendingTarget = false
+    if self.unitTag == "companion" then
+        hasPendingTarget = HasPendingCompanion()
+    elseif IsGroupCompanionUnitTag(self.unitTag) then
+        local playerGroupTag = GetLocalPlayerGroupUnitTag()
+        local playerCompanionTag = GetCompanionUnitTagByGroupUnitTag(playerGroupTag)
+        hasPendingTarget = self.unitTag == playerCompanionTag and HasPendingCompanion()
+    end
+
     if validTarget then
-        if(self.unitTag == "reticleovertarget") then
+        if self.unitTag == "reticleovertarget" then
             local localPlayerIsTarget = AreUnitsEqual("player", "reticleover")
             validTarget = UnitFrames:IsTargetOfTargetEnabled() and not localPlayerIsTarget
         end
@@ -1080,7 +1304,7 @@ function UnitFrame:RefreshUnit(unitChanged)
         end
     end
 
-    self:SetHasTarget(validTarget)
+    self:SetHasTarget(validTarget, hasPendingTarget)
 end
 
 function UnitFrame:SetBarsHidden(hidden)
@@ -1099,18 +1323,14 @@ function UnitFrame:GetPrimaryControl()
     return self.frame
 end
 
-function UnitFrame:DoAlphaUpdate(isNearby, isOnline, isLeader)
+function UnitFrame:DoAlphaUpdate(isNearby)
     -- Don't fade out just the frame, because that needs to appear correctly (along with BG, etc...)
     -- Just make the status bars and any text on the frame fade out.
     local color
     if self.unitTag == "reticleover" then
         color = ZO_SELECTED_TEXT
     else
-        if isLeader then
-            color = ZO_HIGHLIGHT_TEXT
-        else
-            color = ZO_NORMAL_TEXT
-        end
+        color = ZO_HIGHLIGHT_TEXT
     end
 
     local alphaValue = isNearby and FULL_ALPHA_VALUE or FADED_ALPHA_VALUE
@@ -1131,20 +1351,25 @@ end
 
 function UnitFrame:UpdatePowerBar(index, powerType, cur, max, forceInit)
     -- Should this bar type ever be displayed?
-    if(untrackedBarTypes[powerType] ~= nil or not IsValidBarStyle(self.style, powerType)) then
+    if not IsValidBarStyle(self.style, powerType) then
         return
     end
 
     local currentBar = self.powerBars[index]
 
-    if(currentBar == nil) then
+    if currentBar == nil then
         self.powerBars[index] = UnitFrameBar:New(self.frame:GetName().."PowerBar"..index, self.frame, self.barTextMode, self.style, powerType)
         currentBar = self.powerBars[index]
-        currentBar:SetColor(powerType)
+
+        if powerType == POWERTYPE_HEALTH and self.style == COMPANION_RAID_UNIT_FRAME then
+            currentBar:SetColor(powerType, COMPANION_HEALTH_GRADIENT, COMPANION_HEALTH_GRADIENT_LOSS, COMPANION_HEALTH_GRADIENT_GAIN)
+        else
+            currentBar:SetColor(powerType)
+        end
         self.resourceBars[powerType] = currentBar
     end
 
-    if(currentBar ~= nil) then
+    if currentBar ~= nil then
         currentBar:Update(powerType, cur, max, forceInit)
 
         currentBar:Hide(powerType == POWERTYPE_INVALID)
@@ -1196,10 +1421,10 @@ function UnitFrame:UpdateLevel()
         unitLevel = GetUnitLevel(self:GetUnitTag())
     end
 
-    if(self.levelLabel) then
-        if(showLevel and unitLevel > 0) then
+    if self.levelLabel then
+        if showLevel and unitLevel > 0 then
             self.levelLabel:SetHidden(false)
-            self.levelLabel:SetText(tostring(unitLevel))
+            self.levelLabel:SetText(unitLevel)
             self.nameLabel:SetAnchor(TOPLEFT, self.levelLabel, TOPRIGHT, 10, 0)
         else
             self.levelLabel:SetHidden(true)
@@ -1207,7 +1432,7 @@ function UnitFrame:UpdateLevel()
         end
     end
 
-    if(self.championIcon) then
+    if self.championIcon then
         if showLevel and isChampion then
             self.championIcon:SetHidden(false)
         else
@@ -1217,7 +1442,7 @@ function UnitFrame:UpdateLevel()
 end
 
 function UnitFrame:UpdateRank()
-    if(self.rankIcon) then
+    if self.rankIcon then
         local unitTag = self:GetUnitTag()
         local rank = GetUnitAvARank(unitTag)
 
@@ -1352,12 +1577,39 @@ function UnitFrame:UpdateName()
     if self.nameLabel then
         local name
         local tag = self.unitTag
-        if IsUnitPlayer(tag) then
+        if self.unitTag == "companion" and HasPendingCompanion() then
+            pendingCompanionName = GetCompanionName(GetPendingCompanionDefId())
+            name = zo_strformat(SI_COMPANION_NAME_FORMATTER, pendingCompanionName)
+        elseif IsGroupCompanionUnitTag(tag) then
+            local playerGroupTag = GetLocalPlayerGroupUnitTag()
+            local playerCompanionTag = GetCompanionUnitTagByGroupUnitTag(playerGroupTag)
+            if playerCompanionTag == tag and HasPendingCompanion() then
+                pendingCompanionName = GetCompanionName(GetPendingCompanionDefId())
+                name = zo_strformat(SI_COMPANION_NAME_FORMATTER, pendingCompanionName)
+            else
+                if self.style == COMPANION_GROUP_UNIT_FRAME and playerCompanionTag ~= tag then
+                    name = GetString(SI_UNIT_FRAME_NAME_COMPANION)
+                else
+                    name = GetUnitName(tag)
+                end
+            end
+        elseif IsUnitPlayer(tag) then
             name = ZO_GetPrimaryPlayerNameFromUnitTag(tag)
         else
             name = GetUnitName(tag)
         end
         self.nameLabel:SetText(name)
+    end
+end
+
+function UnitFrame:UpdateBackground()
+    if self.style == GROUP_UNIT_FRAME and ZO_Group_IsGroupUnitTag(self.unitTag) then
+        local companionTag = GetCompanionUnitTagByGroupUnitTag(self.unitTag)
+        if IsInGamepadPreferredMode() then
+            self.frame:GetNamedChild("Background2"):SetHidden(DoesUnitExist(companionTag))
+        else
+            self.frame:GetNamedChild("Background1"):SetHidden(DoesUnitExist(companionTag))
+        end
     end
 end
 
@@ -1381,10 +1633,10 @@ function UnitFrame:UpdateCaption()
     end
 end
 
-function UnitFrame:UpdateStatus(isDead, isOnline)
+function UnitFrame:UpdateStatus(isDead, isOnline, isPending)
     local statusLabel = self.statusLabel
-    if(statusLabel) then
-        local hideBars = (isOnline == false) or (isDead == true)
+    if statusLabel then
+        local hideBars = (isOnline == false) or (isDead == true) or isPending
         self:SetBarsHidden(hideBars and not self.neverHideStatusBar)
         local layoutData = GetPlatformLayoutData(self.style)
         statusLabel:SetHidden(not hideBars or not layoutData.statusData)
@@ -1394,19 +1646,23 @@ function UnitFrame:UpdateStatus(isDead, isOnline)
             statusBackground:SetHidden(not isOnline and layoutData.hideHealthBgIfOffline)
         end
 
-        if(layoutData and layoutData.showStatusInName) then
-            if(not isOnline) then
+        if layoutData and layoutData.showStatusInName then
+            if not isOnline then
                 statusLabel:SetText("("..GetString(SI_UNIT_FRAME_STATUS_OFFLINE)..")")
-            elseif(isDead) then
+            elseif isDead then
                 statusLabel:SetText("("..GetString(SI_UNIT_FRAME_STATUS_DEAD)..")")
+            elseif isPending then
+                statusLabel:SetText("("..GetString(SI_UNIT_FRAME_STATUS_SUMMONING)..")")
             else
                 statusLabel:SetText("")
             end
         else
-            if(not isOnline) then
+            if not isOnline then
                 statusLabel:SetText(GetString(SI_UNIT_FRAME_STATUS_OFFLINE))
-            elseif(isDead) then
+            elseif isDead then
                 statusLabel:SetText(GetString(SI_UNIT_FRAME_STATUS_DEAD))
+            elseif isPending then
+                statusLabel:SetText(GetString(SI_UNIT_FRAME_STATUS_SUMMONING))
             else
                 statusLabel:SetText("")
             end
@@ -1670,19 +1926,41 @@ local function CreateTargetFrame()
     CALLBACK_MANAGER:FireCallbacks("TargetFrameCreated", targetFrame)
 end
 
-local function CreateGroupMember(frameIndex, unitTag, groupSize)
-    if(frameIndex == nil) then return end
+local function CreateLocalCompanion()
+    if not HasActiveCompanion() and not HasPendingCompanion() then
+        return
+    end
+    local COMPANION_FRAME_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_SmallGroupAnchorFrame, TOPLEFT, 0, 0)
+    local frame = UnitFrames:CreateFrame("companion", COMPANION_FRAME_ANCHOR, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_UNIT_FRAME)
+    frame:SetHiddenForReason("disabled", IsUnitGrouped("player"))
+    ZO_UnitFrames_UpdateWindow("companion", UNIT_CHANGED)
+end
 
-    local frameStyle = "ZO_GroupUnitFrame"
-    if(groupSize > SMALL_GROUP_SIZE_THRESHOLD) then
-        frameStyle = "ZO_RaidUnitFrame"
+local function CreateGroupMember(frameIndex, unitTag, groupSize)
+    if frameIndex == nil then 
+        return 
     end
 
-    local anchor = GetGroupFrameAnchor(frameIndex, groupSize)
+    local frameStyle = GROUP_UNIT_FRAME
+    if groupSize > SMALL_GROUP_SIZE_THRESHOLD then
+        frameStyle = RAID_UNIT_FRAME
+    end
+
+    local previousGroupTag = GetGroupUnitTagByIndex(frameIndex - 1)
+    local previousCompanionTag = GetCompanionUnitTagByGroupUnitTag(previousGroupTag)
+    local anchor = GetGroupFrameAnchor(frameIndex, groupSize, UnitFrames:GetFrame(previousGroupTag), UnitFrames:GetFrame(previousCompanionTag))
     local frame = UnitFrames:CreateFrame(unitTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, frameStyle)
+
+    --Create the corresponding companion frame for this group member
+    local companionTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
+    if companionTag and frameStyle == GROUP_UNIT_FRAME then
+         local companionFrame = UnitFrames:CreateFrame(companionTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_GROUP_UNIT_FRAME)
+         companionFrame:SetHiddenForReason("disabled", false)
+    end
     frame:SetHiddenForReason("disabled", false)
 
     ZO_UnitFrames_UpdateWindow(unitTag, UNIT_CHANGED)
+    ZO_UnitFrames_UpdateWindow(companionTag, UNIT_CHANGED)
 end
 
 local function CreateGroupsAfter(startIndex)
@@ -1694,6 +1972,41 @@ local function CreateGroupsAfter(startIndex)
         if unitTag then
             CreateGroupMember(i, unitTag, groupSize)
         end
+    end
+
+    if groupSize > SMALL_GROUP_SIZE_THRESHOLD then
+        local numCompanionFrames = 0
+        local maxCompanionFrames = zo_min(UnitFrames:GetCompanionGroupSize(), GROUP_SIZE_MAX - groupSize)
+        if maxCompanionFrames > 0 then
+
+            --We want to prioritize showing the local player's companion, so do that one first
+            local playerGroupTag = GetLocalPlayerGroupUnitTag()
+            local playerCompanionTag = GetCompanionUnitTagByGroupUnitTag(playerGroupTag)
+            if playerCompanionTag and (DoesUnitExist(playerCompanionTag) or HasPendingCompanion()) then
+                numCompanionFrames = numCompanionFrames + 1
+                local anchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, groupSize)
+                local frame = UnitFrames:CreateFrame(playerCompanionTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_RAID_UNIT_FRAME)
+                frame:SetHiddenForReason("disabled", false)
+                ZO_UnitFrames_UpdateWindow(playerCompanionTag, UNIT_CHANGED)
+            end
+
+            for i = 1, groupSize do
+                --At this point we've either hit the companion frame limit or we've created a frame for every companion. So no need to continue looping
+                if numCompanionFrames >= maxCompanionFrames then
+                    break
+                end
+
+                local unitTag = GetGroupUnitTagByIndex(i)
+                local companionTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
+                if companionTag and companionTag ~= playerCompanionTag and DoesUnitExist(companionTag) then
+                    numCompanionFrames = numCompanionFrames + 1
+                    local anchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, groupSize)
+                    local frame = UnitFrames:CreateFrame(companionTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_RAID_UNIT_FRAME)
+                    frame:SetHiddenForReason("disabled", false)
+                    ZO_UnitFrames_UpdateWindow(companionTag, UNIT_CHANGED)
+                end
+            end   
+        end 
     end
 
     DoGroupUpdate()
@@ -1714,11 +2027,12 @@ local function UpdateGroupFrameStyle(groupIndex)
     local newLargeGroup = groupSize > SMALL_GROUP_SIZE_THRESHOLD;
 
     UnitFrames:SetGroupSize(groupSize)
+    UnitFrames:UpdateCompanionGroupSize()
 
     -- In cases where no UI has been setup, the group changes between large and small group sizes, or when
     --  members are removed, we need to run a full update of the UI. These could also be optimized to only
     --  run partial updates if more performance is needed.
-    if (oldGroupSize == nil) or (oldLargeGroup ~= newLargeGroup) or (oldGroupSize > groupSize) then
+    if oldGroupSize == nil or oldLargeGroup ~= newLargeGroup or oldGroupSize > groupSize then
         -- Create all the appropriate frames for the new group member, or in the case of a unit_destroyed
         -- create the small group versions.
         UnitFrames:DisableGroupAndRaidFrames()
@@ -1726,14 +2040,8 @@ local function UpdateGroupFrameStyle(groupIndex)
     else
         -- Only update the frames of the unit being changed, and those after it in the list for performance
         --  reasons.
+        UnitFrames:DisableCompanionRaidFrames()
         CreateGroupsAfter(groupIndex)
-    end
-end
-
-local function RefreshUnitFrames()
-    if UnitFrames:GetIsDirty() then
-        UpdateGroupFrameStyle(UnitFrames:GetFirstDirtyGroupIndex())
-        UnitFrames:ClearDirty()
     end
 end
 
@@ -1779,13 +2087,48 @@ local function UpdateGroupFramesVisualStyle()
 
     -- Update all UnitFrame anchors.
     local groupSize = GetGroupSize()
+    local previousUnitTag = nil
+    local previousCompanionTag = nil
+    local numCompanionFrames = 0
+    local maxCompanionFrames = zo_min(UnitFrames:GetCompanionGroupSize(), GROUP_SIZE_MAX - groupSize)
+    local playerGroupTag = GetLocalPlayerGroupUnitTag()
+    local playerCompanionTag = GetCompanionUnitTagByGroupUnitTag(playerGroupTag)
+    --If we are in a large group, make sure we prioritize sorting the player's local companion to the front
+    if groupSize > SMALL_GROUP_SIZE_THRESHOLD and numCompanionFrames < maxCompanionFrames then
+        if playerCompanionTag and (DoesUnitExist(playerCompanionTag) or HasPendingCompanion()) then
+            numCompanionFrames = numCompanionFrames + 1
+            local companionUnitFrame = UnitFrames:GetFrame(playerCompanionTag)
+            local companionAnchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, groupSize)
+            if companionUnitFrame then
+                companionUnitFrame:SetAnchor(companionAnchor)
+            end
+        end
+    end
+
     for i = 1, GROUP_SIZE_MAX do
         local unitTag = GetGroupUnitTagByIndex(i)
+        local companionTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
         if unitTag then
-            local unitFrame = UnitFrames:GetFrame(unitTag)
-            local anchor = GetGroupFrameAnchor(i, groupSize)
-            unitFrame:SetAnchor(anchor)
+            local unitFrame = UnitFrames:GetFrame(unitTag)            
+            local companionUnitFrame = UnitFrames:GetFrame(companionTag)
+            local groupUnitAnchor = GetGroupFrameAnchor(i, groupSize, UnitFrames:GetFrame(previousUnitTag), UnitFrames:GetFrame(previousCompanionTag))
+            unitFrame:SetAnchor(groupUnitAnchor)
+            if groupSize > SMALL_GROUP_SIZE_THRESHOLD then
+                if companionTag ~= playerCompanionTag and numCompanionFrames < maxCompanionFrames and DoesUnitExist(companionTag) then
+                    numCompanionFrames = numCompanionFrames + 1
+                    local companionAnchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, groupSize)
+                    if companionUnitFrame then
+                        companionUnitFrame:SetAnchor(companionAnchor)
+                    end
+                end
+            else                
+                if companionUnitFrame then
+                    companionUnitFrame:SetAnchor(groupUnitAnchor)
+                end
+            end
         end
+        previousUnitTag = unitTag
+        previousCompanionTag = companionTag
     end
 
     -- Update the Group Leader Icon Texture
@@ -1832,21 +2175,29 @@ local function RefreshGroups()
     DoGroupUpdate()
 
     for i = 1, GROUP_SIZE_MAX do
-        ZO_UnitFrames_UpdateWindow(ZO_Group_GetUnitTagForGroupIndex(i))
+        local unitTag = ZO_Group_GetUnitTagForGroupIndex(i)
+        local companionTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
+        ZO_UnitFrames_UpdateWindow(unitTag)
+        ZO_UnitFrames_UpdateWindow(companionTag)
     end
+end
+
+local function RefreshLocalCompanion()
+    UnitFrames:SetFrameHiddenForReason("companion", "disabled", IsUnitGrouped("player"))
+    ZO_UnitFrames_UpdateWindow("companion", UNIT_CHANGED)
 end
 
 local function UpdateStatus(unitTag, isDead, isOnline)
     local unitFrame = UnitFrames:GetFrame(unitTag)
-    if(unitFrame) then
-        unitFrame:UpdateStatus(isDead, isOnline)
-        unitFrame:DoAlphaUpdate(IsUnitInGroupSupportRange(unitTag), isOnline, IsUnitGroupLeader(unitTag))
+    if unitFrame then
+        unitFrame:UpdateStatus(isDead, isOnline, false)
+        unitFrame:DoAlphaUpdate(IsUnitInGroupSupportRange(unitTag))
     end
 
-    if(AreUnitsEqual(unitTag, "reticleover")) then
+    if AreUnitsEqual(unitTag, "reticleover") then
         unitFrame = UnitFrames:GetFrame("reticleover")
-        if(unitFrame) then
-            unitFrame:UpdateStatus(isDead, isOnline)
+        if unitFrame then
+            unitFrame:UpdateStatus(isDead, isOnline, false)
         end
     end
 end
@@ -1896,16 +2247,22 @@ local function RegisterForEvents()
     ZO_MostRecentPowerUpdateHandler:New("UnitFrames", PowerUpdateHandlerFunction)
 
     local function OnUnitCreated(_, unitTag)
-        if(ZO_Group_IsGroupUnitTag(unitTag)) then
+        if ZO_Group_IsGroupUnitTag(unitTag) then
             ReportUnitChanged(unitTag)
+        elseif IsGroupCompanionUnitTag(unitTag) then
+            --If a group companion unit has been created, mark the corresponding group member dirty
+            ReportUnitChanged(GetGroupUnitTagByCompanionUnitTag(unitTag))
         else
             ZO_UnitFrames_UpdateWindow(unitTag, UNIT_CHANGED)
         end
     end
 
     local function OnUnitDestroyed(_, unitTag)
-        if(ZO_Group_IsGroupUnitTag(unitTag)) then
+        if ZO_Group_IsGroupUnitTag(unitTag) then
             ReportUnitChanged(unitTag)
+        elseif IsGroupCompanionUnitTag(unitTag) then
+            --If a group companion unit has been destroyed, mark the corresponding group member dirty
+            ReportUnitChanged(GetGroupUnitTagByCompanionUnitTag(unitTag))
         else
             ZO_UnitFrames_UpdateWindow(unitTag)
         end
@@ -1914,7 +2271,7 @@ local function RegisterForEvents()
     local function OnLevelUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
-        if(unitFrame) then
+        if unitFrame then
             unitFrame:UpdateLevel()
         end
     end
@@ -1926,7 +2283,7 @@ local function RegisterForEvents()
     local function OnDispositionUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
-        if(unitFrame) then
+        if unitFrame then
             unitFrame:UpdateUnitReaction()
         end
     end
@@ -1934,18 +2291,16 @@ local function RegisterForEvents()
     local function OnGroupSupportRangeUpdate(_, unitTag, isNearby)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
-        if(unitFrame) then
-            local isOnline = IsUnitOnline(unitTag)
-            local isLeader = IsUnitGroupLeader(unitTag)
-            unitFrame:DoAlphaUpdate(isNearby, isOnline, isLeader)
-            if(AreUnitsEqual(unitTag, "reticleover")) then
-                UnitFrames:GetFrame("reticleover"):DoAlphaUpdate(isNearby, isOnline, isLeader)
+        if unitFrame then
+            unitFrame:DoAlphaUpdate(isNearby)
+            if AreUnitsEqual(unitTag, "reticleover") then
+                UnitFrames:GetFrame("reticleover"):DoAlphaUpdate(isNearby)
             end
     
-            if(AreUnitsEqual(unitTag, "reticleovertarget")) then
+            if AreUnitsEqual(unitTag, "reticleovertarget") then
                 local targetOfTarget = UnitFrames:GetFrame("reticleovertarget")
-                if(targetOfTarget) then
-                    targetOfTarget:DoAlphaUpdate(isNearby, isOnline, isLeader)
+                if targetOfTarget then
+                    targetOfTarget:DoAlphaUpdate(isNearby)
                 end
             end
         end
@@ -1954,14 +2309,22 @@ local function RegisterForEvents()
     local function OnGroupUpdate()
         --Pretty much anything can happen on a full group update so refresh everything
         UnitFrames:SetGroupSize(GetGroupSize())
+        UnitFrames:UpdateCompanionGroupSize()
         UnitFrames:DisableGroupAndRaidFrames()
         CreateGroups()
         UnitFrames:ClearDirty()
     end
 
+    local function OnGroupMemberJoined(_, _, isLocalPlayer)
+        if isLocalPlayer then
+            UnitFrames:DisableLocalCompanionFrame()
+        end
+    end
+
     local function OnGroupMemberLeft(_, characterName, reason, wasLocalPlayer)
-        if(wasLocalPlayer) then
+        if wasLocalPlayer then
             RefreshGroups()
+            RefreshLocalCompanion()
         end
     end
 
@@ -1983,7 +2346,7 @@ local function RegisterForEvents()
     local function OnRankPointUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
-        if(unitFrame) then
+        if unitFrame then
             unitFrame:UpdateRank()
         end
     end
@@ -1991,7 +2354,7 @@ local function RegisterForEvents()
     local function OnChampionPointsUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
-        if(unitFrame) then
+        if unitFrame then
             unitFrame:UpdateLevel()
         end    
     end
@@ -1999,7 +2362,7 @@ local function RegisterForEvents()
     local function OnTitleUpdated(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
-        if(unitFrame) then
+        if unitFrame then
             unitFrame:UpdateCaption()
         end    
     end
@@ -2010,8 +2373,56 @@ local function RegisterForEvents()
     
         -- do a full update because we probably missed events while loading
         UnitFrames:SetGroupSize()
+        UnitFrames:UpdateCompanionGroupSize()
         UnitFrames:DisableGroupAndRaidFrames()
+        UnitFrames:DisableLocalCompanionFrame()
         CreateGroups()
+        CreateLocalCompanion()
+    end
+
+    local INACTIVE_COMPANION_STATES =
+    {
+        [COMPANION_STATE_INACTIVE] = true,
+        [COMPANION_STATE_BLOCKED_PERMANENT] = true,
+        [COMPANION_STATE_BLOCKED_TEMPORARY] = true,
+        [COMPANION_STATE_HIDDEN] = true,
+        [COMPANION_STATE_INITIALIZING] = true,
+    }
+
+    local PENDING_COMPANION_STATES = 
+    {
+        [COMPANION_STATE_PENDING] = true,
+        [COMPANION_STATE_INITIALIZED_PENDING] = true,
+    }
+
+    local ACTIVE_COMPANION_STATES =
+    {
+        [COMPANION_STATE_ACTIVE] = true,
+    }
+
+    --If this triggers, we will want to make sure the new state is handled in the OnCompanionStateChanged function
+    internalassert(COMPANION_STATE_MAX_VALUE == 7, "A new companion state has been added. Please add it to one of the state tables.")
+
+    local function OnCompanionStateChanged(eventCode, newState, oldState)
+        if INACTIVE_COMPANION_STATES[newState] then
+            --If we are going straight from pending to inactive, we need to manually mark the player unit as having changed since this won't trigger the normal UNIT_DESTROYED event
+            if PENDING_COMPANION_STATES[oldState] and IsUnitGrouped("player") then
+                ReportUnitChanged(GetLocalPlayerGroupUnitTag())
+            end
+            RefreshLocalCompanion()
+        elseif PENDING_COMPANION_STATES[newState] then
+            if IsUnitGrouped("player") then
+                ReportUnitChanged(GetLocalPlayerGroupUnitTag())
+            end
+            UnitFrames:DisableLocalCompanionFrame()
+            CreateLocalCompanion()
+        elseif ACTIVE_COMPANION_STATES[newState] then
+            --We only need to handle the local companion frame here, as the group frames are handled with the UNIT_CREATED event
+            UnitFrames:DisableLocalCompanionFrame()
+            CreateLocalCompanion()
+        else
+            internalassert(false, "Unhandled companion state")
+        end
     end
 
     local function OnTargetOfTargetEnabledChanged()
@@ -2051,9 +2462,11 @@ local function RegisterForEvents()
     ZO_UnitFrames:RegisterForEvent(EVENT_DISPOSITION_UPDATE, OnDispositionUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_SUPPORT_RANGE_UPDATE, OnGroupSupportRangeUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_UPDATE, OnGroupUpdate)
+    ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, OnGroupMemberLeft)
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_MEMBER_CONNECTED_STATUS, OnGroupMemberConnectedStateChanged)
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_MEMBER_ROLE_CHANGED, OnGroupMemberRoleChanged)
+    ZO_UnitFrames:RegisterForEvent(EVENT_ACTIVE_COMPANION_STATE_CHANGED, OnCompanionStateChanged)
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_DEATH_STATE_CHANGED, OnUnitDeathStateChanged)
     ZO_UnitFrames:RegisterForEvent(EVENT_RANK_POINT_UPDATE, OnRankPointUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, OnChampionPointsUpdate)
@@ -2077,6 +2490,7 @@ function ZO_UnitFrames_Initialize()
             UnitFrames = UnitFramesManager:New()
 
             CreateTargetFrame()
+            CreateLocalCompanion()
             CreateGroups()
 
             local function OnGamepadPreferredModeChanged()
@@ -2099,6 +2513,7 @@ end
 
 function ZO_UnitFrames_OnUpdate()
     if UnitFrames and UnitFrames:GetIsDirty() then
-        RefreshUnitFrames()
+        UpdateGroupFrameStyle(UnitFrames:GetFirstDirtyGroupIndex())
+        UnitFrames:ClearDirty()
     end
 end

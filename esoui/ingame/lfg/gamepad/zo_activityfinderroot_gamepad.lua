@@ -41,6 +41,10 @@ function ActivityFinderRoot_Gamepad:InitializeKeybindStripDescriptors()
                         if entryData.isRoleSelector then
                             GAMEPAD_GROUP_ROLES_BAR:ToggleSelected()
                         else
+                            if entryData.onShowingCallback then
+                                entryData.onShowingCallback(entryData)
+                            end
+
                             SCENE_MANAGER:Push(entryData.sceneName)
                         end
                     end
@@ -193,7 +197,6 @@ function ActivityFinderRoot_Gamepad:AddRolesMenuEntry()
 end
 
 function ActivityFinderRoot_Gamepad:AddCategory(categoryData, categoryPriority)
-
     local function PrioritySort(item1, item2)
         local item1Data = item1.data
         local item2Data = item2.data
@@ -264,6 +267,10 @@ function ActivityFinderRoot_Gamepad:ShowCategory(categoryData)
     local locked = self:IsCategoryLocked(gamepadCategoryData)
     if not locked then
         if not SCENE_MANAGER:IsShowing(gamepadCategoryData.sceneName) then
+            -- Order matters:
+            if gamepadCategoryData.onShowingCallback then
+                gamepadCategoryData.onShowingCallback(gamepadCategoryData)
+            end
             MAIN_MENU_GAMEPAD:SelectMenuEntry(ZO_MENU_MAIN_ENTRIES.ACTIVITY_FINDER)
             SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME, gamepadCategoryData.sceneName)
         end

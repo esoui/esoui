@@ -215,8 +215,9 @@ function ZO_SocialOptionsDialogGamepad:ShouldAddInviteToGroupOption()
     return IsGroupModificationAvailable() and not self:SelectedDataIsPlayer() and IsUnitSoloOrGroupLeader("player")
 end
 
-function ZO_SocialOptionsDialogGamepad:ShouldAddInviteToGroupOptionAndIsSelectedDataLoggedIn()
-    return self:ShouldAddInviteToGroupOption() and self:SelectedDataIsLoggedIn()
+function ZO_SocialOptionsDialogGamepad:ShouldAddInviteToGroupOptionAndCanSelectedDataBeInvited()
+    -- PS can send platform invites to offline players which they can then use to launch the game and join
+    return self:ShouldAddInviteToGroupOption() and (self:SelectedDataIsLoggedIn() or ZO_IsPlaystationPlatform())
 end
 
 function ZO_SocialOptionsDialogGamepad:GetInviteToGroupCallback()
@@ -272,20 +273,6 @@ function ZO_SocialOptionsDialogGamepad:BuildGamerCardOption()
         return self:BuildOptionEntry(nil, GetGamerCardStringId(), callback)
     end
     return nil
-end
-
-function ZO_SocialOptionsDialogGamepad:BuildInviteToGameOption()
-    if ZO_IsPlaystationPlatform() then
-        local callback = function()
-            local accountName = UndecorateDisplayName(self.socialData.displayName)
-
-            if accountName then
-                TriggerSendOrbisFriendInviteDialog(accountName)
-            end
-        end
-
-        return self:BuildOptionEntry(nil, SI_ORBIS_OPEN_INVITE_DIALOG, callback)
-    end
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildIgnoreOption()

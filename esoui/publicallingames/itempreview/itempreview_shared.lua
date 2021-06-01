@@ -279,26 +279,26 @@ end
 
 ZO_ItemPreviewType_Outfit = ZO_ItemPreviewType:Subclass()
 
-function ZO_ItemPreviewType_Outfit:SetStaticParameters(outfitIndex)
+function ZO_ItemPreviewType_Outfit:SetStaticParameters(actorCategory, outfitIndex)
+    self.actorCategory = actorCategory
     self.outfitIndex = outfitIndex
 end
 
 function ZO_ItemPreviewType_Outfit:ResetStaticParameters()
+    self.actorCategory = GAMEPLAY_ACTOR_CATEGORY_PLAYER
     self.outfitIndex = 0
 end
 
-function ZO_ItemPreviewType_Outfit:HasStaticParameters(outfitIndex)
-    return self.outfitIndex == outfitIndex
+function ZO_ItemPreviewType_Outfit:HasStaticParameters(actorCategory, outfitIndex)
+    return self.actorCategory == actorCategory and self.outfitIndex == outfitIndex
 end
 
 function ZO_ItemPreviewType_Outfit:Apply()
     if self.outfitIndex then
-        SetPreviewingOutfitIndexInPreviewCollection(self.outfitIndex)
+        SetPreviewingOutfitIndexInPreviewCollection(self.actorCategory, self.outfitIndex)
     else
-        SetPreviewingUnequippedOutfitInPreviewCollection()
+        SetPreviewingUnequippedOutfitInPreviewCollection(self.actorCategory)
     end
-
-    ApplyChangesToPreviewCollectionShown()
 end
 
 -- Reward
@@ -499,8 +499,6 @@ function ZO_ItemPreview_Shared:OnPreviewHidden()
     EVENT_MANAGER:UnregisterForUpdate("ZO_ItemPreview_Shared")
     EVENT_MANAGER:UnregisterForEvent("ZO_ItemPreview_Shared", EVENT_SCREEN_RESIZED)
 
-    SetInteractionUsingInteractCamera(true)
-
     -- Order matters here
     self:EndCurrentPreview()
     DisablePreviewMode()
@@ -633,15 +631,15 @@ function ZO_ItemPreview_Shared:PreviewStoreEntry(storeEntryIndex)
     self:SharedPreviewSetup(ZO_ITEM_PREVIEW_STORE_ENTRY, storeEntryIndex)
 end
 
-function ZO_ItemPreview_Shared:PreviewOutfit(outfitIndex)
-    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_OUTFIT, outfitIndex)
+function ZO_ItemPreview_Shared:PreviewOutfit(actorCategory, outfitIndex)
+    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_OUTFIT, actorCategory, outfitIndex)
 end
 
 do
     local UNEQUIPPED_OUTFIT_INDEX = nil
 
-    function ZO_ItemPreview_Shared:PreviewUnequipOutfit()
-        self:SharedPreviewSetup(ZO_ITEM_PREVIEW_OUTFIT, UNEQUIPPED_OUTFIT_INDEX)
+    function ZO_ItemPreview_Shared:PreviewUnequipOutfit(actorCategory)
+        self:SharedPreviewSetup(ZO_ITEM_PREVIEW_OUTFIT, actorCategory, UNEQUIPPED_OUTFIT_INDEX)
     end
 end
 

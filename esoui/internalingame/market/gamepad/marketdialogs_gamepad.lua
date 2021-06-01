@@ -36,7 +36,7 @@ ZO_GAMEPAD_MARKET_PURCHASE_SCENE_NAME = "gamepad_market_purchase"
 local function GetAvailableCurrencyHeaderData(marketCurrencyType)
     return {
         value = function(control)
-            ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), GetPlayerMarketCurrency(marketCurrencyType), ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS)
+            ZO_CurrencyControl_SetSimpleCurrency(control, GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), GetPlayerMarketCurrency(marketCurrencyType), ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS)
             return true
         end,
         header = GetString(SI_GAMEPAD_MARKET_FUNDS_LABEL),
@@ -56,7 +56,7 @@ local function GetProductCostHeaderData(cost, marketCurrencyType, hasEsoPlusCost
                     strikethroughCurrencyAmount = true,
                 }
             end
-            ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
+            ZO_CurrencyControl_SetSimpleCurrency(control, GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
             if not hasEsoPlusCost and updateDiscountPercentParentControl then
                 g_dialogDiscountPercentParentControl = control
             end
@@ -82,7 +82,7 @@ local function GetProductEsoPlusCostHeaderData(cost, marketCurrencyType)
                 iconInheritColor = true,
                 color = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
             }
-            ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
+            ZO_CurrencyControl_SetSimpleCurrency(control, GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
             return true
         end,
         header = GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_ESO_PLUS_COST_LABEL),

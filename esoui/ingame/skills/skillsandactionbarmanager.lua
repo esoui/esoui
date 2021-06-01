@@ -89,7 +89,7 @@ function ZO_SkillsAndActionBarManager:OnStartRespec(allocationMode, paymentType)
 end
 
 do
-    internalassert(RESPEC_RESULT_MAX_VALUE == 31, "Update EXPECTED_RESPEC_FAILURES")
+    internalassert(RESPEC_RESULT_MAX_VALUE == 38, "Update EXPECTED_RESPEC_FAILURES")
     local EXPECTED_RESPEC_FAILURES =
     {
         [RESPEC_RESULT_IS_IN_COMBAT] = true,
@@ -99,7 +99,8 @@ do
         if result == RESPEC_RESULT_SUCCESS then
             self:ResetInterface()
         else
-            internalassert(EXPECTED_RESPEC_FAILURES[result], string.format("Unexpected Respec Failure (%d)", result))
+            -- TODO: Companions, temporarily disabling respec failure errors while we are in active development
+            --internalassert(EXPECTED_RESPEC_FAILURES[result], string.format("Unexpected Respec Failure (%d)", result))
             if not self:DoesSkillPointAllocationModeBatchSave() then
                 -- if we aren't in batch mode, the user has no way to fix bad state, so we need to hard reset for them
                 self:ResetRespecState()

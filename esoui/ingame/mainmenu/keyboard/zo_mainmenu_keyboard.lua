@@ -34,10 +34,10 @@ ZO_CATEGORY_LAYOUT_INFO =
             local esoPlusString = zo_iconTextFormatNoSpace("EsoUI/Art/Market/Keyboard/ESOPlus_Chalice_GOLD_32.dds", 28, 28, GetString(SI_ESO_PLUS_TITLE))
             membershipControl:SetText(esoPlusString)
             remainingCrownsControl:SetHidden(false)
-            local currentCrownBalance = GetPlayerCrowns()
+            local currentCrownBalance = GetPlayerMarketCurrency(MKCT_CROWNS)
             remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, currentCrownBalance))
             button:RegisterForEvent(EVENT_CROWN_UPDATE, function(currencyAmount)
-                local playerCrownBalance = GetPlayerCrowns()
+                local playerCrownBalance = GetPlayerMarketCurrency(MKCT_CROWNS)
                 remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, playerCrownBalance))
             end)
         end,
@@ -155,7 +155,7 @@ ZO_CATEGORY_LAYOUT_INFO =
         highlight = "EsoUI/Art/MainMenu/menuBar_skills_over.dds",
 
         indicators = function()
-            if SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER:AreAnySkillLinesNew() then
+            if SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER:AreAnyPlayerSkillLinesNew() then
                 return { ZO_KEYBOARD_NEW_ICON }
             end
         end,
