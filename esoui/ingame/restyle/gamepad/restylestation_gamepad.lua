@@ -187,7 +187,7 @@ function ZO_RestyleStation_Gamepad:OnFragmentHidden()
         TogglePlayerWield()
     end
 
-    ITEM_PREVIEW_KEYBOARD:ClearPreviewCollection()
+    ITEM_PREVIEW_GAMEPAD:ClearPreviewCollection()
     ApplyChangesToPreviewCollectionShown()
 end
 

@@ -431,19 +431,38 @@ h5. CompanionRapportLevel
 
 h5. CompanionState
 * COMPANION_STATE_ACTIVE
+* COMPANION_STATE_BLOCKED_PERMANENT
+* COMPANION_STATE_BLOCKED_TEMPORARY
+* COMPANION_STATE_HIDDEN
 * COMPANION_STATE_INACTIVE
+* COMPANION_STATE_INITIALIZED_PENDING
+* COMPANION_STATE_INITIALIZING
 * COMPANION_STATE_PENDING
 
 
-h5. CompanionWarningType
-* COMPANION_WARNING_TYPE_ADDED_FOR_GROUP_PLAYER
-* COMPANION_WARNING_TYPE_DATA_NOT_LOADED
-* COMPANION_WARNING_TYPE_EXPECTED_DIFFERENT_COMPANION
-* COMPANION_WARNING_TYPE_GROUP_FULL
-* COMPANION_WARNING_TYPE_REMOVED_FOR_GROUP_PLAYER
-* COMPANION_WARNING_TYPE_SPAWN_FAILED
-* COMPANION_WARNING_TYPE_SUMMON_FAILED
-* COMPANION_WARNING_TYPE_SUMMON_FAILED_LOW_RAPPORT
+h5. CompanionSummonResult
+* COMPANION_SUMMON_RESULT_ADDED_FOR_GROUP_PLAYER
+* COMPANION_SUMMON_RESULT_BLOCKED_BY_FOLLOWER
+* COMPANION_SUMMON_RESULT_BLOCKED_BY_SUBZONE
+* COMPANION_SUMMON_RESULT_BLOCKED_BY_WORLD_BOSS
+* COMPANION_SUMMON_RESULT_BLOCKED_BY_WORLD_EVENT
+* COMPANION_SUMMON_RESULT_DATA_NOT_LOADED
+* COMPANION_SUMMON_RESULT_DEACTIVATED_VANITY_PET
+* COMPANION_SUMMON_RESULT_EFFECT_LIMIT
+* COMPANION_SUMMON_RESULT_EXPECTED_DIFFERENT_COMPANION
+* COMPANION_SUMMON_RESULT_GROUP_FULL
+* COMPANION_SUMMON_RESULT_REMOVED_FOR_FOLLOWER
+* COMPANION_SUMMON_RESULT_REMOVED_FOR_GROUP_PLAYER
+* COMPANION_SUMMON_RESULT_REMOVED_FOR_PERF
+* COMPANION_SUMMON_RESULT_REMOVED_FOR_SUBZONE
+* COMPANION_SUMMON_RESULT_REMOVED_FOR_VANITY_PET
+* COMPANION_SUMMON_RESULT_REMOVED_FOR_WORLD_BOSS
+* COMPANION_SUMMON_RESULT_REMOVED_FOR_WORLD_EVENT
+* COMPANION_SUMMON_RESULT_SPAWN_FAILED
+* COMPANION_SUMMON_RESULT_SUMMON_AUTO_REQUESTED
+* COMPANION_SUMMON_RESULT_SUMMON_FAILED
+* COMPANION_SUMMON_RESULT_SUMMON_FAILED_LOW_RAPPORT
+* COMPANION_SUMMON_RESULT_SUMMON_REQUESTED
 
 
 h5. ConsoleActivityType
@@ -2924,6 +2943,13 @@ h5. ChapterUpgradeSource
 * CHAPTER_UPGRADE_SOURCE_PREGAME
 
 
+h5. CollectibleAssociatedQuestState
+* COLLECTIBLE_ASSOCIATED_QUEST_STATE_ACCEPTED
+* COLLECTIBLE_ASSOCIATED_QUEST_STATE_COMPLETED
+* COLLECTIBLE_ASSOCIATED_QUEST_STATE_INACTIVE
+* COLLECTIBLE_ASSOCIATED_QUEST_STATE_NO_QUEST
+
+
 h5. CollectibleCategorySpecialization
 * COLLECTIBLE_CATEGORY_SPECIALIZATION_DLC
 * COLLECTIBLE_CATEGORY_SPECIALIZATION_HOUSING
@@ -2994,6 +3020,7 @@ h5. CollectibleUsageBlockReason
 * COLLECTIBLE_USAGE_BLOCK_REASON_COMPANION_MENU_REQUIRED
 * COLLECTIBLE_USAGE_BLOCK_REASON_DEAD
 * COLLECTIBLE_USAGE_BLOCK_REASON_DUELING
+* COLLECTIBLE_USAGE_BLOCK_REASON_GROUP_FULL
 * COLLECTIBLE_USAGE_BLOCK_REASON_HAS_PENDING_COMPANION
 * COLLECTIBLE_USAGE_BLOCK_REASON_INVALID_ALLIANCE
 * COLLECTIBLE_USAGE_BLOCK_REASON_INVALID_CLASS
@@ -3008,8 +3035,12 @@ h5. CollectibleUsageBlockReason
 * COLLECTIBLE_USAGE_BLOCK_REASON_ON_COOLDOWN
 * COLLECTIBLE_USAGE_BLOCK_REASON_ON_MOUNT
 * COLLECTIBLE_USAGE_BLOCK_REASON_PLACED_IN_HOUSE
+* COLLECTIBLE_USAGE_BLOCK_REASON_QUEST_FOLLOWER
 * COLLECTIBLE_USAGE_BLOCK_REASON_TARGET_REQUIRED
+* COLLECTIBLE_USAGE_BLOCK_REASON_TEMPORARILY_DISABLED
 * COLLECTIBLE_USAGE_BLOCK_REASON_UNUSABLE_BY_COMPANION
+* COLLECTIBLE_USAGE_BLOCK_REASON_WORLD_BOSS
+* COLLECTIBLE_USAGE_BLOCK_REASON_WORLD_EVENT
 
 
 h5. SpecializedCollectibleType
@@ -3345,6 +3376,7 @@ h5. CurrencyChangeReason
 * CURRENCY_CHANGE_REASON_PICKPOCKET
 * CURRENCY_CHANGE_REASON_PLAYER_INIT
 * CURRENCY_CHANGE_REASON_PURCHASED_WITH_CROWNS
+* CURRENCY_CHANGE_REASON_PURCHASED_WITH_ENDEAVOR_SEALS
 * CURRENCY_CHANGE_REASON_PURCHASED_WITH_GEMS
 * CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER
 * CURRENCY_CHANGE_REASON_PVP_RESURRECT
@@ -5207,13 +5239,13 @@ h5. TraitBonus
 * TRAIT_BONUS_BLOODTHIRSTY
 * TRAIT_BONUS_BOLSTERED
 * TRAIT_BONUS_CHARGED
+* TRAIT_BONUS_DECISIVE
 * TRAIT_BONUS_POWERED
 * TRAIT_BONUS_PROLIFIC
 * TRAIT_BONUS_QUICKENED
 * TRAIT_BONUS_STURDY
 * TRAIT_BONUS_SWIFT
 * TRAIT_BONUS_TRAINING_XP
-* TRAIT_BONUS_WEIGHTED
 * TRAIT_BONUS_WELL_FITTED
 
 
@@ -7699,6 +7731,7 @@ h5. ProgressReason
 * PROGRESS_REASON_DUNGEON_CHALLENGE
 * PROGRESS_REASON_EVENT
 * PROGRESS_REASON_FINESSE
+* PROGRESS_REASON_GEYSER_COMPLETED
 * PROGRESS_REASON_GRANT_REPUTATION
 * PROGRESS_REASON_GUILD_REP
 * PROGRESS_REASON_HARROWSTORM_COMPLETED
@@ -11359,6 +11392,9 @@ h2. Game API
 * GetActionSlotEffectTimeRemaining(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
 ** _Returns:_ *integer* _timeRemainingMilliseconds_
 
+* GetActionSlotEffectStackCount(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+** _Returns:_ *integer* _stackCount_
+
 * CanAbilityBeUsedFromHotbar(*integer* _abilityId_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
 ** _Returns:_ *bool* _canBeUsed_
 
@@ -11489,6 +11525,9 @@ h2. Game API
 
 * GetAbilityBuffType(*integer* _abilityId_)
 ** _Returns:_ *[BuffType|#BuffType]* _buffType_
+
+* ShouldAbilityShowAsUsableWithDuration(*integer* _abilityId_)
+** _Returns:_ *bool* _showAsUsable_
 
 * IsBlockActive()
 ** _Returns:_ *bool* _active_
@@ -11655,6 +11694,12 @@ h2. Game API
 
 * GetJournalQuestZoneStoryZoneId(*luaindex* _journalQuestIndex_)
 ** _Returns:_ *integer* _zoneId_
+
+* GetQuestZoneId(*integer* _questId_)
+** _Returns:_ *integer* _zoneId_
+
+* GetQuestName(*integer* _questId_)
+** _Returns:_ *string* _name_
 
 * GetQuestConditionItemInfo(*luaindex* _journalQuestIndex_, *luaindex* _stepIndex_, *luaindex* _conditionIndex_)
 ** _Returns:_ *integer* _itemId_, *integer* _materialItemId_, *[TradeskillType|#TradeskillType]* _craftingType_, *[ItemQuality|#ItemQuality]* _itemQuality_
@@ -14741,6 +14786,9 @@ h2. Game API
 * GetChampionSkillPosition(*integer* _championSkillId_)
 ** _Returns:_ *number* _normalizedX_, *number* _normalizedY_
 
+* GetChampionClusterRootOffset(*integer* _championSkillId_)
+** _Returns:_ *number* _normalizedOffsetX_, *number* _normalizedOffsetY_
+
 * GetChampionSkillName(*integer* _championSkillId_)
 ** _Returns:_ *string* _skillName_
 
@@ -16217,14 +16265,14 @@ h2. Game API
 * GetNumCollectiblesInCollectibleCategory(*luaindex* _topLevelIndex_, *luaindex:nilable* _subCategoryIndex_)
 ** _Returns:_ *integer* _numCollectibles_
 
-* IsCollectibleAvailableToActorCategory(*integer* _collectibleId_, *[GameplayActorCategory|#GameplayActorCategory]* _actorCategory_)
-** _Returns:_ *bool* _isCollectibleAvailable_
-
 * HasActiveCompanion()
 ** _Returns:_ *bool* _hasActiveCompanion_
 
 * HasPendingCompanion()
 ** _Returns:_ *bool* _hasPendingCompanion_
+
+* HasBlockedCompanion()
+** _Returns:_ *bool* _hasBlockedCompanion_
 
 * GetActiveCompanionDefId()
 ** _Returns:_ *integer* _activeCompanionDefId_
@@ -16234,6 +16282,9 @@ h2. Game API
 
 * GetCompanionCollectibleId(*integer* _companionId_)
 ** _Returns:_ *integer* _collectibleId_
+
+* GetCompanionIntroQuestId(*integer* _companionId_)
+** _Returns:_ *integer* _questId_
 
 * GetCompanionName(*integer* _companionId_)
 ** _Returns:_ *string* _name_
@@ -16262,7 +16313,13 @@ h2. Game API
 * GetCompanionNumSlotsUnlockedForLevel(*integer* _companionLevel_)
 ** _Returns:_ *integer* _numSlots_
 
+* IsTimedActivitySystemAvailable()
+** _Returns:_ *bool* _available_
+
 * GetNumTimedActivities()
+** _Returns:_ *integer* _numTimedActivities_
+
+* GetNumTimedActivitiesCompleted(*[TimedActivityType|#TimedActivityType]:nilable* _activityType_)
 ** _Returns:_ *integer* _numTimedActivities_
 
 * GetTimedActivityTypeLimit(*[TimedActivityType|#TimedActivityType]* _activityType_)
@@ -17286,6 +17343,9 @@ h2. Game API
 * GetCollectibleIdFromLink(*string* _link_)
 ** _Returns:_ *integer:nilable* _collectibleId_
 
+* GetCollectibleAssociatedQuestState(*integer* _collectibleId_)
+** _Returns:_ *[CollectibleAssociatedQuestState|#CollectibleAssociatedQuestState]* _questState_
+
 * StartCollectibleSearch(*string* _searchString_)
 
 * GetNumCollectiblesSearchResults()
@@ -17399,6 +17459,9 @@ h2. Game API
 
 * GetCollectibleTagInfo(*integer* _collectibleId_, *luaindex* _tagIndex_)
 ** _Returns:_ *string* _tagDescription_, *[ItemTagCategory|#ItemTagCategory]* _tagCategory_
+
+* IsCollectibleAvailableToActorCategory(*integer* _collectibleId_, *[GameplayActorCategory|#GameplayActorCategory]* _actorCategory_)
+** _Returns:_ *bool* _isCollectibleAvailable_
 
 * UpdateMarketDisplayGroup *private* (*[MarketDisplayGroup|#MarketDisplayGroup]* _displayGroup_)
 
@@ -20641,8 +20704,8 @@ h2. Events
 * EVENT_COMPANION_SKILL_LINE_ADDED (*integer* _skillLineId_)
 * EVENT_COMPANION_SKILL_RANK_UPDATE (*integer* _skillLineId_, *luaindex* _rank_)
 * EVENT_COMPANION_SKILL_XP_UPDATE (*integer* _skillLineId_, *integer* _reason_, *luaindex* _rank_, *integer* _previousXP_, *integer* _currentXP_)
+* EVENT_COMPANION_SUMMON_RESULT (*[CompanionSummonResult|#CompanionSummonResult]* _summonResult_, *integer* _companionId_)
 * EVENT_COMPANION_ULTIMATE_FAILURE (*[CompanionUltimateFailureReason|#CompanionUltimateFailureReason]* _reason_, *string* _companionName_)
-* EVENT_COMPANION_WARNING (*[CompanionWarningType|#CompanionWarningType]* _warningType_, *integer* _companionId_)
 * EVENT_CONFIRM_INTERACT (*string* _dialogTitle_, *string* _dialogBody_, *string* _acceptText_, *string* _cancelText_)
 * EVENT_CONVERSATION_FAILED_INVENTORY_FULL
 * EVENT_CONVERSATION_FAILED_UNIQUE_ITEM
@@ -20947,6 +21010,7 @@ h2. Events
 * EVENT_OPEN_GUILD_BANK
 * EVENT_OPEN_HOUSE_STORE
 * EVENT_OPEN_STORE
+* EVENT_OPEN_TIMED_ACTIVITIES
 * EVENT_OPEN_TRADING_HOUSE
 * EVENT_OPEN_UI_SYSTEM (*[UISystem|#UISystem]* _system_, *integer* _param1_)
 * EVENT_OUTFITS_INITIALIZED
@@ -21097,7 +21161,9 @@ h2. Events
 * EVENT_TARGET_CHANGED (*string* _unitTag_)
 * EVENT_TELVAR_STONE_UPDATE (*integer* _newTelvarStones_, *integer* _oldTelvarStones_, *[CurrencyChangeReason|#CurrencyChangeReason]* _reason_, *integer* _reasonSupplementaryInfo_)
 * EVENT_TIMED_ACTIVITIES_UPDATED
-* EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED (*luaindex* _index_, *integer* _progress_, *bool* _complete_)
+* EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED (*luaindex* _index_, *integer* _previousProgress_, *integer* _currentProgress_, *bool* _complete_)
+* EVENT_TIMED_ACTIVITY_SYSTEM_STATUS_UPDATED
+* EVENT_TIMED_ACTIVITY_TYPE_PROGRESS_UPDATED (*[TimedActivityType|#TimedActivityType]* _timedActivityType_, *integer* _previousNumCompleted_, *integer* _currentNumCompleted_, *bool* _complete_)
 * EVENT_TITLE_UPDATE (*string* _unitTag_)
 * EVENT_TOGGLE_HELP
 * EVENT_TRACKED_ZONE_STORY_ACTIVITY_COMPLETED (*integer* _zoneId_, *[ZoneCompletionType|#ZoneCompletionType]* _zoneCompletionType_, *integer* _activityId_)

@@ -311,9 +311,9 @@ local g_sharedPregameStates =
             -- TODO: Determine if these videos need localization or subtitles...
             SetVideoCancelAllOnCancelAny(false)
 
-            PlayVideo("Video/Bethesda_logo.bik", QUEUE_VIDEO, skipMode)
+            PlayVideo("Video/Bethesda_logo.bk2", QUEUE_VIDEO, skipMode)
 
-            ZO_PlayVideoAndAdvance(PlayVideo, "Video/ZOS_logo.bik", QUEUE_VIDEO, skipMode)
+            ZO_PlayVideoAndAdvance(PlayVideo, "Video/ZOS_logo.bk2", QUEUE_VIDEO, skipMode)
         end,
 
         GetStateTransitionData = function()
@@ -369,7 +369,7 @@ local g_sharedPregameStates =
 
         OnEnter = function()
             local skipMode = ZO_Pregame_CanSkipVideos() and VIDEO_SKIP_MODE_ALLOW_SKIP or VIDEO_SKIP_MODE_NO_SKIP
-            ZO_PlayVideoAndAdvance(PlayVideo, "Video/jp_DMM_logo.bik", QUEUE_VIDEO, skipMode)
+            ZO_PlayVideoAndAdvance(PlayVideo, "Video/jp_DMM_logo.bk2", QUEUE_VIDEO, skipMode)
         end,
 
         GetStateTransitionData = function()
