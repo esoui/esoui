@@ -819,6 +819,8 @@ function ZO_GamepadTradeWindow:OnStateChanged(oldState, newState)
         self:SetCurrentList(self.lists[TRADE_ME])
         GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:ClearFocus()
         self:BeginTrade()
+    elseif newState == SCENE_HIDING then
+        self:OnHiding()
     elseif newState == SCENE_HIDDEN then
         self.goldSlider:Deactivate()
         self.goldSliderControl:SetHidden(true)

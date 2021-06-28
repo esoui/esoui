@@ -119,6 +119,14 @@ function ZO_Gamepad_ParametricList_BagsSearch_Screen:SetSearchText()
     end
 end
 
+function ZO_Gamepad_ParametricList_BagsSearch_Screen:OnShow()
+    self:ActivateTextSearch()
+end
+
+function ZO_Gamepad_ParametricList_BagsSearch_Screen:OnHiding()
+    self:DeactivateTextSearch()
+end
+
 function ZO_Gamepad_ParametricList_BagsSearch_Screen:MarkDirtyByBagId(bagId, shouldSuppressSearchUpdate)
     TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, shouldSuppressSearchUpdate)
 end

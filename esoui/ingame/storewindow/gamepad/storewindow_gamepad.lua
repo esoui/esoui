@@ -231,6 +231,7 @@ function ZO_GamepadStoreManager:OnStateChanged(oldState, newState)
         self.deferredStartingMode = nil
         ZO_GamepadGenericHeader_Activate(self.header)
     elseif newState == SCENE_HIDING then
+        self:OnHiding()
         self.spinner:DetachFromListEntry()
         GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
     elseif newState == SCENE_HIDDEN then

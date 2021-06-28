@@ -791,8 +791,17 @@ function ZO_Market_Keyboard:GetMarketProductPresentations(categoryIndex, subcate
                 return
             end
 
-            local effectiveSubcategoryIndex = subcategoryIndex or "root"
-            if not self.searchResults[categoryIndex][effectiveSubcategoryIndex][index] then
+            local skipMarketProduct = true
+            local categorySearchResults = self.searchResults[categoryIndex]
+            if categorySearchResults then
+                local effectiveSubcategoryIndex = subcategoryIndex or "root"
+                local subcategorySearchResults = categorySearchResults[effectiveSubcategoryIndex]
+                if subcategorySearchResults and subcategorySearchResults[index] then
+                    skipMarketProduct = false
+                end
+            end
+
+            if skipMarketProduct then
                 index = index - 1
                 return self:GetMarketProductPresentations(categoryIndex, subcategoryIndex, index, marketProductPresentations)
             end

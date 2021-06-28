@@ -165,6 +165,7 @@ function ZO_GamepadInventory:OnStateChanged(oldState, newState)
         self:Deactivate()
         self:DeactivateHeader()
         self:ClearActiveKeybinds()
+        self:OnHiding()
 
         --clear the currentListType so we can refresh it when we re-enter
         self:SwitchActiveList(nil)

@@ -152,6 +152,7 @@ function ZO_CompanionEquipment_Gamepad:OnStateChanged(oldState, newState)
         self:Deactivate()
         self:DeactivateHeader()
         self:ClearActiveKeybinds()
+        self:OnHiding()
     elseif newState == SCENE_HIDDEN then
         --clear the currentListType so we can refresh it when we re-enter
         self:SwitchActiveList(nil)
@@ -205,15 +206,6 @@ do
     end
 end
 
-function ZO_CompanionEquipment_Gamepad:OnInventoryShown()
-    --[[ TODO: Determine what tutorials are needed for companion equipment
-    TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED)
-
-    if AreAnyItemsStolen(INVENTORY_BACKPACK) then
-        TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_STOLEN_ITEMS_PRESENT)
-    end]]
-end
-
 function ZO_CompanionEquipment_Gamepad:OnUpdatedSearchResults()
     self:RefreshCategoryList()
     self:RefreshItemList()
@@ -243,8 +235,6 @@ function ZO_CompanionEquipment_Gamepad:SwitchActiveList(listDescriptor, selectDe
     -- we'll rely on the scene showing to set the list
     if self.scene:IsShowing() then
         if listDescriptor == INVENTORY_CATEGORY_LIST then
-            self:OnInventoryShown()
-
             self:SetActiveKeybinds(self.categoryListKeybindStripDescriptor)
 
             self:RefreshCategoryList(selectDefaultEntry)

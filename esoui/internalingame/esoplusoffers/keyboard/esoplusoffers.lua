@@ -75,7 +75,8 @@ function ZO_EsoPlusOffers_Keyboard:AddTopLevelCategories()
     local displayGroup = self:GetDisplayGroup()
     local numMarketCategories = GetNumMarketProductCategories(displayGroup)
     for categoryIndex = 1, numMarketCategories do
-        if self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.marketProductFilterTypes) then
+        local canDisplayCategory = noActiveSearch or self.searchResults[categoryIndex]
+        if canDisplayCategory and self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.marketProductFilterTypes) then
             local containsNewMarketProducts = self:DoesCategoryOrSubcategoriesContainFilteredProducts(displayGroup, categoryIndex, ZO_NO_MARKET_SUBCATEGORY, self.newMarketProductFilterTypes)
             hasAnyNewEsoPlusProducts = hasAnyNewEsoPlusProducts or containsNewMarketProducts
             local categoryInfo =
@@ -216,9 +217,7 @@ end
 function ZO_EsoPlusOffers_Keyboard:GetCategoryMarketProductPresentations(categoryIndex, marketProductPresentations)
     local displayGroup = self:GetDisplayGroup()
     local numSubcategories, numMarketProducts = select(2, GetMarketProductCategoryInfo(displayGroup, categoryIndex))
-    if not self:HasValidSearchString() or self.searchResults[categoryIndex]["root"] then
-        self:GetMarketProductPresentations(categoryIndex, ZO_NO_MARKET_SUBCATEGORY, numMarketProducts, marketProductPresentations)
-    end
+    self:GetMarketProductPresentations(categoryIndex, ZO_NO_MARKET_SUBCATEGORY, numMarketProducts, marketProductPresentations)
 
     for subcategoryIndex = 1, numSubcategories do
         if self:DoesCategoryOrSubcategoriesContainEsoPlusMarketProducts(categoryIndex, subcategoryIndex) then

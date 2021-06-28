@@ -105,6 +105,7 @@ end
 function ZO_MailSend_Gamepad:OnHidden()
     self:Reset()
     self:DisconnectShownEvent()
+    MAIL_MANAGER_GAMEPAD:DeactivateTextSearch()
 end
 
 function ZO_MailSend_Gamepad:PerformDeferredInitialization()

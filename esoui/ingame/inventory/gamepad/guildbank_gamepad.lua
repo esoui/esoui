@@ -178,7 +178,15 @@ function ZO_GuildBank_Gamepad:Initialize(control)
         end
     end
 
+    local function OnCloseGuildBank()
+        if IsInGamepadPreferredMode() then
+            self:DeactivateTextSearch()
+            SCENE_MANAGER:Hide(GAMEPAD_GUILD_BANK_SCENE_NAME)
+        end
+    end
+
     self.control:RegisterForEvent(EVENT_OPEN_GUILD_BANK, OnOpenGuildBank)
+    self.control:RegisterForEvent(EVENT_CLOSE_GUILD_BANK, OnCloseGuildBank)
 
     self:SetTextSearchContext("guildBankTextSearch")
 end
@@ -263,15 +271,6 @@ function ZO_GuildBank_Gamepad:SetWithdrawLoadingControlShown(shouldShowLoading)
 end
 
 function ZO_GuildBank_Gamepad:CreateEventTable()
-    local function OnCloseGuildBank()
-        self:DeactivateTextSearch()
-        SCENE_MANAGER:Hide(GAMEPAD_GUILD_BANK_SCENE_NAME)
-
-        self.loadingGuildBank = false
-        self:SetWithdrawLoadingControlShown(false)
-        self:ClearAllGuildBankItems()
-    end
-
     local function OnGuildBankOpenError()
         if self.loadingGuildBank then
             self.loadingGuildBank = false
@@ -378,7 +377,6 @@ function ZO_GuildBank_Gamepad:CreateEventTable()
 
     self.eventTable =
     {
-        [EVENT_CLOSE_GUILD_BANK] = OnCloseGuildBank,
         [EVENT_GUILD_BANK_OPEN_ERROR] = OnGuildBankOpenError,
 
         [EVENT_GUILD_BANK_SELECTED] = OnGuildBankSelected,
