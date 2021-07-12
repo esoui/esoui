@@ -222,15 +222,17 @@ function ZO_QuickslotManager:Initialize(container)
     UpdateAllQuickSlots()
 
     local function HandleInventoryChanged()
-        for slotNum, quickslot in pairs(self.quickSlots) do
-            local slotType = GetSlotType(slotNum)
-            if slotType == ACTION_TYPE_ITEM then
-                local itemCount = GetSlotItemCount(slotNum)
-                self:SetupQuickslotCount(quickslot, itemCount)
+        if QUICKSLOT_FRAGMENT:IsShowing() then
+            for slotNum, quickslot in pairs(self.quickSlots) do
+                local slotType = GetSlotType(slotNum)
+                if slotType == ACTION_TYPE_ITEM then
+                    local itemCount = GetSlotItemCount(slotNum)
+                    self:SetupQuickslotCount(quickslot, itemCount)
+                end
             end
-        end
 
-        RefreshQuickslotWindow()
+            RefreshQuickslotWindow()
+        end
     end
 
     local function RefreshSlotLocked(slotIndex, locked)

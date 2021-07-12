@@ -156,19 +156,21 @@ function ZO_GamepadTradingHouse:UpdateSearchText()
 end
 
 function ZO_GamepadTradingHouse:ActivateTextSearch()
-    self:UpdateSearchText()
+    if not TEXT_SEARCH_MANAGER:IsActiveTextSearch(self.searchContext) then
+        self:UpdateSearchText()
 
-    local function OnTextSearchResults()
-        local list = self.currentListObject
-        if list then
-            list:UpdateList()
+        local function OnTextSearchResults()
+            local list = self.currentListObject
+            if list then
+                list:UpdateList()
+            end
         end
-    end
-    self.onTextSearchResults = OnTextSearchResults
+        self.onTextSearchResults = OnTextSearchResults
 
-    TEXT_SEARCH_MANAGER:ActivateTextSearch("guildTraderTextSearch")
-    TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", OnTextSearchResults)
-    self:SetTextSearchEntryHidden(false)
+        TEXT_SEARCH_MANAGER:ActivateTextSearch("guildTraderTextSearch")
+        TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", OnTextSearchResults)
+        self:SetTextSearchEntryHidden(false)
+    end
 end
 
 function ZO_GamepadTradingHouse:DeactivateTextSearch()

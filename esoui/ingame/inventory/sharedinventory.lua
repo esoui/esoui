@@ -74,7 +74,7 @@ function ZO_SharedInventoryManager:Initialize()
         self.refresh:UpdateRefreshGroups()
     end
 
-    local function OnInventorySlotUpdated(eventCode, bagId, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange, repairedByCharacterName, repairedByDisplayName, isLastUpdateForMessage)
+    local function OnInventorySlotUpdated(eventCode, bagId, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChangeAmount, repairedByCharacterName, repairedByDisplayName, isLastUpdateForMessage)
         if updateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then
             local newCondition = GetItemCondition(bagId, slotIndex)
             if newCondition == 100 then
@@ -85,10 +85,6 @@ function ZO_SharedInventoryManager:Initialize()
         local previousSlotData = self:GetPreviousSlotDataInternal(bagId, slotIndex)
 
         self.refresh:RefreshSingle("inventory", bagId, slotIndex, isNewItem, itemSoundCategory, updateReason, isLastUpdateForMessage)
-
-        if isLastUpdateForMessage then
-            self.refresh:UpdateRefreshGroups()
-        end
 
         if bagId == BAG_BACKPACK or bagId == BAG_VIRTUAL then
             if isNewItem and GetCraftingInteractionType() == CRAFTING_TYPE_INVALID and not SYSTEMS:IsShowing("crownCrate") then

@@ -768,30 +768,35 @@ function ZO_InventoryManager:InitializeHeaderSort(inventoryType, inventory, head
 end
 
 function ZO_InventoryManager:SetContextForInventories(context, inventoryTypeList)
-    for _, inventoryType in ipairs(inventoryTypeList) do
-        self.inventories[inventoryType].currentContext = context
-    end
+    if not TEXT_SEARCH_MANAGER:IsActiveTextSearch(context) then
+        TEXT_SEARCH_MANAGER:ActivateTextSearch(context)
 
-    if context then
-        local SUPPRESS_TEXT_CHANGED_CALLBACK = true
-        local function OnListTextFilterComplete()
-            for _, inventoryType in ipairs(inventoryTypeList) do
-                if self.inventories[inventoryType].searchBox then
-                    self.inventories[inventoryType].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText(context), SUPPRESS_TEXT_CHANGED_CALLBACK)
-                end
-                self:UpdateList(inventoryType)
-            end
+        for _, inventoryType in ipairs(inventoryTypeList) do
+            self.inventories[inventoryType].currentContext = context
         end
-        self.onListTextFilterCompleteCallback = OnListTextFilterComplete
 
-        TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+        if context then
+            local SUPPRESS_TEXT_CHANGED_CALLBACK = true
+            local function OnListTextFilterComplete()
+                for _, inventoryType in ipairs(inventoryTypeList) do
+                    if self.inventories[inventoryType].searchBox then
+                        self.inventories[inventoryType].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText(context), SUPPRESS_TEXT_CHANGED_CALLBACK)
+                    end
+                    self:UpdateList(inventoryType)
+                end
+            end
+            self.onListTextFilterCompleteCallback = OnListTextFilterComplete
+
+            TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+        else
+            TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+        end
     else
         TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
     end
 end
 
 function ZO_InventoryManager:ActivateInventorySearch()
-    TEXT_SEARCH_MANAGER:ActivateTextSearch("playerInventoryTextSearch")
     self:SetContextForInventories("playerInventoryTextSearch", { INVENTORY_BACKPACK, INVENTORY_CRAFT_BAG })
 
     local inventorySearchText = TEXT_SEARCH_MANAGER:GetSearchText("playerInventoryTextSearch")
@@ -806,7 +811,6 @@ function ZO_InventoryManager:DeactivateInventorySearch()
 end
 
 function ZO_InventoryManager:ActivateBankSearch()
-    TEXT_SEARCH_MANAGER:ActivateTextSearch("playerBankTextSearch")
     self:SetContextForInventories("playerBankTextSearch", { INVENTORY_BACKPACK, INVENTORY_BANK })
 
     local bankSearchText = TEXT_SEARCH_MANAGER:GetSearchText("playerBankTextSearch")
@@ -841,7 +845,6 @@ end
 function ZO_InventoryManager:ActivateGuildBankSearch()
     -- Reset the search string to force a search again since the guild bank slots get rebuild each show.
     TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, BAG_GUILDBANK)
-    TEXT_SEARCH_MANAGER:ActivateTextSearch("guildBankTextSearch")
     self:SetContextForInventories("guildBankTextSearch", { INVENTORY_BACKPACK, INVENTORY_GUILD_BANK })
 
     local guildBankSearchText = TEXT_SEARCH_MANAGER:GetSearchText("guildBankTextSearch")

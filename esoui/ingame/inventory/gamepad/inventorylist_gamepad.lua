@@ -87,27 +87,29 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
     end
 
     local function OnSingleSlotInventoryUpdate(bagId, slotIndex)
-        for _, currentInventoryType in ipairs(self.inventoryTypes) do
-            if bagId == currentInventoryType then
-                local bag = self.dataByBagAndSlotIndex[bagId]
-                --we should always have a bag table to match all entries in self.inventoryTypes but this will catch any issue with that
-                internalassert(bag ~= nil)
-                if bag then
-                    local entry = bag[slotIndex]
-                    if entry then
-                        local itemData = SHARED_INVENTORY:GenerateSingleSlotData(currentInventoryType, slotIndex)
-                        if itemData then
-                            itemData.bestGamepadItemCategoryName = ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
-                            self:SetupItemEntry(entry, itemData)
-                            self.list:RefreshVisible()
-                        else -- The item was removed.
+        if not self.control:IsHidden() then
+            for _, currentInventoryType in ipairs(self.inventoryTypes) do
+                if bagId == currentInventoryType then
+                    local bag = self.dataByBagAndSlotIndex[bagId]
+                    --we should always have a bag table to match all entries in self.inventoryTypes but this will catch any issue with that
+                    internalassert(bag ~= nil)
+                    if bag then
+                        local entry = bag[slotIndex]
+                        if entry then
+                            local itemData = SHARED_INVENTORY:GenerateSingleSlotData(currentInventoryType, slotIndex)
+                            if itemData then
+                                itemData.bestGamepadItemCategoryName = ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
+                                self:SetupItemEntry(entry, itemData)
+                                self.list:RefreshVisible()
+                            else -- The item was removed.
+                                self:RefreshList()
+                            end
+                        else -- The item is new.
                             self:RefreshList()
                         end
-                    else -- The item is new.
-                        self:RefreshList()
+                        -- don't loop over any more inventoryTypes, we've handled the slot update
+                        break
                     end
-                    -- don't loop over any more inventoryTypes, we've handled the slot update
-                    break
                 end
             end
         end

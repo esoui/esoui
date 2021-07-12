@@ -210,10 +210,8 @@ end
 
 function ZO_CompanionEquipment_Keyboard:OnInventoryItemAdded(inventoryType, bagId, slotIndex, newSlotData, suppressItemAlert)
     -- play a brief flash animation on all the filter tabs that match this item's filterTypes
-    if newSlotData.brandNew then
-        if COMPANION_EQUIPMENT_KEYBOARD_FRAGMENT:IsShowing() then
-            self:PlayItemAddedAlert(newSlotData)
-        end
+    if COMPANION_EQUIPMENT_KEYBOARD_FRAGMENT:IsShowing() and newSlotData.brandNew then
+        self:PlayItemAddedAlert(newSlotData)
     end
 end
 

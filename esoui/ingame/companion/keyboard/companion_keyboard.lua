@@ -28,7 +28,9 @@ function ZO_Companion_Keyboard:Initialize(control)
     control:RegisterForEvent(EVENT_OPEN_COMPANION_MENU, OnOpenCompanionMenu)
 
     local function UpdateSceneGroupButtons()
-        self:UpdateSceneGroupButtons()
+        if COMPANION_KEYBOARD_FRAGMENT:IsShowing() then
+            self:UpdateSceneGroupButtons()
+        end
     end
     COMPANION_SKILLS_DATA_MANAGER:RegisterCallback("SkillLineNewStatusChanged", UpdateSceneGroupButtons)
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotNewStatusChanged", UpdateSceneGroupButtons)

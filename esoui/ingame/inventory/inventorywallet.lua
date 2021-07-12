@@ -101,7 +101,9 @@ function InventoryWalletManager:RegisterEvents()
     ZO_InventoryWallet:RegisterForEvent(EVENT_CURRENCY_CAPS_CHANGED, RefreshCurrencies)
 
     local function UpdateFreeSlots()
-         self:UpdateFreeSlots()
+        if WALLET_FRAGMENT:IsShowing() then
+            self:UpdateFreeSlots()
+        end
     end
 
     ZO_InventoryWallet:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, UpdateFreeSlots)

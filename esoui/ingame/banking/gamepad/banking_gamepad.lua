@@ -208,7 +208,9 @@ function ZO_GamepadBanking:OnDeferredInitialization()
 end
 
 function ZO_GamepadBanking:OnInventorySlotUpdated(bagId, slotIndex)
-    self:MarkDirtyByBagId(bagId)
+    if self.scene:IsShowing() then
+        self:MarkDirtyByBagId(bagId)
+    end
 end
 
 function ZO_GamepadBanking:OnSceneShowing()
@@ -643,9 +645,11 @@ function ZO_GamepadBanking:CreateEventTable()
     end
 
     local function OnInventoryUpdate()
-        self:RefreshHeaderData()
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
-        self:LayoutBankingEntryTooltip(self:GetTargetData())
+        if self.scene:IsShowing() then
+            self:RefreshHeaderData()
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
+            self:LayoutBankingEntryTooltip(self:GetTargetData())
+        end
     end
 
     self.eventTable =

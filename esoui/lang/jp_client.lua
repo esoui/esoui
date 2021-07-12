@@ -959,7 +959,7 @@ SafeAddString(SI_CANNOT_CRAFT_WHILE_WEREWOLF, "その手では不器用すぎる
 SafeAddString(SI_CANNOT_CROUCH_WHILE_CARRYING_ARTIFACT, "<<1>>に隠密を阻止された。", 0)
 SafeAddString(SI_CANNOT_DO_THAT_WHILE_DEAD, "死亡中は行えない。", 0)
 SafeAddString(SI_CANNOT_DO_THAT_WHILE_IN_COMBAT, "戦闘中は行えない。", 0)
-SafeAddString(SI_CANNOT_DO_THAT_WHILE_PASSENGER, "グループ騎乗動物に載っている間は行えない。", 0)
+SafeAddString(SI_CANNOT_DO_THAT_WHILE_PASSENGER, "グループ騎乗動物に乗っている間は行えない。", 0)
 SafeAddString(SI_CANNOT_DO_THAT_WHILE_REVIVING, "蘇生中は行えない。", 0)
 SafeAddString(SI_CANNOT_DO_THAT_WHILE_SWIMMING, "水泳中は行えない。", 0)
 SafeAddString(SI_CANNOT_DO_THAT_WHILE_WEREWOLF, "ウェアウルフの姿では行えない。", 0)

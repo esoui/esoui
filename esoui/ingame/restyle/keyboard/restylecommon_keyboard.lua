@@ -536,8 +536,6 @@ end
 function ZO_RestyleCommon_Keyboard:OnShowing()
     self:RegisterForEvents()
     
-    ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:BeginRestyling()
-
     self:InitializeModeData()
 
     self:AddKeybinds()

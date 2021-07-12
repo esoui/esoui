@@ -24,7 +24,9 @@ function ZO_CompanionCharacter_Keyboard:Initialize(control)
     self:InitializeNavigationTree()
 
     local function RefreshCategoryStatusIcons()
-        self:RefreshCategoryStatusIcons()
+        if self.scene:IsShowing() then
+            self:RefreshCategoryStatusIcons()
+        end
     end
     SHARED_INVENTORY:RegisterCallback("SlotAdded", RefreshCategoryStatusIcons)
     SHARED_INVENTORY:RegisterCallback("SlotRemoved", RefreshCategoryStatusIcons)

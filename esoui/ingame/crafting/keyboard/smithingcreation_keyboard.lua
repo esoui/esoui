@@ -179,7 +179,9 @@ function ZO_SmithingCreation:InitializeFilters()
     end
 
     local function HandleInventoryChanged()
-        self:UpdateUniversalStyleItemCheckBox()
+        if not self.control:IsHidden() then
+            self:UpdateUniversalStyleItemCheckBox()
+        end
     end
 
     ZO_CheckButton_SetToggleFunction(self.haveMaterialsCheckBox, OnFilterChanged)

@@ -427,7 +427,7 @@ function ZO_SharedFurnitureManager:OnFullInventoryUpdate(bagId)
 end
 
 function ZO_SharedFurnitureManager:OnSingleSlotInventoryUpdate(bagId, slotIndex, previousSlotData)
-    if ZO_PLACEABLE_FURNITURE_BAGS[bagId] then
+    if GetCurrentZoneHouseId() ~= 0 and ZO_PLACEABLE_FURNITURE_BAGS[bagId] then
         local slotData = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
         if slotData and slotData.isPlaceableFurniture then
             self:CreateOrUpdateItemDataEntry(bagId, slotIndex)

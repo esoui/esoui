@@ -266,8 +266,6 @@ end
 
 function ZO_RestyleSheetWindow_Keyboard:OnShowing()
     TUTORIAL_SYSTEM:RegisterTriggerLayoutInfo(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN, self.control, ZO_RESTYLE_SHEET_WINDOW_FRAGMENT, self.outfitSelectorTutorialAnchor)
-
-    self:BeginRestyling()
 end
 
 function ZO_RestyleSheetWindow_Keyboard:BeginRestyling()

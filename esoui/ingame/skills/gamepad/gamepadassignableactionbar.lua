@@ -550,6 +550,10 @@ function ZO_GamepadAssignableActionBar_QuickMenu_Base:IsShowing()
     return self.fragment:IsShowing()
 end
 
+function ZO_GamepadAssignableActionBar_QuickMenu_Base:RefreshVisible()
+    self.list:RefreshVisible()
+end
+
 function ZO_GamepadAssignableActionBar_QuickMenu_Base:RefreshList()
     self.list:Clear()
 

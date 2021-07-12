@@ -285,10 +285,12 @@ function ZO_GuildBank_Gamepad:CreateEventTable()
     end
 
     local function OnInventoryUpdated(eventId, bagId, slotIndex, _, itemSoundCategory)
-        self:MarkDirtyByBagId(bagId)
-        self:RefreshHeaderData()
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindStripDescriptor)
-        self:LayoutBankingEntryTooltip(self:GetTargetData())
+        if self.scene:IsShowing() then
+            self:MarkDirtyByBagId(bagId)
+            self:RefreshHeaderData()
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindStripDescriptor)
+            self:LayoutBankingEntryTooltip(self:GetTargetData())
+        end
     end
 
     local function OnGuildBankSelected()
@@ -420,9 +422,11 @@ function ZO_GuildBank_Gamepad:OnDeferredInitialization()
     ZO_SharedInventory_SelectAccessibleGuildBank()
 
     SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", function()
-        self:MarkDirtyByBagId(BAG_BACKPACK)
-        self:MarkDirtyByBagId(BAG_GUILDBANK)
-        self:RefreshGuildBank()
+        if self.scene:IsShowing() then
+            self:MarkDirtyByBagId(BAG_BACKPACK)
+            self:MarkDirtyByBagId(BAG_GUILDBANK)
+            self:RefreshGuildBank()
+        end
     end)
 
     if self.loadingGuildBank then

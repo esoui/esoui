@@ -92,7 +92,7 @@ function ZO_Gamepad_ParametricList_BagsSearch_Screen:SetTextSearchContext(contex
 end
 
 function ZO_Gamepad_ParametricList_BagsSearch_Screen:ActivateTextSearch()
-    if self.searchContext then
+    if self.searchContext and not TEXT_SEARCH_MANAGER:IsActiveTextSearch(self.searchContext) then
         self:UpdateSearchText()
 
         local function OnTextSearchResults()
