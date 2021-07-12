@@ -85,7 +85,7 @@ function ZO_FriendsList:SetupEntry(control, data, selected)
 end
 
 function ZO_FriendsList:CreateFriendData(friendIndex, displayName, note, status)
-    local hasCharacter, characterName, zone, class, alliance, level, championPoints = GetFriendCharacterInfo(friendIndex)
+    local hasCharacter, characterName, zone, class, alliance, level, championPoints, zoneId, consoleId = GetFriendCharacterInfo(friendIndex)
 
     local heronName
     if IsHeronUI() then
@@ -101,6 +101,7 @@ function ZO_FriendsList:CreateFriendData(friendIndex, displayName, note, status)
         gender = GetGenderFromNameDescriptor(characterName),
         level = level,
         championPoints = championPoints,
+        consoleId = consoleId,
         class = class,
         formattedZone = ZO_CachedStrFormat(SI_ZONE_NAME, zone),
         alliance = alliance,
@@ -116,7 +117,7 @@ function ZO_FriendsList:CreateFriendData(friendIndex, displayName, note, status)
 end
 
 function ZO_FriendsList:UpdateFriendData(data, friendIndex)
-    local hasCharacter, characterName, zone, class, alliance, level, championPoints = GetFriendCharacterInfo(friendIndex)
+    local hasCharacter, characterName, zone, class, alliance, level, championPoints, zoneId, consoleId = GetFriendCharacterInfo(friendIndex)
 
     data.friendIndex = friendIndex
     data.hasCharacter = hasCharacter
@@ -128,6 +129,7 @@ function ZO_FriendsList:UpdateFriendData(data, friendIndex)
     data.formattedAllianceName = ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(alliance))
     data.level = level
     data.championPoints = championPoints
+    data.consoleId = consoleId
 end
 
 function ZO_FriendsList:BuildMasterList()

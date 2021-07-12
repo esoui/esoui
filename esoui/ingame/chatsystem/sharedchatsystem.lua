@@ -136,7 +136,6 @@ function TextEntry:Initialize(system, control, chatEditBufferTop, chatEditBuffer
     end
     self.targetAutoComplete:RegisterCallback(ZO_AutoComplete.ON_ENTRY_SELECTED, OnAutoCompleteEntrySelected)
 
-
     -- The slash command autocomplete is automatically triggered to display all available slash commands/switches
     local NO_INCLUDE_FLAGS = nil
     local NO_EXCLUDE_FLAGS = nil
@@ -319,6 +318,20 @@ function SharedChatContainer:Initialize(control, windowPool, tabPool)
     self.overflowTab.container = self
 
     self.fadeInReferences = 0
+    self.isMinimizingOrMaximizing = false
+end
+
+function SharedChatContainer:IsMinimizingOrMaximizing()
+    return self.isMinimizingOrMaximizing
+end
+
+function SharedChatContainer:SetMinimizingOrMaximizing(isMinimizingOrMaximizing)
+    if self.isMinimizingOrMaximizing ~= isMinimizingOrMaximizing then
+        self.isMinimizingOrMaximizing = isMinimizingOrMaximizing
+        if self.isDragging and self.isMinimizingOrMaximizing then
+            self:StopDraggingTab()
+        end
+    end
 end
 
 function SharedChatContainer:ShowOverflowedTabsDropdown()
@@ -1102,7 +1115,7 @@ end
 
 function SharedChatContainer:StartDraggingTab(index)
     local window = self.windows[index]
-    if not window or window.locked then
+    if not window or window.locked or self:IsMinimizingOrMaximizing() then
         return
     end
 
@@ -1342,6 +1355,7 @@ function SharedChatSystem:Initialize(control, platformSettings)
     self.isAgentChatActive = false
     self:OnAgentChatActiveChanged()
     self.isMinimized = false
+    self.isMinimizingOrMaximizing = false
     self.allowMultipleContainers = false
 
     self.minContainerWidth = 300
@@ -1980,9 +1994,16 @@ ZO_CHAT_BLOCKING_SCENE_NAMES =
     ["gamepad_market_preview"] = true,
 }
 
-function SharedChatSystem:DoesCurrentSceneBlockChat()
+function SharedChatSystem:ShouldTextEntryBeBlocked()
     local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
-    if currentSceneName and ZO_CHAT_BLOCKING_SCENE_NAMES[currentSceneName] then
+    local nextScene = SCENE_MANAGER:GetNextScene()
+    local nextSceneName
+    if nextScene then
+        nextSceneName = nextScene:GetName()
+    end        
+
+    if (currentSceneName and ZO_CHAT_BLOCKING_SCENE_NAMES[currentSceneName]) or
+        (nextSceneName and ZO_CHAT_BLOCKING_SCENE_NAMES[nextSceneName]) then
         return true
     end
 
@@ -1996,7 +2017,7 @@ function SharedChatSystem:StartTextEntry(text, channel, target, dontShowHUDWindo
     end
 
     if IsPlayerActivated() then
-        if self:DoesCurrentSceneBlockChat() then
+        if self:ShouldTextEntryBeBlocked() then
             return
         end
 

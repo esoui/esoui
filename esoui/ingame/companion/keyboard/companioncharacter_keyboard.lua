@@ -7,7 +7,7 @@ ZO_CompanionCharacter_Keyboard = ZO_InitializingObject:Subclass()
 function ZO_CompanionCharacter_Keyboard:Initialize(control)
     self.control = control
 
-    self.scene = ZO_COMPANION_MANAGER:CreateInteractScene("companionCharacterKeyboard")
+    self.scene = ZO_InteractScene:New("companionCharacterKeyboard", SCENE_MANAGER, ZO_COMPANION_MANAGER:GetInteraction())
     self.scene:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:BuildNavigationTree()

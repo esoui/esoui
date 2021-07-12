@@ -108,7 +108,7 @@
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)AccountNameEntry" relativePoint="BOTTOMRIGHT" offsetY="10" />
                         </Label>
 
-                        <Label name="$(parent)CountryLabel" inherits="ZO_LoginMenuEditLabel" text="SI_CREATEACCOUNT_COUNTRY">
+                        <Label name="$(parent)CountryLabel" inherits="ZO_LoginMenuEditLabel" text="SI_CREATEACCOUNT_REGION">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameDescription" relativePoint="BOTTOMLEFT" offsetY="15" />
                         </Label>
 
@@ -117,7 +117,7 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)CountryLabel" relatviePoint="BOTTOMLEFT" offsetY="25" />
 
                             <Controls>
-                                <Label name="$(parent)DefaultText" inherits="ZO_LoginMenuInfoLabel" text="SI_CREATEACCOUNT_SELECT_COUNTRY">
+                                <Label name="$(parent)DefaultText" inherits="ZO_LoginMenuInfoLabel" text="SI_CREATEACCOUNT_SELECT_REGION">
                                     <Anchor point="LEFT" offsetX="4" />
                                 </Label>
                             </Controls>

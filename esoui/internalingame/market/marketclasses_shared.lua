@@ -599,14 +599,14 @@ end
 function ZO_MarketProductBase:UpdatingPricingInformation()
     local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = self:GetMarketProductPricingByPresentation()
     if self:IsHouseCollectible() then
-        local houseCurrencyType, houseCost, houseCostAfterDiscount, houseDiscountPercent, houseEsoPlusCost, defaultHouseTemplateMarketProductId, hasMultiplePriceOptions = self:GetDefaultHouseTemplatePricingInfo()
+        local houseCurrencyType, houseCost, houseCostAfterDiscount, houseDiscountPercent, houseEsoPlusCost, defaultHouseTemplateMarketProductId, hasMultipleTemplates = self:GetDefaultHouseTemplatePricingInfo()
         if houseCurrencyType ~= MKCT_NONE then
             currencyType = houseCurrencyType
             cost = houseCost
             costAfterDiscount = houseCostAfterDiscount
             discountPercent = houseDiscountPercent or 0
             esoPlusCost = houseEsoPlusCost
-            self.hasMultiplePriceOptions = hasMultiplePriceOptions
+            self.hasMultiplePriceOptions = hasMultipleTemplates
             self.defaultHouseTemplateMarketProductId = defaultHouseTemplateMarketProductId
         else
             self.hasMultiplePriceOptions = false
@@ -790,8 +790,16 @@ function ZO_MarketProduct_GetDefaultHousingTemplatePricingInfo(marketProductId, 
         local defaultHouseTemplateData = houseTemplateDataList[defaultHouseTemplateIndex]
         local currencyType, marketData = next(defaultHouseTemplateData.marketPurchaseOptions)
 
+        -- Count how many templates actually have purchase data.
+        local numValidTemplates = 0
+        for index, houseTemplateData in ipairs(houseTemplateDataList) do
+            if #houseTemplateData.marketPurchaseOptions > 0 then
+                numValidTemplates = numValidTemplates + 1
+            end
+        end
+
         if marketData then
-            return currencyType, marketData.cost, marketData.costAfterDiscount, marketData.discountPercent, marketData.esoPlusCost, marketData.marketProductId, #defaultHouseTemplateData.marketPurchaseOptions > 1
+            return currencyType, marketData.cost, marketData.costAfterDiscount, marketData.discountPercent, marketData.esoPlusCost, marketData.marketProductId, numValidTemplates > 1
         else
             return currencyType
         end

@@ -99,15 +99,18 @@ local function OnPlayerDead(self, eventCode, who)
     end
 end
 
---terminate the trade window
-local function FinishTrade()
+function ZO_SharedTradeWindow.CloseTradeWindow()
     TRADE_WINDOW.state = TRADE_STATE_IDLE
     SYSTEMS:HideScene("trade")
 end
 
+--terminate the trade window
+local function FinishTrade()
+    ZO_SharedTradeWindow.CloseTradeWindow()
+end
+
 local function FailTrade()
-    TRADE_WINDOW.state = TRADE_STATE_IDLE
-    SYSTEMS:HideScene("trade")
+    ZO_SharedTradeWindow.CloseTradeWindow()
 end
 
 local function OnTradeFailed(self, eventCode)

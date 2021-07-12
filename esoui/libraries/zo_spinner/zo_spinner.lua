@@ -363,6 +363,10 @@ function ZO_Spinner:SetEnabled(enabled)
     self:UpdateButtons()
 end
 
+function ZO_Spinner:IsEnabled()
+    return self.enabled
+end
+
 function ZO_Spinner:SetButtonsHidden(hideButtons)
     self.hideButtons = hideButtons
     self:UpdateButtons()

@@ -1264,7 +1264,10 @@ end
 
 function Achievements:OnAchievementUpdated(achievementId)
     -- Needed if this is the first visible achievement in its category
-    self:BuildCategories()
+    local currentCategoryIndex, currentSubCategoryIndex = GetCategoryInfoFromAchievementId(achievementId)
+    if currentCategoryIndex == nil or self.nodeLookupData[currentCategoryIndex] == nil or currentSubCategoryIndex == nil or self.nodeLookupData[currentCategoryIndex][currentSubCategoryIndex] == nil then
+        self:BuildCategories()
+    end
 
     if self:IsSummaryOpen() then
         self:UpdateSummary()
@@ -1797,7 +1800,7 @@ do
                 lookup[parentCategory] = categoryTable
             end
 
-            if(subCategory) then
+            if subCategory then
                 categoryTable.subCategories[subCategory] = node
             else
                 categoryTable.node = node

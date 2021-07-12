@@ -296,13 +296,8 @@ function ZO_ChampionStar:IsClusterPortalStar()
     return false
 end
 
-function ZO_ChampionStar:OnClicked()
-    assert(false, "to be overridden")
-end
-
-function ZO_ChampionStar:OnDragStart()
-    assert(false, "to be overridden")
-end
+ZO_ChampionStar.OnClicked = ZO_ChampionStar:MUST_IMPLEMENT()
+ZO_ChampionStar.OnDragStart = ZO_ChampionStar:MUST_IMPLEMENT()
 
 function ZO_ChampionStar:ShowPlatformTooltip()
     if IsInGamepadPreferredMode() then
@@ -312,33 +307,13 @@ function ZO_ChampionStar:ShowPlatformTooltip()
     end
 end
 
-function ZO_ChampionStar:ShowKeyboardTooltip()
-    assert(false, "to be overridden")
-end
-
-function ZO_ChampionStar:ShowGamepadTooltip()
-    assert(false, "to be overridden")
-end
-
-function ZO_ChampionStar:ClearTooltip()
-    assert(false, "to be overridden")
-end
-
-function ZO_ChampionStar:HasPrimaryGamepadAction()
-    assert(false, "to be overridden")
-end
-
-function ZO_ChampionStar:CanPerformPrimaryGamepadAction()
-    assert(false, "to be overridden")
-end
-
-function ZO_ChampionStar:PerformPrimaryGamepadAction()
-    assert(false, "to be overridden")
-end
-
-function ZO_ChampionStar:GetPrimaryGamepadActionText()
-    assert(false, "to be overridden")
-end
+ZO_ChampionStar.ShowKeyboardTooltip = ZO_ChampionStar:MUST_IMPLEMENT()
+ZO_ChampionStar.ShowGamepadTooltip = ZO_ChampionStar:MUST_IMPLEMENT()
+ZO_ChampionStar.ClearTooltip = ZO_ChampionStar:MUST_IMPLEMENT()
+ZO_ChampionStar.HasPrimaryGamepadAction = ZO_ChampionStar:MUST_IMPLEMENT()
+ZO_ChampionStar.CanPerformPrimaryGamepadAction = ZO_ChampionStar:MUST_IMPLEMENT()
+ZO_ChampionStar.PerformPrimaryGamepadAction = ZO_ChampionStar:MUST_IMPLEMENT()
+ZO_ChampionStar.GetPrimaryGamepadActionText = ZO_ChampionStar:MUST_IMPLEMENT()
 
 ZO_ChampionSkillStar = ZO_ChampionStar:Subclass()
 
@@ -422,10 +397,10 @@ end
 function ZO_ChampionSkillStar:OnClicked(button, upInside)
     if upInside and self.editor then
         local increment = IsShiftKeyDown() and ZO_SPINNER_LARGE_INCREMENT or ZO_SPINNER_SMALL_INCREMENT
-        if button == MOUSE_BUTTON_INDEX_LEFT then
+        if button == MOUSE_BUTTON_INDEX_LEFT and self.editor:CanAddPoints() then
             self.editor:AddOrRemovePoints(increment)
             return HANDLED
-        elseif button == MOUSE_BUTTON_INDEX_RIGHT then
+        elseif button == MOUSE_BUTTON_INDEX_RIGHT and self.editor:CanRemovePoints() then
             self.editor:AddOrRemovePoints(-increment)
             return HANDLED
         end
@@ -434,6 +409,12 @@ function ZO_ChampionSkillStar:OnClicked(button, upInside)
 end
 
 function ZO_ChampionSkillStar:OnDragStart()
+    local result = GetChampionPurchaseAvailability()
+    if result ~= CHAMPION_PURCHASE_SUCCESS then
+        ZO_AlertEvent(EVENT_CHAMPION_PURCHASE_RESULT, result)
+        return NOT_HANDLED
+    end
+
     local championSkillData = self:GetChampionSkillData()
     if championSkillData:TryCursorPickup() then
         PlaySound(SOUNDS.CHAMPION_STAR_PICKED_UP)
@@ -447,6 +428,10 @@ function ZO_ChampionSkillStar:HasPrimaryGamepadAction()
 end
 
 function ZO_ChampionSkillStar:CanPerformPrimaryGamepadAction()
+    local result = GetChampionPurchaseAvailability()
+    if result ~= CHAMPION_PURCHASE_SUCCESS then
+        return false, GetString("SI_CHAMPIONPURCHASERESULT", result)
+    end
     return self:GetChampionSkillData():CanBeSlotted()
 end
 
@@ -646,6 +631,7 @@ function ZO_ChampionStarEditor:AttachToStar(selectedStar)
     self.control:SetAnchor(TOP, parentControl, CENTER, 0, 15)
     self.pointsSpinner:AddToMouseInputGroup(parentControl.mouseInputGroup, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
     self:RefreshPointsMinMax()
+    self:RefreshEnabledState()
 end
 
 function ZO_ChampionStarEditor:OnSelected()
@@ -675,9 +661,10 @@ function ZO_ChampionStarEditor:IsAttached()
 end
 
 function ZO_ChampionStarEditor:CanRemovePoints()
-    if self:IsAttached() then
+    if self:IsAttached() and self:IsEnabled() then
         return self.pointsSpinner:GetValue() > self.pointsSpinner:GetMin()
     end
+
     return false
 end
 
@@ -688,7 +675,7 @@ function ZO_ChampionStarEditor:StartRemovingPoints()
 end
 
 function ZO_ChampionStarEditor:CanAddPoints()
-    if self:IsAttached() then
+    if self:IsAttached() and self:IsEnabled() then
         return self.pointsSpinner:GetValue() < self.pointsSpinner:GetMax()
     end
 
@@ -724,6 +711,17 @@ function ZO_ChampionStarEditor:RefreshPointsMinMax()
             local totalPointsInCluster = self.star:GetChampionClusterData():CalculateTotalPendingPoints()
             self.pointsSpinner:SetValueMinAndMax(totalPointsInCluster, totalPointsInCluster, totalPointsInCluster)
         end
+    end
+end
+
+function ZO_ChampionStarEditor:IsEnabled()
+    return self.pointsSpinner:IsEnabled()
+end
+
+function ZO_ChampionStarEditor:RefreshEnabledState()
+    if self:IsAttached() then
+        local result = GetChampionPurchaseAvailability()
+        self.pointsSpinner:SetEnabled(result == CHAMPION_PURCHASE_SUCCESS)
     end
 end
 

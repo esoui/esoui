@@ -102,7 +102,7 @@ function MainMenu_Manager:UpdateAllPlayerStates()
     stateTable.inCombat = IsUnitInCombat("player")
     stateTable.isReviving = IsUnitReincarnating("player")
     stateTable.isSwimming = IsUnitSwimming("player")
-    stateTable.isWerewolf = IsWerewolf()
+    stateTable.isWerewolf = IsPlayerInWerewolfForm()
 end
 
 function MainMenu_Manager:RefreshPlayerState()

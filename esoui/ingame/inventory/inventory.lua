@@ -806,8 +806,9 @@ end
 
 function ZO_InventoryManager:DeactivateInventorySearch()
     TEXT_SEARCH_MANAGER:DeactivateTextSearch("playerInventoryTextSearch")
-    self.inventories[INVENTORY_BACKPACK].currentContext = nil
-    TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+
+    local REMOVE_CONTEXT = nil
+    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK })
 end
 
 function ZO_InventoryManager:ActivateBankSearch()
@@ -820,9 +821,9 @@ end
 
 function ZO_InventoryManager:DeactivateBankSearch()
     TEXT_SEARCH_MANAGER:DeactivateTextSearch("playerBankTextSearch")
-    self.inventories[INVENTORY_BACKPACK].currentContext = nil
-    self.inventories[INVENTORY_BANK].currentContext = nil
-    TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+
+    local REMOVE_CONTEXT = nil
+    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_BANK })
 end
 
 function ZO_InventoryManager:ActivateHouseBankSearch()
@@ -837,9 +838,9 @@ end
 
 function ZO_InventoryManager:DeactivateHouseBankSearch()
     TEXT_SEARCH_MANAGER:DeactivateTextSearch("houseBankTextSearch")
-    self.inventories[INVENTORY_BACKPACK].currentContext = nil
-    self.inventories[INVENTORY_HOUSE_BANK].currentContext = nil
-    TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+
+    local REMOVE_CONTEXT = nil
+    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_HOUSE_BANK })
 end
 
 function ZO_InventoryManager:ActivateGuildBankSearch()
@@ -854,9 +855,9 @@ end
 
 function ZO_InventoryManager:DeactivateGuildBankSearch()
     TEXT_SEARCH_MANAGER:DeactivateTextSearch("guildBankTextSearch")
-    self.inventories[INVENTORY_BACKPACK].currentContext = nil
-    self.inventories[INVENTORY_GUILD_BANK].currentContext = nil
-    TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+
+    local REMOVE_CONTEXT = nil
+    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_GUILD_BANK })
 end
 
 do
@@ -1286,7 +1287,11 @@ do
         elseif #self.flashingSlots > 0 then
             for _, flashingSlot in ipairs(self.flashingSlots) do
                 for _, subFilter in pairs(inventory.subFilters[currentFilterType]) do
-                    if ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(flashingSlot, currentFilterType, subFilter.filterType) and ZO_IndexOfElementInNumericallyIndexedTable(inventory.backingBags, flashingSlot.bagId) then
+                    if currentFilterType == ITEM_TYPE_DISPLAY_CATEGORY_COMPANION then
+                        if ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcategory(flashingSlot, currentFilterType, subFilter.filterType) and ZO_IndexOfElementInNumericallyIndexedTable(inventory.backingBags, flashingSlot.bagId) then
+                            self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
+                        end
+                    elseif ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(flashingSlot, currentFilterType, subFilter.filterType) and ZO_IndexOfElementInNumericallyIndexedTable(inventory.backingBags, flashingSlot.bagId) then
                         self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
                     end
                 end
@@ -1538,7 +1543,15 @@ function ZO_InventoryManager:PlayItemAddedAlert(slot, inventory)
 
     local currentFilter = inventory.currentFilter
     for _, subFilter in pairs(inventory.subFilters[currentFilter]) do
-        if ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter, subFilter.filterType) then
+        if currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_COMPANION then
+            if ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter, subFilter.filterType) then
+                self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
+            end
+            if not isSlotAdded then
+                table.insert(self.flashingSlots, slot)
+                slotAdded = true
+            end
+        elseif ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter, subFilter.filterType) then
             self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
             if not self.categoryFlashAnimationTimeline:IsPlaying() then
                 self.categoryFlashAnimationTimeline:PlayFromStart()
@@ -2083,7 +2096,7 @@ function ZO_InventoryManager:ApplyBackpackLayout(layoutData)
     inventory.additionalFilter = layoutData.additionalFilter
 
     local craftBag = self.inventories[INVENTORY_CRAFT_BAG]
-    craftBag.additionalFilter = layoutData.additionalFilter
+    craftBag.additionalFilter = layoutData.additionalCraftBagFilter
 
     local menuBar = inventory.filterBar
 

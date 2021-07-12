@@ -7,8 +7,8 @@
                 disabledTextureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"
                 thumbWidth="8"
                 thumbHeight="32"
-                top="0"
-                left="0.5"
+                top="0.5"
+                left="0"
                 bottom="0.5"
                 right="1" />
 

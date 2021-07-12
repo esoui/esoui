@@ -128,6 +128,14 @@ function ZO_Scene:HasFragment(fragment)
     return false
 end
 
+function ZO_Scene:GetFragments()
+    return self.fragments
+end
+
+function ZO_Scene:FragmentIterator(filterFunctions)
+    return ZO_FilteredNumericallyIndexedTableIterator(self.fragments, filterFunctions)
+end
+
 function ZO_Scene:AddTemporaryFragment(fragment)
     if not self:HasFragment(fragment) then
         if(not self.temporaryFragments) then

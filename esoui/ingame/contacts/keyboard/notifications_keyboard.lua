@@ -134,7 +134,14 @@ end
 ZO_KeyboardLeaderboardRaidProvider = ZO_LeaderboardRaidProvider:Subclass()
 
 function ZO_KeyboardLeaderboardRaidProvider:New(notificationManager)
-    local provider = ZO_LeaderboardRaidProvider.New(self, notificationManager)
+    -- Override leaderboard update callback to support audio
+    local function notificationEventCallback(eventId)
+        if eventId == EVENT_RAID_SCORE_NOTIFICATION_ADDED then
+            PlaySound(SOUNDS.NEW_NOTIFICATION)
+        end
+    end
+
+    local provider = ZO_LeaderboardRaidProvider.New(self, notificationManager, notificationEventCallback)
     return provider
 end
 

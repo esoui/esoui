@@ -291,6 +291,17 @@ function zo_normalize(value, min, max)
     return (value - min) / (max - min)
 end
 
+function zo_clampLength2D(x, y, maxLength)
+    local distance = zo_sqrt(x * x + y * y)
+    if distance == 0 then
+        -- there is no valid angle for a 0-length vector
+        return 0, 0
+    end
+    local angleRadians = math.atan2(y, x)
+    distance = zo_clamp(distance, 0, maxLength)
+    return math.cos(angleRadians) * distance, math.sin(angleRadians) * distance
+end
+
 -- Rotate 2D coordinates about the origin by the specified angle.
 function ZO_Rotate2D(angle, x, y)
     local cosine = math.cos(angle)

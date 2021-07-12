@@ -254,7 +254,10 @@ function ZO_SocialOptionsDialogGamepad:BuildGamerCardOption()
         local callback = function()
             local data = self.socialData
             local displayName = data.displayName
-            if data.friendIndex then
+            if data.consoleId then
+                local undecoratedName = UndecorateDisplayName(displayName)
+                ShowGamerCard(undecoratedName, data.consoleId)
+            elseif data.friendIndex then
                 --To make sure we use the correct index if friends list was updated while the dialog is being displayed.
                 local updatedData = FRIENDS_LIST_MANAGER:FindDataByDisplayName(displayName)
                 if updatedData then

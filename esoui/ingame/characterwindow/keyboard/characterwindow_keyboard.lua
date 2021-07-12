@@ -140,7 +140,7 @@ local function RefreshSingleSlot(slotId, slotControl, animationOption, updateRea
         if linkData.linksTo then
             local animateLinkedSlot = animationOption
 
-            if updateReason == INVENTORY_UPDATE_REASON_ITEM_CHARGE then
+            if updateReason == INVENTORY_UPDATE_REASON_ITEM_CHARGE or updateReason == INVENTORY_UPDATE_REASON_PLAYER_LOCKED then
                 animateLinkedSlot = false
             end
             RefreshSingleSlot(linkData.linksTo, slots[linkData.linksTo], animateLinkedSlot)

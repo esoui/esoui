@@ -102,7 +102,8 @@ local function RequirementFailedAlertHandler(errorStringId)
         end
 end
 
-local AlertHandlers = {
+local AlertHandlers =
+{
     [EVENT_COMBAT_EVENT] = function(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log)
         if playerName == sourceName then
             local soundId = CombatEventToSoundId[result]
@@ -220,6 +221,10 @@ local AlertHandlers = {
 
     [EVENT_SLOT_IS_LOCKED_FAILURE] = function()
         return ERROR, GetString(SI_ERROR_ITEM_LOCKED), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_MAIL_SEND_SUCCESS] = function(playerName)
+        return ALERT, zo_strformat(SI_MAIL_SEND_SUCCESS, playerName)
     end,
 
     [EVENT_MAIL_SEND_FAILED] = function(reason)
@@ -438,6 +443,9 @@ local AlertHandlers = {
         if errorReason == TRADE_ACTION_RESULT_IGNORING_YOU then
             ZO_AlertEvent(EVENT_TRADE_INVITE_WAITING, inviteeCharacterName, inviteeDisplayName)
         else
+            if TRADE_WINDOW and TRADE_WINDOW:IsTrading() then
+                ZO_SharedTradeWindow.CloseTradeWindow()
+            end
             return ALERT, GetString("SI_TRADEACTIONRESULT", errorReason), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
@@ -543,7 +551,7 @@ local AlertHandlers = {
     end,
 
     [EVENT_TRAIT_LEARNED] = function(itemName, traitName)
-        if not SYSTEMS:IsShowing("alchemy") then
+        if not SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME) then
             return ALERT, zo_strformat(SI_NEW_TRAIT_UNLOCKED, itemName, traitName)
         end
     end,

@@ -20,8 +20,6 @@ function ZO_VoiceChat_IsNameLocalPlayers(displayName)
     return displayName == GetDisplayName()
 end
 
-VOICE_CHAT_OFFICERS_ROOM_NUMBER = 0 --The guild channel # we use to represent the special Officer's channel.
-
 VOICE_CHAT_ICON_MUTED_PLAYER = "EsoUI/Art/VOIP/Gamepad/gp_VOIP_muted.dds"
 VOICE_CHAT_ICON_LISTENING_CHANNEL = "EsoUI/Art/VOIP/Gamepad/gp_VOIP_listening.dds"
 

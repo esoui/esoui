@@ -1,11 +1,22 @@
 ZO_InteractScene_Mixin = {}
 
 function ZO_InteractScene_Mixin:InitializeInteractInfo(interactionInfo)
-    interactionInfo.OnInteractionCanceled = interactionInfo.OnInteractionCanceled or function()
-        if self:IsShowing() then
-            -- If the interact ended for reasons outside of our control, this scenes state is essentially no longer valid so we need to abort come back in anyway
-            self.sceneManager:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
+    if not interactionInfo.OnInteractionCanceled then
+        -- If the interact ended for reasons outside of our control (i.e.: combat), this scenes state is essentially no longer valid so we need to abort and come back in anyway
+        if not interactionInfo.registeredScenes then
+            interactionInfo.registeredScenes = {}
         end
+
+        interactionInfo.OnInteractionCanceled = function()
+            local currentScene = SCENE_MANAGER:GetCurrentScene()
+            if currentScene and currentScene:IsShowing() and interactionInfo.registeredScenes[currentScene] then
+                self.sceneManager:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
+            end
+        end
+    end
+
+    if interactionInfo.registeredScenes then
+        interactionInfo.registeredScenes[self] = true
     end
 
     self.interactionInfo = interactionInfo
@@ -22,7 +33,7 @@ end
 function ZO_InteractScene_Mixin:OnRemovedFromQueue(newNextScene)
     if not INTERACT_WINDOW:IsInteracting(self.interactionInfo) then
         RemoveActionLayerByName("SceneChangeInterceptLayer")
-        if not newNextScene.GetInteractionInfo or newNextScene:GetInteractionInfo() ~= self.interactionInfo then
+        if not (newNextScene and newNextScene.GetInteractionInfo and newNextScene:GetInteractionInfo() == self.interactionInfo) then
             INTERACT_WINDOW:TerminateClientInteraction(self.interactionInfo)
         end
     end

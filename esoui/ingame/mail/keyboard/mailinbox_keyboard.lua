@@ -208,8 +208,26 @@ function MailInbox:InitializeKeybindDescriptors()
             end,
 
             visible = function()
-                if(self.mailId) then
+                if self.mailId then
                     return IsMailReturnable(self.mailId)
+                end
+                return false
+            end
+        },
+
+        --Reply
+        {
+            name = GetString(SI_MAIL_READ_REPLY),
+            keybind = "UI_SHORTCUT_TERTIARY",
+
+            callback = function()
+                self:Reply()
+            end,
+
+            visible = function()
+                if self.mailId then
+                    local mailData = self:GetMailData(self.mailId)
+                    return mailData and mailData.isFromPlayer or false
                 end
                 return false
             end
@@ -225,7 +243,7 @@ function MailInbox:InitializeKeybindDescriptors()
             end,
 
             visible = function()
-                if(self.mailId) then
+                if self.mailId then
                     return not IsMailReturnable(self.mailId) and self:IsMailDeletable()
                 end
                 return false
@@ -242,9 +260,9 @@ function MailInbox:InitializeKeybindDescriptors()
             end,
 
             visible = function()
-                if(self.mailId) then
+                if self.mailId then
                     local numAttachments, attachedMoney, codAmount = GetMailAttachmentInfo(self.mailId)
-                    if(numAttachments > 0 or attachedMoney > 0) then
+                    if numAttachments > 0 or attachedMoney > 0 then
                         return true
                     end
                 end
@@ -265,7 +283,7 @@ function MailInbox:InitializeKeybindDescriptors()
             end,
 
             callback = function()
-                if(self.mailId) then
+                if self.mailId then
                     local senderDisplayName = GetMailSender(self.mailId)
                     local function ReportCallback()
                         self:RecordSelectedMailAsReported()
@@ -482,6 +500,17 @@ function MailInbox:ShowTakeAttachmentsWithCODDialog(codAmount)
     ZO_Dialogs_ShowDialog("MAIL_TAKE_ATTACHMENT_COD", {codAmount = codAmount})
 end
 
+function MailInbox:Reply()
+    if self.mailId then
+        local mailData = self:GetMailData(self.mailId)
+        if mailData and mailData.isFromPlayer then
+            MAIN_MENU_KEYBOARD:ShowSceneGroup("mailSceneGroup", "mailSend")
+
+            MAIL_SEND:ComposeMailTo(mailData.senderDisplayName, mailData:GetFormattedReplySubject())
+        end
+    end
+end
+
 function MailInbox:Return()
     if self.mailId then
         if IsMailReturnable(self.mailId) then
@@ -535,7 +564,7 @@ end
 
 function MailInbox:IsMailDeletable()
     local mailData = self:GetMailData(self.mailId)
-    if(mailData) then
+    if mailData then
         return mailData.attachedMoney == 0 and mailData.numAttachments == 0
     end
 end
@@ -567,7 +596,7 @@ end
 --Events
 
 function MailInbox:OnInboxUpdate()
-    if(SCENE_MANAGER:IsShowing("mailInbox")) then
+    if SCENE_MANAGER:IsShowing("mailInbox") then
         self:RefreshData()
         self:RefreshMailFrom()
     else
@@ -640,10 +669,10 @@ function MailInbox:RefreshMoneyControls()
     local mailData = self:GetMailData(self.mailId)
     self.sentMoneyControl:SetHidden(true)
     self.codControl:SetHidden(true)
-    if(mailData.attachedMoney > 0) then
+    if mailData.attachedMoney > 0 then
         self.sentMoneyControl:SetHidden(false)
         ZO_CurrencyControl_SetSimpleCurrency(self.sentMoneyCurrencyControl, CURT_MONEY, mailData.attachedMoney, MAIL_COD_ATTACHED_MONEY_OPTIONS)
-    elseif(mailData.codAmount > 0) then
+    elseif mailData.codAmount > 0 then
         self.codControl:SetHidden(false)
         ZO_CurrencyControl_SetSimpleCurrency(self.codCurrencyControl, CURT_MONEY, mailData.codAmount, MAIL_COD_ATTACHED_MONEY_OPTIONS)
     end
@@ -700,7 +729,7 @@ function MailInbox:HasAlreadyReportedSelectedMail()
 end
 
 function MailInbox:RecordSelectedMailAsReported()
-    if(self.mailId) then
+    if self.mailId then
         self.reportedMailIds[zo_getSafeId64Key(self.mailId)] = true
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.selectionKeybindStripDescriptor)
     end
@@ -741,7 +770,7 @@ end
 function MailInbox:Unread_OnMouseEnter(control)
     local numUnreadMail = GetNumUnreadMail()
     InitializeTooltip(InformationTooltip, control, RIGHT, 0, 0)
-    if(numUnreadMail == 0) then
+    if numUnreadMail == 0 then
         SetTooltipText(InformationTooltip, GetString(SI_MAIL_NO_UNREAD_MAIL))
     else
         SetTooltipText(InformationTooltip, zo_strformat(SI_MAIL_UNREAD_MAIL, numUnreadMail))

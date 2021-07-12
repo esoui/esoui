@@ -141,7 +141,7 @@ end
 function ZO_MailInbox_Gamepad:InitializeOptionsList()
     self.optionsList = MAIL_MANAGER_GAMEPAD:AddList("Options")
     self.optionsListControl = self.optionsList:GetControl()
-    
+
     if IsConsoleUI() then
         local gamercardOption = ZO_GamepadEntryData:New(GetString(GetGamerCardStringId()))
         gamercardOption.selectedCallback =  function()
@@ -152,6 +152,19 @@ function ZO_MailInbox_Gamepad:InitializeOptionsList()
                                             end
         self.optionsList:AddEntry("ZO_GamepadMenuEntryTemplate", gamercardOption)
     end
+
+    local replyOption = ZO_GamepadEntryData:New(GetString(SI_MAIL_READ_REPLY))
+    replyOption.selectedCallback = function()
+                                       self:Reply()
+                                   end
+    replyOption.selectedNameColor = function()                                        
+                                        local mailData = self:GetActiveMailData()
+                                        if mailData and mailData.isFromPlayer then
+                                            return ZO_SELECTED_TEXT
+                                        end
+                                        return ZO_DISABLED_TEXT 
+                                    end
+    self.optionsList:AddEntry("ZO_GamepadMenuEntryTemplate", replyOption)
 
     local returnToSenderOption = ZO_GamepadEntryData:New(GetString(SI_MAIL_READ_RETURN))
     returnToSenderOption.selectedCallback = function()
@@ -295,7 +308,7 @@ function ZO_MailInbox_Gamepad:InitializeKeybindDescriptors()
             keybind = "UI_SHORTCUT_TERTIARY",
             visible = function()
                             local mailData = self:GetActiveMailData()
-                            -- Options only has "Report" and "Return to Sender", neither of which is valid on system messages.
+                            -- Options only has "Report", "Reply" and "Return to Sender", none of which are valid on system messages.
                             return mailData and (not IsMailSystem(mailData))
                       end,
             callback = function() self:EnterOptionsList() end,
@@ -440,6 +453,13 @@ function ZO_MailInbox_Gamepad:EnterOptionsList()
     MAIL_MANAGER_GAMEPAD:SwitchToHeader(nil)
     MAIL_MANAGER_GAMEPAD:SetCurrentList(self.optionsList)
     self.optionsList:RefreshVisible()
+
+    PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
+end
+
+function ZO_MailInbox_Gamepad:Reply()
+    MAIL_MANAGER_GAMEPAD:GetSend():ComposeMailTo(self:GetActiveMailSender(), self:GetActiveMailData():GetFormattedReplySubject())
+    MAIL_MANAGER_GAMEPAD:GetSend():SwitchToSendTab()
 
     PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
 end

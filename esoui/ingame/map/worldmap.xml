@@ -21,7 +21,7 @@
         <Texture name="ZO_PinBlob" tier="HIGH" virtual="true" level="6" pixelRoundingEnabled="false" shaderEffectType="HALO"/>
 
         <Polygon name="ZO_PinPolygonBlob" pointLayout="COUNTER_CLOCKWISE" smoothingEnabled="true" layer="BACKGROUND" tier="HIGH" level="6" mouseEnabled="true" virtual="true">
-            <Border minThicknessPixels="3" maxThicknessPixels="3" textureFile="EsoUI\Art\MapPins\PolygonPinBorder.dds"/>
+            <Border minThickness="3px" maxThickness="3px" textureFile="EsoUI\Art\MapPins\PolygonPinBorder.dds"/>
             <OnMouseEnter>
                 ZO_WorldMap_HandlePinEnter()
             </OnMouseEnter>

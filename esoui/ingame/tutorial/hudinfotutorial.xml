@@ -26,9 +26,24 @@
                     <Anchor point="BOTTOMRIGHT" />
                     <TextureCoords left="0.0" right="0.83203125" top="0.0" bottom="0.724609375" />
                 </Texture>
-                <Label name="$(parent)Title" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" verticalAlignment="CENTER" horizontalAlignment="CENTER" wrapMode="ELLIPSIS" modifyTextType="UPPERCASE">
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" verticalAlignment="CENTER" horizontalAlignment="CENTER" wrapMode="ELLIPSIS" modifyTextType="UPPERCASE">
                     <Dimensions x="310" y="30" />
                     <Anchor point="TOP" offsetY="60"/>
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontWinH2",
+                            },
+                            {
+                                font = "ZoFontWinH3",
+                            },
+                            {
+                                font = "ZoFontWinH4",
+                            },
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
                 </Label>
                 <Texture name="$(parent)Divider" inherits="ZO_HorizontalDivider">
                     <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM"/>

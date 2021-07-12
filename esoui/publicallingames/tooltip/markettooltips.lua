@@ -195,7 +195,7 @@ function ZO_Tooltip:LayoutCrownCrate(crateId, stackCount)
 end
 
 do
-    internalassert(INSTANT_UNLOCK_MAX_VALUE == 16, "Update gamepad tooltip for new instant unlock type")
+    internalassert(INSTANT_UNLOCK_MAX_VALUE == 17, "Update gamepad tooltip for new instant unlock type")
     local UNLOCK_LABEL = GetString(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK)
 
     function ZO_Tooltip:LayoutInstantUnlock(instantUnlockId)

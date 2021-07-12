@@ -34,12 +34,12 @@ function ZO_SortFilterList_Gamepad:IsActivated()
     return self.isActive
 end
 
-function ZO_SortFilterList_Gamepad:Activate()
+function ZO_SortFilterList_Gamepad:Activate(animateInstantly, scrollAutoSelectedDataIntoView)
     if not self.isActive then
         self.isActive = true
 
         self:SetDirectionalInputEnabled(true)
-        ZO_ScrollList_AutoSelectData(self.list)
+        ZO_ScrollList_AutoSelectData(self.list, animateInstantly, scrollAutoSelectedDataIntoView)
     end
 end
 

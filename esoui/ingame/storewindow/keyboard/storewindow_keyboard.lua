@@ -751,7 +751,7 @@ function ZO_Store_OnEntryMouseEnter(storeEntrySlot)
     local storeEntryIndex = GetStoreEntryIndexForPreviewFromSlot(storeEntrySlot)
 
     local cursor = MOUSE_CURSOR_DO_NOT_CARE
-    if storeEntryIndex ~= nil then
+    if storeEntryIndex ~= nil and IsCharacterPreviewingAvailable() then
         cursor = MOUSE_CURSOR_PREVIEW
     end
 
@@ -769,7 +769,7 @@ function ZO_Store_OnEntryClicked(storeEntrySlot, button)
     -- we'll do our custom behavior
     if button == MOUSE_BUTTON_INDEX_LEFT then
         local storeEntryIndex = GetStoreEntryIndexForPreviewFromSlot(storeEntrySlot)
-        if storeEntryIndex ~= nil then
+        if storeEntryIndex ~= nil and IsCharacterPreviewingAvailable() then
             STORE_WINDOW:PreviewStoreEntry(storeEntryIndex)
         end
     else

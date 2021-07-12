@@ -953,10 +953,6 @@ function ZO_TreeEntry_OnMouseUp(self, upInside)
     end
 end
 
-function ZO_TreeControl_GetNode(self)
-    return self.node
-end
-
 --ZO_Trees
 ---------------
 

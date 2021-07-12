@@ -9,6 +9,8 @@ function ZO_Enchanting:Initialize(control)
     self.mainSceneName = "enchanting"
 
     ZO_SharedEnchanting.Initialize(self, control)
+
+    SYSTEMS:RegisterKeyboardObject(ZO_ENCHANTING_SYSTEM_NAME, self)
 end
 
 function ZO_Enchanting:InitializeInventory()

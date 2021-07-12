@@ -44,6 +44,14 @@ panelBuilder:AddSetting({
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Video_RenderThread",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_RENDER_THREAD,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+    template = "ZO_Options_Video_Checkbox_IncludeRestartWarning",
+})
+
 -- inline slider
 panelBuilder:AddSetting({
     controlName = "Options_Video_Gamma_Adjustment",

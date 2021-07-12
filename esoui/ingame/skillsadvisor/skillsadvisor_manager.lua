@@ -125,10 +125,10 @@ function SkillsAdvisor_Manager:GetSkillProgressionData(skillBuildId, skillBuildA
 
     local skillData = SKILLS_DATA_MANAGER:GetSkillDataByIndices(skillType, skillLineIndex, skillIndex)
     if not skillData then
-        -- Debugging for ESO-566272 / ESO-581396
-        local name = GetSkillAbilityInfo(skillType, skillLineIndex, skillIndex)
-        local errorText = string.format("SkillsAdvisor_Manager:GetSkillProgressionData - Couldn't find skill data for skillType %d, skillLineIndex %d, skillIndex %d (%s)", skillType, skillLineIndex, skillIndex, name)
-        internalassert(false, errorText)
+        -- ESO-566272 / ESO-581396: We added logging but it didn't really help us narrow down why this can happen.
+        -- Best guess is a timing issue between getting the skills info and the actual C++ progression data populated.
+        -- Removed the logging that was here because it was flooding our reports for no real benefit.
+        -- TODO: A refactor to separate progression from static data would probably solve this, but that's not going to be something we'll do anytime soon
         return nil
     end
 

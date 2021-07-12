@@ -286,12 +286,11 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializeKeybinds()
                 local postedItem = getItemDataCallback()
                 self:ShowPurchaseItemConfirmation(postedItem)
             end,
+            visible = function()
+                return getItemDataCallback() ~= nil
+            end,
             enabled = function()
                 local postedItem = getItemDataCallback()
-                if postedItem == nil then
-                    return false
-                end
-
                 if postedItem.sellerName == GetDisplayName() then
                     return false, GetString("SI_TRADINGHOUSERESULT", TRADING_HOUSE_RESULT_CANT_BUY_YOUR_OWN_POSTS)
                 end

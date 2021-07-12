@@ -7,8 +7,11 @@
 local LIST_CHANNELS = 1
 local LIST_HISTORY = 2
 
+local function GuildRoomEntriesComparator(entry1, entry2)
+    if entry1.guildId ~= entry2.guildId then
+        return entry1.guildId < entry2.guildId
+    end
 
-local function ComparatorGuildRoomEntries(entry1, entry2)
     --We want the officer's room to always be placed at the bottom.
     if entry1.guildRoomNumber == VOICE_CHAT_OFFICERS_ROOM_NUMBER then
         return false
@@ -126,88 +129,102 @@ function ZO_VoiceChatChannelsGamepad:InitializeEvents()
     self.control:RegisterForEvent(EVENT_VOICE_TRANSMIT_CHANNEL_CHANGED, function(eventCode, ...) OnVoiceTransmitChannelChanged(...) end)
 end
 
-local function PopulateChannelsHelper(list, channel, headerText)
-    local newEntry = ZO_GamepadEntryData:New(channel.name, channel.isJoined and VOICE_CHAT_ICON_LISTENING_CHANNEL)
-    newEntry.channel = channel
-    newEntry:SetChannelActive(channel.isTransmitting)
-
-    if headerText then
-        newEntry:SetHeader(headerText)
-        list:AddEntryWithHeader("ZO_VoiceChatChannelsEntryGamepad", newEntry)
-    else
-        list:AddEntry("ZO_VoiceChatChannelsEntryGamepad", newEntry)
-    end
-end
-function ZO_VoiceChatChannelsGamepad:PopulateChannels()
-    local areaData, groupData, guildData = VOICE_CHAT_MANAGER:GetChannelData()
-    local mainHeaderAdded = false
-
-    --Area
-    if areaData then
-        PopulateChannelsHelper(self.list, areaData, GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_MAIN_HEADER))
-        mainHeaderAdded = true
-    end
-
-    --Group
-    if groupData then
-        local header = not mainHeaderAdded and GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_MAIN_HEADER)
-        PopulateChannelsHelper(self.list, groupData, header)
-    end
-
-    --Guild Channels
-    for guildId, guildData in pairs(guildData) do
-        --Collect into sorted list
-        local rooms = {}
-        for guildRoomNumber, roomData in pairs(guildData.rooms) do
-            table.insert(rooms, roomData)
-        end
-        table.sort(rooms, ComparatorGuildRoomEntries)
-
-        for i, roomData in ipairs(rooms) do
-            local header = i == 1 and guildData.header or nil
-            PopulateChannelsHelper(self.list, roomData, header)
-        end
-    end
-end
-
-local function PopulateHistoryHelper(list, historyData, channelName, channel)
-    local dataList = historyData.list
-
-    for i = #dataList, 1, -1 do --we want newer entries added first, and the list is in order from old to new
-        local userData = dataList[i]
-        local newEntry = ZO_GamepadEntryData:New(ZO_FormatUserFacingDisplayName(userData.displayName), userData.isMuted and VOICE_CHAT_ICON_MUTED_PLAYER)
-        newEntry.historyData = userData
-        newEntry.channelName = channelName
+do
+    local function AddChannelToList(list, channel, headerText)
+        local icon = channel.isJoined and VOICE_CHAT_ICON_LISTENING_CHANNEL or nil
+        local newEntry = ZO_GamepadEntryData:New(channel.name, icon)
         newEntry.channel = channel
-        if i == #dataList then --first entry
-            newEntry:SetHeader(channelName)
-            list:AddEntryWithHeader("ZO_VoiceChatHistoryEntryGamepad", newEntry)
+        newEntry:SetChannelActive(channel.isTransmitting)
+
+        if headerText then
+            newEntry:SetHeader(headerText)
+            list:AddEntryWithHeader("ZO_VoiceChatChannelsEntryGamepad", newEntry)
         else
-            list:AddEntry("ZO_VoiceChatHistoryEntryGamepad", newEntry)
+            list:AddEntry("ZO_VoiceChatChannelsEntryGamepad", newEntry)
+        end
+    end
+
+    function ZO_VoiceChatChannelsGamepad:PopulateChannels()
+        local areaData, groupData, guildData = VOICE_CHAT_MANAGER:GetChannelData()
+        local mainHeaderAdded = false
+
+        --Area
+        if areaData then
+            AddChannelToList(self.list, areaData, GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_MAIN_HEADER))
+            mainHeaderAdded = true
+        end
+
+        --Group
+        if groupData then
+            local header = not mainHeaderAdded and GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_MAIN_HEADER)
+            AddChannelToList(self.list, groupData, header)
+        end
+
+        --Guild Channels
+        local guildRooms = {}
+        for guildId, guildChannelData in pairs(guildData) do
+            for guildRoomNumber, roomData in pairs(guildChannelData.rooms) do
+                table.insert(guildRooms, roomData)
+            end
+        end
+
+        table.sort(guildRooms, GuildRoomEntriesComparator)
+
+        local lastGuildHeader = nil
+        for i, roomData in ipairs(guildRooms) do
+            local header = guildData[roomData.guildId].header
+            if header ~= lastGuildHeader then
+                lastGuildHeader = header
+            else
+                header = nil
+            end
+            AddChannelToList(self.list, roomData, header)
         end
     end
 end
-function ZO_VoiceChatChannelsGamepad:PopulateHistory()
-    local areaData, groupData, guildData = VOICE_CHAT_MANAGER:GetChannelData()
 
-    if areaData then
-        PopulateHistoryHelper(self.list, areaData.historyData, areaData.name, areaData)
-    end
-
-    if groupData then
-        PopulateHistoryHelper(self.list, groupData.historyData, groupData.name, groupData)
-    end
-
-    for guildId, guildData in pairs(guildData) do
-        --Collect into sorted list
-        local rooms = {}
-        for guildRoomNumber, roomData in pairs(guildData.rooms) do
-            table.insert(rooms, roomData)
+do
+    local function AddHistoryDataToList(list, historyData, channelName, channel)
+        local dataList = historyData.list
+        local shouldAddHeader = true -- only add the header to the first entry
+        for i, userData in ZO_NumericallyIndexedTableReverseIterator(dataList) do --we want newer entries added first, and the list is in order from old to new
+            local newEntry = ZO_GamepadEntryData:New(ZO_FormatUserFacingDisplayName(userData.displayName), userData.isMuted and VOICE_CHAT_ICON_MUTED_PLAYER)
+            newEntry.historyData = userData
+            newEntry.channelName = channelName
+            newEntry.channel = channel
+            if shouldAddHeader then
+                newEntry:SetHeader(channelName)
+                list:AddEntryWithHeader("ZO_VoiceChatHistoryEntryGamepad", newEntry)
+                shouldAddHeader = false
+            else
+                list:AddEntry("ZO_VoiceChatHistoryEntryGamepad", newEntry)
+            end
         end
-        table.sort(rooms, ComparatorGuildRoomEntries)
+    end
 
-        for i, room in ipairs(rooms) do
-            PopulateHistoryHelper(self.list, room.historyData, room.fullName, room)
+    function ZO_VoiceChatChannelsGamepad:PopulateHistory()
+        local areaData, groupData, guildData = VOICE_CHAT_MANAGER:GetChannelData()
+
+        if areaData then
+            AddHistoryDataToList(self.list, areaData.historyData, areaData.name, areaData)
+        end
+
+        if groupData then
+            AddHistoryDataToList(self.list, groupData.historyData, groupData.name, groupData)
+        end
+
+        -- Guild Channels
+        local guildRooms = {}
+        for guildId, guildChannelData in pairs(guildData) do
+            for guildRoomNumber, roomData in pairs(guildChannelData.rooms) do
+                table.insert(guildRooms, roomData)
+            end
+        end
+
+        table.sort(guildRooms, GuildRoomEntriesComparator)
+
+        for i, roomData in ipairs(guildRooms) do
+            AddHistoryDataToList(self.list, roomData.historyData, roomData.fullName, roomData)
         end
     end
 end

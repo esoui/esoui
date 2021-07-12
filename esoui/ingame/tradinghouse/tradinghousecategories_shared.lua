@@ -352,11 +352,13 @@ do
     local function ApplyAllWeaponsToSearch(search)
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, ITEMTYPE_WEAPON)
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_WEAPON, EVERY_VALID_WEAPON_TYPE)
+        search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     end
 
     local function ApplyWeaponToSearch(search, weaponType)
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, ITEMTYPE_WEAPON)
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_WEAPON, weaponType)
+        search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     end
 
     function AddAllWeaponsCategory(equipmentFilterType)
@@ -380,10 +382,13 @@ do
         local SUBCATEGORY_ENUM_KEY_PREFIX = "WeaponType"
         categoryParams:SetApplyToSearchCallback(ApplyWeaponToSearch)
         categoryParams:SetContainsItemCallback(function(itemLink)
-            local weaponType = GetItemLinkWeaponType(itemLink)
-            for _, searchWeaponType in ipairs(weaponTypes) do
-                if weaponType == searchWeaponType then
-                    return true, SUBCATEGORY_ENUM_KEY_PREFIX .. weaponType
+            local actorCategory = GetItemLinkActorCategory(itemLink)
+            if actorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER then
+                local weaponType = GetItemLinkWeaponType(itemLink)
+                for _, searchWeaponType in ipairs(weaponTypes) do
+                    if weaponType == searchWeaponType then
+                        return true, SUBCATEGORY_ENUM_KEY_PREFIX .. weaponType
+                    end
                 end
             end
             return false
@@ -440,6 +445,7 @@ do
     local function ApplyAllApparelToSearch(search)
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_EQUIP, ALL_APPAREL_EQUIP_TYPES)
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_WEAPON, ALL_APPAREL_WEAPON_TYPES)
+        search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     end
 
     function AddAllApparelCategory()
@@ -459,6 +465,7 @@ do
             search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, ITEMTYPE_ARMOR)
             search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ARMOR, armorType)
             search:SetFilter(TRADING_HOUSE_FILTER_TYPE_EQUIP, subcategoryValue)
+            search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
         end
 
         local categoryParams = AddCategory(string.format("Armor%d", armorType))
@@ -469,11 +476,14 @@ do
         local SUBCATEGORY_ENUM_KEY_PREFIX = "EquipType"
         categoryParams:SetApplyToSearchCallback(ApplyArmorToSearch)
         categoryParams:SetContainsItemCallback(function(itemLink)
-            if armorType == GetItemLinkArmorType(itemLink) then
-                local equipType = GetItemLinkEquipType(itemLink)
-                for _, searchEquipType in ipairs(ARMOR_EQUIP_TYPES) do
-                    if searchEquipType == equipType then
-                        return true, SUBCATEGORY_ENUM_KEY_PREFIX..equipType
+            local actorCategory = GetItemLinkActorCategory(itemLink)
+            if actorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER then
+                if armorType == GetItemLinkArmorType(itemLink) then
+                    local equipType = GetItemLinkEquipType(itemLink)
+                    for _, searchEquipType in ipairs(ARMOR_EQUIP_TYPES) do
+                        if searchEquipType == equipType then
+                            return true, SUBCATEGORY_ENUM_KEY_PREFIX..equipType
+                        end
                     end
                 end
             end
@@ -492,6 +502,7 @@ do
 
     local function ApplyShieldToSearch(search)
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_WEAPON, WEAPONTYPE_SHIELD)
+        search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     end
 
     function AddShieldCategory()
@@ -502,7 +513,11 @@ do
 
         categoryParams:SetApplyToSearchCallback(ApplyShieldToSearch)
         categoryParams:SetContainsItemCallback(function(itemLink)
-            return GetItemLinkWeaponType(itemLink) == WEAPONTYPE_SHIELD
+            local actorCategory = GetItemLinkActorCategory(itemLink)
+            if actorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER then
+                return GetItemLinkWeaponType(itemLink) == WEAPONTYPE_SHIELD
+            end
+            return false
         end)
         categoryParams:AddFeatureKeys("LevelRange", "ArmorTraits", "ArmorEnchantments")
         AddAllSubcategory(categoryParams)
@@ -526,6 +541,7 @@ do
     local function ApplyJewelryToSearch(search, subcategoryValue)
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, ITEMTYPE_ARMOR)
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_EQUIP, subcategoryValue)
+        search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     end
 
     function AddJewelryCategory()
@@ -538,10 +554,13 @@ do
         local SUBCATEGORY_ENUM_KEY_PREFIX = "EquipType"
         categoryParams:SetApplyToSearchCallback(ApplyJewelryToSearch)
         categoryParams:SetContainsItemCallback(function(itemLink)
-            local equipType = GetItemLinkEquipType(itemLink)
-            for _, searchEquipType in ipairs(JEWELRY_EQUIP_TYPES) do
-                if equipType == searchEquipType then
-                    return true, SUBCATEGORY_ENUM_KEY_PREFIX..equipType
+            local actorCategory = GetItemLinkActorCategory(itemLink)
+            if actorCategory == GAMEPLAY_ACTOR_CATEGORY_PLAYER then
+                local equipType = GetItemLinkEquipType(itemLink)
+                for _, searchEquipType in ipairs(JEWELRY_EQUIP_TYPES) do
+                    if equipType == searchEquipType then
+                        return true, SUBCATEGORY_ENUM_KEY_PREFIX..equipType
+                    end
                 end
             end
             return false
@@ -1124,6 +1143,163 @@ do
     end
 end
 
+local AddAllCompanionEquipmentCategory, AddCompanionEquipmentCategory
+do
+    local COMPANION_EQUIPMENT_DISPLAY_CATEGORY_LIST =
+    {
+        ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,
+        ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
+        ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
+    }
+    local iconsForCompanionEquipmentType = {}
+    local enumValuesForCompanionEquipmentType = {}
+
+    for _, displayCategory in ipairs(COMPANION_EQUIPMENT_DISPLAY_CATEGORY_LIST) do
+        iconsForCompanionEquipmentType[displayCategory] = {}
+        enumValuesForCompanionEquipmentType[displayCategory] = {}
+
+        local equipmentFilterTypeSubcategories = ZO_ItemFilterUtils.GetSubCategoryTypesByDisplayCategoryType(displayCategory)
+        for _, equipmentFilterType in pairs(equipmentFilterTypeSubcategories) do
+            if equipmentFilterType ~= EQUIPMENT_FILTER_TYPE_NONE then
+                local displayInfo = ZO_ItemFilterUtils.GetEquipmentFilterTypeFilterDisplayInfo(equipmentFilterType)
+                iconsForCompanionEquipmentType[displayCategory][equipmentFilterType] = displayInfo.icons
+                table.insert(enumValuesForCompanionEquipmentType[displayCategory], equipmentFilterType)
+            end
+        end
+    end
+
+    local EVERY_VALID_WEAPON_TYPE = ZO_ItemFilterUtils.GetAllWeaponTypesInEquipmentFilterTypes()
+
+    local function ApplyAllCompanionEquipmentToSearch(search, subcategoryValue)
+        search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, { ITEMTYPE_WEAPON, ITEMTYPE_ARMOR, ITEMTYPE_JEWELRY })
+        search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+    end
+
+    function AddAllCompanionEquipmentCategory()
+        local categoryParams = AddCategory("AllCompanionEquipment")
+
+        categoryParams:SetName(GetString("SI_TRADINGHOUSECATEGORYHEADER_ALLCATEGORIES", TRADING_HOUSE_CATEGORY_HEADER_COMPANION_EQUIPMENT))
+        categoryParams:SetHeader(TRADING_HOUSE_CATEGORY_HEADER_COMPANION_EQUIPMENT)
+        categoryParams:SetIsAllItemsCategory(true)
+
+        categoryParams:SetApplyToSearchCallback(ApplyAllCompanionEquipmentToSearch)
+        AddAllSubcategory(categoryParams)
+    end
+
+    function AddCompanionEquipmentCategory(companionEquipmentDisplayCategory)
+        local function ApplyCompanionEquipmentWeaponsToSearch(search, subFilterType)
+            local weaponTypes = {}
+            if type(subFilterType) == "table" then
+                -- subFilterType being a table indicates this is the all option so just get every related weapon type
+                weaponTypes = EVERY_VALID_WEAPON_TYPE
+            else
+                weaponTypes = ZO_ItemFilterUtils.GetWeaponTypesByEquipmentFilterType(subFilterType)
+            end
+
+            search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, ITEMTYPE_WEAPON)
+            search:SetFilter(TRADING_HOUSE_FILTER_TYPE_WEAPON, weaponTypes)
+            search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+        end
+
+        local function ApplyCompanionEquipmentArmorToSearch(search, subFilterType)
+            if type(subFilterType) == "table" then
+                -- subFilterType being a table indicates this is the all option so just get every related armor type
+                local ARMOR_EQUIP_TYPES =
+                {
+                    EQUIP_TYPE_CHEST,
+                    EQUIP_TYPE_FEET,
+                    EQUIP_TYPE_HAND,
+                    EQUIP_TYPE_HEAD,
+                    EQUIP_TYPE_LEGS,
+                    EQUIP_TYPE_SHOULDERS,
+                    EQUIP_TYPE_WAIST,
+                }
+
+                -- So this is a bit clever: Each piece of apparel has a slot it can be equipped to, so we enumerate those.
+                -- then we also need to catch shields, so we specify that the weapon type must either be SHIELD or NONE (which is the value all non-weapons have)
+                -- This catches normal armor, and shields.
+                local ALL_APPAREL_EQUIP_TYPES = { EQUIP_TYPE_OFF_HAND }
+                ZO_CombineNumericallyIndexedTables(ALL_APPAREL_EQUIP_TYPES, ARMOR_EQUIP_TYPES)
+
+                local ALL_APPAREL_WEAPON_TYPES =
+                {
+                    WEAPON_TYPE_NONE,
+                    WEAPON_TYPE_SHIELD
+                }
+                search:SetFilter(TRADING_HOUSE_FILTER_TYPE_EQUIP, ALL_APPAREL_EQUIP_TYPES)
+                search:SetFilter(TRADING_HOUSE_FILTER_TYPE_WEAPON, ALL_APPAREL_WEAPON_TYPES)
+            else
+                local armorType = ZO_ItemFilterUtils.GetArmorTypesByEquipmentFilterType(subFilterType)
+                if armorType then
+                    search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ARMOR, armorType)
+                elseif subFilterType == EQUIPMENT_FILTER_TYPE_SHIELD then
+                    search:SetFilter(TRADING_HOUSE_FILTER_TYPE_WEAPON, WEAPONTYPE_SHIELD)
+                end
+            end
+            search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+        end
+
+        local function ApplyCompanionEquipmentJewelryToSearch(search, subFilterType)
+            local jewelryTypes = {}
+            if type(subFilterType) == "table" then
+                search:SetFilter(TRADING_HOUSE_FILTER_TYPE_EQUIP, { EQUIP_TYPE_NECK, EQUIP_TYPE_RING })
+            else
+                if subFilterType == EQUIPMENT_FILTER_TYPE_NECK then
+                    search:SetFilter(TRADING_HOUSE_FILTER_TYPE_EQUIP, EQUIP_TYPE_NECK)
+                elseif subFilterType == EQUIPMENT_FILTER_TYPE_RING then
+                    search:SetFilter(TRADING_HOUSE_FILTER_TYPE_EQUIP, EQUIP_TYPE_RING)
+                end
+            end
+            search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+        end
+
+        local APPLY_TO_SEARCH_FUNCTIONS =
+        {
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = ApplyCompanionEquipmentWeaponsToSearch,
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = ApplyCompanionEquipmentArmorToSearch,
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = ApplyCompanionEquipmentJewelryToSearch,
+        }
+
+        local FEATURE_KEYS =
+        {
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = "CompanionWeaponTraits",
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = "CompanionArmorTraits",
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = "CompanionJewelryTraits",
+        }
+
+        local categoryParams = AddCategory(string.format("Companion%d", companionEquipmentDisplayCategory))
+
+        categoryParams:SetName(GetString("SI_ITEMTYPEDISPLAYCATEGORY", companionEquipmentDisplayCategory))
+        categoryParams:SetHeader(TRADING_HOUSE_CATEGORY_HEADER_COMPANION_EQUIPMENT)
+
+        categoryParams:SetApplyToSearchCallback(APPLY_TO_SEARCH_FUNCTIONS[companionEquipmentDisplayCategory])
+        categoryParams:SetContainsItemCallback(function(itemLink)
+            local actorCategory = GetItemLinkActorCategory(itemLink)
+            if actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+                local linkItemType = GetItemLinkItemType(itemLink)
+                local itemTypeList = ZO_ItemFilterUtils.GetSubCategoryTypesByDisplayCategoryType(companionEquipmentDisplayCategory)
+                for _, itemType in ipairs(itemTypeList) do
+                    if linkItemType == itemType then
+                        return true
+                    end
+                end
+            end
+            return false
+        end)
+
+        categoryParams:AddFeatureKeys(FEATURE_KEYS[companionEquipmentDisplayCategory])
+
+        AddEnumSubcategories(categoryParams,
+        {
+            enumKeyPrefix = "equipmentFilterType",
+            enumStringPrefix = "SI_EQUIPMENTFILTERTYPE",
+            allItemsString = GetString(SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_ALL),
+            iconsForEnumValue = iconsForCompanionEquipmentType[companionEquipmentDisplayCategory],
+            enumValues = enumValuesForCompanionEquipmentType[companionEquipmentDisplayCategory],
+        })
+    end
+end
+
 local function AddMiscCategory(itemType)
     local function ApplyItemTypeToSearch(search)
         search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, itemType)
@@ -1321,6 +1497,12 @@ AddFurnishingCategory(SPECIALIZED_ITEMTYPE_FURNISHING_TARGET_DUMMY)
 AddFurnishingCategory(SPECIALIZED_ITEMTYPE_FURNISHING_LIGHT)
 AddFurnishingCategory(SPECIALIZED_ITEMTYPE_FURNISHING_SEATING)
 AddFurnishingCategory(SPECIALIZED_ITEMTYPE_FURNISHING_ORNAMENTAL)
+
+-- Companion Equipment
+AddAllCompanionEquipmentCategory()
+AddCompanionEquipmentCategory(ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS)
+AddCompanionEquipmentCategory(ITEM_TYPE_DISPLAY_CATEGORY_ARMOR)
+AddCompanionEquipmentCategory(ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY)
 
 -- Misc
 -- Misc does not have an "all" category

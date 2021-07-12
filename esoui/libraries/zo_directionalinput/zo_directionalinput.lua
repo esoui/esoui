@@ -260,13 +260,29 @@ local DIGITAL_BUTTON_MAGNITUDE = 1.0
 local INPUT_DEVICE_QUERY_X =
 {
     [ZO_DI_LEFT_STICK] = function(self)
+        if IsKeyDown(KEY_CTRL) then
+            if IsKeyDown(KEY_NUMPAD6) then
+                return DIGITAL_BUTTON_MAGNITUDE
+            elseif IsKeyDown(KEY_NUMPAD4) then
+                return -DIGITAL_BUTTON_MAGNITUDE
+            end
+        end
         return GetGamepadLeftStickX(GAMEPAD_INCLUDE_DEADZONE)
     end,
     [ZO_DI_RIGHT_STICK] = function(self)
+        if not IsKeyDown(KEY_CTRL) then
+            if IsKeyDown(KEY_NUMPAD6) then
+                return DIGITAL_BUTTON_MAGNITUDE
+            elseif IsKeyDown(KEY_NUMPAD4) then
+                return -DIGITAL_BUTTON_MAGNITUDE
+            end
+        end
         return GetGamepadRightStickX(GAMEPAD_INCLUDE_DEADZONE)
     end,
     [ZO_DI_DPAD] = function(self)
-        return (IsKeyDown(KEY_GAMEPAD_DPAD_LEFT) and -DIGITAL_BUTTON_MAGNITUDE or 0) + (IsKeyDown(KEY_GAMEPAD_DPAD_RIGHT) and DIGITAL_BUTTON_MAGNITUDE or 0)
+        local negativeMagnitude = ((IsKeyDown(KEY_GAMEPAD_DPAD_LEFT) or IsKeyDown(KEY_LEFTARROW)) and -DIGITAL_BUTTON_MAGNITUDE or 0)
+        local positiveMagnitude = ((IsKeyDown(KEY_GAMEPAD_DPAD_RIGHT) or IsKeyDown(KEY_RIGHTARROW)) and DIGITAL_BUTTON_MAGNITUDE or 0)
+        return negativeMagnitude + positiveMagnitude
     end,
 }
 
@@ -277,13 +293,29 @@ end
 local INPUT_DEVICE_QUERY_Y =
 {
     [ZO_DI_LEFT_STICK] = function(self)
+        if IsKeyDown(KEY_CTRL) then
+            if IsKeyDown(KEY_NUMPAD8) then
+                return DIGITAL_BUTTON_MAGNITUDE
+            elseif IsKeyDown(KEY_NUMPAD2) then
+                return -DIGITAL_BUTTON_MAGNITUDE
+            end
+        end
         return GetGamepadLeftStickY(GAMEPAD_INCLUDE_DEADZONE)
     end,
     [ZO_DI_RIGHT_STICK] = function(self)
+        if not IsKeyDown(KEY_CTRL) then
+            if IsKeyDown(KEY_NUMPAD8) then
+                return DIGITAL_BUTTON_MAGNITUDE
+            elseif IsKeyDown(KEY_NUMPAD2) then
+                return -DIGITAL_BUTTON_MAGNITUDE
+            end
+        end
         return GetGamepadRightStickY(GAMEPAD_INCLUDE_DEADZONE)
     end,
     [ZO_DI_DPAD] = function(self)
-        return (IsKeyDown(KEY_GAMEPAD_DPAD_UP) and DIGITAL_BUTTON_MAGNITUDE or 0) + (IsKeyDown(KEY_GAMEPAD_DPAD_DOWN) and -DIGITAL_BUTTON_MAGNITUDE or 0)
+        local negativeMagnitude = ((IsKeyDown(KEY_GAMEPAD_DPAD_DOWN) or IsKeyDown(KEY_DOWNARROW)) and -DIGITAL_BUTTON_MAGNITUDE or 0)
+        local positiveMagnitude = ((IsKeyDown(KEY_GAMEPAD_DPAD_UP) or IsKeyDown(KEY_UPARROW)) and DIGITAL_BUTTON_MAGNITUDE or 0)
+        return negativeMagnitude + positiveMagnitude
     end,
 }
 

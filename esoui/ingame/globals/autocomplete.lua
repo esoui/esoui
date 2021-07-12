@@ -105,7 +105,9 @@ local function Initialize(event, name)
         end
 
         local function OnUnitCreated(event, tag)
-            g_recentInteractions:AddRecentPlayer(GetUnitName(tag))
+            if IsUnitPlayer(tag) then
+                g_recentInteractions:AddRecentPlayer(GetUnitName(tag))
+            end
         end
 
         local function OnInboxUpdate()

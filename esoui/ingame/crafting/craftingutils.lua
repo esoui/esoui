@@ -512,6 +512,7 @@ function ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(menuBar)
 
     local function OnCraftCompleted()
         ZO_MenuBar_SetAllButtonsEnabled(menuBar, true)
+        ZO_MenuBar_UpdateButtons(menuBar, true)
     end
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", OnCraftStarted)
@@ -694,7 +695,7 @@ end
 
 function ZO_CraftingUtils_IsCraftingWindowOpen()
     return ZO_Smithing_IsSceneShowing()
-            or SYSTEMS:IsShowing("alchemy")
+            or SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME)
             or ZO_Enchanting_IsSceneShowing()
             or ZO_Provisioner_IsSceneShowing()
 end

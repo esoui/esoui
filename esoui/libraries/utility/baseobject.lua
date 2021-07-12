@@ -1,3 +1,58 @@
+local MUST_IMPLEMENT_SENTINEL = function()
+    error(2, "Attempted to call unimplemented method!")
+end
+
+function ZO_VerifyClassImplementation(finalClass, classTraceback)
+    -- detect any instances of ZO_MUST_IMPLEMENT that are not implemented.
+    local function VisitClass(currentClass)
+        for fieldName, fieldValue in pairs(currentClass) do
+            if fieldValue == MUST_IMPLEMENT_SENTINEL and finalClass[fieldName] == MUST_IMPLEMENT_SENTINEL then
+                local NO_STACK_TRACE = 0
+                error("Class has unimplemented method: " .. fieldName .. "\n" .. classTraceback, NO_STACK_TRACE)
+            end
+        end
+
+        if currentClass.__parentClasses then
+            for _, parentClass in ipairs(currentClass.__parentClasses) do
+                VisitClass(parentClass)
+            end
+        end
+    end
+    VisitClass(finalClass)
+end
+
+local RegisterConcreteClass, RemoveConcreteClass
+local SHOULD_VERIFY_CLASSES = GetCVar("EnableLuaClassVerification") == "1"
+if SHOULD_VERIFY_CLASSES then
+    local g_concreteClassSet = {}
+    function RegisterConcreteClass(concreteClass, stackLevel)
+        g_concreteClassSet[concreteClass] = debug.traceback(nil, stackLevel + 1)
+    end
+
+    function RemoveConcreteClass(concreteClass)
+        g_concreteClassSet[concreteClass] = nil
+    end
+
+    function ZO_VerifyConcreteClasses()
+        for concreteClass, classTraceback in pairs(g_concreteClassSet) do
+            ZO_VerifyClassImplementation(concreteClass, classTraceback)
+            g_concreteClassSet[concreteClass] = nil
+        end
+    end
+
+    GetEventManager():RegisterForEvent("BaseObject", EVENT_ADD_ON_LOADED, function()
+        ZO_VerifyConcreteClasses()
+    end)
+else
+    -- do nothing instead of tracking and automatically verifying classes
+    function RegisterConcreteClass()
+    end
+    function RemoveConcreteClass()
+    end
+    function ZO_VerifyConcreteClasses()
+    end
+end
+
 ZO_Object = {}
 ZO_Object.__index = ZO_Object
 
@@ -13,6 +68,12 @@ end
 function ZO_Object:Subclass()
     local newClass = setmetatable({}, self)
     newClass.__index = newClass
+    newClass.__parentClasses = { self }
+    newClass.__isAbstractClass = false
+    if self.__isAbstractClass then
+        local PARENT_STACK = 2
+        RegisterConcreteClass(newClass, PARENT_STACK) 
+    end
     return newClass
 end
 
@@ -35,7 +96,44 @@ function ZO_Object:MultiSubclass(...)
         end
     })
     newClass.__index = newClass
+    newClass.__parentClasses = parentClasses
+    newClass.__isAbstractClass = false
+    for _, parentClass in ipairs(parentClasses) do
+        if parentClass.__isAbstractClass then
+            local PARENT_STACK = 2
+            RegisterConcreteClass(newClass, PARENT_STACK) 
+            break
+        end
+    end
     return newClass
+end
+
+--- Use MUST_IMPLEMENT to create a field that must be implemented by
+-- subclasses. If a concrete class does not implement a field that contains a
+-- MUST_IMPLEMENT, it will cause an error after the entire addon has been loaded.
+function ZO_Object:MUST_IMPLEMENT()
+    self.__isAbstractClass = true
+    RemoveConcreteClass(self)
+    return MUST_IMPLEMENT_SENTINEL
+end
+
+function ZO_Object:IsInstanceOf(checkClass)
+    local function VisitClass(currentClass)
+        if currentClass == checkClass then
+            return true
+        end
+
+        if currentClass.__parentClasses then
+            for _, parentClass in ipairs(currentClass.__parentClasses) do
+                if VisitClass(parentClass) then
+                    return true
+                end
+            end
+        end
+
+        return false
+    end
+    return VisitClass(self.__index)
 end
 
 --[[
@@ -104,6 +202,8 @@ end
 function ZO_DataSourceObject:Subclass()
     local newTemplate = setmetatable({}, { __index = self })
     newTemplate.instanceMetaTable = { __index = ZO_GenerateDataSourceMetaTableIndexFunction(newTemplate) }
+    newTemplate.__parentClasses = { self }
+    newTemplate.__isAbstractClass = false
     return newTemplate
 end
 

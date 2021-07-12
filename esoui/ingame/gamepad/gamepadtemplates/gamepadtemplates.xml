@@ -251,9 +251,24 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_GamepadCompanionSkillLinePreview_AbilityEntry" inherits="ZO_GamepadSkillLinePreview_AbilityEntry" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="20" />
+                </Texture>
+
+                <Label name="$(parent)Label" override="true">
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_MINIMUM_INDENT" />
+                    <Dimensions x="328"/>
+                </Label>
+
+                <Texture name="$(parent)LeftIndicator" override="true" hidden="true" />
+            </Controls>
+        </Control>
+
         <Control name="ZO_GamepadSimpleAbilityEntryTemplate" inherits="ZO_GamepadSubMenuEntryTemplate ZO_GamepadSimpleAbilityEntryTemplateBase" virtual="true" override="true">
             <Controls>
-                <Texture name="$(parent)Icon" inherits="ZO_GamepadSkillsEntryIcon"  override="true"/>
+                <Texture name="$(parent)Icon" inherits="ZO_GamepadSkillsEntryIcon" override="true" />
                 <Label name="$(parent)Label" override="true" >
                     <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
                     <Dimensions x="290"/>

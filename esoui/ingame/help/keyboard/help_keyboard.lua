@@ -171,8 +171,7 @@ function ZO_Help_Keyboard:SelectHelp(helpCategoryIndex, helpIndex)
     if self.helpControls and self.helpControls[helpCategoryIndex] then
         local helpControl = self.helpControls[helpCategoryIndex][helpIndex]
         if helpControl then
-            local treeNode = ZO_TreeControl_GetNode(helpControl)
-            treeNode:GetTree():SelectNode(treeNode)
+            helpControl.node:GetTree():SelectNode(helpControl.node)
         end
     end
 end

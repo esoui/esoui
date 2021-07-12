@@ -50,6 +50,7 @@ end
 -- Buy ESO plus
 ESO_Dialogs["BUY_ESO_PLUS_FROM_PLATFORM_STORE"] =
 {
+    mustChoose = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,

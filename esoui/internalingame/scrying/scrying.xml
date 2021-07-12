@@ -123,7 +123,7 @@
 
         <Polygon name="ZO_ScryingFakeHex" inherits="ZO_ScryingHexPolygon" layer="CONTROLS" centerTextureFile="EsoUI/Art/Scrying/hex_fakehex.dds" virtual="true" alpha="0.2">
             <ClearAnchors />
-            <Border thicknessPercent=".05" minThicknessPixels="3" color="AA00EFFF" textureFile="EsoUI/Art/Scrying/hex_line_inout.dds"/>
+            <Border thicknessPercent=".05" minThickness="3px" color="AA00EFFF" textureFile="EsoUI/Art/Scrying/hex_line_inout.dds"/>
         </Polygon>
 
         <Control name="ZO_ScryingHex" virtual="true">

@@ -124,7 +124,7 @@ local ZO_OptionsPanel_Audio_ControlData =
                 ["SoundEnabled_On"] = ZO_Options_SetOptionActive,
                 ["SoundEnabled_Off"]= ZO_Options_SetOptionInactive,
             },
-            onReleasedHandler = function() PlaySound(SOUNDS.VOLUME_DING_VO) end,
+            onReleasedHandler = function() PlaySound(SOUNDS.VOLUME_DING_FOOTSTEPS) end,
             gamepadIsEnabledCallback = IsSoundEnabled,
         },
         --Options_Audio_VOVolume
@@ -165,6 +165,26 @@ local ZO_OptionsPanel_Audio_ControlData =
                 ["SoundEnabled_Off"]= ZO_Options_SetOptionInactive,
             },
             onReleasedHandler = function() PlaySound(SOUNDS.VOLUME_DING_UI) end,
+            gamepadIsEnabledCallback = IsSoundEnabled,
+        },
+        --Options_Audio_VideoSoundVolume
+        [AUDIO_SETTING_VIDEO_VOLUME] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_VIDEO_VOLUME,
+            panel = SETTING_PANEL_AUDIO,
+            text = SI_AUDIO_OPTIONS_VIDEO_VOLUME,
+            tooltipText = SI_AUDIO_OPTIONS_VIDEO_VOLUME_TOOLTIP,
+            minValue = 0,
+            maxValue = 100,
+            showValue = true,
+            eventCallbacks =
+            {
+                ["SoundEnabled_On"] = ZO_Options_SetOptionActive,
+                ["SoundEnabled_Off"]= ZO_Options_SetOptionInactive,
+            },
+            onReleasedHandler = function() PlaySound(SOUNDS.VOLUME_DING_VIDEO) end,
             gamepadIsEnabledCallback = IsSoundEnabled,
         },
         --Options_Audio_BackgroundAudio

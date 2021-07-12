@@ -9,7 +9,7 @@ ZO_CompanionCollectionBook_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 function ZO_CompanionCollectionBook_Gamepad:Initialize(control)
     COMPANION_COLLECTION_BOOK_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
-    COMPANION_COLLECTION_BOOK_GAMEPAD_SCENE = ZO_COMPANION_MANAGER:CreateInteractScene("companionCollectionBookGamepad")
+    COMPANION_COLLECTION_BOOK_GAMEPAD_SCENE = ZO_InteractScene:New("companionCollectionBookGamepad", SCENE_MANAGER, ZO_COMPANION_MANAGER:GetInteraction())
     COMPANION_COLLECTION_BOOK_GAMEPAD_SCENE:AddFragment(COMPANION_COLLECTION_BOOK_GAMEPAD_FRAGMENT)
 
     local ACTIVATE_ON_SHOW = true
@@ -218,7 +218,7 @@ function ZO_CompanionCollectionBook_Gamepad:InitializeKeybindStripDescriptors()
                 local collectibleData = self:GetCurrentTargetCollectibleData()
 
                 if collectibleData then
-                    return IsChatSystemAvailableForCurrentPlatform() or collectibleData:IsRenameable() or self:CanPurchaseCurrentTarget() or self:CanUpgradeCurrentTarget()
+                    return IsChatSystemAvailableForCurrentPlatform() or collectibleData:IsRenameable() or self:CanPurchaseCurrentTarget()
                 else
                     return false
                 end

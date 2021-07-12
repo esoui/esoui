@@ -1200,6 +1200,7 @@ function ZO_CharacterCreate_Gamepad:InitializeTemplatesDialog()
 
     local dialogDescription = 
     {
+        mustChoose = true,
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC

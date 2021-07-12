@@ -92,10 +92,9 @@ end
 
 --Global API
 
-function MailSend:ComposeMailTo(address)
+function MailSend:ComposeMailTo(address, subject)
     MAIN_MENU_KEYBOARD:ShowScene("mailSend")
-    self:ClearFields()
-    SCENE_MANAGER:CallWhen("mailSend", SCENE_SHOWN, function() self:SetReply(address) end)
+    SCENE_MANAGER:CallWhen("mailSend", SCENE_SHOWN, function() self:SetReply(address, subject) end)
 end
 
 --Internal
@@ -217,11 +216,12 @@ function MailSend:Send()
     end
 end
 
-function MailSend:SetReply(to, subject)
+function MailSend:SetReply(to, formattedReplySubject)
+    self:ClearFields()
     self.to:SetText(to or "")
     self.body:SetText("")
-    if subject and subject ~= "" then
-        self.subject:SetText(zo_strformat(SI_MAIL_REPLY_SUBJECT, subject))
+    if formattedReplySubject and formattedReplySubject ~= "" then
+        self.subject:SetText(formattedReplySubject)
         self.body:TakeFocus()
     else
         self.subject:SetText("")

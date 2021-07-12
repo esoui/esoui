@@ -277,6 +277,16 @@ ZO_TOOLTIP_STYLES =
         controlTemplateOverrideName = "skillLineEntry",
         widthPercent = 100,
     },
+    companionSkillLineEntryHeaderSection =
+    {
+        paddingLeft = ZO_GAMEPAD_DEFAULT_LIST_ENTRY_MINIMUM_INDENT,
+    },
+    companionSkillLineEntryRow =
+    {
+        controlTemplate = "ZO_GamepadCompanionSkillLinePreview_AbilityEntry",
+        controlTemplateOverrideName = "companionSkillLineEntry",
+        widthPercent = 100,
+    },
     companionXpBar =
     {
         statusBarTemplate = "ZO_GamepadPlayerProgressBarTemplate",

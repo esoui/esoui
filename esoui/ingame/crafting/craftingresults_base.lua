@@ -156,9 +156,9 @@ local function DoesCraftingTypeHaveSlotAnimations(craftingType)
     if craftingType == CRAFTING_TYPE_PROVISIONING then
         return false
     elseif craftingType == CRAFTING_TYPE_ENCHANTING then
-        return true
+        return SYSTEMS:GetObject(ZO_ENCHANTING_SYSTEM_NAME):DoesCurrentModeHaveSlotAnimations()
     elseif craftingType == CRAFTING_TYPE_ALCHEMY then
-        return true
+        return SYSTEMS:GetObject(ZO_ALCHEMY_SYSTEM_NAME):DoesCurrentModeHaveSlotAnimations()
     elseif ZO_Smithing_IsSmithingStation(craftingType) then
         local activeSmithing = ZO_Smithing_GetActiveObject()
         if activeSmithing then

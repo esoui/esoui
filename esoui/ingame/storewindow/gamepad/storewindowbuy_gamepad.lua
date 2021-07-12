@@ -243,7 +243,7 @@ function ZO_GamepadStoreBuy:TogglePreviewMode()
 end
 
 function ZO_GamepadStoreBuy:CanPreviewStoreEntry(data)
-    if data then
+    if data and IsCharacterPreviewingAvailable() then
         local storeEntryIndex = ZO_Inventory_GetSlotIndex(data)
         return ZO_StoreManager_DoPreviewAction(ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE, storeEntryIndex)
     end

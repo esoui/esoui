@@ -308,6 +308,12 @@ function MailManager_Gamepad:PerformDeferredInitialization()
     }
 
     self:InitializeControls()
+    self:InitializeTabs()
+end
+
+function MailManager_Gamepad:InitializeTabs()
+    self.inbox:PerformDeferredInitialization()
+    self.send:PerformDeferredInitialization()
 end
 
 function MailManager_Gamepad:InitializeControls()

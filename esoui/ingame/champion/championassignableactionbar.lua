@@ -2,6 +2,10 @@
 ZO_CHAMPION_FOCUSED_SKILL_STATUS_INDICATOR = "EsoUI/Art/Champion/Gamepad/gp_quickmenu_equipped_selected.dds"
 ZO_CHAMPION_EQUIPPED_STATUS_INDICATOR = "EsoUI/Art/Champion/Gamepad/gp_quickmenu_equipped.dds"
 
+ZO_CHAMPION_ACTION_BAR_INITIAL_SLOT_OFFSET_X = 44
+ZO_CHAMPION_ACTION_BAR_DISCIPLINE_PADDING_X = 58
+ZO_CHAMPION_ACTION_BAR_SLOT_PADDING_X = 13
+
 --[[
     The ChampionAssignableAction bar is an action bar, like the
     KeyboardAssignableActionBar in the skills UI, but specifically for slotting
@@ -35,13 +39,13 @@ function ZO_ChampionAssignableActionBar:Initialize(control)
 
         if lastSlotControl then
             if lastSlot:GetRequiredDisciplineId() ~= slot:GetRequiredDisciplineId() then
-                slotControl:SetAnchor(LEFT, lastSlotControl, RIGHT, 58, 0)
+                slotControl:SetAnchor(LEFT, lastSlotControl, RIGHT, ZO_CHAMPION_ACTION_BAR_DISCIPLINE_PADDING_X, 0)
                 self.firstSlotPerDiscipline[slot:GetRequiredDisciplineId()] = actionSlotIndex
             else
-                slotControl:SetAnchor(LEFT, lastSlotControl, RIGHT, 13, 0)
+                slotControl:SetAnchor(LEFT, lastSlotControl, RIGHT, ZO_CHAMPION_ACTION_BAR_SLOT_PADDING_X, 0)
             end
         else
-            slotControl:SetAnchor(LEFT, self.control, LEFT, 44, 0)
+            slotControl:SetAnchor(LEFT, self.control, LEFT, ZO_CHAMPION_ACTION_BAR_INITIAL_SLOT_OFFSET_X, 0)
             self.firstSlotPerDiscipline[slot:GetRequiredDisciplineId()] = actionSlotIndex
         end
         lastSlotControl = slotControl
@@ -187,34 +191,6 @@ function ZO_ChampionAssignableActionBar:GetGamepadEditor()
     return self.gamepadEditor
 end
 
-local ACTION_BAR_DISCIPLINE_TEXTURES = 
-{
-    [CHAMPION_DISCIPLINE_TYPE_COMBAT] =
-    {
-        border = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame.dds",
-        selected = "EsoUI/Art/Champion/ActionBar/champion_bar_combat_selection.dds",
-        slotted = "EsoUI/Art/Champion/ActionBar/champion_bar_combat_slotted.dds",
-        empty = "EsoUI/Art/Champion/ActionBar/champion_bar_combat_empty.dds",
-        disabled = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame_disabled.dds",
-    },
-    [CHAMPION_DISCIPLINE_TYPE_CONDITIONING] =
-    {
-        border = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame.dds",
-        selected = "EsoUI/Art/Champion/ActionBar/champion_bar_conditioning_selection.dds",
-        slotted = "EsoUI/Art/Champion/ActionBar/champion_bar_conditioning_slotted.dds",
-        empty = "EsoUI/Art/Champion/ActionBar/champion_bar_conditioning_empty.dds",
-        disabled = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame_disabled.dds",
-    },
-    [CHAMPION_DISCIPLINE_TYPE_WORLD] =
-    {
-        border = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame.dds",
-        selected = "EsoUI/Art/Champion/ActionBar/champion_bar_world_selection.dds",
-        slotted = "EsoUI/Art/Champion/ActionBar/champion_bar_world_slotted.dds",
-        empty = "EsoUI/Art/Champion/ActionBar/champion_bar_world_empty.dds",
-        disabled = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame_disabled.dds",
-    },
-}
-
 ZO_ChampionAssignableActionBarSlot = ZO_InitializingObject:Subclass()
 
 function ZO_ChampionAssignableActionBarSlot:New(...)
@@ -238,7 +214,7 @@ function ZO_ChampionAssignableActionBarSlot:Initialize(control, assignableAction
     self.starVisuals = ZO_ChampionStarVisuals:New(self.starControl)
 
     self.dragAndDropCallout = control:GetNamedChild("DragAndDropCallout")
-    self.textures = ACTION_BAR_DISCIPLINE_TEXTURES[GetChampionDisciplineType(self:GetRequiredDisciplineId())]
+    self.textures = GetChampionBarDisciplineTextures(GetChampionDisciplineType(self:GetRequiredDisciplineId()))
 
     self.starControl:SetHandler("OnUpdate", function(_, timeSecs)
         self.starVisuals:Update(timeSecs)
@@ -432,6 +408,12 @@ function ZO_ChampionAssignableActionBarSlot:HideDragAndDropCallout()
 end
 
 function ZO_ChampionAssignableActionBarSlot:OnDragStart()
+    local result = GetChampionPurchaseAvailability()
+    if result ~= CHAMPION_PURCHASE_SUCCESS then
+        ZO_AlertEvent(EVENT_CHAMPION_PURCHASE_RESULT, result)
+        return
+    end
+
     if GetCursorContentType() == MOUSE_CONTENT_EMPTY then
         if self.championSkillData and self.championSkillData:TryCursorPickup() then
             self:ClearSlot()

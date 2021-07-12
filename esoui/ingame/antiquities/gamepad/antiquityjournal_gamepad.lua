@@ -609,7 +609,11 @@ function ZO_AntiquityJournalGamepad:GetCurrentSubcategoryData()
 end
 
 -- Opens up the provided category, or the current category if no antiquityCategoryData is provided.
-function ZO_AntiquityJournalGamepad:ViewCategory(antiquityCategoryData, focusAntiquityList, autoSelectAntiquityOrSetData)
+function ZO_AntiquityJournalGamepad:ViewCategory(antiquityCategoryData, focusAntiquityList, autoSelectAntiquityOrSetData, resetFilters)
+    if resetFilters then
+        self.currentFilter = ANTIQUITY_FILTER_SHOW_ALL
+    end
+
     local parentCategoryData = nil
     local subcategoryData = nil
     if antiquityCategoryData then
@@ -695,7 +699,19 @@ function ZO_AntiquityJournalListGamepad:InitializeControlPools()
 end
 
 local function AntiquityOrSetEqualityFunction(left, right)
-    return left:GetType() == right:GetType() and left:GetId() == right:GetId()
+    local leftType = left:GetType()
+    local rightType = right:GetType()
+    if leftType == rightType then
+        return left:GetId() == right:GetId()
+    else
+        if leftType == ZO_ANTIQUITY_TYPE_SET and right:IsSetFragment() then
+            return left:GetId() == right:GetAntiquitySetData():GetId()
+        elseif rightType == ZO_ANTIQUITY_TYPE_SET and left:IsSetFragment() then
+            return left:GetAntiquitySetData():GetId() == right:GetId()
+        end
+    end
+
+    return false
 end
 
 function ZO_AntiquityJournalListGamepad:InitializeLists()
@@ -942,7 +958,8 @@ function ZO_AntiquityJournalListGamepad:CreateOptionActionDataViewInCodex()
             local scryableAntiquityData = self:GetCurrentAntiquityData()
             local antiquityCategoryData = scryableAntiquityData:GetAntiquityCategoryData()
             local FOCUS_ANTIQUITY_LIST = true
-            ANTIQUITY_JOURNAL_GAMEPAD:ViewCategory(antiquityCategoryData, FOCUS_ANTIQUITY_LIST, scryableAntiquityData)
+            local RESET_FILTERS = true
+            ANTIQUITY_JOURNAL_GAMEPAD:ViewCategory(antiquityCategoryData, FOCUS_ANTIQUITY_LIST, scryableAntiquityData, RESET_FILTERS)
         end,
         visible = function()
             local categoryData = self:GetCurrentSubcategoryData()
@@ -1073,10 +1090,13 @@ end
 
 function ZO_AntiquityJournalListGamepad:Activate(autoSelectAntiquityOrSetData)
     self:ClearActiveFragmentList()
+    local autoScrollIntoView = false
     if autoSelectAntiquityOrSetData then
         ZO_ScrollList_SetAutoSelectToMatchingDataEntry(self.list, autoSelectAntiquityOrSetData)
+        autoScrollIntoView = true
     end
-    ZO_SortFilterList_Gamepad.Activate(self)
+    local ANIMATE_INSTANTLY = true
+    ZO_SortFilterList_Gamepad.Activate(self, ANIMATE_INSTANTLY, autoScrollIntoView)
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
@@ -1237,10 +1257,9 @@ do
                         if antiquitySetData then
                             if not antiquitySets[antiquitySetData] then
                                 antiquityOrSetData = antiquitySetData
+                                antiquitySets[antiquitySetData] = true
 
                                 if antiquitySetData:HasDiscovered() then
-                                    antiquitySets[antiquitySetData] = true
-
                                     local numAntiquities = antiquitySetData:GetNumAntiquities()
                                     local rowTemplateIndex = math.ceil(numAntiquities / MAX_ANTIQUITIES_PER_ROW)
                                     local rowTemplate = ANTIQUITY_SET_ROW_DATA_TEMPLATES[rowTemplateIndex]

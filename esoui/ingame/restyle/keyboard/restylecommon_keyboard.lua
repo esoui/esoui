@@ -216,7 +216,7 @@ end
 
 function ZO_RestyleCommon_Keyboard:BuildCategories()
     local categoryData = self.categoryTree:GetSelectedData()
-    if categoryData then
+     if categoryData then
         local referenceData = categoryData.referenceData
         -- Because we're using a pool, we need to store off a copy of the restyle slot data for the equality function, in case the previous memory gets reused for a different node
         if referenceData.GetRestyleSetIndex then
@@ -483,17 +483,21 @@ do
     end
 
     function ZO_RestyleCommon_Keyboard:NavigateToCollectibleData(collectibleData)
-        if self:GetRestyleCategoryData():DerivesCollectibleCategoriesFromSlots() then
-            return false
-        end
-
-        local categoryData = collectibleData:GetCategoryData()
-        local node = self.collectibleCategoryNodeLookup[categoryData:GetId()]
-        if node then
-            self.categoryTree:SelectNode(node)
-            if not ScrollToCollectibleData(self:GetRestyleCategoryData():GetSpecializedCollectibleCategory(), collectibleData) then
-                PlaySound(SOUNDS.DEFAULT_CLICK)
+        if self.fragment:IsShowing() then
+            if self:GetRestyleCategoryData():DerivesCollectibleCategoriesFromSlots() then
+                return false
             end
+
+            local categoryData = collectibleData:GetCategoryData()
+            local node = self.collectibleCategoryNodeLookup[categoryData:GetId()]
+            if node then
+                self.categoryTree:SelectNode(node)
+                if not ScrollToCollectibleData(self:GetRestyleCategoryData():GetSpecializedCollectibleCategory(), collectibleData) then
+                    PlaySound(SOUNDS.DEFAULT_CLICK)
+                end
+            end
+        else
+            self.pendingNavigateToData = collectibleData
         end
     end
 
@@ -535,7 +539,9 @@ end
 
 function ZO_RestyleCommon_Keyboard:OnShowing()
     self:RegisterForEvents()
-    
+
+    ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:BeginRestyling()
+
     self:InitializeModeData()
 
     self:AddKeybinds()
@@ -546,7 +552,10 @@ function ZO_RestyleCommon_Keyboard:OnShowing()
 end
 
 function ZO_RestyleCommon_Keyboard:OnShown()
-    --Can be overidden
+    if self.pendingNavigateToData then
+        self:NavigateToCollectibleData(self.pendingNavigateToData)
+        self.pendingNavigateToData = nil
+    end
 end
 
 function ZO_RestyleCommon_Keyboard:OnHidden()

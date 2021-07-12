@@ -316,6 +316,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
 
     local function OnIncomingFriendInviteAdded(eventCode, inviterName)
+        PlaySound(SOUNDS.FRIEND_INVITE_RECEIVED)
         local displayName = ZO_FormatUserFacingDisplayName(inviterName)
         self:AddPromptToIncomingQueue(INTERACT_TYPE_FRIEND_REQUEST, inviterName, nil, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_FRIEND_REQUEST, ZO_SELECTED_TEXT:Colorize(displayName)),
             function()
@@ -403,6 +404,8 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             promptData.expiresAtS = campaignQueueData.expiresAtS
             promptData.dialogTitle = campaignQueueData.dialogTitle
             promptData.expirationCallback = DeferDecisionCallback
+
+            PlaySound(SOUNDS.CAMPAIGN_READY_CHECK)
         else
             --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
             self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId, campaignId)
@@ -431,6 +434,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
         --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
         local NO_TARGET_LABEL = nil
+
         local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED, campaignId, campaignId, NO_TARGET_LABEL, AcceptCampaignEntry, DeclineCampaignEntry)
 
         promptData.messageFormat = campaignQueueData.messageFormat
@@ -894,6 +898,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_QUEST_SHARE)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_TRAVEL_TO_LEADER)
     end
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)

@@ -518,13 +518,20 @@ function ZO_Tooltip:AddTrait(itemLink, extraData)
 end
 
 function ZO_Tooltip:AddSet(itemLink, equipped)
-    local hasSet, setName, numBonuses, numEquipped, maxEquipped = GetItemLinkSetInfo(itemLink)
+    local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = GetItemLinkSetInfo(itemLink)
     if hasSet then
+        local totalEquipped = zo_min(numNormalEquipped + numPerfectedEquipped, maxEquipped)
+        local isPerfectedSet = GetItemSetUnperfectedSetId(setId) > 0
         local setSection = self:AcquireSection(self:GetStyle("bodySection"))
-        setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, numEquipped, maxEquipped), self:GetStyle("bodyHeader"))
+        if isPerfectedSet then
+            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_PERFECTED_SET_NAME, setName, totalEquipped, maxEquipped, numPerfectedEquipped), self:GetStyle("bodyHeader"))
+        else
+            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, totalEquipped, maxEquipped), self:GetStyle("bodyHeader"))
+        end
         for bonusIndex = 1, numBonuses do
-            local numRequired, bonusDescription = GetItemLinkSetBonusInfo(itemLink, equipped, bonusIndex)
-            if numEquipped >= numRequired then
+            local numRequired, bonusDescription, isPerfectedBonus = GetItemLinkSetBonusInfo(itemLink, equipped, bonusIndex)
+            local numRelevantEquipped = isPerfectedBonus and numPerfectedEquipped or totalEquipped
+            if numRelevantEquipped >= numRequired then
                 setSection:AddLine(bonusDescription, self:GetStyle("activeBonus"), self:GetStyle("bodyDescription"))
             else
                 setSection:AddLine(bonusDescription, self:GetStyle("inactiveBonus"), self:GetStyle("bodyDescription"))
@@ -537,7 +544,7 @@ end
 function ZO_Tooltip:AddContainerSets(itemLink)
     local numContainerSets = GetItemLinkNumContainerSetIds(itemLink)
     for setIndex = 1, numContainerSets do
-        local hasSet, setName, numBonuses, numEquipped, maxEquipped = GetItemLinkContainerSetInfo(itemLink, setIndex)
+        local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = GetItemLinkContainerSetInfo(itemLink, setIndex)
         if hasSet then
             if setIndex > 1 then
                 local separatorSection = self:AcquireSection(self:GetStyle("itemSetSeparatorSection"))
@@ -546,12 +553,19 @@ function ZO_Tooltip:AddContainerSets(itemLink)
                 separatorSection:AddTexture(ZO_GAMEPAD_HEADER_DIVIDER_TEXTURE, self:GetStyle("dividerLine"))
                 self:AddSection(separatorSection)
             end
-
+            
+            local totalEquipped = zo_min(numNormalEquipped + numPerfectedEquipped, maxEquipped)
+            local isPerfectedSet = GetItemSetUnperfectedSetId(setId) > 0
             local setSection = self:AcquireSection(self:GetStyle("bodySection"))
-            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, numEquipped, maxEquipped), self:GetStyle("bodyHeader"))
+            if isPerfectedSet then
+                setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_PERFECTED_SET_NAME, setName, totalEquipped, maxEquipped, numPerfectedEquipped), self:GetStyle("bodyHeader"))
+            else
+                setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, totalEquipped, maxEquipped), self:GetStyle("bodyHeader"))
+            end
             for bonusIndex = 1, numBonuses do
-                local numRequired, bonusDescription = GetItemLinkContainerSetBonusInfo(itemLink, setIndex, bonusIndex)
-                if numEquipped >= numRequired then
+                local numRequired, bonusDescription, isPerfectedBonus = GetItemLinkContainerSetBonusInfo(itemLink, setIndex, bonusIndex)
+                local numRelevantEquipped = isPerfectedBonus and numPerfectedEquipped or totalEquipped
+                if numRelevantEquipped >= numRequired then
                     setSection:AddLine(bonusDescription, self:GetStyle("activeBonus"), self:GetStyle("bodyDescription"))
                 else
                     setSection:AddLine(bonusDescription, self:GetStyle("inactiveBonus"), self:GetStyle("bodyDescription"))

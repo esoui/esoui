@@ -67,8 +67,9 @@
                 </Scroll>
                 <Backdrop name="$(parent)Background" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <AnchorFill/>
-                    <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="32" edgeFileHeight="8" />
+                    <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="32" edgeFileHeight="8" edgeSize="3"/>
                     <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+                    <Insets left="3" top="3" right="-3" bottom="-3" />
                 </Backdrop>
             </Controls>
         </TopLevelControl>

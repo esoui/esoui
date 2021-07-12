@@ -636,6 +636,9 @@ function UpdatePlayerRole(role, selected)
     end
 end
 
+-- Renamed to specify being transformed into werewolf form rather than having the skill line
+IsWerewolf = IsPlayerInWerewolfForm
+
 --Skills refactor
 SelectSlotSkillAbility = SlotSkillAbilityInSlot
 
@@ -685,7 +688,7 @@ end
 
 function ZO_Skills_AbilityFailsWerewolfRequirement(skillType, skillLineIndex)
     local skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataByIndices(skillType, skillLineIndex)
-    return IsWerewolf() and not skillLineData:IsWerewolf()
+    return IsInWerewolfForm() and not skillLineData:IsWerewolf()
 end
 
 function ZO_Skills_OnlyWerewolfAbilitiesAllowedAlert()
@@ -1016,4 +1019,14 @@ function GetComparisonEquipSlotsFromBagItem(bagId, slotIndex)
         equipSlot2 = nil
     end
     return equipSlot1, equipSlot2
+end
+
+-- Layout Improvements
+
+GetStringWidthScaledPixels = GetStringWidthScaled
+
+-- ZO_Tree
+
+function ZO_TreeControl_GetNode(self)
+    return self.node
 end
