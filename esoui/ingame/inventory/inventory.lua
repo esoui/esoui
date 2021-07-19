@@ -827,7 +827,6 @@ function ZO_InventoryManager:DeactivateBankSearch()
 end
 
 function ZO_InventoryManager:ActivateHouseBankSearch()
-    TEXT_SEARCH_MANAGER:ActivateTextSearch("houseBankTextSearch")
     self:SetContextForInventories("houseBankTextSearch", { INVENTORY_BACKPACK, INVENTORY_HOUSE_BANK })
 
     local SUPPRESS_TEXT_CHANGED_CALLBACK = true

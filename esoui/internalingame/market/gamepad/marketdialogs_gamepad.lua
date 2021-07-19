@@ -1270,7 +1270,7 @@ do
                 local selectedHouseTemplateEntryData
                 for index, houseTemplateData in ipairs(self.houseSelectionInfo.houseTemplateDataList) do
                     local currencyType, marketData = next(houseTemplateData.marketPurchaseOptions)
-                    if houseTemplateData.name and marketData and (self.isGift and marketData.isGiftable) or (not self.isGift and not marketData.isHouseOwned) then
+                    if houseTemplateData.name and marketData and ((self.isGift and marketData.isGiftable) or (not self.isGift and not marketData.isHouseOwned)) then
                         local formattedName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_TEMPLATE_NAME_FORMAT, houseTemplateData.name)
                         local entry = dropdown:CreateItemEntry(formattedName, function() SetSelectedTemplateId(marketData.houseTemplateId) end)
                         entry.data = houseTemplateData

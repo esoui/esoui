@@ -722,7 +722,12 @@ end
 
 function ZO_MarketProduct_GetMarketProductHouseTemplateDataList(marketProductId, getMarketProductListingsCallback)
     local isHouseMarketProduct = false
+    --[[ If the defined default is valid, defaultHouseTemplateIndex should be that index;
+    if the defined default is not valid, but another is, it will be the first valid one;
+    if none are valid, it's the defined default again. ]]
     local defaultHouseTemplateIndex
+    local isDefaultTemplateValid = false
+    local isAnyTemplateValid = false
     local houseTemplateDataList = {}
 
     local houseId = GetMarketProductHouseId(marketProductId)
@@ -740,10 +745,6 @@ function ZO_MarketProduct_GetMarketProductHouseTemplateDataList(marketProductId,
                 houseTemplateId = houseTemplateId,
                 marketPurchaseOptions = {}
             }
-
-            if houseTemplateId == defaultHouseTemplateId then
-                defaultHouseTemplateIndex = index
-            end
 
             if #marketProductListings > 0 then
                 --There could be multiple listings per template, one for each currency type.
@@ -774,6 +775,23 @@ function ZO_MarketProduct_GetMarketProductHouseTemplateDataList(marketProductId,
                         houseTemplateData.name = houseTemplateData.name or GetMarketProductDisplayName(houseTemplateMarketProductId)
                     end
                 end
+            end
+
+            --[[ The following should guarantee that we set the default index to the defined default if it's valid,
+            the first valid entry if it's not, and the defined default if there are no valid entries. ]]
+            if houseTemplateId == defaultHouseTemplateId then
+                if #houseTemplateData.marketPurchaseOptions > 0 then
+                    isDefaultTemplateValid = true
+                    isAnyTemplateValid = true
+                    defaultHouseTemplateIndex = index
+                -- The following fires if we have the defined default but we haven't found any valid entries (including this one).
+                elseif not isAnyTemplateValid then
+                    defaultHouseTemplateIndex = index
+                end
+            -- The following fires if this is the first valid template we've found.
+            elseif not isAnyTemplateValid and #houseTemplateData.marketPurchaseOptions > 0 then
+                defaultHouseTemplateIndex = index
+                isAnyTemplateValid = true
             end
 
             table.insert(houseTemplateDataList, houseTemplateData)
