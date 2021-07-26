@@ -81,6 +81,10 @@ function ZO_TextSearchManager:SetupContextTextSearch(context, filterTargetDescri
 end
 
 function ZO_TextSearchManager:ActivateTextSearch(context)
+    if context == nil then
+        return
+    end
+
     for currentContext, contextSearch in pairs(self.contextSearches) do
         if contextSearch.isActive and currentContext ~= context then
             internalassert(false, string.format("Activating text search %s, but text search %s is already active, there should only ever be one context search active at a time!", context, currentContext))

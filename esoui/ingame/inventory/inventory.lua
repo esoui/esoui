@@ -806,8 +806,9 @@ end
 
 function ZO_InventoryManager:DeactivateInventorySearch()
     TEXT_SEARCH_MANAGER:DeactivateTextSearch("playerInventoryTextSearch")
-    self.inventories[INVENTORY_BACKPACK].currentContext = nil
-    TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+
+    local REMOVE_CONTEXT = nil
+    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK })
 end
 
 function ZO_InventoryManager:ActivateBankSearch()
@@ -820,13 +821,12 @@ end
 
 function ZO_InventoryManager:DeactivateBankSearch()
     TEXT_SEARCH_MANAGER:DeactivateTextSearch("playerBankTextSearch")
-    self.inventories[INVENTORY_BACKPACK].currentContext = nil
-    self.inventories[INVENTORY_BANK].currentContext = nil
-    TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+
+    local REMOVE_CONTEXT = nil
+    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_BANK })
 end
 
 function ZO_InventoryManager:ActivateHouseBankSearch()
-    TEXT_SEARCH_MANAGER:ActivateTextSearch("houseBankTextSearch")
     self:SetContextForInventories("houseBankTextSearch", { INVENTORY_BACKPACK, INVENTORY_HOUSE_BANK })
 
     local SUPPRESS_TEXT_CHANGED_CALLBACK = true
@@ -837,9 +837,9 @@ end
 
 function ZO_InventoryManager:DeactivateHouseBankSearch()
     TEXT_SEARCH_MANAGER:DeactivateTextSearch("houseBankTextSearch")
-    self.inventories[INVENTORY_BACKPACK].currentContext = nil
-    self.inventories[INVENTORY_HOUSE_BANK].currentContext = nil
-    TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+
+    local REMOVE_CONTEXT = nil
+    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_HOUSE_BANK })
 end
 
 function ZO_InventoryManager:ActivateGuildBankSearch()
@@ -854,9 +854,9 @@ end
 
 function ZO_InventoryManager:DeactivateGuildBankSearch()
     TEXT_SEARCH_MANAGER:DeactivateTextSearch("guildBankTextSearch")
-    self.inventories[INVENTORY_BACKPACK].currentContext = nil
-    self.inventories[INVENTORY_GUILD_BANK].currentContext = nil
-    TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+
+    local REMOVE_CONTEXT = nil
+    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_GUILD_BANK })
 end
 
 do
