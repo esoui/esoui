@@ -154,6 +154,10 @@
             </Controls>
         </Button>
 
+        <Label name="ZO_AlchemySectionHeader" inherits="ZO_CraftingContainerHeader" horizontalAlignment="CENTER" virtual="true">
+            <Dimensions x="200" />
+        </Label>
+        
         <TopLevelControl name="ZO_AlchemyTopLevel" hidden="true">
             <AnchorFill />
 
@@ -179,22 +183,23 @@
                             <Dimensions x="640"/>
                         </Texture>
 
-                        <!-- Anchors for the slots are set in Lua, but are generally centered around their header labels-->
-                        <Label name="$(parent)SolventLabel" inherits="ZO_CraftingContainerHeader" text="SI_ALCHEMY_SOLVENT_HEADER">
-                            <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="120" offsetY="64" />
+                        <Label name="$(parent)ReagentsLabel" inherits="ZO_AlchemySectionHeader" text="SI_ALCHEMY_REAGENTS_HEADER">
+                            <Anchor point="TOP" offsetY="64" />
                         </Label>
+                        <Label name="$(parent)SolventLabel" inherits="ZO_AlchemySectionHeader" text="SI_ALCHEMY_SOLVENT_HEADER">
+                            <Anchor point="RIGHT" relativeTo="$(parent)ReagentsLabel" relativePoint="LEFT" offsetX="-10" />
+                        </Label>
+                        <Label name="$(parent)SpinnerLabel" inherits="ZO_AlchemySectionHeader" text="SI_CRAFTING_QUANTITY_HEADER">
+                            <Anchor point="LEFT" relativeTo="$(parent)ReagentsLabel" relativePoint="RIGHT" offsetX="10" />
+                        </Label>
+                        
+                        <!-- Anchors for the slots are set in Lua, but are generally centered around their header labels-->
                         <Button name="$(parent)SolventSlot" inherits="ZO_AlchemySlotContainerSolventSlot" />
 
-                        <Label name="$(parent)ReagentsLabel" inherits="ZO_CraftingContainerHeader" text="SI_ALCHEMY_REAGENTS_HEADER">
-                            <Anchor point="LEFT" relativeTo="$(parent)SolventLabel" relativePoint="RIGHT" offsetX="100" />
-                        </Label>
                         <Button name="$(parent)ReagentSlot1" inherits="ZO_AlchemyCraftingSlotWithTraits" />
                         <Button name="$(parent)ReagentSlot2" inherits="ZO_AlchemyCraftingSlotWithTraits" />
                         <Button name="$(parent)ReagentSlot3" inherits="ZO_AlchemyCraftingSlotWithTraits" />
 
-                        <Label name="$(parent)SpinnerLabel" inherits="ZO_CraftingContainerHeader" text="SI_CRAFTING_QUANTITY_HEADER">
-                            <Anchor point="LEFT" relativeTo="$(parent)ReagentsLabel" relativePoint="RIGHT" offsetX="100" />
-                        </Label>
                         <Control name="$(parent)Spinner" inherits="ZO_MultiCraftSpinner">
                             <Anchor point="TOP" relativeTo="$(parent)SpinnerLabel" relativePoint="BOTTOM" offsetY="38" />
                         </Control>

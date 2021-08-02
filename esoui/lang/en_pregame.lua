@@ -4135,7 +4135,7 @@ SafeAddString(SI_TRIALACCOUNTRESTRICTIONTYPE3, "Trial accounts may only whisper 
 SafeAddString(SI_TRIALACCOUNTRESTRICTIONTYPE4, "Guilds disabled on trial accounts.", 0)
 SafeAddString(SI_TRUSTED_MACHINE_BUTTON_TOOLTIP, "Trusted Machine\nYou own or trust this computer.  Selecting this device type will give you the option to remember account name.", 0)
 SafeAddString(SI_TRY_AGAIN, "Try Again", 0)
-SafeAddString(SI_TUTORIAL_CONTINUE, "Continue", 1)
+SafeAddString(SI_TUTORIAL_CONTINUE, "<<1>> Continue", 1)
 SafeAddString(SI_UI_ERROR_MORE_INFO, "More Info", 0)
 SafeAddString(SI_UNASSIGNCAMPAIGNRESULT1, "You are unable to unassign yourself from a campaign while in a campaign.", 0)
 SafeAddString(SI_UNASSIGNCAMPAIGNRESULT2, "You do not have enough gold to unassign yourself from a campaign.", 0)

@@ -121,9 +121,11 @@ do
     end
 
     function ZO_Fence_Keyboard:OnClosed()
-        TEXT_SEARCH_MANAGER:DeactivateTextSearch("fenceTextSearch")
-        local REMOVE_CONTEXT = nil
-        PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
+        if TEXT_SEARCH_MANAGER:IsActiveTextSearch("fenceTextSearch") then
+            TEXT_SEARCH_MANAGER:DeactivateTextSearch("fenceTextSearch")
+            local REMOVE_CONTEXT = nil
+            PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
+        end
         SCENE_MANAGER:Hide("fence_keyboard")
         ZO_Dialogs_ReleaseDialog("CANT_BUYBACK_FROM_FENCE")
         ZO_PlayerInventorySortByPriceName:SetText(GetString(SI_INVENTORY_SORT_TYPE_PRICE))

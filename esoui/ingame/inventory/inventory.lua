@@ -805,10 +805,12 @@ function ZO_InventoryManager:ActivateInventorySearch()
 end
 
 function ZO_InventoryManager:DeactivateInventorySearch()
-    TEXT_SEARCH_MANAGER:DeactivateTextSearch("playerInventoryTextSearch")
+    if TEXT_SEARCH_MANAGER:IsActiveTextSearch("playerInventoryTextSearch") then
+        TEXT_SEARCH_MANAGER:DeactivateTextSearch("playerInventoryTextSearch")
 
-    local REMOVE_CONTEXT = nil
-    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK })
+        local REMOVE_CONTEXT = nil
+        self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK })
+    end
 end
 
 function ZO_InventoryManager:ActivateBankSearch()
@@ -820,10 +822,12 @@ function ZO_InventoryManager:ActivateBankSearch()
 end
 
 function ZO_InventoryManager:DeactivateBankSearch()
-    TEXT_SEARCH_MANAGER:DeactivateTextSearch("playerBankTextSearch")
+    if TEXT_SEARCH_MANAGER:IsActiveTextSearch("playerBankTextSearch") then
+        TEXT_SEARCH_MANAGER:DeactivateTextSearch("playerBankTextSearch")
 
-    local REMOVE_CONTEXT = nil
-    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_BANK })
+        local REMOVE_CONTEXT = nil
+        self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_BANK })
+    end
 end
 
 function ZO_InventoryManager:ActivateHouseBankSearch()
@@ -836,10 +840,12 @@ function ZO_InventoryManager:ActivateHouseBankSearch()
 end
 
 function ZO_InventoryManager:DeactivateHouseBankSearch()
-    TEXT_SEARCH_MANAGER:DeactivateTextSearch("houseBankTextSearch")
+    if TEXT_SEARCH_MANAGER:IsActiveTextSearch("houseBankTextSearch") then
+        TEXT_SEARCH_MANAGER:DeactivateTextSearch("houseBankTextSearch")
 
-    local REMOVE_CONTEXT = nil
-    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_HOUSE_BANK })
+        local REMOVE_CONTEXT = nil
+        self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_HOUSE_BANK })
+    end
 end
 
 function ZO_InventoryManager:ActivateGuildBankSearch()
@@ -853,10 +859,12 @@ function ZO_InventoryManager:ActivateGuildBankSearch()
 end
 
 function ZO_InventoryManager:DeactivateGuildBankSearch()
-    TEXT_SEARCH_MANAGER:DeactivateTextSearch("guildBankTextSearch")
+    if TEXT_SEARCH_MANAGER:IsActiveTextSearch("guildBankTextSearch") then
+        TEXT_SEARCH_MANAGER:DeactivateTextSearch("guildBankTextSearch")
 
-    local REMOVE_CONTEXT = nil
-    self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_GUILD_BANK })
+        local REMOVE_CONTEXT = nil
+        self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_GUILD_BANK })
+    end
 end
 
 do

@@ -8809,7 +8809,7 @@ SafeAddString(SI_TRIAL_SCORE_UPDATED_SMALL, "Your current score is <<1>> points.
 SafeAddString(SI_TRIAL_STARTED, "Started: <<1>> Trial", 0)
 SafeAddString(SI_TUTORIALS_RESET, "Your Tutorials Have Been Reset", 0)
 SafeAddString(SI_TUTORIAL_BODY_FORMAT, "<<X:1>>", 0)
-SafeAddString(SI_TUTORIAL_CONTINUE, "Continue", 1)
+SafeAddString(SI_TUTORIAL_CONTINUE, "<<1>> Continue", 1)
 SafeAddString(SI_TUTORIAL_MORE_INFO, "More Info", 0)
 SafeAddString(SI_TUTORIAL_TITLE_FORMAT, "<<1>>", 0)
 SafeAddString(SI_TUTORIAL_USER_ID_PC, "UserID", 0)

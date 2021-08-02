@@ -651,7 +651,6 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
                 self:DeactivateCurrentList()
                 self.assignableActionBar:AssignTargetSkill()
                 self.actionBarAnimation:PlayBackward()
-                self.assignableActionBar:Deactivate()
                 GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
                 PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                 --Don't set mode back to ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE til OnAbilityFinalizedCallback says everything worked
@@ -1041,6 +1040,9 @@ function ZO_GamepadSkills:InitializeEvents()
     local function OnAbilityFinalized()
         if self.mode == ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE then
             self.assignableActionBar:ClearTargetSkill()
+            -- make sur eto deactivate the action bar before changing mode
+            -- so the list can be fully activated when we switch to it
+            self.assignableActionBar:Deactivate()
             self:SetMode(ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE)
         end
     end
