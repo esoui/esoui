@@ -82,7 +82,7 @@
                     </Controls>
                 </Texture>
                 <Label name="$(parent)Text" font="ZoFontHeader3" inherits="ZO_SelectableLabel ZO_IconHeaderMouseArea" wrapMode="ELLIPSIS">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="CENTER" offsetX="25" offsetY="-15"/>
+                    <Anchor point="TOPLEFT" offsetX="55" offsetY="9"/>
                     <DimensionConstraints maxX="230"/>
                 </Label>
                 <!-- Fills the space between the text and the icon -->
@@ -112,6 +112,10 @@
                 <Texture name="$(parent)Icon" override="true">
                     <Anchor point="CENTER" relativeTo="$(parent)StatusIcon" relativePoint="RIGHT" offsetX="16" />
                 </Texture>
+
+                <Label name="$(parent)Text" override="true">
+                    <Anchor point="TOPLEFT" offsetX="70" offsetY="9"/>
+                </Label>
             </Controls>
         </Control>
 

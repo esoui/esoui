@@ -181,11 +181,11 @@ function ZO_UpdateCollectibleEntryDataIconVisuals(entryData)
     end
 
     if locked then
-        entryData:SetIconColor(ZO_LOCKED_ICON_COLOR)
-        entryData:SetIconSampleProcessingWeightTable(ZO_LOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE)
+        entryData:SetIconColor(ZO_SILHOUETTE_ICON_COLOR)
+        entryData:SetIconSampleProcessingWeightTable(ZO_SILHOUETTE_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE)
     else
-        entryData:SetIconColor(ZO_UNLOCKED_ICON_COLOR)
-        entryData:SetIconSampleProcessingWeightTable(ZO_UNLOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE)
+        entryData:SetIconColor(ZO_NO_SILHOUETTE_ICON_COLOR)
+        entryData:SetIconSampleProcessingWeightTable(ZO_NO_SILHOUETTE_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE)
     end
 end
 

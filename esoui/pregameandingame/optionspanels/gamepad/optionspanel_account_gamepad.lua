@@ -24,7 +24,13 @@ function ZO_OptionsGamepad_EmailEditor:Initialize(control)
         setup = function(dialog, data)
             self.enteredText = ""
 
-            local tooltipText = zo_strformat(SI_GAMEPAD_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_TOOLTIP, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_4), ZO_GetPlatformStoreName())
+            local tooltipText
+            if ZO_IsPlaystationPlatform() then
+                tooltipText = zo_strformat(SI_GAMEPAD_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_TOOLTIP_PLAYSTATION, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_4))
+            else
+                tooltipText = zo_strformat(SI_GAMEPAD_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_TOOLTIP, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_4), ZO_GetPlatformStoreName())
+            end
+
             GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipText)
 
             dialog.info.finishedCallback = data.finishedCallback

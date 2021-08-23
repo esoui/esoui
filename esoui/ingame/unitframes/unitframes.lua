@@ -19,6 +19,8 @@ local COMPANION_HEALTH_GRADIENT = { ZO_ColorDef:New("00484F"), ZO_ColorDef:New("
 local COMPANION_HEALTH_GRADIENT_LOSS = ZO_ColorDef:New("621018")
 local COMPANION_HEALTH_GRADIENT_GAIN = ZO_ColorDef:New("D0FFBC")
 
+local UnitFrames = nil
+
 ZO_KEYBOARD_GROUP_FRAME_WIDTH = 288
 ZO_KEYBOARD_GROUP_FRAME_HEIGHT = 80
 ZO_KEYBOARD_RAID_FRAME_WIDTH = 96
@@ -132,7 +134,7 @@ local function CalculateDynamicPlatformConstants()
 end
 
 local function GetPlatformBarFont()
-    local groupSize = GetGroupSize()
+    local groupSize = UnitFrames:GetCombinedGroupSize()
     local constants = GetPlatformConstants()
     if groupSize > SMALL_GROUP_SIZE_THRESHOLD then
         return constants.RAID_BAR_FONT
@@ -148,7 +150,7 @@ local groupFrameAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, 0, 0)
 local function GetGroupFrameAnchor(groupIndex, groupSize, previousFrame, previousCompanionFrame)
     local constants = GetPlatformConstants()
 
-    groupSize = groupSize or GetGroupSize()
+    groupSize = groupSize or UnitFrames:GetCombinedGroupSize()
     local column = zo_floor((groupIndex - 1) / constants.GROUP_FRAMES_PER_COLUMN)
     local row = zo_mod(groupIndex - 1, constants.GROUP_FRAMES_PER_COLUMN)
 
@@ -186,12 +188,6 @@ local function GetGroupAnchorFrameOffsets(subgroupIndex, groupStride, constants)
     return (constants.RAID_FRAME_BASE_OFFSET_X + (column * constants.RAID_FRAME_OFFSET_X)), (constants.RAID_FRAME_BASE_OFFSET_Y + (row * constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT))
 end
 
---[[
-    Global object declarations
---]]
-
-UNIT_FRAMES = nil
-
 ZO_MostRecentPowerUpdateHandler = ZO_MostRecentEventHandler:Subclass()
 
 do
@@ -210,7 +206,7 @@ end
     Local object declarations
 --]]
 
-local UnitFrames, UnitFramesManager, UnitFrame, UnitFrameBar
+local UnitFramesManager, UnitFrame, UnitFrameBar
 
 --[[
     UnitFrames container object.  Used to manage the UnitFrame objects according to UnitTags ("group1", "group4pet", etc...)
@@ -253,7 +249,7 @@ function UnitFramesManager:GetUnitFrameLookupTable(unitTag)
         local isCompanionTag = IsGroupCompanionUnitTag(unitTag)
 
         if isGroupTag or isCompanionTag then
-            if self.groupSize <= SMALL_GROUP_SIZE_THRESHOLD then
+            if self:GetCombinedGroupSize() <= SMALL_GROUP_SIZE_THRESHOLD then
                 return self.groupFrames
             else
                 return isCompanionTag and self.companionRaidFrames or self.raidFrames
@@ -307,6 +303,10 @@ end
 
 function UnitFramesManager:GetCompanionGroupSize()
     return self.companionGroupSize
+end
+
+function UnitFramesManager:GetCombinedGroupSize()
+    return self.groupSize + self.companionGroupSize
 end
 
 function UnitFramesManager:GetFirstDirtyGroupIndex()
@@ -363,13 +363,13 @@ end
 
 function UnitFramesManager:UpdateGroupAnchorFrames()
     -- Only the raid frame anchors need updates for now and it's only for whether or not the group name labels are showing and which one is highlighted
-    if self.groupSize <= SMALL_GROUP_SIZE_THRESHOLD or self.groupAndRaidHiddenReasons:IsHidden() then
+    if self:GetCombinedGroupSize() <= SMALL_GROUP_SIZE_THRESHOLD or self.groupAndRaidHiddenReasons:IsHidden() then
         -- Small groups never show the raid frame anchors
         for subgroupIndex = 1, NUM_SUBGROUPS do
             GetControl("ZO_LargeGroupAnchorFrame"..subgroupIndex):SetHidden(true)
         end
     else
-        local groupSizeWithCompanions = self.groupSize + self.companionGroupSize
+        local groupSizeWithCompanions = self:GetCombinedGroupSize()
         for subgroupIndex = 1, NUM_SUBGROUPS do
             local subgroupThreshold = (subgroupIndex - 1) * SMALL_GROUP_SIZE_THRESHOLD
             local frameIsHidden = groupSizeWithCompanions <= subgroupThreshold
@@ -1577,6 +1577,7 @@ function UnitFrame:UpdateName()
     if self.nameLabel then
         local name
         local tag = self.unitTag
+        local pendingCompanionName
         if self.unitTag == "companion" and HasPendingCompanion() then
             pendingCompanionName = GetCompanionName(GetPendingCompanionDefId())
             name = zo_strformat(SI_COMPANION_NAME_FORMATTER, pendingCompanionName)
@@ -1965,16 +1966,17 @@ end
 
 local function CreateGroupsAfter(startIndex)
     local groupSize = GetGroupSize()
+    local combinedGroupSize = UnitFrames:GetCombinedGroupSize()
 
     for i = startIndex, GROUP_SIZE_MAX do
         local unitTag = GetGroupUnitTagByIndex(i)
 
         if unitTag then
-            CreateGroupMember(i, unitTag, groupSize)
+            CreateGroupMember(i, unitTag, combinedGroupSize)
         end
     end
 
-    if groupSize > SMALL_GROUP_SIZE_THRESHOLD then
+    if combinedGroupSize > SMALL_GROUP_SIZE_THRESHOLD then
         local numCompanionFrames = 0
         local maxCompanionFrames = zo_min(UnitFrames:GetCompanionGroupSize(), GROUP_SIZE_MAX - groupSize)
         if maxCompanionFrames > 0 then
@@ -1984,7 +1986,7 @@ local function CreateGroupsAfter(startIndex)
             local playerCompanionTag = GetCompanionUnitTagByGroupUnitTag(playerGroupTag)
             if playerCompanionTag and (DoesUnitExist(playerCompanionTag) or HasPendingCompanion()) then
                 numCompanionFrames = numCompanionFrames + 1
-                local anchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, groupSize)
+                local anchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, combinedGroupSize)
                 local frame = UnitFrames:CreateFrame(playerCompanionTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_RAID_UNIT_FRAME)
                 frame:SetHiddenForReason("disabled", false)
                 ZO_UnitFrames_UpdateWindow(playerCompanionTag, UNIT_CHANGED)
@@ -2000,7 +2002,7 @@ local function CreateGroupsAfter(startIndex)
                 local companionTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
                 if companionTag and companionTag ~= playerCompanionTag and DoesUnitExist(companionTag) then
                     numCompanionFrames = numCompanionFrames + 1
-                    local anchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, groupSize)
+                    local anchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, combinedGroupSize)
                     local frame = UnitFrames:CreateFrame(companionTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_RAID_UNIT_FRAME)
                     frame:SetHiddenForReason("disabled", false)
                     ZO_UnitFrames_UpdateWindow(companionTag, UNIT_CHANGED)
@@ -2021,18 +2023,20 @@ end
 -- goes above or below the "small group" or "raid group" thresholds.
 local function UpdateGroupFrameStyle(groupIndex)
     local groupSize = GetGroupSize()
-    local oldGroupSize = UnitFrames.groupSize
-
-    local oldLargeGroup = (oldGroupSize ~= nil) and (oldGroupSize > SMALL_GROUP_SIZE_THRESHOLD);
-    local newLargeGroup = groupSize > SMALL_GROUP_SIZE_THRESHOLD;
-
+    local oldCombinedGroupSize = UnitFrames:GetCombinedGroupSize()
+   
     UnitFrames:SetGroupSize(groupSize)
     UnitFrames:UpdateCompanionGroupSize()
+
+    local combinedGroupSize = UnitFrames:GetCombinedGroupSize()
+
+    local oldLargeGroup = (oldCombinedGroupSize ~= nil) and (oldCombinedGroupSize > SMALL_GROUP_SIZE_THRESHOLD);
+    local newLargeGroup = combinedGroupSize > SMALL_GROUP_SIZE_THRESHOLD;
 
     -- In cases where no UI has been setup, the group changes between large and small group sizes, or when
     --  members are removed, we need to run a full update of the UI. These could also be optimized to only
     --  run partial updates if more performance is needed.
-    if oldGroupSize == nil or oldLargeGroup ~= newLargeGroup or oldGroupSize > groupSize then
+    if oldLargeGroup ~= newLargeGroup or oldCombinedGroupSize > combinedGroupSize then
         -- Create all the appropriate frames for the new group member, or in the case of a unit_destroyed
         -- create the small group versions.
         UnitFrames:DisableGroupAndRaidFrames()
@@ -2087,6 +2091,7 @@ local function UpdateGroupFramesVisualStyle()
 
     -- Update all UnitFrame anchors.
     local groupSize = GetGroupSize()
+    local combinedGroupSize = UnitFrames:GetCombinedGroupSize()
     local previousUnitTag = nil
     local previousCompanionTag = nil
     local numCompanionFrames = 0
@@ -2094,11 +2099,11 @@ local function UpdateGroupFramesVisualStyle()
     local playerGroupTag = GetLocalPlayerGroupUnitTag()
     local playerCompanionTag = GetCompanionUnitTagByGroupUnitTag(playerGroupTag)
     --If we are in a large group, make sure we prioritize sorting the player's local companion to the front
-    if groupSize > SMALL_GROUP_SIZE_THRESHOLD and numCompanionFrames < maxCompanionFrames then
+    if combinedGroupSize > SMALL_GROUP_SIZE_THRESHOLD and numCompanionFrames < maxCompanionFrames then
         if playerCompanionTag and (DoesUnitExist(playerCompanionTag) or HasPendingCompanion()) then
             numCompanionFrames = numCompanionFrames + 1
             local companionUnitFrame = UnitFrames:GetFrame(playerCompanionTag)
-            local companionAnchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, groupSize)
+            local companionAnchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, combinedGroupSize)
             if companionUnitFrame then
                 companionUnitFrame:SetAnchor(companionAnchor)
             end
@@ -2111,12 +2116,12 @@ local function UpdateGroupFramesVisualStyle()
         if unitTag then
             local unitFrame = UnitFrames:GetFrame(unitTag)            
             local companionUnitFrame = UnitFrames:GetFrame(companionTag)
-            local groupUnitAnchor = GetGroupFrameAnchor(i, groupSize, UnitFrames:GetFrame(previousUnitTag), UnitFrames:GetFrame(previousCompanionTag))
+            local groupUnitAnchor = GetGroupFrameAnchor(i, combinedGroupSize, UnitFrames:GetFrame(previousUnitTag), UnitFrames:GetFrame(previousCompanionTag))
             unitFrame:SetAnchor(groupUnitAnchor)
-            if groupSize > SMALL_GROUP_SIZE_THRESHOLD then
+            if combinedGroupSize > SMALL_GROUP_SIZE_THRESHOLD then
                 if companionTag ~= playerCompanionTag and numCompanionFrames < maxCompanionFrames and DoesUnitExist(companionTag) then
                     numCompanionFrames = numCompanionFrames + 1
-                    local companionAnchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, groupSize)
+                    local companionAnchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, combinedGroupSize)
                     if companionUnitFrame then
                         companionUnitFrame:SetAnchor(companionAnchor)
                     end
@@ -2488,6 +2493,7 @@ function ZO_UnitFrames_Initialize()
             CreateGroupAnchorFrames()
 
             UnitFrames = UnitFramesManager:New()
+            UNIT_FRAMES = UnitFrames
 
             CreateTargetFrame()
             CreateLocalCompanion()
@@ -2499,8 +2505,6 @@ function ZO_UnitFrames_Initialize()
                 UpdateLeaderIndicator()
             end
             ZO_PlatformStyle:New(OnGamepadPreferredModeChanged)
-
-            UNIT_FRAMES = UnitFrames
 
             CALLBACK_MANAGER:FireCallbacks("UnitFramesCreated")
             EVENT_MANAGER:UnregisterForEvent("UnitFrames_OnAddOnLoaded", EVENT_ADD_ON_LOADED)

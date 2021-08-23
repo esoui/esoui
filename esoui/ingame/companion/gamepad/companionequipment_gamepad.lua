@@ -12,7 +12,7 @@ ZO_CompanionEquipment_Gamepad = ZO_Gamepad_ParametricList_BagsSearch_Screen:Subc
 function ZO_CompanionEquipment_Gamepad:Initialize(control)
     COMPANION_EQUIPMENT_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
-    COMPANION_EQUIPMENT_GAMEPAD_SCENE = ZO_COMPANION_MANAGER:CreateInteractScene("companionEquipmentGamepad")
+    COMPANION_EQUIPMENT_GAMEPAD_SCENE = ZO_InteractScene:New("companionEquipmentGamepad", SCENE_MANAGER, ZO_COMPANION_MANAGER:GetInteraction())
     COMPANION_EQUIPMENT_GAMEPAD_SCENE:AddFragment(COMPANION_EQUIPMENT_GAMEPAD_FRAGMENT)
 
     local ACTIVATE_ON_SHOW = true

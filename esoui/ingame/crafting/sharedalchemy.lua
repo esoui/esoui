@@ -1,5 +1,6 @@
 ALCHEMY_TRAIT_STRIDE = 5
 
+ZO_ALCHEMY_MODE_NONE = 0
 ZO_ALCHEMY_MODE_CREATION = 1
 ZO_ALCHEMY_MODE_RECIPES = 2
 
@@ -11,6 +12,8 @@ ZO_ALCHEMY_DATA_TYPE_REAGENT = 2
 ZO_ALCHEMY_PIN_STATE_HIDDEN = 1
 ZO_ALCHEMY_PIN_STATE_INVALID = 2
 ZO_ALCHEMY_PIN_STATE_VALID = 3 
+
+ZO_ALCHEMY_SYSTEM_NAME = "alchemy"
 
 function ZO_Alchemy_DoesAlchemyItemPassFilter(bagId, slotIndex, filterType, isQuestFilterChecked, questInfo)
     if isQuestFilterChecked then
@@ -109,13 +112,13 @@ function ZO_SharedAlchemy:InitializeSharedEvents()
                 if not isCraftingSameAsPrevious then
                     self:ResetSelectedTab()
                 end
-                SYSTEMS:ShowScene("alchemy")
+                SYSTEMS:ShowScene(ZO_ALCHEMY_SYSTEM_NAME)
             end
         end)
 
         EVENT_MANAGER:RegisterForEvent("ZO_SharedAlchemy", EVENT_END_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
             if craftingType == CRAFTING_TYPE_ALCHEMY then
-                SYSTEMS:HideScene("alchemy")
+                SYSTEMS:HideScene(ZO_ALCHEMY_SYSTEM_NAME)
             end
         end)
     end
@@ -815,6 +818,10 @@ function ZO_SharedAlchemy:GetDataType(bagId, slotIndex)
     elseif craftingSubItemType == ITEMTYPE_REAGENT then
         return ZO_ALCHEMY_DATA_TYPE_REAGENT
     end
+end
+
+function ZO_SharedAlchemy:DoesCurrentModeHaveSlotAnimations()
+    return self.mode == ZO_ALCHEMY_MODE_CREATION
 end
 
 --

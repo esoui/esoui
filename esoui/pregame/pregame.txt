@@ -1,5 +1,5 @@
 ; pregame UI files
-## DependsOn: ZO_PregameLocalization ZO_PregameAndIngame
+## DependsOn: ZO_PregameLocalization ZO_PregameAndIngame ZO_PregameAndInternalIngame
 
 ## SavedVariables: ZO_Pregame_SavedVariables
 ## ValidateSavedVariables: 1

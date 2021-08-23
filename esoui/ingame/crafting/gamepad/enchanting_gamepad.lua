@@ -31,6 +31,8 @@ function ZO_GamepadEnchanting:Initialize(control)
     end)
 
     ZO_GamepadCraftingUtils_InitializeGenericHeader(self, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
+
+    SYSTEMS:RegisterGamepadObject(ZO_ENCHANTING_SYSTEM_NAME, self)
 end
 
 function ZO_GamepadEnchanting:InitializeModes()
@@ -507,6 +509,7 @@ function ZO_GamepadEnchanting:SelectMode()
         elseif data.mode == ENCHANTING_MODE_CREATION then
             SCENE_MANAGER:Push("gamepad_enchanting_creation")
         elseif data.mode == ENCHANTING_MODE_RECIPES then
+            self.enchantingMode = data.mode
             GAMEPAD_PROVISIONER:EmbedInCraftingScene(self.enchantingStationInteraction)
         end
     end

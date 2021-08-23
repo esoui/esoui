@@ -203,6 +203,38 @@ do
     function GetGamepadChampionPointsIcon()
         return GAMEPAD_CHAMPION_POINT_ICON
     end
+
+    local ACTION_BAR_DISCIPLINE_TEXTURES = 
+    {
+        [CHAMPION_DISCIPLINE_TYPE_COMBAT] =
+        {
+            border = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame.dds",
+            selected = "EsoUI/Art/Champion/ActionBar/champion_bar_combat_selection.dds",
+            slotted = "EsoUI/Art/Champion/ActionBar/champion_bar_combat_slotted.dds",
+            empty = "EsoUI/Art/Champion/ActionBar/champion_bar_combat_empty.dds",
+            disabled = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame_disabled.dds",
+        },
+        [CHAMPION_DISCIPLINE_TYPE_CONDITIONING] =
+        {
+            border = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame.dds",
+            selected = "EsoUI/Art/Champion/ActionBar/champion_bar_conditioning_selection.dds",
+            slotted = "EsoUI/Art/Champion/ActionBar/champion_bar_conditioning_slotted.dds",
+            empty = "EsoUI/Art/Champion/ActionBar/champion_bar_conditioning_empty.dds",
+            disabled = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame_disabled.dds",
+        },
+        [CHAMPION_DISCIPLINE_TYPE_WORLD] =
+        {
+            border = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame.dds",
+            selected = "EsoUI/Art/Champion/ActionBar/champion_bar_world_selection.dds",
+            slotted = "EsoUI/Art/Champion/ActionBar/champion_bar_world_slotted.dds",
+            empty = "EsoUI/Art/Champion/ActionBar/champion_bar_world_empty.dds",
+            disabled = "EsoUI/Art/Champion/ActionBar/champion_bar_slot_frame_disabled.dds",
+        },
+    }
+
+    function GetChampionBarDisciplineTextures(disciplineType)
+        return ACTION_BAR_DISCIPLINE_TEXTURES[disciplineType]
+    end
 end
 
 -- Veteran --

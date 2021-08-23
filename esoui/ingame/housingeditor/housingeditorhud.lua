@@ -399,6 +399,7 @@ function ZO_HousingEditorHud:Initialize(control)
                     end
 
                     -- Order here matters:
+                    pitch, yaw, roll = pitch % TWO_PI, yaw % TWO_PI, roll % TWO_PI
                     self:MoveAxisIndicators(centerX, centerY, centerZ, pitch, yaw, roll)
                     self.axisIndicatorWindow:SetHidden(false)
                 end
@@ -671,10 +672,11 @@ function ZO_HousingEditorHud:InitializeAxisIndicators()
     window:SetAnchor(CENTER, GuiRoot, CENTER, 0, 0)
     window:SetMouseEnabled(false)
     window:Create3DRenderSpace()
+    window:Set3DRenderSpaceAxisRotationOrder(AXIS_ROTATION_ORDER_ZXY)
     window:SetDrawLayer(DL_BACKGROUND)
     window:SetDrawTier(DT_LOW)
     window:SetHidden(true)
-
+    
     local translationIndicatorName = "ZO_HousingEditorTranslationAxisIndicators"
     local translationWindow = WINDOW_MANAGER:CreateTopLevelWindow(translationIndicatorName)
     self.translationAxisIndicatorWindow = translationWindow
@@ -758,6 +760,7 @@ function ZO_HousingEditorHud:InitializeAxisIndicators()
         local offsetX, offsetY, offsetZ = indicator.offsetX or 0, indicator.offsetY or 0, indicator.offsetZ or 0
         control:Create3DRenderSpace()
         control:Set3DLocalDimensions(width, height)
+        control:Set3DRenderSpaceAxisRotationOrder(AXIS_ROTATION_ORDER_ZXY)
         control:Set3DRenderSpaceOrigin(width * offsetX, height * offsetY, width * offsetZ)
         control:Set3DRenderSpaceOrientation(indicator.pitch or 0, indicator.yaw or 0, indicator.roll or 0)
         control:SetMouseEnabled(true)
@@ -1136,21 +1139,15 @@ end
 
 function ZO_HousingEditorHud:MoveAxisIndicators(worldX, worldY, worldZ, pitch, yaw, roll)
     local cameraX, cameraY, cameraZ = self:GetCameraOrigin()
-    local axisIndicators, renderX, renderY, renderZ, renderYaw, scaleX, scaleY
+    local renderX, renderY, renderZ, renderPitch, renderYaw, renderRoll, scaleX, scaleY
     local isPrecisionEditing = self:IsPrecisionEditingEnabled()
-
-    if isPrecisionEditing and self:IsPrecisionPlacementMoveMode() then
-        axisIndicators = self.translationIndicators
-    else
-        axisIndicators = self.rotationIndicators
-    end
 
     if isPrecisionEditing then
         renderX, renderY, renderZ = WorldPositionToGuiRender3DPosition(worldX, worldY, worldZ)
         if self:IsPrecisionPlacementRotationMode() then
-            renderYaw = 0
+            renderPitch, renderYaw, renderRoll = pitch, yaw, roll
         else
-            renderYaw = yaw
+            renderPitch, renderYaw, renderRoll = 0, yaw, 0
         end
         scaleX, scaleY = self:CalculateDynamicAxisIndicatorScale(cameraX, cameraY, cameraZ, worldX, worldY, worldZ)
     else
@@ -1159,8 +1156,16 @@ function ZO_HousingEditorHud:MoveAxisIndicators(worldX, worldY, worldZ, pitch, y
         local reticleX, reticleY, reticleZ = cameraX + forwardX * distance, cameraY + forwardY * distance, cameraZ + forwardZ * distance
 
         renderX, renderY, renderZ = WorldPositionToGuiRender3DPosition(reticleX, reticleY, reticleZ)
-        renderYaw = GetPlayerCameraHeading()
+        renderYaw = GetPlayerCameraHeading() - AXIS_INDICATOR_PICKUP_YAW_OFFSET_ANGLE
+        renderPitch, renderRoll = 0, 0
         scaleX, scaleY = 1, 1
+    end
+
+    local axisIndicators
+    if isPrecisionEditing and self:IsPrecisionPlacementMoveMode() then
+        axisIndicators = self.translationIndicators
+    else
+        axisIndicators = self.rotationIndicators
     end
 
     for index, axis in ipairs(axisIndicators) do
@@ -1169,12 +1174,8 @@ function ZO_HousingEditorHud:MoveAxisIndicators(worldX, worldY, worldZ, pitch, y
         axis.control:Set3DRenderSpaceOrigin(scaledX * (axis.offsetX or 0), scaledY * (axis.offsetY or 0), scaledX * (axis.offsetZ or 0))
     end
 
-    if not isPrecisionEditing then
-        renderYaw = renderYaw - AXIS_INDICATOR_PICKUP_YAW_OFFSET_ANGLE
-    end
-
     self.axisIndicatorWindow:Set3DRenderSpaceOrigin(renderX, renderY, renderZ)
-    self.axisIndicatorWindow:Set3DRenderSpaceOrientation(0, renderYaw, 0)
+    self.axisIndicatorWindow:Set3DRenderSpaceOrientation(renderPitch, renderYaw, renderRoll)
 end
 
 function ZO_HousingEditorHud:UpdateAxisIndicators()

@@ -28,6 +28,8 @@ function ZO_EventAnnouncementTile:Layout(data)
     self.data = ZO_MARKET_ANNOUNCEMENT_MANAGER:GetEventAnnouncementDataByIndex(data.eventAnnouncementIndex)
     self:SetTitle(self.data.name)
 
+    self:SetActionAvailable(self.data.marketProductId ~= 0)
+
     -- The tile on all platforms is of a landscape dimension rather than portrait as in gamepad, 
     -- so we want to use the keyboard background on tiles regardless of platform.
     self:SetBackground(self.data.tileImage)

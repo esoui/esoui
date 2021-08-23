@@ -4734,8 +4734,12 @@ do
         [EVENT_REVEAL_ANTIQUITY_DIG_SITES_ON_MAP] = function(_, antiquityId)
             WORLD_MAP_MANAGER:RevealAntiquityDigSpotsOnMap(antiquityId)
         end,
+
+        [EVENT_GROUP_MEMBER_SUBZONE_CHANGED] = function()
+            ZO_WorldMap_RefreshGroupPins()
+        end,
     }
-    
+
     --Callbacks
     ------------
     local function OnAssistStateChanged(unassistedData, assistedData)
@@ -5242,9 +5246,18 @@ function ZO_WorldMap_UpdateInteractKeybind_Gamepad()
                     buttonText = buttonText(pinDatas)
                 end
 
-                ZO_WorldMapGamepadInteractKeybind:SetHidden(g_interactKeybindForceHidden or GAMEPAD_WORLD_MAP_KEY_FRAGMENT:IsShowing())
-                local KEYBIND_SCALE_PERCENT = 120
-                ZO_WorldMapGamepadInteractKeybind:SetText(zo_strformat(SI_GAMEPAD_WORLD_MAP_INTERACT, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1, KEYBIND_SCALE_PERCENT), buttonText))
+                -- Fallback to name if it's just a string. As functions, name and gamepadName take different arguments
+                if not buttonText and type(firstHandler.name) == "string" then
+                    buttonText = firstHandler.name
+                end
+
+                if buttonText then
+                    ZO_WorldMapGamepadInteractKeybind:SetHidden(g_interactKeybindForceHidden or GAMEPAD_WORLD_MAP_KEY_FRAGMENT:IsShowing())
+                    local KEYBIND_SCALE_PERCENT = 120
+                    ZO_WorldMapGamepadInteractKeybind:SetText(zo_strformat(SI_GAMEPAD_WORLD_MAP_INTERACT, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1, KEYBIND_SCALE_PERCENT), buttonText))
+                else
+                    ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
+                end
             end
         end
     else

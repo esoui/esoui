@@ -124,9 +124,7 @@ function ZO_AntiquityTileBase_Keyboard:SetPredecessorTileOrHeading(predecessorTi
     end
 end
 
-function ZO_AntiquityTileBase_Keyboard:Layout()
-    assert(false, "ZO_AntiquityTileBase_Keyboard:Layout must be overridden.")
-end
+ZO_AntiquityTileBase_Keyboard.Layout = ZO_AntiquityTileBase_Keyboard:MUST_IMPLEMENT()
 
 function ZO_AntiquityTileBase_Keyboard:Reset()
     self.tileData = nil
@@ -511,7 +509,7 @@ function ZO_ScryableAntiquityTile_Keyboard:Initialize(control)
             label = GetString(SI_ANTIQUITY_VIEW_IN_CODEX),
             execute = function()
                 local categoryData = self.tileData:GetAntiquityCategoryData()
-                ANTIQUITY_JOURNAL_KEYBOARD:ShowCategory(categoryData:GetId())
+                ANTIQUITY_JOURNAL_KEYBOARD:ShowCategory(categoryData:GetId(), self.tileData:GetName())
             end,
         },
         ["primary"] =
@@ -1273,10 +1271,12 @@ do
             self:AddCategory(category, NO_PARENT_CATEGORY)
         end
 
-        self.categoryTree:Commit()
+        local categoryNode = self.queuedCategoryId and self.categoryNodeLookupData[self.queuedCategoryId]
+        self.categoryTree:Commit(categoryNode)
 
         self:RefreshVisibleCategoryFilter()
         self.isRefreshingAll = false
+        self.queuedCategoryId = nil
     end
 
     function ZO_AntiquityJournal_Keyboard:RefreshVisibleCategoryFilter()
@@ -1357,11 +1357,24 @@ function ZO_AntiquityJournal_Keyboard:OnAntiquitiesUpdated()
     self:RefreshCategories()
 end
 
-function ZO_AntiquityJournal_Keyboard:ShowCategory(categoryId)
-    local categoryNode = self.categoryNodeLookupData[categoryId]
-    if categoryNode ~= nil then
-        self.contentSearchEditBox:SetText("")
-        self.categoryTree:SelectNode(categoryNode)
+function ZO_AntiquityJournal_Keyboard:ShowCategory(categoryId, filterText)
+
+    --Order matters, resetting the filters will trigger a refresh of the categories, and we don't want this call to inadvertantly clear the queuedCategoryId
+    self:ResetFilters()
+
+    if ANTIQUITY_DATA_MANAGER:GetSearch() ~= "" or filterText then
+        if filterText then
+            self.contentSearchEditBox:SetText(filterText)
+        else
+            self.contentSearchEditBox:SetText("")
+        end
+        --Store the category id to be used once the search finishes updating
+        self.queuedCategoryId = categoryId
+    else
+        local categoryNode = self.categoryNodeLookupData[categoryId]
+        if categoryNode ~= nil then
+            self.categoryTree:SelectNode(categoryNode)
+        end
     end
 end
 

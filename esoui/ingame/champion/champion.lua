@@ -579,6 +579,12 @@ function ChampionPerks:InitializeKeybindStrips()
             -- the toggle respec action: the keyboard quinary keybind in practice will not be used.
             keybind = "UI_SHORTCUT_QUINARY",
             gamepadPreferredKeybind = "UI_SHORTCUT_TERTIARY",
+            enabled = function()
+                local result = GetChampionPurchaseAvailability()
+                if result ~= CHAMPION_PURCHASE_SUCCESS then
+                    return false, GetString("SI_CHAMPIONPURCHASERESULT", result)
+                end
+            end,
             callback = function()
                 --If we are opening the quick menu, make sure to deselect the current star (if there is one)
                 if self.chosenConstellation then
@@ -606,7 +612,10 @@ function ChampionPerks:InitializeKeybindStrips()
                 return self:GetSelectedStar() and self:GetSelectedStar():HasPrimaryGamepadAction()
             end,
             enabled = function()
-                return not self:IsAnimating() and self:GetSelectedStar() and self:GetSelectedStar():CanPerformPrimaryGamepadAction()
+                if self:IsAnimating() or self:GetSelectedStar() == nil then
+                    return false
+                end
+                return self:GetSelectedStar():CanPerformPrimaryGamepadAction()
             end,
         },
         {
@@ -1198,6 +1207,15 @@ function ChampionPerks:RegisterEvents()
     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, function() self:OnMoneyChanged() end)
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:OnPlayerActivated() end)
 
+    -- Refresh Champion purchase availability
+    self.control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, function()
+        self.refreshGroup:MarkDirty("ChosenConstellationData")
+    end)
+
+    self.control:RegisterForEvent(EVENT_ZONE_CHANGED, function()
+        self.refreshGroup:MarkDirty("ChosenConstellationData")
+    end)
+
     CHAMPION_DATA_MANAGER:RegisterCallback("AllPointsChanged", function()
         self.refreshGroup:MarkDirty("AllData")
     end)
@@ -1537,6 +1555,7 @@ end
 function ChampionPerks:RefreshStarEditors()
     for _, starEditor in self.starEditorPool:ActiveObjectIterator() do
         starEditor:RefreshPointsMinMax()
+        starEditor:RefreshEnabledState()
     end
 end
 
@@ -1988,7 +2007,7 @@ end
 
 function ChampionPerks:UpdateGamepadSelectedConstellation()
     -- this math assumes +y = up
-    local dx, dy = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK)
+    local dx, dy = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
     local magSq = dx * dx + dy * dy
     if magSq > 0.04 and (self.radialSelectorLastMagSq == nil or magSq + 0.01 >= self.radialSelectorLastMagSq) then
         local angle = ClampRadialSelectorAngle(math.atan2(dy, dx))
@@ -2471,7 +2490,8 @@ ZO_CHAMPION_COUNTERSCROLL_FACTOR_Y = 0.35
 ZO_CHAMPION_SELECTING_STAR_SENSITIVITY = .5
 ZO_CHAMPION_SENSITIVITY_APPROACH = 1
 function ZO_ChampionConstellationCursor_Gamepad:UpdateDirectionalInput()
-    local dx, dy = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK)
+    local dx, dy = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
+    dx, dy = zo_clampLength2D(dx, dy, 1.0) -- clamp dpad output
     local frameDelta = GetFrameDeltaNormalizedForTargetFramerate()
     dx = dx * frameDelta * ZO_CHAMPION_CURSOR_SPEED * self.sensitivityFactor
     dy = -dy * frameDelta * ZO_CHAMPION_CURSOR_SPEED * self.sensitivityFactor

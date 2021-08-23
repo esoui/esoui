@@ -94,9 +94,11 @@ function ZO_MailSend_Gamepad:OnShowing()
     self:UpdateMoneyAttachment()
     ZO_MailSend_Shared.RestorePendingMail(self)
 
-    if self.initialContact then
-        self.mailView:Display(nil, nil, self.initialContact)
+    if self.initialContact or self.initialSubject then
+        self:ClearFields()
+        self.mailView:Display(nil, nil, self.initialContact, self.initialSubject)
         self.initialContact = nil
+        self.initialSubject = nil
     end
 
     self:HighlightActiveTextField()
@@ -188,8 +190,9 @@ end
 
 --Global API
 
-function ZO_MailSend_Gamepad:ComposeMailTo(address)
+function ZO_MailSend_Gamepad:ComposeMailTo(address, subject)
     self.initialContact = address
+    self.initialSubject = subject
     local PUSH_SCENE = true
     MAIL_MANAGER_GAMEPAD:ShowTab(SEND_TAB_INDEX, PUSH_SCENE)
 end

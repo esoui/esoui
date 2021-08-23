@@ -1,3 +1,6 @@
+local PLAY_ANIMATION = true
+local NO_ANIMATION = false
+
 ZO_CompanionCharacterWindow_Keyboard = ZO_InitializingObject:Subclass()
 
 function ZO_CompanionCharacterWindow_Keyboard:Initialize(control)
@@ -147,9 +150,6 @@ function ZO_CompanionCharacterWindow_Keyboard:InitializeSlots()
         ZO_CreateSparkleAnimation(slotControl)
     end
 end
-
-local PLAY_ANIMATION = true
-local NO_ANIMATION = false
 
 function ZO_CompanionCharacterWindow_Keyboard:UpdateSlotAppearance(equipSlot, slotControl, animationOption, copyFromLinkedFn)
     local slotHasItem, iconFile, isLocked

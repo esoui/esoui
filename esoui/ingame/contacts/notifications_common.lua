@@ -26,7 +26,7 @@ NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
 
 ZO_NotificationProvider = ZO_Object:Subclass()
 
-function ZO_NotificationProvider:New(notificationManager)
+function ZO_NotificationProvider:New(notificationManager, notificationEventCallback)
     local provider = ZO_Object.New(self)
     provider.list = {}
     provider.hasTimer = false
@@ -34,8 +34,12 @@ function ZO_NotificationProvider:New(notificationManager)
     provider.notificationManager = notificationManager
 
     provider.pushUpdateCallback = function(eventId)
+        if notificationEventCallback then
+            notificationEventCallback(eventId)
+        end
         provider:PushUpdateToNotificationManager(eventId)
     end
+
     return provider
 end
 
@@ -782,8 +786,8 @@ end
 
 ZO_LeaderboardRaidProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_LeaderboardRaidProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_LeaderboardRaidProvider:New(notificationManager, notificationEventCallback)
+    local provider = ZO_NotificationProvider.New(self, notificationManager, notificationEventCallback)
 
     provider:RegisterUpdateEvent(EVENT_RAID_SCORE_NOTIFICATION_ADDED)
     provider:RegisterUpdateEvent(EVENT_RAID_SCORE_NOTIFICATION_REMOVED)

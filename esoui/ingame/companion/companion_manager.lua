@@ -4,20 +4,10 @@
 ZO_Companion_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_Companion_Manager:Initialize()
-    self.companionSceneNameSet = {}
     self.companionInteraction =
     {
         type = "Companion",
         interactTypes = { INTERACTION_COMPANION_MENU },
-        OnInteractionCanceled = function()
-            -- we want to abort like vanilla interactions, but because vanilla
-            -- interactions are tied to individual scenes we need to instead gate
-            -- on _any_ companion interaction
-            local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
-            if self.companionSceneNameSet[currentSceneName] and SCENE_MANAGER:IsShowing(currentSceneName) then
-                SCENE_MANAGER:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
-            end
-        end,
     }
 
     -- Shared search for companion equipment
@@ -39,10 +29,8 @@ function ZO_Companion_Manager:Initialize()
     TEXT_SEARCH_MANAGER:SetupContextTextSearch("companionEquipmentTextSearch", filterTargetDescriptor)
 end
 
-function ZO_Companion_Manager:CreateInteractScene(newSceneName)
-    local newScene = ZO_InteractScene:New(newSceneName, SCENE_MANAGER, self.companionInteraction)
-    self.companionSceneNameSet[newSceneName] = true
-    return newScene
+function ZO_Companion_Manager:GetInteraction()
+    return self.companionInteraction
 end
 
 function ZO_Companion_Manager:GetLevelInfo()

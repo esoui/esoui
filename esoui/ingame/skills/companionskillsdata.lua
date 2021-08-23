@@ -281,7 +281,7 @@ function ZO_CompanionSkillLineData:BuildStaticData(skillTypeData, skillLineIndex
     self.skillTypeData, self.skillLineIndex = skillTypeData, skillLineIndex
     self.id = GetCompanionSkillLineId(skillTypeData:GetSkillType(), skillLineIndex)
 
-    self.name = GetSkillLineNameById(self.id)
+    self.name = GetCompanionSkillLineNameById(self.id)
     self.unlockText = GetSkillLineUnlockTextById(self.id)
 
     for skillIndex = 1, GetNumAbilitiesInCompanionSkillLine(self.id) do

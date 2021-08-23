@@ -1,4 +1,4 @@
-© 2020 ZENIMAX MEDIA INC. TRADEMARKS BELONG TO THEIR RESPECTIVE OWNERS. ALL RIGHTS RESERVED.
+© 2021 ZENIMAX MEDIA INC. TRADEMARKS BELONG TO THEIR RESPECTIVE OWNERS. ALL RIGHTS RESERVED.
 
 This is the source code for "The Elder Scrolls Online" user interface and it's presented here unchanged for reference only.
 
@@ -6,7 +6,7 @@ If you're a Zenimax Media Inc. representative and have any objection to any of t
 
 This repo is also available at http://www.esoui.com/downloads/info1213-ESOUI-TheElderScrollsOnlinesourcecode.html
 
-**Last update: 7.0.9 (API 100035) on 26 Jul 2021.**
+**Last update: 7.1.5 (API 101031) on 23 Aug 2021.**
 
 *Join ESOUI Dev Community on Gitter :*
 

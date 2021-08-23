@@ -105,13 +105,13 @@ function ZO_CreateAccount_Gamepad:HasValidCountrySelected()
 end
 
 function ZO_CreateAccount_Gamepad:CreateAccountSelected()
-    if (not self:HasValidCountrySelected()) then
-        self:ShowError(GetString(SI_CONSOLE_CREATEACCOUNT_NOCOUNTRY))
-    elseif (self.enteredEmail == nil) or (self.enteredEmail == "") then
+    if not self:HasValidCountrySelected() then
+        self:ShowError(GetString(SI_CONSOLE_CREATEACCOUNT_NOREGION))
+    elseif self.enteredEmail == nil or self.enteredEmail == "" then
         self:ShowError(GetString(SI_CONSOLE_CREATEACCOUNT_NOEMAIL))
     elseif self.ageValid ~= true then
         self:ShowError(zo_strformat(SI_CONSOLE_CREATEACCOUNT_BADAGE, MINIMUM_AGE))
-    elseif(not self.creatingAccount) then
+    elseif not self.creatingAccount then
         self:ClearError()
         PregameStateManager_AdvanceState()
         self.creatingAccount = true
@@ -228,11 +228,11 @@ function ZO_CreateAccount_Gamepad:AddButton(text, callback)
 end
 
 function ZO_CreateAccount_Gamepad:ActivateEditbox(edit, isEmailBox)
-	if (isEmailBox == true) then
-		edit:SetVirtualKeyboardType(VIRTUAL_KEYBOARD_TYPE_EMAIL)
-	else
-		edit:SetVirtualKeyboardType(VIRTUAL_KEYBOARD_TYPE_DEFAULT)
-	end
+    if (isEmailBox == true) then
+        edit:SetVirtualKeyboardType(VIRTUAL_KEYBOARD_TYPE_EMAIL)
+    else
+        edit:SetVirtualKeyboardType(VIRTUAL_KEYBOARD_TYPE_DEFAULT)
+    end
     edit:TakeFocus()
 end
 
@@ -255,7 +255,7 @@ function ZO_CreateAccount_Gamepad:SetupOptionsList()
             self.countriesList:SetDeactivatedCallback(function() self:SwitchToMainList() end)
             self.countriesList:SetSortsItems(false)
             self.defaultTextLabel = control:GetNamedChild("DefaultText")
-            self.defaultTextLabel:SetText(GetString(SI_CREATEACCOUNT_SELECT_COUNTRY))
+            self.defaultTextLabel:SetText(GetString(SI_CREATEACCOUNT_SELECT_REGION))
         end
     end
 
@@ -278,7 +278,7 @@ function ZO_CreateAccount_Gamepad:ResetMainList()
     -- Populate the list.
     self.optionsList:Clear()
 
-    self:AddComboBox(GetString(SI_CREATEACCOUNT_COUNTRY), function(data) return self.selectedCountry end, function(control, data)
+    self:AddComboBox(GetString(SI_CREATEACCOUNT_REGION), function(data) return self.selectedCountry end, function(control, data)
                 self:SwitchToCountryList()
             end)
 

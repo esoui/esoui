@@ -184,6 +184,19 @@ local ZO_OptionsPanel_Video_ControlData =
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_VSYNC_TOOLTIP,
             exists = ZO_IsPCUI,
         },
+        --Options_Video_RenderThread
+        [GRAPHICS_SETTING_RENDER_THREAD] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_RENDER_THREAD,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD_TOOLTIP,
+            exists = function()
+                return ZO_IsPCUI() and not IsMacUI()
+            end
+        },
         --Options_Video_AntiAliasing_Type
         [GRAPHICS_SETTING_ANTIALIASING_TYPE] =
         {
@@ -497,6 +510,19 @@ local ZO_OptionsPanel_Video_ControlData =
             maxValue = 1,
             valueFormat = "%.2f",
             visible = IsSystemUsingHDR,
+        },
+        [GRAPHICS_SETTING_HDR_MODE] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_MODE,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_HDR_MODE,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_HDR_MODE_TOOLTIP,
+            valid = { HDR_MODE_DEFAULT, HDR_MODE_VIBRANT },
+            valueStringPrefix = "SI_HDRMODE",
+            visible = IsSystemUsingHDR,
+            exists = IsConsoleUI,
         },
         [GRAPHICS_SETTING_SHOW_ADDITIONAL_ALLY_EFFECTS] =
         {

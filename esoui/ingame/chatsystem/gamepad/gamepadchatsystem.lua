@@ -278,7 +278,7 @@ function ZO_GamepadChatSystem:StartTextEntry(text, channel, target, dontShowHUDW
 
     -- if we are in a scene that's blocking chat, we don't want to activate the chat whatsoever
     -- this fixes issues where the chat is showing, but not active, when we enter a scene that blocks chat
-    if self:DoesCurrentSceneBlockChat() then
+    if self:ShouldTextEntryBeBlocked() then
         return
     end
 

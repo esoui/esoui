@@ -1,6 +1,6 @@
 ; Internal Ingame Script Files
 ; This will need ## ValidateSavedVariables: 1 if a saved variable is added.
-## DependsOn: ZO_InternalIngameLocalization ZO_PublicAllIngames
+## DependsOn: ZO_InternalIngameLocalization ZO_PublicAllIngames ZO_PregameAndInternalIngame
 
 EsoUI\InternalIngame\Globals\UnofficialClientStringOverrides.lua
 EsoUI\InternalIngame\Globals\bindings.xml
@@ -46,8 +46,6 @@ EsoUI\InternalIngame\Market\Keyboard\EndeavorSealStore_Keyboard.xml
 EsoUI\InternalIngame\EsoPlusOffers\Keyboard\EsoPlusOffers.lua
 EsoUI\InternalIngame\EsoPlusOffers\Keyboard\EsoPlusOffers.xml
 
-EsoUI\InternalIngame\Market\Gamepad\EsoPlusMembershipInfoDialog_Gamepad.lua
-EsoUI\InternalIngame\Market\Gamepad\EsoPlusMembershipInfoDialog_Gamepad.xml
 EsoUI\InternalIngame\Market\Gamepad\MarketClasses_Gamepad.lua
 EsoUI\InternalIngame\Market\Gamepad\MarketClasses_Gamepad.xml
 EsoUI\InternalIngame\Market\Gamepad\MarketProductListScene_Gamepad.lua

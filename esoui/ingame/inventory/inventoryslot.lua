@@ -1238,8 +1238,8 @@ end
 local function CanItemBeAddedToCraft(inventorySlot)
     local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
 
-    if SYSTEMS:IsShowing("alchemy") then
-        return SYSTEMS:GetObject("alchemy"):CanItemBeAddedToCraft(bag, slot)
+    if SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME) then
+        return SYSTEMS:GetObject(ZO_ALCHEMY_SYSTEM_NAME):CanItemBeAddedToCraft(bag, slot)
     elseif ZO_Enchanting_IsSceneShowing() then
         return ZO_Enchanting_GetVisibleEnchanting():CanItemBeAddedToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
@@ -1253,8 +1253,8 @@ end
 
 local function IsItemAlreadySlottedToCraft(inventorySlot)
     local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    if SYSTEMS:IsShowing("alchemy") then
-        return SYSTEMS:GetObject("alchemy"):IsItemAlreadySlottedToCraft(bag, slot)
+    if SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME) then
+        return SYSTEMS:GetObject(ZO_ALCHEMY_SYSTEM_NAME):IsItemAlreadySlottedToCraft(bag, slot)
     elseif ZO_Enchanting_IsSceneShowing() then
         return ZO_Enchanting_GetVisibleEnchanting():IsItemAlreadySlottedToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
@@ -1267,8 +1267,8 @@ end
 
 local function TryAddItemToCraft(inventorySlot)
     local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    if SYSTEMS:IsShowing("alchemy") then
-        SYSTEMS:GetObject("alchemy"):AddItemToCraft(bag, slot)
+    if SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME) then
+        SYSTEMS:GetObject(ZO_ALCHEMY_SYSTEM_NAME):AddItemToCraft(bag, slot)
     elseif ZO_Enchanting_IsSceneShowing() then
         ZO_Enchanting_GetVisibleEnchanting():AddItemToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
@@ -1281,8 +1281,8 @@ end
 
 local function TryRemoveItemFromCraft(inventorySlot)
     local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    if SYSTEMS:IsShowing("alchemy") then
-        SYSTEMS:GetObject("alchemy"):RemoveItemFromCraft(bag, slot)
+    if SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME) then
+        SYSTEMS:GetObject(ZO_ALCHEMY_SYSTEM_NAME):RemoveItemFromCraft(bag, slot)
     elseif ZO_Enchanting_IsSceneShowing() then
        ZO_Enchanting_GetVisibleEnchanting():RemoveItemFromCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
@@ -2327,7 +2327,7 @@ local InventoryEnter =
     {
         function(inventorySlot)
             if not ZO_CraftingUtils_IsPerformingCraftProcess() then
-                if SYSTEMS:IsShowing("alchemy") then
+                if SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME) then
                     return true, nil -- no tooltip, but keep mouseover behavior
                 end
 
@@ -2344,7 +2344,7 @@ local InventoryEnter =
     {
         function(inventorySlot)
             if not ZO_CraftingUtils_IsPerformingCraftProcess() then
-                if SYSTEMS:IsShowing("alchemy") then
+                if SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME) then
                     return true, nil -- no tooltip, but keep mouseover behavior
                 end
 
@@ -2727,8 +2727,8 @@ local InventoryDragStart =
             if not ZO_CraftingUtils_IsPerformingCraftProcess() then
                 local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
                 if bag and index then
-                    if SYSTEMS:IsShowing("alchemy") then
-                        SYSTEMS:GetObject("alchemy"):RemoveItemFromCraft(bag, index)
+                    if SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME) then
+                        SYSTEMS:GetObject(ZO_ALCHEMY_SYSTEM_NAME):RemoveItemFromCraft(bag, index)
                     elseif ZO_Enchanting_IsSceneShowing() then
                         ZO_Enchanting_GetVisibleEnchanting():RemoveItemFromCraft(bag, index)
                     elseif ZO_Smithing_IsSceneShowing() then
@@ -2869,8 +2869,8 @@ local InventoryReceiveDrag =
                 local bagId, slotIndex = GetCursorBagId(), GetCursorSlotIndex()
                 if bagId and slotIndex then
                     ClearCursor()
-                    if SYSTEMS:IsShowing("alchemy") then
-                        SYSTEMS:GetObject("alchemy"):OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
+                    if SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME) then
+                        SYSTEMS:GetObject(ZO_ALCHEMY_SYSTEM_NAME):OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
                     elseif SCENE_MANAGER:IsShowing("enchanting") then
                         ENCHANTING:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
                     elseif ZO_Smithing_IsSceneShowing() then

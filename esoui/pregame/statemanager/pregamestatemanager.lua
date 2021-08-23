@@ -21,7 +21,7 @@ local g_previousState = nil
 local g_loadingUpdates = false
 
 -- We don't want to show the video or the chapter upsell when we're logging out, only when we're logging in
-local shouldTryToPlayChapterOpeningCinematic = false
+local shouldTryToPlayOpeningCinematic = false
 local shouldTryToShowChapterInterstitial = false
 
 function Pregame_ShowScene(sceneName)
@@ -72,7 +72,7 @@ local g_sharedPregameStates =
         end
     },
 
-    ["PlayChapterOpeningCinematic"] =
+    ["PlayOpeningCinematic"] =
     {
         ShouldAdvance = function()
             return false
@@ -501,15 +501,14 @@ local function OnCharacterListReceived(_, characterCount, maxCharacters, mostRec
 
     local isPlayingVideo = false
 
-    if shouldTryToPlayChapterOpeningCinematic then
-        local highestUnlockedChapter = GetHighestUnlockedChapter()
-        local highestSeenOpening = tonumber(GetCVar("HighestChapterOpeningCinematicSeen"))
+    if shouldTryToPlayOpeningCinematic then
+        local openingCinematicSeen = GetCVar("OpeningCinematicSeen") == "1"
 
-        if highestUnlockedChapter > highestSeenOpening then
-            SetCVar("HighestChapterOpeningCinematicSeen", highestUnlockedChapter)
+        if not openingCinematicSeen then
+            SetCVar("OpeningCinematicSeen", 1)
             ZO_SavePlayerConsoleProfile()
             -- Play intro movie
-            PregameStateManager_SetState("PlayChapterOpeningCinematic")
+            PregameStateManager_SetState("PlayOpeningCinematic")
             isPlayingVideo = true
         end
     end
@@ -568,7 +567,7 @@ local function OnAreaLoadStarted()
 end
 
 function IsPlayingChapterOpeningCinematic()
-    return PregameStateManager_GetCurrentState() == "PlayChapterOpeningCinematic"
+    return PregameStateManager_GetCurrentState() == "PlayOpeningCinematic"
 end
 
 function IsInCharacterSelectCinematicState()
@@ -589,7 +588,7 @@ end
 
 function AttemptToAdvancePastChapterOpeningCinematic()
     if PregameIsFullyLoaded() then
-        PregameStateManager_AdvanceStateFromState("PlayChapterOpeningCinematic")
+        PregameStateManager_AdvanceStateFromState("PlayOpeningCinematic")
     end
 end
 
@@ -708,7 +707,7 @@ function PregameStateManager_ClearError()
 end
 
 local function OnDisplayNameReady()
-    shouldTryToPlayChapterOpeningCinematic = true
+    shouldTryToPlayOpeningCinematic = true
     shouldTryToShowChapterInterstitial = true
 end
 

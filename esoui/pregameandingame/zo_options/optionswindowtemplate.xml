@@ -104,8 +104,20 @@
                 </Button>
             </Controls>
         </Control>
-      
-        <Control name="ZO_Options_Dropdown" mouseEnabled="true" hidden="true" virtual="true">
+
+        <Control name="ZO_Options_Video_Checkbox_IncludeRestartWarning" inherits="ZO_Options_Checkbox" virtual="true">
+            <Controls>
+                <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Checkbox" relativePoint="LEFT" offsetX="-5" />
+                    <OnInitialized>
+                        self.data = { tooltipText = SI_OPTIONS_RESTART_WARNING }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <!-- This needs to be on a higher tier so the other controls don't compete for mouse input on the dropdown-->
+        <Control name="ZO_Options_Dropdown" tier="HIGH" mouseEnabled="true" hidden="true" virtual="true">
             <Dimensions x="510" y="26" />
             <OnMouseEnter>
                 ZO_Options_OnMouseEnter(self)
@@ -115,7 +127,7 @@
                 ZO_Options_OnMouseExit(self)
             </OnMouseExit>
             <Controls>
-                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                <Control name="$(parent)Dropdown" inherits="ZO_ScrollableComboBox">
                     <Dimensions x="200" y="26" />
                     <Anchor point="RIGHT" />
                     <OnMouseEnter>

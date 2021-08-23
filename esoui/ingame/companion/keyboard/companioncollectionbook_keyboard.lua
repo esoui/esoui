@@ -17,7 +17,7 @@ function ZO_CompanionCollectionBook_Keyboard:Initialize(control)
     self:InitializeFilters()
     self:InitializeGridListPanel()
 
-    self.scene = ZO_COMPANION_MANAGER:CreateInteractScene("companionCollectionBookKeyboard")
+    self.scene = ZO_InteractScene:New("companionCollectionBookKeyboard", SCENE_MANAGER, ZO_COMPANION_MANAGER:GetInteraction())
     self.scene:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self.refreshGroups:UpdateRefreshGroups() --In case we need to rebuild the categories

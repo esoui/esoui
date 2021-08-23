@@ -832,12 +832,21 @@ local function InitKeybindingDescriptor(self)
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
-            name = GetString(SI_CHARACTER_SELECT_ESO_PLUS_READ_MORE),
+            name = GetString(SI_CHARACTER_SELECT_ESO_PLUS_JOIN),
             keybind = "UI_SHORTCUT_PRIMARY",
             disabledDuringSceneHiding = true,
 
             callback = function()
                 ZO_ShowBuySubscriptionPlatformDialog()
+            end,
+        },
+        {
+            name = GetString(SI_CHARACTER_SELECT_ESO_PLUS_READ_MORE),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            disabledDuringSceneHiding = true,
+
+            callback = function()
+                ZO_ESO_PLUS_MEMBERSHIP_DIALOG:Show()
             end,
         },
         optionsKeybind,

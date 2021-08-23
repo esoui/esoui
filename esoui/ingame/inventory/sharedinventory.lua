@@ -86,6 +86,12 @@ function ZO_SharedInventoryManager:Initialize()
 
         self.refresh:RefreshSingle("inventory", bagId, slotIndex, isNewItem, itemSoundCategory, updateReason, isLastUpdateForMessage)
 
+        -- ESO-718084: Mark the search as dirty if the slot update includes a change in stack count to handle the refreshing the search when a stack of items is split while being searched on.
+        if stackCountChangeAmount ~= 0 then
+            local SUPPRESS_SEARCH = true
+            TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, SUPPRESS_SEARCH)
+        end
+
         if bagId == BAG_BACKPACK or bagId == BAG_VIRTUAL then
             if isNewItem and GetCraftingInteractionType() == CRAFTING_TYPE_INVALID and not SYSTEMS:IsShowing("crownCrate") then
                 PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_ACQUIRE)

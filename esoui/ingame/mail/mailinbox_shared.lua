@@ -29,6 +29,16 @@ local function GetFormattedSubject(self)
     return self.formattedSubject
 end
 
+local function GetFormattedReplySubject(self)
+    local formattedSubject = GetFormattedSubject(self)
+    local tag = GetString(SI_MAIL_READ_REPLY_TAG_NO_LOC)
+    local tagLength = #tag
+    if string.sub(formattedSubject, 1, tagLength) ~= tag then
+        return string.format("%s %s", GetString(SI_MAIL_READ_REPLY_TAG_NO_LOC), formattedSubject)
+    end
+    return formattedSubject
+end
+
 local function GetExpiresText(self)
     if not self.expiresText then
         if not self.expiresInDays then
@@ -71,6 +81,7 @@ function ZO_MailInboxShared_PopulateMailData(dataTable, mailId)
     dataTable.isFromPlayer = not (fromSystem or fromCS)
     dataTable.priority = fromCS and 1 or 2
     dataTable.GetFormattedSubject = GetFormattedSubject
+    dataTable.GetFormattedReplySubject = GetFormattedReplySubject
     dataTable.GetExpiresText = GetExpiresText
     dataTable.GetReceivedText = GetReceivedText
     dataTable.isReadInfoReady = IsReadMailInfoReady(mailId)

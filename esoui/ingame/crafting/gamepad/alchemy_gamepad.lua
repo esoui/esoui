@@ -38,6 +38,7 @@ function ZO_GamepadAlchemy:InitializeScenes()
             local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(CRAFTING_TYPE_ALCHEMY)
             ZO_GamepadCraftingUtils_SetupGenericHeader(self, titleString)
             ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
+            self.mode = ZO_ALCHEMY_MODE_NONE
         elseif newState == SCENE_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.modeKeybindStripDescriptor)
             self.modeList:Deactivate()
@@ -56,6 +57,7 @@ function ZO_GamepadAlchemy:InitializeScenes()
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(self.tooltip)
             GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_SUCCESS, SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_FAIL)
             self:UpdateTooltip()
+            self.mode = ZO_ALCHEMY_MODE_CREATION
         elseif newState == SCENE_HIDDEN then
             self.inventory:Deactivate()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mainKeybindStripDescriptor)
@@ -67,7 +69,7 @@ function ZO_GamepadAlchemy:InitializeScenes()
     end)
 
     self.control:RegisterForEvent(EVENT_TRAIT_LEARNED, function()
-        if SYSTEMS:IsShowing("alchemy") then
+        if SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME) then
             self:OnSlotChanged()
         end
     end)
@@ -312,6 +314,7 @@ function ZO_GamepadAlchemy:SelectMode()
         if data.mode == ZO_ALCHEMY_MODE_CREATION then
             SCENE_MANAGER:Push("gamepad_alchemy_creation")
         elseif data.mode == ZO_ALCHEMY_MODE_RECIPES then
+            self.mode = data.mode
             GAMEPAD_PROVISIONER:EmbedInCraftingScene(self.alchemyStationInteraction)
         end
     end

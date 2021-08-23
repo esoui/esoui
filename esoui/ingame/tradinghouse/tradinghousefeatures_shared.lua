@@ -349,17 +349,24 @@ do
     weaponTraitParams:SetDisplayName(GetString("SI_TRADINGHOUSEFEATURECATEGORY", TRADING_HOUSE_FEATURE_CATEGORY_TRAIT))
     AddEnumSearcher(weaponTraitParams, TRADING_HOUSE_FILTER_TYPE_TRAIT, GetItemLinkTraitType)
     AddEnumChoices(weaponTraitParams, "SI_ITEMTRAITTYPE", allTraitsString, {
-        ITEM_TRAIT_TYPE_WEAPON_ORNATE, 
+        ITEM_TRAIT_TYPE_WEAPON_ORNATE,
         ITEM_TRAIT_TYPE_WEAPON_INTRICATE,
-        ITEM_TRAIT_TYPE_WEAPON_POWERED, 
+        ITEM_TRAIT_TYPE_WEAPON_POWERED,
         ITEM_TRAIT_TYPE_WEAPON_CHARGED,
         ITEM_TRAIT_TYPE_WEAPON_PRECISE,
-        ITEM_TRAIT_TYPE_WEAPON_INFUSED, 
+        ITEM_TRAIT_TYPE_WEAPON_INFUSED,
         ITEM_TRAIT_TYPE_WEAPON_DEFENDING,
         ITEM_TRAIT_TYPE_WEAPON_TRAINING,
         ITEM_TRAIT_TYPE_WEAPON_SHARPENED,
         ITEM_TRAIT_TYPE_WEAPON_DECISIVE,
         ITEM_TRAIT_TYPE_WEAPON_NIRNHONED,
+        ITEM_TRAIT_TYPE_NONE,
+    })
+
+    local companionWeaponTraitParams = CreateDropDownFeatureParams("CompanionWeaponTraits")
+    companionWeaponTraitParams:SetDisplayName(GetString("SI_TRADINGHOUSEFEATURECATEGORY", TRADING_HOUSE_FEATURE_CATEGORY_TRAIT))
+    AddEnumSearcher(companionWeaponTraitParams, TRADING_HOUSE_FILTER_TYPE_TRAIT, GetItemLinkTraitType)
+    AddEnumChoices(companionWeaponTraitParams, "SI_ITEMTRAITTYPE", allTraitsString, {
         ITEM_TRAIT_TYPE_WEAPON_QUICKENED,
         ITEM_TRAIT_TYPE_WEAPON_PROLIFIC,
         ITEM_TRAIT_TYPE_WEAPON_FOCUSED,
@@ -369,24 +376,31 @@ do
         ITEM_TRAIT_TYPE_WEAPON_AUGMENTED,
         ITEM_TRAIT_TYPE_WEAPON_BOLSTERED,
         ITEM_TRAIT_TYPE_WEAPON_VIGOROUS,
-        ITEM_TRAIT_TYPE_NONE, 
+        ITEM_TRAIT_TYPE_NONE,
     })
 
     local armorTraitParams = CreateDropDownFeatureParams("ArmorTraits")
     armorTraitParams:SetDisplayName(GetString("SI_TRADINGHOUSEFEATURECATEGORY", TRADING_HOUSE_FEATURE_CATEGORY_TRAIT))
     AddEnumSearcher(armorTraitParams, TRADING_HOUSE_FILTER_TYPE_TRAIT, GetItemLinkTraitType)
     AddEnumChoices(armorTraitParams, "SI_ITEMTRAITTYPE", allTraitsString, {
-        ITEM_TRAIT_TYPE_ARMOR_ORNATE, 
+        ITEM_TRAIT_TYPE_ARMOR_ORNATE,
         ITEM_TRAIT_TYPE_ARMOR_INTRICATE,
-        ITEM_TRAIT_TYPE_ARMOR_STURDY, 
+        ITEM_TRAIT_TYPE_ARMOR_STURDY,
         ITEM_TRAIT_TYPE_ARMOR_IMPENETRABLE,
         ITEM_TRAIT_TYPE_ARMOR_REINFORCED,
-        ITEM_TRAIT_TYPE_ARMOR_WELL_FITTED, 
+        ITEM_TRAIT_TYPE_ARMOR_WELL_FITTED,
         ITEM_TRAIT_TYPE_ARMOR_TRAINING,
         ITEM_TRAIT_TYPE_ARMOR_INFUSED,
         ITEM_TRAIT_TYPE_ARMOR_PROSPEROUS,
         ITEM_TRAIT_TYPE_ARMOR_DIVINES,
         ITEM_TRAIT_TYPE_ARMOR_NIRNHONED,
+        ITEM_TRAIT_TYPE_NONE,
+    })
+
+    local companionArmorTraitParams = CreateDropDownFeatureParams("CompanionArmorTraits")
+    companionArmorTraitParams:SetDisplayName(GetString("SI_TRADINGHOUSEFEATURECATEGORY", TRADING_HOUSE_FEATURE_CATEGORY_TRAIT))
+    AddEnumSearcher(companionArmorTraitParams, TRADING_HOUSE_FILTER_TYPE_TRAIT, GetItemLinkTraitType)
+    AddEnumChoices(companionArmorTraitParams, "SI_ITEMTRAITTYPE", allTraitsString, {
         ITEM_TRAIT_TYPE_ARMOR_QUICKENED,
         ITEM_TRAIT_TYPE_ARMOR_PROLIFIC,
         ITEM_TRAIT_TYPE_ARMOR_FOCUSED,
@@ -396,14 +410,14 @@ do
         ITEM_TRAIT_TYPE_ARMOR_AUGMENTED,
         ITEM_TRAIT_TYPE_ARMOR_BOLSTERED,
         ITEM_TRAIT_TYPE_ARMOR_VIGOROUS,
-        ITEM_TRAIT_TYPE_NONE, 
+        ITEM_TRAIT_TYPE_NONE,
     })
 
     local jewelryTraitParams = CreateDropDownFeatureParams("JewelryTraits")
     jewelryTraitParams:SetDisplayName(GetString("SI_TRADINGHOUSEFEATURECATEGORY", TRADING_HOUSE_FEATURE_CATEGORY_TRAIT))
     AddEnumSearcher(jewelryTraitParams, TRADING_HOUSE_FILTER_TYPE_TRAIT, GetItemLinkTraitType)
     AddEnumChoices(jewelryTraitParams, "SI_ITEMTRAITTYPE", allTraitsString, {
-        ITEM_TRAIT_TYPE_JEWELRY_ORNATE, 
+        ITEM_TRAIT_TYPE_JEWELRY_ORNATE,
         ITEM_TRAIT_TYPE_JEWELRY_INTRICATE,
         ITEM_TRAIT_TYPE_JEWELRY_ARCANE,
         ITEM_TRAIT_TYPE_JEWELRY_HEALTHY,
@@ -414,6 +428,13 @@ do
         ITEM_TRAIT_TYPE_JEWELRY_SWIFT,
         ITEM_TRAIT_TYPE_JEWELRY_HARMONY,
         ITEM_TRAIT_TYPE_JEWELRY_BLOODTHIRSTY,
+        ITEM_TRAIT_TYPE_NONE,
+    })
+
+    local companionJewelryTraitParams = CreateDropDownFeatureParams("CompanionJewelryTraits")
+    companionJewelryTraitParams:SetDisplayName(GetString("SI_TRADINGHOUSEFEATURECATEGORY", TRADING_HOUSE_FEATURE_CATEGORY_TRAIT))
+    AddEnumSearcher(companionJewelryTraitParams, TRADING_HOUSE_FILTER_TYPE_TRAIT, GetItemLinkTraitType)
+    AddEnumChoices(companionJewelryTraitParams, "SI_ITEMTRAITTYPE", allTraitsString, {
         ITEM_TRAIT_TYPE_JEWELRY_QUICKENED,
         ITEM_TRAIT_TYPE_JEWELRY_PROLIFIC,
         ITEM_TRAIT_TYPE_JEWELRY_FOCUSED,
@@ -423,7 +444,7 @@ do
         ITEM_TRAIT_TYPE_JEWELRY_AUGMENTED,
         ITEM_TRAIT_TYPE_JEWELRY_BOLSTERED,
         ITEM_TRAIT_TYPE_JEWELRY_VIGOROUS,
-        ITEM_TRAIT_TYPE_NONE, 
+        ITEM_TRAIT_TYPE_NONE,
     })
 end
 

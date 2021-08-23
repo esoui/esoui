@@ -582,7 +582,7 @@ function ZO_ActionBar_OnInitialized(control)
             local slotNum = button:GetSlot()
             local timeRemainingMS = GetActionSlotEffectTimeRemaining(slotNum, g_activeHotbar)
             button:SetTimer(timeRemainingMS)
-            local stackCount = GetActionSlotEffectStackCount(slotNum, hotbarCategory)
+            local stackCount = GetActionSlotEffectStackCount(slotNum, g_activeHotbar)
             button:SetStackCount(stackCount)
         else
             local slotNum = button:GetSlot()

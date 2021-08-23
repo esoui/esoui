@@ -44,6 +44,12 @@ function ZO_StoreManager:Initialize(control)
                                                         if self.windowMode == ZO_STORE_WINDOW_MODE_STABLE then
                                                             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                                                         end
+
+                                                        if not IsInGamepadPreferredMode() then
+                                                            TEXT_SEARCH_MANAGER:DeactivateTextSearch("storeTextSearch")
+                                                            local REMOVE_CONTEXT = nil
+                                                            PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
+                                                        end
                                                     end
                                                 end)
 
@@ -188,9 +194,11 @@ function ZO_StoreManager:Initialize(control)
 
     local function CloseStoreWindow()
         if not IsInGamepadPreferredMode() then
-            TEXT_SEARCH_MANAGER:DeactivateTextSearch("storeTextSearch")
-            local REMOVE_CONTEXT = nil
-            PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
+            if TEXT_SEARCH_MANAGER:IsActiveTextSearch("storeTextSearch") then
+                TEXT_SEARCH_MANAGER:DeactivateTextSearch("storeTextSearch")
+                local REMOVE_CONTEXT = nil
+                PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
+            end
 
             -- Ensure that all dialogs related to the store also close when interaction ends
             ZO_Dialogs_ReleaseDialog("REPAIR_ALL")
@@ -751,7 +759,7 @@ function ZO_Store_OnEntryMouseEnter(storeEntrySlot)
     local storeEntryIndex = GetStoreEntryIndexForPreviewFromSlot(storeEntrySlot)
 
     local cursor = MOUSE_CURSOR_DO_NOT_CARE
-    if storeEntryIndex ~= nil then
+    if storeEntryIndex ~= nil and IsCharacterPreviewingAvailable() then
         cursor = MOUSE_CURSOR_PREVIEW
     end
 
@@ -769,7 +777,7 @@ function ZO_Store_OnEntryClicked(storeEntrySlot, button)
     -- we'll do our custom behavior
     if button == MOUSE_BUTTON_INDEX_LEFT then
         local storeEntryIndex = GetStoreEntryIndexForPreviewFromSlot(storeEntrySlot)
-        if storeEntryIndex ~= nil then
+        if storeEntryIndex ~= nil and IsCharacterPreviewingAvailable() then
             STORE_WINDOW:PreviewStoreEntry(storeEntryIndex)
         end
     else

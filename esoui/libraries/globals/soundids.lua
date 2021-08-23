@@ -336,6 +336,8 @@ SOUNDS = {
     GUILD_KEEP_RELEASED = "Guild_Keep_Released",
     GUILD_KEEP_LOST = "Guild_Keep_Lost",
 
+    CAMPAIGN_READY_CHECK = "Campaign_Ready_Check",
+
     -- Broadcast sounds
     MESSAGE_BROADCAST               = "System_Broadcast",
 
@@ -456,7 +458,9 @@ SOUNDS = {
     VOLUME_DING_SFX                 = "Volume_Ding_SFX",
     VOLUME_DING_AMBIENT             = "Volume_Ding_Ambient",
     VOLUME_DING_UI                  = "Volume_Ding_UI",
+    VOLUME_DING_VIDEO               = "Volume_Ding_Video",
     VOLUME_DING_VO                  = "Volume_Ding_VO",
+    VOLUME_DING_FOOTSTEPS           = "Volume_Ding_Footsteps",
 
     --General Settings Sounds
     SINGLE_SETTING_RESET_TO_DEFAULT = "Single_Setting_Reset",
@@ -497,6 +501,9 @@ SOUNDS = {
     TRADE_INVITE_RECEIVED           = "Trade_InviteReceived",
     TRADE_PARTICIPANT_READY         = "Trade_ParticipantReady",
     TRADE_PARTICIPANT_RECONSIDER    = "Trade_ParticipantReconsider",
+
+    -- Friend Sounds
+    FRIEND_INVITE_RECEIVED          = "Friend_InviteReceived",
 
     -- Rings Of Mara Sounds
     MARA_INVITE_RECEIVED            = "Mara_InviteReceived",

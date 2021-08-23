@@ -70,7 +70,7 @@ ZO_CompanionSkills_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 function ZO_CompanionSkills_Gamepad:Initialize(control)
     COMPANION_SKILLS_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
-    COMPANION_SKILLS_GAMEPAD_SCENE = ZO_COMPANION_MANAGER:CreateInteractScene("companionSkillsGamepad")
+    COMPANION_SKILLS_GAMEPAD_SCENE = ZO_InteractScene:New("companionSkillsGamepad", SCENE_MANAGER, ZO_COMPANION_MANAGER:GetInteraction())
     COMPANION_SKILLS_GAMEPAD_SCENE:AddFragment(COMPANION_SKILLS_GAMEPAD_FRAGMENT)
 
     local DONT_ACTIVATE_ON_SHOW = false
@@ -290,7 +290,7 @@ function ZO_CompanionSkills_Gamepad:InitializeSkillLinesList()
         local selectedData = list:GetTargetData()
         if selectedData then 
             local skillLineData = selectedData.skillLineData
-            GAMEPAD_TOOLTIPS:LayoutSkillLinePreview(GAMEPAD_LEFT_TOOLTIP, skillLineData)
+            GAMEPAD_TOOLTIPS:LayoutCompanionSkillLinePreview(GAMEPAD_LEFT_TOOLTIP, skillLineData)
         end
     end
 

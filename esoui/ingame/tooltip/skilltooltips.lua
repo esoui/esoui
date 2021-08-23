@@ -197,6 +197,14 @@ function ZO_Tooltip:LayoutAbilityWithSkillProgressionData(abilityId, skillProgre
     if currentRank then
         local headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
 
+        --Morphed From Header
+        local skillData = skillProgressionData:GetSkillData()
+        local isActive = not skillData:IsPassive()
+        if isActive and skillProgressionData:IsMorph() then
+            local baseMorphProgressionData = skillData:GetMorphData(MORPH_SLOT_BASE)
+            headerSection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_MORPHS_FROM, baseMorphProgressionData:GetName()), self:GetStyle("abilityHeader"))
+        end
+
         self:AddSectionEvenIfEmpty(headerSection)
 
         local formattedNameAndRank = ZO_CachedStrFormat(SI_ABILITY_NAME_AND_RANK, abilityName, currentRank)
@@ -285,6 +293,28 @@ function ZO_Tooltip:LayoutSkillLinePreview(skillLineData)
                 lastHeader = currentHeader
             end
             local rowControl = self:AcquireCustomControl(self:GetStyle("skillLineEntryRow"))
+            ZO_GamepadSkillEntryPreviewRow_Setup(rowControl, skillData)
+            skillsSection:AddCustomControl(rowControl)
+        end
+        self:AddSection(skillsSection)
+    elseif skillLineData:IsAdvised() then
+        self:LayoutTitleAndMultiSectionDescriptionTooltip(skillLineData:GetFormattedName(), skillLineData:GetUnlockText())
+    end
+end
+
+function ZO_Tooltip:LayoutCompanionSkillLinePreview(skillLineData)
+    if skillLineData:IsAvailable() then
+        local skillsSection = self:AcquireSection(self:GetStyle("skillLinePreviewBodySection"))
+        local lastHeader = nil
+        for _, skillData in skillLineData:SkillIterator() do
+            local currentHeader = skillData:GetHeaderText()
+            if lastHeader ~= currentHeader then
+                local headerSection = self:AcquireSection(self:GetStyle("companionSkillLineEntryHeaderSection"))
+                headerSection:AddLine(currentHeader, self:GetStyle("skillLineEntryHeader"))
+                skillsSection:AddSection(headerSection)
+                lastHeader = currentHeader
+            end
+            local rowControl = self:AcquireCustomControl(self:GetStyle("companionSkillLineEntryRow"))
             ZO_GamepadSkillEntryPreviewRow_Setup(rowControl, skillData)
             skillsSection:AddCustomControl(rowControl)
         end

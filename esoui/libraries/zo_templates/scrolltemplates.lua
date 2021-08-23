@@ -276,13 +276,13 @@ local function UpdateScrollFade(self, scroll, isPercent, sliderValue)
         end
 
         if topFadeDistance > 0 then
-            scroll:SetFadeGradient(1, 0, 1, topFadeDistance)
+            scroll:SetFadeGradient(1, 0, 1, topFadeDistance * scroll:GetScale())
         else
             scroll:SetFadeGradient(1, 0, 0, 0)
         end
         
         if bottomFadeDistance > 0 then
-            scroll:SetFadeGradient(2, 0, -1, bottomFadeDistance)
+            scroll:SetFadeGradient(2, 0, -1, bottomFadeDistance * scroll:GetScale())
         else
             scroll:SetFadeGradient(2, 0, 0, 0);
         end
@@ -563,8 +563,9 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
 
     if scrollbar then
         --thumb resizing
-        local scrollBarHeight = scrollbar:GetHeight()
-        local scrollAreaHeight = scroll:GetHeight()
+        local scale = scroll:GetScale()
+        local scrollBarHeight = scrollbar:GetHeight() / scale
+        local scrollAreaHeight = scroll:GetHeight() / scale
         if verticalExtents > 0 and scrollBarHeight >= 0 and scrollAreaHeight >= 0 then
             local thumbHeight = scrollBarHeight * scrollAreaHeight /(verticalExtents + scrollAreaHeight)
             scrollbar:SetThumbTextureHeight(thumbHeight)
@@ -1703,13 +1704,18 @@ local function GetClampedSelectedIndex(self)
     return nil
 end
 
-local function AutoSelect(self, animateInstantly)
+local function AutoSelect(self, animateInstantly, scrollIntoView)
     if #self.data > 0 then
         local selectedIndex = GetClampedSelectedIndex(self)
         if selectedIndex then
             for i = selectedIndex, 1, -1 do
                 if CanSelectData(self, i) then
-                    ZO_ScrollList_SelectData(self, self.data[i].data, NO_DATA_CONTROL, NOT_RESELECTING_DURING_REBUILD, animateInstantly)
+                    if scrollIntoView then
+                        local NO_CALLBACK = nil
+                        ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[i].data, NO_CALLBACK, animateInstantly)
+                    else
+                        ZO_ScrollList_SelectData(self, self.data[i].data, NO_DATA_CONTROL, NOT_RESELECTING_DURING_REBUILD, animateInstantly)
+                    end
                     return
                 end
             end
@@ -1950,8 +1956,8 @@ function ZO_ScrollList_TrySelectLastData(self, onScrollCompleteCallback, shouldA
     return false
 end
 
-function ZO_ScrollList_AutoSelectData(self, animateInstantly)
-    AutoSelect(self, animateInstantly)
+function ZO_ScrollList_AutoSelectData(self, animateInstantly, scrollIntoView)
+    AutoSelect(self, animateInstantly, scrollIntoView)
 end
 
 --When the list in inactive, you can't get selected data.  Auto select is a mechanic of lists that will reselect the last thing that was selected
@@ -2546,7 +2552,7 @@ function ZO_ScrollList_AtBottomOfList(self)
 end
 
 function ZO_ScrollList_SelectDataAndScrollIntoView(self, data, onScrollCompleteCallback, shouldAnimateInstantly)
-    ZO_ScrollList_SelectData(self, data, NOT_RESELECTING_DURING_REBUILD, NO_DATA_CONTROL, shouldAnimateInstantly)
+    ZO_ScrollList_SelectData(self, data, NO_DATA_CONTROL, NOT_RESELECTING_DURING_REBUILD, shouldAnimateInstantly)
     ZO_ScrollList_ScrollDataIntoView(self, self.selectedDataIndex, onScrollCompleteCallback, shouldAnimateInstantly)
 end
 

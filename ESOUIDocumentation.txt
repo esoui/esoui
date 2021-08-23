@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 100035
+h1. ESO UI Documentation for API Version 101031
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -909,6 +909,7 @@ h5. InteractionType
 * INTERACTION_COMPANION_MENU
 * INTERACTION_CONVERSATION
 * INTERACTION_CRAFT
+* INTERACTION_DEPRECATED_1
 * INTERACTION_DYE_STATION
 * INTERACTION_FAST_TRAVEL
 * INTERACTION_FAST_TRAVEL_KEEP
@@ -934,7 +935,6 @@ h5. InteractionType
 * INTERACTION_SIEGE
 * INTERACTION_SKILL_RESPEC
 * INTERACTION_STABLE
-* INTERACTION_STONE_MASON
 * INTERACTION_STORE
 * INTERACTION_TRADINGHOUSE
 * INTERACTION_TREASURE_MAP
@@ -1191,14 +1191,6 @@ h5. NonCombatBonusType
 * NON_COMBAT_BONUS_SHADOWY_CONNECTIONS
 * NON_COMBAT_BONUS_SLY
 * NON_COMBAT_BONUS_SOUL_GEM_FREE_RESURRECT_PERCENT_CHANCE
-* NON_COMBAT_BONUS_SPELLCRAFTING_ABILITIES_LEARNED
-* NON_COMBAT_BONUS_SPELLCRAFTING_FOCUS_AREA
-* NON_COMBAT_BONUS_SPELLCRAFTING_FOCUS_CAST_TIME
-* NON_COMBAT_BONUS_SPELLCRAFTING_FOCUS_CHEAPER
-* NON_COMBAT_BONUS_SPELLCRAFTING_FOCUS_DURATION
-* NON_COMBAT_BONUS_SPELLCRAFTING_FOCUS_ULTIMATE
-* NON_COMBAT_BONUS_SPELLCRAFTING_TABLET_CREATION_TIME
-* NON_COMBAT_BONUS_SPELLCRAFTING_TABLET_QUALITY
 * NON_COMBAT_BONUS_TELVAR_MULTIPLIER
 * NON_COMBAT_BONUS_TIMELY_ESCAPE
 * NON_COMBAT_BONUS_TRAIT_IDENTIFIER
@@ -1783,6 +1775,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_DECONSTRUCTION_LEVEL_PENALTY
 * TUTORIAL_TRIGGER_DISCOVERED_GROUP_DUNGEON
 * TUTORIAL_TRIGGER_DISCOVERED_PUBLIC_DUNGEON
+* TUTORIAL_TRIGGER_DISCOVERED_TRIAL
 * TUTORIAL_TRIGGER_DISREPUTABLE_REACHED
 * TUTORIAL_TRIGGER_DYEING_OPENED
 * TUTORIAL_TRIGGER_DYEING_OPENED_AS_SUBSCRIBER
@@ -2094,6 +2087,7 @@ h5. Globals
 * TRADE_NUM_SLOTS
 * TRADE_DELAY_TIME
 * TUTORIAL_ENABLED_SETTING_ID
+* VOICE_CHAT_OFFICERS_ROOM_NUMBER
 * VOICE_CHAT_REQUEST_DELAY
 
 
@@ -2420,7 +2414,7 @@ h5. VisualLayer
 * VISUAL_LAYER_OUTFIT
 * VISUAL_LAYER_POLYMORPH
 * VISUAL_LAYER_SKIN
-* VISUAL_LAYER_WEREWOLF
+* VISUAL_LAYER_TRANSFORMATION
 
 
 h5. VisualSlot
@@ -3145,6 +3139,7 @@ h5. CombatUnitType
 * COMBAT_UNIT_TYPE_NONE
 * COMBAT_UNIT_TYPE_OTHER
 * COMBAT_UNIT_TYPE_PLAYER
+* COMBAT_UNIT_TYPE_PLAYER_COMPANION
 * COMBAT_UNIT_TYPE_PLAYER_PET
 * COMBAT_UNIT_TYPE_TARGET_DUMMY
 
@@ -4536,6 +4531,7 @@ h5. GamepadItemCategory
 * GAMEPAD_ITEM_CATEGORY_CONSUMABLE
 * GAMEPAD_ITEM_CATEGORY_COSTUME
 * GAMEPAD_ITEM_CATEGORY_DAGGER
+* GAMEPAD_ITEM_CATEGORY_DEPRECATED
 * GAMEPAD_ITEM_CATEGORY_ENCHANTING
 * GAMEPAD_ITEM_CATEGORY_FEET
 * GAMEPAD_ITEM_CATEGORY_GLYPHS
@@ -4555,7 +4551,6 @@ h5. GamepadItemCategory
 * GAMEPAD_ITEM_CATEGORY_SHOULDERS
 * GAMEPAD_ITEM_CATEGORY_SIEGE
 * GAMEPAD_ITEM_CATEGORY_SOUL_GEM
-* GAMEPAD_ITEM_CATEGORY_SPELLCRAFTING
 * GAMEPAD_ITEM_CATEGORY_STAFF
 * GAMEPAD_ITEM_CATEGORY_STYLE_MATERIAL
 * GAMEPAD_ITEM_CATEGORY_SWORD
@@ -4661,6 +4656,12 @@ h5. ItemSellInformation
 * ITEM_SELL_INFORMATION_NONE
 * ITEM_SELL_INFORMATION_PRIORITY_SELL
 * ITEM_SELL_INFORMATION_RECONSTRUCTED
+
+
+h5. ItemSetBonusRules
+* ITEM_SET_BONUS_RULES_DISABLED
+* ITEM_SET_BONUS_RULES_ENABLED
+* ITEM_SET_BONUS_RULES_NO_PROC
 
 
 h5. ItemSetType
@@ -4797,6 +4798,7 @@ h5. ItemType
 * ITEMTYPE_CROWN_ITEM
 * ITEMTYPE_CROWN_REPAIR
 * ITEMTYPE_DEPRECATED
+* ITEMTYPE_DEPRECATED_2
 * ITEMTYPE_DISGUISE
 * ITEMTYPE_DRINK
 * ITEMTYPE_DYE_STAMP
@@ -4837,7 +4839,6 @@ h5. ItemType
 * ITEMTYPE_RECIPE
 * ITEMTYPE_SIEGE
 * ITEMTYPE_SOUL_GEM
-* ITEMTYPE_SPELLCRAFTING_TABLET
 * ITEMTYPE_SPICE
 * ITEMTYPE_STYLE_MATERIAL
 * ITEMTYPE_TABARD
@@ -5122,7 +5123,6 @@ h5. SpecializedItemType
 * SPECIALIZED_ITEMTYPE_SIEGE_TREBUCHET
 * SPECIALIZED_ITEMTYPE_SIEGE_UNIVERSAL
 * SPECIALIZED_ITEMTYPE_SOUL_GEM
-* SPECIALIZED_ITEMTYPE_SPELLCRAFTING_TABLET
 * SPECIALIZED_ITEMTYPE_SPICE
 * SPECIALIZED_ITEMTYPE_STYLE_MATERIAL
 * SPECIALIZED_ITEMTYPE_TABARD
@@ -5419,6 +5419,8 @@ h5. AudioSetting
 * AUDIO_SETTING_SPEAKER_SETUP
 * AUDIO_SETTING_UI_ENABLED
 * AUDIO_SETTING_UI_VOLUME
+* AUDIO_SETTING_VIDEO_ENABLED
+* AUDIO_SETTING_VIDEO_VOLUME
 * AUDIO_SETTING_VOICE_CHAT_VOLUME
 * AUDIO_SETTING_VO_ENABLED
 * AUDIO_SETTING_VO_VOLUME
@@ -5569,6 +5571,7 @@ h5. GamepadSetting
 
 
 h5. InWorldUISetting
+* IN_WORLD_UI_SETTING_COMPANION_CAN_USE_GROUP_MOUNT
 * IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY
 * IN_WORLD_UI_SETTING_DEFAULT_SOUL_GEM
 * IN_WORLD_UI_SETTING_FOOT_INVERSE_KINEMATICS
@@ -6495,6 +6498,7 @@ h5. EnchantmentSearchCategoryType
 h5. TradingHouseCategoryHeader
 * TRADING_HOUSE_CATEGORY_HEADER_ALL_ITEMS
 * TRADING_HOUSE_CATEGORY_HEADER_APPAREL
+* TRADING_HOUSE_CATEGORY_HEADER_COMPANION_EQUIPMENT
 * TRADING_HOUSE_CATEGORY_HEADER_CONSUMABLES
 * TRADING_HOUSE_CATEGORY_HEADER_FURNISHINGS
 * TRADING_HOUSE_CATEGORY_HEADER_GLYPHS
@@ -6847,6 +6851,9 @@ h5. ScryingPassiveSkill
 h5. Globals
 * MAX_IN_PROGRESS_ANTIQUITIES
 * MAX_ANTIQUITY_DIG_SITES
+
+
+h5. Globals
 
 
 h5. Globals
@@ -7482,7 +7489,6 @@ h5. MsgInteractType
 * CHATTER_COMPLETE_QUEST_DIALOG
 * CHATTER_CONFIRM_BUY_BAG_SPACE
 * CHATTER_CONFIRM_BUY_BANK_SPACE
-* CHATTER_CONFIRM_MAKE_TABLET
 * CHATTER_CONTROL_SIEGE
 * CHATTER_CRAFT_ITEM
 * CHATTER_DECONSTRUCT_ITEM
@@ -7514,7 +7520,6 @@ h5. MsgInteractType
 * CHATTER_END_KEEP_GUILD_RELEASE
 * CHATTER_END_KEEP_PIECE
 * CHATTER_END_KEEP_TRAVEL
-* CHATTER_END_LEARN_TABLET
 * CHATTER_END_LOCK
 * CHATTER_END_LOOT
 * CHATTER_END_MAIL
@@ -7527,7 +7532,6 @@ h5. MsgInteractType
 * CHATTER_END_SIEGE
 * CHATTER_END_SKILL_RESPEC
 * CHATTER_END_STABLE
-* CHATTER_END_STONE_MASON
 * CHATTER_END_TALK
 * CHATTER_END_TRADINGHOUSE
 * CHATTER_END_TREASURE_MAP
@@ -7575,7 +7579,6 @@ h5. MsgInteractType
 * CHATTER_SHOW_KEEP_GUILD_CLAIM
 * CHATTER_SHOW_KEEP_GUILD_RELEASE
 * CHATTER_SHOW_KEEP_TRAVEL
-* CHATTER_SHOW_STONE_MASON
 * CHATTER_SHOW_TREASURE_MAP
 * CHATTER_START_ADVANCE_COMPLETABLE_QUEST_CONDITIONS
 * CHATTER_START_ANTIQUITY_DIG_SPOT
@@ -7602,7 +7605,6 @@ h5. MsgInteractType
 * CHATTER_START_KEEP_GUILD_RELEASE
 * CHATTER_START_KEEP_PIECE
 * CHATTER_START_KEEP_TRAVEL
-* CHATTER_START_LEARN_TABLET
 * CHATTER_START_LOCK
 * CHATTER_START_LOOT
 * CHATTER_START_MAIL
@@ -7615,7 +7617,6 @@ h5. MsgInteractType
 * CHATTER_START_SIEGE
 * CHATTER_START_SKILL_RESPEC
 * CHATTER_START_STABLE
-* CHATTER_START_STONE_MASON
 * CHATTER_START_TALK
 * CHATTER_START_TRADINGHOUSE
 * CHATTER_START_TREASURE_MAP
@@ -8035,6 +8036,7 @@ h5. TradingHouseFilterType
 * TRADING_HOUSE_FILTER_TYPE_EQUIP
 * TRADING_HOUSE_FILTER_TYPE_FURNITURE_CATEGORY
 * TRADING_HOUSE_FILTER_TYPE_FURNITURE_SUBCATEGORY
+* TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY
 * TRADING_HOUSE_FILTER_TYPE_ITEM
 * TRADING_HOUSE_FILTER_TYPE_LEVEL
 * TRADING_HOUSE_FILTER_TYPE_NAME_HASH
@@ -8173,8 +8175,17 @@ h5. AnimationType
 * ANIMATION_TEXTURE
 * ANIMATION_TEXTUREROTATE
 * ANIMATION_TEXTURESLIDE
+* ANIMATION_TRANSFORMOFFSET
+* ANIMATION_TRANSFORMROTATION
+* ANIMATION_TRANSFORMSCALE
+* ANIMATION_TRANSFORMSKEW
 * ANIMATION_TRANSLATE
 * ANIMATION_TRANSLATE3D
+
+
+h5. AxisRotationOrder
+* AXIS_ROTATION_ORDER_XYZ
+* AXIS_ROTATION_ORDER_ZXY
 
 
 h5. BarAlignment
@@ -8807,6 +8818,11 @@ h5. ReleaseReferenceOptions
 * RELEASE_TEXTURE_AT_ZERO_REFERENCES
 
 
+h5. RotationAnimationMode
+* ROTATION_ANIMATION_MODE_EULER
+* ROTATION_ANIMATION_MODE_QUATERNION
+
+
 h5. ScrollBounding
 * SCROLL_BOUNDING_BOUND
 * SCROLL_BOUNDING_CONTAINED
@@ -8825,6 +8841,7 @@ h5. ShapeType
 
 
 h5. Space
+* SPACE_CAMERA
 * SPACE_INTERFACE
 * SPACE_WORLD
 
@@ -8880,6 +8897,7 @@ h5. TranslateAnimationDeltaType
 h5. Unit
 * UNIT_CENTIMETERS
 * UNIT_METERS
+* UNIT_PERCENT
 * UNIT_PIXELS
 * UNIT_UI
 
@@ -8960,6 +8978,11 @@ h5. GraphicsPresets
 * GRAPHICS_PRESETS_SCORPIO
 * GRAPHICS_PRESETS_ULTRA
 * GRAPHICS_PRESETS_XB1
+
+
+h5. HDRMode
+* HDR_MODE_DEFAULT
+* HDR_MODE_VIBRANT
 
 
 h5. ParticleDensity
@@ -9236,8 +9259,8 @@ h2. Game API
 * IsInUI *private* (*string* _guiName_)
 ** _Returns:_ *bool* _isInUI_
 
-* GetStringWidthScaledPixels(*object* _fontObject_, *string* _text_, *number* _scale_)
-** _Returns:_ *number* _stringWidthScaledPixels_
+* GetStringWidthScaled(*object* _fontObject_, *string* _text_, *number* _scale_)
+** _Returns:_ *number* _stringWidthScaled_
 
 * GetTooltipStringForRenderQualitySetting()
 ** _Returns:_ *string* _tooltipText_
@@ -11082,8 +11105,8 @@ h2. Game API
 * GetCon(*integer* _otherLevel_, *integer:nilable* _playerLevel_)
 ** _Returns:_ *[DifficultyCon|#DifficultyCon]* _con_
 
-* IsWerewolf()
-** _Returns:_ *bool* _isWerewolf_
+* IsPlayerInWerewolfForm()
+** _Returns:_ *bool* _isInWerewolfForm_
 
 * IsPlayerStunned()
 ** _Returns:_ *bool* _isStunned_
@@ -16355,6 +16378,12 @@ h2. Game API
 * GetTimedActivityTimeRemainingSeconds(*luaindex* _index_)
 ** _Returns:_ *integer* _timeRemainingSeconds_
 
+* GetLocalTimeOfDay()
+** _Returns:_ *integer* _hours_, *integer* _minutes_, *integer* _seconds_
+
+* GetGlobalTimeOfDay()
+** _Returns:_ *integer* _hours_, *integer* _minutes_, *integer* _seconds_
+
 
 * IsGameCameraActive()
 ** _Returns:_ *bool* _isActive_
@@ -16838,22 +16867,22 @@ h2. Game API
 ** _Returns:_ *[ItemTraitType|#ItemTraitType]* _traitType_, *string* _traitDescription_
 
 * GetItemLinkSetInfo(*string* _itemLink_, *bool* _equipped_)
-** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numEquipped_, *integer* _maxEquipped_, *integer* _setId_
+** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numNormalEquipped_, *integer* _maxEquipped_, *integer* _setId_, *integer* _numPerfectedEquipped_
 
 * IsItemLinkSetCollectionPiece(*string* _itemLink_)
 ** _Returns:_ *bool* _isSetCollectionPiece_
 
 * GetItemLinkSetBonusInfo(*string* _itemLink_, *bool* _equipped_, *luaindex* _index_)
-** _Returns:_ *integer* _numRequired_, *string* _bonusDescription_
+** _Returns:_ *integer* _numRequired_, *string* _bonusDescription_, *bool* _isPerfectedBonus_
 
 * GetItemLinkNumContainerSetIds(*string* _itemLink_)
 ** _Returns:_ *integer* _numSetIds_
 
 * GetItemLinkContainerSetInfo(*string* _itemLink_, *luaindex* _containerSetIndex_)
-** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numEquipped_, *integer* _maxEquipped_, *integer* _setId_
+** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numNormalEquipped_, *integer* _maxEquipped_, *integer* _setId_, *integer* _numPerfectedEquipped_
 
 * GetItemLinkContainerSetBonusInfo(*string* _itemLink_, *luaindex* _containerSetIndex_, *luaindex* _bonusIndex_)
-** _Returns:_ *integer* _numRequired_, *string* _bonusDescription_
+** _Returns:_ *integer* _numRequired_, *string* _bonusDescription_, *bool* _isPerfectedBonus_
 
 * GetItemLinkFlavorText(*string* _itemLink_)
 ** _Returns:_ *string* _flavorText_
@@ -18569,7 +18598,7 @@ h3. AnimationManager
 
 h3. AnimationObject
 Objects that inherit behavior from *AnimationObject*
-[AnimationObject3DRotate|#AnimationObject3DRotate], [AnimationObject3DTranslate|#AnimationObject3DTranslate], [AnimationObjectAlpha|#AnimationObjectAlpha], [AnimationObjectColor|#AnimationObjectColor], [AnimationObjectCustom|#AnimationObjectCustom], [AnimationObjectScale|#AnimationObjectScale], [AnimationObjectScroll|#AnimationObjectScroll], [AnimationObjectSize|#AnimationObjectSize], [AnimationObjectTexture|#AnimationObjectTexture], [AnimationObjectTextureRotate|#AnimationObjectTextureRotate], [AnimationObjectTextureSlide|#AnimationObjectTextureSlide], [AnimationObjectTranslate|#AnimationObjectTranslate]
+[AnimationObject3DRotate|#AnimationObject3DRotate], [AnimationObject3DTranslate|#AnimationObject3DTranslate], [AnimationObjectAlpha|#AnimationObjectAlpha], [AnimationObjectColor|#AnimationObjectColor], [AnimationObjectCustom|#AnimationObjectCustom], [AnimationObjectScale|#AnimationObjectScale], [AnimationObjectScroll|#AnimationObjectScroll], [AnimationObjectSize|#AnimationObjectSize], [AnimationObjectTexture|#AnimationObjectTexture], [AnimationObjectTextureRotate|#AnimationObjectTextureRotate], [AnimationObjectTextureSlide|#AnimationObjectTextureSlide], [AnimationObjectTransformOffset|#AnimationObjectTransformOffset], [AnimationObjectTransformRotation|#AnimationObjectTransformRotation], [AnimationObjectTranslate|#AnimationObjectTranslate]
 
 * GetAnimatedControl()
 ** _Returns:_ *object* _animatedControl_
@@ -18825,6 +18854,78 @@ h3. AnimationObjectTextureSlide
 * SetSlideDistances(*number* _slideDistanceU_, *number* _slideDistanceV_)
 
 
+h3. AnimationObjectTransformOffset
+* GetEndOffset()
+** _Returns:_ *number:nilable* _endX_, *number:nilable* _endY_, *number:nilable* _endZ_
+
+* GetStartOffset()
+** _Returns:_ *number:nilable* _startX_, *number:nilable* _startY_, *number:nilable* _startZ_
+
+* SetEndOffset(*layout_measurement* _endX_, *layout_measurement* _endY_, *layout_measurement* _endZ_)
+
+* SetEndOffsetX(*layout_measurement* _endX_)
+
+* SetEndOffsetY(*layout_measurement* _endY_)
+
+* SetEndOffsetZ(*layout_measurement* _endZ_)
+
+* SetOffsets(*layout_measurement* _startX_, *layout_measurement* _startY_, *layout_measurement* _startZ_, *layout_measurement* _endX_, *layout_measurement* _endY_, *layout_measurement* _endZ_)
+
+* SetStartOffset(*layout_measurement* _startX_, *layout_measurement* _startY_, *layout_measurement* _startZ_)
+
+* SetStartOffsetX(*layout_measurement* _startX_)
+
+* SetStartOffsetY(*layout_measurement* _startY_)
+
+* SetStartOffsetZ(*layout_measurement* _startZ_)
+
+
+h3. AnimationObjectTransformRotation
+* SetEndRotation(*number* _endXRadians_, *number* _endYRadians_, *number* _endZRadians_)
+
+* SetEndX(*number* _endXRadians_)
+
+* SetEndY(*number* _endYRadians_)
+
+* SetEndZ(*number* _endZRadians_)
+
+* SetMode(*[RotationAnimationMode|#RotationAnimationMode]* _mode_)
+
+* SetRotations(*number* _startXRadians_, *number* _startYRadians_, *number* _startZRadians_, *number* _endXRadians_, *number* _endYRadians_, *number* _endZRadians_)
+
+* SetStartRotation(*number* _startXRadians_, *number* _startYRadians_, *number* _startZRadians_)
+
+* SetStartX(*number* _startXRadians_)
+
+* SetStartY(*number* _startYRadians_)
+
+* SetStartZ(*number* _startZRadians_)
+
+
+h3. AnimationObjectTransformScale
+* SetEndScale(*number* _endScale_)
+
+* SetEndScaleX(*number* _endScaleX_)
+
+* SetEndScaleY(*number* _endScaleY_)
+
+* SetStartScale(*number* _startScale_)
+
+* SetStartScaleX(*number* _startScaleX_)
+
+* SetStartScaleY(*number* _startScaleY_)
+
+
+h3. AnimationObjectTransformSkew
+* SetEndSkewX(*number* _endSkewXRadians_)
+
+* SetEndSkewY(*number* _endSkewYRadians_)
+
+* SetStartSkewX(*number* _startSkewXRadians_)
+
+* SetStartSkewY(*number* _startSkewYRadians_)
+
+
 h3. AnimationObjectTranslate
 * GetAnchorIndex()
 ** _Returns:_ *integer* _anchorIndex_
@@ -18852,21 +18953,21 @@ h3. AnimationObjectTranslate
 
 * SetAnchorIndex(*integer* _anchorIndex_)
 
-* SetDeltaOffsetX(*number* _deltaX_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
+* SetDeltaOffsetX(*layout_measurement* _deltaX_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
 
-* SetDeltaOffsetY(*number* _deltaY_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
+* SetDeltaOffsetY(*layout_measurement* _deltaY_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
 
-* SetEndOffsetX(*number* _endX_)
+* SetEndOffsetX(*layout_measurement* _endX_)
 
-* SetEndOffsetY(*number* _endY_)
+* SetEndOffsetY(*layout_measurement* _endY_)
 
-* SetStartOffsetX(*number* _startX_)
+* SetStartOffsetX(*layout_measurement* _startX_)
 
-* SetStartOffsetY(*number* _startY_)
+* SetStartOffsetY(*layout_measurement* _startY_)
 
-* SetTranslateDeltas(*number* _deltaX_, *number* _deltaY_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
+* SetTranslateDeltas(*layout_measurement* _deltaX_, *layout_measurement* _deltaY_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
 
-* SetTranslateOffsets(*number* _startX_, *number* _startY_, *number* _endX_, *number* _endY_)
+* SetTranslateOffsets(*layout_measurement* _startX_, *layout_measurement* _startY_, *layout_measurement* _endX_, *layout_measurement* _endY_)
 
 
 h3. AnimationTimeline
@@ -19010,13 +19111,13 @@ h3. BackdropControl
 
 * SetCenterColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
 
-* SetCenterTexture(*string* _filename_, *integer* _tileSize_, *integer* _addressMode_)
+* SetCenterTexture(*string* _filename_, *layout_measurement* _tilingInterval_, *integer* _addressMode_)
 
 * SetEdgeColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
 
-* SetEdgeTexture(*string* _filename_, *integer* _edgeFileWidth_, *integer* _edgeFileHeight_, *integer* _edgeSize_, *integer* _edgeFilePadding_)
+* SetEdgeTexture(*string* _filename_, *integer* _edgeFileWidth_, *integer* _edgeFileHeight_, *layout_measurement* _cornerSize_, *integer* _edgeFilePadding_)
 
-* SetInsets(*number* _left_, *number* _top_, *number* _right_, *number* _bottom_)
+* SetInsets(*layout_measurement* _left_, *layout_measurement* _top_, *layout_measurement* _right_, *layout_measurement* _bottom_)
 
 * SetIntegralWrapping(*bool* _integralWrappingEnabled_)
 
@@ -19051,11 +19152,13 @@ h3. ButtonControl
 
 * SetEnabled(*bool* _enabled_)
 
-* SetEndCapWidth(*layout measurement* _endCapWidth_)
+* SetEndCapWidth(*layout_measurement* _endCapWidth_)
 
 * SetFont(*string* _text_)
 
 * SetHorizontalAlignment(*integer* _horizontalAlign_)
+
+* SetLineHeight(*layout_measurement:nilable* _lineHeight_)
 
 * SetMouseOverBlendMode(*integer* _blendMode_)
 
@@ -19065,7 +19168,7 @@ h3. ButtonControl
 
 * SetNormalFontColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
 
-* SetNormalOffset(*layout measurement* _x_, *layout measurement* _y_)
+* SetNormalOffset(*layout_measurement* _x_, *layout_measurement* _y_)
 
 * SetNormalTexture(*string* _textureFilename_)
 
@@ -19075,7 +19178,7 @@ h3. ButtonControl
 
 * SetPressedMouseOverTexture(*string* _textureFilename_)
 
-* SetPressedOffset(*layout measurement* _x_, *layout measurement* _y_)
+* SetPressedOffset(*layout_measurement* _x_, *layout_measurement* _y_)
 
 * SetPressedTexture(*string* _textureFilename_)
 
@@ -19164,8 +19267,16 @@ h3. Control
 Objects that inherit behavior from *Control*
 [BackdropControl|#BackdropControl], [ButtonControl|#ButtonControl], [ColorSelectControl|#ColorSelectControl], [CompassDisplayControl|#CompassDisplayControl], [CooldownControl|#CooldownControl], [DebugTextControl|#DebugTextControl], [EditControl|#EditControl], [LabelControl|#LabelControl], [LineControl|#LineControl], [MapDisplayControl|#MapDisplayControl], [PolygonControl|#PolygonControl], [RootWindow|#RootWindow], [ScrollControl|#ScrollControl], [SliderControl|#SliderControl], [StatusBarControl|#StatusBarControl], [TextBufferControl|#TextBufferControl], [TextureCompositeControl|#TextureCompositeControl], [TextureControl|#TextureControl], [TooltipControl|#TooltipControl], [TopLevelWindow|#TopLevelWindow]
 
-* AddFilterForEvent(*integer* _event_)
+* AddFilterForEvent(*integer* _event_, *variant* _filterParameter_)
 ** _Returns:_ *bool* _success_
+
+* AddTransformRotation(*number* _deltaXRadians_, *number* _deltaYRadians_, *number* _deltaZRadians_)
+
+* AddTransformRotationX(*number* _deltaXRadians_)
+
+* AddTransformRotationY(*number* _deltaYRadians_)
+
+* AddTransformRotationZ(*number* _deltaZRadians_)
 
 * ClearAnchors *protected-attributes* ()
 
@@ -19192,6 +19303,9 @@ Objects that inherit behavior from *Control*
 
 * Does3DRenderSpaceUseDepthBuffer()
 ** _Returns:_ *bool* _usesDepthBuffer_
+
+* Get3DRenderSpaceAxisRotationOrder()
+** _Returns:_ *[AxisRotationOrder|#AxisRotationOrder]* _axisRotationOrder_
 
 * Get3DRenderSpaceForward()
 ** _Returns:_ *number* _x_, *number* _y_, *number* _z_
@@ -19331,6 +19445,24 @@ Objects that inherit behavior from *Control*
 * GetTop()
 ** _Returns:_ *number* _top_
 
+* GetTransformNormalizedOriginPoint()
+** _Returns:_ *number* _normalizedX_, *number* _normalizedY_
+
+* GetTransformOffset()
+** _Returns:_ *number* _x_, *number* _y_, *number* _z_
+
+* GetTransformRotation()
+** _Returns:_ *number* _xRadians_, *number* _yRadians_, *number* _zRadians_
+
+* GetTransformRotationAxisOrder()
+** _Returns:_ *[AxisRotationOrder|#AxisRotationOrder]* _order_
+
+* GetTransformScale()
+** _Returns:_ *number* _scaleX_, *number* _scaleY_
+
+* GetTransformSkew()
+** _Returns:_ *number* _skewXRadians_, *number* _skewYRadians_
+
 * GetType()
 ** _Returns:_ *integer* _type_
 
@@ -19358,11 +19490,13 @@ Objects that inherit behavior from *Control*
 * IsMouseEnabled()
 ** _Returns:_ *bool* _enabled_
 
-* IsPointInside(*render measurement* _x_, *render measurement* _y_, *layout measurement:nilable* _leftOffset_, *layout measurement:nilable* _topOffset_, *layout measurement:nilable* _rightOffset_, *layout measurement:nilable* _bottomOffset_)
+* IsPointInside(*render_measurement* _x_, *render_measurement* _y_, *layout_measurement:nilable* _leftOffset_, *layout_measurement:nilable* _topOffset_, *layout_measurement:nilable* _rightOffset_, *layout_measurement:nilable* _bottomOffset_)
 ** _Returns:_ *bool* _isInside_
 
 * RegisterForEvent(*integer* _event_, *function* _callback_)
 ** _Returns:_ *bool* _success_
+
+* Set3DRenderSpaceAxisRotationOrder(*[AxisRotationOrder|#AxisRotationOrder]* _axisRotationOrder_)
 
 * Set3DRenderSpaceForward(*number* _x_, *number* _y_, *number* _z_)
 
@@ -19380,7 +19514,7 @@ Objects that inherit behavior from *Control*
 
 * SetAlpha *protected-attributes* (*number* _alpha_)
 
-* SetAnchor *protected-attributes* (*integer* _whereOnMe_, *object* _anchorTargetControl_, *integer* _whereOnTarget_, *layout measurement* _offsetX_, *layout measurement* _offsetY_, *[AnchorConstrains|#AnchorConstrains]* _anchorConstrains_)
+* SetAnchor *protected-attributes* (*integer* _whereOnMe_, *object* _anchorTargetControl_, *integer* _whereOnTarget_, *layout_measurement* _offsetX_, *layout_measurement* _offsetY_, *[AnchorConstrains|#AnchorConstrains]* _anchorConstrains_)
 
 * SetAnchorFill *protected-attributes* (*object* _anchorTargetControl_)
 
@@ -19392,9 +19526,9 @@ Objects that inherit behavior from *Control*
 
 * SetClampedToScreenInsets(*number* _left_, *number* _top_, *number* _right_, *number* _bottom_)
 
-* SetDimensionConstraints(*layout measurement* _minWidth_, *layout measurement* _minHeight_, *layout measurement* _maxWidth_, *layout measurement* _maxHeight_)
+* SetDimensionConstraints(*layout_measurement* _minWidth_, *layout_measurement* _minHeight_, *layout_measurement* _maxWidth_, *layout_measurement* _maxHeight_)
 
-* SetDimensions *protected-attributes* (*layout measurement* _width_, *layout measurement* _height_)
+* SetDimensions *protected-attributes* (*layout_measurement* _width_, *layout_measurement* _height_)
 
 * SetDrawLayer *protected-attributes* (*integer* _layer_)
 
@@ -19408,11 +19542,11 @@ Objects that inherit behavior from *Control*
 
 * SetHandler(*string* _handlerName_, *function* _functionRef_, *string* _name_, *[ControlHandlerOrder|#ControlHandlerOrder]* _controlHandlerOrder_, *string* _targetName_)
 
-* SetHeight *protected-attributes* (*layout measurement* _height_)
+* SetHeight *protected-attributes* (*layout_measurement* _height_)
 
 * SetHidden *protected-attributes* (*bool* _aHidden_)
 
-* SetHitInsets(*layout measurement* _left_, *layout measurement* _top_, *layout measurement* _right_, *layout measurement* _bottom_)
+* SetHitInsets(*layout_measurement* _left_, *layout_measurement* _top_, *layout_measurement* _right_, *layout_measurement* _bottom_)
 
 * SetId(*integer* _id_)
 
@@ -19456,15 +19590,19 @@ Objects that inherit behavior from *Control*
 
 * SetSpace(*[Space|#Space]:nilable* _space_)
 
-* SetTransformNormalizedRotationPoint(*number* _normalizedX_, *number* _normalizedY_)
+* SetTransformNormalizedOriginPoint(*number* _normalizedX_, *number* _normalizedY_)
 
-* SetTransformOffsetX(*render measurement* _x_)
+* SetTransformOffset(*layout_measurement* _x_, *layout_measurement* _y_, *layout_measurement* _z_)
 
-* SetTransformOffsetY(*render measurement* _y_)
+* SetTransformOffsetX(*layout_measurement* _x_)
 
-* SetTransformOffsetZ(*render measurement* _z_)
+* SetTransformOffsetY(*layout_measurement* _y_)
 
-* SetTransformOffsets(*render measurement* _x_, *render measurement* _y_, *render measurement* _z_)
+* SetTransformOffsetZ(*layout_measurement* _z_)
+
+* SetTransformRotation(*number* _xRadians_, *number* _yRadians_, *number* _zRadians_)
+
+* SetTransformRotationAxisOrder(*[AxisRotationOrder|#AxisRotationOrder]* _order_)
 
 * SetTransformRotationX(*number* _xRadians_)
 
@@ -19472,9 +19610,17 @@ Objects that inherit behavior from *Control*
 
 * SetTransformRotationZ(*number* _zRadians_)
 
-* SetTransformRotations(*number* _xRadians_, *number* _yRadians_, *number* _zRadians_)
+* SetTransformScale(*number* _scale_)
 
-* SetWidth *protected-attributes* (*layout measurement* _width_)
+* SetTransformScaleX(*number* _scaleX_)
+
+* SetTransformScaleY(*number* _scaleY_)
+
+* SetTransformSkewX(*number* _skewXRadians_)
+
+* SetTransformSkewY(*number* _skewYRadians_)
+
+* SetWidth *protected-attributes* (*layout_measurement* _width_)
 
 * StartMoving *protected-attributes* ()
 ** _Returns:_ *bool* _isMoving_
@@ -19672,7 +19818,7 @@ h3. LabelControl
 ** _Returns:_ *integer* _numLines_
 
 * GetStringWidth(*string* _text_)
-** _Returns:_ *number* _scaledPixelWidth_
+** _Returns:_ *number* _scaledWidthTextLayoutNative_
 
 * GetStyleColor()
 ** _Returns:_ *number* _r_, *number* _g_, *number* _b_, *number* _a_
@@ -19700,7 +19846,9 @@ h3. LabelControl
 
 * SetHorizontalAlignment(*integer* _align_)
 
-* SetLineSpacing(*integer* _lineSpacingPixels_)
+* SetLineHeight(*layout_measurement:nilable* _height_)
+
+* SetLineSpacing(*layout_measurement* _lineSpacing_)
 
 * SetLinkEnabled(*bool* _linkEnabed_)
 
@@ -19710,7 +19858,7 @@ h3. LabelControl
 
 * SetModifyTextType(*[ModifyTextType|#ModifyTextType]* _modifyTextType_)
 
-* SetNewLineX(*number* _newLineXPixels_)
+* SetNewLineX(*layout_measurement* _newLineX_)
 
 * SetPixelRoundingEnabled(*bool* _pixelRoundingEnabled_)
 
@@ -19768,7 +19916,7 @@ h3. LineControl
 
 * SetTextureCoords(*number* _left_, *number* _right_, *number* _top_, *number* _bottom_)
 
-* SetThickness(*number* _thickness_)
+* SetThickness(*layout_measurement* _thickness_)
 
 * SetVertexColors(*integer* _vertexPoints_, *number* _red_, *number* _green_, *number* _blue_, *number* _alpha_)
 
@@ -19800,7 +19948,7 @@ h3. PolygonControl
 ** _Returns:_ *string* _textureFile_
 
 * GetBorderThickness()
-** _Returns:_ *integer* _minPixels_, *integer* _maxPixels_, *number* _percent_
+** _Returns:_ *number* _mins_, *number* _max_, *number* _percent_
 
 * GetCenterBlendMode()
 ** _Returns:_ *[TextureBlendMode|#TextureBlendMode]* _blendMode_
@@ -19842,7 +19990,7 @@ h3. PolygonControl
 
 * SetBorderTexture(*string* _textureFile_)
 
-* SetBorderThickness(*integer* _minPixels_, *integer* _maxPixels_, *number* _percent_)
+* SetBorderThickness(*layout_measurement* _min_, *layout_measurement* _max_, *number* _percent_)
 
 * SetCenterBlendMode(*[TextureBlendMode|#TextureBlendMode]* _blendMode_)
 
@@ -19874,11 +20022,11 @@ h3. ScrollControl
 
 * RestoreToExtents(*integer* _duration_)
 
-* SetHorizontalScroll(*number* _offset_)
+* SetHorizontalScroll(*layout_measurement* _offset_)
 
 * SetScrollBounding(*[ScrollBounding|#ScrollBounding]* _bounding_)
 
-* SetVerticalScroll(*number* _offset_)
+* SetVerticalScroll(*layout_measurement* _offset_)
 
 
 h3. SliderControl
@@ -19924,9 +20072,9 @@ h3. SliderControl
 
 * SetThumbFlushWithExtents(*bool* _flush_)
 
-* SetThumbTexture(*string* _filename_, *string* _disabledFilename_, *string* _highlightedFilename_, *number* _thumbWidth_, *number* _thumbHeight_, *number* _texTop_, *number* _texLeft_, *number* _texBottom_, *number* _texRight_)
+* SetThumbTexture(*string* _filename_, *string* _disabledFilename_, *string* _highlightedFilename_, *layout_measurement* _thumbWidth_, *layout_measurement* _thumbHeight_, *number* _texTop_, *number* _texLeft_, *number* _texBottom_, *number* _texRight_)
 
-* SetThumbTextureHeight(*number* _height_)
+* SetThumbTextureHeight(*layout_measurement* _height_)
 
 * SetValue(*number* _value_)
 
@@ -20399,7 +20547,7 @@ h3. WindowManager
 * CreateTopLevelWindow(*string* _name_)
 ** _Returns:_ *object* _control_
 
-* GetControlAtPoint(*render measurement* _x_, *render measurement* _y_)
+* GetControlAtPoint(*render_measurement* _x_, *render_measurement* _y_)
 ** _Returns:_ *object* _mouseOverControl_
 
 * GetControlByName(*string* _name_, *string* _suffix_)
@@ -20818,6 +20966,7 @@ h2. Events
 * EVENT_GROUP_MEMBER_JOINED (*string* _memberCharacterName_, *string* _memberDisplayName_, *bool* _isLocalPlayer_)
 * EVENT_GROUP_MEMBER_LEFT (*string* _memberCharacterName_, *[GroupLeaveReason|#GroupLeaveReason]* _reason_, *bool* _isLocalPlayer_, *bool* _isLeader_, *string* _memberDisplayName_, *bool* _actionRequiredVote_)
 * EVENT_GROUP_MEMBER_ROLE_CHANGED (*string* _unitTag_, *[LFGRole|#LFGRole]* _newRole_)
+* EVENT_GROUP_MEMBER_SUBZONE_CHANGED
 * EVENT_GROUP_NOTIFICATION_MESSAGE (*integer* _messageId_)
 * EVENT_GROUP_OPERATION_RESULT (*[GroupOperationResult|#GroupOperationResult]* _result_)
 * EVENT_GROUP_SUPPORT_RANGE_UPDATE (*string* _unitTag_, *bool* _status_)
@@ -20978,7 +21127,7 @@ h2. Events
 * EVENT_MAIL_READABLE (*id64* _mailId_)
 * EVENT_MAIL_REMOVED (*id64* _mailId_)
 * EVENT_MAIL_SEND_FAILED (*[SendMailResult|#SendMailResult]* _reason_)
-* EVENT_MAIL_SEND_SUCCESS
+* EVENT_MAIL_SEND_SUCCESS (*string* _playerName_)
 * EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS (*id64* _mailId_)
 * EVENT_MAIL_TAKE_ATTACHED_MONEY_SUCCESS (*id64* _mailId_)
 * EVENT_MAP_PING (*[MapPingEventType|#MapPingEventType]* _pingEventType_, *[MapDisplayPinType|#MapDisplayPinType]* _pingType_, *string* _pingTag_, *number* _offsetX_, *number* _offsetY_, *bool* _isLocalPlayerOwner_)
@@ -21397,9 +21546,13 @@ h4. Attributes:
 * deltaU *number*
 * deltaV *number*
 * deltaX *number*
+* deltaX *layout_measurement*
 * deltaXFromEnd *number*
+* deltaXFromEnd *layout_measurement*
 * deltaY *number*
+* deltaY *layout_measurement*
 * deltaYFromEnd *number*
+* deltaYFromEnd *layout_measurement*
 * deltaZ *number*
 * deltaZFromEnd *number*
 * desaturation *number*
@@ -21415,17 +21568,24 @@ h4. Attributes:
 * enableFadeOut *bool*
 * enabled *bool*
 * endAlpha *number*
-* endCapWidth *layout measurement*
+* endCapWidth *layout_measurement*
 * endColor *string*
 * endHeight *number*
 * endPitch *number*
 * endRoll *number*
 * endRotation *number*
 * endScale *number*
+* endScaleX *number*
+* endScaleY *number*
+* endSkewX *number*
+* endSkewY *number*
 * endWidth *number*
+* endX *layout_measurement*
 * endX *number*
 * endY *number*
+* endY *layout_measurement*
 * endYaw *number*
+* endZ *layout_measurement*
 * endZ *number*
 * excludeFromResizeToFitExtents *bool*
 * fadeOutGainColor *string*
@@ -21447,7 +21607,8 @@ h4. Attributes:
 * layer *string*
 * leadingEdgeTexture *string*
 * level *integer*
-* lineSpacing *integer*
+* lineHeight *layout_measurement*
+* lineSpacing *layout_measurement*
 * linkEnabled *bool*
 * loopCount *string*
 * maskMode *[ControlMaskMode|#ControlMaskMode]*
@@ -21462,6 +21623,7 @@ h4. Attributes:
 * minLineCount *integer*
 * mirrorAlongX *bool*
 * mirrorAlongY *bool*
+* mode *[RotationAnimationMode|#RotationAnimationMode]*
 * modifyTextType *[ModifyTextType|#ModifyTextType]*
 * mouseEnabled *bool*
 * mouseOver *string*
@@ -21470,7 +21632,7 @@ h4. Attributes:
 * movable *bool*
 * multiLine *bool*
 * newLineEnabled *bool*
-* newLineIndent *number*
+* newLineIndent *layout_measurement*
 * normal *string*
 * normalColor *string*
 * orientation *[ControlOrientation|#ControlOrientation]*
@@ -21500,11 +21662,18 @@ h4. Attributes:
 * startRoll *number*
 * startRotation *number*
 * startScale *number*
+* startScaleX *number*
+* startScaleY *number*
+* startSkewX *number*
+* startSkewY *number*
 * startWidth *number*
 * startX *number*
+* startX *layout_measurement*
 * startY *number*
+* startY *layout_measurement*
 * startYaw *number*
 * startZ *number*
+* startZ *layout_measurement*
 * step *number*
 * styleColor *string*
 * text *string*
@@ -21512,7 +21681,7 @@ h4. Attributes:
 * textureCoordsRotation *number*
 * textureFile *string*
 * textureFileReleaseOption *[ReleaseReferenceOptions|#ReleaseReferenceOptions]*
-* thickness *number*
+* thickness *layout_measurement*
 * tier *string*
 * topmost *bool*
 * verticalAlignment *[TextAlignment|#TextAlignment]*
@@ -21527,8 +21696,8 @@ h5. Anchor
 * _attribute:_ *[AnchorPosition|#AnchorPosition]* _point_
 * _attribute:_ *[AnchorPosition|#AnchorPosition]* _relativePoint_
 * _attribute:_ *string* _relativeTo_
-* _attribute:_ *layout measurement* _offsetX_
-* _attribute:_ *layout measurement* _offsetY_
+* _attribute:_ *layout_measurement* _offsetX_
+* _attribute:_ *layout_measurement* _offsetY_
 * _attribute:_ *[AnchorConstrains|#AnchorConstrains]* _constrains_
 
 h5. AnchorFill
@@ -21574,6 +21743,10 @@ h5. Animations
 * [Child: TextureAnimation|#TextureAnimation]
 * [Child: TextureRotateAnimation|#TextureRotateAnimation]
 * [Child: TextureSlideAnimation|#TextureSlideAnimation]
+* [Child: TransformOffsetAnimation|#TransformOffsetAnimation]
+* [Child: TransformRotationAnimation|#TransformRotationAnimation]
+* [Child: TransformScaleAnimation|#TransformScaleAnimation]
+* [Child: TransformSkewAnimation|#TransformSkewAnimation]
 * [Child: Translate3DAnimation|#Translate3DAnimation]
 * [Child: TranslateAnimation|#TranslateAnimation]
 
@@ -21616,8 +21789,8 @@ h5. BackupFont
 * _attribute:_ *number* _backupFontSizeModifier_
 
 h5. Border
-* _attribute:_ *integer* _minThicknessPixels_
-* _attribute:_ *integer* _maxThicknessPixels_
+* _attribute:_ *layout_measurement* _minThickness_
+* _attribute:_ *layout_measurement* _maxThickness_
 * _attribute:_ *number* _thicknessPercent_
 * _attribute:_ *string* _color_
 * _attribute:_ *string* _textureFile_
@@ -21645,6 +21818,7 @@ h5. Button
 * [Child: endCapWidth|#Attributes]
 * [Child: font|#Attributes]
 * [Child: horizontalAlignment|#Attributes]
+* [Child: lineHeight|#Attributes]
 * [Child: modifyTextType|#Attributes]
 * [Child: mouseOverBlendMode|#Attributes]
 * [Child: pixelRoundingEnabled|#Attributes]
@@ -21666,7 +21840,7 @@ h5. Callbacks
 h5. Center
 * _attribute:_ *string* _file_
 * _attribute:_ *bool* _tiled_
-* _attribute:_ *integer* _tileSize_
+* _attribute:_ *layout_measurement* _tileSize_
 
 h5. CenterTextureCoords
 * _attribute:_ *number* _left_
@@ -21771,6 +21945,10 @@ h5. Control
 * [Child: OnUpdate|#OnUpdate]
 * [Child: RectangularClip|#RectangularClip]
 * [Child: ResizeToFitPadding|#ResizeToFitPadding]
+* [Child: TransformOffset|#TransformOffset]
+* [Child: TransformRotation|#TransformRotation]
+* [Child: TransformScale|#TransformScale]
+* [Child: TransformSkew|#TransformSkew]
 * [Child: alpha|#Attributes]
 * [Child: autoRectClipChildren|#Attributes]
 * [Child: clampedToScreen|#Attributes]
@@ -21840,14 +22018,14 @@ h5. DebugText
 * [Child: font|#Attributes]
 
 h5. DimensionConstraints
-* _attribute:_ *layout measurement* _minX_
-* _attribute:_ *layout measurement* _minY_
-* _attribute:_ *layout measurement* _maxX_
-* _attribute:_ *layout measurement* _maxY_
+* _attribute:_ *layout_measurement* _minX_
+* _attribute:_ *layout_measurement* _minY_
+* _attribute:_ *layout_measurement* _maxX_
+* _attribute:_ *layout_measurement* _maxY_
 
 h5. Dimensions
-* _attribute:_ *layout measurement* _x_
-* _attribute:_ *layout measurement* _y_
+* _attribute:_ *layout_measurement* _x_
+* _attribute:_ *layout_measurement* _y_
 
 h5. EasingFunction
 * [Inherits: OnSetAnimationEaseFunction|#OnSetAnimationEaseFunction]
@@ -21857,7 +22035,7 @@ h5. Edge
 * _attribute:_ *string* _file_
 * _attribute:_ *integer* _edgeFileWidth_
 * _attribute:_ *integer* _edgeFileHeight_
-* _attribute:_ *integer* _edgeSize_
+* _attribute:_ *layout_measurement* _edgeSize_
 * _attribute:_ *integer* _edgeFilePadding_
 
 h5. EditBox
@@ -21916,16 +22094,16 @@ h5. GuiXml
 * [Child: String|#String]
 
 h5. HitInsets
-* _attribute:_ *layout measurement* _left_
-* _attribute:_ *layout measurement* _top_
-* _attribute:_ *layout measurement* _right_
-* _attribute:_ *layout measurement* _bottom_
+* _attribute:_ *layout_measurement* _left_
+* _attribute:_ *layout_measurement* _top_
+* _attribute:_ *layout_measurement* _right_
+* _attribute:_ *layout_measurement* _bottom_
 
 h5. Insets
-* _attribute:_ *number* _left_
-* _attribute:_ *number* _top_
-* _attribute:_ *number* _right_
-* _attribute:_ *number* _bottom_
+* _attribute:_ *layout_measurement* _left_
+* _attribute:_ *layout_measurement* _top_
+* _attribute:_ *layout_measurement* _right_
+* _attribute:_ *layout_measurement* _bottom_
 
 h5. Label
 * [Inherits: Control|#Control]
@@ -21937,6 +22115,7 @@ h5. Label
 * [Child: color|#Attributes]
 * [Child: font|#Attributes]
 * [Child: horizontalAlignment|#Attributes]
+* [Child: lineHeight|#Attributes]
 * [Child: lineSpacing|#Attributes]
 * [Child: linkEnabled|#Attributes]
 * [Child: maxLineCount|#Attributes]
@@ -22015,8 +22194,8 @@ h5. MouseButton
 * _attribute:_ *bool* _enabled_
 
 h5. NormalOffset
-* _attribute:_ *layout measurement* _x_
-* _attribute:_ *layout measurement* _y_
+* _attribute:_ *layout_measurement* _x_
+* _attribute:_ *layout_measurement* _y_
 
 h5. OnAddGameData
 * [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
@@ -22301,8 +22480,8 @@ h5. Polygon
 * [Child: smoothingEnabled|#Attributes]
 
 h5. PressedOffset
-* _attribute:_ *layout measurement* _x_
-* _attribute:_ *layout measurement* _y_
+* _attribute:_ *layout_measurement* _x_
+* _attribute:_ *layout_measurement* _y_
 
 h5. RadialCooldownGradient
 * _attribute:_ *number* _startAlpha_
@@ -22478,8 +22657,8 @@ h5. ThumbTexture
 * _attribute:_ *string* _textureFile_
 * _attribute:_ *string* _disabledTextureFile_
 * _attribute:_ *string* _highlightedTextureFile_
-* _attribute:_ *number* _thumbWidth_
-* _attribute:_ *number* _thumbHeight_
+* _attribute:_ *layout_measurement* _thumbWidth_
+* _attribute:_ *layout_measurement* _thumbHeight_
 * _attribute:_ *number* _left_
 * _attribute:_ *number* _top_
 * _attribute:_ *number* _bottom_
@@ -22498,6 +22677,61 @@ h5. TopLevelControl
 * [Inherits: Control|#Control]
 * [Child: allowBringToTop|#Attributes]
 * [Child: topmost|#Attributes]
+
+h5. TransformOffset
+* _attribute:_ *layout_measurement* _x_
+* _attribute:_ *layout_measurement* _y_
+* _attribute:_ *layout_measurement* _z_
+
+h5. TransformOffsetAnimation
+* [Inherits: AnimationBase|#AnimationBase]
+* [Child: endX|#Attributes]
+* [Child: endY|#Attributes]
+* [Child: endZ|#Attributes]
+* [Child: startX|#Attributes]
+* [Child: startY|#Attributes]
+* [Child: startZ|#Attributes]
+
+h5. TransformRotation
+* _attribute:_ *number* _x_
+* _attribute:_ *number* _y_
+* _attribute:_ *number* _z_
+* _attribute:_ *[AxisRotationOrder|#AxisRotationOrder]* _axisOrder_
+
+h5. TransformRotationAnimation
+* [Inherits: AnimationBase|#AnimationBase]
+* [Child: endX|#Attributes]
+* [Child: endY|#Attributes]
+* [Child: endZ|#Attributes]
+* [Child: mode|#Attributes]
+* [Child: startX|#Attributes]
+* [Child: startY|#Attributes]
+* [Child: startZ|#Attributes]
+
+h5. TransformScale
+* _attribute:_ *number* _x_
+* _attribute:_ *number* _y_
+* _attribute:_ *number* _scale_
+
+h5. TransformScaleAnimation
+* [Inherits: AnimationBase|#AnimationBase]
+* [Child: endScale|#Attributes]
+* [Child: endScaleX|#Attributes]
+* [Child: endScaleY|#Attributes]
+* [Child: startScale|#Attributes]
+* [Child: startScaleX|#Attributes]
+* [Child: startScaleY|#Attributes]
+
+h5. TransformSkew
+* _attribute:_ *number* _x_
+* _attribute:_ *number* _y_
+
+h5. TransformSkewAnimation
+* [Inherits: AnimationBase|#AnimationBase]
+* [Child: endSkewX|#Attributes]
+* [Child: endSkewY|#Attributes]
+* [Child: startSkewX|#Attributes]
+* [Child: startSkewY|#Attributes]
 
 h5. Translate3DAnimation
 * [Inherits: AnimationBase|#AnimationBase]

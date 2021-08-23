@@ -83,14 +83,19 @@ function ZO_GamepadStoreManager:Initialize(control)
         end
     end
 
-    local OnBuyBackSuccess = function(eventId, itemName, itemQuantity, money, itemSoundCategory)
-        if itemSoundCategory == ITEM_SOUND_CATEGORY_NONE then
-            -- Fall back sound if there was no other sound to play
-            PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
-        else
-            PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_ACQUIRE)
+    local function OnBuyBackSuccess(eventId, itemName, itemQuantity, money, itemSoundCategory)
+        if not self.control:IsControlHidden() then
+            -- ESO-713597: Don't play sound if item has no monetary value.
+            if money > 0 then
+                if itemSoundCategory == ITEM_SOUND_CATEGORY_NONE then
+                    -- Fall back sound if there was no other sound to play
+                    PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
+                else
+                    PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_ACQUIRE)
+                end
+            end
+            UpdateActiveComponentKeybindButtonGroup()
         end
-        UpdateActiveComponentKeybindButtonGroup()
     end
 
     local OnInventoryUpdated = function()

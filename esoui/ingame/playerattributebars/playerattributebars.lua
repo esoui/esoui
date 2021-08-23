@@ -496,7 +496,7 @@ function ZO_PlayerAttributeBars:New(control)
     table.insert(bars, werewolfAttributeBar)
 
     control:RegisterForEvent(EVENT_WEREWOLF_STATE_CHANGED, function() werewolfAttributeBar:UpdateContextualFading() end)
-    werewolfAttributeBar:SetExternalVisibilityRequirement(IsWerewolf)
+    werewolfAttributeBar:SetExternalVisibilityRequirement(IsPlayerInWerewolfForm)
     magickaAttributeBar:LinkVisibility(werewolfAttributeBar)
 
     local staminaControl = GetControl(control, "Stamina")

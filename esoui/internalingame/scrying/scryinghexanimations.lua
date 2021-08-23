@@ -292,9 +292,9 @@ function ZO_ScryingBorderIsland:GenerateIsland(startHex)
     ZO_ScryingIsland.GenerateIsland(self, startHex)
 end
 
-ZO_AFFECTED_HEX_BORDER_PIXELS = 10
-ZO_TARGETED_HEX_BORDER_PIXELS = 4
-ZO_NOT_SELECTED_HEX_BORDER_PIXELS = 2
+ZO_AFFECTED_HEX_BORDER_PIXELS = "10px"
+ZO_TARGETED_HEX_BORDER_PIXELS = "4px"
+ZO_NOT_SELECTED_HEX_BORDER_PIXELS = "2px"
 function ZO_ScryingBorderIsland:SetTargetBorderType(borderType)
     self.targetBorderType = borderType
     if borderType == ZO_SCRYING_HEX_BORDER_AFFECTED then

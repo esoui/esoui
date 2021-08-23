@@ -316,92 +316,104 @@ function ZO_ChatSystem:HideMinBar()
     self.minBar:SetHidden(true)
 end
 
-local function CreateSlideAnimations(container, maximizeAnimation)
-    if not container.slideAnim then
-        container.slideAnim = ANIMATION_MANAGER:CreateTimelineFromVirtual("ChatMinMaxAnim", container.control)
+do
+    local function OnPlay(animation, control)
+        control.container:SetMinimizingOrMaximizing(true)
+        control:SetClampedToScreen(false)
     end
 
-    if maximizeAnimation then
-        container.slideAnim:SetHandler("OnStop", function(animation) container.control:SetClampedToScreen(true) end)
-    else
-        container.slideAnim:SetHandler("OnStop", nil)
+    local function OnStop(animation, control)
+        local progress = animation:GetTimeline():GetProgress()
+        local maximized = animation:GetDeltaOffsetX() >= 0
+        control:SetClampedToScreen(maximized)
+        control.container:SetMinimizingOrMaximizing(false)
     end
-end
 
-function ZO_ChatSystem:Minimize()
-    if not self.isMinimized then
-        -- slide all chat windows off the left side of the screen
-        for i,container in pairs(self.containers) do
-            CreateSlideAnimations(container)
+    local function GetOrCreateMinimizeAnimationTimeline(container)
+        if not container.minimizeAnimationTimeline then
+            local animationTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ChatMinMaxAnim", container.control)
+            container.minimizeAnimationTimeline = animationTimeline
 
-            -- If the animation is still playing keep the same positions, otherwise save off the current position and calculate the minimize distance
-            local minimizeDistance
-            if not container.slideAnim:IsPlaying() then
-                minimizeDistance = container.control:GetRight()
-                container.originalPosition = minimizeDistance
-            else
-                minimizeDistance = container.originalPosition
-            end
-
-            minimizeDistance = minimizeDistance + 40 --need a buffer to get the edge offscreen
-
-            -- Set the animation distance
-            container.slideAnim:GetAnimation(1):SetTranslateDeltas(-minimizeDistance, 0)
-            container.control:SetClampedToScreen(false)
-
-            -- fire the animation
-            container.slideAnim:PlayFromStart()
-
-
-            -- hide all the tabs at the top
-            for j, tab in pairs(container.tabGroup.m_Buttons) do
-                tab:SetHidden(true)
-            end
-
-            --hide the oveflow tab
-            container.overflowTab:SetHidden(true)
-
-            container.newWindowTab:SetHidden(true)
+            local animation = animationTimeline:GetAnimation(1)
+            animation:SetHandler("OnPlay", OnPlay)
+            animation:SetHandler("OnStop", OnStop)
         end
 
-        --move the buttons to and show the minimized bar
-        PlaySound(SOUNDS.CHAT_MINIMIZED)
-        self:ShowMinBar()
+        return container.minimizeAnimationTimeline
     end
-end
 
-function ZO_ChatSystem:Maximize()
-    if self.isMinimized then
-        for i, container in pairs(self.containers) do
-            -- calculate the distance to the original position
-            local maximizeDistance = container.originalPosition - container.control:GetRight()
+    function ZO_ChatSystem:Minimize()
+        if not self.isMinimized then
+            -- Slide all chat windows off the left edge of the screen
+            for _, container in pairs(self.containers) do
+                local animationTimeline = GetOrCreateMinimizeAnimationTimeline(container)
 
-            -- setup the animation and fire it
-            CreateSlideAnimations(container, true)
-            container.slideAnim:GetAnimation(1):SetTranslateDeltas(maximizeDistance, 0)
-            container.slideAnim:PlayFromStart()
-
-            --show the tabs that haven't overflowed
-            for j, tab in pairs(container.tabGroup.m_Buttons) do
-                if tab.index < container.hiddenTabStartIndex then
-                    tab:SetHidden(false)
+                -- If the animation is still playing keep the same positions;
+                -- otherwise save the current position and calculate the minimize distance
+                local minimizeDistance
+                if not animationTimeline:IsPlaying() then
+                    minimizeDistance = container.control:GetRight()
+                    container.originalPosition = minimizeDistance
                 else
-                    container.overflowTab:SetHidden(false)
+                    minimizeDistance = container.originalPosition
                 end
+
+                -- Additional margin to ensure the container is completely hidden
+                minimizeDistance = minimizeDistance + 40
+
+                -- Set the animation distance
+                animationTimeline:GetAnimation(1):SetTranslateDeltas(-minimizeDistance, 0)
+
+                -- Fire the animation
+                animationTimeline:PlayFromStart()
+
+                -- Hide all the tabs at the top
+                for _, tab in pairs(container.tabGroup.m_Buttons) do
+                    tab:SetHidden(true)
+                end
+
+                container.overflowTab:SetHidden(true)
+                container.newWindowTab:SetHidden(true)
             end
-            container.newWindowTab:SetHidden(false)
 
-            --fade back in
-            container:FadeIn()
+            -- Move the buttons to and show the minimized bar
+            PlaySound(SOUNDS.CHAT_MINIMIZED)
+            self:ShowMinBar()
         end
+    end
 
-        --hide the minimized bar, fade in the windows
-        PlaySound(SOUNDS.CHAT_MAXIMIZED)
-        self:HideMinBar()
+    function ZO_ChatSystem:Maximize()
+        if self.isMinimized then
+            for _, container in pairs(self.containers) do
+                -- Calculate the distance to the original position
+                local maximizeDistance = container.originalPosition - container.control:GetRight()
 
-        if self.newChatFadeAnim and self.newChatFadeAnim:IsPlaying() then
-            self.newChatFadeAnim:Stop()
-            self.minBar.bgHighlight:SetAlpha(0)
+                -- Setup the animation and fire it
+                local animationTimeline = GetOrCreateMinimizeAnimationTimeline(container)
+                animationTimeline:GetAnimation(1):SetTranslateDeltas(maximizeDistance, 0)
+                animationTimeline:PlayFromStart()
+
+                -- Show the tabs that haven't overflowed
+                for _, tab in pairs(container.tabGroup.m_Buttons) do
+                    if tab.index < container.hiddenTabStartIndex then
+                        tab:SetHidden(false)
+                    else
+                        container.overflowTab:SetHidden(false)
+                    end
+                end
+                container.newWindowTab:SetHidden(false)
+
+                container:FadeIn()
+            end
+
+            -- Hide the minimized bar and fade in the windows
+            PlaySound(SOUNDS.CHAT_MAXIMIZED)
+            self:HideMinBar()
+
+            if self.newChatFadeAnim and self.newChatFadeAnim:IsPlaying() then
+                self.newChatFadeAnim:Stop()
+                self.minBar.bgHighlight:SetAlpha(0)
+            end
         end
     end
 end

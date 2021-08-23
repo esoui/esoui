@@ -50,26 +50,11 @@ function ZO_TradingHouseSearchCategoryFeature_Keyboard:InitializeCategoryList(co
     end
 
     -- Search Header Data
-    internalassert(TRADING_HOUSE_CATEGORY_HEADER_MAX_VALUE == 8, "Update header data")
-
-    local TRADING_HOUSE_HEADER_ICONS =
-    {
-        [TRADING_HOUSE_CATEGORY_HEADER_ALL_ITEMS] = ZO_ItemFilterUtils.GetTradingHouseCategoryHeaderIcons(TRADING_HOUSE_CATEGORY_HEADER_ALL_ITEMS),
-        [TRADING_HOUSE_CATEGORY_HEADER_WEAPONS] = ZO_ItemFilterUtils.GetTradingHouseCategoryHeaderIcons(TRADING_HOUSE_CATEGORY_HEADER_WEAPONS),
-        [TRADING_HOUSE_CATEGORY_HEADER_APPAREL] = ZO_ItemFilterUtils.GetTradingHouseCategoryHeaderIcons(TRADING_HOUSE_CATEGORY_HEADER_APPAREL),
-        [TRADING_HOUSE_CATEGORY_HEADER_JEWELRY] = ZO_ItemFilterUtils.GetTradingHouseCategoryHeaderIcons(TRADING_HOUSE_CATEGORY_HEADER_JEWELRY),
-        [TRADING_HOUSE_CATEGORY_HEADER_CONSUMABLES] = ZO_ItemFilterUtils.GetTradingHouseCategoryHeaderIcons(TRADING_HOUSE_CATEGORY_HEADER_CONSUMABLES),
-        [TRADING_HOUSE_CATEGORY_HEADER_MATERIALS] = ZO_ItemFilterUtils.GetTradingHouseCategoryHeaderIcons(TRADING_HOUSE_CATEGORY_HEADER_MATERIALS),
-        [TRADING_HOUSE_CATEGORY_HEADER_GLYPHS] = ZO_ItemFilterUtils.GetTradingHouseCategoryHeaderIcons(TRADING_HOUSE_CATEGORY_HEADER_GLYPHS),
-        [TRADING_HOUSE_CATEGORY_HEADER_FURNISHINGS] = ZO_ItemFilterUtils.GetTradingHouseCategoryHeaderIcons(TRADING_HOUSE_CATEGORY_HEADER_FURNISHINGS),
-        [TRADING_HOUSE_CATEGORY_HEADER_MISC] = ZO_ItemFilterUtils.GetTradingHouseCategoryHeaderIcons(TRADING_HOUSE_CATEGORY_HEADER_MISC),
-    }
-
     local function SetupIconHeader(control, header, open)
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         control.text:SetText(GetString("SI_TRADINGHOUSECATEGORYHEADER", header))
 
-        local icons = internalassert(TRADING_HOUSE_HEADER_ICONS[header], string.format("missing icon for header(%d)", header))
+        local icons = internalassert(ZO_ItemFilterUtils.GetTradingHouseCategoryHeaderIcons(header), string.format("missing icon for header(%d)", header))
         control.icon:SetTexture(open and icons.down or icons.up)
         control.iconHighlight:SetTexture(icons.over)
         ZO_IconHeader_Setup(control, open)

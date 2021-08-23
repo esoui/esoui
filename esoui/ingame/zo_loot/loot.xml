@@ -36,8 +36,8 @@
     
     <Controls>
         <Control name="ZO_LootItemSlot" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
-            <Dimensions x="250" y="52" />
-            
+            <Dimensions y="52" />
+
             <OnMouseEnter>
                 ZO_LootItemSlot_OnMouseEnter(self)
             </OnMouseEnter>
@@ -65,7 +65,7 @@
 
                 <Label name="$(parent)Name" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS">
                     <Dimensions x="250" />
-                    <Anchor point="LEFT" offsetX="77" />
+                    <Anchor point="LEFT" offsetX="85" />
                 </Label>
             </Controls>
         </Control>

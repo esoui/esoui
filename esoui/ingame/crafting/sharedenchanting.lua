@@ -14,6 +14,8 @@ ENCHANTING_MODE_RECIPES = 3
 NO_FILTER = -1
 EXTRACTION_FILTER = -2
 
+ZO_ENCHANTING_SYSTEM_NAME = "enchanting"
+
 function ZO_Enchanting_IsSceneShowing()
     if ENCHANTING and ENCHANTING:CanShowScene() then
         return ENCHANTING:IsSceneShowing()
@@ -148,6 +150,10 @@ end
 
 function ZO_SharedEnchanting:GetEnchantingMode()
     return self.enchantingMode
+end
+
+function ZO_SharedEnchanting:DoesCurrentModeHaveSlotAnimations()
+    return self.enchantingMode == ENCHANTING_MODE_CREATION or self.enchantingMode == ENCHANTING_MODE_EXTRACTION
 end
 
 function ZO_SharedEnchanting:GetLastRunestoneSoundParams()

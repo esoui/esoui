@@ -85,6 +85,11 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
         },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_MODE,
+        },
     },
     [SETTING_PANEL_CAMERA] =
     {
@@ -341,6 +346,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_AUDIO,
             system = SETTING_TYPE_AUDIO,
             settingId = AUDIO_SETTING_UI_VOLUME,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_VIDEO_VOLUME,
         },
         {
             panel = SETTING_PANEL_AUDIO,

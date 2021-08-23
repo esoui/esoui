@@ -11,6 +11,7 @@
         <Control name="ZO_MarketCategoryWithChildren" inherits="ZO_IconHeader" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" override="true">
+                    <Anchor point="TOPLEFT" offsetX="74" offsetY="9"/>
                     <DimensionConstraints maxX="ZO_MARKET_CATEGORY_LABEL_WIDTH"/>
                 </Label>
 

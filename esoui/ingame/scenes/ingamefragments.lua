@@ -157,10 +157,22 @@ do
         return fragment
     end
 
+    function ZO_InteractionFramingFragment:ShouldResetFrameInteractionTarget()
+        local nextScene = self.sceneManager:GetNextScene()
+        for _, nextSceneFragment in nextScene:FragmentIterator() do
+            if nextSceneFragment:IsInstanceOf(ZO_InteractionFramingFragment) then
+                return false
+            end
+        end
+        return true
+    end
+
     function ZO_InteractionFramingFragment:Hide()
-        -- Only some interactions define a framing: many others just expect the camera to be framed at the default (.5, .5).
-        -- So those can continue to work we'll just reset the camera here
-        SetFrameInteractionTarget(DEFAULT_INTERATION_OFFSET_X, DEFAULT_INTERATION_OFFSET_Y)
+        if self:ShouldResetFrameInteractionTarget() then
+            -- Only some interactions define a framing: many others just expect the camera to be framed at the default (.5, .5).
+            -- So those can continue to work we'll just reset the camera here
+            SetFrameInteractionTarget(DEFAULT_INTERATION_OFFSET_X, DEFAULT_INTERATION_OFFSET_Y)
+        end
         ZO_NormalizedPointFragment.Hide(self)
     end
 
@@ -254,7 +266,7 @@ do
     end
     FRAME_TARGET_GAMEPAD_RIGHT_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadRightFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_BLUR_GAMEPAD_RIGHT_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadRightFramingTarget)
-    
+
     local LOOK_AT_DISTANCE_FACTOR_FAR_RIGHT_FRAMING_TARGET = 1.9
     FRAME_TARGET_DISTANCE_GAMEPAD_FAR_FRAGMENT = ZO_CharacterFramingLookAtDistance:New(LOOK_AT_DISTANCE_FACTOR_FAR_RIGHT_FRAMING_TARGET)
 
