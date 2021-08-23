@@ -4871,7 +4871,7 @@ SafeAddString(SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_ENTRY_DEFAULT, "beispiel
 SafeAddString(SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_ENTRY_TITLE, "Neue E-Mail-Adresse", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_TITLE, "E-Mail ändern", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER, "E-Mail-Adresse", 0)
-SafeAddString(SI_INTERFACE_OPTIONS_ACCOUNT_GET_UPDATES, "E-Mail-Update erhalten", 0)
+SafeAddString(SI_INTERFACE_OPTIONS_ACCOUNT_GET_UPDATES, "E-Mail-Updates erhalten", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_ACCOUNT_GET_UPDATES_TOOLTIP_TEXT, "Ihr müsst Eure E-Mail-Adresse verifizieren, damit Ihr aktuelle Neuigkeiten, Spielupdates, Giveaways und Belohnungen von Bethesda erhaltet. Direkt in Euer Postfach.\n\nAbhängig von Eurem Aufenthaltsland erhaltet Ihr möglicherweise erst eine gesonderte E-Mail, in der Ihr dem gezielt zustimmen müsst.", 2)
 SafeAddString(SI_INTERFACE_OPTIONS_ACCOUNT_GET_UPDATES_TOOLTIP_TITLE, "E-Mail-Updates erhalten", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_ACCOUNT_MARKETING_HEADER, "Marketingpräferenzen", 0)

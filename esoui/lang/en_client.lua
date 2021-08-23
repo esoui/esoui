@@ -7751,7 +7751,7 @@ SafeAddString(SI_SKILL_POINT_AND_SKYSHARD_PIECES_GAINED, "Gained <<1>> Skill Poi
 SafeAddString(SI_SKILL_POINT_GAINED, "Gained <<1>> skill <<1[point/points]>>", 0)
 SafeAddString(SI_SKILL_RANK_UP, "<<1>> increased to <<2>>", 2)
 SafeAddString(SI_SKILL_RESPEC_CONFIRM_CLEAR_ALL_DIALOG_ALL_OPTION, "All skill lines", 0)
-SafeAddString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_FREE, "This has no cost because you did not refund any points from previously learned abilities", 0)
+SafeAddString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_FREE, "This has no cost because you did not refund any points from previously learned abilities.", 0)
 SafeAddString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_SCROLL, "This will consume |cffffff1x|r <<1>>.", 0)
 SafeAddString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO, "Are you sure you want to commit your points?", 0)
 SafeAddString(SI_SKILL_RESPEC_CONFIRM_DIALOG_TITLE, "Confirm Changes", 0)
