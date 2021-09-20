@@ -136,7 +136,7 @@ ZO_KeyboardLeaderboardRaidProvider = ZO_LeaderboardRaidProvider:Subclass()
 function ZO_KeyboardLeaderboardRaidProvider:New(notificationManager)
     -- Override leaderboard update callback to support audio
     local function notificationEventCallback(eventId)
-        if eventId == EVENT_RAID_SCORE_NOTIFICATION_ADDED then
+        if eventId == EVENT_RAID_SCORE_NOTIFICATION_ADDED and GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS) then
             PlaySound(SOUNDS.NEW_NOTIFICATION)
         end
     end
