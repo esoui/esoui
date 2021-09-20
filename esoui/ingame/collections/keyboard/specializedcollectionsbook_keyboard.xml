@@ -54,9 +54,6 @@
                                 <Control name="$(parent)ScrollChild" override="true">
                                     <Anchor point="TOPLEFT" />
                                     <Anchor point="TOPRIGHT" />
-                                    <OnInitialized>
-                                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
-                                    </OnInitialized>
 
                                     <Controls>
                                         <Label name="$(parent)Description" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard">

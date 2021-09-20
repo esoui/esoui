@@ -11,7 +11,8 @@ function ZO_ControllerDisconnect_Initialize(control)
     ZO_GamepadGenericHeader_Initialize(header)
     ZO_GamepadGenericHeader_Refresh(header, headerData)
 
-    control:GetNamedChild("InteractKeybind"):SetText(zo_strformat(SI_GAMEPAD_DISCONNECTED_CONTINUE_TEXT, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)))
+    local interactKeybindControl = control:GetNamedChild("InteractKeybind")
+    ZO_KeybindButtonTemplate_Setup(interactKeybindControl, "DIALOG_PRIMARY", ZO_ControllerDisconnect_DismissPopup, GetString(SI_GAMEPAD_DISCONNECTED_CONTINUE_TEXT))
 end
 
 function ZO_ControllerDisconnect_ShowPopup()
@@ -22,7 +23,7 @@ function ZO_ControllerDisconnect_ShowPopup()
     end
 
     local message
-    if ZO_IsPlaystationPlatform() then 
+    if ZO_IsPlaystationPlatform() then
         message = GetString(SI_GAMEPAD_DISCONNECTED_PLAYSTATION_TEXT)
     else
         message = GetString(SI_GAMEPAD_DISCONNECTED_XBOX_TEXT)

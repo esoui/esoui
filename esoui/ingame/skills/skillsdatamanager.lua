@@ -11,16 +11,12 @@ function ZO_SkillsDataManager:New(...)
 end
 
 function ZO_SkillsDataManager:Initialize()
-    local function ResetData(data)
-        data:Reset()
-    end
-    
-    self.skillTypeObjectPool = ZO_ObjectPool:New(ZO_SkillTypeData, ResetData)
-    self.skillLineObjectPool = ZO_ObjectPool:New(ZO_SkillLineData, ResetData)
-    self.activeSkillObjectPool = ZO_ObjectPool:New(ZO_ActiveSkillData, ResetData)
-    self.passiveSkillObjectPool = ZO_ObjectPool:New(ZO_PassiveSkillData, ResetData)
-    self.activeSkillProgressionObjectPool = ZO_ObjectPool:New(ZO_ActiveSkillProgressionData, ResetData)
-    self.passiveSkillProgressionObjectPool = ZO_ObjectPool:New(ZO_PassiveSkillProgressionData, ResetData)
+    self.skillTypeObjectPool = ZO_ObjectPool:New(ZO_SkillTypeData, ZO_ObjectPool_DefaultResetObject)
+    self.skillLineObjectPool = ZO_ObjectPool:New(ZO_SkillLineData, ZO_ObjectPool_DefaultResetObject)
+    self.activeSkillObjectPool = ZO_ObjectPool:New(ZO_ActiveSkillData, ZO_ObjectPool_DefaultResetObject)
+    self.passiveSkillObjectPool = ZO_ObjectPool:New(ZO_PassiveSkillData, ZO_ObjectPool_DefaultResetObject)
+    self.activeSkillProgressionObjectPool = ZO_ObjectPool:New(ZO_ActiveSkillProgressionData, ZO_ObjectPool_DefaultResetObject)
+    self.passiveSkillProgressionObjectPool = ZO_ObjectPool:New(ZO_PassiveSkillProgressionData, ZO_ObjectPool_DefaultResetObject)
     
     self.isDataReady = false
     self.skillProgressionsDirty = false

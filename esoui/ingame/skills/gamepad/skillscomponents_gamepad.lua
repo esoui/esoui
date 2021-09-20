@@ -117,46 +117,32 @@ do
 
     end
 
-    local function SetBindingTextForSkill(keybindLabel, skillData)
-        local hasBinding = false
-        local keybindWidth = 0
+    local function SetBindingTextForSkill(keybindLabel, skillData, overrideSlotIndex, overrideHotbar)
+        ZO_Keybindings_UnregisterLabelForBindingUpdate(keybindLabel)
+
         --The spot where the keybind goes is occupied by the decrease button in the respec modes
         if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY and skillData:IsActive() then
-            local slot = skillData:GetSlotOnCurrentHotbar()
-            if slot then
-                hasBinding = true
-                local hotbarCategory = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarCategory()
-                local GAMEPAD_MODE = true
-                local actionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetActionNameForSlot(slot, hotbarCategory, GAMEPAD_MODE)
-                local bindingText = ""
-                if actionName then
-                    bindingText = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, GAMEPAD_MODE)                    
-                    local layerIndex, categoryIndex, actionIndex = GetActionIndicesFromName(actionName)
-                    if layerIndex then
-                        local key = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, 1)
-                        if IsKeyCodeChordKey(key) then 
-                            keybindWidth = 90   --width minus double keybind width (RB+LB)
-                        else
-                            keybindWidth = 50   --width minus single keybind
-                        end
-                    end
-                else
-                    bindingText = zo_iconFormat("EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "100%", "100%")
-                    keybindWidth = 50   --width minus single keybind
+            local actionSlotIndex = overrideSlotIndex or skillData:GetSlotOnCurrentHotbar()
+            if actionSlotIndex then
+                local hotbarCategory = overrideHotbar or ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarCategory()
+                local keyboardActionName, gamepadActionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetKeyboardAndGamepadActionNameForSlot(actionSlotIndex, hotbarCategory)
+                local HIDE_UNBOUND = false
+                ZO_Keybindings_RegisterLabelForBindingUpdate(keybindLabel, keyboardActionName, HIDE_UNBOUND, gamepadActionName)
+
+                local keybindWidth = 50 -- width assuming a single keybind
+                if ACTION_BAR_ASSIGNMENT_MANAGER:IsUltimateSlot(actionSlotIndex) then
+                    keybindWidth = 90 -- double keybind width (RB+LB)
                 end
-                keybindLabel:SetText(bindingText)
+
+                keybindLabel:SetHidden(false)
+                return keybindWidth
             end
         end
 
-        if hasBinding then
-            keybindLabel:SetHidden(false)
-        else
-            keybindLabel:SetHidden(true)
-            -- other controls depend on the keybind width for layout so let's reset its size too
-            keybindLabel:SetText("")
-        end
-
-        return keybindWidth
+        keybindLabel:SetHidden(true)
+        -- other controls depend on the keybind width for layout so let's reset its size too
+        keybindLabel:SetText("")
+        return 0
     end
 
     local function SetupIndicatorsForSkill(leftIndicator, rightIndicator, skillData, showIncrease, showDecrease, showNew)
@@ -336,11 +322,34 @@ do
         control.label:SetWidth(labelWidth)
     end
 
-    function ZO_GamepadSkillEntryPreviewRow_Setup(control, skillData)
+    function ZO_GamepadArmorySkillEntryTemplate_Setup(control, skillProgressionData, slotIndex, hotbar)
+        --Icon
+        local iconTexture = control.icon
+        iconTexture:SetTexture(skillProgressionData:GetIcon())
+        iconTexture:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+        local DONT_SHOW_ADVISED = false
+        SetupAbilityIconFrame(control, skillProgressionData.skillData:IsPassive(), skillProgressionData.skillData:IsActive(), DONT_SHOW_ADVISED)
+
+        --Label
+        control.label:SetText(skillProgressionData:GetDetailedGamepadName())
+        control.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+
+        --Lock Icon
+        control.lock:SetHidden(skillProgressionData:IsUnlocked())
+
+        local labelWidth = SKILL_ENTRY_LABEL_WIDTH
+        local keybindWidth = SetBindingTextForSkill(control.keybind, skillProgressionData.skillData, slotIndex, hotbar)
+        labelWidth = labelWidth - keybindWidth
+
+        --Size the label to allow space for the keybind
+        control.label:SetWidth(labelWidth)
+    end
+
+    function ZO_GamepadSkillEntryPreviewRow_Setup(control, skillData, overrideSlotIndex, overrideHotbar)
         local skillProgressionData = skillData:GetPointAllocatorProgressionData()
         local skillPointAllocator = skillData:GetPointAllocator()
         local isUnlocked = skillProgressionData:IsUnlocked()
-        local isPurchased = skillPointAllocator:IsPurchased()
+        local isPurchased = overrideHotbar ~= nil or skillPointAllocator:IsPurchased()
         local isMorph = skillData:IsPlayerSkill() and skillData:IsActive() and skillProgressionData:IsMorph()
 
         --Icon
@@ -356,7 +365,7 @@ do
 
         --Label
         control.label:SetText(skillProgressionData:GetDetailedGamepadName())
-        local color = skillPointAllocator:IsPurchased() and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
+        local color = isPurchased and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
         control.label:SetColor(color:UnpackRGBA())
 
         --Lock Icon
@@ -371,7 +380,7 @@ do
         local indicatorWidth = SetupIndicatorsForSkill(control.leftIndicator, NO_RIGHT_INDICATOR, skillData, SHOW_INCREASE, showDecrease, SHOW_NEW)
         labelWidth = labelWidth - indicatorWidth
 
-        local keybindWidth = SetBindingTextForSkill(control.keybind, skillData)
+        local keybindWidth = SetBindingTextForSkill(control.keybind, skillData, overrideSlotIndex, overrideHotbar)
         labelWidth = labelWidth - keybindWidth
 
         --Size the label to allow space for the keybind and decrease icon

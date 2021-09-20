@@ -55,13 +55,7 @@ function ZO_CraftingResults_Base:Initialize(control, showInGamepadPreferredModeO
     -- Create a pool of CraftingResultTooltipAnimation_Base to be applied to controls that are
     -- not the "primary" crafting tooltip (self.tooltipControl), but are being displayed alongside of it
     -- This allows us to have additional controls animate in-sync with the crafting tooltip
-    local function CreateAnimationTimeline()
-        return ANIMATION_MANAGER:CreateTimelineFromVirtual("CraftingResultTooltipAnimation_Base")
-    end
-    local function ResetTimeline(timeline)
-        --nothing to do
-    end
-    self.secondaryTooltipAnimationPool = ZO_ObjectPool:New(CreateAnimationTimeline, ResetTimeline)
+    self.secondaryTooltipAnimationPool = ZO_AnimationPool:New("CraftingResultTooltipAnimation_Base")
 end
 
 function ZO_CraftingResults_Base:SetCraftingTooltip(tooltipControl)

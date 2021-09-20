@@ -210,6 +210,18 @@ local ZO_OptionsPanel_Audio_ControlData =
             maxValue = 75,
             exists = IsConsoleUI,
         },
+        --Options_Audio_CombatMusicMode
+        [AUDIO_SETTING_COMBAT_MUSIC_MODE] =
+        {
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_COMBAT_MUSIC_MODE,
+            controlType = OPTIONS_FINITE_LIST,
+            panel = SETTING_PANEL_AUDIO,
+            text = SI_AUDIO_OPTIONS_COMBAT_MUSIC,
+            tooltipText = SI_AUDIO_OPTIONS_COMBAT_MUSIC_TOOLTIP,
+            valid = { COMBAT_MUSIC_MODE_SETTING_ALL, COMBAT_MUSIC_MODE_SETTING_NONE, COMBAT_MUSIC_MODE_SETTING_BOSSES_ONLY },
+            valueStringPrefix = "SI_COMBATMUSICMODESETTING"
+        },
     },
 
     --Subtitles

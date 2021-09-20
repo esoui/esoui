@@ -1277,17 +1277,9 @@ function ZO_CollectibleDataManager:Initialize()
         return ZO_CollectibleCategoryData:New(self.collectibleObjectPool)
     end
 
-    local function CreateCollectibleData()
-        return ZO_CollectibleData:New()
-    end
-
-    local function ResetData(data)
-        data:Reset()
-    end
-
-    self.categoryObjectPool = ZO_ObjectPool:New(CreateCategoryData, ResetData)
-    self.subcategoryObjectPool = ZO_ObjectPool:New(CreateSubcategoryData, ResetData)
-    self.collectibleObjectPool = ZO_ObjectPool:New(CreateCollectibleData, ResetData)
+    self.categoryObjectPool = ZO_ObjectPool:New(CreateCategoryData, ZO_ObjectPool_DefaultResetObject)
+    self.subcategoryObjectPool = ZO_ObjectPool:New(CreateSubcategoryData, ZO_ObjectPool_DefaultResetObject)
+    self.collectibleObjectPool = ZO_ObjectPool:New(ZO_CollectibleData, ZO_ObjectPool_DefaultResetObject)
 
     --[[
         EVENT_COLLECTIBLE_UPDATED fires when a nickname changes or a collectible is set as active/inactive. It does not encompass unlock state changes.

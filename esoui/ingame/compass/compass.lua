@@ -52,6 +52,8 @@ local AREA_PIN_TYPE_NAME =
     ANTIQUITY_DIG_SITE_PINS = "antiquityDigSitePins",
 }
 
+ZO_SKYSHARD_DISCOVERY_DISTANCE = GetSkyshardDiscoveryDistanceM()
+
 Compass = ZO_Object:Subclass()
 
 function Compass:New(...)
@@ -162,7 +164,7 @@ function Compass:InitializePoiPins()
         timeline:GetFirstAnimation():SetHandler("OnStop", OnPoiAnimationStopped)
         return timeline
     end
-    self.poiAnimationPool = ZO_ObjectPool:New(CreatePoiAnimationTimeline, function() end)
+    self.poiAnimationPool = ZO_ObjectPool:New(CreatePoiAnimationTimeline)
 
     self.control:RegisterForEvent(EVENT_ZONE_CHANGED, function() self:OnZoneChanged() end)
     self.control:RegisterForEvent(EVENT_QUEST_COMPLETE, function() self:OnZoneChanged() end)
@@ -203,14 +205,10 @@ function Compass:OnPlayerInAntiquityDigSitePinAreaChanged(pinType, param1, param
 end
 
 function Compass:InitializeZoneStoryAreaPins()
-    local function ResetAreaTexture(areaTexture)
-        Compass.ResetAreaTexture(areaTexture)
-    end
-
     local function CreateAreaTexture(objectPool)
         return self:CreateAreaTexture(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, objectPool)
     end
-    local areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, ResetAreaTexture)
+    local areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, Compass.ResetAreaTexture)
 
     local function OnAreaAnimationStarted(animationTimeline)
         local IGNORE_PIN_TEXTURE = true
@@ -224,18 +222,14 @@ function Compass:InitializeZoneStoryAreaPins()
     local function CreateAreaAnimationTimeline()
         return self:CreateAreaAnimationTimeline(OnAreaAnimationStarted, OnAreaAnimationStopped)
     end
-    self.areaAnimationPools[AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS] = ZO_ObjectPool:New(CreateAreaAnimationTimeline, function() end)
+    self.areaAnimationPools[AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS] = ZO_ObjectPool:New(CreateAreaAnimationTimeline)
 end
 
 function Compass:InitializeAntiquityDigSiteAreaPins()
-    local function ResetAreaTexture(areaTexture)
-        Compass.ResetAreaTexture(areaTexture)
-    end
-
     local function CreateAreaTexture(objectPool)
         return self:CreateAreaTexture(AREA_PIN_TYPE_NAME.ANTIQUITY_DIG_SITE_PINS, objectPool)
     end
-    local areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, ResetAreaTexture)
+    local areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, Compass.ResetAreaTexture)
 
     local function OnAreaAnimationStarted(animationTimeline)
         local IGNORE_PIN_TEXTURE = true
@@ -249,7 +243,7 @@ function Compass:InitializeAntiquityDigSiteAreaPins()
     local function CreateAreaAnimationTimeline()
         return self:CreateAreaAnimationTimeline(OnAreaAnimationStarted, OnAreaAnimationStopped)
     end
-    self.areaAnimationPools[AREA_PIN_TYPE_NAME.ANTIQUITY_DIG_SITE_PINS] = ZO_ObjectPool:New(CreateAreaAnimationTimeline, function() end)
+    self.areaAnimationPools[AREA_PIN_TYPE_NAME.ANTIQUITY_DIG_SITE_PINS] = ZO_ObjectPool:New(CreateAreaAnimationTimeline)
 end
 
 function Compass:SetAreaTexturePlatformTextures(areaTexture, pinType)
@@ -427,15 +421,11 @@ function Compass:OnQuestAreaGoalStateChanged(journalIndex, stepIndex, conditionI
 end
 
 function Compass:InitializeQuestPins()
-    local function ResetAreaTexture(areaTexture)
-        Compass.ResetAreaTexture(areaTexture)
-    end
-
     local function CreateAreaTexture(objectPool)
         return self:CreateAreaTexture(AREA_PIN_TYPE_NAME.QUEST_PINS, objectPool)
     end
 
-    local areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, ResetAreaTexture)
+    local areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, Compass.ResetAreaTexture)
 
     local function OnAreaAnimationStarted(animationTimeline)
         local USE_PIN_TEXTURE = false
@@ -457,7 +447,7 @@ function Compass:InitializeQuestPins()
     local function CreateAreaAnimationTimeline()
         return self:CreateAreaAnimationTimeline(OnAreaAnimationStarted, OnAreaAnimationStopped)
     end
-    self.areaAnimationPools[AREA_PIN_TYPE_NAME.QUEST_PINS] = ZO_ObjectPool:New(CreateAreaAnimationTimeline, function() end)
+    self.areaAnimationPools[AREA_PIN_TYPE_NAME.QUEST_PINS] = ZO_ObjectPool:New(CreateAreaAnimationTimeline)
 
     local function OnQuestTrackerTrackingStateChanged()
        local template = IsInGamepadPreferredMode() and "ZO_CompassAreaTexture_Gamepad_Template" or "ZO_CompassAreaTexture_Keyboard_Template"

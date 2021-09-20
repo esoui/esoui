@@ -472,7 +472,7 @@ do
             self:EndRead()
         end
 
-        self.fullLabel:SetHidden(not IsLocalMailboxFull())
+        self.fullLabel:SetHidden(not (IsLocalMailboxFull() or HasUnreceivedMail()))
     end
 end
 

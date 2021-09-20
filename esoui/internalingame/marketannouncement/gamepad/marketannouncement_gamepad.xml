@@ -108,6 +108,28 @@
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)PrimaryAction" relativePoint="TOPLEFT" />
                             <Controls>
                                 <Label name="$(parent)NameLabel" text="SI_MARKET_ANNOUNCEMENT_SCROLL_KEYBIND" override="true" />
+
+                                <Label name="$(parent)ScrollUpKeyLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                                    <Anchor point="CENTER" relativeTo="$(parent)KeyLabel" relativePoint="TOP" constrains="Y" />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)NameLabel" relativePoint="LEFT" constrains="X" offsetX="-15" />
+                                    <Controls>
+                                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_upArrow.dds" layer="TEXT" >
+                                            <Dimensions x="24" y="24" />
+                                            <Anchor point="BOTTOM" relativePoint="TOP" />
+                                        </Texture>
+                                    </Controls>
+                                </Label>
+
+                                <Label name="$(parent)ScrollDownKeyLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                                    <Anchor point="CENTER" relativeTo="$(parent)KeyLabel" relativePoint="BOTTOM" constrains="Y" />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)NameLabel" relativePoint="LEFT" constrains="X" offsetX="-15" />
+                                    <Controls>
+                                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_downArrow.dds" layer="TEXT" >
+                                            <Dimensions x="24" y="24" />
+                                            <Anchor point="TOP" relativePoint="BOTTOM" />
+                                        </Texture>
+                                    </Controls>
+                                </Label>
                             </Controls>
                         </Control>
                     </Controls>

@@ -431,6 +431,10 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(CRAFTING_QUEST_DISABLED_PIN_TEXTURE)
         end
 
+        if data.isInArmory then
+            statusIndicator:AddIcon(ZO_IN_ARMORY_BUILD_ICON)
+        end
+
         statusIndicator:Show()
     end
 end

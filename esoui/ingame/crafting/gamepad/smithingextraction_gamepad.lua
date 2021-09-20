@@ -322,7 +322,8 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_SECONDARY",
             gamepadOrder = 1010,
             callback = function()
-                self:ExtractSingle()
+                -- Use this function to ensure the extraction is evaluated for being part of an armory build.
+                self:ConfirmExtractAll()
             end,
             enabled = function()
                 return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:IsExtractable() and self.extractionSlot:HasOneItem()

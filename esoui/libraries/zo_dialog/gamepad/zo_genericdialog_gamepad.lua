@@ -152,16 +152,7 @@ function DialogKeybindStripDescriptor:SetDefaultSoundFromKeybind(twoOrMoreButton
     end
 end
 
-local function MakeKeybindStripDescriptor(pool)
-    local descriptor = DialogKeybindStripDescriptor:New()
-    return descriptor
-end
-
-local function ResetKeybindStripDescriptor(descriptor)
-    descriptor:Reset()
-end
-
-local g_keybindStripDescriptors = ZO_ObjectPool:New(MakeKeybindStripDescriptor, ResetKeybindStripDescriptor)
+local g_keybindStripDescriptors = ZO_ObjectPool:New(DialogKeybindStripDescriptor, ZO_ObjectPool_DefaultResetObject)
 local g_keybindGroupDesc = {}
 local g_keybindState = nil
 
@@ -850,7 +841,18 @@ function ZO_GenericCenteredGamepadDialogTemplate_OnInitialized(dialog)
     local GENERIC_CENTERED_DIALOG_RIGHT_SCROLL_INDICATOR_X_OFFSET = -1
     dialog.rightStickScrollIndicatorOffsetX = GENERIC_CENTERED_DIALOG_RIGHT_SCROLL_INDICATOR_X_OFFSET
 
-    dialog:GetNamedChild("InteractKeybind"):SetText(zo_strformat(SI_TUTORIAL_CONTINUE, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)))
+    local interactKeybindControl = dialog:GetNamedChild("InteractKeybind")
+
+    local baseShownFunction = dialog.OnDialogShown
+    dialog.OnDialogShown = function(dialog)
+        baseShownFunction(dialog)
+
+        for _, descriptor in ipairs(g_keybindGroupDesc) do
+            if descriptor.keybind == "DIALOG_PRIMARY" then
+                interactKeybindControl:SetKeybindButtonDescriptor(descriptor)
+            end
+        end
+    end
 end
 
 local MIN_HEIGHT_SCROLL_WINDOW = 480
@@ -896,16 +898,7 @@ function ZO_GenericGamepadStaticListDialogTemplate_OnInitialized(dialog)
     local containerName = dialog.scrollChild:GetName()
     dialog.listHeaderControl = CreateControlFromVirtual(containerName .. "ListHeader", dialog.scrollChild, "ZO_GamepadStaticListHeader")
 
-    local function CreateEntryControl(objectPool)
-        return ZO_ObjectPool_CreateNamedControl(containerName .. "Entry", "ZO_GamepadStaticListIconEntry", objectPool, dialog.scrollChild)
-    end
-
-    local function ResetEntryControl(entryControl)
-        entryControl:SetHidden(true)
-        entryControl:ClearAnchors()
-    end
-
-    dialog.entryPool = ZO_ObjectPool:New(CreateEntryControl, ResetEntryControl)
+    dialog.entryPool = ZO_ControlPool:New("ZO_GamepadStaticListIconEntry", dialog.scrollChild, "Entry")
 end
 
 function ZO_GenericStaticListGamepadDialogTemplate_Setup(dialog, data)
@@ -1047,4 +1040,17 @@ function ZO_GenericGamepadDialog_Parametric_TextFieldFocusLost(control)
     ZO_GamepadEditBox_FocusLost(control)
     local paraDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
     paraDialog.entryList:RefreshVisible()
+end
+
+function ZO_GamepadTextFieldItem_OnInitialized(control)
+    ZO_SharedGamepadEntry_OnInitialized(control)
+    control.textFieldControl = control:GetNamedChild("TextField")
+    control.editBoxControl = control.textFieldControl:GetNamedChild("Edit")
+    control.textControl = control.editBoxControl:GetNamedChild("Text")
+    control.highlight = control:GetNamedChild("Highlight")
+
+    control.resetFunction = function()
+        control.editBoxControl.textChangedCallback = nil
+        control.editBoxControl:SetText("")
+    end
 end

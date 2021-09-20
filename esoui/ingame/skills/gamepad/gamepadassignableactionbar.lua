@@ -382,20 +382,19 @@ function ZO_GamepadAssignableActionBarButton:Refresh()
 
     if self.keybindLabel then
         local currentHotbarCategory = hotbarData:GetHotbarCategory()
-        local GAMEPAD_MODE = true
-        local actionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetActionNameForSlot(self.actionSlotIndex, currentHotbarCategory, GAMEPAD_MODE)
+        local keyboardActionName, gamepadActionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetKeyboardAndGamepadActionNameForSlot(self.actionSlotIndex, currentHotbarCategory)
         local actionPriority = ACTION_BAR_ASSIGNMENT_MANAGER:GetAutomaticCastPriorityForSlot(self.actionSlotIndex, currentHotbarCategory)
-        if actionName ~= self.actionName or actionPriority ~= self.actionPriority then
+        if gamepadActionName ~= self.actionName or actionPriority ~= self.actionPriority then
             ZO_Keybindings_UnregisterLabelForBindingUpdate(self.keybindLabel)
-            if actionName then
+            if gamepadActionName then
                 local HIDE_UNBOUND = false
-                ZO_Keybindings_RegisterLabelForBindingUpdate(self.keybindLabel, actionName, HIDE_UNBOUND)
+                ZO_Keybindings_RegisterLabelForBindingUpdate(self.keybindLabel, keyboardActionName, HIDE_UNBOUND, gamepadActionName)
             elseif actionPriority then
                 self.keybindLabel:SetText(tostring(actionPriority))
             else
                 self.keybindLabel:SetText("")
             end
-            self.actionName = actionName
+            self.actionName = gamepadActionName
             self.actionPriority = actionPriority
         end
     end

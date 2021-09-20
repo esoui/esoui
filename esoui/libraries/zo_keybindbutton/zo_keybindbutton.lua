@@ -1,7 +1,7 @@
 ZO_KeybindButtonMixin = {}
 
 function ZO_KeybindButtonMixin:GetKeybind()
-    return (IsInGamepadPreferredMode() or self.alwaysPreferGamepadMode) and self.gamepadPreferredKeybind or self.keybind
+    return ZO_Keybindings_ShouldUseGamepadAction(self.alwaysPreferGamepadMode) and self.gamepadPreferredKeybind or self.keybind
 end
 
 function ZO_KeybindButtonMixin:GetKeyboardKeybind()
@@ -23,7 +23,7 @@ function ZO_KeybindButtonMixin:UpdateEnabledState()
 end
 
 function ZO_KeybindButtonMixin:SetEnabled(enabled)
-    if(enabled ~= self.enabled) then
+    if enabled ~= self.enabled then
         self.enabled = enabled
         self:UpdateEnabledState()
     end
@@ -34,7 +34,7 @@ function ZO_KeybindButtonMixin:SetState(buttonState, locked)
 end
 
 function ZO_KeybindButtonMixin:SetKeybindEnabled(enabled)
-    if(enabled ~= self.keybindEnabled) then
+    if enabled ~= self.keybindEnabled then
         self.keybindEnabled = enabled
         self:UpdateEnabledState()
     end
@@ -98,7 +98,7 @@ function ZO_KeybindButtonMixin:SetKeyFont(font)
 end
 
 function ZO_KeybindButtonMixin:AdjustBindingAnchors(wideSpacing)
-    if(not self:GetUsingCustomAnchors()) then
+    if not self:GetUsingCustomAnchors() then
         self.keyLabel:SetAnchor(RIGHT, self.nameLabel, LEFT, wideSpacing and -15 or 0)
     end
 end

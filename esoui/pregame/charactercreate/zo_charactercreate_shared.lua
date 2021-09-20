@@ -35,13 +35,7 @@ CHARACTER_CREATE_MAX_SUPPORTED_CLASSES = 6
 
 ZO_CHARACTER_CREATE_SYSTEM_NAME = "CHARACTER_CREATE"
 
-ZO_CharacterCreate_Manager = ZO_Object:Subclass()
-
-function ZO_CharacterCreate_Manager:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
+ZO_CharacterCreate_Manager = ZO_InitializingObject:Subclass()
 
 function ZO_CharacterCreate_Manager:Initialize()
     self.characterData = ZO_CharacterCreateData:New()
@@ -246,13 +240,7 @@ end
 
 --[[ Character Create Base ]]--
 
-ZO_CharacterCreate_Base = ZO_Object:Subclass()
-
-function ZO_CharacterCreate_Base:New(...)
-    local characterCreate = ZO_Object.New(self)
-    characterCreate:Initialize(...)
-    return characterCreate
-end
+ZO_CharacterCreate_Base = ZO_InitializingObject:Subclass()
 
 function ZO_CharacterCreate_Base:Initialize(control)
     self.control = control

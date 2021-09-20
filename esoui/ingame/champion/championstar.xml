@@ -50,10 +50,12 @@
             </OnDragStart>
         </TextureComposite>
 
-        <Control name="ZO_ChampionStarEditor" inherits="ZO_Spinner" hidden="true" virtual="true" >
+        <Control name="ZO_ChampionStarEditor" inherits="ZO_SpinnerWithLabels" hidden="true" virtual="true" >
             <OnInitialized>
                 ZO_KeyControl_OnInitialized(self:GetNamedChild("Decrease"))
                 ZO_KeyControl_OnInitialized(self:GetNamedChild("Increase"))
+                self:GetNamedChild("DecreaseKeyLabel"):SetKeybind("UI_SHORTCUT_LEFT_TRIGGER")
+                self:GetNamedChild("IncreaseKeyLabel"):SetKeybind("UI_SHORTCUT_RIGHT_TRIGGER")
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Display" font="ZoFontGamepad34" override="true"/>
@@ -63,6 +65,12 @@
                 <Button name="$(parent)Increase" override="true">
                     <Anchor point="LEFT" relativeTo="$(parent)Display" relativePoint="RIGHT" offsetX="-10" />
                 </Button>
+                <Label name="$(parent)DecreaseKeyLabel" override="true" tier="MEDIUM" hidden="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)Decrease" />
+                </Label>
+                <Label name="$(parent)IncreaseKeyLabel" override="true" tier="MEDIUM" hidden="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)Increase" />
+                </Label>
             </Controls>
         </Control>
     </Controls>

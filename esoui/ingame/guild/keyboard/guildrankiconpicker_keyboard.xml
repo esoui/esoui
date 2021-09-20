@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-       <Control name="ZO_GuildRank_RankIconPickerIcon_Keyboard_Control" mouseEndabled="true" virtual="true">
+       <Control name="ZO_GuildRank_RankIconPickerIcon_Keyboard_Control" mouseEnabled="true" virtual="true">
             <Dimensions x="ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_KEYBOARD_SIZE" y="ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_KEYBOARD_SIZE"/>
             <Controls>
                 <Control name="$(parent)IconContainer">

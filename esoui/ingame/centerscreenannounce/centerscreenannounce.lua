@@ -1098,37 +1098,31 @@ function CenterScreenAnnounce:InitializeLinePools()
     self.scryingUpdatedIconPool = ZO_ControlPool:New("ZO_CenterScreenAnnounce_ScryingUpdated_Icon", self.control, "ScryingIcon")
 end
 
-do
-    local function LineReset(line)
-        line:Reset()
+function CenterScreenAnnounce:CreateLinePool(controlName, controlTemplate, parentControl, lineType)
+    local function OnLineComplete(completedLine)
+        local SKIP_DISPLAY_NEXT = true
+        local lineType = completedLine:GetLineType()
+        self:ReleaseLine(completedLine, SKIP_DISPLAY_NEXT)
+        if lineType == CSA_LINE_TYPE_SMALL and self:HasActiveLines(CSA_LINE_TYPE_SMALL) then
+            self:MoveSmallLinesUp()
+        elseif lineType == CSA_LINE_TYPE_MAJOR then
+            self:StartMajorLineContainerAnimation()
+            completedLine.control:SetScale(1)
+        end
+        self:TryDisplayingNextQueuedMessage()
     end
 
-    function CenterScreenAnnounce:CreateLinePool(controlName, controlTemplate, parentControl, lineType)
-        local function OnLineComplete(completedLine)
-            local SKIP_DISPLAY_NEXT = true
-            local lineType = completedLine:GetLineType()
-            self:ReleaseLine(completedLine, SKIP_DISPLAY_NEXT)
-            if lineType == CSA_LINE_TYPE_SMALL and self:HasActiveLines(CSA_LINE_TYPE_SMALL) then
-                self:MoveSmallLinesUp()
-            elseif lineType == CSA_LINE_TYPE_MAJOR then
-                self:StartMajorLineContainerAnimation()
-                completedLine.control:SetScale(1)
-            end
-            self:TryDisplayingNextQueuedMessage()
-        end
-
-        local function LineFactory(pool)
-            local lineControl = ZO_ObjectPool_CreateNamedControl(controlName, controlTemplate, pool, parentControl)
-            local line = lineType:New(lineControl)
-            line:RegisterCallback("OnLineComplete", OnLineComplete)
-            return line
-        end
-
-        local linePool = ZO_ObjectPool:New(LineFactory, LineReset)
-        linePool:SetCustomAcquireBehavior(function(newLine) newLine:OnAcquire() end)
-
-        return linePool
+    local function LineFactory(pool)
+        local lineControl = ZO_ObjectPool_CreateNamedControl(controlName, controlTemplate, pool, parentControl)
+        local line = lineType:New(lineControl)
+        line:RegisterCallback("OnLineComplete", OnLineComplete)
+        return line
     end
+
+    local linePool = ZO_ObjectPool:New(LineFactory, ZO_ObjectPool_DefaultResetObject)
+    linePool:SetCustomAcquireBehavior(function(newLine) newLine:OnAcquire() end)
+
+    return linePool
 end
 
 function CenterScreenAnnounce:ApplyPlatformStyle()

@@ -14,6 +14,8 @@ TOGGLE_BUTTON_TYPE_MINIMAP = 5
 TOGGLE_BUTTON_TYPE_PADLOCK = 6
 TOGGLE_BUTTON_TYPE_PADLOCK_GAMEPAD = 7
 
+TIMED_CONFIRMATION_BUTTON_INTERVAL_MS = 3000
+
 local NORMAL = 1
 local OVER = 2
 local PRESSED = 3
@@ -548,5 +550,75 @@ function ZO_WeaponSwap_SetPermanentlyHidden(self, hidden)
     if self.permanentlyHidden ~= hidden then
         self.permanentlyHidden = hidden
         UpdateWeaponSwapButton(self)
+    end
+end
+
+------------------------
+-- ZO_TimedConfirmationButton
+------------------------
+
+do
+    local function OnTimedConfirmationButtonUpdate(control)
+        local endTimeMS = control.timerEndMS
+        local confirmText = control.confirmLabelText
+        if endTimeMS and confirmText then
+            local timeRemainingS = zo_ceil((endTimeMS - GetFrameTimeMilliseconds()) / 1000)
+            if timeRemainingS > 0 then
+                if timeRemainingS ~= control.lastTimerUpdateS then
+                    local buttonText = zo_strformat(SI_TIMED_CONFIRMATION_BUTTON_COOLDOWN_FORMAT, confirmText, timeRemainingS)
+                    control:SetText(buttonText)
+                    control.lastTimerUpdateS = timeRemainingS
+                end
+
+                return
+            end
+        end
+
+        ZO_TimedConfirmationButton_SetConfirmationHidden(control, true)
+    end
+
+    function ZO_TimedConfirmationButton_SetConfirmationHidden(control, hidden)
+        if not hidden and not control.timerEndMS then
+            control.timerEndMS = GetFrameTimeMilliseconds() + TIMED_CONFIRMATION_BUTTON_INTERVAL_MS
+            control.lastTimerUpdateS = nil
+            control:SetHandler("OnUpdate", OnTimedConfirmationButtonUpdate)
+        elseif hidden and control.timerEndMS then
+            control.timerEndMS = nil
+            control.lastTimerUpdateS = nil
+            control:SetText(control.buttonLabelText)
+            control:SetHandler("OnUpdate", nil)
+        end
+    end
+end
+
+function ZO_TimedConfirmationButton_OnClicked(control)
+    local clickHandlerCallback = control.clickHandlerCallback
+    if clickHandlerCallback then
+        local toggleState = true
+        local isConfirmationHidden = not control.timerEndMS
+        if isConfirmationHidden then
+            local UNCONFIRMED = false
+            if clickHandlerCallback(control, UNCONFIRMED) then
+                -- Suppress the confirmation state if the handler did not require confirmation.
+                toggleState = false
+            end
+        else
+            local CONFIRMED = true
+            clickHandlerCallback(control, CONFIRMED)
+        end
+
+        if toggleState then
+            ZO_TimedConfirmationButton_SetConfirmationHidden(control, not isConfirmationHidden)
+        end
+    end
+end
+
+function ZO_TimedConfirmationButton_Setup(control, buttonLabelText, confirmLabelText, clickHandlerCallback)
+    control.buttonLabelText = buttonLabelText
+    control.confirmLabelText = confirmLabelText
+    control.clickHandlerCallback = clickHandlerCallback
+
+    if not control.timerEndMS then
+        control:SetText(buttonLabelText)
     end
 end

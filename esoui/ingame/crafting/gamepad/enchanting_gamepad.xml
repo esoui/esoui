@@ -34,11 +34,15 @@
 
                 <Scroll name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
+
+                        <!--Used by GAMEPAD_ENCHANTING_MODE_FRAGMENT -->
                         <Control name="$(parent)Mode" inherits="ZO_VerticalParametricScrollListTemplate">
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
                             <Anchor point="BOTTOMRIGHT"/>
                         </Control>
-                        <Control name="$(parent)Inventory" inherits="ZO_GamepadCraftingInventoryTemplate">
+                        
+                        <!--Used by GAMEPAD_ENCHANTING_INVENTORY_FRAGMENT -->
+                        <Control name="$(parent)Inventory" inherits="ZO_GamepadCraftingInventoryTemplate" hidden="true">
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
                             <Anchor point="BOTTOMRIGHT"/>
                         </Control>

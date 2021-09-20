@@ -21,7 +21,41 @@ function ZO_ConfirmClaimGiftDialog_Keyboard_OnInitialized(self)
         setup = function(dialog, gift)
             local noteHeaderLabel = dialog:GetNamedChild("NoteHeader")
             noteHeaderLabel:SetText(zo_strformat(SI_CONFIRM_CLAIM_GIFT_NOTE_ENTRY_HEADER, ZO_WHITE:Colorize(gift:GetUserFacingPlayerName())))
+            noteHeaderLabel:ClearAnchors()
             dialog:GetNamedChild("NoteEdit"):SetText("")
+
+            local giftData = dialog.data
+            local giftQuantity = giftData:GetQuantity()
+            local claimQuantity = giftData:GetClaimQuantity()
+            local claimContainer = dialog:GetNamedChild("PartialClaim")
+            if claimQuantity == giftQuantity then
+                local promptLabel = dialog:GetNamedChild("Prompt")
+                noteHeaderLabel:SetAnchor(TOPLEFT, promptLabel, BOTTOMLEFT)
+                noteHeaderLabel:SetAnchor(TOPRIGHT, promptLabel, BOTTOMRIGHT)
+                claimContainer:SetHidden(true)
+            else
+                noteHeaderLabel:SetAnchor(TOPLEFT, claimContainer, BOTTOMLEFT, 0, 12)
+                noteHeaderLabel:SetAnchor(TOPRIGHT, claimContainer, BOTTOMRIGHT, 0, 12)
+                claimContainer:SetHidden(false)
+
+                local returnQuantity = giftQuantity - claimQuantity
+                local productName = giftData:GetName()
+                local productIcon = giftData:GetIcon()
+                local senderName = giftData:GetUserFacingPlayerName()
+                local returnString = zo_strformat(SI_CONFIRM_PARTIAL_GIFT_RETURN_EXPLANATION_TEXT, productName, returnQuantity, senderName)
+
+                local claimIconTexture = claimContainer:GetNamedChild("ProductIcon")
+                claimIconTexture:SetTexture(productIcon)
+
+                local claimQuantityLabel = claimContainer:GetNamedChild("ProductIconQuantity")
+                claimQuantityLabel:SetText(claimQuantity)
+
+                local claimProductNameLabel = claimContainer:GetNamedChild("ProductName")
+                claimProductNameLabel:SetText(productName)
+
+                local claimReturnLabel = claimContainer:GetNamedChild("ReturnExplanation")
+                claimReturnLabel:SetText(returnString)
+            end
         end,
 
         buttons =

@@ -1,34 +1,61 @@
 -- Valid Text Instructions Base Class --
 
-ZO_ValidTextInstructions = ZO_Object:Subclass()
+ZO_ValidTextInstructions = ZO_InitializingObject:Subclass()
 
-function ZO_ValidTextInstructions:New(...)
-    local instructions = ZO_Object.New(self)
-    instructions:Initialize(...)
-    return instructions
-end
-
-function ZO_ValidTextInstructions:Initialize(control, template)
+function ZO_ValidTextInstructions:Initialize(control, template, instructions)
     self.m_control = control
-    self.m_ruleToControl = {}
+    self.m_ruleToControl = { }
     self.m_template = template or "ZO_TextInstructionLine"
+    self.m_instructionPool = ZO_ControlPool:New(self.m_template, control, "TextInstruction")
 
-    self:AddInstructions()
+    self:AddInstructions(instructions)
 end
 
 function ZO_ValidTextInstructions:GetControl()
     return self.m_control
 end
 
-function ZO_ValidTextInstructions:AddInstructions()
-    -- Must be overridden
-    assert(false)
+function ZO_ValidTextInstructions:HasRules()
+    return next(self.m_ruleToControl) ~= nil
+end
+
+ZO_ValidTextInstructions.GetViolationPrefix = ZO_ValidTextInstructions:MUST_IMPLEMENT()
+
+function ZO_ValidTextInstructions:AddInstructions(instructions)
+    --[[Because different contexts may use different rules,
+    and because we don't want to display rules that are irrelevant
+    to the current context, which instructions we're adding is
+    handled elsewhere depending on context. The new locations are
+    as follows:
+    Outfit and Collectible renaming: InGameDialogs.lua
+    Guild naming: SocialDialogs_Keyboard.lua
+    Character naming: ZO_CharacterCreate_Keyboad.lua
+    Character REnaming: ZO_CharacterSelect_Keyboard.lua
+
+    If a design decision is made to change which rules any context should follow,
+    then in addition to the above, a corresponding change will also have to be made
+    in NameValidation.cpp. ]]
+
+    if instructions then
+        for _, instruction in ipairs(instructions) do
+            self:AddInstruction(instruction)
+        end
+    end
+end
+
+function ZO_ValidTextInstructions:ClearInstructions()
+    self.m_anchorTo = nil
+    ZO_ClearTable(self.m_ruleToControl)
+    self.m_instructionPool:ReleaseAllObjects()
 end
 
 function ZO_ValidTextInstructions:AddInstruction(instructionEnum)
-    self.instructionLineCounter = (self.instructionLineCounter or 0) + 1
-    local instruction = CreateControlFromVirtual("$(parent)NameInstructionLine" .. instructionEnum .. self.instructionLineCounter, self.m_control, self.m_template)
-    instruction:SetText(GetString(self.violationPrefix, instructionEnum))
+    if self.m_ruleToControl[instructionEnum] then
+        return
+    end
+    
+    local instruction = self.m_instructionPool:AcquireObject()
+    instruction:SetText(GetString(self:GetViolationPrefix(), instructionEnum))
     instruction.m_rule = instructionEnum
 
     if(self.m_anchorTo) then
@@ -42,10 +69,8 @@ function ZO_ValidTextInstructions:AddInstruction(instructionEnum)
 end
 
 local function HasViolatedRule(rule, ruleViolations)
-    for i = 1, #ruleViolations do
-        if(rule == ruleViolations[i]) then
-            return true
-        end
+    if ruleViolations then
+        return ZO_IsElementInNumericallyIndexedTable(ruleViolations, rule)
     end
 
     return false
@@ -73,8 +98,10 @@ function ZO_ValidTextInstructions:Show(editControl, ruleViolations)
         self.m_control:SetAnchor(TOPRIGHT, editControl, TOPLEFT, -50, 0)
     end
 
-    self.m_control:SetHidden(false)
-    self:UpdateViolations(ruleViolations)
+    if self:HasRules() then
+        self.m_control:SetHidden(false)
+        self:UpdateViolations(ruleViolations)
+    end
 end
 
 function ZO_ValidTextInstructions:Hide()
@@ -85,21 +112,8 @@ end
 
 ZO_ValidNameInstructions = ZO_ValidTextInstructions:Subclass()
 
-function ZO_ValidNameInstructions:New(...)
-    return ZO_ValidTextInstructions.New(self, ...)
-end
-
-function ZO_ValidNameInstructions:AddInstructions()
-    self.violationPrefix = "SI_NAMINGERROR"
-
-    self:AddInstruction(NAME_RULE_TOO_SHORT)
-    self:AddInstruction(NAME_RULE_CANNOT_START_WITH_SPACE)
-    self:AddInstruction(NAME_RULE_MUST_END_WITH_LETTER)
-    self:AddInstruction(NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS)
-    self:AddInstruction(NAME_RULE_NO_NUMBERS)
-    self:AddInstruction(NAME_RULE_NO_ADJACENT_PUNCTUATION_CHARACTERS)
-    self:AddInstruction(NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS)
-    self:AddInstruction(NAME_RULE_INVALID_CHARACTERS)
+function ZO_ValidNameInstructions:GetViolationPrefix()
+    return "SI_NAMINGERROR"
 end
 
 local NAME_RULES_TABLE = nil
@@ -144,18 +158,22 @@ end
 
 ZO_ValidAccountNameInstructions = ZO_ValidTextInstructions:Subclass()
 
-function ZO_ValidAccountNameInstructions:New(...)
-    return ZO_ValidTextInstructions.New(self, ...)
+function ZO_ValidAccountNameInstructions:GetViolationPrefix()
+    return "SI_ACCOUNTNAMINGERROR"
 end
 
-function ZO_ValidAccountNameInstructions:AddInstructions()
-    self.violationPrefix = "SI_ACCOUNTNAMINGERROR"
 
-    self:AddInstruction(ACCOUNT_NAME_RULE_INCORRECT_LENGTH)
-    self:AddInstruction(ACCOUNT_NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS)
-    self:AddInstruction(ACCOUNT_NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS)
-    self:AddInstruction(ACCOUNT_NAME_RULE_MUST_START_WITH_LETTER)
-    self:AddInstruction(ACCOUNT_NAME_RULE_MUST_END_WITH_NUMBER_OR_LETTER)
-    self:AddInstruction(ACCOUNT_NAME_RULE_NO_SPACES)
-    self:AddInstruction(ACCOUNT_NAME_RULE_INVALID_CHARACTERS)
+function ZO_ValidAccountNameInstructions:AddInstructions(instructions)
+    local shownInstructions = instructions or
+    {
+        ACCOUNT_NAME_RULE_INCORRECT_LENGTH,
+        ACCOUNT_NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS,
+        ACCOUNT_NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS,
+        ACCOUNT_NAME_RULE_MUST_START_WITH_LETTER,
+        ACCOUNT_NAME_RULE_MUST_END_WITH_NUMBER_OR_LETTER,
+        ACCOUNT_NAME_RULE_NO_SPACES,
+        ACCOUNT_NAME_RULE_INVALID_CHARACTERS
+    }
+    
+    ZO_ValidTextInstructions.AddInstructions(self, shownInstructions)
 end

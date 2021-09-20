@@ -27,6 +27,22 @@
             </Controls>
         </StatusBar>
 
+        <StatusBar name="ZO_AchievementSummaryStatusBar" inherits="ZO_ResponsiveArrowProgressBarWithBG" virtual="true">
+            <OnMouseDown>
+                ZO_AchievementSummaryStatusBar_OnMouseDown(self)
+            </OnMouseDown>
+
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_AchievementsDefaultLabel_Keyboard ZO_PropagateMouseOverBehavior ZO_PropagateMouseButtonBehavior" font="ZoFontWinH4">
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetY="-4" />
+                </Label>
+                <Label name="$(parent)Progress" inherits="ZO_AchievementsDefaultLabel_Keyboard" horizontalAlignment="CENTER" verticalAlignment="CENTER" tier="HIGH" layer="OVERLAY" level="2" override="true">
+                    <Anchor point="TOPLEFT" offsetY="-1" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Label>
+            </Controls>
+        </StatusBar>
+
         <Button name="ZO_IconAchievement" mouseOverBlendMode="ADD" virtual="true">
             <Dimensions x="64" y="64" />
 

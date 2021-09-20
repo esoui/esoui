@@ -40,7 +40,13 @@ function ZO_DailyRewards_TileInfo:GetTitleAndBackground(dailyRewardIndex)
         if rewardData then
             if rewardData:GetQuantity() > 1 then
                 if IsInGamepadPreferredMode() then
-                    title = rewardData:GetFormattedNameWithStackGamepad()
+                    local entryType = GetRewardType(rewardId)
+                    if entryType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
+                        title = rewardData:GetFormattedNameWithStackGamepad()
+                    else
+                        -- Item/crown crate name formatting colorizes quantity, so we need to format the raw name ourselves here to preserve gamepad selection indicator behavior.
+                        title = zo_strformat(SI_REWARDS_FORMAT_REWARD_WITH_AMOUNT, rewardData:GetRawName(), rewardData:GetQuantity())
+                    end
                 else
                     title = rewardData:GetFormattedNameWithStack()
                 end

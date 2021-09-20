@@ -69,13 +69,13 @@
             <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="5" />
         </Texture>
         
-        <!--Positioned above windows. Below chat, tooltips and menues-->
-        <TopLevelControl name="ZO_DialogFrame" tier="MEDIUM" level="1" mouseEnabled="true" hidden="true" allowBringToTop="false" resizeToFitDescendents="true" virtual="true">
+        <!--Positioned above windows. Below chat, tooltips and context menus-->
+        <TopLevelControl name="ZO_DialogFrame" tier="MEDIUM" level="ZO_MEDIUM_TIER_KEYBOARD_STANDARD_DIALOG" mouseEnabled="true" hidden="true" allowBringToTop="false" resizeToFitDescendents="true" virtual="true">
             <Anchor point="CENTER" relativeTo="GuiRoot" />
             <ResizeToFitPadding width="50" height="33" />
             <OnEffectivelyShown>
                 if not self.animation then
-                self.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("DialogModalUnderlay", self)
+                    self.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("DialogModalUnderlay", self)
                 end
                 self.animation:PlayFromStart()
                 PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
@@ -153,6 +153,14 @@
                             <OnTextChanged>
                                 ZO_TwoButtonDialogEditBox_OnTextChanged(self)
                             </OnTextChanged>
+
+                            <OnFocusGained>
+                                ZO_TwoButtonDialogEditBox_OnFocusGained(self)
+                            </OnFocusGained>
+
+                            <OnFocusLost>
+                                ZO_TwoButtonDialogEditBox_OnFocusLost(self)
+                            </OnFocusLost>
                         </EditBox>
                         
                         <Control name="$(parent)Instructions" resizeToFitDescendents="true" excludeFromResizeToFitExtents="true" hidden="true">

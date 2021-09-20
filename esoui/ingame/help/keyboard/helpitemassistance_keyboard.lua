@@ -8,10 +8,6 @@ local CUSTOMER_SERVICE_CATEGORY_DATA =
 
 ZO_HelpItemAssistance_Keyboard = ZO_HelpMechanicAssistanceTemplate_Keyboard:Subclass()
 
-function ZO_HelpItemAssistance_Keyboard:New(...)
-    return ZO_HelpScreenTemplate_Keyboard.New(self, ...)
-end
-
 function ZO_HelpItemAssistance_Keyboard:Initialize(control)
     ZO_HelpMechanicAssistanceTemplate_Keyboard.Initialize(self, control, CUSTOMER_SERVICE_CATEGORY_DATA, ZO_ITEM_ASSISTANCE_CATEGORIES_DATA)
 end

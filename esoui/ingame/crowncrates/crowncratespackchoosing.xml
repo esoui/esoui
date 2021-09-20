@@ -146,26 +146,44 @@
             <AnchorFill />
 
             <Controls>
-                <Button name="$(parent)LeftArrow" inherits="ZO_KeyButton">
+                <Button name="$(parent)LeftArrow_Keyboard">
                     <Dimensions x="64" y="64" />
-                    <Controls>
-                        <Texture name="$(parent)GamepadDirectionIndicator" textureFile="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" hidden="true">
-                            <TextureCoords left="1" right="0" top="0" bottom="1" />
-                            <Dimensions x="32" y="64" />
-                            <Anchor point="RIGHT" relativeTo="$(parent)PageHeader" relativePoint="LEFT" offsetX="-5"/>
-                        </Texture>
-                    </Controls>
+                    <Textures
+                        normal="EsoUI/Art/Buttons/large_leftArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_leftArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_leftArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/large_leftArrow_disabled.dds"
+                    />
                 </Button>
 
-                <Button name="$(parent)RightArrow"  inherits="ZO_KeyButton">
+                <Button name="$(parent)RightArrow_Keyboard">
                     <Dimensions x="64" y="64" />
+                    <Textures
+                        normal="EsoUI/Art/Buttons/large_rightArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_rightArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/large_rightArrow_disabled.dds"
+                    />
+                </Button>
+
+                <Label name="$(parent)LeftArrow_Gamepad" inherits="ZO_ClickableKeybindLabel_Gamepad" hidden="true">
                     <Controls>
-                        <Texture name="$(parent)GamepadDirectionIndicator" textureFile="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" hidden="true">
+                        <Texture name="$(parent)ArrowTexture" textureFile="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds">
+                            <TextureCoords left="1" right="0" top="0" bottom="1" />
                             <Dimensions x="32" y="64" />
-                            <Anchor point="LEFT" relativeTo="$(parent)PageHeader" relativePoint="RIGHT" offsetX="5"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)PageHeader" relativePoint="LEFT" offsetX="-10"/>
                         </Texture>
                     </Controls>
-                </Button>
+                </Label>
+
+                <Label name="$(parent)RightArrow_Gamepad" inherits="ZO_ClickableKeybindLabel_Gamepad" hidden="true">
+                    <Controls>
+                        <Texture name="$(parent)ArrowTexture" textureFile="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds">
+                            <Dimensions x="32" y="64" />
+                            <Anchor point="LEFT" relativeTo="$(parent)PageHeader" relativePoint="RIGHT" offsetX="10"/>
+                        </Texture>
+                    </Controls>
+                </Label>
             </Controls>
         </Control>
 

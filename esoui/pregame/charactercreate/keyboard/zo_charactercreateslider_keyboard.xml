@@ -1,8 +1,14 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_CharacterCreateSliderLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+        <Label name="ZO_CharacterCreateSliderLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" mouseEnabled="true" textureFile="EsoUI\Art\Miscellaneous\ESO_Icon_Warning.dds" excludeFromResizeToFitExtents="true" hidden="true">
+                    <Dimensions x="32" y="32" />
+                </Texture>
+            </Controls>
+        </Label>
 
-         <Button name="ZO_CharacterCreateSliderPreview_Keyboard" mouseOverBlendMode="ADD" virtual="true">
+        <Button name="ZO_CharacterCreateSliderPreview_Keyboard" mouseOverBlendMode="ADD" virtual="true">
             <Dimensions x="32" y="32" />
 
             <Textures
@@ -22,6 +28,11 @@
                 <Label name="$(parent)Name" inherits="ZO_CharacterCreateSliderLabel_Keyboard" font="ZoFontGameShadow">
                     <Anchor point="TOPLEFT" />
                     <Anchor point="TOPRIGHT" />
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT" />
+                        </Texture>
+                    </Controls>
                 </Label>
 
                 <Slider name="$(parent)Slider" inherits="ZO_Slider">
@@ -77,6 +88,11 @@
                 <Label name="$(parent)Name" inherits="ZO_CharacterCreateSliderLabel_Keyboard" font="ZoFontGameShadow">
                     <Anchor point="TOPLEFT" />
                     <Anchor point="TOPRIGHT" />
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT" />
+                        </Texture>
+                    </Controls>
                 </Label>
 
                 <Control name="$(parent)Slider" inherits="ZO_ColorSwatchPicker">

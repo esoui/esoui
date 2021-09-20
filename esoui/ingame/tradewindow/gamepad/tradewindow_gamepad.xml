@@ -16,18 +16,13 @@
                                     <Controls>
                                         <Control name="$(parent)Header" override="true">
                                             <Controls>
-                                                <Control name="$(parent)DividerAccent" inherits="ZO_GamepadHeaderHorizontalDividerWithAccent" hidden="true">
+                                                <Control name="$(parent)DividerAccent" inherits="ZO_GamepadHeaderHorizontalDividerWithKeyLabel" hidden="true">
                                                     <Anchor point="TOPLEFT" relativeTo="$(parent)DividerSimple" />
                                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)DividerSimple" />
                                                     <OnInitialized>
-                                                        local accent = self:GetNamedChild("Accent")
-                                                        accent:SetKeyCode(KEY_GAMEPAD_LEFT_TRIGGER)
+                                                        local keyLabel = self:GetNamedChild("KeyLabel")
+                                                        ZO_Keybindings_RegisterLabelForBindingUpdate(keyLabel, "UI_SHORTCUT_LEFT_TRIGGER")
                                                     </OnInitialized>
-                                                    <Controls>
-                                                        <Texture name="$(parent)Accent" override="true">
-                                                            <Dimensions x="50" y="50" />
-                                                        </Texture>
-                                                    </Controls>
                                                 </Control>
                                             </Controls>
                                         </Control>
@@ -55,17 +50,15 @@
                                     <Controls>
                                         <Control name="$(parent)Header" override="true">
                                             <Controls>
-                                                <Control name="$(parent)DividerAccent" inherits="ZO_GamepadHeaderHorizontalDividerWithAccent" hidden="true">
+                                                <Control name="$(parent)DividerAccent" inherits="ZO_GamepadHeaderHorizontalDividerWithKeyLabel" hidden="true">
                                                     <Anchor point="TOPLEFT" relativeTo="$(parent)DividerSimple" />
                                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)DividerSimple" />
                                                     <OnInitialized>
-                                                        local accent = self:GetNamedChild("Accent")
-                                                        accent:SetKeyCode(KEY_GAMEPAD_RIGHT_TRIGGER)
+                                                        local keyLabel = self:GetNamedChild("KeyLabel")
+                                                        ZO_Keybindings_RegisterLabelForBindingUpdate(keyLabel, "UI_SHORTCUT_RIGHT_TRIGGER")
                                                     </OnInitialized>
                                                     <Controls>
-                                                        <Texture name="$(parent)Accent" override="true">
-                                                            <Dimensions x="50" y="50" />
-                                                        </Texture>
+                                                        <Label name="$(parent)Accent" inherits="ZO_LargeKeyMarkupLabel_Gamepad" override="true" />
                                                     </Controls>
                                                 </Control>
                                             </Controls>

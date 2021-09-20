@@ -82,6 +82,7 @@ function ZO_CompanionSkills_Gamepad:OnDeferredInitialize()
     self:InitializeFooter()
     self:InitializeSkillLinesList()
     self:InitializeSkillsList()
+    self:SetListsUseTriggerKeybinds(true)
     self:InitializeQuickMenu()
     self:ResetSkillLineNewStatus()
     self:RegisterForEvents()
@@ -246,7 +247,7 @@ function ZO_CompanionSkills_Gamepad:InitializeSkillLinesList()
 
         list:AddDataTemplate("ZO_GamepadSkillLineEntryTemplate", SkillLineEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, AreSkillLineEntriesEqual, "SkillLine")
         local DEFAULT_HEADER_SETUP = nil
-        list:AddDataTemplateWithHeader("ZO_GamepadSkillLineEntryTemplate", SkillLineEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, AreSkillLineEntriesEqual, "ZO_GamepadMenuEntryHeaderTemplate", DEFUALT_HEADER_SETUP, "SkillLine")
+        list:AddDataTemplateWithHeader("ZO_GamepadSkillLineEntryTemplate", SkillLineEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, AreSkillLineEntriesEqual, "ZO_GamepadMenuEntryHeaderTemplate", DEFAULT_HEADER_SETUP, "SkillLine")
     end
 
     local skillLineList = self:AddList("SkillLine", SetupSkillLineList)

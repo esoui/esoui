@@ -101,6 +101,9 @@ function ZO_MarketAnnouncement_Gamepad:InitializeKeybindButtons()
     self.helpButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
     self.helpButton:SetHidden(true)
     self.scrollButton = self.controlContainer:GetNamedChild("TertiaryAction")
+    self.keyLabel = self.scrollButton:GetNamedChild("KeyLabel")
+    self.upLabel = self.scrollButton:GetNamedChild("ScrollUpKeyLabel")
+    self.downLabel = self.scrollButton:GetNamedChild("ScrollDownKeyLabel")
     self.scrollButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
     local WIDE_SPACING = false
     ZO_GamepadTypeBasedControl_OnInitialized(self.scrollButton)
@@ -109,6 +112,21 @@ function ZO_MarketAnnouncement_Gamepad:InitializeKeybindButtons()
     end)
     self.scrollButton:AdjustBindingAnchors(WIDE_SPACING)
     self.closeButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
+
+    local function OnInputChanged()
+        if IsInGamepadPreferredMode() then
+            local hideKeyboard = WasLastInputGamepad()
+            self.keyLabel:SetHidden(not hideKeyboard)
+            self.upLabel:SetHidden(hideKeyboard)
+            self.downLabel:SetHidden(hideKeyboard)
+        end
+    end
+
+    local SHOW_UNBOUND = true
+    local DEFAULT_GAMEPAD_ACTION_NAME = nil
+    ZO_Keybindings_RegisterLabelForBindingUpdate(self.upLabel, "UI_SHORTCUT_RIGHT_STICK_UP", SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, OnInputChanged)
+    ZO_Keybindings_RegisterLabelForBindingUpdate(self.downLabel, "UI_SHORTCUT_RIGHT_STICK_DOWN")
+    -- We only need to register one of the above with OnInputChanged because one call of that function does everything we need
 end
 
 function ZO_MarketAnnouncement_Gamepad:OnSelectionClicked()

@@ -156,9 +156,9 @@
         <Control name="ZO_GamepadSimpleAbilityEntryTemplateBase" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)EdgeFrame" tier="HIGH" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" centerColor="00000000" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true"/>
-                <Label name="$(parent)Keybind" excludeFromResizeToFitExtents="true" tier="HIGH" font="ZoFontGamepad18" verticalAlignment="CENTER">
+                <Label name="$(parent)Keybind" inherits="ZO_LargeKeyMarkupLabel_Gamepad" excludeFromResizeToFitExtents="true" tier="HIGH" verticalAlignment="CENTER">
                     <Anchor point="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" />
                 </Label>
             </Controls>
         </Control>
@@ -244,9 +244,9 @@
                     <Anchor point="CENTER" relativePoint="LEFT" offsetX="20" />
                 </Texture>
 
-                <Label name="$(parent)Keybind" tier="HIGH" font="ZoFontGamepad18" verticalAlignment="CENTER">
+                <Label name="$(parent)Keybind" inherits="ZO_LargeKeyMarkupLabel_Gamepad" tier="HIGH" verticalAlignment="CENTER">
                     <Anchor point="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" />
                 </Label>
             </Controls>
         </Control>

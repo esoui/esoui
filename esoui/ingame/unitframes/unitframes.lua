@@ -203,31 +203,21 @@ do
 end
 
 --[[
-    Local object declarations
+    UnitFrames container object.  Used to manage the ZO_UnitFrameObject objects according to UnitTags ("group1", "group4pet", etc...)
 --]]
 
-local UnitFramesManager, UnitFrame, UnitFrameBar
+ZO_UnitFrames_Manager = ZO_InitializingObject:Subclass()
 
---[[
-    UnitFrames container object.  Used to manage the UnitFrame objects according to UnitTags ("group1", "group4pet", etc...)
---]]
-
-UnitFramesManager = ZO_Object:Subclass()
-
-function UnitFramesManager:New()
-    local unitFrames = ZO_Object.New(self)
-
-    unitFrames.groupFrames = {}
-    unitFrames.raidFrames = {}
-    unitFrames.companionRaidFrames = {}
-    unitFrames.staticFrames = {}
-    unitFrames.groupSize = GetGroupSize()
-    unitFrames.targetOfTargetEnabled = true
-    unitFrames.groupAndRaidHiddenReasons = ZO_HiddenReasons:New()
-    unitFrames.firstDirtyGroupIndex = nil
-    unitFrames:UpdateCompanionGroupSize()
-
-    return unitFrames
+function ZO_UnitFrames_Manager:Initialize()
+    self.groupFrames = {}
+    self.raidFrames = {}
+    self.companionRaidFrames = {}
+    self.staticFrames = {}
+    self.groupSize = GetGroupSize()
+    self.targetOfTargetEnabled = true
+    self.groupAndRaidHiddenReasons = ZO_HiddenReasons:New()
+    self.firstDirtyGroupIndex = nil
+    self:UpdateCompanionGroupSize()
 end
 
 local function ApplyVisualStyleToAllFrames(frames)
@@ -236,14 +226,14 @@ local function ApplyVisualStyleToAllFrames(frames)
     end
 end
 
-function UnitFramesManager:ApplyVisualStyle()
+function ZO_UnitFrames_Manager:ApplyVisualStyle()
     ApplyVisualStyleToAllFrames(self.staticFrames)
     ApplyVisualStyleToAllFrames(self.groupFrames)
     ApplyVisualStyleToAllFrames(self.raidFrames)
     ApplyVisualStyleToAllFrames(self.companionRaidFrames)
 end
 
-function UnitFramesManager:GetUnitFrameLookupTable(unitTag)
+function ZO_UnitFrames_Manager:GetUnitFrameLookupTable(unitTag)
     if unitTag then
         local isGroupTag = ZO_Group_IsGroupUnitTag(unitTag)
         local isCompanionTag = IsGroupCompanionUnitTag(unitTag)
@@ -260,7 +250,7 @@ function UnitFramesManager:GetUnitFrameLookupTable(unitTag)
     return self.staticFrames
 end
 
-function UnitFramesManager:GetFrame(unitTag)
+function ZO_UnitFrames_Manager:GetFrame(unitTag)
     local unitFrameTable = self:GetUnitFrameLookupTable(unitTag)
 
     if unitFrameTable then
@@ -268,11 +258,11 @@ function UnitFramesManager:GetFrame(unitTag)
     end
 end
 
-function UnitFramesManager:CreateFrame(unitTag, anchors, barTextMode, style, templateName)
+function ZO_UnitFrames_Manager:CreateFrame(unitTag, anchors, barTextMode, style, templateName)
     local unitFrame = self:GetFrame(unitTag)
     if unitFrame == nil then
         local unitFrameTable = self:GetUnitFrameLookupTable(unitTag)
-        unitFrame = UnitFrame:New(unitTag, anchors, barTextMode, style, templateName)
+        unitFrame = ZO_UnitFrameObject:New(unitTag, anchors, barTextMode, style, templateName)
 
         if unitFrameTable then
              unitFrameTable[unitTag] = unitFrame
@@ -285,7 +275,7 @@ function UnitFramesManager:CreateFrame(unitTag, anchors, barTextMode, style, tem
     return unitFrame
 end
 
-function UnitFramesManager:SetFrameHiddenForReason(unitTag, reason, hidden)
+function ZO_UnitFrames_Manager:SetFrameHiddenForReason(unitTag, reason, hidden)
     local unitFrame = self:GetFrame(unitTag)
 
     if unitFrame then
@@ -293,31 +283,31 @@ function UnitFramesManager:SetFrameHiddenForReason(unitTag, reason, hidden)
     end
 end
 
-function UnitFramesManager:SetGroupSize(groupSize)
+function ZO_UnitFrames_Manager:SetGroupSize(groupSize)
     self.groupSize = groupSize or GetGroupSize()
 end
 
-function UnitFramesManager:UpdateCompanionGroupSize()
+function ZO_UnitFrames_Manager:UpdateCompanionGroupSize()
     self.companionGroupSize = GetNumCompanionsInGroup()
 end
 
-function UnitFramesManager:GetCompanionGroupSize()
+function ZO_UnitFrames_Manager:GetCompanionGroupSize()
     return self.companionGroupSize
 end
 
-function UnitFramesManager:GetCombinedGroupSize()
+function ZO_UnitFrames_Manager:GetCombinedGroupSize()
     return self.groupSize + self.companionGroupSize
 end
 
-function UnitFramesManager:GetFirstDirtyGroupIndex()
+function ZO_UnitFrames_Manager:GetFirstDirtyGroupIndex()
     return self.firstDirtyGroupIndex
 end
 
-function UnitFramesManager:GetIsDirty()
+function ZO_UnitFrames_Manager:GetIsDirty()
     return self.firstDirtyGroupIndex ~= nil
 end
 
-function UnitFramesManager:SetGroupIndexDirty(groupIndex)
+function ZO_UnitFrames_Manager:SetGroupIndexDirty(groupIndex)
     -- The update we call will update all unit frames after and including the one being modified
     -- So we really just need to know what is the smallest groupIndex that is being changed 
     if not self.firstDirtyGroupIndex or groupIndex < self.firstDirtyGroupIndex then
@@ -325,17 +315,17 @@ function UnitFramesManager:SetGroupIndexDirty(groupIndex)
     end
 end
 
-function UnitFramesManager:ClearDirty()
+function ZO_UnitFrames_Manager:ClearDirty()
     self.firstDirtyGroupIndex = nil
 end
 
-function UnitFramesManager:DisableCompanionRaidFrames()
+function ZO_UnitFrames_Manager:DisableCompanionRaidFrames()
     for _, unitFrame in pairs(self.companionRaidFrames) do
         unitFrame:SetHiddenForReason("disabled", true)
     end
 end
 
-function UnitFramesManager:DisableGroupAndRaidFrames()
+function ZO_UnitFrames_Manager:DisableGroupAndRaidFrames()
     -- Disable the raid frames
     for _, unitFrame in pairs(self.raidFrames) do
         unitFrame:SetHiddenForReason("disabled", true)
@@ -349,19 +339,19 @@ function UnitFramesManager:DisableGroupAndRaidFrames()
     self:DisableCompanionRaidFrames()
 end
 
-function UnitFramesManager:DisableLocalCompanionFrame()
+function ZO_UnitFrames_Manager:DisableLocalCompanionFrame()
     local companionFrame = self:GetFrame("companion")
     if companionFrame then
         companionFrame:SetHiddenForReason("disabled", true)
     end
 end
 
-function UnitFramesManager:SetGroupAndRaidFramesHiddenForReason(reason, hidden)
+function ZO_UnitFrames_Manager:SetGroupAndRaidFramesHiddenForReason(reason, hidden)
     UNIT_FRAMES_FRAGMENT:SetHiddenForReason(reason, hidden)
     self.groupAndRaidHiddenReasons:SetHiddenForReason(reason, hidden)
 end
 
-function UnitFramesManager:UpdateGroupAnchorFrames()
+function ZO_UnitFrames_Manager:UpdateGroupAnchorFrames()
     -- Only the raid frame anchors need updates for now and it's only for whether or not the group name labels are showing and which one is highlighted
     if self:GetCombinedGroupSize() <= SMALL_GROUP_SIZE_THRESHOLD or self.groupAndRaidHiddenReasons:IsHidden() then
         -- Small groups never show the raid frame anchors
@@ -380,11 +370,11 @@ function UnitFramesManager:UpdateGroupAnchorFrames()
     end
 end
 
-function UnitFramesManager:IsTargetOfTargetEnabled()
+function ZO_UnitFrames_Manager:IsTargetOfTargetEnabled()
     return self.targetOfTargetEnabled
 end
 
-function UnitFramesManager:SetEnableTargetOfTarget(enableFlag)
+function ZO_UnitFrames_Manager:SetEnableTargetOfTarget(enableFlag)
     if enableFlag ~= self.targetOfTargetEnabled then
         self.targetOfTargetEnabled = enableFlag
         CALLBACK_MANAGER:FireCallbacks("TargetOfTargetEnabledChanged", enableFlag)
@@ -392,7 +382,7 @@ function UnitFramesManager:SetEnableTargetOfTarget(enableFlag)
 end
 
 --[[
-    UnitFrameBar class...defines one bar in the unit frame, including background/glass textures, statusbar and text
+    ZO_UnitFrameBar class...defines one bar in the unit frame, including background/glass textures, statusbar and text
 --]]
 
 local ANY_POWER_TYPE = true -- A special flag that essentially acts like a wild card, accepting any mechanic
@@ -631,27 +621,22 @@ local function CreateBarTextControls(baseBarName, parent, style, mechanic)
     return text1, text2
 end
 
-UnitFrameBar = ZO_Object:Subclass()
+ZO_UnitFrameBar = ZO_InitializingObject:Subclass()
 
-function UnitFrameBar:New(baseBarName, parent, barTextMode, style, mechanic)
+function ZO_UnitFrameBar:Initialize(baseBarName, parent, barTextMode, style, mechanic)
     local barControls = CreateBarStatusControl(baseBarName, parent, style, mechanic)
+    self.barControls = barControls
+    self.barTextMode = barTextMode
+    self.style = style
+    self.mechanic = mechanic
+    self.resourceNumbersLabel = parent:GetNamedChild("ResourceNumbers")
 
-    if barControls then
-        local newFrameBar = ZO_Object.New(self)
-        newFrameBar.barControls = barControls
-        newFrameBar.barTextMode = barTextMode
-        newFrameBar.style = style
-        newFrameBar.mechanic = mechanic
-        newFrameBar.resourceNumbersLabel = parent:GetNamedChild("ResourceNumbers")
-
-        if barTextMode ~= ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN then
-            newFrameBar.leftText, newFrameBar.rightText = CreateBarTextControls(baseBarName, parent, style, mechanic)
-        end
-        return newFrameBar
+    if barTextMode ~= ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN then
+        self.leftText, self.rightText = CreateBarTextControls(baseBarName, parent, style, mechanic)
     end
 end
 
-function UnitFrameBar:Update(barType, cur, max, forceInit)
+function ZO_UnitFrameBar:Update(barType, cur, max, forceInit)
     local barCur = cur
     local barMax = max
 
@@ -685,7 +670,7 @@ local function GetVisibility(self)
     return true
 end
 
-function UnitFrameBar:UpdateText(updateBarType, updateValue)
+function ZO_UnitFrameBar:UpdateText(updateBarType, updateValue)
     if self.barTextMode == ZO_UNIT_FRAME_BAR_TEXT_MODE_SHOWN or self.barTextMode == ZO_UNIT_FRAME_BAR_TEXT_MODE_MOUSE_OVER then
         local visible = GetVisibility(self)
         if self.leftText and self.rightText then
@@ -716,7 +701,7 @@ function UnitFrameBar:UpdateText(updateBarType, updateValue)
     end
 end
 
-function UnitFrameBar:SetMouseInside(inside)
+function ZO_UnitFrameBar:SetMouseInside(inside)
     self.isMouseInside = inside
 
     if self.barTextMode == ZO_UNIT_FRAME_BAR_TEXT_MODE_MOUSE_OVER then
@@ -725,7 +710,7 @@ function UnitFrameBar:SetMouseInside(inside)
     end
 end
 
-function UnitFrameBar:SetColor(barType, overrideGradient, overrideLoss, overrideGain)
+function ZO_UnitFrameBar:SetColor(barType, overrideGradient, overrideLoss, overrideGain)
     local gradient = overrideGradient or ZO_POWER_BAR_GRADIENT_COLORS[barType]
     for i = 1, #self.barControls do
         ZO_StatusBar_SetGradientColor(self.barControls[i], gradient)
@@ -743,13 +728,13 @@ function UnitFrameBar:SetColor(barType, overrideGradient, overrideLoss, override
     end
 end
 
-function UnitFrameBar:Hide(hidden)
+function ZO_UnitFrameBar:Hide(hidden)
     for i = 1, #self.barControls do
         self.barControls[i]:SetHidden(hidden)
     end
 end
 
-function UnitFrameBar:SetAlpha(alpha)
+function ZO_UnitFrameBar:SetAlpha(alpha)
     for i = 1, #self.barControls do
         self.barControls[i]:SetAlpha(alpha)
     end
@@ -763,18 +748,18 @@ function UnitFrameBar:SetAlpha(alpha)
     end
 end
 
-function UnitFrameBar:GetBarControls()
+function ZO_UnitFrameBar:GetBarControls()
     return self.barControls
 end
 
-function UnitFrameBar:SetBarTextMode(alwaysShow)
+function ZO_UnitFrameBar:SetBarTextMode(alwaysShow)
     self.barTextMode = alwaysShow
     local UPDATE_BAR_TYPE, UPDATE_VALUE = true, true
     self:UpdateText(UPDATE_BAR_TYPE, UPDATE_VALUE)
 end
 
 --[[
-    UnitFrame main class and update functions
+    ZO_UnitFrameObject main class and update functions
 --]]
 
 local UNITFRAME_LAYOUT_DATA =
@@ -1003,12 +988,11 @@ local function DoUnitFrameLayout(unitFrame, style)
     end
 end
 
-UnitFrame = ZO_Object:Subclass()
+ZO_UnitFrameObject = ZO_InitializingObject:Subclass()
 
-function UnitFrame:New(unitTag, anchors, barTextMode, style, templateName)
+function ZO_UnitFrameObject:Initialize(unitTag, anchors, barTextMode, style, templateName)
     templateName = templateName or style
-    local newFrame = ZO_Object.New(self)
-    local baseWindowName = templateName..unitTag
+    local baseWindowName = templateName .. unitTag
     local parent = ZO_UnitFrames
 
     if ZO_Group_IsGroupUnitTag(unitTag) or IsGroupCompanionUnitTag(unitTag) or unitTag == "companion" then
@@ -1020,64 +1004,62 @@ function UnitFrame:New(unitTag, anchors, barTextMode, style, templateName)
         return
     end
 
-    newFrame.frame = CreateControlFromVirtual(baseWindowName, parent, templateName)
-    newFrame.style = style
-    newFrame.templateName = templateName
-    newFrame.hasTarget = false
-    newFrame.unitTag = unitTag
-    newFrame.dirty = true
-    newFrame.animateShowHide = false
-    newFrame.fadeComponents = {}
-    newFrame.hiddenReasons = ZO_HiddenReasons:New()
+    self.frame = CreateControlFromVirtual(baseWindowName, parent, templateName)
+    self.style = style
+    self.templateName = templateName
+    self.hasTarget = false
+    self.unitTag = unitTag
+    self.dirty = true
+    self.animateShowHide = false
+    self.fadeComponents = {}
+    self.hiddenReasons = ZO_HiddenReasons:New()
 
     local nameControlName = layoutData.nameControlName or "Name"
-    newFrame.nameLabel = newFrame:AddFadeComponent(nameControlName)
+    self.nameLabel = self:AddFadeComponent(nameControlName)
 
-    newFrame.levelLabel = newFrame:AddFadeComponent("Level")
+    self.levelLabel = self:AddFadeComponent("Level")
 
     if layoutData.captionControlName then
-        newFrame.captionLabel = newFrame:AddFadeComponent(layoutData.captionControlName)
+        self.captionLabel = self:AddFadeComponent(layoutData.captionControlName)
     end
 
     local statusControlName = layoutData.statusControlName or "Status"
-    newFrame.statusLabel = newFrame:AddFadeComponent(statusControlName)
+    self.statusLabel = self:AddFadeComponent(statusControlName)
 
     local DONT_COLOR_RANK_ICON = false
-    newFrame.rankIcon = newFrame:AddFadeComponent("RankIcon", DONT_COLOR_RANK_ICON)
-    newFrame.assignmentIcon = newFrame:AddFadeComponent("AssignmentIcon", DONT_COLOR_RANK_ICON)
-    newFrame.championIcon = newFrame:AddFadeComponent("ChampionIcon")
-    newFrame.leftBracket = newFrame:AddFadeComponent("LeftBracket")
-    newFrame.leftBracketGlow = GetControl(newFrame.frame, "LeftBracketGlow")
-    newFrame.leftBracketUnderlay = GetControl(newFrame.frame, "LeftBracketUnderlay")
-    newFrame.rightBracket = newFrame:AddFadeComponent("RightBracket")
-    newFrame.rightBracketGlow = GetControl(newFrame.frame, "RightBracketGlow")
-    newFrame.rightBracketUnderlay = GetControl(newFrame.frame, "RightBracketUnderlay")
+    self.rankIcon = self:AddFadeComponent("RankIcon", DONT_COLOR_RANK_ICON)
+    self.assignmentIcon = self:AddFadeComponent("AssignmentIcon", DONT_COLOR_RANK_ICON)
+    self.championIcon = self:AddFadeComponent("ChampionIcon")
+    self.leftBracket = self:AddFadeComponent("LeftBracket")
+    self.leftBracketGlow = GetControl(self.frame, "LeftBracketGlow")
+    self.leftBracketUnderlay = GetControl(self.frame, "LeftBracketUnderlay")
+    self.rightBracket = self:AddFadeComponent("RightBracket")
+    self.rightBracketGlow = GetControl(self.frame, "RightBracketGlow")
+    self.rightBracketUnderlay = GetControl(self.frame, "RightBracketUnderlay")
     
-    newFrame.barTextMode = barTextMode
+    self.barTextMode = barTextMode
 
-    newFrame.healthBar = UnitFrameBar:New(baseWindowName.."Hp", newFrame.frame, barTextMode, style, POWERTYPE_HEALTH)
+    self.healthBar = ZO_UnitFrameBar:New(baseWindowName.."Hp", self.frame, barTextMode, style, POWERTYPE_HEALTH)
 
     if style == COMPANION_RAID_UNIT_FRAME then
-        newFrame.healthBar:SetColor(POWERTYPE_HEALTH, COMPANION_HEALTH_GRADIENT, COMPANION_HEALTH_GRADIENT_LOSS, COMPANION_HEALTH_GRADIENT_GAIN)
+        self.healthBar:SetColor(POWERTYPE_HEALTH, COMPANION_HEALTH_GRADIENT, COMPANION_HEALTH_GRADIENT_LOSS, COMPANION_HEALTH_GRADIENT_GAIN)
     else
-        newFrame.healthBar:SetColor(POWERTYPE_HEALTH)
+        self.healthBar:SetColor(POWERTYPE_HEALTH)
     end
 
-    newFrame.resourceBars = {}
-    newFrame.resourceBars[POWERTYPE_HEALTH] = newFrame.healthBar
+    self.resourceBars = {}
+    self.resourceBars[POWERTYPE_HEALTH] = self.healthBar
 
-    newFrame.powerBars = {}
-    newFrame.lastPowerType = 0
-    newFrame.frame.m_unitTag = unitTag
+    self.powerBars = {}
+    self.lastPowerType = 0
+    self.frame.m_unitTag = unitTag
 
-    newFrame:SetAnchor(anchors)
-    newFrame:ApplyVisualStyle()
-    newFrame:RefreshVisible()
-
-    return newFrame
+    self:SetAnchor(anchors)
+    self:ApplyVisualStyle()
+    self:RefreshVisible()
 end
 
-function UnitFrame:ApplyVisualStyle()
+function ZO_UnitFrameObject:ApplyVisualStyle()
     DoUnitFrameLayout(self, self.style)
     local frameTemplate = ZO_GetPlatformTemplate(self.templateName)
     ApplyTemplateToControl(self.frame, frameTemplate)
@@ -1127,11 +1109,11 @@ function UnitFrame:ApplyVisualStyle()
     self:RefreshControls()
 end
 
-function UnitFrame:SetAnimateShowHide(animate)
+function ZO_UnitFrameObject:SetAnimateShowHide(animate)
     self.animateShowHide = animate
 end
 
-function UnitFrame:AddFadeComponent(name, setColor)
+function ZO_UnitFrameObject:AddFadeComponent(name, setColor)
     local control = GetControl(self.frame, name)
     if control then
         control.setColor = setColor ~= false
@@ -1140,7 +1122,7 @@ function UnitFrame:AddFadeComponent(name, setColor)
     return control
 end
 
-function UnitFrame:SetTextIndented(isIndented)
+function ZO_UnitFrameObject:SetTextIndented(isIndented)
     local layoutData = GetPlatformLayoutData(self.style)
     if layoutData then
         LayoutUnitFrameName(self.nameLabel, layoutData, isIndented)
@@ -1148,7 +1130,7 @@ function UnitFrame:SetTextIndented(isIndented)
     end
 end
 
-function UnitFrame:SetAnchor(anchors)
+function ZO_UnitFrameObject:SetAnchor(anchors)
     self.frame:ClearAnchors()
     self.offsetY = anchors:GetOffsetY()
 
@@ -1160,25 +1142,25 @@ function UnitFrame:SetAnchor(anchors)
     end
 end
 
-function UnitFrame:SetBuffTracker(buffTracker)
+function ZO_UnitFrameObject:SetBuffTracker(buffTracker)
     self.buffTracker = buffTracker
 end
 
-function UnitFrame:SetHiddenForReason(reason, hidden)
+function ZO_UnitFrameObject:SetHiddenForReason(reason, hidden)
     if self.hiddenReasons:SetHiddenForReason(reason, hidden) then
         local INSTANT = true
         self:RefreshVisible(INSTANT)
     end
 end
 
-function UnitFrame:SetHasTarget(hasTarget, hasPendingTarget)
+function ZO_UnitFrameObject:SetHasTarget(hasTarget, hasPendingTarget)
     self.hasTarget = hasTarget
     self.hasPendingTarget = hasPendingTarget
     local ANIMATED = false
     self:RefreshVisible(ANIMATED)
 end
 
-function UnitFrame:ComputeHidden()
+function ZO_UnitFrameObject:ComputeHidden()
     if not self.hasTarget and not self.hasPendingTarget then
         return true
     end
@@ -1186,7 +1168,7 @@ function UnitFrame:ComputeHidden()
     return self.hiddenReasons:IsHidden()
 end
 
-function UnitFrame:RefreshVisible(instant)
+function ZO_UnitFrameObject:RefreshVisible(instant)
     local hidden = self:ComputeHidden()
     if hidden ~= self.hidden then
         self.hidden = hidden
@@ -1225,11 +1207,11 @@ function UnitFrame:RefreshVisible(instant)
     end
 end
 
-function UnitFrame:GetHealth()
+function ZO_UnitFrameObject:GetHealth()
     return GetUnitPower(self.unitTag, POWERTYPE_HEALTH)
 end
 
-function UnitFrame:RefreshControls()
+function ZO_UnitFrameObject:RefreshControls()
     if self.hidden then
         self.dirty = true
     else
@@ -1278,7 +1260,7 @@ function UnitFrame:RefreshControls()
     end
 end
 
-function UnitFrame:RefreshUnit(unitChanged)
+function ZO_UnitFrameObject:RefreshUnit(unitChanged)
     local validTarget = DoesUnitExist(self.unitTag)
     local hasPendingTarget = false
     if self.unitTag == "companion" then
@@ -1307,23 +1289,23 @@ function UnitFrame:RefreshUnit(unitChanged)
     self:SetHasTarget(validTarget, hasPendingTarget)
 end
 
-function UnitFrame:SetBarsHidden(hidden)
+function ZO_UnitFrameObject:SetBarsHidden(hidden)
     self.healthBar:Hide(hidden)
 end
 
-function UnitFrame:IsHidden()
+function ZO_UnitFrameObject:IsHidden()
     return self.hidden
 end
 
-function UnitFrame:GetUnitTag()
+function ZO_UnitFrameObject:GetUnitTag()
     return self.frame.m_unitTag
 end
 
-function UnitFrame:GetPrimaryControl()
+function ZO_UnitFrameObject:GetPrimaryControl()
     return self.frame
 end
 
-function UnitFrame:DoAlphaUpdate(isNearby)
+function ZO_UnitFrameObject:DoAlphaUpdate(isNearby)
     -- Don't fade out just the frame, because that needs to appear correctly (along with BG, etc...)
     -- Just make the status bars and any text on the frame fade out.
     local color
@@ -1345,11 +1327,11 @@ function UnitFrame:DoAlphaUpdate(isNearby)
     end
 end
 
-function UnitFrame:GetBuffTracker()
+function ZO_UnitFrameObject:GetBuffTracker()
     return self.buffTracker
 end
 
-function UnitFrame:UpdatePowerBar(index, powerType, cur, max, forceInit)
+function ZO_UnitFrameObject:UpdatePowerBar(index, powerType, cur, max, forceInit)
     -- Should this bar type ever be displayed?
     if not IsValidBarStyle(self.style, powerType) then
         return
@@ -1358,7 +1340,7 @@ function UnitFrame:UpdatePowerBar(index, powerType, cur, max, forceInit)
     local currentBar = self.powerBars[index]
 
     if currentBar == nil then
-        self.powerBars[index] = UnitFrameBar:New(self.frame:GetName().."PowerBar"..index, self.frame, self.barTextMode, self.style, powerType)
+        self.powerBars[index] = ZO_UnitFrameBar:New(self.frame:GetName().."PowerBar"..index, self.frame, self.barTextMode, self.style, powerType)
         currentBar = self.powerBars[index]
 
         if powerType == POWERTYPE_HEALTH and self.style == COMPANION_RAID_UNIT_FRAME then
@@ -1391,7 +1373,7 @@ local HIDE_LEVEL_TYPES =
     [UNIT_TYPE_SIMPLEINTERACTOBJ] = true,
 }
 
-function UnitFrame:ShouldShowLevel()
+function ZO_UnitFrameObject:ShouldShowLevel()
     --show level for players and non-friendly NPCs
     local unitTag = self:GetUnitTag()
     if IsUnitPlayer(unitTag) then
@@ -1411,7 +1393,7 @@ function UnitFrame:ShouldShowLevel()
     end
 end
 
-function UnitFrame:UpdateLevel()
+function ZO_UnitFrameObject:UpdateLevel()
     local showLevel = self:ShouldShowLevel()
     local unitLevel
     local isChampion = IsUnitChampion(self:GetUnitTag())
@@ -1441,7 +1423,7 @@ function UnitFrame:UpdateLevel()
     end
 end
 
-function UnitFrame:UpdateRank()
+function ZO_UnitFrameObject:UpdateRank()
     if self.rankIcon then
         local unitTag = self:GetUnitTag()
         local rank = GetUnitAvARank(unitTag)
@@ -1458,7 +1440,7 @@ function UnitFrame:UpdateRank()
     end
 end
 
-function UnitFrame:UpdateAssignment()
+function ZO_UnitFrameObject:UpdateAssignment()
     if self.assignmentIcon then
         local unitTag = self:GetUnitTag()
         local assignmentTexture = nil
@@ -1516,7 +1498,7 @@ local GAMEPAD_DIFFICULTY_BRACKET_TEXTURE =
     [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/Gamepad/gp_targetUnitFrame_bracket_level4.dds",
 }
 
-function UnitFrame:SetPlatformDifficultyTextures(difficulty)
+function ZO_UnitFrameObject:SetPlatformDifficultyTextures(difficulty)
     if IsInGamepadPreferredMode() then
         local texture = GAMEPAD_DIFFICULTY_BRACKET_TEXTURE[difficulty]
         self.leftBracket:SetTexture(texture)
@@ -1533,7 +1515,7 @@ function UnitFrame:SetPlatformDifficultyTextures(difficulty)
     end
 end
 
-function UnitFrame:UpdateDifficulty()
+function ZO_UnitFrameObject:UpdateDifficulty()
     if self.leftBracket then
         local difficulty = GetUnitDifficulty(self:GetUnitTag())
 
@@ -1561,7 +1543,7 @@ function UnitFrame:UpdateDifficulty()
     end
 end
 
-function UnitFrame:UpdateUnitReaction()
+function ZO_UnitFrameObject:UpdateUnitReaction()
     local unitTag = self:GetUnitTag()
 
     if self.nameLabel then
@@ -1573,7 +1555,7 @@ function UnitFrame:UpdateUnitReaction()
     end
 end
 
-function UnitFrame:UpdateName()
+function ZO_UnitFrameObject:UpdateName()
     if self.nameLabel then
         local name
         local tag = self.unitTag
@@ -1603,7 +1585,7 @@ function UnitFrame:UpdateName()
     end
 end
 
-function UnitFrame:UpdateBackground()
+function ZO_UnitFrameObject:UpdateBackground()
     if self.style == GROUP_UNIT_FRAME and ZO_Group_IsGroupUnitTag(self.unitTag) then
         local companionTag = GetCompanionUnitTagByGroupUnitTag(self.unitTag)
         if IsInGamepadPreferredMode() then
@@ -1614,7 +1596,7 @@ function UnitFrame:UpdateBackground()
     end
 end
 
-function UnitFrame:UpdateCaption()
+function ZO_UnitFrameObject:UpdateCaption()
     local captionLabel = self.captionLabel
     if captionLabel then
         local caption = ""
@@ -1634,7 +1616,7 @@ function UnitFrame:UpdateCaption()
     end
 end
 
-function UnitFrame:UpdateStatus(isDead, isOnline, isPending)
+function ZO_UnitFrameObject:UpdateStatus(isDead, isOnline, isPending)
     local statusLabel = self.statusLabel
     if statusLabel then
         local hideBars = (isOnline == false) or (isDead == true) or isPending
@@ -1671,29 +1653,29 @@ function UnitFrame:UpdateStatus(isDead, isOnline, isPending)
     end
 end
 
-function UnitFrame:SetBarMouseInside(inside)
+function ZO_UnitFrameObject:SetBarMouseInside(inside)
     self.healthBar:SetMouseInside(inside)
     for _, powerBar in pairs(self.powerBars) do
         powerBar:SetMouseInside(inside)
     end
 end
 
-function UnitFrame:HandleMouseEnter()
+function ZO_UnitFrameObject:HandleMouseEnter()
     self:SetBarMouseInside(true)
 end
 
-function UnitFrame:HandleMouseExit()
+function ZO_UnitFrameObject:HandleMouseExit()
     self:SetBarMouseInside(false)
 end
 
-function UnitFrame:SetBarTextMode(alwaysShow)
+function ZO_UnitFrameObject:SetBarTextMode(alwaysShow)
     self.healthBar:SetBarTextMode(alwaysShow)
     for _, powerBar in pairs(self.powerBars) do
         powerBar:SetBarTextMode(alwaysShow)
     end
 end
 
-function UnitFrame:CreateAttributeVisualizer(soundTable)
+function ZO_UnitFrameObject:CreateAttributeVisualizer(soundTable)
     if not self.attributeVisualizer then
         self.frame.barControls = self.healthBar:GetBarControls()
         self.attributeVisualizer = ZO_UnitAttributeVisualizer:New(self:GetUnitTag(), soundTable, self.frame)
@@ -2492,7 +2474,7 @@ function ZO_UnitFrames_Initialize()
             RegisterForEvents()
             CreateGroupAnchorFrames()
 
-            UnitFrames = UnitFramesManager:New()
+            UnitFrames = ZO_UnitFrames_Manager:New()
             UNIT_FRAMES = UnitFrames
 
             CreateTargetFrame()

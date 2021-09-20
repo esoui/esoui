@@ -6,10 +6,38 @@
 
         <Control name="ZO_AddOnSectionHeaderRow" virtual="true">
             <Dimensions y="ZO_ADDON_SECTION_HEADER_ROW_HEIGHT"/>
+            <OnInitialized>
+                self.checkboxControl = self:GetNamedChild("Checkbox")
+                self.textControl = self:GetNamedChild("Text")
+            </OnInitialized>
             <Controls>
                 <Label name="$(parent)Text" font="ZoFontWinH3">
                     <Anchor point="LEFT" offsetY="5"/>
                 </Label>
+
+                <Button name="$(parent)Checkbox" inherits="ZO_CheckButton_Text" horizontalAlignment="LEFT" font="ZoFontWinH4" modifyTextType="UPPERCASE">
+                    <Dimensions x="200" y="26" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetX="20" />
+
+                    <FontColors
+                        normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                        pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                        mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
+                        disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+                    />
+
+                    <OnMouseEnter>
+                        self:SetPressedFontColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT))
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        self:SetPressedFontColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
+                    </OnMouseExit>
+                </Button>
+
+                <Texture name="$(parent)Divider" inherits="ZO_Options_Divider">
+                    <Anchor point="TOPLEFT" offsetY="45"/>
+                </Texture>
             </Controls>
         </Control>
         
@@ -49,7 +77,7 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="20"/>
                 </Label>
 
-                <Label name="$(parent)State" font="ZoFontWinH4"inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1">
+                <Label name="$(parent)State" font="ZoFontWinH4" inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1">
                     <Dimensions x="205"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Author" relativePoint="RIGHT" offsetX="20" />
                 </Label>

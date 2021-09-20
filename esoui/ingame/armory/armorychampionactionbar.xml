@@ -1,0 +1,47 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ArmoryChampionActionBar" mouseEnabled="true" virtual="true">
+            <Dimensions x="765" y="65" />
+            <OnMouseEnter>
+                ZO_ArmoryChampionActionBar_OnMouseEnter(self)
+            </OnMouseEnter>         
+            <OnMouseExit>
+                ZO_ArmoryChampionActionBar_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Champion/ActionBar/champion_constellation_bar.dds">
+                    <AnchorFill/>
+                    <TextureCoords left="0" top="0" right="0.6436" bottom="0.875" />
+                </Texture>
+                
+                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Miscellaneous/status_locked.dds" layer="2" inheritScale="false" inheritAlpha="false" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ArmoryChampionActionSlot" virtual="true">
+            <Dimensions x="37" y="37" />
+            <Controls>
+                <Button name="$(parent)Button" pixelRoundingEnabled="true">
+                    <AnchorFill />
+                    <OnMouseEnter>
+                        ZO_ArmoryChampionActionSlot_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_ArmoryChampionActionSlot_OnMouseExit(self)
+                    </OnMouseExit>
+                </Button>
+
+                <TextureComposite name="$(parent)Star" inherits="ZO_ChampionStarVisuals" level="1" pixelRoundingEnabled="true">
+                    <AnchorFill />
+                </TextureComposite>
+
+                <Texture name="$(parent)Icon" level="1" pixelRoundingEnabled="true">
+                    <AnchorFill />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

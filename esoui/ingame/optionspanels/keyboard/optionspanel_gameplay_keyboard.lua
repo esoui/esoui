@@ -45,6 +45,13 @@ panelBuilder:AddSetting({
     header = SI_GAMEPLAY_OPTIONS_GENERAL,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_CompanionPassengerPreference",
+    settingType = SETTING_TYPE_IN_WORLD,
+    settingId = IN_WORLD_UI_SETTING_COMPANION_PASSENGER_PREFERENCE,
+    header = SI_GAMEPLAY_OPTIONS_GENERAL,
+})
+
 -------------------------
 -- Gameplay -> Combat  --
 -------------------------

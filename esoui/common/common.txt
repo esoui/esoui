@@ -20,8 +20,6 @@ EsoUI\Common\Gamepad\ZO_GamepadTemplatesCommon.xml
 EsoUI\Common\Gamepad\ZO_GamepadLoading.lua
 EsoUI\Common\Gamepad\ZO_GamepadLoading.xml
 
-EsoUI\Common\ZO_Keybindings\KeybindingUtils.lua
-
 EsoUI\Common\Carousel\Carousel_Shared.lua
 EsoUI\Common\Carousel\Carousel_Shared.xml
 

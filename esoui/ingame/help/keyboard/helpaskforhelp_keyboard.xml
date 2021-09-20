@@ -6,26 +6,40 @@
             </OnInitialized>
 
             <Controls>
-                <Label name="$(parent)CategoryTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_CATEGORY">
+                <Label name="$(parent)ImpactTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_IMPACT">
                     <Anchor point="TOPLEFT"/>
                 </Label>
 
-                <Control name="$(parent)CategoryComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                <Control name="$(parent)ImpactComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ImpactTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
                 </Control>
 
-                <Control name="$(parent)SubcategoryContainer" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryComboBox" relativePoint="BOTTOMLEFT" offsetY="20" />
+                <Control name="$(parent)CategoryContainer" resizeToFitDescendents="true" level="2">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ImpactComboBox" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Controls>
+                        <Label name="$(grandparent)CategoryTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_CATEGORY">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                        <Control name="$(grandparent)CategoryComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox">
+                            <Dimensions x="500" />
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)CategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SubcategoryContainer" resizeToFitDescendents="true" level="1">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
                     <Controls>
                         <Label name="$(grandparent)SubcategoryTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_SUBCATEGORY">
                             <Anchor point="TOPLEFT" />
                         </Label>
                         <Control name="$(grandparent)SubcategoryComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox">
+                            <Dimensions x="500" />
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)SubcategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
                         </Control>
                     </Controls>
                 </Control>
-
+                
                 <Control name="$(parent)DetailsContainer" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SubcategoryContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
                     <Controls>
@@ -47,7 +61,7 @@
                 </Label>
 
                 <Backdrop name="$(parent)DescriptionBody" inherits="ZO_MultiLineEditBackdrop_Keyboard">
-                    <Dimensions x="550" y="220"/>
+                    <Dimensions x="550" y="200"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
                     <Controls>
                         <EditBox name="$(parent)Field" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText"/>

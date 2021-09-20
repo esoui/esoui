@@ -10,21 +10,19 @@
                     <Anchor point="CENTER" />
                 </Label>
                 
-                <Button name="$(parent)PreviousButton" inherits="ZO_KeyButton">
-                    <Anchor point="RIGHT" relativeTo="$(parent)PageNumberText" relativePoint="LEFT" offsetX="-10" />
-                    <Dimensions x="50" y="50"/>
+                <Label name="$(parent)PreviousButton" inherits="ZO_ClickableKeybindLabel_Gamepad">
+                    <Anchor point="CENTER" relativeTo="$(parent)PageNumberText" relativePoint="LEFT" offsetX="-30" />
                     <OnInitialized name="ZO_PagedList">
-                        self:SetKeyCode(KEY_GAMEPAD_LEFT_TRIGGER)
+                        self:SetKeybind("UI_SHORTCUT_LEFT_TRIGGER")
                     </OnInitialized>
-                </Button>
+                </Label>
 
-                <Button name="$(parent)NextButton" inherits="ZO_KeyButton">
-                    <Anchor point="LEFT" relativeTo="$(parent)PageNumberText" relativePoint="RIGHT" offsetX="10" />
-                    <Dimensions x="50" y="50"/>
+                <Label name="$(parent)NextButton" inherits="ZO_ClickableKeybindLabel_Gamepad">
+                    <Anchor point="CENTER" relativeTo="$(parent)PageNumberText" relativePoint="RIGHT" offsetX="30" />
                     <OnInitialized name="ZO_PagedList">
-                        self:SetKeyCode(KEY_GAMEPAD_RIGHT_TRIGGER)
+                        self:SetKeybind("UI_SHORTCUT_RIGHT_TRIGGER")
                     </OnInitialized>
-                </Button>
+                </Label>
             </Controls>
         </Control>
     </Controls>

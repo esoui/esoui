@@ -17,7 +17,7 @@
 
         <Control name="ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryText" virtual="true">
             <OnInitialized>
-                ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryHeader_OnInitialized(self)
+                ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryTemplate_OnInitialized(self)
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" maxLineCount="2" >

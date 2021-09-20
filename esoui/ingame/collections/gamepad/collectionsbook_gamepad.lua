@@ -1077,7 +1077,7 @@ function ZO_GamepadCollectionsBook:RefreshHousingTooltip(collectibleData)
         housingPanel.primaryResidenceValueLabel:SetHidden(false)
         housingPanel.hintLabel:SetHidden(true)
     else
-        housingPanel.hintLabel:SetText(collectibleData:GetHint())
+        housingPanel.hintLabel:SetText(zo_strformat(SI_COLLECTIBLE_ACQUIRE_HINT_FORMATTER, collectibleData:GetHint()))
         housingPanel.hintLabel:SetHidden(false)
         housingPanel.primaryResidenceHeaderLabel:SetHidden(true)
         housingPanel.primaryResidenceValueLabel:SetHidden(true)

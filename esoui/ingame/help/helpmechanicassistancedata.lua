@@ -12,11 +12,11 @@ ZO_QUEST_ASSISTANCE_CATEGORIES_DATA =
     {
         [CUSTOMER_SERVICE_QUEST_ASSISTANCE_CATEGORY_NPC_MOBS] =
         {
-            ticketCategory = TICKET_CATEGORY_QUEST_NPC_MOBS,
+            ticketCategory = 763,
         },
         [CUSTOMER_SERVICE_QUEST_ASSISTANCE_CATEGORY_ITEM_MISSING] =
         {
-            ticketCategory = TICKET_CATEGORY_QUEST_ITEM_MISSING,
+            ticketCategory = 983,
         },
     }
 }
@@ -37,19 +37,19 @@ ZO_ITEM_ASSISTANCE_CATEGORIES_DATA =
     {
         [CUSTOMER_SERVICE_ITEM_ASSISTANCE_CATEGORY_MISSING_CROWNS] =
         {
-            ticketCategory = TICKET_CATEGORY_ITEM_MISSING_CROWNS,
+            ticketCategory = 981,
         },
         [CUSTOMER_SERVICE_ITEM_ASSISTANCE_CATEGORY_FROM_CROWN_STORE] =
         {
-            ticketCategory = TICKET_CATEGORY_ITEM_FROM_CROWN_STORE,
+            ticketCategory = 982,
         },
         [CUSTOMER_SERVICE_ITEM_ASSISTANCE_CATEGORY_LOST] =
         {
-            ticketCategory = TICKET_CATEGORY_ITEM_LOST,
+            ticketCategory = 897,
         },
         [CUSTOMER_SERVICE_ITEM_ASSISTANCE_CATEGORY_CANT_ACQUIRE] =
         {
-            ticketCategory = TICKET_CATEGORY_ITEM_CANT_ACQUIRE,
+            ticketCategory = 979,
         },
     }
 }

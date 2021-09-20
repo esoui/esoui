@@ -19,18 +19,46 @@ function CampaignEmperor_Gamepad:Initialize(control)
     ZO_NoSelectionSortFilterList_Gamepad.InitializeSortFilterList(self, control)
     CampaignEmperor_Shared.Initialize(self, control)
 
-    self.scrollIndicator = GetControl(control, "ScrollIndicator")
+    self.scrollIndicator = control:GetNamedChild("ScrollIndicator")
+    self.scrollKeyUp = control:GetNamedChild("ScrollKeyUp")
+    self.scrollKeyDown = control:GetNamedChild("ScrollKeyDown")
     ZO_Scroll_Gamepad_SetScrollIndicatorSide(self.scrollIndicator, ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
+
+    function OnInputChanged()
+        local gamepadInput = WasLastInputGamepad()
+        if not self.scrollIndicator:IsHidden() then
+            if not gamepadInput then
+                self.scrollIndicator:SetHidden(true)
+                self.scrollKeyUp:SetHidden(false)
+                self.scrollKeyDown:SetHidden(false)
+            end
+        elseif not self.scrollKeyUp:IsHidden() then
+            if gamepadInput then
+                self.scrollIndicator:SetHidden(false)
+                self.scrollKeyUp:SetHidden(true)
+                self.scrollKeyDown:SetHidden(true)
+            end
+        end
+    end
+
+    local SHOW_UNBOUND = true
+    local DEFAULT_GAMEPAD_ACTION_NAME = nil
+    ZO_Keybindings_RegisterLabelForBindingUpdate(self.scrollKeyUp, "UI_SHORTCUT_RIGHT_STICK_UP", SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, OnInputChanged)
+    ZO_Keybindings_RegisterLabelForBindingUpdate(self.scrollKeyDown, "UI_SHORTCUT_RIGHT_STICK_DOWN")
     
     self.imperialKeepPool = ZO_ControlPool:New("ZO_CampaignImperialKeep_Gamepad", self.imperialKeeps, "ImperialKeep")
 
-    local function ScrollBarHiddenCallback(list, hidden)
-        self.scrollIndicator:SetHidden(hidden)
+    local function ScrollBarVisibilityCallback(list, hidden)
+        local gamepadInput = WasLastInputGamepad()
+        self.scrollIndicator:SetHidden(hidden or not gamepadInput)
+        self.scrollKeyUp:SetHidden(hidden or gamepadInput)
+        self.scrollKeyDown:SetHidden(hidden or gamepadInput)
         list.scrollbar:SetHidden(true)
     end
 
     local LIST_ENTRY_HEIGHT = 64
-    ZO_ScrollList_SetScrollBarHiddenCallback(self.list, ScrollBarHiddenCallback)
+    ZO_ScrollList_SetScrollBarVisibilityCallback(self.list, ScrollBarVisibilityCallback)
+    ZO_ScrollList_AddCommitOnHeightChange(self.list)
     ZO_ScrollList_SetAutoSelect(self.list, true)
     ZO_ScrollList_EnableSelection(self.list, nil, LeaderboardEntrySelectionCallback)
     ZO_ScrollList_AddDataType(self.list, ZO_EMPEROR_LEADERBOARD_NONPLAYER_DATA, "ZO_CampaignEmperorLeaderboardsNonPlayerRow_Gamepad", LIST_ENTRY_HEIGHT, function(control, data) self:SetupLeaderboardNonPlayerEntry(control, data) end)

@@ -25,6 +25,15 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutIconStringLine(baseSection
     baseSection:AddSection(lineSection)
 end
 
+function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutKeybindStringLine(baseSection, actionName, travelStringFormat, ...)
+    local lineSection = baseSection:AcquireSection(self.tooltip:GetStyle("mapLocationTooltipContentSection"))
+    local DEFAULT_NO_TEXTURE = nil
+
+    lineSection:AddTexture(DEFAULT_NO_TEXTURE, self.tooltip:GetStyle("mapLocationTooltipNoIcon"))
+    lineSection:AddKeybindLine(actionName, travelStringFormat, self.tooltip:GetStyle("mapLocationTooltipContentLabel"), ...)
+    baseSection:AddSection(lineSection)
+end
+
 function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutLargeIconStringLine(baseSection, icon, string, ...)
     local iconStyle
     if not icon then
@@ -202,10 +211,8 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
         local message = GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD)
         self:LayoutIconStringLine(wayshrineSection, nil, message, self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
     elseif isUsingRecall then --Recall
-        local keyText = ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)
         local travelStringId = nodeIsHousePreview and SI_GAMEPAD_TOOLTIP_WAYSHRINE_PREVIEW_HOUSE_INTERACT or SI_GAMEPAD_TOOLTIP_WAYSHRINE_RECALL_INTERACT
-        local travelText = zo_strformat(travelStringId, keyText)
-        self:LayoutIconStringLine(wayshrineSection, nil, travelText, self.tooltip:GetStyle("mapKeepAccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
+        self:LayoutKeybindStringLine(wayshrineSection, "UI_SHORTCUT_PRIMARY", travelStringId, self.tooltip:GetStyle("mapKeepAccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
 
         local _, premiumTimeLeft = GetRecallCooldown()
         if premiumTimeLeft == 0 then --BUTTON: Recall
@@ -220,10 +227,8 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
             self:LayoutIconStringLine(wayshrineSection, nil, cooldownText, self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
         end
     else --BUTTON: Fast Travel
-        local keyText = ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)
         local travelStringId = nodeIsHousePreview and SI_GAMEPAD_TOOLTIP_WAYSHRINE_PREVIEW_HOUSE_INTERACT or SI_GAMEPAD_TOOLTIP_WAYSHRINE_FAST_TRAVEL_INTERACT
-        local travelText = zo_strformat(travelStringId, keyText)
-        self:LayoutIconStringLine(wayshrineSection, nil, travelText, self.tooltip:GetStyle("mapKeepAccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
+        self:LayoutKeybindStringLine(wayshrineSection, "UI_SHORTCUT_PRIMARY", travelStringId, self.tooltip:GetStyle("mapKeepAccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
     end
 
     self.tooltip:AddSection(wayshrineSection)
@@ -257,4 +262,33 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendDigSiteAntiquities(digSite
         end
     end
     self.tooltip:AddSection(antiquitiesSection)
+end
+
+function ZO_MapInformationTooltip_Gamepad_Mixin:AppendSkyshardHint(skyshardId)
+    local skyshardSection = self.tooltip:AcquireSection(self.tooltip:GetStyle("skyshardMainSection"))
+    local skyshardHint = GetSkyshardHint(skyshardId)
+    self:LayoutStringLine(skyshardSection, skyshardHint, self.tooltip:GetStyle("skyshardHint"))
+    self.tooltip:AddSection(skyshardSection)
+end
+
+function ZO_MapInformationTooltip_Gamepad_Mixin:AppendDelveInfo(pin)
+    local poiIndex = pin:GetPOIIndex()
+    local zoneIndex = pin:GetPOIZoneIndex()
+    local poiName, _, poiStartDesc, poiFinishedDesc = GetPOIInfo(zoneIndex, poiIndex)
+
+    local delveSection = self.tooltip:AcquireSection(self.tooltip:GetStyle("delveMainSection"))
+
+    local nameFormat = pin:IsPublicDungeonPin() and SI_WORLD_MAP_PUBLIC_DUNGEON_NAME or SI_WORLD_MAP_DELVE_NAME
+    local delveName = zo_strformat(nameFormat, poiName)
+    self:LayoutStringLine(delveSection, delveName, self.tooltip:GetStyle("delveTooltipName"))
+
+    local skyshardId = GetPOISkyshardId(zoneIndex, poiIndex)
+    if skyshardId ~= 0 then
+        local hint = GetSkyshardHint(skyshardId)
+        self:LayoutStringLine(delveSection, zo_strformat(SI_WORLD_MAP_SKYSHARD_HINT_FORMATTER, hint), self.tooltip:GetStyle("delveSkyshardHint"))
+
+        local skyshardDiscoveryStatus = GetSkyshardDiscoveryStatus(skyshardId)
+        self:LayoutStringLine(delveSection, zo_strformat(SI_WORLD_MAP_SKYSHARD_STATUS_FORMATTER, GetString("SI_SKYSHARDDISCOVERYSTATUS", skyshardDiscoveryStatus)), self.tooltip:GetStyle("delveSkyshardHint"))
+    end
+    self.tooltip:AddSection(delveSection)
 end

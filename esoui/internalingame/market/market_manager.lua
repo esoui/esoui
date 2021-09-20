@@ -121,7 +121,7 @@ function Market_Manager:AddMarketProductPurchaseWarningStringsToTable(marketProd
 end
 
 do
-    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 38, "Update market error flow to handle new purchase result")
+    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 41, "Update market error flow to handle new purchase result")
     local IS_SIMPLE_MARKET_PURCHASE_ERROR = 
     {
         [MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK] = true,

@@ -644,7 +644,7 @@ function ZO_GamepadNotificationManager:InitializeKeybindStripDescriptors()
                         local function ReportCallback()
                             -- TODO: Not sure if we need this
                         end
-                        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportGuildTicketScene(data.guildName, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_DECLINE, ReportCallback)
+                        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportGuildTicketScene(data.guildName, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_DECLINE, ReportCallback)
                     else
                         self:ShowMoreInfo(data)
                     end

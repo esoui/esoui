@@ -192,9 +192,42 @@ local function SetupRenameDialog(dialog, data)
         local NAME_INSTRUCTIONS_OFFSET_X = -20
         local NAME_INSTRUCTIONS_OFFSET_Y = 0
 
-        dialog.renameInstructions = ZO_ValidNameInstructions:New(dialog:GetNamedChild("RenameInstructions"))
+        local VALIDATOR_RULES =
+        {
+            NAME_RULE_TOO_SHORT,
+            NAME_RULE_CANNOT_START_WITH_SPACE,
+            NAME_RULE_MUST_END_WITH_LETTER,
+            NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS,
+            NAME_RULE_NO_NUMBERS,
+            NAME_RULE_NO_ADJACENT_PUNCTUATION_CHARACTERS,
+            NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS,
+            NAME_RULE_INVALID_CHARACTERS
+        }
+        local DEFAULT_TEMPLATE = nil
+        dialog.renameInstructions = ZO_ValidNameInstructions:New(dialog:GetNamedChild("RenameInstructions"), DEFAULT_TEMPLATE, VALIDATOR_RULES)
         dialog.renameInstructions:SetPreferredAnchor(RIGHT, dialog, LEFT, NAME_INSTRUCTIONS_OFFSET_X, NAME_INSTRUCTIONS_OFFSET_Y)   -- Attach instructions to left side of the dialog
     end
+
+    dialog.nameEdit:SetHandler("OnFocusGained", function()
+        local control = dialog.renameInstructions
+        if control:HasRules() then
+            local DEFAULT_ANCHOR_CONTROL = nil
+            local nameText = dialog.nameEdit:GetText()
+            local violations = {IsValidCharacterName(nameText)}
+            control:Show(DEFAULT_ANCHOR_CONTROL, violations)
+        end
+    end, "RenameInstructions")
+
+    dialog.nameEdit:SetHandler("OnFocusLost", function()
+        local control = dialog.renameInstructions
+        if control:HasRules() then
+            local nameText = dialog.nameEdit:GetText()
+            local violations = {IsValidCharacterName(nameText)}
+            if #violations == 0 then
+                control:Hide()
+            end
+        end
+    end, "RenameInstructions")
 
     SetupEditControlForNameValidation(dialog.nameEdit)
     dialog.nameEdit:SetText("")
@@ -242,12 +275,15 @@ function ZO_RenameCharacterDialog_OnInitialized(self)
         updateFn = function(dialog)
             local nameText = dialog.nameEdit:GetText()
             local nameViolations = { IsValidCharacterName(nameText) }
+            local DEFAULT_ANCHOR_CONTROL = nil
+            
+            if dialog.nameEdit:HasFocus() then
+                dialog.renameInstructions:Show(DEFAULT_ANCHOR_CONTROL, nameViolations)
+            end
 
             if #nameViolations > 0 then
-                dialog.renameInstructions:Show(nil, nameViolations)
                 dialog.attemptRenameButton:SetEnabled(false)
             else
-                dialog.renameInstructions:Hide()
                 dialog.attemptRenameButton:SetEnabled(true)
             end
 
@@ -532,6 +568,7 @@ function ZO_CharacterSelect_DeleteSelected()
 end
 
 function ZO_CharacterEntry_OnMouseClick(self)
+    PlaySound(SOUNDS.DEFAULT_CLICK)
     local characterData = ZO_ScrollList_GetData(self)
     CHARACTER_SELECT_MANAGER:SetPlayerSelectedCharacter(characterData)
 end
@@ -813,8 +850,8 @@ end
 
 function NameChangeTokenIndicator:OnMouseUp()
     if self.enabled then
+        PlaySound(SOUNDS.DEFAULT_CLICK)
         local characterData = ZO_CharacterSelect_GetSelectedCharacterData()
-
         if characterData.needsRename then
             ZO_Dialogs_ShowDialog("INELIGIBLE_SERVICE")
         else
@@ -841,6 +878,7 @@ end
 
 function RaceChangeTokenIndicator:OnMouseUp()
     if self.enabled then
+        PlaySound(SOUNDS.DEFAULT_CLICK)
         local characterData = ZO_CharacterSelect_GetSelectedCharacterData()
         ZO_CHARACTERCREATE_MANAGER:InitializeForRaceChange(characterData)
         PregameStateManager_SetState("CharacterCreate_Barbershop")
@@ -865,6 +903,7 @@ end
 
 function AppearanceChangeTokenIndicator:OnMouseUp()
     if self.enabled then
+        PlaySound(SOUNDS.DEFAULT_CLICK)
         local characterData = ZO_CharacterSelect_GetSelectedCharacterData()
         ZO_CHARACTERCREATE_MANAGER:InitializeForAppearanceChange(characterData)
         PregameStateManager_SetState("CharacterCreate_Barbershop")
@@ -889,6 +928,7 @@ end
 
 function AllianceChangeTokenIndicator:OnMouseUp()
     if self.enabled then
+        PlaySound(SOUNDS.DEFAULT_CLICK)
         local characterData = ZO_CharacterSelect_GetSelectedCharacterData()
         ZO_CHARACTERCREATE_MANAGER:InitializeForAllianceChange(characterData)
         PregameStateManager_SetState("CharacterCreate_Barbershop")

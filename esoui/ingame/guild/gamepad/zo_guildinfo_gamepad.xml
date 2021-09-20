@@ -111,9 +111,6 @@
                                 <Control name="$(parent)ScrollChild" override="true" resizeToFitDescendents="true">
                                     <Anchor point="TOPRIGHT" />
                                     <Anchor point="TOPLEFT" />
-                                    <OnInitialized>
-                                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
-                                    </OnInitialized>
                                     <Controls>
                                         <Control name="$(parent)Keep" inherits="ZO_GuildInfoGamepad_InfoIcon">
                                             <Anchor point="TOPLEFT"/>

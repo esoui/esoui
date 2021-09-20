@@ -161,13 +161,13 @@ ESO_Dialogs["DESTROY_ITEM_PROMPT"] =
     }
 }
 
-ESO_Dialogs["CONFIRM_DESTROY_ITEM_PROMPT"] = 
+ESO_Dialogs["CONFIRM_DESTROY_ITEM_PROMPT"] =
 {
     title =
     {
         text = SI_PROMPT_TITLE_DESTROY_ITEM_PROMPT,
     },
-    mainText = 
+    mainText =
     {
         text = SI_CONFIRM_DESTROY_ITEM_PROMPT,
     },
@@ -176,28 +176,69 @@ ESO_Dialogs["CONFIRM_DESTROY_ITEM_PROMPT"] =
         matchingString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
     },
     noChoiceCallback =  function()
-                            RespondToDestroyRequest(false)
-                        end,
+        RespondToDestroyRequest(false)
+    end,
     buttons =
     {
         {
             requiresTextInput = true,
             text =      SI_CHAT_DIALOG_CONFIRM_ITEM_DESTRUCTION,
             callback =  function(dialog)
-                            local confirmDelete = ZO_Dialogs_GetEditBoxText(dialog)
-                            local compareString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
-                            if confirmDelete and confirmDelete ~= compareString then
-                                RespondToDestroyRequest(false)
-                            else
-                                RespondToDestroyRequest(true)
-                            end
-                        end,
-        },        
+                local confirmDelete = ZO_Dialogs_GetEditBoxText(dialog)
+                local compareString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
+                if confirmDelete and confirmDelete ~= compareString then
+                    RespondToDestroyRequest(false)
+                else
+                    RespondToDestroyRequest(true)
+                end
+            end,
+        },
         {
-            text =       SI_DIALOG_CANCEL,
-            callback =  function(dialog)
-                            RespondToDestroyRequest(false)
-                        end,
+            text = SI_DIALOG_CANCEL,
+            callback = function(dialog)
+                RespondToDestroyRequest(false)
+            end,
+        }
+    }
+}
+
+ESO_Dialogs["CONFIRM_DESTROY_ARMORY_ITEM_PROMPT"] =
+{
+    title =
+    {
+        text = SI_DIALOG_DESTROY_ARMORY_ITEM_TITLE,
+    },
+    mainText =
+    {
+        text = SI_ARMORY_CONFIRM_DESTROY_ITEM_BODY,
+    },
+    editBox =
+    {
+        matchingString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
+    },
+    noChoiceCallback =  function()
+        RespondToDestroyRequest(false)
+    end,
+    buttons =
+    {
+        {
+            requiresTextInput = true,
+            text = SI_CHAT_DIALOG_CONFIRM_ITEM_DESTRUCTION,
+            callback = function(dialog)
+                local confirmDelete = ZO_Dialogs_GetEditBoxText(dialog)
+                local compareString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
+                if confirmDelete and confirmDelete ~= compareString then
+                    RespondToDestroyRequest(false)
+                else
+                    RespondToDestroyRequest(true)
+                end
+            end,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+            callback = function(dialog)
+                RespondToDestroyRequest(false)
+            end,
         }
     }
 }
@@ -484,6 +525,37 @@ ESO_Dialogs["DESTROY_ALL_JUNK"] =
         [2] =
         {
             text =       SI_DIALOG_DECLINE,
+        },
+    },
+}
+
+ESO_Dialogs["CONFIRM_SELL_ARMORY_ITEM_PROMPT"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_DIALOG_SELL_ARMORY_ITEM_TITLE,
+    },
+    mainText =
+    {
+        text = SI_DIALOG_SELL_ARMORY_ITEM_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_ITEM_ACTION_SELL,
+            callback =  function(dialog)
+                local bagId = dialog.data.bag or dialog.data.bagId
+                local slotIndex = dialog.data.slot or dialog.data.slotIndex
+                SellInventoryItem(bagId, slotIndex, dialog.data.stackCount)
+            end,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
         },
     },
 }
@@ -1528,6 +1600,138 @@ ESO_Dialogs["CONFIRM_CREATE_NONSET_ITEM"] =
     },
 }
 
+ESO_Dialogs["CONFIRM_DECONSTRUCT_ARMORY_ITEM"] =
+{
+    title =
+    {
+        text = function(dialog)
+            return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", dialog.data.verb)
+        end,
+    },
+    mainText =
+    {
+        text = function(dialog)
+            local deconstructVerify = zo_strformat(SI_DECONSTRUCT_ARMORY_EQUIPMENT_KEYBOARD_VERIFY, GetString(SI_PERFORM_ACTION_CONFIRMATION))
+            return ZO_GenerateParagraphSeparatedList({ GetString(SI_DECONSTRUCT_ARMORY_EQUIPMENT_WARNING), deconstructVerify })
+        end,
+    },
+    editBox =
+    {
+        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+    },
+    buttons =
+    {
+        {
+            requiresTextInput = true,
+            text = SI_CHAT_DIALOG_CONFIRM_ITEM_DESTRUCTION,
+            callback = function(dialog)
+                dialog.data.deconstructFn()
+            end,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        }
+    }
+}
+
+ESO_Dialogs["CONFIRM_DECONSTRUCT_ARMORY_ITEM_GAMEPAD"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = function(dialog)
+            return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", dialog.data.verb)
+        end,
+    },
+    mainText =
+    {
+        text = function(dialog)
+            return ZO_GenerateParagraphSeparatedList({ GetString(SI_DECONSTRUCT_ARMORY_EQUIPMENT_WARNING), GetString(SI_DECONSTRUCT_ARMORY_EQUIPMENT_GAMEPAD_CONTINUE) })
+        end,
+    },
+    setup = function(dialog)
+        local headerData =
+        {
+            data1 =
+            {
+                header = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+                value = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK)),
+            }
+        }
+        dialog:setupFunc(headerData)
+    end,
+    buttons =
+    {
+        {
+            requiresTextInput = true,
+            text = SI_CHAT_DIALOG_CONFIRM_ITEM_DESTRUCTION,
+            callback = function(dialog)
+                dialog.data.deconstructFn()
+            end,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        }
+    }
+}
+
+ESO_Dialogs["CONFIRM_MULTI_DECONSTRUCT_ARMORY_ITEM"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = function(dialog)
+            return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", dialog.data.verb)
+        end,
+    },
+    mainText =
+    {
+        text = function(dialog)
+            local baseDialogContent = GetString("SI_DECONSTRUCTACTIONNAME_CONFIRMMULTIPLE", dialog.data.verb)
+            local deconstructVerify = zo_strformat(SI_DECONSTRUCT_ARMORY_EQUIPMENT_KEYBOARD_VERIFY, GetString(SI_PERFORM_ACTION_CONFIRMATION))
+            return ZO_GenerateParagraphSeparatedList({ baseDialogContent, GetString(SI_DECONSTRUCT_ARMORY_EQUIPMENT_WARNING), deconstructVerify })
+        end,
+    },
+    editBox =
+    {
+        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+    },
+    setup = function(dialog)
+        local headerData =
+        {
+            data1 =
+            {
+                header = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+                value = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK)),
+            }
+        }
+        dialog:setupFunc(headerData)
+    end,
+    buttons =
+    {
+        [1] =
+        {
+            requiresTextInput = true,
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                dialog.data.deconstructFn()
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
 ESO_Dialogs["CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS"] =
 {
     canQueue = true,
@@ -1544,7 +1748,12 @@ ESO_Dialogs["CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS"] =
     mainText =
     {
         text = function(dialog)
-            return GetString("SI_DECONSTRUCTACTIONNAME_CONFIRMMULTIPLE", dialog.data.verb)
+            local baseDialogContent = GetString("SI_DECONSTRUCTACTIONNAME_CONFIRMMULTIPLE", dialog.data.verb)
+            if dialog.data.isAnyItemInArmoryBuild then
+                return ZO_GenerateParagraphSeparatedList({ baseDialogContent, GetString(SI_DECONSTRUCT_ARMORY_EQUIPMENT_WARNING) })
+            else
+                return baseDialogContent
+            end
         end,
     },
     setup = function(dialog)
@@ -2234,6 +2443,7 @@ ESO_Dialogs["COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE"] =
         specialCharacters = {'\'', '-', ' '},
         validatesText = true,
         validator = IsValidCollectibleName,
+        instructions = nil,
         selectAll = true,
     },
     buttons =
@@ -2551,7 +2761,17 @@ ESO_Dialogs["GAMEPAD_CONFIRM_RESEARCH_ITEM"] =
     },
     mainText = 
     {
-        text = SI_GAMEPAD_SMITHING_RESEARCH_CONFIRM_DIALOG_TEXT,
+        text = function(dialog)
+            local researchText = GetString(SI_GAMEPAD_SMITHING_RESEARCH_CONFIRM_DIALOG_TEXT)
+            if IsItemInArmory(dialog.data.bagId, dialog.data.slotIndex) then
+                local armoryBuildList = { GetItemArmoryBuildList(dialog.data.bagId, dialog.data.slotIndex) }
+                local armoryBuildString = ZO_GenerateCommaSeparatedList(armoryBuildList)
+                local armoryBuildText = zo_strformat(SI_RESEARCH_ARMORY_EQUIPMENT_NOTICE, ZO_SELECTED_TEXT:Colorize(armoryBuildString), #armoryBuildList)
+                return ZO_GenerateParagraphSeparatedList({ researchText, armoryBuildText })
+            else
+                return researchText
+            end
+        end,
     },
     buttons =
     {
@@ -3748,6 +3968,7 @@ ESO_Dialogs["RENAME_OUFIT"] =
         specialCharacters = {'\'', '-', ' '},
         validatesText = true,
         validator = IsValidOutfitName,
+        instructions = nil,
         selectAll = true,
     },
     buttons =
@@ -3844,7 +4065,7 @@ ESO_Dialogs["SKILL_RESPEC_CONFIRM_FREE"] =
         text = function()
             local introText = GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO)
             local noCostText = GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_FREE)
-            return string.format("%s\n\n%s", introText, noCostText)
+            return ZO_GenerateParagraphSeparatedList({ introText, noCostText })
         end,
     },
 
@@ -3886,7 +4107,7 @@ ESO_Dialogs["SKILL_RESPEC_CONFIRM_SCROLL"] =
             local scrollDisplayQuality = GetItemLinkDisplayQuality(scrollItemLink)
             local qualityColor = GetItemQualityColor(scrollDisplayQuality)
             local costText = zo_strformat(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_SCROLL, qualityColor:Colorize(scrollName))
-            return string.format("%s\n\n%s", introText, costText)
+            return ZO_GenerateParagraphSeparatedList({ introText, costText })
         end,
     },
 

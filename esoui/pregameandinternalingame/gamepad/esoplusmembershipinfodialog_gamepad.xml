@@ -47,6 +47,15 @@
 
                 <Label name="$(parent)BackKeybind" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" >
                     <Anchor point="CENTER" relativePoint="BOTTOM" offsetY="-48" />
+                    <Controls>
+                        <Label name="$(parent)KeyLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                            <Anchor point="CENTER" relativePoint="LEFT" offsetX="-30" />
+                            <OnInitialized>
+                                ZO_Keybindings_RegisterLabelForBindingUpdate(self, "DIALOG_NEGATIVE")
+                                ZO_KeyMarkupLabel_SetCustomOffsets(self, -5, 5, -2, 3)
+                            </OnInitialized>
+                        </Label>
+                    </Controls>
                 </Label>
             </Controls>
         </TopLevelControl>

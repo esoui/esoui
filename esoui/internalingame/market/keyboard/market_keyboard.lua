@@ -52,12 +52,8 @@ function ZO_Market_Keyboard:Initialize(control, sceneName)
             return ZO_MarketProductIcon:New(objectPool:GetNextControlId(), self.control)
         end
 
-        local function ResetMarketProductIcon(marketProductIcon)
-            marketProductIcon:Reset()
-        end
-
         -- this pool is shared with all instances of this class and other objects
-        ZO_Market_Keyboard.masterMarketProductIconPool = ZO_ObjectPool:New(CreateMarketProductIcon, ResetMarketProductIcon)
+        ZO_Market_Keyboard.masterMarketProductIconPool = ZO_ObjectPool:New(CreateMarketProductIcon, ZO_ObjectPool_DefaultResetObject)
     end
 
     local function OnBackLabelClicked(...) self:OnBackLabelClicked(...) end

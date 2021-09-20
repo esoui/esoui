@@ -19,7 +19,7 @@
                                     <Anchor point="TOPRIGHT" />
                                     
                                     <Controls>
-                                        <Label name="$(parent)DetailsBody1" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" lineSpacing="15">
+                                        <Label name="$(parent)DetailsBody1" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" lineSpacing="15">
                                             <Anchor point="TOPLEFT" offsetY="10" />
                                             <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH"/>
                                         </Label>
@@ -31,7 +31,7 @@
                                             <Anchor point="TOP" relativeTo="$(parent)DetailsBody1" relativePoint="BOTTOM" offsetY="25" />
                                         </Texture>
 
-                                        <Label name="$(parent)DetailsBody2" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" lineSpacing="15">
+                                        <Label name="$(parent)DetailsBody2" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" lineSpacing="15">
                                             <Anchor point="TOP" relativeTo="$(parent)DetailsImage" relativePoint="BOTTOM" offsetY="54" />
                                             <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH"/>
                                         </Label>
@@ -41,6 +41,10 @@
                         </Control>
 
                         <Texture name="$(parent)ScrollIndicator" override="true" tier="HIGH" layer="OVERLAY" />
+
+                        <Label name="$(parent)ScrollKeyUp" override="true" tier="HIGH" layer="OVERLAY" />
+
+                        <Label name="$(parent)ScrollKeyDown" override="true" tier="HIGH" layer="OVERLAY" />
                     </Controls>
                 </Control>
             </Controls>

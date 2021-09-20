@@ -69,12 +69,12 @@ function ZO_UiInfoBoxTutorial:Initialize()
             buttons =
             {
                 {
-                    --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                    name = "Gamepad Tutorial Accept",
+                    -- Even though this is an ethereal keybind, the name will still be shown as the centered dialogs interact keybind
+                    name = GetString(SI_TUTORIAL_CONTINUE),
                     ethereal = true,
-                    keybind =    "DIALOG_PRIMARY",
+                    keybind = "DIALOG_PRIMARY",
                     clickSound = SOUNDS.DIALOG_ACCEPT,
-                    callback =  function(dialog)
+                    callback = function(dialog)
                         dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
                     end,
                 }

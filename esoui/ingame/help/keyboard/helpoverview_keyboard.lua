@@ -1,9 +1,5 @@
 local HelpOverview_Keyboard = ZO_HelpScreenTemplate_Keyboard:Subclass()
 
-function HelpOverview_Keyboard:New(...)
-    return ZO_HelpScreenTemplate_Keyboard.New(self, ...)
-end
-
 function HelpOverview_Keyboard:Initialize(control)
 	HELP_CUSTOMER_SERVICE_OVERVIEW_KEYBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
 

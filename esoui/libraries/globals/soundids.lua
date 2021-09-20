@@ -977,4 +977,11 @@ SOUNDS = {
 
     -- Endeavors
     ENDEAVOR_COMPLETED                     = "Endeavor_Complete",
+
+    -- Armory
+    ARMORY_OPEN = "Armory_Open",
+    ARMORY_RESTORE_SUCCESS = "Armory_EquipBuild_Success",
+    ARMORY_SAVE_SUCCESS = "Armory_SaveBuild_Success",
+    ARMORY_BUILD_SLOT_EXPANDED = "Armory_Expanded",
+    ARMORY_BUILD_SLOT_COLLAPSED = "Armory_Collapsed",
 }

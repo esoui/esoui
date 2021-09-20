@@ -66,6 +66,7 @@ end
 function ZO_Companion_Gamepad:OnDeferredInitialize()
     self:InitializeHeader()
     self:InitializeList()
+    self:SetListsUseTriggerKeybinds(true)
 end
 
 function ZO_Companion_Gamepad:PerformUpdate()

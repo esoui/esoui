@@ -149,6 +149,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_AUDIO,
             system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_COMBAT_MUSIC_MODE,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
             settingId = AUDIO_SETTING_BACKGROUND_AUDIO,
             header = SI_AUDIO_OPTIONS_OUTPUT,
         },

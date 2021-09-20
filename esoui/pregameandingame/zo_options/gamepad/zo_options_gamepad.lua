@@ -415,7 +415,14 @@ do
             if data.gamepadCustomTooltipFunction then
                 data.gamepadCustomTooltipFunction(GAMEPAD_LEFT_TOOLTIP, data.tooltipText)
             else
-                GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipText)
+                local warningText = nil
+                if data.mustRestartToApply then
+                    warningText = GetString(SI_OPTIONS_RESTART_WARNING)
+                elseif data.mustPushApply then
+                    warningText = GetString(SI_OPTIONS_APPLY_WARNING)
+                end
+
+                GAMEPAD_TOOLTIPS:LayoutSettingTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipText, warningText)
             end
         else
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)

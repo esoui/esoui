@@ -546,11 +546,7 @@ function Battleground_Scoreboard_Alliance_Panel:Initialize(control, battleground
         return Battleground_Scoreboard_Player_Row:New(playerRowControl)
     end
 
-    local function PlayerRowReset(playerRow)
-        playerRow:Reset()
-    end
-
-    self.playerRowPool = ZO_ObjectPool:New(PlayerRowFactory, PlayerRowReset)
+    self.playerRowPool = ZO_ObjectPool:New(PlayerRowFactory, ZO_ObjectPool_DefaultResetObject)
     self.sortedPlayerRows = {}
 end
     

@@ -97,6 +97,14 @@ panelBuilder:AddSetting({
     indentLevel = 1,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Audio_CombatMusicMode",
+    settingType = SETTING_TYPE_AUDIO,
+    settingId = AUDIO_SETTING_COMBAT_MUSIC_MODE,
+    header = SI_AUDIO_OPTIONS_GENERAL,
+    indentLevel = 1,
+})
+
 ----------------------
 -- Audio -> Output  --
 ----------------------

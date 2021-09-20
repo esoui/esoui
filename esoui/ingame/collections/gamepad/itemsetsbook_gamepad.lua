@@ -56,6 +56,41 @@ function ZO_ItemSetsBook_Gamepad_Base:RefreshHeader()
     ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 end
 
+function ZO_ItemSetsBook_Gamepad_Base:RefreshCategoryProgress()
+    local currentList = self:GetCurrentList()
+    if currentList then
+        local numEntries = currentList:GetNumItems()
+        for entryIndex = 1, numEntries do
+            local entryData = currentList:GetEntryData(entryIndex)
+            local numCategoryUnlockedPieces, numCategoryPieces = entryData:GetDataSource():GetNumUnlockedAndTotalPieces()
+            local MIN_PIECES = 0
+            entryData:SetBarValues(MIN_PIECES, numCategoryPieces, numCategoryUnlockedPieces)
+        end
+    end
+
+    local numUnlockedPieces, numPieces = 0, 0
+    local categoryName
+    if self:IsViewingCategories() then
+        -- Summary progress
+        categoryName = GetString(SI_ITEM_SETS_BOOK_TITLE)
+        numUnlockedPieces, numPieces = ITEM_SET_COLLECTIONS_SUMMARY_CATEGORY_DATA:GetNumUnlockedAndTotalPieces()
+    elseif self:IsViewingSubcategories() then
+        local categoryData = self:GetSelectedTopLevelCategory()
+        if categoryData then
+            -- Category progress
+            categoryName = categoryData:GetFormattedName()
+            numUnlockedPieces, numPieces = categoryData:GetDataSource():GetNumUnlockedAndTotalPieces()
+        end
+    end
+
+    local footerControl = ZO_ItemSetsBook_Gamepad_Footer
+    footerControl.name:SetText(categoryName)
+    footerControl.value:SetText(numUnlockedPieces)
+    local MIN_POINTS = 0
+    footerControl.progress:SetMinMax(MIN_POINTS, numPieces)
+    footerControl.progress:SetValue(numUnlockedPieces)
+end
+
 function ZO_ItemSetsBook_Gamepad_Base:RefreshGridEntryMultiIcon(control, data)
     local statusControl = control.statusMultiIcon
     if statusControl == nil then
@@ -106,7 +141,11 @@ function ZO_ItemSetsBook_Gamepad_Base:BuildSubcategoryList(parentCategoryData)
         entryData:SetDataSource(subcategoryData)
         entryData:SetIconTintOnSelection(true)
 
-        subcategoryList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+        local numUnlockedPieces, numPieces = subcategoryData:GetNumUnlockedAndTotalPieces()
+        local MIN_PIECES = 0
+        entryData:SetBarValues(MIN_PIECES, numPieces, numUnlockedPieces)
+
+        subcategoryList:AddEntry("ZO_ItemSetsBook_Summary_Gamepad", entryData)
     end
 
     subcategoryList:Commit()
@@ -114,7 +153,6 @@ function ZO_ItemSetsBook_Gamepad_Base:BuildSubcategoryList(parentCategoryData)
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(subcategoryListDescriptor.keybindDescriptor)
 end
-
 
 function ZO_ItemSetsBook_Gamepad_Base:SelectTopLevelCategory(itemSetCollectionCategoryData)
     if internalassert(itemSetCollectionCategoryData:IsTopLevel(), "Attempting to select a subcategory with the SelectTopLevelCategory function") then
@@ -222,6 +260,8 @@ function ZO_ItemSetsBook_Gamepad_Base:ShowListDescriptor(listDescriptor)
         self:UpdateGridPanelVisibility()
         self:RefreshHeader()
     end
+
+    self:RefreshCategoryProgress()
 end
 
 function ZO_ItemSetsBook_Gamepad_Base:HideCurrentListDescriptor()
@@ -261,15 +301,32 @@ end
 
 function ZO_ItemSetsBook_Gamepad_Base:UpdateGridPanelVisibility()
     local categoryData = self:GetSelectedCategory()
-    if categoryData and categoryData:GetNumCollections() > 0 and not self:IsOptionsModeShowing() then
+    local isSummaryCategory = categoryData and categoryData:IsInstanceOf(ZO_ItemSetCollectionSummaryCategoryData)
+
+    if isSummaryCategory then
+        self:ShowSummaryTooltip()
+    else
+        self:HideSummaryTooltip()
+    end
+
+    if not categoryData or isSummaryCategory then
+        SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+        SCENE_MANAGER:RemoveFragment(self.gridListFragment)
+    elseif categoryData:GetNumCollections() > 0 and not self:IsOptionsModeShowing() then
         self.categoryContentRefreshGroup:MarkDirty("List")
 
         SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         SCENE_MANAGER:AddFragment(self.gridListFragment)
-    else
-        SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-        SCENE_MANAGER:RemoveFragment(self.gridListFragment)
     end
+end
+
+function ZO_ItemSetsBook_Gamepad_Base:ShowSummaryTooltip()
+    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
+    GAMEPAD_TOOLTIPS:LayoutItemSetCollectionSummary(GAMEPAD_LEFT_TOOLTIP)
+end
+
+function ZO_ItemSetsBook_Gamepad_Base:HideSummaryTooltip()
+    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
 end
 
 -- Begin ZO_ItemSetsBook_Shared Overrides --
@@ -356,6 +413,13 @@ function ZO_ItemSetsBook_Gamepad_Base:GetSelectedCategory()
     return nil
 end
 
+function ZO_ItemSetsBook_Gamepad_Base:GetSelectedTopLevelCategory()
+    local categoryList = self.categoryListDescriptor
+    if categoryList then
+        return categoryList.list:GetTargetData()
+    end
+end
+
 function ZO_ItemSetsBook_Gamepad_Base:GetGridEntryDataObjectPool()
     return self.entryDataObjectPool
 end
@@ -369,15 +433,34 @@ function ZO_ItemSetsBook_Gamepad_Base:RefreshCategories()
     local categoryList = self.categoryListDescriptor.list
     categoryList:Clear()
 
-    for _, topLevelCategoryData in ITEM_SET_COLLECTIONS_DATA_MANAGER:TopLevelItemSetCollectionCategoryIterator(self.categoryFilters) do
-        local categoryName = topLevelCategoryData:GetFormattedName()
-        local gamepadIcon = topLevelCategoryData:GetGamepadIcon()
+    local entryList = {}
+    local MIN_PIECES = 0
 
+    for _, categoryData in ITEM_SET_COLLECTIONS_DATA_MANAGER:TopLevelItemSetCollectionCategoryIterator(self.categoryFilters) do
+        local categoryName = categoryData:GetFormattedName()
+        local gamepadIcon = categoryData:GetGamepadIcon()
         local entryData = ZO_GamepadEntryData:New(categoryName, gamepadIcon)
-        entryData:SetDataSource(topLevelCategoryData)
+        local numUnlockedPieces, numPieces = categoryData:GetNumUnlockedAndTotalPieces()
+        entryData:SetBarValues(MIN_PIECES, numPieces, numUnlockedPieces)
+        entryData:SetDataSource(categoryData)
         entryData:SetIconTintOnSelection(true)
+        table.insert(entryList, entryData)
+    end
 
-        categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+    if not self:IsReconstructing() then
+        local categoryData = ITEM_SET_COLLECTIONS_SUMMARY_CATEGORY_DATA
+        local categoryName = categoryData:GetFormattedName()
+        local gamepadIcon = categoryData:GetGamepadIcon()
+        local entryData = ZO_GamepadEntryData:New(categoryName, gamepadIcon)
+        local numUnlockedPieces, numPieces = categoryData:GetNumUnlockedAndTotalPieces()
+        entryData:SetBarValues(MIN_PIECES, numPieces, numUnlockedPieces)
+        entryData:SetDataSource(categoryData)
+        entryData:SetIconTintOnSelection(true)
+        table.insert(entryList, 1, entryData)
+    end
+
+    for _, entryData in ipairs(entryList) do
+        categoryList:AddEntry("ZO_ItemSetsBook_Summary_Gamepad", entryData)
     end
 
     categoryList:Commit()
@@ -388,6 +471,8 @@ function ZO_ItemSetsBook_Gamepad_Base:RefreshCategories()
         end
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentListDescriptor.keybindDescriptor)
     end
+
+    self:RefreshCategoryProgress()
 end
 
 -- Do not call this directly, instead call self.categoriesRefreshGroup:MarkDirty("Visible")
@@ -441,7 +526,7 @@ function ZO_ItemSetsBook_Gamepad_Base:InitializeKeybindStripDescriptors()
                 if self.currentListDescriptor then
                     -- A category won't exist if it doesn't have subcategories or collections
                     local categoryData = self:GetSelectedCategory()
-                    return categoryData ~= nil
+                    return categoryData ~= nil and not categoryData:IsInstanceOf(ZO_ItemSetCollectionSummaryCategoryData)
                 end
                 return false
             end,
@@ -527,6 +612,7 @@ function ZO_ItemSetsBook_Gamepad_Base:OnHide()
         self:ExitGridList()
     end
     self:HideCurrentListDescriptor()
+    self:HideSummaryTooltip()
 end
 
 function ZO_ItemSetsBook_Gamepad_Base:OnTargetChanged(list, targetData, oldTargetData)
@@ -555,8 +641,8 @@ function ZO_ItemSetsBook_Gamepad_Base:SetupList(list)
         end
     end
 
-    list:AddDataTemplate("ZO_GamepadMenuEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_ItemSetCollectionCategoryData.Equals)
     list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate", ZO_ItemSetCollectionCategoryData.Equals)
+    list:AddDataTemplate("ZO_ItemSetsBook_Summary_Gamepad", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_ItemSetCollectionCategoryData.Equals)
     list:SetReselectBehavior(ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESET_TO_DEFAULT)
 end
 
@@ -575,6 +661,16 @@ function ZO_ItemSetsBook_Gamepad:Initialize(control)
 
     GAMEPAD_ITEM_SETS_BOOK_SCENE = self:GetScene()
     GAMEPAD_ITEM_SETS_BOOK_FRAGMENT = self:GetFragment()
+end
+
+function ZO_ItemSetsBook_Gamepad:OnShowing()
+    ZO_ItemSetsBook_Gamepad_Base.OnShowing(self)
+    ZO_ItemSetsBook_Gamepad_Footer:SetHidden(false)
+end
+
+function ZO_ItemSetsBook_Gamepad:OnHide()
+    ZO_ItemSetsBook_Gamepad_Base.OnHide(self)
+    ZO_ItemSetsBook_Gamepad_Footer:SetHidden(true)
 end
 
 -- Begin ZO_ItemSetsBook_Shared Overrides --
@@ -608,3 +704,8 @@ function ZO_ItemSetsBook_Entry_Header_Gamepad_OnInitialize(control)
     ZO_StatusBar_SetGradientColor(control.progressBar, ZO_SKILL_XP_BAR_GRADIENT_COLORS)
 end
 
+function ZO_ItemSetsBook_Gamepad_Footer_OnInitialized(control)
+    control.name = control:GetNamedChild("Name")
+    control.value = control:GetNamedChild("Rank")
+    control.progress = control:GetNamedChild("XPBar")
+end

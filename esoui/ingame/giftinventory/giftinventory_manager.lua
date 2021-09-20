@@ -8,11 +8,12 @@ function ZO_Gift_Base:New(...)
     return object
 end
 
-function ZO_Gift_Base:Initialize(giftId, state, seen, marketProductId, senderName, recipientName, expirationTimeStampS, note)
+function ZO_Gift_Base:Initialize(giftId, state, seen, marketProductId, senderName, recipientName, expirationTimeStampS, note, quantity)
     self.giftId = giftId
     self.state = state
     self.seen = seen
     self.marketProductId = marketProductId
+    self.quantity = quantity
     self:SetPlayerName(senderName, recipientName)
     self.expirationTimeStampS = expirationTimeStampS
     self.note = note
@@ -38,6 +39,14 @@ end
 
 function ZO_Gift_Base:GetMarketProductId()
     return self.marketProductId
+end
+
+function ZO_Gift_Base:GetQuantity()
+    return self.quantity
+end
+
+function ZO_Gift_Base:GetClaimQuantity()
+    return GetGiftClaimableQuantity(self.giftId)
 end
 
 function ZO_Gift_Base:GetQualityColor()
@@ -246,7 +255,7 @@ function ZO_GiftInventory_Manager:GetGiftList(state)
 end
 
 function ZO_GiftInventory_Manager:CreateGiftObject(giftId)
-    local state, seen, marketProductId, senderName, recipientName, expirationTimeStampS, note = GetGiftInfo(giftId)
+    local state, seen, marketProductId, senderName, recipientName, expirationTimeStampS, note, quantity = GetGiftInfo(giftId)
     local class
     if state == GIFT_STATE_RECEIVED then
         class = ZO_ReceivedGift
@@ -257,7 +266,7 @@ function ZO_GiftInventory_Manager:CreateGiftObject(giftId)
     elseif state == GIFT_STATE_SENT then
         class = ZO_SentGift
     end
-    return class:New(giftId, state, seen, marketProductId, senderName, recipientName, expirationTimeStampS, note)
+    return class:New(giftId, state, seen, marketProductId, senderName, recipientName, expirationTimeStampS, note, quantity)
 end
 
 function ZO_GiftInventory_Manager:AddGiftToTemporaryUpdatedGiftList(temporaryUpdatedGiftsByState, giftId)

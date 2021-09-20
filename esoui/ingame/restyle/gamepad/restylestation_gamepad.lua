@@ -695,9 +695,10 @@ function ZO_RestyleStation_Gamepad:SetupList(list)
     list:SetAlignToScreenCenter(true)
     local EQUALITY_FUNCTION = nil
     local CONTROL_POOL_PREFIX = nil
+    local NO_HEADER_SETUP_FUNCTION = nil
     list:AddDataTemplate("ZO_RestyleSlot_EntryTemplate_Gamepad", SetupSlotEntry, ZO_GamepadMenuEntryTemplateParametricListFunction, EQUALITY_FUNCTION, CONTROL_POOL_PREFIX, ResetSlotEntry)
     list:AddDataTemplate("ZO_OutfitSlot_EntryTemplate_Gamepad", SetupOutfitSlotEntry, ZO_GamepadMenuEntryTemplateParametricListFunction, EQUALITY_FUNCTION, CONTROL_POOL_PREFIX, ResetOutfitSlotEntry)
-    list:AddDataTemplateWithHeader("ZO_OutfitSlot_EntryTemplate_Gamepad", SetupOutfitSlotEntry, ZO_GamepadMenuEntryTemplateParametricListFunction, EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate", HEADER_SETUP_FUNCTION, CONTROL_POOL_PREFIX, ResetOutfitSlotEntry)
+    list:AddDataTemplateWithHeader("ZO_OutfitSlot_EntryTemplate_Gamepad", SetupOutfitSlotEntry, ZO_GamepadMenuEntryTemplateParametricListFunction, EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate", NO_HEADER_SETUP_FUNCTION, CONTROL_POOL_PREFIX, ResetOutfitSlotEntry)
     list:SetOnSelectedDataChangedCallback(function(callbackList, selectedData, oldData) self:OnSlotChanged(oldData, selectedData) end)
 end
 

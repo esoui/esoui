@@ -69,13 +69,27 @@ do
         self.scroll:SetHandler("OnScrollExtentsChanged", function(...) self:OnScrollExtentsChanged(...) end)
         self:EnableUpdateHandler()
 
-        self.scrollIndicator = GetControl(self, "ScrollIndicator")
+        self.scrollIndicator = self:GetNamedChild("ScrollIndicator")
+        self.scrollKeyUp = self:GetNamedChild("ScrollKeyUp")
+        self.scrollKeyDown = self:GetNamedChild("ScrollKeyDown")
 
         self.scrollInput = 0
         self.animation, self.timeline = ZO_CreateScrollAnimation(self)
         self.scrollValue = SLIDER_MIN_VALUE
         self.directionalInputActivated = false
         self.scrollIndicatorEnabled = true
+
+        local function OnInputChanged()
+            if IsInGamepadPreferredMode() then
+                self:UpdateScrollIndicator()
+            end
+        end
+
+        local SHOW_UNBOUND = true
+        local DEFAULT_GAMEPAD_ACTION_NAME = nil
+        ZO_Keybindings_RegisterLabelForBindingUpdate(self.scrollKeyUp, "UI_SHORTCUT_RIGHT_STICK_UP", SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, OnInputChanged)
+        ZO_Keybindings_RegisterLabelForBindingUpdate(self.scrollKeyDown, "UI_SHORTCUT_RIGHT_STICK_DOWN")
+        -- We only need to register one of the above with OnInputChanged because one call of that function does everything we need
 
         ZO_UpdateScrollFade(self.useFadeGradient, self.scroll, ZO_SCROLL_DIRECTION_VERTICAL)
     end
@@ -96,7 +110,12 @@ end
 function ZO_ScrollContainer_Gamepad:UpdateScrollIndicator()
     if self.scrollIndicator then
         local _, verticalExtents = self.scroll:GetScrollExtents()
-        self.scrollIndicator:SetHidden(not (self.scrollIndicatorEnabled and verticalExtents ~= 0))
+        local wasLastInputGamepad = WasLastInputGamepad()
+        local hideGamepad = not (self.scrollIndicatorEnabled and verticalExtents ~= 0 and wasLastInputGamepad)
+        local hideKeyboard = not (self.scrollIndicatorEnabled and verticalExtents ~= 0 and not wasLastInputGamepad)
+        self.scrollIndicator:SetHidden(hideGamepad)
+        self.scrollKeyUp:SetHidden(hideKeyboard)
+        self.scrollKeyDown:SetHidden(hideKeyboard)
     end
 end
 

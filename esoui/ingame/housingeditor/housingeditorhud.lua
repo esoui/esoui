@@ -1823,7 +1823,7 @@ do
         }
         local keyboardEditPathDescriptor = {}
         ZO_ShallowTableCopy(sharedEditPathKeybind, keyboardEditPathDescriptor)
-        keyboardEditPathDescriptor.keybind = "HOUSING_EDITOR_BEGIN_EDIT_PATH"
+        keyboardEditPathDescriptor.keybind = "HOUSING_EDITOR_QUINARY_ACTION"
 
         local gamepadEditPathDescriptor = {}
         ZO_ShallowTableCopy(sharedEditPathKeybind, gamepadEditPathDescriptor)
@@ -2750,7 +2750,7 @@ do
         }
         local keyboardPathEditDescriptor = {}
         ZO_ShallowTableCopy(pathEditDescriptor, keyboardPathEditDescriptor)
-        keyboardPathEditDescriptor.keybind = "HOUSING_EDITOR_BEGIN_EDIT_PATH"
+        keyboardPathEditDescriptor.keybind = "HOUSING_EDITOR_QUINARY_ACTION"
 
         local gamepadPathEditDescriptor = {}
         ZO_ShallowTableCopy(pathEditDescriptor, gamepadPathEditDescriptor)

@@ -1,64 +1,4 @@
-local HELP_ASK_FOR_HELP_CATEGORY_INFO =
-{
-    [CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_CHARACTER_ISSUE] =
-    {
-        ticketCategory = TICKET_CATEGORY_CHARACTER_ISSUE,
-    },
-    [CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER] =
-    {
-        detailsTitle = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_PLAYER_NAME),
-        detailsRegistrationFunction = SetCustomerServiceTicketPlayerTarget,
-        detailsFormatText = ZO_FormatManualNameEntry,
-        subcategoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY",
-        subcategories = 
-        {
-            {
-                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_NONE,
-            },
-            {
-                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_INAPPROPRIATE_NAME,
-                ticketCategory = TICKET_CATEGORY_REPORT_BAD_NAME,
-            },
-            {
-                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_HARASSMENT,
-                ticketCategory = TICKET_CATEGORY_REPORT_HARASSMENT,
-            },
-            {
-                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_CHEATING,
-                ticketCategory = TICKET_CATEGORY_REPORT_CHEATING,
-            },
-            {
-                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER,
-                ticketCategory = TICKET_CATEGORY_REPORT_OTHER,
-            },
-        },
-    },
-    [CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD] =
-    {
-        detailsTitle = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_GUILD_NAME),
-        detailsRegistrationFunction = SetCustomerServiceTicketPlayerTarget,
-        detailsFormatText = ZO_FormatManualNameEntry,
-        subcategoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDSUBCATEGORY",
-        subcategories =
-        {
-            {
-                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_NONE,
-            },
-            {
-                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_NAME,
-                ticketCategory = TICKET_CATEGORY_REPORT_GUILD_NAME,
-            },
-            {
-                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_LISTING,
-                ticketCategory = TICKET_CATEGORY_REPORT_GUILD_LISTING,
-            },
-            {
-                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_DECLINE,
-                ticketCategory = TICKET_CATEGORY_REPORT_GUILD_DECLINE_MESSAGE,
-            },
-        },
-    },
-}
+local GetListEntryName = ZO_GetAskForHelpListEntryName
 
 local HelpAskForHelp_Keyboard = ZO_HelpScreenTemplate_Keyboard:Subclass()
 
@@ -85,27 +25,40 @@ function HelpAskForHelp_Keyboard:Initialize(control)
     self.helpDescriptionTitle = control:GetNamedChild("DescriptionTitle")
     self.helpDetailsTextControl = control:GetNamedChild("DetailsTextLine")
 
+    self.helpCategoryContainer = control:GetNamedChild("CategoryContainer")
     self.helpSubcategoryContainer = control:GetNamedChild("SubcategoryContainer")
     self.helpDetailsContainer = control:GetNamedChild("DetailsContainer")
 
+    self.helpImpactComboBoxControl = control:GetNamedChild("ImpactComboBox")
     self.helpCategoryComboBoxControl = control:GetNamedChild("CategoryComboBox")
     self.helpSubcategoryComboBoxControl = control:GetNamedChild("SubcategoryComboBox")
 
     self.helpSubmitButton = control:GetNamedChild("SubmitButton")
 
     ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:RegisterCallback("CustomerServiceTicketSubmitted", function (...)
-                                                                        if HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT:IsShowing() then
-                                                                            self:OnCustomerServiceTicketSubmitted(...)
-                                                                        end
-                                                                    end)
+        if HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT:IsShowing() then
+            self:OnCustomerServiceTicketSubmitted(...)
+        end
+    end)
 
     self:InitializeTextBoxes()
     self:InitializeComboBoxes()
     self:InitializeDialogs()
 end
 
-function HelpAskForHelp_Keyboard:InitializeComboBoxes()
+local function OnComboBoxEntryMouseEnter(comboBox, entry)
+    local description = ZO_GetAskForHelpListEntryDescription(entry.m_data.descriptionStringName, entry.m_data.data)
+    if description then
+        InitializeTooltip(InformationTooltip, comboBox.m_container, RIGHT, -10)
+        InformationTooltip:AddLine(description, "", ZO_NORMAL_TEXT:UnpackRGBA())
+    end
+end
 
+local function OnComboBoxEntryMouseExit(comboBox, entry)
+    ClearTooltip(InformationTooltip)
+end
+
+function HelpAskForHelp_Keyboard:InitializeComboBoxes()
     local function CreateComboBox(childName)
         local combo = ZO_ComboBox_ObjectFromContainer(self.control:GetNamedChild(childName))
         combo:SetSortsItems(false)
@@ -114,29 +67,29 @@ function HelpAskForHelp_Keyboard:InitializeComboBoxes()
         return combo
     end
 
+    self.helpImpactComboBox = CreateComboBox("ImpactComboBox")
     self.helpCategoryComboBox = CreateComboBox("CategoryComboBox")
     self.helpSubcategoryComboBox = CreateComboBox("SubcategoryComboBox")
 
-    local function OnCategoryChanged(comboBox, entryText, entry)
-        self:UpdateSubcategories()
+    self.helpCategoryComboBox:SetEntryMouseOverCallbacks(OnComboBoxEntryMouseEnter, OnComboBoxEntryMouseExit)
+    self.helpSubcategoryComboBox:SetEntryMouseOverCallbacks(OnComboBoxEntryMouseEnter, OnComboBoxEntryMouseExit)
+
+    local function OnImpactChanged()
+        self:UpdateCategories()
         self:UpdateDetailsComponents()
         self:UpdateSubmitButton()
         ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:SetReportPlayerTicketSubmittedCallback(nil)
     end
 
-    for i = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_ITERATION_BEGIN, CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_ITERATION_END do
-        -- Omit Submit Feeback since it's Gamepad only per CS (at least that's how it's been setup previously)
-        if i ~= CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_SUBMIT_FEEDBACK then
-            local name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", i)
-            if name ~= nil then
-                local entry = ZO_ComboBox:CreateItemEntry(name, OnCategoryChanged)
-                entry.index = i
-                self.helpCategoryComboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
-            end
-        end
+    local impactStringName = ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO.impactStringName
+    local impacts = ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO.impacts
+    for _, impactData in ipairs(impacts) do
+        local entry = ZO_ComboBox:CreateItemEntry(GetListEntryName(impactStringName, impactData), OnImpactChanged)
+        entry.data = impactData
+        self.helpImpactComboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
 
-    self.helpCategoryComboBox:SelectItemByIndex(1)
+    self.helpImpactComboBox:SelectItemByIndex(1)
 end
 
 function HelpAskForHelp_Keyboard:InitializeTextBoxes()
@@ -187,53 +140,89 @@ function HelpAskForHelp_Keyboard:InitializeDialogs()
     })
 end
 
+function HelpAskForHelp_Keyboard:UpdateCategories()
+    self.helpCategoryComboBox:ClearItems()
+
+    local selectedItemData = self.helpImpactComboBox:GetSelectedItemData()
+    local impactData = selectedItemData and selectedItemData.data or nil
+    local categories = impactData and impactData.categories or nil
+
+    if categories then
+        local function OnCategoryChanged()
+            self:UpdateSubcategories()
+            self:UpdateSubmitButton()
+        end
+
+        self:SetCategoryContentHidden(false)
+        local categoryStringName = impactData.categoryStringName
+        local categoryDescriptionStringName = impactData.categoryDescriptionStringName
+        for _, categoryData in ipairs(categories) do
+            local entry = ZO_ComboBox:CreateItemEntry(GetListEntryName(categoryStringName, categoryData), OnCategoryChanged)
+            entry.data = categoryData
+            entry.descriptionStringName = categoryDescriptionStringName
+            self.helpCategoryComboBox:AddItem(entry, ZO_COMBOBOX_UPDATE_NOW)
+        end
+
+        self.helpCategoryComboBox:SelectItemByIndex(1)
+    else
+        self:SetCategoryContentHidden(true)
+    end
+    
+    self:UpdateSubcategories()
+end
+
 function HelpAskForHelp_Keyboard:UpdateSubcategories()
     self.helpSubcategoryComboBox:ClearItems()
 
-    local categoryIndex = self.helpCategoryComboBox:GetSelectedItemData().index
+    local selectedItemData = self.helpCategoryComboBox:GetSelectedItemData()
+    local categoryData = selectedItemData and selectedItemData.data or nil
+    local subcategories = categoryData and categoryData.subcategories or nil
 
-    local mainArray = HELP_ASK_FOR_HELP_CATEGORY_INFO[categoryIndex]
-
-    if mainArray == nil then
-        self:SetSubcategoryContentHidden(true)
-    else
-        self.subcategoryArray = mainArray.subcategories
-
-        if self.subcategoryArray == nil then
-            self:SetSubcategoryContentHidden(true)
-        else
-            self:SetSubcategoryContentHidden(false)
-
-            for i, subcategoryId in ipairs(self.subcategoryArray) do
-                local entry = ZO_ComboBox:CreateItemEntry(GetString(mainArray.subcategoryStringName, subcategoryId.value), function() self:UpdateSubmitButton() end)
-                entry.index = i
-                self.helpSubcategoryComboBox:AddItem(entry, ZO_COMBOBOX_UPDATE_NOW)
-            end
-
-            self.helpSubcategoryComboBox:SelectItemByIndex(1)
+    if subcategories then
+        local function OnCategoryChanged()
+            self:UpdateSubmitButton()
         end
+
+        self:SetSubcategoryContentHidden(false)
+        local subcategoryStringName = categoryData.subcategoryStringName
+        local subcategoryDescriptionStringName = categoryData.subcategoryDescriptionStringName
+        for _, subcategoryData in ipairs(subcategories) do
+            local entry = ZO_ComboBox:CreateItemEntry(GetListEntryName(subcategoryStringName, subcategoryData), OnCategoryChanged)
+            entry.data = subcategoryData
+            entry.descriptionStringName = subcategoryDescriptionStringName
+            self.helpSubcategoryComboBox:AddItem(entry, ZO_COMBOBOX_UPDATE_NOW)
+        end
+
+        self.helpSubcategoryComboBox:SelectItemByIndex(1)
+    else
+        self:SetSubcategoryContentHidden(true)
     end
 end
 
 function HelpAskForHelp_Keyboard:UpdateDetailsComponents()
     self.details:SetText("")
 
-    local categoryIndex = self.helpCategoryComboBox:GetSelectedItemData().index
-
-    local mainArray = HELP_ASK_FOR_HELP_CATEGORY_INFO[categoryIndex]
+    local selectedItemData = self.helpImpactComboBox:GetSelectedItemData()
+    local impactData = selectedItemData and selectedItemData.data or nil
+    local detailsTitle = impactData and impactData.detailsTitle or nil
         
-    if mainArray == nil then
-        self:SetDetailsContentHidden(true)
+    if detailsTitle then
+        self:SetDetailsContentHidden(false)
+        self.helpDetailsTitle:SetText(detailsTitle)
     else
-        ZO_DefaultEdit_SetEnabled(self.details, true)
-        local title = mainArray.detailsTitle
-        if title == nil then
-            self:SetDetailsContentHidden(true)
-        else
-            self:SetDetailsContentHidden(false)
-            self.helpDetailsTitle:SetText(title)
-        end
+        self:SetDetailsContentHidden(true)
     end
+end
+
+function HelpAskForHelp_Keyboard:SetCategoryContentHidden(shouldHide)
+    self.helpCategoryComboBoxControl:SetHidden(shouldHide)
+    self.helpCategoryTitle:SetHidden(shouldHide)
+
+    local offsetY = 0
+    if not shouldHide then
+        offsetY = 20
+    end
+    self.helpCategoryContainer:SetAnchor(TOPLEFT, self.helpImpactComboBoxControl, BOTTOMLEFT, 0, offsetY)
 end
 
 function HelpAskForHelp_Keyboard:SetSubcategoryContentHidden(shouldHide)
@@ -244,12 +233,13 @@ function HelpAskForHelp_Keyboard:SetSubcategoryContentHidden(shouldHide)
     if not shouldHide then
         offsetY = 20
     end
-    self.helpSubcategoryContainer:SetAnchor(TOPLEFT, self.helpCategoryComboBoxControl, BOTTOMLEFT, 0, offsetY)
+    self.helpSubcategoryContainer:SetAnchor(TOPLEFT, self.helpCategoryContainer, BOTTOMLEFT, 0, offsetY)
 end
 
 function HelpAskForHelp_Keyboard:SetDetailsContentHidden(shouldHide)
     self.helpDetailsTextControl:SetHidden(shouldHide)
     self.helpDetailsTitle:SetHidden(shouldHide)
+    ZO_DefaultEdit_SetEnabled(self.details, not shouldHide)
 
     local offsetY = 0
     if not shouldHide then
@@ -261,34 +251,42 @@ end
 function HelpAskForHelp_Keyboard:UpdateSubmitButton()
     local enableSubmitButton = true
 
-    if self.helpCategoryComboBox == nil or self.helpSubcategoryComboBox == nil or self.descriptionDefaultTextField == nil or self.details == nil then
-        enableSubmitButton = false
-    elseif self.helpCategoryComboBox:GetSelectedItemData().index <= CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_NONE then
-        enableSubmitButton = false
-    elseif not self.helpSubcategoryComboBoxControl:IsHidden() and self.helpSubcategoryComboBox:GetSelectedItemData().index <= 0 then
+    if not self.descriptionDefaultTextField:IsHidden() then
         enableSubmitButton = false
     elseif not self.helpDetailsTextControl:IsHidden() and not self.detailsDefaultTextField:IsHidden() then
         enableSubmitButton = false
-    elseif not self.descriptionDefaultTextField:IsHidden() then
+    elseif not self:GetSelectedTicketCategory() then
         enableSubmitButton = false
     end
-    
+
     self.helpSubmitButton:SetEnabled(enableSubmitButton)
 end
 
 function HelpAskForHelp_Keyboard:ClearFields()
-    self.helpCategoryComboBox:SelectItemByIndex(1)
+    self.helpImpactComboBox:SelectItemByIndex(1)
     self.description:SetText("")
     ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:SetReportPlayerTicketSubmittedCallback(nil)
 
     ResetCustomerServiceTicket()
 end
 
-function HelpAskForHelp_Keyboard:SelectCategory(category)
+function HelpAskForHelp_Keyboard:SelectImpact(impactId)
+    local impacts = self.helpImpactComboBox:GetItems()
+
+    for i, impactItem in ipairs(impacts) do
+        if impactItem.data.id == impactId then
+            local PERFORM_CALLBACK = false
+            self.helpImpactComboBox:SelectItemByIndex(i, PERFORM_CALLBACK)
+            break
+        end
+    end
+end
+
+function HelpAskForHelp_Keyboard:SelectCategory(categoryId)
     local categories = self.helpCategoryComboBox:GetItems()
 
-    for i, categoryId in ipairs(categories) do
-        if categoryId.index == category then
+    for i, categoryItem in ipairs(categories) do
+        if categoryItem.data.id == categoryId then
             local PERFORM_CALLBACK = false
             self.helpCategoryComboBox:SelectItemByIndex(i, PERFORM_CALLBACK)
             break
@@ -296,17 +294,14 @@ function HelpAskForHelp_Keyboard:SelectCategory(category)
     end
 end
 
-function HelpAskForHelp_Keyboard:SelectSubcategory(subcategory)
-    local categoryIndex = self.helpCategoryComboBox:GetSelectedItemData().index
+function HelpAskForHelp_Keyboard:SelectSubcategory(subcategoryId)
+    local subcategories = self.helpSubcategoryComboBox:GetItems()
 
-    local mainArray = HELP_ASK_FOR_HELP_CATEGORY_INFO[categoryIndex]
-    if mainArray and mainArray.subcategories then            
-        for i, subcategoryId in ipairs(mainArray.subcategories) do
-            if subcategoryId.value == subcategory then
-                local PERFORM_CALLBACK = false
-                self.helpSubcategoryComboBox:SelectItemByIndex(i, PERFORM_CALLBACK)
-                break
-            end
+    for i, subcategoryItem in ipairs(subcategories) do
+        if subcategoryItem.data.id == subcategoryId then
+            local PERFORM_CALLBACK = false
+            self.helpSubcategoryComboBox:SelectItemByIndex(i, PERFORM_CALLBACK)
+            break
         end
     end
 end
@@ -315,55 +310,73 @@ function HelpAskForHelp_Keyboard:SetDetailsText(text)
     self.details:SetText(text)
 end
 
-function HelpAskForHelp_Keyboard:OpenAskForHelp(category, subcategory, playerName)
+function HelpAskForHelp_Keyboard:OpenAskForHelp(impactId, categoryId, subcategoryId, details)
     HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
     self:ClearFields()
 
-    if category then
-        self:SelectCategory(category)
+    if impactId then
+        self:SelectImpact(impactId)
 
-        if subcategory then
-            self:SelectSubcategory(subcategory)
+        if categoryId then
+            self:SelectCategory(categoryId)
+
+            if subcategoryId then
+                self:SelectSubcategory(subcategoryId)
+            end
         end
     end
 
-    if playerName then
-        self:SetDetailsText(playerName)
+    if details then
+        self:SetDetailsText(details)
         ZO_DefaultEdit_SetEnabled(self.details, false)
     end
+end
+
+function HelpAskForHelp_Keyboard:GetSelectedTicketCategory()
+    local selectedItemData = self.helpImpactComboBox:GetSelectedItemData()
+    local impactData = selectedItemData and selectedItemData.data
+    if impactData then
+        if impactData.ticketCategory then
+            return impactData.ticketCategory
+        else
+            selectedItemData = self.helpCategoryComboBox:GetSelectedItemData()
+            local categoryData = selectedItemData and selectedItemData.data
+            if categoryData then
+                if categoryData.ticketCategory then
+                    return categoryData.ticketCategory
+                else
+                    selectedItemData = self.helpSubcategoryComboBox:GetSelectedItemData()
+                    local subcategoryData = selectedItemData and selectedItemData.data
+                    if subcategoryData then
+                        return subcategoryData.ticketCategory
+                    end
+                end
+            end
+        end
+    end
+    return nil
 end
 
 function HelpAskForHelp_Keyboard:AttemptToSendTicket()
     ResetCustomerServiceTicket()
 
-    --Populate the ticket fields
-    --Category and subcategory values must be valid as they enable the submit button to be clicked On
-    local categoryIndex = self.helpCategoryComboBox:GetSelectedItemData().index
-    local mainArray = HELP_ASK_FOR_HELP_CATEGORY_INFO[categoryIndex]
-    local ticketCategory = TICKET_CATEGORY_OTHER
+    --Populate the ticket fields.  Impact data must be selected in order to get here.
+    SetCustomerServiceTicketCategory(self:GetSelectedTicketCategory())
 
-    if mainArray.subcategories then
-        local subcategory = self.helpSubcategoryComboBox:GetSelectedItemData().index
-        ticketCategory = mainArray.subcategories[subcategory].ticketCategory
-    else
-        ticketCategory = mainArray.ticketCategory
-    end
-
-    SetCustomerServiceTicketCategory(ticketCategory)
-        
-    if mainArray.detailsRegistrationFunction then
+    local impactData = self.helpImpactComboBox:GetSelectedItemData().data
+    if impactData.detailsRegistrationFunction then
         local text = self.details:GetText()
-        if mainArray.detailsFormatText then
-            text = mainArray.detailsFormatText(text)
+        if impactData.detailsFormatText then
+            text = impactData.detailsFormatText(text)
         end
-        mainArray.detailsRegistrationFunction(text)
+        impactData.detailsRegistrationFunction(text)
     end
 
     SetCustomerServiceTicketBody(self.description:GetText())
 
     ZO_Dialogs_ShowDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
 
-    if categoryIndex == CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER then
+    if impactData.id == CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER then
         ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket()
     end
 

@@ -61,7 +61,7 @@ function ZO_GuildBrowser_GuildList_Gamepad:InitializeKeybinds()
                     end
                     self:Deactivate()
                     GUILD_BROWSER_GAMEPAD:OnReportingGuild()
-                    ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportGuildTicketScene(selectedData.guildName, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_LISTING, ReportCallback)
+                    ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportGuildTicketScene(selectedData.guildName, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_LISTING, ReportCallback)
                 end
             end,
         }

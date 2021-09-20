@@ -5,6 +5,9 @@ ACTION_BUTTON_TYPE_VISIBLE = 1
 ACTION_BUTTON_TYPE_HIDDEN = 2
 ACTION_BUTTON_TYPE_LOCKED = 3
 
+ACTION_BUTTON_TIMER_TEXT_OFFSET_Y_DEFAULT_KEYBOARD = 7
+ACTION_BUTTON_TIMER_TEXT_OFFSET_Y_DEFAULT_GAMEPAD = 4
+
 local ACTION_BUTTON_BGS = {ability = "EsoUI/Art/ActionBar/abilityInset.dds", item = "EsoUI/Art/ActionBar/quickslotBG.dds"}
 local ACTION_BUTTON_BORDERS = {normal = "EsoUI/Art/ActionBar/abilityFrame64_up.dds", mouseDown = "EsoUI/Art/ActionBar/abilityFrame64_down.dds"}
 local MINIMUM_TIMER_DECIMAL_VALUE = 9.94
@@ -67,8 +70,18 @@ function ActionButton:Initialize(slotNum, buttonType, parent, controlTemplate, h
     local HIDE_UNBOUND = false
 
     local function OnUltimateChanged(label)
-        if IsInGamepadPreferredMode() then
+        if IsInGamepadPreferredMode() and WasLastInputGamepad() then
             label:SetHidden(true)
+
+            if self.leftKey and self.rightKey then
+                self:HideKeys(false)
+            end
+        else
+            label:SetHidden(false)
+
+            if self.leftKey and self.rightKey then
+                self:HideKeys(true)
+            end 
         end
     end
     local onChanged = (slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1) and OnUltimateChanged or nil
@@ -308,6 +321,11 @@ function ActionButton:UpdateTimer()
             local SHOW_DECIMAL_UNDER_THRESHOLD_S = ZO_EFFECT_EXPIRATION_IMMINENCE_THRESHOLD_S
             local timeLeftString = ZO_FormatTimeShowUnitOverThresholdShowDecimalUnderThreshold(value, SHOW_UNIT_OVER_THRESHOLD_S, SHOW_DECIMAL_UNDER_THRESHOLD_S, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT)
             self.timerText:SetText(timeLeftString)
+
+            --We only need to worry about updating the anchor for ultimate slots as they are the only ones with count text
+            if self.slot.slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
+                self:RefreshTimerTextAnchor()
+            end
         else
             self.endTimeMS = nil
             self.timerText:SetHidden(true)
@@ -842,6 +860,27 @@ function ActionButton:RefreshUltimateNumberVisibility()
     end
 end
 
+do
+    local TIMER_TEXT_OFFSET_Y_COUNT_TEXT_VISIBLE_GAMEPAD = -8
+    local TIMER_TEXT_OFFSET_Y_COUNT_TEXT_VISIBLE_KEYBOARD =  -5
+
+    function ActionButton:RefreshTimerTextAnchor()
+        local timerTextYOffset = 0
+
+        --The timer text needs to be in a slightly different spot if the count text is showing to prevent overlap
+        if self.countText:IsHidden() then
+            timerTextYOffset = IsInGamepadPreferredMode() and ACTION_BUTTON_TIMER_TEXT_OFFSET_Y_DEFAULT_GAMEPAD or ACTION_BUTTON_TIMER_TEXT_OFFSET_Y_DEFAULT_KEYBOARD
+        else
+            timerTextYOffset = IsInGamepadPreferredMode() and TIMER_TEXT_OFFSET_Y_COUNT_TEXT_VISIBLE_GAMEPAD or TIMER_TEXT_OFFSET_Y_COUNT_TEXT_VISIBLE_KEYBOARD
+        end
+
+        if timerTextYOffset ~= self.timerTextYOffset then
+            self.timerText:SetAnchor(CENTER, nil, CENTER, 0, timerTextYOffset)
+            self.timerTextYOffset = timerTextYOffset
+        end
+    end
+end
+
 function ActionButton:UpdateUltimateNumber()
     local ultimateCount
     if self.button.hotbarCategory == HOTBAR_CATEGORY_COMPANION then
@@ -943,7 +982,7 @@ function ActionButton:SetUltimateMeter(ultimateCount, setProgressNoAnim)
         self:AnchorKeysOut()
     end
 
-    self:HideKeys(not isGamepad)
+    self:HideKeys(not (isGamepad and WasLastInputGamepad()))
 end
 
 --------------------

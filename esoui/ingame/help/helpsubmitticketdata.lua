@@ -112,3 +112,198 @@ ZO_HELP_SUBMIT_FEEDBACK_FIELD_DATA =
         invalidEntry = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_NONE,
     },
 }
+
+ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO =
+{
+    impactStringName = "SI_CUSTOMERSERVICEASKFORHELPIMPACT",
+    impacts =
+    {
+        {
+            id = CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_NONE,
+        },
+        {
+            id = CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_CHARACTER_ISSUE,
+            categoryStringName = "SI_CUSTOMERSERVICEASKFORHELPCHARACTERISSUECATEGORY",
+            categoryDescriptionStringName = "SI_CUSTOMERSERVICEASKFORHELPCHARACTERISSUECATEGORY_DESCRIPTION",
+            categories =
+            {
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_CHARACTER_ISSUE_CATEGORY_NONE,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_CHARACTER_ISSUE_CATEGORY_CHARACTER_RESTORATION,
+                    ticketCategory = 891,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_CHARACTER_ISSUE_CATEGORY_GROUP_ACTIVITIES,
+                    ticketCategory = 978,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_CHARACTER_ISSUE_CATEGORY_CHAT_AND_VENDORS,
+                    ticketCategory = 1186,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_CHARACTER_ISSUE_CATEGORY_SKILLS_AND_ACHIEVEMENTS,
+                    ticketCategory = 893,
+                },
+            },
+        },
+        {
+            id = CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER,
+            detailsTitle = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_PLAYER_NAME),
+            detailsRegistrationFunction = SetCustomerServiceTicketPlayerTarget,
+            detailsFormatText = ZO_FormatManualNameEntry,
+            detailsGamepadDefaultText = zo_strformat(SI_GAMEPAD_HELP_TICKET_EDIT_REQUIRED_NAME_DISPLAY, ZO_GetPlatformAccountLabel()),
+            categoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERCATEGORY",
+            categories = 
+            {
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_CATEGORY_NONE,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_CATEGORY_REAL_WORLD_THREATS,
+                    subcategoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY",
+                    subcategoryDescriptionStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY_DESCRIPTION",
+                    subcategories =
+                    {
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_NONE,
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_CHILD_ABUSE,
+                            ticketCategory = 1244
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_TERRORISM,
+                            ticketCategory = 1245
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_SELF_HARM,
+                            ticketCategory = 1246
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_HARM_TO_OTHERS,
+                            ticketCategory = 1247
+                        },
+                    }
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_CATEGORY_BAD_LANGUAGE,
+                    subcategoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY",
+                    subcategoryDescriptionStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY_DESCRIPTION",
+                    subcategories =
+                    {
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_NONE,
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_HATE_SPEECH,
+                            ticketCategory = 1249
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_TROLLING,
+                            ticketCategory = 1250
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_SPAM,
+                            ticketCategory = 1251
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_PROFANE_VOICE_CHAT,
+                            ticketCategory = 1252
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_PROFANE_NAME,
+                            ticketCategory = 11,
+                            nameStringArgs = { ZO_GetPlatformAccountLabel() },
+                            descriptionStringArgs = { ZO_GetPlatformAccountLabel() },
+                        },
+                    }
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_CATEGORY_BAD_ACTIONS,
+                    subcategoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY",
+                    subcategoryDescriptionStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY_DESCRIPTION",
+                    subcategories =
+                    {
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_NONE,
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_SCAMMING,
+                            ticketCategory = 1254
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_DOXING,
+                            ticketCategory = 1255
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_CHEATING,
+                            ticketCategory = 361
+                        },
+                        {
+                            id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_HARASSMENT,
+                            ticketCategory = 12
+                        },
+                    }
+                },
+            },
+        },
+        {
+            id = CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GUILD,
+            detailsTitle = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_GUILD_NAME),
+            detailsRegistrationFunction = SetCustomerServiceTicketPlayerTarget,
+            detailsFormatText = ZO_FormatManualNameEntry,
+            detailsGamepadDefaultText = GetString(SI_GAMEPAD_HELP_TICKET_EDIT_REQUIRED_NAME_GUILD),
+            categoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDCATEGORY",
+            categoryDescriptionStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDCATEGORY_DESCRIPTION",
+            categories =
+            {
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_NONE,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_NAME,
+                    ticketCategory = 1193,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_LISTING,
+                    ticketCategory = 1195,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_DECLINE,
+                    ticketCategory = 1194,
+                },
+            },
+        },
+    },
+}
+
+function ZO_GetAskForHelpListEntryName(listStringName, entryData)
+    local entryName = GetString(listStringName, entryData.id)
+    local stringArgs = entryData.nameStringArgs
+    if stringArgs then
+        if type(stringArgs) == "function" then
+            stringArgs = stringArgs()
+        end
+        entryName = zo_strformat(entryName, unpack(stringArgs))
+    end
+    return entryName
+end
+
+function ZO_GetAskForHelpListEntryDescription(listDescriptionStringName, entryData)
+    if listDescriptionStringName then
+        local entryDescription = GetString(listDescriptionStringName, entryData.id)
+        if entryDescription and entryDescription ~= "" then
+            local stringArgs = entryData.descriptionStringArgs
+            if stringArgs then
+                if type(stringArgs) == "function" then
+                    stringArgs = stringArgs()
+                end
+                entryDescription = zo_strformat(entryDescription, unpack(stringArgs))
+            end
+            return entryDescription
+        end
+    end
+    return nil
+end

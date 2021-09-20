@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_ClickableKeybindLabel" inherits="ZO_LargeKeyMarkupLabel"  mouseEnabled="true" virtual="true">
+            <DimensionConstraints minY="35" maxY="35" />
+            <OnInitialized>
+                ZO_ClickableKeybindLabelTemplate_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseUp>
+                ZO_ClickableKeybindLabelTemplate_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+        </Label>
+        <Label name="ZO_ClickableKeybindLabel_Gamepad" inherits="ZO_ClickableKeybindLabel" font="ZoFontGamepad22" virtual="true" />
+    </Controls>
+</GuiXml>

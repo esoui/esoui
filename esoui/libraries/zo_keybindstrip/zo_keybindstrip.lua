@@ -70,6 +70,7 @@ function ZO_KeybindStrip:Initialize(control, keybindButtonTemplate, styleInfo)
     control:RegisterForEvent(EVENT_KEYBINDING_CLEARED, UpdateBindingLabels)
     control:RegisterForEvent(EVENT_KEYBINDINGS_LOADED, UpdateBindingLabels)
     control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, UpdateBindingLabels)
+    control:RegisterForEvent(EVENT_INPUT_TYPE_CHANGED, UpdateBindingLabels)
 
     local function OnUpdate(control, time)
         self:UpdateCooldowns(time)
@@ -687,13 +688,18 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
                 end
                 return keybindHandled or keybindHandled == nil --nil is considered true in this case to ensure backwards compatability
             elseif disabledAlertText then
+                local alertText = disabledAlertText
+                if type(disabledAlertText) == "function" then
+                    alertText = disabledAlertText()
+                end
+
                 if disabledAlertType == KEYBIND_STRIP_DISABLED_DIALOG then
-                    ZO_Dialogs_ShowPlatformDialog("KEYBIND_STRIP_DISABLED_DIALOG", nil, {mainTextParams = {disabledAlertText}})
+                    ZO_Dialogs_ShowPlatformDialog("KEYBIND_STRIP_DISABLED_DIALOG", nil, { mainTextParams = { alertText }})
                 else
                     if ZO_REMOTE_SCENE_CHANGE_ORIGIN == SCENE_MANAGER_MESSAGE_ORIGIN_INTERNAL then
-                        RequestAlert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, disabledAlertText)
+                        RequestAlert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, alertText)
                     elseif ZO_REMOTE_SCENE_CHANGE_ORIGIN == SCENE_MANAGER_MESSAGE_ORIGIN_INGAME then
-                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, disabledAlertText)
+                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, alertText)
                     end
                 end
             end
@@ -732,9 +738,14 @@ function ZO_KeybindStrip:TryHandlingKeybindUp(keybind)
 end
 
 function ZO_KeybindStrip:TriggerCooldown(keybindButtonDescriptor, duration, stateIndex, shouldCooldownPersist)
-    keybindButtonDescriptor.cooldown = duration / 1000
-    keybindButtonDescriptor.cooldownStart = GetFrameTimeMilliseconds() / 1000
-    keybindButtonDescriptor.shouldCooldownPersist = shouldCooldownPersist
+    if type(duration) == "function" then
+        keybindButtonDescriptor.cooldown = duration() / 1000
+        keybindButtonDescriptor.remainingFunction = duration
+    else
+        keybindButtonDescriptor.cooldown = duration / 1000
+        keybindButtonDescriptor.cooldownStart = GetFrameTimeMilliseconds() / 1000
+        keybindButtonDescriptor.shouldCooldownPersist = shouldCooldownPersist
+    end
 
     if self.keybinds[keybindButtonDescriptor.keybind] and self.keybinds[keybindButtonDescriptor.keybind].keybindButtonDescriptor == keybindButtonDescriptor then
         self:UpdateKeybindButton(keybindButtonDescriptor, stateIndex)
@@ -754,9 +765,14 @@ end
 function ZO_KeybindStrip:UpdateCooldowns(time)
     for i = #self.cooldownKeybinds, 1, -1 do
         local descriptor = self.cooldownKeybinds[i]
-        local cooldownStart = descriptor.cooldownStart
-        local difference = time - cooldownStart
-        local newCooldown = descriptor.cooldown - difference
+        local newCooldown
+        if descriptor.remainingFunction then
+            newCooldown = descriptor.remainingFunction()
+        else
+            local cooldownStart = descriptor.cooldownStart
+            local difference = time - cooldownStart
+            newCooldown = descriptor.cooldown - difference
+        end
 
         --Only update for changes in the seconds count
         local oldCeiling = zo_ceil(descriptor.cooldown)
@@ -781,6 +797,11 @@ function ZO_KeybindStrip:UpdateCooldowns(time)
                     self:UpdateKeybindButton(descriptor, self:GetTopKeybindStateIndex())
                 end
             end
+        elseif descriptor.cooldown <= 0 then
+            descriptor.cooldown = nil
+            descriptor.cooldownStart = nil
+            descriptor.shouldCooldownPersist = nil
+            table.remove(self.cooldownKeybinds, i)
         end
     end
 end
@@ -933,9 +954,11 @@ do
             end
 
             local enabled = GetValueFromRawOrFunction(keybindButtonDescriptor, "enabled")
-            if(enabled == nil) then enabled = true end
+            if enabled == nil then
+                enabled = true
+            end
             local cooldown = GetValueFromRawOrFunction(keybindButtonDescriptor, "cooldown")
-            if cooldown then
+            if cooldown and cooldown > 0 then
                 enabled = false
             end
             button:SetEnabled(enabled)
@@ -945,7 +968,7 @@ do
             end
 
             local name = GetValueFromRawOrFunction(keybindButtonDescriptor, "name")
-            if cooldown then
+            if cooldown and cooldown > 0 then
                 local seconds = zo_ceil(cooldown)
                 name = zo_strformat(SI_BINDING_NAME_COOLDOWN_FORMAT, name, seconds)
             end

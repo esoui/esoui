@@ -8,13 +8,7 @@ end
 --[[ Character Create Slider and Appearance Slider Managers ]]--
 -- Manages a collection of sliders with a pool
 
-local CharacterCreateSliderManager = ZO_Object:Subclass()
-
-function CharacterCreateSliderManager:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
+local CharacterCreateSliderManager = ZO_InitializingObject:Subclass()
 
 function CharacterCreateSliderManager:Initialize(parent)
     local function CreateSlider(pool)
@@ -89,10 +83,6 @@ end
 --[[ Character Create Keyboard ]]--
 
 local ZO_CharacterCreate_Keyboard = ZO_CharacterCreate_Base:Subclass()
-
-function ZO_CharacterCreate_Keyboard:New(...)
-    return ZO_CharacterCreate_Base.New(self, ...)
-end
 
 function ZO_CharacterCreate_Keyboard:Initialize(...)
     ZO_CharacterCreate_Base.Initialize(self, ...)
@@ -185,7 +175,20 @@ do
         self.createButton:SetEnabled(false)
 
         self.instructionsControl = self.control:GetNamedChild("NameInstructions")
-        self.nameInstructionsObject = ZO_ValidNameInstructions:New(self.instructionsControl)
+
+        local VALIDATOR_RULES =
+        {
+            NAME_RULE_TOO_SHORT,
+            NAME_RULE_CANNOT_START_WITH_SPACE,
+            NAME_RULE_MUST_END_WITH_LETTER,
+            NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS,
+            NAME_RULE_NO_NUMBERS,
+            NAME_RULE_NO_ADJACENT_PUNCTUATION_CHARACTERS,
+            NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS,
+            NAME_RULE_INVALID_CHARACTERS
+        }
+        local DEFAULT_TEMPLATE = nil
+        self.nameInstructionsObject = ZO_ValidNameInstructions:New(self.instructionsControl, DEFAULT_TEMPLATE, VALIDATOR_RULES)
 
         self.nameControl = self.control:GetNamedChild("CharacterName")
         SetupEditControlForNameValidation(self.nameControl)
@@ -878,13 +881,20 @@ function ZO_CharacterCreate_Keyboard:OnCreateButtonClicked(startLocation)
     local characterName = self.nameControl:GetText()
 
     if characterName and #characterName > 0 then
-        if ZO_CHARACTERCREATE_MANAGER:GetShouldPromptForTutorialSkip() and CanSkipTutorialArea() and startLocation ~= CHARACTER_OPTION_CLEAN_TEST_AREA and startLocation ~= "CharacterSelect_FromIngame" then
+        local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+        local currentTemplateId = CharacterCreateGetTemplate(characterMode)
+        local templateSkipsTutorial = GetTemplateSkipsTutorial(currentTemplateId)
+
+        if ZO_CHARACTERCREATE_MANAGER:GetShouldPromptForTutorialSkip() and CanSkipTutorialArea() and (currentTemplateId == 0 or not templateSkipsTutorial) and startLocation ~= CHARACTER_OPTION_CLEAN_TEST_AREA and startLocation ~= "CharacterSelect_FromIngame" then
             ZO_CHARACTERCREATE_MANAGER:SetShouldPromptForTutorialSkip(false)
             -- color the character name white so it's highlighted in the dialog
             local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
             local genderDecoratedCharacterName = ZO_SELECTED_TEXT:Colorize(GetGrammarDecoratedName(characterName, CharacterCreateGetGender(characterMode)))
             ZO_Dialogs_ShowDialog("CHARACTER_CREATE_SKIP_TUTORIAL", { startLocation = startLocation }, {mainTextParams = { genderDecoratedCharacterName }})
         else
+            if currentTemplateId ~= 0 and templateSkipsTutorial then 
+                self.characterCreateOption = CHARACTER_CREATE_SKIP_TUTORIAL
+            end
             self:CreateCharacter(startLocation, self.characterCreateOption)
         end
     end
@@ -1104,7 +1114,6 @@ function ZO_CharacterCreate_CheckEnableCreateButton(editControl)
 
     if isValidName then
         editControl.linkedButton:SetState(BSTATE_NORMAL, false)
-        editControl.linkedInstructions:Hide()
     else
         editControl.linkedButton:SetState(BSTATE_DISABLED, true)
 
@@ -1121,6 +1130,7 @@ end
 
 function ZO_CharacterCreate_OnNameFieldFocusGained(editControl)
     editControl:GetNamedChild("Instructions"):SetHidden(true)
+    editControl.linkedInstructions:Show(editControl)
     ZO_CharacterCreate_CheckEnableCreateButton(editControl)
 
     if WINDOW_MANAGER:IsHandlingHardwareEvent() then

@@ -474,50 +474,74 @@ function ZO_ItemSetCollectionCategoryData:HasCollections()
 end
 
 function ZO_ItemSetCollectionCategoryData:GetNumPieces()
-    local numPieces = 0
-    if self:HasSubcategories() then
-        for _, subcategoryData in self:SubcategoryIterator() do
-            numPieces = numPieces + subcategoryData:GetNumPieces()
+    local numPieces = self.numPieces
+    if not numPieces then
+        numPieces = 0
+        if self:HasSubcategories() then
+            for _, subcategoryData in self:SubcategoryIterator() do
+                numPieces = numPieces + subcategoryData:GetNumPieces()
+            end
+        else
+            for _, collectionData in self:CollectionIterator() do
+                numPieces = numPieces + collectionData:GetNumPieces()
+            end
         end
-    else
-        for _, collectionData in self:CollectionIterator() do
-            numPieces = numPieces + collectionData:GetNumPieces()
-        end
+        self.numPieces = numPieces
     end
     return numPieces
 end
 
 function ZO_ItemSetCollectionCategoryData:GetNumUnlockedPieces()
-    local numUnlockedPieces = 0
-    if self:HasSubcategories() then
-        for _, subcategoryData in self:SubcategoryIterator() do
-            numUnlockedPieces = numUnlockedPieces + subcategoryData:GetNumUnlockedPieces()
+    local numUnlockedPieces = self.numUnlockedPieces
+    if not numUnlockedPieces then
+        numUnlockedPieces = 0
+        if self:HasSubcategories() then
+            for _, subcategoryData in self:SubcategoryIterator() do
+                numUnlockedPieces = numUnlockedPieces + subcategoryData:GetNumUnlockedPieces()
+            end
+        else
+            for _, collectionData in self:CollectionIterator() do
+                numUnlockedPieces = numUnlockedPieces + collectionData:GetNumUnlockedPieces()
+            end
         end
-    else
-        for _, collectionData in self:CollectionIterator() do
-            numUnlockedPieces = numUnlockedPieces + collectionData:GetNumUnlockedPieces()
-        end
+        self.numUnlockedPieces = numUnlockedPieces
     end
     return numUnlockedPieces
 end
 
 -- Minor optimization over calling the two functions independently
 function ZO_ItemSetCollectionCategoryData:GetNumUnlockedAndTotalPieces()
-    local numUnlockedPieces = 0
-    local numTotalPieces = 0
-    if self:HasSubcategories() then
-        for _, subcategoryData in self:SubcategoryIterator() do
-            local numUnlockedSubcategoryPieces, numTotalSubcategoryPieces = subcategoryData:GetNumUnlockedAndTotalPieces()
-            numUnlockedPieces = numUnlockedPieces + numUnlockedSubcategoryPieces
-            numTotalPieces = numTotalPieces + numTotalSubcategoryPieces
+    local numPieces = self.numPieces
+    local numUnlockedPieces = self.numUnlockedPieces
+    if not (numUnlockedPieces or numPieces) then
+        numPieces, numUnlockedPieces = 0, 0
+        if self:HasSubcategories() then
+            for _, subcategoryData in self:SubcategoryIterator() do
+                local numUnlockedSubcategoryPieces, numTotalSubcategoryPieces = subcategoryData:GetNumUnlockedAndTotalPieces()
+                numUnlockedPieces = numUnlockedPieces + numUnlockedSubcategoryPieces
+                numPieces = numPieces + numTotalSubcategoryPieces
+            end
+        else
+            for _, collectionData in self:CollectionIterator() do
+                numUnlockedPieces = numUnlockedPieces + collectionData:GetNumUnlockedPieces()
+                numPieces = numPieces + collectionData:GetNumPieces()
+            end
         end
-    else
-        for _, collectionData in self:CollectionIterator() do
-            numUnlockedPieces = numUnlockedPieces + collectionData:GetNumUnlockedPieces()
-            numTotalPieces = numTotalPieces + collectionData:GetNumPieces()
-        end
+        self.numUnlockedPieces = numUnlockedPieces
+        self.numPieces = numPieces
+    elseif not numUnlockedPieces then
+        numUnlockedPieces = self:GetNumUnlockedPieces()
+    elseif not numPieces then
+        numPieces = self:GetNumPieces()
     end
-    return numUnlockedPieces, numTotalPieces
+    return numUnlockedPieces, numPieces
+end
+
+function ZO_ItemSetCollectionCategoryData:InvalidateCacheData()
+    self.numUnlockedPieces = nil
+    for _, subcategoryData in self:SubcategoryIterator() do
+        subcategoryData:InvalidateCacheData()
+    end
 end
 
 do
@@ -590,6 +614,9 @@ function ZO_ItemSetCollectionCategoryData:Equals(otherItemSetCollectionCategoryD
 end
 
 function ZO_ItemSetCollectionCategoryData:CompareTo(otherItemSetCollectionCategoryData)
+    if self:IsInstanceOf(ZO_ItemSetCollectionSummaryCategoryData) then
+        return not otherItemSetCollectionCategoryData:IsInstanceOf(ZO_ItemSetCollectionSummaryCategoryData)
+    end
     local order = self:GetOrder()
     local otherOrder = otherItemSetCollectionCategoryData:GetOrder()
     return order < otherOrder or (order == otherOrder and self:GetName() < otherItemSetCollectionCategoryData:GetName())
@@ -635,3 +662,40 @@ function ZO_ItemSetCollectionCategoryData:AnyChildPassesFilters(pieceFilterFunct
     end
     return false
 end
+
+-- Summary Category --
+
+ZO_ItemSetCollectionSummaryCategoryData = ZO_ItemSetCollectionCategoryData:Subclass()
+
+function ZO_ItemSetCollectionSummaryCategoryData:AnyChildPassesFilters(pieceFilterFunctions)
+    -- Ensure that this top-level category appears in the list despite having no valid children.
+    return true
+end
+
+function ZO_ItemSetCollectionSummaryCategoryData:GetGamepadIcon()
+    return "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_itemSetCollections.dds"
+end
+
+function ZO_ItemSetCollectionSummaryCategoryData:GetKeyboardIcons()
+    local UP_ICON = "EsoUI/Art/Collections/collections_tabIcon_itemSets_up.dds"
+    local DOWN_ICON = "EsoUI/Art/Collections/collections_tabIcon_itemSets_down.dds"
+    local OVER_ICON = "EsoUI/Art/Collections/collections_tabIcon_itemSets_over.dds"
+    return UP_ICON, DOWN_ICON, OVER_ICON
+end
+
+function ZO_ItemSetCollectionSummaryCategoryData:GetName()
+    return GetString(SI_ITEM_SET_CATEGORY_SUMMARY_LABEL)
+end
+
+function ZO_ItemSetCollectionSummaryCategoryData:GetNumUnlockedAndTotalPieces()
+    local numUnlockedPieces, numPieces = 0, 0
+    for _, topLevelCategoryData in ITEM_SET_COLLECTIONS_DATA_MANAGER:TopLevelItemSetCollectionCategoryIterator() do
+        local categoryUnlockedPieces, categoryPieces = topLevelCategoryData:GetNumUnlockedAndTotalPieces()
+        numUnlockedPieces = numUnlockedPieces + categoryUnlockedPieces
+        numPieces = numPieces + categoryPieces
+    end
+    return numUnlockedPieces, numPieces
+end
+
+local SUMMARY_CATEGORY_ID = 0
+ITEM_SET_COLLECTIONS_SUMMARY_CATEGORY_DATA = ZO_ItemSetCollectionSummaryCategoryData:New(SUMMARY_CATEGORY_ID)

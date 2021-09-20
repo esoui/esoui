@@ -64,10 +64,6 @@ local function GetCategoryInfoFromAchievementIdDetailed(achievementId)
     return nil
 end
 
-function ZO_Achievements_Gamepad:New(...)
-    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
-end
-
 function ZO_Achievements_Gamepad:Initialize(control)
     ACHIEVEMENTS_GAMEPAD_SCENE = ZO_Scene:New("achievementsGamepad", SCENE_MANAGER)
 
@@ -85,7 +81,8 @@ function ZO_Achievements_Gamepad:Initialize(control)
     self.footerBarValue = ZO_Gamepad_Achievements_FooterBar:GetNamedChild("Rank")
     self.footerBarBar = ZO_Gamepad_Achievements_FooterBar:GetNamedChild("XPBar")
 
-    self.headerData = {
+    self.headerData =
+    {
         titleText = GetString(SI_JOURNAL_MENU_ACHIEVEMENTS),
     }
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
@@ -116,7 +113,7 @@ local function CreateAchievementSlot(parent, previous, index)
 end
 
 local function CanFocusAchievement(control)
-    return (control.achievementId ~= nil)
+    return control.achievementId ~= nil
 end
 
 local function AchievementControlActivate(control)
@@ -137,17 +134,18 @@ local function SetupAchievementList(parentControl, numEntries, controllers, canF
     local controls = {}
 
     local previous
-    for i=1, numEntries do
+    for i = 1, numEntries do
         local control = CreateAchievementSlot(parentControl, previous, i)
         table.insert(controls, control)
 
-        local focusEntry = {
-                control = control,
-                canFocus = canFocusFunction,
-                activate = AchievementControlActivate,
-                deactivate = AchievementControlDectivate,
-                iconScaleAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_Gamepad_Achievement_FocusIconScaleAnimation", control.icon),
-            }
+        local focusEntry =
+        {
+            control = control,
+            canFocus = canFocusFunction,
+            activate = AchievementControlActivate,
+            deactivate = AchievementControlDectivate,
+            iconScaleAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_Gamepad_Achievement_FocusIconScaleAnimation", control.icon),
+        }
 
         focus:AddEntry(focusEntry)
         previous = control
@@ -187,11 +185,11 @@ function ZO_Achievements_Gamepad:InitializeEvents()
             end
         end
     end
-    
+
     local function Update()
         self:Update()
     end
-    
+
     self.control:RegisterForEvent(EVENT_ACHIEVEMENTS_UPDATED, Update)
     self.control:RegisterForEvent(EVENT_ACHIEVEMENT_UPDATED, OnAchievementUpdated)
     self.control:RegisterForEvent(EVENT_ACHIEVEMENT_AWARDED, Update)
@@ -241,7 +239,7 @@ function ZO_Achievements_Gamepad:AchievementListSelectionChanged(list, entry)
 end
 
 function ZO_Achievements_Gamepad:RefreshRecentAchievements()
-    local recentAchievements = {GetRecentlyCompletedAchievements(NUM_RECENT_ACHIEVEMENTS_TO_SHOW)}
+    local recentAchievements = { GetRecentlyCompletedAchievements(NUM_RECENT_ACHIEVEMENTS_TO_SHOW) }
     for i = 1, NUM_RECENT_ACHIEVEMENTS_TO_SHOW do
         local control = self.recentAchievementControls[i]
         local achievementId = recentAchievements[i]
@@ -294,7 +292,7 @@ function ZO_Achievements_Gamepad:SwitchToFilterMode(newMode)
     self.filterType = newMode
 
     -- Update the icons displayed in the options dialog.
-    for i=1, #self.dialogFilterEntries do
+    for i = 1, #self.dialogFilterEntries do
         local filterEntry = self.dialogFilterEntries[i]
         filterEntry:ClearIcons()
         if filterEntry.filterType == newMode then
@@ -328,8 +326,13 @@ function ZO_Achievements_Gamepad:InitializeOptionsDialog()
     local showAllAchievements = CreateEntry(SI_ACHIEVEMENT_FILTER_SHOW_ALL)
     local showEarnedAchievements = CreateEntry(SI_ACHIEVEMENT_FILTER_SHOW_EARNED)
     local showUnearnedAchievements = CreateEntry(SI_ACHIEVEMENT_FILTER_SHOW_UNEARNED)
-    
-    self.dialogFilterEntries = {showAllAchievements, showEarnedAchievements, showUnearnedAchievements}
+
+    self.dialogFilterEntries =
+    {
+        showAllAchievements,
+        showEarnedAchievements,
+        showUnearnedAchievements
+    }
 
     ZO_Dialogs_RegisterCustomDialog("ACHIEVEMENTS_OPTIONS_GAMEPAD",
     {
@@ -398,32 +401,32 @@ function ZO_Achievements_Gamepad:InitializeKeybindStripDescriptors()
 
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
-                if self.visibleCategoryId then
-                    self.visibleCategoryId = nil
-                    self.achievementId = nil
-                    self:Update()
-                    PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
-                else
-                    SCENE_MANAGER:HideCurrentScene()
-                end
-            end),
+            if self.visibleCategoryId then
+                self.visibleCategoryId = nil
+                self.achievementId = nil
+                self:Update()
+                PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+            else
+                SCENE_MANAGER:HideCurrentScene()
+            end
+        end),
 
         -- Select
         {
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                    local targetData = self.itemList:GetTargetData()
-                    self:SwitchToCategoryAndAchievement(targetData.categoryIndex, targetData.achievementId)
-                end,
+                local targetData = self.itemList:GetTargetData()
+                self:SwitchToCategoryAndAchievement(targetData.categoryIndex, targetData.achievementId)
+            end,
             visible = function()
-                    if self.recentAchievementFocus.active then
-                        return false
-                    else
-                        local targetData = self.itemList:GetTargetData()
-                        return targetData and targetData.canEnter
-                    end
-                end,
+                if self.recentAchievementFocus.active then
+                    return false
+                else
+                    local targetData = self.itemList:GetTargetData()
+                    return targetData and targetData.canEnter
+                end
+            end,
             sound = SOUNDS.GAMEPAD_MENU_FORWARD,
         },
 

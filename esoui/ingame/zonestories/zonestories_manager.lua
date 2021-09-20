@@ -130,23 +130,10 @@ function ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(zoneId, comp
     local totalActivities = 0
     local numUnblockedActivities = 0
     local blockingBranchErrorStringId = 0
-    if completionType == ZONE_COMPLETION_TYPE_SKYSHARDS then
-        local numAchievements = GetNumZoneActivitiesForZoneCompletionType(zoneId, completionType)
-        for achievementIndex = 1, numAchievements do
-            local achievementId = GetZoneActivityIdForZoneCompletionType(zoneId, completionType, achievementIndex)
-            local numCriteria = GetAchievementNumCriteria(achievementId)
-            for criterionIndex = 1, numCriteria do
-                local _, numCompleted, numRequired = GetAchievementCriterion(achievementId, criterionIndex)
-                numCompletedActivities = numCompletedActivities + numCompleted
-                totalActivities = totalActivities + numRequired
-            end
-        end
-        numUnblockedActivities = totalActivities
-    else
-        numCompletedActivities = GetNumCompletedZoneActivitiesForZoneCompletionType(zoneId, completionType)
-        totalActivities = GetNumZoneActivitiesForZoneCompletionType(zoneId, completionType)
-        numUnblockedActivities, blockingBranchErrorStringId = GetNumUnblockedZoneStoryActivitiesForZoneCompletionType(zoneId, completionType)
-    end
+    
+    numCompletedActivities = GetNumCompletedZoneActivitiesForZoneCompletionType(zoneId, completionType)
+    totalActivities = GetNumZoneActivitiesForZoneCompletionType(zoneId, completionType)
+    numUnblockedActivities, blockingBranchErrorStringId = GetNumUnblockedZoneStoryActivitiesForZoneCompletionType(zoneId, completionType)
 
     return numCompletedActivities, totalActivities, numUnblockedActivities, blockingBranchErrorStringId
 end

@@ -263,10 +263,6 @@ function ZO_GamepadChatSystem:InitializeEventManagement()
         EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
         EVENT_MANAGER:AddFilterForEvent("GamepadChatSystem", EVENT_INTERFACE_SETTING_CHANGED, REGISTER_FILTER_SETTING_SYSTEM_TYPE, SETTING_TYPE_UI)
 
-        local FADE_IN_OVER_TRACKER = true
-        CALLBACK_MANAGER:RegisterCallback("QuestTrackerUpdatedOnScreen", function() self:TryFadeOut() end)
-        CALLBACK_MANAGER:RegisterCallback("QuestTrackerUpdatedOnScreen", function() self:TryFadeIn() end)
-        CALLBACK_MANAGER:RegisterCallback("QuestTrackerFadedOutOnScreen", function() self:TryFadeIn(FADE_IN_OVER_TRACKER) end)
         CALLBACK_MANAGER:RegisterCallback("OnChatChannelUpdated", OnChatChannelUpdated)
     end
 end
@@ -402,20 +398,6 @@ function ZO_GamepadChatSystem:FadeOutWindowContainers(minAlpha)
     end
 end
 
-function ZO_GamepadChatSystem:TryFadeOut()
-    if not self.isMinimized and FOCUSED_QUEST_TRACKER:IsOverlappingTextChat() then
-        self:HideWhenDeactivated(nil, FADE_TEXT, TEXT_OPACITY_WHEN_CLIPPING_QUEST_TRACKER)
-        self:FadeOutWindowContainers(TEXT_OPACITY_WHEN_CLIPPING_QUEST_TRACKER)
-        self.hasFocus = false
-    end
-end
-
-function ZO_GamepadChatSystem:TryFadeIn(forceFadeIn)
-    if not self.isMinimized and not self.hasFocus and (forceFadeIn or not FOCUSED_QUEST_TRACKER:IsOverlappingTextChat()) then
-        self:Maximize()
-    end
-end
-
 function ZO_GamepadChatSystem:StartVisibilityTimer()
     local secondsToExpire = ZO_GAMEPAD_CHAT_SYSTEM_SECONDS_VISIBLE_UNPINNED
 
@@ -485,7 +467,7 @@ function ZO_GamepadChatSystem:IsHidden()
         return true
     end
 
-    -- On platforms with both chat systems (currently only heron), hide on the opposite UI mode
+    -- On platforms with both chat systems, hide on the opposite UI mode
     if ZO_ChatSystem_DoesPlatformUseGamepadChatSystem() and not IsInGamepadPreferredMode() then
         return true
     end

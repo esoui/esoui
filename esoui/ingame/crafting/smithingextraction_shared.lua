@@ -264,9 +264,34 @@ end
 
 function ZO_SharedSmithingExtraction:ConfirmExtractAll()
     if not self:IsMultiExtract() then
-        -- single extracts do not need a confirmation dialog
-        self:ExtractSingle()
+        local bagId, slotIndex = self.extractionSlot:GetItemBagAndSlot(1)
+        if IsItemInArmory(bagId, slotIndex) then
+            local dialogData =
+            {
+                deconstructFn = function()
+                    self:ExtractAll()
+                end,
+                verb = self:IsInRefineMode() and DECONSTRUCT_ACTION_NAME_REFINE or DECONSTRUCT_ACTION_NAME_DECONSTRUCT,
+            }
+            if IsInGamepadPreferredMode() then
+                ZO_Dialogs_ShowPlatformDialog("CONFIRM_DECONSTRUCT_ARMORY_ITEM_GAMEPAD", dialogData, { mainTextParams = { ZO_CommaDelimitNumber(self.extractionSlot:GetStackCount()) } })
+            else
+                ZO_Dialogs_ShowPlatformDialog("CONFIRM_DECONSTRUCT_ARMORY_ITEM", dialogData, { mainTextParams = { ZO_CommaDelimitNumber(self.extractionSlot:GetStackCount()) } })
+            end
+        else
+            -- single extracts do not need a confirmation dialog
+            self:ExtractSingle()
+        end
         return
+    end
+
+    local isAnyItemInArmoryBuild = false
+    for index = 1, self.extractionSlot:GetNumItems() do
+        local bagId, slotIndex = self.extractionSlot:GetItemBagAndSlot(index)
+        if IsItemInArmory(bagId, slotIndex) then
+            isAnyItemInArmoryBuild = true
+            break
+        end
     end
 
     local dialogData =
@@ -275,8 +300,14 @@ function ZO_SharedSmithingExtraction:ConfirmExtractAll()
             self:ExtractAll()
         end,
         verb = self:IsInRefineMode() and DECONSTRUCT_ACTION_NAME_REFINE or DECONSTRUCT_ACTION_NAME_DECONSTRUCT,
+        isAnyItemInArmoryBuild = isAnyItemInArmoryBuild,
     }
-    ZO_Dialogs_ShowPlatformDialog("CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS", dialogData, {mainTextParams = {ZO_CommaDelimitNumber(self.extractionSlot:GetStackCount())}})
+
+    if not IsInGamepadPreferredMode() and isAnyItemInArmoryBuild then
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_MULTI_DECONSTRUCT_ARMORY_ITEM", dialogData, { mainTextParams = { ZO_CommaDelimitNumber(self.extractionSlot:GetStackCount()) } })
+    else
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS", dialogData, { mainTextParams = { ZO_CommaDelimitNumber(self.extractionSlot:GetStackCount()) } })
+    end
 end
 
 function ZO_SharedSmithingExtraction:IsExtractable()

@@ -18,9 +18,31 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_KeybindStripRightScrollKeybind" inherits="ZO_KeybindButton" virtual="true"/>
-      
-        <Control name="ZO_KeybindStripLeftSlideKeybind" inherits="ZO_KeybindButton" virtual="true" />
+        <Control name="ZO_KeybindStripRightScrollKeybind" inherits="ZO_KeybindButton" virtual="true" />
+
+        <Control name="ZO_KeybindStripLeftSlideKeybind" inherits="ZO_KeybindButton" virtual="true">
+            <Controls>
+                <Label name="$(parent)RightKeyLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)KeyLabel" relativePoint="RIGHT" offsetX="-15" />
+                    <Controls>
+                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_menu_rightArrow.dds" layer="TEXT" >
+                            <Dimensions x="24" y="24" />
+                            <Anchor point="LEFT" relativePoint="RIGHT" />
+                        </Texture>
+                    </Controls>
+                </Label>
+
+                <Label name="$(parent)LeftKeyLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)RightKeyLabel" relativePoint="LEFT" offsetX="-15" />
+                    <Controls>
+                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_menu_rightArrow.dds" textureCoordsRotation="3.141" layer="TEXT" >
+                            <Dimensions x="24" y="24" />
+                            <Anchor point="RIGHT" relativePoint="LEFT" />
+                        </Texture>
+                    </Controls>
+                </Label>
+            </Controls>
+        </Control>
 
         <!-- The Keybind strip Initialize assumes that these backgrounds exist -->
         <TopLevelControl name="ZO_KeybindStripMungeBackground" layer="BACKGROUND" hidden="true">
@@ -45,7 +67,7 @@
             </Controls>
         </TopLevelControl>
 
-        <TopLevelControl name="ZO_KeybindStripControl" hidden="true" allowBringToTop="false" tier="MEDIUM">
+        <TopLevelControl name="ZO_KeybindStripControl" hidden="true" allowBringToTop="false" tier="MEDIUM" level="ZO_MEDIUM_TIER_KEYBIND_STRIP">
             <Dimensions y="55" />
             <Anchor point="BOTTOMLEFT" />
             <Anchor point="BOTTOMRIGHT" />

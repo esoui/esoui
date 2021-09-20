@@ -42,6 +42,7 @@ function ZO_CharacterSelect_EventBanner_Shared:OnStateChanged(oldState, newState
 end
 
 function ZO_CharacterSelect_EventBanner_Shared:OnShowing()
+    PlaySound(SOUNDS.DEFAULT_WINDOW_OPEN)
     self:PopulateCarousel()
     self.carousel:Activate()
 end
@@ -51,6 +52,7 @@ function ZO_CharacterSelect_EventBanner_Shared:OnShown()
 end
 
 function ZO_CharacterSelect_EventBanner_Shared:OnHiding()
+    PlaySound(SOUNDS.DEFAULT_WINDOW_CLOSE)
     self.carousel:Deactivate()
     CHARACTER_SELECT_MANAGER:UpdateLastSeenTimestamp()
     ZO_SavePlayerConsoleProfile()
@@ -95,5 +97,6 @@ function ZO_CharacterSelect_EventBanner_Shared:PopulateCarousel()
 end
 
 function ZO_CharacterSelect_EventBanner_Shared:OnEventBannerCloseKeybind()
+    PlaySound(SOUNDS.DIALOG_ACCEPT)
     SCENE_MANAGER:RemoveFragment(self:GetFragment())
 end

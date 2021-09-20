@@ -1,12 +1,6 @@
 --[[ Character Create Slider ]]--
 
-ZO_CharacterCreateSlider_Base = ZO_Object:Subclass()
-
-function ZO_CharacterCreateSlider_Base:New(...)
-    local slider = ZO_Object.New(self)
-    slider:Initialize(...)
-    return slider
-end
+ZO_CharacterCreateSlider_Base = ZO_InitializingObject:Subclass()
 
 function ZO_CharacterCreateSlider_Base:Initialize(control)
     control.sliderObject = self
@@ -159,7 +153,7 @@ function ZO_CharacterCreateAppearanceSlider:SetData(appearanceName, numValues, d
     self.category = appearanceName
 
     self:SetName(displayName, "SI_CHARACTERAPPEARANCENAME", appearanceName)
-    
+
     self.legalInitialSettings = {}
 
     for appearanceIndex =  1, numValues do

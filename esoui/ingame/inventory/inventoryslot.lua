@@ -444,15 +444,23 @@ do
                 local icon, _, _, _, _, _, _, _, displayQuality = GetItemInfo(bag, index)
 
                 local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
-                local nameControl = GetControl(rowControl, "Name")
+                local nameControl = rowControl:GetNamedChild("Name")
                 nameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bag, index)))
                 nameControl:SetColor(r, g, b, 1)
 
-                local inventorySlot = GetControl(rowControl, "Button")
+                local inventorySlot = rowControl:GetNamedChild("Button")
                 ZO_Inventory_BindSlot(inventorySlot, SLOT_TYPE_LIST_DIALOG_ITEM, index, bag)
                 ZO_Inventory_SetupSlot(inventorySlot, slotInfo.stack, icon)
 
-                GetControl(rowControl, "Selected"):SetHidden(g_listDialog:GetSelectedItem() ~= slotInfo)
+                rowControl:GetNamedChild("Selected"):SetHidden(g_listDialog:GetSelectedItem() ~= slotInfo)
+
+                local statusTextureControl = rowControl:GetNamedChild("StatusTexture")
+                if IsItemInArmory(bag, index) then
+                    statusTextureControl:SetTexture(ZO_IN_ARMORY_BUILD_ICON)
+                    statusTextureControl:SetHidden(false)
+                else
+                    statusTextureControl:SetHidden(true)
+                end
 
                 if g_listDialog:GetSelectedItem() then
                     g_listDialog:SetFirstButtonEnabled(true)
@@ -953,6 +961,10 @@ local function TrySellItem(inventorySlot)
 
             if SCENE_MANAGER:IsShowing("fence_keyboard") and itemData.functionalQuality >= ITEM_FUNCTIONAL_QUALITY_ARTIFACT then
                 ZO_Dialogs_ShowDialog("CANT_BUYBACK_FROM_FENCE", itemData)
+            elseif IsItemInArmory(itemData.bag, itemData.slot) then
+                local armoryBuildList = { GetItemArmoryBuildList(itemData.bag, itemData.slot) }
+                local buildListString = ZO_GenerateCommaSeparatedList(armoryBuildList)
+                ZO_Dialogs_ShowDialog("CONFIRM_SELL_ARMORY_ITEM_PROMPT", itemData, { mainTextParams = { ZO_SELECTED_TEXT:Colorize(buildListString), #armoryBuildList }})
             else
                 SellInventoryItem(itemData.bag, itemData.slot, itemData.stackCount)
             end
@@ -3016,6 +3028,9 @@ do
         end
         if slotData.bagId == BAG_WORN then
             table.insert(g_tooltipLines, GetString(SI_INVENTORY_EQUIPPED_ITEM_TOOLTIP))
+        end
+        if slotData.isInArmory then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_ARMORY_BUILD_ITEM_TOOLTIP))
         end
 
         if #g_tooltipLines > 0 then

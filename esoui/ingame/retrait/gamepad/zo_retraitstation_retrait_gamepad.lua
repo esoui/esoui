@@ -435,7 +435,13 @@ do
             local creatorName = GetItemCreatorName(bagId, slotIndex)
             local showPlayerLocked = IsItemPlayerLocked(bagId, slotIndex)
 
-            self.sourceTooltip.tip:LayoutItemWithStackCount(itemLink, equipped, creatorName, DONT_FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, CUSTOM_STACK_COUNT, equipSlot, showPlayerLocked, NO_TRADE_BOP_DATA)
+            local extraData =
+            {
+                bagId = bagId,
+                slotIndex = slotIndex
+            }
+
+            self.sourceTooltip.tip:LayoutItemWithStackCount(itemLink, equipped, creatorName, DONT_FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, CUSTOM_STACK_COUNT, equipSlot, showPlayerLocked, NO_TRADE_BOP_DATA, extraData)
             self.sourceTooltip.icon:SetTexture(itemData.pressedIcon)
         end
         self.sourceTooltip:SetHidden(not itemData)
@@ -455,6 +461,8 @@ do
             local extraData =
             {
                 showTraitAsNew = true,
+                bagId = bagId,
+                slotIndex = slotIndex,
             }
             local CUSTOM_STACK_COUNT = 1
             self.resultTooltip.tip:LayoutItemWithStackCount(resultItemLink, equipped, creatorName, DONT_FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, CUSTOM_STACK_COUNT, equipSlot, showPlayerLocked, NO_TRADE_BOP_DATA, extraData)

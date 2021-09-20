@@ -291,6 +291,14 @@ do
     end
     FRAME_INTERACTION_QUADRANT_4_GAMEPAD_FRAGMENT = ZO_InteractionFramingFragment:New(CalculateGamepadQuadrant4FramingTarget)
     FRAME_TARGET_BLUR_QUADRANT_4_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadQuadrant4FramingTarget)
+
+    local function CalculateGamepadQuadrant34FramingTarget()
+        local x = zo_lerp(ZO_SharedGamepadNavQuadrant_3_Background:GetLeft(), ZO_SharedGamepadNavQuadrant_4_Background:GetRight(), 0.725)
+        local y = zo_lerp(ZO_TopBarBackground:GetBottom(), ZO_KeybindStripMungeBackgroundTexture:GetTop(), 0.55)
+        return x, y
+    end
+    FRAME_INTERACTION_QUADRANT_3_4_GAMEPAD_FRAGMENT = ZO_InteractionFramingFragment:New(CalculateGamepadQuadrant34FramingTarget)
+    FRAME_TARGET_BLUR_QUADRANT_3_4_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadQuadrant34FramingTarget)
 end
 
 ------------------------

@@ -121,11 +121,9 @@ function ZO_GameMenu_InGame_Initialize(self)
     local gameMenuIngameFragment = ZO_FadeSceneFragment:New(self)
     gameMenuIngameFragment:RegisterCallback("StateChange",   function(oldState, newState)
                                             if(newState == SCENE_FRAGMENT_SHOWING) then
-                                                KEYBIND_STRIP:RemoveDefaultExit()
                                                 PushActionLayerByName("GameMenu")
                                             elseif(newState == SCENE_FRAGMENT_HIDING) then
                                                 RemoveActionLayerByName("GameMenu")
-                                                KEYBIND_STRIP:RestoreDefaultExit()
                                             end
                                         end)
 

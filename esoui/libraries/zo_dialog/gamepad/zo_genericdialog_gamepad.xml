@@ -19,16 +19,7 @@
 
         <Control name="ZO_GamepadTextFieldItem" inherits="ZO_Gamepad_TextEditEntry_FullWidth" virtual="true">
             <OnInitialized>
-                ZO_SharedGamepadEntry_OnInitialized(self)
-                self.textFieldControl = self:GetNamedChild("TextField")
-                self.editBoxControl = self.textFieldControl:GetNamedChild("Edit")
-                self.textControl = self.editBoxControl:GetNamedChild("Text")
-                self.highlight = self:GetNamedChild("Highlight")
-
-                self.resetFunction = function()
-                    self.editBoxControl.textChangedCallback = nil
-                    self.editBoxControl:SetText("")
-                end
+                ZO_GamepadTextFieldItem_OnInitialized(self)
             </OnInitialized>
             <Controls>
                 <Backdrop name="$(parent)TextField" override="true">
@@ -189,7 +180,7 @@
                             <Anchor point="TOPLEFT" />
                             <Anchor point="TOPRIGHT" />
                             <Controls>
-                                <Label name="$(parent)MainText" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                <Label name="$(parent)MainText" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                                     <Anchor point="TOPLEFT" />
                                     <Anchor point="TOPRIGHT" />
                                 </Label>
@@ -218,6 +209,8 @@
                             </Controls>
                         </Control>
                         <Texture name="$(parent)ScrollIndicator" override="true" tier="HIGH"/>
+                        <Label name="$(parent)ScrollKeyUp" override="true" tier="HIGH"/>
+                        <Label name="$(parent)ScrollKeyDown" override="true" tier="HIGH"/>
                     </Controls>
                 </Control>
             </Controls>
@@ -337,7 +330,7 @@
                         <Control name="$(parent)ScrollChild" override="true">
                             <Anchor point="TOPLEFT" />
                             <Controls>
-                                <Label name="$(parent)MainText" font="ZoFontGamepadCondensed42"  lineSpacing="9" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                                <Label name="$(parent)MainText" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGamepadCondensed42"  lineSpacing="9" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
                                     <Anchor point="TOPLEFT" />
                                     <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="734" />
                                 </Label>
@@ -350,9 +343,9 @@
                     </Controls>
                 </Control>
 
-                <Label name="$(parent)InteractKeybind" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" >
+                <Control name="$(parent)InteractKeybind" inherits="ZO_KeybindButton_Gamepad">
                     <Anchor point="CENTER" relativePoint="BOTTOM" offsetY="-48" />
-                </Label>
+                </Control>
             </Controls>
         </TopLevelControl>
 

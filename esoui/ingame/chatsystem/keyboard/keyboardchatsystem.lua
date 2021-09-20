@@ -144,7 +144,7 @@ function ZO_ChatSystem:InitializeSharedControlManagement(control)
     self.mailBurstTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("NotificationAddedBurst", mailBurst)
     self.mailBurstTimeline:SetHandler("OnStop", function() mailBurst:SetAlpha(0) end)
 
-    -- Setup the minmizied bar
+    -- Setup the minimized bar
     self.minBar = control:GetNamedChild("MinBar")
     self.minBar:SetInheritAlpha(false)
     self.minBar.maxButton = self.minBar:GetNamedChild("Maximize")
@@ -441,7 +441,7 @@ function ZO_ChatSystem:IsHidden()
         return true
     end
 
-    -- On platforms with both chat systems (currently only heron), hide on the opposite UI mode
+    -- On platforms with both chat systems, hide on the opposite UI mode
     if ZO_ChatSystem_DoesPlatformUseGamepadChatSystem() and IsInGamepadPreferredMode() then
         return true
     end
@@ -530,7 +530,7 @@ function ZO_ChatSystem_OnInitialized(control)
     SYSTEMS:RegisterKeyboardObject("ChatSystem", KEYBOARD_CHAT_SYSTEM)
 
     if not ZO_ChatSystem_DoesPlatformUseGamepadChatSystem() then
-        -- On PC platforms, we do not load a gamepad chat system. Let's reuse the keyboard system instead.
+        -- On platforms that do not support gamepad chat, we do not load a gamepad chat system. Let's reuse the keyboard system instead.
         GAMEPAD_CHAT_SYSTEM = KEYBOARD_CHAT_SYSTEM
         SYSTEMS:RegisterGamepadObject("ChatSystem", KEYBOARD_CHAT_SYSTEM)
     end

@@ -1,9 +1,5 @@
 ZO_SmithingResearch = ZO_SharedSmithingResearch:Subclass()
 
-function ZO_SmithingResearch:New(...)
-    return ZO_SharedSmithingResearch.New(self, ...)
-end
-
 function ZO_SmithingResearch:Initialize(control, owner)
     ZO_SharedSmithingResearch.Initialize(self, control, owner, "ZO_SmithingResearchSlot")
 
@@ -144,7 +140,8 @@ function ZO_SmithingResearch:Research(overrideRow)
 end
 
 do
-    local TRAIT_COLORS = {
+    local TRAIT_COLORS =
+    {
         ZO_SELECTED_TEXT,
         ZO_NORMAL_TEXT,
     }
@@ -182,17 +179,17 @@ function ZO_SmithingResearch:SetupTraitDisplay(slotControl, researchLine, known,
     elseif duration then
         slotControl.statusLabel:SetText(GetString(SI_SMITHING_RESEARCH_IN_PROGRESS))
         slotControl.statusLabel:SetColor(ZO_SECOND_CONTRAST_TEXT:UnpackRGBA())
-		slotControl.nameLabel:SetColor(ZO_SECOND_CONTRAST_TEXT:UnpackRGBA())
+        slotControl.nameLabel:SetColor(ZO_SECOND_CONTRAST_TEXT:UnpackRGBA())
         slotControl.lockIcon:SetHidden(true)
         slotControl.timerIcon:SetHidden(false)
-		slotControl.timerIcon:SetAlpha(1)
-		slotControl.timerIcon:SetColor(ZO_SECOND_CONTRAST_TEXT:UnpackRGBA())
+        slotControl.timerIcon:SetAlpha(1)
+        slotControl.timerIcon:SetColor(ZO_SECOND_CONTRAST_TEXT:UnpackRGBA())
     elseif researchLine.itemTraitCounts and researchLine.itemTraitCounts[traitIndex] then
         slotControl.statusLabel:SetText(GetString(SI_SMITHING_RESEARCH_RESEARCHABLE))
         slotControl.statusLabel:SetColor(normalColor:UnpackRGBA())
         slotControl.researchable = true
         slotControl.lockIcon:SetHidden(true)
-		slotControl.nameLabel:SetColor(normalColor:UnpackRGBA())
+        slotControl.nameLabel:SetColor(normalColor:UnpackRGBA())
         slotControl.timerIcon:SetHidden(true)
     else
         slotControl.statusLabel:SetText(GetString(SI_SMITHING_RESEARCH_UNKNOWN))
@@ -212,10 +209,6 @@ end
 
 ZO_SmithingResearchSelect = ZO_SharedSmithingResearchSelect:Subclass()
 
-function ZO_SmithingResearchSelect:New(...)
-    return ZO_SharedSmithingResearchSelect.New(self, ...)
-end
-
 function ZO_SmithingResearchSelect:Initialize(control)
     ZO_SharedSmithingResearchSelect.Initialize(self, control)
 
@@ -227,7 +220,7 @@ function ZO_SmithingResearchSelect:Initialize(control)
         title =
         {
             text = SI_SMITHING_RESEARCH_DIALOG_TITLE,
-        },        
+        },
         buttons =
         {
             {
@@ -254,17 +247,29 @@ local function SortComparator(left, right)
     return left.data.name < right.data.name
 end
 
+function ZO_SmithingResearchSelect:OnItemSelected(bagId, slotIndex)
+    if IsItemInArmory(bagId, slotIndex) then
+        local armoryBuildListNames = { GetItemArmoryBuildList(bagId, slotIndex) }
+        local armoryBuildList = ZO_GenerateCommaSeparatedList(armoryBuildListNames)
+        local armoryBuildText = zo_strformat(SI_RESEARCH_ARMORY_EQUIPMENT_NOTICE, ZO_SELECTED_TEXT:Colorize(armoryBuildList), #armoryBuildListNames)
+        local researchText = zo_strformat(SI_SMITHING_RESEARCH_DIALOG_CONSUME, self.formattedTime)
+        self.listDialog:SetBelowText(string.format("|t32:32:%s|t\n%s\n\n%s", ZO_IN_ARMORY_BUILD_ICON, armoryBuildText, researchText))
+    else
+        self.listDialog:SetBelowText(zo_strformat(SI_SMITHING_RESEARCH_DIALOG_CONSUME, self.formattedTime))
+    end
+end
+
 function ZO_SmithingResearchSelect:SetupDialog(craftingType, researchLineIndex, traitIndex)
-    local listDialog = ZO_InventorySlot_GetItemListDialog()
+    self.listDialog = ZO_InventorySlot_GetItemListDialog()
 
     local _, _, _, timeRequiredForNextResearchSecs = GetSmithingResearchLineInfo(craftingType, researchLineIndex)
-    local formattedTime = ZO_FormatTime(timeRequiredForNextResearchSecs, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+    self.formattedTime = ZO_FormatTime(timeRequiredForNextResearchSecs, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
 
-    listDialog:SetAboveText(GetString(SI_SMITHING_RESEARCH_DIALOG_SELECT))
-    listDialog:SetBelowText(zo_strformat(SI_SMITHING_RESEARCH_DIALOG_CONSUME, formattedTime))
-    listDialog:SetEmptyListText("")
+    self.listDialog:SetAboveText(GetString(SI_SMITHING_RESEARCH_DIALOG_SELECT))
+    self.listDialog:SetBelowText(zo_strformat(SI_SMITHING_RESEARCH_DIALOG_CONSUME, self.formattedTime))
+    self.listDialog:SetEmptyListText("")
 
-    listDialog:ClearList()
+    self.listDialog:ClearList()
 
     local function IsResearchableItem(bagId, slotIndex)
         return ZO_SharedSmithingResearch.IsResearchableItem(bagId, slotIndex, craftingType, researchLineIndex, traitIndex)
@@ -277,12 +282,14 @@ function ZO_SmithingResearchSelect:SetupDialog(craftingType, researchLineIndex, 
 
     for itemId, itemInfo in pairs(virtualInventoryList) do
         itemInfo.name = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(itemInfo.bag, itemInfo.index))
-        listDialog:AddListItem(itemInfo)
+        self.listDialog:AddListItem(itemInfo)
     end
 
-    listDialog:CommitList(SortComparator)
+    self.listDialog:CommitList(SortComparator)
 
-    listDialog:AddCustomControl(self.control, LIST_DIALOG_CUSTOM_CONTROL_LOCATION_BOTTOM)
+    self.listDialog:AddCustomControl(self.control, LIST_DIALOG_CUSTOM_CONTROL_LOCATION_BOTTOM)
+
+    self.listDialog:SetOnSelectedCallback(function(selectedData) self:OnItemSelected(selectedData.bag, selectedData.index) end)
 end
 
 --Global XML

@@ -11,8 +11,8 @@ ENCHANTING_MODE_CREATION = 1
 ENCHANTING_MODE_EXTRACTION = 2
 ENCHANTING_MODE_RECIPES = 3
 
-NO_FILTER = -1
-EXTRACTION_FILTER = -2
+ENCHANTING_NO_FILTER = -1
+ENCHANTING_EXTRACTION_FILTER = -2
 
 ZO_ENCHANTING_SYSTEM_NAME = "enchanting"
 
@@ -46,9 +46,9 @@ end
 function ZO_Enchanting_DoesEnchantingItemPassFilter(bagId, slotIndex, filterType, questFilterChecked, questRunes)
     local usedInCraftingType, craftingSubItemType, runeType = GetItemCraftingInfo(bagId, slotIndex)
 
-    if filterType == EXTRACTION_FILTER then
+    if filterType == ENCHANTING_EXTRACTION_FILTER then
         return craftingSubItemType == ITEMTYPE_GLYPH_WEAPON or craftingSubItemType == ITEMTYPE_GLYPH_ARMOR or craftingSubItemType == ITEMTYPE_GLYPH_JEWELRY
-    elseif filterType == NO_FILTER or filterType == runeType then
+    elseif filterType == ENCHANTING_NO_FILTER or filterType == runeType then
         if questFilterChecked then
             local itemId = GetItemId(bagId, slotIndex)
             if questRunes.potency == itemId or questRunes.essence == itemId or questRunes.aspect == itemId then

@@ -42,17 +42,6 @@ local GAMEPAD_ALLOCATE_POINTS_BUTTON_TEMPLATES =
     },
 }
 
-local GAMEPAD_TRIGGER_ALLOCATE_POINTS_BUTTON_TEMPLATES = 
-{
-    SIZE = 55,
-    DECREASE = {
-        KEY_CODE = KEY_GAMEPAD_LEFT_TRIGGER,
-    },
-    INCREASE = {
-        KEY_CODE = KEY_GAMEPAD_RIGHT_TRIGGER,
-    },
-}
-
 function ZO_ChampionStar:Initialize(constellation, parentCluster)
     self.constellation = constellation
     self.parentCluster = parentCluster
@@ -554,7 +543,7 @@ function ZO_ChampionStarEditor:Initialize(pool)
     local DEFAULT_INPUT_MODE = nil
     local DEFAULT_SPINNER_MODE = nil
     local ACCELERATION_TIME_MS = 50
-    self.pointsSpinner = ZO_Spinner:New(self.control, DEFAULT_MIN, DEFAULT_MAX, DEFAULT_INPUT_MODE, DEFAULT_SPINNER_MODE, ACCELERATION_TIME_MS)
+    self.pointsSpinner = ZO_SpinnerWithLabels:New(self.control, DEFAULT_MIN, DEFAULT_MAX, DEFAULT_INPUT_MODE, DEFAULT_SPINNER_MODE, ACCELERATION_TIME_MS)
     self.pointsSpinner:SetPlaySoundFunction(function(spinner, currentValue, oldValue)
         local championSkillData = self.star:GetChampionSkillData()
         local currentJumpPoint = championSkillData:GetJumpPointForValue(currentValue)
@@ -636,13 +625,23 @@ end
 
 function ZO_ChampionStarEditor:OnSelected()
     if IsInGamepadPreferredMode() then
-        self:ApplyButtonTemplatesToSpinner(GAMEPAD_TRIGGER_ALLOCATE_POINTS_BUTTON_TEMPLATES)
+        self.pointsSpinner.decreaseButton:SetHidden(true)
+        self.pointsSpinner.increaseButton:SetHidden(true)
+        if not self.star:IsClusterPortalStar() then
+            self.pointsSpinner.decreaseKeyLabel:SetHidden(false)
+            self.pointsSpinner.increaseKeyLabel:SetHidden(false)
+        end
     end
 end
 
 function ZO_ChampionStarEditor:OnDeselected()
     if IsInGamepadPreferredMode() then
-        self:ApplyButtonTemplatesToSpinner(GAMEPAD_ALLOCATE_POINTS_BUTTON_TEMPLATES)
+        if not self.star:IsClusterPortalStar() then
+            self.pointsSpinner.decreaseButton:SetHidden(false)
+            self.pointsSpinner.increaseButton:SetHidden(false)
+        end
+        self.pointsSpinner.decreaseKeyLabel:SetHidden(true)
+        self.pointsSpinner.increaseKeyLabel:SetHidden(true)
     end
 end
 

@@ -78,13 +78,14 @@ do
         end
 
         self:SortTopLevelCategories()
-        self:FireCallbacks("CollectionsUpdated")
+        self:OnCollectionsUpdated()
     end
 end
 
 function ZO_ItemSetCollectionsDataManager:OnUpdateSlotsJustUnlocked()
     if #self.queuedSlotsJustUnlocked > 0 then
         self:FireCallbacks("SlotsJustUnlocked", self.queuedSlotsJustUnlocked)
+        self:OnCollectionsUpdated()
         ZO_ClearNumericallyIndexedTable(self.queuedSlotsJustUnlocked)
     end
 
@@ -99,8 +100,15 @@ function ZO_ItemSetCollectionsDataManager:GetReconstructionCurrencyOptionTypes()
     return self.reconstructionCurrencyOptionTypes
 end
 
-function ZO_ItemSetCollectionsDataManager:OnCollectionsUpdated()
-    self:FireCallbacks("CollectionsUpdated")
+function ZO_ItemSetCollectionsDataManager:InvalidateCacheData()
+    for _, itemSetCollectionCategoryData in ipairs(self.topLevelCategories) do
+        itemSetCollectionCategoryData:InvalidateCacheData()
+    end
+end
+
+function ZO_ItemSetCollectionsDataManager:OnCollectionsUpdated(itemSetIds)
+    self:InvalidateCacheData()
+    self:FireCallbacks("CollectionsUpdated", itemSetIds)
 end
 
 function ZO_ItemSetCollectionsDataManager:OnCollectionUpdated(itemSetId, slotsJustUnlockedMask)
@@ -117,7 +125,7 @@ function ZO_ItemSetCollectionsDataManager:OnCollectionUpdated(itemSetId, slotsJu
         EVENT_MANAGER:RegisterForUpdate("ZO_ItemSetCollectionsDataManager_SlotsJustUnlocked", 100, function() self:OnUpdateSlotsJustUnlocked() end)
     end
 
-    self:FireCallbacks("CollectionsUpdated", { itemSetId })
+    self:OnCollectionsUpdated({ itemSetId })
 end
 
 function ZO_ItemSetCollectionsDataManager:OnLevelUpdate()

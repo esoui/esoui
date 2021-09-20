@@ -115,8 +115,11 @@
                     </Controls>
                 </Button>
 
-                <Label name="$(parent)Keybind" font="ZoFontWinH3">
+                <Label name="$(parent)Keybind" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontWinH3">
                     <Anchor point="BOTTOM" relativeTo="$(parent)AbilitySlot" relativePoint="TOP" offsetY="6"/>
+                    <OnInitialized>
+                        ZO_KeyMarkupLabel_SetCustomOffsets(self, -5, 5, -2, 3)
+                    </OnInitialized>
                 </Label>
             </Controls>
         </Control>

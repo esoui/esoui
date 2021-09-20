@@ -6,14 +6,10 @@ ZO_CompanionSkillsDataManager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_CompanionSkillsDataManager:Initialize()
     COMPANION_SKILLS_DATA_MANAGER = self
-
-    local function ResetData(data)
-        data:Reset()
-    end
     
-    self.skillTypeObjectPool = ZO_ObjectPool:New(ZO_SkillTypeData, ResetData)
-    self.skillLineObjectPool = ZO_ObjectPool:New(ZO_CompanionSkillLineData, ResetData)
-    self.skillObjectPool = ZO_ObjectPool:New(ZO_CompanionSkillData, ResetData)
+    self.skillTypeObjectPool = ZO_ObjectPool:New(ZO_SkillTypeData, ZO_ObjectPool_DefaultResetObject)
+    self.skillLineObjectPool = ZO_ObjectPool:New(ZO_CompanionSkillLineData, ZO_ObjectPool_DefaultResetObject)
+    self.skillObjectPool = ZO_ObjectPool:New(ZO_CompanionSkillData, ZO_ObjectPool_DefaultResetObject)
     self.skillsByAbilityId = {}
     
     self.isDataReady = false

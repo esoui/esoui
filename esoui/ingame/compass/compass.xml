@@ -182,8 +182,9 @@
 
         <Control name="ZO_Compass_Keyboard_Template" virtual="true">
             <Controls>
-                <Label name="$(parent)CenterOverPinLabel" font="ZoFontHeader2">
-                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-5"/>
+                <Label name="$(parent)CenterOverPinLabel" font="ZoFontHeader2" wrapMode="ELLIPSIS" maxLineCount="1">
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-5" />
+                    <DimensionConstraints maxX="750" />
                 </Label>
 
                 <Scroll name="$(parent)AreaOverride">
@@ -652,6 +653,22 @@
                                     layer="TEXT"
                                     drawLevelOffsetBase="20"
                     />
+                    <CompassPinType name="SKYSHARD_SUGGESTED"
+                                    pinTexture="$(COMPASS_PATH)skyshard_seen.dds"
+                                    clamped="true"
+                                    maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE"
+                                    closeAlpha="1.0"
+                                    farAlpha="0.75"
+                                    farAlphaDistanceM="85"
+                                    farScaleDistanceM="200"
+                                    drawLevelOffsetBase="21"
+                    />
+                    <CompassPinType name="SKYSHARD_SEEN"
+                                    pinTexture="$(COMPASS_PATH)skyshard_seen.dds"
+                                    maxDistanceM="ZO_SKYSHARD_DISCOVERY_DISTANCE"
+                                    removedAnimation="CompassPinOut"
+                                    drawLevelOffsetBase="21"
+                    />
                     <CompassPinType name="POI_SUGGESTED"
                                     clamped="true"
                                     maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE"
@@ -671,7 +688,6 @@
                                     removedAnimation="CompassPinOut"
                                     drawLevelOffsetBase="22"
                     />
-                    <!-- TODO: This will need to be handled when we add support for world event states in the Compass-->
                     <CompassPinType name="WORLD_EVENT_POI_ACTIVE"
                                     maxDistanceM="225"
                                     removedAnimation="CompassPinOut"

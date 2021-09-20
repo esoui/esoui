@@ -2,8 +2,15 @@
     <Controls>
         <Control name="ZO_HelpCustomerService_Type" inherits="ZO_IconChildlessHeader" virtual="true" />
         <Label name="ZO_HelpCustomerService_Keyboard_Title" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" horizontalAlignment="LEFT" virtual="true" />
-        <Control name="ZO_HelpCustomerService_Keyboard_ComboBox" inherits="ZO_ComboBox" virtual="true">
+        <Control name="ZO_HelpCustomerService_Keyboard_ComboBox" inherits="ZO_ScrollableComboBox" virtual="true">
             <Dimensions x="322" />
+            <OnInitialized name="Help">
+                self.m_comboBox:SetHeight(450)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Dropdown" override="true" excludeFromResizeToFitExtents="true" />
+            </Controls>
         </Control>
 
         <Control name="ZO_HelpCustomerServiceDivider" virtual="true">

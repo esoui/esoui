@@ -50,7 +50,7 @@
             <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
         </Label>
 
-        <Backdrop name="ZO_LargeKeyBackdrop" virtual="true">
+        <Backdrop name="ZO_LargeKeyBackdrop" layer="CONTROLS" virtual="true">
             <Edge file="EsoUI/Art/Miscellaneous/interactKeyFrame_edge.dds" edgeFileWidth="64" edgeFileHeight="8"/>
             <Center file="EsoUI/Art/Miscellaneous/interactKeyFrame_center.dds" />
             <Insets left="8" top="8" right="-8" bottom="-8" />
@@ -63,6 +63,12 @@
             <OnUserAreaCreated>
                 ZO_LargeKeyMarkupLabel_OnNewUserAreaCreated(...)
             </OnUserAreaCreated>
+        </Label>
+
+        <Label name="ZO_LargeKeyMarkupLabel_Gamepad" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGamepad18" virtual="true">
+            <OnInitialized>
+                ZO_KeyMarkupLabel_SetCustomOffsets(self, -5, 5, -2, 3)
+            </OnInitialized>
         </Label>
 
         <Label name="ZO_SmallKeyMarkupLabel" lineSpacing="5" virtual="true">

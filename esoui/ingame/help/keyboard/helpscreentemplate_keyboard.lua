@@ -1,10 +1,4 @@
-ZO_HelpScreenTemplate_Keyboard = ZO_Object:Subclass()
-
-function ZO_HelpScreenTemplate_Keyboard:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_HelpScreenTemplate_Keyboard = ZO_InitializingObject:Subclass()
 
 function ZO_HelpScreenTemplate_Keyboard:Initialize(control, data)
 	self.control = control

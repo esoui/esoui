@@ -283,7 +283,7 @@ CHAT_ROUTER = ZO_ChatRouter:New()
 
 --- Global functions ---
 function ZO_ChatSystem_DoesPlatformUseGamepadChatSystem()
-    return IsHeronUI() or IsConsoleUI()
+    return IsGamepadUISupported()
 end
 
 function ZO_ChatSystem_DoesPlatformUseKeyboardChatSystem()

@@ -3,21 +3,18 @@ local ENTRY_WIDTH = 16
 local SELECTED_ENTRY_WIDTH = 24
 local DEFAULT_STRIDE = 10 -- Might make this adjustable later.
 
-local ZO_PaletteButtonManager = ZO_ObjectPool:Subclass()
+local ZO_PaletteButtonManager = ZO_ControlPool:Subclass()
 
-function ZO_PaletteButtonManager:New()
+function ZO_PaletteButtonManager:Initialize()
     -- Just use GuiRoot as parent, since all of these controls will be reparented to the correct swatch picker
-    local function CreateEntry(pool)
-        return ZO_ObjectPool_CreateNamedControl("ZO_ColorSwatchEntry", "ZO_PaletteEntry", pool, GuiRoot)
-    end
+    ZO_ControlPool.Initialize(self, "ZO_PaletteEntry", GuiRoot, "ZO_ColorSwatchEntry")
+end
 
-    local function ResetEntry(entryControl)
-        entryControl.m_key = nil
-        entryControl.m_paletteIndex = nil
-        entryControl:SetHidden(true)
-    end
-    
-    return ZO_ObjectPool.New(self, CreateEntry, ResetEntry)
+function ZO_PaletteButtonManager:ResetObject(control)
+    ZO_ControlPool.ResetObject(self, control)
+
+    control.m_key = nil
+    control.m_paletteIndex = nil
 end
 
 local g_buttonManager = ZO_PaletteButtonManager:New()

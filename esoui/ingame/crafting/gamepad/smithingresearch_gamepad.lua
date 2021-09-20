@@ -1,5 +1,5 @@
 local CONFIRM_SCENE_NAME = "gamepad_smithing_research_confirm"
-local CONFIRM_TEMPLATE_NAME = "ZO_GamepadSubMenuEntryTemplate"
+local CONFIRM_TEMPLATE_NAME = "ZO_GamepadSubMenuEntryTemplateWithStatus"
 ZO_GAMEPAD_CONFIRM_CANCEL_RESEARCH_DIALOG = "GAMEPAD_CONFIRM_CANCEL_RESEARCH"
 
 local GAMEPAD_SMITHING_RESEARCH_FILTER_INCLUDE_BANKED = 1
@@ -16,10 +16,6 @@ local g_filters =
 }
 
 ZO_GamepadSmithingResearch = ZO_SharedSmithingResearch:Subclass()
-
-function ZO_GamepadSmithingResearch:New(...)
-    return ZO_SharedSmithingResearch.New(self, ...)
-end
 
 function ZO_GamepadSmithingResearch:Initialize(panelContent, owner, scene)
     local researchPanel = panelContent:GetNamedChild("Research")

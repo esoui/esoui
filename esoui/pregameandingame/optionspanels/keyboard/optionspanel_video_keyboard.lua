@@ -129,6 +129,14 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Video_DLSS_Mode",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_DLSS_MODE,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Video_Sub_Sampling",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_SUB_SAMPLING,

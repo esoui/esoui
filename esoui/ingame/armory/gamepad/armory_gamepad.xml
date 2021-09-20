@@ -1,0 +1,63 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_Armory_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_Armory_Gamepad_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
+                    <Controls>
+                        <Control name="$(parent)BuildIconPicker" inherits="ZO_GridScrollList_Gamepad" hidden="true">
+                            <Anchor point="CENTER" />
+                            <Dimensions x="700" y="600" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_GamepadArmoryBuildStatAttributeRow" inherits="ZO_GamepadStatAttributeRow" virtual="true">
+            <Controls>
+                <Control name="$(parent)Spinner" override="true">
+                    <Anchor point="RIGHT" offsetX="40" />
+                    <Controls>
+                        <Button name="$(parent)Increase" override="true" hidden="true" />
+
+                        <Label name="$(parent)Display" override="true" font="ZoFontGamepad42" />
+
+                        <Button name="$(parent)Decrease" override="true" hidden="true" />
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Label" override="true">
+                    <ClearAnchors />
+                    <Anchor point="TOPLEFT" offsetX="51" />
+                    <Dimensions x="180"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadArmoryBuildSkillsRow" inherits="ZO_GamepadSkillLinePreview_AbilityEntry" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <ClearAnchors />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="28" />
+                </Texture>
+
+                <Label name="$(parent)Label" override="true">
+                    <ClearAnchors />
+                    <Anchor point="TOPLEFT" offsetX="61" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadArmoryBuildChampionRow" inherits="ZO_GamepadMenuEntryTemplateLowercase34" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" override="true">
+                    <ClearAnchors />
+                    <Anchor point="TOPLEFT" offsetX="61" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

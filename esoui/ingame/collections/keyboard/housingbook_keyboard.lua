@@ -57,7 +57,7 @@ function HousingBook_Keyboard:RefreshDetails()
             self.nicknameLabel:SetText(nickname)
         end
         self.nicknameLabel:SetHidden(not hasNickname)
-        
+
         local isUnlocked = collectibleData:IsUnlocked()
         local canJumpToHouse = CanJumpToHouseFromCurrentLocation()
         self.locationLabel:SetText(zo_strformat(SI_HOUSING_BOOK_LOCATION_FORMATTER, collectibleData:GetHouseLocation()))
@@ -65,18 +65,18 @@ function HousingBook_Keyboard:RefreshDetails()
         if not canJumpToHouse then
             local disableReason = isUnlocked and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
             self.hintLabel:SetText(ZO_ERROR_COLOR:Colorize(disableReason))
-            
+
             self.hintLabel:SetHidden(false)
             self.primaryResidenceLabel:SetHidden(true)
         elseif isUnlocked then
             local isPrimaryResidence = collectibleData:IsPrimaryResidence() and GetString(SI_YES) or GetString(SI_NO)
             self.primaryResidenceLabel:SetText(zo_strformat(SI_HOUSING_BOOK_PRIMARY_RESIDENCE_FORMATTER, isPrimaryResidence))
-            
+
             self.primaryResidenceLabel:SetHidden(false)
             self.hintLabel:SetHidden(true)
         else
-            self.hintLabel:SetText(collectibleData:GetHint())
-            
+            self.hintLabel:SetText(zo_strformat(SI_COLLECTIBLE_ACQUIRE_HINT_FORMATTER, collectibleData:GetHint()))
+
             self.hintLabel:SetHidden(false)
             self.primaryResidenceLabel:SetHidden(true)
         end

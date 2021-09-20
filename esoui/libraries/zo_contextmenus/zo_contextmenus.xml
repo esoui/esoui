@@ -42,7 +42,7 @@
 
         <Backdrop name="ZO_MenuItemHighlight" inherits="ZO_SelectionHighlight" hidden="true" virtual="true" />
 
-        <TopLevelControl name="ZO_Menus" tier="HIGH">
+        <TopLevelControl name="ZO_Menus" tier="HIGH" level="ZO_HIGH_TIER_KEYBOARD_COMBO_BOX_DROPDOWN">
             <OnInitialized>
                 ZO_Menu_Initialize()
             </OnInitialized>

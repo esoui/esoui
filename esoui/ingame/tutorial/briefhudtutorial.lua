@@ -32,6 +32,7 @@ function ZO_BriefHudTutorial:Initialize(parent)
     --in case the player changes the keybind or resets to default while a tutorial is up.
     self.tutorial:RegisterForEvent(EVENT_KEYBINDING_SET, UpdateDescription)
     self.tutorial:RegisterForEvent(EVENT_KEYBINDINGS_LOADED, UpdateDescription)
+    self.tutorial:RegisterForEvent(EVENT_INPUT_TYPE_CHANGED, UpdateDescription)
     
     self.tutorialAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("HudBriefTutorialAnimation", self.tutorial)
     self.tutorialAnimation:SetHandler("OnStop", function(timeline) 

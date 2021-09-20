@@ -1135,21 +1135,28 @@ function ZO_ActionBarAssignmentManager:IsUltimateSlot(actionSlotIndex)
 end
 
 function ZO_ActionBarAssignmentManager:GetActionNameForSlot(actionSlotIndex, hotbarCategory, isGamepadPreferred)
+    local keyboardActionName, gamepadActionName = self:GetKeyboardAndGamepadActionNameForSlot(actionSlotIndex, hotbarCategory)
+    if isGamepadPreferred then
+        return gamepadActionName
+    else
+        return keyboardActionName
+    end
+end
+
+function ZO_ActionBarAssignmentManager:GetKeyboardAndGamepadActionNameForSlot(actionSlotIndex, hotbarCategory)
     local isCompanionBar = hotbarCategory == HOTBAR_CATEGORY_COMPANION
     if isCompanionBar then
         if self:IsUltimateSlot(actionSlotIndex) then
-           return "COMMAND_PET"
-       else
-           -- use Automatic Cast priority instead
-           return nil
-       end
-    else
-       if isGamepadPreferred then
-           return string.format("GAMEPAD_ACTION_BUTTON_%d", actionSlotIndex)
-       else
-           return string.format("ACTION_BUTTON_%d", actionSlotIndex)
-       end 
+            return "COMMAND_PET", "COMMAND_PET"
+        end
+
+        -- use Automatic Cast priority instead
+        return nil, nil
     end
+
+    local keyboardActionName = string.format("ACTION_BUTTON_%d", actionSlotIndex)
+    local gamepadActionName = string.format("GAMEPAD_ACTION_BUTTON_%d", actionSlotIndex)
+    return keyboardActionName, gamepadActionName
 end
 
 function ZO_ActionBarAssignmentManager:GetAutomaticCastPriorityForSlot(actionSlotIndex, hotbarCategory)

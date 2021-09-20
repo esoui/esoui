@@ -175,6 +175,23 @@
             </Controls>
         </TopLevelControl>
 
+        <TopLevelControl name="ZO_CharacterCreate_Gamepad_CollectibleBlockingInfo" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_CharacterCreate_Gamepad_CollectibleBlockingInfo_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Title" inherits="CCLabel_Gamepad" text="SI_CHARACTER_CREATE_PREVIEWING_COLLECTIBLES_TOOLTIP_TITLE" font="ZoFontGamepad42" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="222" />
+                </Label>
+
+                <Label name="$(parent)Description" inherits="CCLabel_Gamepad" font="ZoFontGamepadCondensed42" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Dimensions x="370" />
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="55" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+
         <TopLevelControl name="ZO_CharacterCreate_Gamepad" hidden="true">
             <AnchorFill />
 
@@ -190,6 +207,11 @@
 
                     <Controls>
                         <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                        <Label name="$(parent)Preview" font="ZoFontGamepad27" modifyTextType="UPPERCASE"  horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS" >
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" offsetY="140" />
+                        </Label>
 
                         <Control name="$(parent)Inner">
                             <Anchor point="TOPLEFT" offsetX="20" offsetY="130"/>

@@ -143,7 +143,7 @@
                 </Label>
                 <Label name="$(parent)TimerText" font="ZoFontGameBold" color="DCD822">
                     <Dimensions x="50" y="18"/>
-                    <Anchor point="CENTER" relativePoint="CENTER" offsetY="7"/>
+                    <Anchor point="CENTER" relativePoint="CENTER" offsetY="ACTION_BUTTON_TIMER_TEXT_OFFSET_Y_DEFAULT_KEYBOARD"/>
                 </Label>
                 <Texture name="$(parent)TimerOverlay" />
 
@@ -178,7 +178,7 @@
                 </Label>
                 <Label name="$(parent)TimerText" font="ZoFontGamepad27" color="DCD822">
                     <Dimensions x="0" y="25"/>
-                    <Anchor point="CENTER" relativePoint="CENTER" offsetY="4"/>
+                    <Anchor point="CENTER" relativePoint="CENTER" offsetY="ACTION_BUTTON_TIMER_TEXT_OFFSET_Y_DEFAULT_GAMEPAD"/>
                 </Label>
                 <Texture name="$(parent)TimerOverlay">
                     <Dimensions x="ZO_GAMEPAD_ACTION_BUTTON_SIZE" y="ZO_GAMEPAD_ACTION_BUTTON_SIZE" />

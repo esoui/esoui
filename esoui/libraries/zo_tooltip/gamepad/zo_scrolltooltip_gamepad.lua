@@ -6,9 +6,17 @@ ZO_ScrollTooltip_Gamepad = {} -- A scrolling wrapper for ZO_Tooltip
 local MIN_SCROLL_VALUE = 0
 local MAX_SCROLL_VALUE = 100
 
-function ZO_ScrollTooltip_Gamepad:Initialize(control, styleNamespace, style)
-    local scrollIndicator = control:GetNamedChild("ScrollIndicator")
+function ZO_ScrollTooltip_Gamepad:RefreshDisplayedKeybinds()
+    local enabled = self.inputEnabled
+    local wasLastInputGamepad = WasLastInputGamepad()
+    local hideGamepad = not enabled or not self.canScroll or not wasLastInputGamepad
+    local hideKeyboard = not enabled or not self.canScroll or wasLastInputGamepad    
+    self.scrollIndicator:SetHidden(hideGamepad)
+    self.scrollKeyUp:SetHidden(hideKeyboard)
+    self.scrollKeyDown:SetHidden(hideKeyboard)
+end
 
+function ZO_ScrollTooltip_Gamepad:Initialize(control, styleNamespace, style)
     local scroll = control:GetNamedChild("Scroll")
     local scrollChild = scroll:GetNamedChild("ScrollChild")
     local tooltip = scrollChild:GetNamedChild("Tooltip")
@@ -18,7 +26,9 @@ function ZO_ScrollTooltip_Gamepad:Initialize(control, styleNamespace, style)
     
     control.scroll = scroll
     control.scrollChild = scrollChild
-    control.scrollIndicator = scrollIndicator
+    control.scrollIndicator = control:GetNamedChild("ScrollIndicator")
+    control.scrollKeyUp = control:GetNamedChild("ScrollKeyUp")
+    control.scrollKeyDown = control:GetNamedChild("ScrollKeyDown")
     ZO_SetScrollMaxFadeGradientSize(control, 256)
     control.animation, control.timeline = ZO_CreateScrollAnimation(control)
     control.scrollValue = MIN_SCROLL_VALUE
@@ -30,6 +40,21 @@ function ZO_ScrollTooltip_Gamepad:Initialize(control, styleNamespace, style)
     control:SetHandler("OnUpdate", function() control:OnUpdate() end)
     scroll:SetHandler("OnScrollExtentsChanged", function(...) control:OnScrollExtentsChanged(...) end)
 
+    local function OnInputChanged()
+        if IsInGamepadPreferredMode() then
+            local gamepadInput = WasLastInputGamepad()
+            local hideGamepad = not gamepadInput or not control.canScroll
+            local hideKeyboard = gamepadInput or not control.canScroll
+            control:RefreshDisplayedKeybinds()
+        end
+    end
+
+    local SHOW_UNBOUND = true
+    local DEFAULT_GAMEPAD_ACTION_NAME = nil
+    ZO_Keybindings_RegisterLabelForBindingUpdate(control.scrollKeyUp, "UI_SHORTCUT_RIGHT_STICK_UP", SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, OnInputChanged)
+    ZO_Keybindings_RegisterLabelForBindingUpdate(control.scrollKeyDown, "UI_SHORTCUT_RIGHT_STICK_DOWN")
+    -- We only need to register one of the above with OnInputChanged because one call of that function does everything we need
+
     control.baseMagnitude = 0.4
     control.magnitude = 1
 
@@ -39,7 +64,10 @@ end
 
 function ZO_ScrollTooltip_Gamepad:SetInputEnabled(enabled)
     self.inputEnabled = enabled
-    self.scrollIndicator:SetHidden(not enabled or not self.canScroll)
+    local wasLastInputGamepad = WasLastInputGamepad()
+    local hideGamepad = not enabled or not self.canScroll or not wasLastInputGamepad
+    local hideKeyboard = not enabled or not self.canScroll or wasLastInputGamepad
+    self:RefreshDisplayedKeybinds()
 end
 
 function ZO_ScrollTooltip_Gamepad:OnEffectivelyShown()
@@ -71,7 +99,10 @@ end
 function ZO_ScrollTooltip_Gamepad:OnScrollExtentsChanged(scroll, horizontalExtents, verticalExtents)
     -- If our height is > 0, and our scroll child is bigger than self (which means it would have to scroll to fit)...
     self.canScroll = verticalExtents > 0 and self:GetHeight() < self.scrollChild:GetHeight() and not zo_floatsAreEqual(self:GetHeight(), self.scrollChild:GetHeight())
-    self.scrollIndicator:SetHidden(not self.canScroll)
+    local wasLastInputGamepad = WasLastInputGamepad()
+    local hideGamepad = not self.canScroll or not wasLastInputGamepad
+    local hideKeyboard = not self.canScroll or wasLastInputGamepad
+    self:RefreshDisplayedKeybinds()
 
     ZO_UpdateScrollFade(self.useFadeGradient, self.scroll, ZO_SCROLL_DIRECTION_VERTICAL, ZO_GetScrollMaxFadeGradientSize(self))
     self:RefreshDirectionalInputActivation()

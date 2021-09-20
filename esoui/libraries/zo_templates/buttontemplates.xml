@@ -33,6 +33,16 @@
             />
         </Button>
 
+        <Button name="ZO_TimedConfirmationButton" inherits="ZO_DefaultButton" virtual="true">
+            <OnClicked>
+                ZO_TimedConfirmationButton_OnClicked(self)
+            </OnClicked>
+
+            <OnEffectivelyHidden>
+                ZO_TimedConfirmationButton_SetConfirmationHidden(self, true)
+            </OnEffectivelyHidden>
+        </Button>
+
         <Button name="ZO_MenuDropDownTextButton" font="ZoFontHeader" inherits="ZO_ButtonBehaviorClickSound" verticalAlignment="CENTER" virtual="true">
             <Dimensions x="128" y="26" />
             <PressedOffset x="1" y="1" />

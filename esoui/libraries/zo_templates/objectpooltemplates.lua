@@ -5,34 +5,17 @@
 ZO_AnimationPool = ZO_ObjectPool:Subclass()
 
 do
-    local function Reset(animation, pool)
-        animation:Stop()
-
-        if pool.customResetBehavior then
-            pool.customResetBehavior(animation)
-        end
+    local function AnimationReset(timeline)
+        timeline:Stop()
     end
 
-    function ZO_AnimationPool:New(templateName)
-        local function AnimationFactory(pool)
-            local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual(templateName)
-            if pool.customFactoryBehavior then
-                pool.customFactoryBehavior(timeline)
-            end
-            return timeline
+    function ZO_AnimationPool:Initialize(templateName)
+        local function AnimationFactory()
+            return ANIMATION_MANAGER:CreateTimelineFromVirtual(templateName)
         end
 
-        return ZO_ObjectPool.New(self, AnimationFactory, Reset)
+        ZO_ObjectPool.Initialize(self, AnimationFactory, AnimationReset)
     end
-end
-
-function ZO_AnimationPool:SetCustomResetBehavior(customResetBehavior)
-    self.customResetBehavior = customResetBehavior
-end
-
-
-function ZO_AnimationPool:SetCustomFactoryBehavior(customFactoryBehavior)
-    self.customFactoryBehavior = customFactoryBehavior
 end
 
 --[[
@@ -41,47 +24,33 @@ end
 
 ZO_ControlPool = ZO_ObjectPool:Subclass()
 
-local function ControlFactory(pool, objectKey)
-    local control = ZO_ObjectPool_CreateNamedControl(pool.name, pool.templateName, pool, pool.parent)
-    if pool.customFactoryBehavior then
-        pool.customFactoryBehavior(control, objectKey)
-    end
-    return control
-end
-
-local function ControlReset(control, pool)
-    control:SetHidden(true)
-    control:ClearAnchors()
-    if pool.customResetBehavior then
-        pool.customResetBehavior(control)
-    end
-end
-
-function ZO_ControlPool:New(templateName, parent, overrideName)
-    local pool = ZO_ObjectPool.New(self, ControlFactory, ControlReset)
-
-    local controlName = overrideName or templateName
-
-    if parent then
-        controlName = parent:GetName() .. controlName
-    else
-        parent = GuiRoot
+do
+    local function ControlFactory(pool)
+        return ZO_ObjectPool_CreateNamedControl(pool.name, pool.templateName, pool, pool.parent)
     end
 
-    pool.name = controlName
-    pool.parent = parent
-    pool.templateName = templateName
+    local function ControlReset(control)
+        control:SetHidden(true)
+        control:ClearAnchors()
+    end
 
-    return pool
+    function ZO_ControlPool:Initialize(templateName, parent, overrideName)
+        ZO_ObjectPool.Initialize(self, ControlFactory, ControlReset)
+
+        local controlName = overrideName or templateName
+
+        parent = parent or GuiRoot
+        if parent ~= GuiRoot then
+            controlName = parent:GetName() .. controlName
+        end
+
+        self.name = controlName
+        self.parent = parent
+        self.templateName = templateName
+    end
 end
 
-function ZO_ControlPool:SetCustomFactoryBehavior(customFactoryBehavior)
-    self.customFactoryBehavior = customFactoryBehavior
-end
-
-function ZO_ControlPool:SetCustomResetBehavior(customResetBehavior)
-    self.customResetBehavior = customResetBehavior
-end
+-- Begin ZO_ObjectPool Overrides --
 
 function ZO_ControlPool:AcquireObject(objectKey)
     local control, key = ZO_ObjectPool.AcquireObject(self, objectKey)
@@ -91,27 +60,41 @@ function ZO_ControlPool:AcquireObject(objectKey)
     return control, key
 end
 
+-- End ZO_ObjectPool Overrides --
+
 --[[
     Entry Data Pool
 --]]
 
 ZO_EntryDataPool = ZO_ObjectPool:Subclass()
 
-function ZO_EntryDataPool:New(entryDataObjectClass, factoryFunction, resetFunction)
-    local factoryFunction = factoryFunction or function()
-        return entryDataObjectClass:New()
+function ZO_EntryDataPool:Initialize(entryDataObjectClass, factoryFunction, resetFunction)
+    factoryFunction = factoryFunction or function()
+        -- EntryData classes typically take dataSource in their constructors,
+        -- so we can't use ZO_ObjectPool's default factory object behavior, which constructs with the pool and key
+        return self.entryDataObjectClass:New()
     end
 
-    local resetFunction = resetFunction or function(data)
-        data:SetDataSource(nil)
+    resetFunction = resetFunction or function(entryData)
+        entryData:SetDataSource(nil)
     end
 
-    local pool = ZO_ObjectPool.New(self, factoryFunction, resetFunction)
+    ZO_ObjectPool.Initialize(self, factoryFunction, resetFunction)
 
-    pool.entryDataObjectClass = entryDataObjectClass
-
-    return pool
+    self.entryDataObjectClass = entryDataObjectClass
 end
+
+-- Begin ZO_ObjectPool Overrides --
+
+function ZO_EntryDataPool:AcquireObject(objectKey, dataSource)
+    local entryData, key = ZO_ObjectPool.AcquireObject(self, objectKey)
+    if entryData and dataSource then
+        entryData:SetDataSource(dataSource)
+    end
+    return entryData, key
+end
+
+-- End ZO_ObjectPool Overrides --
 
 --[[
     Meta Pool

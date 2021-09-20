@@ -1,4 +1,4 @@
-ZO_Spinner = ZO_CallbackObject:Subclass()
+ZO_Spinner = ZO_InitializingCallbackObject:Subclass()
 
 SPINNER_MODE_CLAMP = 1
 SPINNER_MODE_WRAP = 2
@@ -23,12 +23,6 @@ local function DefaultSpinnerPlaySound(spinner, currentValue, oldValue)
     else
         PlaySound(SOUNDS.SPINNER_DOWN)
     end
-end
-
-function ZO_Spinner:New(...)
-    local spinner = ZO_CallbackObject.New(self)
-    spinner:Initialize(...)
-    return spinner
 end
 
 local DEFAULT_ACCELERATION_TIME_MS = 350
@@ -374,4 +368,30 @@ end
 
 function ZO_Spinner:SetPlaySoundFunction(onPlaySoundFunction)
     self.onPlaySoundFunction = onPlaySoundFunction
+end
+
+--
+-- ZO_SpinnerWithLabels
+--
+
+ZO_SpinnerWithLabels = ZO_Spinner:Subclass()
+
+function ZO_SpinnerWithLabels:Initialize(control, min, max, isGamepad, spinnerMode, accelerationTime)
+    self.decreaseKeyLabel = control:GetNamedChild("DecreaseKeyLabel")
+    self.increaseKeyLabel = control:GetNamedChild("IncreaseKeyLabel")
+    ZO_Spinner.Initialize(self, control, min, max, isGamepad, spinnerMode, accelerationTime)
+end
+
+function ZO_SpinnerWithLabels:UpdateButtons()
+    ZO_Spinner.UpdateButtons(self)
+
+    if not self.hideButtons then
+        if not self.enabled then
+            self.increaseKeyLabel:SetEnabled(false)
+            self.decreaseKeyLabel:SetEnabled(false)
+        else
+            self.increaseKeyLabel:SetEnabled(self.value + self.step <= self:GetMax())
+            self.decreaseKeyLabel:SetEnabled(self.value - self.step >= self:GetMin())
+        end
+    end
 end

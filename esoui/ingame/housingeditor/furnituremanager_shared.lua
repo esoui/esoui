@@ -80,15 +80,7 @@ function ZO_SharedFurnitureManager:Initialize()
     self.placementFurnitureTheme = FURNITURE_THEME_TYPE_ALL
     self.purchaseFurnitureTheme = FURNITURE_THEME_TYPE_ALL
 
-    local function CreateMarketProduct(objectPool)
-        return ZO_HousingMarketProduct:New()
-    end
-    
-    local function ResetMarketProduct(housingMarketProduct)
-        housingMarketProduct:Reset()
-    end
-
-    self.housingMarketProductPool = ZO_ObjectPool:New(CreateMarketProduct, ResetMarketProduct)
+    self.housingMarketProductPool = ZO_ObjectPool:New(ZO_HousingMarketProduct, ZO_ObjectPool_DefaultResetObject)
 
     self:RegisterForEvents()
 end

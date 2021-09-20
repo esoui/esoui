@@ -3,10 +3,6 @@ local lastSubmitTime = 0
 
 local HelpSubmitFeedback_Keyboard = ZO_HelpScreenTemplate_Keyboard:Subclass()
 
-function HelpSubmitFeedback_Keyboard:New(...)
-    return ZO_HelpScreenTemplate_Keyboard.New(self, ...)
-end
-
 function HelpSubmitFeedback_Keyboard:Initialize(control)
     HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
     
@@ -20,7 +16,7 @@ function HelpSubmitFeedback_Keyboard:Initialize(control)
     }
     ZO_HelpScreenTemplate_Keyboard.Initialize(self, control, iconData)
 
-    self.helpScrollChild = control:GetNamedChild("ScrollContainerScrollChild")
+    self.helpScrollChild = control:GetNamedChild("FieldsScrollChild")
     self.helpImpactTitle = self.helpScrollChild:GetNamedChild("ImpactTitle")
     self.helpCategoryTitle = self.helpScrollChild:GetNamedChild("CategoryTitle")
     self.helpSubcategoryTitle = self.helpScrollChild:GetNamedChild("SubcategoryTitle")
@@ -32,8 +28,8 @@ function HelpSubmitFeedback_Keyboard:Initialize(control)
     self.helpSubcategoryContainer = self.helpScrollChild:GetNamedChild("SubcategoryContainer")
     self.helpDetailsContainer = self.helpScrollChild:GetNamedChild("DetailsContainer")
 
-    self.helpCategoryComboBoxControl = self.helpScrollChild:GetNamedChild("CategoryComboBox")
-    self.helpSubcategoryComboBoxControl = self.helpScrollChild:GetNamedChild("SubcategoryComboBox")
+    self.helpCategoryComboBoxControl = self.helpScrollChild:GetNamedChild("CategoryCB")
+    self.helpSubcategoryComboBoxControl = self.helpScrollChild:GetNamedChild("SubcategoryCB")
 
     ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:RegisterCallback("CustomerServiceFeedbackSubmitted", function (...) self:OnCustomerServiceFeedbackSubmitted(...) end)
 
@@ -43,7 +39,6 @@ function HelpSubmitFeedback_Keyboard:Initialize(control)
 end
 
 function HelpSubmitFeedback_Keyboard:InitializeComboBoxes()
-
     local function CreateComboBox(childName)
         local combo = ZO_ComboBox_ObjectFromContainer(self.helpScrollChild:GetNamedChild(childName))
         combo:SetSortsItems(false)
@@ -52,9 +47,22 @@ function HelpSubmitFeedback_Keyboard:InitializeComboBoxes()
         return combo
     end
 
-    self.helpImpactComboBox = CreateComboBox("ImpactComboBox")
-    self.helpCategoryComboBox = CreateComboBox("CategoryComboBox")
-    self.helpSubcategoryComboBox = CreateComboBox("SubcategoryComboBox")
+    self.helpImpactComboBox = CreateComboBox("ImpactCB")
+    self.helpCategoryComboBox = CreateComboBox("CategoryCB")
+    self.helpSubcategoryComboBox = CreateComboBox("SubcategoryCB")
+    
+    local helpImpactComboBoxControl = self.helpScrollChild:GetNamedChild("ImpactCB")
+    local function OnComboBoxEntryMouseEnter()
+        InitializeTooltip(InformationTooltip, helpImpactComboBoxControl, RIGHT, -10)
+        InformationTooltip:AddLine(GetString(SI_CUSTOMER_SERVICE_FEEDBACK_IMPACT_DESCRIPTION), "", ZO_NORMAL_TEXT:UnpackRGBA())
+    end
+
+    local function OnComboBoxEntryMouseExit()
+        ClearTooltip(InformationTooltip)
+    end
+
+    helpImpactComboBoxControl:SetHandler("OnMouseEnter", OnComboBoxEntryMouseEnter)
+    helpImpactComboBoxControl:SetHandler("OnMouseExit", OnComboBoxEntryMouseExit)
 
     local function SetupComboBox(comboBox, fieldData, callback)
         if fieldData.universallyAddEnum then

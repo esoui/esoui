@@ -129,16 +129,19 @@ end
 --where ... is the list of styles
 function ZO_TooltipStyledObject:GetWidthProperty(...)
     local width = self:GetPropertyNoChain("width", ...)
-    if(width == nil) then
+    if width == nil then
         local widthPercent = self:GetPropertyNoChain("widthPercent", ...)
-        if(widthPercent) then
-            if(self.parent) then
-                if(self.parent:IsVertical()) then
+        if widthPercent then
+            if self.parent then
+                if self.parent:IsVertical() then
                     width = self.parent:GetInnerSecondaryDimension()
                 else
                     width = self.parent:GetInnerPrimaryDimension()
                 end
-                width = width * (widthPercent / 100)
+
+                if width then
+                    width = width * (widthPercent / 100)
+                end
             end
         end
     end
@@ -148,16 +151,19 @@ end
 --where ... is the list of styles
 function ZO_TooltipStyledObject:GetHeightProperty(...)
     local height = self:GetPropertyNoChain("height", ...)
-    if(height == nil) then
+    if height == nil then
         local heightPercent = self:GetPropertyNoChain("heightPercent", unpack(self.styles))
-        if(heightPercent) then
-            if(self.parent) then
-                if(self.parent:IsVertical()) then
+        if heightPercent then
+            if self.parent then
+                if self.parent:IsVertical() then
                     height = self.parent:GetInnerPrimaryDimension()
                 else
                     height = self.parent:GetInnerSecondaryDimension()
                 end
-                height = height * (heightPercent / 100)
+
+                if height then
+                    height = height * (heightPercent / 100)
+                end
             end
         end
     end
@@ -336,7 +342,8 @@ ZO_TooltipSection = {}
 
 function ZO_TooltipSection.InitializeStaticPools(class)
     class.labelPool = ZO_ControlPool:New("ZO_TooltipLabel", GuiRoot, "Label")
-
+    class.keyLabelPool = ZO_ControlPool:New("ZO_LargeKeyMarkupLabel", GuiRoot, "KeyLabel")
+    class.keyLabelPool:SetCustomResetBehavior(ZO_Keybindings_UnregisterLabelForBindingUpdate)
     class.texturePool = ZO_ControlPool:New("ZO_TooltipTexture", GuiRoot, "Texture")
     class.colorPool = ZO_ControlPool:New("ZO_TooltipColorSwatch", GuiRoot, "Color")
     class.colorPool:SetCustomFactoryBehavior(function(control)
@@ -389,6 +396,7 @@ function ZO_TooltipSection:Initialize(parent)
 
     if not self.hasInitialized then
         self.labelPool = self:CreateMetaControlPool(ZO_TooltipSection.labelPool)
+        self.keyLabelPool = self:CreateMetaControlPool(ZO_TooltipSection.keyLabelPool)
         self.texturePool = self:CreateMetaControlPool(ZO_TooltipSection.texturePool)
         self.colorPool = self:CreateMetaControlPool(ZO_TooltipSection.colorPool)
         self.statValuePairPool = self:CreateMetaControlPool(ZO_TooltipSection.statValuePairPool)
@@ -509,6 +517,7 @@ function ZO_TooltipSection:Reset()
     self:SetupPrimaryDimension()
     self:SetupSecondaryDimension()
     self.labelPool:ReleaseAllObjects()
+    self.keyLabelPool:ReleaseAllObjects()
     self.texturePool:ReleaseAllObjects()
     self.colorPool:ReleaseAllObjects()
     self.sectionPool:ReleaseAllObjects()
@@ -722,9 +731,30 @@ function ZO_TooltipSection:AddLine(text, ...)
     self:AddCustomLabel(customFunction, ...)
 end
 
+function ZO_TooltipSection:AddKeybindLine(actionName, travelStringFormat, ...)
+    local styles = {...}
+    local DEFAULT_TEXT_OPTIONS = nil
+    local function customFunction(label)
+        local bindingText, key, mod1, mod2, mod3, mod4 = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, DEFAULT_TEXT_OPTIONS, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP)
+        bindingText = bindingText or ZO_Keybindings_GenerateTextKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
+        bindingText = ZO_WHITE:Colorize(bindingText)
+        local travelText = zo_strformat(travelStringFormat, bindingText)
+        self:FormatLabel(label, travelText, unpack(styles))
+    end
+    
+    local label = self.keyLabelPool:AcquireObject()
+    local SHOW_UNBOUND = true
+    local DEFAULT_GAMEPAD_ACTION_NAME = nil
+    ZO_Keybindings_RegisterLabelForInLineBindingUpdate(label, actionName, SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, customFunction)
+    self:AddCustomLabelInternal(label, customFunction, ...)
+end
+
 function ZO_TooltipSection:AddCustomLabel(customFunction, ...)
     local label = self.labelPool:AcquireObject()
+    self:AddCustomLabelInternal(label, customFunction, ...)
+end
 
+function ZO_TooltipSection:AddCustomLabelInternal(label, customFunction, ...)
     customFunction(label, ...)
 
     local widthProperty = self:GetWidthProperty(...)

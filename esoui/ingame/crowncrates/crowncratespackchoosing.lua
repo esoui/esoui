@@ -631,25 +631,37 @@ function ZO_CrownCratesPackChoosing:GetOwner()
 end
 
 function ZO_CrownCratesPackChoosing:InitializePackPool()
-    local reset = function(pack)
-        pack:Reset()
+    local function Factory(pool)
+        local pack = ZO_CrownCratesPack:New(CreateControlFromVirtual("$(parent)Pack", self.owner:GetControl(), "ZO_CrownCratePack", self.nextPackIndex), self)
+        self.nextPackIndex = self.nextPackIndex + 1
+        return pack
     end
-    local factory = function(pool)
-                        local pack = ZO_CrownCratesPack:New(CreateControlFromVirtual("$(parent)Pack", self.owner:GetControl(), "ZO_CrownCratePack", self.nextPackIndex), self)
-                        self.nextPackIndex = self.nextPackIndex + 1
-                        return pack
-                    end
 
-    self.packPool = ZO_ObjectPool:New(factory, reset)
+    self.packPool = ZO_ObjectPool:New(Factory, ZO_ObjectPool_DefaultResetObject)
 
     self.pageChangeFrameControl = CreateControlFromVirtual("$(parent)PageChangeFrame", self.owner:GetControl(), "ZO_PackChoosingPageChangeFrame")
-    self.leftArrow = self.pageChangeFrameControl:GetNamedChild("LeftArrow")
-    self.rightArrow = self.pageChangeFrameControl:GetNamedChild("RightArrow")
-    self.leftArrowGamepadDirectionIndicator = self.leftArrow:GetNamedChild("GamepadDirectionIndicator")
-    self.rightArrowGamepadDirectionIndicator = self.rightArrow:GetNamedChild("GamepadDirectionIndicator")
 
-    self.leftArrow:SetHandler("OnClicked", function() self:RequestPreviousPage() end)
-    self.rightArrow:SetHandler("OnClicked", function() self:RequestNextPage() end)
+    local function PreviousPageCallback()
+        self:RequestPreviousPage()
+    end
+
+    local function NextPageCallback()
+        self:RequestPreviousPage()
+    end
+
+    self.leftArrowKeyboard = self.pageChangeFrameControl:GetNamedChild("LeftArrow_Keyboard")
+    self.rightArrowKeyboard = self.pageChangeFrameControl:GetNamedChild("RightArrow_Keyboard")
+    self.leftArrowKeyboard:SetHandler("OnClicked", PreviousPageCallback)
+    self.rightArrowKeyboard:SetHandler("OnClicked", NextPageCallback)
+
+    self.leftArrowGamepad = self.pageChangeFrameControl:GetNamedChild("LeftArrow_Gamepad")
+    self.rightArrowGamepad = self.pageChangeFrameControl:GetNamedChild("RightArrow_Gamepad")
+
+    self.leftArrowGamepad:SetKeybind("UI_SHORTCUT_LEFT_SHOULDER")
+    self.leftArrowGamepad:SetCallback(PreviousPageCallback)
+
+    self.rightArrowGamepad:SetKeybind("UI_SHORTCUT_RIGHT_SHOULDER")
+    self.rightArrowGamepad:SetCallback(NextPageCallback)
 
     self.pageIndicatorContainer = ZO_PackChoosingPageIndicator
     self.pageIndicatorLabel = self.pageIndicatorContainer.pageIndicator
@@ -741,73 +753,31 @@ function ZO_CrownCratesPackChoosing:GetManifestCameraPlaneMetrics()
     return self.manifestCameraPlaneMetrics
 end
 
-do
-    local KEYBOARD_ARROW_BUTTON_TEXTURES =
-    {
-        LEFT = {
-            NORMAL = "EsoUI/Art/Buttons/large_leftArrow_up.dds",
-            PRESSED = "EsoUI/Art/Buttons/large_leftArrow_down.dds",
-            MOUSEOVER = "EsoUI/Art/Buttons/large_leftArrow_over.dds",
-            DISABLED = "EsoUI/Art/Buttons/large_leftArrow_disabled.dds",
-        },
-        RIGHT = {
-            NORMAL = "EsoUI/Art/Buttons/large_rightArrow_up.dds",
-            PRESSED = "EsoUI/Art/Buttons/large_rightArrow_down.dds",
-            MOUSEOVER = "EsoUI/Art/Buttons/large_rightArrow_over.dds",
-            DISABLED = "EsoUI/Art/Buttons/large_rightArrow_disabled.dds",
-        },
-    }
+function ZO_CrownCratesPackChoosing:RefreshPlatformStyle()
+    self.leftArrowKeyboard:ClearAnchors()
+    self.rightArrowKeyboard:ClearAnchors()
+    self.leftArrowGamepad:ClearAnchors()
+    self.rightArrowGamepad:ClearAnchors()
+    self.pageIndicatorContainer:ClearAnchors()
 
-    local GAMEPAD_ARROW_BUTTON_TEXTURES =
-    {
-        LEFT = {
-            KEY_CODE = KEY_GAMEPAD_LEFT_SHOULDER,
-        },
-        RIGHT = {
-            KEY_CODE = KEY_GAMEPAD_RIGHT_SHOULDER,
-        },
-    }
+    local isGamepadMode = IsInGamepadPreferredMode()
 
-    local function SetButtonTextures(btn, textures)
-        if textures.KEY_CODE then
-            btn:SetKeyCode(textures.KEY_CODE)
-        else
-            btn:SetKeyCode(nil)
-            btn:SetNormalTexture(textures.NORMAL)
-            btn:SetPressedTexture(textures.PRESSED)
-            btn:SetMouseOverTexture(textures.MOUSEOVER)
-            btn:SetDisabledTexture(textures.DISABLED)
-        end
-    end
+    self.leftArrowKeyboard:SetHidden(isGamepadMode)
+    self.rightArrowKeyboard:SetHidden(isGamepadMode)
+    self.leftArrowGamepad:SetHidden(not isGamepadMode)
+    self.rightArrowGamepad:SetHidden(not isGamepadMode)
 
-    function ZO_CrownCratesPackChoosing:RefreshPlatformStyle()
-        self.leftArrow:ClearAnchors()
-        self.rightArrow:ClearAnchors()
-        self.pageIndicatorContainer:ClearAnchors()
+    -- we're aiming to get a point at the middle of the crates for anchoring, but we'll subtract 25 to get it to look a bit better
+    local arrowYOffset = ZO_CROWN_CRATES_PACK_OFFSET_Y_UI + ZO_CrownCrates.GetBottomOffsetUI() + (ZO_CROWN_CRATES_PACK_WIDTH_UI* 0.5) - 25
+    local arrowXOffset = ZO_CROWN_CRATES_PAGE_CHANGE_ARROW_OFFSET_X_UI
+    local gamepadArrowXOffset = arrowXOffset + 10 -- additional space for arrow + keybind
 
-        local buttonTextures
-        local isGamepadMode = IsInGamepadPreferredMode()
-        if isGamepadMode then
-            buttonTextures = GAMEPAD_ARROW_BUTTON_TEXTURES
-        else
-            buttonTextures = KEYBOARD_ARROW_BUTTON_TEXTURES
-        end
+    self.leftArrowKeyboard:SetAnchor(BOTTOMLEFT, nil, BOTTOMLEFT, arrowXOffset, -arrowYOffset)
+    self.rightArrowKeyboard:SetAnchor(BOTTOMRIGHT, nil, BOTTOMRIGHT, -arrowXOffset, -arrowYOffset)
+    self.leftArrowGamepad:SetAnchor(BOTTOMLEFT, nil, BOTTOMLEFT, gamepadArrowXOffset, -arrowYOffset)
+    self.rightArrowGamepad:SetAnchor(BOTTOMRIGHT, nil, BOTTOMRIGHT, -gamepadArrowXOffset, -arrowYOffset)
 
-        self.leftArrowGamepadDirectionIndicator:SetHidden(not isGamepadMode)
-        self.rightArrowGamepadDirectionIndicator:SetHidden(not isGamepadMode)
-
-        -- we're aiming to get a point at the middle of the crates for anchoring, but we'll subtract 25 to get it to look a bit better
-        local arrowYOffset = ZO_CROWN_CRATES_PACK_OFFSET_Y_UI + ZO_CrownCrates.GetBottomOffsetUI() + (ZO_CROWN_CRATES_PACK_WIDTH_UI* 0.5) - 25
-        local arrowXOffset = ZO_CROWN_CRATES_PAGE_CHANGE_ARROW_OFFSET_X_UI
-
-        self.leftArrow:SetAnchor(BOTTOMLEFT, nil, BOTTOMLEFT, arrowXOffset, -arrowYOffset)
-        self.rightArrow:SetAnchor(BOTTOMRIGHT, nil, BOTTOMRIGHT, -arrowXOffset, -arrowYOffset)
-
-        SetButtonTextures(self.leftArrow, buttonTextures.LEFT)
-        SetButtonTextures(self.rightArrow, buttonTextures.RIGHT)
-
-        ApplyTemplateToControl(self.pageIndicatorContainer, ZO_GetPlatformTemplate("ZO_PackChoosingPageIndicator"))
-    end
+    ApplyTemplateToControl(self.pageIndicatorContainer, ZO_GetPlatformTemplate("ZO_PackChoosingPageIndicator"))
 end
 
 function ZO_CrownCratesPackChoosing:HidePageControls(setHidden)
@@ -1172,16 +1142,20 @@ function ZO_CrownCratesPackChoosing:OnActivate()
     self:RefreshSelectedPack()
     self:HidePageControls(not self.showPagination)
     if self.showPagination then
-        self.leftArrow:SetEnabled(true)
-        self.rightArrow:SetEnabled(true)
+        self.leftArrowKeyboard:SetEnabled(true)
+        self.rightArrowKeyboard:SetEnabled(true)
+        self.leftArrowGamepad:SetEnabled(true)
+        self.rightArrowGamepad:SetEnabled(true)
     end
 end
 
 function ZO_CrownCratesPackChoosing:OnDeactivate()
     self:RemoveManifestKeybinds()
     if self.showPagination then
-        self.leftArrow:SetEnabled(false)
-        self.rightArrow:SetEnabled(false)
+        self.leftArrowKeyboard:SetEnabled(false)
+        self.rightArrowKeyboard:SetEnabled(false)
+        self.leftArrowGamepad:SetEnabled(false)
+        self.rightArrowGamepad:SetEnabled(false)
     end
 end
 

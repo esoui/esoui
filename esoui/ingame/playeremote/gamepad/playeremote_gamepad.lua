@@ -157,19 +157,13 @@ function ZO_GamepadEmoteGrid:Initialize(control, footerControl)
     self:SetPageNumberFont("ZoFontGamepadBold54")
 end
 
-do
-    local function ResetEmote(emote)
-        emote:Reset()
+function ZO_GamepadEmoteGrid:InitializeEmoteItemPool()
+    local function CreateEmote(objectPool)
+        local emoteControl = ZO_ObjectPool_CreateControl("ZO_PlayerEmoteItemControl", objectPool, self.control)
+        return ZO_EmoteItem:New(emoteControl)
     end
 
-    function ZO_GamepadEmoteGrid:InitializeEmoteItemPool()
-        local function CreateEmote(objectPool)
-            local emoteControl = ZO_ObjectPool_CreateControl("ZO_PlayerEmoteItemControl", objectPool, self.control)
-            return ZO_EmoteItem:New(emoteControl)
-        end
-
-        self.emoteItemPool = ZO_ObjectPool:New(CreateEmote, ResetEmote)
-    end
+    self.emoteItemPool = ZO_ObjectPool:New(CreateEmote, ZO_ObjectPool_DefaultResetObject)
 end
 
 function ZO_GamepadEmoteGrid:InitializeEmoteItemGrid()

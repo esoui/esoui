@@ -457,6 +457,8 @@ function ZO_GamepadAlchemyInventory:Initialize(owner, control, ...)
     ZO_GamepadCraftingInventory.Initialize(self, control, ...)
 
     self.owner = owner
+
+    local NO_FILTER = nil
     self.filterType = NO_FILTER
 
     local function OnAddOnLoaded(event, name)

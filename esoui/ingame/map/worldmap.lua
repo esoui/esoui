@@ -15,7 +15,6 @@ local g_campaignId = 0
 local g_pendingKeepInfo
 local g_keybindStrips = {}
 local g_mapRefresh
-local g_gamepadMode = false
 local g_interactKeybindForceHidden = false
 local g_questPingData = nil
 
@@ -56,24 +55,6 @@ local CONSTANTS =
         [ALLIANCE_ALDMERI_DOMINION] = MAP_PIN_TYPE_RESTRICTED_LINK_ALDMERI_DOMINION,
         [ALLIANCE_EBONHEART_PACT] = MAP_PIN_TYPE_RESTRICTED_LINK_EBONHEART_PACT,
         [ALLIANCE_DAGGERFALL_COVENANT] = MAP_PIN_TYPE_RESTRICTED_LINK_DAGGERFALL_COVENANT,
-    },
-
-    KEYBOARD_HEADER_STYLE = {
-        NAME_OFFSET_Y = 10,
-        NAME_FONT = "ZoFontAnnounceMessage",
-        NAME_MODIFY_STYLE = MODIFY_TEXT_TYPE_NONE,
-        DESCRIPTION_OFFSET_Y = 2,
-        DESCRIPTION_FONT = "ZoFontGameOutline",
-        DESCRIPTION_MODIFY_STYLE = MODIFY_TEXT_TYPE_NONE,
-    },
-
-    GAMEPAD_HEADER_STYLE = {
-        NAME_OFFSET_Y = 44,
-        NAME_FONT = "ZoFontGamepadBold34",
-        NAME_MODIFY_STYLE = MODIFY_TEXT_TYPE_UPPERCASE,
-        DESCRIPTION_OFFSET_Y = 8,
-        DESCRIPTION_FONT = "ZoFontGamepad34",
-        DESCRIPTION_MODIFY_STYLE = MODIFY_TEXT_TYPE_NONE,
     },
 }
 
@@ -157,6 +138,9 @@ local g_refreshUpdateTime = nil
 local g_activeGroupPins = {}
 local g_objectiveMovingPins = {}
 local g_nextRespawnTimeMS = 0
+
+MAP_FLOOR_CHANGE_DIRECTION_UP = 1
+MAP_FLOOR_CHANGE_DIRECTION_DOWN = -1
 
 MAP_MODE_SMALL_CUSTOM = 1
 MAP_MODE_LARGE_CUSTOM = 2
@@ -352,6 +336,32 @@ function ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin)
     return zo_strformat(stringId, collectibleData:GetName(), collectibleData:GetCategoryData():GetName())
 end
 
+function InformationTooltipMixin:AppendDelveInfo(pin)
+    local poiIndex = pin:GetPOIIndex()
+    local zoneIndex = pin:GetPOIZoneIndex()
+
+    local poiName, _, poiStartDesc, poiFinishedDesc = GetPOIInfo(zoneIndex, poiIndex)
+
+    local informationTooltip = GetPlatformInformationTooltip()
+    
+    if pin:IsDelvePin() then    
+        informationTooltip:AddLine(zo_strformat(SI_WORLD_MAP_DELVE_NAME, poiName), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+    elseif pin:IsPublicDungeonPin() then
+        informationTooltip:AddLine(zo_strformat(SI_WORLD_MAP_PUBLIC_DUNGEON_NAME, poiName), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+    else
+        informationTooltip:AddLine(poiName, "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+    end
+
+    local skyshardId = GetPOISkyshardId(zoneIndex, poiIndex)
+    if skyshardId ~= 0 then
+        local hintText = GetSkyshardHint(skyshardId)
+        informationTooltip:AddLine(zo_strformat(SI_WORLD_MAP_SKYSHARD_HINT_FORMATTER, hintText), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+
+        local skyshardDiscoveryStatus = GetSkyshardDiscoveryStatus(skyshardId)
+        informationTooltip:AddLine(zo_strformat(SI_WORLD_MAP_SKYSHARD_STATUS_FORMATTER, GetString("SI_SKYSHARDDISCOVERYSTATUS", skyshardDiscoveryStatus)), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+    end
+end
+
 function InformationTooltipMixin:AppendWayshrineTooltip(pin)
     local nodeIndex = pin:GetFastTravelNodeIndex()
     local informationTooltip = GetPlatformInformationTooltip()
@@ -427,84 +437,6 @@ function ZO_WorldMap_GetTooltipForMode(mode)
         return GetPlatformMapLocationTooltip()
     else
         assert(false)
-    end
-end
-do
-    local KEYBOARD_DUNGEON_BUTTON_TEXTURES =
-    {
-        UP = {
-            NORMAL = "EsoUI/Art/WorldMap/mapNav_upArrow_up.dds",
-            PRESSED = "EsoUI/Art/WorldMap/mapNav_upArrow_down.dds",
-            MOUSEOVER = "EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds",
-            DISABLED = "EsoUI/Art/WorldMap/mapNav_upArrow_disabled.dds",
-        },
-        DOWN = {
-            NORMAL = "EsoUI/Art/WorldMap/mapNav_downArrow_up.dds",
-            PRESSED = "EsoUI/Art/WorldMap/mapNav_downArrow_down.dds",
-            MOUSEOVER = "EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds",
-            DISABLED = "EsoUI/Art/WorldMap/mapNav_downArrow_disabled.dds",
-        },
-    }
-
-    local GAMEPAD_DUNGEON_BUTTON_TEXTURES = {
-        UP = {
-            KEY_CODE = KEY_GAMEPAD_LEFT_SHOULDER,
-        },
-        DOWN = {
-            KEY_CODE = KEY_GAMEPAD_RIGHT_SHOULDER,
-        },
-    }
-
-    local function SetButtonTextures(button, textures)
-        if textures.KEY_CODE then
-            button:SetKeyCode(textures.KEY_CODE)
-        else
-            button:SetKeyCode(nil)
-            button:SetNormalTexture(textures.NORMAL)
-            button:SetPressedTexture(textures.PRESSED)
-            button:SetMouseOverTexture(textures.MOUSEOVER)
-            button:SetDisabledTexture(textures.DISABLED)
-        end
-    end
-
-    SetupWorldMap = function()
-        local buttonTextures
-        if IsInGamepadPreferredMode() then
-            buttonTextures = GAMEPAD_DUNGEON_BUTTON_TEXTURES
-            g_gamepadMode = true
-        else
-            buttonTextures = KEYBOARD_DUNGEON_BUTTON_TEXTURES
-            g_gamepadMode = false
-        end
-
-        local headerStyle
-        if IsInGamepadPreferredMode() then
-            headerStyle = CONSTANTS.GAMEPAD_HEADER_STYLE
-        else
-            headerStyle = CONSTANTS.KEYBOARD_HEADER_STYLE
-        end
-
-        ZO_WorldMapMouseoverName:ClearAnchors()
-        ZO_WorldMapMouseoverName:SetAnchor(TOPLEFT, ZO_WorldMapScroll, TOPLEFT, 0, headerStyle.NAME_OFFSET_Y)
-        ZO_WorldMapMouseoverName:SetAnchor(TOPRIGHT, ZO_WorldMapScroll, TOPRIGHT, 0, headerStyle.NAME_OFFSET_Y)
-        ZO_WorldMapMouseoverName:SetFont(headerStyle.NAME_FONT)
-        ZO_WorldMapMouseoverName:SetModifyTextType(headerStyle.NAME_MODIFY_STYLE)
-
-        ZO_WorldMapMouseOverDescription:ClearAnchors()
-        ZO_WorldMapMouseOverDescription:SetAnchor(TOPLEFT, ZO_WorldMapMouseoverName, BOTTOMLEFT, 0, headerStyle.DESCRIPTION_OFFSET_Y)
-        ZO_WorldMapMouseOverDescription:SetAnchor(TOPRIGHT, ZO_WorldMapMouseoverName, BOTTOMRIGHT, 0, headerStyle.DESCRIPTION_OFFSET_Y)
-        ZO_WorldMapMouseOverDescription:SetFont(headerStyle.DESCRIPTION_FONT)
-        ZO_WorldMapMouseOverDescription:SetModifyTextType(headerStyle.DESCRIPTION_MODIFY_STYLE)
-
-        SetButtonTextures(ZO_WorldMapButtonsFloorsUp, buttonTextures.UP)
-        SetButtonTextures(ZO_WorldMapButtonsFloorsDown, buttonTextures.DOWN)
-        SetButtonTextures(ZO_WorldMapButtonsLevelsUp, buttonTextures.UP)
-        SetButtonTextures(ZO_WorldMapButtonsLevelsDown, buttonTextures.DOWN)
-
-        ApplyTemplateToControl(ZO_WorldMapMapFrame, ZO_GetPlatformTemplate("ZO_WorldMapFrame"))
-        ApplyTemplateToControl(ZO_WorldMapButtonsFloors, ZO_GetPlatformTemplate("ZO_DungeonFloorNavigation"))
-
-        WORLD_MAP_MANAGER:RefreshMapFrameAnchor()
     end
 end
 
@@ -722,21 +654,21 @@ local function ClearHideTooltipsLater()
 end
 
 local function HideAllTooltipsLater()
-    if not g_gamepadMode then
+    if IsInGamepadPreferredMode() then
+        g_hideTooltipsAt = GetGameTimeMilliseconds() + 1000
+    else
         HideKeyboardTooltips()
         for i = 1, #tooltipOrder do
             usedTooltips[i] = nil
         end
-    else
-        g_hideTooltipsAt = GetGameTimeMilliseconds() + 1000
     end
 end
 
 local function HideAllTooltips()
-    if not g_gamepadMode then
-        HideKeyboardTooltips()
-    else
+    if IsInGamepadPreferredMode() then
         HideGamepadTooltip()
+    else
+        HideKeyboardTooltips()
     end
     ClearHideTooltipsLater()
     for i = 1, #tooltipOrder do
@@ -914,7 +846,6 @@ local function UpdateMouseOverPins()
     for index, pin in ipairs(tooltipMouseOverPins) do
         local isMousedOver = currentMouseOverPins[pin]
 
-        -- NOTE: Right now we don't need to call the mouse enter handlers, because all custom behavior is part of tooltip generation, so just move on to that step.
         -- Verify that control is still moused over due to OnUpdate/OnShow handler issues (prevents tooltip popping)
         if isMousedOver and pin:MouseIsOver(cursorPositionX, cursorPositionY) then
             table.insert(foundTooltipMouseOverPins, pin)
@@ -1041,6 +972,24 @@ local function UpdateMouseOverPins()
                         informationTooltip:AddVerticalPadding(5)
                     end
                 end
+            end
+        end
+        
+        -- For POIs, add name to the top of the map
+        local pinType = pin:GetPinType()
+        if pinType == MAP_PIN_TYPE_POI_COMPLETE or pinType == MAP_PIN_TYPE_POI_SEEN then
+            local poiIndex = pin:GetPOIIndex()
+            local zoneIndex = pin:GetPOIZoneIndex()
+
+            local poiName, _, poiStartDesc, poiFinishedDesc = GetPOIInfo(zoneIndex, poiIndex)
+
+            ZO_WorldMapMouseoverName.owner = "poi"
+            ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, poiName))
+
+            if pinType == MAP_PIN_TYPE_POI_COMPLETE then
+                ZO_WorldMapMouseOverDescription:SetText(poiFinishedDesc)
+            else
+                ZO_WorldMapMouseOverDescription:SetText(poiStartDesc)
             end
         end
     end
@@ -1307,7 +1256,7 @@ end
 
 ZO_WorldMapPins = ZO_ObjectPool:Subclass()
 
-function ZO_WorldMapPins:New(parentControl)
+function ZO_WorldMapPins:Initialize(parentControl)
     local mouseInputGroup = ZO_MouseInputGroup:New(parentControl)
 
     local function CreatePin(pool)
@@ -1322,15 +1271,15 @@ function ZO_WorldMapPins:New(parentControl)
         pin:Reset()
     end
 
-    local mapPins = ZO_ObjectPool.New(self, CreatePin, ResetPin)
+    ZO_ObjectPool.Initialize(self, CreatePin, ResetPin)
 
-    mapPins.mouseInputGroup = mouseInputGroup
+    self.mouseInputGroup = mouseInputGroup
 
     -- Each of these tables holds a method of mapping pin lookup indices to the actual object pool keys needed to release the pins later
     -- The reason this exists is because the game events will hold info like "remove this specific quest index", and at that point we
     -- need to be able to lookup a pin for game-event data rather than pinTag data, without iterating over every single pin in the
     -- active objects list.
-    mapPins.m_keyToPinMapping =
+    self.m_keyToPinMapping =
     {
         ["poi"] = {},       -- { [zone index 1] = { [objective index 1] = pinKey1, [objective index 2] = pinKey2,  ... }, ... }
         ["loc"] = {},
@@ -1350,48 +1299,41 @@ function ZO_WorldMapPins:New(parentControl)
         ["worldEventPOI"] = {},
         ["antiquityDigSite"] = {},
         ["companion"] = {},
+        ["skyshard"] = {},
     }
 
-    mapPins.nextCustomPinType = MAP_PIN_TYPE_INVALID
-    mapPins.customPins = {}
+    self.nextCustomPinType = MAP_PIN_TYPE_INVALID
+    self.customPins = {}
 
-    local function CreateBlobControl(pool)
-        return ZO_ObjectPool_CreateNamedControl("ZO_QuestPinBlob", "ZO_PinBlob", pool, parentControl)
-    end
+    self.pinBlobPool = ZO_ControlPool:New("ZO_PinBlob", parentControl, "PinBlob")
 
-    local function ResetBlobControl(blobControl)
-        ZO_ObjectPool_DefaultResetControl(blobControl)
+    self.pinBlobPool:SetCustomResetBehavior(function(blobControl)
         blobControl:SetAlpha(1)
-    end
+    end)
 
-    mapPins.pinBlobPool = ZO_ObjectPool:New(CreateBlobControl, ResetBlobControl)
+    self.pinPolygonBlobPool = ZO_ControlPool:New("ZO_PinPolygonBlob", parentControl, "PinPolygonBlob")
 
-    local function CreatePolygonBlobControl(pool)
-        local polygonBlob = ZO_ObjectPool_CreateNamedControl("ZO_PinPolygonBlob", "ZO_PinPolygonBlob", pool, parentControl)
-        mouseInputGroup:Add(polygonBlob, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
-        return polygonBlob
-    end
+    self.pinPolygonBlobPool:SetCustomFactoryBehavior(function(blobControl)
+        mouseInputGroup:Add(blobControl, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
+    end)
 
-    local function ResetPolygonBlobControl(polygonControl)
-        ZO_ObjectPool_DefaultResetControl(polygonControl)
-        polygonControl:SetHandler("OnMouseUp", nil)
-        polygonControl:SetHandler("OnMouseDown", nil)
-        polygonControl:SetAlpha(1)
-    end
+    self.pinPolygonBlobPool:SetCustomFactoryBehavior(function(blobControl)
+        blobControl:SetHandler("OnMouseUp", nil)
+        blobControl:SetHandler("OnMouseDown", nil)
+        blobControl:SetAlpha(1)
+    end)
 
-    mapPins.pinPolygonBlobPool = ZO_ObjectPool:New(CreatePolygonBlobControl, ResetPolygonBlobControl)
-
-    mapPins.pinFadeInAnimationPool = ZO_AnimationPool:New("ZO_WorldMapPinFadeIn")
+    self.pinFadeInAnimationPool = ZO_AnimationPool:New("ZO_WorldMapPinFadeIn")
 
     local function OnAnimationTimelineStopped(timeline)
-        mapPins.pinFadeInAnimationPool:ReleaseObject(timeline.key)
+        self.pinFadeInAnimationPool:ReleaseObject(timeline.key)
     end
 
     local function SetupTimeline(timeline)
         timeline:SetHandler("OnStop", OnAnimationTimelineStopped)
     end
 
-    mapPins.pinFadeInAnimationPool:SetCustomFactoryBehavior(SetupTimeline)
+    self.pinFadeInAnimationPool:SetCustomFactoryBehavior(SetupTimeline)
 
     local function ResetTimeline(animationTimeline)
         local pinAnimation = animationTimeline:GetAnimation(1)
@@ -1401,20 +1343,18 @@ function ZO_WorldMapPins:New(parentControl)
         areaAnimation:SetAnimatedControl(nil)
     end
 
-    mapPins.pinFadeInAnimationPool:SetCustomResetBehavior(ResetTimeline)
+    self.pinFadeInAnimationPool:SetCustomResetBehavior(ResetTimeline)
 
     --Wait until the map mode has been set before fielding these updates since adding a pin depends on the map having a mode.
     local OnWorldMapModeChanged
     OnWorldMapModeChanged = function(modeData)
         if modeData then
-            WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestAvailable", function(...) mapPins:OnQuestAvailable(...) end)
-            WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestRemoved", function(...) mapPins:OnQuestRemoved(...) end)
+            WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestAvailable", function(...) self:OnQuestAvailable(...) end)
+            WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestRemoved", function(...) self:OnQuestRemoved(...) end)
             CALLBACK_MANAGER:UnregisterCallback("OnWorldMapModeChanged", OnWorldMapModeChanged)
         end
     end
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapModeChanged", OnWorldMapModeChanged)
-
-    return mapPins
 end
 
 function ZO_WorldMapPins:AcquirePinBlob()
@@ -1604,6 +1544,8 @@ function ZO_WorldMapPins:CreatePin(pinType, pinTag, xLoc, yLoc, radius, borderIn
         self:MapPinLookupToPinKey("antiquityDigSite", pinType, pinTag, pinKey)
     elseif pin:IsCompanion() then
         self:MapPinLookupToPinKey("companion", pinType, pinTag, pinKey)
+    elseif pin:IsSkyshard() then
+        self:MapPinLookupToPinKey("skyshard", pinType, pinTag, pinKey)
     else
         local customPinData = self.customPins[pinType]
         if customPinData then
@@ -1798,12 +1740,13 @@ end
 
 ZO_MouseoverMapBlobManager = ZO_ObjectPool:Subclass()
 
-function ZO_MouseoverMapBlobManager:New(blobContainer)
-    local blobFactory = function(pool) return MapOverlayControlFactory(pool, "MapMouseoverBlob", "ZO_MapBlob", blobContainer) end
-    local manager = ZO_ObjectPool.New(self, blobFactory, ZO_ObjectPool_DefaultResetControl)
-    manager.m_currentTexture = ""
-    manager.m_currentLocation = ""
-    return manager
+function ZO_MouseoverMapBlobManager:Initialize(blobContainer)
+    local function BlobFactory(pool) 
+        return MapOverlayControlFactory(pool, "MapMouseoverBlob", "ZO_MapBlob", blobContainer)
+    end
+    ZO_ObjectPool.Initialize(self, BlobFactory, ZO_ObjectPool_DefaultResetControl)
+    self.m_currentTexture = ""
+    self.m_currentLocation = ""
 end
 
 local function NormalizedBlobDataToUI(blobWidth, blobHeight, blobXOffset, blobYOffset)
@@ -1884,19 +1827,16 @@ end
 
 CONSTANTS.LOCATION_FONT = "$(BOLD_FONT)|%d|soft-shadow-thin"
 
-ZO_MapLocations = ZO_ObjectPool:Subclass()
+ZO_MapLocations = ZO_ControlPool:Subclass()
 
-function ZO_MapLocations:New(container)
-    local factory = function(pool) return ZO_ObjectPool_CreateNamedControl("ZO_MapLandmark", "ZO_MapLocation", pool, container) end
-    local locations = ZO_ObjectPool.New(self, factory, ZO_ObjectPool_DefaultResetControl)
+function ZO_MapLocations:Initialize(container)
+    ZO_ControlPool.Initialize(self, "ZO_MapLocation", container, "Landmark")
 
-    locations.m_minFontSize = 17
-    locations.m_maxFontSize = 32
-    locations.m_cachedFontStrings = {}
+    self.m_minFontSize = 17
+    self.m_maxFontSize = 32
+    self.m_cachedFontStrings = {}
 
-    locations:SetFontScale(1)
-
-    return locations
+    self:SetFontScale(1)
 end
 
 function ZO_MapLocations:SetFontScale(scale)
@@ -2226,7 +2166,7 @@ local function GetGamepadAdjustedMapDimensions()
     local newMapWidth = left - right - padding
 
     --caculate the safe zone height
-    local headerHeight = ZO_WorldMapHeader_Gamepad:GetNamedChild("ZoomKeybind"):GetHeight() + ZOOM_KEYBIND_STRIP_PADDING_Y -- use the zoomkeybind so we don't create a cyclical dependancy between the header title and map extants
+    local headerHeight = ZO_WorldMapHeader_Gamepad:GetNamedChild("ZoomKeybindLabel"):GetHeight() + ZOOM_KEYBIND_STRIP_PADDING_Y -- use ZoomKeybindLabel so we don't create a cyclical dependancy between the header title and map extants
     local buttonsHeight = ZO_WorldMapButtons:GetHeight()
     local keybindStripHeight = ZO_KeybindStripGamepadBackgroundTexture:GetHeight()
     local safeHeight = uiHeight - ZO_GAMEPAD_SAFE_ZONE_INSET_Y - headerHeight - buttonsHeight - keybindStripHeight - padding
@@ -3028,8 +2968,8 @@ function GamepadMap:UpdateDirectionalInput()
         local isInputAvailable = DIRECTIONAL_INPUT:IsAvailable(ZO_DI_LEFT_STICK) or DIRECTIONAL_INPUT:IsAvailable(ZO_DI_DPAD)
         ZO_WorldMapCenterPoint:SetHidden(not isInputAvailable)
 
-        local zoomInMagnitude = GetGamepadRightTriggerMagnitude()
-        local zoomOutMagnitude = GetGamepadLeftTriggerMagnitude()
+        local zoomInMagnitude = DIRECTIONAL_INPUT:GetRightTriggerMagnitude()
+        local zoomOutMagnitude = DIRECTIONAL_INPUT:GetLeftTriggerMagnitude()
         local zoomDelta = zoomInMagnitude - zoomOutMagnitude
         local wantsToZoom = zoomDelta ~= 0
 
@@ -3580,6 +3520,16 @@ do
     function ZO_WorldMap_DoesMapHideCompanionPins()
         return MAPS_WITHOUT_COMPANION_PINS[GetMapType()]
     end
+
+    local MAPS_WITHOUT_SKYSHARD_PINS =
+    {
+        [MAPTYPE_WORLD] = true,
+        [MAPTYPE_COSMIC] = true,
+    }
+
+    function ZO_WorldMap_DoesMapHideSkyshardPins()
+        return MAPS_WITHOUT_SKYSHARD_PINS[GetMapType()]
+    end
 end
 
 local RefreshSinglePOI
@@ -3836,29 +3786,6 @@ function ZO_WorldMap_RefreshAllPOIs()
     end
 end
 
-local function FloorLevelNavigationUpdate()
-    local currentFloor, numFloors = GetMapFloorInfo()
-
-    local showFloorControls = false
-    local showLevelControls = false
-    if IsInGamepadPreferredMode() then
-        if not (ZO_WorldMap_IsWorldMapInfoShowing() or ZO_WorldMap_IsKeepInfoShowing()) then
-            showFloorControls = numFloors > 0
-            showLevelControls = not showFloorControls
-        end
-    else
-        showFloorControls = numFloors > 0
-    end
-
-    ZO_WorldMapButtonsFloors:SetHidden(not showFloorControls)
-    ZO_WorldMapButtonsLevels:SetHidden(not showLevelControls)
-
-    if showFloorControls then
-        ZO_WorldMapButtonsFloorsUp:SetEnabled(currentFloor ~= 1)
-        ZO_WorldMapButtonsFloorsDown:SetEnabled(currentFloor ~= numFloors)
-    end
-end
-
 function ZO_WorldMap_GetMapTitle()
     local titleText
     local mapName = GetMapName()
@@ -3903,7 +3830,7 @@ function ZO_WorldMap_UpdateMap()
     g_mapRefresh:RefreshAll("location")
     g_mapRefresh:RefreshAll("keepNetwork")
     ZO_WorldMap_RefreshAllPOIs()
-    FloorLevelNavigationUpdate()
+    WORLD_MAP_MANAGER:UpdateFloorAndLevelNavigation()
     ZO_WorldMap_RefreshObjectives()
     ZO_WorldMap_RefreshKeeps()
     RefreshMapPings()
@@ -4269,12 +4196,10 @@ function ZO_WorldMap_HandlePinExit()
     UpdateMouseOverPins()
 end
 
-function ZO_WorldMap_ChangeFloor(self)
-    local currentFloor = GetMapFloorInfo()
-    if SetMapFloor(currentFloor + self.floorDirection) == SET_MAP_RESULT_MAP_CHANGED then
-        PlayerChosenMapUpdate()
-    end
+function ZO_WorldMap_ChangeFloor(control)
+    WORLD_MAP_MANAGER:ChangeFloor(control.floorDirection)
 end
+
 
 function ZO_WorldMap_ShowDungeonFloorTooltip(self)
     local informationTooltip = GetPlatformInformationTooltip()
@@ -4534,8 +4459,627 @@ end
 --Initialization
 ------------------
 do
-    --Event Handlers
-    ---------------------
+    --Initialize Refresh Groups
+    ----------------------------
+
+    local function InitializeRefreshGroups()
+        g_mapRefresh = ZO_Refresh:New()
+
+        g_mapRefresh:AddRefreshGroup("keep",
+        {
+            RefreshAll = RefreshKeeps,
+            RefreshSingle = RefreshKeep,
+            IsShown = IsPresentlyShowingKeeps,
+        })
+
+        g_mapRefresh:AddRefreshGroup("keepNetwork",
+        {
+            RefreshAll = function()
+                if g_keepNetworkManager then
+                    g_keepNetworkManager:RefreshLinks()
+                end
+            end,
+            IsShown = IsPresentlyShowingKeeps,
+        })
+
+        g_mapRefresh:AddRefreshGroup("objective",
+        {
+            RefreshAll = RefreshObjectives,
+        })
+
+        g_mapRefresh:AddRefreshGroup("group",
+        {
+            RefreshAll = ZO_WorldMap_RefreshGroupPins,
+        })
+
+        g_mapRefresh:AddRefreshGroup("location",
+        {
+            RefreshAll =  function()
+                g_mapLocationManager:RefreshLocations()
+            end,
+        })
+
+        g_mapRefresh:AddRefreshGroup("worldEvent",
+        {
+            RefreshAll = ZO_WorldMap_RefreshWorldEvents,
+            RefreshSingle = ZO_WorldMap_RefreshWorldEvent,
+        })
+    end
+
+    --Initialize
+    ---------------
+    function ZO_WorldMap_Initialize(control)
+        local worldMapContainer = control:GetNamedChild("Container")
+        g_mapLocationManager = ZO_MapLocations:New(worldMapContainer)
+        g_mouseoverMapBlobManager = ZO_MouseoverMapBlobManager:New(worldMapContainer)
+        g_mapTileManager = ZO_WorldMapTiles:New(worldMapContainer)
+        g_mapPinManager = ZO_WorldMapPins:New(worldMapContainer)
+        InitializeRefreshGroups()
+
+        g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER, "player")
+
+        g_nextRespawnTimeMS = GetNextForwardCampRespawnTime()
+
+        --setup history
+        ZO_WorldMapButtonsHistorySlider:SetMinMax(0, CONSTANTS.HISTORY_SLIDER_RANGE)
+        ZO_WorldMapButtonsHistorySlider:SetValue(CONSTANTS.HISTORY_SLIDER_RANGE)
+        g_historyPercent = 1
+
+        --info panels
+        if ZO_WorldMapInfo_Initialize then
+            ZO_WorldMapInfo_Initialize()
+        end
+        if ZO_WorldMapInfo_Gamepad_Initialize then
+            ZO_WorldMapInfo_Gamepad_Initialize()
+        end
+
+        if GetKeepFastTravelInteraction() then
+            CloseChatter()
+        end
+
+        local function OnGamepadPreferredModeChanged()
+            if IsInGamepadPreferredMode() then
+                HideKeyboardTooltips()
+            end
+        end
+
+        control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
+
+        --TODO: Move WAY more into the object
+        WORLD_MAP_MANAGER = ZO_WorldMapManager:New(control)
+    end
+end
+
+function SetCampaignHistoryEnabled(enabled)
+    local wasUsingHistory = ShouldUseHistoryPercent()
+
+    g_enableCampaignHistory = enabled
+
+    local isUsingHistory = ShouldUseHistoryPercent()
+    ZO_WorldMapButtonsHistorySlider:SetHidden(not isUsingHistory)
+
+    if wasUsingHistory ~= isUsingHistory then
+        RebuildMapHistory()
+    end
+end
+
+function ZO_WorldMap_MarkKeybindStripsDirty()
+    g_keybindStrips.mouseover:MarkDirty()
+    g_keybindStrips.PC:MarkDirty()
+    g_keybindStrips.gamepad:MarkDirty()
+end
+
+function ZO_WorldMap_InteractKeybindForceHidden(hidden)
+    g_interactKeybindForceHidden = hidden
+    ZO_WorldMap_UpdateInteractKeybind_Gamepad()
+end
+
+function ZO_WorldMap_SetKeepMode(active)
+    if not IsInGamepadPreferredMode() then
+        return
+    end
+
+    if active then
+        ZO_WorldMap_SetGamepadKeybindsShown(false)
+
+        GAMEPAD_WORLD_MAP_KEEP_UPGRADE:Activate()
+
+        -- Hide the tooltips
+        ZO_WorldMap_HideAllTooltips()
+
+        -- Add the Close Keep keybind
+        KEYBIND_STRIP:AddKeybindButtonGroup(g_keybindStrips.gamepadCloseKeep:GetDescriptor())
+
+        ZO_WorldMap_InteractKeybindForceHidden(true)
+    else
+        -- Remove the Close Keep keybind
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepadCloseKeep:GetDescriptor())
+
+        GAMEPAD_WORLD_MAP_KEEP_UPGRADE:Deactivate()
+
+        ZO_WorldMap_SetGamepadKeybindsShown(true)
+        ZO_WorldMap_InteractKeybindForceHidden(false)
+    end
+end
+
+function ZO_WorldMap_HandlersContain(pinDatas, types)
+    for _, pinData in ipairs(pinDatas) do
+        local handler = pinData.handler
+        for _, type in ipairs(types) do
+            if handler == type then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function ZO_WorldMap_GetGamepadPinActionGroupForHandler(handler)
+    if handler.gamepadPinActionGroup then
+        return handler.gamepadPinActionGroup
+    end
+
+    for gamepadPinActionGroup, handlers in ipairs(ZO_WORLD_MAP_GAMEPAD_PIN_ACTION_GROUP_TYPE_TO_HANDLERS) do
+        for _, searchHandler in ipairs(handlers) do
+            if searchHandler == handler then
+                return gamepadPinActionGroup
+            end
+        end
+    end
+end
+
+function ZO_WorldMap_CountHandlerTypes(pinDatas)
+    local count = 0
+    for _, types in ipairs(ZO_WORLD_MAP_GAMEPAD_PIN_ACTION_GROUP_TYPE_TO_HANDLERS) do
+        if ZO_WorldMap_HandlersContain(pinDatas, types) then
+            count = count + 1
+        end
+    end
+
+    return count
+end
+
+function ZO_WorldMap_UpdateInteractKeybind_Gamepad()
+    if IsInGamepadPreferredMode() then
+        if not ZO_WorldMap_IsWorldMapInfoShowing() then
+            local pinDatas = ZO_WorldMap_GetPinHandlers(MOUSE_BUTTON_INDEX_LEFT)
+
+            if #pinDatas == 0 then
+                -- There are no actionable pins under the cursor.
+                ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
+            else
+                -- We want to filter out all invalid spawn locations because if they are selected
+                -- along with another pin that is valid they should be ignored as if they are not selected
+                -- If there are no validHandlers, we have only invalid spawn locations.
+                -- We still want to display the invalid spawn location text, so use the first invalid handler
+                -- to access the buttonText callback
+                local firstHandler = pinDatas[1].handler
+                RemoveInvalidSpawnLocations(pinDatas)
+
+                -- Use the first valid handler if one exists
+                if #pinDatas > 0 then
+                    firstHandler = pinDatas[1].handler
+                end
+
+                local buttonText = firstHandler.gamepadName
+                -- If we are highlighting multiple types of pins at the same time
+                if ZO_WorldMap_CountHandlerTypes(pinDatas) > 1 then
+                    buttonText = GetString(SI_GAMEPAD_SELECT_OPTION)
+                elseif type(buttonText) == "function" then
+                    buttonText = buttonText(pinDatas)
+                end
+
+                -- Fallback to name if it's just a string. As functions, name and gamepadName take different arguments
+                if not buttonText and type(firstHandler.name) == "string" then
+                    buttonText = firstHandler.name
+                end
+
+                if buttonText then
+                    ZO_WorldMapGamepadInteractKeybind:SetHidden(g_interactKeybindForceHidden or GAMEPAD_WORLD_MAP_KEY_FRAGMENT:IsShowing())
+                    local KEYBIND_SCALE_PERCENT = 120
+                    ZO_WorldMapGamepadInteractKeybind:SetText(zo_strformat(SI_GAMEPAD_WORLD_MAP_INTERACT, buttonText))
+                else
+                    ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
+                end
+            end
+        end
+    else
+        ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
+    end
+end
+
+function ZO_WorldMap_SetDirectionalInputActive(active)
+    if active then
+        if GAMEPAD_WORLD_MAP_SCENE:IsShowing() then
+            DIRECTIONAL_INPUT:Activate(g_gamepadMap, ZO_WorldMap)
+        end
+    else
+        DIRECTIONAL_INPUT:Deactivate(g_gamepadMap)
+    end
+end
+
+function ZO_WorldMap_SetGamepadKeybindsShown(enabled)
+    ZO_WorldMap_SetDirectionalInputActive(enabled)
+    if enabled then
+        -- Activate the keybinding and directional controls
+        KEYBIND_STRIP:AddKeybindButtonGroup(g_keybindStrips.gamepad:GetDescriptor())
+        ZO_WorldMapCenterPoint:SetHidden(false)
+        ZO_WorldMapHeader_GamepadZoomKeybind:SetHidden(false)
+    else
+        -- Deactivate the keybinding and directional controls
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepad:GetDescriptor())
+        ZO_WorldMapCenterPoint:SetHidden(true)
+        ZO_WorldMapHeader_GamepadZoomKeybind:SetHidden(true)
+    end
+end
+
+function ZO_WorldMap_HideAllTooltips()
+    if not GetPlatformInformationTooltip() then -- Tooltips aren't active
+        return
+    end
+
+    HideAllTooltips()
+
+    CALLBACK_MANAGER:FireCallbacks("OnHideWorldMapTooltip")
+end
+
+function ZO_WorldMap_ShowGamepadTooltip(resetScroll)
+    if not GetPlatformInformationTooltip() then -- Tooltips aren't active
+        return
+    end
+
+    local tooltipControl = ShowGamepadTooltip(resetScroll)
+
+    CALLBACK_MANAGER:FireCallbacks("OnShowWorldMapTooltip")
+
+    return tooltipControl
+end
+
+function ZO_WorldMap_IsTooltipShowing()
+    if IsInGamepadPreferredMode() then
+        return usedTooltips[CONSTANTS.GAMEPAD_TOOLTIP_ID]
+    else
+        for i = 1, #tooltipOrder do
+            if usedTooltips[i] then
+                return true
+            end
+        end
+
+        return false
+    end
+end
+
+function ZO_WorldMap_IsWorldMapInfoShowing()
+    return GAMEPAD_WORLD_MAP_INFO_FRAGMENT:IsShowing()
+end
+
+function ZO_WorldMap_IsKeepInfoShowing()
+    return GAMEPAD_WORLD_MAP_KEEP_INFO_FRAGMENT:IsShowing()
+end
+
+function ZO_WorldMap_IsWorldMapShowing()
+    return SCENE_MANAGER:IsShowing("worldMap") or SCENE_MANAGER:IsShowing("gamepad_worldMap")
+end
+
+function ZO_WorldMap_ShowWorldMap()
+    if IsInGamepadPreferredMode() then
+        SCENE_MANAGER:Show("gamepad_worldMap")
+    else
+        SCENE_MANAGER:Show("worldMap")
+    end
+end
+
+function ZO_WorldMap_HideWorldMap()
+    if SCENE_MANAGER:IsShowing("worldMap") then
+        SCENE_MANAGER:Hide("worldMap")
+    elseif SCENE_MANAGER:IsShowing("gamepad_worldMap") then
+        SCENE_MANAGER:Hide("gamepad_worldMap")
+    end
+end
+
+function ZO_WorldMap_SetupGamepadChoiceDialog(mouseOverPinHandlers)
+    ZO_Dialogs_ShowGamepadDialog("WORLD_MAP_CHOICE_GAMEPAD", { mouseOverPinHandlers = mouseOverPinHandlers })
+end
+
+--[[
+The World Map object, where state for the map system in general can be stored
+This file still relies heavily on locals and global functions but in time that can be migrated to the class
+]]--
+
+local AUTO_NAVIGATION_STATE =
+{
+    INACTIVE = 1,
+    WAITING_TO_PAN = 2,
+    PANNING = 3,
+    WAITING_TO_CLICK = 4,
+}
+
+local AUTO_NAVIGATION_CONSTANTS =
+{
+    START_PAN_DELAY_S = 1.5,
+    PAN_DELAY_S = 1.0,
+    CLICK_DELAY_S = 0.25,
+    START_ZOOM = 0.3,
+}
+
+local ANTIQUITY_DIG_SITE_ANIMATION_STATE =
+{
+    INACTIVE = 1,
+    INITIALIZE_ANIMATIONS = 2,
+    TRIGGER_ANIMATIONS = 3,
+    FINISH_ANIMATIONS = 4,
+}
+
+local ANTIQUITY_DIG_SITE_ANIMATION_CONSTANTS =
+{
+    START_ADDING_PINGS_DELAY_S = 3.8, -- delayed largely for CSA
+    TIME_BETWEEN_PINGS_S = 0.8,
+    PING_DURATION_S = 0.6,
+}
+
+local function GetSavedVarDefaults()
+    local DEFAULT_SMALL_WIDTH, DEFAULT_SMALL_HEIGHT = GetSquareMapWindowDimensions(CONSTANTS.WORLDMAP_SIZE_SMALL_WINDOW_SIZE, CONSTANTS.WORLDMAP_RESIZE_HEIGHT_DRIVEN, CONSTANTS.WORLDMAP_SIZE_SMALL)
+
+    local defaults =
+    {
+        [MAP_MODE_SMALL_CUSTOM] =
+        {
+            keepSquare = true,
+            width = DEFAULT_SMALL_WIDTH,
+            height = DEFAULT_SMALL_HEIGHT,
+            x = 0,
+            y = 0,
+            point = CENTER,
+            relPoint = CENTER,
+            mapSize = CONSTANTS.WORLDMAP_SIZE_SMALL,
+            filters =
+            {
+                [MAP_FILTER_TYPE_STANDARD] = {},
+                [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                {
+                    [MAP_FILTER_OBJECTIVES] = false,
+                    [MAP_FILTER_AVA_GRAVEYARD_AREAS] = false,
+                    [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
+                },
+                [MAP_FILTER_TYPE_AVA_IMPERIAL] = {},
+                [MAP_FILTER_TYPE_BATTLEGROUND] = {},
+            }
+        },
+        [MAP_MODE_LARGE_CUSTOM] =
+        {
+            mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
+            filters =
+            {
+                [MAP_FILTER_TYPE_STANDARD] = {},
+                [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                {
+                    [MAP_FILTER_OBJECTIVES] = false,
+                    [MAP_FILTER_AVA_GRAVEYARD_AREAS] = false,
+                    [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
+                },
+                [MAP_FILTER_TYPE_AVA_IMPERIAL] = {},
+                [MAP_FILTER_TYPE_BATTLEGROUND] = {},
+            }
+        },
+        [MAP_MODE_KEEP_TRAVEL] =
+        {
+            mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
+            allowHistory = false,
+            filters =
+            {
+                [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                {
+                    [MAP_FILTER_KILL_LOCATIONS] = false,
+                    [MAP_FILTER_OBJECTIVES] = false,
+                    [MAP_FILTER_QUESTS] = false,
+                    [MAP_FILTER_RESOURCE_KEEPS] = false,
+                    [MAP_FILTER_AVA_GRAVEYARDS] = false,
+                    [MAP_FILTER_WAYSHRINES] = false,
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                    [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
+                }
+            },
+            disabledStickyPins =
+            {
+                [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                {
+                    [MAP_FILTER_RESOURCE_KEEPS] = true,
+                }
+            },
+        },
+        [MAP_MODE_FAST_TRAVEL] =
+        {
+            mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
+            allowHistory = false,
+            filters =
+            {
+                [MAP_FILTER_TYPE_STANDARD] = {},
+                [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                {
+                    [MAP_FILTER_KILL_LOCATIONS] = false,
+                    [MAP_FILTER_AVA_OBJECTIVES] = false,
+                    [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
+                },
+                [MAP_FILTER_TYPE_AVA_IMPERIAL] = {},
+                [MAP_FILTER_TYPE_BATTLEGROUND] = {},
+            }
+        },
+        [MAP_MODE_AVA_RESPAWN] =
+        {
+            mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
+            allowHistory = false,
+            filters =
+            {
+                [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                {
+                    [MAP_FILTER_KILL_LOCATIONS] = false,
+                    [MAP_FILTER_WAYSHRINES] = false,
+                    [MAP_FILTER_OBJECTIVES] = false,
+                    [MAP_FILTER_RESOURCE_KEEPS] = false,
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                    [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
+                },
+                [MAP_FILTER_TYPE_AVA_IMPERIAL] = {},
+                [MAP_FILTER_TYPE_BATTLEGROUND] = {},
+            },
+            disabledStickyPins =
+            {
+                [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                {
+                    [MAP_FILTER_RESOURCE_KEEPS] = true,
+                }
+            },
+        },
+        [MAP_MODE_AVA_KEEP_RECALL] =
+        {
+            mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
+            allowHistory = false,
+            filters =
+            {
+                [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                {
+                    [MAP_FILTER_KILL_LOCATIONS] = false,
+                    [MAP_FILTER_OBJECTIVES] = false,
+                    [MAP_FILTER_QUESTS] = false,
+                    [MAP_FILTER_RESOURCE_KEEPS] = false,
+                    [MAP_FILTER_AVA_GRAVEYARDS] = false,
+                    [MAP_FILTER_WAYSHRINES] = false,
+                    [MAP_FILTER_TRANSIT_LINES] = false,
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                }
+            },
+            disabledStickyPins =
+            {
+                [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                {
+                    [MAP_FILTER_RESOURCE_KEEPS] = true,
+                }
+            },
+        },
+        [MAP_MODE_DIG_SITES] =
+        {
+            mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
+            allowHistory = false,
+            filters =
+            {
+                [MAP_FILTER_TYPE_STANDARD] =
+                {
+                    [MAP_FILTER_OBJECTIVES] = false,
+                    [MAP_FILTER_COMPANIONS] = false,
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
+                [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                {
+                    [MAP_FILTER_OBJECTIVES] = false,
+                    [MAP_FILTER_KILL_LOCATIONS] = false,
+                    [MAP_FILTER_AVA_OBJECTIVES] = false,
+                    [MAP_FILTER_COMPANIONS] = false,
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                    [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
+                },
+                [MAP_FILTER_TYPE_AVA_IMPERIAL] = {},
+                [MAP_FILTER_TYPE_BATTLEGROUND] = {},
+            }
+        },
+        userMode = MAP_MODE_LARGE_CUSTOM,
+    }
+
+    return defaults
+end
+
+ZO_WorldMapManager = ZO_InitializingCallbackObject:Subclass()
+
+function ZO_WorldMapManager:Initialize(control)
+    self.control = control
+
+    -- NOTE: The update loop queries to see if it needs to update the current map, so we don't have to register for the ZONE_CHANGED event.
+    control:SetHandler("OnUpdate", Update)
+
+    --Constrain map to screen
+    local uiWidth, uiHeight = GuiRoot:GetDimensions()
+    control:SetDimensionConstraints(CONSTANTS.MAP_MIN_SIZE, CONSTANTS.MAP_MIN_SIZE, uiWidth, uiHeight)
+
+    self.autoNavigationState = AUTO_NAVIGATION_STATE.INACTIVE
+    self.autoNavigationDelayUntilFrameTimeS = nil
+
+    self.antiquityDigSiteAnimationState = ANTIQUITY_DIG_SITE_ANIMATION_STATE.INACTIVE
+    self.antiquityDigSiteAnimationDelayUntilFrameTimeS = nil
+    self.antiquityDigSitePinInfo = {}
+
+    -- initial mode will be set from the saved variables
+    self.mode = nil
+    self.modeData = nil
+    self.inSpecialMode = false
+
+    --Scenes
+    self:CreateKeyboardWorldMapScene()
+    self:CreateGamepadWorldMapScene()
+
+    WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_WorldMapAutoNavigationOverlay)
+    WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:SetConditional(function() return self:IsPreventingMapNavigation() end)
+
+    local autoNavigationOverlayControl = ZO_WorldMapAutoNavigationOverlay
+    WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT = ZO_SimpleSceneFragment:New(autoNavigationOverlayControl)
+    WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:SetConditional(function() return self:IsPreventingMapNavigation() end)
+
+    local autoNavigationContinueKeybind = autoNavigationOverlayControl:GetNamedChild("ContinueKeybind")
+
+    -- TODO: Make this a more generic handler for exiting map auto-navigation
+    local function EndDigSiteReveal()
+        self:EndDigSiteReveal()
+    end
+    ZO_KeybindButtonTemplate_Setup(autoNavigationContinueKeybind, "UI_SHORTCUT_PRIMARY", EndDigSiteReveal, GetString(SI_WORLD_MAP_ANTIQUITIES_CONTINUE))
+    autoNavigationContinueKeybind:SetMouseOverEnabled(false)
+    autoNavigationContinueKeybind:SetClickSound(SOUNDS.POSITIVE_CLICK)
+    autoNavigationContinueKeybind:SetAnchor(BOTTOM, control:GetNamedChild("MapFrame"), BOTTOM, 0, -15)
+    self.autoNavigationContinueKeybind = autoNavigationContinueKeybind
+
+    local buttonsContainer = control:GetNamedChild("Buttons")
+    self.keyboardFloorsControl = buttonsContainer:GetNamedChild("Floors_Keyboard")
+    self.gamepadLevelsControl = buttonsContainer:GetNamedChild("Levels_Gamepad")
+    self.gamepadFloorsControl = buttonsContainer:GetNamedChild("Floors_Gamepad")
+
+    WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD = ZO_FadeSceneFragment:New(ZO_WorldMapRespawnTimer)
+    ZO_MixinHideableSceneFragment(WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD)
+    WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD:SetHiddenForReason("TimerInactive", true)
+
+    WORLD_MAP_SCENE:AddFragment(WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT)
+    WORLD_MAP_SCENE:AddFragment(WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD)
+    GAMEPAD_WORLD_MAP_SCENE:AddFragment(WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT)
+
+    WORLD_MAP_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    WORLD_MAP_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            UpdateMovingPins()
+            g_dataRegistration:Refresh()
+            g_mapPanAndZoom:OnWorldMapShowing()
+            self:OnShowing()
+            self:TryTriggeringTutorials()
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            HideAllTooltips()
+            ResetMouseOverPins()
+            self:OnHiding()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            g_dataRegistration:Refresh()
+            self:OnHidden()
+        end
+    end)
+
+    GAMEPAD_WORLD_MAP_INFO_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING or newState == SCENE_FRAGMENT_HIDDEN then
+            self:UpdateFloorAndLevelNavigation()
+        end
+    end)
+
+    --Information tooltip mixin
+    zo_mixin(InformationTooltip, InformationTooltipMixin)
+
+    self:InitializeKeybinds()
+
+    self:RegisterForEvents()
+end
+
+do
     local EVENT_HANDLERS =
     {
         [EVENT_NON_COMBAT_BONUS_CHANGED] = function()
@@ -4740,312 +5284,15 @@ do
         end,
     }
 
-    --Callbacks
-    ------------
-    local function OnAssistStateChanged(unassistedData, assistedData)
-        if unassistedData then
-            g_mapPinManager:SetQuestPinsAssisted(unassistedData:GetJournalIndex(), false)
-        end
-        if assistedData then
-            g_mapPinManager:SetQuestPinsAssisted(assistedData:GetJournalIndex(), true)
-        end
-        ZO_WorldMap_InvalidateTooltip()
-    end
-    
-    local function OnGamepadPreferredModeChanged()
-        SetupWorldMap()
-        FloorLevelNavigationUpdate()
-    end
-
-    local function OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
-        if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
-            ZO_WorldMap_RefreshAllPOIs()
-            ZO_WorldMap_RefreshWayshrines()
-            return
-        else
-            for _, unlockStateTable in pairs(collectiblesByNewUnlockState) do
-                for _, collectibleData in ipairs(unlockStateTable) do
-                    if collectibleData:IsStory() then
-                        ZO_WorldMap_RefreshAllPOIs()
-                        ZO_WorldMap_RefreshWayshrines()
-                        return
-                    end
-                end
-            end
-        end
-    end
-
-    --Initialize Refresh Groups
-    ----------------------------
-
-    local function InitializeRefreshGroups()
-        g_mapRefresh = ZO_Refresh:New()
-
-        g_mapRefresh:AddRefreshGroup("keep",
-        {
-            RefreshAll = RefreshKeeps,
-            RefreshSingle = RefreshKeep,
-            IsShown = IsPresentlyShowingKeeps,
-        })
-
-        g_mapRefresh:AddRefreshGroup("keepNetwork",
-        {
-            RefreshAll = function()
-                if g_keepNetworkManager then
-                    g_keepNetworkManager:RefreshLinks()
-                end
-            end,
-            IsShown = IsPresentlyShowingKeeps,
-        })
-
-        g_mapRefresh:AddRefreshGroup("objective",
-        {
-            RefreshAll = RefreshObjectives,
-        })
-
-        g_mapRefresh:AddRefreshGroup("group",
-        {
-            RefreshAll = ZO_WorldMap_RefreshGroupPins,
-        })
-
-        g_mapRefresh:AddRefreshGroup("location",
-        {
-            RefreshAll =  function()
-                g_mapLocationManager:RefreshLocations()
-            end,
-        })
-
-        g_mapRefresh:AddRefreshGroup("worldEvent",
-        {
-            RefreshAll = ZO_WorldMap_RefreshWorldEvents,
-            RefreshSingle = ZO_WorldMap_RefreshWorldEvent,
-        })
-    end
-
-    --Initialize
-    ---------------
-    function ZO_WorldMap_Initialize(control)
-        local worldMapContainer = control:GetNamedChild("Container")
-        g_mapLocationManager = ZO_MapLocations:New(worldMapContainer)
-        g_mouseoverMapBlobManager = ZO_MouseoverMapBlobManager:New(worldMapContainer)
-        g_mapTileManager = ZO_WorldMapTiles:New(worldMapContainer)
-        g_mapPinManager = ZO_WorldMapPins:New(worldMapContainer)
-        InitializeRefreshGroups()
-
-        g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER, "player")
-
-        g_nextRespawnTimeMS = GetNextForwardCampRespawnTime()
-
-        --delay a lot of initialization until after the addon loads
+    function ZO_WorldMapManager:RegisterForEvents()
         local function OnAddOnLoaded(eventCode, addOnName)
             if addOnName == "ZO_Ingame" then
-                local DEFAULT_SMALL_WIDTH, DEFAULT_SMALL_HEIGHT = GetSquareMapWindowDimensions(CONSTANTS.WORLDMAP_SIZE_SMALL_WINDOW_SIZE, CONSTANTS.WORLDMAP_RESIZE_HEIGHT_DRIVEN, CONSTANTS.WORLDMAP_SIZE_SMALL)
-
-                local defaults =
-                {
-                    [MAP_MODE_SMALL_CUSTOM] =
-                    {
-                        keepSquare = true,
-                        width = DEFAULT_SMALL_WIDTH,
-                        height = DEFAULT_SMALL_HEIGHT,
-                        x = 0,
-                        y = 0,
-                        point = CENTER,
-                        relPoint = CENTER,
-                        mapSize = CONSTANTS.WORLDMAP_SIZE_SMALL,
-                        filters =
-                        {
-                            [MAP_FILTER_TYPE_STANDARD] =
-                            {
-
-                            },
-                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
-                            {
-                                [MAP_FILTER_OBJECTIVES] = false,
-                                [MAP_FILTER_AVA_GRAVEYARD_AREAS] = false,
-                                [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
-                            },
-                            [MAP_FILTER_TYPE_AVA_IMPERIAL] =
-                            {
-
-                            },
-                            [MAP_FILTER_TYPE_BATTLEGROUND] =
-                            {
-
-                            },
-                        }
-                    },
-                    [MAP_MODE_LARGE_CUSTOM] =
-                    {
-                        mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
-                        filters =
-                        {
-                            [MAP_FILTER_TYPE_STANDARD] =
-                            {
-
-                            },
-                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
-                            {
-                                [MAP_FILTER_OBJECTIVES] = false,
-                                [MAP_FILTER_AVA_GRAVEYARD_AREAS] = false,
-                                [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
-                            },
-                            [MAP_FILTER_TYPE_AVA_IMPERIAL] =
-                            {
-
-                            },
-
-                            [MAP_FILTER_TYPE_BATTLEGROUND] =
-                            {
-
-                            },
-                        }
-                    },
-                    [MAP_MODE_KEEP_TRAVEL] =
-                    {
-                        mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
-                        allowHistory = false,
-                        filters =
-                        {
-                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
-                            {
-                                [MAP_FILTER_KILL_LOCATIONS] = false,
-                                [MAP_FILTER_OBJECTIVES] = false,
-                                [MAP_FILTER_QUESTS] = false,
-                                [MAP_FILTER_RESOURCE_KEEPS] = false,
-                                [MAP_FILTER_AVA_GRAVEYARDS] = false,
-                                [MAP_FILTER_WAYSHRINES] = false,
-                                [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
-                            }
-                        },
-                        disabledStickyPins =
-                        {
-                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
-                            {
-                                [MAP_FILTER_RESOURCE_KEEPS] = true,
-                            }
-                        },
-                    },
-                    [MAP_MODE_FAST_TRAVEL] =
-                    {
-                        mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
-                        allowHistory = false,
-                        filters =
-                        {
-                            [MAP_FILTER_TYPE_STANDARD] =
-                            {
-
-                            },
-                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
-                            {
-                                [MAP_FILTER_KILL_LOCATIONS] = false,
-                                [MAP_FILTER_AVA_OBJECTIVES] = false,
-                                [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
-                            },
-                            [MAP_FILTER_TYPE_AVA_IMPERIAL] =
-                            {
-
-                            },
-
-                            [MAP_FILTER_TYPE_BATTLEGROUND] =
-                            {
-
-                            },
-                        }
-                    },
-                    [MAP_MODE_AVA_RESPAWN] =
-                    {
-                        mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
-                        allowHistory = false,
-                        filters =
-                        {
-                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
-                            {
-                                [MAP_FILTER_KILL_LOCATIONS] = false,
-                                [MAP_FILTER_WAYSHRINES] = false,
-                                [MAP_FILTER_OBJECTIVES] = false,
-                                [MAP_FILTER_RESOURCE_KEEPS] = false,
-                                [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
-                            },
-                            [MAP_FILTER_TYPE_AVA_IMPERIAL] =
-                            {
-
-                            },
-
-                            [MAP_FILTER_TYPE_BATTLEGROUND] =
-                            {
-
-                            },
-                        },
-                        disabledStickyPins =
-                        {
-                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
-                            {
-                                [MAP_FILTER_RESOURCE_KEEPS] = true,
-                            }
-                        },
-                    },
-                    [MAP_MODE_AVA_KEEP_RECALL] =
-                    {
-                        mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
-                        allowHistory = false,
-                        filters =
-                        {
-                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
-                            {
-                                [MAP_FILTER_KILL_LOCATIONS] = false,
-                                [MAP_FILTER_OBJECTIVES] = false,
-                                [MAP_FILTER_QUESTS] = false,
-                                [MAP_FILTER_RESOURCE_KEEPS] = false,
-                                [MAP_FILTER_AVA_GRAVEYARDS] = false,
-                                [MAP_FILTER_WAYSHRINES] = false,
-                                [MAP_FILTER_TRANSIT_LINES] = false,
-                            }
-                        },
-                        disabledStickyPins =
-                        {
-                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
-                            {
-                                [MAP_FILTER_RESOURCE_KEEPS] = true,
-                            }
-                        },
-                    },
-                    [MAP_MODE_DIG_SITES] =
-                    {
-                        mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
-                        allowHistory = false,
-                        filters =
-                        {
-                            [MAP_FILTER_TYPE_STANDARD] =
-                            {
-                                [MAP_FILTER_OBJECTIVES] = false,
-                            },
-                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
-                            {
-                                [MAP_FILTER_OBJECTIVES] = false,
-                                [MAP_FILTER_KILL_LOCATIONS] = false,
-                                [MAP_FILTER_AVA_OBJECTIVES] = false,
-                                [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
-                            },
-                            [MAP_FILTER_TYPE_AVA_IMPERIAL] =
-                            {
-
-                            },
-
-                            [MAP_FILTER_TYPE_BATTLEGROUND] =
-                            {
-
-                            },
-                        }
-                    },
-                    userMode = MAP_MODE_LARGE_CUSTOM,
-                }
-
-                g_savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 4, "WorldMap", defaults)
-                local smallCustom = g_savedVars[MAP_MODE_SMALL_CUSTOM]
-
                 g_cyrodiilMapIndex = GetCyrodiilMapIndex()
                 g_imperialCityMapIndex = GetImperialCityMapIndex()
+
+                local defaults = GetSavedVarDefaults()
+                g_savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 4, "WorldMap", defaults)
+                local smallCustom = g_savedVars[MAP_MODE_SMALL_CUSTOM]
 
                 CALLBACK_MANAGER:FireCallbacks("OnWorldMapSavedVarsReady", g_savedVars)
 
@@ -5056,10 +5303,7 @@ do
                     smallCustom.height = DEFAULT_SMALL_HEIGHT
                 end
 
-                WORLD_MAP_MANAGER:SetUserMode(g_savedVars.userMode)
-
-                SetupWorldMap()
-                EVENT_MANAGER:RegisterForEvent("ZO_WorldMap", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
+                self:SetUserMode(g_savedVars.userMode)
 
                 g_keepNetworkManager = ZO_KeepNetwork:New(ZO_WorldMapContainerKeepLinks)
                 g_dataRegistration = ZO_CampaignDataRegistration:New("WorldMapData", function()
@@ -5076,16 +5320,21 @@ do
                 ZO_WorldMap_UpdateMap()
 
                 for event, handler in pairs(EVENT_HANDLERS) do
-                    EVENT_MANAGER:RegisterForEvent("ZO_WorldMap", event, handler)
+                    self.control:RegisterForEvent(event, handler)
                 end
 
-                FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", OnAssistStateChanged)
-                ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
+                FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", function(...) self:OnAssistStateChanged(...) end)
+
+                ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
 
                 CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function(wasNavigateIn)
-                    ZO_WorldMapMouseoverName:SetText("")
-                    ZO_WorldMapMouseOverDescription:SetText("")
-                    ZO_WorldMapMouseoverName.owner = ""
+                    local mouseoverNameControl = self.control:GetNamedChild("MouseoverName")
+                    mouseoverNameControl:SetText("")
+                    mouseoverNameControl.owner = ""
+
+                    local mouseoverDescriptionControl = self.control:GetNamedChild("MouseOverDescription")
+                    mouseoverDescriptionControl:SetText("")
+                
                     UpdateMovingPins()
                     UpdateMapCampaign()
                     ZO_WorldMap_UpdateMap()
@@ -5093,440 +5342,82 @@ do
                     g_mapPanAndZoom:OnWorldMapChanged(wasNavigateIn)
                     ZO_WorldMap_MarkKeybindStripsDirty()
                     g_dataRegistration:Refresh()
-                    WORLD_MAP_MANAGER:TryTriggeringTutorials()
+                    self:TryTriggeringTutorials()
                 end)
+
+                -- Delay initializing the platform style until after the saved variables are loaded
+                -- since RefreshMapFrameAnchor depends on it
+                self:InitializePlatformStyle()
             end
         end
+        self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 
-        EVENT_MANAGER:RegisterForEvent("ZO_WorldMap_Add_On_Loaded", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
-
-        --setup history
-        ZO_WorldMapButtonsHistorySlider:SetMinMax(0, CONSTANTS.HISTORY_SLIDER_RANGE)
-        ZO_WorldMapButtonsHistorySlider:SetValue(CONSTANTS.HISTORY_SLIDER_RANGE)
-        g_historyPercent = 1
-
-        --info panels
-        if ZO_WorldMapInfo_Initialize then
-            ZO_WorldMapInfo_Initialize()
-        end
-        if ZO_WorldMapInfo_Gamepad_Initialize then
-            ZO_WorldMapInfo_Gamepad_Initialize()
-        end
-        GAMEPAD_WORLD_MAP_INFO_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-            if newState == SCENE_FRAGMENT_SHOWING or newState == SCENE_FRAGMENT_HIDDEN then
-                FloorLevelNavigationUpdate()
-            end
+        self.control:RegisterForEvent(EVENT_AUTO_MAP_NAVIGATION_TARGET_SET, function()
+            self:OnAutoNavigationTargetSet()
         end)
 
-        if GetKeepFastTravelInteraction() then
-            CloseChatter()
+        local function RefreshSuggestionPins()
+            self:RefreshSuggestionPins()
+            self:RefreshSkyshardPins()
         end
 
-        --TODO: Move WAY more into the object
-        WORLD_MAP_MANAGER = ZO_WorldMapManager:New(control)
-    end
-end
+        self.control:RegisterForEvent(EVENT_ZONE_STORY_ACTIVITY_TRACKED, RefreshSuggestionPins)
+        self.control:RegisterForEvent(EVENT_ZONE_STORY_ACTIVITY_UNTRACKED, RefreshSuggestionPins)
 
-function SetCampaignHistoryEnabled(enabled)
-    local wasUsingHistory = ShouldUseHistoryPercent()
-
-    g_enableCampaignHistory = enabled
-
-    local isUsingHistory = ShouldUseHistoryPercent()
-    ZO_WorldMapButtonsHistorySlider:SetHidden(not isUsingHistory)
-
-    if wasUsingHistory ~= isUsingHistory then
-        RebuildMapHistory()
-    end
-end
-
-function ZO_WorldMap_MarkKeybindStripsDirty()
-    g_keybindStrips.mouseover:MarkDirty()
-    g_keybindStrips.PC:MarkDirty()
-    g_keybindStrips.gamepad:MarkDirty()
-end
-
-function ZO_WorldMap_InteractKeybindForceHidden(hidden)
-    g_interactKeybindForceHidden = hidden
-    ZO_WorldMap_UpdateInteractKeybind_Gamepad()
-end
-
-function ZO_WorldMap_SetKeepMode(active)
-    if not IsInGamepadPreferredMode() then
-        return
-    end
-
-    if active then
-        ZO_WorldMap_SetGamepadKeybindsShown(false)
-
-        GAMEPAD_WORLD_MAP_KEEP_UPGRADE:Activate()
-
-        -- Hide the tooltips
-        ZO_WorldMap_HideAllTooltips()
-
-        -- Add the Close Keep keybind
-        KEYBIND_STRIP:AddKeybindButtonGroup(g_keybindStrips.gamepadCloseKeep:GetDescriptor())
-
-        ZO_WorldMap_InteractKeybindForceHidden(true)
-    else
-        -- Remove the Close Keep keybind
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepadCloseKeep:GetDescriptor())
-
-        GAMEPAD_WORLD_MAP_KEEP_UPGRADE:Deactivate()
-
-        ZO_WorldMap_SetGamepadKeybindsShown(true)
-        ZO_WorldMap_InteractKeybindForceHidden(false)
-    end
-end
-
-function ZO_WorldMap_HandlersContain(pinDatas, types)
-    for _, pinData in ipairs(pinDatas) do
-        local handler = pinData.handler
-        for _, type in ipairs(types) do
-            if handler == type then
-                return true
-            end
-        end
-    end
-    return false
-end
-
-function ZO_WorldMap_GetGamepadPinActionGroupForHandler(handler)
-    if handler.gamepadPinActionGroup then
-        return handler.gamepadPinActionGroup
-    end
-
-    for gamepadPinActionGroup, handlers in ipairs(ZO_WORLD_MAP_GAMEPAD_PIN_ACTION_GROUP_TYPE_TO_HANDLERS) do
-        for _, searchHandler in ipairs(handlers) do
-            if searchHandler == handler then
-                return gamepadPinActionGroup
-            end
-        end
-    end
-end
-
-function ZO_WorldMap_CountHandlerTypes(pinDatas)
-    local count = 0
-    for _, types in ipairs(ZO_WORLD_MAP_GAMEPAD_PIN_ACTION_GROUP_TYPE_TO_HANDLERS) do
-        if ZO_WorldMap_HandlersContain(pinDatas, types) then
-            count = count + 1
-        end
-    end
-
-    return count
-end
-
-function ZO_WorldMap_UpdateInteractKeybind_Gamepad()
-    if IsInGamepadPreferredMode() then
-        if not ZO_WorldMap_IsWorldMapInfoShowing() then
-            local pinDatas = ZO_WorldMap_GetPinHandlers(MOUSE_BUTTON_INDEX_LEFT)
-
-            if #pinDatas == 0 then
-                -- There are no actionable pins under the cursor.
-                ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
-            else
-                -- We want to filter out all invalid spawn locations because if they are selected
-                -- along with another pin that is valid they should be ignored as if they are not selected
-                -- If there are no validHandlers, we have only invalid spawn locations.
-                -- We still want to display the invalid spawn location text, so use the first invalid handler
-                -- to access the buttonText callback
-                local firstHandler = pinDatas[1].handler
-                RemoveInvalidSpawnLocations(pinDatas)
-
-                -- Use the first valid handler if one exists
-                if #pinDatas > 0 then
-                    firstHandler = pinDatas[1].handler
-                end
-
-                local buttonText = firstHandler.gamepadName
-                -- If we are highlighting multiple types of pins at the same time
-                if ZO_WorldMap_CountHandlerTypes(pinDatas) > 1 then
-                    buttonText = GetString(SI_GAMEPAD_SELECT_OPTION)
-                elseif type(buttonText) == "function" then
-                    buttonText = buttonText(pinDatas)
-                end
-
-                -- Fallback to name if it's just a string. As functions, name and gamepadName take different arguments
-                if not buttonText and type(firstHandler.name) == "string" then
-                    buttonText = firstHandler.name
-                end
-
-                if buttonText then
-                    ZO_WorldMapGamepadInteractKeybind:SetHidden(g_interactKeybindForceHidden or GAMEPAD_WORLD_MAP_KEY_FRAGMENT:IsShowing())
-                    local KEYBIND_SCALE_PERCENT = 120
-                    ZO_WorldMapGamepadInteractKeybind:SetText(zo_strformat(SI_GAMEPAD_WORLD_MAP_INTERACT, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1, KEYBIND_SCALE_PERCENT), buttonText))
-                else
-                    ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
-                end
-            end
-        end
-    else
-        ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
-    end
-end
-
-function ZO_WorldMap_SetDirectionalInputActive(active)
-    if active then
-        if GAMEPAD_WORLD_MAP_SCENE:IsShowing() then
-            DIRECTIONAL_INPUT:Activate(g_gamepadMap, ZO_WorldMap)
-        end
-    else
-        DIRECTIONAL_INPUT:Deactivate(g_gamepadMap)
-    end
-end
-
-function ZO_WorldMap_SetGamepadKeybindsShown(enabled)
-    ZO_WorldMap_SetDirectionalInputActive(enabled)
-    if enabled then
-        -- Activate the keybinding and directional controls
-        KEYBIND_STRIP:AddKeybindButtonGroup(g_keybindStrips.gamepad:GetDescriptor())
-        ZO_WorldMapCenterPoint:SetHidden(false)
-        ZO_WorldMapHeader_GamepadZoomKeybind:SetHidden(false)
-    else
-        -- Deactivate the keybinding and directional controls
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepad:GetDescriptor())
-        ZO_WorldMapCenterPoint:SetHidden(true)
-        ZO_WorldMapHeader_GamepadZoomKeybind:SetHidden(true)
-    end
-end
-
-function ZO_WorldMap_HideAllTooltips()
-    if not GetPlatformInformationTooltip() then -- Tooltips aren't active
-        return
-    end
-
-    HideAllTooltips()
-
-    CALLBACK_MANAGER:FireCallbacks("OnHideWorldMapTooltip")
-end
-
-function ZO_WorldMap_ShowGamepadTooltip(resetScroll)
-    if not GetPlatformInformationTooltip() then -- Tooltips aren't active
-        return
-    end
-
-    local tooltipControl = ShowGamepadTooltip(resetScroll)
-
-    CALLBACK_MANAGER:FireCallbacks("OnShowWorldMapTooltip")
-
-    return tooltipControl
-end
-
-function ZO_WorldMap_IsTooltipShowing()
-    if IsInGamepadPreferredMode() then
-        return usedTooltips[CONSTANTS.GAMEPAD_TOOLTIP_ID]
-    else
-        for i = 1, #tooltipOrder do
-            if usedTooltips[i] then
-                return true
-            end
+        local function RefreshAntiquityDigSites()
+            self:RefreshAllAntiquityDigSites()
         end
 
-        return false
-    end
-end
+        ANTIQUITY_DATA_MANAGER:RegisterCallback("AntiquitiesUpdated", RefreshAntiquityDigSites)
+        ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityDigSitesUpdated", RefreshAntiquityDigSites)
+        self.control:RegisterForEvent(EVENT_ANTIQUITY_TRACKING_UPDATE, RefreshAntiquityDigSites)
 
-function ZO_WorldMap_GetZoomText_Gamepad()
-    return ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_LEFT_TRIGGER) .. ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_RIGHT_TRIGGER, SCALE) .. GetString(SI_WORLD_MAP_ZOOM)
-end
-
-function ZO_WorldMap_IsWorldMapInfoShowing()
-    return GAMEPAD_WORLD_MAP_INFO_FRAGMENT:IsShowing()
-end
-
-function ZO_WorldMap_IsKeepInfoShowing()
-    return GAMEPAD_WORLD_MAP_KEEP_INFO_FRAGMENT:IsShowing()
-end
-
-function ZO_WorldMap_IsWorldMapShowing()
-    return SCENE_MANAGER:IsShowing("worldMap") or SCENE_MANAGER:IsShowing("gamepad_worldMap")
-end
-
-function ZO_WorldMap_ShowWorldMap()
-    if IsInGamepadPreferredMode() then
-        SCENE_MANAGER:Show("gamepad_worldMap")
-    else
-        SCENE_MANAGER:Show("worldMap")
-    end
-end
-
-function ZO_WorldMap_HideWorldMap()
-    if SCENE_MANAGER:IsShowing("worldMap") then
-        SCENE_MANAGER:Hide("worldMap")
-    elseif SCENE_MANAGER:IsShowing("gamepad_worldMap") then
-        SCENE_MANAGER:Hide("gamepad_worldMap")
-    end
-end
-
-function ZO_WorldMap_SetupGamepadChoiceDialog(mouseOverPinHandlers)
-    ZO_Dialogs_ShowGamepadDialog("WORLD_MAP_CHOICE_GAMEPAD", { mouseOverPinHandlers = mouseOverPinHandlers })
-end
-
---[[
-The World Map object, where state for the map system in general can be stored
-This file still relies heavily on locals and global functions but in time that can be migrated to the class
-]]--
-
-local AUTO_NAVIGATION_STATE =
-{
-    INACTIVE = 1,
-    WAITING_TO_PAN = 2,
-    PANNING = 3,
-    WAITING_TO_CLICK = 4,
-}
-
-local AUTO_NAVIGATION_CONSTANTS =
-{
-    START_PAN_DELAY_S = 1.5,
-    PAN_DELAY_S = 1.0,
-    CLICK_DELAY_S = 0.25,
-    START_ZOOM = 0.3,
-}
-
-local ANTIQUITY_DIG_SITE_ANIMATION_STATE =
-{
-    INACTIVE = 1,
-    INITIALIZE_ANIMATIONS = 2,
-    TRIGGER_ANIMATIONS = 3,
-    FINISH_ANIMATIONS = 4,
-}
-
-local ANTIQUITY_DIG_SITE_ANIMATION_CONSTANTS =
-{
-    START_ADDING_PINGS_DELAY_S = 3.8, -- delayed largely for CSA
-    TIME_BETWEEN_PINGS_S = 0.8,
-    PING_DURATION_S = 0.6,
-}
-
-ZO_WorldMapManager = ZO_CallbackObject:Subclass()
-
-function ZO_WorldMapManager:New(...)
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize(...)
-    return manager
-end
-
-function ZO_WorldMapManager:Initialize(control)
-    self.control = control
-
-    -- NOTE: The update loop queries to see if it needs to update the current map, so we don't have to register for the ZONE_CHANGED event.
-    control:SetHandler("OnUpdate", Update)
-
-    --Constrain map to screen
-    local uiWidth, uiHeight = GuiRoot:GetDimensions()
-    control:SetDimensionConstraints(CONSTANTS.MAP_MIN_SIZE, CONSTANTS.MAP_MIN_SIZE, uiWidth, uiHeight)
-
-    self.autoNavigationState = AUTO_NAVIGATION_STATE.INACTIVE
-    self.autoNavigationDelayUntilFrameTimeS = nil
-
-    self.antiquityDigSiteAnimationState = ANTIQUITY_DIG_SITE_ANIMATION_STATE.INACTIVE
-    self.antiquityDigSiteAnimationDelayUntilFrameTimeS = nil
-    self.antiquityDigSitePinInfo = {}
-
-    -- initial mode will be set from the saved variables
-    self.mode = nil
-    self.modeData = nil
-    self.inSpecialMode = false
-
-    --Scenes
-    self:CreateKeyboardWorldMapScene()
-    self:CreateGamepadWorldMapScene()
-
-    WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_WorldMapAutoNavigationOverlay)
-    WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:SetConditional(function() return self:IsPreventingMapNavigation() end)
-
-    local autoNavigationOverlayControl = ZO_WorldMapAutoNavigationOverlay
-    WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT = ZO_SimpleSceneFragment:New(autoNavigationOverlayControl)
-    WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:SetConditional(function() return self:IsPreventingMapNavigation() end)
-
-    local autoNavigationContinueKeybind = autoNavigationOverlayControl:GetNamedChild("ContinueKeybind")
-
-    -- TODO: Make this a more generic handler for exiting map auto-navigation
-    local function EndDigSiteReveal()
-        WORLD_MAP_MANAGER:EndDigSiteReveal()
-    end
-    ZO_KeybindButtonTemplate_Setup(autoNavigationContinueKeybind, "UI_SHORTCUT_PRIMARY", EndDigSiteReveal, GetString(SI_WORLD_MAP_ANTIQUITIES_CONTINUE))
-    autoNavigationContinueKeybind:SetMouseOverEnabled(false)
-    autoNavigationContinueKeybind:SetClickSound(SOUNDS.POSITIVE_CLICK)
-    autoNavigationContinueKeybind:SetAnchor(BOTTOM, control:GetNamedChild("MapFrame"), BOTTOM, 0, -15)
-    self.autoNavigationContinueKeybind = autoNavigationContinueKeybind
-
-    WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD = ZO_FadeSceneFragment:New(ZO_WorldMapRespawnTimer)
-    ZO_MixinHideableSceneFragment(WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD)
-    WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD:SetHiddenForReason("TimerInactive", true)
-
-    WORLD_MAP_SCENE:AddFragment(WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT)
-    WORLD_MAP_SCENE:AddFragment(WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD)
-    GAMEPAD_WORLD_MAP_SCENE:AddFragment(WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT)
-
-    WORLD_MAP_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    WORLD_MAP_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING then
-            UpdateMovingPins()
-            g_dataRegistration:Refresh()
-            g_mapPanAndZoom:OnWorldMapShowing()
-            self:OnShowing()
-            self:TryTriggeringTutorials()
-        elseif newState == SCENE_FRAGMENT_HIDING then
-            HideAllTooltips()
-            ResetMouseOverPins()
-            self:OnHiding()
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
-            g_dataRegistration:Refresh()
-            self:OnHidden()
+        local function RefreshCompanionPins()
+            self:RefreshCompanionPins()
         end
-    end)
 
-    --Information tooltip mixin
-    zo_mixin(InformationTooltip, InformationTooltipMixin)
+        self.control:RegisterForEvent(EVENT_COMPANION_ACTIVATED, RefreshCompanionPins)
+        self.control:RegisterForEvent(EVENT_COMPANION_DEACTIVATED, RefreshCompanionPins)
 
-    self:InitializeKeybinds()
+        CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
+            self:OnWorldMapChanged()
+        end)
 
-    self:RegisterForEvents()
+        local function RefreshSkyshardPins()
+            self:RefreshSkyshardPins()
+            self:RefreshSuggestionPins()
+        end
 
-    self:InitializePlatformStyle()
-end
-
-function ZO_WorldMapManager:RegisterForEvents()
-    self.control:RegisterForEvent(EVENT_AUTO_MAP_NAVIGATION_TARGET_SET, function()
-        self:OnAutoNavigationTargetSet()
-    end)
-
-    local function RefreshSuggestionPins()
-        self:RefreshSuggestionPins()
+        self.control:RegisterForEvent(EVENT_SKYSHARDS_UPDATED, RefreshSkyshardPins)
     end
-
-    self.control:RegisterForEvent(EVENT_ZONE_STORY_ACTIVITY_TRACKED, RefreshSuggestionPins)
-    self.control:RegisterForEvent(EVENT_ZONE_STORY_ACTIVITY_UNTRACKED, RefreshSuggestionPins)
-
-    local function RefreshAntiquityDigSites()
-        self:RefreshAllAntiquityDigSites()
-    end
-
-    ANTIQUITY_DATA_MANAGER:RegisterCallback("AntiquitiesUpdated", RefreshAntiquityDigSites)
-    ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityDigSitesUpdated", RefreshAntiquityDigSites)
-    self.control:RegisterForEvent(EVENT_ANTIQUITY_TRACKING_UPDATE, RefreshAntiquityDigSites)
-
-    local function RefreshCompanionPins()
-        self:RefreshCompanionPins()
-    end
-
-    self.control:RegisterForEvent(EVENT_COMPANION_ACTIVATED, RefreshCompanionPins)
-    self.control:RegisterForEvent(EVENT_COMPANION_DEACTIVATED, RefreshCompanionPins)
-
-    CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
-        self:OnWorldMapChanged()
-    end)
 end
 
 do
     local KEYBOARD_STYLE =
     {
+        headerStyle =
+        {
+            NAME_OFFSET_Y = 10,
+            NAME_FONT = "ZoFontAnnounceMessage",
+            NAME_MODIFY_STYLE = MODIFY_TEXT_TYPE_NONE,
+            DESCRIPTION_OFFSET_Y = 2,
+            DESCRIPTION_FONT = "ZoFontGameOutline",
+            DESCRIPTION_MODIFY_STYLE = MODIFY_TEXT_TYPE_NONE,
+        },
         hideAutoNavigationContinueKeybindBackground = false,
     }
 
     local GAMEPAD_STYLE =
     {
+        headerStyle =
+        {
+            NAME_OFFSET_Y = 44,
+            NAME_FONT = "ZoFontGamepadBold34",
+            NAME_MODIFY_STYLE = MODIFY_TEXT_TYPE_UPPERCASE,
+            DESCRIPTION_OFFSET_Y = 8,
+            DESCRIPTION_FONT = "ZoFontGamepad34",
+            DESCRIPTION_MODIFY_STYLE = MODIFY_TEXT_TYPE_NONE,
+        },
         hideAutoNavigationContinueKeybindBackground = true,
     }
 
@@ -5536,6 +5427,38 @@ do
 end
 
 function ZO_WorldMapManager:ApplyPlatformStyle(style)
+    -- Map Frame
+
+    ApplyTemplateToControl(self.control:GetNamedChild("MapFrame"), ZO_GetPlatformTemplate("ZO_WorldMapFrame"))
+    self:RefreshMapFrameAnchor()
+
+    -- Header Style
+
+    local headerStyle = style.headerStyle
+
+    local mouseoverNameControl = self.control:GetNamedChild("MouseoverName")
+    local scrollControl = self.control:GetNamedChild("Scroll")
+
+    mouseoverNameControl:ClearAnchors()
+    mouseoverNameControl:SetAnchor(TOPLEFT, scrollControl, TOPLEFT, 0, headerStyle.NAME_OFFSET_Y)
+    mouseoverNameControl:SetAnchor(TOPRIGHT, scrollControl, TOPRIGHT, 0, headerStyle.NAME_OFFSET_Y)
+    mouseoverNameControl:SetFont(headerStyle.NAME_FONT)
+    mouseoverNameControl:SetModifyTextType(headerStyle.NAME_MODIFY_STYLE)
+
+    local mouseoverDescriptionControl = self.control:GetNamedChild("MouseOverDescription")
+
+    mouseoverDescriptionControl:ClearAnchors()
+    mouseoverDescriptionControl:SetAnchor(TOPLEFT, mouseoverNameControl, BOTTOMLEFT, 0, headerStyle.DESCRIPTION_OFFSET_Y)
+    mouseoverDescriptionControl:SetAnchor(TOPRIGHT, mouseoverNameControl, BOTTOMRIGHT, 0, headerStyle.DESCRIPTION_OFFSET_Y)
+    mouseoverDescriptionControl:SetFont(headerStyle.DESCRIPTION_FONT)
+    mouseoverDescriptionControl:SetModifyTextType(headerStyle.DESCRIPTION_MODIFY_STYLE)
+
+    -- Map Navigation Buttons/Keybind Icons
+
+    self:UpdateFloorAndLevelNavigation()
+
+    -- Auto Navigation
+
     local autoNavigationContinueKeybind = self.autoNavigationContinueKeybind
     ApplyTemplateToControl(autoNavigationContinueKeybind, ZO_GetPlatformTemplate("ZO_KeybindButton"))
     autoNavigationContinueKeybind:GetNamedChild("Bg"):SetHidden(style.hideAutoNavigationContinueKeybindBackground)
@@ -5613,6 +5536,34 @@ end
 
 function ZO_WorldMapManager:OnWorldMapChanged()
     self:HidePinPointerBox()
+end
+
+function ZO_WorldMapManager:OnAssistStateChanged(unassistedData, assistedData)
+    if unassistedData then
+        g_mapPinManager:SetQuestPinsAssisted(unassistedData:GetJournalIndex(), false)
+    end
+    if assistedData then
+        g_mapPinManager:SetQuestPinsAssisted(assistedData:GetJournalIndex(), true)
+    end
+    ZO_WorldMap_InvalidateTooltip()
+end
+
+function ZO_WorldMapManager:OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
+    if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
+        ZO_WorldMap_RefreshAllPOIs()
+        ZO_WorldMap_RefreshWayshrines()
+        return
+    else
+        for _, unlockStateTable in pairs(collectiblesByNewUnlockState) do
+            for _, collectibleData in ipairs(unlockStateTable) do
+                if collectibleData:IsStory() then
+                    ZO_WorldMap_RefreshAllPOIs()
+                    ZO_WorldMap_RefreshWayshrines()
+                    return
+                end
+            end
+        end
+    end
 end
 
 function ZO_WorldMapManager:InitializeKeybinds()
@@ -5716,7 +5667,7 @@ function ZO_WorldMapManager:InitializeKeybinds()
             callback = function()
                 local currentFloor, numFloors = GetMapFloorInfo()
                 if numFloors > 0 and currentFloor ~= numFloors then
-                    ZO_WorldMap_ChangeFloor(ZO_WorldMapButtonsFloorsDown)
+                    self:ChangeFloor(MAP_FLOOR_CHANGE_DIRECTION_UP)
                 else
                     if self:IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_OUT) and MapZoomOut() == SET_MAP_RESULT_MAP_CHANGED then
                         g_gamepadMap:StopMotion()
@@ -5738,7 +5689,7 @@ function ZO_WorldMapManager:InitializeKeybinds()
             callback = function()
                 local currentFloor, numFloors = GetMapFloorInfo()
                 if numFloors > 0 then
-                    ZO_WorldMap_ChangeFloor(ZO_WorldMapButtonsFloorsUp)
+                    self:ChangeFloor(MAP_FLOOR_CHANGE_DIRECTION_DOWN)
                 else
                     if self:IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_IN) and ProcessMapClick(NormalizePreferredMousePositionToMap()) == SET_MAP_RESULT_MAP_CHANGED then
                         g_gamepadMap:StopMotion()
@@ -5926,6 +5877,38 @@ function ZO_WorldMapManager:InitializeKeybinds()
     g_keybindStrips.mouseover = ZO_MapMouseoverKeybindStrip:New(self.control, mouseoverDescriptor)
 end
 
+function ZO_WorldMapManager:ChangeFloor(direction)
+    local currentFloor = GetMapFloorInfo()
+    if SetMapFloor(currentFloor + direction) == SET_MAP_RESULT_MAP_CHANGED then
+        PlayerChosenMapUpdate()
+    end
+end
+
+function ZO_WorldMapManager:UpdateFloorAndLevelNavigation()
+    local currentFloor, numFloors = GetMapFloorInfo()
+
+    local showKeyboardFloorControls = false
+    local showGamepadFloorControls = false
+    local showGamepadLevelControls = false
+    if IsInGamepadPreferredMode() then
+        if not (ZO_WorldMap_IsWorldMapInfoShowing() or ZO_WorldMap_IsKeepInfoShowing()) then
+            showGamepadFloorControls = numFloors > 0
+            showGamepadLevelControls = not showGamepadFloorControls
+        end
+    else
+        showKeyboardFloorControls = numFloors > 0
+    end
+
+    self.gamepadLevelsControl:SetHidden(not showGamepadLevelControls)
+    self.gamepadFloorsControl:SetHidden(not showGamepadFloorControls)
+
+    self.keyboardFloorsControl:SetHidden(not showKeyboardFloorControls)
+    if showKeyboardFloorControls then
+        self.keyboardFloorsControl:GetNamedChild("Up"):SetEnabled(currentFloor ~= 1)
+        self.keyboardFloorsControl:GetNamedChild("Down"):SetEnabled(currentFloor ~= numFloors)
+    end
+end
+
 --
 -- Auto Navigation Functions
 --
@@ -6081,13 +6064,11 @@ do
     local ZONE_COMPLETION_TYPE_WITHOUT_PIN =
     {
         [ZONE_COMPLETION_TYPE_MAGES_GUILD_BOOKS] = true,
-        [ZONE_COMPLETION_TYPE_SKYSHARDS] = true,
         [ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS] = true,
     }
 
     function ZO_WorldMapManager:RefreshSuggestionPins()
         g_mapPinManager:RemovePins("suggestion")
-
         if IsZoneStoryActivelyTracking() then
             local zoneId, zoneCompletionType, activityId = GetTrackedZoneStoryActivityInfo()
             if not ZONE_COMPLETION_TYPE_WITHOUT_PIN[zoneCompletionType] then
@@ -6099,6 +6080,11 @@ do
                             questOfferTag.isBreadcrumb = false -- TODO: Zone Stories: Hook up quest offer breadcrumbing
                             g_mapPinManager:CreatePin(MAP_PIN_TYPE_TRACKED_QUEST_OFFER_ZONE_STORY, questOfferTag, normalizedX, normalizedY, normalizedRadius)
                         end
+                    elseif zoneCompletionType == ZONE_COMPLETION_TYPE_SKYSHARDS then
+                        if not ZO_WorldMap_DoesMapHideSkyshardPins() then
+                            local suggestedSkyshardTag = ZO_MapPin.CreateSkyshardPinTag(activityId)
+                            g_mapPinManager:CreatePin(MAP_PIN_TYPE_SKYSHARD_SUGGESTED, suggestedSkyshardTag, normalizedX, normalizedY, normalizedRadius)
+                        end
                     else
                         -- Everything else is a POI
                         local zoneIndex, poiIndex = GetPOIIndices(activityId)
@@ -6109,6 +6095,37 @@ do
                             g_mapPinManager:CreatePin(MAP_PIN_TYPE_POI_SUGGESTED, suggestedPOITag, normalizedX, normalizedY, normalizedRadius)
                         end
                     end
+                end
+            end
+        end
+    end
+end
+
+function ZO_WorldMapManager:RefreshSkyshardPins()
+    g_mapPinManager:RemovePins("skyshard")
+    local showAcquiredSkyshards = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_ACQUIRED_SKYSHARDS)
+    local showObjectives = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_OBJECTIVES)
+    if showAcquiredSkyshards or showObjectives then
+        local zoneId = ZO_ExplorationUtils_GetZoneStoryZoneIdForCurrentMap()
+        local numSkyshardsInZone = GetNumSkyshardsInZone(zoneId)
+        for skyshardIndex = 1, numSkyshardsInZone do
+            local skyshardId = GetZoneSkyshardId(zoneId, skyshardIndex)
+            local normalizedX, normalizedY, isShownInCurrentMap = GetNormalizedPositionForSkyshardId(skyshardId)
+            if isShownInCurrentMap and ZO_WorldMap_IsNormalizedPointInsideMapBounds(normalizedX, normalizedY) then
+                local discoveryStatus = GetSkyshardDiscoveryStatus(skyshardId)
+                local pinType = nil
+                if discoveryStatus == SKYSHARD_DISCOVERY_STATUS_ACQUIRED and showAcquiredSkyshards then
+                    pinType = MAP_PIN_TYPE_SKYSHARD_COMPLETE
+                elseif discoveryStatus == SKYSHARD_DISCOVERY_STATUS_DISCOVERED and showObjectives then                    
+                    local _, zoneCompletionType, activityId = GetTrackedZoneStoryActivityInfo()
+                    local isSkyshardTracked = zoneCompletionType == ZONE_COMPLETION_TYPE_SKYSHARDS and activityId == skyshardId
+                    if not isSkyshardTracked then
+                        pinType = MAP_PIN_TYPE_SKYSHARD_SEEN
+                    end
+                end
+                if pinType then
+                    local skyshardTag = ZO_MapPin.CreateSkyshardPinTag(skyshardId)
+                    g_mapPinManager:CreatePin(pinType, skyshardTag, normalizedX, normalizedY)
                 end
             end
         end
@@ -6420,6 +6437,7 @@ function ZO_WorldMapManager:RefreshAll()
     self:RefreshSuggestionPins()
     self:RefreshAllAntiquityDigSites()
     self:RefreshCompanionPins()
+    self:RefreshSkyshardPins()
 end
 
 function ZO_WorldMapManager:IsPreventingMapNavigation()
@@ -6652,4 +6670,14 @@ function ZO_WorldMapManager:TryTriggeringTutorials()
             TriggerTutorial(TUTORIAL_TRIGGER_PVE_FAST_TRAVEL)
         end
     end
+end
+
+-- XML functions
+function ZO_WorldMap_ZoomKeybindOnInitialized(control, keybind)
+    local DEFAULT_PREFERRED_GAMEPAD_KEYBIND = nil
+    local OPTIONS =
+    {
+        scalePercent = 150,
+    }
+    control:SetKeybind(keybind, DEFAULT_PREFERRED_GAMEPAD_KEYBIND, options)
 end

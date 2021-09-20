@@ -48,12 +48,23 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_ACTIVE_DISPLAY,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_RESOLUTION,
         },
         {
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_VSYNC,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_RENDER_THREAD,
         },
         {
             panel = SETTING_PANEL_VIDEO,
@@ -89,6 +100,114 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_HDR_MODE,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_PRESETS,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_MIP_LOAD_SKIP_LEVELS,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_ANTIALIASING_TYPE,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_DLSS_MODE,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_SUB_SAMPLING,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_SHADOWS,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_SCREENSPACE_WATER_REFLECTION_QUALITY,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_PLANAR_WATER_REFLECTION_QUALITY,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_PFX_GLOBAL_MAXIMUM,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_PFX_SUPPRESS_DISTANCE,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_VIEW_DISTANCE,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_AMBIENT_OCCLUSION_TYPE,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CLUTTER_2D_QUALITY,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_DEPTH_OF_FIELD_MODE,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_BLOOM,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_DISTORTION,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_GOD_RAYS,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_SHOW_ADDITIONAL_ALLY_EFFECTS,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
         },
     },
     [SETTING_PANEL_CAMERA] =
@@ -193,6 +312,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_IN_WORLD,
             settingId = IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_COMPANION_PASSENGER_PREFERENCE,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
@@ -366,6 +490,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_AUDIO,
             system = SETTING_TYPE_AUDIO,
             settingId = AUDIO_SETTING_VOICE_CHAT_VOLUME,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_COMBAT_MUSIC_MODE,
         },
         {
             panel = SETTING_PANEL_AUDIO,

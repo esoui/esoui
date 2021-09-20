@@ -1,9 +1,5 @@
 ZO_HelpMechanicAssistanceTemplate_Keyboard = ZO_HelpScreenTemplate_Keyboard:Subclass()
 
-function ZO_HelpMechanicAssistanceTemplate_Keyboard:New(...)
-    return ZO_HelpScreenTemplate_Keyboard.New(self, ...)
-end
-
 function ZO_HelpMechanicAssistanceTemplate_Keyboard:Initialize(control, customerServiceCategoryData, mechanicCategoriesData)
     local fragment = ZO_FadeSceneFragment:New(control)
     customerServiceCategoryData.categoryFragment = fragment

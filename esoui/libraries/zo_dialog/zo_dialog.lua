@@ -652,10 +652,19 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 end
             end
 
-            if not editControl.instructions then
-                editControl.instructions = ZO_ValidNameInstructions:New(editContainer:GetNamedChild("Instructions"))
+            if editBoxInfo.instructions and #editBoxInfo.instructions > 0 then
+                if editControl.instructions then
+                    editControl.instructions:ClearInstructions()
+                    editControl.instructions:AddInstructions(editBoxInfo.instructions)
+                else
+                    local DEFAULT_TEMPLATE = nil
+                    editControl.instructions = ZO_ValidNameInstructions:New(editContainer:GetNamedChild("Instructions"), DEFAULT_TEMPLATE, editBoxInfo.instructions)
+                end
+                editControl.instructions:Show(dialog.nameEdit)
+            elseif editControl.instructions then
+                editControl.instructions:ClearInstructions()
+                editControl.instructions:Hide()
             end
-            editControl.instructions:Hide()
 
             if editBoxInfo.validatesText and editBoxInfo.validator then
                 editControl.validator = editBoxInfo.validator
@@ -1325,15 +1334,32 @@ function ZO_TwoButtonDialogEditBox_OnTextChanged(control)
 
     if control.instructions then
         if control.validator then
+            local DEFAULT_ANCHOR_CONTROL = nil
             local violations = {control.validator(control:GetText())}
-            local noViolations = #violations == 0
-            if noViolations then
-                control.instructions:Hide()
-            else
-                control.instructions:Show(nil, violations)
-            end
+            control.instructions:Show(DEFAULT_ANCHOR_CONTROL, violations)
         else
             control.instructions:Hide()
+        end
+    end
+end
+
+function ZO_TwoButtonDialogEditBox_OnFocusGained(control)
+    if control.instructions then
+        if control.validator then
+            local DEFAULT_ANCHOR_CONTROL = nil
+            local violations = {control.validator(control:GetText())}
+            control.instructions:Show(DEFAULT_ANCHOR_CONTROL, violations)
+        end
+    end
+end
+
+function ZO_TwoButtonDialogEditBox_OnFocusLost(control)
+    if control.instructions and control.instructions:HasRules() then
+        if control.validator then
+            local violations = {control.validator(control:GetText())}
+            if #violations == 0 then
+                control.instructions:Hide()
+            end
         end
     end
 end

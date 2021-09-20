@@ -10,9 +10,7 @@
             </OnHide>
 
             <OnKeyDown>
-                if IsKeyCodeGamepadKey(key) then
-                    ZO_ControllerDisconnect_DismissPopup()
-                end
+                ZO_ControllerDisconnect_DismissPopup()
             </OnKeyDown>
 
             <OnInitialized>
