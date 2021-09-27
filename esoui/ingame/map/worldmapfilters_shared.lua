@@ -174,6 +174,7 @@ function ZO_PvPWorldMapFilterPanel_Shared:BuildControls()
     self:AddPinFilterCheckBox(MAP_FILTER_TRANSIT_LINES, ZO_WorldMap_RefreshKeepNetwork)
     self:ComboBoxDependsOn(MAP_FILTER_TRANSIT_LINES_ALLIANCE, MAP_FILTER_TRANSIT_LINES)
     self:AddPinFilterComboBox(MAP_FILTER_TRANSIT_LINES_ALLIANCE, ZO_WorldMap_RefreshKeepNetwork, GetString(SI_WORLD_MAP_FILTERS_SHOW_ALLIANCE), "SI_MAPTRANSITLINEALLIANCE", MAP_TRANSIT_LINE_ALLIANCE_ALL, MAP_TRANSIT_LINE_ALLIANCE_MINE)
+    self:AddPinFilterCheckBox(MAP_FILTER_ACQUIRED_SKYSHARDS, function() WORLD_MAP_MANAGER:RefreshSkyshardPins() end)
 
     self:PostBuildControls()
 end
@@ -186,6 +187,7 @@ function ZO_ImperialPvPWorldMapFilterPanel_Shared:BuildControls()
     self:AddPinFilterCheckBox(MAP_FILTER_OBJECTIVES, ZO_WorldMap_RefreshAllPOIs, GetString(SI_WORLD_MAP_FILTERS_SHOW_DETAILS))
     self:AddPinFilterCheckBox(MAP_FILTER_GROUP_MEMBERS, ZO_WorldMap_RefreshGroupPins)
     self:AddPinFilterCheckBox(MAP_FILTER_KILL_LOCATIONS, ZO_WorldMap_RefreshKillLocations)
+    self:AddPinFilterCheckBox(MAP_FILTER_ACQUIRED_SKYSHARDS, function() WORLD_MAP_MANAGER:RefreshSkyshardPins() end)
 
     self:PostBuildControls()
 end

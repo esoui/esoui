@@ -432,7 +432,7 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
         local extraOptions =
         {
             color = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
-            iconInheritColor = marketCurrencyType ~= MKCT_CROWN_GEMS,
+            iconInheritColor = marketPurchaseData.marketCurrencyType ~= MKCT_CROWN_GEMS,
         }
         local currencyString = ZO_Currency_FormatKeyboard(currencyType, marketPurchaseData.esoPlusCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON, extraOptions)
 
@@ -1126,7 +1126,7 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
                 end
 
                 -- append ESO Plus savings, if any
-                local esoPlusSavingsString = ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(data.marketProductData)
+                local esoPlusSavingsString = ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(marketProductData, quantity)
                 if esoPlusSavingsString then
                     mainText = string.format("%s\n\n%s", mainText, esoPlusSavingsString)
                 end

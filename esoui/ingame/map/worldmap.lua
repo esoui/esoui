@@ -4834,14 +4834,21 @@ local function GetSavedVarDefaults()
             mapSize = CONSTANTS.WORLDMAP_SIZE_SMALL,
             filters =
             {
-                [MAP_FILTER_TYPE_STANDARD] = {},
+                [MAP_FILTER_TYPE_STANDARD] =
+                {
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
                 [MAP_FILTER_TYPE_AVA_CYRODIIL] =
                 {
                     [MAP_FILTER_OBJECTIVES] = false,
                     [MAP_FILTER_AVA_GRAVEYARD_AREAS] = false,
                     [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 },
-                [MAP_FILTER_TYPE_AVA_IMPERIAL] = {},
+                [MAP_FILTER_TYPE_AVA_IMPERIAL] =
+                {
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
             }
         },
@@ -4850,14 +4857,21 @@ local function GetSavedVarDefaults()
             mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
             filters =
             {
-                [MAP_FILTER_TYPE_STANDARD] = {},
+                [MAP_FILTER_TYPE_STANDARD] =
+                {
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
                 [MAP_FILTER_TYPE_AVA_CYRODIIL] =
                 {
                     [MAP_FILTER_OBJECTIVES] = false,
                     [MAP_FILTER_AVA_GRAVEYARD_AREAS] = false,
                     [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 },
-                [MAP_FILTER_TYPE_AVA_IMPERIAL] = {},
+                [MAP_FILTER_TYPE_AVA_IMPERIAL] =
+                {
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
             }
         },
@@ -4893,14 +4907,21 @@ local function GetSavedVarDefaults()
             allowHistory = false,
             filters =
             {
-                [MAP_FILTER_TYPE_STANDARD] = {},
+                [MAP_FILTER_TYPE_STANDARD] =
+                {
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
                 [MAP_FILTER_TYPE_AVA_CYRODIIL] =
                 {
                     [MAP_FILTER_KILL_LOCATIONS] = false,
                     [MAP_FILTER_AVA_OBJECTIVES] = false,
                     [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 },
-                [MAP_FILTER_TYPE_AVA_IMPERIAL] = {},
+                [MAP_FILTER_TYPE_AVA_IMPERIAL] =
+                {
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
             }
         },
@@ -4919,7 +4940,10 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                     [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
                 },
-                [MAP_FILTER_TYPE_AVA_IMPERIAL] = {},
+                [MAP_FILTER_TYPE_AVA_IMPERIAL] =
+                {
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
             },
             disabledStickyPins =

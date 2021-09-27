@@ -773,7 +773,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                     end
 
                     -- append ESO Plus savings, if any
-                    local esoPlusSavingsString = ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(self.marketProductData)
+                    local esoPlusSavingsString = ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(marketProductData, quantity)
                     if esoPlusSavingsString then
                         mainText = string.format("%s\n\n%s", mainText, esoPlusSavingsString)
                     end

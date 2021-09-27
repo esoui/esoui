@@ -1116,12 +1116,12 @@ function ZO_CharacterCreate_CheckEnableCreateButton(editControl)
         editControl.linkedButton:SetState(BSTATE_NORMAL, false)
     else
         editControl.linkedButton:SetState(BSTATE_DISABLED, true)
+    end
 
-        if editControl:HasFocus() then
-            editControl.linkedInstructions:Show(editControl, nameViolations)
-        else
-            editControl.linkedInstructions:Hide()
-        end
+    if editControl:HasFocus() then
+        editControl.linkedInstructions:Show(editControl, nameViolations)
+    else
+        editControl.linkedInstructions:Hide()
     end
 
     CALLBACK_MANAGER:FireCallbacks("OnCharacterCreateNameChanged", isValidName)

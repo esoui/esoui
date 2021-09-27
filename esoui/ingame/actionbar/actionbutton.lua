@@ -1039,14 +1039,14 @@ function ZO_ActionBarTimer:SetFillBar(timeRemainingMS, durationMS)
     self.durationMS = durationMS
 
     self:UpdateFillBar()
-    if self:HasValidDuration() then
+    if self.showBackRowSlot and self:HasValidDuration() then
         self.slot:SetHidden(false)
         self.slot:SetHandler("OnUpdate", function() self:UpdateFillBar() end, "FillBarUpdate")
     end
 end
 
 function ZO_ActionBarTimer:UpdateFillBar()
-    if self:HasValidDuration() then
+    if self.showBackRowSlot and self:HasValidDuration() then
         local interval = (self.endTimeMS - GetFrameTimeMilliseconds()) / self.durationMS
         self.fillStatusBar:SetValue(interval)
     else
@@ -1058,7 +1058,7 @@ function ZO_ActionBarTimer:UpdateFillBar()
 end
 
 function ZO_ActionBarTimer:HasValidDuration()
-    return self.showBackRowSlot and self.durationMS and self.durationMS ~= 0 and self.endTimeMS and self.endTimeMS >= GetFrameTimeMilliseconds()
+    return self.durationMS and self.durationMS ~= 0 and self.endTimeMS and self.endTimeMS >= GetFrameTimeMilliseconds()
 end
 
 function ZO_ActionBarTimer:HandleSlotChanged(barType)
@@ -1110,7 +1110,7 @@ end
 
 function ZO_ActionBarTimer:SetupBackRowSlot(slotId, barType)
     local isValidBarType = barType == HOTBAR_CATEGORY_BACKUP or barType == HOTBAR_CATEGORY_PRIMARY
-    local shown = isValidBarType and GetSlotType(slotId, barType) ~= ACTION_TYPE_NOTHING and self.active and self.showBackRowSlot
+    local shown = isValidBarType and GetSlotType(slotId, barType) ~= ACTION_TYPE_NOTHING and self.active and self.showBackRowSlot and self:HasValidDuration()
     self.slot:SetHidden(not shown)
 
     if shown and self.iconTexture then
