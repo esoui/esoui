@@ -642,7 +642,7 @@ function ZO_ItemSetsBook_Gamepad_Base:SetupList(list)
     end
 
     list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate", ZO_ItemSetCollectionCategoryData.Equals)
-    list:AddDataTemplate("ZO_ItemSetsBook_Summary_Gamepad", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_ItemSetCollectionCategoryData.Equals)
+    list:AddDataTemplate("ZO_ItemSetsBook_Summary_Gamepad", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_ItemSetCollectionCategoryData.Equals, "Summary")
     list:SetReselectBehavior(ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESET_TO_DEFAULT)
 end
 

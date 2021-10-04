@@ -442,7 +442,7 @@ function ZO_ChatSystem:IsHidden()
     end
 
     -- On platforms with both chat systems, hide on the opposite UI mode
-    if ZO_ChatSystem_DoesPlatformUseGamepadChatSystem() and IsInGamepadPreferredMode() then
+    if not ZO_ChatSystem_ShouldUseKeyboardChatSystem() then
         return true
     end
 

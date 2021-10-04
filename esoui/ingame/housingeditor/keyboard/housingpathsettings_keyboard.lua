@@ -90,19 +90,23 @@ function ZO_HousingPathSettingsMenu_Keyboard:ShowPathSettingsPanel()
 end
 
 function ZO_HousingPathSettingsMenu_Keyboard:ShowChangeCollectibleTooltip(control)
-    --TODO: show tooltip
+    InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
+    SetTooltipText(InformationTooltip, GetString(SI_HOUSING_PATH_SETTINGS_CHANGE_COLLECTIBLE_TOOLTIP))
 end
 
 function ZO_HousingPathSettingsMenu_Keyboard:ShowPathingStateTooltip(control)
-    --TODO: show tooltip
+    InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
+    SetTooltipText(InformationTooltip, GetString(SI_HOUSING_PATH_SETTINGS_PATHING_STATE_TOOLTIP))
 end
 
 function ZO_HousingPathSettingsMenu_Keyboard:ShowPathTypeTooltip(control)
-    --TODO: show tooltip
+    InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
+    SetTooltipText(InformationTooltip, GetString(SI_HOUSING_PATH_SETTINGS_PATHING_TYPE_TOOLTIP))
 end
 
 function ZO_HousingPathSettingsMenu_Keyboard:ShowConformToGroundTooltip(control)
-    --TODO: show tooltip
+    InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
+    SetTooltipText(InformationTooltip, GetString(SI_HOUSING_PATH_SETTINGS_CONFORM_TO_GROUND_TOOLTIP))
 end
 
 -- Path Settings Panel

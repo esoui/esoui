@@ -266,8 +266,18 @@ local INPUT_DEVICE_QUERY_X =
         return GetGamepadOrKeyboardRightStickX(GAMEPAD_INCLUDE_DEADZONE)
     end,
     [ZO_DI_DPAD] = function(self)
-        local negativeMagnitude = ((IsKeyDown(KEY_GAMEPAD_DPAD_LEFT) or IsKeyDown(KEY_LEFTARROW)) and -DIGITAL_BUTTON_MAGNITUDE or 0)
-        local positiveMagnitude = ((IsKeyDown(KEY_GAMEPAD_DPAD_RIGHT) or IsKeyDown(KEY_RIGHTARROW)) and DIGITAL_BUTTON_MAGNITUDE or 0)
+        local hasFocusControl = WINDOW_MANAGER:HasFocusControl()
+        local negativeMagnitude = 0
+        local positiveMagnitude = 0
+
+        if IsKeyDown(KEY_GAMEPAD_DPAD_LEFT) or (IsKeyDown(KEY_LEFTARROW) and not hasFocusControl) then
+            negativeMagnitude = -DIGITAL_BUTTON_MAGNITUDE
+        end
+
+        if IsKeyDown(KEY_GAMEPAD_DPAD_RIGHT) or (IsKeyDown(KEY_RIGHTARROW) and not hasFocusControl) then
+            positiveMagnitude = DIGITAL_BUTTON_MAGNITUDE
+        end
+
         return negativeMagnitude + positiveMagnitude
     end,
 }
@@ -285,8 +295,18 @@ local INPUT_DEVICE_QUERY_Y =
         return GetGamepadOrKeyboardRightStickY(GAMEPAD_INCLUDE_DEADZONE)
     end,
     [ZO_DI_DPAD] = function(self)
-        local negativeMagnitude = ((IsKeyDown(KEY_GAMEPAD_DPAD_DOWN) or IsKeyDown(KEY_DOWNARROW)) and -DIGITAL_BUTTON_MAGNITUDE or 0)
-        local positiveMagnitude = ((IsKeyDown(KEY_GAMEPAD_DPAD_UP) or IsKeyDown(KEY_UPARROW)) and DIGITAL_BUTTON_MAGNITUDE or 0)
+        local hasFocusControl = WINDOW_MANAGER:HasFocusControl()
+        local negativeMagnitude = 0
+        local positiveMagnitude = 0
+
+        if IsKeyDown(KEY_GAMEPAD_DPAD_DOWN) or (IsKeyDown(KEY_DOWNARROW) and not hasFocusControl) then
+            negativeMagnitude = -DIGITAL_BUTTON_MAGNITUDE
+        end
+
+        if IsKeyDown(KEY_GAMEPAD_DPAD_UP) or (IsKeyDown(KEY_UPARROW) and not hasFocusControl) then
+            positiveMagnitude = DIGITAL_BUTTON_MAGNITUDE
+        end
+
         return negativeMagnitude + positiveMagnitude
     end,
 }

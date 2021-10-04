@@ -65,10 +65,10 @@
                 <Button name="$(parent)Increase" override="true">
                     <Anchor point="LEFT" relativeTo="$(parent)Display" relativePoint="RIGHT" offsetX="-10" />
                 </Button>
-                <Label name="$(parent)DecreaseKeyLabel" override="true" tier="MEDIUM" hidden="true">
+                <Label name="$(parent)DecreaseKeyLabel" override="true" tier="MEDIUM" hidden="true" mouseEnabled="false">
                     <Anchor point="CENTER" relativeTo="$(parent)Decrease" />
                 </Label>
-                <Label name="$(parent)IncreaseKeyLabel" override="true" tier="MEDIUM" hidden="true">
+                <Label name="$(parent)IncreaseKeyLabel" override="true" tier="MEDIUM" hidden="true" mouseEnabled="false">
                     <Anchor point="CENTER" relativeTo="$(parent)Increase" />
                 </Label>
             </Controls>

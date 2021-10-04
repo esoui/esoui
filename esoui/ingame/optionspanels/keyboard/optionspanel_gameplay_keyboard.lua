@@ -171,6 +171,14 @@ panelBuilder:AddSetting({
     header = SI_GAMEPAD_SECTION_HEADER,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_UseKeyboardChat",
+    settingType = SETTING_TYPE_GAMEPAD,
+    settingId = GAMEPAD_SETTING_USE_KEYBOARD_CHAT,
+    header = SI_GAMEPAD_SECTION_HEADER,
+    indentLevel = 1,
+})
+
 -------------------------
 -- Gameplay -> Items --
 -------------------------

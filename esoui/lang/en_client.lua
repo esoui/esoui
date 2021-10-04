@@ -1526,6 +1526,7 @@ SafeAddString(SI_COLLECTIBLEUSAGEBLOCKREASON29, "You can't use this collectible 
 SafeAddString(SI_COLLECTIBLEUSAGEBLOCKREASON3, "You can't use collectibles while dead.", 0)
 SafeAddString(SI_COLLECTIBLEUSAGEBLOCKREASON30, "This collectible has been temporarily disabled. Please try again later.", 0)
 SafeAddString(SI_COLLECTIBLEUSAGEBLOCKREASON31, "This default collectible is already in use.", 0)
+SafeAddString(SI_COLLECTIBLEUSAGEBLOCKREASON32, "You can't use this collectible during a timed event.", 0)
 SafeAddString(SI_COLLECTIBLEUSAGEBLOCKREASON4, "You can't use this collectible.", 1)
 SafeAddString(SI_COLLECTIBLEUSAGEBLOCKREASON5, "You are the wrong gender to use this collectible.", 0)
 SafeAddString(SI_COLLECTIBLEUSAGEBLOCKREASON6, "You are the wrong race to use this collectible.", 0)

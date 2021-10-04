@@ -42,7 +42,7 @@ end
 
 function ZO_LinkHandler_InsertLinkAndSubmit(link)
     ZO_LinkHandler_InsertLink(link)
-    local chatSystem = SYSTEMS:GetObject("ChatSystem")
+    local chatSystem = ZO_GetChatSystem()
     chatSystem:SubmitTextEntry()
     chatSystem:Maximize()
 end

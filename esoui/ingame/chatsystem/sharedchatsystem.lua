@@ -104,7 +104,7 @@ function TextEntry:New(...)
 end
 
 local TEXT_ENTRY_DURATION = 500
-local TEXT_ENTRY_MIN_ALPHA = .25
+local TEXT_ENTRY_MIN_ALPHA = 0.25
 local TEXT_ENTRY_MAX_ALPHA = 1.0
 
 function TextEntry:Initialize(system, control, chatEditBufferTop, chatEditBufferBottom)
@@ -1500,6 +1500,14 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_AGENT_CHAT_TERMINATED, OnAgentChatActiveChanged)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_CHAT_CATEGORY_COLOR_CHANGED, OnChatCategoryColorChanged)
+
+        local function OnGamepadUseKeyboardChatChanged()
+            self:CloseTextEntry()
+            -- If the chat window is hidden and we try to start text entry, the edit control will not be able to be focused
+            -- and it will become stuck in an open state. So make sure the visibility is refreshed.
+            self:RefreshVisibility()
+        end
+        EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GAMEPAD_USE_KEYBOARD_CHAT_CHANGED, OnGamepadUseKeyboardChatChanged)
     end
 end
 
@@ -2397,38 +2405,38 @@ end
 
 function StartChatInput(text, channel, target)
     if IsChatSystemAvailableForCurrentPlatform() then
-        SYSTEMS:GetObject("ChatSystem"):StartTextEntry(text, channel, target)
+        ZO_GetChatSystem():StartTextEntry(text, channel, target)
     end
 end
 
 function AutoSendChatInput(text, channel, target, dontShowHUDWindow)
     if IsChatSystemAvailableForCurrentPlatform() then
-        SYSTEMS:GetObject("ChatSystem"):AutoSendTextEntry(text, channel, target, dontShowHUDWindow)
+        ZO_GetChatSystem():AutoSendTextEntry(text, channel, target, dontShowHUDWindow)
     end
 end
 
 function ChatReplyToLastWhisper()
     if IsChatSystemAvailableForCurrentPlatform() then
-        SYSTEMS:GetObject("ChatSystem"):ReplyToLastTarget(CHAT_CHANNEL_WHISPER)
+        ZO_GetChatSystem():ReplyToLastTarget(CHAT_CHANNEL_WHISPER)
     end
 end
 
 function ZO_ChatSystem_SubmitChat()
     if IsChatSystemAvailableForCurrentPlatform() then
-        SYSTEMS:GetObject("ChatSystem"):SubmitTextEntry()
+        ZO_GetChatSystem():SubmitTextEntry()
     end
 end
 
 function ZO_ChatSystem_CancelChat()
     if IsChatSystemAvailableForCurrentPlatform() then
         local KEEP_TEXT = true
-        SYSTEMS:GetObject("ChatSystem"):CloseTextEntry(KEEP_TEXT)
+        ZO_GetChatSystem():CloseTextEntry(KEEP_TEXT)
     end
 end
 
 function ZO_ChatSystem_ExitChat()
     if IsChatSystemAvailableForCurrentPlatform() then
-        SYSTEMS:GetObject("ChatSystem"):CloseTextEntry()
+        ZO_GetChatSystem():CloseTextEntry()
     end
 end
 

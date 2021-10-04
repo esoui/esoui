@@ -2120,7 +2120,7 @@ function ZO_MapPin:IsDelvePin()
     local zoneIndex = self:GetPOIZoneIndex()
     local zoneCompletionType = GetPOIZoneCompletionType(zoneIndex, poiIndex)
     
-    return zoneCompletionType == ZONE_COMPLETION_TYPE_DELVES
+    return zoneCompletionType == ZONE_COMPLETION_TYPE_DELVES or zoneCompletionType == ZONE_COMPLETION_TYPE_GROUP_DELVES
 end
 
 function ZO_MapPin:ShowsPinAndArea()

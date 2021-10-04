@@ -504,7 +504,7 @@ function ZO_MinimizeChatFragment:New(actionLayerName)
 end
 
 function ZO_MinimizeChatFragment:Show()
-    local chatSystem = SYSTEMS:GetObject("ChatSystem")
+    local chatSystem = ZO_GetChatSystem()
     self.wasChatMaximized = not chatSystem:IsMinimized()
     if self.wasChatMaximized then
         chatSystem:Minimize()
@@ -513,7 +513,7 @@ function ZO_MinimizeChatFragment:Show()
 end
 
 function ZO_MinimizeChatFragment:Hide()
-    local chatSystem = SYSTEMS:GetObject("ChatSystem")
+    local chatSystem = ZO_GetChatSystem()
     if (self.wasChatMaximized or (chatSystem:IsPinnable() and chatSystem:IsWindowPinned())) and chatSystem:IsMinimized() then
         chatSystem:Maximize()
     end
