@@ -1014,13 +1014,9 @@ function ZO_Dialogs_UpdateDialogMainText(dialog, textTable, params)
         if dialog.isGamepad then
             if dialog.info and dialog.headerData then
                 local mainTextTable = textTable or dialog.info.mainText
-                local subTextTable = textTable or dialog.info.subText
-
                 local mainText = GetFormattedText(dialog, mainTextTable, params)
-                local subText = GetFormattedText(dialog, subTextTable, params)
                 if mainText and mainText ~= "" then
-                    local NO_WARNING_TEXT = nil
-                    ZO_GenericGamepadDialog_RefreshText(dialog, dialog.headerData.titleText, mainText, NO_WARNING_TEXT, subText)
+                    ZO_GenericGamepadDialog_RefreshText(dialog, dialog.headerData.titleText, mainText, dialog.warningTextControl:GetText(), dialog.subTextControl:GetText())
                 end
             end
         else

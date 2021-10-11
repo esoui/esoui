@@ -89,8 +89,8 @@ function ZO_SharedInventoryManager:Initialize()
 
         -- ESO-718084: Mark the search as dirty if the slot update includes a change in stack count to handle the refreshing the search when a stack of items is split while being searched on.
         if stackCountChangeAmount ~= 0 then
-            local SUPPRESS_SEARCH = true
-            TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, SUPPRESS_SEARCH)
+            local shouldSuppressSearch = (not isLastUpdateForMessage) or IsInGamepadPreferredMode()
+            TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, shouldSuppressSearch)
         end
 
         if bagId == BAG_BACKPACK or bagId == BAG_VIRTUAL then

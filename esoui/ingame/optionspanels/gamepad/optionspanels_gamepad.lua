@@ -64,7 +64,7 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_RENDER_THREAD,
+            settingId = GRAPHICS_SETTING_RENDERTHREAD,
         },
         {
             panel = SETTING_PANEL_VIDEO,

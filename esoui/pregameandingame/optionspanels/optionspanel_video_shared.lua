@@ -182,11 +182,11 @@ local ZO_OptionsPanel_Video_ControlData =
             exists = ZO_IsPCUI,
         },
         --Options_Video_RenderThread
-        [GRAPHICS_SETTING_RENDER_THREAD] =
+        [GRAPHICS_SETTING_RENDERTHREAD] =
         {
             controlType = OPTIONS_CHECKBOX,
             system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_RENDER_THREAD,
+            settingId = GRAPHICS_SETTING_RENDERTHREAD,
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD_TOOLTIP,

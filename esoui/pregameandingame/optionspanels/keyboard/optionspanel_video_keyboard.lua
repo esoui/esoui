@@ -47,7 +47,7 @@ panelBuilder:AddSetting({
 panelBuilder:AddSetting({
     controlName = "Options_Video_RenderThread",
     settingType = SETTING_TYPE_GRAPHICS,
-    settingId = GRAPHICS_SETTING_RENDER_THREAD,
+    settingId = GRAPHICS_SETTING_RENDERTHREAD,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
     template = "ZO_Options_Video_Checkbox_IncludeRestartWarning",
 })

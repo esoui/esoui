@@ -79,7 +79,7 @@ EsoStrings =
     "GRAPHICS_OPTIONS_VIDEO_SUB_SAMPLING_TOOLTIP", -- SI_GRAPHICS_OPTIONS_VIDEO_SUB_SAMPLING_TOOLTIP
     "Vertical Sync", -- SI_GRAPHICS_OPTIONS_VIDEO_VSYNC
     "GRAPHICS_OPTIONS_VIDEO_VSYNC_TOOLTIP", -- SI_GRAPHICS_OPTIONS_VIDEO_VSYNC_TOOLTIP
-    "Multithreaded Rendering (Beta)", -- SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD
+    "Multithreaded Rendering", -- SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD
     "Enables a separate thread for the render process which can improve performance.", -- SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD_TOOLTIP
     "Ambient Occlusion", -- SI_GRAPHICS_OPTIONS_VIDEO_AMBIENT_OCCLUSION_TYPE
     "Enhances the fidelity of shadows and lighting by taking into account objects blocking light. LSAO is more realistic and more expensive than HBAO, which is more realistic and more expensive than SSAO. Screen Space GI improves on LSAO by accounting for additional bounces of light. Disabling this setting may help improve performance.", -- SI_GRAPHICS_OPTIONS_VIDEO_WINDOWS_AMBIENT_OCCLUSION_TYPE_TOOLTIP
@@ -2502,8 +2502,8 @@ EsoStrings =
     "None", -- SI_ANTIALIASINGTYPE0
     "FXAA", -- SI_ANTIALIASINGTYPE1
     "TAA", -- SI_ANTIALIASINGTYPE2
-    "Nvidia DLSS", -- SI_ANTIALIASINGTYPE3
-    "Nvidia DLAA", -- SI_ANTIALIASINGTYPE4
+    "NVIDIA DLSS", -- SI_ANTIALIASINGTYPE3
+    "NVIDIA DLAA", -- SI_ANTIALIASINGTYPE4
     "Off", -- SI_CLUTTERQUALITY0
     "Low", -- SI_CLUTTERQUALITY1
     "Medium", -- SI_CLUTTERQUALITY2
@@ -2923,7 +2923,7 @@ EsoStrings =
     "That account has been permanently banned. Contact customer service at <<1>> for more information or link to a different account.", -- SI_ACCOUNTCREATELINKERROR12104
     "Connection to server timed out. Please try again later.", -- SI_LOGINAUTHERROR2
     "Unable to connect to the PlayStation™Network. Please confirm you are connected to the PlayStation™Network or try again later.", -- SI_LOGINAUTHERROR3
-    "Unable to connect to Xbox Live. Please confirm you are connected to Xbox Live or try again later.", -- SI_LOGINAUTHERROR4
+    "Unable to connect to the Xbox network. Please confirm you are connected to the Xbox network or try again later.", -- SI_LOGINAUTHERROR4
     "Unable to initialize connection to Steam. Please ensure the game was launched through Steam or try again later.", -- SI_LOGINAUTHERROR5
     "Unable to initialize connection to Heron.", -- SI_LOGINAUTHERROR6
     "The servers are temporarily down for maintenance. Please try again later.", -- SI_LOGINAUTHERROR3000
@@ -2936,17 +2936,17 @@ EsoStrings =
     "Your account must be verified in order to continue to play. Check the email you used to create an ESO account for instruction on how to complete the verification process.", -- SI_LOGINAUTHERROR8011
     "Your account has restricted authentication.  Please contact customer service at <<1>>.", -- SI_LOGINAUTHERROR8012
     "The servers are temporarily down for maintenance. Please try again later.", -- SI_LOGINAUTHERROR8013
-    "Could not connect to Xbox Live", -- SI_LOGINAUTHERROR13000
-    "Could not connect to Xbox Live. Please try again later or contact customer service at <<1>>.", -- SI_LOGINAUTHERROR13002
-    "Could not connect to Xbox Live. Please try again later or contact customer service at <<1>>.", -- SI_LOGINAUTHERROR13003
-    "Could not connect to Xbox Live. Please try again later or contact customer service at <<1>>.", -- SI_LOGINAUTHERROR13004
+    "Could not connect to the Xbox network", -- SI_LOGINAUTHERROR13000
+    "Could not connect to the Xbox network. Please try again later or contact customer service at <<1>>.", -- SI_LOGINAUTHERROR13002
+    "Could not connect to the Xbox network. Please try again later or contact customer service at <<1>>.", -- SI_LOGINAUTHERROR13003
+    "Could not connect to the Xbox network. Please try again later or contact customer service at <<1>>.", -- SI_LOGINAUTHERROR13004
     "Could not connect to The PlayStation™Network. Please try again later or contact customer service at <<1>>.", -- SI_LOGINAUTHERROR14000
     "Could not connect to The PlayStation™Network. Please try again later or contact customer service at <<1>>.", -- SI_LOGINAUTHERROR14002
     "Required credentials are missing, please relaunch the game from the launcher.", -- SI_LOGINAUTHERROR5000
     "Incompatible client version. Please update your client and try again.", -- SI_LOGINAUTHERROR5008
     "Incorrect token, please relaunch the game from the launcher.", -- SI_LOGINAUTHERROR17001
     "PlayStation™Network", -- SI_PLATFORMSERVICETYPE1
-    "Xbox Live", -- SI_PLATFORMSERVICETYPE2
+    "Xbox network", -- SI_PLATFORMSERVICETYPE2
     "DMM", -- SI_PLATFORMSERVICETYPE3
     "Steam", -- SI_PLATFORMSERVICETYPE4
     "Stadia", -- SI_PLATFORMSERVICETYPE5
@@ -3658,22 +3658,22 @@ EsoStrings =
     "Error <<1>>\nTimeout while waiting for character list.", -- SI_GLOBALERRORCODE400
     "Error <<1>>\nData version does not match the client version. Please make sure the game is fully up to date.", -- SI_GLOBALERRORCODE500
     "You must be logged into an account for PlayStation™Network to play ESO", -- SI_LOGOUTERROR2
-    "You must be logged into a Xbox Live account to play ESO", -- SI_LOGOUTERROR3
-    "Unable to connect to Xbox Live. Please make sure you have a valid internet connection.", -- SI_LOGOUTERROR4
+    "You must be signed in to an Xbox profile to play ESO", -- SI_LOGOUTERROR3
+    "Unable to connect to the Xbox network. Please make sure you have a valid internet connection.", -- SI_LOGOUTERROR4
     "ESO servers are down for maintenance. Please try again later or visit <<1>> for more information", -- SI_LOGOUTERROR5
     "Unable to connect to PlayStation™Network. Please make sure you have a valid internet connection.", -- SI_LOGOUTERROR6
     "Unable to connect to game server. Please make sure you have a valid internet connection.", -- SI_LOGOUTERROR7
     "Patch required. Please download and apply to access online features.", -- SI_LOGOUTERROR8
     "Selected user profile age does not meet the requirements for playing this game.", -- SI_PROFILELOGINERROR2
     "Selected user profile is a guest account.", -- SI_PROFILELOGINERROR3
-    "You do not currently have network connectivity. This title requires Xbox Live and a network connection.", -- SI_PROFILELOGINERROR4
+    "You do not currently have network connectivity. This title requires a network connection as well as access to the Xbox network.", -- SI_PROFILELOGINERROR4
     "You do not currently have network connectivity. This title requires an account for PlayStation™Network and a network connection.", -- SI_PROFILELOGINERROR5
-    "The Xbox Live Account selected does not have Multiplayer privileges. Please select another account, or update your permissions.", -- SI_PROFILELOGINERROR6
+    "The Xbox profile selected does not have Multiplayer privileges. Please select an account with Xbox Live Gold, or update your permissions.", -- SI_PROFILELOGINERROR6
     "A user profile was not selected.", -- SI_PROFILELOGINERROR7
     "The selected account for PlayStation™Network does not have realtime multiplayer privileges. Please select another account, or update your permissions.", -- SI_PROFILELOGINERROR8
     "Selected sub-account for PlayStation™Network does not have access to user-generated content.", -- SI_PROFILELOGINERROR9
     "Patch required. Please download and apply to access online features.", -- SI_PROFILELOGINERROR10
-    "The Xbox Live Account selected does not have user-generated content privileges. Please select another account, or update your permissions.", -- SI_PROFILELOGINERROR11
+    "The Xbox profile selected does not have user-generated content privileges. Please select another account, or update your permissions.", -- SI_PROFILELOGINERROR11
     "There is not enough free space to create save data. Please free up additional space.", -- SI_PROFILELOGINERROR12
     "Servers are busy. Please try again in a few minutes.", -- SI_PROFILELOGINERROR13
     "Temporary server error. Please try again in a few minutes.", -- SI_PROFILELOGINERROR14
@@ -4217,7 +4217,7 @@ EsoStrings =
     "No save was created, game progress will not be saved.  Continue without saving?", -- SI_NO_SAVE_CONTINUE
     "No save device was selected, game progress will not be saved.  Continue without saving?", -- SI_NO_SAVE_DEVICE
     "You already have save data on this storage device, do you want to overwrite it?", -- SI_ALLOW_OVERWRITE
-    "The Xbox LIVE Account selected does not have Multiplayer privileges. Please select another account, or update your permissions.", -- SI_PROFILE_PRIVILEGES_FAILED_ERROR_TEXT
+    "The Xbox profile selected does not have Multiplayer privileges. Please select an account with Xbox Live Gold, or update your permissions.", -- SI_PROFILE_PRIVILEGES_FAILED_ERROR_TEXT
     "Cannot enter world - Game install in progress", -- SI_CHARACTER_SELECT_LOAD_IN_PROGRESS
     "   Installation Progress:  <<1>> %", -- SI_DIALOG_INSTALLATION_PROGRESS
     "Loading Profile Failed", -- SI_PROFILE_LOAD_FAILED_TITLE
@@ -9312,6 +9312,7 @@ SafeAddVersion(SI_GRAPHICS_OPTIONS_VIDEO_PRESETS, 1)
 SafeAddVersion(SI_GRAPHICS_OPTIONS_VIDEO_RESOLUTION, 2)
 SafeAddVersion(SI_GRAPHICS_OPTIONS_VIDEO_SUB_SAMPLING, 1)
 SafeAddVersion(SI_GRAPHICS_OPTIONS_VIDEO_VSYNC, 1)
+SafeAddVersion(SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD, 1)
 SafeAddVersion(SI_GRAPHICS_OPTIONS_VIDEO_SCREENSPACE_WATER_REFLECTION_QUALITY, 1)
 SafeAddVersion(SI_GRAPHICS_OPTIONS_VIDEO_SCREENSPACE_WATER_REFLECTION_QUALITY_TOOLTIP, 1)
 SafeAddVersion(SI_GRAPHICS_OPTIONS_VIDEO_PLANAR_WATER_REFLECTION_QUALITY_TOOLTIP, 1)
@@ -9849,6 +9850,8 @@ SafeAddVersion(SI_RAIDLIFEVISIBILITYCHOICE0, 1)
 SafeAddVersion(SI_RAIDLIFEVISIBILITYCHOICE1, 1)
 SafeAddVersion(SI_GAMEPADCHATTEXTSIZESETTING22, 1)
 SafeAddVersion(SI_GAMEPADCHATTEXTSIZESETTING27, 1)
+SafeAddVersion(SI_ANTIALIASINGTYPE3, 1)
+SafeAddVersion(SI_ANTIALIASINGTYPE4, 1)
 SafeAddVersion(SI_OUTFITSLOT20, 1)
 SafeAddVersion(SI_OUTFITSLOT21, 1)
 SafeAddVersion(SI_OUTFITSLOT24, 1)
@@ -9942,11 +9945,15 @@ SafeAddVersion(SI_TRADINGHOUSEFEATURECATEGORY5, 1)
 SafeAddVersion(SI_TRADINGHOUSEFEATURECATEGORY6, 1)
 SafeAddVersion(SI_ACCOUNTCREATELINKERROR12004, 1)
 SafeAddVersion(SI_LOGINAUTHERROR3, 2)
-SafeAddVersion(SI_LOGINAUTHERROR4, 1)
-SafeAddVersion(SI_LOGINAUTHERROR13000, 1)
+SafeAddVersion(SI_LOGINAUTHERROR4, 2)
+SafeAddVersion(SI_LOGINAUTHERROR13000, 2)
+SafeAddVersion(SI_LOGINAUTHERROR13002, 1)
+SafeAddVersion(SI_LOGINAUTHERROR13003, 1)
+SafeAddVersion(SI_LOGINAUTHERROR13004, 1)
 SafeAddVersion(SI_LOGINAUTHERROR14000, 1)
 SafeAddVersion(SI_LOGINAUTHERROR14002, 1)
 SafeAddVersion(SI_PLATFORMSERVICETYPE1, 2)
+SafeAddVersion(SI_PLATFORMSERVICETYPE2, 1)
 SafeAddVersion(SI_REDEEMCODERESULT5, 2)
 SafeAddVersion(SI_REDEEMCODERESULT7, 1)
 SafeAddVersion(SI_REDEEMCODERESULT8, 1)
@@ -10100,17 +10107,19 @@ SafeAddVersion(SI_PLEDGEOFMARARESULT3, 1)
 SafeAddVersion(SI_PLEDGEOFMARARESULT4, 1)
 SafeAddVersion(SI_TRADEACTIONRESULT66, 1)
 SafeAddVersion(SI_LOGOUTERROR2, 2)
+SafeAddVersion(SI_LOGOUTERROR3, 1)
+SafeAddVersion(SI_LOGOUTERROR4, 1)
 SafeAddVersion(SI_LOGOUTERROR6, 1)
 SafeAddVersion(SI_PROFILELOGINERROR2, 2)
 SafeAddVersion(SI_PROFILELOGINERROR3, 2)
-SafeAddVersion(SI_PROFILELOGINERROR4, 2)
+SafeAddVersion(SI_PROFILELOGINERROR4, 3)
 SafeAddVersion(SI_PROFILELOGINERROR5, 4)
-SafeAddVersion(SI_PROFILELOGINERROR6, 2)
+SafeAddVersion(SI_PROFILELOGINERROR6, 3)
 SafeAddVersion(SI_PROFILELOGINERROR7, 2)
 SafeAddVersion(SI_PROFILELOGINERROR8, 4)
 SafeAddVersion(SI_PROFILELOGINERROR9, 4)
 SafeAddVersion(SI_PROFILELOGINERROR10, 2)
-SafeAddVersion(SI_PROFILELOGINERROR11, 2)
+SafeAddVersion(SI_PROFILELOGINERROR11, 3)
 SafeAddVersion(SI_JUMPRESULT4, 1)
 SafeAddVersion(SI_JUMPRESULT8, 1)
 SafeAddVersion(SI_SOCIALACTIONRESULT5, 1)
@@ -10184,7 +10193,7 @@ SafeAddVersion(SI_SAVE_DEST_REMOVED_STORAGE, 1)
 SafeAddVersion(SI_NO_SAVE_CONTINUE, 1)
 SafeAddVersion(SI_NO_SAVE_DEVICE, 1)
 SafeAddVersion(SI_ALLOW_OVERWRITE, 1)
-SafeAddVersion(SI_PROFILE_PRIVILEGES_FAILED_ERROR_TEXT, 2)
+SafeAddVersion(SI_PROFILE_PRIVILEGES_FAILED_ERROR_TEXT, 3)
 SafeAddVersion(SI_CHARACTER_SELECT_LOAD_IN_PROGRESS, 1)
 SafeAddVersion(SI_DIALOG_INSTALLATION_PROGRESS, 1)
 SafeAddVersion(SI_PROFILE_LOAD_FAILED_TITLE, 1)

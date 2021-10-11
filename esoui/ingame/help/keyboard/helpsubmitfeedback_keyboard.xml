@@ -28,7 +28,7 @@
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
                                 </Control>
 
-                                <Control name="$(parent)SubcategoryContainer" resizeToFitDescendents="true">
+                                <Control name="$(parent)SubcategoryContainer" resizeToFitDescendents="true" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryCB" relativePoint="BOTTOMLEFT" offsetY="20" />
                                     <Controls>
                                         <Label name="$(grandparent)SubcategoryTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_SUBCATEGORY">

@@ -386,7 +386,7 @@ do
                     if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= cost then
                         return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON))
                     end
-                    return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_AMOUNT_ERROR_ICON))
+                    return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON))
                 end,
                 keybind = "UI_SHORTCUT_SECONDARY",
                 visible = function() return self.windowMode == ZO_STORE_WINDOW_MODE_NORMAL and CanStoreRepair() and GetRepairAllCost() > 0 end,

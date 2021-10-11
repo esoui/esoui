@@ -431,9 +431,15 @@ ESO_Dialogs["REPAIR_ALL"] =
     },
     buttons =
     {
-        [1] =
         {
-            text =      SI_DIALOG_ACCEPT,
+            text = function(dialog)
+                if IsInGamepadPreferredMode() then
+                    local costString = ZO_CurrencyControl_FormatCurrency(dialog.data.cost)
+                    return zo_strformat(SI_GAMEPAD_REPAIR_ALL_ACCEPT, costString, ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)) 
+                else
+                    return GetString(SI_DIALOG_ACCEPT)
+                end
+            end,
             callback =  function(dialog)
                             RepairAll()
                             PlaySound(SOUNDS.INVENTORY_ITEM_REPAIR)
@@ -449,7 +455,6 @@ ESO_Dialogs["REPAIR_ALL"] =
                             end
                         end,
         },
-        [2] =
         {
             text =      SI_DIALOG_DECLINE,
             callback =  function(dialog)

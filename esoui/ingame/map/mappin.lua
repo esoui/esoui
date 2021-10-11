@@ -36,7 +36,9 @@ local CONSTANTS =
     RETURN_OBJECTIVE_PIN_SIZE = 64,
     SUGGESTED_AREA_PIN_SIZE = 40,
 
-    FAST_TRAVEL_DEFAULT_PIN_LEVEL = 120,
+    --The highest-priority fast travel pins are 7 higher than the default,
+    --so starting with 112 lets us fit between 110 and 120.
+    FAST_TRAVEL_DEFAULT_PIN_LEVEL = 112,
 }
 
 do
