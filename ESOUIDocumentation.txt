@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 101031
+h1. ESO UI Documentation for API Version 101032
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -2794,6 +2794,7 @@ h5. CollectibleUsageBlockReason
 * COLLECTIBLE_USAGE_BLOCK_REASON_ACTIVE_DIG_SITE_REQUIRED
 * COLLECTIBLE_USAGE_BLOCK_REASON_BLACKLISTED
 * COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_SUBZONE
+* COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_TIMED_EVENT
 * COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_ZONE
 * COLLECTIBLE_USAGE_BLOCK_REASON_CATEGORY_REQUIREMENT_FAILED
 * COLLECTIBLE_USAGE_BLOCK_REASON_COLLECTIBLE_ALREADY_QUEUED
@@ -5366,6 +5367,7 @@ h5. GamepadSetting
 * GAMEPAD_SETTING_INPUT_PREFERRED_MODE
 * GAMEPAD_SETTING_INVERT_X
 * GAMEPAD_SETTING_INVERT_Y
+* GAMEPAD_SETTING_USE_KEYBOARD_CHAT
 * GAMEPAD_SETTING_VIBRATION
 * GAMEPAD_SETTING_WAS_LAST_INPUT_GAMEPAD
 
@@ -20844,6 +20846,9 @@ h3. WindowManager
 * GetNumIMECandidates()
 ** _Returns:_ *integer* _numCandidates_
 
+* HasFocusControl()
+** _Returns:_ *bool* _hasFocusControl_
+
 * IsChoosingIMECandidate()
 ** _Returns:_ *bool* _isChoosingCandidate_
 
@@ -21713,6 +21718,7 @@ h2. Events
 * EVENT_FRIEND_REMOVED (*string* _displayName_)
 * EVENT_FULLSCREEN_MODE_CHANGED
 * EVENT_GAMEPAD_TYPE_CHANGED (*[GamepadType|#GamepadType]* _gamepadType_)
+* EVENT_GAMEPAD_USE_KEYBOARD_CHAT_CHANGED (*bool* _useKeyboardChat_)
 * EVENT_GAME_CREDITS_READY
 * EVENT_GUILD_CLAIM_KEEP_CAMPAIGN_NOTIFICATION (*integer* _campaignId_, *integer* _keepId_, *string* _guildName_, *string* _playerName_)
 * EVENT_GUILD_CLAIM_KEEP_RESPONSE (*[ClaimKeepResultType|#ClaimKeepResultType]* _response_, *integer* _keepId_)

@@ -1625,7 +1625,7 @@ SafeAddString(SI_GAMEPAD_OPTIONS_INVERT_Y, "Инвертировать ось Y"
 SafeAddString(SI_GAMEPAD_OPTIONS_MENU, "Настройки", 0)
 SafeAddString(SI_GAMEPAD_OPTIONS_RESET_CONTROLS, "Сброс настроек геймпада", 0)
 SafeAddString(SI_GAMEPAD_OPTIONS_TEMPLATES, "Шаблоны", 0)
-SafeAddString(SI_GAMEPAD_OPTIONS_USE_KEYBOARD_CHAT, "Использование текстового чата", 0)
+SafeAddString(SI_GAMEPAD_OPTIONS_USE_KEYBOARD_CHAT, "Использовать чат клавиатуры", 0)
 SafeAddString(SI_GAMEPAD_OPTIONS_USE_KEYBOARD_CHAT_TOOLTIP, "Позволяет использовать окно чата клавиатуры вместо окна чата геймпада в интерфейсе геймпада.", 0)
 SafeAddString(SI_GAMEPAD_PAGED_LIST_PAGE_NUMBER, "<<1>>", 2)
 SafeAddString(SI_GAMEPAD_PLAYER_INVENTORY_CAPACITY_FOOTER_LABEL, "Вместимость инвентаря", 0)

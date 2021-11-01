@@ -675,7 +675,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         {
             text =  function()
                 local color = GetItemQualityColor(GetMarketProductDisplayQuality(self.marketProductData.marketProductId))
-                local quantity = self.quantity
+                local quantity = self.quantity or 1
                 local stackCount = self.marketProductData:GetStackCount()
                 local totalStackCount = stackCount * quantity
                 if totalStackCount > 1 then
@@ -738,7 +738,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             text = function(dialog)
                 local marketProductData = self.marketProductData
                 local marketProductId = marketProductData:GetId()
-                local quantity = self.quantity
+                local quantity = self.quantity or 1
                 local stackCount = marketProductData:GetStackCount()
                 local totalStackCount = stackCount * quantity
                 local itemName = self.itemName
