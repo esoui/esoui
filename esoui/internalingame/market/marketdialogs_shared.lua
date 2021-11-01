@@ -18,12 +18,12 @@ function ZO_MarketDialogs_Shared_ShouldRestartGiftFlow(giftResult)
     return giftResult == MARKET_PURCHASE_RESULT_CANNOT_GIFT_TO_PLAYER or giftResult == MARKET_PURCHASE_RESULT_CANNOT_GIFT_RECIPIENT_NOT_FOUND
 end
 
-function ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(productData)
+function ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(productData, quantity)
     if IsEligibleForEsoPlusPricing() then
         local marketCurrencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = productData:GetMarketProductPricingByPresentation()
         if esoPlusCost ~= nil and costAfterDiscount ~= nil then
             local currencyType = GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType)
-            local esoPlusSavings = costAfterDiscount - esoPlusCost
+            local esoPlusSavings = (costAfterDiscount - esoPlusCost) * quantity
             if esoPlusSavings > 0 then
                 local currencyString = ZO_Currency_FormatKeyboard(currencyType, esoPlusSavings, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
                 return zo_strformat(SI_MARKET_PURCHASE_SUCCESS_ESO_PLUS_SAVINGS_TEXT, currencyString)

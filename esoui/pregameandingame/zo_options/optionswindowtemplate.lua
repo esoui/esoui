@@ -247,6 +247,24 @@ local function GetValueString(data)
     return type(data) == "function" and data() or GetString(data)
 end
 
+local function GetHorizontalScrollListOptionText(control, index)
+    local data = control.data
+    --gamepadValidStringOverrides exists in case the enum used here has PC specific localization. If so, we create the strings in ClientGamepadStrings.xml and add them
+    --to the data table's gamepadValidStringOverrides in the same order.
+    local hasGamepadStrings = control.optionsManager:IsGamepadOptions() and (data.gamepadValidStringOverrides ~= nil)
+    if hasGamepadStrings then
+        return GetString(data.gamepadValidStringOverrides[index])
+    elseif data.itemText then
+        return data.itemText[index]
+    elseif data.valueStringPrefix then
+        return GetString(data.valueStringPrefix, data.valid[index])
+    elseif data.valueStrings then
+        return GetValueString(data.valueStrings[index])
+    else
+        return data.valid[index]
+    end
+end
+
 local DEFAULT_SLIDER_VALUE_STEP_PERCENT = 6.66
 local updateControlFromSettings =
 {
@@ -263,7 +281,7 @@ local updateControlFromSettings =
                                 elseif data.valueStringPrefix and isValidNumber then
                                     dropdown:SetSelectedItemText(GetString(data.valueStringPrefix, currentChoice))
                                 elseif data.valueStrings then
-                                    dropdown:SetSelectedItemText(GetValueString(data.valueStrings[GetValidIndexFromCurrentChoice(data.valid, currentChoice)]))                                
+                                    dropdown:SetSelectedItemText(GetValueString(data.valueStrings[GetValidIndexFromCurrentChoice(data.valid, currentChoice)]))
                                 else
                                     dropdown:SetSelectedItemText(tostring(currentChoice))
                                 end
@@ -282,27 +300,18 @@ local updateControlFromSettings =
                                     break
                                 end
                             end
-                            local ALLOW_EVEN_IF_DISABLED = true
-                            local NO_ANIMATION = true
 
-                            if IsGamepadOption(control) then
-                                local targetChild = control.horizontalListObject:GetCenterControl()
-                                if control.data.enabled == false then
-                                    targetChild:SetText(GetString(SI_CHECK_BUTTON_DISABLED))
-                                    targetChild:SetColor(ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR:UnpackRGBA())
-                                else
-                                    if data.gamepadValidStringOverrides then
-                                        targetChild:SetText(GetString(data.gamepadValidStringOverrides[index]))
-                                    elseif data.valueStringPrefix then
-                                        targetChild:SetText(GetString(data.valueStringPrefix, data.valid[index]))
-                                    elseif data.valueStrings then
-                                        targetChild:SetText(GetValueString(data.valueStrings[index]))
-                                    else
-                                        targetChild:SetText(currentChoice)
-                                    end
-                                end
+                            local targetChild = control.horizontalListObject:GetCenterControl()
+                            if control.data.enabled == false then
+                                targetChild:SetText(GetString(SI_CHECK_BUTTON_DISABLED))
+                                targetChild:SetColor(ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR:UnpackRGBA())
+                            else
+                                local text = GetHorizontalScrollListOptionText(control, index)
+                                targetChild:SetText(text)
                             end
 
+                            local ALLOW_EVEN_IF_DISABLED = true
+                            local NO_ANIMATION = true
                             control.horizontalListObject:SetSelectedDataIndex(index, ALLOW_EVEN_IF_DISABLED, NO_ANIMATION)
                             control.horizontalListObject:SetOnSelectedDataChangedCallback(OptionsScrollListSelectionChanged)
                             return currentChoice
@@ -682,26 +691,14 @@ end
 
 function ZO_Options_SetupScrollList(control, selected)
     control.horizontalListObject:Clear()
-    for i = 1, #control.data.valid do
-        --gamepadValidStringOverrides exists in case the enum used here has PC specific localization. If so, we create the strings in ClientGamepadStrings.xml and add them
-        --to the data table's gamepadValidStringOverrides in the same order.
-        local hasGamepadStrings = control.optionsManager:IsGamepadOptions() and (control.data.gamepadValidStringOverrides ~= nil)
-        local entryText = ""
 
-        if hasGamepadStrings then
-            entryText = GetString(control.data.gamepadValidStringOverrides[i])
-        elseif control.data.valueStringPrefix then
-            entryText = GetString(control.data.valueStringPrefix, control.data.valid[i])
-        elseif control.data.valueStrings then
-            entryText = GetValueString(control.data.valueStrings[i])
-        else
-            entryText = control.data.valid[i]
-        end
+    for i, validOption in ipairs(control.data.valid) do
+        local entryText = GetHorizontalScrollListOptionText(control, i)
 
         local entryData =
         {
             text = entryText,
-            value = control.data.valid[i],
+            value = validOption,
             parentControl = control
         }
         control.horizontalListObject:AddEntry(entryData)

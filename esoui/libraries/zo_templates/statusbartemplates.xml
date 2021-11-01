@@ -10,6 +10,20 @@
                 </CustomAnimation>
             </Animations>
         </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ArrowBarGlowAnimation">
+            <Animations>
+                <CustomAnimation duration="140">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+
+                    <UpdateFunction>
+                        self:GetAnimatedControl():SetAlpha(progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
     </Animations>
 
         <Controls>
@@ -128,12 +142,60 @@
 
         <StatusBar name="ZO_ArrowProgressBarWithBG" inherits="ZO_ArrowStatusBarWithBG" virtual="true">
             <Controls>
-                <Label name="$(parent)Progress" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" verticalAlignment="CENTER" tier="HIGH" layer="OVERLAY">
+                <Label name="$(parent)Progress" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" verticalAlignment="CENTER" tier="HIGH" layer="OVERLAY" level="1">
                     <Anchor point="CENTER" />
                 </Label>
             </Controls>
         </StatusBar>
-            
+
+        <Control name="ZO_ArrowBarGlow" tier="HIGH" layer="OVERLAY" level="1" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/progressbar_glow.dds">
+                    <Dimensions x="12" />
+                    <Anchor point="TOPLEFT" offsetX="-5" offsetY="-6" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-5" offsetY="4" />
+                    <TextureCoords left="0.6796" right="0.5859" top="0.2188" bottom="0.7813" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/progressbar_glow.dds">
+                    <Dimensions x="16" />
+                    <Anchor point="TOPRIGHT" offsetX="4" offsetY="-6" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4" />
+                    <TextureCoords left="0.4609" right="0.3359" top="0.2188" bottom="0.7813" />
+                </Texture>
+
+                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_glow.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+                    <TextureCoords left="0.4610" right="0.5858" top="0.2188" bottom="0.7813" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <StatusBar name="ZO_ResponsiveArrowBarBehavior" inherits="ZO_PropagateMouseButtonBehavior ZO_PropagateMouseOverBehavior" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                ZO_ResponsiveArrowBar_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_ResponsiveArrowBar_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Control name="$(parent)Glow" inherits="ZO_ArrowBarGlow" alpha="0" />
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_ResponsiveArrowStatusBar" inherits="ZO_ArrowStatusBar ZO_ResponsiveArrowBarBehavior" virtual="true" />
+
+        <StatusBar name="ZO_ResponsiveArrowStatusBarWithBG" inherits="ZO_ArrowStatusBarWithBG ZO_ResponsiveArrowBarBehavior" virtual="true" />
+
+        <StatusBar name="ZO_ResponsiveArrowProgressBar" inherits="ZO_ArrowProgressBar ZO_ResponsiveArrowBarBehavior" virtual="true" />
+
+        <StatusBar name="ZO_ResponsiveArrowProgressBarWithBG" inherits="ZO_ArrowProgressBarWithBG ZO_ResponsiveArrowBarBehavior" virtual="true" />
+
         <StatusBar name="ZO_DefaultStatusBarBG" inherits="ZO_DefaultStatusBar" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">

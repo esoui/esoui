@@ -168,7 +168,7 @@ function ZO_CharacterCreateBucket_Gamepad:Initialize(...)
 
     -- Handle all the input through this screen
     -- (so the focused control gets first access then we pass the input to the scrollchild)
-    self.scrollChild:SetDirectionalInputEnabled(false) 
+    self.scrollChild:SetDirectionalInputEnabled(false)
 end
 
 function ZO_CharacterCreateBucket_Gamepad:SetTabIndex(index)
@@ -291,6 +291,10 @@ function ZO_CharacterCreateBucketManager_Gamepad:Initialize(container)
 
     self.active = false
 
+    self.onTargetDataChangedCallback = function(...)
+        self:OnTargetDataChanged(...)
+    end
+
     local header = GAMEPAD_CHARACTER_CREATE_MANAGER.header
     ZO_GamepadGenericHeader_Refresh(header, self.headerData)
 end
@@ -326,10 +330,16 @@ function ZO_CharacterCreateBucketManager_Gamepad:EnableTabBarCategory(bucket, en
     ZO_GamepadGenericHeader_Refresh(header, self.headerData)
 end
 
+function ZO_CharacterCreateBucketManager_Gamepad:OnTargetDataChanged(list, selectedData, oldSelectedData)
+    local selectedInfo = selectedData and selectedData.control and selectedData.control.sliderObject and selectedData.control.sliderObject.info
+    GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateCollectibleBlockingInfoTooltip(selectedInfo)
+end
+
 function ZO_CharacterCreateBucketManager_Gamepad:Activate()
     if not self.active then
         self.active = true
         if self.currentBucket then
+            self.currentBucket:GetScrollChild():SetOnTargetDataChangedCallback(self.onTargetDataChangedCallback)
             self.currentBucket:GetScrollChild():Activate()
             self.currentBucket:GetScrollChild():RefreshVisible()
         end
@@ -340,6 +350,9 @@ function ZO_CharacterCreateBucketManager_Gamepad:Deactivate()
     if self.active then
         self.active = false
         if self.currentBucket then
+            if self.onTargetDataChangedCallback then
+                self.currentBucket:GetScrollChild():RemoveOnTargetDataChangedCallback(self.onTargetDataChangedCallback)
+            end
             self.currentBucket:GetScrollChild():Deactivate()
         end
     end
@@ -361,6 +374,9 @@ function ZO_CharacterCreateBucketManager_Gamepad:SwitchBucketsInternal(bucketCat
     if self.currentBucket then
         self.currentBucket:Collapse()
         if self.active then
+            if self.onTargetDataChangedCallback then
+                self.currentBucket:GetScrollChild():RemoveOnTargetDataChangedCallback(self.onTargetDataChangedCallback)
+            end
             self.currentBucket:GetScrollChild():Deactivate()
         end
         self.currentBucket = nil
@@ -371,6 +387,7 @@ function ZO_CharacterCreateBucketManager_Gamepad:SwitchBucketsInternal(bucketCat
         bucket:Expand()
         self.currentBucket = bucket
         if self.active then
+            self.currentBucket:GetScrollChild():SetOnTargetDataChangedCallback(self.onTargetDataChangedCallback)
             self.currentBucket:GetScrollChild():Activate()
             self.currentBucket:GetScrollChild():RefreshVisible()
         end

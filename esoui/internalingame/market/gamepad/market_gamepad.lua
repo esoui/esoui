@@ -714,11 +714,7 @@ function GamepadMarket:InitializeObjectPools()
         return ZO_GamepadMarketProduct:New(objectPool:GetNextControlId(), self.currentCategoryControl, PRODUCT_BASE_CONTROL_NAME)
     end
 
-    local function ResetMarketProduct(marketProduct)
-        marketProduct:Reset()
-    end
-
-    self.marketProductPool = ZO_ObjectPool:New(CreateMarketProduct, ResetMarketProduct)
+    self.marketProductPool = ZO_ObjectPool:New(CreateMarketProduct, ZO_ObjectPool_DefaultResetObject)
 
     self.currentCategoryMarketProductPool = ZO_MetaPool:New(self.marketProductPool)
     self.lastCategoryMarketProductPool = ZO_MetaPool:New(self.marketProductPool)
@@ -729,11 +725,7 @@ function GamepadMarket:InitializeObjectPools()
         return ZO_GamepadMarketBlankTile:New(control)
     end
 
-    local function ResetBlankTile(blankTile)
-        blankTile:Reset()
-    end
-
-    self.blankTilePool = ZO_ObjectPool:New(CreateBlankTile, ResetBlankTile)
+    self.blankTilePool = ZO_ObjectPool:New(CreateBlankTile, ZO_ObjectPool_DefaultResetObject)
 
     self.currentCategoryBlankProductPool = ZO_MetaPool:New(self.blankTilePool)
     self.lastCategoryBlankProductPool = ZO_MetaPool:New(self.blankTilePool)
@@ -744,11 +736,7 @@ function GamepadMarket:InitializeObjectPools()
         return ZO_GamepadMarketGenericTile:New(control)
     end
 
-    local function ResetGenericTile(genericTile)
-        genericTile:Reset()
-    end
-
-    self.genericTilePool = ZO_ObjectPool:New(CreateGenericTile, ResetGenericTile)
+    self.genericTilePool = ZO_ObjectPool:New(CreateGenericTile, ZO_ObjectPool_DefaultResetObject)
 
     self.currentCategoryGenericProductPool = ZO_MetaPool:New(self.genericTilePool)
     self.lastCategoryGenericProductPool = ZO_MetaPool:New(self.genericTilePool)
@@ -1657,20 +1645,12 @@ function GamepadMarketBundleContents:Initialize(control)
 end
 
 function GamepadMarketBundleContents:InitializeMarketProductPool()
-    local function ResetMarketProduct(marketProduct)
-        marketProduct:Reset()
-    end
-
     local BUNDLE_ATTACHMENT_NAME = self.control:GetName() .. ZO_GAMEPAD_MARKET_PRODUCT_BUNDLE_ATTACHMENT_TEMPLATE
     local function CreateMarketBundleAttachment(objectPool)
         return ZO_GamepadMarketProductBundleAttachment:New(objectPool:GetNextControlId(), self.currentCategoryControl, BUNDLE_ATTACHMENT_NAME)
     end
 
-    self.marketBundleAttachmentPool = ZO_ObjectPool:New(CreateMarketBundleAttachment, ResetMarketProduct)
-
-    local function ResetBlankTile(blankTile)
-        blankTile:Reset()
-    end
+    self.marketBundleAttachmentPool = ZO_ObjectPool:New(CreateMarketBundleAttachment, ZO_ObjectPool_DefaultResetObject)
 
     local BLANK_TILE_NAME = self.control:GetName() .. ZO_GAMEPAD_MARKET_BLANK_TILE_TEMPLATE
     local function CreateBlankTile(objectPool)
@@ -1678,7 +1658,7 @@ function GamepadMarketBundleContents:InitializeMarketProductPool()
         return ZO_GamepadMarketBlankTile:New(control)
     end
 
-     self.blankTilePool = ZO_ObjectPool:New(CreateBlankTile, ResetBlankTile)
+     self.blankTilePool = ZO_ObjectPool:New(CreateBlankTile, ZO_ObjectPool_DefaultResetObject)
 end
 
 function GamepadMarketBundleContents:FinishRowWithBlankTiles()

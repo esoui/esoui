@@ -1,20 +1,13 @@
-local function GetDisplayText(index)
-    -- Start index display at 1 instead of 0
-    return zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, index + 1)
-end
-
 local function InitializeDisplays(control, numDisplays)
     local valid = {}
     local events = {}
     local itemText = {}
 
     for i = 1, numDisplays do
-        -- Identifying indicies start at 0
-        local index = i - 1
-        local optionText = GetDisplayText(index)
-        valid[#valid + 1] = index
-        events[#events + 1] = "ActiveDisplayChanged"
-        itemText[#itemText + 1] = optionText
+        local optionText = zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, i) 
+        valid[i] = i - 1 -- Identifying indices start at 0
+        events[i] = "ActiveDisplayChanged"
+        itemText[i] = optionText
     end
 
     control.data.valid = valid
@@ -145,6 +138,10 @@ local ZO_OptionsPanel_Video_ControlData =
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_TOOLTIP,
             exists = IsActiveDisplayEnabledOnPlatform,
 
+            gamepadIsEnabledCallback = function()
+                return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE
+            end,
+
             eventCallbacks =
             {
                 ["DisplayModeNonExclusive"] = ZO_Options_SetOptionInactive,
@@ -162,16 +159,16 @@ local ZO_OptionsPanel_Video_ControlData =
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_RESOLUTION_TOOLTIP,
             exists = ZO_IsPCUI,
 
+            gamepadIsEnabledCallback = function()
+                return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE
+            end,
+
             eventCallbacks =
             {
                 ["DisplayModeNonExclusive"] = ZO_Options_SetOptionInactive,
                 ["DisplayModeExclusive"] = ZO_Options_SetOptionActive,
                 ["ActiveDisplayChanged"] = ZO_OptionsPanel_Video_OnActiveDisplayChanged,
             },
-
-            gamepadIsEnabledCallback = function()
-                                return tonumber(GetSetting(SETTING_TYPE_GRAPHICS,GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE
-                            end
         },
         --Options_Video_VSync
         [GRAPHICS_SETTING_VSYNC] =
@@ -185,14 +182,15 @@ local ZO_OptionsPanel_Video_ControlData =
             exists = ZO_IsPCUI,
         },
         --Options_Video_RenderThread
-        [GRAPHICS_SETTING_RENDER_THREAD] =
+        [GRAPHICS_SETTING_RENDERTHREAD] =
         {
             controlType = OPTIONS_CHECKBOX,
             system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_RENDER_THREAD,
+            settingId = GRAPHICS_SETTING_RENDERTHREAD,
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD_TOOLTIP,
+            mustRestartToApply = true,
             exists = function()
                 return ZO_IsPCUI() and not IsMacUI()
             end
@@ -206,9 +204,20 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_ANTI_ALIASING,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_ANTI_ALIASING_TOOLTIP,
-            valid = { ANTIALIASING_TYPE_NONE, ANTIALIASING_TYPE_FXAA, ANTIALIASING_TYPE_TAA, },
+            valid = ShouldShowDLSSSetting()
+                    and { ANTIALIASING_TYPE_NONE, ANTIALIASING_TYPE_FXAA, ANTIALIASING_TYPE_TAA, ANTIALIASING_TYPE_DLSS, ANTIALIASING_TYPE_NVAA, }
+                    or { ANTIALIASING_TYPE_NONE, ANTIALIASING_TYPE_FXAA, ANTIALIASING_TYPE_TAA, },
+
             valueStringPrefix = "SI_ANTIALIASINGTYPE",
             exists = ZO_IsPCUI,
+
+            events = {
+                [ANTIALIASING_TYPE_NONE] = "DLSSDisabled",
+                [ANTIALIASING_TYPE_FXAA] = "DLSSDisabled",
+                [ANTIALIASING_TYPE_TAA] = "DLSSDisabled",
+                [ANTIALIASING_TYPE_DLSS] = "DLSSEnabled",
+                [ANTIALIASING_TYPE_NVAA] = "DLSSDisabled",
+            },
         },
         --Options_Video_Gamma_Adjustment
         [GRAPHICS_SETTING_GAMMA_ADJUSTMENT] =
@@ -260,6 +269,25 @@ local ZO_OptionsPanel_Video_ControlData =
             mustPushApply = true,
             exists = ZO_IsPCUI,
         },
+        --Options_Video_DLSS_Mode
+        [GRAPHICS_SETTING_DLSS_MODE] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_DLSS_MODE,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_DLSS_MODE,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_DLSS_MODE_TOOLTIP,
+            valid = {DLSS_MODE_QUALITY, DLSS_MODE_BALANCED, DLSS_MODE_PERFORMANCE},
+            valueStringPrefix = "SI_DLSSMODE",
+            exists = ZO_IsPCUI and ShouldShowDLSSSetting(),
+
+            eventCallbacks =
+            {
+                ["DLSSEnabled"] = ZO_Options_SetOptionActive,
+                ["DLSSDisabled"] = ZO_Options_SetOptionInactive,
+            },
+        },
         --Options_Video_Sub_Sampling
         [GRAPHICS_SETTING_SUB_SAMPLING] =
         {
@@ -272,6 +300,12 @@ local ZO_OptionsPanel_Video_ControlData =
             valid = {SUB_SAMPLING_MODE_LOW, SUB_SAMPLING_MODE_MEDIUM, SUB_SAMPLING_MODE_NORMAL},
             valueStringPrefix = "SI_SUBSAMPLINGMODE",
             exists = ZO_IsPCUI,
+
+            eventCallbacks =
+            {
+                ["DLSSEnabled"] = ZO_Options_SetOptionInactive,
+                ["DLSSDisabled"] = ZO_Options_SetOptionActive,
+            },
         },
         --Options_Video_Shadows
         [GRAPHICS_SETTING_SHADOWS] =

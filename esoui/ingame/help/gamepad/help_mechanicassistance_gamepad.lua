@@ -2,10 +2,6 @@ local LIST_REFRESH_VISIBLE = true
 
 ZO_Help_MechanicAssistance_Gamepad = ZO_Help_GenericTicketSubmission_Gamepad:Subclass()
 
-function ZO_Help_MechanicAssistance_Gamepad:New(...)
-    return ZO_Help_GenericTicketSubmission_Gamepad.New(self, ...)
-end
-
 function ZO_Help_MechanicAssistance_Gamepad:Initialize(control, mechanicCategoriesData)
     ZO_Help_GenericTicketSubmission_Gamepad.Initialize(self, control)
     

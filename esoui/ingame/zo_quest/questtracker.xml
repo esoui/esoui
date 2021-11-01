@@ -1,18 +1,4 @@
 <GuiXml>
-    <Animations>
-        <AnimationTimeline name="FocusedQuestTrackerFadeGamepad">
-            <Animations>
-                <AlphaAnimation duration="GAMEPAD_FQT_ANIMATION_FADE_IN_MS" startAlpha="GAMEPAD_FQT_TEXT_MIN_ALPHA" endAlpha="1" />
-                    
-                <AlphaAnimation duration="GAMEPAD_FQT_ANIMATION_FADE_OUT_MS" startAlpha="1" endAlpha="GAMEPAD_FQT_TEXT_MIN_ALPHA">
-                    <EasingFunction>
-                        return ZO_EaseOutQuadratic(progress)
-                    </EasingFunction>
-                </AlphaAnimation>
-            </Animations>
-        </AnimationTimeline>
-    </Animations>
-
     <Controls>
         <Label name="ZO_TrackedHeader" mouseEnabled="true" virtual="true">
             <Anchor point="TOPLEFT" offsetX="22"/>

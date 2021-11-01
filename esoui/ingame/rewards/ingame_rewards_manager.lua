@@ -14,6 +14,7 @@ function IngameRewardsManager:GetCollectibleEntryInfo(rewardId, parentChoice)
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
     if collectibleData then
         local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+        rewardData:SetRawName(collectibleData:GetName())
         rewardData:SetFormattedName(collectibleData:GetFormattedName())
         rewardData:SetIcon(collectibleData:GetIcon())
         rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))

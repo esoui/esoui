@@ -39,8 +39,16 @@ do
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
         setup = function(dialog)
-                    dialog:setupFunc()
-                end,
+            dialog:setupFunc()
+
+            local giftData = dialog.data.gift
+            if giftData then
+                local claimQuantity = giftData:GetClaimQuantity()
+                if claimQuantity ~= giftData:GetQuantity() then
+                    GAMEPAD_TOOLTIPS:LayoutPartialClaimGiftData(GAMEPAD_LEFT_DIALOG_TOOLTIP, giftData)
+                end
+            end
+        end,
         title =
         {
             text = SI_CONFIRM_CLAIM_GIFT_TITLE,
@@ -127,6 +135,10 @@ do
         noChoiceCallback = function(dialog)
             ZO_Dialogs_ReleaseDialogOnButtonPress("CONFIRM_CLAIM_GIFT_GAMEPAD")
         end,
+
+        onHidingCallback = function(dialog)
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP)
+        end
     })
 end
 

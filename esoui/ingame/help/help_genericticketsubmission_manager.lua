@@ -113,19 +113,22 @@ function ZO_Help_GenericTicketSubmission_Manager:OpenReportPlayerTicketScene(nam
         SCENE_MANAGER:Push("helpCustomerServiceGamepad")
         ZO_Help_Customer_Service_Gamepad_SetupReportPlayerTicket(name)
     else
-        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_NONE, name)
+        local DEFAULT_CATEGORY = nil
+        local DEFAULT_SUBCATEGORY = nil
+        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, name)
     end
 
     self:SetReportPlayerTicketSubmittedCallback(ticketSubmittedCallback)
 end
 
-function ZO_Help_GenericTicketSubmission_Manager:OpenReportGuildTicketScene(name, subCategory, ticketSubmittedCallback)
-    subCategory = subCategory or CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_NONE
+function ZO_Help_GenericTicketSubmission_Manager:OpenReportGuildTicketScene(name, category, ticketSubmittedCallback)
+    category = category or CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_NONE
     if IsInGamepadPreferredMode() then
         SCENE_MANAGER:Push("helpCustomerServiceGamepad")
-        ZO_Help_Customer_Service_Gamepad_SetupReportGuildTicket(name, subCategory)
+        ZO_Help_Customer_Service_Gamepad_SetupReportGuildTicket(name, category)
     else
-        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD, subCategory, name)
+        local DEFAULT_SUBCATEGORY = nil
+        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GUILD, category, DEFAULT_SUBCATEGORY, name)
     end
 
     self:SetReportGuildTicketSubmittedCallback(ticketSubmittedCallback)

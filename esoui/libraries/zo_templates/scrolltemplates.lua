@@ -775,6 +775,23 @@ function ZO_ScrollList_AddResizeOnScreenResize(self)
     self:RegisterForEvent(EVENT_SCREEN_RESIZED, OnScreenResized)
 end
 
+do
+    local function OnRectHeightChanged(self, newHeight)
+        if self:IsHidden() then
+            self:SetHandler("OnUpdate", function()
+                self:SetHandler("OnUpdate", nil, "HeightChanged")
+                ZO_ScrollList_Commit(self)
+            end, "HeightChanged")
+        else
+            ZO_ScrollList_Commit(self)
+        end
+    end
+
+    function ZO_ScrollList_AddCommitOnHeightChange(self)
+        self:SetHandler("OnRectHeightChanged", OnRectHeightChanged)
+    end
+end
+
 local function UpdateModeFromHeight(self, height)
     if self.mode == SCROLL_LIST_UNIFORM then
         if self.uniformControlHeight == NO_HEIGHT_SET then
@@ -1121,8 +1138,10 @@ function ZO_ScrollList_SetAutoSelect(self, autoSelect)
     self.autoSelect = autoSelect
 end
 
-function ZO_ScrollList_SetScrollBarHiddenCallback(self, callback)
-    self.ScrollBarHiddenCallback = callback
+function ZO_ScrollList_SetScrollBarVisibilityCallback(self, callback)
+    self.ScrollBarVisibilityCallback = callback
+    --ScrollBarHiddenCallback is deprecated. Included here for addon backwards compatibility
+     self.ScrollBarHiddenCallback = callback
 end
 
 function ZO_ScrollList_AddCategory(self, categoryId, parentId)
@@ -1661,10 +1680,10 @@ local function ResizeScrollBar(self, scrollableDistance)
 
     shouldHideScrollbar = shouldHideScrollbar or not self.useScrollbar
 
-    if self.scrollbar:IsControlHidden() ~= shouldHideScrollbar then
-        if self.ScrollBarHiddenCallback then
-            self.ScrollBarHiddenCallback(self, shouldHideScrollbar)
-        else
+    if self.ScrollBarVisibilityCallback then
+        self.ScrollBarVisibilityCallback(self, shouldHideScrollbar)
+    else
+        if self.scrollbar:IsControlHidden() ~= shouldHideScrollbar then
             self.scrollbar:SetHidden(shouldHideScrollbar)
         end
     end

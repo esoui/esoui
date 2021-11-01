@@ -59,6 +59,7 @@ function ZO_CompanionEquipment_Gamepad:OnDeferredInitialize()
     -- setup our lists
     self:InitializeCategoryList()
     self:InitializeItemList()
+    self:SetListsUseTriggerKeybinds(true)
 
     self:InitializeHeader()
 

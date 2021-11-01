@@ -1,5 +1,31 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_ItemSetsBook_SummaryEntry_Header_Keyboard" inherits="ZO_ItemSetsBook_SummaryEntry_Header_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions y="67" />
+            
+            <OnInitialized name="Keyboard">
+                ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnInitialize(self)
+            </OnInitialized>
+            
+            <OnMouseUp>
+                ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+
+            <OnMouseEnter>
+                ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnMouseExit(self)
+            </OnMouseExit>
+            
+            <Controls>
+                <Label name="$(parent)Name" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" />
+
+                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_ResponsiveArrowProgressBarWithBG" mouseEnabled="false" />
+            </Controls>
+        </Control>
+        
         <Control name="ZO_ItemSetsBook_Entry_Header_Keyboard" inherits="ZO_ItemSetsBook_Entry_Header_Shared" mouseEnabled="true" virtual="true">
             <Dimensions y="60" />
             
@@ -30,7 +56,7 @@
                 </Button>
                 
                 <Label name="$(parent)Name" override="true" font="ZoFontWinH3">
-                    <Anchor point="LEFT" relativeTo="$(parent)ExpandedState" relativePoint="RIGHT" offsetX="5" />
+                    <Anchor point="LEFT" relativeTo="$(parent)ExpandedState" relativePoint="RIGHT" />
                     <Anchor point="RIGHT" offsetX="-10" constrains="X" />
                 </Label>
 
@@ -122,6 +148,38 @@
                 <Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_COLLECTIONS_BOOK_SEARCH_NO_MATCHES" horizontalAlignment="CENTER" hidden="true">
                     <Anchor point="TOP" relativeTo="$(parent)CategoryContentList" />
                 </Label>
+
+                <Control name="$(parent)Summary" hidden="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Filters" relativePoint="BOTTOMRIGHT" offsetY="12" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Categories" relativePoint="BOTTOMRIGHT" offsetX="40" />
+
+                    <Controls>
+                        <Label name="$(parent)Header" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" maxLineCount="1" modifyTextType="UPPERCASE" text="SI_ITEM_SET_CATEGORY_SUMMARY_LABEL" wrapMode="ELLIPSIS">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(grandparent)Categories" relativePoint="TOPRIGHT" offsetX="38" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(grandparent)Filters" offsetY="11" />
+                        </Label>
+
+                        <Control name="$(parent)Content" inherits="ZO_ScrollContainer">
+                            <Anchor point="TOPRIGHT" />
+                            <Anchor point="BOTTOMLEFT" />
+
+                            <Controls>
+                                <Control name="$(parent)ScrollChild" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)Total" inherits="ZO_ItemSetsBook_SummaryEntry_Header_Keyboard">
+                                            <Anchor point="TOPLEFT" offsetX="6" />
+                                            <Anchor point="RIGHT" relativeTo="$(grandparent)" constrains="X" offsetX="-25" />
+
+                                            <Controls>
+                                                <Label name="$(parent)Name" override="true" text="SI_ITEM_SET_SUMMARY_ITEM_COUNT_LABEL" />
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

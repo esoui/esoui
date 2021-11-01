@@ -4,19 +4,19 @@ GAMEPAD_EXCLUDE_DEADZONE = false
 local g_defaultEaseFunction = ZO_EaseInCubic
 
 function ZO_Gamepad_GetLeftStickEasedX()
-    return g_defaultEaseFunction(GetGamepadLeftStickX(GAMEPAD_INCLUDE_DEADZONE))
+    return g_defaultEaseFunction(GetGamepadOrKeyboardLeftStickX(GAMEPAD_INCLUDE_DEADZONE))
 end
 
 function ZO_Gamepad_GetLeftStickEasedY()
-    return g_defaultEaseFunction(GetGamepadLeftStickY(GAMEPAD_INCLUDE_DEADZONE))
+    return g_defaultEaseFunction(GetGamepadOrKeyboardLeftStickY(GAMEPAD_INCLUDE_DEADZONE))
 end
 
 function ZO_Gamepad_GetRightStickEasedX()
-    return g_defaultEaseFunction(GetGamepadRightStickX(GAMEPAD_INCLUDE_DEADZONE))
+    return g_defaultEaseFunction(GetGamepadOrKeyboardRightStickX(GAMEPAD_INCLUDE_DEADZONE))
 end
 
 function ZO_Gamepad_GetRightStickEasedY()
-    return g_defaultEaseFunction(GetGamepadRightStickY(GAMEPAD_INCLUDE_DEADZONE))
+    return g_defaultEaseFunction(GetGamepadOrKeyboardRightStickY(GAMEPAD_INCLUDE_DEADZONE))
 end
 
 local function DefaultIsDataHeader(data)

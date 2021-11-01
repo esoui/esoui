@@ -1,4 +1,5 @@
 ZO_TRADE_BOP_ICON = "EsoUI/Art/Inventory/inventory_Tradable_icon.dds"
+ZO_IN_ARMORY_BUILD_ICON = "EsoUI/Art/Armory/buildItem_icon.dds"
 
 ZO_SharedInventoryManager = ZO_InitializingCallbackObject:Subclass()
 
@@ -22,7 +23,7 @@ function ZO_SharedInventoryManager:Initialize()
     end
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_ITEM_COMBINATION_RESULT, OnItemCombinationResult)
 
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_FENCE, function() 
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_FENCE, function()
         self:RefreshInventory(BAG_BACKPACK)
         self:RefreshInventory(BAG_WORN)
     end)
@@ -88,8 +89,8 @@ function ZO_SharedInventoryManager:Initialize()
 
         -- ESO-718084: Mark the search as dirty if the slot update includes a change in stack count to handle the refreshing the search when a stack of items is split while being searched on.
         if stackCountChangeAmount ~= 0 then
-            local SUPPRESS_SEARCH = true
-            TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, SUPPRESS_SEARCH)
+            local shouldSuppressSearch = (not isLastUpdateForMessage) or IsInGamepadPreferredMode()
+            TEXT_SEARCH_MANAGER:MarkDirtyByFilterTargetAndPrimaryKey(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, shouldSuppressSearch)
         end
 
         if bagId == BAG_BACKPACK or bagId == BAG_VIRTUAL then
@@ -127,10 +128,17 @@ function ZO_SharedInventoryManager:Initialize()
         self:FireCallbacks("FullInventoryUpdate", BAG_GUILDBANK)
     end
 
+    local function RefreshInventoryOnBuildSaveResponse(eventCode, result, buildIndex)
+        if result == ARMORY_BUILD_SAVE_RESULT_SUCCESS then
+            self.refresh:RefreshAll("inventory")
+        end
+    end
+
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_INVENTORY_FULL_UPDATE, OnFullInventoryUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventorySlotUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_SELF_JOINED_GUILD, RefreshInventoryOnGuildChange)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_SELF_LEFT_GUILD, RefreshInventoryOnGuildChange)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_ARMORY_BUILD_SAVE_RESPONSE, RefreshInventoryOnBuildSaveResponse)
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_GUILD_BANK, OnGuildBankUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CLOSE_GUILD_BANK, OnGuildBankUpdated)
@@ -551,7 +559,7 @@ function ZO_SharedInventoryManager:ComputeDynamicStatusMask(...)
 end
 
 function ZO_SharedInventoryManager:RefreshStatusSortOrder(slotData)
-    slotData.statusSortOrder = self:ComputeDynamicStatusMask(slotData.isPlayerLocked, slotData.isGemmable, slotData.stolen, slotData.isBoPTradeable, slotData.brandNew, slotData.bagId == BAG_WORN)
+    slotData.statusSortOrder = self:ComputeDynamicStatusMask(slotData.isPlayerLocked, slotData.isGemmable, slotData.stolen, slotData.isBoPTradeable, slotData.isInArmory, slotData.brandNew, slotData.bagId == BAG_WORN)
 end
 
 function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagId, slotIndex, isNewItem)
@@ -593,7 +601,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
         slot.itemType, slot.specializedItemType = GetItemType(bagId, slotIndex)
         slot.uniqueId = GetItemUniqueId(bagId, slotIndex)
     end
-    
+
     slot.iconFile = icon
     slot.stackCount = stackCount
     slot.sellPrice = sellPrice
@@ -627,6 +635,13 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.sellInformation = GetItemSellInformation(bagId, slotIndex)
     slot.sellInformationSortOrder = ZO_GetItemSellInformationCustomSortOrder(slot.sellInformation)
     slot.actorCategory = GetItemActorCategory(bagId, slotIndex)
+    --Don't bother checking for guild bank or buyback because we don't care in those cases
+    --In the case of the craft bag or companion worn bag, it isn't possible for a build item to live there, so we can just immediately infer false
+    if bagId == BAG_GUILDBANK or bagId == BAG_BUYBACK or bagId == BAG_VIRTUAL or bagId == BAG_COMPANION_WORN then
+        slot.isInArmory = false
+    else
+        slot.isInArmory = IsItemInArmory(bagId, slotIndex)
+    end
 
     local isFromCrownCrate = IsItemFromCrownCrate(bagId, slotIndex)
     slot.isGemmable = false

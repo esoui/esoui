@@ -57,8 +57,8 @@ function TrialAccountSplashDialog:Initialize(control)
             buttons =
             {
                 {
-                    --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                    name = "Free Trial Close Dialog 1",
+                    -- Even though this is an ethereal keybind, the name will still be shown as the centered dialogs interact keybind
+                    name = GetString(SI_TUTORIAL_CONTINUE),
                     ethereal = true,
                     keybind = "DIALOG_PRIMARY",
                     clickSound = SOUNDS.DIALOG_ACCEPT,

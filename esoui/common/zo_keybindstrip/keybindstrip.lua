@@ -38,7 +38,7 @@ KEYBIND_STRIP_GAMEPAD_STYLE = {
     nameFontColor = ZO_SELECTED_TEXT,
     keyFont = "ZoFontGamepad22",
     modifyTextType = MODIFY_TEXT_TYPE_UPPERCASE,
-    alwaysPreferGamepadMode = true,
+    alwaysPreferGamepadMode = false,
     resizeToFitPadding = 15,
     leftAnchorOffset = 96,
     centerAnchorOffset = 0,
@@ -117,7 +117,7 @@ function ZO_KeybindStrip_OnInitialized(control)
         self:RemoveKeybindButton(defaultGamepadExit, stateIndex)
         if self:HasDefaultExit(stateIndex) then
             local styleInfo = self:GetStyle()
-            if styleInfo.alwaysPreferGamepadMode then
+            if IsInGamepadPreferredMode() then
                 self:AddKeybindButton(defaultGamepadExit, stateIndex)
             else
                 self:AddKeybindButton(defaultExit, stateIndex)
@@ -203,6 +203,25 @@ function ZO_KeybindStrip_OnInitialized(control)
         if self.leftSlideKeybind == nil then
             self.leftSlideKeybind = keybindControl
         end
+
+        self.gamepadKeyLabel = self.leftSlideKeybind:GetNamedChild("KeyLabel")
+        self.leftKeyLabel = self.leftSlideKeybind:GetNamedChild("LeftKeyLabel")
+        self.rightKeyLabel = self.leftSlideKeybind:GetNamedChild("RightKeyLabel")
+
+        local SHOW_UNBOUND = true
+        local DEFAULT_GAMEPAD_ACTION_NAME = nil
+        local function OnInputChanged()
+            if IsInGamepadPreferredMode() then
+                local gamepadInput = WasLastInputGamepad()
+                self.leftKeyLabel:SetHidden(gamepadInput)
+                self.rightKeyLabel:SetHidden(gamepadInput)
+                self.gamepadKeyLabel:SetHidden(not gamepadInput)
+            end
+        end
+
+        ZO_Keybindings_RegisterLabelForBindingUpdate(self.leftKeyLabel, "UI_SHORTCUT_LEFT_STICK_LEFT", SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, OnInputChanged)
+        ZO_Keybindings_RegisterLabelForBindingUpdate(self.rightKeyLabel, "UI_SHORTCUT_LEFT_STICK_RIGHT")
+        -- We only need to register one of the above with OnInputChanged because one call of that function does everything we need
 
         return keybind
     end

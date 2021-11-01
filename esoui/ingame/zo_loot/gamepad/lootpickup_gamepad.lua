@@ -46,11 +46,9 @@ function ZO_LootPickup_Gamepad:DeferredInitialize()
 
     self.takeControl = contentContainer:GetNamedChild("KeybindContainer"):GetNamedChild("TakeContainer")
     self.takeAllControl = contentContainer:GetNamedChild("KeybindContainer"):GetNamedChild("TakeAllContainer")
-    local SHOW_UNBOUND = true
 
-    local ALWAYS_PREFER_GAMEPAD_MODE = true
-    self.takeControl:SetKeybind(nil, SHOW_UNBOUND, "UI_SHORTCUT_PRIMARY", ALWAYS_PREFER_GAMEPAD_MODE)
-    self.takeAllControl:SetKeybind(nil, SHOW_UNBOUND, "UI_SHORTCUT_SECONDARY", ALWAYS_PREFER_GAMEPAD_MODE)
+    self.takeControl:SetKeybind("UI_SHORTCUT_PRIMARY")
+    self.takeAllControl:SetKeybind("UI_SHORTCUT_SECONDARY")
 
     KEYBIND_STRIP:SetupButtonStyle(self.takeControl, KEYBIND_STRIP_GAMEPAD_STYLE)
     KEYBIND_STRIP:SetupButtonStyle(self.takeAllControl, KEYBIND_STRIP_GAMEPAD_STYLE)

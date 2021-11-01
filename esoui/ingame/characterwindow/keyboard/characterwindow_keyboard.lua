@@ -114,18 +114,19 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
         stackCountLabel:SetText("")
     end
 
-    if not g_isReadOnly then
-        if not disabled and copyFromLinkedFn then
-            iconControl:SetDesaturation(0)
-            iconControl:SetColor(1, 0, 0, .5)
-        else
-            iconControl:SetColor(1, 1, 1, 1)
+    if not disabled and copyFromLinkedFn then
+        iconControl:SetDesaturation(0)
+        local r, g, b = ZO_ERROR_COLOR:UnpackRGB()
+        iconControl:SetColor(r, g, b, 0.5)
+    else
+        local alpha = g_isReadOnly and 0.5 or 1
+        local r, g, b = ZO_WHITE:UnpackRGB()
+        iconControl:SetColor(r, g, b, alpha)
 
-            if not disabled and locked then
-                iconControl:SetDesaturation(1)
-            else
-                iconControl:SetDesaturation(0)
-            end
+        if not disabled and locked then
+            iconControl:SetDesaturation(1)
+        else
+            iconControl:SetDesaturation(0)
         end
     end
 end

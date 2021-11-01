@@ -1,10 +1,6 @@
 
 local ZO_Help_SubmitFeedback_Gamepad = ZO_Help_GenericTicketSubmission_Gamepad:Subclass()
 
-function ZO_Help_SubmitFeedback_Gamepad:New(...)
-    return ZO_Help_GenericTicketSubmission_Gamepad.New(self, ...)
-end
-
 function ZO_Help_SubmitFeedback_Gamepad:Initialize(control)
     ZO_Help_GenericTicketSubmission_Gamepad.Initialize(self, control)
     HELP_SUBMIT_FEEDBACK_GAMEPAD_SCENE = self:GetScene()
@@ -185,6 +181,18 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
     list:AddDataTemplate("ZO_GamepadTextFieldSubmitItem", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 end
 
+function ZO_Help_SubmitFeedback_Gamepad:OnShowing()
+    ZO_Help_GenericTicketSubmission_Gamepad.OnShowing(self)
+
+    GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_CUSTOMER_SERVICE_FEEDBACK_IMPACT_DESCRIPTION))
+end
+
+function ZO_Help_SubmitFeedback_Gamepad:OnHiding()
+    ZO_Help_GenericTicketSubmission_Gamepad.OnHiding(self)
+
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+end
+
 -- Feedback has dynamic categories, which means it's not always enough to just refresh what's visible.
 -- We need to rebuild the list when we reset in case the controls have changed.
 function ZO_Help_SubmitFeedback_Gamepad:ResetTicket()
@@ -259,7 +267,7 @@ end
 
 function ZO_Help_SubmitFeedback_Gamepad:AddImpactEntry()
     local entryData = ZO_GamepadEntryData:New("")
-    entryData.header = GetString(SI_CUSTOMER_SERVICE_FEEDBACK_IMPACT)
+    entryData.header = GetString(SI_GAMEPAD_HELP_FIELD_TITLE_IMPACT)
     entryData.fieldType = ZO_HELP_TICKET_FIELD_TYPE.IMPACT
 
     self.itemList:AddEntryWithHeader("ZO_Gamepad_Help_Dropdown_Item", entryData)

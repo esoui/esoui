@@ -92,7 +92,9 @@ end
 
 function ZO_GiftInventoryCategory_Keyboard:SetupStackCount(control, gift)
     local stackCountLabel = control:GetNamedChild("StackCount")
-    local stackCount = gift:GetStackCount()
+    local unitStackCount = gift:GetStackCount()
+    local quantity = gift:GetQuantity()
+    local stackCount = unitStackCount * quantity
     if stackCount > 1 then
         stackCountLabel:SetHidden(false)
         stackCountLabel:SetText(stackCount)

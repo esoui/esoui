@@ -31,6 +31,7 @@ EsoUI\Libraries\Utility\ZO_PrioritizedVisibility.lua
 EsoUI\Libraries\Utility\ZO_ScrollAnimationUtils.lua
 EsoUI\Libraries\Utility\ZO_PlatformUtils.lua
 ESOUI\Libraries\Utility\ZO_PrimaryPlayerName.lua
+EsoUI\Libraries\Utility\KeybindingUtils.lua
 
 EsoUI\Libraries\Globals\GlobalVars.lua
 EsoUI\Libraries\Globals\Globals.lua
@@ -81,6 +82,8 @@ EsoUI\Libraries\ZO_Templates\ZO_ItemScreenTemplates.xml
 
 EsoUI\Libraries\ZO_KeybindButton\ZO_KeybindButton.lua
 EsoUI\Libraries\ZO_KeybindButton\ZO_KeybindButton.xml
+EsoUI\Libraries\ZO_KeybindButton\ZO_ClickableKeybindLabel.lua
+EsoUI\Libraries\ZO_KeybindButton\ZO_ClickableKeybindLabel.xml
 
 EsoUI\Libraries\ZO_DirectionalInput\ZO_DirectionalInput.lua
 

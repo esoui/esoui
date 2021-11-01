@@ -236,12 +236,20 @@ function ZO_ComboBox_Base:SelectFirstItem(ignoreCallback)
     self:SelectItemByIndex(1, ignoreCallback)
 end
 
-function ZO_ComboBox_Base:SetSelectedItemByEval(eval, ignoreCallback)
+function ZO_ComboBox_Base:GetIndexByEval(eval)
     for i, item in ipairs(self.m_sortedItems) do
         if eval(item) then
-            self:SelectItemByIndex(i, ignoreCallback)
-            return true
+            return i
         end
+    end
+    return nil
+end
+
+function ZO_ComboBox_Base:SetSelectedItemByEval(eval, ignoreCallback)
+    local index = self:GetIndexByEval(eval)
+    if index then
+        self:SelectItemByIndex(index, ignoreCallback)
+        return true
     end
     return false
 end

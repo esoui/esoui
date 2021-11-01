@@ -69,13 +69,12 @@
                     <Dimensions x="32" y="32"/>
                     <Anchor point="BOTTOMLEFT"/>
                 </Texture>
-                <Texture name="$(parent)Key" inherits="ZO_KeyTexture">
-                    <Dimensions x="55" y="55"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Cursor" relativePoint="BOTTOMRIGHT" offsetY="8"/>
+                <Label name="$(parent)Key" inherits="ZO_ClickableKeybindLabel_Gamepad">
+                    <Anchor point="LEFT" relativeTo="$(parent)Cursor" relativePoint="RIGHT" offsetX="8"/>
                     <OnInitialized name="Constellation">
-                        self:SetKeyCode(KEY_GAMEPAD_LEFT_SHOULDER)
+                        self:SetKeybind("UI_SHORTCUT_LEFT_SHOULDER")
                     </OnInitialized>
-                </Texture>
+                </Label>
             </Controls>
         </Control>
         <Control name="ZO_ConstellationCycleRightKey" resizeToFitDescendents="true" virtual="true">
@@ -84,13 +83,12 @@
                     <Dimensions x="32" y="32"/>
                     <Anchor point="BOTTOMRIGHT"/>
                 </Texture>
-                <Texture name="$(parent)Key" inherits="ZO_KeyTexture">
-                    <Dimensions x="55" y="55"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Cursor" relativePoint="BOTTOMLEFT" offsetY="8"/>
+                <Label name="$(parent)Key" inherits="ZO_ClickableKeybindLabel_Gamepad">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Cursor" relativePoint="LEFT" offsetX="-8"/>
                     <OnInitialized name="Constellation">
-                        self:SetKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER)
+                       self:SetKeybind("UI_SHORTCUT_RIGHT_SHOULDER")
                     </OnInitialized>
-                </Texture>
+                </Label>
             </Controls>
         </Control>
 

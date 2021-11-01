@@ -1,0 +1,45 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ArmoryBuildSettingsDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_ArmoryBuildSettingsDialog_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ContentContainer" inherits="ZO_DialogContentAnchors">
+                    <Controls>
+                        <Label name="$(parent)NameHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_ARMORY_BUILD_DIALOG_NAME_LABEL">
+                            <Anchor point="TOPLEFT" offsetX="-12" />
+                        </Label>
+
+                        <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Dimensions x="340" />
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                                    <OnInitialized>
+                                        ZO_EditDefaultText_Initialize(self, GetString(SI_ARMORY_BUILD_DIALOG_NAME_DEFAULT))
+                                    </OnInitialized>
+                                    <OnEffectivelyShown>
+                                        self:TakeFocus()
+                                    </OnEffectivelyShown>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+
+                        <Label name="$(parent)IconHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_ARMORY_BUILD_DIALOG_ICONS_LABEL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Edit" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                        </Label>
+
+                        <Control name="$(parent)BuildIconPicker" inherits="ZO_GridScrollList_Keyboard">
+                            <Dimensions x="380" y="380" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)IconHeader" relativePoint="BOTTOMLEFT" offsetY="5" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Close" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

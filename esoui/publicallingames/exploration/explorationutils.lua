@@ -11,3 +11,8 @@ function ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(zoneIndex)
     local zoneId = GetZoneId(zoneIndex)
     return GetZoneStoryZoneIdForZoneId(zoneId)
 end
+
+function ZO_ExplorationUtils_GetZoneStoryZoneIdForCurrentMap()
+    local currentZoneIndex = GetCurrentMapZoneIndex()
+    return ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(currentZoneIndex)
+end

@@ -96,6 +96,12 @@ function ZO_GamepadEntryData:InitializeCraftingInventoryVisualData(bagId, slotIn
     self.quality = displayQuality
     self.itemType = GetItemType(self.bagId, self.slotIndex)
     self.customSortData = customSortData
+    -- In the case of the craft bag it isn't possible for a build item to live there, so we can just immediately infer false
+    if bagId == BAG_VIRTUAL then
+        self.isInArmory = false
+    else
+        self.isInArmory = IsItemInArmory(self.bagId, self.slotIndex)
+    end
 
     if slotData then
         ZO_ShallowTableCopy(slotData, self)

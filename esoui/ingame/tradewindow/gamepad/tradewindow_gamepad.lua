@@ -68,12 +68,7 @@ function ZO_GamepadTradeWindow:Initialize(control)
     self:SetTextSearchContext("tradeTextSearch")
 end
 
-function ZO_GamepadTradeWindow:PerformDeferredInitialization()
-    if self.isFullyInitialized then
-        return
-    end
-    self.isFullyInitialized = true
-
+function ZO_GamepadTradeWindow:OnDeferredInitialize()
     local function HandleInventoryChanged()
         if not self.control:IsHidden() then
             self:RefreshOfferList(TRADE_ME)
@@ -556,7 +551,7 @@ function ZO_GamepadTradeWindow:ExitConfirmation(tradetype)
 end
 
 function ZO_GamepadTradeWindow:PrepareWindowForNewTrade()
-    self:PerformDeferredInitialization()
+    -- Do nothing, must implement as it's called from shared class
 end
 
 function ZO_GamepadTradeWindow:BeginTrade()
@@ -809,32 +804,28 @@ function ZO_GamepadTradeWindow:OnBackButtonClicked()
     self.desiredTradeIndex = nil
 end
 
-function ZO_GamepadTradeWindow:OnStateChanged(oldState, newState)
-    if newState == SCENE_SHOWING then
-        self:PerformDeferredInitialization()
-        KEYBIND_STRIP:RemoveDefaultExit()
-        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-        DIRECTIONAL_INPUT:Activate(self, self.control)
-        self.activeListType = TRADE_ME
-        self:SetCurrentList(self.lists[TRADE_ME])
-        GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:ClearFocus()
-        self:BeginTrade()
-    elseif newState == SCENE_HIDING then
-        self:OnHiding()
-    elseif newState == SCENE_HIDDEN then
-        self.goldSlider:Deactivate()
-        self.goldSliderControl:SetHidden(true)
-        self:DisableCurrentList()
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-        KEYBIND_STRIP:RestoreDefaultExit()
-        TradeCancel()
-        TradeSetMoney(0)
-        self.offeredMoney = {}
-        DIRECTIONAL_INPUT:Deactivate(self)
-        GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:ClearHighlight()
-        GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:ClearHighlight()
-        ZO_Trade_GamepadWaiting:SetHidden(true)
-    end
+function ZO_GamepadTradeWindow:OnShowing()
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.OnShowing(self)
+
+    KEYBIND_STRIP:RemoveDefaultExit()
+    self.activeListType = TRADE_ME
+    self:SetCurrentList(self.lists[TRADE_ME])
+    GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:ClearFocus()
+    self:BeginTrade()
+end
+
+function ZO_GamepadTradeWindow:OnHide()
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.OnHide(self)
+
+    self.goldSlider:Deactivate()
+    self.goldSliderControl:SetHidden(true)
+    KEYBIND_STRIP:RestoreDefaultExit()
+    TradeCancel()
+    TradeSetMoney(0)
+    self.offeredMoney = {}
+    GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:ClearHighlight()
+    GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:ClearHighlight()
+    ZO_Trade_GamepadWaiting:SetHidden(true)
 end
 
 ----------------------------

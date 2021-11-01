@@ -191,13 +191,21 @@ function ZO_HousingPathSettings_Gamepad:InitializeLists()
     self.mainList = self:GetMainList()
     self.mainList:AddDataTemplate("ZO_GamepadFullWidthLabelEntryTemplate", SetupChangeCollectibleControl)
     self.mainList:AddDataTemplate("ZO_CheckBoxTemplate_Gamepad", SetupCheckboxControl, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    self.mainList:AddDataTemplate("ZO_GamepadHorizontalListRow", SetupPathTypeControl, ZO_GamepadMenuEntryTemplateParametricListFunction)    
+    self.mainList:AddDataTemplate("ZO_GamepadHorizontalListRow", SetupPathTypeControl, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.mainList:SetOnTargetDataChangedCallback(function(...) self:OnSettingsTargetChanged(...) end)
 
     self.changeObjectList = self:AddList("changeObject")
     self.changeObjectList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     local USE_DEFAULT_COMPARISON = nil
     self.changeObjectList:AddDataTemplateWithHeader("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, USE_DEFAULT_COMPARISON, "ZO_GamepadMenuEntryHeaderTemplate")
     self.changeObjectList:SetNoItemText(GetString(SI_ANTIQUITY_EMPTY_LIST))
+end
+
+function ZO_HousingPathSettings_Gamepad:OnSettingsTargetChanged(list, targetData, oldTargetData)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    if targetData and targetData.generalInfo then
+        targetData.generalInfo.tooltipFunction()
+    end
 end
 
 function ZO_HousingPathSettings_Gamepad:RefreshOptionList()
@@ -314,6 +322,30 @@ end
 
 function ZO_HousingPathSettings_Gamepad:SetPathData()
     self:Update()
+end
+
+function ZO_HousingPathSettings_Gamepad:ShowPathTypeTooltip()
+    local title = GetString(SI_HOUSING_PATH_SETTINGS_PATHING_TYPE_TEXT)
+    local body = GetString(SI_HOUSING_PATH_SETTINGS_PATHING_TYPE_TOOLTIP)
+    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
+end
+
+function ZO_HousingPathSettings_Gamepad:ShowPathingStateTooltip()
+    local title = GetString(SI_HOUSING_PATH_SETTINGS_PATHING_STATE_TEXT)
+    local body = GetString(SI_HOUSING_PATH_SETTINGS_PATHING_STATE_TOOLTIP)
+    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
+end
+
+function ZO_HousingPathSettings_Gamepad:ShowConformToGroundTooltip()
+    local title = GetString(SI_HOUSING_PATH_SETTINGS_CONFORM_TO_GROUND_TEXT)
+    local body = GetString(SI_HOUSING_PATH_SETTINGS_CONFORM_TO_GROUND_TOOLTIP)
+    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
+end
+
+function ZO_HousingPathSettings_Gamepad:ShowChangeCollectibleTooltip()
+    local title = GetString(SI_HOUSING_PATH_SETTINGS_CHANGE_COLLECTIBLE_BUTTON_TEXT)
+    local body = GetString(SI_HOUSING_PATH_SETTINGS_CHANGE_COLLECTIBLE_TOOLTIP)
+    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
 end
 
 -- Global UI

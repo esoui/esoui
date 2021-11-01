@@ -148,7 +148,7 @@ local function UpdateDuration(buffDebuffControl, currentTime)
     local showDuration = data.duration > 0 and not data.permanent
     durationLabel:SetHidden(not showDuration)
     if showDuration then
-        local timeRemainingS = data.timeEnding - currentTime
+        local timeRemainingS = math.max(data.timeEnding - currentTime, 0)
         if buffDebuffControl.blinkAnimation and timeRemainingS <= ZO_EFFECT_EXPIRATION_IMMINENCE_THRESHOLD_S then
             if not buffDebuffControl.blinkAnimation:IsPlaying() then
                 buffDebuffControl.blinkAnimation:PlayFromStart()

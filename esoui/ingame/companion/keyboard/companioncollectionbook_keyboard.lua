@@ -168,18 +168,10 @@ do
 end
 
 function ZO_CompanionCollectionBook_Keyboard:InitializeGridListPanel()
-    local function Factory()
-        local entryData = ZO_GridSquareEntryData_Shared:New()
+    self.entryDataObjectPool = ZO_EntryDataPool:New(ZO_GridSquareEntryData_Shared)
+    self.entryDataObjectPool:SetCustomFactoryBehavior(function(entryData)
         entryData.actorCategory = GAMEPLAY_ACTOR_CATEGORY_COMPANION
-        return entryData
-    end
-
-    local function Reset(entryData)
-        entryData:SetDataSource(nil)
-        entryData.categoryTypeToSetDefault = nil
-    end
-
-    self.entryDataObjectPool = ZO_EntryDataPool:New(ZO_GridSquareEntryData_Shared, Factory, Reset)
+    end)
 
     local gridListPanel = self.control:GetNamedChild("List")
     self.gridListPanelControl = gridListPanel

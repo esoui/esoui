@@ -214,6 +214,16 @@ do
         end
         return itemColors[quality]
     end
+
+    local dimColors = {}
+    function GetDimListColor(color)
+        if not dimColors[color] then
+            local r, g, b = color:UnpackRGBA()
+            r, g, b = zo_saturate(r - REDUCE_AMOUNT), zo_saturate(g - REDUCE_AMOUNT), zo_saturate(b - REDUCE_AMOUNT)
+            dimColors[color] = ZO_ColorDef:New(r, g, b)
+        end
+        return dimColors[color]
+    end
 end
 
 do
@@ -287,6 +297,8 @@ ZO_GAME_REPRESENTATIVE_TEXT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_
 ZO_BLADE_HIGHLIGHT_TEXT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_BLADE_HIGHLIGHT))
 ZO_BLADE_TEXT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_BLADE))
 ZO_DEFAULT_TEXT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DEFAULT_TEXT))
+ZO_SECOND_SELECTED_TEXT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SECOND_SELECTED))
+ZO_SECOND_NORMAL_TEXT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SECOND_NORMAL))
 
 ZO_SUCCEEDED_TEXT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SUCCEEDED))
 

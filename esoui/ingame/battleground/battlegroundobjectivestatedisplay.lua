@@ -501,10 +501,7 @@ function ZO_BattlegroundObjectiveStateIndicatorManager:GetIndicatorPoolForGameTy
         local function Factory(objectPool)
             return indicatorClass:New(objectPool:GetNextControlId(), self)
         end
-        local function Reset(indicator)
-            indicator:Reset()
-        end
-        pool = ZO_ObjectPool:New(Factory, Reset)
+        pool = ZO_ObjectPool:New(Factory, ZO_ObjectPool_DefaultResetObject)
         self.indicatorPoolsByGameType[gameType] = pool
     end
     return pool
@@ -518,10 +515,7 @@ function ZO_BattlegroundObjectiveStateIndicatorManager:GetFakeIndicatorPoolForGa
             local function Factory(objectPool)
                 return fakeIndicatorClass:New(objectPool:GetNextControlId(), self)
             end
-            local function Reset(fakeIndicator)
-                fakeIndicator:Reset()
-            end
-            pool = ZO_ObjectPool:New(Factory, Reset)
+            pool = ZO_ObjectPool:New(Factory, ZO_ObjectPool_DefaultResetObject)
             self.fakeindicatorPoolsByGameType[gameType] = pool
         end
     end

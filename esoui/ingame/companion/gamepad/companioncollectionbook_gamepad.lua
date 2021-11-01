@@ -569,7 +569,16 @@ function ZO_CompanionCollectionBook_Gamepad:UpdateCollectionListVisualLayer()
     local list = self.collectionList.list
     for i = 1, list:GetNumItems() do
         local collectibleData = list:GetDataForDataIndex(i)
-        collectibleData:SetIsHiddenByWardrobe(collectibleData:IsVisualLayerHidden(GAMEPLAY_ACTOR_CATEGORY_COMPANION))
+
+        -- ESO-725038: ZO_SetDefaultCollectibleData doesn't implement IsVisualLayerHidden
+        -- so if the visual layer updates while a collectibleData of this type is show we don't
+        -- want to attempt to show it. Should we run into other instanciations of ZO_SetDefaultCollectibleData
+        -- besides "Default Mount" that have a visual layer we should implement the function on that class.
+        -- An example of this happening is when werewolf ends while viewing the
+        -- companion mount subcategory which has a default collectible entry of "Default Mount"
+        if collectibleData:IsInstanceOf(ZO_CollectibleData) then
+            collectibleData:SetIsHiddenByWardrobe(collectibleData:IsVisualLayerHidden(GAMEPLAY_ACTOR_CATEGORY_COMPANION))
+        end
     end
     self:RefreshRightPanel(self.collectionList.list:GetTargetData())
 end

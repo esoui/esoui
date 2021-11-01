@@ -12,6 +12,21 @@ function ZO_StatusBar_InitializeDefaultColors(statusBar)
     statusBar:SetGradientColors(startR, startG, startB, 1, endR, endG, endB, 1)
 end
 
+local function ZO_GetOrCreateArrowBarGlowAnimationTimeline(control)
+    if not control.glowAnimation then
+        control.glowAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ArrowBarGlowAnimation", control:GetNamedChild("Glow"))
+    end
+    return control.glowAnimation
+end
+
+function ZO_ResponsiveArrowBar_OnMouseEnter(control)
+    ZO_GetOrCreateArrowBarGlowAnimationTimeline(control):PlayForward()
+end
+
+function ZO_ResponsiveArrowBar_OnMouseExit(control)
+    ZO_GetOrCreateArrowBarGlowAnimationTimeline(control):PlayBackward()
+end
+
 FORCE_INIT_SMOOTH_STATUS_BAR = true
 
 do

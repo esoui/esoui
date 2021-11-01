@@ -1,10 +1,5 @@
 ZO_Spinner_Gamepad = ZO_Spinner:Subclass()
 
-function ZO_Spinner_Gamepad:New(...)
-    return ZO_Spinner.New(self, ...)
-end
-
-
 GAMEPAD_SPINNER_DIRECTION_VERTICAL = 1
 GAMEPAD_SPINNER_DIRECTION_HORIZONTAL = 2
 

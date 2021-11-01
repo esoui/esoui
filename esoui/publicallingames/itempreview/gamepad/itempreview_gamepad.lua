@@ -10,17 +10,16 @@ function ZO_ItemPreview_Gamepad:Initialize(control)
     control.owner = self
     self.control = control
 
-    local function CreateIconTexture(name, parent, keyCode)
-        local iconTexture = CreateControlFromVirtual(name, parent, "ZO_KeyTexture")
-        iconTexture:SetKeyCode(keyCode)
-        iconTexture:SetDimensions(ZO_TABBAR_ICON_WIDTH, ZO_TABBAR_ICON_HEIGHT)
-        iconTexture:SetHidden(true)
-        return iconTexture
+    local function CreateIconLabel(name, parent, actionName)
+        local iconLabel = CreateControlFromVirtual(name, parent, "ZO_ClickableKeybindLabel_Gamepad")
+        iconLabel:SetKeybind(actionName)
+        iconLabel:SetHidden(true)
+        return iconLabel
     end
 
     self.variationLabel = control:GetNamedChild("VariationLabel")
-    self.previewVariationLeftIcon = CreateIconTexture("$(parent)PreviewLeftIcon", control, KEY_GAMEPAD_DPAD_LEFT)
-    self.previewVariationRightIcon = CreateIconTexture("$(parent)PreviewRightIcon", control, KEY_GAMEPAD_DPAD_RIGHT)
+    self.previewVariationLeftIcon = CreateIconLabel("$(parent)PreviewLeftIcon", control, "UI_SHORTCUT_INPUT_LEFT")
+    self.previewVariationRightIcon = CreateIconLabel("$(parent)PreviewRightIcon", control, "UI_SHORTCUT_INPUT_RIGHT")
 
     self.previewVariationLeftIcon:SetAnchor(RIGHT, self.variationLabel, LEFT, -32)
     self.previewVariationRightIcon:SetAnchor(LEFT, self.variationLabel, RIGHT, 32)

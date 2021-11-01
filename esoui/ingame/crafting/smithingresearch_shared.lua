@@ -1,10 +1,4 @@
-ZO_SharedSmithingResearch = ZO_Object:Subclass()
-
-function ZO_SharedSmithingResearch:New(...)
-    local smithingResearch = ZO_Object.New(self)
-    smithingResearch:Initialize(...)
-    return smithingResearch
-end
+ZO_SharedSmithingResearch = ZO_InitializingObject:Subclass()
 
 function ZO_SharedSmithingResearch:Initialize(control, owner, slotContainerName)
     self.control = control
@@ -341,13 +335,7 @@ function ZO_SharedSmithingResearch:GetSelectedData()
     return self.researchLineList:GetSelectedData()
 end
 
-ZO_SharedSmithingResearchSelect = ZO_Object:Subclass()
-
-function ZO_SharedSmithingResearchSelect:New(...)
-    local researchSelect = ZO_Object.New(self)
-    researchSelect:Initialize(...)
-    return researchSelect
-end
+ZO_SharedSmithingResearchSelect = ZO_InitializingObject:Subclass()
 
 function ZO_SharedSmithingResearchSelect:Initialize(control)
     self.control = control

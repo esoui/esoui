@@ -18,7 +18,7 @@
                         lineLimit = 1,
                     },
                     {
-                        font = "ZoFontHeader1",
+                        font = "ZoFontHeader",
                         lineLimit = 1,
                         dontUseForAdjusting = true,
                     },

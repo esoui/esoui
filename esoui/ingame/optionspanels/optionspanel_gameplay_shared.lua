@@ -367,6 +367,19 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             valid = { COMPANION_REACTION_FREQUENCY_RATE_LOW, COMPANION_REACTION_FREQUENCY_RATE_NORMAL, COMPANION_REACTION_FREQUENCY_RATE_HIGH, },
             valueStringPrefix = "SI_COMPANIONREACTIONFREQUENCYRATE",
         },
+
+        --Options_Gameplay_CompanionPassengerPreference
+        [IN_WORLD_UI_SETTING_COMPANION_PASSENGER_PREFERENCE] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_IN_WORLD,
+            panel = SETTING_PANEL_GAMEPLAY,
+            settingId = IN_WORLD_UI_SETTING_COMPANION_PASSENGER_PREFERENCE,
+            text = SI_INTERFACE_OPTIONS_COMPANION_PASSENGER_PREFERENCE,
+            tooltipText = SI_INTERFACE_OPTIONS_COMPANION_PASSENGER_PREFERENCE_TOOLTIP,
+            valid = { COMPANION_PASSENGER_PREFERENCE_ALWAYS, COMPANION_PASSENGER_PREFERENCE_NEVER, COMPANION_PASSENGER_PREFERENCE_WHEN_PLAYER_NOT_GROUPED, },
+            valueStringPrefix = "SI_COMPANIONPASSENGERPREFERENCE",
+        },
     },
 
     --Tutorial
@@ -467,11 +480,38 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
         settingId = GAMEPAD_SETTING_INPUT_PREFERRED_MODE,
         text = SI_GAMEPAD_OPTIONS_GAMEPAD_MODE,
         tooltipText = SI_GAMEPAD_OPTIONS_GAMEPAD_MODE_TOOLTIP,
-        valid = {INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD, INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD, INPUT_PREFERRED_MODE_AUTOMATIC},
+        valid =
+        {
+            INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD,
+            INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD,
+            INPUT_PREFERRED_MODE_AUTOMATIC,
+        },
+        events = 
+        {
+            [INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD] = "OnInputPreferredModeKeyboard",
+            [INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD] = "OnInputPreferredModeGamepad",
+            [INPUT_PREFERRED_MODE_AUTOMATIC] = "OnInputPreferredModeAutomatic",
+        },
         exists = DoesPlatformAllowConfiguringAutomaticInputChanging,
         valueStringPrefix = "SI_INPUTPREFERREDMODE",
     },
-
+    --Options_Gameplay_UseKeyboardChat
+    [GAMEPAD_SETTING_USE_KEYBOARD_CHAT] =
+    {
+        controlType = OPTIONS_CHECKBOX,
+        system = SETTING_TYPE_GAMEPAD,
+        panel = SETTING_PANEL_GAMEPLAY,
+        settingId = GAMEPAD_SETTING_USE_KEYBOARD_CHAT,
+        text = SI_GAMEPAD_OPTIONS_USE_KEYBOARD_CHAT,
+        tooltipText = SI_GAMEPAD_OPTIONS_USE_KEYBOARD_CHAT_TOOLTIP,
+        eventCallbacks =
+        {
+            ["OnInputPreferredModeKeyboard"] = ZO_Options_SetOptionInactive,
+            ["OnInputPreferredModeGamepad"] = ZO_Options_SetOptionActive,
+            ["OnInputPreferredModeAutomatic"] = ZO_Options_SetOptionActive,
+        },
+        exists = ZO_IsPCUI,
+    },
     --Options_Gamepad_Template
     [GAMEPAD_SETTING_GAMEPAD_TEMPLATE] =
     {

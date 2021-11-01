@@ -1,27 +1,60 @@
 --[[ Character Create Slider ]]--
 ZO_CharacterCreateSlider_Keyboard = ZO_CharacterCreateSlider_Base:Subclass()
 
-function ZO_CharacterCreateSlider_Keyboard:New(...)
-    return ZO_CharacterCreateSlider_Base.New(self, ...)
-end
-
 function ZO_CharacterCreateSlider_Keyboard:Initialize(...)
     ZO_CharacterCreateSlider_Base.Initialize(self, ...)
 
-    self.decrementButton = GetControl(self.control, "Decrement")
-    self.incrementButton = GetControl(self.control, "Increment")
+    self.decrementButton = self.control:GetNamedChild("Decrement")
+    self.incrementButton = self.control:GetNamedChild("Increment")
+    self.warningIcon = self.control:GetNamedChild("NameIcon")
+
+    local function OnMouseEnterLabel(label)
+        local sliderObject = label:GetParent() and label:GetParent():GetParent() and label:GetParent():GetParent().sliderObject
+        local category = sliderObject.category
+        local collectibleId = GetActiveCollectibleIdForCharacterAppearance(category)
+        local collectibleName = GetCollectibleName(collectibleId)
+        local categoryName = GetCollectibleCategoryNameByCollectibleId(collectibleId)
+        local formattedCollectibleName = ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2, collectibleName, categoryName))
+        local appearanceTypeText = ZO_SELECTED_TEXT:Colorize(overrideAppearanceName or GetString("SI_CHARACTERAPPEARANCENAME", category))
+        local previewTypeToShow = ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_CREATE_CHARACTER_GAMEPAD_PREVIEW_OPTION_FORMAT, GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_YOUR_GEAR)))
+        local descriptionText = zo_strformat(SI_CHARACTER_CREATE_PREVIEWING_COLLECTIBLES_TOOLTIP_DESCRIPTION_FORMATTER, appearanceTypeText, formattedCollectibleName, previewTypeToShow, appearanceTypeText)
+
+        InitializeTooltip(InformationTooltip, label, BOTTOM, 0, -10, TOP)
+        SetTooltipText(InformationTooltip, descriptionText)
+    end
+
+    local function OnMouseExitLabel()
+        ClearTooltip(InformationTooltip)
+    end
+
+    if self.warningIcon then
+        self.warningIcon:SetHandler("OnMouseEnter", OnMouseEnterLabel)
+        self.warningIcon:SetHandler("OnMouseExit", OnMouseExitLabel)
+    end
 end
 
 --[[ Character Create Appearance Slider ]]-- 
 ZO_CharacterCreateAppearanceSlider_Keyboard = ZO_CharacterCreateSlider_Keyboard:Subclass()
 
-function ZO_CharacterCreateAppearanceSlider_Keyboard:New(...)
-    return ZO_CharacterCreateSlider_Keyboard.New(self, ...)
-end
-
 function ZO_CharacterCreateAppearanceSlider_Keyboard:Initialize(...)
     ZO_CharacterCreateSlider_Keyboard.Initialize(self, ...)
     zo_mixin(self, ZO_CharacterCreateAppearanceSlider)
+
+    -- The mixin seems to override the class definition of SetData, so set it back to this class
+    self.SetData = ZO_CharacterCreateAppearanceSlider_Keyboard.SetData
+end
+
+function ZO_CharacterCreateAppearanceSlider_Keyboard:SetData(appearanceName, numValues, displayName)
+    ZO_CharacterCreateAppearanceSlider.SetData(self, appearanceName, numValues, displayName)
+
+    if self.warningIcon then
+        local collectibleId = GetActiveCollectibleIdForCharacterAppearance(self.category)
+        if collectibleId ~= nil then
+            self.warningIcon:SetHidden(false)
+        else
+            self.warningIcon:SetHidden(true)
+        end
+    end
 end
 
 --[[ Character Create Color Slider ]]--
@@ -30,10 +63,6 @@ end
 -- for wiring up the subsystems.  The internal object and control will be a ZO_ColorSwatchPicker, but this will wrap that in an interface
 -- that makes it look like a CharCreate*Slider object.
 ZO_CharacterCreateColorSlider_Keyboard = ZO_CharacterCreateSlider_Keyboard:Subclass()
-
-function ZO_CharacterCreateColorSlider_Keyboard:New(...)
-    return ZO_CharacterCreateSlider_Keyboard.New(self, ...)
-end
 
 function ZO_CharacterCreateColorSlider_Keyboard:Initialize(...)
     ZO_CharacterCreateSlider_Keyboard.Initialize(self, ...)
@@ -64,6 +93,15 @@ function ZO_CharacterCreateColorSlider_Keyboard:SetData(appearanceName, numValue
     end
 
     self:Update()
+
+    if self.warningIcon then
+        local collectibleId = GetActiveCollectibleIdForCharacterAppearance(self.category)
+        if collectibleId ~= nil then
+            self.warningIcon:SetHidden(false)
+        else
+            self.warningIcon:SetHidden(true)
+        end
+    end
 end
 
 -- Override parent function, otherwise parent function will break if called for this class object

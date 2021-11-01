@@ -410,11 +410,7 @@ function ZO_CrownCrates:GetCrateSpecificCardParticlePool(crownCrateId, crownCrat
             return ZO_WorldParticle:New(particleId)
         end
 
-        local function Reset(particle, pool)
-            particle:Reset()
-        end
-
-        crateTable[crownCrateParticleEffects] = ZO_ObjectPool:New(Factory, Reset)
+        crateTable[crownCrateParticleEffects] = ZO_ObjectPool:New(Factory, ZO_ObjectPool_DefaultResetObject)
     end
     
     return crateTable[crownCrateParticleEffects]
@@ -432,11 +428,7 @@ function ZO_CrownCrates:GetTierSpecificCardParticlePool(crownCrateTierId, crownC
             return ZO_WorldParticle:New(particleId)
         end
 
-        local function Reset(particle, pool)
-            particle:Reset()
-        end
-
-        crateTierTable[crownCrateTierParticleEffects] = ZO_ObjectPool:New(Factory, Reset)
+        crateTierTable[crownCrateTierParticleEffects] = ZO_ObjectPool:New(Factory, ZO_ObjectPool_DefaultResetObject)
     end
 
     return crateTierTable[crownCrateTierParticleEffects]

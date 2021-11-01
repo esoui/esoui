@@ -96,11 +96,7 @@ function ChatOptions:Initialize(control)
 	    control.owner = self
         self.filterSection = control:GetNamedChild("FilterSection")
         self.guildSection = control:GetNamedChild("GuildSection")
-
-        local function Reset(control)
-            control:SetHidden(true)
-        end
-    
+            
         local function FilterFactory(pool)
             return ZO_ObjectPool_CreateControl("ZO_ChatOptionsFilterEntry", pool, self.filterSection)
         end
@@ -109,8 +105,8 @@ function ChatOptions:Initialize(control)
             return ZO_ObjectPool_CreateControl("ZO_ChatOptionsGuildFilters", pool, self.guildSection)
         end
     
-        self.filterPool = ZO_ObjectPool:New(FilterFactory, Reset)
-        self.guildPool = ZO_ObjectPool:New(GuildFactory, Reset)
+        self.filterPool = ZO_ObjectPool:New(FilterFactory, ZO_ObjectPool_DefaultResetControl)
+        self.guildPool = ZO_ObjectPool:New(GuildFactory, ZO_ObjectPool_DefaultResetControl)
 
         self.filterButtons = {}
         self.guildNameLabels = {}

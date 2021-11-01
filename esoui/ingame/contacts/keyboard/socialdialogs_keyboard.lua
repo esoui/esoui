@@ -178,18 +178,26 @@ function ZO_CreateGuildDialog_OnInitialized(self)
     createGuildFields:SetBoolean("ValidName", false)
     self.createGuildFields = createGuildFields
 
-    self.nameInstructions = ZO_ValidNameInstructions:New(GetControl(self, "NameInstructions"))
+    local VALIDATOR_RULES =
+    {
+        NAME_RULE_TOO_SHORT,
+        NAME_RULE_CANNOT_START_WITH_SPACE,
+        NAME_RULE_MUST_END_WITH_LETTER,
+        NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS,
+        NAME_RULE_NO_NUMBERS,
+        NAME_RULE_NO_ADJACENT_PUNCTUATION_CHARACTERS,
+        NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS,
+        NAME_RULE_INVALID_CHARACTERS
+    }
+    local DEFAULT_TEMPLATE = nil
+    self.nameInstructions = ZO_ValidNameInstructions:New(GetControl(self, "NameInstructions"), DEFAULT_TEMPLATE, VALIDATOR_RULES)
 end
 
 function ZO_CreateGuildDialogName_UpdateViolations(self)
     local dialog = self:GetParent():GetParent()
     local violations = { IsValidGuildName(self:GetText()) }
     local noViolations = #violations == 0
-    if noViolations then
-        dialog.nameInstructions:Hide()
-    else
-        dialog.nameInstructions:Show(dialog.nameEdit, violations)
-    end
+    dialog.nameInstructions:Show(dialog.nameEdit, violations)
     dialog.createGuildFields:SetBoolean("ValidName", noViolations)
 end
 

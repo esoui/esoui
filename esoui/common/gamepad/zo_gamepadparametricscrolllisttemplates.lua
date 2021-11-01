@@ -83,16 +83,15 @@ function ZO_GamepadTabBarScrollList:New(control, leftIcon, rightIcon, onActivate
     list:SetDirectionalInputEnabled(false)
     list:SetHideUnselectedControls(true)
 
-    local function CreateIconTexture(name, parent, keyCode, anchor)
-        local iconTexture = CreateControlFromVirtual(name, parent, "ZO_KeyTexture")
-        iconTexture:SetKeyCode(keyCode)
-        iconTexture:SetDimensions(ZO_TABBAR_ICON_WIDTH, ZO_TABBAR_ICON_HEIGHT)
-        iconTexture:SetAnchor(anchor, control, anchor)
-        return iconTexture
+    local function CreateKeybindLabel(name, parent, anchor)
+        local keybindLabel = CreateControlFromVirtual(name, parent, "ZO_ClickableKeybindLabel_Gamepad")
+        keybindLabel:SetAnchor(anchor, parent, anchor)
+        return keybindLabel
     end
 
-    list.leftIcon = leftIcon or CreateButtonIcon("$(parent)LeftIcon", control, KEY_GAMEPAD_LEFT_SHOULDER, LEFT)
-    list.rightIcon = rightIcon or CreateButtonIcon("$(parent)RightIcon", control, KEY_GAMEPAD_RIGHT_SHOULDER, RIGHT)
+    list.leftIcon = leftIcon or CreateKeybindLabel("$(parent)LeftIcon", control, LEFT)
+
+    list.rightIcon = rightIcon or CreateKeybindLabel("$(parent)RightIcon", control, RIGHT)
 
     list:SetEntryAnchors({ BOTTOM, BOTTOM })
 
@@ -121,32 +120,41 @@ function ZO_GamepadTabBarScrollList:InitializeKeybindStripDescriptors()
     if control then
         debugName = debugName .. " " .. control:GetName()
     end
+
+    local leftShoulderKeybind =
+    {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = debugName .. " Left Shoulder",
+        keybind = "UI_SHORTCUT_LEFT_SHOULDER",
+        ethereal = true,
+        callback = function()
+            if self.active then
+                self:MovePrevious()
+            end
+        end,
+    }
+
+    local rightShoulderKeybind =
+    {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = debugName .. " Right Shoulder",
+        keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
+        ethereal = true,
+        callback = function()
+            if self.active then
+                self:MoveNext()
+            end
+        end,
+    }
+
     self.keybindStripDescriptor =
     {
-        {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = debugName .. " Left Shoulder",
-            keybind = "UI_SHORTCUT_LEFT_SHOULDER",
-            ethereal = true,
-            callback = function()
-                if self.active then
-                    self:MovePrevious()
-                end
-            end,
-        },
-
-        {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = debugName .. " Right Shoulder",
-            keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
-            ethereal = true,
-            callback = function()
-                if self.active then
-                    self:MoveNext()
-                end
-            end,
-        },
+        leftShoulderKeybind,
+        rightShoulderKeybind,
     }
+
+    self.leftIcon:SetKeybindButtonDescriptor(leftShoulderKeybind)
+    self.rightIcon:SetKeybindButtonDescriptor(rightShoulderKeybind)
 end
 
 function ZO_GamepadTabBarScrollList:Commit(dontReselect)

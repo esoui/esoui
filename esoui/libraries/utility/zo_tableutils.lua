@@ -256,6 +256,24 @@ function ZO_IndexOfElementInNumericallyIndexedTable(table, element)
     return nil
 end
 
+function ZO_IsElementInNonContiguousTable(t, element)
+    for key, value in pairs(t) do
+        if value == element then
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_KeyOfFirstElementInNonContiguousTable(t, element)
+    for key, value in pairs(t) do
+        if value == element then
+            return key
+        end
+    end
+    return nil
+end
+
 function ZO_RemoveFirstElementFromNumericallyIndexedTable(t, element)
     for index, value in ipairs(t) do
         if value == element then

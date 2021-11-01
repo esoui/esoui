@@ -1,0 +1,22 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_Gamepad_MarketDialog_Quantity" inherits="ZO_Gamepad_GenericDialog_Parametric_TextFieldItem" virtual="true">
+            <OnInitialized>
+                ZO_GamepadTextFieldItem_OnInitialized(self)
+                self.maximumControl = self:GetNamedChild("Maximum")
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)TextField" override="true">
+                    <Controls>
+                        <EditBox name="$(parent)Edit" maxInputCharacters="2" textType="numeric_unsigned_int" override="true" />
+                    </Controls>
+                </Backdrop>
+
+                <Label name="$(parent)Maximum" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" layer="OVERLAY">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Quantity" offsetX="-15" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -280,6 +280,16 @@ function ZO_Tooltip:AddItemSetCollectionText(itemLink)
     self:AddSection(itemSetCollectionSection)
 end
 
+function ZO_Tooltip:AddArmoryBuilds(bagId, slotIndex)
+    local armoryBuildList = { GetItemArmoryBuildList(bagId, slotIndex) }
+    if #armoryBuildList > 0 then
+        local armoryBuildSection = self:AcquireSection(self:GetStyle("bodySection"))
+        local buildListString = ZO_SELECTED_TEXT:Colorize(ZO_GenerateCommaSeparatedListWithoutAnd(armoryBuildList))
+        armoryBuildSection:AddLine(zo_strformat(SI_ITEM_TOOLTIP_IN_ARMORY_DESCRIPTION, buildListString), self:GetStyle("bodyDescription"))
+        self:AddSection(armoryBuildSection)
+    end
+end
+
 function ZO_Tooltip:AddItemValue(itemLink)
     local statsSection = self:AcquireSection(self:GetStyle("valueStatsSection"))
 
@@ -781,6 +791,9 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
     end
     self:LayoutTradeBoPInfo(tradeBoPData)
     self:AddItemSetCollectionText(itemLink)
+    if extraData and extraData.bagId ~= nil and extraData.slotIndex ~= nil then
+        self:AddArmoryBuilds(extraData.bagId, extraData.slotIndex)
+    end
     self:AddItemValue(itemLink)
     self:AddItemForcedNotDeconstructable(itemLink)
 end
@@ -1636,6 +1649,16 @@ function ZO_Tooltip:LayoutBagItem(bagId, slotIndex, showCombinedCount, extraData
             namesString = GetItemBoPTradeableDisplayNamesString(bagId, slotIndex),
         }
     end
+
+    --We do not want to show armory builds for items in the guild bank or buyback, and it is not possible for items in the other 2 bags to be in builds
+    --Therefore, we can skip checking entirely for these bags
+    if bagId ~= BAG_GUILDBANK and bagId ~= BAG_BUYBACK and bagId ~= BAG_VIRTUAL and bagId ~= BAG_COMPANION_WORN then
+        if not extraData then
+            extraData = {}
+        end
+        extraData.bagId = bagId
+        extraData.slotIndex = slotIndex
+    end
     return self:LayoutItemWithStackCount(itemLink, equipped, GetItemCreatorName(bagId, slotIndex), DONT_FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, stackCount, equipSlot, showPlayerLocked, tradeBoPData, extraData)
 end
 
@@ -1701,6 +1724,8 @@ function ZO_Tooltip:LayoutPendingEnchantedItem(itemBagId, itemIndex, enchantment
     local extraData =
     {
         enchantDiffMode = ZO_ENCHANT_DIFF_ADD,
+        bagId = itemBagId,
+        slotIndex = itemIndex,
     }
     self:LayoutItem(itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, NO_ITEM_NAME, EQUIP_SLOT_NONE, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
 end
@@ -1711,6 +1736,8 @@ function ZO_Tooltip:LayoutPendingItemChargeOrRepair(itemBagId, itemSlotIndex, im
     local extraData =
     {
         enchantDiffMode = ZO_ENCHANT_DIFF_ADD,
+        bagId = itemBagId,
+        slotIndex = itemSlotIndex,
     }
     self:LayoutItem(itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, DONT_FORCE_FULL_DURABILITY, previewValueToAdd, NO_ITEM_NAME, EQUIP_SLOT_NONE, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
 end
@@ -1735,7 +1762,13 @@ function ZO_Tooltip:LayoutImproveSourceSmithingItem(bagId, slotIndex)
             namesString = GetItemBoPTradeableDisplayNamesString(bagId, slotIndex),
         }
     end
-    return self:LayoutItem(itemLink, NOT_EQUIPPED, GetItemCreatorName(bagId, slotIndex), DONT_FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, NO_ITEM_NAME, EQUIP_SLOT_NONE, showPlayerLocked, tradeBoPData)
+
+    local extraData =
+    {
+        bagId = bagId,
+        slotIndex = slotIndex,
+    }
+    return self:LayoutItem(itemLink, NOT_EQUIPPED, GetItemCreatorName(bagId, slotIndex), DONT_FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, NO_ITEM_NAME, EQUIP_SLOT_NONE, showPlayerLocked, tradeBoPData, extraData)
 end
 
 function ZO_Tooltip:LayoutImproveResultSmithingItem(itemToImproveBagId, itemToImproveSlotIndex, craftingSkillType)
@@ -1748,7 +1781,12 @@ function ZO_Tooltip:LayoutImproveResultSmithingItem(itemToImproveBagId, itemToIm
             self.icon:SetHidden(false)
         end
 
-        self:LayoutItem(itemLink, NOT_EQUIPPED)
+        local extraData =
+        {
+            bagId = itemToImproveBagId,
+            slotIndex = itemToImproveSlotIndex,
+        }
+        self:LayoutItem(itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, DONT_FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, NO_ITEM_NAME, EQUIP_SLOT_NONE, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     end
 
     --Add line for tradeable loss
@@ -1799,6 +1837,25 @@ function ZO_Tooltip:LayoutItemSetCollectionPieceLink(itemLink, hideTrait)
         hideTrait = hideTrait,
     }
     return self:LayoutItem(itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, NO_ITEM_NAME, EQUIP_SLOT_NONE, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
+end
+
+function ZO_Tooltip:LayoutItemSetCollectionSummary()
+    for _, topLevelCategoryData in ITEM_SET_COLLECTIONS_DATA_MANAGER:TopLevelItemSetCollectionCategoryIterator(self.categoryFilters) do
+        local categoryName = topLevelCategoryData:GetFormattedName()
+        local categorySection = self:AcquireSection(self:GetStyle("itemSetCollectionSummaryCategorySection"))
+        categorySection:AddLine(categoryName, self:GetStyle("itemSetCollectionSummaryCategoryHeader"))
+
+        local barSection = self:AcquireSection(self:GetStyle("topSection"))
+        local statusBar = self:AcquireStatusBar(self:GetStyle("itemSetCollectionSummaryCategoryBar"))
+        local MIN_PIECES = 0
+        local unlockedPieces, totalPieces = topLevelCategoryData:GetNumUnlockedAndTotalPieces()
+        statusBar:SetMinMax(MIN_PIECES, totalPieces)
+        statusBar:SetValue(unlockedPieces)
+        barSection:AddStatusBar(statusBar)
+
+        categorySection:AddSection(barSection)
+        self:AddSection(categorySection)
+    end
 end
 
 function ZO_Tooltip:LayoutItemStatComparison(bagId, slotId, comparisonSlot)

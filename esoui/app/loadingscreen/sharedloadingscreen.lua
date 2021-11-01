@@ -34,8 +34,10 @@ end
 local g_keyEdgefileFreeList = {}
 local g_keyEdgefileActiveList = {}
 
-local function GetOrCreateKeyEdgefile()
-    local keyEdgeFile = next(g_keyEdgefileFreeList) or GetWindowManager():CreateControlFromVirtual("", LoadingScreenZoneDescription, "ZO_LoadingScreen_KeyBackdrop")
+local function GetOrCreateKeyEdgefile(control)
+    local keyEdgeFile = next(g_keyEdgefileFreeList) or GetWindowManager():CreateControlFromVirtual("", control, "ZO_LoadingScreen_KeyBackdrop")
+    --If we already have something in the pool, we need to set the parent.
+    keyEdgeFile:SetParent(control)
 
     g_keyEdgefileFreeList[keyEdgeFile] = nil
     g_keyEdgefileActiveList[keyEdgeFile] = true
@@ -355,7 +357,7 @@ end
 
 function LoadingScreen_Base:OnZoneDescriptionNewUserAreaCreated(control, areaData, areaText, left, right, top, bottom)
     if areaData == "key" then
-        local keyEdgeFile = GetOrCreateKeyEdgefile()
+        local keyEdgeFile = GetOrCreateKeyEdgefile(control)
         keyEdgeFile:SetAnchor(TOPLEFT, control, TOPLEFT, left + 2, top - 1)
         keyEdgeFile:SetAnchor(BOTTOMRIGHT, control, TOPLEFT, right - 2, bottom + 1)
         keyEdgeFile:SetHidden(false)

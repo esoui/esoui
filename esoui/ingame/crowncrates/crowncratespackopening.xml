@@ -265,8 +265,8 @@
 
                             <Controls>
                                 <Label name="$(parent)NameLabel" override="true">
-                                    <!-- Due to the way resizeToFitDescendants calculates its width, the parent ends up being too big, making it not look centered -->
-                                    <!-- So we need to account for that. It would be best to fix resizeToFitDescendants but that would be... potentially far reaching... -->
+                                    <!-- Due to the way resizeToFitDescendents calculates its width, the parent ends up being too big, making it not look centered -->
+                                    <!-- So we need to account for that. It would be best to fix resizeToFitDescendents but that would be... potentially far reaching... -->
                                     <Anchor point="RIGHT" offsetX="-20" />
                                 </Label>
                             </Controls>

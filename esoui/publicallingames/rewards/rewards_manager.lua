@@ -34,6 +34,10 @@ function ZO_RewardData:SetFormattedName(formattedName)
     self.formattedName = formattedName
 end
 
+function ZO_RewardData:SetRawName(rawName)
+    self.rawName = rawName
+end    
+
 function ZO_RewardData:SetFormattedNameWithStack(keyboardName, gamepadName)
     self.formattedNameWithStackKeyboard = keyboardName
     self.formattedNameWithStackGamepad = gamepadName
@@ -168,6 +172,10 @@ function ZO_RewardData:GetParentChoice()
     return self.parentChoice
 end
 
+function ZO_RewardData:GetRawName()
+    return self.rawName
+end
+
 function ZO_RewardData:GetFormattedName()
     return self.formattedName
 end
@@ -276,7 +284,10 @@ function ZO_RewardsManager:GetChoiceEntryInfo(rewardId, parentChoice, validation
     local choiceListId = GetChoiceRewardListId(rewardId)
 
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
-    rewardData:SetFormattedName(GetChoiceRewardDisplayName(rewardId))
+    local rawName = GetChoiceRewardDisplayName(rewardId)
+    -- There doesn't seem to be any special formatting done for "Choice rewards," so the raw name and formatted name are the same in this instance.
+    rewardData:SetRawName(rawName)
+    rewardData:SetFormattedName(rawName)
     rewardData:SetIcon(GetChoiceRewardIcon(rewardId))
     rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
 
@@ -291,11 +302,13 @@ function ZO_RewardsManager:GetCurrencyEntryInfo(rewardId, quantity, parentChoice
     local currencyType = GetAddCurrencyRewardInfo(rewardId)
     local IS_PLURAL = false
     local IS_UPPER = false
-    local formattedName = zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER))
+    local rawName = GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)
+    local formattedName = zo_strformat(SI_CURRENCY_NAME_FORMAT, rawName)
     local formattedNameWithStackKeyboard = zo_strformat(SI_CURRENCY_NAME_FORMAT, ZO_Currency_FormatKeyboard(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
     local formattedNameWithStackGamepad = zo_strformat(SI_CURRENCY_NAME_FORMAT, ZO_Currency_FormatGamepad(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
 
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    rewardData:SetRawName(rawName)
     rewardData:SetFormattedName(formattedName)
     rewardData:SetIcon(GetCurrencyKeyboardIcon(currencyType), GetCurrencyGamepadIcon(currencyType))
     rewardData:SetLootIcon(GetCurrencyLootKeyboardIcon(currencyType), GetCurrencyLootGamepadIcon(currencyType))
@@ -324,6 +337,7 @@ function ZO_RewardsManager:GetItemEntryInfo(rewardId, quantity, parentChoice)
     rewardData:SetItemDisplayQuality(itemDisplayQuality)
     rewardData:SetEquipSlot(equipSlot)
     rewardData:SetQuantity(quantity)
+    rewardData:SetRawName(displayName)
     rewardData:SetFormattedNameWithStack(zo_strformat(SI_REWARDS_FORMAT_REWARD_WITH_AMOUNT, displayName, ZO_SELECTED_TEXT:Colorize(quantity)))
     rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
 
@@ -339,6 +353,7 @@ function ZO_RewardsManager:GetCrownCrateEntryInfo(rewardId, quantity, parentChoi
     local formattedNameWithStack = zo_strformat(SI_REWARDS_FORMAT_REWARD_WITH_AMOUNT, displayName, ZO_SELECTED_TEXT:Colorize(quantity))
     
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    rewardData:SetRawName(displayName)
     rewardData:SetFormattedName(formattedDisplayName)
     rewardData:SetFormattedNameWithStack(formattedNameWithStack)
     rewardData:SetIcon(icon)
@@ -355,6 +370,7 @@ function ZO_RewardsManager:GetInstantUnlockEntryInfo(rewardId, parentChoice)
     local formattedDisplayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName)
     
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    rewardData:SetRawName(displayName)
     rewardData:SetFormattedName(formattedDisplayName)
     rewardData:SetIcon(icon)
     rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
@@ -369,6 +385,7 @@ function ZO_RewardsManager:GetExperienceEntryInfo(rewardId, quantity, parentChoi
     local formattedNameWithStack = zo_strformat(SI_REWARDS_FORMAT_REWARD_WITH_AMOUNT, displayName, ZO_SELECTED_TEXT:Colorize(commaDelimitedQuantity))
 
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    rewardData:SetRawName(displayName)
     rewardData:SetFormattedName(displayName)
     rewardData:SetFormattedNameWithStack(formattedNameWithStack)
     rewardData:SetIcon("EsoUI/Art/Icons/Icon_Experience.dds")
@@ -390,6 +407,7 @@ function ZO_RewardsManager:GetSkillLineExperienceEntryInfo(rewardId, quantity, p
 
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
     rewardData:SetSkillLineId(skillLineId)
+    rewardData:SetRawName(displayName)
     rewardData:SetFormattedName(formattedDisplayName)
     rewardData:SetFormattedNameWithStack(formattedNameWithStack)
     rewardData:SetIcon(icon)

@@ -18,7 +18,7 @@ function ZO_ItemSetsBook_Keyboard:Initialize(control)
     ITEM_SETS_BOOK_FRAGMENT = self:GetFragment()
 end
 
-function ZO_ItemSetsBook_Keyboard:AddCategory(itemSetCollectionCategoryData, parentNode)
+function ZO_ItemSetsBook_Keyboard:AddCategory(itemSetCollectionCategoryData, parentNode, categoryFilters)
     local tree = self.categoryTree
     local nodeTemplate = nil
 
@@ -36,21 +36,21 @@ function ZO_ItemSetsBook_Keyboard:AddCategory(itemSetCollectionCategoryData, par
     local entryData = ZO_EntryData:New(itemSetCollectionCategoryData)
     entryData.node = tree:AddNode(nodeTemplate, entryData, parentNode)
 
-    for _, subcategoryData in itemSetCollectionCategoryData:SubcategoryIterator(self.categoryFilters) do
-        self:AddCategory(subcategoryData, entryData.node)
+    for _, subcategoryData in itemSetCollectionCategoryData:SubcategoryIterator(categoryFilters) do
+        self:AddCategory(subcategoryData, entryData.node, categoryFilters)
     end
 end
 
 function ZO_ItemSetsBook_Keyboard:RefreshCategoryProgress()
     local itemSetCollectionCategoryData = self:GetSelectedCategory()
-    if itemSetCollectionCategoryData then
+    if itemSetCollectionCategoryData and not itemSetCollectionCategoryData:IsInstanceOf(ZO_ItemSetCollectionSummaryCategoryData) then
         if self:IsReconstructing() then
             self.categoryProgress:SetHidden(true)
             self.selectReconstructItemHeaderLabel:SetHidden(false)
         else
             self.selectReconstructItemHeaderLabel:SetHidden(true)
             self.categoryProgress:SetHidden(false)
-            local numUnlockedPieces, numPieces = itemSetCollectionCategoryData:GetNumUnlockedAndTotalPieces()
+            local numUnlockedPieces, numPieces = itemSetCollectionCategoryData:GetDataSource():GetNumUnlockedAndTotalPieces()
             self.categoryProgress:SetValue(numUnlockedPieces / numPieces)
             self.categoryProgressLabel:SetText(zo_strformat(SI_ITEM_SETS_BOOK_CATEGORY_PROGRESS, numUnlockedPieces, numPieces))
         end
@@ -120,9 +120,24 @@ function ZO_ItemSetsBook_Keyboard:OnContentHeaderMouseExit(control)
     ClearTooltip(ItemTooltip)
 end
 
+function ZO_ItemSetsBook_Keyboard:NavigateToItemSetCollectionCategoryData(itemSetCollectionCategoryData)
+    if itemSetCollectionCategoryData then
+        if not self:GetScene():IsShowing() then
+            MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", self:GetSceneName())
+        end
+
+        local treeNode = self.categoryTree:GetTreeNodeByData(itemSetCollectionCategoryData)
+        if treeNode then
+            local OPEN = true
+            local USER_REQUESTED = true
+            self.categoryTree:SetNodeOpen(treeNode, OPEN, USER_REQUESTED)
+        end
+    end
+end
+
 function ZO_ItemSetsBook_Keyboard:NavigateToItemSetCollectionData(itemSetCollectionData)
-    if not ITEM_SET_COLLECTIONS_BOOK_SCENE:IsShowing() then
-        MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "itemSetCollectionsBook")
+    if not self:GetScene():IsShowing() then
+        MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", self:GetSceneName())
     end
     -- TODO: Implement
 end
@@ -190,7 +205,6 @@ function ZO_ItemSetsBook_Keyboard:InitializeControls()
     self.filtersContainer = filtersContainer
 
     self.categories = control:GetNamedChild("Categories")
-
     self.categoryContentContainer = control:GetNamedChild("CategoryContent")
     self.selectReconstructItemHeaderLabel = self.categoryContentContainer:GetNamedChild("SelectReconstructItemHeader")
     self.categoryProgress = self.categoryContentContainer:GetNamedChild("CategoryProgress")
@@ -198,6 +212,14 @@ function ZO_ItemSetsBook_Keyboard:InitializeControls()
     ZO_StatusBar_SetGradientColor(self.categoryProgress, ZO_XP_BAR_GRADIENT_COLORS)
     self.gridListPanelControl = self.categoryContentContainer:GetNamedChild("List")
     self.noMatchesLabel = control:GetNamedChild("NoMatchMessage")
+
+    self.summaryContainer = control:GetNamedChild("Summary")
+    local function UpdateSummary()
+        self.summaryRefreshGroup:UpdateRefreshGroups()
+    end
+    self.summaryContainer:SetHandler("OnUpdate", UpdateSummary)
+    self.summaryContentContainer = self.summaryContainer:GetNamedChild("Content")
+    self.summaryScrollChild = self.summaryContentContainer:GetNamedChild("ScrollChild")
 
     local function UpdateShowLockedAndRefresh(button, checked)
         ITEM_SET_COLLECTIONS_DATA_MANAGER:SetShowLocked(checked)
@@ -310,6 +332,46 @@ function ZO_ItemSetsBook_Keyboard:InitializeGridList()
     gridListPanelList:SetHeaderPrePadding(TILE_GRID_PADDING * 2)
 end
 
+function ZO_ItemSetsBook_Keyboard:InitializeSummaryCategoryContent()
+    if not self.summaryCategoryControls then
+        self.summaryCategoryControls = {}
+
+        local totalControl = self.summaryScrollChild:GetNamedChild("Total")
+        local previousLeftControl, previousRightControl = totalControl, totalControl
+        local index = 0
+        for _, categoryData in ITEM_SET_COLLECTIONS_DATA_MANAGER:TopLevelItemSetCollectionCategoryIterator() do
+            local categoryId = categoryData:GetId()
+            local categoryControl = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)Category", self.summaryScrollChild, "ZO_ItemSetsBook_SummaryEntry_Header_Keyboard", tostring(categoryId))
+
+            self.summaryCategoryControls[categoryData] = categoryControl
+            categoryControl.categoryData = categoryData
+            categoryControl.nameLabel:SetText(categoryData:GetFormattedName())
+
+            if index % 2 == 0 then
+                categoryControl:SetAnchor(TOPLEFT, previousLeftControl, BOTTOMLEFT)
+                if previousLeftControl == totalControl then
+                    categoryControl:SetAnchor(TOPRIGHT, previousLeftControl, BOTTOM, -10)
+                else
+                    categoryControl:SetAnchor(TOPRIGHT, previousLeftControl, BOTTOMRIGHT)
+                end
+
+                previousLeftControl = categoryControl
+            else
+                if previousRightControl == totalControl then
+                    categoryControl:SetAnchor(TOPLEFT, previousRightControl, BOTTOM, 10)
+                else
+                    categoryControl:SetAnchor(TOPLEFT, previousRightControl, BOTTOMLEFT)
+                end
+                categoryControl:SetAnchor(TOPRIGHT, previousRightControl, BOTTOMRIGHT)
+
+                previousRightControl = categoryControl
+            end
+
+            index = index + 1
+        end
+    end
+end
+
 function ZO_ItemSetsBook_Keyboard:OnItemSetCollectionsUpdated(...)
     ZO_ItemSetsBook_Shared.OnItemSetCollectionsUpdated(self, ...)
 
@@ -371,6 +433,12 @@ function ZO_ItemSetsBook_Keyboard:GetGridHeaderEntryDataObjectPool()
     return self.entryDataObjectPool
 end
 
+function ZO_ItemSetsBook_Keyboard:SetFiltersHidden(hidden)
+    self.apparelFilterTypesControl:SetHidden(hidden)
+    self.weaponFilterTypesControl:SetHidden(hidden)
+    self.showLockedCheckBox:SetHidden(hidden)
+end
+
 function ZO_ItemSetsBook_Keyboard:IsSetHeaderCollapsed(itemSetId)
     return self.collapsedSetIds[itemSetId] or false
 end
@@ -387,14 +455,35 @@ end
 function ZO_ItemSetsBook_Keyboard:RefreshCategories()
     self.categoryTree:Reset()
 
-    for _, topLevelCategoryData in ITEM_SET_COLLECTIONS_DATA_MANAGER:TopLevelItemSetCollectionCategoryIterator(self.categoryFilters) do
-        self:AddCategory(topLevelCategoryData)
+    local categoryList = {}
+    local categoryFilters = self.categoryFilters
+    for _, topLevelCategoryData in ITEM_SET_COLLECTIONS_DATA_MANAGER:TopLevelItemSetCollectionCategoryIterator(categoryFilters) do
+        table.insert(categoryList, topLevelCategoryData)
+    end
+
+    local selectedCategory = self:GetSelectedCategory()
+    if #categoryList == 0 and not ITEM_SET_COLLECTIONS_DATA_MANAGER:HasSearchFilter() then
+        -- Add all categories, regardless of current filters, if no categories are visible and a search is not in progress.
+        categoryFilters = nil
+        for _, topLevelCategoryData in ITEM_SET_COLLECTIONS_DATA_MANAGER:TopLevelItemSetCollectionCategoryIterator() do
+            table.insert(categoryList, topLevelCategoryData)
+        end
+    end
+
+    if not self:IsReconstructing() then
+        -- Insert the special Summary category.
+        table.insert(categoryList, 1, ITEM_SET_COLLECTIONS_SUMMARY_CATEGORY_DATA)
+    end
+
+    local EMPTY_PARENT_NODE = nil
+    for _, topLevelCategoryData in ipairs(categoryList) do
+        self:AddCategory(topLevelCategoryData, EMPTY_PARENT_NODE, categoryFilters)
     end
 
     self.categoryTree:Commit()
 
-    -- If no category is selected, that likely means the search had no results, so there won't be a typical selection event, so manually refresh the content
-    if not self:GetSelectedCategory() then
+    if not selectedCategory then
+        -- If no category is selected, that likely means the search had no results, so there won't be a typical selection event, so manually refresh the content.
         self.categoryContentRefreshGroup:MarkDirty("All")
     end
 end
@@ -409,14 +498,51 @@ end
 function ZO_ItemSetsBook_Keyboard:RefreshCategoryContent()
     local itemSetCollectionCategoryData = self:GetSelectedCategory()
     if itemSetCollectionCategoryData then
-        self.categoryContentContainer:SetHidden(false)
-
-        self:RefreshCategoryProgress()
-        self:RefreshCategoryContentList()
+        if itemSetCollectionCategoryData:IsInstanceOf(ZO_ItemSetCollectionSummaryCategoryData) then
+            -- Summary category
+            self:SetFiltersHidden(true)
+            self.categoryContentContainer:SetHidden(true)
+            self.noMatchesLabel:SetHidden(true)
+            self.summaryContainer:SetHidden(false)
+            self.summaryRefreshGroup:UpdateRefreshGroups()
+        else
+            -- Standard category
+            self:SetFiltersHidden(false)
+            self.categoryContentContainer:SetHidden(false)
+            self.summaryContainer:SetHidden(true)
+            self:RefreshCategoryProgress()
+            self:RefreshCategoryContentList()
+        end
     else
+        -- No category
         self.categoryContentContainer:SetHidden(true)
+        self.summaryContainer:SetHidden(true)
         self.noMatchesLabel:SetHidden(false)
     end
+end
+
+-- Do not call this directly, instead call self.summaryRefreshGroup:MarkDirty("FullUpdate")
+function ZO_ItemSetsBook_Keyboard:RefreshSummaryCategoryContent()
+    self:InitializeSummaryCategoryContent()
+
+    local sumUnlockedPieces, sumTotalPieces = 0, 0
+    for _, categoryData in ITEM_SET_COLLECTIONS_DATA_MANAGER:TopLevelItemSetCollectionCategoryIterator() do
+        local categoryControl = self.summaryCategoryControls[categoryData]
+        if categoryControl then
+            local unlockedPieces, totalPieces = categoryData:GetNumUnlockedAndTotalPieces()
+            local progressText = zo_strformat(SI_ITEM_SETS_BOOK_CATEGORY_PROGRESS, ZO_CommaDelimitNumber(unlockedPieces), ZO_CommaDelimitNumber(totalPieces))
+
+            categoryControl.progressBar:SetValue(unlockedPieces / totalPieces)
+            categoryControl.progressBar.progress:SetText(progressText)
+            sumUnlockedPieces = sumUnlockedPieces + unlockedPieces
+            sumTotalPieces = sumTotalPieces + totalPieces
+        end
+    end
+
+    local sumProgressText = zo_strformat(SI_ITEM_SETS_BOOK_CATEGORY_PROGRESS, ZO_CommaDelimitNumber(sumUnlockedPieces), ZO_CommaDelimitNumber(sumTotalPieces))
+    local totalControl = self.summaryScrollChild:GetNamedChild("Total")
+    totalControl.progressBar:SetValue(sumUnlockedPieces / sumTotalPieces)
+    totalControl.progressBar.progress:SetText(sumProgressText)
 end
 
 -- Do not call this directly, instead call self.categoryContentRefreshGroup:MarkDirty("List")
@@ -463,4 +589,30 @@ end
 
 function ZO_ItemSetsBook_Entry_Header_Keyboard_OnMouseExit(control)
     ITEM_SET_COLLECTIONS_BOOK_KEYBOARD:OnContentHeaderMouseExit(control)
+end
+
+function ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnInitialize(control)
+    control.progressBar.gloss = control.progressBar:GetNamedChild("Gloss")
+    control.progressBar.progress = control.progressBar:GetNamedChild("Progress")
+    ZO_StatusBar_SetGradientColor(control.progressBar, ZO_XP_BAR_GRADIENT_COLORS)
+end
+
+function ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnMouseUp(control, button, upInside)
+    if control.categoryData then
+        ITEM_SET_COLLECTIONS_BOOK_KEYBOARD:NavigateToItemSetCollectionCategoryData(control.categoryData)
+    end
+end
+
+function ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnMouseEnter(control)
+    if control.categoryData then
+        control.nameLabel:SetColor(ZO_HIGHLIGHT_TEXT:UnpackRGBA())
+        ZO_ResponsiveArrowBar_OnMouseEnter(control.progressBar)
+    end
+end
+
+function ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnMouseExit(control)
+    if control.categoryData then
+        control.nameLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+        ZO_ResponsiveArrowBar_OnMouseExit(control.progressBar)
+    end
 end

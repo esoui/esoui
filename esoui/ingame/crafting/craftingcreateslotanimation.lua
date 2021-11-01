@@ -23,10 +23,7 @@ do
                 return burst
             end
 
-            local function Reset()
-            end
-
-            g_burstPool = ZO_ObjectPool:New(Factory, Reset)
+            g_burstPool = ZO_ObjectPool:New(Factory)
         end
 
         local burst, key = g_burstPool:AcquireObject()

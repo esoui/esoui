@@ -69,7 +69,7 @@
         <Control name="ZO_GamepadSkillsActionButton" inherits="ZO_GamepadSkillsActionButtonNoKeybind" virtual="true">
             <Dimensions x="40" y="40" />
             <Controls>
-                <Label name="$(parent)KeybindLabel" font="ZoFontGamepad18" alpha="1" layer="OVERLAY" tier="HIGH" pixelRoundingEnabled="false">
+                <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad" alpha="1" layer="OVERLAY" tier="HIGH" pixelRoundingEnabled="false">
                     <Anchor point="BOTTOM" relativeTo="$(parent)Icon" relativePoint="TOP" offsetY="10"/>
                 </Label>
             </Controls>

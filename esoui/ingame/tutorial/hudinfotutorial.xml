@@ -74,7 +74,7 @@
             </OnInitialized>
 
             <Controls>
-                <!--This makes sure the parent locks in its width for the resizeToFitDescendants (namely for the backdrop), 
+                <!--This makes sure the parent locks in its width for the resizeToFitDescendents (namely for the backdrop), 
                     so everything below can base their respective widths on this-->
                 <Control name="$(parent)Spacer">
                     <Dimensions x="ZO_GAMEPAD_PANEL_WIDTH" />

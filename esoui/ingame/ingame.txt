@@ -47,6 +47,7 @@ EsoUI\Ingame\Tooltip\SkillBuildTooltips.lua
 EsoUI\Ingame\Tooltip\SkillTooltips.lua
 EsoUI\Ingame\Tooltip\SocialTooltips.lua
 EsoUI\Ingame\Tooltip\StableTooltips.lua
+EsoUI\Ingame\Tooltip\ArmoryTooltips.lua
 EsoUI\Ingame\Tooltip\Console\VoiceChatTooltips.lua
 
 EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.xml
@@ -1480,6 +1481,31 @@ EsoUI\Ingame\TimedActivities\Gamepad\TimedActivities_Gamepad.lua
 EsoUI\Ingame\TimedActivities\Gamepad\TimedActivities_Gamepad.xml
 EsoUI\Ingame\TimedActivities\Keyboard\TimedActivities_Keyboard.lua
 EsoUI\Ingame\TimedActivities\Keyboard\TimedActivities_Keyboard.xml
+
+EsoUI\Ingame\Armory\ArmoryBuildData.lua
+EsoUI\Ingame\Armory\Armory_Manager.lua
+EsoUI\Ingame\Armory\ArmoryChampionActionBar.lua
+EsoUI\Ingame\Armory\ArmoryChampionActionBar.xml
+EsoUI\Ingame\Armory\ArmorySkillsActionBar.lua
+EsoUI\Ingame\Armory\ArmorySkillsActionBar.xml
+EsoUI\Ingame\Armory\ArmoryDialogs.lua
+EsoUI\Ingame\Armory\ArmoryBuildIconPicker_Shared.lua
+EsoUI\Ingame\Armory\Keyboard\ArmoryBuildIconPicker_Keyboard.lua
+EsoUI\Ingame\Armory\Keyboard\ArmoryBuildIconPicker_Keyboard.xml
+EsoUI\Ingame\Armory\Keyboard\ArmoryDialogs_Keyboard.lua
+EsoUI\Ingame\Armory\Keyboard\ArmoryDialogs_Keyboard.xml
+EsoUI\Ingame\Armory\Keyboard\Armory_Keyboard.lua
+EsoUI\Ingame\Armory\Keyboard\Armory_Keyboard.xml
+EsoUI\Ingame\Armory\Gamepad\ArmoryBuildIconPicker_Gamepad.lua
+EsoUI\Ingame\Armory\Gamepad\ArmoryBuildIconPicker_Gamepad.xml
+EsoUI\Ingame\Armory\Gamepad\Armory_Gamepad.lua
+EsoUI\Ingame\Armory\Gamepad\Armory_Gamepad.xml
+EsoUI\Ingame\Armory\Gamepad\ArmoryBuildOverview_Gamepad.lua
+EsoUI\Ingame\Armory\Gamepad\ArmoryBuildOverview_Gamepad.xml
+EsoUI\Ingame\Armory\Gamepad\ArmoryBuildSkills_Gamepad.lua
+EsoUI\Ingame\Armory\Gamepad\ArmoryBuildSkills_Gamepad.xml
+EsoUI\Ingame\Armory\Gamepad\ArmoryBuildChampion_Gamepad.lua
+EsoUI\Ingame\Armory\Gamepad\ArmoryBuildChampion_Gamepad.xml
 
 ; Subtitles needs to be loaded after PlayerToPlayer so it can anchor off of it
 EsoUI\Ingame\Subtitles\Subtitles.lua

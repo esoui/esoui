@@ -291,6 +291,14 @@ do
     end
     FRAME_INTERACTION_QUADRANT_4_GAMEPAD_FRAGMENT = ZO_InteractionFramingFragment:New(CalculateGamepadQuadrant4FramingTarget)
     FRAME_TARGET_BLUR_QUADRANT_4_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadQuadrant4FramingTarget)
+
+    local function CalculateGamepadQuadrant34FramingTarget()
+        local x = zo_lerp(ZO_SharedGamepadNavQuadrant_3_Background:GetLeft(), ZO_SharedGamepadNavQuadrant_4_Background:GetRight(), 0.725)
+        local y = zo_lerp(ZO_TopBarBackground:GetBottom(), ZO_KeybindStripMungeBackgroundTexture:GetTop(), 0.55)
+        return x, y
+    end
+    FRAME_INTERACTION_QUADRANT_3_4_GAMEPAD_FRAGMENT = ZO_InteractionFramingFragment:New(CalculateGamepadQuadrant34FramingTarget)
+    FRAME_TARGET_BLUR_QUADRANT_3_4_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadQuadrant34FramingTarget)
 end
 
 ------------------------
@@ -496,7 +504,7 @@ function ZO_MinimizeChatFragment:New(actionLayerName)
 end
 
 function ZO_MinimizeChatFragment:Show()
-    local chatSystem = SYSTEMS:GetObject("ChatSystem")
+    local chatSystem = ZO_GetChatSystem()
     self.wasChatMaximized = not chatSystem:IsMinimized()
     if self.wasChatMaximized then
         chatSystem:Minimize()
@@ -505,7 +513,7 @@ function ZO_MinimizeChatFragment:Show()
 end
 
 function ZO_MinimizeChatFragment:Hide()
-    local chatSystem = SYSTEMS:GetObject("ChatSystem")
+    local chatSystem = ZO_GetChatSystem()
     if (self.wasChatMaximized or (chatSystem:IsPinnable() and chatSystem:IsWindowPinned())) and chatSystem:IsMinimized() then
         chatSystem:Maximize()
     end

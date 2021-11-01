@@ -261,6 +261,12 @@ function ZO_Gamepad_ParametricList_Screen:SetParentFragment(parentFragment)
     self.parentFragment = parentFragment
 end
 
+function ZO_Gamepad_ParametricList_Screen:IsShowing()
+    local isSceneShowing = self.scene ~= nil and SCENE_MANAGER:IsShowing(self.scene.name)
+    local isParentFragmentShowing = self.parentFragment ~= nil and self.parentFragment:IsShowing()
+    return isSceneShowing or isParentFragmentShowing
+end
+
 -- Header functions --
 
 function ZO_Gamepad_ParametricList_Screen:AddSearch(textSearchKeybindStripDescriptor, onTextSearchTextChangedCallback)
@@ -382,7 +388,7 @@ function ZO_Gamepad_ParametricList_Screen:OnLeaveHeader()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
         end
 
-        if self.keybindStripDescriptor then
+        if self.keybindStripDescriptor and self:IsShowing() then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
         end
     end
@@ -456,9 +462,7 @@ end
 
 -- A function that can be called from (or as) the header's tabBar callback.
 function ZO_Gamepad_ParametricList_Screen:OnTabBarCategoryChanged(selectedData)
-    local isSceneShowing = self.scene ~= nil and SCENE_MANAGER:IsShowing(self.scene.name)
-    local isParentFragmentShowing = self.parentFragment ~= nil and self.parentFragment:IsShowing()
-    if isSceneShowing or isParentFragmentShowing then
+    if self:IsShowing() then
         if self.currentFragment then
             SCENE_MANAGER:RemoveFragment(self.currentFragment)
         end

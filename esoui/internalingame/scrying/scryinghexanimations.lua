@@ -322,9 +322,9 @@ end
 function ZO_ScryingHexAnimationProvider:Initialize()
     self.idleAnimationPool = ZO_AnimationPool:New("ZO_ScryingHex_Idle")
     self.flashAnimationPool = ZO_AnimationPool:New("ZO_ScryingHex_Flash")
-    self.goalPool = ZO_ObjectPool:New(ZO_ScryingGoal, ZO_ScryingGoal.Reset)
+    self.goalPool = ZO_ObjectPool:New(ZO_ScryingGoal, ZO_ObjectPool_DefaultResetObject)
     self.numBlockingGoals = 0
-    self.borderIslandPool = ZO_ObjectPool:New(ZO_ScryingBorderIsland, ZO_ScryingBorderIsland.Reset)
+    self.borderIslandPool = ZO_ObjectPool:New(ZO_ScryingBorderIsland, ZO_ObjectPool_DefaultResetObject)
 end
 
 function ZO_ScryingHexAnimationProvider:ReleaseAllAnimations()

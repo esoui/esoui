@@ -39,3 +39,15 @@ function ZO_Tooltip:LayoutSettingAccountGetUpdates(hasActivatedEmail)
     bodySection:AddLine(GetString(SI_INTERFACE_OPTIONS_ACCOUNT_GET_UPDATES_TOOLTIP_TEXT))
     self:AddSection(bodySection)
 end
+
+function ZO_Tooltip:LayoutSettingTooltip(tooltipText, warningText)
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    bodySection:AddLine(tooltipText, self:GetStyle("bodyDescription"))
+    self:AddSection(bodySection)
+
+    if warningText then
+        local warningSection = self:AcquireSection(self:GetStyle("bodySection"))
+        warningSection:AddLine(warningText, self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+        self:AddSection(warningSection)
+    end
+end

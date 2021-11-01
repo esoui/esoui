@@ -45,6 +45,13 @@ panelBuilder:AddSetting({
     header = SI_GAMEPLAY_OPTIONS_GENERAL,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_CompanionPassengerPreference",
+    settingType = SETTING_TYPE_IN_WORLD,
+    settingId = IN_WORLD_UI_SETTING_COMPANION_PASSENGER_PREFERENCE,
+    header = SI_GAMEPLAY_OPTIONS_GENERAL,
+})
+
 -------------------------
 -- Gameplay -> Combat  --
 -------------------------
@@ -162,6 +169,14 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_GAMEPAD,
     settingId = GAMEPAD_SETTING_INPUT_PREFERRED_MODE,
     header = SI_GAMEPAD_SECTION_HEADER,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_UseKeyboardChat",
+    settingType = SETTING_TYPE_GAMEPAD,
+    settingId = GAMEPAD_SETTING_USE_KEYBOARD_CHAT,
+    header = SI_GAMEPAD_SECTION_HEADER,
+    indentLevel = 1,
 })
 
 -------------------------

@@ -27,10 +27,6 @@ end
 --[[ Multicraft Spinner ]]--
 ZO_MultiCraftSpinner = ZO_Spinner:Subclass()
 
-function ZO_MultiCraftSpinner:New(...)
-    return ZO_Spinner.New(self, ...)
-end
-
 function ZO_MultiCraftSpinner:Initialize(control)
     -- init will require minMaxButton to be defined so we can safely call UpdateButtons()
     self.minMaxButton = control:GetNamedChild("MinMax")

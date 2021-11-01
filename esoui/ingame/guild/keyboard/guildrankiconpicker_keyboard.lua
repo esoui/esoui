@@ -9,10 +9,6 @@ ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_KEYBOARD_OFFSET = 10
 
 ZO_GuildRankIconPicker_Keyboard = ZO_GuildRankIconPicker_Shared:Subclass()
 
-function ZO_GuildRankIconPicker_Keyboard:New(...)
-    return ZO_GuildRankIconPicker_Shared.New(self, ...)
-end
-
 function ZO_GuildRankIconPicker_Keyboard:Initialize(control)
     local templateData =
     {

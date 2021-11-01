@@ -1,3 +1,5 @@
+local MIN_PURCHASE_QUANTITY = 1
+
 local function LogPurchaseClose(dialog)
     if dialog.data then
         if not dialog.data.dontLogClose then
@@ -342,7 +344,17 @@ local TEXT_CALLOUT_BACKGROUND_ALPHA = 0.9
 local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data)
     local marketPurchaseData
     if data.marketProductData then
+        local quantity = data.quantity or MIN_PURCHASE_QUANTITY
         local marketCurrencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = data.marketProductData:GetMarketProductPricingByPresentation()
+        if cost then
+            cost = cost * quantity
+        end
+        if costAfterDiscount then
+            costAfterDiscount = costAfterDiscount * quantity
+        end
+        if esoPlusCost then
+            esoPlusCost = esoPlusCost * quantity
+        end
         marketPurchaseData =
         {
             marketCurrencyType = marketCurrencyType,
@@ -420,7 +432,7 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
         local extraOptions =
         {
             color = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
-            iconInheritColor = marketCurrencyType ~= MKCT_CROWN_GEMS,
+            iconInheritColor = marketPurchaseData.marketCurrencyType ~= MKCT_CROWN_GEMS,
         }
         local currencyString = ZO_Currency_FormatKeyboard(currencyType, marketPurchaseData.esoPlusCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON, extraOptions)
 
@@ -479,28 +491,93 @@ local function MarketPurchaseSelectTemplateDialogSetupHouseInfoControls(dialog, 
     end
 end
 
+local function MarketPurchaseConfirmationDialogSetupQuantityControls(dialog, data)
+    local marketProductData = data.marketProductData
+    local maxQuantity
+    if data.isGift then
+        maxQuantity = marketProductData:GetMaxGiftQuantity()
+    else
+        maxQuantity = marketProductData:GetMaxPurchaseQuantity()
+    end
+    data.maxQuantity = maxQuantity
+
+    local quantityContainer = dialog.quantityContainer
+    local quantityEnabled = maxQuantity > 1
+    if quantityEnabled then
+        if maxQuantity == MAX_MARKET_PURCHASE_QUANTITY then
+            -- No predetermined quantity limit requires input but excludes the maximum limit label.
+            quantityContainer.quantityMaxLabel:SetHidden(true)
+        else
+            -- A maximum quantity greater than one requires input and the maximum limit label.
+            quantityContainer.quantityMaxLabel:SetText(zo_strformat(SI_MARKET_CONFIRM_PURCHASE_MAXIMUM_LABEL, maxQuantity))
+            quantityContainer.quantityMaxLabel:SetHidden(false)
+        end
+        quantityContainer.quantitySpinner:SetMinMax(MIN_PURCHASE_QUANTITY, maxQuantity)
+        quantityContainer:SetHidden(false)
+    else
+        -- Maximum quantity of zero or one does not require input or the maximum limit label.
+        quantityContainer:SetHidden(true)
+    end
+
+    local itemContainerControl = dialog:GetNamedChild("ItemContainer")
+    local itemContainerTextContainer = itemContainerControl:GetNamedChild("ItemText")
+    local iconTextureControl = itemContainerControl:GetNamedChild("Icon")
+
+    itemContainerTextContainer:ClearAnchors()
+    if quantityEnabled then
+        itemContainerTextContainer:SetAnchor(TOPLEFT, iconTextureControl, TOPRIGHT, 10)
+    else
+        itemContainerTextContainer:SetAnchor(LEFT, iconTextureControl, RIGHT, 10)
+    end
+end
+
 local function UpdateConfirmRestrictions(dialogControl)
     local nameEditControl = dialogControl:GetNamedChild("GiftRecipientEditBox")
     local confirmButton = dialogControl:GetNamedChild("Confirm")
     local confirmButtonState, confirmButtonStateLocked = BSTATE_NORMAL, false
+    local errorText, errorControl
 
     local data = dialogControl.data
     if data.isGift then
         local recipientDisplayName = nameEditControl:GetText()
         local result = IsGiftRecipientNameValid(recipientDisplayName)
-        local errorText
         if result ~= GIFT_ACTION_RESULT_SUCCESS then
             confirmButtonState, confirmButtonStateLocked = BSTATE_DISABLED, true
             if result ~= GIFT_ACTION_RESULT_RECIPIENT_EMPTY then
                 errorText = zo_strformat(GetString("SI_GIFTBOXACTIONRESULT", result), recipientDisplayName)
+                errorControl = nameEditControl
             end
         end
-        if errorText then
-            InitializeTooltip(InformationTooltip, nameEditControl, RIGHT, -35, 0)
-            SetTooltipText(InformationTooltip, errorText, ZO_ERROR_COLOR:UnpackRGB())
+    end
+
+    local maxQuantityLabel = dialogControl.quantityContainer.quantityMaxLabel
+    maxQuantityLabel:SetColor(ZO_HIGHLIGHT_TEXT:UnpackRGB())
+
+    MarketPurchaseConfirmationDialogSetupQuantityControls(dialogControl, data)
+
+    if not dialogControl.quantityContainer:IsControlHidden() then
+        local quantity = data.quantity
+        local isValid, result
+        if data.isGift then
+            isValid, result = data.marketProductData:IsGiftQuantityValid(quantity)
         else
-            ClearTooltip(InformationTooltip)
+            isValid, result = data.marketProductData:IsPurchaseQuantityValid(quantity)
         end
+        if not isValid then
+            confirmButtonState, confirmButtonStateLocked = BSTATE_DISABLED, true
+            errorControl = maxQuantityLabel
+            if result == MARKET_PURCHASE_RESULT_EXCEEDS_MAX_QUANTITY then
+                errorText = zo_strformat(GetString("SI_MARKETPURCHASABLERESULT", result), data.maxQuantity)
+                maxQuantityLabel:SetColor(ZO_ERROR_COLOR:UnpackRGB())
+            else
+                errorText = GetString("SI_MARKETPURCHASABLERESULT", result)
+            end
+        end
+    end
+
+    if errorText then
+        InitializeTooltip(InformationTooltip, errorControl, LEFT, 20, 0)
+        SetTooltipText(InformationTooltip, errorText, ZO_ERROR_COLOR:UnpackRGB())
     else
         ClearTooltipImmediately(InformationTooltip)
     end
@@ -532,6 +609,10 @@ end
 
 local function MarketPurchaseConfirmationDialogSetup(dialog, data)
     local marketProductData = data.marketProductData
+
+    local quantity = MIN_PURCHASE_QUANTITY
+    data.quantity = quantity
+    dialog.quantityContainer.quantitySpinner:SetValue(quantity)
 
     local selectedRadioButton, otherRadioButtonResult, otherRadioButton, anchorToControl, anchorDirection
     local selectedRadioButtonWarningStrings = {}
@@ -614,15 +695,16 @@ local function MarketPurchaseConfirmationDialogSetup(dialog, data)
 
     local itemContainerControl = dialog:GetNamedChild("ItemContainer")
     local itemContainerTextContainer = itemContainerControl:GetNamedChild("ItemText")
+    local itemNameControl = itemContainerTextContainer:GetNamedChild("ItemName")
 
     local houseId = GetMarketProductHouseId(data.marketProductData.marketProductId)
     if houseId > 0 then
         local houseCollectibleId = GetCollectibleIdForHouse(houseId)
         local houseDisplayName = GetCollectibleName(houseCollectibleId)
-        itemContainerTextContainer:GetNamedChild("ItemName"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, houseDisplayName))
+        itemNameControl:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, houseDisplayName))
         itemContainerTextContainer:GetNamedChild("ItemDetail"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, data.itemName))
     else
-        itemContainerTextContainer:GetNamedChild("ItemName"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, data.itemName))
+        itemNameControl:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, data.itemName))
         itemContainerTextContainer:GetNamedChild("ItemDetail"):SetText("")
     end
 
@@ -636,9 +718,39 @@ local function MarketPurchaseConfirmationDialogSetup(dialog, data)
     stackCountControl:SetText(stackSize)
     stackCountControl:SetHidden(stackSize < 2)
 
+    MarketPurchaseConfirmationDialogSetupQuantityControls(dialog, data)
     MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data)
-
     UpdateConfirmRestrictions(dialog)
+end
+
+local function ConfirmMarketPurchaseDialog(dialog)
+    local data = dialog.data
+    data.logPurchasedMarketId = true
+
+    local marketProductData = data.marketProductData
+    local quantity = data.quantity
+    local recipientDisplayName
+    local note
+
+    if data.isGift then
+        recipientDisplayName = dialog:GetNamedChild("GiftRecipientEditBox"):GetText()
+        note = dialog:GetNamedChild("NoteEdit"):GetText()
+    end
+
+    -- the MARKET_PURCHASING dialog will be queued to show once this one is hidden
+    ZO_Dialogs_ShowDialog("MARKET_PURCHASING", {itemName = data.itemName, marketProductData = marketProductData, recipientDisplayName = recipientDisplayName, note = note, quantity = quantity})
+
+    if data.isGift then
+        marketProductData:RequestPurchaseAsGift(note, recipientDisplayName, quantity)
+    else
+        marketProductData:RequestPurchase(quantity)
+    end
+end
+
+function ZO_MarketPurchaseConfirmationDialog_OnQuantityChanged(dialog, quantity)
+    dialog.data.quantity = quantity
+    UpdateConfirmRestrictions(dialog)
+    MarketPurchaseConfirmationDialogSetupPricingControls(dialog, dialog.data)
 end
 
 function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
@@ -672,6 +784,10 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
             data.isGift = true
         end
 
+        -- Always reset to the default quantity when toggling between gifting and purchasing.
+        data.quantity = MIN_PURCHASE_QUANTITY
+        control.quantityContainer.quantitySpinner:SetValue(data.quantity)
+
         UpdateConfirmRestrictions(control)
         MarketPurchaseConfirmationDialogSetupGiftingControls(control, data)
         MarketPurchaseConfirmationDialogSetupPricingControls(control, data)
@@ -689,11 +805,55 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
 
     -- Note edit
     local noteEdit = control:GetNamedChild("NoteEdit")
+
+    local function OnRandomNoteClicked(control, confirmed)
+        local generateNote = false
+        if confirmed then
+            generateNote = true
+        else
+            local noteText = noteEdit:GetText()
+            if noteText == "" or noteText == control._lastRandomNoteText then
+                generateNote = true
+            end
+        end
+
+        if generateNote then
+            -- The note field was already empty or was populated with the last generated note text,
+            -- or the player gave confirmation.
+            local randomNoteText = GetRandomGiftSendNoteText()
+            control._lastRandomNoteText = randomNoteText
+            noteEdit:SetText(randomNoteText)
+
+            -- Indicate that the operation was carried out.
+            return true
+        end
+
+        -- Indicate that player confirmation is required.
+        return false
+    end
+
     local randomNoteButton = control:GetNamedChild("NoteRandomText"):GetNamedChild("Button")
-    randomNoteButton:SetText(zo_iconFormat("EsoUI/Art/Market/Keyboard/giftMessageIcon_up.dds", "100%", "100%"))
-    randomNoteButton:SetHandler("OnClicked", function()
-        noteEdit:SetText(GetRandomGiftSendNoteText())
-    end)
+    local randomNoteButtonLabel = string.format("%s %s", GetString(SI_MARKET_GIFTING_RANDOM_NOTE_LABEL), zo_iconFormat("EsoUI/Art/Market/Keyboard/giftMessageIcon_up.dds", "100%", "100%"))
+    local randomNoteConfirmLabel = GetString(SI_MARKET_GIFTING_RANDOM_NOTE_CONFIRMATION_LABEL)
+    ZO_TimedConfirmationButton_Setup(randomNoteButton, randomNoteButtonLabel, randomNoteConfirmLabel, OnRandomNoteClicked)
+
+    -- Item Quantity
+    control.itemContainer = control:GetNamedChild("ItemContainer")
+    control.quantityContainer = control.itemContainer:GetNamedChild("QuantityContainer")
+    control.quantityContainer.quantityMaxLabel = control.quantityContainer:GetNamedChild("Maximum")
+
+    local quantitySpinner = ZO_Spinner:New(control.quantityContainer:GetNamedChild("Spinner"))
+    control.quantityContainer.quantitySpinner = quantitySpinner
+
+    local quantityEditControl = quantitySpinner.display
+    quantityEditControl:SetSelectAllOnFocus(true)
+    ZO_MarketPurchaseConfirmationDialog_RegisterEditControl(quantityEditControl)
+    quantityEditControl:SetHandler("OnTab", function() ZO_MarketPurchaseConfirmationDialog_FocusNextEditControl(quantityEditControl) end)
+
+    local function OnQuantityChanged(quantity)
+        ZO_MarketPurchaseConfirmationDialog_OnQuantityChanged(control:GetOwningWindow(), quantity)
+    end
+    control.quantityContainer.quantitySpinner:RegisterCallback("OnValueChanged", OnQuantityChanged)
 
     ZO_Dialogs_RegisterCustomDialog(
         "MARKET_PURCHASE_CONFIRMATION",
@@ -710,25 +870,7 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
                 {
                     control = control:GetNamedChild("Confirm"),
                     text = SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT,
-                    callback =  function(dialog)
-                                    local data = dialog.data
-                                    data.logPurchasedMarketId = true
-                                    local marketProductData = data.marketProductData
-                                    local recipientDisplayName
-                                    local note
-                                    if data.isGift then
-                                        recipientDisplayName = dialog:GetNamedChild("GiftRecipientEditBox"):GetText()
-                                        note = dialog:GetNamedChild("NoteEdit"):GetText()
-                                    end
-                                    -- the MARKET_PURCHASING dialog will be queued to show once this one is hidden
-                                    ZO_Dialogs_ShowDialog("MARKET_PURCHASING", {itemName = data.itemName, marketProductData = marketProductData, recipientDisplayName = recipientDisplayName, note = note})
-
-                                    if data.isGift then
-                                        marketProductData:RequestPurchaseAsGift(note, recipientDisplayName)
-                                    else
-                                        marketProductData:RequestPurchase()
-                                    end
-                                end,
+                    callback = ConfirmMarketPurchaseDialog,
                 },
 
                 {
@@ -943,7 +1085,9 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
 
             local marketProductData = data.marketProductData
             local marketProductId = marketProductData:GetId()
+            local quantity = data.quantity
             local stackCount = marketProductData:GetStackCount()
+            local totalStackCount = stackCount * quantity
             local itemName = data.itemName
             local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
             local houseId = GetMarketProductHouseId(marketProductId)
@@ -954,8 +1098,8 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
             end
 
             if data.wasGift then
-                if stackCount > 1 then
-                    mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
+                if totalStackCount > 1 then
+                    mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), totalStackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
                 else
                     mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, color:Colorize(itemName), ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
                 end
@@ -965,15 +1109,15 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
                     if useProductInfo.transactionCompleteTitleText then
                         titleText = useProductInfo.transactionCompleteTitleText
                     end
-                    mainText = zo_strformat(useProductInfo.transactionCompleteText, color:Colorize(itemName), stackCount)
+                    mainText = zo_strformat(useProductInfo.transactionCompleteText, color:Colorize(itemName), totalStackCount)
 
                     local useProductControl = dialog:GetNamedChild("UseProduct")
                     useProductControl:SetHidden(useProductInfo.visible and not useProductInfo.visible())
                     useProductControl:SetEnabled(not useProductInfo.enabled or useProductInfo.enabled())
                     useProductControl:SetText(useProductInfo.buttonText)
                 else
-                    if stackCount > 1 then
-                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount)
+                    if totalStackCount > 1 then
+                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), totalStackCount)
                     elseif marketProductData:GetNumAttachedCollectibles() > 0 then
                         mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, color:Colorize(itemName))
                     else
@@ -982,7 +1126,7 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
                 end
 
                 -- append ESO Plus savings, if any
-                local esoPlusSavingsString = ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(data.marketProductData)
+                local esoPlusSavingsString = ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(marketProductData, quantity)
                 if esoPlusSavingsString then
                     mainText = string.format("%s\n\n%s", mainText, esoPlusSavingsString)
                 end
@@ -1010,7 +1154,7 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
     elseif data.currentState == MARKET_PURCHASING_STATE_DELAY and timeInMilliseconds > data.loadingDelayTimeMS then
         data.currentState = MARKET_PURCHASING_STATE_WAITING
 
-        ZO_Dialogs_UpdateDialogMainText(dialog, { text = zo_strformat(SI_MARKET_PURCHASING_TEXT, data.itemName), TEXT_ALIGN_CENTER })
+        ZO_Dialogs_UpdateDialogMainText(dialog, { text = zo_strformat(SI_MARKET_PURCHASING_TEXT, data.itemName, data.quantity), TEXT_ALIGN_CENTER })
         ZO_Dialogs_SetDialogLoadingIcon(dialog:GetNamedChild("Loading"), dialog:GetNamedChild("Text"), SHOW_LOADING_ICON)
     end
 end
@@ -1019,6 +1163,7 @@ local function MarketPurchasingDialogSetup(dialog, data)
     data.result = nil
     data.loadingDelayTimeMS = nil
     data.currentState = MARKET_PURCHASING_STATE_DELAY
+    data.quantity = data.quantity or 1
     EVENT_MANAGER:RegisterForEvent("MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(data, ...) end)
 
     dialog:GetNamedChild("Confirm"):SetHidden(true)
@@ -1089,4 +1234,51 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
             },
         }
     )
+end
+
+do
+    local editControls = {}
+
+    function ZO_MarketPurchaseConfirmationDialog_RegisterEditControl(control)
+        table.insert(editControls, control)
+    end
+
+    -- If no control is specified this gives focus to the first registered, visible edit control.
+    -- If a registered edit control is specified this gives focus to the next visible edit control that follows the specified control;
+    -- note that the edit control list behaves like a circular buffer.
+    function ZO_MarketPurchaseConfirmationDialog_FocusNextEditControl(control)
+        local numEditControls = #editControls
+        if numEditControls == 0 then
+            return
+        end
+
+        local controlIndex = nil
+        if control then
+            for index, editControl in ipairs(editControls) do
+                if editControl == control then
+                    controlIndex = index
+                    break
+                end
+            end
+
+            if not controlIndex then
+                return
+            end
+        end
+
+        local iterations = 0
+        local index = controlIndex or 0
+        repeat
+            index = index + 1
+            if index > numEditControls then
+                index = 1
+            end
+            local editControl = editControls[index]
+            if not editControl:IsHidden() then
+                editControl:TakeFocus()
+                break
+            end
+            iterations = iterations + 1
+        until iterations == numEditControls
+    end
 end

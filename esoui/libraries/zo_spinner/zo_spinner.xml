@@ -54,5 +54,15 @@
                 </Label>
             </Controls>
         </Control>
+
+        <Control name ="ZO_SpinnerKeyLabels" virtual="true">
+            <Controls>
+                <Label name="$(parent)DecreaseKeyLabel" inherits="ZO_ClickableKeybindLabel_Gamepad" />
+
+                <Label name="$(parent)IncreaseKeyLabel" inherits="ZO_ClickableKeybindLabel_Gamepad" />
+            </Controls>
+        </Control>
+
+        <Control name ="ZO_SpinnerWithLabels" inherits="ZO_Spinner ZO_SpinnerKeyLabels" virtual="true" />
     </Controls>
 </GuiXml>

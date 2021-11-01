@@ -235,6 +235,9 @@ do
             elseif instantUnlockType == INSTANT_UNLOCK_OUTFIT then
                 currentUnlock = GetNumUnlockedOutfits(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                 maxUnlock = MAX_OUTFIT_UNLOCKS
+            elseif instantUnlockType == INSTANT_UNLOCK_ARMORY_BUILD_SLOT then
+                currentUnlock = GetNumUnlockedArmoryBuilds()
+                maxUnlock = MAX_NUM_ARMORY_BUILDS
             end
 
             table.insert(tooltipLines, instantUnlockDescription)

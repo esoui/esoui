@@ -35,7 +35,7 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
     self:AddFurnitureListKeybind({    
         order = 1,
         name =  GetString(SI_HOUSING_EDITOR_PRECISION_EDIT),
-        keybind = "HOUSING_EDITOR_SENARY_ACTION",
+        keybind = "UI_SHORTCUT_QUINARY",
         callback =  function()
                         local targetData = self.furnitureList.list:GetTargetData()
                         if targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then

@@ -183,12 +183,12 @@ function ZO_ChatRouter:Initialize()
     end
 
     local function OnTryInsertLink(...)
-        return SYSTEMS:GetObject("ChatSystem"):HandleTryInsertLink(...)
+        return ZO_GetChatSystem():HandleTryInsertLink(...)
     end
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.INSERT_LINK_EVENT, OnTryInsertLink)
 
     local function OnLinkClicked(...)
-        return SYSTEMS:GetObject("ChatSystem"):OnLinkClicked(...)
+        return ZO_GetChatSystem():OnLinkClicked(...)
     end
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, OnLinkClicked)
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, OnLinkClicked)
@@ -283,9 +283,27 @@ CHAT_ROUTER = ZO_ChatRouter:New()
 
 --- Global functions ---
 function ZO_ChatSystem_DoesPlatformUseGamepadChatSystem()
-    return IsHeronUI() or IsConsoleUI()
+    return IsGamepadUISupported()
 end
 
 function ZO_ChatSystem_DoesPlatformUseKeyboardChatSystem()
     return IsKeyboardUISupported()
 end
+
+function ZO_ChatSystem_ShouldUseKeyboardChatSystem()
+    if not IsKeyboardUISupported() then
+        return false
+    end
+
+    local useKeyboardChat = GetSetting_Bool(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_USE_KEYBOARD_CHAT)
+    return IsInGamepadPreferredMode() == false or useKeyboardChat == true
+end
+
+function ZO_GetChatSystem()
+    if ZO_ChatSystem_ShouldUseKeyboardChatSystem() then
+        return SYSTEMS:GetKeyboardObject("ChatSystem")
+    else
+        return SYSTEMS:GetGamepadObject("ChatSystem")
+    end
+end
+

@@ -227,6 +227,11 @@
                     <Dimensions x="250" />
                     <Anchor point="LEFT" offsetX="100" />
                 </Label>
+
+                <Texture name="$(parent)StatusTexture" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Button" relativePoint="LEFT" offsetX="-5" />
+                </Texture>
             </Controls>
         </Control>
     </Controls>

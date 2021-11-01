@@ -1,0 +1,131 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ArmoryActionButton" virtual="true">
+            <OnInitialized>
+                self.abilityIcon = self:GetNamedChild("Icon")
+                self.lockIcon = self:GetNamedChild("Lock")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" hidden="true" />
+                <Texture name="$(parent)Lock" hidden="true"/>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_ArmoryActionButton_Keyboard" inherits="ZO_ArmoryActionButton" virtual="true">
+            <Dimensions x="50" y="50" />
+            <Controls>
+                <Button name="$(parent)Button">
+                    <AnchorFill />
+                    <Textures normal="EsoUI/Art/ActionBar/abilityFrame64_up.dds" />
+
+                    <OnMouseEnter>                       
+                        ZO_ArmoryActionButton_Keyboard_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_ArmoryActionButton_Keyboard_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Button>
+
+                <Texture name="$(parent)Icon" override="true" level="1">
+                    <Anchor point="CENTER" />
+                    <Dimensions x="47" y="47" />
+                </Texture>
+
+                <Texture name="$(parent)Lock" override="true" textureFile="EsoUI/Art/Miscellaneous/status_locked.dds" level="2">
+                    <Anchor point="CENTER" />
+                    <Dimensions x="32" y="32" />
+                </Texture>
+
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/ActionBar/abilityInset.dds" level="0">
+                    <Anchor point="CENTER" />
+                    <Dimensions x="47" y="47" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ArmoryActionButton_Gamepad" inherits="ZO_GamepadSkillsActionButton" virtual="true" tier="MEDIUM">
+            <OnInitialized>
+                self.abilityIcon = self:GetNamedChild("Icon")
+                self.lockIcon = self:GetNamedChild("Lock")
+            </OnInitialized>
+            
+            <Controls>
+                <Texture name="$(parent)Lock" override="true" hidden="true" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ArmoryUltimateButton_Keyboard" inherits="ZO_ArmoryActionButton_Keyboard" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Decoration" textureFile="EsoUI/Art/ActionBar/ability_ultimate_frameDecoBG.dds" level="2" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-25" offsetY="-25"/>
+                    <Dimensions x="100" y="100"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ArmorySkillsActionBar" virtual="true">
+            <OnInitialized>
+                ZO_ArmorySkillsActionBar:New(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="ZO_ArmorySkillsActionBar_Keyboard" inherits="ZO_ArmorySkillsActionBar" virtual="true" level="1">
+            <Dimensions x="375" y="50"/>
+            <Controls>
+                <Control name="$(parent)Button1" inherits="ZO_ArmoryActionButton_Keyboard">
+                    <Anchor point="LEFT" />
+                </Control>
+
+                <Control name="$(parent)Button2" inherits="ZO_ArmoryActionButton_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button1" relativePoint="RIGHT" offsetX="2"/>
+                </Control>
+
+                <Control name="$(parent)Button3" inherits="ZO_ArmoryActionButton_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button2" relativePoint="RIGHT" offsetX="2"/>
+                </Control>
+
+                <Control name="$(parent)Button4" inherits="ZO_ArmoryActionButton_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button3" relativePoint="RIGHT" offsetX="2"/>
+                </Control>
+
+                <Control name="$(parent)Button5" inherits="ZO_ArmoryActionButton_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button4" relativePoint="RIGHT" offsetX="2"/>
+                </Control>
+
+                <Control name="$(parent)UltimateButton" inherits="ZO_ArmoryUltimateButton_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button5" relativePoint="RIGHT" offsetX="32"/>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_ArmorySkillsActionBar_Gamepad" inherits="ZO_ArmorySkillsActionBar" virtual="true">
+            <Dimensions x="466" y="106" />
+            <Controls>
+                <Control name="$(parent)Button1" inherits="ZO_ArmoryActionButton_Gamepad">
+                    <Anchor point="BOTTOMLEFT" offsetX="54" offsetY="-14"/>
+                </Control>
+
+                <Control name="$(parent)Button2" inherits="ZO_ArmoryActionButton_Gamepad">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button1" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)Button3" inherits="ZO_ArmoryActionButton_Gamepad">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button2" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)Button4" inherits="ZO_ArmoryActionButton_Gamepad">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button3" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)Button5" inherits="ZO_ArmoryActionButton_Gamepad">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button4" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)UltimateButton" inherits="ZO_ArmoryActionButton_Gamepad">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button5" relativePoint="RIGHT" offsetX="38"/>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

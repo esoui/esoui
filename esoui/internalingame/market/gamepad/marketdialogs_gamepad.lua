@@ -427,7 +427,9 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
                     local targetControl = dialog.entryList:GetTargetControl()
-                    if targetData.dropdownEntry then
+                    if targetData.quantityEntry and targetControl then
+                        targetControl.editBoxControl:TakeFocus()
+                    elseif targetData.dropdownEntry then
                         local dropdown = targetControl.dropdown
                         dropdown:Activate()
                     elseif targetData.messageEntry and targetControl then
@@ -473,9 +475,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                     if self.isGift then
                         local recipientDisplayName = self.recipientDisplayName
                         local result = IsGiftRecipientNameValid(recipientDisplayName)
-                        if result == GIFT_ACTION_RESULT_SUCCESS then
-                            return true
-                        else
+                        if result ~= GIFT_ACTION_RESULT_SUCCESS then
                             local errorText
                             if result == GIFT_ACTION_RESULT_RECIPIENT_EMPTY then
                                 -- avoid issue where we'd pass nil to zo_strformat when no displayName has been set
@@ -486,11 +486,28 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                             end
                             return false, errorText
                         end
-                    else
-                        return true
                     end
+
+                    local quantity = self.quantity
+                    local isValid, result
+                    if self.isGift then
+                        isValid, result = self.marketProductData:IsGiftQuantityValid(quantity)
+                    else
+                        isValid, result = self.marketProductData:IsPurchaseQuantityValid(quantity)
+                    end
+                    if not isValid then
+                        local errorText
+                        if result == MARKET_PURCHASE_RESULT_EXCEEDS_MAX_QUANTITY then
+                            errorText = zo_strformat(GetString("SI_MARKETPURCHASABLERESULT", result), self.maxQuantity)
+                        else
+                            errorText = GetString("SI_MARKETPURCHASABLERESULT", result)
+                        end
+                        return false, errorText
+                    end
+
+                    return true
                 end,
-                callback =  function(dialog)
+                callback = function(dialog)
                     OnMarketEndPurchase(self.marketProductData:GetId())
                     ZO_Dialogs_ReleaseDialogOnButtonPress(DIALOG_FLOW[FLOW_CONFIRMATION])
                     self:SetFlowPosition(FLOW_PURCHASING)
@@ -632,9 +649,9 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             RespondToSendPartiallyOwnedGift(true)
         else
             if not self.isGift then
-                self.marketProductData:RequestPurchase()
+                self.marketProductData:RequestPurchase(self.quantity)
             else
-                self.marketProductData:RequestPurchaseAsGift(self.giftMessage, self.recipientDisplayName)
+                self.marketProductData:RequestPurchaseAsGift(self.giftMessage, self.recipientDisplayName, self.quantity)
             end
         end
     end
@@ -658,9 +675,11 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         {
             text =  function()
                 local color = GetItemQualityColor(GetMarketProductDisplayQuality(self.marketProductData.marketProductId))
+                local quantity = self.quantity or 1
                 local stackCount = self.marketProductData:GetStackCount()
-                if stackCount > 1 then
-                    return zo_strformat(SI_MARKET_PURCHASING_TEXT_WITH_QUANTITY, color:Colorize(self.itemName), stackCount)
+                local totalStackCount = stackCount * quantity
+                if totalStackCount > 1 then
+                    return zo_strformat(SI_MARKET_PURCHASING_TEXT_WITH_QUANTITY, color:Colorize(self.itemName), totalStackCount)
                 else
                     local itemName = self.itemName
                     local houseId = GetMarketProductHouseId(self.marketProductData.marketProductId)
@@ -719,7 +738,9 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             text = function(dialog)
                 local marketProductData = self.marketProductData
                 local marketProductId = marketProductData:GetId()
+                local quantity = self.quantity or 1
                 local stackCount = marketProductData:GetStackCount()
+                local totalStackCount = stackCount * quantity
                 local itemName = self.itemName
                 local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
                 local houseId = GetMarketProductHouseId(marketProductId)
@@ -730,18 +751,18 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 end
 
                 if self.isGift then
-                    if stackCount > 1 then
-                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
+                    if totalStackCount > 1 then
+                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), totalStackCount, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
                     else
                         return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, color:Colorize(itemName), ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
                     end
                 else
                     local mainText
                     if self.useProductInfo then
-                        mainText = zo_strformat(self.useProductInfo.transactionCompleteText, color:Colorize(itemName), stackCount)
+                        mainText = zo_strformat(self.useProductInfo.transactionCompleteText, color:Colorize(itemName), totalStackCount)
                     else
-                        if stackCount > 1 then
-                            mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount)
+                        if totalStackCount > 1 then
+                            mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), totalStackCount)
                         else
                             if not self.isGift and self.marketProductData:GetNumAttachedCollectibles() > 0 then
                                 mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, color:Colorize(itemName))
@@ -752,7 +773,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                     end
 
                     -- append ESO Plus savings, if any
-                    local esoPlusSavingsString = ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(self.marketProductData)
+                    local esoPlusSavingsString = ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(marketProductData, quantity)
                     if esoPlusSavingsString then
                         mainText = string.format("%s\n\n%s", mainText, esoPlusSavingsString)
                     end
@@ -1000,6 +1021,9 @@ function ZO_GamepadMarketPurchaseManager:GetSelectedHouseTemplateMarketProductDa
 end
 
 function ZO_GamepadMarketPurchaseManager:GetMarketProductPricingHeaderData(updateDiscountPercentParentControl)
+    -- self.quantity must be valid if specified. (See CC#15606)
+    local quantity = self.quantity or 1
+
     local priceData
     if self.houseSelectionInfo and self.houseSelectionInfo.isHouseMarketProduct then
         local selectedMarketData = self:GetSelectedHouseTemplateMarketProductData()
@@ -1013,7 +1037,6 @@ function ZO_GamepadMarketPurchaseManager:GetMarketProductPricingHeaderData(updat
         }
     else
         local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = self.marketProductData:GetMarketProductPricingByPresentation()
-
         priceData =
         {
             currencyType = currencyType,
@@ -1022,6 +1045,16 @@ function ZO_GamepadMarketPurchaseManager:GetMarketProductPricingHeaderData(updat
             discountPercent = discountPercent,
             esoPlusCost = esoPlusCost,
         }
+    end
+
+    if priceData.cost then
+        priceData.cost = priceData.cost * quantity
+    end
+    if priceData.costAfterDiscount then
+        priceData.costAfterDiscount = priceData.costAfterDiscount * quantity
+    end
+    if priceData.esoPlusCost then
+        priceData.esoPlusCost = priceData.esoPlusCost * quantity
     end
 
     local hasNormalCost = priceData.cost ~= nil
@@ -1083,6 +1116,7 @@ function ZO_GamepadMarketPurchaseManager:UpdateDiscountPercentDisplay(discountPe
 end
 
 function ZO_GamepadMarketPurchaseManager:MarketPurchaseConfirmationDialogSetup(dialog)
+    self.quantity = self.quantity or 1
     self:BuildMarketPurchaseConfirmationDialogEntries(dialog)
 
     g_dialogDiscountPercentParentControl = nil
@@ -1165,6 +1199,7 @@ do
                 local forMeEntry = dropdown:CreateItemEntry(GetString(SI_MARKET_CONFIRM_PURCHASE_FOR_ME_LABEL), function() SetAsGift(false) end)
                 forMeEntry.expectedResult = self.marketProductData:CouldPurchase()
                 forMeEntry.enabled = forMeEntry.expectedResult == MARKET_PURCHASE_RESULT_SUCCESS
+
                 local purchaseWarningStrings = {}
                 ZO_MARKET_MANAGER:AddMarketProductPurchaseWarningStringsToTable(self.marketProductData, purchaseWarningStrings)
                 forMeEntry.warningStrings = purchaseWarningStrings
@@ -1366,9 +1401,95 @@ do
     end
 end
 
+do
+    local itemQuantityEntryData
+    function ZO_GamepadMarketPurchaseManager:GetOrCreateItemQuantityEntryData()
+        if itemQuantityEntryData == nil then
+            itemQuantityEntryData = ZO_GamepadEntryData:New()
+            itemQuantityEntryData.quantityEntry = true
+
+            itemQuantityEntryData.textChangedCallback = function(control)
+                local maximumControl = itemQuantityEntryData.control.maximumControl
+                maximumControl:SetColor(ZO_DEFAULT_TEXT:UnpackRGB())
+                self.quantity = tonumber(control:GetText())
+
+                local isValid, result
+                if self.isGift then
+                    isValid, result = self.marketProductData:IsGiftQuantityValid(self.quantity)
+                else
+                    isValid, result = self.marketProductData:IsPurchaseQuantityValid(self.quantity)
+                end
+                if isValid then
+                    GAMEPAD_TOOLTIPS:LayoutMarketProductListing(GAMEPAD_LEFT_DIALOG_TOOLTIP, self.marketProductData:GetId(), self.marketProductData:GetPresentationIndex())
+                    ZO_GenericGamepadDialog_ShowTooltip(self)
+                else
+                    local errorText
+                    if result == MARKET_PURCHASE_RESULT_EXCEEDS_MAX_QUANTITY then
+                        errorText = zo_strformat(GetString("SI_MARKETPURCHASABLERESULT", result), self.maxQuantity)
+                        maximumControl:SetColor(ZO_ERROR_COLOR:UnpackRGB())
+                    else
+                        errorText = GetString("SI_MARKETPURCHASABLERESULT", result)
+                    end
+                    GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, errorText)
+                    ZO_GenericGamepadDialog_ShowTooltip(self)
+                end
+
+                local data1, data2, data3 = self:GetMarketProductPricingHeaderData()
+                local headerData =
+                {
+                    data1 = data1,
+                    data2 = data2,
+                    data3 = data3,
+                }
+                ZO_GenericGamepadDialog_RefreshHeaderData(itemQuantityEntryData.dialog, headerData)
+
+                ZO_GenericGamepadDialog_RefreshKeybinds(itemQuantityEntryData.dialog)
+            end
+
+            itemQuantityEntryData.setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
+                itemQuantityEntryData.control = control
+                control.highlight:SetHidden(not selected)
+                control.editBoxControl.textChangedCallback = data.textChangedCallback
+                control.editBoxControl:SetText(self.quantity or 1)
+                local maxQuantity = self.maxQuantity
+                if maxQuantity then
+                    -- Maximum quantity of greater than one requires input and maximum limit label.
+                    -- This parametric entry is not added for market products with a maximum quantity of zero or one.
+                    control.maximumControl:SetText(zo_strformat(SI_MARKET_CONFIRM_PURCHASE_MAXIMUM_LABEL, maxQuantity))
+                    control.maximumControl:SetHidden(false)
+                else
+                    -- No maximum quantity requires input but no maximum limit label.
+                    control.maximumControl:SetHidden(true)
+                end
+            end
+        end
+
+        return itemQuantityEntryData
+    end
+end
+
 function ZO_GamepadMarketPurchaseManager:BuildMarketPurchaseConfirmationDialogEntries(dialog)
     local parametricListEntries = dialog.info.parametricList
     ZO_ClearNumericallyIndexedTable(parametricListEntries)
+
+    self.quantity = 1
+    if self.isGift then
+        self.maxQuantity = self.marketProductData:GetMaxGiftQuantity()
+    else
+        self.maxQuantity = self.marketProductData:GetMaxPurchaseQuantity()
+    end
+
+    if self.maxQuantity > 1 then
+        local itemQuantityEntry =
+        {
+            header = GetString(SI_MARKET_CONFIRM_PURCHASE_QUANTITY_LABEL),
+            headerTemplate = "ZO_GamepadMenuEntryFullWidthHeaderTemplate",
+            template = "ZO_Gamepad_MarketDialog_Quantity",
+            entryData = self:GetOrCreateItemQuantityEntryData(),
+        }
+
+        table.insert(parametricListEntries, itemQuantityEntry)
+    end
 
     local chooseAsGiftDropdown =
     {

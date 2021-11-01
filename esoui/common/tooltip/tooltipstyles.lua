@@ -161,7 +161,7 @@ ZO_TOOLTIP_STYLES =
     --Character Attribute Tooltip
 
     attributeBody =
-    {   
+    {
         customSpacing = 30,
         widthPercent = 100,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
@@ -295,7 +295,55 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         statusBarGradientColors = ZO_XP_BAR_GRADIENT_COLORS,
     },
-    enchantDiff = 
+    armoryBuildAttributeBodySection =
+    {
+        customSpacing = 30,
+        childSpacing = 10,
+        widthPercent = 100,
+    },
+    armoryBuildAttributeEntryRow =
+    {
+        controlTemplate = "ZO_GamepadArmoryBuildStatAttributeRow",
+        controlTemplateOverrideName = "armoryBuildAttributeEntry",
+        height = 51,
+        widthPercent = 100,
+    },
+    armoryBuildAttributeStatsSection =
+    {
+        paddingTop = 100,
+        widthPercent = 100,
+    },
+    armoryBuildStatValuePair =
+    {
+        height = 40,
+        widthPercent = 100,
+    },
+    armoryBuildStatValuePairValue =
+    {
+        fontSize = "$(GP_42)",
+        fontColorField = GENERAL_COLOR_WHITE,
+        horizontalAlignment = TEXT_ALIGN_RIGHT,
+    },
+    armoryBuildBodySection =
+    {
+        paddingBottom = 10,
+        widthPercent = 100,
+    },
+    armoryBuildSkillsEntryRow =
+    {
+        controlTemplate = "ZO_GamepadArmoryBuildSkillsRow",
+        controlTemplateOverrideName = "armoryBuildSkillsEntry",
+        height = 51,
+        widthPercent = 100,
+    },
+    armoryBuildChampionEntryRow =
+    {
+        controlTemplate = "ZO_GamepadArmoryBuildChampionRow",
+        controlTemplateOverrideName = "armoryBuildChampionEntry",
+        height = 51,
+        widthPercent = 100,
+    },
+    enchantDiff =
     {
         customSpacing = 30,
         childSpacing = 10,
@@ -425,6 +473,27 @@ ZO_TOOLTIP_STYLES =
     itemSetCollection = 
     {
         fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+    itemSetCollectionSummaryCategorySection =
+    {
+        paddingBottom = 20,
+        uppercase = true,
+        layoutPrimaryDirection = "down",
+        layoutSecondaryDirection = "right",
+    },
+    itemSetCollectionSummaryCategoryHeader =
+    {
+        widthPercent = 100,
+        fontSize = "$(GP_27)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+    itemSetCollectionSummaryCategoryBar =
+    {
+        width = 380,
+        statusBarTemplate = "ZO_GamepadArrowStatusBarWithBGMedium",
+        statusBarTemplateOverrideName = "ArrowBar",
+        customSpacing = 4,
+        statusBarGradientColors = ZO_SKILL_XP_BAR_GRADIENT_COLORS,
     },
     stolen = 
     {
@@ -1408,7 +1477,7 @@ ZO_TOOLTIP_STYLES =
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
-    currencyStatValuePairValue = 
+    currencyStatValuePairValue =
     {
         fontSize = "$(GP_34)",
         fontFace = "$(GAMEPAD_LIGHT_FONT)",
@@ -1424,11 +1493,6 @@ ZO_TOOLTIP_STYLES =
     {
         fontSize = "$(GP_42)",
         fontColorField = GAMEPAD_TOOLTIP_COLOR_FAILED,
-    },
-    giftNameHeader =
-    {
-        fontSize = "$(GP_34)",
-        fontColorField = GENERAL_COLOR_WHITE,
     },
     dailyLoginRewardsTimerSection =
     {
@@ -1621,6 +1685,8 @@ ZO_TOOLTIP_STYLES =
         width = 32,
         height = 32
     },
+
+    -- Timed Activities
     timedActivityRewardHeader =
     {
         fontSize = "$(GP_27)",
@@ -1631,6 +1697,67 @@ ZO_TOOLTIP_STYLES =
     {
         fontColorField = GENERAL_COLOR_WHITE,
         fontSize = "$(GP_42)",
+    },
+
+    -- Gifting
+    giftNameHeader =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+        fontSize = "$(GP_34)",
+    },
+    giftName =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_42)",
+        paddingLeft = 15,
+        uppercase = true,
+    },
+    giftSection =
+    {
+        paddingBottom = 10,
+        paddingTop = 30,
+        widthPercent = 100,
+    },
+
+    -- Delve
+    delveMainSection =
+    {
+        widthPercent = 100,
+        childSpacing = 5,
+        paddingTop = 40,
+    },
+    delveTooltipName =
+    {
+        fontSize = "$(GP_34)",
+        fontColorField = GENERAL_COLOR_WHITE,
+        width = 305,
+    },
+    delveSkyshardHint =
+    {
+        fontSize = "$(GP_34)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+    delveSkyshardStatus =
+    {
+        fontSize = "$(GP_34)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+
+    -- Skyshard
+    skyshardMainSection =
+    {
+        widthPercent = 100,
+        childSpacing = 5,
+        paddingTop = 40,
+    },
+    skyshardHint =
+    {
+        fontSize = "$(GP_34)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
 }
 

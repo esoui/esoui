@@ -128,7 +128,7 @@ function ZO_GuildBrowser_GuildList_Keyboard:InitializeKeybindStripDescriptor()
                     GUILD_BROWSER_MANAGER:AddReportedGuild(guildToReport)
                 end
                 local guildData = GUILD_BROWSER_MANAGER:GetGuildData(self.currentGuildId)
-                ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportGuildTicketScene(guildData.guildName, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_LISTING, ReportCallback)
+                ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportGuildTicketScene(guildData.guildName, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_LISTING, ReportCallback)
             end,
             visible = function()
                 return self.currentGuildId ~= nil

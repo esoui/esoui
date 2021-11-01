@@ -225,10 +225,18 @@ function ZO_ScrollableComboBox:HideDropdownInternal()
     end
 end
 
+function ZO_ScrollableComboBox:SetEntryMouseOverCallbacks(onMouseEnterCallback, onMouseExitCallback)
+    self.onMouseEnterCallback = onMouseEnterCallback
+    self.onMouseExitCallback = onMouseExitCallback
+end
+
 function ZO_ScrollableComboBox_Entry_OnMouseEnter(entry)
     if entry.m_owner then
         ZO_ScrollList_MouseEnter(entry.m_owner.m_scroll, entry)
         entry.m_label:SetColor(entry.m_owner.m_highlightColor:UnpackRGBA())
+        if entry.m_owner.onMouseEnterCallback then
+            entry.m_owner:onMouseEnterCallback(entry)
+        end
     end
 end
 
@@ -236,6 +244,9 @@ function ZO_ScrollableComboBox_Entry_OnMouseExit(entry)
     if entry.m_owner then
         ZO_ScrollList_MouseExit(entry.m_owner.m_scroll, entry)
         entry.m_label:SetColor(entry.m_owner.m_normalColor:UnpackRGBA())
+        if entry.m_owner.onMouseExitCallback then
+            entry.m_owner:onMouseExitCallback(entry)
+        end
     end
 end
 

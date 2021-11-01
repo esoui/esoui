@@ -12,9 +12,17 @@
                                     <AnchorFill />
                                 </Control>
                                 
-                                <Label name="$(parent)ChangeCollectibleTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                <Label name="$(parent)ChangeCollectibleTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)SettingsScrollChild"  offsetX="20" offsetY="20" />
 
+                                    <OnMouseEnter>
+                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseEnter(self)
+                                    </OnMouseEnter>
+
+                                    <OnMouseExit>
+                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseExit(self)
+                                    </OnMouseExit>
+                                    
                                     <OnInitialized>
                                         self.data = ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA[ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_CHANGE_COLLECTIBLE]
                                     </OnInitialized>
@@ -28,9 +36,17 @@
                                     </OnInitialized>
                                 </Control>
                                 
-                                <Label name="$(parent)ChangePathingStateTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                <Label name="$(parent)ChangePathingStateTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)ChangeCollectible" relativePoint="BOTTOMLEFT" offsetY="20" />
 
+                                    <OnMouseEnter>
+                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseEnter(self)
+                                    </OnMouseEnter>
+
+                                    <OnMouseExit>
+                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseExit(self)
+                                    </OnMouseExit>
+                                    
                                     <OnInitialized>
                                         self.data = ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA[ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATHING_STATE]
                                     </OnInitialized>
@@ -44,9 +60,17 @@
                                     <Anchor point="LEFT" relativeTo="$(parent)ChangePathingStateOnLabel" relativePoint="RIGHT" offsetX="30" />
                                 </Button>
 
-                                <Label name="$(parent)ChangeConformToGroundTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                <Label name="$(parent)ChangeConformToGroundTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)ChangePathingStateOn" relativePoint="BOTTOMLEFT" offsetY="20" />
 
+                                    <OnMouseEnter>
+                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseEnter(self)
+                                    </OnMouseEnter>
+
+                                    <OnMouseExit>
+                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseExit(self)
+                                    </OnMouseExit>
+                                    
                                     <OnInitialized>
                                         self.data = ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA[ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_CONFORM_TO_GROUND]
                                     </OnInitialized>
@@ -60,9 +84,17 @@
                                     <Anchor point="LEFT" relativeTo="$(parent)ChangeConformToGroundOnLabel" relativePoint="RIGHT" offsetX="30" />
                                 </Button>
                                 
-                                <Label name="$(parent)ChangePathTypeTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                <Label name="$(parent)ChangePathTypeTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)ChangeConformToGroundOn" relativePoint="BOTTOMLEFT" offsetY="20" />
 
+                                    <OnMouseEnter>
+                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseEnter(self)
+                                    </OnMouseEnter>
+
+                                    <OnMouseExit>
+                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseExit(self)
+                                    </OnMouseExit>
+                                    
                                     <OnInitialized>
                                         self.data = ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA[ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATH_TYPE]
                                     </OnInitialized>
@@ -71,14 +103,6 @@
                                 <Control name="$(parent)ChangePathTypeDropDown" inherits="ZO_ComboBox">
                                     <Dimensions x="230" y="35" />
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)ChangePathTypeTitle" relativePoint="BOTTOMLEFT" offsetY="15" />
-                                    
-                                    <OnMouseEnter>
-                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseEnter(self)
-                                    </OnMouseEnter>
-
-                                    <OnMouseExit>
-                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseExit(self)
-                                    </OnMouseExit>
                                     
                                     <OnInitialized>
                                         ZO_ComboBox:New(self)

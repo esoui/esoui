@@ -2,13 +2,7 @@
 --Guild Rank Icon Picker --
 ---------------------------
 
-ZO_GuildRankIconPicker_Shared = ZO_Object:Subclass()
-
-function ZO_GuildRankIconPicker_Shared:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_GuildRankIconPicker_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_GuildRankIconPicker_Shared:Initialize(control, templateData)
     self.control = control

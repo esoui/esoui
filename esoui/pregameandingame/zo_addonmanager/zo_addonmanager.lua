@@ -111,29 +111,37 @@ function ZO_AddOnManager:GetRowSetupFunction()
             end
         end
 
+        local color = AddOnManager:AreAddOnsEnabled() and ZO_DEFAULT_ENABLED_COLOR or ZO_DEFAULT_DISABLED_COLOR
+        state:SetColor(color:UnpackRGBA())
         state:SetText(stateText)
     end
 
     local function UpdateNameAndAuthor(control, isEnabled, data)
-        local checkboxControl = GetControl(control, "Enabled")
+        local checkboxControl = control:GetNamedChild("Enabled")
+        local expandControl = control:GetNamedChild("ExpandButton")
         local checkState = ZO_TriStateCheckButton_GetState(checkboxControl)
 
-        local nameControl = GetControl(control, "Name")
-        local authorControl = GetControl(control, "Author")
+        local nameControl = control:GetNamedChild("Name")
+        local authorControl = control:GetNamedChild("Author")
 
         local color
         local stripColorMarkup
 
+        local areAddOnsEnabled = AddOnManager:AreAddOnsEnabled()
+
         if not isEnabled then
             color = ZO_ERROR_COLOR
             stripColorMarkup = true
-        elseif checkState == TRISTATE_CHECK_BUTTON_UNCHECKED then
+        elseif checkState == TRISTATE_CHECK_BUTTON_UNCHECKED or not areAddOnsEnabled then
             color = ZO_DEFAULT_DISABLED_COLOR
             stripColorMarkup = true
         else
             color = ZO_DEFAULT_ENABLED_COLOR
             stripColorMarkup = false
         end
+
+        ZO_CheckButton_SetEnableState(checkboxControl, areAddOnsEnabled)
+        ZO_CheckButton_SetEnableState(expandControl, areAddOnsEnabled)
 
         nameControl:SetColor(color:UnpackRGBA())
         authorControl:SetColor(color:UnpackRGBA())
@@ -208,7 +216,30 @@ function ZO_AddOnManager:GetRowSetupFunction()
 end
 
 function ZO_AddOnManager:SetupSectionHeaderRow(control, data)
-    control:GetNamedChild("Text"):SetText(data.text)
+    control.textControl:SetText(data.text)
+    if data.isLibrary then
+        control.checkboxControl:SetHidden(true)
+    else
+        control.checkboxControl:SetHidden(false)
+        ZO_CheckButton_SetCheckState(control.checkboxControl, AddOnManager:AreAddOnsEnabled())
+        ZO_CheckButton_SetToggleFunction(control.checkboxControl, function(checkboxControl, isBoxChecked)
+            local scrollData = ZO_ScrollList_GetDataList(control:GetParent():GetParent())
+
+            AddOnManager:SetAddOnsEnabled(isBoxChecked)
+            if not isBoxChecked then
+                for _, addOn in ipairs(scrollData) do
+                    local addOnData = addOn.data
+                    if addOnData.addOnFileName and addOnData.expanded then
+                        self:ToggleExpandedData(addOnData)
+                    end
+                end
+            end
+
+            self.isDirty = true
+            self:RefreshMultiButton()
+            self:RefreshData()
+        end)
+    end
 end
 
 function ZO_AddOnManager:GetCombinedAddOnStates(index)
@@ -381,6 +412,7 @@ function ZO_AddOnManager:BuildMasterList()
     self.addonTypes = {}
     self.addonTypes[IS_LIBRARY] = {}
     self.addonTypes[IS_ADDON] = {}
+    local areAddOnsEnabled = AddOnManager:AreAddOnsEnabled()
 
     if self.selectedCharacterEntry and not self.selectedCharacterEntry.allCharacters then
         self.isAllFilterSelected = false
@@ -422,7 +454,7 @@ function ZO_AddOnManager:BuildMasterList()
                 entryData.hasDependencyError = true
                 if not dependencyExists then
                     dependencyInfoLine = zo_strformat(SI_ADDON_MANAGER_DEPENDENCY_MISSING, dependencyName)
-                elseif not dependencyActive then
+                elseif not dependencyActive or not areAddOnsEnabled then
                     dependencyInfoLine = zo_strformat(SI_ADDON_MANAGER_DEPENDENCY_DISABLED, dependencyName)
                 elseif dependencyTooLowVersion then
                     dependencyInfoLine = zo_strformat(SI_ADDON_MANAGER_DEPENDENCY_TOO_LOW_VERSION, dependencyName)
@@ -444,7 +476,7 @@ function ZO_AddOnManager:AddAddonTypeSection(isLibrary, sectionTitleText)
     table.sort(addonEntries, self.sortCallback)
 
     local scrollData = ZO_ScrollList_GetDataList(self.list)
-    scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(SECTION_HEADER_DATA, { text = sectionTitleText })
+    scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(SECTION_HEADER_DATA, { isLibrary = isLibrary, text = sectionTitleText })
     for _, entryData in ipairs(addonEntries) do
         if entryData.expandable and expandedAddons[entryData.index] then
             entryData.expanded = true
@@ -512,8 +544,13 @@ function ZO_AddOnManager:OnEnabledButtonClicked(control, checkState)
 end
 
 function ZO_AddOnManager:OnExpandButtonClicked(row)
-    local scrollData = ZO_ScrollList_GetDataList(self.list)
     local data = ZO_ScrollList_GetData(row)
+    self:ToggleExpandedData(data)
+    row.owner:CommitScrollList()
+end
+
+function ZO_AddOnManager:ToggleExpandedData(data)
+    local scrollData = ZO_ScrollList_GetDataList(self.list)
 
     if expandedAddons[data.index] then
         expandedAddons[data.index] = false
@@ -530,8 +567,6 @@ function ZO_AddOnManager:OnExpandButtonClicked(row)
         data.height = useHeight
         scrollData[data.sortIndex] = ZO_ScrollList_CreateDataEntry(typeId, data)
     end
-
-    self:CommitScrollList()
 end
 
 function ZO_AddOnManager:AllowReload()

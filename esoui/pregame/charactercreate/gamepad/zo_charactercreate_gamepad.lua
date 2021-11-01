@@ -10,6 +10,7 @@ local INITIAL_BUCKET = CREATE_BUCKET_RACE
 local function CreatePreviewOption(dressingOption)
     return {
         name = zo_strformat(SI_CREATE_CHARACTER_GAMEPAD_PREVIEW_OPTION_FORMAT, GetString("SI_CHARACTERCREATEDRESSINGOPTION", dressingOption)),
+        modeName = zo_strformat(SI_CREATE_CHARACTER_GAMEPAD_PREVIEWING_OPTION_FORMAT, GetString("SI_CHARACTERCREATEDRESSINGOPTION", dressingOption)),
         OnSelectedCallback =  function()
             SelectClothing(dressingOption)
         end,
@@ -45,13 +46,7 @@ end
 -- Character Create Slider and Appearance Slider Managers
 -- Manages a collection of sliders with a pool
 
-local CharacterCreateSliderManager = ZO_Object:Subclass()
-
-function CharacterCreateSliderManager:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
+local CharacterCreateSliderManager = ZO_InitializingObject:Subclass()
 
 function CharacterCreateSliderManager:Initialize(parent)
     local CreateSlider = function(pool)
@@ -113,10 +108,6 @@ end
 
 local ZO_CharacterCreate_Gamepad = ZO_CharacterCreate_Base:Subclass()
 
-function ZO_CharacterCreate_Gamepad:New(...)
-    return ZO_CharacterCreate_Base.New(self, ...)
-end
-
 function ZO_CharacterCreate_Gamepad:Initialize(...)
     ZO_CharacterCreate_Base.Initialize(self, ...)
 
@@ -132,13 +123,20 @@ function ZO_CharacterCreate_Gamepad:Initialize(...)
 
     local function CharacterNameValidationCallback(isValid)
         if isValid then
-            if ZO_CHARACTERCREATE_MANAGER:GetShouldPromptForTutorialSkip() and CanSkipTutorialArea() then
+            local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+            local currentTemplateId = CharacterCreateGetTemplate(characterMode)
+            local templateSkipsTutorial = GetTemplateSkipsTutorial(currentTemplateId)
+            
+            if ZO_CHARACTERCREATE_MANAGER:GetShouldPromptForTutorialSkip() and CanSkipTutorialArea() and (currentTemplateId == 0 or not templateSkipsTutorial) then
                 ZO_CHARACTERCREATE_MANAGER:SetShouldPromptForTutorialSkip(false)
                 -- color the character name white so it's highlighted in the dialog
                 local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
                 local genderDecoratedCharacterName = ZO_SELECTED_TEXT:Colorize(GetGrammarDecoratedName(self.characterName, CharacterCreateGetGender(characterMode)))
                 ZO_Dialogs_ShowGamepadDialog(SKIP_TUTORIAL_GAMEPAD_DIALOG, { characterName = self.characterName }, {mainTextParams = { genderDecoratedCharacterName }})
             else
+                if currentTemplateId ~= 0 and templateSkipsTutorial then 
+                    self.characterCreateOption = CHARACTER_CREATE_SKIP_TUTORIAL
+                end
                 self:CreateCharacter(self.characterStartLocation, self.characterCreateOption)
             end
         else
@@ -205,6 +203,7 @@ end
 function ZO_CharacterCreate_Gamepad:InitializeControls()
     self.control.fadeTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CharacterCreateMainControlsFade", self.control)
 
+    self.previewLabel = self.control:GetNamedChild("ContainerPreview")
     self.bucketsControl = self.control:GetNamedChild("ContainerInnerBuckets")
     self.sliderManager = CharacterCreateSliderManager:New(self.bucketsControl)
 
@@ -246,7 +245,7 @@ function ZO_CharacterCreate_Gamepad:InitializeControls()
         return mode == CHARACTER_CREATE_MODE_CREATE or mode == CHARACTER_CREATE_MODE_EDIT_ALLIANCE
     end
 
-    self.customBucketControls = 
+    self.customBucketControls =
     {
         [GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER] = {control = self.genderSlider.control, updateFn = UpdateSlider, shouldAdd = IsAppearanceChangeEnabled},
         [GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE] = {control = ZO_CharacterCreate_GamepadAlliance, updateFn = function() self:UpdateRaceControl() end, shouldAdd = IsAllianceChangeEnabled},
@@ -342,7 +341,7 @@ function ZO_CharacterCreate_Gamepad:InitializeSkipTutorialDialog()
         {
             text = SI_PROMPT_TITLE_SKIP_TUTORIAL,
         },
-        mainText = 
+        mainText =
         {
             text = SI_PROMPT_BODY_SKIP_TUTORIAL,
         },
@@ -351,26 +350,26 @@ function ZO_CharacterCreate_Gamepad:InitializeSkipTutorialDialog()
             {
                 text = SI_PROMPT_PLAY_TUTORIAL_BUTTON,
                 keybind = "DIALOG_PRIMARY",
-                callback =  function(dialog)
-                                self:CreateCharacter(dialog.data.startLocation, CHARACTER_CREATE_DEFAULT_LOCATION)
-                            end,
+                callback = function(dialog)
+                    self:CreateCharacter(dialog.data.startLocation, CHARACTER_CREATE_DEFAULT_LOCATION)
+                end,
             },
 
             {
                 text = SI_PROMPT_SKIP_TUTORIAL_BUTTON,
                 keybind = "DIALOG_SECONDARY",
-                callback =  function(dialog)
-                                self:CreateCharacter(dialog.data.startLocation, CHARACTER_CREATE_SKIP_TUTORIAL)
-                            end,
+                callback = function(dialog)
+                    self:CreateCharacter(dialog.data.startLocation, CHARACTER_CREATE_SKIP_TUTORIAL)
+                end,
             },
 
             {
                 text = SI_PROMPT_BACK_TUTORIAL_BUTTON,
                 keybind = "DIALOG_NEGATIVE",
-                callback =  function(dialog)
-                                ZO_CharacterCreate_Gamepad_CancelSkipDialogue()
-                                ZO_Dialogs_ShowGamepadDialog(CHARACTER_CREATE_GAMEPAD_DIALOG, { characterName = dialog.data.characterName })
-                            end,
+                callback = function(dialog)
+                    ZO_CharacterCreate_Gamepad_CancelSkipDialogue()
+                    ZO_Dialogs_ShowGamepadDialog(CHARACTER_CREATE_GAMEPAD_DIALOG, { characterName = dialog.data.characterName })
+                end,
             },
         }
     })
@@ -459,16 +458,16 @@ function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
             end
 
             keybindStripDescriptor[#keybindStripDescriptor + 1] =
-                {
-                    name = keybindName,
-                    keybind = "UI_SHORTCUT_RIGHT_STICK",
+            {
+                name = keybindName,
+                keybind = "UI_SHORTCUT_RIGHT_STICK",
 
-                    callback = function()
-                        self.focusControl:ToggleLocked()
-                        PlaySound(callbackSound)
-                        self:RefreshKeybindStrip()
-                    end,
-                }
+                callback = function()
+                    self.focusControl:ToggleLocked()
+                    PlaySound(callbackSound)
+                    self:RefreshKeybindStrip()
+                end,
+            }
         end
     end
 
@@ -482,6 +481,8 @@ function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
     local nextGear = (self.currentGearPreviewIndex % #gearPreviews) + 1
     local name = gearPreviews[nextGear].name
 
+    self.previewLabel:SetText(gearPreviews[self.currentGearPreviewIndex].modeName)
+
     keybindStripDescriptor[#keybindStripDescriptor + 1] =
     {
         name = name,
@@ -492,6 +493,9 @@ function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
 
             gearPreviews[self.currentGearPreviewIndex].OnSelectedCallback()
             PlaySound(SOUNDS.CC_PREVIEW_GEAR)
+
+            local selectedInfo = self.focusControl and self.focusControl.info
+            self:UpdateCollectibleBlockingInfoTooltip(selectedInfo)
 
             self:RefreshKeybindStrip()
         end,
@@ -509,6 +513,25 @@ function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
     keybindStripDescriptor[#keybindStripDescriptor + 1] = KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(LeaveCharacterCreate)
 
     return keybindStripDescriptor
+end
+
+function ZO_CharacterCreate_Gamepad:UpdateCollectibleBlockingInfoTooltip(selectedInfo)
+    if selectedInfo then
+        local selectedBucket = selectedInfo.bucketIndex
+        local selectedIndex = selectedInfo.index
+        local selectedName = selectedInfo.name
+        local selectedType = selectedInfo.type
+        if selectedType == GAMEPAD_BUCKET_CONTROL_TYPE_APPEARANCE then
+            local selectedTable = ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD[selectedBucket].controls[selectedIndex]
+            local collectibleId = GetActiveCollectibleIdForCharacterAppearance(selectedTable[selectedType])
+            if collectibleId then
+                GAMEPAD_CHARACTER_CREATE_MANAGER:ShowCollectibleBlockingInfo(selectedName, collectibleId)
+                return
+            end
+        end
+    end
+
+    GAMEPAD_CHARACTER_CREATE_MANAGER:HideCollectibleBlockingInfo()
 end
 
 -- Can't simply return (currentStrip ~= newStrip) because ZoKeybindStrip stores additional 
@@ -581,46 +604,6 @@ function ZO_CharacterCreate_Gamepad:SetFocus(newFocusControl)
     if not self.control:IsHidden() then
         self:RefreshKeybindStrip()
     end
-end
-
-function ZO_CharacterCreate_Gamepad:GetNextFocus(control)
-    if control == nil then
-        return nil
-    end
-
-    local bucket = control.info.bucketIndex
-    local index = control.info.index
-
-    while index < #(ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD[bucket].controls) do
-        index = index + 1
-
-        local newControl = self.controls[bucket][index]
-        if newControl then
-            return newControl
-        end
-    end
-
-    return control
-end
-
-function ZO_CharacterCreate_Gamepad:GetPreviousFocus(control)
-    if control == nil then
-        return nil
-    end
-
-    local bucket = control.info.bucketIndex
-    local index = control.info.index
-
-    while index > 1 do
-        index = index - 1
-
-        local newControl = self.controls[bucket][index]
-        if newControl then
-            return newControl
-        end
-    end
-
-    return control
 end
 
 -- Creator Control Initialization
@@ -1336,6 +1319,27 @@ function ZO_CharacterCreate_Gamepad:HideInformationTooltip()
     SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT)
 end
 
+function ZO_CharacterCreate_Gamepad:ShowCollectibleBlockingInfo(appearanceIndex, collectibleId)
+    SCENE_MANAGER:AddFragment(CHARACTER_CREATE_GAMEPAD_COLLECTIBLE_BLOCKING_INFO_FRAGMENT)
+    SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+
+    local overrideAppearanceName = select(4, GetAppearanceInfo(appearanceIndex))
+    local collectibleName = GetCollectibleName(collectibleId)
+    local categoryName = GetCollectibleCategoryNameByCollectibleId(collectibleId)
+    local formattedCollectibleName = ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2, collectibleName, categoryName))
+    local appearanceTypeText = ZO_SELECTED_TEXT:Colorize(overrideAppearanceName or GetString("SI_CHARACTERAPPEARANCENAME", appearanceIndex))
+    local previewTypeToShow = ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_CREATE_CHARACTER_GAMEPAD_PREVIEW_OPTION_FORMAT, GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_YOUR_GEAR)))
+    local descriptionControl = CHARACTER_CREATE_GAMEPAD_COLLECTIBLE_BLOCKING_INFO_FRAGMENT.control:GetNamedChild("Description")
+
+    local descriptionText = zo_strformat(SI_CHARACTER_CREATE_PREVIEWING_COLLECTIBLES_TOOLTIP_DESCRIPTION_FORMATTER, appearanceTypeText, formattedCollectibleName, previewTypeToShow, appearanceTypeText)
+    descriptionControl:SetText(descriptionText)
+end
+
+function ZO_CharacterCreate_Gamepad:HideCollectibleBlockingInfo()
+    SCENE_MANAGER:RemoveFragment(CHARACTER_CREATE_GAMEPAD_COLLECTIBLE_BLOCKING_INFO_FRAGMENT)
+    SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+end
+
 function ZO_CharacterCreate_Gamepad:ContainerOnUpdate()
     if self.focusControl and self.focusControl.disableFocusMovementController then
         -- Just do focus update
@@ -1518,6 +1522,11 @@ end
 function ZO_CharacterCreate_GamepadInformationTooltip_Initialize(control)
     local ALWAYS_ANIMATE = true
     CHARACTER_CREATE_GAMEPAD_INFORMATION_TOOLTIP_FRAGMENT = ZO_FadeSceneFragment:New(control, ALWAYS_ANIMATE)
+end
+
+function ZO_CharacterCreate_Gamepad_CollectibleBlockingInfo_Initialize(control)
+    local ALWAYS_ANIMATE = true
+    CHARACTER_CREATE_GAMEPAD_COLLECTIBLE_BLOCKING_INFO_FRAGMENT = ZO_FadeSceneFragment:New(control, ALWAYS_ANIMATE)
 end
 
 do

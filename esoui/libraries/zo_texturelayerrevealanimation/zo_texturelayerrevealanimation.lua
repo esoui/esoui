@@ -122,11 +122,7 @@ function ZO_TextureLayerRevealAnimation:Initialize(container)
         return Layer:New(textureControl, windowControl, self.timeline)
     end
 
-    local function LayerReset(layer, pool)
-        layer:Reset()
-    end
-
-    self.layerPool = ZO_ObjectPool:New(LayerFactory, LayerReset)
+    self.layerPool = ZO_ObjectPool:New(LayerFactory, ZO_ObjectPool_DefaultResetObject)
 end
 
 function ZO_TextureLayerRevealAnimation:RemoveAllLayers()

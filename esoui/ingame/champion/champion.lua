@@ -129,6 +129,7 @@ function ChampionPerks:Initialize(control)
 
             self.lastHealthValue = GetUnitPower("player", POWERTYPE_HEALTH)
             self.control:RegisterForEvent(EVENT_POWER_UPDATE, function(...) self:OnPowerUpdate(...) end)
+            self.refreshGroup:TryClean()
         elseif newState == SCENE_SHOWN then
             TriggerTutorial(TUTORIAL_TRIGGER_CHAMPION_UI_SHOWN)
         elseif newState == SCENE_HIDING then
@@ -1206,6 +1207,15 @@ function ChampionPerks:RegisterEvents()
     self.control:RegisterForEvent(EVENT_CHAMPION_PURCHASE_RESULT, function(_, result) self:OnChampionPurchaseResult(result) end)
     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, function() self:OnMoneyChanged() end)
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:OnPlayerActivated() end)
+
+    --Refresh and clear unsaved changes if we successfully finished equipping an armory build
+    self.control:RegisterForEvent(EVENT_ARMORY_BUILD_RESTORE_RESPONSE, function(_, result, buildIndex)
+        if result == ARMORY_BUILD_RESTORE_RESULT_SUCCESS then
+            self.isInRespecMode = false
+            self:ClearUnsavedChanges()
+            self.refreshGroup:MarkDirty("AllData")
+        end
+    end)
 
     -- Refresh Champion purchase availability
     self.control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, function()

@@ -279,8 +279,6 @@ function ZO_CrownCratesCard:Initialize(control, owner)
 
     self:InitializeStyles()
 
-    self.nextSingleGemIndex = 1
-
     self.mouseAreaControl:SetHandler("OnMouseUp", function() self:OnMouseUp() end)
 end
 
@@ -399,17 +397,7 @@ do
 end
 
 function ZO_CrownCratesCard:InitializeSingleGemPool()
-    local reset = function(singleGem)
-        singleGem:ClearAnchors()
-        singleGem:SetHidden(true)
-    end 
-    local factory = function(pool)
-                        local singleGem = CreateControlFromVirtual("$(parent)SingleGem",  self.control, "ZO_CrownCrateSingleGem", self.nextSingleGemIndex)
-                        self.nextSingleGemIndex = self.nextSingleGemIndex + 1
-                        return singleGem
-                    end
-
-    self.singleGemPool = ZO_ObjectPool:New(factory, reset)
+    self.singleGemPool = ZO_ControlPool:New("ZO_CrownCrateSingleGem", self.control, "SingleGem")
 end
 
 function ZO_CrownCratesCard:ApplyStyle(style)
@@ -1261,16 +1249,14 @@ function ZO_CrownCratesPackOpening:GetRevealedCameraPlaneMetrics()
 end
 
 function ZO_CrownCratesPackOpening:InitializeCardPool()
-    local reset = function(card)
-        card:Reset()
-    end    
-    local factory = function(pool)
-                        local card = ZO_CrownCratesCard:New(CreateControlFromVirtual("$(parent)Card", self.owner:GetControl(), "ZO_CrownCrateCard", self.nextCardIndex), self)
-                        self.nextCardIndex = self.nextCardIndex + 1
-                        return card
-                    end
+    local function Factory(pool)
+        local control = CreateControlFromVirtual("$(parent)Card", self.owner:GetControl(), "ZO_CrownCrateCard", self.nextCardIndex)
+        local card = ZO_CrownCratesCard:New(control, self)
+        self.nextCardIndex = self.nextCardIndex + 1
+        return card
+    end
     
-    self.cardPool = ZO_ObjectPool:New(factory, reset)
+    self.cardPool = ZO_ObjectPool:New(Factory, ZO_ObjectPool_DefaultResetObject)
 end
 
 function ZO_CrownCratesPackOpening:InitializeKeybinds()

@@ -192,7 +192,7 @@ function ZO_GiftInventoryView_Shared:InitializeKeybinds(claimKeybind, previewKey
     self.updateKeybindsCallback = function() KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor) end
 end
 
-internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 38, "Update gift claim dialog to handle new purchase result")
+internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 41, "Update gift claim dialog to handle new purchase result")
 function ZO_GiftInventoryView_Shared:ClaimGift()
     local marketProductId = self.gift:GetMarketProductId()
     local expectedClaimResult = CouldAcquireMarketProduct(marketProductId)
@@ -331,7 +331,9 @@ function ZO_GiftInventoryView_Shared:SetupAndShowGift(gift)
     self.titleLabel:SetText(zo_strformat(titleStringFormatterId, gift:GetUserFacingPlayerName()))
     self.giftNameLabel:SetText(gift:GetFormattedName())
     self.giftIconTexture:SetTexture(gift:GetIcon())
-    local stackCount = gift:GetStackCount()
+    local unitStackCount = gift:GetStackCount()
+    local quantity = gift:GetQuantity()
+    local stackCount = unitStackCount * quantity
     if stackCount > 1 then
         self.giftStackCountLabel:SetHidden(false)
         self.giftStackCountLabel:SetText(stackCount)

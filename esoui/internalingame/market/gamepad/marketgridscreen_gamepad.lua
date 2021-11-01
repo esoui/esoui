@@ -254,13 +254,11 @@ do
         end
     end
 
-    local function CreateIconButton(name, parent, keyCode, anchor)
-        local iconButton = CreateControlFromVirtual(name, parent, "ZO_KeyButton")
-        iconButton:SetKeyCode(keyCode)
-        iconButton:SetDimensions(ZO_TABBAR_ICON_WIDTH, ZO_TABBAR_ICON_HEIGHT)
-        iconButton:SetAnchor(anchor, parent, anchor)
-        iconButton:SetHidden(true) -- hidden by default
-        return iconButton
+    local function CreateKeybindLabel(name, parent, anchor)
+        local keybindLabel = CreateControlFromVirtual(name, parent, "ZO_ClickableKeybindLabel_Gamepad")
+        keybindLabel:SetAnchor(anchor, parent, anchor)
+        keybindLabel:SetHidden(true)
+        return keybindLabel
     end
 
     local function OnTabChanged(newData)
@@ -274,8 +272,8 @@ do
 
     function GamepadMarket_TabBarScrollList:Initialize(control)
         self.control = control
-        self.leftIcon = CreateIconButton("$(parent)LeftArrow", self.control, KEY_GAMEPAD_LEFT_SHOULDER, LEFT)
-        self.rightIcon = CreateIconButton("$(parent)RightArrow", self.control, KEY_GAMEPAD_RIGHT_SHOULDER, RIGHT)
+        self.leftIcon = CreateKeybindLabel("$(parent)LeftArrow", self.control, LEFT)
+        self.rightIcon = CreateKeybindLabel("$(parent)RightArrow", self.control, RIGHT)
         ZO_HorizontalScrollList.Initialize(self, control, "ZO_GamepadMarket_TabBarEntryTemplate", NUM_VISIBLE_CATEGORIES, TabBar_Setup, MenuEntryTemplateEquality)
         self:InitializeKeybindStripDescriptors()
         self:SetOnTargetDataChangedCallback(OnTabChanged)
@@ -294,32 +292,40 @@ function GamepadMarket_TabBarScrollList:Deactivate()
 end
 
 function GamepadMarket_TabBarScrollList:InitializeKeybindStripDescriptors()
+    local leftShoulderKeybind =
+    {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Gampad Market Tab Bar Back",
+        keybind = "UI_SHORTCUT_LEFT_SHOULDER",
+        ethereal = true,
+        enabled = function() return self:GetNumItems() > 0 end,
+        callback = function()
+            self:MoveRight()
+            PlaySound(SOUNDS.GAMEPAD_PAGE_BACK)
+        end,
+    }
+
+    local rightShoulderKeybind =
+    {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Gamepad Market Tab Bar Forward",
+        keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
+        ethereal = true,
+        enabled = function() return self:GetNumItems() > 0 end,
+        callback = function()
+            self:MoveLeft()
+            PlaySound(SOUNDS.GAMEPAD_PAGE_FORWARD)
+        end,
+    }
+
     self.keybindStripDescriptors = 
     {
-        {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = "Gampad Market Tab Bar Back",
-            keybind = "UI_SHORTCUT_LEFT_SHOULDER",
-            ethereal = true,
-            enabled = function() return self:GetNumItems() > 0 end,
-            callback = function()
-                self:MoveRight()
-                PlaySound(SOUNDS.GAMEPAD_PAGE_BACK)
-            end,
-        },
-
-        {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = "Gamepad Market Tab Bar Forward",
-            keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
-            ethereal = true,
-            enabled = function() return self:GetNumItems() > 0 end,
-            callback = function()
-                self:MoveLeft()
-                PlaySound(SOUNDS.GAMEPAD_PAGE_FORWARD)
-            end,
-        },
+        leftShoulderKeybind,
+        rightShoulderKeybind,
     }
+
+    self.leftIcon:SetKeybindButtonDescriptor(leftShoulderKeybind)
+    self.rightIcon:SetKeybindButtonDescriptor(rightShoulderKeybind)
 end
 
 --

@@ -97,6 +97,44 @@ function ZO_MarketProductData:GetColorizedDisplayName()
     return color:Colorize(self:GetDisplayName())
 end
 
+function ZO_MarketProductData:GetMaxGiftQuantity()
+    local maxQuantity = GetMarketProductMaxGiftQuantity(self.marketProductId)
+    return maxQuantity
+end
+
+function ZO_MarketProductData:IsGiftQuantityValid(giftQuantity)
+    local quantity = tonumber(giftQuantity)
+    if not quantity or quantity < 1 or quantity ~= math.floor(quantity) then
+        return false, MARKET_PURCHASE_RESULT_INVALID_QUANTITY
+    end
+
+    local maxQuantity = self:GetMaxGiftQuantity()
+    if maxQuantity and maxQuantity < quantity then
+        return false, MARKET_PURCHASE_RESULT_EXCEEDS_MAX_QUANTITY
+    end
+
+    return true, MARKET_PURCHASE_RESULT_SUCCESS
+end
+
+function ZO_MarketProductData:GetMaxPurchaseQuantity()
+    local maxQuantity = GetMarketProductMaxPurchaseQuantity(self.marketProductId)
+    return maxQuantity
+end
+
+function ZO_MarketProductData:IsPurchaseQuantityValid(purchaseQuantity)
+    local quantity = tonumber(purchaseQuantity)
+    if not quantity or quantity < 1 or quantity ~= math.floor(quantity) then
+        return false, MARKET_PURCHASE_RESULT_INVALID_QUANTITY
+    end
+
+    local maxQuantity = self:GetMaxPurchaseQuantity()
+    if maxQuantity and maxQuantity < quantity then
+        return false, MARKET_PURCHASE_RESULT_EXCEEDS_MAX_QUANTITY
+    end
+
+    return true, MARKET_PURCHASE_RESULT_SUCCESS
+end
+
 function ZO_MarketProductData:GetHidesChildProducts()
     if self:IsBundle() then
         return GetMarketProductBundleHidesChildProducts(self.marketProductId)
@@ -238,20 +276,22 @@ function ZO_MarketProductData:GetEndTimeString()
     return GetMarketProductEndTimeString(self.marketProductId)
 end
 
-function ZO_MarketProductData:CouldPurchase()
-    return CouldPurchaseMarketProduct(self.marketProductId, self.presentationIndex)
+function ZO_MarketProductData:CouldPurchase(quantity)
+    return CouldPurchaseMarketProduct(self.marketProductId, self.presentationIndex, quantity)
 end
 
-function ZO_MarketProductData:CouldGift()
-    return CouldGiftMarketProduct(self.marketProductId, self.presentationIndex)
+function ZO_MarketProductData:CouldGift(quantity)
+    return CouldGiftMarketProduct(self.marketProductId, self.presentationIndex, quantity)
 end
 
-function ZO_MarketProductData:RequestPurchase()
-    BuyMarketProduct(self.marketProductId, self.presentationIndex)
+function ZO_MarketProductData:RequestPurchase(quantity)
+    local purchaseQuantity = quantity or 1
+    BuyMarketProduct(self.marketProductId, self.presentationIndex, purchaseQuantity)
 end
 
-function ZO_MarketProductData:RequestPurchaseAsGift(giftMessage, recipientDisplayName)
-    GiftMarketProduct(self.marketProductId, self.presentationIndex, giftMessage, recipientDisplayName)
+function ZO_MarketProductData:RequestPurchaseAsGift(giftMessage, recipientDisplayName, quantity)
+    local purchaseQuantity = quantity or 1
+    GiftMarketProduct(self.marketProductId, self.presentationIndex, purchaseQuantity, giftMessage, recipientDisplayName)
 end
 
 function ZO_MarketProductData:GetMarketProductPreviewType()

@@ -11,9 +11,6 @@ local QUEST_TRACKER_TREE_CONDITION              = 2
 local QUEST_TRACKER_TREE_SUBCATEGORY_TITLE      = 3
 local QUEST_TRACKER_TREE_SUBCATEGORY_CONDITION  = 4
 
-GAMEPAD_FQT_TEXT_MIN_ALPHA = 0.3
-GAMEPAD_FQT_ANIMATION_FADE_IN_MS = 300
-GAMEPAD_FQT_ANIMATION_FADE_OUT_MS = 2000
 
 --Style
 
@@ -325,7 +322,6 @@ function ZO_Tracker:Initialize(trackerPanel, trackerControl)
 
     trackerPanel:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 
-    self:InitializeFadeAnimations()
     self:RegisterCallbacks()
     self:ApplyPlatformStyle()
 
@@ -340,7 +336,6 @@ function ZO_Tracker:GetFragment()
 end
 
 function ZO_Tracker:RegisterCallbacks()
-    CALLBACK_MANAGER:RegisterCallback("GamepadChatSystemActiveOnScreen", function() self:TryFadeOut() end)
     self.trackerControl:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
 end
 
@@ -468,39 +463,27 @@ end
 function ZO_Tracker:AssistNext(ignoreSceneRestriction)
     local isShowingBase = SCENE_MANAGER:IsShowingBaseScene()
     if ignoreSceneRestriction or isShowingBase then
-        if isShowingBase and self.isFaded then
-            self:TryFadeIn()
-        else
-            --if we are showing one quest now, find the next one to show ordered by the order they appear in the quest journal
-            if self.assistedData then
-                local nextQuestIndex = QUEST_JOURNAL_MANAGER:GetNextSortedQuestForQuestIndex(self.assistedData.arg1)
-                if nextQuestIndex then
-                    if self:BeginTracking(TRACK_TYPE_QUEST, nextQuestIndex) then
-                        CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")
-                        return
-                    end
+        --if we are showing one quest now, find the next one to show ordered by the order they appear in the quest journal
+        if self.assistedData then
+            local nextQuestIndex = QUEST_JOURNAL_MANAGER:GetNextSortedQuestForQuestIndex(self.assistedData.arg1)
+            if nextQuestIndex then
+                if self:BeginTracking(TRACK_TYPE_QUEST, nextQuestIndex) then
+                    CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")
+                    return
                 end
             end
+        end
 
-            --if we aren't showing any quest look for some quest to show
-            for i = 1, MAX_JOURNAL_QUESTS do
-                if IsValidQuestIndex(i) then
-                    if self:BeginTracking(TRACK_TYPE_QUEST, i) then
-                        CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")
-                        break
-                    end
+        --if we aren't showing any quest look for some quest to show
+        for i = 1, MAX_JOURNAL_QUESTS do
+            if IsValidQuestIndex(i) then
+                if self:BeginTracking(TRACK_TYPE_QUEST, i) then
+                    CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")
+                    break
                 end
             end
         end
     end
-end
-
-function ZO_Tracker:SetFaded(faded)
-    self.isFaded = faded
-end
-
-function ZO_Tracker:GetFaded()
-    return self.isFaded
 end
 
 --
@@ -1098,65 +1081,8 @@ function ZO_Tracker:SetAssisted(data, assisted)
     end
 end
 
-do
-    local ANIMATION_HOLD_TIME_MS = 8000
-    local FADE_OUT_OFFSET = GAMEPAD_FQT_ANIMATION_FADE_IN_MS + ANIMATION_HOLD_TIME_MS
-
-    function ZO_Tracker:OnGamepadPreferredModeChanged()
-        self:ApplyPlatformStyle()
-    end
-
-    local function OnFadeInAnimationStop(animation, control)
-        control.isFaded = false
-    end
-
-    local function OnFadeOutAnimationStop(animation)
-        animation.control.isFaded = true
-        FOCUSED_QUEST_TRACKER:SetFaded(true)
-        CALLBACK_MANAGER:FireCallbacks("QuestTrackerFadedOutOnScreen")
-    end
-
-    local function SetupAnimationTimeline(control, fadeAnimationName, setHandlers)
-        local fadeTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual(fadeAnimationName, control)
-        local fadeInAnimation = fadeTimeline:GetAnimation(1)
-        local fadeOutAnimation = fadeTimeline:GetAnimation(2)
-
-        if setHandlers then
-            fadeInAnimation:SetHandler("OnStop", OnFadeInAnimationStop)
-            fadeTimeline:SetHandler("OnStop", OnFadeOutAnimationStop)
-        end
-
-        fadeTimeline:SetAnimationOffset(fadeOutAnimation, FADE_OUT_OFFSET)
-
-        fadeTimeline.control = control
-        control.fadeTimeline = fadeTimeline
-    end
-
-    function ZO_Tracker:InitializeFadeAnimations()
-        local SET_FADE_HANDLERS = true
-        SetupAnimationTimeline(self.trackerControl, "FocusedQuestTrackerFadeGamepad", SET_FADE_HANDLERS)
-    end
-
-    function ZO_Tracker:TryFadeOut()
-        if self:IsOverlappingTextChat() then
-            local trackerControl = self.trackerControl
-
-            if FOCUSED_QUEST_TRACKER_FRAGMENT:IsShowing() then
-                if not trackerControl.isFaded then
-                    local fadeTimeline = trackerControl.fadeTimeline
-                    fadeTimeline:Stop()
-                    fadeTimeline:PlayFromStart(FADE_OUT_OFFSET)
-                end
-            else
-                trackerControl:SetAlpha(GAMEPAD_FQT_TEXT_MIN_ALPHA)
-            end
-        end
-    end
-
-    function ZO_Tracker:TryFadeIn()
-        FOCUSED_QUEST_TRACKER:SetFaded(false)
-        CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")
-    end
+function ZO_Tracker:OnGamepadPreferredModeChanged()
+    self:ApplyPlatformStyle()
 end
 
 do

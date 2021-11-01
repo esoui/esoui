@@ -396,7 +396,7 @@ end
 function ZO_EnchantingInventory:Initialize(owner, control, ...)
     local inventory = ZO_CraftingInventory.Initialize(self, control, ...)
     self.owner = owner
-    self.filterType = NO_FILTER
+    self.filterType = ENCHANTING_NO_FILTER
 
     self.questFilterCheckButton = control:GetNamedChild("QuestItemsOnly")
     self.filterDivider = control:GetNamedChild("ButtonDivider")
@@ -468,7 +468,7 @@ function ZO_EnchantingInventory:ChangeMode(enchantingMode)
             self:CreateNewTabFilterData(ENCHANTING_RUNE_ASPECT, GetString("SI_ENCHANTINGRUNECLASSIFICATION", ENCHANTING_RUNE_ASPECT), "EsoUI/Art/Crafting/enchantment_tabIcon_aspect_up.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_aspect_down.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_aspect_over.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_aspect_disabled.dds"),
             self:CreateNewTabFilterData(ENCHANTING_RUNE_ESSENCE, GetString("SI_ENCHANTINGRUNECLASSIFICATION", ENCHANTING_RUNE_ESSENCE), "EsoUI/Art/Crafting/enchantment_tabIcon_essence_up.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_essence_down.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_essence_over.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_essence_disabled.dds"),
             self:CreateNewTabFilterData(ENCHANTING_RUNE_POTENCY, GetString("SI_ENCHANTINGRUNECLASSIFICATION", ENCHANTING_RUNE_POTENCY), "EsoUI/Art/Crafting/enchantment_tabIcon_potency_up.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_potency_down.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_potency_over.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_potency_disabled.dds"),
-            self:CreateNewTabFilterData(NO_FILTER, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL), "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_disabled.dds"),
+            self:CreateNewTabFilterData(ENCHANTING_NO_FILTER, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL), "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_disabled.dds"),
         }
         self:SetActiveFilterByDescriptor(self.filterType)
         self.filterDivider:SetHidden(false)
@@ -478,9 +478,9 @@ function ZO_EnchantingInventory:ChangeMode(enchantingMode)
         self.sortByControl:SetAnchor(TOPLEFT, self.filterDivider, BOTTOMLEFT, OFFSET_X)
     elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
         self:SetFilters{
-            self:CreateNewTabFilterData(NO_FILTER, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL), "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_disabled.dds"),
+            self:CreateNewTabFilterData(ENCHANTING_NO_FILTER, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL), "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_disabled.dds"),
         }
-        self:SetActiveFilterByDescriptor(NO_FILTER)
+        self:SetActiveFilterByDescriptor(ENCHANTING_NO_FILTER)
         self.filterDivider:SetHidden(true)
         self.questFilterCheckButton:SetHidden(true)
         self.sortByControl:ClearAnchors()
@@ -520,7 +520,7 @@ function ZO_EnchantingInventory:Refresh(data)
     if enchantingMode == ENCHANTING_MODE_CREATION then
         filterType = self.filterType
     elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
-        filterType = EXTRACTION_FILTER
+        filterType = ENCHANTING_EXTRACTION_FILTER
     end
     local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Enchanting_IsEnchantingItem, ZO_Enchanting_DoesEnchantingItemPassFilter, filterType, data)
     self.owner:OnInventoryUpdate(validItemIds)

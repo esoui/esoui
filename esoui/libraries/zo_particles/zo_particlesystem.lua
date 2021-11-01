@@ -12,13 +12,10 @@ end
 
 function ZO_ParticleSystem:Initialize(particleClass)
     if not ZO_ParticleSystem.particleClassToPool[particleClass] then
-        local Factory = function()
-            return particleClass:New()
-        end
-        local Reset = function(particle)
+        local function Reset(particle)
             particle:Stop()
         end
-        local pool = ZO_ObjectPool:New(Factory, Reset)
+        local pool = ZO_ObjectPool:New(particleClass, Reset)
         ZO_ParticleSystem.particleClassToPool[particleClass] = pool
     end
     self.particlePool = ZO_MetaPool:New(ZO_ParticleSystem.particleClassToPool[particleClass])

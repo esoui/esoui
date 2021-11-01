@@ -272,8 +272,8 @@
             </OnTab>
         </EditBox>
 
-        <!--Positioned above windows and the dialogs. Below tooltips and menues-->
-        <TopLevelControl name="ZO_ChatWindowTopLevelTemplate" inherits="ZO_ChatContainerTemplate ZO_TextChatTemplate" tier="MEDIUM" level="2" virtual="true">
+        <!--Positioned above windows and the dialogs. Below tooltips and context menus-->
+        <TopLevelControl name="ZO_ChatWindowTopLevelTemplate" inherits="ZO_ChatContainerTemplate ZO_TextChatTemplate" tier="MEDIUM" level="ZO_MEDIUM_TIER_KEYBOARD_CHAT_WINDOW" virtual="true">
             <Controls>
                 <Control name="$(parent)TextEntry">
                     <Dimensions y="30" />

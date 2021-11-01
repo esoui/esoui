@@ -335,7 +335,7 @@ do
         local skillSection = self:AcquireSection(self:GetStyle("bodySection"))
         local hotbar = ACTION_BAR_ASSIGNMENT_MANAGER:GetHotbar(HOTBAR_CATEGORY_COMPANION)
         for slotIndex, slotData in hotbar:SlotIterator(COMPANION_SKILLS_FILTER) do
-            local rowControl = self:AcquireCustomControl(self:GetStyle("skillLineEntryRow"))
+            local rowControl = self:AcquireCustomControl(self:GetStyle("companionSkillLineEntryRow"))
             ZO_GamepadSkillEntryPreviewRow_Setup(rowControl, slotData:GetCompanionSkillData())
             skillSection:AddCustomControl(rowControl)
         end

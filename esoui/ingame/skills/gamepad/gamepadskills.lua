@@ -1843,6 +1843,5 @@ function ZO_GamepadSkills_RespecBindingsBinding_OnInitialized(self, binding)
     ZO_KeybindButtonTemplate_OnInitialized(self)
     ApplyTemplateToControl(self, "ZO_KeybindButton_Gamepad_Template")
     local DONT_SHOW_UNBOUND = false
-    local PREFER_GAMEPAD = true
-    self:SetKeybind(binding, DONT_SHOW_UNBOUND, binding, PREFER_GAMEPAD)
+    self:SetKeybind(binding, DONT_SHOW_UNBOUND, binding)
 end

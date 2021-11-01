@@ -19,10 +19,6 @@ local REFRESH_KEYBIND_STRIP = true
 
 ZO_Help_GenericTicketSubmission_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
-function ZO_Help_GenericTicketSubmission_Gamepad:New(...)
-    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
-end
-
 -- Initialization --
 
 function ZO_Help_GenericTicketSubmission_Gamepad:Initialize(control)

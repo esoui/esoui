@@ -19,6 +19,7 @@ do
     local g_roleIconTable = {}
 
     function ZO_Tooltip:AddAbilityStats(abilityId, overrideActiveRank, overrideCasterUnitTag)
+        overrideCasterUnitTag = overrideCasterUnitTag or "player"
         local statsSection = self:AcquireSection(self:GetStyle("abilityStatsSection"))
 
         --Cast Time

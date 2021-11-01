@@ -31,6 +31,36 @@
             </OnMouseExit>
         </Polygon>
 
+        <Control name="ZO_MapNavigationButtons_Gamepad" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)RightKeybind" inherits="ZO_ClickableKeybindLabel_Gamepad">
+                    <Anchor point="BOTTOMRIGHT" />
+                </Label>
+
+                <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
+                    <Anchor point="RIGHT" relativeTo="$(parent)RightKeybind" relativePoint="LEFT" offsetX="-10" />
+                </Label>
+
+                <Label name="$(parent)LeftKeybind" inherits="ZO_ClickableKeybindLabel_Gamepad">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="-10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_MapNavigationButtons_Keyboard" virtual="true">
+            <Controls>
+                <Button name="$(parent)Down" inherits="ZO_KeyButton">
+                    <Dimensions x="42" y="42" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="TOPLEFT" offsetX ="-5" />
+                </Button>
+
+                <Button name="$(parent)Up" inherits="ZO_KeyButton">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Down" relativePoint="TOPLEFT" />
+                    <Dimensions x="42" y="42" />
+                </Button>
+            </Controls>
+        </Control>
+
         <Button name="ZO_DungeonFloorSelect" inherits="ZO_KeyButton" virtual="true">
             <OnClicked>
                 ZO_WorldMap_ChangeFloor(self)
@@ -44,83 +74,6 @@
                 SetTooltipText(InformationTooltip)
             </OnMouseExit>
         </Button>
-
-        <Control name="ZO_MapLevelNavigation" virtual="true">
-            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" offsetY="10"/>
-            <Controls>
-                <Label name="$(parent)Text" text="SI_GAMEPAD_WORLD_MAP_SWITCH_LEVEL_KEYBIND" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" modifyTextType="UPPERCASE" hidden="false">
-                    <Anchor point="TOPRIGHT" />
-                </Label>
-
-                <Button name="$(parent)Down" inherits="ZO_KeyButton" mouseEnabled="false">
-                    <Dimensions x="42" y="42" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="TOPLEFT" offsetX ="-5" />
-                </Button>
-
-                <Button name="$(parent)Up" inherits="ZO_KeyButton" mouseEnabled="false">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Down" relativePoint="TOPLEFT" />
-                    <Dimensions x="42" y="42" />
-                </Button>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_DungeonFloorNavigation_Keyboard_Template" virtual="true">
-            <Anchor point="TOPRIGHT" offsetX="-11" offsetY="1"/>
-            <Controls>
-                <Label name="$(parent)Text" hidden="true" />
-
-                <Button name="$(parent)Up" mouseEnabled="true">
-                    <Anchor point="TOPRIGHT" />
-                    <Dimensions x="20" y="20" />
-                </Button>
-
-                <Button name="$(parent)Down" mouseEnabled="true">
-                    <Dimensions x="20" y="20" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Up" relativePoint="TOPLEFT" offsetX="-10" />
-                </Button>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_DungeonFloorNavigation_Gamepad_Template" virtual="true">
-            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" offsetY="10"/>
-            <Controls>
-                <Label name="$(parent)Text" text="SI_GAMEPAD_WORLD_MAP_SWITCH_ELEVATION_KEYBIND" font="ZoFontGamepad34" hidden="false" />
-
-                <Button name="$(parent)Down" mouseEnabled="false">
-                    <Dimensions x="42" y="42" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="TOPLEFT" offsetX ="-5" />
-                </Button>
-
-                <Button name="$(parent)Up" mouseEnabled="false">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Down" relativePoint="TOPLEFT" />
-                    <Dimensions x="42" y="42" />
-                </Button>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_DungeonFloorNavigation" virtual="true">
-            <Controls>
-                <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPRIGHT" />
-                </Label>
-
-                <Button name="$(parent)Up" inherits="ZO_DungeonFloorSelect">
-                    <OnInitialized>
-                        ZO_KeyControl_OnInitialized(self)
-                        self.floorDirection = -1
-                        self.tooltipFormatString = GetString(SI_DUNGEON_FLOOR_UP_TOOLTIP)
-                    </OnInitialized>
-                </Button>
-
-                <Button name="$(parent)Down" inherits="ZO_DungeonFloorSelect">
-                    <OnInitialized>
-                        ZO_KeyControl_OnInitialized(self)
-                        self.floorDirection = 1
-                        self.tooltipFormatString = GetString(SI_DUNGEON_FLOOR_DOWN_TOOLTIP)
-                    </OnInitialized>
-                </Button>
-            </Controls>
-        </Control>
 
         <Button name="ZO_WorldMapZoomButton" inherits="ZO_DefaultSmoothSliderButton" virtual="true">
             <OnMouseWheel>
@@ -430,13 +383,78 @@
                             </OnValueChanged>
                         </Slider>
 
-                        <Control name="$(parent)Floors" inherits="ZO_DungeonFloorNavigation" resizeToFitDescendents="true" />
-                        <Control name="$(parent)Levels" inherits="ZO_MapLevelNavigation" resizeToFitDescendents="true" />
+                        <Control name="$(parent)Floors_Keyboard" resizeToFitDescendents="true">
+                            <Anchor point="TOPRIGHT" offsetX="-11" offsetY="1"/>
+                            <Controls>
+                                <Button name="$(parent)Up" inherits="ZO_DungeonFloorSelect">
+                                    <Anchor point="TOPRIGHT" />
+                                    <Dimensions x="20" y="20" />
+                                    <Textures
+                                        normal="EsoUI/Art/WorldMap/mapNav_upArrow_up.dds"
+                                        pressed="EsoUI/Art/WorldMap/mapNav_upArrow_down.dds"
+                                        mouseOver="EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds"
+                                        disabled="EsoUI/Art/WorldMap/mapNav_upArrow_disabled.dds"
+                                    />
+                                    <OnInitialized>
+                                        ZO_KeyControl_OnInitialized(self)
+                                        self.floorDirection = MAP_FLOOR_CHANGE_DIRECTION_DOWN
+                                        self.tooltipFormatString = GetString(SI_DUNGEON_FLOOR_UP_TOOLTIP)
+                                    </OnInitialized>
+                                </Button>
+
+                                <Button name="$(parent)Down" inherits="ZO_DungeonFloorSelect">
+                                    <Dimensions x="20" y="20" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Up" relativePoint="TOPLEFT" offsetX="-10" />
+                                    <Textures
+                                        normal="EsoUI/Art/WorldMap/mapNav_downArrow_up.dds"
+                                        pressed="EsoUI/Art/WorldMap/mapNav_downArrow_down.dds"
+                                        mouseOver="EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds"
+                                        disabled="EsoUI/Art/WorldMap/mapNav_downArrow_disabled.dds"
+                                    />
+                                    <OnInitialized>
+                                        ZO_KeyControl_OnInitialized(self)
+                                        self.floorDirection = MAP_FLOOR_CHANGE_DIRECTION_UP
+                                        self.tooltipFormatString = GetString(SI_DUNGEON_FLOOR_DOWN_TOOLTIP)
+                                    </OnInitialized>
+                                </Button>
+                            </Controls>
+                        </Control>
+                        
+                        <Control name="$(parent)Floors_Gamepad" inherits="ZO_MapNavigationButtons_Gamepad">
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                            <OnInitialized>
+                                ZO_WorldMap_ZoomKeybindOnInitialized(self:GetNamedChild("RightKeybind"), "UI_SHORTCUT_RIGHT_SHOULDER")
+                                ZO_WorldMap_ZoomKeybindOnInitialized(self:GetNamedChild("LeftKeybind"), "UI_SHORTCUT_LEFT_SHOULDER")
+                            </OnInitialized>
+                            <Controls>
+                                <Label name="$(parent)Label" override="true" text="SI_GAMEPAD_WORLD_MAP_SWITCH_ELEVATION_KEYBIND" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Levels_Gamepad" inherits="ZO_MapNavigationButtons_Gamepad">
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                            <OnInitialized>
+                                ZO_WorldMap_ZoomKeybindOnInitialized(self:GetNamedChild("RightKeybind"), "UI_SHORTCUT_RIGHT_SHOULDER")
+                                ZO_WorldMap_ZoomKeybindOnInitialized(self:GetNamedChild("LeftKeybind"), "UI_SHORTCUT_LEFT_SHOULDER")
+                            </OnInitialized>
+                            <Controls>
+                                <Label name="$(parent)Label" override="true" text="SI_GAMEPAD_WORLD_MAP_SWITCH_LEVEL_KEYBIND" />
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Control>
 
                 <Label name="$(parent)GamepadInteractKeybind" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepadBold34" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" hidden="true">
                     <Anchor point="TOP" relativePoint="CENTER" offsetY="40" />
+                    <Controls>
+                        <Label name="$(parent)KeyLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                            <Anchor point="CENTER" relativeTo="$(parent)" relativePoint="LEFT" offsetX="-20" />
+                            <OnInitialized>
+                                ZO_Keybindings_RegisterLabelForBindingUpdate(self, "UI_SHORTCUT_PRIMARY")
+                                ZO_KeyMarkupLabel_SetCustomOffsets(self, -5, 5, -2, 3)
+                            </OnInitialized>
+                        </Label>
+                    </Controls>
                 </Label>
 
                 <Label name="$(parent)PinPointerBoxContents" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" >
@@ -446,14 +464,17 @@
         </TopLevelControl>
 
         <TopLevelControl name="ZO_WorldMapHeader_Gamepad" hidden="true">
-            <OnInitialized>
-                self:GetNamedChild("ZoomKeybind"):SetText(ZO_WorldMap_GetZoomText_Gamepad())
-            </OnInitialized>
-
             <Controls>
-                <Label name="$(parent)ZoomKeybind" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
-                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" relativeTo="ZO_WorldMap" offsetX="-5" offsetY="-6"/>
-                </Label>
+                <Control name="$(parent)ZoomKeybind" inherits="ZO_MapNavigationButtons_Gamepad">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_WorldMap" relativePoint="TOPRIGHT" offsetX="-5" offsetY="-8"/>
+                    <OnInitialized>
+                        ZO_WorldMap_ZoomKeybindOnInitialized(self:GetNamedChild("RightKeybind"), "UI_SHORTCUT_RIGHT_TRIGGER")
+                        ZO_WorldMap_ZoomKeybindOnInitialized(self:GetNamedChild("LeftKeybind"), "UI_SHORTCUT_LEFT_TRIGGER")
+                    </OnInitialized>
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" text="SI_WORLD_MAP_ZOOM" />
+                    </Controls>
+                </Control>
                 
                 <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <OnInitialized>

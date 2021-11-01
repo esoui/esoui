@@ -1030,3 +1030,6 @@ GetStringWidthScaledPixels = GetStringWidthScaled
 function ZO_TreeControl_GetNode(self)
     return self.node
 end
+
+-- ScrollTemplates
+ZO_ScrollList_SetScrollBarHiddenCallback = ZO_ScrollList_SetScrollBarVisibilityCallback

@@ -39,10 +39,6 @@
                                     <Anchor point="TOPLEFT"/>
                                     <Anchor point="TOPRIGHT"/>
 
-                                    <OnInitialized>
-                                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
-                                    </OnInitialized>
-
                                     <Controls>
                                         <Label name="$(parent)Description" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                                             <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" />

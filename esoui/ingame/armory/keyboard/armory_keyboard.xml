@@ -1,0 +1,342 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_ArmoryEquippedSlot" virtual="true">
+            <Dimensions x="40" y="40" />
+            <OnInitialized>
+                self.icon = self:GetNamedChild("Icon")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" level="2">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Texture>
+            </Controls>
+        </Button>
+        
+        <Control name="ZO_ArmoryWeaponSetRow" mouseEnabled="true" virtual="true">
+            <Dimensions y="52" />
+            <OnInitialized>
+                ZO_ArmoryWeaponSetRow_Keyboard:New(self)
+            </OnInitialized>
+            <OnMouseEnter>
+                ZO_ArmoryWeaponSetRow_Keyboard_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_ArmoryWeaponSetRow_Keyboard_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Button name="$(parent)MainHand" inherits="ZO_ArmoryEquippedSlot">
+                    <Dimensions x="50" y="50" />
+                    <Anchor point="LEFT" />
+                </Button>
+                
+                <Button name="$(parent)OffHand" inherits="ZO_ArmoryEquippedSlot">
+                    <Dimensions x="50" y="50" />
+                    <Anchor point="LEFT" relativeTo="$(parent)MainHand" relativePoint="RIGHT" offsetX="6"/>
+                </Button>
+                                
+                <Button name="$(parent)Poison" inherits="ZO_ArmoryEquippedSlot">
+                    <Dimensions x="50" y="50" />
+                    <Anchor point="LEFT" relativeTo="$(parent)OffHand" relativePoint="RIGHT" offsetX="6"/>
+                </Button>
+            
+                <Control name="$(parent)Skills" inherits="ZO_ArmorySkillsActionBar_Keyboard">
+                    <Anchor point="RIGHT" />
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_ArmoryAttribute" mouseEnabled="true" virtual="true">
+            <Dimensions x="190" y="80" />
+            <OnInitialized>
+                self.nameLabel = self:GetNamedChild("Name")
+                self.bar = self:GetNamedChild("Bar")
+                self.attributeValue = self:GetNamedChild("Points")
+            </OnInitialized>
+
+            <OnMouseEnter>
+                ZO_ArmoryAttribute_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_ArmoryAttribute_OnMouseExit()
+            </OnMouseExit>
+            
+            <Controls>           
+                <Label name="$(parent)Name" horizontalAlignment="CENTER" inherits="ZO_StatsRowName">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <Dimensions y="27"/>
+                </Label>
+
+                <Texture name="$(parent)Bar">
+                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM"/>
+                    <Dimensions x="138" y="16"/>
+                    <TextureCoords left="0" right="0.5390625" top="0" bottom="1"/>
+                </Texture>
+
+                <Label name="$(parent)Points" font="ZoFontHeader4" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                    <Anchor point="TOP" relativeTo="$(parent)Bar" relativePoint="BOTTOM" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_Armory_UnlockBuildEntry" virtual="true">
+            <Dimensions y="ZO_ARMORY_KEYBOARD_UNLOCK_ENTRY_HEIGHT"/>
+            
+            <Controls>
+                <Control name="$(parent)Container" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="8" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-8" />
+
+                    <OnMouseUp>
+                        ZO_Armory_Keyboard_UnlockBuildEntry_OnMouseUp(self, button, upInside)
+                    </OnMouseUp>
+                    
+                    <Controls>
+                        <Backdrop name="$(parent)Background" inherits="ZO_DefaultBackdrop">
+                            <AnchorFill/>
+                        </Backdrop>
+                        
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Armory/newBuild_Icon.dds">
+                            <Dimensions x="48" y="48" />
+                            <Anchor point="LEFT" offsetX="10" />
+                        </Texture>
+                        
+                        <Label name="$(parent)UnlockText" text="SI_ARMORY_UNLOCK_NEW_BUILD_ENTRY_NAME" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15" />
+                        </Label>
+
+                        <Button name="$(parent)Unlock">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="RIGHT" offsetX="-10"/>
+                            <Textures
+                                normal="EsoUI/Art/Buttons/pointsPlus_up.dds"
+                                pressed="EsoUI/Art/Buttons/pointsPlus_down.dds"
+                                mouseOver="EsoUI/Art/Buttons/pointsPlus_over.dds"
+                                disabled="EsoUI/Art/Buttons/pointsPlus_disabled.dds"
+                            />
+
+                            <OnClicked>
+                                local UP_INSIDE = true
+                                ZO_PropagateHandler(self:GetParent(), "OnMouseUp", button, UP_INSIDE)
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Armory_CollapsedBuildEntry" virtual="true">
+            <Dimensions y="ZO_ARMORY_KEYBOARD_COLLAPSED_ENTRY_HEIGHT"/>
+            
+            <OnInitialized>
+                self.nameLabel = self:GetNamedChild("ContainerName")
+                self.iconTexture = self:GetNamedChild("ContainerIcon")               
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Container" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="8" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-8" />
+                    
+                    <OnMouseUp>
+                        ZO_Armory_Keyboard_CollapsedEntry_OnMouseUp(self, button, upInside)
+                    </OnMouseUp>
+                    
+                    <Controls>
+                        <Backdrop name="$(parent)Background" inherits="ZO_DefaultBackdrop">
+                            <AnchorFill/>
+                        </Backdrop>
+                        
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds">
+                            <Dimensions x="48" y="48" />
+                            <Anchor point="LEFT" offsetX="10" />
+                        </Texture>
+                        
+                        <Label name="$(parent)Name" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" >
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15" />
+                        </Label>
+                        
+                        <Button name="$(parent)Expand">
+                            <Dimensions x="16" y="16" />
+                            <Anchor point="RIGHT" offsetX="-10"/>
+                            <Textures
+                                normal="EsoUI/Art/Buttons/scrollbox_downArrow_up.dds"
+                                pressed="EsoUI/Art/Buttons/scrollbox_downArrow_down.dds"
+                                mouseOver="EsoUI/Art/Buttons/scrollbox_downArrow_over.dds"
+                                disabled="EsoUI/Art/Buttons/scrollbox_downArrow_up_disabled.dds"
+                            />
+                            
+                            <OnClicked>
+                                local UP_INSIDE = true
+                                ZO_PropagateHandler(self:GetParent(), "OnMouseUp", button, UP_INSIDE)
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Armory_ExpandedBuildEntry" virtual="true">
+            <Dimensions y="ZO_ARMORY_KEYBOARD_EXPANDED_ENTRY_HEIGHT"/>
+
+            <OnInitialized>
+                ZO_Armory_ExpandedEntry_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Container">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="8" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-8" />
+                    
+                    <Controls>
+                        <Backdrop name="$(parent)Background" inherits="ZO_DefaultBackdrop">
+                            <AnchorFill/>
+                        </Backdrop>
+                        
+                        <Control name="$(parent)Header" mouseEnabled="true">
+                            <Dimensions y="80"/>
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                            
+                            <OnMouseUp>
+                                ZO_Armory_Keyboard_ExpandedEntry_OnMouseUp(self, button, upInside)
+                            </OnMouseUp>
+                            
+                            <Controls>
+                                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds">
+                                    <Dimensions x="48" y="48" />
+                                    <Anchor point="LEFT" offsetX="10" />
+                                </Texture>
+                                
+                                <Label name="$(parent)Name" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" >
+                                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15" />
+                                </Label>
+                                
+                                <Button name="$(parent)Collapse">
+                                    <Dimensions x="16" y="16" />
+                                    <Anchor point="RIGHT" offsetX="-10" />
+                                    <Textures
+                                        normal="EsoUI/Art/Buttons/scrollbox_upArrow_up.dds"
+                                        pressed="EsoUI/Art/Buttons/scrollbox_upArrow_down.dds"
+                                        mouseOver="EsoUI/Art/Buttons/scrollbox_upArrow_over.dds"
+                                        disabled="EsoUI/Art/Buttons/scrollbox_upArrow_up_disabled.dds"
+                                    />
+
+                                    <OnClicked>
+                                        local UP_INSIDE = true
+                                        ZO_PropagateHandler(self:GetParent(), "OnMouseUp", button, UP_INSIDE)
+                                    </OnClicked>
+                                </Button>
+                            </Controls>
+                        </Control>
+                        
+                        <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider" >
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT"  offsetX="15" />
+                            <Anchor point="RIGHT" constrains="X" offsetX="-15"/>
+                        </Control>                        
+
+                        <Control name="$(parent)ChampionBar" inherits="ZO_ArmoryChampionActionBar" scale="0.75">
+                            <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="25" />
+                        </Control>
+
+                        <Control name="$(parent)Attributes">
+                            <Dimensions x="589" y="80" />
+                            <Anchor point="TOP" relativeTo="$(parent)ChampionBar" relativePoint="BOTTOM" offsetY="15" />
+                            <Controls>
+                                <Control name="$(parent)Magicka" inherits="ZO_ArmoryAttribute">
+                                    <Anchor point="TOPLEFT"/>                                  
+                                    <OnInitialized name="AttributeType">
+                                        self.attributeType = ATTRIBUTE_MAGICKA
+                                    </OnInitialized>
+                                </Control>
+                                
+                                <Control name="$(parent)Health" inherits="ZO_ArmoryAttribute">
+                                    <Anchor point="TOP"/>                                
+                                    <OnInitialized name="AttributeType">
+                                        self.attributeType = ATTRIBUTE_HEALTH
+                                    </OnInitialized>
+                                </Control>
+                                
+                                <Control name="$(parent)Stamina" inherits="ZO_ArmoryAttribute">
+                                    <Anchor point="TOPRIGHT"/>                                    
+                                    <OnInitialized name="AttributeType">
+                                        self.attributeType = ATTRIBUTE_STAMINA
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)WeaponSets" text="SI_ARMORY_WEAPON_SETS_LABEL" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Attributes" relativePoint="BOTTOMLEFT" offsetX="27" offsetY="10" />
+                        </Label>
+
+                        <Control name="$(parent)WeaponRow1" inherits="ZO_ArmoryWeaponSetRow">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)WeaponSets" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="RIGHT" constrains="X" />
+                        </Control>
+                        
+                        <Control name="$(parent)WeaponRow2" inherits="ZO_ArmoryWeaponSetRow">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)WeaponRow1" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Anchor point="RIGHT" constrains="X" />
+                        </Control>
+
+                        <Label name="$(parent)EquipmentLabel" text="SI_ARMORY_EQUIPMENT_LABEL" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)WeaponRow2" relativePoint="BOTTOMLEFT" offsetY="15" />
+                        </Label>
+                        
+                        <Control name="$(parent)EquipmentRow" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)EquipmentLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Anchor point="RIGHT" constrains="X" />                           
+                        </Control>
+
+                        <Label name="$(parent)CurseTypeLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)EquipmentRow" relativePoint="BOTTOMLEFT" offsetY="15" />
+                        </Label>
+
+                        <Label name="$(parent)OutfitLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="LEFT" relativeTo="$(parent)CurseTypeLabel" relativePoint="RIGHT" offsetX="20" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_Armory_Keyboard_TopLevel" hidden="true">
+            <Dimensions x="645" y="730" />
+            <Anchor point="RIGHT" offsetY="18" />
+            
+            <OnInitialized>
+                ZO_Armory_Keyboard_TopLevel_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)TitleSection">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="605" y="32"/>
+                    
+                    <Controls>
+                        <Label name="$(parent)Header" font="ZoFontHeader4" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ARMORY_TITLE">
+                            <Anchor point="LEFT" />
+                        </Label>
+                        
+                        <Label name="$(parent)BuildCount" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="RIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider" >
+                    <Anchor point="TOPLEFT" offsetY="35"/>
+                    <Anchor point="RIGHT" constrains="X" offsetX="-40" />
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleSection" relativePoint="BOTTOMLEFT" offsetY="30" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,12 +1,6 @@
 --[[ Character Creation Bucket]]--
 
-ZO_CharacterCreateBucket_Base = ZO_Object:Subclass()
-
-function ZO_CharacterCreateBucket_Base:New(...)
-    local bucket = ZO_Object.New(self)
-    bucket:Initialize(...)
-    return bucket
-end
+ZO_CharacterCreateBucket_Base = ZO_InitializingObject:Subclass()
 
 function ZO_CharacterCreateBucket_Base:Initialize(parent, bucketCategory, manager)
     self.parent = parent
@@ -41,13 +35,7 @@ function ZO_CharacterCreateBucket_Base:RandomizeAppearance(randomizeType)
 end
 
 --[[ Character Creation Bucket Manager ]]--
-ZO_CharacterCreateBucketManager_Base = ZO_Object:Subclass()
-
-function ZO_CharacterCreateBucketManager_Base:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
+ZO_CharacterCreateBucketManager_Base = ZO_InitializingObject:Subclass()
 
 function ZO_CharacterCreateBucketManager_Base:Initialize(container, bucketCategories)
     self.buckets = {}

@@ -82,7 +82,7 @@ function ZO_ListDialog:SetFirstButtonEnabled(enabled)
 end
 
 function ZO_ListDialog:SetSecondButtonEnabled(enabled)
-    self.firstButton:SetEnabled(enabled)
+    self.secondButton:SetEnabled(enabled)
 end
 
 function ZO_ListDialog:SetEmptyListText(text)

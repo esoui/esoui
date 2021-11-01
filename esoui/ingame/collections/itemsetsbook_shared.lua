@@ -50,12 +50,25 @@ function ZO_ItemSetsBook_Shared:InitializeCategories()
     end)
     categoriesRefreshGroup:AddDirtyState("Visible", function()
         self:RefreshVisibleCategories()
+        self:RefreshCategoryProgress()
     end)
     categoriesRefreshGroup:SetActive(function()
         return self:IsCategoriesRefreshGroupActive()
     end)
     categoriesRefreshGroup:MarkDirty("List")
     self.categoriesRefreshGroup = categoriesRefreshGroup
+
+    -- Summary category refresh group
+    local summaryRefreshGroup = ZO_Refresh:New()
+    self.summaryRefreshGroup = summaryRefreshGroup
+    local refreshGroupOptions =
+    {
+        RefreshAll = function()
+            self:RefreshSummaryCategoryContent()
+        end,
+    }
+    summaryRefreshGroup:AddRefreshGroup("FullUpdate", refreshGroupOptions)
+    summaryRefreshGroup:RefreshAll("FullUpdate")
 end
 
 function ZO_ItemSetsBook_Shared:InitializeGridList(gridScrollListTemplate)
@@ -74,7 +87,6 @@ function ZO_ItemSetsBook_Shared:InitializeGridList(gridScrollListTemplate)
         return self:IsCategoryContentRefreshGroupActive()
     end)
     self.categoryContentRefreshGroup = categoryContentRefreshGroup
-
     self.gridListPanelList = gridScrollListTemplate:New(self.gridListPanelControl, ZO_GRID_SCROLL_LIST_AUTOFILL)
 end
 
@@ -104,6 +116,8 @@ function ZO_ItemSetsBook_Shared:RegisterForEvents()
 end
 
 function ZO_ItemSetsBook_Shared:OnItemSetCollectionsUpdated(itemSetIds)
+    self.summaryRefreshGroup:RefreshAll("FullUpdate")
+
     if itemSetIds and ITEM_SET_COLLECTIONS_DATA_MANAGER:GetShowLocked() then
         for _, itemSetId in ipairs(itemSetIds) do
             local itemSetCollectionData = ITEM_SET_COLLECTIONS_DATA_MANAGER:GetItemSetCollectionData(itemSetId)
@@ -208,6 +222,14 @@ end
 
 function ZO_ItemSetsBook_Shared:ShowReconstructOptions()
     assert(false) -- Must be overriden
+end
+
+function ZO_ItemSetsBook_Shared:RefreshSummaryCategoryContent()
+    -- Can be overridden
+end
+
+function ZO_ItemSetsBook_Shared:RefreshCategoryProgress()
+    -- Can be overridden
 end
 
 function ZO_ItemSetsBook_Shared:RefreshFilters()
@@ -317,6 +339,15 @@ end
 
 function ZO_ItemSetsBook_Shared:OnFragmentShowing()
     ITEM_SET_COLLECTIONS_DATA_MANAGER:CleanData()
+
+    local isReconstructing = self:IsReconstructing()
+    if self.wasReconstructing ~= isReconstructing then
+        -- Force a refresh of the categories when switching between collection and
+        -- reconstruction mode to display the appropriate categories contextually.
+        self.wasReconstructing = isReconstructing
+        self.categoriesRefreshGroup:MarkDirty("List")
+    end
+
     self.categoriesRefreshGroup:TryClean()
     self.categoryContentRefreshGroup:TryClean()
 end
@@ -325,8 +356,13 @@ function ZO_ItemSetsBook_Shared:MarkCategoryContentDirty(stateName)
     self.categoryContentRefreshGroup:MarkDirty(stateName)
 end
 
-function ZO_ItemSetsBook_Entry_Header_Shared_OnInitialize(control)
+function ZO_ItemSetsBook_SummaryEntry_Header_Shared_OnInitialize(control)
     control.nameLabel = control:GetNamedChild("Name")
+    control.progressBar = control:GetNamedChild("Progress")
+end
+
+function ZO_ItemSetsBook_Entry_Header_Shared_OnInitialize(control)
     control.costLabel = control:GetNamedChild("Cost")
+    control.nameLabel = control:GetNamedChild("Name")
     control.progressBar = control:GetNamedChild("Progress")
 end

@@ -268,11 +268,6 @@
                 </Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_EMOTES_QUICK_SLOTS">
-                <Down>PLAYER_EMOTE_QUICKSLOT:StartInteraction()</Down>
-                <Up>PLAYER_EMOTE_QUICKSLOT:StopInteraction()</Up>
-            </Action>
-
             <Action name="SHEATHE_WEAPON_TOGGLE">
                 <Down>TogglePlayerWield()</Down>
             </Action>
@@ -321,6 +316,11 @@
             <Action name="PLAYER_TO_PLAYER_INTERACT">
                 <Down>PLAYER_TO_PLAYER:StartInteraction()</Down>
                 <Up>PLAYER_TO_PLAYER:StopInteraction()</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_EMOTES_QUICK_SLOTS">
+                <Down>if IsInGamepadPreferredMode() then PLAYER_EMOTE_QUICKSLOT:StartInteraction() end</Down>
+                <Up>PLAYER_EMOTE_QUICKSLOT:StopInteraction()</Up>
             </Action>
         </Category>
 
@@ -503,7 +503,7 @@
         </Category>
     </Layer>
     <Layer name="SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS">
-        <Category>
+        <Category name="SI_KEYBINDINGS_CATEGORY_GENERAL">
             <Action name="UI_SHORTCUT_PRIMARY">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
@@ -545,53 +545,93 @@
             <Action name="UI_SHORTCUT_EXIT" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
             </Action>
-
-            <Action name="UI_SHORTCUT_RIGHT_TRIGGER" hideAction="true" rebindable="false">
+        </Category>
+        
+        <Category name="SI_KEYBINDINGS_CATEGORY_USER_INTERFACE_GAMEPAD">
+            <Action name="UI_SHORTCUT_LEFT_STICK">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_LEFT_TRIGGER" hideAction="true" rebindable="false">
+            <!-- These binds don't do anything directly, but they allow the keys that
+            emulate analog stick directional input to be rebound. -->
+
+            <Action name="UI_SHORTCUT_LEFT_STICK_UP">
+                <Down>return false</Down>
+            </Action>
+
+            <Action name="UI_SHORTCUT_LEFT_STICK_RIGHT">
+                <Down>return false</Down>
+            </Action>
+
+            <Action name="UI_SHORTCUT_LEFT_STICK_DOWN">
+                <Down>return false</Down>
+            </Action>
+
+            <Action name="UI_SHORTCUT_LEFT_STICK_LEFT">
+                <Down>return false</Down>
+            </Action>
+
+            <Action name="UI_SHORTCUT_INPUT_UP">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_RIGHT_SHOULDER" hideAction="true" rebindable="false">
+            <Action name="UI_SHORTCUT_INPUT_RIGHT">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_LEFT_SHOULDER" hideAction="true" rebindable="false">
+            <Action name="UI_SHORTCUT_INPUT_DOWN">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_INPUT_LEFT" hideAction="true" rebindable="false">
+            <Action name="UI_SHORTCUT_INPUT_LEFT">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_INPUT_RIGHT" hideAction="true" rebindable="false">
+            <Action name="UI_SHORTCUT_RIGHT_STICK">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_INPUT_UP" hideAction="true" rebindable="false">
+            <!-- These binds don't do anything directly, but they allow the keys that
+            emulate analog stick directional input to be rebound. -->
+
+            <Action name="UI_SHORTCUT_RIGHT_STICK_UP">
+                <Down>return false</Down>
+            </Action>
+
+            <Action name="UI_SHORTCUT_RIGHT_STICK_RIGHT">
+                <Down>return false</Down>
+            </Action>
+
+            <Action name="UI_SHORTCUT_RIGHT_STICK_DOWN">
+                <Down>return false</Down>
+            </Action>
+
+            <Action name="UI_SHORTCUT_RIGHT_STICK_LEFT">
+                <Down>return false</Down>
+            </Action>
+
+            <Action name="UI_SHORTCUT_LEFT_SHOULDER">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_INPUT_DOWN" hideAction="true" rebindable="false">
+            <Action name="UI_SHORTCUT_RIGHT_SHOULDER">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_LEFT_STICK" hideAction="true" rebindable="false">
+            <Action name="UI_SHORTCUT_LEFT_TRIGGER">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_RIGHT_STICK" hideAction="true" rebindable="false">
+            <Action name="UI_SHORTCUT_RIGHT_TRIGGER">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
@@ -1227,11 +1267,6 @@
             </Action>
 
             <Action name="HOUSING_EDITOR_BEGIN_FURNITURE_LINKING">
-                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
-                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
-            </Action>
-
-            <Action name="HOUSING_EDITOR_BEGIN_EDIT_PATH">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>

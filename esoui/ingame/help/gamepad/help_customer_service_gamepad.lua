@@ -1,82 +1,6 @@
-local TICKET_CATEGORIES =
-{
-    {
-        id = TICKET_CATEGORY_CHARACTER_ISSUE,
-        value = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_CHARACTER_ISSUE,
-        name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_CHARACTER_ISSUE),
-    },
-    {
-        id = TICKET_CATEGORY_REPORT_DEFAULT,
-        value = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER,
-        name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER),
-    },
-    {
-        id = TICKET_CATEGORY_REPORT_DEFAULT,
-        value = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD,
-        name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD),
-    },
-    {
-        id = TICKET_CATEGORY_OTHER,
-        value = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_SUBMIT_FEEDBACK,
-        name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_SUBMIT_FEEDBACK),
-    },
-}
-
-local TICKET_SUBCATEGORIES =
-{
-    [CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER] =
-    {
-        {
-            id = TICKET_CATEGORY_REPORT_BAD_NAME,
-            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_INAPPROPRIATE_NAME,
-            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_INAPPROPRIATE_NAME),
-        },
-        {
-            id = TICKET_CATEGORY_REPORT_HARASSMENT,
-            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_HARASSMENT,
-            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_HARASSMENT),
-        },
-        {
-            id = TICKET_CATEGORY_REPORT_CHEATING,
-            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_CHEATING,
-            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_CHEATING),
-        },
-        {
-            id = TICKET_CATEGORY_REPORT_OTHER,
-            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_CHEATING,
-            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER),
-        },
-    },
-    [CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD] =
-    {
-        {
-            id = TICKET_CATEGORY_REPORT_GUILD_NAME,
-            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_NAME,
-            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_NAME),
-        },
-        {
-            id = TICKET_CATEGORY_REPORT_GUILD_LISTING,
-            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_LISTING,
-            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_LISTING),
-        },
-        {
-            id = TICKET_CATEGORY_REPORT_GUILD_DECLINE_MESSAGE,
-            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_DECLINE,
-            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_DECLINE),
-        },
-    },
-}
-
-local REQUIRED_FIELD_DEFAULT_TEXTS =
-{
-    [CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER] = zo_strformat(SI_GAMEPAD_HELP_TICKET_EDIT_REQUIRED_NAME_DISPLAY, ZO_GetPlatformAccountLabel()),
-}
+local GetListEntryName = ZO_GetAskForHelpListEntryName
 
 local ZO_Help_Customer_Service_Gamepad = ZO_Help_GenericTicketSubmission_Gamepad:Subclass()
-
-function ZO_Help_Customer_Service_Gamepad:New(...)
-    return ZO_Help_GenericTicketSubmission_Gamepad.New(self, ...)
-end
 
 function ZO_Help_Customer_Service_Gamepad:Initialize(control)
     ZO_Help_GenericTicketSubmission_Gamepad.Initialize(self, control)
@@ -135,62 +59,48 @@ function ZO_Help_Customer_Service_Gamepad:GetFieldEntryMessage()
 end
 
 function ZO_Help_Customer_Service_Gamepad:GetTicketCategoryForSubmission()
-    local categoryValue = self:GetCurrentCategoryValue()
-    local categoryTicketId = self:GetTicketIdByValue(categoryValue)
-    local subcategoryIndex = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY)
-    if subcategoryIndex then
-        local subcategoryInfo = TICKET_SUBCATEGORIES[categoryValue]
-        if subcategoryInfo then
-            categoryTicketId = subcategoryInfo[subcategoryIndex].id
-        end
+    local subcategoryData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY)
+    if subcategoryData and subcategoryData.ticketCategory then
+        return subcategoryData.ticketCategory
     end
 
-    return categoryTicketId
-end
-
-function ZO_Help_Customer_Service_Gamepad:GetCurrentCategoryValue()
-    local categoryIndex = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY)
-    if categoryIndex then
-        return self:GetCategoryValueFromIndex(categoryIndex)
+    local categoryData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY)
+    if categoryData and categoryData.ticketCategory then
+        return categoryData.ticketCategory
     end
-end
-
-function ZO_Help_Customer_Service_Gamepad:GetCategoryValueFromIndex(categoryIndex)
-    local categoryInfo = TICKET_CATEGORIES[categoryIndex]
-    if categoryInfo then
-        return categoryInfo.value
-    end
-end
-
-function ZO_Help_Customer_Service_Gamepad:GetTicketIdByValue(value)
-    for i, info in ipairs(TICKET_CATEGORIES) do
-        if info.value == value then
-            return info.id
-        end
+    
+    local impactData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.IMPACT)
+    if impactData and impactData.ticketCategory then
+        return impactData.ticketCategory
     end
 end
 
 function ZO_Help_Customer_Service_Gamepad:ValidateTicketFields()
-    local result = ZO_HELP_TICKET_VALIDATION_STATUS.SUCCESS
-    local details = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS)
-    if details == nil or details == "" then
-        local categoryValue = self:GetCurrentCategoryValue()
-        local ticketId = self:GetTicketIdByValue(categoryValue)
-        --"Character" required information is inferred, so nothing is required
-        if ticketId ~= TICKET_CATEGORY_CHARACTER_ISSUE and ticketId ~= TICKET_CATEGORY_OTHER then
-            result = ZO_HELP_TICKET_VALIDATION_STATUS.FAILED_NO_DISPLAY_NAME
+    local impactData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.IMPACT)
+    if not impactData or impactData.id == CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_NONE then
+        return ZO_HELP_TICKET_VALIDATION_STATUS.FAILED_NO_IMPACT
+    elseif not self:GetTicketCategoryForSubmission() then
+        return ZO_HELP_TICKET_VALIDATION_STATUS.FAILED_NO_CATEGORY
+    elseif impactData.detailsTitle then
+        local details = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS)
+        if details == nil or details == "" then
+            if impactData.id == CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER then
+                return ZO_HELP_TICKET_VALIDATION_STATUS.FAILED_NO_DISPLAY_NAME
+            else
+                return ZO_HELP_TICKET_VALIDATION_STATUS.FAILED_NO_DETAILS
+            end
         end
     end
-    return result
+
+    return ZO_HELP_TICKET_VALIDATION_STATUS.SUCCESS
 end
 
 function ZO_Help_Customer_Service_Gamepad:SubmitTicket()
     ResetCustomerServiceTicket()
     SetCustomerServiceTicketCategory(self:GetTicketCategoryForSubmission())
     SetCustomerServiceTicketBody(self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DESCRIPTION))
-    local categoryValue = self:GetCurrentCategoryValue()
-    local ticketId = self:GetTicketIdByValue(categoryValue)
-    if ticketId == TICKET_CATEGORY_REPORT_DEFAULT then
+    local impactData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.IMPACT)
+    if impactData.id == CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER then
         SetCustomerServiceTicketPlayerTarget(self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS))
         ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket()
     end
@@ -205,19 +115,28 @@ function ZO_Help_Customer_Service_Gamepad:SetReportGuildTargetByName(guildName)
     self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS, guildName)
 end
 
-function ZO_Help_Customer_Service_Gamepad:SetCategory(categoryValue)
-    for categoryIndex, categoryInfo in ipairs(TICKET_CATEGORIES) do
-        if categoryInfo.value == categoryValue then
-            self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY, categoryIndex)
-            break
-        end
-    end
-end
-
-function ZO_Help_Customer_Service_Gamepad:SetReportGuildSubcategory(subCategoryValue)
-    for subCategoryIndex, subCategoryInfo in ipairs(TICKET_SUBCATEGORIES[CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD]) do
-        if subCategoryInfo.value == subCategoryValue then
-            self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY, subCategoryIndex)
+function ZO_Help_Customer_Service_Gamepad:SetCategories(impact, category, subcategory)
+    for _, impactData in ipairs(ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO.impacts) do
+        if impactData.id == impact then
+            self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.IMPACT, impactData)
+            
+            if category and impactData.categories then
+                for _, categoryData in ipairs(impactData.categories) do
+                    if categoryData.id == category then
+                        self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY, categoryData)
+                        
+                        if subcategory and categoryData.subcategories then
+                            for _, subcategoryData in ipairs(categoryData.subcategories) do
+                                if subcategoryData.id == subcategory then
+                                    self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY, subcategoryData)
+                                    break
+                                end
+                            end
+                        end
+                        break
+                    end
+                end
+            end
             break
         end
     end
@@ -261,8 +180,8 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
         end
 
         if data.isRequired and not self.requiredInfoProvidedInternally then
-            local defaultText = REQUIRED_FIELD_DEFAULT_TEXTS[self:GetCurrentCategoryValue()]
-            ZO_EditDefaultText_Initialize(control.editBox, defaultText)
+            local impactData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.IMPACT)
+            ZO_EditDefaultText_Initialize(control.editBox, impactData.detailsGamepadDefaultText)
         else
             ZO_EditDefaultText_Disable(control.editBox)
         end
@@ -285,9 +204,21 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
         control.highlight:SetHidden(not selected)
     end
 
+    local function OnDropdownItemSelected(control, data)
+        if data.description then
+            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, data.description)
+        end
+    end
+
+    local function OnDropdownItemDeselected(control, data)
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    end
+
     local function SetupDropdownListEntry(control, data, selected, selectedDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, active)
         control.dropdown:SetSortsItems(false)
+        control.dropdown:RegisterCallback("OnItemSelected", OnDropdownItemSelected)
+        control.dropdown:RegisterCallback("OnItemDeselected", OnDropdownItemDeselected)
 
         self:BuildDropdownList(control.dropdown, data)
         if selected then
@@ -301,37 +232,56 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
     list:AddDataTemplate("ZO_GamepadTextFieldSubmitItem", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 end
 
-function ZO_Help_Customer_Service_Gamepad:DropdownItemCallback(selectionIndex, fieldType, ticketCategoryId)
-    if self:GetSavedField(fieldType) ~= selectionIndex then
-        self:SetSavedField(fieldType, selectionIndex)
-        if fieldType == ZO_HELP_TICKET_FIELD_TYPE.CATEGORY then
-            if self.requiredInfoProvidedInternally then
-                self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS, nil)
-            end
-            self.requiredInfoProvidedInternally = false
-            ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:SetReportPlayerTicketSubmittedCallback(nil)
-        end
-        self:BuildList()
-    end
-end
-
-function ZO_Help_Customer_Service_Gamepad:BuildDropdownList(dropdown, data)
+function ZO_Help_Customer_Service_Gamepad:BuildDropdownList(dropdown, fieldData)
     dropdown:ClearItems()
+    local fieldType = fieldData.fieldType
+    local function OnSelectionChanged(_, _, entry)
+        if self:GetSavedField(fieldType) ~= entry.data then
+            self:SetSavedField(fieldType, entry.data)
+            if fieldType == ZO_HELP_TICKET_FIELD_TYPE.IMPACT then
+                if self.requiredInfoProvidedInternally then
+                    self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS, nil)
+                end
+                self.requiredInfoProvidedInternally = false
+                ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:SetReportPlayerTicketSubmittedCallback(nil)
+            end
+            self:BuildList()
+        end
+    end
 
-    for index, item in ipairs(data.list) do
-        dropdown:AddItem(ZO_ComboBox:CreateItemEntry(item.name, function() self:DropdownItemCallback(index, data.fieldType, item.id) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
+    for index, listEntry in ipairs(fieldData.list) do
+        local entry = ZO_ComboBox:CreateItemEntry(GetListEntryName(fieldData.listStringName, listEntry), OnSelectionChanged)
+        entry.index = index
+        entry.data = listEntry
+        entry.description = ZO_GetAskForHelpListEntryDescription(fieldData.listDescriptionStringName, listEntry)
+        dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
 
     dropdown:UpdateItems()
-    self:UpdateDropdownSelection(dropdown, data.fieldType)
+    self:UpdateDropdownSelection(dropdown, fieldType)
 end
 
+function ZO_Help_Customer_Service_Gamepad:SetSavedField(fieldType, fieldValue, refreshVisible)
+    local oldFieldValue = self:GetSavedField(fieldType)
+    if oldFieldValue ~= fieldValue then
+        ZO_Help_GenericTicketSubmission_Gamepad.SetSavedField(self, fieldType, fieldValue, refreshVisible)
+
+        if fieldType == ZO_HELP_TICKET_FIELD_TYPE.IMPACT then
+            local categoryData = fieldValue and fieldValue.categories and fieldValue.categories[1]
+            self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY, categoryData)
+        elseif fieldType == ZO_HELP_TICKET_FIELD_TYPE.CATEGORY then
+            local subcategoryData = fieldValue and fieldValue.subcategories and fieldValue.subcategories[1]
+            self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY, subcategoryData)
+        end
+    end
+end
+
+
 function ZO_Help_Customer_Service_Gamepad:UpdateDropdownSelection(dropdown, fieldType)
-    local savedField = self:GetSavedField(fieldType)
-    if savedField then
-        dropdown:SelectItemByIndex(savedField)
-    else
-        dropdown:SelectFirstItem()
+    local savedFieldData = self:GetSavedField(fieldType)
+    if not (savedFieldData and dropdown:SetSelectedItemByEval(function(entry) return entry.data == savedFieldData end)) then
+        local IGNORE_CALLBACK = true
+        dropdown:SelectFirstItem(IGNORE_CALLBACK)
     end
 end
 
@@ -340,14 +290,12 @@ function ZO_Help_Customer_Service_Gamepad:SetCurrentDropdown(dropdown)
 end
 
 function ZO_Help_Customer_Service_Gamepad:ActivateCurrentDropdown(fieldType)
-    if(self.currentDropdown ~= nil) then
-        self.currentDropdown:Activate()
-        local savedField = self:GetSavedField(fieldType)
-        if savedField then
-            self.currentDropdown:SetHighlightedItem(savedField)
-        else
-            self.currentDropdown:SetHighlightedItem(1)
-        end
+    local currentDropdown = self.currentDropdown
+    if currentDropdown then
+        currentDropdown:Activate()
+        local savedFieldData = self:GetSavedField(fieldType)
+        local entryIndex = savedFieldData and currentDropdown:GetIndexByEval(function(entry) return entry.data == savedFieldData end) or 1
+        currentDropdown:SetHighlightedItem(entryIndex)
     end
 end
 
@@ -366,9 +314,11 @@ function ZO_Help_Customer_Service_Gamepad:AddTextFieldEntry(fieldType, header, r
     end
 end
 
-function ZO_Help_Customer_Service_Gamepad:AddDropdownEntry(fieldType, header, list)
+function ZO_Help_Customer_Service_Gamepad:AddDropdownEntry(fieldType, header, list, listStringName, listDescriptionStringName)
     local entryData = ZO_GamepadEntryData:New("Dropdown")
     entryData.list = list
+    entryData.listStringName = listStringName
+    entryData.listDescriptionStringName = listDescriptionStringName
     entryData.fieldType = fieldType
     entryData.header = header
     entryData.isDropdown = true
@@ -386,22 +336,25 @@ end
 function ZO_Help_Customer_Service_Gamepad:BuildList()
     self.itemList:Clear()
 
-    local FIELD_IS_REQUIRED = true
+    -- impacts
+    self:AddDropdownEntry(ZO_HELP_TICKET_FIELD_TYPE.IMPACT, GetString(SI_GAMEPAD_HELP_FIELD_TITLE_IMPACT), ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO.impacts, ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO.impactStringName)
 
-    -- categories
-    self:AddDropdownEntry(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY, GetString(SI_GAMEPAD_HELP_FIELD_TITLE_CATEGORY), TICKET_CATEGORIES)
+    local impactData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.IMPACT)
+    if impactData then
+        if impactData.categories then
+            -- contextual categories
+            self:AddDropdownEntry(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY, GetString(SI_GAMEPAD_HELP_FIELD_TITLE_CATEGORY), impactData.categories, impactData.categoryStringName, impactData.categoryDescriptionStringName)
 
-    local categoryValue = self:GetCurrentCategoryValue()
-    if categoryValue then
-        -- contextual subcategories
-        local subcategories = TICKET_SUBCATEGORIES[categoryValue]
-        if subcategories then
-            self:AddDropdownEntry(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY, GetString(SI_GAMEPAD_HELP_FIELD_TITLE_SUBCATEGORY), subcategories)
+            local categoryData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY)
+            if categoryData and categoryData.subcategories then
+                -- contextual subcategories
+                self:AddDropdownEntry(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY, GetString(SI_GAMEPAD_HELP_FIELD_TITLE_SUBCATEGORY), categoryData.subcategories, categoryData.subcategoryStringName, categoryData.subcategoryDescriptionStringName)
+            end
         end
 
-        -- required fields
-        local ticketId = self:GetTicketIdByValue(categoryValue)
-        if ticketId ~= TICKET_CATEGORY_CHARACTER_ISSUE and ticketId ~= TICKET_CATEGORY_OTHER then
+        -- required details
+        if impactData.detailsTitle then
+            local FIELD_IS_REQUIRED = true
             self:AddTextFieldEntry(ZO_HELP_TICKET_FIELD_TYPE.DETAILS, GetString(SI_GAMEPAD_HELP_FIELD_TITLE_REQUIRED_DETAILS), FIELD_IS_REQUIRED, self.requiredInfoProvidedInternally)
         end
     end
@@ -424,9 +377,9 @@ function ZO_Help_Customer_Service_Gamepad:ResetTicket()
     ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:SetReportPlayerTicketSubmittedCallback(nil)
 end
 
-function ZO_Help_Customer_Service_Gamepad:SetupTicketByCategoryValue(value, autoFillFieldsFunction)
+function ZO_Help_Customer_Service_Gamepad:SetupTicket(impact, category, subcategory, autoFillFieldsFunction)
     self:ResetTicket()
-    self:SetCategory(value)
+    self:SetCategories(impact, category, subcategory)
     if autoFillFieldsFunction ~= nil then
         autoFillFieldsFunction()
     end
@@ -435,7 +388,7 @@ function ZO_Help_Customer_Service_Gamepad:SetupTicketByCategoryValue(value, auto
     self:BuildList()
 end
 
-function ZO_Help_Customer_Service_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
+function ZO_Help_Customer_Service_Gamepad:OnSelectionChanged()
     if self.activeEditBox then
         self.activeEditBox:LoseFocus()
     end
@@ -445,17 +398,21 @@ function ZO_Help_Customer_Service_Gamepad_OnInitialize(control)
     HELP_CUSTOMER_SERVICE_GAMEPAD = ZO_Help_Customer_Service_Gamepad:New(control)
 end
 
-function ZO_Help_Customer_Service_Gamepad_SetupReportPlayerTicket(displayName)
-    local function SetDisplayName()
-        HELP_CUSTOMER_SERVICE_GAMEPAD:SetReportPlayerTargetByDisplayName(displayName)
-    end
-    HELP_CUSTOMER_SERVICE_GAMEPAD:SetupTicketByCategoryValue(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, SetDisplayName)
-end
+do
+    local DEFAULT_CATEGORY = nil
+    local DEFAULT_SUBCATEGORY = nil
 
-function ZO_Help_Customer_Service_Gamepad_SetupReportGuildTicket(guildName, subCategory)
-    local function SetGuildName()
-        HELP_CUSTOMER_SERVICE_GAMEPAD:SetReportGuildTargetByName(guildName)
-        HELP_CUSTOMER_SERVICE_GAMEPAD:SetReportGuildSubcategory(subCategory)
+    function ZO_Help_Customer_Service_Gamepad_SetupReportPlayerTicket(displayName)
+        local function SetDisplayName()
+            HELP_CUSTOMER_SERVICE_GAMEPAD:SetReportPlayerTargetByDisplayName(displayName)
+        end
+        HELP_CUSTOMER_SERVICE_GAMEPAD:SetupTicket(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, SetDisplayName)
     end
-    HELP_CUSTOMER_SERVICE_GAMEPAD:SetupTicketByCategoryValue(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD, SetGuildName)
+
+    function ZO_Help_Customer_Service_Gamepad_SetupReportGuildTicket(guildName, category)
+        local function SetGuildName()
+            HELP_CUSTOMER_SERVICE_GAMEPAD:SetReportGuildTargetByName(guildName)
+        end
+        HELP_CUSTOMER_SERVICE_GAMEPAD:SetupTicket(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GUILD, category, DEFAULT_SUBCATEGORY, SetGuildName)
+    end
 end

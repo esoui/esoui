@@ -631,7 +631,7 @@ end
 function ZO_GamepadEnchantingInventory:Initialize(owner, control, ...)
     local inventory = ZO_GamepadCraftingInventory.Initialize(self, control, ...)
     self.owner = owner
-    self.filterType = NO_FILTER
+    self.filterType = ENCHANTING_NO_FILTER
     self.runeSlots = self.owner.runeSlots
     local function OnAddOnLoaded(event, name)
         if name == "ZO_Ingame" then
@@ -709,7 +709,7 @@ function ZO_GamepadEnchantingInventory:Refresh(data)
             self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_RUNES))
         end
     elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
-        filterType = EXTRACTION_FILTER
+        filterType = ENCHANTING_EXTRACTION_FILTER
         titleString = GetString(SI_ENCHANTING_EXTRACTION)
     end
     local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Enchanting_IsEnchantingItem, ZO_Enchanting_DoesEnchantingItemPassFilter, filterType, data)

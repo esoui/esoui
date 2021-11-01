@@ -248,14 +248,11 @@ function ZO_PointerBoxManager:New(...)
 end
 
 function ZO_PointerBoxManager:Initialize()
-    local factory = function(pool)
+    local function Factory(pool)
         local control = ZO_ObjectPool_CreateNamedControl("ZO_PointerBox_KeyboardControl", "ZO_PointerBox_KeyboardControl", pool, GuiRoot)
         return ZO_PointerBox_Keyboard:New(control)
     end
-    local reset = function(pointerBox)
-        pointerBox:Reset()
-    end
-    self.pool = ZO_ObjectPool:New(factory, reset)
+    self.pool = ZO_ObjectPool:New(Factory, ZO_ObjectPool_DefaultResetObject)
 end
 
 function ZO_PointerBoxManager:Acquire()

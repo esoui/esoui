@@ -1,5 +1,7 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_ItemSetsBook_Summary_Gamepad" inherits="ZO_GamepadMenuEntryWithBarTemplate" virtual="true" />
+
         <Control name="ZO_ItemSetsBook_Entry_Header_Gamepad" inherits="ZO_ItemSetsBook_Entry_Header_Shared" virtual="true">
             <Dimensions y="70" />
 
@@ -45,6 +47,12 @@
                 </Texture>
             </Controls>
         </Control>
+
+        <TopLevelControl name="ZO_ItemSetsBook_Gamepad_Footer" inherits="ZO_GamepadXPBarFooter" hidden="true">
+            <OnInitialized>
+                ZO_ItemSetsBook_Gamepad_Footer_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
         
         <TopLevelControl name="ZO_ItemSetsBook_Gamepad_Base" inherits="ZO_Gamepad_ParametricList_Screen" virtual="true">
             <Controls>

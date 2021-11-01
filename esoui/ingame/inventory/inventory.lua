@@ -84,21 +84,31 @@ function ZO_UpdateStatusControlIcons(inventorySlot, slotData)
     if slotData.brandNew then
         statusControl:AddIcon(NEW_ICON_TEXTURE)
     end
+
     if slotData.stolen then
         statusControl:AddIcon(STOLEN_ICON_TEXTURE)
     end
+
     if slotData.isPlayerLocked then
         statusControl:AddIcon(ZO_KEYBOARD_LOCKED_ICON)
     end
+
     if slotData.isBoPTradeable then
         statusControl:AddIcon(ZO_TRADE_BOP_ICON)
     end
+
     if slotData.isGemmable then
         statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS))
     end
+
     if slotData.bagId == BAG_WORN then
         statusControl:AddIcon(ZO_KEYBOARD_IS_EQUIPPED_ICON)
     end
+
+    if slotData.isInArmory then
+        statusControl:AddIcon(ZO_IN_ARMORY_BUILD_ICON)
+    end
+
     if slotData.additionalIcons ~= nil then
         for _, additionalIcon in ipairs(slotData.additionalIcons) do
             statusControl:AddIcon(additionalIcon)
@@ -877,11 +887,21 @@ do
         local displayQuality = GetItemDisplayQuality(bag, slot)
         local coloredItemName = GetItemQualityColor(displayQuality):Colorize(name)
         if needsConfirm then
-            local dialogName = "CONFIRM_DESTROY_ITEM_PROMPT"
-            if IsInGamepadPreferredMode() then
-                dialogName = ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG
+            local armoryBuildListNames = { GetItemArmoryBuildList(bag, slot) }
+            if #armoryBuildListNames == 0 then
+                local dialogName = "CONFIRM_DESTROY_ITEM_PROMPT"
+                if IsInGamepadPreferredMode() then
+                    dialogName = ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG
+                end
+                ZO_Dialogs_ShowPlatformDialog(dialogName, nil, { mainTextParams = { coloredItemName, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION) } })
+            else
+                local dialogName = "CONFIRM_DESTROY_ARMORY_ITEM_PROMPT"
+                if IsInGamepadPreferredMode() then
+                    dialogName = ZO_GAMEPAD_CONFIRM_DESTROY_ARMORY_ITEM_DIALOG
+                end
+                local armoryBuildList = ZO_GenerateCommaSeparatedList(armoryBuildListNames)
+                ZO_Dialogs_ShowPlatformDialog(dialogName, nil, { mainTextParams = { ZO_SELECTED_TEXT:Colorize(armoryBuildList), #armoryBuildListNames, coloredItemName, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION) } })
             end
-            ZO_Dialogs_ShowPlatformDialog(dialogName, nil, { mainTextParams = { coloredItemName, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION) } })
         else
             ZO_Dialogs_ShowPlatformDialog("DESTROY_ITEM_PROMPT", nil, { mainTextParams = { coloredItemName, itemCount } })
         end
