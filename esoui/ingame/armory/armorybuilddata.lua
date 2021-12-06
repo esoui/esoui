@@ -51,8 +51,9 @@ end
 
 function ZO_ArmoryBuildData:GetChampionTotalSpentPoints()
     local totalSpentPoints = 0
-    for i = CHAMPION_DISCIPLINE_TYPE_ITERATION_BEGIN, CHAMPION_DISCIPLINE_TYPE_ITERATION_END do
-        totalSpentPoints = totalSpentPoints + self:GetChampionSpentPointsByDiscipline(i)
+    for i = 1, GetNumChampionDisciplines() do
+        local disciplineId = GetChampionDisciplineId(i)
+        totalSpentPoints = totalSpentPoints + self:GetChampionSpentPointsByDiscipline(disciplineId)
     end
     return totalSpentPoints
 end

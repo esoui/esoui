@@ -295,7 +295,7 @@ function ZO_ChatSystem_ShouldUseKeyboardChatSystem()
         return false
     end
 
-    local useKeyboardChat = GetSetting_Bool(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_USE_KEYBOARD_CHAT)
+    local useKeyboardChat = GetSetting_Bool(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_USE_KEYBOARD_CHAT) and not IsHeronUI()
     return IsInGamepadPreferredMode() == false or useKeyboardChat == true
 end
 
