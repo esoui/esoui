@@ -138,8 +138,8 @@
                 </Control>
 
                 <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" />
                 </Control>
             </Controls>
         </TopLevelControl>

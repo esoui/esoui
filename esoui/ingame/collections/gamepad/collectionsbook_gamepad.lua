@@ -389,7 +389,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
         }
     }
 
-    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.subcategoryKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
+    ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.subcategoryKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
         self:ClearAllCurrentSlotPreviews()
         self:ShowList(self.categoryList)
     end)

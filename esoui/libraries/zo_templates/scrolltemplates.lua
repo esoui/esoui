@@ -171,6 +171,11 @@ local function OnScrollAnimationUpdate(animationObject, progress)
     if scrollObject.animationUnits == SCROLL_ANIMATION_UNITS_REAL then
         local _, verticalExtents = scrollObject.scroll:GetScrollExtents()
         if verticalExtents > 0 then
+            -- Store off raw offset if the value is out of the bounds of the extents
+            -- and extents have not yet updated and animation progress is complete.
+            if progress == 1 and verticalExtents < value then
+                scrollObject.scrollRawOffset = value
+            end
             value = MAX_SCROLL_VALUE * (value / verticalExtents)
         else
             value = 0
@@ -229,10 +234,10 @@ local function OnAnimationStop(animationObject, control, completedPlaying)
     scrollObject.animationStart = nil
     scrollObject.animationTarget = nil
 
-    if scrollObject.onScrollCompleteCallback then 
-        scrollObject.onScrollCompleteCallback(completedPlaying) 
-        scrollObject.onScrollCompleteCallback = nil 
-    end 
+    if scrollObject.onScrollCompleteCallback then
+        scrollObject.onScrollCompleteCallback(completedPlaying)
+        scrollObject.onScrollCompleteCallback = nil
+    end
 end
 
 local function CreateScrollAnimation(scrollObject)
@@ -365,7 +370,7 @@ end
 
 function ZO_Scroll_ScrollRelative(self, verticalDelta)
     local scroll = self.scroll
-    local _, verticalExtents = scroll:GetScrollExtents()   
+    local _, verticalExtents = scroll:GetScrollExtents()
     
     if verticalExtents > 0 then
         if self.animationTarget then
@@ -390,7 +395,7 @@ function ZO_Scroll_MoveWindow(self, value)
     local _, verticalExtents = scroll:GetScrollExtents()
 
     scroll:SetVerticalScroll((value/MAX_SCROLL_VALUE) * verticalExtents)
-    ZO_Scroll_UpdateScrollBar(self)    
+    ZO_Scroll_UpdateScrollBar(self)
 end
 
 local SCROLL_TO_SIDE_TOP = 1
@@ -590,6 +595,7 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
         if verticalExtentsChanged or forceUpdateBarValue then
             if verticalExtents > 0 then
                 local previousScrollBarValue = scrollbar:GetValue()
+                verticalOffset = self.scrollRawOffset and self.scrollRawOffset or verticalOffset
                 local finalValue = MAX_SCROLL_VALUE * (verticalOffset / verticalExtents)
                 if not zo_floatsAreEqual(previousScrollBarValue, finalValue) then
                     scrollbar:SetValue(finalValue)
@@ -605,6 +611,7 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
                 ZO_Scroll_ResetToTop(self)
             end
         end
+        self.scrollRawOffset = nil
 
         local IS_PERCENT = true
         UpdateScrollFade(self, scroll, IS_PERCENT)

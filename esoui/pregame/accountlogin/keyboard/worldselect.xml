@@ -79,7 +79,7 @@
 
         <TopLevelControl name="ZO_WorldSelect" hidden="true">
             <Dimensions x="600" y="650" />
-            <Anchor point="CENTER" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
 
             <OnInitialized>
                 ZO_WorldSelect_Initialize()

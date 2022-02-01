@@ -12,9 +12,9 @@ local CAPTURE_BAR_LENGTH        = .76   -- Is 75% of a circle long. We add an ex
 local ARROW_LENGTH              = .04   -- Arrow's about 4% of the circle long
 local ENDCAP_LENGTH             = .02   -- About 2% of the circle long.
 
-local CAPTURE_BAR_ARCLENGTH = CAPTURE_BAR_LENGTH * 2 * math.pi
-local ARROW_ARCLENGTH = ARROW_LENGTH * 2 * math.pi
-local ENDCAP_ARCLENGTH = ENDCAP_LENGTH * 2 * math.pi
+local CAPTURE_BAR_ARCLENGTH = CAPTURE_BAR_LENGTH * ZO_TWO_PI
+local ARROW_ARCLENGTH = ARROW_LENGTH * ZO_TWO_PI
+local ENDCAP_ARCLENGTH = ENDCAP_LENGTH * ZO_TWO_PI
 
 local FADE_DURATION_MS          = 150
 local FULL_BAR_TIMEOUT_MS       = 4000

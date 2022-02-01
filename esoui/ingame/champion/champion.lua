@@ -7,7 +7,7 @@ local SMOKE_DEPTH = 1.7
 local CLOUDS_DEPTH = 1.71
 local CONSTELLATIONS_DARKNESS_DEPTH = 1.72
 local SKY_DEPTH = 5
-local ONE_SIXTH_PI = math.pi / 6
+local ONE_SIXTH_PI = ZO_PI / 6
 
 ZO_CHAMPION_GAMEPAD_ZOOMED_IN_CAMERA_Y = 1000
 ZO_CHAMPION_GAMEPAD_ZOOMED_IN_CAMERA_Z = 1.3
@@ -926,7 +926,7 @@ function ChampionPerks:InitializeStateMachine()
         state:RegisterCallback("OnActivated", function()
             local targetNode = self.constellations[ZO_CHAMPION_CENTERED_CONSTELLATION_INDEX]:GetFirstRingNode()
 
-            self.ring:SetAngle(math.pi - ONE_SIXTH_PI)
+            self.ring:SetAngle(ZO_PI - ONE_SIXTH_PI)
             self.centerInfoAlphaInterpolator:SetCurrentValue(0)
             self.centerInfoControl:SetAlpha(0)
             self.radialSelectorTexture:SetAlpha(0)
@@ -972,7 +972,7 @@ function ChampionPerks:InitializeStateMachine()
             targetCameraY = ZOOMED_IN_CAMERA_Y,
             targetCameraZ = ZOOMED_IN_CAMERA_Z,
             targetNodeDurationBase = 0.75,
-            targetNodeDurationMultiplier = 0.5 / math.pi,
+            targetNodeDurationMultiplier = 0.5 / ZO_PI,
             nodePadding = {},
             chooseTargetNode = true,
             chooseTargetNodeAtDurationPercent = 1,
@@ -1849,7 +1849,7 @@ function ChampionPerks:UpdateAnimations(frameDeltaSecs)
                     self.ring:RefreshNodePositions()
                 end
 
-                anim.targetAngle = (-anim.targetNode:GetRotation() + math.pi * 0.5) % ZO_TWO_PI
+                anim.targetAngle = (-anim.targetNode:GetRotation() + ZO_HALF_PI) % ZO_TWO_PI
 
                 if anim.nodePadding then
                     for node, targetPadding in pairs(anim.nodePadding) do
@@ -1991,8 +1991,8 @@ end
 
 local numDisciplines = GetNumChampionDisciplines()
 -- clamp to the center of the first and last constellations within the half circle
-local RADIAL_SELECTOR_ANGLE_MIN = math.pi * 0.5 / numDisciplines
-local RADIAL_SELECTOR_ANGLE_MAX = math.pi * (numDisciplines - 0.5) / numDisciplines
+local RADIAL_SELECTOR_ANGLE_MIN = ZO_HALF_PI / numDisciplines
+local RADIAL_SELECTOR_ANGLE_MAX = ZO_PI * (numDisciplines - 0.5) / numDisciplines
 local function ClampRadialSelectorAngle(angle)
     if angle > RADIAL_SELECTOR_ANGLE_MIN and angle < RADIAL_SELECTOR_ANGLE_MAX then
         return angle
@@ -2027,12 +2027,11 @@ function ChampionPerks:UpdateGamepadSelectedConstellation()
 end
 
 function ChampionPerks:ResetConstellationSelectorToTop()
-    local TOP_ANGLE = math.pi * 0.5
-    self:MoveConstellationSelectorToAngleInternal(TOP_ANGLE)
+    self:MoveConstellationSelectorToAngleInternal(ZO_HALF_PI)
 end
 
 function ChampionPerks:MoveConstellationSelectorToAngleInternal(angle)
-    self.radialSelectorNode:SetRotation(angle - math.pi * 0.5)
+    self.radialSelectorNode:SetRotation(angle - ZO_HALF_PI)
     local closestNodeToAngle = self.ring:GetNodeAtAngle(angle)
     return self:SelectConstellationNodeInternal(closestNodeToAngle)
 end
@@ -2350,7 +2349,7 @@ function ChampionPerks:OnUpdate(timeSecs)
 end
 
 local SPIRAL_STAR_MAX_ALPHA = 0.5
-local SPIRAL_STAR_ANGLE_DISTANCE = math.pi * 0.25
+local SPIRAL_STAR_ANGLE_DISTANCE = ZO_PI * 0.25
 
 function ChampionPerks:OnSpiralUpdate(animation, progress)
     local progressDelta = 1 / #self.starSpirals

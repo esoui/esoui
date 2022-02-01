@@ -112,7 +112,7 @@ end
 
 function ZO_SmoothCycleGenerator:Generate()
     local progress = zo_mod(GetGameTimeSeconds(), self.cycleDurationS) / self.cycleDurationS
-    self.lerpValue = (cos(progress * 2 * math.pi) + 1) / 2
+    self.lerpValue = (cos(progress * ZO_TWO_PI) + 1) / 2
 end
 
 function ZO_SmoothCycleGenerator:GetValue(i)

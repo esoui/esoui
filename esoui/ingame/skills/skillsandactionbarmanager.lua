@@ -99,8 +99,7 @@ do
         if result == RESPEC_RESULT_SUCCESS then
             self:ResetInterface()
         else
-            -- TODO: Companions, temporarily disabling respec failure errors while we are in active development
-            --internalassert(EXPECTED_RESPEC_FAILURES[result], string.format("Unexpected Respec Failure (%d)", result))
+            internalassert(EXPECTED_RESPEC_FAILURES[result], string.format("Unexpected Respec Failure (%d)", result))
             if not self:DoesSkillPointAllocationModeBatchSave() then
                 -- if we aren't in batch mode, the user has no way to fix bad state, so we need to hard reset for them
                 self:ResetRespecState()

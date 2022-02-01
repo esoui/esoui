@@ -2870,24 +2870,26 @@ ESO_Dialogs["CONSOLE_COMMUNICATION_PERMISSION_ERROR"] =
 
 ESO_Dialogs["KEYBINDINGS_RESET_KEYBOARD_TO_DEFAULTS"] = 
 {
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
     title =
     {
         text = SI_KEYBINDINGS_KEYBOARD_RESET_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = zo_strformat(SI_KEYBINDINGS_KEYBOARD_RESET_PROMPT),
     },
     buttons =
     {
-        [1] =
         {
             text = SI_OPTIONS_RESET,
-            callback =  function(dialog)
-                            ResetKeyboardBindsToDefault()
-                        end
+            callback = function(dialog)
+                ResetKeyboardBindsToDefault()
+            end
         },
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
         },
@@ -2904,20 +2906,18 @@ ESO_Dialogs["KEYBINDINGS_RESET_GAMEPAD_TO_DEFAULTS"] =
     {
         text = SI_KEYBINDINGS_GAMEPAD_RESET_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_KEYBINDINGS_GAMEPAD_RESET_PROMPT,
     },
     buttons =
     {
-        [1] =
         {
             text = SI_OPTIONS_RESET,
-            callback =  function(dialog)
-                            ResetGamepadBindsToDefault()
-                        end
+            callback = function(dialog)
+                ResetGamepadBindsToDefault()
+            end
         },
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
         },
@@ -3302,7 +3302,7 @@ ESO_Dialogs["GAMEPAD_CRAFTING_OPTIONS_DIALOG"] =
     end,
     onHidingCallback = function(dialog)
         if dialog.data.finishedCallback then
-            dialog.data.finishedCallback()
+            dialog.data.finishedCallback(dialog)
         end
     end,
     title =

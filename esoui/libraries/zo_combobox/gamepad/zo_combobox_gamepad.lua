@@ -16,26 +16,20 @@ end
 
 function ZO_ComboBox_Gamepad:Initialize(control)
     ZO_ComboBox_Base.Initialize(self, control)
-
     control.comboBoxObject = self
-
     self:InitializeKeybindStripDescriptors()
     self.m_active = false
     self.dropdownTemplate = ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_STANDARD
-
     self.m_dropdown = GAMEPAD_COMBO_BOX_DROPDOWN
     self.m_focus = ZO_GamepadFocus:New(control)
-
     self.m_highlightedIndex = 1
-
     self.m_highlightColor = ZO_SELECTED_TEXT
     self.m_normalColor = ZO_DISABLED_TEXT
-    
     self.m_font = ZO_GAMEPAD_COMBO_BOX_FONT
     self.m_highlightFont = ZO_GAMEPAD_COMBO_BOX_HIGHLIGHTED_FONT
 
-    -- find the difference in font size to keep the width of text the same between them
-    -- so line wrapping looks consistent between the two fonts
+    -- Find the difference in font size to keep the width of text the same between them
+    -- so line wrapping looks consistent between the two fonts.
     local _, unselectedSize = _G[self.m_font]:GetFontInfo()
     local _, selectedSize = _G[self.m_highlightFont]:GetFontInfo()
     self.m_fontRatio = unselectedSize / selectedSize
@@ -78,13 +72,17 @@ function ZO_ComboBox_Gamepad:OnItemAdded()
 end
 
 function ZO_ComboBox_Gamepad:GetNormalColor(item)
-    local itemColor = item.m_normalColor or self.m_normalColor
-    return itemColor
+    if item.enabled == false then
+        return item.m_disabledColor or self.m_disabledColor
+    end
+    return item.m_normalColor or self.m_normalColor
 end
 
 function ZO_ComboBox_Gamepad:GetHighlightColor(item)
-    local itemColor = item.m_highlightColor or self.m_highlightColor
-    return itemColor
+    if item.enabled == false then
+        return item.m_disabledColor or self.m_disabledColor
+    end
+    return item.m_highlightColor or self.m_highlightColor
 end
 
 function ZO_ComboBox_Gamepad:GetHeight()
@@ -105,8 +103,12 @@ function ZO_ComboBox_Gamepad:AddMenuItems()
         local focusEntry = {
             control = control,
             data = item,
-            activate = function(control, data) self:OnItemSelected(control, data) end,
-            deactivate = function(control, data) self:OnItemDeselected(control, data) end,
+            activate = function(control, data)
+                self:OnItemSelected(control, data)
+            end,
+            deactivate = function(control, data)
+                self:OnItemDeselected(control, data)
+            end,
         }
         self.m_focus:AddEntry(focusEntry)
     end
@@ -118,9 +120,9 @@ function ZO_ComboBox_Gamepad:SetupMenuItemControl(control, item)
     control.nameControl = control:GetNamedChild("Name")
     control.nameControl:SetText(item.name)
     control.nameControl:SetColor(self:GetNormalColor(item):UnpackRGBA())
-
     control.nameControl:SetFont(self.m_highlightFont) -- Use the highlighted font for sizing purposes
     control.nameControl:SetWidth(self.m_container:GetWidth())
+
     local height = control.nameControl:GetTextHeight()
     control:SetHeight(height)
     self.m_dropdown:AddHeight(height)
@@ -140,6 +142,9 @@ function ZO_ComboBox_Gamepad:OnItemSelected(control, data)
     self.m_currentData = data
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor, self.m_keybindState)
     self:FireCallbacks("OnItemSelected", control, data)
+    if data and data.onEnter then
+        data.onEnter(control, data)
+    end
 end
 
 function ZO_ComboBox_Gamepad:OnItemDeselected(control, data)
@@ -148,6 +153,9 @@ function ZO_ComboBox_Gamepad:OnItemDeselected(control, data)
     control.nameControl:SetFont(self.m_font)
 
     self:FireCallbacks("OnItemDeselected", control, data)
+    if data and data.onExit then
+        data.onExit(control, data)
+    end
 end
 
 function ZO_ComboBox_Gamepad:ClearMenuItems()
@@ -187,8 +195,9 @@ function ZO_ComboBox_Gamepad:SelectHighlightedItem()
     end
 
     if focusItem then
-        self:SelectItem(focusItem.data)
-        PlaySound(SOUNDS.DEFAULT_CLICK)
+        if self:SelectItem(focusItem.data) then
+            PlaySound(SOUNDS.DEFAULT_CLICK)
+        end
     end
    
     self:Deactivate()
@@ -203,18 +212,17 @@ end
 
 function ZO_ComboBox_Gamepad:SelectItemByIndex(index, ignoreCallback)
     self.m_highlightedIndex = index
-    ZO_ComboBox_Base.SelectItemByIndex(self, index, ignoreCallback)
+    return ZO_ComboBox_Base.SelectItemByIndex(self, index, ignoreCallback)
 end
 
 function ZO_ComboBox_Gamepad:SetHighlightedItem(highlightIndex, reselectIndex)
-    self.m_focus:SetFocusByIndex(highlightIndex, reselectIndex)
+    return self.m_focus:SetFocusByIndex(highlightIndex, reselectIndex)
 end
 
 function ZO_ComboBox_Gamepad:TrySelectItemByData(itemData, ignoreCallback)
     for i, data in ipairs(self.m_sortedItems) do
         if data.name == itemData.name then
-            self:SelectItemByIndex(i, ignoreCallback)
-            return true
+            return self:SelectItemByIndex(i, ignoreCallback)
         end
     end
     return false
@@ -469,13 +477,18 @@ function ZO_MultiSelection_ComboBox_Gamepad:SelectHighlightedItem()
     end
 
     if focusItem then
-        self:SelectItem(focusItem.data)
-        PlaySound(SOUNDS.DEFAULT_CLICK)
+        if self:SelectItem(focusItem.data) then
+            PlaySound(SOUNDS.DEFAULT_CLICK)
+        end
     end
 end
 
 -- Overridden function
 function ZO_MultiSelection_ComboBox_Gamepad:SelectItem(item, ignoreCallback)
+    if item.enabled == false then
+        return false
+    end
+
     self.currentItemData:ToggleItemSelected(item)
     local newSelectedState = self.currentItemData:IsItemSelected(item)
     local control = self.itemDataToControl[item]
@@ -489,6 +502,8 @@ function ZO_MultiSelection_ComboBox_Gamepad:SelectItem(item, ignoreCallback)
         item.callback(self, item.name, item, newSelectedState)
     end
     self:RefreshSelectedItemText()
+
+    return true
 end
 
 -- Overridden function
@@ -555,13 +570,7 @@ end
 -- ZO_MultiSelection_ComboBox_Data_Gamepad
 -------------------------------------------
 
-ZO_MultiSelection_ComboBox_Data_Gamepad = ZO_Object:Subclass()
-
-function ZO_MultiSelection_ComboBox_Data_Gamepad:New()
-    local object = ZO_Object.New(self)
-    object:Initialize()
-    return object
-end
+ZO_MultiSelection_ComboBox_Data_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_MultiSelection_ComboBox_Data_Gamepad:Initialize()
     self.entryItems = {}
@@ -583,12 +592,12 @@ end
 
 function ZO_MultiSelection_ComboBox_Data_Gamepad:ToggleItemSelected(item)
     local newSelectedState = not self:IsItemSelected(item)
-    self:SetItemSelected(item, newSelectedState)
+    return self:SetItemSelected(item, newSelectedState)
 end
 
 function ZO_MultiSelection_ComboBox_Data_Gamepad:SetItemSelected(item, isSelected)
     if isSelected ~= self:IsItemSelected(item) then
-        if isSelected then
+        if isSelected and item.enabled ~= false then
             self:AddItemToSelected(item)
         else
             self:RemoveItemFromSelected(item)
@@ -597,7 +606,7 @@ function ZO_MultiSelection_ComboBox_Data_Gamepad:SetItemSelected(item, isSelecte
 end
 
 function ZO_MultiSelection_ComboBox_Data_Gamepad:SetItemIndexSelected(itemIndex, isSelected)
-    self:SetItemSelected(self.entryItems[itemIndex], isSelected)
+    return self:SetItemSelected(self.entryItems[itemIndex], isSelected)
 end
 
 function ZO_MultiSelection_ComboBox_Data_Gamepad:GetNumSelectedItems()
@@ -633,4 +642,11 @@ function ZO_MultiSelection_ComboBox_Data_Gamepad:IsItemSelected(item)
     end
 
     return false
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:SetItemEnabled(item, enabled)
+    item.enabled = enabled ~= false
+    if item.enabled == false then
+        self:RemoveItemFromSelected(item)
+    end
 end

@@ -31,7 +31,7 @@
 
                 <Button name="$(parent)Decrease">
                     <Dimensions x="16" y="16" />
-                    <Anchor point="TOP" relativeTo="$(parent)Backdrop"  relativePoint="BOTTOM" offsetY="3"/>
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="3"/>
                     <Textures normal="EsoUI/Art/Miscellaneous/Gamepad/arrow_down.dds"
                               pressed="EsoUI/Art/Miscellaneous/Gamepad/arrow_down.dds"
                               disabled="EsoUI/Art/Miscellaneous/Gamepad/arrow_down.dds"/>
@@ -39,7 +39,7 @@
 
                 <Button name="$(parent)Increase">
                     <Dimensions x="16" y="16" />
-                    <Anchor point="BOTTOM" relativeTo="$(parent)Backdrop"  relativePoint="TOP" offsetY="-3"/>
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-3"/>
                     <Textures normal="EsoUI/Art/Miscellaneous/Gamepad/arrow_up.dds"
                               pressed="EsoUI/Art/Miscellaneous/Gamepad/arrow_up.dds"
                               disabled="EsoUI/Art/Miscellaneous/Gamepad/arrow_up.dds"/>

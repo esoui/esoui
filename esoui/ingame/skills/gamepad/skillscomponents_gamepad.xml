@@ -5,5 +5,11 @@
                 ZO_Skills_SkillLineInfo_Shared_OnInitialized(self)
             </OnInitialized>
         </TopLevelControl>
+
+        <Control name="ZO_MultipleCraftingSkillsFooter_Gamepad" inherits="ZO_GamepadXPBarFooter" alpha="0" virtual="true">
+            <OnInitialized>
+                ZO_MultipleCraftingSkillsXpBar_OnInitialized(self)
+            </OnInitialized>
+        </Control>
     </Controls>
 </GuiXml>

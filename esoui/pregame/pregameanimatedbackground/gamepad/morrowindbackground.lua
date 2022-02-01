@@ -22,17 +22,16 @@ function CameraWander:Start()
 end
 
 do
-    local MIN_DIFFERENCE_RADIANS = math.pi / 4
-    local NEW_ANGLE_RANGE_RADIANS = math.pi
-    local TWO_PI = 2 * math.pi
+    local MIN_DIFFERENCE_RADIANS = ZO_PI / 4
+    local NEW_ANGLE_RANGE_RADIANS = ZO_PI
 
     function CameraWander:AcquireTarget()
         if not self.targetAngle then
             --Choose any angle the first time
-            self.targetAngle = zo_random() * TWO_PI
+            self.targetAngle = zo_random() * ZO_TWO_PI
         else
             --Subsequent times, choose angles that are at least MIN_DIFFERENCE_RADIANS away from the last angle.
-            self.targetAngle = zo_mod(self.targetAngle + MIN_DIFFERENCE_RADIANS + zo_random() * NEW_ANGLE_RANGE_RADIANS, TWO_PI)
+            self.targetAngle = zo_mod(self.targetAngle + MIN_DIFFERENCE_RADIANS + zo_random() * NEW_ANGLE_RANGE_RADIANS, ZO_TWO_PI)
         end
         self.targetX = math.cos(self.targetAngle) * self.magnitude
         self.targetY = math.sin(self.targetAngle) * self.magnitude

@@ -1,0 +1,173 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_Keybindings_Gamepad_ActionName_GridEntry_Template_Gamepad" virtual="true">
+            <Dimensions x="ZO_KEYBINDINGS_GAMEPAD_ACTION_NAME_GRID_ENTRY_WIDTH" y="ZO_KEYBINDINGS_GAMEPAD_GRID_ENTRY_HEIGHT" />
+            <OnInitialized>
+                self.label = self:GetNamedChild("Label")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepadBold27" maxLineCount="2" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <AnchorFill />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_Keybindings_Gamepad_Keybind_GridEntry_Template_Gamepad" virtual="true">
+            <Dimensions x="ZO_KEYBINDINGS_GAMEPAD_KEYBIND_GRID_ENTRY_WIDTH" y="ZO_KEYBINDINGS_GAMEPAD_GRID_ENTRY_HEIGHT" />
+            <OnInitialized>
+                self.keybindLabel = self:GetNamedChild("KeybindLabel")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad" font="ZoFontGamepad22" verticalAlignment="CENTER" horizontalAlignment="CENTER">
+                    <AnchorFill />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Keybindings_Gamepad_Divider_GridEntry_Template_Gamepad" virtual="true">
+            <Dimensions x="ZO_KEYBINDINGS_GAMEPAD_DIVIDER_GRID_ENTRY_WIDTH" y="ZO_KEYBINDINGS_GAMEPAD_DIVIDER_GRID_ENTRY_HEIGHT" />
+            <Controls>
+                <Texture name="$(parent)Divider" inherits="ZO_GamepadHorizontalDivider">
+                    <Anchor point="LEFT" offsetX="-0"/>
+                    <Anchor point="RIGHT" offsetX="0" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_Keybindings_Gamepad_ListHeader" virtual="true" font="ZoFontGamepadBold34" maxLineCount="2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" verticalAlignment="CENTER" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+            <Dimensions x="ZO_KEYBINDINGS_GAMEPAD_KEYBIND_GRID_ENTRY_WIDTH" y="82" />
+        </Label>
+
+        <TopLevelControl name="ZO_Keybindings_GamepadTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_Keybindings_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_4_Anchors" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)QuaternaryKeyHeader" inherits="ZO_Keybindings_Gamepad_ListHeader" text="SI_KEYBINDINGS_QUATERNARY_HEADER">
+                            <Anchor point="TOPRIGHT" offsetX="-70" />
+                        </Label>
+
+                        <Label name="$(parent)TertiaryKeyHeader" inherits="ZO_Keybindings_Gamepad_ListHeader" text="SI_KEYBINDINGS_TERTIARY_HEADER">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)QuaternaryKeyHeader" relativePoint="TOPLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)SecondaryKeyHeader" inherits="ZO_Keybindings_Gamepad_ListHeader" text="SI_KEYBINDINGS_SECONDARY_HEADER">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TertiaryKeyHeader" relativePoint="TOPLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)PrimaryKeyHeader" inherits="ZO_Keybindings_Gamepad_ListHeader" text="SI_KEYBINDINGS_PRIMARY_HEADER">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)SecondaryKeyHeader" relativePoint="TOPLEFT" />
+                        </Label>
+
+                        <Control name="$(parent)KeybindingGridList" inherits="ZO_GridScrollList_Gamepad">
+                            <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_4_Background" offsetY="84" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_4_Background" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_BindKeyDialog_GamepadTopLevel" inherits="ZO_CustomCenteredGamepadDialogTemplate" resizeToFitDescendents="true" hidden="true">
+            <ResizeToFitPadding width="40" height="72" />
+
+            <OnInitialized>
+                ZO_BindKeyDialog_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontGamepadBold48" horizontalAlignment="CENTER" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE">
+                    <Dimensions x="800"/>
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="38"/>
+                </Label>
+
+                <Control name="$(parent)DividerSimple" inherits="ZO_GamepadHeaderHorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="60" offsetY="30"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetX="-60" offsetY="30" />
+                </Control>
+
+                <Label name="$(parent)Instructions" inherits="ZO_LargeKeyMarkupLabel_Gamepad" font="ZoFontGamepadCondensed42" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DividerSimple" relativePoint="BOTTOMLEFT" offsetY="30" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DividerSimple" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                </Label>
+
+                <Control name="$(parent)BindContainer">
+                    <Dimensions y="200" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <Controls>
+                        <Texture name="$(parent)Background" color="FFFFFF" alpha="0.10" layer="CONTROLS">
+                            <Dimensions y="200" />
+                            <Anchor point="LEFT" />
+                            <Anchor point="RIGHT" />
+                        </Texture>
+
+                        <Control name="$(parent)InputBox" mouseEnabled="true" keyboardEnabled="true" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Background" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" />
+
+                            <OnMouseDown>
+                                ZO_BindKeyDialog_Gamepad_OnMouseDown(button, ctrl, alt, shift, command)
+                            </OnMouseDown>
+
+                            <OnMouseDoubleClick>
+                                ZO_BindKeyDialog_Gamepad_OnMouseDown(button, ctrl, alt, shift, command)
+                            </OnMouseDoubleClick>
+
+                            <OnMouseUp>
+                                ZO_BindKeyDialog_Gamepad_OnMouseUp(button, ctrl, alt, shift, command)
+                            </OnMouseUp>
+
+                            <OnMouseWheel>
+                                ZO_BindKeyDialog_Gamepad_OnMouseWheel(delta, ctrl, alt, shift, command)
+                            </OnMouseWheel>
+
+                            <OnKeyDown>
+                                ZO_BindKeyDialog_Gamepad_OnKeyDown(key, ctrl, alt, shift, command)
+                            </OnKeyDown>
+
+                            <OnKeyUp>
+                                ZO_BindKeyDialog_Gamepad_OnKeyUp(key, ctrl, alt, shift, command)
+                            </OnKeyUp>
+                        </Control>
+
+                        <Label name="$(parent)CurrentBind" inherits="ZO_LargeKeyMarkupLabel_Gamepad" font="ZoFontGamepadCondensed42" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="CENTER" relativeTo="$(parent)InputBox" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)OverwriteWarning1" font="ZoFontGamepadCondensed42" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BindContainer" relativePoint="BOTTOMLEFT" offsetY="15" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BindContainer" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                </Label>
+
+                <Label name="$(parent)OverwriteWarning2" font="ZoFontGamepadCondensed42" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)OverwriteWarning1" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)OverwriteWarning1" relativePoint="BOTTOMRIGHT" />
+                </Label>
+
+                <Control name="$(parent)Keybinds" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)OverwriteWarning2" relativePoint="BOTTOM" offsetY="10" />
+                    <Controls>
+                        <Control name="$(parent)PrimaryKeybind" inherits="ZO_KeybindButton_Gamepad">
+                            <Anchor point="LEFT" />
+                        </Control>
+                        <Control name="$(parent)BackKeybind" inherits="ZO_KeybindButton_Gamepad">
+                            <Anchor point="LEFT" relativeTo="$(parent)PrimaryKeybind" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                        <Control name="$(parent)SecondaryKeybind" inherits="ZO_KeybindButton_Gamepad">
+                            <Anchor point="LEFT" relativeTo="$(parent)BackKeybind" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                        <Control name="$(parent)TertiaryKeybind" inherits="ZO_KeybindButton_Gamepad">
+                            <Anchor point="LEFT" relativeTo="$(parent)SecondaryKeybind" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

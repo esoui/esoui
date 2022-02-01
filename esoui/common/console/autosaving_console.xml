@@ -2,7 +2,7 @@
     <Animations>
         <AnimationTimeline name="AutoSaveSpin" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <TextureRotateAnimation duration="2000" startRotation="6.28318530718" endRotation="0" playbackType="LOOP" loopCount="LOOP_INDEFINITELY"/>
+                <TextureRotateAnimation duration="2000" startRotation="ZO_TWO_PI" endRotation="0" playbackType="LOOP" loopCount="LOOP_INDEFINITELY"/>
             </Animations>
         </AnimationTimeline>
 

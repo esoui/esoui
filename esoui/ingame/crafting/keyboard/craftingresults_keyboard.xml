@@ -116,7 +116,7 @@
 
         <TopLevelControl name="ZO_CraftingResultsTopLevel" hidden="true" tier="HIGH">
             <Dimensions x="500" y="750" />
-            <Anchor point="TOP" offsetY="258" />
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="258" />
 
             <OnInitialized>
                 ZO_CraftingResults_Keyboard_Initialize(self)

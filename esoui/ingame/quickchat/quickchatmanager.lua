@@ -1,65 +1,64 @@
-local QuickChatManager = ZO_Object:Subclass()
+local CUSTOM_QUICK_CHAT_INDEX_START = 1000
 
-local CUSTOM_QUICK_CHAT_ID_START = 1000
+ZO_QuickChatManager = ZO_InitializingObject:Subclass()
 
-function QuickChatManager:New()
-    local obj = ZO_Object.New(self)
-    obj:Initialize()
-    return obj
-end
-
-function QuickChatManager:Initialize()
+function ZO_QuickChatManager:Initialize()
     self.formattedNames = {}
 end
 
-function QuickChatManager:GetNumQuickChats()
+function ZO_QuickChatManager:GetNumQuickChats()
     return GetNumDefaultQuickChats()
 end
 
-function QuickChatManager:GetQuickChatIcon()
-    return "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_quickchat.dds"
+function ZO_QuickChatManager:IsDefaultQuickChat(quickChatIndex)
+    return quickChatIndex < CUSTOM_QUICK_CHAT_INDEX_START
 end
 
-function QuickChatManager:IsDefaultQuickChat(id)
-    return id < CUSTOM_QUICK_CHAT_ID_START
-end
-
-function QuickChatManager:GetQuickChatId(index)
+--This number can be treated as both an ID or an index depending on what it's being used for, so GetQuickChatId and GetQuickChatIndex are here to help make it more obvious when we want one vs the other
+function ZO_QuickChatManager:GetQuickChatId(index)
     return index
 end
 
-function QuickChatManager:HasQuickChat(id)
-    if self:IsDefaultQuickChat(id) then
-        return id <= GetNumDefaultQuickChats()
+function ZO_QuickChatManager:GetQuickChatIndex(id)
+    return id
+end
+
+function ZO_QuickChatManager:HasQuickChat(id)
+    local quickChatIndex = self:GetQuickChatIndex(id)
+    if self:IsDefaultQuickChat(quickChatIndex) then
+        return quickChatIndex <= GetNumDefaultQuickChats()
     end
 end
 
-function QuickChatManager:GetQuickChatName(id)
-    if self:IsDefaultQuickChat(id) then
-        return GetDefaultQuickChatName(id)
+function ZO_QuickChatManager:GetQuickChatName(quickChatIndex)
+    if self:IsDefaultQuickChat(quickChatIndex) then
+        return GetDefaultQuickChatName(quickChatIndex)
     end
 end
 
-function QuickChatManager:GetFormattedQuickChatName(id)
-    if not self.formattedNames[id] then
-        self.formattedNames[id] = zo_strformat(SI_GAMEPAD_PLAYER_EMOTE_NAME, self:GetQuickChatName(id))
+function ZO_QuickChatManager:GetFormattedQuickChatName(id)
+    local quickChatIndex = self:GetQuickChatIndex(id)
+    if not self.formattedNames[quickChatIndex] then
+        self.formattedNames[quickChatIndex] = zo_strformat(SI_PLAYER_EMOTE_NAME, self:GetQuickChatName(quickChatIndex))
     end
-    return self.formattedNames[id]
+    return self.formattedNames[quickChatIndex]
 end
 
-function QuickChatManager:GetQuickChatMessage(id)
-    if self:IsDefaultQuickChat(id) then
-        return GetDefaultQuickChatMessage(id)
-    end
-end
-
-function QuickChatManager:PlayQuickChat(id)
-    if self:IsDefaultQuickChat(id) then
-        return PlayDefaultQuickChat(id)
+function ZO_QuickChatManager:GetQuickChatMessage(id)
+    local quickChatIndex = self:GetQuickChatIndex(id)
+    if self:IsDefaultQuickChat(quickChatIndex) then
+        return GetDefaultQuickChatMessage(quickChatIndex)
     end
 end
 
-function QuickChatManager:BuildQuickChatList()
+function ZO_QuickChatManager:PlayQuickChat(id)
+    local quickChatIndex = self:GetQuickChatIndex(id)
+    if self:IsDefaultQuickChat(quickChatIndex) then
+        return PlayDefaultQuickChat(quickChatIndex)
+    end
+end
+
+function ZO_QuickChatManager:BuildQuickChatList()
     local quickChats = {}
     local numChats = self:GetNumQuickChats()
     for index = 1, numChats do
@@ -68,4 +67,4 @@ function QuickChatManager:BuildQuickChatList()
     return quickChats
 end
 
-QUICK_CHAT_MANAGER = QuickChatManager:New()
+QUICK_CHAT_MANAGER = ZO_QuickChatManager:New()

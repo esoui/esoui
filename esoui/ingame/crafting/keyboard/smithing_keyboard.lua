@@ -2,10 +2,6 @@ local SMITHING_SCENE_NAME = "smithing"
 
 ZO_Smithing = ZO_Smithing_Common:Subclass()
 
-function ZO_Smithing:New(...)
-    return ZO_Smithing_Common.New(self, ...)
-end
-
 function ZO_Smithing:Initialize(control)
     ZO_Smithing_Common.Initialize(self, control)
 
@@ -47,15 +43,15 @@ function ZO_Smithing:Initialize(control)
         end
     end)
 
-    self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType, sameStation)
-        if ZO_Smithing_IsSmithingStation(craftingType) and not IsInGamepadPreferredMode() then
+    self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType, sameStation, craftingMode)
+        if ZO_Smithing_IsSmithingStation(craftingType, craftingMode) and not IsInGamepadPreferredMode() then
             self.interactingWithSameStation = sameStation
             SCENE_MANAGER:Show(SMITHING_SCENE_NAME)
         end
     end)
 
-    self.control:RegisterForEvent(EVENT_END_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
-        if ZO_Smithing_IsSmithingStation(craftingType) and not IsInGamepadPreferredMode() then
+    self.control:RegisterForEvent(EVENT_END_CRAFTING_STATION_INTERACT, function(eventCode, craftingType, craftingMode)
+        if ZO_Smithing_IsSmithingStation(craftingType, craftingMode) and not IsInGamepadPreferredMode() then
             SCENE_MANAGER:Hide(SMITHING_SCENE_NAME)
         end
     end)

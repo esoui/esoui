@@ -5,7 +5,7 @@ local LOADING_TIP_PERCENTAGE = 0.8
 local TARGET_FRAMERATE = 60
 local MAX_FRAMES_PER_UPDATE = 5
 local MAX_ROTATION = math.pi * 2
-local ROTATION_PER_FRAME = -math.pi * .02
+local ROTATION_PER_FRAME = -MAX_ROTATION * 0.01
 local MINIMUM_TIME_TO_HOLD_LOADING_TIP_MS = 15000
 
 -- Instance type icons 

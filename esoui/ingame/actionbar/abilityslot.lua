@@ -2,6 +2,8 @@
 
 ABILITY_SLOT_TYPE_ACTIONBAR = 1
 ABILITY_SLOT_TYPE_QUICKSLOT = 2
+--TODO: Replace ABILITY_SLOT_TYPE_QUICKSLOT with this once the quickslot wheel logic is moved to the assignable utility wheel
+ABILITY_SLOT_TYPE_UTILITY = 3
 
 local USE_BASE_ABILITY = true
 
@@ -70,6 +72,13 @@ local function TryPlaceQuickslotAction(abilitySlot)
     end
 end
 
+local function TryPlaceUtilitySlotAction(abilitySlot)
+    if GetCursorContentType() ~= MOUSE_CONTENT_EMPTY then
+        ZO_ActionBar_AttemptPlacement(abilitySlot.slotNum)
+        return true
+    end
+end
+
 local function TryPickupAction(abilitySlot)
     local lockedReason = GetActionBarLockedReason()
     if lockedReason == ACTION_BAR_LOCKED_REASON_COMBAT then
@@ -91,6 +100,11 @@ local function TryPickupAction(abilitySlot)
 end
 
 local function TryPickupQuickslotAction(abilitySlot)
+    ZO_ActionBar_AttemptPickup(abilitySlot.slotNum)
+    return true
+end
+
+local function TryPickupUtilitySlotAction(abilitySlot)
     ZO_ActionBar_AttemptPickup(abilitySlot.slotNum)
     return true
 end
@@ -132,6 +146,15 @@ local function TryShowQuickslotActionMenu(abilitySlot)
     end
 end
 
+local function TryShowUtilitySlotActionMenu(abilitySlot)
+    if IsSlotUsed(abilitySlot.slotNum) and not IsSlotLocked(abilitySlot.slotNum) then
+        ClearMenu()
+        AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function() ClearAbilitySlot(abilitySlot.slotNum) end)
+        ShowMenu(abilitySlot)
+        return true
+    end
+end
+
 local AbilityClicked =
 {
     [ABILITY_SLOT_TYPE_ACTIONBAR] =
@@ -165,6 +188,22 @@ local AbilityClicked =
                 return TryShowQuickslotActionMenu(abilitySlot)
             end,
         },
+    },
+    [ABILITY_SLOT_TYPE_UTILITY] =
+    {
+        [MOUSE_BUTTON_INDEX_LEFT] =
+        {
+            function(abilitySlot)
+                return TryPlaceUtilitySlotAction(abilitySlot)
+            end,
+        },
+
+        [MOUSE_BUTTON_INDEX_RIGHT] =
+        {
+            function(abilitySlot)
+                return TryShowUtilitySlotActionMenu(abilitySlot)
+            end,
+        },
     }
 }
 
@@ -179,6 +218,13 @@ local function TryClearQuickslot(abilitySlot)
     end
 end
 
+local function TryClearUtilitySlot(abilitySlot)
+    if IsSlotUsed(abilitySlot.slotNum) and not IsSlotLocked(abilitySlot.slotNum) then
+        ClearSlot(abilitySlot.slotNum)
+        return true
+    end
+end
+
 local AbilityDoubleClicked =
 {
     [ABILITY_SLOT_TYPE_QUICKSLOT] =
@@ -187,6 +233,15 @@ local AbilityDoubleClicked =
         {
             function(abilitySlot)
                 return TryClearQuickslot(abilitySlot)
+            end,
+        },
+    },
+    [ABILITY_SLOT_TYPE_UTILITY] =
+    {
+        [MOUSE_BUTTON_INDEX_LEFT] =
+        {
+            function(abilitySlot)
+                return TryClearUtilitySlot(abilitySlot)
             end,
         },
     }
@@ -226,6 +281,12 @@ local AbilityDragStart =
             return TryPickupQuickslotAction(abilitySlot)
         end,
     },
+    [ABILITY_SLOT_TYPE_UTILITY] =
+    {
+        function(abilitySlot)
+            return TryPickupUtilitySlotAction(abilitySlot)
+        end,
+    },
 }
 
 function ZO_AbilitySlot_OnDragStart(abilitySlot, button)
@@ -249,6 +310,12 @@ local AbilityReceiveDrag =
     {
         function(abilitySlot)
             return TryPlaceQuickslotAction(abilitySlot)
+        end,
+    },
+    [ABILITY_SLOT_TYPE_UTILITY] =
+    {
+        function(abilitySlot)
+            return TryPlaceUtilitySlotAction(abilitySlot)
         end,
     },
 }
@@ -316,6 +383,15 @@ local function TryShowQuickslotTooltip(abilitySlot, tooltip, owner)
     end
 end
 
+local function TryShowUtilitySlotTooltip(abilitySlot, tooltip, owner)
+    if GetSlotType(abilitySlot.slotNum) ~= ACTION_TYPE_NOTHING then
+        AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, owner)
+        return SetTooltipToActionBarSlot(tooltip, abilitySlot.slotNum)
+    else
+        ClearTooltip(tooltip)
+    end
+end
+
 local AbilityEnter =
 {
     [ABILITY_SLOT_TYPE_ACTIONBAR] =
@@ -331,6 +407,13 @@ local AbilityEnter =
             return TryShowQuickslotTooltip(abilitySlot, ItemTooltip, abilitySlot)
         end,
     },
+    [ABILITY_SLOT_TYPE_UTILITY] =
+    {
+        function(abilitySlot)
+            abilitySlot.object:OnMouseOverUtilitySlot(abilitySlot)
+            return TryShowUtilitySlotTooltip(abilitySlot, ItemTooltip, abilitySlot)
+        end,
+    },
 }
 
 function ZO_AbilitySlot_OnMouseEnter(abilitySlot)
@@ -343,6 +426,12 @@ local AbilityExit =
     {
         function(abilitySlot)
             ZO_QuickslotControl_OnMouseExit(abilitySlot)
+        end,
+    },
+    [ABILITY_SLOT_TYPE_UTILITY] =
+    {
+        function(abilitySlot)
+            abilitySlot.object:OnMouseExitUtilitySlot(abilitySlot)
         end,
     },
 }

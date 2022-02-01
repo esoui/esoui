@@ -194,6 +194,7 @@ local function RegisterLabelForBindingUpdate(label, actionName, showUnbound, gam
     label:RegisterForEvent(EVENT_KEYBINDINGS_LOADED, UpdateRegisteredKeybind)
     label:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, UpdateRegisteredKeybind)
     label:RegisterForEvent(EVENT_INPUT_TYPE_CHANGED, UpdateRegisteredKeybind)
+    label:RegisterForEvent(EVENT_KEYBIND_DISPLAY_MODE_CHANGED, UpdateRegisteredKeybind)
 
     label.updateRegisteredKeybindCallback = UpdateRegisteredKeybind
 
@@ -228,6 +229,7 @@ function ZO_Keybindings_UnregisterLabelForBindingUpdate(label)
     label:UnregisterForEvent(EVENT_KEYBINDINGS_LOADED)
     label:UnregisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED)
     label:UnregisterForEvent(EVENT_INPUT_TYPE_CHANGED)
+    label:UnregisterForEvent(EVENT_KEYBIND_DISPLAY_MODE_CHANGED)
 
     label.updateRegisteredKeybindCallback = nil
 end
@@ -254,11 +256,17 @@ function ZO_Keybindings_ShouldShowGamepadKeybind(alwaysPreferGamepadMode)
     end
 
     if IsInGamepadPreferredMode() then
-        if IsConsoleUI() then
-            -- always show gamepad keybinds on consoles
+        local keybindDisplayMode = tonumber(GetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE))
+        if keybindDisplayMode == KEYBIND_DISPLAY_MODE_ALWAYS_KEYBOARD then
+            return false
+        elseif keybindDisplayMode == KEYBIND_DISPLAY_MODE_ALWAYS_GAMEPAD then
             return true
-        else
-            return WasLastInputGamepad()
+        else -- keybindDisplayMode == KEYBIND_DISPLAY_MODE_AUTOMATIC
+            if AreKeyboardBindingsSupportedInGamepadUI() then
+                return WasLastInputGamepad()
+            else
+                return true
+            end
         end
     end
 

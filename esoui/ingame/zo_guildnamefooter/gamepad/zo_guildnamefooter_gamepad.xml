@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_Gamepad_GuildNameFooter" resizeToFitDescendents="true" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
-            <Anchor point="BOTTOMRIGHT" offsetX="ZO_GAMEPAD_PLAYER_INVENTORY_FOOTER_SCREEN_EDGE_OFFSET_X" offsetY="ZO_GAMEPAD_PLAYER_INVENTORY_FOOTER_SCREEN_EDGE_OFFSET_Y" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_PLAYER_INVENTORY_FOOTER_SCREEN_EDGE_OFFSET_X" offsetY="ZO_GAMEPAD_PLAYER_INVENTORY_FOOTER_SCREEN_EDGE_OFFSET_Y" />
             <Controls>
                 <Label name="$(parent)GuildName" horizontalAlignment="RIGHT" font="ZoFontGamepad42">
                     <Anchor point="BOTTOMRIGHT" />

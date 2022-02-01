@@ -292,17 +292,32 @@ function ZO_Tree:ComputeEndOfPathControlFinalBottomOffset(currentTreeNode, pathT
     return 0
 end
 
-function ZO_Tree:SetScrollToTargetNode(treeNode)
+function ZO_Tree:SetScrollToTargetNode(parentTreeNode, childNode)
     local pathToSelectedNode = {}
-    local currentNode = treeNode
+    local currentNode = parentTreeNode
+
     while currentNode and currentNode ~= self.rootNode do
         table.insert(pathToSelectedNode, currentNode)
         currentNode = currentNode:GetParent()
     end
 
     --Compute some metrics about the state of this tree after treeNode is selected. We use this so we can scroll to where the node WILL BE instead of where it is right now.
-    local treeNodeControlFinalBottomOffset = self:ComputeEndOfPathControlFinalBottomOffset(self.rootNode, pathToSelectedNode)
-    local treeNodeControlFinalTopOffset = treeNodeControlFinalBottomOffset - treeNode:GetControlHeight()
+    local parentTreeNodeControlFinalBottomOffset = self:ComputeEndOfPathControlFinalBottomOffset(self.rootNode, pathToSelectedNode)
+    local parentTreeNodeControlFinalTopOffset = parentTreeNodeControlFinalBottomOffset - parentTreeNode:GetControlHeight()
+
+    local finalTopOffset = parentTreeNodeControlFinalTopOffset
+    local childNodeControlFinalBottomOffset = 0
+    local childNodeControlFinalTopOffset = 0
+    if childNode then
+        table.insert(pathToSelectedNode, 1, childNode)
+
+        childNodeControlFinalBottomOffset = self:ComputeEndOfPathControlFinalBottomOffset(self.rootNode, pathToSelectedNode)
+        childNodeControlFinalTopOffset = childNodeControlFinalBottomOffset - childNode:GetControlHeight()
+
+        if childNodeControlFinalTopOffset - parentTreeNodeControlFinalTopOffset > self.scrollControl:GetHeight() then
+            finalTopOffset = childNodeControlFinalBottomOffset + childNode:GetControlHeight() - self.scrollControl:GetHeight() * 0.5
+        end
+    end
 
     local finalTotalHeight
     if self.exclusive then
@@ -313,15 +328,15 @@ function ZO_Tree:SetScrollToTargetNode(treeNode)
                 break
             end
         end
-        -- new node's height subtracted from the previously openned nodes' heights
+        -- new node's height subtracted from the previously opened nodes' heights
         -- this is the change in height the tree will have, which will be needed to calculate the scroll's animation
-        finalTotalHeight = self.rootNode:GetCurrentChildrenHeight() + treeNode:GetChildrenHeight() - previouslyOpenSectionChildrenHeight
+        finalTotalHeight = self.rootNode:GetCurrentChildrenHeight() + parentTreeNode:GetChildrenHeight() - previouslyOpenSectionChildrenHeight
     else
-        finalTotalHeight = self.rootNode:GetCurrentChildrenHeight() + treeNode:GetChildrenHeight()
+        finalTotalHeight = self.rootNode:GetCurrentChildrenHeight() + parentTreeNode:GetChildrenHeight()
     end
 
-    ZO_Scroll_SetScrollToRealOffsetAccountingForGradients(self.scrollControl, finalTotalHeight, treeNodeControlFinalTopOffset, self:GetOpenAnimationDuration())
-    self.scrollTargetNode = treeNode
+    ZO_Scroll_SetScrollToRealOffsetAccountingForGradients(self.scrollControl, finalTotalHeight, finalTopOffset, self:GetOpenAnimationDuration())
+    self.scrollTargetNode = parentTreeNode
 end
 
 function ZO_Tree:ToggleNode(treeNode)
@@ -387,9 +402,13 @@ function ZO_Tree:SelectNode(treeNode, reselectingDuringRebuild, bringParentIntoV
                         if immediateParentNode:IsOpen() and not immediateParentNode == self.scrollTargetNode then
                             --If the parent is open then just scroll it to the top right now
                             ZO_Scroll_ScrollControlToTop(self.scrollControl, immediateParentNodeControl)
+
+                            if not ZO_Scroll_IsControlFullyInView(self.scrollControl, self.selectedNode.control) then
+                                ZO_Scroll_ScrollControlIntoCentralView(self.scrollControl, self.selectedNode.control)
+                            end
                         else
                             --If the parent is closed we need to open it and set up the scroll to target node behavior
-                            self:SetScrollToTargetNode(immediateParentNode)
+                            self:SetScrollToTargetNode(immediateParentNode, self.selectedNode)
                             self:SetNodeOpen(immediateParentNode, true, SYSTEM_REQUESTED_OPEN)
                         end
                     end
@@ -412,7 +431,7 @@ function ZO_Tree:SelectNode(treeNode, reselectingDuringRebuild, bringParentIntoV
                                 ZO_Scroll_ScrollControlToTop(self.scrollControl, immediateParentNodeControl)
                             else
                                 --Otherwise we need to setup scroll over time since sections will be opening and closing
-                                self:SetScrollToTargetNode(immediateParentNode)
+                                self:SetScrollToTargetNode(immediateParentNode, self.selectedNode)
                             end
                         end
                     end

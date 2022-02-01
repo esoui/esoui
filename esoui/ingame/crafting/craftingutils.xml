@@ -8,15 +8,15 @@
 
         <TextureRotateAnimation name="CraftingBurstRotationAnimationBase1">
             <OnPlay>
-                local start = math.random() * math.pi
-                self:SetRotationValues(start, start + math.pi * 2)
+                local start = math.random() * ZO_PI
+                self:SetRotationValues(start, start + ZO_TWO_PI)
             </OnPlay>
         </TextureRotateAnimation>
 
         <TextureRotateAnimation name="CraftingBurstRotationAnimationBase2">
             <OnPlay>
-                local start = math.random() * math.pi
-                self:SetRotationValues(start, start - math.pi * 2)
+                local start = math.random() * ZO_PI
+                self:SetRotationValues(start, start - ZO_TWO_PI)
             </OnPlay>
         </TextureRotateAnimation>
 

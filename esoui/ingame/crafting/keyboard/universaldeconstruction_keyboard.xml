@@ -1,0 +1,24 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_UniversalDeconstructionTopLevel_Keyboard" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_UniversalDeconstruction_Keyboard_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)SkillInfo" inherits="ZO_MultipleCraftingSkills_SkillLineInfo_Keyboard">
+                    <Anchor point="TOPLEFT" offsetX="12" offsetY="5" />
+                </Control>
+
+                <Control name="$(parent)ModeMenu" inherits="ZO_CraftingModeMenu">
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40" />
+                    <Dimensions x="550" />
+                </Control>
+
+                <Control name="$(parent)Panel" inherits="ZO_UniversalDeconstructionPanel_Keyboard_Template ZO_SmithingPanelAnchors" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -68,6 +68,7 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeSortsAndFilters()
     end
 
     self.allTypesFilterEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_OUTFIT_ALL_TYPES_FILTER), RefreshVisible)
+    self.newFilterEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_OUTFIT_NEW_FILTER), RefreshVisible)
 
     ZO_OUTFIT_MANAGER:RegisterCallback("ShowLockedChanged", function()
         ZO_CheckButton_SetCheckState(self.showLockedCheckBox, ZO_OUTFIT_MANAGER:GetShowLocked())
@@ -228,10 +229,11 @@ do
 
         local typeFilterDropDown = self.typeFilterDropDown
         local previouslySelectedTypeFilterEntry = typeFilterDropDown:GetSelectedItemData()
-        local autoSelectTypeFilterEntry = self.allTypesFilterEntry
+        local autoSelectTypeFilterEntry = (previouslySelectedTypeFilterEntry == self.newFilterEntry) and self.newFilterEntry or self.allTypesFilterEntry
 
         typeFilterDropDown:ClearItems()
         typeFilterDropDown:AddItem(self.allTypesFilterEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
+        typeFilterDropDown:AddItem(self.newFilterEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
         if self.collectibleCategoryData then
             local unlockedCount = 0
@@ -338,6 +340,7 @@ function ZO_OutfitStylesPanel_Keyboard:RefreshVisible(retainScrollPosition)
         local typeFilterEntry = self.typeFilterDropDown:GetSelectedItemData()
         local filterVisualArmorType = typeFilterEntry and typeFilterEntry.visualArmorType
         local filterWeaponModelType = typeFilterEntry and typeFilterEntry.weaponModelType
+        local filterNew = typeFilterEntry == self.newFilterEntry
 
         local relevantSearchResults = nil
         local searchResults = COLLECTIONS_BOOK_SINGLETON:GetSearchResults()
@@ -366,6 +369,10 @@ function ZO_OutfitStylesPanel_Keyboard:RefreshVisible(retainScrollPosition)
 
             if not showLocked and collectibleData:IsLocked() then
                 return false
+            end
+
+            if filterNew then
+                return collectibleData:IsNew()
             end
 
             if filterVisualArmorType then

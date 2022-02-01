@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="ZO_GiftInventoryView_Gamepad_TopLevel" inherits="ZO_GiftInventoryView_Shared_TopLevel">
             <ResizeToFitPadding width="40" height="20" />
-            <Anchor point="LEFT" constrains="Y" />
+            <Anchor point="LEFT" relativeTo="GuiRoot" constrains="Y" />
             <Anchor point="CENTER" relativeTo="ZO_SharedGamepadNavQuadrant_1_2_Background" constrains="X" />
             
             <OnInitialized>

@@ -21,7 +21,7 @@
         </Label>
 
         <TopLevelControl name="ZO_AlertTextNotification" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT">
-            <Anchor point="TOPRIGHT" offsetX="-15" offsetY="15" />
+            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="-15" offsetY="15" />
             <OnInitialized>
                 ZO_AlertTextKeyboard_OnInitialized(self)
             </OnInitialized>

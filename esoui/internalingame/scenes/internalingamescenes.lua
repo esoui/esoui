@@ -23,7 +23,7 @@ if ZO_GAMEPAD_MARKET_ANNOUNCEMENT then
     announcementScene:AddFragment(ZO_GAMEPAD_MARKET_ANNOUNCEMENT:GetFragment())
 end
 announcementScene:AddFragment(MOUSE_UI_MODE_FRAGMENT)
-announcementScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
+announcementScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
 announcementScene:AddFragment(ZO_ActionLayerFragment:New("MarketAnnouncement"))
 
 ------------------------------
@@ -31,10 +31,10 @@ announcementScene:AddFragment(ZO_ActionLayerFragment:New("MarketAnnouncement"))
 ------------------------------
 ANTIQUITY_DIGGING_SCENE:AddFragment(ANTIQUITY_DIGGING_FRAGMENT)
 ANTIQUITY_DIGGING_SCENE:AddFragment(MOUSE_UI_MODE_FRAGMENT)
-ANTIQUITY_DIGGING_SCENE:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
+ANTIQUITY_DIGGING_SCENE:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
 
 -------------------
 --Scrying Game Scene
 -------------------
 SCRYING_SCENE:AddFragment(MOUSE_UI_MODE_FRAGMENT)
-SCRYING_SCENE:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
+SCRYING_SCENE:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)

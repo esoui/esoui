@@ -956,7 +956,6 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
                 antiquityFragmentDiscovered = meetsLeadRequirement
             end
 
-            -- TODO: Still need hidden antiquity icon
             local icon = antiquityFragmentDiscovered and GetAntiquityIcon(antiquityFragmentId) or "EsoUI/Art/Icons/U26_Unknown_Antiquity_QuestionMark.dds"
             local iconTexture = control.iconTexture
             iconTexture:SetTexture(icon)

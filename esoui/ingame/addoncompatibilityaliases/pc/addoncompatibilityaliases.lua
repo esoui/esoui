@@ -1033,3 +1033,6 @@ end
 
 -- ScrollTemplates
 ZO_ScrollList_SetScrollBarHiddenCallback = ZO_ScrollList_SetScrollBarVisibilityCallback
+
+--ZO_RadialMenu
+ZO_RadialMenu.UpdateEntry = ZO_RadialMenu.UpdateEntriesByName

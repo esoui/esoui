@@ -3,6 +3,7 @@ LINK_HANDLER = ZO_CallbackObject:New()
 LINK_HANDLER.INSERT_LINK_EVENT = "ZO_LinkHandler_InsertLinkEvent"
 LINK_HANDLER.LINK_CLICKED_EVENT = "ZO_LinkHandler_LinkClickedEvent"
 LINK_HANDLER.LINK_MOUSE_UP_EVENT = "ZO_LinkHandler_LinkMouseUpEvent"
+LINK_HANDLER.LINK_NOT_HANDLED_EVENT = "ZO_LinkHandler_NotHandledEvent"
 
 ITEM_LINK_TYPE = "item"
 ACHIEVEMENT_LINK_TYPE = "achievement"
@@ -51,18 +52,7 @@ local function HandleLinkMouseEvent(link, button, control, eventType)
     if type(link) == "string" and #link > 0 then
         local handled = LINK_HANDLER:FireCallbacks(eventType, link, button, ZO_LinkHandler_ParseLink(link))
         if not handled then
-            ClearMenu()
-            if button == MOUSE_BUTTON_INDEX_LEFT and ZO_PopupTooltip_SetLink then
-                ZO_PopupTooltip_SetLink(link)
-            elseif button == MOUSE_BUTTON_INDEX_RIGHT and link ~= "" then
-                local function AddLink()
-                    ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link))
-                end
-
-                AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), AddLink)
-                    
-                ShowMenu(control)
-            end
+            LINK_HANDLER:FireCallbacks(LINK_HANDLER.LINK_NOT_HANDLED_EVENT, link, button, ZO_LinkHandler_ParseLink(link))
         end
     end
 end

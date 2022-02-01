@@ -61,7 +61,7 @@
     <Controls>
         <Control name="ZO_CompassFrame_Keyboard_Template" virtual="true">
             <Dimensions y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD" />
-            <Anchor point="TOP" offsetY="40" />
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="40" />
 
             <Controls>
                 <Texture name="$(parent)Center" textureFile="$(COMPASS_PATH)compass.dds">
@@ -82,7 +82,7 @@
 
         <Control name="ZO_CompassFrame_Gamepad_Template" virtual="true">
             <Dimensions y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD" />
-            <Anchor point="TOP" offsetY="58" />
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="58" />
 
             <Controls>
                 <Texture name="$(parent)Center" textureFile="$(COMPASS_PATH)Gamepad/gp_compass.dds">
@@ -124,11 +124,11 @@
                 </Texture>
 
                 <Texture name="$(parent)Left">
-                    <Anchor point="RIGHT" relativeTo="$(parent)BgCenter" relativePoint="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Center" relativePoint="LEFT" />
                 </Texture>
 
                 <Texture name="$(parent)Right">
-                    <Anchor point="LEFT" relativeTo="$(parent)BgCenter" relativePoint="RIGHT" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Center" relativePoint="RIGHT" />
                 </Texture>
             </Controls>
         </TopLevelControl>

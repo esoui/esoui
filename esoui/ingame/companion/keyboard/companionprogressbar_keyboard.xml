@@ -34,7 +34,7 @@
 
         <TopLevelControl name="ZO_CompanionProgress_Keyboard_TopLevel" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
             <Dimensions x="375" y="56" />
-            <Anchor point="TOPLEFT" offsetX="15" offsetY="10"/>
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="15" offsetY="10"/>
             <OnInitialized>
                 ZO_CompanionProgress_Keyboard_OnInitialize(self)
             </OnInitialized>

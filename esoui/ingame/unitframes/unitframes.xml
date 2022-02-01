@@ -174,14 +174,16 @@
 
         <Control name="ZO_NamedUnitFrame" inherits="ZO_UnitFrame" virtual="true">
             <Controls>
-                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="TRUNCATE" maxLineCount="1"/>
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="TRUNCATE" maxLineCount="1" />
             </Controls>
         </Control>
 
         <Control name="ZO_GroupUnitFrame_Keyboard_Template" virtual="true">
             <Dimensions x="ZO_KEYBOARD_GROUP_FRAME_WIDTH" y="ZO_KEYBOARD_GROUP_FRAME_HEIGHT" />
             <Controls>
-                <Label name="$(parent)Name" font="ZoFontGameBold" wrapMode="TRUNCATE" />
+                <Label name="$(parent)Name" font="ZoFontGameBold" wrapMode="TRUNCATE">
+                    <DimensionConstraints minX="170" maxX="215" />
+                </Label>
                 <Label name="$(parent)Status" inherits="ZO_UnitFrameBarText_Keyboard_Template" />
                 <Control name="$(parent)Background1">
                     <Anchor point="TOPLEFT"/>
@@ -248,6 +250,10 @@
                     <Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="-9"/>
                 </Texture>
                 <Texture name="$(parent)AssignmentIcon" layer="OVERLAY" hidden="true"/>
+                <Texture name="$(parent)ElectionIcon" layer="OVERLAY" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="5" />
+                </Texture>
             </Controls>
         </Control>
 
@@ -377,6 +383,10 @@
                 <Texture name="$(parent)Background" hidden="true" />
                 <Label name="$(parent)Name" font="ZoFontGameBold" wrapMode="TRUNCATE" />
                 <Label name="$(parent)Status" inherits="ZO_UnitFrameBarText_Keyboard_Template" />
+                <Texture name="$(parent)ElectionIcon">
+                    <Dimensions x="28" y="28" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BG" relativePoint="BOTTOMRIGHT" />
+                </Texture>
             </Controls>
         </Control>
 
@@ -387,6 +397,10 @@
                 <Texture name="$(parent)Background" hidden="false" />
                 <Label name="$(parent)Name" font="ZoFontGamepad20" wrapMode="ELLIPSIS" />
                 <Label name="$(parent)Status" inherits="ZO_UnitFrameBarText_Gamepad_Template" />
+                <Texture name="$(parent)ElectionIcon">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" />
+                </Texture>
             </Controls>
         </Control>
 
@@ -402,6 +416,7 @@
                     <AnchorFill />
                 </Texture>
                 <Label name="$(parent)Status" hidden="true" />
+                <Texture name="$(parent)ElectionIcon" layer="OVERLAY" hidden="true" />
             </Controls>
         </Control>
 
@@ -641,7 +656,7 @@
         </Control>
 
         <TopLevelControl name="ZO_UnitFrames" allowBringToTop="false">
-            <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="5" offsetY="5" />
 
             <OnInitialized>
                 ZO_UnitFrames_Initialize()

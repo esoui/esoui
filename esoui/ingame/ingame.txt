@@ -112,6 +112,8 @@ EsoUI\Ingame\Globals\bindings.xml
 EsoUI\Ingame\Keybindings\Keybindings_Manager.lua
 EsoUI\Ingame\Keybindings\Keyboard\Keybindings.lua
 EsoUI\Ingame\Keybindings\Keyboard\Keybindings.xml
+EsoUI\Ingame\Keybindings\Gamepad\Keybindings_Gamepad.lua
+EsoUI\Ingame\Keybindings\Gamepad\Keybindings_Gamepad.xml
 
 EsoUI\Ingame\Logout\Keyboard\LogoutDialog_Keyboard.lua
 EsoUI\Ingame\Logout\Keyboard\LogoutDialog_Keyboard.xml
@@ -339,6 +341,12 @@ EsoUI\Ingame\Reticle\Reticle.lua
 EsoUI\Ingame\Reticle\Reticle.xml
 
 EsoUI\Ingame\SiegeBar\SiegeBar.lua
+
+EsoUI\Ingame\UtilityWheel\AssignableUtilityWheel_Shared.lua
+EsoUI\Ingame\UtilityWheel\Keyboard\AssignableUtilityWheel_Keyboard.lua
+EsoUI\Ingame\UtilityWheel\Keyboard\AssignableUtilityWheel_Keyboard.xml
+EsoUI\Ingame\UtilityWheel\Gamepad\AssignableUtilityWheel_Gamepad.lua
+EsoUI\Ingame\UtilityWheel\Gamepad\AssignableUtilityWheel_Gamepad.xml
 
 EsoUI\Ingame\Quickslot\QuickslotRadial.lua
 EsoUI\Ingame\Quickslot\Keyboard\QuickslotRadial_Keyboard.lua
@@ -818,17 +826,26 @@ EsoUI\Ingame\Crafting\Gamepad\SmithingResearch_Gamepad.lua
 EsoUI\Ingame\Crafting\Gamepad\SmithingResearch_Gamepad.xml
 
 EsoUI\Ingame\Crafting\SmithingExtraction_Shared.lua
+EsoUI\Ingame\Crafting\UniversalDeconstructionPanel_Shared.lua
 EsoUI\Ingame\Crafting\Keyboard\SmithingExtraction_Keyboard.lua
 EsoUI\Ingame\Crafting\Keyboard\SmithingExtraction_Keyboard.xml
+EsoUI\Ingame\Crafting\Keyboard\UniversalDeconstructionPanel_Keyboard.lua
+EsoUI\Ingame\Crafting\Keyboard\UniversalDeconstructionPanel_Keyboard.xml
 EsoUI\Ingame\Crafting\Gamepad\SmithingExtraction_Gamepad.lua
 EsoUI\Ingame\Crafting\Gamepad\SmithingExtraction_Gamepad.xml
+EsoUI\Ingame\Crafting\Gamepad\UniversalDeconstructionPanel_Gamepad.lua
+EsoUI\Ingame\Crafting\Gamepad\UniversalDeconstructionPanel_Gamepad.xml
 
 EsoUI\Ingame\Crafting\Smithing_Common.lua
 EsoUI\Ingame\Crafting\Smithing_Common.xml
 EsoUI\Ingame\Crafting\Keyboard\Smithing_Keyboard.lua
 EsoUI\Ingame\Crafting\Keyboard\Smithing_Keyboard.xml
+EsoUI\Ingame\Crafting\Keyboard\UniversalDeconstruction_Keyboard.lua
+EsoUI\Ingame\Crafting\Keyboard\UniversalDeconstruction_Keyboard.xml
 EsoUI\Ingame\Crafting\Gamepad\Smithing_Gamepad.lua
 EsoUI\Ingame\Crafting\Gamepad\Smithing_Gamepad.xml
+EsoUI\Ingame\Crafting\Gamepad\UniversalDeconstruction_Gamepad.lua
+EsoUI\Ingame\Crafting\Gamepad\UniversalDeconstruction_Gamepad.xml
 
 EsoUI\Ingame\Retrait\ZO_RetraitStation_Manager.lua
 EsoUI\Ingame\Retrait\ZO_RetraitStation_Retrait_Base.lua
@@ -861,7 +878,9 @@ EsoUI\Ingame\Banking\Gamepad\BankingCommon_Gamepad.lua
 EsoUI\Ingame\Banking\Gamepad\Banking_Gamepad.lua
 EsoUI\Ingame\Banking\Gamepad\Banking_Gamepad.xml
 
-EsoUI\Ingame\PlayerEmote\PlayerEmote.lua
+EsoUI\Ingame\QuickChat\QuickChatManager.lua
+
+EsoUI\Ingame\PlayerEmote\PlayerEmoteManager.lua
 EsoUI\Ingame\PlayerEmote\PlayerEmoteQuickslot.lua
 EsoUI\Ingame\PlayerEmote\PlayerEmoteQuickslot.xml
 EsoUI\Ingame\PlayerEmote\Gamepad\PlayerEmote_Gamepad.lua
@@ -1216,8 +1235,6 @@ EsoUI\Ingame\Vibration\Vibration.lua
 
 EsoUI\Ingame\Performance\PerformanceMeter.lua
 EsoUI\Ingame\Performance\PerformanceMeter.xml
-
-EsoUI\Ingame\QuickChat\QuickChatManager.lua
 
 EsoUI\Ingame\SCT\SCTAnimations.xml
 

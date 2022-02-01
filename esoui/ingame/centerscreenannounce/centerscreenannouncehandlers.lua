@@ -1203,6 +1203,14 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_TIMED_ACTIVITY_TYPE_PROGRESS_UPDATED] = funct
     end
 end
 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ACHIEVEMENTS_COMPLETED_ON_UPGRADE_TO_ACCOUNT_WIDE] = function(numCompletedAchievement)
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+    local messageTitle = zo_strformat(SI_ACHIEVEMENT_ON_UPGRADE_TITLE, numCompletedAchievement)
+    local messageSubheading = GetString(SI_ACHIEVEMENT_ON_UPGRADE_TEXT)
+    messageParams:SetText(messageTitle, messageSubheading)
+    return messageParams
+end
+
 function ZO_CenterScreenAnnounce_GetEventHandlers()
     return CENTER_SCREEN_EVENT_HANDLERS
 end

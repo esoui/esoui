@@ -87,10 +87,6 @@ end
 
 local ZO_AttributeTooltipsGrid_Gamepad = ZO_GamepadGrid:Subclass()
 
-function ZO_AttributeTooltipsGrid_Gamepad:New(...)
-    return ZO_GamepadGrid.New(self, ...)
-end
-
 function ZO_AttributeTooltipsGrid_Gamepad:Initialize(control, rowMajor, backButtonCallback)
     ZO_GamepadGrid.Initialize(self, control, rowMajor)
     self.attributeItems = {}

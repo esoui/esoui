@@ -14,19 +14,24 @@ function MultiIconTimer:New()
 end
 
 function MultiIconTimer:SetupMultiIconTexture(multiIcon)
-    local index = (self.cycle % #multiIcon.iconTextures) + 1
-    multiIcon:SetTexture(multiIcon.iconTextures[index])
+    local index = (self.cycle % #multiIcon.iconData) + 1
+    multiIcon:SetTexture(multiIcon.iconData[index].iconTexture)
+    if multiIcon.iconData[index].iconTint then
+        multiIcon:SetColor(multiIcon.iconData[index].iconTint:UnpackRGBA())
+    else
+        multiIcon:SetColor(ZO_WHITE:UnpackRGBA())
+    end
 end
 
 function MultiIconTimer:AddMultiIcon(multiIcon)
     table.insert(self.multiIcons, multiIcon)
     self:SetupMultiIconTexture(multiIcon)
-    multiIcon:SetAlpha(self.alpha * (multiIcon.maxAlpha or 1)) 
+    multiIcon:SetAlpha(self.alpha * (multiIcon.maxAlpha or 1))
 end
 
 function MultiIconTimer:RemoveMultiIcon(multiIcon)
     for i = 1, #self.multiIcons do
-        if(self.multiIcons[i] == multiIcon) then
+        if self.multiIcons[i] == multiIcon then
             table.remove(self.multiIcons, i)
             break
         end
@@ -64,7 +69,7 @@ do
     local MULTI_ICON_TIMER
     
     local function Show(self)
-        if self:IsHidden() and self.iconTextures and #self.iconTextures > 0 then
+        if self:IsHidden() and self.iconData and #self.iconData > 0 then
             self:SetHidden(false)
         end
     end
@@ -74,16 +79,16 @@ do
     end
 
     local function ClearIcons(self)
-        if self.iconTextures then
+        if self.iconData then
             Hide(self)
-            ZO_ClearNumericallyIndexedTable(self.iconTextures)
+            ZO_ClearNumericallyIndexedTable(self.iconData)
         end
     end
 
     local function HasIcon(self, iconTexture)
-        if self.iconTextures then
-            for _, existingIconTexture in ipairs(self.iconTextures) do
-                if existingIconTexture == iconTexture then
+        if self.iconData then
+            for _, existingIconTexture in ipairs(self.iconData) do
+                if existingIconTexture.iconTexture == iconTexture then
                     return true
                 end
             end
@@ -91,11 +96,19 @@ do
         return false
     end
 
-    local function AddIcon(self, iconTexture)
-        if not self.iconTextures then
-            self.iconTextures = {}
+    local function AddIcon(self, iconTexture, iconTint)
+        if iconTexture then
+            if not self.iconData then
+                self.iconData = {}
+            end
+
+            local iconData =
+            {
+                iconTexture = iconTexture,
+                iconTint = iconTint,
+            }
+            table.insert(self.iconData, iconData)
         end
-        table.insert(self.iconTextures, iconTexture)
     end
 
     local function SetMaxAlpha(self, maxAlpha)
@@ -103,19 +116,24 @@ do
     end
 
     function ZO_MultiIcon_OnShow(self)
-        if self.iconTextures then
-            if #self.iconTextures > 1 then
+        if self.iconData then
+            if #self.iconData > 1 then
                 MULTI_ICON_TIMER:AddMultiIcon(self)
             else
-                self:SetTexture(self.iconTextures[1])
+                self:SetTexture(self.iconData[1].iconTexture)
+                if self.iconData[1].iconTint then
+                    self:SetColor(self.iconData[1].iconTint:UnpackRGBA())
+                else
+                    self:SetColor(ZO_WHITE:UnpackRGBA())
+                end
                 self:SetAlpha(self.maxAlpha or 1)
             end
         end
     end
 
     function ZO_MultiIcon_OnHide(self)
-        if self.iconTextures then
-            if #self.iconTextures > 1 then
+        if self.iconData then
+            if #self.iconData > 1 then
                 MULTI_ICON_TIMER:RemoveMultiIcon(self)
             end
         end

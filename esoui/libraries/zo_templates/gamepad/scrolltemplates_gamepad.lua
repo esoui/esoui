@@ -110,9 +110,9 @@ end
 function ZO_ScrollContainer_Gamepad:UpdateScrollIndicator()
     if self.scrollIndicator then
         local _, verticalExtents = self.scroll:GetScrollExtents()
-        local wasLastInputGamepad = WasLastInputGamepad()
-        local hideGamepad = not (self.scrollIndicatorEnabled and verticalExtents ~= 0 and wasLastInputGamepad)
-        local hideKeyboard = not (self.scrollIndicatorEnabled and verticalExtents ~= 0 and not wasLastInputGamepad)
+        local shouldShowGamepadKeybinds = ZO_Keybindings_ShouldShowGamepadKeybind()
+        local hideGamepad = not (self.scrollIndicatorEnabled and verticalExtents ~= 0 and shouldShowGamepadKeybinds)
+        local hideKeyboard = not (self.scrollIndicatorEnabled and verticalExtents ~= 0 and not shouldShowGamepadKeybinds)
         self.scrollIndicator:SetHidden(hideGamepad)
         self.scrollKeyUp:SetHidden(hideKeyboard)
         self.scrollKeyDown:SetHidden(hideKeyboard)

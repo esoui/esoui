@@ -627,7 +627,7 @@ do
                 local lineEndHex = endHexIndex and self.board:GetHexByIndex(endHexIndex)
 
                 AnchorToHex(self.lineStartControl, lineStartHex)
-                self.lineStartControl:SetTextureRotation(angle + math.pi)
+                self.lineStartControl:SetTextureRotation(angle + ZO_PI)
 
                 if lineEndHex then
                     self.lineEndControl:SetHidden(false)
@@ -638,7 +638,7 @@ do
                 end
             else
                 AnchorToHex(self.lineStartControl, targetHex)
-                self.lineStartControl:SetTextureRotation(math.pi)
+                self.lineStartControl:SetTextureRotation(ZO_PI)
 
                 self.lineEndControl:SetHidden(false)
                 AnchorToHex(self.lineEndControl, targetHex)
@@ -680,7 +680,7 @@ function ZO_ScryingModalCursor:UpdateDirectionalInput()
             dy = -dy -- flip such that +1 is down
             local DEADZONE = 0.4
             if math.sqrt(dx * dx + dy * dy) > DEADZONE then
-                local angleTurns = math.atan2(dy, dx) / (2 * math.pi)
+                local angleTurns = math.atan2(dy, dx) / ZO_TWO_PI
                 -- recenter such that the top sixth of of the circle is centered around 0 and the bottom sixth around 3
                 local angleTurnsNormalized = (angleTurns + 5 / 16) % 1
                 local angleDirection = math.floor(angleTurnsNormalized * 6)

@@ -1,0 +1,57 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_AssignableUtilityWheelSlot_Keyboard_Template" inherits="ZO_AbilitySlot" virtual="true">
+            <Dimensions x="64" y="64" />
+            <OnInitialized>
+                ZO_UtilityWheelSlotControl_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds" level="1">
+                    <Dimensions x="61" y="61" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Label name="$(parent)CountText" tier="HIGH" font="ZoFontGameShadow">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4"/>
+                </Label>
+
+                <Texture name="$(parent)Sparkle" inherits="ZO_SparkleTemplate">
+                    <Anchor point="TOPLEFT" offsetX="-50" offsetY="-50" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="50" offsetY="50" />
+                </Texture>
+
+                <Texture name="$(parent)DropCallout" hidden="true" textureFile="EsoUI/Art/Quickslots/quickslot_dragSlot.dds">
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Quickslots/quickslot_highlight_blob.dds" alpha="0" level="0">
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="CENTER"/>
+                </Texture>
+            
+                <Label name="$(parent)Label" font="ZoFontWinH5" horizontalAlignment="CENTER">
+                    <Anchor point="TOP" relativeto="$(parent)Icon" relativePoint="BOTTOM" offsetY="5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AssignableUtilityWheel_Keyboard_Template" mouseEnabled="true" hidden="true" virtual="true">
+            <Dimensions x="300" y="300" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" offsetX="-20" offsetY="-100" />
+
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Quickslots/quickslot_mapping_bg.dds">
+                    <Dimensions x="512" y="512" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)Underlay" color="000000" alpha=".55" excludeFromResizeToFitExtents="true" inheritScale="false" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

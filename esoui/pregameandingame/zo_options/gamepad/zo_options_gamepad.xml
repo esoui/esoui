@@ -227,7 +227,7 @@
 
             <Controls>
                 <Control name="$(parent)LoadingContainer" hidden="true" inherits="ZO_GamepadLoadingIconAndLabelTemplate">
-                    <Anchor point="CENTER" relativePoint="TOPRIGHT" relativeTo="$(parent)Container"/>
+                    <Anchor point="CENTER" relativePoint="TOPRIGHT"/>
                     <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
                 </Control>
 

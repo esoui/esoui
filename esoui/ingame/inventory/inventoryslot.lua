@@ -2498,7 +2498,20 @@ function ZO_InventorySlot_OnMouseEnter(inventorySlot)
 
     ZO_InventorySlot_SetHighlightHidden(listPart, false)
 
+    -- ESO-747254: This function will be called recursively in RunHandlers. Since
+    -- we only want the tooltip build once, we only call RunHandlers on the initial
+    -- call and not on the recursive calls. InitializeTooltips nees to be called regardless
+    -- recursion since the recursive process will also call MouseExit and clear the tooltip.
+    if inventorySlot.isBuildingTooltip then
+        return false
+    end
+
+    inventorySlot.isBuildingTooltip = true
+
     local success, tooltipUsed = RunHandlers(InventoryEnter, buttonPart)
+
+    inventorySlot.isBuildingTooltip = nil
+
     if success then
         if tooltipUsed == ItemTooltip and not NO_COMPARISON_TOOLTIPS_FOR_SLOT_TYPE[ZO_InventorySlot_GetType(buttonPart)] then
             tooltipUsed:HideComparativeTooltips()
@@ -2529,7 +2542,6 @@ function ZO_InventorySlot_OnMouseEnter(inventorySlot)
     else
         ItemTooltip:SetHidden(true)
         InformationTooltip:SetHidden(true)
-
         return false
     end
 end

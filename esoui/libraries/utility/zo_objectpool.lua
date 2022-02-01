@@ -116,7 +116,7 @@ end
 -- Optional supplementary behavior that can be run after the factory has created the object
 -- Often used in conjunction with extension pool classes (e.g.: ZO_ControlPool) when you want all the default factory behavior, plus something extra
 function ZO_ObjectPool:SetCustomFactoryBehavior(customFactoryBehavior)
-    self.customFactoryBehavior = customFactoryBehavior -- Signature: function(objectBeingCreated)
+    self.customFactoryBehavior = customFactoryBehavior -- Signature: function(objectBeingCreated, objectKey, ZO_ObjectPool)
 end
 
 -- Optional supplementary behavior that can be run after the primary reset function has been run on the object
@@ -166,7 +166,7 @@ function ZO_ObjectPool:CreateObject(objectKey)
     local object = self:m_Factory(objectKey)
 
     if self.customFactoryBehavior then
-        self.customFactoryBehavior(object)
+        self.customFactoryBehavior(object, objectKey, self)
     end
 
     return object

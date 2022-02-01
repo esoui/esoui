@@ -35,7 +35,7 @@
                 <Label name="$(parent)LeftKeyLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad" hidden="true">
                     <Anchor point="RIGHT" relativeTo="$(parent)RightKeyLabel" relativePoint="LEFT" offsetX="-15" />
                     <Controls>
-                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_menu_rightArrow.dds" textureCoordsRotation="3.141" layer="TEXT" >
+                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_menu_rightArrow.dds" textureCoordsRotation="ZO_PI" layer="TEXT" >
                             <Dimensions x="24" y="24" />
                             <Anchor point="RIGHT" relativePoint="LEFT" />
                         </Texture>
@@ -47,8 +47,8 @@
         <!-- The Keybind strip Initialize assumes that these backgrounds exist -->
         <TopLevelControl name="ZO_KeybindStripMungeBackground" layer="BACKGROUND" hidden="true">
             <Dimensions y="55" />
-            <Anchor point="BOTTOMLEFT" />
-            <Anchor point="BOTTOMRIGHT" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
             <Controls>
                 <Texture name="$(parent)Texture" inherits="ZO_BottomBarBG" />
             </Controls>
@@ -56,8 +56,8 @@
 
         <TopLevelControl name="ZO_KeybindStripGamepadBackground" hidden="true">
             <Dimensions y="ZO_GAMEPAD_KEYBIND_STRIP_BACKGROUND_HEIGHT" />
-            <Anchor point="BOTTOMLEFT" />
-            <Anchor point="BOTTOMRIGHT" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
             <Controls>
                 <Texture name="$(parent)Texture" textureFile="EsoUI/Art/Windows/Gamepad/gp_hintbar.dds" >
                     <AnchorFill />
@@ -69,8 +69,8 @@
 
         <TopLevelControl name="ZO_KeybindStripControl" hidden="true" allowBringToTop="false" tier="MEDIUM" level="ZO_MEDIUM_TIER_KEYBIND_STRIP">
             <Dimensions y="55" />
-            <Anchor point="BOTTOMLEFT" />
-            <Anchor point="BOTTOMRIGHT" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
 
             <OnInitialized>
                 ZO_KeybindStrip_OnInitialized(self)

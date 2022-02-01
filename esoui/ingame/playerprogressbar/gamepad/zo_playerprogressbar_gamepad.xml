@@ -82,7 +82,7 @@
 
         <Control name="ZO_GamepadPlayerProgressTemplate" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
             <Dimensions x="255" y="56" />
-            <Anchor point="BOTTOMRIGHT" offsetX="-98" offsetY="-53"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-98" offsetY="-53"/>
             <Controls>
                 <Label name="$(parent)Level" font="ZoFontGamepad42">
                     <Anchor point="TOPLEFT"/>
@@ -114,7 +114,7 @@
         
         <Control name="ZO_GamepadPlayerChampionProgressTemplate" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
             <Dimensions x="255" y="56" />
-            <Anchor point="BOTTOMRIGHT" offsetX="-135" offsetY="-53"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-135" offsetY="-53"/>
             <Controls>
                 <Label name="$(parent)Level" font="ZoFontGamepad42">
                     <Anchor point="TOPLEFT"/>

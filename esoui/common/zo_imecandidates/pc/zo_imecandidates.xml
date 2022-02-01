@@ -9,7 +9,7 @@
         </Control>
         
         <TopLevelControl name="ZO_IMECandidates_TopLevel" topmost="true" clampedToScreen="true" hidden="true">
-            <Anchor point="CENTER"/>
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
             <ClampedToScreenInsets top="-8" left="-8" bottom="8" right="8"/>
             <OnInitialized>
                 ZO_IMECandidates_TopLevel_OnInitialized(self)
@@ -33,12 +33,12 @@
                                                 </Texture>
                                             </Controls>
                                         </Control>
-                                    </Controls>                                    
+                                    </Controls>
                                 </Control>
                             </Controls>
                         </Control>
                     </Controls>
-                </Control>                
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

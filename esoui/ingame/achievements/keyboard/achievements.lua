@@ -66,7 +66,7 @@ end
 --[[ Achievement ]]--
 Achievement = ZO_InitializingObject:Subclass()
 
-function Achievement:Initialize(control, checkPool, statusBarPool, rewardLabelPool, rewardIconPool, lineThumbPool, dyeSwatchPool)
+function Achievement:Initialize(control, checkPool, statusBarPool, rewardLabelPool, rewardIconPool, lineThumbPool, dyeSwatchPool, characterFrameBorderControlPool)
     control.achievement = self
     self.control = control
     ZO_InventorySlot_SetType(self.control, SLOT_TYPE_ACHIEVEMENT_REWARD)
@@ -76,6 +76,7 @@ function Achievement:Initialize(control, checkPool, statusBarPool, rewardLabelPo
     self.rewardIconPool = rewardIconPool
     self.lineThumbPool = lineThumbPool
     self.dyeSwatchPool = dyeSwatchPool
+    self.characterFrameBorderControlPool = characterFrameBorderControlPool
 
     self.checkBoxes = {}
     self.progressBars = {}
@@ -101,6 +102,40 @@ function Achievement:Initialize(control, checkPool, statusBarPool, rewardLabelPo
     if self.highlight then
         self.highlight:SetHeight(ACHIEVEMENT_COLLAPSED_HEIGHT)
     end
+
+    self:InitializeKeybindDescriptors()
+end
+
+function Achievement:InitializeKeybindDescriptors()
+    self.keybindStripDescriptor =
+    {
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            name = function()
+                if GetSkyshardAchievementZoneId(self.achievementId) ~= 0 then
+                    return GetString(SI_ZONE_STORY_OPEN_FROM_ACHIEVEMENT_ACTION)
+                else
+                    return GetString(SI_ACHIEVEMENT_TO_LORE_LIBRARY_ACTION)
+                end
+            end,
+            keybind = "UI_SHORTCUT_SECONDARY",
+            callback = function()
+                local zoneId = GetSkyshardAchievementZoneId(self.achievementId)
+                if zoneId ~= 0 then
+                    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+                    ZONE_STORIES_MANAGER:ShowZoneStoriesScene(zoneId)
+                else
+                    local bookCollectionId = GetAchievementLinkedBookCollectionId(self.achievementId)
+                    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+                    LORE_LIBRARY:SetCollectionIdToSelect(bookCollectionId)
+                    MAIN_MENU_KEYBOARD:ShowScene("loreLibrary")
+                end
+            end,
+            visible = function()
+                return GetSkyshardAchievementZoneId(self.achievementId) ~= 0 or GetAchievementLinkedBookCollectionId(self.achievementId) ~= 0
+            end
+        },
+    }
 end
 
 function Achievement:GetId()
@@ -123,15 +158,44 @@ function Achievement:Show(achievementId)
     self.achievementId = achievementId
     local name, description, points, icon, completed, date, time = self:GetAchievementInfo(achievementId)
 
-    self.title:SetText(zo_strformat(name))
+    local titleText
+    local persistenceLevel = GetAchievementPersistenceLevel(achievementId)
+    self.isCharacterPersistent = persistenceLevel == ACHIEVEMENT_PERSISTENCE_CHARACTER
+    if self.isCharacterPersistent then
+        local titleIcon = zo_iconFormatInheritColor("EsoUI/Art/Miscellaneous/Gamepad/gp_charNameIcon.dds", "100%", "100%")
+        titleText = zo_strformat(SI_ACHIEVEMENT_TITLE_CHARACTER_LEVEL, titleIcon, name)
+        local frameColor = completed and ZO_SECOND_SELECTED_TEXT or ZO_SECOND_NORMAL_TEXT
+        local iconFrameBorder
+        if self.control.iconFrameBorderKey then
+            iconFrameBorder = self.characterFrameBorderControlPool:AcquireObject(self.control.iconFrameBorderKey)
+        else
+            local iconFrameBorderKey
+            iconFrameBorder, iconFrameBorderKey = self.characterFrameBorderControlPool:AcquireObject()
+            iconFrameBorder:SetParent(self.control:GetNamedChild("Icon"))
+            iconFrameBorder:SetAnchor(TOPLEFT, nil, TOPLEFT, -6, -6)
+            iconFrameBorder:SetAnchor(BOTTOMRIGHT, nil, BOTTOMRIGHT, 6, 6)
+            self.control.iconFrameBorderKey = iconFrameBorderKey
+        end
+        iconFrameBorder:SetColor(frameColor:UnpackRGBA())
+    else
+        titleText = zo_strformat(name)
+        if self.control.iconFrameBorderKey then
+            self.characterFrameBorderControlPool:ReleaseObject(self.control.iconFrameBorderKey)
+            self.control.iconFrameBorderKey = nil
+        end
+    end
+
+    self.title:SetText(titleText)
     self.description:SetText(zo_strformat(description))
     self.icon:SetTexture(icon)
 
     self.points:SetHidden(points == ACHIEVEMENT_POINT_LEGENDARY_DEED)
     self.points:SetText(tostring(points))
 
+    local titleNormalColor = self.isCharacterPersistent and ZO_SECOND_SELECTED_TEXT or ZO_SELECTED_TEXT
+    local titleDisabledColor = self.isCharacterPersistent and ZO_SECOND_NORMAL_TEXT or NO_DISABLED_COLOR
     ZO_Achievements_ApplyTextColorToLabel(self.points, completed, ZO_SELECTED_TEXT)
-    ZO_Achievements_ApplyTextColorToLabel(self.title, completed, ZO_SELECTED_TEXT)
+    ZO_Achievements_ApplyTextColorToLabel(self.title, completed, titleNormalColor, titleDisabledColor)
     ZO_Achievements_ApplyTextColorToLabel(self.description, completed)
 
     if self.highlight then
@@ -165,7 +229,7 @@ function Achievement:Show(achievementId)
 
     self:SetRewardThumb(achievementId)
     self:UpdateExpandedStateIcon()
-    
+
     self.control:SetHidden(false)
 end
 
@@ -320,7 +384,7 @@ function Achievement:AddProgressBar(description, numCompleted, numRequired, show
 
     bar:SetHidden(false)
 
-    self.progressBars[#self.progressBars + 1] = bar
+    table.insert(self.progressBars, bar)
 end
 
 function Achievement:AddCheckBox(description, checked)
@@ -351,7 +415,7 @@ function Achievement:AddIconReward(name, icon, displayQuality, rewardIndex)
     iconControl.label:SetText(name) -- Already localized
     iconControl.label:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
 
-    self.rewardIcons[#self.rewardIcons + 1] = iconControl
+    table.insert(self.rewardIcons, iconControl)
 end
 
 function Achievement:GetPooledLabel(labelType, completed)
@@ -370,7 +434,7 @@ function Achievement:GetPooledLabel(labelType, completed)
     label.isHeader = labelType == HEADER_LABEL
     label:SetMouseEnabled(false)
     label:SetHidden(false)
-    self.rewardLabels[#self.rewardLabels + 1] = label
+    table.insert(self.rewardLabels, label)
     return label
 end
 
@@ -402,7 +466,7 @@ function Achievement:AddDyeReward(dyeId, completed)
     dyeSwatch.label:SetText(zo_strformat(SI_DYEING_SWATCH_TOOLTIP_TITLE, dyeName))
     ZO_Achievements_ApplyTextColorToLabel(dyeSwatch.label, completed)
 
-    self.dyeSwatches[#self.dyeSwatches + 1] = dyeSwatch
+    table.insert(self.dyeSwatches, dyeSwatch)
 end
 
 function Achievement:AddCollectibleReward(collectibleId, completed)
@@ -691,6 +755,7 @@ do
         ReleaseControls(self.rewardLabelPool, self.rewardLabels)
         ReleaseControls(self.lineThumbPool, self.lineThumbs)
         ReleaseControls(self.dyeSwatchPool, self.dyeSwatches)
+        ReleaseControls(self.characterFrameBorderControlPool, {})
 
         self.rewardLabel = nil
     end
@@ -746,6 +811,11 @@ function Achievement:Reset()
     self.rewardLabel = nil
     self:SetIndex(nil)
 
+    if self.control.iconFrameBorderKey then
+        self.characterFrameBorderControlPool:ReleaseObject(self.control.iconFrameBorderKey)
+        self.control.iconFrameBorderKey = nil
+    end
+
     self.anchoredToAchievement = nil
     self:SetDependentAnchoredAchievement(nil)
 end
@@ -766,17 +836,39 @@ function Achievement:SetHighlightHidden(hidden)
     end
 end
 
-function Achievement:OnMouseEnter()
+function Achievement:OnMouseEnter(control)
     self:SetHighlightHidden(false)
+    self:RefreshTooltip(control)
+    KEYBIND_STRIP:AddKeybindButtonGroup(control.achievement.keybindStripDescriptor)
 end
 
-function Achievement:OnMouseExit()
+function Achievement:OnMouseExit(control)
     self:SetHighlightHidden(true)
+    ClearTooltip(InformationTooltip)
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(control.achievement.keybindStripDescriptor)
+end
+
+function Achievement:RefreshTooltip(control)
+    ClearTooltip(InformationTooltip)
+    if self.collapsed or #self.lineThumbs == 0 then
+        if self.completed and not self.isCharacterPersistent then
+            local completeByCharId = GetCharIdForCompletedAchievement(self.achievementId)
+            if completeByCharId then
+                local characterName = GetCharacterNameById(completeByCharId)
+                if characterName ~= "" then
+                    local colorizedCharacterName = ZO_SELECTED_TEXT:Colorize(characterName)
+                    InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0)
+                    SetTooltipText(InformationTooltip, zo_strformat(SI_ACHIEVEMENT_EARNED_FORMATTER, colorizedCharacterName))
+                end
+            end
+        end
+    end
 end
 
 function Achievement:OnClicked(button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         self:ToggleCollapse()
+        self:RefreshTooltip(self.control)
     elseif button == MOUSE_BUTTON_INDEX_RIGHT and IsChatSystemAvailableForCurrentPlatform() then
         ClearMenu()
         AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(ZO_LinkHandler_CreateChatLink(GetAchievementLink, self:GetId())) end)
@@ -967,6 +1059,8 @@ do
                 if self.achievementsById and self.achievementsById[self.queuedScrollToAchievement] then
                     ZO_Scroll_ScrollControlIntoCentralView(self.contentList, self.achievementsById[self.queuedScrollToAchievement]:GetControl())
                 end
+            elseif newState == SCENE_HIDING then
+                ClearTooltip(InformationTooltip)
             end
         end)
 
@@ -1107,8 +1201,14 @@ function Achievements:InitializeEvents()
         end,
     })
 
-    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, self.OnLinkClicked, self)
-    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, self.OnLinkClicked, self)
+    local function OnLinkClicked(...)
+        if not IsInGamepadPreferredMode() then
+            return self.OnLinkClicked(...)
+        end
+    end
+
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, OnLinkClicked, self)
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, OnLinkClicked, self)
 
     local function OnUpdateSearchResults()
         if self.scene:IsShowing() then
@@ -1250,6 +1350,10 @@ function Achievements:OnAchievementUpdated(achievementId)
         self:BuildCategories()
     end
 
+    self:UpdateSelectionDisplay()
+end
+
+function Achievements:UpdateSelectionDisplay()
     if self:IsSummaryOpen() then
         self:UpdateSummary()
         self:RefreshRecentAchievements()
@@ -1257,37 +1361,8 @@ function Achievements:OnAchievementUpdated(achievementId)
         local data = self.categoryTree:GetSelectedData()
         if data then
             local selectedCategoryIndex, selectedSubCategoryIndex = self:GetCategoryIndicesFromData(data)
-            local categoryIndex, subCategoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(achievementId)
-            -- Only update if the achievement is in the category you're currently viewing
-            -- An achievement can only be in one category, and switching categories does a full refresh anyway
-            if categoryIndex == selectedCategoryIndex and subCategoryIndex == selectedSubCategoryIndex then
-                -- We might have filtered the achievement list we are viewing, and since an achievement has updated
-                -- it's possible we need to remove it from the list, so we'll just rebuild the whole list
-                local dontRebuildContentList = ZO_ShouldShowAchievement(self.categoryFilter.filterType, achievementId)
-                self:UpdateCategoryLabels(data, SAVE_EXPANDED, dontRebuildContentList)
-                if dontRebuildContentList and ACHIEVEMENTS_MANAGER:IsInSearchResults(categoryIndex, subCategoryIndex, achievementIndex) then
-                    local baseAchievementId = self:GetBaseAchievementId(achievementId)
-
-                    -- Must use base here because in a line, all of the remaining achievements get an update,
-                    -- but you only want the lowest one that hasn't been completed
-                    -- e.g.: Ids 1, 2, 3.  1 complete, 2 and 3 in progress.  2 and 3 both get updates.
-                    -- 2 calls ZO_GetNextInProgressAchievementInLine, returns 2 as next in progress (good).
-                    -- 3 calls ZO_GetNextInProgressAchievementInLine, returns 3 as next in progress (bad).
-                    -- 1 (base for 2 AND 3) calls ZO_GetNextInProgressAchievementInLine, returns 2 as next in progress (best).
-                    if ZO_GetNextInProgressAchievementInLine(baseAchievementId) == achievementId then
-                        local updatedAchievement = self.achievementsById[baseAchievementId]
-
-                        if not updatedAchievement then
-                            updatedAchievement = self.achievementPool:AcquireObject()
-                            self.achievementsById[baseAchievementId] = updatedAchievement
-                        end
-
-                        updatedAchievement:Show(achievementId)
-                        updatedAchievement:RefreshExpandedView()
-
-                        return updatedAchievement
-                    end
-                end
+            if data.parentData and data.categoryIndex == selectedSubCategoryIndex or data.categoryIndex == selectedCategoryIndex then
+                self:UpdateCategoryLabels(data, SAVE_EXPANDED, ACHIEVEMENTS_MANAGER:IsRequestingSearchResults())
             end
         end
     end
@@ -1356,9 +1431,9 @@ function Achievements:InitializeAchievementList(control)
     self.achievementsById = {}
 
     local sharedCheckPool = ZO_ControlPool:New("ZO_AchievementCheckbox", self.contentListScrollChild)
-    sharedCheckPool:SetCustomFactoryBehavior(   function(checkControl)
-                                                    checkControl.label = checkControl:GetNamedChild("Label")
-                                                end)
+    sharedCheckPool:SetCustomFactoryBehavior(function(checkControl)
+                                                checkControl.label = checkControl:GetNamedChild("Label")
+                                             end)
 
     local sharedStatusBarPool = ZO_ControlPool:New("ZO_AchievementsStatusBar", self.contentListScrollChild)
     sharedStatusBarPool:SetCustomFactoryBehavior(   function(statusBarControl)
@@ -1388,19 +1463,21 @@ function Achievements:InitializeAchievementList(control)
 
     local sharedDyeSwatchPool = ZO_ControlPool:New("ZO_AchievementDyeSwatch", self.contentListScrollChild)
 
+    local characterFrameBorderControlPool = ZO_ControlPool:New("ZO_AchievementIconCharacterFrameBorder", ZO_Achievements, "IconFrameBorder")
+
     local function CreateAchievement(objectPool)
         local achievement = ZO_ObjectPool_CreateControl("ZO_Achievement", objectPool, self.contentListScrollChild)
         achievement.owner = self
-        return Achievement:New(achievement, sharedCheckPool, sharedStatusBarPool, sharedRewardLabelPool, sharedRewardIconPool, sharedLineThumbPool, sharedDyeSwatchPool)
+        return Achievement:New(achievement, sharedCheckPool, sharedStatusBarPool, sharedRewardLabelPool, sharedRewardIconPool, sharedLineThumbPool, sharedDyeSwatchPool, characterFrameBorderControlPool)
     end
 
     self.achievementPool = ZO_ObjectPool:New(CreateAchievement, ZO_ObjectPool_DefaultResetObject)
 
     ZO_AchievementPopup.owner = self
-    self.popup = PopupAchievement:New(ZO_AchievementPopup, sharedCheckPool, sharedStatusBarPool, sharedRewardLabelPool, sharedRewardIconPool, sharedLineThumbPool, sharedDyeSwatchPool)
+    self.popup = PopupAchievement:New(ZO_AchievementPopup, sharedCheckPool, sharedStatusBarPool, sharedRewardLabelPool, sharedRewardIconPool, sharedLineThumbPool, sharedDyeSwatchPool, characterFrameBorderControlPool)
 
     ZO_AchievementTooltip.owner = self
-    self.tooltip = AchievementContainer:New(ZO_AchievementTooltip, sharedCheckPool, sharedStatusBarPool, sharedRewardLabelPool, sharedRewardIconPool, sharedLineThumbPool, sharedDyeSwatchPool)
+    self.tooltip = AchievementContainer:New(ZO_AchievementTooltip, sharedCheckPool, sharedStatusBarPool, sharedRewardLabelPool, sharedRewardIconPool, sharedLineThumbPool, sharedDyeSwatchPool, characterFrameBorderControlPool)
 end
 
 do
@@ -1616,9 +1693,7 @@ function Achievements:OnAchievementsUpdated()
     self:BuildCategories()
     self:UpdateSummary()
     self:UpdatePointDisplay()
-    if self:IsSummaryOpen() then
-        self:RefreshRecentAchievements()
-    end
+    self:UpdateSelectionDisplay()
 end
 
 function Achievements:UpdatePointDisplay()
@@ -1732,6 +1807,13 @@ function Achievements:GetLookupNodeByCategory(categoryIndex, subcategoryIndex)
 end
 
 function Achievements:BuildCategories()
+    local searchResults = ACHIEVEMENTS_MANAGER:GetSearchResults()
+    if searchResults and ACHIEVEMENTS_MANAGER:IsRequestingSearchResults() then
+        return
+    end
+
+    local selectedNode
+    local selectedData = self.categoryTree:GetSelectedData()
     self.categoryTree:Reset()
     ZO_ClearTable(self.nodeLookupData)
 
@@ -1741,21 +1823,28 @@ function Achievements:BuildCategories()
     local function AddCategoryByCategoryIndex(categoryIndex)
         local name, numSubCategories, _, _, _, hidesUnearned = GetAchievementCategoryInfo(categoryIndex)
         local normalIcon, pressedIcon, mouseoverIcon = GetAchievementCategoryKeyboardIcons(categoryIndex)
-        self:AddTopLevelCategory(categoryIndex, name, numSubCategories, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
+        return self:AddTopLevelCategory(categoryIndex, name, numSubCategories, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
     end
 
-    local searchResults = ACHIEVEMENTS_MANAGER:GetSearchResults()
     if searchResults then
         for categoryIndex, data in pairs(searchResults) do
-            AddCategoryByCategoryIndex(categoryIndex)
+            local categoryNode = AddCategoryByCategoryIndex(categoryIndex)
+
+            if selectedData and selectedData.categoryIndex == categoryIndex then
+                selectedNode = categoryNode
+            end
         end
     else
         for categoryIndex = 1, GetNumAchievementCategories() do
-            AddCategoryByCategoryIndex(categoryIndex)
+            local categoryNode = AddCategoryByCategoryIndex(categoryIndex)
+
+            if selectedData and selectedData.categoryIndex == categoryIndex then
+                selectedNode = categoryNode
+            end
         end
     end
 
-    self.categoryTree:Commit()
+    self.categoryTree:Commit(selectedNode)
 end
 
 do
@@ -1879,11 +1968,11 @@ function ZO_Achievements_OnSearchTextChanged(editBox)
 end
 
 function ZO_Achievement_OnMouseEnter(control)
-    control.achievement:OnMouseEnter()
+    control.achievement:OnMouseEnter(control)
 end
 
 function ZO_Achievement_OnMouseExit(control)
-    control.achievement:OnMouseExit()
+    control.achievement:OnMouseExit(control)
 end
 
 function ZO_Achievement_Reward_OnMouseEnter(control)

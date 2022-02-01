@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="ZO_TreasureMap" mouseEnabled="true" hidden="true">
             <Dimensions x="1024" y="1024" />
-            <Anchor point="CENTER" offsetY="-30" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" offsetY="-30" />
             
             <OnInitialized>
                 ZO_TreasureMap_OnInitialize(self)

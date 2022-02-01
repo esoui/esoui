@@ -1,9 +1,5 @@
 ZO_CraftingInventory = ZO_SharedCraftingInventory:Subclass()
 
-function ZO_CraftingInventory:New(...)
-    return ZO_SharedCraftingInventory.New(self, ...)
-end
-
 function ZO_CraftingInventory:Initialize(control, slotType, noDragging, connectInfoFn, connectInfoControl)
     ZO_SharedCraftingInventory.Initialize(self, control, slotType, connectInfoFn, connectInfoControl)
 

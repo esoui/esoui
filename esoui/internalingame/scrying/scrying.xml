@@ -46,7 +46,7 @@
         </AnimationTimeline>
         <AnimationTimeline name="ZO_ScryingBackdrop_SpinCW" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <TextureRotateAnimation duration="8000" startRotation="6.28318" endRotation="0" />
+                <TextureRotateAnimation duration="8000" startRotation="ZO_TWO_PI" endRotation="0" />
             </Animations>
         </AnimationTimeline>
         <AnimationTimeline name="ZO_ScryingBackdrop_TextureScroll" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
@@ -57,7 +57,7 @@
 
         <AnimationTimeline name="ZO_ScryingGamepadTargetCursor_Idle" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <TextureRotateAnimation duration="5000" startRotation="6.28318" endRotation="0" />
+                <TextureRotateAnimation duration="5000" startRotation="ZO_TWO_PI" endRotation="0" />
                 <ScaleAnimation duration="5000" startScale="1" endScale="1.33">
                     <EasingFunction>
                         return ZO_EaseInOutZeroToOneToZero(progress)
@@ -219,8 +219,8 @@
         </Control>
 
         <TopLevelControl name="ZO_ScryingTopLevel" mouseEnabled="true" tier="LOW" layer="BACKGROUND" hidden="true">
-            <Anchor point="TOPLEFT"/>
-            <Anchor point="BOTTOMRIGHT"/>
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
 
             <OnInitialized>
                 ZO_Scrying_OnInitialized(self)

@@ -175,9 +175,6 @@ end
 function ZO_LinkAccount_Gamepad:SetupOptionsList()
     self.username = ""
     self.password = ""
-    -- TODO: HACK: Starting with a prefilled userId and password.
-    self.username = HACK_DEFAULT_USERID
-    self.password = HACK_DEFAULT_PASSWORD
 
     -- Setup the actual list.
     self.optionsControl = self.control:GetNamedChild("Container"):GetNamedChild("Options")

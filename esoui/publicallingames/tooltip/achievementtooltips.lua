@@ -33,10 +33,18 @@ end
 function ZO_Tooltip:LayoutAchievement(achievementId)
     local achievementName, description, points, icon, completed, date, time = GetAchievementInfo(achievementId)
     local achievementStatus = ACHIEVEMENTS_MANAGER:GetAchievementStatus(achievementId)
+    local persistenceLevel = GetAchievementPersistenceLevel(achievementId)
+    local isCharacterPersistent = persistenceLevel == ACHIEVEMENT_PERSISTENCE_CHARACTER
 
     -- Title
     local titleTextSection = self:AcquireSection(self:GetStyle("topSection"))
-    titleTextSection:AddLine(zo_strformat(SI_ACHIEVEMENTS_NAME, achievementName), self:GetStyle("title"))
+    local titleStyle = {}
+    if isCharacterPersistent then
+        table.insert(titleStyle, self:GetStyle("achievementCharacterHeading"))
+    end
+    table.insert(titleStyle, self:GetStyle("title"))
+    titleTextSection:AddLine(zo_strformat(SI_ACHIEVEMENTS_NAME, achievementName), unpack(titleStyle))
+
     if completed then
         titleTextSection:AddLine(date)
     elseif achievementStatus == ZO_ACHIEVEMENTS_COMPLETION_STATUS.IN_PROGRESS then
@@ -44,6 +52,13 @@ function ZO_Tooltip:LayoutAchievement(achievementId)
     elseif achievementStatus == ZO_ACHIEVEMENTS_COMPLETION_STATUS.INCOMPLETE then
         titleTextSection:AddLine(GetString(SI_ACHIEVEMENTS_INCOMPLETE))
     end
+
+    if isCharacterPersistent then
+        local titleIcon = zo_iconFormatInheritColor("EsoUI/Art/Miscellaneous/Gamepad/gp_charNameIcon.dds", "75%", "75%")
+        local titleText = zo_strformat(SI_ACHIEVEMENT_TITLE_CHARACTER_LEVEL, titleIcon, GetString(SI_GAMEPAD_ACHIEVEMENTS_CHARACTER_PERSISTENT))
+        titleTextSection:AddLine(titleText, self:GetStyle("achievementCharacterHeading"))
+    end
+
     self:AddSection(titleTextSection)
 
     if points ~= ACHIEVEMENT_POINT_LEGENDARY_DEED then
@@ -60,6 +75,19 @@ function ZO_Tooltip:LayoutAchievement(achievementId)
 
     self:LayoutAchievementCriteria(achievementId)
     self:LayoutAchievementRewards(achievementId)
+
+    if completed and not isCharacterPersistent then
+        local completeByCharId = GetCharIdForCompletedAchievement(achievementId)
+        if completeByCharId then
+            local completedSection = self:AcquireSection(self:GetStyle("bodySection"))
+            local characterName = GetCharacterNameById(completeByCharId)
+            if characterName ~= "" then
+                local colorizedCharacterName = ZO_SELECTED_TEXT:Colorize(colorizedCharacterName)
+                completedSection:AddLine(zo_strformat(SI_ACHIEVEMENT_EARNED_FORMATTER, characterName), self:GetStyle("flavorText"))
+                self:AddSection(completedSection)
+            end
+        end
+    end
 end
 
 function ZO_Tooltip:LayoutAchievementCriteria(achievementId)

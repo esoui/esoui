@@ -41,6 +41,20 @@ function BookSetGamepad:InitializeKeybindStripDescriptors()
                 return selectedData and selectedData.enabled
             end,
         },
+        -- Open in Achievements
+        {
+            name = GetString(SI_LORE_LIBRARY_TO_ACHIEVEMENT_ACTION),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            visible = function()
+                local achievementId = GetLoreBookCollectionLinkedAchievement(self.categoryIndex, self.collectionIndex)
+                return achievementId ~= 0
+            end,
+            callback = function()
+                local achievementId = GetLoreBookCollectionLinkedAchievement(self.categoryIndex, self.collectionIndex)
+                MAIN_MENU_GAMEPAD:SelectMenuEntry(ZO_MENU_MAIN_ENTRIES.JOURNAL)
+                ACHIEVEMENTS_GAMEPAD:ShowAchievement(achievementId)
+            end,
+        },
     }
 
     -- Jump to next section.

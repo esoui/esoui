@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="ZO_ColorPicker_Keyboard_TopLevel" inherits="ZO_ColorPicker_Shared ZO_CustomDialogBase">
             <Dimensions x="512" y="256" />
-            <Anchor point="CENTER" offsetY="-45" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" offsetY="-45" />
 
             <OnInitialized>
                 ZO_ColorPicker_Keyboard_TopLevel_OnInitialized(self)
@@ -96,7 +96,7 @@
                                     <Dimensions x="22" y="128" />
                                     <Anchor point="CENTER" />
                                     <OnInitialized>
-                                        self:SetTextureRotation(math.pi / 2)
+                                        self:SetTextureRotation(ZO_HALF_PI)
                                     </OnInitialized>
                                 </Texture>
                             </Controls>

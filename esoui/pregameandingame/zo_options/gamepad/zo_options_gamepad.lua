@@ -1,3 +1,17 @@
+ZO_GAMEPAD_OPTIONS_CATEGORY_SORT_ORDER =
+{
+    [SETTING_PANEL_CINEMATIC] = 0,
+    [SETTING_PANEL_VIDEO] = 10,
+    [SETTING_PANEL_AUDIO] = 20,
+    [SETTING_PANEL_GAMEPLAY] = 30,
+    [SETTING_PANEL_CAMERA] = 40,
+    [SETTING_PANEL_INTERFACE] = 50,
+    [SETTING_PANEL_SOCIAL] = 60,
+    [SETTING_PANEL_NAMEPLATES] = 70,
+    [SETTING_PANEL_COMBAT] = 80,
+    [SETTING_PANEL_ACCOUNT] = 90,
+}
+
 local SETTING_PANEL_GAMEPAD_CATEGORIES_ROOT = -1
 
 ZO_GamepadOptions = ZO_Object.MultiSubclass(ZO_SharedOptions, ZO_Gamepad_ParametricList_Screen)
@@ -11,6 +25,8 @@ function ZO_GamepadOptions:Initialize(control)
     self.isGamepadOptions = true
     self.currentCategory = SETTING_PANEL_GAMEPAD_CATEGORIES_ROOT
     self.settingsNeedApply = false
+
+    self.customCategories = {}
 
     local function OnDeferredSettingRequestCompleted(eventId, system, settingId, success, result)
         if GAMEPAD_OPTIONS_FRAGMENT:IsShowing() and not self:AreDeferredSettingsForPanelLoading(self.currentCategory) then
@@ -217,8 +233,12 @@ do
                 keybind = "UI_SHORTCUT_PRIMARY",
                 callback = function()
                     local data = self.categoryList:GetTargetData()
-                    self.currentCategory = data.panelId
-                    SCENE_MANAGER:Push("gamepad_options_panel")
+                    if data.isCustomCategory then
+                        data.callback()
+                    else
+                        self.currentCategory = data.panelId
+                        SCENE_MANAGER:Push("gamepad_options_panel")
+                    end
                 end,
             },
         }
@@ -325,6 +345,13 @@ end
 
 function ZO_GamepadOptions:InitializeOptionsLists()
     self.categoryList = self:GetMainList()
+    self.categoryList:SetSortFunction(function(entry1, entry2)
+        if entry1.sortOrder ~= entry2.sortOrder then
+            return entry1.sortOrder < entry2.sortOrder
+        end
+
+        return entry1:GetText() < entry2:GetText()
+    end)
     self.optionsList = self:AddList("options", function(list) self:SetupOptionsList(list) end)
     self.optionsLoadingControl = self.control:GetNamedChild("LoadingContainer")
 end
@@ -691,6 +718,15 @@ local TEMPLATE_NAMES =
     [OPTIONS_CHAT_COLOR] = "ZO_GamepadOptionsColorRow",
 }
 
+-- Function to add a ZO_GamepadEntryData to the list of settings categories
+-- the entry data should have these fields:
+--   sortOrder - a number used to sort the categories
+--   callback - a function called when the primary keybind is pressed on the category
+function ZO_GamepadOptions:RegisterCustomCategory(entryData)
+    entryData.isCustomCategory = true
+    table.insert(self.customCategories, entryData)
+end
+
 function ZO_GamepadOptions:RefreshCategoryList()
     self.categoryList:Clear()
 
@@ -706,6 +742,10 @@ function ZO_GamepadOptions:RefreshCategoryList()
 
     if ZO_OptionsPanel_IsAccountManagementAvailable() then
         self:AddCategory(SETTING_PANEL_ACCOUNT)
+    end
+
+    for _, customCategoryEntryData in ipairs(self.customCategories) do
+        self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", customCategoryEntryData)
     end
 
     self.categoryList:Commit()
@@ -731,6 +771,7 @@ do
         if settings then
             local entryData = ZO_GamepadEntryData:New(GetString("SI_SETTINGSYSTEMPANEL", panelId), CATEGORY_ICONS[panelId])
             entryData.panelId = panelId
+            entryData.sortOrder = ZO_GAMEPAD_OPTIONS_CATEGORY_SORT_ORDER[panelId]
             entryData:SetIconTintOnSelection(true)
             self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
         end

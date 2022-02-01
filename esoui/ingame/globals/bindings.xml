@@ -319,8 +319,8 @@
             </Action>
 
             <Action name="UI_SHORTCUT_EMOTES_QUICK_SLOTS">
-                <Down>if IsInGamepadPreferredMode() then PLAYER_EMOTE_QUICKSLOT:StartInteraction() end</Down>
-                <Up>PLAYER_EMOTE_QUICKSLOT:StopInteraction()</Up>
+                <Down>if IsInGamepadPreferredMode() then PLAYER_EMOTE_QUICKSLOT_RADIAL_MANAGER:StartInteraction() end</Down>
+                <Up>PLAYER_EMOTE_QUICKSLOT_RADIAL_MANAGER:StopInteraction()</Up>
             </Action>
         </Category>
 
@@ -424,7 +424,7 @@
                 <Down> HELP_MANAGER:ToggleHelp() </Down>
             </Action>
 
-            <Action name="TOGGLE_SYSTEM" rebindable="false">
+            <Action name="TOGGLE_SYSTEM" rebindable="false" allowOnInputModeChange="true">
                 <Down>ZO_SceneManager_ToggleGameMenuBinding()</Down>
             </Action>
 
@@ -542,7 +542,7 @@
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_EXIT" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true">
+            <Action name="UI_SHORTCUT_EXIT" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true" allowOnInputModeChange="true">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
             </Action>
         </Category>

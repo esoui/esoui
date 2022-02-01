@@ -19,11 +19,59 @@ local COMPANION_HEALTH_GRADIENT = { ZO_ColorDef:New("00484F"), ZO_ColorDef:New("
 local COMPANION_HEALTH_GRADIENT_LOSS = ZO_ColorDef:New("621018")
 local COMPANION_HEALTH_GRADIENT_GAIN = ZO_ColorDef:New("D0FFBC")
 
+local SMALL_GROUP_ELECTION_ICON_INFO =
+{
+    [GROUP_VOTE_CHOICE_ABSTAIN] = 
+    {
+        icon = "EsoUI/Art/UnitFrames/votedIcon_notYet.dds",
+        color =  ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED)),
+    },
+    [GROUP_VOTE_CHOICE_FOR] = 
+    {
+        icon = "EsoUI/Art/UnitFrames/votedIcon_yes.dds",
+        color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SUCCEEDED)),
+    },
+    [GROUP_VOTE_CHOICE_AGAINST] = 
+    {
+        icon = "EsoUI/Art/UnitFrames/votedIcon_no.dds",
+        color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_FAILED)),
+    },
+    [GROUP_VOTE_CHOICE_INVALID] = 
+    {
+        icon = "EsoUI/Art/UnitFrames/votedIcon_notYet.dds",
+        color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED)),
+    },
+}
+
+local LARGE_GROUP_ELECTION_ICON_INFO =
+{
+    [GROUP_VOTE_CHOICE_ABSTAIN] = 
+    {
+        icon = "EsoUI/Art/UnitFrames/votedIcon_notYet.dds",
+        color = ZO_NORMAL_TEXT,
+    },
+    [GROUP_VOTE_CHOICE_FOR] = 
+    {
+        icon = "EsoUI/Art/UnitFrames/votedIcon_yes.dds",
+        color = ZO_NORMAL_TEXT,
+    },
+    [GROUP_VOTE_CHOICE_AGAINST] = 
+    {
+        icon = "EsoUI/Art/UnitFrames/votedIcon_no.dds",
+        color = ZO_NORMAL_TEXT,
+    },
+    [GROUP_VOTE_CHOICE_INVALID] = 
+    {
+        icon = "EsoUI/Art/UnitFrames/votedIcon_notYet.dds",
+        color = ZO_NORMAL_TEXT,
+    },
+}
+
 local UnitFrames = nil
 
 ZO_KEYBOARD_GROUP_FRAME_WIDTH = 288
 ZO_KEYBOARD_GROUP_FRAME_HEIGHT = 80
-ZO_KEYBOARD_RAID_FRAME_WIDTH = 96
+ZO_KEYBOARD_RAID_FRAME_WIDTH = 120
 ZO_KEYBOARD_RAID_FRAME_HEIGHT = 45
 ZO_KEYBOARD_COMPANION_FRAME_WIDTH = 288
 ZO_KEYBOARD_COMPANION_FRAME_HEIGHT = 80
@@ -68,7 +116,7 @@ local KEYBOARD_CONSTANTS =
 
 ZO_GAMEPAD_GROUP_FRAME_WIDTH = 160
 ZO_GAMEPAD_GROUP_FRAME_HEIGHT = 70
-ZO_GAMEPAD_RAID_FRAME_WIDTH = 175
+ZO_GAMEPAD_RAID_FRAME_WIDTH = 207
 ZO_GAMEPAD_RAID_FRAME_HEIGHT = 40
 ZO_GAMEPAD_COMPANION_FRAME_WIDTH = 160
 ZO_GAMEPAD_COMPANION_FRAME_HEIGHT = 70
@@ -381,6 +429,69 @@ function ZO_UnitFrames_Manager:SetEnableTargetOfTarget(enableFlag)
     end
 end
 
+function ZO_UnitFrames_Manager:BeginGroupElection()
+    self.activeElection = true
+
+    if self.endElectionCallback then
+        zo_removeCallLater(self.endElectionCallback)
+    end
+
+    self:UpdateElectionIcons()
+end
+
+function ZO_UnitFrames_Manager:UpdateElectionInfo(resultType)
+    local electionType, timeRemainingSeconds, descriptor, targetUnitTag, initiatorUnitTag = GetGroupElectionInfo()
+    self.activeElection = timeRemainingSeconds > 0
+    if self.activeElection and ZO_IsGroupElectionTypeCustom(electionType) then
+        if descriptor == ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK then
+            self:UpdateElectionIcons()
+        end
+    elseif ZO_IsGroupElectionTypeCustom(electionType) then
+        -- Time remaining <= 0.
+        resultType = resultType or GROUP_ELECTION_RESULT_NOT_APPLICABLE
+        self:EndGroupElection(resultType)
+    end
+end
+
+function ZO_UnitFrames_Manager:EndGroupElection(resultType)
+    self.activeElection = false
+
+    if resultType ~= GROUP_ELECTION_RESULT_ABANDONED and resultType ~= GROUP_ELECTION_RESULT_NOT_APPLICABLE then
+        local ELECTION_WON_DELAY_MS = 3000
+        local ELECTION_LOST_DELAY_MS = 5000
+        local postElectionDelayMS = resultType == GROUP_ELECTION_RESULT_ELECTION_WON and ELECTION_WON_DELAY_MS or ELECTION_LOST_DELAY_MS
+        local function OnEndElection()
+            self:HideElectionIcons()
+            self.endElectionCallback = nil
+        end
+        self.endElectionCallback = zo_callLater(OnEndElection, postElectionDelayMS)
+    end
+
+    self:UpdateElectionIcons()
+end
+
+function ZO_UnitFrames_Manager:HideElectionIcons()
+    for i = 1, GROUP_SIZE_MAX do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        local unitFrame = unitTag and self:GetFrame(unitTag)
+
+        if unitFrame then
+            unitFrame.electionIcon:SetHidden(true)
+        end
+    end
+end
+
+function ZO_UnitFrames_Manager:UpdateElectionIcons()
+    for i = 1, GROUP_SIZE_MAX do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        local unitFrame = unitTag and self:GetFrame(unitTag)
+
+        if unitFrame then
+            unitFrame:RefreshElectionIcon()
+        end
+    end
+end
+
 --[[
     ZO_UnitFrameBar class...defines one bar in the unit frame, including background/glass textures, statusbar and text
 --]]
@@ -399,7 +510,7 @@ local UNITFRAME_BAR_STYLES =
             },
             centered = true,
         },
-    },    
+    },
 
     [GROUP_UNIT_FRAME] =
     {
@@ -432,7 +543,7 @@ local UNITFRAME_BAR_STYLES =
             {
                 template = "ZO_UnitFrameStatus",
                 barHeight = 39,
-                barWidth = 90,
+                barWidth = 114,
                 barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 2, 2) },
             },
 
@@ -453,7 +564,7 @@ local UNITFRAME_BAR_STYLES =
             {
                 template = "ZO_UnitFrameStatus",
                 barHeight = 39,
-                barWidth = 90,
+                barWidth = 114,
                 barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 2, 2) },
             },
 
@@ -769,7 +880,6 @@ local UNITFRAME_LAYOUT_DATA =
         keyboard =
         {
             nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 35, 19),
-            nameWidth = 215,
             nameWrapMode = TEXT_WRAP_MODE_ELLIPSIS,
 
             statusData = { anchor1 = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 36, 42), anchor2 = ZO_Anchor:New(TOPRIGHT, nil, TOPRIGHT, -140, 42), height = 0, },
@@ -780,14 +890,17 @@ local UNITFRAME_LAYOUT_DATA =
         gamepad =
         {
             nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, 1),
-            nameWidth = 306,
             nameWrapMode = TEXT_WRAP_MODE_ELLIPSIS,
 
             indentedNameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 25, 3),
 
             statusData = { anchor1 = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, 0), anchor2 = ZO_Anchor:New(TOPRIGHT, nil, TOPRIGHT, 0, 35), height = 0, },
             hideHealthBgIfOffline = true,
-
+            baseMinX = 150,
+            baseMaxX = 215,
+            -- Indented constraints are base constraints minus the width of the leader icon.
+            indentedMinX = 125,
+            indentedMaxX = 190,
             leaderIconData = {width = 25, height = 25, offsetX = 0, offsetY = 12}
         },
     },
@@ -823,10 +936,10 @@ local UNITFRAME_LAYOUT_DATA =
                 icon = { width = 14, height = 14, customAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 66, 7) },
             },
 
-            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 6, 2),
-            nameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 6,
+            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 6, 3),
+            nameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 40,
             indentedNameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 20, 3),
-            indentedNameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 20 - 2,
+            indentedNameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 52 - 2,
 
             leaderIconData = {width = 18, height = 18, offsetX = 2, offsetY = 7}
         },
@@ -959,9 +1072,15 @@ local function LayoutUnitFrameName(nameLabel, layoutData, indented)
         local nameWidth = layoutData.nameWidth or 0
 
         if indented then
-            nameLabel:SetWidth(layoutData.indentedNameWidth or nameWidth)
+            nameLabel:SetWidth(indentedNameWidth or nameWidth)
+            if layoutData.baseMinX then
+                nameLabel:SetDimensionConstraints(layoutData.indentedMinX, 0, layoutData.indentedMaxX, 0)
+            end
         else
             nameLabel:SetWidth(nameWidth)
+            if layoutData.indentedMinX then
+                nameLabel:SetDimensionConstraints(layoutData.baseMinX, 0, layoutData.baseMaxX, 0)
+            end
         end
     end
 end
@@ -1053,6 +1172,8 @@ function ZO_UnitFrameObject:Initialize(unitTag, anchors, barTextMode, style, tem
     self.powerBars = {}
     self.lastPowerType = 0
     self.frame.m_unitTag = unitTag
+
+    self.electionIcon = self.frame:GetNamedChild("ElectionIcon")
 
     self:SetAnchor(anchors)
     self:ApplyVisualStyle()
@@ -1220,6 +1341,7 @@ function ZO_UnitFrameObject:RefreshControls()
             self:UpdateUnitReaction()
             self:UpdateLevel()
             self:UpdateCaption()
+            self:RefreshElectionIcon()
 
             local health, maxHealth = self:GetHealth()
             self.healthBar:Update(POWERTYPE_HEALTH, health, maxHealth, FORCE_INIT)
@@ -1481,14 +1603,14 @@ local DIFFICULTY_BRACKET_GLOW_LEFT_TEXTURE =
 {
     [MONSTER_DIFFICULTY_NORMAL] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level2_left.dds",
     [MONSTER_DIFFICULTY_HARD] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level3_left.dds",
-    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_left.dds",    
+    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_left.dds",
 }
 
 local DIFFICULTY_BRACKET_GLOW_RIGHT_TEXTURE =
 {
     [MONSTER_DIFFICULTY_NORMAL] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level2_right.dds",
     [MONSTER_DIFFICULTY_HARD] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level3_right.dds",
-    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_right.dds",    
+    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_right.dds",
 }
 
 local GAMEPAD_DIFFICULTY_BRACKET_TEXTURE =
@@ -1683,6 +1805,30 @@ function ZO_UnitFrameObject:CreateAttributeVisualizer(soundTable)
     return self.attributeVisualizer
 end
 
+function ZO_UnitFrameObject:RefreshElectionIcon()
+    local electionIcon = self.electionIcon
+    if electionIcon then
+        if IsUnitOnline(self.unitTag) then
+            if not UnitFrames.activeElection and not UnitFrames.endElectionCallback then
+                electionIcon:SetHidden(true)
+            else
+                local electionIconInfo = UnitFrames:GetCombinedGroupSize() > SMALL_GROUP_SIZE_THRESHOLD and LARGE_GROUP_ELECTION_ICON_INFO or SMALL_GROUP_ELECTION_ICON_INFO
+                local vote = GetGroupElectionVoteByUnitTag(self.unitTag)
+                if vote ~= GROUP_VOTE_CHOICE_FOR and not UnitFrames.activeElection then
+                    vote = GROUP_VOTE_CHOICE_AGAINST
+                end
+                local voteIconInfo = electionIconInfo[vote]
+
+                electionIcon:SetTexture(voteIconInfo.icon)
+                electionIcon:SetColor(voteIconInfo.color:UnpackRGBA())
+                electionIcon:SetHidden(false)
+            end
+        else
+            electionIcon:SetHidden(true)
+        end
+    end
+end
+
 --[[
     UnitFrame Utility functions
 --]]
@@ -1752,9 +1898,9 @@ local function DoGroupUpdate()
     UnitFrames:UpdateGroupAnchorFrames()
 end
 
-local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS = 
+local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS =
 {
-    [STAT_HEALTH_MAX] = 
+    [STAT_HEALTH_MAX] =
     {
         [ATTRIBUTE_BAR_STATE_NORMAL]    = SOUNDS.UAV_MAX_HEALTH_NORMAL_TARGET,
         [ATTRIBUTE_BAR_STATE_EXPANDED]  = SOUNDS.UAV_MAX_HEALTH_INCREASED_TARGET,
@@ -1766,41 +1912,41 @@ local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS =
         [ATTRIBUTE_BAR_STATE_EXPANDED]  = SOUNDS.UAV_MAX_MAGICKA_INCREASED_TARGET,
         [ATTRIBUTE_BAR_STATE_SHRUNK]    = SOUNDS.UAV_MAX_MAGICKA_DECREASED_TARGET,
     },
-    [STAT_STAMINA_MAX] = 
+    [STAT_STAMINA_MAX] =
     {
         [ATTRIBUTE_BAR_STATE_NORMAL]    = SOUNDS.UAV_MAX_STAMINA_NORMAL_TARGET,
         [ATTRIBUTE_BAR_STATE_EXPANDED]  = SOUNDS.UAV_MAX_STAMINA_INCREASED_TARGET,
         [ATTRIBUTE_BAR_STATE_SHRUNK]    = SOUNDS.UAV_MAX_STAMINA_DECREASED_TARGET,
     },
-    [STAT_HEALTH_REGEN_COMBAT] = 
+    [STAT_HEALTH_REGEN_COMBAT] =
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_HEALTH_REGEN_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_HEALTH_REGEN_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_HEALTH_REGEN_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_HEALTH_REGEN_LOST_TARGET,
     },
-    [STAT_MAGICKA_REGEN_COMBAT] = 
+    [STAT_MAGICKA_REGEN_COMBAT] =
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_MAGICKA_REGEN_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_MAGICKA_REGEN_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_MAGICKA_REGEN_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_MAGICKA_REGEN_LOST_TARGET,
     },
-    [STAT_STAMINA_REGEN_COMBAT] = 
+    [STAT_STAMINA_REGEN_COMBAT] =
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_STAMINA_REGEN_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_STAMINA_REGEN_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_STAMINA_REGEN_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_STAMINA_REGEN_LOST_TARGET,
     },
-    [STAT_ARMOR_RATING] = 
+    [STAT_ARMOR_RATING] =
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_ARMOR_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_ARMOR_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_ARMOR_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_ARMOR_LOST_TARGET,
     },
-    [STAT_POWER] = 
+    [STAT_POWER] =
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_POWER_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_POWER_LOST_TARGET,
@@ -1921,7 +2067,7 @@ end
 
 local function CreateGroupMember(frameIndex, unitTag, groupSize)
     if frameIndex == nil then 
-        return 
+        return
     end
 
     local frameStyle = GROUP_UNIT_FRAME
@@ -1989,8 +2135,8 @@ local function CreateGroupsAfter(startIndex)
                     frame:SetHiddenForReason("disabled", false)
                     ZO_UnitFrames_UpdateWindow(companionTag, UNIT_CHANGED)
                 end
-            end   
-        end 
+            end
+        end
     end
 
     DoGroupUpdate()
@@ -2016,8 +2162,8 @@ local function UpdateGroupFrameStyle(groupIndex)
     local newLargeGroup = combinedGroupSize > SMALL_GROUP_SIZE_THRESHOLD;
 
     -- In cases where no UI has been setup, the group changes between large and small group sizes, or when
-    --  members are removed, we need to run a full update of the UI. These could also be optimized to only
-    --  run partial updates if more performance is needed.
+    -- members are removed, we need to run a full update of the UI. These could also be optimized to only
+    -- run partial updates if more performance is needed.
     if oldLargeGroup ~= newLargeGroup or oldCombinedGroupSize > combinedGroupSize then
         -- Create all the appropriate frames for the new group member, or in the case of a unit_destroyed
         -- create the small group versions.
@@ -2025,7 +2171,7 @@ local function UpdateGroupFrameStyle(groupIndex)
         CreateGroups()
     else
         -- Only update the frames of the unit being changed, and those after it in the list for performance
-        --  reasons.
+        -- reasons.
         UnitFrames:DisableCompanionRaidFrames()
         CreateGroupsAfter(groupIndex)
     end
@@ -2061,7 +2207,7 @@ local function UpdateGroupFramesVisualStyle()
         -- Clearing and setting the text again seems to reapply the ModifyTextType attribute.
         local groupNameControl = GetControl(raidFrame, "GroupName")
         groupNameControl:SetText("")
-        
+
         if constants.SHOW_GROUP_LABELS then
             groupNameControl:SetText(zo_strformat(SI_GROUP_SUBGROUP_LABEL, i))
         end
@@ -2108,7 +2254,7 @@ local function UpdateGroupFramesVisualStyle()
                         companionUnitFrame:SetAnchor(companionAnchor)
                     end
                 end
-            else                
+            else
                 if companionUnitFrame then
                     companionUnitFrame:SetAnchor(groupUnitAnchor)
                 end
@@ -2205,7 +2351,7 @@ local function RegisterForEvents()
     local function OnTargetChanged()
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
     end
-    
+
     local function OnUnitCharacterNameChanged(_, unitTag)
         ZO_UnitFrames_UpdateWindow(unitTag)
     end
@@ -2221,7 +2367,7 @@ local function RegisterForEvents()
             if powerType == POWERTYPE_HEALTH then
                 local oldHealth = unitFrame.healthBar.currentValue    
                 unitFrame.healthBar:Update(POWERTYPE_HEALTH, powerPool, powerPoolMax)
-    
+
                 if oldHealth ~= nil and oldHealth == 0 then
                     -- Unit went from dead to non dead...update reaction
                     unitFrame:UpdateUnitReaction()
@@ -2257,7 +2403,7 @@ local function RegisterForEvents()
 
     local function OnLevelUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if unitFrame then
             unitFrame:UpdateLevel()
         end
@@ -2269,7 +2415,7 @@ local function RegisterForEvents()
 
     local function OnDispositionUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if unitFrame then
             unitFrame:UpdateUnitReaction()
         end
@@ -2277,13 +2423,13 @@ local function RegisterForEvents()
 
     local function OnGroupSupportRangeUpdate(_, unitTag, isNearby)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if unitFrame then
             unitFrame:DoAlphaUpdate(isNearby)
             if AreUnitsEqual(unitTag, "reticleover") then
                 UnitFrames:GetFrame("reticleover"):DoAlphaUpdate(isNearby)
             end
-    
+
             if AreUnitsEqual(unitTag, "reticleovertarget") then
                 local targetOfTarget = UnitFrames:GetFrame("reticleovertarget")
                 if targetOfTarget then
@@ -2306,6 +2452,7 @@ local function RegisterForEvents()
         if isLocalPlayer then
             UnitFrames:DisableLocalCompanionFrame()
         end
+        UnitFrames:EndGroupElection(GROUP_ELECTION_RESULT_ABANDONED)
     end
 
     local function OnGroupMemberLeft(_, characterName, reason, wasLocalPlayer)
@@ -2313,12 +2460,14 @@ local function RegisterForEvents()
             RefreshGroups()
             RefreshLocalCompanion()
         end
+        UnitFrames:EndGroupElection(GROUP_ELECTION_RESULT_ABANDONED)
     end
 
     local function OnGroupMemberConnectedStateChanged(_, unitTag, isOnline)
         UpdateStatus(unitTag, IsUnitDead(unitTag), isOnline)
+        UnitFrames:EndGroupElection(GROUP_ELECTION_RESULT_ABANDONED)
     end
-    
+
     local function OnGroupMemberRoleChanged(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
         if unitFrame then
@@ -2332,7 +2481,7 @@ local function RegisterForEvents()
 
     local function OnRankPointUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if unitFrame then
             unitFrame:UpdateRank()
         end
@@ -2340,18 +2489,18 @@ local function RegisterForEvents()
 
     local function OnChampionPointsUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if unitFrame then
             unitFrame:UpdateLevel()
-        end    
+        end
     end
 
     local function OnTitleUpdated(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if unitFrame then
             unitFrame:UpdateCaption()
-        end    
+        end
     end
 
     local function OnPlayerActivated()
@@ -2437,6 +2586,14 @@ local function RegisterForEvents()
         end
     end
 
+    local function OnGroupElectionRequested()
+        UnitFrames:BeginGroupElection()
+    end
+
+    local function OnGroupElectionUpdate(eventCode, resultType)
+        UnitFrames:UpdateElectionInfo(resultType)
+    end
+
     ZO_UnitFrames:RegisterForEvent(EVENT_TARGET_CHANGED, OnTargetChanged)
     ZO_UnitFrames:AddFilterForEvent(EVENT_TARGET_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_CHARACTER_NAME_CHANGED, OnUnitCharacterNameChanged)
@@ -2463,6 +2620,9 @@ local function RegisterForEvents()
     ZO_UnitFrames:RegisterForEvent(EVENT_GUILD_NAME_AVAILABLE, OnGuildNameAvailable)
     ZO_UnitFrames:RegisterForEvent(EVENT_GUILD_ID_CHANGED, OnGuildIdChanged)
     ZO_UnitFrames:AddFilterForEvent(EVENT_GUILD_ID_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
+    ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_REQUESTED, OnGroupElectionRequested)
+    ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_NOTIFICATION_ADDED, OnGroupElectionRequested)
+    ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_RESULT, OnGroupElectionUpdate)
 
     CALLBACK_MANAGER:RegisterCallback("TargetOfTargetEnabledChanged", OnTargetOfTargetEnabledChanged)
 end

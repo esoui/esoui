@@ -1,7 +1,10 @@
 function ZO_SkillInfoXPBar_OnMouseEnter(control)
-    SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations() -- TODO: Companions, remove direct skills reference
-    InitializeTooltip(SkillTooltip, control, TOPLEFT, 15, 5, BOTTOMLEFT)
-    SkillTooltip:SetSkillLineById(control.skillLineData:GetId())
+    -- Verify that the control has skillLineData and is truly visible for systems like Universal Deconstruction that do not show/hide the XP bar.
+    if control.skillLineData and control:GetAlpha() > 0 then
+        SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations() -- TODO: Companions, remove direct skills reference
+        InitializeTooltip(SkillTooltip, control, TOPLEFT, 15, 5, BOTTOMLEFT)
+        SkillTooltip:SetSkillLineById(control.skillLineData:GetId())
+    end
 end
 
 function ZO_SkillInfoXPBar_OnMouseExit()

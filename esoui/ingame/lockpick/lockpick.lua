@@ -159,7 +159,7 @@ end
 do
     local RANGE = 24
     local HALF_RANGE = RANGE / 2
-    local ROTATION_FACTOR = math.pi / 140
+    local ROTATION_FACTOR = ZO_PI / 140
 
     local function GenerateLoosenessFunction(loosenessFunction)
         return function(x) 
@@ -311,8 +311,8 @@ function ZO_Lockpick:GetLockpickXValues(chamberIndex)
 end
 
 do
-    local LOCKPICK_X_ROTATION_FACTOR = math.pi / 45
-    local LOCKPICK_Y_ROTATION_FACTOR = math.pi / 15
+    local LOCKPICK_X_ROTATION_FACTOR = ZO_PI / 45
+    local LOCKPICK_Y_ROTATION_FACTOR = ZO_PI / 15
     local LOCKPICK_X_ROTATION_OFFSET_FACTOR = .15
 
     local AnchorParams =
@@ -363,9 +363,9 @@ do
         self.lockpick:SetScale(1 - normalizedX * .1)
     end
 
-    local LEFT_ROTATION_FACTOR = math.pi * 1.04
-    local LEFT_ROTATION_FACTOR_AFTER_HIT = math.pi * 2
-    local RIGHT_ROTATION_FACTOR = math.pi / 3
+    local LEFT_ROTATION_FACTOR = ZO_PI * 1.04
+    local LEFT_ROTATION_FACTOR_AFTER_HIT = ZO_TWO_PI
+    local RIGHT_ROTATION_FACTOR = ZO_PI / 3
 
     function ZO_Lockpick:UpdateBrokenLockpick(progressThroughDuration)        
         local clampedXOffset, normalizedX = self:GetLockpickXValues(self.breakingChamberIndex)

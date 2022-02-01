@@ -59,7 +59,7 @@
         </Control>
       
         <TopLevelControl name="ZO_LootHistoryControl_Gamepad" inherits="ZO_LootHistory_Shared" >
-            <Anchor point="BOTTOMLEFT" offsetY="-120" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetY="-120" />
             <OnInitialized>
                 ZO_LootHistory_Gamepad_OnInitialized(self)
             </OnInitialized>

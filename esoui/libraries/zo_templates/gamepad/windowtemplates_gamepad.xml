@@ -29,8 +29,8 @@
                     <Anchor point="BOTTOMRIGHT" offsetX="50" offsetY="50" />
                 </Texture>
                 <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-8" offsetY="-8"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="8" offsetY="8"/>
+                    <Anchor point="TOPLEFT" offsetX="-8" offsetY="-8"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="8" offsetY="8"/>
                 </Backdrop>
                 <Label name="$(parent)CountText" tier="HIGH" font="ZoFontGamepadBold27" inheritScale="false">
                     <Anchor point="BOTTOMRIGHT" offsetX="-4"/>

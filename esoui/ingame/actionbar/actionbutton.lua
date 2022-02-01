@@ -70,7 +70,7 @@ function ActionButton:Initialize(slotNum, buttonType, parent, controlTemplate, h
     local HIDE_UNBOUND = false
 
     local function OnUltimateChanged(label)
-        if IsInGamepadPreferredMode() and WasLastInputGamepad() then
+        if IsInGamepadPreferredMode() and ZO_Keybindings_ShouldShowGamepadKeybind() then
             label:SetHidden(true)
 
             if self.leftKey and self.rightKey then
@@ -982,7 +982,7 @@ function ActionButton:SetUltimateMeter(ultimateCount, setProgressNoAnim)
         self:AnchorKeysOut()
     end
 
-    self:HideKeys(not (isGamepad and WasLastInputGamepad()))
+    self:HideKeys(not (isGamepad and ZO_Keybindings_ShouldShowGamepadKeybind()))
 end
 
 --------------------
@@ -1113,7 +1113,7 @@ function ZO_ActionBarTimer:SetupBackRowSlot(slotId, barType)
     local shown = isValidBarType and GetSlotType(slotId, barType) ~= ACTION_TYPE_NOTHING and self.active and self.showBackRowSlot and self:HasValidDuration()
     self.slot:SetHidden(not shown)
 
-    if shown and self.iconTexture then
+    if self.iconTexture then
         local slotIcon = GetSlotTexture(slotId, barType)
         self.iconTexture:SetTexture(slotIcon)
     end

@@ -6,7 +6,7 @@
 
         <TopLevelControl name="ZO_RamTopLevel" hidden="true">
             <Dimensions x="290" y="110" />
-            <Anchor point="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y" />
+            <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y" />
             
             <OnInitialized>
                 ZO_Ram_Initialize(self)

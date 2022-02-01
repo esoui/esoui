@@ -49,7 +49,7 @@
                             <Anchor point="TOP" relativeTo="$(parent)Carousel" relativePoint="BOTTOM" offsetY="10"/>
                             <Controls>
                                 <Control name="$(parent)TopDivider">
-                                    <Anchor point="TOP" relativeTo="$(parent)Greeting" />
+                                    <Anchor point="TOP"/>
                                     <Dimensions x="1000" /> 
                                 </Control>
 
@@ -70,7 +70,7 @@
                         </Control>
 
                         <Control name="$(parent)Close" inherits="ZO_KeybindButton">
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Container" relativePoint="BOTTOMRIGHT" offsetX="-40" offsetY="-30" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-40" offsetY="-30" />
                             <Controls>
                                 <Label name="$(parent)NameLabel" text="SI_DIALOG_EXIT" override="true" />
                             </Controls>

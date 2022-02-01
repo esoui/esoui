@@ -70,10 +70,6 @@ ZO_GroupElectionResultToAlertTextOverrides =
     {
         [ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK] = GetString(SI_GROUP_ELECTION_READY_CHECK_PASSED),
     },
-    [GROUP_ELECTION_RESULT_ELECTION_LOST] =
-    {
-        [ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK] = GetString(SI_GROUP_ELECTION_READY_CHECK_FAILED),
-    },
 }
 
 ZO_GroupElectionDescriptorToRequestAlertText =
@@ -812,10 +808,21 @@ local AlertHandlers =
             --No override found
             if not alertText then
                 local electionType, _, _, targetUnitTag = GetGroupElectionInfo()
-                if not targetUnitTag then
+
+                if descriptor == ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK and resultType == GROUP_ELECTION_RESULT_ELECTION_LOST then
+                    local unreadyUnitTags = { GetGroupElectionUnreadyUnitTags() }
+                    local unreadyPlayers = {}
+                    local DO_NOT_USE_INTERNAL_FORMAT = false
+                    for _, unitTag in pairs(unreadyUnitTags) do
+                        if IsUnitOnline(unitTag) then
+                            table.insert(unreadyPlayers, ZO_GetPrimaryPlayerNameFromUnitTag(unitTag, DO_NOT_USE_INTERNAL_FORMAT))
+                        end
+                    end
+                    local unreadyList = ZO_GenerateCommaSeparatedList(unreadyPlayers)
+                    alertText = zo_strformat(SI_GROUP_ELECTION_READY_CHECK_FAILED, unreadyList, #unreadyPlayers)
+                elseif not targetUnitTag then
                     return
-                end
-                if electionType == GROUP_ELECTION_TYPE_KICK_MEMBER then
+                elseif electionType == GROUP_ELECTION_TYPE_KICK_MEMBER then
                     if resultType == GROUP_ELECTION_RESULT_ELECTION_LOST then
                         local primaryName = ZO_GetPrimaryPlayerNameFromUnitTag(targetUnitTag)
                         local secondaryName = ZO_GetSecondaryPlayerNameFromUnitTag(targetUnitTag)

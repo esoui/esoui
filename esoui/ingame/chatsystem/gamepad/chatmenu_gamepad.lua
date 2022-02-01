@@ -9,12 +9,6 @@ ZO_CHAT_MENU_GAMEPAD_LOG_LINE_WIDTH = ZO_GAMEPAD_QUADRANT_1_2_3_CONTAINER_WIDTH 
 --Initialization--
 ------------------
 
-function ZO_ChatMenu_Gamepad:New(...)
-    local obj = ZO_Object.New(self)
-    obj:Initialize(...)
-    return obj
-end
-
 function ZO_ChatMenu_Gamepad:Initialize(control)
     CHAT_MENU_GAMEPAD_SCENE = ZO_Scene:New("gamepadChatMenu", SCENE_MANAGER)
 
@@ -111,7 +105,8 @@ function ZO_ChatMenu_Gamepad:InitializeChannelDropdown()
 
     table.sort(switches)
 
-    local channelFocusData = {
+    local channelFocusData =
+    {
         keybindText = GetString(SI_GAMEPAD_SELECT_OPTION),
         callback = function()
             channelDropdown:Activate()
@@ -154,7 +149,8 @@ function ZO_ChatMenu_Gamepad:InitializeTextEdit()
     textEdit:SetHandler("OnFocusLost", TextEditFocusLost)
     textEdit:SetHandler("OnTextChanged", TextEditTextChanged)
 
-    local textEditData = {
+    local textEditData =
+    {
         callback = function()
             if not textEdit:HasFocus() then
                 textEdit:TakeFocus()
@@ -460,7 +456,16 @@ end
 function ZO_ChatMenu_Gamepad:OnShow()
     self.channelRefreshGroup:TryClean()
     self.list:RefreshVisible()
-    self:FocusTextInput()
+    if not self.isFocusSetFromLink then
+        self:FocusTextInput()
+    else
+        local OLD_TARGET_DATA = nil
+        local REACHED_TARGET = nil
+        local targetData = self.list:GetTargetData()
+        local targetSelectedIndex = self.list:GetSelectedIndex()
+        self:OnTargetChanged(list, targetData, OLD_TARGET_DATA, REACHED_TARGET, targetSelectedIndex)
+    end
+    self.isFocusSetFromLink = nil
 end
 
 function ZO_ChatMenu_Gamepad:OnHiding()
@@ -681,6 +686,25 @@ function ZO_ChatMenu_Gamepad:BuildChatList()
     end
 
     self.list:Commit()
+end
+
+function ZO_ChatMenu_Gamepad:SelectMessageEntryByLink(link)
+    self:ActivateFocusArea(self.chatEntryPanelFocalArea)
+
+    for messageIndex = 1, #self.messageEntries do
+        local entry = self.messageEntries[messageIndex]
+        if entry.data.links then
+            for linkIndex, currentLink in ipairs(entry.data.links) do
+                if currentLink.link == link then
+                    self.list:SetSelectedIndex(messageIndex)
+                    if self.scene:GetState() ~= SCENE_SHOWN then
+                        self.isFocusSetFromLink = true
+                    end
+                    return
+                end
+            end
+        end
+    end
 end
 
 function ZO_ChatMenu_Gamepad:SetupOptions(entryData)

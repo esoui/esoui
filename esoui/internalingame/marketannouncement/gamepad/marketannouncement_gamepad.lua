@@ -115,7 +115,7 @@ function ZO_MarketAnnouncement_Gamepad:InitializeKeybindButtons()
 
     local function OnInputChanged()
         if IsInGamepadPreferredMode() then
-            local hideKeyboard = WasLastInputGamepad()
+            local hideKeyboard = ZO_Keybindings_ShouldShowGamepadKeybind()
             self.keyLabel:SetHidden(not hideKeyboard)
             self.upLabel:SetHidden(hideKeyboard)
             self.downLabel:SetHidden(hideKeyboard)

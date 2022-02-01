@@ -29,6 +29,11 @@ function ZO_Fence_Keyboard:Initialize(control)
                 ZO_InventorySlot_RemoveMouseOverKeybinds()
                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                 self.modeBar:Clear()
+
+                TEXT_SEARCH_MANAGER:DeactivateTextSearch("fenceTextSearch")
+                local INVENTORY_TYPE_LIST = { INVENTORY_BACKPACK }
+                local REMOVE_CONTEXT = nil
+                PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
             end
         end)
 
@@ -125,6 +130,7 @@ do
             TEXT_SEARCH_MANAGER:DeactivateTextSearch("fenceTextSearch")
             local REMOVE_CONTEXT = nil
             PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
+            PLAYER_INVENTORY:RefreshPlayerInventorySearchContext()
         end
         SCENE_MANAGER:Hide("fence_keyboard")
         ZO_Dialogs_ReleaseDialog("CANT_BUYBACK_FROM_FENCE")

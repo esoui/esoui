@@ -959,6 +959,7 @@ HOUSING_PATH_SETTINGS_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_HOUSING_EDITOR
 ALCHEMY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_AlchemyTopLevel)
 ENCHANTING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_EnchantingTopLevel)
 SMITHING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SmithingTopLevel)
+UNIVERSAL_DECONSTRUCTION_KEYBOARD_FRAGMENT = ZO_FadeSceneFragment:New(ZO_UniversalDeconstructionTopLevel_Keyboard)
 
 SKILLS_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_WINDOW_TITLE_SKILLS)
 

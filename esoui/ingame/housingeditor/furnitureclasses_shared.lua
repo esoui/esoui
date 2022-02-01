@@ -398,7 +398,7 @@ function ZO_RetrievableFurniture:RefreshPositionalData(playerWorldX, playerWorld
     local vectorToFurnitureX = worldX - playerWorldX
     local vectorToFurnitureZ = worldZ - playerWorldZ
     local angleRadians = math.atan2(vectorToFurnitureX, vectorToFurnitureZ)
-    self.angleFromPlayerHeadingRadians = zo_mod(angleRadians - playerCameraHeadingRadians, math.pi * 2)
+    self.angleFromPlayerHeadingRadians = zo_mod(angleRadians - playerCameraHeadingRadians, ZO_TWO_PI)
 end
 
 function ZO_RetrievableFurniture:GetDistanceFromPlayerM()
@@ -622,7 +622,7 @@ function ZO_FurniturePathNode:RefreshPositionalData(playerWorldX, playerWorldY, 
     local vectorToFurnitureX = worldX - playerWorldX
     local vectorToFurnitureZ = worldZ - playerWorldZ
     local angleRadians = math.atan2(vectorToFurnitureX, vectorToFurnitureZ)
-    self.angleFromPlayerHeadingRadians = zo_mod(angleRadians - playerCameraHeadingRadians, math.pi * 2)
+    self.angleFromPlayerHeadingRadians = zo_mod(angleRadians - playerCameraHeadingRadians, ZO_TWO_PI)
 end
 
 function ZO_FurniturePathNode:GetDistanceFromPlayerM()

@@ -35,7 +35,7 @@
         
         <TopLevelControl name="ZO_CurrencyInput" hidden="true" tier="HIGH" keyboardEnabled="true">
             <Dimensions x="270" y="105" />
-            <Anchor point="CENTER" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
 
             <OnInitialized>
                 CURRENCY_INPUT = ZO_CurrencyInputObject:New(self, "CurrencyInputPulse")
@@ -61,5 +61,5 @@
                 </Label>
             </Controls>
         </TopLevelControl>
-	</Controls>
+    </Controls>
 </GuiXml>

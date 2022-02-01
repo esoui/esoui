@@ -158,8 +158,8 @@
         </Control>
 
         <TopLevelControl name="ZO_AntiquityDigging_KeybindContainer" alpha="0" hidden="true">
-            <Anchor point="BOTTOMLEFT" offsetX="100" offsetY="-40"/>
-            <Anchor point="BOTTOMRIGHT" offsetX="-100" offsetY="-40"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="100" offsetY="-40"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-100" offsetY="-40"/>
             <Controls>
                 <Control name="$(parent)MoreInfoKeybindButton" inherits="ZO_KeybindButton">
                     <Anchor point="BOTTOMLEFT" />

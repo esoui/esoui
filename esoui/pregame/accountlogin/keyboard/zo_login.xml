@@ -32,7 +32,7 @@
         </Control>
 
         <TopLevelControl name="ZO_PregameBackground_Keyboard" layer="BACKGROUND" tier="LOW" hidden="true">
-            <Anchor point="CENTER"/>
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
             <OnInitialized>
                 ZO_PregameBackground_Keyboard_Initialize(self)
             </OnInitialized>
@@ -46,7 +46,7 @@
 
         <TopLevelControl name="ZO_LoginBG_Keyboard" layer="BACKGROUND" tier="LOW" hidden="true">
             <Dimensions x="ZO_MIN_CANVAS_WIDTH" y="ZO_MIN_CANVAS_HEIGHT" />
-            <Anchor point="CENTER"/>
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
             <OnInitialized>
                 ZO_LoginBG_Initialize(self)
             </OnInitialized>

@@ -78,6 +78,7 @@ do
     local FILTER_DATA =
     {
         SI_COLLECTIONS_BOOK_FILTER_SHOW_ALL,
+        SI_COLLECTIONS_BOOK_FILTER_SHOW_NEW,
         SI_COLLECTIONS_BOOK_FILTER_SHOW_LOCKED,
         SI_COLLECTIONS_BOOK_FILTER_SHOW_UNLOCKED,
     }
@@ -331,9 +332,13 @@ do
         end
 
         if collectibleData:IsUnlocked() then
-            return filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_UNLOCKED
-        else
-            return filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_LOCKED
+            if filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_UNLOCKED then
+                return true
+            elseif filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_NEW then
+                return collectibleData:IsNew()
+            else
+                return false
+            end
         end
     end
 

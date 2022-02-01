@@ -91,7 +91,6 @@ local NORMAL_STAR_LAYERS =
     },
     rimlight3 = 
     {
-        -- TODO: use for pending state?
         texCoords = { 0, 0.5, 0.5, 0.75 },
         interpolators = {},
     },
@@ -179,7 +178,6 @@ local SLOTTABLE_STAR_LAYERS =
     },
     expandingRimlight =
     {
-        -- TODO: this should be modeled using a particle system instead
         texCoords =  { 0, 0.25, 0.125, 0.25 },
         interpolators = {}
     },
@@ -267,7 +265,6 @@ local SLOTTABLE_STAR_LAYERS =
     },
     combatEnergy = 
     {
-        -- TODO: this should be modeled using a particle system instead
         texCoords = { 0.75, 1, 0.125, 0.25 },
         interpolators = {}
     },
@@ -314,7 +311,6 @@ local SLOTTABLE_STAR_LAYERS =
     -- conditioning layers
     conditioningBloodsplash =
     {
-        -- TODO: this should be modeled using a particle system instead
         texCoords = { 0, 0.25, 0.5, 0.625 },
         interpolators = {},
     },

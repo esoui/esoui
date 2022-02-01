@@ -188,7 +188,7 @@
         </TopLevelControl>
 
         <Control name="ZO_TextChatTemplate" virtual="true">
-            <Anchor point="BOTTOMLEFT" offsetX="8" offsetY="-50" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="8" offsetY="-50" />
             
             <Controls>
                  <Texture name="$(parent)InsertIndicator" textureFile="EsoUI/Art/ChatWindow/chat_tabInsertIndicator.dds" hidden="true">

@@ -3691,15 +3691,23 @@ function ZO_WorldMap_RefreshGroupPins()
     ZO_ClearTable(g_activeGroupPins)
 
     if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_GROUP_MEMBERS) and not IsShowingCosmicMap() then
+        local isInDungeon = GetMapContentType() == MAP_CONTENT_DUNGEON
+        local isInHouse = GetCurrentZoneHouseId() ~= 0
         for i = 1, GROUP_SIZE_MAX do
             local groupTag = ZO_Group_GetUnitTagForGroupIndex(i)
+            local isBreadcrumbed = IsUnitWorldMapPositionBreadcrumbed(groupTag)
             if DoesUnitExist(groupTag) and not AreUnitsEqual("player", groupTag) and IsUnitOnline(groupTag) then
                 local isGroupMemberHiddenByInstance = false
-                -- We're in the same world as the group member, but a different instance
-                if DoesCurrentMapMatchMapForPlayerLocation() and IsGroupMemberInSameWorldAsPlayer(groupTag) and not IsGroupMemberInSameInstanceAsPlayer(groupTag) then
-                    -- If the instance we're in has it's own map, it's going to be a dungeon map.  Don't show on the map if we're on different instances
-                    -- If it doesn't have it's own map, we're okay to show the group member regardless of instance
-                    isGroupMemberHiddenByInstance = GetMapContentType() == MAP_CONTENT_DUNGEON
+                -- If we're in an instance and it has its own map, it's going to be a dungeon map or house. Don't show on the map if we're on different instances/layers
+                -- If it doesn't have its own map, we're okay to show the group member regardless of instance
+                if DoesCurrentMapMatchMapForPlayerLocation() and IsGroupMemberInSameWorldAsPlayer(groupTag) and (isInDungeon or isInHouse) then
+                    if not IsGroupMemberInSameInstanceAsPlayer(groupTag) then
+                        -- We're in the same world as the group member, but a different instance
+                        isGroupMemberHiddenByInstance = true
+                    elseif not IsGroupMemberInSameLayerAsPlayer(groupTag) then
+                        -- We're in the same instance as the group member, but a different layer
+                        isGroupMemberHiddenByInstance = not isBreadcrumbed 
+                    end
                 end
 
                 if not isGroupMemberHiddenByInstance then
@@ -3707,7 +3715,7 @@ function ZO_WorldMap_RefreshGroupPins()
                     if isInCurrentMap then
                         local isLeader = IsUnitGroupLeader(groupTag)
                         local tagData = groupTag
-                        if IsUnitWorldMapPositionBreadcrumbed(groupTag) then
+                        if isBreadcrumbed then
                             tagData =
                             {
                                 groupTag = groupTag,

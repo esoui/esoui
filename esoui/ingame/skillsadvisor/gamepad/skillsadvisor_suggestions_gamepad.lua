@@ -32,7 +32,7 @@ function SkillsAdvisorSuggestions_Gamepad:Initialize(control)
     self:InitializeKeybinds()
 end
 
-function SkillsAdvisorSuggestions_Gamepad:OnShowing() 
+function SkillsAdvisorSuggestions_Gamepad:OnShowing()
     self:RefreshData()
     self:UpdateTooltip()
 end
@@ -209,7 +209,7 @@ do
         ZO_ScrollList_Commit(self.list)
 
         if reselectData then
-            ZO_ScrollList_SelectData(self.list, reselectData)
+            ZO_ScrollList_SelectDataAndScrollIntoView(self.list, reselectData)
         end
     end
 end

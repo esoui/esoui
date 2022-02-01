@@ -16,7 +16,7 @@
                 <!-- A sending screen shown while waiting for a mail to send. -->
                 <Control name="$(parent)Loading" hidden="true" inherits="ZO_GamepadCenteredLoadingIconAndLabelTemplate">
                     <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ListBox" />
+                    <Anchor point="BOTTOMRIGHT" />
                 </Control>
             </Controls>
         </TopLevelControl>

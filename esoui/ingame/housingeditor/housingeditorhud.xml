@@ -74,7 +74,7 @@
         </TopLevelControl>
 
         <TopLevelControl name="ZO_HousingEditorHistory_TopLevel" hidden="true">
-            <Anchor point="RIGHT" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" />
             <OnInitialized>
                 ZO_HousingEditorHistory_Initialize(self)
             </OnInitialized>
@@ -92,7 +92,7 @@
             </Controls>
         </TopLevelControl>
 
-		<!-- Pickup and Precision Rotation action bar button -->
+        <!-- Pickup and Precision Rotation action bar button -->
         <Control name="ZO_HousingHudButton" virtual="true">
             <Controls>
                 <Texture name="$(parent)Icon">
@@ -116,7 +116,7 @@
             </OnInitialized>
             <AnchorFill/>
             <Controls>
-				<!-- Pickup action bar -->
+                <!-- Pickup action bar -->
                 <Control name="$(parent)ButtonContainer" resizeToFitDescendents="true">
                     <Anchor point="BOTTOM" offsetY="-200"/>
                     <Controls>
@@ -131,46 +131,46 @@
                     </Controls>
                 </Control>
 
-				<!-- Precision Movement action bar -->
+                <!-- Precision Movement action bar -->
                 <Control name="$(parent)PrecisionMoveButtonContainer" resizeToFitDescendents="true" hidden="true">
                     <Anchor point="BOTTOM" relativeTo="$(parent)" relativePoint="BOTTOM" offsetY="-75"/>
                     <Controls>
-						<Control name="$(parent)PrecisionMoveButtons" resizeToFitDescendents="true">
-							<Anchor point="TOP" />
-							<Controls>
-								<Control name="$(parent)PrecisionMoveLeftButton" inherits="ZO_HousingHudButton">
-									<Anchor point="LEFT"/>
-									<Controls>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_left.dds" override="true" />
-									</Controls>
-								</Control>
-								<Control name="$(parent)PrecisionMoveRightButton" inherits="ZO_HousingHudButton">
-									<Controls>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_right.dds" override="true" />
-									</Controls>
-								</Control>
-								<Control name="$(parent)PrecisionMoveForwardButton" inherits="ZO_HousingHudButton">
-									<Controls>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_forward.dds" override="true"/>
-									</Controls>
-								</Control>
-								<Control name="$(parent)PrecisionMoveBackButton" inherits="ZO_HousingHudButton">
-									<Controls>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_back.dds" override="true"/>
-									</Controls>
-								</Control>
-								<Control name="$(parent)PrecisionMoveDownButton" inherits="ZO_HousingHudButton">
-									<Controls>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_up.dds" override="true"/>
-									</Controls>
-								</Control>
-								<Control name="$(parent)PrecisionMoveUpButton" inherits="ZO_HousingHudButton">
-									<Controls>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_down.dds" override="true"/>
-									</Controls>
-								</Control>
-							</Controls>
-						</Control>
+                        <Control name="$(parent)PrecisionMoveButtons" resizeToFitDescendents="true">
+                            <Anchor point="TOP" />
+                            <Controls>
+                                <Control name="$(parent)PrecisionMoveLeftButton" inherits="ZO_HousingHudButton">
+                                    <Anchor point="LEFT"/>
+                                    <Controls>
+                                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_left.dds" override="true" />
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)PrecisionMoveRightButton" inherits="ZO_HousingHudButton">
+                                    <Controls>
+                                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_right.dds" override="true" />
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)PrecisionMoveForwardButton" inherits="ZO_HousingHudButton">
+                                    <Controls>
+                                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_forward.dds" override="true"/>
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)PrecisionMoveBackButton" inherits="ZO_HousingHudButton">
+                                    <Controls>
+                                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_back.dds" override="true"/>
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)PrecisionMoveDownButton" inherits="ZO_HousingHudButton">
+                                    <Controls>
+                                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_up.dds" override="true"/>
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)PrecisionMoveUpButton" inherits="ZO_HousingHudButton">
+                                    <Controls>
+                                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_down.dds" override="true"/>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
                         <Label name="$(parent)PrecisionMoveUnitsLabel" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" maxLineCount="1" tier="HIGH" verticalAlignment="TOP" font="ZoFontGameLargeBold">
                             <Anchor point="TOP" relativeTo="$(parent)PrecisionMoveButtons" relativePoint="BOTTOM" offsetY="25" />
                         </Label>
@@ -180,32 +180,32 @@
                     </Controls>
                 </Control>
 
-				<!-- Precision Rotation action bar -->
+                <!-- Precision Rotation action bar -->
                 <Control name="$(parent)PrecisionRotateButtonContainer" resizeToFitDescendents="true" hidden="true">
                     <Anchor point="BOTTOM" relativeTo="$(parent)" relativePoint="BOTTOM" offsetY="-75"/>
                     <Controls>
-						<Control name="$(parent)PrecisionRotateButtons" resizeToFitDescendents="true">
-							<Anchor point="TOP" />
-							<Controls>
-								<Control name="$(parent)PrecisionYawLeftButton" inherits="ZO_HousingHudButton">
-									<Anchor point="LEFT"/>
-								</Control>
-								<Control name="$(parent)PrecisionYawRightButton" inherits="ZO_HousingHudButton" />
-								<Control name="$(parent)PrecisionPitchForwardButton" inherits="ZO_HousingHudButton" />
-								<Control name="$(parent)PrecisionPitchBackButton" inherits="ZO_HousingHudButton" />
-								<Control name="$(parent)PrecisionRollRightButton" inherits="ZO_HousingHudButton" />
-								<Control name="$(parent)PrecisionRollLeftButton" inherits="ZO_HousingHudButton" />
-							</Controls>
-						</Control>
-						<Label name="$(parent)PrecisionRotateUnitsLabel" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" maxLineCount="1" tier="HIGH" verticalAlignment="TOP" font="ZoFontGameLargeBold">
-							<Anchor point="TOP" relativeTo="$(parent)PrecisionRotateButtons" relativePoint="BOTTOM" offsetY="25" />
-						</Label>
-						<Label name="$(parent)PrecisionOrientationLabel" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" maxLineCount="1" tier="HIGH" verticalAlignment="TOP" font="ZoFontGameLargeBold">
-							<Anchor point="TOP" relativeTo="$(parent)PrecisionRotateUnitsLabel" relativePoint="BOTTOM" offsetY="15" />
-						</Label>
+                        <Control name="$(parent)PrecisionRotateButtons" resizeToFitDescendents="true">
+                            <Anchor point="TOP" />
+                            <Controls>
+                                <Control name="$(parent)PrecisionYawLeftButton" inherits="ZO_HousingHudButton">
+                                    <Anchor point="LEFT"/>
+                                </Control>
+                                <Control name="$(parent)PrecisionYawRightButton" inherits="ZO_HousingHudButton" />
+                                <Control name="$(parent)PrecisionPitchForwardButton" inherits="ZO_HousingHudButton" />
+                                <Control name="$(parent)PrecisionPitchBackButton" inherits="ZO_HousingHudButton" />
+                                <Control name="$(parent)PrecisionRollRightButton" inherits="ZO_HousingHudButton" />
+                                <Control name="$(parent)PrecisionRollLeftButton" inherits="ZO_HousingHudButton" />
+                            </Controls>
+                        </Control>
+                        <Label name="$(parent)PrecisionRotateUnitsLabel" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" maxLineCount="1" tier="HIGH" verticalAlignment="TOP" font="ZoFontGameLargeBold">
+                            <Anchor point="TOP" relativeTo="$(parent)PrecisionRotateButtons" relativePoint="BOTTOM" offsetY="25" />
+                        </Label>
+                        <Label name="$(parent)PrecisionOrientationLabel" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" maxLineCount="1" tier="HIGH" verticalAlignment="TOP" font="ZoFontGameLargeBold">
+                            <Anchor point="TOP" relativeTo="$(parent)PrecisionRotateUnitsLabel" relativePoint="BOTTOM" offsetY="15" />
+                        </Label>
                     </Controls>
                 </Control>
-			</Controls>
-		</TopLevelControl>
+            </Controls>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

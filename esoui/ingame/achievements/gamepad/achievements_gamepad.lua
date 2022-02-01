@@ -69,6 +69,8 @@ function ZO_Achievements_Gamepad:Initialize(control)
 
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, nil, ACHIEVEMENTS_GAMEPAD_SCENE)
 
+    self.characterFrameBorderControlPool = ZO_ControlPool:New("ZO_Gamepad_Achievement_IconCharacterFrameBorder", ZO_Gamepad_Achievements, "IconFrameBorder")
+
     self.selectedCategoryId = nil
     self.visibleCategoryId = nil
     self.achievementId = nil
@@ -89,8 +91,46 @@ function ZO_Achievements_Gamepad:Initialize(control)
 end
 
 function ZO_Achievements_Gamepad:SetupList(list)
-    list:AddDataTemplate("ZO_GamepadAchievementsEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    list:AddDataTemplateWithHeader("ZO_GamepadAchievementsEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    function ZO_Gamepad_Achivement_Entry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+
+        local persistenceLevel = GetAchievementPersistenceLevel(data.achievementId)
+        local isCharacterPersistent = persistenceLevel == ACHIEVEMENT_PERSISTENCE_CHARACTER
+        if isCharacterPersistent then
+            local characterPersistentColor = selected and ZO_SECOND_SELECTED_TEXT or ZO_SECOND_NORMAL_TEXT
+
+            control.label:SetColor(characterPersistentColor:UnpackRGBA())
+            control.statusIndicator:ClearIcons()
+
+            if data.isEarnedAchievement then
+                control.statusIndicator:AddIcon("EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds")
+            end
+
+            control.statusIndicator:AddIcon("EsoUI/Art/Miscellaneous/Gamepad/gp_charNameIcon.dds", characterPersistentColor)
+            control.statusIndicator:Show()
+
+            local iconFrameBorder
+            if control.iconFrameBorderKey then
+                iconFrameBorder = self.characterFrameBorderControlPool:AcquireObject(control.iconFrameBorderKey)
+            else
+                local iconFrameBorderKey
+                iconFrameBorder, iconFrameBorderKey = self.characterFrameBorderControlPool:AcquireObject()
+                iconFrameBorder:SetParent(control:GetNamedChild("Icon"))
+                iconFrameBorder:SetAnchor(TOPLEFT, nil, TOPLEFT, -9, -9)
+                iconFrameBorder:SetAnchor(BOTTOMRIGHT, nil, BOTTOMRIGHT, 9, 9)
+                control.iconFrameBorderKey = iconFrameBorderKey
+            end
+            iconFrameBorder:SetColor(characterPersistentColor:UnpackRGBA())
+        else
+            if control.iconFrameBorderKey then
+                self.characterFrameBorderControlPool:ReleaseObject(control.iconFrameBorderKey)
+                control.iconFrameBorderKey = nil
+            end
+        end
+    end
+
+    list:AddDataTemplate("ZO_GamepadAchievementsEntryTemplate", ZO_Gamepad_Achivement_Entry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    list:AddDataTemplateWithHeader("ZO_GamepadAchievementsEntryTemplate", ZO_Gamepad_Achivement_Entry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
     list:AddDataTemplate("ZO_GamepadMenuEntryWithBarTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
     self.itemList = list
@@ -284,6 +324,8 @@ function ZO_Achievements_Gamepad:OnHide()
     self:HideTooltip()
 
     self.recentAchievementFocus:Deactivate()
+
+    self.characterFrameBorderControlPool:ReleaseAllObjects()
 end
 
 function ZO_Achievements_Gamepad:SwitchToFilterMode(newMode)
@@ -434,8 +476,43 @@ function ZO_Achievements_Gamepad:InitializeKeybindStripDescriptors()
         {
             name = GetString(SI_GAMEPAD_DYEING_OPTIONS),
             keybind = "UI_SHORTCUT_TERTIARY",
-            callback = function() ZO_Dialogs_ShowGamepadDialog("ACHIEVEMENTS_OPTIONS_GAMEPAD") end,
-            visible = function() return self.visibleCategoryId ~= nil end,
+            callback = function()
+                ZO_Dialogs_ShowGamepadDialog("ACHIEVEMENTS_OPTIONS_GAMEPAD")
+            end,
+            visible = function()
+                return self.visibleCategoryId ~= nil
+            end,
+        },
+
+        -- Navigate to Zone Guide
+        {
+            name = function()
+                local targetData = self.itemList:GetTargetData()
+                if targetData then
+                    if GetSkyshardAchievementZoneId(targetData.achievementId) ~= 0 then
+                        return GetString(SI_ZONE_STORY_OPEN_FROM_ACHIEVEMENT_ACTION)
+                    else
+                        return GetString(SI_ACHIEVEMENT_TO_LORE_LIBRARY_ACTION)
+                    end
+                end
+            end,
+            keybind = "UI_SHORTCUT_SECONDARY",
+            callback = function()
+                local targetData = self.itemList:GetTargetData()
+                local zoneId = GetSkyshardAchievementZoneId(targetData.achievementId)
+                if zoneId ~= 0 then
+                    ZONE_STORIES_MANAGER:ShowZoneStoriesScene(zoneId)
+                else
+                    local bookCollectionId = GetAchievementLinkedBookCollectionId(targetData.achievementId)
+                    LORE_LIBRARY_GAMEPAD:SetCollectionIdToSelect(bookCollectionId)
+                    MAIN_MENU_GAMEPAD:SelectMenuEntry(ZO_MENU_MAIN_ENTRIES.JOURNAL)
+                    SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "loreLibraryGamepad")
+                end
+            end,
+            visible = function()
+                local targetData = self.itemList:GetTargetData()
+                return targetData and (GetSkyshardAchievementZoneId(targetData.achievementId) ~= 0 or GetAchievementLinkedBookCollectionId(targetData.achievementId) ~= 0)
+            end,
         },
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.itemList)

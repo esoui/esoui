@@ -3,7 +3,7 @@
     Subclasses are responsible for the look of the combo box.
 --]]
 
-ZO_ComboBox_Base = ZO_Object:Subclass()
+ZO_ComboBox_Base = ZO_InitializingObject:Subclass()
 
 ZO_COMBOBOX_UPDATE_NOW = 1
 ZO_COMBOBOX_SUPPRESS_UPDATE = 2
@@ -26,20 +26,13 @@ function ZO_ComboBox_Base:OnItemAdded()
     -- this can optionally be overriden by a subclass and is called when a new entry is added to the combo box
 end
 
-function ZO_ComboBox_Base:New(...)
-    local comboBox = ZO_Object.New(self)
-    comboBox:Initialize(...)
-    return comboBox
-end
-
 function ZO_ComboBox_Base:Initialize(container)
     self.m_container = container
     self.m_selectedItemText = GetControl(container, "SelectedItemText")
 	self.m_selectedItemData = nil
     self.m_openDropdown = GetControl(container, "OpenDropdown")
     self.m_selectedColor = { GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED) }
-    container.m_comboBox = self
-    
+    self.m_disabledColor = ZO_ERROR_COLOR
     self.m_sortOrder = ZO_SORT_ORDER_UP
     self.m_sortType = ZO_SORT_BY_NAME
     self.m_sortsItems = true
@@ -48,8 +41,8 @@ function ZO_ComboBox_Base:Initialize(container)
     self.m_font = nil
     self.m_preshowDropdownFn = nil
     self.m_spacing = 0
-    
     self.m_name = container:GetName()
+    container.m_comboBox = self
 end
 
 function ZO_ComboBox_Base:GetContainer()
@@ -87,6 +80,10 @@ function ZO_ComboBox_Base:SetSelectedColor(color, colorG, colorB, colorA)
     self.m_selectedItemText:SetColor(color, colorG, colorB, colorA)
 end
 
+function ZO_ComboBox_Base:SetDisabledColor(color, colorG, colorB, colorA)
+    self.m_disabledColor = ZO_ColorDef:New(color, colorG, colorB, colorA)
+end
+
 function ZO_ComboBox_Base:SetNormalColor(color, colorG, colorB, colorA)
     self.m_normalColor = ZO_ColorDef:New(color, colorG, colorB, colorA)
 end
@@ -121,8 +118,20 @@ function ZO_ComboBox_Base:SetVisible(visible)
     self.m_isDropdownVisible = visible
 end
 
-function ZO_ComboBox_Base:CreateItemEntry(name, callback)
-    return { name = name, callback = callback }
+function ZO_ComboBox_Base:CreateItemEntry(name, callback, enabled)
+    local isEnabled = enabled
+    if isEnabled == nil then
+        -- Evaluate nil to be equivalent to true for backwards compatibility.
+        isEnabled = true
+    end
+
+    local itemEntry =
+    {
+        name = name,
+        callback = callback,
+        enabled = isEnabled,
+    }
+    return itemEntry
 end
 
 function ZO_ComboBox_Base:AddItem(itemEntry, updateOptions)
@@ -202,38 +211,44 @@ function ZO_ComboBox_Base:SetSelectedItem(itemText)
 end
 
 function ZO_ComboBox_Base:ItemSelectedClickHelper(item, ignoreCallback)
+    if item.enabled == false then
+        return false
+    end
+
     local oldItem = self.m_selectedItemData
     if self.dontSetSelectedTextOnSelection ~= true then
         self:SetSelectedItemText(item.name)
     end
     self.m_selectedItemData = item
 
-    if(item.callback and not ignoreCallback) then
+    if item.callback and not ignoreCallback then
         local selectionChanged = (oldItem ~= item)
         if not selectionChanged and oldItem and item then
             selectionChanged = item.name ~= oldItem.name
         end
         item.callback(self, item.name, item, selectionChanged, oldItem)
     end
+
+    return true
 end
 
 --Maintain for addons
 function ZO_ComboBox_Base_ItemSelectedClickHelper(comboBox, item, ignoreCallback)
-    comboBox:ItemSelectedClickHelper(item, ignoreCallback)
+    return comboBox:ItemSelectedClickHelper(item, ignoreCallback)
 end
 
 function ZO_ComboBox_Base:SelectItem(item, ignoreCallback)
     if item then
-        self:ItemSelectedClickHelper(item, ignoreCallback)
+        return self:ItemSelectedClickHelper(item, ignoreCallback)
     end
 end
 
 function ZO_ComboBox_Base:SelectItemByIndex(index, ignoreCallback)
-    self:SelectItem(self.m_sortedItems[index], ignoreCallback)
+    return self:SelectItem(self.m_sortedItems[index], ignoreCallback)
 end
 
 function ZO_ComboBox_Base:SelectFirstItem(ignoreCallback)
-    self:SelectItemByIndex(1, ignoreCallback)
+    return self:SelectItemByIndex(1, ignoreCallback)
 end
 
 function ZO_ComboBox_Base:GetIndexByEval(eval)
@@ -248,8 +263,7 @@ end
 function ZO_ComboBox_Base:SetSelectedItemByEval(eval, ignoreCallback)
     local index = self:GetIndexByEval(eval)
     if index then
-        self:SelectItemByIndex(index, ignoreCallback)
-        return true
+        return self:SelectItemByIndex(index, ignoreCallback)
     end
     return false
 end
@@ -292,6 +306,23 @@ function ZO_ComboBox_Base:SetEnabled(enabled)
     if(self:IsDropdownVisible()) then
         self:HideDropdown()
     end
+end
+
+function ZO_ComboBox_Base:SetItemEnabled(item, enabled)
+    local isEnabled = enabled
+    if isEnabled == nil then
+        -- Evaluate nil to be equivalent to true for backwards compatibility.
+        isEnabled = true
+    end
+    item.enabled = isEnabled
+end
+
+function ZO_ComboBox_Base:SetItemOnEnter(item, handler)
+    item.onEnter = handler
+end
+
+function ZO_ComboBox_Base:SetItemOnExit(item, handler)
+    item.onExit = handler
 end
 
 function ZO_ComboBox_Base:GetControl()

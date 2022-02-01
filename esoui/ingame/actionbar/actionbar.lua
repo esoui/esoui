@@ -572,9 +572,6 @@ function ZO_ActionBar_OnInitialized(control)
     g_quickslotButton:SetupBounceAnimation()
 
     local function OnSwapAnimationHalfDone(animation, button, isBackBarSlot)
-        --Main hotbar buttons' HandleSlotChanged does not take a parameter, therefore we can always pass g_backHotbar for back row's use
-        button:HandleSlotChanged(g_backHotbar)
-
         if not isBackBarSlot then
             if button:GetSlot() == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
                 button:UpdateUltimateMeter()
@@ -584,11 +581,13 @@ function ZO_ActionBar_OnInitialized(control)
             button:SetTimer(timeRemainingMS)
             local stackCount = GetActionSlotEffectStackCount(slotNum, g_activeHotbar)
             button:SetStackCount(stackCount)
+            button:HandleSlotChanged()
         else
             local slotNum = button:GetSlot()
             local timeRemainingMS = GetActionSlotEffectTimeRemaining(slotNum, g_backHotbar)
             local durationMS = GetActionSlotEffectDuration(slotNum, g_backHotbar)
             button:SetFillBar(timeRemainingMS, durationMS)
+            button:HandleSlotChanged(g_backHotbar)
         end
     end
 
