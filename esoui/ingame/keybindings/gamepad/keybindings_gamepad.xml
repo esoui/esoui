@@ -6,8 +6,27 @@
                 self.label = self:GetNamedChild("Label")
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Label" font="ZoFontGamepadBold27" maxLineCount="2" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                <Label name="$(parent)Label" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <AnchorFill />
+                    
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontGamepad42",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontGamepad34",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontGamepad27",
+                                lineLimit = 2,
+                            }
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
                 </Label>
             </Controls>
         </Control>
@@ -18,8 +37,28 @@
                 self.keybindLabel = self:GetNamedChild("KeybindLabel")
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad" font="ZoFontGamepad22" verticalAlignment="CENTER" horizontalAlignment="CENTER">
+                <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad" verticalAlignment="CENTER" horizontalAlignment="CENTER">
                     <AnchorFill />
+                    
+                    <OnInitialized>
+                        -- The resizing for the keybind really only comes into play for showing "unbound"
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontGamepad36",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontGamepad34",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontGamepad27",
+                                lineLimit = 1,
+                            }
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
                 </Label>
             </Controls>
         </Control>

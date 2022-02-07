@@ -1,10 +1,11 @@
-local BACKGROUND_TEXTURE_USED_HEIGHT = 1080
-local BACKGROUND_TEXTURE_USED_WIDTH = 1920
-local BACKGROUND_TEXTURE_COORDINATE_BOUNDS =
-{
-    x = BACKGROUND_TEXTURE_USED_WIDTH / 2048,
-    y = BACKGROUND_TEXTURE_USED_HEIGHT / 2048
-}
+local BACKGROUND_TEXTURE_HEIGHT = 1080
+local BACKGROUND_TEXTURE_WIDTH = 1920
+local BACKGROUND_TEXTURE_ASPECT_RATIO = BACKGROUND_TEXTURE_WIDTH / BACKGROUND_TEXTURE_HEIGHT
+local BACKGROUND_TEXTURE_COORDINATE_BOUNDS = {0, BACKGROUND_TEXTURE_WIDTH / 2048, 0, BACKGROUND_TEXTURE_HEIGHT / 2048}
+
+local TITLE_TEXTURE_WIDTH = 512
+local TITLE_TEXTURE_HEIGHT = 128
+local TITLE_TEXTURE_OFFSET_Y = -250
 
 local REPEAT_ANIMATION_WARM_UP_SECONDS = 6
 local REPEAT_GLOW_ALPHA_BOUNDS = {0.8, 1.0}
@@ -16,7 +17,6 @@ function DuneBackground:Initialize(control)
     self.control = control
     control.owner = self
 
-    self.nativeAspectRatio = BACKGROUND_TEXTURE_COORDINATE_BOUNDS.x / BACKGROUND_TEXTURE_COORDINATE_BOUNDS.y
     self:InitializeControls()
 
     PREGAME_ANIMATED_BACKGROUND_FRAGMENT = ZO_SimpleSceneFragment:New(control)
@@ -39,8 +39,7 @@ function DuneBackground:InitializeControls()
     local control = self.control
     self.backgroundControl = control:GetNamedChild("Background")
     self.causticsControl = control:GetNamedChild("Caustics")
-    self.causticsHighlightControl = control:GetNamedChild("CausticsHighlight")
-    self.cloudsControl = control:GetNamedChild("Clouds")
+    self.clouds1Control = control:GetNamedChild("Clouds1")
     self.clouds2Control = control:GetNamedChild("Clouds2")
     self.clouds3Control = control:GetNamedChild("Clouds3")
     self.gemGlow1Control = control:GetNamedChild("GemGlow1")
@@ -51,8 +50,20 @@ function DuneBackground:InitializeControls()
     self.titleControl = control:GetNamedChild("Title")
     self.vignetteControl = control:GetNamedChild("Vignette")
 
-    self.cloudsControl.startTextureCoords = {-0.3, 0, 0, 1}
-    self.cloudsControl.endTextureCoords = {2.5, 3.5, 0.25, 1.4}
+    self.fullscreenTextureControls =
+    {
+        self.backgroundControl,
+        self.causticsControl,
+        self.gemGlow1Control,
+        self.gemGlow2Control,
+        self.gemGlow3Control,
+        self.gemSpecularControl,
+        self.initialGlowControl,
+        self.vignetteControl,
+    }
+
+    self.clouds1Control.startTextureCoords = {-0.3, 0, 0, 1}
+    self.clouds1Control.endTextureCoords = {2.5, 3.5, 0.25, 1.4}
 
     self.clouds2Control.startTextureCoords = {-0.5, -0.1, 0.3, 1.1}
     self.clouds2Control.endTextureCoords = {1.0, 1.45, 0.35, 1.2}
@@ -67,37 +78,35 @@ function DuneBackground:InitializeControls()
     self.repeatTimeline:SetSkipAnimationsBehindPlayheadOnInitialPlay(false)
 end
 
+function DuneBackground:RefreshFullScreenDimensions()
+    local screenWidth, screenHeight = GuiRoot:GetDimensions()
+    local screenAspectRatio = screenWidth / screenHeight
+
+    local fullScreenWidth, fullScreenHeight
+    if screenAspectRatio < BACKGROUND_TEXTURE_ASPECT_RATIO then
+        local scale = screenHeight / BACKGROUND_TEXTURE_HEIGHT 
+        fullScreenWidth, fullScreenHeight = BACKGROUND_TEXTURE_WIDTH * scale, screenHeight
+    else
+        local scale = screenWidth / BACKGROUND_TEXTURE_WIDTH
+        fullScreenWidth, fullScreenHeight = screenWidth, BACKGROUND_TEXTURE_HEIGHT * scale
+    end
+    return fullScreenWidth, fullScreenHeight
+end
+
 function DuneBackground:UpdateLayout()
-    local guiWidth, guiHeight = GuiRoot:GetDimensions()
-    self.guiWidth, self.guiHeight = guiWidth, guiHeight
-    self.aspectRatioX = guiWidth / BACKGROUND_TEXTURE_USED_WIDTH
-    self.aspectRatioY = guiHeight / BACKGROUND_TEXTURE_USED_HEIGHT
+    local width, height = self:RefreshFullScreenDimensions()
+    local x1, x2, y1, y2 = unpack(BACKGROUND_TEXTURE_COORDINATE_BOUNDS)
 
-    local aspectOverscanX = self.aspectRatioX - 1
-    local aspectOverscanY = self.aspectRatioY - 1
-    if aspectOverscanX < 0 then
-        aspectOverscanX = 0
-    else
-        aspectOverscanX = aspectOverscanX * BACKGROUND_TEXTURE_COORDINATE_BOUNDS.x * 0.5
+    for _, textureControl in ipairs(self.fullscreenTextureControls) do
+        textureControl:SetDimensions(width, height)
+        textureControl:SetTextureCoords(x1, x2, y1, y2)
     end
-    if aspectOverscanY < 0 then
-        aspectOverscanY = 0
-    else
-        aspectOverscanY = aspectOverscanY * BACKGROUND_TEXTURE_COORDINATE_BOUNDS.y * 0.5
-    end
-    self.aspectOverscanX, self.aspectOverscanY = aspectOverscanX, aspectOverscanY
 
-    local x1, x2 = -aspectOverscanX, BACKGROUND_TEXTURE_COORDINATE_BOUNDS.x * self.aspectRatioX - aspectOverscanX
-    local y1, y2 = -aspectOverscanY, BACKGROUND_TEXTURE_COORDINATE_BOUNDS.y * self.aspectRatioY - aspectOverscanY
-    self.backgroundControl:SetTextureCoords(x1, x2, y1, y2)
-    self.causticsControl:SetTextureCoords(x1, x2, y1, y2)
-    self.causticsHighlightControl:SetTextureCoords(x1, x2, y1, y2)
-    self.gemGlow1Control:SetTextureCoords(x1, x2, y1, y2)
-    self.gemGlow2Control:SetTextureCoords(x1, x2, y1, y2)
-    self.gemGlow3Control:SetTextureCoords(x1, x2, y1, y2)
-    self.gemSpecularControl:SetTextureCoords(x1, x2, y1, y2)
-    self.initialGlowControl:SetTextureCoords(x1, x2, y1, y2)
-    self.vignetteControl:SetTextureCoords(x1, x2, y1, y2)
+    local widthRatio = width / BACKGROUND_TEXTURE_WIDTH
+    local heightRatio = height / BACKGROUND_TEXTURE_HEIGHT
+    self.titleControl:SetDimensions(TITLE_TEXTURE_WIDTH * widthRatio, TITLE_TEXTURE_HEIGHT * heightRatio)
+    local titleOffsetY = TITLE_TEXTURE_OFFSET_Y * heightRatio
+    self.titleControl:SetAnchor(CENTER, nil, nil, 0, titleOffsetY)
 end
 
 function DuneBackground:Start()
@@ -106,7 +115,6 @@ function DuneBackground:Start()
     end
 
     self.isPlaying = true
-    self.hasPlayedGemSound = nil
     self.repeatWarmUpEndTimeS = GetFrameTimeSeconds() + REPEAT_ANIMATION_WARM_UP_SECONDS
     PlayPregameAnimatedBackgroundSounds()
 
@@ -116,7 +124,6 @@ end
 
 function DuneBackground:Stop()
     self.isPlaying = nil
-    self.hasPlayedGemSound = nil
     StopPregameAnimatedBackgroundSounds()
 
     self.introTimeline:Stop()
@@ -130,13 +137,13 @@ function DuneBackground:OnScreenResized()
 end
 
 function DuneBackground:OnPlayIntroAnimation(completed)
-    self.cloudsControl:SetHidden(false)
+    self.clouds1Control:SetHidden(false)
     self.clouds2Control:SetHidden(false)
     self.clouds3Control:SetHidden(false)
 end
 
 function DuneBackground:OnStopIntroAnimation(completed)
-    self.cloudsControl:SetHidden(true)
+    self.clouds1Control:SetHidden(true)
     self.clouds2Control:SetHidden(true)
     self.clouds3Control:SetHidden(true)
 end
@@ -146,23 +153,28 @@ function DuneBackground:OnUpdateIntroAnimation(progress)
     self.backgroundControl:SetColor(easedProgress, easedProgress, easedProgress, 1)
     self.titleControl:SetColor(easedProgress, easedProgress, easedProgress, 1)
     self.vignetteControl:SetAlpha(easedProgress)
-    self.causticsControl:SetVertexColors(VERTEX_POINTS_TOPLEFT + VERTEX_POINTS_TOPRIGHT, 0, 0, 0, 0)
-    self.causticsControl:SetVertexColors(VERTEX_POINTS_BOTTOMLEFT + VERTEX_POINTS_BOTTOMRIGHT, 1, 1, 1, easedProgress)
-    self.causticsHighlightControl:SetVertexColors(VERTEX_POINTS_TOPLEFT + VERTEX_POINTS_TOPRIGHT, 0, 0, 0, 0)
-    self.causticsHighlightControl:SetVertexColors(VERTEX_POINTS_BOTTOMLEFT + VERTEX_POINTS_BOTTOMRIGHT, 1, 1, 1, easedProgress)
+    self.causticsControl:SetAlpha(easedProgress)
 
-    local glowAlpha = zo_sin(progress * ZO_PI) * 0.85
-    self.initialGlowControl:SetAlpha(glowAlpha)
-    if glowAlpha >= 0.25 and not self.hasPlayedGemSound then
-        self.hasPlayedGemSound = true
-        PlaySound(SOUNDS.PREGAME_ANIMATEDBACKGROUND_HIGHISLE_GEM_SPARKLE)
+    local glowProgress
+    if progress < 0.5 then
+        glowProgress = zo_max(0, zo_lerp(-0.5, 0.5, progress * 2))
+    elseif progress < 0.75 then
+        glowProgress = 0.5
+    else
+        glowProgress = zo_lerp(0.5, 1, (progress - 0.75) * 4)
     end
+    local glowAlpha = zo_sin(glowProgress * ZO_PI) * 0.8
+    local glowFlickerTheta = progress * ZO_TWO_PI * 5
+    local glowFlickerAlpha1 = zo_lerp(zo_max(0.6, progress), 1, zo_sin(glowFlickerTheta) * 0.5 + 0.5) * glowAlpha
+    local glowFlickerAlpha2 = zo_lerp(zo_max(0.6, progress), 1, zo_sin(glowFlickerTheta + 0.3) * 0.5 + 0.5) * glowAlpha
+    self.initialGlowControl:SetVertexColors(VERTEX_POINTS_TOPLEFT + VERTEX_POINTS_TOPRIGHT, 1, 1, 1, glowFlickerAlpha1)
+    self.initialGlowControl:SetVertexColors(VERTEX_POINTS_BOTTOMLEFT + VERTEX_POINTS_BOTTOMRIGHT, 1, 1, 1, glowFlickerAlpha2)
 
     local cloudAlpha = easedProgress * 0.8
     local textureCoords
-    textureCoords = zo_lerpVector(self.cloudsControl.startTextureCoords, self.cloudsControl.endTextureCoords, zo_lerp(0, 1.5, easedProgress))
-    self.cloudsControl:SetTextureCoords(unpack(textureCoords))
-    self.cloudsControl:SetAlpha(cloudAlpha)
+    textureCoords = zo_lerpVector(self.clouds1Control.startTextureCoords, self.clouds1Control.endTextureCoords, zo_lerp(0, 1.5, easedProgress))
+    self.clouds1Control:SetTextureCoords(unpack(textureCoords))
+    self.clouds1Control:SetAlpha(cloudAlpha)
 
     textureCoords = zo_lerpVector(self.clouds2Control.startTextureCoords, self.clouds2Control.endTextureCoords, zo_lerp(-0.15, 1.15, progress))
     self.clouds2Control:SetTextureCoords(unpack(textureCoords))
@@ -195,7 +207,6 @@ function DuneBackground:OnUpdateRepeatAnimation(progress)
     self.gemSpecularControl:SetAlpha(specularAlpha * globalAlpha)
 
     self.causticsControl:SetCausticOffset(interval)
-    self.causticsHighlightControl:SetCausticOffset(interval)
 end
 
 --Global XML Handlers
