@@ -203,6 +203,11 @@ function ZO_UniversalDeconstructionPanel_Gamepad:SetFilterType(filterType, filte
         if tooltipText then
             GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipText)
         end
+
+        local currentTab = self.currentFilterData
+        local craftingTypes = self:GetSelectedCraftingTypeFilters() or {}
+        local includeBankedItems = self:GetIncludeBankedItems()
+        self:FireCallbacks("OnFilterChanged", currentTab, craftingTypes, includeBankedItems)
     end
 end
 

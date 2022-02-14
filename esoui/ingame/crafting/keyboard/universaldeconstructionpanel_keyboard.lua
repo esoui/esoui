@@ -160,7 +160,15 @@ function ZO_UniversalDeconstructionPanel_Keyboard:OnFilterChanged()
 	if self.savedVars.includeBankedItemsChecked ~= includeBankedItemsChecked then
 		self.savedVars.includeBankedItemsChecked = includeBankedItemsChecked
 	end
-    self.savedVars.craftingTypeFilters = self:GetSelectedCraftingTypeFilters()
+
+    local craftingTypeFilters = self:GetSelectedCraftingTypeFilters()
+    self.savedVars.craftingTypeFilters = craftingTypeFilters
+
+    local currentTab = self.inventory:GetCurrentFilter()
+    if not craftingTypeFilters then
+        craftingTypeFilters = {}
+    end
+    self:FireCallbacks("OnFilterChanged", currentTab, craftingTypeFilters, includeBankedItemsChecked)
 
     self.inventory:PerformFullRefresh()
 end
@@ -174,6 +182,7 @@ function ZO_UniversalDeconstructionInventory_Keyboard:Initialize(control, univer
     local tabFilters = {}
     for _, filterData in ipairs(ZO_UNIVERSAL_DECONSTRUCTION_FILTER_TYPES) do
         local tabFilterData = self:CreateNewTabFilterData(filterData.filter, filterData.displayName, filterData.iconUp, filterData.iconDown, filterData.iconOver, filterData.iconDisabled)
+        tabFilterData.filter = filterData
         tabFilterData.enabled = filterData.enabled
         if filterData.tooltipText then
             -- Only override the tooltip text if specified.
@@ -214,9 +223,14 @@ end
 function ZO_UniversalDeconstructionInventory_Keyboard:ChangeFilter(filterData)
     ZO_CraftingInventory.ChangeFilter(self, filterData)
 
+    self.filter = filterData.filter
     self.filterType = filterData.descriptor
     self.universalDeconstructionPanel:OnFilterChanged()
     self:HandleDirtyEvent()
+end
+
+function ZO_UniversalDeconstructionInventory_Keyboard:GetCurrentFilter()
+    return self.filter or ZO_GetUniversalDeconstructionFilterType("all")
 end
 
 function ZO_UniversalDeconstructionInventory_Keyboard:GetCurrentFilterType()

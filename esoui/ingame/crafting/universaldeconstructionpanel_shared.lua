@@ -102,7 +102,15 @@ ZO_UNIVERSAL_DECONSTRUCTION_FILTER_TYPES =
     },
 }
 
-ZO_UniversalDeconstructionPanel_Shared = ZO_InitializingObject:Subclass()
+function ZO_GetUniversalDeconstructionFilterType(filterKey)
+    for _, filterType in ipairs(ZO_UNIVERSAL_DECONSTRUCTION_FILTER_TYPES) do
+        if filterKey == filterType.key then
+            return filterType
+        end
+    end
+end
+
+ZO_UniversalDeconstructionPanel_Shared = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_UniversalDeconstructionPanel_Shared:Initialize(control, universalDeconstructionParent, extractionSlotControl, extractLabel)
     self.control = control
