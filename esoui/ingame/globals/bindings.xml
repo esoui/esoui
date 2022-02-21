@@ -1139,6 +1139,16 @@
             <AllowAction name="GAMEPAD_JUMP_OR_INTERACT" />
             <AllowAction name="GAME_CAMERA_GAMEPAD_ZOOM" />
 
+            <!-- Keyboard specific -->
+            <AllowAction name="MOVE_JUMPASCEND" />
+            <AllowAction name="CAMERA_ZOOM_IN" />
+            <AllowAction name="CAMERA_ZOOM_OUT" />
+            <AllowAction name="MOVE_FORWARD" />
+            <AllowAction name="MOVE_BACKWARD" />
+            <AllowAction name="TURN_LEFT" />
+            <AllowAction name="TURN_RIGHT" />
+            <AllowAction name="TAKE_SCREENSHOT" />
+
             <Action name="SCREENSHOT_MODE_EXIT" hideAction="true" rebindable="false">
                 <Down>
                     SCREENSHOT_MODE_GAMEPAD:ExitKeybind()
