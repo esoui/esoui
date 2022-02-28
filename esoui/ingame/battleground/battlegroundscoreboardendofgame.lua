@@ -130,6 +130,8 @@ function ZO_Battleground_Scoreboard_End_Of_Game:ApplyPlatformStyle(style)
     end
 
     self.playerOptionsButton:SetHidden(not style.hasPlayerOptionsButton)
+
+    self.leaveBattlegroundKeybind:ClearAnchors()
     if style.hasPlayerOptionsButton then
         self.leaveBattlegroundKeybind:SetAnchor(LEFT, self.playerOptionsButton, RIGHT, KEYBIND_BUTTON_SPACING_X, 0)
     else

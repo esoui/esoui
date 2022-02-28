@@ -31,7 +31,6 @@ announcementScene:AddFragment(ZO_ActionLayerFragment:New("MarketAnnouncement"))
 ------------------------------
 ANTIQUITY_DIGGING_SCENE:AddFragment(ANTIQUITY_DIGGING_FRAGMENT)
 ANTIQUITY_DIGGING_SCENE:AddFragment(MOUSE_UI_MODE_FRAGMENT)
-ANTIQUITY_DIGGING_SCENE:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
 
 -------------------
 --Scrying Game Scene

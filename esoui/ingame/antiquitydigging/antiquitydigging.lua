@@ -92,11 +92,7 @@ function ZO_AntiquityDigging:Initialize(control)
     self.meterContainer = control:GetNamedChild("MeterContainer")
     self.helpTutorialsKeybindButton = self.keybindContainer:GetNamedChild("HelpTutorialsKeybindButton")
     self.moreInfoKeybindButton = self.keybindContainer:GetNamedChild("MoreInfoKeybindButton")
-    local DEFAULT_SHOW_UNBOUND = nil
-    local DEFAULT_GAMEPAD_PREFERRED_KEYBIND = nil
-    local DEFAULT_ALWAYS_PREFER_GAMEPAD_MODE = nil
-    local SHOW_AS_HOLD = true
-    self.moreInfoKeybindButton:SetKeybind("ANTIQUITY_DIGGING_MORE_INFO", DEFAULT_SHOW_UNBOUND, DEFAULT_GAMEPAD_PREFERRED_KEYBIND, DEFAULT_ALWAYS_PREFER_GAMEPAD_MODE, SHOW_AS_HOLD)
+    self.moreInfoKeybindButton:SetKeybind("ANTIQUITY_DIGGING_MORE_INFO")
     self.stabilityControl = self.meterContainer:GetNamedChild("Stability")
     self.stabilityBarLeft = self.meterContainer:GetNamedChild("StabilityHealthBarLeft")
     self.stabilityBarRight = self.meterContainer:GetNamedChild("StabilityHealthBarRight")
@@ -130,6 +126,8 @@ function ZO_AntiquityDigging:Initialize(control)
     self.meterContainerTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingHUDFade", self.meterContainer)
     self.meterContainerFastPartialTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingHUDFastPartialFade", self.meterContainer)
 
+    self.showingMoreInfoTooltip = false
+
     ANTIQUITY_DIGGING_SCENE = ZO_RemoteInteractScene:New("antiquityDigging", SCENE_MANAGER, ANTIQUITY_DIGGING_INTERACTION)
     local overlaySceneInfo =
     {
@@ -141,14 +139,14 @@ function ZO_AntiquityDigging:Initialize(control)
 
     ANTIQUITY_DIGGING_ACTIONS_FRAGMENT = ZO_ActionLayerFragment:New("AntiquityDiggingActions")
     ANTIQUITY_DIGGING_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    ANTIQUITY_DIGGING_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING then
+    ANTIQUITY_DIGGING_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
             self.isGameOver = false
             self:RefreshInputModeFragments()
             control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY, function() self:OnAntiquityDiggingReadyToPlay() end)
-        elseif newState == SCENE_FRAGMENT_HIDING then
+        elseif newState == SCENE_HIDING then
             control:SetHandler("OnUpdate", nil)
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
+        elseif newState == SCENE_HIDDEN then
             self:HideMoreInfo()
             control:UnregisterForEvent(EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY)
             self.keybindContainerTimeline:PlayInstantlyToStart()
@@ -168,7 +166,7 @@ function ZO_AntiquityDigging:Initialize(control)
 
         -- When the end of game summary fragment comes in, we want to get rid of the keybinds
         -- and tone down the bars so they don't feel like they're part of the summary but can still be referenced
-        if ANTIQUITY_DIGGING_FRAGMENT:IsShowing() then
+        if ANTIQUITY_DIGGING_SCENE:IsShowing() then
             self:HideMoreInfo()
             self.keybindContainerFastTimeline:PlayFromEnd()
             self.meterContainerFastPartialTimeline:PlayFromEnd()
@@ -247,15 +245,16 @@ function ZO_AntiquityDigging:Initialize(control)
 end
 
 function ZO_AntiquityDigging:RefreshInputModeFragments()
-    if ANTIQUITY_DIGGING_ACTIONS_FRAGMENT:IsShowing() then
+    if ANTIQUITY_DIGGING_SCENE:IsShowing() then
         if self.isGameOver then
             self.keybindContainerTimeline:PlayFromEnd()
             self.meterContainerTimeline:PlayFromEnd()
         end
-        --Remove the digging actions fragment so it can be on top of the gamepad UI mode fragment
-        ANTIQUITY_DIGGING_SCENE:RemoveFragment(ANTIQUITY_DIGGING_ACTIONS_FRAGMENT)
-        ANTIQUITY_DIGGING_SCENE:RemoveFragment(SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT)
     end
+
+    --Remove the digging actions fragment so it can be on top of the gamepad UI mode fragment
+    ANTIQUITY_DIGGING_SCENE:RemoveFragment(ANTIQUITY_DIGGING_ACTIONS_FRAGMENT)
+    ANTIQUITY_DIGGING_SCENE:RemoveFragment(SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT)
 
     if IsInGamepadPreferredMode() then
         ANTIQUITY_DIGGING_SCENE:AddFragment(GAMEPAD_UI_MODE_FRAGMENT)
@@ -544,12 +543,12 @@ function ZO_AntiquityDigging:OnUpdate(timeS)
     end
 end
 
-function ZO_AntiquityDigging:OnShowMoreInfoKeybindPressed()
-    -- this keybind is currently only enabled for gamepad and hidden for keyboard
-    -- keyboard shows the tooltip by mousing over
-    if IsInGamepadPreferredMode() then
+function ZO_AntiquityDigging:ToggleShowMoreInfoTooltip()
+    if not self.showingMoreInfoTooltip then
         local selectedActiveSkill = GetSelectedDiggingActiveSkill()
         self:ShowMoreInfoBySkill(selectedActiveSkill)
+    else
+        self:HideMoreInfo()
     end
 end
 
@@ -591,15 +590,15 @@ function ZO_AntiquityDigging:ShowMoreInfoBySkill(skill)
         local DONT_SHOW_SKILL_POINT_COST = false
         skillProgressionData:SetKeyboardTooltip(InformationTooltip, DONT_SHOW_SKILL_POINT_COST)
     end
-end
 
-function ZO_AntiquityDigging:OnShowMoreInfoKeybindReleased()
-    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    self.showingMoreInfoTooltip = true
 end
 
 function ZO_AntiquityDigging:HideMoreInfo()
     ClearTooltip(InformationTooltip)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+
+    self.showingMoreInfoTooltip = false
 end
 
 -- Global XML --

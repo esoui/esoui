@@ -1358,8 +1358,7 @@
     <Layer name="AntiquityDiggingActions">
         <Category>
             <Action name="ANTIQUITY_DIGGING_MORE_INFO">
-                <Down> return ANTIQUITY_DIGGING:OnShowMoreInfoKeybindPressed() </Down>
-                <Up> return ANTIQUITY_DIGGING:OnShowMoreInfoKeybindReleased() </Up>
+                <Down> return ANTIQUITY_DIGGING:ToggleShowMoreInfoTooltip() </Down>
             </Action>
         </Category>
     </Layer>
