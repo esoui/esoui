@@ -335,7 +335,7 @@ SafeAddString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_ANTIQUITY_UNEARTHED_TITLE, "<<
 SafeAddString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BEGIN_TEXT, "Trouvez et déterrez l'antiquité.", 0)
 SafeAddString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BEGIN_TITLE, "Excavation", 0)
 SafeAddString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BONUS_LOOT_TITLE, "Objet bonus découvert !", 0)
-SafeAddString(SI_ANTIQUITIES_DIGGING_MORE_INFO, "Informations sur l'outil", 2)
+SafeAddString(SI_ANTIQUITIES_DIGGING_MORE_INFO, "Activer l'informations sur l’outil", 2)
 SafeAddString(SI_ANTIQUITIES_SCRYING_PROGRESS_UPDATED_HEADER, "Progrès des fouilles mis à jour", 0)
 SafeAddString(SI_ANTIQUITYABANDONRESULT1, "Vous n'avez pas encore effectué de recherches sur cette antiquité.", 0)
 SafeAddString(SI_ANTIQUITYDIFFICULTY0, "Trivial", 0)
