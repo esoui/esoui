@@ -47,7 +47,7 @@
 
     <Controls>
         <Control name="ZO_HUDTelvarMeter_KeyboardTemplate" virtual="true" >
-            <Anchor point="BOTTOMRIGHT" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
             <Controls>
                 <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/Telvar_Meter_Frame.dds">
                     <TextureCoords left="0" right="1" />
@@ -78,7 +78,7 @@
         </Control>
 
         <Control name="ZO_HUDTelvarMeter_GamepadTemplate" virtual="true" >
-            <Anchor point="BOTTOMLEFT" offsetX="5" offsetY="-5" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="5" offsetY="-5" />
             <Controls>
                 <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/Gamepad/gp_Telvar_Meter_Frame.dds">
                     <TextureCoords left="1" right="0" />

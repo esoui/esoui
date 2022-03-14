@@ -55,13 +55,7 @@ end
 
 
 --[[ Crafting Multi Slot Base ]]--
-ZO_CraftingMultiSlotBase = ZO_CallbackObject:Subclass()
-
-function ZO_CraftingMultiSlotBase:New(...)
-    local craftingSlot = ZO_CallbackObject.New(self)
-    craftingSlot:Initialize(...)
-    return craftingSlot
-end
+ZO_CraftingMultiSlotBase = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_CraftingMultiSlotBase:Initialize(owner, control, slotType, emptyTexture, multipleItemsTexture, craftingInventory, emptySlotIconTexture)
     self.owner = owner
@@ -391,10 +385,6 @@ end
 -- current item.
 ZO_CraftingSlotBase = ZO_CraftingMultiSlotBase:Subclass()
 
-function ZO_CraftingSlotBase:New(...)
-    return ZO_CraftingMultiSlotBase.New(self, ...)
-end
-
 function ZO_CraftingSlotBase:Initialize(owner, control, slotType, emptyTexture, craftingInventory, emptySlotIcon)
     return ZO_CraftingMultiSlotBase.Initialize(self, owner, control, slotType, emptyTexture, "", craftingInventory, emptySlotIcon)
 end
@@ -545,6 +535,10 @@ end
 
 function ZO_CraftingUtils_ConnectHorizontalScrollListToCraftingProcess(horizontalScrollList)
     ConnectStandardObjectToCraftingProcess(horizontalScrollList)
+end
+
+function ZO_CraftingUtils_ConnectComboBoxToCraftingProcess(comboBox)
+    ConnectStandardObjectToCraftingProcess(comboBox)
 end
 
 function ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(checkBox)

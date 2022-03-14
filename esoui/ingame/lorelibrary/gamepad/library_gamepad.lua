@@ -34,6 +34,25 @@ function LoreLibraryGamepad:InitializeKeybindStripDescriptors()
                 BOOK_SET_GAMEPAD:Push(selectedData)
             end,
         },
+        -- Open in Achievements
+        {
+            name = GetString(SI_LORE_LIBRARY_TO_ACHIEVEMENT_ACTION),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            visible = function()
+                local selectedData = self.itemList:GetTargetData()
+                if selectedData and selectedData.collectionIndex then
+                    local achievementId = GetLoreBookCollectionLinkedAchievement(selectedData.categoryIndex, selectedData.collectionIndex)
+                    return achievementId ~= 0
+                end
+                return false
+            end,
+            callback = function()
+                local selectedData = self.itemList:GetTargetData()
+                local achievementId = GetLoreBookCollectionLinkedAchievement(selectedData.categoryIndex, selectedData.collectionIndex)
+                MAIN_MENU_GAMEPAD:SelectMenuEntry(ZO_MENU_MAIN_ENTRIES.JOURNAL)
+                ACHIEVEMENTS_GAMEPAD:ShowAchievement(achievementId)
+            end,
+        },
     }
 
     -- Jump to next section.
@@ -47,6 +66,11 @@ end
 
 local function NameSorter(left, right)
     return left.name < right.name
+end
+
+function LoreLibraryGamepad:SetCollectionIdToSelect(collectionId)
+    self.collectionIdToSelect = collectionId
+    self.dirty = true
 end
 
 function LoreLibraryGamepad:PerformUpdate()
@@ -64,7 +88,7 @@ function LoreLibraryGamepad:PerformUpdate()
         for collectionIndex = 1, numCollections do
             local _, _, _, _, hidden = GetLoreCollectionInfo(categoryIndex, collectionIndex)
             if not hidden then
-                categories[#categories + 1] = { categoryIndex = categoryIndex, name = categoryName, numCollections = numCollections }
+                categories[#categories + 1] = { categoryIndex = categoryIndex, name = categoryName, numCollections = numCollections}
                 break
             end
         end
@@ -79,9 +103,9 @@ function LoreLibraryGamepad:PerformUpdate()
         -- Get the list of collections that we need to show.
         local collections = {}
         for collectionIndex = 1, numCollections do
-            local collectionName, description, numKnownBooks, totalBooks, hidden, gamepadIcon = GetLoreCollectionInfo(categoryIndex, collectionIndex)
+            local collectionName, description, numKnownBooks, totalBooks, hidden, gamepadIcon, collectionId = GetLoreCollectionInfo(categoryIndex, collectionIndex)
             if not hidden then
-                collections[#collections + 1] = { categoryIndex = categoryIndex, collectionIndex = collectionIndex, name = collectionName, knownBooks = numKnownBooks, totalBooks = totalBooks, description = description, enabled = (numKnownBooks > 0), icon = gamepadIcon }
+                collections[#collections + 1] = { categoryIndex = categoryIndex, collectionIndex = collectionIndex, name = collectionName, knownBooks = numKnownBooks, totalBooks = totalBooks, description = description, enabled = (numKnownBooks > 0), icon = gamepadIcon, collectionId = collectionId }
 
                 totalCurrentlyCollected = totalCurrentlyCollected + numKnownBooks
                 totalPossibleCollected = totalPossibleCollected + totalBooks
@@ -123,6 +147,10 @@ function LoreLibraryGamepad:PerformUpdate()
             end
 
             self.itemList:AddEntry(templateName, entryData)
+
+            if self.collectionIdToSelect == collectionData.collectionId then
+                self.itemList:SetSelectedIndex(k)
+            end
         end
     end
 
@@ -138,6 +166,13 @@ function LoreLibraryGamepad:PerformUpdate()
     -- Update the header.
     self.headerData.titleText = GetString(SI_WINDOW_TITLE_LORE_LIBRARY)
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+
+    if self.collectionIdToSelect then
+        local selectedData = self.itemList:GetTargetData()
+        BOOK_SET_GAMEPAD:Push(selectedData)
+    end
+
+    self.collectionIdToSelect = nil
 end
 
 function ZO_Gamepad_LoreLibrary_OnInitialize(control)

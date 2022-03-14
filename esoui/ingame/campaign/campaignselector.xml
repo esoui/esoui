@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="ZO_CampaignSelector" hidden="true">
             <Dimensions x="400" y="50" />
-            <Anchor point="RIGHT" offsetX="-29" offsetY="-214" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-29" offsetY="-214" />
             <OnInitialized>
                 ZO_CampaignSelector_OnInitialized(self)
             </OnInitialized>
@@ -20,7 +20,7 @@
                     <Controls>
                         <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
                             <Dimensions x="16" y="16" />
-                            <Anchor point="TOPRIGHT"/>                            
+                            <Anchor point="TOPRIGHT"/>
                             <OnClicked>
                                 ZO_ComboBox_DropdownClicked(self:GetParent())
                             </OnClicked>

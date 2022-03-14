@@ -1,6 +1,8 @@
 -- Cached versions of the lua library functions
 
-ZO_TWO_PI = math.pi * 2
+ZO_PI = math.pi
+ZO_TWO_PI = ZO_PI * 2
+ZO_HALF_PI = ZO_PI / 2
 
 zo_strlower         = LocaleAwareToLower
 zo_strupper         = LocaleAwareToUpper
@@ -30,6 +32,10 @@ zo_max              = math.max
 zo_min              = math.min
 zo_sqrt             = math.sqrt
 zo_pow              = math.pow
+zo_cos              = math.cos
+zo_sin              = math.sin
+zo_tan              = math.tan
+zo_atan2            = math.atan2
 zo_randomseed       = math.randomseed
 zo_random           = math.random
 zo_insecureNext     = InsecureNext
@@ -105,7 +111,7 @@ function zo_saturate(value)
 end
 
 function zo_round(value)
-    return (value > 0) and zo_floor(value + 0.5) or zo_ceil(value - 0.5)
+    return (value >= 0) and zo_floor(value + 0.5) or zo_ceil(value - 0.5)
 end
 
 function zo_roundToZero(value, precision)
@@ -141,8 +147,19 @@ function zo_strjoin(separator, ...)
     return table.concat({...}, separator)
 end
 
+-- Expected range for amount: [0, 1]
 function zo_lerp(from, to, amount)
     return from + amount * (to - from)
+end
+
+-- Expected range for amount: [0, 1]
+function zo_lerpVector(from, to, amount)
+    local numElements = #from
+    local interpolatedElements = {}
+    for index = 1, numElements do
+        interpolatedElements[index] = from[index] + amount * (to[index] - from[index])
+    end
+    return interpolatedElements
 end
 
 function zo_frameDeltaNormalizedForTargetFramerate()
@@ -257,11 +274,11 @@ function zo_mixin(object, ...)
 end
 
 function zo_forwardArcSize(startAngle, angle)
-    return (angle - startAngle) % (2 * math.pi)
+    return (angle - startAngle) % ZO_TWO_PI
 end
 
 function zo_backwardArcSize(startAngle, angle)
-    return 2 * math.pi - zo_forwardArcSize(startAngle, angle)
+    return ZO_TWO_PI - zo_forwardArcSize(startAngle, angle)
 end
 
 function zo_arcSize(startAngle, angle)

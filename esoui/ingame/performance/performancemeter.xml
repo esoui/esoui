@@ -2,8 +2,8 @@
     <Controls>
         <TopLevelControl name="ZO_PerformanceMeters" movable="true" mouseEnabled="true" clampedToScreen="true" hidden="true">
             <Dimensions x="173" y="70" />
-            <ClampedToScreenInsets top="20" bottom="-20" left="20" right="-20"/>
-            <Anchor point="BOTTOMLEFT"/>
+            <ClampedToScreenInsets top="20" bottom="-20" left="20" right="-20" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
             <Controls>
                 <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Performance/StatusMeterMunge.dds">
                     <Dimensions x="256" y="256"/>
@@ -11,7 +11,7 @@
                 </Texture>
                 <Control name="$(parent)FramerateMeter" mouseEnabled="true" >
                     <Dimensions x="65" y="40"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)" relativePoint="CENTER"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)" relativePoint="CENTER" />
                     <Controls>
                         <Label name="$(parent)Label" font="ZoFontWinT2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" verticalAlignment="CENTER">
                             <AnchorFill/>
@@ -32,14 +32,14 @@
                 </Control>
                 <Control name="$(parent)LatencyMeter" mouseEnabled="true" >
                     <Dimensions x="65" y="40"/>
-                    <Anchor point="LEFT" relativeTo="$(parent)" relativePoint="CENTER"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)" relativePoint="CENTER" />
                     <Controls>
                         <Texture name="$(parent)Bars" textureFile="EsoUI/Art/Campaign/campaignBrowser_hiPop.dds">
                             <Dimensions x="26" y="26"/>
-                            <Anchor point="LEFT" relativeTo="$(parent)" relativePoint="LEFT"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)" relativePoint="LEFT" />
                         </Texture>
                         <Label name="$(parent)Label" font="ZoFontWinT2" horizontalAlignment="LEFT" verticalAlignment="CENTER">
-                            <Anchor point="LEFT" relativeTo="$(parent)Bars" relativePoint="RIGHT"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)Bars" relativePoint="RIGHT" />
                         </Label>
                     </Controls>
                     <OnMouseDown>

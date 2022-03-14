@@ -1,5 +1,5 @@
 ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_DIMENSIONS_X = 284
-ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_DIMENSIONS_Y = 64
+ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_DIMENSIONS_Y = 74
 ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_ICON_DIMENSIONS = 64
 
 -- Primary logic class must be subclassed after the platform class so that platform specific functions will have priority over the logic class functionality

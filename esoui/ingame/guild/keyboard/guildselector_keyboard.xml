@@ -2,17 +2,17 @@
     <Controls>
         <TopLevelControl name="ZO_GuildSelector" hidden="true">
             <Dimensions x="1024" y="50" />
-            <Anchor point="RIGHT" offsetX="30" offsetY="-335" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="30" offsetY="-335" />
             <OnInitialized>
                 ZO_GuildSelector_OnInitialized(self)
             </OnInitialized>
+            
             <Controls>
-              
                 <Texture name="$(parent)GuildIcon" mouseEnabled="false">
                   <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="65" offsetY="10"/>
                   <Dimensions x="32" y="32"/>
                 </Texture>
-              
+
                 <Control name="$(parent)ComboBox" resizeToFitDescendents="true" mouseEnabled="true">
                     <Anchor point="LEFT" offsetX="115" />
                     <OnInitialized>
@@ -50,7 +50,7 @@
                 <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Miscellaneous/centerscreen_topDivider.dds">
                     <Dimensions x="1024" y="4" />
                     <Anchor point="BOTTOM"/>
-                </Texture>                
+                </Texture>
             </Controls>
         </TopLevelControl>
     </Controls>

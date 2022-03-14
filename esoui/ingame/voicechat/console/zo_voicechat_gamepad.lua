@@ -146,8 +146,7 @@ function ZO_VoiceChat_Gamepad:InitializeEventAlerts()
         if VOICE_CHAT_CHANNELS_GAMEPAD:IsHidden() and VOICE_CHAT_PARTICIPANTS_GAMEPAD:IsHidden() then
             local channel = VOICE_CHAT_MANAGER:GetChannel(channelData)
 
-            -- TODO: Temporarily disable the alert sound for ESO-696541
-            local soundId = nil--SOUNDS.VOICE_CHAT_ALERT_CHANNEL_MADE_ACTIVE
+            local soundId = SOUNDS.VOICE_CHAT_ALERT_CHANNEL_MADE_ACTIVE
             local text = zo_strformat(SI_GAMEPAD_VOICECHAT_ALERT_CHANNEL_ACTIVE, channel.name)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, soundId, text)
         end

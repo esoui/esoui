@@ -11,7 +11,6 @@ marketScene:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP
 marketScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
 marketScene:AddFragment(KEYBIND_STRIP_FADE_FRAGMENT)
 marketScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
-marketScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
 
 ----------------------------
 --Endeavor Seals Store Scene
@@ -26,7 +25,6 @@ endeavorSealStoreScene:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRA
 endeavorSealStoreScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
 endeavorSealStoreScene:AddFragment(KEYBIND_STRIP_FADE_FRAGMENT)
 endeavorSealStoreScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
-endeavorSealStoreScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
 
 -------------------
 --Eso Plus Offers Scene
@@ -41,7 +39,6 @@ esoPlusOffersScene:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMEN
 esoPlusOffersScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
 esoPlusOffersScene:AddFragment(KEYBIND_STRIP_FADE_FRAGMENT)
 esoPlusOffersScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
-esoPlusOffersScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
 
 -------------------
 --Crown Crates Scene

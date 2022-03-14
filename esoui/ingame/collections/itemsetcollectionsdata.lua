@@ -240,8 +240,10 @@ function ZO_ItemSetCollectionData:Initialize(itemSetId)
     for i = 1, GetNumItemSetCollectionPieces(itemSetId) do
         local pieceId, slot = GetItemSetCollectionPieceInfo(itemSetId, i)
         local itemSetCollectionPieceData = ITEM_SET_COLLECTIONS_DATA_MANAGER:GetOrCreateItemSetCollectionPieceData(pieceId, slot)
-        table.insert(self.pieces, itemSetCollectionPieceData)
-        itemSetCollectionPieceData:SetItemSetCollectionData(self)
+        if internalassert(itemSetCollectionPieceData ~= nil) then
+            table.insert(self.pieces, itemSetCollectionPieceData)
+            itemSetCollectionPieceData:SetItemSetCollectionData(self)
+        end
     end
 end
 

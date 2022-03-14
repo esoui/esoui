@@ -55,11 +55,13 @@ function ZO_AbstractGridScrollList:AddHeaderTemplate(templateName, height, setup
     return nil
 end
 
-function ZO_AbstractGridScrollList:AddEntryTemplate(templateName, width, height, setupFunc, onHideFunc, resetControlFunc, spacingX, spacingY, centerEntries)
+function ZO_AbstractGridScrollList:AddEntryTemplate(templateName, width, height, setupFunc, onHideFunc, resetControlFunc, spacingX, spacingY, centerEntries, isSelectable)
     if self.templateOperationIds[templateName] == nil then
         local operationId = self.nextOperationId
-        local IS_SELECTABLE = true
-        ZO_ScrollList_AddControlOperation(self.list, operationId, templateName, width, height, resetControlFunc, setupFunc, onHideFunc, spacingX, spacingY, self.indentAmount, IS_SELECTABLE, centerEntries)
+        if isSelectable == nil then
+            isSelectable = true
+        end
+        ZO_ScrollList_AddControlOperation(self.list, operationId, templateName, width, height, resetControlFunc, setupFunc, onHideFunc, spacingX, spacingY, self.indentAmount, isSelectable, centerEntries)
 
         self.nextOperationId = self.nextOperationId + 1
         self.templateOperationIds[templateName] = operationId

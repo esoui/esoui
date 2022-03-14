@@ -1,9 +1,5 @@
 ZO_GamepadCraftingInventory = ZO_SharedCraftingInventory:Subclass()
 
-function ZO_GamepadCraftingInventory:New(...)
-    return ZO_SharedCraftingInventory.New(self, ...)
-end
-
 local SCROLL_TYPE_ITEM = 1
 function ZO_GamepadCraftingInventory:Initialize(control, slotType, connectInfoFn, connectInfoControl)
     ZO_SharedCraftingInventory.Initialize(self, control, slotType, connectInfoFn, connectInfoControl)
@@ -144,7 +140,8 @@ function ZO_GamepadCraftingInventory:EnumerateInventorySlotsAndAddToScrollData(p
     local filteredDataTable = {}
     for itemId, itemInfo in pairs(list) do
         if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType) then
-            filteredDataTable[#filteredDataTable + 1] = self:GenerateCraftingInventoryEntryData(itemInfo.bag, itemInfo.index, itemInfo.stack)
+            local filteredDataEntry = self:GenerateCraftingInventoryEntryData(itemInfo.bag, itemInfo.index, itemInfo.stack)
+            table.insert(filteredDataTable, filteredDataEntry)
         end
         self.itemCounts[itemId] = itemInfo.stack
     end
@@ -174,7 +171,8 @@ function ZO_GamepadCraftingInventory:GetIndividualInventorySlotsAndAddToScrollDa
         local bagId = slotData.bagId
         local slotIndex = slotData.slotIndex
         if not filterFunction or filterFunction(bagId, slotIndex, filterType) then
-            filteredDataTable[#filteredDataTable + 1] = self:GenerateCraftingInventoryEntryData(bagId, slotIndex, slotData.stackCount, slotData)
+            local filteredDataEntry = self:GenerateCraftingInventoryEntryData(bagId, slotIndex, slotData.stackCount, slotData)
+            table.insert(filteredDataTable, filteredDataEntry)
         end
         self.itemCounts[i] = slotData.stackCount
     end

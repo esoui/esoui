@@ -89,6 +89,7 @@ do
     local FILTER_DATA = 
     {
         SI_COLLECTIONS_BOOK_FILTER_SHOW_ALL,
+        SI_COLLECTIONS_BOOK_FILTER_SHOW_NEW,
         SI_COLLECTIONS_BOOK_FILTER_SHOW_LOCKED,
         SI_COLLECTIONS_BOOK_FILTER_SHOW_USABLE,
         SI_COLLECTIONS_BOOK_FILTER_SHOW_UNLOCKED,
@@ -336,6 +337,8 @@ do
                 return true
             elseif filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_USABLE then
                 return collectibleData:IsValidForPlayer()
+            elseif filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_NEW then
+                return collectibleData:IsNew()
             else
                 return false
             end

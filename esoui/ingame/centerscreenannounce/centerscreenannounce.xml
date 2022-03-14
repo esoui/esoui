@@ -268,7 +268,7 @@
         </Texture>
 
         <Control name="ZO_CenterScreenAnnounce_Keyboard_Template" virtual="true">
-            <Anchor point="TOP" offsetY="230" />
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="230" />
 
             <Controls>
                 <Control name="$(parent)MajorLineContainer">
@@ -281,7 +281,7 @@
         </Control>
 
         <Control name="ZO_CenterScreenAnnounce_Gamepad_Template" virtual="true">
-            <Anchor point="TOP" offsetY="290" />
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="290" />
 
             <Controls>
                 <Control name="$(parent)MajorLineContainer">

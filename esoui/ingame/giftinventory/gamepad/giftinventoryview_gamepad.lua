@@ -23,6 +23,7 @@ function ZO_GiftInventoryView_Gamepad:InitializeControls()
 
     ZO_Scroll_Initialize_Gamepad(self.noteContainer)
     local scrollIndicator = self.noteContainer:GetNamedChild("ScrollIndicator")
+    scrollIndicator:ClearAnchors()
     scrollIndicator:SetAnchor(CENTER, self.noteContainer, RIGHT, 0, 0, ANCHOR_CONSTRAINS_Y)
     scrollIndicator:SetAnchor(CENTER, self.control, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X)
     scrollIndicator:SetDrawLayer(DL_OVERLAY)

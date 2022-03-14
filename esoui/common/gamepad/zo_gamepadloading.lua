@@ -5,8 +5,8 @@ ZO_GAMEPAD_LOADING_ICON_FOOTER_SIZE = 64
 
 local TARGET_FRAMERATE = 60
 local MAX_FRAMES_PER_UPDATE = 5
-local MAX_ROTATION = math.pi * 2
-local ROTATION_PER_FRAME = -math.pi * .02
+local MAX_ROTATION = ZO_TWO_PI
+local ROTATION_PER_FRAME = -MAX_ROTATION * 0.01
 
 function ZO_LoadingIcon_Gamepad_Initialize(self)
     self.animation = self:GetNamedChild("Animation")

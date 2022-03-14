@@ -99,7 +99,7 @@ end
 
 function ZO_SceneGraphNode:SetRotation(radians)
     if self.rotation ~= radians then
-        self.rotation = radians % (2 * math.pi)
+        self.rotation = radians % ZO_TWO_PI
         self:SetDirty(true)
     end
 end

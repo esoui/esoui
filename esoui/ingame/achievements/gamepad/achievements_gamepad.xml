@@ -7,6 +7,8 @@
         </AnimationTimeline>
     </Animations>
     <Controls>
+        <Texture name="ZO_Gamepad_Achievement_IconCharacterFrameBorder" textureFile="EsoUI/Art/Achievements/Gamepad/gp_achievement_character_icon_frame.dds" layer="OVERLAY" hidden="true" virtual="true" />
+
         <Texture name="ZO_Gamepad_Achievement_Icon" level="2" layer="CONTROLS" inherits="ZO_MultiIcon" virtual="true" excludeFromResizeToFitExtents="true">
             <Dimensions x="40" y="40" />
         </Texture>
@@ -42,9 +44,9 @@
                 </Label>
             </Controls>
         </Control>
-        
+
         <TopLevelControl name="ZO_Gamepad_Achievements_FooterBar" inherits="ZO_GamepadXPBarFooter" hidden="true"/>
-        
+
         <TopLevelControl name="ZO_Gamepad_Achievements" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_Achievements_Gamepad_OnInitialize(self)

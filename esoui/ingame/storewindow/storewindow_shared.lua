@@ -85,6 +85,7 @@ function ZO_StoreManager_DoesBuyStoreFailureLockEntry(buyStoreFailure)
     return buyStoreFailure == STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE
         or buyStoreFailure == STORE_FAILURE_AWARDS_ALREADY_OWNED_COLLECTIBLE
         or buyStoreFailure == STORE_FAILURE_ALREADY_HAVE_ANTIQUITY_LEAD
+        or buyStoreFailure == STORE_FAILURE_BUY_ITEM_FAILED_REQS
 end
 
 local function GetFormattedStoreEntryName(name, entryType)

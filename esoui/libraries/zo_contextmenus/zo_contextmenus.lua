@@ -263,15 +263,24 @@ function GetMenuPadding()
     return ZO_Menu.menuPad
 end
 
-function AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highlightColor, itemYPad, horizontalAlignment, isHighlighted)
+function AddMenuItem(labelText, onSelect, itemType, labelFont, normalColor, highlightColor, itemYPad, horizontalAlignment, isHighlighted, onEnter, onExit, enabled)
+    local isEnabled = enabled
+    if isEnabled == nil then
+        -- Evaluate nil to be equivalent to true for backwards compatibility.
+        isEnabled = true
+    end
+
     local menuItemControl = ZO_Menu.itemPool:AcquireObject()
-    menuItemControl.OnSelect = myfunction
+    menuItemControl.OnSelect = onSelect
     menuItemControl.menuIndex = ZO_Menu.currentIndex
+    menuItemControl.enabled = isEnabled
+    menuItemControl.onEnter = onEnter
+    menuItemControl.onExit = onExit
 
     local checkboxItemControl
     if itemType == MENU_ADD_OPTION_CHECKBOX then
         checkboxItemControl = ZO_Menu.checkBoxPool:AcquireObject()
-        ZO_CheckButton_SetToggleFunction(checkboxItemControl, myfunction)
+        ZO_CheckButton_SetToggleFunction(checkboxItemControl, onSelect)
         checkboxItemControl.menuIndex = ZO_Menu.currentIndex
     end
 
@@ -313,11 +322,11 @@ function AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highligh
 
     ZO_Menu.nextAnchor = checkboxItemControl or menuItemControl
 
-    if myFont == nil then
+    if labelFont == nil then
         if not IsInGamepadPreferredMode() then
-            myFont = "ZoFontGame"
+            labelFont = "ZoFontGame"
         else
-            myFont = "ZoFontGamepad22"
+            labelFont = "ZoFontGamepad22"
         end
     end
 
@@ -325,8 +334,8 @@ function AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highligh
     nameLabel.highlightColor = highlightColor or DEFAULT_TEXT_HIGHLIGHT
 
     -- NOTE: Must set text AFTER the current index has been incremented.
-    nameLabel:SetFont(myFont)
-    nameLabel:SetText(mytext)
+    nameLabel:SetFont(labelFont)
+    nameLabel:SetText(labelText)
     UpdateMenuDimensions(ZO_Menu.items[#ZO_Menu.items])
 
     -- Now that we know how the label wil size, finish the anchors if we need the label to be right aligned
@@ -431,11 +440,19 @@ end
 
 function ZO_Menu_EnterItem(control)
     ZO_Menu_SetSelectedIndex(control.menuIndex)
+
+    if type(control.onEnter) == "function" then
+        control.onEnter(control)
+    end
 end
 
 function ZO_Menu_ExitItem(control)
     if selectedIndex == control.menuIndex then
         ZO_Menu_SetSelectedIndex(nil)
+
+        if type(control.onExit) == "function" then
+            control.onExit(control)
+        end
     end
 end
 
@@ -449,16 +466,18 @@ function ZO_Menu_ClickItem(control, button)
         else
             -- Treat it like the label was clicked
             control.OnSelect()
-            if ZO_Menu.menuType == MENU_TYPE_MULTISELECT_COMBO_BOX then
-                control.isHighlighted = not control.isHighlighted
+            if control.enabled ~= false then
+                if ZO_Menu.menuType == MENU_TYPE_MULTISELECT_COMBO_BOX then
+                    control.isHighlighted = not control.isHighlighted
 
-                if control.isHighlighted then
-                    ZO_Menu_AcquireAndApplyHighlight(control)
+                    if control.isHighlighted then
+                        ZO_Menu_AcquireAndApplyHighlight(control)
+                    else
+                        ZO_Menu_ReleaseHighlight(control)
+                    end
                 else
-                    ZO_Menu_ReleaseHighlight(control)
+                    ClearMenu()
                 end
-            else
-                ClearMenu()
             end
         end
     end

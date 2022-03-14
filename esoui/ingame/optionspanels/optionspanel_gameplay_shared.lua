@@ -495,6 +495,24 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
         exists = DoesPlatformAllowConfiguringAutomaticInputChanging,
         valueStringPrefix = "SI_INPUTPREFERREDMODE",
     },
+    --Options_Gameplay_KeybindDisplayMode
+    [GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE] =
+    {
+        controlType = OPTIONS_FINITE_LIST,
+        system = SETTING_TYPE_GAMEPAD,
+        panel = SETTING_PANEL_GAMEPLAY,
+        settingId = GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE,
+        text = SI_GAMEPAD_OPTIONS_KEYBIND_DISPLAY_MODE,
+        tooltipText = SI_GAMEPAD_OPTIONS_KEYBIND_DISPLAY_MODE_TOOLTIP,
+        valid =
+        {
+            KEYBIND_DISPLAY_MODE_ALWAYS_KEYBOARD,
+            KEYBIND_DISPLAY_MODE_ALWAYS_GAMEPAD,
+            KEYBIND_DISPLAY_MODE_AUTOMATIC,
+        },
+        exists = ZO_IsPCUI,
+        valueStringPrefix = "SI_KEYBINDDISPLAYMODE",
+    },
     --Options_Gameplay_UseKeyboardChat
     [GAMEPAD_SETTING_USE_KEYBOARD_CHAT] =
     {

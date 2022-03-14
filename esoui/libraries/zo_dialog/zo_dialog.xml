@@ -184,7 +184,7 @@
         </TopLevelControl>
 
         <TopLevelControl name="ZO_Dialog1" inherits="ZO_TwoButtonDialog">
-            <Anchor point="CENTER" offsetY="-55" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" offsetY="-55" />
             <OnInitialized>
                 ZO_TwoButtonDialog_OnInitialized(self, 1)
             </OnInitialized>

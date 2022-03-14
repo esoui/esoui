@@ -1421,7 +1421,7 @@ end
 
 -- TODO: Refactor this so that collectiblesByNewUnlockState can hold collectibles for any collectionUpdateType to support different kinds of state changes
 function ZO_CollectibleDataManager:FinalizeCollectionUpdates(collectionUpdateType, collectiblesByNewUnlockState)
-    local hasUnlockStateChanges = NonContiguousCount(collectiblesByNewUnlockState) > 0
+    local hasUnlockStateChanges = not ZO_IsTableEmpty(collectiblesByNewUnlockState)
     if hasUnlockStateChanges then
         if collectiblesByNewUnlockState[COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED] then
             TriggerTutorial(TUTORIAL_TRIGGER_ACQUIRED_COLLECTIBLE)

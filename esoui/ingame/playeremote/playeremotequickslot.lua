@@ -1,4 +1,4 @@
-local ZO_PlayerEmoteQuickslot = ZO_InteractiveRadialMenuController:Subclass()
+ZO_PlayerEmoteQuickslot = ZO_InteractiveRadialMenuController:Subclass()
 
 function ZO_PlayerEmoteQuickslot:New(...)
     return ZO_InteractiveRadialMenuController.New(self, ...)
@@ -6,6 +6,10 @@ end
 
 function ZO_PlayerEmoteQuickslot:Initialize(control, entryTemplate, animationTemplate, entryAnimationTemplate)
     ZO_InteractiveRadialMenuController.Initialize(self, control, entryTemplate, animationTemplate, entryAnimationTemplate)
+    control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
+        local CLEAR_SELECTION = true
+        self:StopInteraction(CLEAR_SELECTION)
+    end)
 end
 
 -- functions overridden from base
@@ -32,10 +36,10 @@ function ZO_PlayerEmoteQuickslot:SetupEntryControl(control, data)
         end
 
         if IsInGamepadPreferredMode() then
-		    control.label:SetFont("ZoFontGamepad54")
-	    else
-		    control.label:SetFont("ZoInteractionPrompt")
-	    end
+            control.label:SetFont("ZoFontGamepad54")
+        else
+            control.label:SetFont("ZoInteractionPrompt")
+        end
     end
 end
 
@@ -55,20 +59,20 @@ function ZO_PlayerEmoteQuickslot:PopulateMenu()
             local emoteInfo = PLAYER_EMOTE_MANAGER:GetEmoteItemInfo(id)
             found = emoteInfo ~= nil
             if found then
-				if emoteInfo.isOverriddenByPersonality then
-					icon = GAMEPAD_PLAYER_EMOTE:GetPersonalityEmoteIconForCategory(emoteInfo.emoteCategory)				
-					name = ZO_PERSONALITY_EMOTES_COLOR:Colorize(emoteInfo.displayName)
-				else
-					icon = GAMEPAD_PLAYER_EMOTE:GetEmoteIconForCategory(emoteInfo.emoteCategory)
-					name = emoteInfo.displayName
-				end
+                if emoteInfo.isOverriddenByPersonality then
+                    icon = PLAYER_EMOTE_MANAGER:GetSharedPersonalityEmoteIconForCategory(emoteInfo.emoteCategory)
+                    name = ZO_PERSONALITY_EMOTES_COLOR:Colorize(emoteInfo.displayName)
+                else
+                    icon = PLAYER_EMOTE_MANAGER:GetSharedEmoteIconForCategory(emoteInfo.emoteCategory)
+                    name = emoteInfo.displayName
+                end
 
                 callback = function() PlayEmoteByIndex(emoteInfo.emoteIndex) end
             end
         elseif type == ACTION_TYPE_QUICK_CHAT then
             found = QUICK_CHAT_MANAGER:HasQuickChat(id)
             if found then
-                icon = QUICK_CHAT_MANAGER:GetQuickChatIcon()
+                icon = GetSharedQuickChatIcon()
                 name = QUICK_CHAT_MANAGER:GetFormattedQuickChatName(id)
                 callback = function() QUICK_CHAT_MANAGER:PlayQuickChat(id) end
             end
@@ -78,10 +82,32 @@ function ZO_PlayerEmoteQuickslot:PopulateMenu()
             local data = {name = name}
             self.menu:AddEntry(name, icon, icon, callback, data)
         else
-            self.menu:AddEntry(EMPTY_QUICKSLOT_STRING, EMPTY_QUICKSLOT_TEXTURE, EMPTY_QUICKSLOT_TEXTURE, nil, {name=EMPTY_QUICKSLOT_STRING})
+            self.menu:AddEntry(EMPTY_QUICKSLOT_STRING, EMPTY_QUICKSLOT_TEXTURE, EMPTY_QUICKSLOT_TEXTURE, nil, {name = EMPTY_QUICKSLOT_STRING})
         end
     end
 end
+
+--Emote Quickslot Radial Manager
+ZO_PlayerEmoteQuickslotRadialManager = ZO_InitializingObject:Subclass()
+
+function ZO_PlayerEmoteQuickslotRadialManager:StartInteraction()
+    self.gamepad = IsInGamepadPreferredMode()
+    if self.gamepad then
+        return PLAYER_EMOTE_QUICKSLOT_GAMEPAD:StartInteraction()
+    else
+        return PLAYER_EMOTE_QUICKSLOT_KEYBOARD:StartInteraction()
+    end
+end
+
+function ZO_PlayerEmoteQuickslotRadialManager:StopInteraction()
+    if self.gamepad then
+        return PLAYER_EMOTE_QUICKSLOT_GAMEPAD:StopInteraction()
+    else
+        return PLAYER_EMOTE_QUICKSLOT_KEYBOARD:StopInteraction()
+    end
+end
+
+PLAYER_EMOTE_QUICKSLOT_RADIAL_MANAGER = ZO_PlayerEmoteQuickslotRadialManager:New()
 
 -- Global Functions
 
@@ -90,6 +116,10 @@ function ZO_PlayerEmoteRadialMenuEntryTemplate_OnInitialized(self)
     ZO_SelectableItemRadialMenuEntryTemplate_OnInitialized(self)
 end
 
-function ZO_PlayerEmoteQuickslot_Initialize(control)
-    PLAYER_EMOTE_QUICKSLOT = ZO_PlayerEmoteQuickslot:New(control, "ZO_PlayerEmoteRadialMenuEntryTemplate", nil, "SelectableItemRadialMenuEntryAnimation")
+function ZO_PlayerEmoteQuickslot_Gamepad_Initialize(control)
+    PLAYER_EMOTE_QUICKSLOT_GAMEPAD = ZO_PlayerEmoteQuickslot:New(control, "ZO_PlayerEmoteRadialMenuEntryTemplate_Gamepad", nil, "SelectableItemRadialMenuEntryAnimation")
+end
+
+function ZO_PlayerEmoteQuickslot_Keyboard_Initialize(control)
+    PLAYER_EMOTE_QUICKSLOT_KEYBOARD = ZO_PlayerEmoteQuickslot:New(control, "ZO_PlayerEmoteRadialMenuEntryTemplate_Keyboard", nil, "SelectableItemRadialMenuEntryAnimation")
 end

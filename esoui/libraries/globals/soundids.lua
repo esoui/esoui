@@ -976,7 +976,7 @@ SOUNDS = {
     ANTIQUITIES_FANFARE_FAILURE = "Antiquities_Digging_Failure",
 
     -- Endeavors
-    ENDEAVOR_COMPLETED                     = "Endeavor_Complete",
+    ENDEAVOR_COMPLETED = "Endeavor_Complete",
 
     -- Armory
     ARMORY_OPEN = "Armory_Open",
@@ -984,4 +984,7 @@ SOUNDS = {
     ARMORY_SAVE_SUCCESS = "Armory_SaveBuild_Success",
     ARMORY_BUILD_SLOT_EXPANDED = "Armory_Expanded",
     ARMORY_BUILD_SLOT_COLLAPSED = "Armory_Collapsed",
+
+    -- Pregame Animated Background
+    PREGAME_ANIMATEDBACKGROUND_HIGHISLE_GEM_SPARKLE = "Pregame_AnimatedBackground_HighIsle_Gem_Sparkle",
 }

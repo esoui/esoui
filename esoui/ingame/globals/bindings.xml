@@ -319,8 +319,8 @@
             </Action>
 
             <Action name="UI_SHORTCUT_EMOTES_QUICK_SLOTS">
-                <Down>if IsInGamepadPreferredMode() then PLAYER_EMOTE_QUICKSLOT:StartInteraction() end</Down>
-                <Up>PLAYER_EMOTE_QUICKSLOT:StopInteraction()</Up>
+                <Down>if IsInGamepadPreferredMode() then PLAYER_EMOTE_QUICKSLOT_RADIAL_MANAGER:StartInteraction() end</Down>
+                <Up>PLAYER_EMOTE_QUICKSLOT_RADIAL_MANAGER:StopInteraction()</Up>
             </Action>
         </Category>
 
@@ -424,7 +424,7 @@
                 <Down> HELP_MANAGER:ToggleHelp() </Down>
             </Action>
 
-            <Action name="TOGGLE_SYSTEM" rebindable="false">
+            <Action name="TOGGLE_SYSTEM" rebindable="false" allowOnInputModeChange="true">
                 <Down>ZO_SceneManager_ToggleGameMenuBinding()</Down>
             </Action>
 
@@ -542,7 +542,7 @@
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_EXIT" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true">
+            <Action name="UI_SHORTCUT_EXIT" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true" allowOnInputModeChange="true">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
             </Action>
         </Category>
@@ -1139,6 +1139,16 @@
             <AllowAction name="GAMEPAD_JUMP_OR_INTERACT" />
             <AllowAction name="GAME_CAMERA_GAMEPAD_ZOOM" />
 
+            <!-- Keyboard specific -->
+            <AllowAction name="MOVE_JUMPASCEND" />
+            <AllowAction name="CAMERA_ZOOM_IN" />
+            <AllowAction name="CAMERA_ZOOM_OUT" />
+            <AllowAction name="MOVE_FORWARD" />
+            <AllowAction name="MOVE_BACKWARD" />
+            <AllowAction name="TURN_LEFT" />
+            <AllowAction name="TURN_RIGHT" />
+            <AllowAction name="TAKE_SCREENSHOT" />
+
             <Action name="SCREENSHOT_MODE_EXIT" hideAction="true" rebindable="false">
                 <Down>
                     SCREENSHOT_MODE_GAMEPAD:ExitKeybind()
@@ -1348,8 +1358,7 @@
     <Layer name="AntiquityDiggingActions">
         <Category>
             <Action name="ANTIQUITY_DIGGING_MORE_INFO">
-                <Down> return ANTIQUITY_DIGGING:OnShowMoreInfoKeybindPressed() </Down>
-                <Up> return ANTIQUITY_DIGGING:OnShowMoreInfoKeybindReleased() </Up>
+                <Down> return ANTIQUITY_DIGGING:ToggleShowMoreInfoTooltip() </Down>
             </Action>
         </Category>
     </Layer>

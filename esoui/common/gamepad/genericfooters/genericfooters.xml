@@ -16,7 +16,7 @@
                 ZO_GenericFooter_Gamepad_OnHidden(self)
             </OnEffectivelyHidden>
 
-            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-64"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-64"/>
 
             <Controls>
                 <Label name="$(parent)Data1" inherits="ZO_GamepadGenericFooterHeaderDataTextTemplate">

@@ -1,12 +1,5 @@
-local LoreLibrary = ZO_Object:Subclass()
+local LoreLibrary = ZO_InitializingObject:Subclass()
 local LoreLibraryScrollList
-
-function LoreLibrary:New(...)
-    local loreLibrary = ZO_Object.New(self)
-    loreLibrary:Initialize(...)
-    
-    return loreLibrary
-end
 
 function LoreLibrary:Initialize(control)
     control.owner = self
@@ -24,6 +17,10 @@ function LoreLibrary:Initialize(control)
     local function OnStateChanged(oldState, newState)
         if newState == SCENE_SHOWING then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+
+            if self.collectionIdToSelect then
+                self.dirty = true
+            end
         elseif newState == SCENE_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         end
@@ -53,6 +50,8 @@ function LoreLibrary:InitializeCategoryList(control)
         if selected then
             self:BuildBookList()
         end
+
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
     local function TreeEntryEquality(left, right)
         return left.categoryIndex == right.categoryIndex and left.collectionIndex == right.collectionIndex
@@ -88,6 +87,10 @@ function LoreLibrary:OnShow()
     if self.dirty then
         self:BuildCategoryList()
     end
+end
+
+function LoreLibrary:SetCollectionIdToSelect(collectionId)
+    self.collectionIdToSelect = collectionId
 end
 
 function LoreLibrary:GetSelectedCategoryIndex()
@@ -137,6 +140,7 @@ function LoreLibrary:BuildCategoryList()
 
     table.sort(categories, NameSorter)
 
+    local collectionNodeToSelect = nil
     for i, categoryData in ipairs(categories) do
         local parent = self.navigationTree:AddNode("ZO_LabelHeader", categoryData)
 
@@ -146,9 +150,9 @@ function LoreLibrary:BuildCategoryList()
         local collections = {}
 
         for collectionIndex = 1, numCollections do
-            local collectionName, description, numKnownBooks, totalBooks, hidden = GetLoreCollectionInfo(categoryIndex, collectionIndex)
+            local collectionName, description, numKnownBooks, totalBooks, hidden, _, collectionId = GetLoreCollectionInfo(categoryIndex, collectionIndex)
             if not hidden then
-                collections[#collections + 1] = { categoryIndex = categoryIndex, collectionIndex = collectionIndex, name = collectionName, description = description, numKnownBooks = numKnownBooks, totalBooks = totalBooks }
+                collections[#collections + 1] = { categoryIndex = categoryIndex, collectionIndex = collectionIndex, name = collectionName, description = description, numKnownBooks = numKnownBooks, totalBooks = totalBooks, collectionId = collectionId }
 
                 self.totalCurrentlyCollected = self.totalCurrentlyCollected + numKnownBooks
                 self.totalPossibleCollected = self.totalPossibleCollected + totalBooks
@@ -156,18 +160,23 @@ function LoreLibrary:BuildCategoryList()
         end
 
         table.sort(collections, NameSorter)
-        
+
         for k, collectionData in ipairs(collections) do
-            self.navigationTree:AddNode("ZO_LoreLibraryNavigationEntry", collectionData, parent)
+            local node = self.navigationTree:AddNode("ZO_LoreLibraryNavigationEntry", collectionData, parent)
+
+            if self.collectionIdToSelect and self.collectionIdToSelect == collectionData.collectionId then
+                collectionNodeToSelect = node
+            end
         end
     end
 
-    self.navigationTree:Commit()
+    self.navigationTree:Commit(collectionNodeToSelect, true)
 
     self:RefreshCollectedInfo()
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
+    self.collectionIdToSelect = nil
     self.dirty = false
 end
 
@@ -184,6 +193,26 @@ function LoreLibrary:InitializeKeybindStripDescriptors()
                 ZO_LoreLibrary_ReadBook(self.list:GetMouseOverRow().categoryIndex, self.list:GetMouseOverRow().collectionIndex, self.list:GetMouseOverRow().bookIndex)
             end,
         },
+        -- Open in Achievements
+        {
+            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            name = GetString(SI_LORE_LIBRARY_TO_ACHIEVEMENT_ACTION),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            visible = function()
+                local targetData = self.navigationTree:GetSelectedData()
+                if targetData then
+                    local achievementId = GetLoreBookCollectionLinkedAchievement(targetData.categoryIndex, targetData.collectionIndex)
+                    return achievementId ~= 0
+                end
+                return false
+            end,
+            callback = function()
+                local targetData = self.navigationTree:GetSelectedData()
+                local achievementId = GetLoreBookCollectionLinkedAchievement(targetData.categoryIndex, targetData.collectionIndex)
+                SYSTEMS:GetObject("achievements"):ShowAchievement(achievementId)
+                MAIN_MENU_KEYBOARD:ShowScene("achievements")
+            end,
+        },
     }
 end
 
@@ -193,10 +222,6 @@ end
 
 LoreLibraryScrollList = ZO_SortFilterList:Subclass()
 local BOOK_DATA_TYPE = 1
-
-function LoreLibraryScrollList:New(...)
-    return ZO_SortFilterList.New(self, ...)
-end
 
 function LoreLibraryScrollList:Initialize(control, owner)
     ZO_SortFilterList.Initialize(self, control, owner)

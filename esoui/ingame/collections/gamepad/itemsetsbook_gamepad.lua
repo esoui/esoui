@@ -563,7 +563,7 @@ function ZO_ItemSetsBook_Gamepad_Base:InitializeKeybindStripDescriptors()
 
         FILTERS_KEYBIND,
     }
-    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.subcategoryKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
+    ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.subcategoryKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
         self:ShowListDescriptor(self.categoryListDescriptor)
     end)
 

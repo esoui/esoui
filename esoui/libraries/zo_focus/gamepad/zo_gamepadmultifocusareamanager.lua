@@ -30,7 +30,16 @@ function ZO_GamepadMultiFocusArea_Base:SetNextSibling(next)
 end
 
 function ZO_GamepadMultiFocusArea_Base:SetKeybindDescriptor(keybindDescriptor)
+    if self.active and self.keybindDescriptor then
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindDescriptor)
+    end
+
     self.keybindDescriptor = keybindDescriptor
+
+    -- If set active before keybindDescriptor was set, add keybindDescriptor to the keybind strip
+    if self.active and self.keybindDescriptor then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindDescriptor)
+    end
 end
 
 function ZO_GamepadMultiFocusArea_Base:AppendKeybind(keybind)

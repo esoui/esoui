@@ -47,6 +47,12 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_MultipleCraftingSkills_SkillLineInfo_Keyboard" inherits="ZO_Skills_SkillLineInfo_Keyboard" alpha="0" virtual="true">
+            <OnInitialized>
+                ZO_MultipleCraftingSkillsXpBar_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+
         <Button name="ZO_Skills_AbilitySlot" virtual="true" level="1">
             <Dimensions x="56" y="56"/>
             <Textures

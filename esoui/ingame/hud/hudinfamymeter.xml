@@ -38,7 +38,7 @@
     <Controls>
         <Control name="ZO_HUDInfamyMeter_KeyboardTemplate" virtual="true" >
             <Dimensions x="INFAMY_METER_WIDTH" y="INFAMY_METER_HEIGHT" />
-            <Anchor point="BOTTOMRIGHT" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
             <Controls>
                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/HUD/infamy_meter-back-grey_px_per.dds" level="1">
                     <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
@@ -74,7 +74,7 @@
 
         <Control name="ZO_HUDInfamyMeter_GamepadTemplate" virtual="true" >
             <Dimensions x="INFAMY_METER_WIDTH" y="INFAMY_METER_HEIGHT" />
-            <Anchor point="BOTTOMLEFT" offsetX="5" offsetY="-5" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="5" offsetY="-5" />
             <Controls>
                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-back-grey_px_per.dds" level="1">
                     <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />

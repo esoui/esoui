@@ -1,8 +1,8 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="LegalAgreementsScreen_Gamepad" hidden="true">
-            <Anchor point="TOPLEFT" offsetX="260" offsetY="ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
-            <Anchor point="BOTTOMRIGHT" offsetX="-260" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="260" offsetY="ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-260" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
             
             <OnInitialized>
                 ZO_LegalAgreementsScreen_Gamepad_Initialize(self)

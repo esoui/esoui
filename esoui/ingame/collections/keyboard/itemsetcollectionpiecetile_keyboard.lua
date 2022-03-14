@@ -27,7 +27,7 @@ function ZO_ItemSetCollectionPieceTile_Keyboard:PostInitializePlatform()
     {
         keybind = "UI_SHORTCUT_PRIMARY",
 
-        name = GetString(SI_ITEM_RECONSTRUCTION_SELECT), -- TODO: May need two strings depending on design
+        name = GetString(SI_ITEM_RECONSTRUCTION_SELECT),
 
         callback = function()
             self:ShowReconstructOptions()

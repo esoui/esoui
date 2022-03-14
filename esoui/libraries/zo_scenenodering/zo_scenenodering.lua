@@ -52,7 +52,7 @@ function ZO_SceneNodeRing:RefreshNodePositions()
         --padding is on both side of a node
         totalPadding = totalPadding * 2
 
-        local nodeArcSize = (2 * math.pi - totalPadding) / #self.ringNodes
+        local nodeArcSize = (ZO_TWO_PI - totalPadding) / #self.ringNodes
         local currentAngle = 0
         for i, node in ipairs(self.ringNodes) do
             local nextNodeIndex = i % #self.ringNodes + 1
@@ -87,19 +87,19 @@ function ZO_SceneNodeRing:GetAngle()
 end
 
 function ZO_SceneNodeRing:SetAngle(angle)
-    self.currentAngle = angle % (2 * math.pi)
+    self.currentAngle = angle % ZO_TWO_PI
     self.rootNode:SetRotation(self.currentAngle)
 end
 
 function ZO_SceneNodeRing:GetNodeAtAngle(radians)
-    radians = (radians - self.rootNode:GetRotation()) % (2 * math.pi)
+    radians = (radians - self.rootNode:GetRotation()) % ZO_TWO_PI
     local closestNode
     local closestDistance
     for _, node in ipairs(self.ringNodes) do
         local nodeAngle = node:GetRotation()
         local distance = zo_abs(nodeAngle - radians)
-        if distance > math.pi then
-            distance = 2 * math.pi - distance
+        if distance > ZO_PI then
+            distance = ZO_TWO_PI - distance
         end
         if not closestNode or distance < closestDistance then
             closestNode = node

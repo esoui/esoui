@@ -27,6 +27,10 @@
             <Dimensions x="607" />
         </Label>
 
+        <Label name="ZO_AdvancedStatsHeader" inherits="ZO_StatsHeader ZO_TooltipIfTruncatedLabel" wrapMode="ELLIPSIS" maxLineCount="1" virtual="true">
+            <Dimensions x="295" />
+        </Label>
+
         <Control name="ZO_AttributesHeader" virtual="true">
             <Dimensions x="607"/>
             <Controls>

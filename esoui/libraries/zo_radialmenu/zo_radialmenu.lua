@@ -213,7 +213,7 @@ end
 
 do
     local atan2 = math.atan2
-    local ROTATION_OFFSET = 3 * math.pi / 2
+    local ROTATION_OFFSET = 3 * ZO_HALF_PI
 
     function ZO_RadialMenu:UpdateSelectedEntryFromVirtualMousePosition(suppressSound)
         self:FindSelectedEntry(self.virtualMouseX, self.virtualMouseY, suppressSound)
@@ -246,64 +246,60 @@ do
     end 
 end
 
-do
-    local TWO_PI = math.pi * 2
+function ZO_RadialMenu:PerformLayout()
+    local width, height = self.control:GetDimensions()
+    local halfWidth, halfHeight = width / 2 / self.control:GetScale(), height / 2 / self.control:GetScale()
+    local numEntries = #self.entries
+    local halfSliceSize = ZO_TWO_PI / numEntries / 2
 
-    function ZO_RadialMenu:PerformLayout()
-        local width, height = self.control:GetDimensions()
-        local halfWidth, halfHeight = width / 2 / self.control:GetScale(), height / 2 / self.control:GetScale()
-        local numEntries = #self.entries
-        local halfSliceSize = TWO_PI / numEntries / 2
+    self.entryPool:ReleaseAllObjects()
 
-        self.entryPool:ReleaseAllObjects()
+    local initialRotation = #self.entries == 2 and ZO_HALF_PI or 0
 
-        local initialRotation = #self.entries == 2 and math.pi / 2 or 0
+    -- For this circle, 0 rotation points straight down from the circle's center and rotation is in CCW direction.
+    for i, entry in ipairs(self.entries) do
+        local centerAngle = initialRotation + i / numEntries * ZO_TWO_PI
+        local x = math.sin(centerAngle)
+        local y = math.cos(centerAngle)
 
-        -- For this circle, 0 rotation points straight down from the circle's center and rotation is in CCW direction.
-        for i, entry in ipairs(self.entries) do
-            local centerAngle = initialRotation + i / numEntries * TWO_PI
-            local x = math.sin(centerAngle)
-            local y = math.cos(centerAngle)
+        --- math.sin is returning very small numbers instead of 0 for PI and TWO_PI
+        if math.abs(x) < 0.01 then
+            x = 0
+        end
 
-            --- math.sin is returning very small numbers instead of 0 for PI and TWO_PI
-            if math.abs(x) < 0.01 then
-                x = 0
-            end
+        local entryControl = self.entryPool:AcquireObject()
+        if entryControl.icon then
+            entryControl.icon:SetTexture(entry.inactiveIcon)
 
-            local entryControl = self.entryPool:AcquireObject()
-            if entryControl.icon then
-                entryControl.icon:SetTexture(entry.inactiveIcon)
-
-                if entryControl.label then
-                    entryControl.label:ClearAnchors()
-                    if x > 0 then
-                        entryControl.label:SetAnchor(LEFT, entryControl.icon, RIGHT, 15, 0)
-                    elseif x < 0 then
-                        entryControl.label:SetAnchor(RIGHT, entryControl.icon, LEFT, -15, 0)
-                    elseif y > 0 then        
-                        entryControl.label:SetAnchor(TOP, entryControl.icon, BOTTOM, 0, 0)
-                    else
-                        entryControl.label:SetAnchor(BOTTOM, entryControl.icon, TOP, 0, -5)
-                    end
+            if entryControl.label then
+                entryControl.label:ClearAnchors()
+                if x > 0 then
+                    entryControl.label:SetAnchor(LEFT, entryControl.icon, RIGHT, 15, 0)
+                elseif x < 0 then
+                    entryControl.label:SetAnchor(RIGHT, entryControl.icon, LEFT, -15, 0)
+                elseif y > 0 then        
+                    entryControl.label:SetAnchor(TOP, entryControl.icon, BOTTOM, 0, 0)
+                else
+                    entryControl.label:SetAnchor(BOTTOM, entryControl.icon, TOP, 0, -5)
                 end
             end
-
-            if self.setupFunction then
-                self.setupFunction(entryControl, entry.data)
-            end
-
-            entryControl:SetAnchor(CENTER, nil, CENTER, x * halfWidth, y * halfHeight)
-            entryControl:SetHidden(false)
-
-            entryControl.startX = math.sin(centerAngle - halfSliceSize)
-            entryControl.startY = math.cos(centerAngle - halfSliceSize)
-
-            entryControl.endX = math.sin(centerAngle + halfSliceSize)
-            entryControl.endY = math.cos(centerAngle + halfSliceSize)
-
-            entryControl.entry = entry
-            entry.control = entryControl
         end
+
+        if self.setupFunction then
+            self.setupFunction(entryControl, entry.data)
+        end
+
+        entryControl:SetAnchor(CENTER, nil, CENTER, x * halfWidth, y * halfHeight)
+        entryControl:SetHidden(false)
+
+        entryControl.startX = math.sin(centerAngle - halfSliceSize)
+        entryControl.startY = math.cos(centerAngle - halfSliceSize)
+
+        entryControl.endX = math.sin(centerAngle + halfSliceSize)
+        entryControl.endY = math.cos(centerAngle + halfSliceSize)
+
+        entryControl.entry = entry
+        entry.control = entryControl
     end
 end
 
@@ -316,13 +312,28 @@ function ZO_RadialMenu:AddEntry(name, inactiveIcon, activeIcon, callback, data)
     self.entries[#self.entries + 1] = { name = name, inactiveIcon = inactiveIcon, activeIcon = activeIcon, callback = callback, data = data }
 end
 
-function ZO_RadialMenu:UpdateEntry(name, inactiveIcon, activeIcon, callback, data)
-    for i = 1, #self.entries do
+function ZO_RadialMenu:UpdateEntriesByName(name, inactiveIcon, activeIcon, callback, data)
+    for i, entry in ipairs(self.entries) do
         if self.entries[i].name == name then
             self.entries[i].inactiveIcon = inactiveIcon
-            self.entries[i].activeIcon= activeIcon
-            self.entries[i].callback= callback
+            self.entries[i].activeIcon = activeIcon
+            self.entries[i].callback = callback
             self.entries[i].data = data
+        end
+    end
+
+    self:Refresh()
+end
+
+function ZO_RadialMenu:UpdateFirstEntryByFilter(filterFunction, name, inactiveIcon, activeIcon, callback, data)
+    for i, entry in ipairs(self.entries) do
+        if filterFunction(entry) then
+            self.entries[i].name = name
+            self.entries[i].inactiveIcon = inactiveIcon
+            self.entries[i].activeIcon = activeIcon
+            self.entries[i].callback = callback
+            self.entries[i].data = data
+            break
         end
     end
 

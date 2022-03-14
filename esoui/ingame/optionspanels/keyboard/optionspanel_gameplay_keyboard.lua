@@ -172,6 +172,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_KeybindDisplayMode",
+    settingType = SETTING_TYPE_GAMEPAD,
+    settingId = GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE,
+    header = SI_GAMEPAD_SECTION_HEADER,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Gameplay_UseKeyboardChat",
     settingType = SETTING_TYPE_GAMEPAD,
     settingId = GAMEPAD_SETTING_USE_KEYBOARD_CHAT,

@@ -460,7 +460,7 @@
         </Control>
         
         <TopLevelControl name="ZO_DeathRecap" hidden="true">
-            <Anchor point="TOP" offsetY="105" />
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="105" />
             <Dimensions x="752" y="726" />
             <OnInitialized>
                 ZO_DeathRecap_OnInitialized(self)

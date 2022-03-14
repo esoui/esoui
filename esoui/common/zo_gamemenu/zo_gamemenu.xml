@@ -28,8 +28,8 @@
 
         <TopLevelControl name="ZO_GameMenu_Template" virtual="true">
             <Dimensions x="210" />
-            <Anchor point="TOPLEFT" />
-            <Anchor point="BOTTOMLEFT" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
             <OnShow>
                 ZO_GameMenu_OnShow(self)
             </OnShow>

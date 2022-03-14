@@ -17,7 +17,7 @@
         </Control>
         
         <TopLevelControl name="ZO_StorePanelTabContainer" resizeToFitDescendents="true" hidden="true">
-            <Anchor point="TOP" offsetY="12"/>
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="12"/>
         </TopLevelControl>
 
         <!-- Buy Multiple Dialog -->

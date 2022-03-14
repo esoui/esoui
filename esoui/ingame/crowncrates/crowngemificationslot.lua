@@ -38,7 +38,7 @@ end
 
 function ZO_ManualGemifySwing_OnUpdate(animation, progress)
     local control = animation:GetAnimatedControl()
-    local waveValue = -1 * math.sin(progress * math.pi)
+    local waveValue = -1 * math.sin(progress * ZO_PI)
     local magnitudeValue = zo_lerp(ZO_MANUAL_GEMIFY_SET_SWING_START_MAGNITUDE_DEGREES, ZO_MANUAL_GEMIFY_SET_SWING_END_MAGNITUDE_DEGREES, progress)
     control:Set3DRenderSpaceOrientation(math.rad(waveValue * magnitudeValue + ZO_GEMIFY_CARD_PITCH_OFFSET_DEGREES), 0, 0)
 end

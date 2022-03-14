@@ -651,6 +651,8 @@ function ZO_ChampionStarEditor:Release()
         starTexture.mouseInputGroup:RemoveAll(ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
     end
     self.control:SetHidden(true)
+    self.pointsSpinner.decreaseKeyLabel:SetHidden(true)
+    self.pointsSpinner.increaseKeyLabel:SetHidden(true)
     self.fadeIn:PlayInstantlyToStart()
     self.star = nil
 end

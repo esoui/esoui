@@ -68,10 +68,13 @@ end
 
 --Quickslot Radial Manager
 
-local QuickslotSlotRadialManager = ZO_Object:Subclass()
+local QuickslotSlotRadialManager = ZO_InitializingObject:Subclass()
 
-function QuickslotSlotRadialManager:New()
-    return ZO_Object.New(self)
+function QuickslotSlotRadialManager:Initialize()
+    EVENT_MANAGER:RegisterForEvent("QuickslotSlotRadialManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
+        local CLEAR_SELECTION = true
+        self:StopInteraction(CLEAR_SELECTION) 
+    end)
 end
 
 function QuickslotSlotRadialManager:StartInteraction()
@@ -83,11 +86,11 @@ function QuickslotSlotRadialManager:StartInteraction()
     end
 end
 
-function QuickslotSlotRadialManager:StopInteraction()
+function QuickslotSlotRadialManager:StopInteraction(clearSelection)
     if self.gamepad then
-        return QUICKSLOT_RADIAL_GAMEPAD:StopInteraction()
+        return QUICKSLOT_RADIAL_GAMEPAD:StopInteraction(clearSelection)
     else
-        return QUICKSLOT_RADIAL_KEYBOARD:StopInteraction()
+        return QUICKSLOT_RADIAL_KEYBOARD:StopInteraction(clearSelection)
     end
 end
 

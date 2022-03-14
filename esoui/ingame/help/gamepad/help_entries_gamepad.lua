@@ -15,6 +15,15 @@ function HelpTutorialsEntriesGamepad:Initialize(control)
         self:OnStateChanged(...)
     end
     HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE:RegisterCallback("StateChange", OnStateChanged)
+
+    local function OnLinkClicked(...)
+        if IsInGamepadPreferredMode() then
+            return self.OnLinkClicked(...)
+        end
+    end
+
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, OnLinkClicked, self)
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, OnLinkClicked, self)
 end
 
 function HelpTutorialsEntriesGamepad:SelectOrQueueHelpEntry(categoryIndex, helpIndex)
@@ -135,6 +144,16 @@ function HelpTutorialsEntriesGamepad:OnSelectionChanged(list, selectedData, oldS
     end
 
     HELP_TUTORIAL_DISPLAY_GAMEPAD:ShowHelp(self.categoryIndex, selectedData.helpIndex)
+end
+
+function HelpTutorialsEntriesGamepad:OnLinkClicked(link, button, text, color, linkType, ...)
+    if linkType == HELP_LINK_TYPE and button == MOUSE_BUTTON_INDEX_LEFT then
+        local helpCategoryIndex, helpIndex = GetHelpIndicesFromHelpLink(link)
+        if helpCategoryIndex and helpIndex then
+            self:Push(helpCategoryIndex, helpIndex)
+        end
+        return true
+    end
 end
 
 function ZO_Gamepad_Tutorials_Entries_OnInitialize(control)

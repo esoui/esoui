@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="ZO_OverflowDialog" layer="OVERLAY" tier="HIGH" inherits="ZO_CustomDialogBase" resizeToFitDescendents="false">
             <Dimensions x="750" y="430" />
-            <Anchor point="CENTER" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
             <OnInitialized>
                 ZO_OverflowDialogInitialize(self)
             </OnInitialized>

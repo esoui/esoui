@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="ZO_CompanionOverview_Panel_Keyboard" hidden="true">
             <Dimensions x="615" y="690" />
-            <Anchor point="RIGHT" offsetY="32" />       
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="32" />
             <OnInitialized>
                 ZO_CompanionOverview_Keyboard_OnInitialize(self)
             </OnInitialized>

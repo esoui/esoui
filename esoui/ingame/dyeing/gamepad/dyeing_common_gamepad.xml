@@ -13,19 +13,19 @@
                     <AnchorFill/>
                 </Texture>
 
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Dye/Gamepad/gp_EmptySwatch-Diag_4px.dds" addressMode="WRAP" level="1">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Swatch" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Swatch" />
+                </Texture>
+
                 <Backdrop name="$(parent)EdgeFrame" inherits="ZO_GamepadNormalOutlineHighlight" tier="HIGH">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Background" offsetX="-4" offsetY="-4"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" offsetX="4" offsetY="4"/>
-                </Backdrop>     
-
-                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Dye/Gamepad/gp_EmptySwatch-Diag_4px.dds" addressMode="WRAP" level="1">
-                    <Anchor point="TOPLEFT" relativeTo="($parent)Swatch" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="($parent)Swatch" />
-                </Texture>
+                </Backdrop>
 
                 <Texture name="$(parent)BadSlot" textureFile="EsoUI/Art/Dye/Gamepad/gp_Disabled_X.dds" tier="HIGH" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
-                    <Anchor point="TOPLEFT" relativeTo="($parent)Swatch" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="($parent)Swatch" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Swatch" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Swatch" />
                 </Texture>
             </Controls>
         </Control>

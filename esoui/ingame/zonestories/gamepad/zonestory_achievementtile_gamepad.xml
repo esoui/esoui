@@ -11,6 +11,13 @@
                 <Texture name="$(parent)Icon" override="true" level="2" layer="CONTROLS">
                     <Dimensions x="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_ICON_DIMENSIONS" y="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_ICON_DIMENSIONS" />
                     <Anchor point="LEFT" offsetX="14" />
+
+                    <Controls>
+                        <Texture name="$(parent)CharacterFrame" textureFile="EsoUI/Art/Achievements/Gamepad/gp_achievement_character_icon_frame.dds" layer="OVERLAY" hidden="true">
+                            <Anchor point="TOPLEFT" offsetX="-15" offsetY="-15" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="15" offsetY="15" />
+                        </Texture>
+                    </Controls>
                 </Texture>
 
                 <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame" tier="LOW" />

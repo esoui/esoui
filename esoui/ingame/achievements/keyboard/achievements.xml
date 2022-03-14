@@ -12,6 +12,8 @@
     </Animations>
     
     <Controls>
+        <Texture name="ZO_AchievementIconCharacterFrameBorder" textureFile="EsoUI/Art/Achievements/achievement_character_icon_frame.dds" layer="OVERLAY" hidden="true" virtual="true" />
+
         <Label name="ZO_AchievementsDefaultLabel_Keyboard" font="ZoFontWinH5" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
         <Label name="ZO_AchievementsLargeLabel_Keyboard" inherits="ZO_AchievementsDefaultLabel_Keyboard" font="ZoFontWinH2" modifyTextType="UPPERCASE" virtual="true" />
 
@@ -246,7 +248,7 @@
         
         <TopLevelControl name="ZO_AchievementPopup" hidden="true" clampedToScreen="true" movable="true" mouseEnabled="true" tier="HIGH" level="ZO_HIGH_TIER_TOOLTIPS">
             <Dimensions x="565" y="88" />
-            <Anchor point="CENTER" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
                     <Anchor point="TOPLEFT" offsetX="28" />
@@ -267,7 +269,7 @@
 
         <TopLevelControl name="ZO_AchievementTooltip" hidden="true" clampedToScreen="true" tier="HIGH" level="ZO_HIGH_TIER_TOOLTIPS">
             <Dimensions x="565" y="88" />
-            <Anchor point="CENTER" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
                     <Anchor point="TOPLEFT" />

@@ -1011,7 +1011,11 @@ ZO_TOOLTIP_STYLES =
     {
         fontColorField = GENERAL_COLOR_WHITE,
     },
-
+    achievementCharacterHeading =
+    {
+        fontColorType = INTERFACE_COLOR_TYPE_TEXT_COLORS,
+        fontColorField = INTERFACE_TEXT_COLOR_SECOND_SELECTED,
+    },
     attributeStatsSection =
     {
         paddingTop = 100,

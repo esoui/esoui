@@ -276,7 +276,7 @@
 
         <TopLevelControl name="ZO_GenericCenteredGamepadDialogTemplate" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
             <Dimensions x="930" y="480" />
-            <Anchor point="TOP" offsetY="228"/>
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="228"/>
 
             <OnInitialized>
                 ZO_GenericCenteredGamepadDialogTemplate_OnInitialized(self)
@@ -350,7 +350,7 @@
         </TopLevelControl>
 
         <TopLevelControl name="ZO_CustomCenteredGamepadDialogTemplate" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
-            <Anchor point="CENTER" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
 
             <OnInitialized>
                 ZO_CustomCenteredGamepadDialogTemplate_OnInitialized(self)

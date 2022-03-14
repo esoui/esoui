@@ -41,7 +41,7 @@ gamepadMarketContentListScene:AddFragment(MARKET_CURRENCY_GAMEPAD_FRAGMENT)
 gamepadMarketContentListScene:AddFragment(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT)
 gamepadMarketContentListScene:AddFragment(GAMEPAD_MARKET_LIST_FRAGMENT)
 gamepadMarketContentListScene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
-gamepadMarketContentListScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
+gamepadMarketContentListScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
 
 GAMEPAD_MARKET_SCENE_GROUP = ZO_SceneGroup:New(
                                         ZO_GAMEPAD_MARKET_SCENE_NAME,
@@ -69,7 +69,7 @@ gamepadMailScene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
 
 local codeRedemptionGamepadScene = SCENE_MANAGER:GetScene("codeRedemptionGamepad")
 codeRedemptionGamepadScene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
-codeRedemptionGamepadScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
+codeRedemptionGamepadScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
 codeRedemptionGamepadScene:AddFragment(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT)
 
 ------------------------------------

@@ -133,7 +133,7 @@
         </Label>
 
         <TopLevelControl name="ZO_ClaimLevelUpRewardsScreen_Keyboard" hidden="true">
-            <Anchor point="TOPLEFT" relativePoint="LEFT" offsetY="-365" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT" offsetY="-365" />
             <Dimensions x="ZO_LEVEL_UP_REWARDS_KEYBOARD_SCREEN_WIDTH"/>
 
             <OnInitialized>

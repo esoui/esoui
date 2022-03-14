@@ -146,13 +146,13 @@ function ZO_PointerBox_Keyboard:RefreshArrow()
             arrowTexture:SetTextureCoordsRotation(0)
         elseif self.point == RIGHT then
             arrowTexture:SetAnchor(CENTER, nil, RIGHT, ZO_POINTER_BOX_ARROW_CENTER_OFFSET_FROM_BOX_SIDE, 0)
-            arrowTexture:SetTextureCoordsRotation(math.pi)
+            arrowTexture:SetTextureCoordsRotation(ZO_PI)
         elseif self.point == TOP then
             arrowTexture:SetAnchor(CENTER, nil, TOP, 0, -ZO_POINTER_BOX_ARROW_CENTER_OFFSET_FROM_BOX_SIDE)
-            arrowTexture:SetTextureCoordsRotation(1.5 * math.pi)
+            arrowTexture:SetTextureCoordsRotation(1.5 * ZO_PI)
         else
             arrowTexture:SetAnchor(CENTER, nil, BOTTOM, 0, ZO_POINTER_BOX_ARROW_CENTER_OFFSET_FROM_BOX_SIDE)
-            arrowTexture:SetTextureCoordsRotation(0.5 * math.pi)
+            arrowTexture:SetTextureCoordsRotation(ZO_HALF_PI)
         end
     end
 end

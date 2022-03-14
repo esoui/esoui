@@ -158,8 +158,8 @@
 
         <TopLevelControl name="ZO_CharacterSelect" layer="TEXT" hidden="true" mouseEnabled="true">
             <Dimensions x="410" />
-            <Anchor point="TOPRIGHT" />
-            <Anchor point="BOTTOMRIGHT" />
+            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
 
             <OnInitialized>
               ZO_CharacterSelect_Initialize(self)
@@ -334,7 +334,7 @@
                             <Controls>
                                 <Control name="$(parent)SelectionIndicator" tier="MEDIUM" layer="OVERLAY" override="true">
                                     <ClearAnchors />
-                                    <Anchor point="TOP" relativeTo="$(parent)Carousel" relativePoint="BOTTOM" offsetY="20"/>
+                                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="20"/>
                                 </Control>
 
                                 <Scroll name="$(parent)Scroll" override="true">

@@ -20,17 +20,21 @@ function Achievements_Manager:Initialize()
     self.searchString = ""
     self.searchResults = {}
 
+    -- ESO-747009: Ensure that the last search string stored in C++ is reset when we reinitialize UI
+    StartAchievementSearch("")
+
     local function OnAchievementsUpdated()
         -- When the data is getting rebuilt, the indicies can change so our old search results are no longer any good
         if self:GetSearchResults() then
             local currentSearch = self.searchString
             ZO_ClearTable(self.searchResults)
-            self:SetSearchString("")
-            self:SetSearchString(currentSearch)
+            local FORCE_REFRESH = true
+            self:SetSearchString(currentSearch, FORCE_REFRESH)
         end
     end
 
     EVENT_MANAGER:RegisterForEvent("Achievements_Manager", EVENT_ACHIEVEMENTS_UPDATED, OnAchievementsUpdated)
+    EVENT_MANAGER:RegisterForEvent("Achievements_Manager", EVENT_ACHIEVEMENT_AWARDED, OnAchievementsUpdated)
     EVENT_MANAGER:RegisterForEvent("Achievements_Manager", EVENT_ACHIEVEMENTS_SEARCH_RESULTS_READY, function() self:UpdateSearchResults() end)
 end
 
@@ -47,12 +51,21 @@ function Achievements_Manager:ClearSearch(requiresImmediateRefresh)
     end
 end
 
-function Achievements_Manager:SetSearchString(searchString)
-    self.searchString = searchString or ""
-    StartAchievementSearch(self.searchString)
+function Achievements_Manager:SetSearchString(searchString, forceRefresh)
+    if forceRefresh or (self.searchString ~= (searchString or "")) then
+        self.requestingSearchResults = true
+        self.searchString = searchString or ""
+        StartAchievementSearch(self.searchString, forceRefresh)
+    end
+end
+
+function Achievements_Manager:IsRequestingSearchResults()
+    return self.requestingSearchResults
 end
 
 function Achievements_Manager:UpdateSearchResults()
+    self.requestingSearchResults = false
+
     ZO_ClearTable(self.searchResults)
 
     local searchResults = self.searchResults

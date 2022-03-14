@@ -11,6 +11,7 @@ function ZO_ZoneStory_AchievementTile:Initialize(...)
     local control = self.control
     local contentControl = control:GetNamedChild("TextContainer")
     self.iconControl = control:GetNamedChild("Icon")
+    self.characterFrame = self.iconControl:GetNamedChild("CharacterFrame")
     self.titleControl = contentControl:GetNamedChild("Title")
     self.statusControl = contentControl:GetNamedChild("Status")
 end
@@ -22,19 +23,34 @@ function ZO_ZoneStory_AchievementTile:Layout(data)
 
     local name, _, _, icon, completed, date = GetAchievementInfo(data.achievementId)
 
+    local persistenceLevel = GetAchievementPersistenceLevel(self.achievementId)
+    local isCharacterPersistent = persistenceLevel == ACHIEVEMENT_PERSISTENCE_CHARACTER
+    if isCharacterPersistent then
+        local frameColor = completed and ZO_SECOND_SELECTED_TEXT or ZO_SECOND_NORMAL_TEXT
+        self.characterFrame:SetColor(frameColor:UnpackRGBA())
+        self.characterFrame:SetHidden(false)
+
+    else
+        self.characterFrame:SetHidden(true)
+    end
+
     self.iconControl:SetTexture(icon)
-    self:SetTitle(zo_strformat(name), completed)
+    self:SetTitle(zo_strformat(name), completed, isCharacterPersistent)
     self:SetStatus(date)
 end
 
-function ZO_ZoneStory_AchievementTile:SetTitle(title, completed)
+function ZO_ZoneStory_AchievementTile:SetTitle(title, completed, isCharacterPersistent)
     local control = self.titleControl
-    control:SetText(title)
-    if completed then
-        control:SetColor(ZO_SELECTED_TEXT:UnpackRGB())
+    local titleColor
+
+    if isCharacterPersistent then
+        titleColor = completed and ZO_SECOND_SELECTED_TEXT or ZO_SECOND_NORMAL_TEXT
     else
-        control:SetColor(ZO_DEFAULT_TEXT:UnpackRGB())
+        titleColor = completed and ZO_SELECTED_TEXT or ZO_DEFAULT_TEXT
     end
+
+    control:SetText(title)
+    control:SetColor(titleColor:UnpackRGB())
 end
 
 function ZO_ZoneStory_AchievementTile:SetStatus(date)

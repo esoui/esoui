@@ -916,7 +916,8 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GAME_CAMERA_UI_MODE_CHANGED, OnGameCameraUIModeChanged)
 
     self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
-        self:StopInteraction()
+        local CLEAR_SELECTION = true
+        self:StopInteraction(CLEAR_SELECTION)
     end)
 
     local function OnLogoutDeferred()
@@ -1298,7 +1299,7 @@ function ZO_PlayerToPlayer:StartInteraction()
     end
 end
 
-function ZO_PlayerToPlayer:StopInteraction()
+function ZO_PlayerToPlayer:StopInteraction(clearSelection)
     self.targetLabel:SetHidden(false)
 
     if self.isInteracting then
@@ -1313,6 +1314,9 @@ function ZO_PlayerToPlayer:StopInteraction()
             self.showingPlayerInteractMenu = false
             local radialMenu = self:GetLastActiveRadialMenu()
             if radialMenu then
+                if clearSelection then
+                    radialMenu:ClearSelection()
+                end
                 radialMenu:SelectCurrentEntry()
             end
         end
@@ -1323,6 +1327,9 @@ function ZO_PlayerToPlayer:StopInteraction()
 
         local radialMenu = self:GetLastActiveRadialMenu()
         if radialMenu then
+            if clearSelection then
+                radialMenu:ClearSelection()
+            end
             radialMenu:SelectCurrentEntry()
         end
     end

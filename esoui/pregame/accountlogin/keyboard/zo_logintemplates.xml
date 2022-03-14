@@ -1,8 +1,8 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_LoginBase_Keyboard" virtual="true">
-            <Anchor point="TOPLEFT" />
-            <Anchor point="BOTTOMRIGHT" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
 
             <Controls>
                 <Texture name="$(parent)BGMunge" textureFile="EsoUI/Art/Login/login_UIWindowBG_left.dds" hidden="true">

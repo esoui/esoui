@@ -24,21 +24,21 @@ function ZO_Smithing_GetActiveObject()
     return sceneOwner
 end
 
-function ZO_Smithing_IsSmithingStation(craftingType)
-    return IsSmithingCraftingType(craftingType)
+function ZO_Smithing_IsSmithingStation(craftingType, craftingMode)
+    craftingMode = craftingMode or GetCraftingInteractionMode()
+    return craftingMode == CRAFTING_INTERACTION_MODE_STANDARD_STATION and IsSmithingCraftingType(craftingType)
+end
+
+function ZO_Smithing_IsUniversalDeconstructionCraftingMode(craftingMode)
+    craftingMode = craftingMode or GetCraftingInteractionMode()
+    return craftingMode == CRAFTING_INTERACTION_MODE_UNIVERSAL_DECONSTRUCTION
 end
 
 --
 -- ZO_Smithing_Common
 --
 
-ZO_Smithing_Common = ZO_Object:Subclass()
-
-function ZO_Smithing_Common:New(...)
-    local smithing = ZO_Object.New(self)
-    smithing:Initialize(...)
-    return smithing
-end
+ZO_Smithing_Common = ZO_InitializingObject:Subclass()
 
 SMITHING_BONUSES = 
 {
@@ -101,62 +101,57 @@ SMITHING_MODE_IMPROVEMENT = 4
 SMITHING_MODE_RESEARCH = 5
 SMITHING_MODE_RECIPES = 6
 
+local g_craftingTypeModeTutorialMap =
+{
+    [CRAFTING_TYPE_BLACKSMITHING] =
+    {
+        [SMITHING_MODE_REFINEMENT] = TUTORIAL_TRIGGER_BLACKSMITHING_REFINEMENT_OPENED,
+        [SMITHING_MODE_CREATION] = TUTORIAL_TRIGGER_BLACKSMITHING_CREATION_OPENED,
+        [SMITHING_MODE_DECONSTRUCTION] = TUTORIAL_TRIGGER_BLACKSMITHING_DECONSTRUCTION_OPENED,
+        [SMITHING_MODE_IMPROVEMENT] = TUTORIAL_TRIGGER_BLACKSMITHING_IMPROVEMENT_OPENED,
+        [SMITHING_MODE_RESEARCH] = TUTORIAL_TRIGGER_BLACKSMITHING_RESEARCH_OPENED,
+    },
+    [CRAFTING_TYPE_CLOTHIER] =
+    {
+        [SMITHING_MODE_REFINEMENT] = TUTORIAL_TRIGGER_CLOTHIER_REFINEMENT_OPENED,
+        [SMITHING_MODE_CREATION] = TUTORIAL_TRIGGER_CLOTHIER_CREATION_OPENED,
+        [SMITHING_MODE_DECONSTRUCTION] = TUTORIAL_TRIGGER_CLOTHIER_DECONSTRUCTION_OPENED,
+        [SMITHING_MODE_IMPROVEMENT] = TUTORIAL_TRIGGER_CLOTHIER_IMPROVEMENT_OPENED,
+        [SMITHING_MODE_RESEARCH] = TUTORIAL_TRIGGER_CLOTHIER_RESEARCH_OPENED,
+    },
+    [CRAFTING_TYPE_JEWELRYCRAFTING] =
+    {
+        [SMITHING_MODE_REFINEMENT] = TUTORIAL_TRIGGER_JEWELRYCRAFTING_REFINEMENT_OPENED,
+        [SMITHING_MODE_CREATION] = TUTORIAL_TRIGGER_JEWELRYCRAFTING_CREATION_OPENED,
+        [SMITHING_MODE_DECONSTRUCTION] = TUTORIAL_TRIGGER_JEWELRYCRAFTING_DECONSTRUCTION_OPENED,
+        [SMITHING_MODE_IMPROVEMENT] = TUTORIAL_TRIGGER_JEWELRYCRAFTING_IMPROVEMENT_OPENED,
+        [SMITHING_MODE_RESEARCH] = TUTORIAL_TRIGGER_JEWELRYCRAFTING_RESEARCH_OPENED,
+    },
+    [CRAFTING_TYPE_WOODWORKING] =
+    {
+        [SMITHING_MODE_REFINEMENT] = TUTORIAL_TRIGGER_WOODWORKING_REFINEMENT_OPENED,
+        [SMITHING_MODE_CREATION] = TUTORIAL_TRIGGER_WOODWORKING_CREATION_OPENED,
+        [SMITHING_MODE_DECONSTRUCTION] = TUTORIAL_TRIGGER_WOODWORKING_DECONSTRUCTION_OPENED,
+        [SMITHING_MODE_IMPROVEMENT] = TUTORIAL_TRIGGER_WOODWORKING_IMPROVEMENT_OPENED,
+        [SMITHING_MODE_RESEARCH] = TUTORIAL_TRIGGER_WOODWORKING_RESEARCH_OPENED,
+    },
+}
+
 function ZO_Smithing_Common:GetTutorialTrigger(craftingType, mode)
-    if craftingType == CRAFTING_TYPE_BLACKSMITHING then
-        if mode == SMITHING_MODE_REFINEMENT then
-            return TUTORIAL_TRIGGER_BLACKSMITHING_REFINEMENT_OPENED
-        elseif mode == SMITHING_MODE_CREATION then
-            return TUTORIAL_TRIGGER_BLACKSMITHING_CREATION_OPENED
-        elseif mode == SMITHING_MODE_DECONSTRUCTION then
-            return TUTORIAL_TRIGGER_BLACKSMITHING_DECONSTRUCTION_OPENED
-        elseif mode == SMITHING_MODE_IMPROVEMENT then
-            return TUTORIAL_TRIGGER_BLACKSMITHING_IMPROVEMENT_OPENED
-        elseif mode == SMITHING_MODE_RESEARCH then
-            return TUTORIAL_TRIGGER_BLACKSMITHING_RESEARCH_OPENED
-        end
-    elseif craftingType == CRAFTING_TYPE_CLOTHIER then
-        if mode == SMITHING_MODE_REFINEMENT then
-            return TUTORIAL_TRIGGER_CLOTHIER_REFINEMENT_OPENED
-        elseif mode == SMITHING_MODE_CREATION then
-            return TUTORIAL_TRIGGER_CLOTHIER_CREATION_OPENED
-        elseif mode == SMITHING_MODE_DECONSTRUCTION then
-            return TUTORIAL_TRIGGER_CLOTHIER_DECONSTRUCTION_OPENED
-        elseif mode == SMITHING_MODE_IMPROVEMENT then
-            return TUTORIAL_TRIGGER_CLOTHIER_IMPROVEMENT_OPENED
-        elseif mode == SMITHING_MODE_RESEARCH then
-            return TUTORIAL_TRIGGER_CLOTHIER_RESEARCH_OPENED
-        end
-    elseif craftingType == CRAFTING_TYPE_WOODWORKING then
-        if mode == SMITHING_MODE_REFINEMENT then
-            return TUTORIAL_TRIGGER_WOODWORKING_REFINEMENT_OPENED
-        elseif mode == SMITHING_MODE_CREATION then
-            return TUTORIAL_TRIGGER_WOODWORKING_CREATION_OPENED
-        elseif mode == SMITHING_MODE_DECONSTRUCTION then
-            return TUTORIAL_TRIGGER_WOODWORKING_DECONSTRUCTION_OPENED
-        elseif mode == SMITHING_MODE_IMPROVEMENT then
-            return TUTORIAL_TRIGGER_WOODWORKING_IMPROVEMENT_OPENED
-        elseif mode == SMITHING_MODE_RESEARCH then
-            return TUTORIAL_TRIGGER_WOODWORKING_RESEARCH_OPENED
-        end
-    elseif craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
-        if mode == SMITHING_MODE_REFINEMENT then
-            return TUTORIAL_TRIGGER_JEWELRYCRAFTING_REFINEMENT_OPENED
-        elseif mode == SMITHING_MODE_CREATION then
-            return TUTORIAL_TRIGGER_JEWELRYCRAFTING_CREATION_OPENED
-        elseif mode == SMITHING_MODE_DECONSTRUCTION then
-            return TUTORIAL_TRIGGER_JEWELRYCRAFTING_DECONSTRUCTION_OPENED
-        elseif mode == SMITHING_MODE_IMPROVEMENT then
-            return TUTORIAL_TRIGGER_JEWELRYCRAFTING_IMPROVEMENT_OPENED
-        elseif mode == SMITHING_MODE_RESEARCH then
-            return TUTORIAL_TRIGGER_JEWELRYCRAFTING_RESEARCH_OPENED
-        end
-    end
+    local modeTriggerMap = g_craftingTypeModeTutorialMap[craftingType]
+    return modeTriggerMap and modeTriggerMap[mode] or nil
 end
 
 function ZO_Smithing_Common:DirtyAllPanels()
-    self.creationPanel:DirtyAllLists()
-    self.improvementPanel:HandleDirtyEvent()
-    self.researchPanel:HandleDirtyEvent()
+    if self.creationPanel then
+        self.creationPanel:DirtyAllLists()
+    end
+    if self.improvementPanel then
+        self.improvementPanel:HandleDirtyEvent()
+    end
+    if self.researchPanel then
+        self.researchPanel:HandleDirtyEvent()
+    end
 end
 
 function ZO_Smithing_Common:IsItemAlreadySlottedToCraft(bagId, slotIndex)
@@ -267,5 +262,5 @@ function ZO_Smithing_Common:GetMode()
 end
 
 function ZO_Smithing_Common:UpdateQuestPins()
-    -- To be overridden
+    -- Can be overridden
 end

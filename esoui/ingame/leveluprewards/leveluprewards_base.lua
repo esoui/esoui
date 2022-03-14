@@ -98,7 +98,7 @@ function ZO_LevelUpRewardsArtTile_SetupTileForLevel(self, level)
         local startPoint2X = normalizedStartPoint2X * maskWidth
         local startPoint2Y = normalizedStartPoint2Y * maskHeight
         local velocityMin, velocityMax
-        local percentageOfUnitCircle = angleRadians / (2 * math.pi)
+        local percentageOfUnitCircle = angleRadians / ZO_TWO_PI
         if (percentageOfUnitCircle > 1/8 and percentageOfUnitCircle < 3/8) or (percentageOfUnitCircle > 5/8 and percentageOfUnitCircle < 7/8) then
             --Points more in the Y direction than the X, normalize the particle velocity against height
             velocityMin = normalizedVelocityMin * maskHeight

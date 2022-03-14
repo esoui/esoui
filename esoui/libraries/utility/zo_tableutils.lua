@@ -3,14 +3,11 @@
     (...or would also fail on tables using non-numeric keys.)
 --]]
 
-function NonContiguousCount(tableObject)
+function NonContiguousCount(t)
     local count = 0
-
-    for _, _ in pairs(tableObject)
-    do
+    for _, _ in pairs(t) do
         count = count + 1
     end
-
     return count
 end
 
@@ -177,18 +174,15 @@ end
 
 function ZO_ShallowTableCopy(source, dest)
     dest = dest or {}
-
     for k, v in pairs(source) do
         dest[k] = v
     end
-
     return dest
 end
 
 function ZO_DeepTableCopy(source, dest)
     dest = dest or {}
-    setmetatable (dest, getmetatable(source))
-
+    setmetatable(dest, getmetatable(source))
     for k, v in pairs(source) do
         if type(v) == "table" then
             dest[k] = ZO_DeepTableCopy(v)
@@ -196,13 +190,12 @@ function ZO_DeepTableCopy(source, dest)
             dest[k] = v
         end
     end
-
     return dest
 end
 
 -- Returns true if table is nil or empty
-function ZO_IsTableEmpty(table)
-    return not table or next(table) == nil
+function ZO_IsTableEmpty(t)
+    return not t or next(t) == nil
 end
 
 -- Returns true if running the iterator once did not return a value. this modifies the iterator.
@@ -238,8 +231,8 @@ function ZO_CombineNonContiguousTables(dest, ...)
     end
 end
 
-function ZO_IsElementInNumericallyIndexedTable(table, element)
-    for index, value in ipairs(table) do
+function ZO_IsElementInNumericallyIndexedTable(t, element)
+    for index, value in ipairs(t) do
         if value == element then
             return true
         end
@@ -247,8 +240,8 @@ function ZO_IsElementInNumericallyIndexedTable(table, element)
     return false
 end
 
-function ZO_IndexOfElementInNumericallyIndexedTable(table, element)
-    for index, value in ipairs(table) do
+function ZO_IndexOfElementInNumericallyIndexedTable(t, element)
+    for index, value in ipairs(t) do
         if value == element then
             return index
         end
@@ -302,16 +295,16 @@ function ZO_NumericallyIndexedTableReverseIterator(t)
     end
 end
 
-function ZO_FilteredNumericallyIndexedTableIterator(table, filterFunctions)
+function ZO_FilteredNumericallyIndexedTableIterator(t, filterFunctions)
     local numFilters = filterFunctions and #filterFunctions or 0
     if numFilters > 0  then
         local index = 0
-        local count = #table
+        local count = #t
         return function()
             index = index + 1
             while index <= count do
                 local passesFilter = true
-                local data = table[index]
+                local data = t[index]
                 for filterIndex = 1, numFilters do
                     if not filterFunctions[filterIndex](data) then
                         passesFilter = false
@@ -327,18 +320,18 @@ function ZO_FilteredNumericallyIndexedTableIterator(table, filterFunctions)
             end
         end
     else
-        return ipairs(table)
+        return ipairs(t)
     end
 end
 
-function ZO_FilteredNonContiguousTableIterator(table, filterFunctions)
+function ZO_FilteredNonContiguousTableIterator(t, filterFunctions)
     local numFilters = filterFunctions and #filterFunctions or 0
     if numFilters > 0 then
-        local nextKey, nextData = next(table)
+        local nextKey, nextData = next(t)
         return function()
             while nextKey do
                 local currentKey, currentData = nextKey, nextData
-                nextKey, nextData = next(table, nextKey)
+                nextKey, nextData = next(t, nextKey)
 
                 local passesFilter = true
                 for filterIndex = 1, numFilters do
@@ -354,7 +347,7 @@ function ZO_FilteredNonContiguousTableIterator(table, filterFunctions)
             end
         end
     else
-        return pairs(table)
+        return pairs(t)
     end
 end
 
@@ -363,7 +356,7 @@ function ZO_DeepAcyclicTableCompare(t1, t2, maxTablesVisited)
     local numVisited = 0
 
     local function visit(left, right)
-        if type(left) == 'table' and type(right) == 'table' then
+        if type(left) == "table" and type(right) == "table" then
             if visitedLeft[left] or visitedRight[right] then
                 internalassert(false, "Comparing tables with cycles.")
                 return false
@@ -421,4 +414,65 @@ function ZO_AreNumericallyIndexedTablesEqual(left, right)
         return true
     end
     return false
+end
+
+-- Creates a non-contiguous table, the keys of which are the unique values
+-- in the numerically indexed table t or, if t is scalar, the value of t.
+function ZO_CreateSet(t)
+    local s = {}
+    local tType = type(t)
+    if tType == "table" then
+        for _, v in ipairs(t) do
+            s[v] = true
+        end
+    elseif tType ~= "nil" then
+        s[t] = true
+    end
+    return s
+end
+
+-- Returns a non-contiguous table, the keys of which are the intersecting keys
+-- shared between the non-contiguous sets s1 and s2.
+function ZO_IntersectSets(s1, s2)
+    local s = {}
+    for k in pairs(s1) do
+        if s2[k] then
+            s[k] = true
+        end
+    end
+    return s
+end
+
+-- Returns true if the non-contiguous sets s1 and s2 share one or more keys.
+function ZO_AreIntersectingSets(s1, s2)
+    return next(ZO_IntersectSets(s1, s2)) ~= nil
+end
+
+-- Returns a non-contiguous table, the keys of which are the intersecting values
+-- shared between the numerically indexed tables t1 and t2.
+function ZO_IntersectNumericallyIndexedTables(t1, t2)
+    local s1 = ZO_CreateSet(t1)
+    local s2 = ZO_CreateSet(t2)
+    return ZO_IntersectSets(s1, s2)
+end
+
+-- Returns true if the numerically indexed tables t1 and t2 share one or more values.
+function ZO_AreIntersectingNumericallyIndexedTables(t1, t2)
+    local s = ZO_IntersectNumericallyIndexedTables(t1, t2)
+    return next(s) ~= nil
+end
+
+-- Returns true if the non-contiguous sets s1 and s2 contain the same keys.
+function ZO_AreEqualSets(s1, s2)
+    local size1 = NonContiguousCount(s1)
+    local size2 = NonContiguousCount(s2)
+    if size1 ~= size2 then
+        return false
+    end
+    for k in pairs(s1) do
+        if not s2[k] then
+            return false
+        end
+    end
+    return true
 end

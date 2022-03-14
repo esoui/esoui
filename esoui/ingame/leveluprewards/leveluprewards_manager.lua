@@ -257,7 +257,7 @@ do
         local particleSystem = ZO_ControlParticleSystem:New(ZO_BentArcParticle_Control)
         particleSystem:SetParentControl(artControl)
         particleSystem:SetParticleParameter("Texture", "EsoUI/Art/PregameAnimatedBackground/ember.dds")
-        particleSystem:SetParticleParameter("BentArcElevationStartRadians", ZO_UniformRangeGenerator:New(0.3 * math.pi, 0.7 *math.pi))
+        particleSystem:SetParticleParameter("BentArcElevationStartRadians", ZO_UniformRangeGenerator:New(0.3 * ZO_PI, 0.7 * ZO_PI))
         particleSystem:SetParticleParameter("BentArcElevationChangeRadians", ZO_UniformRangeGenerator:New(-0.8, 0.8))
         particleSystem:SetParticleParameter("BentArcAzimuthStartRadians", 0)
         particleSystem:SetParticleParameter("BentArcAzimuthChangeRadians", 0)

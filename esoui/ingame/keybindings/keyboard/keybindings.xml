@@ -78,10 +78,7 @@
                 ZO_Tooltips_HideTruncatedTextTooltip()
             </OnMouseExit>
             <OnClicked>
-                local rowData = self:GetParent().data
-                local dialogData = ZO_ShallowTableCopy(rowData)
-                dialogData.bindingIndex = self.bindingIndex
-                ZO_Dialogs_ShowDialog("BINDINGS", dialogData)
+                ZO_KeybindingListButton_OnClicked(self)
             </OnClicked>
         </Button>
         
@@ -124,13 +121,13 @@
                     </OnMouseExit>
                 </Label>
                 
-                <Button name="$(parent)PrimaryBind" inherits="ZO_KeybindingListButton">                                        
+                <Button name="$(parent)PrimaryBind" inherits="ZO_KeybindingListButton">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ActionName" relativePoint="TOPRIGHT" />
                     <OnInitialized>
                         self.bindingIndex = 1
                         self:GetLabelControl():SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
                     </OnInitialized>
-                </Button>        
+                </Button>
                 
                 <Button name="$(parent)SecondaryBind" inherits="ZO_KeybindingListButton">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryBind" relativePoint="TOPRIGHT" offsetX="5" />
@@ -160,7 +157,7 @@
         
         <TopLevelControl name="ZO_Keybindings" hidden="true">
             <Dimensions x="1665" y="750" />
-            <Anchor point="LEFT" offsetX="230" offsetY="20"/>
+            <Anchor point="LEFT" relativeTo="GuiRoot" offsetX="230" offsetY="20"/>
 
             <OnInitialized>
                 ZO_Keybindings_OnInitialize(self)
@@ -217,12 +214,6 @@
 
                 <Label name="$(parent)CurrentKeyboardLayout" inherits="ZO_KeybindingListHeader" font="ZoFontDialogKeybindDescription">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetY="15" />
-                    <OnInitialized>
-                        local function UpdateKeyboardLayout()
-                            self:SetText(zo_strformat(SI_KEYBIND_CURRENT_KEYBOARD_LAYOUT, GetKeyboardLayout()))
-                        end
-                        self:RegisterForEvent(EVENT_INPUT_LANGUAGE_CHANGED, UpdateKeyboardLayout)
-                    </OnInitialized>
                 </Label>
             </Controls>
          </TopLevelControl>

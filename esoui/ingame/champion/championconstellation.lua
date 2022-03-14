@@ -32,7 +32,7 @@ function ZO_ChampionConstellationRingAnchor:Initialize(sceneGraph, anchorIndex)
 
     self.rotatedNode = sceneGraph:CreateNode(string.format("constellationRingRotated%d", self.anchorIndex))
     self.rotatedNode:SetParent(self.ringNode)
-    self.rotatedNode:SetRotation(-0.5 * math.pi)
+    self.rotatedNode:SetRotation(-ZO_HALF_PI)
 end
 
 function ZO_ChampionConstellationRingAnchor:SetConstellation(constellation)

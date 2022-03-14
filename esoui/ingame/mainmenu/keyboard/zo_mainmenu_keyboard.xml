@@ -28,7 +28,7 @@
             </OnMouseExit>
             <Controls>
                 <Label name="$(parent)RemainingCrowns" font="ZoFontHeader2" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHTED" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true">
-                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-20" offsetY="0" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20" offsetY="0" />
                 </Label>
                 <Label name="$(parent)Membership" font="ZoFontGameSmall" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ESO_PLUS" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RemainingCrowns" relativePoint="TOPRIGHT" />
@@ -47,7 +47,7 @@
             </Controls>
         </Control>
         <TopLevelControl name="ZO_MainMenu" tier="MEDIUM">
-            <Anchor point="TOP" offsetY="28"/>
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="28"/>
             <OnInitialized>
                 ZO_MainMenu_OnInitialized(self)
             </OnInitialized>

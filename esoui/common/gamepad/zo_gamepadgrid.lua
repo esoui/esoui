@@ -1,12 +1,6 @@
 --[[ Grid Selector Code ]]--
 -- The user should call DIRECTIONAL_INPUT:Activate(self) and DIRECTIONAL_INPUT:Deactivate(self) as appropriate
-ZO_GamepadGrid = ZO_Object:Subclass()
-
-function ZO_GamepadGrid:New(...)
-    local gridObject = ZO_Object.New(self)
-    gridObject:Initialize(...)
-    return gridObject
-end
+ZO_GamepadGrid = ZO_InitializingObject:Subclass()
 
 -- rowMajor = true specifies that you have a grid of rows with a potentially variable number of columns in each row
 -- rowMajor = false specifies that you have a grid of columns with a potentially variable number of rows in each column
@@ -105,10 +99,6 @@ end
 --
 
 ZO_GamepadPagedGrid = ZO_GamepadGrid:Subclass()
-
-function ZO_GamepadPagedGrid:New(...)
-    return ZO_GamepadGrid.New(self, ...)
-end
 
 function ZO_GamepadPagedGrid:Initialize(control, rowMajor, footerControl)
     ZO_GamepadGrid.Initialize(self, control, rowMajor)

@@ -153,7 +153,6 @@ function ZO_WritAdvisor_Keyboard:RefreshQuestList()
 
         local firstNode = nil
         local previousNode = nil 
-        local assistedNode = nil
         for i, questInfo in ipairs(quests) do
             --First, add the quest name
             questNodes[questInfo] = self.navigationTree:AddNode("ZO_ActiveWritHeader", questInfo)
@@ -175,11 +174,6 @@ function ZO_WritAdvisor_Keyboard:RefreshQuestList()
 
                     if i == #quests and conditionIndex == conditionCount then
                         taskNode.nextNode = firstNode
-                    end
-
-                    --Select the first quest in the list that has incomplete crafting tasks
-                    if assistedNode == nil and curCount < maxCount then
-                        assistedNode = questNode
                     end
 
                     previousNode = taskNode
@@ -205,7 +199,7 @@ function ZO_WritAdvisor_Keyboard:RefreshQuestList()
             end
         end
 
-        self.navigationTree:Commit(assistedNode)
+        self.navigationTree:Commit()
         self.dirtyFlag = false
     else
         self.dirtyFlag = true

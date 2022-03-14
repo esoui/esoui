@@ -7,7 +7,7 @@
 
         <TopLevelControl name="ZO_WorldMapKeepInfo" hidden="true">
             <Dimensions x="350" y="485" />
-            <Anchor point="LEFT" offsetY="-105" />
+            <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="-105" />
             <OnInitialized>
                 ZO_WorldMapKeepInfo_OnInitialize(self)
             </OnInitialized>

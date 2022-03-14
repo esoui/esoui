@@ -1,0 +1,78 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_UniversalDeconstructionPanel_Keyboard_Template" virtual="true">
+            <OnEffectivelyShown>
+                self.object:OnShown()
+            </OnEffectivelyShown>
+
+            <Controls>                
+                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate">
+                    <Controls>
+                        <Button name="$(parent)IncludeBanked" inherits="ZO_CheckButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="10" />
+                            
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                                SetTooltipText(InformationTooltip, GetString(SI_CRAFTING_INCLUDE_BANKED_TOOLTIP))
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                        </Button>
+
+                        <Control name="$(parent)CraftingTypes" inherits="ZO_MultiselectComboBox">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="2" />
+                            <Dimensions x="200" />
+
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                                SetTooltipText(InformationTooltip, GetString(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_DESCRIPTION))
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                        </Control>
+
+                        <Control name="$(parent)ButtonDivider" inherits="ZO_InventoryFilterDivider">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)IncludeBanked" relativePoint="BOTTOMLEFT" offsetX="-30" offsetY="14" />
+                        </Control>
+                        
+                        <Control name="$(parent)SortBy" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ButtonDivider" relativePoint="BOTTOMLEFT" offsetX="-13" />
+                        </Control>
+                        
+                        <Control name="$(parent)Backpack" override="true">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMRIGHT" offsetY="2" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SlotContainer">
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100"/>
+                    <Dimensions x="512" y="256" />
+
+                    <Controls>
+                        <Texture name="$(parent)Bg" inherits="ZO_CraftingContainerBackground" />
+
+                        <Label name="$(parent)ExtractLabel" inherits="ZO_CraftingContainerHeader">
+                            <Anchor point="TOP" offsetY="64" />
+                        </Label>
+
+                        <Button name="$(parent)ExtractionSlot" inherits="ZO_CraftingSlot">
+                            <Anchor point="TOP" relativeTo="$(parent)ExtractLabel" relativePoint="BOTTOM" offsetY="20" />
+                            <Controls>
+                                <Label name="$(parent)Name" font="ZoFontWinH4" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel">
+                                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                                    <Dimensions x="230" />
+                                </Label>
+                            </Controls>
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

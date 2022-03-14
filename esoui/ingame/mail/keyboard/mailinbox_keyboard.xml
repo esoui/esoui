@@ -105,12 +105,25 @@
                     <Anchor point="TOPLEFT"/>
                     <Controls>
                         <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Mail/mail_inbox_unreadMessage.dds">
-                            <Anchor point="TOPLEFT"/>
-                            <Dimensions x="32" y="32"/>
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="32" y="32" />
                         </Texture>
                         <Label name="$(parent)Label" font="ZoFontWinH3">
-                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" />
                         </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Loading">
+                    <Anchor point="LEFT" relativeTo="$(parent)UnreadLabel" relativePoint="LEFT" offsetX="-5" />
+                    <Controls>
+                        <Control name="$(parent)Icon" inherits="ZO_Loading" tier="HIGH">
+                            <Anchor point="LEFT" />
+                            <Dimensions x="64" y="64" />
+                            <OnInitialized>
+                                ZO_Loading_Initialize(self, GetString(SI_MAIL_INBOX_LOADING))
+                            </OnInitialized>
+                        </Control>
                     </Controls>
                 </Control>
 

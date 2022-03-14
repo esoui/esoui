@@ -1,0 +1,34 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_UniversalDeconstructionSkillInfoTopLevel_Gamepad" inherits="ZO_MultipleCraftingSkillsFooter_Gamepad" hidden="true" />
+        
+        <TopLevelControl name="ZO_UniversalDeconstructionTopLevel_Gamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                ZO_UniversalDeconstruction_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Container">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+
+                            <Controls>
+                                <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                                    <AnchorFill />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Panel" inherits="ZO_UniversalDeconstructionPanelContent_Gamepad" />
+                    </Controls>
+                </Scroll>
+
+                <Control name="$(parent)Floating" inherits="ZO_UniversalDeconstructionFloatingContent_Gamepad" hidden="true" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

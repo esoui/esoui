@@ -10,21 +10,26 @@
             <Controls>
                 <Texture name="$(parent)Icon" override="true" level="3">
                     <Dimensions x="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_ICON_DIMENSIONS" />
-                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
 
                     <Controls>
                         <Texture name="$(parent)EmergencyBG" textureFile="EsoUI/Art/Achievements/achievements_iconBG.dds" level="2">
                             <AnchorFill />
                         </Texture>
-                        
+
                         <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS">
                             <AnchorFill />
+                        </Texture>
+
+                        <Texture name="$(parent)CharacterFrame" textureFile="EsoUI/Art/Achievements/achievement_character_icon_frame.dds" layer="OVERLAY" hidden="true">
+                            <Anchor point="TOPLEFT" offsetX="-9" offsetY="-9" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="9" offsetY="9" />
                         </Texture>
                     </Controls>
                 </Texture>
 
                 <Control name ="$(parent)TextContainer" override="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="10" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="10" offsetY="-5" />
                     <Anchor point="RIGHT" constrains="X" />
                     <Controls>
                         <Label name="$(parent)Title" override="true" font="ZoFontWinH4" maxLineCount="2">

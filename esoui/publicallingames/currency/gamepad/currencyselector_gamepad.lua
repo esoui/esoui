@@ -1,6 +1,6 @@
 ZO_CURRENCY_SELECTOR_BUTTON_ANIMATION_DURATION_GAMEPAD = 25
 
-local DEGREE_THRESHOLD =  30 * (math.pi / 180)
+local DEGREE_THRESHOLD =  30 * (ZO_PI / 180)
 local MAGNITUDE_THRESHOLD = 0.1
 
 local g_directionalInputX, g_directionalInputY = 0, 0
@@ -24,7 +24,7 @@ local function MagnitudeQuery(direction)
     local absAngle = math.abs(angle)
     
     if direction == GAMEPAD_SPINNER_DIRECTION_VERTICAL then
-        if absAngle >= DEGREE_THRESHOLD and absAngle <= math.pi - DEGREE_THRESHOLD then
+        if absAngle >= DEGREE_THRESHOLD and absAngle <= ZO_PI - DEGREE_THRESHOLD then
             -- When there is vertical movement, the horizontal movement is consumed to ensure that pressing the L-stick at an angle doesn't cause horizontal and vertical movement
             g_directionalInputX = 0
             return g_directionalInputY
@@ -33,7 +33,7 @@ local function MagnitudeQuery(direction)
             return g_directionalInputY
         end
     else
-        if absAngle < DEGREE_THRESHOLD or absAngle > math.pi - DEGREE_THRESHOLD then
+        if absAngle < DEGREE_THRESHOLD or absAngle > ZO_PI - DEGREE_THRESHOLD then
             g_directionalInputY = 0
             return -g_directionalInputX
         else

@@ -50,8 +50,14 @@ function ZO_Help_Keyboard:Initialize(control)
     control:RegisterForEvent(EVENT_HELP_INITIALIZED, UpdateHelp)
     HELP_MANAGER:RegisterCallback("UpdateSearchResults", UpdateHelp)
 
-    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, self.OnLinkClicked, self)
-    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, self.OnLinkClicked, self)
+    local function OnLinkClicked(...)
+        if not IsInGamepadPreferredMode() then
+            return self.OnLinkClicked(...)
+        end
+    end
+
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, OnLinkClicked, self)
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, OnLinkClicked, self)
 
     UpdateHelp()
 

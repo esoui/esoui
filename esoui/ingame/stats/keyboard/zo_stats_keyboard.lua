@@ -605,6 +605,8 @@ function ZO_Stats:CreateMountSection()
         local timeUntilCanBeTrained, totalTrainedWaitDuration = GetTimeUntilCanBeTrained()
         local speedBonus, _, staminaBonus, _, inventoryBonus = STABLE_MANAGER:GetStats()
 
+        self.isTimerActive = false
+
         stableRow.speedStatLabel:SetText(zo_strformat(SI_MOUNT_ATTRIBUTE_SPEED_FORMAT, speedBonus))
         stableRow.staminaStatLabel:SetText(staminaBonus)
         stableRow.carryStatLabel:SetText(inventoryBonus)
@@ -618,6 +620,7 @@ function ZO_Stats:CreateMountSection()
             stableRow.timer:SetHidden(ridingSkillMaxedOut)
             if not ridingSkillMaxedOut then
                 stableRow.timerOverlay:StartCooldown(timeUntilCanBeTrained, totalTrainedWaitDuration, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, NO_LEADING_EDGE)
+                self.isTimerActive = true
             end
         end
     end
@@ -631,6 +634,8 @@ function ZO_Stats:CreateMountSection()
                 InformationTooltip:ClearLines()
                 SetTooltipText(InformationTooltip, zo_strformat(SI_STABLE_NOT_TRAINABLE_TOOLTIP, timeLeft))
             end
+        elseif self.isTimerActive then
+            UpdateRidingSkills()
         end
     end
 
@@ -919,7 +924,7 @@ function ZO_AdvancedStats_Keyboard:InitializeList()
 
     ZO_ScrollList_AddDataType(self.list, DATA_ENTRY_TYPE_STAT, "ZO_AdvancedStatsEntry", 24, SetupStatEntry)
     ZO_ScrollList_AddDataType(self.list, DATA_ENTRY_TYPE_DIVIDER, "ZO_AdvancedStatsDividerEntry", 25)
-    ZO_ScrollList_AddDataType(self.list, DATA_ENTRY_TYPE_HEADER, "ZO_StatsHeader", 30, SetupStatHeaderEntry)
+    ZO_ScrollList_AddDataType(self.list, DATA_ENTRY_TYPE_HEADER, "ZO_AdvancedStatsHeader", 30, SetupStatHeaderEntry)
     ZO_ScrollList_AddDataType(self.list, DATA_ENTRY_TYPE_MULTI_STAT, "ZO_AdvancedStatsMultiEntry", 72, SetupStatMultiEntry)
 end
 

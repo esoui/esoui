@@ -2,7 +2,7 @@
     <Controls>
         <Control name="ZO_BattlegroundScoreboard_Timer_Keyboard_Template" virtual="true">
             <ClearAnchors/>
-            <Anchor point="BOTTOMLEFT" offsetX="32" offsetY="-12" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="32" offsetY="-12" />
             <Controls>
                 <Label name="$(parent)Timer" font="ZoFontKeybindStripDescription" />
             </Controls>
@@ -10,7 +10,7 @@
 
         <Control name="ZO_BattlegroundScoreboard_Timer_Gamepad_Template" virtual="true">
             <ClearAnchors/>
-            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
             <Controls>
                 <Label name="$(parent)Timer" font="ZoFontGamepad42" />
             </Controls>

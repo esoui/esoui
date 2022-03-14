@@ -88,7 +88,7 @@
 
         <Control name="ZO_PlayerProgressTemplate" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
             <Dimensions x="375" y="56" />
-            <Anchor point="TOPLEFT" offsetX="15" offsetY="10"/>
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="15" offsetY="10"/>
             <Controls>
                 <Label name="$(parent)Level" font="ZoFontCallout3">
                     <Anchor point="TOPLEFT"/>
@@ -119,7 +119,7 @@
 
         <Control name="ZO_PlayerChampionProgressTemplate" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true" mouseEnabled="true">
             <Dimensions x="375" y="56" />
-            <Anchor point="TOPLEFT" offsetX="15" offsetY="10"/>
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="15" offsetY="10"/>
             <Controls>
                 <Label name="$(parent)Level" font="ZoFontCallout3">
                     <Anchor point="TOPLEFT"/>
@@ -144,13 +144,13 @@
 
         <TopLevelControl name="ZO_PlayerProgress" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
             <Dimensions x="375" y="56" />
-            <Anchor point="TOPLEFT" offsetX="15" offsetY="10"/>
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="15" offsetY="10"/>
             <OnInitialized>
                 ZO_PlayerProgress_OnInitialized(self)
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Level" font="ZoFontCallout3">
-                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPLEFT" />
                 </Label>
                 
                 <Texture name="$(parent)ChampionIcon" hidden="true" textureFile="EsoUI/Art/Champion/champion_icon.dds">

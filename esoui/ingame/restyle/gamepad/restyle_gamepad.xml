@@ -224,7 +224,7 @@
                 ZO_Outfit_Slots_Panel_Gamepad_OnInitialize(self)
             </OnInitialized>
 
-            <Anchor point="TOPLEFT" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
 
             <Controls>
                 <Control name="$(parent)ContentHeader" resizeToFitDescendents="true" >
@@ -249,7 +249,7 @@
             <OnInitialized>
                 ZO_Dyeing_Slots_Panel_Gamepad_OnInitialize(self)
             </OnInitialized>
-            <Anchor point="TOPLEFT" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
 
             <Controls>
                 <Control name="$(parent)ToolsGrid" inherits="ZO_GridScrollList_Gamepad" hidden="true">

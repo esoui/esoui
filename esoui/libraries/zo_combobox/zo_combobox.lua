@@ -20,7 +20,7 @@ do
         for i = 1, #self.m_sortedItems do
             -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
             local item = self.m_sortedItems[i]
-            AddMenuItem(item.name, function() self:ItemSelectedClickHelper(item) end, MENU_ADD_OPTION_LABEL, self.m_font, self.m_normalColor, self.m_highlightColor, NO_PADDING_Y, self.horizontalAlignment)
+            AddMenuItem(item.name, function() self:ItemSelectedClickHelper(item) end, MENU_ADD_OPTION_LABEL, self.m_font, item.normalColor or self.m_normalColor, item.highlightColor or self.m_highlightColor, NO_PADDING_Y, self.horizontalAlignment, item.onEnter, item.onExit, item.enabled)
         end
     end
 end
@@ -93,13 +93,11 @@ function ZO_ScrollableComboBox:Initialize(container)
     ZO_ComboBox.Initialize(self, container)
     self.m_dropdown = container:GetNamedChild("Dropdown")
     self.m_scroll = self.m_dropdown:GetNamedChild("Scroll")
-
     self.m_font = DEFAULT_FONT
     self.m_normalColor = DEFAULT_TEXT_COLOR
     self.m_highlightColor = DEFAULT_TEXT_HIGHLIGHT
 
     self:SetHeight(DEFAULT_HEIGHT)
-
     self:SetupScrollList()
 end
 
@@ -284,8 +282,19 @@ do
             local function OnMenuItemSelected()
                 self:SelectItem(item)
             end
+
             local needsHighlight = self:IsItemSelected(item)
-            AddMenuItem(item.name, OnMenuItemSelected, MENU_ADD_OPTION_LABEL, self.m_font, self.m_normalColor, self.m_highlightColor, NO_PADDING_Y, self.horizontalAlignment, needsHighlight)
+            local normalColor
+            local highlightColor
+            if item.enabled == false then
+                normalColor = item.disabledColor or self.m_disabledColor
+                highlightColor = item.disabledColor or self.m_disabledColor
+            else
+                normalColor = item.normalColor or self.m_normalColor
+                highlightColor = item.highlightColor or self.m_highlightColor
+            end
+
+            AddMenuItem(item.name, OnMenuItemSelected, MENU_ADD_OPTION_LABEL, self.m_font, normalColor, highlightColor, NO_PADDING_Y, self.horizontalAlignment, needsHighlight, item.onEnter, item.onExit, item.enabled)
         end
     end
 end
@@ -332,6 +341,10 @@ end
 
 -- Overridden function
 function ZO_MultiSelectComboBox:SelectItem(item, ignoreCallback)
+    if item.enabled == false then
+        return
+    end
+
     local newSelectionStatus = not self:IsItemSelected(item)
     if newSelectionStatus then
         self:AddItemToSelected(item)

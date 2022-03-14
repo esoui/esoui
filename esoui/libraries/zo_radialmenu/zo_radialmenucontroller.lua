@@ -76,7 +76,7 @@ function ZO_InteractiveRadialMenuController:StartInteraction()
     end
 end
 
-function ZO_InteractiveRadialMenuController:StopInteraction()
+function ZO_InteractiveRadialMenuController:StopInteraction(clearSelection)
     local wasShowingRadial = self.beginHold == nil
     self.beginHold = nil
 
@@ -85,7 +85,9 @@ function ZO_InteractiveRadialMenuController:StopInteraction()
 
         LockCameraRotation(false)
         RETICLE:RequestHidden(false)
-
+        if clearSelection then
+            self.menu:ClearSelection()
+        end
         self.menu:SelectCurrentEntry()
     end
 

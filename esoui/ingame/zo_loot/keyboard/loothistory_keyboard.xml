@@ -35,7 +35,7 @@
         </Control>
       
         <TopLevelControl name="ZO_LootHistoryControl_Keyboard" inherits="ZO_LootHistory_Shared">
-            <Anchor point="BOTTOMRIGHT" offsetY="-95"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetY="-95"/>
             <OnInitialized>
                 ZO_LootHistory_Keyboard_OnInitialized(self)
             </OnInitialized>

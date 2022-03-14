@@ -24,7 +24,7 @@
 
         <AnimationTimeline name="LoadIconAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <TextureRotateAnimation duration="1500" startRotation="6.28" endRotation="0"/>
+                <TextureRotateAnimation duration="1500" startRotation="ZO_TWO_PI" endRotation="0"/>
             </Animations>
         </AnimationTimeline>
 
@@ -45,8 +45,8 @@
 
         <AnimationTimeline name="SparkleStarburstAnim">
             <Animations>
-                <TextureRotateAnimation duration="750" startRotation="0" endRotation="1.57079632679" />
-                <TextureRotateAnimation duration="750" startRotation="0" endRotation="-1.57079632679" />
+                <TextureRotateAnimation duration="750" startRotation="0" endRotation="ZO_HALF_PI" />
+                <TextureRotateAnimation duration="750" startRotation="0" endRotation="-ZO_HALF_PI" />
                 <AlphaAnimation duration="75" startAlpha="0.0" endAlpha="1.0"/>
                 <AlphaAnimation duration="125" delay="625" startAlpha="1.0" endAlpha="0.0"/>
             </Animations>
@@ -242,7 +242,7 @@
 
         <TopLevelControl name="ZO_PanelTitle" virtual="true">
             <Dimensions x="1024" y="50" />
-            <Anchor point="RIGHT" offsetX="30" offsetY="-335" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="30" offsetY="-335" />
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontWindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
                     <Anchor point="LEFT" offsetX="50" />
@@ -257,17 +257,17 @@
 
         <TopLevelControl name="ZO_NarrowRightPanelFootPrint" virtual="true">
             <Dimensions x="551" y="730" />
-            <Anchor point="RIGHT" offsetX="-14" offsetY="17" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-14" offsetY="17" />
         </TopLevelControl>
         
         <Control name="ZO_RightPanelFootPrint" virtual="true">
             <Dimensions x="930" y="690" />
-            <Anchor point="RIGHT" offsetY="32" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="32" />
         </Control>
 
         <TopLevelControl name="ZO_RightFootPrintBackground" allowBringToTop="false" virtual="true">
             <Dimensions x="960" y="750" />
-            <Anchor point="RIGHT" offsetY="20"/>
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="20"/>
             <Controls>
                 <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
                     <Dimensions x="1024" y="1024" />
@@ -282,12 +282,12 @@
 
         <TopLevelControl name="ZO_WideRightFootPrint" virtual="true">
             <Dimensions x="1105" y="690" />
-            <Anchor point="RIGHT" offsetY="32" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="32" />
         </TopLevelControl>
 
         <TopLevelControl name="ZO_WideRightFootPrintBackground" allowBringToTop="false" virtual="true">
             <Dimensions x="1105" y="750" />
-            <Anchor point="RIGHT" offsetY="20"/>
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="20"/>
             <Controls>
                 <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
                     <Dimensions x="1215" y="1024" />
@@ -302,12 +302,12 @@
 
         <TopLevelControl name="ZO_StatsFootPrint" virtual="true">
             <Dimensions x="645" y="730" />
-            <Anchor point="RIGHT" offsetY="18" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="18" />
         </TopLevelControl>
 
         <TopLevelControl name="ZO_StatsFootPrintBackground" allowBringToTop="false" virtual="true">
             <Dimensions x="645" y="750" />
-            <Anchor point="RIGHT" offsetY="20"/>
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="20"/>
             <Controls>
                 <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
                     <Dimensions x="1024" y="1024" />
@@ -318,12 +318,12 @@
 
         <TopLevelControl name="ZO_ThinRightFootPrint" virtual="true">
             <Dimensions x="480" y="730" />
-            <Anchor point="RIGHT" offsetY="18" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="18" />
         </TopLevelControl>
 
         <TopLevelControl name="ZO_ThinRightFootPrintBackground" allowBringToTop="false" virtual="true">
             <Dimensions x="500" y="750" />
-            <Anchor point="RIGHT" offsetY="20" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="20" />
             <Controls>
                 <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
                     <Dimensions x="1024" y="1024" />
@@ -334,7 +334,7 @@
 
         <TopLevelControl name="ZO_TreeUnderlay" virtual="true">
             <Dimensions x="384" y="1024" />
-            <Anchor point="RIGHT" offsetX="-611" offsetY="82" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-611" offsetY="82" />
             <Controls>
                 <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_indexArea_left.dds">
                     <Dimensions x="256" y="1024" />
@@ -834,7 +834,6 @@
 
         <Texture name="ZO_TransformArrow" virtual="true" textureFile="EsoUI/Art/Miscellaneous/transform_arrow.dds">
             <Dimensions x="88" y="46"/>
-            <Anchor point="LEFT" relativeTo="$(parent)Source" relativePoint="RIGHT" offsetX="20"/>
             <TextureCoords left="0" right="0.6875" top="0" bottom="0.71875" />
         </Texture>
 

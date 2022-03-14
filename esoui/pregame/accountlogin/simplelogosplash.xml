@@ -2,7 +2,7 @@
     <Controls>        
         <TopLevelControl name="ZO_SimpleLogoSplash" hidden="true" keyboardEnabled="true" mouseEnabled="true">
             <Dimensions x="ZO_MIN_CANVAS_WIDTH" y="ZO_MIN_CANVAS_HEIGHT" />
-            <Anchor point="CENTER" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
 
             <OnInitialized>
                 SimpleLogoSplash_Initialize(self)

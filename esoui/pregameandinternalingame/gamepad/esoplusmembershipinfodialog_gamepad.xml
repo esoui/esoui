@@ -20,7 +20,7 @@
 
         <TopLevelControl name="ZO_MembershipInfoDialog_Gamepad" inherits="ZO_CustomCenteredGamepadDialogTemplate" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
             <Dimensions x="930" y="680" />
-            <Anchor point="TOP" offsetY="150"/>
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="150"/>
 
             <OnInitialized>
                 ZO_EsoPlusMembershipInfoDialog_Gamepad_OnInitialized(self)

@@ -60,6 +60,7 @@ function MailInbox:InitializeControls()
     self.fullLabel = control:GetNamedChild("Full")
     self.nodeBGControlPool = ZO_ControlPool:New("ZO_MailInboxRowBg", self.navigationContainer:GetNamedChild("ScrollChild"))
     self.minNumBackgroundControls = zo_ceil(self.navigationContainer:GetHeight() / ZO_MAIL_INDBOX_KEYBOARD_NODE_HEIGHT / 2)
+    self.loadingIcon = control:GetNamedChild("LoadingIcon")
 
     self:SetNumUnread(GetNumUnreadMail())
 end
@@ -189,6 +190,16 @@ function MailInbox:RegisterForEvents()
         --again now that the interaction is open again. We wait till shown for the interaction to be open.
         if self.pendingRequestMailId then
             self:RequestReadMessage(self.pendingRequestMailId)
+        end
+
+        -- isFirstTimeShowing is set to false only when RefreshData() is called, not when the inbox is opened. Since we exit this "loading state"
+        -- when RefreshData is called, it's an appropriate variable to check against for purposes of our loading indicator.
+        if self.isFirstTimeOpening then
+            self.loadingIcon:Show()
+            self.unreadLabel:SetHidden(true)
+        else
+            self.loadingIcon:Hide()
+            self.unreadLabel:SetHidden(false)
         end
     end)
 end
@@ -355,6 +366,8 @@ do
 
         -- Initialize and clear
         self.inboxDirty = false
+        self.loadingIcon:Hide()
+        self.unreadLabel:SetHidden(false)
         local tree = self.navigationTree
         tree:Reset()
         self.nodeBGControlPool:ReleaseAllObjects()

@@ -85,7 +85,9 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeLists()
 
     if hasEntriesWithRewards and hasEntriesWithoutRewards then
         self.categoryList = self:GetMainList()
-        self:AddRolesMenuEntry(self.categoryList)
+        if not self.categoryData.hideGroupRoles then
+            self:AddRolesMenuEntry(self.categoryList)
+        end
         local filterModes = self.dataManager:GetFilterModeData()
 
         local randomEntryData = ZO_GamepadEntryData:New(filterModes:GetRandomFilterName(), RANDOM_CATEGORY_ICON)
@@ -293,7 +295,9 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
     end
 
     self.entryList:Clear()
-    self:AddRolesMenuEntry(self.entryList)
+    if not self.categoryData.hideGroupRoles then
+        self:AddRolesMenuEntry(self.entryList)
+    end
     local isSearching = IsCurrentlySearchingForGroup()
     local lockReasonTextOverride = self:GetGlobalLockText()
     local modes = self.dataManager:GetFilterModeData()

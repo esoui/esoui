@@ -1,10 +1,4 @@
-ZO_SharedCraftingInventory = ZO_Object:Subclass()
-
-function ZO_SharedCraftingInventory:New(...)
-    local craftingInventory = ZO_Object.New(self)
-    craftingInventory:Initialize(...)
-    return craftingInventory
-end
+ZO_SharedCraftingInventory = ZO_InitializingObject:Subclass()
 
 local SCROLL_TYPE_ITEM = 1
 function ZO_SharedCraftingInventory:Initialize(control, slotType, connectInfoFn, connectInfoControl)
@@ -44,7 +38,6 @@ function ZO_SharedCraftingInventory:Initialize(control, slotType, connectInfoFn,
         self.hasRecipesForQuest = updatedQuestInfo.hasRecipesForQuest
         self:HandleDirtyEvent()
     end)
-
 end
 
 function ZO_SharedCraftingInventory:InitializeList()

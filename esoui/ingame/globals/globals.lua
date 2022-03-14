@@ -50,12 +50,32 @@ local function OnZoneCollectibleRequirementFailed(eventId, collectibleId, messag
     ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = collectibleData, marketOpenOperation = marketOperation }, { mainTextParams = { message, collectibleName, categoryName } })
 end
 
+local function OnLinkNotHandled(link, button, ...)
+    ClearMenu()
+    if button == MOUSE_BUTTON_INDEX_LEFT then
+        if ZO_ChatSystem_ShouldUseKeyboardChatSystem() then
+            ZO_PopupTooltip_SetLink(link)
+        else
+            SCENE_MANAGER:Push("gamepadChatMenu")
+            CHAT_MENU_GAMEPAD:SelectMessageEntryByLink(link)
+        end
+    elseif button == MOUSE_BUTTON_INDEX_RIGHT and link ~= "" then
+        local function AddLink()
+            ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link))
+        end
+
+        AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), AddLink)
+        ShowMenu(control)
+    end
+end
+
 EVENT_MANAGER:RegisterForEvent("Globals", EVENT_GLOBAL_MOUSE_UP, OnGlobalMouseUp)
 EVENT_MANAGER:RegisterForEvent("Globals", EVENT_LOGOUT_DEFERRED, OnLogoutDeferred)
 EVENT_MANAGER:RegisterForEvent("Globals", EVENT_LOGOUT_DISALLOWED, OnLogoutDisallowed)
 EVENT_MANAGER:RegisterForEvent("Globals", EVENT_PLAYER_COMBAT_STATE, OnCombatStateChanged)
 EVENT_MANAGER:RegisterForEvent("Globals", EVENT_ZONE_COLLECTIBLE_REQUIREMENT_FAILED, OnZoneCollectibleRequirementFailed)
 
+LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_NOT_HANDLED_EVENT, OnLinkNotHandled)
 
 -- Item sounds for slotting actions should mirror the equip sounds according to the audio department.
 -- This is globally overridden here...

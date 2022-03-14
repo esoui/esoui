@@ -171,7 +171,7 @@
 
         <TopLevelControl name="ZO_WorldMap" mouseEnabled="true" clampedToScreen="true" resizeHandleSize="8" hidden="true">
             <Dimensions x="690" y="708" />
-            <Anchor point="TOPLEFT"/>
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
 
             <OnInitialized>
                 ZO_WorldMap_Initialize(self)

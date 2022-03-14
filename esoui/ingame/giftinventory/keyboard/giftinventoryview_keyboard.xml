@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="ZO_GiftInventoryView_Keyboard_TopLevel" inherits="ZO_GiftInventoryView_Shared_TopLevel">
             <ResizeToFitPadding width="20" height="40" />
-            <Anchor point="RIGHT" offsetX="-100" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-100" />
             
             <OnInitialized>
                 ZO_GiftInventoryView_Keyboard_OnInitialized(self)

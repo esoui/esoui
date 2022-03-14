@@ -275,6 +275,14 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
             --ESO-714374: Order matters as we need to set the current list to CategoryList before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
             self:SetCurrentList(self.categoryList)
             self:RefreshCategoryList(selectDefaultEntry)
+
+            -- For the case where the previous list didn't have any selectible items which would allow the header to be exited we need to attempt
+            -- to exit the header again if there are items in the new list (which their will be in this case as Category List has Currency)
+            -- so that we can ensure that the header and main list will not be active at the same time, which would cause a keybind conflict
+            if self:IsHeaderActive() then
+                self:RequestLeaveHeader()
+            end
+
             self:SetActiveKeybinds(self.categoryListKeybindStripDescriptor)
 
             self:SetSelectedItemUniqueId(self:GenerateItemSlotData(self.categoryList:GetTargetData()))

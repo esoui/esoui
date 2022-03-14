@@ -254,7 +254,7 @@
 
         <TopLevelControl name="ZO_Death" hidden="true">
             <Dimensions x="800" y="116"/>
-            <Anchor point="BOTTOM" offsetY="-16"/>
+            <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-16"/>
             <OnInitialized>
                 ZO_Death_OnInitialized(self)
             </OnInitialized>

@@ -1,9 +1,5 @@
 ZO_SmithingExtractionSlot = ZO_CraftingMultiSlotBase:Subclass()
 
-function ZO_SmithingExtractionSlot:New(...)
-    return ZO_CraftingMultiSlotBase.New(self, ...)
-end
-
 function ZO_SmithingExtractionSlot:Initialize(owner, control, craftingInventory)
     local NO_EMPTY_TEXTURE = ""
     local NO_MULTIPLE_ITEMS_TEXTURE = ""

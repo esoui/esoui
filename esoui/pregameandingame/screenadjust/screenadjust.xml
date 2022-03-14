@@ -7,7 +7,7 @@
             <OnInitialized>
                 ZO_ScreenAdjust_OnInitialized(self)
             </OnInitialized>
-            <Anchor point="CENTER"/>
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
             <Controls>
                 <Texture name="$(parent)BG" color="222222">
                     <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
@@ -16,13 +16,13 @@
                 <Texture name="$(parent)TopLeft" inherits="ZO_ScreenAdjustCorner">
                     <Anchor point="TOPLEFT"/>
                 </Texture>
-                <Texture name="$(parent)TopRight" inherits="ZO_ScreenAdjustCorner" textureCoordsRotation="4.712">
+                <Texture name="$(parent)TopRight" inherits="ZO_ScreenAdjustCorner" textureCoordsRotation="-ZO_HALF_PI">
                     <Anchor point="TOPRIGHT"/>
                 </Texture>
-                <Texture name="$(parent)BottomLeft" inherits="ZO_ScreenAdjustCorner" textureCoordsRotation="1.571">
+                <Texture name="$(parent)BottomLeft" inherits="ZO_ScreenAdjustCorner" textureCoordsRotation="ZO_HALF_PI">
                     <Anchor point="BOTTOMLEFT"/>
                 </Texture>
-                <Texture name="$(parent)BottomRight" inherits="ZO_ScreenAdjustCorner" textureCoordsRotation="3.142">
+                <Texture name="$(parent)BottomRight" inherits="ZO_ScreenAdjustCorner" textureCoordsRotation="ZO_PI">
                     <Anchor point="BOTTOMRIGHT"/>
                 </Texture>
 

@@ -1,27 +1,53 @@
-local KeybindingsManager = ZO_Object:Subclass()
-local KeybindsScrollList
+--
+-- KeybindingsManager
+--
 
-function KeybindingsManager:New(...)
-    local keybindingsManager = ZO_Object.New(self)
-    keybindingsManager:Initialize(...)
-    return keybindingsManager
-end
+local KeybindingsManager = ZO_InitializingObject:Subclass()
+local KeybindsScrollList
 
 function KeybindingsManager:Initialize(control)
     self.control = control
+    self.chordingAlwaysEnabled = false
+
+    self.currentKeyboardLayoutLabel = control:GetNamedChild("CurrentKeyboardLayout")
 
     self:InitializeList()
 
-    control:RegisterForEvent(EVENT_KEYBINDING_SET, function(eventCode, ...) self:HandleBindingSet(...) end)
-    control:RegisterForEvent(EVENT_KEYBINDING_CLEARED, function(eventCode, ...) self:HandleBindingCleared(...) end)
-    control:RegisterForEvent(EVENT_KEYBINDINGS_LOADED, function(eventCode, ...) self:HandleBindingsLoaded(...) end)
-    control:RegisterForEvent(EVENT_MOST_RECENT_GAMEPAD_TYPE_CHANGED, function(eventCode, ...) self:HandleMostRecentGamepadChanged(...) end)
+    self.refreshGroups = ZO_Refresh:New()
+    self.refreshGroups:AddRefreshGroup("KeybindingsList",
+    {
+        RefreshAll = function()
+            self:RefreshList()
+        end,
+        IsShown = function() return KEYBINDINGS_FRAGMENT:IsShowing() end,
+    })
+
+    local function RefreshList()
+        self.refreshGroups:RefreshAll("KeybindingsList")
+        -- If we're showing we want to update immediately
+        -- refresh group will determine if showing using IsShown above
+        self.refreshGroups:UpdateRefreshGroups()
+    end
+
+    KEYBINDINGS_MANAGER:RegisterCallback("OnKeybindingSet", RefreshList)
+    KEYBINDINGS_MANAGER:RegisterCallback("OnKeybindingCleared", RefreshList)
+    KEYBINDINGS_MANAGER:RegisterCallback("OnKeybindingsLoaded", RefreshList)
+    control:RegisterForEvent(EVENT_MOST_RECENT_GAMEPAD_TYPE_CHANGED, RefreshList)
+
+    local function UpdateCurrentKeyboardLayout(currentKeyboardLayout)
+        self.currentKeyboardLayoutLabel:SetText(zo_strformat(SI_KEYBIND_CURRENT_KEYBOARD_LAYOUT, currentKeyboardLayout))
+    end
+
+    KEYBINDINGS_MANAGER:RegisterCallback("OnInputLanguageChanged", UpdateCurrentKeyboardLayout)
+
+    UpdateCurrentKeyboardLayout(GetKeyboardLayout())
 
     KEYBINDINGS_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
     local function OnStateChanged(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             PushActionLayerByName("KeybindWindow")
+            self.refreshGroups:UpdateRefreshGroups()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             RemoveActionLayerByName("KeybindWindow")
         end
@@ -37,22 +63,6 @@ function KeybindingsManager:RefreshList()
     self.list:RefreshData()
 end
 
-function KeybindingsManager:HandleBindingSet(layerIndex, categoryIndex, actionIndex, bindingIndex, keyCode, mod1, mod2, mod3, mod4)
-    self:RefreshList()
-end
-
-function KeybindingsManager:HandleBindingCleared(layerIndex, categoryIndex, actionIndex, bindingIndex)
-    self:RefreshList()
-end
-
-function KeybindingsManager:HandleBindingsLoaded()
-    self:RefreshList()
-end
-
-function KeybindingsManager:HandleMostRecentGamepadChanged()
-    self:RefreshList()
-end
-
 function KeybindingsManager:SetChordingAlwaysEnabled(alwaysEnabled)
     self.chordingAlwaysEnabled = alwaysEnabled
 end
@@ -61,13 +71,11 @@ function KeybindingsManager:IsChordingAlwaysEnabled()
     return self.chordingAlwaysEnabled
 end
 
-local BindKeyDialog = ZO_Object:Subclass()
+--
+-- BindKeyDialog
+--
 
-function BindKeyDialog:New(...)
-    local bindKeyDialog = ZO_Object.New(self)
-    bindKeyDialog:Initialize(...)
-    return bindKeyDialog
-end
+local BindKeyDialog = ZO_InitializingObject:Subclass()
 
 function BindKeyDialog:Initialize(control)
     control.owner = self
@@ -82,7 +90,6 @@ function BindKeyDialog:Initialize(control)
         },
         buttons =
         {
-            [1] =
             {
                 control =   GetControl(control, "Bind"),
                 text =      SI_KEYBINDINGS_BIND_BUTTON,
@@ -91,8 +98,7 @@ function BindKeyDialog:Initialize(control)
                                 self:OnBindClicked()
                             end,
             },
-        
-            [2] =
+
             {
                 control =   GetControl(control, "Unbind"),
                 text =      SI_KEYBINDINGS_UNBIND_BUTTON,
@@ -100,9 +106,8 @@ function BindKeyDialog:Initialize(control)
                 callback =  function(dialog)
                                 self:OnUnbindClicked()
                             end,
-            }, 
+            },
 
-            [3] =
             {
                 control =   GetControl(control, "Cancel"),
                 text =      SI_DIALOG_CANCEL,
@@ -124,25 +129,13 @@ function BindKeyDialog:OnUnbindClicked()
     ZO_Dialogs_ReleaseDialogOnButtonPress("BINDINGS")
 end
 
-local function GetBindTypeTextFromIndex(bindingIndex)
-    if bindingIndex == 1 then 
-        return GetString(SI_KEYBINDINGS_PRIMARY) 
-    elseif bindingIndex == 2 then
-        return GetString(SI_KEYBINDINGS_SECONDARY)
-    elseif bindingIndex == 3 then
-        return GetString(SI_KEYBINDINGS_TERTIARY)
-    else
-        return GetString(SI_KEYBINDINGS_QUATERNARY)
-    end
-end
-
 function BindKeyDialog:SetupDialog(data)
     self.layerIndex = data.layerIndex
     self.categoryIndex = data.categoryIndex
     self.actionIndex = data.actionIndex
     self.bindingIndex = data.bindingIndex
     
-    local bindingSlotText = GetBindTypeTextFromIndex(self.bindingIndex)
+    local bindingSlotText = KEYBINDINGS_MANAGER:GetBindTypeTextFromIndex(self.bindingIndex)
     self.control.instructionsLabel:SetText(zo_strformat(SI_KEYBINDINGS_PRESS_A_KEY_OR_CLICK, ZO_SELECTED_TEXT:Colorize(bindingSlotText), ZO_SELECTED_TEXT:Colorize(data.localizedActionName)))
 
     local key, mod1, mod2, mod3, mod4 = GetActionBindingInfo(self.layerIndex, self.categoryIndex, self.actionIndex, self.bindingIndex)
@@ -156,6 +149,9 @@ function BindKeyDialog:SetupDialog(data)
 
     self:SetCurrentKeys(key, ctrl, alt, shift, command)
 
+    self.numMouseButtonsDown = 0
+    self.numKeysDown = 0
+
     local canBeUnbound = self:HasValidKeyToBind()
     self.control.unbindButton:SetEnabled(canBeUnbound)
     BlockAutomaticInputModeChange(true)
@@ -168,7 +164,7 @@ end
 function BindKeyDialog:OnMouseDown(button, ctrl, alt, shift, command)
     local mouseButtonAsKeyCode = ConvertMouseButtonToKeyCode(button)
 
-    self.numMouseButtonsDown = (self.numMouseButtonsDown or 0) + 1
+    self.numMouseButtonsDown = self.numMouseButtonsDown + 1
 
     if mouseButtonAsKeyCode == KEY_MOUSE_LEFTRIGHT then
         self.forcedLmbRmb = true
@@ -192,22 +188,11 @@ function BindKeyDialog:OnMouseWheel(delta, ctrl, alt, shift, command)
     self:SetCurrentKeys(mouseWheelAsKey, ctrl, alt, shift, command)
 end
 
-local function IsBindableKey(key)
-    if key ~= KEY_LWINDOWS and key ~= KEY_RWINDOWS then
-        return true
-    end
-    return false
-end
-
-local function IsComboKey(key)
-    return IsKeyCodeChordKey(key)
-end
-
 function BindKeyDialog:OnKeyDown(key, ctrl, alt, shift, command)
-    if IsBindableKey(key) then
-        self.numKeysDown = (self.numKeysDown or 0) + 1
+    if KEYBINDINGS_MANAGER:IsBindableKey(key) then
+        self.numKeysDown = self.numKeysDown + 1
 
-        if IsComboKey(key) then
+        if IsKeyCodeChordKey(key) then
             self.forcedComboKey = key
             self:SetCurrentKeys(key, ctrl, alt, shift, command)
         elseif not self.forcedComboKey then
@@ -217,7 +202,7 @@ function BindKeyDialog:OnKeyDown(key, ctrl, alt, shift, command)
 end
 
 function BindKeyDialog:OnKeyUp(key, ctrl, alt, shift, command)
-    if IsBindableKey(key) then
+    if KEYBINDINGS_MANAGER:IsBindableKey(key) then
         self.numKeysDown = self.numKeysDown - 1
 
         if self.numKeysDown == 0 and self.forcedComboKey ~= key then
@@ -288,7 +273,7 @@ function BindKeyDialog:UpdateCurrentKeyLabel()
             local localizedActionName = GetString(_G["SI_BINDING_NAME_"..actionName])
 
             if isRebindable then
-                local bindingSlotText = GetBindTypeTextFromIndex(bindingIndex)
+                local bindingSlotText = KEYBINDINGS_MANAGER:GetBindTypeTextFromIndex(bindingIndex)
                 self.control.overwriteWarning1:SetText(zo_strformat(SI_KEYBINDINGS_ALREADY_BOUND, ZO_SELECTED_TEXT:Colorize(bindingSlotText), ZO_SELECTED_TEXT:Colorize(localizedActionName)))
                 self.control.overwriteWarning2:SetText(zo_strformat(SI_KEYBINDINGS_WOULD_UNBIND, ZO_SELECTED_TEXT:Colorize(localizedActionName)))
                 self.control.overwriteWarning2:SetHidden(false)
@@ -312,6 +297,10 @@ end
 function ZO_BindKeyDialog_OnInitialized(control)
     BIND_KEY_DIALOG = BindKeyDialog:New(control)
 end
+
+--
+-- KeybindsScrollList
+--
 
 KeybindsScrollList = ZO_SortFilterList:Subclass()
 local LAYER_DATA_TYPE = 1
@@ -368,61 +357,24 @@ function KeybindsScrollList:SortScrollList()
     -- no sorting, use the order defined in xml
 end
 
-local function AddBindingRow(masterList, layerIndex, categoryIndex, actionIndex, actionName, isRebindable, layerName, layerId, categoryName, categoryId)
-    local localizedActionName = GetString(_G["SI_BINDING_NAME_"..actionName])
-    if localizedActionName == "" then
-        return layerId, categoryId
-    end
-
-    if not layerId then
-        masterList[#masterList + 1] = ZO_ScrollList_CreateDataEntry(LAYER_DATA_TYPE, { layerIndex = layerIndex, layerName = layerName })
-        layerId = #masterList
-    end
-
-    if not categoryId then
-        if categoryName ~= "" then
-            masterList[#masterList + 1] = ZO_ScrollList_CreateDataEntry(CATEGORY_DATA_TYPE, { layerIndex = layerIndex, categoryIndex = categoryIndex, categoryName = categoryName })
-            categoryId = #masterList
-        end
-    end
-
-    local data = {
-        actionName = actionName, 
-        localizedActionName = localizedActionName, 
-        isRebindable = isRebindable,
-
-        layerIndex = layerIndex, 
-        categoryIndex = categoryIndex, 
-        actionIndex = actionIndex,
-
-        layerId = layerId,
-        categoryId = categoryId,
-     }
-
-    masterList[#masterList + 1] = ZO_ScrollList_CreateDataEntry(KEYBIND_DATA_TYPE, data)
-
-    return layerId, categoryId
-end
-
 function KeybindsScrollList:BuildMasterList()
     self.masterList = {}
     local masterList = self.masterList
 
-    for layerIndex = 1, GetNumActionLayers() do
-        local layerName, numCategories = GetActionLayerInfo(layerIndex)
-        local layerId = nil
+    local keybindData = KEYBINDINGS_MANAGER:GetKeybindData()
 
-        for categoryIndex = 1, numCategories do
-            local categoryName, numActions = GetActionLayerCategoryInfo(layerIndex, categoryIndex)
-            local categoryId = nil
-            for actionIndex = 1, numActions do
-                local actionName, isRebindable, isHidden = GetActionInfo(layerIndex, categoryIndex, actionIndex)
-                if not isHidden then
-                    layerId, categoryId = AddBindingRow(masterList, layerIndex, categoryIndex, actionIndex, actionName, isRebindable, layerName, layerId, categoryName, categoryId)
-                end
+    for _, layerData in ipairs(keybindData) do
+        masterList[#masterList + 1] = ZO_ScrollList_CreateDataEntry(LAYER_DATA_TYPE, layerData)
+        for _, categoryData in ipairs(layerData.categories) do
+            if categoryData.categoryName ~= "" then
+                masterList[#masterList + 1] = ZO_ScrollList_CreateDataEntry(CATEGORY_DATA_TYPE, categoryData)
+            end
+            for _, action in ipairs(categoryData.actions) do
+                masterList[#masterList + 1] = ZO_ScrollList_CreateDataEntry(KEYBIND_DATA_TYPE, action)
             end
         end
     end
+
 end
 
 function KeybindsScrollList:FilterScrollList()
@@ -432,6 +384,17 @@ function KeybindsScrollList:FilterScrollList()
     for i, data in ipairs(self.masterList) do
         scrollData[#scrollData + 1] = data
     end
+end
+
+----
+-- Global XML Function
+----
+
+function ZO_KeybindingListButton_OnClicked(control)
+    local actionData = control:GetParent().data:GetDataSource()
+    local dialogData = ZO_ShallowTableCopy(actionData)
+    dialogData.bindingIndex = control.bindingIndex
+    ZO_Dialogs_ShowDialog("BINDINGS", dialogData)
 end
 
 function ZO_Keybindings_OnInitialize(control)

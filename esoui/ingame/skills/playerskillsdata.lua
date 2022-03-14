@@ -146,8 +146,17 @@ function ZO_ActiveSkillProgressionData:SetKeyboardTooltip(tooltip, showSkillPoin
 end
 
 function ZO_ActiveSkillProgressionData:TryPickup()
-    PickupAbilityBySkillLine(self:GetIndices()) 
-    return true
+    local isPurchased = self.skillData:IsPurchased()
+    if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+        local skillPointAllocator = self.skillData:GetPointAllocator()
+        isPurchased = skillPointAllocator:IsPurchased()
+    end
+
+    if isPurchased then
+        PickupAbilityBySkillLine(self:GetIndices())
+        return true
+    end
+    return false
 end
 
 -------------------------------

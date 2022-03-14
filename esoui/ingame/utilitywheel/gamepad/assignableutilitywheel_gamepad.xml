@@ -1,0 +1,25 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_AssignableUtilityWheelSlot_Gamepad_Template" inherits="ZO_GamepadSelectableItemRadialMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                self.label = self:GetNamedChild("Label")
+                ZO_SelectableItemRadialMenuEntryTemplate_OnInitialized(self)
+                ZO_CreateSparkleAnimation(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepad54" horizontalAlignment="CENTER">
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="5"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AssignableUtilityWheel_Gamepad_Template" inherits="ZO_RadialMenuHUDSize_Gamepad" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Sparkle" inherits="ZO_SparkleTemplate" >
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="CENTER"/>
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

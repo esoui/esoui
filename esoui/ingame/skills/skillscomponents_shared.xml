@@ -7,7 +7,45 @@
                         self:SetAlphaValues(animatingControl:GetAlpha(), 1.0)
                     </OnPlay>
                 </AlphaAnimation>
+
                 <AlphaAnimation duration="550" delay="1300" startAlpha="1.0" endAlpha="0.0" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_MultipleCraftingSkills_XpGainAnimation">
+            <Animations>
+                <CustomAnimation duration="200" delay="0">
+                    <OnPlay>
+                        self:GetAnimatedControl().owner:OnPlayAnimation()
+                    </OnPlay>
+
+                    <UpdateFunction>
+                        progress = ZO_EaseInQuadratic(progress)
+                        self:GetAnimatedControl():SetAlpha(progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+
+                <CustomAnimation duration="1700" delay="300">
+                    <OnPlay>
+                        self:GetAnimatedControl().owner:ShowQueuedXpBarUpdate()
+                    </OnPlay>
+
+                    <UpdateFunction>
+                        progress = ZO_EaseInOutQuartic(1 - progress)
+                        self:GetAnimatedControl().owner.glowContainer:SetAlpha(progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+
+                <CustomAnimation duration="400" delay="2000">
+                    <OnStop>
+                        self:GetAnimatedControl().owner:OnStopAnimation()
+                    </OnStop>
+
+                    <UpdateFunction>
+                        progress = ZO_EaseInQuadratic(1 - progress)
+                        self:GetAnimatedControl():SetAlpha(progress)
+                    </UpdateFunction>
+                </CustomAnimation>
             </Animations>
         </AnimationTimeline>
     </Animations>

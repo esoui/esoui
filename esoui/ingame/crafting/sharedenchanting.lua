@@ -557,10 +557,6 @@ end
 
 ZO_SharedEnchantExtractionSlot = ZO_CraftingMultiSlotBase:Subclass()
 
-function ZO_SharedEnchantExtractionSlot:New(...)
-    return ZO_CraftingMultiSlotBase.New(self, ...)
-end
-
 function ZO_SharedEnchantExtractionSlot:Initialize(owner, control, multipleItemsTexture, craftingInventory, useEmptySlotIcon)
     self.nameLabel = control:GetNamedChild("Name")
 

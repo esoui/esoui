@@ -269,6 +269,12 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE,
+            header = SI_GAMEPAD_SECTION_HEADER,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_USE_KEYBOARD_CHAT,
             header = SI_GAMEPAD_SECTION_HEADER,
         },

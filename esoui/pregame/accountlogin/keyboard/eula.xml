@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="ZO_EndUserLicenseAgreement" layer="OVERLAY" tier="HIGH" inherits="ZO_CustomDialogBase">
             <Dimensions x="730" y="400" />
-            <Anchor point="CENTER" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
 
             <OnInitialized>
                 ZO_EULAInit(self)

@@ -270,6 +270,7 @@ do
         ["dailyLoginRewardsPreview_Gamepad"] = true,
         ["dailyLoginRewards"] = true,
         ["tradinghouse"] = true,
+        ["guildHeraldry"] = true,
     }
 
     function ZO_IngameSceneManager:DoesCurrentSceneOverrideMountStateChange()

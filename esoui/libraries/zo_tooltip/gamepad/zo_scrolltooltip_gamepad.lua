@@ -8,9 +8,9 @@ local MAX_SCROLL_VALUE = 100
 
 function ZO_ScrollTooltip_Gamepad:RefreshDisplayedKeybinds()
     local enabled = self.inputEnabled
-    local wasLastInputGamepad = WasLastInputGamepad()
-    local hideGamepad = not enabled or not self.canScroll or not wasLastInputGamepad
-    local hideKeyboard = not enabled or not self.canScroll or wasLastInputGamepad    
+    local shouldShowGamepadKeybinds = ZO_Keybindings_ShouldShowGamepadKeybind()
+    local hideGamepad = not enabled or not self.canScroll or not shouldShowGamepadKeybinds
+    local hideKeyboard = not enabled or not self.canScroll or shouldShowGamepadKeybinds    
     self.scrollIndicator:SetHidden(hideGamepad)
     self.scrollKeyUp:SetHidden(hideKeyboard)
     self.scrollKeyDown:SetHidden(hideKeyboard)

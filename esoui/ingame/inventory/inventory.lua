@@ -777,6 +777,19 @@ function ZO_InventoryManager:InitializeHeaderSort(inventoryType, inventory, head
     inventory.sortHeaders = sortHeaders
 end
 
+function ZO_InventoryManager:RefreshPlayerInventorySearchContext()
+    if not INVENTORY_FRAGMENT:IsHidden() then
+        -- If the inventory fragment is shown then shown was called before the previous context screen
+        -- was closed and the search context was not properly updated at that time, so update it now.
+        self:ActivateInventorySearch()
+
+        local UPDATE_EVEN_IF_HIDDEN = true
+        if TEXT_SEARCH_MANAGER:IsFilterTargetInContext(self.inventories[INVENTORY_BACKPACK].currentContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT) then
+            self:UpdateList(INVENTORY_BACKPACK, UPDATE_EVEN_IF_HIDDEN)
+        end
+    end
+end
+
 function ZO_InventoryManager:SetContextForInventories(context, inventoryTypeList)
     if not TEXT_SEARCH_MANAGER:IsActiveTextSearch(context) then
         TEXT_SEARCH_MANAGER:ActivateTextSearch(context)
@@ -1060,6 +1073,8 @@ do
                 if ZO_Dialogs_IsShowingDialog() then
                     ZO_Dialogs_ReleaseAllDialogs()
                 end
+
+                self:RefreshPlayerInventorySearchContext()
             end
         end
 
@@ -1737,7 +1752,7 @@ function ZO_InventoryManager:ShouldAddSlotToList(inventory, slot)
         return false
     end
 
-    if not DoesSlotPassAdditionalFilter(slot,  currentFilter, inventory.additionalFilter) then
+    if not DoesSlotPassAdditionalFilter(slot, currentFilter, inventory.additionalFilter) then
         return false
     end
 
@@ -2862,6 +2877,8 @@ function ZO_InventoryManager:CloseGuildBank()
     SCENE_MANAGER:Hide("guildBank")
     ZO_GuildBankBackpackLoading:SetHidden(true)
     self:ClearAllGuildBankItems()
+
+    self:RefreshPlayerInventorySearchContext()
 end
 
 function ZO_InventoryManager:RefreshAllGuildBankItems()
@@ -3009,12 +3026,13 @@ function ZO_InventoryManager:CreateCraftBagFragment()
             if self.inventories[INVENTORY_CRAFT_BAG].searchBox then
                 self.inventories[INVENTORY_CRAFT_BAG].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText(self.inventories[INVENTORY_CRAFT_BAG].currentContext))
             end
-
+            TriggerTutorial(TUTORIAL_TRIGGER_CRAFT_BAG_OPENED)
+            self:UpdateApparelSection()
+        elseif newState == SCENE_FRAGMENT_SHOWN then
+            -- ESO-750278: This update must occur after ApplyBackpackLayout is called so the list is filtered properly
             if self.isListDirty[INVENTORY_CRAFT_BAG] then
                 self:UpdateList(INVENTORY_CRAFT_BAG, UPDATE_EVEN_IF_HIDDEN)
             end
-            TriggerTutorial(TUTORIAL_TRIGGER_CRAFT_BAG_OPENED)
-            self:UpdateApparelSection()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             self:DeactivateInventorySearch()
             ZO_InventorySlot_RemoveMouseOverKeybinds()
@@ -3114,8 +3132,15 @@ end
 
 function ZO_PlayerInventory_FilterButtonOnMouseEnter(self)
     ZO_MenuBarButtonTemplate_OnMouseEnter(self)
+
+    local data = ZO_MenuBarButtonTemplate_GetData(self)
+    local tooltipText = data.tooltipText
+    if type(tooltipText) == "function" then
+        tooltipText = tooltipText(data)
+    end
+
     InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
-    SetTooltipText(InformationTooltip, ZO_MenuBarButtonTemplate_GetData(self).tooltipText)
+    SetTooltipText(InformationTooltip, tooltipText)
 end
 
 function ZO_PlayerInventory_FilterButtonOnMouseExit(self)

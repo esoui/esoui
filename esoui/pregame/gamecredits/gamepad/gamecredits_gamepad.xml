@@ -12,8 +12,8 @@
 
         <TopLevelControl name="ZO_GameCredits_Gamepad" hidden="true">
             <Dimensions x="800"/>
-            <Anchor point="TOPLEFT" offsetX="140" />
-            <Anchor point="BOTTOMLEFT" offsetX="140" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="140" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="140" />
 
             <OnInitialized>
                 ZO_GameCredits_Gamepad_Initialize(self)

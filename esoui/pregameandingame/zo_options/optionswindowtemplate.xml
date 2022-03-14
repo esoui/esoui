@@ -208,7 +208,7 @@
                 <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" verticalAlignment="CENTER">
                     <Dimensions y="26" />
                     <Anchor point="LEFT" />
-                    <Anchor point="RIGHT" relativeTo="$(parent)LowLabel" relativePoint="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Slider" relativePoint="LEFT" offsetY="-5"/>
                 </Label>
 
                 <Label name="$(parent)ValueLabel" font="ZoFontWinH4" wrapMode="ELLIPSIS" verticalAlignment="CENTER" excludeFromResizeToFitExtents="true">

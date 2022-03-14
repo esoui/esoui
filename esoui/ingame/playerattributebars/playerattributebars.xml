@@ -1,11 +1,11 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_PlayerAttribute_Keyboard_Template" virtual="true">
-            <Anchor point="BOTTOM" offsetY="-74"/>
+            <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-74"/>
         </Control>
 
         <Control name="ZO_PlayerAttribute_Gamepad_Template" virtual="true">
-            <Anchor point="BOTTOM" offsetY="-105"/>
+            <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-105"/>
         </Control>
       
         <Texture name="ZO_PlayerAttributeMagickaWarnerTexture_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_magickaGlow.dds" virtual="true" />

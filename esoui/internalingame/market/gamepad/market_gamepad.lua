@@ -1493,12 +1493,12 @@ function GamepadMarket:OnTutorialHidden()
 end
 
 function GamepadMarket:RestoreActionLayerForTutorial()
-    PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_GENERAL))
+    PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))
 end
 
 function GamepadMarket:RemoveActionLayerForTutorial()
     -- we exit the gamepad tutorial by pressing "A"
-    RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_GENERAL))
+    RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))
 end
 
 function GamepadMarket:ClearProducts()

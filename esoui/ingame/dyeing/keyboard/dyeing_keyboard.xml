@@ -2,7 +2,7 @@
     <Controls>
         <Control name="ZO_Restyle_Content_Anchors" virtual="true">
             <Dimensions x="595" y="670" />
-            <Anchor point="RIGHT" offsetX="-10" offsetY="30" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-10" offsetY="30" />
         </Control>
         
         <Control name="ZO_DyeingEquipSlotDyeSwatch" virtual="true" mouseEnabled="true">

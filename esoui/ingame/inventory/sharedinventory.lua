@@ -660,6 +660,10 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
 
     if wasSameItemInSlotBefore and slot.age ~= 0 then
         -- don't modify the age, keep it the same relative sort - for now?
+        -- Age is only set to 0 before this point from ClearNewStatus, so if brandNew is false
+        -- but age isn't 0, something has tried to set brandNew to false without calling ClearNewStatus,
+        -- so we can still rely on it actually being new.
+        slot.brandNew = true
     elseif isNewItem then
         slot.age = GetFrameTimeSeconds()
     else

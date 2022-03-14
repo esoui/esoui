@@ -8,7 +8,7 @@
 
         <AnimationTimeline name="ZO_HUDDaedricEnergyMeter_RotateOnce">
             <Animations>
-                <TextureRotateAnimation duration="1500" startRotation="6.28318530718" endRotation="-6.28318530718">
+                <TextureRotateAnimation duration="1500" startRotation="ZO_TWO_PI" endRotation="-ZO_TWO_PI">
                     <EasingFunction>
                         return ZO_EaseInQuadratic(progress)
                     </EasingFunction>
@@ -44,7 +44,7 @@
 
     <Controls>
         <Control name="ZO_HUDDaedricEnergyMeter_KeyboardTemplate" virtual="true" >
-            <Anchor point="BOTTOMRIGHT" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
             <Dimensions x="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_FRAME_WIDTH" y="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_FRAME_HEIGHT" />
             <Controls>
                 <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/daedricHunger_meter_frame.dds">
@@ -72,7 +72,7 @@
         </Control>
 
         <Control name="ZO_HUDDaedricEnergyMeter_GamepadTemplate" virtual="true" >
-            <Anchor point="BOTTOMLEFT" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
             <Dimensions x="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_FRAME_WIDTH" y="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_FRAME_HEIGHT" />
             <Controls>
                 <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/Gamepad/gp_daedricHunger_meter_frame.dds">

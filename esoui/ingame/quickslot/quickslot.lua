@@ -191,7 +191,7 @@ function ZO_QuickslotManager:Initialize(container)
         end
     end
 
-    local function HandleQuestItemSlotPickup(questItemId)
+    local function HandleQuestItemSlotPickup(questIndex, stepIndex, conditionIndex, toolIndex, questItemId)
         for actionSlotIndex, quickSlot in pairs(self.quickSlots) do
             local validInSlot = IsValidQuestItemForSlot(questItemId, actionSlotIndex)
             if validInSlot then
@@ -335,7 +335,6 @@ end
 local EMPTY_QUICKSLOT_TEXTURE = "EsoUI/Art/Quickslots/quickslot_emptySlot.dds"
 
 local INITIAL_ROTATION = 0
-local TWO_PI = math.pi * 2
 
 function ZO_QuickslotManager:PerformQuickSlotLayout()
     local width, height = self.circle:GetDimensions()
@@ -345,7 +344,7 @@ function ZO_QuickslotManager:PerformQuickSlotLayout()
 
     for i = 1, numQuickSlots do
         local control = self.quickSlots[i + ACTION_BAR_FIRST_UTILITY_BAR_SLOT]
-        local centerAngle = INITIAL_ROTATION + i / numQuickSlots * TWO_PI
+        local centerAngle = INITIAL_ROTATION + i / numQuickSlots * ZO_TWO_PI
         local x = math.sin(centerAngle)
         local y = math.cos(centerAngle)
 

@@ -101,12 +101,12 @@
                                                 </Label>
                                                 
                                                 <Label name="$(parent)Tokens" font="ZoFontGamepad42" horizontalAlignment="RIGHT" text="0">
-                                                    <Anchor point="TOPRIGHT" relativeTo="BOTTOMRIGHT" />
+                                                    <Anchor point="TOPRIGHT"/>
                                                 </Label>
 
                                                 <Label name="$(parent)Instructions" font="ZoFontGamepadCondensed42"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
-                                                    <Anchor point="TOPLEFT" relativeTo="BOTTOMLEFT" offsetY="70" />
-                                                    <Anchor point="TOPRIGHT" relativeTo="BOTTOMRIGHT" offsetY="70" />
+                                                    <Anchor point="TOPLEFT" offsetY="70" />
+                                                    <Anchor point="TOPRIGHT" offsetY="70" />
                                                 </Label>
                                             </Controls>
                                         </Control>
