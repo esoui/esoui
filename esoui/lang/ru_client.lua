@@ -335,7 +335,7 @@ SafeAddString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_ANTIQUITY_UNEARTHED_TITLE, "<<
 SafeAddString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BEGIN_TEXT, "Найдите и выкопайте реликвию.", 0)
 SafeAddString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BEGIN_TITLE, "Раскопки", 0)
 SafeAddString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BONUS_LOOT_TITLE, "Выкопан дополнительный предмет!", 0)
-SafeAddString(SI_ANTIQUITIES_DIGGING_MORE_INFO, "Информация об инструменте", 2)
+SafeAddString(SI_ANTIQUITIES_DIGGING_MORE_INFO, "Показать/скрыть информацию об инструменте", 2)
 SafeAddString(SI_ANTIQUITIES_SCRYING_PROGRESS_UPDATED_HEADER, "Прогресс лоцирования обновлен", 0)
 SafeAddString(SI_ANTIQUITYABANDONRESULT1, "Вы еще не приступили к поиску этой реликвии.", 0)
 SafeAddString(SI_ANTIQUITYDIFFICULTY0, "Простейший", 0)
