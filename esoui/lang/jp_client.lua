@@ -4994,7 +4994,7 @@ SafeAddString(SI_INSTANTUNLOCKREWARDCATEGORY3, "クエスト スターター", 0
 SafeAddString(SI_INTERACT_BUSY, "誰かが使用している。", 1)
 SafeAddString(SI_INTERACT_FAILED_CLUMSY_DEBUFF, "再び開錠するには数秒待つ必要がある。", 0)
 SafeAddString(SI_INTERACT_OPTION_ARMORY, "武装", 0)
-SafeAddString(SI_INTERACT_OPTION_ATTRIBUTE_RESPEC, "属性：寄付をする", 0)
+SafeAddString(SI_INTERACT_OPTION_ATTRIBUTE_RESPEC, "属性：寄付をする。", 0)
 SafeAddString(SI_INTERACT_OPTION_BANK, "銀行", 0)
 SafeAddString(SI_INTERACT_OPTION_BUY_BAG_SPACE, "バックパックのアップグレードを購入", 0)
 SafeAddString(SI_INTERACT_OPTION_COMPANION_MENU, "コンパニオンメニュー", 0)
