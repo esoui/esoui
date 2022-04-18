@@ -5686,6 +5686,7 @@ h5. GamepadSetting
 * GAMEPAD_SETTING_INPUT_PREFERRED_MODE
 * GAMEPAD_SETTING_INVERT_X
 * GAMEPAD_SETTING_INVERT_Y
+* GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE
 * GAMEPAD_SETTING_USE_KEYBOARD_CHAT
 * GAMEPAD_SETTING_VIBRATION
 * GAMEPAD_SETTING_WAS_LAST_INPUT_GAMEPAD
@@ -5707,6 +5708,12 @@ h5. InWorldUISetting
 * IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_INTENSITY
 * IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED
 * IN_WORLD_UI_SETTING_TARGET_GLOW_INTENSITY
+
+
+h5. KeybindDisplayMode
+* KEYBIND_DISPLAY_MODE_ALWAYS_GAMEPAD
+* KEYBIND_DISPLAY_MODE_ALWAYS_KEYBOARD
+* KEYBIND_DISPLAY_MODE_AUTOMATIC
 
 
 h5. LanguageSetting
@@ -8432,6 +8439,12 @@ h5. EventReasonType
 * EVENT_REASON_SOFTWARE
 
 
+h5. ExpectedInputChangeResult
+* EXPECTED_INPUT_CHANGE_RESULT_INPUT_MODE_CHANGED
+* EXPECTED_INPUT_CHANGE_RESULT_INPUT_TYPE_CHANGED
+* EXPECTED_INPUT_CHANGE_RESULT_NO_CHANGE
+
+
 h5. FontStyle
 * FONT_STYLE_NORMAL
 * FONT_STYLE_OUTLINE
@@ -8778,8 +8791,10 @@ h5. ScrollBounding
 
 
 h5. ShaderEffectType
+* SHADER_EFFECT_TYPE_CAUSTIC
 * SHADER_EFFECT_TYPE_HALO
 * SHADER_EFFECT_TYPE_NONE
+* SHADER_EFFECT_TYPE_WAVE
 
 
 h5. ShapeType
@@ -10448,6 +10463,9 @@ h2. Game API
 
 * IsGroupMemberInSameInstanceAsPlayer(*string* _unitTag_)
 ** _Returns:_ *bool* _isInSameInstance_
+
+* IsGroupMemberInSameLayerAsPlayer(*string* _unitTag_)
+** _Returns:_ *bool* _isInSameLayer_
 
 * IsUnitSoloOrGroupLeader(*string* _unitTag_)
 ** _Returns:_ *bool* _isSoloOrGroupLeader_
@@ -19729,6 +19747,12 @@ Objects that inherit behavior from *Control*
 * GetBottom()
 ** _Returns:_ *number* _bottom_
 
+* GetCaustic()
+** _Returns:_ *number* _frequencyX_, *number* _frequencyY_, *number* _speed_, *number* _offset_
+
+* GetCausticOffset()
+** _Returns:_ *number* _offset_
+
 * GetCenter()
 ** _Returns:_ *number* _centerX_, *number* _centerY_
 
@@ -19861,6 +19885,24 @@ Objects that inherit behavior from *Control*
 * GetType()
 ** _Returns:_ *integer* _type_
 
+* GetWave()
+** _Returns:_ *number* _angleRadians_, *number* _frequency_, *number* _speed_, *number* _offset_
+
+* GetWaveAngle()
+** _Returns:_ *number* _angleRadians_
+
+* GetWaveBounds()
+** _Returns:_ *number* _minX_, *number* _maxX_, *number* _minY_, *number* _maxY_
+
+* GetWaveFrequency()
+** _Returns:_ *number* _frequency_
+
+* GetWaveOffset()
+** _Returns:_ *number* _offset_
+
+* GetWaveSpeed()
+** _Returns:_ *number* _speed_
+
 * GetWidth()
 ** _Returns:_ *number* _width_
 
@@ -19916,6 +19958,10 @@ Objects that inherit behavior from *Control*
 * SetAnchorFill *protected-attributes* (*object* _anchorTargetControl_)
 
 * SetAutoRectClipChildren(*bool* _autoRectClipChildren_)
+
+* SetCaustic(*number* _frequencyX_, *number* _frequencyY_, *number* _speed_, *number* _offset_)
+
+* SetCausticOffset(*number* _offset_)
 
 * SetCircularClip(*number* _centerX_, *number* _centerY_, *number* _radius_)
 
@@ -20020,6 +20066,18 @@ Objects that inherit behavior from *Control*
 * SetTransformSkewX(*number* _skewXRadians_)
 
 * SetTransformSkewY(*number* _skewYRadians_)
+
+* SetWave(*number* _angleRadians_, *number* _frequency_, *number* _speed_, *number* _offset_)
+
+* SetWaveAngle(*number* _angleRadians_)
+
+* SetWaveBounds(*number* _minX_, *number* _maxX_, *number* _minY_, *number* _maxY_)
+
+* SetWaveFrequency(*number* _frequency_)
+
+* SetWaveOffset(*number* _offset_)
+
+* SetWaveSpeed(*number* _speed_)
 
 * SetWidth *protected-attributes* (*layout_measurement* _width_)
 
@@ -21908,6 +21966,7 @@ h2. Events
 * EVENT_INCOMING_FRIEND_INVITE_REMOVED (*string* _displayName_)
 * EVENT_INTERFACE_SETTING_CHANGED (*[SettingSystemType|#SettingSystemType]* _settingSystemType_, *integer* _settingId_)
 * EVENT_JUMP_FAILED (*[JumpResult|#JumpResult]* _reason_)
+* EVENT_KEYBIND_DISPLAY_MODE_CHANGED (*[KeybindDisplayMode|#KeybindDisplayMode]* _keybindDisplayMode_)
 * EVENT_LEADER_TO_FOLLOWER_SYNC (*[SceneManagerMessageOrigin|#SceneManagerMessageOrigin]* _messageOrigin_, *[RemoteSceneSyncType|#RemoteSceneSyncType]* _syncType_, *string* _currentSceneName_, *string* _nextSceneName_, *integer* _sequenceNumber_, *bool* _currentSceneFragmentsComplete_)
 * EVENT_MOST_RECENT_GAMEPAD_TYPE_CHANGED (*[GamepadType|#GamepadType]* _mostRecentGamepadType_)
 * EVENT_OUTGOING_FRIEND_INVITE_ADDED (*string* _displayName_)
@@ -22262,6 +22321,12 @@ h5. Callback
 h5. Callbacks
 * [Child: Callback|#Callback]
 
+h5. Caustic
+* _attribute:_ *number* _frequencyX_
+* _attribute:_ *number* _frequencyY_
+* _attribute:_ *number* _speed_
+* _attribute:_ *number* _offset_
+
 h5. Center
 * _attribute:_ *string* _file_
 * _attribute:_ *layout_measurement* _tileSize_
@@ -22334,6 +22399,7 @@ h5. Control
 * _attribute:_ *[ControlAccessControl|#ControlAccessControl]* _accessControl_
 * [Child: Anchor|#Anchor]
 * [Child: AnchorFill|#AnchorFill]
+* [Child: Caustic|#Caustic]
 * [Child: CircularClip|#CircularClip]
 * [Child: ClampedToScreenInsets|#ClampedToScreenInsets]
 * [Child: ClearAnchors|#ClearAnchors]
@@ -22375,6 +22441,8 @@ h5. Control
 * [Child: TransformRotation|#TransformRotation]
 * [Child: TransformScale|#TransformScale]
 * [Child: TransformSkew|#TransformSkew]
+* [Child: Wave|#Wave]
+* [Child: WaveBounds|#WaveBounds]
 * [Child: alpha|#Attributes]
 * [Child: autoRectClipChildren|#Attributes]
 * [Child: clampedToScreen|#Attributes]
@@ -23180,6 +23248,18 @@ h5. TranslateAnimation
 h5. UpdateFunction
 * [Inherits: OnSetUpdateFunction|#OnSetUpdateFunction]
 * ScriptArguments: local self, progress = ...
+
+h5. Wave
+* _attribute:_ *number* _angleRadians_
+* _attribute:_ *number* _frequency_
+* _attribute:_ *number* _speed_
+* _attribute:_ *number* _offset_
+
+h5. WaveBounds
+* _attribute:_ *number* _minX_
+* _attribute:_ *number* _maxX_
+* _attribute:_ *number* _minY_
+* _attribute:_ *number* _maxY_
 
 h5. sentinel_element
 
