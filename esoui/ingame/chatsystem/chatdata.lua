@@ -31,6 +31,7 @@ local MultiLevelEventToCategoryMappings = {
         [CHAT_CHANNEL_ZONE_LANGUAGE_3] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_3),
         [CHAT_CHANNEL_ZONE_LANGUAGE_4] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_4),
         [CHAT_CHANNEL_ZONE_LANGUAGE_5] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_5),
+        [CHAT_CHANNEL_ZONE_LANGUAGE_6] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_6),
         [CHAT_CHANNEL_WHISPER] = GetChannelCategoryFromChannel(CHAT_CHANNEL_WHISPER),
         [CHAT_CHANNEL_WHISPER_SENT] = GetChannelCategoryFromChannel(CHAT_CHANNEL_WHISPER_SENT),
         [CHAT_CHANNEL_PARTY] = GetChannelCategoryFromChannel(CHAT_CHANNEL_PARTY),
@@ -344,6 +345,15 @@ if not IsConsoleUI() then
         channelLinkable = false,
         supportCSIcon = true,
         switches = GetString(SI_CHANNEL_SWITCH_ZONE_RUSSIAN)
+    }
+    ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_6] =
+    {
+        format = SI_CHAT_MESSAGE_ZONE_SPANISH,
+        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_SPANISH),
+        playerLinkable = true,
+        channelLinkable = false,
+        supportCSIcon = true,
+        switches = GetString(SI_CHANNEL_SWITCH_ZONE_SPANISH)
     }
 end
 

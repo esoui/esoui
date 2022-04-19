@@ -22,6 +22,8 @@ function ActivityFinderRoot_Gamepad:Initialize(control)
     end
 
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", RefreshCategories)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshCategories)
+
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, RefreshCategories)
 end
 
@@ -157,17 +159,21 @@ do
         if self.scene:IsShowing() and not data.isRoleSelector then
             local lockedText = nil
             if data.activityFinderObject then
-                local isLevelLocked, lowestLevelLimit, lowestPointsLimit = data.activityFinderObject:GetLevelLockInfo()
-                if isLevelLocked then
-                    if lowestLevelLimit then
-                        lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, LOCK_TEXTURE, lowestLevelLimit)
-                    elseif lowestPointsLimit then
-                        lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, LOCK_TEXTURE, CHAMPION_ICON, lowestPointsLimit)
-                    end
+                if data.isTribute then
+                    lockedText = ZO_GetTributeLockReasonTooltipString(LOCK_TEXTURE)
                 else
-                    local numLocations = data.activityFinderObject:GetNumLocations()
-                    if numLocations == 0 then
-                        lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_NO_ACTIVITIES_LOCK, LOCK_TEXTURE)
+                    local isLevelLocked, lowestLevelLimit, lowestPointsLimit = data.activityFinderObject:GetLevelLockInfo()
+                    if isLevelLocked then
+                        if lowestLevelLimit then
+                            lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, LOCK_TEXTURE, lowestLevelLimit)
+                        elseif lowestPointsLimit then
+                            lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, LOCK_TEXTURE, CHAMPION_ICON, lowestPointsLimit)
+                        end
+                    else
+                        local numLocations = data.activityFinderObject:GetNumLocations()
+                        if numLocations == 0 then
+                            lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_NO_ACTIVITIES_LOCK, LOCK_TEXTURE)
+                        end
                     end
                 end
             end
@@ -255,7 +261,11 @@ end
 function ActivityFinderRoot_Gamepad:IsCategoryLocked(gamepadCategoryData)
     local activityFinderObject = gamepadCategoryData.activityFinderObject
     if activityFinderObject then
-        return activityFinderObject:GetLevelLockInfo() or activityFinderObject:GetNumLocations() == 0
+        if gamepadCategoryData.isTribute then
+            return ZO_IsTributeLocked()
+        else
+            return activityFinderObject:GetLevelLockInfo() or activityFinderObject:GetNumLocations() == 0
+        end
     elseif gamepadCategoryData.isZoneStories then
         return ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil
     end

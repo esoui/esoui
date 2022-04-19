@@ -112,9 +112,13 @@ local StartWatchingComparisonDynamicAnchor
 do
     local g_comparisonDynamicAnchors = {}
 
-    local function DynamicAnchorLayout(tooltip, owner, quadrant, comparativeTooltip1, comparativeTooltip2)
+    local function DynamicAnchorLayout(tooltip, owner, quadrant, comparativeTooltip1, comparativeTooltip2, relativeAnchorsUsed)
+        local isValid, point, relativeTo, relativePoint, offsetX, offsetY = tooltip:GetAnchor()
+        local positionToLeftByAnchors = relativeAnchorsUsed and isValid and point == TOPRIGHT or false
+        local positionToLeftByQuadrant = not relativeAnchorsUsed and quadrant and (quadrant == QUAD_TOPLEFT or quadrant == QUAD_BOTTOMLEFT)
+
         if comparativeTooltip1 and comparativeTooltip2 then
-            if quadrant == QUAD_TOPLEFT or quadrant == QUAD_BOTTOMLEFT then
+            if positionToLeftByAnchors or positionToLeftByQuadrant then
                 comparativeTooltip1:SetOwner(tooltip, TOPLEFT, BETWEEN_TOOLTIP_OFFSET_X, 0)
                 comparativeTooltip2:SetOwner(comparativeTooltip1, TOPLEFT, BETWEEN_TOOLTIP_OFFSET_X, 0, TOPRIGHT)
             else
@@ -125,7 +129,7 @@ do
             comparativeTooltip1:SetClampedToScreenInsets(0, comparativeTooltip1.topClampedToScreenInset, 0, 0)
             comparativeTooltip2:SetClampedToScreenInsets(0, comparativeTooltip2.topClampedToScreenInset, 0, 0)
         elseif comparativeTooltip1 then
-            if quadrant == QUAD_TOPLEFT or quadrant == QUAD_BOTTOMLEFT then
+            if positionToLeftByAnchors or positionToLeftByQuadrant then
                 comparativeTooltip1:SetOwner(tooltip, TOPLEFT, BETWEEN_TOOLTIP_OFFSET_X, 0)
                 comparativeTooltip1:SetClampedToScreenInsets(0, comparativeTooltip1.topClampedToScreenInset, 0, 0)
             else
@@ -146,50 +150,62 @@ do
     end
     EVENT_MANAGER:RegisterForUpdate("UpdateComparisonDynamicAnchors", 0, UpdateComparisonDynamicAnchors)
 
-    function StartWatchingComparisonDynamicAnchor(tooltip, owner, quadrant, comparativeTooltip1, comparativeTooltip2)
+    function StartWatchingComparisonDynamicAnchor(tooltip, owner, quadrant, comparativeTooltip1, comparativeTooltip2, relativeAnchorsUsed)
         if comparativeTooltip1 then
-            g_comparisonDynamicAnchors[tooltip] = { owner, quadrant, comparativeTooltip1, comparativeTooltip2 }
+            g_comparisonDynamicAnchors[tooltip] = { owner, quadrant, comparativeTooltip1, comparativeTooltip2, relativeAnchorsUsed }
         else
             g_comparisonDynamicAnchors[tooltip] = nil
         end
     end
 end
 
-function ZO_Tooltips_SetupDynamicTooltipAnchors(tooltip, owner, comparativeTooltip1, comparativeTooltip2)
+function ZO_Tooltips_SetupDynamicTooltipAnchors(tooltip, owner, comparativeTooltip1, comparativeTooltip2, useRelativeAnchors)
     if tooltip and owner then
-        local left, top, right, bottom = owner:GetScreenRect()
-        local ownerScale = owner:GetScale()
-        local ownerMiddleX = (left + right) / (2 * ownerScale)
-        local ownerMiddleY = (top + bottom) / (2 * ownerScale)
-        
-        local screenWidth, screenHeight = GuiRoot:GetDimensions()
-        local middleScreenX = screenWidth / 2
-        local middleScreenY = screenHeight / 2
-        
-        local quadrant = CalculateQuandrant(ownerMiddleX, ownerMiddleY, middleScreenX, middleScreenY)
+        local quadrant = nil
+        local relativeAnchorsUsed = false
+        if useRelativeAnchors then
+            local isValid, point, relativeTo, relativePoint, offsetX, offsetY = tooltip:GetAnchor()
+            if isValid then
+                tooltip:ClearAnchors()
+                tooltip:SetOwner(owner, point, offsetX, offsetY, relativePoint)
+                relativeAnchorsUsed = true
+            end
+        end
 
-        tooltip:ClearAnchors()
-        
-        if quadrant == QUAD_TOPLEFT or quadrant == QUAD_BOTTOMLEFT then
-            tooltip:SetOwner(owner, LEFT, OFFSET_FROM_OWNER, 0)
-        else
-            tooltip:SetOwner(owner, RIGHT, -OFFSET_FROM_OWNER, 0)
+        if not relativeAnchorsUsed then
+            local left, top, right, bottom = owner:GetScreenRect()
+            local ownerScale = owner:GetScale()
+            local ownerMiddleX = (left + right) / (2 * ownerScale)
+            local ownerMiddleY = (top + bottom) / (2 * ownerScale)
+
+            local screenWidth, screenHeight = GuiRoot:GetDimensions()
+            local middleScreenX = screenWidth / 2
+            local middleScreenY = screenHeight / 2
+
+            quadrant = CalculateQuandrant(ownerMiddleX, ownerMiddleY, middleScreenX, middleScreenY)
+
+            tooltip:ClearAnchors()
+            if quadrant == QUAD_TOPLEFT or quadrant == QUAD_BOTTOMLEFT then
+                tooltip:SetOwner(owner, LEFT, OFFSET_FROM_OWNER, 0)
+            else
+                tooltip:SetOwner(owner, RIGHT, -OFFSET_FROM_OWNER, 0)
+            end
         end
 
         comparativeTooltip1 = ValidateComparativeTooltip(comparativeTooltip1)
         comparativeTooltip2 = ValidateComparativeTooltip(comparativeTooltip2)
-        
+
         if comparativeTooltip2 and not comparativeTooltip1 then
             comparativeTooltip1 = comparativeTooltip2
             comparativeTooltip2 = nil
         end
 
-        StartWatchingComparisonDynamicAnchor(tooltip, owner, quadrant, comparativeTooltip1, comparativeTooltip2)
+        StartWatchingComparisonDynamicAnchor(tooltip, owner, quadrant, comparativeTooltip1, comparativeTooltip2, relativeAnchorsUsed)
     end
 end
 
 function ZO_Tooltips_ShowTruncatedTextTooltip(labelControl)
-    if(labelControl:WasTruncated()) then
+    if labelControl:WasTruncated() then
         local buttonText = labelControl:GetText()
 
         InitializeTooltip(InformationTooltip, labelControl, BOTTOM, 0, -3)

@@ -24,13 +24,7 @@ local SERVER_STATUS_UNSELECTED_COLORS =
 }
 
 -- Main class.
-local ZO_WorldSelect_Gamepad = ZO_Object:Subclass()
-
-function ZO_WorldSelect_Gamepad:New(control)
-    local object = ZO_Object.New(self)
-    object:Initialize(control)
-    return object
-end
+local ZO_WorldSelect_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_WorldSelect_Gamepad:Initialize(control)
     self.control = control
@@ -105,7 +99,7 @@ function ZO_WorldSelect_Gamepad:InitKeybindingDescriptors()
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                    if(not self.worldLoading) then
+                    if not self.worldLoading then
                         PlaySound(SOUNDS.DIALOG_ACCEPT)
                         self.worldLoading = true
                         self:OnWorldSelected()
@@ -203,7 +197,7 @@ function ZO_WorldSelect_Gamepad:RefreshWorldList_Internal()
             self.optionsList:SetSelectedIndex(selectedIndex, ALLOW_IF_DISABLED)
             self.optionsList:RefreshVisible() -- Force the previous selection to take place immediately.
 
-            if (GetCVar("QuickLaunch") == "1") then
+            if GetCVar("QuickLaunch") == "1" then
                 self:OnWorldSelected()
             end
         else
@@ -224,30 +218,6 @@ function ZO_WorldSelect_Gamepad:SetupOptionsList()
     self.optionsList:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
     self:RefreshWorldList()
-end
-
-function ZO_WorldSelect_Gamepad:SetImagesFragment(fragment)
-    if fragment == self.imagesFragment then return end
-
-    if self.imagesFragment then
-        WORLD_SELECT_GAMEPAD_SCENE:RemoveFragment(self.imagesFragment)
-    end
-    if fragment then
-        WORLD_SELECT_GAMEPAD_SCENE:AddFragment(fragment)
-    end
-    self.imagesFragment = fragment
-end
-
-function ZO_WorldSelect_Gamepad:SetBackgroundFragment(fragment)
-    if fragment == self.backgroundFragment then return end
-
-    if self.backgroundFragment then
-        WORLD_SELECT_GAMEPAD_SCENE:RemoveFragment(self.backgroundFragment)
-    end
-    if fragment then
-        WORLD_SELECT_GAMEPAD_SCENE:AddFragment(fragment)
-    end
-    self.backgroundFragment = fragment
 end
 
 function ZO_WorldSelect_Gamepad_Initialize(self)

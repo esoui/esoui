@@ -25,7 +25,7 @@
             </OnInitialized>
 
             <Controls>
-                <Label name="$(parent)PressText" alpha="0" modifyTextType="UPPERCASE" font="ZoFontGamepad34" horizontalAlignment="CENTER">
+                <Label name="$(parent)PressText" inherits="ZO_LargeKeyMarkupLabel_Gamepad" alpha="0" modifyTextType="UPPERCASE" font="ZoFontGamepad34" horizontalAlignment="CENTER">
                     <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-45" />
                 </Label>
 

@@ -35,7 +35,8 @@
 
             <Action name="TOGGLE_GAMEPAD_MODE" preventAutomaticInputModeChange="true">
                 <Down>
-                    if IsGamepadUISupported() and IsKeyboardUISupported() then
+                    local accessibilityModeEnabled = GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE)
+                    if not accessibilityModeEnabled and IsGamepadUISupported() and IsKeyboardUISupported() then
                         local mode = IsInGamepadPreferredMode() and INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD or INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD
                         SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE, mode)
                     end
@@ -269,6 +270,14 @@
             </Action>
             <Action name="SCREEN_ADJUST_CANCEL" hideAction="true" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
                 <Down>ZO_ScreenAdjust_Handle_OnCancel()</Down>
+            </Action>
+        </Category>
+    </Layer>
+
+    <Layer name="AccessibilityModePromptActions">
+        <Category>
+            <Action name="TOGGLE_ACCESSIBILITY_MODE_CHECKBOX" hideAction="true" inheritsBindFrom="UI_SHORTCUT_SECONDARY">
+                <Down>ZO_AccessibilityModePrompt_OnToggleEnableButton()</Down>
             </Action>
         </Category>
     </Layer>

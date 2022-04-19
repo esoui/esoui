@@ -70,7 +70,7 @@
 
                 <Control name="$(parent)InfoSection" resizeToFitDescendents="true" >
                     <Controls>
-                        <Control name="$(parent)FurnishingLimits" resizToFitDescendents="true">
+                        <Control name="$(parent)FurnishingLimits" resizeToFitDescendents="true">
                             <Anchor point="TOPLEFT" />
                         </Control>
                     </Controls>

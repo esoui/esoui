@@ -79,9 +79,9 @@ function ZO_UnitVisualizer_ShrinkExpandModule:InitializeBarValues()
     local oldBarInfo = self.barInfo
     self.barInfo =
     {
-        [STAT_HEALTH_MAX] = self:CreateInfoTable(healthBarControl, oldBarInfo, STAT_HEALTH_MAX, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH),
-        [STAT_MAGICKA_MAX] = self:CreateInfoTable(magickaBarControl, oldBarInfo, STAT_MAGICKA_MAX, ATTRIBUTE_MAGICKA, POWERTYPE_MAGICKA),
-        [STAT_STAMINA_MAX] = self:CreateInfoTable(staminaBarControl, oldBarInfo, STAT_STAMINA_MAX, ATTRIBUTE_STAMINA, POWERTYPE_STAMINA),
+        [STAT_HEALTH_MAX] = self:CreateInfoTable(healthBarControl, oldBarInfo, STAT_HEALTH_MAX, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH),
+        [STAT_MAGICKA_MAX] = self:CreateInfoTable(magickaBarControl, oldBarInfo, STAT_MAGICKA_MAX, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA),
+        [STAT_STAMINA_MAX] = self:CreateInfoTable(staminaBarControl, oldBarInfo, STAT_STAMINA_MAX, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA),
     }
 
     for stat, bar in pairs(self.barControls) do

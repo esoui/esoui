@@ -9,6 +9,7 @@ do
         [CHAT_CATEGORY_ZONE_GERMAN] = CHAT_CHANNEL_ZONE_LANGUAGE_3,
         [CHAT_CATEGORY_ZONE_JAPANESE] = CHAT_CHANNEL_ZONE_LANGUAGE_4,
         [CHAT_CATEGORY_ZONE_RUSSIAN] = CHAT_CHANNEL_ZONE_LANGUAGE_5,
+        [CHAT_CATEGORY_ZONE_SPANISH] = CHAT_CHANNEL_ZONE_LANGUAGE_6,
         [CHAT_CATEGORY_WHISPER_INCOMING] = CHAT_CHANNEL_WHISPER,
         [CHAT_CATEGORY_WHISPER_OUTGOING] = CHAT_CHANNEL_WHISPER,
         [CHAT_CATEGORY_PARTY] = CHAT_CHANNEL_PARTY,
@@ -385,6 +386,15 @@ local ZO_OptionsPanel_Social_ControlData =
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_ZONE_RUSSIAN,
             tooltipText = SI_SOCIAL_OPTIONS_ZONE_RUSSIAN_COLOR_TOOLTIP,
+        },
+        --Options_Social_ChatColor_Zone_Spanish
+        [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_SPA] =
+        {
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
+            panel = SETTING_PANEL_SOCIAL,
+            chatChannelCategory = CHAT_CATEGORY_ZONE_SPANISH,
+            tooltipText = SI_SOCIAL_OPTIONS_ZONE_SPANISH_COLOR_TOOLTIP,
         },
         --Options_Social_ChatColor_NPC
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_NPC] = 

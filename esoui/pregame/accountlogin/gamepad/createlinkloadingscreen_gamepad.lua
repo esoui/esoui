@@ -1,11 +1,5 @@
 -- Main class.
-local ZO_CreateLinkLoading_Gamepad = ZO_Object:Subclass()
-
-function ZO_CreateLinkLoading_Gamepad:New(control)
-    local object = ZO_Object.New(self)
-    object:Initialize(control)
-    return object
-end
+local ZO_CreateLinkLoading_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_CreateLinkLoading_Gamepad:Initialize(control)
     self.control = control
@@ -17,7 +11,7 @@ function ZO_CreateLinkLoading_Gamepad:Initialize(control)
 
     self.previousState = "AccountLogin"
 
-    local StateChanged = function(oldState, newState)
+    local function StateChanged(oldState, newState)
         if newState == SCENE_SHOWING then
             self:PerformDeferredInitialize()
 
@@ -95,7 +89,6 @@ local function OnNoLink()
 end
 
 do
-    local loginQueuedScene
     local currentLoginQueueWaitTime
     local lastQueuePosition
 
@@ -271,51 +264,19 @@ function ZO_CreateLinkLoading_Gamepad:RegisterEvents()
 end
 
 function ZO_CreateLinkLoading_Gamepad:UnregisterEvents()
-    for i=1, #self.registeredEvents do
-        local eventId = self.registeredEvents[i]
+    for i, eventId in ipairs(self.registeredEvents) do
         self.control:UnregisterForEvent(eventId)
     end
 
     self.registeredEvents = {}
 end
 
-function ZO_CreateLinkLoading_Gamepad:SetImagesFragment(fragment)
-    if fragment == self.imagesFragment then return end
-
-    if self.imagesFragment then
-        CREATE_LINK_LOADING_SCREEN_GAMEPAD_SCENE:RemoveFragment(self.imagesFragment)
-    end
-    if fragment then
-        CREATE_LINK_LOADING_SCREEN_GAMEPAD_SCENE:AddFragment(fragment)
-    end
-    self.imagesFragment = fragment
-end
-
-function ZO_CreateLinkLoading_Gamepad:SetBackgroundFragment(fragment)
-    if fragment == self.backgroundFragment then return end
-
-    if self.backgroundFragment then
-        CREATE_LINK_LOADING_SCREEN_GAMEPAD_SCENE:RemoveFragment(self.backgroundFragment)
-    end
-    if fragment then
-        CREATE_LINK_LOADING_SCREEN_GAMEPAD_SCENE:AddFragment(fragment)
-    end
-    self.backgroundFragment = fragment
-end
-
-function ZO_CreateLinkLoading_Gamepad:Show(previousState, loginFunction, loadingText, backgroundFragment, imagesFragment)
+function ZO_CreateLinkLoading_Gamepad:Show(previousState, loginFunction, loadingText)
     self:PerformDeferredInitialize()
 
     self.previousState = previousState
     self.loginFunction = loginFunction
     self.loadingText:SetText(loadingText)
-
-    if backgroundFragment then
-        self:SetBackgroundFragment(backgroundFragment)
-    end
-    if imagesFragment then
-        self:SetImagesFragment(imagesFragment)
-    end
 
     SCENE_MANAGER:Show("CreateLinkLoadingScreen_Gamepad")
 end

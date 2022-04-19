@@ -577,8 +577,8 @@ function ZO_TooltipSection:GetDimensionWithContraints(base, useHeightContraint)
         max = constraints.maxWidth
     end
 
-    min = min or base
-    max = max or base
+    min = min or 0
+    max = max or math.huge
     return zo_clamp(base, min, max)
 end
 
@@ -622,6 +622,22 @@ end
 
 function ZO_TooltipSection:AddToSecondaryDimension(amount)
     self:SetSecondaryDimension(self.secondaryDimension + amount)
+end
+
+function ZO_TooltipSection:CleanDimensions()
+    if not self:IsPrimaryDimensionFixed() then
+        local primaryDirectionWithConstraints = self:GetPrimaryDimension()
+        if primaryDirectionWithConstraints ~= self.primaryDimension then
+            self:SetPrimaryDimension(primaryDirectionWithConstraints)
+        end
+    end
+
+    if not self:IsSecondaryDimensionFixed() then
+        local secondaryDirectionWithConstraints = self:GetSecondaryDimension()
+        if secondaryDirectionWithConstraints ~= self.secondaryDimension then
+            self:SetSecondaryDimension(secondaryDirectionWithConstraints)
+        end
+    end
 end
 
 function ZO_TooltipSection:GetNumControls()
@@ -872,6 +888,8 @@ function ZO_TooltipSection:AddColorAndTextSwatch(r, g, b, a, text, ...)
 end
 
 function ZO_TooltipSection:AddSectionEvenIfEmpty(section)
+    section:CleanDimensions()
+
     if(self:IsVertical()) then
         if(section:IsVertical()) then
             self:AddControl(section, section:GetPrimaryDimension(), section:GetSecondaryDimension(), unpack(section:GetStyles()))

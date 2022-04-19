@@ -28,6 +28,7 @@ EsoUI\Ingame\Scenes\IngameSceneManager.lua
 
 EsoUI\Ingame\Tooltip\ActivityFinderTooltips.lua
 EsoUI\Ingame\Tooltip\AntiquityTooltips.lua
+EsoUI\Ingame\Tooltip\ArmoryTooltips.lua
 EsoUI\Ingame\Tooltip\AvATooltips.lua
 EsoUI\Ingame\Tooltip\CadwellsTooltips.lua
 EsoUI\Ingame\Tooltip\ChampionTooltips.lua
@@ -47,7 +48,7 @@ EsoUI\Ingame\Tooltip\SkillBuildTooltips.lua
 EsoUI\Ingame\Tooltip\SkillTooltips.lua
 EsoUI\Ingame\Tooltip\SocialTooltips.lua
 EsoUI\Ingame\Tooltip\StableTooltips.lua
-EsoUI\Ingame\Tooltip\ArmoryTooltips.lua
+EsoUI\Ingame\Tooltip\UtilityWheelTooltips.lua
 EsoUI\Ingame\Tooltip\Console\VoiceChatTooltips.lua
 
 EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.xml
@@ -159,6 +160,7 @@ EsoUI\Ingame\LFG\Gamepad\ZO_GroupRolesBar_Gamepad.xml
 EsoUI\Ingame\Group\Gamepad\ZO_GroupMenu_Gamepad.lua
 EsoUI\Ingame\Group\Gamepad\ZO_GroupMenu_Gamepad.xml
 
+EsoUI\Ingame\LFG\TributeClubRank.lua
 EsoUI\Ingame\LFG\ZO_ActivityFinderTemplate_Manager.lua
 EsoUI\Ingame\LFG\ZO_ActivityFinderTemplate_Shared.lua
 EsoUI\Ingame\LFG\ZO_ActivityFinderTemplate_Shared.xml
@@ -170,6 +172,13 @@ EsoUI\Ingame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.lua
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.xml
 EsoUI\Ingame\LFG\ZO_DungeonFinder_Manager.lua
 EsoUI\Ingame\LFG\ZO_BattlegroundFinder_Manager.lua
+EsoUI\Ingame\LFG\TributeFinder_Manager.lua
+EsoUI\Ingame\LFG\Keyboard\TributeRewards_Keyboard.lua
+EsoUI\Ingame\LFG\Keyboard\TributeRewards_Keyboard.xml
+EsoUI\Ingame\LFG\Gamepad\TributeRewards_Gamepad.lua
+EsoUI\Ingame\LFG\Gamepad\TributeRewards_Gamepad.xml
+EsoUI\Ingame\LFG\Gamepad\ZO_ActivityTributeRankFooter_Gamepad.lua
+EsoUI\Ingame\LFG\Gamepad\ZO_ActivityTributeRankFooter_Gamepad.xml
 
 EsoUI\Ingame\LFG\SearchingForGroup.lua
 EsoUI\Ingame\LFG\SearchingForGroup.xml
@@ -225,6 +234,30 @@ EsoUI\Ingame\Inventory\Keyboard\ConfirmCollectibleEvolutionDialog_Keyboard.lua
 EsoUI\Ingame\Inventory\Keyboard\ConfirmCollectibleEvolutionDialog_Keyboard.xml
 EsoUI\Ingame\Inventory\Gamepad\ConfirmCollectibleEvolutionDialog_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\ConfirmCollectibleEvolutionDialog_Gamepad.xml
+
+EsoUI\Ingame\QuickChat\QuickChatManager.lua
+EsoUI\Ingame\PlayerEmote\PlayerEmoteManager.lua
+
+EsoUI\Ingame\UtilityWheel\UtilityWheel_Shared.lua
+EsoUI\Ingame\UtilityWheel\Keyboard\UtilityWheel_Keyboard.lua
+EsoUI\Ingame\UtilityWheel\Keyboard\UtilityWheel_Keyboard.xml
+EsoUI\Ingame\UtilityWheel\Gamepad\UtilityWheel_Gamepad.lua
+EsoUI\Ingame\UtilityWheel\Gamepad\UtilityWheel_Gamepad.xml
+EsoUI\Ingame\UtilityWheel\UtilityWheel_Manager.lua
+
+EsoUI\Ingame\UtilityWheel\AssignableUtilityWheel_Shared.lua
+EsoUI\Ingame\UtilityWheel\Keyboard\AssignableUtilityWheel_Keyboard.lua
+EsoUI\Ingame\UtilityWheel\Keyboard\AssignableUtilityWheel_Keyboard.xml
+EsoUI\Ingame\UtilityWheel\Gamepad\AssignableUtilityWheel_Gamepad.lua
+EsoUI\Ingame\UtilityWheel\Gamepad\AssignableUtilityWheel_Gamepad.xml
+
+EsoUI\Ingame\ActionBar\AbilitySlot.lua
+EsoUI\Ingame\ActionBar\AbilitySlot.xml
+EsoUI\Ingame\ActionBar\ActionButton.lua
+EsoUI\Ingame\ActionBar\ActionButton.xml
+EsoUI\Ingame\ActionBar\QuickslotActionButton.lua
+EsoUI\Ingame\ActionBar\ActionBar.lua
+EsoUI\Ingame\ActionBar\ActionBar.xml
 
 EsoUI\Ingame\Collections\Keyboard\CollectibleTile_Keyboard.lua
 EsoUI\Ingame\Collections\Keyboard\CollectibleTile_Keyboard.xml
@@ -342,26 +375,6 @@ EsoUI\Ingame\Reticle\Reticle.xml
 
 EsoUI\Ingame\SiegeBar\SiegeBar.lua
 
-EsoUI\Ingame\UtilityWheel\AssignableUtilityWheel_Shared.lua
-EsoUI\Ingame\UtilityWheel\Keyboard\AssignableUtilityWheel_Keyboard.lua
-EsoUI\Ingame\UtilityWheel\Keyboard\AssignableUtilityWheel_Keyboard.xml
-EsoUI\Ingame\UtilityWheel\Gamepad\AssignableUtilityWheel_Gamepad.lua
-EsoUI\Ingame\UtilityWheel\Gamepad\AssignableUtilityWheel_Gamepad.xml
-
-EsoUI\Ingame\Quickslot\QuickslotRadial.lua
-EsoUI\Ingame\Quickslot\Keyboard\QuickslotRadial_Keyboard.lua
-EsoUI\Ingame\Quickslot\Keyboard\QuickslotRadial_Keyboard.xml
-EsoUI\Ingame\Quickslot\Gamepad\QuickslotRadial_Gamepad.lua
-EsoUI\Ingame\Quickslot\Gamepad\QuickslotRadial_Gamepad.xml
-
-EsoUI\Ingame\ActionBar\AbilitySlot.lua
-EsoUI\Ingame\ActionBar\AbilitySlot.xml
-EsoUI\Ingame\ActionBar\ActionButton.lua
-EsoUI\Ingame\ActionBar\ActionButton.xml
-EsoUI\Ingame\ActionBar\QuickslotActionButton.lua
-EsoUI\Ingame\ActionBar\ActionBar.lua
-EsoUI\Ingame\ActionBar\ActionBar.xml
-
 EsoUI\Ingame\Death\RaidLifeDisplay.lua
 EsoUI\Ingame\Death\RaidLifeDisplay.xml
 EsoUI\Ingame\Death\HUDRaidLifeDisplay.lua
@@ -423,10 +436,10 @@ EsoUI\Ingame\Inventory\Inventory.lua
 EsoUI\Ingame\Inventory\Inventory.xml
 EsoUI\Ingame\Inventory\InventoryWallet.lua
 EsoUI\Ingame\Inventory\InventoryWallet.xml
-EsoUI\Ingame\Quickslot\Quickslot.lua
-EsoUI\Ingame\Quickslot\Quickslot.xml
-EsoUI\Ingame\Quickslot\Gamepad\GamepadQuickslot.lua
-EsoUI\Ingame\Quickslot\Gamepad\GamepadQuickslot.xml
+EsoUI\Ingame\Quickslot\Keyboard\Quickslot_Keyboard.lua
+EsoUI\Ingame\Quickslot\Keyboard\Quickslot_Keyboard.xml
+EsoUI\Ingame\Quickslot\Gamepad\Quickslot_Gamepad.lua
+EsoUI\Ingame\Quickslot\Gamepad\Quickslot_Gamepad.xml
 EsoUI\Ingame\Inventory\InventoryMenuBar.lua
 EsoUI\Ingame\Inventory\InventoryMenuBar.xml
 
@@ -605,6 +618,13 @@ EsoUI\Ingame\Collections\Keyboard\ItemSetsBook_Keyboard.lua
 EsoUI\Ingame\Collections\Keyboard\ItemSetsBook_Keyboard.xml
 EsoUI\Ingame\Collections\Gamepad\ItemSetsBook_Gamepad.lua
 EsoUI\Ingame\Collections\Gamepad\ItemSetsBook_Gamepad.xml
+
+EsoUI\Ingame\Collections\TributePatronBook_Shared.lua
+EsoUI\Ingame\Collections\TributePatronBook_Shared.xml
+EsoUI\Ingame\Collections\Keyboard\TributePatronBook_Keyboard.lua
+EsoUI\Ingame\Collections\Keyboard\TributePatronBook_Keyboard.xml
+EsoUI\Ingame\Collections\Gamepad\TributePatronBook_Gamepad.lua
+EsoUI\Ingame\Collections\Gamepad\TributePatronBook_Gamepad.xml
 
 EsoUI\Ingame\ChapterUpgrade\ChapterUpgradeUtils.lua
 EsoUI\Ingame\ChapterUpgrade\Gamepad\ChapterUpgrade_Gamepad.lua
@@ -878,11 +898,6 @@ EsoUI\Ingame\Banking\Gamepad\BankingCommon_Gamepad.lua
 EsoUI\Ingame\Banking\Gamepad\Banking_Gamepad.lua
 EsoUI\Ingame\Banking\Gamepad\Banking_Gamepad.xml
 
-EsoUI\Ingame\QuickChat\QuickChatManager.lua
-
-EsoUI\Ingame\PlayerEmote\PlayerEmoteManager.lua
-EsoUI\Ingame\PlayerEmote\PlayerEmoteQuickslot.lua
-EsoUI\Ingame\PlayerEmote\PlayerEmoteQuickslot.xml
 EsoUI\Ingame\PlayerEmote\Gamepad\PlayerEmote_Gamepad.lua
 EsoUI\Ingame\PlayerEmote\Gamepad\PlayerEmote_Gamepad.xml
 EsoUI\Ingame\PlayerEmote\Keyboard\PlayerEmote_Keyboard.lua
@@ -1207,6 +1222,11 @@ EsoUI\Ingame\Leaderboards\Keyboard\BattlegroundLeaderboards_Keyboard.lua
 EsoUI\Ingame\Leaderboards\Keyboard\BattlegroundLeaderboards_Keyboard.xml
 EsoUI\Ingame\Leaderboards\Gamepad\BattlegroundLeaderboards_Gamepad.lua
 EsoUI\Ingame\Leaderboards\Gamepad\BattlegroundLeaderboards_Gamepad.xml
+EsoUI\Ingame\Leaderboards\TributeLeaderboards_Shared.lua
+EsoUI\Ingame\Leaderboards\Keyboard\TributeLeaderboards_Keyboard.lua
+EsoUI\Ingame\Leaderboards\Keyboard\TributeLeaderboards_Keyboard.xml
+EsoUI\Ingame\Leaderboards\Gamepad\TributeLeaderboards_Gamepad.lua
+EsoUI\Ingame\Leaderboards\Gamepad\TributeLeaderboards_Gamepad.xml
 
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Dialogs_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Gamepad.lua
@@ -1433,8 +1453,14 @@ EsoUI\Ingame\ChatSystem\Keyboard\KeyboardChatSystem.lua
 EsoUI\Ingame\ChatSystem\Keyboard\KeyboardChatSystem.xml
 EsoUI\Ingame\ChatSystem\Gamepad\GamepadChatSystem.lua
 EsoUI\Ingame\ChatSystem\Gamepad\GamepadChatSystem.xml
+EsoUI\Ingame\ChatSystem\Gamepad\InteractiveChatLog_Gamepad.lua
+EsoUI\Ingame\ChatSystem\Gamepad\InteractiveChatLog_Gamepad.xml
 EsoUI\Ingame\ChatSystem\Gamepad\ChatMenu_Gamepad.lua
 EsoUI\Ingame\ChatSystem\Gamepad\ChatMenu_Gamepad.xml
+
+; VoiceChatTranscript_Gamepad needs to initialize after InteractiveChatLog_Gamepad
+EsoUI\Ingame\VoiceChat\Console\VoiceChatTranscript_Gamepad.lua
+EsoUI\Ingame\VoiceChat\Console\VoiceChatTranscript_Gamepad.xml
 
 EsoUI\Ingame\SlashCommands\SlashCommands_Shared.lua
 EsoUI\Ingame\SlashCommands\PC\SlashCommands_PC.lua
@@ -1463,6 +1489,9 @@ EsoUI\Ingame\AntiquityDigging\AntiquityDigging.xml
 
 EsoUI\Ingame\Scrying\IngameScrying.lua
 EsoUI\Ingame\Scrying\IngameScrying.xml
+
+EsoUI\Ingame\Tribute\Tribute.lua
+EsoUI\Ingame\Tribute\Tribute.xml
 
 EsoUI\Ingame\Companion\Keyboard\CompanionProgressBar_Keyboard.lua
 EsoUI\Ingame\Companion\Keyboard\CompanionProgressBar_Keyboard.xml

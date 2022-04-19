@@ -254,7 +254,7 @@
                                     </OnInitialized>
                                 </Polygon>
 
-                                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Scrying/eye_background.dds" centerTextureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" >
+                                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Scrying/eye_background.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" >
                                     <Anchor point="CENTER"/>
                                     <Dimensions x="1160" y="1135"/>
                                 </Texture>

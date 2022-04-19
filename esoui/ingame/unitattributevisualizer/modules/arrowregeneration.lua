@@ -65,9 +65,9 @@ function ZO_UnitVisualizer_ArrowRegenerationModule:InitializeBarValues()
 
     self.barInfo =
     {
-        [STAT_HEALTH_REGEN_COMBAT] = healthBarControl and { value = self:GetInitialStatValue(STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH), arrowsRemaining = 0, tickDelay = 1 } or nil,
-        [STAT_MAGICKA_REGEN_COMBAT] = magickaBarControl and { value = self:GetInitialStatValue(STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, POWERTYPE_MAGICKA), arrowsRemaining = 0, tickDelay = 0 } or nil,
-        [STAT_STAMINA_REGEN_COMBAT] = staminaBarControl and { value = self:GetInitialStatValue(STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, POWERTYPE_STAMINA), arrowsRemaining = 0, tickDelay = 0 } or nil,
+        [STAT_HEALTH_REGEN_COMBAT] = healthBarControl and { value = self:GetInitialStatValue(STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH), arrowsRemaining = 0, tickDelay = 1 } or nil,
+        [STAT_MAGICKA_REGEN_COMBAT] = magickaBarControl and { value = self:GetInitialStatValue(STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA), arrowsRemaining = 0, tickDelay = 0 } or nil,
+        [STAT_STAMINA_REGEN_COMBAT] = staminaBarControl and { value = self:GetInitialStatValue(STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA), arrowsRemaining = 0, tickDelay = 0 } or nil,
     }
 end
 
@@ -170,9 +170,9 @@ function ZO_UnitVisualizer_ArrowRegenerationModule:Pulse()
 end
 
 local STAT_TO_COMBAT_MECHANIC = {
-    [STAT_HEALTH_REGEN_COMBAT] = POWERTYPE_HEALTH,
-    [STAT_MAGICKA_REGEN_COMBAT] = POWERTYPE_MAGICKA,
-    [STAT_STAMINA_REGEN_COMBAT] = POWERTYPE_STAMINA,
+    [STAT_HEALTH_REGEN_COMBAT] = COMBAT_MECHANIC_FLAGS_HEALTH,
+    [STAT_MAGICKA_REGEN_COMBAT] = COMBAT_MECHANIC_FLAGS_MAGICKA,
+    [STAT_STAMINA_REGEN_COMBAT] = COMBAT_MECHANIC_FLAGS_STAMINA,
 }
 
 function ZO_UnitVisualizer_ArrowRegenerationModule:GetNumArrowsByStat(stat, value)

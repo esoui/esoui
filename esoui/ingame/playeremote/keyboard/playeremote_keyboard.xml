@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Label name="ZO_PlayerEmote_Keyboard_EmoteText" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" inherits="ZO_SelectableLabel" virtual="true">
-            <Dimensions x="165" />
+            <Dimensions x="200" />
             <OnInitialized>
                 ZO_SelectableLabel_OnInitialized(self, ZO_PlayerEmoteEntry_GetTextColor)
             </OnInitialized>
@@ -33,8 +33,9 @@
                     <Anchor point="BOTTOMLEFT" offsetX="-10" />
                 </Control>
 
-                <Control name="$(parent)EmoteContainer">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" />
+                <Control name="$(parent)EmoteContainer" inherits="ZO_GridScrollList_Keyboard">
+                    <Dimensions x="630" y="600" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10"/>
                 </Control>
             </Controls>
         </TopLevelControl>

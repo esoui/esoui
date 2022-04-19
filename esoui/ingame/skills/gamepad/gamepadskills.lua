@@ -359,7 +359,6 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
             --We may already be in the process of a scroll, so "current data" isn't reliable.
             local targetData = self.categoryList:GetTargetData()
             if self.assignableActionBar:IsActive() then
-                self:DeactivateCurrentList()
                 self.selectedTooltipRefreshGroup:MarkDirty("Full")
                 self.quickMenu:Show()
                 PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
@@ -655,7 +654,6 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
                 PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                 --Don't set mode back to ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE til OnAbilityFinalizedCallback says everything worked
             elseif self.assignableActionBar:IsActive() then
-                self:DeactivateCurrentList()
                 self.quickMenu:Show()
                 PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
             else
@@ -1805,7 +1803,7 @@ function ZO_GamepadSkills:SetMode(mode)
     if self.mode == ZO_GAMEPAD_SKILLS_SKILL_LIST_BROWSE_MODE then
         if self:IsCurrentList(self.categoryList) then
             if not self.assignableActionBar:IsActive() then
-                self.categoryList:Activate()
+                self:ActivateCurrentList()
             end
         else
             self:SetCurrentList(self.categoryList)

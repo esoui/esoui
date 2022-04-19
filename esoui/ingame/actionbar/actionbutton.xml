@@ -326,7 +326,7 @@
         <Control name="ZO_ActionBarTimer_BackBarSlot_Keyboard_Template" virtual="true">
             <Dimensions x="40" y="56" />
             <Controls>
-                <StatusBar name="$(parent)ActionTimerStatusBar" inherits="ZO_DefaultStatusBar" pixelRoundingEnabled="false">
+                <StatusBar name="$(parent)ActionTimerStatusBar" inherits="ZO_DefaultStatusBar">
                     <Dimensions y="6" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Frame" relativePoint="TOPLEFT" offsetX="3" offsetY="3" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Frame" relativePoint="TOPRIGHT" offsetX="-3" offsetY="3" />
@@ -358,7 +358,7 @@
         <Control name="ZO_ActionBarTimer_BackBarSlot_Gamepad_Template" virtual="true" override="true">
             <Dimensions x="52" y="68" />
             <Controls>
-                <StatusBar name="$(parent)ActionTimerStatusBar" inherits="ZO_GamepadStatusBarMedium" pixelRoundingEnabled="false">
+                <StatusBar name="$(parent)ActionTimerStatusBar" inherits="ZO_GamepadStatusBarMedium">
                     <Dimensions y="8" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Frame" relativePoint="TOPLEFT" offsetX="4" offsetY="3" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Frame" relativePoint="TOPRIGHT" offsetX="-4" offsetY="3" />

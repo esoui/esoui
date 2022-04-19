@@ -1065,7 +1065,8 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry)
                 end
 
                 local function DoesNewItemMatchEquipSlot(itemData)
-                    return ZO_Character_DoesEquipSlotUseEquipType(equipSlot, itemData.equipType)
+                    -- ESO-752569: Companion items use the same equip slots, but they're categorized as "supplies" (see above), so we need to filter them out here.
+                    return ZO_Character_DoesEquipSlotUseEquipType(equipSlot, itemData.equipType) and not itemData.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION
                 end
 
                 local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(DoesNewItemMatchEquipSlot, nil, BAG_BACKPACK)
@@ -1297,10 +1298,10 @@ function ZO_GamepadInventory:RefreshItemList(selectDefaultEntry)
 
                 entryData.isHiddenByWardrobe = WouldEquipmentBeHidden(itemData.slotIndex or EQUIP_SLOT_NONE, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
             elseif isQuestItemFilter then
-                local slotIndex = FindActionSlotMatchingSimpleAction(ACTION_TYPE_QUEST_ITEM, itemData.questItemId)
+                local slotIndex = FindActionSlotMatchingSimpleAction(ACTION_TYPE_QUEST_ITEM, itemData.questItemId, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
                 entryData.isEquippedInCurrentCategory = slotIndex ~= nil
             else
-                local slotIndex = FindActionSlotMatchingItem(itemData.bagId, itemData.slotIndex)
+                local slotIndex = FindActionSlotMatchingItem(itemData.bagId, itemData.slotIndex, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
                 entryData.isEquippedInCurrentCategory = slotIndex ~= nil
             end
 

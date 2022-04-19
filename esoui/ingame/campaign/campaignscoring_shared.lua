@@ -19,7 +19,7 @@ function ZO_CampaignScoringManager_Shared:New(control)
     manager:UpdateScores()
 
     control:RegisterForEvent(EVENT_CAMPAIGN_SCORE_DATA_CHANGED, function() if manager.shown then manager:UpdateScores() end end)
-    control:RegisterForEvent(EVENT_CAMPAIGN_LEADERBOARD_DATA_CHANGED, function() if manager.shown then manager:UpdateRewardTier() end end)
+    control:RegisterForEvent(EVENT_CAMPAIGN_LEADERBOARD_DATA_RECEIVED, function() if manager.shown then manager:UpdateRewardTier() end end)
     control:RegisterForEvent(EVENT_KEEP_ALLIANCE_OWNER_CHANGED, function() if manager.shown then manager:UpdateScores() end end)
     control:RegisterForEvent(EVENT_OBJECTIVES_UPDATED, function() if manager.shown then manager:UpdateScores() end end)
 

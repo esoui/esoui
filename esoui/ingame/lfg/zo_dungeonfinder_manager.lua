@@ -7,6 +7,7 @@ local categoryData =
         normalIcon = "EsoUI/Art/LFG/LFG_indexIcon_dungeon_up.dds",
         pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_dungeon_down.dds",
         mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_dungeon_over.dds",
+        disabledIcon = "EsoUI/Art/LFG/LFG_indexIcon_dungeon_disabled.dds",
     },
     gamepadData =
     {

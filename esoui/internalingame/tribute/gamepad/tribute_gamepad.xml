@@ -1,0 +1,43 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TributeFloatingTooltipsTopLevel_Gamepad" tier="HIGH">
+            <Controls>
+                <Control name="$(parent)CardTooltip" inherits="ZO_ResizingFloatingScrollTooltip_Gamepad" clampedToScreen="true" hidden="true">
+                    <ClampedToScreenInsets top="-25" bottom="25" />
+
+                    <OnInitialized>
+                        ZO_TributeCardTooltip_Gamepad_Initialize(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true" hidden="true" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)PatronTooltip" inherits="ZO_ResizingFloatingScrollTooltip_Gamepad" clampedToScreen="true" hidden="true">
+                    <ClampedToScreenInsets top="-25" bottom="140" />
+
+                    <OnInitialized>
+                        ZO_TributePatronTooltip_Gamepad_Initialize(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true" hidden="true" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)BoardLocationPatronsTooltip" inherits="ZO_ResizingFloatingScrollTooltip_Gamepad" clampedToScreen="true" hidden="true">
+                    <ClampedToScreenInsets top="-25" bottom="25" />
+
+                    <OnInitialized>
+                        ZO_TributeBoardLocationPatronsTooltip_Gamepad_Initialize(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true" hidden="true" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

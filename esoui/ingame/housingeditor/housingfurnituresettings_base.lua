@@ -58,10 +58,6 @@ function ZO_HousingFurnitureSettings_Base:GetNumGuildPermissions(houseId)
     return GetNumHousingPermissions(houseId, HOUSE_PERMISSION_USER_GROUP_GUILD)
 end
 
-function ZO_HousingFurnitureSettings_Base:IsCurrentHomeInHomeShow()
-    return self.isCurrentHomeShowListed
-end
-
 function ZO_HousingFurnitureSettings_Base:UpdateLists()
     self:UpdateGeneralSettings()
     self:UpdateSingleVisitorSettings()
@@ -99,10 +95,6 @@ function ZO_HousingFurnitureSettings_Base:ShowDefaultAccessTooltip()
 end
 
 function ZO_HousingFurnitureSettings_Base:ShowPrimaryResidenceTooltip()
-    assert(false) -- override in derived classes
-end
-
-function ZO_HousingFurnitureSettings_Base:ShowHomeShowTooltip()
     assert(false) -- override in derived classes
 end
 

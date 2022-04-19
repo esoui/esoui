@@ -1,21 +1,15 @@
-local RAID_LEADERBOARD_FRAGMENT
-
-local ZO_RaidLeaderboardsManager_Keyboard = ZO_RaidLeaderboardsManager_Shared:Subclass()
-
-function ZO_RaidLeaderboardsManager_Keyboard:New(...)
-    return ZO_RaidLeaderboardsManager_Shared.New(self, ...)
-end
+ZO_RaidLeaderboardsManager_Keyboard = ZO_RaidLeaderboardsManager_Shared:Subclass()
 
 function ZO_RaidLeaderboardsManager_Keyboard:Initialize(control)
     RAID_LEADERBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
-    self.currentScoreLabel = GetControl(control, "CurrentScore")
-    self.currentRankLabel = GetControl(control, "CurrentRank")
-    self.scoringInfoLabel = GetControl(control, "ScoringInfo")
-    self.timerLabel = GetControl(control, "Timer")
-    self.activeScore = GetControl(control, "ActiveScore")
+    self.currentScoreLabel = control:GetNamedChild("CurrentScore")
+    self.currentRankLabel = control:GetNamedChild("CurrentRank")
+    self.scoringInfoLabel = control:GetNamedChild("ScoringInfo")
+    self.timerLabel = control:GetNamedChild("Timer")
+    self.activeScore = control:GetNamedChild("ActiveScore")
 
-    self.scoringInfoHelpIcon = GetControl(control, "ScoringInfoHelp")
+    self.scoringInfoHelpIcon = control:GetNamedChild("ScoringInfoHelp")
     self.scoringInfoHelpIcon:SetParent(self.scoringInfoLabel)
     
     ZO_RaidLeaderboardsManager_Shared.Initialize(self, control, LEADERBOARDS, LEADERBOARDS_SCENE, RAID_LEADERBOARD_FRAGMENT)
@@ -23,13 +17,13 @@ function ZO_RaidLeaderboardsManager_Keyboard:Initialize(control)
     self:RegisterForEvents()
 
     RAID_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                 if newState == SCENE_FRAGMENT_SHOWING then
-                                                     self:UpdateAllInfo()
-                                                 end
-                                             end)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:UpdateAllInfo()
+            self:SendLeaderboardQuery()
+        end
+    end)
 
-    SYSTEMS:RegisterKeyboardObject(RAID_LEADERBOARD_SYSTEM_NAME, self)
-    LEADERBOARDS:UpdateCategories()
+    SYSTEMS:RegisterKeyboardObject(ZO_RAID_LEADERBOARD_SYSTEM_NAME, self)
 end
 
 function ZO_RaidLeaderboardsManager_Keyboard:RefreshHeaderPlayerInfo(isWeekly)

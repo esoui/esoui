@@ -9,3 +9,7 @@ end
 function ZO_EntryData:Initialize(dataSource)
     self:SetDataSource(dataSource)
 end
+
+function ZO_EntryData:Reset()
+    self:SetDataSource(nil)
+end

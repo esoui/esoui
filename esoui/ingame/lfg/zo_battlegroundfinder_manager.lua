@@ -7,6 +7,7 @@ local categoryData =
         normalIcon = "EsoUI/Art/LFG/LFG_indexIcon_battlegrounds_up.dds",
         pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_battlegrounds_down.dds",
         mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_battlegrounds_over.dds",
+        disabledIcon = "EsoUI/Art/LFG/LFG_indexIcon_battlegrounds_disabled.dds",
     },
     gamepadData =
     {

@@ -7,6 +7,14 @@
                 <SizeAnimation duration="2000" delay="3500" startWidth="ZO_MAX_CSA_SCROLL_WIDTH" endWidth="ZO_MIN_CSA_SCROLL_WIDTH" startHeight="ZO_MAX_CSA_SCROLL_HEIGHT" endHeight="ZO_MAX_CSA_SCROLL_HEIGHT" />
             </Animations>
         </AnimationTimeline>
+        
+        <AnimationTimeline name="CenterScreenLargeTextFade">
+            <Animations>
+                <!-- Keep the height "large" so that we don't have to worry about fitting the scroll around the text -->
+                <SizeAnimation duration="1700" startWidth="ZO_MIN_CSA_SCROLL_WIDTH" endWidth="ZO_MAX_CSA_SCROLL_WIDTH" startHeight="ZO_MAX_CSA_SCROLL_HEIGHT" endHeight="ZO_MAX_CSA_SCROLL_HEIGHT" />
+                <AlphaAnimation duration="500" delay="3500" startAlpha="1" endAlpha="0" />
+            </Animations>
+        </AnimationTimeline>
 
         <AnimationTimeline name="CenterScreenSmallTextFadeIn">
             <Animations>
@@ -76,6 +84,22 @@
         <AnimationTimeline name="CenterScreenScryingUpdatedIconFadeIn">
             <Animations>
                 <AlphaAnimation applyToChildControlName="AchievedIcon" duration="200" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CenterScreenBackgroundFadeIn">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CenterScreenBackgroundFadeOut">
+            <Animations>
+                <AlphaAnimation duration="500" delay="250" startAlpha="1" endAlpha="0" />
             </Animations>
         </AnimationTimeline>
     </Animations>
@@ -307,6 +331,16 @@
             
                 <Control name="$(parent)SmallLineContainer" resizeToFitDescendents="true" >
                     <Anchor point="TOP" relativeTo="$(parent)MajorLineContainer" relativePoint="BOTTOM" offsetY="20"/>
+                </Control>
+
+                <Control name="$(parent)BackgroundContainer" hidden="true">
+                    <Anchor point="LEFT" relativeTo="GuiRoot" relativePoint="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="GuiRoot" relativePoint="RIGHT" />
+                    <Controls>
+                        <Texture name="$(parent)BG" textureFile="EsoUI/Art/Windows/Gamepad/gp_HUD_Window.dds">
+                            <Dimensions x="100%" />
+                        </Texture>
+                    </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>

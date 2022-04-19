@@ -115,6 +115,7 @@ function GroupList_Gamepad:BuildOptionsList()
     self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
     self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
     self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildVisitPlayerHouseOption, CanJumpToPlayerHouse)
+    self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildInviteToTributeOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsLoggedIn)
 
     self:AddInviteToGuildOptionTemplates()
 end

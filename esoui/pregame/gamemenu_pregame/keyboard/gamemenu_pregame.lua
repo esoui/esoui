@@ -1,13 +1,4 @@
------------------
-
-
-ZO_GameMenu_PreGame_Keyboard = ZO_Object:Subclass()
-
-function ZO_GameMenu_PreGame_Keyboard:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_GameMenu_PreGame_Keyboard = ZO_InitializingObject:Subclass()
 
 function ZO_GameMenu_PreGame_Keyboard:Initialize(control)
     self.control = control
@@ -52,24 +43,15 @@ function ZO_GameMenu_PreGame_Keyboard:BuildMenu()
     self.horizontalMenu:Reset()
 
     -- Server Menu Option
-    local function OnHideServerSelect()
-        self.horizontalMenu:Refresh()
-    end
-
-    local function OnShowServerSelect(control)
-        ZO_Dialogs_ShowDialog("SERVER_SELECT_DIALOG", { onSelectedCallback = OnHideServerSelect })
-    end
-
-    local function GetServerSelectButtonName()
-        if DoesPlatformSelectServer() then
-            local currentServer = GetCVar("LastPlatform")
-            currentServer = ZO_GetLocalizedServerName(currentServer)
-            return zo_strformat(SI_GAME_MENU_SERVER, currentServer)
-        end
-        return ""
-    end
-
      if DoesPlatformSelectServer() then
+        local function OnHideServerSelect()
+            self.horizontalMenu:Refresh()
+        end
+
+        local function OnShowServerSelect(control)
+            ZO_Dialogs_ShowDialog("SERVER_SELECT_DIALOG", { onSelectedCallback = OnHideServerSelect })
+        end
+
         local function GetServerMenuItemName()
             local currentServer = GetCVar("LastPlatform")
             currentServer = ZO_GetLocalizedServerName(currentServer)
@@ -87,7 +69,7 @@ function ZO_GameMenu_PreGame_Keyboard:BuildMenu()
         local loginFragment = LOGIN_MANAGER_KEYBOARD:GetRelevantLoginFragment()
         self.scene:RemoveFragment(loginFragment)
     end
-        
+
     local function OnHideSettings()
         self.control:SetHidden(false)
         self.scene:RemoveFragment(SETTINGS_FRAGMENT)

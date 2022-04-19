@@ -1,0 +1,22 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TributeCardTile_Shared_Control" inherits="ZO_ContextualActionsTile_Control" virtual="true" />
+
+        <Control name="ZO_TributePatronBookCardTile_Shared_Control" inherits="ZO_TributeCardTile_Shared_Control" virtual="true">
+            <Controls>
+                <Label name="$(parent)Title" override="true" tier="MEDIUM" />
+
+                <Label name="$(parent)Count" tier="MEDIUM" />
+
+                <Texture name="$(parent)StatusIcon" tier="MEDIUM" inherits="ZO_MultiIcon" mouseEnabled="false">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" offsetX="5" />
+                </Texture>
+
+                <Texture name="$(parent)LockOverlay" inherits="ZO_TributeCard_FullTextureFootprint" textureFile="EsoUI/Art/Tribute/tributeCardFrame_lockOverlay.dds" layer="OVERLAY">
+                    <Dimensions x="ZO_TRIBUTE_CARD_UI_WIDTH" y="ZO_TRIBUTE_CARD_UI_HEIGHT" />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

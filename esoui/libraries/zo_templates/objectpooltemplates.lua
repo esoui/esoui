@@ -94,6 +94,12 @@ function ZO_EntryDataPool:AcquireObject(objectKey, dataSource)
     return entryData, key
 end
 
+function ZO_EntryDataPool:ResetObject(entryData)
+    ZO_ObjectPool.ResetObject(self, entryData)
+
+    entryData:Reset()
+end
+
 -- End ZO_ObjectPool Overrides --
 
 --[[

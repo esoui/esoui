@@ -372,7 +372,7 @@ local function CanUseSecondaryActionOnSlot(inventorySlot)
     end
 
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    return not QUICKSLOT_WINDOW:AreQuickSlotsShowing()
+    return not (QUICKSLOT_KEYBOARD and QUICKSLOT_KEYBOARD:AreQuickSlotsShowing())
            and not (TRADING_HOUSE_SEARCH and TRADING_HOUSE_SEARCH:IsAtTradingHouse())
            and not (ZO_Store_IsShopping and ZO_Store_IsShopping())
            and not IsSendingMail()
@@ -963,7 +963,7 @@ local function TrySellItem(inventorySlot)
                 ZO_Dialogs_ShowDialog("CANT_BUYBACK_FROM_FENCE", itemData)
             elseif IsItemInArmory(itemData.bag, itemData.slot) then
                 local armoryBuildList = { GetItemArmoryBuildList(itemData.bag, itemData.slot) }
-                local buildListString = ZO_GenerateCommaSeparatedList(armoryBuildList)
+                local buildListString = ZO_GenerateCommaSeparatedListWithAnd(armoryBuildList)
                 ZO_Dialogs_ShowDialog("CONFIRM_SELL_ARMORY_ITEM_PROMPT", itemData, { mainTextParams = { ZO_SELECTED_TEXT:Colorize(buildListString), #armoryBuildList }})
             else
                 SellInventoryItem(itemData.bag, itemData.slot, itemData.stackCount)
@@ -1555,7 +1555,7 @@ local linkHelperActions =
 local QUICKSLOT_SHARED_OPTIONS = {visibleWhenDead = true}
 
 local function AddQuickslotRemoveAction(slotActions, slot)
-    slotActions:AddSlotAction(SI_ITEM_ACTION_REMOVE_FROM_QUICKSLOT, function() ClearSlot(slot) end, "primary", nil, QUICKSLOT_SHARED_OPTIONS)
+    slotActions:AddSlotAction(SI_ITEM_ACTION_REMOVE_FROM_QUICKSLOT, function() ClearSlot(slot, HOTBAR_CATEGORY_QUICKSLOT_WHEEL) end, "primary", nil, QUICKSLOT_SHARED_OPTIONS)
 end
 
 local function AddQuickslotAddAction(callback, slotActions)
@@ -1563,16 +1563,16 @@ local function AddQuickslotAddAction(callback, slotActions)
 end
 
 local function ItemQuickslotAction(inventorySlot, slotActions)
-    local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    if(QUICKSLOT_WINDOW:AreQuickSlotsShowing()) then
-        local currentSlot = FindActionSlotMatchingItem(bag, index)
+    if QUICKSLOT_KEYBOARD:AreQuickSlotsShowing() then
+        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        local currentSlot = FindActionSlotMatchingItem(bag, index, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
         if currentSlot then
             AddQuickslotRemoveAction(slotActions, currentSlot)
         else
-            local validSlot = GetFirstFreeValidSlotForItem(bag, index)
+            local validSlot = GetFirstFreeValidSlotForItem(bag, index, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
             if validSlot then
                 AddQuickslotAddAction(function()
-                     SelectSlotItem(bag, index, validSlot)
+                     SelectSlotItem(bag, index, validSlot, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
                  end, slotActions)
             end
         end
@@ -1580,15 +1580,15 @@ local function ItemQuickslotAction(inventorySlot, slotActions)
 end
 
 local function ApplySimpleQuickslotAction(slotActions, actionType, actionId)
-    if(QUICKSLOT_WINDOW:AreQuickSlotsShowing()) then
-        local currentSlot = FindActionSlotMatchingSimpleAction(actionType, actionId)
+    if QUICKSLOT_KEYBOARD:AreQuickSlotsShowing() then
+        local currentSlot = FindActionSlotMatchingSimpleAction(actionType, actionId, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
         if currentSlot then
             AddQuickslotRemoveAction(slotActions, currentSlot)
         else
-            local validSlot = GetFirstFreeValidSlotForSimpleAction(actionType, actionId)
+            local validSlot = GetFirstFreeValidSlotForSimpleAction(actionType, actionId, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
             if validSlot then
                 AddQuickslotAddAction(function()
-                    SelectSlotSimpleAction(actionType, actionId, validSlot)
+                    SelectSlotSimpleAction(actionType, actionId, validSlot, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
                 end, slotActions)
             end
         end
@@ -1794,14 +1794,14 @@ local actionHandlers =
 
     ["mark_as_locked"] = function(inventorySlot, slotActions)
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        if not IsSlotLocked(inventorySlot) and CanItemBePlayerLocked(bag, index) and not IsItemPlayerLocked(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsItemAlreadySlottedToCraft(inventorySlot) then
+        if not IsSlotLocked(inventorySlot) and CanItemBePlayerLocked(bag, index) and not IsItemPlayerLocked(bag, index) and not (QUICKSLOT_KEYBOARD and QUICKSLOT_KEYBOARD:AreQuickSlotsShowing()) and not IsItemAlreadySlottedToCraft(inventorySlot) then
             slotActions:AddSlotAction(SI_ITEM_ACTION_MARK_AS_LOCKED, function() MarkAsPlayerLockedHelper(bag, index, true) end, "secondary")
         end
     end,
 
     ["unmark_as_locked"] = function(inventorySlot, slotActions)
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        if not IsSlotLocked(inventorySlot) and CanItemBePlayerLocked(bag, index) and IsItemPlayerLocked(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() then
+        if not IsSlotLocked(inventorySlot) and CanItemBePlayerLocked(bag, index) and IsItemPlayerLocked(bag, index) and not (QUICKSLOT_KEYBOARD and QUICKSLOT_KEYBOARD:AreQuickSlotsShowing()) then
             slotActions:AddSlotAction(SI_ITEM_ACTION_UNMARK_AS_LOCKED, function() MarkAsPlayerLockedHelper(bag, index, false) end, "secondary")
         end
     end,
@@ -1809,20 +1809,22 @@ local actionHandlers =
     ["mark_as_junk"] = function(inventorySlot, slotActions)
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
         local actorCategory = GetItemActorCategory(bag, index)
-        if actorCategory ~= GAMEPLAY_ACTOR_CATEGORY_COMPANION and not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and not IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
+        if not IsInGamepadPreferredMode() and actorCategory ~= GAMEPLAY_ACTOR_CATEGORY_COMPANION and not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and not IsItemJunk(bag, index) and not QUICKSLOT_KEYBOARD:AreQuickSlotsShowing() then
             slotActions:AddSlotAction(SI_ITEM_ACTION_MARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, true) end, "secondary")
         end
     end,
 
     ["unmark_as_junk"] = function(inventorySlot, slotActions)
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        if not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
+        if not IsInGamepadPreferredMode() and not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and IsItemJunk(bag, index) and not QUICKSLOT_KEYBOARD:AreQuickSlotsShowing() then
             slotActions:AddSlotAction(SI_ITEM_ACTION_UNMARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, false) end, "secondary")
         end
     end,
 
     ["quickslot"] = function(inventorySlot, slotActions)
-        DiscoverSlotActionFromType(quickslotActions, inventorySlot, slotActions)
+        if not IsInGamepadPreferredMode() then
+            DiscoverSlotActionFromType(quickslotActions, inventorySlot, slotActions)
+        end
     end,
 
     ["trading_house_post"] = function(inventorySlot, slotActions)
@@ -2800,16 +2802,18 @@ local InventoryDragStart =
 }
 
 function ZO_InventorySlot_OnDragStart(inventorySlot)
-    if IsUnitDead("player") then
-        if not QUICKSLOT_WINDOW:AreQuickSlotsShowing() then
-            ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_DEAD)
-            return
+    if not IsInGamepadPreferredMode() then
+        if IsUnitDead("player") then
+            if not QUICKSLOT_KEYBOARD:AreQuickSlotsShowing() then
+                ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_DEAD)
+                return
+            end
         end
-    end
 
-    if GetCursorContentType() == MOUSE_CONTENT_EMPTY then
-        inventorySlot = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
-        return RunHandlers(InventoryDragStart, inventorySlot)
+        if GetCursorContentType() == MOUSE_CONTENT_EMPTY then
+            inventorySlot = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
+            return RunHandlers(InventoryDragStart, inventorySlot)
+        end
     end
 end
 

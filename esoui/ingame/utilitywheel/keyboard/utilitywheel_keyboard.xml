@@ -1,0 +1,67 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_UtilityWheelMenuEntryTemplate_Keyboard" inherits="ZO_SelectableItemRadialMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_UtilityWheelMenuEntryTemplate_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontHeader4" horizontalAlignment="CENTER">
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="5" />
+                </Label>
+
+                <Cooldown name="$(parent)Cooldown" inherits="ZO_DefaultCooldown" tier="HIGH" alpha="0.7" />
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_UtilityWheel_Keyboard_Template" inherits="ZO_RadialMenuBaseTemplate" hidden="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Category" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Dimensions x="250" />
+                    <Anchor point="CENTER" offsetY="-40" />
+                </Label>
+                
+                <Label name="$(parent)Action" font="ZoFontHeader3" horizontalAlignment="CENTER" verticalAlignment="CENTER" maxLineCount="3" wrapMode="ELLIPSIS" inheritScale="false">
+                    <Dimensions x="250" />
+                    <Anchor point="TOP" relativeTo="$(parent)Category" relativePoint="BOTTOM" offsetY="5" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_UtilityWheel_Keyboard_TopLevel">
+            <AnchorFill/>
+
+            <OnInitialized>
+                ZO_UtilityWheel_Keyboard_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Menu" inherits="ZO_UtilityWheel_Keyboard_Template" />
+                
+                <!-- Cycle Keybinds -->
+                <Control name="$(parent)PreviousCategory" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontWinH2">
+                            <Anchor point="TOPRIGHT" relativeTo="$(grandparent)Menu" relativePoint="BOTTOMLEFT" offsetY="100" />
+                        </Label>
+
+                        <Label name="$(parent)CategoryName" font="ZoFontWinH2" >
+                            <Anchor point="RIGHT" relativeTo="$(parent)KeybindLabel" relativePoint="LEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)NextCategory" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontWinH2">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)Menu" relativePoint="BOTTOMRIGHT" offsetY="100" />
+                        </Label>
+
+                        <Label name="$(parent)CategoryName" font="ZoFontWinH2" >
+                            <Anchor point="LEFT" relativeTo="$(parent)KeybindLabel" relativePoint="RIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

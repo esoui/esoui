@@ -38,6 +38,7 @@ local MENU_COLLECTIONS_ENTRIES =
 {
     COLLECTIONS         = 1,
     ITEM_SETS           = 2,
+    TRIBUTE_PATRONS     = 3,
 }
 local MENU_JOURNAL_ENTRIES =
 {
@@ -213,6 +214,15 @@ local MENU_ENTRY_DATA =
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_itemSetCollections.dds",
                 isNewCallback = function()
                     return ITEM_SET_COLLECTIONS_DATA_MANAGER:HasAnyNewPieces()
+                end,
+            },
+            [MENU_COLLECTIONS_ENTRIES.TRIBUTE_PATRONS] =
+            {
+                scene = "gamepadTributePatronBook",
+                name = GetString(SI_TRIBUTE_PATRON_BOOK_TITLE),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_tributePatrons.dds",
+                isNewCallback = function()
+                    -- TODO Tribute: Implement
                 end,
             },
         }

@@ -196,22 +196,6 @@ function ZO_PlayerEmote_Manager:GetEmoteCategories()
     return self.emoteCategoryTypes
 end
 
-function ZO_PlayerEmote_Manager:GetSlottedEmotes()
-    local slottedEmoteList = {}
-    for i = 1, ACTION_BAR_EMOTE_QUICK_SLOT_SIZE do
-        local slotIndex = i + ACTION_BAR_FIRST_EMOTE_QUICK_SLOT_INDEX
-        local slotType = GetSlotType(slotIndex)
-        local emoteID = GetSlotBoundId(slotIndex)
-        slottedEmoteList[i] =
-        {
-            type = slotType,
-            id = emoteID,
-            slotIndex = slotIndex,
-        }
-    end
-    return slottedEmoteList
-end
-
 do
     local SHARED_EMOTE_EMPTY_SLOT_ICON_PATH = "EsoUI/Art/Quickslots/quickslot_emptySlot.dds"
     function ZO_PlayerEmote_Manager:GetSharedEmoteIconForCategory(category)

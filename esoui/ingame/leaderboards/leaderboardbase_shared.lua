@@ -2,13 +2,7 @@
 -- Base Leaderboard Object
 -----------------
 
-ZO_LeaderboardBase_Shared = ZO_Object:Subclass()
-
-function ZO_LeaderboardBase_Shared:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
+ZO_LeaderboardBase_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_LeaderboardBase_Shared:Initialize(control, leaderboardSystem, leaderboardScene, fragment)
     self.control = control
@@ -23,7 +17,6 @@ function ZO_LeaderboardBase_Shared:Initialize(control, leaderboardSystem, leader
 end
 
 function ZO_LeaderboardBase_Shared:OnDataChanged()
-    self.leaderboardSystem:UpdateCategories()
     self.leaderboardSystem:OnLeaderboardDataChanged(self)
 end
 
@@ -41,4 +34,8 @@ end
 
 function ZO_LeaderboardBase_Shared:GetKeybind()
     return self.keybind
+end
+
+function ZO_LeaderboardBase_Shared:SetLoadingSpinnerVisibility(show)
+    self.leaderboardSystem:SetLoadingSpinnerVisibility(show)
 end

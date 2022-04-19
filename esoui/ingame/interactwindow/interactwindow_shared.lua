@@ -474,9 +474,9 @@ function ZO_QuestReward_GetSkillPointText(numPartialSkillPoints)
 end
 
 local function SetupPartialSkillPointReward(control, amount)
-    local nameControl = GetControl(control, "Name")
-    GetControl(control, "Icon"):SetHidden(true)
-    GetControl(control, "StackSize"):SetHidden(true)
+    local nameControl = control:GetNamedChild("Name")
+    control:GetNamedChild("Icon"):SetHidden(true)
+    control:GetNamedChild("StackSize"):SetHidden(true)
 
     nameControl:SetText(ZO_QuestReward_GetSkillPointText(amount))
     nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
@@ -485,11 +485,11 @@ local function SetupPartialSkillPointReward(control, amount)
 end
 
 local function SetupSkillLineReward(control, name, icon)
-    local nameControl = GetControl(control, "Name")
-    local iconTexture = GetControl(control, "Icon")
+    local nameControl = control:GetNamedChild("Name")
+    local iconTexture = control:GetNamedChild("Icon")
     iconTexture:SetHidden(false)
     iconTexture:SetTexture(icon)
-    GetControl(control, "StackSize"):SetHidden(true)
+    control:GetNamedChild("StackSize"):SetHidden(true)
 
     nameControl:SetText(ZO_QuestReward_GetSkillLineEarnedText(name))
     nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
@@ -499,6 +499,23 @@ end
 
 function ZO_QuestReward_GetSkillLineEarnedText(skillLineName)
     return zo_strformat(SI_QUEST_REWARD_SKILL_LINE, skillLineName)
+end
+
+local function SetupTribureClubReward(control, amount, icon)
+    local nameControl = control:GetNamedChild("Name")
+    local iconTexture = control:GetNamedChild("Icon")
+    iconTexture:SetHidden(false)
+    iconTexture:SetTexture(icon)
+    control:GetNamedChild("StackSize"):SetHidden(true)
+
+    nameControl:SetText(ZO_QuestReward_GetTributeClubEarnedText(amount))
+    nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
+    control.allowTooltip = false
+    control:SetHidden(false)
+end
+
+function ZO_QuestReward_GetTributeClubEarnedText(amount)
+    return zo_strformat(SI_QUEST_REWARD_TRIBUTE_CLUB_EXPERIENCE, amount)
 end
 
 local REWARD_CREATORS =
@@ -542,7 +559,7 @@ local REWARD_CREATORS =
         function(control, name, amount, currencyOptions)
             SetupCurrencyReward(control, CURT_WRIT_VOUCHERS, amount, currencyOptions)
         end,
-    [REWARD_TYPE_SKILL_LINE] = 
+    [REWARD_TYPE_SKILL_LINE] =
         function(control, name, amount, icon)
             SetupSkillLineReward(control, name, icon)
         end,
@@ -557,6 +574,10 @@ local REWARD_CREATORS =
     [REWARD_TYPE_UNDAUNTED_KEYS] =
         function(control, name, amount, currencyOptions)
             SetupCurrencyReward(control, CURT_UNDAUNTED_KEYS, amount, currencyOptions)
+        end,
+    [REWARD_TYPE_TRIBUTE_CLUB_EXPERIENCE] =
+        function(control, name, amount, icon)
+            SetupTribureClubReward(control, amount, icon)
         end,
 }
 
@@ -592,11 +613,20 @@ function ZO_SharedInteraction:GetCurrencyTypeFromReward(rewardType)
     return currencyRewardToCurrencyType[rewardType]
 end
 
-function ZO_SharedInteraction:TryGetMaxCurrencyWarningText(rewardType, rewardAmount)
+function ZO_SharedInteraction:WouldCurrencyExceedMax(rewardType, rewardAmount)
     local currencyType = currencyRewardToCurrencyType[rewardType]
-    if currencyType and (GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) + rewardAmount >= MAX_PLAYER_CURRENCY) then
+    if not currencyType then
+        return nil
+    end
+
+    local playerStoredLocation = GetCurrencyPlayerStoredLocation(currencyType)
+    return GetCurrencyAmount(currencyType, playerStoredLocation) + rewardAmount > GetMaxPossibleCurrency(currencyType, playerStoredLocation)
+end
+
+function ZO_SharedInteraction:TryGetMaxCurrencyWarningText(rewardType, rewardAmount)
+    if self:WouldCurrencyExceedMax(rewardType, rewardAmount) then
         return zo_strformat(SI_QUEST_REWARD_MAX_CURRENCY_ERROR, GetCurrencyName(currencyType))
-    end        
+    end
 end
 
 function ZO_SharedInteraction:GetRewardCreateFunc(rewardType)

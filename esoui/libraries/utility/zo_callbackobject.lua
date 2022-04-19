@@ -2,42 +2,63 @@ local ZO_CallbackObjectMixin = {}
 
 local CALLBACK_INDEX = 1
 local ARGUMENT_INDEX = 2
-local DELETED_INDEX = 3
+local PRIORITY_INDEX = 3
+local DELETED_INDEX = 4
 
---Registers a callback to be executed when eventName is triggered.
---You may optionally specify an argument to be passed to the callback.
-function ZO_CallbackObjectMixin:RegisterCallback(eventName, callback, arg)
-    if not eventName or not callback then
-        return
-    end
-
-    --if this is the first callback then create the registry
-    if not self.callbackRegistry then
-        self.callbackRegistry = {}
-    end
-
-    --create a list to hold callbacks of this type if it doesn't exist
-    local registry = self.callbackRegistry[eventName]
-    if not registry then
-        registry = {}
-        self.callbackRegistry[eventName] = registry
-    end
-
-    --make sure this callback wasn't already registered
-    for _, registration in ipairs(registry) do
-        if registration[CALLBACK_INDEX] == callback and registration[ARGUMENT_INDEX] == arg then
-            -- If the callback is already registered, make sure it hasn't been flagged for delete
-            -- so it won't be unregistered in self:Clean later
-            -- This can happen if you attempt to unregister and register for a callback
-            -- during a callback, since that will delay the clean until after we have tried to re-register
-            registration[DELETED_INDEX] = false
-            return
+do
+    local function SortRegistry(left, right)
+        local leftPriority = left[PRIORITY_INDEX]
+        local rightPriority = right[PRIORITY_INDEX]
+        if leftPriority and rightPriority then
+            return leftPriority < rightPriority
+        elseif leftPriority then
+            return true
+        else
+            return false
         end
     end
 
-    --store the callback with an optional argument
-    --note: the order of the arguments to the table constructor must match the order of the *_INDEX locals above
-    table.insert(registry, { callback, arg, false })
+    --Registers a callback to be executed when eventName is triggered.
+    --You may optionally specify an argument to be passed to the callback.
+    function ZO_CallbackObjectMixin:RegisterCallback(eventName, callback, arg, priority)
+        if not eventName or not callback then
+            return
+        end
+
+        --if this is the first callback then create the registry
+        if not self.callbackRegistry then
+            self.callbackRegistry = {}
+        end
+
+        --create a list to hold callbacks of this type if it doesn't exist
+        local registry = self.callbackRegistry[eventName]
+        if not registry then
+            registry = {}
+            self.callbackRegistry[eventName] = registry
+        end
+
+        --make sure this callback wasn't already registered
+        for _, registration in ipairs(registry) do
+            if registration[CALLBACK_INDEX] == callback and registration[ARGUMENT_INDEX] == arg then
+                -- If the callback is already registered, make sure it hasn't been flagged for delete
+                -- so it won't be unregistered in self:Clean later
+                -- This can happen if you attempt to unregister and register for a callback
+                -- during a callback, since that will delay the clean until after we have tried to re-register
+                registration[DELETED_INDEX] = false
+                return
+            end
+        end
+
+        --store the callback with an optional argument
+        --note: the order of the arguments to the table constructor must match the order of the *_INDEX locals above
+        table.insert(registry, { callback, arg, priority, false })
+
+        if priority then
+            -- If this registration has a priorty, we need to determine where it goes in the order
+            -- If it does not, we can assume any with priorities were already sorted to the front, and this can stay tacked on the end with the rest of the unprioritized
+            table.sort(registry, SortRegistry)
+        end
+    end
 end
 
 function ZO_CallbackObjectMixin:UnregisterCallback(eventName, callback)
@@ -78,6 +99,10 @@ function ZO_CallbackObjectMixin:UnregisterAllCallbacks(eventName)
     end
 end
 
+function ZO_CallbackObjectMixin:SetHandleOnce(handleOnce)
+    self.handleOnce = handleOnce
+end
+
 --Executes all callbacks registered on this object with this event name
 --Accepts the event name, and a list of arguments to be passed to the callbacks
 --The return value is from the callbacks, the most recently registered non-nil non-false callback return value is returned
@@ -100,11 +125,15 @@ function ZO_CallbackObjectMixin:FireCallbacks(eventName, ...)
             local callback = callbackInfo[CALLBACK_INDEX]
             local deleted = callbackInfo[DELETED_INDEX]
             
-            if(not deleted) then
-                if(argument) then
+            if not deleted then
+                if argument then
                     result = callback(argument, ...) or result
                 else
                     result = callback(...) or result
+                end
+
+                if result and self.handleOnce then
+                    break
                 end
             end
 

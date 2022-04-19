@@ -74,7 +74,27 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
+            settingId = GRAPHICS_SETTING_HDR_PEAK_BRIGHTNESS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_SCENE_BRIGHTNESS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_SCENE_CONTRAST,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_UI_BRIGHTNESS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_UI_CONTRAST,
         },
         {
             panel = SETTING_PANEL_VIDEO,
@@ -181,6 +201,24 @@ GAMEPAD_SETTINGS_DATA =
             header = SI_INTERFACE_OPTIONS_ACCOUNT_MARKETING_HEADER,
         },
     },
+    [SETTING_PANEL_ACCESSIBILITY] =
+    {
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_VOICE_CHAT_ACCESSIBILITY,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_TEXT_CHAT_ACCESSIBILITY,
+        },
+    },
 }
 
 local ZO_OptionsPanel_Gamepad_Pregame_ControlData =
@@ -199,7 +237,6 @@ local ZO_OptionsPanel_Gamepad_Pregame_ControlData =
             callback = function()
                             SCENE_MANAGER:Push("gamepad_credits")
                         end
-
         },
         --Play Cinematic
         [OPTIONS_CUSTOM_SETTING_GAMEPAD_PREGAME_PLAY_CINEMATIC] =
@@ -211,8 +248,9 @@ local ZO_OptionsPanel_Gamepad_Pregame_ControlData =
             text = SI_GAME_MENU_PLAY_CINEMATIC,
             callback = ZO_PlayIntroCinematicAndReturn,
         },
-
     }
 }
 
 ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_CINEMATIC, ZO_OptionsPanel_Gamepad_Pregame_ControlData)
+
+GAMEPAD_OPTIONS:SetSettingPanelFilter(ShouldShowSettingPanel)

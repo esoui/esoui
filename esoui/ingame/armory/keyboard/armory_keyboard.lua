@@ -9,6 +9,8 @@ ZO_ARMORY_KEYBOARD_COLLAPSED_ENTRY_HEIGHT = 96
 ZO_ARMORY_KEYBOARD_EXPANDED_ENTRY_HEIGHT = 550
 ZO_ARMORY_KEYBOARD_UNLOCK_ENTRY_HEIGHT = 96
 
+ZO_ARMORY_KEYBOARD_MISC_ROW_LABEL_OFFSET_X = 20
+
 local DEFAULT_SELECTED_BUILD_INDEX = 1
 
 function ZO_Armory_Keyboard:Initialize(control)
@@ -160,7 +162,11 @@ function ZO_Armory_Keyboard:InitializeList()
                 slotControl.icon:SetColor(ZO_WHITE:UnpackRGBA())
             end
         end
-        
+
+        --Set the mundus stones
+        local mundusStoneList = ZO_GenerateCommaSeparatedListWithoutAnd(data:GetEquippedMundusStoneNames())
+        control.mundusLabel:SetText(zo_strformat(SI_ARMORY_MUNDUS_STONE_LABEL, ZO_SELECTED_TEXT:Colorize(mundusStoneList)))
+
         --Set the curse type
         local curseType = GetString("SI_CURSETYPE", data:GetCurseType())
         control.curseTypeLabel:SetText(zo_strformat(SI_ARMORY_CURSE_TYPE_LABEL, ZO_SELECTED_TEXT:Colorize(curseType)))
@@ -405,8 +411,10 @@ do
         control.weaponSetRow1:SetHotbarCategory(HOTBAR_CATEGORY_PRIMARY)
         control.weaponSetRow2:SetHotbarCategory(HOTBAR_CATEGORY_BACKUP)
 
-        control.curseTypeLabel = control:GetNamedChild("ContainerCurseTypeLabel")
-        control.outfitNameLabel = control:GetNamedChild("ContainerOutfitLabel")
+        local curseOutfitRow = control:GetNamedChild("ContainerCurseOutfitRow")
+        control.mundusLabel = control:GetNamedChild("ContainerMundus")
+        control.curseTypeLabel = curseOutfitRow:GetNamedChild("CurseType")
+        control.outfitNameLabel = curseOutfitRow:GetNamedChild("Outfit")
 
         --Setup the equipment slots
         control.equipmentRow = control:GetNamedChild("ContainerEquipmentRow")

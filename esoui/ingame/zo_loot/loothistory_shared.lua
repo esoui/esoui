@@ -10,11 +10,15 @@ LOOT_ENTRY_TYPE_KEEP_REWARD = 9
 LOOT_ENTRY_TYPE_ANTIQUITY_LEAD = 10
 LOOT_ENTRY_TYPE_COMPANION_EXPERIENCE = 11
 LOOT_ENTRY_TYPE_COMPANION_RAPPORT = 12
+LOOT_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE = 13
 
 LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
 LOOT_LEADERBOARD_SCORE_ICON = "EsoUI/Art/Icons/Battleground_Score.dds"
-LOOT_RAPPORT_INCREASE_ICON = "EsoUI/Art/HUD/lootHistory_icon_rapportIncrease.dds"
-LOOT_RAPPORT_DECREASE_ICON = "EsoUI/Art/HUD/lootHistory_icon_rapportDecrease.dds"
+LOOT_TRIBUTE_CARD_UPGRADE_ICON = "EsoUI/Art/HUD/lootHistory_icon_tributeUpgrade.dds"
+
+LOOT_RAPPORT_INCREASE_ICON_FORMATTER = "EsoUI/Art/HUD/lootHistory_icon_rapportIncrease_%d.dds"
+LOOT_RAPPORT_DECREASE_ICON_FORMATTER = "EsoUI/Art/HUD/lootHistory_icon_rapportDecrease_%d.dds"
+internalassert(RAPPORT_ADJUSTMENT_AMOUNT_ITERATION_END == 7, "New RAPPORT_ADJUSTMENT_AMOUNT added, new rapport increase and decrease icons will need to be created.")
 
 ZO_LOOT_HISTORY_DISPLAY_TYPE_CRAFT_BAG = "craftBag"
 ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN = "stolen"
@@ -126,6 +130,8 @@ do
             return data1.companionId == data2.companionId
         elseif data1EntryType == LOOT_ENTRY_TYPE_COMPANION_RAPPORT then
             return false --Rapport updates are always on their own line
+        elseif data1EntryType == LOOT_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE then
+            return false -- Tribute card upgrades don't stack
         else
             return true
         end
@@ -417,13 +423,14 @@ do
 
     local RAPPORT_INCREASE_BACKGROUND_COLOR = ZO_ColorDef:New("102d0b")
     local RAPPORT_DECREASE_BACKGROUND_COLOR = ZO_ColorDef:New("3f0a0a")
-    function ZO_LootHistory_Shared:AddCompanionRapportEntry(companionId, isIncrease)
+    function ZO_LootHistory_Shared:AddCompanionRapportEntry(companionId, isIncrease, adjustmentAmountType)
         local rapportFormatter = isIncrease and SI_LOOT_HISTORY_COMPANION_RAPPORT_GAIN_FORMATTER or SI_LOOT_HISTORY_COMPANION_RAPPORT_LOSS_FORMATTER
         local colorizedCompanionName = COMPANION_NAME_COLOR:Colorize(GetCompanionName(companionId))
+        local iconFormatter = isIncrease and LOOT_RAPPORT_INCREASE_ICON_FORMATTER or LOOT_RAPPORT_DECREASE_ICON_FORMATTER
         local lootData =
         {
             text = zo_strformat(rapportFormatter, colorizedCompanionName),
-            icon = isIncrease and LOOT_RAPPORT_INCREASE_ICON or LOOT_RAPPORT_DECREASE_ICON,
+            icon = string.format(iconFormatter, adjustmentAmountType),
             color = ZO_SELECTED_TEXT,
             backgroundColor = isIncrease and RAPPORT_INCREASE_BACKGROUND_COLOR or RAPPORT_DECREASE_BACKGROUND_COLOR,
             companionId = companionId,
@@ -433,6 +440,21 @@ do
         }
         local lootEntry = self:CreateLootEntry(lootData)
         lootEntry.isPersistent = true
+        self:InsertOrQueue(lootEntry)
+    end
+end
+
+function ZO_LootHistory_Shared:AddTributeCardUpgradeEntry(cardData)
+    if self:CanShowItemsInHistory() then
+        local lootData =
+        {
+            text = cardData:GetColorizedFormattedName(),
+            icon = LOOT_TRIBUTE_CARD_UPGRADE_ICON,
+            color = GetItemQualityColor(cardData:GetRarity()),
+            entryType = LOOT_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE,
+            showIconOverlayText = false,
+        }
+        local lootEntry = self:CreateLootEntry(lootData)
         self:InsertOrQueue(lootEntry)
     end
 end
@@ -578,9 +600,20 @@ function ZO_LootHistory_Shared:OnCompanionExperienceGainUpdate(companionId, leve
     end
 end
 
-function ZO_LootHistory_Shared:OnCompanionRapportUpdate(companionId, previousRapport, currentRapport)
+function ZO_LootHistory_Shared:OnCompanionRapportUpdate(companionId, previousRapport, currentRapport, adjustmentAmountType)
     if currentRapport ~= previousRapport then
-        self:AddCompanionRapportEntry(companionId, currentRapport > previousRapport)
+        self:AddCompanionRapportEntry(companionId, currentRapport > previousRapport, adjustmentAmountType)
+    end
+end
+
+function ZO_LootHistory_Shared:OnTributeProgressionUpgradeStatusChanged(patronId, changedProgressions, refreshReason)
+    if refreshReason == ZO_TRIBUTE_PATRON_PROGRESSION_REFRESH_REASON.DATA_CHANGED then
+        for _, progressionData in ipairs(changedProgressions) do
+            if progressionData:HasUpgrade() then
+                local upgradeCardData = ZO_TributeCardData:New(patronId, progressionData:GetUpgradeCardId())
+                self:AddTributeCardUpgradeEntry(upgradeCardData)
+            end
+        end
     end
 end
 

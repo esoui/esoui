@@ -288,16 +288,33 @@
                         
                         <Control name="$(parent)EquipmentRow" resizeToFitDescendents="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)EquipmentLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
-                            <Anchor point="RIGHT" constrains="X" />                           
+                            <Anchor point="RIGHT" constrains="X" />
                         </Control>
 
-                        <Label name="$(parent)CurseTypeLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                        <Label name="$(parent)Mundus" font="ZoFontHeader" inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <DimensionConstraints maxX="300" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)EquipmentRow" relativePoint="BOTTOMLEFT" offsetY="15" />
                         </Label>
 
-                        <Label name="$(parent)OutfitLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="LEFT" relativeTo="$(parent)CurseTypeLabel" relativePoint="RIGHT" offsetX="20" />
-                        </Label>
+                        <Control name="$(parent)CurseOutfitRow">
+                            <Anchor point="LEFT" relativeTo="$(parent)Mundus" relativePoint="RIGHT" offsetX="ZO_ARMORY_KEYBOARD_MISC_ROW_LABEL_OFFSET_X" />
+                            <Anchor point="RIGHT" offsetX="-15" constrains="X" />
+                            <OnRectWidthChanged>
+                                local curseTypeLabel = self:GetNamedChild("CurseType")
+                                curseTypeLabel:SetDimensionConstraints(0, 0, (newWidth / 2) - (ZO_ARMORY_KEYBOARD_MISC_ROW_LABEL_OFFSET_X / 2), 0)
+                            </OnRectWidthChanged>
+
+                            <Controls>
+                                <Label name="$(parent)CurseType" inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1" wrapMode="ELLIPSIS" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="LEFT" />
+                                </Label>
+
+                                <Label name="$(parent)Outfit" inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1" wrapMode="ELLIPSIS" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="LEFT" relativeTo="$(parent)CurseType" relativePoint="RIGHT" offsetX="ZO_ARMORY_KEYBOARD_MISC_ROW_LABEL_OFFSET_X" />
+                                    <Anchor point="RIGHT" />
+                                </Label>
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Control>
             </Controls>

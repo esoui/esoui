@@ -163,6 +163,7 @@ function ZO_GroupList_Keyboard:GroupListRow_OnMouseUp(control, button, upInside)
                     AddMenuItem(GetString(SI_SOCIAL_LIST_PANEL_WHISPER), function() StartChatInput("", CHAT_CHANNEL_WHISPER, data.characterName) end)
                 end
                 AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function() JumpToHouse(data.displayName) end)
+                AddMenuItem(GetString(SI_SOCIAL_MENU_TRIBUTE_INVITE), function() InviteToTribute(data.displayName) end)
                 AddMenuItem(GetString(SI_SOCIAL_MENU_JUMP_TO_PLAYER), function() JumpToGroupMember(data.characterName) end)
             end
 

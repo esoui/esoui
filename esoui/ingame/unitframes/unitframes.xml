@@ -655,7 +655,7 @@
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_UnitFrames" allowBringToTop="false">
+        <TopLevelControl name="ZO_UnitFrames">
             <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="5" offsetY="5" />
 
             <OnInitialized>

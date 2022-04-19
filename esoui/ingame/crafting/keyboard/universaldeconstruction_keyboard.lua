@@ -31,6 +31,7 @@ function ZO_UniversalDeconstruction_Keyboard:Initialize(control)
 
     local function OnSceneStateChanged(oldState, newState)
         if newState == SCENE_SHOWN then
+            CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.UNIVERSAL_DECONSTRUCTION_SUCCESS, SOUNDS.UNIVERSAL_DECONSTRUCTION_FAIL)
             TriggerTutorial(TUTORIAL_TRIGGER_UNIVERSAL_DECONSTRUCTION_OPENED)
         elseif newState == SCENE_SHOWING then
             ZO_MultipleCraftingSkillsXpBar_TieSkillInfoHeaderToCraftingTypes(self.skillInfoControl, self.craftingTypes)

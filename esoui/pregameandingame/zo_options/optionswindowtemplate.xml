@@ -4,7 +4,7 @@
             <Dimensions x="512" y="4" />
         </Texture>
 
-        <Texture name="ZO_Options_WarningIcon" textureFile="EsoUI\Art\Miscellaneous\ESO_Icon_Warning.dds" mouseEnabled="true" virtual="true">
+        <Texture name="ZO_Options_WarningIcon" textureFile="EsoUI\Art\Miscellaneous\ESO_Icon_Warning.dds" mouseEnabled="true" virtual="true" layer="CONTROLS">
             <Dimensions x="24" y="24" />
             <OnMouseEnter>
                 ZO_Options_OnMouseEnter(self)
@@ -105,10 +105,21 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_Options_Video_Checkbox_IncludeRestartWarning" inherits="ZO_Options_Checkbox" virtual="true">
+        <Control name="ZO_Options_Checkbox_DynamicWarning" inherits="ZO_Options_Checkbox" virtual="true">
             <Controls>
                 <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon">
                     <Anchor point="RIGHT" relativeTo="$(parent)Checkbox" relativePoint="LEFT" offsetX="-5" />
+                    <OnInitialized>
+                        -- Set using ZO_Options_SetWarningText, ZO_Options_ShowOrHideAssociatedWarning, etc.
+                        self.data = { tooltipText = "" }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_Options_Video_Checkbox_IncludeRestartWarning" inherits="ZO_Options_Checkbox_DynamicWarning" virtual="true">
+            <Controls>
+                <Texture name="$(parent)WarningIcon" override="true">
                     <OnInitialized>
                         self.data = { tooltipText = SI_OPTIONS_RESTART_WARNING }
                     </OnInitialized>
@@ -116,8 +127,7 @@
             </Controls>
         </Control>
 
-        <!-- This needs to be on a higher tier so the other controls don't compete for mouse input on the dropdown-->
-        <Control name="ZO_Options_Dropdown" tier="HIGH" mouseEnabled="true" hidden="true" virtual="true">
+        <Control name="ZO_Options_Dropdown" mouseEnabled="true" hidden="true" virtual="true">
             <Dimensions x="510" y="26" />
             <OnMouseEnter>
                 ZO_Options_OnMouseEnter(self)
@@ -146,17 +156,6 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_Options_Video_Dropdown_IncludeApplyScreenWarning" inherits="ZO_Options_Dropdown" virtual="true">
-            <Controls>
-                <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon">
-                    <Anchor point="RIGHT" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetX="-5" />
-                    <OnInitialized>
-                        self.data = { tooltipText = SI_OPTIONS_APPLY_WARNING }
-                    </OnInitialized>
-                </Texture>
-            </Controls>
-        </Control>
-
         <Control name="ZO_Options_Dropdown_DynamicWarning" inherits="ZO_Options_Dropdown" virtual="true">
             <Controls>
                 <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon">
@@ -164,6 +163,16 @@
                     <OnInitialized>
                         -- Set using ZO_Options_SetWarningText, ZO_Options_ShowOrHideAssociatedWarning, etc.
                         self.data = { tooltipText = "" }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Video_Dropdown_IncludeApplyScreenWarning" inherits="ZO_Options_Dropdown_DynamicWarning" virtual="true">
+            <Controls>
+                <Texture name="$(parent)WarningIcon" override="true">
+                    <OnInitialized>
+                        self.data = { tooltipText = SI_OPTIONS_APPLY_WARNING }
                     </OnInitialized>
                 </Texture>
             </Controls>

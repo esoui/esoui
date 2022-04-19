@@ -14,7 +14,7 @@
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_MarketCurrency_Gamepad_TopLevel" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" verticalAlignment="BOTTOM" hidden="true">
+        <TopLevelControl name="ZO_MarketCurrency_Gamepad_TopLevel" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" hidden="true">
             <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-64" />
             <Dimensions y="42" />
 

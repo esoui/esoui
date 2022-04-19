@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Texture name="ZO_GiftInventoryCategory_Keyboard_NoteTexture" textureFile="EsoUI/Art/Contacts/social_note_up.dds" mouseEnabled="true" virtual="true">
+        <Texture name="ZO_GiftInventoryCategory_Keyboard_NoteTexture" textureFile="EsoUI/Art/Contacts/social_note_up.dds" layer="CONTROLS" mouseEnabled="true" virtual="true">
             <Dimensions x="32" y="32"/>
             <OnMouseEnter>
                 ZO_GiftInventoryCategory_Keyboard_NoteTexture_OnMouseEnter(self)

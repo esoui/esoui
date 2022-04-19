@@ -62,6 +62,7 @@ function ZO_GamepadCollectionsBook:Initialize(control)
     self:InitializeGridListPanel()
     self:InitializeActionsDialog()
     self:InitializeRenameCollectibleDialog()
+    self:InitializeUtilityWheel()
 
     self.control:RegisterForEvent(EVENT_VISUAL_LAYER_CHANGED, function()
                                                                     if GAMEPAD_COLLECTIONS_BOOK_SCENE:IsShowing() then
@@ -133,6 +134,21 @@ function ZO_GamepadCollectionsBook:InitializeHousingPanel()
     housingPanel.hintLabel = scrollContainer:GetNamedChild("Hint")
 
     self.housingPanelControl = housingPanel
+end
+
+function ZO_GamepadCollectionsBook:InitializeUtilityWheel()
+    local quickslotControl = self.control:GetNamedChild("Quickslot")
+    self.wheelControl = quickslotControl:GetNamedChild("Wheel")
+    self.assignLabel = quickslotControl:GetNamedChild("Assign")
+    self.selectedCollectibleNameLabel = quickslotControl:GetNamedChild("SelectedCollectibleName")
+    local wheelData =
+    {
+        hotbarCategories = { HOTBAR_CATEGORY_QUICKSLOT_WHEEL },
+        numSlots = ACTION_BAR_UTILITY_BAR_SIZE,
+        showPendingIcon = true,
+        showCategoryLabel = true,
+    }
+    self.wheel = ZO_AssignableUtilityWheel_Gamepad:New(self.wheelControl, wheelData)
 end
 
 function ZO_GamepadCollectionsBook:RefreshGridEntryMultiIcon(control, data)
@@ -246,18 +262,22 @@ function ZO_GamepadCollectionsBook:OnShowing()
     elseif self.savedOutfitStyleIndex then
         self:ShowList(self.subcategoryList)
         self.subcategoryList.list:SetSelectedIndexWithoutAnimation(self.savedOutfitStyleIndex)
-    elseif self.savedQuickSlotCollectibleData then
-        local categoryData = self.savedQuickSlotCollectibleData:GetCategoryData()
+    elseif self.savedEmoteCollectibleData then
+        local categoryData = self.savedEmoteCollectibleData:GetCategoryData()
         if categoryData:IsSubcategory() then
             self:ViewSubcategory(categoryData)
         else
             self:ViewCategory(categoryData)
         end
-        self:SelectCollectibleEntry(self.savedQuickSlotCollectibleData:GetId())
+        self:SelectCollectibleEntry(self.savedEmoteCollectibleData:GetId())
     end
     
     self.savedOutfitStyleIndex = nil
-    self.savedQuickSlotCollectibleData = nil
+    self.savedEmoteCollectibleData = nil
+end
+
+function ZO_GamepadCollectionsBook:OnHiding()
+    self:HideAssignableUtilityWheel()
 end
 
 function ZO_GamepadCollectionsBook:OnHide()
@@ -525,7 +545,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
         {
             name = function()
                 local collectibleData = self:GetCurrentTargetData()
-                if collectibleData:IsSlottable() then
+                if collectibleData:IsSlottable() or (collectibleData:IsUnlocked() and collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE)) then
                     return GetString(SI_GAMEPAD_ITEM_ACTION_QUICKSLOT_ASSIGN)
                 elseif self:CanPurchaseCurrentTarget() then
                     return GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE)
@@ -537,9 +557,19 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             callback = function()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData:IsSlottable() then
-                    self.savedQuickSlotCollectibleData = collectibleData
-                    GAMEPAD_QUICKSLOT:SetCollectibleToQuickslot(collectibleData:GetId())
-                    SCENE_MANAGER:Push("gamepad_quickslot")
+                    self:ShowAssignableUtilityWheel(collectibleData)
+                elseif collectibleData:IsUnlocked() and collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE) then
+                    local emoteInfo = PLAYER_EMOTE_MANAGER:GetEmoteItemInfo(collectibleData:GetReferenceId())
+                    if emoteInfo then
+                        local data =
+                        {
+                            type = ACTION_TYPE_EMOTE,
+                            emoteCategory = emoteInfo.emoteCategory,
+                        }
+                        GAMEPAD_PLAYER_EMOTE:QueueBrowseToCategoryData(data)
+                    end
+                    self.savedEmoteCollectibleData = collectibleData
+                    SCENE_MANAGER:Push("gamepad_player_emote")
                 elseif self:CanPurchaseCurrentTarget() then
                     local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
                     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
@@ -551,6 +581,8 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData then
                     if collectibleData:IsSlottable() then
+                        return true
+                    elseif collectibleData:IsUnlocked() and collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE) then
                         return true
                     elseif self:CanPurchaseCurrentTarget() then
                         return true
@@ -623,7 +655,73 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
         end
     end
     ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.collectionKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnCollectionListBack )
+    
+    --Utility Wheel Keybinds
+    self.utilityAssignmentKeybindStripDescriptor = {}
+    local function OnUtilityWheelBack()
+        self:HideAssignableUtilityWheel()
+    end
+
+    local function OnAssignPendingData()
+        self.wheel:TryAssignPendingToSelectedEntry()
+    end
+    ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.utilityAssignmentKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnAssignPendingData, GetString(SI_GAMEPAD_ITEM_ACTION_QUICKSLOT_ASSIGN))
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.utilityAssignmentKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnUtilityWheelBack)
+
 end
+
+function ZO_GamepadCollectionsBook:ShowAssignableUtilityWheel(collectibleData)
+    local categoryData = collectibleData:GetCategoryData()
+    local hotbarCategory = GetHotbarForCollectibleCategoryId(categoryData.categoryId)
+    --Determine which wheels we want to show
+    local hotbarCategories
+    if hotbarCategory then
+        hotbarCategories = {hotbarCategory, HOTBAR_CATEGORY_QUICKSLOT_WHEEL}
+    else
+        hotbarCategories = { HOTBAR_CATEGORY_QUICKSLOT_WHEEL }
+    end
+    self.wheel:SetHotbarCategories(hotbarCategories)
+
+    --Disable the current collections list before bringing up the wheel
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentList.keybind)
+    self:DeactivateCurrentList()
+
+    local actionId = collectibleData:GetId()
+    self.wheel:SetPendingSimpleAction(ACTION_TYPE_COLLECTIBLE, actionId)
+
+    self.assignLabel:SetHidden(false)
+    self.selectedCollectibleNameLabel:SetHidden(false)
+    self.selectedCollectibleNameLabel:SetText(collectibleData:GetFormattedName())
+    self.pendingUtilityWheelCollectibleData = collectibleData
+
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.utilityAssignmentKeybindStripDescriptor)
+
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    GAMEPAD_COLLECTIONS_BOOK_SCENE:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT)
+    -- This will Activate the menu and show it
+    self.wheel:Show()
+end
+
+function ZO_GamepadCollectionsBook:HideAssignableUtilityWheel()
+    if self.pendingUtilityWheelCollectibleData then
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.utilityAssignmentKeybindStripDescriptor)
+        self.assignLabel:SetHidden(true)
+        self.selectedCollectibleNameLabel:SetHidden(true)
+
+        -- This will deactivate the menu and hide it
+        self.wheel:Hide()
+        GAMEPAD_COLLECTIONS_BOOK_SCENE:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT)
+
+        --Re-show the tooltip that we had supressed while the wheel was up
+        self:RefreshStandardTooltip(self.pendingUtilityWheelCollectibleData)
+        self.pendingUtilityWheelCollectibleData = nil
+
+        --Reactivate the collectible list now that we are done with the wheel
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.currentList.keybind)
+        self:ActivateCurrentList()
+    end
+end
+
 
 --Opens up the provided category, or the current category if no categoryData is provided
 function ZO_GamepadCollectionsBook:ViewCategory(categoryData)
@@ -815,14 +913,17 @@ function ZO_GamepadCollectionsBook:BuildCategoryList()
 
     -- Add the categories entries
     for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator({ ZO_CollectibleCategoryData.HasShownCollectiblesInCollection }) do
-        local formattedCategoryName = categoryData:GetFormattedName()
-        local gamepadIcon = categoryData:GetGamepadIcon()
+        -- Tribute patron special categories are in a different scene
+        if not categoryData:IsTributePatronCategory() then
+            local formattedCategoryName = categoryData:GetFormattedName()
+            local gamepadIcon = categoryData:GetGamepadIcon()
 
-        local entryData = ZO_GamepadEntryData:New(formattedCategoryName, gamepadIcon)
-        entryData:SetDataSource(categoryData)
-        entryData:SetIconTintOnSelection(true)
+            local entryData = ZO_GamepadEntryData:New(formattedCategoryName, gamepadIcon)
+            entryData:SetDataSource(categoryData)
+            entryData:SetIconTintOnSelection(true)
 
-        self.categoryList.list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+            self.categoryList.list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+        end
     end
     self.categoryList.list:Commit()
 
@@ -1564,7 +1665,8 @@ function ZO_GamepadCollectionsBook:UpdateActiveCollectibleCooldownTimer()
 end
 
 function ZO_GamepadCollectionsBook:IsViewingCollectionsList()
-    return self.currentList == self.collectionList
+    --If self.pendingUtilityWheelCollectibleData is set that means we are currently assigning to the utility wheel
+    return self.currentList == self.collectionList and not self.pendingUtilityWheelCollectibleData 
 end
 
 function ZO_GamepadCollectionsBook:IsViewingCategoryList()

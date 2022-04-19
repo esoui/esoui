@@ -106,9 +106,12 @@ ESO_Dialogs["ARMORY_BUILD_RESTORE_CONFIRM_DIALOG"] =
             local playerCurseType = GetPlayerCurseType()
             local confirmationText = zo_strformat(SI_ARMORY_BUILD_RESTORE_CONFIRMATION_DIALOG_TEXT, dialog.textParams.mainTextParams[1])
             local respecText = IsChampionSystemUnlocked() and GetString(SI_ARMORY_BUILD_RESTORE_CONFIRMATION_DIALOG_RESPEC_TEXT) or GetString(SI_ARMORY_BUILD_RESTORE_CONFIRMATION_DIALOG_CHAMPION_LOCKED_RESPEC_TEXT)
-            if data.curseType == playerCurseType then
-                return ZO_GenerateParagraphSeparatedList({confirmationText, respecText})
-            else
+            local paragraphs = 
+            {
+                confirmationText, 
+                respecText,
+            }
+            if data.curseType ~= playerCurseType then
                 local curseWarningMessage = nil
                 if data.curseType == CURSE_TYPE_NONE then
                     --If equipping the build will cure your curse
@@ -124,8 +127,15 @@ ESO_Dialogs["ARMORY_BUILD_RESTORE_CONFIRM_DIALOG"] =
                     local buildCurseTypeName = GetString("SI_CURSETYPE", data.curseType)
                     curseWarningMessage = zo_strformat(SI_ARMORY_BUILD_RESTORE_CONFIRMATION_DIALOG_CURSE_CHANGE_TEXT, ZO_SELECTED_TEXT:Colorize(playerCurseTypeName), ZO_SELECTED_TEXT:Colorize(buildCurseTypeName))
                 end
-                return ZO_GenerateParagraphSeparatedList({confirmationText, respecText, curseWarningMessage})
+                table.insert(paragraphs, curseWarningMessage)
             end
+            
+            --If equipping the build will clear your mundus stones
+            if data.primaryMundus == MUNDUS_STONE_INVALID then
+                table.insert(paragraphs, GetString(SI_ARMORY_BUILD_RESTORE_EMPTY_MUNDUS_TEXT))
+            end
+
+            return ZO_GenerateParagraphSeparatedList(paragraphs)
         end,
     },
     buttons =

@@ -61,6 +61,15 @@ function ZO_UISystemManager:Initialize()
                 ZONE_STORIES_MANAGER:ShowZoneStoriesScene(zoneId)
             end,
         },
+        [UI_SYSTEM_TRIBUTE_FINDER] =
+        {
+            keyboardOpen = function()
+                GROUP_MENU_KEYBOARD:ShowCategory(TRIBUTE_FINDER_KEYBOARD:GetFragment())
+            end,
+            gamepadOpen = function()
+                ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(TRIBUTE_FINDER_MANAGER:GetCategoryData())
+            end,
+        },
     }
 
     -- ... is a series of param1, param2, etc.

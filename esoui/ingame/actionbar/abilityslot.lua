@@ -1,9 +1,7 @@
 --Uses ZO_SlotUtil.lua behavior
 
 ABILITY_SLOT_TYPE_ACTIONBAR = 1
-ABILITY_SLOT_TYPE_QUICKSLOT = 2
---TODO: Replace ABILITY_SLOT_TYPE_QUICKSLOT with this once the quickslot wheel logic is moved to the assignable utility wheel
-ABILITY_SLOT_TYPE_UTILITY = 3
+ABILITY_SLOT_TYPE_UTILITY = 2
 
 local USE_BASE_ABILITY = true
 
@@ -64,17 +62,9 @@ local function TryPlaceAction(abilitySlot)
     end
 end
 
-local function TryPlaceQuickslotAction(abilitySlot)
-    if(GetCursorContentType() ~= MOUSE_CONTENT_EMPTY)
-    then
-        ZO_ActionBar_AttemptPlacement(abilitySlot.slotNum)
-        return true
-    end
-end
-
-local function TryPlaceUtilitySlotAction(abilitySlot)
+local function TryPlaceUtilitySlotAction(utilitySlot)
     if GetCursorContentType() ~= MOUSE_CONTENT_EMPTY then
-        ZO_ActionBar_AttemptPlacement(abilitySlot.slotNum)
+        ZO_ActionBar_AttemptPlacement(utilitySlot.slotNum, utilitySlot.object:GetHotbarCategory())
         return true
     end
 end
@@ -89,46 +79,40 @@ local function TryPickupAction(abilitySlot)
         return false
     end
 
-    if not abilitySlot.hotbarCategory or abilitySlot.hotbarCategory ~= HOTBAR_CATEGORY_COMPANION then
-        local button = ZO_ActionBar_GetButton(abilitySlot.slotNum)
+    if abilitySlot.hotbarCategory ~= HOTBAR_CATEGORY_COMPANION then
+        local button = ZO_ActionBar_GetButton(abilitySlot.slotNum, abilitySlot.hotbarCategory)
         if button then
             local slotNum = button:GetSlot()
-            ZO_ActionBar_AttemptPickup(slotNum)
+            ZO_ActionBar_AttemptPickup(slotNum, abilitySlot.hotbarCategory)
             return true
         end
     end
 end
 
-local function TryPickupQuickslotAction(abilitySlot)
-    ZO_ActionBar_AttemptPickup(abilitySlot.slotNum)
+local function TryPickupUtilitySlotAction(utilitySlot)
+    ZO_ActionBar_AttemptPickup(utilitySlot.slotNum, utilitySlot.object:GetHotbarCategory())
     return true
 end
 
-local function TryPickupUtilitySlotAction(abilitySlot)
-    ZO_ActionBar_AttemptPickup(abilitySlot.slotNum)
-    return true
-end
-
-local function ClearAbilitySlot(slotNum)
-    local slotType = GetSlotType(slotNum)
-    if(slotType == ACTION_TYPE_ITEM) then
-        local soundCategory = GetSlotItemSound(slotNum) 
-        if(soundCategory ~= ITEM_SOUND_CATEGORY_NONE) then
+local function ClearAbilitySlot(slotNum, hotbarCategory)
+    local slotType = GetSlotType(slotNum, hotbarCategory)
+    if slotType == ACTION_TYPE_ITEM then
+        local soundCategory = GetSlotItemSound(slotNum, hotbarCategory)
+        if soundCategory ~= ITEM_SOUND_CATEGORY_NONE then
             PlayItemSound(soundCategory, ITEM_SOUND_ACTION_UNEQUIP)
         end
     end
-    ClearSlot(slotNum) 
+    ClearSlot(slotNum, hotbarCategory)
 end
 
 local function TryShowActionMenu(abilitySlot)
-    if not abilitySlot.hotbarCategory or abilitySlot.hotbarCategory ~= HOTBAR_CATEGORY_COMPANION then
-        local button = ZO_ActionBar_GetButton(abilitySlot.slotNum)
+    if abilitySlot.hotbarCategory ~= HOTBAR_CATEGORY_COMPANION then
+        local button = ZO_ActionBar_GetButton(abilitySlot.slotNum, abilitySlot.hotbarCategory)
         if button then
             local slotNum = button:GetSlot()
-            if IsSlotUsed(slotNum) and not IsSlotLocked(slotNum)
-            then
+            if IsSlotUsed(slotNum, abilitySlot.hotbarCategory) and not IsActionSlotRestricted(slotNum, abilitySlot.hotbarCategory) then
                 ClearMenu()
-                AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function() ClearAbilitySlot(slotNum) end)
+                AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function() ClearAbilitySlot(slotNum, abilitySlot.hotbarCategory) end)
                 ShowMenu(abilitySlot)
                 return true
             end
@@ -136,21 +120,12 @@ local function TryShowActionMenu(abilitySlot)
     end
 end
 
-local function TryShowQuickslotActionMenu(abilitySlot)
-    if IsSlotUsed(abilitySlot.slotNum) and not IsSlotLocked(abilitySlot.slotNum)
-    then
+local function TryShowUtilitySlotActionMenu(utilitySlot)
+    local hotbarCategory = utilitySlot.object:GetHotbarCategory()
+    if IsSlotUsed(utilitySlot.slotNum, hotbarCategory) and not IsActionSlotRestricted(utilitySlot.slotNum, hotbarCategory) then
         ClearMenu()
-        AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function() ClearAbilitySlot(abilitySlot.slotNum) end)
-        ShowMenu(abilitySlot)
-        return true
-    end
-end
-
-local function TryShowUtilitySlotActionMenu(abilitySlot)
-    if IsSlotUsed(abilitySlot.slotNum) and not IsSlotLocked(abilitySlot.slotNum) then
-        ClearMenu()
-        AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function() ClearAbilitySlot(abilitySlot.slotNum) end)
-        ShowMenu(abilitySlot)
+        AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function() ClearAbilitySlot(utilitySlot.slotNum, hotbarCategory) end)
+        ShowMenu(utilitySlot)
         return true
     end
 end
@@ -173,35 +148,19 @@ local AbilityClicked =
             end,
         },
     },
-    [ABILITY_SLOT_TYPE_QUICKSLOT] =
-    {
-        [MOUSE_BUTTON_INDEX_LEFT] =
-        {
-            function(abilitySlot)
-                return TryPlaceQuickslotAction(abilitySlot)
-            end,
-        },
-
-        [MOUSE_BUTTON_INDEX_RIGHT] =
-        {
-            function(abilitySlot)
-                return TryShowQuickslotActionMenu(abilitySlot)
-            end,
-        },
-    },
     [ABILITY_SLOT_TYPE_UTILITY] =
     {
         [MOUSE_BUTTON_INDEX_LEFT] =
         {
-            function(abilitySlot)
-                return TryPlaceUtilitySlotAction(abilitySlot)
+            function(utilitySlot)
+                return TryPlaceUtilitySlotAction(utilitySlot)
             end,
         },
 
         [MOUSE_BUTTON_INDEX_RIGHT] =
         {
-            function(abilitySlot)
-                return TryShowUtilitySlotActionMenu(abilitySlot)
+            function(utilitySlot)
+                return TryShowUtilitySlotActionMenu(utilitySlot)
             end,
         },
     }
@@ -211,37 +170,22 @@ function ZO_AbilitySlot_OnSlotClicked(abilitySlot, buttonId)
     return RunClickHandlers(AbilityClicked, abilitySlot, buttonId)
 end
 
-local function TryClearQuickslot(abilitySlot)
-    if IsSlotUsed(abilitySlot.slotNum) and not IsSlotLocked(abilitySlot.slotNum) then
-        ClearSlot(abilitySlot.slotNum)
-        return true
-    end
-end
-
-local function TryClearUtilitySlot(abilitySlot)
-    if IsSlotUsed(abilitySlot.slotNum) and not IsSlotLocked(abilitySlot.slotNum) then
-        ClearSlot(abilitySlot.slotNum)
+local function TryClearUtilitySlot(utilitySlot)
+    local hotbarCategory = utilitySlot.object:GetHotbarCategory()
+    if IsSlotUsed(utilitySlot.slotNum, hotbarCategory) and not IsActionSlotRestricted(utilitySlot.slotNum, hotbarCategory) then
+        ClearSlot(utilitySlot.slotNum, hotbarCategory)
         return true
     end
 end
 
 local AbilityDoubleClicked =
 {
-    [ABILITY_SLOT_TYPE_QUICKSLOT] =
-    {
-        [MOUSE_BUTTON_INDEX_LEFT] =
-        {
-            function(abilitySlot)
-                return TryClearQuickslot(abilitySlot)
-            end,
-        },
-    },
     [ABILITY_SLOT_TYPE_UTILITY] =
     {
         [MOUSE_BUTTON_INDEX_LEFT] =
         {
-            function(abilitySlot)
-                return TryClearUtilitySlot(abilitySlot)
+            function(utilitySlot)
+                return TryClearUtilitySlot(utilitySlot)
             end,
         },
     }
@@ -275,16 +219,10 @@ local AbilityDragStart =
             return TryPickupAction(abilitySlot)
         end,
     },
-    [ABILITY_SLOT_TYPE_QUICKSLOT] =
-    {
-        function(abilitySlot)
-            return TryPickupQuickslotAction(abilitySlot)
-        end,
-    },
     [ABILITY_SLOT_TYPE_UTILITY] =
     {
-        function(abilitySlot)
-            return TryPickupUtilitySlotAction(abilitySlot)
+        function(utilitySlot)
+            return TryPickupUtilitySlotAction(utilitySlot)
         end,
     },
 }
@@ -306,16 +244,10 @@ local AbilityReceiveDrag =
             return TryPlaceAction(abilitySlot)
         end,
     },
-    [ABILITY_SLOT_TYPE_QUICKSLOT] =
-    {
-        function(abilitySlot)
-            return TryPlaceQuickslotAction(abilitySlot)
-        end,
-    },
     [ABILITY_SLOT_TYPE_UTILITY] =
     {
-        function(abilitySlot)
-            return TryPlaceUtilitySlotAction(abilitySlot)
+        function(utilitySlot)
+            return TryPlaceUtilitySlotAction(utilitySlot)
         end,
     },
 }
@@ -334,11 +266,11 @@ local function AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, owner)
     InitializeTooltip(tooltip, owner, BOTTOM, 0, -5, TOP)
 end
 
-local function SetTooltipToActionBarSlot(tooltip, slot)
-    local slotType = GetSlotType(slot)
+local function SetTooltipToActionBarSlot(tooltip, slotIndex, hotbarCategory)
+    local slotType = GetSlotType(slotIndex, hotbarCategory)
 
     if slotType ~= ACTION_TYPE_NOTHING then
-        tooltip:SetAction(slot)
+        tooltip:SetAction(slotIndex, hotbarCategory)
         return true
     end
     return false
@@ -348,45 +280,39 @@ local function TryShowActionBarTooltip(abilitySlot)
     local button = ZO_ActionBar_GetButton(abilitySlot.slotNum, abilitySlot.hotbarCategory)
     if button then
         local actionSlotIndex = button:GetSlot()
-        local hotbar = abilitySlot.hotbarCategory and ACTION_BAR_ASSIGNMENT_MANAGER:GetHotbar(abilitySlot.hotbarCategory) or ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
-        local slotData = hotbar:GetSlotData(actionSlotIndex)
-        if slotData then
-            -- This is an ability, use the slotData tooltip
-            if abilitySlot.activeTooltip then
-                ClearTooltip(abilitySlot.activeTooltip)
-                abilitySlot.activeTooltip = nil
-            end
-
-            local tooltip = slotData:GetKeyboardTooltipControl()
-            if tooltip then
-                AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, abilitySlot)
-                slotData:SetKeyboardTooltip(tooltip)
-            end
-        else
-            -- this is a quickslot, use the quickslot path
-            if GetSlotType(actionSlotIndex) ~= ACTION_TYPE_NOTHING then
+        if abilitySlot.hotbarCategory == HOTBAR_CATEGORY_QUICKSLOT_WHEEL then
+            --this is a quickslot, use the quickslot path
+            if GetSlotType(actionSlotIndex, abilitySlot.hotbarCategory) ~= ACTION_TYPE_NOTHING then
                 AbilitySlotTooltipBaseInitialize(abilitySlot, ItemTooltip, abilitySlot)
-                return SetTooltipToActionBarSlot(ItemTooltip, actionSlotIndex)
+                return SetTooltipToActionBarSlot(ItemTooltip, actionSlotIndex, abilitySlot.hotbarCategory)
             else
                 ClearTooltip(ItemTooltip)
+            end
+        else
+            local hotbar = abilitySlot.hotbarCategory and ACTION_BAR_ASSIGNMENT_MANAGER:GetHotbar(abilitySlot.hotbarCategory) or ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
+            local slotData = hotbar:GetSlotData(actionSlotIndex)
+            if slotData then
+                -- This is an ability, use the slotData tooltip
+                if abilitySlot.activeTooltip then
+                    ClearTooltip(abilitySlot.activeTooltip)
+                    abilitySlot.activeTooltip = nil
+                end
+
+                local tooltip = slotData:GetKeyboardTooltipControl()
+                if tooltip then
+                    AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, abilitySlot)
+                    slotData:SetKeyboardTooltip(tooltip)
+                end
             end
         end
     end
 end
 
-local function TryShowQuickslotTooltip(abilitySlot, tooltip, owner)
-    if GetSlotType(abilitySlot.slotNum) ~= ACTION_TYPE_NOTHING then
-        AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, owner)
-        return SetTooltipToActionBarSlot(tooltip, abilitySlot.slotNum)
-    else
-        ClearTooltip(tooltip)
-    end
-end
-
-local function TryShowUtilitySlotTooltip(abilitySlot, tooltip, owner)
-    if GetSlotType(abilitySlot.slotNum) ~= ACTION_TYPE_NOTHING then
-        AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, owner)
-        return SetTooltipToActionBarSlot(tooltip, abilitySlot.slotNum)
+local function TryShowUtilitySlotTooltip(utilitySlot, tooltip, owner)
+    local hotbarCategory = utilitySlot.object:GetHotbarCategory()
+    if GetSlotType(utilitySlot.slotNum, hotbarCategory) ~= ACTION_TYPE_NOTHING then
+        AbilitySlotTooltipBaseInitialize(utilitySlot, tooltip, owner)
+        return SetTooltipToActionBarSlot(tooltip, utilitySlot.slotNum, hotbarCategory)
     else
         ClearTooltip(tooltip)
     end
@@ -400,18 +326,11 @@ local AbilityEnter =
             return TryShowActionBarTooltip(abilitySlot)
         end,
     },
-    [ABILITY_SLOT_TYPE_QUICKSLOT] =
-    {
-        function(abilitySlot)
-            ZO_QuickslotControl_OnMouseEnter(abilitySlot)
-            return TryShowQuickslotTooltip(abilitySlot, ItemTooltip, abilitySlot)
-        end,
-    },
     [ABILITY_SLOT_TYPE_UTILITY] =
     {
-        function(abilitySlot)
-            abilitySlot.object:OnMouseOverUtilitySlot(abilitySlot)
-            return TryShowUtilitySlotTooltip(abilitySlot, ItemTooltip, abilitySlot)
+        function(utilitySlot)
+            utilitySlot.object:OnMouseOverUtilitySlot(utilitySlot)
+            return TryShowUtilitySlotTooltip(utilitySlot, ItemTooltip, utilitySlot)
         end,
     },
 }
@@ -422,16 +341,10 @@ end
 
 local AbilityExit =
 {
-    [ABILITY_SLOT_TYPE_QUICKSLOT] =
-    {
-        function(abilitySlot)
-            ZO_QuickslotControl_OnMouseExit(abilitySlot)
-        end,
-    },
     [ABILITY_SLOT_TYPE_UTILITY] =
     {
-        function(abilitySlot)
-            abilitySlot.object:OnMouseExitUtilitySlot(abilitySlot)
+        function(utilitySlot)
+            utilitySlot.object:OnMouseExitUtilitySlot(utilitySlot)
         end,
     },
 }

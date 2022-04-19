@@ -115,10 +115,10 @@ function ZO_UnitVisualizer_PossessionModule:InitializeBarValues()
     if self.barInfo == nil then
         self.barInfo =
         {
-            [ATTRIBUTE_HEALTH] = self:CreateInfoTable(healthBarControl, STAT_MITIGATION, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH, self.PlayPossessionAnimation),
+            [ATTRIBUTE_HEALTH] = self:CreateInfoTable(healthBarControl, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, self.PlayPossessionAnimation),
         }
     else
-        self.barInfo[ATTRIBUTE_HEALTH].value = self:GetInitialStatValue(STAT_MITIGATION, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH)
+        self.barInfo[ATTRIBUTE_HEALTH].value = self:GetInitialStatValue(STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
     end
 
     for attribute, bar in pairs(self.barControls) do

@@ -75,7 +75,7 @@ function CampaignEmperor_Gamepad:Initialize(control)
     CAMPAIGN_EMPEROR_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignEmperor_Gamepad)
     CAMPAIGN_EMPEROR_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWN then
-            QueryCampaignLeaderboardData()
+            self:QueryLeaderboardData(ALLIANCE_ALDMERI_DOMINION, ALLIANCE_DAGGERFALL_COVENANT, ALLIANCE_EBONHEART_PACT)
             self:RefreshData()
             self:RefreshEmperor()
             self:SetDirectionalInputEnabled(true)

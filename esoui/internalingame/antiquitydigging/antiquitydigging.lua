@@ -84,7 +84,6 @@ function ZO_AntiquityDigging:Initialize(control)
 
     self.keybindLabels = {} -- will be populated on EVENT_KEYBINDINGS_LOADED
 
-    self.isHelpOverlayVisible = false
     self.areGamepadControlsEnabled = false
 
     ANTIQUITY_DIGGING_FRAGMENT = ZO_FadeSceneFragment:New(control)
@@ -104,7 +103,6 @@ function ZO_AntiquityDigging:Initialize(control)
             control:UnregisterForEvent(EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY)
             control:SetHandler("OnUpdate", nil)
             --clear the current tutorial when hiding so we don't push an extra action layer
-            self.triggeredTutorial = false
             self:RefreshInputState()
             ZO_Dialogs_ReleaseAllDialogsOfName("CONFIRM_STOP_ANTIQUITY_DIGGING")
         elseif newState == SCENE_HIDDEN then
@@ -155,37 +153,31 @@ function ZO_AntiquityDigging:Initialize(control)
             ANTIQUITY_DIGGING_SUMMARY:BeginEndOfGameFanfare(gameOverFlags)
         end, fanfareDelayMs)
     end)
-    
-    control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
-        self:RefreshInputState()
-    end)
-
-    control:RegisterForEvent(EVENT_TUTORIAL_HIDDEN, function()
-        if self.triggeredTutorial then
-            self.triggeredTutorial = false
-            self:RefreshInputState()
-        end
-    end)
 
     control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_ANTIQUITY_UNEARTHED, function()
-        self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_ANTIQUITY_UNEARTHED)
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_ANTIQUITY_UNEARTHED)
     end)
 
     control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_BONUS_LOOT_UNEARTHED, function()
-        self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_BONUS_LOOT_UNEARTHED)
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_BONUS_LOOT_UNEARTHED)
     end)
 
     control:RegisterForEvent(EVENT_ANTIQUITY_DIG_SPOT_DURABILITY_CHANGED, function(_, newDurability)
-        self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_ANTIQUITY_DAMAGED)
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_ANTIQUITY_DAMAGED)
         if newDurability == 0 then
-            self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_ANTIQUITY_DESTROYED)
+            TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_ANTIQUITY_DESTROYED)
         end
     end)
 
-    control:RegisterForEvent(EVENT_HELP_OVERLAY_VISIBILITY_CHANGED, function(_, isVisible)
-        self.isHelpOverlayVisible = isVisible
+    local function RefreshInputState()
         self:RefreshInputState()
-    end)
+    end
+
+    HELP_MANAGER:RegisterCallback("OverlayVisibilityChanged", RefreshInputState)
+
+    TUTORIAL_MANAGER:RegisterCallback("TriggeredTutorialChanged", RefreshInputState)
+    
+    control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, RefreshInputState)
 
     self.platformStyle = ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
 end
@@ -319,17 +311,8 @@ function ZO_AntiquityDigging:RefreshActiveToolKeybinds()
     end
 end
 
-function ZO_AntiquityDigging:ShowTutorial(tutorial)
-    local tutorialId = GetTutorialId(tutorial)
-    if CanTutorialBeSeen(tutorialId) and (not HasSeenTutorial(tutorialId)) then
-        self.triggeredTutorial = true
-        self:RefreshInputState()
-        TriggerTutorial(tutorial)
-    end
-end
-
 function ZO_AntiquityDigging:RefreshInputState()
-    local allowPlayerInput = self:IsReadyToPlay() and not self.triggeredTutorial and not self.isHelpOverlayVisible and not ZO_Dialogs_IsShowingDialog()
+    local allowPlayerInput = self:IsReadyToPlay() and not TUTORIAL_MANAGER:IsTutorialTriggered() and not HELP_MANAGER:IsHelpOverlayVisible() and not ZO_Dialogs_IsShowingDialog()
     if self.isPlayerInputEnabled ~= allowPlayerInput then
         if allowPlayerInput then
             PushActionLayerByName("AntiquityDiggingActions")
@@ -365,17 +348,17 @@ do
     }
 
     function ZO_AntiquityDigging:TryTriggerInitialTutorials()
-        self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_OPENED)
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_OPENED)
         for skill = DIGGING_ACTIVE_SKILL_ITERATION_BEGIN, DIGGING_ACTIVE_SKILL_ITERATION_END do
             if IsDiggingActiveSkillUnlocked(skill) then
-                self:ShowTutorial(TOOL_TUTORIALS[skill])
+                TUTORIAL_MANAGER:ShowTutorial(TOOL_TUTORIALS[skill])
                 if IsDiggingActiveSkillUpgraded(skill) then
-                    self:ShowTutorial(UPGRADED_TOOL_TUTORIALS[skill])
+                    TUTORIAL_MANAGER:ShowTutorial(UPGRADED_TOOL_TUTORIALS[skill])
                 end
             end
         end
         if DidDigSpotSpawnWithFissures() then
-            self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_FISSURE_SPAWNED)
+            TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_FISSURE_SPAWNED)
         end
     end
 end

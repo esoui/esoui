@@ -1,0 +1,25 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ActivityTributeRankFooter_Gamepad_TL" inherits="ZO_GamepadXPBarFooter" resizeToFitDescendents="true" hidden="true">
+            <OnInitialized>
+                ZO_ActivityTributeRankFooterGamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <StatusBar name="$(parent)XPBar" override="true">
+                    <ClearAnchors />
+                    <Anchor point="RIGHT" offsetY="5" />
+                </StatusBar>
+
+                <Texture name="$(parent)Icon">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)XPBar" relativePoint="BOTTOMLEFT" offsetX="-5" offsetY="17" />
+                    <Dimensions x="64" y="64" />
+                </Texture>
+
+                <Label name="$(parent)Rank" override="true">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetX="-5" offsetY="-5" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

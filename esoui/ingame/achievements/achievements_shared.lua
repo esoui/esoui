@@ -19,7 +19,7 @@ function ZO_ShouldShowAchievement(filterType, id)
     end
 
     while id ~= 0 do
-        local _, _, _, _, completed, _, _= GetAchievementInfo(id)
+        local completed = select(5, GetAchievementInfo(id))
         if completed then
             if filterType == SI_ACHIEVEMENT_FILTER_SHOW_EARNED then
                 return true

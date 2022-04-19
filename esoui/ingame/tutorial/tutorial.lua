@@ -16,11 +16,16 @@ function ZO_Tutorials:Initialize(control)
     self.control = control
 
     self.tutorialHandlers = {}
-
     self.tutorialQueue = {}
 
     -- Events that have no TutorialTriggerHandler
-    control:RegisterForEvent(EVENT_DISPLAY_TUTORIAL, function(eventCode, ...) self:DisplayOrQueueTutorial(...) end)
+
+    local function OnDisplayTutorial(eventCode, ...)
+        self:DisplayOrQueueTutorial(...)
+    end
+
+    control:RegisterForEvent(EVENT_DISPLAY_TUTORIAL, OnDisplayTutorial)
+    control:RegisterForEvent(EVENT_DISPLAY_TUTORIAL_WITH_ANCHOR, OnDisplayTutorial)
     control:RegisterForEvent(EVENT_REMOVE_TUTORIAL, function(eventCode, ...) self:OnRemoveTutorial(...) end)
     control:RegisterForEvent(EVENT_TUTORIAL_SYSTEM_ENABLED_STATE_CHANGED, function(eventCode, enabled) self:OnTutorialEnabledStateChanged(enabled) end)
 
@@ -42,15 +47,15 @@ function ZO_Tutorials:Initialize(control)
             end
 
             -- Dequeue tutorial display events
-            -- I use a while loop just in case the list changes while I'm calling the tutorial function
-            while #self.tutorialQueue > 0 do 
-                self.tutorialQueue[1]()
-                table.remove(self.tutorialQueue, 1)
+            local nextTutorialCallback = table.remove(self.tutorialQueue, 1)
+            while nextTutorialCallback do
+                nextTutorialCallback()
+                nextTutorialCallback = table.remove(self.tutorialQueue, 1)
             end
         end)
 
         for event in pairs(triggerHandlers) do
-            if event ~= EVENT_PLAYER_ACTIVATED then --avoid ones we've already registered
+            if event ~= EVENT_PLAYER_ACTIVATED then -- Handled above
                 control:RegisterForEvent(event, OnTriggeredEvent)
             end
         end
@@ -64,13 +69,14 @@ function ZO_Tutorials:Initialize(control)
     end
 end
 
-function ZO_Tutorials:DisplayOrQueueTutorial(tutorialIndex, priority)
+function ZO_Tutorials:DisplayOrQueueTutorial(tutorialIndex, ...)
     local currentScene = SCENE_MANAGER:GetCurrentScene()
     if currentScene == nil then
-       -- Queue Tutorial
-       self.tutorialQueue[#self.tutorialQueue + 1] = function() self:OnDisplayTutorial(tutorialIndex, priority) end
+        -- Queue Tutorial
+        local optionalParameters = {...}
+        table.insert(self.tutorialQueue, function() self:OnDisplayTutorial(tutorialIndex, unpack(optionalParameters)) end)
     else
-        self:OnDisplayTutorial(tutorialIndex, priority)
+        self:OnDisplayTutorial(tutorialIndex, ...)
     end
 end
 
@@ -106,17 +112,18 @@ end
 
 function ZO_Tutorials:ForceRemoveAll()
     for type, handler in pairs(self.tutorialHandlers) do
-        if handler:GetCurrentlyDisplayedTutorialIndex() then
-            self:OnRemoveTutorial(handler:GetCurrentlyDisplayedTutorialIndex())
+        local tutorialIndex = handler:GetCurrentlyDisplayedTutorialIndex()
+        if tutorialIndex then
+            handler:OnRemoveTutorial(tutorialIndex)
         end
     end
 end
 
-function ZO_Tutorials:OnDisplayTutorial(tutorialIndex)
+function ZO_Tutorials:OnDisplayTutorial(tutorialIndex, ...)
     local tutorialType = GetTutorialType(tutorialIndex)
     if self.tutorialHandlers[tutorialType] then
         local priority = GetTutorialDisplayPriority(tutorialIndex)
-        self.tutorialHandlers[tutorialType]:OnDisplayTutorial(tutorialIndex, priority)
+        self.tutorialHandlers[tutorialType]:OnDisplayTutorial(tutorialIndex, priority, ...)
     end
 end
 
@@ -138,7 +145,7 @@ end
 
 function ZO_Tutorials:TriggerTutorialWithDeferredAction(triggerType, tutorialCompletedCallback)
     local triggerEventTag = "ZO_TutorialTrigger"..triggerType
-
+    
     local function OnTutorialTriggerCompleted(eventCode, completedTriggerType)
         if completedTriggerType == triggerType then
             EVENT_MANAGER:UnregisterForEvent(triggerEventTag, EVENT_TUTORIAL_TRIGGER_COMPLETED)

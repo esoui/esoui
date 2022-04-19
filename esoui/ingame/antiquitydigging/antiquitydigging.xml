@@ -300,11 +300,11 @@
                                 </Texture>
 
                                 <Texture name="$(parent)Left">
-                                    <Anchor point="RIGHT" relativeTo="$(parent)BgCenter" relativePoint="LEFT" />
+                                    <Anchor point="RIGHT" relativePoint="LEFT" />
                                 </Texture>
 
                                 <Texture name="$(parent)Right">
-                                    <Anchor point="LEFT" relativeTo="$(parent)BgCenter" relativePoint="RIGHT" />
+                                    <Anchor point="LEFT" relativePoint="RIGHT" />
                                 </Texture>
                             </Controls>
                         </Control>

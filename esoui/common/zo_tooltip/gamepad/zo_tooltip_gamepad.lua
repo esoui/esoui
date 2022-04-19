@@ -231,6 +231,13 @@ function ZO_GamepadTooltip:SetScrollIndicatorSide(tooltipType, side)
     end
 end
 
+function ZO_GamepadTooltip:SetInputEnabled(tooltipType, enabled)
+    local tooltipContainerTip = self:GetAndInitializeTooltipContainerTip(tooltipType)
+    if tooltipContainerTip then
+        tooltipContainerTip:SetInputEnabled(enabled)
+    end
+end
+
 function ZO_GamepadTooltip:ShowBg(tooltipType)
     SCENE_MANAGER:AddFragment(self:GetTooltipBgFragment(tooltipType))
 end

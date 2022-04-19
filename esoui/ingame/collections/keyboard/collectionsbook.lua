@@ -24,6 +24,7 @@ function ZO_CollectionsBook:Initialize(control)
     self.categoryNodeLookupData = {}
 
     self:InitializeControls()
+    self:InitializeWheel()
     self:InitializeEvents()
     self:InitializeCategories()
     self:InitializeFilters()
@@ -36,11 +37,21 @@ function ZO_CollectionsBook:Initialize(control)
         if newState == SCENE_SHOWING then
             self.refreshGroups:UpdateRefreshGroups() --In case we need to rebuild the categories
             self:UpdateCollectionVisualLayer()
+            if self.hotbarCategory then
+                self.wheelContainer:SetHidden(false)
+                self.wheel:Activate()
+            else
+                self.wheelContainer:SetHidden(true)
+            end
             COLLECTIONS_BOOK_SINGLETON:SetSearchString(self.contentSearchEditBox:GetText())
             COLLECTIONS_BOOK_SINGLETON:SetSearchCategorySpecializationFilters(COLLECTIBLE_CATEGORY_SPECIALIZATION_NONE)
             COLLECTIONS_BOOK_SINGLETON:SetSearchChecksHidden(true)
         elseif newState == SCENE_HIDDEN then
             self.gridListPanelList:ResetToTop()
+            self.wheelContainer:SetHidden(true)
+            if self.hotbarCategory then
+                self.wheel:Deactivate()
+            end
         end
     end)
 
@@ -53,6 +64,19 @@ function ZO_CollectionsBook:InitializeControls()
     self.categoryFilterComboBox = self.control:GetNamedChild("Filter")
     self.contentSearchEditBox = self.control:GetNamedChild("SearchBox")
     self.noMatches = self.control:GetNamedChild("NoMatchMessage")
+end
+
+function ZO_CollectionsBook:InitializeWheel()
+    self.wheelContainer = self.control:GetNamedChild("WheelContainer")
+    self.wheelControl = self.wheelContainer:GetNamedChild("UtilityWheel")
+    local wheelData =
+    {
+        hotbarCategories = { HOTBAR_CATEGORY_QUICKSLOT_WHEEL },
+        numSlots = ACTION_BAR_UTILITY_BAR_SIZE,
+        includeHiddenState = true,
+        showCategoryLabel = true,
+    }
+    self.wheel = ZO_AssignableUtilityWheel_Keyboard:New(self.wheelControl, wheelData)
 end
 
 function ZO_CollectionsBook:InitializeEvents()
@@ -157,6 +181,7 @@ do
             control:SetSelected(selected)
 
             if selected then
+                self:UpdateUtilityWheel(categoryData)
                 self:BuildContentList(categoryData)
             end
         end
@@ -326,6 +351,29 @@ function ZO_CollectionsBook:UpdateCategoryStatusIcon(categoryNode)
     categoryControl.statusIcon:Show()
 end
 
+function ZO_CollectionsBook:UpdateUtilityWheel(categoryData)
+    local hotbarCategory = GetHotbarForCollectibleCategoryId(categoryData.categoryId)
+    if hotbarCategory ~= self.hotbarCategory then
+        if hotbarCategory then
+            local hotbarCategories = {hotbarCategory, HOTBAR_CATEGORY_QUICKSLOT_WHEEL}
+            self.wheel:SetHotbarCategories(hotbarCategories)
+            --If the wheel is currently not showing, we need to show and activate it
+            if not self.hotbarCategory and self.scene:IsShowing() then
+                self.wheelContainer:SetHidden(false)
+                self.wheel:Activate()
+            end
+        else
+            --If the wheel is currently showing, we need to deactivate and hide it
+            if self.scene:IsShowing() then
+                self.wheelContainer:SetHidden(true)
+                self.wheel:Deactivate()
+            end
+        end
+
+        self.hotbarCategory = hotbarCategory
+    end
+end
+
 do
     local function ShouldAddCollectible(filterType, collectibleData)
         if filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_ALL then
@@ -362,6 +410,11 @@ do
                     entryData:SetDataSource(collectibleData)
                     local headerState = collectibleData:IsUnlocked() and COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED or COLLECTIBLE_UNLOCK_STATE_LOCKED
                     entryData.gridHeaderName = GetString("SI_COLLECTIBLEUNLOCKSTATE", headerState)
+                    if self.hotbarCategory then
+                        entryData.utilityWheel = self.wheel
+                    else
+                        entryData.utilityWheel = nil
+                    end
                     gridListPanelList:AddEntry(entryData)
                 end
             end
@@ -413,6 +466,9 @@ function ZO_CollectionsBook:UpdateCollectible(collectibleId)
                         {
                             collectibleId = collectibleId,
                         }
+                        if self.hotbarCategory then
+                            data.utilityWheel = self.wheel
+                        end
                         tileControl.object:Layout(data)
                     end
                 else

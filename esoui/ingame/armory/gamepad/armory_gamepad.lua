@@ -458,7 +458,7 @@ do
                         mainHandLinks[equipType] = itemLink
                     end
                 elseif slotState == ARMORY_BUILD_EQUIP_SLOT_STATE_MISSING or slotState == ARMORY_BUILD_EQUIP_SLOT_STATE_INACCESSIBLE then
-                    local unselectedErrorColor = GetDimListColor(ZO_ERROR_COLOR)
+                    local unselectedErrorColor = ZO_ERROR_COLOR:GetDim()
                     entryData:AddIcon(ZO_Character_GetEmptyEquipSlotTexture(equipType))
                     entryData:SetIconTint(ZO_ERROR_COLOR, unselectedErrorColor)
                     entryData:SetText(zo_strformat(SI_GAMEPAD_ARMORY_EQUIPMENT_FORMATTER, GetString("SI_EQUIPSLOT", equipType)))

@@ -10,13 +10,7 @@
 ]]--
 
 -- Heron server select behaves like PC server select; it lists all platforms from platforms.xml directly.
-local ZO_HeronServerSelector = ZO_Object:Subclass()
-
-function ZO_HeronServerSelector:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+local ZO_HeronServerSelector = ZO_InitializingObject:Subclass()
 
 function ZO_HeronServerSelector:Initialize(owner)
     self.owner = owner
@@ -76,13 +70,7 @@ function ZO_HeronServerSelector:OnSelected(entryData)
 end
 
 -- Console server select pulls a platform list from console title storage, and picks the first platform from that list. A different platform list will be loaded depending on whether you pick NA or EU.
-local ZO_ConsoleServerSelector = ZO_Object:Subclass()
-
-function ZO_ConsoleServerSelector:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+local ZO_ConsoleServerSelector = ZO_InitializingObject:Subclass()
 
 function ZO_ConsoleServerSelector:Initialize(owner)
     self.owner = owner
@@ -173,24 +161,32 @@ function ZO_ConsoleServerSelector:OnConsolePlatformsListLoaded(serverChoice)
     end
 end
 
-local ZO_GameStartup_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
+----
+-- ZO_GameStartup_Gamepad
+----
 
-function ZO_GameStartup_Gamepad:New(control)
-    local object = ZO_Object.New(self)
-    object:Initialize(control)
-    return object
-end
+local ENTRY_TYPE =
+{
+    PLAY_BUTTON = "PlayButton",
+    EDIT_BOX = "EditBox",
+    SETTINGS = "Settings",
+    ANNOUNCEMENTS = "Announcements",
+    CREDITS = "Credits",
+    QUIT = "Quit",
+}
+
+local ZO_GameStartup_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ZO_GameStartup_Gamepad:Initialize(control)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control)
-    self.control = control
+
     self.gotMOTD = false
     self.isWaitingForDurangoAccountSelection = false
     self.canCancelOrLoadPlatforms = true
     self.profileSaveInProgress = false
     if IsConsoleUI() then
         self.serverSelector = ZO_ConsoleServerSelector:New(self)
-    elseif IsHeronUI() then
+    elseif IsHeronUI() or ZO_IsPCUI() then -- TODO pregame: rename ZO_HeronServerSelector?
         self.serverSelector = ZO_HeronServerSelector:New(self)
     elseif IsGamepadUISupported() then
         internalassert(false, "Server selection not implemented")
@@ -246,7 +242,6 @@ function ZO_GameStartup_Gamepad:Initialize(control)
             self:PopulateInitialList()
             self:SetCurrentList(self.initialList)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.initialKeybindStripDescriptor)
-
         elseif newState == SCENE_HIDDEN then
             self:Deactivate()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.initialKeybindStripDescriptor)
@@ -288,6 +283,9 @@ function ZO_GameStartup_Gamepad:RefreshHeader(titleText)
     local accountName
     if ZO_IsForceConsoleOrHeronFlow() then
         accountName = DecorateDisplayName(GetCVar("AccountName"))
+    elseif ZO_IsPCUI() then
+        -- PC UI will not show account name in the header since we need to specify a username and password
+        accountName = ""
     else
         accountName = GetOnlineIdForActiveProfile()
     end
@@ -304,7 +302,6 @@ function ZO_GameStartup_Gamepad:RefreshHeader(titleText)
 end
 
 function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
-
     self.mainKeybindStripDescriptor = {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         -- Select Control
@@ -313,18 +310,34 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
             keybind = "UI_SHORTCUT_PRIMARY",
             disabledDuringSceneHiding = true,
             callback = function()
-                if self.isWaitingForDurangoAccountSelection == false then
-                    local data = self.mainList:GetTargetData()
-                    if data.allowKeybind then
+                local data = self.mainList:GetTargetData()
+                if data.entryType == ENTRY_TYPE.PLAY_BUTTON then
+                    if self.isWaitingForDurangoAccountSelection == false then
                         self.serverSelector:OnPlayButtonPressed()
                         PregameStateManager_AdvanceStateFromState("GameStartup") -- only advance state from startup state (button spam protection)
                         PlaySound(SOUNDS.DIALOG_ACCEPT)
                     end
+                elseif data.entryType == ENTRY_TYPE.EDIT_BOX then
+                    local editBox = data.control.editBox
+                    editBox:TakeFocus()
+                elseif data.entryType == ENTRY_TYPE.SETTINGS then
+                    GAMEPAD_OPTIONS_ROOT_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+                    SCENE_MANAGER:Push(GAMEPAD_OPTIONS_ROOT_SCENE:GetName())
+                elseif data.entryType == ENTRY_TYPE.CREDITS then
+                    GAMEPAD_CREDITS_ROOT_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+                    SCENE_MANAGER:Push(GAMEPAD_CREDITS_ROOT_SCENE:GetName())
+                elseif data.entryType == ENTRY_TYPE.QUIT then
+                    PregameQuit()
                 end
             end,
             visible = function()
                 local data = self.mainList:GetTargetData()
-                return data.allowKeybind and IsGateInstalled("BaseGame") and not self.profileSaveInProgress
+                if data.entryType == ENTRY_TYPE.PLAY_BUTTON then
+                    return IsGateInstalled("BaseGame") and not self.profileSaveInProgress
+                elseif data.entryType == ENTRY_TYPE.EDIT_BOX or data.entryType == ENTRY_TYPE.SETTINGS or data.entryType == ENTRY_TYPE.CREDITS or data.entryType == ENTRY_TYPE.QUIT then
+                    return true
+                end
+                return false
             end,
         },
         -- Change Profile
@@ -462,6 +475,34 @@ function ZO_GameStartup_Gamepad:InitializeLists()
     local function MainSetupList(list)
         list:AddDataTemplate("GameStartupLabelEntry", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplate("ZO_GamepadHorizontalListRow", ServerSelectListSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+
+        local function SetupTextFieldListEntry(control, data, selected, reselectingDuringRebuild, enabled, active)
+            ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+            data.control = control
+            local editContainer = control:GetNamedChild("TextField")
+            local editBox = editContainer:GetNamedChild("Edit")
+            control.editBox = editBox
+
+            local function OnTextChanged(...)
+                if data.onTextChanged then
+                    data.onTextChanged(...)
+                end
+            end
+
+            editBox:SetHandler("OnTextChanged", OnTextChanged)
+
+            editBox:SetMaxInputChars(data.maxInputChars)
+
+            local textType = data.textType or TEXT_TYPE_ALL
+            editBox:SetTextType(textType)
+
+            local initialText = data.initialTextFunction and data.initialTextFunction() or ""
+            editBox:SetText(initialText)
+
+            control.highlight:SetHidden(not selected)
+        end
+        local DEFAULT_EQUALITY_FUNCTION = nil
+        list:AddDataTemplateWithHeader("ZO_GamepadTextFieldItem", SetupTextFieldListEntry, ZO_GamepadMenuEntryTemplateParametricListFunction, DEFAULT_EQUALITY_FUNCTION, "ZO_GamepadMenuEntryFullWidthHeaderTemplate")
     end
 
     local function InitialSetupList(list)
@@ -473,34 +514,72 @@ end
 
 function ZO_GameStartup_Gamepad:PopulateMainList()
     self:RefreshHeader(GetString(SI_GAME_STARTUP_HEADER))
+    self.username, self.password = ZO_GameStartup_Gamepad_GetInitialLoginInfo()
     self.mainList:Clear()
 
     if self.psnFreeTrialEnded then
         local data = ZO_GamepadEntryData:New(GetString(SI_FREE_TRIAL_MENU_ENTRY_PURCHASE))
         self.mainList:AddEntry("GameStartupLabelEntry", data)
     else
-        local optionString = GetString(SI_GAME_STARTUP_PLAY)
-        if not IsGateInstalled("BaseGame") then
-            optionString = GetString(SI_CONSOLE_GAME_DOWNLOAD_UPDATING)
+        if not IsUsingLinkedLogin() then
+            local usernameEntryData = ZO_GamepadEntryData:New("")
+            usernameEntryData.header = GetString(SI_ACCOUNT_NAME)
+            usernameEntryData.entryType = ENTRY_TYPE.EDIT_BOX
+            usernameEntryData.initialTextFunction = function() return self.username end
+            usernameEntryData.maxInputChars = MAX_EMAIL_LENGTH
+            usernameEntryData.onTextChanged = function(control)
+                self.username = control:GetText()
+            end
+            self.mainList:AddEntryWithHeader("ZO_GamepadTextFieldItem", usernameEntryData)
+
+            local passwordEntryData = ZO_GamepadEntryData:New("")
+            passwordEntryData.header = GetString(SI_PASSWORD)
+            passwordEntryData.entryType = ENTRY_TYPE.EDIT_BOX
+            passwordEntryData.initialTextFunction = function() return self.password end
+            passwordEntryData.maxInputChars = MAX_PASSWORD_LENGTH
+            passwordEntryData.textType = TEXT_TYPE_PASSWORD
+            passwordEntryData.onTextChanged = function(control)
+                self.password = control:GetText()
+            end
+            self.mainList:AddEntryWithHeader("ZO_GamepadTextFieldItem", passwordEntryData)
         end
 
-        local data = ZO_GamepadEntryData:New(optionString)
-        data.allowKeybind = true
-        self.mainList:AddEntry("GameStartupLabelEntry", data)
+        local playEntryString = GetString(SI_GAME_STARTUP_PLAY)
+        if not IsGateInstalled("BaseGame") then
+            playEntryString = GetString(SI_CONSOLE_GAME_DOWNLOAD_UPDATING)
+        end
 
-        data = ZO_GamepadEntryData:New(GetString(SI_GAME_STARTUP_SERVER_SELECT))
-        self.mainList:AddEntry("ZO_GamepadHorizontalListRow", data)
+        local playEntryData = ZO_GamepadEntryData:New(playEntryString)
+        playEntryData.entryType = ENTRY_TYPE.PLAY_BUTTON
+        self.mainList:AddEntry("GameStartupLabelEntry", playEntryData)
 
-        data = ZO_GamepadEntryData:New(GetString(SI_LOGIN_ANNOUNCEMENTS_TITLE))
-        data.isAnnouncement = true
-        self.mainList:AddEntry("GameStartupLabelEntry", data)
+        local serverSelectEntryData = ZO_GamepadEntryData:New(GetString(SI_GAME_STARTUP_SERVER_SELECT))
+        self.mainList:AddEntry("ZO_GamepadHorizontalListRow", serverSelectEntryData)
+
+        local settingsEntryData = ZO_GamepadEntryData:New(GetString(SI_GAME_MENU_SETTINGS))
+        settingsEntryData.entryType = ENTRY_TYPE.SETTINGS
+        self.mainList:AddEntry("GameStartupLabelEntry", settingsEntryData)
+
+        local announcementEntryData = ZO_GamepadEntryData:New(GetString(SI_LOGIN_ANNOUNCEMENTS_TITLE))
+        announcementEntryData.entryType = ENTRY_TYPE.ANNOUNCEMENTS
+        self.mainList:AddEntry("GameStartupLabelEntry", announcementEntryData)
+        
+        local creditsEntryData = ZO_GamepadEntryData:New(GetString(SI_GAME_MENU_CREDITS))
+        creditsEntryData.entryType = ENTRY_TYPE.CREDITS
+        self.mainList:AddEntry("GameStartupLabelEntry", creditsEntryData)
+
+        if ZO_IsPCUI() then
+            local quitEntryData = ZO_GamepadEntryData:New(GetString(SI_GAME_MENU_QUIT))
+            quitEntryData.entryType = ENTRY_TYPE.QUIT
+            self.mainList:AddEntry("GameStartupLabelEntry", quitEntryData)
+        end
     end
 
     self.mainList:Commit()
 end
 
 function ZO_GameStartup_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
-    if (selectedData and not selectedData.isAnnouncement) and not GAME_STARTUP_SERVERALERT_GAMEPAD.serverAlert:IsControlHidden() then
+    if (selectedData and selectedData.entryType ~= ENTRY_TYPE.ANNOUNCEMENTS) and not GAME_STARTUP_SERVERALERT_GAMEPAD.serverAlert:IsControlHidden() then
         GAME_STARTUP_MAIN_GAMEPAD_SCENE:RemoveFragment(self.announcementFragment)
         GAME_STARTUP_MAIN_GAMEPAD_SCENE:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         GAME_STARTUP_MAIN_GAMEPAD_SCENE:AddFragment(self.serverAlertFragment)
@@ -537,13 +616,25 @@ function ZO_GameStartup_Gamepad:SetPsnFreeTrialEnded(psnFreeTrialEnded)
     self.psnFreeTrialEnded = psnFreeTrialEnded
 end
 
-local ZO_GameStartup_ServerAlert_Gamepad = ZO_Object:Subclass()
-
-function ZO_GameStartup_ServerAlert_Gamepad:New(control)
-    local object = ZO_Object.New(self)
-    object:Initialize(control)
-    return object
+function ZO_GameStartup_Gamepad:GetEnteredUserName()
+    return self.username
 end
+
+function ZO_GameStartup_Gamepad:GetEnteredPassword()
+    return self.password
+end
+
+function ZO_GameStartup_Gamepad_GetInitialLoginInfo()
+    local username = GetCVar("AccountName")
+    local password = ""
+    return username, password
+end
+
+----
+-- ZO_GameStartup_ServerAlert_Gamepad
+----
+
+local ZO_GameStartup_ServerAlert_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_GameStartup_ServerAlert_Gamepad:Initialize(control)
     self.control = control

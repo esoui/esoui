@@ -36,10 +36,10 @@ function ZO_PointerBox_Keyboard:Initialize(control)
     
     control:SetHandler("OnMouseUp", function(control, button, upInside)
         if upInside and self.closeable then
-            local ANIMATE = false
-            self:Hide(ANIMATE)
+            self:Hide()
         end
     end)
+
     self:Reset()
 end
 
@@ -54,6 +54,8 @@ end
 -- Hiding can release the object (resetting it), so we should never rely on Reset to hide the object
 function ZO_PointerBox_Keyboard:Reset()
     self.poolKey = nil
+    self.tutorialIndex = nil
+    self.tutorialTrigger = nil
     self.padding = ZO_POINTER_BOX_DEFAULT_PADDING
     self.closeable = true
     self.contentsControl = nil
@@ -123,6 +125,19 @@ function ZO_PointerBox_Keyboard:SetOnHiddenCallback(callback)
     self.onHiddenCallback = callback
 end
 
+function ZO_PointerBox_Keyboard:GetTutorialIndex()
+    return self.tutorialIndex
+end
+
+function ZO_PointerBox_Keyboard:GetTutorialTrigger()
+    return self.tutorialTrigger
+end
+
+function ZO_PointerBox_Keyboard:SetTutorialIndex(tutorialIndex)
+    self.tutorialIndex = tutorialIndex
+    self.tutorialTrigger = GetTutorialTrigger(tutorialIndex)
+end
+
 function ZO_PointerBox_Keyboard:Commit()
     self:RefreshLayout()
     self:RefreshArrow()
@@ -160,6 +175,8 @@ end
 function ZO_PointerBox_Keyboard:RefreshAnchor()
     if self.contentsControl and self.point then
         self.contentsControl:ClearAnchors()
+
+        local anchorPoint, anchorOffsetX, anchorOffsetY
         if self.point == LEFT or self.point == RIGHT then
             local boxCenterY = self.control:GetHeight() * 0.5
             local contentsCenterY = self.contentsControl:GetHeight() * 0.5 + self.padding
@@ -168,10 +185,14 @@ function ZO_PointerBox_Keyboard:RefreshAnchor()
 
             if self.point == LEFT then
                 --Assumes that relative point is one of the right side anchors
-                self.contentsControl:SetAnchor(LEFT, self.relativeTo, self.relativePoint, self.offsetX + ZO_POINTER_BOX_ARROW_CENTER_TO_TIP_DISTANCE + ZO_POINTER_BOX_ARROW_CENTER_OFFSET_FROM_BOX_SIDE + self.padding, offsetY + self.offsetY)
+                anchorPoint = LEFT
+                anchorOffsetX = self.offsetX + ZO_POINTER_BOX_ARROW_CENTER_TO_TIP_DISTANCE + ZO_POINTER_BOX_ARROW_CENTER_OFFSET_FROM_BOX_SIDE + self.padding
+                anchorOffsetY = offsetY + self.offsetY
             else
                  --Assumes that relative point is one of the left side anchors
-                self.contentsControl:SetAnchor(RIGHT, self.relativeTo, self.relativePoint, self.offsetX - (ZO_POINTER_BOX_ARROW_CENTER_TO_TIP_DISTANCE + ZO_POINTER_BOX_ARROW_CENTER_OFFSET_FROM_BOX_SIDE + self.padding), offsetY + self.offsetY)
+                anchorPoint = RIGHT
+                anchorOffsetX = self.offsetX - (ZO_POINTER_BOX_ARROW_CENTER_TO_TIP_DISTANCE + ZO_POINTER_BOX_ARROW_CENTER_OFFSET_FROM_BOX_SIDE + self.padding)
+                anchorOffsetY = offsetY + self.offsetY
             end
         elseif self.point == TOP or self.point == BOTTOM then
             local boxCenterX = self.control:GetWidth() * 0.5
@@ -181,11 +202,28 @@ function ZO_PointerBox_Keyboard:RefreshAnchor()
 
             if self.point == TOP then
                --Assumes that relative point is one of the bottom side anchors
-                self.contentsControl:SetAnchor(TOP, self.relativeTo, self.relativePoint, offsetX + self.offsetX, self.offsetY + ZO_POINTER_BOX_ARROW_CENTER_TO_TIP_DISTANCE + ZO_POINTER_BOX_ARROW_CENTER_OFFSET_FROM_BOX_SIDE + self.padding)
+                anchorPoint = TOP
+                anchorOffsetX = offsetX + self.offsetX
+                anchorOffsetY = self.offsetY + ZO_POINTER_BOX_ARROW_CENTER_TO_TIP_DISTANCE + ZO_POINTER_BOX_ARROW_CENTER_OFFSET_FROM_BOX_SIDE + self.padding
             else
                 --Assumes that relative point is one of the top side anchors
-                self.contentsControl:SetAnchor(BOTTOM, self.relativeTo, self.relativePoint, offsetX + self.offsetX, self.offsetY - (ZO_POINTER_BOX_ARROW_CENTER_TO_TIP_DISTANCE + ZO_POINTER_BOX_ARROW_CENTER_OFFSET_FROM_BOX_SIDE + self.padding))
+                anchorPoint = BOTTOM
+                anchorOffsetX = offsetX + self.offsetX
+                anchorOffsetY = self.offsetY - (ZO_POINTER_BOX_ARROW_CENTER_TO_TIP_DISTANCE + ZO_POINTER_BOX_ARROW_CENTER_OFFSET_FROM_BOX_SIDE + self.padding)
             end
+        end
+
+        if self.relativeTo and self.relativeTo:GetSpace() ~= self.contentsControl:GetSpace() then
+            -- Anchoring to a relative control in non-interface space.
+            -- Assumes self.contentsControl and self.relativeTo positions are static.
+            if internalassert(self.contentsControl:GetSpace() == SPACE_INTERFACE, "Non-interface space PointerBox contents controls are not supported.") then
+                local anchorToControl = self.relativeTo or self.contentsControl:GetParent()
+                local anchorToX, anchorToY = anchorToControl:ProjectRectToScreenAndComputeAABBPoint(self.relativePoint)
+                self.contentsControl:SetAnchor(anchorPoint, GuiRoot, TOPLEFT, anchorToX + anchorOffsetX, anchorToY + anchorOffsetY)
+            end
+        else
+            -- Anchoring for interface space controls.
+            self.contentsControl:SetAnchor(anchorPoint, self.relativeTo, self.relativePoint, anchorOffsetX, anchorOffsetY)
         end
     end
 end
@@ -263,6 +301,10 @@ end
 
 function ZO_PointerBoxManager:Release(pointerBox)
     self.pool:ReleaseObject(pointerBox:GetPoolKey())
+end
+
+function ZO_PointerBoxManager:GetActiveObjects()
+    return self.pool:GetActiveObjects()
 end
 
 POINTER_BOXES = ZO_PointerBoxManager:New()

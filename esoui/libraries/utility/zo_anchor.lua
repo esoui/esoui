@@ -5,6 +5,55 @@ local OFFS_X = 4
 local OFFS_Y = 5
 local CONSTRAINTS = 6
 
+ZO_OPPOSING_ANCHOR_POINTS =
+{
+    [BOTTOM] = TOP,
+    [BOTTOMLEFT] = TOPRIGHT,
+    [BOTTOMRIGHT] = TOPLEFT,
+    [CENTER] = CENTER,
+    [LEFT] = RIGHT,
+    [RIGHT] = LEFT,
+    [TOP] = BOTTOM,
+    [TOPLEFT] = BOTTOMRIGHT,
+    [TOPRIGHT] = BOTTOMLEFT,
+}
+
+function ZO_GetOpposingAnchorPoint(anchorPoint)
+    return ZO_OPPOSING_ANCHOR_POINTS[anchorPoint] or NONE
+end
+
+function ZO_GetAnchorPointNearestScreenCenter(controlCenterX, controlCenterY)
+    local screenCenterX, screenCenterY = GuiRoot:GetCenter()
+    local screenOffsetX = controlCenterX / screenCenterX
+    local screenOffsetY = controlCenterY / screenCenterY
+
+    local strongHorizontalAnchor, weakHorizontalAnchor
+    if screenOffsetX < 0.5 then
+        weakHorizontalAnchor = RIGHT
+        strongHorizontalAnchor = screenOffsetX < 0.45 and RIGHT or NONE
+    else
+        weakHorizontalAnchor = LEFT
+        strongHorizontalAnchor = screenOffsetX > 0.55 and LEFT or NONE
+    end
+
+    local strongVerticalAnchor, weakVerticalAnchor
+    if screenOffsetY < 0.5 then
+        weakVerticalAnchor = BOTTOM
+        strongVerticalAnchor = screenOffsetY < 0.45 and BOTTOM or NONE
+    else
+        weakVerticalAnchor = TOP
+        strongVerticalAnchor = screenOffsetY > 0.55 and TOP or NONE
+    end
+
+    local strongAnchor = strongHorizontalAnchor + strongVerticalAnchor
+    if strongAnchor ~= NONE then
+        return strongAnchor
+    end
+
+    local weakAnchor = weakHorizontalAnchor + weakVerticalAnchor
+    return weakAnchor
+end
+
 ZO_Anchor = ZO_Object:Subclass ()
 
 function ZO_Anchor:New(pointOnMe, target, pointOnTarget, offsetX, offsetY, constraints)

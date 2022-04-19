@@ -1,5 +1,3 @@
-local TOTALS_EMOTES_IN_ONE_COLUMN = 22
-local NUM_OF_COLUMNS = 4
 --Quick chat is not a real emote category, so make a fake one
 local QUICK_CHAT_CATEGORY = -1
 
@@ -22,38 +20,30 @@ function ZO_PlayerEmote_Keyboard:Initialize(control)
     self:MarkDirty()
     self.control = control
     self.wheelControl = self.control:GetNamedChild("EmoteWheel")
+    self.emoteGridListControl = self.control:GetNamedChild("EmoteContainer")
     control.owner = self
     local wheelData =
     {
-        --TODO: Currently not used
-        restrictToActionTypes =
-        {
-            [ACTION_TYPE_EMOTE] = true,
-            [ACTION_TYPE_QUICK_CHAT] = true,
-        },
-        numSlots = ACTION_BAR_EMOTE_QUICK_SLOT_SIZE,
-        startSlotIndex = ACTION_BAR_FIRST_EMOTE_QUICK_SLOT_INDEX,
+        hotbarCategories = { HOTBAR_CATEGORY_EMOTE_WHEEL, HOTBAR_CATEGORY_QUICKSLOT_WHEEL },
+        numSlots = ACTION_BAR_UTILITY_BAR_SIZE,
+        showCategoryLabel = true,
     }
     self.wheel = ZO_AssignableUtilityWheel_Keyboard:New(self.wheelControl, wheelData)
 
     HELP_EMOTES_SCENE = ZO_Scene:New("helpEmotes", SCENE_MANAGER)
     local keyboardPlayerEmoteFragment = ZO_FadeSceneFragment:New(control)
     keyboardPlayerEmoteFragment:RegisterCallback("StateChange", function(oldState, newState)
-                                                                    if newState == SCENE_SHOWING then
-                                                                        TriggerTutorial(TUTORIAL_TRIGGER_EMOTES_MENU_OPENED)
-                                                                        if self.isDirty then
-                                                                            self:UpdateCategories()
-                                                                        end
-                                                                        --TODO: Re-enable this
-                                                                        --KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-                                                                    elseif newState == SCENE_FRAGMENT_HIDDEN then
-                                                                        --TODO: Re-enable this
-                                                                        --KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-                                                                    end
-                                                                end)
-                                                                
-    --TODO: Include this fragment in the scene
-    HELP_KEYBOARD_PLAYER_EMOTE_WHEEL_FRAGMENT = ZO_FadeSceneFragment:New(self.wheelControl)
+        if newState == SCENE_SHOWING then
+            TriggerTutorial(TUTORIAL_TRIGGER_EMOTES_MENU_OPENED)
+            if self.isDirty then
+                self:UpdateCategories()
+            end
+            self.wheel:Activate()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self.wheel:Deactivate()
+        end
+    end)
+
     HELP_EMOTES_SCENE:AddFragment(keyboardPlayerEmoteFragment)
 
     PLAYER_EMOTE_MANAGER:RegisterCallback("EmoteListUpdated",
@@ -66,27 +56,7 @@ function ZO_PlayerEmote_Keyboard:Initialize(control)
                                     end)
 
     self:InitializeTree()
-    self:InitializeEmoteControlPool()
-    self:InitializeKeybindStripDescriptors()
-end
-
-function ZO_PlayerEmote_Keyboard:InitializeKeybindStripDescriptors()
-    self.keybindStripDescriptor =
-    {
-        alignment = KEYBIND_STRIP_ALIGN_CENTER,
-        {
-            name = GetString(SI_HELP_EMOTES_TOGGLE_EMOTE_WHEEL),
-            keybind = "UI_SHORTCUT_SECONDARY",
-            callback = function()
-                if HELP_KEYBOARD_PLAYER_EMOTE_WHEEL_FRAGMENT:IsShowing() then
-                    HELP_EMOTES_SCENE:RemoveFragment(HELP_KEYBOARD_PLAYER_EMOTE_WHEEL_FRAGMENT)
-                    ClearCursor()
-                else
-                    HELP_EMOTES_SCENE:AddFragment(HELP_KEYBOARD_PLAYER_EMOTE_WHEEL_FRAGMENT)
-                end
-            end,
-        },
-    }
+    self:InitializeEmoteGridList()
 end
 
 function ZO_PlayerEmote_Keyboard:InitializeTree()
@@ -104,7 +74,7 @@ function ZO_PlayerEmote_Keyboard:InitializeTree()
 
     local function CategorySelected(control, data, selected, reselectingDuringRebuild)
         if selected then
-            self:UpdateEmotes(data.emoteCategory)
+            self:BuildEmoteGridList(data.emoteCategory)
         end
         CategorySetup(nil, control, data, selected)
     end
@@ -113,49 +83,55 @@ function ZO_PlayerEmote_Keyboard:InitializeTree()
     self.categoryTree:SetExclusive(true)
 end
 
-function ZO_PlayerEmote_Keyboard:InitializeEmoteControlPool()
-    local function EmoteTextControlFactory(pool)
-        local control = ZO_ObjectPool_CreateNamedControl("EmoteText", "ZO_PlayerEmote_Keyboard_EmoteText", pool, self.control)
-
-        if not self.firstEmoteInColumn then
-            self.firstEmoteInColumn = control
-            self.totalEmotesInCurrentColumn = 1
-            control:SetAnchor(TOPLEFT, self.control:GetNamedChild("EmoteContainer"), TOPLEFT)
-        else
-            if self.totalEmotesInCurrentColumn > TOTALS_EMOTES_IN_ONE_COLUMN then
-                self.totalEmotesInCurrentColumn = 1
-                control:SetAnchor(TOPLEFT, self.firstEmoteInColumn, TOPRIGHT)
-                self.firstEmoteInColumn = control
+function ZO_PlayerEmote_Keyboard:InitializeEmoteGridList()
+    self.gridList = ZO_SingleTemplateGridScrollList_Keyboard:New(self.emoteGridListControl)
+    local function EmoteTextEntrySetup(control, data)
+        control.data = data
+        if data.quickChatId then
+            control:SetText(QUICK_CHAT_MANAGER:GetFormattedQuickChatName(data.quickChatId))
+            ZO_SelectableLabel_SetNormalColor(control, ZO_NORMAL_TEXT)
+        elseif data.emoteId then
+            if data.isOverriddenByPersonality then
+                ZO_SelectableLabel_SetNormalColor(control, ZO_PERSONALITY_EMOTES_COLOR)
             else
-                self.totalEmotesInCurrentColumn = self.totalEmotesInCurrentColumn + 1
-                control:SetAnchor(TOPLEFT, self.lastEmote, BOTTOMLEFT, 0, 0)
+                ZO_SelectableLabel_SetNormalColor(control, ZO_NORMAL_TEXT)
             end
+            control:SetText(data.emoteSlashName)
         end
-
-        self.lastEmote = control
-
-        return control
     end
 
-    local function EmoteTextControlReset(control)
-        control:SetText("")
-        control.data = nil
-        ZO_ObjectPool_DefaultResetControl(control)
-    end
+    local HIDE_CALLBACK = nil
+    local DEFAULT_RESET_ENTRY = nil
+    local ENTRY_WIDTH = 200
+    local ENTRY_HEIGHT = 24
+    local ENTRY_PADDING_X = 5
+    local ENTRY_PADDING_Y = 0
+    self.gridList:SetGridEntryTemplate("ZO_PlayerEmote_Keyboard_EmoteText", ENTRY_WIDTH, ENTRY_HEIGHT, EmoteTextEntrySetup, HIDE_CALLBACK, DEFAULT_RESET_ENTRY, ENTRY_PADDING_X, ENTRY_PADDING_Y)
+end
 
-    --Uses an object pool because we don't want the default control pool behavior of clearing anchors when a control is released back into the pool
-    self.emoteControlPool = ZO_ObjectPool:New(EmoteTextControlFactory, EmoteTextControlReset)
-    self.emoteControlPool:SetCustomAcquireBehavior(function(control)
-        control:SetHidden(false)
-    end)
+function ZO_PlayerEmote_Keyboard:ShowCategory(category)
+    self.queuedCategoryToShow = category
+    if not SCENE_MANAGER:IsShowing("helpEmotes") then
+        self:MarkDirty()
+        MAIN_MENU_KEYBOARD:ShowScene("helpEmotes")
+    else
+        self:UpdateCategories()
+    end
 end
 
 function ZO_PlayerEmote_Keyboard:UpdateCategories()
-    local oldSelectedData = self.categoryTree:GetSelectedData()
     local oldSelectedCategory
-    if oldSelectedData then
-        oldSelectedCategory = oldSelectedData.emoteCategory
+
+    if self.queuedCategoryToShow then
+        oldSelectedCategory = self.queuedCategoryToShow
+        self.queuedCategoryToShow = nil
+    else
+        local oldSelectedData = self.categoryTree:GetSelectedData()
+        if oldSelectedData then
+            oldSelectedCategory = oldSelectedData.emoteCategory
+        end
     end
+
     local nodeToSelect
 
     self.categoryTree:Reset()
@@ -211,47 +187,32 @@ function ZO_PlayerEmote_Keyboard:MarkDirty()
     self.isDirty = true
 end
 
-function ZO_PlayerEmote_Keyboard:UpdateEmotes(category)
-    self.emoteControlPool:ReleaseAllObjects()
+function ZO_PlayerEmote_Keyboard:BuildEmoteGridList(category)
+    self.gridList:ClearGridList()
 
     if category == QUICK_CHAT_CATEGORY then
         local quickChatList = QUICK_CHAT_MANAGER:BuildQuickChatList()
         for i, quickChatId in ipairs(quickChatList) do
-            if i <= NUM_OF_COLUMNS * TOTALS_EMOTES_IN_ONE_COLUMN then
-                local quickChatControl = self.emoteControlPool:AcquireObject(i)
-                quickChatControl:SetText(QUICK_CHAT_MANAGER:GetFormattedQuickChatName(quickChatId))
-                local quickChatData = 
-                {
-                    quickChatId = quickChatId,
-                    isOverriddenByPersonality = false, 
-                }
-                quickChatControl.data = quickChatData
-                ZO_SelectableLabel_SetNormalColor(quickChatControl, ZO_NORMAL_TEXT)
-            else
-                break
-            end
+            local quickChatData = 
+            {
+                quickChatId = quickChatId,
+                isOverriddenByPersonality = false, 
+            }
+            self.gridList:AddEntry(quickChatData)
         end
     else
         local emoteList = PLAYER_EMOTE_MANAGER:GetEmoteListForType(category)
-
         for i, emote in ipairs(emoteList) do
-            if i <= NUM_OF_COLUMNS * TOTALS_EMOTES_IN_ONE_COLUMN then
-                local emoteInfo = PLAYER_EMOTE_MANAGER:GetEmoteItemInfo(emote)
-
-                local emoteControl = self.emoteControlPool:AcquireObject(i)
-                emoteControl.data = emoteInfo
-
-                if emoteInfo.isOverriddenByPersonality then
-                    ZO_SelectableLabel_SetNormalColor(emoteControl, ZO_PERSONALITY_EMOTES_COLOR)
-                else
-                    ZO_SelectableLabel_SetNormalColor(emoteControl, ZO_NORMAL_TEXT)
-                end
-                emoteControl:SetText(emoteInfo.emoteSlashName)
-            else
-                break
-            end
+            local emoteInfo = PLAYER_EMOTE_MANAGER:GetEmoteItemInfo(emote)
+            self.gridList:AddEntry(emoteInfo)
         end
     end
+
+    self.gridList:CommitGridList()
+end
+
+function ZO_PlayerEmote_Keyboard:GetUtilityWheel()
+    return self.wheel
 end
 
 -- Global XML --
@@ -270,10 +231,12 @@ function ZO_PlayerEmoteEntry_GetTextColor(entry)
 end
 
 function ZO_PlayerEmoteEntry_OnDragStart(control)
-    if HELP_KEYBOARD_PLAYER_EMOTE_WHEEL_FRAGMENT:IsShowing() and GetCursorContentType() == MOUSE_CONTENT_EMPTY then
-        if control.data.emoteId then
+    local utilityWheel = KEYBOARD_PLAYER_EMOTE:GetUtilityWheel()
+    local hotbarCategory = utilityWheel:GetHotbarCategory()
+    if hotbarCategory ~= ZO_UTILITY_WHEEL_HOTBAR_CATEGORY_HIDDEN and GetCursorContentType() == MOUSE_CONTENT_EMPTY then
+        if control.data.emoteId and utilityWheel:IsActionTypeSupported(ACTION_TYPE_EMOTE) then
             PickupEmoteById(control.data.emoteId)
-        elseif control.data.quickChatId then
+        elseif control.data.quickChatId and utilityWheel:IsActionTypeSupported(ACTION_TYPE_QUICK_CHAT) then
             PickupQuickChatById(control.data.quickChatId)
         end
     end
@@ -305,14 +268,15 @@ function ZO_PlayerEmoteEntry_OnMouseUp(control, button, upInside)
             end)
         end
 
+        local utilityWheel = KEYBOARD_PLAYER_EMOTE:GetUtilityWheel()
+        local hotbarCategory = utilityWheel:GetHotbarCategory()
         --Only include the following options if the wheel is toggled on
-        if HELP_KEYBOARD_PLAYER_EMOTE_WHEEL_FRAGMENT:IsShowing() and actionId and actionType then
-            local slottedEmotes = PLAYER_EMOTE_MANAGER:GetSlottedEmotes()
+        if hotbarCategory ~= ZO_UTILITY_WHEEL_HOTBAR_CATEGORY_HIDDEN and actionId and actionType and utilityWheel:IsActionTypeSupported(actionType) then
+            local slottedEmotes = ZO_GetUtilityWheelSlottedEntries(hotbarCategory)
 
-            --TODO: Do we want to be allowing emotes to be in multiple slots at once?
             local matchingSlots = {}
             for i, slotData in ipairs(slottedEmotes) do
-                if slotData.id == actionId then
+                if slotData.type == actionType and slotData.id == actionId then
                     table.insert(matchingSlots, slotData.slotIndex)
                 end
             end
@@ -321,15 +285,15 @@ function ZO_PlayerEmoteEntry_OnMouseUp(control, button, upInside)
             if #matchingSlots > 0 then
                 AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function()
                     for i, slotIndex in ipairs(matchingSlots) do
-                        ClearSlot(slotIndex)
+                        ClearSlot(slotIndex, hotbarCategory)
                     end
                 end)
             else
                 --If the emote/quick chat is not slotted, show the Assign option
-                local validSlot = GetFirstFreeValidSlotForSimpleAction(actionType, actionId)
+                local validSlot = GetFirstFreeValidSlotForSimpleAction(actionType, actionId, hotbarCategory)
                 if validSlot then
                     AddMenuItem(GetString(SI_PLAYER_EMOTE_ASSIGN_EMOTE), function()
-                        SelectSlotSimpleAction(actionType, actionId, validSlot)
+                        SelectSlotSimpleAction(actionType, actionId, validSlot, hotbarCategory)
                     end)
                 end
             end

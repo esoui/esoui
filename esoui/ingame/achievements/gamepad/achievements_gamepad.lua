@@ -287,7 +287,7 @@ function ZO_Achievements_Gamepad:RefreshRecentAchievements()
         control.icon:ClearIcons()
 
         if achievementId then
-            local achievementName, description, points, icon, completed, date, time = GetAchievementInfo(achievementId)
+            local icon = select(4, GetAchievementInfo(achievementId))
             control.achievementId = achievementId
             control.icon:AddIcon(icon)
         else
@@ -555,7 +555,7 @@ function ZO_Achievements_Gamepad:SetupLineList(achievementId)
 
     while chainId ~= 0 do
         local chainControl = self.chainControls[chainIndex]
-        local achievementName, description, points, icon, completed, date, time = GetAchievementInfo(chainId)
+        local icon, completed = select(4, GetAchievementInfo(chainId))
         local iconDesaturation = completed and 0 or 1
 
         chainControl.icon:ClearIcons()
@@ -671,8 +671,9 @@ function ZO_Achievements_Gamepad:AddAchievements(categoryIndex, subCategoryIndex
 
             currentIndex = currentIndex + 1
 
-            local achievementName, description, points, icon, completed, date, time = GetAchievementInfo(nextAchievementId)
+            local achievementName, _, points, icon, completed = GetAchievementInfo(nextAchievementId)
 
+            -- Achievement display names use gender switching
             local entryData = ZO_GamepadEntryData:New(zo_strformat(achievementName), icon)
             entryData:SetFontScaleOnSelection(false)
             entryData:SetIconDesaturation(completed and 0 or 1)

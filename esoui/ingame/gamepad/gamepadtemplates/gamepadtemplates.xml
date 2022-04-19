@@ -27,7 +27,7 @@
             <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-19" />
         </Label>
 
-        <Cooldown name="ZO_GamepadMenuEntryCooldownTemplate" inherits="ZO_DefaultCooldown" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" virtual="true">
+        <Cooldown name="ZO_GamepadMenuEntryCooldownTemplate" inherits="ZO_DefaultCooldown" excludeFromResizeToFitExtents="true" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" />
             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" />
         </Cooldown>
@@ -62,9 +62,9 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_GamepadRightCheckboxOptionTemplate" inherits="ZO_GamepadOptionsMenuEntryTemplate ZO_OptionsRightCheckbox_Gamepad" modifyTextType="UPPERCASE" virtual="true" />
+        <Control name="ZO_GamepadRightCheckboxOptionTemplate" inherits="ZO_GamepadOptionsMenuEntryTemplate ZO_OptionsRightCheckbox_Gamepad" virtual="true" />
         
-        <Control name="ZO_GamepadLeftCheckboxOptionTemplate" inherits="ZO_GamepadOptionsMenuEntryTemplate ZO_OptionsLeftCheckbox_Gamepad" modifyTextType="UPPERCASE" virtual="true" />
+        <Control name="ZO_GamepadLeftCheckboxOptionTemplate" inherits="ZO_GamepadOptionsMenuEntryTemplate ZO_OptionsLeftCheckbox_Gamepad" virtual="true" />
 
         <Control name="ZO_GamepadMenuEntryWithBarTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
             <OnInitialized>

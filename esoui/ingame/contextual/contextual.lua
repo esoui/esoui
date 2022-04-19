@@ -99,7 +99,7 @@ local function RefreshHasValidTarget()
             g_hasValidTarget = true
         else
             if reaction == UNIT_REACTION_FRIENDLY or reaction == UNIT_REACTION_PLAYER_ALLY or IsUnitFriendlyFollower("reticleover") then
-                local currentHealth, maxHealth = GetUnitPower("reticleover", POWERTYPE_HEALTH)
+                local currentHealth, maxHealth = GetUnitPower("reticleover", COMBAT_MECHANIC_FLAGS_HEALTH)
                 if currentHealth < maxHealth then
                     g_hasValidTarget = true
                 end
@@ -163,7 +163,7 @@ function ZO_ContextualActionBar_OnInitialized(self)
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, OnSlotsUpdated)
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_PLAYER_ACTIVATED, OnSlotsUpdated)
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_POWER_UPDATE, OnPowerUpdate)
-    EVENT_MANAGER:AddFilterForEvent("ZO_Contextual", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH, REGISTER_FILTER_UNIT_TAG, "reticleover")
+    EVENT_MANAGER:AddFilterForEvent("ZO_Contextual", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_HEALTH, REGISTER_FILTER_UNIT_TAG, "reticleover")
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_RETICLE_TARGET_CHANGED, OnReticleTargetChanged)
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_PLAYER_COMBAT_STATE, OnPlayerCombatState)
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)

@@ -94,7 +94,7 @@
 
         <!-- Player Inventory -->
 
-        <TopLevelControl name="ZO_PlayerInventory" mouseEnabled="true" hidden="true" allowBringToTop="false">
+        <TopLevelControl name="ZO_PlayerInventory" mouseEnabled="true" hidden="true">
             <Dimensions x="565" />
             <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-20" />
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />

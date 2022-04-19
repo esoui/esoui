@@ -1,7 +1,7 @@
 -----------------
 -- Leaderboard Campaign Selector Shared
 -----------------
-CAMPAIGN_LEADERBOARD_SYSTEM_NAME = "campaignLeaderboards"
+ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME = "campaignLeaderboards"
 
 ZO_LeaderboardCampaignSelector_Shared = ZO_CampaignSelector_Shared:Subclass()
 
@@ -48,10 +48,6 @@ end
 -----------------
 
 ZO_CampaignLeaderboardsManager_Shared = ZO_LeaderboardBase_Shared:Subclass()
-
-function ZO_CampaignLeaderboardsManager_Shared:New(...)
-    return ZO_LeaderboardBase_Shared.New(self, ...)
-end
 
 function ZO_CampaignLeaderboardsManager_Shared:Initialize(...)
     ZO_LeaderboardBase_Shared.Initialize(self, ...)
@@ -135,8 +131,11 @@ function ZO_CampaignLeaderboardsManager_Shared:AddCategoriesToParentSystem()
         return GetCampaignLeaderboardMaxRank(self.campaignId)
     end
 
-    local function GetOverallCount()
+    local function UpdatePlayerInfo()
         self:UpdatePlayerInfo()
+    end
+
+    local function GetOverallCount()
         return GetNumCampaignLeaderboardEntries(self.campaignId)
     end
 
@@ -153,10 +152,12 @@ function ZO_CampaignLeaderboardsManager_Shared:AddCategoriesToParentSystem()
         return ZO_ID_REQUEST_TYPE_CAMPAIGN_LEADERBOARD, self.campaignId, index
     end
 
-    self.leaderboardSystem:AddEntry(self, GetString(SI_CAMPAIGN_LEADERBOARDS_OVERALL), nil, header, nil, GetOverallCount, GetMaxRank, GetOverallInfo, nil, nil, GetOverallConsoleIdRequestParams, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_overall.dds", LEADERBOARD_TYPE_OVERALL)
+    local NO_TITLE_NAME = nil
+    local NO_POINTS_FORMAT_FUNCTION = nil
+    local NO_POINTS_HEADER_STRING = nil
+    self.leaderboardSystem:AddEntry(self, GetString(SI_CAMPAIGN_LEADERBOARDS_OVERALL), NO_TITLE_NAME, header, ALLIANCE_NONE, GetOverallCount, GetMaxRank, GetOverallInfo, NO_POINTS_FORMAT_FUNCTION, NO_POINTS_HEADER_STRING, GetOverallConsoleIdRequestParams, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_overall.dds", LEADERBOARD_TYPE_OVERALL, UpdatePlayerInfo)
 
     local function GetSingleAllianceCount(alliance)
-        self:UpdatePlayerInfo()
         return GetNumCampaignAllianceLeaderboardEntries(self.campaignId, alliance)
     end
 
@@ -174,7 +175,7 @@ function ZO_CampaignLeaderboardsManager_Shared:AddCategoriesToParentSystem()
     end
 
     local function AddAllianceEntryToLeaderboard(alliance, iconPath)
-        self.leaderboardSystem:AddEntry(self, zo_strformat(SI_ALLIANCE_NAME, GetAllianceName(alliance)), nil, header, alliance, GetSingleAllianceCount, GetMaxRank, GetSingleAllianceInfo, nil, nil, GetSingleAllianceConsoleIdRequestParams, iconPath, LEADERBOARD_TYPE_ALLIANCE)
+        self.leaderboardSystem:AddEntry(self, zo_strformat(SI_ALLIANCE_NAME, GetAllianceName(alliance)), NO_TITLE_NAME, header, alliance, GetSingleAllianceCount, GetMaxRank, GetSingleAllianceInfo, NO_POINTS_FORMAT_FUNCTION, NO_POINTS_HEADER_STRING, GetSingleAllianceConsoleIdRequestParams, iconPath, LEADERBOARD_TYPE_ALLIANCE, UpdatePlayerInfo)
     end
 
     AddAllianceEntryToLeaderboard(ALLIANCE_ALDMERI_DOMINION, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_aldmeri.dds")
@@ -185,4 +186,27 @@ end
 function ZO_CampaignLeaderboardsManager_Shared:SetCampaignAndQueryType(campaignId, queryType)
     self.campaignId = campaignId
     self:OnDataChanged()
+end
+
+function ZO_CampaignLeaderboardsManager_Shared:SendLeaderboardQuery()
+    if not self.selectedSubType then
+        return
+    end
+
+    self.requestedAlliance = self.selectedSubType
+    LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(PENDING_LEADERBOARD_DATA_TYPE.CAMPAIGN, self:GenerateRequestData())
+end
+
+function ZO_CampaignLeaderboardsManager_Shared:GenerateRequestData()
+    local data =
+    { 
+        campaignId = self.campaignId,
+        alliance = self.requestedAlliance,
+    }
+    return data
+end
+
+function ZO_CampaignLeaderboardsManager_Shared:HandleFilterDropdownChanged()
+    -- Returning false to signify no special handling
+    return false
 end

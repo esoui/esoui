@@ -1,4 +1,3 @@
-local CAMPAIGN_LEADERBOARD_FRAGMENT
 
 -----------------
 -- Leaderboard Campaign Selector Keyboard
@@ -57,7 +56,7 @@ end
 function ZO_LeaderboardCampaignSelector_Keyboard:SetCampaignWindows()
     self.campaignWindows =
     {
-        SYSTEMS:GetKeyboardObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME),
+        SYSTEMS:GetKeyboardObject(ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME),
     }
 end
 
@@ -108,34 +107,29 @@ end
 -- Campaign Leaderboards Keyboard
 -----------------
 
-local ZO_CampaignLeaderboardsManager_Keyboard = ZO_CampaignLeaderboardsManager_Shared:Subclass()
-
-function ZO_CampaignLeaderboardsManager_Keyboard:New(...)  
-    return ZO_CampaignLeaderboardsManager_Shared.New(self, ...)
-end
+ZO_CampaignLeaderboardsManager_Keyboard = ZO_CampaignLeaderboardsManager_Shared:Subclass()
 
 function ZO_CampaignLeaderboardsManager_Keyboard:Initialize(control)
     CAMPAIGN_LEADERBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
     ZO_CampaignLeaderboardsManager_Shared.Initialize(self, control, LEADERBOARDS, LEADERBOARDS_SCENE, CAMPAIGN_LEADERBOARD_FRAGMENT)
 
-    self.currentScoreLabel = GetControl(control, "CurrentScore")
-    self.currentRankLabel = GetControl(control, "CurrentRank")
-    self.scoringInfoLabel = GetControl(control, "ScoringInfo")
-    self.timerLabel = GetControl(control, "Timer")
+    self.currentScoreLabel = control:GetNamedChild("CurrentScore")
+    self.currentRankLabel = control:GetNamedChild("CurrentRank")
+    self.scoringInfoLabel = control:GetNamedChild("ScoringInfo")
+    self.timerLabel = control:GetNamedChild("Timer")
 
     self:InitializeTimer()
 
     CAMPAIGN_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                 if newState == SCENE_FRAGMENT_SHOWING then
-                                                     self.selector.dataRegistration:Refresh()
-                                                 elseif newState == SCENE_FRAGMENT_HIDDEN then
-                                                     self.selector.dataRegistration:Refresh()
-                                                 end
-                                             end)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self.selector.dataRegistration:Refresh()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self.selector.dataRegistration:Refresh()
+        end
+    end)
 
-    SYSTEMS:RegisterKeyboardObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME, self)
-    LEADERBOARDS:UpdateCategories()
+    SYSTEMS:RegisterKeyboardObject(ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME, self)
     self.selector = ZO_LeaderboardCampaignSelector_Keyboard:New(control)
 end
 

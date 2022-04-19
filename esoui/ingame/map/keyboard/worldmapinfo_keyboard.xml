@@ -15,7 +15,7 @@
             </OnInitialized>
         </Control>
         
-        <TopLevelControl name="ZO_WorldMapInfoFootPrintBackground" layer="BACKGROUND" allowBringToTop="false" hidden="true" mouseEnabled="true">
+        <TopLevelControl name="ZO_WorldMapInfoFootPrintBackground" layer="BACKGROUND" hidden="true" mouseEnabled="true">
             <Dimensions x="350" y="750" />
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="20"/>
             <Controls>

@@ -7,9 +7,9 @@ local PARTNER_ICONS =
 }
 
 local function LinkAccountsDialogSetup(dialog, data)
-    local partnerAccountName = GetControl(dialog, "PartnerAccount")
-    local optionalTextLabel = GetControl(dialog, "OptionalText")
-    local partnerIcon = GetControl(dialog, "PartnerIcon")
+    local partnerAccountName = dialog:GetNamedChild("PartnerAccount")
+    local optionalTextLabel = dialog:GetNamedChild("OptionalText")
+    local partnerIcon = dialog:GetNamedChild("PartnerIcon")
     local serviceType = GetPlatformServiceType()
 
     local iconPath = PARTNER_ICONS[serviceType]
@@ -26,11 +26,11 @@ local function LinkAccountsDialogSetup(dialog, data)
 
     local accountTypeName = GetString("SI_PLATFORMSERVICETYPE", serviceType)
     if accountTypeName then
-        local confirmWarning = GetControl(dialog, "LinkConfirm2")
-        confirmWarning:SetText(zo_strformat(GetString(SI_KEYBOARD_LINKACCOUNT_CONFIRM_2_FORMAT), accountTypeName))
+        local confirmWarning = dialog:GetNamedChild("LinkConfirm2")
+        confirmWarning:SetText(zo_strformat(GetString(SI_LINKACCOUNT_CONFIRM_2_FORMAT), accountTypeName))
     end
 
-    GetControl(dialog, "ESOAccount"):SetText(data.esoAccount or "")
+    dialog:GetNamedChild("ESOAccount"):SetText(data.esoAccount or "")
 end
 
 function ZO_LinkAccountsDialog_Initialized(control)
@@ -39,14 +39,14 @@ function ZO_LinkAccountsDialog_Initialized(control)
         customControl = control,
         setup = LinkAccountsDialogSetup,
         canQueue = true,
-        title = 
+        title =
         {
             text = SI_KEYBOARD_LINKACCOUNT_DIALOG_HEADER,
         },
         buttons =
         {
             {
-                control = GetControl(control, "Link"),
+                control = control:GetNamedChild("Link"),
                 text    = SI_DIALOG_ACCEPT,
                 callback = function(dialog)
                         local data = dialog.data
@@ -55,7 +55,7 @@ function ZO_LinkAccountsDialog_Initialized(control)
             },
 
             {
-                control = GetControl(control, "Cancel"),
+                control = control:GetNamedChild("Cancel"),
                 text    = SI_DIALOG_CANCEL,
             },
         }

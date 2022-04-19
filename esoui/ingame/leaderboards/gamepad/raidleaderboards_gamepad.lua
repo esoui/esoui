@@ -1,8 +1,4 @@
-local ZO_RaidLeaderboardsManager_Gamepad = ZO_RaidLeaderboardsManager_Shared:Subclass()
-
-function ZO_RaidLeaderboardsManager_Gamepad:New(...)
-    return ZO_RaidLeaderboardsManager_Shared.New(self, ...)
-end
+ZO_RaidLeaderboardsManager_Gamepad = ZO_RaidLeaderboardsManager_Shared:Subclass()
 
 function ZO_RaidLeaderboardsManager_Gamepad:Initialize(control)
     GAMEPAD_RAID_LEADERBOARD_FRAGMENT = ZO_SimpleSceneFragment:New(control)
@@ -10,14 +6,16 @@ function ZO_RaidLeaderboardsManager_Gamepad:Initialize(control)
     ZO_RaidLeaderboardsManager_Shared.Initialize(self, control, GAMEPAD_LEADERBOARDS, GAMEPAD_LEADERBOARDS_SCENE, GAMEPAD_RAID_LEADERBOARD_FRAGMENT)
 
     GAMEPAD_RAID_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                 if newState == SCENE_FRAGMENT_SHOWING then
-                                                    self:UpdateAllInfo()
-                                                    local NO_NAME, NO_ICON
-                                                    GAMEPAD_LEADERBOARDS:SetActiveCampaign(NO_NAME, NO_ICON)
-                                                 end
-                                             end)
+        if newState == SCENE_FRAGMENT_SHOWING then
+           self:UpdateAllInfo()
+           local NO_NAME = nil 
+           local NO_ICON = nil
+           GAMEPAD_LEADERBOARDS:SetActiveCampaign(NO_NAME, NO_ICON)
+           self:SendLeaderboardQuery()
+        end
+    end)
 
-    SYSTEMS:RegisterGamepadObject(RAID_LEADERBOARD_SYSTEM_NAME, self)
+    SYSTEMS:RegisterGamepadObject(ZO_RAID_LEADERBOARD_SYSTEM_NAME, self)
     GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self)
 end
 

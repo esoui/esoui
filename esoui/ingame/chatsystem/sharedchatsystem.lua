@@ -1353,7 +1353,7 @@ function SharedChatSystem:Initialize(control, platformSettings)
     self.numUnreadMails = 0
     self:OnNumUnreadMailChanged(GetNumUnreadMail())
     self.isAgentChatActive = false
-    self:OnAgentChatActiveChanged()
+    self:OnAgentChatUpdated()
     self.isMinimized = false
     self.isMinimizingOrMaximizing = false
     self.allowMultipleContainers = false
@@ -1390,16 +1390,6 @@ function SharedChatSystem:InitializeSharedControlManagement(control, newContaine
 
     self.windowPool = ZO_ObjectPool:New(CreateWindow, ResetWindowControl)
     self.insertIndicator = control:GetNamedChild("InsertIndicator")
-    self.agentChatButton = control:GetNamedChild("AgentChat")
-    self.agentChatGlow = self.agentChatButton:GetNamedChild("Glow")
-
-    local agentChatBurst = self.agentChatButton:GetNamedChild("Burst")
-    self.agentChatBurstTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("NotificationAddedBurst", agentChatBurst)
-    self.agentChatBurstTimeline:SetHandler("OnStop", function() agentChatBurst:SetAlpha(0) end)
-
-    local agentChatEcho = self.agentChatButton:GetNamedChild("Echo")
-    self.agentChatPulseTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("NotificationPulse", agentChatEcho)
-    self.agentChatPulseTimeline:SetHandler("OnStop", function() agentChatEcho:SetAlpha(0) end)
 
     local function CreateContainer(objectPool)
         local containerControl = ZO_ObjectPool_CreateControl("ZO_ChatContainerTemplate", objectPool, GuiRoot)
@@ -1443,13 +1433,11 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
             end
 
             self:TryNotificationAndMailBursts()
-
-            if self.isAgentChatActive then
-                self.agentChatBurstTimeline:PlayFromStart()
-            end
         end
 
         self:RefreshVisibility()
+
+        self:OnPlayerActivated()
     end
 
     EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
@@ -1477,8 +1465,8 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
             self:UpdateTextEntryChannel()
         end
 
-        local function OnAgentChatActiveChanged()
-            self:OnAgentChatActiveChanged()
+        local function OnAgentChatUpdated()
+            self:OnAgentChatUpdated()
         end
 
         local function OnGamepadPreferredModeChanged()
@@ -1495,9 +1483,9 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GUILD_RANKS_CHANGED, function() self:ValidateChatChannel() end)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GUILD_MEMBER_RANK_CHANGED, function() self:ValidateChatChannel() end)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_MAIL_NUM_UNREAD_CHANGED, function(_, numUnread) self:OnNumUnreadMailChanged(numUnread) end)
-        EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_AGENT_CHAT_REQUESTED, OnAgentChatActiveChanged)
-        EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_AGENT_CHAT_FORCED, OnAgentChatActiveChanged)
-        EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_AGENT_CHAT_TERMINATED, OnAgentChatActiveChanged)
+        EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_AGENT_CHAT_REQUESTED, OnAgentChatUpdated)
+        EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_AGENT_CHAT_FORCED, OnAgentChatUpdated)
+        EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_AGENT_CHAT_TERMINATED, OnAgentChatUpdated)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_CHAT_CATEGORY_COLOR_CHANGED, OnChatCategoryColorChanged)
 
@@ -2322,24 +2310,13 @@ function SharedChatSystem:OnNumUnreadMailChanged(numUnread)
     self.numUnreadMails = numUnread
 end
 
-function SharedChatSystem:OnAgentChatActiveChanged()
+function SharedChatSystem:OnAgentChatUpdated()
     local isActive = IsAgentChatActive()
 
     if isActive ~= self.isAgentChatActive then
         self.isAgentChatActive = isActive
 
-        if isActive and IsPlayerActivated() then
-            self.agentChatBurstTimeline:PlayFromStart()
-            PlaySound(SOUNDS.AGENT_CHAT_ACTIVE)
-        end
-
-        if isActive then
-            self.agentChatPulseTimeline:PlayFromStart()
-        else
-            self.agentChatPulseTimeline:Stop()
-        end
-
-        self.agentChatButton:SetHidden(not isActive)
+        self:OnAgentChatActiveChanged(isActive)
     end
 end
 
@@ -2350,6 +2327,14 @@ function SharedChatSystem:GetTextEntryFontString(fontSize)
         return ("%s|%s|%s"):format(face, fontSizeString, options)
     end
     return ("%s|%s"):format(face, fontSizeString)
+end
+
+function SharedChatSystem:OnPlayerActivated()
+    -- Overridden if applicable
+end
+
+function SharedChatSystem:OnAgentChatActiveChanged()
+    -- Overridden if applicable
 end
 
 function SharedChatSystem:OnNumOnlineFriendsChanged()

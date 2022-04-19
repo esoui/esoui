@@ -79,9 +79,9 @@ function ZO_Tooltip:LayoutCompanionOverview(companionData)
     rapportBar:SetValue(rapportValue)
 
     --Add the rapport bar in between the two rapport icons
-    rapportBarSection:AddTexture("EsoUI/Art/HUD/lootHistory_icon_rapportDecrease.dds", self:GetStyle("companionRapportTexture"))
+    rapportBarSection:AddTexture("EsoUI/Art/HUD/lootHistory_icon_rapportDecrease_generic.dds", self:GetStyle("companionRapportTexture"))
     rapportBarSection:AddCustomControl(rapportBarControl)
-    rapportBarSection:AddTexture("EsoUI/Art/HUD/lootHistory_icon_rapportIncrease.dds", self:GetStyle("companionRapportTexture"))
+    rapportBarSection:AddTexture("EsoUI/Art/HUD/lootHistory_icon_rapportIncrease_generic.dds", self:GetStyle("companionRapportTexture"))
     self:AddSection(rapportBarSection)
 
     --Section containing the description for the companion's current rapport level

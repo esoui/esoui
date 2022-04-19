@@ -26,7 +26,7 @@ function CampaignEmperor:Initialize(control)
     CAMPAIGN_EMPEROR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignEmperor)
     CAMPAIGN_EMPEROR_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWN then
-            QueryCampaignLeaderboardData()
+            QueryCampaignLeaderboardData(self.listAlliance)
             self:RefreshData()
             self:RefreshEmperor()
         end

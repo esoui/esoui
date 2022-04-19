@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_ChampionAssignableActionBar" virtual="true" allowBringToTop="false" />
+        <Control name="ZO_ChampionAssignableActionBar" virtual="true"/>
 
         <Control name="ZO_ChampionAssignableActionSlot" virtual="true">
             <Dimensions x="37" y="37" />

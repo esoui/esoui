@@ -265,7 +265,7 @@
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="32" />
         </Control>
 
-        <TopLevelControl name="ZO_RightFootPrintBackground" allowBringToTop="false" virtual="true">
+        <TopLevelControl name="ZO_RightFootPrintBackground" virtual="true">
             <Dimensions x="960" y="750" />
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="20"/>
             <Controls>
@@ -285,7 +285,7 @@
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="32" />
         </TopLevelControl>
 
-        <TopLevelControl name="ZO_WideRightFootPrintBackground" allowBringToTop="false" virtual="true">
+        <TopLevelControl name="ZO_WideRightFootPrintBackground" virtual="true">
             <Dimensions x="1105" y="750" />
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="20"/>
             <Controls>
@@ -305,7 +305,7 @@
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="18" />
         </TopLevelControl>
 
-        <TopLevelControl name="ZO_StatsFootPrintBackground" allowBringToTop="false" virtual="true">
+        <TopLevelControl name="ZO_StatsFootPrintBackground" virtual="true">
             <Dimensions x="645" y="750" />
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="20"/>
             <Controls>
@@ -321,7 +321,7 @@
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="18" />
         </TopLevelControl>
 
-        <TopLevelControl name="ZO_ThinRightFootPrintBackground" allowBringToTop="false" virtual="true">
+        <TopLevelControl name="ZO_ThinRightFootPrintBackground" virtual="true">
             <Dimensions x="500" y="750" />
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="20" />
             <Controls>
@@ -373,7 +373,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_ThinRightPanelBG" allowBringToTop="false" virtual="true">
+        <Control name="ZO_ThinRightPanelBG" virtual="true">
             <Dimensions x="300" y="500" />
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="-85"/>
             <Controls>

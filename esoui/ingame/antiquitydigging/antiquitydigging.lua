@@ -198,7 +198,9 @@ function ZO_AntiquityDigging:Initialize(control)
     end)
 
     control:RegisterForEvent(EVENT_STOP_ANTIQUITY_DIGGING, function()
-        SCENE_MANAGER:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
+        if ANTIQUITY_DIGGING_SCENE:IsShowing() then
+            SCENE_MANAGER:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
+        end
     end)
 
     control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_MOUSE_OVER_ACTIVE_SKILL_CHANGED, function(_, mousedOverSkill)
@@ -334,7 +336,7 @@ end
 function ZO_AntiquityDigging:RefreshDurabilityBar()
     if self.durabilityUnitFrame then
         local current, max = GetDigSpotDurability()
-        self.durabilityUnitFrame.healthBar:Update(POWERTYPE_HEALTH, current, max)
+        self.durabilityUnitFrame.healthBar:Update(COMBAT_MECHANIC_FLAGS_HEALTH, current, max)
     end
 end
 

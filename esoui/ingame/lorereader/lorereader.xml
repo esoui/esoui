@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_LoreReader" allowBringToTop="false" mouseEnabled="true" hidden="true">
+        <TopLevelControl name="ZO_LoreReader" mouseEnabled="true" hidden="true">
             <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
             <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetY="-55" />
 

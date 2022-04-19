@@ -1,5 +1,5 @@
 local PAB_TEMPLATES = {
-    [POWERTYPE_MAGICKA] = {
+    [COMBAT_MECHANIC_FLAGS_MAGICKA] = {
         background = {
             Left = "ZO_PlayerAttributeBgLeftArrow",
             Right = "ZO_PlayerAttributeBgRight",
@@ -20,7 +20,7 @@ local PAB_TEMPLATES = {
             "ZO_PlayerAttributeBarAnchorLeft",
         },
     },
-    [POWERTYPE_HEALTH] = {
+    [COMBAT_MECHANIC_FLAGS_HEALTH] = {
         background = {
             Left = "ZO_PlayerAttributeBgLeftArrow",
             Right = "ZO_PlayerAttributeBgRightArrow",
@@ -48,7 +48,7 @@ local PAB_TEMPLATES = {
             "ZO_PlayerAttributeHealthBarSmallAnchorRight",
         },
     },
-    [POWERTYPE_STAMINA] = {
+    [COMBAT_MECHANIC_FLAGS_STAMINA] = {
         background = {
             Left = "ZO_PlayerAttributeBgLeft",
             Right = "ZO_PlayerAttributeBgRightArrow",
@@ -69,7 +69,7 @@ local PAB_TEMPLATES = {
             "ZO_PlayerAttributeBarAnchorRight",
         },
     },
-    [POWERTYPE_WEREWOLF] = {
+    [COMBAT_MECHANIC_FLAGS_WEREWOLF] = {
         background = {
             small = "ZO_PlayerAttributeBgSmallLeft",
         },
@@ -80,7 +80,7 @@ local PAB_TEMPLATES = {
             "ZO_PlayerAttributeSmallAnchorLeft",
         },
     },
-    [POWERTYPE_MOUNT_STAMINA] = {
+    [COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA] = {
         background = {
             small = "ZO_PlayerAttributeBgSmallRight",
         },
@@ -461,14 +461,14 @@ function ZO_PlayerAttributeBars:New(control)
     local healthBarControls = {GetControl(healthControl, "BarLeft"), GetControl(healthControl, "BarRight")}
     healthControl.barControls = healthBarControls
     healthControl.resourceNumbersLabel = GetControl(healthControl, "ResourceNumbers")
-    local healthAttributeBar = ZO_PlayerAttributeBar:New(healthControl, healthBarControls, POWERTYPE_HEALTH)
+    local healthAttributeBar = ZO_PlayerAttributeBar:New(healthControl, healthBarControls, COMBAT_MECHANIC_FLAGS_HEALTH)
     table.insert(bars, healthAttributeBar)
     healthControl.warner = ZO_HealthWarner:New(healthControl)
 
     local siegeHealthControl = GetControl(control, "SiegeHealth")
     local siegeHealthBarControls = {GetControl(siegeHealthControl, "BarLeft"), GetControl(siegeHealthControl, "BarRight")}
     siegeHealthControl.barControls = siegeHealthBarControls
-    local siegeHealthAttributeBar = ZO_PlayerAttributeBar:New(siegeHealthControl, siegeHealthBarControls, POWERTYPE_HEALTH, "controlledsiege", "escortedram")
+    local siegeHealthAttributeBar = ZO_PlayerAttributeBar:New(siegeHealthControl, siegeHealthBarControls, COMBAT_MECHANIC_FLAGS_HEALTH, "controlledsiege", "escortedram")
     table.insert(bars, siegeHealthAttributeBar)
 
     local function UpdateSiegeHealthBar() 
@@ -485,14 +485,14 @@ function ZO_PlayerAttributeBars:New(control)
     local magickaBarControls = {GetControl(magickaControl, "Bar")}
     magickaControl.barControls = magickaBarControls
     magickaControl.resourceNumbersLabel = GetControl(magickaControl, "ResourceNumbers")
-    local magickaAttributeBar = ZO_PlayerAttributeBar:New(magickaControl, magickaBarControls, POWERTYPE_MAGICKA)
+    local magickaAttributeBar = ZO_PlayerAttributeBar:New(magickaControl, magickaBarControls, COMBAT_MECHANIC_FLAGS_MAGICKA)
     table.insert(bars, magickaAttributeBar)
-    magickaControl.warner = ZO_ResourceWarner:New(magickaControl, POWERTYPE_MAGICKA)
+    magickaControl.warner = ZO_ResourceWarner:New(magickaControl, COMBAT_MECHANIC_FLAGS_MAGICKA)
 
     local werewolfControl = GetControl(control, "Werewolf")
     local werewolfBarControls = {GetControl(werewolfControl, "Bar")}
     werewolfControl.barControls = werewolfBarControls
-    local werewolfAttributeBar = ZO_PlayerAttributeBar:New(werewolfControl, werewolfBarControls, POWERTYPE_WEREWOLF)
+    local werewolfAttributeBar = ZO_PlayerAttributeBar:New(werewolfControl, werewolfBarControls, COMBAT_MECHANIC_FLAGS_WEREWOLF)
     table.insert(bars, werewolfAttributeBar)
 
     control:RegisterForEvent(EVENT_WEREWOLF_STATE_CHANGED, function() werewolfAttributeBar:UpdateContextualFading() end)
@@ -503,14 +503,14 @@ function ZO_PlayerAttributeBars:New(control)
     local staminaBarControls = {GetControl(staminaControl, "Bar")}
     staminaControl.barControls = staminaBarControls
     staminaControl.resourceNumbersLabel = GetControl(staminaControl, "ResourceNumbers")
-    local staminaAttributeBar = ZO_PlayerAttributeBar:New(staminaControl, staminaBarControls, POWERTYPE_STAMINA)
+    local staminaAttributeBar = ZO_PlayerAttributeBar:New(staminaControl, staminaBarControls, COMBAT_MECHANIC_FLAGS_STAMINA)
     table.insert(bars, staminaAttributeBar)
-    staminaControl.warner = ZO_ResourceWarner:New(staminaControl, POWERTYPE_STAMINA)
+    staminaControl.warner = ZO_ResourceWarner:New(staminaControl, COMBAT_MECHANIC_FLAGS_STAMINA)
 
     local mountStaminaControl = GetControl(control, "MountStamina")
     local mountStaminaBarControls = {GetControl(mountStaminaControl, "Bar")}
     mountStaminaControl.barControls = mountStaminaBarControls
-    local mountStaminaAttributeBar = ZO_PlayerAttributeBar:New(mountStaminaControl, mountStaminaBarControls, POWERTYPE_MOUNT_STAMINA)
+    local mountStaminaAttributeBar = ZO_PlayerAttributeBar:New(mountStaminaControl, mountStaminaBarControls, COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA)
     table.insert(bars, mountStaminaAttributeBar)
 
     mountStaminaAttributeBar:SetExternalVisibilityRequirement(IsMounted)

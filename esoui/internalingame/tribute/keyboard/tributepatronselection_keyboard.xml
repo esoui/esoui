@@ -1,0 +1,81 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TributePatronSelection_Keyboard_TopLevel" tier="MEDIUM" hidden="true">
+            <Dimensions x="1405" y="1000" />
+            <Anchor point="LEFT" relativeTo="GuiRoot" offsetX="50" />
+            <OnInitialized>
+                ZO_TributePatronSelection_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)BackgroundLeft" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
+                    <TextureCoords bottom="0.87"/>
+                    <Dimensions x="1341" y="1033" />
+                    <Anchor point="TOPLEFT" offsetX="0" offsetY="-75" />
+                </Texture>
+                
+                <Texture name="$(parent)BackgroundRight" textureFile="EsoUI/Art/Miscellaneous/centerscreen_right.dds" mouseEnabled="true">
+                    <TextureCoords bottom="0.87"/>
+                    <Dimensions x="64" y="1033" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BackgroundLeft" relativePoint="TOPRIGHT" />
+                </Texture>
+                
+                <Control name="$(parent)Header">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_KEYBOARD_HEADER_WIDTH" y="64"/>
+                    <Anchor point="TOP" offsetY="10" offsetX="-8"/>
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontCallout" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_TRIBUTE_DECK_SELECTION_HEADER">
+                            <Anchor point="TOP" />
+                        </Label>
+
+                        <Label name="$(parent)MatchInfo" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" />
+                        </Label>
+
+                        <Control name="$(parent)Timer">
+                            <Dimensions x="150" y="64" />
+                            <Anchor point="TOPRIGHT"/>
+                            <Controls>
+                                <Texture name="$(parent)Background" color="000000">
+                                    <AnchorFill />
+                                    <Controls>
+                                        <Backdrop name="$(parent)Border" inherits="ZO_DarkThinFrame" />
+                                    </Controls>
+                                </Texture>
+                                
+                                <Label name="$(parent)Text" font="ZoFontCallout2" verticalAlignment="CENTER" horizontalAlignment="CENTER" text="25">
+                                    <AnchorFill />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SubHeader">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_KEYBOARD_HEADER_WIDTH" y="24"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="40"/>
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                            <Anchor point="TOP" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)Divider" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_KEYBOARD_HEADER_WIDTH" y="10" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubHeader" relativePoint="BOTTOMLEFT" offsetY="5" />
+                </Texture>
+
+                <Control name="$(parent)GridContainer">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_KEYBOARD_GRID_WIDTH" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="-120" constrains="Y"/>
+                    <Controls>
+                        <Control name="$(parent)GridList" inherits="ZO_GridScrollList_Keyboard">
+                            <AnchorFill />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

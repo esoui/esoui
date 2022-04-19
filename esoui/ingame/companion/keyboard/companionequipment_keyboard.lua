@@ -203,7 +203,7 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
 
     SHARED_INVENTORY:RegisterCallback("SlotAdded", function(bagId, slotIndex, newSlotData, suppressItemAlert)
         if bagId == BAG_BACKPACK then
-            self:OnInventoryItemAdded(inventory, bagId, slotIndex, newSlotData, suppressItemAlert)
+            self:OnInventoryItemAdded(INVENTORY_BACKPACK, bagId, slotIndex, newSlotData, suppressItemAlert)
         end
     end)
 end
@@ -211,7 +211,7 @@ end
 function ZO_CompanionEquipment_Keyboard:OnInventoryItemAdded(inventoryType, bagId, slotIndex, newSlotData, suppressItemAlert)
     -- play a brief flash animation on all the filter tabs that match this item's filterTypes
     if COMPANION_EQUIPMENT_KEYBOARD_FRAGMENT:IsShowing() and newSlotData.brandNew then
-        self:PlayItemAddedAlert(newSlotData)
+        self:PlayItemAddedAlert(newSlotData, suppressItemAlert)
     end
 end
 
@@ -465,7 +465,11 @@ do
     end
 end
 
-function ZO_CompanionEquipment_Keyboard:PlayItemAddedAlert(slot)
+function ZO_CompanionEquipment_Keyboard:PlayItemAddedAlert(slot, suppressItemAlert)
+    if suppressItemAlert then
+        return
+    end
+
     local isSlotAdded = false
     for _, filter in pairs(self.filters) do
         if ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, ITEM_TYPE_DISPLAY_CATEGORY_COMPANION, filter.descriptor) then
@@ -475,7 +479,7 @@ function ZO_CompanionEquipment_Keyboard:PlayItemAddedAlert(slot)
             end
             if not isSlotAdded then
                 table.insert(self.flashingSlots, slot)
-                slotAdded = true
+                isSlotAdded = true
             end
         end
     end
@@ -489,7 +493,7 @@ function ZO_CompanionEquipment_Keyboard:PlayItemAddedAlert(slot)
             end
             if not isSlotAdded then
                 table.insert(self.flashingSlots, slot)
-                slotAdded = true
+                isSlotAdded = true
             end
         end
     end

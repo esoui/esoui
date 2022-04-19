@@ -14,7 +14,7 @@
             </OnMouseUp>
         </Label>
 
-        <TextureComposite name="ZO_GuildHeraldry_DyeingSwatch" inherits="ZO_DyeingSwatchVisuals" virtual="true" mouseEnabled="true">
+        <TextureComposite name="ZO_GuildHeraldry_DyeingSwatch" inherits="ZO_DyeingSwatchVisuals" layer="CONTROLS" virtual="true" mouseEnabled="true">
             <OnMouseEnter>
                 ZO_GuildHeraldry_DyeingSwatch_OnMouseEnter(self)
             </OnMouseEnter>

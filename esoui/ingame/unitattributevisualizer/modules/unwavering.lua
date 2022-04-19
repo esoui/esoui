@@ -43,7 +43,7 @@ function ZO_UnitVisualizer_UnwaveringModule:InitializeBarValues()
     local oldBarInfo = self.barInfo
     self.barInfo =
     {
-        [ATTRIBUTE_HEALTH] = self:CreateInfoTable(healthBarControl, oldBarInfo, STAT_MITIGATION, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH),
+        [ATTRIBUTE_HEALTH] = self:CreateInfoTable(healthBarControl, oldBarInfo, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH),
     }
 
     for attribute, bar in pairs(self.barControls) do

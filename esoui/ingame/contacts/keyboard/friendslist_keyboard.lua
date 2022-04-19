@@ -213,12 +213,12 @@ function ZO_KeyboardFriendsListManager:CompareFriends(listEntry1, listEntry2)
 end
 
 function ZO_KeyboardFriendsListManager:FriendsListRow_OnMouseUp(control, button, upInside)
-    if(button == MOUSE_BUTTON_INDEX_RIGHT and upInside) then
+    if button == MOUSE_BUTTON_INDEX_RIGHT and upInside then
         ClearMenu()
 
         local data = ZO_ScrollList_GetData(control)
         if data then
-            if(data.hasCharacter and data.online) then
+            if data.hasCharacter and data.online then
                 if IsChatSystemAvailableForCurrentPlatform() then
                     AddMenuItem(GetString(SI_SOCIAL_LIST_SEND_MESSAGE), function() StartChatInput("", CHAT_CHANNEL_WHISPER, data.displayName) end)
                 end
@@ -234,9 +234,20 @@ function ZO_KeyboardFriendsListManager:FriendsListRow_OnMouseUp(control, button,
 
             AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function() JumpToHouse(data.displayName) end)
 
-            AddMenuItem(GetString(SI_SOCIAL_MENU_EDIT_NOTE),    function()
-                                                                    ZO_Dialogs_ShowDialog("EDIT_NOTE", {displayName = data.displayName, note = data.note, changedCallback = FRIENDS_LIST_MANAGER:GetNoteEditedFunction()})
-                                                                end)
+            if data.hasCharacter and data.online then
+                AddMenuItem(GetString(SI_SOCIAL_MENU_TRIBUTE_INVITE), function() InviteToTribute(data.displayName) end)
+            end
+
+            AddMenuItem(GetString(SI_SOCIAL_MENU_EDIT_NOTE), function()
+                local dialogParams =
+                {
+                    displayName = data.displayName,
+                    note = data.note,
+                    changedCallback = FRIENDS_LIST_MANAGER:GetNoteEditedFunction()
+                }
+                ZO_Dialogs_ShowDialog("EDIT_NOTE", dialogParams)
+            end)
+
             local function SendMailCallback()
                 if not IsUnitDead("player") then
                     MAIL_SEND:ComposeMailTo(data.displayName)
@@ -245,10 +256,10 @@ function ZO_KeyboardFriendsListManager:FriendsListRow_OnMouseUp(control, button,
                 end
             end
             AddMenuItem(GetString(SI_SOCIAL_MENU_SEND_MAIL), SendMailCallback)
-            
+
             AddMenuItem(GetString(SI_FRIEND_MENU_REMOVE_FRIEND), function() ZO_Dialogs_ShowDialog("CONFIRM_REMOVE_FRIEND", {displayName = data.displayName}, {mainTextParams = {data.displayName}}) end)
             AddMenuItem(GetString(SI_FRIEND_MENU_IGNORE), function() AddIgnore(data.displayName) end)
-        
+
             self:ShowMenu(control)
         end
     end

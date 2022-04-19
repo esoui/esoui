@@ -28,9 +28,6 @@
     <Font name="ZoFontGamepadCondensed34" font="$(GAMEPAD_LIGHT_FONT)|$(GP_34)|soft-shadow-thick" />
     <Font name="ZoFontGamepadCondensed27" font="$(GAMEPAD_LIGHT_FONT)|$(GP_27)|soft-shadow-thick" />
     <Font name="ZoFontGamepadCondensed25" font="$(GAMEPAD_LIGHT_FONT)|$(GP_25)|soft-shadow-thick" />
-    <Font name="ZoFontGamepadCondensed22" font="$(GAMEPAD_LIGHT_FONT)|$(GP_22)|soft-shadow-thick" />
-    <Font name="ZoFontGamepadCondensed20" font="$(GAMEPAD_LIGHT_FONT)|$(GP_20)|soft-shadow-thick" />
-    <Font name="ZoFontGamepadCondensed18" font="$(GAMEPAD_LIGHT_FONT)|$(GP_18)|soft-shadow-thick" />
 
     <Font name="ZoFontGamepadBold61" font="$(GAMEPAD_BOLD_FONT)|$(GP_61)|soft-shadow-thick" />
     <Font name="ZoFontGamepadBold54" font="$(GAMEPAD_BOLD_FONT)|$(GP_54)|soft-shadow-thick" />
@@ -64,6 +61,15 @@
     <Font name="ZoFontGamepadBookScrollTitle" font="$(HANDWRITTEN_FONT)|44" />
     <Font name="ZoFontGamepadBookTabletTitle" font="$(STONE_TABLET_FONT)|40|soft-shadow-thick" />
     <Font name="ZoFontGamepadBookMetalTitle" font="$(ANTIQUE_FONT)|40|soft-shadow-thick" />
+    
+    <!-- Tribute Fonts-->
+    <!-- TODO Tribute: Clean up any unused fonts before ship-->
+    <Font name="ZoFontTributeAntique18NoShadow" font="$(ANTIQUE_FONT)|18" />
+    <Font name="ZoFontTributeAntique27" font="$(ANTIQUE_FONT)|27|soft-shadow-thick" />
+    <Font name="ZoFontTributeAntique30NoShadow" font="$(ANTIQUE_FONT)|30" />
+    <Font name="ZoFontTributeAntique34" font="$(ANTIQUE_FONT)|34|soft-shadow-thick" />
+    <Font name="ZoFontTributeAntique40" font="$(ANTIQUE_FONT)|40|soft-shadow-thick" />
+    <Font name="ZoFontTributeAntique52" font="$(ANTIQUE_FONT)|52|soft-shadow-thick" />
     
     <!-- Header fonts-->
     <Font name="ZoFontGamepadHeaderDataValue" font="$(GAMEPAD_MEDIUM_FONT)|$(GP_42)|soft-shadow-thick" />

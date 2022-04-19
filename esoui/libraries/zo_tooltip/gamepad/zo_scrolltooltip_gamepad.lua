@@ -10,7 +10,7 @@ function ZO_ScrollTooltip_Gamepad:RefreshDisplayedKeybinds()
     local enabled = self.inputEnabled
     local shouldShowGamepadKeybinds = ZO_Keybindings_ShouldShowGamepadKeybind()
     local hideGamepad = not enabled or not self.canScroll or not shouldShowGamepadKeybinds
-    local hideKeyboard = not enabled or not self.canScroll or shouldShowGamepadKeybinds    
+    local hideKeyboard = not enabled or not self.canScroll or shouldShowGamepadKeybinds
     self.scrollIndicator:SetHidden(hideGamepad)
     self.scrollKeyUp:SetHidden(hideKeyboard)
     self.scrollKeyDown:SetHidden(hideKeyboard)
@@ -68,6 +68,7 @@ function ZO_ScrollTooltip_Gamepad:SetInputEnabled(enabled)
     local hideGamepad = not enabled or not self.canScroll or not wasLastInputGamepad
     local hideKeyboard = not enabled or not self.canScroll or wasLastInputGamepad
     self:RefreshDisplayedKeybinds()
+    self:RefreshDirectionalInputActivation()
 end
 
 function ZO_ScrollTooltip_Gamepad:OnEffectivelyShown()
@@ -78,7 +79,7 @@ end
 
 function ZO_ScrollTooltip_Gamepad:RefreshDirectionalInputActivation()
     local _, verticalExtents = self.scroll:GetScrollExtents()
-    local canScroll = verticalExtents > 0
+    local canScroll = verticalExtents > 0 and self.inputEnabled
     if not self:IsHidden() and canScroll then
         if not self.directionalInputActivated then
             self.directionalInputActivated = true

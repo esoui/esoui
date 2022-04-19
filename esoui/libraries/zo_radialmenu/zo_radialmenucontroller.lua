@@ -3,17 +3,11 @@
     Does basic initialization and provides callbacks / function overrides to populate the menu and interact with it.
   ]]
 
-ZO_RadialMenuController = ZO_Object:Subclass()
+ZO_RadialMenuController = ZO_InitializingObject:Subclass()
 
-function ZO_RadialMenuController:New(...)
-    local radial = ZO_Object.New(self)
-    radial:Initialize(...)
-    return radial
-end
-
-function ZO_RadialMenuController:Initialize(control, entryTemplate, animationTemplate, entryAnimationTemplate)
+function ZO_RadialMenuController:Initialize(control, entryTemplate, animationTemplate, entryAnimationTemplate, actionLayerNames)
     self.menuControl = control:GetNamedChild("Menu")
-    self.menu = ZO_RadialMenu:New(self.menuControl, entryTemplate, animationTemplate, entryAnimationTemplate, "RadialMenu")
+    self.menu = ZO_RadialMenu:New(self.menuControl, entryTemplate, animationTemplate, entryAnimationTemplate, actionLayerNames or "RadialMenu")
 
     local function SetupEntryControl(entryControl, data)
         self:SetupEntryControl(entryControl, data)
@@ -56,12 +50,8 @@ local TIME_TO_HOLD_KEY_MS = 250
 
 ZO_InteractiveRadialMenuController = ZO_RadialMenuController:Subclass()
 
-function ZO_InteractiveRadialMenuController:New(...)
-    return ZO_RadialMenuController.New(self, ...)
-end
-
-function ZO_InteractiveRadialMenuController:Initialize(control, entryTemplate, animationTemplate, entryAnimationTemplate )
-    ZO_RadialMenuController.Initialize(self, control, entryTemplate, animationTemplate, entryAnimationTemplate)
+function ZO_InteractiveRadialMenuController:Initialize(control, entryTemplate, animationTemplate, entryAnimationTemplate, actionLayerNames)
+    ZO_RadialMenuController.Initialize(self, control, entryTemplate, animationTemplate, entryAnimationTemplate, actionLayerNames)
 
     control:SetHandler("OnUpdate", function() self:OnUpdate() end)
     self.menu:SetOnClearCallback(function() self:StopInteraction() end)
@@ -92,6 +82,10 @@ function ZO_InteractiveRadialMenuController:StopInteraction(clearSelection)
     end
 
     return wasShowingRadial
+end
+
+function ZO_InteractiveRadialMenuController:IsInteracting()
+    return self.isInteracting
 end
 
 function ZO_InteractiveRadialMenuController:OnUpdate()

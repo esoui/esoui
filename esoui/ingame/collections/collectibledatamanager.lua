@@ -1010,6 +1010,10 @@ function ZO_CollectibleCategoryData:IsDLCCategory()
     return self.categorySpecialization == COLLECTIBLE_CATEGORY_SPECIALIZATION_DLC
 end
 
+function ZO_CollectibleCategoryData:IsTributePatronCategory()
+    return self.categorySpecialization == COLLECTIBLE_CATEGORY_SPECIALIZATION_TRIBUTE_PATRONS
+end
+
 function ZO_CollectibleCategoryData:IsStandardCategory()
     return self.categorySpecialization == COLLECTIBLE_CATEGORY_SPECIALIZATION_NONE
 end

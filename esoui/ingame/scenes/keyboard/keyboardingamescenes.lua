@@ -469,6 +469,21 @@ ITEM_SETS_BOOK_SCENE:AddFragment(COLLECTIONS_WINDOW_SOUNDS)
 ITEM_SETS_BOOK_SCENE:AddFragment(TITLE_FRAGMENT)
 ITEM_SETS_BOOK_SCENE:AddFragment(COLLECTIONS_TITLE_FRAGMENT)
 
+-----------------------------
+--Tribute Patron Book Scene--
+-----------------------------
+
+TRIBUTE_PATRON_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+TRIBUTE_PATRON_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+TRIBUTE_PATRON_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+TRIBUTE_PATRON_BOOK_SCENE:AddFragment(TRIBUTE_PATRON_BOOK_FRAGMENT)
+TRIBUTE_PATRON_BOOK_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+TRIBUTE_PATRON_BOOK_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_JOURNAL) -- TODO Tribute: Custom framing emote?
+TRIBUTE_PATRON_BOOK_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+TRIBUTE_PATRON_BOOK_SCENE:AddFragment(COLLECTIONS_WINDOW_SOUNDS)
+TRIBUTE_PATRON_BOOK_SCENE:AddFragment(TITLE_FRAGMENT)
+TRIBUTE_PATRON_BOOK_SCENE:AddFragment(COLLECTIONS_TITLE_FRAGMENT)
+
 -------------------
 --Notifications
 -------------------
@@ -1158,8 +1173,18 @@ do
                 return nil
             end,
         },
+        {
+            categoryName = SI_TRIBUTE_PATRON_BOOK_TITLE,
+            descriptor = "tributePatronBook",
+            normal = "EsoUI/Art/Collections/collections_tabIcon_tributePatrons_up.dds",
+            pressed = "EsoUI/Art/Collections/collections_tabIcon_tributePatrons_down.dds",
+            highlight = "EsoUI/Art/Collections/collections_tabIcon_tributePatrons_over.dds",
+            statusIcon = function()
+                return StatusIconForSpecializedCategory(COLLECTIBLE_CATEGORY_SPECIALIZATION_TRIBUTE_PATRONS)
+            end,
+        },
     }
-    SCENE_MANAGER:AddSceneGroup("collectionsSceneGroup", ZO_SceneGroup:New("collectionsBook", "dlcBook", "housingBook", "outfitStylesBook", "itemSetsBook"))
+    SCENE_MANAGER:AddSceneGroup("collectionsSceneGroup", ZO_SceneGroup:New("collectionsBook", "dlcBook", "housingBook", "outfitStylesBook", "itemSetsBook", "tributePatronBook"))
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_COLLECTIONS, "collectionsSceneGroup", iconData)
 end
 

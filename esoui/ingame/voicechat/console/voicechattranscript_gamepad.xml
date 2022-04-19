@@ -1,0 +1,28 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_VoiceChatTranscript_GamepadTopLevel" inherits="ZO_InteractiveChatLog_GamepadTopLevel" hidden="true">
+            <OnInitialized>
+                ZO_VoiceChatTranscript_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Scroll name="$(parent)Mask" override="true">
+                    <Controls>
+                        <Control name="$(parent)TextInput" override="true">
+                            <Controls>
+                                <Label name="$(parent)Channel" font="ZoFontGamepad36" horizontalAlignment="RIGHT">
+                                    <Dimensions y="60" />
+                                    <Anchor point="BOTTOMLEFT" offsetY="15" />
+                                </Label>
+                                <Control name="$(parent)Text" override="true">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Channel" relativePoint="BOTTOMRIGHT" offsetX="15" />
+                                    <Anchor point="TOPRIGHT" />
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

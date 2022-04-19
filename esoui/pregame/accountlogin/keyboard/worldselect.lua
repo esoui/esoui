@@ -1,5 +1,3 @@
-local syncOptions -- Choice of repository, network share, or perforce fetch for new gamedata
-
 local SERVER_DATA = 1
 
 local worldStatusStrings =
@@ -10,7 +8,7 @@ local worldStatusStrings =
     [SERVER_STATUS_LOCKED]  = SI_SERVER_STATUS_LOCKED,
 }
 
-local defaultColor = ZO_ColorDef:New (1, 1, 1)
+local defaultColor = ZO_ColorDef:New(1, 1, 1)
 
 local STATUS_COLORS =
 {
@@ -21,8 +19,8 @@ local STATUS_COLORS =
 }
 
 local function SetupWorld(control, data)
-    local worldName = GetControl(control, "Name")
-    local worldStatus = GetControl(control, "Status")
+    local worldName = control:GetNamedChild("Name")
+    local worldStatus = control:GetNamedChild("Status")
 
     worldName:SetText(data.name)
     worldStatus:SetText(data.status)
@@ -147,18 +145,22 @@ function ZO_WorldSelect_SelectWorldByName(worldName)
     end
 end
 
-function ZO_WorldSelect_Initialize()
-    local list = ZO_WorldSelectScrollList
+function ZO_WorldSelect_Cancel()
+    SetCVar("QuickLaunch", "0")
+    PregameStateManager_SetState("AccountLogin")
+end
+
+function ZO_WorldSelect_Initialize(control)
+    local list = control:GetNamedChild("ScrollList")
     ZO_ScrollList_AddDataType(list, SERVER_DATA, "ZO_WorldSelectRowTemplate", 24, SetupWorld)
     ZO_ScrollList_SetEqualityFunction(list, SERVER_DATA, function(world1, world2) return world1.name == world2.name end)
     ZO_ScrollList_EnableSelection(list, "ZO_ThinListHighlight")
     ZO_ScrollList_EnableHighlight(list, "ZO_ThinListHighlight")
     ZO_ScrollList_SetDeselectOnReselect(list, false)
-    ZO_WorldSelectCancel.gameStateString = "AccountLogin"
 
     EVENT_MANAGER:RegisterForEvent("WorldSelect", EVENT_WORLD_LIST_RECEIVED, ZO_WorldSelect_UpdateWorlds)
 
-    local worldSelectFragment = ZO_FadeSceneFragment:New(ZO_WorldSelect)
+    local worldSelectFragment = ZO_FadeSceneFragment:New(control)
     local worldSelectScene = ZO_Scene:New("worldSelect", SCENE_MANAGER)
     worldSelectScene:AddFragment(worldSelectFragment)
     worldSelectScene:AddFragment(PREGAME_BACKGROUND_FRAGMENT)

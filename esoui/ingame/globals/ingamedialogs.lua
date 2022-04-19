@@ -2770,7 +2770,7 @@ ESO_Dialogs["GAMEPAD_CONFIRM_RESEARCH_ITEM"] =
             local researchText = GetString(SI_GAMEPAD_SMITHING_RESEARCH_CONFIRM_DIALOG_TEXT)
             if IsItemInArmory(dialog.data.bagId, dialog.data.slotIndex) then
                 local armoryBuildList = { GetItemArmoryBuildList(dialog.data.bagId, dialog.data.slotIndex) }
-                local armoryBuildString = ZO_GenerateCommaSeparatedList(armoryBuildList)
+                local armoryBuildString = ZO_GenerateCommaSeparatedListWithAnd(armoryBuildList)
                 local armoryBuildText = zo_strformat(SI_RESEARCH_ARMORY_EQUIPMENT_NOTICE, ZO_SELECTED_TEXT:Colorize(armoryBuildString), #armoryBuildList)
                 return ZO_GenerateParagraphSeparatedList({ researchText, armoryBuildText })
             else

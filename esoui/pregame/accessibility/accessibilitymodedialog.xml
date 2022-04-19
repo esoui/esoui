@@ -1,0 +1,59 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_AccessibilityModePrompt"  inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_AccessibilityModePrompt_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontWinH1" override="true" />
+                <Control name="$(parent)ContentContainer" inherits="ZO_DialogContentAnchors" >
+                    <Dimensions y="350" />
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" />
+                    <Controls>
+                        <Label name="$(parent)MainText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_ACCESSIBILITY_MODE_PROMPT_MAIN_TEXT" font="ZoFontSubtitleText" horizontalAlignment="LEFT">
+                            <Anchor point="TOP" relativePoint="TOP" offsetY="15"/>
+                            <DimensionConstraints maxX="600" />
+                        </Label>
+
+                        <Button name="$(parent)EnableAccessibilityModeCheckbox" inherits="ZO_CheckButton">
+                            <Dimensions x="16" y="16" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)MainText" relativePoint="BOTTOMLEFT" offsetY="35" />
+                            <Controls>
+                                <Label name="$(parent)Label" font="ZoFontSubtitleText" horizontalAlignment="CENTER" inherits="ZO_LargeKeyMarkupLabel" mouseEnabled="true">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="14" />
+                                    <OnInitialized>
+                                        ZO_KeyMarkupLabel_SetCustomOffsets(self, -5, 5, -2, 3)
+                                    </OnInitialized>
+                                    <OnMouseUp>
+                                        ZO_AccessibilityModePrompt_OnToggleEnableButton()
+                                    </OnMouseUp>
+
+                                    <Controls>
+                                        <Label name="$(parent)Text" font="ZoFontWinH1" horizontalAlignment="CENTER" text="SI_ACCESSIBILITY_MODE_PROMPT_ENABLE_LABEL" mouseEnabled="true">
+                                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="14" />
+                                            <OnInitialized>
+                                                ZO_KeyMarkupLabel_SetCustomOffsets(self, -5, 5, -2, 3)
+                                            </OnInitialized>
+                                            <OnMouseUp>
+                                                ZO_AccessibilityModePrompt_OnToggleEnableButton()
+                                            </OnMouseUp>
+                                        </Label>
+                                    </Controls>
+                                </Label>
+                            </Controls>
+                        </Button>
+
+                        <Control name="$(parent)Continue" inherits="ZO_DialogButton" excludeFromResizeToFitExtents="true">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_AccessibilityModePrompt" relativePoint="BOTTOMRIGHT" offsetX="-20" offsetY="-25" />
+                            <Controls>
+                                <Label name="$(parent)KeyLabel" font="ZoFontSubtitleText" override="true" />
+                                <Label name="$(parent)NameLabel" font="ZoFontWinH1" override="true" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

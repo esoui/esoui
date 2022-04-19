@@ -1637,6 +1637,10 @@ function ZO_ItemFilterUtils.IsSlotInEquipmentFilterType(slot, equipmentFilterTyp
     return equipmentFilterType == GetItemEquipmentFilterType(slot.bagId, slot.slotIndex)
 end
 
+function ZO_ItemFilterUtils.GetItemTypesByItemTypeDisplayCategory(itemTypeDisplayCategory)
+    return ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[itemTypeDisplayCategory]
+end
+
 function ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategory(slot, itemTypeDisplayCategory)
     if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
         return true

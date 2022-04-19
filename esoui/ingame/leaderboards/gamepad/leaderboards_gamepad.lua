@@ -76,7 +76,6 @@ end
 
 function ZO_LeaderboardsManager_Gamepad:InitializeScenes()
     ZO_LeaderboardsManager_Shared.InitializeScenes(self, "gamepad_leaderboards")
-
     GAMEPAD_LEADERBOARDS_SCENE = self:GetScene()
 end
 
@@ -95,14 +94,12 @@ end
 
 function ZO_LeaderboardsManager_Gamepad:OnShowing()
     ZO_Gamepad_ParametricList_Screen.OnShowing(self)
-
+    self:UpdateCategories()
+    self:RefreshCategoryList()
     self:TryAddLeaderboardObjectKeybind()
 end
 
 function ZO_LeaderboardsManager_Gamepad:OnShow()
-    self:QueryData()
-    self:RefreshCategoryList()
-    self:OnLeaderboardSelected(self:GetSelectedLeaderboardData())
     TriggerTutorial(TUTORIAL_TRIGGER_LEADERBOARDS_OPENED)
 end
 
@@ -125,8 +122,6 @@ function ZO_LeaderboardsManager_Gamepad:OnDeferredInitialize()
             systemObject:PerformDeferredInitialization()
         end
     end
-
-    self:UpdateCategories()
 end
 
 function ZO_LeaderboardsManager_Gamepad:AddCategory(name, normalIcon, pressedIcon, mouseoverIcon)
@@ -134,7 +129,7 @@ function ZO_LeaderboardsManager_Gamepad:AddCategory(name, normalIcon, pressedIco
     return name
 end
 
-function ZO_LeaderboardsManager_Gamepad:AddEntry(leaderboardObject, name, titleName, parent, subType, countFunction, maxRankFunction, infoFunction, pointsFormatFunction, pointsHeaderString, consoleIdRequestParamsFunction, iconPath, leaderboardRankType)
+function ZO_LeaderboardsManager_Gamepad:AddEntry(leaderboardObject, name, titleName, parent, subType, countFunction, maxRankFunction, infoFunction, pointsFormatFunction, pointsHeaderString, consoleIdRequestParamsFunction, iconPath, leaderboardRankType, playerInfoUpdateFunction)
     local entryData = ZO_GamepadEntryData:New(name)
     entryData.group = parent
     entryData.leaderboardObject = leaderboardObject
@@ -148,6 +143,7 @@ function ZO_LeaderboardsManager_Gamepad:AddEntry(leaderboardObject, name, titleN
     entryData.pointsHeaderString = pointsHeaderString
     entryData.consoleIdRequestParamsFunction = consoleIdRequestParamsFunction
     entryData.leaderboardRankType = leaderboardRankType
+    entryData.playerInfoUpdateFunction = playerInfoUpdateFunction
 
     entryData:AddIcon(iconPath, iconPath)
     entryData:SetIconTintOnSelection(true)
@@ -208,6 +204,7 @@ function ZO_LeaderboardsManager_Gamepad:SetActiveCampaign(campaignName, icon)
 end
 
 function ZO_LeaderboardsManager_Gamepad:RefreshData()
+    LEADERBOARD_LIST_MANAGER:BuildMasterList()
     GAMEPAD_LEADERBOARD_LIST:RefreshData()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
@@ -285,7 +282,14 @@ function ZO_LeaderboardsManager_Gamepad:RefreshCategoryList()
 end
 
 function ZO_LeaderboardsManager_Gamepad:RepopulateFilterDropdown()
-    GAMEPAD_LEADERBOARD_LIST:RepopulateFilterDropdown()
+    local function OnFilterChanged(comboBox, entryText, entry)
+        local leaderboard = self:GetSelectedLeaderboardData()
+        if not leaderboard.leaderboardObject:HandleFilterDropdownChanged() then
+            GAMEPAD_LEADERBOARD_LIST:RefreshFilters()
+        end
+    end
+
+    GAMEPAD_LEADERBOARD_LIST:RepopulateFilterDropdown(OnFilterChanged)
 end
 
 function ZO_LeaderboardsManager_Gamepad:SetKeybindButtonGroup(descriptor)
@@ -298,6 +302,14 @@ function ZO_LeaderboardsManager_Gamepad:SetKeybindButtonGroup(descriptor)
     end
 
     self.currentKeybindButtonGroup = descriptor
+end
+
+function ZO_LeaderboardsManager_Gamepad:GetSelectedClassFilter()
+    return GAMEPAD_LEADERBOARD_LIST:GetSelectedClassFilter()
+end
+
+function ZO_LeaderboardsManager_Gamepad:SetLoadingSpinnerVisibility(show)
+    GAMEPAD_LEADERBOARD_LIST:SetLoadingSpinnerVisibility(show)
 end
 
 --Global XML Handlers

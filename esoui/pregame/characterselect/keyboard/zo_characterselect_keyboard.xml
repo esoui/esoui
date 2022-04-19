@@ -265,7 +265,7 @@
                     </OnClicked>
                 </Button>
 
-                <Button name="$(parent)Delete" inherits="ZO_DefaultButton" enabled="false">
+                <Button name="$(parent)Delete" inherits="ZO_DefaultButton">
                     <Dimensions x="185" y="40"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-14" />
                     <OnMouseEnter>

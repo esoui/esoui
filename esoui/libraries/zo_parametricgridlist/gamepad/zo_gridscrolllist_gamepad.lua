@@ -61,6 +61,10 @@ function ZO_AbstractGridScrollList_Gamepad:InitializeTriggerKeybinds()
     }
 end
 
+function ZO_AbstractGridScrollList_Gamepad:SetScrollToExtent(scrollToExtent)
+    ZO_ScrollList_SetScrollToExtent(self.list, scrollToExtent)
+end
+
 function ZO_AbstractGridScrollList_Gamepad:SetDirectionalInputEnabled(enabled)
     if self.directionalInputEnabled ~= enabled then
         self.directionalInputEnabled = enabled
@@ -189,8 +193,8 @@ function ZO_AbstractGridScrollList_Gamepad:GetSelectedDataIndex()
     return 0
 end
 
-function ZO_AbstractGridScrollList_Gamepad:RefreshSelection()
-    ZO_ScrollList_AutoSelectData(self.list)
+function ZO_AbstractGridScrollList_Gamepad:RefreshSelection(animateInstantly, scrollIntoView)
+    ZO_ScrollList_AutoSelectData(self.list, animateInstantly, scrollIntoView)
 end
 
 function ZO_AbstractGridScrollList_Gamepad:AddTriggerKeybinds()

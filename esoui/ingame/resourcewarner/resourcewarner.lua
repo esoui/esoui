@@ -80,7 +80,7 @@ function ZO_HealthWarner:Initialize(parent)
         self:OnHealthUpdate(health, maxHealth)
     end
     local function OnPlayerActivated()
-        local current, max = GetUnitPower("player", POWERTYPE_HEALTH)
+        local current, max = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_HEALTH)
         self:OnHealthUpdate(current, max)
     end
 
@@ -91,7 +91,7 @@ function ZO_HealthWarner:Initialize(parent)
     self.paused = false
 
     self.warning:RegisterForEvent(EVENT_POWER_UPDATE, OnPowerUpdate)
-    self.warning:AddFilterForEvent(EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH, REGISTER_FILTER_UNIT_TAG, "player")
+    self.warning:AddFilterForEvent(EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_HEALTH, REGISTER_FILTER_UNIT_TAG, "player")
     self.warning:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 end
 
@@ -103,7 +103,7 @@ function ZO_HealthWarner:SetPaused(paused)
                 self.warnAnimation:Stop()
             end
         else
-            local current, max = GetUnitPower("player", POWERTYPE_HEALTH)
+            local current, max = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_HEALTH)
             self.warning:SetAlpha(0)
             self:UpdateAlphaPulse(current / max)
         end

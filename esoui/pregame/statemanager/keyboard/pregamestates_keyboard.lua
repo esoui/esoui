@@ -15,7 +15,11 @@ local pregameStates =
         end,
 
         GetStateTransitionData = function()
-            return "ScreenAdjustIntro"
+            if not DoesPlatformSelectServer() then
+                return "ShowEULA"
+            else
+                return "ServerSelectIntro"
+            end
         end,
     },
 
@@ -71,10 +75,6 @@ local pregameStates =
             ZO_PREGAME_CHARACTER_COUNT = 0
 
             Pregame_ShowScene("gameMenuPregame")
-
-            if ZO_WorldSelectCancel ~= nil then
-                ZO_WorldSelectCancel.gameStateString = "AccountLogin"
-            end
 
             if IsErrorQueuedFromIngame() then
                 ZO_Pregame_DisplayServerDisconnectedError()

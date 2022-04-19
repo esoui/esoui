@@ -20,6 +20,7 @@ EsoUI\PregameAndIngame\Gamepad\ControllerDisconnect\ControllerDisconnect.xml
 EsoUI\PregameAndIngame\GammaAdjust\GammaAdjust.lua
 EsoUI\PregameAndIngame\GammaAdjust\GammaAdjust.xml
 
+EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Accessibility_Shared.lua
 EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Account_Shared.lua
 EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Audio_Shared.lua
 EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Camera_Shared.lua
@@ -27,6 +28,7 @@ EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Gameplay_Shared.lua
 EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Video_Shared.lua
 
 EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanelBuilder_Keyboard.lua
+EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanel_Accessibility_Keyboard.lua
 EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanel_Audio_Keyboard.lua
 EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanel_Video_Keyboard.lua
 

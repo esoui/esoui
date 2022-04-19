@@ -94,7 +94,27 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
+            settingId = GRAPHICS_SETTING_HDR_PEAK_BRIGHTNESS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_SCENE_BRIGHTNESS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_SCENE_CONTRAST,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_UI_BRIGHTNESS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_UI_CONTRAST,
         },
         {
             panel = SETTING_PANEL_VIDEO,
@@ -123,6 +143,12 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_DLSS_MODE,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_FSR_MODE,
             header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
         },
         {
@@ -434,6 +460,24 @@ GAMEPAD_SETTINGS_DATA =
             settingId = OPTIONS_CUSTOM_SETTING_RESET_TUTORIALS,
         },
     },
+    [SETTING_PANEL_ACCESSIBILITY] =
+    {
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_VOICE_CHAT_ACCESSIBILITY,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_TEXT_CHAT_ACCESSIBILITY,
+        },
+    },
     [SETTING_PANEL_AUDIO] =
     {
         {
@@ -621,6 +665,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_RUS,
+        },
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_SPA,
         },
         {
             panel = SETTING_PANEL_SOCIAL,

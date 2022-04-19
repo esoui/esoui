@@ -19,7 +19,7 @@
             </Controls>
         </Control>
         
-        <TopLevelControl name="ZO_PlayerInventoryMenu" inherits="ZO_InventoryMenuBar_Template">
+        <TopLevelControl name="ZO_PlayerInventoryMenu" level="2" inherits="ZO_InventoryMenuBar_Template">
             <OnInitialized>
                 ZO_PlayerInventoryMenu_OnInitialized(self)
             </OnInitialized>

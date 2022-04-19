@@ -862,7 +862,7 @@ local OPEN_LEADERBOARDS = true
 
 function ZO_LeaderboardRaidProvider:Accept(data)
     local raidLeaderboardsObject = SYSTEMS:GetObject("raidLeaderboards")
-    raidLeaderboardsObject:SelectRaidById(data.raidId, RAID_LEADERBOARD_SELECT_OPTION_SKIP_WEEKLY, OPEN_LEADERBOARDS)
+    raidLeaderboardsObject:SelectRaidById(data.raidId, ZO_RAID_LEADERBOARD_SELECT_OPTION_SKIP_WEEKLY, OPEN_LEADERBOARDS)
     RemoveRaidScoreNotification(data.notificationId)
 end
 

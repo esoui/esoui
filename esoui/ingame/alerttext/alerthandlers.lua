@@ -20,10 +20,10 @@ local CombatEventToSoundId =
     [ACTION_RESULT_CASTER_DEAD] = SOUNDS.ABILITY_CASTER_DEAD,
     [ACTION_RESULT_INSUFFICIENT_RESOURCE] =
     {
-        [POWERTYPE_STAMINA] = SOUNDS.ABILITY_NOT_ENOUGH_STAMINA,
-        [POWERTYPE_MAGICKA] = SOUNDS.ABILITY_NOT_ENOUGH_MAGICKA,
-        [POWERTYPE_HEALTH] = SOUNDS.ABILITY_NOT_ENOUGH_HEALTH,
-        [POWERTYPE_ULTIMATE] = SOUNDS.ABILITY_NOT_ENOUGH_ULTIMATE,
+        [COMBAT_MECHANIC_FLAGS_STAMINA] = SOUNDS.ABILITY_NOT_ENOUGH_STAMINA,
+        [COMBAT_MECHANIC_FLAGS_MAGICKA] = SOUNDS.ABILITY_NOT_ENOUGH_MAGICKA,
+        [COMBAT_MECHANIC_FLAGS_HEALTH] = SOUNDS.ABILITY_NOT_ENOUGH_HEALTH,
+        [COMBAT_MECHANIC_FLAGS_ULTIMATE] = SOUNDS.ABILITY_NOT_ENOUGH_ULTIMATE,
     },
     [ACTION_RESULT_FAILED] = SOUNDS.ABILITY_FAILED,
     [ACTION_RESULT_IN_COMBAT] = SOUNDS.ABILITY_FAILED_IN_COMBAT,
@@ -818,7 +818,7 @@ local AlertHandlers =
                             table.insert(unreadyPlayers, ZO_GetPrimaryPlayerNameFromUnitTag(unitTag, DO_NOT_USE_INTERNAL_FORMAT))
                         end
                     end
-                    local unreadyList = ZO_GenerateCommaSeparatedList(unreadyPlayers)
+                    local unreadyList = ZO_GenerateCommaSeparatedListWithAnd(unreadyPlayers)
                     alertText = zo_strformat(SI_GROUP_ELECTION_READY_CHECK_FAILED, unreadyList, #unreadyPlayers)
                 elseif not targetUnitTag then
                     return
@@ -1094,6 +1094,38 @@ local AlertHandlers =
     [EVENT_COMPANION_SUMMON_RESULT] = function(summonResult, companionId)
         return ALERT, zo_strformat(GetString("SI_COMPANIONSUMMONRESULT", summonResult), GetCompanionName(companionId))
     end,
+
+    [EVENT_TRIBUTE_INVITE_FAILED] = function(reason, targetCharacterName, targetDisplayName)
+        local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(targetDisplayName, targetCharacterName)
+        if userFacingName then
+            return ERROR, zo_strformat(GetString("SI_TRIBUTEMATCHEVENT", reason), userFacingName), SOUNDS.GENERAL_ALERT_ERROR
+        else
+            return ERROR, GetString("SI_TRIBUTEMATCHEVENT", reason), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_TRIBUTE_INVITE_RECEIVED] = function(inviterCharacterName, inviterDisplayName)
+        local userFacingName = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
+        return ALERT, zo_strformat(SI_TRIBUTE_INVITE_RECEIVED, userFacingName)
+    end,
+
+    [EVENT_TRIBUTE_INVITE_SENT] = function(inviteeCharacterName, inviteeDisplayName)
+        local userFacingName = ZO_GetPrimaryPlayerName(inviteeDisplayName, inviteeCharacterName)
+        return ALERT, zo_strformat(SI_TRIBUTE_INVITE_SENT, userFacingName)
+    end,
+
+    [EVENT_TRIBUTE_INVITE_ACCEPTED] = function()
+        -- TODO Tribute: use Tribute specific accept sound
+        return ALERT, GetString(SI_TRIBUTE_INVITE_ACCEPTED), SOUNDS.DUEL_ACCEPTED
+    end,
+
+    [EVENT_TRIBUTE_INVITE_DECLINED] = function()
+        return ALERT, GetString(SI_TRIBUTE_INVITE_DECLINED), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_TRIBUTE_INVITE_CANCELED] = function()
+        return ALERT, GetString(SI_TRIBUTE_INVITE_CANCELED), SOUNDS.GENERAL_ALERT_ERROR
+    end,
 }
 
 ZO_AntiquityScryingResultsToAlert =
@@ -1166,7 +1198,7 @@ function IsSocialErrorIgnoreResponse(error)
 end
 
 function ShouldShowGroupErrorInAlert(error)
-    return ZO_Menu_WasLastCommandFromMenu() or (error ~= GROUP_INVITE_RESPONSE_PLAYER_NOT_FOUND)
+    return ZO_Menu_WasLastCommandFromMenu()
 end
 
 function IsGroupErrorIgnoreResponse(error)

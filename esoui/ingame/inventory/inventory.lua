@@ -912,7 +912,7 @@ do
                 if IsInGamepadPreferredMode() then
                     dialogName = ZO_GAMEPAD_CONFIRM_DESTROY_ARMORY_ITEM_DIALOG
                 end
-                local armoryBuildList = ZO_GenerateCommaSeparatedList(armoryBuildListNames)
+                local armoryBuildList = ZO_GenerateCommaSeparatedListWithAnd(armoryBuildListNames)
                 ZO_Dialogs_ShowPlatformDialog(dialogName, nil, { mainTextParams = { ZO_SELECTED_TEXT:Colorize(armoryBuildList), #armoryBuildListNames, coloredItemName, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION) } })
             end
         else

@@ -10,7 +10,6 @@ ACTION_BUTTON_TIMER_TEXT_OFFSET_Y_DEFAULT_GAMEPAD = 4
 
 local ACTION_BUTTON_BGS = {ability = "EsoUI/Art/ActionBar/abilityInset.dds", item = "EsoUI/Art/ActionBar/quickslotBG.dds"}
 local ACTION_BUTTON_BORDERS = {normal = "EsoUI/Art/ActionBar/abilityFrame64_up.dds", mouseDown = "EsoUI/Art/ActionBar/abilityFrame64_down.dds"}
-local MINIMUM_TIMER_DECIMAL_VALUE = 9.94
 local FORCE_SUPPRESS_COOLDOWN_SOUND = true
 
 local g_showGlobalCooldown = false
@@ -25,6 +24,8 @@ function ActionButton:Initialize(slotNum, buttonType, parent, controlTemplate, h
     local controlName 
     if hotbarCategory == HOTBAR_CATEGORY_COMPANION then
         controlName = "CompanionUltimateButton"
+    elseif hotbarCategory == HOTBAR_CATEGORY_QUICKSLOT_WHEEL then
+        controlName = "QuickslotButton"
     else
         controlName = "ActionButton"..slotNum
     end
@@ -35,6 +36,7 @@ function ActionButton:Initialize(slotNum, buttonType, parent, controlTemplate, h
     self.hasAction = false
     self.slot = slotControl
     self.slot.slotNum = slotNum
+    self.slot.hotbarCategory = hotbarCategory
     self.button = slotControl:GetNamedChild("Button")
     self.button.slotNum = slotNum
     self.button.slotType = ABILITY_SLOT_TYPE_ACTIONBAR
@@ -84,14 +86,18 @@ function ActionButton:Initialize(slotNum, buttonType, parent, controlTemplate, h
             end 
         end
     end
-    local onChanged = (slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1) and OnUltimateChanged or nil
-    if self.button.hotbarCategory == HOTBAR_CATEGORY_COMPANION then
+
+    local isUltimateSlot = ZO_ActionBar_IsUltimateSlot(slotNum, hotbarCategory)
+    local onChanged = isUltimateSlot and OnUltimateChanged or nil
+    if hotbarCategory == HOTBAR_CATEGORY_COMPANION then
         ZO_Keybindings_RegisterLabelForBindingUpdate(self.buttonText, "COMMAND_PET", HIDE_UNBOUND, "COMMAND_PET", onChanged)
+    elseif hotbarCategory == HOTBAR_CATEGORY_QUICKSLOT_WHEEL then
+        ZO_Keybindings_RegisterLabelForBindingUpdate(self.buttonText, "ACTION_BUTTON_9", HIDE_UNBOUND, "GAMEPAD_ACTION_BUTTON_9")
     else
         ZO_Keybindings_RegisterLabelForBindingUpdate(self.buttonText, "ACTION_BUTTON_".. slotNum, HIDE_UNBOUND, "GAMEPAD_ACTION_BUTTON_".. slotNum, onChanged)
     end
 
-    if slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
+    if isUltimateSlot then
         slotControl:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, settingType, settingId)
             if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_ULTIMATE_NUMBER then
                 self:RefreshUltimateNumberVisibility()
@@ -108,6 +114,10 @@ end
 
 function ActionButton:GetSlot()
     return self.slot.slotNum
+end
+
+function ActionButton:GetHotbarCategory()
+    return self.slot.hotbarCategory
 end
 
 function ActionButton:GetButtonType()
@@ -138,8 +148,7 @@ function ActionButton:SetEnabled(enabled)
 end
 
 local function SetupActionSlot(slotObject, slotId)
-    -- pass slotObject.button.hotbarCategory which will be nil or companion
-    local slotIcon = GetSlotTexture(slotId, slotObject.button.hotbarCategory)
+    local slotIcon = GetSlotTexture(slotId, slotObject:GetHotbarCategory())
     slotObject:SetEnabled(true)
     local isGamepad = IsInGamepadPreferredMode()
     ZO_ActionSlot_SetupSlot(slotObject.icon, slotObject.button, slotIcon, isGamepad and "" or ACTION_BUTTON_BORDERS.normal, isGamepad and "" or ACTION_BUTTON_BORDERS.mouseDown, slotObject.cooldownIcon)
@@ -154,7 +163,7 @@ end
 local function SetupAbilitySlot(slotObject, slotId)
     SetupActionSlotWithBg(slotObject, slotId)
 
-    if slotId == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
+    if ZO_ActionBar_IsUltimateSlot(slotId, slotObject:GetHotbarCategory()) then
         slotObject:RefreshUltimateNumberVisibility()
     else
         slotObject:ClearCount()
@@ -176,6 +185,16 @@ local function SetupQuestItemActionSlot(slotObject, slotId)
     slotObject:SetupCount()
 end
 
+local function SetupEmoteActionSlot(slotObject, slotId)
+    SetupActionSlotWithBg(slotObject, slotId)
+    slotObject:ClearCount()
+end
+
+local function SetupQuickChatActionSlot(slotObject, slotId)
+    SetupActionSlotWithBg(slotObject, slotId)
+    slotObject:ClearCount()
+end
+
 local function SetupEmptyActionSlot(slotObject, slotId)
     slotObject:Clear()
 end
@@ -186,15 +205,18 @@ SetupSlotHandlers =
     [ACTION_TYPE_ITEM]          = SetupItemSlot,
     [ACTION_TYPE_COLLECTIBLE]   = SetupCollectibleActionSlot,
     [ACTION_TYPE_QUEST_ITEM]    = SetupQuestItemActionSlot,
+    [ACTION_TYPE_EMOTE]         = SetupEmoteActionSlot,
+    [ACTION_TYPE_QUICK_CHAT]    = SetupQuickChatActionSlot,
     [ACTION_TYPE_NOTHING]       = SetupEmptyActionSlot,
 }
 
 function ActionButton:SetupCount()
     local slotId = self:GetSlot()
-    local slotType = GetSlotType(slotId, self.button.hotbarCategory)
+    local hotbarCategory = self:GetHotbarCategory()
+    local slotType = GetSlotType(slotId, hotbarCategory)
     local stackCount
     if slotType == ACTION_TYPE_ITEM then
-        stackCount = GetSlotItemCount(slotId)
+        stackCount = GetSlotItemCount(slotId, hotbarCategory)
     end
 
     if stackCount and stackCount >= 0 then
@@ -209,9 +231,13 @@ function ActionButton:ClearCount()
     self.countText:SetHidden(true)
 end
 
-function ActionButton:HandleSlotChanged()
+function ActionButton:HandleSlotChanged(hotbarCategory)
+    --We no longer use self.button.hotbarCategory, but are keeping it around for addon compatibility
+    self.slot.hotbarCategory = hotbarCategory
+    self.button.hotbarCategory = hotbarCategory
+
     local slotId = self:GetSlot()
-    local slotType = GetSlotType(slotId, self.button.hotbarCategory)
+    local slotType = GetSlotType(slotId, hotbarCategory)
 
     local setupSlotHandler = SetupSlotHandlers[slotType]
     if internalassert(setupSlotHandler, "update slot handlers") then
@@ -241,17 +267,18 @@ function ActionButton:Clear()
 end
 
 function ActionButton:UpdateActivationHighlight()
-    local slotnum = self:GetSlot()
-    local slotType = GetSlotType(slotnum, self.button.hotbarCategory)
+    local slotNum = self:GetSlot()
+    local hotbarCategory = self:GetHotbarCategory()
+    local slotType = GetSlotType(slotNum, hotbarCategory)
     local slotIsEmpty = (slotType == ACTION_TYPE_NOTHING)
-    local showHighlight = not slotIsEmpty and HasActivationHighlight(slotnum, self.button.hotbarCategory) and not self.useFailure and not self.showingCooldown
+    local showHighlight = not slotIsEmpty and ActionSlotHasActivationHighlight(slotNum, hotbarCategory) and not self.useFailure and not self.showingCooldown
     local isShowingHighlight = self.activationHighlight:IsControlHidden() == false
 
     if showHighlight ~= isShowingHighlight then
         self.activationHighlight:SetHidden(not showHighlight)
 
         if showHighlight then
-            local _, _, activationAnimationTexture = GetSlotTexture(slotnum, self.button.hotbarCategory)
+            local _, _, activationAnimationTexture = GetSlotTexture(slotNum, hotbarCategory)
             self.activationHighlight:SetTexture(activationAnimationTexture)
 
             local anim = self.activationHighlight.animation
@@ -275,15 +302,16 @@ function ActionButton:UpdateActivationHighlight()
 end
 
 function ActionButton:UpdateState()
-    local slotnum = self:GetSlot()
-    local slotType = GetSlotType(slotnum, self.button.hotbarCategory)
+    local slotNum = self:GetSlot()
+    local hotbarCategory = self:GetHotbarCategory()
+    local slotType = GetSlotType(slotNum, hotbarCategory)
     local slotIsEmpty = (slotType == ACTION_TYPE_NOTHING)
 
-    self.button.actionId = GetSlotBoundId(slotnum, self.button.hotbarCategory)
+    self.button.actionId = GetSlotBoundId(slotNum, hotbarCategory)
 
     self:UpdateUseFailure()
 
-    self.status:SetHidden(slotIsEmpty or IsSlotToggled(slotnum) == false)
+    self.status:SetHidden(slotIsEmpty or IsSlotToggled(slotNum, hotbarCategory) == false)
 
     self:UpdateActivationHighlight()
     self:UpdateCooldown(FORCE_SUPPRESS_COOLDOWN_SOUND)
@@ -301,8 +329,10 @@ end
 function ActionButton:SetTimer(durationMS)
     self.endTimeMS = GetFrameTimeMilliseconds() + durationMS
     self.timerText:SetHidden(false)
-    local actionType = GetSlotType(self:GetSlot(), self.button.hotbarCategory) 
-    local abilityId = GetSlotBoundId(self:GetSlot(), self.button.hotbarCategory)
+    local slotNum = self:GetSlot()
+    local hotbarCategory = self:GetHotbarCategory()
+    local actionType = GetSlotType(slotNum, hotbarCategory) 
+    local abilityId = GetSlotBoundId(slotNum, hotbarCategory)
     if actionType == ACTION_TYPE_ABILITY and ShouldAbilityShowAsUsableWithDuration(abilityId) then
         self.timerOverlay:SetHidden(true)
     else
@@ -323,7 +353,7 @@ function ActionButton:UpdateTimer()
             self.timerText:SetText(timeLeftString)
 
             --We only need to worry about updating the anchor for ultimate slots as they are the only ones with count text
-            if self.slot.slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
+            if ZO_ActionBar_IsUltimateSlot(self:GetSlot(), self:GetHotbarCategory()) then
                 self:RefreshTimerTextAnchor()
             end
         else
@@ -336,25 +366,23 @@ function ActionButton:UpdateTimer()
 end
 
 function ActionButton:UpdateUseFailure()
-    local slotnum = self:GetSlot()
-    local slotType = GetSlotType(slotnum, self.button.hotbarCategory)
+    local slotNum = self:GetSlot()
+    local hotbarCategory = self:GetHotbarCategory()
+    local slotType = GetSlotType(slotNum, hotbarCategory)
 
     self.itemQtyFailure = false
     local soulGemFailure = false
     if slotType == ACTION_TYPE_ITEM then
-        self.itemQtyFailure = (GetSlotItemCount(slotnum) == 0)
+        self.itemQtyFailure = (GetSlotItemCount(slotNum, hotbarCategory) == 0)
     elseif slotType == ACTION_TYPE_ABILITY then
-        local isSoulGemAbility = IsSlotSoulTrap(slotnum)
+        local isSoulGemAbility = IsSlotSoulTrap(slotNum)
         if isSoulGemAbility and not DoesInventoryContainEmptySoulGem() then
             soulGemFailure = true
         end
     end
 
-    local costFailure = HasCostFailure(slotnum, self.button.hotbarCategory)
-    local nonCostFailure = slotType ~= ACTION_TYPE_NOTHING and
-                           self.itemQtyFailure or
-                           soulGemFailure or
-                           HasNonCostStateFailure(slotnum, self.button.hotbarCategory)
+    local costFailure = ActionSlotHasCostFailure(slotNum, hotbarCategory)
+    local nonCostFailure = slotType ~= ACTION_TYPE_NOTHING and self.itemQtyFailure or soulGemFailure or ActionSlotHasNonCostStateFailure(slotNum, hotbarCategory)
 
     self.costFailureOnly = costFailure and not nonCostFailure
     self.useFailure = costFailure or nonCostFailure
@@ -363,7 +391,9 @@ end
 function ActionButton:UpdateUsable()
     local isGamepad = IsInGamepadPreferredMode()
     local isShowingCooldown = self.showingCooldown
-    local isKeyboardUltimateSlot = not isGamepad and self.slot.slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
+    local slotNum = self:GetSlot()
+    local hotbarCategory = self:GetHotbarCategory()
+    local isKeyboardUltimateSlot = not isGamepad and ZO_ActionBar_IsUltimateSlot(slotNum, hotbarCategory)
     local usable = false
     if not self.useFailure and not isShowingCooldown then
         usable = true
@@ -371,11 +401,10 @@ function ActionButton:UpdateUsable()
         usable = true
     end
 
-    local slotId = self:GetSlot()
-    local slotType = GetSlotType(slotId, self.button.hotbarCategory)
+    local slotType = GetSlotType(slotNum, hotbarCategory)
     local stackEmpty = false
     if slotType == ACTION_TYPE_ITEM then
-        local stackCount = GetSlotItemCount(slotId)
+        local stackCount = GetSlotItemCount(slotNum, hotbarCategory)
         if stackCount <= 0 then
             stackEmpty = true
             usable = false
@@ -416,7 +445,7 @@ function ActionButton:SetCooldownPercentComplete(percentComplete)
 end
 
 function ActionButton:RefreshCooldown()
-    local remain, duration = GetSlotCooldownInfo(self:GetSlot())
+    local remain, duration = GetSlotCooldownInfo(self:GetSlot(), self:GetHotbarCategory())
     local percentComplete = (1 - remain/duration)
 
     if IsInGamepadPreferredMode() then
@@ -429,10 +458,11 @@ end
 
 local NO_LEADING_EDGE = false
 function ActionButton:UpdateCooldown(options)
-    local slotnum = self:GetSlot()
-    local remain, duration, global, globalSlotType = GetSlotCooldownInfo(slotnum)
+    local slotNum = self:GetSlot()
+    local hotbarCategory = self:GetHotbarCategory()
+    local remain, duration, global, globalSlotType = GetSlotCooldownInfo(slotNum, hotbarCategory)
     local isInCooldown = duration > 0
-    local slotType = GetSlotType(slotnum, self.button.hotbarCategory)
+    local slotType = GetSlotType(slotNum, hotbarCategory)
     local showGlobalCooldownForCollectible = global and slotType == ACTION_TYPE_COLLECTIBLE and globalSlotType == ACTION_TYPE_COLLECTIBLE
     local showCooldown = isInCooldown and (g_showGlobalCooldown or not global or showGlobalCooldownForCollectible)
     local updateChromaQuickslot = slotType ~= ACTION_TYPE_ABILITY and ZO_RZCHROMA_EFFECTS
@@ -526,14 +556,6 @@ end
 
 local BOUNCE_DURATION_MS = 500
 
-local function GetUnusableForPlatform(slotNum, useFailure, usable)
-    if IsInGamepadPreferredMode() or slotNum ~= ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
-        return useFailure
-    else
-        return not usable
-    end
-end
-
 function ActionButton:ApplyStyle(template)
     ApplyTemplateToControl(self.slot, template)
 
@@ -552,8 +574,9 @@ function ActionButton:ApplyStyle(template)
         self.cooldown:SetHidden(isGamepad)
 
         if isGamepad then
-            local slotnum = self:GetSlot()
-            local remain = GetSlotCooldownInfo(slotnum)
+            local slotNum = self:GetSlot()
+            local hotbarCategory = self:GetHotbarCategory()
+            local remain = GetSlotCooldownInfo(slotNum, hotbarCategory)
             self:PlayAbilityUsedBounce(BOUNCE_DURATION_MS + remain)
 
             if not self.itemQtyFailure then
@@ -614,7 +637,7 @@ do
     end
 
     function ActionButton:SetBounceAnimationParameters(cooldownTime)
-        local isUltimateSlot = self:GetSlot() == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
+        local isUltimateSlot = ZO_ActionBar_IsUltimateSlot(self:GetSlot(), self:GetHotbarCategory())
         SetAnimationParameters(self.bounceAnimation, self.flipCard, SHRINK_SCALE, FRAME_RESET_TIME_MS, isUltimateSlot)
         SetAnimationParameters(self.iconBounceAnimation, self.icon, ICON_SHRINK_SCALE, ICON_RESET_TIME_MS, isUltimateSlot)
     end
@@ -641,9 +664,10 @@ end
 function ActionButton:PlayAbilityUsedBounce(offset)
     if not self.bounceAnimation:IsPlaying() then
         if self.needsAnimationParameterUpdate then
-            local slotnum = self:GetSlot()
-            local _, duration = GetSlotCooldownInfo(slotnum)
-            local slotType = GetSlotType(slotnum, self.button.hotbarCategory)
+            local slotNum = self:GetSlot()
+            local hotbarCategory = self:GetHotbarCategory()
+            local _, duration = GetSlotCooldownInfo(slotNum, hotbarCategory)
+            local slotType = GetSlotType(slotNum, hotbarCategory)
             self:SetBounceAnimationParameters(slotType == ACTION_TYPE_ITEM and duration or 0)
             self.needsAnimationParameterUpdate = false
         end
@@ -669,7 +693,7 @@ function ActionButton:SetupKeySlideAnimation()
     local rightKey = self.slot:GetNamedChild("RightKeybind")
     
     if leftKey and rightKey then
-        if self.button.hotbarCategory == HOTBAR_CATEGORY_COMPANION then
+        if self:GetHotbarCategory() == HOTBAR_CATEGORY_COMPANION then
             leftKey:SetKeyCode(KEY_GAMEPAD_LEFT_STICK)
             rightKey:SetKeyCode(KEY_GAMEPAD_RIGHT_STICK)
         end
@@ -800,7 +824,7 @@ function ActionButton:StopUltimateReadyAnimations()
 end
 
 function ActionButton:PlayUltimateReadyAnimations(ultimateReadyBurstTexture, ultimateReadyLoopTexture, setProgressNoAnim)
-    local isCompanionUltimate = self.button.hotbarCategory == HOTBAR_CATEGORY_COMPANION
+    local isCompanionUltimate = self:GetHotbarCategory() == HOTBAR_CATEGORY_COMPANION
     local ultimateSound = isCompanionUltimate and SOUNDS.ABILITY_COMPANION_ULTIMATE_READY or SOUNDS.ABILITY_ULTIMATE_READY
     if not self.ultimateReadyBurstTimeline then
         self.ultimateReadyBurstTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("UltimateReadyBurst", ultimateReadyBurstTexture)
@@ -883,10 +907,10 @@ end
 
 function ActionButton:UpdateUltimateNumber()
     local ultimateCount
-    if self.button.hotbarCategory == HOTBAR_CATEGORY_COMPANION then
-        ultimateCount = GetUnitPower("companion", POWERTYPE_ULTIMATE)
+    if self:GetHotbarCategory() == HOTBAR_CATEGORY_COMPANION then
+        ultimateCount = GetUnitPower("companion", COMBAT_MECHANIC_FLAGS_ULTIMATE)
     else
-        ultimateCount = GetUnitPower("player", POWERTYPE_ULTIMATE)
+        ultimateCount = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE)
     end
     self.countText:SetText(ultimateCount)
 end
@@ -895,28 +919,21 @@ function ActionButton:UpdateUltimateMeter()
     local SET_ULTIMATE_METER_NO_ANIM = true
     self:UpdateCurrentUltimateMax()
     local ultimateCount
-    if self.button.hotbarCategory == HOTBAR_CATEGORY_COMPANION then
-        ultimateCount = GetUnitPower("companion", POWERTYPE_ULTIMATE)
+    if self:GetHotbarCategory() == HOTBAR_CATEGORY_COMPANION then
+        ultimateCount = GetUnitPower("companion", COMBAT_MECHANIC_FLAGS_ULTIMATE)
     else
-        ultimateCount = GetUnitPower("player", POWERTYPE_ULTIMATE)
+        ultimateCount = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE)
     end
 
     self:SetUltimateMeter(ultimateCount, SET_ULTIMATE_METER_NO_ANIM)
 end
 
 function ActionButton:UpdateCurrentUltimateMax()
-    local cost, mechanic = GetSlotAbilityCost(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1, self.button.hotbarCategory)
-
-    if mechanic == POWERTYPE_ULTIMATE then
-        self.currentUltimateMax = cost
-    else
-        self.currentUltimateMax = 0
-    end
+    self.currentUltimateMax = GetSlotAbilityCost(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1, COMBAT_MECHANIC_FLAGS_ULTIMATE, self:GetHotbarCategory())
 end
 
 function ActionButton:SetUltimateMeter(ultimateCount, setProgressNoAnim)
-    --self.button.hotbarCategory below can be nil, and currently should be in all cases except the companion ultimate button
-    local isSlotUsed = IsSlotUsed(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1, self.button.hotbarCategory)
+    local isSlotUsed = IsSlotUsed(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1, self:GetHotbarCategory())
     local barTexture = GetControl(self.slot, "UltimateBar")
     local leadingEdge = GetControl(self.slot, "LeadingEdge")
     local ultimateReadyBurstTexture = GetControl(self.slot, "ReadyBurst")
@@ -1106,6 +1123,10 @@ end
 
 function ZO_ActionBarTimer:GetSlot()
     return self.slot.slotNum
+end
+
+function ZO_ActionBarTimer:GetHotbarCategory()
+    return self.barType
 end
 
 function ZO_ActionBarTimer:SetupBackRowSlot(slotId, barType)

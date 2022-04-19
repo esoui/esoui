@@ -250,7 +250,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
     local IS_KEYBOARD = false
     local rewardData = self:GetRewardData(journalQuestIndex, IS_KEYBOARD)
     local numRewards = #rewardData
-    local confirmError
+    local currenciesWithMaxWarning = {}
     for i, reward in ipairs(rewardData) do
         local creatorFunc = self:GetRewardCreateFunc(reward.rewardType)
         if creatorFunc then
@@ -266,13 +266,23 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                 moneyControls[#moneyControls + 1] = control
 
                 --warn the player they aren't going to get their money when they hit complete
-                confirmError = self:TryGetMaxCurrencyWarningText(reward.rewardType, reward.amount)
+
+                if self:WouldCurrencyExceedMax(reward.rewardType, reward.amount) then
+                    local currency = self:GetCurrencyTypeFromReward(reward.rewardType)
+                    table.insert(currenciesWithMaxWarning, GetCurrencyName(currency))
+                end
             else
                 local control = self.givenRewardPool:AcquireObject()
                 control.index = reward.index
                 control.itemType = reward.itemType
                 if control.itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
                     control.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
+                elseif control.itemType == REWARD_ITEM_TYPE_TRIBUTE_CARD_UPGRADE then
+                    local patronDefId, cardIndex = GetJournalQuestRewardTributeCardUpgradeInfo(journalQuestIndex, i)
+                    local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(patronDefId)
+                    local baseCardId, upgradeCardId = patronData:GetDockCardInfoByIndex(cardIndex)
+                    control.patronDefId = patronDefId
+                    control.upgradeCardId = upgradeCardId
                 end
 
                 -- reward.quality is deprecated, included here for addon backwards compatibility
@@ -284,11 +294,17 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                 anchorIndex = anchorIndex + 1
 
                 -- Controls in the first column and last row serve as the anchor for the money reward control
-                if(zo_mod(anchorIndex, REWARD_STRIDE) == 1) then
+                if zo_mod(anchorIndex, REWARD_STRIDE) == 1 then
                     moneyAnchorControl = control
                 end
             end
         end
+    end
+
+    local confirmError
+    if #currenciesWithMaxWarning > 0 then
+        local currencyList = ZO_GenerateCommaSeparatedListWithOr(currenciesWithMaxWarning)
+        confirmError = ZO_ERROR_COLOR:Colorize(zo_strformat(SI_QUEST_REWARD_MAX_CURRENCY_ERROR, currencyList))
     end
 
     local rewardWindowHeight = zo_ceil(anchorIndex / REWARD_STRIDE) * (ZO_REWARD_SIZE_Y + REWARD_PADDING_Y) + 50
@@ -360,6 +376,7 @@ function ZO_QuestReward_MouseEnter(control)
         if control.itemType == REWARD_ITEM_TYPE_ITEM then
             InitializeTooltip(ItemTooltip)
             ItemTooltip:SetQuestReward(control.index)
+            ItemTooltip:HideComparativeTooltips()
             ItemTooltip:ShowComparativeTooltips()
             ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
             ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
@@ -367,6 +384,9 @@ function ZO_QuestReward_MouseEnter(control)
         elseif control.itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
             InitializeTooltip(ItemTooltip, control, RIGHT, -5, 0, LEFT)
             ItemTooltip:SetCollectible(control.itemId)
+        elseif control.itemType == REWARD_ITEM_TYPE_TRIBUTE_CARD_UPGRADE then
+            InitializeTooltip(ItemTooltip, control, RIGHT, -5, 0, LEFT)
+            ItemTooltip:SetTributeCard(control.patronDefId, control.upgradeCardId)
         end
     end
 end

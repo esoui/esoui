@@ -31,7 +31,7 @@
                 </Label>
             </Controls>
         </Control>
-        
+
         <Control name="ZO_ActivityFinderSingularTemplate_Shared" virtual="true">
             <Controls>
                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/Icons/icon_missing.dds"/>
@@ -48,7 +48,7 @@
                         <Label name="$(parent)List" override="true" />
                     </Controls>
                 </Control>
-                
+
                 <Control name="$(parent)RewardsSection" resizeToFitDescendents="true" hidden="true">
                     <Controls>
                         <Label name="$(parent)Header" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
@@ -64,6 +64,63 @@
                                 </Control>
                             </Controls>
                         </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)TributeSeasonSection" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)Header" text="SI_TRIBUTE_FINDER_SEASON_PROGRESS_HEADER" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)CountDown" text="SI_TRIBUTE_FINDER_SEASON_PROGRESS_HEADER" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPRIGHT" offsetX="-20"/>
+                        </Label>
+
+                        <Label name="$(parent)LeaderboardRank" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Label>
+
+                        <Texture name="$(parent)CurrentRankIcon" textureFile="EsoUI/Art/icons/icon_missing.dds" layer="CONTROLS">
+                            <Dimensions x="64" y="64" />
+                        </Texture>
+
+                        <Texture name="$(parent)NextRankIcon" textureFile="EsoUI/Art/icons/icon_missing.dds" layer="CONTROLS">
+                            <Anchor point="RIGHT" offsetX="-30" constrains="X"/>
+                            <Anchor point="TOP" relativeTo="$(parent)CurrentRankIcon" relativePoint="TOP" constrains="Y" />
+                            <Dimensions x="64" y="64" />
+                        </Texture>
+
+                        <Control name="$(parent)PlacementMatchProgressBar" hidden="true">
+                            <Anchor point="LEFT" relativeTo="$(parent)CurrentRankIcon" relativePoint="RIGHT" offsetX="10" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)NextRankIcon" relativePoint="LEFT" offsetX="-10" />
+                            <Dimensions y="32" />
+                        </Control>
+
+                        <Control name="$(parent)ClubRankBarContainer" tier="MEDIUM" hidden="true">
+                            <Anchor point="LEFT" relativeTo="$(parent)CurrentRankIcon" relativePoint="RIGHT" offsetX="10" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)NextRankIcon" relativePoint="LEFT" offsetX="-10" />
+                            <Dimensions y="32" />
+                            <Controls>
+                                <StatusBar name="$(parent)ProgressBar">
+                                    <Anchor point="LEFT" />
+                                    <Anchor point="RIGHT" />
+                                </StatusBar>
+
+                                <Control name="$(parent)Bg" inherits="ZO_ArrowStatusBarBG" >
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ProgressBar" />
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ProgressBar" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)ProgressStateLabel" modifyTextType="UPPERCASE">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ClubRankBarContainerProgressBar" relativePoint="TOPLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)ProgressValueLabel" modifyTextType="UPPERCASE">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ClubRankBarContainerProgressBar" relativePoint="TOPRIGHT" offsetX="-5" />
+                        </Label>
                     </Controls>
                 </Control>
             </Controls>

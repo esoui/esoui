@@ -32,6 +32,7 @@ RIGHT_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedRightBackground)
 UI_SHORTCUTS_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))
 MOUSE_UI_MODE_FRAGMENT = ZO_ActionLayerFragment:New("MouseUIMode")
 TREE_UNDERLAY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedTreeUnderlay)
+KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_KeybindStripMungeBackground)
 
 ----------------------------------------
 --Window Sound Fragment
@@ -58,3 +59,26 @@ function ZO_WindowSoundFragment:Hide()
     end
     self:OnHidden()
 end
+
+
+-------------------------
+--Keyboard Tribute
+-------------------------
+
+ZO_KEYBOARD_TRIBUTE_PILE_VIEWER_FRAGMENT_GROUP =
+{
+    TRIBUTE_PILE_VIEWER_KEYBOARD_FRAGMENT,
+    KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT,
+}
+
+ZO_KEYBOARD_TRIBUTE_TARGET_VIEWER_FRAGMENT_GROUP =
+{
+    TRIBUTE_TARGET_VIEWER_KEYBOARD_FRAGMENT,
+    KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT,
+}
+
+ZO_KEYBOARD_TRIBUTE_PATRON_SELECTION_FRAGMENT_GROUP =
+{
+    TRIBUTE_PATRON_SELECTION_KEYBOARD_FRAGMENT,
+    KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT,
+}

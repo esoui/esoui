@@ -80,11 +80,9 @@
             </Controls>
         </Control>
 
-        <Label name="ZO_AddPermissionIndividualNameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_NAME_INSTRUCTIONS" virtual="true"/>
-        <Label name="ZO_AddPermissionGuildNameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_ADD_GUILD_PERMISSION_INSTRUCTIONS" virtual="true"/>
-        <Label name="ZO_AddPermissionPresetsHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_SELECT_PERMISSION_HEADER" virtual="true">
-            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="15" />
-        </Label>
+        <Label name="ZO_AddPermissionIndividualNameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_NAME_INSTRUCTIONS" virtual="true" />
+        <Label name="ZO_AddPermissionGuildNameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_ADD_GUILD_PERMISSION_INSTRUCTIONS" virtual="true" />
+        <Label name="ZO_AddPermissionPresetsHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_SELECT_PERMISSION_HEADER" virtual="true" />
 
         <Control name="ZO_AddPermissionPresets" inherits="ZO_ComboBox" virtual="true">
             <Dimensions x="200" y="36"/>
@@ -313,7 +311,9 @@
 
                 <Backdrop name="$(parent)Name" inherits="ZO_AddPermissionIndividualEditBackdrop" />
 
-                <Label name="$(parent)PresetsHeader" inherits="ZO_AddPermissionPresetsHeader" />
+                <Label name="$(parent)PresetsHeader" inherits="ZO_AddPermissionPresetsHeader">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="15" />
+                </Label>
                 
                 <Control name="$(parent)Presets" inherits="ZO_AddPermissionPresets" />
 
@@ -332,7 +332,9 @@
 
                 <Backdrop name="$(parent)Name" inherits="ZO_AddPermissionGuildEditBackdrop" />
 
-                <Label name="$(parent)PresetsHeader" inherits="ZO_AddPermissionPresetsHeader" />
+                <Label name="$(parent)PresetsHeader" inherits="ZO_AddPermissionPresetsHeader">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="15" />
+                </Label>
 
                 <Control name="$(parent)Presets" inherits="ZO_AddPermissionPresets" />
 

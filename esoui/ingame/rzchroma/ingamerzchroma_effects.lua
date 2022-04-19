@@ -49,14 +49,12 @@ function ZO_IngameRzChroma_Effects:RegisterForEvents()
             self:AddDeathEffects()
         end
 
-        local ultimateCost, mechanic = GetSlotAbilityCost(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
-        if mechanic == POWERTYPE_ULTIMATE then
-            local currentUltimatePower = GetUnitPower("player", POWERTYPE_ULTIMATE)
-            if currentUltimatePower >= ultimateCost then
-                ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect("ACTION_BUTTON_8")
-            else
-                ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect("ACTION_BUTTON_8")
-            end
+        local ultimateCost = GetSlotAbilityCost(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1, COMBAT_MECHANIC_FLAGS_ULTIMATE)
+        local currentUltimatePower = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE)
+        if currentUltimatePower >= ultimateCost then
+            ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect("ACTION_BUTTON_8")
+        else
+            ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect("ACTION_BUTTON_8")
         end
     end
 

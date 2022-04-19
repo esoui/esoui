@@ -162,7 +162,8 @@
             </OnInitialized>
             <AnchorFill/>
             <Controls>
-                <Control name="$(parent)Canvas" mouseEnabled="true">
+                <!-- ZO_ChampionStar are texture composites which are background layer-->
+                <Control name="$(parent)Canvas" mouseEnabled="true" layer="BACKGROUND">
                     <AnchorFill/>
                     <OnMouseUp>
                         ZO_ChampionPerksCanvas_OnMouseUp(button, upInside)

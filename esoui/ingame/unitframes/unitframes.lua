@@ -502,7 +502,7 @@ local UNITFRAME_BAR_STYLES =
 {
     [TARGET_UNIT_FRAME] =
     {
-        [POWERTYPE_HEALTH] =
+        [COMBAT_MECHANIC_FLAGS_HEALTH] =
         {
             textAnchors =
             {
@@ -514,7 +514,7 @@ local UNITFRAME_BAR_STYLES =
 
     [GROUP_UNIT_FRAME] =
     {
-        [POWERTYPE_HEALTH] =
+        [COMBAT_MECHANIC_FLAGS_HEALTH] =
         {
             keyboard =
             {
@@ -537,7 +537,7 @@ local UNITFRAME_BAR_STYLES =
 
     [RAID_UNIT_FRAME] =
     {
-        [POWERTYPE_HEALTH] =
+        [COMBAT_MECHANIC_FLAGS_HEALTH] =
         {
             keyboard =
             {
@@ -558,7 +558,7 @@ local UNITFRAME_BAR_STYLES =
     },
     [COMPANION_RAID_UNIT_FRAME] =
     {
-        [POWERTYPE_HEALTH] =
+        [COMBAT_MECHANIC_FLAGS_HEALTH] =
         {
             keyboard =
             {
@@ -579,7 +579,7 @@ local UNITFRAME_BAR_STYLES =
     },
     [COMPANION_UNIT_FRAME] =
     {
-        [POWERTYPE_HEALTH] =
+        [COMBAT_MECHANIC_FLAGS_HEALTH] =
         {
             keyboard =
             {
@@ -600,7 +600,7 @@ local UNITFRAME_BAR_STYLES =
     },
     [COMPANION_GROUP_UNIT_FRAME] =
     {
-        [POWERTYPE_HEALTH] =
+        [COMBAT_MECHANIC_FLAGS_HEALTH] =
         {
             keyboard =
             {
@@ -768,7 +768,7 @@ function ZO_UnitFrameBar:Update(barType, cur, max, forceInit)
     if barType ~= self.barType then
         updateBarType = true
         self.barType = barType
-        self.barTypeName = GetString("SI_COMBATMECHANICTYPE", self.barType)
+        self.barTypeName = GetString("SI_COMBATMECHANICFLAGS", self.barType)
     end
 
     self:UpdateText(updateBarType, updateValue)
@@ -1158,16 +1158,16 @@ function ZO_UnitFrameObject:Initialize(unitTag, anchors, barTextMode, style, tem
     
     self.barTextMode = barTextMode
 
-    self.healthBar = ZO_UnitFrameBar:New(baseWindowName.."Hp", self.frame, barTextMode, style, POWERTYPE_HEALTH)
+    self.healthBar = ZO_UnitFrameBar:New(baseWindowName.."Hp", self.frame, barTextMode, style, COMBAT_MECHANIC_FLAGS_HEALTH)
 
     if style == COMPANION_RAID_UNIT_FRAME then
-        self.healthBar:SetColor(POWERTYPE_HEALTH, COMPANION_HEALTH_GRADIENT, COMPANION_HEALTH_GRADIENT_LOSS, COMPANION_HEALTH_GRADIENT_GAIN)
+        self.healthBar:SetColor(COMBAT_MECHANIC_FLAGS_HEALTH, COMPANION_HEALTH_GRADIENT, COMPANION_HEALTH_GRADIENT_LOSS, COMPANION_HEALTH_GRADIENT_GAIN)
     else
-        self.healthBar:SetColor(POWERTYPE_HEALTH)
+        self.healthBar:SetColor(COMBAT_MECHANIC_FLAGS_HEALTH)
     end
 
     self.resourceBars = {}
-    self.resourceBars[POWERTYPE_HEALTH] = self.healthBar
+    self.resourceBars[COMBAT_MECHANIC_FLAGS_HEALTH] = self.healthBar
 
     self.powerBars = {}
     self.lastPowerType = 0
@@ -1329,7 +1329,7 @@ function ZO_UnitFrameObject:RefreshVisible(instant)
 end
 
 function ZO_UnitFrameObject:GetHealth()
-    return GetUnitPower(self.unitTag, POWERTYPE_HEALTH)
+    return GetUnitPower(self.unitTag, COMBAT_MECHANIC_FLAGS_HEALTH)
 end
 
 function ZO_UnitFrameObject:RefreshControls()
@@ -1344,9 +1344,9 @@ function ZO_UnitFrameObject:RefreshControls()
             self:RefreshElectionIcon()
 
             local health, maxHealth = self:GetHealth()
-            self.healthBar:Update(POWERTYPE_HEALTH, health, maxHealth, FORCE_INIT)
+            self.healthBar:Update(COMBAT_MECHANIC_FLAGS_HEALTH, health, maxHealth, FORCE_INIT)
 
-            for i = 1, NUM_POWER_POOLS do
+            for i = 1, COMBAT_MECHANIC_FLAGS_MAX_INDEX do
                 local powerType, cur, max = GetUnitPowerInfo(self.unitTag, i)
                 self:UpdatePowerBar(i, powerType, cur, max, FORCE_INIT)
             end
@@ -1465,7 +1465,7 @@ function ZO_UnitFrameObject:UpdatePowerBar(index, powerType, cur, max, forceInit
         self.powerBars[index] = ZO_UnitFrameBar:New(self.frame:GetName().."PowerBar"..index, self.frame, self.barTextMode, self.style, powerType)
         currentBar = self.powerBars[index]
 
-        if powerType == POWERTYPE_HEALTH and self.style == COMPANION_RAID_UNIT_FRAME then
+        if powerType == COMBAT_MECHANIC_FLAGS_HEALTH and self.style == COMPANION_RAID_UNIT_FRAME then
             currentBar:SetColor(powerType, COMPANION_HEALTH_GRADIENT, COMPANION_HEALTH_GRADIENT_LOSS, COMPANION_HEALTH_GRADIENT_GAIN)
         else
             currentBar:SetColor(powerType)
@@ -1476,7 +1476,7 @@ function ZO_UnitFrameObject:UpdatePowerBar(index, powerType, cur, max, forceInit
     if currentBar ~= nil then
         currentBar:Update(powerType, cur, max, forceInit)
 
-        currentBar:Hide(powerType == POWERTYPE_INVALID)
+        currentBar:Hide(powerType == COMBAT_MECHANIC_FLAGS_INVALID)
     end
 end
 
@@ -2364,9 +2364,9 @@ local function RegisterForEvents()
     local function PowerUpdateHandlerFunction(unitTag, powerPoolIndex, powerType, powerPool, powerPoolMax)
         local unitFrame = UnitFrames:GetFrame(unitTag)
         if unitFrame then
-            if powerType == POWERTYPE_HEALTH then
+            if powerType == COMBAT_MECHANIC_FLAGS_HEALTH then
                 local oldHealth = unitFrame.healthBar.currentValue    
-                unitFrame.healthBar:Update(POWERTYPE_HEALTH, powerPool, powerPoolMax)
+                unitFrame.healthBar:Update(COMBAT_MECHANIC_FLAGS_HEALTH, powerPool, powerPoolMax)
 
                 if oldHealth ~= nil and oldHealth == 0 then
                     -- Unit went from dead to non dead...update reaction

@@ -43,6 +43,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Audio_IntroMusic",
+    settingType = SETTING_TYPE_AUDIO,
+    settingId = AUDIO_SETTING_INTRO_MUSIC,
+    header = SI_AUDIO_OPTIONS_GENERAL,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Audio_SoundEnabled",
     settingType = SETTING_TYPE_AUDIO,
     settingId = AUDIO_SETTING_SOUND_ENABLED,

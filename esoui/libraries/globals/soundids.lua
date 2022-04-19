@@ -985,6 +985,15 @@ SOUNDS = {
     ARMORY_BUILD_SLOT_EXPANDED = "Armory_Expanded",
     ARMORY_BUILD_SLOT_COLLAPSED = "Armory_Collapsed",
 
+    -- Deconstruction Assistant
+    UNIVERSAL_DECONSTRUCTION_SUCCESS = "Universal_Deconstruction_Success",
+    UNIVERSAL_DECONSTRUCTION_FAIL = "Universal_Deconstruction_Fail",
+
     -- Pregame Animated Background
     PREGAME_ANIMATEDBACKGROUND_HIGHISLE_GEM_SPARKLE = "Pregame_AnimatedBackground_HighIsle_Gem_Sparkle",
+
+    -- Tribute
+    TRIBUTE_TURN_START = "Tribute_TurnStart",
+    TRIBUTE_TURN_START_OPPONENT_PENULTIMATE_FAVOR = "Tribute_TurnStart_OpponentPenultimateFavor",
+    TRIBUTE_RANK_CHANGE         = "Tribute_RankChange",
 }

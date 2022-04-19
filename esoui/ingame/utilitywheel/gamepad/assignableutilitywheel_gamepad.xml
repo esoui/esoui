@@ -3,11 +3,13 @@
         <Control name="ZO_AssignableUtilityWheelSlot_Gamepad_Template" inherits="ZO_GamepadSelectableItemRadialMenuEntryTemplate" virtual="true">
             <OnInitialized>
                 self.label = self:GetNamedChild("Label")
+                self.CustomOnStopCallback = ZO_AssignableUtilityWheelSlot_Gamepad_OnSparkleAnimationStop
                 ZO_SelectableItemRadialMenuEntryTemplate_OnInitialized(self)
                 ZO_CreateSparkleAnimation(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Label" font="ZoFontGamepad54" horizontalAlignment="CENTER">
+                <Label name="$(parent)Label" font="ZoFontGamepad42" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS" hidden="true">
+                    <Dimensions x="300" />
                     <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="5"/>
                 </Label>
             </Controls>
@@ -15,6 +17,35 @@
 
         <Control name="ZO_AssignableUtilityWheel_Gamepad_Template" inherits="ZO_RadialMenuHUDSize_Gamepad" virtual="true">
             <Controls>
+                <Label name="$(parent)Category" tier="MEDIUM" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS" hidden="true">
+                    <Dimensions x="300" />
+                    <Anchor point="CENTER" />
+                </Label>
+                
+                <Texture name="$(parent)Icon" tier="MEDIUM" hidden="true">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                
+                <Texture name="$(parent)Sparkle" inherits="ZO_SparkleTemplate" >
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="CENTER"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AssignableUtilityWheelSmall_Gamepad_Template" inherits="ZO_RadialMenuPanelSize_Gamepad" virtual="true">
+            <Controls>
+                <Label name="$(parent)Category" tier="MEDIUM" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS" hidden="true">
+                    <Dimensions x="150" />
+                    <Anchor point="CENTER" />
+                </Label>
+                
+                <Texture name="$(parent)Icon" tier="MEDIUM" hidden="true">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                
                 <Texture name="$(parent)Sparkle" inherits="ZO_SparkleTemplate" >
                     <Dimensions x="128" y="128" />
                     <Anchor point="CENTER"/>

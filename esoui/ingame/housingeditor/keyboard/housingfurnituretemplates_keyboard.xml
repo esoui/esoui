@@ -186,7 +186,7 @@
                 </EditBox>
 
                 <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_HOUSING_BROWSER_SEARCH_FILTER_BY">
-                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Search"/>
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" />
                 </Label>
             </Controls>
         </Backdrop>

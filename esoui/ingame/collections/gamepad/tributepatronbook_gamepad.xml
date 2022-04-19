@@ -1,0 +1,45 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_TributePatron_Gamepad_Description_Label" font="ZoFontGamepad27" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <Control name="ZO_TributePatron_GP_Header_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_TributePatronBook_Gamepad_TL" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_TributePatronBook_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
+                    <Controls>
+                        <Control name="$(parent)InfoContainer" inherits="ZO_TributePatronBook_Layout_Template ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>
+                                <Label name="$(parent)Header" font="ZoFontGamepad45" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="TOPLEFT" />
+                                </Label>
+
+                                <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_NotAnchored_Gamepad">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="BOTTOMRIGHT" />
+
+                                    <Controls>
+                                        <Label name="$(parent)SetupLabel" inherits="ZO_TributePatron_Gamepad_Description_Label" hidden="true">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

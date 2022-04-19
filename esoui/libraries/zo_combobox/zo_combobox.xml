@@ -56,7 +56,7 @@
             </Controls>
         </Control>
         
-        <Control name="ZO_ScrollableComboBox" mouseEnabled="true" inherits="ZO_ComboBox" virtual="true" tier="MEDIUM">
+        <Control name="ZO_ScrollableComboBox" mouseEnabled="true" inherits="ZO_ComboBox" virtual="true">
             <OnInitialized>
                 ZO_ScrollableComboBox:New(self)
             </OnInitialized>

@@ -16,7 +16,7 @@ function BossBar:Initialize(control)
     self.bossHealthValues = {}
 
     for i = 1, #self.bars do
-        local gradient = ZO_POWER_BAR_GRADIENT_COLORS[POWERTYPE_HEALTH]
+        local gradient = ZO_POWER_BAR_GRADIENT_COLORS[COMBAT_MECHANIC_FLAGS_HEALTH]
         ZO_StatusBar_SetGradientColor(self.bars[i], gradient)
     end
 
@@ -29,7 +29,7 @@ function BossBar:Initialize(control)
         self:OnPowerUpdate(unitTag, powerType)
     end
     local powerUpdateEventHandler = ZO_MostRecentPowerUpdateHandler:New("BossBar", PowerUpdateHandlerFunction)
-    powerUpdateEventHandler:AddFilterForEvent(REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH)
+    powerUpdateEventHandler:AddFilterForEvent(REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_HEALTH)
     powerUpdateEventHandler:AddFilterForEvent(REGISTER_FILTER_UNIT_TAG_PREFIX, "boss")
 
     control:RegisterForEvent(EVENT_BOSSES_CHANGED, function(_, forceReset) self:RefreshAllBosses(forceReset) end)
@@ -61,7 +61,7 @@ function BossBar:RefreshBossHealth(unitTag)
     local bossEntry = self.bossHealthValues[unitTag]
 
     if bossEntry ~= nil then
-        local health, maxHealth = GetUnitPower(unitTag, POWERTYPE_HEALTH)
+        local health, maxHealth = GetUnitPower(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH)
         bossEntry.health = health
         bossEntry.maxHealth = maxHealth
     end

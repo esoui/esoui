@@ -122,9 +122,26 @@ function ZO_Help_Manager:ToggleHelpOverlay()
     end
 end
 
-function ZO_Help_Manager:OnOverlayVisibilityChanged(isShowing)
-    BroadcastHelpOverlayVisibilityChange(isShowing) -- Inform internal ingame
-    self:FireCallbacks("OverlayVisibilityChanged", isShowing)
+do
+    local function OnInterceptCloseAction()
+        SCENE_MANAGER:RemoveFragmentGroup(HELP_TUTORIALS_OVERLAY_KEYBOARD_FRAGMENT_GROUP)
+        local HANDLED = true
+        return HANDLED
+    end
+
+    function ZO_Help_Manager:OnOverlayVisibilityChanged(isShowing)
+        BroadcastHelpOverlayVisibilityChange(isShowing) -- Inform internal ingame
+        self:FireCallbacks("OverlayVisibilityChanged", isShowing)
+
+        if isShowing then
+            local NO_ARG = nil
+            -- We want HelpOverlay to get dibs on intercepting the close button before other systems (e.g.: Tribute conceding)
+            local PRIORITY = 1
+            CLOSE_ACTIONS_INTERCEPT_LAYER_FRAGMENT:RegisterCallback("InterceptCloseAction", OnInterceptCloseAction, NO_ARG, PRIORITY)
+        else
+            CLOSE_ACTIONS_INTERCEPT_LAYER_FRAGMENT:UnregisterCallback("InterceptCloseAction", OnInterceptCloseAction)
+        end
+    end
 end
 
 HELP_MANAGER = ZO_Help_Manager:New()

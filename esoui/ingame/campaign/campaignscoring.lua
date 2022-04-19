@@ -7,7 +7,7 @@ function ZO_CampaignScoringManager:New(control)
     CAMPAIGN_SCORING_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
                                                                     if newState == SCENE_FRAGMENT_SHOWN then
                                                                         manager.shown = true
-                                                                        QueryCampaignLeaderboardData()
+                                                                        QueryCampaignLeaderboardData(ALLIANCE_NONE)
                                                                         manager:UpdateRewardTier()
                                                                         manager:UpdateScores()
                                                                     elseif newState == SCENE_FRAGMENT_HIDDEN then

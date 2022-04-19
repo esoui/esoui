@@ -138,7 +138,9 @@ end
 
 function ZO_HUDEquipmentStatus:Initialize(control)
     self.control = control
-    local quickslotButton = ZO_ActionBar_GetButton(ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1)
+    --ZO_ActionBar_GetButton always returns the quickslot button when the category is HOTBAR_CATEGORY_QUICKSLOT_WHEEL, so there is no reason to pass in a slot
+    local UNUSED = nil
+    local quickslotButton = ZO_ActionBar_GetButton(UNUSED, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
     self.control:SetAnchor(RIGHT, quickslotButton.slot, LEFT, -10, 0)
     self.indicators = {}
     self.indicators[WEAPON_INDICATOR] = HUDIndicator:New(GetControl(self.control, WEAPON_INDICATOR), ZO_HUDEquipmentStatus.WEAPON_INDICATOR_DATA)

@@ -195,44 +195,6 @@
                     <Dimensions x="8" y="32" />
                     <TextureCoords left="0.25" right=".75" top="0" bottom="1" />
                 </Texture>
-
-                <Button name="$(parent)AgentChat" mouseOverBlendMode="ADD" inherits="ZO_ButtonBehaviorClickSound" inheritAlpha="false" hidden="true">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="LEFT" relativeTo="$(parent)NumNotifications" relativePoint="RIGHT" offsetX="10" />
-
-                    <Textures
-                        normal="EsoUI/Art/ChatWindow/chat_cs_up.dds"
-                        pressed="EsoUI/Art/ChatWindow/chat_cs_down.dds"
-                        mouseOver="EsoUI/Art/ChatWindow/chat_cs_over.dds"
-                    />
-
-                    <OnMouseEnter>
-                        ZO_ChatSystem_OnAgentChatEnter(self)
-                    </OnMouseEnter>
-
-                    <OnMouseExit>
-                        ZO_ChatSystem_OnAgentChatExit(self)
-                    </OnMouseExit>
-
-                    <OnClicked>
-                        ZO_ChatSystem_OnAgentChatClicked(self)
-                    </OnClicked>
-
-                    <Controls>
-                        <Texture name="$(parent)Glow" tier="HIGH" textureFile="EsoUI/Art/ChatWindow/chat_cs_glow.dds" hidden="false" inheritAlpha="false">
-                            <Dimensions x="32" y="32"/>
-                            <Anchor point="CENTER"/>
-                        </Texture>
-                        <Texture name="$(parent)Burst" tier="HIGH" textureFile="EsoUI/Art/ChatWindow/chat_notification_burst.dds" blendMode="ADD" alpha="0" inheritAlpha="false">
-                            <Dimensions x="512" y="512"/>
-                            <Anchor point="CENTER"/>
-                        </Texture>
-                        <Texture name="$(parent)Echo" tier="MEDIUM" textureFile="EsoUI/Art/ChatWindow/chat_cs_echo.dds" blendMode="ADD" alpha="0" inheritAlpha="false">
-                            <Dimensions x="32" y="32"/>
-                            <Anchor point="CENTER"/>
-                        </Texture>
-                    </Controls>
-                </Button>  
             </Controls>
         </Control>
 

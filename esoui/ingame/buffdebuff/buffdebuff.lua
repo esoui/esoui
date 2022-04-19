@@ -62,6 +62,7 @@ function ZO_BuffDebuff_ContainerObject:Initialize(control, buffControlPool, unit
         if self.isDirty then
             self:Update()
         end
+        self:RefreshContainerVisibility()
         self:UpdateTime()
     end
 
@@ -132,7 +133,6 @@ function ZO_BuffDebuff_ContainerObject:Update()
 
     self.styleObject:UpdateContainer(self)
 
-    self:RefreshContainerVisibility()
     self.isDirty = false
 end
 
@@ -150,8 +150,8 @@ end
 
 function ZO_BuffDebuff_ContainerObject:RefreshContainerVisibility()
     local shouldContextuallyShow = self:ShouldContextuallyShow()
-    self.buffPool.container:SetHidden(not self.buffPool:HasActiveObjects() or not shouldContextuallyShow)
-    self.debuffPool.container:SetHidden(not self.debuffPool:HasActiveObjects() or not shouldContextuallyShow)
+    self.buffPool.container:SetHidden(not shouldContextuallyShow or not self.buffPool:HasActiveObjects())
+    self.debuffPool.container:SetHidden(not shouldContextuallyShow or not self.debuffPool:HasActiveObjects())
 end
 
 function ZO_BuffDebuff_ContainerObject:UpdateTime()
@@ -192,6 +192,11 @@ function ZO_BuffDebuff_ContainerObject:GetVisibilitySetting(settingId)
 end
 
 function ZO_BuffDebuff_ContainerObject:ShouldContextuallyShow()
+    --Don't show while the wheels are up
+    if UTILITY_WHEEL_MANAGER:IsInteracting() then
+        return false
+    end
+
     if self.settings[BUFFS_SETTING_ALL_ENABLED] == BUFF_DEBUFF_ENABLED_CHOICE_AUTOMATIC then
         if self.fadeTimeline:IsPlaying() then
             return true

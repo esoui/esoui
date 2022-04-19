@@ -93,6 +93,32 @@ function ZO_ColorDef:ToHSV()
     return ConvertRGBToHSV(self.r, self.g, self.b)
 end
 
+do
+    local REDUCE_AMOUNT = 0.25
+    function ZO_ColorDef:GetDim()
+        if not self.dimColor then
+            local r, g, b, a = self:UnpackRGBA()
+            r, g, b = zo_saturate(r - REDUCE_AMOUNT), zo_saturate(g - REDUCE_AMOUNT), zo_saturate(b - REDUCE_AMOUNT)
+            self.dimColor = ZO_ColorDef:New(r, g, b, a)
+        end
+
+        return self.dimColor
+    end
+end
+
+do
+    local INCREASE_AMOUNT = 0.15
+    function ZO_ColorDef:GetBright()
+        if not self.brightColor then
+            local r, g, b, a = self:UnpackRGBA()
+            r, g, b = zo_saturate(r + INCREASE_AMOUNT), zo_saturate(g + INCREASE_AMOUNT), zo_saturate(b + INCREASE_AMOUNT)
+            self.brightColor = ZO_ColorDef:New(r, g, b, a)
+        end
+
+        return self.brightColor
+    end
+end
+
 -- Utility functions for ColorDef...
 -- Some of these functions are not fast, they were copied from an internal dev utility.
 -- RGBA values are values from 0 - 255

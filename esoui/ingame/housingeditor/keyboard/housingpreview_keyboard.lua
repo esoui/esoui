@@ -51,6 +51,7 @@ end
 function HousingPreviewDialog_Keyboard:RefreshTemplateComboBox()
     ZO_HousingPreviewDialog_Shared.RefreshTemplateComboBox(self)
 
+    self.returnToEntranceButton:ClearAnchors()
     if self.notAvailableLabel:IsControlHidden() then
         self.returnToEntranceButton:SetAnchor(TOPLEFT, self.templatePreviewButton, BOTTOMLEFT, 0, 10)
     else

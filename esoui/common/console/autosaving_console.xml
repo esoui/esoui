@@ -2,7 +2,7 @@
     <Animations>
         <AnimationTimeline name="AutoSaveSpin" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <TextureRotateAnimation duration="2000" startRotation="ZO_TWO_PI" endRotation="0" playbackType="LOOP" loopCount="LOOP_INDEFINITELY"/>
+                <TextureRotateAnimation duration="2000" startRotation="ZO_TWO_PI" endRotation="0" />
             </Animations>
         </AnimationTimeline>
 
@@ -15,7 +15,7 @@
 
     <Controls>
         <TopLevelControl name="ZO_AutoSaving_Console_TopLevel" tier="HIGH" level="ZO_HIGH_TIER_GAMEPAD_AUTO_SAVING_ICON">
-            <AnchorFill />         
+            <AnchorFill />
             <OnInitialized>
                 ZO_InitializeAutoSaving_Console(self)
             </OnInitialized>
@@ -23,9 +23,9 @@
                 <Texture name="$(parent)Spinner" override="true" textureFile="EsoUI/Art/HUD/Gamepad/Ouroboros_Saving-128.dds" alpha="0">
                     <Dimensions x="128" y="128" />
                     <!-- Safe zone - 16 because the ouroboros only takes up the center 96 pixels-->
-                    <Anchor point="TOPRIGHT" offsetX="-80" offsetY="38"/>
+                    <Anchor point="TOPRIGHT" offsetX="-80" offsetY="38" />
                 </Texture>
             </Controls>
-        </TopLevelControl>        
+        </TopLevelControl>
     </Controls>
 </GuiXml>

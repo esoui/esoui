@@ -482,6 +482,34 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_USER_SPEAKING, OnVoiceUserSpeaking)
     EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_MUTE_LIST_UPDATED, OnVoiceMuteListUpdated)
 
+    local function OnVoiceChatTranscript(eventId, channelName, fromName, text, fromDisplayName)
+        local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
+
+        if not self:DoesChannelExist(channelData) then
+            return
+        end
+
+        local channel = self:GetChannel(channelData)
+
+        local userFacingName
+        if not IsDecoratedDisplayName(fromName) and fromDisplayName ~= "" then
+            --We have a character name and a display name, so follow the setting
+            userFacingName = ZO_ShouldPreferUserId() and fromDisplayName or fromName
+        else
+            --We either have two display names, or we weren't given a guaranteed display name, so just use the default fromName
+            userFacingName = fromName
+        end
+
+        userFacingName = zo_strformat(SI_CHAT_MESSAGE_PLAYER_FORMATTER, userFacingName)
+        local fromLink = ZO_LinkHandler_CreatePlayerLink(userFacingName)
+
+        local formattedText = string.format(GetString(SI_CHAT_MESSAGE_VOICE_TRANSCRIPT), channel.name, fromLink, text)
+
+        self:FireCallbacks("VoiceChatTranscript", formattedText, fromDisplayName, text, channel.channelType)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("ZO_VoiceChat_Manager", EVENT_VOICE_CHAT_TRANSCRIPT, OnVoiceChatTranscript)
+
     EVENT_MANAGER:RegisterForUpdate("ZO_VoiceChat_Manager", 0, function() self:OnUpdate() end)
 end
 
@@ -510,6 +538,14 @@ end
 function ZO_VoiceChat_Manager:StopTransmitting()
     local NULL_CHANNEL_NAME = "N00000000#00000000"
     VoiceChatChannelTransmit(NULL_CHANNEL_NAME)
+end
+
+function ZO_VoiceChat_Manager:GetActiveChannel()
+    return self.activeChannel
+end
+
+function ZO_VoiceChat_Manager:HasActiveTransmitChannel()
+    return self.activeChannel ~= nil and self.activeChannel.isTransmitting
 end
 
 function ZO_VoiceChat_Manager:LeaveChannel(channel)

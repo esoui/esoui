@@ -27,7 +27,7 @@
             </Controls>
         </Button>
 
-        <Label name="ZO_WorldMapKeepUpgradeHeader_Keyboard" inherit="ZO_GridScrollList_Entry_Header_Keyboard" override="true" font="ZoFontWinH4" modifyTextType="UPPERCASE" virtual="true" />
+        <Label name="ZO_WorldMapKeepUpgradeHeader_Keyboard" inherits="ZO_GridScrollList_Entry_Header_Keyboard" override="true" font="ZoFontWinH4" modifyTextType="UPPERCASE" virtual="true" />
         
         <TopLevelControl name="ZO_WorldMapKeepUpgrade" inherits="ZO_WorldMapKeepInfoContent">
             <OnInitialized>

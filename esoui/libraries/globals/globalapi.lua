@@ -358,3 +358,78 @@ function ZO_MaskIterator(iterationBegin, iterationEnd)
         end
     end
 end
+
+function ZO_MaskHasFlag(mask, flag)
+    return BitAnd(mask, flag) == flag
+end
+
+function ZO_ClearMaskFlag(mask, flag)
+    if BitAnd(mask, flag) == flag then
+        return mask - flag
+    end
+    return mask
+end
+
+function ZO_ClearMaskFlags(mask, ...)
+    local flags = {...}
+    for _, flag in ipairs(flags) do
+        if BitAnd(mask, flag) == flag then
+            mask = mask - flag
+        end
+    end
+    return mask
+end
+
+function ZO_SetMaskFlag(mask, flag)
+    if BitAnd(mask, flag) ~= flag then
+        return mask + flag
+    end
+    return mask
+end
+
+function ZO_SetMaskFlags(mask, ...)
+    local flags = {...}
+    for _, flag in ipairs(flags) do
+        if BitAnd(mask, flag) ~= flag then
+            mask = mask + flag
+        end
+    end
+    return mask
+end
+
+-- Returns nil if no flags have changed; otherwise,
+-- Returns a table whose keys and values are the flags that
+-- have changed and their new corresponding Boolean values.
+function ZO_CompareMaskFlags(flagsBefore, flagsAfter)
+    if flagsBefore == flagsAfter then
+        -- No flags have changed.
+        return
+    end
+
+    local changedFlags = nil
+    -- Higher mask value of either the before or after mask.
+    local maxFlagMask = zo_max(flagsBefore, flagsAfter)
+    -- Begin with first bit mask.
+    local currentFlagMask = 1
+
+    while currentFlagMask <= maxFlagMask do
+        -- The new ("after") flag bit value.
+        local flagAfter = BitAnd(flagsAfter, currentFlagMask)
+
+        -- Has this flag bit value changed?
+        if flagAfter ~= BitAnd(flagsBefore, currentFlagMask) then
+            if not changedFlags then
+                -- Deferred table allocation for performance.
+                changedFlags = {}
+            end
+            -- Key: Flag mask (such as 1 or 4 or 64, etc.)
+            -- Value: Flag bit value (true or false)
+            changedFlags[currentFlagMask] = flagAfter ~= 0
+        end
+
+        -- Left shift mask to next highest bit.
+        currentFlagMask = currentFlagMask * 2
+    end
+
+    return changedFlags
+end

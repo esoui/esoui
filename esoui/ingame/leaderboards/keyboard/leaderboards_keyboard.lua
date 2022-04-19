@@ -3,12 +3,6 @@ local CATEGORY_ENTRY_TEMPLATE = "ZO_LeaderboardsNavigationEntry"
 
 ZO_LeaderboardsManager_Keyboard = ZO_Object.MultiSubclass(ZO_SortFilterList, ZO_LeaderboardsManager_Shared)
 
-function ZO_LeaderboardsManager_Keyboard:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
-
 function ZO_LeaderboardsManager_Keyboard:Initialize(control, leaderboardControl)
     ZO_LeaderboardsManager_Shared.Initialize(self)
     ZO_SortFilterList.InitializeSortFilterList(self, control)
@@ -17,19 +11,14 @@ function ZO_LeaderboardsManager_Keyboard:Initialize(control, leaderboardControl)
     self.pointsHeaderLabel = GetControl(control, "HeadersPoints")
     self.classHeaderLabel = GetControl(control, "HeadersClass")
     self.allianceHeaderLabel = GetControl(control, "HeadersAlliance")
-    self.houseHeaderLabel = GetControl(control, "HeadersHouse")
     self.emptyRow = GetControl(control, "EmptyRow")
+    self.loadingIcon = self.control:GetNamedChild("LoadingIcon")
 
     self:InitializeFilters()
     self:InitializeCategoryList()
     self:InitializeLeaderboard()
 
     LEADERBOARDS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Leaderboards)
-    LEADERBOARDS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                 if newState == SCENE_FRAGMENT_SHOWING then
-                                                     self:QueryData()
-                                                 end
-                                             end)
 end
 
 function ZO_LeaderboardsManager_Keyboard:InitializeFilters()
@@ -87,8 +76,7 @@ function ZO_LeaderboardsManager_Keyboard:InitializeScenes()
     LEADERBOARDS_SCENE = self:GetScene()
     LEADERBOARDS_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
-            self:OnLeaderboardSelected(self:GetSelectedLeaderboardData())
-            self:RefreshData()
+            self:UpdateCategories()
             if self.leaderboardObject then
                 self:ActivateLeaderboard()
             end
@@ -109,7 +97,7 @@ function ZO_LeaderboardsManager_Keyboard:AddCategory(name, normalIcon, pressedIc
 end
 
 -- NOTE: Adding a maxRankFunction will require that all data is loaded up right away, instead of as-needed. Use a maxRankFunction ONLY when you want/need that behavior.
-function ZO_LeaderboardsManager_Keyboard:AddEntry(leaderboardObject, name, titleName, parent, subType, countFunction, maxRankFunction, infoFunction, pointsFormatFunction, pointsHeaderString, consoleIdRequestParamsFunction, iconPath, leaderboardRankType)
+function ZO_LeaderboardsManager_Keyboard:AddEntry(leaderboardObject, name, titleName, parent, subType, countFunction, maxRankFunction, infoFunction, pointsFormatFunction, pointsHeaderString, consoleIdRequestParamsFunction, iconPath, leaderboardRankType, playerInfoUpdateFunction)
     local entryData = 
     {
         leaderboardObject = leaderboardObject,
@@ -122,6 +110,7 @@ function ZO_LeaderboardsManager_Keyboard:AddEntry(leaderboardObject, name, title
         pointsFormatFunction = pointsFormatFunction,
         pointsHeaderString = pointsHeaderString,
         leaderboardRankType = leaderboardRankType,
+        playerInfoUpdateFunction = playerInfoUpdateFunction,
     }
 
     local node = self.navigationTree:AddNode(CATEGORY_ENTRY_TEMPLATE, entryData, parent)
@@ -160,36 +149,35 @@ function ZO_LeaderboardsManager_Keyboard:UpdateCategories()
     self.nodeToReselect = nil
     self.navigationTree:Reset()
 
-    local campaignLeaderboards = CAMPAIGN_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetKeyboardObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME)
+    local campaignLeaderboards = SYSTEMS:GetKeyboardObject(ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME)
     if campaignLeaderboards then
         campaignLeaderboards:AddCategoriesToParentSystem()
     end
 
-    local raidLeaderboards = RAID_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetKeyboardObject(RAID_LEADERBOARD_SYSTEM_NAME)
+    local raidLeaderboards = SYSTEMS:GetKeyboardObject(ZO_RAID_LEADERBOARD_SYSTEM_NAME)
     if raidLeaderboards then
         raidLeaderboards:AddCategoriesToParentSystem()
     end
 
-    local housingLeaderboards = HOUSING_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetKeyboardObject(HOUSING_LEADERBOARD_SYSTEM_NAME)
-    if housingLeaderboards then
-        housingLeaderboards:AddCategoriesToParentSystem()
-    end
-
-    local battlegroundLeaderboards = BATTLEGROUND_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetKeyboardObject(BATTLEGROUND_LEADERBOARD_SYSTEM_NAME)
+    local battlegroundLeaderboards = SYSTEMS:GetKeyboardObject(ZO_BATTLEGROUND_LEADERBOARD_SYSTEM_NAME)
     if battlegroundLeaderboards then
         battlegroundLeaderboards:AddCategoriesToParentSystem()
+    end
+
+    local tributeLeaderboards = SYSTEMS:GetKeyboardObject(ZO_TRIBUTE_LEADERBOARD_SYSTEM_NAME)
+    if tributeLeaderboards then
+        tributeLeaderboards:AddCategoriesToParentSystem()
     end
 
     self.navigationTree:Commit(self.nodeToReselect)
 end
 
 function ZO_LeaderboardsManager_Keyboard:RefreshLeaderboardType(leaderboardType)
-    local isHouseLeaderboard = leaderboardType == LEADERBOARD_TYPE_HOUSE
     local isBattlegroundLeaderboard = leaderboardType == LEADERBOARD_TYPE_BATTLEGROUND
-    local shouldHideClassAndAlliance = isHouseLeaderboard or isBattlegroundLeaderboard
+    local isTributeLeaderboard = leaderboardType == LEADERBOARD_TYPE_TRIBUTE
+    local shouldHideClassAndAlliance = isBattlegroundLeaderboard or isTributeLeaderboard
     self.classHeaderLabel:SetHidden(shouldHideClassAndAlliance)
     self.allianceHeaderLabel:SetHidden(shouldHideClassAndAlliance)
-    self.houseHeaderLabel:SetHidden(not isHouseLeaderboard)
 end
 
 function ZO_LeaderboardsManager_Keyboard:SetSelectedLeaderboardObject(leaderboardObject, subType)
@@ -237,15 +225,14 @@ function ZO_LeaderboardsManager_Keyboard:SortScrollList()
 end
 
 function ZO_LeaderboardsManager_Keyboard:BuildMasterList()
-    -- The master list lives in LEADERBOARD_LIST_MANAGER and was built during OnLeaderboardSelected
+    -- We previously counted on the LEADERBOARD_LIST_MANAGER to build the list, but the on-demand queries now require manual building here
+    LEADERBOARD_LIST_MANAGER:BuildMasterList()
 end
 
 function ZO_LeaderboardsManager_Keyboard:FilterScrollList()
     local selectedData = self.filterComboBox:GetSelectedItemData()
     if selectedData then
         local playerName = GetUnitName("player")
-        local filteredClass = self.filterComboBox:GetSelectedItemData().classId
-
         local index = 0
         local function PreAddCallback(data)
             index = index + 1
@@ -253,6 +240,7 @@ function ZO_LeaderboardsManager_Keyboard:FilterScrollList()
             data.recolorName = data.characterName == playerName
         end
 
+        local filteredClass = self:GetSelectedClassFilter()
         LEADERBOARD_LIST_MANAGER:FilterScrollList(self.list, filteredClass, PreAddCallback)
 
         self.emptyRow:SetHidden(index > 0)
@@ -266,10 +254,32 @@ end
 
 function ZO_LeaderboardsManager_Keyboard:RepopulateFilterDropdown()
     local function OnFilterChanged(comboBox, entryText, entry)
-        self:RefreshFilters()
+        local leaderboard = self:GetSelectedLeaderboardData()
+        if not leaderboard.leaderboardObject:HandleFilterDropdownChanged() then
+            self:RefreshFilters()
+        end
     end
 
     ZO_Leaderboards_PopulateDropdownFilter(self.filterComboBox, OnFilterChanged, LEADERBOARD_LIST_MANAGER.leaderboardRankType)
+end
+
+function ZO_LeaderboardsManager_Keyboard:GetSelectedClassFilter()
+    local selectedData = self.filterComboBox:GetSelectedItemData()
+    if selectedData then
+        return selectedData.classId
+    end
+    
+    return 0
+end
+
+function ZO_LeaderboardsManager_Keyboard:SetLoadingSpinnerVisibility(show)
+    self.list:SetHidden(show)
+    if show then
+        self.loadingIcon:Show()
+        self.emptyRow:SetHidden(true)
+    else
+        self.loadingIcon:Hide()
+    end
 end
 
 --Global XML Handlers

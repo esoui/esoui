@@ -250,7 +250,7 @@ end
 function ZO_SmithingResearchSelect:OnItemSelected(bagId, slotIndex)
     if IsItemInArmory(bagId, slotIndex) then
         local armoryBuildListNames = { GetItemArmoryBuildList(bagId, slotIndex) }
-        local armoryBuildList = ZO_GenerateCommaSeparatedList(armoryBuildListNames)
+        local armoryBuildList = ZO_GenerateCommaSeparatedListWithAnd(armoryBuildListNames)
         local armoryBuildText = zo_strformat(SI_RESEARCH_ARMORY_EQUIPMENT_NOTICE, ZO_SELECTED_TEXT:Colorize(armoryBuildList), #armoryBuildListNames)
         local researchText = zo_strformat(SI_SMITHING_RESEARCH_DIALOG_CONSUME, self.formattedTime)
         self.listDialog:SetBelowText(string.format("|t32:32:%s|t\n%s\n\n%s", ZO_IN_ARMORY_BUILD_ICON, armoryBuildText, researchText))

@@ -5,7 +5,7 @@
 ]]--
 
 -- These bars can be viewed inside of skills. This should be every bar used ingame.
-internalassert(HOTBAR_CATEGORY_MAX_VALUE == 9, "Update hotbars")
+internalassert(HOTBAR_CATEGORY_MAX_VALUE == 14, "Update hotbars")
 local VIEWABLE_HOTBAR_CATEGORY_SET =
 {
     [HOTBAR_CATEGORY_PRIMARY] = true,
@@ -18,7 +18,7 @@ local VIEWABLE_HOTBAR_CATEGORY_SET =
 }
 
 -- These bars can be edited, and the server will persist those edits
-internalassert(NUM_ASSIGNABLE_HOTBARS == 6, "Update hotbars")
+internalassert(NUM_ASSIGNABLE_HOTBARS == 11, "Update hotbars")
 local ASSIGNABLE_HOTBAR_CATEGORY_SET =
 {
     [HOTBAR_CATEGORY_PRIMARY] = true,
@@ -1144,8 +1144,9 @@ function ZO_ActionBarAssignmentManager:GetActionNameForSlot(actionSlotIndex, hot
 end
 
 function ZO_ActionBarAssignmentManager:GetKeyboardAndGamepadActionNameForSlot(actionSlotIndex, hotbarCategory)
-    local isCompanionBar = hotbarCategory == HOTBAR_CATEGORY_COMPANION
-    if isCompanionBar then
+    if hotbarCategory == HOTBAR_CATEGORY_QUICKSLOT_WHEEL then
+        return "ACTION_BUTTON_9", "GAMEPAD_ACTION_BUTTON_9"
+    elseif hotbarCategory == HOTBAR_CATEGORY_COMPANION then
         if self:IsUltimateSlot(actionSlotIndex) then
             return "COMMAND_PET", "COMMAND_PET"
         end

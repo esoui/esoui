@@ -43,7 +43,8 @@ function ZO_Tooltip:LayoutAchievement(achievementId)
         table.insert(titleStyle, self:GetStyle("achievementCharacterHeading"))
     end
     table.insert(titleStyle, self:GetStyle("title"))
-    titleTextSection:AddLine(zo_strformat(SI_ACHIEVEMENTS_NAME, achievementName), unpack(titleStyle))
+    -- Achievement display names use gender switching
+    titleTextSection:AddLine(zo_strformat(achievementName), unpack(titleStyle))
 
     if completed then
         titleTextSection:AddLine(date)
@@ -70,7 +71,7 @@ function ZO_Tooltip:LayoutAchievement(achievementId)
 
     -- Body
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
-    bodySection:AddLine(zo_strformat(SI_ACHIEVEMENTS_DESCRIPTION, description), self:GetStyle("flavorText"))
+    bodySection:AddLine(zo_strformat(description), self:GetStyle("flavorText"))
     self:AddSection(bodySection)
 
     self:LayoutAchievementCriteria(achievementId)
@@ -141,7 +142,8 @@ function ZO_Tooltip:LayoutAchievementRewards(achievementId)
     local hasRewardTitle, titleName = GetAchievementRewardTitle(achievementId)
     local hasRewardDye, dyeId = GetAchievementRewardDye(achievementId)
     local hasRewardCollectible, collectibleId = GetAchievementRewardCollectible(achievementId)
-    local hasReward = hasRewardItem or hasRewardTitle or hasRewardDye or hasRewardCollectible
+    local hasRewardTributeCardUpgrade, tributePatronId, tributeCardIndex = GetAchievementRewardTributeCardUpgradeInfo(achievementId)
+    local hasReward = hasRewardItem or hasRewardTitle or hasRewardDye or hasRewardCollectible or hasRewardTributeCardUpgrade
 
     if not hasReward then
         return
@@ -187,6 +189,17 @@ function ZO_Tooltip:LayoutAchievementRewards(achievementId)
         rewardsEntrySection:AddLine(collectibleData:GetFormattedName(), self:GetStyle("statValuePairValueSmall"))
         rewardsEntrySection:AddLine(ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleData:GetCategoryTypeDisplayName()))
 
+        rewardsSection:AddSection(rewardsEntrySection)
+    end
+
+    --Tribute Card Upgrade
+    if hasRewardTributeCardUpgrade then
+        local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(tributePatronId)
+        local baseCardId, upgradeCardId = patronData:GetDockCardInfoByIndex(tributeCardIndex)
+        local upgradeCardData = ZO_TributeCardData:New(tributePatronId, upgradeCardId)
+        local rewardsEntrySection = rewardsSection:AcquireSection(self:GetStyle("topSection"))
+        rewardsEntrySection:AddLine(upgradeCardData:GetColorizedFormattedName(), self:GetStyle("statValuePairValueSmall"))
+        rewardsEntrySection:AddLine(GetString(SI_GAMEPAD_ACHIEVEMENTS_TRIBUTE_CARD_UPGRADE))
         rewardsSection:AddSection(rewardsEntrySection)
     end
 

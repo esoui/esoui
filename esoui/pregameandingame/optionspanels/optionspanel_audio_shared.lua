@@ -222,6 +222,17 @@ local ZO_OptionsPanel_Audio_ControlData =
             valid = { COMBAT_MUSIC_MODE_SETTING_ALL, COMBAT_MUSIC_MODE_SETTING_NONE, COMBAT_MUSIC_MODE_SETTING_BOSSES_ONLY },
             valueStringPrefix = "SI_COMBATMUSICMODESETTING"
         },
+        [AUDIO_SETTING_INTRO_MUSIC] = 
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_INTRO_MUSIC,
+            panel = SETTING_PANEL_AUDIO,
+            text = SI_AUDIO_OPTIONS_INTRO_MUSIC,
+            tooltipText = SI_AUDIO_OPTIONS_INTRO_MUSIC_TOOLTIP,
+            -- valid = dynamically determined near EOF, introMusicSetting.valid
+            -- itemText = dynamically determined near EOF, introMusicSetting.itemText
+        },
     },
 
     --Subtitles
@@ -250,5 +261,19 @@ local ZO_OptionsPanel_Audio_ControlData =
         },
     },
 }
+
+--Dynamically determine which chapter-specific intro music options are available for selection
+local introMusicSetting = ZO_OptionsPanel_Audio_ControlData[SETTING_TYPE_AUDIO][AUDIO_SETTING_INTRO_MUSIC]
+introMusicSetting.valid = {}
+introMusicSetting.itemText = {}
+
+-- Adding -1 to table first to represent default setting
+table.insert(introMusicSetting.valid, -1)
+table.insert(introMusicSetting.itemText, GetString(SI_AUDIO_OPTIONS_INTRO_MUSIC_DEFAULT))
+
+for settingValue = CHAPTER_ITERATION_BEGIN, CHAPTER_ITERATION_END do
+    table.insert(introMusicSetting.valid, settingValue)
+    table.insert(introMusicSetting.itemText, GetString("SI_CHAPTER", settingValue))
+end
 
 ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_AUDIO, ZO_OptionsPanel_Audio_ControlData)

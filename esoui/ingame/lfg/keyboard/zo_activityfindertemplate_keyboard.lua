@@ -1,5 +1,7 @@
 local GROUP_SIZE_ICON_FORMAT = zo_iconFormat("EsoUI/Art/LFG/LFG_icon_groupSize.dds", 32, 32)
 
+ZO_TRIBUTE_REWARD_KEYBOARD_ROW_HEIGHT = 52
+
 ------------------
 --Initialization--
 ------------------
@@ -11,8 +13,12 @@ function ZO_ActivityFinderTemplate_Keyboard:New(...)
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:Initialize(dataManager, categoryData, categoryPriority)
+    self.tributeProgressSegmentTemplate = "ZO_TributeFinder_ArrowStatusBarTemplate_Keyboard"
     local control = CreateControlFromVirtual(dataManager:GetName() .. "_Keyboard", GuiRoot, "ZO_ActivityFinderTemplateTopLevel_Keyboard")
     ZO_ActivityFinderTemplate_Shared.Initialize(self, control, dataManager, categoryData, categoryPriority)
+
+    self.rewardsOffsetYDefault = -250
+    self.rewardsOffsetYTribute = -300
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:InitializeControls()
@@ -21,7 +27,13 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeControls()
     self.lfmPromptBodyLabel = self.lfmPromptSection:GetNamedChild("Body")
 
     self.filterControl = self.control:GetNamedChild("Filter")
-    self.joinQueueButton = self.control:GetNamedChild("QueueButton")
+
+    self.clubRankControl = self.control:GetNamedChild("ClubRank")
+    self.clubRankObject = ZO_TributeClubRank:New(self.clubRankControl)
+
+    self.buttonContainer = self.control:GetNamedChild("ActionButtonContainer")
+    self.joinQueueButton = self.buttonContainer:GetNamedChild("QueueButton")
+    self.viewRewardsButton = self.buttonContainer:GetNamedChild("ViewRewardsButton")
     self.lockReasonLabel = self.control:GetNamedChild("LockReason")
 
     local function OnLockReasonLabelUpdate()
@@ -104,6 +116,33 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeFragment()
                 self:RefreshFilters()
             end
 
+            local isTribute = false
+            local isCompetitive = false
+            local selectedData = self.filterComboBox:GetSelectedItemData()
+            if selectedData then
+                local filterData = selectedData.data
+                isTribute = filterData.isTribute
+                isCompetitive = filterData.isCompetitive
+            end
+
+            if isTribute then
+                if RequestTributeClubData() == TRIBUTE_PLAYER_INITIALIZATION_STATE_SUCCESS then
+                    self:OnTributeClubDataInitialized()
+                end
+
+                if isCompetitive and RequestActiveTributeCampaignData() == TRIBUTE_PLAYER_INITIALIZATION_STATE_SUCCESS then
+                    self:OnTributeCampaignDataInitialized()
+                end
+            end
+
+            self.clubRankControl:SetHidden(not isTribute)
+
+            local selectedData = self.filterComboBox:GetSelectedItemData()
+            if selectedData then
+                local filterData = selectedData.data
+                self.singularSection:SetHidden(not filterData.singular)
+            end
+
             local shouldShowLFMPrompt, lfmPromptActivityName = self:GetLFMPromptInfo()
             if shouldShowLFMPrompt then
                 self.lfmPromptBodyLabel:SetText(zo_strformat(GetString(SI_LFG_FIND_REPLACEMENT_TEXT), lfmPromptActivityName))
@@ -134,11 +173,14 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
     if not self.fragment:IsShowing() then
         return
     end
-    
+
     local shouldShowLFMPrompt = self:GetLFMPromptInfo()
     if not shouldShowLFMPrompt then
         self:ResetLFMPrompt()
     end
+
+    self.tributeSeasonProgressControl:SetHidden(true)
+    self.clubRankObject:Refresh()
 
     local lockReasonText
 
@@ -151,6 +193,11 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
             if filterData:IsLocked() then
                 lockReasonText = filterData:GetLockReasonText()
             end
+
+            local HIDE_IF_NOT_COMPETITIVE = not filterData.isCompetitive
+            self:RefreshTributeSeasonData(HIDE_IF_NOT_COMPETITIVE)
+
+            self.viewRewardsButton:SetHidden(HIDE_IF_NOT_COMPETITIVE)
         else
             self.navigationTree:Reset()
 
@@ -240,9 +287,9 @@ do
 
         local modes = self.dataManager:GetFilterModeData()
         local activityTypes = modes:GetActivityTypes()
-        
+
         local addListViewSubmenuEntry = false
-        
+
         -- Add singular panel entries
         for _, activityType in ipairs(activityTypes) do
             if ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetNumLocationsByActivity(activityType, modes:GetVisibleEntryTypes()) > 0 then
@@ -253,6 +300,12 @@ do
                         if modes:IsEntryTypeVisible(location:GetEntryType()) and location:DoesPlayerMeetLevelRequirements() then
                             if location:ShouldForceFullPanelKeyboard() then
                                 local entry = ZO_ComboBox:CreateItemEntry(location:GetNameKeyboard(), OnFilterChanged)
+                                if activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE or activityType == LFG_ACTIVITY_TRIBUTE_CASUAL then
+                                    location.isTribute = true
+                                    if activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE then
+                                        location.isCompetitive = true
+                                    end
+                                end
                                 location.singular = true
                                 entry.data = location
 
@@ -276,6 +329,8 @@ do
             entry.data =
             {
                 singular = false,
+                isTribute = false,
+                isCompetitive = false,
                 activityTypes = activityTypes,
             }
 
@@ -301,8 +356,20 @@ do
     end
 end
 
+function ZO_ActivityFinderTemplate_Keyboard:IsShowingTributeFinder()
+    local selectedData = self.filterComboBox:GetSelectedItemData()
+    if selectedData then
+        local filterData = selectedData.data
+        return filterData.isTribute
+    end
+    return false
+end
+
 function ZO_ActivityFinderTemplate_Keyboard:RefreshJoinQueueButton()
-    self.joinQueueButton:SetEnabled(ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsAnyLocationSelected() and not ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetIsCurrentlyInQueue())
+    local isAnyLocationSelected = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsAnyLocationSelected()
+    local isJoinButtonEnabled = isAnyLocationSelected and not ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetIsCurrentlyInQueue()
+    self.joinQueueButton:SetEnabled(isJoinButtonEnabled)
+    self.viewRewardsButton:SetEnabled(HasActiveCampaignStarted())
 end
 
 ----------
@@ -319,20 +386,23 @@ function ZO_ActivityFinderTemplate_Keyboard:OnFilterChanged(comboBox, entryText,
     if data.singular then
         self.titleLabel:SetText(data:GetNameKeyboard())
         self.backgroundTexture:SetTexture(data:GetDescriptionTextureLargeKeyboard())
-        data:SetGroupSizeRangeText(self.groupSizeRangeLabel, GROUP_SIZE_ICON_FORMAT)
 
-        -- Add game mode text into battlegrounds info
-        local hideControls = true
-        local setTypeListControl = self.setTypesSectionControl:GetNamedChild("List")
-        if data:IsSetEntryType() then
-            local setTypesHeaderText = data:GetSetTypesHeaderText()
-            local setTypesListText = data:GetSetTypesListText()
-            if setTypesHeaderText ~= "" and setTypesListText ~= "" then
-                setTypeListControl:SetText(zo_strformat(SI_BATTLEGROUND_GAME_MODE_FORMATTER_KEYBOARD, setTypesHeaderText, setTypesListText))
-                hideControls = false
+        if not data.isTribute then
+            data:SetGroupSizeRangeText(self.groupSizeRangeLabel, GROUP_SIZE_ICON_FORMAT)
+
+            -- Add game mode text into battlegrounds info
+            local hideControls = true
+            local setTypeListControl = self.setTypesSectionControl:GetNamedChild("List")
+            if data:IsSetEntryType() then
+                local setTypesHeaderText = data:GetSetTypesHeaderText()
+                local setTypesListText = data:GetSetTypesListText()
+                if setTypesHeaderText ~= "" and setTypesListText ~= "" then
+                    setTypeListControl:SetText(zo_strformat(SI_BATTLEGROUND_GAME_MODE_FORMATTER_KEYBOARD, setTypesHeaderText, setTypesListText))
+                    hideControls = false
+                end
             end
+            setTypeListControl:SetHidden(hideControls)
         end
-        setTypeListControl:SetHidden(hideControls)
 
         self:RefreshRewards(data)
     end
@@ -352,6 +422,25 @@ function ZO_ActivityFinderTemplate_Keyboard:OnCooldownsUpdate()
             self:RefreshRewards(filterData)
         end
     end
+end
+
+function ZO_ActivityFinderTemplate_Keyboard:OnTributeClubRankDataChanged()
+    ZO_ActivityFinderTemplate_Shared.OnTributeClubRankDataChanged(self)
+    self.clubRankObject:Refresh()
+end
+
+function ZO_ActivityFinderTemplate_Keyboard:OnTributeCampaignDataChanged()
+    ZO_ActivityFinderTemplate_Shared.OnTributeCampaignDataChanged(self)
+
+    local hideIfNotCompetitive = true
+    local selectedData = self.filterComboBox:GetSelectedItemData()
+    if selectedData then
+        local filterData = selectedData.data
+        if filterData.isCompetitive then
+            hideIfNotCompetitive = false
+        end
+    end
+    self:RefreshTributeSeasonData(hideIfNotCompetitive)
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:ShowPrimaryControls()
@@ -387,6 +476,10 @@ function ZO_ActivityFinderTemplate_Keyboard:OnHandleLFMPromptResponse()
     end
 end
 
+function ZO_ActivityFinderTemplate_Keyboard:OnViewRewards()
+    ZO_Dialogs_ShowPlatformDialog("TRIBUTE_REWARDS_VIEW")
+end
+
 -------------
 --Accessors--
 -------------
@@ -403,11 +496,11 @@ function ZO_ActivityFinderTemplate_Keyboard.ShowActivityTooltip(control)
     local data = control.node.data
     local tooltip = ZO_ActivityFinderTemplateTooltip_Keyboard
     InitializeTooltip(tooltip, control, TOPRIGHT, -70, 0, TOPLEFT)
-    
+
     local tooltipContents = tooltip:GetNamedChild("Contents")
     local groupSizeLabel = tooltipContents:GetNamedChild("GroupSizeLabel")
     data:SetGroupSizeRangeText(groupSizeLabel, GROUP_SIZE_ICON_FORMAT)
-        
+
     local nameLabel = tooltipContents:GetNamedChild("NameLabel")
     nameLabel:SetText(data.nameKeyboard)
 
@@ -462,6 +555,12 @@ function ZO_ActivityFinderTemplateQueueButtonKeyboard_OnClicked(control)
     if not IsCurrentlySearchingForGroup() then
         ZO_ACTIVITY_FINDER_ROOT_MANAGER:StartSearch()
     end
+end
+
+function ZO_ActivityFinderTemplateViewRewardsButtonKeyboard_OnClicked(control)
+    local topLevelControl = control:GetParent():GetParent()
+    local finderObjectKeyboard = topLevelControl.object
+    finderObjectKeyboard:OnViewRewards()
 end
 
 function ZO_ActivityFinderTemplateNavigationEntryKeyboard_OnInitialized(control)

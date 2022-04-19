@@ -12,8 +12,6 @@ function GroupMenu_Keyboard:Initialize(control)
     self.headerControl = self.control:GetNamedChild("Header")
     self.categoriesControl = self.control:GetNamedChild("Categories")
 
-    self:InitializeCategories()
-
     local function OnStateChange(oldState, newState)
         if newState == SCENE_SHOWING  then
             KEYBIND_STRIP:AddKeybindButton(self.keybindStripDescriptor)
@@ -28,6 +26,8 @@ function GroupMenu_Keyboard:Initialize(control)
                 self:SetCurrentCategory(self.categoryFragmentToShow)
                 self.categoryFragmentToShow = nil
             end
+
+            self.categoriesRefreshGroup:TryClean()
         elseif newState == SCENE_HIDING then
             KEYBIND_STRIP:RemoveKeybindButton(self.keybindStripDescriptor)
         end
@@ -36,16 +36,20 @@ function GroupMenu_Keyboard:Initialize(control)
     KEYBOARD_GROUP_MENU_SCENE = ZO_Scene:New("groupMenuKeyboard", SCENE_MANAGER)
     KEYBOARD_GROUP_MENU_SCENE:RegisterCallback("StateChange", OnStateChange)
 
+    self:InitializeCategories()
     self:InitializeKeybindDescriptors()
 
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateGroupStatus", function(...) self:OnUpdateGroupStatus(...) end)
-
     local function RefreshCategories()
-        self:RefreshCategories()
+        self.categoriesRefreshGroup:MarkDirty("List")
     end
 
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateGroupStatus", function(...) self:OnUpdateGroupStatus(...) end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", RefreshCategories)
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshCategories)
+
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, RefreshCategories)
+    self.control:RegisterForEvent(EVENT_QUEST_COMPLETE, RefreshCategories)
 end
 
 function GroupMenu_Keyboard:InitializeCategories()
@@ -53,9 +57,23 @@ function GroupMenu_Keyboard:InitializeCategories()
     self.categoryFragmentToNodeLookup = {}
     self.nodeList = {}
 
+    -- Categories refresh group
+    local categoriesRefreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
+    categoriesRefreshGroup:AddDirtyState("List", function()
+        self:RefreshCategories()
+    end)
+
+    categoriesRefreshGroup:SetActive(function()
+        return self:IsCategoriesRefreshGroupActive()
+    end)
+
+    categoriesRefreshGroup:MarkDirty("List")
+    self.categoriesRefreshGroup = categoriesRefreshGroup
+
     local function RefreshNode(control, categoryData, open, enabled)
         if control.icon then
             local iconTexture = open and categoryData.pressedIcon or categoryData.normalIcon
+            iconTexture = not enabled and categoryData.disabledIcon or iconTexture
             control.icon:SetTexture(iconTexture)
             control.iconHighlight:SetTexture(categoryData.mouseoverIcon)
 
@@ -71,6 +89,9 @@ function GroupMenu_Keyboard:InitializeCategories()
         if categoryData then
             disabled = categoryData.activityFinderObject and (categoryData.activityFinderObject:GetLevelLockInfo() or categoryData.activityFinderObject:GetNumLocations() == 0) or false
             disabled = disabled or (categoryData.isZoneStories and ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil) or false
+            if not disabled and categoryData.isTribute then
+                disabled = ZO_IsTributeLocked()
+            end
         end
 
         local selected = node.selected or open
@@ -171,6 +192,10 @@ function GroupMenu_Keyboard:ShowCategory(categoryFragment)
     end
 end
 
+function GroupMenu_Keyboard:IsCategoriesRefreshGroupActive()
+    return KEYBOARD_GROUP_MENU_SCENE:IsShowing()
+end
+
 do
     local LOCK_TEXTURE = zo_iconFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", "100%", "100%")
     local CHAMPION_ICON = zo_iconFormat(GetChampionPointsIcon(), "100%", "100%")
@@ -211,6 +236,17 @@ do
             end
         end
     end
+
+    function GroupMenu_Keyboard:OnTributeCategoryMouseEnter(control, data)
+        ZO_IconHeader_OnMouseEnter(control)
+        if not control.enabled then
+            local tooltipText = ZO_GetTributeLockReasonTooltipString(LOCK_TEXTURE)
+            if tooltipText then
+                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
+                SetTooltipText(InformationTooltip, tooltipText)
+            end
+        end
+    end
 end
 
 do
@@ -244,7 +280,11 @@ do
         end
 
         if nodeData.activityFinderObject then
-            node.control.OnMouseEnter = function(control) self:OnActivityCategoryMouseEnter(control, nodeData) end
+            if nodeData.isTribute then
+                node.control.OnMouseEnter = function(control) self:OnTributeCategoryMouseEnter(control, nodeData) end
+            else
+                node.control.OnMouseEnter = function(control) self:OnActivityCategoryMouseEnter(control, nodeData) end
+            end
         elseif nodeData.isZoneStories then
             node.control.OnMouseEnter = function(control) self:OnZoneStoriesCategoryMouseEnter(control, nodeData) end
         end

@@ -30,7 +30,7 @@ function ZO_Ram:Initialize(control)
         prevControl = currentControl
     end
 
-    ZO_StatusBar_SetGradientColor(ZO_RamHealth, ZO_POWER_BAR_GRADIENT_COLORS[POWERTYPE_HEALTH])
+    ZO_StatusBar_SetGradientColor(ZO_RamHealth, ZO_POWER_BAR_GRADIENT_COLORS[COMBAT_MECHANIC_FLAGS_HEALTH])
 
     local function OnRamEscortCountUpdate(eventCode, numEscorts)
         self:UpdateRam(numEscorts)

@@ -137,7 +137,7 @@ do
                             mainHandLinks[equipmentType] = itemLink
                         end
                      elseif slotState == ARMORY_BUILD_EQUIP_SLOT_STATE_MISSING or slotState == ARMORY_BUILD_EQUIP_SLOT_STATE_INACCESSIBLE then
-                        local unselectedErrorColor = GetDimListColor(ZO_ERROR_COLOR)
+                        local unselectedErrorColor = ZO_ERROR_COLOR:GetDim()
                         entryData:AddIcon(ZO_Character_GetEmptyEquipSlotTexture(equipmentType))
                         entryData:SetIconTint(ZO_ERROR_COLOR, unselectedErrorColor)
                         entryData:SetText(zo_strformat(SI_GAMEPAD_ARMORY_EQUIPMENT_FORMATTER, GetString("SI_EQUIPSLOT", equipmentType)))
@@ -172,6 +172,12 @@ do
                     end
                     previousControl = equipmentControl
                 end
+            end
+
+            --Setup the mundus stone data
+            local mundusStoneList = self.armoryBuildData:GetEquippedMundusStoneNames()
+            for _, mundusName in ipairs(mundusStoneList) do
+                previousControl = self:AddStatValuePair(previousControl, GetString(SI_GAMEPAD_ARMORY_MUNDUS_HEADER), mundusName, 0, 20)
             end
 
             -- Setup the curse data

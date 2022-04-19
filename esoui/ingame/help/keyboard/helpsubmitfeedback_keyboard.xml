@@ -36,6 +36,9 @@
                                         </Label>
                                         <Control name="$(grandparent)SubcategoryCB" inherits="ZO_HelpCustomerService_Keyboard_ComboBox">
                                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)SubcategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                            <OnInitialized name="Help">
+                                                self.m_comboBox:SetHeight(350)
+                                            </OnInitialized>
                                         </Control>
                                     </Controls>
                                 </Control>

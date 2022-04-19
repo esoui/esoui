@@ -40,6 +40,19 @@ function ZO_Tooltip:LayoutSettingAccountGetUpdates(hasActivatedEmail)
     self:AddSection(bodySection)
 end
 
+function ZO_Tooltip:LayoutSettingAccessibilityTooltipWarning(mainText, warningText, shouldDisplayWarning)
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"), self:GetStyle("bodyDescription"))
+    local text
+    if not shouldDisplayWarning then
+        text = mainText
+    else
+        local colorizedWarningText = ZO_ERROR_COLOR:Colorize(warningText)
+        text = zo_strformat(SI_OPTIONS_ACCESSIBILITY_MODE_TOOLTIP_WARNING_FORMAT, mainText, colorizedWarningText)
+    end
+    bodySection:AddLine(text, self:GetStyle("bodyDescription"))
+    self:AddSection(bodySection)
+end
+
 function ZO_Tooltip:LayoutSettingTooltip(tooltipText, warningText)
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
     bodySection:AddLine(tooltipText, self:GetStyle("bodyDescription"))

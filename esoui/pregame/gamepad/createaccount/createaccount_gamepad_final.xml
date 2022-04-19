@@ -1,0 +1,58 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CreateAccount_Gamepad_Final" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                CreateAccount_Gamepad_Final_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Header" inherits="ZO_PregameGamepadHeaderImageTemplate"/>
+
+                        <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="BOTTOMRIGHT"/>
+                            <OnInitialized>
+                                ZO_Scroll_Initialize_Gamepad(self)
+                                ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_1_Background, RIGHT )
+                            </OnInitialized>
+
+                            <Controls>
+                                <Scroll name="$(parent)Scroll" override="true">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                </Scroll>
+
+                                <Control name="$(parent)ScrollChild" override="true">
+                                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+                                    <Controls>
+                                        <Label name="$(parent)FillText" font="ZoFontGamepadCondensed42" text="SI_CREATEACCOUNT_SUCCESS_HEADER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="TOPLEFT"/>
+                                            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+                                        </Label>
+
+                                        <Label name="$(parent)Note1" font="ZoFontGamepadCondensed42" text="SI_CREATEACCOUNT_SUCCESS_NOTE_1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)FillText" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)FillText" relativePoint="BOTTOMRIGHT" offsetY="64" />
+                                        </Label>
+
+                                        <Label name="$(parent)Note2" font="ZoFontGamepadCondensed42" text="SI_CREATEACCOUNT_SUCCESS_NOTE_2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Note1" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Note1" relativePoint="BOTTOMRIGHT" offsetY="64" />
+                                        </Label>
+
+                                        <Label name="$(parent)Note3" font="ZoFontGamepadCondensed42" text="SI_CREATEACCOUNT_SUCCESS_NOTE_3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Note2" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Note2" relativePoint="BOTTOMRIGHT" offsetY="64" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

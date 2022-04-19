@@ -7,13 +7,7 @@ ZO_SCRYING_FRAME_LEVEL = 10
 --[[
     Each scrying hex manages the state of each hexagonal tile in the game board.
 ]]--
-ZO_ScryingHex = ZO_Object:Subclass()
-
-function ZO_ScryingHex:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_ScryingHex = ZO_InitializingObject:Subclass()
 
 do
     function ZO_ScryingHex:Initialize(board, control, hexIndex)
@@ -281,13 +275,7 @@ end
 --[[
     Each action button represents the state of a scrying active skill, and the keybind you use to activate it
 ]]--
-ZO_ScryingActionButton = ZO_Object:Subclass()
-
-function ZO_ScryingActionButton:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_ScryingActionButton = ZO_InitializingObject:Subclass()
 
 function ZO_ScryingActionButton:Initialize(control, skill, actionName)
     self.control = control
@@ -352,13 +340,7 @@ end
 --[[
     This object replicates the StatusBarControl API for the normal actions meter, so we can reuse the existing status bar animations.
 ]]--
-ZO_ScryingNormalActionsMeter = ZO_Object:Subclass()
-
-function ZO_ScryingNormalActionsMeter:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_ScryingNormalActionsMeter = ZO_InitializingObject:Subclass()
 
 function ZO_ScryingNormalActionsMeter:Initialize(control)
     self.control = control
@@ -461,13 +443,7 @@ end
     Unlike the normal actions meter, which is fairly statusbar-like, the special actions meter is special in that the valid number of steps is fixed.
     The special actions meter crossfades between two well-defined textures for each step.
 ]]--
-ZO_ScryingSpecialActionsMeter = ZO_Object:Subclass()
-
-function ZO_ScryingSpecialActionsMeter:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_ScryingSpecialActionsMeter = ZO_InitializingObject:Subclass()
 
 function ZO_ScryingSpecialActionsMeter:Initialize(control)
     self.control = control
@@ -519,13 +495,7 @@ end
     * for gamepad, it helps the players know which hex they currently have targeted
     * on both platforms, it will add extra context to each special ability
 ]]--
-ZO_ScryingModalCursor = ZO_Object:Subclass()
-
-function ZO_ScryingModalCursor:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_ScryingModalCursor = ZO_InitializingObject:Subclass()
 
 function ZO_ScryingModalCursor:Initialize(board, control)
     self.board = board
@@ -739,13 +709,7 @@ end
 --[[
     The scrying board maintains the state of each hex, and any extra data about the game such as turns left
 ]]--
-ZO_ScryingBoard = ZO_Object:Subclass()
-
-function ZO_ScryingBoard:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_ScryingBoard = ZO_InitializingObject:Subclass()
 
 function ZO_ScryingBoard:Initialize(gameControl)
     self.gameControl = gameControl
@@ -1255,7 +1219,7 @@ function ZO_ScryingBoard:PerformActionOnTargetHex()
     SCRYING:RefreshEyeAnimations()
 
     if GetNumScryingGoalsAchieved() > 0 then
-        SCRYING:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_SCRYING_GOAL_CAPTURED)
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_SCRYING_GOAL_CAPTURED)
     end
 end
 
@@ -1302,13 +1266,7 @@ end
 -- Scrying Minigame --
 ----------------------
 
-ZO_Scrying = ZO_Object:Subclass()
-
-function ZO_Scrying:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_Scrying = ZO_InitializingObject:Subclass()
 
 function ZO_Scrying:Initialize(control)
     self.control = control
@@ -1318,7 +1276,6 @@ function ZO_Scrying:Initialize(control)
     self.waitingForScryingResult = false
     self.waitingToCompleteScrying = false
     self.lastScryingResult = nil
-    self.isHelpOverlayVisible = false
 
     local frameElements = control:GetNamedChild("GameFrame")
     self.normalActionMeter = ZO_ScryingNormalActionsMeter:New(frameElements:GetNamedChild("NormalActionMeter"))
@@ -1361,7 +1318,6 @@ function ZO_Scrying:Initialize(control)
             PlaySound(SOUNDS.SCRYING_START_INTRO)
         elseif newState == SCENE_HIDING then
             --clear the current tutorial when hiding so we don't push an extra action layer
-            self.triggeredTutorial = false
             self:RefreshInputState()
             ZO_Dialogs_ReleaseAllDialogsOfName("CONFIRM_EXIT_SCRYING")
         elseif newState == SCENE_HIDDEN then
@@ -1412,20 +1368,16 @@ function ZO_Scrying:Initialize(control)
         end
     end)
 
-    control:RegisterForEvent(EVENT_TUTORIAL_HIDDEN, function()
-        if self.triggeredTutorial then
-            self.triggeredTutorial = false
-            self:RefreshInputState()
-            if self.waitingOnTutorialToEndGame then
-                self:TryCompleteScrying()
-                self.waitingOnTutorialToEndGame = false
-            end
-        end
+    HELP_MANAGER:RegisterCallback("OverlayVisibilityChanged", function()
+        self:RefreshInputState()
     end)
 
-    control:RegisterForEvent(EVENT_HELP_OVERLAY_VISIBILITY_CHANGED, function(_, isVisible)
-        self.isHelpOverlayVisible = isVisible
+    TUTORIAL_MANAGER:RegisterCallback("TriggeredTutorialChanged", function(isTutorialTriggered)
         self:RefreshInputState()
+        if not isTutorialTriggered and self.waitingOnTutorialToEndGame then
+            self:TryCompleteScrying()
+            self.waitingOnTutorialToEndGame = false
+        end
     end)
 
     SCRYING_HEX_ANIMATION_PROVIDER:RegisterCallback("BlockingAnimationsCompleted", function()
@@ -1446,7 +1398,7 @@ function ZO_Scrying:CanFireActions()
 end
 
 function ZO_Scrying:RefreshInputState()
-    local allowPlayerInput = SCRYING_SCENE:IsShowing() and not self.triggeredTutorial and not self.isHelpOverlayVisible and not ZO_Dialogs_IsShowingDialog()
+    local allowPlayerInput = SCRYING_SCENE:IsShowing() and not TUTORIAL_MANAGER:IsTutorialTriggered() and not HELP_MANAGER:IsHelpOverlayVisible() and not ZO_Dialogs_IsShowingDialog()
     if self.isPlayerInputEnabled ~= allowPlayerInput then
         if allowPlayerInput then
             PushActionLayerByName("ScryingActions")
@@ -1485,15 +1437,6 @@ function ZO_Scrying:IsPlayerInputEnabled()
     return self.isPlayerInputEnabled
 end
 
-function ZO_Scrying:ShowTutorial(tutorial)
-    local tutorialId = GetTutorialId(tutorial)
-    if CanTutorialBeSeen(tutorialId) and (not HasSeenTutorial(tutorialId)) then
-        self.triggeredTutorial = true
-        self:RefreshInputState()
-        TriggerTutorial(tutorial)
-    end
-end
-
 do
     local ABILITY_TUTORIALS =
     {
@@ -1510,18 +1453,18 @@ do
     }
 
     function ZO_Scrying:TryTriggerInitialTutorials()
-        self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_SCRYING_OPENED)
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_SCRYING_OPENED)
 
         for skill = SCRYING_ACTIVE_SKILL_ITERATION_BEGIN, SCRYING_ACTIVE_SKILL_ITERATION_END do
             if IsScryingActiveSkillUnlocked(skill) then
                 local abilityTutorial = ABILITY_TUTORIALS[skill]
                 if abilityTutorial then
-                    self:ShowTutorial(abilityTutorial)
+                    TUTORIAL_MANAGER:ShowTutorial(abilityTutorial)
                 end
                 if IsScryingActiveSkillUpgraded(skill) then
                     local upgradedAbilityTutorial = ABILITY_UPGRADED_TUTORIALS[skill]
                     if upgradedAbilityTutorial then
-                        self:ShowTutorial(upgradedAbilityTutorial)
+                        TUTORIAL_MANAGER:ShowTutorial(upgradedAbilityTutorial)
                     end
                 end
             end
@@ -1552,7 +1495,7 @@ function ZO_Scrying:TryCompleteScrying()
         return
     end
 
-    if self.triggeredTutorial then
+    if TUTORIAL_MANAGER:IsTutorialTriggered() then
         -- Wait until the user closes the tutorial
         self.waitingOnTutorialToEndGame = true
         return

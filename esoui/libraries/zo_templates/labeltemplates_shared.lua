@@ -111,7 +111,7 @@ do
     end
 
     function ZO_KeyMarkupLabel_OnNewUserAreaCreated(self, areaData, areaText, left, right, top, bottom, largeSize)
-        if areaData == "key" then
+        if zo_strlower(areaData) == "key" then
             if not self.keyBackdrops then
                 self.keyBackdrops = {}
             end

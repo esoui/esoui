@@ -272,7 +272,7 @@ function ZO_ItemTooltip_SetCharges(tooltipControl, charges, maxCharges)
         local leftBar = chargeMeterContainer:GetNamedChild("BarLeft")
         local rightBar = chargeMeterContainer:GetNamedChild("BarRight")
 
-        local gradient = ZO_POWER_BAR_GRADIENT_COLORS[POWERTYPE_MAGICKA]
+        local gradient = ZO_POWER_BAR_GRADIENT_COLORS[COMBAT_MECHANIC_FLAGS_MAGICKA]
         ZO_StatusBar_SetGradientColor(leftBar, gradient)
         ZO_StatusBar_SetGradientColor(rightBar, gradient)
 
@@ -299,7 +299,7 @@ function ZO_ItemTooltip_SetCondition(tooltipControl, condition, maxCondition)
         local leftBar = conditionMeterContainer:GetNamedChild("BarLeft")
         local rightBar = conditionMeterContainer:GetNamedChild("BarRight")
 
-        local gradient = ZO_POWER_BAR_GRADIENT_COLORS[POWERTYPE_STAMINA]
+        local gradient = ZO_POWER_BAR_GRADIENT_COLORS[COMBAT_MECHANIC_FLAGS_STAMINA]
         ZO_StatusBar_SetGradientColor(leftBar, gradient)
         ZO_StatusBar_SetGradientColor(rightBar, gradient)
 

@@ -1,0 +1,97 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_TributePatronStall_TabFadeTimeline">
+            <Animations>
+                <AlphaAnimation delay="1000" duration="750" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+            
+            <OnStop>
+                self.owner:OnTabFadeTimelineStopped(completedPlaying)
+            </OnStop>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_TributePatronStall_RequirementsFadeTimeline">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+
+            <OnStop>
+                self.owner:OnRequirementsFadeTimelineStopped(completedPlaying)
+            </OnStop>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_TributePatronStall_Requirement_SingleDigit_Style" virtual="true">
+            <Dimensions x="64" y="64" />
+
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Requirements/tributePatronRequirementFrame_single.dds" />
+
+                <Texture name="$(parent)TypeIcon">
+                    <Anchor point="CENTER" offsetX="-16" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributePatronStall_Requirement_DoubleDigit_Style" virtual="true">
+            <Dimensions x="128"  y="64" />
+
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Requirements/tributePatronRequirementFrame_double.dds" />
+
+                <Texture name="$(parent)TypeIcon">
+                    <Anchor point="CENTER" offsetX="-26" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_TributePatronStall_RequirementContainer_Template" scale="1.2" virtual="true">
+            <OnInitialized>
+                ZO_TributePatron_RequirementContainer_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Frame" level="1">
+                    <AnchorFill />
+                </Texture>
+
+                <Texture name="$(parent)TypeIcon" level="2">
+                    <Dimensions x="32" y="32" />
+                </Texture>
+
+                <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" level="3">
+                    <Anchor point="LEFT" relativeTo="$(parent)TypeIcon" relativePoint="RIGHT" offsetY="-1" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributePatronStall_Control" virtual="true">
+            <Anchor point="CENTER" />
+
+            <OnInitialized>
+                ZO_TributePatronStall_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)SuitTab">
+                    <Anchor point="CENTER" />
+                    <Dimensions x="ZO_TRIBUTE_SUIT_TAB_ICON_WIDTH" y="ZO_TRIBUTE_SUIT_TAB_ICON_HEIGHT" />
+                    <TextureCoords left="ZO_TRIBUTE_SUIT_TAB_ICON_LEFT_COORD" right="ZO_TRIBUTE_SUIT_TAB_ICON_RIGHT_COORD" top="ZO_TRIBUTE_SUIT_TAB_ICON_TOP_COORD" bottom="ZO_TRIBUTE_SUIT_TAB_ICON_BOTTOM_COORD" />
+                </Texture>
+
+                <Control name="$(parent)Requirements">
+                    <Anchor point="LEFT" relativeTo="$(parent)SuitTab" relativePoint="RIGHT" offsetX="40" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

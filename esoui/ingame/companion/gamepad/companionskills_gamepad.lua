@@ -645,7 +645,6 @@ end
 
 function ZO_CompanionSkills_Gamepad:ActivateCurrentListDescriptor()
     if self.currentListDescriptor then
-        self:ActivateCurrentList()
         self:UpdateActiveKeybindStrip()
         self:RefreshTooltip()
     end
@@ -653,7 +652,6 @@ end
 
 function ZO_CompanionSkills_Gamepad:DeactivateCurrentListDescriptor()
     if self.currentListDescriptor then
-        self:DeactivateCurrentList()
         self:UpdateActiveKeybindStrip()
         self:RefreshTooltip()
     end
