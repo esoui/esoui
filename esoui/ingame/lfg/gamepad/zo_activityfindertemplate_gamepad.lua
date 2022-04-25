@@ -359,7 +359,8 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
         local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(self.currentSpecificActivityType)
 
         for _, location in ipairs(locationData) do
-            if modes:IsEntryTypeVisible(location:GetEntryType()) and location:HasRewardData() then
+            local isTribute = location.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE or location.activityType == LFG_ACTIVITY_TRIBUTE_CASUAL
+            if modes:IsEntryTypeVisible(location:GetEntryType()) and ((isTribute and location:HasRewardData()) or not location:HasRewardData()) then
                 AddLocationEntry(location)
             end
         end

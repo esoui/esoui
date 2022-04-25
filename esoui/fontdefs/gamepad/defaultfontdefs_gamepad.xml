@@ -63,11 +63,10 @@
     <Font name="ZoFontGamepadBookMetalTitle" font="$(ANTIQUE_FONT)|40|soft-shadow-thick" />
     
     <!-- Tribute Fonts-->
-    <!-- TODO Tribute: Clean up any unused fonts before ship-->
-    <Font name="ZoFontTributeAntique18NoShadow" font="$(ANTIQUE_FONT)|18" />
-    <Font name="ZoFontTributeAntique27" font="$(ANTIQUE_FONT)|27|soft-shadow-thick" />
+    <Font name="ZoFontTributeAntique20NoShadow" font="$(ANTIQUE_FONT)|20" />
+    <Font name="ZoFontTributeAntique20" font="$(ANTIQUE_FONT)|20|soft-shadow-thick" />
     <Font name="ZoFontTributeAntique30NoShadow" font="$(ANTIQUE_FONT)|30" />
-    <Font name="ZoFontTributeAntique34" font="$(ANTIQUE_FONT)|34|soft-shadow-thick" />
+    <Font name="ZoFontTributeAntique30" font="$(ANTIQUE_FONT)|30|soft-shadow-thick" />
     <Font name="ZoFontTributeAntique40" font="$(ANTIQUE_FONT)|40|soft-shadow-thick" />
     <Font name="ZoFontTributeAntique52" font="$(ANTIQUE_FONT)|52|soft-shadow-thick" />
     

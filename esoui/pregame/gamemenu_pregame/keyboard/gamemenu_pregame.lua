@@ -71,7 +71,10 @@ function ZO_GameMenu_PreGame_Keyboard:BuildMenu()
     end
 
     local function OnHideSettings()
-        self.control:SetHidden(false)
+        if not IsInGamepadPreferredMode() then
+            self.control:SetHidden(false)
+        end
+
         self.scene:RemoveFragment(SETTINGS_FRAGMENT)
         self.scene:AddFragment(self.gameMenuPregameFragment)
         self.scene:AddFragment(LOGIN_BG_FRAGMENT)

@@ -30,6 +30,8 @@ local WRAP = false
 local NO_WRAP = true
 local REWARDS_MATCH_KEY = 1
 local REWARDS_RANK_UP_KEY = 2
+local PROGRESS_TRANSLATION_ANIMATION_TIME_MS = 500
+local REWARD_WIPE_PER_ITEM_DURATION_MS = 300
 
 function ZO_TributeSummary:Initialize(control)
     self.control = control
@@ -151,13 +153,20 @@ function ZO_TributeSummary:InitializeControls()
     local offsetY = 240
     self.progressionLabel:SetAnchor(TOP, self.rewardsHeader, BOTTOM, offsetX, offsetY)
 
-    self.progressionLeaderboardLabel = self.progressionControl:GetNamedChild("LeaderboardLabel")
-    self.progressionLeaderboardLabel:SetMaskAnchor(TOPLEFT, BOTTOMLEFT)
+    self.progressionLeaderboardBackdrop = self.progressionControl:GetNamedChild("LeaderboardBackdrop")
+    self.progressionLeaderboardBackdrop:SetMaskAnchor(TOPLEFT, BOTTOMLEFT)
     self.progressionRankChange = self.progressionControl:GetNamedChild("RankChange")
     self.progressionProgressBarControl = self.progressionControl:GetNamedChild("ProgressBar")
     self.progressionProgressBar = ZO_WrappingStatusBar:New(self.progressionProgressBarControl)
-    local ANIMATION_TIME_MS = 500
-    self.progressionProgressBar:SetAnimationTime(ANIMATION_TIME_MS)
+    self.progressionProgressNumber = self.progressionProgressBarControl:GetNamedChild("ProgressNumber")
+    self.progressionProgressNumberTranslateTimeline = ANIMATION_MANAGER:CreateTimeline()
+    self.progressionProgressNumberTranslateAnimation = self.progressionProgressNumberTranslateTimeline:InsertAnimation(ANIMATION_TRANSLATE, self.progressionProgressNumber)
+    local progressNumberTranslateY = 20
+    self.progressionProgressNumberTranslateAnimation:SetStartOffsetY(progressNumberTranslateY)
+    self.progressionProgressNumberTranslateAnimation:SetEndOffsetY(progressNumberTranslateY)
+    self.progressionProgressNumberFadeInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeEndOfGameFadeIn", self.progressionProgressNumber)
+    self.progressionProgressNumberFadeOutTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeEndOfGameFadeOut", self.progressionProgressNumber)
+    self.progressionProgressBar:SetAnimationTime(PROGRESS_TRANSLATION_ANIMATION_TIME_MS)
     self.progressionProgressBarFadeInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeEndOfGameFadeIn", self.progressionProgressBarControl)
     self.progressionCurrentRankIcon = self.progressionProgressBarControl:GetNamedChild("CurrentRankIcon")
     self.progressionCurrentRankLabel = self.progressionCurrentRankIcon:GetNamedChild("CurrentRankLabel")
@@ -175,11 +184,11 @@ function ZO_TributeSummary:InitializeControls()
     self.progressionRankChangeUpTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeRankChangeUp", self.progressionRankChange)
     self.progressionRankChangeUpTimeline:SetSkipAnimationsBehindPlayheadOnInitialPlay(false)
     self.progressionRankChangeFadeOutTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeRankChangeFadeOut", self.progressionRankChange)
-    self.progressionLeaderboardWipeInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeLeaderboardWipeIn", self.progressionLeaderboardLabel)
+    self.progressionLeaderboardWipeInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeLeaderboardWipeIn", self.progressionLeaderboardBackdrop)
     self.progressionLeaderboardWipeInTimeline:SetSkipAnimationsBehindPlayheadOnInitialPlay(false)
-    self.progressionLeaderboardLabel:SetAnimation(self.progressionLeaderboardWipeInTimeline:GetAnimation(1))
-    self.progressionLeaderboardLossBounceTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeLeaderboardLossBounce", self.progressionLeaderboardLabel)
-    self.progressionLeaderboardWinBounceTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeLeaderboardWinBounce", self.progressionLeaderboardLabel)
+    self.progressionLeaderboardBackdrop:SetAnimation(self.progressionLeaderboardWipeInTimeline:GetAnimation(1))
+    self.progressionLeaderboardLossBounceTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeLeaderboardLossBounce", self.progressionLeaderboardBackdrop)
+    self.progressionLeaderboardWinBounceTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeLeaderboardWinBounce", self.progressionLeaderboardBackdrop)
     self.progressionNextRankBounceTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeNextRankBounce", self.progressionNextRankIcon)
     self.progressionRankUpScaleTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeRankUpScale", self.progressionRankUpIndicator)
     self.progressionRankUpScaleTimeline:SetSkipAnimationsBehindPlayheadOnInitialPlay(false)
@@ -188,6 +197,96 @@ function ZO_TributeSummary:InitializeControls()
     self.progressionNextRankFadeOutTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeEndOfGameFadeOut", self.progressionNextRankIcon)
     self.progressionCurrentRankFadeInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeEndOfGameFadeIn", self.progressionCurrentRankIcon)
     self.progressionNextRankFadeInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeEndOfGameFadeIn", self.progressionNextRankIcon)
+
+    self:InitializeParticleSystems()
+end
+
+function ZO_TributeSummary:InitializeParticleSystems()
+    local particleR, particleG, particleB = ZO_OFF_WHITE:UnpackRGB()
+    local FULL_CIRCLE_RADIANS = math.rad(360)
+
+    local nextRankParticleSystem = ZO_ControlParticleSystem:New(ZO_StationaryParticle_Control)
+    nextRankParticleSystem:SetParentControl(self.progressionNextRankIcon:GetNamedChild("NextRankIconFlareContainer"))
+    nextRankParticleSystem:SetParticlesPerSecond(20)
+    nextRankParticleSystem:SetStartPrimeS(2)
+    nextRankParticleSystem:SetParticleParameter("Texture", "EsoUI/Art/Miscellaneous/lensflare_star_256.dds")
+    nextRankParticleSystem:SetParticleParameter("BlendMode", TEX_BLEND_MODE_ADD)
+    nextRankParticleSystem:SetParticleParameter("StartAlpha", 0)
+    nextRankParticleSystem:SetParticleParameter("EndAlpha", 1)
+    nextRankParticleSystem:SetParticleParameter("AlphaEasing", ZO_EaseInOutZeroToOneToZero)
+    nextRankParticleSystem:SetParticleParameter("StartScale", ZO_UniformRangeGenerator:New(1.5, 1.8))
+    nextRankParticleSystem:SetParticleParameter("EndScale", ZO_UniformRangeGenerator:New(1.05, 1.5))
+    nextRankParticleSystem:SetParticleParameter("DurationS", ZO_UniformRangeGenerator:New(1, 2))
+    nextRankParticleSystem:SetParticleParameter("StartColorR", particleR)
+    nextRankParticleSystem:SetParticleParameter("StartColorG", particleG)
+    nextRankParticleSystem:SetParticleParameter("StartColorB", particleB)
+    nextRankParticleSystem:SetParticleParameter("StartRotationRadians", ZO_UniformRangeGenerator:New(0, FULL_CIRCLE_RADIANS))
+    local MIN_ROTATION_SPEED = math.rad(1.5)
+    local MAX_ROTATION_SPEED = math.rad(3)
+    local headerStarbustRotationSpeedGenerator = ZO_WeightedChoiceGenerator:New(
+        MIN_ROTATION_SPEED , 0.25,
+        MAX_ROTATION_SPEED , 0.25,
+        -MIN_ROTATION_SPEED, 0.25,
+        -MAX_ROTATION_SPEED, 0.25)
+
+    nextRankParticleSystem:SetParticleParameter("RotationSpeedRadians", headerStarbustRotationSpeedGenerator)
+    nextRankParticleSystem:SetParticleParameter("Size", 256)
+    nextRankParticleSystem:SetParticleParameter("DrawLevel", 0)
+
+    self.nextRankParticleSystem = nextRankParticleSystem
+
+    local rankUpParticleSystem = ZO_ControlParticleSystem:New(ZO_StationaryParticle_Control)
+    rankUpParticleSystem:SetParentControl(self.progressionRankUpIndicator:GetNamedChild("RankUpFlareContainer"))
+    rankUpParticleSystem:SetParticlesPerSecond(20)
+    rankUpParticleSystem:SetStartPrimeS(2)
+    rankUpParticleSystem:SetParticleParameter("Texture", "EsoUI/Art/Miscellaneous/lensflare_star_256.dds")
+    rankUpParticleSystem:SetParticleParameter("BlendMode", TEX_BLEND_MODE_ADD)
+    rankUpParticleSystem:SetParticleParameter("StartAlpha", 0)
+    rankUpParticleSystem:SetParticleParameter("EndAlpha", 1)
+    rankUpParticleSystem:SetParticleParameter("AlphaEasing", ZO_EaseInOutZeroToOneToZero)
+    rankUpParticleSystem:SetParticleParameter("StartScale", ZO_UniformRangeGenerator:New(1.5, 1.8))
+    rankUpParticleSystem:SetParticleParameter("EndScale", ZO_UniformRangeGenerator:New(1.05, 1.5))
+    rankUpParticleSystem:SetParticleParameter("DurationS", ZO_UniformRangeGenerator:New(1, 2))
+    rankUpParticleSystem:SetParticleParameter("StartColorR", particleR)
+    rankUpParticleSystem:SetParticleParameter("StartColorG", particleG)
+    rankUpParticleSystem:SetParticleParameter("StartColorB", particleB)
+    rankUpParticleSystem:SetParticleParameter("StartRotationRadians", ZO_UniformRangeGenerator:New(0, FULL_CIRCLE_RADIANS))
+    rankUpParticleSystem:SetParticleParameter("RotationSpeedRadians", headerStarbustRotationSpeedGenerator)
+    rankUpParticleSystem:SetParticleParameter("Size", 256)
+    rankUpParticleSystem:SetParticleParameter("DrawLevel", 0)
+
+    self.rankUpParticleSystem = rankUpParticleSystem
+
+    local leaderboardParticleSystem = ZO_ControlParticleSystem:New(ZO_StationaryParticle_Control)
+    leaderboardParticleSystem:SetParentControl(self.progressionControl:GetNamedChild("LeaderboardFlareContainer"))
+    leaderboardParticleSystem:SetParticlesPerSecond(5)
+    leaderboardParticleSystem:SetStartPrimeS(2)
+    leaderboardParticleSystem:SetParticleParameter("Texture", "EsoUI/Art/Miscellaneous/lensflare_burst_512.dds")
+    leaderboardParticleSystem:SetParticleParameter("BlendMode", TEX_BLEND_MODE_ADD)
+    leaderboardParticleSystem:SetParticleParameter("StartAlpha", 0)
+    leaderboardParticleSystem:SetParticleParameter("EndAlpha", 1)
+    leaderboardParticleSystem:SetParticleParameter("AlphaEasing", ZO_EaseInOutZeroToOneToZero)
+    leaderboardParticleSystem:SetParticleParameter("StartScale", ZO_UniformRangeGenerator:New(1.5, 1.8))
+    leaderboardParticleSystem:SetParticleParameter("EndScale", ZO_UniformRangeGenerator:New(1.05, 1.5))
+    leaderboardParticleSystem:SetParticleParameter("DurationS", ZO_UniformRangeGenerator:New(1, 2))
+    leaderboardParticleSystem:SetParticleParameter("StartColorR", particleR)
+    leaderboardParticleSystem:SetParticleParameter("StartColorG", particleG)
+    leaderboardParticleSystem:SetParticleParameter("StartColorB", particleB)
+    leaderboardParticleSystem:SetParticleParameter("StartRotationRadians", 0)--FULL_CIRCLE_RADIANS / 2))
+    local MIN_ROTATION_SPEED = math.rad(1.5)
+    local MAX_ROTATION_SPEED = math.rad(3)
+    local headerStarbustRotationSpeedGenerator = ZO_WeightedChoiceGenerator:New(
+        MIN_ROTATION_SPEED , 0.25,
+        MAX_ROTATION_SPEED , 0.25,
+        -MIN_ROTATION_SPEED, 0.25,
+        -MAX_ROTATION_SPEED, 0.25)
+
+    leaderboardParticleSystem:SetParticleParameter("RotationSpeedRadians", headerStarbustRotationSpeedGenerator)
+    leaderboardParticleSystem:SetParticleParameter("Width", 512)
+    leaderboardParticleSystem:SetParticleParameter("Height", 128)
+    leaderboardParticleSystem:SetParticleParameter("DrawLevel", 0)
+
+    self.leaderboardParticleSystem = leaderboardParticleSystem
 end
 
 function ZO_TributeSummary:InitializeStateMachine()
@@ -219,11 +318,15 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.statisticsControl:SetHidden(true)
             self.summaryControl:SetHidden(true)
             self.rewardsControl:SetHidden(true)
+            self.clubRankBarControl:SetHidden(true)
             self.rewardItemsControl:SetHidden(true)
             self.progressionControl:SetHidden(true)
-            self.progressionLeaderboardLabel:SetHidden(true)
+            self.progressionLeaderboardBackdrop:SetHidden(true)
             self.progressionRankChange:SetHidden(true)
             self.progressionRankUpIndicator:SetHidden(true)
+            self.nextRankParticleSystem:Stop()
+            self.rankUpParticleSystem:Stop()
+            self.leaderboardParticleSystem:Stop()
         end)
     end
 
@@ -231,7 +334,6 @@ function ZO_TributeSummary:InitializeStateMachine()
         local state = fanfareStateMachine:AddState("BEGIN")
         state:RegisterCallback("OnActivated", function()
             self.modalUnderlayTimeline:PlayFromStart()
-            -- TODO Tribute: Animation timelines
             fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.NEXT)
         end)
     end
@@ -246,6 +348,7 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.keybindTimeline:PlayFromStart()
             self.statisticsInTimeline:PlayFromStart()
             self.summaryInTimeline:PlayFromStart()
+            PlaySound(SOUNDS.TRIBUTE_SUMMARY_BEGIN)
             -- This will be a fade in of all on-screen UI elements simultaneously
         end)
 
@@ -302,6 +405,7 @@ function ZO_TributeSummary:InitializeStateMachine()
                 self.clubRankBar:SetValue(clubRank, currentClubExperienceForRank, maxClubExperienceForRank, NO_WRAP, ANIMATE_INSTANTLY)
             end
             self.rewardsControl:SetHidden(false)
+            self.clubRankBarControl:SetHidden(false)
             self.statisticsControl:SetHidden(false)
             self.rewardItemsControl:SetHidden(false)
             self.rewardRowControlPool:GetActiveObject(REWARDS_MATCH_KEY):SetHidden(false)
@@ -408,6 +512,7 @@ function ZO_TributeSummary:InitializeStateMachine()
         state:RegisterCallback("OnActivated", function()
             self.progressionRankChangeFadeOutTimeline:PlayFromStart()
             if self.rankUp then
+                self.nextRankParticleSystem:Start()
                 self.progressionNextRankBounceTimeline:PlayFromStart()
             end
         end)
@@ -426,11 +531,28 @@ function ZO_TributeSummary:InitializeStateMachine()
         local state = fanfareStateMachine:AddState("PROGRESSION_PROGRESS_BAR_IN")
         state:RegisterCallback("OnActivated", function()
             local playerCampaignXPNew = self.playerCampaignXP
+            local playerCampaignXPNext = self.playerRankNextRequiredXP
+            local wrapType = WRAP
+            local animationType = ANIMATE_FULLY
             if self.rankUp then
                 playerCampaignXPNew = self.playerRankNextRequiredXP
+            elseif self.playerRankCurrent == TRIBUTE_TIER_PLATINUM then
+                playerCampaignXPNew = 1
+                playerCampaignXPNext = 1
+                wrapType = NO_WRAP
+                animationType = ANIMATE_INSTANTLY
             end
+
             self.progressionPlacementBarNewFadeInTimeline:PlayFromStart()
-            self.progressionProgressBar:SetValue(self.playerRankCurrent, playerCampaignXPNew, self.playerRankNextRequiredXP, WRAP, ANIMATE_FULLY)
+            self.progressionProgressNumberTranslateTimeline:PlayFromStart()
+            self.progressionProgressBar:SetValue(self.playerRankCurrent, playerCampaignXPNew, playerCampaignXPNext, wrapType, animationType)
+            -- If we don't animate the bar, we need to trigger the animation completion manually.
+            if animationType == ANIMATE_INSTANTLY then
+                fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.ANIMATION_COMPLETE)
+            else
+                -- Only play the bar fill sound when we actually animate bar progress.
+                PlaySound(SOUNDS.TRIBUTE_SUMMARY_PROGRESS_BAR_FILL)
+            end
         end)
     end
 
@@ -441,6 +563,12 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.progressionRankUpIndicator:GetNamedChild("NewRankLabel"):SetText(self.playerRankNewRewardsData:GetTierName())
             self.progressionRankUpIndicator:SetHidden(false)
             self.progressionRankUpScaleTimeline:PlayFromStart()
+            self.rankUpParticleSystem:Start()
+            if self.playerRankNew == TRIBUTE_TIER_PLATINUM then
+                PlaySound(SOUNDS.TRIBUTE_SUMMARY_RANK_CHANGE_LEADERBOARD)
+            else
+                PlaySound(SOUNDS.TRIBUTE_SUMMARY_RANK_CHANGE)
+            end
         end)
 
         state:RegisterCallback("OnDeactivated", function()
@@ -471,6 +599,7 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.progressionNextRankFadeOutTimeline:PlayFromStart()
             self.progressionPlacementBarFadeOutTimeline:PlayFromStart()
             self.progressionPlacementBarNewFadeOutTimeline:PlayFromStart()
+            self.progressionProgressNumberFadeOutTimeline:PlayFromStart()
         end)
 
         state:RegisterCallback("OnDeactivated", function()
@@ -486,12 +615,16 @@ function ZO_TributeSummary:InitializeStateMachine()
             if self.progressionPlacementBarNewFadeOutTimeline:IsPlaying() then
                 self.progressionPlacementBarNewFadeOutTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             end
+            if self.progressionProgressNumberFadeOutTimeline:IsPlaying() then
+                self.progressionProgressNumberFadeOutTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+            end
         end)
     end
 
     do
         local state = fanfareStateMachine:AddState("NEW_RANKS_FADE_IN")
         state:RegisterCallback("OnActivated", function()
+            self.nextRankParticleSystem:Stop()
             self.progressionPlacementBarControl:SetHidden(true)
             self.progressionPlacementBarNewControl:SetHidden(true)
             self.progressionProgressBarFadeInTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
@@ -502,6 +635,11 @@ function ZO_TributeSummary:InitializeStateMachine()
                 local newNextRankData = ZO_TributeRewardsData:New(TRIBUTE_REWARDS_DATA_MANAGER:GetTributeRewardsTypeData(ZO_TRIBUTE_REWARD_TYPES.SEASON_REWARDS), self.playerRankNew + 1)
                 self.progressionNextRankIcon:SetTexture(newNextRankData:GetTierIcon())
                 self.progressionNextRankLabel:SetText(newNextRankData:GetTierName())
+                local playerXP = self.playerCampaignXP + GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent, self.campaignId) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew, self.campaignId)
+                local requiredXP = zo_max(1, GetTributeCampaignRankExperienceRequirement(self.playerRankNew + 1, self.campaignId) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew, self.campaignId))
+                self.progressionProgressNumber:SetText(string.format("%d / %d", playerXP, self.playerRankNextRequiredXP))
+                self.progressionProgressNumberTranslateAnimation:SetStartOffsetX(0)
+                self.progressionProgressNumberTranslateAnimation:SetEndOffsetX(playerXP / requiredXP * self.progressionProgressBarControl:GetWidth())
             end
 
             if self.playerRankNext == TRIBUTE_TIER_PLATINUM then
@@ -512,14 +650,22 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.progressionProgressBarFadeInTimeline:PlayFromStart()
             self.progressionCurrentRankFadeInTimeline:PlayFromStart()
             self.progressionNextRankFadeInTimeline:PlayFromStart()
+            self.progressionProgressNumberTranslateTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
+            self.progressionProgressNumberFadeInTimeline:PlayFromStart()
         end)
 
         state:RegisterCallback("OnDeactivated", function()
+            if self.progressionProgressBarFadeInTimeline:IsPlaying() then
+                self.progressionProgressBarFadeInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+            end
             if self.progressionCurrentRankFadeInTimeline:IsPlaying() then
                 self.progressionCurrentRankFadeInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             end
             if self.progressionNextRankFadeInTimeline:IsPlaying() then
                 self.progressionNextRankFadeInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+            end
+            if self.progressionProgressNumberFadeInTimeline:IsPlaying() then
+                self.progressionProgressNumberFadeInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             end
         end)
     end
@@ -527,13 +673,22 @@ function ZO_TributeSummary:InitializeStateMachine()
     do
         local state = fanfareStateMachine:AddState("NEW_RANK_PROGRESS_BAR_IN")
         state:RegisterCallback("OnActivated", function()
-            self.playerCampaignXP = self.playerCampaignXP - self.playerRankNextRequiredXP
+            self.playerCampaignXP = zo_min(0, self.playerCampaignXP + GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew))
+            local playerCampaignXPNew = self.playerCampaignXP
+
             self.playerRankCurrent = self.playerRankNew
             if self.playerRankNew ~= TRIBUTE_TIER_PLATINUM then
                 self.playerRankNext = self.playerRankNew + 1
             end
+
             self.playerRankNextRequiredXP = GetTributeCampaignRankExperienceRequirement(self.playerRankNext) - GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent)
-            self.progressionProgressBar:SetValue(self.playerRankCurrent, self.playerCampaignXP, self.playerRankNextRequiredXP, WRAP, ANIMATE_FULLY)
+            local playerCampaignXPNext = self.playerRankNextRequiredXP
+            if self.playerRankNew == TRIBUTE_TIER_PLATINUM then
+                playerCampaignXPNew = 1
+                playerCampaignXPNext = 1
+            end
+            self.progressionProgressBar:SetValue(self.playerRankCurrent, playerCampaignXPNew, playerCampaignXPNext, WRAP, ANIMATE_FULLY)
+            self.progressionProgressNumberTranslateTimeline:PlayFromStart()
         end)
     end
 
@@ -565,13 +720,12 @@ function ZO_TributeSummary:InitializeStateMachine()
                     self.progressionNextRankLabel:SetText(newNextRankData:GetTierName())
                 end
 
-                self.playerCampaignXP = self.playerCampaignXP - self.playerRankNextRequiredXP
+                self.playerCampaignXP = zo_min(0, self.playerCampaignXP + GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew))
                 self.playerRankCurrent = self.playerRankNew
                 if self.playerRankNew ~= TRIBUTE_TIER_PLATINUM then
                     self.playerRankNext = self.playerRankNew + 1
                 else
                     self.progressionNextRankIcon:SetHidden(true)
-                    self.progressionNextRankLabel:SetHidden(true)
                 end
                 self.playerRankNextRequiredXP = GetTributeCampaignRankExperienceRequirement(self.playerRankNext) - GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent)
             end
@@ -597,7 +751,7 @@ function ZO_TributeSummary:InitializeStateMachine()
             local offsetY = 60
             self.rewardItemsControl:SetAnchor(TOP, self.progressionControl:GetNamedChild("Divider"), BOTTOM, offsetX, offsetY)
 
-            self.progressionProgressBar:SetValue(self.playerRankCurrent, self.playerCampaignXP, self.playerRankNextRequiredXP, WRAP, ANIMATE_INSTANTLY)
+            self.progressionProgressBar:SetValue(self.playerRankCurrent, self.playerCampaignXP, self.playerRankNextRequiredXP, NO_WRAP, ANIMATE_INSTANTLY)
 
             self.rewardsControl:SetHidden(false)
             self.statisticsControl:SetHidden(false)
@@ -608,9 +762,17 @@ function ZO_TributeSummary:InitializeStateMachine()
                 rankUpRewardsRow:SetHidden(false)
                 self.rankUpItemsInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             end
+            self.nextRankParticleSystem:Stop()
             self.progressionControl:SetHidden(false)
-            self.progressionRankChange:SetHidden(self.rankUp)
+            self.progressionRankChange:SetHidden(self.rankUp or self.playerRankCurrent == TRIBUTE_TIER_UNRANKED)
             self.progressionRankUpIndicator:SetHidden(not self.rankUp)
+            local progressFinal = self.playerCampaignXP / zo_max(1, self.playerRankNextRequiredXP)
+            self.progressionProgressNumber:SetText(string.format("%d / %d", self.playerCampaignXP, self.playerRankNextRequiredXP))
+            local width = self.progressionProgressBarControl:GetWidth()
+            local xFinal = progressFinal * width
+            self.progressionProgressNumberTranslateAnimation:SetEndOffsetX(xFinal)
+            self.progressionProgressNumberTranslateTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+            self.progressionProgressNumber:SetHidden(self.playerRankCurrent == TRIBUTE_TIER_UNRANKED)
             self.rewardsHeaderInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             self.statisticsInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             self.matchRewardItemsInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
@@ -624,8 +786,7 @@ function ZO_TributeSummary:InitializeStateMachine()
     do
         local state = fanfareStateMachine:AddState("LEADERBOARD_IN")
         state:RegisterCallback("OnActivated", function()
-            self.progressionLeaderboardLabel:SetText("[DEBUG] Leaderboard Rank: 853")
-            self.progressionLeaderboardLabel:SetHidden(false)
+            self.progressionLeaderboardBackdrop:SetHidden(false)
             self.progressionLeaderboardWipeInTimeline:PlayFromStart()
         end)
 
@@ -640,6 +801,7 @@ function ZO_TributeSummary:InitializeStateMachine()
         local state = fanfareStateMachine:AddState("LEADERBOARD_BOUNCE_IN")
         state:RegisterCallback("OnActivated", function()
             if self.victory then
+                self.leaderboardParticleSystem:Start()
                 self.progressionLeaderboardWinBounceTimeline:PlayFromStart()
             else
                 self.progressionLeaderboardLossBounceTimeline:PlayFromStart()
@@ -664,16 +826,19 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.rewardsControl:SetHidden(false)
             self.statisticsControl:SetHidden(false)
             self.rewardItemsControl:SetHidden(false)
+            self.progressionNextRankIcon:SetHidden(true)
             self.rewardRowControlPool:GetActiveObject(REWARDS_MATCH_KEY):SetHidden(false)
             local rankUpRewardsRow = self.rewardRowControlPool:GetActiveObject(REWARDS_RANK_UP_KEY)
             if rankUpRewardsRow then
                 rankUpRewardsRow:SetHidden(false)
                 self.rankUpItemsInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             end
+            self.nextRankParticleSystem:Stop()
             self.progressionControl:SetHidden(false)
             self.progressionRankChange:SetHidden(true)
-            self.progressionLeaderboardLabel:SetText("[DEBUG] Leaderboard Rank: 853")
-            self.progressionLeaderboardLabel:SetHidden(false)
+            self.progressionProgressBar:SetValue(self.playerRankCurrent, 1, 1, NO_WRAP, ANIMATE_INSTANTLY)
+            self.progressionLeaderboardBackdrop:SetHidden(false)
+            self.progressionLeaderboardWipeInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             self.rewardsHeaderInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             self.statisticsInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             self.matchRewardItemsInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
@@ -681,6 +846,7 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.progressionRankChangeUpTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             if self.victory then
                 self.progressionLeaderboardLossBounceTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+                self.leaderboardParticleSystem:Start()
             else
                 self.progressionLeaderboardWinBounceTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             end
@@ -755,14 +921,14 @@ function ZO_TributeSummary:InitializeStateMachine()
         end)
         local rankChangeLeaderboardInEdge = fanfareStateMachine:AddEdgeAutoName("RANK_CHANGE_OUT", "LEADERBOARD_IN")
         rankChangeLeaderboardInEdge:SetConditional(function()
-            return self.playerRankCurrent == TRIBUTE_TIER_PLATINUM
+            return (not self.rankUp) and self.playerRankCurrent == TRIBUTE_TIER_PLATINUM
         end)
         local rankChangeRankUpInEdge = fanfareStateMachine:AddEdgeAutoName("RANK_CHANGE_OUT", "RANK_UP_IN")
         rankChangeRankUpInEdge:SetConditional(function()
             return self.rankUp
         end)
         local rankChangeRankUpSkipEdge = fanfareStateMachine:AddEdgeAutoName("RANK_CHANGE_OUT", "RANK_UP_SKIP")
-        rankChangeRankUpInEdge:SetConditional(function()
+        rankChangeRankUpSkipEdge:SetConditional(function()
             return self.rankUp
         end)
         fanfareStateMachine:AddEdgeAutoName("RANK_UP_IN", "RANK_UP_REWARDS_IN")
@@ -775,20 +941,26 @@ function ZO_TributeSummary:InitializeStateMachine()
         fanfareStateMachine:AddEdgeAutoName("NEW_RANKS_FADE_IN", "RANK_UP_SKIP")
         local newProgressBarInRankUpOutEdge = fanfareStateMachine:AddEdgeAutoName("NEW_RANK_PROGRESS_BAR_IN", "RANK_UP_OUT")
         newProgressBarInRankUpOutEdge:SetConditional(function()
-            return self.playerRankCurrent == TRIBUTE_TIER_PLATINUM
+            return self.playerRankCurrent == TRIBUTE_TIER_PLATINUM or (self.rankUp and self.playerRankNew == TRIBUTE_TIER_PLATINUM)
         end)
         local newProgressBarInNoLeaderboardEdge = fanfareStateMachine:AddEdgeAutoName("NEW_RANK_PROGRESS_BAR_IN", "NO_LEADERBOARD")
         newProgressBarInNoLeaderboardEdge:SetConditional(function()
-            return self.playerRankCurrent ~= TRIBUTE_TIER_PLATINUM
+            return self.playerRankCurrent ~= TRIBUTE_TIER_PLATINUM and not (self.rankUp and self.playerRankNew == TRIBUTE_TIER_PLATINUM)
         end)
         local newProgressBarInNoLeaderboardSkipEdge = fanfareStateMachine:AddEdge("NEW_RANK_PROGRESS_BAR_IN_TO_NO_LEADERBOARD_SKIP", "NEW_RANK_PROGRESS_BAR_IN", "NO_LEADERBOARD")
         newProgressBarInNoLeaderboardSkipEdge:SetConditional(function()
-            return self.playerRankCurrent ~= TRIBUTE_TIER_PLATINUM
+            return self.playerRankCurrent ~= TRIBUTE_TIER_PLATINUM and not (self.rankUp and self.playerRankNew == TRIBUTE_TIER_PLATINUM)
         end)
         local rankUpSkipNoLeaderboardEdge = fanfareStateMachine:AddEdgeAutoName("RANK_UP_SKIP", "NO_LEADERBOARD")
         rankUpSkipNoLeaderboardEdge:SetConditional(function()
-            return self.playerRankCurrent ~= TRIBUTE_TIER_PLATINUM
+            return self.playerRankCurrent ~= TRIBUTE_TIER_PLATINUM and not (self.rankUp and self.playerRankNew == TRIBUTE_TIER_PLATINUM)
         end)
+        local rankUpSkipLeaderboardEdge = fanfareStateMachine:AddEdgeAutoName("RANK_UP_SKIP", "LEADERBOARD")
+        rankUpSkipLeaderboardEdge:SetConditional(function()
+            return self.playerRankCurrent == TRIBUTE_TIER_PLATINUM or (self.rankUp and self.playerRankNew == TRIBUTE_TIER_PLATINUM)
+        end)
+        fanfareStateMachine:AddEdgeAutoName("RANK_UP_OUT", "LEADERBOARD_IN")
+        fanfareStateMachine:AddEdge("RANK_UP_OUT_TO_LEADERBOARD_SKIP", "RANK_UP_OUT", "LEADERBOARD")
         fanfareStateMachine:AddEdgeAutoName("LEADERBOARD_IN", "LEADERBOARD_BOUNCE_IN")
         fanfareStateMachine:AddEdgeAutoName("LEADERBOARD_BOUNCE_IN", "LEADERBOARD")
         fanfareStateMachine:AddEdgeAutoName("LEADERBOARD", "QUIT")
@@ -859,7 +1031,14 @@ function ZO_TributeSummary:InitializeStateMachine()
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "NEW_RANK_PROGRESS_BAR_IN_TO_NO_LEADERBOARD")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "NEW_RANK_PROGRESS_BAR_IN_TO_NO_LEADERBOARD_SKIP")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "LEADERBOARD_TRANSITORY_STATE_TO_RANK_UP_SKIP")
+    fanfareStateMachine:AddTriggerToEdge("NEXT", "LEADERBOARD_TRANSITORY_STATE_TO_LEADERBOARD")
+    fanfareStateMachine:AddTriggerToEdge("NEXT", "LEADERBOARD_TRANSITORY_STATE_TO_NO_LEADERBOARD")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "RANK_UP_SKIP_TO_NO_LEADERBOARD")
+    fanfareStateMachine:AddTriggerToEdge("NEXT", "RANK_UP_SKIP_TO_LEADERBOARD")
+
+    -- The player has just attained leaderboard rank
+    fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "RANK_UP_OUT_TO_LEADERBOARD_IN")
+    fanfareStateMachine:AddTriggerToEdge("NEXT", "RANK_UP_OUT_TO_LEADERBOARD_SKIP")
 
     -- The player is already on the leaderboard
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "RANK_CHANGE_OUT_TO_LEADERBOARD_IN")
@@ -876,19 +1055,24 @@ function ZO_TributeSummary:InitializeStateMachine()
         end
     end
 
+    local function OnProgressBarCompleteFireTrigger()
+        fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.ANIMATION_COMPLETE)
+    end
+
     self.summaryInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.summaryOutTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.rewardsHeaderInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.rewardsOutTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionRankChangeUpTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionRankChangeFadeOutTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
-    self.progressionProgressBar:SetOnCompleteCallback(OnCompleteFireTrigger)
+    self.progressionProgressBar:SetOnCompleteCallback(OnProgressBarCompleteFireTrigger)
     self.progressionLeaderboardWipeInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionLeaderboardLossBounceTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionLeaderboardWinBounceTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionRankUpScaleTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionCurrentRankFadeOutTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionCurrentRankFadeInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
+    self.progressionRankUpFadeOutTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
 
     -- Reset state machine
     self.fanfareStateMachine:SetCurrentState("INACTIVE")
@@ -907,7 +1091,7 @@ function ZO_TributeSummary:ApplyPlatformStyle()
     ApplyTemplateToControl(self.progressionControl, ZO_GetPlatformTemplate("ZO_TributeSummary_TributeProgression"))
 
     -- We have to rebuild the placement match bars from scratch if we change style templates.
-    if self.progressionPlacementBar then
+    if self.progressionPlacementBar and not self.progressionPlacementBarControl:IsHidden() then
         local numRequiredPlacementMatches = GetNumRequiredPlacementMatches(self.campaignId)
         self.progressionPlacementBar:SetSegmentTemplate(ZO_GetPlatformTemplate("ZO_TributeSummary_ArrowStatusBar"))
         self.progressionPlacementBar:SetMaxSegments(numRequiredPlacementMatches)
@@ -919,17 +1103,21 @@ function ZO_TributeSummary:ApplyPlatformStyle()
         end
     end
 
+    for _, reward in self.rewardsControlPool:ActiveAndFreeObjectIterator() do
+        reward:MarkStyleDirty()
+    end
+
     -- TODO Tribute: Other controls specific to this scene
 
     -- Reset the text here to handle the force uppercase on gamepad
-    self.keybindButton:SetText(self.keybindButton.nameLabel:GetText())
+    self.keybindButton:SetText(GetString(SI_TRIBUTE_SUMMARY_CONTINUE))
 end
 
 function ZO_TributeSummary:BeginEndOfGameFanfare()
     SCENE_MANAGER:AddFragment(TRIBUTE_SUMMARY_FRAGMENT)
 
     local matchType = GetTributeMatchType()
-    self.hasRewards = matchType ~= TRIBUTE_MATCH_TYPE_CASUAL
+    self.hasRewards = matchType ~= TRIBUTE_MATCH_TYPE_PRIVATE
     self.isRanked = matchType == TRIBUTE_MATCH_TYPE_COMPETITIVE
 
     self.campaignId = GetTributeMatchCampaignId()
@@ -947,41 +1135,15 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     self.playerRankCurrent = GetTributePlayerCampaignRank()
     if self.playerRankCurrent ~= TRIBUTE_TIER_PLATINUM then
         self.playerRankNext = self.playerRankCurrent + 1
+        self.progressionNextRankIcon:SetHidden(false)
     else
         self.playerRankNext = self.playerRankCurrent
+        self.progressionNextRankIcon:SetHidden(true)
     end
     -- Rarely (esp. when completing placement matches) the player's new rank may not actually be the next rank (i.e. they can skip over ranks)
     self.playerRankNew = GetNewCampaignRank()
 
-    self.matchResults = {}
-    self.matchResultsNew = {}
-    local hasUpdatedCurrentMatch = false
-    local numRequiredPlacementMatches = GetNumRequiredPlacementMatches(self.campaignId)
-    for i = 0, numRequiredPlacementMatches do
-        local hasRecord, wasAWin = GetCampaignMatchResultFromHistoryByMatchNumber(i)
-        if hasRecord then
-            if wasAWin then
-                table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_WON)
-                table.insert(self.matchResultsNew, ZO_TRIBUTE_FINDER_MATCH_WON)
-            else
-                table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_LOSS)
-                table.insert(self.matchResultsNew, ZO_TRIBUTE_FINDER_MATCH_LOSS)
-            end
-        elseif not hasUpdatedCurrentMatch then
-            if self.victory then
-                table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_EMPTY)
-                table.insert(self.matchResultsNew, ZO_TRIBUTE_FINDER_MATCH_WON)
-            else
-                table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_EMPTY)
-                table.insert(self.matchResultsNew, ZO_TRIBUTE_FINDER_MATCH_LOSS)
-            end
-            hasUpdatedCurrentMatch = true
-        else
-            table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_EMPTY)
-            table.insert(self.matchResultsNew, ZO_TRIBUTE_FINDER_MATCH_EMPTY)
-        end
-    end
-
+    -- We create the placement bars even if we're not going to use them to avoid a bunch of nil checks in the states later.
     local function UpdateBarVisualDisplay(control, segmentIndex, handleNewMatch)
         local overlayControl = control:GetNamedChild("Overlay")
         local leftControl = overlayControl:GetNamedChild("Left")
@@ -1018,18 +1180,68 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     if not self.progressionPlacementBar then
         self.progressionPlacementBar = ZO_MultiSegmentProgressBar:New(self.progressionPlacementBarControl, ZO_GetPlatformTemplate("ZO_TributeSummary_ArrowStatusBar"), UpdateBarVisualDisplay)
     end
-    self.progressionPlacementBar:SetSegmentationUniformity(true)
-    self.progressionPlacementBar:SetProgressBarGrowthDirection(ZO_PROGRESS_BAR_GROWTH_DIRECTION_LEFT_TO_RIGHT)
-    self.progressionPlacementBar:SetPreviousSegmentUnderneathOverlap(-32)
     if not self.progressionPlacementBarNew then
         self.progressionPlacementBarNew = ZO_MultiSegmentProgressBar:New(self.progressionPlacementBarNewControl, ZO_GetPlatformTemplate("ZO_TributeSummary_ArrowStatusBar"), UpdateBarVisualDisplayNew)
     end
-    self.progressionPlacementBarNew:SetSegmentationUniformity(true)
-    self.progressionPlacementBarNew:SetProgressBarGrowthDirection(ZO_PROGRESS_BAR_GROWTH_DIRECTION_LEFT_TO_RIGHT)
-    self.progressionPlacementBarNew:SetPreviousSegmentUnderneathOverlap(-32)
-    self.progressionPlacementBarNew.handleNewMatch = true
 
+    -- We can avoid doing this if we're not going to use the placement bars.
     if self.playerRankCurrent == TRIBUTE_TIER_UNRANKED then
+        self.matchResults = {}
+        self.matchResultsNew = {}
+        local hasUpdatedCurrentMatch = false
+        local numRequiredPlacementMatches = GetNumRequiredPlacementMatches(self.campaignId)
+        local winCount = 0
+        local lossCount = 0
+        for i = 1, numRequiredPlacementMatches do
+            local hasRecord, wasAWin = GetCampaignMatchResultFromHistoryByMatchIndex(i, self.campaignId)
+            if hasRecord then
+                if wasAWin then
+                    table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_WON)
+                    table.insert(self.matchResultsNew, ZO_TRIBUTE_FINDER_MATCH_WON)
+                    winCount = winCount + 1
+                else
+                    table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_LOSS)
+                    table.insert(self.matchResultsNew, ZO_TRIBUTE_FINDER_MATCH_LOSS)
+                    lossCount = lossCount + 1
+                end
+            elseif not hasUpdatedCurrentMatch then
+                if self.victory then
+                    table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_EMPTY)
+                    table.insert(self.matchResultsNew, ZO_TRIBUTE_FINDER_MATCH_WON)
+                    winCount = winCount + 1
+                else
+                    table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_EMPTY)
+                    table.insert(self.matchResultsNew, ZO_TRIBUTE_FINDER_MATCH_LOSS)
+                    lossCount = lossCount + 1
+                end
+                hasUpdatedCurrentMatch = true
+            else
+                table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_EMPTY)
+                table.insert(self.matchResultsNew, ZO_TRIBUTE_FINDER_MATCH_EMPTY)
+            end
+        end
+
+        local matchRecordLabel = self.progressionPlacementBarNewControl:GetNamedChild("MatchRecordText")
+        local formattedRecord = zo_strformat(SI_TRIBUTE_FINDER_PLACEMENT_STATUS, winCount, lossCount)
+        local offsetX = 0
+        if numRequiredPlacementMatches ~= 0 then
+            offsetX = (winCount + lossCount) / numRequiredPlacementMatches * self.progressionPlacementBarNewControl:GetWidth()
+        else
+            assert(false)
+        end
+        local offsetY = 20
+        matchRecordLabel:SetText(formattedRecord)
+        matchRecordLabel:SetAnchor(TOP, nil, BOTTOMLEFT, offsetX, offsetY)
+
+        self.progressionPlacementBar:SetSegmentationUniformity(true)
+        self.progressionPlacementBar:SetProgressBarGrowthDirection(ZO_PROGRESS_BAR_GROWTH_DIRECTION_LEFT_TO_RIGHT)
+        self.progressionPlacementBar:SetPreviousSegmentUnderneathOverlap(-32)
+
+        self.progressionPlacementBarNew:SetSegmentationUniformity(true)
+        self.progressionPlacementBarNew:SetProgressBarGrowthDirection(ZO_PROGRESS_BAR_GROWTH_DIRECTION_LEFT_TO_RIGHT)
+        self.progressionPlacementBarNew:SetPreviousSegmentUnderneathOverlap(-32)
+        self.progressionPlacementBarNew.handleNewMatch = true
+
         self.progressionProgressBarControl:SetHidden(true)
         self.progressionPlacementBarControl:SetHidden(false)
         self.progressionPlacementBarNewControl:SetHidden(false)
@@ -1047,15 +1259,34 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
         self.progressionPlacementBarNewControl:SetHidden(true)
     end
 
+    self.progressionProgressBar:Reset()
     self.playerRankNextRequiredXP = GetTributeCampaignRankExperienceRequirement(self.playerRankNext, self.campaignId) - GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent, self.campaignId)
-    self.playerCampaignXP = GetTributePlayerCampaignTotalExperience(self.campaignId) - GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent, self.campaignId)
+    self.playerCampaignXP = zo_max(0, GetTributePlayerExperienceInCurrentCampaignRank(self.campaignId))
     self.playerCampaignXPDelta = GetPendingCampaignExperience(self.campaignId)
     self.progressionRankChange:SetText(string.format("%+d", self.playerCampaignXPDelta))
     if self.playerRankNew > self.playerRankCurrent then
         self.rankUp = true
+    else
+        self.rankUp = false
     end
     self.progressionProgressBar:SetValue(self.playerRankCurrent, self.playerCampaignXP, self.playerRankNextRequiredXP, WRAP, ANIMATE_INSTANTLY)
     self.playerCampaignXP = self.playerCampaignXP + self.playerCampaignXPDelta
+    if self.playerRankCurrent ~= TRIBUTE_TIER_UNRANKED and self.playerRankCurrent ~= TRIBUTE_TIER_PLATINUM then
+        local playerXP = self.rankUp and self.playerRankNextRequiredXP or self.playerCampaignXP
+        self.progressionProgressNumber:SetText(string.format("%d / %d", playerXP, self.playerRankNextRequiredXP))
+        local progressInitial = (self.playerCampaignXP - self.playerCampaignXPDelta) /  zo_max(1, self.playerRankNextRequiredXP)
+        local progressFinal = self.rankUp and 1 or self.playerCampaignXP / zo_max(1, self.playerRankNextRequiredXP)
+        local width = self.progressionProgressBarControl:GetWidth()
+        local xInitial = progressInitial * width
+        local xFinal = progressFinal * width
+        self.progressionProgressNumberTranslateAnimation:SetStartOffsetX(xInitial)
+        self.progressionProgressNumberTranslateAnimation:SetEndOffsetX(xFinal)
+        self.progressionProgressNumberTranslateAnimation:SetDuration(PROGRESS_TRANSLATION_ANIMATION_TIME_MS)
+        self.progressionProgressNumberTranslateTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
+        self.progressionProgressNumber:SetHidden(false)
+    else
+        self.progressionProgressNumber:SetHidden(true)
+    end
 
     -- TODO Tribute: Get in-game stats from the game (gold acquired, cards acquired, duration)
     local DEBUG_GOLD_ACQUIRED = 10
@@ -1083,7 +1314,7 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
             local indicator = patron:GetNamedChild("Indicator")
             local nameLabel = patron:GetNamedChild("Label")
             patron:SetTexture(GetTributePatronLargeIcon(patronId))
-            indicator:SetTexture(GetTributePatronLargeRingIcon(PatronId))
+            indicator:SetTexture(GetTributePatronLargeRingIcon(patronId))
             nameLabel:SetText(GetTributePatronName(patronId))
             if self.victory then
                 indicator:SetTransformRotation(0, 0, ZO_PI)
@@ -1133,7 +1364,6 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     local MAX_REWARDS_PER_ROW = 4
 
     local function SetUpRewardsRow(rewardsTable, rowControl, rewardsControlPool)
-        local currentRowControl = nil
         local previousControl = nil
         local overflow = #rewardsTable > MAX_REWARDS_PER_ROW
         for rewardIndex, reward in ipairs(rewardsTable) do
@@ -1141,12 +1371,14 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
             if not overflow or rewardIndex < MAX_REWARDS_PER_ROW then
                 local rewardType = reward.rewardType
                 local name = reward.rawName
+                local icon = reward.icon
                 local count = reward.quantity
                 local qualityColorDef = nil
                 local countText = ""
                 if rewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
-                    name = zo_strformat(SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT, ZO_Currency_GetAmountLabel(id))
-                    icon = ZO_Currency_GetPlatformCurrencyLootIcon(id)
+                    local currencyType = reward.currencyType
+                    name = zo_strformat(SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT, ZO_Currency_GetAmountLabel(currencyType))
+                    icon = ZO_Currency_GetPlatformCurrencyLootIcon(currencyType)
                     local USE_SHORT_FORMAT = true
                     countText = ZO_CurrencyControl_FormatAndLocalizeCurrency(count, USE_SHORT_FORMAT)
                 else
@@ -1163,10 +1395,10 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
                 end
 
                 control.nameLabel:SetText(name)
-                control.iconTexture:SetTexture(reward.icon)
+                control.iconTexture:SetTexture(icon)
                 control.stackCountLabel:SetText(countText)
             else
-                local genericItemTexture = "" --TODO Tribute: Get an actual texture path from Vince
+                local genericItemTexture = "EsoUI/Art/Tribute/tributeEndOfGameReward_overflow.dds"
                 local numAdditionalRewards = #rewardsTable - (MAX_REWARDS_PER_ROW - 1)
                 control.nameLabel:SetText(zo_strformat(SI_TRIBUTE_SUMMARY_REWARD_OVERFLOW, numAdditionalRewards))
                 control.iconTexture:SetTexture(genericItemTexture)
@@ -1195,6 +1427,8 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     self.matchRewardItemsInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeRewardItemsWipeIn", matchRewardsRowControl)
     self.matchRewardItemsInTimeline:SetSkipAnimationsBehindPlayheadOnInitialPlay(false)
     self.matchRewardItemsInTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
+    local matchRewardWipeDuration = REWARD_WIPE_PER_ITEM_DURATION_MS * zo_min(MAX_REWARDS_PER_ROW, #matchCombinedRewards)
+    self.matchRewardItemsInTimeline:GetAnimation(1):SetDuration(matchRewardWipeDuration)
     matchRewardsRowControl:SetMaskAnchor(TOPLEFT, BOTTOMLEFT)
     matchRewardsRowControl:SetAnimation(self.matchRewardItemsInTimeline:GetAnimation(1))
     matchRewardsRowControl.maskSimulator:SetScale(0)
@@ -1214,6 +1448,8 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
         end
         self.rankUpItemsInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
         self.rankUpItemsInTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
+        local rankUpItemsWipeDuration = REWARD_WIPE_PER_ITEM_DURATION_MS * zo_min(MAX_REWARDS_PER_ROW, #rankUpRewards)
+        self.rankUpItemsInTimeline:GetAnimation(1):SetDuration(rankUpItemsWipeDuration)
         rankUpRewardsRowControl:SetMaskAnchor(TOPLEFT, BOTTOMLEFT)
         rankUpRewardsRowControl:SetAnimation(self.rankUpItemsInTimeline:GetAnimation(1))
         rankUpRewardsRowControl:SetHidden(true)
@@ -1224,6 +1460,24 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     self.progressionCurrentRankLabel:SetText(self.playerRankCurrentRewardsData:GetTierName())
     self.progressionNextRankIcon:SetTexture(self.playerRankNextRewardsData:GetTierIcon())
     self.progressionNextRankLabel:SetText(self.playerRankNextRewardsData:GetTierName())
+
+    if self.playerRankCurrent == TRIBUTE_TIER_PLATINUM or (self.rankUp and self.playerRankNew == TRIBUTE_TIER_PLATINUM) then
+        local leaderboardRank, leaderboardSize = GetTributeLeaderboardRankInfo()
+        local percentile = leaderboardSize == 0 and 100 or leaderboardRank * 100 / leaderboardSize
+        local labelString = leaderboardRank ~= 0 and zo_strformat(SI_TRIBUTE_SUMMARY_LEADERBOARD_LABEL, leaderboardRank) or zo_strformat(SI_TRIBUTE_SUMMARY_LEADERBOARD_NO_RANK)
+        self.leaderboardRank = leaderboardRank
+        self.progressionLeaderboardBackdrop:GetNamedChild("LeaderboardLabel"):SetText(labelString)
+        if percentile > 0 and percentile <= 2 then
+            self.leaderboardTier = TRIBUTE_LEADERBOARD_TIER_TOP_2
+            self.progressionLeaderboardBackdrop:SetTexture("EsoUI/Art/Tribute/tributeEndOfGameLeaderboardBackdrop_top2.dds")
+        elseif percentile > 0 and percentile <= 10 then
+            self.leaderboardTier = TRIBUTE_LEADERBOARD_TIER_TOP_10
+            self.progressionLeaderboardBackdrop:SetTexture("EsoUI/Art/Tribute/tributeEndOfGameLeaderboardBackdrop_top10.dds")
+        else
+            self.leaderboardTier = TRIBUTE_LEADERBOARD_TIER_NONE
+            self.progressionLeaderboardBackdrop:SetTexture("EsoUI/Art/Tribute/tributeEndOfGameLeaderboardBackdrop_standard.dds")
+        end
+    end
 
     self.fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.BEGIN)
 end

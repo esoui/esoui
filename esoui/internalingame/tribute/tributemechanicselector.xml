@@ -28,8 +28,8 @@
                 </Texture>
             
                 <Label name="$(parent)Text" wrapMode="ELLIPSIS" verticalAlignment="CENTER" horizontalAlignment="CENTER" level="3">
-                    <Anchor point="TOPLEFT" offsetX="35" offsetY="120" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-40" offsetY="-120" />
+                    <Anchor point="TOPLEFT" offsetX="35" offsetY="112" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-40" offsetY="-115" />
                 </Label>
             </Controls>
         </Control>
@@ -40,12 +40,8 @@
             </OnInitialized>
 
             <Controls>
-                <Label name="$(parent)Instruction" font="ZoFontTributeAntique40" horizontalAlignment="CENTER" text="SI_TRIBUTE_MECHANIC_SELECTOR_CHOOSE_ONE">
-                    <Anchor point="TOP" relativeTo="GuiRoot" offsetY="120" />
-                </Label>
-                
                 <Control name="$(parent)MechanicContainer" resizeToFitDescendents="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Instruction" relativePoint="BOTTOM" offsetY="20" />
+                    <Anchor point="CENTER" relativeTo="GuiRoot" offsetY="-80" />
                     <Controls>
                         <Control name="$(parent)Mechanic1" inherits="ZO_TributeMechanicSelectorCard">
                             <Anchor point="LEFT" />
@@ -64,6 +60,10 @@
                         </Control>
                     </Controls>
                 </Control>
+
+                <Label name="$(parent)Instruction" font="ZoFontTributeAntique40" horizontalAlignment="CENTER" text="SI_TRIBUTE_MECHANIC_SELECTOR_CHOOSE_ONE">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)MechanicContainer" relativePoint="TOP" offsetY="-20" />
+                </Label>
             
                 <Texture name="$(parent)Underlay" alpha="0" excludeFromResizeToFitExtents="true" inheritScale="false" mouseEnabled="true">
                     <Anchor point="TOPLEFT" relativeTo="GuiRoot" />

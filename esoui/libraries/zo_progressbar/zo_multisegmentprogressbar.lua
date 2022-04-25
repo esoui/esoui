@@ -22,7 +22,13 @@ function ZO_MultiSegmentProgressBar:Initialize(control, templateName, setupFunct
     self.progressBarGrowthDirection = ZO_PROGRESS_BAR_GROWTH_DIRECTION_LEFT_TO_RIGHT
     self.previousSegmentUnderneathOverlap = 0
 
+    -- This ensures proper draw ordering using accumulators
+    local function FactorySetup(segment)
+        segment:SetAutoRectClipChildren(true)
+    end
+
     self.segmentControlPool = ZO_ControlPool:New(self.segmentTemplate, self.control, "Segment")
+    self.segmentControlPool:SetCustomFactoryBehavior(FactorySetup)
 end
 
 function ZO_MultiSegmentProgressBar:SetSegmentationUniformity(isUniform)

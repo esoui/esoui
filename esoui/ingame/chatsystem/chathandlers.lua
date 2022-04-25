@@ -153,6 +153,11 @@ local BUILTIN_MESSAGE_FORMATTERS = {
         -- system messages will already be formatted by the time they get here
         return messageText
     end,
+
+    ["AddTranscriptMessage"] = function(messageText)
+        -- Transcript messages will already be formatted by the time they get here
+        return messageText
+    end,
 }
 
 -----------------
@@ -181,6 +186,14 @@ function ZO_ChatRouter:Initialize()
     for eventCode, messageFormatter in pairs(BUILTIN_MESSAGE_FORMATTERS) do
         self:RegisterMessageFormatter(eventCode, messageFormatter)
     end
+
+    local function SetTranscriptForwardingEnabled()
+        local enableTranscriptForwarding = GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_SEND_TRANSCRIPT_TO_TEXT_CHAT)
+        self:SetTranscriptForwardingEnabled(enableTranscriptForwarding)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("ChatRouter", EVENT_VOICE_CHAT_ACCESSIBILITY_SETTING_CHANGED, SetTranscriptForwardingEnabled)
+    EVENT_MANAGER:RegisterForEvent("ChatRouter", EVENT_FORWARD_TRANSCRIPT_TO_TEXT_CHAT_ACCESSIBILITY_SETTING_CHANGED, SetTranscriptForwardingEnabled)
 
     local function OnTryInsertLink(...)
         return ZO_GetChatSystem():HandleTryInsertLink(...)
@@ -263,6 +276,22 @@ end
 
 function ZO_ChatRouter:AddDebugMessage(messageText)
     self:AddSystemMessage(messageText)
+end
+
+function ZO_ChatRouter:AddTranscriptMessage(messageText)
+    self:FormatAndAddChatMessage("AddTranscriptMessage", messageText)
+end
+
+local function AddTranscriptMessage(...)
+    CHAT_ROUTER:AddTranscriptMessage(...) 
+end
+
+function ZO_ChatRouter:SetTranscriptForwardingEnabled(enabled)
+    if enabled then
+        VOICE_CHAT_MANAGER:RegisterCallback("VoiceChatTranscript", AddTranscriptMessage)
+    else
+        VOICE_CHAT_MANAGER:UnregisterCallback("VoiceChatTranscript", AddTranscriptMessage)
+    end
 end
 
 function ZO_ChatRouter:AddCommandPrefix(prefixCharacter, callback)

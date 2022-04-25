@@ -5,6 +5,7 @@ local function GammaDialogInitialize(dialogControl)
     ZO_Dialogs_RegisterCustomDialog("ADJUST_GAMMA_DIALOG",
     {
         customControl = dialogControl,
+        canQueue = true,
         mustChoose = true,
         title =
         {
@@ -12,29 +13,21 @@ local function GammaDialogInitialize(dialogControl)
         },
         buttons =
         {
-            [1] =
             {
                 control = GetControl(dialogControl, "KeyContainerConfirmGamma"),
                 text = SI_GAMMA_CONFIRM,
                 noReleaseOnClick = true, -- Don't release because the scene needs to fade out, will release later
                 callback =  function(dialog)
-                                if IsInUI("pregame") and not IsAccountLoggedIn() then
-                                    GAMEPAD_OPTIONS_PANEL_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
-                                end
                                 SetCVar("GAMMA_ADJUSTMENT", tostring(g_currentGamma))
                                 SCENE_MANAGER:Hide("gammaAdjust")
                                 ZO_SavePlayerConsoleProfile()
                             end,
             },
-            [2] =
             {
                 control = GetControl(dialogControl, "KeyContainerDeclineGamma"),
                 text = SI_GAMMA_DECLINE,
                 noReleaseOnClick = true, -- Don't release because the scene needs to fade out, will release later
                 callback =  function(dialog)
-                                if IsInUI("pregame") and not IsAccountLoggedIn() then
-                                    GAMEPAD_OPTIONS_PANEL_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
-                                end
                                 SCENE_MANAGER:Hide("gammaAdjust")
                             end,
                 visible = function() return not ZO_GammaAdjust_NeedsFirstSetup() end,

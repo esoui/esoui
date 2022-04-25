@@ -123,6 +123,8 @@ EsoUI\InternalIngame\Tribute\TributeData.lua
 EsoUI\InternalIngame\Tribute\TributePileViewer_Manager.lua
 EsoUI\InternalIngame\Tribute\TributeTargetViewer_Manager.lua
 EsoUI\InternalIngame\Tribute\TributePatronSelection_Manager.lua
+EsoUI\InternalIngame\Tribute\TributeMechanic_Manager.lua
+EsoUI\InternalIngame\Tribute\TributeMechanic_Manager.xml
 EsoUI\InternalIngame\Tribute\TributeSummary.lua
 EsoUI\InternalIngame\Tribute\TributeSummary.xml
 EsoUI\InternalIngame\Tribute\TributePileViewer_Shared.lua

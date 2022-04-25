@@ -31,7 +31,7 @@ local ZO_Panel_Accessibility_ControlData =
             panel = SETTING_PANEL_ACCESSIBILITY,
             text = SI_ACCESSIBILITY_OPTIONS_VOICE_CHAT_ACCESSIBILITY,
             tooltipText = SI_ACCESSIBILITY_OPTIONS_VOICE_CHAT_ACCESSIBILITY_TOOLTIP,
-            exists = IsConsoleUI,
+            exists = false, -- TODO XAR Settings: IsConsoleUI,
             eventCallbacks =
             {
                 ["OnAccessibilityModeEnabled"] = ZO_Options_SetOptionActive,
@@ -56,7 +56,7 @@ local ZO_Panel_Accessibility_ControlData =
             panel = SETTING_PANEL_ACCESSIBILITY,
             text = SI_ACCESSIBILITY_OPTIONS_TEXT_CHAT_ACCESSIBILITY,
             tooltipText = SI_ACCESSIBILITY_OPTIONS_TEXT_CHAT_ACCESSIBILITY_TOOLTIP,
-            exists = IsChatSystemAvailableForCurrentPlatform,
+            exists = false, -- TODO XAR Settings: IsChatSystemAvailableForCurrentPlatform,
             eventCallbacks =
             {
                 ["OnAccessibilityModeEnabled"] = ZO_Options_SetOptionActive,

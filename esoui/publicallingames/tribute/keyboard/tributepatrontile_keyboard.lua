@@ -50,7 +50,7 @@ function ZO_TributePatronBookTile_Keyboard:OnFocusChanged(isFocused)
     ZO_ContextualActionsTile.OnFocusChanged(self, isFocused)
     if isFocused then
         ClearTooltip(ItemTooltip)
-        InitializeTooltip(ItemTooltip, self.control, RIGHT, offsetX, 0, LEFT)
+        InitializeTooltip(ItemTooltip, self.control, RIGHT, 0, 0, LEFT)
         ItemTooltip:SetTributePatron(self.patronData:GetId())
     else
         ClearTooltip(ItemTooltip)
@@ -87,6 +87,8 @@ function ZO_TributePatronSelectionTile_Keyboard:LayoutPlatform(patronData)
     ZO_TributePatronTile_Keyboard.LayoutPlatform(self, patronData)
     local isDrafted = false
     local isSelected = false
+    local isLocked = self.patronData:IsPatronLocked()
+
     if ZO_TRIBUTE_PATRON_SELECTION_MANAGER then
         local patronId = patronData:GetId()
         local currentSelectedPatronId = ZO_TRIBUTE_PATRON_SELECTION_MANAGER:GetSelectedPatron()
@@ -95,8 +97,7 @@ function ZO_TributePatronSelectionTile_Keyboard:LayoutPlatform(patronData)
     end
     
     self.draftedIcon:SetHidden(not isDrafted)
-    self:RefreshGlow(isSelected, isDrafted) 
-    local isLocked = self.patronData:IsPatronLocked()
+    self:RefreshGlow(isSelected, isDrafted, isLocked) 
     ZO_SetDefaultIconSilhouette(self.iconTexture, isLocked)
     local iconDesaturation = isLocked and 1 or 0
     local highlightTexture = isLocked and "EsoUI/Art/Tribute/tributePatronHighlight_Disabled.dds" or "EsoUI/Art/Tribute/tributePatronHighlight_Hover.dds"
@@ -104,7 +105,7 @@ function ZO_TributePatronSelectionTile_Keyboard:LayoutPlatform(patronData)
     self.iconTexture:SetDesaturation(iconDesaturation)
 end
 
-function ZO_TributePatronSelectionTile_Keyboard:RefreshGlow(isSelected, isDrafted)
+function ZO_TributePatronSelectionTile_Keyboard:RefreshGlow(isSelected, isDrafted, isLocked)
     local showGlow = isSelected or isDrafted
     if self.isGlowShowing ~= showGlow then
         self.isGlowShowing = showGlow
@@ -116,7 +117,12 @@ function ZO_TributePatronSelectionTile_Keyboard:RefreshGlow(isSelected, isDrafte
     end
 
     if showGlow then
-        local glowTexture = isDrafted and "EsoUI/Art/Tribute/tributePatronHighlight_Drafted.dds" or "EsoUI/Art/Tribute/tributePatronHighlight_Selected.dds"
+        local glowTexture
+        if isDrafted then
+            glowTexture = isLocked and "EsoUI/Art/Tribute/tributePatronHighlight_DraftedDisabled.dds" or "EsoUI/Art/Tribute/tributePatronHighlight_Drafted.dds"
+        else
+            glowTexture = "EsoUI/Art/Tribute/tributePatronHighlight_Selected.dds"
+        end
         self.glow:SetTexture(glowTexture)
     end
 end
@@ -127,7 +133,7 @@ function ZO_TributePatronSelectionTile_Keyboard:OnFocusChanged(isFocused)
     ZO_ContextualActionsTile.OnFocusChanged(self, isFocused)
     if isFocused then
         ClearTooltip(ItemTooltip)
-        InitializeTooltip(ItemTooltip, self.control, LEFT, offsetX, 0, RIGHT)
+        InitializeTooltip(ItemTooltip, self.control, LEFT, 0, 0, RIGHT)
         ItemTooltip:SetTributePatron(self.patronData:GetId())
     else
         ClearTooltip(ItemTooltip)

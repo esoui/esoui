@@ -312,6 +312,7 @@ function ZO_TributePatronBook_Gamepad:OnHide()
         self:ExitGridList()
     end
     self:HideCurrentListDescriptor()
+    self:GetScene():RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
 end
 
 

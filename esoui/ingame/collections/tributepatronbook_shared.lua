@@ -103,7 +103,7 @@ function ZO_TributePatronBook_Shared:RegisterForEvents()
     end
 
     local function OnPatronsUpdated()
-        if self:IsCategoriesRefreshGroupActive() then
+        if self:IsCategoriesRefreshGroupActive() and self.patronId ~= nil then
             self:BuildGridList()
         end
     end

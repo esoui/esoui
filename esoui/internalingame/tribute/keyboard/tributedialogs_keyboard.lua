@@ -68,6 +68,7 @@ end
 
 function ZO_TributeSettingsDialogConcedeButton_Keyboard_OnClicked(control)
     --TODO Tribute: Look into potentially making this transition smoother
-    ZO_Dialogs_ShowDialog("CONFIRM_CONCEDE_TRIBUTE")
     ZO_Dialogs_ReleaseDialog("KEYBOARD_TRIBUTE_OPTIONS")
+    ZO_Dialogs_ShowDialog("CONFIRM_CONCEDE_TRIBUTE")
+    TRIBUTE:RefreshInputState()
 end

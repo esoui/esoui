@@ -82,6 +82,7 @@ end
 
 function ZO_SubtitleManager:Initialize(control)
     SUBTITLE_HUD_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)
+    SUBTITLE_UI_FRAGMENT = ZO_FadeSceneFragment:New(control)
     self.control = control
     self.messageText = control:GetNamedChild("Text")
     self.messageBackground = self.messageText:GetNamedChild("Background")

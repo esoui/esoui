@@ -87,18 +87,9 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             end
 
             self.spinner:Deactivate()
-
-            GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
-            GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(ZO_SharedSmithingImprovement_GetImprovementTooltipSounds())
-
-            GAMEPAD_CRAFTING_RESULTS:ClearSecondaryTooltipAnimationControls()
-            GAMEPAD_CRAFTING_RESULTS:AddSecondaryTooltipAnimationControl(self.sourceTooltip)
-            GAMEPAD_CRAFTING_RESULTS:AddSecondaryTooltipAnimationControl(self.qualityBridge)
         else
             self.sourceTooltip.tip:ClearLines()
             self.sourceTooltip:SetHidden(true)
-
-            GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
 
             self:ClearBoosterRowHighlight()
 
@@ -162,6 +153,13 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             end
 
             self.owner:SetEnableSkillBar(true)
+
+            GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
+            GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(ZO_SharedSmithingImprovement_GetImprovementTooltipSounds())
+
+            GAMEPAD_CRAFTING_RESULTS:ClearSecondaryTooltipAnimationControls()
+            GAMEPAD_CRAFTING_RESULTS:AddSecondaryTooltipAnimationControl(self.sourceTooltip)
+            GAMEPAD_CRAFTING_RESULTS:AddSecondaryTooltipAnimationControl(self.qualityBridge)
         elseif newState == SCENE_HIDDEN then
             self.itemActions:SetInventorySlot(nil)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -174,6 +172,8 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             self.resultTooltip:SetHidden(true)
             self.slotContainer:SetHidden(true)
             self:EnableQualityBridge(false)
+
+            GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
 
             ZO_GamepadGenericHeader_Deactivate(self.owner.header)
 

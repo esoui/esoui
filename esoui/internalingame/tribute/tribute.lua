@@ -86,7 +86,6 @@ function ZO_Tribute:Initialize(control)
                 self.turnTimerTextLabelTimeline:PlayInstantlyToStart()
             elseif gameFlowState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT then
                 self.patronSelectionShowTime = GetFrameTimeSeconds() + TRIBUTE_PATRON_SELECTION_DELAY_SECONDS
-                -- TODO Tribute: Start Patron draft interface
             elseif gameFlowState == TRIBUTE_GAME_FLOW_STATE_BOARD_SETUP then
                 -- TODO Tribute: Do we need to do anything here?
             elseif gameFlowState == TRIBUTE_GAME_FLOW_STATE_PLAYING then
@@ -119,6 +118,7 @@ function ZO_Tribute:InitializeControls()
     self.activeCardTooltip = {}
     self.queuedCardPopup = {}
     self.queuedCardTooltip = {}
+    self.activeBoardLocationPatronsTooltipCardObject = nil
 
     self.boardOrientControl = control:GetNamedChild("BoardOrient")
 
@@ -463,13 +463,12 @@ do
         control:RegisterForEvent(EVENT_TRIBUTE_AGENT_DEFEAT_COST_CHANGED, function(_, cardInstanceId, delta, newDefeatCost, shouldPlayFx)
             local cardObject = self.cardInstanceIdToCardObject[cardInstanceId]
             if cardObject then
+                self:ResetCardPopupAndTooltip(ANY_ACTIVE_CARD)
+
                 if shouldPlayFx then
-                    -- TODO: Add a heal or damage animation using the delta. If the newDefeatCost is now 0, do a KO animation instead.
-                end
-                cardObject:UpdateDefeatCost()
-                local activeCardPopup = self.activeCardPopup
-                if activeCardPopup.popupObject and activeCardPopup.cardObject == cardObject then
-                    activeCardPopup.popupObject:UpdateDefeatCost()
+                    cardObject:UpdateDefeatCost(newDefeatCost, delta)
+                else
+                    cardObject:RefreshDefeatCost()
                 end
             end
         end)
@@ -612,13 +611,21 @@ do
         end)
 
         self.gamepadCursor:RegisterCallback("ObjectUnderCursorChanged", function(object, objectType, previousObject, previousObjectType)
-            if previousObjectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD then
+            if previousObjectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD or previousObjectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.MECHANIC_TILE then
                 previousObject:OnCursorExit()
             end
 
-            if objectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD then
+            if objectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD or objectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.MECHANIC_TILE then
                 object:OnCursorEnter()
             end
+        end)
+
+        self.gamepadCursor:RegisterCallback("CursorPositionChanged", function(x, y)
+            TRIBUTE_MECHANIC_MANAGER:OnGamepadCursorPositionChanged(x, y)
+        end)
+
+        self.gamepadCursor:RegisterCallback("CursorStateChanged", function(active)
+            TRIBUTE_MECHANIC_MANAGER:OnGamepadCursorStateChanged(active)
         end)
 
         local function OnUpdate(_, frameTimeSeconds)
@@ -940,6 +947,12 @@ function ZO_Tribute:HideCardPopup(cardObject)
 end
 
 function ZO_Tribute:HideCardTooltip(cardObject)
+    local activeBoardLocationPatronsTooltipCardObject = self.activeBoardLocationPatronsTooltipCardObject
+    if activeBoardLocationPatronsTooltipCardObject and (not cardObject or activeBoardLocationPatronsTooltipCardObject == cardObject) then
+        activeBoardLocationPatronsTooltipCardObject:HideBoardLocationPatronsTooltip()
+        self.activeBoardLocationPatronsTooltipCardObject = nil
+    end
+
     local activeCardTooltip = self.activeCardTooltip
     if cardObject and cardObject ~= activeCardTooltip.cardObject then
         return
@@ -965,6 +978,9 @@ function ZO_Tribute:QueueCardPopupAndTooltip(cardObject)
     end
 
     if cardObject:IsStacked() then
+        if cardObject:ShowBoardLocationPatronsTooltip(self.cardInstanceId) then
+            self.activeBoardLocationPatronsTooltipCardObject = cardObject
+        end
         return
     end
 

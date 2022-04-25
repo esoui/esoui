@@ -1,18 +1,25 @@
 -- optionalDockCardUpgradeContext should be a table from ZO_TributePatronData:GetDockCards
 function ZO_Tooltip:LayoutTributeCard(cardData, optionalDockCardUpgradeContext)
     local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(cardData:GetPatronDefId())
+    local isContract = cardData:IsContract()
+    local isCurse = cardData:IsCurse()
 
     -- Header
     local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
 
     local cardTypeString = GetString("SI_TRIBUTECARDTYPE", cardData:GetCardType())
-    if cardData:IsContract() then
+    if isContract then
         topSection:AddLine(zo_strformat(SI_TRIBUTE_CARD_TYPE_CONTRACT, cardTypeString))
+    elseif isCurse then
+        topSection:AddLine(zo_strformat(SI_TRIBUTE_CARD_TYPE_CURSE, cardTypeString))
     else
         topSection:AddLine(cardTypeString)
     end
 
-    topSection:AddLine(patronData:GetFormattedNameAndSuitIcon())
+    if not isCurse then
+        topSection:AddLine(patronData:GetFormattedNameAndSuitIcon())
+    end
+
     topSection:AddLine(GetString(SI_TRIBUTE_CARD_ITEM_TYPE))
     self:AddSection(topSection)
 
@@ -40,71 +47,80 @@ function ZO_Tooltip:LayoutTributeCard(cardData, optionalDockCardUpgradeContext)
 
     self:AddSection(titleSection)
 
-    -- Tribute Mechanics
-    local function AddPlayMechanics()
-        local ACTIVATION_TRIGGER = TRIBUTE_MECHANIC_TRIGGER_ACTIVATION
-        local numMechanics = cardData:GetNumMechanics(ACTIVATION_TRIGGER)
-        if numMechanics > 0 then
-            local activationSection = self:AcquireSection(self:GetStyle("bodySection"))
-            activationSection:AddLine(GetString(SI_TRIBUTE_CARD_PLAY_EFFECT), self:GetStyle("bodyHeader"))
-            if cardData:DoesChooseOneMechanic() then
-                activationSection:AddLine(GetString(SI_TRIBUTE_CARD_CHOOSE_ONE_MECHANIC), self:GetStyle("tributeBodyText"), self:GetStyle("tributeChooseOneText"))
-            end
-            local PREPEND_ICON = true
-            for index = 1, numMechanics do
-                local mechanicText = cardData:GetMechanicText(ACTIVATION_TRIGGER, index, PREPEND_ICON)
-                activationSection:AddLine(mechanicText, self:GetStyle("tributeBodyText"))
-            end
-            self:AddSection(activationSection)
+    -- Activation Mechanics
+    -- Even when there are no activation effects, add the header, cause we'll put a line saying there are no activation effects
+    local activationSection = self:AcquireSection(self:GetStyle("bodySection"))
+    activationSection:AddLine(GetString(SI_TRIBUTE_CARD_PLAY_EFFECT), self:GetStyle("bodyHeader"))
+    local ACTIVATION_TRIGGER = TRIBUTE_MECHANIC_TRIGGER_ACTIVATION
+    local numMechanics = cardData:GetNumMechanics(ACTIVATION_TRIGGER)
+    if numMechanics > 0 then
+        if cardData:DoesChooseOneMechanic() then
+            activationSection:AddLine(GetString(SI_TRIBUTE_CARD_CHOOSE_ONE_MECHANIC), self:GetStyle("tributeBodyText"), self:GetStyle("tributeChooseOneText"))
         end
+        local PREPEND_ICON = true
+        for index = 1, numMechanics do
+            local mechanicText = cardData:GetMechanicText(ACTIVATION_TRIGGER, index, PREPEND_ICON)
+            activationSection:AddLine(mechanicText, self:GetStyle("tributeBodyText"))
+        end
+    else
+        activationSection:AddLine(GetString(SI_TRIBUTE_CARD_NO_PLAY_EFFECT_DESCRIPTION), self:GetStyle("tributeBodyText"))
     end
+    self:AddSection(activationSection)
 
-    local function AddComboMechanics()
-        local COMBO_TRIGGER = TRIBUTE_MECHANIC_TRIGGER_COMBO
-        local numMechanics = cardData:GetNumMechanics(COMBO_TRIGGER)
-        if numMechanics > 0 then
-            local comboSection = nil
-            local mechanicsProcessed = 0
-            for currentComboIndex = 1, numMechanics do
-                local currentComboNum = select(3, cardData:GetMechanicInfo(COMBO_TRIGGER, currentComboIndex))
-                local isHeaderShown = false
-                local PREPEND_ICON = true
-                
-                for index = 1, numMechanics do
-                    local mechanicComboNum = select(3, cardData:GetMechanicInfo(COMBO_TRIGGER, index))
-                    if currentComboNum == mechanicComboNum then
-                        if not isHeaderShown then
-                            local headerText = zo_strformat(SI_TRIBUTE_CARD_COMBO_EFFECT, currentComboNum)
-                            if comboSection then
-                                self:AddSection(comboSection)
-                            end
-                            comboSection = self:AcquireSection(self:GetStyle("bodySection"))
-                            comboSection:AddLine(headerText, self:GetStyle("bodyHeader"))
-                            isHeaderShown = true
-                        end
-                        local mechanicText = cardData:GetMechanicText(COMBO_TRIGGER, index, PREPEND_ICON)
-                        comboSection:AddLine(mechanicText, self:GetStyle("tributeBodyText"))
-
-                        mechanicsProcessed = mechanicsProcessed + 1
-                        if mechanicsProcessed == numMechanics then
+    -- Combo mechanics
+    local COMBO_TRIGGER = TRIBUTE_MECHANIC_TRIGGER_COMBO
+    local numMechanics = cardData:GetNumMechanics(COMBO_TRIGGER)
+    if numMechanics > 0 then
+        local comboSection = nil
+        -- We technically only support combo 2, combo 3, and combo 4 right now. Any more requires a different visual solution on the card itself.
+        -- That said, it makes no real difference to support an arbitrarily higher number here to remain somewhat flexible for future designs
+        -- since we'll stop as soon as we've processed every mechanic anyway
+        local MIN_COMBO_NUM = 2
+        local MAX_COMBO_NUM = 10
+        local PREPEND_ICON = true
+        local mechanicsProcessed = 0
+        for currentComboNum = MIN_COMBO_NUM, MAX_COMBO_NUM do
+            local isHeaderShown = false
+            for comboMechanicIndex = 1, numMechanics do
+                local mechanicComboNum = select(3, cardData:GetMechanicInfo(COMBO_TRIGGER, comboMechanicIndex))
+                if currentComboNum == mechanicComboNum then
+                    if not isHeaderShown then
+                        local headerText = zo_strformat(SI_TRIBUTE_CARD_COMBO_EFFECT, currentComboNum)
+                        if comboSection then
                             self:AddSection(comboSection)
-                            return
                         end
+                        comboSection = self:AcquireSection(self:GetStyle("bodySection"))
+                        comboSection:AddLine(headerText, self:GetStyle("bodyHeader"))
+                        isHeaderShown = true
+                    end
+                    local mechanicText = cardData:GetMechanicText(COMBO_TRIGGER, comboMechanicIndex, PREPEND_ICON)
+                    comboSection:AddLine(mechanicText, self:GetStyle("tributeBodyText"))
+
+                    mechanicsProcessed = mechanicsProcessed + 1
+                    if mechanicsProcessed == numMechanics then
+                        self:AddSection(comboSection)
+                        return
                     end
                 end
             end
         end
     end
 
-    AddPlayMechanics()
-
-    AddComboMechanics()
-
-    -- Tribute Actions
+    -- Flags
     if cardData:DoesTaunt() then
         local section = self:AcquireSection(self:GetStyle("bodySection"))
         section:AddLine(GetString(SI_TRIBUTE_CARD_TAUNT_TITLE), self:GetStyle("bodyHeader"))
         section:AddLine(GetString(SI_TRIBUTE_CARD_TAUNT_DESCRIPTION), self:GetStyle("tributeBodyText"))
+        self:AddSection(section)
+    end
+
+    if isContract then
+        local section = self:AcquireSection(self:GetStyle("bodySection"))
+        section:AddLine(GetString(SI_TRIBUTE_CARD_CONTRACT_DESCRIPTION), self:GetStyle("tributeBodyText"))
+        self:AddSection(section)
+    elseif isCurse then
+        local section = self:AcquireSection(self:GetStyle("bodySection"))
+        section:AddLine(GetString(SI_TRIBUTE_CARD_CURSE_DESCRIPTION), self:GetStyle("tributeBodyText"))
         self:AddSection(section)
     end
 

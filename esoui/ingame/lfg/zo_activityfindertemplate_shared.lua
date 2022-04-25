@@ -178,8 +178,8 @@ function ZO_ActivityFinderTemplate_Shared:RefreshTributeSeasonData(forceHide)
                 local numWins = 0
                 local numLoses = 0
                 self.matchResults = {}
-                for i = 0, numRequiredPlacementMatches do
-                    local hasRecord, wasAWin = GetCampaignMatchResultFromHistoryByMatchNumber(i)
+                for i = 1, numRequiredPlacementMatches do
+                    local hasRecord, wasAWin = GetCampaignMatchResultFromHistoryByMatchIndex(i)
                     if hasRecord then
                         if wasAWin then
                             table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_WON)
@@ -269,8 +269,6 @@ function ZO_ActivityFinderTemplate_Shared:RefreshTributeSeasonData(forceHide)
     else
         self.tributeSeasonProgressControl:SetHidden(true)
     end
-
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:MarkDataDirty()
 end
 
 function ZO_ActivityFinderTemplate_Shared:OnActivityFinderStatusUpdate(status)

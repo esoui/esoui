@@ -36,6 +36,8 @@ function ZO_TributeFinder_Manager:Initialize()
     filterModeData:SetVisibleEntryTypes(ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SET)
     ZO_ActivityFinderTemplate_Manager.Initialize(self, "ZO_TributeFinder", categoryData, filterModeData)
 
+    self:SetLockingCooldownTypes(LFG_COOLDOWN_TRIBUTE_DESERTED)
+
     TRIBUTE_FINDER_KEYBOARD = self:GetKeyboardObject()
     TRIBUTE_FINDER_GAMEPAD = self:GetGamepadObject()
     GAMEPAD_TRIBUTE_FINDER_SCENE = TRIBUTE_FINDER_GAMEPAD:GetScene()

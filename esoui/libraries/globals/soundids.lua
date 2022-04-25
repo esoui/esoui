@@ -995,5 +995,9 @@ SOUNDS = {
     -- Tribute
     TRIBUTE_TURN_START = "Tribute_TurnStart",
     TRIBUTE_TURN_START_OPPONENT_PENULTIMATE_FAVOR = "Tribute_TurnStart_OpponentPenultimateFavor",
-    TRIBUTE_RANK_CHANGE         = "Tribute_RankChange",
+    TRIBUTE_RANK_CHANGE = "Tribute_RankChange",
+    TRIBUTE_SUMMARY_BEGIN = "Tribute_Summary_Begin",
+    TRIBUTE_SUMMARY_PROGRESS_BAR_FILL = "Tribute_Summary_ProgressBarFill",
+    TRIBUTE_SUMMARY_RANK_CHANGE = "Tribute_Summary_RankChange",
+    TRIBUTE_SUMMARY_RANK_CHANGE_LEADERBOARD = "Tribute_Summary_RankChange_Leaderboard",
 }

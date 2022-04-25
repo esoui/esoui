@@ -15,16 +15,9 @@
             </Controls>
         </Control>
 
-        <StatusBar name="ZO_TributeFinder_ArrowStatusBarTemplate_Keyboard" inherits="ZO_ArrowStatusBarWithBG" layer="CONTROLS" virtual="true">
+        <StatusBar name="ZO_TributeFinder_ArrowStatusBarTemplate_Keyboard" inherits="ZO_ArrowStatusBarWithBG" virtual="true">
             <Controls>
-                <Control name="$(parent)BG" override="true" />
-                <Control name="$(parent)Overlay" override="true" tier="LOW" layer="CONTROLS">
-                    <Controls>
-                        <Texture name="$(parent)Left" override="true" layer="CONTROLS" />
-                        <Texture name="$(parent)Right" override="true" layer="CONTROLS" />
-                        <Texture name="$(parent)Middle" override="true" layer="CONTROLS" />
-                    </Controls>
-                </Control>
+                <Control name="$(parent)Overlay" override="true" tier="LOW" />
             </Controls>
         </StatusBar>
 

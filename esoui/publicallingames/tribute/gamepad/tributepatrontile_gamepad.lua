@@ -100,22 +100,24 @@ function ZO_TributePatronSelectionTile_Gamepad:LayoutPlatform(patronData)
     self.titleLabel:SetText(patronData:GetFormattedColorizedName())
     local isDrafted = false
     local isSelected = false
+    local isLocked = self.patronData:IsPatronLocked() 
+
     if ZO_TRIBUTE_PATRON_SELECTION_MANAGER then
         local patronId = patronData:GetId()
         local currentSelectedPatronId = ZO_TRIBUTE_PATRON_SELECTION_MANAGER:GetSelectedPatron()
         isSelected = currentSelectedPatronId == patronId
         isDrafted = ZO_TRIBUTE_PATRON_SELECTION_MANAGER:IsPatronDrafted(patronId)
     end
-    self:RefreshGlow(isSelected, isDrafted)
+
+    self:RefreshGlow(isSelected, isDrafted, isLocked)
     self.draftedIcon:SetHidden(not isDrafted)
-    local isLocked = self.patronData:IsPatronLocked() 
     ZO_SetDefaultIconSilhouette(self.iconTexture, isLocked)
     local iconDesaturation = isLocked and 1 or 0
     self.iconTexture:SetDesaturation(iconDesaturation)
 end
 
 --TODO Tribute: Determine if any of this logic can be moved to shared
-function ZO_TributePatronSelectionTile_Gamepad:RefreshGlow(isSelected, isDrafted)
+function ZO_TributePatronSelectionTile_Gamepad:RefreshGlow(isSelected, isDrafted, isLocked)
     local showGlow = isSelected or isDrafted
     if self.isGlowShowing ~= showGlow then
         self.isGlowShowing = showGlow
@@ -127,7 +129,12 @@ function ZO_TributePatronSelectionTile_Gamepad:RefreshGlow(isSelected, isDrafted
     end
 
     if showGlow then
-        local glowTexture = isDrafted and "EsoUI/Art/Tribute/tributePatronHighlight_Drafted.dds" or "EsoUI/Art/Tribute/tributePatronHighlight_Selected.dds"
+        local glowTexture
+        if isDrafted then
+            glowTexture = isLocked and "EsoUI/Art/Tribute/tributePatronHighlight_DraftedDisabled.dds" or "EsoUI/Art/Tribute/tributePatronHighlight_Drafted.dds"
+        else
+            glowTexture = "EsoUI/Art/Tribute/tributePatronHighlight_Selected.dds"
+        end
         self.glow:SetTexture(glowTexture)
     end
 end

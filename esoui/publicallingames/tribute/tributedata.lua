@@ -302,6 +302,10 @@ function ZO_TributePatronData:IsNeutral()
     return IsTributePatronNeutral(self.patronId)
 end
 
+function ZO_TributePatronData:GetFamily()
+    return GetTributePatronFamily(self.patronId)
+end
+
 function ZO_TributePatronData:DoesSkipNeutralFavorState()
     return DoesTributePatronSkipNeutralFavorState(self.patronId)
 end
@@ -558,6 +562,10 @@ end
 
 function ZO_TributeCardData:IsContract()
     return IsTributeCardContract(self.cardDefId)
+end
+
+function ZO_TributeCardData:IsCurse()
+    return IsTributeCardCurse(self.cardDefId)
 end
 
 function ZO_TributeCardData:DoesChooseOneMechanic()

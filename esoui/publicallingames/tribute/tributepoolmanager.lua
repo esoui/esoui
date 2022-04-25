@@ -60,6 +60,33 @@ function ZO_TributeCardMechanicContainerPool:ResetObject(control)
     control.object:Reset()
 end
 
+-- Card Mechanic Glow Control Pool --
+
+ZO_TributeCardMechanicGlowPool = ZO_ControlPool:Subclass()
+
+function ZO_TributeCardMechanicGlowPool:CreateObject(objectKey)
+    local control = ZO_ControlPool.CreateObject(self, objectKey)
+    control.key = objectKey
+    return control
+end
+
+function ZO_TributeCardMechanicGlowPool:AcquireObject(mechanicContainerObject, ...)
+    local control, objectKey = ZO_ControlPool.AcquireObject(self, ...)
+    local textureFileName = mechanicContainerObject:GetFrameGlowTextureFileName()
+    control:SetTexture(textureFileName)
+    control:SetParent(mechanicContainerObject:GetControl())
+    control:SetAnchorFill()
+    return control, objectKey
+end
+
+function ZO_TributeCardMechanicGlowPool:ResetObject(control)
+    ZO_ControlPool.ResetObject(self, control)
+
+    -- When waiting in the pool, parent to the pool's parent, instead of the card
+    control:SetParent(self.parent)
+    control:SetTexture(nil)
+end
+
 -- Card State Effect Pool --
 
 ZO_TributeCardStateEffectPool = ZO_ControlPool:Subclass()
@@ -139,6 +166,58 @@ function ZO_TributeCardPool:ResetObject(control)
     control:SetParent(self.parent)
 end
 
+-- Mechanic Tile Pool --
+
+ZO_TributeMechanicTilePool = ZO_ControlPool:Subclass()
+
+function ZO_TributeMechanicTilePool:CreateObject(objectKey)
+    local control = ZO_ControlPool.CreateObject(self, objectKey)
+    control.object:SetPoolAndKey(self, objectKey)
+    return control
+end
+
+function ZO_TributeMechanicTilePool:AcquireObject(parentControl, cardInstanceId, mechanicTrigger, mechanicIndex, isLocalPlayerOwner, quantity, isResolved, ...)
+    local control, objectKey = ZO_ControlPool.AcquireObject(self, ...)
+
+    -- It's a control pool under the hood, for ease of creating the relationship between the control and the object,
+    -- but consumers will want the object, not the control, to work with
+    local object = control.object
+    object:Setup(parentControl, cardInstanceId, mechanicTrigger, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
+    return object, objectKey
+end
+
+function ZO_TributeMechanicTilePool:ResetObject(control)
+    ZO_ControlPool.ResetObject(self, control)
+
+    -- When waiting in the pool, parent to the pool's parent, instead of the card
+    control:SetParent(self.parent)
+    control.object:Reset()
+end
+
+-- Mechanic Tile Animation Pool --
+
+ZO_TributeMechanicTileAnimationPool = ZO_AnimationPool:Subclass()
+
+function ZO_TributeMechanicTileAnimationPool:CreateObject(objectKey)
+    local timeline = ZO_AnimationPool.CreateObject(self, objectKey)
+    timeline.key = objectKey
+    return timeline
+end
+
+function ZO_TributeMechanicTileAnimationPool:AcquireObject(tileObject, animation, ...)
+    local timeline, objectKey = ZO_AnimationPool.AcquireObject(self, ...)
+    timeline.object = tileObject
+    timeline.animation = animation
+    return timeline, objectKey
+end
+
+function ZO_TributeMechanicTileAnimationPool:ResetObject(timeline)
+    timeline.object = nil
+    timeline.animation = nil
+    timeline:PlayInstantlyToStart()
+    ZO_AnimationPool.ResetObject(self, timeline)
+end
+
 -- Patron Requirement Container Pool --
 
 ZO_TributePatronRequirementContainerPool = ZO_ControlPool:Subclass()
@@ -184,8 +263,11 @@ function ZO_Tribute_PoolManager:Initialize(control)
     -- Glow Animation Pool
     self.glowAnimationPool = ZO_TributeCardGlowAnimationPool:New("ZO_TributeCard_GlowTimeline")
 
-    -- Mechanic Control Pool
+    -- Card Mechanic Control Pool
     self.mechanicContainerPool = ZO_TributeCardMechanicContainerPool:New("ZO_TributeCard_MechanicContainer_Template", control, "Mechanic")
+
+    -- Card Mechanic Glow Control Pool
+    self.mechanicGlowPool = ZO_TributeCardMechanicGlowPool:New("ZO_TributeCard_MechanicGlow_Template", control, "MechanicGlow")
 
     -- Card State Effect Control Pool
     self.cardStateEffectPool = ZO_TributeCardStateEffectPool:New("ZO_TributeCard_StateEffect_Template", control, "CardStateEffect")
@@ -200,6 +282,15 @@ function ZO_Tribute_PoolManager:Initialize(control)
         [TRIBUTE_CARD_TYPE_ACTION] = ZO_TributeCardPool:New("ZO_TributeCard_Action", control, "ActionCard"),
         [TRIBUTE_CARD_TYPE_AGENT] = ZO_TributeCardPool:New("ZO_TributeCard_Agent", control, "AgentCard"),
     }
+
+    -- Mechanic Tile Player Control Pool
+    self.mechanicTilePlayerPool = ZO_TributeMechanicTilePool:New("ZO_TributeMechanicTilePlayer", control, "TributeMechanicTilePlayer")
+
+    -- Mechanic Tile Opponent Control Pool
+    self.mechanicTileOpponentPool = ZO_TributeMechanicTilePool:New("ZO_TributeMechanicTileOpponent", control, "TributeMechanicTileOpponent")
+
+    -- Mechanic Tile Animation Pool
+    self.mechanicTileAnimationPool = ZO_TributeMechanicTileAnimationPool:New("ZO_TributeMechanicTile_Timeline")
 
     -- Patron Requirement Control Pool
     self.patronRequirementContainerPool = ZO_TributePatronRequirementContainerPool:New("ZO_TributePatronStall_RequirementContainer_Template", control, "Requirement")
@@ -217,6 +308,10 @@ function ZO_Tribute_PoolManager:GetMechanicContainerPool()
     return self.mechanicContainerPool
 end
 
+function ZO_Tribute_PoolManager:GetMechanicGlowPool()
+    return self.mechanicGlowPool
+end
+
 function ZO_Tribute_PoolManager:GetCardStateEffectPool()
     return self.cardStateEffectPool
 end
@@ -227,6 +322,18 @@ end
 
 function ZO_Tribute_PoolManager:GetCardPool(cardType)
     return self.cardTypeToPool[cardType]
+end
+
+function ZO_Tribute_PoolManager:GetMechanicTilePlayerPool()
+    return self.mechanicTilePlayerPool
+end
+
+function ZO_Tribute_PoolManager:GetMechanicTileOpponentPool()
+    return self.mechanicTileOpponentPool
+end
+
+function ZO_Tribute_PoolManager:GetMechanicTileAnimationPool()
+    return self.mechanicTileAnimationPool
 end
 
 function ZO_Tribute_PoolManager:AcquireCardByDefIds(cardDefId, patronDefId, parentControl, overrideSpace)

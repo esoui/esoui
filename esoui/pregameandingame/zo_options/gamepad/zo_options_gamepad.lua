@@ -77,6 +77,9 @@ function ZO_GamepadOptions:InitializeScenes()
             self:RefreshOptionsList()
             self:RefreshHeader()
             self:SetCurrentList(self.optionsList)
+            if IsInUI("pregame") and not IsAccountLoggedIn() then
+                GAMEPAD_OPTIONS_PANEL_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+            end
             KEYBIND_STRIP:AddKeybindButtonGroup(self.panelKeybindDescriptor)
         elseif newState == SCENE_HIDDEN then
             if ZO_SharedOptions.DoesPanelDisableShareFeatures(self.currentCategory) and DoesPlatformSupportDisablingShareFeatures() then

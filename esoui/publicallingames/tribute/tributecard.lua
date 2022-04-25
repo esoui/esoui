@@ -16,6 +16,9 @@ ZO_TRIBUTE_SUIT_ICON_BOTTOM_COORD = ZO_TRIBUTE_SUIT_ICON_DIMENSIONS / TRIBUTE_CA
 ZO_TRIBUTE_SUIT_ICON_LEFT_COORD = (TRIBUTE_CARD_ATLAS_FILE_DIMENSIONS - ZO_TRIBUTE_SUIT_ICON_DIMENSIONS) / TRIBUTE_CARD_ATLAS_FILE_DIMENSIONS
 ZO_TRIBUTE_SUIT_ICON_RIGHT_COORD = 1
 
+local TRIBUTE_CARD_COLOR_DAMAGED = ZO_ColorDef:New(ZO_ColorDef.HexToFloats("fff25454"))
+local TRIBUTE_CARD_COLOR_HEALED = ZO_ColorDef:New(ZO_ColorDef.HexToFloats("ff2adc22"))
+
 local MECHANIC_CONTAINER_LARGE_ACTIVATION_HEIGHT = 55
 local MECHANIC_CONTAINER_LARGE_COMBO_HEIGHT = 55
 local MECHANIC_CONTAINER_SMALL_ACTIVATION_HEIGHT = 41
@@ -108,7 +111,7 @@ do
         [TRIBUTE_MECHANIC_TRIGGER_COMBO] = "Combo",
     }
 
-    internalassert(TRIBUTE_MECHANIC_ITERATION_END == 12, "A new Tribute mechanic has been added. Does the MECHANIC_PARAM_MODIFIERS need special modifiers for this mechanic?")
+    internalassert(TRIBUTE_MECHANIC_ITERATION_END == 13, "A new Tribute mechanic has been added. Does the MECHANIC_PARAM_MODIFIERS need special modifiers for this mechanic?")
     local MECHANIC_PARAM_MODIFIERS =
     {
         [TRIBUTE_MECHANIC_HEAL_AGENT] =
@@ -227,6 +230,10 @@ function ZO_TributeCard_MechanicContainer:GetControl()
     return self.control
 end
 
+function ZO_TributeCard_MechanicContainer:GetTriggerAndIndex()
+    return self.trigger, self.mechanicIndex
+end
+
 function ZO_TributeCard_MechanicContainer:GetFrameGlowTextureFileName()
     return self.frameGlowTextureFileName
 end
@@ -242,6 +249,178 @@ function ZO_TributeCard_MechanicContainer:SetGlowHidden(hidden)
             self.frameGlowTexture = TRIBUTE_POOL_MANAGER:GetMechanicGlowPool():AcquireObject(self)
         end
     end
+end
+
+-- Card Defeat Cost Adjustment --
+
+ZO_TributeCard_DefeatCostAdjustment = ZO_InitializingObject:Subclass()
+
+function ZO_TributeCard_DefeatCostAdjustment:Initialize(cardObject)
+    self.cardObject = cardObject
+
+    local frontControl = self.cardObject:GetFrontControl()
+    self.control = CreateControlFromVirtual("$(parent)DefeatCostAdjustment", frontControl, "ZO_TributeCard_DefeatCostAdjustment")
+    self.control:SetExcludeFromResizeToFitExtents(true)
+    self.bannerTexture = self.control:GetNamedChild("Banner")
+    self.baseBannerTexture = frontControl:GetNamedChild("DefeatCostBanner")
+    self.anchorToControl = frontControl:GetNamedChild("NameBanner")
+
+    local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeCard_DefeatCostAdjustmentTimeline")
+    self.timeline = timeline
+    timeline.object = self
+    timeline:ApplyAllAnimationsToControl(self.control)
+
+    self.queue = {}
+    self:Reset()
+end
+
+function ZO_TributeCard_DefeatCostAdjustment:Reset()
+    ZO_ClearTable(self.queue)
+    self:ResetVisuals()
+
+    -- Force the card to refresh the defeat cost in order to ensure that the current value is shown.
+    self.cardObject:RefreshDefeatCost()
+end
+
+function ZO_TributeCard_DefeatCostAdjustment:ResetVisuals()
+    local control = self.control
+    control:SetHidden(true)
+    control:SetAlpha(0)
+    control:ClearAnchors()
+    control:SetAnchor(TOP, self.anchorToControl, nil, nil, 30)
+    control:SetScale(1)
+
+    local bannerTexture = self.bannerTexture
+    bannerTexture:SetScale(1)
+
+    -- Order matters
+    self.currentEntry = nil
+    self.targetOffsetX = nil
+    self.targetOffsetY = nil
+    self.timeline:PlayInstantlyToStart()
+end
+
+do
+    local function TryShowNextQueueEntry(self, queueEntry)
+        if self.currentEntry then
+            if queueEntry then
+                -- An animation is already playing; queue this entry.
+                table.insert(self.queue, queueEntry)
+            end
+            return
+        end
+
+        local nextQueueEntry = table.remove(self.queue, 1)
+        if nextQueueEntry then
+            if queueEntry then
+                -- The queue is not empty; queue this entry and play the next entry from the queue.
+                table.insert(self.queue, queueEntry)
+            end
+        else
+            nextQueueEntry = queueEntry
+        end
+
+        if not nextQueueEntry then
+            -- The queue is empty and no queue entry was specified.
+            return
+        end
+
+        -- Order matters
+        self.currentEntry = nextQueueEntry
+        self:OnTimelineStart()
+        self.timeline:PlayForward()
+    end
+
+    function ZO_TributeCard_DefeatCostAdjustment:UpdateDefeatCost(newCost, costDelta)
+        -- Queue this animation or, if the queue is empty and no animation is already playing, play it immediately.
+        local queueEntry =
+        {
+            oldCost = newCost - costDelta,
+            newCost = newCost,
+            costDelta = costDelta,
+        }
+        TryShowNextQueueEntry(self, queueEntry)
+    end
+
+    function ZO_TributeCard_DefeatCostAdjustment:OnTimelineStopped()
+        if self.currentEntry then
+            -- The current animation has finished playing; update the card to reflect the final defeat cost for the
+            -- current animation, reset the controls and, if the queue is not empty, play the next queued animation.
+            -- Order matters
+            self.cardObject:SetDefeatCost(self.currentEntry.newCost)
+            self:ResetVisuals()
+            TryShowNextQueueEntry(self)
+        end
+    end
+end
+
+function ZO_TributeCard_DefeatCostAdjustment:OnTimelineStart()
+    local entry = self.currentEntry
+    if not entry then
+        -- No animation is currently playing.
+        return
+    end
+
+    local control = self.control
+    self.cardObject:SetDefeatCost(entry.newCost)
+    control:SetText(string.format("%s%d", entry.costDelta > 0 and "+" or "", entry.costDelta))
+    -- Interpolate the font color based upon whether this is a damage or healing event.
+    if entry.costDelta < 0 then
+        self.startFontColor = TRIBUTE_CARD_COLOR_DAMAGED
+    else
+        self.startFontColor = TRIBUTE_CARD_COLOR_HEALED
+    end
+    self.endFontColor = self.startFontColor:GetBright()
+    control:SetColor(self.startFontColor:UnpackRGBA())
+
+    local cardBannerTextureFileName = self.cardObject:GetDefeatCostTextureFile()
+    self.bannerTexture:SetTexture(cardBannerTextureFileName)
+
+    -- Translate upward and to either the left or right randomly.
+    local MIN_OFFSET = 110
+    local MAX_OFFSET = 125
+    local targetOffset = zo_lerp(MIN_OFFSET, MAX_OFFSET, zo_random())
+    if zo_random() < 0.5 then
+        self.targetOffsetX = -targetOffset
+    else
+        self.targetOffsetX = targetOffset
+    end
+    self.targetOffsetY = 30 - targetOffset * 0.5
+
+    -- Animate over slightly varied durations to reduce repetitiveness.
+    local MIN_DURATION_MS = 1900
+    local MAX_DURATION_MS = 2100
+    local durationMS = zo_lerp(MIN_DURATION_MS, MAX_DURATION_MS, zo_random())
+    local animation = self.timeline:GetFirstAnimation()
+    animation:SetDuration(durationMS)
+
+    -- Prepare for animation to begin.
+    control:SetHidden(false)
+end
+
+function ZO_TributeCard_DefeatCostAdjustment:OnTimelineUpdate(progress)
+    local entry = self.currentEntry
+    if not entry then
+        -- No animation is currently playing.
+        return
+    end
+
+    -- Interpolate the banner texture scale.
+    local easeOut = ZO_EaseOutQuadratic(progress)
+    self.bannerTexture:SetScale(zo_lerp(1, 1.75, easeOut))
+
+    local control = self.control
+    control:ClearAnchors()
+
+    -- Translate the control up and to the left/right.
+    local interpolatedOffsetX = zo_lerp(0, self.targetOffsetX, easeOut)
+    local interpolatedOffsetY = zo_lerp(30, self.targetOffsetY, easeOut)
+    control:SetAnchor(CENTER, self.anchorToControl, nil, interpolatedOffsetX, interpolatedOffsetY)
+
+    -- Interpolate the font color from dim to bright while gradually fading the control away.
+    control:SetColor(self.startFontColor:Lerp(self.endFontColor, easeOut):UnpackRGBA())
+    local alpha = progress < 0.5 and 1 or (1 - ZO_EaseInCubic((progress - 0.5) * 2))
+    control:SetAlpha(alpha)
 end
 
 -- Card State Effect --
@@ -380,7 +559,7 @@ function ZO_TributeCard:Initialize(control)
     self.frameGlowableTexture = frontControl:GetNamedChild("Frame")
     self.suitGlowableTexture = frontControl:GetNamedChild("Suit")
     self.nameLabel = frontControl:GetNamedChild("Name")
-    self.contractBannerTexture = frontControl:GetNamedChild("ContractBanner")
+    self.contractOrCurseBannerTexture = frontControl:GetNamedChild("ContractOrCurseBanner")
     self.costLabel = frontControl:GetNamedChild("Cost")
     self.costIconTexture = self.costLabel:GetNamedChild("Icon")
     self.defeatCostLabel = frontControl:GetNamedChild("DefeatCost")
@@ -413,17 +592,35 @@ function ZO_TributeCard:Setup(cardDefId, patronDefId, overrideSpace)
     local patronData = self:GetPatronData()
     local suitAtlasImage, suitAtlasGlowImage = patronData:GetSuitAtlas(self:GetCardType())
     local portraitImage, portraitGlowImage = self:GetPortrait()
+    local isContract = self:IsContract()
+    local isCurse = self:IsCurse()
 
     self.bgGlowableTexture:SetTexture(suitAtlasImage)
     self.bgGlowableTexture.glowTexture:SetTexture(suitAtlasGlowImage)
-    self.suitGlowableTexture:SetTexture(suitAtlasImage)
-    self.suitGlowableTexture.glowTexture:SetTexture(suitAtlasImage)
+    if isCurse then
+        self.suitGlowableTexture:SetHidden(true)
+    else
+        self.suitGlowableTexture:SetHidden(false)
+        self.suitGlowableTexture:SetTexture(suitAtlasImage)
+        self.suitGlowableTexture.glowTexture:SetTexture(suitAtlasGlowImage)
+    end
     self.portraitGlowableTexture:SetTexture(portraitImage)
     self.portraitGlowableTexture.glowTexture:SetTexture(portraitGlowImage)
     self.nameLabel:SetText(self:GetFormattedName())
 
-    local isContract = self:IsContract()
-    self.contractBannerTexture:SetHidden(not isContract)
+    local contractOrCurseBannerTextureFile = nil
+    if isContract then
+        contractOrCurseBannerTextureFile = "EsoUI/Art/Tribute/tributeCardContractBanner.dds"
+    elseif isCurse then
+        contractOrCurseBannerTextureFile = "EsoUI/Art/Tribute/tributeCardCurseBanner.dds"
+    end
+
+    if contractOrCurseBannerTextureFile then
+        self.contractOrCurseBannerTexture:SetTexture(contractOrCurseBannerTextureFile)
+        self.contractOrCurseBannerTexture:SetHidden(false)
+    else
+        self.contractOrCurseBannerTexture:SetHidden(true)
+    end
 
     local costResourceType, costQuantity = self:GetAcquireCost()
     if costQuantity > 0 then
@@ -440,7 +637,7 @@ function ZO_TributeCard:Setup(cardDefId, patronDefId, overrideSpace)
         self.defeatCostBannerTexture:SetTexture(defeatCostBannerTextureFile)
     end
 
-    self:UpdateDefeatCost()
+    self:RefreshDefeatCost()
 
     local mechanicContainerPool = TRIBUTE_POOL_MANAGER:GetMechanicContainerPool()
     for trigger = TRIBUTE_MECHANIC_TRIGGER_ITERATION_BEGIN, TRIBUTE_MECHANIC_TRIGGER_ITERATION_END do
@@ -457,11 +654,21 @@ end
 
 function ZO_TributeCard:SetCardInstanceId(cardInstanceId)
     self.cardInstanceId = cardInstanceId
-    self:UpdateDefeatCost()
+    self:RefreshDefeatCost()
     if self:IsWorldCard() then
         AssignControlToTributeCard(cardInstanceId, self.control)
     end
     self:OnStateFlagsChanged(GetTributeCardStateFlags(cardInstanceId))
+end
+
+function ZO_TributeCard:GetMechanicContainer(mechanicTrigger, mechanicIndex)
+    for _, mechanicContainer in ipairs(self.mechanicContainers) do
+        local trigger, index = mechanicContainer:GetTriggerAndIndex()
+        if trigger == mechanicTrigger and index == mechanicIndex then
+            return mechanicContainer
+        end
+    end
+    return nil
 end
 
 function ZO_TributeCard:GetPopupType()
@@ -535,17 +742,38 @@ function ZO_TributeCard:GetDefeatCost()
     return resourceType, maxQuantity, currentQuantity
 end
 
-function ZO_TributeCard:UpdateDefeatCost()
-    if self:GetCardType() == TRIBUTE_CARD_TYPE_AGENT then
-        local resourceType, maxQuantity, currentQuantity = self:GetDefeatCost()
-        if resourceType ~= TRIBUTE_RESOURCE_POWER then
-            assert(false, string.format("Card %d using invalid Defeat Cost type. No UI design for any defeat cost that isn't TRIBUTE_RESOURCE_POWER. If another type is desired, please contact a UI designer.", self.cardDefId))
-        end
-
-        self.defeatCostLabel:SetText(currentQuantity)
-        local color = currentQuantity < maxQuantity and GetStatusEffectColor(STATUS_EFFECT_TYPE_WOUND) or ZO_WHITE
-        self.defeatCostLabel:SetColor(color:UnpackRGB())
+function ZO_TributeCard:SetDefeatCost(quantity)
+    if self:GetCardType() ~= TRIBUTE_CARD_TYPE_AGENT then
+        -- Only Agent cards have a defeat cost.
+        return
     end
+
+    local resourceType, maxQuantity, currentQuantity = self:GetDefeatCost()
+    if resourceType ~= TRIBUTE_RESOURCE_POWER then
+        assert(false, string.format("Card %d using invalid Defeat Cost type. No UI design for any defeat cost that isn't TRIBUTE_RESOURCE_POWER. If another type is desired, please contact a UI designer.", self.cardDefId))
+    end
+
+    quantity = quantity or currentQuantity
+    self.defeatCostLabel:SetText(quantity)
+    local color = quantity < maxQuantity and TRIBUTE_CARD_COLOR_DAMAGED or ZO_WHITE
+    self.defeatCostLabel:SetColor(color:UnpackRGBA())
+end
+
+function ZO_TributeCard:RefreshDefeatCost()
+    local USE_CURRENT_QUANTITY = nil
+    self:SetDefeatCost(USE_CURRENT_QUANTITY)
+end
+
+function ZO_TributeCard:UpdateDefeatCost(newCost, costDelta)
+    local adjustmentObject = self.defeatCostAdjustmentObject
+    if not adjustmentObject then
+        -- Create and permanently cache ZO_TributeCard_DefeatCostAdjustment object.
+        adjustmentObject = ZO_TributeCard_DefeatCostAdjustment:New(self)
+        self.defeatCostAdjustmentObject = adjustmentObject
+    end
+
+    -- Queue animation of the defeat cost update.
+    adjustmentObject:UpdateDefeatCost(newCost, costDelta)
 end
 
 -- Evaluates the effective state flags given the specified state flags or, if unspecified, the current state flags of the card.
@@ -555,8 +783,8 @@ function ZO_TributeCard:GetEffectiveStateFlags(currentStateFlags)
 
     if self:IsWorldCard() then
         if (isStacked and not isTopOfStack) or not TRIBUTE:CanInteractWithCards() then
-            -- Suppress all flags for World space cards in a stack that are not the top card in that stack.
-            -- Suppress all flags for World space cards while the pile viewer, target viewer or mechanic selector is open.
+            -- Suppress all flags for World space cards (1) while the pile viewer, target viewer or mechanic
+            -- selector is open or (2) that are in a stack that are not the top card in that stack.
             stateFlags = 0
         end
     else
@@ -564,7 +792,7 @@ function ZO_TributeCard:GetEffectiveStateFlags(currentStateFlags)
             -- Suppress all flags for a Mechanic tile's popup card.
             stateFlags = 0
         else
-            -- Suppress stack-related flags for all Interface space cards.
+            -- Suppress stack-related flags for non-Mechanic popup cards.
             stateFlags = ZO_ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_STACK_DAMAGEABLE, TRIBUTE_CARD_STATE_FLAGS_STACK_PLAYABLE)
         end
     end
@@ -651,6 +879,11 @@ end
 function ZO_TributeCard:Reset()
     self:HideBoardLocationPatronsTooltip()
     self:ReleaseAllObjects()
+
+    if self.defeatCostAdjustmentObject then
+        -- Abort any playing animation, empty the queue and reset the visuals.
+        self.defeatCostAdjustmentObject:Reset()
+    end
 
     local control = self.control
     control:SetClampedToScreen(false)
@@ -815,10 +1048,6 @@ end
 function ZO_TributeCard:OnCursorEnter()
     if self:IsInteractive() then
         SetHighlightedTributeCard(self.cardInstanceId)
-
-        if self:IsStacked() then
-            self:ShowBoardLocationPatronsTooltip(self.cardInstanceId)
-        end
     end
 end
 
@@ -856,6 +1085,14 @@ function ZO_TributeCard:IsTargeted()
     return ZO_MaskHasFlag(self.stateFlags, TRIBUTE_CARD_STATE_FLAGS_TARGETED)
 end
 
+function ZO_TributeCard:IsHidden()
+    return self.control:IsHidden()
+end
+
+function ZO_TributeCard:SetHidden(hidden)
+    self.control:SetHidden(hidden)
+end
+
 function ZO_TributeCard:IsHighlighted()
     return ZO_MaskHasFlag(self.stateFlags, TRIBUTE_CARD_STATE_FLAGS_HIGHLIGHTED)
 end
@@ -878,32 +1115,44 @@ function ZO_TributeCard:SetHighlighted(isHighlighted)
     end
 end
 
+function ZO_TributeCard:SetMechanicGlowHidden(mechanicTrigger, mechanicIndex, hidden)
+    local mechanicContainer = self:GetMechanicContainer(mechanicTrigger, mechanicIndex)
+    if mechanicContainer then
+        mechanicContainer:SetGlowHidden(hidden)
+    end
+end
+
 function ZO_TributeCard:SetMouseEnabled(enabled)
     self.control:SetMouseEnabled(enabled)
 end
 
 function ZO_TributeCard:ShowAsPopup(screenX, screenY, popupType)
     local control = self.control
-    local timeline = self.popupTimeline
-    if not timeline then
-        timeline = TRIBUTE_POOL_MANAGER:GetCardPopupAnimationPool():AcquireObject()
-        timeline:ApplyAllAnimationsToControl(control)
-        timeline:PlayInstantlyToStart()
-        timeline.cardObject = self
-        self.popupTimeline = timeline
-    end
-    timeline:PlayForward()
 
-    self:SetMouseEnabled(false)
-    control:SetAnchor(CENTER, GuiRoot, TOPLEFT, screenX, screenY)
+    self:SetPopupType(popupType)
+    if popupType == ZO_TRIBUTE_CARD_POPUP_TYPE.CARD then
+        control:SetAnchor(CENTER, GuiRoot, TOPLEFT, screenX, screenY)
+
+        local timeline = self.popupTimeline
+        if not timeline then
+            timeline = TRIBUTE_POOL_MANAGER:GetCardPopupAnimationPool():AcquireObject()
+            timeline:ApplyAllAnimationsToControl(control)
+            timeline:PlayInstantlyToStart()
+            timeline.cardObject = self
+            self.popupTimeline = timeline
+        end
+        timeline:PlayForward()
+    elseif popupType == ZO_TRIBUTE_CARD_POPUP_TYPE.MECHANIC then
+        control:SetAnchor(LEFT, GuiRoot, TOPLEFT, screenX, screenY)
+    end
+
     if ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() then
         local bottom = IsInGamepadPreferredMode() and ZO_KEYBIND_STRIP_GAMEPAD_VISUAL_HEIGHT or ZO_KEYBIND_STRIP_KEYBOARD_VISUAL_HEIGHT
         control:SetClampedToScreenInsets(0, 0, 0, bottom)
     end
     control:SetClampedToScreen(true)
     control:SetHidden(false)
-
-    self:SetPopupType(popupType)
+    self:SetMouseEnabled(false)
 end
 
 function ZO_TributeCard:OnAlphaTimelineStopped(timeline)
@@ -968,6 +1217,19 @@ function ZO_TributeCard_AlphaTimeline_SetProgress(animation, progress)
     local timeline = animation:GetTimeline()
     if timeline.cardObject then
         timeline.cardObject:SetAlphaProgress(progress)
+    end
+end
+
+function ZO_TributeCard_DefeatCostAdjustmentTimeline_OnStop(timeline, completedPlaying)
+    if timeline.object then
+        timeline.object:OnTimelineStopped(completedPlaying)
+    end
+end
+
+function ZO_TributeCard_DefeatCostAdjustmentTimeline_SetProgress(animation, progress)
+    local timeline = animation:GetTimeline()
+    if timeline.object then
+        timeline.object:OnTimelineUpdate(progress)
     end
 end
 

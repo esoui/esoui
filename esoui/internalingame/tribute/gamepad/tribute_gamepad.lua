@@ -2,14 +2,16 @@ ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES =
 {
     NONE = 0,
     CARD = 1,
-    PATRON_STALL = 2,
-    TURN_TIMER = 3,
+    MECHANIC_TILE = 2,
+    PATRON_STALL = 3,
+    TURN_TIMER = 4,
 }
 
 ZO_TRIBUTE_GAMEPAD_CURSOR_FRICTION_FACTORS =
 {
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.NONE] = 1,
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD] = 0.5,
+    [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.MECHANIC_TILE] = 0.4,
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.PATRON_STALL] = 0.5,
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.TURN_TIMER] = 0.5,
 }
@@ -47,21 +49,36 @@ function ZO_TributeCursor_Gamepad:Reset()
 end
 
 function ZO_TributeCursor_Gamepad:UpdateDirectionalInput()
+    local cursorMoved = false
     local dx, dy = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
     if dx ~= 0 or dy ~= 0 then
-        dx, dy = zo_clampLength2D(dx, dy, 1.0) -- clamp dpad output
+        dx, dy = zo_clampLength2D(dx, dy, 1.0) -- Clamp dpad output
         local frameDelta = GetFrameDeltaNormalizedForTargetFramerate()
         local magnitude = frameDelta * self.frictionInterpolationFactor * ZO_TRIBUTE_GAMEPAD_CURSOR_SPEED
         dx = dx * magnitude
         dy = -dy * magnitude
 
         self.control:SetAnchor(CENTER, GuiRoot, TOPLEFT, self.x + dx, self.y + dy)
-        self.x, self.y = self.control:GetCenter() -- store clamped values
+        local clampedX, clampedY = self.control:GetCenter()
+        if clampedX ~= self.x or clampedY ~= self.y then
+            self.x, self.y = clampedX, clampedY
+            cursorMoved = true
+        end
     end
 
     self:RefreshObjectUnderCursor()
     local targetFriction = ZO_TRIBUTE_GAMEPAD_CURSOR_FRICTION_FACTORS[self.objectTypeUnderCursor]
     self.frictionInterpolationFactor = zo_deltaNormalizedLerp(self.frictionInterpolationFactor, targetFriction, ZO_TRIBUTE_GAMEPAD_CURSOR_FRICTION_INTERPOLATION_RATE)
+
+    if cursorMoved then
+        -- Defer firing of this callback until after the object under the cursor has been evaluated in order to ensure
+        -- that any potential call to GetObjectUnderCursor() from a callback handler will provide a valid response.
+        self:OnCursorPositionChanged()
+    end
+end
+
+function ZO_TributeCursor_Gamepad:OnCursorPositionChanged()
+    self:FireCallbacks("CursorPositionChanged", self.x, self.y)
 end
 
 function ZO_TributeCursor_Gamepad:SetActive(active)
@@ -71,7 +88,18 @@ function ZO_TributeCursor_Gamepad:SetActive(active)
     else
         DIRECTIONAL_INPUT:Deactivate(self)
     end
+
+    -- Order matters
     self:RefreshObjectUnderCursor()
+    self:FireCallbacks("CursorStateChanged", active)
+    if active then
+        -- Fire this callback upon activation in order to ensure that registered handlers are immediately
+        -- aware of the current cursor position without requiring subsequent motion.
+        -- Note:
+        -- Firing of this callback is deferred until after CursorStateChanged is fired so that handlers
+        -- are aware of the new cursor state when receiving the CursorPositionChanged callback.
+        self:OnCursorPositionChanged()
+    end
 end
 
 function ZO_TributeCursor_Gamepad:RefreshObjectUnderCursor()
@@ -84,11 +112,20 @@ function ZO_TributeCursor_Gamepad:RefreshObjectUnderCursor()
     -- TODO Tribute: Evaluate whether a more efficient solution is needed.
     local targetControl = WINDOW_MANAGER:GetControlAtPoint(self.x, self.y)
     local targetObject = targetControl and targetControl.object
-    local isUnderCursor = targetObject and targetObject:IsInstanceOf(ZO_TributeCard) and targetObject:IsWorldCard()
-    if not isUnderCursor then
-        targetObject = nil
+    local objectType = ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.NONE
+    local isUnderCursor = false
+
+    if targetObject then
+        if targetObject:IsInstanceOf(ZO_TributeCard) and targetObject:IsWorldCard() then
+            objectType = ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD
+            isUnderCursor = true
+        elseif targetObject:IsInstanceOf(ZO_TributeMechanicTile) then
+            objectType = ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.MECHANIC_TILE
+            isUnderCursor = true
+        end
     end
-    self:SetObjectUnderCursor(targetObject, ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD, isUnderCursor)
+
+    self:SetObjectUnderCursor(targetObject, objectType, isUnderCursor)
 end
 
 function ZO_TributeCursor_Gamepad:SetObjectUnderCursor(object, objectType, isUnderCursor)

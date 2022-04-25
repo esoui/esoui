@@ -19,6 +19,7 @@ local SimpleEventToCategoryMappings = {
     [EVENT_BATTLEGROUND_INACTIVITY_WARNING] = CHAT_CATEGORY_SYSTEM,
 
     ["AddSystemMessage"] = CHAT_CATEGORY_SYSTEM,
+    ["AddTranscriptMessage"] = CHAT_CATEGORY_SYSTEM,
 }
 
 local MultiLevelEventToCategoryMappings = {

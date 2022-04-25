@@ -441,6 +441,8 @@ function ZO_ActivityFinderTemplate_Keyboard:OnTributeCampaignDataChanged()
         end
     end
     self:RefreshTributeSeasonData(hideIfNotCompetitive)
+
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:MarkDataDirty()
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:ShowPrimaryControls()

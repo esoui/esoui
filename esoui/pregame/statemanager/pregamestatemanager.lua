@@ -345,7 +345,7 @@ local g_sharedPregameStates =
     ["ShowAccessibilityModePrompt"] =
     {
         ShouldAdvance = function()
-            return IsInGamepadPreferredMode() or GetCVar("PregameAccessibilityMenuEnabled") ~= "1"
+            return IsInGamepadPreferredMode() or GetCVar("PregameAccessibilityPromptEnabled") ~= "1"
         end,
 
         OnEnter = function()
@@ -357,21 +357,24 @@ local g_sharedPregameStates =
         end,
 
         GetStateTransitionData = function()
-            return "FirstTimeAccessibilitySettings"
+            -- TODO XAR Settings: Replace the following:
+            -- return "FirstTimeAccessibilitySettings"
+            return "ScreenAdjustIntro"
         end,
     },
 
+    -- TODO XAR Settings: To be integrated in next update
     ["FirstTimeAccessibilitySettings"] =
     {
         ShouldAdvance = function()
-            return GetCVar("PregameAccessibilityMenuEnabled") ~= "1"
+            return GetCVar("PregameAccessibilitySettingMenuEnabled") ~= "1"
         end,
 
         OnEnter = function()
             GAMEPAD_OPTIONS:SetCategory(SETTING_PANEL_ACCESSIBILITY)
             SCENE_MANAGER:Show(GAMEPAD_OPTIONS_PANEL_SCENE:GetName())
             local function BackButtonCallback()
-                SetCVar("PregameAccessibilityMenuEnabled", "false")
+                SetCVar("PregameAccessibilitySettingMenuEnabled", "false")
                 PregameStateManager_AdvanceState()
             end
             GAMEPAD_OPTIONS:ReplaceBackKeybind(BackButtonCallback, GetString(SI_ACCESSIBILITY_SETTINGS_CONTINUE_KEYBIND))
@@ -850,9 +853,12 @@ function ZO_Pregame_OnGamepadPreferredModeChanged()
     ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE)
 
     if currentState == "ShowAccessibilityModePrompt" then
-        PregameStateManager_SetState("FirstTimeAccessibilitySettings")
-    elseif currentState == "FirstTimeAccessibilitySettings" then
-        PregameStateManager_SetState("ShowAccessibilityModePrompt")
+        -- TODO XAR Settings: Replace the following
+        -- PregameStateManager_SetState("FirstTimeAccessibilitySettings")
+        PregameStateManager_SetState("AccountLoginEntryPoint")
+    -- TODO XAR Settings: Replace the following
+    -- elseif currentState == "FirstTimeAccessibilitySettings" then
+        -- PregameStateManager_SetState("ShowAccessibilityModePrompt")
     elseif not IsAccountLoggedIn() or IS_WORLD_SELECT_STATE[currentState] then -- While in world select, we're logged in but haven't yet started the character loading process
         PregameStateManager_SetState("AccountLoginEntryPoint")
     elseif not IsPregameCharacterConstructionReady() then

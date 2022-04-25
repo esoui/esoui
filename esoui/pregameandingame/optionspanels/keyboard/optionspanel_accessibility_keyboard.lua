@@ -15,6 +15,7 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_ACCESSIBILITY,
     settingId = ACCESSIBILITY_SETTING_VOICE_CHAT_ACCESSIBILITY,
     header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
+    exists = false, -- TODO XAR Settings: Remove this line
 })
 
 panelBuilder:AddSetting({
@@ -22,4 +23,5 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_ACCESSIBILITY,
     settingId = ACCESSIBILITY_SETTING_TEXT_CHAT_ACCESSIBILITY,
     header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
+    exists = false, -- TODO XAR Settings: Remove this line
 })

@@ -13,9 +13,16 @@ function ZO_TributePatronSelection_Manager:Initialize()
     end)
 
     EVENT_MANAGER:RegisterForEvent("TributePatronSelection_Manager", EVENT_TRIBUTE_PATRON_DRAFTED, function(_, patronDraftId, patronDefId)
+        local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(patronDefId)
+
         --Filter out neutral patrons
-        if IsTributePatronNeutral(patronDefId) then
+        if patronData:IsNeutral() then
             return
+        end
+        
+        local family = patronData:GetFamily()
+        if family ~= 0 then
+            self.draftedFamilies[family] = true
         end
         
         self.draftedPatrons[patronDefId] = patronDraftId
@@ -50,6 +57,7 @@ function ZO_TributePatronSelection_Manager:Initialize()
 
     self.patronDataList = {}
     self.draftedPatrons = {}
+    self.draftedFamilies = {}
     self.showGamepadTooltips = true
 end
 
@@ -100,6 +108,7 @@ end
 function ZO_TributePatronSelection_Manager:EndPatronSelection(forceEndSelection)
     if self.isSelectionInProgress or forceEndSelection then
         ZO_ClearTable(self.draftedPatrons)
+        ZO_ClearTable(self.draftedFamilies)
         self.isSelectionInProgress = false
         self.isAnimating = false
         self.selectedPatron = nil
@@ -123,7 +132,8 @@ function ZO_TributePatronSelection_Manager:GetSelectedPatron()
 end
 
 function ZO_TributePatronSelection_Manager:IsPatronDrafted(patronId)
-    return self.draftedPatrons[patronId] ~= nil
+    local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(patronId)
+    return self.draftedPatrons[patronId] ~= nil or self.draftedFamilies[patronData:GetFamily()]
 end
 
 function ZO_TributePatronSelection_Manager:GetNumDraftedPatrons()

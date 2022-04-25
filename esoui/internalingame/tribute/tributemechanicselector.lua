@@ -18,12 +18,12 @@ function ZO_TributeMechanicCard:Initialize(control, mechanicIndex)
             lineLimit = 5,
         },
         {
-            font = "ZoFontTributeAntique34",
-            lineLimit = 6,
+            font = "ZoFontTributeAntique30",
+            lineLimit = 7,
         },
         {
-            font = "ZoFontTributeAntique27",
-            lineLimit = 7,
+            font = "ZoFontTributeAntique20",
+            lineLimit = 10,
         },
     }
     ZO_FontAdjustingWrapLabel_OnInitialized(self.mechanicText, fonts, TEXT_WRAP_MODE_ELLIPSIS)

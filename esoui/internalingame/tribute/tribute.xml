@@ -45,7 +45,7 @@
                     <Dimensions x="64" y="64" />
                 </Texture>
 
-                <Label name="$(parent)Instruction" font="ZoFontTributeAntique40" horizontalAlignment="CENTER" level="1" hidden="true">
+                <Label name="$(parent)Instruction" font="ZoFontTributeAntique40" horizontalAlignment="CENTER" level="15" hidden="true">
                     <Controls>
                         <Texture name="$(parent)Background" layer="TEXT" textureFile="EsoUI/Art/Subtitles/subtitle_background_centerBlur.dds" alpha="0.6">
                             <Anchor point="TOPLEFT" offsetY="-20"/>
@@ -70,7 +70,7 @@
 
                 <Control name="$(parent)Cards" space="WORLD" />
 
-                <Control name="$(parent)Confirm" inherits="ZO_KeybindButton" hidden="true">
+                <Control name="$(parent)Confirm" layer="BACKGROUND" inherits="ZO_KeybindButton" hidden="true">
                     <Controls>
                         <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop_white.dds" excludeFromResizeToFitExtents="true">
                             <Anchor point="TOPLEFT" offsetX="-50" offsetY="-5"/>

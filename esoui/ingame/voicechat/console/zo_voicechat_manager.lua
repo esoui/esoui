@@ -192,6 +192,8 @@ end
 ZO_VoiceChat_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_VoiceChat_Manager:Initialize()
+    VOICE_CHAT_MANAGER = self
+
     self.channelData =
     {
         [VOICE_CHANNEL_AREA] =
@@ -247,6 +249,8 @@ function ZO_VoiceChat_Manager:Initialize()
     self.desiredActiveChannel = nil
 
     self:RegisterForEvents()
+    
+    CHAT_ROUTER:SetTranscriptForwardingEnabled(GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_SEND_TRANSCRIPT_TO_TEXT_CHAT))
 end
 
 function ZO_VoiceChat_Manager:RegisterForEvents()
@@ -422,7 +426,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
 
     local function OnVoiceUserLeftChannel(event, channelName, displayName)
         local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
-        
+
         --The guild id in the channel data is invalid for this event, so use the cache
         if channelData.channelType == VOICE_CHANNEL_GUILD then
             channelData.guildId = self.guildChannelsToIds[channelName]
@@ -430,6 +434,10 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
             if not channelData.guildId then
                 return
             end
+        end
+
+        if not self:DoesChannelExist(channelData) then
+            return
         end
 
         local channel = self:GetChannel(channelData)
@@ -790,4 +798,5 @@ end
 
 --Globals
 
-VOICE_CHAT_MANAGER = ZO_VoiceChat_Manager:New()
+ZO_VoiceChat_Manager:New()
+
