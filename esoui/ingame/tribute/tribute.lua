@@ -187,7 +187,8 @@ function ZO_Tribute:RefreshPlayerInfo()
     local nameFont = IsInGamepadPreferredMode() and TRIBUTE_PLAYER_NAME_FONT_INFO.GAMEPAD_INFO.fontObjectForWidthCalculation or TRIBUTE_PLAYER_NAME_FONT_INFO.KEYBOARD_INFO.fontObjectForWidthCalculation
     for perspective = TRIBUTE_PLAYER_PERSPECTIVE_ITERATION_BEGIN, TRIBUTE_PLAYER_PERSPECTIVE_ITERATION_END do
         local playerInfoDisplay = self.playerInfoDisplays[perspective]
-        local name = GetTributePlayerInfo(perspective)
+        local name, playerType = GetTributePlayerInfo(perspective)
+        name = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(name) or name
         local nameWidth = GetStringWidthScaled(nameFont, name, 1, SPACE_INTERFACE)
         if nameWidth > longestNameWidth then
             longestNameWidth = nameWidth

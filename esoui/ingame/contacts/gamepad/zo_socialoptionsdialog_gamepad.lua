@@ -256,12 +256,14 @@ function ZO_SocialOptionsDialogGamepad:BuildVisitPlayerHouseOption()
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildInviteToTributeOption()
-    local function InviteToTributeCallback()
-        InviteToTribute(DecorateDisplayName(self.socialData.displayName))
-        SCENE_MANAGER:ShowBaseScene()
+    if not ZO_IsTributeLocked() then
+        local function InviteToTributeCallback()
+            InviteToTribute(DecorateDisplayName(self.socialData.displayName))
+            SCENE_MANAGER:ShowBaseScene()
+        end
+        local unusedHeader = nil
+        return self:BuildOptionEntry(unusedHeader, SI_SOCIAL_MENU_TRIBUTE_INVITE, InviteToTributeCallback)
     end
-    local unusedHeader = nil
-    return self:BuildOptionEntry(unusedHeader, SI_SOCIAL_MENU_TRIBUTE_INVITE, InviteToTributeCallback)
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildGamerCardOption()

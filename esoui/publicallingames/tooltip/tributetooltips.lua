@@ -243,3 +243,13 @@ function ZO_Tooltip:LayoutTributeBoardLocationPatrons(boardLocationData)
         self:AddSection(patronsSection)
     end
 end
+
+function ZO_Tooltip:LayoutTributeResource(resource)
+    local titleSection = self:AcquireSection(self:GetStyle("title"))
+    titleSection:AddLine(GetString("SI_TRIBUTERESOURCE", resource))
+    self:AddSection(titleSection)
+
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    bodySection:AddLine(GetString("SI_TRIBUTERESOURCE_TOOLTIP", resource), self:GetStyle("bodyDescription"))
+    self:AddSection(bodySection)
+end

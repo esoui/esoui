@@ -194,7 +194,7 @@
 
         <!-- MultiSegmentProgressBar Templates-->
         <StatusBar name="ZO_TributeSummary_ArrowStatusBar_Keyboard_Template" inherits="ZO_ArrowStatusBarWithBG" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_genericFill.dds" layer="CONTROLS" level="0" virtual="true">
-            <Dimensions x="570" y="53" />
+            <Dimensions x="550" y="53" />
             <LeadingEdge override="true" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_genericFill_leadingEdge.dds" width="25" height="53" />
             <TextureCoords left="0" right="1" top="0" bottom="0.78125" />
             <LeadingEdgeTextureCoords left="0" right="0.78125" top="0" bottom="0.78125" />
@@ -237,7 +237,7 @@
         </StatusBar>
 
         <StatusBar name="ZO_TributeSummary_ArrowStatusBar_Gamepad_Template" inherits="ZO_GamepadArrowStatusBarWithBGMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_genericFill.dds" layer="CONTROLS" virtual="true">
-            <Dimensions y="56" />
+            <Dimensions x="550" y="56" />
             <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_genericFill_leadingEdge.dds" width="23" height="50" />
             <LeadingEdgeTextureCoords left="0" right="0.71875" top="0" bottom="0.859375" />
             <TextureCoords left="0" right="1" top="0" bottom="0.859375" />
@@ -344,7 +344,7 @@
                     <Anchor offsetX="52" offsetY="52" />
                     <Dimensions x="270" y="373" />
                     <Controls>
-                        <Label name="$(parent)Duration" text="[DEBUG] Duration">
+                        <Label name="$(parent)Duration">
                             <Anchor point="TOP" offsetY="10" />
                         </Label>
 
@@ -434,7 +434,7 @@
             <Controls>
                 <Texture name="$(parent)Banner">
                     <Dimensions x="820" y="160" />
-                    <Anchor point="TOP" offsetY="120"/>
+                    <Anchor point="CENTER" offsetY="-425"/>
                     <Controls>
                         <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
                             <Anchor point="CENTER" />
@@ -443,32 +443,32 @@
                 </Texture>
 
                 <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Tribute/tributeIcon_Large.dds">
-                    <Anchor point="TOP" relativeTo="$(parent)Banner" relativePoint="BOTTOM"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Banner" relativePoint="BOTTOM" offsetY="75" />
                     <Dimensions x="250" y="250" />
                 </Texture>
 
                 <Label name="$(parent)PlayerLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetX="-250" offsetY="150"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetX="-250" offsetY="75"/>
                     <DimensionConstraints maxX="400" />
                 </Label>
 
                 <Label name="$(parent)OpponentLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="250" offsetY="150" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="250" offsetY="75" />
                     <DimensionConstraints maxX="400" />
                 </Label>
 
                 <Control name="$(parent)Prestige" hidden="true">
                     <Controls>
                         <Label name="$(parent)Divider" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="—">
-                            <Anchor point="CENTER" relativeTo="$(grandparent)Icon" offsetY="400"/>
+                            <Anchor point="CENTER" relativeTo="$(grandparent)Icon" offsetY="325"/>
                         </Label>
 
                         <Label name="$(parent)PlayerValue" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="RIGHT" relativeTo="$(parent)Divider" relativePoint="LEFT" offsetX="-100"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)Divider" relativePoint="LEFT" offsetX="-30"/>
                         </Label>
 
                         <Label name="$(parent)OpponentValue" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="LEFT" relativeTo="$(parent)Divider" relativePoint="RIGHT" offsetX="100"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)Divider" relativePoint="RIGHT" offsetX="30"/>
                         </Label>
                     </Controls>
                 </Control>
@@ -518,7 +518,7 @@
                     </Controls>
                 </Texture>
                 <Label name ="$(parent)RankChange" font="ZoFontWinH1" />
-                <StatusBar name="$(parent)ProgressBar" inherits="ZO_TributeSummary_ArrowStatusBar_Keyboard_Template" scale="0.9">
+                <StatusBar name="$(parent)ProgressBar" inherits="ZO_TributeSummary_ArrowStatusBar_Keyboard_Template">
                     <Controls>
                         <Label name="$(parent)ProgressNumber" font="ZoFontWinH3"/>
                         <Texture name="$(parent)CurrentRankIcon">
@@ -630,12 +630,7 @@
                     </Controls>
                 </Label>
 
-                <Control name="$(parent)LeaderboardFlareContainer" level="0">
-                    <Anchor point="CENTER" relativeTo="$(parent)LeaderboardBackdrop" offsetY="-25"/>
-                    <Dimensions x="465" y="96" />
-                </Control>
-
-                <Texture name="$(parent)LeaderboardBackdrop" inherits="ZO_RevealingControl" level="1">
+                <Texture name="$(parent)LeaderboardBackdrop" inherits="ZO_RevealingControl" layer="CONTROLS">
                     <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="-10" />
                     <Dimensions x="512" y="256" />
                     <Controls>
@@ -644,6 +639,11 @@
                         </Label>
                     </Controls>
                 </Texture>
+
+                <Control name="$(parent)LeaderboardFlareContainer" layer="BACKGROUND">
+                    <Anchor point="CENTER" relativeTo="$(parent)LeaderboardBackdrop" offsetY="25" />
+                    <Dimensions x="465" y="96" />
+                </Control>
 
                 <Texture name="$(parent)RankUpIndicator" scale="0" level="1">
                     <Dimensions x="125" y="125" />
@@ -702,7 +702,7 @@
 
                 <Control name="$(parent)PlacementBarPrevious" level="0">
                     <Anchor point="CENTER" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="240" />
-                    <Dimensions x="315" y="53"/>
+                    <Dimensions x="550" y="53"/>
 
                     <Controls>
                         <Texture name="$(parent)CurrentRankIcon" textureFile="EsoUI/Art/Tribute/tributeRankIcon_1.dds">
@@ -729,7 +729,7 @@
 
                 <Control name="$(parent)PlacementBarNew" level="1">
                     <Anchor point="CENTER" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="240" />
-                    <Dimensions x="315" y="53" />
+                    <Dimensions x="550" y="53" />
 
                     <Controls>
                         <Label name="$(parent)MatchRecordText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
@@ -737,7 +737,7 @@
                 </Control>
 
                 <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider">
-                    <Anchor point="TOP" relativeTo="$(parent)ProgressBar" relativePoint="BOTTOM" offsetY="120" />
+                    <Anchor point="TOP" relativeTo="$(parent)ProgressBar" relativePoint="BOTTOM" offsetY="65" />
                     <Dimensions x="1000" y="8" />
                 </Control>
             </Controls>
@@ -828,7 +828,7 @@
             <AnchorFill />
             <Controls>
                 <Control name="$(parent)Header">
-                    <Anchor point="TOP" offsetY="120" />
+                    <Anchor point="CENTER" offsetY="-425" />
                     <Controls>
                         <Label name="$(parent)Text" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_TRIBUTE_SUMMARY_REWARDS">
                             <Anchor point="CENTER" />

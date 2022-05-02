@@ -54,8 +54,6 @@ EsoUI\Ingame\Tooltip\Console\VoiceChatTooltips.lua
 EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.xml
 EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.lua
 
-EsoUI\Ingame\Gamepad\GamepadGamercard.lua
-
 EsoUI\Ingame\Utility\TextSearchManager.lua
 
 EsoUI\Ingame\Inventory\ItemFilterUtils.lua

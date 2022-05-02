@@ -130,10 +130,64 @@ function ZO_ActivityFinderTemplate_Shared:InitializeSingularPanelControls(reward
     self.placementMatchProgressBar:SetProgressBarGrowthDirection(ZO_PROGRESS_BAR_GROWTH_DIRECTION_LEFT_TO_RIGHT)
     self.placementMatchProgressBar:SetPreviousSegmentUnderneathOverlap(-32)
 
-    self.clubRankProgressStatusBarContainer = self.tributeSeasonProgressControl:GetNamedChild("ClubRankBarContainer")
-    self.clubRankProgressStatusBar = self.clubRankProgressStatusBarContainer:GetNamedChild("ProgressBar")
-    self.clubRankProgressBarBG = self.clubRankProgressStatusBarContainer:GetNamedChild("Bg")
-    ZO_StatusBar_SetGradientColor(self.clubRankProgressStatusBar, ZO_XP_BAR_GRADIENT_COLORS)
+    self.seasonRankProgressStatusBarContainer = self.tributeSeasonProgressControl:GetNamedChild("SeasonRankBarContainer")
+    self.seasonRankProgressStatusBar = self.seasonRankProgressStatusBarContainer:GetNamedChild("ProgressBar")
+    self.seasonRankProgressBarBG = self.seasonRankProgressStatusBarContainer:GetNamedChild("Bg")
+    ZO_StatusBar_SetGradientColor(self.seasonRankProgressStatusBar, ZO_XP_BAR_GRADIENT_COLORS)
+
+    local function OnMouseEnter(...)
+        InitializeTooltip(InformationTooltip, self.seasonRankProgressStatusBar, TOP)
+
+        local tierRank = GetTributePlayerCampaignRank()
+
+        if tierRank == TRIBUTE_TIER_INVALID then
+            return
+        end
+
+        if tierRank == TRIBUTE_TIER_UNRANKED then
+            local numRequiredPlacementMatches = GetNumRequiredPlacementMatches()
+
+            local numWins = 0
+            local numLoses = 0
+            for i = 1, numRequiredPlacementMatches do
+                local hasRecord, wasAWin = GetCampaignMatchResultFromHistoryByMatchIndex(i)
+                if hasRecord then
+                    if wasAWin then
+                        numWins = numWins + 1
+                    else
+                        numLoses = numLoses + 1
+                    end
+                end
+            end
+
+            InformationTooltip:AddLine(zo_strformat(SI_TRIBUTE_SEASON_PLACEMENT_DESCRIPTION, numRequiredPlacementMatches), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGBA())
+            InformationTooltip:AddLine(zo_strformat(SI_TRIBUTE_SEASON_PLACEMENT_RECORD_FORMATTER, numWins, numLoses, numRequiredPlacementMatches - numWins - numLoses), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGBA())
+        else
+            local experience, requiredExperience = GetTributePlayerExperienceInCurrentCampaignRank()
+
+            --If the maximum season experience for this rank is 0, then we are maxed out
+            if requiredExperience == 0 then
+                InformationTooltip:AddLine(GetString(SI_TRIBUTE_SEASON_EXPERIENCE_LIMIT_REACHED), "", ZO_NORMAL_TEXT:UnpackRGBA())
+            else
+                local percentageXp = zo_floor(experience / requiredExperience * 100)
+                local formattedRatioText = zo_strformat(SI_TRIBUTE_EXPERIENCE_CURRENT_MAX_PERCENT, ZO_CommaDelimitNumber(experience), ZO_CommaDelimitNumber(requiredExperience), percentageXp)
+                InformationTooltip:AddLine(zo_strformat(SI_TRIBUTE_SEASON_EXPERIENCE_TOOLTIP_FORMATTER, formattedRatioText), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGBA())
+            end
+
+            InformationTooltip:AddVerticalPadding(18)
+
+            InformationTooltip:AddLine(GetString(SI_TRIBUTE_SEASON_EXPERIENCE_DESCRIPTION), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGBA())
+        end
+    end
+
+    local function OnMouseExit(...)
+        ClearTooltip(InformationTooltip)
+    end
+
+    self.placementMatchProgressBar.control:SetHandler("OnMouseEnter", OnMouseEnter)
+    self.placementMatchProgressBar.control:SetHandler("OnMouseExit", OnMouseExit)
+    self.seasonRankProgressStatusBar:SetHandler("OnMouseEnter", OnMouseEnter)
+    self.seasonRankProgressStatusBar:SetHandler("OnMouseExit", OnMouseExit)
 
     self.rewardsSection = rewardsSection
     self.singularSection = panel
@@ -205,13 +259,13 @@ function ZO_ActivityFinderTemplate_Shared:RefreshTributeSeasonData(forceHide)
                 self.nextRankIcon:SetTexture(string.format(TRIBUTE_RANK_ICON_FORMATTER, tierRank + 1))
 
                 self.leaderboardRankLabel:SetHidden(true)
-                self.clubRankProgressStatusBarContainer:SetHidden(true)
+                self.seasonRankProgressStatusBarContainer:SetHidden(true)
                 self.placementMatchProgressControl:SetHidden(false)
             else
                 local experience, requiredExperience = GetTributePlayerExperienceInCurrentCampaignRank()
 
-                self.clubRankProgressStatusBar:SetMinMax(0, requiredExperience)
-                self.clubRankProgressStatusBar:SetValue(experience)
+                self.seasonRankProgressStatusBar:SetMinMax(0, requiredExperience)
+                self.seasonRankProgressStatusBar:SetValue(experience)
 
                 local anchorRelativePoint = self.tributeSeasonProgressHeader
 
@@ -262,7 +316,7 @@ function ZO_ActivityFinderTemplate_Shared:RefreshTributeSeasonData(forceHide)
                     self.currentRankIcon:SetAnchor(point, anchorRelativePoint, relativePoint, offsetX, offsetY, anchorConstrains)
                 end
 
-                self.clubRankProgressStatusBarContainer:SetHidden(false)
+                self.seasonRankProgressStatusBarContainer:SetHidden(false)
                 self.placementMatchProgressControl:SetHidden(true)
             end
         end
@@ -350,7 +404,7 @@ do
 
                     local itemRewardControl = self.itemRewardControls[nodeIndex]
                     itemRewardControl.icon:SetTexture(icon)
-                    itemRewardControl.text:SetText(displayName)
+                    itemRewardControl.text:SetText(zo_strformat(SI_ACTIVITY_FINDER_REWARD_NAME_FORMAT, displayName))
                     itemRewardControl.text:SetColor(textColorRed, textColorBlue, textColorGreen)
                     itemRewardControl:SetHidden(false)
                     table.insert(g_rewardControlsToAnchor, itemRewardControl)

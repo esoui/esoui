@@ -33,6 +33,8 @@ function ZO_CreateLinkLoading_Gamepad:Initialize(control)
     end
 
     CREATE_LINK_LOADING_SCREEN_GAMEPAD_SCENE:RegisterCallback("StateChange", StateChanged)
+
+    self:InitializeOtpDialog()
 end
 
 function ZO_CreateLinkLoading_Gamepad:PerformDeferredInitialize()
@@ -171,9 +173,11 @@ local function OnGlobalError(eventID, errorCode, helpLinkURL, errorText)
 end
 
 local function OnOTPPending(eventID, otpReason, otpType, otpDurationInSeconds)
-    -- TODO: Is this a case that needs to be handled properly on console (and thus needs to be designed), or is this
-    --  show a dialog good enough as its only needed for PC testing?
-    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_OTP_DIALOG_TITLE), GetString(SI_PROVIDE_OTP_INITIAL_DIALOG_TEXT))
+    local otpDurationMs = otpDurationInSeconds * 1000
+    local otpExpirationMs = GetFrameTimeMilliseconds() + otpDurationMs
+
+    ZO_Dialogs_ReleaseAllDialogs(true)
+    ZO_Dialogs_ShowGamepadDialog("PROVIDE_OTP_INITIAL_GAMEPAD", { otpExpirationMs = otpExpirationMs, otpReason = otpReason })
 end
 
 local function OnCreateLinkLoadingError(eventId, loginError, linkingError, debugInfo)
@@ -279,6 +283,130 @@ function ZO_CreateLinkLoading_Gamepad:Show(previousState, loginFunction, loading
     self.loadingText:SetText(loadingText)
 
     SCENE_MANAGER:Show("CreateLinkLoadingScreen_Gamepad")
+end
+
+function ZO_CreateLinkLoading_Gamepad:InitializeOtpDialog()
+    local dialogName = "PROVIDE_OTP_INITIAL_GAMEPAD"
+    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+
+    local oneTimePasswordText = ""
+
+    -- OTP entry
+    local otpEntryData = ZO_GamepadEntryData:New()
+    otpEntryData.isEditControl = true
+
+    otpEntryData.textChangedCallback = function(control)
+        oneTimePasswordText = control:GetText()
+    end
+
+    otpEntryData.setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
+        control.highlight:SetHidden(not selected)
+
+        control.editBoxControl.textChangedCallback = data.textChangedCallback
+        control.editBoxControl:SetMaxInputChars(32) -- 32 is oversized, but gives wiggle-room
+        control.editBoxControl:SetText(oneTimePasswordText)
+    end
+
+    -- Submit entry
+    local submitEntryData = ZO_GamepadEntryData:New(GetString(SI_OTP_DIALOG_SUBMIT))
+    submitEntryData.isSubmit = true
+
+    submitEntryData.setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
+        local isValid = oneTimePasswordText ~= ""
+        data.disabled = not isValid
+        data:SetEnabled(isValid)
+
+        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, isValid, active)
+    end
+
+    ZO_Dialogs_RegisterCustomDialog(dialogName,
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        },
+        canQueue = true,
+        mustChoose = true,
+        setup = function(dialog)
+            oneTimePasswordText = ""
+            ZO_GenericGamepadDialog_ShowTooltip(dialog)
+            dialog:setupFunc()
+        end,
+        title =
+        {
+            text = SI_OTP_DIALOG_TITLE,
+        },
+        parametricList =
+        {
+            {
+                template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
+                entryData = otpEntryData,
+            },
+            {
+                template = "ZO_GamepadTextFieldSubmitItem",
+                entryData = submitEntryData,
+            },
+        },
+        updateFn = function()
+            local dialogData = parametricDialog.data
+            local timeLeftMs = dialogData.otpExpirationMs - GetFrameTimeMilliseconds()
+            if timeLeftMs >= 0 then
+                local timeLeftString = ZO_FormatTimeMilliseconds(timeLeftMs, TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT_SHOW_ZERO_SECS)
+
+                local instructionText
+                if dialogData.otpReason ~= LOGIN_STATUS_OTP_FAILED then
+                    instructionText = zo_strformat(SI_PROVIDE_OTP_INITIAL_DIALOG_TEXT_GAMEPAD, timeLeftString)
+                else
+                    instructionText = zo_strformat(SI_PROVIDE_OTP_SUBSEQUENT_DIALOG_TEXT, timeLeftString)
+                end
+
+                GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, instructionText)
+            else
+                ZO_Dialogs_ReleaseDialog(dialog)
+                PregameStateManager_ReenterLoginState()
+            end
+        end,
+
+        blockDialogReleaseOnPress = true,
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_GAMEPAD_SELECT_OPTION,
+                callback = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    local targetControl = dialog.entryList:GetTargetControl()
+                    if targetData.isEditControl and targetControl then
+                        targetControl.editBoxControl:TakeFocus()
+                    elseif targetData.isSubmit then
+                        if oneTimePasswordText ~= "" then
+                            ZO_Dialogs_ReleaseDialogOnButtonPress(dialogName)
+                            SendOneTimePassword(oneTimePasswordText)
+                        end
+                    end
+                end,
+                enabled = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+
+                    if targetData.isEditControl then
+                        return true
+                    elseif targetData.isSubmit then
+                        return oneTimePasswordText ~= ""
+                    end
+
+                    return false
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_CANCEL,
+                callback = function(dialog)
+                    ZO_Dialogs_ReleaseDialogOnButtonPress(dialogName)
+                    PregameStateManager_ReenterLoginState()
+                end,
+            },
+        },
+    })
 end
 
 function CreateLinkLoadingScreen_Gamepad_Initialize(self)

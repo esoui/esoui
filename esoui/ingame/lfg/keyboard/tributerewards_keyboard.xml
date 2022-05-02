@@ -8,7 +8,7 @@
                     <Controls>
                         <Texture name="$(parent)Info" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" mouseEnabled="true" layer="OVERLAY">
                             <Dimensions x="32" y="32"/>
-                            <Anchor point="LEFT" />
+                            <Anchor point="LEFT" offsetX="28"/>
                             <OnMouseEnter>
                                 ZO_TributeRewardsDialog_Info_OnMouseEnter(self)
                             </OnMouseEnter>
@@ -19,14 +19,14 @@
                         </Texture>
                         <Control name="$(parent)Tier" inherits="ZO_SortHeaderAppearance">
                             <Anchor point="LEFT" relativeTo="$(parent)Info" relativePoint="RIGHT" />
-                            <Dimensions x="241" y="20" />
+                            <Dimensions x="208" y="20" />
                             <Controls>
                                 <Label name="$(parent)Name" override="true" font="ZoFontGameLargeBold" text="SI_TRIBUTE_FINDER_REWARDS_SEASON_TIER_HEADER" horizontalAlignment="LEFT" />
                             </Controls>
                         </Control>
 
                         <Control name="$(parent)Reward" inherits="ZO_SortHeaderAppearance">
-                            <Anchor point="LEFT" relativeTo="$(parent)Tier" relativePoint="RIGHT" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Tier" relativePoint="RIGHT" offsetX="5" />
                             <Dimensions x="221" y="20" />
                             <Controls>
                                 <Label name="$(parent)Name" override="true" font="ZoFontGameLargeBold" text="SI_TRIBUTE_FINDER_REWARDS_TIER_REWARDS_HEADER" horizontalAlignment="LEFT" />

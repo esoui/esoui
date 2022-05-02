@@ -484,6 +484,7 @@ function ZO_TributeMechanic_Manager:AddMechanicHistory(cardInstanceId, mechanicT
 
     self:SetHeadingHidden(false)
     self:SetLastMechanicTile(tileObject)
+    PlaySound(SOUNDS.TRIBUTE_COMBO_TRIGGERED)
     return tileObject
 end
 

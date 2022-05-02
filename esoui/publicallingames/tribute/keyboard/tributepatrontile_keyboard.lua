@@ -40,8 +40,14 @@ end
 
 function ZO_TributePatronBookTile_Keyboard:LayoutPlatform(patronData)
     ZO_TributePatronTile_Keyboard.LayoutPlatform(self, patronData)
-    local desaturation = self.patronData:IsPatronLocked() and 1 or 0
+    local isLocked = self.patronData:IsPatronLocked()
+    ZO_SetDefaultIconSilhouette(self.iconTexture, isLocked)
+    local desaturation = isLocked and 1 or 0
     self:GetHighlightControl():SetDesaturation(desaturation)
+
+    if isLocked then
+        self.titleLabel:SetText(self.patronData:GetDisabledFormattedColorizedName())
+    end
 end
 
 -- Begin ZO_ContextualActionsTile_Keyboard Overrides --
@@ -110,9 +116,9 @@ function ZO_TributePatronSelectionTile_Keyboard:RefreshGlow(isSelected, isDrafte
     if self.isGlowShowing ~= showGlow then
         self.isGlowShowing = showGlow
         if showGlow then
-            ZO_TRIBUTE_PATRON_SELECTION_TILE_KEYBOARD_GLOW_ANIMATION_PROVIDER:PlayForward(self.glow)
+            ZO_TRIBUTE_PATRON_SELECTION_TILE_KEYBOARD_GLOW_ANIMATION_PROVIDER:PlayForward(self.glow, self.patronData.animateInstantly)
         else
-            ZO_TRIBUTE_PATRON_SELECTION_TILE_KEYBOARD_GLOW_ANIMATION_PROVIDER:PlayBackward(self.glow)
+            ZO_TRIBUTE_PATRON_SELECTION_TILE_KEYBOARD_GLOW_ANIMATION_PROVIDER:PlayBackward(self.glow, self.patronData.animateInstantly)
         end
     end
 

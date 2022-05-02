@@ -543,15 +543,19 @@ function ZO_TributeSummary:InitializeStateMachine()
                 animationType = ANIMATE_INSTANTLY
             end
 
-            self.progressionPlacementBarNewFadeInTimeline:PlayFromStart()
-            self.progressionProgressNumberTranslateTimeline:PlayFromStart()
-            self.progressionProgressBar:SetValue(self.playerRankCurrent, playerCampaignXPNew, playerCampaignXPNext, wrapType, animationType)
-            -- If we don't animate the bar, we need to trigger the animation completion manually.
-            if animationType == ANIMATE_INSTANTLY then
-                fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.ANIMATION_COMPLETE)
-            else
-                -- Only play the bar fill sound when we actually animate bar progress.
+            if self.playerRankCurrent == TRIBUTE_TIER_UNRANKED then
+                self.progressionPlacementBarNewFadeInTimeline:PlayFromStart()
                 PlaySound(SOUNDS.TRIBUTE_SUMMARY_PROGRESS_BAR_FILL)
+            else
+                self.progressionProgressNumberTranslateTimeline:PlayFromStart()
+                self.progressionProgressBar:SetValue(self.playerRankCurrent, playerCampaignXPNew, playerCampaignXPNext, wrapType, animationType)
+                -- If we don't animate the bar, we need to trigger the animation completion manually.
+                if animationType == ANIMATE_INSTANTLY then
+                    fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.ANIMATION_COMPLETE)
+                else
+                    -- Only play the bar fill sound when we actually animate bar progress.
+                    PlaySound(SOUNDS.TRIBUTE_SUMMARY_PROGRESS_BAR_FILL)
+                end
             end
         end)
     end
@@ -871,7 +875,7 @@ function ZO_TributeSummary:InitializeStateMachine()
         fanfareStateMachine:AddEdgeAutoName("SUMMARY", "SUMMARY_OUT")
         local summaryToQuitInEdge = fanfareStateMachine:AddEdgeAutoName("SUMMARY_OUT", "QUIT")
         summaryToQuitInEdge:SetConditional(function()
-            return not self.hasRewards
+            return not (self.hasRewards or self.isRanked)
         end)
         local rewardsInEdge = fanfareStateMachine:AddEdgeAutoName("SUMMARY_OUT", "REWARDS_IN")
         rewardsInEdge:SetConditional(function()
@@ -1066,6 +1070,7 @@ function ZO_TributeSummary:InitializeStateMachine()
     self.progressionRankChangeUpTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionRankChangeFadeOutTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionProgressBar:SetOnCompleteCallback(OnProgressBarCompleteFireTrigger)
+    self.progressionPlacementBarNewFadeInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionLeaderboardWipeInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionLeaderboardLossBounceTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionLeaderboardWinBounceTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
@@ -1116,15 +1121,13 @@ end
 function ZO_TributeSummary:BeginEndOfGameFanfare()
     SCENE_MANAGER:AddFragment(TRIBUTE_SUMMARY_FRAGMENT)
 
-    local matchType = GetTributeMatchType()
-    self.hasRewards = matchType ~= TRIBUTE_MATCH_TYPE_PRIVATE
-    self.isRanked = matchType == TRIBUTE_MATCH_TYPE_COMPETITIVE
-
     self.campaignId = GetTributeMatchCampaignId()
-
+    local matchType = GetTributeMatchType()
     local victor, victoryType = GetTributeResultsWinnerInfo()
     self.victory = victor == TRIBUTE_PLAYER_PERSPECTIVE_SELF
     self.victoryType = victoryType
+    self.hasRewards = matchType ~= TRIBUTE_MATCH_TYPE_PRIVATE and (victoryType ~= TRIBUTE_VICTORY_TYPE_EARLY_CONCESSION or self.victory)
+    self.isRanked = matchType == TRIBUTE_MATCH_TYPE_COMPETITIVE
     self.playerPrestige = GetTributePlayerPerspectiveResource(TRIBUTE_PLAYER_PERSPECTIVE_SELF, TRIBUTE_RESOURCE_PRESTIGE)
     self.opponentPrestige = GetTributePlayerPerspectiveResource(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT, TRIBUTE_RESOURCE_PRESTIGE)
 
@@ -1141,7 +1144,7 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
         self.progressionNextRankIcon:SetHidden(true)
     end
     -- Rarely (esp. when completing placement matches) the player's new rank may not actually be the next rank (i.e. they can skip over ranks)
-    self.playerRankNew = GetNewCampaignRank()
+    self.playerRankNew = GetNewTributeCampaignRank()
 
     -- We create the placement bars even if we're not going to use them to avoid a bunch of nil checks in the states later.
     local function UpdateBarVisualDisplay(control, segmentIndex, handleNewMatch)
@@ -1260,15 +1263,12 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     end
 
     self.progressionProgressBar:Reset()
+    self.playerClubXP = GetPendingTributeClubExperience()
     self.playerRankNextRequiredXP = GetTributeCampaignRankExperienceRequirement(self.playerRankNext, self.campaignId) - GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent, self.campaignId)
     self.playerCampaignXP = zo_max(0, GetTributePlayerExperienceInCurrentCampaignRank(self.campaignId))
-    self.playerCampaignXPDelta = GetPendingCampaignExperience(self.campaignId)
+    self.playerCampaignXPDelta = GetPendingTributeCampaignExperience(self.campaignId)
     self.progressionRankChange:SetText(string.format("%+d", self.playerCampaignXPDelta))
-    if self.playerRankNew > self.playerRankCurrent then
-        self.rankUp = true
-    else
-        self.rankUp = false
-    end
+    self.rankUp = self.playerRankNew > self.playerRankCurrent
     self.progressionProgressBar:SetValue(self.playerRankCurrent, self.playerCampaignXP, self.playerRankNextRequiredXP, WRAP, ANIMATE_INSTANTLY)
     self.playerCampaignXP = self.playerCampaignXP + self.playerCampaignXPDelta
     if self.playerRankCurrent ~= TRIBUTE_TIER_UNRANKED and self.playerRankCurrent ~= TRIBUTE_TIER_PLATINUM then
@@ -1334,7 +1334,9 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     self.summaryHeaderLabel:SetText(headerText)
     self.summaryBanner:SetTexture(self.victory and END_OF_GAME_RESULT_BANNERS.VICTORY or END_OF_GAME_RESULT_BANNERS.DEFEAT)
     local playerName = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_SELF)
-    local opponentName = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
+    playerName = ZO_FormatUserFacingDisplayName(playerName)
+    local opponentName, playerType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
+    opponentName = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(opponentName) or opponentName
     self.summaryPlayerLabel:SetText(playerName)
     self.summaryOpponentLabel:SetText(opponentName)
     self.summaryPlayerValue:SetText(self.playerPrestige)
@@ -1346,7 +1348,17 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     self.summaryControl:GetNamedChild("Prestige"):SetHidden(HIDE_PRESTIGE)
 
     -- Rewards
+    -- Club rank points don't get to us via reward list defs, so we have to create the reward item for it ourselves
+    -- to display it as a reward.
+    local clubXPReward =
+    {
+        rewardType = REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE,
+        quantity = self.playerClubXP,
+    }
     local matchStandardRewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(GetTributeGeneralMatchRewardListId())
+    if self.playerClubXP > 0 then
+        table.insert(matchStandardRewards, 1, clubXPReward)
+    end
     local matchLFGRewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(GetTributeGeneralMatchLFGRewardListId())
     local rankUpRewards = {}
     if self.rankUp then
@@ -1375,19 +1387,33 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
                 local count = reward.quantity
                 local qualityColorDef = nil
                 local countText = ""
-                if rewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
+                if rewardType == REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE then
+                    name = zo_strformat(SI_TRIBUTE_CLUB_EXPERIENCE, self.playerClubXP)
+                    -- TODO Tribute: Get a new icon for this.
+                    icon = "EsoUI/Art/Tribute/tribute_tabIcon_tribute_up.dds"
+                    if count > 1 then
+                        countText = tostring(count)
+                    end
+                elseif rewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
                     local currencyType = reward.currencyType
                     name = zo_strformat(SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT, ZO_Currency_GetAmountLabel(currencyType))
                     icon = ZO_Currency_GetPlatformCurrencyLootIcon(currencyType)
                     local USE_SHORT_FORMAT = true
                     countText = ZO_CurrencyControl_FormatAndLocalizeCurrency(count, USE_SHORT_FORMAT)
-                else
+                elseif rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
+                    name = reward.formattedName
+                    icon = reward.icon
+                elseif rewardType == REWARD_ENTRY_TYPE_ITEM then
                     name = zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
                     qualityColorDef = GetItemQualityColor(reward.quality)
 
                     if count > 1 then
                         countText = tostring(count)
                     end
+                elseif rewardType == REWARD_ENTRY_TYPE_MAIL_ITEM then
+                    -- TODO Tribute: handle mail items
+                else
+                    internalassert(false, "Unexpected Tribute match reward type")
                 end
 
                 if qualityColorDef then
@@ -1507,7 +1533,8 @@ function ZO_TributeSummary_ClubRankProgressBar_Keyboard_OnMouseEnter(control)
             InformationTooltip:AddLine(GetString(SI_TRIBUTE_CLUB_EXPERIENCE_LIMIT_REACHED))
         else
             local percentageXp = zo_floor(currentClubExperienceForRank / maxClubExperienceForRank * 100)
-            InformationTooltip:AddLine(zo_strformat(SI_TRIBUTE_CLUB_EXPERIENCE_CURRENT_MAX_PERCENT, ZO_CommaDelimitNumber(currentClubExperienceForRank), ZO_CommaDelimitNumber(maxClubExperienceForRank), percentageXp))
+            local clubExperienceRatioText = zo_strformat(SI_TRIBUTE_EXPERIENCE_CURRENT_MAX_PERCENT, ZO_CommaDelimitNumber(currentClubExperienceForRank), ZO_CommaDelimitNumber(maxClubExperienceForRank), percentageXp)
+            InformationTooltip:AddLine(zo_strformat(SI_TRIBUTE_CLUB_EXPERIENCE_TOOLTIP_FORMATTER, clubExperienceRatioText))
         end
     end
 end

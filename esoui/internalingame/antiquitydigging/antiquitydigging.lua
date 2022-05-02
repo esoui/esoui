@@ -392,6 +392,7 @@ end
 
 function ZO_AntiquityDigging:SelectTool(activeSkill)
     SetSelectedDiggingActiveSkill(activeSkill)
+    OnSelectedDigToolChanged()
 end
 
 function ZO_AntiquityDigging:TryCancel()

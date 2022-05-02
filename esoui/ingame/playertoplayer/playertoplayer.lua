@@ -224,8 +224,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
     
     local function OnTributeInviteReceived(eventCode, inviterCharacterName, inviterDisplayName)
-        -- TODO Tribute: Add this sound to soundIds if we decide we need it.
-        --PlaySound(SOUNDS.TRIBUTE_INVITE_RECEIVED)
+        PlaySound(SOUNDS.TRIBUTE_INVITE_RECEIVED)
         local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
         self:AddPromptToIncomingQueue(INTERACT_TYPE_TRIBUTE_INVITE, inviterCharacterName, inviterDisplayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_TRIBUTE, ZO_SELECTED_TEXT:Colorize(userFacingName)),
             function()

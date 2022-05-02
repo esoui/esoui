@@ -30,7 +30,7 @@ function ActivityTributeRank_Gamepad:RefreshClubRank()
 
     -- Display one higher than the clubRank used so we don't display 0 as the minimum
     self.rankLabel:SetText(clubRank + 1)
-    self.rankNameLabel:SetText(GetString("SI_TRIBUTECLUBRANK", clubRank))
+    self.rankNameLabel:SetText(zo_strformat(GetString("SI_TRIBUTECLUBRANK", clubRank)))
     self.iconTexture:SetTexture(string.format("EsoUI/Art/Tribute/tributeClubRank_%d.dds", clubRank))
 
     local currentClubExperienceForRank, maxClubExperienceForRank = GetTributePlayerExperienceInCurrentClubRank()

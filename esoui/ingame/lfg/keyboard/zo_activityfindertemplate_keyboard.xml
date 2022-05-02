@@ -209,9 +209,11 @@
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20" />
                                 </Texture>
 
-                                <Control name="$(parent)ClubRankBarContainer" override="true">
+                                <Control name="$(parent)PlacementMatchProgressBar" override="true" mouseEnabled="true" />
+
+                                <Control name="$(parent)SeasonRankBarContainer" override="true">
                                     <Controls>
-                                        <StatusBar name="$(parent)ProgressBar" override="true" inherits="ZO_ArrowStatusBarWithBG" />
+                                        <StatusBar name="$(parent)ProgressBar" override="true" inherits="ZO_ArrowStatusBarWithBG" mouseEnabled="true" />
                                     </Controls>
                                 </Control>
 
@@ -268,7 +270,7 @@
                 </Control>
 
                 <Control name="$(parent)ClubRank" resizeToFitDescendents="true" hidden="true">
-                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="-2" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="-5" />
                     <Controls>
                         <Texture name="$(parent)Icon">
                             <Anchor point="LEFT" offsetX="5" />
@@ -284,7 +286,7 @@
                         </Label>
 
                         <StatusBar name="$(parent)XPBar" mouseEnabled="true" inherits="ZO_ArrowStatusBarWithBG">
-                            <Dimensions x="215" />
+                            <Dimensions x="210" />
                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Rank" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-11" />
                         </StatusBar>
                     </Controls>

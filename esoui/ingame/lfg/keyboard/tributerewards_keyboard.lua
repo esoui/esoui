@@ -130,7 +130,7 @@ function ZO_TributeRewardsDialog_OnInitialized(control)
                 local dividerControl = control.tributeRewardsDialogDividerPool:AcquireObject()
                 dividerControl:ClearAnchors()
                 dividerControl:SetAnchor(TOPLEFT, anchorControl, BOTTOMLEFT)
-                dividerControl:SetAnchor(TOPRIGHT, anchorControl, BOTTOMRIGHT)
+                dividerControl:SetAnchor(TOPRIGHT, anchorControl, BOTTOMRIGHT, 0, 10)
                 anchorControl = dividerControl
             end
 
@@ -138,7 +138,7 @@ function ZO_TributeRewardsDialog_OnInitialized(control)
             listObject.control:SetHidden(false)
             listObject.control:SetParent(parentControl)
             listObject.control:ClearAnchors()
-            listObject.control:SetAnchor(TOP, anchorControl)
+            listObject.control:SetAnchor(TOP, anchorControl, TOP, 0, insertDivider and 20 or 0)
             anchorControl = listObject.control
             insertDivider = true
 

@@ -301,7 +301,7 @@ end
 
 function ZO_ItemSetsBook_Gamepad_Base:UpdateGridPanelVisibility()
     local categoryData = self:GetSelectedCategory()
-    local isSummaryCategory = categoryData and categoryData:IsInstanceOf(ZO_ItemSetCollectionSummaryCategoryData)
+    local isSummaryCategory = categoryData and categoryData:IsInstanceOf(ZO_ItemSetCollectionSummaryCategoryData) or false
 
     if isSummaryCategory then
         self:ShowSummaryTooltip()
@@ -309,7 +309,7 @@ function ZO_ItemSetsBook_Gamepad_Base:UpdateGridPanelVisibility()
         self:HideSummaryTooltip()
     end
 
-    if not categoryData or isSummaryCategory then
+    if self:IsViewingCategories() or not categoryData or isSummaryCategory then
         SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         SCENE_MANAGER:RemoveFragment(self.gridListFragment)
     elseif categoryData:GetNumCollections() > 0 and not self:IsOptionsModeShowing() then

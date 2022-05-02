@@ -216,6 +216,16 @@ local ZO_OptionsPanel_Social_ControlData =
             text = SI_SOCIAL_OPTIONS_AUTO_DECLINE_DUEL_INVITES,
             tooltipText = SI_SOCIAL_OPTIONS_AUTO_DECLINE_DUEL_INVITES_TOOLTIP,
         },
+        --Options_Social_AutoDeclineTributeInvites
+        [UI_SETTING_AUTO_DECLINE_TRIBUTE_INVITES] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_AUTO_DECLINE_TRIBUTE_INVITES,
+            panel = SETTING_PANEL_SOCIAL,
+            text = SI_SOCIAL_OPTIONS_AUTO_DECLINE_TRIBUTE_INVITES,
+            tooltipText = SI_SOCIAL_OPTIONS_AUTO_DECLINE_TRIBUTE_INVITES_TOOLTIP,
+        },
         --Options_Social_AvANotifications
         [UI_SETTING_SHOW_AVA_NOTIFICATIONS] =
         {

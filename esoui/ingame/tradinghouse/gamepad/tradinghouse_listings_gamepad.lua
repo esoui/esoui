@@ -118,8 +118,10 @@ function ZO_GamepadTradingHouse_Listings:RefreshData(dontReselect)
         itemList:SetNoItemText(GetString(SI_GUILD_STORE_NO_LISTINGS))
     end
 
-    self:UpdateItemSelectedTooltip(itemList:GetTargetData())
-    self:UpdateKeybind()
+    if not self.control:IsHidden() then
+        self:UpdateItemSelectedTooltip(itemList:GetTargetData())
+        self:UpdateKeybind()
+    end
 end
 
 function ZO_GamepadTradingHouse_Listings:ShowCancelListingConfirmation(selectedData)

@@ -51,6 +51,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Social_AutoDeclineTributeInvites",
+    settingType = SETTING_TYPE_UI,
+    settingId = UI_SETTING_AUTO_DECLINE_TRIBUTE_INVITES,
+    header = SI_SOCIAL_OPTIONS_NOTIFICATIONS,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Social_AvANotifications",
     settingType = SETTING_TYPE_UI,
     settingId = UI_SETTING_SHOW_AVA_NOTIFICATIONS,

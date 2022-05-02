@@ -608,6 +608,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_AUTO_DECLINE_TRIBUTE_INVITES,
+        },
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_AVA_NOTIFICATIONS,
         },
         {

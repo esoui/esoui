@@ -2539,31 +2539,6 @@ ESO_Dialogs["GAMEPAD_TRAVEL_TO_HOUSE_OPTIONS_DIALOG"] =
     }
 }
 
-ESO_Dialogs["GAMERCARD_UNAVAILABLE"] =
-{
-    canQueue = true,
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title = 
-    {
-        text = ZO_IsPlaystationPlatform() and SI_GAMEPAD_PSN_PROFILE_UNAVAILABLE_DIALOG_TITLE or
-               SI_GAMEPAD_GAMERCARD_UNAVAILABLE_DIALOG_TITLE,
-    },
-    mainText =
-    {
-        text = ZO_IsPlaystationPlatform() and SI_GAMEPAD_PSN_PROFILE_UNAVAILABLE_DIALOG_BODY or
-               SI_GAMEPAD_GAMERCARD_UNAVAILABLE_DIALOG_BODY,
-    },
-    buttons =
-    {
-        {
-            text = SI_OK,
-        }
-    }
-}
-
 ESO_Dialogs["TRADE_CANCEL_TRADE"] =
 {
     gamepadInfo =

@@ -42,7 +42,17 @@ function ZO_TributeTargetViewer_Shared:InitializeKeybindStripDescriptors()
                 TributeConfirmTargetSelection()
             end,
             enabled = function()
-                return CanConfirmTributeTargetSelection()
+                local canConfirm, expectedResult = CanConfirmTributeTargetSelection()
+                if canConfirm then
+                    return true
+                else
+                    local resultString = GetString("SI_TRIBUTETARGETSELECTIONCONFIRMATIONRESULT", expectedResult)
+                    if resultString ~= "" then
+                        return false, resultString
+                    else
+                        return false
+                    end
+                end
             end,
             visible = function()
                 return not IsTributeTargetSelectionAutoComplete()

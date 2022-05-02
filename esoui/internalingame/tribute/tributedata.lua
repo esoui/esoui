@@ -140,7 +140,7 @@ function ZO_TributePileData.PatronCardCountListSortFunction(left, right)
     return left.patronData:GetName() < right.patronData:GetName()
 end
 
-function ZO_TributePileData:TryTriggerTutorials()
+function ZO_TributePileData:TryTriggerHandAndDocksTutorials()
     local cardList = self:GetCardList()
     local hasContractAgent = false
     local hasTaunt = false
@@ -195,6 +195,29 @@ function ZO_TributePileData:TryTriggerTutorials()
 
     if hasChoice then
         TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_TRIBUTE_CHOICE_CARD_SEEN)
+    end
+end
+
+function ZO_TributePileData:TryTriggerDeckAndCooldownTutorials()
+    local cardList = self:GetCardList()
+    local hasCurse = false
+
+    --Loop through the cards in this pile and determine which tutorials we should try to trigger
+    for _, cardData in ipairs(cardList) do
+        local cardDefId = cardData.cardId
+
+        --If the card is a curse card
+        if IsTributeCardCurse(cardDefId) then
+            hasCurse = true
+            --This is only doable because hasCurse is the only thing we are checking for right now.
+            --We should remove this line if we add more tutorial triggers to this function in the future
+            break
+        end
+    end
+
+    --Trigger the tutorials in the order of the priority we want them to show in
+    if hasCurse then
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_TRIBUTE_CURSE_CARD_SEEN)
     end
 end
 

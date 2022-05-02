@@ -196,6 +196,11 @@ function ZO_TributePatronData:GetFormattedColorizedName()
     return qualityColor:Colorize(self:GetFormattedName())
 end
 
+function ZO_TributePatronData:GetDisabledFormattedColorizedName()
+    local qualityColor = GetDimItemQualityColor(self:GetRarity())
+    return qualityColor:Colorize(self:GetFormattedName())
+end
+
 function ZO_TributePatronData:GetCategoryData()
     return self.tributePatronCategoryData
 end

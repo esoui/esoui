@@ -234,7 +234,7 @@ function ZO_KeyboardFriendsListManager:FriendsListRow_OnMouseUp(control, button,
 
             AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function() JumpToHouse(data.displayName) end)
 
-            if data.hasCharacter and data.online then
+            if not ZO_IsTributeLocked() and data.hasCharacter and data.online then
                 AddMenuItem(GetString(SI_SOCIAL_MENU_TRIBUTE_INVITE), function() InviteToTribute(data.displayName) end)
             end
 

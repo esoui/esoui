@@ -25,12 +25,12 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutIconStringLine(baseSection
     baseSection:AddSection(lineSection)
 end
 
-function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutKeybindStringLine(baseSection, actionName, travelStringFormat, ...)
+function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutKeybindStringLine(baseSection, actionName, formatString, ...)
     local lineSection = baseSection:AcquireSection(self.tooltip:GetStyle("mapLocationTooltipContentSection"))
     local DEFAULT_NO_TEXTURE = nil
 
-    lineSection:AddTexture(DEFAULT_NO_TEXTURE, self.tooltip:GetStyle("mapLocationTooltipNoIcon"))
-    lineSection:AddKeybindLine(actionName, travelStringFormat, self.tooltip:GetStyle("mapLocationTooltipContentLabel"), ...)
+    lineSection:AddTexture(DEFAULT_NO_TEXTURE, self.tooltip:GetStyle("mapLocationTooltipNoIcon"), ...)
+    lineSection:AddKeybindLine(actionName, formatString, self.tooltip:GetStyle("mapLocationTooltipContentLabel"), ...)
     baseSection:AddSection(lineSection)
 end
 

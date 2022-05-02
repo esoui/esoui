@@ -218,6 +218,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                 if self.navigationMode == NAVIGATION_MODES.CATEGORIES or not self.hasCategories then
                     SCENE_MANAGER:HideCurrentScene()
                 else
+                    ZO_ACTIVITY_FINDER_ROOT_MANAGER:ClearSelections()
                     self:SetNavigationMode(NAVIGATION_MODES.CATEGORIES)
                 end
             end,
@@ -333,6 +334,10 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
     local isSearching = IsCurrentlySearchingForGroup()
     local lockReasonTextOverride = self:GetGlobalLockText()
     local modes = self.dataManager:GetFilterModeData()
+
+    if self.categoryData.isTribute then
+        TriggerTutorial(TUTORIAL_TRIGGER_TRIBUTE_FINDER_OPENED)
+    end
 
     local function AddLocationEntry(location)
         local entryData = ZO_GamepadEntryData:New(location:GetNameGamepad(), self.categoryData.menuIcon)

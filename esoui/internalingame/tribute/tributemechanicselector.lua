@@ -74,6 +74,7 @@ end
 function ZO_TributeMechanicCard:OnMouseUp(button, upInside)
     if not IsInGamepadPreferredMode() and button == MOUSE_BUTTON_INDEX_LEFT and upInside then
         TributeChooseMechanic(self.mechanicIndex)
+        PlaySound(SOUNDS.TRIBUTE_MECHANIC_CHOSEN)
     end
 end
 
@@ -144,6 +145,7 @@ function ZO_TributeMechanicSelector:InitializeKeybindStripDescriptors()
                 local selectedData = self.focus:GetFocusItem()
                 local mechanicIndex = selectedData.control.object:GetMechanicIndex()
                 TributeChooseMechanic(mechanicIndex)
+                PlaySound(SOUNDS.TRIBUTE_MECHANIC_CHOSEN)
             end,
         },
         {

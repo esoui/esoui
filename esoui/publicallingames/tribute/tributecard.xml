@@ -219,7 +219,9 @@
         <!-- End Mechanic Container Templates -->
 
         <Texture name="ZO_TributeCard_MechanicGlow_Template" blendMode="ADD" color="00c8ff" level="11" pixelRoundingEnabled="false" virtual="true" />
-        
+
+        <Label name="ZO_TributeCard_MechanicComboPip_Template" font="ZoFontTributeAntique20NoShadow" level="12" pixelRoundingEnabled="false" virtual="true" />
+            
         <Texture name="ZO_TributeCard_FullTextureFootprint" pixelRoundingEnabled="false" virtual="true">
             <AnchorFill />
             <TextureCoords left="ZO_TRIBUTE_CARD_LEFT_COORD" right="ZO_TRIBUTE_CARD_RIGHT_COORD" top="ZO_TRIBUTE_CARD_TOP_COORD" bottom="ZO_TRIBUTE_CARD_BOTTOM_COORD" />
@@ -235,14 +237,14 @@
             <TextureCoords left="ZO_TRIBUTE_SUIT_ICON_LEFT_COORD" right="ZO_TRIBUTE_SUIT_ICON_RIGHT_COORD" top="ZO_TRIBUTE_SUIT_ICON_TOP_COORD" bottom="ZO_TRIBUTE_SUIT_ICON_BOTTOM_COORD" />
         </Texture>
 
-        <Texture name="ZO_TributeCard_GlowableTexture_Base" virtual="true">
+        <Texture name="ZO_TributeCard_GlowableTexture_Base" pixelRoundingEnabled="false" virtual="true">
             <OnInitialized>
                 self.glowTexture = self:GetNamedChild("Glow")
                 self.glowTexture:SetDrawLevel(self:GetDrawLevel() + 1)
             </OnInitialized>
             
             <Controls>
-                <Texture name="$(parent)Glow" alpha="0" blendMode="ADD" />
+                <Texture name="$(parent)Glow" alpha="0" blendMode="ADD" pixelRoundingEnabled="false" />
             </Controls>
         </Texture>
 

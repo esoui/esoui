@@ -1115,7 +1115,6 @@ local AlertHandlers =
     end,
 
     [EVENT_TRIBUTE_INVITE_ACCEPTED] = function()
-        -- TODO Tribute: use Tribute specific accept sound
         return ALERT, GetString(SI_TRIBUTE_INVITE_ACCEPTED), SOUNDS.DUEL_ACCEPTED
     end,
 

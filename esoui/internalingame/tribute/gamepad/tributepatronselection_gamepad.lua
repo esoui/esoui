@@ -308,7 +308,9 @@ end
 
 function ZO_TributePatronSelection_Gamepad:Show()
     local RESET_TO_TOP = true
-    self:RefreshGridList(RESET_TO_TOP)
+    local DONT_RESELECT_DATA = false
+    local ANIMATE_INSTANTLY = true
+    self:RefreshGridList(RESET_TO_TOP, DONT_RESELECT_DATA, ANIMATE_INSTANTLY)
     SCENE_MANAGER:AddFragmentGroup(ZO_GAMEPAD_TRIBUTE_PATRON_SELECTION_FRAGMENT_GROUP)
 end
 

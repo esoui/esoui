@@ -133,6 +133,8 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeFragment()
                 if isCompetitive and RequestActiveTributeCampaignData() == TRIBUTE_PLAYER_INITIALIZATION_STATE_SUCCESS then
                     self:OnTributeCampaignDataInitialized()
                 end
+
+                TriggerTutorial(TUTORIAL_TRIGGER_TRIBUTE_FINDER_OPENED)
             end
 
             self.clubRankControl:SetHidden(not isTribute)

@@ -214,6 +214,14 @@ function ZO_AntiquityDigging:Initialize(control)
         end
     end)
 
+    control:RegisterForEvent(EVENT_ANTIQUITY_SELECTED_TOOL_CHANGED, function()
+        -- Only handle tool change on gamepad, keyboard is handled elsewhere
+        -- Also, only handle this if we were already viewing a tool info
+        if IsInGamepadPreferredMode() and self.showingMoreInfoTooltip then
+            self:ShowMoreInfoForActiveTool()
+        end
+    end)
+
     CALLBACK_MANAGER:RegisterCallback("UnitFramesCreated", function()
         --This anchor does nothing. It's controlled by the keyboard and gamepad XML templates
         local ANCHOR = ZO_Anchor:New(TOP, GuiRoot, TOP, 0, 0)
@@ -547,11 +555,15 @@ end
 
 function ZO_AntiquityDigging:ToggleShowMoreInfoTooltip()
     if not self.showingMoreInfoTooltip then
-        local selectedActiveSkill = GetSelectedDiggingActiveSkill()
-        self:ShowMoreInfoBySkill(selectedActiveSkill)
+        self:ShowMoreInfoForActiveTool()
     else
         self:HideMoreInfo()
     end
+end
+
+function ZO_AntiquityDigging:ShowMoreInfoForActiveTool()
+    local selectedActiveSkill = GetSelectedDiggingActiveSkill()
+    self:ShowMoreInfoBySkill(selectedActiveSkill)
 end
 
 function ZO_AntiquityDigging:ShowMoreInfoBySkill(skill)

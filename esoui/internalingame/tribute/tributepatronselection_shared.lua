@@ -65,13 +65,14 @@ function ZO_TributePatronSelection_Shared:InitializeGridList()
     self.gridList:SetEntryTemplateEqualityFunction(patronEntryData.entryTemplate, PatronEntryEqualityFunction)
 end
 
-function ZO_TributePatronSelection_Shared:RefreshGridList(resetToTop, reselectData)
+function ZO_TributePatronSelection_Shared:RefreshGridList(resetToTop, reselectData, animateInstantly)
     if self.gridList then
         local selectedData = self.gridList:GetSelectedData()
         self.gridList:ClearGridList(not resetToTop)
         local patronDataList = ZO_TRIBUTE_PATRON_SELECTION_MANAGER:GetPatronData()
         for _, patronData in ipairs(patronDataList) do
             local entryData = ZO_EntryData:New(patronData)
+            entryData.animateInstantly = animateInstantly
             self.gridList:AddEntry(entryData, self.templateData.patronEntryData.entryTemplate)
         end
 
@@ -108,6 +109,7 @@ function ZO_TributePatronSelection_Shared:RefreshSelectionState()
         if playerType == TRIBUTE_PLAYER_TYPE_NPC then
             self.selectionText:SetText(zo_strformat(SI_TRIBUTE_DECK_SELECTION_NPC_SELECT, opponentName))
         else
+            opponentName = ZO_FormatUserFacingDisplayName(opponentName)
             self.selectionText:SetText(zo_strformat(SI_TRIBUTE_DECK_SELECTION_OPPONENT_SELECT, opponentName, patronToSelect))
         end
         self.divider:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_FAILED))
@@ -117,13 +119,8 @@ end
 function ZO_TributePatronSelection_Shared:RefreshMatchInfo()
     local matchType = GetTributeMatchType()
     local opponentName, playerType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
-    local descriptionFormatter
-    if playerType == TRIBUTE_PLAYER_TYPE_NPC then
-        descriptionFormatter = SI_TRIBUTE_DECK_SELECTION_NPC_MATCH_DESCRIPTION
-    else
-        descriptionFormatter = SI_TRIBUTE_DECK_SELECTION_PLAYER_MATCH_DESCRIPTION
-    end
-    self.matchInfo:SetText(zo_strformat(descriptionFormatter, GetString("SI_TRIBUTEMATCHTYPE", matchType), opponentName))
+    opponentName = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(opponentName) or opponentName
+    self.matchInfo:SetText(zo_strformat(SI_TRIBUTE_DECK_SELECTION_MATCH_DESCRIPTION, GetString("SI_TRIBUTEMATCHTYPE", matchType), opponentName))
 end
 
 function ZO_TributePatronSelection_Shared:ShouldShowConfirm()

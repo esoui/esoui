@@ -551,6 +551,10 @@ function ZO_UniversalDeconstructionInventory_Gamepad:Refresh(data)
     self.universalDeconstructionPanel:OnInventoryUpdate(validItems, self.filterType)
 end
 
+function ZO_UniversalDeconstructionInventory_Gamepad:GetCurrentFilter()
+    return self.universalDeconstructionPanel.currentFilterData
+end
+
 function ZO_UniversalDeconstructionInventory_Gamepad:GetCurrentFilterType()
     return self.filterType
 end

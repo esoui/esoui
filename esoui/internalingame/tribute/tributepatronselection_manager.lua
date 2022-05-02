@@ -27,6 +27,7 @@ function ZO_TributePatronSelection_Manager:Initialize()
         
         self.draftedPatrons[patronDefId] = patronDraftId
         self.isAnimating = true
+        PlaySound(SOUNDS.TRIBUTE_PATRON_DRAFTED)
 
         --No need to do this if the screen isn't up
         if self.isSelectionInProgress then
@@ -133,7 +134,7 @@ end
 
 function ZO_TributePatronSelection_Manager:IsPatronDrafted(patronId)
     local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(patronId)
-    return self.draftedPatrons[patronId] ~= nil or self.draftedFamilies[patronData:GetFamily()]
+    return self.draftedPatrons[patronId] ~= nil or self.draftedFamilies[patronData:GetFamily()] == true
 end
 
 function ZO_TributePatronSelection_Manager:GetNumDraftedPatrons()

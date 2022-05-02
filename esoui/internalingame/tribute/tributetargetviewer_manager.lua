@@ -72,7 +72,9 @@ end
 function ZO_TributeTargetViewer_Manager:OnBeginTargetSelection(needsTargetViewer)
     if needsTargetViewer then
         local targetData = {}
-        for cardInstanceId in ZO_GetNextTributeCardWithStateFlagMask(TRIBUTE_CARD_STATE_FLAGS_TARGETABLE) do
+        local numTargetable = GetNumTargetableTributeCards()
+        for targetableIndex = 1, numTargetable do
+            local cardInstanceId = GetTargetableTributeCardInstanceIdByIndex(targetableIndex)
             local cardId, patronId = GetTributeCardInstanceDefIds(cardInstanceId)
             local data =
             {
@@ -83,6 +85,7 @@ function ZO_TributeTargetViewer_Manager:OnBeginTargetSelection(needsTargetViewer
             table.insert(targetData, data)
         end
         self:SetViewingTargets(targetData)
+        PlaySound(SOUNDS.TRIBUTE_SHOW_TARGET_VIEWER)
     else
         self:SetViewingTargets(nil)
     end

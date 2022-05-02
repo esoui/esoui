@@ -137,24 +137,26 @@ do
     local SMALL_PADDING_Y = 10
 
     function ZO_TributeCard_MechanicContainer:Setup(cardObject, trigger, mechanicIndex)
+        local control = self.control
         self.cardDefId = cardObject:GetCardDefId()
         self.trigger = trigger
         self.mechanicIndex = mechanicIndex
         self.tributeMechanicType, self.quantity, self.comboNum, self.param1, self.param2, self.param3 = cardObject:GetMechanicInfo(trigger, mechanicIndex)
         self.numSiblings = cardObject:GetNumMechanics(trigger)
         local isActivationTrigger = trigger == TRIBUTE_MECHANIC_TRIGGER_ACTIVATION
+        local isComboTrigger = trigger == TRIBUTE_MECHANIC_TRIGGER_COMBO
         local chooseOneMechanic = isActivationTrigger and cardObject:DoesChooseOneMechanic()
         if chooseOneMechanic then
             -- Quick and dirty workaround. The choice display isn't actually a mechanic, it replaces all of the mechanics on the card as one unified concept
             -- TODO Tribute: If we want to change to let design control which mechanics require choice, or work with combos, this logic will be useless and will need to be reimplemented
             if mechanicIndex == 1 then
-                ApplyTemplateToControl(self.control, "ZO_TributeCard_MechanicContainer_Large_SingleDigit_Activation_Style")
+                ApplyTemplateToControl(control, "ZO_TributeCard_MechanicContainer_Large_SingleDigit_Activation_Style")
                 self.typeIconTexture:SetTexture("EsoUI/Art/Tribute/Mechanics/tributeMechanicCardDisplay_chooseOne.dds")
                 self.quantityLabel:SetText(self.numSiblings)
                 local offsetY = FIRST_TOP_OFFSET_Y + (MECHANIC_CONTAINER_LARGE_ACTIVATION_HEIGHT / 2)
-                self.control:SetAnchor(CENTER, nil, TOPLEFT, OFFSET_X, offsetY)
+                control:SetAnchor(CENTER, nil, TOPLEFT, OFFSET_X, offsetY)
             else
-                self.control:SetHidden(true)
+                control:SetHidden(true)
             end
             return
         end
@@ -181,12 +183,27 @@ do
         local isDoubleDigitContainer = quantityDisplayValue >= 10
         local digitsSuffix = isDoubleDigitContainer and "Double" or "Single"
         
-        ApplyTemplateToControl(self.control, string.format("ZO_TributeCard_MechanicContainer_%s_%sDigit_%s_Style", sizeSuffix, digitsSuffix, triggerSuffix))
+        ApplyTemplateToControl(control, string.format("ZO_TributeCard_MechanicContainer_%s_%sDigit_%s_Style", sizeSuffix, digitsSuffix, triggerSuffix))
         self.typeIconTexture:SetTexture(GetTributeMechanicIconPath(self.tributeMechanicType, self.param1, self.param2, self.param3))
         local quantityDisplayText = quantityDisplayValue == 0 and GetString(SI_TRIBUTE_MECHANIC_ANY_QUANTITY_SYMBOL) or quantityDisplayValue
         self.quantityLabel:SetText(quantityDisplayText)
         self.frameGlowTextureFileName = string.format("EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_%s_%s_%s_glow.dds", triggerSuffix, sizeSuffix, digitsSuffix)
         
+        -- Add pips to combo hexes.
+        -- Combo 2 has no pips. Combo 3 has 1 pip. Combo 4 has 2 pips...
+        if isComboTrigger and self.comboNum > 2 then
+            if not self.pipsLabel then
+                self.pipsLabel = CreateControlFromVirtual("$(parent)Pips", control, "ZO_TributeCard_MechanicComboPip_Template")
+            end
+            local pipSize = isSmallContainer and 14 or 16
+            local offsetY = isSmallContainer and 17 or 24
+            local pipTextureMarkup = zo_iconFormat("EsoUI/Art/Tribute/Mechanics/tributeMechanicComboPip_full.dds", pipSize, pipSize)
+
+            local numPips = self.comboNum - 2
+            self.pipsLabel:SetText(string.rep(pipTextureMarkup, numPips))
+            self.pipsLabel:SetAnchor(CENTER, control, CENTER, 0, offsetY)
+        end
+
         local offsetX = OFFSET_X
         local height
         local paddingY
@@ -204,16 +221,18 @@ do
         local firstCenterOffsetY = FIRST_TOP_OFFSET_Y + (height / 2)
         local offsetY = firstCenterOffsetY + ((height + paddingY) * (mechanicIndex - 1))
         if isActivationTrigger then
-            self.control:SetAnchor(CENTER, nil, TOPLEFT, offsetX, offsetY)
+            control:SetAnchor(CENTER, nil, TOPLEFT, offsetX, offsetY)
         else
-            self.control:SetAnchor(CENTER, nil, TOPRIGHT, -offsetX, offsetY)
+            control:SetAnchor(CENTER, nil, TOPRIGHT, -offsetX, offsetY)
         end
     end
 end
 
 function ZO_TributeCard_MechanicContainer:Reset()
     self:SetGlowHidden(true)
-
+    if self.pipsLabel then
+        self.pipsLabel:SetText("")
+    end
     self.cardDefId = nil
     self.trigger = nil
     self.mechanicIndex = nil
@@ -466,7 +485,7 @@ do
             alphaAnimation:SetEndAlpha(1.0)
         end
 
-        local parentControl = self.cardObject.frontControl
+        local parentControl = self.cardObject.control
         control:SetParent(parentControl)
         control:ClearAnchors()
         control:SetAnchor(CENTER, parentControl)
@@ -772,6 +791,16 @@ function ZO_TributeCard:UpdateDefeatCost(newCost, costDelta)
         self.defeatCostAdjustmentObject = adjustmentObject
     end
 
+    if costDelta < 0 then
+        if newCost > 0 then
+            PlaySound(SOUNDS.TRIBUTE_AGENT_DAMAGED)
+        else
+            PlaySound(SOUNDS.TRIBUTE_AGENT_KNOCKED_OUT)
+        end
+    elseif costDelta > 0 then
+        PlaySound(SOUNDS.TRIBUTE_AGENT_HEALED)
+    end
+
     -- Queue animation of the defeat cost update.
     adjustmentObject:UpdateDefeatCost(newCost, costDelta)
 end
@@ -1060,7 +1089,7 @@ function ZO_TributeCard:OnCursorExit()
 end
 
 function ZO_TributeCard:OnMouseUp(button, upInside)
-    if upInside and button == MOUSE_BUTTON_INDEX_LEFT and self.cardInstanceId then
+    if TRIBUTE:IsInputStyleMouse() and upInside and button == MOUSE_BUTTON_INDEX_LEFT and self.cardInstanceId then
         -- Don't allow interaction with cards while the target viewer is up
         if ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() then
             return
@@ -1108,6 +1137,7 @@ function ZO_TributeCard:SetHighlighted(isHighlighted)
             self.glowTimeline = timeline
         end
         timeline:PlayForward()
+        PlaySound(SOUNDS.TRIBUTE_CARD_HIGHLIGHTED)
     else
         if timeline then
             timeline:PlayBackward()

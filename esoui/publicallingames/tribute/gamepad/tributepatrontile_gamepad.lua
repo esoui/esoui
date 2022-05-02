@@ -47,6 +47,8 @@ end
 function ZO_TributePatronBookTile_Gamepad:LayoutPlatform(patronData)
     ZO_TributePatronTile_Gamepad.LayoutPlatform(self, patronData)
     -- TODO Tribute: Implement gamepad content for each element
+    local isLocked = self.patronData:IsPatronLocked()
+    ZO_SetDefaultIconSilhouette(self.iconTexture, isLocked)
 end
 
 -- Begin ZO_ContextualActionsTile_Gamepad Overrides --
@@ -122,9 +124,9 @@ function ZO_TributePatronSelectionTile_Gamepad:RefreshGlow(isSelected, isDrafted
     if self.isGlowShowing ~= showGlow then
         self.isGlowShowing = showGlow
         if showGlow then
-            ZO_TRIBUTE_PATRON_SELECTION_TILE_GAMEPAD_GLOW_ANIMATION_PROVIDER:PlayForward(self.glow)
+            ZO_TRIBUTE_PATRON_SELECTION_TILE_GAMEPAD_GLOW_ANIMATION_PROVIDER:PlayForward(self.glow, self.patronData.animateInstantly)
         else
-            ZO_TRIBUTE_PATRON_SELECTION_TILE_GAMEPAD_GLOW_ANIMATION_PROVIDER:PlayBackward(self.glow)
+            ZO_TRIBUTE_PATRON_SELECTION_TILE_GAMEPAD_GLOW_ANIMATION_PROVIDER:PlayBackward(self.glow, self.patronData.animateInstantly)
         end
     end
 

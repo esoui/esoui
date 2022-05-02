@@ -87,14 +87,14 @@
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="30" />
                                 </Texture>
 
-                                <Control name="$(parent)ClubRankBarContainer" override="true">
+                                <Control name="$(parent)SeasonRankBarContainer" override="true">
                                     <Controls>
                                         <StatusBar name="$(parent)ProgressBar" override="true" inherits="ZO_GamepadArrowStatusBarWithBGMedium" />
                                     </Controls>
                                 </Control>
-                                <Label name="$(parent)ProgressStateLabel" override="true" font="ZoFontGamepad27" />
+                                <Label name="$(parent)ProgressStateLabel" override="true" font="ZoFontGamepadBold27" />
 
-                                <Label name="$(parent)ProgressValueLabel" override="true" font="ZoFontGamepad27" />
+                                <Label name="$(parent)ProgressValueLabel" override="true" font="ZoFontGamepadBold27" />
                             </Controls>
                         </Control>
                     </Controls>

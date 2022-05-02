@@ -2,6 +2,7 @@ local ANIMATE_INSTANTLY = true
 local ANY_ACTIVE_CARD = nil
 local NO_CARD = 0
 local NO_PATRON = nil
+local NO_RESOURCE = nil
 
 -------------
 -- Tribute --
@@ -15,6 +16,7 @@ ZO_TRIBUTE_CARD_POPUP_TYPE =
 
 ZO_TRIBUTE_SHOW_CARD_POPUP_DELAY_SECONDS = 0
 ZO_TRIBUTE_SHOW_CARD_TOOLTIP_DELAY_SECONDS = 0.35
+ZO_TRIBUTE_SHOW_RESOURCE_TOOLTIP_DELAY_SECONDS = 0.5
 
 ZO_TRIBUTE_PATRON_TOOLTIP_OFFSET_X = -40
 ZO_TRIBUTE_PATRON_TOOLTIP_OFFSET_Y = 0
@@ -51,6 +53,7 @@ function ZO_Tribute:Initialize(control)
                 self.beginEndOfGameFanfareEventId = nil
             end
 
+            self:ResetResourceTooltip()
 	        self:ResetCardPopupAndTooltip(ANY_ACTIVE_CARD)
             self:RefreshInputState()
             KEYBIND_STRIP:RestoreDefaultExit()
@@ -72,9 +75,9 @@ function ZO_Tribute:Initialize(control)
         local previousState = self.gameFlowState
         self.gameFlowState = gameFlowState
         if gameFlowState ~= TRIBUTE_GAME_FLOW_STATE_INACTIVE then
-            self:DeferredInitialize()
-
-            if previousState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT then
+            if previousState == TRIBUTE_GAME_FLOW_STATE_INACTIVE then
+                self:DeferredInitialize()
+            elseif previousState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT then
                 --If we still have patronSelectionShowTime set, that means we are ending the drafting state before we actually began showing the selection screen.
                 local forceEndSelection = self.patronSelectionShowTime ~= nil
                 ZO_TRIBUTE_PATRON_SELECTION_MANAGER:EndPatronSelection(forceEndSelection)
@@ -118,6 +121,7 @@ function ZO_Tribute:InitializeControls()
     self.activeCardTooltip = {}
     self.queuedCardPopup = {}
     self.queuedCardTooltip = {}
+    self.queuedResourceTooltip = {}
     self.activeBoardLocationPatronsTooltipCardObject = nil
 
     self.boardOrientControl = control:GetNamedChild("BoardOrient")
@@ -138,12 +142,10 @@ function ZO_Tribute:InitializeControls()
         name = GetString(SI_TRIBUTE_TARGET_VIEWER_CONFIRM_ACTION),
         keybind = "UI_SHORTCUT_SECONDARY",
         callback = function()
-            if CanConfirmTributeTargetSelection() then
+            local canConfirm, expectedResult = CanConfirmTributeTargetSelection()
+            if canConfirm then
                 TributeConfirmTargetSelection()
             end
-        end,
-        enabled = function()
-            return CanConfirmTributeTargetSelection()
         end,
     }
     self.confirmButton = control:GetNamedChild("Confirm")
@@ -166,7 +168,6 @@ function ZO_Tribute:InitializeControls()
     local gamepadCursorControl = control:GetNamedChild("GamepadCursor")
     self.gamepadCursorControl = gamepadCursorControl
     self.gamepadCursor = ZO_TributeCursor_Gamepad:New(gamepadCursorControl)
-    SetTributeGamepadCursorControl(gamepadCursorControl)
 
     self.turnTimerTextLabel = self.boardOrientControl:GetNamedChild("TurnTimerText")
     self.turnTimerTextLabelTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_Tribute_HUDFade", self.turnTimerTextLabel)
@@ -203,8 +204,14 @@ function ZO_Tribute:DeferredInitialize()
                 keybind = "UI_SHORTCUT_SECONDARY",
                 ethereal = true,
                 callback = function()
-                    if CanConfirmTributeTargetSelection() then
+                    local canConfirm, expectedResult = CanConfirmTributeTargetSelection()
+                    if canConfirm then
                         TributeConfirmTargetSelection()
+                    else
+                        local alertText = GetString("SI_TRIBUTETARGETSELECTIONCONFIRMATIONRESULT", expectedResult)
+                        if alertText ~= "" then
+                            RequestAlert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR,  alertText)
+                        end
                     end
                 end,
                 enabled = function()
@@ -245,6 +252,65 @@ function ZO_Tribute:SetupSavedVars()
 end
 
 function ZO_Tribute:RegisterDialogs()
+    local GAMEPAD_TRIBUTE_AUTO_PLAY_ENTRY =
+    {
+        template = "ZO_CheckBoxTemplate_WithoutIndent_Gamepad",
+        text = GetString(SI_TRIBUTE_SETTINGS_DIALOG_AUTO_PLAY),
+        templateData =
+        {
+            -- Called when the checkbox is toggled
+            setChecked = function(checkBox, checked)
+                checkBox.dialog.autoPlay = checked
+            end,
+
+            --Used during setup to determine if the data should be setup checked or unchecked
+            checked = function(data)
+                return data.dialog.autoPlay
+            end,
+
+            setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
+                control.checkBox.dialog = data.dialog
+                ZO_GamepadCheckBoxTemplate_Setup(control, data, selected, reselectingDuringRebuild, enabled, active)
+            end,
+
+            callback = function(dialog)
+                local targetControl = dialog.entryList:GetTargetControl()
+                ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
+            end,
+        },
+    }
+
+    local GAMEPAD_TRIBUTE_CONCEDE_ENTRY =
+    {
+        template = "ZO_GamepadFullWidthLeftLabelEntryTemplate",
+        templateData =
+        {
+            text = GetString(SI_TRIBUTE_SETTINGS_DIALOG_CONCEDE_MATCH),
+            setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
+                data:SetNameColors(ZO_ERROR_COLOR, ZO_ERROR_COLOR:GetDim())
+                ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+            end,
+            callback = function(dialog)
+                ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_TRIBUTE_OPTIONS")
+                ZO_Dialogs_ShowGamepadDialog("CONFIRM_CONCEDE_TRIBUTE")
+            end,
+        },
+    }
+
+    local GAMEPAD_TRIBUTE_SHOW_GAMER_CARD_ENTRY =
+    {
+        template = "ZO_GamepadFullWidthLeftLabelEntryTemplate",
+        templateData =
+        {
+            text = GetString(GetGamerCardStringId()),
+            setup = ZO_SharedGamepadEntry_OnSetup,
+            callback = function(dialog)
+                ZO_ShowGamerCardFromDisplayName(dialog.data.opponentName)
+                ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_TRIBUTE_OPTIONS")
+            end,
+        },
+    }
+
     ZO_Dialogs_RegisterCustomDialog("GAMEPAD_TRIBUTE_OPTIONS",
     {
         gamepadInfo =
@@ -253,56 +319,18 @@ function ZO_Tribute:RegisterDialogs()
             dialogFragmentGroup = ZO_GAMEPAD_KEYBINDS_FRAGMENT_GROUP,
         },
         setup = function(dialog, data)
+            local parametricList = dialog.info.parametricList
+            ZO_ClearNumericallyIndexedTable(parametricList)
+            table.insert(parametricList, GAMEPAD_TRIBUTE_AUTO_PLAY_ENTRY)
+            if IsConsoleUI() and (data.opponentPlayerType == TRIBUTE_PLAYER_TYPE_REMOTE_PLAYER or data.opponentPlayerType == TRIBUTE_PLAYER_TYPE_PLAYER) then
+                table.insert(parametricList, GAMEPAD_TRIBUTE_SHOW_GAMER_CARD_ENTRY)
+            end
+            table.insert(parametricList, GAMEPAD_TRIBUTE_CONCEDE_ENTRY)
             ZO_GenericGamepadDialog_RefreshText(dialog, GetString(SI_TRIBUTE_SETTINGS_DIALOG_TITLE))
             dialog.autoPlay = data.autoPlay
             dialog:setupFunc()
         end,
-        parametricList =
-        {
-            --Auto play
-            {
-                template = "ZO_CheckBoxTemplate_WithoutIndent_Gamepad",
-                text = GetString(SI_TRIBUTE_SETTINGS_DIALOG_AUTO_PLAY),
-                templateData =
-                {
-                    -- Called when the checkbox is toggled
-                    setChecked = function(checkBox, checked)
-                        checkBox.dialog.autoPlay = checked
-                    end,
-
-                    --Used during setup to determine if the data should be setup checked or unchecked
-                    checked = function(data)
-                        return data.dialog.autoPlay
-                    end,
-
-                    setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
-                        control.checkBox.dialog = data.dialog
-                        ZO_GamepadCheckBoxTemplate_Setup(control, data, selected, reselectingDuringRebuild, enabled, active)
-                    end,
-
-                    callback = function(dialog)
-                        local targetControl = dialog.entryList:GetTargetControl()
-                        ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
-                    end,
-                }
-            },
-            --Concede
-            {
-                template = "ZO_GamepadFullWidthLeftLabelEntryTemplate",
-                templateData =
-                {
-                    text = GetString(SI_TRIBUTE_SETTINGS_DIALOG_CONCEDE_MATCH),
-                    setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
-                        data:SetNameColors(ZO_ERROR_COLOR, ZO_ERROR_COLOR:GetDim())
-                        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-                    end,
-                    callback = function(dialog)
-                        ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_TRIBUTE_OPTIONS")
-                        ZO_Dialogs_ShowGamepadDialog("CONFIRM_CONCEDE_TRIBUTE")
-                    end,
-                },
-            },
-        },
+        parametricList = {}, -- Added Dynamically
         blockDialogReleaseOnPress = true,
         finishedCallback = function(dialog)
             TRIBUTE:OnSettingsChanged(dialog.autoPlay)
@@ -405,7 +433,17 @@ do
             end
         end)
 
-       control:RegisterForEvent(EVENT_TRIBUTE_BEGIN_TARGET_SELECTION, function(_, needsTargetViewer)
+        control:RegisterForEvent(EVENT_TRIBUTE_RESOURCE_TOKEN_HIGHLIGHTED, function(_, perspective, resource)
+            if perspective and resource then
+                self:QueueResourceTooltip(perspective, resource)
+                self.gamepadCursor:SetObjectUnderCursor(resource, ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.RESOURCE_TOKEN, true)
+            else
+                self:ResetResourceTooltip()
+                self.gamepadCursor:ResetObjectUnderCursor()
+            end
+        end)
+
+        control:RegisterForEvent(EVENT_TRIBUTE_BEGIN_TARGET_SELECTION, function(_, needsTargetViewer)
             if not needsTargetViewer then
                 --Anchor to the right of the resources area
                 self.confirmButton:ClearAnchors()
@@ -416,7 +454,8 @@ do
                 --Only show the confirm button if we actually need one
                 if not IsTributeTargetSelectionAutoComplete() then
                     self.confirmButton:SetHidden(false)
-                    self.confirmButton:SetEnabled(CanConfirmTributeTargetSelection())
+                    local canConfirm, expectedResult = CanConfirmTributeTargetSelection()
+                    self.confirmButton:SetEnabled(canConfirm)
                 end
 
                 local SHOW_INSTRUCTION = true
@@ -455,7 +494,13 @@ do
                 end
 
                 if wasTargeted ~= isTargeted then
-                    self.confirmButton:SetEnabled(CanConfirmTributeTargetSelection())
+                    if isTargeted then
+                        PlaySound(SOUNDS.TRIBUTE_CARD_TARGETED)
+                    else
+                        PlaySound(SOUNDS.TRIBUTE_CARD_UNTARGETED)
+                    end
+                    local canConfirm, expectedResult = CanConfirmTributeTargetSelection()
+                    self.confirmButton:SetEnabled(canConfirm)
                 end
             end
         end)
@@ -479,17 +524,29 @@ do
             self.gamepadCursor:SetObjectUnderCursor(patronStallObject, ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.PATRON_STALL, isUnderCursor)
         end)
 
-        self.tutorialPiles =
+        self.handAndDocksTutorialPiles =
         {
             [TRIBUTE_BOARD_LOCATION_PLAYER_HAND] = ZO_TributePileData:New(TRIBUTE_BOARD_LOCATION_PLAYER_HAND),
             [TRIBUTE_BOARD_LOCATION_DOCKS] = ZO_TributePileData:New(TRIBUTE_BOARD_LOCATION_DOCKS),
         }
 
+        self.deckAndCooldownTutorialPiles =
+        {
+            [TRIBUTE_BOARD_LOCATION_PLAYER_DECK] = ZO_TributePileData:New(TRIBUTE_BOARD_LOCATION_PLAYER_DECK),
+            [TRIBUTE_BOARD_LOCATION_PLAYER_COOLDOWN] = ZO_TributePileData:New(TRIBUTE_BOARD_LOCATION_PLAYER_COOLDOWN),
+        }
+
         control:RegisterForEvent(EVENT_TRIBUTE_PILE_UPDATED, function(_, boardLocation)
-            local pileData = self.tutorialPiles[boardLocation]
+            local pileData = self.handAndDocksTutorialPiles[boardLocation]
             if pileData then
                 pileData:MarkDirty()
-                pileData:TryTriggerTutorials()
+                pileData:TryTriggerHandAndDocksTutorials()
+            end
+
+            pileData = self.deckAndCooldownTutorialPiles[boardLocation]
+            if pileData then
+                pileData:MarkDirty()
+                pileData:TryTriggerDeckAndCooldownTutorials()
             end
         end)
 
@@ -596,9 +653,12 @@ do
             end
 
             if not closedMenu then
+                local opponentName, opponentPlayerType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
                 local dialogData =
                 {
                     autoPlay = self:IsAutoPlayChecked(),
+                    opponentName = opponentName,
+                    opponentPlayerType = opponentPlayerType,
                 }
 
                 if IsInGamepadPreferredMode() then
@@ -663,7 +723,15 @@ function ZO_Tribute:OnUpdate(frameTimeSeconds)
         self:ShowCardTooltip(tooltipCardObject)
     end
 
-    --TODO Tribute: Instead of using a hardcoded time, find a way to hook up a callback for when the CSA ends
+    if self.queuedResourceTooltip.showTimeSeconds and self.queuedResourceTooltip.showTimeSeconds <= frameTimeSeconds then
+        local perspective = self.queuedResourceTooltip.perspective
+        local resource = self.queuedResourceTooltip.resource
+        self.queuedResourceTooltip.perspective = nil
+        self.queuedResourceTooltip.resource = nil
+        self.queuedResourceTooltip.showTimeSeconds = nil
+        self:ShowResourceTooltip(perspective, resource)
+    end
+
     if self.patronSelectionShowTime and self.patronSelectionShowTime <= frameTimeSeconds then
         self.patronSelectionShowTime = nil
         ZO_TRIBUTE_PATRON_SELECTION_MANAGER:BeginPatronSelection()
@@ -751,6 +819,7 @@ do
         if not resetTargetObjects then
             SetHighlightedTributeCard(NO_CARD)
             SetHighlightedTributePatron(NO_PATRON)
+            SetHighlightedTributeResource(NO_RESOURCE)
         end
     end
 end
@@ -820,7 +889,7 @@ function ZO_Tribute:OnSettingsChanged(autoPlayChecked)
 end
 
 function ZO_Tribute:OnBoardClicked(button, upInside)
-    if upInside then
+    if self:IsInputStyleMouse() and upInside then
         --Disallow interacting with the board while the target viewer is up
         if ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() then
             return
@@ -840,6 +909,7 @@ function ZO_Tribute:SetupGame()
     self:LayoutBoard()
     self:ResetPatrons()
     SetTributeAutoPlayEnabled(self.savedVars.autoPlayChecked)
+    SetTributeGamepadCursorControl(self.gamepadCursorControl)
 
     for _, perspectiveResourceDisplayControls in pairs(self.resourceDisplayControls) do
         for _, resourceDisplayControl in pairs(perspectiveResourceDisplayControls) do
@@ -941,7 +1011,7 @@ function ZO_Tribute:HideCardPopup(cardObject)
 
     if popupObject then
         local PLAY_FORWARD = true
-        activeCardObject:PlayAlphaAnimation(PLAY_FORWARD)
+        activeCardObject:PlayAlphaAnimation(PLAY_FORWARD, ANIMATE_INSTANTLY)
         popupObject:ReleaseObject()
     end
 end
@@ -1017,7 +1087,6 @@ function ZO_Tribute:ShowCardPopup(cardObject, centerX, centerY)
     popupCardObject:ShowAsPopup(centerX, centerY, ZO_TRIBUTE_CARD_POPUP_TYPE.CARD)
 
     local PLAY_BACKWARD = false
-    local ANIMATE_INSTANTLY = true
     cardObject:PlayAlphaAnimation(PLAY_BACKWARD, ANIMATE_INSTANTLY)
 end
 
@@ -1060,6 +1129,54 @@ function ZO_Tribute:ShowCardTooltip(cardObject, anchorPoint, anchorControl, anch
         local tooltipControl = ZO_TributeCardTooltip_Gamepad_GetControl()
         ZO_TributeCardTooltip_Gamepad_Show(cardObject, anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)
         self.activeCardTooltip.gamepadControl = tooltipControl
+    end
+end
+
+function ZO_Tribute:QueueResourceTooltip(perspective, resource)
+    local currentTimeSeconds = GetFrameTimeSeconds()
+    self.queuedResourceTooltip.perspective = perspective
+    self.queuedResourceTooltip.resource = resource
+    self.queuedResourceTooltip.showTimeSeconds = currentTimeSeconds + ZO_TRIBUTE_SHOW_RESOURCE_TOOLTIP_DELAY_SECONDS
+end
+
+function ZO_Tribute:ResetResourceTooltip()
+    self.queuedResourceTooltip.perspective = nil
+    self.queuedResourceTooltip.resource = nil
+    self.queuedResourceTooltip.showTimeSeconds = nil
+    self:HideResourceTooltip()
+end
+
+function ZO_Tribute:HideResourceTooltip()
+    ClearTooltip(InformationTooltip)
+    ZO_TributeResourceTooltip_Gamepad_Hide()
+end
+
+function ZO_Tribute:ShowResourceTooltip(perspective, resource)
+    self:HideResourceTooltip()
+    local perspectiveResourceDisplayControls = self.resourceDisplayControls[perspective]
+    if perspectiveResourceDisplayControls then
+        local resourceDisplayControl = perspectiveResourceDisplayControls[resource]
+        if resourceDisplayControl then
+            local offsetX, offsetY
+            local anchorPoint
+            if resource == TRIBUTE_RESOURCE_POWER then
+                offsetX, offsetY = resourceDisplayControl:ProjectRectToScreenAndComputeAABBPoint(LEFT)
+                offsetX = offsetX - 30
+                anchorPoint = RIGHT
+            else
+                offsetX, offsetY = resourceDisplayControl:ProjectRectToScreenAndComputeAABBPoint(RIGHT)
+                offsetX = offsetX + 30
+                anchorPoint = LEFT
+            end
+
+            if IsInGamepadPreferredMode() then
+                ZO_TributeResourceTooltip_Gamepad_Show(resource, anchorPoint, GuiRoot, TOPLEFT, offsetX, offsetY)
+            else
+                InitializeTooltip(InformationTooltip, GuiRoot, anchorPoint, offsetX, offsetY, TOPLEFT)
+                InformationTooltip:AddLine(GetString("SI_TRIBUTERESOURCE", resource), "", ZO_NORMAL_TEXT:UnpackRGBA())
+                InformationTooltip:AddLine(GetString("SI_TRIBUTERESOURCE_TOOLTIP", resource))
+            end
+        end
     end
 end
 

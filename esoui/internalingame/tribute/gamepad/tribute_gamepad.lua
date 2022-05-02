@@ -5,6 +5,7 @@ ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES =
     MECHANIC_TILE = 2,
     PATRON_STALL = 3,
     TURN_TIMER = 4,
+    RESOURCE_TOKEN = 5,
 }
 
 ZO_TRIBUTE_GAMEPAD_CURSOR_FRICTION_FACTORS =
@@ -13,7 +14,15 @@ ZO_TRIBUTE_GAMEPAD_CURSOR_FRICTION_FACTORS =
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD] = 0.5,
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.MECHANIC_TILE] = 0.4,
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.PATRON_STALL] = 0.5,
+    --TODO Tribute: Turn timer target type is not currently hooked up to anything
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.TURN_TIMER] = 0.5,
+    [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.RESOURCE_TOKEN] = 0.25,
+}
+
+ZO_TRIBUTE_GAMEPAD_CURSOR_MANUAL_TARGET_TYPES =
+{
+    [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.PATRON_STALL] = true,
+    [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.RESOURCE_TOKEN] = true,
 }
 
 ZO_TRIBUTE_GAMEPAD_CURSOR_SPEED = 20
@@ -125,7 +134,9 @@ function ZO_TributeCursor_Gamepad:RefreshObjectUnderCursor()
         end
     end
 
-    self:SetObjectUnderCursor(targetObject, objectType, isUnderCursor)
+    if not ZO_TRIBUTE_GAMEPAD_CURSOR_MANUAL_TARGET_TYPES[self.objectTypeUnderCursor] then
+        self:SetObjectUnderCursor(targetObject, objectType, isUnderCursor)
+    end
 end
 
 function ZO_TributeCursor_Gamepad:SetObjectUnderCursor(object, objectType, isUnderCursor)
@@ -342,4 +353,64 @@ function ZO_TributeBoardLocationPatronsTooltip_Gamepad_Initialize(tooltipControl
     local DEFAULT_TOOLTIP_STYLES = nil
     ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized(g_boardLocationPatronsTooltipControl, DEFAULT_TOOLTIP_STYLES, ScreenResizeHandler, LEFT)
     ScreenResizeHandler(g_boardLocationPatronsTooltipControl)
+end
+
+----------------------------------
+-- Tribute Resource Tooltip Gamepad --
+----------------------------------
+
+local g_resourceTooltipControl
+
+function ZO_TributeResourceTooltip_Gamepad_Hide()
+    local control = g_resourceTooltipControl
+    if not internalassert(control, "ZO_TributeResourceTooltip_Gamepad failed to initialize.") then
+        return false
+    end
+
+    control:SetHidden(true)
+    control:ClearAnchors()
+    control.scrollTooltip:ClearLines()
+    control.resource = nil
+    return true
+end
+
+function ZO_TributeResourceTooltip_Gamepad_Show(resource, anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)
+    if not ZO_TributeResourceTooltip_Gamepad_Hide() then
+        return
+    end
+
+    if resource then
+        -- Order matters
+        local control = g_resourceTooltipControl
+        control.resource = resource
+        control.tip:LayoutTributeResource(resource)
+        control:ClearAnchors()
+        if anchorPoint then
+            control:SetAnchor(anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)
+        end
+
+        if ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingBoard() then
+            control:SetClampedToScreenInsets(0, -25, 0, ZO_KEYBIND_STRIP_GAMEPAD_VISUAL_HEIGHT)
+        else
+            control:SetClampedToScreenInsets(0, -25, 0, 25)
+        end
+        control:SetHidden(false)
+    end
+end
+
+function ZO_TributeResourceTooltip_Gamepad_GetControl()
+    return g_resourceTooltipControl
+end
+
+function ZO_TributeResourceTooltip_Gamepad_Initialize(tooltipControl)
+    g_resourceTooltipControl = tooltipControl
+
+    local function ScreenResizeHandler(control)
+        local maxHeight = GuiRoot:GetHeight() - (ZO_GAMEPAD_PANEL_FLOATING_HEIGHT_DISCOUNT * 2)
+        control:SetDimensionConstraints(0, 0, 0, maxHeight)
+    end
+
+    local DEFAULT_TOOLTIP_STYLES = nil
+    ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized(g_resourceTooltipControl, DEFAULT_TOOLTIP_STYLES, ScreenResizeHandler, LEFT)
+    ScreenResizeHandler(g_resourceTooltipControl)
 end
