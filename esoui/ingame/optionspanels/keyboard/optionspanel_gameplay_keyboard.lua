@@ -190,6 +190,15 @@ panelBuilder:AddSetting({
     template = "ZO_Options_Checkbox_DynamicWarning",
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_UseKeyboardLogin",
+    settingType = SETTING_TYPE_GAMEPAD,
+    settingId = GAMEPAD_SETTING_USE_KEYBOARD_LOGIN,
+    header = SI_GAMEPAD_SECTION_HEADER,
+    indentLevel = 1,
+    template = "ZO_Options_Checkbox_DynamicWarning",
+})
+
 -------------------------
 -- Gameplay -> Items --
 -------------------------

@@ -20,7 +20,7 @@
                     <Controls>
                         <Control name="$(parent)InfoContainer" inherits="ZO_TributePatronBook_Layout_Template ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                             <Controls>
-                                <Label name="$(parent)Header" font="ZoFontGamepad45" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                <Label name="$(parent)Header" font="ZoFontGamepad42" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                                     <Anchor point="TOPLEFT" />
                                 </Label>
 

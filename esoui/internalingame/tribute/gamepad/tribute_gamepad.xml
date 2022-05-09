@@ -49,6 +49,18 @@
                         <Texture name="$(parent)Icon" override="true" hidden="true" />
                     </Controls>
                 </Control>
+
+                <Control name="$(parent)DiscardCounterTooltip" inherits="ZO_ResizingFloatingScrollTooltip_Gamepad" clampedToScreen="true" hidden="true">
+                    <ClampedToScreenInsets top="-25" bottom="25" />
+
+                    <OnInitialized>
+                        ZO_TributeDiscardCounterTooltip_Gamepad_Initialize(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true" hidden="true" />
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

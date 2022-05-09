@@ -1178,6 +1178,38 @@ function ZO_CollectibleCategoryData:HasAnyNewCompanionCollectibles()
     return false
 end
 
+function ZO_CollectibleCategoryData:HasAnyNewTributePatronCollectibles()
+    if NonContiguousCount(self.newCollectibleIdsCache) > 0 and self:IsTributePatronCategory() then
+        return true
+    end
+
+       if self.isTopLevelCategory then
+        for _, subcategoryData in ipairs(self.orderedSubcategories) do
+            if subcategoryData:HasAnyNewTributePatronCollectibles() then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function ZO_CollectibleCategoryData:HasAnyNewNonTributePatronCollectibles()
+    if NonContiguousCount(self.newCollectibleIdsCache) > 0 and not self:IsTributePatronCategory() then
+        return true
+    end
+
+    if self.isTopLevelCategory then
+        for _, subcategoryData in ipairs(self.orderedSubcategories) do
+            if subcategoryData:HasAnyNewNonTributePatronCollectibles() then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 function ZO_CollectibleCategoryData:UpdateNewCache(collectibleData)
     local collectibleId = collectibleData:GetId()
     local isNew = collectibleData:IsNew()
@@ -1584,6 +1616,24 @@ end
 function ZO_CollectibleDataManager:HasAnyNewCompanionCollectibles()
     for _, categoryData in self:CategoryIterator() do
         if categoryData:HasAnyNewCompanionCollectibles() then
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_CollectibleDataManager:HasAnyNewTributePatronCollectibles()
+    for _, categoryData in self:CategoryIterator() do
+        if categoryData:HasAnyNewTributePatronCollectibles() then
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_CollectibleDataManager:HasAnyNewNonTributePatronCollectibles()
+    for _, categoryData in self:CategoryIterator() do
+        if categoryData:HasAnyNewNonTributePatronCollectibles() then
             return true
         end
     end

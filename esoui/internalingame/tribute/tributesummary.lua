@@ -95,7 +95,7 @@ function ZO_TributeSummary:InitializeControls()
 
     self.statisticsBackdrop = self.statisticsControl:GetNamedChild("Backdrop")
     self.statisticsDuration = self.statisticsBackdrop:GetNamedChild("Duration")
-    self.statisticsPrestige = self.statisticsBackdrop:GetNamedChild("PrestigeIcon"):GetNamedChild("Text")
+    self.statisticsPrestige = self.statisticsBackdrop:GetNamedChild("PrestigeLabel")
     self.statisticsGold = self.statisticsBackdrop:GetNamedChild("GoldIcon"):GetNamedChild("Text")
     self.statisticsCards = self.statisticsBackdrop:GetNamedChild("CardsIcon"):GetNamedChild("Text")
     self.statisticsInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeEndOfGameFadeIn", self.statisticsControl)
@@ -125,9 +125,13 @@ function ZO_TributeSummary:InitializeControls()
 
     self.clubRankContainer = self.rewardsControl:GetNamedChild("ClubRank")
     self.clubRankLabel = self.clubRankContainer:GetNamedChild("Rank")
+    self.clubRankIcon = self.clubRankContainer:GetNamedChild("Icon")
+    self.clubRankTypeLabel = self.clubRankContainer:GetNamedChild("RankType")
     self.clubRankBarControl = self.clubRankContainer:GetNamedChild("Bar")
     local function OnBarRankChanged(_, rank)
         self.clubRankLabel:SetText(rank + 1)
+        self.clubRankTypeLabel:SetText(zo_strformat(GetString("SI_TRIBUTECLUBRANK", rank)))
+        self.clubRankIcon:SetTexture(string.format("EsoUI/Art/Tribute/tributeClubRank_%d.dds", rank))
     end
     ZO_StatusBar_SetGradientColor(self.clubRankBarControl, ZO_XP_BAR_GRADIENT_COLORS)
     self.clubRankBar = ZO_WrappingStatusBar:New(self.clubRankBarControl, OnBarRankChanged)
@@ -138,9 +142,13 @@ function ZO_TributeSummary:InitializeControls()
     self.rewardsControlPool:SetCustomFactoryBehavior(function(control)
         control.iconTexture = control:GetNamedChild("Icon")
         control.stackCountLabel = control.iconTexture:GetNamedChild("StackCount")
+        control.mailIndicatorIcon = control.iconTexture:GetNamedChild("MailIndicator")
         control.nameLabel = control:GetNamedChild("Name")
 
         SetupControlStyleTemplating(control, "ZO_TributeRewardItem_Control")
+    end)
+    self.rewardsControlPool:SetCustomResetBehavior(function(control)
+        control.mailIndicatorIcon:SetHidden(true)
     end)
     self.rewardsControlPool:SetCustomAcquireBehavior(function(control)
         control:CleanStyle()
@@ -318,7 +326,7 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.statisticsControl:SetHidden(true)
             self.summaryControl:SetHidden(true)
             self.rewardsControl:SetHidden(true)
-            self.clubRankBarControl:SetHidden(true)
+            self.clubRankContainer:SetHidden(true)
             self.rewardItemsControl:SetHidden(true)
             self.progressionControl:SetHidden(true)
             self.progressionLeaderboardBackdrop:SetHidden(true)
@@ -327,6 +335,7 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.nextRankParticleSystem:Stop()
             self.rankUpParticleSystem:Stop()
             self.leaderboardParticleSystem:Stop()
+            self.rewardsControlPool:ReleaseAllObjects()
         end)
     end
 
@@ -348,7 +357,11 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.keybindTimeline:PlayFromStart()
             self.statisticsInTimeline:PlayFromStart()
             self.summaryInTimeline:PlayFromStart()
-            PlaySound(SOUNDS.TRIBUTE_SUMMARY_BEGIN)
+            if self.victory then
+                PlaySound(SOUNDS.TRIBUTE_SUMMARY_BEGIN_VICTORY)
+            else
+                PlaySound(SOUNDS.TRIBUTE_SUMMARY_BEGIN_DEFEAT)
+            end
             -- This will be a fade in of all on-screen UI elements simultaneously
         end)
 
@@ -405,7 +418,7 @@ function ZO_TributeSummary:InitializeStateMachine()
                 self.clubRankBar:SetValue(clubRank, currentClubExperienceForRank, maxClubExperienceForRank, NO_WRAP, ANIMATE_INSTANTLY)
             end
             self.rewardsControl:SetHidden(false)
-            self.clubRankBarControl:SetHidden(false)
+            self.clubRankContainer:SetHidden(false)
             self.statisticsControl:SetHidden(false)
             self.rewardItemsControl:SetHidden(false)
             self.rewardRowControlPool:GetActiveObject(REWARDS_MATCH_KEY):SetHidden(false)
@@ -473,7 +486,7 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.progressionControl:SetHidden(false)
             self.rewardsHeaderInTimeline:PlayFromStart()
             self.statisticsInTimeline:PlayFromStart()
-            self.matchRewardItemsInTimeline:PlayFromStart()
+            self.matchRewardItemsInTimeline:PlayFromStart() 
             self.progressionInTimeline:PlayFromStart()
         end)
 
@@ -545,7 +558,11 @@ function ZO_TributeSummary:InitializeStateMachine()
 
             if self.playerRankCurrent == TRIBUTE_TIER_UNRANKED then
                 self.progressionPlacementBarNewFadeInTimeline:PlayFromStart()
-                PlaySound(SOUNDS.TRIBUTE_SUMMARY_PROGRESS_BAR_FILL)
+                if self.victory then
+                    PlaySound(SOUNDS.TRIBUTE_SUMMARY_PLACEMENT_MATCH_SEGMENT_FILL_VICTORY)
+                else
+                    PlaySound(SOUNDS.TRIBUTE_SUMMARY_PLACEMENT_MATCH_SEGMENT_FILL_DEFEAT)
+                end
             else
                 self.progressionProgressNumberTranslateTimeline:PlayFromStart()
                 self.progressionProgressBar:SetValue(self.playerRankCurrent, playerCampaignXPNew, playerCampaignXPNext, wrapType, animationType)
@@ -554,7 +571,11 @@ function ZO_TributeSummary:InitializeStateMachine()
                     fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.ANIMATION_COMPLETE)
                 else
                     -- Only play the bar fill sound when we actually animate bar progress.
-                    PlaySound(SOUNDS.TRIBUTE_SUMMARY_PROGRESS_BAR_FILL)
+                    if self.playerCampaignXPDelta > 0 then
+                        PlaySound(SOUNDS.TRIBUTE_SUMMARY_PROGRESS_BAR_INCREASE)
+                    elseif self.playerCampaignXPDelta < 0 then
+                        PlaySound(SOUNDS.TRIBUTE_SUMMARY_PROGRESS_BAR_DECREASE)
+                    end
                 end
             end
         end)
@@ -677,7 +698,7 @@ function ZO_TributeSummary:InitializeStateMachine()
     do
         local state = fanfareStateMachine:AddState("NEW_RANK_PROGRESS_BAR_IN")
         state:RegisterCallback("OnActivated", function()
-            self.playerCampaignXP = zo_min(0, self.playerCampaignXP + GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew))
+            self.playerCampaignXP = zo_max(0, self.playerCampaignXP + GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew))
             local playerCampaignXPNew = self.playerCampaignXP
 
             self.playerRankCurrent = self.playerRankNew
@@ -724,7 +745,7 @@ function ZO_TributeSummary:InitializeStateMachine()
                     self.progressionNextRankLabel:SetText(newNextRankData:GetTierName())
                 end
 
-                self.playerCampaignXP = zo_min(0, self.playerCampaignXP + GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew))
+                self.playerCampaignXP = zo_max(0, self.playerCampaignXP + GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew))
                 self.playerRankCurrent = self.playerRankNew
                 if self.playerRankNew ~= TRIBUTE_TIER_PLATINUM then
                     self.playerRankNext = self.playerRankNew + 1
@@ -1065,7 +1086,6 @@ function ZO_TributeSummary:InitializeStateMachine()
 
     self.summaryInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.summaryOutTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
-    self.rewardsHeaderInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.rewardsOutTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionRankChangeUpTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     self.progressionRankChangeFadeOutTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
@@ -1288,9 +1308,6 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
         self.progressionProgressNumber:SetHidden(true)
     end
 
-    -- TODO Tribute: Get in-game stats from the game (gold acquired, cards acquired, duration)
-    local DEBUG_GOLD_ACQUIRED = 10
-    local DEBUG_CARDS_ACQUIRED = 5
     self.playerRankCurrentRewardsData = ZO_TributeRewardsData:New(TRIBUTE_REWARDS_DATA_MANAGER:GetTributeRewardsTypeData(ZO_TRIBUTE_REWARD_TYPES.SEASON_REWARDS), self.playerRankCurrent)
     self.playerRankNextRewardsData = ZO_TributeRewardsData:New(TRIBUTE_REWARDS_DATA_MANAGER:GetTributeRewardsTypeData(ZO_TRIBUTE_REWARD_TYPES.SEASON_REWARDS), self.playerRankNext)
     self.playerRankNewRewardsData = ZO_TributeRewardsData:New(TRIBUTE_REWARDS_DATA_MANAGER:GetTributeRewardsTypeData(ZO_TRIBUTE_REWARD_TYPES.SEASON_REWARDS), self.playerRankNew)
@@ -1323,11 +1340,12 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     end
 
     -- Match statistics
-    self.statisticsDuration:SetText("[DEBUG] MM:ss")
+    local matchDurationMS, goldAccumulated, cardsAcquired = GetTributeMatchStatistics()
+    self.statisticsDuration:SetText(ZO_FormatTimeMilliseconds(matchDurationMS, DESCRIPTIVE_MINIMAL_HIDE_ZEROES))
     self.statisticsBackdrop:SetTexture(self.victory and END_OF_GAME_STATISTICS_BACKDROPS.VICTORY or END_OF_GAME_STATISTICS_BACKDROPS.DEFEAT)
     self.statisticsPrestige:SetText(string.format("%d - %d", self.playerPrestige, self.opponentPrestige))
-    self.statisticsGold:SetText(DEBUG_GOLD_ACQUIRED)
-    self.statisticsCards:SetText(DEBUG_CARDS_ACQUIRED)
+    self.statisticsGold:SetText(goldAccumulated)
+    self.statisticsCards:SetText(cardsAcquired)
 
     -- Summary
     local headerText = self.victory and GetString(SI_TRIBUTE_MATCH_RESULT_VICTORY) or GetString(SI_TRIBUTE_MATCH_RESULT_DEFEAT)
@@ -1355,15 +1373,31 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
         rewardType = REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE,
         quantity = self.playerClubXP,
     }
-    local matchStandardRewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(GetTributeGeneralMatchRewardListId())
+    local mailedReward =
+    {
+        rewardType = REWARD_ENTRY_TYPE_MAIL_ITEM,
+    }
+
+    local standardRewardListId = GetTributeGeneralMatchRewardListId()
+    local LFGRewardListId = GetTributeGeneralMatchLFGRewardListId()
+    local matchStandardRewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(standardRewardListId)
+    if REWARDS_MANAGER:DoesRewardListContainMailItems(standardRewardListId)
+        or REWARDS_MANAGER:DoesRewardListContainMailItems(LFGRewardListId) then
+        table.insert(matchStandardRewards, 1, mailedReward)
+    end
     if self.playerClubXP > 0 then
         table.insert(matchStandardRewards, 1, clubXPReward)
     end
-    local matchLFGRewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(GetTributeGeneralMatchLFGRewardListId())
+    local matchLFGRewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(LFGRewardListId)
+    local rankUpMailedRewards = false
     local rankUpRewards = {}
     if self.rankUp then
         for rank = self.playerRankCurrent, self.playerRankNew do
-            local rankUpRewardList = REWARDS_MANAGER:GetAllRewardInfoForRewardList(GetActiveTributeCampaignTierRewardListId(rank))
+            local rankUpRewardListId = GetActiveTributeCampaignTierRewardListId(rank)
+            local rankUpRewardList = REWARDS_MANAGER:GetAllRewardInfoForRewardList(rankUpRewardListId)
+            if REWARDS_MANAGER:DoesRewardListContainMailItems(rankUpRewardListId) then
+                rankUpMailedRewards = true
+            end
             if next(rankUpRewardList) then
                 for _, reward in ipairs(rankUpRewardList) do
                     table.insert(rankUpRewards, reward)
@@ -1371,6 +1405,25 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
             end
         end
     end
+    local numClubRankRewardLists = GetNumTributeClubRankRewardLists()
+    if numClubRankRewardLists > 0 then
+        for clubRankRewardIndex = 1, numClubRankRewards do
+            local clubRankRewardListId = GetClubRankRewardListIdByIndex(clubRankRewardIndex)
+            local clubRankRewardList = REWARDS_MANAGER:GetAllRewardInfoForRewardList(clubRankRewardListId)
+            if REWARDS_MANAGER:DoesRewardListContainMailItems(clubRankRewardListId) then
+                rankUpMailedRewards = true
+            end
+            if next(clubRankRewardList) then
+                for _, reward in ipairs(clubRankRewardList) do
+                    table.insert(rankUpRewards, reward)
+                end
+            end
+        end
+    end
+    if rankUpMailedRewards then
+        table.insert(rankUpRewards, 1, mailedReward)
+    end
+
     local matchCombinedRewards = {}
     ZO_CombineNumericallyIndexedTables(matchCombinedRewards, matchStandardRewards, matchLFGRewards)
     local MAX_REWARDS_PER_ROW = 4
@@ -1411,7 +1464,9 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
                         countText = tostring(count)
                     end
                 elseif rewardType == REWARD_ENTRY_TYPE_MAIL_ITEM then
-                    -- TODO Tribute: handle mail items
+                    name = GetString(SI_TRIBUTE_SUMMARY_REWARD_MAIL)
+                    icon = "EsoUI/Art/Icons/Quest_Container_001.dds"
+                    control.mailIndicatorIcon:SetHidden(false)
                 else
                     internalassert(false, "Unexpected Tribute match reward type")
                 end
@@ -1455,6 +1510,13 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     self.matchRewardItemsInTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
     local matchRewardWipeDuration = REWARD_WIPE_PER_ITEM_DURATION_MS * zo_min(MAX_REWARDS_PER_ROW, #matchCombinedRewards)
     self.matchRewardItemsInTimeline:GetAnimation(1):SetDuration(matchRewardWipeDuration)
+
+    local function OnCompleteFireTrigger(_, completedPlaying)
+        if completedPlaying then
+            self.fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.ANIMATION_COMPLETE)
+        end
+    end
+    self.matchRewardItemsInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     matchRewardsRowControl:SetMaskAnchor(TOPLEFT, BOTTOMLEFT)
     matchRewardsRowControl:SetAnimation(self.matchRewardItemsInTimeline:GetAnimation(1))
     matchRewardsRowControl.maskSimulator:SetScale(0)

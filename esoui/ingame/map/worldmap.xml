@@ -485,10 +485,6 @@
                                 lineLimit = 1,
                             },
                             {
-                                font = "ZoFontGamepad45",
-                                lineLimit = 1,
-                            },
-                            {
                                 font = "ZoFontGamepad42",
                                 lineLimit = 1,
                             },

@@ -15,7 +15,8 @@ local categoryData =
     {
         priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.TRIBUTE,
         name = GetString(SI_ACTIVITY_FINDER_CATEGORY_TRIBUTE),
-        menuIcon = ZO_TRIBUTE_ICON_GAMEPAD,
+        menuIcon = ZO_TRIBUTE_ICONS_GAMEPAD.normal,
+        disabledMenuIcon = ZO_TRIBUTE_ICONS_GAMEPAD.disabled,
         sceneName = "gamepadTributeFinder",
         tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_TRIBUTE),
         hideGroupRoles = true,

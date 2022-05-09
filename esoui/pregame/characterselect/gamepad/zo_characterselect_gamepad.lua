@@ -17,23 +17,6 @@ local CREATE_NEW_ICON = "EsoUI/Art/Buttons/Gamepad/gp_plus_large.dds"
 
 --[[ Character Select Delete Screen ]]--
 
-local CHARACTER_DELETE_KEY_ICONS = 
-{
-    [true] = 
-    {
-        KEY_GAMEPAD_LEFT_SHOULDER_HOLD,
-        KEY_GAMEPAD_RIGHT_SHOULDER_HOLD,
-        KEY_GAMEPAD_LEFT_TRIGGER_HOLD,
-        KEY_GAMEPAD_RIGHT_TRIGGER_HOLD
-    },
-    [false] = 
-    {   
-        KEY_GAMEPAD_LEFT_SHOULDER,
-        KEY_GAMEPAD_RIGHT_SHOULDER,
-        KEY_GAMEPAD_LEFT_TRIGGER,
-        KEY_GAMEPAD_RIGHT_TRIGGER
-    },
-}
 
 function ZO_CharacterSelect_Gamepad_ReturnToCharacterList(activateViewPort)
     local self = ZO_CharacterSelect_Gamepad
@@ -48,95 +31,109 @@ function ZO_CharacterSelect_Gamepad_ReturnToCharacterList(activateViewPort)
     self.characterList:Activate()
 end
 
-local function ZO_CharacterSelect_Gamepad_GetDeleteKeyText()
-    local keys = ZO_CharacterSelect_Gamepad.deleteKeys
-
-    local keyText = ""
-    for i, enabled in ipairs(keys) do
-
-        if keyText ~= "" then
-            keyText = keyText .. "  "   -- Space out the icons
-        end
-
-        local keyCode = CHARACTER_DELETE_KEY_ICONS[enabled][i]
-        keyText = keyText .. ZO_Keybindings_GenerateIconKeyMarkup(keyCode)
-    end
-
-    return keyText
-end
-
-local function ZO_CharacterSelectDelete_Gamepad_ResetDeleteKeys()
-    local keys = ZO_CharacterSelect_Gamepad.deleteKeys
-
-    for i = 1, #keys do
-        keys[i] = false
-    end
-end
-
-local function ZO_CharacterSelectDelete_Gamepad_OnKeyChanged(key, onDown)
-    local self = ZO_CharacterSelect_Gamepad
-    local keys = self.deleteKeys
-
-    if self.deleting then
-        return
-    end
-
-    if onDown then
-        PlaySound(SOUNDS.POSITIVE_CLICK)
-    else
-        PlaySound(SOUNDS.NEGATIVE_CLICK)
-    end
-
-    -- Change key if we pressed it
-    for i, deleteKey in ipairs(CHARACTER_DELETE_KEY_ICONS[false]) do
-        if deleteKey == key then
-            keys[i] = onDown
-        end
-    end
-
-    -- Are all of them activated?
-    local activated = 0
-    for i, deleteKey in ipairs(CHARACTER_DELETE_KEY_ICONS[false]) do
-        if keys[i] then
-            activated = activated + 1
-        end
-    end
-
-    if activated == #CHARACTER_DELETE_KEY_ICONS[false] then
-        -- Delete character and exit dialog
-        PlaySound(SOUNDS.DIALOG_ACCEPT)
-        self.deleting = true
-        ZO_Dialogs_ReleaseDialog("CONFIRM_DELETE_SELECTED_CHARACTER_GAMEPAD")
-        local characterData = CHARACTER_SELECT_MANAGER:GetSelectedCharacterData()
-        CHARACTER_SELECT_MANAGER:AttemptCharacterDelete(characterData.id)
-    end
-end
-
 function ZO_CharacterSelect_Gamepad_InitConfirmDeleteCustomDialog()
+    local confirmationString = GetString(SI_DELETE_CHARACTER_CONFIRMATION_TEXT)
+    local deleteCharacterText = ""
+
+    local lowercaseConfirmationString = string.lower(confirmationString)
+    local function DoesDeleteEntryTextMatchConfirmationString()
+        return string.lower(deleteCharacterText) == lowercaseConfirmationString
+    end
+
+    -- Delete entry
+    local deleteEntryData = ZO_GamepadEntryData:New()
+    deleteEntryData.isEditControl = true
+
+    deleteEntryData.textChangedCallback = function(control)
+        deleteCharacterText = control:GetText()
+    end
+
+    deleteEntryData.setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
+        control.highlight:SetHidden(not selected)
+
+        control.editBoxControl.textChangedCallback = data.textChangedCallback
+        control.editBoxControl:SetMaxInputChars(32) -- 32 is oversized, but gives wiggle-room
+        control.editBoxControl:SetText(deleteCharacterText)
+    end
+
+    -- Submit entry
+    local submitEntryData = ZO_GamepadEntryData:New(GetString(SI_OTP_DIALOG_SUBMIT))
+    submitEntryData.isSubmit = true
+
+    submitEntryData.setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
+        local isValid = DoesDeleteEntryTextMatchConfirmationString()
+        data.disabled = not isValid
+        data:SetEnabled(isValid)
+
+        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, isValid, active)
+    end
+
     ZO_Dialogs_RegisterCustomDialog("CONFIRM_DELETE_SELECTED_CHARACTER_GAMEPAD",
     {
         gamepadInfo =
         {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
-        setup = function()
-            ZO_CharacterSelectDelete_Gamepad_ResetDeleteKeys()
-        end,
-        updateFn = function(dialog)
-            ZO_Dialogs_RefreshDialogText("CONFIRM_DELETE_SELECTED_CHARACTER_GAMEPAD", dialog, { mainTextParams = { ZO_CharacterSelect_Gamepad_GetDeleteKeyText() }})
-        end,
+        canQueue = true,
         mustChoose = true,
+        setup = function(dialog)
+            deleteCharacterText = ""
+            dialog:setupFunc()
+        end,
         title =
         {
             text = SI_CONFIRM_DELETE_CHARACTER_DIALOG_GAMEPAD_TITLE,
         },
         mainText =
         {
-            text = SI_CONFIRM_DELETE_CHARACTER_DIALOG_GAMEPAD_TEXT,
+            text = zo_strformat(SI_CONFIRM_DELETE_CHARACTER_DIALOG_GAMEPAD_TEXT, confirmationString)
         },
+        parametricList =
+        {
+            {
+                template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
+                entryData = deleteEntryData,
+            },
+            {
+                template = "ZO_GamepadTextFieldSubmitItem",
+                entryData = submitEntryData,
+            },
+        },
+
         blockDialogReleaseOnPress = true,
         buttons =
         {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_GAMEPAD_SELECT_OPTION,
+                callback = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    local targetControl = dialog.entryList:GetTargetControl()
+                    if targetData.isEditControl and targetControl then
+                        targetControl.editBoxControl:TakeFocus()
+                    elseif targetData.isSubmit then
+                        if DoesDeleteEntryTextMatchConfirmationString() then
+                            -- Delete character and exit dialog
+                            ZO_CharacterSelect_Gamepad.deleting = true
+                            ZO_Dialogs_ReleaseDialogOnButtonPress("CONFIRM_DELETE_SELECTED_CHARACTER_GAMEPAD")
+                            local characterData = CHARACTER_SELECT_MANAGER:GetSelectedCharacterData()
+                            CHARACTER_SELECT_MANAGER:AttemptCharacterDelete(characterData.id)
+                        end
+                    end
+                end,
+                enabled = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+
+                    if targetData.isEditControl then
+                        return true
+                    elseif targetData.isSubmit then
+                        return DoesDeleteEntryTextMatchConfirmationString()
+                    end
+
+                    return false
+                end,
+            },
+
             {
                 text = GetString(SI_CHARACTER_SELECT_GAMEPAD_DELETE_CANCEL),
                 keybind = "DIALOG_NEGATIVE",
@@ -152,46 +149,6 @@ function ZO_CharacterSelect_Gamepad_InitConfirmDeleteCustomDialog()
                         ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorDefault)
                     end
                     ZO_Dialogs_ReleaseDialog("CONFIRM_DELETE_SELECTED_CHARACTER_GAMEPAD")
-                end,
-            },
-            {
-                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                name = "Character Select Delete Left Shoulder",
-                keybind = "DIALOG_LEFT_SHOULDER",
-                handlesKeyUp = true,
-                ethereal = true,
-                callback = function(dialog, onUp)
-                    ZO_CharacterSelectDelete_Gamepad_OnKeyChanged(KEY_GAMEPAD_LEFT_SHOULDER, not onUp)
-                end,
-            },
-            {
-                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                name = "Character Select Delete Right Shoulder",
-                keybind = "DIALOG_RIGHT_SHOULDER",
-                handlesKeyUp = true,
-                ethereal = true,
-                callback = function(dialog, onUp)
-                    ZO_CharacterSelectDelete_Gamepad_OnKeyChanged(KEY_GAMEPAD_RIGHT_SHOULDER, not onUp)
-                end,
-            },
-            {
-                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                name = "Character Select Delete Left Trigger",
-                keybind = "DIALOG_LEFT_TRIGGER",
-                handlesKeyUp = true,
-                ethereal = true,
-                callback = function(dialog, onUp)
-                    ZO_CharacterSelectDelete_Gamepad_OnKeyChanged(KEY_GAMEPAD_LEFT_TRIGGER, not onUp)
-                end,
-            },
-            {
-                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                name = "Character Select Delete Right Trigger",
-                keybind = "DIALOG_RIGHT_TRIGGER",
-                handlesKeyUp = true,
-                ethereal = true,
-                callback = function(dialog, onUp)
-                    ZO_CharacterSelectDelete_Gamepad_OnKeyChanged(KEY_GAMEPAD_RIGHT_TRIGGER, not onUp)
                 end,
             },
         },

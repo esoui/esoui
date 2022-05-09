@@ -16,6 +16,7 @@ function ZO_TributePatronBook_Shared:Initialize(control, infoContainerControl, t
     self.fragment = ZO_FadeSceneFragment:New(control)
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
+            self.categoriesRefreshGroup:TryClean()
             self:OnFragmentShowing()
         end
     end)
@@ -112,10 +113,32 @@ function ZO_TributePatronBook_Shared:RegisterForEvents()
         self.categoriesRefreshGroup:MarkDirty("List")
     end
 
+    local function OnCollectibleUpdated(collectibleId)
+        local categoryType = GetCollectibleCategoryType(collectibleId)
+        if categoryType == COLLECTIBLE_CATEGORY_TYPE_TRIBUTE_PATRON then
+            OnPatronsDataDirty()
+        end
+    end
+
+    local function OnCollectionUpdated(collectibleUpdateType, collectiblesByNewUnlockState)
+        for _, unlockState in pairs(collectiblesByNewUnlockState) do
+            for _, collectible in pairs(unlockState) do
+                local categoryType = GetCollectibleCategoryType(collectible.collectibleId)
+                if categoryType == COLLECTIBLE_CATEGORY_TYPE_TRIBUTE_PATRON then
+                    OnPatronsDataDirty()
+                    return
+                end
+            end
+        end
+    end
+
     TRIBUTE_DATA_MANAGER:RegisterCallback("PatronsUpdated", OnPatronsUpdated)
     TRIBUTE_DATA_MANAGER:RegisterCallback("PatronsDataDirty", OnPatronsDataDirty)
     TRIBUTE_DATA_MANAGER:RegisterCallback("ProgressionUpgradeStatusChanged", OnProgressionUpgradeStatusChanged)
     TRIBUTE_DATA_MANAGER:RegisterCallback("UpdateSearchResults", function() self:OnUpdateSearchResults() end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", OnCollectibleUpdated)
 end
 
 ZO_TributePatronBook_Shared.BuildGridList = ZO_TributePatronBook_Shared:MUST_IMPLEMENT()

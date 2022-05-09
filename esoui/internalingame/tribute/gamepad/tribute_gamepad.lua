@@ -6,6 +6,7 @@ ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES =
     PATRON_STALL = 3,
     TURN_TIMER = 4,
     RESOURCE_TOKEN = 5,
+    DISCARD_COUNTER = 6,
 }
 
 ZO_TRIBUTE_GAMEPAD_CURSOR_FRICTION_FACTORS =
@@ -17,6 +18,7 @@ ZO_TRIBUTE_GAMEPAD_CURSOR_FRICTION_FACTORS =
     --TODO Tribute: Turn timer target type is not currently hooked up to anything
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.TURN_TIMER] = 0.5,
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.RESOURCE_TOKEN] = 0.25,
+    [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.DISCARD_COUNTER] = 0.5,
 }
 
 ZO_TRIBUTE_GAMEPAD_CURSOR_MANUAL_TARGET_TYPES =
@@ -127,6 +129,9 @@ function ZO_TributeCursor_Gamepad:RefreshObjectUnderCursor()
     if targetObject then
         if targetObject:IsInstanceOf(ZO_TributeCard) and targetObject:IsWorldCard() then
             objectType = ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD
+            isUnderCursor = true
+        elseif targetObject:IsInstanceOf(ZO_TributeDiscardCountDisplay) then
+            objectType = ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.DISCARD_COUNTER
             isUnderCursor = true
         elseif targetObject:IsInstanceOf(ZO_TributeMechanicTile) then
             objectType = ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.MECHANIC_TILE
@@ -413,4 +418,60 @@ function ZO_TributeResourceTooltip_Gamepad_Initialize(tooltipControl)
     local DEFAULT_TOOLTIP_STYLES = nil
     ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized(g_resourceTooltipControl, DEFAULT_TOOLTIP_STYLES, ScreenResizeHandler, LEFT)
     ScreenResizeHandler(g_resourceTooltipControl)
+end
+
+---------------------------------------------
+-- Tribute Discard Counter Tooltip Gamepad --
+---------------------------------------------
+
+local g_discardCounterTooltipControl
+
+function ZO_TributeDiscardCounterTooltip_Gamepad_Hide()
+    local control = g_discardCounterTooltipControl
+    if not internalassert(control, "ZO_TributeDiscardCounterTooltip_Gamepad failed to initialize.") then
+        return false
+    end
+
+    control:SetHidden(true)
+    control:ClearAnchors()
+    control.scrollTooltip:ClearLines()
+    return true
+end
+
+function ZO_TributeDiscardCounterTooltip_Gamepad_Show(anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)
+    if not ZO_TributeResourceTooltip_Gamepad_Hide() then
+        return
+    end
+
+    -- Order matters
+    local control = g_discardCounterTooltipControl
+    control.tip:LayoutTributeDiscardCounter()
+    control:ClearAnchors()
+    if anchorPoint then
+        control:SetAnchor(anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)
+    end
+
+    if ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingBoard() then
+        control:SetClampedToScreenInsets(0, -25, 0, ZO_KEYBIND_STRIP_GAMEPAD_VISUAL_HEIGHT)
+    else
+        control:SetClampedToScreenInsets(0, -25, 0, 25)
+    end
+    control:SetHidden(false)
+end
+
+function ZO_TributeDiscardCounterTooltip_Gamepad_GetControl()
+    return g_discardCounterTooltipControl
+end
+
+function ZO_TributeDiscardCounterTooltip_Gamepad_Initialize(tooltipControl)
+    g_discardCounterTooltipControl = tooltipControl
+
+    local function ScreenResizeHandler(control)
+        local maxHeight = GuiRoot:GetHeight() - (ZO_GAMEPAD_PANEL_FLOATING_HEIGHT_DISCOUNT * 2)
+        control:SetDimensionConstraints(0, 0, 0, maxHeight)
+    end
+
+    local DEFAULT_TOOLTIP_STYLES = nil
+    ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized(g_discardCounterTooltipControl, DEFAULT_TOOLTIP_STYLES, ScreenResizeHandler, LEFT)
+    ScreenResizeHandler(g_discardCounterTooltipControl)
 end

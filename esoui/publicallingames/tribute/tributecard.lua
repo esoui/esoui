@@ -135,6 +135,8 @@ do
     local FIRST_TOP_OFFSET_Y = 135
     local LARGE_PADDING_Y = 15
     local SMALL_PADDING_Y = 10
+    local OVERSIZED_SCALE = 1.2
+    local OVERSIZED_PADDING_Y = 6
 
     function ZO_TributeCard_MechanicContainer:Setup(cardObject, trigger, mechanicIndex)
         local control = self.control
@@ -146,6 +148,9 @@ do
         local isActivationTrigger = trigger == TRIBUTE_MECHANIC_TRIGGER_ACTIVATION
         local isComboTrigger = trigger == TRIBUTE_MECHANIC_TRIGGER_COMBO
         local chooseOneMechanic = isActivationTrigger and cardObject:DoesChooseOneMechanic()
+        local isOversized = self.numSiblings <= 2
+        local scale = isOversized and OVERSIZED_SCALE or 1
+        control:SetScale(scale)
         if chooseOneMechanic then
             -- Quick and dirty workaround. The choice display isn't actually a mechanic, it replaces all of the mechanics on the card as one unified concept
             -- TODO Tribute: If we want to change to let design control which mechanics require choice, or work with combos, this logic will be useless and will need to be reimplemented
@@ -153,7 +158,7 @@ do
                 ApplyTemplateToControl(control, "ZO_TributeCard_MechanicContainer_Large_SingleDigit_Activation_Style")
                 self.typeIconTexture:SetTexture("EsoUI/Art/Tribute/Mechanics/tributeMechanicCardDisplay_chooseOne.dds")
                 self.quantityLabel:SetText(self.numSiblings)
-                local offsetY = FIRST_TOP_OFFSET_Y + (MECHANIC_CONTAINER_LARGE_ACTIVATION_HEIGHT / 2)
+                local offsetY = FIRST_TOP_OFFSET_Y + (MECHANIC_CONTAINER_LARGE_ACTIVATION_HEIGHT / 2 * OVERSIZED_SCALE)
                 control:SetAnchor(CENTER, nil, TOPLEFT, OFFSET_X, offsetY)
             else
                 control:SetHidden(true)
@@ -212,6 +217,7 @@ do
             paddingY = SMALL_PADDING_Y
         else
             height = isActivationTrigger and MECHANIC_CONTAINER_LARGE_ACTIVATION_HEIGHT or MECHANIC_CONTAINER_LARGE_COMBO_HEIGHT
+            height = height * scale
             paddingY = LARGE_PADDING_Y
             if isDoubleDigitContainer then
                 offsetX = LARGE_DOUBLE_DIGIT_OFFSET_X
@@ -296,9 +302,6 @@ end
 function ZO_TributeCard_DefeatCostAdjustment:Reset()
     ZO_ClearTable(self.queue)
     self:ResetVisuals()
-
-    -- Force the card to refresh the defeat cost in order to ensure that the current value is shown.
-    self.cardObject:RefreshDefeatCost()
 end
 
 function ZO_TributeCard_DefeatCostAdjustment:ResetVisuals()
@@ -346,7 +349,7 @@ do
 
         -- Order matters
         self.currentEntry = nextQueueEntry
-        self:OnTimelineStart()
+        self:OnTimelineStarted()
         self.timeline:PlayForward()
     end
 
@@ -363,17 +366,14 @@ do
 
     function ZO_TributeCard_DefeatCostAdjustment:OnTimelineStopped()
         if self.currentEntry then
-            -- The current animation has finished playing; update the card to reflect the final defeat cost for the
-            -- current animation, reset the controls and, if the queue is not empty, play the next queued animation.
             -- Order matters
-            self.cardObject:SetDefeatCost(self.currentEntry.newCost)
             self:ResetVisuals()
             TryShowNextQueueEntry(self)
         end
     end
 end
 
-function ZO_TributeCard_DefeatCostAdjustment:OnTimelineStart()
+function ZO_TributeCard_DefeatCostAdjustment:OnTimelineStarted()
     local entry = self.currentEntry
     if not entry then
         -- No animation is currently playing.
@@ -381,7 +381,6 @@ function ZO_TributeCard_DefeatCostAdjustment:OnTimelineStart()
     end
 
     local control = self.control
-    self.cardObject:SetDefeatCost(entry.newCost)
     control:SetText(string.format("%s%d", entry.costDelta > 0 and "+" or "", entry.costDelta))
     -- Interpolate the font color based upon whether this is a damage or healing event.
     if entry.costDelta < 0 then
@@ -396,15 +395,15 @@ function ZO_TributeCard_DefeatCostAdjustment:OnTimelineStart()
     self.bannerTexture:SetTexture(cardBannerTextureFileName)
 
     -- Translate upward and to either the left or right randomly.
-    local MIN_OFFSET = 110
-    local MAX_OFFSET = 125
+    local MIN_OFFSET = 90
+    local MAX_OFFSET = 100
     local targetOffset = zo_lerp(MIN_OFFSET, MAX_OFFSET, zo_random())
     if zo_random() < 0.5 then
         self.targetOffsetX = -targetOffset
     else
         self.targetOffsetX = targetOffset
     end
-    self.targetOffsetY = 30 - targetOffset * 0.5
+    self.targetOffsetY = 30 - targetOffset * 0.25
 
     -- Animate over slightly varied durations to reduce repetitiveness.
     local MIN_DURATION_MS = 1900
@@ -413,7 +412,6 @@ function ZO_TributeCard_DefeatCostAdjustment:OnTimelineStart()
     local animation = self.timeline:GetFirstAnimation()
     animation:SetDuration(durationMS)
 
-    -- Prepare for animation to begin.
     control:SetHidden(false)
 end
 
@@ -433,13 +431,13 @@ function ZO_TributeCard_DefeatCostAdjustment:OnTimelineUpdate(progress)
 
     -- Translate the control up and to the left/right.
     local interpolatedOffsetX = zo_lerp(0, self.targetOffsetX, easeOut)
-    local interpolatedOffsetY = zo_lerp(30, self.targetOffsetY, easeOut)
+    local interpolatedOffsetY = zo_lerp(30, self.targetOffsetY, ZO_EaseOutQuartic(progress))
     control:SetAnchor(CENTER, self.anchorToControl, nil, interpolatedOffsetX, interpolatedOffsetY)
 
     -- Interpolate the font color from dim to bright while gradually fading the control away.
-    control:SetColor(self.startFontColor:Lerp(self.endFontColor, easeOut):UnpackRGBA())
-    local alpha = progress < 0.5 and 1 or (1 - ZO_EaseInCubic((progress - 0.5) * 2))
-    control:SetAlpha(alpha)
+    local r, g, b = self.startFontColor:Lerp(self.endFontColor, easeOut):UnpackRGB()
+    local a = progress < 0.75 and 1 or (1 - (progress - 0.75) * 4)
+    control:SetColor(r, g, b, a)
 end
 
 -- Card State Effect --
@@ -645,7 +643,7 @@ function ZO_TributeCard:Setup(cardDefId, patronDefId, overrideSpace)
     if costQuantity > 0 then
         self.costLabel:SetHidden(false)
         self.costLabel:SetText(costQuantity)
-        local costTextureFile = self:GetAcquireCostTextureFile()
+        local costTextureFile = self:GetAcquireCostTextureFile(isContract)
         self.costIconTexture:SetTexture(costTextureFile)
     else
         self.costLabel:SetHidden(true)
@@ -784,13 +782,18 @@ function ZO_TributeCard:RefreshDefeatCost()
 end
 
 function ZO_TributeCard:UpdateDefeatCost(newCost, costDelta)
-    local adjustmentObject = self.defeatCostAdjustmentObject
-    if not adjustmentObject then
-        -- Create and permanently cache ZO_TributeCard_DefeatCostAdjustment object.
-        adjustmentObject = ZO_TributeCard_DefeatCostAdjustment:New(self)
-        self.defeatCostAdjustmentObject = adjustmentObject
+    -- Reflect the new defeat cost instantly.
+    self:SetDefeatCost(newCost)
+
+    if not self.defeatCostAdjustmentObject then
+        -- Create and permanently cache a ZO_TributeCard_DefeatCostAdjustment object for this card object.
+        self.defeatCostAdjustmentObject = ZO_TributeCard_DefeatCostAdjustment:New(self)
     end
 
+    -- Queue animation of the defeat cost delta.
+    self.defeatCostAdjustmentObject:UpdateDefeatCost(newCost, costDelta)
+
+    -- Play the associated audio.
     if costDelta < 0 then
         if newCost > 0 then
             PlaySound(SOUNDS.TRIBUTE_AGENT_DAMAGED)
@@ -800,9 +803,6 @@ function ZO_TributeCard:UpdateDefeatCost(newCost, costDelta)
     elseif costDelta > 0 then
         PlaySound(SOUNDS.TRIBUTE_AGENT_HEALED)
     end
-
-    -- Queue animation of the defeat cost update.
-    adjustmentObject:UpdateDefeatCost(newCost, costDelta)
 end
 
 -- Evaluates the effective state flags given the specified state flags or, if unspecified, the current state flags of the card.
@@ -910,7 +910,6 @@ function ZO_TributeCard:Reset()
     self:ReleaseAllObjects()
 
     if self.defeatCostAdjustmentObject then
-        -- Abort any playing animation, empty the queue and reset the visuals.
         self.defeatCostAdjustmentObject:Reset()
     end
 
@@ -1088,6 +1087,12 @@ function ZO_TributeCard:OnCursorExit()
     end
 end
 
+function ZO_TributeCard:OnMouseEnter()
+    if TRIBUTE:IsInputStyleMouse() and self:IsInteractive() then
+        SetHighlightedTributeCard(self.cardInstanceId)
+    end
+end
+
 function ZO_TributeCard:OnMouseUp(button, upInside)
     if TRIBUTE:IsInputStyleMouse() and upInside and button == MOUSE_BUTTON_INDEX_LEFT and self.cardInstanceId then
         -- Don't allow interaction with cards while the target viewer is up
@@ -1137,7 +1142,11 @@ function ZO_TributeCard:SetHighlighted(isHighlighted)
             self.glowTimeline = timeline
         end
         timeline:PlayForward()
-        PlaySound(SOUNDS.TRIBUTE_CARD_HIGHLIGHTED)
+        if not self:IsWorldCard() then
+            -- If a world card is being highlighted, that means we'll get a popup interface card, also highlighted.
+            -- We'll let that play the sound so we don't play it twice.
+            PlaySound(SOUNDS.TRIBUTE_CARD_HIGHLIGHTED)
+        end
     else
         if timeline then
             timeline:PlayBackward()

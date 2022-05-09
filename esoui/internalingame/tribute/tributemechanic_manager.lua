@@ -307,6 +307,12 @@ function ZO_TributeMechanicTile:OnCursorExit()
     self:HideCardPopupAndTooltip()
 end
 
+function ZO_TributeMechanicTile:OnMouseEnter()
+    if not IsInGamepadPreferredMode() then
+        self:ShowCardPopupAndTooltip()
+    end
+end
+
 function ZO_TributeMechanicTile:OnTimelineStop(timeline, completedPlaying)
     if timeline.object and not timeline.retainAnimation then
         if (not timeline.reversePlayback and completedPlaying) or (timeline.reversePlayback and not completedPlaying) then

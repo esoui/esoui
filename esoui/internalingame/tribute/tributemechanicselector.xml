@@ -61,7 +61,7 @@
                     </Controls>
                 </Control>
 
-                <Label name="$(parent)Instruction" font="ZoFontTributeAntique40" horizontalAlignment="CENTER" text="SI_TRIBUTE_MECHANIC_SELECTOR_CHOOSE_ONE">
+                <Label name="$(parent)Instruction" horizontalAlignment="CENTER" text="SI_TRIBUTE_MECHANIC_SELECTOR_CHOOSE_ONE">
                     <Anchor point="BOTTOM" relativeTo="$(parent)MechanicContainer" relativePoint="TOP" offsetY="-20" />
                 </Label>
             

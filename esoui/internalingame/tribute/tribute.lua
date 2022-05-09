@@ -31,6 +31,16 @@ function ZO_Tribute:Initialize(control)
     self.control = control
     
     TRIBUTE_FRAGMENT = ZO_SimpleSceneFragment:New(control)
+    TRIBUTE_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_HIDING then
+            -- Due to the nature of UI controls plastered on models, a timing issue can occur where the UI can hide several frames
+            -- before the game cleans up the models resulting in ESO-771856. So if the UI hides, just make sure the TributeState immediately gets us back to viewing the world.
+            -- We also don't want to wait for the summary fragment to go away naturally, we want it gone immediately
+            SCENE_MANAGER:RemoveFragmentImmediately(TRIBUTE_SUMMARY_FRAGMENT)
+            SCENE_MANAGER:RemoveFragmentImmediately(UNIFORM_BLUR_FRAGMENT)
+            OnTributeUIHiding()
+        end
+    end)
 
     TRIBUTE_SCENE = ZO_RemoteScene:New("tribute", SCENE_MANAGER)
     TRIBUTE_SCENE:RegisterCallback("StateChange", function(oldState, newState)
@@ -54,7 +64,8 @@ function ZO_Tribute:Initialize(control)
             end
 
             self:ResetResourceTooltip()
-	        self:ResetCardPopupAndTooltip(ANY_ACTIVE_CARD)
+            self:ResetDiscardCounters()
+            self:ResetCardPopupAndTooltip(ANY_ACTIVE_CARD)
             self:RefreshInputState()
             KEYBIND_STRIP:RestoreDefaultExit()
         elseif newState == SCENE_HIDDEN then
@@ -77,6 +88,8 @@ function ZO_Tribute:Initialize(control)
         if gameFlowState ~= TRIBUTE_GAME_FLOW_STATE_INACTIVE then
             if previousState == TRIBUTE_GAME_FLOW_STATE_INACTIVE then
                 self:DeferredInitialize()
+            elseif previousState == TRIBUTE_GAME_FLOW_STATE_PLAYING then
+                self:ResetDiscardCounters()
             elseif previousState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT then
                 --If we still have patronSelectionShowTime set, that means we are ending the drafting state before we actually began showing the selection screen.
                 local forceEndSelection = self.patronSelectionShowTime ~= nil
@@ -116,6 +129,7 @@ function ZO_Tribute:InitializeControls()
     self.cardInstanceIdToCardObject = {}
 
     self.resourceDisplayControls = {}
+    self.discardCounters = {}
 
     self.activeCardPopup = {}
     self.activeCardTooltip = {}
@@ -127,6 +141,8 @@ function ZO_Tribute:InitializeControls()
     self.boardOrientControl = control:GetNamedChild("BoardOrient")
 
     for perspective = TRIBUTE_PLAYER_PERSPECTIVE_ITERATION_BEGIN, TRIBUTE_PLAYER_PERSPECTIVE_ITERATION_END do
+        local discardCounter = CreateControlFromVirtual("$(parent)DiscardCountDisplay", self.boardOrientControl, "ZO_TributeDiscardCountDisplay_Control", perspective)
+        self.discardCounters[perspective] = ZO_TributeDiscardCountDisplay:New(discardCounter, perspective)
         local perspectiveResourceDisplayControls = {}
         self.resourceDisplayControls[perspective] = perspectiveResourceDisplayControls
         for resource = TRIBUTE_RESOURCE_ITERATION_BEGIN, TRIBUTE_RESOURCE_ITERATION_END do
@@ -155,6 +171,8 @@ function ZO_Tribute:InitializeControls()
     self.confirmButton:GetNamedChild("Bg"):SetColor(ZO_BLACK:UnpackRGB())
 
     self.instruction = control:GetNamedChild("Instruction")
+    -- ZoFontTributeAntique40 is a rarely used font, so defer loading it until it's actually becomes necessary
+    self.instruction:SetFont("ZoFontTributeAntique40")
     self.instructionBackground = self.instruction:GetNamedChild("Background")
 
     local patronStalls = {}
@@ -170,7 +188,13 @@ function ZO_Tribute:InitializeControls()
     self.gamepadCursor = ZO_TributeCursor_Gamepad:New(gamepadCursorControl)
 
     self.turnTimerTextLabel = self.boardOrientControl:GetNamedChild("TurnTimerText")
+    -- ZoFontTributeAntique40 is a rarely used font, so defer loading it until it's actually becomes necessary
+    self.turnTimerTextLabel:SetFont("ZoFontTributeAntique40")
     self.turnTimerTextLabelTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_Tribute_HUDFade", self.turnTimerTextLabel)
+
+    self.turnTimerTimeRemainingLabel = self.turnTimerTextLabel:GetNamedChild("TimeRemaining")
+    -- ZoFontTributeAntique40 is a rarely used font, so defer loading it until it actually becomes necessary
+    self.turnTimerTimeRemainingLabel:SetFont("ZoFontTributeAntique40")
 end
 
 function ZO_Tribute:DeferredInitialize()
@@ -671,11 +695,11 @@ do
         end)
 
         self.gamepadCursor:RegisterCallback("ObjectUnderCursorChanged", function(object, objectType, previousObject, previousObjectType)
-            if previousObjectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD or previousObjectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.MECHANIC_TILE then
+            if previousObjectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD or previousObjectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.MECHANIC_TILE or previousObjectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.DISCARD_COUNTER then
                 previousObject:OnCursorExit()
             end
 
-            if objectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD or objectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.MECHANIC_TILE then
+            if objectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD or objectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.MECHANIC_TILE or objectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.DISCARD_COUNTER then
                 object:OnCursorEnter()
             end
         end)
@@ -736,6 +760,17 @@ function ZO_Tribute:OnUpdate(frameTimeSeconds)
         self.patronSelectionShowTime = nil
         ZO_TRIBUTE_PATRON_SELECTION_MANAGER:BeginPatronSelection()
     end
+
+    local showTurnTimeRemaining = false
+    if GetActiveTributePlayerPerspective() == TRIBUTE_PLAYER_PERSPECTIVE_SELF then
+        local timeLeftMs = GetTributeRemainingTimeForTurn()
+        if timeLeftMs and timeLeftMs <= self.turnTimerWarningThresholdMs then
+            local formattedTimeLeft = ZO_FormatTimeMilliseconds(timeLeftMs, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_HIDE_ZEROES, TIME_FORMAT_PRECISION_SECONDS)
+            self.turnTimerTimeRemainingLabel:SetText(formattedTimeLeft)
+            showTurnTimeRemaining = true
+        end
+    end
+    self.turnTimerTimeRemainingLabel:SetHidden(not showTurnTimeRemaining)
 end
 
 function ZO_Tribute:TryTriggerInitialTutorials()
@@ -853,7 +888,9 @@ function ZO_Tribute:RefreshInstruction(showTargetInstructions, forceRefresh)
 end
 
 function ZO_Tribute:SetMouseControlsEnabled(enabled)
-    --TODO Tribute: Setup any mouse style specific handling
+    if not enabled then
+        self:ResetDiscardCounterTooltips()
+    end
 end
 
 function ZO_Tribute:IsInputStyleMouse()
@@ -910,6 +947,8 @@ function ZO_Tribute:SetupGame()
     self:ResetPatrons()
     SetTributeAutoPlayEnabled(self.savedVars.autoPlayChecked)
     SetTributeGamepadCursorControl(self.gamepadCursorControl)
+    --This value can change depending on the arena def, so regrab this value any time we start a match
+    self.turnTimerWarningThresholdMs = GetTributeTurnTimerWarningThreshold()
 
     for _, perspectiveResourceDisplayControls in pairs(self.resourceDisplayControls) do
         for _, resourceDisplayControl in pairs(perspectiveResourceDisplayControls) do
@@ -962,6 +1001,10 @@ function ZO_Tribute:LayoutBoard()
     renderPositionX, renderPositionY, renderPositionZ, rotationXRadians, rotationYRadians, rotationZRadians = GetTributeTurnTimerLabelTransformInfo()
     self.turnTimerTextLabel:SetTransformOffset(renderPositionX, renderPositionY, renderPositionZ)
     self.turnTimerTextLabel:SetTransformRotation(rotationXRadians, rotationYRadians, rotationZRadians)
+
+    for _, discardCounter in pairs(self.discardCounters) do
+        discardCounter:UpdateTransform()
+    end
 
     for _, patronStall in pairs(self.patronStalls) do
         patronStall:RefreshLayout()
@@ -1180,6 +1223,18 @@ function ZO_Tribute:ShowResourceTooltip(perspective, resource)
     end
 end
 
+function ZO_Tribute:ResetDiscardCounterTooltips()
+    for _, discardCounter in pairs(self.discardCounters) do
+        discardCounter:HideTooltip()
+    end
+end
+
+function ZO_Tribute:ResetDiscardCounters()
+    for _, discardCounter in pairs(self.discardCounters) do
+        discardCounter:Reset()
+    end
+end
+
 function ZO_Tribute:RemoveTutorial(tutorialTrigger)
     TUTORIAL_MANAGER:RemoveTutorialByTrigger(tutorialTrigger)
 end
@@ -1209,6 +1264,86 @@ end
 function ZO_Tribute:GetCardByInstanceId(cardInstanceId)
     return self.cardInstanceIdToCardObject[cardInstanceId]
 end
+
+-----------------------------------
+-- Tribute Discard Count Display --
+-----------------------------------
+
+ZO_TributeDiscardCountDisplay = ZO_InitializingObject:Subclass()
+
+function ZO_TributeDiscardCountDisplay:Initialize(control, perspective)
+    self.control = control
+    self.control.object = self
+    self.text = self.control:GetNamedChild("Text")
+    self.perspective = perspective
+
+    -- ZoFontTributeAntique52 is a rarely used font, so defer loading it until it actually becomes necessary
+    self.text:SetFont("ZoFontTributeAntique52")
+    self.count = 0
+
+    self.control:RegisterForEvent(EVENT_TRIBUTE_FORCE_DISCARD_COUNT_CHANGED, function(_, perspective, newCount)
+        if perspective == self.perspective then
+            self:SetCount(newCount)
+        end
+    end)
+end
+
+function ZO_TributeDiscardCountDisplay:UpdateTransform()
+    local renderPositionX, renderPositionY, renderPositionZ, rotationXRadians, rotationYRadians, rotationZRadians = GetTributeDiscardCountTransformInfo(self.perspective)
+    self.control:SetTransformOffset(renderPositionX, renderPositionY, renderPositionZ)
+    self.control:SetTransformRotation(rotationXRadians, rotationYRadians, rotationZRadians)
+end
+
+function ZO_TributeDiscardCountDisplay:SetCount(newCount)
+    if newCount > 0 then
+        self.text:SetText(newCount)
+        self.control:SetHidden(false)
+    else
+        self.control:SetHidden(true)
+    end
+end
+
+function ZO_TributeDiscardCountDisplay:Reset()
+    self:SetCount(0)
+    self:HideTooltip()
+end
+
+function ZO_TributeDiscardCountDisplay:HideTooltip()
+    ClearTooltip(InformationTooltip)
+    ZO_TributeDiscardCounterTooltip_Gamepad_Hide()
+end
+
+function ZO_TributeDiscardCountDisplay:ShowTooltip()
+    self:HideTooltip()
+    local offsetX, offsetY = self.control:ProjectRectToScreenAndComputeAABBPoint(LEFT)
+    offsetX = offsetX - 30
+
+    if IsInGamepadPreferredMode() then
+        ZO_TributeDiscardCounterTooltip_Gamepad_Show(RIGHT, GuiRoot, TOPLEFT, offsetX, offsetY)
+    else
+        InitializeTooltip(InformationTooltip, GuiRoot, RIGHT, offsetX, offsetY, TOPLEFT)
+        InformationTooltip:AddLine(GetString(SI_TRIBUTE_DISCARD_COUNTER_TOOLTIP_TITLE), "", ZO_NORMAL_TEXT:UnpackRGBA())
+        InformationTooltip:AddLine(GetString(SI_TRIBUTE_DISCARD_COUNTER_TOOLTIP_DESCRIPTION))
+    end
+end
+
+function ZO_TributeDiscardCountDisplay:OnCursorEnter()
+    self:ShowTooltip()
+end
+
+function ZO_TributeDiscardCountDisplay:OnCursorExit()
+    self:HideTooltip()
+end
+
+function ZO_TributeDiscardCountDisplay:OnMouseEnter()
+    if not IsInGamepadPreferredMode() then
+        self:ShowTooltip()
+    end
+end
+
+-----------------------------
+-- Global Functions
+-----------------------------
 
 function ZO_Tribute_OnInitialized(control)
     TRIBUTE = ZO_Tribute:New(control)

@@ -86,7 +86,7 @@
 
                 <Texture name="$(parent)TypeIcon">
                     <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-16" />
+                    <Anchor point="CENTER" offsetX="-14" />
                 </Texture>
 
                 <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" />
@@ -101,7 +101,7 @@
 
                 <Texture name="$(parent)TypeIcon">
                     <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-16" />
+                    <Anchor point="CENTER" offsetX="-14" />
                 </Texture>
 
                 <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" />
@@ -116,7 +116,7 @@
 
                 <Texture name="$(parent)TypeIcon">
                     <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-26" />
+                    <Anchor point="CENTER" offsetX="-22" />
                 </Texture>
 
                 <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" />
@@ -131,7 +131,7 @@
 
                 <Texture name="$(parent)TypeIcon">
                     <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-26" />
+                    <Anchor point="CENTER" offsetX="-23" />
                 </Texture>
 
                 <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" />
@@ -355,7 +355,7 @@
             <Dimensions x="ZO_TRIBUTE_CARD_UI_WIDTH" y="ZO_TRIBUTE_CARD_UI_HEIGHT" />
 
             <OnMouseEnter>
-                self.object:OnCursorEnter()
+                self.object:OnMouseEnter()
             </OnMouseEnter>
 
             <OnMouseExit>

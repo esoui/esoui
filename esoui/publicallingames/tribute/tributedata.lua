@@ -49,7 +49,11 @@ ZO_TRIBUTE_ICONS_KEYBOARD =
     disabled = "EsoUI/Art/Tribute/tribute_tabIcon_tribute_disabled.dds",
 }
 
-ZO_TRIBUTE_ICON_GAMEPAD = "EsoUI/Art/Tribute/gamepad/gp_tribute_tabIcon_tribute.dds"
+ZO_TRIBUTE_ICONS_GAMEPAD =
+{
+    normal = "EsoUI/Art/Tribute/gamepad/gp_tribute_tabIcon_tribute.dds",
+    disabled = "EsoUI/Art/Tribute/gamepad/gp_tribute_tabIcon_tribute_disabled.dds",
+}
 
 ----------------------------------
 -- Pooled Object Abstract Class --
@@ -303,6 +307,11 @@ function ZO_TributePatronData:GetMechanicsText(favorState)
     return GetTributePatronMechanicsText(self.patronId, favorState)
 end
 
+function ZO_TributePatronData:IsNew()
+    local patronCollectibleId = self:GetPatronCollectibleId()
+    return IsCollectibleNew(patronCollectibleId)
+end
+
 function ZO_TributePatronData:IsNeutral()
     return IsTributePatronNeutral(self.patronId)
 end
@@ -482,6 +491,13 @@ function ZO_TributePatronCategoryData:PatronIterator(filterFunctions)
     return ZO_FilteredNumericallyIndexedTableIterator(self.tributePatrons, filterFunctions)
 end
 
+function ZO_TributePatronCategoryData:HasAnyNewPatronCollectibles()
+    for _, tributePatron in self:PatronIterator({ZO_TributePatronData.IsNew}) do
+        return true
+    end
+    return false
+end
+
 function ZO_TributePatronCategoryData:SetSearchResultsVersion(searchResultsVersion)
     self.searchResultsVersion = searchResultsVersion
 end
@@ -506,6 +522,10 @@ function ZO_TributePatronCategoryData:CompareTo(otherTributePatronCategoryData)
     else
         return order < otherOrder
     end
+end
+
+function ZO_TributePatronCategoryData:Equals(otherTributePatronCategoryData)
+    return self:GetId() == otherTributePatronCategoryData:GetId()
 end
 
 -----------------------
@@ -611,10 +631,13 @@ function ZO_TributeCardData:GetFlavorText()
     return GetTributeCardFlavorText(self.cardDefId)
 end
 
-function ZO_TributeCardData:GetAcquireCostTextureFile()
+function ZO_TributeCardData:GetAcquireCostTextureFile(showContract)
     local costResourceType, costQuantity = self:GetAcquireCost()
-    local textureFile = string.format("EsoUI/Art/Tribute/tributeCardCost_%d.dds", costResourceType)
-    return textureFile
+    if showContract then
+        return string.format("EsoUI/Art/Tribute/tributeCardCost_Contract_%d.dds", costResourceType)
+    else
+        return string.format("EsoUI/Art/Tribute/tributeCardCost_%d.dds", costResourceType)
+    end
 end
 
 function ZO_TributeCardData:GetDefeatCostTextureFile()

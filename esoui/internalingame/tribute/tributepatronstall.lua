@@ -323,6 +323,9 @@ function ZO_TributePatronStall:Reset()
     self:ReleaseRequirements()
     self.stateFlags = nil
     self.favorState = nil
+    local IGNORE_CALLBACKS = true
+    self.tabFadeTimeline:PlayInstantlyToStart(IGNORE_CALLBACKS)
+    self.requirementsFadeTimeline:PlayInstantlyToStart(IGNORE_CALLBACKS)
 end
 
 function ZO_TributePatronStall_OnInitialized(control)

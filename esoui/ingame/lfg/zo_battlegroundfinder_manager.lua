@@ -14,6 +14,7 @@ local categoryData =
         priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.BATTLEGROUNDS,
         name = GetString(SI_ACTIVITY_FINDER_CATEGORY_BATTLEGROUNDS),
         menuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_battlegrounds.dds",
+        disabledMenuIcon = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_battlegrounds_disabled.dds",
         sceneName = "gamepadBattlegroundFinder",
         tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_BATTLEGROUNDS),
     },

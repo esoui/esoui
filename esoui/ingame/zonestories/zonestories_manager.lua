@@ -103,6 +103,7 @@ do
             normalIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_up.dds",
             pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_down.dds",
             mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_over.dds",
+            disabledIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_disabled.dds",
             isZoneStories = true,
         },
 
@@ -111,6 +112,7 @@ do
             priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.ZONE_STORIES,
             name = GetString(SI_ACTIVITY_FINDER_CATEGORY_ZONE_STORIES),
             menuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_zoneStories.dds",
+            disabledMenuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_zoneStories_disabled.dds",
             sceneName = "zoneStoriesGamepad",
             tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_ZONE_STORIES),
             isZoneStories = true,

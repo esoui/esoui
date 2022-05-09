@@ -86,7 +86,7 @@ function ZO_TributePatronBook_Gamepad:ViewCategory(tributePatronCategoryData)
         entryData:SetDataSource(patronData)
         entryData:SetIconTintOnSelection(true)
 
-        patronList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+        patronList:AddEntry("ZO_GamepadNewMenuEntryTemplate", entryData)
     end
 
     patronList:Commit()
@@ -171,6 +171,7 @@ end
 -- Do not call this directly, instead call self.categoriesRefreshGroup:MarkDirty("List")
 function ZO_TributePatronBook_Gamepad:RefreshCategories()
     local categoryList = self.categoryListDescriptor.list
+    local selectedData = self.currentListDescriptor.list:GetTargetData()
     categoryList:Clear()
 
     local entryList = {}
@@ -185,13 +186,21 @@ function ZO_TributePatronBook_Gamepad:RefreshCategories()
     end
 
     for _, entryData in ipairs(entryList) do
-        categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+        categoryList:AddEntry("ZO_GamepadNewMenuEntryTemplate", entryData)
+
+        if selectedData and selectedData:GetId() == entryData:GetId() then
+            selectedData = entryData
+        end
     end
 
     categoryList:Commit()
 
     if self.currentListDescriptor then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentListDescriptor.keybindDescriptor)
+
+        if self.currentListDescriptor == self.patronListDescriptor then
+            self:ViewCategory(self.patronListDescriptor.lastParentCategoryData)
+        end
     end
 end
 
@@ -317,8 +326,17 @@ end
 
 
 function ZO_TributePatronBook_Gamepad:SetupList(list)
-    list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate", ZO_ItemSetCollectionCategoryData.Equals)
-    list:AddDataTemplate("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    local function TributePatronEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+        if data.HasAnyNewPatronCollectibles then
+            data:SetNew(data:HasAnyNewPatronCollectibles())
+        else
+            data:SetNew(data.dataSource:IsNew())
+        end
+        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+    end
+
+    list:AddDataTemplateWithHeader("ZO_GamepadNewMenuEntryTemplate", TributePatronEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_TributePatronCategoryData.Equals, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplate("ZO_GamepadNewMenuEntryTemplate", TributePatronEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_TributePatronCategoryData.Equals)
     list:SetReselectBehavior(ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESET_TO_DEFAULT)
 end
 
@@ -344,6 +362,14 @@ end
 
 function ZO_TributePatronBook_Gamepad:HideCurrentListDescriptor()
     if self.currentListDescriptor then
+        if not self.currentListDescriptor.isCategoriesDescriptor then
+            local currentData = self.currentListDescriptor.list:GetTargetData()
+            if currentData and currentData:IsNew() then
+                ClearCollectibleNewStatus(currentData:GetPatronCollectibleId())
+                self.categoriesRefreshGroup:MarkDirty("List")
+            end
+        end
+
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentListDescriptor.keybindDescriptor)
         self:DisableCurrentList()
         self.currentListDescriptor = nil
@@ -370,6 +396,11 @@ function ZO_TributePatronBook_Gamepad:GetCurrentListTargetData()
 end
 
 function ZO_TributePatronBook_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
+    if oldSelectedData and oldSelectedData:IsNew() and oldSelectedData.GetPatronCollectibleId then
+        ClearCollectibleNewStatus(oldSelectedData:GetPatronCollectibleId())
+        self.categoriesRefreshGroup:MarkDirty("List")
+    end
+
     if selectedData and selectedData.dataSource then
         if list == self.patronListDescriptor.list then
             self.patronId = selectedData.patronId

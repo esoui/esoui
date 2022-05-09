@@ -152,8 +152,12 @@
                     <Controls>
                         <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false">
                             <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1" />
                         </Label>
+                        <Texture name="$(parent)MailIndicator" textureFile="EsoUI/Art/Mail/mail_inbox_unreadMessage.dds" inheritScale="false" hidden="true">
+                            <Anchor point="CENTER" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="-15" />
+                            <Dimensions x="32" y="32" />
+                        </Texture>
                     </Controls>
                 </Texture>
 
@@ -288,11 +292,7 @@
                     <Controls>
                         <Label name="$(parent)Duration" font="ZoFontHeader4" />
 
-                        <Texture name="$(parent)PrestigeIcon">
-                            <Controls>
-                                <Label name="$(parent)Text" font="ZoFontAnnounce" />
-                            </Controls>
-                        </Texture>
+                        <Label name="$(parent)PrestigeLabel" font="ZoFontAnnounce" />
 
                         <Texture name="$(parent)GoldIcon">
                             <Controls>
@@ -316,11 +316,7 @@
                     <Controls>
                         <Label name="$(parent)Duration" font="ZoFontGamepadBold27" />
 
-                        <Texture name="$(parent)PrestigeIcon">
-                            <Controls>
-                                <Label name="$(parent)Text" font="ZoFontGamepad34" />
-                            </Controls>
-                        </Texture>
+                        <Label name="$(parent)PrestigeLabel" font="ZoFontGamepad34" />
 
                         <Texture name="$(parent)GoldIcon">
                             <Controls>
@@ -340,28 +336,37 @@
 
         <Control name="ZO_TributeSummary_Statistics" virtual="true">
             <Controls>
+                <Texture name="$(parent)TopBorder" textureFile="EsoUI/Art/Tribute/tributeEndOfGameStatsBackdrop_Top.dds" addressMode="WRAP">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot" />
+                    <Dimensions y="64" />
+                    <OnRectWidthChanged>
+                        local textureCoordRight = newWidth / 512
+                        self:SetTextureCoords(0, textureCoordRight, 0, 1)
+                    </OnRectWidthChanged>
+                </Texture>
                 <Texture name="$(parent)Backdrop">
-                    <Anchor offsetX="52" offsetY="52" />
+                    <Anchor point="TOP" relativeTo="$(parent)TopBorder" relativePoint="BOTTOM" offsetX="-700"/>
                     <Dimensions x="270" y="373" />
                     <Controls>
                         <Label name="$(parent)Duration">
                             <Anchor point="TOP" offsetY="10" />
                         </Label>
 
-                        <Texture name="$(parent)PrestigeIcon" textureFile="EsoUI/Art/Tribute/tributeEndOfGame_prestige.dds">
-                            <Dimensions x="32" y="32" />
+                        <Label name="$(parent)PrestigeLabel">
                             <Anchor point="TOP" relativeTo="$(parent)Duration" relativePoint="BOTTOM" offsetY="30" constrains="Y" />
-                            <Anchor point="LEFT" offsetX="15" constrains="X" />
+                            <Anchor point="CENTER" relativeTo="$(parent)Duration" constrains="X" />
                             <Controls>
-                                <Label name="$(parent)Text">
-                                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="10" />
-                                </Label>
+                                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Tribute/tributeEndOfGame_prestige.dds">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-10" />
+                                </Texture>
                             </Controls>
-                        </Texture>
+                        </Label>
 
                         <Texture name="$(parent)GoldIcon" textureFile="EsoUI/Art/Tribute/tributeEndOfGame_gold.dds">
                             <Dimensions x="32" y="32" />
-                            <Anchor point="TOP" relativeTo="$(parent)PrestigeIcon" relativePoint="BOTTOM" offsetY="20" />
+                            <Anchor point="TOP" relativeTo="$(parent)PrestigeLabelIcon" relativePoint="BOTTOM" offsetY="20" />
                             <Controls>
                                 <Label name="$(parent)Text">
                                     <Anchor point="LEFT" relativePoint="RIGHT" offsetX="10" />
@@ -411,7 +416,7 @@
             <Controls>
                 <Texture name="$(parent)Banner">
                     <Controls>
-                        <Label name="$(parent)Text" font="ZoFontGamepadBold61" />
+                        <Label name="$(parent)Text" font="ZoFontGamepadBold54" />
                     </Controls>
                 </Texture>
 
@@ -421,9 +426,9 @@
 
                 <Control name ="$(parent)Prestige">
                     <Controls>
-                        <Label name="$(parent)Divider" font="ZoFontGamepadBold61" />
-                        <Label name="$(parent)PlayerValue" font="ZoFontGamepadBold61" />
-                        <Label name="$(parent)OpponentValue" font="ZoFontGamepadBold61" />
+                        <Label name="$(parent)Divider" font="ZoFontGamepadBold54" />
+                        <Label name="$(parent)PlayerValue" font="ZoFontGamepadBold54" />
+                        <Label name="$(parent)OpponentValue" font="ZoFontGamepadBold54" />
                     </Controls>
                 </Control>
             </Controls>
@@ -434,7 +439,7 @@
             <Controls>
                 <Texture name="$(parent)Banner">
                     <Dimensions x="820" y="160" />
-                    <Anchor point="CENTER" offsetY="-425"/>
+                    <Anchor point="CENTER" offsetY="-365"/>
                     <Controls>
                         <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
                             <Anchor point="CENTER" />
@@ -443,7 +448,7 @@
                 </Texture>
 
                 <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Tribute/tributeIcon_Large.dds">
-                    <Anchor point="TOP" relativeTo="$(parent)Banner" relativePoint="BOTTOM" offsetY="75" />
+                    <Anchor point="TOP" relativeTo="$(parent)Banner" relativePoint="BOTTOM" offsetY="15" />
                     <Dimensions x="250" y="250" />
                 </Texture>
 
@@ -793,10 +798,15 @@
                 <Label name="$(parent)Rank">
                     <Anchor point="TOPLEFT" />
                 </Label>
-                
+
                 <StatusBar name="$(parent)Bar" />
-                
-                <Label name="$(parent)RankType" modifyTextType="UPPERCASE" text="SI_TRIBUTE_SUMMARY_CLUB_RANK_LABEL" />
+
+                <Label name="$(parent)RankType" modifyTextType="UPPERCASE" />
+
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Rank" relativePoint="LEFT" />
+                </Texture>
             </Controls>
         </Control>
 
@@ -816,7 +826,7 @@
             <Controls>
                 <Control name="$(parent)Header">
                     <Controls>
-                        <Label name="$(parent)Text" font="ZoFontGamepadBold61" />
+                        <Label name="$(parent)Text" font="ZoFontGamepadBold54" />
                         <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" />
                     </Controls>
                 </Control>
@@ -828,7 +838,7 @@
             <AnchorFill />
             <Controls>
                 <Control name="$(parent)Header">
-                    <Anchor point="CENTER" offsetY="-425" />
+                    <Anchor point="CENTER" offsetY="-365" />
                     <Controls>
                         <Label name="$(parent)Text" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_TRIBUTE_SUMMARY_REWARDS">
                             <Anchor point="CENTER" />
@@ -843,15 +853,15 @@
 
                 <Control name="$(parent)ClubRank" inherits="ZO_TributeSummary_ClubRank">
                     <Dimensions x="315" y="50" />
-                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-60" offsetY="30"/>
+                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-60" offsetY="75"/>
                 </Control>
 
                 <Control name="$(parent)MatchItems" resizeToFitDescendents="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="500"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="440"/>
                 </Control>
 
                 <Control name="$(parent)RankUpItems" resizeToFitDescendents="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="500"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="440"/>
                 </Control>
             </Controls>
         </Control>
@@ -872,7 +882,7 @@
                 </Texture>
 
                 <Control name="$(parent)Keybind" inherits="ZO_KeybindButton">
-                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-110" />
+                    <Anchor point="CENTER" offsetY="500" />
                 </Control>
 
                 <Control name="$(parent)Statistics" inherits="ZO_TributeSummary_Statistics" />

@@ -40,7 +40,7 @@ do
             local NO_TITLE_NAME = nil
             local NO_MAX_RANK_FUNCTION = nil
             local NO_POINTS_RANK_FUNCTION = nil
-            local node = self.leaderboardSystem:AddEntry(self, name, NO_TITLE_NAME, parent, tributeLeaderboardType, GetNumEntries, NO_MAX_RANK_FUNCTION, GetSingleTributeEntryInfo, NO_POINTS_RANK_FUNCTION, GetString(SI_LEADERBOARDS_HEADER_POINTS), GetTributeLeaderboardEntryConsoleIdRequestParams, ZO_TRIBUTE_ICON_GAMEPAD, LEADERBOARD_TYPE_TRIBUTE, UpdatePlayerInfo)
+            local node = self.leaderboardSystem:AddEntry(self, name, NO_TITLE_NAME, parent, tributeLeaderboardType, GetNumEntries, NO_MAX_RANK_FUNCTION, GetSingleTributeEntryInfo, NO_POINTS_RANK_FUNCTION, GetString(SI_LEADERBOARDS_HEADER_POINTS), GetTributeLeaderboardEntryConsoleIdRequestParams, ZO_TRIBUTE_ICONS_GAMEPAD.normal, LEADERBOARD_TYPE_TRIBUTE, UpdatePlayerInfo)
             if node then
                 local nodeData = node.GetData and node:GetData() or node
                 nodeData.tributeLeaderboardType = tributeLeaderboardType

@@ -804,6 +804,8 @@ h5. ProgressReason
 * PROGRESS_REASON_TRADESKILL_QUEST
 * PROGRESS_REASON_TRADESKILL_RECIPE
 * PROGRESS_REASON_TRADESKILL_TRAIT
+* PROGRESS_REASON_TRIBUTE_CAMPAIGN
+* PROGRESS_REASON_TRIBUTE_CLUB
 * PROGRESS_REASON_WORLD_EVENT_COMPLETED
 
 
@@ -1291,7 +1293,6 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_RECEIVED_WHISPER
 * TUTORIAL_TRIGGER_REFUGE_ENTERED
 * TUTORIAL_TRIGGER_RETRAIT_STATION_OPENED
-* TUTORIAL_TRIGGER_REUSE_ME1
 * TUTORIAL_TRIGGER_RIDING_SKILL_MANAGEMENT_OPENED
 * TUTORIAL_TRIGGER_SCALEABLE_REGION_ENTERED
 * TUTORIAL_TRIGGER_SEAL_MARKET_OPENED
@@ -1315,6 +1316,8 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_TRIBUTE_CLUE_ACQUIRED
 * TUTORIAL_TRIGGER_TRIBUTE_CONTRACT_AGENT_CARD_SEEN
 * TUTORIAL_TRIGGER_TRIBUTE_CONTRACT_CARD_SEEN
+* TUTORIAL_TRIGGER_TRIBUTE_CURSE_CARD_SEEN
+* TUTORIAL_TRIGGER_TRIBUTE_FINDER_OPENED
 * TUTORIAL_TRIGGER_TRIBUTE_LOSE_PRESTIGE
 * TUTORIAL_TRIGGER_TRIBUTE_PVP_VICTORY
 * TUTORIAL_TRIGGER_TRIBUTE_TAUNT_AGENT_CARD_SEEN
@@ -1676,6 +1679,7 @@ h5. ActivityQueueResult
 * ACTIVITY_QUEUE_RESULT_REQUEST_QUEUED
 * ACTIVITY_QUEUE_RESULT_REQUEST_QUEUE_FAILURE
 * ACTIVITY_QUEUE_RESULT_SUCCESS
+* ACTIVITY_QUEUE_RESULT_TRIBUTE_INVALID_AREA
 * ACTIVITY_QUEUE_RESULT_TRIBUTE_LFG_DISABLED
 * ACTIVITY_QUEUE_RESULT_UNSPECIFIED_INTERNAL_ERROR
 
@@ -5749,6 +5753,7 @@ h5. GamepadSetting
 * GAMEPAD_SETTING_INVERT_Y
 * GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE
 * GAMEPAD_SETTING_USE_KEYBOARD_CHAT
+* GAMEPAD_SETTING_USE_KEYBOARD_LOGIN
 * GAMEPAD_SETTING_VIBRATION
 * GAMEPAD_SETTING_WAS_LAST_INPUT_GAMEPAD
 
@@ -6031,6 +6036,7 @@ h5. TextureResolutionChoice
 h5. UISetting
 * UI_SETTING_ALWAYS_SHOW_STATUS_TEXT
 * UI_SETTING_AUTO_DECLINE_DUEL_INVITES
+* UI_SETTING_AUTO_DECLINE_TRIBUTE_INVITES
 * UI_SETTING_COMPASS_ACTIVE_QUESTS
 * UI_SETTING_COMPASS_COMPANION
 * UI_SETTING_COMPASS_GROUP_LEADER
@@ -7817,6 +7823,7 @@ h5. TributeMatchType
 
 h5. TributeMechanic
 * TRIBUTE_MECHANIC_ACQUIRE_CARDS
+* TRIBUTE_MECHANIC_AGENT_SELF_HEAL
 * TRIBUTE_MECHANIC_BONUS_PATRON_INTERACTION
 * TRIBUTE_MECHANIC_CREATE_CARDS
 * TRIBUTE_MECHANIC_CULL_FROM_DOCKS
@@ -7920,6 +7927,12 @@ h5. TributeTargetCardType
 * TRIBUTE_TARGET_TYPE_SAME_SUIT
 
 
+h5. TributeTargetSelectionConfirmationResult
+* TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_NOT_ENOUGH_TARGETS
+* TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_SUCCESS
+* TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_TARGET_SELECTION_NOT_ACTIVE
+
+
 h5. TributeTargetSelectionTriggerType
 * TRIBUTE_TARGET_SELECTION_TRIGGER_TYPE_MECHANIC
 * TRIBUTE_TARGET_SELECTION_TRIGGER_TYPE_NONE
@@ -7938,6 +7951,7 @@ h5. TributeTier
 
 h5. TributeVictoryType
 * TRIBUTE_VICTORY_TYPE_CONCESSION
+* TRIBUTE_VICTORY_TYPE_EARLY_CONCESSION
 * TRIBUTE_VICTORY_TYPE_NONE
 * TRIBUTE_VICTORY_TYPE_PATRON
 * TRIBUTE_VICTORY_TYPE_PRESTIGE
@@ -12033,9 +12047,6 @@ h2. Game API
 
 * RequestTributeLeaderboardRank()
 ** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
-
-* GetTributeLeaderboardRankInfo()
-** _Returns:_ *integer* _playerLeaderboardRank_, *integer* _totalLeaderboardSize_
 
 * JumpToFriend(*string* _displayName_)
 
@@ -19361,6 +19372,8 @@ h2. Game API
 * GetMouseOverDiggingActiveSkill()
 ** _Returns:_ *[DiggingActiveSkills|#DiggingActiveSkills]:nilable* _diggingActiveSkill_
 
+* OnSelectedDigToolChanged()
+
 * SetShouldRenderWorld(*bool* _shouldRenderWorld_)
 
 * GetAbilityName(*integer* _abilityId_)
@@ -19452,6 +19465,18 @@ h2. Game API
 * GetNumPatronsFavoringPlayerPerspective(*[TributePlayerPerspective|#TributePlayerPerspective]* _playerPerspective_)
 ** _Returns:_ *integer* _numPatronsFavored_
 
+* DoesTributeSkipPatronDrafting()
+** _Returns:_ *bool* _skipsDrafting_
+
+* GetTributePlayerPerspectiveResource(*[TributePlayerPerspective|#TributePlayerPerspective]* _playerPerspective_, *[TributeResource|#TributeResource]* _resource_)
+** _Returns:_ *integer* _value_
+
+* GetTributeRemainingTimeForTurn()
+** _Returns:_ *integer:nilable* _timeRemainingMs_
+
+* GetTributePrestigeRequiredToWin()
+** _Returns:_ *integer* _requiredPrestige_
+
 * GetTributeMechanicIconPath(*[TributeMechanic|#TributeMechanic]* _mechanicType_, *integer* _param1_, *integer* _param2_, *integer* _param3_)
 ** _Returns:_ *string* _iconPath_
 
@@ -19509,6 +19534,9 @@ h2. Game API
 * IsTributeCardContract(*integer* _cardDefId_)
 ** _Returns:_ *bool* _isContract_
 
+* IsTributeCardCurse(*integer* _cardDefId_)
+** _Returns:_ *bool* _isCurse_
+
 * DoesTributeCardChooseOneMechanic(*integer* _cardDefId_)
 ** _Returns:_ *bool* _chooseOneMechanic_
 
@@ -19538,6 +19566,9 @@ h2. Game API
 
 * IsTributePatronNeutral(*integer* _patronId_)
 ** _Returns:_ *bool* _isNeutral_
+
+* GetTributePatronFamily(*integer* _patronId_)
+** _Returns:_ *integer* _family_
 
 * DoesTributePatronSkipNeutralFavorState(*integer* _patronId_)
 ** _Returns:_ *bool* _doesSkipNeutral_
@@ -19638,10 +19669,7 @@ h2. Game API
 * GetTributePlayerExperienceInCurrentCampaignRank(*integer:nilable* _campaignId_)
 ** _Returns:_ *integer* _experience_, *integer* _rankExperienceRequirement_
 
-* GetCampaignMatchResultFromHistoryByIndex(*integer* _matchIndex_, *integer:nilable* _campaignId_)
-** _Returns:_ *bool* _wasAWin_
-
-* GetCampaignMatchResultFromHistoryByMatchNumber(*integer* _matchIndex_, *integer:nilable* _campaignId_)
+* GetCampaignMatchResultFromHistoryByMatchIndex(*luaindex* _matchIndex_, *integer:nilable* _campaignId_)
 ** _Returns:_ *bool* _hasRecord_, *bool* _wasAWin_
 
 * GetTotalCampaignMatchesPlayed(*integer:nilable* _campaignId_)
@@ -19667,6 +19695,9 @@ h2. Game API
 
 * GetActiveTributeCampaignLeaderboardTierRewardListId(*[TributeLeaderboardTier|#TributeLeaderboardTier]* _tributeCampaignRank_)
 ** _Returns:_ *integer* _rewardListId_
+
+* GetTributeLeaderboardRankInfo()
+** _Returns:_ *integer* _playerLeaderboardRank_, *integer* _totalLeaderboardSize_
 
 * GetNextRaidLeaderboardId(*[RaidCategory|#RaidCategory]* _raidCategory_, *integer:nilable* _lastRaidId_)
 ** _Returns:_ *integer:nilable* _nextRaidId_
@@ -22039,6 +22070,7 @@ h2. Events
 * EVENT_ANTIQUITY_JOURNAL_SHOW_SCRYABLE
 * EVENT_ANTIQUITY_LEAD_ACQUIRED (*integer* _antiquityId_)
 * EVENT_ANTIQUITY_SEARCH_RESULTS_READY
+* EVENT_ANTIQUITY_SELECTED_TOOL_CHANGED
 * EVENT_ANTIQUITY_SHOW_CODEX_ENTRY (*integer* _antiquityId_)
 * EVENT_ANTIQUITY_TRACKING_INITIALIZED
 * EVENT_ANTIQUITY_TRACKING_UPDATE (*integer* _trackedAntiquityId_)

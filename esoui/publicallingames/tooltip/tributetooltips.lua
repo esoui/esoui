@@ -99,9 +99,12 @@ function ZO_Tooltip:LayoutTributeCard(cardData, optionalDockCardUpgradeContext)
                     mechanicsProcessed = mechanicsProcessed + 1
                     if mechanicsProcessed == numMechanics then
                         self:AddSection(comboSection)
-                        return
+                        break
                     end
                 end
+            end
+            if mechanicsProcessed == numMechanics then
+                break
             end
         end
     end
@@ -251,5 +254,15 @@ function ZO_Tooltip:LayoutTributeResource(resource)
 
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
     bodySection:AddLine(GetString("SI_TRIBUTERESOURCE_TOOLTIP", resource), self:GetStyle("bodyDescription"))
+    self:AddSection(bodySection)
+end
+
+function ZO_Tooltip:LayoutTributeDiscardCounter()
+    local titleSection = self:AcquireSection(self:GetStyle("title"))
+    titleSection:AddLine(GetString(SI_TRIBUTE_DISCARD_COUNTER_TOOLTIP_TITLE))
+    self:AddSection(titleSection)
+
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    bodySection:AddLine(GetString(SI_TRIBUTE_DISCARD_COUNTER_TOOLTIP_DESCRIPTION), self:GetStyle("bodyDescription"))
     self:AddSection(bodySection)
 end

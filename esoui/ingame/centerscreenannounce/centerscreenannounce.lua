@@ -23,7 +23,7 @@ local SMALL_TEXT_FONT_KEYBOARD = "ZoFontCenterScreenAnnounceSmall"
 local SMALL_TEXT_FONT_GAMEPAD = "ZoFontGamepad42"
 
 local COUNTDOWN_TEXT_FONT_KEYBOARD = "ZoFontCallout3"
-local COUNTDOWN_TEXT_FONT_GAMEPAD = "ZoFontGamepadBold61"
+local COUNTDOWN_TEXT_FONT_GAMEPAD = "ZoFontGamepadBold54"
 
 local SMALL_TEXT_SPACING_KEYBOARD = 0
 local SMALL_TEXT_SPACING_GAMEPAD = 10
@@ -1202,6 +1202,13 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
     }
 
+    local ALLOWED_TYPES_DURING_TRIBUTE =
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+    }
+
     function CenterScreenAnnounce:CanDisplayMessage(category, csaType)
         -- Early out if category is not of scrying category while showing scrying or map mode dig sites
         if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_DIG_SITES) and category ~= CSA_CATEGORY_SCRYING_PROGRESS_TEXT then
@@ -1214,6 +1221,11 @@ do
 
         -- Early out if the message type can't be shown during antiquity digging
         if ANTIQUITY_DIGGING_FRAGMENT:IsShowing() and not ALLOWED_TYPES_DURING_ANTIQUITIES_DIGGING[csaType] then
+            return false
+        end
+
+        -- Early out if the message type can't be shown during tribute
+        if TRIBUTE_FRAGMENT:IsShowing() and not ALLOWED_TYPES_DURING_TRIBUTE[csaType] then
             return false
         end
 
@@ -1712,6 +1724,10 @@ function CenterScreenAnnounce:RemoveAllCSAsOfAnnounceType(announceType)
                     line.translateTimeline:PlayInstantlyToEnd(true)
                     line.fadeInTimeline:PlayInstantlyToEnd(true)
                     line.fadeOutTimeline:PlayInstantlyToEnd()
+                elseif lineStyle == CSA_LINE_TYPE_COUNTDOWN then
+                    line.countdownLoopAnimationTimeline:PlayInstantlyToEnd(true)
+                    line.countdownBufferAnimationTimeline:PlayInstantlyToEnd(true)
+                    line.countdownEndImageAnimationTimeline:PlayInstantlyToEnd()
                 end
             end
         end
@@ -1795,6 +1811,33 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED] = true,
     }
 
+    -- Types that if they were to happen while showing tribute
+    -- will be stored and shown after the tribute is over
+    local ALLOWED_QUEUE_TYPES_WHILE_IN_TRIBUTE =
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_TRIBUTE_CARD_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TIMED_ACTIVITY_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED] = true,
+    }
+
     function CenterScreenAnnounce:AddMessageWithParams(messageParams)
         if not messageParams then
             return
@@ -1831,6 +1874,12 @@ do
 
             -- prevent unwanted announcements from queuing when the user is digging for antiquities
             if ANTIQUITY_DIGGING_FRAGMENT:IsShowing() and not ALLOWED_QUEUE_TYPES_WHILE_ANTIQUITIES_DIGGING[csaType] then
+                self.messageParamsPool:ReleaseObject(messageParams.key)
+                return
+            end
+
+            -- prevent unwanted announcements from queuing when the user is in tribute
+            if TRIBUTE_FRAGMENT:IsShowing() and not ALLOWED_QUEUE_TYPES_WHILE_IN_TRIBUTE[csaType] then
                 self.messageParamsPool:ReleaseObject(messageParams.key)
                 return
             end

@@ -99,6 +99,14 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
         local isLocked = self:IsCategoryLocked(categoryData)
         enabled = enabled and not isLocked
         data.enabled = enabled
+        data.iconUpdateFn = function()
+            data:ClearIcons()
+            if data.enabled then
+                data:AddIcon(data.data.menuIcon)
+            else
+                data:AddIcon(data.data.disabledMenuIcon)
+            end
+        end
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
 

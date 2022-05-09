@@ -246,6 +246,18 @@ function ZO_RewardsManager:GetAllRewardInfoForRewardList(rewardListId, parentCho
     return rewardListInfo
 end
 
+function ZO_RewardsManager:DoesRewardListContainMailItems(rewardListId)
+    local numRewards = GetNumRewardListEntries(rewardListId)
+
+    for rewardIndex = 1, numRewards do
+        local rewardId, entryType = GetRewardListEntryInfo(rewardListId, rewardIndex)
+        if entryType == REWARD_ENTRY_TYPE_MAIL_ITEM then
+            return true
+        end
+    end
+    return false
+end
+
 function ZO_RewardsManager:GetInfoForReward(rewardId, quantity, parentChoice, validationFunction, isSelectedChoiceFunction)
     local entryType = GetRewardType(rewardId)
     local rewardData

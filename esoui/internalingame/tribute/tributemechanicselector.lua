@@ -102,6 +102,7 @@ function ZO_TributeMechanicSelector:Initialize(control)
     TRIBUTE_MECHANIC_SELECTOR_FRAGMENT = ZO_FadeSceneFragment:New(control)
     TRIBUTE_MECHANIC_SELECTOR_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
+            self:DeferredInitialize()
             self.focus:SetFocusByIndex(1)
         elseif newState == SCENE_FRAGMENT_SHOWN then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
@@ -114,10 +115,17 @@ function ZO_TributeMechanicSelector:Initialize(control)
         end
     end)
 
-    self:InitializeControls()
-    self:InitializeKeybindStripDescriptors()
     self:RegisterForEvents()
-    self:SetupFocus()
+end
+
+function ZO_TributeMechanicSelector:DeferredInitialize()
+    if not self.initialized then
+        self:InitializeControls()
+        self:InitializeKeybindStripDescriptors()
+        self:SetupFocus()
+
+        self.initialized = true
+    end
 end
 
 function ZO_TributeMechanicSelector:InitializeControls()
@@ -128,6 +136,8 @@ function ZO_TributeMechanicSelector:InitializeControls()
         table.insert(mechanicCards, ZO_TributeMechanicCard:New(mechanicControl, i))
     end
     self.mechanicCards = mechanicCards
+    -- ZoFontTributeAntique40 is a rarely used font, so defer loading it until it's actually becomes necessary
+    self.control:GetNamedChild("Instruction"):SetFont("ZoFontTributeAntique40")
 end
 
 function ZO_TributeMechanicSelector:InitializeKeybindStripDescriptors()
@@ -164,7 +174,8 @@ function ZO_TributeMechanicSelector:InitializeKeybindStripDescriptors()
 end
 
 function ZO_TributeMechanicSelector:RegisterForEvents()
-    EVENT_MANAGER:RegisterForEvent("TributeMechanicSelector", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
+    local control = self.control
+    control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
         --No need to do anything if the screen isn't up in the first place
         if TRIBUTE_MECHANIC_SELECTOR_FRAGMENT:IsShowing() then
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -177,12 +188,13 @@ function ZO_TributeMechanicSelector:RegisterForEvents()
         end
     end)
 
-    EVENT_MANAGER:RegisterForEvent("TributeMechanicSelector", EVENT_TRIBUTE_BEGIN_MECHANIC_SELECTION, function(_, cardInstanceId)
+    control:RegisterForEvent(EVENT_TRIBUTE_BEGIN_MECHANIC_SELECTION, function(_, cardInstanceId)
+        self:DeferredInitialize()
         local cardDefId, patronDefId = GetTributeCardInstanceDefIds(cardInstanceId)
         self:OnBeginMechanicSelection(patronDefId, cardDefId)
     end)
 
-    EVENT_MANAGER:RegisterForEvent("TributeMechanicSelector", EVENT_TRIBUTE_END_MECHANIC_SELECTION, function()
+    control:RegisterForEvent(EVENT_TRIBUTE_END_MECHANIC_SELECTION, function()
         self:Hide()
     end)
 end

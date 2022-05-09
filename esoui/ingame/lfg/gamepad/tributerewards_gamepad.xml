@@ -16,17 +16,17 @@
                     <Dimensions x="32" y="32" />
                 </Texture>
 
-                <Label name="$(parent)TierLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed45" modifyTextType="NONE">
+                <Label name="$(parent)TierLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed42" modifyTextType="NONE">
                     <Anchor point="LEFT" relativeTo="$(parent)IconTexture" relativePoint="RIGHT" offsetX="20" />
                     <Dimensions x="250" />
                 </Label>
 
-                <Label name="$(parent)RewardsNameLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed45" modifyTextType="NONE">
+                <Label name="$(parent)RewardsNameLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed42" modifyTextType="NONE">
                     <Anchor point="LEFT" relativeTo="$(parent)TierLabel" relativePoint="RIGHT" />
                     <Dimensions x="250" />
                 </Label>
 
-                <Label name="$(parent)GoldLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed45" modifyTextType="NONE" horizontalAlignment="RIGHT">
+                <Label name="$(parent)GoldLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed42" modifyTextType="NONE" horizontalAlignment="RIGHT">
                     <Anchor point="LEFT" relativeTo="$(parent)RewardsNameLabel" relativePoint="RIGHT" />
                     <Dimensions x="150" />
                 </Label>

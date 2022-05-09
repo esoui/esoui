@@ -3,18 +3,6 @@
         <Control name="ZO_CharacterSelect_EventTile_Gamepad_Control" inherits="ZO_CharacterSelect_EventTile_Control ZO_Tile_Gamepad_Control" mouseEnabled="true" virtual="true">
             <Dimensions x="1920" y="632" />
             <OnInitialized>
-                local fonts =
-                {
-                    {
-                        font = "ZoFontGamepadBold61",
-                        lineLimit = 2,
-                    },
-                    {
-                        font = "ZoFontGamepadBold54",
-                        lineLimit = 2,
-                    }
-                }
-                ZO_FontAdjustingWrapLabel_OnInitialized(self:GetNamedChild("ContainerTitle"), fonts, TEXT_WRAP_MODE_ELLIPSIS)
                 ZO_CharacterSelect_EventTile_Gamepad_OnInitialized(self)
             </OnInitialized>
 
@@ -27,6 +15,8 @@
                         </Texture>
 
                         <Label name="$(parent)TimeRemaining" override="true" font="ZoFontGamepad27" />
+
+                        <Label name="$(parent)Title" override="true" font="ZoFontGamepadBold54" wrapMode="ELLIPSIS" maxLineCount="2" />
 
                         <Texture name="$(parent)EventImage" override="true">
                             <ClearAnchors />

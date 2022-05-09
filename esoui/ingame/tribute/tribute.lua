@@ -1,6 +1,7 @@
 ZO_TRIBUTE_PLAYER_NAME_PADDING_X = 65
 ZO_TRIBUTE_PLAYER_NAME_BACKDROP_MAX_WIDTH = 350
 ZO_TRIBUTE_PLAYER_NAME_TEXT_MAX_WIDTH = ZO_TRIBUTE_PLAYER_NAME_BACKDROP_MAX_WIDTH - ZO_TRIBUTE_PLAYER_NAME_PADDING_X
+ZO_TRIBUTE_TURN_COUNTDOWN_CSA_THRESHOLD_MS = 5500
 
 local TRIBUTE_INTERACTION =
 {
@@ -95,6 +96,7 @@ function ZO_Tribute:Initialize(control)
     HELP_MANAGER:AddOverlayScene("tribute", overlaySceneInfo)
 
     self.gameFlowState = TRIBUTE_GAME_FLOW_STATE_INACTIVE
+    self.showingCountdown = false
 
     self:InitializeControls()
     self:RegisterForEvents()
@@ -136,6 +138,10 @@ function ZO_Tribute:RegisterForEvents()
     end)
 
     control:RegisterForEvent(EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE, function(_, gameFlowState)
+        --Clear the turn timer countdown CSA if the game flow state changes
+        self.showingCountdown = false
+        CENTER_SCREEN_ANNOUNCE:RemoveAllCSAsOfAnnounceType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
+
         self.gameFlowState = gameFlowState
         -- TODO Tribute: Change HUD elements by state
         if gameFlowState == TRIBUTE_GAME_FLOW_STATE_INACTIVE then
@@ -158,7 +164,18 @@ function ZO_Tribute:RegisterForEvents()
     control:RegisterForEvent(EVENT_TRIBUTE_EXIT_RESPONSE, function(_, accept)
         self:OnTributeExitResponse(accept)
     end)
-    
+
+    control:RegisterForEvent(EVENT_TRIBUTE_PLAYER_TURN_STARTED, function(_, isLocalPlayer)
+        self.showingCountdown = false
+        CENTER_SCREEN_ANNOUNCE:RemoveAllCSAsOfAnnounceType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
+    end)
+
+    local function OnUpdate(_, frameTimeSeconds)
+        self:OnUpdate(frameTimeSeconds)
+    end
+
+    control:SetHandler("OnUpdate", OnUpdate)
+
     TRIBUTE_SCENE:SetHideSceneConfirmationCallback(function(...) self:OnConfirmHideScene(...) end)
     TRIBUTE_SCENE:SetHandleGamepadPreferredModeChangedCallback(function(...) return self:HandleGamepadPreferredModeChanged(...) end)
 end
@@ -271,6 +288,21 @@ function ZO_Tribute:RefreshInputModeFragments()
 
     if self.gameFlowState ~= TRIBUTE_GAME_FLOW_STATE_INACTIVE and self.gameFlowState ~= TRIBUTE_GAME_FLOW_STATE_GAME_OVER then
         TRIBUTE_SCENE:AddFragment(CLOSE_ACTIONS_INTERCEPT_LAYER_FRAGMENT)
+    end
+end
+
+function ZO_Tribute:OnUpdate(frameTimeSeconds)
+    if self.gameFlowState == TRIBUTE_GAME_FLOW_STATE_PLAYING then
+        if not self.showingCountdown and GetActiveTributePlayerPerspective() == TRIBUTE_PLAYER_PERSPECTIVE_SELF then
+            local timeLeftMs = GetTributeRemainingTimeForTurn()
+            if timeLeftMs and timeLeftMs <= ZO_TRIBUTE_TURN_COUNTDOWN_CSA_THRESHOLD_MS then
+                self.showingCountdown = true
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_COUNTDOWN_TEXT)
+                messageParams:SetLifespanMS(timeLeftMs)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+        end
     end
 end
 

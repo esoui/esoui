@@ -14,6 +14,7 @@ local categoryData =
         priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.DUNGEONS,
         name = GetString(SI_ACTIVITY_FINDER_CATEGORY_DUNGEON_FINDER),
         menuIcon = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_Dungeon.dds",
+        disabledMenuIcon = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_Dungeon_disabled.dds",
         sceneName = "gamepadDungeonFinder",
         tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_DUNGEON_FINDER),
     },

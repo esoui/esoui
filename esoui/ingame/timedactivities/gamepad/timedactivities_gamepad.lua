@@ -352,7 +352,7 @@ function ZO_TimedActivitiesList_Gamepad:RefreshList(currentActivityType, activit
     for index, activityData in ipairs(activitiesList) do
         local entryData = ZO_EntryData:New(activityData)
         local activityName = activityData:GetName()
-        local numActivityNameLines = ZO_LabelUtils_GetNumLines(activityName, "ZoFontGamepad45", ZO_TIMED_ACTIVITY_DATA_ROW_NAME_WIDTH_GAMEPAD)
+        local numActivityNameLines = ZO_LabelUtils_GetNumLines(activityName, "ZoFontGamepad42", ZO_TIMED_ACTIVITY_DATA_ROW_NAME_WIDTH_GAMEPAD)
 
         local dataType = TIMED_ACTIVITY_ROW_DATA_1
         if numActivityNameLines == 2 then

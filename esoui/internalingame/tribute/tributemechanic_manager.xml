@@ -34,7 +34,7 @@
             </OnInitialized>
 
             <OnMouseEnter>
-                self.object:OnCursorEnter()
+                self.object:OnMouseEnter()
             </OnMouseEnter>
 
             <OnMouseExit>

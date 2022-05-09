@@ -62,6 +62,8 @@ function ZO_TributePatronBook_Keyboard:Initialize(control)
      local infoContainerControl = control:GetNamedChild("InfoContainer")
     ZO_TributePatronBook_Shared.Initialize(self, control, infoContainerControl, TEMPLATE_DATA)
 
+    self.categoryNodeLookupData = {}
+
     TRIBUTE_PATRON_BOOK_SCENE = self:GetScene()
     TRIBUTE_PATRON_BOOK_FRAGMENT = self:GetFragment()
 end
@@ -90,6 +92,8 @@ function ZO_TributePatronBook_Keyboard:AddCategory(tributePatronCategoryData, ca
     for _, patronData in tributePatronCategoryData:PatronIterator(categoryFilters) do
         self:AddPatron(patronData, entryData.node, categoryFilters)
     end
+
+    self.categoryNodeLookupData[tributePatronCategoryData:GetId()] = entryData.node
 end
 
 function ZO_TributePatronBook_Keyboard:AddPatron(tributePatronData, parentNode, categoryFilters)
@@ -141,12 +145,17 @@ do
             end
         end
 
-        local function TreeEntryOnSelected(control, categoryData, selected, reselectingDuringRebuild)
+        local function TreeEntryOnSelected(control, patronData, selected, reselectingDuringRebuild)
             control:SetSelected(selected)
 
             if selected then
-                self.patronId = categoryData.patronId
+                self.patronId = patronData.patronId
                 self:BuildGridList()
+            else
+                if patronData:IsNew() then
+                    ClearCollectibleNewStatus(patronData:GetPatronCollectibleId())
+                    self:UpdateCategoryStatusIcon(patronData.node.parentNode)
+                end
             end
         end
 
@@ -183,7 +192,12 @@ end
 
 -- Do not call this directly, instead call self.categoriesRefreshGroup:MarkDirty("List")
 function ZO_TributePatronBook_Keyboard:RefreshCategories()
+    local selectedNode = self.categoryTree:GetSelectedNode()
+    local selectedPatronId = selectedNode and selectedNode.data:GetId()
+    selectedNode = nil
+
     self.categoryTree:Reset()
+    ZO_ClearTable(self.categoryNodeLookupData)
 
     local categoryList = {}
     local categoryFilters = self.categoryFilters
@@ -200,16 +214,57 @@ function ZO_TributePatronBook_Keyboard:RefreshCategories()
         end
     end
 
-    local function CompareCategories(category1, category2)
-        return category1:GetFormattedName() < category2:GetFormattedName()
-    end
-    table.sort(categoryList, CompareCategories)
-
     for _, tributePatronCategoryData in ipairs(categoryList) do
         self:AddCategory(tributePatronCategoryData, categoryFilters)
+
+        if selectedPatronId then
+            local categoryNode = self.categoryNodeLookupData[tributePatronCategoryData:GetId()]
+            for _, patronNode in pairs(categoryNode.children) do
+                if selectedPatronId == patronNode.data:GetId() then
+                    selectedNode = patronNode
+                end
+            end
+        end
     end
 
-    self.categoryTree:Commit()
+    self.categoryTree:Commit(selectedNode)
+
+    self:UpdateAllCategoryStatusIcons()
+end
+
+function ZO_TributePatronBook_Keyboard:UpdateAllCategoryStatusIcons()
+    for _, categoryNode in pairs(self.categoryNodeLookupData) do
+        self:UpdateCategoryStatusIcon(categoryNode)
+    end
+end
+
+function ZO_TributePatronBook_Keyboard:UpdateCategoryStatusIcon(categoryNode)
+    local categoryData = categoryNode.data
+    local categoryControl = categoryNode.control
+
+    if not categoryControl.statusIcon then
+        categoryControl.statusIcon = categoryControl:GetNamedChild("StatusIcon")
+    end
+
+    categoryControl.statusIcon:ClearIcons()
+
+    if categoryData:HasAnyNewPatronCollectibles() then
+        categoryControl.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+    end
+
+    for i, patronEntry in pairs(categoryData.node.children) do
+        local patronStatusIcon = patronEntry.control:GetNamedChild("StatusIcon")
+        patronStatusIcon:ClearIcons()
+
+        if patronEntry.data:IsNew() then
+            patronStatusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+            patronStatusIcon:Show()
+
+            categoryControl.statusIcon:AddIcon(VISIBLE_ICON)
+        end
+    end
+
+    categoryControl.statusIcon:Show()
 end
 
 -- Do not call this directly, instead call self.categoriesRefreshGroup:MarkDirty("Visible")

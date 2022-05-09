@@ -8,9 +8,13 @@ function ZO_TributeTargetViewer_Manager:Initialize()
     EVENT_MANAGER:RegisterForEvent("TributeTargetViewer_Manager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
         --If the viewer is already up, we need to close and reopen it to make sure it switches to the correct UI
         if self:IsViewingTargets() then
-            local targetData = self:GetCurrentTargetData()
-            self:SetViewingTargets(nil)
-            self:SetViewingTargets(targetData)
+            --ESO-773300: In the situation where this event fires at the same time as EVENT_TRIBUTE_END_TARGET_SELECTION, the information cached on the manager may have not yet been updated
+            --As a result, we need to ask the C++ directly to make sure target selection is actually still active
+            if GetCurrentTributeTargetSelectionTriggerType() ~= TRIBUTE_TARGET_SELECTION_TRIGGER_TYPE_NONE then
+                local targetData = self:GetCurrentTargetData()
+                self:SetViewingTargets(nil)
+                self:SetViewingTargets(targetData)
+            end
         end
     end)
 
