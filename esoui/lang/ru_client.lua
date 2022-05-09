@@ -1571,7 +1571,7 @@ SafeAddString(SI_COLLECTIBLE_TOOLTIP_NOT_USABLE_BY_CHARACTER, "Ваш текущ
 SafeAddString(SI_COLLECTIBLE_TOOLTIP_NOT_USABLE_BY_COMPANION, "Спутники не могут использовать этот коллекционный предмет.", 0)
 SafeAddString(SI_COLLECTIBLE_TOOLTIP_PERSONALITY_OVERRIDES_DISPLAY_NAMES_FORMATTER, "Затрагивает <<2[эмоцию/эмоции/эмоции]>> <<1>>.", 0)
 SafeAddString(SI_COLLECTIBLE_TOOLTIP_PERSONALITY_OVERRIDES_SLASH_NAMES_FORMATTER, "Затрагивает <<2[эмоцию/эмоции/эмоции]>> <<1>>.", 0)
-SafeAddString(SI_COLLECTIBLE_TOOLTIP_PURCHASABLE, "Получено в рамках промоакции или события либо приобретено в магазине", 2)
+SafeAddString(SI_COLLECTIBLE_TOOLTIP_PURCHASABLE, "Получено в рамках промоакции или события либо приобретено в магазине.", 2)
 SafeAddString(SI_COLLECTIBLE_TOOLTIP_RESTRICTION_PAIR_FORMATTER, "<<C:1>>: <<2>>", 0)
 SafeAddString(SI_COLLECTIONS_BLOCKED_ERROR, "Использование этого коллекционного предмета невозможно.", 0)
 SafeAddString(SI_COLLECTIONS_BOOK_FILTER_SHOW_ALL, "Все", 0)
