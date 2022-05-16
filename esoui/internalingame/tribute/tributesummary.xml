@@ -218,7 +218,7 @@
                             <Dimensions x="30" />
                             <TextureCoords left="0.5273" right="0.5566" top="0" bottom="0.78125" />
                         </Texture>
-                        <Texture name="$(parent)Middle" override="true" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_frame_bg.dds">
+                        <Texture name="$(parent)Middle" override="true" layer="BACKGROUND" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_frame_bg.dds">
                             <TextureCoords left="0.00977" right="0.5273" top="0" bottom="0.78125" />
                         </Texture>
                     </Controls>
@@ -240,7 +240,7 @@
             </Controls>
         </StatusBar>
 
-        <StatusBar name="ZO_TributeSummary_ArrowStatusBar_Gamepad_Template" inherits="ZO_GamepadArrowStatusBarWithBGMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_genericFill.dds" layer="CONTROLS" virtual="true">
+        <StatusBar name="ZO_TributeSummary_ArrowStatusBar_Gamepad_Template" inherits="ZO_GamepadArrowStatusBarWithBGMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_genericFill.dds" tier="LOW" layer="CONTROLS" virtual="true">
             <Dimensions x="550" y="56" />
             <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_genericFill_leadingEdge.dds" width="23" height="50" />
             <LeadingEdgeTextureCoords left="0" right="0.71875" top="0" bottom="0.859375" />
@@ -268,14 +268,14 @@
                 </Control>
                 <Control name="$(parent)Overlay" override="true" tier="LOW" layer="CONTROLS">
                     <Controls>
-                        <Texture name="$(parent)Left" override="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame.dds">
+                        <Texture name="$(parent)Left" override="true" tier="LOW" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame.dds">
                             <TextureCoords left="0" right="0.109375" top="0" bottom="0.859375" />
                         </Texture>
-                        <Texture name="$(parent)Right" override="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame.dds">
+                        <Texture name="$(parent)Right" override="true" tier="LOW" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame.dds">
                             <Dimensions x="30" y="55" />
                             <TextureCoords left="0.28125" right="0.75" top="0" bottom="0.859375" />
                         </Texture>
-                        <Texture name="$(parent)Middle" override="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame.dds">
+                        <Texture name="$(parent)Middle" override="true" tier="LOW" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame.dds">
                             <TextureCoords left="0.109375" right="0.28125" top="0" bottom="0.859375" />
                         </Texture>
                     </Controls>
@@ -679,9 +679,9 @@
                             <Anchor point="TOP" relativePoint="BOTTOMLEFT" offsetY="20" />
                         </Label>
 
-                        <Texture name="$(parent)CurrentRankIcon">
-                            <Anchor point="RIGHT" relativePoint="LEFT" />
-                            <Dimensions x="100" y="100" />
+                        <Texture name="$(parent)CurrentRankIcon" tier="MEDIUM">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="75" />
+                            <Dimensions x="150" y="150" />
                             <Controls>
                                 <Label name="$(parent)CurrentRankLabel">
                                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20" />
@@ -689,9 +689,9 @@
                             </Controls>
                         </Texture>
 
-                        <Texture name="$(parent)NextRankIcon" level="1">
-                            <Anchor point="LEFT" relativePoint="RIGHT" />
-                            <Dimensions x="100" y="100" />
+                        <Texture name="$(parent)NextRankIcon" tier="MEDIUM" level="1">
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-75" />
+                            <Dimensions x="150" y="150" />
                             <Controls>
                                 <Label name="$(parent)NextRankLabel">
                                     <Anchor point="LEFT" relativePoint="RIGHT" offsetX="20" />
@@ -710,9 +710,9 @@
                     <Dimensions x="550" y="53"/>
 
                     <Controls>
-                        <Texture name="$(parent)CurrentRankIcon" textureFile="EsoUI/Art/Tribute/tributeRankIcon_1.dds">
-                            <Anchor point="RIGHT" relativePoint="LEFT" />
-                            <Dimensions x="100" y="100" />
+                        <Texture name="$(parent)CurrentRankIcon" textureFile="EsoUI/Art/Tribute/tributeRankIcon_1.dds" tier="MEDIUM">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="75" />
+                            <Dimensions x="150" y="150" />
                             <Controls>
                                 <Label name="$(parent)CurrentRankLabel" text="SI_TRIBUTETIER1">
                                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20" />
@@ -720,9 +720,9 @@
                             </Controls>
                         </Texture>
 
-                        <Texture name="$(parent)NextRankIcon" textureFile="EsoUI/Art/Tribute/tributeRankIcon_2.dds">
-                            <Anchor point="LEFT" relativePoint="RIGHT" />
-                            <Dimensions x="100" y="100" />
+                        <Texture name="$(parent)NextRankIcon" textureFile="EsoUI/Art/Tribute/tributeRankIcon_2.dds" tier="MEDIUM">
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-75" />
+                            <Dimensions x="150" y="150" />
                             <Controls>
                                 <Label name="$(parent)NextRankLabel" text="SI_TRIBUTETIER2">
                                     <Anchor point="LEFT" relativePoint="RIGHT" offsetX="20" />

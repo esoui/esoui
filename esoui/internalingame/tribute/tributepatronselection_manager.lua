@@ -63,7 +63,6 @@ function ZO_TributePatronSelection_Manager:Initialize()
 end
 
 do
-    --TODO Tribute: Verify that this is how we want it to sort
     local function ComparePatrons(left, right)
         local isLeftLocked = left:IsPatronLocked()
         local isRightLocked = right:IsPatronLocked()

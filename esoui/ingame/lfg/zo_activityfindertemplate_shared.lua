@@ -279,7 +279,7 @@ function ZO_ActivityFinderTemplate_Shared:RefreshTributeSeasonData(forceHide)
                         local topPercent = totalLeaderboardPlayers == 0 and 100 or playerLeaderboardRank * 100 / totalLeaderboardPlayers
 
                         local colorizedFormattedLeaderboardRank
-                        if topPercent >= 10 then
+                        if topPercent <= 10 then
                             local formattedLeaderboardRank = zo_strformat(SI_TRIBUTE_FINDER_LEADERBOARD_RANK_CONTENT_PERCENT, playerLeaderboardRank, topPercent)
                             colorizedFormattedLeaderboardRank = ZO_SELECTED_TEXT:Colorize(formattedLeaderboardRank)
                         else

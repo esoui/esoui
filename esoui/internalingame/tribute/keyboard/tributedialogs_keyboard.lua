@@ -42,6 +42,17 @@ function ZO_TributeSettingsDialog_Keyboard_OnInitialized(self)
         },
         setup = function(dialog, data)
             self.object:SetAutoPlay(data.autoPlay)
+
+            local warningLabel = self.object.containerControl:GetNamedChild("ConcedeWarning")
+            if WillConcedeCausePenalty() then
+                local forfeitPenaltyMs = GetTributeForfeitPenaltyDurationMs()
+                local formattedTimeText = ZO_FormatTimeMilliseconds(forfeitPenaltyMs, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+                warningLabel:SetText(zo_strformat(SI_TRIBUTE_SETTINGS_DIALOG_CONCEDE_WARNING, formattedTimeText))
+                warningLabel:SetHidden(false)
+            else
+                warningLabel:SetText("")
+                warningLabel:SetHidden(true)
+            end
         end,
         finishedCallback = function(dialog)
             --Wait until the dialog closes before saving the changes to the settings

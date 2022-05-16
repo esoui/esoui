@@ -318,6 +318,17 @@ function ZO_Tribute:RegisterDialogs()
                 ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_TRIBUTE_OPTIONS")
                 ZO_Dialogs_ShowGamepadDialog("CONFIRM_CONCEDE_TRIBUTE")
             end,
+            updateFn = function(dialog)
+                if WillConcedeCausePenalty() then
+                    local forfeitPenaltyMs = GetTributeForfeitPenaltyDurationMs()
+                    local formattedTimeText = ZO_FormatTimeMilliseconds(forfeitPenaltyMs, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+                    local concedeWarningText = zo_strformat(SI_TRIBUTE_SETTINGS_DIALOG_CONCEDE_WARNING, formattedTimeText)
+                    GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, concedeWarningText)
+                    ZO_GenericGamepadDialog_ShowTooltip(dialog)
+                else
+                    ZO_GenericGamepadDialog_HideTooltip(dialog)
+                end
+            end,
         },
     }
 
@@ -353,6 +364,12 @@ function ZO_Tribute:RegisterDialogs()
             ZO_GenericGamepadDialog_RefreshText(dialog, GetString(SI_TRIBUTE_SETTINGS_DIALOG_TITLE))
             dialog.autoPlay = data.autoPlay
             dialog:setupFunc()
+        end,
+        updateFn = function(dialog)
+            local targetData = dialog.entryList:GetTargetData()
+            if targetData and targetData.updateFn then
+                targetData.updateFn(dialog)
+            end
         end,
         parametricList = {}, -- Added Dynamically
         blockDialogReleaseOnPress = true,
@@ -1216,7 +1233,7 @@ function ZO_Tribute:ShowResourceTooltip(perspective, resource)
                 ZO_TributeResourceTooltip_Gamepad_Show(resource, anchorPoint, GuiRoot, TOPLEFT, offsetX, offsetY)
             else
                 InitializeTooltip(InformationTooltip, GuiRoot, anchorPoint, offsetX, offsetY, TOPLEFT)
-                InformationTooltip:AddLine(GetString("SI_TRIBUTERESOURCE", resource), "", ZO_NORMAL_TEXT:UnpackRGBA())
+                InformationTooltip:AddLine(zo_strformat(SI_TRIBUTE_RESOURCE_NAME_FORMATTER, GetString("SI_TRIBUTERESOURCE", resource)), "", ZO_NORMAL_TEXT:UnpackRGBA())
                 InformationTooltip:AddLine(GetString("SI_TRIBUTERESOURCE_TOOLTIP", resource))
             end
         end
@@ -1253,8 +1270,22 @@ function ZO_Tribute:ShowPatronStallTutorial(tutorialTrigger, patronStallObject, 
     end
 end
 
+function ZO_Tribute:GetGameFlowState()
+    return self.gameFlowState
+end
+
 function ZO_Tribute:GetPatronStalls()
     return self.patronStalls
+end
+
+function ZO_Tribute:GetPatronStallByPatronId(patronId)
+    for _, patronStall in pairs(self.patronStalls) do
+        if patronStall.GetId and patronStall:GetId() == patronId then
+            return patronStall
+        end
+    end
+
+    return nil
 end
 
 function ZO_Tribute:QueueVictoryTutorial()

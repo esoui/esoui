@@ -270,7 +270,7 @@ function ZO_TributePatronTooltip_Gamepad_Hide()
     return true
 end
 
-function ZO_TributePatronTooltip_Gamepad_Show(patronData, anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)
+function ZO_TributePatronTooltip_Gamepad_Show(patronData, optionalArgs, anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)
     if not ZO_TributePatronTooltip_Gamepad_Hide() then
         return
     end
@@ -279,7 +279,7 @@ function ZO_TributePatronTooltip_Gamepad_Show(patronData, anchorPoint, anchorCon
         -- Order matters
         local control = g_patronTooltipControl
         control.patronData = patronData
-        control.tip:LayoutTributePatron(patronData)
+        control.tip:LayoutTributePatron(patronData, optionalArgs)
         control:ClearAnchors()
         if anchorPoint then
             control:SetAnchor(anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)

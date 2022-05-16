@@ -220,7 +220,7 @@
 
         <Texture name="ZO_TributeCard_MechanicGlow_Template" blendMode="ADD" color="00c8ff" level="11" pixelRoundingEnabled="false" virtual="true" />
 
-        <Label name="ZO_TributeCard_MechanicComboPip_Template" font="ZoFontTributeAntique20NoShadow" level="12" pixelRoundingEnabled="false" virtual="true" />
+        <Label name="ZO_TributeCard_MechanicComboPip_Template" font="ZoFontTributeAntique20NoShadow" level="12" virtual="true" />
             
         <Texture name="ZO_TributeCard_FullTextureFootprint" pixelRoundingEnabled="false" virtual="true">
             <AnchorFill />
@@ -272,7 +272,7 @@
 
         <Label name="ZO_TributeCard_DefeatCost" font="ZoFontTributeAntique52" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_WHITE" level="9" horizontalAlignment="CENTER" verticalAlignment="CENTER" virtual="true">
             <Controls>
-                <Texture name="$(parent)Banner" level="8">
+                <Texture name="$(parent)Banner" level="8" pixelRoundingEnabled="false">
                     <Dimensions x="64" y="64" />
                 </Texture>
             </Controls>
@@ -390,7 +390,7 @@
                             <Dimensions x="200" />
                             
                             <Controls>
-                                <Texture name="$(parent)Banner" textureFile="EsoUI/Art/Tribute/tributeCardNameBanner.dds" level="9">
+                                <Texture name="$(parent)Banner" textureFile="EsoUI/Art/Tribute/tributeCardNameBanner.dds" level="9" pixelRoundingEnabled="false">
                                     <Dimensions x="256" y="64" />
                                     <Anchor point="TOP" offsetY="-5" />
                                 </Texture>
@@ -401,7 +401,7 @@
                             <Anchor point="TOP" offsetY="20" />
                             
                             <Controls>
-                                <Texture name="$(parent)Icon" level="8">
+                                <Texture name="$(parent)Icon" level="8" pixelRoundingEnabled="false">
                                     <Dimensions x="128" y="128" />
                                     <Anchor point="CENTER" offsetY="2" />
                                 </Texture>

@@ -486,9 +486,9 @@ end
 
 function ZO_ActivityFinderTemplate_Gamepad:HideTributeRank()
     SCENE_MANAGER:RemoveFragment(GAMEPAD_ACTIVITY_TRIBUTE_RANK_FRAGMENT)
-    ZO_GenericFooter_Gamepad:ClearAnchors()
     if self.defaultFooterAnchor then
         local anchor = self.defaultFooterAnchor
+        ZO_GenericFooter_Gamepad:ClearAnchors()
         ZO_GenericFooter_Gamepad:SetAnchor(anchor.point, anchor.relativeTo, anchor.relativePoint, anchor.offsetX, anchor.offsetY)
     end
     self.defaultFooterAnchor = nil

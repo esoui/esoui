@@ -125,8 +125,7 @@ function ZO_TributeRewardsData:GetTierIcon()
     if rewardsTypeId == ZO_TRIBUTE_REWARD_TYPES.SEASON_REWARDS then
         return string.format("EsoUI/Art/Tribute/tributeRankIcon_%d.dds", self.rewardsTierId)
     else
-        -- TODO Tribute: Get expected leaderboards Rewards Icon here
-        return "EsoUI/Art/icons/icon_missing.dds"
+        return string.format("EsoUI/Art/Tribute/tributeLeaderboardRankIcon_%d.dds", self.rewardsTierId)
     end
 end
 

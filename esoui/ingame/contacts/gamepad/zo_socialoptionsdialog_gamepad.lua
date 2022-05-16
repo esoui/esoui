@@ -258,7 +258,7 @@ end
 function ZO_SocialOptionsDialogGamepad:BuildInviteToTributeOption()
     if not ZO_IsTributeLocked() then
         local function InviteToTributeCallback()
-            InviteToTribute(DecorateDisplayName(self.socialData.displayName))
+            InviteToTributeByDisplayName(DecorateDisplayName(self.socialData.displayName))
             SCENE_MANAGER:ShowBaseScene()
         end
         local unusedHeader = nil

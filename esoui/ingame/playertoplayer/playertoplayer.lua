@@ -1856,10 +1856,10 @@ local GAMEPAD_INTERACT_ICONS =
     },
     [SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE] =
     {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_down.dds",
-        disabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
+        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
+        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
+        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
+        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
     },
     [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
     {

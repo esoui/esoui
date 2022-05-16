@@ -428,6 +428,10 @@ ZO_TOOLTIP_STYLES =
     {
         fontFace = "$(GAMEPAD_MEDIUM_FONT)",
     },
+    tributeDisabledMechanicText =
+    {
+        fontColorField = GAMEPAD_TOOLTIP_COLOR_INACTIVE,
+    },
     prioritySellText =
     {
         fontSize = "$(GP_42)",

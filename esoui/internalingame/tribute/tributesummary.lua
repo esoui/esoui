@@ -32,6 +32,7 @@ local REWARDS_MATCH_KEY = 1
 local REWARDS_RANK_UP_KEY = 2
 local PROGRESS_TRANSLATION_ANIMATION_TIME_MS = 500
 local REWARD_WIPE_PER_ITEM_DURATION_MS = 300
+local REWARD_ROW_OFFSET_Y = 40
 
 function ZO_TributeSummary:Initialize(control)
     self.control = control
@@ -476,8 +477,7 @@ function ZO_TributeSummary:InitializeStateMachine()
         local state = fanfareStateMachine:AddState("PROGRESSION_IN")
         state:RegisterCallback("OnActivated", function()
             local offsetX = 0
-            local offsetY = 60
-            self.rewardItemsControl:SetAnchor(TOP, self.progressionControl:GetNamedChild("Divider"), BOTTOM, offsetX, offsetY)
+            self.rewardItemsControl:SetAnchor(TOP, self.progressionControl:GetNamedChild("Divider"), BOTTOM, offsetX, REWARD_ROW_OFFSET_Y)
 
             self.rewardsControl:SetHidden(false)
             self.statisticsControl:SetHidden(false)
@@ -773,8 +773,7 @@ function ZO_TributeSummary:InitializeStateMachine()
             -- We may have gotten here via a skip, which means we may never have even made it into the interstitial states
             -- So just ensure these animations are where we want them to be by this point in the flow
             local offsetX = 0
-            local offsetY = 60
-            self.rewardItemsControl:SetAnchor(TOP, self.progressionControl:GetNamedChild("Divider"), BOTTOM, offsetX, offsetY)
+            self.rewardItemsControl:SetAnchor(TOP, self.progressionControl:GetNamedChild("Divider"), BOTTOM, offsetX, REWARD_ROW_OFFSET_Y)
 
             self.progressionProgressBar:SetValue(self.playerRankCurrent, self.playerCampaignXP, self.playerRankNextRequiredXP, NO_WRAP, ANIMATE_INSTANTLY)
 
@@ -848,6 +847,9 @@ function ZO_TributeSummary:InitializeStateMachine()
         state:RegisterCallback("OnActivated", function()
             -- We may have gotten here via a skip, which means we may never have even made it into the interstitial states
             -- So just ensure these animations are where we want them to be by this point in the flow
+            local offsetX = 0
+            self.rewardItemsControl:SetAnchor(TOP, self.progressionControl:GetNamedChild("Divider"), BOTTOM, offsetX, REWARD_ROW_OFFSET_Y)
+
             self.rewardsControl:SetHidden(false)
             self.statisticsControl:SetHidden(false)
             self.rewardItemsControl:SetHidden(false)
@@ -870,10 +872,10 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.progressionInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             self.progressionRankChangeUpTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             if self.victory then
-                self.progressionLeaderboardLossBounceTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+                self.progressionLeaderboardLossBounceTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
                 self.leaderboardParticleSystem:Start()
             else
-                self.progressionLeaderboardWinBounceTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+                self.progressionLeaderboardWinBounceTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
             end
         end)
     end
@@ -948,6 +950,10 @@ function ZO_TributeSummary:InitializeStateMachine()
         rankChangeLeaderboardInEdge:SetConditional(function()
             return (not self.rankUp) and self.playerRankCurrent == TRIBUTE_TIER_PLATINUM
         end)
+        local rankChangeLeaderboardSkipEdge = fanfareStateMachine:AddEdge("RANK_CHANGE_OUT_TO_LEADERBOARD_SKIP", "RANK_CHANGE_OUT", "LEADERBOARD")
+        rankChangeLeaderboardSkipEdge:SetConditional(function()
+            return (not self.rankUp) and self.playerRankCurrent == TRIBUTE_TIER_PLATINUM
+        end)
         local rankChangeRankUpInEdge = fanfareStateMachine:AddEdgeAutoName("RANK_CHANGE_OUT", "RANK_UP_IN")
         rankChangeRankUpInEdge:SetConditional(function()
             return self.rankUp
@@ -987,7 +993,9 @@ function ZO_TributeSummary:InitializeStateMachine()
         fanfareStateMachine:AddEdgeAutoName("RANK_UP_OUT", "LEADERBOARD_IN")
         fanfareStateMachine:AddEdge("RANK_UP_OUT_TO_LEADERBOARD_SKIP", "RANK_UP_OUT", "LEADERBOARD")
         fanfareStateMachine:AddEdgeAutoName("LEADERBOARD_IN", "LEADERBOARD_BOUNCE_IN")
+        fanfareStateMachine:AddEdge("LEADERBOARD_IN_TO_LEADERBOARD_SKIP", "LEADERBOARD_IN", "LEADERBOARD")
         fanfareStateMachine:AddEdgeAutoName("LEADERBOARD_BOUNCE_IN", "LEADERBOARD")
+        fanfareStateMachine:AddEdge("LEADERBOARD_BOUNCE_IN_TO_LEADERBOARD_SKIP", "LEADERBOARD_BOUNCE_IN", "LEADERBOARD")
         fanfareStateMachine:AddEdgeAutoName("LEADERBOARD", "QUIT")
 
         local transitoryNoLeaderboardInEdge = fanfareStateMachine:AddEdgeAutoName("LEADERBOARD_TRANSITORY_STATE", "NO_LEADERBOARD")
@@ -1067,8 +1075,11 @@ function ZO_TributeSummary:InitializeStateMachine()
 
     -- The player is already on the leaderboard
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "RANK_CHANGE_OUT_TO_LEADERBOARD_IN")
+    fanfareStateMachine:AddTriggerToEdge("NEXT", "RANK_CHANGE_OUT_TO_LEADERBOARD_SKIP")
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "LEADERBOARD_IN_TO_LEADERBOARD_BOUNCE_IN")
+    fanfareStateMachine:AddTriggerToEdge("NEXT", "LEADERBOARD_IN_TO_LEADERBOARD_SKIP")
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "LEADERBOARD_BOUNCE_IN_TO_LEADERBOARD")
+    fanfareStateMachine:AddTriggerToEdge("NEXT", "LEADERBOARD_BOUNCE_IN_TO_LEADERBOARD_SKIP")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "LEADERBOARD_TO_QUIT")
 
     -- TODO Tribute: Add remaining triggers
@@ -1327,12 +1338,11 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
         local patronData = patronStalls[patronDraftId]:GetDataSource()
         if patronData then
             local patron = self.summaryPatrons:GetChild(patronIndex)
-            local patronId = patronData.patronId
             local indicator = patron:GetNamedChild("Indicator")
             local nameLabel = patron:GetNamedChild("Label")
-            patron:SetTexture(GetTributePatronLargeIcon(patronId))
-            indicator:SetTexture(GetTributePatronLargeRingIcon(patronId))
-            nameLabel:SetText(GetTributePatronName(patronId))
+            patron:SetTexture(patronData:GetPatronLargeIcon())
+            indicator:SetTexture(patronData:GetPatronLargeRingIcon())
+            nameLabel:SetText(patronData:GetFormattedName())
             if self.victory then
                 indicator:SetTransformRotation(0, 0, ZO_PI)
             end
@@ -1442,8 +1452,7 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
                 local countText = ""
                 if rewardType == REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE then
                     name = zo_strformat(SI_TRIBUTE_CLUB_EXPERIENCE, self.playerClubXP)
-                    -- TODO Tribute: Get a new icon for this.
-                    icon = "EsoUI/Art/Tribute/tribute_tabIcon_tribute_up.dds"
+                    icon = "EsoUI/Art/Tribute/tributeRankPoints.dds"
                     if count > 1 then
                         countText = tostring(count)
                     end
@@ -1524,7 +1533,7 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
 
     if self.rankUp then
         local rankUpRewardsRowControl = self.rewardRowControlPool:AcquireObject(REWARDS_RANK_UP_KEY)
-        rankUpRewardsRowControl:SetAnchor(TOP, matchRewardsRowControl, BOTTOM, 0, 20)
+        rankUpRewardsRowControl:SetAnchor(TOP, matchRewardsRowControl, BOTTOM, 0, 10)
         SetUpRewardsRow(rankUpRewards, rankUpRewardsRowControl, self.rewardsControlPool)
         self.rankUpItemsInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeRewardItemsWipeIn", rankUpRewardsRowControl)
         self.rankUpItemsInTimeline:SetAllAnimationOffsets(0)

@@ -48,6 +48,7 @@
         </Control>
 
         <Control name="ZO_TributePileViewerCardTile_Keyboard_Control" inherits="ZO_TributeCardTile_Shared_Control ZO_TributeCardTile_Keyboard_Control" virtual="true">
+            <Dimensions y="ZO_TRIBUTE_CARD_TILE_TALL_HEIGHT_KEYBOARD" />
             <OnInitialized>
                 ZO_TributePileViewerCardTile_Keyboard_OnInitialized(self)
             </OnInitialized>
@@ -57,6 +58,7 @@
         </Control>
 
         <Control name="ZO_TributeTargetViewerCardTile_Keyboard_Control" inherits="ZO_TributeCardTile_Shared_Control ZO_TributeCardTile_Keyboard_Control" virtual="true">
+            <Dimensions y="ZO_TRIBUTE_CARD_TILE_TALL_HEIGHT_KEYBOARD" />
             <OnInitialized>
                 ZO_TributeTargetViewerCardTile_Keyboard_OnInitialized(self)
             </OnInitialized>

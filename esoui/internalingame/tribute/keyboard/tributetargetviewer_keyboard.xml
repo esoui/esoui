@@ -36,7 +36,7 @@
 
                 <Control name="$(parent)GridContainer">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="20" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-100" offsetY="-25" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-100" offsetY="-20" />
                     <Controls>
                         <Label name="$(parent)ContentEmptyLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_TRIBUTE_PILE_VIEWER_EMPTY_LIST" hidden="true">
                             <Anchor point="TOP" offsetY="20"/>

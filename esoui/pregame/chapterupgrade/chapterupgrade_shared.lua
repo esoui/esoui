@@ -62,8 +62,8 @@ function ZO_ChapterUpgrade_Shared:PerformDeferredInitialize()
         local backgroundTexture, registrationSummary, chapterSummaryHeader, chapterSummary = GetCurrentChapterRegistrationInfo()
         local logoTexture = GetCurrentChapterLargeLogoFileIndex()
         self.backgroundImage:SetTexture(backgroundTexture)
-        self:ResizeBackground()
         self.logoTexture:SetTexture(logoTexture)
+        self:ResizeBackground()
         self.registrationSummaryControl:SetText(registrationSummary)
         self.chapterSummaryHeaderControl:SetText(chapterSummaryHeader)
         self.chapterSummaryControl:SetText(chapterSummary)
@@ -73,6 +73,7 @@ end
 
 function ZO_ChapterUpgrade_Shared:ResizeBackground()
     ZO_ResizeControlForBestScreenFit(self.backgroundImage)
+    ZO_ResizeControlForBestScreenFit(self.logoTexture)
 end
 
 function ZO_ChapterUpgrade_Shared:OnShowing()

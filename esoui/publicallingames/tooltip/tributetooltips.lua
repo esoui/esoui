@@ -147,22 +147,22 @@ function ZO_Tooltip:LayoutTributeCard(cardData, optionalDockCardUpgradeContext)
     end
 end
 
-function ZO_Tooltip:LayoutTributePatronFavorStateInfo(patronData, favorState)
+function ZO_Tooltip:LayoutTributePatronFavorStateInfo(patronData, favorState, useDesaturatedText)
     local requirementsText = patronData:GetRequirementsText(favorState)
     local mechanicsText = patronData:GetMechanicsText(favorState)
-
     if requirementsText ~= "" and mechanicsText ~= "" then
         local favorSection = self:AcquireSection(self:GetStyle("bodySection"))
 
         --Layout the title of the favor state
         local favorText = GetString("SI_TRIBUTEPATRONPERSPECTIVEFAVORSTATE", favorState)
+        local colorStyle = useDesaturatedText and self:GetStyle("tributeDisabledMechanicText") or nil
 
         if favorState == TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_PLAYER then
-            favorSection:AddLine(favorText, self:GetStyle("succeeded"), self:GetStyle("bodyHeader"))
+            favorSection:AddLine(favorText, colorStyle or self:GetStyle("succeeded"), self:GetStyle("bodyHeader"))
         elseif favorState == TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_NEUTRAL then
-            favorSection:AddLine(favorText, self:GetStyle("bodyHeader"))
+            favorSection:AddLine(favorText, colorStyle, self:GetStyle("bodyHeader"))
         elseif favorState == TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_OPPONENT then
-            favorSection:AddLine(favorText, self:GetStyle("failed"), self:GetStyle("bodyHeader"))
+            favorSection:AddLine(favorText, colorStyle or self:GetStyle("failed"), self:GetStyle("bodyHeader"))
         else
             internalassert(false, "Unsupported Favor State")
         end
@@ -178,15 +178,18 @@ function ZO_Tooltip:LayoutTributePatronFavorStateInfo(patronData, favorState)
             resultText = GetString("SI_TRIBUTEPATRONPERSPECTIVEFAVORSTATE_RESULT", displayFavorState)
         end
 
-        favorSection:AddLine(zo_strformat(GetString(SI_TRIBUTE_PATRON_TOOLTIP_FAVOR_DESCRIPTION_FORMATTER), requirementsText, mechanicsText, resultText), self:GetStyle("whiteFontColor"), self:GetStyle("bodyDescription"))
+        local formatterStringId = useDesaturatedText and SI_TRIBUTE_PATRON_TOOLTIP_FAVOR_DESCRIPTION_DISABLED_FORMATTER or SI_TRIBUTE_PATRON_TOOLTIP_FAVOR_DESCRIPTION_FORMATTER
+        favorSection:AddLine(zo_strformat(GetString(formatterStringId), requirementsText, mechanicsText, resultText), colorStyle or self:GetStyle("whiteFontColor"), self:GetStyle("bodyDescription"))
         self:AddSection(favorSection)
     end
 end
 
-function ZO_Tooltip:LayoutTributePatron(patronData)
+function ZO_Tooltip:LayoutTributePatron(patronData, optionalArgs)
+    local highlightActivePatronState = optionalArgs and optionalArgs.highlightActivePatronState or false
+    local suppressNotCollectibleWarning = optionalArgs and optionalArgs.suppressNotCollectibleWarning or false
+
     -- Header
     local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
-
     topSection:AddLine(GetString(SI_TRIBUTE_PATRON_TYPE))
     local collectionId = patronData:GetPatronCollectibleId()
     if patronData:IsNeutral() then
@@ -206,9 +209,27 @@ function ZO_Tooltip:LayoutTributePatron(patronData)
     titleSection:AddLine(patronData:GetFormattedName(), { fontColor = qualityColor })
     self:AddSection(titleSection)
 
-    self:LayoutTributePatronFavorStateInfo(patronData, TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_PLAYER)
-    self:LayoutTributePatronFavorStateInfo(patronData, TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_NEUTRAL)
-    self:LayoutTributePatronFavorStateInfo(patronData, TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_OPPONENT)
+    local currentFavorState = nil
+    if highlightActivePatronState and TRIBUTE.GetGameFlowState and TRIBUTE:GetGameFlowState() ~= TRIBUTE_GAME_FLOW_STATE_INACTIVE then
+        -- Highlight the active Favor state only if requested and if a Tribute game is currently active.
+        local patronStall = TRIBUTE:GetPatronStallByPatronId(patronData:GetId())
+        if patronStall then
+            currentFavorState = patronStall:GetCurrentFavorState()
+        end
+    end
+
+    do
+        local useDesaturatedText
+
+        useDesaturatedText = currentFavorState and currentFavorState ~= TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_PLAYER or false
+        self:LayoutTributePatronFavorStateInfo(patronData, TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_PLAYER, useDesaturatedText)
+
+        useDesaturatedText = currentFavorState and currentFavorState ~= TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_NEUTRAL or false
+        self:LayoutTributePatronFavorStateInfo(patronData, TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_NEUTRAL, useDesaturatedText)
+
+        useDesaturatedText = currentFavorState and currentFavorState ~= TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_OPPONENT or false
+        self:LayoutTributePatronFavorStateInfo(patronData, TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_OPPONENT, useDesaturatedText)
+    end
 
     -- Body
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
@@ -216,7 +237,7 @@ function ZO_Tooltip:LayoutTributePatron(patronData)
     self:AddSection(bodySection)
 
     local infoSection = self:AcquireSection(self:GetStyle("bodySection"))
-    if collectionId == 0 then
+    if collectionId == 0 and not suppressNotCollectibleWarning then
         infoSection:AddLine(GetString(SI_TRIBUTE_PATRON_TOOLTIP_NO_COLLECTIBLE), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
     end
     self:AddSection(infoSection)
@@ -249,7 +270,7 @@ end
 
 function ZO_Tooltip:LayoutTributeResource(resource)
     local titleSection = self:AcquireSection(self:GetStyle("title"))
-    titleSection:AddLine(GetString("SI_TRIBUTERESOURCE", resource))
+    titleSection:AddLine(zo_strformat(SI_TRIBUTE_RESOURCE_NAME_FORMATTER, GetString("SI_TRIBUTERESOURCE", resource)))
     self:AddSection(titleSection)
 
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))

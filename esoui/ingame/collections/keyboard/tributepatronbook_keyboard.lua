@@ -201,7 +201,7 @@ function ZO_TributePatronBook_Keyboard:RefreshCategories()
 
     local categoryList = {}
     local categoryFilters = self.categoryFilters
-    for _, tributePatronCategoryData in TRIBUTE_DATA_MANAGER:TributePatronCategoryIterator() do
+    for _, tributePatronCategoryData in TRIBUTE_DATA_MANAGER:TributePatronCategoryIterator(categoryFilters) do
         table.insert(categoryList, tributePatronCategoryData)
     end
 

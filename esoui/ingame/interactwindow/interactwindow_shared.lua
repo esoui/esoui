@@ -501,21 +501,17 @@ function ZO_QuestReward_GetSkillLineEarnedText(skillLineName)
     return zo_strformat(SI_QUEST_REWARD_SKILL_LINE, skillLineName)
 end
 
-local function SetupTribureClubReward(control, amount, icon)
+local function SetupTribureClubReward(control, name, icon)
     local nameControl = control:GetNamedChild("Name")
     local iconTexture = control:GetNamedChild("Icon")
     iconTexture:SetHidden(false)
     iconTexture:SetTexture(icon)
     control:GetNamedChild("StackSize"):SetHidden(true)
 
-    nameControl:SetText(ZO_QuestReward_GetTributeClubEarnedText(amount))
+    nameControl:SetText(name)
     nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
     control.allowTooltip = false
     control:SetHidden(false)
-end
-
-function ZO_QuestReward_GetTributeClubEarnedText(amount)
-    return zo_strformat(SI_QUEST_REWARD_TRIBUTE_CLUB_EXPERIENCE, amount)
 end
 
 local REWARD_CREATORS =
@@ -577,7 +573,7 @@ local REWARD_CREATORS =
         end,
     [REWARD_TYPE_TRIBUTE_CLUB_EXPERIENCE] =
         function(control, name, amount, icon)
-            SetupTribureClubReward(control, amount, icon)
+            SetupTribureClubReward(control, name, icon)
         end,
 }
 
@@ -667,6 +663,8 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex, isGamepad)
                 else
                     rewardData.icon = "EsoUI/Art/currency/currency_inspiration.dds"
                 end
+            elseif rewardType == REWARD_TYPE_TRIBUTE_CLUB_EXPERIENCE then
+                rewardData.icon = "EsoUI/Art/Tribute/tributeRankPoints.dds"
             end
 
             table.insert(data, rewardData)

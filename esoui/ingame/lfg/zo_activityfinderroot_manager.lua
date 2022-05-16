@@ -342,6 +342,8 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                     location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_BATTLEGROUND)
                 elseif IsPlayerInAvAWorld() then
                     location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_AVA)
+                else
+                    location:SetLockReasonText(SI_LFG_LOCK_REASON_INVALID_AREA)
                 end
             elseif location:IsLockedByCollectible() then
                 local collectibleId = location:GetFirstLockingCollectible()

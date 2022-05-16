@@ -164,7 +164,7 @@ function ZO_GroupList_Keyboard:GroupListRow_OnMouseUp(control, button, upInside)
                 end
                 AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function() JumpToHouse(data.displayName) end)
                 if not ZO_IsTributeLocked() then
-                    AddMenuItem(GetString(SI_SOCIAL_MENU_TRIBUTE_INVITE), function() InviteToTribute(data.displayName) end)
+                    AddMenuItem(GetString(SI_SOCIAL_MENU_TRIBUTE_INVITE), function() InviteToTributeByDisplayName(data.displayName) end)
                 end
                 AddMenuItem(GetString(SI_SOCIAL_MENU_JUMP_TO_PLAYER), function() JumpToGroupMember(data.characterName) end)
             end

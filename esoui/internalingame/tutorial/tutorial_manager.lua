@@ -1,6 +1,6 @@
 -- Tutorial types that should neither fire TriggeredTutorialChanged callbacks nor affect TUTORIAL_MANAGER:IsTutorialTriggered()
 -- For now this works with no additional logic required for tutorial as they are hidden because Pointer Box tutorials do not fire the hidden event.
-local UNTRACKED_TUTORIAL_TYPES = ZO_CreateSetFromArguments(TUTORIAL_TYPE_POINTER_BOX)
+local UNTRACKED_TUTORIAL_TYPES = ZO_CreateSetFromArguments(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TYPE_HUD_BRIEF, TUTORIAL_TYPE_HUD_INFO_BOX)
 
 local Tutorial_Manager = ZO_InitializingCallbackObject:Subclass()
 

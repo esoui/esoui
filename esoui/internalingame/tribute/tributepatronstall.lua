@@ -157,6 +157,10 @@ function ZO_TributePatronStall:SetPatronDraftId(patronDraftId)
     self.control:AddFilterForEvent(EVENT_TRIBUTE_PATRON_FAVOR_STATE_CHANGED, REGISTER_FILTER_PATRON_DRAFT_ID, patronDraftId)
 end
 
+function ZO_TributePatronStall:GetCurrentFavorState()
+    return self.favorState
+end
+
 function ZO_TributePatronStall:HideTooltip()
     if self.isShowingTooltip then
         ClearTooltipImmediately(ItemTooltip)
@@ -176,18 +180,26 @@ function ZO_TributePatronStall:ShowTooltip()
 
         local screenX, screenY = self:GetScreenAnchorPosition(LEFT)
         screenX, screenY = screenX + ZO_TRIBUTE_PATRON_TOOLTIP_OFFSET_X, screenY + ZO_TRIBUTE_PATRON_TOOLTIP_OFFSET_Y
+        local currentGameFlowState = TRIBUTE:GetGameFlowState()
+        local highlightActivePatronState = currentGameFlowState == TRIBUTE_GAME_FLOW_STATE_PLAYING
+        local SUPPRESS_NOT_COLLECTIBLE_WARNING = true
 
         if IsInGamepadPreferredMode() then
-            if TRIBUTE.gameFlowState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT and not ZO_TRIBUTE_PATRON_SELECTION_MANAGER:ShouldShowGamepadTooltips() then
+            if currentGameFlowState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT and not ZO_TRIBUTE_PATRON_SELECTION_MANAGER:ShouldShowGamepadTooltips() then
                 return
             end
-            ZO_TributePatronTooltip_Gamepad_Show(patronData, RIGHT, GuiRoot, TOPLEFT, screenX, screenY)
+
+            local optionalArgs =
+            {
+                highlightActivePatronState = highlightActivePatronState,
+                suppressNotCollectibleWarning = SUPPRESS_NOT_COLLECTIBLE_WARNING,
+            }
+            ZO_TributePatronTooltip_Gamepad_Show(patronData, optionalArgs, RIGHT, GuiRoot, TOPLEFT, screenX, screenY)
         else
             InitializeTooltip(ItemTooltip, GuiRoot, RIGHT, screenX, screenY, TOPLEFT)
-
-            local patronId = patronData:GetId()
-            ItemTooltip:SetTributePatron(patronId)
+            ItemTooltip:SetTributePatron(patronData:GetId(), highlightActivePatronState, SUPPRESS_NOT_COLLECTIBLE_WARNING)
         end
+
         self.isShowingTooltip = true
     end
 end

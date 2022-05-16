@@ -1684,6 +1684,51 @@ function ZO_OutOfDateAddonsProvider:Decline(data)
     self.notificationManager:RefreshNotificationList()
 end
 
+-- Tribute Invite Provider
+------------------------------
+
+ZO_TributeInviteProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_TributeInviteProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_TRIBUTE_INVITE_RECEIVED)
+    provider:RegisterUpdateEvent(EVENT_TRIBUTE_INVITE_REMOVED)
+
+    return provider
+end
+
+function ZO_TributeInviteProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    local inviteState, inviterCharacterName, inviterDisplayName, targetType = GetTributeInviteInfo()
+    if inviterCharacterName ~= "" and inviteState == TRIBUTE_INVITE_STATE_INVITE_CONSIDERING then
+        local nameToUse = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
+        local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
+        table.insert(self.list,
+        {
+            dataType = NOTIFICATIONS_REQUEST_DATA,
+            notificationType = NOTIFICATION_TYPE_TRIBUTE_INVITE,
+            secsSinceRequest = ZO_NormalizeSecondsSince(0),
+            message = self:CreateMessage(formattedPlayerNames),
+            characterNameForGamercard = inviterCharacterName,
+            shortDisplayText = zo_strformat(SI_NOTIFICATIONS_LIST_ENTRY, nameToUse)
+        })
+    end
+end
+
+function ZO_TributeInviteProvider:Accept(data)
+    AcceptTribute()
+end
+
+function ZO_TributeInviteProvider:Decline(data, button, openedFromKeybind)
+    DeclineTribute()
+end
+
+function ZO_TributeInviteProvider:CreateMessage(inviterName)
+    return zo_strformat(SI_TRIBUTE_INVITE_MESSAGE, inviterName)
+end
+
 -- Sort List
 -------------------------
 local ENTRY_SORT_KEYS =

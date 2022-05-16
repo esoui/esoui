@@ -317,7 +317,7 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
                 AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function() JumpToHouse(data.displayName) end)
 
                 if not ZO_IsTributeLocked() and data.hasCharacter and data.online then
-                    AddMenuItem(GetString(SI_SOCIAL_MENU_TRIBUTE_INVITE), function() InviteToTribute(data.displayName) end)
+                    AddMenuItem(GetString(SI_SOCIAL_MENU_TRIBUTE_INVITE), function() InviteToTributeByDisplayName(data.displayName) end)
                 end
 
                 AddMenuItem(GetString(SI_SOCIAL_MENU_SEND_MAIL), function() MAIL_SEND:ComposeMailTo(data.displayName) end)

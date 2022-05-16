@@ -19,9 +19,14 @@
                             </Controls>
                         </Control>
 
+                        <Label name="$(parent)ConcedeWarning" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" >
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AutoPlay" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)AutoPlay" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                        </Label>
+
                         <Button name="$(parent)ConcedeButton" inherits="ZO_DefaultButton" text="SI_TRIBUTE_SETTINGS_DIALOG_CONCEDE_MATCH">
                             <Dimensions x="200"/>
-                            <Anchor point="TOP" relativeTo="$(parent)AutoPlay" relativePoint="BOTTOM" offsetY="40" />
+                            <Anchor point="TOP" relativeTo="$(parent)ConcedeWarning" relativePoint="BOTTOM" offsetY="10" />
                             <OnClicked>
                                 ZO_TributeSettingsDialogConcedeButton_Keyboard_OnClicked(self)
                             </OnClicked>

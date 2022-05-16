@@ -144,7 +144,8 @@ end
 function ZO_TributePatronSelectionTile_Gamepad:RefreshTooltip()
     ZO_TributePatronTooltip_Gamepad_Hide()
     if self:IsSelected() and ZO_TRIBUTE_PATRON_SELECTION_MANAGER:ShouldShowGamepadTooltips() then
-        ZO_TributePatronTooltip_Gamepad_Show(self.patronData, LEFT, self.control, RIGHT, 25, 0)
+        local DEFAULT_OPTIONS = nil
+        ZO_TributePatronTooltip_Gamepad_Show(self.patronData, DEFAULT_OPTIONS, LEFT, self.control, RIGHT, 25, 0)
     end
 end
 

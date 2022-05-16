@@ -8,9 +8,10 @@ function ZO_TributePileViewer_Keyboard:Initialize(control)
         {
             entryTemplate = "ZO_TributePileViewerCardTile_Keyboard_Control",
             width = ZO_TRIBUTE_CARD_TILE_WIDTH_KEYBOARD,
-            height = ZO_TRIBUTE_CARD_TILE_HEIGHT_KEYBOARD,
+            height = ZO_TRIBUTE_CARD_TILE_TALL_HEIGHT_KEYBOARD,
             gridPaddingX = 20,
-            gridPaddingY = 10,
+            --Allow tiles to overlap to accommodate size of card highlight without excessive spacing between cards
+            gridPaddingY = -15,
         },
     }
     ZO_TributePileViewer_Shared.Initialize(self, control, TEMPLATE_DATA)
