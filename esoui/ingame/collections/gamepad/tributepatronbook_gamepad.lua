@@ -311,7 +311,22 @@ end
 function ZO_TributePatronBook_Gamepad:OnShowing()
     ZO_Gamepad_ParametricList_Screen.OnShowing(self)
 
-    self:ShowListDescriptor(self.categoryListDescriptor)
+    if self.browseToCollectibleInfo then
+        local patronId = self.browseToCollectibleInfo.patronId
+        local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(patronId)
+        local tributePatronCategoryData = patronData:GetCategoryData()
+        local patronList = self.patronListDescriptor.list
+        self:ViewCategory(tributePatronCategoryData)
+        
+        local patronIndex = patronList:GetIndexForData("ZO_GamepadNewMenuEntryTemplate", patronData)
+        patronList:SetSelectedIndexWithoutAnimation(patronIndex)
+        self.browseToCollectibleInfo = nil
+
+        self:GetScene():AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+        self.categoriesRefreshGroup:MarkDirty("List")
+    else
+        self:ShowListDescriptor(self.categoryListDescriptor)
+    end
 end
 
 function ZO_TributePatronBook_Gamepad:OnHide()
@@ -407,6 +422,15 @@ function ZO_TributePatronBook_Gamepad:OnSelectionChanged(list, selectedData, old
             self:BuildGridList()
         end
     end
+end
+
+function ZO_TributePatronBook_Gamepad:BrowseToPatron(patronId)
+    self.browseToCollectibleInfo =
+    {
+        patronId = patronId,
+    }
+
+    SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", self:GetSceneName())
 end
 
 --[[Global functions]]--

@@ -618,7 +618,7 @@ end
 
 function ZO_ActivityFinderTemplate_Gamepad:OnTributeClubRankDataChanged()
     if self.fragment:IsShowing() then
-        GAMEPAD_ACTIVITY_TRIBUTE_RANK:Refresh()
+        GAMEPAD_ACTIVITY_TRIBUTE_RANK:RefreshClubRank()
     end
 end
 

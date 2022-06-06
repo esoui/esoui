@@ -80,6 +80,12 @@ end
 
 function ZO_TributePatronBook_Keyboard:OnFragmentShowing()
     self:DeferredInitialize()
+
+    if self.pendingNavigateToData then
+        self:NavigateToCollectibleData(self.pendingNavigateToData)
+        self.pendingNavigateToData = nil
+    end
+
     ZO_TributePatronBook_Shared.OnFragmentShowing(self)
 end
 
@@ -101,6 +107,31 @@ function ZO_TributePatronBook_Keyboard:AddPatron(tributePatronData, parentNode, 
 
     local entryData = ZO_EntryData:New(tributePatronData)
     entryData.node = tree:AddNode("ZO_TributePatronBook_PatronEntry", entryData, parentNode)
+end
+
+function ZO_TributePatronBook_Keyboard:NavigateToCollectibleData(collectibleData)
+    if not TRIBUTE_PATRON_BOOK_SCENE:IsShowing() then
+        MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "tributePatronBook")
+    end
+
+    if TRIBUTE_PATRON_BOOK_FRAGMENT:IsShowing() then
+        local patronId = collectibleData:GetReferenceId()
+        local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(patronId)
+        local tributePatronCategoryData = patronData:GetCategoryData()
+        local categoryNode = self.categoryNodeLookupData[tributePatronCategoryData:GetId()]
+        if categoryNode then
+            for _, patronNode in ipairs(categoryNode:GetChildren()) do
+                local nodePatronData = patronNode:GetData():GetDataSource()
+                if nodePatronData == patronData then
+                    self.categoryTree:SelectNode(patronNode)
+                    break
+                end
+            end
+            self.categoriesRefreshGroup:MarkDirty("List")
+        end
+    else
+        self.pendingNavigateToData = collectibleData
+    end
 end
 
 -- Begin ZO_TributePatronBook_Shared Overrides --

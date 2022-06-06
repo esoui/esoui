@@ -319,7 +319,12 @@ end
 function ZO_GamepadCollectionsUpdateProvider:Accept(entryData)
     ZO_CollectionsUpdateProvider.Accept(self, entryData)
 
-    GAMEPAD_COLLECTIONS_BOOK:BrowseToCollectible(entryData.data:GetId())
+    -- The Tribute Patron book is a different scene than the standard collections menu, so we need to handle it uniquely.
+    if entryData.data:GetCategoryData():IsTributePatronCategory() then
+        GAMEPAD_TRIBUTE_PATRON_BOOK:BrowseToPatron(entryData.data:GetReferenceId())
+    else
+        GAMEPAD_COLLECTIONS_BOOK:BrowseToCollectible(entryData.data:GetId())
+    end
 end
 
 function ZO_GamepadCollectionsUpdateProvider:GetMessage(hasMoreInfo, categoryName, collectibleName)

@@ -503,6 +503,8 @@ function ZO_CollectionsBook:BrowseToCollectible(collectibleId)
                 HOUSING_BOOK_KEYBOARD:BrowseToCollectible(collectibleId)
             elseif categoryData:IsOutfitStylesCategory() then
                 ZO_OUTFIT_STYLES_BOOK_KEYBOARD:NavigateToCollectibleData(collectibleData)
+            elseif categoryData:IsTributePatronCategory() then
+                TRIBUTE_PATRON_BOOK_KEYBOARD:NavigateToCollectibleData(collectibleData)
             else
                 --Select the category or subcategory of the collectible
                 local categoryNode = self.categoryNodeLookupData[categoryData:GetId()]
