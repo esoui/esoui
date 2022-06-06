@@ -1,10 +1,4 @@
-ZO_SortFilterListBase = ZO_Object:Subclass()
-
-function ZO_SortFilterListBase:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
+ZO_SortFilterListBase = ZO_InitializingObject:Subclass()
 
 function ZO_SortFilterListBase:Initialize()
 end
@@ -15,9 +9,8 @@ end
 function ZO_SortFilterListBase:RefreshSort()
 end
 
-function ZO_SortFilterListBase:RefreshFilters() 
+function ZO_SortFilterListBase:RefreshFilters()
 end
 
 function ZO_SortFilterListBase:RefreshData()
 end
-

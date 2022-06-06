@@ -1,28 +1,21 @@
-local ZO_BattlegroundLeaderboardsManager_Keyboard = ZO_BattlegroundLeaderboardsManager_Shared:Subclass()
-
-function ZO_BattlegroundLeaderboardsManager_Keyboard:New(...)
-    return ZO_BattlegroundLeaderboardsManager_Shared.New(self, ...)
-end
+ZO_BattlegroundLeaderboardsManager_Keyboard = ZO_BattlegroundLeaderboardsManager_Shared:Subclass()
 
 function ZO_BattlegroundLeaderboardsManager_Keyboard:Initialize(control)
-    local fragment = ZO_FadeSceneFragment:New(control)
+    BATTLEGROUND_LEADERBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
-    self.currentScoreLabel = GetControl(control, "CurrentScore")
-    self.currentRankLabel = GetControl(control, "CurrentRank")
-    self.timerLabel = GetControl(control, "Timer")
+    self.currentScoreLabel = control:GetNamedChild("CurrentScore")
+    self.currentRankLabel = control:GetNamedChild("CurrentRank")
+    self.timerLabel = control:GetNamedChild("Timer")
     
-    ZO_BattlegroundLeaderboardsManager_Shared.Initialize(self, control, LEADERBOARDS, LEADERBOARDS_SCENE, fragment)
+    ZO_BattlegroundLeaderboardsManager_Shared.Initialize(self, control, LEADERBOARDS, LEADERBOARDS_SCENE, BATTLEGROUND_LEADERBOARD_FRAGMENT)
 
-    self:RegisterForEvents()
+    BATTLEGROUND_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:UpdatePlayerInfo()
+        end
+    end)
 
-    fragment:RegisterCallback("StateChange", function(oldState, newState)
-                                                 if newState == SCENE_FRAGMENT_SHOWING then
-                                                     self:UpdateAllInfo()
-                                                 end
-                                             end)
-
-    SYSTEMS:RegisterKeyboardObject(BATTLEGROUND_LEADERBOARD_SYSTEM_NAME, self)
-    LEADERBOARDS:UpdateCategories()
+    SYSTEMS:RegisterKeyboardObject(ZO_BATTLEGROUND_LEADERBOARD_SYSTEM_NAME, self)
 end
 
 function ZO_BattlegroundLeaderboardsManager_Keyboard:RefreshHeaderPlayerInfo(isWeekly)

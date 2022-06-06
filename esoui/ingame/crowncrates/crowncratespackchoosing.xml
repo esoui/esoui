@@ -171,7 +171,7 @@
                         <Texture name="$(parent)ArrowTexture" textureFile="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds">
                             <TextureCoords left="1" right="0" top="0" bottom="1" />
                             <Dimensions x="32" y="64" />
-                            <Anchor point="RIGHT" relativeTo="$(parent)PageHeader" relativePoint="LEFT" offsetX="-10"/>
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-10"/>
                         </Texture>
                     </Controls>
                 </Label>
@@ -180,7 +180,7 @@
                     <Controls>
                         <Texture name="$(parent)ArrowTexture" textureFile="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds">
                             <Dimensions x="32" y="64" />
-                            <Anchor point="LEFT" relativeTo="$(parent)PageHeader" relativePoint="RIGHT" offsetX="10"/>
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="10"/>
                         </Texture>
                     </Controls>
                 </Label>

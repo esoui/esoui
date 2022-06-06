@@ -69,9 +69,37 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
-    controlName = "Options_Video_HDR_Brightness",
+    controlName = "Options_Video_HDR_Peak_Brightness",
     settingType = SETTING_TYPE_GRAPHICS,
-    settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
+    settingId = GRAPHICS_SETTING_HDR_PEAK_BRIGHTNESS,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_HDR_Scene_Brightness",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_HDR_SCENE_BRIGHTNESS,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_HDR_Scene_Contrast",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_HDR_SCENE_CONTRAST,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_HDR_UI_Brightness",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_HDR_UI_BRIGHTNESS,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_HDR_UI_Contrast",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_HDR_UI_CONTRAST,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
 })
 
@@ -132,6 +160,14 @@ panelBuilder:AddSetting({
     controlName = "Options_Video_DLSS_Mode",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_DLSS_MODE,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_FSR_Mode",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_FSR_MODE,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
     indentLevel = 1,
 })

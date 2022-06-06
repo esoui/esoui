@@ -37,7 +37,7 @@ function CampaignEmperor_Shared:Initialize(control)
     control:RegisterForEvent(EVENT_KEEPS_INITIALIZED, function() self:RefreshImperialKeeps() end)
     control:RegisterForEvent(EVENT_CAMPAIGN_EMPEROR_CHANGED, function(_, campaignId) self:OnCampaignEmperorChanged(campaignId) end)
     control:RegisterForEvent(EVENT_CAMPAIGN_STATE_INITIALIZED, function(_, campaignId) self:OnCampaignStateInitialized(campaignId) end)
-    control:RegisterForEvent(EVENT_CAMPAIGN_LEADERBOARD_DATA_CHANGED, function() self:RefreshData() end)
+    control:RegisterForEvent(EVENT_CAMPAIGN_LEADERBOARD_DATA_RECEIVED, function(_, campaignId, alliance) self:OnCampaignEmperorLeaderboardDataReceived(campaignId, { alliance }) end)
 end
 
 function CampaignEmperor_Shared:InitializeMenu()
@@ -69,7 +69,7 @@ function CampaignEmperor_Shared:ChangeAlliance(alliance, shownAllianceString)
     self.listAlliance = alliance
     self.shownAllianceString = shownAllianceString
 
-    self:RefreshData()
+    self:QueryLeaderboardData(alliance)
 end
 
 function CampaignEmperor_Shared:CreateImperialKeepControl(rulesetId, playerAlliance, index, prevKeep)
@@ -331,6 +331,34 @@ function CampaignEmperor_Shared:ColorRow(control, data, mouseIsOver)
     local textColor = self:GetRowColors(data, mouseIsOver)
     local name = GetControl(control, "Name")
     name:SetColor(textColor:UnpackRGBA())
+end
+
+function CampaignEmperor_Shared:QueryLeaderboardData(...)
+    local data = 
+    {
+        campaignId = self.campaignId,
+        alliances = {...},
+    }
+    self.pendingRequestData = data
+
+    local readyState = QueryCampaignLeaderboardData(...)
+
+    if readyState == LEADERBOARD_DATA_READY then
+        self:OnCampaignEmperorLeaderboardDataReceived(data.campaignId, data.alliances)
+    end
+end
+
+function CampaignEmperor_Shared:OnCampaignEmperorLeaderboardDataReceived(campaignId, requestedAlliances)
+    if not self.pendingRequestData.alliances or not self.pendingRequestData.campaignId then
+        return
+    end
+
+    local passesAllianceCheck = requestedAlliances == self.pendingRequestData.alliances
+    local passesCampaignCheck = self.pendingRequestData.campaignId == campaignId
+    if passesAllianceCheck and passesCampaignCheck then
+        self:RefreshData()
+        self:RefreshEmperor()
+    end
 end
 
 --Events

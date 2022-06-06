@@ -48,8 +48,8 @@ ZO_ID_REQUEST_TYPE_TRIAL_LEADERBOARD = "trialLeaderboard"
 ZO_ID_REQUEST_TYPE_TRIAL_OF_THE_WEEK_LEADERBOARD = "trialOfTheWeekLeaderboard"
 ZO_ID_REQUEST_TYPE_CHALLENGE_LEADERBOARD = "challengeLeaderboard"
 ZO_ID_REQUEST_TYPE_CHALLENGE_OF_THE_WEEK_LEADERBOARD = "challengeOfTheWeekLeaderboard"
-ZO_ID_REQUEST_TYPE_HOME_SHOW_LEADERBOARD = "homeShowLeaderboard"
 ZO_ID_REQUEST_TYPE_BATTLEGROUND_LEADERBOARD = "battlegroundLeaderboard"
+ZO_ID_REQUEST_TYPE_TRIBUTE_LEADERBOARD = "tributeLeaderboard"
 
 local CONSOLE_INFO_FUNCTIONS = 
 {
@@ -70,8 +70,8 @@ local CONSOLE_INFO_FUNCTIONS =
     [ZO_ID_REQUEST_TYPE_TRIAL_OF_THE_WEEK_LEADERBOARD] = GetConsoleInfoFromTrialOfTheWeekLeaderboardEntry,
     [ZO_ID_REQUEST_TYPE_CHALLENGE_LEADERBOARD] = GetConsoleInfoFromChallengeLeaderboardEntry,
     [ZO_ID_REQUEST_TYPE_CHALLENGE_OF_THE_WEEK_LEADERBOARD] = GetConsoleInfoFromChallengeOfTheWeekLeaderboardEntry,
-    [ZO_ID_REQUEST_TYPE_HOME_SHOW_LEADERBOARD] = GetConsoleInfoFromHomeShowLeaderboardEntry,
     [ZO_ID_REQUEST_TYPE_BATTLEGROUND_LEADERBOARD] = GetConsoleInfoFromBattlegroundLeaderboardEntry,
+    [ZO_ID_REQUEST_TYPE_TRIBUTE_LEADERBOARD] = GetConsoleInfoFromTributeLeaderboardEntry,
 }
 
 function PlayerConsoleInfoRequestManager:RequestId(idRequestType, block, callback, ...)

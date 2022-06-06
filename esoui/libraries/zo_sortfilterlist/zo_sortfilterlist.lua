@@ -8,22 +8,18 @@ local UPDATE_DATA = 3
 
 ZO_SortFilterList = ZO_SortFilterListBase:Subclass()
 
-function ZO_SortFilterList:New(...)
-    return ZO_SortFilterListBase.New(self, ...)
-end
-
 function ZO_SortFilterList:Initialize(control, ...)
     ZO_SortFilterListBase.Initialize(self, ...)
     self:InitializeSortFilterList(control, ...)
 end
 
 function ZO_SortFilterList:BuildMasterList()
-    -- intended to be overriden
+    -- intended to be overridden
     -- should build the master list of data that is later filtered by FilterScrollList
 end
 
 function ZO_SortFilterList:FilterScrollList()
-    -- intended to be overriden
+    -- intended to be overridden
     -- should take the master list data and filter it
 end
 
@@ -34,10 +30,11 @@ end
 
 function ZO_SortFilterList:InitializeSortFilterList(control)
     self.control = control
-    self.list = GetControl(control, "List") 
+    control.object = self
+    self.list = control:GetNamedChild("List")
     ZO_ScrollList_AddResizeOnScreenResize(self.list)
 
-    self.headersContainer = GetControl(control, "Headers")
+    self.headersContainer = control:GetNamedChild("Headers")
     if self.headersContainer then
         self.sortHeaderGroup = ZO_SortHeaderGroup:New(self.headersContainer, true)
         self.sortHeaderGroup:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, function(key, order) self:OnSortHeaderClicked(key, order) end)
@@ -60,10 +57,10 @@ function ZO_SortFilterList:SetUpdateInterval(updateIntervalSecs)
     local hadUpdateInterval = self.updateIntervalSecs ~= nil
     self.updateIntervalSecs = updateIntervalSecs
 
-    if(not hadUpdateInterval) then
+    if not hadUpdateInterval then
         self.updateIntervalLastUpdate = 0
         ZO_PreHookHandler(self.control, "OnUpdate", function(control, seconds)
-            if(seconds > self.updateIntervalLastUpdate + self.updateIntervalSecs) then
+            if seconds > self.updateIntervalLastUpdate + self.updateIntervalSecs then
                 self.updateIntervalLastUpdate = seconds
                 self:RefreshVisible()
             end
@@ -79,7 +76,7 @@ function ZO_SortFilterList:SetEmptyText(emptyText)
     if not self.emptyRow then
         self.emptyRow = CreateControlFromVirtual("$(parent)EmptyRow", self.list, "ZO_SortFilterListEmptyRow_Keyboard")
     end
-    GetControl(self.emptyRow, "Message"):SetText(emptyText)
+    self.emptyRow:GetNamedChild("Message"):SetText(emptyText)
 end
 
 function ZO_SortFilterList:SetAutomaticallyColorRows(autoColorRows)
@@ -87,18 +84,18 @@ function ZO_SortFilterList:SetAutomaticallyColorRows(autoColorRows)
 end
 
 function ZO_SortFilterList:ShowMenu(...)
-    if(not self.unlockSelectionCallback) then
+    if not self.unlockSelectionCallback then
         self.unlockSelectionCallback = function() self:UnlockSelection() end
     end
 
     SetMenuHiddenCallback(self.unlockSelectionCallback)
-    if(ShowMenu(...)) then
+    if ShowMenu(...) then
         self:LockSelection()
     end
 end
 
 function ZO_SortFilterList:UpdatePendingUpdateLevel(pendingUpdate)
-    if(self.pendingUpdate == nil or pendingUpdate > self.pendingUpdate) then
+    if self.pendingUpdate == nil or pendingUpdate > self.pendingUpdate then
         self.pendingUpdate = pendingUpdate
     end
 end
@@ -108,7 +105,7 @@ function ZO_SortFilterList:RefreshVisible()
 end
 
 function ZO_SortFilterList:RefreshSort()
-    if(self:IsLockedForUpdates()) then
+    if self:IsLockedForUpdates() then
         self:UpdatePendingUpdateLevel(UPDATE_SORT)
         return
     end
@@ -118,7 +115,7 @@ function ZO_SortFilterList:RefreshSort()
 end
 
 function ZO_SortFilterList:RefreshFilters()
-    if(self:IsLockedForUpdates()) then
+    if self:IsLockedForUpdates() then
         self:UpdatePendingUpdateLevel(UPDATE_FILTER)
         return
     end
@@ -129,7 +126,7 @@ function ZO_SortFilterList:RefreshFilters()
 end
 
 function ZO_SortFilterList:RefreshData()
-    if(self:IsLockedForUpdates()) then
+    if self:IsLockedForUpdates() then
         self:UpdatePendingUpdateLevel(UPDATE_DATA)
         return
     end
@@ -146,11 +143,11 @@ function ZO_SortFilterList:CommitScrollList()
         scrollData[i].data.sortIndex = i
     end
 
-    if(self.emptyRow) then
+    if self.emptyRow then
         self.emptyRow:SetHidden(#scrollData > 0)
     end
 
-    if(self.mouseOverRow) then
+    if self.mouseOverRow then
         self:ExitRow(self.mouseOverRow)
     end
 
@@ -158,21 +155,21 @@ function ZO_SortFilterList:CommitScrollList()
 end
 
 function ZO_SortFilterList:SetLockedForUpdates(locked)
-    if(locked ~= self.lockedForUpdates) then
+    if locked ~= self.lockedForUpdates then
         self.lockedForUpdates = locked
-        if(not locked) then
-            if(self.mouseOverRow) then
+        if not locked then
+            if self.mouseOverRow then
                 self:ExitRow(self.mouseOverRow)
             end
-            
-            if(self.pendingUpdate) then
+
+            if self.pendingUpdate then
                 local pendingUpdate = self.pendingUpdate
                 self.pendingUpdate = nil
-                if(pendingUpdate == UPDATE_DATA) then
+                if pendingUpdate == UPDATE_DATA then
                     self:RefreshData()
-                elseif(pendingUpdate == UPDATE_FILTER) then
+                elseif pendingUpdate == UPDATE_FILTER then
                     self:RefreshFilters()
-                elseif(pendingUpdate == UPDATE_SORT) then
+                elseif pendingUpdate == UPDATE_SORT then
                     self:RefreshSort()
                 end
             end
@@ -220,7 +217,7 @@ function ZO_SortFilterList:EnterRow(row)
     if not self.lockedForUpdates then
         ZO_ScrollList_MouseEnter(self.list, row)
         local data = ZO_ScrollList_GetData(row)
-        if(data) then
+        if data then
             self:ColorRow(row, ZO_ScrollList_GetData(row), true)
         end
         self.mouseOverRow = row
@@ -232,7 +229,7 @@ function ZO_SortFilterList:ExitRow(row)
     if not self.lockedForUpdates then
         ZO_ScrollList_MouseExit(self.list, row)
         local data = ZO_ScrollList_GetData(row)
-        if(data) then
+        if data then
             self:ColorRow(row, ZO_ScrollList_GetData(row), false)
         end
         self.mouseOverRow = nil
@@ -286,25 +283,25 @@ end
 function ZO_SortFilterList:SetupRow(control, data)
     local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
     local mocBelongsToRow = false
-    while(mouseOverControl ~= nil) do
-        if(mouseOverControl == control) then
+    while mouseOverControl ~= nil do
+        if mouseOverControl == control then
             mocBelongsToRow = true
             break
         end
         mouseOverControl = mouseOverControl:GetParent()
     end
 
-    if(self.lockedForUpdates) then
+    if self.lockedForUpdates then
         self:ColorRow(control, data, self.mouseOverRow == control)
     else
-        if(mocBelongsToRow) then
+        if mocBelongsToRow then
             self:EnterRow(control)
         else 
             self:ColorRow(control, data, false)
         end
     end
 
-    if(self.alternateRowBackgrounds) then
+    if self.alternateRowBackgrounds then
         local bg = GetControl(control, "BG")
         local hidden = (data.sortIndex % 2) == 0
         bg:SetHidden(hidden)

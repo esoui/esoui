@@ -71,7 +71,7 @@
                     <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-15" offsetY="81" />
 
                     <Controls>
-                        <Label name="$(parent)TitleLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed45" modifyTextType="NONE">
+                        <Label name="$(parent)TitleLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed42" modifyTextType="NONE">
                             <Anchor point="TOPLEFT" />
                         </Label>
 

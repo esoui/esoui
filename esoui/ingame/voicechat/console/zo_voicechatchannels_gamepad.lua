@@ -25,12 +25,6 @@ end
 
 ZO_VoiceChatChannelsGamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
-function ZO_VoiceChatChannelsGamepad:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
 function ZO_VoiceChatChannelsGamepad:Initialize(control)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
     self:SetListsUseTriggerKeybinds(true)
@@ -312,112 +306,125 @@ function ZO_VoiceChatChannelsGamepad:OnSelectionChanged(list, selectedData, oldS
     end
 end
 
-do
-    function ZO_VoiceChatChannelsGamepad:InitializeKeybindStripDescriptors()
-        local joinOrActivateChannelKeybind =
-        {
-            name = function()
-                local channel = self.list:GetTargetData().channel
-                if not channel.isJoined then
-                    return GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_JOIN_CHANNEL)
-                elseif not channel.isTransmitting then
-                    return GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_ENABLE_MIC)
-                else
-                    return GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_DISABLE_MIC)
-                end
-            end,
-            keybind = "UI_SHORTCUT_PRIMARY",
-            callback = function()
-                local channel = self.list:GetTargetData().channel
-                if not channel.isJoined then
-                    VOICE_CHAT_MANAGER:JoinChannel(channel)
-                elseif not channel.isTransmitting then
-                    VOICE_CHAT_MANAGER:TransmitChannel(channel)
-                else
-                    VOICE_CHAT_MANAGER:StopTransmitting()
-                end
-            end,
-            visible = function()
-                if self.currentList ~= LIST_CHANNELS then
-                    return false
-                end
+function ZO_VoiceChatChannelsGamepad:InitializeKeybindStripDescriptors()
+    local joinOrActivateChannelKeybind =
+    {
+        name = function()
+            local channel = self.list:GetTargetData().channel
+            if not channel.isJoined then
+                return GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_JOIN_CHANNEL)
+            elseif not channel.isTransmitting then
+                return GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_ENABLE_MIC)
+            else
+                return GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_DISABLE_MIC)
+            end
+        end,
+        keybind = "UI_SHORTCUT_PRIMARY",
+        callback = function()
+            local channel = self.list:GetTargetData().channel
+            if not channel.isJoined then
+                VOICE_CHAT_MANAGER:JoinChannel(channel)
+            elseif not channel.isTransmitting then
+                VOICE_CHAT_MANAGER:TransmitChannel(channel)
+            else
+                VOICE_CHAT_MANAGER:StopTransmitting()
+            end
+        end,
+        visible = function()
+            if self.currentList ~= LIST_CHANNELS then
+                return false
+            end
     
-                local entry = self.list:GetTargetData()
-                if not entry then
-                    return false
-                end
+            local entry = self.list:GetTargetData()
+            if not entry then
+                return false
+            end
     
-                return true
-            end,
-        }
-        local leaveChannelKeybind =
-        {
-            name = GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_LEAVE_CHANNEL),
-            keybind = "UI_SHORTCUT_SECONDARY",
-            callback = function()
-                local channel = self.list:GetTargetData().channel
-                VOICE_CHAT_MANAGER:LeaveChannel(channel)
-            end,
-            visible = function()
-                if self.currentList ~= LIST_CHANNELS then
-                    return false
-                end
-    
-                local entry = self.list:GetTargetData()
-                if not entry then
-                    return false
-                end
-    
-                local channel = entry.channel
-                return channel.isJoined
-            end,
-        }
-        local showParticipantsKeybind =
-        {
-            name = GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_PARTICIPANT_OPTIONS),
-            keybind = "UI_SHORTCUT_TERTIARY",
-            callback = function()
-                local channel = self.list:GetTargetData().channel
-                VOICE_CHAT_PARTICIPANTS_GAMEPAD:SetChannel(channel)
-                SCENE_MANAGER:Push("gamepad_voice_chat_participants")
-            end,
-            visible = function()
-                if self.currentList ~= LIST_CHANNELS then
-                    return false
-                end
-    
-                local entry = self.list:GetTargetData()
-                if not entry then
-                    return false
-                end
+            return true
+        end,
+    }
 
-                local channel = entry.channel
-                if not channel.isJoined then
-                    return false
-                end
+    local leaveChannelKeybind =
+    {
+        name = GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_LEAVE_CHANNEL),
+        keybind = "UI_SHORTCUT_SECONDARY",
+        callback = function()
+            local channel = self.list:GetTargetData().channel
+            VOICE_CHAT_MANAGER:LeaveChannel(channel)
+        end,
+        visible = function()
+            if self.currentList ~= LIST_CHANNELS then
+                return false
+            end
     
-                local participantDataList = VOICE_CHAT_MANAGER:GetParticipantDataList(channel)
-                return #participantDataList > 1 --we don't show the local player, so we need at least 1 other player
-            end,
-        }
+            local entry = self.list:GetTargetData()
+            if not entry then
+                return false
+            end
+    
+            local channel = entry.channel
+            return channel.isJoined
+        end,
+    }
 
-        self.channelKeybinds =
-        {
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            --These are inserted as numerically indiced entries
-            joinOrActivateChannelKeybind,
-            leaveChannelKeybind,
-            showParticipantsKeybind,
-        }
-        ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.channelKeybinds, GAME_NAVIGATION_TYPE_BUTTON)
+    local showParticipantsKeybind =
+    {
+        name = GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_PARTICIPANT_OPTIONS),
+        keybind = "UI_SHORTCUT_TERTIARY",
+        callback = function()
+            local channel = self.list:GetTargetData().channel
+            VOICE_CHAT_PARTICIPANTS_GAMEPAD:SetChannel(channel)
+            SCENE_MANAGER:Push("gamepad_voice_chat_participants")
+        end,
+        visible = function()
+            if self.currentList ~= LIST_CHANNELS then
+                return false
+            end
+    
+            local entry = self.list:GetTargetData()
+            if not entry then
+                return false
+            end
 
-        self.historyKeybinds = {} --ZO_VoiceChatSocialOptions_Gamepad will add the social keybinds
-        ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.historyKeybinds, GAME_NAVIGATION_TYPE_BUTTON)
+            local channel = entry.channel
+            if not channel.isJoined then
+                return false
+            end
+    
+            local participantDataList = VOICE_CHAT_MANAGER:GetParticipantDataList(channel)
+            return #participantDataList > 1 --we don't show the local player, so we need at least 1 other player
+        end,
+    }
 
-        --Save these off so we can register cooldown delays on them later
-        self.joinOrActivateChannelKeybind = joinOrActivateChannelKeybind
-        self.leaveChannelKeybind = leaveChannelKeybind
-    end
+    local viewTranscriptKeybind =
+    {
+        name = GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_VIEW_TRANSCRIPT),
+        keybind = "UI_SHORTCUT_RIGHT_STICK",
+        callback = function()
+            SCENE_MANAGER:Push("gamepadVoiceChatTranscript")
+        end,
+        visible = function()
+            return GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_VOICE_CHAT_ACCESSIBILITY)
+        end,
+    }
+
+    self.channelKeybinds =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        --These are inserted as numerically indiced entries
+        joinOrActivateChannelKeybind,
+        leaveChannelKeybind,
+        showParticipantsKeybind,
+        viewTranscriptKeybind,
+    }
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.channelKeybinds, GAME_NAVIGATION_TYPE_BUTTON)
+
+    self.historyKeybinds = {} --ZO_VoiceChatSocialOptions_Gamepad will add the social keybinds
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.historyKeybinds, GAME_NAVIGATION_TYPE_BUTTON)
+
+    --Save these off so we can register cooldown delays on them later
+    self.joinOrActivateChannelKeybind = joinOrActivateChannelKeybind
+    self.leaveChannelKeybind = leaveChannelKeybind
 end
 
 function ZO_VoiceChatChannelsGamepad:OnShowing()

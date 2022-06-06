@@ -38,6 +38,7 @@ local MENU_COLLECTIONS_ENTRIES =
 {
     COLLECTIONS         = 1,
     ITEM_SETS           = 2,
+    TRIBUTE_PATRONS     = 3,
 }
 local MENU_JOURNAL_ENTRIES =
 {
@@ -203,7 +204,7 @@ local MENU_ENTRY_DATA =
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
                 header = GetString(SI_MAIN_MENU_COLLECTIONS),
                 isNewCallback = function()
-                    return ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewCollectibles()
+                    return ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewNonTributePatronCollectibles()
                 end,
             },
             [MENU_COLLECTIONS_ENTRIES.ITEM_SETS] =
@@ -213,6 +214,15 @@ local MENU_ENTRY_DATA =
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_itemSetCollections.dds",
                 isNewCallback = function()
                     return ITEM_SET_COLLECTIONS_DATA_MANAGER:HasAnyNewPieces()
+                end,
+            },
+            [MENU_COLLECTIONS_ENTRIES.TRIBUTE_PATRONS] =
+            {
+                scene = "gamepadTributePatronBook",
+                name = GetString(SI_TRIBUTE_PATRON_BOOK_TITLE),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_tributePatrons.dds",
+                isNewCallback = function()
+                    return ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewTributePatronCollectibles()
                 end,
             },
         }

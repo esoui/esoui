@@ -1,33 +1,26 @@
-ZO_ChatMenu_Gamepad = ZO_Object.MultiSubclass(ZO_Gamepad_ParametricList_Screen, ZO_SocialOptionsDialogGamepad, ZO_GamepadMultiFocusArea_Manager)
-
 ZO_CHAT_MENU_GAMEPAD_LOG_MAX_SIZE = 200
-ZO_CHAT_MENU_GAMEPAD_COLOR_MODIFIER = .7
-ZO_CHAT_MENU_GAMEPAD_DESATURATION_MODIFIER = .1
-ZO_CHAT_MENU_GAMEPAD_LOG_LINE_WIDTH = ZO_GAMEPAD_QUADRANT_1_2_3_CONTAINER_WIDTH - (ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING * 2) --We squeeze in for the highlighting
+ZO_CHAT_MENU_GAMEPAD_COLOR_MODIFIER = 0.7
+ZO_CHAT_MENU_GAMEPAD_DESATURATION_MODIFIER = 0.1
 
 ------------------
 --Initialization--
 ------------------
 
+ZO_ChatMenu_Gamepad = ZO_InteractiveChatLog_Gamepad:Subclass()
+
 function ZO_ChatMenu_Gamepad:Initialize(control)
     CHAT_MENU_GAMEPAD_SCENE = ZO_Scene:New("gamepadChatMenu", SCENE_MANAGER)
 
-    local ACTIVATE_ON_SHOW = true
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, CHAT_MENU_GAMEPAD_SCENE)
-    ZO_SocialOptionsDialogGamepad.Initialize(self)
-    ZO_GamepadMultiFocusArea_Manager.Initialize(self)
+    ZO_InteractiveChatLog_Gamepad.Initialize(self, control, CHAT_MENU_GAMEPAD_SCENE)
 
-    self:InitializeFragment()
-    self:InitializeControls()
-    self:InitializePassiveFocus()
+    self.currentLinkIndex = 1
+
     self:InitializeRefreshGroup()
-    self:RegisterForEvents()
 end
 
-function ZO_ChatMenu_Gamepad:InitializeFragment()
-    local chatMenuFragment = ZO_FadeSceneFragment:New(self.control)
-    self.scene:AddFragment(chatMenuFragment)
+-- ZO_InteractiveChatLog_Gamepad Overrides
 
+function ZO_ChatMenu_Gamepad:InitializeHeader()
     self.headerData =
     {
         titleText = GetString(SI_GAMEPAD_TEXT_CHAT),
@@ -35,197 +28,34 @@ function ZO_ChatMenu_Gamepad:InitializeFragment()
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end
 
-function ZO_ChatMenu_Gamepad:InitializeControls()
-    self.messageEntries = {}
-    self.nextMessageId = 1
-    self.mask = self.control:GetNamedChild("Mask")
-
-    --Log List--
-    local list = self:GetMainList()
-    list:SetSelectedItemOffsets(0, 0)
-    list:SetAnchorOppositeSide(true)
-    list:SetHandleDynamicViewProperties(true)
-    list:AddDataTemplate("ZO_ChatMenu_Gamepad_LogLine", function(...) self:SetupLogMessage(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction, function(a, b) return a.data.id == b.data.id end)
-
-    local function HandleListDirectionalInput(result)
-        if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
-            if list:GetSelectedIndex() == list:GetNumEntries() then
-                self:FocusTextInput()
-            end
-        end
-    end
-
-    list:SetCustomDirectionInputHandler(HandleListDirectionalInput)
-    list:SetDirectionalInputEnabled(false)
-    list:SetSoundEnabled(false)
-    self.list = list
-    self:BuildChatList()
-    self.currentLinkIndex = 1
-
-    self.moreBelowTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ChatMenu_Gamepad_MoreBelowAnimation", self.mask:GetNamedChild("MoreBelow"))
-
-    self:InitializeTextInputSection()
-end
-
 function ZO_ChatMenu_Gamepad:InitializeTextInputSection()
-    self.textInputControl = self.mask:GetNamedChild("TextInput")
     --For active focus switching between channel and edit box
     self.textInputFocusSwitcher = ZO_GamepadFocus:New(self.textInputControl, nil, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
-    --For passive focus switching between text input area and chat entry list
-    self.textInputVerticalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
 
     self:InitializeChannelDropdown()
-    self:InitializeTextEdit()
-end
 
-function ZO_ChatMenu_Gamepad:InitializeChannelDropdown()
-    local channelControl = self.textInputControl:GetNamedChild("Channel")
-    local channelDropdownControl = channelControl:GetNamedChild("Dropdown")
-    local channelDropdown = ZO_ComboBox_ObjectFromContainer(channelDropdownControl)
-    channelDropdown:SetSelectedColor(ZO_DISABLED_TEXT)
-    channelDropdown:SetSortsItems(false)
-    channelDropdown:SetDontSetSelectedTextOnSelection(true)
-    self.selectedChannelLabel = channelDropdownControl:GetNamedChild("SelectedItemText")
-    self.selectedChannelFakeLabel = channelDropdownControl:GetNamedChild("SelectedItemFakeTextForResizing")
-
-    -- Prepare switches for sorting
-    -- These switches are the slash commands used to set the channel (e.g.:/zone)
-    -- The channelData holds a table of all the channels and their information,
-    -- and the switch lookup provides the mapping of the channel id to the default (e.g.: /zone vs /z) switch needed to go there
-    local channelData = ZO_ChatSystem_GetChannelInfo()
-    local switchLookup = ZO_ChatSystem_GetChannelSwitchLookupTable()
-    local switches = {}
-    for channel in pairs(channelData) do
-        local switch = switchLookup[channel]
-        --Not every channel in the channel data is going to map to a switch
-        if switch then
-            switches[#switches + 1] = switch
-        end
-    end
-
-    table.sort(switches)
-
-    local channelFocusData =
-    {
-        keybindText = GetString(SI_GAMEPAD_SELECT_OPTION),
-        callback = function()
-            channelDropdown:Activate()
-        end,
-        highlight = channelControl:GetNamedChild("Highlight"),
-        control = channelDropdown,
-    }
-    self.textInputFocusSwitcher:AddEntry(channelFocusData)
-
-    self.channelDropdown = channelDropdown
-    self.channelControl = channelControl
-    self.sortedChannelSwitches = switches
-
-    local DONT_RESELECT = false
-    self:RefreshChannelDropdown(DONT_RESELECT)
+    ZO_InteractiveChatLog_Gamepad.InitializeTextInputSection(self)
 end
 
 function ZO_ChatMenu_Gamepad:InitializeTextEdit()
-    local textControl = self.textInputControl:GetNamedChild("Text")
-    local textEdit = textControl:GetNamedChild("EditBox")
-
-    local function TextEditFocusGained()
-        self:FocusTextInput()
-        self.textInputAreaFocalArea:Deactivate()
-        ZO_GamepadEditBox_FocusGained(textEdit)
-    end
-
-    local function TextEditFocusLost()
-        ZO_GamepadEditBox_FocusLost(textEdit)
-        self:FocusTextInput()
-    end
-
-    local function TextEditTextChanged()
-        if self.textInputAreaFocalArea:IsFocused() and not self.channelDropdown:IsActive() then
-            self.textInputAreaFocalArea:UpdateKeybinds()
-        end
-    end
-
-    textEdit:SetHandler("OnFocusGained", TextEditFocusGained)
-    textEdit:SetHandler("OnFocusLost", TextEditFocusLost)
-    textEdit:SetHandler("OnTextChanged", TextEditTextChanged)
+    ZO_InteractiveChatLog_Gamepad.InitializeTextEdit(self)
 
     local textEditData =
     {
         callback = function()
-            if not textEdit:HasFocus() then
-                textEdit:TakeFocus()
+            if not self.textEdit:HasFocus() then
+                self.textEdit:TakeFocus()
             end
         end,
-        highlight = textControl:GetNamedChild("Highlight"),
-        control = textEdit,
+        highlight = self.textControlHighlight,
+        control = self.textEdit,
     }
     self.textInputFocusSwitcher:AddEntry(textEditData)
-
-    self.textEdit = textEdit
-end
-
-function ZO_ChatMenu_Gamepad:InitializePassiveFocus()
-    --Passive Area Focus--
-    local function TextInputAreaActivateCallback()
-        self.textInputFocusSwitcher:Activate()
-        DIRECTIONAL_INPUT:Activate(self, self.textInputControl)
-    end
-
-    local function TextInputAreaDeactivateCallback()
-        self.textInputFocusSwitcher:Deactivate()
-        DIRECTIONAL_INPUT:Deactivate(self)
-    end
-
-    self.textInputAreaFocalArea = ZO_GamepadMultiFocusArea_Base:New(self, TextInputAreaActivateCallback, TextInputAreaDeactivateCallback)
-
-    local function EnableChatDirectionalInputLater()
-        if self.chatEntryPanelFocalArea:IsFocused() then
-            self.list:SetDirectionalInputEnabled(true)
-        end
-    end
-
-    local function ChatEntryPanelActivateCallback()
-        --We want the chat entry list to wait a moment before it starts processing the input
-        --Otherwise it will move immediately on the next frame after gaining focus
-        zo_callLater(EnableChatDirectionalInputLater, 200)
-        self.list:RefreshVisible()
-        self.list:SetSoundEnabled(true)
-        self.currentLinkIndex = 1
-        self:RefreshTooltip()
-    end
-
-    local function ChatEntryPanelDeactivateCallback()
-        self.list:SetDirectionalInputEnabled(false)
-        self.list:RefreshVisible()
-        self.list:SetSoundEnabled(false)
-        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-    end
-    self.chatEntryPanelFocalArea = ZO_GamepadMultiFocusArea_Base:New(self, ChatEntryPanelActivateCallback, ChatEntryPanelDeactivateCallback)
-
-    self:AddNextFocusArea(self.chatEntryPanelFocalArea)
-    self:AddNextFocusArea(self.textInputAreaFocalArea)
-end
-
-function ZO_ChatMenu_Gamepad:InitializeRefreshGroup()
-    self.channelRefreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
-    self.channelRefreshGroup:AddDirtyState("Dropdown", function()
-        local RESELECT = true
-        self:RefreshChannelDropdown(RESELECT)
-    end)
-    self.channelRefreshGroup:AddDirtyState("ActiveChannel", function()
-        self:OnChatChannelChanged()
-    end)
-end
-
-function ZO_ChatMenu_Gamepad:DirtyChannelDropdown()
-    self.channelRefreshGroup:MarkDirty("Dropdown")
-end
-
-function ZO_ChatMenu_Gamepad:DirtyActiveChannel()
-    self.channelRefreshGroup:MarkDirty("ActiveChannel")
 end
 
 function ZO_ChatMenu_Gamepad:RegisterForEvents()
+    ZO_InteractiveChatLog_Gamepad.RegisterForEvents(self)
+
     local function AddMessage(...)
         self:AddMessage(...)
     end
@@ -236,10 +66,6 @@ function ZO_ChatMenu_Gamepad:RegisterForEvents()
 
     local function DirtyActiveChannel()
         self:DirtyActiveChannel()
-    end
-
-    local function OnScreenResized()
-        self:ReadjustFixedCenterOffset()
     end
 
     local function OnGroupMemberJoined(eventCode, playerName)
@@ -262,13 +88,11 @@ function ZO_ChatMenu_Gamepad:RegisterForEvents()
 
     CHAT_ROUTER:RegisterCallback("FormattedChatMessage", AddMessage)
     CALLBACK_MANAGER:RegisterCallback("OnChatChannelUpdated", DirtyActiveChannel)
-    self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, OnScreenResized)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, OnGroupMemberLeft)
     self.control:RegisterForEvent(EVENT_GUILD_SELF_JOINED_GUILD, DirtyChannelDropdown)
     self.control:RegisterForEvent(EVENT_GUILD_SELF_LEFT_GUILD, DirtyChannelDropdown)
     self.control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, OnGuildMemberRankChanged)
-    self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, DirtyChannelDropdown)
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, DirtyChannelDropdown)
     self.control:RegisterForEvent(EVENT_CHAT_CATEGORY_COLOR_CHANGED, DirtyChannelDropdown)
 end
@@ -440,19 +264,6 @@ function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
     self.textInputAreaFocalArea:SetKeybindDescriptor(self.textInputAreaKeybindDescriptor)
 end
 
-----------
---Events--
-----------
-
-function ZO_ChatMenu_Gamepad:OnDeferredInitialize()
-    self:ReadjustFixedCenterOffset()
-    self:InitializeFocusKeybinds()
-end
-
-function ZO_ChatMenu_Gamepad:PerformUpdate()
-    -- We have to override this to prevent an assert in the base class
-end
-
 function ZO_ChatMenu_Gamepad:OnShow()
     self.channelRefreshGroup:TryClean()
     self.list:RefreshVisible()
@@ -463,47 +274,16 @@ function ZO_ChatMenu_Gamepad:OnShow()
         local REACHED_TARGET = nil
         local targetData = self.list:GetTargetData()
         local targetSelectedIndex = self.list:GetSelectedIndex()
-        self:OnTargetChanged(list, targetData, OLD_TARGET_DATA, REACHED_TARGET, targetSelectedIndex)
+        self:OnTargetChanged(self.list, targetData, OLD_TARGET_DATA, REACHED_TARGET, targetSelectedIndex)
     end
     self.isFocusSetFromLink = nil
 end
 
-function ZO_ChatMenu_Gamepad:OnHiding()
-    if self.currentFocalArea then
-        self.currentFocalArea:Deactivate()
-    end
-end
-
 function ZO_ChatMenu_Gamepad:FocusTextInput()
+    ZO_InteractiveChatLog_Gamepad.FocusTextInput(self)
+
     if self.scene:IsShowing() then
-        if self.currentFocalArea ~= self.textInputAreaFocalArea then
-            if self.currentFocalArea then
-                self.currentFocalArea:Deactivate()
-            end
-            self.currentFocalArea = self.textInputAreaFocalArea
-        end
-        self.currentFocalArea:Activate()
         self.textInputFocusSwitcher:SetFocusToMatchingEntry(self.textEdit)
-    end
-end
-
-function ZO_ChatMenu_Gamepad:UpdateDirectionalInput()
-    --We don't want to change focus to the chat entry area if there are no entries to scroll through
-    if self.list:GetNumEntries() > 0 then
-        local result = self.textInputVerticalMovementController:CheckMovement()
-        if result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-            self.textInputAreaFocalArea:HandleMovePrevious()
-        end
-    end
-end
-
-do
-    local FIXED_CENTER_OFFSET_PADDING = 37
-
-    function ZO_ChatMenu_Gamepad:ReadjustFixedCenterOffset()
-        local scrollHeight = self.list.control:GetHeight()
-        local fixedCenterOffset = scrollHeight / 2 - FIXED_CENTER_OFFSET_PADDING
-        self.list:SetFixedCenterOffset(fixedCenterOffset)
     end
 end
 
@@ -517,90 +297,159 @@ function ZO_ChatMenu_Gamepad:SetupLogMessage(control, data, selected, reselectin
     control.label:SetDesaturation(useSelectedColor and 0 or ZO_CHAT_MENU_GAMEPAD_DESATURATION_MODIFIER)
 end
 
-do
-    local LINK_GMATCH_PATTERN = "|H.-|h.-|h"
-    local LINK_TYPE_MATCH_PATTERN = "|H%d:(.-):"
-    function ZO_ChatMenu_Gamepad:AddMessage(message, category, targetChannel, fromDisplayName, rawMessageText)
-        if message ~= nil then
-            local targetIndex = self.list:GetTargetIndex()
-            local selectingMostRecent = targetIndex == #self.messageEntries
+function ZO_ChatMenu_Gamepad:AddMessage(message, category, targetChannel, fromDisplayName, rawMessageText)
+    if message ~= nil then
+        local targetIndex = self.list:GetTargetIndex()
+        local selectingMostRecent = targetIndex == #self.messageEntries
 
-            local links
-            --Only chat channel messages will have raw text, because they're the only ones that could have links in them
-            if rawMessageText then
-                links = {}
-                ZO_ExtractLinksFromText(rawMessageText, ZO_VALID_LINK_TYPES_CHAT, links)
-                links = #links > 0 and links or nil
-            end
-
-            local messageEntry = ZO_GamepadEntryData:New(message)
-            messageEntry:SetFontScaleOnSelection(false)
-            messageEntry.data =
-            {
-                id = self.nextMessageId,
-                fromDisplayName = fromDisplayName,
-                category = category,
-                targetChannel = targetChannel,
-                rawMessageText = rawMessageText,
-                links = links,
-            }
-
-            self.nextMessageId = self.nextMessageId + 1
-            table.insert(self.messageEntries, messageEntry)
-
-            if #self.messageEntries > ZO_CHAT_MENU_GAMEPAD_LOG_MAX_SIZE then
-                table.remove(self.messageEntries, 1)
-                self:BuildChatList()
-            else
-                self.list:AddEntry("ZO_ChatMenu_Gamepad_LogLine", messageEntry)
-                self.list:Commit()
-            end
-
-            if selectingMostRecent then
-                self.list:SetSelectedIndex(#self.messageEntries)
-            end
+        local links
+        --Only chat channel messages will have raw text, because they're the only ones that could have links in them
+        if rawMessageText then
+            links = {}
+            ZO_ExtractLinksFromText(rawMessageText, ZO_VALID_LINK_TYPES_CHAT, links)
+            links = #links > 0 and links or nil
         end
-    end
-end
 
-do
-    local function IsEntryForCurrentChannel(entry)
-        local channelData = GAMEPAD_CHAT_SYSTEM:GetCurrentChannelData()
-        return entry.data == channelData
-    end
+        local messageEntry = ZO_GamepadEntryData:New(message)
+        messageEntry:SetFontScaleOnSelection(false)
+        messageEntry.data =
+        {
+            id = self.nextMessageId,
+            fromDisplayName = fromDisplayName,
+            category = category,
+            targetChannel = targetChannel,
+            rawMessageText = rawMessageText,
+            links = links,
+        }
 
-    function ZO_ChatMenu_Gamepad:OnChatChannelChanged()
-        --Set the dropdown selection to the appropriate channel
-        self.channelDropdown:SetSelectedItemByEval(IsEntryForCurrentChannel, true)
+        self.nextMessageId = self.nextMessageId + 1
+        table.insert(self.messageEntries, messageEntry)
 
-        --Set the selected item text for the dropdown to the appropriate text
-        local channelData, channelTarget = CHAT_ROUTER:GetCurrentChannelData()
-        local channelText
-        if channelTarget then
-            --Console can only have display names.  This won't do anything to character names on PC
-            channelTarget = ZO_FormatUserFacingDisplayName(channelTarget)
-            channelText = zo_strformat(SI_CHAT_ENTRY_TARGET_FORMAT, GetChannelName(channelData.id), channelTarget)
+        if #self.messageEntries > ZO_CHAT_MENU_GAMEPAD_LOG_MAX_SIZE then
+            table.remove(self.messageEntries, 1)
+            self:BuildChatList()
         else
-            channelText = zo_strformat(SI_CHAT_ENTRY_GENERAL_FORMAT, GetChannelName(channelData.id))
+            self.list:AddEntry("ZO_InteractiveChatLog_Gamepad_LogLine", messageEntry)
+            self.list:Commit()
         end
-        self.selectedChannelLabel:SetText(channelText)
-        local r, g, b = ZO_ChatSystem_GetCategoryColorFromChannel(channelData.id)
-        self.selectedChannelLabel:SetColor(r, g, b, 1)
-        self.textEdit:SetColor(r, g, b)
 
-        --Set the dropdown width to be wide enough to fit the text
-        local stringWidth = self.selectedChannelFakeLabel:GetStringWidth(zo_strupper(channelText)) / GetUIGlobalScale()
-        self.channelControl:SetWidth(zo_max(self.channelDropdown.minimumWidth, stringWidth))
+        if selectingMostRecent then
+            self.list:SetSelectedIndex(#self.messageEntries)
+        end
     end
 end
 
-function ZO_ChatMenu_Gamepad:RefreshMoreBelow(targetSelectedIndex)
-    local isMoreBelow = targetSelectedIndex < self.list:GetNumItems()
-    if isMoreBelow then
-        self.moreBelowTimeline:PlayForward()
-    else
-        self.moreBelowTimeline:PlayBackward()
+function ZO_ChatMenu_Gamepad:OnTargetChanged(list, targetData, ...)
+    self.currentLinkIndex = 1
+
+    ZO_InteractiveChatLog_Gamepad.OnTargetChanged(self, list, targetData, ...)
+
+    if self.chatEntryPanelFocalArea:IsFocused() then
+        self:RefreshTooltip(targetData)
     end
+end
+
+function ZO_ChatMenu_Gamepad:SetupOptions(entryData)
+    local data = entryData.data
+
+    local socialData =
+    {
+        displayName = data.fromDisplayName,
+        category = data.category,
+        targetChannel = data.targetChannel,
+    }
+
+    ZO_InteractiveChatLog_Gamepad.SetupOptions(self, socialData)
+end
+
+function ZO_ChatMenu_Gamepad:BuildOptionsList()
+    local groupId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
+
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.ShouldAddInviteToGroupOption)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption, ZO_SocialOptionsDialogGamepad.ShouldAddSendMailOption)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsNotPlayer)
+end
+
+function ZO_ChatMenu_Gamepad:OnScreenResized()
+    ZO_InteractiveChatLog_Gamepad.OnScreenResized(self)
+
+    self:DirtyChannelDropdown()
+end
+
+function ZO_ChatMenu_Gamepad:OnTextInputAreaActivated()
+    self.textInputFocusSwitcher:Activate()
+
+    ZO_InteractiveChatLog_Gamepad.OnTextInputAreaActivated(self)
+end
+
+function ZO_ChatMenu_Gamepad:OnTextInputAreaDeactivated()
+    self.textInputFocusSwitcher:Deactivate()
+
+    ZO_InteractiveChatLog_Gamepad.OnTextInputAreaDeactivated(self)
+end
+
+function ZO_ChatMenu_Gamepad:OnChatEntryPanelActivated()
+    ZO_InteractiveChatLog_Gamepad.OnChatEntryPanelActivated(self)
+
+    self.currentLinkIndex = 1
+    self:RefreshTooltip()
+end
+
+function ZO_ChatMenu_Gamepad:OnChatEntryPanelDeactivated()
+    ZO_InteractiveChatLog_Gamepad.OnChatEntryPanelDeactivated(self)
+
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+end
+
+-- End ZO_InteractiveChatLog_Gamepad Overrides
+
+function ZO_ChatMenu_Gamepad:InitializeChannelDropdown()
+    local channelControl = self.textInputControl:GetNamedChild("Channel")
+    local channelDropdownControl = channelControl:GetNamedChild("Dropdown")
+    local channelDropdown = ZO_ComboBox_ObjectFromContainer(channelDropdownControl)
+    channelDropdown:SetSelectedColor(ZO_DISABLED_TEXT)
+    channelDropdown:SetSortsItems(false)
+    channelDropdown:SetDontSetSelectedTextOnSelection(true)
+    self.selectedChannelLabel = channelDropdownControl:GetNamedChild("SelectedItemText")
+    self.selectedChannelFakeLabel = channelDropdownControl:GetNamedChild("SelectedItemFakeTextForResizing")
+
+    -- Prepare switches for sorting
+    -- These switches are the slash commands used to set the channel (e.g.:/zone)
+    -- The channelData holds a table of all the channels and their information,
+    -- and the switch lookup provides the mapping of the channel id to the default (e.g.: /zone vs /z) switch needed to go there
+    local channelData = ZO_ChatSystem_GetChannelInfo()
+    local switchLookup = ZO_ChatSystem_GetChannelSwitchLookupTable()
+    local switches = {}
+    for channel in pairs(channelData) do
+        local switch = switchLookup[channel]
+        --Not every channel in the channel data is going to map to a switch
+        if switch then
+            switches[#switches + 1] = switch
+        end
+    end
+
+    table.sort(switches)
+
+    local channelFocusData =
+    {
+        keybindText = GetString(SI_GAMEPAD_SELECT_OPTION),
+        callback = function()
+            channelDropdown:Activate()
+        end,
+        highlight = channelControl:GetNamedChild("Highlight"),
+        control = channelDropdown,
+    }
+    self.textInputFocusSwitcher:AddEntry(channelFocusData)
+
+    self.channelDropdown = channelDropdown
+    self.channelControl = channelControl
+    self.sortedChannelSwitches = switches
+
+    local DONT_RESELECT = false
+    self:RefreshChannelDropdown(DONT_RESELECT)
 end
 
 function ZO_ChatMenu_Gamepad:RefreshChannelDropdown(reselectDuringRebuild)
@@ -639,13 +488,34 @@ function ZO_ChatMenu_Gamepad:RefreshChannelDropdown(reselectDuringRebuild)
     end
 end
 
-function ZO_ChatMenu_Gamepad:OnTargetChanged(list, targetData, oldTargetData, reachedTarget, targetSelectedIndex)
-    self:RefreshMoreBelow(targetSelectedIndex)
-    self:SetupOptions(targetData)
-    self.currentLinkIndex = 1
-    if self.chatEntryPanelFocalArea:IsFocused() then
-        self.chatEntryPanelFocalArea:UpdateKeybinds()
-        self:RefreshTooltip(targetData)
+do
+    local function IsEntryForCurrentChannel(entry)
+        local channelData = GAMEPAD_CHAT_SYSTEM:GetCurrentChannelData()
+        return entry.data == channelData
+    end
+
+    function ZO_ChatMenu_Gamepad:OnChatChannelChanged()
+        --Set the dropdown selection to the appropriate channel
+        self.channelDropdown:SetSelectedItemByEval(IsEntryForCurrentChannel, true)
+
+        --Set the selected item text for the dropdown to the appropriate text
+        local channelData, channelTarget = CHAT_ROUTER:GetCurrentChannelData()
+        local channelText
+        if channelTarget then
+            --Console can only have display names.  This won't do anything to character names on PC
+            channelTarget = ZO_FormatUserFacingDisplayName(channelTarget)
+            channelText = zo_strformat(SI_CHAT_ENTRY_TARGET_FORMAT, GetChannelName(channelData.id), channelTarget)
+        else
+            channelText = zo_strformat(SI_CHAT_ENTRY_GENERAL_FORMAT, GetChannelName(channelData.id))
+        end
+        self.selectedChannelLabel:SetText(channelText)
+        local r, g, b = ZO_ChatSystem_GetCategoryColorFromChannel(channelData.id)
+        self.selectedChannelLabel:SetColor(r, g, b, 1)
+        self.textEdit:SetColor(r, g, b)
+
+        --Set the dropdown width to be wide enough to fit the text
+        local stringWidth = self.selectedChannelFakeLabel:GetStringWidth(zo_strupper(channelText)) / GetUIGlobalScale()
+        self.channelControl:SetWidth(zo_max(self.channelDropdown.minimumWidth, stringWidth))
     end
 end
 
@@ -677,15 +547,23 @@ function ZO_ChatMenu_Gamepad:RefreshTooltip(targetData)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
 end
 
-function ZO_ChatMenu_Gamepad:BuildChatList()
-    --TODO: Implement filtering systems
-    self.list:Clear()
+function ZO_ChatMenu_Gamepad:InitializeRefreshGroup()
+    self.channelRefreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
+    self.channelRefreshGroup:AddDirtyState("Dropdown", function()
+        local RESELECT = true
+        self:RefreshChannelDropdown(RESELECT)
+    end)
+    self.channelRefreshGroup:AddDirtyState("ActiveChannel", function()
+        self:OnChatChannelChanged()
+    end)
+end
 
-    for i, entry in ipairs(self.messageEntries) do
-        self.list:AddEntry("ZO_ChatMenu_Gamepad_LogLine", entry)
-    end
+function ZO_ChatMenu_Gamepad:DirtyChannelDropdown()
+    self.channelRefreshGroup:MarkDirty("Dropdown")
+end
 
-    self.list:Commit()
+function ZO_ChatMenu_Gamepad:DirtyActiveChannel()
+    self.channelRefreshGroup:MarkDirty("ActiveChannel")
 end
 
 function ZO_ChatMenu_Gamepad:SelectMessageEntryByLink(link)
@@ -707,46 +585,10 @@ function ZO_ChatMenu_Gamepad:SelectMessageEntryByLink(link)
     end
 end
 
-function ZO_ChatMenu_Gamepad:SetupOptions(entryData)
-    local data = entryData.data
-
-    local socialData =
-    {
-        displayName = data.fromDisplayName,
-        category = data.category,
-        targetChannel = data.targetChannel,
-    }
-
-    ZO_SocialOptionsDialogGamepad.SetupOptions(self, socialData)
-end
-
-function ZO_ChatMenu_Gamepad:BuildOptionsList()
-    local groupId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
-
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.ShouldAddInviteToGroupOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption, ZO_SocialOptionsDialogGamepad.ShouldAddSendMailOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsNotPlayer)
-end
-
 --------------
 --Global XML--
 --------------
 
-do
-    local function GetHeight(self)
-        return self.label:GetTextHeight()
-    end
-
-    function ZO_ChatMenu_Gamepad_LogLine_OnInitialized(self)
-        ZO_SharedGamepadEntry_OnInitialized(self)
-        self.GetHeight = GetHeight
-        self.label = self:GetNamedChild("Label")
-    end
-end
-
-function ZO_ChatMenu_Gamepad_OnInitialized(self)
-    CHAT_MENU_GAMEPAD = ZO_ChatMenu_Gamepad:New(self)
+function ZO_ChatMenu_Gamepad_OnInitialized(control)
+    CHAT_MENU_GAMEPAD = ZO_ChatMenu_Gamepad:New(control)
 end

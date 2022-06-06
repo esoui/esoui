@@ -1,0 +1,80 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CollectionsSlot_Keyboard_Template" inherits="ZO_PlayerInventorySlot" virtual="true">
+            <Controls>
+                <Texture name="$(parent)ActiveIcon" textureFile="EsoUI/Art/Inventory/inventory_icon_equipped.dds">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_QuickSlotTab_Keyboard_Template" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
+            <OnMouseEnter>
+                ZO_QuickSlotTab_Keyboard_FilterButtonOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_QuickSlotTab_Keyboard_FilterButtonOnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+
+        <TopLevelControl name="ZO_QuickSlot_Keyboard_TopLevel" inherits="ZO_InventoryTemplate" level="1" mouseEnabled="true" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+
+            <OnInitialized>
+                ZO_Quickslot_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)SearchFilters" override="true" hidden="false" />
+                <Control name="$(parent)SearchDivider" override="true" hidden="false" />
+
+                <Control name="$(parent)QuickSlotCircle" inherits="ZO_AssignableUtilityWheel_Keyboard_Template" layer="BACKGROUND" hidden="true"/>
+                
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchDivider" relativePoint="BOTTOMRIGHT" />
+                    <Controls>
+                        <Control name="$(parent)New" inherits="ZO_SortHeaderIcon">
+                            <Dimensions x="16" y="32" />
+                            <Anchor point="LEFT" offsetX="8"/>
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeaderIcon(self,
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_neutral.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds",
+                                "age")
+
+                                ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_STATUS), BOTTOMRIGHT, 0, 32)
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Dimensions x="241" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)New" relativePoint="RIGHT" offsetX="88" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                            </OnInitialized>
+                        </Control>
+                        
+                        <Control name="$(parent)Price" inherits="ZO_SortHeader">
+                            <Dimensions x="70" y="20" />
+                            <Anchor point="RIGHT" offsetX="-21" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)List" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

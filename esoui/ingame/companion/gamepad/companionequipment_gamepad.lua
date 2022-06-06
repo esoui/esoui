@@ -785,9 +785,6 @@ function ZO_CompanionEquipment_Gamepad:RefreshItemList(selectDefaultEntry)
                 entryData.isEquippedInAnotherCategory = itemData.slotIndex ~= filteredEquipSlot
 
                 entryData.isHiddenByWardrobe = WouldEquipmentBeHidden(itemData.slotIndex or EQUIP_SLOT_NONE, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
-            else
-                local slotIndex = FindActionSlotMatchingItem(itemData.bagId, itemData.slotIndex)
-                entryData.isEquippedInCurrentCategory = slotIndex ~= nil
             end
 
             local remaining, duration = GetItemCooldownInfo(itemData.bagId, itemData.slotIndex)

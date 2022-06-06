@@ -985,6 +985,35 @@ SOUNDS = {
     ARMORY_BUILD_SLOT_EXPANDED = "Armory_Expanded",
     ARMORY_BUILD_SLOT_COLLAPSED = "Armory_Collapsed",
 
+    -- Deconstruction Assistant
+    UNIVERSAL_DECONSTRUCTION_SUCCESS = "Universal_Deconstruction_Success",
+    UNIVERSAL_DECONSTRUCTION_FAIL = "Universal_Deconstruction_Fail",
+
     -- Pregame Animated Background
     PREGAME_ANIMATEDBACKGROUND_HIGHISLE_GEM_SPARKLE = "Pregame_AnimatedBackground_HighIsle_Gem_Sparkle",
+
+    -- Tribute
+    TRIBUTE_TURN_START = "Tribute_TurnStart",
+    TRIBUTE_TURN_START_OPPONENT_PENULTIMATE_FAVOR = "Tribute_TurnStart_OpponentPenultimateFavor",
+    TRIBUTE_RANK_CHANGE = "Tribute_RankChange",
+    TRIBUTE_SUMMARY_BEGIN_VICTORY = "Tribute_Summary_Begin_Victory",
+    TRIBUTE_SUMMARY_BEGIN_DEFEAT = "Tribute_Summary_Begin_Defeat",
+    TRIBUTE_SUMMARY_PROGRESS_BAR_INCREASE = "Tribute_Summary_ProgressBarIncrease",
+    TRIBUTE_SUMMARY_PROGRESS_BAR_DECREASE = "Tribute_Summary_ProgressBarDecrease",
+    TRIBUTE_SUMMARY_PLACEMENT_MATCH_SEGMENT_FILL_VICTORY = "Tribute_Summary_PlacementMatchSegmentFill_Victory",
+    TRIBUTE_SUMMARY_PLACEMENT_MATCH_SEGMENT_FILL_DEFEAT = "Tribute_Summary_PlacementMatchSegmentFill_Defeat",
+    TRIBUTE_SUMMARY_RANK_CHANGE = "Tribute_Summary_RankChange",
+    TRIBUTE_SUMMARY_RANK_CHANGE_LEADERBOARD = "Tribute_Summary_RankChange_Leaderboard",
+    TRIBUTE_AGENT_DAMAGED = "Tribute_AgentDamaged",
+    TRIBUTE_AGENT_HEALED = "Tribute_AgentHealed",
+    TRIBUTE_AGENT_KNOCKED_OUT = "Tribute_AgentKnockedOut",
+    TRIBUTE_COMBO_TRIGGERED = "Tribute_ComboTriggered",
+    TRIBUTE_PATRON_DRAFTED = "Tribute_PatronDrafted",
+    TRIBUTE_MECHANIC_CHOSEN = "Tribute_MechanicChosen",
+    TRIBUTE_CARD_HIGHLIGHTED = "Tribute_CardHighlighted",
+    TRIBUTE_CARD_TARGETED = "Tribute_CardTargeted",
+    TRIBUTE_CARD_UNTARGETED = "Tribute_CardUntargeted",
+    TRIBUTE_SHOW_TARGET_VIEWER = "Tribute_ShowTargetViewer",
+    TRIBUTE_INVITE_RECEIVED = "Tribute_InviteReceived",
+    TRIBUTE_TURN_START_OPPONENT_PRESTIGE_VICTORY_NEAR = "Tribute_TurnStart_OpponentPrestigeVictoryNear",
 }

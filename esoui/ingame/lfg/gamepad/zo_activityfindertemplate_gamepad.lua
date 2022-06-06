@@ -19,12 +19,16 @@ function ZO_ActivityFinderTemplate_Gamepad:New(...)
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:Initialize(dataManager, categoryData, categoryPriority)
+    self.tributeProgressSegmentTemplate = "ZO_TributeFinder_ArrowStatusBarTemplate_Gamepad"
     local control = CreateControlFromVirtual(dataManager:GetName() .. "_Gamepad", GuiRoot, "ZO_ActivityFinderTemplateTopLevel_Gamepad")
     ZO_ActivityFinderTemplate_Shared.Initialize(self, control, dataManager, categoryData, categoryPriority)
     local ACTIVATE_LIST_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, ACTIVATE_LIST_ON_SHOW, self.scene)
     self:SetListsUseTriggerKeybinds(true)
     self:InitializeLists()
+
+    self.rewardsOffsetYDefault = 50
+    self.rewardsOffsetYTribute = 0
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:InitializeControls()
@@ -204,7 +208,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
             end,
         },
 
-        --Back
+        -- Back
         {
             name = GetString(SI_GAMEPAD_BACK_OPTION),
 
@@ -214,12 +218,38 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                 if self.navigationMode == NAVIGATION_MODES.CATEGORIES or not self.hasCategories then
                     SCENE_MANAGER:HideCurrentScene()
                 else
+                    ZO_ACTIVITY_FINDER_ROOT_MANAGER:ClearSelections()
                     self:SetNavigationMode(NAVIGATION_MODES.CATEGORIES)
                 end
             end,
         },
 
-        --Toggle Queue
+        -- View Rewards
+        {
+            name = GetString(SI_LFG_VIEW_REWARDS),
+            keybind = "UI_SHORTCUT_TERTIARY",
+
+            callback = function()
+                SCENE_MANAGER:Push("tribute_rewards_gamepad")
+            end,
+
+            enabled = function()
+                return HasActiveCampaignStarted()
+            end,
+
+            visible = function()
+                local currentList = self:GetCurrentList()
+                if currentList then
+                    local targetData = currentList:GetTargetData()
+                    if targetData and targetData.data then
+                        return targetData.data.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE
+                    end
+                end
+                return false
+            end,
+        },
+
+        -- Toggle Queue
         {
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
 
@@ -245,7 +275,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                 local playerCanToggleQueue = not ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsLockedByNotLeader()
                 return playerCanToggleQueue and (anySelected or currentlySearching)
             end,
-        }
+        },
     }
 end
 
@@ -255,7 +285,7 @@ function ZO_ActivityFinderTemplate_Gamepad:FilterByActivity(activityType)
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:PerformUpdate()
-    --Must be overriden
+    --Must be overridden
 end
 
 --Add an ethereal entry to interact with the roles
@@ -297,10 +327,17 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
     self.entryList:Clear()
     if not self.categoryData.hideGroupRoles then
         self:AddRolesMenuEntry(self.entryList)
+        self.entryList:SetDefaultSelectedIndex(2)
+    else
+        self.entryList:SetDefaultSelectedIndex(1)
     end
     local isSearching = IsCurrentlySearchingForGroup()
     local lockReasonTextOverride = self:GetGlobalLockText()
     local modes = self.dataManager:GetFilterModeData()
+
+    if self.categoryData.isTribute then
+        TriggerTutorial(TUTORIAL_TRIGGER_TRIBUTE_FINDER_OPENED)
+    end
 
     local function AddLocationEntry(location)
         local entryData = ZO_GamepadEntryData:New(location:GetNameGamepad(), self.categoryData.menuIcon)
@@ -327,7 +364,8 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
         local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(self.currentSpecificActivityType)
 
         for _, location in ipairs(locationData) do
-            if modes:IsEntryTypeVisible(location:GetEntryType()) and not location:HasRewardData() then
+            local isTribute = location.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE or location.activityType == LFG_ACTIVITY_TRIBUTE_CASUAL
+            if modes:IsEntryTypeVisible(location:GetEntryType()) and ((isTribute and location:HasRewardData()) or not location:HasRewardData()) then
                 AddLocationEntry(location)
             end
         end
@@ -387,6 +425,10 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshFilters()
     end
 end
 
+function ZO_ActivityFinderTemplate_Gamepad:IsShowingTributeFinder()
+    return self.categoryData.isTribute and self.categoryData.isTribute or false
+end
+
 function ZO_ActivityFinderTemplate_Gamepad:OnActivityFinderStatusUpdate()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     self:RefreshView()
@@ -398,7 +440,13 @@ function ZO_ActivityFinderTemplate_Gamepad:OnShowing()
     self:SetNavigationMode(navigationMode)
     --If we have no categories we go straight into the default view, which means navigation mode never technically changes, so the header never gets reactivated
     if not self.hasCategories then
-        self:RefreshHeaderAndView(self.specificHeaderData)
+        local targetHeader
+        if navigationMode == NAVIGATION_MODES.RANDOM_ENTRIES then
+            targetHeader = self.randomHeaderData
+        else
+            targetHeader = self.specificHeaderData
+        end
+        self:RefreshHeaderAndView(targetHeader)
     end
 end
 
@@ -411,6 +459,39 @@ end
 
 function ZO_ActivityFinderTemplate_Gamepad:OnHiding()
     ZO_GamepadGenericHeader_Deactivate(self.header)
+
+    self:HideTributeRank()
+end
+
+function ZO_ActivityFinderTemplate_Gamepad:ShowTributeRank()
+    if self.isTributeClubDataInitialized then
+        SCENE_MANAGER:AddFragment(GAMEPAD_ACTIVITY_TRIBUTE_RANK_FRAGMENT)
+        if not self.defaultFooterAnchor then
+            local isValid, point, relativeTo, relativePoint, offsetX, offsetY = ZO_GenericFooter_Gamepad:GetAnchor(0)
+            if isValid then
+                self.defaultFooterAnchor =
+                {
+                    point = point,
+                    relativeTo = relativeTo,
+                    relativePoint = relativePoint,
+                    offsetX = offsetX,
+                    offsetY = offsetY,
+                }
+            end
+        end
+        ZO_GenericFooter_Gamepad:ClearAnchors()
+        ZO_GenericFooter_Gamepad:SetAnchor(RIGHT, ZO_ActivityTributeRankFooter_Gamepad_TL, LEFT)
+    end
+end
+
+function ZO_ActivityFinderTemplate_Gamepad:HideTributeRank()
+    SCENE_MANAGER:RemoveFragment(GAMEPAD_ACTIVITY_TRIBUTE_RANK_FRAGMENT)
+    if self.defaultFooterAnchor then
+        local anchor = self.defaultFooterAnchor
+        ZO_GenericFooter_Gamepad:ClearAnchors()
+        ZO_GenericFooter_Gamepad:SetAnchor(anchor.point, anchor.relativeTo, anchor.relativePoint, anchor.offsetX, anchor.offsetY)
+    end
+    self.defaultFooterAnchor = nil
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:SetNavigationMode(navigationMode)
@@ -469,6 +550,7 @@ do
 
                         self.backgroundTexture:SetTexture(entryData.descriptionTextureGamepad)
                         self.titleLabel:SetText(entryData.nameGamepad)
+
                         entryData:SetGroupSizeRangeText(self.groupSizeRangeLabel, GROUP_SIZE_ICON_FORMAT)
 
                         self:RefreshRewards(entryData)
@@ -483,7 +565,26 @@ do
                         else
                             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
                         end
-                        
+
+                        local isCompetitive = entryData.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE
+                        local HIDE_IF_NOT_COMPETITIVE = not isCompetitive
+                        self:RefreshTributeSeasonData(HIDE_IF_NOT_COMPETITIVE)
+                        if isCompetitive then
+                            if RequestTributeClubData() == TRIBUTE_PLAYER_INITIALIZATION_STATE_SUCCESS then
+                                self:OnTributeClubDataInitialized()
+                            end
+
+                            if RequestActiveTributeCampaignData() == TRIBUTE_PLAYER_INITIALIZATION_STATE_SUCCESS then
+                                self:OnTributeCampaignDataInitialized()
+                            end
+
+                            self:ShowTributeRank()
+                        elseif entryData.activityType == LFG_ACTIVITY_TRIBUTE_CASUAL then
+                            self:ShowTributeRank()
+                        else
+                            self:HideTributeRank()
+                        end
+
                         ZO_ActivityFinderTemplate_Shared.AppendSetDataToControl(self.setTypesSectionControl, entryData)
                         return
                     end
@@ -512,6 +613,12 @@ function ZO_ActivityFinderTemplate_Gamepad:OnCooldownsUpdate()
                 end
             end
         end
+    end
+end
+
+function ZO_ActivityFinderTemplate_Gamepad:OnTributeClubRankDataChanged()
+    if self.fragment:IsShowing() then
+        GAMEPAD_ACTIVITY_TRIBUTE_RANK:RefreshClubRank()
     end
 end
 

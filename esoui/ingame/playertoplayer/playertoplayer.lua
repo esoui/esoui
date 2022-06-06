@@ -20,6 +20,7 @@ local INTERACT_TYPE_TRACK_ZONE_STORY = 16
 local INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED = 17
 local INTERACT_TYPE_CAMPAIGN_LOCK_PENDING = 18
 local INTERACT_TYPE_TRAVEL_TO_LEADER = 19
+local INTERACT_TYPE_TRIBUTE_INVITE = 20
 
 local TIMED_PROMPTS =
 {
@@ -112,6 +113,10 @@ do
 end
 
 function ZO_PlayerToPlayer:OnDuelStarted()
+    self:StopInteraction()
+end
+
+function ZO_PlayerToPlayer:OnTributeStarted()
     self:StopInteraction()
 end
 
@@ -216,6 +221,25 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
     local function OnDuelInviteRemoved()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_DUEL_INVITE)
+    end
+    
+    local function OnTributeInviteReceived(eventCode, inviterCharacterName, inviterDisplayName)
+        PlaySound(SOUNDS.TRIBUTE_INVITE_RECEIVED)
+        local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
+        self:AddPromptToIncomingQueue(INTERACT_TYPE_TRIBUTE_INVITE, inviterCharacterName, inviterDisplayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_TRIBUTE, ZO_SELECTED_TEXT:Colorize(userFacingName)),
+            function()
+                AcceptTribute()
+            end,
+            function()
+                DeclineTribute()
+            end,
+            function()
+                self:RemoveFromIncomingQueue(INTERACT_TYPE_TRIBUTE_INVITE)
+            end)
+    end
+
+    local function OnTributeInviteRemoved()
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_TRIBUTE_INVITE)
     end
 
     local function OnGroupInviteReceived(eventCode, inviterCharacterName, inviterDisplayName)
@@ -582,6 +606,8 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_RECEIVED, OnDuelInviteReceived)
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_REMOVED, OnDuelInviteRemoved)
+    self.control:RegisterForEvent(EVENT_TRIBUTE_INVITE_RECEIVED, OnTributeInviteReceived)
+    self.control:RegisterForEvent(EVENT_TRIBUTE_INVITE_REMOVED, OnTributeInviteRemoved)
     self.control:RegisterForEvent(EVENT_GROUP_INVITE_RECEIVED, OnGroupInviteReceived)
     self.control:RegisterForEvent(EVENT_GROUP_INVITE_REMOVED, OnGroupInviteRemoved)
     self.control:RegisterForEvent(EVENT_TRADE_INVITE_CONSIDERING, OnTradeWindowInviteConsidering)
@@ -827,6 +853,11 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         if duelState == DUEL_STATE_INVITE_CONSIDERING then
             OnDuelInviteReceived(nil, duelPartnerCharacterName, duelPartnerDisplayName)
         end
+        
+        local tributeInviteState, tributePartnerCharacterName, tributePartnerDisplayName = GetTributeInviteInfo()
+        if tributeInviteState == TRIBUTE_INVITE_STATE_INVITE_CONSIDERING then
+            OnTributeInviteReceived(nil, tributePartnerCharacterName, tributePartnerDisplayName)
+        end
 
         local inviterCharaterName, millisecondsSinceRequest, inviterDisplayName = GetGroupInviteInfo()
 
@@ -890,6 +921,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
     local function OnPlayerDeactivated()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_DUEL_INVITE)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_TRIBUTE_INVITE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_GROUP_INVITE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_TRADE_INVITE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_RITUAL_OF_MARA)
@@ -1649,6 +1681,10 @@ function ZO_PlayerToPlayer:OnUpdate()
             -- Dialogs are prioritized above interact labels, so we don't accidentally show the same p2p notification that a dialog is currently showing
             hideSelf = true
             hideTargetLabel = true
+        elseif UTILITY_WHEEL_MANAGER:IsInteracting() then
+            --We should not be showing this if any utility wheels are in use
+            hideSelf = true
+            hideTargetLabel = true
         elseif self:TryShowingResurrectLabel(P2P_UNIT_TAG) and isReticleTargetInteractable then
             -- TryShowingResurrectLabel has to be checked first to set the state of the pendingResurrectInfo label
             hideSelf = false
@@ -1741,6 +1777,13 @@ local KEYBOARD_INTERACT_ICONS =
         disabledNormal = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
         disabledSelected = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
     },
+    [SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE] =
+    {
+        enabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_up.dds",
+        enabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_over.dds",
+        disabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
+        disabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
+    },
     [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
     {
         enabledNormal = "EsoUI/Art/HUD/radialIcon_trade_up.dds",
@@ -1810,6 +1853,13 @@ local GAMEPAD_INTERACT_ICONS =
         enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_down.dds",
         disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
         disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
+    },
+    [SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE] =
+    {
+        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
+        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
+        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
+        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
     },
     [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
     {
@@ -1973,6 +2023,26 @@ do
                 ChallengeTargetToDuel(currentTargetCharacterName)
             end
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], ENABLED_IF_NOT_IGNORED, ENABLED_IF_NOT_IGNORED and DuelInviteOption or AlertIgnored)
+        end
+
+       -- Play Tribute --
+        local tributeInviteState, partnerCharacterName, partnerDisplayName = GetTributeInviteInfo()
+        if tributeInviteState ~= TRIBUTE_INVITE_STATE_NONE then
+            local function TributeInviteFailWarning(tributeInviteState, characterName, displayName)
+                return function()
+                    local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
+                    local statusString = GetString("SI_TRIBUTEINVITESTATE", tributeInviteState)
+                    statusString = zo_strformat(statusString, userFacingPartnerName)
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)
+                end
+            end
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], DISABLED, TributeInviteFailWarning(tributeInviteState, partnerCharacterName, partnerDisplayName))
+        else
+            local function TributeInviteOption()
+                ChallengeTargetToTribute(currentTargetCharacterName)
+            end
+            local isEnabled = ENABLED_IF_NOT_IGNORED and not ZO_IsTributeLocked()
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], isEnabled, ENABLED_IF_NOT_IGNORED and TributeInviteOption or AlertIgnored)
         end
 
         --Trade--

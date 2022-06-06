@@ -84,10 +84,6 @@ local pregameStates =
 
                 PregameSelectProfile()
             else
-                CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
-                CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
-                WORLD_SELECT_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
-                WORLD_SELECT_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
 
                 if IsConsoleUI() then
                     -- ESO-404970: reset overscan, gamma, and audio settings
@@ -150,7 +146,13 @@ local pregameStates =
         end,
 
         GetStateTransitionData = function()
-            return "ScreenAdjustIntro"
+            if IsConsoleUI() then
+                -- TODO XAR Settings: Replace the following
+                -- return "FirstTimeAccessibilitySettings"
+                return "ScreenAdjustIntro"
+            else
+                return "ShowEULA"
+            end
         end,
     },
 
@@ -186,7 +188,16 @@ local pregameStates =
                 SetCurrentVideoPlaybackVolume(0.0, 4.0)
             end
             
-            if ZO_IsForceConsoleOrHeronFlow() then
+            if ZO_IsPCUI() and not IsUsingLinkedLogin() then
+                -- login using the username/password the user provides
+                function Login()
+                    local username = GAME_STARTUP_GAMEPAD:GetEnteredUserName()
+                    local password = GAME_STARTUP_GAMEPAD:GetEnteredPassword()
+                    PregameLogin(username, password)
+                end
+
+                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", Login, GetString(SI_GAMEPAD_PREGAME_LOADING))
+            elseif ZO_IsForceConsoleOrHeronFlow() then
                 -- login using the username/password in user settings
                 CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", ZO_FakeConsoleOrHeronLogin, GetString(SI_GAMEPAD_PREGAME_LOADING))
             else
@@ -200,6 +211,188 @@ local pregameStates =
 
         GetStateTransitionData = function()
             return "WorldSelect"
+        end,
+    },
+
+    
+    ["CreateLinkAccount"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function()
+            SCENE_MANAGER:Show("CreateLinkAccountScreen_Gamepad")
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "NoCreateLinkAccountLoading"
+        end,
+    },
+
+    ["CreateAccountSetup"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function()
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("CreateLinkAccount", LoadCountryData, GetString(SI_GAMEPAD_PREGAME_LOADING))
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "CreateAccount"
+        end,
+    },
+
+    ["CreateAccount"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function()
+            SCENE_MANAGER:Show("CreateAccount_Gamepad")
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            local enteredEmail = CREATE_ACCOUNT_GAMEPAD:GetEnteredEmail()
+            local isAgeValid = CREATE_ACCOUNT_GAMEPAD:IsAgeValid()
+            local shouldRevieveNews = CREATE_ACCOUNT_GAMEPAD:ShouldReceiveNewsEmail()
+            local countryCode = CREATE_ACCOUNT_GAMEPAD:GetCountryCode()
+            local enteredAccountName = CREATE_ACCOUNT_GAMEPAD:GetEnteredAccountName()
+            return "CreateAccountLoading", enteredEmail, isAgeValid, shouldRevieveNews, countryCode, enteredAccountName
+        end,
+    },
+
+    ["CreateAccountLoading"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function(email, ageValid, emailSignup, country, requestedAccountName)
+            local function CreateAccount()
+                PregameSetAccountCreationInfo(email, ageValid, emailSignup, country, requestedAccountName)
+                PregameCreateAccount()
+            end
+
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", CreateAccount, GetString(SI_CREATEACCOUNT_CREATING_ACCOUNT))
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "CreateAccountFinished"
+        end,
+    },
+    
+    ["CreateAccountFinished"] = 
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function(username, password)
+            SCENE_MANAGER:Show("CreateAccount_Gamepad_Final")
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "NoCreateLinkAccountLoading"
+        end,
+    },
+
+    ["LinkAccount"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function()
+            SCENE_MANAGER:Show("LinkAccount_Gamepad")
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "ConfirmLinkAccount", LINK_ACCOUNT_GAMEPAD.username, LINK_ACCOUNT_GAMEPAD.password
+        end,
+    },
+
+    ["ConfirmLinkAccount"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function(username, password)
+            CONFIRM_LINK_ACCOUNT_SCREEN_GAMEPAD:Show(username, password)
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            local username, password = CONFIRM_LINK_ACCOUNT_SCREEN_GAMEPAD:GetUsernamePassword()
+            return "LinkAccountLoading", username, password
+        end,
+    },
+
+    ["LinkAccountLoading"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function(username, password)
+            local function LinkAccount()
+                if ZO_IsForceConsoleOrHeronFlow() then
+                    PregameStateManager_AdvanceState()
+                else
+                    PregameLinkAccount(username, password)
+                end
+            end
+
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", LinkAccount, GetString(SI_LINKACCOUNT_LINKING_ACCOUNT))
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "LinkAccountFinished"
+        end,
+    },
+
+    ["LinkAccountFinished"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function(username, password)
+            SCENE_MANAGER:Show("LinkAccountScreen_Gamepad_Final")
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "NoCreateLinkAccountLoading"
         end,
     },
 

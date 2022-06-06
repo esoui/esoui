@@ -75,7 +75,7 @@ function ZO_UnitVisualizer_PowerShieldModule:InitializeBarValues()
     local oldBarInfo = self.attributeInfo
     self.attributeInfo =
     {
-        [ATTRIBUTE_HEALTH] = self:CreateInfoTable(healthBarControl, oldBarInfo and oldBarInfo[ATTRIBUTE_HEALTH], STAT_MITIGATION, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH),
+        [ATTRIBUTE_HEALTH] = self:CreateInfoTable(healthBarControl, oldBarInfo and oldBarInfo[ATTRIBUTE_HEALTH], STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH),
     }
 
     for attribute, bar in pairs(self.attributeBarControls) do
@@ -158,7 +158,7 @@ function ZO_UnitVisualizer_PowerShieldModule:ShowOverlay(attributeBar, info)
         for _, overlay in ipairs(info.overlayControls) do
             ZO_StatusBar_SetGradientColor(overlay, SHIELD_COLOR_GRADIENT)
             ZO_StatusBar_SetGradientColor(overlay.traumaBar, TRAUMA_COLOR_GRADIENT)
-            ZO_StatusBar_SetGradientColor(overlay.fakeHealthBar, ZO_POWER_BAR_GRADIENT_COLORS[POWERTYPE_HEALTH])
+            ZO_StatusBar_SetGradientColor(overlay.fakeHealthBar, ZO_POWER_BAR_GRADIENT_COLORS[COMBAT_MECHANIC_FLAGS_HEALTH])
             overlay:SetValue(1)
         end
 

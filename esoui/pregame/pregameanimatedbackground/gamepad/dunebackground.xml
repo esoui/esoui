@@ -1,6 +1,6 @@
 <GuiXml>
     <Animations>
-        <AnimationTimeline name="ZO_DuneBackgroundAnimation_Intro" duration="4000">
+        <AnimationTimeline name="ZO_DuneBackgroundAnimation_Intro">
             <Animations>
                 <CustomAnimation delay="0" duration="4000">
                     <UpdateFunction>
@@ -20,7 +20,7 @@
     </Animations>
 
     <Animations>
-        <AnimationTimeline name="ZO_DuneBackgroundAnimation_Repeat" duration="10000" loopCount="LOOP_INDEFINITELY" playbackType="LOOP">
+        <AnimationTimeline name="ZO_DuneBackgroundAnimation_Repeat" loopCount="LOOP_INDEFINITELY" playbackType="LOOP">
             <Animations>
                 <CustomAnimation duration="10000">
                     <UpdateFunction>

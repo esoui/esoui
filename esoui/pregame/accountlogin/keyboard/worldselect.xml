@@ -82,7 +82,7 @@
             <Anchor point="CENTER" relativeTo="GuiRoot" />
 
             <OnInitialized>
-                ZO_WorldSelect_Initialize()
+                ZO_WorldSelect_Initialize(self)
             </OnInitialized>
 
             <Controls>
@@ -107,8 +107,7 @@
                 <Button name="$(parent)Cancel" inherits="ZO_DefaultButton" text="SI_DIALOG_CANCEL" modifyTextType="UPPERCASE">
                     <Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" offsetX="70" offsetY="-10" />
                     <OnClicked>
-                        SetCVar("QuickLaunch", "0")
-                        PregameStateManager_SetState(self.gameStateString)
+                        ZO_WorldSelect_Cancel()
                     </OnClicked>
                 </Button>
 

@@ -249,8 +249,8 @@ EsoUI\Libraries\ZO_PointerBox\Keyboard\ZO_PointerBox_Keyboard.xml
 EsoUI\Libraries\ZO_TextureLayerRevealAnimation\ZO_TextureLayerRevealAnimation.lua
 EsoUI\Libraries\ZO_TextureLayerRevealAnimation\ZO_TextureLayerRevealAnimation.xml
 
-EsoUI\Libraries\ZO_LabelRevealAnimation\ZO_LabelRevealAnimation.lua
-EsoUI\Libraries\ZO_LabelRevealAnimation\ZO_LabelRevealAnimation.xml
+EsoUI\Libraries\ZO_RevealingControl\ZO_RevealingControl.lua
+EsoUI\Libraries\ZO_RevealingControl\ZO_RevealingControl.xml
 
 EsoUI\Libraries\ZO_Tile\Tile.lua
 EsoUI\Libraries\ZO_Tile\Tile.xml
@@ -290,3 +290,5 @@ EsoUI\Libraries\ZO_ScriptProfiler\ZO_ScriptProfiler.lua
 
 EsoUI\Libraries\ZO_Horizontal_Menu\ZO_Horizontal_Menu.lua
 EsoUI\Libraries\ZO_Horizontal_Menu\ZO_Horizontal_Menu.xml
+
+EsoUI\Libraries\ZO_ProgressBar\ZO_MultiSegmentProgressBar.lua

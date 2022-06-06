@@ -350,9 +350,9 @@ function ZO_Stats:CreateAttributesSection()
     self:SetNextControlPadding(20)
 
     local attributesRow = self:CreateControlFromVirtual("AttributesRow", "ZO_StatsAttributesRow")
-    self:SetUpAttributeControl(attributesRow:GetNamedChild("Health"), STAT_HEALTH_MAX, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH)
-    self:SetUpAttributeControl(attributesRow:GetNamedChild("Magicka"), STAT_MAGICKA_MAX, ATTRIBUTE_MAGICKA, POWERTYPE_MAGICKA)
-    self:SetUpAttributeControl(attributesRow:GetNamedChild("Stamina"), STAT_STAMINA_MAX, ATTRIBUTE_STAMINA, POWERTYPE_STAMINA)
+    self:SetUpAttributeControl(attributesRow:GetNamedChild("Health"), STAT_HEALTH_MAX, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+    self:SetUpAttributeControl(attributesRow:GetNamedChild("Magicka"), STAT_MAGICKA_MAX, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA)
+    self:SetUpAttributeControl(attributesRow:GetNamedChild("Stamina"), STAT_STAMINA_MAX, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA)
 
     self:SetNextControlPadding(20)
 
@@ -554,9 +554,9 @@ end
 
 local BAR_TEXTURES =
 {
-    [POWERTYPE_HEALTH] = "EsoUI/Art/Stats/stats_healthBar.dds",
-    [POWERTYPE_MAGICKA] = "EsoUI/Art/Stats/stats_magickaBar.dds",
-    [POWERTYPE_STAMINA] = "EsoUI/Art/Stats/stats_staminaBar.dds",
+    [COMBAT_MECHANIC_FLAGS_HEALTH] = "EsoUI/Art/Stats/stats_healthBar.dds",
+    [COMBAT_MECHANIC_FLAGS_MAGICKA] = "EsoUI/Art/Stats/stats_magickaBar.dds",
+    [COMBAT_MECHANIC_FLAGS_STAMINA] = "EsoUI/Art/Stats/stats_staminaBar.dds",
 }
 
 function ZO_Stats:SetUpAttributeControl(attributeControl, statType, attributeType, powerType)

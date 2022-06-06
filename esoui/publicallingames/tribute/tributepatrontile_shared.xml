@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TributePatronTile_Shared_Control" inherits="ZO_ContextualActionsTile_Control" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" override="true" level="2" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -8,7 +8,7 @@
             </Controls>
         </Label>
         
-        <TopLevelControl name="ZO_GenericFooter_Gamepad" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
+        <TopLevelControl name="ZO_GenericFooter_Gamepad" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" resizeToFitDescendents="true">
             <OnInitialized>
                 ZO_GenericFooter_Gamepad_OnInitialized(self)
             </OnInitialized>

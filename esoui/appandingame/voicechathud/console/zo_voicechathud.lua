@@ -3,27 +3,28 @@ local function ZO_FormatUserFacingDisplayName(name)
     return IsConsoleUI() and UndecorateDisplayName(name) or name
 end
 
---------------------------------------------------------------------------------
--- Speaker List
---      A helper class for generating hud speaker entries and anchoring them to
---      form a list. Allows the VoiceChat HUD to only have to deal with adding
---      to and clearing from a list.
---------------------------------------------------------------------------------
-
-local CHANNEL_TO_COLOR =
+ZO_VOICE_CHAT_CHANNEL_TO_COLOR =
 {
     [VOICE_CHANNEL_AREA] = VOICE_CHAT_COLORS_AREA,
     [VOICE_CHANNEL_GROUP] = VOICE_CHAT_COLORS_GROUP,
     [VOICE_CHANNEL_GUILD] = VOICE_CHAT_COLORS_GUILD,
     [VOICE_CHANNEL_BATTLEGROUP] = VOICE_CHAT_COLORS_GROUP,
 }
-local CHANNEL_TO_ICON =
+
+ZO_VOICE_CHAT_CHANNEL_TO_ICON =
 {
     [VOICE_CHANNEL_AREA] = "EsoUI/Art/VOIP/voip-area.dds",
     [VOICE_CHANNEL_GROUP] = "EsoUI/Art/VOIP/voip-group.dds",
     [VOICE_CHANNEL_GUILD] = "EsoUI/Art/VOIP/voip-guild.dds",
     [VOICE_CHANNEL_BATTLEGROUP] = "EsoUI/Art/VOIP/voip-group.dds",
 }
+
+--------------------------------------------------------------------------------
+-- Speaker List
+--      A helper class for generating hud speaker entries and anchoring them to
+--      form a list. Allows the VoiceChat HUD to only have to deal with adding
+--      to and clearing from a list.
+--------------------------------------------------------------------------------
 
 local SpeakerList = {}
 
@@ -53,7 +54,7 @@ function SpeakerList:AddLine(text, channelType)
     --Set text
     local textControl = newEntry.textControl
     textControl:SetText(text)
-    textControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_VOICE_CHAT_COLORS, CHANNEL_TO_COLOR[channelType]))
+    textControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_VOICE_CHAT_COLORS, ZO_VOICE_CHAT_CHANNEL_TO_COLOR[channelType]))
 
     --Set anchor
     if self.lastEntry then
@@ -65,8 +66,8 @@ function SpeakerList:AddLine(text, channelType)
     
     --Set icon
     local icon = newEntry.icon
-    icon:SetTexture(CHANNEL_TO_ICON[channelType])
-    icon:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_VOICE_CHAT_COLORS, CHANNEL_TO_COLOR[channelType]))
+    icon:SetTexture(ZO_VOICE_CHAT_CHANNEL_TO_ICON[channelType])
+    icon:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_VOICE_CHAT_COLORS, ZO_VOICE_CHAT_CHANNEL_TO_COLOR[channelType]))
 end
 
 function SpeakerList:Clear()

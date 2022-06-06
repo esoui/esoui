@@ -66,19 +66,19 @@ ZO_TOOLTIP_STYLES =
     {
         fontSize = "$(GP_34)",
         fontColorType = INTERFACE_COLOR_TYPE_POWER,
-        fontColorField = POWERTYPE_MAGICKA,
+        fontColorField = COMBAT_MECHANIC_FLAGS_MAGICKA,
     },
     abilityStatValuePairStaminaValue =
     {
         fontSize = "$(GP_34)",
         fontColorType = INTERFACE_COLOR_TYPE_POWER,
-        fontColorField = POWERTYPE_STAMINA,
+        fontColorField = COMBAT_MECHANIC_FLAGS_STAMINA,
     },
     abilityStatValuePairHealthValue =
     {
         fontSize = "$(GP_34)",
         fontColorType = INTERFACE_COLOR_TYPE_POWER,
-        fontColorField = POWERTYPE_HEALTH,
+        fontColorField = COMBAT_MECHANIC_FLAGS_HEALTH,
     },
     championRequirements =
     {
@@ -397,7 +397,10 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         childSpacing = 1,
         fontSize = "$(GP_27)",
-        height = 110,
+        dimensionConstraints =
+        {
+            minHeight = 110,
+        },
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
@@ -414,6 +417,20 @@ ZO_TOOLTIP_STYLES =
     flavorText =
     {
         fontSize = "$(GP_42)",
+    },
+    tributeBodyText =
+    {
+        widthPercent = 100,
+        fontSize = "$(GP_42)",
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+    tributeChooseOneText =
+    {
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+    },
+    tributeDisabledMechanicText =
+    {
+        fontColorField = GAMEPAD_TOOLTIP_COLOR_INACTIVE,
     },
     prioritySellText =
     {
@@ -743,7 +760,8 @@ ZO_TOOLTIP_STYLES =
         layoutPrimaryDirection = "down",
         layoutSecondaryDirection = "right",
         layoutPrimaryDirectionCentered = true,
-        dimensionConstraints = {
+        dimensionConstraints =
+        {
             minHeight = 40,
         },
     },

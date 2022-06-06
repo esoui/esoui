@@ -366,7 +366,7 @@ end
 local HELP_MAX_IMAGE_WIDTH = 490
 function ZO_Tutorials_Entries_OnTextureLoaded(control)
     -- when hidden we directly manipulate the height, so don't apply constraints in those cases
-    if not control:IsHidden() then
+    if not control:IsControlHidden() then
         ZO_ResizeTextureWidthAndMaintainAspectRatio(control, HELP_MAX_IMAGE_WIDTH)
     end
 end

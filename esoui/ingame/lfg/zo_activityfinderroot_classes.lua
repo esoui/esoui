@@ -5,6 +5,8 @@ ZO_ACTIVITY_FINDER_GENERALIZED_ACTIVITY_DESCRIPTORS =
     [LFG_ACTIVITY_BATTLE_GROUND_CHAMPION] = GetString(SI_BATTLEGROUND_FINDER_GENERAL_ACTIVITY_DESCRIPTOR),
     [LFG_ACTIVITY_BATTLE_GROUND_NON_CHAMPION] = GetString(SI_BATTLEGROUND_FINDER_GENERAL_ACTIVITY_DESCRIPTOR),
     [LFG_ACTIVITY_BATTLE_GROUND_LOW_LEVEL] = GetString(SI_BATTLEGROUND_FINDER_GENERAL_ACTIVITY_DESCRIPTOR),
+    [LFG_ACTIVITY_TRIBUTE_COMPETITIVE] = GetString(SI_TRIBUTE_FINDER_GENERAL_ACTIVITY_DESCRIPTOR),
+    [LFG_ACTIVITY_TRIBUTE_CASUAL] = GetString(SI_TRIBUTE_FINDER_GENERAL_ACTIVITY_DESCRIPTOR),
 }
 
 ----------
@@ -64,21 +66,25 @@ do
     }
 
     function ZO_ActivityFinderLocation_Base:SetGroupSizeRangeText(labelControl, groupIconFormat)
-        local minGroupSize, maxGroupSize = self:GetGroupSizeRange()
-        if TEAM_BASED_ACTIVITY_TYPES[self.activityType] then
-            -- HARD CODING TO four to make it clear the player will be put on a four person team even when entering solo
-            maxGroupSize = 4
-            labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_TEAM_FORMAT, maxGroupSize, groupIconFormat))
-        elseif minGroupSize ~= maxGroupSize then
-            labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_RANGE_FORMAT, minGroupSize, maxGroupSize, groupIconFormat))
+        if self.activityType ~= LFG_ACTIVITY_TRIBUTE_COMPETITIVE and self.activityType ~= LFG_ACTIVITY_TRIBUTE_CASUAL then
+            local minGroupSize, maxGroupSize = self:GetGroupSizeRange()
+            if TEAM_BASED_ACTIVITY_TYPES[self.activityType] then
+                -- HARD CODING TO four to make it clear the player will be put on a four person team even when entering solo
+                maxGroupSize = 4
+                labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_TEAM_FORMAT, maxGroupSize, groupIconFormat))
+            elseif minGroupSize ~= maxGroupSize then
+                labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_RANGE_FORMAT, minGroupSize, maxGroupSize, groupIconFormat))
+            else
+                labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_SIMPLE_FORMAT, minGroupSize, groupIconFormat))
+            end
         else
-            labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_SIMPLE_FORMAT, minGroupSize, groupIconFormat))
+            labelControl:SetText("")
         end
     end
 end
 
 do
-    local DUNGEON_COOLDOWNS = 
+    local DUNGEON_COOLDOWNS =
     {
         queueCooldownType = LFG_COOLDOWN_ACTIVITY_STARTED,
         dailyRewardCooldownType = LFG_COOLDOWN_DUNGEON_REWARD_GRANTED,
@@ -90,6 +96,12 @@ do
         dailyRewardCooldownType = LFG_COOLDOWN_BATTLEGROUND_REWARD_GRANTED,
     }
 
+    local TRIBUTE_COOLDOWNS =
+    {
+        queueCooldownType = LFG_COOLDOWN_TRIBUTE_DESERTED,
+        dailyRewardCooldownType = LFG_COOLDOWN_TRIBUTE_REWARD_GRANTED,
+    }
+
     local ACTIVITY_TYPE_APPLICABLE_COOLDOWN_TYPES =
     {
         [LFG_ACTIVITY_DUNGEON] = DUNGEON_COOLDOWNS,
@@ -97,6 +109,8 @@ do
         [LFG_ACTIVITY_BATTLE_GROUND_CHAMPION] = BATTLEGROUND_COOLDOWNS,
         [LFG_ACTIVITY_BATTLE_GROUND_NON_CHAMPION] = BATTLEGROUND_COOLDOWNS,
         [LFG_ACTIVITY_BATTLE_GROUND_LOW_LEVEL] = BATTLEGROUND_COOLDOWNS,
+        [LFG_ACTIVITY_TRIBUTE_COMPETITIVE] = TRIBUTE_COOLDOWNS,
+        [LFG_ACTIVITY_TRIBUTE_CASUAL] = TRIBUTE_COOLDOWNS,
     }
 
     function ZO_ActivityFinderLocation_Base:GetApplicableCooldownTypes()

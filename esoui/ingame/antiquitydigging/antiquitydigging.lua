@@ -198,7 +198,9 @@ function ZO_AntiquityDigging:Initialize(control)
     end)
 
     control:RegisterForEvent(EVENT_STOP_ANTIQUITY_DIGGING, function()
-        SCENE_MANAGER:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
+        if ANTIQUITY_DIGGING_SCENE:IsShowing() then
+            SCENE_MANAGER:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
+        end
     end)
 
     control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_MOUSE_OVER_ACTIVE_SKILL_CHANGED, function(_, mousedOverSkill)
@@ -209,6 +211,14 @@ function ZO_AntiquityDigging:Initialize(control)
             else
                 self:HideMoreInfo()
             end
+        end
+    end)
+
+    control:RegisterForEvent(EVENT_ANTIQUITY_SELECTED_TOOL_CHANGED, function()
+        -- Only handle tool change on gamepad, keyboard is handled elsewhere
+        -- Also, only handle this if we were already viewing a tool info
+        if IsInGamepadPreferredMode() and self.showingMoreInfoTooltip then
+            self:ShowMoreInfoForActiveTool()
         end
     end)
 
@@ -334,7 +344,7 @@ end
 function ZO_AntiquityDigging:RefreshDurabilityBar()
     if self.durabilityUnitFrame then
         local current, max = GetDigSpotDurability()
-        self.durabilityUnitFrame.healthBar:Update(POWERTYPE_HEALTH, current, max)
+        self.durabilityUnitFrame.healthBar:Update(COMBAT_MECHANIC_FLAGS_HEALTH, current, max)
     end
 end
 
@@ -545,11 +555,15 @@ end
 
 function ZO_AntiquityDigging:ToggleShowMoreInfoTooltip()
     if not self.showingMoreInfoTooltip then
-        local selectedActiveSkill = GetSelectedDiggingActiveSkill()
-        self:ShowMoreInfoBySkill(selectedActiveSkill)
+        self:ShowMoreInfoForActiveTool()
     else
         self:HideMoreInfo()
     end
+end
+
+function ZO_AntiquityDigging:ShowMoreInfoForActiveTool()
+    local selectedActiveSkill = GetSelectedDiggingActiveSkill()
+    self:ShowMoreInfoBySkill(selectedActiveSkill)
 end
 
 function ZO_AntiquityDigging:ShowMoreInfoBySkill(skill)

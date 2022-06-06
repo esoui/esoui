@@ -577,8 +577,8 @@ function ZO_TooltipSection:GetDimensionWithContraints(base, useHeightContraint)
         max = constraints.maxWidth
     end
 
-    min = min or base
-    max = max or base
+    min = min or 0
+    max = max or math.huge
     return zo_clamp(base, min, max)
 end
 
@@ -622,6 +622,22 @@ end
 
 function ZO_TooltipSection:AddToSecondaryDimension(amount)
     self:SetSecondaryDimension(self.secondaryDimension + amount)
+end
+
+function ZO_TooltipSection:CleanDimensions()
+    if not self:IsPrimaryDimensionFixed() then
+        local primaryDirectionWithConstraints = self:GetPrimaryDimension()
+        if primaryDirectionWithConstraints ~= self.primaryDimension then
+            self:SetPrimaryDimension(primaryDirectionWithConstraints)
+        end
+    end
+
+    if not self:IsSecondaryDimensionFixed() then
+        local secondaryDirectionWithConstraints = self:GetSecondaryDimension()
+        if secondaryDirectionWithConstraints ~= self.secondaryDimension then
+            self:SetSecondaryDimension(secondaryDirectionWithConstraints)
+        end
+    end
 end
 
 function ZO_TooltipSection:GetNumControls()
@@ -731,15 +747,18 @@ function ZO_TooltipSection:AddLine(text, ...)
     self:AddCustomLabel(customFunction, ...)
 end
 
-function ZO_TooltipSection:AddKeybindLine(actionName, travelStringFormat, ...)
+function ZO_TooltipSection:AddKeybindLine(actionName, formatString, ...)
     local styles = {...}
     local DEFAULT_TEXT_OPTIONS = nil
+    local DEFALT_PREFER_GAMEPAD_MODE = nil
+    local DEFALT_SHOW_AS_HOLD = nil
+    local scalePercent = 100
     local function customFunction(label)
-        local bindingText, key, mod1, mod2, mod3, mod4 = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, DEFAULT_TEXT_OPTIONS, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP)
+        local bindingText, key, mod1, mod2, mod3, mod4 = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, DEFAULT_TEXT_OPTIONS, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, DEFALT_PREFER_GAMEPAD_MODE, DEFALT_SHOW_AS_HOLD, scalePercent)
         bindingText = bindingText or ZO_Keybindings_GenerateTextKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
         bindingText = ZO_WHITE:Colorize(bindingText)
-        local travelText = zo_strformat(travelStringFormat, bindingText)
-        self:FormatLabel(label, travelText, unpack(styles))
+        local formattedKeybindString = zo_strformat(formatString, bindingText)
+        self:FormatLabel(label, formattedKeybindString, unpack(styles))
     end
     
     local label = self.keyLabelPool:AcquireObject()
@@ -872,6 +891,8 @@ function ZO_TooltipSection:AddColorAndTextSwatch(r, g, b, a, text, ...)
 end
 
 function ZO_TooltipSection:AddSectionEvenIfEmpty(section)
+    section:CleanDimensions()
+
     if(self:IsVertical()) then
         if(section:IsVertical()) then
             self:AddControl(section, section:GetPrimaryDimension(), section:GetSecondaryDimension(), unpack(section:GetStyles()))

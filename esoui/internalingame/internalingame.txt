@@ -1,6 +1,8 @@
 ; Internal Ingame Script Files
-; This will need ## ValidateSavedVariables: 1 if a saved variable is added.
 ## DependsOn: ZO_InternalIngameLocalization ZO_PublicAllIngames ZO_PregameAndInternalIngame
+
+## SavedVariables: ZO_InternalIngame_SavedVariables
+## ValidateSavedVariables: 1
 
 EsoUI\InternalIngame\Globals\UnofficialClientStringOverrides.lua
 EsoUI\InternalIngame\Globals\bindings.xml
@@ -14,6 +16,10 @@ EsoUI\InternalIngame\Scenes\InternalIngameSceneElements.xml
 EsoUI\InternalIngame\Tooltip\InternalIngameTooltips.lua
 
 EsoUI\InternalIngame\Rewards\InternalIngame_Rewards_Manager.lua
+
+EsoUI\InternalIngame\Tutorial\Tutorial_Manager.lua
+
+EsoUI\InternalIngame\Help\Help_Manager.lua
 
 EsoUI\InternalIngame\Market\MarketDialogs_Shared.lua
 EsoUI\InternalIngame\Globals\MarketDialogs.lua
@@ -112,6 +118,40 @@ EsoUI\InternalIngame\AntiquityDigging\AntiquityDiggingSummary.lua
 EsoUI\InternalIngame\AntiquityDigging\AntiquityDiggingSummary.xml
 EsoUI\InternalIngame\AntiquityDigging\AntiquityDigging.lua
 EsoUI\InternalIngame\AntiquityDigging\AntiquityDigging.xml
+
+EsoUI\InternalIngame\Tribute\TributeData.lua
+EsoUI\InternalIngame\Tribute\TributePileViewer_Manager.lua
+EsoUI\InternalIngame\Tribute\TributeTargetViewer_Manager.lua
+EsoUI\InternalIngame\Tribute\TributePatronSelection_Manager.lua
+EsoUI\InternalIngame\Tribute\TributeMechanic_Manager.lua
+EsoUI\InternalIngame\Tribute\TributeMechanic_Manager.xml
+EsoUI\InternalIngame\Tribute\TributeSummary.lua
+EsoUI\InternalIngame\Tribute\TributeSummary.xml
+EsoUI\InternalIngame\Tribute\TributePileViewer_Shared.lua
+EsoUI\InternalIngame\Tribute\TributeTargetViewer_Shared.lua
+EsoUI\InternalIngame\Tribute\TributeMechanicSelector.lua
+EsoUI\InternalIngame\Tribute\TributeMechanicSelector.xml
+EsoUI\InternalIngame\Tribute\TributePatronSelection_Shared.lua
+EsoUI\InternalIngame\Tribute\Keyboard\TributePileViewer_Keyboard.lua
+EsoUI\InternalIngame\Tribute\Keyboard\TributePileViewer_Keyboard.xml
+EsoUI\InternalIngame\Tribute\Keyboard\TributeTargetViewer_Keyboard.lua
+EsoUI\InternalIngame\Tribute\Keyboard\TributeTargetViewer_Keyboard.xml
+EsoUI\InternalIngame\Tribute\Keyboard\TributePatronSelection_Keyboard.lua
+EsoUI\InternalIngame\Tribute\Keyboard\TributePatronSelection_Keyboard.xml
+EsoUI\InternalIngame\Tribute\Keyboard\TributeDialogs_Keyboard.lua
+EsoUI\InternalIngame\Tribute\Keyboard\TributeDialogs_Keyboard.xml
+EsoUI\InternalIngame\Tribute\Gamepad\Tribute_Gamepad.lua
+EsoUI\InternalIngame\Tribute\Gamepad\Tribute_Gamepad.xml
+EsoUI\InternalIngame\Tribute\Gamepad\TributePileViewer_Gamepad.lua
+EsoUI\InternalIngame\Tribute\Gamepad\TributePileViewer_Gamepad.xml
+EsoUI\InternalIngame\Tribute\Gamepad\TributeTargetViewer_Gamepad.lua
+EsoUI\InternalIngame\Tribute\Gamepad\TributeTargetViewer_Gamepad.xml
+EsoUI\InternalIngame\Tribute\Gamepad\TributePatronSelection_Gamepad.lua
+EsoUI\InternalIngame\Tribute\Gamepad\TributePatronSelection_Gamepad.xml
+EsoUI\InternalIngame\Tribute\TributePatronStall.lua
+EsoUI\InternalIngame\Tribute\TributePatronStall.xml
+EsoUI\InternalIngame\Tribute\Tribute.lua
+EsoUI\InternalIngame\Tribute\Tribute.xml
 
 ; These should remain at the bottom of the file, to ensure functionality of fragments
 EsoUI\InternalIngame\Scenes\InternalIngameFragments.lua

@@ -84,6 +84,8 @@ function ZO_TutorialHandlerBase:OnRemoveTutorial(tutorialIndex)
     self:RemoveTutorial(tutorialIndex)
 end
 
+ZO_TutorialHandlerBase.RemoveTutorial = ZO_TutorialHandlerBase:MUST_IMPLEMENT()
+
 function ZO_TutorialHandlerBase:RemoveTutorialByTrigger(tutorialTrigger)
     --To be overriden, when you know you want to clear a particular trigger for a specific reason unrelated to tutorial interactions
 end
@@ -97,10 +99,12 @@ function ZO_TutorialHandlerBase:GetCurrentlyDisplayedTutorialIndex()
 end
 
 function ZO_TutorialHandlerBase:IsTutorialDisplayedOrQueued(tutorialIndex)
-    if tutorialIndex == self:GetCurrentlyDisplayedTutorialIndex() then
-        return true
-    end
-    return self:IsTutorialQueued(tutorialIndex)
+    return self:IsTutorialDisplayed(tutorialIndex) or self:IsTutorialQueued(tutorialIndex)
+end
+
+function ZO_TutorialHandlerBase:IsTutorialDisplayed(tutorialIndex)
+    -- Can be overriden for custom behavior
+    return tutorialIndex == self:GetCurrentlyDisplayedTutorialIndex()
 end
 
 function ZO_TutorialHandlerBase:IsTutorialQueued(tutorialIndex)

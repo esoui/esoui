@@ -31,6 +31,7 @@ ZO_GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_PLAYER_APPLICATIONS] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_guild.dds",
     [NOTIFICATION_TYPE_MARKET_PRODUCT_AVAILABLE] = "EsoUI/Art/Notifications/Gamepad/gp_notification_crownStore.dds",
     [NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds.dds",
+    [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_tribute.dds",
 }
 
 ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE = 
@@ -318,7 +319,12 @@ end
 function ZO_GamepadCollectionsUpdateProvider:Accept(entryData)
     ZO_CollectionsUpdateProvider.Accept(self, entryData)
 
-    GAMEPAD_COLLECTIONS_BOOK:BrowseToCollectible(entryData.data:GetId())
+    -- The Tribute Patron book is a different scene than the standard collections menu, so we need to handle it uniquely.
+    if entryData.data:GetCategoryData():IsTributePatronCategory() then
+        GAMEPAD_TRIBUTE_PATRON_BOOK:BrowseToPatron(entryData.data:GetReferenceId())
+    else
+        GAMEPAD_COLLECTIONS_BOOK:BrowseToCollectible(entryData.data:GetId())
+    end
 end
 
 function ZO_GamepadCollectionsUpdateProvider:GetMessage(hasMoreInfo, categoryName, collectibleName)
@@ -457,6 +463,18 @@ function ZO_GamepadPointsResetProvider:Accept(data)
     end
 end
 
+-- ---------------------------------
+--ZO_GamepadTributeInviteProvider --
+------------------------------------
+
+ZO_GamepadTributeInviteProvider = ZO_TributeInviteProvider:Subclass()
+
+function ZO_GamepadTributeInviteProvider:New(notificationManager)
+    local provider = ZO_TributeInviteProvider.New(self, notificationManager)
+    provider:SetCanShowGamerCard(true)
+    return provider
+end
+
 --Notification Manager
 -------------------------
 
@@ -567,6 +585,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_PlayerApplicationsProvider:New(self),
         ZO_GamepadMarketProductUnlockedProvider:New(self),
         ZO_OutOfDateAddonsProvider:New(self),
+        ZO_GamepadTributeInviteProvider:New(self),
     }
 end
 

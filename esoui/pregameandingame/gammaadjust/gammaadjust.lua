@@ -5,6 +5,7 @@ local function GammaDialogInitialize(dialogControl)
     ZO_Dialogs_RegisterCustomDialog("ADJUST_GAMMA_DIALOG",
     {
         customControl = dialogControl,
+        canQueue = true,
         mustChoose = true,
         title =
         {
@@ -12,7 +13,6 @@ local function GammaDialogInitialize(dialogControl)
         },
         buttons =
         {
-            [1] =
             {
                 control = GetControl(dialogControl, "KeyContainerConfirmGamma"),
                 text = SI_GAMMA_CONFIRM,
@@ -23,7 +23,6 @@ local function GammaDialogInitialize(dialogControl)
                                 ZO_SavePlayerConsoleProfile()
                             end,
             },
-            [2] =
             {
                 control = GetControl(dialogControl, "KeyContainerDeclineGamma"),
                 text = SI_GAMMA_DECLINE,

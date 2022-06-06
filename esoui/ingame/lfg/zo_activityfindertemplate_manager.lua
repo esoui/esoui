@@ -64,9 +64,9 @@ function ZO_ActivityFinderTemplate_Manager:Initialize(name, categoryData, filter
     self.name = name
     self.filterModeData = filterModeData
     if not IsConsoleUI() then
-        self.keyboardObject = ZO_ActivityFinderTemplate_Keyboard:New(self, categoryData.keyboardData, categoryData.priority)
+        self.keyboardObject = ZO_ActivityFinderTemplate_Keyboard:New(self, categoryData.keyboardData, categoryData.keyboardData.priority)
     end
-    self.gamepadObject = ZO_ActivityFinderTemplate_Gamepad:New(self, categoryData.gamepadData, categoryData.priority)
+    self.gamepadObject = ZO_ActivityFinderTemplate_Gamepad:New(self, categoryData.gamepadData, categoryData.gamepadData.priority)
     self.lockingCooldownTypes = {}
 end
 

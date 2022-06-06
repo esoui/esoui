@@ -51,6 +51,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Social_AutoDeclineTributeInvites",
+    settingType = SETTING_TYPE_UI,
+    settingId = UI_SETTING_AUTO_DECLINE_TRIBUTE_INVITES,
+    header = SI_SOCIAL_OPTIONS_NOTIFICATIONS,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Social_AvANotifications",
     settingType = SETTING_TYPE_UI,
     settingId = UI_SETTING_SHOW_AVA_NOTIFICATIONS,
@@ -134,6 +141,13 @@ panelBuilder:AddSetting({
     controlName = "Options_Social_ChatColor_Zone_Russian",
     settingType = SETTING_TYPE_CUSTOM,
     settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_RUS,
+    header = SI_SOCIAL_OPTIONS_CHAT_COLORS,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Social_ChatColor_Zone_Spanish",
+    settingType = SETTING_TYPE_CUSTOM,
+    settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_SPA,
     header = SI_SOCIAL_OPTIONS_CHAT_COLORS,
 })
 

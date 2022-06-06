@@ -144,9 +144,22 @@ function FriendsList_Gamepad:BuildOptionsList()
     local function BuildTravelToFriendPlayerOption()
         return self:BuildTravelToPlayerOption(JumpToFriend)
     end
-    self:AddOptionTemplate(groupId, BuildTravelToFriendPlayerOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsLoggedIn)
 
+    self:AddOptionTemplate(groupId, BuildTravelToFriendPlayerOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsLoggedIn)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildVisitPlayerHouseOption)
+
+    local function ShouldShowInviteToTribute()
+        -- As part of SelectedDataIsLoggedIn we check if we have character information for the player in question
+        -- On PlayStation we don't have character info when we run this check, so remove the hasCharacter check
+        -- All other platforms will have character information as appropriate
+        if ZO_IsPlaystationPlatform() then
+            return self.socialData.online and not self:SelectedDataIsPlayer()
+        else
+            return self:SelectedDataIsLoggedIn()
+        end
+    end
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToTributeOption, ShouldShowInviteToTribute)
+
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption)

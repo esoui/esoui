@@ -1,9 +1,5 @@
 ZO_Fishing = ZO_InteractiveRadialMenuController:Subclass()
 
-function ZO_Fishing:New(...)
-    return ZO_InteractiveRadialMenuController.New(self, ...)
-end
-
 -- Overridden from base
 
 function ZO_Fishing:PrepareForInteraction()

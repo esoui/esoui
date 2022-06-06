@@ -84,6 +84,12 @@ do
             GAMEPAD_TOOLTIPS:LayoutQuestItem(self.tooltipType, GetLootQuestItemId(selectedData.lootId))
         elseif lootType == LOOT_TYPE_ANTIQUITY_LEAD then
             GAMEPAD_TOOLTIPS:LayoutAntiquityLead(self.tooltipType, GetLootAntiquityLeadId(selectedData.lootId))
+        elseif lootType == LOOT_TYPE_TRIBUTE_CARD_UPGRADE then
+            local patronDefId, cardIndex = GetLootTributeCardUpgradeInfo(selectedData.lootId)
+            local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(patronDefId)
+            local baseCardId, upgradeCardId = patronData:GetDockCardInfoByIndex(cardIndex)
+            local cardData = ZO_TributeCardData:New(patronDefId, upgradeCardId)
+            GAMEPAD_TOOLTIPS:LayoutTributeCard(GAMEPAD_RIGHT_TOOLTIP, cardData)
         else
             local lootLink = GetLootItemLink(selectedData.lootId)
             if lootType == LOOT_TYPE_COLLECTIBLE then

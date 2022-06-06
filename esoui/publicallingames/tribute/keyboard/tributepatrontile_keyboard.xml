@@ -1,0 +1,92 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TributePatronTile_Keyboard_Control" inherits="ZO_TributePatronTile_Shared_Control ZO_ContextualActionsTile_Keyboard_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_PATRON_BOOK_TILE_WIDTH_KEYBOARD" y="ZO_TRIBUTE_PATRON_BOOK_TILE_HEIGHT_KEYBOARD" />
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_TILE_ICON_DIMENSIONS_KEYBOARD" y="ZO_TRIBUTE_PATRON_TILE_ICON_DIMENSIONS_KEYBOARD" />
+                    <Anchor point="TOP" offsetY="20" />
+                </Texture>
+
+                <Label name="$(parent)Title" override="true" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetY="-35" />
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontWinH1",
+                                lineLimit = 2,
+                            },
+                            {
+                                font = "ZoFontWinH2",
+                                lineLimit = 2,
+                            },
+                            {
+                                font = "ZoFontWinH3",
+                                lineLimit = 2,
+                            },
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                </Label>
+
+                <Backdrop name="$(parent)OverlayBorder" override="true" centerColor="00000000" tier="HIGH" layer="OVERLAY">
+                    <AnchorFill />
+                    <Edge file="EsoUI/Art/Miscellaneous/inset_edgeFile_8.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                </Backdrop>
+
+                <Texture name="$(parent)Highlight" override="true" textureFile="EsoUI/Art/Tribute/tribute_collections_3row_hover.dds" alpha="0">
+                    <AnchorFill />
+                    <TextureCoords left="0.2880859375" right="0.576171875" top="0" bottom="0.302734375"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributePatronTile_Keyboard_Control_Wide" inherits="ZO_TributePatronTile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_PATRON_BOOK_TILE_WIDE_WIDTH_KEYBOARD"/>
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_TILE_ICON_WIDE_DIMENSIONS_KEYBOARD" y="ZO_TRIBUTE_PATRON_TILE_ICON_WIDE_DIMENSIONS_KEYBOARD" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributePatronBookTile_Keyboard_Control" inherits="ZO_TributePatronTile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_TributePatronBookTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_TributePatronBookTile_Keyboard_Control_Wide" inherits="ZO_TributePatronTile_Keyboard_Control_Wide" virtual="true">
+            <OnInitialized>
+                ZO_TributePatronBookTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="ZO_TributePatronSelectionTile_Keyboard_Control" inherits="ZO_TributePatronTile_Keyboard_Control_Wide" virtual="true">
+            <OnInitialized>
+                ZO_TributePatronSelectionTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)DraftedIcon" textureFile="EsoUI/Art/Tribute/tribute_icon_drafted.dds" level="3" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPRIGHT" offsetX="-3" offsetY="3" />
+                </Texture>
+
+                <Texture name="$(parent)Highlight" override="true" textureFile="EsoUI/Art/Tribute/tributePatronHighlight_Hover.dds" alpha="0">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_TILE_ICON_WIDE_DIMENSIONS_KEYBOARD" y="ZO_TRIBUTE_PATRON_TILE_ICON_WIDE_DIMENSIONS_KEYBOARD" />
+                    <Anchor point="TOP" offsetY="20" />
+                    <TextureCoords left="0" right="1" top="0" bottom="1"/>
+                </Texture>
+
+                <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Tribute/tributePatronHighlight_Selected.dds" alpha="0">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_TILE_ICON_WIDE_DIMENSIONS_KEYBOARD" y="ZO_TRIBUTE_PATRON_TILE_ICON_WIDE_DIMENSIONS_KEYBOARD" />
+                    <Anchor point="TOP" offsetY="20" />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

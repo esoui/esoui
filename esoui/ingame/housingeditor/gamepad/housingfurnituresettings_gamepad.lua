@@ -362,12 +362,6 @@ function ZO_HousingFurnitureSettings_Gamepad:ShowPrimaryResidenceTooltip()
     GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
 end
 
-function ZO_HousingFurnitureSettings_Gamepad:ShowHomeShowTooltip()
-    local title = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOMESHOW_TEXT)
-    local body = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOMESHOW_TOOLTIP_TEXT)
-    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
-end
-
 function ZO_HousingFurnitureSettings_Gamepad:ShowRestartPathsTooltip()
     local title = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_TEXT)
     local body = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_TOOLTIP_TEXT)

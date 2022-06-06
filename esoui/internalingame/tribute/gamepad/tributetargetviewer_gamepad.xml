@@ -1,0 +1,33 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TributeTargetViewer_Gamepad_TopLevel" tier="MEDIUM" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template" hidden="true">
+            <OnInitialized>
+                ZO_TributeTargetViewer_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <!-- We are using a custom BG here so it will properly render above the main tribute scene -->
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_1_2_3_Background_Template" />
+
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                <Control name="$(parent)GridContainer" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Label name="$(parent)ContentEmptyLabel" font="ZoFontGamepadCondensed34" text="SI_TRIBUTE_PILE_VIEWER_EMPTY_LIST" hidden="true" >
+                            <Anchor point="TOP" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOM" offsetY="35" />
+                        </Label>
+
+                        <Control name="$(parent)GridList" inherits="ZO_GridScrollList_NotAnchored_Gamepad">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="15" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)Underlay" color="000000" alpha="0.55" excludeFromResizeToFitExtents="true" inheritScale="false" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

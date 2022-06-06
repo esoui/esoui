@@ -1,0 +1,98 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_TributePatron_Keyboard_Description_Label" font="ZoFontHeader2" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <Control name="ZO_TributePatron_Keyboard_Header_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_GridScrollList_Entry_Header_Keyboard">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <!-- Wrap early, and when wrapping, indent the next line to make it clear that the line is part of the same label -->
+        <Label name="ZO_TributePatronBook_PatronEntry" inherits="ZO_TreeStatusLabelSubCategory" maxLineCount="2" newLineIndent="10" virtual="true">
+            <Dimensions x="228" />
+        </Label>
+
+        <Control name="ZO_TributePatronBook_StatusIconHeader" inherits="ZO_StatusIconHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="227"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_TributePatronBook_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_TributePatronBook_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Filters">
+                    <Dimensions y="66" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" offsetX="-17" />
+
+                    <Controls>
+                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Dimensions x="240"/>
+                            <Anchor point="BOTTOMLEFT" offsetX="9" />
+
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                                    <OnInitialized>
+                                        ZO_EditDefaultText_Initialize(self, GetString(SI_ENTER_KEYWORD_SEARCH_EDIT_DEFAULT))
+                                    </OnInitialized>
+
+                                    <OnTextChanged>
+                                        ZO_TributePatronBook_Keyboard_OnSearchTextChanged(self)
+                                    </OnTextChanged>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+
+                        <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_SEARCH_FILTER_BY">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                    <Dimensions x="353" />
+                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="77" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-28" />
+                </Control>
+
+                <Control name="$(parent)InfoContainer" inherits="ZO_TributePatronBook_Layout_Template">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" />
+                    <Controls>
+                        <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_Keyboard">
+                            <AnchorFill />
+
+                            <Controls>
+                                <Control name="$(parent)Container" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)List" override="true">
+                                            <Controls>
+                                                <Scroll name="$(parent)Contents" override="true">
+                                                    <Controls>
+                                                        <Label name="$(parent)SetupLabel" inherits="ZO_TributePatron_Keyboard_Description_Label" hidden="true">
+                                                            <Anchor point="TOPLEFT" />
+                                                            <Anchor point="TOPRIGHT" />
+                                                        </Label>
+                                                    </Controls>
+                                                </Scroll>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

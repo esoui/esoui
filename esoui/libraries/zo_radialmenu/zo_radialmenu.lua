@@ -400,7 +400,13 @@ function ZO_RadialMenu:FinalizeClear()
     end
 
     if self.actionLayerName then
-        RemoveActionLayerByName(self.actionLayerName)
+        if type(self.actionLayerName) == "table" then
+            for _, actionLayer in pairs(self.actionLayerName) do
+                RemoveActionLayerByName(actionLayer)
+            end
+        else
+            RemoveActionLayerByName(self.actionLayerName)
+        end
     end
 
     self:ClearSelection()
@@ -426,7 +432,13 @@ function ZO_RadialMenu:Show(suppressSound)
     end
     self:PerformLayout()
     if self.actionLayerName then
-        PushActionLayerByName(self.actionLayerName)
+        if type(self.actionLayerName) == "table" then
+            for _, actionLayer in pairs(self.actionLayerName) do
+                PushActionLayerByName(actionLayer)
+            end
+        else
+            PushActionLayerByName(self.actionLayerName)
+        end
     end
 
     if self.activateOnShow then

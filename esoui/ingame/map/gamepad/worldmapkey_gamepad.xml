@@ -3,7 +3,7 @@
         <Control name="ZO_WorldMapKeySymbol_Gamepad" virtual="true" resizeToFitDescendents="true">
             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
             <Controls>
-                <Texture name="$(parent)Symbol">
+                <Texture name="$(parent)Symbol" layer="CONTROLS">
                     <Anchor point="LEFT"/>
                     <Dimensions x="64" y="64" />
                 </Texture>

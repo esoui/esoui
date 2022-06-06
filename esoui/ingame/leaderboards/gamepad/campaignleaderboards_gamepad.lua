@@ -32,7 +32,7 @@ end
 function ZO_LeaderboardCampaignSelector_Gamepad:SetCampaignWindows()
     self.campaignWindows =
     {
-        SYSTEMS:GetGamepadObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME),
+        SYSTEMS:GetGamepadObject(ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME),
     }
 end
 
@@ -75,11 +75,7 @@ end
 -- Campaign Leaderboards Gamepad
 -----------------
 
-local ZO_CampaignLeaderboardsManager_Gamepad = ZO_CampaignLeaderboardsManager_Shared:Subclass()
-
-function ZO_CampaignLeaderboardsManager_Gamepad:New(...)    
-    return ZO_CampaignLeaderboardsManager_Shared.New(self, ...)
-end
+ZO_CampaignLeaderboardsManager_Gamepad = ZO_CampaignLeaderboardsManager_Shared:Subclass()
 
 function ZO_CampaignLeaderboardsManager_Gamepad:Initialize(control)
     GAMEPAD_CAMPAIGN_LEADERBOARD_FRAGMENT = ZO_SimpleSceneFragment:New(control)
@@ -87,15 +83,16 @@ function ZO_CampaignLeaderboardsManager_Gamepad:Initialize(control)
     ZO_CampaignLeaderboardsManager_Shared.Initialize(self, control, GAMEPAD_LEADERBOARDS, GAMEPAD_LEADERBOARDS_SCENE, GAMEPAD_CAMPAIGN_LEADERBOARD_FRAGMENT)
 
     GAMEPAD_CAMPAIGN_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                 if newState == SCENE_FRAGMENT_SHOWING then
-                                                     self.selector.dataRegistration:Refresh()
-                                                     self:SetActiveCampaign()
-                                                 elseif newState == SCENE_FRAGMENT_HIDDEN then
-                                                     self.selector.dataRegistration:Refresh()
-                                                 end
-                                             end)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self.selector.dataRegistration:Refresh()
+            self:SetActiveCampaign()
+            self:SendLeaderboardQuery()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self.selector.dataRegistration:Refresh()
+        end
+    end)
 
-    SYSTEMS:RegisterGamepadObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME, self)
+    SYSTEMS:RegisterGamepadObject(ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME, self)
     GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self)
     self.selector = ZO_LeaderboardCampaignSelector_Gamepad:New(control)
 end

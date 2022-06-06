@@ -127,7 +127,7 @@ function ChampionPerks:Initialize(control)
             SetShouldRenderWorld(false)
             self:SetChampionSystemNew(false)
 
-            self.lastHealthValue = GetUnitPower("player", POWERTYPE_HEALTH)
+            self.lastHealthValue = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_HEALTH)
             self.control:RegisterForEvent(EVENT_POWER_UPDATE, function(...) self:OnPowerUpdate(...) end)
             self.refreshGroup:TryClean()
         elseif newState == SCENE_SHOWN then
@@ -162,12 +162,22 @@ function ChampionPerks:Initialize(control)
         SharedStateChangeCallback(oldState, newState)
         if newState == SCENE_SHOWING then
             DIRECTIONAL_INPUT:Activate(self, control)
+        elseif newState == SCENE_SHOWN then
+            CALLBACK_MANAGER:RegisterCallback("OnGamepadDialogShowing", self.OnGamepadDialogShowing)
         elseif newState == SCENE_HIDING then
             DIRECTIONAL_INPUT:Deactivate(self)
             self.gamepadStarTooltip.scrollTooltip:ClearLines()
             self.gamepadCursor:UpdateVisibility()
+            CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogShowing", self.OnGamepadDialogShowing)
         end
     end)
+
+    self.OnGamepadDialogShowing = function()
+        local editor = self:GetSelectedStarEditor()
+        if editor then
+            editor:StopChangingPoints()
+        end
+    end
 
     SYSTEMS:RegisterKeyboardRootScene("champion", CHAMPION_PERKS_SCENE)
     SYSTEMS:RegisterGamepadRootScene("champion", GAMEPAD_CHAMPION_PERKS_SCENE)
@@ -2425,7 +2435,7 @@ function ChampionPerks:OnPlayerActivated()
 end
 
 function ChampionPerks:OnPowerUpdate(eventCode, unitTag, powerIndex, powerType, value, max, effectiveMax)
-    if unitTag == "player" and powerType == POWERTYPE_HEALTH then
+    if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_HEALTH then
         if IsUnitInCombat("player") and value < self.lastHealthValue then
              PlaySound(SOUNDS.CHAMPION_DAMAGE_TAKEN)
         end

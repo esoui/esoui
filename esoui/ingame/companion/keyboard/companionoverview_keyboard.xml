@@ -80,12 +80,12 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="10" />
                             <Anchor point="RIGHT" offsetX="-60" constrains="X" />
                             <Controls>
-                                <Texture name="$(parent)IconLeft" textureFile="EsoUI/Art/HUD/lootHistory_icon_rapportDecrease.dds">
+                                <Texture name="$(parent)IconLeft" textureFile="EsoUI/Art/HUD/lootHistory_icon_rapportDecrease_generic.dds">
                                     <Dimensions x="32" y="32" />
                                     <Anchor point="TOPLEFT" />
                                 </Texture>
                                 
-                                <Texture name="$(parent)IconRight" textureFile="EsoUI/Art/HUD/lootHistory_icon_rapportIncrease.dds">
+                                <Texture name="$(parent)IconRight" textureFile="EsoUI/Art/HUD/lootHistory_icon_rapportIncrease_generic.dds">
                                     <Dimensions x="32" y="32" />
                                     <Anchor point="TOPRIGHT" />
                                 </Texture>

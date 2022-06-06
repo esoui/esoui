@@ -552,8 +552,9 @@ function ZO_CompanionSkills_Gamepad:RegisterForEvents()
 
     --action bar
     local function OnSelectedActionBarButtonChanged(selectedSlotIndex, didSlotTypeChange)
-        -- refresh action bar tooltips
+        -- refresh action bar tooltips and keybinds
         self:RefreshTooltip()
+        self:RefreshKeybinds()
     end
     self.assignableActionBar:RegisterCallback("SelectedButtonChanged", OnSelectedActionBarButtonChanged)
 
@@ -645,7 +646,6 @@ end
 
 function ZO_CompanionSkills_Gamepad:ActivateCurrentListDescriptor()
     if self.currentListDescriptor then
-        self:ActivateCurrentList()
         self:UpdateActiveKeybindStrip()
         self:RefreshTooltip()
     end
@@ -653,7 +653,6 @@ end
 
 function ZO_CompanionSkills_Gamepad:DeactivateCurrentListDescriptor()
     if self.currentListDescriptor then
-        self:DeactivateCurrentList()
         self:UpdateActiveKeybindStrip()
         self:RefreshTooltip()
     end

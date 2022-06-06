@@ -132,7 +132,7 @@ do
             local emoteOverrideNames = {GetCollectiblePersonalityOverridenEmoteDisplayNames(collectibleId)}
             if #emoteOverrideNames > 0 then
                 local numEmoteNames = #emoteOverrideNames
-                local emoteString = ZO_GenerateCommaSeparatedList(emoteOverrideNames)
+                local emoteString = ZO_GenerateCommaSeparatedListWithAnd(emoteOverrideNames)
                 local formattedEmoteString = zo_strformat(SI_COLLECTIBLE_TOOLTIP_PERSONALITY_OVERRIDES_DISPLAY_NAMES_FORMATTER, emoteString, numEmoteNames)
                 bodySection:AddLine(formattedEmoteString, descriptionStyle, self:GetStyle("collectionsPersonality"))
             end

@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_GuildRecruitment_AttributeSelectionTile_Keyboard_Control" tier="HIGH" layer="OVERLAY" level="5" inherits="ZO_Tile_Control ZO_Tile_Keyboard_Control" virtual="true">
+        <Control name="ZO_GuildRecruitment_AttributeSelectionTile_Keyboard_Control" inherits="ZO_Tile_Control ZO_Tile_Keyboard_Control" virtual="true">
             <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_COLUMN_WIDTH" y="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_COMBOBOX_HEIGHT" />
 
             <OnInitialized>

@@ -87,6 +87,19 @@ NAMEPLATE_CHOICE_HURT = NAMEPLATE_CHOICE_INJURED_OR_TARGETED
 --Stat Change
 STAT_WEAPON_POWER = STAT_WEAPON_AND_SPELL_DAMAGE
 
+--CombatMechanicType to CombatMechanicFlags
+POWERTYPE_INVALID = COMBAT_MECHANIC_FLAGS_INVALID
+POWERTYPE_MAGICKA = COMBAT_MECHANIC_FLAGS_MAGICKA
+POWERTYPE_HEALTH_BONUS = COMBAT_MECHANIC_FLAGS_HEALTH
+POWERTYPE_WEREWOLF = COMBAT_MECHANIC_FLAGS_WEREWOLF
+POWERTYPE_STAMINA = COMBAT_MECHANIC_FLAGS_STAMINA
+POWERTYPE_ULTIMATE = COMBAT_MECHANIC_FLAGS_ULTIMATE
+POWERTYPE_MOUNT_STAMINA = COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA
+POWERTYPE_HEALTH = COMBAT_MECHANIC_FLAGS_HEALTH
+POWERTYPE_DAEDRIC = COMBAT_MECHANIC_FLAGS_DAEDRIC
+
+NUM_POWER_POOLS = COMBAT_MECHANIC_FLAGS_MAX_INDEX
+
 -- VR Removal 
 GetUnitVeteranRank = GetUnitChampionPoints
 GetUnitVeteranPoints = GetUnitXP
@@ -736,10 +749,6 @@ EVENT_ACTION_SLOTS_FULL_UPDATE = EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED
 EVENT_ACTION_BAR_SLOTTING_ALLOWED_STATE_CHANGED = EVENT_ACTION_BAR_IS_RESPECCABLE_BAR_STATE_CHANGED
 IsActionBarSlottingAllowed = IsActionBarRespeccable
 
-function GetItemCurrentActionBarSlot(bagId, slotIndex)
-    return FindActionSlotMatchingItem(bagId, slotIndex)
-end
-
 function GetCollectibleCurrentActionBarSlot(collectibleId)
     return FindActionSlotMatchingSimpleAction(ACTION_TYPE_COLLECTIBLE, collectibleId)
 end
@@ -876,7 +885,6 @@ ITEM_QUALITY_ITERATION_END = ITEM_FUNCTIONAL_QUALITY_ITERATION_END
 
 GetItemQuality = GetItemFunctionalQuality
 GetItemLinkQuality = GetItemLinkFunctionalQuality
-GetSlotItemQuality = GetSlotItemDisplayQuality
 ZO_FurnitureDataBase.GetQuality = ZO_FurnitureDataBase.GetDisplayQuality
 ZO_PlaceableFurnitureItem.GetQuality = ZO_PlaceableFurnitureItem.GetDisplayQuality
 ZO_RetrievableFurniture.GetQuality = ZO_RetrievableFurniture.GetDisplayQuality
@@ -1036,3 +1044,39 @@ ZO_ScrollList_SetScrollBarHiddenCallback = ZO_ScrollList_SetScrollBarVisibilityC
 
 --ZO_RadialMenu
 ZO_RadialMenu.UpdateEntry = ZO_RadialMenu.UpdateEntriesByName
+
+--Hotbar refactor
+IsSlotLocked = IsActionSlotRestricted
+
+HasCostFailure = ActionSlotHasCostFailure
+HasRequirementFailure = ActionSlotHasRequirementFailure
+HasWeaponSlotFailure = ActionSlotHasWeaponSlotFailure
+HasTargetFailure = ActionSlotHasTargetFailure
+HasRangeFailure = ActionSlotHasRangeFailure
+HasLeapKeepTargetFailure = ActionSlotHasLeapKeepTargetFailure
+HasSubzoneFailure = ActionSlotHasSubzoneFailure
+HasStatusEffectFailure = ActionSlotHasStatusEffectFailure
+HasFallingFailure = ActionSlotHasFallingFailure
+HasSwimmingFailure = ActionSlotHasSwimmingFailure
+HasMountedFailure = ActionSlotHasMountedFailure
+HasReincarnatingFailure = ActionSlotHasReincarnatingFailure
+HasActivationHighlight = ActionSlotHasActivationHighlight
+HasNonCostStateFailure = ActionSlotHasNonCostStateFailure
+
+-- Leaderboard refactor
+BATTLEGROUND_LEADERBOARD_SYSTEM_NAME = ZO_BATTLEGROUND_LEADERBOARD_SYSTEM_NAME
+CAMPAIGN_LEADERBOARD_SYSTEM_NAME = ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME
+HOUSING_LEADERBOARD_SYSTEM_NAME = ZO_HOUSING_LEADERBOARD_SYSTEM_NAME
+RAID_LEADERBOARD_SYSTEM_NAME = ZO_RAID_LEADERBOARD_SYSTEM_NAME
+
+RAID_LEADERBOARD_SELECT_OPTION_DEFAULT = ZO_RAID_LEADERBOARD_SELECT_OPTION_DEFAULT
+RAID_LEADERBOARD_SELECT_OPTION_SKIP_WEEKLY = ZO_RAID_LEADERBOARD_SELECT_OPTION_SKIP_WEEKLY
+RAID_LEADERBOARD_SELECT_OPTION_PREFER_WEEKLY = ZO_RAID_LEADERBOARD_SELECT_OPTION_PREFER_WEEKLY
+
+--Renamed to be more specific
+ZO_GenerateCommaSeparatedList = ZO_GenerateCommaSeparatedListWithAnd
+
+--Mouse Input refactor
+--if you happen to have XML code that uses <MouseButton button="4" />, that should be changed to <MouseButton button="BUTTON_4" />
+MOUSE_BUTTON_INDEX_4 = MOUSE_BUTTON_INDEX_BUTTON_4
+MOUSE_BUTTON_INDEX_5 = MOUSE_BUTTON_INDEX_BUTTON_5

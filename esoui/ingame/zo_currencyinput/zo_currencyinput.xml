@@ -18,7 +18,7 @@
     </Animations>
 
     <Controls>
-        <Backdrop name="ZO_DefaultCurrencyInputField" inherits="ZO_EditBackdrop" mouseEnabled="true" virtual="true">
+        <Backdrop name="ZO_DefaultCurrencyInputField" inherits="ZO_EditBackdrop" layer="CONTROLS" mouseEnabled="true" virtual="true">
             <OnMouseUp>
                 if(upInside and button == MOUSE_BUTTON_INDEX_LEFT) then
                     self.OnBeginInput()

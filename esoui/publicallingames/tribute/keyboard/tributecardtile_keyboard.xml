@@ -1,0 +1,70 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_TributePatron_Keyboard_Card_Label" font="ZoFontWinH3" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <Control name="ZO_TributeCardTile_Keyboard_Control" inherits="ZO_ContextualActionsTile_Keyboard_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_CARD_TILE_WIDTH_KEYBOARD" y="ZO_TRIBUTE_CARD_TILE_HEIGHT_KEYBOARD" />
+
+            <Controls>
+                <Backdrop name="$(parent)OverlayBorder" override="true" centerColor="00000000" tier="HIGH" layer="OVERLAY">
+                    <AnchorFill />
+                    <Edge file="EsoUI/Art/Miscellaneous/inset_edgeFile_8.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                </Backdrop>
+
+                <Texture name="$(parent)Highlight" override="true" textureFile="EsoUI/Art/Tribute/tribute_collections_3row_hover.dds" alpha="0" layer="BACKGROUND" level="1">
+                    <AnchorFill />
+                    <TextureCoords left="0.2880859375" right="0.576171875" top="0" bottom="0.302734375"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributePatronBookCardTile_Keyboard_Control" inherits="ZO_TributePatronBookCardTile_Shared_Control ZO_TributeCardTile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_PATRON_BOOK_TILE_WIDTH_KEYBOARD" y="ZO_TRIBUTE_PATRON_BOOK_TILE_HEIGHT_KEYBOARD" />
+
+            <OnInitialized>
+                ZO_TributePatronBookCardTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Title" override="true" inherits="ZO_TributePatron_Keyboard_Card_Label">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+                </Label>
+
+                <Label name="$(parent)Count" override="true" inherits="ZO_TributePatron_Keyboard_Card_Label">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="-5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributePatronBookCardTile_Keyboard_Control_Wide" inherits="ZO_TributePatronBookCardTile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_PATRON_BOOK_TILE_WIDE_WIDTH_KEYBOARD" />
+
+            <Controls>
+                <Texture name="$(parent)Highlight" override="true" textureFile="EsoUI/Art/Tribute/tribute_collections_3row_hover.dds" alpha="0" layer="BACKGROUND" level="1">
+                    <AnchorFill />
+                    <TextureCoords left="0.2880859375" right="0.576171875" top="0" bottom="0.302734375"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributePileViewerCardTile_Keyboard_Control" inherits="ZO_TributeCardTile_Shared_Control ZO_TributeCardTile_Keyboard_Control" virtual="true">
+            <Dimensions y="ZO_TRIBUTE_CARD_TILE_TALL_HEIGHT_KEYBOARD" />
+            <OnInitialized>
+                ZO_TributePileViewerCardTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeTargetViewerCardTile_Keyboard_Control" inherits="ZO_TributeCardTile_Shared_Control ZO_TributeCardTile_Keyboard_Control" virtual="true">
+            <Dimensions y="ZO_TRIBUTE_CARD_TILE_TALL_HEIGHT_KEYBOARD" />
+            <OnInitialized>
+                ZO_TributeTargetViewerCardTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

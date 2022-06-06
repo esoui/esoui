@@ -1,0 +1,61 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_UtilityWheelMenuEntryTemplate_Gamepad" inherits="ZO_GamepadSelectableItemRadialMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_UtilityWheelMenuEntryTemplate_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepad54" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="5" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_UtilityWheel_Gamepad_TopLevel">
+            <AnchorFill/>
+
+            <OnInitialized>
+                ZO_UtilityWheel_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Menu" inherits="ZO_RadialMenuHUDSize_Gamepad">
+                    <Controls>
+                        <Label name="$(parent)Category" tier="MEDIUM" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS">
+                            <Dimensions x="300" />
+                            <Anchor point="CENTER" offsetY="-100" />
+                        </Label>
+                        
+                        <Label name="$(parent)Action" inherits="ZO_RadialMenuActionText_Gamepad" />
+                    </Controls>
+                </Control>
+
+                <!-- Cycle Keybinds -->
+                <Control name="$(parent)PreviousCategory" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                            <Anchor point="TOPRIGHT" relativeTo="$(grandparent)Menu" relativePoint="BOTTOMLEFT" offsetY="50" />
+                        </Label>
+
+                        <Label name="$(parent)CategoryName" font="ZoFontGamepad42" >
+                            <Anchor point="RIGHT" relativeTo="$(parent)KeybindLabel" relativePoint="LEFT" offsetX="-15" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)NextCategory" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)Menu" relativePoint="BOTTOMRIGHT" offsetY="50" />
+                        </Label>
+
+                        <Label name="$(parent)CategoryName" font="ZoFontGamepad42" >
+                            <Anchor point="LEFT" relativeTo="$(parent)KeybindLabel" relativePoint="RIGHT" offsetX="15" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

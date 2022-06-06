@@ -209,6 +209,15 @@ function ZO_Options_SetWarningText(control, text)
     ZO_Options_ShowOrHideAssociatedWarning(control, hideWarning)
 end
 
+function ZO_Options_SetWarningTexture(control, texturePath)
+    local shouldHideWarning = texturePath == nil or texturePath == ""
+    if not shouldHideWarning then
+        local warningControl = control:GetNamedChild("WarningIcon")
+        warningControl:SetTexture(texturePath)
+    end
+    ZO_Options_ShowOrHideAssociatedWarning(control, shouldHideWarning)
+end
+
 local function GetValidIndexFromCurrentChoice(valid, currentChoice)
     for i = 1, #valid do
         if valid[i] == currentChoice then

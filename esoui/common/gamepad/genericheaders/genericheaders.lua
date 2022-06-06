@@ -302,6 +302,12 @@ function ZO_GamepadGenericHeader_Initialize(control, createTabBar, layout)
     ZO_GamepadGenericHeader_SetDataLayout(control, layout or DEFAULT_LAYOUT)
 end
 
+function ZO_GamepadGenericHeader_AddTabBarTemplate(control, template)
+    if control.tabBar then
+        control.tabBar:AddDataTemplate(template, TabBar_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    end
+end
+
 function ZO_GamepadGenericHeader_GetChildControl(control, controlId)
     return control.controls[controlId]
 end
@@ -600,7 +606,11 @@ function ZO_GamepadGenericHeader_Refresh(control, data, blockTabBarCallbacks)
         if data.tabBarEntries then
             for i, tabData in ipairs(data.tabBarEntries) do
                 if (tabData.visible == nil) or tabData.visible() then
-                    control.tabBar:AddEntry("ZO_GamepadTabBarTemplate", tabData)
+                    if tabData.template then
+                        control.tabBar:AddEntry(tabData.template, tabData)
+                    else
+                        control.tabBar:AddEntry("ZO_GamepadTabBarTemplate", tabData)
+                    end
                     numEntries = numEntries + 1
                 end
             end

@@ -82,6 +82,17 @@ local PC_SETTINGS =
 }
 
 function ZO_ChatSystem:Initialize(control)
+    self.agentChatButton = control:GetNamedChild("AgentChat")
+    self.agentChatGlow = self.agentChatButton:GetNamedChild("Glow")
+
+    local agentChatBurst = self.agentChatButton:GetNamedChild("Burst")
+    self.agentChatBurstTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("NotificationAddedBurst", agentChatBurst)
+    self.agentChatBurstTimeline:SetHandler("OnStop", function() agentChatBurst:SetAlpha(0) end)
+
+    local agentChatEcho = self.agentChatButton:GetNamedChild("Echo")
+    self.agentChatPulseTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("NotificationPulse", agentChatEcho)
+    self.agentChatPulseTimeline:SetHandler("OnStop", function() agentChatEcho:SetAlpha(0) end)
+
     SharedChatSystem.Initialize(self, control, PC_SETTINGS)
     self.currentNumNotifications = 0
 end
@@ -430,12 +441,14 @@ function ZO_ChatSystem:GetFontSizeFromSetting()
     return GetChatFontSize()
 end
 
--- override
+--
+-- SharedChatSystem Overrides
+--
+
 function ZO_ChatSystem:ShouldOnlyShowOnHUD()
     return false
 end
 
--- override
 function ZO_ChatSystem:IsHidden()
     if not IsChatSystemAvailableForCurrentPlatform() then
         return true
@@ -448,6 +461,33 @@ function ZO_ChatSystem:IsHidden()
 
     return false
 end
+
+function ZO_ChatSystem:OnAgentChatActiveChanged()
+    if self.isAgentChatActive and IsPlayerActivated() then
+        self.agentChatBurstTimeline:PlayFromStart()
+        PlaySound(SOUNDS.AGENT_CHAT_ACTIVE)
+    end
+
+    if self.isAgentChatActive then
+        self.agentChatPulseTimeline:PlayFromStart()
+    else
+        self.agentChatPulseTimeline:Stop()
+    end
+
+    self.agentChatButton:SetHidden(not self.isAgentChatActive)
+end
+
+function ZO_ChatSystem:OnPlayerActivated()
+    if IsChatSystemAvailableForCurrentPlatform() then
+        if self.isAgentChatActive then
+            self.agentChatBurstTimeline:PlayFromStart()
+        end
+    end
+end
+
+--
+-- End SharedChatSystem Overrides
+--
 
 --[[ Global/XML Handlers ]]--
 

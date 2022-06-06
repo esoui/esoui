@@ -1,4 +1,12 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="UtilitySlotGlowAlphaAnimation">
+            <Animations>
+                <AlphaAnimation duration="100" startAlpha="0.0" endAlpha="1.0"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
     <Controls>
         <Control name="ZO_AssignableUtilityWheelSlot_Keyboard_Template" inherits="ZO_AbilitySlot" virtual="true">
             <Dimensions x="64" y="64" />
@@ -31,17 +39,22 @@
                     <Anchor point="CENTER"/>
                 </Texture>
             
-                <Label name="$(parent)Label" font="ZoFontWinH5" horizontalAlignment="CENTER">
+                <Label name="$(parent)Label" font="ZoFontWinH5" horizontalAlignment="CENTER" hidden="true">
                     <Anchor point="TOP" relativeto="$(parent)Icon" relativePoint="BOTTOM" offsetY="5" />
                 </Label>
             </Controls>
         </Control>
 
-        <Control name="ZO_AssignableUtilityWheel_Keyboard_Template" mouseEnabled="true" hidden="true" virtual="true">
+        <Control name="ZO_AssignableUtilityWheel_Keyboard_Template" mouseEnabled="true" virtual="true">
             <Dimensions x="300" y="300" />
             <Anchor point="CENTER" relativeTo="GuiRoot" offsetX="-20" offsetY="-100" />
 
             <Controls>
+                <Label name="$(parent)Category" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS" hidden="true">
+                    <Dimensions x="250" />
+                    <Anchor point="CENTER"/>
+                </Label>
+                
                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/Quickslots/quickslot_mapping_bg.dds">
                     <Dimensions x="512" y="512" />
                     <Anchor point="CENTER" />

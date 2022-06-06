@@ -96,17 +96,31 @@ function ZO_Gamepad_ParametricList_Screen:GetHeaderContainer()
     return self.headerContainer
 end
 
-function ZO_Gamepad_ParametricList_Screen:ActivateCurrentList()
+function ZO_Gamepad_ParametricList_Screen:ActivateCurrentList(requestedByHeader)
     if self._currentList ~= nil then
         self:TryAddListTriggers()
-        self._currentList:Activate()
+        if not requestedByHeader then
+            if self.headerFocus and not DIRECTIONAL_INPUT:IsListening(self) then
+                self._currentList:SetDirectionalInputEnabled(false)
+                DIRECTIONAL_INPUT:Activate(self, self.control)
+            end
+
+            if not self:IsHeaderActive() then
+                self._currentList:Activate()
+            end
+        else
+            self._currentList:Activate()
+        end
     end
 end
 
-function ZO_Gamepad_ParametricList_Screen:DeactivateCurrentList()
+function ZO_Gamepad_ParametricList_Screen:DeactivateCurrentList(requestedByHeader)
     if self._currentList ~= nil then
         self._currentList:Deactivate()
         self:TryRemoveListTriggers()
+        if not requestedByHeader and self.headerFocus and DIRECTIONAL_INPUT:IsListening(self) then
+            DIRECTIONAL_INPUT:Deactivate(self)
+        end
     end
 end
 
@@ -116,29 +130,18 @@ function ZO_Gamepad_ParametricList_Screen:EnableCurrentList()
         if currentFragment then
             SCENE_MANAGER:AddFragment(currentFragment)
         end
-        self:TryAddListTriggers()
-        if self.headerFocus and not DIRECTIONAL_INPUT:IsListening(self) then
-            self._currentList:SetDirectionalInputEnabled(false)
-            DIRECTIONAL_INPUT:Activate(self, self.control)
-        end
-        if not self:IsHeaderActive() then
-            self._currentList:Activate()
-        end
+        self:ActivateCurrentList()
     end
 end
 
 function ZO_Gamepad_ParametricList_Screen:DisableCurrentList()
     if self._currentList ~= nil then
-        self._currentList:Deactivate()
+        self:DeactivateCurrentList()
         local currentFragment = self:GetListFragment(self._currentList)
         if currentFragment then
             SCENE_MANAGER:RemoveFragment(currentFragment)
         end
-        self:TryRemoveListTriggers()
         self._currentList = nil
-        if self.headerFocus and DIRECTIONAL_INPUT:IsListening(self) then
-            DIRECTIONAL_INPUT:Deactivate(self)
-        end
     end
 end
 
@@ -322,7 +325,8 @@ function ZO_Gamepad_ParametricList_Screen:RequestEnterHeader()
     end
 
     if self:CanEnterHeader() then
-        self._currentList:Deactivate()
+        local REQUESTED_BY_HEADER = true
+        self:DeactivateCurrentList(REQUESTED_BY_HEADER)
         self.headerFocus:Activate()
         self:RefreshKeybinds()
         self:OnEnterHeader()
@@ -337,9 +341,8 @@ function ZO_Gamepad_ParametricList_Screen:RequestLeaveHeader()
     if self:CanLeaveHeader() then
         self.headerFocus:Deactivate()
         self:OnLeaveHeader()
-        if self._currentList then
-            self._currentList:Activate()
-        end
+        local REQUESTED_BY_HEADER = true
+        self:ActivateCurrentList(REQUESTED_BY_HEADER)
         self:RefreshKeybinds()
     end
 end
@@ -501,7 +504,8 @@ end
 -- A function, which may be overridden in a sub-class, and is called whenever the item list's select is changed.
 function ZO_Gamepad_ParametricList_Screen:OnSelectionChanged(list, selectedData, oldSelectedData)
     if self:IsHeaderActive() and self._currentList then
-        self._currentList:Deactivate()
+        local REQUESTED_BY_HEADER = true
+        self:DeactivateCurrentList(REQUESTED_BY_HEADER)
     end
 end
 

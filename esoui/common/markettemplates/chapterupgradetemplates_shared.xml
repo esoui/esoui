@@ -24,7 +24,7 @@
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Background" offsetX="5" offsetY="-5" />
                 </Label>
 
-                <Label name="$(parent)TextCallout" inherit="ZO_MarketTextCallout_Base" hidden="true">
+                <Label name="$(parent)TextCallout" hidden="true">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)PurchaseState" relativePoint="TOPLEFT" offsetX="10" offsetY="-5" />
                 </Label>
 

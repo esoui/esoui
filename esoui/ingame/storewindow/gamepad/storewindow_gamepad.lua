@@ -161,9 +161,9 @@ function ZO_GamepadStoreManager:ActivateActiveComponent()
     end
 end
 
-function ZO_GamepadStoreManager:DeactivateActiveComponent()
+function ZO_GamepadStoreManager:DeactivateActiveComponent(requestedByHeader)
     if self.activeComponent then
-        self:DeactivateCurrentList()
+        self:DeactivateCurrentList(requestedByHeader)
         self.activeComponent:RemoveKeybinds()
     end
 end
@@ -178,7 +178,8 @@ function ZO_GamepadStoreManager:RequestEnterHeader()
     end
 
     if self:CanEnterHeader() then
-        self:DeactivateActiveComponent()
+        local REQUESTED_BY_HEADER = true
+        self:DeactivateActiveComponent(REQUESTED_BY_HEADER)
         self.headerFocus:Activate()
         self:RefreshKeybinds()
         self:OnEnterHeader()

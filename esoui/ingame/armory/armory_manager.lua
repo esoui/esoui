@@ -189,7 +189,13 @@ function ZO_Armory_Manager:ShowBuildOperationConfirmationDialog(operationType, b
     local buildData = self:GetBuildDataByIndex(buildIndex)
     if buildData then
         if operationType == ARMORY_BUILD_OPERATION_TYPE_RESTORE then
-            ZO_Dialogs_ShowPlatformDialog("ARMORY_BUILD_RESTORE_CONFIRM_DIALOG", { selectedBuildIndex = buildIndex, curseType = buildData:GetCurseType() }, { mainTextParams = { ZO_SELECTED_TEXT:Colorize(buildData:GetName()) } })
+            local data =
+            {
+                selectedBuildIndex = buildIndex,
+                curseType = buildData:GetCurseType(),
+                primaryMundus = buildData:GetPrimaryMundusStone(),
+            }
+            ZO_Dialogs_ShowPlatformDialog("ARMORY_BUILD_RESTORE_CONFIRM_DIALOG", data, { mainTextParams = { ZO_SELECTED_TEXT:Colorize(buildData:GetName()) } })
         elseif operationType == ARMORY_BUILD_OPERATION_TYPE_SAVE then
             ZO_Dialogs_ShowPlatformDialog("ARMORY_BUILD_SAVE_CONFIRM_DIALOG", { selectedBuildIndex = buildIndex }, { mainTextParams = { ZO_SELECTED_TEXT:Colorize(buildData:GetName()) } })
         end

@@ -1,0 +1,179 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_TributeMechanicHistory_ShowTimeline">
+            <Animations>
+                <AlphaAnimation duration="150" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_TributeMechanicTile_Timeline">
+            <OnStop>
+                ZO_TributeMechanicTile_Timeline_OnStop(self, completedPlaying)
+            </OnStop>
+
+            <Animations>
+                <CustomAnimation duration="100">
+                    <UpdateFunction>
+                        ZO_TributeMechanicTile_Timeline_OnUpdate(self:GetTimeline(), progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_TributeMechanicTileBase" mouseEnabled="true" virtual="true">
+            <DimensionConstraints minX="ZO_TRIBUTE_MECHANIC_TILE_UI_WIDTH" minY="ZO_TRIBUTE_MECHANIC_TILE_UI_HEIGHT" />
+
+            <OnInitialized>
+                ZO_TributeMechanicTile_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                self.object:OnMouseEnter()
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.object:OnCursorExit()
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Backdrop" excludeFromResizeToFitExtents="true" level="1" textureFile="EsoUI/Art/Tribute/tributeMechanicTileBackdrop.dds">
+                    <Anchor point="TOPLEFT" offsetX="-15" offsetY="8" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-50" offsetY="-8" />
+                </Texture>
+
+                <Control name="$(parent)Container" excludeFromResizeToFitExtents="true">
+                    <Anchor point="CENTER" offsetX="8" />
+                    <Dimensions x="ZO_TRIBUTE_MECHANIC_TILE_CONTAINER_UI_WIDTH" y="ZO_TRIBUTE_MECHANIC_TILE_CONTAINER_UI_HEIGHT" />
+
+                    <Controls>
+                        <Texture name="$(parent)Portrait" level="5" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <Dimensions x="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_UI_WIDTH" y="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_UI_HEIGHT" />
+                            <TextureCoords left="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_LEFT_COORD" right="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_RIGHT_COORD" top="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_TOP_COORD" bottom="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_BOTTOM_COORD" />
+
+                            <Controls>
+                                <Texture name="$(parent)Frame" level="3" textureFile="EsoUI/Art/Tribute/tributeMechanicTileFrame.dds">
+                                    <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
+                                </Texture>
+                            </Controls>
+                        </Texture>
+
+                        <Texture name="$(parent)Patron" level="7" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <Anchor point="BOTTOM" relativeTo="$(parent)Mechanic" relativePoint="TOP" />
+                            <Dimensions x="36" y="36" />
+                            <TextureCoords left="ZO_TRIBUTE_SUIT_ICON_LEFT_COORD" right="ZO_TRIBUTE_SUIT_ICON_RIGHT_COORD" top="ZO_TRIBUTE_SUIT_ICON_TOP_COORD" bottom="ZO_TRIBUTE_SUIT_ICON_BOTTOM_COORD" />
+                        </Texture>
+
+                        <Control name="$(parent)Mechanic" level="9">
+                            <Controls>
+                                <Texture name="$(parent)Frame" level="10">
+                                    <AnchorFill />
+                                </Texture>
+
+                                <Texture name="$(parent)TypeIcon" level="11" />
+
+                                <Label name="$(parent)Quantity" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" verticalAlignment="CENTER" level="12">
+                                    <Anchor point="LEFT" relativeTo="$(parent)TypeIcon" relativePoint="RIGHT" offsetY="-1" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeMechanicTilePlayer" inherits="ZO_TributeMechanicTileBase" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Backdrop" color="082244" alpha="0.5" override="true" />
+
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Portrait" override="true">
+                            <Anchor point="LEFT" />
+
+                            <Controls>
+                                <Texture name="$(parent)Frame" color="2266bb" override="true" />
+                            </Controls>
+                        </Texture>
+
+                        <Texture name="$(parent)Patron" override="true">
+                            <Anchor point="CENTER" relativeTo="$(parent)Portrait" relativePoint="TOPLEFT" offsetY="8" />
+                        </Texture>
+
+                        <Control name="$(parent)Mechanic" override="true">
+                            <Anchor point="LEFT" relativeTo="$(parent)Portrait" relativePoint="RIGHT" offsetX="-20" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeMechanicTileOpponent" inherits="ZO_TributeMechanicTileBase" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Backdrop" color="441104" alpha="0.5" override="true" />
+
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Portrait" override="true">
+                            <Anchor point="RIGHT" />
+
+                            <Controls>
+                                <Texture name="$(parent)Frame" color="bb4411" override="true" />
+                            </Controls>
+                        </Texture>
+
+                        <Texture name="$(parent)Patron" override="true">
+                            <Anchor point="CENTER" relativeTo="$(parent)Portrait" relativePoint="TOPRIGHT" offsetY="8" />
+                        </Texture>
+
+                        <Control name="$(parent)Mechanic" override="true">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Portrait" relativePoint="LEFT" offsetX="20" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_TributeMechanicHistory_TopLevel" hidden="true" mouseEnabled="true">
+            <Anchor point="LEFT" offsetY="20" />
+            <Dimensions x="132" y="555" />
+
+            <OnInitialized>
+                ZO_TributeMechanicHistory_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseWheel>
+                ZO_TributeMechanicHistory_OnMouseWheel(self, -delta, ctrl, alt, shift)
+            </OnMouseWheel>
+
+            <OnUpdate>
+                ZO_TributeMechanicHistory_OnUpdate(self)
+            </OnUpdate>
+
+            <Controls>
+                <Label name="$(parent)Heading" alpha="0" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_WHITE" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_TRIBUTE_COMBO_HISTORY_HEADING">
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetX="-6" />
+                    <Dimensions x="ZO_TRIBUTE_MECHANIC_HISTORY_HEADING_UI_WIDTH" />
+                </Label>
+
+                <Scroll name="$(parent)Scroll">
+                    <Anchor point="TOPLEFT" offsetX="-ZO_TRIBUTE_MECHANIC_TILE_UI_WIDTH" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" />
+                    <FadeGradient x1="0" y1="1" size1="0" x2="0" y2="-1" size2="ZO_TRIBUTE_MECHANIC_HISTORY_FADE_GRADIENT_HEIGHT" />
+
+                    <Controls>
+                        <Control name="$(parent)Child" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" />
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

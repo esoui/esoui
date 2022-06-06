@@ -5,6 +5,7 @@ ZO_ACTIVITY_FINDER_SORT_PRIORITY =
     ZONE_STORIES = 200,
     DUNGEONS = 300,
     BATTLEGROUNDS = 400,
+    TRIBUTE = 500,
 }
 
 local function LFGSort(entry1, entry2)
@@ -56,10 +57,6 @@ function ZO_IsActivityTypeDungeon(activityType)
     return activityType == LFG_ACTIVITY_MASTER_DUNGEON or activityType == LFG_ACTIVITY_DUNGEON
 end
 
-function ZO_IsActivityTypeHomeShow(activityType)
-    return activityType == LFG_ACTIVITY_HOME_SHOW
-end
-
 function ZO_IsActivityTypeBattleground(activityType)
     return activityType == LFG_ACTIVITY_BATTLE_GROUND_LOW_LEVEL or activityType == LFG_ACTIVITY_BATTLE_GROUND_CHAMPION or activityType == LFG_ACTIVITY_BATTLE_GROUND_NON_CHAMPION
 end
@@ -97,6 +94,13 @@ function ActivityFinderRoot_Manager:Initialize()
             expiresAtS = 0,
             conciseFormatter = SI_LFG_LOCK_REASON_LEFT_BATTLEGROUND_EARLY_CONCISE,
             verboseFormatter = SI_LFG_LOCK_REASON_LEFT_BATTLEGROUND_EARLY_VERBOSE,
+        },
+        [LFG_COOLDOWN_TRIBUTE_DESERTED] =
+        {
+            isOnCooldown = false,
+            expiresAtS = 0,
+            conciseFormatter = SI_LFG_LOCK_REASON_LEFT_TRIBUTE_EARLY_CONCISE,
+            verboseFormatter = SI_LFG_LOCK_REASON_LEFT_TRIBUTE_EARLY_VERBOSE,
         },
     }
 
@@ -163,9 +167,39 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
         OnCooldownsUpdate()
     end
 
+    function OnTributeClubDataInitialized()
+        self:MarkDataDirty()
+        self:FireCallbacks("OnTributeClubDataInitialized")
+    end
+
+    function OnTributeCampaignDataInitialized()
+        self:MarkDataDirty()
+        self:FireCallbacks("OnTributeCampaignDataInitialized")
+    end
+
+    function OnTributeClubRankDataChanged()
+        self:MarkDataDirty()
+        self:FireCallbacks("OnTributeClubRankDataChanged")
+    end
+
+    function OnTributeCampaignDataChanged()
+        self:MarkDataDirty()
+        self:FireCallbacks("OnTributeCampaignDataChanged")
+    end
+
+        function OnTributeLeaderboardRankChanged()
+        self:MarkDataDirty()
+        self:FireCallbacks("OnTributeLeaderboardRankChanged")
+    end
+
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, function(eventCode, ...) self:OnActivityFinderStatusUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_COOLDOWNS_UPDATE, OnCooldownsUpdate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CURRENT_CAMPAIGN_CHANGED, OnCurrentCampaignChanged)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_TRIBUTE_CLUB_INIT, OnTributeClubDataInitialized)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_TRIBUTE_PLAYER_CAMPAIGN_INIT, OnTributeCampaignDataInitialized)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_TRIBUTE_CLUB_EXPERIENCE_GAINED, OnTributeClubRankDataChanged)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_TRIBUTE_CAMPAIGN_CHANGE, OnTributeCampaignDataChanged)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_TRIBUTE_LEADERBOARD_RANK_RECEIVED, OnTributeLeaderboardRankChanged)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
 
     --We should clear selections when switching filters, but we won't necessarily clear them when closing scenes
@@ -175,7 +209,7 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
 
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_LEVEL_UPDATE, OnLevelUpdate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CHAMPION_POINT_UPDATE, OnLevelUpdate)
-    
+
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_PLAYER_ACTIVATED, OnPlayerActivate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_GROUP_MEMBER_LEFT, UpdateGroupStatus)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_UNIT_CREATED, function(eventCode, unitTag) 
@@ -287,10 +321,8 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
     local isLeader = IsUnitGroupLeader("player")
 
     for activityType, locationsByActivity in pairs(self.sortedLocationsData) do
-        local isActivityHomeShow = ZO_IsActivityTypeHomeShow(activityType)
-
         local activityRequiresRoles = ZO_DoesActivityTypeRequireRoles(activityType)
-        local isGroupRelevant = inAGroup and not isActivityHomeShow
+        local isGroupRelevant = inAGroup
         local CONCISE_COOLDOWN_TEXT = false
 
         for _, location in ipairs(locationsByActivity) do
@@ -310,6 +342,8 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                     location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_BATTLEGROUND)
                 elseif IsPlayerInAvAWorld() then
                     location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_AVA)
+                else
+                    location:SetLockReasonText(SI_LFG_LOCK_REASON_INVALID_AREA)
                 end
             elseif location:IsLockedByCollectible() then
                 local collectibleId = location:GetFirstLockingCollectible()
@@ -335,6 +369,8 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                     local championPointsMin, championPointsMax = location:GetChampionPointsRange()
                     location:SetLockReasonText(GetLevelOrChampionPointsRequirementText(levelMin, levelMax, championPointsMin, championPointsMax))
                     location:SetCountsForAverageRoleTime(false)
+                elseif activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE and not HasActiveCampaignStarted() then
+                    location:SetLockReasonText(SI_TRIBUTE_FINDER_LOCKED_NO_CAMPAIGN_TEXT)
                 elseif isGroupRelevant and not location:DoesGroupMeetLevelRequirements() then
                     location:SetLockReasonText(SI_LFG_LOCK_REASON_GROUP_LOCATION_LEVEL_REQUIREMENTS)
                 elseif isGroupRelevant and not isLeader then
@@ -510,14 +546,7 @@ function ActivityFinderRoot_Manager:GetNumLocationsByActivity(activityType, visi
 end
 
 function ActivityFinderRoot_Manager:IsLockedByNotLeader()
-    if self.playerIsGrouped and not self.playerIsLeader then
-        --Home Show ignores the group
-        if ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsActivityTypeSelected(LFG_ACTIVITY_HOME_SHOW) then
-            return false
-        end
-        return true
-    end
-    return false
+    return self.playerIsGrouped and not self.playerIsLeader
 end
 
 function ActivityFinderRoot_Manager:IsLFGCooldownTypeOnCooldown(cooldownType)

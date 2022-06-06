@@ -95,7 +95,7 @@ end
 
 function ZO_TargetDummyLog_Manager:HandleCombatEvent(actionResult, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, shouldLog, sourceUnitId, targetUnitId, abilityId)
     local isFromMe = sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET
-    local isDPSEvent = hitValue > 0 and powerType ~= POWERTYPE_INVALID
+    local isDPSEvent = hitValue > 0 and powerType ~= COMBAT_MECHANIC_FLAGS_INVALID
     if isFromMe and isDPSEvent then
         local logObject = self.logObjects[targetUnitId]
         if not logObject then

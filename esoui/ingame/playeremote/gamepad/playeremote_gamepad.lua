@@ -307,7 +307,30 @@ function ZO_GamepadPlayerEmote:OnSelectionChanged()
 end
 
 function ZO_GamepadPlayerEmote:SetupList(list)
-    list:AddDataTemplate(GAMEPAD_PLAYER_EMOTE_MENU_ENTRY_TEMPLATE, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    local function IsEntryCategoryEqual(left, right)
+        if left.type == right.type then
+            if left.type == ACTION_TYPE_QUICK_CHAT then
+                return true
+            elseif left.type == ACTION_TYPE_EMOTE then
+                return left.emoteCategory == right.emoteCategory
+            end
+        end
+
+        return false
+    end
+    list:AddDataTemplate(GAMEPAD_PLAYER_EMOTE_MENU_ENTRY_TEMPLATE, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsEntryCategoryEqual)
+end
+
+function ZO_GamepadPlayerEmote:ViewCategory(categoryData)
+    if categoryData then
+        local ANY_TEMPLATE = nil
+        local index = self.categoryList:GetIndexForData(ANY_TEMPLATE, categoryData)
+        if index then
+            self.categoryList:SetSelectedIndexWithoutAnimation(index)
+        else
+            return internalassert(false, "Trying to view an invalid category")
+        end
+    end
 end
 
 function ZO_GamepadPlayerEmote:CreateCategoryList()
@@ -381,14 +404,9 @@ end
 function ZO_GamepadPlayerEmote:InitializeRadialMenu()
     local wheelData =
     {
-        --TODO: Currently not used
-        restrictToActionTypes =
-        {
-            [ACTION_TYPE_EMOTE] = true,
-            [ACTION_TYPE_QUICK_CHAT] = true,
-        },
-        numSlots = ACTION_BAR_EMOTE_QUICK_SLOT_SIZE,
-        startSlotIndex = ACTION_BAR_FIRST_EMOTE_QUICK_SLOT_INDEX,
+        hotbarCategories = { HOTBAR_CATEGORY_EMOTE_WHEEL, HOTBAR_CATEGORY_QUICKSLOT_WHEEL },
+        numSlots = ACTION_BAR_UTILITY_BAR_SIZE,
+        showCategoryLabel = true,
     }
     self.wheel = ZO_AssignableUtilityWheel_Gamepad:New(self.wheelControl, wheelData)
 end
@@ -456,7 +474,7 @@ function ZO_GamepadPlayerEmote:InitializeKeybindStripDescriptors()
     self.emoteAssignmentKeybindStripDescriptor = {}
     ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.emoteAssignmentKeybindStripDescriptor,
                                             GAME_NAVIGATION_TYPE_BUTTON, 
-                                            function() self:AssignToSelectedEntry() end,
+                                            function() self.wheel:TryAssignPendingToSelectedEntry() end,
                                             GetString(SI_GAMEPAD_ITEM_ACTION_QUICKSLOT_ASSIGN))
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.emoteAssignmentKeybindStripDescriptor,
@@ -519,8 +537,15 @@ function ZO_GamepadPlayerEmote:ChangeCurrentMode(mode)
 end
 
 function ZO_GamepadPlayerEmote:ShowAssignableUtilityWheel()
-    self.activeEmoteId = self.emoteListGrid:GetSelectedEmoteId()
-    self.activeEmoteType = self.emoteListGrid:GetSelectedEmoteType()
+    local actionId = self.emoteListGrid:GetSelectedEmoteId()
+    local activeEntryType = self.emoteListGrid:GetSelectedEmoteType()
+
+    if activeEntryType == EMOTE_GRID_ENTRY_TYPE_EMOTE then
+        self.wheel:SetPendingSimpleAction(ACTION_TYPE_EMOTE, actionId)
+    elseif activeEntryType == EMOTE_GRID_ENTRY_TYPE_QUICK_CHAT then
+        self.wheel:SetPendingSimpleAction(ACTION_TYPE_QUICK_CHAT, actionId)
+    end
+
     self.assignLabel:SetHidden(false)
     self.selectedEmoteNameLabel:SetHidden(false)
     self.selectedEmoteNameLabel:SetText(self.emoteListGrid:GetSelectedEmoteName())
@@ -530,8 +555,6 @@ function ZO_GamepadPlayerEmote:ShowAssignableUtilityWheel()
 end
 
 function ZO_GamepadPlayerEmote:HideAssignableUtilityWheel()
-    self.activeEmoteId = nil
-    self.activeEmoteType = nil
     self.assignLabel:SetHidden(true)
     self.selectedEmoteNameLabel:SetHidden(true)
 
@@ -539,23 +562,14 @@ function ZO_GamepadPlayerEmote:HideAssignableUtilityWheel()
     self.wheel:Hide()
 end
 
-function ZO_GamepadPlayerEmote:AssignToSelectedEntry()
-    local selectedEntry = self.wheel:GetSelectedRadialEntry()
-    if selectedEntry then
-        local selectedData = selectedEntry.data
-        local slotIndex = selectedData.slotIndex
-        local actionType = ACTION_TYPE_EMOTE
-        if self.activeEmoteType == EMOTE_GRID_ENTRY_TYPE_QUICK_CHAT then
-            actionType = ACTION_TYPE_QUICK_CHAT
-        end
-        SelectSlotSimpleAction(actionType, self.activeEmoteId, slotIndex)
-        PlaySound(SOUNDS.RADIAL_MENU_SELECTION)
-    end
-end
-
 function ZO_GamepadPlayerEmote:OnShowing()
     if self.isDirty then
         self:CreateCategoryList()
+    end
+
+    if self.queuedBrowseToCategoryData then
+        self:ViewCategory(self.queuedBrowseToCategoryData)
+        self.queuedBrowseToCategoryData = nil
     end
 
     self:ChangeCurrentMode(MODE_CATEGORY_SELECTION)
@@ -564,6 +578,10 @@ end
 
 function ZO_GamepadPlayerEmote:OnHiding()
     self:ChangeCurrentMode(MODE_CATEGORY_INACTIVE)
+end
+
+function ZO_GamepadPlayerEmote:QueueBrowseToCategoryData(categoryData)
+    self.queuedBrowseToCategoryData = categoryData
 end
 
 --Global XML Handlers

@@ -293,10 +293,11 @@ end
 
 function ZO_GamepadChatSystem:CloseTextEntry(keepText)
     SharedChatSystem.CloseTextEntry(self, keepText)
-    ZO_GamepadEditBox_FocusLost(self.textEntry:GetEditControl())
-    RemoveActionLayerByName("GamepadChatSystem")
-    DIRECTIONAL_INPUT:Deactivate(self.UIModeInputEater)
-    self.eatingInput = false
+    if DIRECTIONAL_INPUT:IsListening(self.UIModeInputEater) then
+        ZO_GamepadEditBox_FocusLost(self.textEntry:GetEditControl())
+        RemoveActionLayerByName("GamepadChatSystem")
+        DIRECTIONAL_INPUT:Deactivate(self.UIModeInputEater)
+    end
 end
 
 function ZO_GamepadChatSystem:OnTextEntryFocusGained()

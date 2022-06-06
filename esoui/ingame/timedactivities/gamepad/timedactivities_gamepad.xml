@@ -24,7 +24,7 @@
             </OnInitialized>
 
             <Controls>
-                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad45" maxLineCount="1">
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad42" maxLineCount="1">
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="10" />
                     <Dimensions x="ZO_TIMED_ACTIVITY_DATA_ROW_NAME_WIDTH_GAMEPAD" />
                 </Label>

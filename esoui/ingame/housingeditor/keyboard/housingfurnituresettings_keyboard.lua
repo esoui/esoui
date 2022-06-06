@@ -269,11 +269,6 @@ function ZO_HousingFurnitureSettings_Keyboard:ShowPrimaryResidenceTooltip(contro
     InformationTooltip:AddLine(GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_TOOLTIP_TEXT), "", ZO_NORMAL_TEXT:UnpackRGB())
 end
 
-function ZO_HousingFurnitureSettings_Keyboard:ShowHomeShowTooltip(control)
-    InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
-    SetTooltipText(InformationTooltip, GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOMESHOW_TOOLTIP_TEXT))
-end
-
 function ZO_HousingFurnitureSettings_Keyboard:ShowRestartPathsTooltip(control)
     InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
     SetTooltipText(InformationTooltip, GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_TOOLTIP_TEXT))

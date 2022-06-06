@@ -32,14 +32,15 @@
                     <Dimensions x="600" />
                 </Control>
 
-                <Control name="$(parent)Subcategory">
-                    <Dimensions y="50" />
-                </Control>
-
                 <Label name="$(parent)Title" font="ZoFontCenterScreenAnnounceLarge" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_GAME_MENU_SETTINGS">
-                    <Anchor point="BOTTOM" relativeTo="$(parent)Subcategory" relativePoint="TOP" />
+                    <Anchor offsetX="200" offsetY="25" />
                 </Label>
 
+                <Control name="$(parent)Subcategory">
+                    <Dimensions y="50" />
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" />
+                </Control>
+                
                 <Control name="$(parent)BackButton" inherits="ZO_DialogButton">
                     <Anchor point="TOPLEFT" relativeTo="ZO_OptionsWindowResetToDefaultButton" relativePoint="TOPRIGHT" offsetX="30" />
                     <OnInitialized> 

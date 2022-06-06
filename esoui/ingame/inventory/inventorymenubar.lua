@@ -46,7 +46,7 @@ end
 
 function ZO_InventoryMenuBar:ToggleQuickslotsTab()
     if SCENE_MANAGER:IsShowing("inventory") then
-        if QUICKSLOT_FRAGMENT:IsShowing() then
+        if KEYBOARD_QUICKSLOT_FRAGMENT:IsShowing() then
             self.modeBar:SelectFragment(self.quickslotToggleFragment)
         else
             self.modeBar:SelectFragment(SI_INVENTORY_MODE_QUICKSLOTS)
@@ -150,16 +150,20 @@ do
 end
 
 function ZO_InventoryMenuBar:AddTab(tabType, keybinds, additionalFragment)
-    if tabType == INVENTORY_MENU_INVENTORY_BUTTON then
-        self.modeBar:Add(SI_INVENTORY_MODE_ITEMS, { INVENTORY_FRAGMENT, additionalFragment }, self.inventoryButtonData, keybinds)
-    elseif tabType == INVENTORY_MENU_CRAFT_BAG_BUTTON then
-        self.modeBar:Add(SI_INVENTORY_MODE_CRAFT_BAG, { CRAFT_BAG_FRAGMENT, additionalFragment }, self.craftBagButtonData, keybinds)
-    elseif tabType == INVENTORY_MENU_WALLET_BUTTON then
-        self.modeBar:Add(SI_INVENTORY_MODE_CURRENCY, { WALLET_FRAGMENT, additionalFragment }, self.currencyButtonData, keybinds)
-    elseif tabType == INVENTORY_MENU_QUEST_ITEMS_BUTTON then
-        self.modeBar:Add(SI_INVENTORY_MODE_QUEST_ITEMS, { QUEST_ITEMS_FRAGMENT, additionalFragment }, self.questButtonData, keybinds)
-    elseif tabType == INVENTORY_MENU_QUICKSLOT_BUTTON then
-        self.modeBar:Add(SI_INVENTORY_MODE_QUICKSLOTS, { QUICKSLOT_FRAGMENT, QUICKSLOT_CIRCLE_FRAGMENT, additionalFragment }, self.quickslotsButtonData, keybinds)
+    --Although it is not in a keyboard folder, this file is technically only used on keyboard
+    --Actually moving this file to a keyboard folder is a bit of a rabbit hole, so instead just don't do anything here if we know we aren't loading the keyboard files
+    if ZO_IsPCOrHeronUI() then
+        if tabType == INVENTORY_MENU_INVENTORY_BUTTON then
+            self.modeBar:Add(SI_INVENTORY_MODE_ITEMS, { INVENTORY_FRAGMENT, additionalFragment }, self.inventoryButtonData, keybinds)
+        elseif tabType == INVENTORY_MENU_CRAFT_BAG_BUTTON then
+            self.modeBar:Add(SI_INVENTORY_MODE_CRAFT_BAG, { CRAFT_BAG_FRAGMENT, additionalFragment }, self.craftBagButtonData, keybinds)
+        elseif tabType == INVENTORY_MENU_WALLET_BUTTON then
+            self.modeBar:Add(SI_INVENTORY_MODE_CURRENCY, { WALLET_FRAGMENT, additionalFragment }, self.currencyButtonData, keybinds)
+        elseif tabType == INVENTORY_MENU_QUEST_ITEMS_BUTTON then
+            self.modeBar:Add(SI_INVENTORY_MODE_QUEST_ITEMS, { QUEST_ITEMS_FRAGMENT, additionalFragment }, self.questButtonData, keybinds)
+        elseif tabType == INVENTORY_MENU_QUICKSLOT_BUTTON then
+            self.modeBar:Add(SI_INVENTORY_MODE_QUICKSLOTS, { KEYBOARD_QUICKSLOT_FRAGMENT, KEYBOARD_QUICKSLOT_CIRCLE_FRAGMENT, additionalFragment }, self.quickslotsButtonData, keybinds)
+        end
     end
 end
 

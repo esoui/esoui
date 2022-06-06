@@ -242,13 +242,13 @@ function ZO_AntiquityTileBase_Keyboard:ShowTooltip()
             InitializeTooltip(AntiquityTooltip, self.control, TOPLEFT, 0, 5, BOTTOMLEFT)
             AntiquityTooltip:SetAntiquitySetFragment(antiquityData:GetId())
         elseif antiquityData:HasReward() then
-            ZO_LayoutAntiquityRewardTooltip_Keyboard(antiquityData, self.control, RIGHT, LEFT, -4)
+            ZO_LayoutAntiquityRewardTooltip_Keyboard(antiquityData, self.control, RIGHT, LEFT)
         end
     end
 
     if antiquitySetData and antiquitySetData:HasDiscovered() then
         if antiquitySetData:HasReward() then
-            ZO_LayoutAntiquityRewardTooltip_Keyboard(antiquitySetData, self.control, RIGHT, LEFT, -4)
+            ZO_LayoutAntiquityRewardTooltip_Keyboard(antiquitySetData, self.control, RIGHT, LEFT)
         end
     end
 end

@@ -1,0 +1,71 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TributePatronSelection_Gamepad_TopLevel" tier="MEDIUM" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template" hidden="true">
+            <OnInitialized>
+                ZO_TributePatronSelection_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <!-- We are using a custom BG here so it will properly render above the main tribute scene -->
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_1_2_3_Background_Template" />
+
+                <Control name="$(parent)Header">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_GAMEPAD_HEADER_WIDTH" y="90" />
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <Controls>
+                        <Label name="$(parent)Title" inherits="ZO_GamepadScreenHeaderTitleTextTemplate" horizontalAlignment="LEFT" text="SI_TRIBUTE_DECK_SELECTION_HEADER">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)MatchInfo" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="LEFT">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>
+                        </Label>
+
+                        <Control name="$(parent)Timer">
+                            <Dimensions x="150" y="64" />
+                            <Anchor point="RIGHT"/>
+                            <Controls>
+                                <Texture name="$(parent)Background" layer="CONTROLS" color="000000">
+                                    <AnchorFill />
+                                    <Controls>
+                                        <Backdrop name="$(parent)Border" layer="CONTROLS" inherits="ZO_DarkThinFrame" />
+                                    </Controls>
+                                </Texture>
+
+                                <Label name="$(parent)Text" font="ZoFontGamepadBold48" verticalAlignment="CENTER" horizontalAlignment="CENTER" text="25">
+                                    <AnchorFill />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SubHeader">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_GAMEPAD_HEADER_WIDTH" y="41" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontGamepadBold34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)Divider" level="3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_GAMEPAD_HEADER_WIDTH" y="10" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubHeader" relativePoint="BOTTOMLEFT" offsetY="5" />
+                </Texture>
+
+                <Control name="$(parent)GridContainer">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_GAMEPAD_GRID_WIDTH" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="15" />
+                    <Anchor point="BOTTOM" relativePoint="BOTTOM" constrains="Y" />
+                    <Controls>
+                        <Control name="$(parent)GridList" inherits="ZO_GridScrollList_NotAnchored_Gamepad">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,13 +1,7 @@
-ZO_GridSquareEntryData_Shared = ZO_DataSourceObject:Subclass()
+ZO_GridSquareEntryData_Shared = ZO_EntryData:Subclass()
 
 function ZO_GridSquareEntryData_Shared:New(...)
-    local entryData = ZO_DataSourceObject.New(self)
-    entryData:Initialize(...)
-    return entryData
-end
-
-function ZO_GridSquareEntryData_Shared:Initialize(dataSource)
-    self:SetDataSource(dataSource)
+    return ZO_EntryData.New(self, ...)
 end
 
 -- If these are set for one data entry in a list for a given data type, they must be set for all entries in that list for that data type

@@ -171,6 +171,7 @@ ANTIQUITY_DIGGING_SCENE:AddFragment(ANTIQUITY_DIGGING_FRAGMENT)
 --This is separated so the keybinds can be above the help overlay while everything else is below it
 ANTIQUITY_DIGGING_SCENE:AddFragment(ZO_SimpleSceneFragment:New(ZO_AntiquityDigging_KeybindContainer))
 ANTIQUITY_DIGGING_SCENE:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+ANTIQUITY_DIGGING_SCENE:AddFragment(SUBTITLE_UI_FRAGMENT)
 
 -------------------
 -- Scrying Minigame Remote Scene
@@ -178,3 +179,13 @@ ANTIQUITY_DIGGING_SCENE:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 
 SCRYING_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_STRIP)
 SCRYING_SCENE:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+SCRYING_SCENE:AddFragment(SUBTITLE_UI_FRAGMENT)
+
+-------------------
+-- Tribute Game Remote Scene
+-------------------
+
+TRIBUTE_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_STRIP)
+TRIBUTE_SCENE:AddFragment(TRIBUTE_FRAGMENT)
+TRIBUTE_SCENE:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+TRIBUTE_SCENE:AddFragment(SUBTITLE_UI_FRAGMENT)

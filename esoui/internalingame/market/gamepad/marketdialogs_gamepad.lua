@@ -375,6 +375,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+            allowRightStickPassThrough = true,
         },
         title =
         {

@@ -189,7 +189,7 @@
 
         <TopLevelControl name="ComparativeTooltip1TopLevel" inherits="TooltipTopLevel">
             <Controls>
-                <Tooltip name="ComparativeTooltip1"  inherits="ItemTooltipBase">
+                <Tooltip name="ComparativeTooltip1" inherits="ItemTooltipBase">
                     <OnInitialized>
                         self:SetAsComparativeTooltip1()
                         self.topClampedToScreenInset = -24
@@ -204,7 +204,7 @@
 
         <TopLevelControl name="ComparativeTooltip2TopLevel" inherits="TooltipTopLevel">
             <Controls>
-                <Tooltip name="ComparativeTooltip2"  inherits="ItemTooltipBase">
+                <Tooltip name="ComparativeTooltip2" inherits="ItemTooltipBase">
                     <OnInitialized>
                         self:SetAsComparativeTooltip2()
                         self.topClampedToScreenInset = -24
@@ -253,10 +253,19 @@
 
         <TopLevelControl name="InformationTooltipTopLevel" inherits="TooltipTopLevel">
             <Controls>
-                <Tooltip name="InformationTooltip"  inherits="ZO_BaseTooltip">
+                <Tooltip name="InformationTooltip" inherits="ZO_BaseTooltip">
                     <Controls>
                         <Control name="$(parent)SellPrice" inherits="ZO_TooltipMoneyLine" hidden="true"/>
                     </Controls>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="NarrowTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="NarrowTooltip" inherits="ZO_BaseTooltip">
+                    <ResizeToFitPadding width="32" height="40"/>
+                    <DimensionConstraints minX="330" maxX="330" />
                 </Tooltip>
             </Controls>
         </TopLevelControl>
@@ -283,7 +292,7 @@
 
         <TopLevelControl name="SkillTooltipTopLevel" inherits="TooltipTopLevel">
             <Controls>
-                <Tooltip name="SkillTooltip"  inherits="ZO_BaseTooltip">
+                <Tooltip name="SkillTooltip" inherits="ZO_BaseTooltip">
                     <ResizeToFitPadding width="32" height="40"/>
                     <DimensionConstraints minX="384" maxX="384" />
                     <OnInitialized>

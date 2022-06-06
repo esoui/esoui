@@ -1,0 +1,91 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TributeRewardListTemplate_Keyboard" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOP" />
+                    <Dimensions x="585" y="32" />
+                    <Controls>
+                        <Texture name="$(parent)Info" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" mouseEnabled="true" layer="OVERLAY">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="LEFT" offsetX="28"/>
+                            <OnMouseEnter>
+                                ZO_TributeRewardsDialog_Info_OnMouseEnter(self)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_TributeRewardsDialog_Info_OnMouseExit(self)
+                            </OnMouseExit>
+                        </Texture>
+                        <Control name="$(parent)Tier" inherits="ZO_SortHeaderAppearance">
+                            <Anchor point="LEFT" relativeTo="$(parent)Info" relativePoint="RIGHT" />
+                            <Dimensions x="208" y="20" />
+                            <Controls>
+                                <Label name="$(parent)Name" override="true" font="ZoFontGameLargeBold" text="SI_TRIBUTE_FINDER_REWARDS_SEASON_TIER_HEADER" horizontalAlignment="LEFT" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Reward" inherits="ZO_SortHeaderAppearance">
+                            <Anchor point="LEFT" relativeTo="$(parent)Tier" relativePoint="RIGHT" offsetX="5" />
+                            <Dimensions x="221" y="20" />
+                            <Controls>
+                                <Label name="$(parent)Name" override="true" font="ZoFontGameLargeBold" text="SI_TRIBUTE_FINDER_REWARDS_TIER_REWARDS_HEADER" horizontalAlignment="LEFT" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" />
+                    <Dimensions x="585" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeRewards_Keyboard_Row" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
+            <Dimensions y="ZO_TRIBUTE_REWARD_KEYBOARD_ROW_HEIGHT"/>
+            <OnMouseEnter>
+                ZO_TributeRewardsDialog_Row_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_TributeRewardsDialog_Row_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Texture name="$(parent)StatusHighlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" hidden="true">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                </Texture>
+
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="LEFT"/>
+                </Texture>
+                <Label name="$(parent)Name" font="ZoFontGame" horizontalAlignment="LEFT" maxLineCount="2">
+                    <Dimensions x="213"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="20"/>
+                </Label>
+                <Label name="$(parent)RewardsName" font="ZoFontGame" horizontalAlignment="LEFT" maxLineCount="1">
+                    <Dimensions x="221"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" />
+                </Label>
+                <Label name="$(parent)Gold" font="ZoFontGame" horizontalAlignment="RIGHT">
+                    <Dimensions x="70"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)RewardsName" relativePoint="RIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_TributeRewardsDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_TributeRewardsDialog_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_DialogContentAnchors">
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" />
+                </Control>
+
+                <Control name="$(parent)Close" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

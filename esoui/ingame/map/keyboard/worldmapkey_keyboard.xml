@@ -2,7 +2,7 @@
     <Controls>
         <Label name="ZO_WorldMapKeyHeader" virtual="true" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
 
-        <Texture name="ZO_WorldMapKeySymbol" mouseEnabled="true" virtual="true">
+        <Texture name="ZO_WorldMapKeySymbol" layer="CONTROLS" mouseEnabled="true" virtual="true">
             <OnMouseEnter>
                 ZO_WorldMapKeySymbol_OnMouseEnter(self)
             </OnMouseEnter>

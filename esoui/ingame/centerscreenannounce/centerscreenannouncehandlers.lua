@@ -1001,6 +1001,13 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_ACTIVITY_FINDER_ACTIVITY_COMPLETE] = function
     return messageParams
 end
 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_TRIBUTE_CLUB_RANK_CHANGED] = function(newClubRank)
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.TRIBUTE_RANK_CHANGE)
+    messageParams:SetText(GetString(SI_TRIBUTE_CLUB_RANK_CHANGE_ANNOUNCEMENT_TITLE), zo_strformat(SI_TRIBUTE_CLUB_RANK_CHANGE_ANNOUNCEMENT_CONTENT, newClubRank + 1))
+    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED)
+    return messageParams
+end
+
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_DUEL_COUNTDOWN] = function(startTimeMS)
     local displayTime = startTimeMS - GetFrameTimeMilliseconds()
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_COUNTDOWN_TEXT, SOUNDS.DUEL_START)
@@ -1211,6 +1218,74 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_ACHIEVEMENTS_COMPLETED_ON_UPGRADE_TO_ACCOUNT_
     return messageParams
 end
 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE] = function(gameFlowState)
+    --TODO Tribute: Do we want CSAs for any other states?
+    if gameFlowState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT then
+        if not DoesTributeSkipPatronDrafting() then
+            local firstPick, playerType = GetTributePlayerInfo(GetActiveTributePlayerPerspective())
+            firstPick = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(firstPick) or firstPick
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            messageParams:SetText(GetString(SI_TRIBUTE_DRAFTING_PHASE_ANNOUNCEMENT_TITLE), ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_TRIBUTE_DRAFTING_PHASE_ANNOUNCEMENT_BODY, firstPick)))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+            messageParams:MarkShowBackground()
+            return messageParams
+        end
+    elseif gameFlowState == TRIBUTE_GAME_FLOW_STATE_PLAYING then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        local firstPlay, playerType = GetTributePlayerInfo(GetActiveTributePlayerPerspective())
+        firstPlay = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(firstPlay) or firstPlay
+        messageParams:SetText(GetString(SI_TRIBUTE_PLAYING_PHASE_ANNOUNCEMENT_TITLE), ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_TRIBUTE_PLAYING_PHASE_ANNOUNCEMENT_BODY, firstPlay)))
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+        messageParams:MarkShowBackground()
+        return messageParams
+    end
+end
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_TRIBUTE_PLAYER_TURN_STARTED] = function(isLocalPlayer)
+    if isLocalPlayer then
+        local showBeginTurn = true
+        local opponentPrestige = GetTributePlayerPerspectiveResource(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT, TRIBUTE_RESOURCE_PRESTIGE)
+        --If the opponent has at least the amount of prestige required to win then they are close to a prestige victory
+        if opponentPrestige >= GetTributePrestigeRequiredToWin() then
+            local prestigeMessageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.TRIBUTE_TURN_START_OPPONENT_PRESTIGE_VICTORY_NEAR)
+            local opponentName, playerType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
+            opponentName = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(opponentName) or opponentName
+            local messageTitle = zo_strformat(SI_TRIBUTE_OPPONENT_PRESTIGE_ANNOUNCEMENT_TITLE, opponentName, opponentPrestige)
+            prestigeMessageParams:SetText(messageTitle, ZO_NORMAL_TEXT:Colorize(GetString(SI_TRIBUTE_OPPONENT_PRESTIGE_ANNOUNCEMENT_BODY)))
+            prestigeMessageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+            prestigeMessageParams:MarkShowBackground()
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(prestigeMessageParams)
+            showBeginTurn = false
+        end
+
+        local messageSubheading = nil
+        local sound = SOUNDS.TRIBUTE_TURN_START
+        local opponentFavorCount = GetNumPatronsFavoringPlayerPerspective(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
+        -- Is the opponent 1 favor away from victory (ignoring neutral Patron)?
+        if opponentFavorCount == (TRIBUTE_PATRON_DRAFT_ID_MAX_VALUE - 1) then
+            local localPlayerFavorCount = GetNumPatronsFavoringPlayerPerspective(TRIBUTE_PLAYER_PERSPECTIVE_SELF)
+            -- If the local player doesn't have favor with the last Patron, the opponent is 1 action away from victory
+            if localPlayerFavorCount == 0 then
+                local opponentName, playerType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
+                opponentName = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(opponentName) or opponentName
+                messageSubheading = ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_TRIBUTE_OPPONENT_FAVOR_ANNOUNCEMENT_BODY, opponentName))
+                sound = SOUNDS.TRIBUTE_TURN_START_OPPONENT_PENULTIMATE_FAVOR
+                --When the opponent is close to both a prestige and patron victory, we want to show both CSAs, so set this back to true
+                showBeginTurn = true
+            end
+        end
+
+        --If we are showing the prestige CSA, only show the begin turn CSA if we also need to display the patron victory message
+        if showBeginTurn then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
+            messageParams:SetText(GetString(SI_TRIBUTE_TURN_START_ANNOUNCEMENT_TITLE), messageSubheading)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+            messageParams:MarkShowBackground()
+            return messageParams
+        end
+    end
+end
+
 function ZO_CenterScreenAnnounce_GetEventHandlers()
     return CENTER_SCREEN_EVENT_HANDLERS
 end
@@ -1257,6 +1332,7 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_TRIBUTE_CARD_UPDATED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_RIDING_SKILL_IMPROVEMENT)
@@ -1270,6 +1346,7 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DUEL_FINISHED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DUEL_NEAR_BOUNDARY)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DUEL_COUNTDOWN)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_CRAFTING_RESULTS)
@@ -1519,6 +1596,32 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
                     messageParams:SetIconData(icon, COLLECTIBLE_EMERGENCY_BACKGROUND)
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
                     table.insert(messageParamsObjects, messageParams)
+                end
+                return unpack(messageParamsObjects)
+            end
+        end,
+    },
+
+    {
+        callbackManager = TRIBUTE_DATA_MANAGER,
+        callbackRegistration = "ProgressionUpgradeStatusChanged",
+        callbackFunction = function(patronId, changedProgressions, refreshReason)
+            if refreshReason == ZO_TRIBUTE_PATRON_PROGRESSION_REFRESH_REASON.DATA_CHANGED then
+                local messageParamsObjects = {}
+                for _, progressionData in ipairs(changedProgressions) do
+                    if progressionData:HasUpgrade() then
+                        local baseCardData = ZO_TributeCardData:New(patronId, progressionData:GetBaseCardId())
+                        local upgradeCardData = ZO_TributeCardData:New(patronId, progressionData:GetUpgradeCardId())
+                        local patronName = progressionData:GetPatronData():GetFormattedColorizedName()
+
+                        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                        messageParams:SetText(zo_strformat(GetString(SI_TRIBUTE_CARD_UPGRADED_ANNOUNCEMENT_TITLE), patronName), zo_strformat(SI_TRIBUTE_CARD_UPGRADED_ANNOUNCEMENT_BODY, baseCardData:GetColorizedName(), upgradeCardData:GetColorizedName()))
+                        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_TRIBUTE_CARD_UPDATED)
+                        table.insert(messageParamsObjects, messageParams)
+                    end
+                end
+                if #messageParamsObjects > 0 then
+                    TriggerTutorial(TUTORIAL_TRIGGER_TRIBUTE_CARD_UPGRADED)
                 end
                 return unpack(messageParamsObjects)
             end

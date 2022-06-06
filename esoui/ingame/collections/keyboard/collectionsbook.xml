@@ -27,6 +27,14 @@
             </OnInitialized>
 
             <Controls>
+                <Control name="$(parent)WheelContainer" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)UtilityWheel" inherits="ZO_AssignableUtilityWheel_Keyboard_Template">
+                            <Anchor point="RIGHT" relativeTo="ZO_SharedRightBackground" relativePoint="LEFT" offsetX="-250" />
+                        </Control>
+                    </Controls>
+                </Control>
+                
                 <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
                     <Dimensions x="353" />
                     <Anchor point="TOPLEFT" offsetX="-28" offsetY="77" />

@@ -12,13 +12,33 @@
 
         <Control name="ZO_ArmoryStatValuePair" virtual="true">
             <Dimensions x="395" y="51"/>
+            <OnInitialized>
+                local valueLabel = self:GetNamedChild("Value")
+                local fonts =
+                {
+                    {
+                        font = "ZoFontGamepad42",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontGamepad34",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontGamepad27",
+                        lineLimit = 1,
+                        dontUseForAdjusting = true,
+                    },
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(valueLabel, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+            </OnInitialized>
             <Controls>
                 <Label name="$(parent)Stat" inherits="ZO_GamepadHeaderLabelTextTemplate">
                     <Anchor point="BOTTOMLEFT"/>
                     <Anchor point="BOTTOMRIGHT"/>
                 </Label>
 
-                <Label name="$(parent)Value" inherits="ZO_GamepadMenuEntryLabelTemplateLowercase42" horizontalAlignment="RIGHT" hidden="true">
+                <Label name="$(parent)Value" inherits="ZO_GamepadMenuEntryLabelTemplateLowercase42" maxLineCount="1" horizontalAlignment="RIGHT" hidden="true">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Stat" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="4" constrain="Y" />
                 </Label>
             </Controls>

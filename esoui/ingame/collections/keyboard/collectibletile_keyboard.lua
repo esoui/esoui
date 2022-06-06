@@ -29,6 +29,7 @@ function ZO_CollectibleTile_Keyboard:InitializePlatform()
     
     self.onUpdateCooldownsCallback = function() self:OnUpdateCooldowns() end
     self:GetControl():SetHandler("OnUpdate", function() self:OnUpdate() end)
+    self:GetControl():SetHandler("OnDragStart", function(_, ...) self:OnDragStart(...) end)
 end
 
 function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
@@ -65,6 +66,25 @@ function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
 
         visible = function()
             return self.collectibleData and self.collectibleData:IsRenameable()
+        end,
+    })
+
+    table.insert(self.keybindStripDescriptor,
+    {
+        keybind = "UI_SHORTCUT_TERTIARY",
+
+        name = GetString(SI_COLLECTIBLE_ACTION_ASSIGN),
+
+        callback = function()
+            local emoteId = self.collectibleData:GetReferenceId()
+            local emoteInfo = PLAYER_EMOTE_MANAGER:GetEmoteItemInfo(emoteId)
+            if emoteInfo then
+                KEYBOARD_PLAYER_EMOTE:ShowCategory(emoteInfo.emoteCategory)
+            end
+        end,
+
+        visible = function()
+            return self.collectibleData and self.collectibleData:IsUnlocked() and self.collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE)
         end,
     })
 
@@ -149,6 +169,39 @@ function ZO_CollectibleTile_Keyboard:ShowMenu()
         --Rename
         if collectibleData:IsRenameable() then
             AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_RENAME), ZO_CollectionsBook.GetShowRenameDialogClosure(collectibleId))
+        end
+
+        --Assign and Remove
+        if collectibleData:IsUnlocked() then
+            local utilityWheel = self.utilityWheel
+            if utilityWheel and utilityWheel:IsActionTypeSupported(ACTION_TYPE_COLLECTIBLE) then
+                local hotbarCategory = utilityWheel:GetHotbarCategory()
+                local slottedEntries = ZO_GetUtilityWheelSlottedEntries(hotbarCategory)
+                local matchingSlots = {}
+                --First find any slots matching this collectible
+                for i, slotData in ipairs(slottedEntries) do
+                    if slotData.type == ACTION_TYPE_COLLECTIBLE and slotData.id == collectibleId then
+                        table.insert(matchingSlots, slotData.slotIndex)
+                    end
+                end
+
+                --If the collectible is slotted in at least one slot, show the Remove option
+                if #matchingSlots > 0 then
+                    AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function()
+                        for i, slotIndex in ipairs(matchingSlots) do
+                            ClearSlot(slotIndex, hotbarCategory)
+                        end
+                    end)
+                else
+                    --If the collectible is not slotted and there is a valid slot available, show the Assign option
+                    local validSlot = GetFirstFreeValidSlotForSimpleAction(ACTION_TYPE_COLLECTIBLE, collectibleId, hotbarCategory)
+                    if validSlot then
+                        AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_ASSIGN), function()
+                            SelectSlotSimpleAction(ACTION_TYPE_COLLECTIBLE, collectibleId, validSlot, hotbarCategory)
+                        end)
+                    end
+                end
+            end
         end
 
         ShowMenu(self.control)
@@ -292,6 +345,7 @@ function ZO_CollectibleTile_Keyboard:LayoutPlatform(data)
     internalassert(collectibleData ~= nil)
     self.collectibleData = collectibleData
     self.actorCategory = data.actorCategory
+    self.utilityWheel = data.utilityWheel
     self:SetCanFocus(true)
 
     -- Title
@@ -353,6 +407,14 @@ function ZO_CollectibleTile_Keyboard:OnMouseDoubleClick(button)
         local collectibleData = self.collectibleData
         if collectibleData and collectibleData:IsUsable(self:GetActorCategory()) then
             collectibleData:Use(self:GetActorCategory())
+        end
+    end
+end
+
+function ZO_CollectibleTile_Keyboard:OnDragStart(button)
+    if button == MOUSE_BUTTON_INDEX_LEFT then
+        if self.collectibleData and self.collectibleData:IsUnlocked() and self.utilityWheel and self.utilityWheel:IsActionTypeSupported(ACTION_TYPE_COLLECTIBLE) and GetCursorContentType() == MOUSE_CONTENT_EMPTY then
+            PickupCollectible(self.collectibleData:GetId())
         end
     end
 end

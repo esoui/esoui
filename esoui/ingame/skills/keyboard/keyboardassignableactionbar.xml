@@ -26,7 +26,7 @@
         </AnimationTimeline>
     </Animations>
     <Controls>
-        <Control name="ZO_KeyboardAssignableActionBar" virtual="true" allowBringToTop="false" layer="OVERLAY" level="1">
+        <Control name="ZO_KeyboardAssignableActionBar" virtual="true" layer="OVERLAY" level="1">
             <Dimensions x="483" y="70"/>
             <Controls>
                 <Button name="$(parent)HotbarSwap" inherits="ZO_WeaponSwapRight">

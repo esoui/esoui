@@ -1,0 +1,68 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TributeRewards_Row_Gamepad" virtual="true">
+            <Dimensions y="ZO_TRIBUTE_REWARDS_ROW_HEIGHT_GAMEPAD"/>
+            <OnInitialized>
+                ZO_TributeRewards_Row_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)IconTexture" level="2">
+                    <Anchor point="LEFT" offsetX="50" />
+                    <Dimensions x="40" y="40"/>
+                </Texture>
+
+                <Texture name="$(parent)Status" inherits="ZO_MultiIcon" excludeFromResizeToFitExtents="true" level="3">
+                    <Anchor point="RIGHT" relativeTo="$(parent)IconTexture" relativePoint="LEFT" offsetX="-10" />
+                    <Dimensions x="32" y="32" />
+                </Texture>
+
+                <Label name="$(parent)TierLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed42" modifyTextType="NONE">
+                    <Anchor point="LEFT" relativeTo="$(parent)IconTexture" relativePoint="RIGHT" offsetX="20" />
+                    <Dimensions x="250" />
+                </Label>
+
+                <Label name="$(parent)RewardsNameLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed42" modifyTextType="NONE">
+                    <Anchor point="LEFT" relativeTo="$(parent)TierLabel" relativePoint="RIGHT" />
+                    <Dimensions x="250" />
+                </Label>
+
+                <Label name="$(parent)GoldLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed42" modifyTextType="NONE" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativeTo="$(parent)RewardsNameLabel" relativePoint="RIGHT" />
+                    <Dimensions x="150" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_TributeRewards_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_TributeRewards_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_TributeRewardsList_Gamepad_TopLevel" inherits="ZO_AnchoredToQuadrant_2_3_Background" hidden="true">
+            <OnInitialized>
+                ZO_TributeRewardsList_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadBold48">
+                    <Anchor point="TOP" offsetY="38" />
+                </Label>
+
+                <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="104" />
+                    <Anchor point="TOPRIGHT" offsetX="-20" offsetY="104" />
+                </Control>
+
+                <Label name="$(parent)EmptyLabel" font="ZoFontGamepadCondensed34" hidden="true" text="SI_TRIBUTE_FINDER_REWARDS_EMPTY">
+                    <Anchor point="LEFT" relativeTo="$(parent)Divider" constrains="X" />
+                    <Anchor point="CENTER" relativeTo="GuiRoot" constrains="Y" />
+                </Label>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-15" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

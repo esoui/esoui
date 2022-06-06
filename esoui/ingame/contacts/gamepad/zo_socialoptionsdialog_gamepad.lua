@@ -182,7 +182,8 @@ function ZO_SocialOptionsDialogGamepad:BuildEditNoteOption()
         }
         ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_EDIT_NOTE_DIALOG", data)
     end
-    return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_EDIT_NOTE, callback)
+    local unusedHeader = nil
+    return self:BuildOptionEntry(unusedHeader, SI_SOCIAL_MENU_EDIT_NOTE, callback)
 end
 
 function ZO_SocialOptionsDialogGamepad:ShouldAddSendMailOption()
@@ -199,7 +200,8 @@ function ZO_SocialOptionsDialogGamepad:BuildSendMailOption()
             MAIL_MANAGER_GAMEPAD:GetSend():ComposeMailTo(ZO_FormatUserFacingCharacterOrDisplayName(self.socialData.displayName))
         end
     end
-    return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_SEND_MAIL, nil, Callback)
+    local unusedHeader = nil
+    return self:BuildOptionEntry(unusedHeader, SI_SOCIAL_MENU_SEND_MAIL, nil, Callback)
 end
 
 function ZO_SocialOptionsDialogGamepad:ShouldAddWhisperOption()
@@ -208,7 +210,8 @@ end
 
 function ZO_SocialOptionsDialogGamepad:BuildWhisperOption()
     local finishCallback = function() StartChatInput("", CHAT_CHANNEL_WHISPER, self.socialData.displayName) end
-    return self:BuildOptionEntry(nil, SI_SOCIAL_LIST_PANEL_WHISPER, nil, finishCallback)
+    local unusedHeader = nil
+    return self:BuildOptionEntry(unusedHeader, SI_SOCIAL_LIST_PANEL_WHISPER, nil, finishCallback)
 end
 
 function ZO_SocialOptionsDialogGamepad:ShouldAddInviteToGroupOption()
@@ -229,24 +232,38 @@ function ZO_SocialOptionsDialogGamepad:GetInviteToGroupCallback()
 end
 function ZO_SocialOptionsDialogGamepad:BuildInviteToGroupOption()
     if self:ShouldAddInviteToGroupOption() then
-        return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_INVITE, self:GetInviteToGroupCallback())
+        local unusedHeader = nil
+        return self:BuildOptionEntry(unusedHeader, SI_SOCIAL_MENU_INVITE, self:GetInviteToGroupCallback())
     end
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildTravelToPlayerOption(jumpFunc)
-    local callback = function()
+    local function JumpToPlayerCallback()
         jumpFunc(DecorateDisplayName(self.socialData.displayName))
         SCENE_MANAGER:ShowBaseScene()
     end
-    return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_JUMP_TO_PLAYER, callback)
+    local unusedHeader = nil
+    return self:BuildOptionEntry(unusedHeader, SI_SOCIAL_MENU_JUMP_TO_PLAYER, JumpToPlayerCallback)
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildVisitPlayerHouseOption()
-    local callback = function()
+    local function JumpToHouseCallback()
         JumpToHouse(DecorateDisplayName(self.socialData.displayName))
         SCENE_MANAGER:ShowBaseScene()
     end
-    return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_VISIT_HOUSE, callback)
+    local unusedHeader = nil
+    return self:BuildOptionEntry(unusedHeader, SI_SOCIAL_MENU_VISIT_HOUSE, JumpToHouseCallback)
+end
+
+function ZO_SocialOptionsDialogGamepad:BuildInviteToTributeOption()
+    if not ZO_IsTributeLocked() then
+        local function InviteToTributeCallback()
+            InviteToTributeByDisplayName(DecorateDisplayName(self.socialData.displayName))
+            SCENE_MANAGER:ShowBaseScene()
+        end
+        local unusedHeader = nil
+        return self:BuildOptionEntry(unusedHeader, SI_SOCIAL_MENU_TRIBUTE_INVITE, InviteToTributeCallback)
+    end
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildGamerCardOption()

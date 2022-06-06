@@ -93,7 +93,7 @@
                             </Controls>
                         </Control>
 
-                        <Control name="$(parent)PrimaryAction" inherits="ZO_KeybindButton" text="SI_GAMEPAD_SELECT_OPTION">
+                        <Control name="$(parent)PrimaryAction" inherits="ZO_KeybindButton">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Close" relativePoint="TOPLEFT" />
                         </Control>
 

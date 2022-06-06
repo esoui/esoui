@@ -18,6 +18,12 @@ do
     local DAMAGE_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_dps_down_no_glow_64.dds", 40, 40)
     local g_roleIconTable = {}
 
+    local function GetNextAbilityMechanicFlagIter(abilityId)
+        return function(_, lastFlag)
+            return GetNextAbilityMechanicFlag(abilityId, lastFlag)
+        end
+    end
+
     function ZO_Tooltip:AddAbilityStats(abilityId, overrideActiveRank, overrideCasterUnitTag)
         overrideCasterUnitTag = overrideCasterUnitTag or "player"
         local statsSection = self:AcquireSection(self:GetStyle("abilityStatsSection"))
@@ -98,45 +104,48 @@ do
         end
 
         --Cost
-        local cost, mechanic = GetAbilityCost(abilityId, overrideActiveRank)
-        if cost > 0 then
-            local costPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-            costPair:SetStat(GetString(SI_ABILITY_TOOLTIP_RESOURCE_COST_LABEL), self:GetStyle("statValuePairStat"))
-            local mechanicName = GetString("SI_COMBATMECHANICTYPE", mechanic)
-            local costString = zo_strformat(SI_ABILITY_TOOLTIP_RESOURCE_COST, cost, mechanicName)
-            if mechanic == POWERTYPE_MAGICKA then
-                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairMagickaValue"))
-            elseif mechanic == POWERTYPE_STAMINA then
-                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairStaminaValue"))
-            elseif mechanic == POWERTYPE_HEALTH then
-                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairHealthValue"))
-            else
-                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairValue"))
+        for flag in GetNextAbilityMechanicFlagIter(abilityId) do
+            local cost = GetAbilityCost(abilityId, flag, overrideActiveRank)
+            if cost > 0 then
+                local costPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+                costPair:SetStat(GetString(SI_ABILITY_TOOLTIP_RESOURCE_COST_LABEL), self:GetStyle("statValuePairStat"))
+                local mechanicName = GetString("SI_COMBATMECHANICFLAGS", flag)
+                local costString = zo_strformat(SI_ABILITY_TOOLTIP_RESOURCE_COST, cost, mechanicName)
+                if flag == COMBAT_MECHANIC_FLAGS_MAGICKA then
+                    costPair:SetValue(costString, self:GetStyle("abilityStatValuePairMagickaValue"))
+                elseif flag == COMBAT_MECHANIC_FLAGS_STAMINA then
+                    costPair:SetValue(costString, self:GetStyle("abilityStatValuePairStaminaValue"))
+                elseif flag == COMBAT_MECHANIC_FLAGS_HEALTH then
+                    costPair:SetValue(costString, self:GetStyle("abilityStatValuePairHealthValue"))
+                else
+                    costPair:SetValue(costString, self:GetStyle("abilityStatValuePairValue"))
+                end
+                statsSection:AddStatValuePair(costPair)
             end
-            statsSection:AddStatValuePair(costPair)
         end
 
-        local chargeFrequencyMS
-        cost, mechanic, chargeFrequencyMS = GetAbilityCostOverTime(abilityId, overrideActiveRank)
-        if cost > 0 then
-            local costPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-            costPair:SetStat(GetString(SI_ABILITY_TOOLTIP_RESOURCE_COST_LABEL), self:GetStyle("statValuePairStat"))
+        for flag in GetNextAbilityMechanicFlagIter(abilityId) do
+            local cost, chargeFrequencyMS = GetAbilityCostOverTime(abilityId, flag, overrideActiveRank)
+            if cost > 0 then
+                local costPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+                costPair:SetStat(GetString(SI_ABILITY_TOOLTIP_RESOURCE_COST_LABEL), self:GetStyle("statValuePairStat"))
 
-            local mechanicName = GetString("SI_COMBATMECHANICTYPE", mechanic)
+                local mechanicName = GetString("SI_COMBATMECHANICFLAGS", flag)
 
-            if mechanic == POWERTYPE_MAGICKA or mechanic == POWERTYPE_STAMINA or mechanic == POWERTYPE_HEALTH then
-                local mechanicColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER, mechanic))
-                cost = mechanicColor:Colorize(cost)
-                mechanicName = mechanicColor:Colorize(mechanicName)
-            end
+                if flag == COMBAT_MECHANIC_FLAGS_MAGICKA or flag == COMBAT_MECHANIC_FLAGS_STAMINA or flag == COMBAT_MECHANIC_FLAGS_HEALTH then
+                    local mechanicColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER, flag))
+                    cost = mechanicColor:Colorize(cost)
+                    mechanicName = mechanicColor:Colorize(mechanicName)
+                end
 
-            local formattedChargeFrequency = ZO_FormatTimeMilliseconds(chargeFrequencyMS, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE)
-            local costOverTimeString = zo_strformat(SI_ABILITY_TOOLTIP_RESOURCE_COST_OVER_TIME, cost, mechanicName, formattedChargeFrequency)
+                local formattedChargeFrequency = ZO_FormatTimeMilliseconds(chargeFrequencyMS, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE)
+                local costOverTimeString = zo_strformat(SI_ABILITY_TOOLTIP_RESOURCE_COST_OVER_TIME, cost, mechanicName, formattedChargeFrequency)
             
 
-            costPair:SetValue(costOverTimeString, self:GetStyle("abilityStatValuePairValue"))
+                costPair:SetValue(costOverTimeString, self:GetStyle("abilityStatValuePairValue"))
 
-            statsSection:AddStatValuePair(costPair)
+                statsSection:AddStatValuePair(costPair)
+            end
         end
 
         --Roles

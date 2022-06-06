@@ -256,48 +256,6 @@ local g_sharedPregameStates =
         end
     },
 
-    ["ScreenAdjustIntro"] =
-    {
-        ShouldAdvance = function()
-            return not IsConsoleUI() or GetCVar("PregameScreenAdjustEnabled") ~= "1"
-        end,
-
-        OnEnter = function()
-            SCENE_MANAGER:Show("screenAdjust")
-            SetCVar("PregameScreenAdjustEnabled", "false")
-        end,
-
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            return "GammaAdjust"
-        end,
-    },
-
-    ["GammaAdjust"] =
-    {
-        ShouldAdvance = function()
-            return not ZO_GammaAdjust_NeedsFirstSetup()
-        end,
-
-        OnEnter = function()
-            SCENE_MANAGER:Show("gammaAdjust")
-        end,
-
-        OnExit = function()
-            SetCVar("PregameGammaCheckEnabled", "false")
-        end,
-
-        GetStateTransitionData = function()
-            if IsInGamepadPreferredMode() or not DoesPlatformSelectServer() then
-                return "ShowEULA"
-            else
-                return "ServerSelectIntro"
-            end
-        end,
-    },
-
     ["PlayIntroMovies"] =
     {
         ShouldAdvance = function()
@@ -318,24 +276,6 @@ local g_sharedPregameStates =
 
         GetStateTransitionData = function()
             return "ShowHavokSplashScreen"
-        end,
-
-        OnExit = function()
-        end,
-    },
-
-    ["ShowLegalSplashScreen"] =
-    {
-        ShouldAdvance = function()
-            return ZO_Pregame_ShouldSkipVideos()
-        end,
-
-        OnEnter = function()
-            SCENE_MANAGER:Show("copyrightLogosSplash")
-        end,
-
-        GetStateTransitionData = function()
-            return "AccountLoginEntryPoint"
         end,
 
         OnExit = function()
@@ -373,11 +313,121 @@ local g_sharedPregameStates =
         end,
 
         GetStateTransitionData = function()
-            -- The keyboard and gamepad flows begin to diverge here
             return "ShowLegalSplashScreen"
         end,
 
         OnExit = function()
+        end,
+    },
+
+    ["ShowLegalSplashScreen"] =
+    {
+        ShouldAdvance = function()
+            return ZO_Pregame_ShouldSkipVideos()
+        end,
+
+        OnEnter = function()
+            SCENE_MANAGER:Show("copyrightLogosSplash")
+        end,
+
+        GetStateTransitionData = function()
+            if IsConsoleUI() then
+                return "AccountLoginEntryPoint"
+            else
+                return "ShowAccessibilityModePrompt"
+            end
+        end,
+
+        OnExit = function()
+        end,
+    },
+
+    ["ShowAccessibilityModePrompt"] =
+    {
+        ShouldAdvance = function()
+            return IsInGamepadPreferredMode() or GetCVar("PregameAccessibilityPromptEnabled") ~= "1"
+        end,
+
+        OnEnter = function()
+            SCENE_MANAGER:Show("accessibilityModePrompt")
+        end,
+
+        OnExit = function()
+            -- Do nothing
+        end,
+
+        GetStateTransitionData = function()
+            -- TODO XAR Settings: Replace the following:
+            -- return "FirstTimeAccessibilitySettings"
+            return "ScreenAdjustIntro"
+        end,
+    },
+
+    -- TODO XAR Settings: To be integrated in next update
+    ["FirstTimeAccessibilitySettings"] =
+    {
+        ShouldAdvance = function()
+            return GetCVar("PregameAccessibilitySettingMenuEnabled") ~= "1"
+        end,
+
+        OnEnter = function()
+            GAMEPAD_OPTIONS:SetCategory(SETTING_PANEL_ACCESSIBILITY)
+            SCENE_MANAGER:Show(GAMEPAD_OPTIONS_PANEL_SCENE:GetName())
+            local function BackButtonCallback()
+                SetCVar("PregameAccessibilitySettingMenuEnabled", "false")
+                PregameStateManager_AdvanceState()
+            end
+            GAMEPAD_OPTIONS:ReplaceBackKeybind(BackButtonCallback, GetString(SI_ACCESSIBILITY_SETTINGS_CONTINUE_KEYBIND))
+        end,
+
+        OnExit = function()
+            GAMEPAD_OPTIONS:RevertBackKeybind()
+        end,
+
+        GetStateTransitionData = function()
+            return "ScreenAdjustIntro"
+        end,
+    },
+
+    ["ScreenAdjustIntro"] =
+    {
+        ShouldAdvance = function()
+            return not IsConsoleUI() or GetCVar("PregameScreenAdjustEnabled") ~= "1"
+        end,
+
+        OnEnter = function()
+            SCENE_MANAGER:Show("screenAdjust")
+            SetCVar("PregameScreenAdjustEnabled", "false")
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "GammaAdjust"
+        end,
+    },
+
+    ["GammaAdjust"] =
+    {
+        ShouldAdvance = function()
+            return not ZO_GammaAdjust_NeedsFirstSetup()
+        end,
+
+        OnEnter = function()
+            SCENE_MANAGER:Show("gammaAdjust")
+        end,
+
+        OnExit = function()
+            SetCVar("PregameGammaCheckEnabled", "false")
+        end,
+
+        GetStateTransitionData = function()
+            if IsConsoleUI() or not DoesPlatformSelectServer() then
+                return "ShowEULA"
+            else
+                return "AccountLoginEntryPoint"
+            end
         end,
     },
 
@@ -802,7 +852,14 @@ function ZO_Pregame_OnGamepadPreferredModeChanged()
     local FORCE_CLOSE = true
     ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE)
 
-    if not IsAccountLoggedIn() or IS_WORLD_SELECT_STATE[currentState] then -- While in world select, we're logged in but haven't yet started the character loading process
+    if currentState == "ShowAccessibilityModePrompt" then
+        -- TODO XAR Settings: Replace the following
+        -- PregameStateManager_SetState("FirstTimeAccessibilitySettings")
+        PregameStateManager_SetState("AccountLoginEntryPoint")
+    -- TODO XAR Settings: Replace the following
+    -- elseif currentState == "FirstTimeAccessibilitySettings" then
+        -- PregameStateManager_SetState("ShowAccessibilityModePrompt")
+    elseif not IsAccountLoggedIn() or IS_WORLD_SELECT_STATE[currentState] then -- While in world select, we're logged in but haven't yet started the character loading process
         PregameStateManager_SetState("AccountLoginEntryPoint")
     elseif not IsPregameCharacterConstructionReady() then
         PregameStateManager_SetState("WaitForCharacterDataLoaded")

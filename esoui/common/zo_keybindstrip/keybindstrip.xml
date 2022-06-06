@@ -67,7 +67,7 @@
             </Controls>
         </TopLevelControl>
 
-        <TopLevelControl name="ZO_KeybindStripControl" hidden="true" allowBringToTop="false" tier="MEDIUM" level="ZO_MEDIUM_TIER_KEYBIND_STRIP">
+        <TopLevelControl name="ZO_KeybindStripControl" hidden="true" tier="MEDIUM" level="ZO_MEDIUM_TIER_KEYBIND_STRIP">
             <Dimensions y="55" />
             <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
             <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />

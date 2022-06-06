@@ -1,0 +1,58 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TributeTargetViewer_Keyboard_TopLevel" tier="MEDIUM" hidden="true">
+            <Dimensions x="1665" y="750" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" offsetX="40" offsetY="20"/>
+            <OnInitialized>
+                ZO_TributeTargetViewer_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
+                    <Dimensions x="1667" y="1024" />
+                    <Anchor point="TOPLEFT" offsetX="-65" offsetY="-75" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/centerscreen_right.dds" mouseEnabled="true">
+                    <Dimensions x="64" y="1024" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                </Texture>
+
+                <Control name="$(parent)Header">
+                    <Dimensions y="50"/>
+                    <Anchor point="TOPLEFT" offsetX="100" />
+                    <Anchor point="TOPRIGHT" offsetX="-100" />
+                    <Controls>
+                        <Label name="$(parent)Instruction" modifyTextType="UPPERCASE" font="ZoFontWinH2">
+                            <Anchor point="BOTTOM" relativePoint="BOTTOM" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="RIGHT" constrains="X" offsetX="-100" />
+                </Control>
+
+                <Control name="$(parent)GridContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-100" offsetY="-20" />
+                    <Controls>
+                        <Label name="$(parent)ContentEmptyLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_TRIBUTE_PILE_VIEWER_EMPTY_LIST" hidden="true">
+                            <Anchor point="TOP" offsetY="20"/>
+                        </Label>
+
+                        <Control name="$(parent)GridList" inherits="ZO_GridScrollList_Keyboard">
+                            <AnchorFill />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)Underlay" color="000000" alpha="0.55" excludeFromResizeToFitExtents="true" inheritScale="false" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

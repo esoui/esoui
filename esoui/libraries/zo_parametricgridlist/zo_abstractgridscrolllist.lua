@@ -67,6 +67,7 @@ function ZO_AbstractGridScrollList:AddEntryTemplate(templateName, width, height,
         self.templateOperationIds[templateName] = operationId
 
         if self.autoFillRows then
+            assert(type(width) == "number", "AutoFillRows is not supported with dynamic width entry templates.")
             local listWidth = self.list:GetWidth()
             local numCellsPerRow = zo_floor(listWidth / (width + spacingX))
             if self.numCellsPerRow then
@@ -212,6 +213,10 @@ function ZO_AbstractGridScrollList:SelectData(data)
     if internalassert(dataIndex ~= nil) then
         ZO_ScrollList_SelectData(self.list, data)
     end
+end
+
+function ZO_AbstractGridScrollList:SetAutoSelectToMatchingDataEntry(dataEntry)
+    ZO_ScrollList_SetAutoSelectToMatchingDataEntry(self.list, dataEntry)
 end
 
 function ZO_AbstractGridScrollList:GetScrollValue()

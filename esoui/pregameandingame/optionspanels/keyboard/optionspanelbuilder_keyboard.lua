@@ -27,6 +27,7 @@ do
         ["ZO_Options_Slider_VerticalLabel"] = 4,
         ["ZO_Options_Checkbox"] = 6,
         ["ZO_Options_Video_Checkbox_IncludeRestartWarning"] = 6,
+        ["ZO_Options_Checkbox_DynamicWarning"] = 6,
         ["ZO_Options_InvokeCallback"] = 4,
         ["ZO_Options_InvokeCallback_Wide"] = 4,
         ["ZO_Options_Account_InvokeCallback_WithEmail"] = 4,

@@ -50,7 +50,7 @@ local function GetLastCompletedAchievementInLine(achievementId)
     local lastCompleted = achievementId
 
     while achievementId ~= 0 do
-        local _, _, _, _, completed, _, _= GetAchievementInfo(achievementId)
+        local completed = select(5, GetAchievementInfo(achievementId))
 
         if not completed then
             return lastCompleted
@@ -156,7 +156,7 @@ end
 
 function Achievement:Show(achievementId)
     self.achievementId = achievementId
-    local name, description, points, icon, completed, date, time = self:GetAchievementInfo(achievementId)
+    local name, description, points, icon, completed, date = self:GetAchievementInfo(achievementId)
 
     local titleText
     local persistenceLevel = GetAchievementPersistenceLevel(achievementId)
@@ -481,6 +481,18 @@ function Achievement:AddCollectibleReward(collectibleId, completed)
     collectibleNameLabel.prefix = collectiblePrefixLabel
 end
 
+function Achievement:AddTributeCardUpgradeReward(tributePatronId, tributeCardIndex, completed)
+    local upgrade = self:GetPooledLabel(nil, completed)
+    local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(tributePatronId)
+    local baseCardId, upgradeCardId = patronData:GetDockCardInfoByIndex(tributeCardIndex)
+    local upgradeCardData = ZO_TributeCardData:New(tributePatronId, upgradeCardId)
+    upgrade:SetText(upgradeCardData:GetColorizedFormattedName())
+
+    local upgradePrefix = self:GetPooledLabel(PREFIX_LABEL, completed)
+    upgradePrefix:SetText(GetString(SI_ACHIEVEMENTS_TRIBUTE_CARD_UPGRADE))
+    upgrade.prefix = upgradePrefix
+end
+
 do
     local ORDER_PREFIX = 1
     local ORDER_POSTFIX = 2
@@ -625,6 +637,11 @@ local function AddRewards(self, achievementId)
     local hasRewardCollectible, collectibleId = GetAchievementRewardCollectible(achievementId)
     if hasRewardCollectible then
         self:AddCollectibleReward(collectibleId, completed)
+    end
+
+    local hasRewardTributeCardUpgrade, tributePatronId, tributeCardIndex = GetAchievementRewardTributeCardUpgradeInfo(achievementId)
+    if hasRewardTributeCardUpgrade then
+        self:AddTributeCardUpgradeReward(tributePatronId, tributeCardIndex, completed)
     end
 end
 
@@ -853,13 +870,11 @@ function Achievement:RefreshTooltip(control)
     if self.collapsed or #self.lineThumbs == 0 then
         if self.completed and not self.isCharacterPersistent then
             local completeByCharId = GetCharIdForCompletedAchievement(self.achievementId)
-            if completeByCharId then
-                local characterName = GetCharacterNameById(completeByCharId)
-                if characterName ~= "" then
-                    local colorizedCharacterName = ZO_SELECTED_TEXT:Colorize(characterName)
-                    InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0)
-                    SetTooltipText(InformationTooltip, zo_strformat(SI_ACHIEVEMENT_EARNED_FORMATTER, colorizedCharacterName))
-                end
+            local characterName = GetCharacterNameById(completeByCharId)
+            if characterName ~= "" then
+                local colorizedCharacterName = ZO_SELECTED_TEXT:Colorize(characterName)
+                InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0)
+                SetTooltipText(InformationTooltip, zo_strformat(SI_ACHIEVEMENT_EARNED_FORMATTER, colorizedCharacterName))
             end
         end
     end
@@ -978,7 +993,7 @@ end
 
 function IconAchievement:Show(achievementId)
     self.achievementId = achievementId
-    local name, description, points, icon, completed, date, time = GetAchievementInfo(achievementId)
+    local name, _, _, icon = GetAchievementInfo(achievementId)
     self.name = name
     self.icon:SetTexture(icon)
     self.control:SetHidden(false)

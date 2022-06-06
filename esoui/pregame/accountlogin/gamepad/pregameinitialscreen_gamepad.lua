@@ -25,13 +25,7 @@ local VERIFICATION_STATE =
     OFFER = 2,
 }
 
-local PregameInitialScreen_Gamepad = ZO_Object:Subclass()
-
-function PregameInitialScreen_Gamepad:New(control)
-    local object = ZO_Object.New(self)
-    object:Initialize(control)
-    return object
-end
+local PregameInitialScreen_Gamepad = ZO_InitializingObject:Subclass()
 
 function PregameInitialScreen_Gamepad:Initialize(control)
     self.control = control
@@ -54,7 +48,7 @@ function PregameInitialScreen_Gamepad:Initialize(control)
 
             KEYBIND_STRIP:RemoveDefaultExit()
             self.currentKeybindStripDescriptor = self.pressAnyKeybindsDescriptor
-            if IsConsoleUI() and self:IsShowingVerificationError() then
+            if not IsHeronUI() and self:IsShowingVerificationError() then
                 self.currentKeybindStripDescriptor = self.verifyEmailKeybindsDescriptor
             end
             KEYBIND_STRIP:AddKeybindButtonGroup(self.currentKeybindStripDescriptor)
@@ -72,6 +66,18 @@ function PregameInitialScreen_Gamepad:Initialize(control)
             KEYBIND_STRIP:RestoreDefaultExit()
             self.continueDesired = false
             self.continueAllowed = false
+
+            -- It's possible to switch from the gamepad UI to the keyboard UI while esoAnimatedBackgroundAnimation
+            -- is still playing. The OnStop handler of the animation may then attempt to advance the state, which
+            -- will fail when we are in the keyboard UI. To prevent the OnStop handler from doing anything, we
+            -- clear fadeMode.
+            self.fadeMode = nil
+            self.esoAnimatedBackgroundAnimation:Stop()
+
+            -- Similar to esoAnimatedBackgroundAnimation, we'll stop this animation if it's playing and prevent
+            -- it from carrying out any unwanted actions.
+            self.pressAnyPromptFadingIn = false
+            self.pressTextAnimation:Stop()
         end
     end)
 end
@@ -89,7 +95,16 @@ function PregameInitialScreen_Gamepad:PerformDeferredInitialization()
     local pressTextLabel = self.control:GetNamedChild("PressText")
 
     -- Note: the line of text says "Press <<primary button icon>> To Start" but we're still going to handle other input buttons
-    pressTextLabel:SetText(zo_strformat(SI_GAMEPAD_PREGAME_PRESS_BUTTON, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)))
+    local function customTextFunction(label, bindingText)
+        label:SetText(zo_strformat(SI_GAMEPAD_PREGAME_PRESS_BUTTON, bindingText))
+    end
+
+    local SHOW_UNBOUND = true
+    local DEFAULT_GAMEPAD_ACTION_NAME = nil
+    local DONT_ALWAYS_PREFER_GAMEPAD = false
+    local DONT_SHOW_AS_HOLD = false
+    local scalePercent = 110
+    ZO_Keybindings_RegisterLabelForInLineBindingUpdate(pressTextLabel, "UI_SHORTCUT_PRIMARY", SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, customTextFunction, DONT_ALWAYS_PREFER_GAMEPAD, DONT_SHOW_AS_HOLD, scalePercent)
 
     self.esoAnimatedBackgroundAnimation = GetAnimationManager():CreateTimelineFromVirtual("ZO_PregameInitialScreen_AnimatedBackgroundAnimation", esoLogoControl)
     self.pressTextAnimation = GetAnimationManager():CreateTimelineFromVirtual("ZO_PregameInitialScreen_PressTextFadeAnimation", pressTextLabel)
@@ -200,11 +215,13 @@ function PregameInitialScreen_Gamepad:SetupStartupButtons()
         {
             keybind = "UI_SHORTCUT_SECONDARY",
             name = GetString(SI_CONSOLE_RESEND_VERIFY_EMAIL_KEYBIND),
-            callback =  function()
-                            PregameAttemptResendVerificationEmail()
-                            self:ResetScreenState()
-                        end,
-            visible = function() return self.verificationState == VERIFICATION_STATE.OFFER end
+            callback = function()
+                PregameAttemptResendVerificationEmail() -- Console Only Function
+                self:ResetScreenState()
+            end,
+            visible = function()
+                return IsConsoleUI() and self.verificationState == VERIFICATION_STATE.OFFER
+            end
         },
     }
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.verifyEmailKeybindsDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() self:ResetScreenState() end)

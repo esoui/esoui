@@ -84,6 +84,25 @@ function ZO_ArmoryBuildData:GetCurseType()
     return GetArmoryBuildCurseType(self.buildIndex)
 end
 
+function ZO_ArmoryBuildData:GetPrimaryMundusStone()
+    return GetArmoryBuildPrimaryMundusStone(self.buildIndex)
+end
+
+function ZO_ArmoryBuildData:GetSecondaryMundusStone()
+    return GetArmoryBuildSecondaryMundusStone(self.buildIndex)
+end
+
+function ZO_ArmoryBuildData:GetEquippedMundusStoneNames()
+    local primaryMundus = GetArmoryBuildPrimaryMundusStone(self.buildIndex)
+    local secondaryMundus = GetArmoryBuildSecondaryMundusStone(self.buildIndex)
+    if primaryMundus == MUNDUS_STONE_INVALID or secondaryMundus == MUNDUS_STONE_INVALID then
+        --We will never have a secondary mundus stone if the primary mundus stone is invalid, so we can just return the primary mundus if either are invalid
+        return { GetString("SI_MUNDUSSTONE", primaryMundus) }
+    else
+        return { GetString("SI_MUNDUSSTONE", primaryMundus), GetString("SI_MUNDUSSTONE", secondaryMundus) }
+    end
+end
+
 do
     local INACCESSIBLE_BAGS =
     {

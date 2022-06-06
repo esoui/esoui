@@ -80,7 +80,7 @@ local function OnPowerUpdate(evt, tag, powerIndex, powerType, health, maxHealth)
 end
 
 local function UpdateHealthWarning()
-    local health, maxHealth = GetUnitPower("player", POWERTYPE_HEALTH)
+    local health, maxHealth = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_HEALTH)
 
     if(maxHealth and maxHealth > 0)
     then
@@ -96,7 +96,7 @@ end
 EVENT_MANAGER:RegisterForEvent("ZO_HealthWarning", EVENT_PLAYER_DEAD, PlayerDead)
 EVENT_MANAGER:RegisterForEvent("ZO_HealthWarning", EVENT_PLAYER_ALIVE, UpdateHealthWarning)
 EVENT_MANAGER:RegisterForEvent("ZO_HealthWarning", EVENT_POWER_UPDATE, OnPowerUpdate)
-EVENT_MANAGER:AddFilterForEvent("ZO_HealthWarning", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH)
+EVENT_MANAGER:AddFilterForEvent("ZO_HealthWarning", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_HEALTH)
 EVENT_MANAGER:AddFilterForEvent("ZO_HealthWarning", EVENT_POWER_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
 
 UpdateHealthWarning()

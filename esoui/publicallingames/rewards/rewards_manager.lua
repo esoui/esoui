@@ -246,6 +246,18 @@ function ZO_RewardsManager:GetAllRewardInfoForRewardList(rewardListId, parentCho
     return rewardListInfo
 end
 
+function ZO_RewardsManager:DoesRewardListContainMailItems(rewardListId)
+    local numRewards = GetNumRewardListEntries(rewardListId)
+
+    for rewardIndex = 1, numRewards do
+        local rewardId, entryType = GetRewardListEntryInfo(rewardListId, rewardIndex)
+        if entryType == REWARD_ENTRY_TYPE_MAIL_ITEM then
+            return true
+        end
+    end
+    return false
+end
+
 function ZO_RewardsManager:GetInfoForReward(rewardId, quantity, parentChoice, validationFunction, isSelectedChoiceFunction)
     local entryType = GetRewardType(rewardId)
     local rewardData
@@ -468,11 +480,13 @@ function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativ
             local quantity = rewardData:GetQuantity()
             InitializeTooltip(ItemTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
             ItemTooltip:SetReward(rewardId, quantity)
+            ItemTooltip:HideComparativeTooltips()
             if rewardType == REWARD_ENTRY_TYPE_ITEM then
+                local USE_RELATIVE_ANCHORS = true
                 ItemTooltip:ShowComparativeTooltips()
                 ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
                 ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
-                ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2)
+                ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2, USE_RELATIVE_ANCHORS)
             end
         end
     end

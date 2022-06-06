@@ -129,7 +129,7 @@ function ZO_GamepadStoreSell:ConfirmSell()
             STORE_WINDOW_GAMEPAD:SetupSpinner(selectedData.stackCount, selectedData.stackCount, selectedData.sellPrice, selectedData.currencyType1 or CURT_MONEY)
         elseif IsItemInArmory(bag, index) then
             local armoryBuildList = { GetItemArmoryBuildList(bag, index) }
-            local buildListString = ZO_GenerateCommaSeparatedList(armoryBuildList)
+            local buildListString = ZO_GenerateCommaSeparatedListWithAnd(armoryBuildList)
             ZO_Dialogs_ShowGamepadDialog("CONFIRM_SELL_ARMORY_ITEM_PROMPT", selectedData, { mainTextParams = { ZO_SELECTED_TEXT:Colorize(buildListString), #armoryBuildList }})
         else
             SellInventoryItem(bag, index, 1)

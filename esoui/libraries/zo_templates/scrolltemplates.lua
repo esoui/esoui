@@ -863,7 +863,15 @@ function ZO_ScrollListOperation:Initialize()
 end
 
 function ZO_ScrollListOperation:IsDataVisible(data)
-    return true -- Can be overriden in derived classes
+    return true -- Can be overridden in derived classes
+end
+
+function ZO_ScrollListOperation:GetControlWidth()
+    return nil  -- Can be overridden in derived classes
+end
+
+function ZO_ScrollListOperation:GetControlHeight()
+    return nil  -- Can be overridden in derived classes
 end
 
 function ZO_ScrollListOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, data)
@@ -1000,39 +1008,35 @@ function ZO_ScrollList_AddControl_Operation:SetScrollUpdateCallbacks(setupCallba
     self.hideCallback = hideCallback
 end
 
-function ZO_ScrollList_AddControl_Operation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, data)
-    local controlWidth = self.controlWidth
-    if controlWidth then
-        if currentX * layoutInfo.direction + controlWidth > layoutInfo.endPos then
-            currentX, currentY = GetLineBreakPositions(layoutInfo, currentX, currentY, self.spacingY, self.indentX)
-        end
+function ZO_ScrollList_AddControl_Operation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, dataEntry)
+    local instanceData = dataEntry.data
+    local controlWidth = self:GetControlWidth(instanceData, layoutInfo)
+    local controlHeight = self:GetControlHeight(instanceData)
 
-        -- Calculate left and right based on the direction we are told to advance
-        -- Since we want Left to always be less than Right, and having Right_To_Left
-        -- build direction will cause Left to be greater than Right
-        -- we need to compensate for that fact in this case, but keep the calculation the same
-        -- when we are in the direction of Left_To_Right
-        local halfControlWidth = controlWidth / 2 
-        data.left = currentX - halfControlWidth + halfControlWidth * layoutInfo.direction
-        data.right = currentX + halfControlWidth + halfControlWidth * layoutInfo.direction
-        data.top = currentY
-        data.bottom = currentY + self.controlHeight
+    local controlEndPos = currentX * layoutInfo.direction + controlWidth
+    local lineBreakAfterControl = false
+    if controlEndPos > layoutInfo.endPos then
+        currentX, currentY = GetLineBreakPositions(layoutInfo, currentX, currentY, self.spacingY, self.indentX)
+    elseif zo_floatsAreEqual(controlEndPos, layoutInfo.endPos) then
+        lineBreakAfterControl = true
+    end
 
-        currentX = currentX + (controlWidth + self.spacingX) * layoutInfo.direction
+    -- Calculate left and right based on the direction we are told to advance
+    -- Since we want Left to always be less than Right, and having Right_To_Left
+    -- build direction will cause Left to be greater than Right
+    -- we need to compensate for that fact in this case, but keep the calculation the same
+    -- when we are in the direction of Left_To_Right
+    local halfControlWidth = controlWidth / 2 
+    dataEntry.left = currentX - halfControlWidth + halfControlWidth * layoutInfo.direction
+    dataEntry.right = currentX + halfControlWidth + halfControlWidth * layoutInfo.direction
+    dataEntry.top = currentY
+    dataEntry.bottom = currentY + controlHeight
 
-        layoutInfo.lineBreakModifier = zo_max(layoutInfo.lineBreakModifier, self.controlHeight)
-    else
-        if layoutInfo.startPos < layoutInfo.endPos then
-            data.left = layoutInfo.startPos
-            data.right = layoutInfo.endPos
-        else
-            data.left = layoutInfo.endPos
-            data.right = layoutInfo.startPos
-        end
-        data.top = currentY
-        data.bottom = currentY + self.controlHeight
-        layoutInfo.lineBreakModifier = zo_max(layoutInfo.lineBreakModifier, self.controlHeight)
+    currentX = currentX + (controlWidth + self.spacingX) * layoutInfo.direction
 
+    layoutInfo.lineBreakModifier = zo_max(layoutInfo.lineBreakModifier, controlHeight)
+
+    if lineBreakAfterControl then
         currentX, currentY = GetLineBreakPositions(layoutInfo, currentX, currentY, self.spacingY, self.indentX)
     end
 
@@ -1052,6 +1056,33 @@ function ZO_ScrollList_AddControl_Operation:AddToScrollContents(contents, contro
     end
 end
 
+function ZO_ScrollList_AddControl_Operation:GetControlWidth(instanceData, layoutInfo)
+    if self.controlWidth then
+        if type(self.controlWidth) == "function" then
+            return self.controlWidth(instanceData)
+        else
+            return self.controlWidth
+        end
+    else
+        if layoutInfo then
+            return zo_abs(layoutInfo.endPos - layoutInfo.startPos)
+        else
+            -- Nil width (i.e.: fill) requires derivitive layoutInfo to calculate.
+            -- If we're not calling this from a place to knows that information,
+            -- just return nil to denote that the size is "fill" but we can't calculate it in this context
+            return nil
+        end
+    end
+end
+
+function ZO_ScrollList_AddControl_Operation:GetControlHeight(instanceData)
+    if type(self.controlHeight) == "function" then
+        return self.controlHeight(instanceData)
+    else
+        return self.controlHeight
+    end
+end
+
 -- ZO_ScrollList_AddControl_Centered_Operation --
 
 ZO_ScrollList_AddControl_Centered_Operation = ZO_ScrollList_AddControl_Operation:Subclass()
@@ -1061,12 +1092,15 @@ function ZO_ScrollList_AddControl_Centered_Operation:New()
 end
 
 function ZO_ScrollList_AddControl_Centered_Operation:AddToScrollContents(contents, control, currentX, currentY, offset)
+    assert(self.controlWidth) -- Nil width not supported for centered operations
+
     control:ClearAnchors()
 
     local xOffset = currentX
     local yOffset = currentY - offset
     if self.controlWidth then
-        control:SetAnchor(CENTER, contents, TOPLEFT, xOffset + self.controlWidth / 2, yOffset + self.controlHeight / 2)
+        local instanceData = ZO_ScrollList_GetData(control)
+        control:SetAnchor(CENTER, contents, TOPLEFT, xOffset + self:GetControlWidth(instanceData) / 2, yOffset + self:GetControlHeight(instanceData) / 2)
     else
         control:SetAnchor(TOPLEFT, contents, TOPLEFT, xOffset, yOffset)
         control:SetAnchor(TOPRIGHT, contents, TOPRIGHT, xOffset, yOffset)
@@ -1091,6 +1125,11 @@ end
 
 function ZO_ScrollList_SetBuildDirection(self, buildDirection)
     self.buildDirection = buildDirection
+end
+
+-- If items at the end of the scroll are not selectable, max out the scroll in that direction.
+function ZO_ScrollList_SetScrollToExtent(self, scrollToExtent)
+    self.scrollToExtent = scrollToExtent
 end
 
 -- A controlWidth of nil will cause controls to be added Anchor TOPLEFT Anchor TOPRIGHT to fill the horizontal space of the parent control
@@ -1774,8 +1813,9 @@ local function GetDataControlDimensions(self, dataEntry)
     local controlHeight
     local dataTypeInfo = ZO_ScrollList_GetDataTypeTable(self, dataEntry.typeId)
     if self.mode == SCROLL_LIST_OPERATIONS then
-        controlWidth = dataTypeInfo.controlWidth
-        controlHeight = dataTypeInfo.controlHeight
+        local instanceData = dataEntry.data
+        controlWidth = dataTypeInfo:GetControlWidth(instanceData)
+        controlHeight = dataTypeInfo:GetControlHeight(instanceData)
     else
         controlHeight = dataTypeInfo.height
     end
@@ -1922,6 +1962,13 @@ function ZO_ScrollList_SelectNextDataInDirection(self, xDirection, yDirection)
 
         if bestIndex then
             ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[bestIndex].data)
+            if self.scrollToExtent then
+                if yDirection == ZO_SCROLL_MOVEMENT_DIRECTION_NEGATIVE and nextIndex == 0 and ZO_ScrollList_CanScrollUp(self) then
+                    ZO_ScrollList_ScrollDataIntoView(self, 1)
+                elseif yDirection == ZO_SCROLL_MOVEMENT_DIRECTION_POSITIVE and nextIndex >= numDataEntries and ZO_ScrollList_CanScrollDown(self) then
+                    ZO_ScrollList_ScrollDataIntoView(self, numDataEntries)
+                end
+            end
         end
     end
 

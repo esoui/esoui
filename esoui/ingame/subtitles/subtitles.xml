@@ -13,7 +13,7 @@
 
         <Label name="ZO_Subtitles_Text_Gamepad_Template" font="ZoFontGamepad42" virtual="true" />
 
-        <TopLevelControl name="ZO_Subtitles" layer="BACKGROUND" tier="LOW" level="0">
+        <TopLevelControl name="ZO_Subtitles" layer="BACKGROUND" tier="LOW" level="1">
             <Anchor point="BOTTOM" relativeTo="ZO_PlayerToPlayerAreaPromptContainerTarget" relativePoint="TOP" />
 
             <OnInitialized>

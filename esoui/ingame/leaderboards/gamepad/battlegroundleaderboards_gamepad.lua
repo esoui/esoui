@@ -1,8 +1,4 @@
-local ZO_BattlegroundLeaderboardsManager_Gamepad = ZO_BattlegroundLeaderboardsManager_Shared:Subclass()
-
-function ZO_BattlegroundLeaderboardsManager_Gamepad:New(...)
-    return ZO_BattlegroundLeaderboardsManager_Shared.New(self, ...)
-end
+ZO_BattlegroundLeaderboardsManager_Gamepad = ZO_BattlegroundLeaderboardsManager_Shared:Subclass()
 
 function ZO_BattlegroundLeaderboardsManager_Gamepad:Initialize(control)
     GAMEPAD_BATTLEGROUND_LEADERBOARD_FRAGMENT = ZO_SimpleSceneFragment:New(control)
@@ -10,23 +6,17 @@ function ZO_BattlegroundLeaderboardsManager_Gamepad:Initialize(control)
     ZO_BattlegroundLeaderboardsManager_Shared.Initialize(self, control, GAMEPAD_LEADERBOARDS, GAMEPAD_LEADERBOARDS_SCENE, GAMEPAD_BATTLEGROUND_LEADERBOARD_FRAGMENT)
 
     GAMEPAD_BATTLEGROUND_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                 if newState == SCENE_FRAGMENT_SHOWING then
-                                                    self:UpdateAllInfo()
-                                                    local NO_NAME, NO_ICON
-                                                    GAMEPAD_LEADERBOARDS:SetActiveCampaign(NO_NAME, NO_ICON)
-                                                 end
-                                             end)
+        if newState == SCENE_FRAGMENT_SHOWING then
+           self:UpdatePlayerInfo()
+           self:SendLeaderboardQuery()
+           local NO_NAME = nil 
+           local NO_ICON = nil
+           GAMEPAD_LEADERBOARDS:SetActiveCampaign(NO_NAME, NO_ICON)
+        end
+    end)
 
-    SYSTEMS:RegisterGamepadObject(BATTLEGROUND_LEADERBOARD_SYSTEM_NAME, self)
+    SYSTEMS:RegisterGamepadObject(ZO_BATTLEGROUND_LEADERBOARD_SYSTEM_NAME, self)
     GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self)
-end
-
-function ZO_BattlegroundLeaderboardsManager_Gamepad:PerformDeferredInitialization()
-    if self.isInitialized then return end
-
-    self:RegisterForEvents()
-
-    self.isInitialized = true
 end
 
 function ZO_BattlegroundLeaderboardsManager_Gamepad:RefreshHeaderPlayerInfo()

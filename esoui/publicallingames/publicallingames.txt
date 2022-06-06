@@ -25,6 +25,9 @@ EsoUI\PublicAllIngames\Tooltip\CurrencyTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\ItemTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\MarketTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\RewardTooltips.lua
+EsoUI\PublicAllIngames\Tooltip\TributeTooltips.lua
+
+EsoUI\PublicAllIngames\Gamepad\GamepadGamercard.lua
 
 EsoUI\PublicAllIngames\Dialogs\PublicAllIngamesDialogs.xml
 
@@ -65,3 +68,25 @@ EsoUI\PublicAllIngames\Tile\Gamepad\DailyRewardsTile_Gamepad.xml
 
 EsoUI\PublicAllIngames\Antiquities\AntiquityLoreDocument_Manager.lua
 EsoUI\PublicAllIngames\Antiquities\AntiquityLoreDocument_Manager.xml
+
+EsoUI\PublicAllIngames\Tribute\TributeData.lua
+EsoUI\PublicAllIngames\Tribute\TributeDataManager.lua
+EsoUI\PublicAllIngames\Tribute\TributeCard.lua
+EsoUI\PublicAllIngames\Tribute\TributeCard.xml
+EsoUI\PublicAllIngames\Tribute\TributePoolManager.lua
+EsoUI\PublicAllIngames\Tribute\TributePoolManager.xml
+EsoUI\PublicAllIngames\Tribute\TributeRewardsData.lua
+EsoUI\PublicAllIngames\Tribute\TributeRewardsDataManager.lua
+
+EsoUI\PublicAllIngames\Tribute\TributeCardTile_Shared.lua
+EsoUI\PublicAllIngames\Tribute\TributeCardTile_Shared.xml
+EsoUI\PublicAllIngames\Tribute\TributePatronTile_Shared.lua
+EsoUI\PublicAllIngames\Tribute\TributePatronTile_Shared.xml
+EsoUI\PublicAllIngames\Tribute\Keyboard\TributeCardTile_Keyboard.lua
+EsoUI\PublicAllIngames\Tribute\Keyboard\TributeCardTile_Keyboard.xml
+EsoUI\PublicAllIngames\Tribute\Keyboard\TributePatronTile_Keyboard.lua
+EsoUI\PublicAllIngames\Tribute\Keyboard\TributePatronTile_Keyboard.xml
+EsoUI\PublicAllIngames\Tribute\Gamepad\TributeCardTile_Gamepad.lua
+EsoUI\PublicAllIngames\Tribute\Gamepad\TributeCardTile_Gamepad.xml
+EsoUI\PublicAllIngames\Tribute\Gamepad\TributePatronTile_Gamepad.lua
+EsoUI\PublicAllIngames\Tribute\Gamepad\TributePatronTile_Gamepad.xml

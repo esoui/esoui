@@ -1010,6 +1010,10 @@ function ZO_CollectibleCategoryData:IsDLCCategory()
     return self.categorySpecialization == COLLECTIBLE_CATEGORY_SPECIALIZATION_DLC
 end
 
+function ZO_CollectibleCategoryData:IsTributePatronCategory()
+    return self.categorySpecialization == COLLECTIBLE_CATEGORY_SPECIALIZATION_TRIBUTE_PATRONS
+end
+
 function ZO_CollectibleCategoryData:IsStandardCategory()
     return self.categorySpecialization == COLLECTIBLE_CATEGORY_SPECIALIZATION_NONE
 end
@@ -1166,6 +1170,38 @@ function ZO_CollectibleCategoryData:HasAnyNewCompanionCollectibles()
     if self.isTopLevelCategory then
         for _, subcategoryData in ipairs(self.orderedSubcategories) do
             if subcategoryData:HasAnyNewCompanionCollectibles() then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function ZO_CollectibleCategoryData:HasAnyNewTributePatronCollectibles()
+    if NonContiguousCount(self.newCollectibleIdsCache) > 0 and self:IsTributePatronCategory() then
+        return true
+    end
+
+       if self.isTopLevelCategory then
+        for _, subcategoryData in ipairs(self.orderedSubcategories) do
+            if subcategoryData:HasAnyNewTributePatronCollectibles() then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function ZO_CollectibleCategoryData:HasAnyNewNonTributePatronCollectibles()
+    if NonContiguousCount(self.newCollectibleIdsCache) > 0 and not self:IsTributePatronCategory() then
+        return true
+    end
+
+    if self.isTopLevelCategory then
+        for _, subcategoryData in ipairs(self.orderedSubcategories) do
+            if subcategoryData:HasAnyNewNonTributePatronCollectibles() then
                 return true
             end
         end
@@ -1580,6 +1616,24 @@ end
 function ZO_CollectibleDataManager:HasAnyNewCompanionCollectibles()
     for _, categoryData in self:CategoryIterator() do
         if categoryData:HasAnyNewCompanionCollectibles() then
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_CollectibleDataManager:HasAnyNewTributePatronCollectibles()
+    for _, categoryData in self:CategoryIterator() do
+        if categoryData:HasAnyNewTributePatronCollectibles() then
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_CollectibleDataManager:HasAnyNewNonTributePatronCollectibles()
+    for _, categoryData in self:CategoryIterator() do
+        if categoryData:HasAnyNewNonTributePatronCollectibles() then
             return true
         end
     end

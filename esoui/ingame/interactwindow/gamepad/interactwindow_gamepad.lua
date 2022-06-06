@@ -227,8 +227,8 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
     end
 
     local parametricListRewards = {}
-    local confirmError
     local goldReward
+    local currenciesWithMaxWarning = {}
     for i, data in ipairs(rewardDataList) do
         if self:IsCurrencyReward(data.rewardType) then
             if data.rewardType == REWARD_TYPE_MONEY then
@@ -236,16 +236,24 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
             else
                 table.insert(parametricListRewards, data)
             end
-            --warn the player they aren't going to get their money when they hit complete
-            confirmError = self:TryGetMaxCurrencyWarningText(data.rewardType, data.amount)
+
+            if self:WouldCurrencyExceedMax(data.rewardType, data.amount) then
+                local currency = self:GetCurrencyTypeFromReward(data.rewardType)
+                table.insert(currenciesWithMaxWarning, GetCurrencyName(currency))
+            end
         end
     end
     for i, data in ipairs(rewardDataList) do
         if not self:IsCurrencyReward(data.rewardType) then
-            table.insert(parametricListRewards, data) 
+            table.insert(parametricListRewards, data)
         end
     end
 
+    local confirmError
+    if #currenciesWithMaxWarning > 0 then
+        local currencyList = ZO_GenerateCommaSeparatedListWithOr(currenciesWithMaxWarning)
+        confirmError = ZO_ERROR_COLOR:Colorize(zo_strformat(SI_QUEST_REWARD_MAX_CURRENCY_ERROR, currencyList))
+    end
 
     local titleData = {}
     titleData.canSelect = false
@@ -271,6 +279,10 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
         if rewardData.rewardType == REWARD_TYPE_AUTO_ITEM and rewardData.itemType == REWARD_ITEM_TYPE_ITEM then
             entry:InitializeInventoryVisualData(rewardData)
         else
+            if rewardData.rewardType == REWARD_TYPE_AUTO_ITEM and rewardData.itemType == REWARD_ITEM_TYPE_TRIBUTE_CARD_UPGRADE then
+                entry:SetNameColors(entry:GetColorsBasedOnQuality(rewardData.displayQuality or rewardData.quality))
+            end
+
             entry:SetFontScaleOnSelection(false)
             if rewardData.icon then
                 entry:AddIcon(rewardData.icon)
@@ -278,7 +290,10 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
         end
 
         entry.rewardData = rewardData
-        entry:SetStackCount(rewardData.amount)
+
+        if rewardData.rewardType ~= REWARD_TYPE_TRIBUTE_CLUB_EXPERIENCE then
+            entry:SetStackCount(rewardData.amount)
+        end
 
         self.itemList:AddEntry("ZO_QuestReward_Gamepad", entry)
     end

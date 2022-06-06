@@ -85,7 +85,7 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
     -- Adds Zone Stories to category list in Activity Finder
     local categoryData = ZONE_STORIES_MANAGER.GetCategoryData()
     local gamepadCategoryData = categoryData.gamepadData
-    ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:AddCategory(gamepadCategoryData, categoryData.priority)
+    ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:AddCategory(gamepadCategoryData, gamepadCategoryData.priority)
 
     GAMEPAD_ZONE_STORIES_SCENE:RegisterCallback("StateChange", function(oldState, newState)
                                                             if newState == SCENE_SHOWING then

@@ -1,0 +1,78 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TributeMechanicSelectorCard" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_CARD_UI_WIDTH" y="ZO_TRIBUTE_CARD_UI_HEIGHT" />
+            
+            <OnMouseUp>
+                self.object:OnMouseUp(button, upInside)
+            </OnMouseUp>
+            
+            <OnMouseEnter>
+                self.object:OnMouseEnter()
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.object:OnMouseExit()
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Tribute/tributeBackdrop_choice.dds" pixelRoundingEnabled="false" level="1">
+                    <AnchorFill />
+                    <TextureCoords left="ZO_TRIBUTE_CARD_LEFT_COORD" right="ZO_TRIBUTE_CARD_RIGHT_COORD" top="ZO_TRIBUTE_CARD_TOP_COORD" bottom="ZO_TRIBUTE_CARD_BOTTOM_COORD" />
+                    <Controls>
+                        <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Tribute/tributeBackdrop_choice_glow.dds" blendMode="ADD" pixelRoundingEnabled="false" level="2" hidden="true">
+                            <AnchorFill />
+                            <TextureCoords left="ZO_TRIBUTE_CARD_LEFT_COORD" right="ZO_TRIBUTE_CARD_RIGHT_COORD" top="ZO_TRIBUTE_CARD_TOP_COORD" bottom="ZO_TRIBUTE_CARD_BOTTOM_COORD" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+            
+                <Label name="$(parent)Text" wrapMode="ELLIPSIS" verticalAlignment="CENTER" horizontalAlignment="CENTER" level="3">
+                    <Anchor point="TOPLEFT" offsetX="35" offsetY="112" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-40" offsetY="-115" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_TributeMechanicSelector_TopLevel" tier="MEDIUM" hidden="true">
+            <OnInitialized>
+                ZO_TributeMechanicSelector_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)MechanicContainer" resizeToFitDescendents="true">
+                    <Anchor point="CENTER" relativeTo="GuiRoot" offsetY="-80" />
+                    <Controls>
+                        <Control name="$(parent)Mechanic1" inherits="ZO_TributeMechanicSelectorCard">
+                            <Anchor point="LEFT" />
+                        </Control>
+                        
+                        <Control name="$(parent)Mechanic2" inherits="ZO_TributeMechanicSelectorCard">
+                            <Anchor point="LEFT" relativeTo="$(parent)Mechanic1" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                        
+                        <Control name="$(parent)Mechanic3" inherits="ZO_TributeMechanicSelectorCard">
+                            <Anchor point="LEFT" relativeTo="$(parent)Mechanic2" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                        
+                        <Control name="$(parent)Mechanic4" inherits="ZO_TributeMechanicSelectorCard">
+                            <Anchor point="LEFT" relativeTo="$(parent)Mechanic3" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Instruction" horizontalAlignment="CENTER" text="SI_TRIBUTE_MECHANIC_SELECTOR_CHOOSE_ONE">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)MechanicContainer" relativePoint="TOP" offsetY="-20" />
+                </Label>
+            
+                <Texture name="$(parent)Underlay" alpha="0" excludeFromResizeToFitExtents="true" inheritScale="false" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+                    <OnMouseUp>
+                        ZO_TributeMechanicSelectorUnderlay_OnMouseUp(self, upInside)
+                    </OnMouseUp>
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

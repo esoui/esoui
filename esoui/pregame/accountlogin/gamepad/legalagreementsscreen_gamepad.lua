@@ -146,7 +146,7 @@ function ZO_LegalAgreementsScreen_Gamepad:Initialize(control)
     self.docData = nil
     if IsConsoleUI() then
         self.docProvider = ZO_ConsoleLegalDocsProvider:New()
-    elseif IsHeronUI() then
+    elseif IsHeronUI() or ZO_IsPCUI() then -- TODO pregame: rename ZO_HeronLegalDocsProvider?
         self.docProvider = ZO_HeronLegalDocsProvider:New()
     elseif IsGamepadUISupported() then
         internalassert(false, "platform eulas not supported")

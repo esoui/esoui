@@ -223,12 +223,12 @@ function ZO_UnitVisualizer_ArmorDamage:InitializeBarValues()
     if self.barInfo == nil then
         self.barInfo =
         {
-            [STAT_ARMOR_RATING] = self:CreateInfoTable(healthBarControl, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH, self.PlayArmorIncreaseAnimation, self.PlayArmorDecreaseAnimation),
-            [STAT_POWER] = self:CreateInfoTable(healthBarControl, STAT_POWER, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH, self.PlayPowerIncreaseAnimation, self.PlayPowerDecreaseAnimation),
+            [STAT_ARMOR_RATING] = self:CreateInfoTable(healthBarControl, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, self.PlayArmorIncreaseAnimation, self.PlayArmorDecreaseAnimation),
+            [STAT_POWER] = self:CreateInfoTable(healthBarControl, STAT_POWER, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, self.PlayPowerIncreaseAnimation, self.PlayPowerDecreaseAnimation),
         }
     else
-        self.barInfo[STAT_ARMOR_RATING].value = self:GetInitialStatValue(STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH)
-        self.barInfo[STAT_POWER].value = self:GetInitialStatValue(STAT_POWER, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH)
+        self.barInfo[STAT_ARMOR_RATING].value = self:GetInitialStatValue(STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+        self.barInfo[STAT_POWER].value = self:GetInitialStatValue(STAT_POWER, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
     end
 
     for stat, bar in pairs(self.barControls) do

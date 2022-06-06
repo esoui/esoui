@@ -85,7 +85,7 @@
             <Dimensions x="32" y="32" />
             <Anchor point="TOPLEFT" offsetY="10"/>
             <Controls>
-                <Texture name="$(parent)Texture" inherits="ZO_MultiIcon" mouseEnabled="true">
+                <Texture name="$(parent)Texture" inherits="ZO_MultiIcon" layer="CONTROLS" mouseEnabled="true">
                     <AnchorFill />
                     <OnMouseEnter>
                         ZO_InventorySlot_Status_OnMouseEnter(self)
@@ -162,7 +162,7 @@
 
         <Control name="ZO_PlayerInventorySlot" inherits="ZO_PlayerInventorySlot_Base" virtual="true">
             <Controls>
-                <Texture name="$(parent)TraitInfo" mouseEnabled="true" inherits="ZO_MultiIcon">
+                <Texture name="$(parent)TraitInfo" inherits="ZO_MultiIcon" layer="CONTROLS" mouseEnabled="true">
                     <Dimensions x="32" y="32" />
                     <Anchor point="RIGHT" relativeTo="$(parent)SellPrice" relativePoint="LEFT" offsetX="-5" />
                     <OnMouseEnter>

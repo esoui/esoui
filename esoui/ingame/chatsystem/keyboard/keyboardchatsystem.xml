@@ -46,7 +46,7 @@
 
                     <OnClicked>
                         ZO_ChatSystem_ShowOptions(self:GetParent())
-                    </OnClicked>                  
+                    </OnClicked>
                 </Button>
 
                 <Button name="$(parent)Mail" mouseOverBlendMode="ADD" inherits="ZO_ButtonBehaviorClickSound">
@@ -82,10 +82,10 @@
                         </Texture>
                     </Controls>
                 </Button>
-              
+
                 <Label name="$(parent)NumUnreadMail" font="ZoFontWinH4">
                     <Anchor point="LEFT" relativeTo="$(parent)Mail" relativePoint="RIGHT" offsetX="2" />
-                </Label>   
+                </Label>
               
                 <Button name="$(parent)Friends" mouseOverBlendMode="ADD" inherits="ZO_ButtonBehaviorClickSound">
                     <Dimensions x="32" y="32" />
@@ -111,7 +111,7 @@
               
                 <Label name="$(parent)NumOnlineFriends" font="ZoFontWinH4">
                     <Anchor point="LEFT" relativeTo="$(parent)Friends" relativePoint="RIGHT" offsetX="2" />
-                </Label>              
+                </Label>
               
                 <Button name="$(parent)Notifications" mouseOverBlendMode="ADD" inherits="ZO_ButtonBehaviorClickSound" >
                     <Dimensions x="32" y="32" />
@@ -155,6 +155,44 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Notifications" relativePoint="RIGHT" offsetX="2" />
                 </Label>
 
+                <Button name="$(parent)AgentChat" mouseOverBlendMode="ADD" inherits="ZO_ButtonBehaviorClickSound" inheritAlpha="false" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativeTo="$(parent)NumNotifications" relativePoint="RIGHT" offsetX="10" />
+
+                    <Textures
+                        normal="EsoUI/Art/ChatWindow/chat_cs_up.dds"
+                        pressed="EsoUI/Art/ChatWindow/chat_cs_down.dds"
+                        mouseOver="EsoUI/Art/ChatWindow/chat_cs_over.dds"
+                    />
+
+                    <OnMouseEnter>
+                        ZO_ChatSystem_OnAgentChatEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_ChatSystem_OnAgentChatExit(self)
+                    </OnMouseExit>
+
+                    <OnClicked>
+                        ZO_ChatSystem_OnAgentChatClicked(self)
+                    </OnClicked>
+
+                    <Controls>
+                        <Texture name="$(parent)Glow" tier="HIGH" textureFile="EsoUI/Art/ChatWindow/chat_cs_glow.dds" hidden="false" inheritAlpha="false">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                        <Texture name="$(parent)Burst" tier="HIGH" textureFile="EsoUI/Art/ChatWindow/chat_notification_burst.dds" blendMode="ADD" alpha="0" inheritAlpha="false">
+                            <Dimensions x="512" y="512"/>
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                        <Texture name="$(parent)Echo" tier="MEDIUM" textureFile="EsoUI/Art/ChatWindow/chat_cs_echo.dds" blendMode="ADD" alpha="0" inheritAlpha="false">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                    </Controls>
+                </Button>
+
                 <Button name="$(parent)Minimize" mouseOverBlendMode="ADD" >
                     <Dimensions x="32" y="32" />
                     <Anchor point="BOTTOMLEFT" offsetY="-6"/>
@@ -168,7 +206,7 @@
                     <OnClicked>
                         ZO_ChatSystem_OnMinMaxClicked()
                     </OnClicked>
-                </Button>               
+                </Button>
 
                 <Control name="$(parent)MinBar" hidden="true">
                     <Dimensions x="128" y="512"/>
@@ -194,17 +232,17 @@
                           />
 
                           <OnClicked>
-                            ZO_ChatSystem_OnMinMaxClicked()
+                              ZO_ChatSystem_OnMinMaxClicked()
                           </OnClicked>
                         </Button>
-                    </Controls>         
+                    </Controls>
                 </Control>
-              
+
                 <Control name="$(parent)TextEntry" override="true">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Minimize" relativePoint="BOTTOMRIGHT" offsetX="-6" offsetY="-13"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-23" offsetY="-13"/>
                     
-                    <Controls>                     
+                    <Controls>
                         <Label name="$(parent)Label" override="true" font="ZoFontChat" />
 
                         <Backdrop name="$(parent)Edit" override="true" inherits="ZO_SingleLineEditBackdrop_Keyboard">
@@ -214,7 +252,7 @@
                                     <Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-3"/>
                                 </EditBox>
                             </Controls>
-                        </Backdrop>                    
+                        </Backdrop>
                     </Controls>
                 </Control>
             </Controls>

@@ -1,0 +1,898 @@
+﻿<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_TributeModalUnderlayFade">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="0.85">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_TributeEndOfGameFadeIn">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_TributeEndOfGameFadeOut">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_TributeRewardItemsWipeIn">
+            <Animations>
+                <ScaleAnimation applyToChildControlName="ContainerNameMaskSimulator" delay="190" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_TributeRankChangeUp">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <TranslateAnimation duration="300" deltaY="-100">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name ="ZO_TributeRankChangeFadeOut">
+            <Animations>
+                <AlphaAnimation delay="500" duration="500" startAlpha="1" endAlpha="0">
+                    return ZO_EaseOutQuadratic(progress)
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_TributeLeaderboardWipeIn">
+            <Animations>
+                <ScaleAnimation applyToChildControlName="ContainerNameMaskSimulator" delay="190" duration="1500">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_TributeLeaderboardLossBounce" playbackType="PING_PONG" loopCount="1">
+            <Animations>
+                <ScaleAnimation duration="200" startScale="1" endScale="0.94">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_TributeLeaderboardWinBounce" playbackType="PING_PONG" loopCount="1">
+            <Animations>
+                <ScaleAnimation duration="200" startScale="1" endScale="1.06">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_TributeNextRankBounce" playbackType="PING_PONG" loopCount="1">
+            <Animations>
+                <ScaleAnimation duration="250" startScale="1" endScale="1.06">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_TributeRankUpScale">
+            <Animations>
+                <ScaleAnimation duration="1000" startScale="0" endScale="1.06">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+                <ScaleAnimation delay="1000" duration="300" startScale="1.06" endScale="1">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <!-- Icons Templates -->
+
+        <Control name="ZO_TributeRewardRowContainer_Control" inherits="ZO_RevealingControl" resizeToFitDescendents="true" virtual="true" />
+
+        <Control name="ZO_TributeRewardItem_Control_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Controls>
+                        <Label name="$(parent)StackCount" font="ZoFontWinH1" />
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontWinH1" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeRewardItem_Control_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Controls>
+                        <Label name="$(parent)StackCount" font="ZoFontGamepadBold27" />
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGamepadBold34" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeRewardItem_Control" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="64" y="64" />
+
+                    <Controls>
+                        <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false">
+                            <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1" />
+                        </Label>
+                        <Texture name="$(parent)MailIndicator" textureFile="EsoUI/Art/Mail/mail_inbox_unreadMessage.dds" inheritScale="false" hidden="true">
+                            <Anchor point="CENTER" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="-15" />
+                            <Dimensions x="32" y="32" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)Name" maxLineCount="2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
+                    <DimensionConstraints maxX="400" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Texture name="ZO_TributeSummary_Patron_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontCallout" />
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_TributeSummary_Patron_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepad42" />
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_TributeSummary_Patron" virtual="true">
+            <Dimensions x="175" y="175" />
+            <Anchor relativePoint="BOTTOM" />
+            <Controls>
+                <Texture name="$(parent)Indicator" level="1">
+                    <Dimensions x="175" y="175" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Label name="$(parent)Label" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="30" />
+                    <DimensionConstraints maxX="300" />
+                </Label>
+            </Controls>
+        </Texture>
+
+        <!-- MultiSegmentProgressBar Templates-->
+        <StatusBar name="ZO_TributeSummary_ArrowStatusBar_Keyboard_Template" inherits="ZO_ArrowStatusBarWithBG" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_genericFill.dds" layer="CONTROLS" level="0" virtual="true">
+            <Dimensions x="550" y="53" />
+            <LeadingEdge override="true" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_genericFill_leadingEdge.dds" width="25" height="53" />
+            <TextureCoords left="0" right="1" top="0" bottom="0.78125" />
+            <LeadingEdgeTextureCoords left="0" right="0.78125" top="0" bottom="0.78125" />
+
+            <Controls>
+                <StatusBar name="$(parent)Gloss" override="true" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_genericFill_gloss.dds" level="0">
+                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_large_genericFill_leadingEdge_gloss.dds" width="30" height="53" />
+                    <TextureCoords left="0" right="1" top="0" bottom="0.78125" />
+                    <LeadingEdgeTextureCoords left="0" right="0.78125" top="0" bottom="0.78125" />
+                </StatusBar>
+                <Control name="$(parent)BG" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Left" override="true" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_frame_bg.dds">
+                            <TextureCoords left="0" right="0.00977" top="0" bottom="0.78125" />
+                        </Texture>
+                        <Texture name="$(parent)Right" override="true" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_frame_bg.dds">
+                            <Dimensions x="30" />
+                            <TextureCoords left="0.5273" right="0.5566" top="0" bottom="0.78125" />
+                        </Texture>
+                        <Texture name="$(parent)Middle" override="true" layer="BACKGROUND" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_frame_bg.dds">
+                            <TextureCoords left="0.00977" right="0.5273" top="0" bottom="0.78125" />
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Overlay" override="true" tier="LOW">
+                    <Controls>
+                        <Texture name="$(parent)Left" override="true" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_frame.dds">
+                            <TextureCoords left="0" right="0.00977" top="0" bottom="0.78125" />
+                        </Texture>
+                        <Texture name="$(parent)Right" override="true" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_frame.dds">
+                            <Dimensions x="30" />
+                            <TextureCoords left="0.5273" right="0.5566" top="0" bottom="0.78125" />
+                        </Texture>
+                        <Texture name="$(parent)Middle" override="true" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_frame.dds">
+                            <TextureCoords left="0.00977" right="0.5273" top="0" bottom="0.78125" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_TributeSummary_ArrowStatusBar_Gamepad_Template" inherits="ZO_GamepadArrowStatusBarWithBGMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_genericFill.dds" tier="LOW" layer="CONTROLS" virtual="true">
+            <Dimensions x="550" y="56" />
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_genericFill_leadingEdge.dds" width="23" height="50" />
+            <LeadingEdgeTextureCoords left="0" right="0.71875" top="0" bottom="0.859375" />
+            <TextureCoords left="0" right="1" top="0" bottom="0.859375" />
+
+            <Controls>
+                <StatusBar name="$(parent)Gloss" override="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_genericFill_gloss.dds">
+                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_genericFill_leadingEdge_gloss.dds" width="23" height="50" />
+                    <LeadingEdgeTextureCoords left="0" right="0.71875" top="0" bottom="0.859375" />
+                    <TextureCoords left="0" right="1" top="0" bottom="0.859375" />
+                </StatusBar>
+                <Control name="$(parent)BG" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Left" override="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame_bg.dds">
+                            <TextureCoords left="0" right="0.00977" top="0" bottom="0.828125" />
+                        </Texture>
+                        <Texture name="$(parent)Right" override="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame_bg.dds">
+                            <Dimensions x="25" />
+                            <TextureCoords left="0.296875" right="0.6875" top="0" bottom="0.828125" />
+                        </Texture>
+                        <Texture name="$(parent)Middle" override="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame_bg.dds">
+                            <TextureCoords left="0.00977" right="0.296875" top="0" bottom="0.828125" />
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Overlay" override="true" tier="LOW" layer="CONTROLS">
+                    <Controls>
+                        <Texture name="$(parent)Left" override="true" tier="LOW" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame.dds">
+                            <TextureCoords left="0" right="0.109375" top="0" bottom="0.859375" />
+                        </Texture>
+                        <Texture name="$(parent)Right" override="true" tier="LOW" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame.dds">
+                            <Dimensions x="30" y="55" />
+                            <TextureCoords left="0.28125" right="0.75" top="0" bottom="0.859375" />
+                        </Texture>
+                        <Texture name="$(parent)Middle" override="true" tier="LOW" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_extraLarge_frame.dds">
+                            <TextureCoords left="0.109375" right="0.28125" top="0" bottom="0.859375" />
+                        </Texture>
+                    </Controls>
+
+                </Control>
+            </Controls>
+        </StatusBar>
+
+        <!-- Match Statistics -->
+
+        <Control name="ZO_TributeSummary_Statistics_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Backdrop">
+                    <Controls>
+                        <Label name="$(parent)Duration" font="ZoFontHeader4" />
+
+                        <Label name="$(parent)PrestigeLabel" font="ZoFontAnnounce" />
+
+                        <Texture name="$(parent)GoldIcon">
+                            <Controls>
+                                <Label name="$(parent)Text" font="ZoFontAnnounce" />
+                            </Controls>
+                        </Texture>
+
+                        <Texture name="$(parent)CardsIcon">
+                            <Controls>
+                                <Label name="$(parent)Text" font="ZoFontAnnounce" />
+                            </Controls>
+                        </Texture>
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeSummary_Statistics_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Backdrop">
+                    <Controls>
+                        <Label name="$(parent)Duration" font="ZoFontGamepadBold27" />
+
+                        <Label name="$(parent)PrestigeLabel" font="ZoFontGamepad34" />
+
+                        <Texture name="$(parent)GoldIcon">
+                            <Controls>
+                                <Label name="$(parent)Text" font="ZoFontGamepad34" />
+                            </Controls>
+                        </Texture>
+
+                        <Texture name="$(parent)CardsIcon">
+                            <Controls>
+                                <Label name="$(parent)Text" font="ZoFontGamepad34" />
+                            </Controls>
+                        </Texture>
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeSummary_Statistics" virtual="true">
+            <Controls>
+                <Texture name="$(parent)TopBorder" textureFile="EsoUI/Art/Tribute/tributeEndOfGameStatsBackdrop_Top.dds" addressMode="WRAP">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot" />
+                    <Dimensions y="64" />
+                    <OnRectWidthChanged>
+                        local textureCoordRight = newWidth / 512
+                        self:SetTextureCoords(0, textureCoordRight, 0, 1)
+                    </OnRectWidthChanged>
+                </Texture>
+                <Texture name="$(parent)Backdrop">
+                    <Anchor point="TOP" relativeTo="$(parent)TopBorder" relativePoint="BOTTOM" offsetX="-700"/>
+                    <Dimensions x="270" y="373" />
+                    <Controls>
+                        <Label name="$(parent)Duration">
+                            <Anchor point="TOP" offsetY="10" />
+                        </Label>
+
+                        <Label name="$(parent)PrestigeLabel">
+                            <Anchor point="TOP" relativeTo="$(parent)Duration" relativePoint="BOTTOM" offsetY="30" constrains="Y" />
+                            <Anchor point="CENTER" relativeTo="$(parent)Duration" constrains="X" />
+                            <Controls>
+                                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Tribute/tributeEndOfGame_prestige.dds">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-10" />
+                                </Texture>
+                            </Controls>
+                        </Label>
+
+                        <Texture name="$(parent)GoldIcon" textureFile="EsoUI/Art/Tribute/tributeEndOfGame_gold.dds">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="TOP" relativeTo="$(parent)PrestigeLabelIcon" relativePoint="BOTTOM" offsetY="20" />
+                            <Controls>
+                                <Label name="$(parent)Text">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="10" />
+                                </Label>
+                            </Controls>
+                        </Texture>
+
+                        <Texture name="$(parent)CardsIcon" textureFile="EsoUI/Art/Tribute/tributeEndOfGame_cards.dds">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="TOP" relativeTo="$(parent)GoldIcon" relativePoint="BOTTOM" offsetY="20" />
+                            <Controls>
+                                <Label name="$(parent)Text">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="10" />
+                                </Label>
+                            </Controls>
+                        </Texture>
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <!-- Match Status -->
+
+        <Control name="ZO_TributeSummary_TributeStatus_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Banner">
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontCallout3" />
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)PlayerLabel" font="ZoFontCallout2" />
+
+                <Label name="$(parent)OpponentLabel" font="ZoFontCallout2" />
+
+                <Control name ="$(parent)Prestige">
+                    <Controls>
+                        <Label name="$(parent)Divider" font="ZoFontCallout3" />
+                        <Label name="$(parent)PlayerValue" font="ZoFontCallout3" />
+                        <Label name="$(parent)OpponentValue" font="ZoFontCallout3" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeSummary_TributeStatus_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Banner">
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontGamepadBold54" />
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)PlayerLabel" font="ZoFontGamepadBold54" />
+
+                <Label name="$(parent)OpponentLabel" font="ZoFontGamepadBold54" />
+
+                <Control name ="$(parent)Prestige">
+                    <Controls>
+                        <Label name="$(parent)Divider" font="ZoFontGamepadBold54" />
+                        <Label name="$(parent)PlayerValue" font="ZoFontGamepadBold54" />
+                        <Label name="$(parent)OpponentValue" font="ZoFontGamepadBold54" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeSummary_TributeStatus" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Texture name="$(parent)Banner">
+                    <Dimensions x="820" y="160" />
+                    <Anchor point="CENTER" offsetY="-365"/>
+                    <Controls>
+                        <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                            <Anchor point="CENTER" />
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Tribute/tributeIcon_Large.dds">
+                    <Anchor point="TOP" relativeTo="$(parent)Banner" relativePoint="BOTTOM" offsetY="15" />
+                    <Dimensions x="250" y="250" />
+                </Texture>
+
+                <Label name="$(parent)PlayerLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetX="-250" offsetY="75"/>
+                    <DimensionConstraints maxX="400" />
+                </Label>
+
+                <Label name="$(parent)OpponentLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="250" offsetY="75" />
+                    <DimensionConstraints maxX="400" />
+                </Label>
+
+                <Control name="$(parent)Prestige" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)Divider" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="—">
+                            <Anchor point="CENTER" relativeTo="$(grandparent)Icon" offsetY="325"/>
+                        </Label>
+
+                        <Label name="$(parent)PlayerValue" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Divider" relativePoint="LEFT" offsetX="-30"/>
+                        </Label>
+
+                        <Label name="$(parent)OpponentValue" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="LEFT" relativeTo="$(parent)Divider" relativePoint="RIGHT" offsetX="30"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Patrons" hidden="true">
+                    <Controls>
+                        <Texture name="$(parent)Patron1" inherits="ZO_TributeSummary_Patron">
+                            <Anchor point="CENTER" relativeTo="$(grandparent)Icon" offsetX="-600" offsetY="400" />
+                        </Texture>
+
+                        <Texture name="$(parent)Patron2" inherits="ZO_TributeSummary_Patron">
+                            <Anchor point="CENTER" relativeTo="$(parent)Patron1" offsetX="400" />
+                        </Texture>
+
+                        <Texture name="$(parent)Patron3" inherits="ZO_TributeSummary_Patron">
+                            <Anchor point="CENTER" relativeTo="$(parent)Patron2" offsetX="400" />
+                        </Texture>
+
+                        <Texture name="$(parent)Patron4" inherits="ZO_TributeSummary_Patron">
+                            <Anchor point="CENTER" relativeTo="$(parent)Patron3" offsetX="400" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- Season Progression -->
+
+        <Control name="ZO_TributeSummary_TributeProgression_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontCallout">
+                    <Controls>
+                        <Texture name="$(parent)Backdrop">
+                            <Dimensions x="480" y="76" />
+                        </Texture>
+                    </Controls>
+                </Label>
+                <Texture name="$(parent)LeaderboardBackdrop">
+                    <Controls>
+                        <Label name="$(parent)LeaderboardLabel" font="ZoFontWinH1" />
+                    </Controls>
+                </Texture>
+                <Texture name="$(parent)RankUpIndicator">
+                    <Controls>
+                        <Label name="$(parent)IndicatorLabel" font="ZoFontCallout" />
+                        <Label name="$(parent)NewRankLabel" font="ZoFontCallout" />
+                    </Controls>
+                </Texture>
+                <Label name ="$(parent)RankChange" font="ZoFontWinH1" />
+                <StatusBar name="$(parent)ProgressBar" inherits="ZO_TributeSummary_ArrowStatusBar_Keyboard_Template">
+                    <Controls>
+                        <Label name="$(parent)ProgressNumber" font="ZoFontWinH3"/>
+                        <Texture name="$(parent)CurrentRankIcon">
+                            <Controls>
+                                <Label name="$(parent)CurrentRankLabel" font="ZoFontWinH2" />
+                            </Controls>
+                        </Texture>
+                        <Texture name="$(parent)NextRankIcon">
+                            <Controls>
+                                <Label name="$(parent)NextRankLabel" font="ZoFontWinH2" />
+                            </Controls>
+                        </Texture>
+                    </Controls>
+                </StatusBar>
+                <Control name="$(parent)PlacementBarPrevious">
+                    <Controls>
+                        <Texture name="$(parent)CurrentRankIcon">
+                            <Controls>
+                                <Label name="$(parent)CurrentRankLabel" font="ZoFontWinH1" />
+                            </Controls>
+                        </Texture>
+
+                        <Texture name="$(parent)NextRankIcon">
+                            <Controls>
+                                <Label name="$(parent)NextRankLabel" font="ZoFontWinH1" />
+                            </Controls>
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)PlacementBarNew">
+                    <Controls>
+                        <Label name="$(parent)MatchRecordText" font="ZoFontWinH3" />
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeSummary_TributeProgression_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontGamepadBold48">
+                    <Controls>
+                        <Texture name="$(parent)Backdrop">
+                            <Dimensions x="480" y="86" />
+                        </Texture>
+                    </Controls>
+                </Label>
+                <Texture name="$(parent)LeaderboardBackdrop">
+                    <Controls>
+                        <Label name="$(parent)LeaderboardLabel" font="ZoFontGamepad42" />
+                    </Controls>
+                </Texture>
+                <Texture name="$(parent)RankUpIndicator">
+                    <Controls>
+                        <Label name="$(parent)IndicatorLabel" font="ZoFontGamepadBold48" />
+                        <Label name="$(parent)NewRankLabel" font="ZoFontGamepadBold48" />
+                    </Controls>
+                </Texture>
+                <Label name ="$(parent)RankChange" font="ZoFontGamepadBold48" />
+                <StatusBar name="$(parent)ProgressBar" inherits="ZO_TributeSummary_ArrowStatusBar_Gamepad_Template">
+                    <Dimensions x="545" y="50" />
+                    <Controls>
+                        <Label name="$(parent)ProgressNumber" font="ZoFontGamepad27"/>
+                        <Texture name="$(parent)CurrentRankIcon">
+                            <Controls>
+                                <Label name="$(parent)CurrentRankLabel" font="ZoFontGamepadBold34" />
+                            </Controls>
+                        </Texture>
+                        <Texture name="$(parent)NextRankIcon">
+                            <Controls>
+                                <Label name="$(parent)NextRankLabel" font="ZoFontGamepadBold34" />
+                            </Controls>
+                        </Texture>
+                    </Controls>
+                </StatusBar>
+                <StatusBar name="$(parent)PlacementBarPrevious">
+                    <Controls>
+                        <Texture name="$(parent)CurrentRankIcon">
+                            <Controls>
+                                <Label name="$(parent)CurrentRankLabel" font="ZoFontGamepadBold34" />
+                            </Controls>
+                        </Texture>
+
+                        <Texture name="$(parent)NextRankIcon">
+                            <Controls>
+                                <Label name="$(parent)NextRankLabel" font="ZoFontGamepadBold34" />
+                            </Controls>
+                        </Texture>
+                    </Controls>
+                </StatusBar>
+                <StatusBar name="$(parent)PlacementBarNew">
+                    <Controls>
+                        <Label name="$(parent)MatchRecordText" font="ZoFontGamepad27" />
+                    </Controls>
+                </StatusBar>
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeSummary_TributeProgression" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_TRIBUTE_SUMMARY_PROGRESSION" modifyTextType="UPPERCASE">
+                    <Controls>
+                        <Texture name="$(parent)Backdrop" textureFile="EsoUI/Art/Tribute/tributeEndOfGame_progressionBackdrop.dds">
+                            <Anchor point="CENTER" />
+                        </Texture>
+                    </Controls>
+                </Label>
+
+                <Texture name="$(parent)LeaderboardBackdrop" inherits="ZO_RevealingControl" layer="CONTROLS">
+                    <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="-10" />
+                    <Dimensions x="512" y="256" />
+                    <Controls>
+                        <Label name="$(parent)LeaderboardLabel" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                            <Anchor point="CENTER" offsetY="25"/>
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Control name="$(parent)LeaderboardFlareContainer" layer="BACKGROUND">
+                    <Anchor point="CENTER" relativeTo="$(parent)LeaderboardBackdrop" offsetY="25" />
+                    <Dimensions x="465" y="96" />
+                </Control>
+
+                <Texture name="$(parent)RankUpIndicator" scale="0" level="1">
+                    <Dimensions x="125" y="125" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="100" />
+                    <Controls>
+                        <Label name="$(parent)IndicatorLabel" text="SI_TRIBUTE_SUMMARY_RANK_UP">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-30" />
+                        </Label>
+                        <Label name="$(parent)NewRankLabel">
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="30" />
+                        </Label>
+                        <Control name="$(parent)RankUpFlareContainer" level="0">
+                            <Anchor point="CENTER" />
+                            <Dimensions x="175" y="175" />
+                        </Control>
+                    </Controls>
+                </Texture>
+
+                <Label name ="$(parent)RankChange" inheritAlpha="false" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_PERSONALITY_EMOTES">
+                    <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="180" />
+                </Label>
+
+                <StatusBar name="$(parent)ProgressBar" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_PERSONALITY_EMOTES">
+                    <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="240" />
+
+                    <Controls>
+                        <Label name="$(parent)ProgressNumber" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOP" relativePoint="BOTTOMLEFT" offsetY="20" />
+                        </Label>
+
+                        <Texture name="$(parent)CurrentRankIcon" tier="MEDIUM">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="75" />
+                            <Dimensions x="150" y="150" />
+                            <Controls>
+                                <Label name="$(parent)CurrentRankLabel">
+                                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20" />
+                                </Label>
+                            </Controls>
+                        </Texture>
+
+                        <Texture name="$(parent)NextRankIcon" tier="MEDIUM" level="1">
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-75" />
+                            <Dimensions x="150" y="150" />
+                            <Controls>
+                                <Label name="$(parent)NextRankLabel">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="20" />
+                                </Label>
+                                <Control name="$(parent)NextRankIconFlareContainer" level="0">
+                                    <Anchor point="CENTER" />
+                                    <Dimensions x="150" y="150" />
+                                </Control>
+                            </Controls>
+                        </Texture>
+                    </Controls>
+                </StatusBar>
+
+                <Control name="$(parent)PlacementBarPrevious" level="0">
+                    <Anchor point="CENTER" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="240" />
+                    <Dimensions x="550" y="53"/>
+
+                    <Controls>
+                        <Texture name="$(parent)CurrentRankIcon" textureFile="EsoUI/Art/Tribute/tributeRankIcon_1.dds" tier="MEDIUM">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="75" />
+                            <Dimensions x="150" y="150" />
+                            <Controls>
+                                <Label name="$(parent)CurrentRankLabel" text="SI_TRIBUTETIER1">
+                                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20" />
+                                </Label>
+                            </Controls>
+                        </Texture>
+
+                        <Texture name="$(parent)NextRankIcon" textureFile="EsoUI/Art/Tribute/tributeRankIcon_2.dds" tier="MEDIUM">
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-75" />
+                            <Dimensions x="150" y="150" />
+                            <Controls>
+                                <Label name="$(parent)NextRankLabel" text="SI_TRIBUTETIER2">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="20" />
+                                </Label>
+                            </Controls>
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)PlacementBarNew" level="1">
+                    <Anchor point="CENTER" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="240" />
+                    <Dimensions x="550" y="53" />
+
+                    <Controls>
+                        <Label name="$(parent)MatchRecordText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider">
+                    <Anchor point="TOP" relativeTo="$(parent)ProgressBar" relativePoint="BOTTOM" offsetY="65" />
+                    <Dimensions x="1000" y="8" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- Rewards -->
+
+        <Control name="ZO_TributeSummary_ClubRank_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Rank" font="ZoFontCallout2" />
+
+                <StatusBar name="$(parent)Bar" inherits="ZO_ArrowStatusBarWithBG" mouseEnabled="true">
+                    <Dimensions y="20" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Rank" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="-12" />
+                    <Anchor point="RIGHT" constrains="X" />
+                    <OnMouseEnter>
+                        ZO_TributeSummary_ClubRankProgressBar_Keyboard_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_TributeSummary_ClubRankProgressBar_Keyboard_OnMouseExit()
+                    </OnMouseExit>
+                </StatusBar>
+
+                <Label name="$(parent)RankType" font="ZoFontHeader2">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT" offsetX="2" offsetY="3" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeSummary_ClubRank_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Rank" font="ZoFontGamepad42" />
+
+                <StatusBar name="$(parent)Bar" tier="MEDIUM" inherits="ZO_GamepadStatusBarMedium">
+                    <Dimensions y="22" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Rank" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="-6" />
+                    <Anchor point="RIGHT" constrains="X" />
+                    <Controls>
+                        <Control name="$(parent)BG" inherits="ZO_GamepadArrowStatusBarBGMedium" tier="LOW"/>
+                        <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium" />
+                    </Controls>
+                </StatusBar>
+
+                <Label name="$(parent)RankType" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:ZO_NORMAL_TEXT">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT" offsetX="1" offsetY="7" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeSummary_ClubRank" virtual="true">
+            <Controls>
+                <Label name="$(parent)Rank">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <StatusBar name="$(parent)Bar" />
+
+                <Label name="$(parent)RankType" modifyTextType="UPPERCASE" />
+
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Rank" relativePoint="LEFT" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeSummary_TributeReward_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Header">
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontCallout3" />
+                        <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template" />
+                    </Controls>
+                </Control>
+                <Control name="$(parent)ClubRank" inherits="ZO_TributeSummary_ClubRank_Keyboard_Template" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeSummary_TributeReward_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Header">
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontGamepadBold54" />
+                        <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" />
+                    </Controls>
+                </Control>
+                <Control name="$(parent)ClubRank" inherits="ZO_TributeSummary_ClubRank_Gamepad_Template" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeSummary_TributeReward" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Control name="$(parent)Header">
+                    <Anchor point="CENTER" offsetY="-365" />
+                    <Controls>
+                        <Label name="$(parent)Text" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_TRIBUTE_SUMMARY_REWARDS">
+                            <Anchor point="CENTER" />
+                        </Label>
+
+                        <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider">
+                            <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="20" />
+                            <Dimensions x="500" y="8" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ClubRank" inherits="ZO_TributeSummary_ClubRank">
+                    <Dimensions x="315" y="50" />
+                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-60" offsetY="75"/>
+                </Control>
+
+                <Control name="$(parent)MatchItems" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="440"/>
+                </Control>
+
+                <Control name="$(parent)RankUpItems" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="440"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- Top Level -->
+
+        <TopLevelControl name="ZO_TributeSummaryTopLevel" tier="MEDIUM" layer="BACKGROUND" level="1" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_TributeSummary_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)ModalUnderlay" color="000000" mouseEnabled="true">
+                    <AnchorFill />
+                    <OnMouseWheel />
+                </Texture>
+
+                <Control name="$(parent)Keybind" inherits="ZO_KeybindButton">
+                    <Anchor point="CENTER" offsetY="500" />
+                </Control>
+
+                <Control name="$(parent)Statistics" inherits="ZO_TributeSummary_Statistics" />
+
+                <Control name="$(parent)Status" inherits="ZO_TributeSummary_TributeStatus" />
+
+                <Control name="$(parent)Progression" inherits="ZO_TributeSummary_TributeProgression" />
+
+                <Control name="$(parent)Rewards" inherits="ZO_TributeSummary_TributeReward" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

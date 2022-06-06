@@ -23,6 +23,7 @@ function ZO_UniversalDeconstruction_Gamepad:Initialize(control)
     local function OnCraftingInteractStarted(eventCode, craftingType, sameStation, craftingMode)
         if self.CanSceneShowForCraftingMode(craftingMode) then
             SCENE_MANAGER:Show("universalDeconstructionSceneGamepad")
+            GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.UNIVERSAL_DECONSTRUCTION_SUCCESS, SOUNDS.UNIVERSAL_DECONSTRUCTION_FAIL)
         end
     end
     self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, OnCraftingInteractStarted)

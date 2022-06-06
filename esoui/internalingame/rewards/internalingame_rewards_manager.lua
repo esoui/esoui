@@ -24,7 +24,7 @@ function InternalIngameRewardsManager:GetCollectibleEntryInfo(rewardId, parentCh
     return nil
 end
 
-function InternalIngameRewardsManager:GetListOfRewardNamesFromLastCodeRedemption(rewardId, parentChoice)
+function InternalIngameRewardsManager:GetListOfRewardNamesFromLastCodeRedemption()
     local rewardNames = {}
     local numRewards = GetNumRewardIdsFromLastCodeRedemption()
     for rewardIndex = 1, numRewards do

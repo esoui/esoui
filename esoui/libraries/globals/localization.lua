@@ -199,24 +199,23 @@ do
     end
 end
 
-function ZO_GenerateCommaSeparatedList(argumentTable)
+function ZO_GenerateDelimiterSeparatedListWithCustomFinalDelimiter(argumentTable, delimiter, finalDelimiter, finalDelimiterIfListLengthIsTwo)
     if argumentTable ~= nil and #argumentTable > 0 then
         local numArguments = #argumentTable
         -- If there's only one item in the list, the string is just the first item
         if numArguments == 1 then
             return argumentTable[1]
         else
-            -- loop through the first through the second to last element adding commas in between
+            -- loop through the first through the second to last element adding the delimiter in between
             -- don't add the last since we will use a different separator for it
-            local listString = table.concat(argumentTable, GetString(SI_LIST_COMMA_SEPARATOR), 1, numArguments - 1)
+            local listString = table.concat(argumentTable, delimiter, 1, numArguments - 1)
 
-            -- add the last element of the array to the list using the ", and" separator
-            local finalSeparator = SI_LIST_COMMA_AND_SEPARATOR
-            -- if there are only two items in the list, we want to use "and" without a comma
-            if numArguments == 2 then
-                finalSeparator = SI_LIST_AND_SEPARATOR
+            -- add the last element of the array to the list using finalDelimiter or finalDelimiterIfListLengthIsTwo as appropriate
+            local finalSeparator = finalDelimiter
+            if numArguments == 2 and finalDelimiterIfListLengthIsTwo then
+                finalSeparator = finalDelimiterIfListLengthIsTwo
             end
-            listString = string.format('%s%s%s', listString, GetString(finalSeparator), argumentTable[numArguments])
+            listString = string.format('%s%s%s', listString, finalSeparator, argumentTable[numArguments])
             return listString
         end
     else
@@ -224,28 +223,36 @@ function ZO_GenerateCommaSeparatedList(argumentTable)
     end
 end
 
-function ZO_GenerateCommaSeparatedListWithoutAnd(argumentTable)
+function ZO_GenerateCommaSeparatedListWithAnd(argumentTable)
+    return ZO_GenerateDelimiterSeparatedListWithCustomFinalDelimiter(argumentTable, GetString(SI_LIST_COMMA_SEPARATOR), GetString(SI_LIST_COMMA_AND_SEPARATOR), GetString(SI_LIST_AND_SEPARATOR))
+end
+
+function ZO_GenerateCommaSeparatedListWithOr(argumentTable)
+    return ZO_GenerateDelimiterSeparatedListWithCustomFinalDelimiter(argumentTable, GetString(SI_LIST_COMMA_SEPARATOR), GetString(SI_LIST_COMMA_OR_SEPARATOR), GetString(SI_LIST_OR_SEPARATOR))
+end
+
+function ZO_GenerateDelimiterSeparatedList(argumentTable, delimiter)
     if argumentTable ~= nil then
-        return table.concat(argumentTable, GetString(SI_LIST_COMMA_SEPARATOR))
+        return table.concat(argumentTable, delimiter)
     else
         return ""
     end
+end
+
+function ZO_GenerateCommaSeparatedListWithoutAnd(argumentTable)
+    return ZO_GenerateDelimiterSeparatedList(argumentTable, GetString(SI_LIST_COMMA_SEPARATOR))
+end
+
+function ZO_GenerateSpaceSeparatedList(argumentTable)
+    return ZO_GenerateDelimiterSeparatedList(argumentTable, GetString(SI_LIST_SPACE_SEPARATOR))
 end
 
 function ZO_GenerateNewlineSeparatedList(argumentTable)
-    if argumentTable ~= nil then
-        return table.concat(argumentTable, "\n")
-    else
-        return ""
-    end
+    return ZO_GenerateDelimiterSeparatedList(argumentTable, "\n")
 end
 
 function ZO_GenerateParagraphSeparatedList(argumentTable)
-    if argumentTable ~= nil then
-        return table.concat(argumentTable, "\n\n")
-    else
-        return ""
-    end
+    return ZO_GenerateDelimiterSeparatedList(argumentTable, "\n\n")
 end
 
 

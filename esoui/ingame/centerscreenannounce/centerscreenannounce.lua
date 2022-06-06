@@ -23,7 +23,7 @@ local SMALL_TEXT_FONT_KEYBOARD = "ZoFontCenterScreenAnnounceSmall"
 local SMALL_TEXT_FONT_GAMEPAD = "ZoFontGamepad42"
 
 local COUNTDOWN_TEXT_FONT_KEYBOARD = "ZoFontCallout3"
-local COUNTDOWN_TEXT_FONT_GAMEPAD = "ZoFontGamepadBold61"
+local COUNTDOWN_TEXT_FONT_GAMEPAD = "ZoFontGamepadBold54"
 
 local SMALL_TEXT_SPACING_KEYBOARD = 0
 local SMALL_TEXT_SPACING_GAMEPAD = 10
@@ -187,6 +187,14 @@ end
 
 function ZO_CenterScreenMessageParams:GetLifespanMS()
     return self.lifespanMS
+end
+
+function ZO_CenterScreenMessageParams:MarkShowBackground()
+    self.showBackground = true
+end
+
+function ZO_CenterScreenMessageParams:GetShowBackground()
+    return self.showBackground
 end
 
 function ZO_CenterScreenMessageParams:MarkSuppressIconFrame()
@@ -541,7 +549,7 @@ function ZO_CenterScreenAnnouncementLargeLine:Initialize(control)
     ZO_CenterScreenAnnouncementLine.Initialize(self, control)
 
     self.largeText = self.control:GetNamedChild("Text")
-    self.smallCombinedText = self.largeText:GetNamedChild("Combined")    
+    self.smallCombinedText = self.largeText:GetNamedChild("Combined")
     self.smallCombinedIcon = self.smallCombinedText:GetNamedChild("Icon")
     self.smallCombinedIconBG = self.smallCombinedText:GetNamedChild("IconBG")
     self.smallCombinedIconFrame = self.smallCombinedText:GetNamedChild("IconFrame")
@@ -564,6 +572,9 @@ function ZO_CenterScreenAnnouncementLargeLine:Reset()
     self.smallCombinedIcon:SetHidden(true)
     self.raidCompleteContainer:SetHidden(true)
     self.wipeAnimationTimeline:Stop()
+    self.wipeFadeAnimationTimeline:Stop()
+
+    self.control:SetAlpha(1)
 
     if self.scryingIcons then
         for _, iconTexture in ipairs(self.scryingIcons) do
@@ -697,16 +708,25 @@ function ZO_CenterScreenAnnouncementLargeLine:CreateTimelines()
     local onWipeInEnd = function() self:OnWipeInComplete() end
     local onWipeOutBegin = ZO_CenterScreenAnnouncementLargeLine.SetupWipeOut
     self.wipeAnimationTimeline = self:CreateWipeAnimation("CenterScreenLargeTextWipe", onTimelineStopped, DEFAULT_FADE_OUT_TIME_MS, expiringCallback, onWipeInBegin, onWipeOutBegin, onWipeInEnd)
+    self.wipeFadeAnimationTimeline = self:CreateWipeAnimation("CenterScreenLargeTextFade", onTimelineStopped, DEFAULT_FADE_OUT_TIME_MS, expiringCallback, onWipeInBegin, onWipeOutBegin, onWipeInEnd)
 end
 
 function ZO_CenterScreenAnnouncementLargeLine:SetWipeTimelineLifespan(lifespan)
-    local fadeOutAnimation = self.wipeAnimationTimeline:GetAnimation(2)
-    self.wipeAnimationTimeline:SetAnimationOffset(fadeOutAnimation, lifespan)
+    local wipeOutAnimation = self.wipeAnimationTimeline:GetAnimation(2)
+    self.wipeAnimationTimeline:SetAnimationOffset(wipeOutAnimation, lifespan)
     self.wipeAnimationTimeline:SetCallbackOffset(ZO_CenterScreenAnnouncementLargeLine.ExpiringCallback, lifespan)
+
+    local fadeOutAnimation = self.wipeFadeAnimationTimeline:GetAnimation(2)
+    self.wipeFadeAnimationTimeline:SetAnimationOffset(fadeOutAnimation, lifespan)
+    self.wipeFadeAnimationTimeline:SetCallbackOffset(ZO_CenterScreenAnnouncementLargeLine.ExpiringCallback, lifespan)
 end
 
 function ZO_CenterScreenAnnouncementLargeLine:PlayWipeAnimation()
     self.wipeAnimationTimeline:PlayFromStart()
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:PlayWipeFadeAnimation()
+    self.wipeFadeAnimationTimeline:PlayFromStart()
 end
 
 function ZO_CenterScreenAnnouncementLargeLine:GetLineType()
@@ -956,9 +976,25 @@ do
         self.smallLineContainer = control:GetNamedChild("SmallLineContainer")
         self.majorLineContainer = control:GetNamedChild("MajorLineContainer")
         self.countdownLineContainer = control:GetNamedChild("CountdownLineContainer")
+        self.backgroundContainer = control:GetNamedChild("BackgroundContainer")
+
+        local backgroundContainerFadeInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CenterScreenBackgroundFadeIn", self.backgroundContainer)
+        backgroundContainerFadeInTimeline:SetHandler("OnPlay", function()
+            self.isBackgroundAnimating = true
+            self.backgroundContainer:SetHidden(false) 
+        end)
+        self.backgroundContainerFadeInTimeline = backgroundContainerFadeInTimeline
+
+        local backgroundContainerFadeOutTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CenterScreenBackgroundFadeOut", self.backgroundContainer)
+        backgroundContainerFadeOutTimeline:SetHandler("OnStop", function(timeline, completedPlayback)
+            self.isBackgroundAnimating = false
+            self.backgroundContainer:SetHidden(true) 
+        end)
+        self.backgroundContainerFadeOutTimeline = backgroundContainerFadeOutTimeline
+
         local majorContainerTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CenterScreenMajorTextContainerExpand", self.majorLineContainer)
-        local containerHieghtAnimation = majorContainerTimeline:GetFirstAnimation()
-        containerHieghtAnimation:SetUpdateFunction(function(animation, progress) self:SetMajorLineContainerHeight(progress) end)
+        local containerHeightAnimation = majorContainerTimeline:GetFirstAnimation()
+        containerHeightAnimation:SetUpdateFunction(function(animation, progress) self:SetMajorLineContainerHeight(progress) end)
         majorContainerTimeline:SetHandler("OnStop", function(timeline, completedPlayback) self:OnMajorLineContainerAnimationComplete(completedPlayback) end)
         self.majorLineContainerTimeline = majorContainerTimeline
 
@@ -1166,6 +1202,13 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
     }
 
+    local ALLOWED_TYPES_DURING_TRIBUTE =
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+    }
+
     function CenterScreenAnnounce:CanDisplayMessage(category, csaType)
         -- Early out if category is not of scrying category while showing scrying or map mode dig sites
         if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_DIG_SITES) and category ~= CSA_CATEGORY_SCRYING_PROGRESS_TEXT then
@@ -1181,7 +1224,16 @@ do
             return false
         end
 
+        -- Early out if the message type can't be shown during tribute
+        if TRIBUTE_FRAGMENT:IsShowing() and not ALLOWED_TYPES_DURING_TRIBUTE[csaType] then
+            return false
+        end
+
         if self.isWaitingOnExternalHandle then
+            return false
+        end
+
+        if self.isBackgroundAnimating then
             return false
         end
 
@@ -1496,7 +1548,7 @@ local setupFunctions =
 
         largeMessageLine:SetLargeText(messageParams:GetMainText())
         largeMessageLine:SetSmallCombinedText(messageParams:GetSecondaryText())
-        
+
         -- check for an overriding lifespan coming from the handlers, if not stick with the default        
         local lifespanMS = messageParams:GetLifespanMS()
 
@@ -1521,7 +1573,20 @@ local setupFunctions =
             local ANIMATION = nil
             largeMessageLine.SetupWipeIn(ANIMATION, largeMessageControl)
         else
-            largeMessageLine:PlayWipeAnimation()
+            if messageParams:GetShowBackground() then
+                local backgroundControl = self.backgroundContainer:GetNamedChild("BG")
+                backgroundControl:ClearAnchors()
+                backgroundControl:SetAnchor(TOP, largeMessageLine.largeText, TOP, 0, -70)
+                if messageParams:GetSecondaryText() then
+                    backgroundControl:SetAnchor(BOTTOM, largeMessageLine.smallCombinedText, BOTTOM, 0, 80)
+                else
+                    backgroundControl:SetAnchor(BOTTOM, largeMessageLine.largeText, BOTTOM, 0, 70)
+                end
+                self.backgroundContainerFadeInTimeline:PlayFromStart()
+                largeMessageLine:PlayWipeFadeAnimation()
+            else
+                largeMessageLine:PlayWipeAnimation()
+            end
             self.isBeforeMessageExpiring = true 
         end
 
@@ -1622,9 +1687,14 @@ local setupFunctions =
 }
 
 function CenterScreenAnnounce:CallExpiringCallback(announcementLine)
-    announcementLine:GetMessageParams():CallExpiringCallback()
+    local messageParams = announcementLine:GetMessageParams()
+    messageParams:CallExpiringCallback()
 
     self.isBeforeMessageExpiring = false
+
+    if messageParams:GetCategory() == CSA_CATEGORY_LARGE_TEXT and messageParams:GetShowBackground() then
+        self.backgroundContainerFadeOutTimeline:PlayFromStart()
+    end
 
     if PLAYER_PROGRESS_BAR:GetOwner() == self then
         PLAYER_PROGRESS_BAR:SetHoldBeforeFadeOut(false)
@@ -1645,11 +1715,19 @@ function CenterScreenAnnounce:RemoveAllCSAsOfAnnounceType(announceType)
             if line.messageParams and line.messageParams.csaType == announceType then
                 --The animations for each of the line types are stored in different locations, so we need a separate implementation for each type
                 if lineStyle == CSA_LINE_TYPE_LARGE then
-                    line.wipeAnimationTimeline:PlayInstantlyToEnd()
+                    if line.messageParams:GetShowBackground() then
+                        line.wipeFadeAnimationTimeline:PlayInstantlyToEnd()
+                    else
+                        line.wipeAnimationTimeline:PlayInstantlyToEnd()
+                    end
                 elseif lineStyle == CSA_LINE_TYPE_SMALL then
                     line.translateTimeline:PlayInstantlyToEnd(true)
                     line.fadeInTimeline:PlayInstantlyToEnd(true)
                     line.fadeOutTimeline:PlayInstantlyToEnd()
+                elseif lineStyle == CSA_LINE_TYPE_COUNTDOWN then
+                    line.countdownLoopAnimationTimeline:PlayInstantlyToEnd(true)
+                    line.countdownBufferAnimationTimeline:PlayInstantlyToEnd(true)
+                    line.countdownEndImageAnimationTimeline:PlayInstantlyToEnd()
                 end
             end
         end
@@ -1676,9 +1754,11 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_TRIBUTE_CARD_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_CRAFTING_RESULTS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED] = true,
     }
 
     -- Types that if they were to happen while scrying for an antiquity
@@ -1697,11 +1777,13 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_TRIBUTE_CARD_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_TIMED_ACTIVITY_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED] = true,
     }
 
     -- Types that if they were to happen while digging for an antiquity
@@ -1720,11 +1802,40 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_TRIBUTE_CARD_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_TIMED_ACTIVITY_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED] = true,
+    }
+
+    -- Types that if they were to happen while showing tribute
+    -- will be stored and shown after the tribute is over
+    local ALLOWED_QUEUE_TYPES_WHILE_IN_TRIBUTE =
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_TRIBUTE_CARD_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TIMED_ACTIVITY_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED] = true,
     }
 
     function CenterScreenAnnounce:AddMessageWithParams(messageParams)
@@ -1763,6 +1874,12 @@ do
 
             -- prevent unwanted announcements from queuing when the user is digging for antiquities
             if ANTIQUITY_DIGGING_FRAGMENT:IsShowing() and not ALLOWED_QUEUE_TYPES_WHILE_ANTIQUITIES_DIGGING[csaType] then
+                self.messageParamsPool:ReleaseObject(messageParams.key)
+                return
+            end
+
+            -- prevent unwanted announcements from queuing when the user is in tribute
+            if TRIBUTE_FRAGMENT:IsShowing() and not ALLOWED_QUEUE_TYPES_WHILE_IN_TRIBUTE[csaType] then
                 self.messageParamsPool:ReleaseObject(messageParams.key)
                 return
             end

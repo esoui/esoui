@@ -6,10 +6,11 @@ ZO_GAMEPAD_OPTIONS_CATEGORY_SORT_ORDER =
     [SETTING_PANEL_GAMEPLAY] = 30,
     [SETTING_PANEL_CAMERA] = 40,
     [SETTING_PANEL_INTERFACE] = 50,
-    [SETTING_PANEL_SOCIAL] = 60,
-    [SETTING_PANEL_NAMEPLATES] = 70,
+    [SETTING_PANEL_NAMEPLATES] = 60,
+    [SETTING_PANEL_SOCIAL] = 70,
     [SETTING_PANEL_COMBAT] = 80,
-    [SETTING_PANEL_ACCOUNT] = 90,
+    [SETTING_PANEL_ACCESSIBILITY] = 90,
+    [SETTING_PANEL_ACCOUNT] = 100,
 }
 
 local SETTING_PANEL_GAMEPAD_CATEGORIES_ROOT = -1
@@ -76,6 +77,9 @@ function ZO_GamepadOptions:InitializeScenes()
             self:RefreshOptionsList()
             self:RefreshHeader()
             self:SetCurrentList(self.optionsList)
+            if IsInUI("pregame") and not IsAccountLoggedIn() then
+                GAMEPAD_OPTIONS_PANEL_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+            end
             KEYBIND_STRIP:AddKeybindButtonGroup(self.panelKeybindDescriptor)
         elseif newState == SCENE_HIDDEN then
             if ZO_SharedOptions.DoesPanelDisableShareFeatures(self.currentCategory) and DoesPlatformSupportDisablingShareFeatures() then
@@ -201,6 +205,7 @@ do
         [SETTING_PANEL_CINEMATIC] = true,
         [SETTING_PANEL_ACCOUNT] = true,
     }
+
     function ZO_GamepadOptions:InitializeKeybindStrip()
         self.keybindStripDescriptor =
         {
@@ -223,7 +228,27 @@ do
                 end,
             },
         }
-        ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() SCENE_MANAGER:HideCurrentScene() end)
+
+        local function BackCallback()
+            if self.overrideBackCallback then
+                self.overrideBackCallback()
+            else
+                if IsInUI("pregame") and not IsAccountLoggedIn() then
+                    GAMEPAD_OPTIONS_ROOT_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+                end
+                SCENE_MANAGER:HideCurrentScene()
+            end
+        end
+
+        local function BackName()
+            if self.overrideBackName then
+                return self.overrideBackName
+            end
+
+            return GetString(SI_GAMEPAD_BACK_OPTION)
+        end
+
+        ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, BackCallback, BackName)
     
         self.rootKeybindDescriptor = 
         {
@@ -237,6 +262,9 @@ do
                         data.callback()
                     else
                         self.currentCategory = data.panelId
+                        if IsInUI("pregame") and not IsAccountLoggedIn() and PregameStateManager_GetCurrentState() ~= "FirstTimeAccessibilitySettings" then
+                            GAMEPAD_OPTIONS_PANEL_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+                        end
                         SCENE_MANAGER:Push("gamepad_options_panel")
                     end
                 end,
@@ -269,6 +297,10 @@ do
             },
         }
     end
+end
+
+function ZO_GamepadOptions:SetCategory(category)
+    self.currentCategory = category
 end
 
 function ZO_GamepadOptions:HasInfoPanel()
@@ -730,15 +762,16 @@ end
 function ZO_GamepadOptions:RefreshCategoryList()
     self.categoryList:Clear()
 
-    self:AddCategory(SETTING_PANEL_CINEMATIC)
     self:AddCategory(SETTING_PANEL_VIDEO)
     self:AddCategory(SETTING_PANEL_AUDIO)
+    self:AddCategory(SETTING_PANEL_CINEMATIC)
     self:AddCategory(SETTING_PANEL_GAMEPLAY)
     self:AddCategory(SETTING_PANEL_CAMERA)
     self:AddCategory(SETTING_PANEL_INTERFACE)
     self:AddCategory(SETTING_PANEL_NAMEPLATES)
     self:AddCategory(SETTING_PANEL_SOCIAL)
     self:AddCategory(SETTING_PANEL_COMBAT)
+    self:AddCategory(SETTING_PANEL_ACCESSIBILITY)
 
     if ZO_OptionsPanel_IsAccountManagementAvailable() then
         self:AddCategory(SETTING_PANEL_ACCOUNT)
@@ -751,10 +784,15 @@ function ZO_GamepadOptions:RefreshCategoryList()
     self.categoryList:Commit()
 end
 
+function ZO_GamepadOptions:SetSettingPanelFilter(filterFunction)
+    self.settingPanelFilter = filterFunction
+end
+
 do
     local CATEGORY_ICONS =
     {
         [SETTING_PANEL_CINEMATIC] = "EsoUI/Art/Options/Gamepad/gp_options_social.dds",
+        [SETTING_PANEL_ACCESSIBILITY] = "EsoUI/Art/Options/Gamepad/gp_options_accessibility.dds",
         [SETTING_PANEL_VIDEO] = "EsoUI/Art/Options/Gamepad/gp_options_video.dds",
         [SETTING_PANEL_AUDIO] = "EsoUI/Art/Options/Gamepad/gp_options_audio.dds",
         [SETTING_PANEL_GAMEPLAY] = "EsoUI/Art/Options/Gamepad/gp_options_gameplay.dds",
@@ -767,6 +805,10 @@ do
     }
 
     function ZO_GamepadOptions:AddCategory(panelId)
+        if self.settingPanelFilter and not self.settingPanelFilter(panelId) then
+            return
+        end
+
         local settings = GAMEPAD_SETTINGS_DATA[panelId]
         if settings then
             local entryData = ZO_GamepadEntryData:New(GetString("SI_SETTINGSYSTEMPANEL", panelId), CATEGORY_ICONS[panelId])
@@ -776,6 +818,16 @@ do
             self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
         end
     end
+end
+
+function ShouldShowSettingPanel(panelId)
+    if panelId == SETTING_PANEL_CINEMATIC
+      or panelId == SETTING_PANEL_CAMERA
+      or panelId == SETTING_PANEL_ACCOUNT then
+        return IsAccountLoggedIn()
+    end
+
+    return true
 end
 
 function ZO_GamepadOptions:PanelRequiresDeferredLoading(panelId)
@@ -948,4 +1000,22 @@ function ZO_GamepadOptions:LoadAllDefaults()
     self:SaveCachedSettings()
 
     self:RefreshGamepadInfoPanel()
+end
+
+function ZO_GamepadOptions:ReplaceBackKeybind(callback, name)
+    self.overrideBackCallback = callback
+    self.overrideBackName = name
+
+    if self:IsShowing() then
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+end
+
+function ZO_GamepadOptions:RevertBackKeybind()
+     self.overrideBackCallback = nil
+     self.overrideBackName = nil
+
+    if self:IsShowing() then
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    end
 end

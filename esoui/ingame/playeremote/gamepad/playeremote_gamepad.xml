@@ -59,13 +59,13 @@
                             <Anchor point="TOPRIGHT" offsetY="35"/>
                         </Label>
                         
-                        <Label name="$(parent)SelectedEmoteName" horizontalAlignment="CENTER" font="ZoFontGamepad54" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                        <Label name="$(parent)SelectedEmoteName" horizontalAlignment="CENTER" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Assign" relativePoint="BOTTOMLEFT"/>
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Assign" relativePoint="BOTTOMRIGHT"/>
                         </Label>
 
                         <Control name="$(parent)EmoteWheel" inherits="ZO_AssignableUtilityWheel_Gamepad_Template">
-                            <Anchor point="CENTER" offsetY="80" />
+                            <Anchor point="CENTER" offsetY="75" />
                         </Control>
                     </Controls>
                 </Control>

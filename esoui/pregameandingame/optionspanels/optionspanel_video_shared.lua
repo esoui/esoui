@@ -25,6 +25,10 @@ local function GetResolutionInfo(w, h)
     return optionValue, optionText
 end
 
+local function IsSystemNotUsingHDR()
+    return not IsSystemUsingHDR()
+end
+
 local function InitializeResolution(control, ...)
     local valid = {}
     local itemText = {}
@@ -105,7 +109,6 @@ function ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting()
 
     return false
 end
-
 
 local ZO_OptionsPanel_Video_ControlData =
 {
@@ -214,9 +217,20 @@ local ZO_OptionsPanel_Video_ControlData =
             events = {
                 [ANTIALIASING_TYPE_NONE] = "DLSSDisabled",
                 [ANTIALIASING_TYPE_FXAA] = "DLSSDisabled",
-                [ANTIALIASING_TYPE_TAA] = "DLSSDisabled",
+                [ANTIALIASING_TYPE_TAA]  = "DLSSDisabled",
                 [ANTIALIASING_TYPE_DLSS] = "DLSSEnabled",
                 [ANTIALIASING_TYPE_NVAA] = "DLSSDisabled",
+            },
+
+            eventCallbacks =
+            {
+                ["FSREnabled"]  = function(control)
+                    if (tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ANTIALIASING_TYPE)) == ANTIALIASING_TYPE_DLSS) or
+                       (tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ANTIALIASING_TYPE)) == ANTIALIASING_TYPE_NVAA) then
+                        SetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ANTIALIASING_TYPE, ANTIALIASING_TYPE_TAA)
+                        ZO_Options_UpdateOption(control)
+                    end
+                end,
             },
         },
         --Options_Video_Gamma_Adjustment
@@ -231,6 +245,7 @@ local ZO_OptionsPanel_Video_ControlData =
             minValue = 75,
             maxValue = 150,
             valueFormat = "%.2f",
+            exists = IsSystemNotUsingHDR,
         },
         --Options_Video_Graphics_Quality
         [GRAPHICS_SETTING_PRESETS] =
@@ -288,6 +303,42 @@ local ZO_OptionsPanel_Video_ControlData =
                 ["DLSSDisabled"] = ZO_Options_SetOptionInactive,
             },
         },
+        --Options_Video_FSR_Mode 
+        [GRAPHICS_SETTING_FSR_MODE] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_FSR_MODE,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_FSR_MODE,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_FSR_MODE_TOOLTIP,
+            valid = {FSR_MODE_OFF, FSR_MODE_ULTRA_QUALITY, FSR_MODE_QUALITY, FSR_MODE_BALANCED, FSR_MODE_PERFORMANCE},
+            valueStringPrefix = "SI_FSRMODE",
+            exists = ZO_IsPCUI and ShouldShowFSRSetting(),
+            
+            eventCallbacks =
+            {
+                ["DLSSEnabled"] = function(control)
+                    SetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FSR_MODE, FSR_MODE_OFF)
+                    ZO_Options_UpdateOption(control)
+                end,
+
+                ["DLSSDisabled"] = function(control)
+                    if tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ANTIALIASING_TYPE)) == ANTIALIASING_TYPE_NVAA then
+                        SetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FSR_MODE, FSR_MODE_OFF)
+                        ZO_Options_UpdateOption(control)
+                    end
+                end,
+            },
+
+            events = {
+                [FSR_MODE_OFF]           = "FSRDisabled",
+                [FSR_MODE_ULTRA_QUALITY] = "FSREnabled",
+                [FSR_MODE_QUALITY]       = "FSREnabled",
+                [FSR_MODE_BALANCED]      = "FSREnabled",
+                [FSR_MODE_PERFORMANCE]   = "FSREnabled",
+            },
+        },
         --Options_Video_Sub_Sampling
         [GRAPHICS_SETTING_SUB_SAMPLING] =
         {
@@ -303,8 +354,10 @@ local ZO_OptionsPanel_Video_ControlData =
 
             eventCallbacks =
             {
-                ["DLSSEnabled"] = ZO_Options_SetOptionInactive,
+                ["DLSSEnabled"]  = ZO_Options_SetOptionInactive,
                 ["DLSSDisabled"] = ZO_Options_SetOptionActive,
+                ["FSREnabled"]   = ZO_Options_SetOptionInactive,
+                ["FSRDisabled"]  = ZO_Options_SetOptionActive,
             },
         },
         --Options_Video_Shadows
@@ -532,16 +585,68 @@ local ZO_OptionsPanel_Video_ControlData =
             mustPushApply = true,
             exists = DoesPlatformSupportGraphicSetting(GRAPHICS_SETTING_GRAPHICS_MODE_XBSX)
         },
-        [GRAPHICS_SETTING_HDR_BRIGHTNESS] =
+        [GRAPHICS_SETTING_HDR_PEAK_BRIGHTNESS] =
         {
             controlType = OPTIONS_SLIDER,
             system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
+            settingId = GRAPHICS_SETTING_HDR_PEAK_BRIGHTNESS,
             panel = SETTING_PANEL_VIDEO,
-            text = SI_GRAPHICS_OPTIONS_VIDEO_HDR_BRIGHTNESS,
-            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_HDR_BRIGHTNESS_TOOLTIP,
-            minValue = 0,
-            maxValue = 1,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_HDR_PEAK_BRIGHTNESS,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_HDR_PEAK_BRIGHTNESS_TOOLTIP,
+            minValue = 200,
+            maxValue = 1000,
+            valueFormat = "%.2f",
+            visible = IsSystemUsingHDR,
+        },
+        [GRAPHICS_SETTING_HDR_SCENE_BRIGHTNESS] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_SCENE_BRIGHTNESS,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_HDR_SCENE_BRIGHTNESS,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_HDR_SCENE_BRIGHTNESS_TOOLTIP,
+            minValue = 0.8,
+            maxValue = 2.0,
+            valueFormat = "%.2f",
+            visible = IsSystemUsingHDR,
+        },
+        [GRAPHICS_SETTING_HDR_SCENE_CONTRAST] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_SCENE_CONTRAST,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_HDR_SCENE_CONTRAST,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_HDR_SCENE_CONTRAST_TOOLTIP,
+            minValue = 0.8,
+            maxValue = 2.4,
+            valueFormat = "%.2f",
+            visible = IsSystemUsingHDR,
+        },
+        [GRAPHICS_SETTING_HDR_UI_BRIGHTNESS] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_UI_BRIGHTNESS,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_HDR_UI_BRIGHTNESS,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_HDR_UI_BRIGHTNESS_TOOLTIP,
+            minValue = 1.0,
+            maxValue = 2.0,
+            valueFormat = "%.2f",
+            visible = IsSystemUsingHDR,
+        },
+        [GRAPHICS_SETTING_HDR_UI_CONTRAST] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_UI_CONTRAST,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_HDR_UI_CONTRAST,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_HDR_UI_CONTRAST_TOOLTIP,
+            minValue = 0.8,
+            maxValue = 1.4,
             valueFormat = "%.2f",
             visible = IsSystemUsingHDR,
         },
@@ -666,6 +771,7 @@ local ZO_OptionsPanel_Video_ControlData =
             settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
             text = SI_VIDEO_OPTIONS_CALIBRATE_GAMMA,
             gamepadTextOverride = SI_GAMMA_MAIN_TEXT,
+            exists = IsSystemNotUsingHDR,
             callback = function()
                 SCENE_MANAGER:Push("gammaAdjust")
             end,

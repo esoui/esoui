@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_ActionBar1" hidden="true" allowBringToTop="false" layer="OVERLAY" level="1">
+        <TopLevelControl name="ZO_ActionBar1" hidden="true" layer="OVERLAY" level="1">
             <Dimensions y="70"/>
             <OnInitialized>
                 ZO_ActionBar_OnInitialized(self)

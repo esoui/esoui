@@ -234,7 +234,7 @@ function ZO_HUDDaedricEnergyMeter:Initialize(control)
         self:UpdateEnergyValues(current, max)
     end
     control:RegisterForEvent(EVENT_POWER_UPDATE, OnPowerUpdate)
-    control:AddFilterForEvent(EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, POWERTYPE_DAEDRIC)
+    control:AddFilterForEvent(EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_DAEDRIC)
 
     local function OnActiveDaedricArtifactChanged()
         self:UpdateVisibility()
@@ -309,7 +309,7 @@ do
         self.activeWeapon:Show()
 
         -- set initial values
-        local currentEnergy, maxEnergy = GetUnitPower("player", POWERTYPE_DAEDRIC)
+        local currentEnergy, maxEnergy = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_DAEDRIC)
         local INSTANT = true
         self:UpdateEnergyValues(currentEnergy, maxEnergy, INSTANT)
         self.control:RegisterForEvent(EVENT_ACTION_SLOT_ABILITY_USED, function(_, actionSlotIndex)

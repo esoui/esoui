@@ -1042,8 +1042,28 @@ end
 
 CRAFTING_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_CraftingWindowKeybindInterceptLayerFragment:New("SceneChangeInterceptLayer")
 CRAFTING_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetConditional(function()
-        return ZO_CraftingUtils_IsPerformingCraftProcess()
-    end)
+    return ZO_CraftingUtils_IsPerformingCraftProcess()
+end)
+
+-- Close Actions Intercept Layer
+ZO_CloseActionsInterceptLayerFragment = ZO_ActionLayerFragment:Subclass()
+
+function ZO_CloseActionsInterceptLayerFragment:New(actionLayerName)
+    local fragment = ZO_ActionLayerFragment.New(self, actionLayerName)
+    fragment:SetHandleOnce(true)
+    return fragment
+end
+
+function ZO_CloseActionsInterceptLayerFragment:InterceptCloseAction(keybind)
+    if self:IsShowing() then
+        if self:FireCallbacks("InterceptCloseAction", keybind) then
+            return true
+        end
+    end
+    return false
+end
+
+CLOSE_ACTIONS_INTERCEPT_LAYER_FRAGMENT = ZO_CloseActionsInterceptLayerFragment:New("CloseActionsInterceptLayer")
 
 --Shared Tutorials
 LOCKPICK_TUTORIAL_FRAGMENT = ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_LOCKPICKING_OPENED)

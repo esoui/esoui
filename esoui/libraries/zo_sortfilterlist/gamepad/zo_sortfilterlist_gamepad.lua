@@ -3,10 +3,6 @@
 ----------------------
 ZO_SortFilterList_Gamepad = ZO_SortFilterList:Subclass()
 
-function ZO_SortFilterList_Gamepad:New(...)
-    return ZO_SortFilterList.New(self, ...)
-end
-
 function ZO_SortFilterList_Gamepad:Initialize(...)
     ZO_SortFilterList.Initialize(self, ...)
     self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)

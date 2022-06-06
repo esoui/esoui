@@ -70,7 +70,7 @@
         </Texture>
         
         <!--Positioned above windows. Below chat, tooltips and context menus-->
-        <TopLevelControl name="ZO_DialogFrame" tier="MEDIUM" level="ZO_MEDIUM_TIER_KEYBOARD_STANDARD_DIALOG" mouseEnabled="true" hidden="true" allowBringToTop="false" resizeToFitDescendents="true" virtual="true">
+        <TopLevelControl name="ZO_DialogFrame" tier="MEDIUM" level="ZO_MEDIUM_TIER_KEYBOARD_STANDARD_DIALOG" mouseEnabled="true" hidden="true" resizeToFitDescendents="true" virtual="true">
             <Anchor point="CENTER" relativeTo="GuiRoot" />
             <ResizeToFitPadding width="50" height="33" />
             <OnEffectivelyShown>

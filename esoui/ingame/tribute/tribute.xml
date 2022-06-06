@@ -1,0 +1,58 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_Tribute_HUDFade">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Control name="ZO_Tribute_PlayerInfoDisplay" virtual="true">
+            <DimensionConstraints maxX="ZO_TRIBUTE_PLAYER_NAME_BACKDROP_MAX_WIDTH" />
+            <Dimensions y="60" />
+            <OnInitialized>
+                ZO_Tribute_PlayerInfoDisplay_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" offsetX="25"/>
+                    <Anchor point="RIGHT" constrains="X" />
+                    <DimensionConstraints maxX="ZO_TRIBUTE_PLAYER_NAME_TEXT_MAX_WIDTH" />
+                </Label>
+
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop_white.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0.8" right="0" top="0" bottom=".78125" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_Tribute_TopLevel" hidden="true">
+            <OnInitialized>
+                ZO_Tribute_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)PlayerInfo">
+                    <Controls>
+                        <!-- TRIBUTE_PLAYER_PERSPECTIVE_SELF -->
+                        <Control name="$(parent)Display0" inherits="ZO_Tribute_PlayerInfoDisplay">
+                            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetY="-50" />
+                        </Control>
+
+                        <!-- TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT -->
+                        <Control name="$(parent)Display1" inherits="ZO_Tribute_PlayerInfoDisplay">
+                            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetY="50" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

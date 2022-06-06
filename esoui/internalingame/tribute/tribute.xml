@@ -1,0 +1,129 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_Tribute_HUDFade">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Label name="ZO_TributeResourceDisplay_Control" font="ZoFontTributeAntique52" scale="1.5" horizontalAlignment="CENTER" virtual="true">
+            <Anchor point="CENTER" />
+        </Label>
+
+        <Control name="ZO_TributeDiscardCountDisplay_Control" resizeToFitDescendents="true" scale="1.5" mouseEnabled="true" hidden="true" virtual="true">
+            <Anchor point="CENTER" />
+            <OnMouseEnter>
+                self.object:OnMouseEnter()
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.object:OnCursorExit()
+            </OnMouseExit>
+            
+            <Controls>
+                <Label name="$(parent)Text" horizontalAlignment="CENTER" />
+                
+                <Texture name="$(parent)MechanicIcon" layer="CONTROLS" textureFile="EsoUI\Art\Tribute\tribute_icon_discardCounter.dds">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Text" relativePoint="LEFT" offsetX="-5" />
+                </Texture>
+
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Subtitles/subtitle_background_centerBlur.dds" alpha="0.6">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MechanicIcon" relativePoint="TOPLEFT" offsetY="-20"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                </Texture>
+
+                <Texture name="$(parent)BackgroundLeft" textureFile="EsoUI/Art/Subtitles/subtitle_background_blurCap.dds" alpha="0.6">
+                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                    <Dimensions x="32"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Background" relativePoint="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT"/>
+                </Texture>
+
+                <Texture name="$(parent)BackgroundRight" textureFile="EsoUI/Art/Subtitles/subtitle_background_blurCap.dds" alpha="0.6">
+                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                    <Dimensions x="32"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="TOPRIGHT"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMRIGHT"/>
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_Tribute_TopLevel" hidden="true">
+            <OnInitialized>
+                ZO_Tribute_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)BoardOrient" space="WORLD" scale="ZO_TRIBUTE_CARD_WORLD_SCALE" mouseEnabled="true" tier="LOW" layer="BACKGROUND">
+                    <Anchor point="CENTER" relativeTo="GuiRoot"/>
+                    <Dimensions x="ZO_TRIBUTE_BOARD_ORIENT_DIMENSIONS" y="ZO_TRIBUTE_BOARD_ORIENT_DIMENSIONS" />
+
+                    <OnMouseUp>
+                        TRIBUTE:OnBoardClicked(button, upInside)
+                    </OnMouseUp>
+
+                    <Controls>
+                        <Label name="$(parent)TurnTimerText" text="SI_TRIBUTE_END_TURN" horizontalAlignment="CENTER" mouseEnabled="true">
+                            <Anchor point="CENTER" />
+                            <Controls>
+                                <Label name="$(parent)TimeRemaining" horizontalAlignment="CENTER" hidden="true">
+                                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="5"/>
+                                </Label>
+                            </Controls>
+
+                            <OnMouseUp>
+                                TributeEndTurn()
+                            </OnMouseUp>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)GamepadCursor" hidden="true" tier="HIGH" clampedToScreen="true" textureFile="EsoUI/Art/Tribute/gamepad/gp_tribute_reticle.dds">
+                    <Dimensions x="64" y="64" />
+                </Texture>
+
+                <Label name="$(parent)Instruction" horizontalAlignment="CENTER" level="15" hidden="true">
+                    <Controls>
+                        <Texture name="$(parent)Background" layer="TEXT" textureFile="EsoUI/Art/Subtitles/subtitle_background_centerBlur.dds" alpha="0.6">
+                            <Anchor point="TOPLEFT" offsetY="-20"/>
+                            <Anchor point="BOTTOMRIGHT" offsetY="20"/>
+                        </Texture>
+                        
+                        <Texture name="$(parent)BackgroundLeft" layer="TEXT" textureFile="EsoUI/Art/Subtitles/subtitle_background_blurCap.dds" alpha="0.6">
+                            <TextureCoords left="0" right="1" top="0" bottom="1" />
+                            <Dimensions x="64"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Background" relativePoint="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT"/>
+                        </Texture>
+                        
+                        <Texture name="$(parent)BackgroundRight" layer="TEXT" textureFile="EsoUI/Art/Subtitles/subtitle_background_blurCap.dds" alpha="0.6">
+                            <TextureCoords left="1" right="0" top="0" bottom="1" />
+                            <Dimensions x="64"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="TOPRIGHT"/>
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMRIGHT"/>
+                        </Texture>
+                    </Controls>
+                </Label>
+
+                <Control name="$(parent)Cards" space="WORLD" />
+
+                <Control name="$(parent)Confirm" layer="BACKGROUND" inherits="ZO_KeybindButton" hidden="true">
+                    <Controls>
+                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop_white.dds" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" offsetX="-50" offsetY="-5"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="50" offsetY="5"/>
+                            <TextureCoords left="0" right="1" top="0" bottom="0.78125" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

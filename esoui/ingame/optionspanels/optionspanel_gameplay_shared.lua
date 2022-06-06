@@ -1,3 +1,5 @@
+ACCESSIBILITY_MODE_ICON_PATH = "EsoUI/Art/Miscellaneous/Icon_Accessibility_Warning.dds"
+
 local function AreMonsterTellsEnabled()
     return tonumber(GetSetting(SETTING_TYPE_COMBAT, COMBAT_SETTING_MONSTER_TELLS_ENABLED)) ~= 0
 end
@@ -364,7 +366,7 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             settingId = IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY,
             text = SI_INTERFACE_OPTIONS_COMPANION_REACTIONS,
             tooltipText = SI_INTERFACE_OPTIONS_COMPANION_REACTIONS_TOOLTIP,
-            valid = { COMPANION_REACTION_FREQUENCY_RATE_LOW, COMPANION_REACTION_FREQUENCY_RATE_NORMAL, COMPANION_REACTION_FREQUENCY_RATE_HIGH, },
+            valid = { COMPANION_REACTION_FREQUENCY_RATE_VERY_LOW, COMPANION_REACTION_FREQUENCY_RATE_LOW, COMPANION_REACTION_FREQUENCY_RATE_NORMAL, COMPANION_REACTION_FREQUENCY_RATE_HIGH },
             valueStringPrefix = "SI_COMPANIONREACTIONFREQUENCYRATE",
         },
 
@@ -469,6 +471,18 @@ local ZO_OptionsPanel_Gameplay_ControlData =
     }
 }
 
+local function IsAccessibilityModeEnabled()
+    return GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE)
+end
+
+local function IsInputPreferredSettingKeyboard()
+    return tonumber(GetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE)) == INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD
+end
+
+local function IsInputPreferredSettingGamepad()
+    return tonumber(GetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE)) == INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD
+end
+
 local ZO_SharedOptions_Gameplay_GamepadSettingsData = 
 {
     --Options_Gameplay_InputModePreferred
@@ -492,6 +506,28 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
             [INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD] = "OnInputPreferredModeGamepad",
             [INPUT_PREFERRED_MODE_AUTOMATIC] = "OnInputPreferredModeAutomatic",
         },
+        eventCallbacks =
+        {
+            ["OnAccessibilityModeEnabled"] = function(control)
+                ZO_Options_SetOptionInactive(control)
+                ZO_Options_SetWarningText(control, SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING)
+                ZO_Options_SetWarningTexture(control, ACCESSIBILITY_MODE_ICON_PATH)
+            end,
+            ["OnAccessibilityModeDisabled"] = function(control)
+                ZO_Options_SetOptionActive(control)
+                ZO_Options_HideAssociatedWarning(control)
+            end,
+        },
+        enabled = function()
+             return not IsAccessibilityModeEnabled()
+        end,
+        gamepadIsEnabledCallback = function()
+             return not IsAccessibilityModeEnabled()
+        end,
+        gamepadHasEnabledDependencies = true,
+        gamepadCustomTooltipFunction = function(tooltip)
+            GAMEPAD_TOOLTIPS:LayoutSettingAccessibilityTooltipWarning(tooltip, GetString(SI_GAMEPAD_OPTIONS_GAMEPAD_MODE_TOOLTIP), GetString(SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING), IsAccessibilityModeEnabled())
+        end,
         exists = DoesPlatformAllowConfiguringAutomaticInputChanging,
         valueStringPrefix = "SI_INPUTPREFERREDMODE",
     },
@@ -510,8 +546,48 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
             KEYBIND_DISPLAY_MODE_ALWAYS_GAMEPAD,
             KEYBIND_DISPLAY_MODE_AUTOMATIC,
         },
+        eventCallbacks =
+        {
+            -- Input Preferred Mode callbacks
+            ["OnInputPreferredModeKeyboard"] = ZO_Options_SetOptionInactive,
+            ["OnInputPreferredModeGamepad"] = function(control)
+                if not IsAccessibilityModeEnabled() then
+                    ZO_Options_SetOptionActive(control)
+                end
+            end,
+            ["OnInputPreferredModeAutomatic"] = ZO_Options_SetOptionInactive,
+            -- Accessibility Mode callbacks
+            ["OnAccessibilityModeEnabled"] = function(control)
+                ZO_Options_SetOptionInactive(control)
+                ZO_Options_SetWarningText(control, SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING)
+                ZO_Options_SetWarningTexture(control, ACCESSIBILITY_MODE_ICON_PATH)
+            end,
+            ["OnAccessibilityModeDisabled"] = function(control)
+                if IsInputPreferredSettingGamepad() then
+                    ZO_Options_SetOptionActive(control)
+                else
+                    ZO_Options_SetOptionInactive(control)
+                end
+                ZO_Options_HideAssociatedWarning(control)
+            end,
+        },
+        enabled = function()
+             return not IsAccessibilityModeEnabled() and IsInputPreferredSettingGamepad()
+        end,
+        gamepadIsEnabledCallback = function()
+             return not IsAccessibilityModeEnabled() and IsInputPreferredSettingGamepad()
+        end,
+        gamepadCustomTooltipFunction = function(tooltip)
+            GAMEPAD_TOOLTIPS:LayoutSettingAccessibilityTooltipWarning(tooltip, GetString(SI_GAMEPAD_OPTIONS_KEYBIND_DISPLAY_MODE_TOOLTIP), GetString(SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING), IsAccessibilityModeEnabled())
+        end,
         exists = ZO_IsPCUI,
         valueStringPrefix = "SI_KEYBINDDISPLAYMODE",
+        initializeControlFunction = function(control)
+            ZO_OptionsWindow_InitializeControl(control)
+            EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Gameplay", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
+                ZO_Options_UpdateOption(control)
+            end)
+        end,
     },
     --Options_Gameplay_UseKeyboardChat
     [GAMEPAD_SETTING_USE_KEYBOARD_CHAT] =
@@ -524,11 +600,104 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
         tooltipText = SI_GAMEPAD_OPTIONS_USE_KEYBOARD_CHAT_TOOLTIP,
         eventCallbacks =
         {
+            -- Input Preferred Mode callbacks
             ["OnInputPreferredModeKeyboard"] = ZO_Options_SetOptionInactive,
-            ["OnInputPreferredModeGamepad"] = ZO_Options_SetOptionActive,
-            ["OnInputPreferredModeAutomatic"] = ZO_Options_SetOptionActive,
+            ["OnInputPreferredModeGamepad"] = function(control)
+                if not IsAccessibilityModeEnabled() then
+                    ZO_Options_SetOptionActive(control)
+                end
+            end,
+            ["OnInputPreferredModeAutomatic"] = function(control)
+                if not IsAccessibilityModeEnabled() then
+                    ZO_Options_SetOptionActive(control)
+                end
+            end,
+            -- Accessibility Mode callbacks
+            ["OnAccessibilityModeEnabled"] = function(control)
+                ZO_Options_SetOptionInactive(control)
+                ZO_Options_SetWarningText(control, SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING)
+                ZO_Options_SetWarningTexture(control, ACCESSIBILITY_MODE_ICON_PATH)
+            end,
+            ["OnAccessibilityModeDisabled"] = function(control)
+                if not IsInputPreferredSettingKeyboard() then
+                    ZO_Options_SetOptionActive(control)
+                else
+                    ZO_Options_SetOptionInactive(control)
+                end
+                ZO_Options_HideAssociatedWarning(control)
+            end,
         },
+        enabled = function()
+            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard()
+        end,
+        gamepadIsEnabledCallback = function()
+            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard()
+        end,
+        gamepadCustomTooltipFunction = function(tooltip)
+            GAMEPAD_TOOLTIPS:LayoutSettingAccessibilityTooltipWarning(tooltip, GetString(SI_GAMEPAD_OPTIONS_USE_KEYBOARD_CHAT_TOOLTIP), GetString(SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING), IsAccessibilityModeEnabled())
+        end,
         exists = ZO_IsPCUI,
+        initializeControlFunction = function(control)
+            ZO_OptionsWindow_InitializeControl(control)
+            EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Gameplay", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
+                ZO_Options_UpdateOption(control)
+            end)
+        end,
+    },
+    --Options_Gameplay_UseKeyboardLogin
+    [GAMEPAD_SETTING_USE_KEYBOARD_LOGIN] =
+    {
+        controlType = OPTIONS_CHECKBOX,
+        system = SETTING_TYPE_GAMEPAD,
+        panel = SETTING_PANEL_GAMEPLAY,
+        settingId = GAMEPAD_SETTING_USE_KEYBOARD_LOGIN,
+        text = SI_GAMEPAD_OPTIONS_USE_KEYBOARD_LOGIN,
+        tooltipText = SI_GAMEPAD_OPTIONS_USE_KEYBOARD_LOGIN_TOOLTIP,
+        eventCallbacks =
+        {
+            -- Input Preferred Mode callbacks
+            ["OnInputPreferredModeKeyboard"] = ZO_Options_SetOptionInactive,
+            ["OnInputPreferredModeGamepad"] = function(control)
+                if not IsAccessibilityModeEnabled() then
+                    ZO_Options_SetOptionActive(control)
+                end
+            end,
+            ["OnInputPreferredModeAutomatic"] = function(control)
+                if not IsAccessibilityModeEnabled() then
+                    ZO_Options_SetOptionActive(control)
+                end
+            end,
+            -- Accessibility Mode callbacks
+            ["OnAccessibilityModeEnabled"] = function(control)
+                ZO_Options_SetOptionInactive(control)
+                ZO_Options_SetWarningText(control, SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING)
+                ZO_Options_SetWarningTexture(control, ACCESSIBILITY_MODE_ICON_PATH)
+            end,
+            ["OnAccessibilityModeDisabled"] = function(control)
+                if not IsInputPreferredSettingKeyboard() then
+                    ZO_Options_SetOptionActive(control)
+                else
+                    ZO_Options_SetOptionInactive(control)
+                end
+                ZO_Options_HideAssociatedWarning(control)
+            end,
+        },
+        enabled = function()
+            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard()
+        end,
+        gamepadIsEnabledCallback = function()
+            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard()
+        end,
+        gamepadCustomTooltipFunction = function(tooltip)
+            GAMEPAD_TOOLTIPS:LayoutSettingAccessibilityTooltipWarning(tooltip, GetString(SI_GAMEPAD_OPTIONS_USE_KEYBOARD_LOGIN_TOOLTIP), GetString(SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING), IsAccessibilityModeEnabled())
+        end,
+        exists = ZO_IsPCUI,
+        initializeControlFunction = function(control)
+            ZO_OptionsWindow_InitializeControl(control)
+            EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Gameplay", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
+                ZO_Options_UpdateOption(control)
+            end)
+        end,
     },
     --Options_Gamepad_Template
     [GAMEPAD_SETTING_GAMEPAD_TEMPLATE] =

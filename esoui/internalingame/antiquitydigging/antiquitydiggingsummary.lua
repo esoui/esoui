@@ -25,7 +25,7 @@ local SET_PROGRESSION_FRAMED_ICON_DELAY_MODIFIER_MS = 35
 ZO_PROGRESSION_FRAMED_ICON_FADE_DURATION_MS = 300
 ZO_PROGRESSION_FRAMED_ICON_SCALE_DURATION_MS = 100
 
-ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS =
+local END_OF_GAME_FANFARE_TRIGGER_COMMANDS =
 {
     BEGIN = "Begin",
     NEXT = "Next",
@@ -103,7 +103,7 @@ function ZO_AntiquityDiggingSummary:InitializeControls()
     {
         keybind = "ANTIQUITY_DIGGING_PRIMARY_ACTION",
         callback = function()
-            self:HandleCommand(ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.NEXT)
+            self:HandleCommand(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.NEXT)
         end,
     }
     self.primaryKeybindButton = self.keybindButtonsControl:GetNamedChild("Primary")
@@ -140,9 +140,12 @@ function ZO_AntiquityDiggingSummary:InitializeControls()
     self.rewardAntiquityIconTexture = antiquityRewardContainerControl:GetNamedChild("FrameIcon")
     self.antiquityRewardTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingAntiquityRewardInTimeline", self.antiquityRewardControl)
     self.antiquityRewardTimeline:SetSkipAnimationsBehindPlayheadOnInitialPlay(false)
-    self.rewardAntiquityHeaderLabelRevealer:SetSizeAnimation(self.antiquityRewardTimeline:GetAnimation(2))
-    self.rewardAntiquitySubHeaderLabelRevealer:SetSizeAnimation(self.antiquityRewardTimeline:GetAnimation(8))
-    self.rewardAntiquityNameLabelRevealer:SetSizeAnimation(self.antiquityRewardTimeline:GetAnimation(9))
+    self.rewardAntiquityHeaderLabelRevealer:SetMaskAnchor(BOTTOM)
+    self.rewardAntiquityHeaderLabelRevealer:SetAnimation(self.antiquityRewardTimeline:GetAnimation(2))
+    self.rewardAntiquitySubHeaderLabelRevealer:SetMaskAnchor(TOPLEFT, BOTTOMLEFT)
+    self.rewardAntiquitySubHeaderLabelRevealer:SetAnimation(self.antiquityRewardTimeline:GetAnimation(8))
+    self.rewardAntiquityNameLabelRevealer:SetMaskAnchor(TOPLEFT, BOTTOMLEFT)
+    self.rewardAntiquityNameLabelRevealer:SetAnimation(self.antiquityRewardTimeline:GetAnimation(9))
 
     -- New Lead
     self.newLeadControl = self.rewardsControl:GetNamedChild("NewLead")
@@ -195,7 +198,7 @@ function ZO_AntiquityDiggingSummary:InitializeControls()
 
     local function OnCompleteFireTrigger(_, completedPlaying)
         if completedPlaying then
-            ANTIQUITY_DIGGING_SUMMARY:HandleCommand(ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.PARTIAL_ANIMATION_COMPLETE)
+            ANTIQUITY_DIGGING_SUMMARY:HandleCommand(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.PARTIAL_ANIMATION_COMPLETE)
         end
     end
 
@@ -410,7 +413,7 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
             SCENE_MANAGER:AddFragment(UNIFORM_BLUR_FRAGMENT)
             self.modalUnderlayTimeline:PlayFromStart()
             self.keybindTimeline:PlayFromStart()
-            fanfareStateMachine:FireCallbacks(ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.NEXT)
+            fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.NEXT)
         end)
     end
 
@@ -703,11 +706,11 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
     end
 
     -- Triggers --
-    fanfareStateMachine:AddTrigger("BEGIN", ZO_StateMachine_TriggerStateCallback, ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.BEGIN)
-    fanfareStateMachine:AddTrigger("NEXT", ZO_StateMachine_TriggerStateCallback, ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.NEXT)
-    fanfareStateMachine:AddTrigger("ANIMATION_COMPLETE", ZO_StateMachine_TriggerStateCallback, ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.ANIMATION_COMPLETE)
+    fanfareStateMachine:AddTrigger("BEGIN", ZO_StateMachine_TriggerStateCallback, END_OF_GAME_FANFARE_TRIGGER_COMMANDS.BEGIN)
+    fanfareStateMachine:AddTrigger("NEXT", ZO_StateMachine_TriggerStateCallback, END_OF_GAME_FANFARE_TRIGGER_COMMANDS.NEXT)
+    fanfareStateMachine:AddTrigger("ANIMATION_COMPLETE", ZO_StateMachine_TriggerStateCallback, END_OF_GAME_FANFARE_TRIGGER_COMMANDS.ANIMATION_COMPLETE)
     do
-        local trigger = fanfareStateMachine:AddTrigger("SET_PROGRESSION_ANIMATIONS_COMPLETE", ZO_StateMachine_TriggerStateCallback, ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.PARTIAL_ANIMATION_COMPLETE)
+        local trigger = fanfareStateMachine:AddTrigger("SET_PROGRESSION_ANIMATIONS_COMPLETE", ZO_StateMachine_TriggerStateCallback, END_OF_GAME_FANFARE_TRIGGER_COMMANDS.PARTIAL_ANIMATION_COMPLETE)
         trigger:SetEventCount(function()
             local antiquityId = GetDigSpotAntiquityId()
             local antiquitySetId = GetAntiquitySetId(antiquityId)
@@ -717,7 +720,7 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
             return numFadeAnimations + NUM_SCALE_ANIMATIONS
         end)
     end
-    fanfareStateMachine:AddTrigger("TIME_HAS_PASSED", ZO_StateMachine_TriggerStateCallback, ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.TIME_HAS_PASSED)
+    fanfareStateMachine:AddTrigger("TIME_HAS_PASSED", ZO_StateMachine_TriggerStateCallback, END_OF_GAME_FANFARE_TRIGGER_COMMANDS.TIME_HAS_PASSED)
 
     -- Add triggers to edges --
     fanfareStateMachine:AddTriggerToEdge("BEGIN", "INACTIVE_TO_BEGIN")
@@ -758,7 +761,7 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
     -- Animation callbacks --
     local function OnCompleteFireTrigger(_, completedPlaying)
         if completedPlaying then
-            fanfareStateMachine:FireCallbacks(ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.ANIMATION_COMPLETE)
+            fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.ANIMATION_COMPLETE)
         end
     end
 
@@ -823,7 +826,7 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
 
     if gameOverFlags ~= ANTIQUITY_DIGGING_GAME_OVER_FLAGS_VICTORY then
         self.failureReasonBodyLabel:SetText(GetString("SI_DIGGINGGAMEOVERFLAGS", gameOverFlags))
-        self.fanfareStateMachine:FireCallbacks(ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.BEGIN)
+        self.fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.BEGIN)
         return
     end
 
@@ -995,7 +998,7 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
         end
     end
 
-    self.fanfareStateMachine:FireCallbacks(ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.BEGIN)
+    self.fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.BEGIN)
 end
 
 function ZO_AntiquityDiggingSummary:AcquireAndLayoutLoreDocumentControl()

@@ -1,0 +1,54 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TributePatronTile_Gamepad_Control" inherits="ZO_TributePatronTile_Shared_Control ZO_ContextualActionsTile_Gamepad_Control" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_BOOK_TILE_ICON_DIMENSIONS_GAMEPAD" y="ZO_TRIBUTE_PATRON_BOOK_TILE_ICON_DIMENSIONS_GAMEPAD" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Backdrop name="$(parent)OverlayBorder" override="true" tier="LOW" layer="BACKGROUND" centerColor="FFFFFF">
+                    <AnchorFill />
+                    <Center file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_center_16.dds" />
+                    <Edge file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_edge_16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributePatronBookTile_Gamepad_Control" inherits="ZO_TributePatronTile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_PATRON_BOOK_TILE_WIDTH_GAMEPAD" y="ZO_TRIBUTE_PATRON_BOOK_TILE_HEIGHT_GAMEPAD" />
+            <OnInitialized>
+                ZO_TributePatronBookTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_TributePatronSelectionTile_Gamepad_Control" inherits="ZO_TributePatronTile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_TILE_WIDTH_GAMEPAD" y="ZO_TRIBUTE_PATRON_SELECTION_TILE_HEIGHT_GAMEPAD" />
+            <OnInitialized>
+                ZO_TributePatronSelectionTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)DraftedIcon" textureFile="EsoUI/Art/Tribute/tribute_icon_drafted.dds" level="3" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPRIGHT" offsetX="-3" offsetY="3" />
+                </Texture>
+
+                <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Tribute/tributePatronHighlight_Selected.dds" alpha="0">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_TILE_ICON_DIMENSIONS_GAMEPAD" y="ZO_TRIBUTE_PATRON_SELECTION_TILE_ICON_DIMENSIONS_GAMEPAD" />
+                    <Anchor point="TOP" />
+                </Texture>
+                
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_TILE_ICON_DIMENSIONS_GAMEPAD" y="ZO_TRIBUTE_PATRON_SELECTION_TILE_ICON_DIMENSIONS_GAMEPAD" />
+                    <Anchor point="TOP" />
+                </Texture>
+
+                <Label name="$(parent)Title" override="true" horizontalAlignment="CENTER" font="ZoFontGamepad36">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetY="-35"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -221,7 +221,7 @@
                                 self.gloss = self:GetNamedChild("Gloss")
                             </OnInitialized>
                         </StatusBar>
-                        <Label name="$(parent)Time" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                        <Label name="$(parent)Time" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" tier="HIGH">
                             <Anchor point="CENTER" />
                         </Label>
                     </Controls>

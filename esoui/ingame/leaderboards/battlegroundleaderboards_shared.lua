@@ -1,7 +1,7 @@
 ---------------
 -- Battleground Leaderboards
 ---------------
-BATTLEGROUND_LEADERBOARD_SYSTEM_NAME = "battlegroundLeaderboards"
+ZO_BATTLEGROUND_LEADERBOARD_SYSTEM_NAME = "battlegroundLeaderboards"
 
 local BATTLEGROUND_SHOW_HEADER_ICONS =
 {
@@ -12,18 +12,11 @@ local BATTLEGROUND_SHOW_HEADER_ICONS =
 
 ZO_BattlegroundLeaderboardsManager_Shared = ZO_LeaderboardBase_Shared:Subclass()
 
-function ZO_BattlegroundLeaderboardsManager_Shared:New(...)
-    return ZO_LeaderboardBase_Shared.New(self, ...)
-end
-
 function ZO_BattlegroundLeaderboardsManager_Shared:Initialize(...)
     ZO_LeaderboardBase_Shared.Initialize(self, ...)
 
     self.battlegroundListNodes = {}
-end
-
-function ZO_BattlegroundLeaderboardsManager_Shared:RegisterForEvents()
-    self.control:RegisterForEvent(EVENT_BATTLEGROUND_LEADERBOARD_DATA_CHANGED, function() self:OnDataChanged() end)
+    self.control:SetHandler("OnUpdate", function(_, currentTime) self:TimerLabelOnUpdate(currentTime) end)
 end
 
 do
@@ -49,14 +42,20 @@ do
     function ZO_BattlegroundLeaderboardsManager_Shared:AddCategoriesToParentSystem()
         ZO_ClearNumericallyIndexedTable(self.battlegroundListNodes)
 
+        local function UpdatePlayerInfo()
+            self:UpdatePlayerInfo()
+        end
+
         local function GetNumEntries(battlegroundLeaderboardType)
-            self:UpdateAllInfo()
             return GetNumBattlegroundLeaderboardEntries(battlegroundLeaderboardType)
         end
 
         local function AddEntry(parent, name, battlegroundLeaderboardType)
             local gamepadIcon = GAMEPAD_CATEGORY_ICON_MAP[battlegroundLeaderboardType] or ZO_NO_TEXTURE_FILE
-            local node = self.leaderboardSystem:AddEntry(self, name, nil, parent, battlegroundLeaderboardType, GetNumEntries, nil, GetSingleBattlegroundEntryInfo, nil, GetString(SI_LEADERBOARDS_HEADER_POINTS), GetBattlegroundLeaderboardEntryConsoleIdRequestParams, gamepadIcon, LEADERBOARD_TYPE_BATTLEGROUND)
+            local NO_TITLE_NAME = nil
+            local NO_POINTS_FORMAT_FUNCTION = nil
+            local NO_POINTS_HEADER_STRING = nil
+            local node = self.leaderboardSystem:AddEntry(self, name, NO_TITLE_NAME, parent, battlegroundLeaderboardType, GetNumEntries, NO_POINTS_FORMAT_FUNCTION, GetSingleBattlegroundEntryInfo, NO_POINTS_HEADER_STRING, GetString(SI_LEADERBOARDS_HEADER_POINTS), GetBattlegroundLeaderboardEntryConsoleIdRequestParams, gamepadIcon, LEADERBOARD_TYPE_BATTLEGROUND, UpdatePlayerInfo)
             if node then
                 local nodeData = node.GetData and node:GetData() or node
                 nodeData.battlegroundLeaderboardType = battlegroundLeaderboardType
@@ -112,8 +111,6 @@ do
             else
                 self.timerLabelIdentifier = nil
                 self.timerLabelData = nil
-                -- Client will prevent server spam automatically
-                QueryBattlegroundLeaderboardData()
             end
 
             timerLabelLastUpdateSecs = currentTime
@@ -129,13 +126,11 @@ function ZO_BattlegroundLeaderboardsManager_Shared:UpdatePlayerInfo()
     end
 
     local currentRank, currentScore = GetBattlegroundLeaderboardLocalPlayerInfo(self.selectedSubType)
-    local hasRank = currentRank and currentRank > 0
-    local hasScore = currentScore and currentScore > 0
+    local hasRank = currentRank > 0
+    local hasScore = currentScore > 0
 
     self.currentRankData = hasRank and currentRank or nil
     self.currentScoreData = hasScore and currentScore or nil
-
-    self.control:SetHandler("OnUpdate", function(_, currentTime) self:TimerLabelOnUpdate(currentTime) end)
 
     self:RefreshHeaderPlayerInfo()
 end
@@ -143,9 +138,27 @@ end
 function ZO_BattlegroundLeaderboardsManager_Shared:OnSubtypeSelected(subType)
     ZO_LeaderboardBase_Shared.OnSubtypeSelected(self, subType)
 
-    self:UpdateAllInfo()
+    self:UpdatePlayerInfo()
 end
 
-function ZO_BattlegroundLeaderboardsManager_Shared:UpdateAllInfo()
-    self:UpdatePlayerInfo()
+function ZO_BattlegroundLeaderboardsManager_Shared:SendLeaderboardQuery()
+    if not self.selectedSubType then
+        return
+    end
+
+    self.requestedBattlegroundType = self.selectedSubType
+    LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(PENDING_LEADERBOARD_DATA_TYPE.BATTLEGROUND, self:GenerateRequestData())
+end
+
+function ZO_BattlegroundLeaderboardsManager_Shared:GenerateRequestData()
+    local data =
+    { 
+        battlegroundType = self.requestedBattlegroundType,
+    }
+    return data
+end
+
+function ZO_BattlegroundLeaderboardsManager_Shared:HandleFilterDropdownChanged()
+    -- Returning false to signify no special handling required
+    return false
 end

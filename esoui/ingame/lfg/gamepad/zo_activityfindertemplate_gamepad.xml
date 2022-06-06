@@ -7,7 +7,20 @@
                 </Label>
             </Controls>
         </Control>
-        
+
+        <StatusBar name="ZO_TributeFinder_ArrowStatusBarTemplate_Gamepad" inherits="ZO_GamepadArrowStatusBarWithBGMedium" layer="CONTROLS" virtual="true">
+            <Controls>
+                <Control name="$(parent)BG" override="true" />
+                <Control name="$(parent)Overlay" override="true" tier="LOW" layer="CONTROLS">
+                    <Controls>
+                        <Texture name="$(parent)Left" override="true" layer="CONTROLS" />
+                        <Texture name="$(parent)Right" override="true" layer="CONTROLS" />
+                        <Texture name="$(parent)Middle" override="true" layer="CONTROLS" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </StatusBar>
+
         <TopLevelControl name="ZO_ActivityFinderTemplateTopLevel_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen" virtual="true">
             <Controls>
                 <Control name="$(parent)SingularSection" inherits="ZO_ActivityFinderSingularTemplate_Shared ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true">
@@ -56,6 +69,32 @@
                                 <Control name="$(parent)Entries" override="true">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="10" />
                                 </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)TributeSeasonSection" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RewardsSection" relativePoint="BOTTOMLEFT" offsetY="50" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)Background" relativePoint="RIGHT" constrains="X" />
+
+                            <Controls>
+                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad36" />
+
+                                <Label name="$(parent)CountDown" override="true" font="ZoFontGamepad36" />
+
+                                <Label name="$(parent)LeaderboardRank" override="true" font="ZoFontGamepadCondensed42" />
+
+                                <Texture name="$(parent)CurrentRankIcon" override="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="30" />
+                                </Texture>
+
+                                <Control name="$(parent)SeasonRankBarContainer" override="true">
+                                    <Controls>
+                                        <StatusBar name="$(parent)ProgressBar" override="true" inherits="ZO_GamepadArrowStatusBarWithBGMedium" />
+                                    </Controls>
+                                </Control>
+                                <Label name="$(parent)ProgressStateLabel" override="true" font="ZoFontGamepadBold27" />
+
+                                <Label name="$(parent)ProgressValueLabel" override="true" font="ZoFontGamepadBold27" />
                             </Controls>
                         </Control>
                     </Controls>

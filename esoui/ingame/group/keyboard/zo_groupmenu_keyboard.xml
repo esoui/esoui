@@ -9,6 +9,26 @@
         </Control>
 
         <Control name="ZO_GroupMenuKeyboard_StatusIconChildlessHeader" inherits="ZO_StatusIconChildlessHeader" virtual="true">
+            <OnInitialized name="GroupMenu">
+                local textLabel = self:GetNamedChild("Text")
+                local fonts =
+                {
+                    {
+                        font = "ZoFontHeader3",
+                        lineLimit = 2,
+                    },
+                    {
+                        font = "ZoFontHeader2",
+                        lineLimit = 2,
+                    },
+                    {
+                        font = "ZoFontHeader",
+                        lineLimit = 2,
+                        dontUseForAdjusting = true,
+                    },
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(textLabel, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+            </OnInitialized>
             <Controls>
                 <Label name="$(parent)Text" override="true">
                     <DimensionConstraints maxX="ZO_GROUP_MENU_KEYBOARD_TREE_LABEL_WIDTH" />

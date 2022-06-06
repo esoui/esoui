@@ -1,0 +1,52 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_TributePatron_Gamepad_Card_Label" font="ZoFontGamepad34" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <Control name="ZO_TributeCardTile_Gamepad_Control" inherits="ZO_ContextualActionsTile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_TILE_WIDTH_GAMEPAD" y="ZO_TRIBUTE_TILE_HEIGHT_GAMEPAD" />
+
+            <Controls>
+                <Backdrop name="$(parent)OverlayBorder" override="true" tier="LOW" layer="BACKGROUND" centerColor="FFFFFF">
+                    <AnchorFill />
+                    <Center file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_center_16.dds" />
+                    <Edge file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_edge_16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributePatronBookCardTile_Gamepad_Control" inherits="ZO_TributePatronBookCardTile_Shared_Control ZO_TributeCardTile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_PATRON_BOOK_TILE_WIDTH_GAMEPAD" y="ZO_TRIBUTE_PATRON_BOOK_TILE_HEIGHT_GAMEPAD" />
+
+            <OnInitialized>
+                ZO_TributePatronBookCardTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Title" override="true" inherits="ZO_TributePatron_Gamepad_Card_Label">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="-3" />
+                </Label>
+
+                <Label name="$(parent)Count" override="true" inherits="ZO_TributePatron_Gamepad_Card_Label">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Title" relativePoint="TOPRIGHT" offsetX="-5" offsetY="10" />
+                </Label>
+
+                <Texture name="$(parent)StatusIcon" override="true">
+                    <Dimensions x="64" y="64" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributePileViewerCardTile_Gamepad_Control" inherits="ZO_TributeCardTile_Shared_Control ZO_TributeCardTile_Gamepad_Control" virtual="true">
+            <OnInitialized>
+                ZO_TributePileViewerCardTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_TributeTargetViewerCardTile_Gamepad_Control" inherits="ZO_TributeCardTile_Shared_Control ZO_TributeCardTile_Gamepad_Control" virtual="true">
+            <OnInitialized>
+                ZO_TributeTargetViewerCardTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

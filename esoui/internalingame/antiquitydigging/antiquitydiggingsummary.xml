@@ -26,11 +26,11 @@
             <Animations>
                 <AlphaAnimation applyToChildControlName="Header" delay="10" duration="210" startAlpha="0" endAlpha="1" />
 
-                <SizeAnimation applyToChildControlName="HeaderMask" delay="10" duration="210" startWidth="0" startHeight="0">
+                <ScaleAnimation applyToChildControlName="HeaderMaskSimulator" delay="10" duration="210">
                     <EasingFunction>
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
-                </SizeAnimation>
+                </ScaleAnimation>
                 
                 <ScaleAnimation applyToChildControlName="Divider" duration="190" startScale="0" endScale="1">
                     <EasingFunction>
@@ -58,17 +58,17 @@
                     </EasingFunction>
                 </ScaleAnimation>
 
-                <SizeAnimation applyToChildControlName="SubHeaderMask" delay="190" duration="500" startWidth="0">
+                <ScaleAnimation applyToChildControlName="SubHeaderMaskSimulator" delay="190" duration="500">
                     <EasingFunction>
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
-                </SizeAnimation>
+                </ScaleAnimation>
 
-                <SizeAnimation applyToChildControlName="ContainerNameMask" delay="190" duration="500" startWidth="0">
+                <ScaleAnimation applyToChildControlName="ContainerNameMaskSimulator" delay="190" duration="500">
                     <EasingFunction>
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
-                </SizeAnimation>
+                </ScaleAnimation>
             </Animations>
         </AnimationTimeline>
 
@@ -348,39 +348,15 @@
             <Controls>
                 <Control name="$(parent)Container">
                     <Controls>
-                        <Control name="$(parent)Name">
-                            <Controls>
-                                <Scroll name="$(parent)Mask">
-                                    <Controls>
-                                        <Label name="$(parent)Text" font="ZoFontWinH2" />
-                                    </Controls>
-                                </Scroll>
-                            </Controls>
-                        </Control>
+                        <Label name="$(parent)Name" font="ZoFontWinH2" />
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)SubHeader">
-                    <Controls>
-                        <Scroll name="$(parent)Mask">
-                            <Controls>
-                                <Label name="$(parent)Text" font="ZoFontWinH3" />
-                            </Controls>
-                        </Scroll>
-                    </Controls>
-                </Control>
+                <Label name="$(parent)SubHeader" font="ZoFontWinH3" />
 
                 <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template" />
 
-                <Control name="$(parent)Header">
-                    <Controls>
-                        <Scroll name="$(parent)Mask">
-                            <Controls>
-                                <Label name="$(parent)Text" font="ZoFontWinH1" />
-                            </Controls>
-                        </Scroll>
-                    </Controls>
-                </Control>
+                <Label name="$(parent)Header" font="ZoFontWinH1" />
             </Controls>
         </Control>
         
@@ -388,39 +364,15 @@
             <Controls>
                 <Control name="$(parent)Container">
                     <Controls>
-                        <Control name="$(parent)Name">
-                            <Controls>
-                                <Scroll name="$(parent)Mask">
-                                    <Controls>
-                                        <Label name="$(parent)Text" font="ZoFontGamepad42" />
-                                    </Controls>
-                                </Scroll>
-                            </Controls>
-                        </Control>
+                        <Label name="$(parent)Name" font="ZoFontGamepad42" />
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)SubHeader">
-                    <Controls>
-                        <Scroll name="$(parent)Mask">
-                            <Controls>
-                                <Label name="$(parent)Text" font="ZoFontGamepad27" />
-                            </Controls>
-                        </Scroll>
-                    </Controls>
-                </Control>
+                <Label name="$(parent)SubHeader" font="ZoFontGamepad27" />
                 
                 <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" />
 
-                <Control name="$(parent)Header">
-                    <Controls>
-                        <Scroll name="$(parent)Mask">
-                            <Controls>
-                                <Label name="$(parent)Text" font="ZoFontGamepadBold48" />
-                            </Controls>
-                        </Scroll>
-                    </Controls>
-                </Control>
+                <Label name="$(parent)Header" font="ZoFontGamepadBold48" />
             </Controls>
         </Control>
 
@@ -444,30 +396,15 @@
                             </Controls>
                         </Control>
 
-                        <Control name="$(parent)Name" inherits="ZO_LabelRevealAnimationWindow">
+                        <Label name="$(parent)Name" inherits="ZO_RevealingControl">
                             <Anchor point="LEFT" relativeTo="$(parent)Frame" relativePoint="RIGHT" offsetX="10" />
-                            <Controls>
-                                <Scroll name="$(parent)Mask" override="true">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="BOTTOMLEFT" />
-                                </Scroll>
-                            </Controls>
-                        </Control>
+                        </Label>
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)SubHeader" inherits="ZO_LabelRevealAnimationWindow">
+                <Label name="$(parent)SubHeader" inherits="ZO_RevealingControl" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" >
                     <Anchor point="BOTTOM" relativeTo="$(parent)Container" relativePoint="TOP"/>
-                    <Controls>
-                        <Scroll name="$(parent)Mask" override="true">
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="BOTTOMLEFT" />
-                            <Controls>
-                                <Label name="$(parent)Text" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" />
-                            </Controls>
-                        </Scroll>
-                    </Controls>
-                </Control>
+                </Label>
                 
                 <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider">
                     <Anchor point="BOTTOM" relativeTo="$(parent)SubHeader" relativePoint="TOP" offsetY="-20" />
@@ -475,19 +412,9 @@
                     <Dimensions x="500" />
                 </Control>
 
-                <Control name="$(parent)Header" inherits="ZO_LabelRevealAnimationWindow">
+                <Label name="$(parent)Header" inherits="ZO_RevealingControl" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_REWARDS_HEADER">
                     <Anchor point="BOTTOM" relativeTo="$(parent)Divider" relativePoint="TOP" offsetY="-10" />
-                    <Controls>
-                        <Scroll name="$(parent)Mask" override="true">
-                            <Anchor point="BOTTOM" />
-                            <Controls>
-                                <Label name="$(parent)Text" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_REWARDS_HEADER">
-                                    <Anchor point="BOTTOM" />
-                                </Label>
-                            </Controls>
-                        </Scroll>
-                    </Controls>
-                </Control>
+                </Label>
             </Controls>
         </Control>
 

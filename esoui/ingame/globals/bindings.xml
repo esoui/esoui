@@ -256,13 +256,14 @@
                     end
                 </Up>
             </Action>
+            <!-- This is the action for the quickslot wheel. The name isn't great, but changing it at this point would be too much of a pain, so we just kind of have to live with it -->
             <Action name="ACTION_BUTTON_9">
-                <Down>QUICKSLOT_RADIAL_MANAGER:StartInteraction()</Down>
+                <Down>UTILITY_WHEEL_MANAGER:StartInteraction()</Down>
                 <Up>
-                    if not QUICKSLOT_RADIAL_MANAGER:StopInteraction() then
+                    if not UTILITY_WHEEL_MANAGER:StopInteraction() then
                         if ZO_ActionBar_CanUseActionSlots() then
-                            OnSlotUp(GetCurrentQuickslot())
-                            ZO_ActionBar_OnActionButtonUp(9)
+                            OnSlotUp(GetCurrentQuickslot(), HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
+                            ZO_ActionBar_OnActionButtonUp(GetCurrentQuickslot(), HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
                         end
                     end
                 </Up>
@@ -316,11 +317,6 @@
             <Action name="PLAYER_TO_PLAYER_INTERACT">
                 <Down>PLAYER_TO_PLAYER:StartInteraction()</Down>
                 <Up>PLAYER_TO_PLAYER:StopInteraction()</Up>
-            </Action>
-
-            <Action name="UI_SHORTCUT_EMOTES_QUICK_SLOTS">
-                <Down>if IsInGamepadPreferredMode() then PLAYER_EMOTE_QUICKSLOT_RADIAL_MANAGER:StartInteraction() end</Down>
-                <Up>PLAYER_EMOTE_QUICKSLOT_RADIAL_MANAGER:StopInteraction()</Up>
             </Action>
         </Category>
 
@@ -442,7 +438,8 @@
 
             <Action name="TOGGLE_GAMEPAD_MODE" preventAutomaticInputModeChange="true">
                 <Down>
-                    if IsGamepadUISupported() and IsKeyboardUISupported() then
+                    local accessibilityModeEnabled = GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE)
+                    if not accessibilityModeEnabled and IsGamepadUISupported() and IsKeyboardUISupported() then
                         local mode = IsInGamepadPreferredMode() and INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD or INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD
                         SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE, mode)
                     end
@@ -703,6 +700,29 @@
             </Action>
         </Category>
     </Layer>
+
+    <Layer name="SI_KEYBINDINGS_LAYER_UTILITY_WHEEL">
+        <Category name="SI_KEYBINDINGS_CATEGORY_UTILITY_WHEEL_KEYBOARD">
+            <Action name="UTILITY_WHEEL_KEYBOARD_CYCLE_LEFT">
+                <Down>if not IsInGamepadPreferredMode() then UTILITY_WHEEL_MANAGER:CycleLeft() end</Down>
+            </Action>
+
+            <Action name="UTILITY_WHEEL_KEYBOARD_CYCLE_RIGHT">
+                <Down>if not IsInGamepadPreferredMode() then UTILITY_WHEEL_MANAGER:CycleRight() end</Down>
+            </Action>
+        </Category>
+
+        <Category name="SI_KEYBINDINGS_CATEGORY_UTILITY_WHEEL_GAMEPAD">
+            <Action name="UTILITY_WHEEL_GAMEPAD_CYCLE_LEFT">
+                <Down>if IsInGamepadPreferredMode() then UTILITY_WHEEL_MANAGER:CycleLeft() end</Down>
+            </Action>
+
+            <Action name="UTILITY_WHEEL_GAMEPAD_CYCLE_RIGHT">
+                <Down>if IsInGamepadPreferredMode() then UTILITY_WHEEL_MANAGER:CycleRight() end</Down>
+            </Action>
+        </Category>
+    </Layer>
+    
     <Layer name="SI_KEYBINDINGS_LAYER_INSTANCE_KICK_WARNING">
         <Category>
             <Action name="INSTANCE_KICK_LEAVE_INSTANCE">
@@ -945,10 +965,13 @@
 
     <!-- Not player facing -->
     <Layer name="RadialMenu">
-        <BlockKey key="MOUSE_LEFT" />
-        <BlockKey key="MOUSE_RIGHT" />
-        <BlockKey key="MOUSE_MIDDLE" />
+        <Category>
+            <BlockAction name="SPECIAL_MOVE_ATTACK" />
+            <BlockAction name="SPECIAL_MOVE_BLOCK" />
+            <BlockAction name="SPECIAL_MOVE_INTERRUPT" />
+        </Category>
     </Layer>
+    
     <!-- Not player facing -->
     <Layer name="Death">
         <Category>
@@ -1367,6 +1390,21 @@
     <Layer name="PathNodeRotationBlockCrouchLayer">
         <Category>
             <BlockAction name="SPECIAL_MOVE_CROUCH"/>
+        </Category>
+    </Layer>
+
+    <!-- Not player facing -->
+    <Layer name="CloseActionsInterceptLayer">
+        <Category>
+            <Action name="CLOSE_INTERCEPT_TOGGLE_SYSTEM" hideAction="true" inheritsBindFrom="TOGGLE_SYSTEM" rebindable="false">
+                <Down>return CLOSE_ACTIONS_INTERCEPT_LAYER_FRAGMENT:InterceptCloseAction(keybind)</Down>
+            </Action>
+            <Action name="CLOSE_INTERCEPT_TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" rebindable="false">
+                <Down>return CLOSE_ACTIONS_INTERCEPT_LAYER_FRAGMENT:InterceptCloseAction(keybind)</Down>
+            </Action>
+            <Action name="CLOSE_INTERCEPT_GAMEPAD_UI_EXIT" hideAction="true" inheritsBindFrom="GAMEPAD_UI_EXIT" rebindable="false">
+                <Down>return CLOSE_ACTIONS_INTERCEPT_LAYER_FRAGMENT:InterceptCloseAction(keybind)</Down>
+            </Action>
         </Category>
     </Layer>
 </Bindings>

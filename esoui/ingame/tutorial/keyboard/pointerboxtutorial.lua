@@ -1,6 +1,7 @@
 ZO_PointerBoxTutorial = ZO_TutorialHandlerBase:Subclass()
 
 function ZO_PointerBoxTutorial:Initialize(parent)
+    self.parent = parent
     self.tutorial = CreateControlFromVirtual(parent:GetName(), parent, "ZO_PointerBoxTutorialTip", "PointerBoxTip")
 end
 
@@ -26,35 +27,46 @@ function ZO_PointerBoxTutorial:SuppressTutorials(suppress, reason)
     -- Suppression is disabled in ZO_PointerBoxTutorial
 end
 
-function ZO_PointerBoxTutorial:DisplayTutorial(tutorialIndex)
-    self.tutorialIndex = tutorialIndex
+function ZO_PointerBoxTutorial:DisplayTutorial(tutorialIndex, anchor, offsetX, offsetY)
     local title, description = GetTutorialInfo(tutorialIndex)
     local trigger = GetTutorialTrigger(tutorialIndex)
     local layoutInfo = self:GetTriggerLayoutInfo(trigger)
-
+    if not layoutInfo then
+        internalassert(false, string.format("No tutorial layout registered for trigger %d", trigger or 0))
+        return
+    end
 
     self.tutorial:SetText(description)
 
-    self.pointerBox = POINTER_BOXES:Acquire()
-    self.pointerBox:SetContentsControl(self.tutorial)
-    self.pointerBox:SetParent(layoutInfo.parent)
-    self.pointerBox:SetCloseable(true)
-    self.pointerBox:SetReleaseOnHidden(true)
+    local pointerBox = POINTER_BOXES:Acquire()
+    pointerBox:SetContentsControl(self.tutorial)
+    pointerBox:SetCloseable(true)
+    pointerBox:SetParent(layoutInfo.parent)
+    pointerBox:SetReleaseOnHidden(true)
+    pointerBox:SetTutorialIndex(tutorialIndex)
 
-    self.pointerBox:SetOnHiddenCallback(function()
-        self.pointerBox = nil
-        self:RemoveTutorial(tutorialIndex)
-    end)
-    layoutInfo.anchor:Set(self.pointerBox)
-    if layoutInfo.fragment then
-        self.pointerBox:SetHideWithFragment(layoutInfo.fragment)
+    if not anchor or anchor == NONE then
+        -- Preregistered layout anchoring
+        layoutInfo.anchor:Set(pointerBox)
+    else
+        -- Ad-hoc anchoring
+        local customAnchor = ZO_Anchor:New()
+        customAnchor:ResetToAnchor(layoutInfo.anchor)
+        customAnchor:SetMyPoint(anchor)
+        customAnchor:SetOffsets(offsetX, offsetY)
+        customAnchor:Set(pointerBox)
     end
+
+    if layoutInfo.fragment then
+        pointerBox:SetHideWithFragment(layoutInfo.fragment)
+    end
+
     self:SetOptionalPointerBoxParams(layoutInfo.optionalParams)
-    self.pointerBox:Commit()
-    self.pointerBox:Show()
+
+    pointerBox:Commit()
+    pointerBox:Show()
 
     SetTutorialSeen(tutorialIndex)
-    self:SetCurrentlyDisplayedTutorialIndex(tutorialIndex, trigger)
 end
 
 do
@@ -64,48 +76,91 @@ do
     local DEFAULT_HEIGHT = 0
 
     function ZO_PointerBoxTutorial:SetOptionalPointerBoxParams(optionalParams)
+        local tutorialControl = self.tutorial
         if optionalParams then
             if optionalParams.dimensionConstraintsMinX or optionalParams.dimensionConstraintsMinY or optionalParams.dimensionConstraintsMaxX or optionalParams.dimensionConstraintsMaxY then
-                self.tutorial:SetDimensionConstraints(optionalParams.dimensionConstraintsMinX or 0, optionalParams.dimensionConstraintsMinY or 0, optionalParams.dimensionConstraintsMaxX or 0, optionalParams.dimensionConstraintsMaxY or 0)
+                tutorialControl:SetDimensionConstraints(optionalParams.dimensionConstraintsMinX or 0, optionalParams.dimensionConstraintsMinY or 0, optionalParams.dimensionConstraintsMaxX or 0, optionalParams.dimensionConstraintsMaxY or 0)
             else
-                self.tutorial:SetDimensions(optionalParams.width or DEFAULT_WIDTH, optionalParams.height or DEFAULT_HEIGHT)
+                tutorialControl:SetDimensions(optionalParams.width or DEFAULT_WIDTH, optionalParams.height or DEFAULT_HEIGHT)
             end
-            self.tutorial:SetVerticalAlignment(optionalParams.verticalAlignment or DEFAULT_VERTICAL_ALIGNMENT)
-            self.tutorial:SetHorizontalAlignment(optionalParams.horizontalAlignment or DEFAULT_HORIZONTAL_ALIGNMENT)
+            tutorialControl:SetVerticalAlignment(optionalParams.verticalAlignment or DEFAULT_VERTICAL_ALIGNMENT)
+            tutorialControl:SetHorizontalAlignment(optionalParams.horizontalAlignment or DEFAULT_HORIZONTAL_ALIGNMENT)
         else
-            self.tutorial:SetDimensionConstraints(0, 0, 0, 0)
-            self.tutorial:SetDimensions(DEFAULT_WIDTH, DEFAULT_HEIGHT)
-            self.tutorial:SetVerticalAlignment(DEFAULT_VERTICAL_ALIGNMENT)
-            self.tutorial:SetHorizontalAlignment(DEFAULT_HORIZONTAL_ALIGNMENT)
+            tutorialControl:SetDimensionConstraints(0, 0, 0, 0)
+            tutorialControl:SetDimensions(DEFAULT_WIDTH, DEFAULT_HEIGHT)
+            tutorialControl:SetVerticalAlignment(DEFAULT_VERTICAL_ALIGNMENT)
+            tutorialControl:SetHorizontalAlignment(DEFAULT_HORIZONTAL_ALIGNMENT)
         end
     end
 end
 
-function ZO_PointerBoxTutorial:OnDisplayTutorial(tutorialIndex, priority)
-     if tutorialIndex ~= self:GetCurrentlyDisplayedTutorialIndex() then
+function ZO_PointerBoxTutorial:GetActiveTutorials()
+    local activePointerBoxes = {}
+    local activeObjects = POINTER_BOXES:GetActiveObjects()
+    for _, pointerBox in pairs(activeObjects) do
+        if pointerBox:GetTutorialIndex() then
+            table.insert(activePointerBoxes, pointerBox)
+        end
+    end
+    return activePointerBoxes
+end
+
+function ZO_PointerBoxTutorial:GetActiveTutorialByIndex(tutorialIndex)
+    local activeObjects = POINTER_BOXES:GetActiveObjects()
+    for _, pointerBox in pairs(activeObjects) do
+        if pointerBox:GetTutorialIndex() == tutorialIndex then
+            return pointerBox
+        end
+    end
+end
+
+function ZO_PointerBoxTutorial:GetActiveTutorialByTrigger(tutorialTrigger)
+    local activeObjects = POINTER_BOXES:GetActiveObjects()
+    for _, pointerBox in pairs(activeObjects) do
+        if pointerBox:GetTutorialTrigger() == tutorialTrigger then
+            return pointerBox
+        end
+    end
+end
+
+function ZO_PointerBoxTutorial:GetCurrentlyDisplayedTutorialIndex()
+    -- For backward compatibility with:
+    --   ZO_Tutorials:ForceRemoveAll()
+    --   ZO_TutorialHandlerBase:SuppressTutorials()
+    --   ZO_TutorialHandlerBase:CanShowTutorial()
+
+    local activeObjects = POINTER_BOXES:GetActiveObjects()
+    for _, pointerBox in pairs(activeObjects) do
+        local tutorialIndex = pointerBox:GetTutorialIndex()
+        if tutorialIndex then
+            return tutorialIndex
+        end
+    end
+end
+
+function ZO_PointerBoxTutorial:IsTutorialDisplayed(tutorialIndex)
+    return self:GetActiveTutorialByIndex(tutorialIndex) ~= nil
+end
+
+function ZO_PointerBoxTutorial:OnDisplayTutorial(tutorialIndex, priority, ...)
+     if not self:GetActiveTutorialByIndex(tutorialIndex) then
         if self:CanShowTutorial() then
-            self:DisplayTutorial(tutorialIndex)
+            self:DisplayTutorial(tutorialIndex, ...)
         end
     end
-end
-
-function ZO_PointerBoxTutorial:SetCurrentlyDisplayedTutorialIndex(currentlyDisplayedTutorialIndex, currentlyDisplayedTutorialTrigger)
-    self.currentlyDisplayedTutorialIndex = currentlyDisplayedTutorialIndex
-    self.currentlyDisplayedTutorialTrigger = currentlyDisplayedTutorialTrigger
 end
 
 function ZO_PointerBoxTutorial:RemoveTutorialByTrigger(tutorialTrigger)
-    if self.currentlyDisplayedTutorialTrigger == tutorialTrigger then
-        self:RemoveTutorial(self:GetCurrentlyDisplayedTutorialIndex())
+    local pointerBox = self:GetActiveTutorialByTrigger(tutorialTrigger)
+    if pointerBox then
+        pointerBox:Hide()
     end
 end
 
 function ZO_PointerBoxTutorial:RemoveTutorial(tutorialIndex)
-    if self:GetCurrentlyDisplayedTutorialIndex() == tutorialIndex then
-        self:SetCurrentlyDisplayedTutorialIndex(nil)
-        if self.pointerBox then
-            self.pointerBox:Hide()
-        end
+    local pointerBox = self:GetActiveTutorialByIndex(tutorialIndex)
+    if pointerBox then
+        pointerBox:Hide()
     end
 end
 
@@ -114,5 +169,8 @@ function ZO_PointerBoxTutorial:GetTutorialType()
 end
 
 function ZO_PointerBoxTutorial:ClearAll()
-    self:SetCurrentlyDisplayedTutorialIndex(nil)
+    local activePointerBoxes = self:GetActiveTutorials()
+    for _, pointerBox in ipairs(activePointerBoxes) do
+        pointerBox:Hide()
+    end
 end
