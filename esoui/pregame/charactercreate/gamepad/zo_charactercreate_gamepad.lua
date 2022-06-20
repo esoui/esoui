@@ -1333,11 +1333,15 @@ function ZO_CharacterCreate_Gamepad:ShowCollectibleBlockingInfo(appearanceIndex,
 
     local descriptionText = zo_strformat(SI_CHARACTER_CREATE_PREVIEWING_COLLECTIBLES_TOOLTIP_DESCRIPTION_FORMATTER, appearanceTypeText, formattedCollectibleName, previewTypeToShow, appearanceTypeText)
     descriptionControl:SetText(descriptionText)
+    self.collectibleBlockingInfoShowing = true
 end
 
 function ZO_CharacterCreate_Gamepad:HideCollectibleBlockingInfo()
-    SCENE_MANAGER:RemoveFragment(CHARACTER_CREATE_GAMEPAD_COLLECTIBLE_BLOCKING_INFO_FRAGMENT)
-    SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+    if self.collectibleBlockingInfoShowing then
+        SCENE_MANAGER:RemoveFragment(CHARACTER_CREATE_GAMEPAD_COLLECTIBLE_BLOCKING_INFO_FRAGMENT)
+        SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+        self.collectibleBlockingInfoShowing = false
+    end
 end
 
 function ZO_CharacterCreate_Gamepad:ContainerOnUpdate()

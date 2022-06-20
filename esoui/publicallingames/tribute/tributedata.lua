@@ -653,3 +653,8 @@ function ZO_TributeCardData:GetPortrait()
     local portraitImage, portraitGlowImage = GetTributeCardPortrait(self.cardDefId)
     return portraitImage, portraitGlowImage
 end
+
+function ZO_TributeCardData:GetPortraitIcon()
+    local portraitIcon = GetTributeCardPortraitIcon(self.cardDefId)
+    return portraitIcon 
+end

@@ -856,13 +856,7 @@
                     <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-60" offsetY="75"/>
                 </Control>
 
-                <Control name="$(parent)MatchItems" resizeToFitDescendents="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="440"/>
-                </Control>
-
-                <Control name="$(parent)RankUpItems" resizeToFitDescendents="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="440"/>
-                </Control>
+                <Control name="$(parent)MatchItems" resizeToFitDescendents="true" />
             </Controls>
         </Control>
 

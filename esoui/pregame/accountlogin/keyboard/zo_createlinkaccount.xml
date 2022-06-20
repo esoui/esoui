@@ -72,7 +72,7 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="15" />
                         </Label>
 
-                        <Backdrop name="$(parent)AccountNameEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                        <Backdrop name="$(parent)AccountNameEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
                             <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameLabel" relativePoint="BOTTOMLEFT" />
 
@@ -127,7 +127,7 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)CountryDropdown" relativePoint="BOTTOMLEFT" offsetY="15" />
                         </Label>
 
-                        <Backdrop name="$(parent)EmailEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                        <Backdrop name="$(parent)EmailEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
                             <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)EmailLabel" relativePoint="BOTTOMLEFT" />
 
@@ -198,7 +198,7 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="15" />
                         </Label>
                         
-                        <Backdrop name="$(parent)AccountName" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                        <Backdrop name="$(parent)AccountName" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
                             <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameLabel" relativePoint="BOTTOMLEFT" />
 
@@ -223,7 +223,7 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)AccountName" relativePoint="BOTTOMLEFT" offsetY="15" />
                         </Label>
 
-                        <Backdrop name="$(parent)Password" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                        <Backdrop name="$(parent)Password" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
                             <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)PasswordLabel" relativePoint="BOTTOMLEFT" />
 

@@ -276,7 +276,9 @@ function ZO_RewardsManager:GetInfoForReward(rewardId, quantity, parentChoice, va
     elseif entryType == REWARD_ENTRY_TYPE_EXPERIENCE then
         rewardData = self:GetExperienceEntryInfo(rewardId, quantity, parentChoice)
     elseif entryType == REWARD_ENTRY_TYPE_SKILL_LINE_EXPERIENCE then
-        rewardData = self:GetSkillLineExperienceEntryInfo(rewardId, quantity, parentChoice)
+        rewardData = self:GetTributeCardUpgradeEntryInfo(rewardId, quantity, parentChoice)
+    elseif entryType == REWARD_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE then
+        rewardData = self:GetTributeCardUpgradeEntryInfo(rewardId, parentChoice)
     end
 
     if rewardData then
@@ -426,6 +428,22 @@ function ZO_RewardsManager:GetSkillLineExperienceEntryInfo(rewardId, quantity, p
     rewardData:SetQuantity(quantity)
     rewardData:SetAbbreviatedQuantity(abbreviatedQuantity)
     rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
+
+    return rewardData
+end
+
+function ZO_RewardsManager:GetTributeCardUpgradeEntryInfo(rewardId, parentChoice)
+    local patronId, cardIndex = GetTributeCardUpgradeRewardTributeCardUpgradeInfo(rewardId)
+    local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(patronId)
+    local baseCardId, upgradeCardId = patronData:GetDockCardInfoByIndex(cardIndex)
+    local upgradeCardData = ZO_TributeCardData:New(patronId, upgradeCardId)
+    local portraitIcon = upgradeCardData:GetPortraitIcon()
+
+    local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    rewardData:SetRawName(upgradeCardData:GetName())
+    rewardData:SetFormattedName(upgradeCardData:GetFormattedName())
+    rewardData:SetItemDisplayQuality(upgradeCardData:GetRarity())
+    rewardData:SetIcon(portraitIcon)
 
     return rewardData
 end

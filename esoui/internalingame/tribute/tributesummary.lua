@@ -307,6 +307,11 @@ function ZO_TributeSummary:InitializeStateMachine()
     do
         local state = fanfareStateMachine:AddState("INACTIVE")
         state:RegisterCallback("OnActivated", function()
+            self.hasRankUpRewards = false
+            local headerControl = self.rewardsControl:GetNamedChild("Header")
+            local offsetX = 0
+            local offsetY = 440
+            self.rewardItemsControl:SetAnchor(TOP, headerControl, BOTTOM, offsetX, offsetY)
             self.modalUnderlayTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
             self.keybindTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
             self.statisticsInTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
@@ -426,6 +431,11 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.rewardsHeaderInTimeline:PlayFromStart()
             self.statisticsInTimeline:PlayFromStart()
             self.matchRewardItemsInTimeline:PlayFromStart()
+            if self.hasRankUpRewards then
+                self.rankUpItemsInTimeline:SetAllAnimationOffsets(self.rewardsHeaderInTimeline:GetDuration())
+                self.rewardRowControlPool:GetActiveObject(REWARDS_RANK_UP_KEY):SetHidden(false)
+                self.rankUpItemsInTimeline:PlayFromStart()
+            end
         end)
 
         state:RegisterCallback("OnDeactivated", function()
@@ -437,6 +447,9 @@ function ZO_TributeSummary:InitializeStateMachine()
             end
             if self.matchRewardItemsInTimeline:IsPlaying() then
                 self.matchRewardItemsInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+            end
+            if self.hasRankUpRewards and self.rankUpItemsInTimeline:IsPlaying() then
+                self.rankUpItemsInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             end
         end)
     end
@@ -453,6 +466,10 @@ function ZO_TributeSummary:InitializeStateMachine()
             self.rewardsHeaderInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             self.statisticsInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
             self.matchRewardItemsInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+            if self.hasRankUpRewards then
+                self.rewardRowControlPool:GetActiveObject(REWARDS_RANK_UP_KEY):SetHidden(false)
+                self.rankUpItemsInTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+            end
         end)
     end
 
@@ -921,13 +938,17 @@ function ZO_TributeSummary:InitializeStateMachine()
         summaryOutLeaderboardSkipEdge:SetConditional(function()
             return self.isRanked
         end)
+        local progressionInRankUpRewardsInEdge = fanfareStateMachine:AddEdgeAutoName("PROGRESSION_IN", "RANK_UP_REWARDS_IN")
+        progressionInRankUpRewardsInEdge:SetConditional(function()
+            return self.hasRankUpRewards and not self.rankUp
+        end)
         local progressionInRankChangeInEdge = fanfareStateMachine:AddEdgeAutoName("PROGRESSION_IN", "RANK_CHANGE_IN")
         progressionInRankChangeInEdge:SetConditional(function()
-            return self.playerRankCurrent ~= TRIBUTE_TIER_UNRANKED
+            return self.playerRankCurrent ~= TRIBUTE_TIER_UNRANKED and not (self.hasRankUpRewards and not self.rankUp)
         end)
         local progressionInProgressBarInEdge = fanfareStateMachine:AddEdgeAutoName("PROGRESSION_IN", "PROGRESSION_PROGRESS_BAR_IN")
         progressionInProgressBarInEdge:SetConditional(function()
-            return self.playerRankCurrent == TRIBUTE_TIER_UNRANKED
+            return self.playerRankCurrent == TRIBUTE_TIER_UNRANKED and not (self.hasRankUpRewards and not self.rankUp)
         end)
         fanfareStateMachine:AddEdge("PROGRESSION_IN_TO_LEADERBOARD_TRANSITORY_STATE_SKIP", "PROGRESSION_IN", "LEADERBOARD_TRANSITORY_STATE")
         fanfareStateMachine:AddEdgeAutoName("RANK_CHANGE_IN", "PROGRESSION_PROGRESS_BAR_IN")
@@ -964,7 +985,18 @@ function ZO_TributeSummary:InitializeStateMachine()
         end)
         fanfareStateMachine:AddEdgeAutoName("RANK_UP_IN", "RANK_UP_REWARDS_IN")
         fanfareStateMachine:AddEdgeAutoName("RANK_UP_IN", "RANK_UP_SKIP")
-        fanfareStateMachine:AddEdgeAutoName("RANK_UP_REWARDS_IN", "OLD_RANKS_FADE_OUT")
+        local rankUpRewardsInRankChangeInEdge = fanfareStateMachine:AddEdgeAutoName("RANK_UP_REWARDS_IN", "RANK_CHANGE_IN")
+        rankUpRewardsInRankChangeInEdge:SetConditional(function()
+            return self.playerRankCurrent ~= TRIBUTE_TIER_UNRANKED and not self.rankUp
+        end)
+        local rankUpRewardsInProgressBarInEdge = fanfareStateMachine:AddEdgeAutoName("RANK_UP_REWARDS_IN", "PROGRESSION_PROGRESS_BAR_IN")
+        rankUpRewardsInProgressBarInEdge:SetConditional(function()
+            return self.playerRankCurrent == TRIBUTE_TIER_UNRANKED and not self.rankUp
+        end)
+        local rankUpRewardsInOldRanksFadeOutEdge = fanfareStateMachine:AddEdgeAutoName("RANK_UP_REWARDS_IN", "OLD_RANKS_FADE_OUT")
+        rankUpRewardsInOldRanksFadeOutEdge:SetConditional(function()
+            return self.rankUp
+        end)
         fanfareStateMachine:AddEdgeAutoName("RANK_UP_REWARDS_IN", "RANK_UP_SKIP")
         fanfareStateMachine:AddEdgeAutoName("OLD_RANKS_FADE_OUT", "NEW_RANKS_FADE_IN")
         fanfareStateMachine:AddEdgeAutoName("OLD_RANKS_FADE_OUT", "RANK_UP_SKIP")
@@ -1038,6 +1070,7 @@ function ZO_TributeSummary:InitializeStateMachine()
     -- Ranked match initial states
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "SUMMARY_OUT_TO_PROGRESSION_IN")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "SUMMARY_OUT_TO_LEADERBOARD_TRANSITORY_STATE_SKIP")
+    fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "PROGRESSION_IN_TO_RANK_UP_REWARDS_IN")
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "PROGRESSION_IN_TO_RANK_CHANGE_IN")
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "PROGRESSION_IN_TO_PROGRESSION_PROGRESS_BAR_IN")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "PROGRESSION_IN_TO_LEADERBOARD_TRANSITORY_STATE_SKIP")
@@ -1296,7 +1329,8 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     self.progressionProgressBar:Reset()
     self.playerClubXP = GetPendingTributeClubExperience()
     self.playerRankNextRequiredXP = GetTributeCampaignRankExperienceRequirement(self.playerRankNext, self.campaignId) - GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent, self.campaignId)
-    self.playerCampaignXP = zo_max(0, GetTributePlayerExperienceInCurrentCampaignRank(self.campaignId))
+    local currentXPForRank = GetTributePlayerExperienceInCurrentCampaignRank(self.campaignId)
+    self.playerCampaignXP = zo_max(0, currentXPForRank)
     self.playerCampaignXPDelta = GetPendingTributeCampaignExperience(self.campaignId)
     self.progressionRankChange:SetText(string.format("%+d", self.playerCampaignXPDelta))
     self.rankUp = self.playerRankNew > self.playerRankCurrent
@@ -1417,8 +1451,8 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     end
     local numClubRankRewardLists = GetNumTributeClubRankRewardLists()
     if numClubRankRewardLists > 0 then
-        for clubRankRewardIndex = 1, numClubRankRewards do
-            local clubRankRewardListId = GetClubRankRewardListIdByIndex(clubRankRewardIndex)
+        for clubRankRewardListIndex = 1, numClubRankRewardLists do
+            local clubRankRewardListId = GetTributeClubRankRewardListIdByIndex(clubRankRewardListIndex)
             local clubRankRewardList = REWARDS_MANAGER:GetAllRewardInfoForRewardList(clubRankRewardListId)
             if REWARDS_MANAGER:DoesRewardListContainMailItems(clubRankRewardListId) then
                 rankUpMailedRewards = true
@@ -1464,7 +1498,6 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
                     countText = ZO_CurrencyControl_FormatAndLocalizeCurrency(count, USE_SHORT_FORMAT)
                 elseif rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
                     name = reward.formattedName
-                    icon = reward.icon
                 elseif rewardType == REWARD_ENTRY_TYPE_ITEM then
                     name = zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
                     qualityColorDef = GetItemQualityColor(reward.quality)
@@ -1472,6 +1505,9 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
                     if count > 1 then
                         countText = tostring(count)
                     end
+                elseif rewardType == REWARD_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE then
+                    name = reward.formattedName
+                    qualityColorDef = GetItemQualityColor(reward.quality)
                 elseif rewardType == REWARD_ENTRY_TYPE_MAIL_ITEM then
                     name = GetString(SI_TRIBUTE_SUMMARY_REWARD_MAIL)
                     icon = "EsoUI/Art/Icons/Quest_Container_001.dds"
@@ -1525,13 +1561,13 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
             self.fanfareStateMachine:FireCallbacks(END_OF_GAME_FANFARE_TRIGGER_COMMANDS.ANIMATION_COMPLETE)
         end
     end
-    self.matchRewardItemsInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     matchRewardsRowControl:SetMaskAnchor(TOPLEFT, BOTTOMLEFT)
     matchRewardsRowControl:SetAnimation(self.matchRewardItemsInTimeline:GetAnimation(1))
     matchRewardsRowControl.maskSimulator:SetScale(0)
     matchRewardsRowControl:SetHidden(true)
 
-    if self.rankUp then
+    if next(rankUpRewards) then
+        self.hasRankUpRewards = true
         local rankUpRewardsRowControl = self.rewardRowControlPool:AcquireObject(REWARDS_RANK_UP_KEY)
         rankUpRewardsRowControl:SetAnchor(TOP, matchRewardsRowControl, BOTTOM, 0, 10)
         SetUpRewardsRow(rankUpRewards, rankUpRewardsRowControl, self.rewardsControlPool)
@@ -1549,7 +1585,13 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
         self.rankUpItemsInTimeline:GetAnimation(1):SetDuration(rankUpItemsWipeDuration)
         rankUpRewardsRowControl:SetMaskAnchor(TOPLEFT, BOTTOMLEFT)
         rankUpRewardsRowControl:SetAnimation(self.rankUpItemsInTimeline:GetAnimation(1))
+        rankUpRewardsRowControl.maskSimulator:SetScale(0)
         rankUpRewardsRowControl:SetHidden(true)
+    end
+
+    -- In unranked matches that have rank up rewards, we don't want the matchRewardItemsInTimeline to trigger the state transition
+    if self.isRanked or not self.hasRankUpRewards then
+        self.matchRewardItemsInTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
     end
 
     -- Progression

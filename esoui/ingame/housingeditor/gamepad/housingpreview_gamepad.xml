@@ -58,7 +58,7 @@
                     </Controls>
                 </Control>
 
-                <Texture name="$(parent)HouseImage" override="true">
+                <Texture name="$(parent)HouseImage" override="true" layer="CONTROLS">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)EdgeFrame" />
                     <Dimensions x="ZO_GAMEPAD_HOUSING_PREVIEW_IMAGE_TEXTURE_WIDTH" y="ZO_GAMEPAD_HOUSING_PREVIEW_IMAGE_TEXTURE_HEIGHT" />
                 </Texture>
