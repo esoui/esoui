@@ -9248,7 +9248,7 @@ SafeAddString(SI_TRIBUTEMATCHEVENT72, "<<1>> is not available to play Tales of T
 SafeAddString(SI_TRIBUTEMATCHEVENT73, "The Tales of Tribute match has been ended due to an internal issue.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT74, "Cannot join while in an Activity Finder queue.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT75, "They are already in an Activity Finder queue.", 0)
-SafeAddString(SI_TRIBUTEMATCHEVENT76, "Target is not ready to play Tales of Tribute.", 0)
+SafeAddString(SI_TRIBUTEMATCHEVENT76, "Your opponent has declined the Tales of Tribute invite.", 1)
 SafeAddString(SI_TRIBUTEMATCHEVENT77, "You are not able to play Tales of Tribute.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT8, "<<1>> is not available for Tales of Tribute because they have challenged someone else.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT9, "<<1>> is not available for Tales of Tribute because they are considering another challenge.", 0)

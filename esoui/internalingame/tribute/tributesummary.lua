@@ -1423,16 +1423,15 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     }
 
     local standardRewardListId = GetTributeGeneralMatchRewardListId()
-    local LFGRewardListId = GetTributeGeneralMatchLFGRewardListId()
+    local lfgRewardUiDataId = GetTributeGeneralMatchLFGRewardUIDataId()
     local matchStandardRewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(standardRewardListId)
-    if REWARDS_MANAGER:DoesRewardListContainMailItems(standardRewardListId)
-        or REWARDS_MANAGER:DoesRewardListContainMailItems(LFGRewardListId) then
+    if REWARDS_MANAGER:DoesRewardListContainMailItems(standardRewardListId) then
         table.insert(matchStandardRewards, 1, mailedReward)
     end
     if self.playerClubXP > 0 then
         table.insert(matchStandardRewards, 1, clubXPReward)
     end
-    local matchLFGRewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(LFGRewardListId)
+    local matchLFGRewards = REWARDS_MANAGER:GetAllRewardInfoForLFGActivityRewardUIData(lfgRewardUiDataId)
     local rankUpMailedRewards = false
     local rankUpRewards = {}
     if self.rankUp then
@@ -1479,39 +1478,38 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
             local control = rewardsControlPool:AcquireObject()
             if not overflow or rewardIndex < MAX_REWARDS_PER_ROW then
                 local rewardType = reward.rewardType
-                local name = reward.rawName
+                local name = reward.formattedName
                 local icon = reward.icon
-                local count = reward.quantity
                 local qualityColorDef = nil
                 local countText = ""
                 if rewardType == REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE then
                     name = zo_strformat(SI_TRIBUTE_CLUB_EXPERIENCE, self.playerClubXP)
                     icon = "EsoUI/Art/Tribute/tributeRankPoints.dds"
-                    if count > 1 then
-                        countText = tostring(count)
+                    if reward.quantity > 1 then
+                        countText = reward.quantity
                     end
                 elseif rewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
                     local currencyType = reward.currencyType
                     name = zo_strformat(SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT, ZO_Currency_GetAmountLabel(currencyType))
                     icon = ZO_Currency_GetPlatformCurrencyLootIcon(currencyType)
                     local USE_SHORT_FORMAT = true
-                    countText = ZO_CurrencyControl_FormatAndLocalizeCurrency(count, USE_SHORT_FORMAT)
+                    countText = ZO_CurrencyControl_FormatAndLocalizeCurrency(reward.quantity, USE_SHORT_FORMAT)
                 elseif rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
-                    name = reward.formattedName
+                    -- No extra steps needed
                 elseif rewardType == REWARD_ENTRY_TYPE_ITEM then
-                    name = zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
                     qualityColorDef = GetItemQualityColor(reward.quality)
 
-                    if count > 1 then
-                        countText = tostring(count)
+                    if reward.quantity > 1 then
+                        countText = reward.quantity
                     end
                 elseif rewardType == REWARD_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE then
-                    name = reward.formattedName
                     qualityColorDef = GetItemQualityColor(reward.quality)
                 elseif rewardType == REWARD_ENTRY_TYPE_MAIL_ITEM then
                     name = GetString(SI_TRIBUTE_SUMMARY_REWARD_MAIL)
                     icon = "EsoUI/Art/Icons/Quest_Container_001.dds"
                     control.mailIndicatorIcon:SetHidden(false)
+                elseif rewardType == ZO_REWARD_CUSTOM_ENTRY_TYPE.LFG_ACTIVITY then
+                    qualityColorDef = reward:GetColor()
                 else
                     internalassert(false, "Unexpected Tribute match reward type")
                 end

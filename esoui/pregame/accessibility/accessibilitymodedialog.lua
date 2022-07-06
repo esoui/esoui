@@ -19,10 +19,13 @@ local function SetupAccessibilityModeDialog(dialogControl)
                 end,
                 keybind =   "DIALOG_PRIMARY",
                 callback =  function(dialog)
-                                ZO_AccessibilityModePrompt_OnContinueClicked()
+                                -- do nothing .... yet
                             end,
             },
         },
+        finishedCallback = function(dialog)
+            ZO_AccessibilityModePrompt_OnContinueClicked()
+        end,
     })
 end
 

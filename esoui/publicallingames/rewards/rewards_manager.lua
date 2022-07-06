@@ -1,11 +1,11 @@
-ZO_RewardData = ZO_Object:Subclass()
+-- TODO: One day I'd like to fold LFGReward into the RewardDef system. This is a stop gap solution.
+-- This will allow us to eaily define unique custom reward types that won't collide with the REWARD_ENTRY_TYPE enum values
+ZO_REWARD_CUSTOM_ENTRY_TYPE =
+{
+    LFG_ACTIVITY = { 1 },
+}
 
-function ZO_RewardData:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
+ZO_RewardData = ZO_InitializingObject:Subclass()
 
 function ZO_RewardData:Initialize(rewardId, parentChoice)
     self.rewardId = rewardId
@@ -89,6 +89,10 @@ function ZO_RewardData:SetIsSelectedChoice(isSelectedChoice)
     if self:GetParentChoice() then
         self.isSelectedChoice = isSelectedChoice
     end
+end
+
+function ZO_RewardData:SetColor(colorDef)
+    self.colorDef = colorDef
 end
 
 function ZO_RewardData:SetAnnouncementBackground(announcementBackground)
@@ -195,6 +199,10 @@ end
 
 function ZO_RewardData:GetRewardType()
     return self.rewardType
+end
+
+function ZO_RewardData:GetColor()
+    return self.colorDef
 end
 
 function ZO_RewardData:IsValidReward()
@@ -444,6 +452,32 @@ function ZO_RewardsManager:GetTributeCardUpgradeEntryInfo(rewardId, parentChoice
     rewardData:SetFormattedName(upgradeCardData:GetFormattedName())
     rewardData:SetItemDisplayQuality(upgradeCardData:GetRarity())
     rewardData:SetIcon(portraitIcon)
+
+    return rewardData
+end
+
+-- Helper function to make LFGActivityRewardUIData play nice with other rewards
+function ZO_RewardsManager:GetAllRewardInfoForLFGActivityRewardUIData(lfgRewardUIDataId)
+    local rewardListInfo = {}
+    local numNodes = GetNumLFGActivityRewardUINodes(lfgRewardUIDataId)
+    for nodeIndex = 1, numNodes do
+        local rewardData = self:GetLFGActivityRewardUINodeInfo(lfgRewardUIDataId, nodeIndex)
+        table.insert(rewardListInfo, rewardData)
+    end
+    return rewardListInfo
+end
+
+-- Helper function to make LFGActivityRewardUIData play nice with other rewards
+function ZO_RewardsManager:GetLFGActivityRewardUINodeInfo(lfgRewardUIDataId, nodeIndex)
+    local displayName, icon, r, g, b = GetLFGActivityRewardUINodeInfo(lfgRewardUIDataId, nodeIndex)
+    local formattedDisplayName = zo_strformat(SI_ACTIVITY_FINDER_REWARD_NAME_FORMAT, displayName)
+
+    local rewardData = ZO_RewardData:New(lfgRewardUIDataId)
+    rewardData:SetRawName(displayName)
+    rewardData:SetFormattedName(formattedDisplayName)
+    rewardData:SetColor(ZO_ColorDef:New(r, g, b))
+    rewardData:SetIcon(icon)
+    rewardData:SetRewardType(ZO_REWARD_CUSTOM_ENTRY_TYPE.LFG_ACTIVITY)
 
     return rewardData
 end

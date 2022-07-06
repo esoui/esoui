@@ -3976,7 +3976,7 @@ EsoStrings =
     "The Tales of Tribute match has been ended due to an internal issue.", -- SI_TRIBUTEMATCHEVENT73
     "Cannot join while in an Activity Finder queue.", -- SI_TRIBUTEMATCHEVENT74
     "They are already in an Activity Finder queue.", -- SI_TRIBUTEMATCHEVENT75
-    "Target is not ready to play Tales of Tribute.", -- SI_TRIBUTEMATCHEVENT76
+    "Your opponent has declined the Tales of Tribute invite.", -- SI_TRIBUTEMATCHEVENT76
     "You are not able to play Tales of Tribute.", -- SI_TRIBUTEMATCHEVENT77
     "Draw", -- SI_TRIBUTECARDPILE0
     "Hand", -- SI_TRIBUTECARDPILE1
@@ -10778,6 +10778,7 @@ SafeAddVersion(SI_TRIBUTEPATRONREQUIREMENT_OPPONENTPERSPECTIVE2, 1)
 SafeAddVersion(SI_TRIBUTEMATCHEVENT24, 1)
 SafeAddVersion(SI_TRIBUTEMATCHEVENT59, 1)
 SafeAddVersion(SI_TRIBUTEMATCHEVENT60, 1)
+SafeAddVersion(SI_TRIBUTEMATCHEVENT76, 1)
 SafeAddVersion(SI_TRIBUTECARDPILE0, 1)
 SafeAddVersion(SI_TRIBUTECARDPILE4, 1)
 SafeAddVersion(SI_TRIBUTEBOARDLOCATION0, 1)
