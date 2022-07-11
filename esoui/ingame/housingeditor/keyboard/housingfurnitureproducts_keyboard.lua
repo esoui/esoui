@@ -78,7 +78,6 @@ function ZO_HousingFurnitureProducts_Keyboard:OnShowing()
 end
 
 function ZO_HousingFurnitureProducts_Keyboard:OnSearchTextChanged(editBox)
-    ZO_HousingFurnitureList.OnSearchTextChanged(self, editBox)
     SHARED_FURNITURE:SetMarketProductTextFilter(editBox:GetText())
 end
 

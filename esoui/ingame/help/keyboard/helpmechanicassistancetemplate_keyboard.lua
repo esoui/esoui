@@ -34,8 +34,9 @@ function ZO_HelpMechanicAssistanceTemplate_Keyboard:Initialize(control, customer
     end)
 
     self.fragment = fragment
-    self:InitializeTextBoxes()
+    --Order of initialization matters, ComboBox needs to be initialized before the TextBoxes.
     self:InitializeComboBox()
+    self:InitializeTextBoxes()
 end
 
 function ZO_HelpMechanicAssistanceTemplate_Keyboard:InitializeComboBox()
@@ -72,17 +73,11 @@ function ZO_HelpMechanicAssistanceTemplate_Keyboard:InitializeTextBoxes()
 
     self.description = self.control:GetNamedChild("DescriptionBodyField")
     self.description:SetMaxInputChars(MAX_HELP_DESCRIPTION_BODY)
-    ZO_EditDefaultText_Initialize(self.description, GetString(SI_CUSTOMER_SERVICE_DEFAULT_DESCRIPTION_TEXT_GENERIC))
+    self.description:SetDefaultText(GetString(SI_CUSTOMER_SERVICE_DEFAULT_DESCRIPTION_TEXT_GENERIC))
 
     --Storing the text field and adding handlers to the visibility events so the Submit Button can be enabled/disabled when the player has typed something in
     --The Submit Button is disabled if the description text is empty
-    self.descriptionDefaultTextField = self.description:GetNamedChild("Text")
-    
-    local function UpdateSubmitButton()
-        self:UpdateSubmitButton()
-    end
-    self.descriptionDefaultTextField:SetHandler("OnEffectivelyShown", UpdateSubmitButton)
-    self.descriptionDefaultTextField:SetHandler("OnEffectivelyHidden", UpdateSubmitButton)
+    self.description:SetHandler("OnTextChanged", function() self:UpdateSubmitButton() end)
 
     self.description:SetText("")
 end
@@ -110,7 +105,7 @@ function ZO_HelpMechanicAssistanceTemplate_Keyboard:UpdateSubmitButton()
         enableSubmitButton = false
     elseif not self.details.hasValue and self:DetailsRequired() then
         enableSubmitButton = false
-    elseif not self.description:IsHidden() and not self.descriptionDefaultTextField:IsHidden() then
+    elseif not self.description:IsHidden() and self.description:GetText() == "" then
         enableSubmitButton = false
     end
     

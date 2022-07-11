@@ -478,7 +478,7 @@ do
                     elseif activePanel:GetUserGroup() == HOUSE_PERMISSION_USER_GROUP_GUILD then
                         defaultEditString = GetString(SI_REQUEST_GUILD_INSTRUCTIONS)
                     end
-                    ZO_EditDefaultText_Initialize(control.editBoxControl, defaultEditString)
+                    control.editBoxControl:SetDefaultText(defaultEditString)
 
                     control.resetFunction = function()
                         control.editBoxControl.textChangedCallback = nil

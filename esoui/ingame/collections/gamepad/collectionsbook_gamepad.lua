@@ -861,6 +861,10 @@ end
 
 function ZO_GamepadCollectionsBook:OnCollectionUpdated()
     if not self.control:IsHidden() then
+        if self.gridListPanelList and self.gridListPanelList:IsActive() then
+            self:ExitGridList()
+        end
+
         if self.categoryList then
             self:ShowList(self.categoryList)
             self.categoryList.list:SetSelectedIndex(1)
@@ -894,6 +898,8 @@ function ZO_GamepadCollectionsBook:OnCollectibleStatusUpdated()
     if not self.control:IsHidden() then
         if self:IsViewingCollectionsList() then
             self.currentList.list:RefreshVisible()
+        elseif self.gridListPanelList:IsActive() then
+            self.gridListPanelList:RefreshGridList()
         end
         self.categoryList.list:RefreshVisible()
         self.subcategoryList.list:RefreshVisible()
@@ -1576,8 +1582,6 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
 
                         if parametricDialog.data then
                             control.editBoxControl:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, parametricDialog.data.name))
-                        else
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, "")
                         end
                     end, 
                 },

@@ -172,18 +172,8 @@
                         </Button>
                     </Controls>
                 </Slider>
-                
+
                 <Control name="$(parent)WindowContainer"/>
-                
-                <Control name="$(parent)OverflowTab" inherits="ZO_SimpleIconWithHighlightTabButton" hidden="true">
-                    <OnMouseEnter>
-                        ZO_ChatSystem_OnMouseEnter(self)
-                        ZO_TabButton_OnMouseEnter(self)
-                    </OnMouseEnter>
-                    <OnMouseDown>
-                        ZO_TabButton_Select(self)
-                    </OnMouseDown>
-                </Control>
             </Controls>
         </TopLevelControl>
 

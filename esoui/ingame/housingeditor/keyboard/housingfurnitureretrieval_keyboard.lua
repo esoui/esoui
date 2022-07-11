@@ -116,7 +116,6 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
 end
 
 function ZO_HousingFurnitureRetrieval_Keyboard:OnSearchTextChanged(editBox)
-    ZO_HousingFurnitureList.OnSearchTextChanged(self, editBox)
     SHARED_FURNITURE:SetRetrievableTextFilter(editBox:GetText())
 end
 

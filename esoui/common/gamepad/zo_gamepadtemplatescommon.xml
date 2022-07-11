@@ -642,11 +642,7 @@
                     <Anchor point="TOPLEFT"/>
                     <Anchor point="TOPRIGHT"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Disable(self)
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad" />
                     </Controls>
                 </Backdrop>
                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
@@ -665,11 +661,7 @@
                 <Backdrop name="$(parent)TextField" inherits="ZO_MultiLineEditBackdrop_Gamepad">
                     <AnchorFill/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad ZO_EditDefaultText_Gamepad">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Disable(self)
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad" />
                     </Controls>
                 </Backdrop>
                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">

@@ -149,7 +149,7 @@
                 <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" offsetY="5"/>
                     <Controls>
-                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop">
                             <OnTextChanged>
                                 ZO_TwoButtonDialogEditBox_OnTextChanged(self)
                             </OnTextChanged>

@@ -116,7 +116,6 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
     self.searchBox = control:GetNamedChild("SearchFiltersTextSearchBox");
 
     local function OnTextSearchTextChanged(editBox)
-        ZO_EditDefaultText_OnTextChanged(editBox)
         TEXT_SEARCH_MANAGER:SetSearchText("companionEquipmentTextSearch", editBox:GetText())
     end
 

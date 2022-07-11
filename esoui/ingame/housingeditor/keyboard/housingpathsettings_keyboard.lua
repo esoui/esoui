@@ -338,7 +338,6 @@ function ZO_HousingPathChangeObject_Keyboard:ReplaceWithCollectible(collectibleI
 end
 
 function ZO_HousingPathChangeObject_Keyboard:OnSearchTextChanged(editBox)
-    ZO_HousingFurnitureList.OnSearchTextChanged(self, editBox)
     SHARED_FURNITURE:SetPlaceableTextFilter(editBox:GetText())
 end
 

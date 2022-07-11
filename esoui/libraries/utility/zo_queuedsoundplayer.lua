@@ -48,12 +48,11 @@ function ZO_QueuedSoundPlayer:StartSound(soundName, soundLength)
 end
 
 function ZO_QueuedSoundPlayer:OnSoundFinished()
-    EVENT_MANAGER:UnregisterForUpdate(self.id)
-
     if #self.queue > 0 then
         local nextSound = table.remove(self.queue, 1)
         self:StartSound(nextSound.soundName, nextSound.soundLength)
     else
+        EVENT_MANAGER:UnregisterForUpdate(self.id)
         self.currentPlayingSoundLength = nil
         if self.finishedAllSoundsCallback then
             self.finishedAllSoundsCallback(self)

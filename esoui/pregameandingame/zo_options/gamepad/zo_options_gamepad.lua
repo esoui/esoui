@@ -95,31 +95,21 @@ function ZO_GamepadOptions:InitializeScenes()
         end
     end)
 
-    local function OnScreenResize()
-        self:RefreshOptionsList()
-    end
+    local GAMEPAD_OPTIONS_SCENE_GROUP = ZO_SceneGroup:New("gamepad_options_root", "gamepad_options_panel")
+    self:SetSceneGroup(GAMEPAD_OPTIONS_SCENE_GROUP)
+end
 
-    local function RegisterForScreenResizeComplete()
+function ZO_GamepadOptions:OnStateChanged(oldState, newState)
+    ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
+    if newState == SCENE_GROUP_SHOWING then
+        RefreshSettings()
         -- make sure to handle both start and end of screen resize (start only matters for resetting to defautlt)
-        self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, OnScreenResize)
-        self.control:RegisterForEvent(EVENT_ALL_GUI_SCREENS_RESIZED, OnScreenResize)
-    end
-
-    local function UnregisterForScreenResizeComplete()
+        self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, function() self:RefreshOptionsList() end)
+        self.control:RegisterForEvent(EVENT_ALL_GUI_SCREENS_RESIZED, function() self:RefreshOptionsList() end)
+    elseif newState == SCENE_GROUP_HIDDEN then
         self.control:UnregisterForEvent(EVENT_SCREEN_RESIZED)
         self.control:UnregisterForEvent(EVENT_ALL_GUI_SCREENS_RESIZED)
     end
-
-    local GAMEPAD_OPTIONS_SCENE_GROUP = ZO_SceneGroup:New("gamepad_options_root", "gamepad_options_panel")
-    GAMEPAD_OPTIONS_SCENE_GROUP:RegisterCallback("StateChange", function(oldState, newState)
-        ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
-        if newState == SCENE_GROUP_SHOWING then
-            RefreshSettings()
-            RegisterForScreenResizeComplete()
-        elseif newState == SCENE_GROUP_HIDDEN then
-            UnregisterForScreenResizeComplete()
-        end
-    end)
 end
 
 function ZO_GamepadOptions:RefreshOptionsList()
@@ -771,7 +761,10 @@ function ZO_GamepadOptions:RefreshCategoryList()
     self:AddCategory(SETTING_PANEL_NAMEPLATES)
     self:AddCategory(SETTING_PANEL_SOCIAL)
     self:AddCategory(SETTING_PANEL_COMBAT)
-    self:AddCategory(SETTING_PANEL_ACCESSIBILITY)
+    -- TODO XAR Settings: Remove this condition
+    if not IsConsoleUI() then
+        self:AddCategory(SETTING_PANEL_ACCESSIBILITY)
+    end
 
     if ZO_OptionsPanel_IsAccountManagementAvailable() then
         self:AddCategory(SETTING_PANEL_ACCOUNT)

@@ -23,42 +23,11 @@ end
 
 --Initialization
 function ZO_GroupMenu_Gamepad:Initialize(control)
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
-
-    self:InitializeScene()
-    ZO_GamepadGenericHeader_SetDataLayout(self.header, ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_TOGETHER)
-end
-
-function ZO_GroupMenu_Gamepad:InitializeScene()
-    local function OnStateChanged(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:PerformDeferredInitialization()
-
-            self:UpdateMenuList()
-            self:SelectMenuList()
-
-            ZO_GamepadGenericHeader_Activate(self.header)
-
-            SCENE_MANAGER:AddFragment(GAMEPAD_GROUP_ROLES_FRAGMENT)
-            TriggerTutorial(TUTORIAL_TRIGGER_YOUR_GROUP_OPENED)
-        elseif newState == SCENE_HIDDEN then
-            self:DisableCurrentList()
-            if self.currentFragmentGroup then
-                SCENE_MANAGER:RemoveFragmentGroup(self.currentFragmentGroup)
-            end
-
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-            GROUP_LIST_GAMEPAD:Deactivate()
-
-            ZO_GamepadGenericHeader_Deactivate(self.header)
-
-            SCENE_MANAGER:RemoveFragment(GAMEPAD_GROUP_ROLES_FRAGMENT)
-            GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
-        end
-    end
-
+    --Order matters. We need to initialize the scene before the parametric list screen
     GAMEPAD_GROUP_SCENE = ZO_Scene:New("gamepad_groupList", SCENE_MANAGER)
-    GAMEPAD_GROUP_SCENE:RegisterCallback("StateChange", OnStateChanged)
+    local UNUSED_ACTIVATE_ON_SHOW = nil
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, UNUSED_ACTIVATE_ON_SHOW, GAMEPAD_GROUP_SCENE)
+    ZO_GamepadGenericHeader_SetDataLayout(self.header, ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_TOGETHER)
 end
 
 function ZO_GroupMenu_Gamepad:PerformDeferredInitialization()
@@ -315,6 +284,33 @@ end
 
 
 --ZO_Gamepad_ParametricList_Screen overrides
+function ZO_GroupMenu_Gamepad:OnStateChanged(oldState, newState)
+    if newState == SCENE_SHOWING then
+        self:PerformDeferredInitialization()
+
+        self:UpdateMenuList()
+        self:SelectMenuList()
+
+        ZO_GamepadGenericHeader_Activate(self.header)
+
+        SCENE_MANAGER:AddFragment(GAMEPAD_GROUP_ROLES_FRAGMENT)
+        TriggerTutorial(TUTORIAL_TRIGGER_YOUR_GROUP_OPENED)
+    elseif newState == SCENE_HIDDEN then
+        self:DisableCurrentList()
+        if self.currentFragmentGroup then
+            SCENE_MANAGER:RemoveFragmentGroup(self.currentFragmentGroup)
+        end
+
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+        GROUP_LIST_GAMEPAD:Deactivate()
+
+        ZO_GamepadGenericHeader_Deactivate(self.header)
+
+        SCENE_MANAGER:RemoveFragment(GAMEPAD_GROUP_ROLES_FRAGMENT)
+        GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
+    end
+end
+
 function ZO_GroupMenu_Gamepad:SetupList(list)
     local function CreateListEntry(textEnum, type, iconUp, iconDown, iconOver)
         local newEntry = ZO_GamepadEntryData:New(GetString(textEnum), iconUp, iconDown, iconOver)

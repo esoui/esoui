@@ -14,7 +14,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
                     <Anchor point="BOTTOMRIGHT" />
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad ZO_EditDefaultText_Gamepad" maxInputCharacters="MAX_GUILD_HEADER_MESSAGE_LENGTH" />
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad" maxInputCharacters="MAX_GUILD_HEADER_MESSAGE_LENGTH" />
                     </Controls>
                 </Backdrop>
 

@@ -28,7 +28,6 @@ do
         -- Add quantity overrides for TRIBUTE_PATRON_REQUIREMENTs here. Supports displayParam, displayFunction, indexing by param1
     }
 
-    -- TODO Tribute: Finalize numbers
     local ANCHOR_OFFSETS =
     {
         { X = 67, Y = -72, }, -- TOP
@@ -338,6 +337,8 @@ function ZO_TributePatronStall:Reset()
     local IGNORE_CALLBACKS = true
     self.tabFadeTimeline:PlayInstantlyToStart(IGNORE_CALLBACKS)
     self.requirementsFadeTimeline:PlayInstantlyToStart(IGNORE_CALLBACKS)
+    -- Allow cleanup of big texture to gain back some memory
+    self.suitTabTexture:SetTexture(nil)
 end
 
 function ZO_TributePatronStall_OnInitialized(control)

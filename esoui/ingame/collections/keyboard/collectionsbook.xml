@@ -45,10 +45,7 @@
                     <Anchor point="TOPLEFT" offsetX="9" offsetY="33" />
                     <Dimensions x="240"/>
                     <Controls>
-                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_COLLECTIONS_BOOK_SEARCH_EDIT_DEFAULT))
-                            </OnInitialized>
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_COLLECTIONS_BOOK_SEARCH_EDIT_DEFAULT">
                             <OnTextChanged>
                                 ZO_CollectionsBook_OnSearchTextChanged(self)
                             </OnTextChanged>

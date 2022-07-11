@@ -139,8 +139,9 @@ do
 
     -- Doesn't return the GetString(SI_ACTION_IS_NOT_BOUND) automatically, just nil if theres no binds
     function ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, textOptions, textureOptions, alwaysPreferGamepadMode, showAsHold, scalePercent, useDisabledIcon)
-        local preferGamepadMode = ZO_Keybindings_ShouldShowGamepadKeybind(alwaysPreferGamepadMode)
-        local key, mod1, mod2, mod3, mod4 = GetHighestPriorityActionBindingInfoFromName(actionName, preferGamepadMode)
+        local preferredKeybindType = ZO_Keybindings_GetPreferredKeyType(alwaysPreferGamepadMode)
+        local key, mod1, mod2, mod3, mod4 = GetHighestPriorityActionBindingInfoFromNameAndInputDevice(actionName, preferredKeybindType)
+
         if key == KEY_INVALID then
             return nil
         end
@@ -271,4 +272,31 @@ function ZO_Keybindings_ShouldShowGamepadKeybind(alwaysPreferGamepadMode)
     end
 
     return false
+end
+
+function ZO_Keybindings_GetPreferredKeyType(alwaysPreferGamepadMode)
+    if alwaysPreferGamepadMode then
+        return PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
+    end
+
+    if IsInGamepadPreferredMode() then
+        local keybindDisplayMode = tonumber(GetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE))
+        if keybindDisplayMode == KEYBIND_DISPLAY_MODE_ALWAYS_KEYBOARD then
+            return PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD
+        elseif keybindDisplayMode == KEYBIND_DISPLAY_MODE_ALWAYS_GAMEPAD then
+            return PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
+        else -- keybindDisplayMode == KEYBIND_DISPLAY_MODE_AUTOMATIC
+            if AreKeyboardBindingsSupportedInGamepadUI() then
+                if WasLastInputGamepad() then
+                    return PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
+                else
+                    return PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD
+                end
+            else
+                return PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
+            end
+        end
+    end
+
+    return PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD_OR_MOUSE
 end

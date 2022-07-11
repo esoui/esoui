@@ -100,7 +100,7 @@
             <Dimensions x="210" />
         </Control>
 
-        <EditBox name="ZO_TradingHouse_LevelBox" font="ZoFontWinT1" maxInputCharacters="3" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" virtual="true" />
+        <EditBox name="ZO_TradingHouse_LevelBox" font="ZoFontWinT1" maxInputCharacters="3" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop" virtual="true" />
 
         <Control name="TradingHouseLevelRangeFeatureControl" hidden="true" virtual="true" resizeToFitDescendents="true">
             <Controls>
@@ -269,11 +269,8 @@
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)BrowseItemsLeftPane" relativePoint="TOPLEFT" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BrowseItemsLeftPane" relativePoint="TOPRIGHT" offsetX="-21"/>
                     <Controls>
-                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_TRADING_HOUSE_BROWSE_ITEM_NAME_SEARCH_EDIT_DEFAULT))
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_TRADING_HOUSE_BROWSE_ITEM_NAME_SEARCH_EDIT_DEFAULT" />
+                        
                         <Button name="$(parent)Clear" inherits="ZO_CloseButton">
                             <Anchor point="LEFT" relativePoint="RIGHT" offsetX="2"/>
                         </Button>

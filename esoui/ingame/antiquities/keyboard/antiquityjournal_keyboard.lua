@@ -1390,7 +1390,6 @@ function ZO_AntiquityJournal_Keyboard_OnInitialized(control)
 end
 
 function ZO_AntiquityJournal_Keyboard_OnSearchTextChanged(editBox)
-    ZO_EditDefaultText_OnTextChanged(editBox)
     ANTIQUITY_DATA_MANAGER:SetSearch(editBox:GetText())
 end
 

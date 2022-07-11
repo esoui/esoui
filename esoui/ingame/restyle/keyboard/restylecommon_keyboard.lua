@@ -522,8 +522,6 @@ do
 end
 
 function ZO_RestyleCommon_Keyboard:OnSearchTextChanged()
-    ZO_EditDefaultText_OnTextChanged(self.contentSearchEditBox)
-
     local restyleCategoryData = self:GetRestyleCategoryData()
     if restyleCategoryData then
         local editText = self.contentSearchEditBox:GetText()

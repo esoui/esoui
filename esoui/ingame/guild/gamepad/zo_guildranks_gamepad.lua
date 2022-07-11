@@ -341,10 +341,7 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
                         control.highlight:SetHidden(not selected)
 
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
-
-                        if self.selectedName == "" then
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GAMEPAD_GUILD_RANK_DIALOG_DEFAULT_TEXT))
-                        end
+                        control.editBoxControl:SetDefaultText(GetString(SI_GAMEPAD_GUILD_RANK_DIALOG_DEFAULT_TEXT))
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_RANK_NAME_LENGTH)
                         control.editBoxControl:SetText(self.selectedName)
                         
@@ -517,10 +514,7 @@ function ZO_GuildRanks_Gamepad:InitializeRenameRankDialog()
                         control.highlight:SetHidden(not selected)
 
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
-
-                        if self.selectedName == "" then
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GAMEPAD_GUILD_RANK_DIALOG_DEFAULT_TEXT))
-                        end
+                        control.editBoxControl:SetDefaultText(GetString(SI_GAMEPAD_GUILD_RANK_DIALOG_DEFAULT_TEXT))
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_RANK_NAME_LENGTH)
                         control.editBoxControl:SetText(self.selectedName)
                         

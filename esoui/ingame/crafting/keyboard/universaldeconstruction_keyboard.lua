@@ -141,7 +141,7 @@ function ZO_UniversalDeconstruction_Keyboard:OnItemReceiveDrag(slotControl, bagI
     end
 end
 
-function ZO_UniversalDeconstruction_Keyboard:UpdateSharedKeybindStrip()
+function ZO_UniversalDeconstruction_Keyboard:UpdateKeybindStrip()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 

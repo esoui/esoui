@@ -140,8 +140,6 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
     end
 
     local function OnTextChanged(control)
-        ZO_EditDefaultText_OnTextChanged(control)
-
         self:SetSavedField(control.fieldType, control:GetText())
     end
 
@@ -156,8 +154,7 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
         editBox:SetHandler("OnTextChanged", OnTextChanged)
 
         editBox:SetText(self:GetSavedField(fieldType) or "")
-
-        ZO_EditDefaultText_Initialize(editBox, data.defaultText)
+        editBox:SetDefaultText(data.defaultText)
         control.highlight:SetHidden(not selected)
 
         self.editBoxes[fieldType] = editBox

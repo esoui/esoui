@@ -4,7 +4,6 @@ function ZO_TributePatronSelection_Shared:Initialize(control, templateData)
     self.control = control
     self.templateData = templateData
 
-    --TODO Tribute: Can probably combine a whole bunch of these callbacks
     ZO_TRIBUTE_PATRON_SELECTION_MANAGER:RegisterCallback("BeginSelection", function() 
         self:OnBeginSelection() 
     end)

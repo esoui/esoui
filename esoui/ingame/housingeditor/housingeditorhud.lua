@@ -1183,7 +1183,11 @@ function ZO_HousingEditorHud:UpdateAxisIndicators()
         local isPrecisionMode = self:IsPrecisionEditingEnabled()
 
         if not isPlacementMode then
-            EVENT_MANAGER:UnregisterForUpdate("HousingEditor_AxisIndicators")
+            if self.axisIndicatorUpdateHandlerRegistered then
+                self.axisIndicatorUpdateHandlerRegistered = false
+                EVENT_MANAGER:UnregisterForUpdate("HousingEditor_AxisIndicators")
+            end
+
             self.axisIndicatorWindow:SetHidden(true)
         else
             local hideTranslation = self:IsPrecisionPlacementRotationMode() or not isPrecisionMode
@@ -1237,7 +1241,10 @@ function ZO_HousingEditorHud:UpdateAxisIndicators()
                 indicator.control:SetHidden(hideRotation or alpha <= 0 or not shouldBeVisible)
             end
 
-            EVENT_MANAGER:RegisterForUpdate("HousingEditor_AxisIndicators", 1, self.axisIndicatorUpdateHandler)
+            if not self.axisIndicatorUpdateHandlerRegistered then
+                self.axisIndicatorUpdateHandlerRegistered = true
+                EVENT_MANAGER:RegisterForUpdate("HousingEditor_AxisIndicators", 1, self.axisIndicatorUpdateHandler)
+            end
         end
     end
 end

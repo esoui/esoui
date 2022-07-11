@@ -562,6 +562,5 @@ function ZO_CollectionsBook_OnInitialize(control)
 end
 
 function ZO_CollectionsBook_OnSearchTextChanged(editBox)
-    ZO_EditDefaultText_OnTextChanged(editBox)
     COLLECTIONS_BOOK_SINGLETON:SetSearchString(editBox:GetText())
 end

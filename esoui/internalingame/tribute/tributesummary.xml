@@ -680,7 +680,7 @@
                         </Label>
 
                         <Texture name="$(parent)CurrentRankIcon" tier="MEDIUM">
-                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="75" />
+                            <Anchor point="RIGHT" relativePoint="LEFT" />
                             <Dimensions x="150" y="150" />
                             <Controls>
                                 <Label name="$(parent)CurrentRankLabel">
@@ -690,7 +690,7 @@
                         </Texture>
 
                         <Texture name="$(parent)NextRankIcon" tier="MEDIUM" level="1">
-                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-75" />
+                            <Anchor point="LEFT" relativePoint="RIGHT" />
                             <Dimensions x="150" y="150" />
                             <Controls>
                                 <Label name="$(parent)NextRankLabel">
@@ -711,7 +711,7 @@
 
                     <Controls>
                         <Texture name="$(parent)CurrentRankIcon" textureFile="EsoUI/Art/Tribute/tributeRankIcon_1.dds" tier="MEDIUM">
-                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="75" />
+                            <Anchor point="RIGHT" relativePoint="LEFT" />
                             <Dimensions x="150" y="150" />
                             <Controls>
                                 <Label name="$(parent)CurrentRankLabel" text="SI_TRIBUTETIER1">
@@ -721,7 +721,7 @@
                         </Texture>
 
                         <Texture name="$(parent)NextRankIcon" textureFile="EsoUI/Art/Tribute/tributeRankIcon_2.dds" tier="MEDIUM">
-                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-75" />
+                            <Anchor point="LEFT" relativePoint="RIGHT" />
                             <Dimensions x="150" y="150" />
                             <Controls>
                                 <Label name="$(parent)NextRankLabel" text="SI_TRIBUTETIER2">

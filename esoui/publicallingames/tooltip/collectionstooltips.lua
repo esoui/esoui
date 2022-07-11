@@ -284,8 +284,8 @@ function ZO_Tooltip:AddCollectibleTags(collectibleId)
 
         -- Build a map of tag category -> table of tags in that category
         for i = 1, numTags do
-            local tagDescription, tagCategory = GetCollectibleTagInfo(collectibleId, i)
-            if tagDescription ~= "" then
+            local tagDescription, tagCategory, hideInUi = GetCollectibleTagInfo(collectibleId, i)
+            if tagDescription ~= "" and not hideInUi then
                 if not tagStrings[tagCategory] then
                     tagStrings[tagCategory] = {}
                 end

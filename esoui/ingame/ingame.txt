@@ -649,11 +649,10 @@ EsoUI\Ingame\LoreLibrary\LoreLibrary_Shared.lua
 EsoUI\Ingame\LoreLibrary\Keyboard\LoreLibrary_Keyboard.lua
 EsoUI\Ingame\LoreLibrary\Keyboard\LoreLibrary_Keyboard.xml
 
-EsoUI\Ingame\LoreLibrary\Gamepad\Library_Common_Gamepad.lua
-EsoUI\Ingame\LoreLibrary\Gamepad\BookSet_Gamepad.lua
-EsoUI\Ingame\LoreLibrary\Gamepad\BookSet_Gamepad.xml
-EsoUI\Ingame\LoreLibrary\Gamepad\Library_Gamepad.lua
-EsoUI\Ingame\LoreLibrary\Gamepad\Library_Gamepad.xml
+EsoUI\Ingame\LoreLibrary\Gamepad\LoreLibraryBookSet_Gamepad.lua
+EsoUI\Ingame\LoreLibrary\Gamepad\LoreLibraryBookSet_Gamepad.xml
+EsoUI\Ingame\LoreLibrary\Gamepad\LoreLibrary_Gamepad.lua
+EsoUI\Ingame\LoreLibrary\Gamepad\LoreLibrary_Gamepad.xml
 
 EsoUI\Ingame\ScriptedWorldEvents\ScriptedWorldEvents.lua
 

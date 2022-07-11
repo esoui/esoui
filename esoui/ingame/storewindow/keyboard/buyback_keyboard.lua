@@ -74,7 +74,6 @@ function BuyBack:InitializeSortHeader()
     self.searchBox = self.control:GetNamedChild("SearchFiltersTextSearchBox")
 
     local function OnTextSearchTextChanged(editBox)
-        ZO_EditDefaultText_OnTextChanged(editBox)
         TEXT_SEARCH_MANAGER:SetSearchText("storeTextSearch", editBox:GetText())
     end
 

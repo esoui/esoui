@@ -17,7 +17,7 @@
                     <Anchor point="TOPLEFT"/>
                     <Anchor point="TOPRIGHT"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad">
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad">
                             <OnEnter>
                                 self:LoseFocus()
                             </OnEnter>

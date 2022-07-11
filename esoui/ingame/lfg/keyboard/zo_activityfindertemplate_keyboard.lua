@@ -219,7 +219,7 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
                         local headerNode = self.navigationTree:AddNode("ZO_ActivityFinderTemplateNavigationHeader_Keyboard", headerText, NO_PARENT_NODE, NO_OVERRIDE_SOUND, HEADER_OPEN)
 
                         for _, location in ipairs(locationData) do
-                            if modes:IsEntryTypeVisible(location:GetEntryType()) and not location:ShouldForceFullPanelKeyboard() then
+                            if modes:IsEntryTypeVisible(location:GetEntryType()) and location:IsActive() and not location:ShouldForceFullPanelKeyboard() then
                                 self.navigationTree:AddNode("ZO_ActivityFinderTemplateNavigationEntry_Keyboard", location, headerNode)
                             end
                         end
@@ -299,7 +299,7 @@ do
                 if not isActivityLocked then
                     local locationsData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
                     for _, location in ipairs(locationsData) do
-                        if modes:IsEntryTypeVisible(location:GetEntryType()) and location:DoesPlayerMeetLevelRequirements() then
+                        if modes:IsEntryTypeVisible(location:GetEntryType()) and location:IsActive() and location:DoesPlayerMeetLevelRequirements() then
                             if location:ShouldForceFullPanelKeyboard() then
                                 local entry = ZO_ComboBox:CreateItemEntry(location:GetNameKeyboard(), OnFilterChanged)
                                 if activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE or activityType == LFG_ACTIVITY_TRIBUTE_CASUAL then

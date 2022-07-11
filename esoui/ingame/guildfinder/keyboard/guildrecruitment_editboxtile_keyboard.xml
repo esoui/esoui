@@ -14,11 +14,7 @@
                     <Dimensions x="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_WIDTH" y="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_HEADLINE_HEIGHT" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_GUILD_HEADER_MESSAGE_LENGTH">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self)
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="MAX_GUILD_HEADER_MESSAGE_LENGTH" />
                     </Controls>
                 </Backdrop>
             </Controls>

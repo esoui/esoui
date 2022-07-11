@@ -177,7 +177,7 @@ UNIVERSAL_DECONSTRUCTION_FLOATING_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(ZO
 GAMEPAD_LORE_LIBRARY_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_Gamepad_LoreLibrary)
 GAMEPAD_LORE_LIBRARY_FRAGMENT:SetHideOnSceneHidden(true)
 
-GAMEPAD_BOOK_SET_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_Gamepad_BookSet)
+GAMEPAD_BOOK_SET_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_LoreLibraryBookSetTopLevel_Gamepad)
 GAMEPAD_BOOK_SET_FRAGMENT:SetHideOnSceneHidden(true)
 
 GAMEPAD_LOOT_PICKUP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Gamepad_LootPickup, GAMEPAD_GRID_NAV2)

@@ -41,7 +41,6 @@ function ZO_TradingHouseNameSearchFeature_Gamepad:SetupNameSearchField(control, 
 
     data.editBoxControl = control.editBoxControl
     control.editBoxControl.textChangedCallback = function(editBoxControl)
-        ZO_EditDefaultText_OnTextChanged(editBoxControl)
         local searchText = editBoxControl:GetText()
         if searchText ~= self.searchText then
             self:SetSearchText(searchText)
@@ -50,8 +49,8 @@ function ZO_TradingHouseNameSearchFeature_Gamepad:SetupNameSearchField(control, 
             end
         end
     end
-
-    ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_TRADING_HOUSE_BROWSE_ITEM_NAME_SEARCH_EDIT_DEFAULT))
+    
+    control.editBoxControl:SetDefaultText(GetString(SI_TRADING_HOUSE_BROWSE_ITEM_NAME_SEARCH_EDIT_DEFAULT))
     if control.editBoxControl:GetText() ~= self.searchText then
         control.editBoxControl:SetText(self.searchText)
     end

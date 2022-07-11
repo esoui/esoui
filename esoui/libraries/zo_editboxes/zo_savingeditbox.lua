@@ -37,7 +37,7 @@ function ZO_SavingEditBox:Initialize(control)
 end
 
 function ZO_SavingEditBox:SetDefaultText(defaultText)
-    ZO_EditDefaultText_Initialize(self.edit, defaultText)
+    self.edit:SetDefaultText(defaultText)
 end
 
 function ZO_SavingEditBox:SetEmptyText(emptyText)
@@ -158,7 +158,6 @@ function ZO_SavingEditBox:OnTextChanged()
         self.modified = true
         self:RefreshButtons()
     end
-    ZO_EditDefaultText_OnTextChanged(self.edit)
 end
 
 function ZO_SavingEditBox:OnEnter()

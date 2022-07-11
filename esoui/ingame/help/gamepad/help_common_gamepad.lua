@@ -1,17 +1,14 @@
 --[[Basic screen]]--
 ZO_HelpTutorialsGamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
-function ZO_HelpTutorialsGamepad:New(...)
-    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
-end
-
 function ZO_HelpTutorialsGamepad:Initialize(control, activateOnShow)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, activateOnShow)
     self.itemList = ZO_Gamepad_ParametricList_Screen.GetMainList(self)
 
-    self.headerData = {
-	        titleText = GetString(SI_HELP_TUTORIALS),
-        }
+    self.headerData = 
+    {
+        titleText = GetString(SI_HELP_TUTORIALS),
+    }
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 
     self:InitializeEvents()
@@ -37,13 +34,7 @@ end
 
 --[[Tutorial Info Display]]--
 
-ZO_HelpTutorialsDisplay_Gamepad = ZO_Object:Subclass()
-
-function ZO_HelpTutorialsDisplay_Gamepad:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_HelpTutorialsDisplay_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_HelpTutorialsDisplay_Gamepad:Initialize(control)
     self.control = control
@@ -64,8 +55,8 @@ function ZO_HelpTutorialsDisplay_Gamepad:ShowHelp(helpCategoryIndex, helpIndex)
         self.helpIndex = helpIndex
 
         local _, description1, description2, image, gamepadDescription1, gamepadDescription2 = GetHelpInfo(helpCategoryIndex, helpIndex)
-        local description1 = gamepadDescription1 == "" and description1 or gamepadDescription1
-        local description2 = gamepadDescription2 == "" and description2 or gamepadDescription2
+        description1 = gamepadDescription1 == "" and description1 or gamepadDescription1
+        description2 = gamepadDescription2 == "" and description2 or gamepadDescription2
 
         self.description1Label:SetText(description1)
 
@@ -96,14 +87,11 @@ ESO_Dialogs["HELP_TUTORIALS_OVERLAY_DIALOG"] =
         dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         allowRightStickPassThrough = true,
     },
-
     title =
     {
         text = SI_HELP_TUTORIALS,
     },
-
     parametricList = {}, -- Generated Dynamically
-
     setup = function(dialog)
         local parametricList = dialog.info.parametricList
         ZO_ClearNumericallyIndexedTable(parametricList)
@@ -148,7 +136,6 @@ ESO_Dialogs["HELP_TUTORIALS_OVERLAY_DIALOG"] =
 
         dialog:setupFunc()
     end,
-
     parametricListOnSelectionChangedCallback = function(dialog, list)
         local targetData = list:GetTargetData()
         if targetData then
@@ -157,16 +144,13 @@ ESO_Dialogs["HELP_TUTORIALS_OVERLAY_DIALOG"] =
             HELP_TUTORIAL_DISPLAY_GAMEPAD:Hide()
         end
     end,
-
     onHidingCallback = function()
         HELP_TUTORIAL_DISPLAY_GAMEPAD:Hide()
     end,
-
     finishedCallback = function()
         local IS_NOT_VISIBLE = false
         HELP_MANAGER:OnOverlayVisibilityChanged(IS_NOT_VISIBLE)
     end,
-
     buttons =
     {
         {

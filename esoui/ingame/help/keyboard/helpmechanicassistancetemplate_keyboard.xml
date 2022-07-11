@@ -40,7 +40,7 @@
                     <Dimensions x="550" y="150"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
                     <Controls>
-                        <EditBox name="$(parent)Field" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText"/>
+                        <EditBox name="$(parent)Field" inherits="ZO_DefaultEditMultiLineForBackdrop"/>
                     </Controls>
                 </Backdrop>
 

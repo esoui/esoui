@@ -102,8 +102,6 @@ function ZO_Tribute:Initialize(control)
                 self.turnTimerTextLabelTimeline:PlayInstantlyToStart()
             elseif gameFlowState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT then
                 self.patronSelectionShowTime = GetFrameTimeSeconds() + TRIBUTE_PATRON_SELECTION_DELAY_SECONDS
-            elseif gameFlowState == TRIBUTE_GAME_FLOW_STATE_BOARD_SETUP then
-                -- TODO Tribute: Do we need to do anything here?
             elseif gameFlowState == TRIBUTE_GAME_FLOW_STATE_PLAYING then
                 self:OnTributeReadyToPlay()
             elseif gameFlowState == TRIBUTE_GAME_FLOW_STATE_GAME_OVER then
@@ -258,7 +256,6 @@ function ZO_Tribute:DeferredInitialize()
                     end
                 end,
             },
-            -- TODO Tribute: There are more keybinds to come
         }
 
         ZO_PlatformStyle:New(function(...) self:ApplyPlatformStyle(...) end)
@@ -738,7 +735,6 @@ do
 end
 
 function ZO_Tribute:ApplyPlatformStyle()
-    -- TODO Tribute: Anything we need to be different between gamepad and keyboard
     ApplyTemplateToControl(self.confirmButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
     --Reset the text here to handle the force uppercase on gamepad
     self.confirmButton:SetText(GetString(SI_TRIBUTE_TARGET_VIEWER_CONFIRM_ACTION))
@@ -814,6 +810,7 @@ do
     function ZO_Tribute:RefreshInputState()
         local allowPlayerInput = TRIBUTE_SCENE:IsShowing() and INPUT_ENABLED_GAME_FLOW_STATES[self.gameFlowState]
         local resetTargetObjects = true
+        local refreshEffectiveCardStates = false
 
         local isShowingDialog = ZO_Dialogs_IsShowingDialog()
         local isUsingViewer = ZO_TRIBUTE_PILE_VIEWER_MANAGER:IsViewingPile() or ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() or TRIBUTE_MECHANIC_SELECTOR:IsSelectingMechanic()
@@ -824,14 +821,12 @@ do
 
         if self.isPlayerInputEnabled ~= allowPlayerInput then
             if allowPlayerInput then
-                -- TODO Tribute: Push action layer / add keybind descriptor
                 KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             else
-                -- TODO Tribute: Remove action layer / remove keybind descriptor
                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             end
             self.isPlayerInputEnabled = allowPlayerInput
-            self:RefreshEffectiveCardStates()
+            refreshEffectiveCardStates = true
         end
 
         local inputStyle = TRIBUTE_INPUT_STYLE_NONE
@@ -844,6 +839,7 @@ do
         end
 
         if self.inputStyle ~= inputStyle then
+            refreshEffectiveCardStates = true
             resetTargetObjects = false
 
             local oldInputStyle = self.inputStyle
@@ -866,6 +862,10 @@ do
         if self.isPlayerInputEnabled then
             -- Perform the update after any potential change to the input style.
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+
+        if refreshEffectiveCardStates then
+            self:RefreshEffectiveCardStates()
         end
 
         if not resetTargetObjects then

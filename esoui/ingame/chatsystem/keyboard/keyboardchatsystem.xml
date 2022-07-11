@@ -208,6 +208,16 @@
                     </OnClicked>
                 </Button>
 
+                <Control name="$(parent)OverflowTab" inherits="ZO_SimpleIconWithHighlightTabButton" hidden="true">
+                    <OnMouseEnter>
+                        ZO_ChatSystem_OnMouseEnter(self)
+                        ZO_TabButton_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseDown>
+                        ZO_TabButton_Select(self)
+                    </OnMouseDown>
+                </Control>
+
                 <Control name="$(parent)MinBar" hidden="true">
                     <Dimensions x="128" y="512"/>
                     <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetY="-20"/>

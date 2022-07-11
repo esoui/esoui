@@ -38,7 +38,6 @@ function ZO_GuildRecruitment_EditBoxTile_Gamepad:Initialize(...)
     end
 
     local function OnTextEditTextChanged()
-        ZO_EditDefaultText_OnTextChanged(self.edit)
         if self.onEditFunction then
             local value = self.edit:GetText()
             self.onEditFunction(self.attribute, tonumber(value) or value)
@@ -65,7 +64,7 @@ function ZO_GuildRecruitment_EditBoxTile_Gamepad:Layout(data)
     self.titleLabel:SetText(data.headerText)
 
     self.attribute = data.attribute
-    ZO_EditDefaultText_Initialize(self.edit, data.defaultText)
+    self.edit:SetDefaultText(data.defaultText)
     self.onEditFunction = data.onEditCallback
     self.onFocusLostFunction = data.onFocusLostCallback
     if data.currentValue and data.currentValue ~= self.edit:GetText() then

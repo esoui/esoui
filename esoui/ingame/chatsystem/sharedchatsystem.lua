@@ -310,13 +310,6 @@ function SharedChatContainer:Initialize(control, windowPool, tabPool)
     self.backdrop = control:GetNamedChild("Bg")
     control.container = self
 
-    self.visualData = {}
-    self.overflowTab = control:GetNamedChild("OverflowTab")
-    ZO_CreateUniformIconTabData(self.visualData, nil, 32, 32, "EsoUI/Art/ChatWindow/chat_overflowArrow_down.dds", "EsoUI/Art/ChatWindow/chat_overflowArrow_up.dds", "EsoUI/Art/ChatWindow/chat_overflowArrow_over.dds")
-    ZO_TabButton_Icon_Initialize(self.overflowTab, "SimpleIconHighlight", self.visualData)
-    self.overflowTab:SetHandler("OnMouseUp", function(tab, button, isUpInside) if isUpInside then self:ShowOverflowedTabsDropdown() end ZO_TabButton_Unselect(tab) end)
-    self.overflowTab.container = self
-
     self.fadeInReferences = 0
     self.isMinimizingOrMaximizing = false
 end
@@ -331,18 +324,6 @@ function SharedChatContainer:SetMinimizingOrMaximizing(isMinimizingOrMaximizing)
         if self.isDragging and self.isMinimizingOrMaximizing then
             self:StopDraggingTab()
         end
-    end
-end
-
-function SharedChatContainer:ShowOverflowedTabsDropdown()
-    if self.hiddenTabStartIndex <= #self.windows then
-        ClearMenu()
-
-        for i=self.hiddenTabStartIndex, #self.windows do
-            AddMenuItem(self:GetTabName(i), function() self:ForceWindowIntoView(i) end)
-        end
-
-        ShowMenu(self.overflowTab)
     end
 end
 
@@ -572,9 +553,6 @@ function SharedChatContainer:LoadSettings(settings)
             end
         end
     end
-
-    self:FadeOut(0)
-
 end
 
 function SharedChatContainer:SetAllowSaveSettings(saveSettings)
@@ -596,44 +574,6 @@ function SharedChatContainer:SaveSettings()
         self.system:SaveLocalContainerSettings(self, self.control)
         local bgR, bgG, bgB = self.backdrop:GetCenterColor()
         SetChatContainerColors(self.id, bgR, bgG, bgB, self.minAlpha, self.maxAlpha)
-    end
-end
-
-function SharedChatContainer:ShowContextMenu(tabIndex)
-    tabIndex = tabIndex or (self.currentBuffer and self.currentBuffer:GetParent() and self.currentBuffer:GetParent().tab and self.currentBuffer:GetParent().tab.index)
-    local window = self.windows[tabIndex]
-    if window then
-        ClearMenu()
-
-        if not ZO_Dialogs_IsShowingDialog() then
-            AddMenuItem(GetString(SI_CHAT_CONFIG_CREATE_NEW), function() self.system:CreateNewChatTab(self) end)
-        end
-
-        if not ZO_Dialogs_IsShowingDialog() and not window.combatLog and (not self:IsPrimary() or tabIndex ~= 1) then
-            AddMenuItem(GetString(SI_CHAT_CONFIG_REMOVE), function() self:ShowRemoveTabDialog(tabIndex) end)
-        end
-
-        if not ZO_Dialogs_IsShowingDialog() then
-            AddMenuItem(GetString(SI_CHAT_CONFIG_OPTIONS), function() self:ShowOptions(tabIndex) end)
-        end
-
-        if self:IsPrimary() and tabIndex == 1 then
-            if self:IsLocked(tabIndex) then
-                AddMenuItem(GetString(SI_CHAT_CONFIG_UNLOCK), function() self:SetLocked(tabIndex, false) end)
-            else
-                AddMenuItem(GetString(SI_CHAT_CONFIG_LOCK), function() self:SetLocked(tabIndex, true) end)
-            end
-        end
-
-        if window.combatLog then
-            if self:AreTimestampsEnabled(tabIndex) then
-                AddMenuItem(GetString(SI_CHAT_CONFIG_HIDE_TIMESTAMP), function() self:SetTimestampsEnabled(tabIndex, false) end)
-            else
-                AddMenuItem(GetString(SI_CHAT_CONFIG_SHOW_TIMESTAMP), function() self:SetTimestampsEnabled(tabIndex, true) end)
-            end
-        end
-
-        ShowMenu(window.tab)
     end
 end
 
@@ -682,35 +622,6 @@ function SharedChatContainer:OnMouseEnter()
     self:FadeIn()
 end
 
-function SharedChatContainer:IsMouseInside()
-    if MouseIsOver(self.control) or MouseIsOver(self.overflowTab) then
-        return true
-    end
-
-    for i=1, #self.windows do
-        if MouseIsOver(self.windows[i].tab) then
-            return true
-        end
-    end
-
-    return false
-end
-
-function SharedChatContainer:MonitorForMouseExit()
-    self.FadeOutCheckOnUpdate = self.FadeOutCheckOnUpdate or function()
-        if not self:IsMouseInside() and not self.resizing and not self.fadeAnim:IsPlaying() and not self.isDragging then
-            if not self:IsPrimary() or not self.system:IsTextEntryOpen() then
-                if not self.monitoredControl then
-                    self:FadeOut()
-                    self.windowContainer:SetHandler("OnUpdate", nil)
-                end
-            end
-        end
-    end
-
-    self.windowContainer:SetHandler("OnUpdate", self.FadeOutCheckOnUpdate)
-end
-
 function SharedChatContainer:FadeOut(delay)
     if self.fadeInReferences > 0 or not IsChatSystemAvailableForCurrentPlatform() then
         return
@@ -735,7 +646,6 @@ function SharedChatContainer:FadeIn(delay, fadeOption)
 
     self.fadeAnim:SetMinMaxAlpha(self.minAlpha, self.maxAlpha)
     self.fadeAnim:FadeIn(delay or 0, FADE_ANIMATION_DURATION, fadeOption)
-    self:MonitorForMouseExit()
 
     if self.currentBuffer then
         self.currentBuffer:ShowFadedLines()
@@ -804,21 +714,6 @@ function SharedChatContainer:ApplyInsertIndicator(insertIndex)
     else
         self.system:ReleaseInsertIndicator(self)
     end
-end
-
-function SharedChatContainer:UpdateOverflowArrow()
-    if self.hiddenTabStartIndex <= #self.windows then
-        self.overflowTab:SetHidden(false)
-    else
-        self.overflowTab:SetHidden(true)
-    end
-end
-
-function SharedChatContainer:ShowRemoveTabDialog(index, dialogName)
-    local window = self.windows[index]
-    local name = ZO_TabButton_Text_GetText(window.tab)
-
-    ZO_Dialogs_ShowDialog(dialogName, {container = self, index = index}, {mainTextParams = {name}} )
 end
 
 function SharedChatContainer:HandleTabClick(tab)
@@ -2469,10 +2364,6 @@ end
 
 function ZO_ChatSystem_OnMouseEnter(control)
     control.container:OnMouseEnter()
-end
-
-function ZO_ChatWindow_OpenContextMenu(control)
-    control.container:ShowContextMenu(control.index)
 end
 
 function ZO_ChatTextEntry_PreviousCommand(control)

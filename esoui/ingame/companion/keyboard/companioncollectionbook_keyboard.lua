@@ -159,9 +159,13 @@ do
             control:SetText(categoryData:GetFormattedName())
         end
 
-        self.categoryTree:AddTemplate("ZO_CompanionCollectionsBook_StatusIconHeader", TreeHeaderSetup_Child, nil, nil, CHILD_INDENT, CHILD_SPACING)
-        self.categoryTree:AddTemplate("ZO_CompanionCollectionsBook_StatusIconChildlessHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless)
-        self.categoryTree:AddTemplate("ZO_CompanionCollectionsBook_SubCategory", TreeEntrySetup, TreeEntryOnSelected)
+        local DEFAULT_ON_SELECTED = nil
+        local DEFAULT_EQUALITY = nil
+        local DEFAULT_INDENT = nil
+        local DEFAULT_SPACING = nil
+        self.categoryTree:AddTemplate("ZO_CompanionCollectionsBook_StatusIconHeader", TreeHeaderSetup_Child, DEFAULT_ON_SELECTED, DEFAULT_EQUALITY, CHILD_INDENT, CHILD_SPACING, "StatusIconHeader")
+        self.categoryTree:AddTemplate("ZO_CompanionCollectionsBook_StatusIconChildlessHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless, DEFAULT_EQUALITY, DEFAULT_INDENT, DEFAULT_SPACING, "StatusIconChildlessHeader")
+        self.categoryTree:AddTemplate("ZO_CompanionCollectionsBook_SubCategory", TreeEntrySetup, TreeEntryOnSelected, DEFAULT_EQUALITY, DEFAULT_INDENT, DEFAULT_SPACING, "SubCategory")
 
         self.categoryTree:SetExclusive(true)
         self.categoryTree:SetOpenAnimation("ZO_TreeOpenAnimation")

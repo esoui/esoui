@@ -148,7 +148,6 @@ end
 
 function ZO_Help_Customer_Service_Gamepad:OnTextFieldFocusLost(control, fieldType)
     if control then
-        ZO_EditDefaultText_OnTextChanged(control)
         self:SetSavedField(fieldType, control:GetText())
     end
 end
@@ -170,7 +169,6 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
                                                         self.activeEditBox = nil
                                                         list:RefreshVisible()
                                                     end)
-        control.editBox:SetHandler("OnTextChanged", ZO_EditDefaultText_OnTextChanged)
 
         local savedText = self:GetSavedField(data.fieldType)
         if savedText then
@@ -181,9 +179,9 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
 
         if data.isRequired and not self.requiredInfoProvidedInternally then
             local impactData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.IMPACT)
-            ZO_EditDefaultText_Initialize(control.editBox, impactData.detailsGamepadDefaultText)
+            control.editBox:SetDefaultText(impactData.detailsGamepadDefaultText)
         else
-            ZO_EditDefaultText_Disable(control.editBox)
+            control.editBox:SetDefaultText("")
         end
 
         control.highlight:SetHidden(not selected)

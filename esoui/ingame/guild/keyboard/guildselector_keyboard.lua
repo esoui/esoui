@@ -107,6 +107,8 @@ function GuildSelector:InitializeGuilds()
 
     local selectedEntry
     local lastGuildId = self.guildId
+    local lastTradingHouseGuildId = GetSelectedTradingHouseGuildId()
+    local isLastTradingHouseGuildFound = false
     
     self.guildId = nil
     self.comboBox:ClearItems()
@@ -126,11 +128,19 @@ function GuildSelector:InitializeGuilds()
             selectedEntry = entry
         end
 
+        if guildId == lastTradingHouseGuildId then
+            isLastTradingHouseGuildFound = true
+        end
+
         if not playerIsGuildMaster then
             if IsPlayerGuildMaster(guildId) then
                 playerIsGuildMaster = true
             end
         end
+    end
+
+    if not isLastTradingHouseGuildFound and selectedEntry then
+        SelectTradingHouseGuildId(selectedEntry.guildId)
     end
 
     local GUILD_BROWSER_TITLE = GetString(SI_GUILD_BROWSER_TITLE)

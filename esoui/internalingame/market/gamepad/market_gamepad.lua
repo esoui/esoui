@@ -97,6 +97,13 @@ ZO_GAMEPAD_MARKET_TEMPLATES =
      },
 }
 
+-- Establishes priority for routing requests to show products (ascending order).
+ZO_GAMEPAD_PRIORITIZED_MARKET_TEMPLATES =
+{
+    ZO_GAMEPAD_MARKET_TEMPLATES.CROWN_STORE,
+    ZO_GAMEPAD_MARKET_TEMPLATES.SEAL_STORE,
+}
+
 local FIRST_CATEGORY_INDEX = 1
 local GAMEPAD_MARKET_LABELED_GROUP_LABEL_TEMPLATE = "ZO_GamepadMarket_GroupLabel"
 
@@ -1528,11 +1535,46 @@ function GamepadMarket:GetFirstMarketProductInSubcategoryFromCurrentCategory(cat
     end
 end
 
+function GamepadMarket:SwitchToMarketTemplateAndShowMarketProduct(alternateMarketTemplate, marketProductId)
+    if not alternateMarketTemplate or not marketProductId then
+        return false
+    end
+
+    -- Switch to the specified market template and attempt to show the specified market product.
+    -- Order matters:
+    self:ApplyMarketTemplate(alternateMarketTemplate)
+    self:OnShown()
+    self:ShowMarketProduct(marketProductId)
+end
+
 function GamepadMarket:RequestShowMarketProduct(marketProductId)
-    if self.isInitialized and self.marketScene:IsShowing() and self.marketState == MARKET_STATE_OPEN then
-        self:ShowMarketProduct(marketProductId)
-    else
+    if not (self.isInitialized and self.marketScene:IsShowing() and self.marketState == MARKET_STATE_OPEN) then
+        -- The market is not yet initialized or is hidden; queue the market product for deferred display.
         self:SetQueuedMarketProductId(marketProductId)
+        return
+    end
+
+    -- Identify the highest priority market template that offers this market product.
+    local marketTemplate = nil
+    for _, template in ipairs(ZO_GAMEPAD_PRIORITIZED_MARKET_TEMPLATES) do
+        for _, filterType in ipairs(template.marketProductFilterTypes) do
+            if DoesAnyMarketProductPresentationMatchFilter(marketProductId, filterType) then
+                marketTemplate = template
+                break
+            end
+        end
+
+        if marketTemplate then
+            break
+        end
+    end
+
+    if marketTemplate == self.marketTemplate then
+        self:ShowMarketProduct(marketProductId)
+    elseif marketTemplate then
+        -- The market product was not found in any category for the current market template;
+        -- attempt to switch to the market that currently offers this product.
+        self:SwitchToMarketTemplateAndShowMarketProduct(marketTemplate, marketProductId)
     end
 end
 

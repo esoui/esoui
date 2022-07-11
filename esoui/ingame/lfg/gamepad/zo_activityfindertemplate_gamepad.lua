@@ -354,7 +354,7 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
         for _, activityType in ipairs(modeActivityTypes) do
             local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
             for _, location in ipairs(locationData) do
-                if modes:IsEntryTypeVisible(location:GetEntryType()) and location:HasRewardData() and location:DoesPlayerMeetLevelRequirements() then
+                if modes:IsEntryTypeVisible(location:GetEntryType()) and location:IsActive() and location:HasRewardData() and location:DoesPlayerMeetLevelRequirements() then
                     AddLocationEntry(location)
                 end
             end
@@ -365,7 +365,7 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
 
         for _, location in ipairs(locationData) do
             local isTribute = location.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE or location.activityType == LFG_ACTIVITY_TRIBUTE_CASUAL
-            if modes:IsEntryTypeVisible(location:GetEntryType()) and ((isTribute and location:HasRewardData()) or not location:HasRewardData()) then
+            if modes:IsEntryTypeVisible(location:GetEntryType()) and location:IsActive() and ((isTribute and location:HasRewardData()) or not location:HasRewardData()) then
                 AddLocationEntry(location)
             end
         end
@@ -422,6 +422,8 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshFilters()
     self:RefreshSpecificFilters()
     if self.navigationMode == NAVIGATION_MODES.SPECIFIC_ENTRIES then
         self:RefreshHeaderAndView(self.specificHeaderData)
+    elseif self.navigationMode == NAVIGATION_MODES.RANDOM_ENTRIES then
+        self:RefreshHeaderAndView(self.randomHeaderData)
     end
 end
 

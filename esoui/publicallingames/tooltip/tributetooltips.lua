@@ -13,7 +13,7 @@ function ZO_Tooltip:LayoutTributeCard(cardData, optionalDockCardUpgradeContext)
     elseif isCurse then
         topSection:AddLine(zo_strformat(SI_TRIBUTE_CARD_TYPE_CURSE, cardTypeString))
     else
-        topSection:AddLine(cardTypeString)
+        topSection:AddLine(zo_strformat(SI_TRIBUTE_CARD_TYPE_FORMATTER, cardTypeString))
     end
 
     if not isCurse then
@@ -187,6 +187,7 @@ end
 function ZO_Tooltip:LayoutTributePatron(patronData, optionalArgs)
     local highlightActivePatronState = optionalArgs and optionalArgs.highlightActivePatronState or false
     local suppressNotCollectibleWarning = optionalArgs and optionalArgs.suppressNotCollectibleWarning or false
+    local showAcquireHint = optionalArgs and optionalArgs.showAcquireHint or false
 
     -- Header
     local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
@@ -237,8 +238,12 @@ function ZO_Tooltip:LayoutTributePatron(patronData, optionalArgs)
     self:AddSection(bodySection)
 
     local infoSection = self:AcquireSection(self:GetStyle("bodySection"))
-    if collectionId == 0 and not suppressNotCollectibleWarning then
-        infoSection:AddLine(GetString(SI_TRIBUTE_PATRON_TOOLTIP_NO_COLLECTIBLE), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+    if collectionId == 0 then
+        if not suppressNotCollectibleWarning then
+            infoSection:AddLine(GetString(SI_TRIBUTE_PATRON_TOOLTIP_NO_COLLECTIBLE), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+        end
+    elseif showAcquireHint then
+        infoSection:AddLine(patronData:GetTributePatronAcquireHint(), self:GetStyle("title"))
     end
     self:AddSection(infoSection)
 end

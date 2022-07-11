@@ -3225,6 +3225,9 @@ do
         end
 
         WORLD_MAP_MANAGER:Update(currentTimeS)
+
+        -- Call this at the end of the update to turn off any logging that was turned on for a single update.
+        OnMapUpdateComplete()
     end
 end
 
@@ -4160,9 +4163,12 @@ function ZO_WorldMap_MouseUp(mapControl, mouseButton, upInside)
         if mouseButton == MOUSE_BUTTON_INDEX_LEFT and WORLD_MAP_MANAGER:IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_IN) then
             needUpdate = ProcessMapClick(NormalizePreferredMousePositionToMap()) == SET_MAP_RESULT_MAP_CHANGED
             navigateIn = true
-        elseif mouseButton == MOUSE_BUTTON_INDEX_RIGHT and WORLD_MAP_MANAGER:IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_OUT) then
-            needUpdate = (MapZoomOut() == SET_MAP_RESULT_MAP_CHANGED)
-            navigateIn = false
+        elseif mouseButton == MOUSE_BUTTON_INDEX_RIGHT then
+            local isHandled = WORLD_MAP_MANAGER:HandleRightMouseClicked()
+            if not isHandled and WORLD_MAP_MANAGER:IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_OUT) then
+                needUpdate = (MapZoomOut() == SET_MAP_RESULT_MAP_CHANGED)
+                navigateIn = false
+            end
         end
 
         if needUpdate then
@@ -4462,6 +4468,14 @@ end
 
 function ZO_WorldMap_GetQuestPingData()
     return g_questPingData
+end
+
+function ZO_WorldMap_GetGamepadMap()
+    return g_gamepadMap
+end
+
+function ZO_WorldMap_GetFoundTooltipMouseOverPins()
+    return foundTooltipMouseOverPins
 end
 
 --Initialization
@@ -5939,6 +5953,10 @@ function ZO_WorldMapManager:UpdateFloorAndLevelNavigation()
         self.keyboardFloorsControl:GetNamedChild("Up"):SetEnabled(currentFloor ~= 1)
         self.keyboardFloorsControl:GetNamedChild("Down"):SetEnabled(currentFloor ~= numFloors)
     end
+end
+
+function ZO_WorldMapManager:HandleRightMouseClicked()
+    return false
 end
 
 --

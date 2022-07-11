@@ -15,11 +15,7 @@
                     <Dimensions y="180"/>
 
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="GIFT_NOTE_MAX_LENGTH">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_GIFT_INVENTORY_REQUEST_GIFT_MESSAGE_TEXT))
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="GIFT_NOTE_MAX_LENGTH" defaultText="SI_GIFT_INVENTORY_REQUEST_GIFT_MESSAGE_TEXT" />
                     </Controls>
                 </Backdrop>
 

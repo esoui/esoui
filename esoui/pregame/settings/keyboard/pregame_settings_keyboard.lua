@@ -12,7 +12,6 @@ end
 
 function ZO_Pregame_Settings_Keyboard:Initialize(control)
     self.control = control
-    self.settingsCategories = ZO_GameMenuManager_GetVisibleSettingsEntries()
 
     local subcategoriesMenuControl = control:GetNamedChild("Subcategory")
     self.subcategoriesMenu = ZO_Horizontal_Menu:New(subcategoriesMenuControl, ZO_HORIZONAL_MENU_ALIGN_CENTER)
@@ -52,6 +51,7 @@ end
 
 function ZO_Pregame_Settings_Keyboard:BuildSubcategoriesMenu()
     if not self.isSubcategoriesMenuBuilt then
+        self.settingsCategories = ZO_GameMenuManager_GetVisibleSettingsEntries()
         for i, subcategory in ipairs(self.settingsCategories) do
             local function OnSelectionCallback(control)
                 subcategory.callback(control, ZO_ReanchorControlTopHorizontalMenu)

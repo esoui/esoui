@@ -169,9 +169,7 @@ function ZO_TributeDataManager:UpdateSearchResults()
     for i = 1, GetNumTributePatronSearchResults() do
         local patronId = GetTributePatronSearchResult(i)
         local patronData = self:GetTributePatronData(patronId)
-        if patronData:GetCategoryData() then
-            patronData:SetSearchResultsVersion(self.searchResultsVersion)
-        end
+        patronData:SetSearchResultsVersion(self.searchResultsVersion)
     end
 
     self:FireCallbacks("UpdateSearchResults")

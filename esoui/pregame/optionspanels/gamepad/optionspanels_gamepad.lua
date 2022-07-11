@@ -129,6 +129,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_AUDIO,
             system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_INTRO_MUSIC,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
             settingId = AUDIO_SETTING_SOUND_ENABLED,
         },
         {

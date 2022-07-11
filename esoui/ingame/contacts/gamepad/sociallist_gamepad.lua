@@ -27,8 +27,8 @@ end
 
 function ZO_GamepadSocialListPanel:InitializeSearchFilter()
     ZO_GamepadInteractiveSortFilterList.InitializeSearchFilter(self)
-
-    ZO_EditDefaultText_Initialize(self.searchEdit, ZO_GetPlatformAccountLabel())
+    
+    self.searchEdit:SetDefaultText(ZO_GetPlatformAccountLabel())
 end
 
 function ZO_GamepadSocialListPanel:Deactivate()

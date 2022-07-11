@@ -4,7 +4,6 @@ function ZO_Gamepad_ParametricList_BagsSearch_Screen:Initialize(...)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, ...)
 
     local function OnTextSearchTextChanged(editBox)
-        ZO_EditDefaultText_OnTextChanged(editBox)
         if self.searchContext then
             TEXT_SEARCH_MANAGER:SetSearchText(self.searchContext, editBox:GetText())
         end

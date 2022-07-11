@@ -10,6 +10,7 @@ function KeybindingsManager:Initialize(control)
     self.chordingAlwaysEnabled = false
 
     self.currentKeyboardLayoutLabel = control:GetNamedChild("CurrentKeyboardLayout")
+    self.currentBindingsSavedLabel = control:GetNamedChild("CurrentBindingsSaved")
 
     self:InitializeList()
 
@@ -22,11 +23,22 @@ function KeybindingsManager:Initialize(control)
         IsShown = function() return KEYBINDINGS_FRAGMENT:IsShowing() end,
     })
 
+    local maxCustomBinds = GetMaxNumSavedKeybindings()
+
     local function RefreshList()
         self.refreshGroups:RefreshAll("KeybindingsList")
         -- If we're showing we want to update immediately
         -- refresh group will determine if showing using IsShown above
         self.refreshGroups:UpdateRefreshGroups()
+
+        local currentNumSavedBindings = GetNumSavedKeybindings()
+        self.currentBindingsSavedLabel:SetText(zo_strformat(SI_KEYBINDINGS_CURRENT_SAVED_BIND_COUNT, currentNumSavedBindings, maxCustomBinds))
+
+        local color = ZO_NORMAL_TEXT
+        if currentNumSavedBindings >= maxCustomBinds then
+            color = ZO_ERROR_COLOR
+        end
+        self.currentBindingsSavedLabel:SetColor(color:UnpackRGBA())
     end
 
     KEYBINDINGS_MANAGER:RegisterCallback("OnKeybindingSet", RefreshList)
@@ -91,27 +103,37 @@ function BindKeyDialog:Initialize(control)
         buttons =
         {
             {
-                control =   GetControl(control, "Bind"),
-                text =      SI_KEYBINDINGS_BIND_BUTTON,
-                keybind =   false,
-                callback =  function(dialog)
-                                self:OnBindClicked()
-                            end,
+                control = control.bindButton,
+                text = SI_KEYBINDINGS_BIND_BUTTON,
+                keybind = false,
+                callback = function(dialog)
+                    self:OnBindClicked()
+                end,
             },
 
             {
-                control =   GetControl(control, "Unbind"),
-                text =      SI_KEYBINDINGS_UNBIND_BUTTON,
-                keybind =   false,
-                callback =  function(dialog)
-                                self:OnUnbindClicked()
-                            end,
+                control = control.unbindButton,
+                text = SI_KEYBINDINGS_UNBIND_BUTTON,
+                keybind = false,
+                callback = function(dialog)
+                    self:OnUnbindClicked()
+                end,
             },
 
             {
-                control =   GetControl(control, "Cancel"),
-                text =      SI_DIALOG_CANCEL,
-                keybind =   false,
+                control = control.setDefaultButton,
+                text = SI_KEYBINDINGS_DEFAULT_BUTTON,
+                keybind = false,
+                noReleaseOnClick = true,
+                callback = function(dialog)
+                    self:OnDefaultClicked()
+                end,
+            },
+
+            {
+                control = control.cancelButton,
+                text = SI_DIALOG_CANCEL,
+                keybind = false,
             },
         }
     })
@@ -119,14 +141,20 @@ function BindKeyDialog:Initialize(control)
 end
 
 function BindKeyDialog:OnBindClicked()
-    BindKeyToAction(self.layerIndex, self.categoryIndex, self.actionIndex, self.bindingIndex, self:GetCurrentKeys())
-    
-    ZO_Dialogs_ReleaseDialogOnButtonPress("BINDINGS")
+    if self:HasValidKeyToBind() then
+        BindKeyToAction(self.layerIndex, self.categoryIndex, self.actionIndex, self.bindingIndex, self:GetCurrentKeys())
+    else
+        -- Allow for the Bind button to unbind the key if we set the current key to unbound using the Set Default button
+        UnbindKeyFromAction(self.layerIndex, self.categoryIndex, self.actionIndex, self.bindingIndex)
+    end
 end
 
 function BindKeyDialog:OnUnbindClicked()
     UnbindKeyFromAction(self.layerIndex, self.categoryIndex, self.actionIndex, self.bindingIndex)
-    ZO_Dialogs_ReleaseDialogOnButtonPress("BINDINGS")
+end
+
+function BindKeyDialog:OnDefaultClicked()
+    self:SetCurrentKeys(self.defaultKey, self.defaultCtrl, self.defaultAlt, self.defaultShift, self.defaultCommand)
 end
 
 function BindKeyDialog:SetupDialog(data)
@@ -144,16 +172,37 @@ function BindKeyDialog:SetupDialog(data)
     local alt = ZO_Keybindings_DoesKeyMatchAnyModifiers(KEY_ALT, mod1, mod2, mod3, mod4)
     local shift = ZO_Keybindings_DoesKeyMatchAnyModifiers(KEY_SHIFT, mod1, mod2, mod3, mod4)
     local command = ZO_Keybindings_DoesKeyMatchAnyModifiers(KEY_COMMAND, mod1, mod2, mod3, mod4)
-    
-    self.allowChording = KEYBINDING_MANAGER:IsChordingAlwaysEnabled() or ctrl or alt or shift or command
+
+    self.existingKey = key
+    self.existingMod1 = mod1
+    self.existingMod2 = mod2
+    self.existingMod3 = mod3
+    self.existingMod4 = mod4
+
+    -- Get default before calling SetCurrentKeys so that UpdateCurrentKeyLabel has the correct info when called
+    self.defaultKey, self.defaultMod1, self.defaultMod2, self.defaultMod3, self.defaultMod4 = GetActionDefaultBindingInfo(self.layerIndex, self.categoryIndex, self.actionIndex, self.bindingIndex)
+    self.defaultCtrl = ZO_Keybindings_DoesKeyMatchAnyModifiers(KEY_CTRL, self.defaultMod1, self.defaultMod2, self.defaultMod3, self.defaultMod4)
+    self.defaultAlt = ZO_Keybindings_DoesKeyMatchAnyModifiers(KEY_ALT, self.defaultMod1, self.defaultMod2, self.defaultMod3, self.defaultMod4)
+    self.defaultShift = ZO_Keybindings_DoesKeyMatchAnyModifiers(KEY_SHIFT, self.defaultMod1, self.defaultMod2, self.defaultMod3, self.defaultMod4)
+    self.defaultCommand = ZO_Keybindings_DoesKeyMatchAnyModifiers(KEY_COMMAND, self.defaultMod1, self.defaultMod2, self.defaultMod3, self.defaultMod4)
+
+    local maxCustomBinds = GetMaxNumSavedKeybindings()
+    local currentNumSavedBindings = GetNumSavedKeybindings()
+
+    local expectedNumChangedBindingsWhenUnbound = KEYBINDINGS_MANAGER:GetNumChangedSavedKeybindingsIfUnbound(self.layerIndex, self.categoryIndex, self.actionIndex, self.bindingIndex)
+    self.willUnbindExceedLimit = currentNumSavedBindings + expectedNumChangedBindingsWhenUnbound > maxCustomBinds
+
+    local canBeUnbound = self:HasValidKeyToBind() and not self.willUnbindExceedLimit
+    self.control.unbindButton:SetEnabled(canBeUnbound)
 
     self:SetCurrentKeys(key, ctrl, alt, shift, command)
 
     self.numMouseButtonsDown = 0
     self.numKeysDown = 0
 
-    local canBeUnbound = self:HasValidKeyToBind()
-    self.control.unbindButton:SetEnabled(canBeUnbound)
+    self.allowChording = KEYBINDING_MANAGER:IsChordingAlwaysEnabled() or ctrl or alt or shift or command
+                             or self.defaultCtrl or self.defaultAlt or self.defaultShift or self.defaultCommand
+
     BlockAutomaticInputModeChange(true)
 end
 
@@ -240,7 +289,8 @@ function BindKeyDialog:SetCurrentKeys(key, ctrl, alt, shift, command)
 end
 
 function BindKeyDialog:ClearCurrentKeys()
-    self:SetCurrentKeys(KEY_INVALID, KEY_INVALID, KEY_INVALID, KEY_INVALID, KEY_INVALID)
+    local NO_MODIFIER = false
+    self:SetCurrentKeys(KEY_INVALID, NO_MODIFIER, NO_MODIFIER, NO_MODIFIER, NO_MODIFIER)
 end
 
 function BindKeyDialog:GetCurrentKeys()
@@ -252,45 +302,74 @@ function BindKeyDialog:HasValidKeyToBind()
 end
 
 function BindKeyDialog:UpdateCurrentKeyLabel()
-    self.control.bindButton:SetEnabled(true)
+    local control = self.control
+
+    -- clear the text so the dialog resizes appropriately
+    control.overwriteWarning1:SetText("")
+    control.overwriteWarning2:SetText("")
+
+    local key, mod1, mod2, mod3, mod4 = self:GetCurrentKeys()
+
+    local isCurrentKeyDefault = key == self.defaultKey and mod1 == self.defaultMod1 and mod2 == self.defaultMod2 and mod3 == self.defaultMod3 and mod4 == self.defaultMod4
+    control.setDefaultButton:SetEnabled(not isCurrentKeyDefault)
+
+    local expectedNumChangedBindings = KEYBINDINGS_MANAGER:GetNumChangedSavedKeybindings(self.layerIndex, self.categoryIndex, self.actionIndex, self.bindingIndex, key, mod1, mod2, mod3, mod4)
+
+    local maxCustomBinds = GetMaxNumSavedKeybindings()
+    local currentNumSavedBindings = GetNumSavedKeybindings()
+
+    local willBindExceedLimit = (currentNumSavedBindings + expectedNumChangedBindings) > maxCustomBinds
+    local isCurrentKeySameAsExisting = key == self.existingKey and mod1 == self.existingMod1 and mod2 == self.existingMod2 and mod3 == self.existingMod3 and mod4 == self.existingMod4
+    local enableBindButton = not (willBindExceedLimit or isCurrentKeySameAsExisting)
+
+    control.bindButton:SetEnabled(enableBindButton)
 
     if self:HasValidKeyToBind() then
-        self.control.currentBindLabel:SetHidden(false)
-        local key, mod1, mod2, mod3, mod4 = self:GetCurrentKeys()
+        control.currentBindLabel:SetHidden(false)
         local bindingString = ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP)
         if ZO_Keybindings_ShouldUseIconKeyMarkup(key) then
-            self.control.currentBindLabel:SetFont("ZoFontHeader4")
+            control.currentBindLabel:SetFont("ZoFontHeader4")
         else
-            self.control.currentBindLabel:SetFont("ZoFontCallout")
+            control.currentBindLabel:SetFont("ZoFontCallout")
         end
-        self.control.currentBindLabel:SetText(bindingString)
+        control.currentBindLabel:SetText(bindingString)
+
+        local showSaveLimitWarning = willBindExceedLimit or (isCurrentKeyDefault and self.willUnbindExceedLimit)
 
         local categoryIndex, actionIndex, bindingIndex = GetBindingIndicesFromKeys(self.layerIndex, key, mod1, mod2, mod3, mod4)
         if categoryIndex and actionIndex and bindingIndex and (self.categoryIndex ~= categoryIndex or self.actionIndex ~= actionIndex) then
-            self.control.overwriteWarning1:SetHidden(false)
+            control.overwriteWarning1:SetHidden(false)
 
             local actionName, isRebindable, isHidden = GetActionInfo(self.layerIndex, categoryIndex, actionIndex)
             local localizedActionName = GetString(_G["SI_BINDING_NAME_"..actionName])
 
             if isRebindable then
-                local bindingSlotText = KEYBINDINGS_MANAGER:GetBindTypeTextFromIndex(bindingIndex)
-                self.control.overwriteWarning1:SetText(zo_strformat(SI_KEYBINDINGS_ALREADY_BOUND, ZO_SELECTED_TEXT:Colorize(bindingSlotText), ZO_SELECTED_TEXT:Colorize(localizedActionName)))
-                self.control.overwriteWarning2:SetText(zo_strformat(SI_KEYBINDINGS_WOULD_UNBIND, ZO_SELECTED_TEXT:Colorize(localizedActionName)))
-                self.control.overwriteWarning2:SetHidden(false)
+                if showSaveLimitWarning then
+                    control.overwriteWarning1:SetText(ZO_ERROR_COLOR:Colorize(GetString(SI_KEYBINDINGS_WOULD_EXCEED_SAVE_LIMIT)))
+                else
+                    local bindingSlotText = KEYBINDINGS_MANAGER:GetBindTypeTextFromIndex(bindingIndex)
+                    control.overwriteWarning1:SetText(zo_strformat(SI_KEYBINDINGS_ALREADY_BOUND, ZO_SELECTED_TEXT:Colorize(bindingSlotText), ZO_SELECTED_TEXT:Colorize(localizedActionName)))
+                    control.overwriteWarning2:SetText(zo_strformat(SI_KEYBINDINGS_WOULD_UNBIND, ZO_SELECTED_TEXT:Colorize(localizedActionName)))
+                    control.overwriteWarning2:SetHidden(false)
+                end
             else
-                self.control.overwriteWarning1:SetText(zo_strformat(SI_KEYBINDINGS_CANNOT_BIND_TO, ZO_SELECTED_TEXT:Colorize(localizedActionName)))
-                self.control.overwriteWarning2:SetHidden(true)
-                self.control.bindButton:SetEnabled(false)
+                control.overwriteWarning1:SetText(zo_strformat(SI_KEYBINDINGS_CANNOT_BIND_TO, ZO_SELECTED_TEXT:Colorize(localizedActionName)))
+                control.overwriteWarning2:SetHidden(true)
+                control.bindButton:SetEnabled(false)
             end
         else
-            self.control.overwriteWarning1:SetHidden(true)
-            self.control.overwriteWarning2:SetHidden(true)
+            if showSaveLimitWarning then
+                control.overwriteWarning1:SetHidden(false)
+                control.overwriteWarning1:SetText(ZO_ERROR_COLOR:Colorize(GetString(SI_KEYBINDINGS_WOULD_EXCEED_SAVE_LIMIT)))
+            else
+                control.overwriteWarning1:SetHidden(true)
+            end
+            control.overwriteWarning2:SetHidden(true)
         end
     else
-        self.control.currentBindLabel:SetHidden(true)
-        self.control.overwriteWarning1:SetHidden(true)
-        self.control.overwriteWarning2:SetHidden(true)
-        self.control.bindButton:SetEnabled(false)
+        control.currentBindLabel:SetHidden(true)
+        control.overwriteWarning1:SetHidden(true)
+        control.overwriteWarning2:SetHidden(true)
     end
 end
 
@@ -322,6 +401,10 @@ local function SetBindingButtonData(button, data, bindingIndex)
     else
         button:SetState(BSTATE_DISABLED, true)
     end
+
+    local isDefault = IsCurrentBindingDefault(data.actionName, bindingIndex)
+    local indicatorLabel = button:GetNamedChild("Indicator")
+    indicatorLabel:SetHidden(isDefault)
 end
 
 function KeybindsScrollList:Initialize(control, owner)

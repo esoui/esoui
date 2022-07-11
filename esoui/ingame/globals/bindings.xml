@@ -1048,8 +1048,11 @@
     <!-- Not player facing -->
     <Layer name="Addons">
         <Category>
-            <Action name="ADDONS_PANEL_MULTI_BUTTON" hideAction="true" inheritsBindFrom="DIALOG_PRIMARY">
-                <Down>ZO_AddOnManagerMultiButton_Callback()</Down>
+            <Action name="ADDONS_PANEL_PRIMARY" hideAction="true" inheritsBindFrom="DIALOG_PRIMARY">
+                <Down>ZO_AddOnManagerPrimaryButton_Callback()</Down>
+            </Action>
+            <Action name="ADDONS_PANEL_SECONDARY" hideAction="true" inheritsBindFrom="DIALOG_SECONDARY">
+                <Down>ZO_AddOnManagerSecondaryButton_Callback()</Down>
             </Action>
         </Category>
     </Layer>

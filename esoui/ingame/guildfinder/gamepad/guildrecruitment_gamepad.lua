@@ -355,8 +355,7 @@ function ZO_GuildRecruitment_Gamepad:InitializeResponseMessageDialog()
                                                                         dialog.currentText = control:GetText()
                                                                      end
                         data.control = control
-                        local defaultEditString = GetString(SI_GUILD_RECRUITMENT_DEFAULT_RESPONSE_DEFAULT_TEXT)
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, defaultEditString)
+                        control.editBoxControl:SetDefaultText(GetString(SI_GUILD_RECRUITMENT_DEFAULT_RESPONSE_DEFAULT_TEXT))
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_APPLICATION_DECLINE_MESSAGE_LENGTH)
                         control.editBoxControl:SetText(dialog.currentText)
                     end,

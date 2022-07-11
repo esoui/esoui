@@ -60,15 +60,7 @@
 
        <Backdrop name="ZO_InventorySearchTemplate" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
             <Controls>
-                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
-                    <OnInitialized>
-                        ZO_EditDefaultText_Initialize(self, GetString(SI_ITEM_FILTER_BY_TEXT))
-                    </OnInitialized>
-
-                    <OnTextChanged>
-                        ZO_EditDefaultText_OnTextChanged(self)
-                    </OnTextChanged>
-
+                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ITEM_FILTER_BY_TEXT">
                     <OnEnter>
                         ZO_PlayerInventory_OnSearchEnterKeyPressed(self)
                     </OnEnter>

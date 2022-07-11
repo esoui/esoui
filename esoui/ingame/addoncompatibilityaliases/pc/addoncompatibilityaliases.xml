@@ -15,5 +15,8 @@
         <Control name="GamepadSkillsSimpleActionButtonTemplate" inherits="ZO_GamepadSkillsActionButtonNoKeybind" virtual="true" />
         <Control name="GamepadSkillsActionButtonTemplate" inherits="ZO_GamepadSkillsActionButton" virtual="true" />
         <Control name="GamepadSkillsActionBarTemplate" inherits="ZO_GamepadSkillsPlayerActionBar" virtual="true" />
-	</Controls>
+        <!-- EditBox default text has moved to the C++ control -->
+        <EditBox name="ZO_EditDefaultText" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" />
+        <EditBox name="ZO_EditDefaultText_Gamepad" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" />
+    </Controls>
 </GuiXml>

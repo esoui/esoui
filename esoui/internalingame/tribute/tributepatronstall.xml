@@ -82,7 +82,7 @@
             </OnInitialized>
 
             <Controls>
-                <Texture name="$(parent)SuitTab">
+                <Texture name="$(parent)SuitTab" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                     <Anchor point="CENTER" />
                     <Dimensions x="ZO_TRIBUTE_SUIT_TAB_ICON_WIDTH" y="ZO_TRIBUTE_SUIT_TAB_ICON_HEIGHT" />
                     <TextureCoords left="ZO_TRIBUTE_SUIT_TAB_ICON_LEFT_COORD" right="ZO_TRIBUTE_SUIT_TAB_ICON_RIGHT_COORD" top="ZO_TRIBUTE_SUIT_TAB_ICON_TOP_COORD" bottom="ZO_TRIBUTE_SUIT_TAB_ICON_BOTTOM_COORD" />

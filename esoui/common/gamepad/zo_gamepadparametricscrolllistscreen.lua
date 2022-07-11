@@ -227,6 +227,9 @@ function ZO_Gamepad_ParametricList_Screen:SetScene(scene)
     -- Make sure we don't register multiple callbacks
     if self.scene then
         self.scene:UnregisterCallback("StateChange", self.onStateChangedCallback)
+    elseif self.sceneGroup then
+        self.sceneGroup:UnregisterCallback("StateChange", self.onStateChangedCallback)
+        self.sceneGroup = nil
     elseif self.parentFragment then
         self.parentFragment:UnregisterCallback("StateChange", self.onStateChangedCallback)
         self.parentFragment = nil
@@ -242,6 +245,28 @@ function ZO_Gamepad_ParametricList_Screen:SetScene(scene)
     self.scene = scene
 end
 
+function ZO_Gamepad_ParametricList_Screen:SetSceneGroup(sceneGroup)
+    -- Make sure we don't register multiple callbacks
+    if self.scene then
+        self.scene:UnregisterCallback("StateChange", self.onStateChangedCallback)
+        self.scene = nil
+    elseif self.sceneGroup then
+        self.sceneGroup:UnregisterCallback("StateChange", self.onStateChangedCallback)
+    elseif self.parentFragment then
+        self.parentFragment:UnregisterCallback("StateChange", self.onStateChangedCallback)
+        self.parentFragment = nil
+    end
+
+    if sceneGroup then
+        self.onStateChangedCallback = function(...)
+            self:OnStateChanged(...)
+        end
+        sceneGroup:RegisterCallback("StateChange", self.onStateChangedCallback)
+    end
+
+    self.sceneGroup = sceneGroup
+end
+
 -- instead of associating this screen with a scene, you can instead associate
 -- it with a fragment. This parent fragment will behave like the scene would;
 -- you can hide it and show it to hide and show the list screen.
@@ -250,6 +275,9 @@ function ZO_Gamepad_ParametricList_Screen:SetParentFragment(parentFragment)
     if self.scene then
         self.scene:UnregisterCallback("StateChange", self.onStateChangedCallback)
         self.scene = nil
+    elseif self.sceneGroup then
+        self.sceneGroup:UnregisterCallback("StateChange", self.onStateChangedCallback)
+        self.sceneGroup = nil
     elseif self.parentFragment then
         self.parentFragment:UnregisterCallback("StateChange", self.onStateChangedCallback)
     end
@@ -267,7 +295,8 @@ end
 function ZO_Gamepad_ParametricList_Screen:IsShowing()
     local isSceneShowing = self.scene ~= nil and SCENE_MANAGER:IsShowing(self.scene.name)
     local isParentFragmentShowing = self.parentFragment ~= nil and self.parentFragment:IsShowing()
-    return isSceneShowing or isParentFragmentShowing
+    local isSceneGroupShowing = self.sceneGroup ~= nil and self.sceneGroup:IsShowing()
+    return isSceneShowing or isParentFragmentShowing or isSceneGroupShowing
 end
 
 -- Header functions --

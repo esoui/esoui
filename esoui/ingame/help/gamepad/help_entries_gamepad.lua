@@ -1,20 +1,13 @@
-local HelpTutorialsEntriesGamepad = ZO_HelpTutorialsGamepad:Subclass()
+ZO_HelpTutorialsEntries_Gamepad = ZO_HelpTutorialsGamepad:Subclass()
 
-function HelpTutorialsEntriesGamepad:New(...)
-    return ZO_HelpTutorialsGamepad.New(self, ...)
-end
-
-function HelpTutorialsEntriesGamepad:Initialize(control)
+function ZO_HelpTutorialsEntries_Gamepad:Initialize(control)
     ZO_HelpTutorialsGamepad.Initialize(self, control)
 
     local helpEntriesFragment = ZO_FadeSceneFragment:New(control)
     HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE = ZO_Scene:New("helpTutorialsEntriesGamepad", SCENE_MANAGER)
     HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE:AddFragment(helpEntriesFragment)
 
-    local function OnStateChanged(...)
-        self:OnStateChanged(...)
-    end
-    HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE:RegisterCallback("StateChange", OnStateChanged)
+    self:SetScene(HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE)
 
     local function OnLinkClicked(...)
         if IsInGamepadPreferredMode() then
@@ -26,7 +19,7 @@ function HelpTutorialsEntriesGamepad:Initialize(control)
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, OnLinkClicked, self)
 end
 
-function HelpTutorialsEntriesGamepad:SelectOrQueueHelpEntry(categoryIndex, helpIndex)
+function ZO_HelpTutorialsEntries_Gamepad:SelectOrQueueHelpEntry(categoryIndex, helpIndex)
     if self.categoryIndex ~= categoryIndex then
         self.dirty = true
         self.showHelpIndex = helpIndex
@@ -37,49 +30,44 @@ function HelpTutorialsEntriesGamepad:SelectOrQueueHelpEntry(categoryIndex, helpI
     self.categoryIndex = categoryIndex
 end
 
-function HelpTutorialsEntriesGamepad:Push(categoryIndex, helpIndex)
+function ZO_HelpTutorialsEntries_Gamepad:Push(categoryIndex, helpIndex)
     self:SelectOrQueueHelpEntry(categoryIndex, helpIndex)
     SCENE_MANAGER:Push("helpTutorialsEntriesGamepad")
 end
 
-function HelpTutorialsEntriesGamepad:Show(categoryIndex, helpIndex)
+function ZO_HelpTutorialsEntries_Gamepad:Show(categoryIndex, helpIndex)
     self:SelectOrQueueHelpEntry(categoryIndex, helpIndex)
     SCENE_MANAGER:Show("helpTutorialsEntriesGamepad")
 end
 
-function HelpTutorialsEntriesGamepad:InitializeKeybindStripDescriptors()
+function ZO_HelpTutorialsEntries_Gamepad:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
         -- Link in Chat
         {
             name = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
             keybind = "UI_SHORTCUT_SECONDARY",
-
             callback = function()
                 local targetData = self.itemList:GetTargetData()
                 local link = ZO_LinkHandler_CreateChatLink(GetHelpLink, self.categoryIndex, targetData.helpIndex)
                 ZO_LinkHandler_InsertLinkAndSubmit(link)
             end,
-
             visible = function()
                 local targetData = self.itemList:GetTargetData()
                 if targetData then
                     return IsChatSystemAvailableForCurrentPlatform()
                 end
-
                 return false
             end,
         },
-
         -- Back
         KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor(),
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, function() return self.itemList end )
 end
 
-function HelpTutorialsEntriesGamepad:AddHelpEntry(categoryIndex, helpIndex)
+function ZO_HelpTutorialsEntries_Gamepad:AddHelpEntry(categoryIndex, helpIndex)
     local helpName, _, _, _, _, _, showOption = GetHelpInfo(categoryIndex, helpIndex)
 
     if IsGamepadHelpOption(showOption) then
@@ -89,7 +77,7 @@ function HelpTutorialsEntriesGamepad:AddHelpEntry(categoryIndex, helpIndex)
     end
 end
 
-function HelpTutorialsEntriesGamepad:PerformUpdate()
+function ZO_HelpTutorialsEntries_Gamepad:PerformUpdate()
     self.dirty = false
 
     -- Add the entries.
@@ -128,7 +116,7 @@ function HelpTutorialsEntriesGamepad:PerformUpdate()
     end
 end
 
-function HelpTutorialsEntriesGamepad:SelectHelpEntry(helpIndex)
+function ZO_HelpTutorialsEntries_Gamepad:SelectHelpEntry(helpIndex)
     for i = 1, self.itemList:GetNumEntries() do
         local data = self.itemList:GetEntryData(i)
         if data.helpIndex == helpIndex then
@@ -138,7 +126,7 @@ function HelpTutorialsEntriesGamepad:SelectHelpEntry(helpIndex)
     end
 end
 
-function HelpTutorialsEntriesGamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
+function ZO_HelpTutorialsEntries_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
     if not selectedData then
         return
     end
@@ -146,7 +134,7 @@ function HelpTutorialsEntriesGamepad:OnSelectionChanged(list, selectedData, oldS
     HELP_TUTORIAL_DISPLAY_GAMEPAD:ShowHelp(self.categoryIndex, selectedData.helpIndex)
 end
 
-function HelpTutorialsEntriesGamepad:OnLinkClicked(link, button, text, color, linkType, ...)
+function ZO_HelpTutorialsEntries_Gamepad:OnLinkClicked(link, button, text, color, linkType, ...)
     if linkType == HELP_LINK_TYPE and button == MOUSE_BUTTON_INDEX_LEFT then
         local helpCategoryIndex, helpIndex = GetHelpIndicesFromHelpLink(link)
         if helpCategoryIndex and helpIndex then
@@ -157,5 +145,5 @@ function HelpTutorialsEntriesGamepad:OnLinkClicked(link, button, text, color, li
 end
 
 function ZO_Gamepad_Tutorials_Entries_OnInitialize(control)
-    HELP_TUTORIALS_ENTRIES_GAMEPAD = HelpTutorialsEntriesGamepad:New(control)
+    HELP_TUTORIALS_ENTRIES_GAMEPAD = ZO_HelpTutorialsEntries_Gamepad:New(control)
 end

@@ -42,7 +42,6 @@ function ZO_TributePatronSelection_Keyboard:InitializeControls()
 end
 
 function ZO_TributePatronSelection_Keyboard:InitializeKeybindStripDescriptors()
-    --TODO Tribute: Implement
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,

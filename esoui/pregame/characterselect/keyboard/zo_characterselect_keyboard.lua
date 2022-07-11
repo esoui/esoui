@@ -459,7 +459,19 @@ end
 
 function ZO_CharacterSelect_SetupAddonManager()
     if not ADD_ON_MANAGER then
-        ADD_ON_MANAGER = ZO_AddOnManager:New()
+        local primaryKeybindDescriptor =
+        {
+            keybind = "ADDONS_PANEL_PRIMARY",
+            name = GetString(SI_ADDON_MANAGER_VIEW_EULA),
+            visible = function()
+                return not HasAgreedToEULA(EULA_TYPE_ADDON_EULA)
+            end,
+            callback = function()
+                CALLBACK_MANAGER:FireCallbacks("ShowAddOnEULAIfNecessary")
+            end,
+        }
+        local NO_SECONDARY_KEYBIND_DESCRIPTOR = nil
+        ADD_ON_MANAGER = ZO_AddOnManager:New(primaryKeybindDescriptor, NO_SECONDARY_KEYBIND_DESCRIPTOR)
     end
 
     local dataList = ZO_ScrollList_GetDataList(ZO_CharacterSelectScrollList)

@@ -223,8 +223,6 @@ function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
 
                         if parametricDialog.data then
                             control.editBoxControl:SetText(parametricDialog.data.name)
-                        else
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, "")
                         end
                     end,
                 },

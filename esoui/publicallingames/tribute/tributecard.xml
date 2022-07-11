@@ -297,18 +297,18 @@
             </OnInitialized>
         </Texture>
 
-        <Texture name="ZO_TributeCard_StateEffectOverlay_Template" inherits="ZO_TributeCard_StateEffect_Template" blendMode="ADD" color="888888" level="20" scale="1.2" virtual="true" />
+        <Texture name="ZO_TributeCard_StateEffectOverlay_Template" inherits="ZO_TributeCard_StateEffect_Template" blendMode="ADD" color="222222" level="20" scale="1.2" virtual="true" />
 
-        <Texture name="ZO_TributeCard_StateEffectUnderlay_Template" inherits="ZO_TributeCard_StateEffect_Template" color="888888" level="0" scale="1.2" virtual="true" />
+        <Texture name="ZO_TributeCard_StateEffectUnderlay_Template" inherits="ZO_TributeCard_StateEffect_Template" blendMode="ALPHA" color="ffffff" level="0" scale="1.2" virtual="true" />
 
         <Texture name="ZO_TributeCard_StateEffectOverlayWave_Template" inherits="ZO_TributeCard_StateEffectOverlay_Template" shaderEffectType="WAVE" virtual="true">
-            <Wave frequency="5.0" offset="0.0" speed="2.0" />
+            <Wave angle="0.0" frequency="5.0" offset="0.0" speed="5.0" />
             <WaveBounds minX="0.0" maxX="0.0" minY="0.02" maxY="0.02" />
         </Texture>
 
         <Texture name="ZO_TributeCard_StateEffectUnderlayWave_Template" inherits="ZO_TributeCard_StateEffectUnderlay_Template" shaderEffectType="WAVE" virtual="true">
-            <Wave frequency="7.0" offset="0.0" speed="3.0" />
-            <WaveBounds minX="0.0" maxX="0.0" minY="0.04" maxY="0.04" />
+            <Wave angle="0.0" frequency="7.0" offset="0.0" speed="5.0" />
+            <WaveBounds minX="0.0" maxX="0.0" minY="0.02" maxY="0.02" />
         </Texture>
 
         <Texture name="ZO_TributeCard_BuyableOverlay_Template" inherits="ZO_TributeCard_StateEffectOverlayWave_Template" textureFile="EsoUI/Art/Tribute/Overlays/tributeCardOverlay_buyable.dds" virtual="true" />
@@ -328,12 +328,12 @@
         <Texture name="ZO_TributeCard_TargetableUnderlay_Template" inherits="ZO_TributeCard_StateEffectUnderlayWave_Template" textureFile="EsoUI/Art/Tribute/Overlays/tributeCardOverlay_targetable.dds" virtual="true" />
 
         <Texture name="ZO_TributeCard_TargetedOverlay_Template" inherits="ZO_TributeCard_StateEffectOverlay_Template" shaderEffectType="WAVE" textureFile="EsoUI/Art/Tribute/Overlays/tributeCardOverlay_targeted.dds" virtual="true">
-            <Wave frequency="1.0" speed="2.0" offset="0.0" />
+            <Wave angle="0.0" frequency="1.0" offset="0.0" speed="3.0" />
             <WaveBounds minX="0.01" maxX="0.01" minY="0.05" maxY="0.05" />
         </Texture>
 
         <Texture name="ZO_TributeCard_TargetedUnderlay_Template" inherits="ZO_TributeCard_StateEffectUnderlay_Template" shaderEffectType="WAVE" textureFile="EsoUI/Art/Tribute/Overlays/tributeCardOverlay_targeted.dds" virtual="true">
-            <Wave frequency="1.0" speed="3.0" offset="0.0" />
+            <Wave angle="0.0" frequency="1.0" offset="0.0" speed="3.0" />
             <WaveBounds minX="0.01" maxX="0.01" minY="0.065" maxY="0.065" />
         </Texture>
 
@@ -371,7 +371,7 @@
                     <AnchorFill />
                     
                     <Controls>
-                        <Texture name="$(parent)BG" inherits="ZO_TributeCard_FullGlowableTexture" level="1" />
+                        <Texture name="$(parent)BG" inherits="ZO_TributeCard_FullGlowableTexture" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" level="1" />
                         
                         <Texture name="$(parent)Portrait" inherits="ZO_TributeCard_FrameGlowableTexture" maskMode="BASIC" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" level="3">
                             <Controls>
@@ -383,7 +383,7 @@
 
                         <Texture name="$(parent)ContractOrCurseBanner" inherits="ZO_TributeCard_FullTextureFootprint" hidden="true" level="7" />
                         
-                        <Texture name="$(parent)Suit" inherits="ZO_TributeCard_SuitGlowableTexture" level="8" />
+                        <Texture name="$(parent)Suit" inherits="ZO_TributeCard_SuitGlowableTexture" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" level="8" />
 
                         <Label name="$(parent)Name" font="ZoFontTributeAntique20NoShadow" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" verticalAlignment="CENTER" horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS" level="10">
                             <Anchor point="TOP" offsetY="390" />

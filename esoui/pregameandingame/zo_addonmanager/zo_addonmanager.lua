@@ -16,9 +16,12 @@ function ZO_AddOnManager:New(...)
     return ZO_SortFilterList.New(self, control, ...)
 end
 
-function ZO_AddOnManager:Initialize(control, allowReload)
-    ZO_SortFilterList.Initialize(self, control, allowReload)
-    self.allowReload = allowReload
+function ZO_AddOnManager:Initialize(control, primaryKeybindDescriptor, secondaryKeybindDescriptor)
+    ZO_SortFilterList.Initialize(self, control)
+
+    self.primaryKeybindDescriptor = primaryKeybindDescriptor
+    self.secondaryKeybindDescriptor = secondaryKeybindDescriptor
+
     self.control:SetHandler("OnShow", function() self:OnShow() end)
 
     self.sizerLabel = CreateControlFromVirtual("", self.control, "ZO_AddOn_SizerLabel")
@@ -37,7 +40,7 @@ function ZO_AddOnManager:Initialize(control, allowReload)
     ZO_ScrollList_AddDataType(self.list, ADDON_DATA, "ZO_AddOnRow", ZO_ADDON_ROW_HEIGHT, self:GetRowSetupFunction())
     ZO_ScrollList_AddDataType(self.list, SECTION_HEADER_DATA, "ZO_AddOnSectionHeaderRow", ZO_ADDON_SECTION_HEADER_ROW_HEIGHT, function(...) self:SetupSectionHeaderRow(...) end)
 
-    self.characterDropdown = ZO_ComboBox:New(GetControl(self.control, "CharacterSelectDropdown"))
+    self.characterDropdown = ZO_ComboBox:New(self.control:GetNamedChild("CharacterSelectDropdown"))
     self.characterDropdown:SetSortsItems(false)
 
     local function OnAddOnEulaHidden()
@@ -46,7 +49,7 @@ function ZO_AddOnManager:Initialize(control, allowReload)
 
         self.isDirty = true
 
-        self:RefreshMultiButton()
+        self:RefreshKeybinds()
         self:RefreshData()
     end
 
@@ -54,9 +57,9 @@ function ZO_AddOnManager:Initialize(control, allowReload)
 
     ADDONS_FRAGMENT = ZO_FadeSceneFragment:New(self.control)
     ADDONS_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
-                                                if(newState == SCENE_FRAGMENT_SHOWING) then
+                                                if newState == SCENE_FRAGMENT_SHOWING then
                                                     PushActionLayerByName("Addons")
-                                                elseif(newState == SCENE_FRAGMENT_HIDING) then
+                                                elseif newState == SCENE_FRAGMENT_HIDING then
                                                     RemoveActionLayerByName("Addons")
                                                 end
                                             end)
@@ -155,10 +158,10 @@ function ZO_AddOnManager:GetRowSetupFunction()
         control.owner = self
         control.data = data
         local name = control:GetNamedChild("Name")
-        local enabledControl = control:GetNamedChild("Enabled") 
-        local state = control:GetNamedChild("State") 
-        local description = control:GetNamedChild("Description") 
-        local dependencies = control:GetNamedChild("Dependencies") 
+        local enabledControl = control:GetNamedChild("Enabled")
+        local state = control:GetNamedChild("State")
+        local description = control:GetNamedChild("Description")
+        local dependencies = control:GetNamedChild("Dependencies")
         local expandButton = control:GetNamedChild("ExpandButton")
 
         control:SetHeight(data.height)
@@ -236,7 +239,7 @@ function ZO_AddOnManager:SetupSectionHeaderRow(control, data)
             end
 
             self.isDirty = true
-            self:RefreshMultiButton()
+            self:RefreshKeybinds()
             self:RefreshData()
         end)
     end
@@ -332,7 +335,7 @@ function ZO_AddOnManager:BuildCharacterDropdown()
         self.characterDropdown:AddItem(allCharactersEntry)
 
         local characterNames = {}
-        for i=1, self:GetNumCharacters() do
+        for i = 1, self:GetNumCharacters() do
             local name = self:GetCharacterInfo(i)
             table.insert(characterNames, name)
         end
@@ -504,21 +507,38 @@ end
 function ZO_AddOnManager:OnShow()
     self:BuildCharacterDropdown()
     self:RefreshData()
-    self:RefreshMultiButton()
+    self:RefreshKeybinds()
     CALLBACK_MANAGER:FireCallbacks("ShowAddOnEULAIfNecessary")
 end
 
-function ZO_AddOnManager:RefreshMultiButton()
-    local multiButton = self.control:GetNamedChild("MultiButton")
-
-    if(HasAgreedToEULA(EULA_TYPE_ADDON_EULA)) then
-        local isShown = self:AllowReload()
-        multiButton:SetHidden(not isShown)
-        multiButton:SetText(GetString(SI_ADDON_MANAGER_RELOAD))
-    else
-        multiButton:SetHidden(false)
-        multiButton:SetText(GetString(SI_ADDON_MANAGER_VIEW_EULA))
+function ZO_AddOnManager:UpdateKeybindButton(keybindButton, descriptor)
+    local visible = descriptor.visible or true
+    if type(visible) == "function" then
+        visible = visible()
     end
+
+    keybindButton:SetHidden(not visible)
+
+    local enabled = descriptor.enabled or true
+    if type(enabled) == "function" then
+        enabled = enabled()
+    end
+
+    keybindButton:SetEnabled(enabled)
+end
+
+function ZO_AddOnManager:RefreshKeybinds()
+    local primaryButton = self.control:GetNamedChild("PrimaryButton")
+    primaryButton:SetKeybindButtonDescriptor(self.primaryKeybindDescriptor)
+    self:UpdateKeybindButton(primaryButton, self.primaryKeybindDescriptor)
+
+    if self.secondaryKeybindDescriptor then
+        local secondaryButton = self.control:GetNamedChild("SecondaryButton")
+        secondaryButton:SetKeybindButtonDescriptor(self.secondaryKeybindDescriptor)
+        self:UpdateKeybindButton(secondaryButton, self.secondaryKeybindDescriptor)
+    end
+
+    self:RefreshSavedKeybindsLabel()
 end
 
 function ZO_AddOnManager:OnMouseEnter(control)
@@ -540,7 +560,7 @@ function ZO_AddOnManager:OnEnabledButtonClicked(control, checkState)
     local row = control:GetParent()
     self:ChangeEnabledState(row.data.index, checkState)
     self.isDirty = true
-    self:RefreshMultiButton()
+    self:RefreshKeybinds()
 end
 
 function ZO_AddOnManager:OnExpandButtonClicked(row)
@@ -570,8 +590,38 @@ function ZO_AddOnManager:ToggleExpandedData(data)
 end
 
 function ZO_AddOnManager:AllowReload()
-    return (self.allowReload and self.isDirty)
+    return self.isDirty
 end
+
+function ZO_AddOnManager:OnPrimaryButtonPressed()
+    local primaryButton = self.control:GetNamedChild("PrimaryButton")
+    primaryButton:OnClicked()
+end
+
+function ZO_AddOnManager:OnSecondaryButtonPressed()
+    local secondaryButton = self.control:GetNamedChild("SecondaryButton")
+    if self.secondaryKeybindDescriptor then
+        secondaryButton:OnClicked()
+    end
+end
+
+function ZO_AddOnManager:SetRefreshSavedKeybindsLabelFunction(refreshFunction)
+    self.refreshSavedKeybindsLabelFunction = refreshFunction
+end
+
+function ZO_AddOnManager:RefreshSavedKeybindsLabel()
+    local keybindsLabel = self.control:GetNamedChild("CurrentBindingsSaved")
+    if not self.refreshSavedKeybindsLabelFunction then
+        keybindsLabel:SetHidden(true)
+        return
+    end
+
+    self.refreshSavedKeybindsLabelFunction(keybindsLabel)
+end
+
+---
+-- Global Functions
+---
 
 function ZO_AddOnManager_OnExpandButtonClicked(control)
     local row = control:GetParent()
@@ -583,12 +633,10 @@ function ZO_AddOnManager_OnEnabledButtonMouseEnter(control)
     row.owner:OnMouseEnter(control)
 end
 
-function ZO_AddOnManagerMultiButton_Callback()
-    if(HasAgreedToEULA(EULA_TYPE_ADDON_EULA)) then
-        if ADD_ON_MANAGER:AllowReload() then
-            ReloadUI("ingame")
-        end
-    else
-        CALLBACK_MANAGER:FireCallbacks("ShowAddOnEULAIfNecessary")
-    end
+function ZO_AddOnManagerPrimaryButton_Callback()
+    ADD_ON_MANAGER:OnPrimaryButtonPressed()
+end
+
+function ZO_AddOnManagerSecondaryButton_Callback()
+    ADD_ON_MANAGER:OnSecondaryButtonPressed()
 end

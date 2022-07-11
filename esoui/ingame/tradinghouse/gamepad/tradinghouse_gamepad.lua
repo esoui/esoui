@@ -65,7 +65,6 @@ function ZO_GamepadTradingHouse:InitializeHeader()
     end)
 
     local function OnTextSearchTextChanged(editBox)
-        ZO_EditDefaultText_OnTextChanged(editBox)
         TEXT_SEARCH_MANAGER:SetSearchText("guildTraderTextSearch", editBox:GetText())
     end
 

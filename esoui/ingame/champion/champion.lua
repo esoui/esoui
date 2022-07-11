@@ -2524,7 +2524,16 @@ function ZO_ChampionConstellationCursor_Gamepad:UpdateDirectionalInput()
     CHAMPION_PERKS:SetCameraPanXY(counterScrollX, counterScrollY)
 
     local constellation = CHAMPION_PERKS:GetChosenConstellation()
-    local mouseOverControl = WINDOW_MANAGER:GetControlAtPoint(self.x, self.y)
+
+    local mouseOverControl
+    if WINDOW_MANAGER:AreCustomCursorsEnabled() then
+        WINDOW_MANAGER:UpdateCursorPosition(self.cursorId, self.x, self.y)
+        mouseOverControl = WINDOW_MANAGER:GetControlAtCursor(self.cursorId) 
+    else
+        mouseOverControl = WINDOW_MANAGER:GetControlAtPoint(self.x, self.y)
+    end
+    self.mouseOverControl = mouseOverControl
+    
     local targetSensitivity
     if mouseOverControl and mouseOverControl.star then
         constellation:SelectStar(mouseOverControl.star)
@@ -2537,21 +2546,40 @@ function ZO_ChampionConstellationCursor_Gamepad:UpdateDirectionalInput()
 end
 
 function ZO_ChampionConstellationCursor_Gamepad:UpdateVisibility()
+    local show
     if IsInGamepadPreferredMode() and CHAMPION_PERKS:HasChosenConstellation() then
         if CHAMPION_PERKS:GetChampionBar():GetGamepadEditor():IsFocused() then
-            self.control:SetHidden(true)
+            show = false
         else
-            self.control:SetHidden(false)
+            show = true
         end
     else
-        self.control:SetHidden(true)
+        show = false
     end
+
+    self.control:SetHidden(not show)
+
+    if WINDOW_MANAGER:AreCustomCursorsEnabled() then
+        if show then
+            if not self.cursorId then
+                self.cursorId = WINDOW_MANAGER:CreateCursor(self.x, self.y)
+            end
+        else
+            if self.cursorId then
+                WINDOW_MANAGER:DestroyCursor(self.cursorId)
+                self.cursorId = nil
+            end
+        end
+    end
+
+    if not show then
+        self.mouseOverControl = nil
+    end 
 end
 
 function ZO_ChampionConstellationCursor_Gamepad:GetLastSelectedStar()
-    local mouseOverControl = WINDOW_MANAGER:GetControlAtPoint(self.x, self.y)
-    if mouseOverControl and mouseOverControl.star then
-        return mouseOverControl.star
+    if self.mouseOverControl and self.mouseOverControl.star then
+        return self.mouseOverControl.star
     else
         return nil
     end

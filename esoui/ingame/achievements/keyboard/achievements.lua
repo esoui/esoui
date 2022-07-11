@@ -104,6 +104,9 @@ function Achievement:Initialize(control, checkPool, statusBarPool, rewardLabelPo
     end
 
     self:InitializeKeybindDescriptors()
+    control:SetHandler("OnEffectivelyHidden", function()
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    end)
 end
 
 function Achievement:InitializeKeybindDescriptors()
@@ -1978,7 +1981,6 @@ function ZO_Achievements_OnInitialize(self)
 end
 
 function ZO_Achievements_OnSearchTextChanged(editBox)
-    ZO_EditDefaultText_OnTextChanged(editBox)
     ACHIEVEMENTS_MANAGER:SetSearchString(editBox:GetText())
 end
 

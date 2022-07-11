@@ -135,7 +135,7 @@ function ZO_LootPickup_Gamepad:Show()
     SCENE_MANAGER:Show("lootGamepad")
     
     local OPEN_LOOT_WINDOW = false
-    ZO_PlayMonsterLootSound(OPEN_LOOT_WINDOW)
+    ZO_PlayLootWindowSound(OPEN_LOOT_WINDOW)
 end
 
 function ZO_LootPickup_Gamepad:InitializeKeybindStripDescriptors()

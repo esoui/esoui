@@ -29,6 +29,8 @@ local TIMED_PROMPTS =
     [INTERACT_TYPE_WORLD_EVENT_INVITE] = true,
     [INTERACT_TYPE_GROUP_ELECTION] = true,
     [INTERACT_TYPE_CAMPAIGN_LOCK_PENDING] = true,
+    [INTERACT_TYPE_DUEL_INVITE] = true,
+    [INTERACT_TYPE_TRIBUTE_INVITE] = true,
     -- Campaign Queue is the only timed prompt without a fixed expiration time; instead it's manually removed when the queue it's a part of pops.
     -- This means it does not define expiresAtS or expirationCallback, and it refreshes every second without necessarily needing to; it doesn't show a timer.
     [INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED] = true,
@@ -204,38 +206,44 @@ end
 function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.incomingQueue = {}
 
-    local function OnDuelInviteReceived(eventCode, inviterCharacterName, inviterDisplayName)
+    local function OnDuelInviteReceived(eventCode, inviterCharacterName, inviterDisplayName, timeRemainingMS)
         PlaySound(SOUNDS.DUEL_INVITE_RECEIVED)
-        local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
-        self:AddPromptToIncomingQueue(INTERACT_TYPE_DUEL_INVITE, inviterCharacterName, inviterDisplayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_DUEL, ZO_SELECTED_TEXT:Colorize(userFacingName)),
-            function()
-                AcceptDuel()
-            end,
-            function()
-                DeclineDuel()
-            end,
-            function()
-                self:RemoveFromIncomingQueue(INTERACT_TYPE_DUEL_INVITE)
-            end)
+
+        local function DeferDecisionCallback()
+            self:RemoveFromIncomingQueue(INTERACT_TYPE_DUEL_INVITE)
+        end
+
+        local NO_TARGET_LABEL = nil
+        local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_DUEL_INVITE, inviterCharacterName, inviterDisplayName, NO_TARGET_LABEL, AcceptDuel, DeclineDuel, DeferDecisionCallback)
+
+        data.messageFormat = GetString(SI_PLAYER_TO_PLAYER_INCOMING_DUEL)
+        -- the time left is added automatically to messageParams in position <<2>>
+        data.messageParams = { ZO_SELECTED_TEXT:Colorize(data.inviterName) }
+        data.dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_DUEL)
+        data.expiresAtS = GetFrameTimeSeconds() + (timeRemainingMS / ZO_ONE_SECOND_IN_MILLISECONDS)
+        data.expirationCallback = DeferDecisionCallback
     end
 
     local function OnDuelInviteRemoved()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_DUEL_INVITE)
     end
     
-    local function OnTributeInviteReceived(eventCode, inviterCharacterName, inviterDisplayName)
+    local function OnTributeInviteReceived(eventCode, inviterCharacterName, inviterDisplayName, timeRemainingMS)
         PlaySound(SOUNDS.TRIBUTE_INVITE_RECEIVED)
-        local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
-        self:AddPromptToIncomingQueue(INTERACT_TYPE_TRIBUTE_INVITE, inviterCharacterName, inviterDisplayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_TRIBUTE, ZO_SELECTED_TEXT:Colorize(userFacingName)),
-            function()
-                AcceptTribute()
-            end,
-            function()
-                DeclineTribute()
-            end,
-            function()
-                self:RemoveFromIncomingQueue(INTERACT_TYPE_TRIBUTE_INVITE)
-            end)
+
+        local function DeferDecisionCallback()
+            self:RemoveFromIncomingQueue(INTERACT_TYPE_TRIBUTE_INVITE)
+        end
+
+        local NO_TARGET_LABEL = nil
+        local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_TRIBUTE_INVITE, inviterCharacterName, inviterDisplayName, NO_TARGET_LABEL, AcceptTribute, DeclineTribute, DeferDecisionCallback)
+
+        data.messageFormat = GetString(SI_PLAYER_TO_PLAYER_INCOMING_TRIBUTE)
+        -- the time left is added automatically to messageParams in position <<2>>
+        data.messageParams = { ZO_SELECTED_TEXT:Colorize(data.inviterName) }
+        data.dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_TRIBUTE_INVITE)
+        data.expiresAtS = GetFrameTimeSeconds() + (timeRemainingMS / ZO_ONE_SECOND_IN_MILLISECONDS)
+        data.expirationCallback = DeferDecisionCallback
     end
 
     local function OnTributeInviteRemoved()
@@ -849,14 +857,14 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, function(event, ...) OnGroupMemberLeft(...) end)
 
     local function OnPlayerActivated()
-        local duelState, duelPartnerCharacterName, duelPartnerDisplayName = GetDuelInfo()
+        local duelState, duelPartnerCharacterName, duelPartnerDisplayName, timeRemainingMS = GetDuelInfo()
         if duelState == DUEL_STATE_INVITE_CONSIDERING then
-            OnDuelInviteReceived(nil, duelPartnerCharacterName, duelPartnerDisplayName)
+            OnDuelInviteReceived(nil, duelPartnerCharacterName, duelPartnerDisplayName, timeRemainingMS)
         end
         
-        local tributeInviteState, tributePartnerCharacterName, tributePartnerDisplayName = GetTributeInviteInfo()
+        local tributeInviteState, tributePartnerCharacterName, tributePartnerDisplayName, timeRemainingMS = GetTributeInviteInfo()
         if tributeInviteState == TRIBUTE_INVITE_STATE_INVITE_CONSIDERING then
-            OnTributeInviteReceived(nil, tributePartnerCharacterName, tributePartnerDisplayName)
+            OnTributeInviteReceived(nil, tributePartnerCharacterName, tributePartnerDisplayName, timeRemainingMS)
         end
 
         local inviterCharaterName, millisecondsSinceRequest, inviterDisplayName = GetGroupInviteInfo()

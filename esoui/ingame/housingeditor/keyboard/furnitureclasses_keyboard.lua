@@ -307,7 +307,7 @@ function ZO_HousingFurnitureList:Initialize(...)
             self:OnSearchTextChanged(editBox)
         end)
     end
-
+    
     self.searchEditBox = searchEditBox
 
     self.freeSlotsLabel = self.contents:GetNamedChild("InfoBarFreeSlots")
@@ -351,7 +351,7 @@ function ZO_HousingFurnitureList:OnHiding()
 end
 
 function ZO_HousingFurnitureList:OnSearchTextChanged(editBox)
-    ZO_EditDefaultText_OnTextChanged(editBox)
+    -- Can override
 end
 
 function ZO_HousingFurnitureList:AddDataType(dataType, controlTemplate, entryHeight, setupFunction, hideFunction)

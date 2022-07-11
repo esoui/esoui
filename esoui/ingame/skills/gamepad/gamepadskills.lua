@@ -242,6 +242,12 @@ function ZO_GamepadSkills:PerformUpdate()
     self.dirty = false
 end
 
+--TODO: Because we do not associate the parametric list screen with a scene/fragment/scene group, we need to override the ZO_Gamepad_ParametricList_Screen.IsShowing function to make sure it returns the proper thing
+--We cannot assign a scene to this screen because there are two separate scenes that are managing the state change functionality. At some point, we should refactor this screen so we don't need to do this anymore
+function ZO_GamepadSkills:IsShowing()
+    return GAMEPAD_SKILLS_ROOT_SCENE:IsShowing() or GAMEPAD_SKILLS_LINE_FILTER_SCENE:IsShowing()
+end
+
 function ZO_GamepadSkills:PerformDeferredInitialization()
     if self.fullyInitialized then return end
     self.fullyInitialized = true

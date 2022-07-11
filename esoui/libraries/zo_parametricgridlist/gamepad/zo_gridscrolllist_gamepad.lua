@@ -136,10 +136,10 @@ end
 
 function ZO_AbstractGridScrollList_Gamepad:CommitGridList()
     ZO_AbstractGridScrollList.CommitGridList(self)
-    ZO_ScrollList_RefreshLastHoldPosition(self.list)
     if self.active then
         self:RefreshSelection()
     end
+    ZO_ScrollList_RefreshLastHoldPosition(self.list)
 end
 
 function ZO_AbstractGridScrollList_Gamepad:Activate(foregoDirectionalInput)

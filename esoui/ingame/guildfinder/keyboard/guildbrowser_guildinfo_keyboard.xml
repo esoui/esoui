@@ -155,11 +155,7 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)ApplicationHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="180"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_GUILD_BROWSER_SUBMIT_APPLICATION_DIALOG_DEFAULT_EDIT_TEXT))
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" defaultText="SI_GUILD_BROWSER_SUBMIT_APPLICATION_DIALOG_DEFAULT_EDIT_TEXT" />
                     </Controls>
                 </Backdrop>
 

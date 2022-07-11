@@ -155,7 +155,7 @@ end
 do
     local ANCHORS_TO_BACKGROUND = true
 
-    local function ResizingUpdateLoop(control)
+    local function UpdateHeight(control)
         local contentHeight = control.scrollTooltip.scrollChild:GetHeight()
         
         if not zo_floatsAreEqual(contentHeight, control.lastContentHeight) or control.forceResizeUpdate then
@@ -176,6 +176,7 @@ do
         control.icon = control:GetNamedChild("Icon")
         control.scrollTooltip = control:GetNamedChild("ContainerTip")
         ZO_ScrollTooltip_Gamepad:Initialize(control.scrollTooltip, tooltipStyles or ZO_TOOLTIP_STYLES)
+        control.scrollTooltip.scrollChild:SetHandler("OnRectHeightChanged", function() UpdateHeight(control) end)
         control.tip = control.scrollTooltip.tooltip
         control.tip.icon = control.icon
         control.tip.gamepadTooltipContainerBorderControl = control:GetNamedChild("Border")
@@ -185,7 +186,6 @@ do
                 control.forceResizeUpdate = true
             end)
             control.lastContentHeight = 0
-            control:SetHandler("OnUpdate", ResizingUpdateLoop)
             control:SetHandler("OnEffectivelyShown", ForceResizeUpdate)
             control.scrollTooltip.scroll:SetHandler("OnScrollExtentsChanged", nil)
             screenResizeHandler(control)

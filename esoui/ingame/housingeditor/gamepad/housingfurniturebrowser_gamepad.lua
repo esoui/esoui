@@ -106,7 +106,6 @@ function ZO_HousingFurnitureBrowser_Gamepad:InitializeHeader()
     self.headerBGTexture = self.headerTextFilterControl:GetNamedChild("BG")
 
     self.headerTextFilterEditBox:SetHandler("OnTextChanged", function(editBox)
-        ZO_EditDefaultText_OnTextChanged(editBox)
         local text = editBox:GetText()
         if self.mode == HOUSING_BROWSER_MODE.PLACEMENT then
             SHARED_FURNITURE:SetPlaceableTextFilter(text)

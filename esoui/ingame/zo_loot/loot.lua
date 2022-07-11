@@ -53,7 +53,7 @@ function ZO_LootSceneFragment:Show()
     SHARED_INFORMATION_AREA:SetHidden(self.control, false)
 
     local OPEN_LOOT_WINDOW = false
-    ZO_PlayMonsterLootSound(OPEN_LOOT_WINDOW)
+    ZO_PlayLootWindowSound(OPEN_LOOT_WINDOW)
     
     TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, true, TUTORIAL_SUPPRESSED_BY_LOOT)
     if self.animateShow then

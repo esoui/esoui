@@ -11,9 +11,8 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_REQUEST_NAME_DEFAULT_TEXT">
                             <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_NAME_DEFAULT_TEXT))
                                 local includeFlags = { AUTO_COMPLETE_FLAG_GUILD, AUTO_COMPLETE_FLAG_RECENT, AUTO_COMPLETE_FLAG_RECENT_TARGET, AUTO_COMPLETE_FLAG_RECENT_CHAT }
                                 local excludeFlags = { AUTO_COMPLETE_FLAG_FRIEND }
                                 ZO_AutoComplete:New(self, includeFlags, excludeFlags, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)
@@ -37,11 +36,7 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)MessageHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="180"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_FRIEND_MESSAGE_DEFAULT_TEXT))
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" defaultText="SI_REQUEST_FRIEND_MESSAGE_DEFAULT_TEXT" />
                     </Controls>
                 </Backdrop>
 
@@ -62,10 +57,7 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)DisplayName" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="265"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" maxInputCharacters="254" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_EDIT_NOTE_DEFAULT_TEXT))
-                            </OnInitialized>
+                        <EditBox name="$(parent)Edit" maxInputCharacters="254" inherits="ZO_DefaultEditMultiLineForBackdrop" defaultText="SI_EDIT_NOTE_DEFAULT_TEXT">
                             <OnEffectivelyShown>
                                 self:TakeFocus()
                             </OnEffectivelyShown>
@@ -91,12 +83,8 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" maxInputCharacters="24">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_GUILD_CREATE_DIALOG_NAME_DEFAULT_TEXT))
-                            </OnInitialized>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="24" defaultText="SI_GUILD_CREATE_DIALOG_NAME_DEFAULT_TEXT">
                             <OnTextChanged>
-                                ZO_EditDefaultText_OnTextChanged(self)
                                 ZO_CreateGuildDialogName_UpdateViolations(self)
                             </OnTextChanged>
                             <OnEffectivelyShown>
