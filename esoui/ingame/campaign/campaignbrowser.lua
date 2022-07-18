@@ -426,11 +426,14 @@ do
         self:SetupAllianceControl(alliancePopulation3, {population = data.alliancePopulation3, selectionIndex = selectionIndex, alliance = ALLIANCE_DAGGERFALL_COVENANT})
 
         local rulesetType = GetCampaignRulesetType(self.rulesetIdFilter)
-        local hiddenColumns = HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE[rulesetType]
+        -- ESO-774582: If encountered during a load screen we can get an invalid value of 0
+        if rulesetType ~= 0 then
+            local hiddenColumns = HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE[rulesetType]
 
-        control:GetNamedChild("GroupMembers"):SetHidden(hiddenColumns["numGroupMembers"] or data.numGroupMembers == 0)
-        control:GetNamedChild("Friends"):SetHidden(hiddenColumns["numFriends"] or data.numFriends == 0)
-        control:GetNamedChild("GuildMembers"):SetHidden(hiddenColumns["numGuildMembers"] or data.numGuildMembers == 0)    
+            control:GetNamedChild("GroupMembers"):SetHidden(hiddenColumns["numGroupMembers"] or data.numGroupMembers == 0)
+            control:GetNamedChild("Friends"):SetHidden(hiddenColumns["numFriends"] or data.numFriends == 0)
+            control:GetNamedChild("GuildMembers"):SetHidden(hiddenColumns["numGuildMembers"] or data.numGuildMembers == 0)
+        end
     end
 end
 

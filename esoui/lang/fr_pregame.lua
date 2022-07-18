@@ -3171,7 +3171,7 @@ SafeAddString(SI_LOOTITEMRESULT8, "Vous ne pouvez pas prendre <<1>> car cet obje
 SafeAddString(SI_LOOTITEMRESULT9, "Au moins un objet n'a pas pu être ramassé car il est unique et vous en possédez déjà un.", 0)
 SafeAddString(SI_LORE_LIBRARY_IN_LIBRARY, "Déjà dans votre bibliothèque.", 0)
 SafeAddString(SI_LORE_LIBRARY_NOT_IN_LIBRARY, "Vous ne possédez pas ce livre.", 0)
-SafeAddString(SI_LORE_LIBRARY_USE_TO_LEARN, "Utilisez ceci pour l'ajouter à votre bibliothèque.", 0)
+SafeAddString(SI_LORE_LIBRARY_USE_TO_LEARN, "Utilisez ceci pour l'ajouter à votre bibliothèque du lore.", 0)
 SafeAddString(SI_LOW, "Rare", 0)
 SafeAddString(SI_MAIN_MENU_CHAPTERS, "Chapitres", 0)
 SafeAddString(SI_MAIN_MENU_TOOLTIP_DISABLED_BUTTON, "Vous ne pouvez pas y accéder présentement.", 0)
