@@ -137,6 +137,21 @@ function ZO_Tribute:RegisterForEvents()
         end
     end)
 
+    -- Fixing ESO-771856 required sending the GameCameraActive event earlier than we typically expect it. Whereas we
+    -- would normally receive that event when the base scene is being shown, that fix sends it when the Tribute scene
+    -- is hiding, which prevents the Scene Manager from exiting UI mode in the same way it does in other comperable
+    -- situations. Therfore, to fix ESO-780072, we have to exit UI mode ourselves here. The Scene Manager is supposed
+    -- to handle this on its own; it's only because the ESO-771856 fix broke its assumptions that we're doing this.
+    -- Don't cite this as an example of standard procedure!
+    TRIBUTE_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_HIDDEN then
+            if SCENE_MANAGER:IsInUIMode() and SCENE_MANAGER:IsShowingBaseSceneNext() then
+                local IS_SHOWING_HUDUI = true
+                SCENE_MANAGER:ConsiderExitingUIMode(IS_SHOWING_HUDUI)
+            end
+        end
+    end)
+
     control:RegisterForEvent(EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE, function(_, gameFlowState)
         --Clear the turn timer countdown CSA if the game flow state changes
         self.showingCountdown = false
