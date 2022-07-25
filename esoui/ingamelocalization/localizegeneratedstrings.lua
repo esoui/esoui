@@ -3865,10 +3865,10 @@ EsoStrings =
     "Reach 40 Prestige to enter the end game. In the end game each player competes to hold the highest Prestige amount at the end of their opponent's turn. The player that can hold the lead at the end of their opponent's turn wins the game. Any player that reaches 80 Prestige will win the game at the end of their turn.", -- SI_TRIBUTERESOURCE_TOOLTIP2
     "Gain |cffffff<<X:1>>|r <<t:2>>.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE0
     "Opponent gains |cffffff<<X:1>>|r <<t:2>>.", -- SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE0
-    "Remove up to |cffffff<<X:1>>|r <<1[card/cards]>> from the Tavern.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE1
-    "Remove up to |cffffff<<X:1>>|r <<1[card/cards]>>", -- SI_TRIBUTEMECHANIC_TARGETING1
-    "Knock Out - Place |cffffff<<X:1>>|r of your active agents into your cooldown.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE2
-    "Knock Out - Place |cffffff<<X:1>>|r of your opponent's active agents into their cooldown.", -- SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE2
+    "Replace up to |cffffff<<X:1>>|r <<1[card/cards]>> from the Tavern.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE1
+    "Replace up to |cffffff<<X:1>>|r <<1[card/cards]>>", -- SI_TRIBUTEMECHANIC_TARGETING1
+    "Knock Out - Place |cffffff<<X:1>>|r of your active agents into your cooldown pile.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE2
+    "Knock Out - Place |cffffff<<X:1>>|r of your opponent's active agents into their cooldown pile.", -- SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE2
     "Knock out |cffffff<<X:1>>|r <<1[agent/agents]>>", -- SI_TRIBUTEMECHANIC_TARGETING2
     "Discard |cffffff<<X:1>>|r <<1[card/cards]>> from your hand immediately.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE3
     "Opponent discards |cffffff<<X:1>>|r <<1[card/cards]>> from their hand at the start of their turn.", -- SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE3
@@ -3886,13 +3886,13 @@ EsoStrings =
     "Acquire up to |cffffff<<X:1>>|r <<1[card/cards]>> from the Tavern with a cost up to |cffffff<<2>>|r<<1[/ each]>>.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE8
     "Acquire up to |cffffff<<X:1>>|r <<1[card/cards]>>", -- SI_TRIBUTEMECHANIC_TARGETING8
     "Call on |cffffff<<X:1>>|r additional <<1[Patron/Patrons]>> this turn.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE9
-    "Refresh - Return up to |cffffff<<X:1>>|r <<z:2>> <<1[card/cards]>> from your cooldown to the top of your draw.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE10
-    "Refresh - Return up to |cffffff<<X:1>>|r <<z:2>> <<1[card/cards]>> from your opponent's cooldown to the top of their draw.", -- SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE10
-    "Refresh - Move up to |cffffff<<X:1>>|r <<1[card/cards]>> to the top of the draw", -- SI_TRIBUTEMECHANIC_TARGETING10
+    "Refresh - Return up to |cffffff<<X:1>>|r <<z:2>> <<1[card/cards]>> from your cooldown pile to the top of your draw pile.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE10
+    "Refresh - Return up to |cffffff<<X:1>>|r <<z:2>> <<1[card/cards]>> from your opponent's cooldown pile to the top of their draw pile.", -- SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE10
+    "Refresh - Move up to |cffffff<<X:1>>|r <<1[card/cards]>> to the top of the draw pile", -- SI_TRIBUTEMECHANIC_TARGETING10
     "Create |cffffff<<X:1>>|r <<C:2>> <<1[card/cards]>> and place <<1[it/them]>> in your <<z:3>>.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE11
     "Create |cffffff<<X:1>>|r <<C:2>> <<1[card/cards]>> and place <<1[it/them]>> in your opponent's <<z:3>>.", -- SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE11
-    "Toss - Look at the next <<1[card/|cffffff%d|r cards]>> of your draw. <<1[You may move that card/Choose up to |cffffff%d|r of those cards to move]>> to your cooldown.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE12
-    "Toss - Move up to |cffffff<<X:1>>|r <<1[card/cards]>> to your cooldown<<1[/ (ordered top to bottom)]>>", -- SI_TRIBUTEMECHANIC_TARGETING12
+    "Toss - Look at the next <<1[card/|cffffff%d|r cards]>> of your draw pile. <<1[You may move that card/Choose up to |cffffff%d|r of those cards to move]>> to your cooldown pile.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE12
+    "Toss - Move up to |cffffff<<X:1>>|r <<1[card/cards]>> to your cooldown pile<<1[/ (ordered top to bottom)]>>", -- SI_TRIBUTEMECHANIC_TARGETING12
     "Heal this agent for |cffffff<<X:1>>|r health.", -- SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE13
     "Sacrifice <<X:1>> of your <<z:2>> cards", -- SI_TRIBUTEPATRONREQUIREMENT_PLAYERPERSPECTIVE0
     "Sacrifice <<X:1>> of your opponent's <<z:2>> cards", -- SI_TRIBUTEPATRONREQUIREMENT_OPPONENTPERSPECTIVE0
@@ -3984,15 +3984,15 @@ EsoStrings =
     "",
     "",
     "",
-    "Draw", -- SI_TRIBUTEBOARDLOCATION0
-    "Opponent Draw", -- SI_TRIBUTEBOARDLOCATION1
+    "Draw Pile", -- SI_TRIBUTEBOARDLOCATION0
+    "Opponent Draw Pile", -- SI_TRIBUTEBOARDLOCATION1
     "Your Hand", -- SI_TRIBUTEBOARDLOCATION2
-    "Played Cards", -- SI_TRIBUTEBOARDLOCATION4
-    "Opponent Played Cards", -- SI_TRIBUTEBOARDLOCATION5
-    "Your Agents", -- SI_TRIBUTEBOARDLOCATION6
-    "Opponent Agents", -- SI_TRIBUTEBOARDLOCATION7
-    "Cooldown", -- SI_TRIBUTEBOARDLOCATION8
-    "Opponent Cooldown", -- SI_TRIBUTEBOARDLOCATION9
+    "Played Cards Pile", -- SI_TRIBUTEBOARDLOCATION4
+    "Opponent Played Cards Pile", -- SI_TRIBUTEBOARDLOCATION5
+    "Your Agents Pile", -- SI_TRIBUTEBOARDLOCATION6
+    "Opponent Agents Pile", -- SI_TRIBUTEBOARDLOCATION7
+    "Cooldown Pile", -- SI_TRIBUTEBOARDLOCATION8
+    "Opponent Cooldown Pile", -- SI_TRIBUTEBOARDLOCATION9
     "Tavern Draw", -- SI_TRIBUTEBOARDLOCATION11
     "Tavern Discard", -- SI_TRIBUTEBOARDLOCATION12
     "Competitive Match", -- SI_TRIBUTEMATCHTYPE1
@@ -20531,9 +20531,10 @@ SafeAddVersion(SI_TRIBUTERESOURCE_ACQUIRE1, 1)
 SafeAddVersion(SI_TRIBUTERESOURCE_TOOLTIP1, 1)
 SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE0, 1)
 SafeAddVersion(SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE0, 1)
-SafeAddVersion(SI_TRIBUTEMECHANIC_TARGETING1, 1)
-SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE2, 2)
-SafeAddVersion(SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE2, 2)
+SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE1, 1)
+SafeAddVersion(SI_TRIBUTEMECHANIC_TARGETING1, 2)
+SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE2, 3)
+SafeAddVersion(SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE2, 3)
 SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE4, 1)
 SafeAddVersion(SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE4, 1)
 SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE5, 1)
@@ -20544,11 +20545,11 @@ SafeAddVersion(SI_TRIBUTEMECHANIC_TARGETING7, 2)
 SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE8, 1)
 SafeAddVersion(SI_TRIBUTEMECHANIC_TARGETING8, 1)
 SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE9, 1)
-SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE10, 3)
-SafeAddVersion(SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE10, 3)
-SafeAddVersion(SI_TRIBUTEMECHANIC_TARGETING10, 2)
-SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE12, 2)
-SafeAddVersion(SI_TRIBUTEMECHANIC_TARGETING12, 3)
+SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE10, 4)
+SafeAddVersion(SI_TRIBUTEMECHANIC_OPPONENTPERSPECTIVE10, 4)
+SafeAddVersion(SI_TRIBUTEMECHANIC_TARGETING10, 3)
+SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE12, 3)
+SafeAddVersion(SI_TRIBUTEMECHANIC_TARGETING12, 4)
 SafeAddVersion(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE13, 1)
 SafeAddVersion(SI_TRIBUTEPATRONREQUIREMENT_PLAYERPERSPECTIVE0, 2)
 SafeAddVersion(SI_TRIBUTEPATRONREQUIREMENT_OPPONENTPERSPECTIVE0, 2)
@@ -20560,13 +20561,14 @@ SafeAddVersion(SI_TRIBUTEMATCHEVENT24, 1)
 SafeAddVersion(SI_TRIBUTEMATCHEVENT59, 1)
 SafeAddVersion(SI_TRIBUTEMATCHEVENT60, 1)
 SafeAddVersion(SI_TRIBUTEMATCHEVENT76, 1)
-SafeAddVersion(SI_TRIBUTEBOARDLOCATION0, 1)
-SafeAddVersion(SI_TRIBUTEBOARDLOCATION1, 1)
-SafeAddVersion(SI_TRIBUTEBOARDLOCATION4, 2)
-SafeAddVersion(SI_TRIBUTEBOARDLOCATION5, 2)
-SafeAddVersion(SI_TRIBUTEBOARDLOCATION6, 2)
-SafeAddVersion(SI_TRIBUTEBOARDLOCATION8, 1)
-SafeAddVersion(SI_TRIBUTEBOARDLOCATION9, 1)
+SafeAddVersion(SI_TRIBUTEBOARDLOCATION0, 2)
+SafeAddVersion(SI_TRIBUTEBOARDLOCATION1, 2)
+SafeAddVersion(SI_TRIBUTEBOARDLOCATION4, 3)
+SafeAddVersion(SI_TRIBUTEBOARDLOCATION5, 3)
+SafeAddVersion(SI_TRIBUTEBOARDLOCATION6, 3)
+SafeAddVersion(SI_TRIBUTEBOARDLOCATION7, 1)
+SafeAddVersion(SI_TRIBUTEBOARDLOCATION8, 2)
+SafeAddVersion(SI_TRIBUTEBOARDLOCATION9, 2)
 SafeAddVersion(SI_TRIBUTEBOARDLOCATION11, 2)
 SafeAddVersion(SI_TRIBUTEBOARDLOCATION12, 2)
 SafeAddVersion(SI_TRIBUTEMATCHTYPE1, 1)

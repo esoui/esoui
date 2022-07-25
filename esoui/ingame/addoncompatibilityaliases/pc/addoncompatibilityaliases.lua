@@ -1088,7 +1088,7 @@ ZO_PlayMonsterLootSound = ZO_PlayLootWindowSound
 -- EditBox default text has moved to the C++ control
 function ZO_EditDefaultText_OnTextChanged() end
 
-function ZO_EditDefaultText_Initialize(control)
+function ZO_EditDefaultText_Initialize(control, defaultText)
     control:SetDefaultText(defaultText)
 end
 
