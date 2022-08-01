@@ -56,10 +56,11 @@ function ZO_TributePatronBookTile_Keyboard:OnFocusChanged(isFocused)
         local DONT_HIGHLIGHT_ACTIVE_FAVOR_STATE = false
         local ALLOW_NOT_COLLECTIBLE_WARNING = false
         local SHOW_ACQUIRE_HINT = true
+        local SHOW_LORE = true
 
         ClearTooltip(ItemTooltip)
         InitializeTooltip(ItemTooltip, self.control, RIGHT, 0, 0, LEFT)
-        ItemTooltip:SetTributePatron(self.patronData:GetId(), DONT_HIGHLIGHT_ACTIVE_FAVOR_STATE, ALLOW_NOT_COLLECTIBLE_WARNING, SHOW_ACQUIRE_HINT)
+        ItemTooltip:SetTributePatron(self.patronData:GetId(), DONT_HIGHLIGHT_ACTIVE_FAVOR_STATE, ALLOW_NOT_COLLECTIBLE_WARNING, SHOW_ACQUIRE_HINT, SHOW_LORE)
     else
         ClearTooltip(ItemTooltip)
     end

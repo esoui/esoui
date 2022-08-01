@@ -55,6 +55,7 @@ function ZO_TributePatronBookTile_Gamepad:OnFocusChanged(isFocused)
             highlightActivePatronState = false,
             suppressNotCollectibleWarning = false,
             showAcquireHint = true,
+            showLore = true,
         }
         GAMEPAD_TOOLTIPS:LayoutTributePatron(GAMEPAD_RIGHT_TOOLTIP, self.patronData, optionalArgs)
     end
@@ -149,7 +150,6 @@ function ZO_TributePatronSelectionTile_Gamepad:RefreshTooltip()
             highlightActivePatronState = hDONT_HIGHLIGHT_ACTIVE_FAVOR_STATE,
             suppressNotCollectibleWarning = ALLOW_NOT_COLLECTIBLE_WARNING,
             showAcquireHint = self.patronData:IsPatronLocked(),
-
         }
         ZO_TributePatronTooltip_Gamepad_Show(self.patronData, optionalArgs, LEFT, self.control, RIGHT, 25, 0)
     end
