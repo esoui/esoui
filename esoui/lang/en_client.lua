@@ -9255,6 +9255,8 @@ SafeAddString(SI_TRIBUTEMATCHEVENT74, "Cannot join while in an Activity Finder q
 SafeAddString(SI_TRIBUTEMATCHEVENT75, "They are already in an Activity Finder queue.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT76, "Your opponent has declined the Tales of Tribute invite.", 1)
 SafeAddString(SI_TRIBUTEMATCHEVENT77, "You are not able to play Tales of Tribute.", 0)
+SafeAddString(SI_TRIBUTEMATCHEVENT78, "You cannot send a Tales of Tribute invite while in an active match.", 0)
+SafeAddString(SI_TRIBUTEMATCHEVENT79, "Target is in an active Tales of Tribute match.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT8, "<<1>> is not available for Tales of Tribute because they have challenged someone else.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT9, "<<1>> is not available for Tales of Tribute because they are considering another challenge.", 0)
 SafeAddString(SI_TRIBUTEMATCHTYPE1, "Competitive Match", 1)
