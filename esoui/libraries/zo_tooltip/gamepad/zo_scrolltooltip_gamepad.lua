@@ -176,6 +176,7 @@ do
         control.icon = control:GetNamedChild("Icon")
         control.scrollTooltip = control:GetNamedChild("ContainerTip")
         ZO_ScrollTooltip_Gamepad:Initialize(control.scrollTooltip, tooltipStyles or ZO_TOOLTIP_STYLES)
+        control.lastContentHeight = 0
         control.scrollTooltip.scrollChild:SetHandler("OnRectHeightChanged", function() UpdateHeight(control) end)
         control.tip = control.scrollTooltip.tooltip
         control.tip.icon = control.icon
@@ -185,7 +186,6 @@ do
                 screenResizeHandler(control)
                 control.forceResizeUpdate = true
             end)
-            control.lastContentHeight = 0
             control:SetHandler("OnEffectivelyShown", ForceResizeUpdate)
             control.scrollTooltip.scroll:SetHandler("OnScrollExtentsChanged", nil)
             screenResizeHandler(control)
