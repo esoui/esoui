@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 101034
+h1. ESO UI Documentation for API Version 101035
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -1944,7 +1944,6 @@ h5. CampaignAllianceLockReason
 * CAMPAIGN_ALLIANCE_LOCK_REASON_CAMPAIGN_ENTERED_AND_ASSIGNED
 * CAMPAIGN_ALLIANCE_LOCK_REASON_CHARACTER_ASSIGNED
 * CAMPAIGN_ALLIANCE_LOCK_REASON_ENTERED_CAMPAIGN
-* CAMPAIGN_ALLIANCE_LOCK_REASON_NOT_LOCKED
 
 
 h5. CampaignBuffType
@@ -2847,6 +2846,16 @@ h5. Attributes
 * ATTRIBUTE_MAGICKA
 * ATTRIBUTE_NONE
 * ATTRIBUTE_STAMINA
+
+
+h5. BlockState
+* BLOCK_STATE_ACTIVE
+* BLOCK_STATE_BLOCKED
+* BLOCK_STATE_CLIENT_REQUESTED
+* BLOCK_STATE_DRAINED
+* BLOCK_STATE_IDLE
+* BLOCK_STATE_NONE
+* BLOCK_STATE_OVERRIDDEN
 
 
 h5. BossRank
@@ -6967,6 +6976,7 @@ h5. StoreEntryType
 h5. StoreFailure
 * STORE_FAILURE_ALREADY_HAVE_ANTIQUITY_LEAD
 * STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE
+* STORE_FAILURE_ALREADY_OWN_COMBINATION_RESULT
 * STORE_FAILURE_ALREADY_UNEARTHED_ANTIQUITY
 * STORE_FAILURE_AT_FENCE_LIMIT
 * STORE_FAILURE_AWARDS_ALREADY_OWNED_COLLECTIBLE
@@ -7662,6 +7672,18 @@ h5. TributeBoardLocation
 * TRIBUTE_BOARD_LOCATION_PLAYER_PERM_REMOVED
 
 
+h5. TributeCardPile
+* TRIBUTE_CARD_PILE_BOARD_ACTION
+* TRIBUTE_CARD_PILE_BOARD_AGENT
+* TRIBUTE_CARD_PILE_COOLDOWN
+* TRIBUTE_CARD_PILE_DECK
+* TRIBUTE_CARD_PILE_DOCKS
+* TRIBUTE_CARD_PILE_DOCKS_DECK
+* TRIBUTE_CARD_PILE_DOCKS_DISCARD
+* TRIBUTE_CARD_PILE_HAND
+* TRIBUTE_CARD_PILE_PERM_REMOVED
+
+
 h5. TributeCardStateFlags
 * TRIBUTE_CARD_STATE_FLAGS_BUYABLE
 * TRIBUTE_CARD_STATE_FLAGS_CALLOUT
@@ -7775,6 +7797,7 @@ h5. TributeMatchEvent
 * TRIBUTE_MATCH_EVENT_SELF_DEAD
 * TRIBUTE_MATCH_EVENT_SELF_INELIGIBLE_AREA
 * TRIBUTE_MATCH_EVENT_SELF_IN_COMBAT
+* TRIBUTE_MATCH_EVENT_SELF_IN_MATCH
 * TRIBUTE_MATCH_EVENT_SELF_LOADING
 * TRIBUTE_MATCH_EVENT_SELF_MATCH_REJECT_INVITE_TYPE
 * TRIBUTE_MATCH_EVENT_SELF_NOT_INITIALIZED
@@ -7795,6 +7818,7 @@ h5. TributeMatchEvent
 * TRIBUTE_MATCH_EVENT_TARGET_INELIGIBLE_AREA
 * TRIBUTE_MATCH_EVENT_TARGET_INVALID
 * TRIBUTE_MATCH_EVENT_TARGET_IN_COMBAT
+* TRIBUTE_MATCH_EVENT_TARGET_IN_MATCH
 * TRIBUTE_MATCH_EVENT_TARGET_LOADING
 * TRIBUTE_MATCH_EVENT_TARGET_MATCH_REJECT_INVITE_TYPE
 * TRIBUTE_MATCH_EVENT_TARGET_NOT_INITIALIZED
@@ -7936,6 +7960,7 @@ h5. TributeTargetCardType
 
 h5. TributeTargetSelectionConfirmationResult
 * TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_NOT_ENOUGH_TARGETS
+* TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_REQUIRES_TAUNT_AGENTS
 * TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_SUCCESS
 * TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_TARGET_SELECTION_NOT_ACTIVE
 
@@ -8023,6 +8048,7 @@ h5. InteractTargetType
 * INTERACT_TARGET_TYPE_NONE
 * INTERACT_TARGET_TYPE_OBJECT
 * INTERACT_TARGET_TYPE_QUEST_ITEM
+* INTERACT_TARGET_TYPE_TRIBUTE
 
 
 h5. InteractType
@@ -8802,6 +8828,11 @@ h5. CardinalDirection
 * CARDINAL_DIRECTION_WEST
 
 
+h5. ChildLayoutType
+* CHILD_LAYOUT_TYPE_FLEX
+* CHILD_LAYOUT_TYPE_NONE
+
+
 h5. ControlAccessControl
 * CONTROL_ACCESS_PRIVATE
 * CONTROL_ACCESS_PUBLIC
@@ -8885,6 +8916,51 @@ h5. ExpectedInputChangeResult
 * EXPECTED_INPUT_CHANGE_RESULT_NO_CHANGE
 
 
+h5. FlexAlignment
+* FLEX_ALIGNMENT_AUTO
+* FLEX_ALIGNMENT_BASELINE
+* FLEX_ALIGNMENT_CENTER
+* FLEX_ALIGNMENT_FLEX_END
+* FLEX_ALIGNMENT_FLEX_START
+* FLEX_ALIGNMENT_SPACE_AROUND
+* FLEX_ALIGNMENT_SPACE_BETWEEN
+* FLEX_ALIGNMENT_STRETCH
+
+
+h5. FlexDirection
+* FLEX_DIRECTION_COLUMN
+* FLEX_DIRECTION_COLUMN_REVERSE
+* FLEX_DIRECTION_ROW
+* FLEX_DIRECTION_ROW_REVERSE
+
+
+h5. FlexEdge
+* FLEX_EDGE_ALL
+* FLEX_EDGE_BOTTOM
+* FLEX_EDGE_END
+* FLEX_EDGE_HORIZONTAL
+* FLEX_EDGE_LEFT
+* FLEX_EDGE_RIGHT
+* FLEX_EDGE_START
+* FLEX_EDGE_TOP
+* FLEX_EDGE_VERTICAL
+
+
+h5. FlexJustification
+* FLEX_JUSTIFICATION_CENTER
+* FLEX_JUSTIFICATION_FLEX_END
+* FLEX_JUSTIFICATION_FLEX_START
+* FLEX_JUSTIFICATION_SPACE_AROUND
+* FLEX_JUSTIFICATION_SPACE_BETWEEN
+* FLEX_JUSTIFICATION_SPACE_EVENLY
+
+
+h5. FlexWrap
+* FLEX_WRAP_NO_WRAP
+* FLEX_WRAP_WRAP
+* FLEX_WRAP_WRAP_REVERSE
+
+
 h5. FontStyle
 * FONT_STYLE_NORMAL
 * FONT_STYLE_OUTLINE
@@ -8897,6 +8973,12 @@ h5. FontStyle
 h5. GuiRender3DSpaceSystem
 * GUI_RENDER_3D_SPACE_SYSTEM_CAMERA
 * GUI_RENDER_3D_SPACE_SYSTEM_WORLD
+
+
+h5. HitTestingDesiredHandlers
+* HIT_TESTING_DESIRED_HANDLERS_ANY
+* HIT_TESTING_DESIRED_HANDLERS_MOUSE_WHEEL_ONLY
+* HIT_TESTING_DESIRED_HANDLERS_RECEIVE_DRAG_ONLY
 
 
 h5. InputDeviceType
@@ -9298,6 +9380,7 @@ h5. TranslateAnimationDeltaType
 
 h5. Unit
 * UNIT_CENTIMETERS
+* UNIT_EXPRESSION
 * UNIT_METERS
 * UNIT_NATIVE
 * UNIT_PERCENT
@@ -9537,6 +9620,13 @@ h5. MouseButtonIndex
 * MOUSE_BUTTON_INDEX_LEFT_AND_RIGHT
 * MOUSE_BUTTON_INDEX_MIDDLE
 * MOUSE_BUTTON_INDEX_RIGHT
+
+
+h5. PreferredInputDeviceType
+* PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
+* PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD
+* PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD_OR_MOUSE
+* PREFERRED_INPUT_DEVICE_TYPE_MOUSE
 
 
 h5. VirtualKeyboardType
@@ -10805,6 +10895,8 @@ h2. Game API
 
 * ResetGamepadBindsToDefault()
 
+* ClearBindsForUnknownActions()
+
 * DoesUnitExist(*string* _unitTag_)
 ** _Returns:_ *bool* _exists_
 
@@ -11725,7 +11817,13 @@ h2. Game API
 * GetActionBindingInfo(*luaindex* _layerIndex_, *luaindex* _categoryIndex_, *luaindex* _actionIndex_, *luaindex* _bindingIndex_)
 ** _Returns:_ *[KeyCode|#KeyCode]* _keyCode_, *[KeyCode|#KeyCode]* _mod1_, *[KeyCode|#KeyCode]* _mod2_, *[KeyCode|#KeyCode]* _mod3_, *[KeyCode|#KeyCode]* _mod4_
 
+* GetActionDefaultBindingInfo(*luaindex* _layerIndex_, *luaindex* _categoryIndex_, *luaindex* _actionIndex_, *luaindex* _bindingIndex_)
+** _Returns:_ *[KeyCode|#KeyCode]* _keyCode_, *[KeyCode|#KeyCode]* _mod1_, *[KeyCode|#KeyCode]* _mod2_, *[KeyCode|#KeyCode]* _mod3_, *[KeyCode|#KeyCode]* _mod4_
+
 * GetHighestPriorityActionBindingInfoFromName(*string* _actionName_, *bool* _preferGamepad_)
+** _Returns:_ *[KeyCode|#KeyCode]* _keyCode_, *[KeyCode|#KeyCode]* _mod1_, *[KeyCode|#KeyCode]* _mod2_, *[KeyCode|#KeyCode]* _mod3_, *[KeyCode|#KeyCode]* _mod4_
+
+* GetHighestPriorityActionBindingInfoFromNameAndInputDevice(*string* _actionName_, *[PreferredInputDeviceType|#PreferredInputDeviceType]* _preferredInputDeviceType_)
 ** _Returns:_ *[KeyCode|#KeyCode]* _keyCode_, *[KeyCode|#KeyCode]* _mod1_, *[KeyCode|#KeyCode]* _mod2_, *[KeyCode|#KeyCode]* _mod3_, *[KeyCode|#KeyCode]* _mod4_
 
 * GetMaxBindingsPerAction()
@@ -11747,6 +11845,9 @@ h2. Game API
 
 * GetActionNameFromKey(*string* _layerName_, *[KeyCode|#KeyCode]* _keyCode_)
 ** _Returns:_ *string* _actionName_
+
+* IsCurrentBindingDefault(*string* _actionName_, *luaindex* _bindingIndex_)
+** _Returns:_ *bool* _isDefault_
 
 * PushActionLayerByName(*string* _layerName_)
 
@@ -12956,6 +13057,8 @@ h2. Game API
 * GetRawNormalizedWorldPosition(*integer* _zoneId_, *integer* _worldX_, *integer* _worldY_, *integer* _worldZ_)
 ** _Returns:_ *number* _normalizedX_, *number* _normalizedY_
 
+* OnMapUpdateComplete()
+
 * PingMap(*[MapDisplayPinType|#MapDisplayPinType]* _pingType_, *[MapDisplayType|#MapDisplayType]* _mapDisplayType_, *number* _normalizedX_, *number* _normalizedZ_)
 
 * SetPlayerWaypointByWorldLocation(*integer* _worldX_, *integer* _worldY_, *integer* _worldZ_)
@@ -13946,7 +14049,7 @@ h2. Game API
 ** _Returns:_ *string* _guildName_
 
 * GetDuelInfo()
-** _Returns:_ *[DuelState|#DuelState]* _duelState_, *string* _partnerCharacterName_, *string* _partnerDisplayName_
+** _Returns:_ *[DuelState|#DuelState]* _duelState_, *string* _partnerCharacterName_, *string* _partnerDisplayName_, *integer* _timeRemainingMS_
 
 * ChallengeTargetToDuel(*string* _characterOrDisplayName_)
 
@@ -15151,6 +15254,12 @@ h2. Game API
 * IsActivityAvailableFromPlayerLocation(*integer* _activityId_)
 ** _Returns:_ *bool* _isActivityAvailableFromPlayerLocation_
 
+* DoesActivitySetHaveAvailablityRequirementList(*integer* _activitySetId_)
+** _Returns:_ *bool* _hasAvailablityReq_
+
+* DoesActivitySetPassAvailablityRequirementList(*integer* _activitySetId_)
+** _Returns:_ *bool* _passesAvailablityReq_, *integer* _errorStringId_
+
 * UpdateSelectedLFGRole(*[LFGRole|#LFGRole]* _role_)
 
 * GetSelectedLFGRole()
@@ -15158,18 +15267,6 @@ h2. Game API
 
 * CanUpdateSelectedLFGRole()
 ** _Returns:_ *bool* _canUpdateSelectedLFGRole_
-
-* GetActivitySetRewardData(*integer* _activitySetId_)
-** _Returns:_ *integer* _rewardUIDataId_, *integer* _xpReward_
-
-* GetNumLFGActivityRewardUINodes(*integer* _rewardUIDataId_)
-** _Returns:_ *integer* _numNodes_
-
-* GetLFGActivityRewardUINodeInfo(*integer* _rewardUIDataId_, *luaindex* _nodeIndex_)
-** _Returns:_ *string* _displayName_, *textureName* _icon_, *number* _textColorRed_, *number* _textColorBlue_, *number* _textColorGreen_
-
-* GetLFGActivityRewardDescriptionOverride(*integer* _rewardUIDataId_)
-** _Returns:_ *string* _descriptionOverride_
 
 * IsActivityEligibleForDailyReward(*[LFGActivity|#LFGActivity]* _activity_)
 ** _Returns:_ *bool* _isEligible_
@@ -15532,6 +15629,12 @@ h2. Game API
 
 * GetGamepadTemplate()
 ** _Returns:_ *[GamepadTemplate|#GamepadTemplate]* _gamepadTemplate_
+
+* GetNumSavedKeybindings()
+** _Returns:_ *integer* _numSavedBindings_
+
+* GetMaxNumSavedKeybindings()
+** _Returns:_ *integer* _maxNumSavedBindings_
 
 * SendAllCachedSettingMessages()
 
@@ -17217,7 +17320,7 @@ h2. Game API
 ** _Returns:_ *integer* _remainingTime_
 
 * GetTributeInviteInfo()
-** _Returns:_ *[TributeInviteState|#TributeInviteState]* _tributeInviteState_, *string* _partnerCharacterName_, *string* _partnerDisplayName_, *[TributePlayerType|#TributePlayerType]* _targetType_
+** _Returns:_ *[TributeInviteState|#TributeInviteState]* _tributeInviteState_, *string* _partnerCharacterName_, *string* _partnerDisplayName_, *[TributePlayerType|#TributePlayerType]* _targetType_, *integer* _timeRemainingMS_
 
 * ChallengeTargetToTribute(*string* _characterOrDisplayName_)
 
@@ -18324,6 +18427,9 @@ h2. Game API
 * GetCollectibleFurnitureDataId(*integer* _collectibleId_)
 ** _Returns:_ *integer* _furnitureDataId_
 
+* GetCollectibleFurnitureDataIdForPreview(*integer* _collectibleId_)
+** _Returns:_ *integer* _furnitureDataId_
+
 * GetCollectibleReferenceId(*integer* _collectibleId_)
 ** _Returns:_ *integer* _referenceId_
 
@@ -18361,7 +18467,7 @@ h2. Game API
 ** _Returns:_ *integer* _numTags_
 
 * GetCollectibleTagInfo(*integer* _collectibleId_, *luaindex* _tagIndex_)
-** _Returns:_ *string* _tagDescription_, *[ItemTagCategory|#ItemTagCategory]* _tagCategory_
+** _Returns:_ *string* _tagDescription_, *[ItemTagCategory|#ItemTagCategory]* _tagCategory_, *bool* _hideInUi_
 
 * IsCollectibleAvailableToActorCategory(*integer* _collectibleId_, *[GameplayActorCategory|#GameplayActorCategory]* _actorCategory_)
 ** _Returns:_ *bool* _isCollectibleAvailable_
@@ -18390,6 +18496,9 @@ h2. Game API
 ** _Returns:_ *bool* _containsProducts_
 
 * DoesMarketProductMatchFilter(*integer* _marketProductId_, *luaindex:nilable* _presentationIndex_, *integer* _filterTypes_)
+** _Returns:_ *bool* _matchesFilter_
+
+* DoesAnyMarketProductPresentationMatchFilter(*integer* _marketProductId_, *integer* _filterTypes_)
 ** _Returns:_ *bool* _matchesFilter_
 
 * GetMarketProductInfo *private* (*integer* _marketProductId_)
@@ -18800,6 +18909,9 @@ h2. Game API
 
 * IsCharacterPreviewingAvailable()
 ** _Returns:_ *bool* _canPreview_
+
+* CanCollectibleBePreviewed(*integer* _collectibleId_)
+** _Returns:_ *bool* _canCollectibleBePreviewed_
 
 * ApplyChangesToPreviewCollectionShown()
 
@@ -19464,6 +19576,36 @@ h2. Game API
 * GetTributeMatchType()
 ** _Returns:_ *[TributeMatchType|#TributeMatchType]* _matchType_
 
+* GetTributeMatchStatistics()
+** _Returns:_ *integer* _matchDurationMS_, *integer* _goldAccumulated_, *integer* _cardsAcquired_
+
+* GetTributeMatchCampaignId()
+** _Returns:_ *integer* _tributeMatchCampaignId_
+
+* GetNumTributeClubRankRewardLists()
+** _Returns:_ *integer* _numTributeClubRankRewardLists_
+
+* GetTributeClubRankRewardListIdByIndex(*luaindex* _rewardListIndex_)
+** _Returns:_ *integer* _rewardListId_
+
+* GetTributeGeneralMatchRewardListId()
+** _Returns:_ *integer* _rewardListId_
+
+* GetTributeGeneralMatchLFGRewardUIDataId()
+** _Returns:_ *integer* _rewardUIDataId_
+
+* GetPendingTributeClubExperience()
+** _Returns:_ *integer* _pendingClubXP_
+
+* GetPendingTributeCampaignExperience()
+** _Returns:_ *integer* _pendingCampaignXP_
+
+* GetNewTributeCampaignRank()
+** _Returns:_ *[TributeTier|#TributeTier]* _newTributeCampaignRank_
+
+* GetTributeForfeitPenaltyDurationMs()
+** _Returns:_ *integer* _forfeitPenaltyMs_
+
 * TributeMatchEndSummaryComplete()
 
 * GetActiveTributePlayerPerspective()
@@ -19480,6 +19622,9 @@ h2. Game API
 
 * GetTributeRemainingTimeForTurn()
 ** _Returns:_ *integer:nilable* _timeRemainingMs_
+
+* GetTributeResultsWinnerInfo()
+** _Returns:_ *[TributePlayerPerspective|#TributePlayerPerspective]* _winningPlayerPerspective_, *[TributeVictoryType|#TributeVictoryType]* _victoryType_
 
 * GetTributePrestigeRequiredToWin()
 ** _Returns:_ *integer* _requiredPrestige_
@@ -19504,6 +19649,9 @@ h2. Game API
 
 * GetTributeCardPortrait(*integer* _cardDefId_)
 ** _Returns:_ *textureName* _portrait_, *textureName* _portraitGlow_
+
+* GetTributeCardPortraitIcon(*integer* _cardDefId_)
+** _Returns:_ *textureName* _portraitIcon_
 
 * GetTributePatronSuitAtlas(*integer* _patronId_, *[TributeCardType|#TributeCardType]* _cardType_)
 ** _Returns:_ *textureName* _suitAtlas_, *textureName* _suitAtlasGlow_
@@ -19703,12 +19851,6 @@ h2. Game API
 * GetActiveTributeCampaignLeaderboardTierRewardListId(*[TributeLeaderboardTier|#TributeLeaderboardTier]* _tributeCampaignRank_)
 ** _Returns:_ *integer* _rewardListId_
 
-* GetTributeLeaderboardRankInfo()
-** _Returns:_ *integer* _playerLeaderboardRank_, *integer* _totalLeaderboardSize_
-
-* GetNextRaidLeaderboardId(*[RaidCategory|#RaidCategory]* _raidCategory_, *integer:nilable* _lastRaidId_)
-** _Returns:_ *integer:nilable* _nextRaidId_
-
 * RequestTributeClubData()
 ** _Returns:_ *[TributePlayerInitializationState|#TributePlayerInitializationState]* _state_
 
@@ -19718,11 +19860,29 @@ h2. Game API
 * RequestTributeCampaignData(*integer:nilable* _campaignId_)
 ** _Returns:_ *[TributePlayerInitializationState|#TributePlayerInitializationState]* _state_
 
-* GetActiveTributeCampaignTimeRemainingMs()
-** _Returns:_ *integer* _timeRemainingMs_
+* GetActiveTributeCampaignTimeRemainingS()
+** _Returns:_ *integer* _timeRemainingS_
 
 * HasActiveCampaignStarted()
 ** _Returns:_ *bool* _hasStarted_
+
+* GetTributeLeaderboardRankInfo()
+** _Returns:_ *integer* _playerLeaderboardRank_, *integer* _totalLeaderboardSize_
+
+* GetNextRaidLeaderboardId(*[RaidCategory|#RaidCategory]* _raidCategory_, *integer:nilable* _lastRaidId_)
+** _Returns:_ *integer:nilable* _nextRaidId_
+
+* GetActivitySetRewardData(*integer* _activitySetId_)
+** _Returns:_ *integer* _rewardUIDataId_, *integer* _xpReward_
+
+* GetNumLFGActivityRewardUINodes(*integer* _rewardUIDataId_)
+** _Returns:_ *integer* _numNodes_
+
+* GetLFGActivityRewardUINodeInfo(*integer* _rewardUIDataId_, *luaindex* _nodeIndex_)
+** _Returns:_ *string* _displayName_, *textureName* _icon_, *number* _textColorRed_, *number* _textColorBlue_, *number* _textColorGreen_
+
+* GetLFGActivityRewardDescriptionOverride(*integer* _rewardUIDataId_)
+** _Returns:_ *string* _descriptionOverride_
 
 
 h2. Object API
@@ -19804,6 +19964,9 @@ Objects that inherit behavior from *AnimationObject*
 
 * GetTimeline()
 ** _Returns:_ *object* _owningTimeline_
+
+* GetType()
+** _Returns:_ *[AnimationType|#AnimationType]* _animationObjectType_
 
 * IsEnabled()
 ** _Returns:_ *bool* _isEnabled_
@@ -20162,6 +20325,8 @@ h3. AnimationTimeline
 
 * ClearAllCallbacks()
 
+* ClearAnimatedControlFromAllAnimations()
+
 * GetAnimation(*luaindex* _animationIndex_)
 ** _Returns:_ *object* _animation_
 
@@ -20219,7 +20384,7 @@ h3. AnimationTimeline
 * GetSkipAnimationsBehindPlayheadOnInitialPlay()
 ** _Returns:_ *bool* _skipAnimations_
 
-* InsertAnimation(*integer* _animationType_, *object* _animatedControl_, *integer* _offset_)
+* InsertAnimation(*[AnimationType|#AnimationType]* _animationType_, *object* _animatedControl_, *integer* _offset_)
 ** _Returns:_ *object* _animation_
 
 * InsertAnimationFromVirtual(*string* _animationVirtualName_, *object* _animatedControl_)
@@ -20549,7 +20714,7 @@ Objects that inherit behavior from *Control*
 ** _Returns:_ *number* _alpha_
 
 * GetAnchor(*integer* _anchorIndex_)
-** _Returns:_ *bool* _isValidAnchor_, *integer* _point_, *object* _relativeTo_, *integer* _relativePoint_, *number* _offsetX_, *number* _offsetY_, *[AnchorConstrains|#AnchorConstrains]* _anchorConstrains_
+** _Returns:_ *bool* _isValidAnchor_, *[AnchorPosition|#AnchorPosition]* _point_, *object* _relativeTo_, *[AnchorPosition|#AnchorPosition]* _relativePoint_, *number* _offsetX_, *number* _offsetY_, *[AnchorConstrains|#AnchorConstrains]* _anchorConstrains_
 
 * GetBottom()
 ** _Returns:_ *number* _bottom_
@@ -20565,6 +20730,24 @@ Objects that inherit behavior from *Control*
 
 * GetChild(*luaindex* _childIndex_)
 ** _Returns:_ *object* _childControl_
+
+* GetChildFlexContentAlignment()
+** _Returns:_ *[FlexAlignment|#FlexAlignment]* _alignment_
+
+* GetChildFlexDirection()
+** _Returns:_ *[FlexDirection|#FlexDirection]* _direction_
+
+* GetChildFlexItemAlignment()
+** _Returns:_ *[FlexAlignment|#FlexAlignment]* _alignment_
+
+* GetChildFlexJustification()
+** _Returns:_ *[FlexJustification|#FlexJustification]* _justification_
+
+* GetChildFlexWrap()
+** _Returns:_ *[FlexWrap|#FlexWrap]* _wrap_
+
+* GetChildLayout()
+** _Returns:_ *[ChildLayoutType|#ChildLayoutType]* _childLayoutType_
 
 * GetClampedToScreen()
 ** _Returns:_ *bool* _clamped_
@@ -20602,11 +20785,32 @@ Objects that inherit behavior from *Control*
 * GetDrawTier()
 ** _Returns:_ *[DrawTier|#DrawTier]* _tier_
 
+* GetExcludeFromFlexbox()
+** _Returns:_ *bool* _exclude_
+
 * GetExcludeFromResizeToFitExtents()
 ** _Returns:_ *bool* _excludes_
 
 * GetFadeGradient(*luaindex* _gradientIndex_)
 ** _Returns:_ *number* _normalX_, *number* _normalY_, *number* _gradientLength_
+
+* GetFlex()
+** _Returns:_ *number:nilable* _growOrShrink_
+
+* GetFlexAlignSelf()
+** _Returns:_ *[FlexAlignment|#FlexAlignment]* _alignment_
+
+* GetFlexBasis()
+** _Returns:_ *number* _basis_
+
+* GetFlexGrow()
+** _Returns:_ *number* _grow_
+
+* GetFlexMargin(*[FlexEdge|#FlexEdge]* _edge_)
+** _Returns:_ *number* _margin_
+
+* GetFlexShrink()
+** _Returns:_ *number* _shrink_
 
 * GetHandler(*string* _handlerName_, *string* _name_)
 ** _Returns:_ *function* _functionRef_
@@ -20652,6 +20856,9 @@ Objects that inherit behavior from *Control*
 
 * GetParent()
 ** _Returns:_ *object* _ret1_
+
+* GetResizeToFitConstrains()
+** _Returns:_ *[AnchorConstrains|#AnchorConstrains]* _constrains_
 
 * GetResizeToFitDescendents()
 ** _Returns:_ *bool* _resizes_
@@ -20792,6 +20999,18 @@ Objects that inherit behavior from *Control*
 
 * SetCausticOffset(*number* _offset_)
 
+* SetChildFlexContentAlignment(*[FlexAlignment|#FlexAlignment]* _alignment_)
+
+* SetChildFlexDirection(*[FlexDirection|#FlexDirection]* _direction_)
+
+* SetChildFlexItemAlignment(*[FlexAlignment|#FlexAlignment]* _alignment_)
+
+* SetChildFlexJustification(*[FlexJustification|#FlexJustification]* _justification_)
+
+* SetChildFlexWrap(*[FlexWrap|#FlexWrap]* _wrap_)
+
+* SetChildLayout(*[ChildLayoutType|#ChildLayoutType]* _childLayoutType_)
+
 * SetCircularClip(*number* _centerX_, *number* _centerY_, *number* _radius_)
 
 * SetClampedToScreen(*bool* _clamped_)
@@ -20808,9 +21027,25 @@ Objects that inherit behavior from *Control*
 
 * SetDrawTier *protected-attributes* (*[DrawTier|#DrawTier]* _tier_)
 
+* SetExcludeFromFlexbox(*bool* _exclude_)
+
 * SetExcludeFromResizeToFitExtents *protected-attributes* (*bool* _exclude_)
 
 * SetFadeGradient(*luaindex* _gradientIndex_, *number* _normalX_, *number* _normalY_, *number* _gradientLength_)
+
+* SetFlex(*number* _growOrShrink_)
+
+* SetFlexAlignSelf(*[FlexAlignment|#FlexAlignment]* _alignment_)
+
+* SetFlexBasis(*number* _basis_)
+
+* SetFlexGrow(*number* _grow_)
+
+* SetFlexMargin(*[FlexEdge|#FlexEdge]* _edge_, *number* _margin_)
+
+* SetFlexMargins(*number* _left_, *number* _top_, *number* _right_, *number* _bottom_)
+
+* SetFlexShrink(*number* _shrink_)
 
 * SetHandler(*string* _handlerName_, *function* _functionRef_, *string* _name_, *[ControlHandlerOrder|#ControlHandlerOrder]* _controlHandlerOrder_, *string* _targetName_)
 
@@ -20847,6 +21082,8 @@ Objects that inherit behavior from *Control*
 * SetRectangularClip(*number* _left_, *number* _top_, *number* _right_, *number* _bottom_)
 
 * SetResizeHandleSize(*number* _handleSize_)
+
+* SetResizeToFitConstrains(*[AnchorConstrains|#AnchorConstrains]* _constrains_)
 
 * SetResizeToFitDescendents *protected-attributes* (*bool* _resize_)
 
@@ -20986,6 +21223,9 @@ h3. EditControl
 * GetCursorPosition()
 ** _Returns:_ *integer* _cursorPosition_
 
+* GetDefaultText()
+** _Returns:_ *string* _apRet_
+
 * GetEditEnabled()
 ** _Returns:_ *bool* _enabled_
 
@@ -21041,7 +21281,9 @@ h3. EditControl
 
 * SetCursorPosition(*integer* _cursorPosition_)
 
-* SetDefaultTextForVirtualKeyboard(*string* _aText_)
+* SetDefaultText(*string* _aDefaultText_)
+
+* SetDefaultTextColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
 
 * SetEditEnabled(*bool* _enabled_)
 
@@ -21821,7 +22063,7 @@ h3. TooltipControl
 
 * SetTributeLeaderboardRewardList(*integer* _rewardListId_)
 
-* SetTributePatron(*integer* _patronId_, *bool* _highlightActiveFavorState_, *bool* _suppressNotCollectibleWarning_)
+* SetTributePatron(*integer* _patronId_, *bool* _highlightActiveFavorState_, *bool* _suppressNotCollectibleWarning_, *bool* _showAcquireHint_, *bool* _showLore_)
 
 * SetTributePatronDockCard(*integer* _patronId_, *luaindex* _cardIndex_, *bool* _showUpgrade_)
 
@@ -21852,6 +22094,9 @@ h3. TopLevelWindow
 h3. WindowManager
 * ApplyTemplateToControl(*object* _control_, *string* _virtualName_)
 
+* AreCustomCursorsEnabled()
+** _Returns:_ *bool* _enabled_
+
 * CompareControlVisualOrder(*object* _controlA_, *object* _controlB_)
 ** _Returns:_ *integer* _order_
 
@@ -21861,8 +22106,16 @@ h3. WindowManager
 * CreateControlFromVirtual(*string* _controlName_, *object* _parent_, *string* _virtualName_, *string* _optionalSuffix_)
 ** _Returns:_ *object* _control_
 
+* CreateCursor(*layout_measurement* _x_, *layout_measurement* _y_)
+** _Returns:_ *integer* _cursorId_
+
 * CreateTopLevelWindow(*string* _name_)
 ** _Returns:_ *object* _control_
+
+* DestroyCursor(*integer* _cursorId_)
+
+* GetControlAtCursor(*integer* _cursorId_, *[HitTestingDesiredHandlers|#HitTestingDesiredHandlers]* _desiredHandlers_)
+** _Returns:_ *object* _controlAtCursor_
 
 * GetControlAtPoint(*layout_measurement* _x_, *layout_measurement* _y_)
 ** _Returns:_ *object* _mouseOverControl_
@@ -21913,6 +22166,8 @@ h3. WindowManager
 * SetMouseCursor(*integer* _cursorType_)
 
 * SetMouseFocusByName(*string* _name_)
+
+* UpdateCursorPosition(*integer* _cursorId_, *layout_measurement* _x_, *layout_measurement* _y_)
 
 
 * GetWindowManager()
@@ -22224,7 +22479,7 @@ h2. Events
 * EVENT_DUEL_INVITE_CANCELED
 * EVENT_DUEL_INVITE_DECLINED
 * EVENT_DUEL_INVITE_FAILED (*[DuelInviteFailReason|#DuelInviteFailReason]* _reason_, *string* _targetCharacterName_, *string* _targetDisplayName_)
-* EVENT_DUEL_INVITE_RECEIVED (*string* _inviterCharacterName_, *string* _inviterDisplayName_)
+* EVENT_DUEL_INVITE_RECEIVED (*string* _inviterCharacterName_, *string* _inviterDisplayName_, *integer* _timeRemainingMS_)
 * EVENT_DUEL_INVITE_REMOVED
 * EVENT_DUEL_INVITE_SENT (*string* _inviteeCharacterName_, *string* _inviteeDisplayName_)
 * EVENT_DUEL_NEAR_BOUNDARY (*bool* _isInWarningArea_)
@@ -22344,6 +22599,7 @@ h2. Events
 * EVENT_HIDE_BOOK
 * EVENT_HIDE_OBJECTIVE_STATUS
 * EVENT_HIGH_FALL_DAMAGE
+* EVENT_HOLIDAYS_CHANGED
 * EVENT_HOME_SHOW_LEADERBOARD_DATA_CHANGED (*integer* _voteCategory_, *[HouseCategoryType|#HouseCategoryType]* _houseCategory_)
 * EVENT_HOTBAR_SLOT_CHANGE_REQUESTED (*integer* _newAbilityId_, *luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
 * EVENT_HOTBAR_SLOT_STATE_UPDATED (*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
@@ -22691,7 +22947,7 @@ h2. Events
 * EVENT_TRIBUTE_INVITE_CANCELED
 * EVENT_TRIBUTE_INVITE_DECLINED
 * EVENT_TRIBUTE_INVITE_FAILED (*[TributeMatchEvent|#TributeMatchEvent]* _reason_, *string* _targetCharacterName_, *string* _targetDisplayName_)
-* EVENT_TRIBUTE_INVITE_RECEIVED (*string* _inviterCharacterName_, *string* _inviterDisplayName_)
+* EVENT_TRIBUTE_INVITE_RECEIVED (*string* _inviterCharacterName_, *string* _inviterDisplayName_, *integer* _timeRemainingMS_)
 * EVENT_TRIBUTE_INVITE_REMOVED
 * EVENT_TRIBUTE_INVITE_SENT (*string* _inviteeCharacterName_, *string* _inviteeDisplayName_)
 * EVENT_TRIBUTE_LEADERBOARD_DATA_RECEIVED (*[TributeLeaderboardType|#TributeLeaderboardType]* _leaderboardType_)
@@ -22765,6 +23021,7 @@ h2. Events
 * EVENT_REQUEST_SHOW_GAMEPAD_CHAPTER_UPGRADE (*integer* _chapterUpgradeId_)
 * EVENT_SCRYING_ACTIVE_SKILL_USE_RESULT (*[ScryingActiveSkillUseResult|#ScryingActiveSkillUseResult]* _result_)
 * EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE (*[TributeGameFlowState|#TributeGameFlowState]* _flowState_)
+* EVENT_TRIBUTE_MATCH_END_SUMMARY_READY
 * EVENT_TRIBUTE_PATRON_PROGRESSION_DATA_CHANGED (*integer:nilable* _patronId_)
 * EVENT_TRIBUTE_PLAYER_TURN_STARTED (*bool* _isLocalPlayer_)
 * EVENT_TUTORIAL_HIDDEN (*luaindex* _tutorialIndex_)
@@ -22897,9 +23154,12 @@ h4. Attributes:
 * centerDesaturation *number*
 * centerTextureAddressMode *[TextureAddressMode|#TextureAddressMode]*
 * centerTextureFile *string*
+* childLayout *[ChildLayoutType|#ChildLayoutType]*
 * clampedToScreen *bool*
 * clickSound *string*
 * color *string*
+* defaultText *string*
+* defaultTextColor *string*
 * delay *integer*
 * deltaU *number*
 * deltaV *number*
@@ -22907,10 +23167,10 @@ h4. Attributes:
 * deltaX *number*
 * deltaXFromEnd *layout_measurement*
 * deltaXFromEnd *number*
-* deltaY *layout_measurement*
 * deltaY *number*
-* deltaYFromEnd *number*
+* deltaY *layout_measurement*
 * deltaYFromEnd *layout_measurement*
+* deltaYFromEnd *number*
 * deltaZ *number*
 * deltaZFromEnd *number*
 * desaturation *number*
@@ -22938,18 +23198,29 @@ h4. Attributes:
 * endSkewX *number*
 * endSkewY *number*
 * endWidth *number*
-* endX *number*
 * endX *layout_measurement*
+* endX *number*
 * endY *layout_measurement*
 * endY *number*
 * endYaw *number*
-* endZ *layout_measurement*
 * endZ *number*
+* endZ *layout_measurement*
+* excludeFromFlexContainer *bool*
 * excludeFromResizeToFitExtents *bool*
 * fadeOutGainColor *string*
 * fadeOutLossColor *string*
 * fadeOutTextureFile *string*
 * fillColor *string*
+* flex *number*
+* flexBasis *number*
+* flexContentAlignment *[FlexAlignment|#FlexAlignment]*
+* flexDirection *[FlexDirection|#FlexDirection]*
+* flexGrow *number*
+* flexItemAlignment *[FlexAlignment|#FlexAlignment]*
+* flexJustification *[FlexJustification|#FlexJustification]*
+* flexSelfAlignment *[FlexAlignment|#FlexAlignment]*
+* flexShrink *number*
+* flexWrap *[FlexWrap|#FlexWrap]*
 * font *string*
 * framerate *number*
 * headerRowSpacing *number*
@@ -23004,6 +23275,7 @@ h4. Attributes:
 * radialCooldownClockwise *bool*
 * radialCooldownOriginAngle *number*
 * resizeHandleSize *number*
+* resizeToFitConstrains *[AnchorConstrains|#AnchorConstrains]*
 * resizeToFitDescendents *bool*
 * resizeToFitFile *bool*
 * scale *number*
@@ -23277,6 +23549,7 @@ h5. Control
 * [Child: DimensionConstraints|#DimensionConstraints]
 * [Child: Dimensions|#Dimensions]
 * [Child: FadeGradient|#FadeGradient]
+* [Child: FlexMargin|#FlexMargin]
 * [Child: HitInsets|#HitInsets]
 * [Child: OnChar|#OnChar]
 * [Child: OnDragStart|#OnDragStart]
@@ -23314,8 +23587,20 @@ h5. Control
 * [Child: WaveBounds|#WaveBounds]
 * [Child: alpha|#Attributes]
 * [Child: autoRectClipChildren|#Attributes]
+* [Child: childLayout|#Attributes]
 * [Child: clampedToScreen|#Attributes]
+* [Child: excludeFromFlexContainer|#Attributes]
 * [Child: excludeFromResizeToFitExtents|#Attributes]
+* [Child: flex|#Attributes]
+* [Child: flexBasis|#Attributes]
+* [Child: flexContentAlignment|#Attributes]
+* [Child: flexDirection|#Attributes]
+* [Child: flexGrow|#Attributes]
+* [Child: flexItemAlignment|#Attributes]
+* [Child: flexJustification|#Attributes]
+* [Child: flexSelfAlignment|#Attributes]
+* [Child: flexShrink|#Attributes]
+* [Child: flexWrap|#Attributes]
 * [Child: hidden|#Attributes]
 * [Child: id|#Attributes]
 * [Child: inheritAlpha|#Attributes]
@@ -23332,6 +23617,7 @@ h5. Control
 * [Child: mouseEnabled|#Attributes]
 * [Child: movable|#Attributes]
 * [Child: resizeHandleSize|#Attributes]
+* [Child: resizeToFitConstrains|#Attributes]
 * [Child: resizeToFitDescendents|#Attributes]
 * [Child: scale|#Attributes]
 * [Child: shape|#Attributes]
@@ -23418,6 +23704,8 @@ h5. EditBox
 * [Child: OnUpArrow|#OnUpArrow]
 * [Child: allowMarkupType|#Attributes]
 * [Child: color|#Attributes]
+* [Child: defaultText|#Attributes]
+* [Child: defaultTextColor|#Attributes]
 * [Child: editEnabled|#Attributes]
 * [Child: font|#Attributes]
 * [Child: maxInputCharacters|#Attributes]
@@ -23425,6 +23713,7 @@ h5. EditBox
 * [Child: newLineEnabled|#Attributes]
 * [Child: selectAllOnFocus|#Attributes]
 * [Child: selectionColor|#Attributes]
+* [Child: text|#Attributes]
 * [Child: textType|#Attributes]
 
 h5. FadeGradient
@@ -23434,6 +23723,12 @@ h5. FadeGradient
 * _attribute:_ *number* _x2_
 * _attribute:_ *number* _y2_
 * _attribute:_ *number* _size2_
+
+h5. FlexMargin
+* _attribute:_ *number* _left_
+* _attribute:_ *number* _top_
+* _attribute:_ *number* _right_
+* _attribute:_ *number* _bottom_
 
 h5. Font
 * _attribute:_ *string* _name_
@@ -23808,7 +24103,7 @@ h5. OnUpdate
 
 h5. OnUserAreaCreated
 * [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
-* ScriptArguments: local self, areaData, areaText, left, right, top, bottom, continuation = ...
+* ScriptArguments: local self, areaData, areaText, unscaledLeft, unscaledRight, unscaledTop, unscaledBottom, continuation = ...
 
 h5. OnValueChanged
 * [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]

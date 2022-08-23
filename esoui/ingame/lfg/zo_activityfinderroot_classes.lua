@@ -220,6 +220,10 @@ function ZO_ActivityFinderLocation_Base:GetFirstLockingCollectible()
     assert(false) -- Must be overrideen
 end
 
+function ZO_ActivityFinderLocation_Base:IsLockedByAvailablityRequirementList()
+    return false
+end
+
 function ZO_ActivityFinderLocation_Base:GetEntryType()
     assert(false) -- Must be overriden
 end
@@ -252,6 +256,14 @@ end
 
 function ZO_ActivityFinderLocation_Base:IsLocked()
     return self.isLocked
+end
+
+function ZO_ActivityFinderLocation_Base:SetActive(isActive)
+    self.isActive = isActive
+end
+
+function ZO_ActivityFinderLocation_Base:IsActive()
+    return self.isActive
 end
 
 function ZO_ActivityFinderLocation_Base:SetLockReasonText(lockReasonTextOrStringId)
@@ -438,6 +450,7 @@ function ZO_ActivityFinderLocation_Set:Initialize(activityType, index)
     local forceFullPanelKeyboard = ShouldActivitySetForceFullPanelKeyboard(activitySetId)
     self.icon = GetActivitySetIcon(activitySetId)
     self.hasRewardData = DoesActivitySetHaveRewardData(activitySetId) 
+    self.hasAvailabilityRequirementList = DoesActivitySetHaveAvailablityRequirementList(activitySetId)
 
     ZO_ActivityFinderLocation_Base.Initialize(self, activityType, activitySetId, rawName, description, levelMin, levelMax, championPointsMin, championPointsMax, minGroupSize, maxGroupSize, sortOrder, descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard, descriptionTextureGamepad, forceFullPanelKeyboard)
 end
@@ -505,6 +518,14 @@ function ZO_ActivityFinderLocation_Set:GetFirstLockingCollectible()
     end
 
     return 0
+end
+
+function ZO_ActivityFinderLocation_Set:IsLockedByAvailablityRequirementList()
+    if self.hasAvailabilityRequirementList then
+        local isAvailable, errorStringId = DoesActivitySetPassAvailablityRequirementList(self:GetId())
+        return not isAvailable, errorStringId
+    end
+    return false
 end
 
 function ZO_ActivityFinderLocation_Set:GetEntryType()

@@ -161,7 +161,7 @@ local function DefaultEqualityFunction(left, right)
     return left == right
 end
 
-function ZO_Tree:AddTemplate(template, setupFunction, selectionFunction, equalityFunction, childIndent, childSpacing)
+function ZO_Tree:AddTemplate(template, setupFunction, selectionFunction, equalityFunction, childIndent, childSpacing, overrideName)
     self.templateInfo[template] =
     {
         template = template,
@@ -170,7 +170,7 @@ function ZO_Tree:AddTemplate(template, setupFunction, selectionFunction, equalit
         setupFunction = setupFunction,
         selectionFunction = selectionFunction,
         equalityFunction = equalityFunction or DefaultEqualityFunction,
-        objectPool = ZO_ControlPool:New(template, self.control)
+        objectPool = ZO_ControlPool:New(template, self.control, overrideName)
     }
 end
 

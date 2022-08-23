@@ -60,6 +60,10 @@
                         ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
                     </OnInitialized>
                 </Label>
+
+                <Label name="$(parent)Indicator" font="ZoFontGamepad34" text="*" hidden="false">
+                    <Anchor point="LEFT" offsetX="10" />
+                </Label>
             </Controls>
         </Control>
 
@@ -120,7 +124,7 @@
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontGamepadBold48" horizontalAlignment="CENTER" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE">
                     <Dimensions x="800"/>
-                    <Anchor point="TOPLEFT" offsetX="20" offsetY="38"/>
+                    <Anchor point="TOP" offsetY="38"/>
                 </Label>
 
                 <Control name="$(parent)DividerSimple" inherits="ZO_GamepadHeaderHorizontalDivider">
@@ -203,6 +207,9 @@
                         </Control>
                         <Control name="$(parent)TertiaryKeybind" inherits="ZO_KeybindButton_Gamepad">
                             <Anchor point="LEFT" relativeTo="$(parent)SecondaryKeybind" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                        <Control name="$(parent)QuaternaryKeybind" inherits="ZO_KeybindButton_Gamepad">
+                            <Anchor point="LEFT" relativeTo="$(parent)TertiaryKeybind" relativePoint="RIGHT" offsetX="20" />
                         </Control>
                     </Controls>
                 </Control>

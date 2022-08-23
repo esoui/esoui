@@ -102,22 +102,18 @@ end
 function HelpSubmitFeedback_Keyboard:InitializeTextBox()
     self.details = self.helpScrollChild:GetNamedChild("DetailsTextLineField")
     self.details:SetMaxInputChars(MAX_HELP_DETAILS_TEXT)
-    ZO_EditDefaultText_Initialize(self.details, GetString(SI_CUSTOMER_SERVICE_ENTER_NAME))
+    self.details:SetDefaultText(GetString(SI_CUSTOMER_SERVICE_ENTER_NAME))
 
-    --Storing the text field and adding handlers to the visibility events so the Submit Button can be enabled/disabled when the player has typed something in
+    --Storing the text field and adding handlers to the text events so the Submit Button can be enabled/disabled when the player has typed something in
     --The Submit Button is disabled when the details text is empty (and the details text is visible)
-    self.detailsDefaultTextField = self.details:GetNamedChild("Text")
-    self.detailsDefaultTextField:SetHandler("OnEffectivelyShown",function() self:UpdateSubmitButton() end)
-    self.detailsDefaultTextField:SetHandler("OnEffectivelyHidden",function() self:UpdateSubmitButton() end)
+    self.details:SetHandler("OnTextChanged",function() self:UpdateSubmitButton() end)
 
     self.description = self.helpScrollChild:GetNamedChild("DescriptionBodyField")
     self.description:SetMaxInputChars(MAX_HELP_DESCRIPTION_BODY)
-    ZO_EditDefaultText_Initialize(self.description, GetString(SI_CUSTOMER_SERVICE_DEFAULT_DESCRIPTION_TEXT_FEEDBACK))
+    self.description:SetDefaultText(GetString(SI_CUSTOMER_SERVICE_DEFAULT_DESCRIPTION_TEXT_FEEDBACK))
 
     --The Submit Button is disabled when the description text is empty
-    self.descriptionDefaultTextField = self.description:GetNamedChild("Text")
-    self.descriptionDefaultTextField:SetHandler("OnEffectivelyShown",function() self:UpdateSubmitButton() end)
-    self.descriptionDefaultTextField:SetHandler("OnEffectivelyHidden",function() self:UpdateSubmitButton() end)
+    self.description:SetHandler("OnTextChanged",function() self:UpdateSubmitButton() end)
 
     self.description:SetText("")
 end
@@ -208,7 +204,7 @@ end
 function HelpSubmitFeedback_Keyboard:UpdateSubmitButton()
     local enableSubmitButton = true
 
-    if self.helpCategoryComboBox == nil or self.helpImpactComboBox == nil or self.helpSubcategoryComboBox == nil or self.descriptionDefaultTextField == nil then
+    if self.helpCategoryComboBox == nil or self.helpImpactComboBox == nil or self.helpSubcategoryComboBox == nil then
         enableSubmitButton = false
     elseif self.helpImpactComboBox:GetSelectedItemData().index <= ZO_HELP_SUBMIT_FEEDBACK_FIELD_DATA[ZO_HELP_TICKET_FIELD_TYPE.IMPACT].invalidEntry then
         enableSubmitButton = false
@@ -218,7 +214,7 @@ function HelpSubmitFeedback_Keyboard:UpdateSubmitButton()
         enableSubmitButton = false
     elseif not self.helpDetailsTextControl:IsHidden() and self.details:GetText() == "" then
         enableSubmitButton = false
-    elseif not self.descriptionDefaultTextField:IsHidden() then
+    elseif self.description:GetText() == "" then
         enableSubmitButton = false
     end
 

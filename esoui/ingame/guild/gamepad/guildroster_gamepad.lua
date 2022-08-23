@@ -435,7 +435,7 @@ function ZO_GamepadGuildRosterManager:InitializeConfirmRemoveDialog()
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
                         data.control = control
 
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GUILD_RECRUITMENT_BLACKLIST_NOTE_DEFAULT_TEXT))
+                        control.editBoxControl:SetDefaultText(GetString(SI_GUILD_RECRUITMENT_BLACKLIST_NOTE_DEFAULT_TEXT))
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_BLACKLIST_MESSAGE_LENGTH)
                         if self.blacklistNote then
                             control.editBoxControl:SetText(self.blacklistNote)

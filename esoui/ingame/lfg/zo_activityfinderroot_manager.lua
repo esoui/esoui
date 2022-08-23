@@ -192,6 +192,11 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
         self:FireCallbacks("OnTributeLeaderboardRankChanged")
     end
 
+    function OnHolidaysChanged()
+        self:MarkDataDirty()
+        self:FireCallbacks("OnHolidaysChanged")
+    end
+
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, function(eventCode, ...) self:OnActivityFinderStatusUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_COOLDOWNS_UPDATE, OnCooldownsUpdate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CURRENT_CAMPAIGN_CHANGED, OnCurrentCampaignChanged)
@@ -209,6 +214,8 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
 
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_LEVEL_UPDATE, OnLevelUpdate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CHAMPION_POINT_UPDATE, OnLevelUpdate)
+
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_HOLIDAYS_CHANGED, OnHolidaysChanged)
 
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_PLAYER_ACTIVATED, OnPlayerActivate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_GROUP_MEMBER_LEFT, UpdateGroupStatus)
@@ -326,6 +333,7 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
         local CONCISE_COOLDOWN_TEXT = false
 
         for _, location in ipairs(locationsByActivity) do
+            location:SetActive(true)
             location:SetLocked(true)
             location:SetCountsForAverageRoleTime(activityRequiresRoles)
             
@@ -360,24 +368,35 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                 location:SetLockReasonText(lockReasonText)
                 location:SetCountsForAverageRoleTime(false)
             else
-                local groupTooLarge = isGroupRelevant and self.groupSize > location:GetMaxGroupSize()
-
-                if groupTooLarge then
-                    location:SetLockReasonText(SI_LFG_LOCK_REASON_GROUP_TOO_LARGE)
-                elseif not location:DoesPlayerMeetLevelRequirements() then
-                    local levelMin, levelMax = location:GetLevelRange()
-                    local championPointsMin, championPointsMax = location:GetChampionPointsRange()
-                    location:SetLockReasonText(GetLevelOrChampionPointsRequirementText(levelMin, levelMax, championPointsMin, championPointsMax))
+                local isLockedByAvailabilityRequirement, availabilityRequirementErrorStringId = location:IsLockedByAvailablityRequirementList()
+                if isLockedByAvailabilityRequirement then
+                    local lockReasonText = GetErrorString(availabilityRequirementErrorStringId)
+                    if lockReasonText == "" then
+                        lockReasonText = GetString("SI_ACTIVITYQUEUERESULT", ACTIVITY_QUEUE_RESULT_DESTINATION_NO_LONGER_VALID)
+                    end
+                    location:SetLockReasonText(lockReasonText)
                     location:SetCountsForAverageRoleTime(false)
-                elseif activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE and not HasActiveCampaignStarted() then
-                    location:SetLockReasonText(SI_TRIBUTE_FINDER_LOCKED_NO_CAMPAIGN_TEXT)
-                elseif isGroupRelevant and not location:DoesGroupMeetLevelRequirements() then
-                    location:SetLockReasonText(SI_LFG_LOCK_REASON_GROUP_LOCATION_LEVEL_REQUIREMENTS)
-                elseif isGroupRelevant and not isLeader then
-                    location:SetLockReasonText(SI_LFG_LOCK_REASON_NOT_LEADER)
+                    location:SetActive(false)
                 else
-                    location:SetLocked(false)
-                    location:SetLockReasonText("")
+                    local groupTooLarge = isGroupRelevant and self.groupSize > location:GetMaxGroupSize()
+
+                    if groupTooLarge then
+                        location:SetLockReasonText(SI_LFG_LOCK_REASON_GROUP_TOO_LARGE)
+                    elseif not location:DoesPlayerMeetLevelRequirements() then
+                        local levelMin, levelMax = location:GetLevelRange()
+                        local championPointsMin, championPointsMax = location:GetChampionPointsRange()
+                        location:SetLockReasonText(GetLevelOrChampionPointsRequirementText(levelMin, levelMax, championPointsMin, championPointsMax))
+                        location:SetCountsForAverageRoleTime(false)
+                    elseif activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE and not HasActiveCampaignStarted() then
+                        location:SetLockReasonText(SI_TRIBUTE_FINDER_LOCKED_NO_CAMPAIGN_TEXT)
+                    elseif isGroupRelevant and not location:DoesGroupMeetLevelRequirements() then
+                        location:SetLockReasonText(SI_LFG_LOCK_REASON_GROUP_LOCATION_LEVEL_REQUIREMENTS)
+                    elseif isGroupRelevant and not isLeader then
+                        location:SetLockReasonText(SI_LFG_LOCK_REASON_NOT_LEADER)
+                    else
+                        location:SetLocked(false)
+                        location:SetLockReasonText("")
+                    end
                 end
             end
 
@@ -532,7 +551,7 @@ function ActivityFinderRoot_Manager:GetNumLocationsByActivity(activityType, visi
             local numLocations = 0
             for _, location in ipairs(locationsByActivity) do
                 for _, entryType in ipairs(visibleEntryTypes) do
-                    if location:GetEntryType() == entryType then
+                    if location:GetEntryType() == entryType and location:IsActive() then
                         numLocations = numLocations + 1
                         break
                     end

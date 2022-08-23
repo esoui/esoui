@@ -1,10 +1,10 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_TributePatron_Keyboard_Description_Label" font="ZoFontHeader2" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+        <Label name="ZO_TributePatron_Keyboard_Description_Label" font="ZoFontGameBold" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
 
         <Control name="ZO_TributePatron_Keyboard_Header_Template" virtual="true">
             <Controls>
-                <Label name="$(parent)Text" inherits="ZO_GridScrollList_Entry_Header_Keyboard">
+                <Label name="$(parent)Text" inherits="ZO_GridScrollList_Entry_Header_Keyboard" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <Anchor point="TOPLEFT" />
                 </Label>
             </Controls>
@@ -40,11 +40,7 @@
                             <Anchor point="BOTTOMLEFT" offsetX="9" />
 
                             <Controls>
-                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
-                                    <OnInitialized>
-                                        ZO_EditDefaultText_Initialize(self, GetString(SI_ENTER_KEYWORD_SEARCH_EDIT_DEFAULT))
-                                    </OnInitialized>
-
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ENTER_KEYWORD_SEARCH_EDIT_DEFAULT">
                                     <OnTextChanged>
                                         ZO_TributePatronBook_Keyboard_OnSearchTextChanged(self)
                                     </OnTextChanged>

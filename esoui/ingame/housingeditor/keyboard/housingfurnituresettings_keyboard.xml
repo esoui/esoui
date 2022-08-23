@@ -93,9 +93,8 @@
             <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
             <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
             <Controls>
-                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_REQUEST_NAME_DEFAULT_TEXT">
                     <OnInitialized>
-                        ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_NAME_DEFAULT_TEXT))
                         local includeFlags = { AUTO_COMPLETE_FLAG_FRIEND, AUTO_COMPLETE_FLAG_GUILD, AUTO_COMPLETE_FLAG_RECENT, AUTO_COMPLETE_FLAG_RECENT_TARGET, AUTO_COMPLETE_FLAG_RECENT_CHAT }
                         local excludeFlags = { AUTO_COMPLETE_FLAG_GUILD_NAMES }
                         ZO_AutoComplete:New(self, includeFlags, excludeFlags, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)
@@ -111,9 +110,8 @@
             <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
             <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
             <Controls>
-                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_REQUEST_GUILD_DEFAULT_TEXT">
                     <OnInitialized>
-                        ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_GUILD_DEFAULT_TEXT))
                         local includeFlags = { AUTO_COMPLETE_FLAG_GUILD_NAMES }
                         local excludeFlags = { AUTO_COMPLETE_FLAG_FRIEND, AUTO_COMPLETE_FLAG_GUILD, AUTO_COMPLETE_FLAG_RECENT, AUTO_COMPLETE_FLAG_RECENT_TARGET, AUTO_COMPLETE_FLAG_RECENT_CHAT }
                         ZO_AutoComplete:New(self, includeFlags, excludeFlags, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)

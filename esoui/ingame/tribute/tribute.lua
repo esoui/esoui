@@ -158,7 +158,6 @@ function ZO_Tribute:RegisterForEvents()
         CENTER_SCREEN_ANNOUNCE:RemoveAllCSAsOfAnnounceType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
 
         self.gameFlowState = gameFlowState
-        -- TODO Tribute: Change HUD elements by state
         if gameFlowState == TRIBUTE_GAME_FLOW_STATE_INACTIVE then
             if TRIBUTE_SCENE:IsShowing() then
                 SCENE_MANAGER:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
@@ -236,7 +235,6 @@ function ZO_Tribute:RefreshPlayerInfo()
 end
 
 function ZO_Tribute:HandleGamepadPreferredModeChanged(isGamepadPreferred)
-    -- TODO Tribute: Refresh mouseover info
     -- We don't want to hide the scene.  The internal version will update the styles
     self:RefreshInputModeFragments()
     self:RefreshPlayerInfo()

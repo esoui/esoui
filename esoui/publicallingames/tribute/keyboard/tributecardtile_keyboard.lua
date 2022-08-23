@@ -41,7 +41,6 @@ function ZO_TributeCardTile_Keyboard:LayoutPlatform(data)
     self.cardData.control:SetAnchor(CENTER, nil, CENTER, 0, 0)
     self.cardData.control:SetScale(0.60)
     self:SetCanFocus(true)
-    -- TODO Tribute: Implement keyboard content for each element
 end
 
 -----------------------------------
@@ -58,7 +57,6 @@ end
 function ZO_TributePatronBookCardTile_Keyboard:InitializePlatform(...)
     ZO_TributeCardTile_Keyboard.InitializePlatform(self, ...)
 
-    -- TODO Tribute: Implement keyboard content for each element
     self.upgradeToIcon = TRIBUTE_CARD_UPGRADE_TO_ICON
     self.upgradedIcon = TRIBUTE_CARD_UPGRADED_ICON
 end
@@ -142,8 +140,6 @@ end
 
 function ZO_TributePileViewerCardTile_Keyboard:InitializePlatform(...)
     ZO_TributeCardTile_Keyboard.InitializePlatform(self, ...)
-
-    -- TODO Tribute: Implement keyboard content for each element
 end
 
 function ZO_TributePileViewerCardTile_Keyboard:PostInitializePlatform(...)
@@ -183,8 +179,6 @@ end
 
 function ZO_TributeTargetViewerCardTile_Keyboard:InitializePlatform(...)
     ZO_TributeCardTile_Keyboard.InitializePlatform(self, ...)
-
-    -- TODO Tribute: Implement keyboard content for each element
 end
 
 function ZO_TributeTargetViewerCardTile_Keyboard:PostInitializePlatform(...)

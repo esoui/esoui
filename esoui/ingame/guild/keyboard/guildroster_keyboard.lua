@@ -223,7 +223,6 @@ function ZO_KeyboardGuildRosterManager:OnEffectivelyHidden()
 end
 
 function ZO_KeyboardGuildRosterManager:OnSearchTextChanged()
-    ZO_EditDefaultText_OnTextChanged(self.searchBox)
     self:RefreshFilters()
 end
 

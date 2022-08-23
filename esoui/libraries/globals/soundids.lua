@@ -12,7 +12,8 @@ SOUNDS = {
     -- Window Sounds
     DEFAULT_WINDOW_OPEN             = "Window_Open",
     DEFAULT_WINDOW_CLOSE            = "Window_Close",
-    LOOT_WINDOW_OPEN                = "LootRoll",
+    LOOT_WINDOW_OPEN                = "Loot_Open",
+    LOOT_WINDOW_CLOSE               = "Loot_Close",
     BACKPACK_WINDOW_OPEN            = "Backpack_Open",
     BACKPACK_WINDOW_CLOSE           = "Backpack_Close",
     CHARACTER_WINDOW_OPEN           = "Character_Open",
@@ -974,6 +975,10 @@ SOUNDS = {
     ANTIQUITIES_FANFARE_FRAGMENT_DISCOVERED_FINAL = "Antiquities_Digging_Fragments_Found_All",
     ANTIQUITIES_FANFARE_COMPLETED = "Antiquities_Digging_Antiquity_Completed",
     ANTIQUITIES_FANFARE_FAILURE = "Antiquities_Digging_Failure",
+
+    -- Set Collections
+    ITEM_SET_EXPANDED = "ItemSet_Expanded",
+    ITEM_SET_COLLAPSED = "ItemSet_Collapsed",
 
     -- Endeavors
     ENDEAVOR_COMPLETED = "Endeavor_Complete",

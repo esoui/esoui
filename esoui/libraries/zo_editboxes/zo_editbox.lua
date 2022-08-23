@@ -20,7 +20,7 @@ function ZO_EditBox:Initialize(control)
 end
 
 function ZO_EditBox:SetDefaultText(defaultText)
-    ZO_EditDefaultText_Initialize(self.edit, defaultText)
+    self.edit:SetDefaultText(defaultText)
 end
 
 function ZO_EditBox:SetEmptyText(emptyText)
@@ -57,8 +57,4 @@ end
 
 function ZO_EditBox:LoseFocus()
     return self.edit:LoseFocus()
-end
-
-function ZO_EditBox:OnTextChanged()
-    ZO_EditDefaultText_OnTextChanged(self.edit)
 end

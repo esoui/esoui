@@ -1687,8 +1687,7 @@ function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
 
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
-                        
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_CREATE_CHARACTER_GAMEPAD_ENTER_NAME))
+                        control.editBoxControl:SetDefaultText(GetString(SI_CREATE_CHARACTER_GAMEPAD_ENTER_NAME))
 
                         local validInput = parametricDialog.selectedName and parametricDialog.selectedName ~= ""
                         if validInput then

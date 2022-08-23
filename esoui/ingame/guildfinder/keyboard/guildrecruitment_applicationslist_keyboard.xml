@@ -79,11 +79,7 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="180"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_GUILD_APPLICATION_DECLINE_MESSAGE_LENGTH">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_GUILD_RECRUITMENT_APPLICATION_DECLINE_DEFAULT_RESPONSE))
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="MAX_GUILD_APPLICATION_DECLINE_MESSAGE_LENGTH" defaultText="SI_GUILD_RECRUITMENT_APPLICATION_DECLINE_DEFAULT_RESPONSE" />
                     </Controls>
                 </Backdrop>
 
@@ -96,11 +92,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Check" relativePoint="BOTTOMLEFT" offsetY="10" />
                     <Dimensions y="180"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_GUILD_BLACKLIST_MESSAGE_LENGTH">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_GUILD_RECRUITMENT_BLACKLIST_NOTE_DEFAULT_TEXT))
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="MAX_GUILD_BLACKLIST_MESSAGE_LENGTH" defaultText="SI_GUILD_RECRUITMENT_BLACKLIST_NOTE_DEFAULT_TEXT" />
                     </Controls>
                 </Backdrop>
 

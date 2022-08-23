@@ -90,15 +90,23 @@ function ZO_TributePileViewer_Manager:Initialize()
             self:FireCallbacks("ViewingPileChanged", self.viewingPileLocation)
         end
     end)
+
     EVENT_MANAGER:RegisterForEvent("TributePileViewer_Manager", EVENT_TRIBUTE_VIEW_PILE, function(_, boardLocation)
         local pileData = self:GetPileData(boardLocation)
         if pileData then
             self:SetViewingPile(boardLocation)
         end
     end)
+
     EVENT_MANAGER:RegisterForEvent("TributePileViewer_Manager", EVENT_TRIBUTE_CARD_STATE_FLAGS_CHANGED, function(_, cardInstanceId, stateFlags)
         if self:IsViewingPile() then
             self:FireCallbacks("CardStateFlagsChanged", cardInstanceId, stateFlags)
+        end
+    end)
+
+    EVENT_MANAGER:RegisterForEvent("TributePileViewer_Manager", EVENT_TRIBUTE_AGENT_DEFEAT_COST_CHANGED, function(_, cardInstanceId, delta, newDefeatCost, shouldPlayFx)
+        if self:IsViewingPile() then
+            self:FireCallbacks("AgentDefeatCostChanged", cardInstanceId, delta, newDefeatCost, shouldPlayFx)
         end
     end)
 

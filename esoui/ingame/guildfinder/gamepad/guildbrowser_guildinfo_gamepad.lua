@@ -331,15 +331,13 @@ function ZO_GuildBrowser_GuildInfo_Gamepad:InitializeSubmitDialog()
                         local dialog = data.dialog
 
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_APPLICATION_MESSAGE_LENGTH)
+                        control.editBoxControl:SetDefaultText(GetString(SI_GUILD_BROWSER_SUBMIT_APPLICATION_DIALOG_DEFAULT_EDIT_TEXT))
                         control.editBoxControl.textChangedCallback = function(control)
                                                                         self.applicationSubmissionText = control:GetText()
                                                                      end
                         data.control = control
 
                         if self.applicationSubmissionText == "" then
-                            local defaultEditString = GetString(SI_GUILD_BROWSER_SUBMIT_APPLICATION_DIALOG_DEFAULT_EDIT_TEXT)
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, defaultEditString)
-
                             control.resetFunction = function()
                                 control.editBoxControl.textChangedCallback = nil
                                 control.editBoxControl:SetText("")

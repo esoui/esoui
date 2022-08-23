@@ -18,13 +18,10 @@ end
 
 function ZO_TributePatronTile_Gamepad:InitializePlatform(...)
     ZO_ContextualActionsTile_Gamepad.InitializePlatform(self, ...)
-
-    -- TODO Tribute: Implement gamepad content for each element
 end
 
 function ZO_TributePatronTile_Gamepad:LayoutPlatform(patronData)
     ZO_ContextualActionsTile_Gamepad.LayoutPlatform(self, patronData)
-    -- TODO Tribute: Implement gamepad content for each element
 end
 
 -------------------------
@@ -40,13 +37,10 @@ end
 
 function ZO_TributePatronBookTile_Gamepad:InitializePlatform(...)
     ZO_TributePatronTile_Gamepad.InitializePlatform(self, ...)
-
-    -- TODO Tribute: Implement gamepad content for each element
 end
 
 function ZO_TributePatronBookTile_Gamepad:LayoutPlatform(patronData)
     ZO_TributePatronTile_Gamepad.LayoutPlatform(self, patronData)
-    -- TODO Tribute: Implement gamepad content for each element
     local isLocked = self.patronData:IsPatronLocked()
     ZO_SetDefaultIconSilhouette(self.iconTexture, isLocked)
 end
@@ -56,7 +50,14 @@ end
 function ZO_TributePatronBookTile_Gamepad:OnFocusChanged(isFocused)
     ZO_ContextualActionsTile.OnFocusChanged(self, isFocused)
     if isFocused then
-        GAMEPAD_TOOLTIPS:LayoutTributePatron(GAMEPAD_RIGHT_TOOLTIP, self.patronData)
+        local optionalArgs =
+        {
+            highlightActivePatronState = false,
+            suppressNotCollectibleWarning = false,
+            showAcquireHint = true,
+            showLore = true,
+        }
+        GAMEPAD_TOOLTIPS:LayoutTributePatron(GAMEPAD_RIGHT_TOOLTIP, self.patronData, optionalArgs)
     end
 end
 
@@ -66,7 +67,7 @@ end
 -- Tribute Patron Selection Tile --
 -----------------------------------
 ZO_TRIBUTE_PATRON_SELECTION_TILE_GAMEPAD_GLOW_ANIMATION_PROVIDER = ZO_ReversibleAnimationProvider:New("ShowOnMouseOverLabelAnimation")
-
+--TODO Tribute: Determine if any of this logic can be moved to shared
 ZO_TributePatronSelectionTile_Gamepad = ZO_Object.MultiSubclass(ZO_TributePatronTile_Gamepad, ZO_TributePatronSelectionTile_Shared)
 
 function ZO_TributePatronSelectionTile_Gamepad:New(...)
@@ -96,7 +97,6 @@ function ZO_TributePatronSelectionTile_Gamepad:PostInitializePlatform(...)
     self.keybindStripDescriptor.alignment = KEYBIND_STRIP_ALIGN_CENTER
 end
 
---TODO Tribute: Determine if any of this logic can be moved to shared
 function ZO_TributePatronSelectionTile_Gamepad:LayoutPlatform(patronData)
     ZO_TributePatronTile_Gamepad.LayoutPlatform(self, patronData)
     self.titleLabel:SetText(patronData:GetFormattedColorizedName())
@@ -118,7 +118,6 @@ function ZO_TributePatronSelectionTile_Gamepad:LayoutPlatform(patronData)
     self.iconTexture:SetDesaturation(iconDesaturation)
 end
 
---TODO Tribute: Determine if any of this logic can be moved to shared
 function ZO_TributePatronSelectionTile_Gamepad:RefreshGlow(isSelected, isDrafted, isLocked)
     local showGlow = isSelected or isDrafted
     if self.isGlowShowing ~= showGlow then
@@ -144,8 +143,15 @@ end
 function ZO_TributePatronSelectionTile_Gamepad:RefreshTooltip()
     ZO_TributePatronTooltip_Gamepad_Hide()
     if self:IsSelected() and ZO_TRIBUTE_PATRON_SELECTION_MANAGER:ShouldShowGamepadTooltips() then
-        local DEFAULT_OPTIONS = nil
-        ZO_TributePatronTooltip_Gamepad_Show(self.patronData, DEFAULT_OPTIONS, LEFT, self.control, RIGHT, 25, 0)
+        local DONT_HIGHLIGHT_ACTIVE_FAVOR_STATE = false
+        local ALLOW_NOT_COLLECTIBLE_WARNING = false
+        local optionalArgs =
+        {
+            highlightActivePatronState = hDONT_HIGHLIGHT_ACTIVE_FAVOR_STATE,
+            suppressNotCollectibleWarning = ALLOW_NOT_COLLECTIBLE_WARNING,
+            showAcquireHint = self.patronData:IsPatronLocked(),
+        }
+        ZO_TributePatronTooltip_Gamepad_Show(self.patronData, optionalArgs, LEFT, self.control, RIGHT, 25, 0)
     end
 end
 

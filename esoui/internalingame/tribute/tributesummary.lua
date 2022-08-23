@@ -422,6 +422,26 @@ function ZO_TributeSummary:InitializeStateMachine()
                 self.clubRankBar:SetValue(clubRank, 1, 1, NO_WRAP, ANIMATE_INSTANTLY)
             else
                 self.clubRankBar:SetValue(clubRank, currentClubExperienceForRank, maxClubExperienceForRank, NO_WRAP, ANIMATE_INSTANTLY)
+                if self.playerClubXP > 0 then
+                    currentClubExperienceForRank = currentClubExperienceForRank + self.playerClubXP
+                    if currentClubExperienceForRank > maxClubExperienceForRank then
+                        currentClubExperienceForRank = currentClubExperienceForRank - maxClubExperienceForRank
+                        clubRank = clubRank + 1
+                        local clubExperienceForNextRank = GetTributeClubRankExperienceRequirement(clubRank + 1)
+                        if clubExperienceForNextRank ~= 0 then
+                            maxClubExperienceForRank = clubExperienceForNextRank - GetTributeClubRankExperienceRequirement(clubRank)
+                        else
+                            maxClubExperienceForRank = 0
+                        end
+                        if maxClubExperienceForRank == 0 then
+                            self.clubRankBar:SetValue(clubRank, 1, 1, NO_WRAP, ANIMATE_FULLY)
+                        else
+                            self.clubRankBar:SetValue(clubRank, currentClubExperienceForRank, maxClubExperienceForRank, WRAP, ANIMATE_FULLY)
+                        end
+                    else
+                        self.clubRankBar:SetValue(clubRank, currentClubExperienceForRank, maxClubExperienceForRank, NO_WRAP, ANIMATE_FULLY)
+                    end
+                end
             end
             self.rewardsControl:SetHidden(false)
             self.clubRankContainer:SetHidden(false)
@@ -904,8 +924,6 @@ function ZO_TributeSummary:InitializeStateMachine()
         end)
     end
 
-    -- TODO Tribute: Add remaining states:
-
     -- Edges
     do
         fanfareStateMachine:AddEdgeAutoName("INACTIVE", "BEGIN")
@@ -1044,8 +1062,6 @@ function ZO_TributeSummary:InitializeStateMachine()
         end)
     end
 
-    -- TODO Tribute: Add remaining edges
-
     -- Triggers
     fanfareStateMachine:AddTrigger("BEGIN", ZO_StateMachine_TriggerStateCallback, END_OF_GAME_FANFARE_TRIGGER_COMMANDS.BEGIN)
     fanfareStateMachine:AddTrigger("NEXT", ZO_StateMachine_TriggerStateCallback, END_OF_GAME_FANFARE_TRIGGER_COMMANDS.NEXT)
@@ -1114,8 +1130,6 @@ function ZO_TributeSummary:InitializeStateMachine()
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "LEADERBOARD_BOUNCE_IN_TO_LEADERBOARD")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "LEADERBOARD_BOUNCE_IN_TO_LEADERBOARD_SKIP")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "LEADERBOARD_TO_QUIT")
-
-    -- TODO Tribute: Add remaining triggers
 
     -- Animation callbacks --
     local function OnCompleteFireTrigger(_, completedPlaying)
@@ -1637,6 +1651,21 @@ function ZO_TributeSummary_ClubRankProgressBar_Keyboard_OnMouseEnter(control)
     if not IsInGamepadPreferredMode() then
         local clubRank = GetTributePlayerClubRank()
         local currentClubExperienceForRank, maxClubExperienceForRank = GetTributePlayerExperienceInCurrentClubRank()
+        local newClubXP = TRIBUTE_SUMMARY.playerClubXP or 0
+        if newClubXP > 0 then
+            currentClubExperienceForRank = currentClubExperienceForRank + newClubXP
+            if currentClubExperienceForRank > maxClubExperienceForRank then
+                currentClubExperienceForRank = currentClubExperienceForRank - maxClubExperienceForRank
+                clubRank = clubRank + 1
+                local clubExperienceForNextRank = GetTributeClubRankExperienceRequirement(clubRank + 1)
+                if clubExperienceForNextRank ~= 0 then
+                    maxClubExperienceForRank = clubExperienceForNextRank - GetTributeClubRankExperienceRequirement(clubRank)
+                else
+                    maxClubExperienceForRank = 0
+                end
+            end
+        end
+
         InitializeTooltip(InformationTooltip, control, TOP, 0, 10)
         SetTooltipText(InformationTooltip, GetString("SI_TRIBUTECLUBRANK", clubRank))
         --If the maximum club experience for this rank is 0, then we are maxed out

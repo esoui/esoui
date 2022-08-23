@@ -895,8 +895,7 @@ function ZO_GuildBrowser_Gamepad:InitializeApplicationMessageDialog()
                                                                         dialog.currentText = control:GetText()
                                                                      end
                         data.control = control
-                        local defaultEditString = GetString(SI_GUILD_BROWSER_APPLICATIONS_MESSAGE_EMPTY_TEXT)
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, defaultEditString)
+                        control.editBoxControl:SetDefaultText(GetString(SI_GUILD_BROWSER_APPLICATIONS_MESSAGE_EMPTY_TEXT))
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_APPLICATION_MESSAGE_LENGTH)
                         control.editBoxControl:SetText(dialog.currentText)
                     end,

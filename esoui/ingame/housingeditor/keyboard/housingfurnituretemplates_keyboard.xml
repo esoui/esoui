@@ -179,11 +179,7 @@
         <Backdrop name="ZO_HousingFurniture_SearchBox" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
             <Dimensions x="240"/>
             <Controls>
-                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
-                    <OnInitialized>
-                        ZO_EditDefaultText_Initialize(self, GetString(SI_HOUSING_FURNITURE_TEXT_FILTER_DEFAULT_TEXT))
-                    </OnInitialized>
-                </EditBox>
+                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_HOUSING_FURNITURE_TEXT_FILTER_DEFAULT_TEXT" />
 
                 <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_HOUSING_BROWSER_SEARCH_FILTER_BY">
                     <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" />

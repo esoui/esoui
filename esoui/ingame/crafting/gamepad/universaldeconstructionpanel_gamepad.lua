@@ -552,7 +552,7 @@ function ZO_UniversalDeconstructionInventory_Gamepad:Refresh(data)
 end
 
 function ZO_UniversalDeconstructionInventory_Gamepad:GetCurrentFilter()
-    return self.universalDeconstructionPanel.currentFilterData
+    return self.universalDeconstructionPanel.currentFilterData or ZO_GetUniversalDeconstructionFilterType("all")
 end
 
 function ZO_UniversalDeconstructionInventory_Gamepad:GetCurrentFilterType()

@@ -2,49 +2,18 @@ GAMEPAD_GUILD_HOME_SCENE_NAME = "gamepad_guild_home"
 
 ZO_GamepadGuildHome = ZO_Gamepad_ParametricList_Screen:Subclass()
 
-function ZO_GamepadGuildHome:New(...)
-    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
-end
-
 function ZO_GamepadGuildHome:Initialize(control)
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
+    GAMEPAD_GUILD_HOME_SCENE = ZO_Scene:New(GAMEPAD_GUILD_HOME_SCENE_NAME, SCENE_MANAGER)
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_GUILD_HOME_SCENE)
 
     self.headerData = {}
-
-    GAMEPAD_GUILD_HOME_SCENE = ZO_Scene:New(GAMEPAD_GUILD_HOME_SCENE_NAME, SCENE_MANAGER)
-    GAMEPAD_GUILD_HOME_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:PerformDeferredInitializationHome()
-            self:PerformUpdate()
-            if self.activeScreenCallback then
-                self.activeScreenCallback()
-            end
-            ZO_GamepadGenericHeader_Activate(self.header)
-            
-            self.control:RegisterForEvent(EVENT_GUILD_DATA_LOADED, function() self:Update() end)
-            self.control:RegisterForEvent(EVENT_GUILD_MEMBER_REMOVED, function(_, guildId, displayName) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
-            self.control:RegisterForEvent(EVENT_GUILD_MEMBER_ADDED, function(_, guildId, displayName) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
-            self.control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, function(_, guildId, displayName, rankIndex) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
-            self.control:RegisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, guildId, displayName, oldStatus, newStatus) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
-
-        elseif newState == SCENE_HIDDEN then
-            ZO_GamepadGenericHeader_Deactivate(self.header)
-
-            self:RemoveCurrentPage()
-            
-            self.control:UnregisterForEvent(EVENT_GUILD_DATA_LOADED)
-            self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_REMOVED)
-            self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_ADDED)
-            self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED)
-            self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED)
-        end
-        
-        ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
-    end)
 end
 
 function ZO_GamepadGuildHome:PerformDeferredInitializationHome()
-    if self.deferredInitialized then return end
+    if self.deferredInitialized then 
+        return
+    end
     self.deferredInitialized = true
 
     self.itemList = self:GetMainList()
@@ -52,6 +21,34 @@ function ZO_GamepadGuildHome:PerformDeferredInitializationHome()
 
     self:InitializeHeader()
     self:InitializeFooter()
+end
+
+function ZO_GamepadGuildHome:OnStateChanged(oldState, newState)
+    if newState == SCENE_SHOWING then
+        self:PerformDeferredInitializationHome()
+        self:PerformUpdate()
+        if self.activeScreenCallback then
+            self.activeScreenCallback()
+        end
+        ZO_GamepadGenericHeader_Activate(self.header)
+            
+        self.control:RegisterForEvent(EVENT_GUILD_DATA_LOADED, function() self:Update() end)
+        self.control:RegisterForEvent(EVENT_GUILD_MEMBER_REMOVED, function(_, guildId, displayName) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
+        self.control:RegisterForEvent(EVENT_GUILD_MEMBER_ADDED, function(_, guildId, displayName) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
+        self.control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, function(_, guildId, displayName, rankIndex) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
+        self.control:RegisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, guildId, displayName, oldStatus, newStatus) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
+    elseif newState == SCENE_HIDDEN then
+        ZO_GamepadGenericHeader_Deactivate(self.header)
+
+        self:RemoveCurrentPage()
+            
+        self.control:UnregisterForEvent(EVENT_GUILD_DATA_LOADED)
+        self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_REMOVED)
+        self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_ADDED)
+        self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED)
+        self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED)
+    end
+    ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
 end
 
 function ZO_GamepadGuildHome:PerformUpdate()

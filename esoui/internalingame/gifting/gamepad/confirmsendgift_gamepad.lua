@@ -53,9 +53,7 @@ do
 
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
 
-                        local platform = ZO_GetPlatformAccountLabel()
-                        local instructions = zo_strformat(SI_REQUEST_DISPLAY_NAME_INSTRUCTIONS, platform)
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, instructions)
+                        control.editBoxControl:SetDefaultText(zo_strformat(SI_REQUEST_DISPLAY_NAME_INSTRUCTIONS, ZO_GetPlatformAccountLabel()))
                         if parametricDialog.data.recipientDisplayName then
                             control.editBoxControl:SetText(parametricDialog.data.recipientDisplayName)
                         end
@@ -77,8 +75,8 @@ do
                         control.highlight:SetHidden(not selected)
 
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
-
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GIFT_INVENTORY_REQUEST_GIFT_MESSAGE_TEXT))
+                        
+                        control.editBoxControl:SetDefaultText(GetString(SI_GIFT_INVENTORY_REQUEST_GIFT_MESSAGE_TEXT))
                         control.editBoxControl:SetMaxInputChars(GIFT_NOTE_MAX_LENGTH)
                         control.editBoxControl:SetText(parametricDialog.data.giftMessage)
                     end,

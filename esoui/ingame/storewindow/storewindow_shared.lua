@@ -234,7 +234,8 @@ function ZO_StoreManager_DoPreviewAction(action, storeEntryIndex)
         local collectibleId = GetStoreCollectibleInfo(storeEntryIndex)
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
         if collectibleData  then
-            if collectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE then
+            local collectibleCategory = collectibleData:GetCategoryType()
+            if collectibleCategory == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE then
                 if action == ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE then
                     return true
                 elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then
@@ -245,7 +246,7 @@ function ZO_StoreManager_DoPreviewAction(action, storeEntryIndex)
                     AddOutfitSlotPreviewElementToPreviewCollection(outfitSlot, collectibleId, ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX, NO_DYE, NO_DYE, NO_DYE)
                     ApplyChangesToPreviewCollectionShown()
                 end
-            elseif GetCollectibleFurnitureDataId(collectibleId) ~= 0 then
+            elseif CanCollectibleBePreviewed(collectibleId) then
                 if action == ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE then
                     return true
                 elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then

@@ -1080,3 +1080,25 @@ ZO_GenerateCommaSeparatedList = ZO_GenerateCommaSeparatedListWithAnd
 --if you happen to have XML code that uses <MouseButton button="4" />, that should be changed to <MouseButton button="BUTTON_4" />
 MOUSE_BUTTON_INDEX_4 = MOUSE_BUTTON_INDEX_BUTTON_4
 MOUSE_BUTTON_INDEX_5 = MOUSE_BUTTON_INDEX_BUTTON_5
+
+-- Loot sound
+-- PlayLootWindowSound is not a direct equivalent to PlayMonsterLootSound, as it adds functionality for non-monster loot. We've deemed this acceptable due to low likelihood of negative impact.
+ZO_PlayMonsterLootSound = ZO_PlayLootWindowSound
+
+-- EditBox default text has moved to the C++ control
+function ZO_EditDefaultText_OnTextChanged() end
+
+function ZO_EditDefaultText_Initialize(control, defaultText)
+    control:SetDefaultText(defaultText)
+end
+
+function ZO_EditDefaultText_Disable(control)
+    control:SetDefaultText("")
+end
+
+--Lore Library Gamepad Refactor
+ZO_Gamepad_BookSet_OnInitialize = ZO_LoreLibraryBookSet_Gamepad_OnInitialize
+ZO_Gamepad_BookSet = ZO_LoreLibraryBookSetTopLevel_Gamepad
+ZO_Gamepad_LoreLibrary_OnInitialize = ZO_LoreLibrary_Gamepad_OnInitialize
+BOOK_SET_GAMEPAD = LORE_LIBRARY_BOOK_SET_GAMEPAD
+BOOKSET_SCENE_GAMEPAD = LORE_LIBRARY_BOOK_SET_SCENE_GAMEPAD

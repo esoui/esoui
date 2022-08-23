@@ -12,11 +12,7 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="180"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_EMAIL_LENGTH">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_ENTRY_DEFAULT))
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="MAX_EMAIL_LENGTH" defaultText="SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_ENTRY_DEFAULT" />
                     </Controls>
                 </Backdrop>
 
@@ -30,11 +26,7 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)ConfirmText" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="180"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_EMAIL_LENGTH">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self)
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="MAX_EMAIL_LENGTH" />
                     </Controls>
                 </Backdrop>
 

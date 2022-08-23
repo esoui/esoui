@@ -4462,9 +4462,41 @@ ESO_Dialogs["GUILD_FINDER_SAVE_FROM_RECRUITMENT_STATUS_UNLISTED"] =
 
     buttons =
     {
-        [1] =
         {
             text = SI_DIALOG_CLOSE,
         },
+    },
+}
+
+ESO_Dialogs["CONFIRM_CLEAR_UNUSED_KEYBINDS"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_CONFIRM_CLEAR_UNUSED_KEYBINDS_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_CONFIRM_CLEAR_UNUSED_KEYBINDS_BODY,
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                ClearBindsForUnknownActions()
+                ADD_ON_MANAGER:RefreshSavedKeybindsLabel()
+            end,
+        },
+        {
+            text = SI_DIALOG_DECLINE,
+        }
     },
 }

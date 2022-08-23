@@ -193,16 +193,25 @@ function ZO_TributePatronBook_Shared:SetupDockCards()
 end
 
 function ZO_TributePatronBook_Shared:AddDescriptionEntry()
-    local loreDescription = GetTributePatronLoreDescription(self.patronId)
-    local playStyleDescription = GetTributePatronPlayStyleDescription(self.patronId)
-    local acquireHint = GetTributePatronAcquireHint(self.patronId)
+    local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(self.patronId)
+    local loreDescription = patronData:GetLoreDescription()
+    local playStyleDescription = patronData:GetTributePatronPlayStyleDescription()
+    local acquireHint = patronData:GetTributePatronAcquireHint()
 
     local displayText = loreDescription
-    if playStyleDescription ~= "" then
-        displayText = string.format("%s\n\n%s", displayText, playStyleDescription)
+    if  playStyleDescription ~= "" then
+        if displayText ~= "" then
+            displayText = string.format("%s\n\n%s", displayText, playStyleDescription)
+        else
+            displayText = playStyleDescription
+        end
     end
-    if acquireHint ~= "" then
-        displayText = string.format("%s\n\n%s", displayText, acquireHint)
+    if patronData:IsPatronLocked() and acquireHint ~= "" then
+        if displayText ~= "" then
+            displayText = string.format("%s\n\n%s", displayText, acquireHint)
+        else
+            displayText = acquireHint
+        end
     end
 
     self.setupLabel:SetText(displayText)

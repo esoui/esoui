@@ -275,6 +275,14 @@ function ZO_TributePatronData:GetLoreDescription()
     return GetTributePatronLoreDescription(self.patronId)
 end
 
+function ZO_TributePatronData:GetTributePatronPlayStyleDescription()
+    return GetTributePatronPlayStyleDescription(self.patronId)
+end
+
+function ZO_TributePatronData:GetTributePatronAcquireHint()
+    return GetTributePatronAcquireHint(self.patronId)
+end
+
 function ZO_TributePatronData:GetUpgradeHintTextByIndex(cardIndex)
     return GetTributeCardUpgradeHintText(self.patronId, cardIndex)
 end
@@ -326,7 +334,9 @@ end
 
 function ZO_TributePatronData:SetSearchResultsVersion(searchResultsVersion)
     self.searchResultsVersion = searchResultsVersion
-    self.tributePatronCategoryData:SetSearchResultsVersion(searchResultsVersion)
+    if self.tributePatronCategoryData then
+        self.tributePatronCategoryData:SetSearchResultsVersion(searchResultsVersion)
+    end
 end
 
 function ZO_TributePatronData:IsSearchResult()

@@ -655,7 +655,7 @@ function ZO_Armory_Gamepad:InitializeBuildOptionsDialog()
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
 
                         if self.selectedName == "" then
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_ARMORY_BUILD_DIALOG_NAME_LABEL))
+                            control.editBoxControl:SetDefaultText(GetString(SI_ARMORY_BUILD_DIALOG_NAME_LABEL))
                         end
                         control.editBoxControl:SetMaxInputChars(MAX_ARMORY_BUILD_NAME_LENGTH)
                         control.editBoxControl:SetText(self.selectedName)

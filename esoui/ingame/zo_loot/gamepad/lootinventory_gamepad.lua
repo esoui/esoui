@@ -44,7 +44,7 @@ end
 
 function ZO_LootInventory_Gamepad:OnShow()
     local OPEN_LOOT_WINDOW = false
-    ZO_PlayMonsterLootSound(OPEN_LOOT_WINDOW)
+    ZO_PlayLootWindowSound(OPEN_LOOT_WINDOW)
 end
 
 function ZO_LootInventory_Gamepad:Hide()

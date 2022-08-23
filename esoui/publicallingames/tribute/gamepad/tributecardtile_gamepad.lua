@@ -23,15 +23,12 @@ function ZO_TributeCardTile_Gamepad:InitializePlatform(...)
     self.cardOffsetX = TRIBUTE_CARD_DEFAULT_OFFSET_X
     self.cardOffsetY = TRIBUTE_CARD_DEFAULT_OFFSET_Y
     self.cardScale = TRIBUTE_CARD_DEFAULT_SCALE
-    -- TODO Tribute: Implement gamepad content for each element
 end
 
 function ZO_TributeCardTile_Gamepad:LayoutPlatform(data)
     ZO_Tile_Gamepad.LayoutPlatform(self, data)
     self.cardData.control:SetAnchor(CENTER, nil, CENTER, self.cardOffsetX, self.cardOffsetY)
     self.cardData.control:SetScale(self.cardScale)
-
-    -- TODO Tribute: Implement gamepad content for each element
 end
 
 -- Begin ZO_Tile_Gamepad Overrides --
@@ -58,7 +55,6 @@ end
 function ZO_TributePatronBookCardTile_Gamepad:InitializePlatform(...)
     ZO_TributeCardTile_Gamepad.InitializePlatform(self, ...)
 
-    -- TODO Tribute: Implement gamepad content for each element
     self.upgradeToIcon = TRIBUTE_CARD_UPGRADE_TO_ICON
     self.upgradedIcon = TRIBUTE_CARD_UPGRADED_ICON
     self.cardOffsetY = -20
@@ -89,8 +85,6 @@ function ZO_TributePatronBookCardTile_Gamepad:LayoutPlatform(data)
     self.lockOverlay:ClearAnchors()
     self.lockOverlay:SetAnchor(CENTER, nil, CENTER, self.cardOffsetX, self.cardOffsetY)
     self.lockOverlay:SetScale(0.65)
-
-    -- TODO Tribute: Implement gamepad content for each element
 end
 
 -- Begin ZO_Tile_Gamepad Overrides --
@@ -123,8 +117,6 @@ end
 
 function ZO_TributePileViewerCardTile_Gamepad:InitializePlatform(...)
     ZO_TributeCardTile_Gamepad.InitializePlatform(self, ...)
-
-    -- TODO Tribute: Implement gamepad content for each element
 end
 
 function ZO_TributePileViewerCardTile_Gamepad:PostInitializePlatform(...)
@@ -158,8 +150,6 @@ end
 
 function ZO_TributeTargetViewerCardTile_Gamepad:InitializePlatform(...)
     ZO_TributeCardTile_Gamepad.InitializePlatform(self, ...)
-
-    -- TODO Tribute: Implement gamepad content for each element
 end
 
 function ZO_TributeTargetViewerCardTile_Gamepad:PostInitializePlatform(...)

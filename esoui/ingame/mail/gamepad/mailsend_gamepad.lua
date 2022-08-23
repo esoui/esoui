@@ -794,6 +794,6 @@ end
 -- XML Handlers
 
 function ZO_MailView_Initialize_Send_Fields_Gamepad(control)
-    ZO_EditDefaultText_Initialize(control.addressEdit.edit, GetDefaultAddresseeText())
-    ZO_EditDefaultText_Initialize(control.subjectEdit.edit, GetString(SI_MAIL_SUBJECT_DEFAULT_TEXT))
+    control.addressEdit.edit:SetDefaultText(GetDefaultAddresseeText())
+    control.subjectEdit.edit:SetDefaultText(GetString(SI_MAIL_SUBJECT_DEFAULT_TEXT))
 end

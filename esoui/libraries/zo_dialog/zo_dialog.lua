@@ -626,9 +626,9 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 if type(defaultText) == "number" then
                     defaultText = GetString(defaultText)
                 end
-                ZO_EditDefaultText_Initialize(editControl, defaultText)
+                editControl:SetDefaultText(defaultText)
             else
-                ZO_EditDefaultText_Disable(editControl)
+                editControl:SetDefaultText("")
             end
 
             if textParams.initialEditText then
@@ -1326,8 +1326,6 @@ function ZO_DialogButton_OnInitialized(self)
 end
 
 function ZO_TwoButtonDialogEditBox_OnTextChanged(control)
-    ZO_EditDefaultText_OnTextChanged(control)
-
     if control.instructions then
         if control.validator then
             local DEFAULT_ANCHOR_CONTROL = nil

@@ -16,12 +16,10 @@ function ZO_TributePatronTile_Keyboard:InitializePlatform(...)
     ZO_ContextualActionsTile_Keyboard.InitializePlatform(self, ...)
 
     self.titleLabel = self.control:GetNamedChild("Title")
-    -- TODO Tribute: Implement keyboard content for each element
 end
 
 function ZO_TributePatronTile_Keyboard:LayoutPlatform(patronData)
     self.titleLabel:SetText(patronData:GetFormattedColorizedName())
-    -- TODO Tribute: Implement keyboard content for each element
 end
 
 -------------------------
@@ -55,9 +53,14 @@ end
 function ZO_TributePatronBookTile_Keyboard:OnFocusChanged(isFocused)
     ZO_ContextualActionsTile.OnFocusChanged(self, isFocused)
     if isFocused then
+        local DONT_HIGHLIGHT_ACTIVE_FAVOR_STATE = false
+        local ALLOW_NOT_COLLECTIBLE_WARNING = false
+        local SHOW_ACQUIRE_HINT = true
+        local SHOW_LORE = true
+
         ClearTooltip(ItemTooltip)
         InitializeTooltip(ItemTooltip, self.control, RIGHT, 0, 0, LEFT)
-        ItemTooltip:SetTributePatron(self.patronData:GetId())
+        ItemTooltip:SetTributePatron(self.patronData:GetId(), DONT_HIGHLIGHT_ACTIVE_FAVOR_STATE, ALLOW_NOT_COLLECTIBLE_WARNING, SHOW_ACQUIRE_HINT, SHOW_LORE)
     else
         ClearTooltip(ItemTooltip)
     end
@@ -138,9 +141,13 @@ end
 function ZO_TributePatronSelectionTile_Keyboard:OnFocusChanged(isFocused)
     ZO_ContextualActionsTile.OnFocusChanged(self, isFocused)
     if isFocused then
+        local DONT_HIGHLIGHT_ACTIVE_FAVOR_STATE = false
+        local ALLOW_NOT_COLLECTIBLE_WARNING = false
+        local showAquireHintIfPatronIsLocked = self.patronData:IsPatronLocked()
+
         ClearTooltip(ItemTooltip)
         InitializeTooltip(ItemTooltip, self.control, LEFT, 0, 0, RIGHT)
-        ItemTooltip:SetTributePatron(self.patronData:GetId())
+        ItemTooltip:SetTributePatron(self.patronData:GetId(), DONT_HIGHLIGHT_ACTIVE_FAVOR_STATE, ALLOW_NOT_COLLECTIBLE_WARNING, showAquireHintIfPatronIsLocked)
     else
         ClearTooltip(ItemTooltip)
     end

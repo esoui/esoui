@@ -342,13 +342,6 @@
             </OnInitialized>
         </Control>
 
-        <Control name="ZO_NotificationsActivityReviewRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
-            <OnInitialized>
-                self.acceptText = GetString(SI_NOTIFICATIONS_REVIEW_ACTIVITY_ACTION)
-                self.declineText = GetString(SI_NOTIFICATIONS_REQUEST_DECLINE)
-            </OnInitialized>
-        </Control>
-
         <TopLevelControl name="ZO_Notifications" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_Notifications_OnInitialized(self)

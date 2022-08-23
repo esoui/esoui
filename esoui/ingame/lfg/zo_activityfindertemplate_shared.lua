@@ -43,16 +43,17 @@ function ZO_ActivityFinderTemplate_Shared:InitializeFragment()
 end
 
 function ZO_ActivityFinderTemplate_Shared:RegisterEvents()
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateLocationData", function()
-        self:RefreshView()
-    end)
+    local function RefreshFilters()
+        self:RefreshFilters()
+    end
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateLocationData", RefreshFilters)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", function(status) self:OnActivityFinderStatusUpdate(status) end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnHandleLFMPromptResponse", function() self:OnHandleLFMPromptResponse() end)
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", function() self:RefreshFilters() end)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", RefreshFilters)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnCooldownsUpdate", function() self:OnCooldownsUpdate() end)
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnCurrentCampaignChanged", function()
-        self:RefreshFilters()
-    end)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnCurrentCampaignChanged", RefreshFilters)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnHolidaysChanged", RefreshFilters)
+    
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnTributeClubDataInitialized", function() self:OnTributeClubDataInitialized() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnTributeCampaignDataInitialized", function() self:OnTributeCampaignDataInitialized() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnTributeClubRankDataChanged", function() self:OnTributeClubRankDataChanged() end)
@@ -216,7 +217,7 @@ function ZO_ActivityFinderTemplate_Shared:RefreshTributeSeasonData(forceHide)
             self.tributeSeasonProgressControl:SetHidden(false)
 
             local formattedTime
-            local remainingTimeS = GetActiveTributeCampaignTimeRemainingMs() * 0.001
+            local remainingTimeS = GetActiveTributeCampaignTimeRemainingS()
             if remainingTimeS <= ZO_ONE_MINUTE_IN_SECONDS then
                 formattedTime = GetString(SI_TRIBUTE_CAMPAIGN_LESS_THAN_ONE_MINUTE)
             else

@@ -48,7 +48,7 @@ function ZO_Loot_Shared:Initialize()
     local function CloseLootWindow() -- Called when C++ is telling us to close the window.  Don't call CloseLoot.
         self:Hide()
         local CLOSE_LOOT_WINDOW = true
-        ZO_PlayMonsterLootSound(CLOSE_LOOT_WINDOW)
+        ZO_PlayLootWindowSound(CLOSE_LOOT_WINDOW)
     end
 
     local function LootItemFailed(eventCode, reason, itemLink)
@@ -198,11 +198,17 @@ end
 --[[ Globals ]]--
 LOOT_SHARED = ZO_Loot_Shared:New()
 
-function ZO_PlayMonsterLootSound(isOpen)
+function ZO_PlayLootWindowSound(isOpen)
     local isMonster = IsGameCameraInteractableUnitMonster()
 
     if isMonster then
         local audioModelType, audioModelMaterial, audioModelSize = GetGameCameraInteractableUnitAudioInfo()
         PlayLootSound(audioModelType, isOpen)
+    else
+        if isOpen then
+            PlaySound(SOUNDS.LOOT_WINDOW_CLOSE)
+        else
+            PlaySound(SOUNDS.LOOT_WINDOW_OPEN)
+        end
     end
 end

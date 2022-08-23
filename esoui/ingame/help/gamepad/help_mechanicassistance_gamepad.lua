@@ -174,8 +174,6 @@ function ZO_Help_MechanicAssistance_Gamepad:SetupList(list)
     end
 
     local function OnDescriptionTextChanged(control)
-        ZO_EditDefaultText_OnTextChanged(control)
-
         self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DESCRIPTION, control:GetText())
     end
 
@@ -188,8 +186,8 @@ function ZO_Help_MechanicAssistance_Gamepad:SetupList(list)
 
         local savedText = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DESCRIPTION)
         editBox:SetText(savedText or "")
-
-        ZO_EditDefaultText_Initialize(editBox, GetString(SI_CUSTOMER_SERVICE_DEFAULT_DESCRIPTION_TEXT_GENERIC))
+        
+        editBox:SetDefaultText(GetString(SI_CUSTOMER_SERVICE_DEFAULT_DESCRIPTION_TEXT_GENERIC))
         control.highlight:SetHidden(not selected)
 
         self.descriptionEditBox = editBox

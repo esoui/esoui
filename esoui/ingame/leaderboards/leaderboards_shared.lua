@@ -86,11 +86,7 @@ function ZO_LeaderboardsListManager_Shared:SetupDataTable(dataTable)
         --This is the overall rank for the specific type of leaderboard you've requested.
         --The rank that is ultimately shown might be reshuffled based on the provided filters.
         dataTable.trueRank = rank
-        if points == 0 and self.leaderboardRankType ~= LEADERBOARD_TYPE_TRIBUTE then
-            dataTable.points = ""
-        else
-            dataTable.points = self.pointsFormatFunction and self.pointsFormatFunction(points) or points
-        end
+        dataTable.points = self.pointsFormatFunction and self.pointsFormatFunction(points) or points
     end
 end
 

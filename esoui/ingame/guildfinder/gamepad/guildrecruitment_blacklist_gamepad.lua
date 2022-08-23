@@ -146,11 +146,9 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:InitializeBlacklistPlayerDialog()
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
 
                         local platform = ZO_GetPlatformAccountLabel()
-                        local instructions = zo_strformat(SI_REQUEST_DISPLAY_NAME_INSTRUCTIONS, platform)
+                        control.editBoxControl:SetDefaultText(zo_strformat(SI_REQUEST_DISPLAY_NAME_INSTRUCTIONS, platform))
                         if parametricDialog.data.name then
                             control.editBoxControl:SetText(parametricDialog.data.name)
-                        else
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, instructions)
                         end
                     end,
                     callback = function(dialog)
@@ -172,12 +170,11 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:InitializeBlacklistPlayerDialog()
                         control.highlight:SetHidden(not selected)
 
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_BLACKLIST_MESSAGE_LENGTH)
+                        control.editBoxControl:SetDefaultText(GetString(SI_GUILD_RECRUITMENT_BLACKLIST_DEFAULT_NOTE_TEXT))
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
 
                         if parametricDialog.data.note then
                             control.editBoxControl:SetText(parametricDialog.data.note)
-                        else
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GUILD_RECRUITMENT_BLACKLIST_DEFAULT_NOTE_TEXT))
                         end
                     end,
                     callback = function(dialog)

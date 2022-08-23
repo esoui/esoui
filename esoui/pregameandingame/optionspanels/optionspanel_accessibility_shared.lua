@@ -21,6 +21,9 @@ local ZO_Panel_Accessibility_ControlData =
                 [false] = "OnAccessibilityModeDisabled",
             },
             gamepadHasEnabledDependencies = true,
+            exists = function()
+                return not IsConsoleUI()
+            end
         },
         -- Options_Accessibility_VoiceChatAccessibility
         [ACCESSIBILITY_SETTING_VOICE_CHAT_ACCESSIBILITY] =

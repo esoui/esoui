@@ -54,7 +54,6 @@ ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE =
     [NOTIFICATIONS_GUILD_NEW_APPLICATIONS] = "ZO_GamepadNotificationsGuildNewApplicationsRow",
     [NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA] = "ZO_GamepadNotificationsMarketProductUnlockedRow",
     [NOTIFICATIONS_POINTS_RESET_DATA] = "ZO_GamepadNotificationsPointsResetRow",
-    [NOTIFICATIONS_ACTIVITY_REVIEW_DATA] = "ZO_GamepadNotificationsActivityReviewRow",
 }
 
 -- Provider Overrides
@@ -539,7 +538,6 @@ function ZO_GamepadNotificationManager:SetupList(list)
         ["ZO_GamepadNotificationsGuildNewApplicationsRow"] = SetupRequest,
         ["ZO_GamepadNotificationsMarketProductUnlockedRow"] = SetupRequest,
         ["ZO_GamepadNotificationsPointsResetRow"] = SetupRequest,
-        ["ZO_GamepadNotificationsActivityReviewRow"] = SetupRequest,
     }
 
     for template, setupCallback in pairs(TEMPLATE_TO_SETUP) do

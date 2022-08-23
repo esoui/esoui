@@ -16,7 +16,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ToLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
                     <Dimensions x="340"/>
                     <Controls>
-                        <EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText"/>
+                        <EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop"/>
                     </Controls>
                 </Backdrop>
                 <Label name="$(parent)SubjectLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MAIL_SEND_SUBJECT_LABEL">
@@ -26,7 +26,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
                     <Dimensions x="340"/>
                     <Controls>
-                        <EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" />
+                        <EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop" />
                     </Controls>
                 </Backdrop>
                 <Backdrop name="$(parent)Body" inherits="ZO_MultiLineEditBackdrop_Keyboard">

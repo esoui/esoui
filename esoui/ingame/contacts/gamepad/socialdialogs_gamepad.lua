@@ -157,7 +157,7 @@ function ZO_GamepadSocialDialogs:InitializeEditNoteDialog()
                         control.highlight:SetHidden(not selected)
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
                         control.editBoxControl:SetMaxInputChars(254)
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_EDIT_NOTE_DEFAULT_TEXT))
+                        control.editBoxControl:SetDefaultText(GetString(SI_EDIT_NOTE_DEFAULT_TEXT))
                         if parametricDialog.data.note then
                             control.editBoxControl:SetText(parametricDialog.data.note)
                         end
@@ -245,10 +245,9 @@ function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
                     userIdControl = control
                     control.editBoxControl.textChangedCallback = data.textChangedCallback
                     control.editBoxControl.isInScreen = true
+                    control.editBoxControl:SetDefaultText(ZO_GetInviteInstructions())
                     data.control = control
-
                     if nameText == "" then
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, ZO_GetInviteInstructions())
                         control.resetFunction = function()
                             control.editBoxControl.textChangedCallback = nil
                             if not control.editBoxControl.isInScreen then
@@ -297,11 +296,11 @@ function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
 
                     messageControl = control
                     control.editBoxControl.textChangedCallback = data.textChangedCallback
+                    control.editBoxControl:SetDefaultText(GetString(SI_REQUEST_FRIEND_MESSAGE_DEFAULT_TEXT))
                     control.editBoxControl.isInScreen = true
                     data.control = control
 
                     if noteText == "" then
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_REQUEST_FRIEND_MESSAGE_DEFAULT_TEXT))
                         control.resetFunction = function()
                             control.editBoxControl.textChangedCallback = nil
                             if not control.editBoxControl.isInScreen then
@@ -405,6 +404,7 @@ function ZO_GamepadSocialDialogs:InitializeAddIgnoreDialog()
                         control.highlight:SetHidden(not selected)
 
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
+                        control.editBoxControl:SetDefaultText(ZO_GetInviteInstructions())
                         data.control = control
 
                         if parametricDialog.data and data.nameField then
@@ -413,8 +413,6 @@ function ZO_GamepadSocialDialogs:InitializeAddIgnoreDialog()
                             local validInput = IsValidInput(nameText)
                             if validInput then
                                 control.editBoxControl:SetText(nameText)
-                            else
-                                ZO_EditDefaultText_Initialize(control.editBoxControl, ZO_GetInviteInstructions())
                             end
                         end
                     end,
@@ -502,13 +500,12 @@ function ZO_GamepadSocialDialogs:InitializeInviteMemberDialog()
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.highlight:SetHidden(not selected)
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
+                        control.editBoxControl:SetDefaultText(ZO_GetInviteInstructions())
                         data.control = control
 
                         local validInput = IsValidInput(nameText)
                         if validInput then
                             control.editBoxControl:SetText(nameText)
-                        else
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, ZO_GetInviteInstructions())
                         end
                     end,
                     callback = function(dialog)
@@ -597,13 +594,12 @@ function ZO_GamepadSocialDialogs:InitializeGroupInviteDialog()
                         control.highlight:SetHidden(not selected)
 
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
+                        control.editBoxControl:SetDefaultText(ZO_GetInviteInstructions())
                         data.control = control
 
                         local validInput = IsValidInput(nameText)
                         if validInput then
                             control.editBoxControl:SetText(nameText)
-                        else
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, ZO_GetInviteInstructions())
                         end
                     end,
                     callback = function(dialog)

@@ -1169,12 +1169,6 @@ AlertHandlers[EVENT_CLIENT_INTERACT_RESULT] = function(result, interactTargetNam
     end
 end
 
-if GetUIPlatform() == UI_PLATFORM_PS5 then
-    AlertHandlers[EVENT_CONSOLE_ACTIVITY_REVIEW_AVAILABLE] = function()
-        return ALERT, GetString(SI_NOTIFICATIONS_REVIEW_ACTIVITY_ALERT)
-    end
-end
-
 function ZO_AlertText_GetHandlers()
     return AlertHandlers
 end

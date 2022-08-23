@@ -266,7 +266,6 @@ function ZO_KeyboardFriendsListManager:FriendsListRow_OnMouseUp(control, button,
 end
 
 function ZO_KeyboardFriendsListManager:OnSearchTextChanged()
-    ZO_EditDefaultText_OnTextChanged(self.searchBox)
     self:RefreshFilters()
 end
 

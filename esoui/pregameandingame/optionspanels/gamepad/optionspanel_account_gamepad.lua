@@ -64,7 +64,7 @@ function ZO_OptionsGamepad_EmailEditor:Initialize(control)
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
                         data.control = control
  
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_ENTRY_DEFAULT))
+                        control.editBoxControl:SetDefaultText(GetString(SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_ENTRY_DEFAULT))
                         control.editBoxControl:SetMaxInputChars(MAX_EMAIL_LENGTH)
                         if self.enteredText then
                             control.editBoxControl:SetText(self.enteredText)

@@ -1,6 +1,7 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_BindKeyDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <ResizeToFitPadding width="50" height="33" />
             <Anchor point="TOP" relativeTo="GuiRoot" relativePoint="CENTER" offsetY="-230"/>
             <OnInitialized>
                 self.instructionsLabel = self:GetNamedChild("Instructions")
@@ -9,8 +10,12 @@
                 self.bindBox = self:GetNamedChild("BindBox")
                 self.currentBindLabel = self:GetNamedChild("CurrentBind")
 
-                self.bindButton = self:GetNamedChild("Bind")
-                self.unbindButton = self:GetNamedChild("Unbind")
+                local keybindContainer = self:GetNamedChild("Keybinds")
+
+                self.bindButton = keybindContainer:GetNamedChild("Bind")
+                self.unbindButton = keybindContainer:GetNamedChild("Unbind")
+                self.cancelButton = keybindContainer:GetNamedChild("Cancel")
+                self.setDefaultButton = keybindContainer:GetNamedChild("SetDefault")
 
                 ZO_BindKeyDialog_OnInitialized(self)
             </OnInitialized>
@@ -63,12 +68,26 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)OverwriteWarning1" relativePoint="BOTTOMRIGHT" />
                 </Label>
 
-                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
-                <Control name="$(parent)Unbind" inherits="ZO_CustomDialogButton"/>
-                <Control name="$(parent)Bind" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Keybinds" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)OverwriteWarning2" relativePoint="BOTTOM" offsetY="10" />
+                    <Controls>
+                        <Control name="$(parent)SetDefault" inherits="ZO_DialogButton">
+                            <Anchor point="LEFT" />
+                        </Control>
+                        <Control name="$(parent)Bind" inherits="ZO_DialogButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)SetDefault" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                        <Control name="$(parent)Unbind" inherits="ZO_DialogButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)Bind" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                        <Control name="$(parent)Cancel" inherits="ZO_DialogButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)Unbind" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
-        
+
         <Button name="ZO_KeybindingListButton" virtual="true" inherits="ZO_DefaultButton">
             <Dimensions x="300" y="35"/>
             <OnMouseEnter>
@@ -80,8 +99,13 @@
             <OnClicked>
                 ZO_KeybindingListButton_OnClicked(self)
             </OnClicked>
+            <Controls>
+                <Label name="$(parent)Indicator" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" text="*" hidden="true">
+                    <Anchor point="LEFT" offsetX="20" />
+                </Label>
+            </Controls>
         </Button>
-        
+
         <Label name="ZO_KeybindingListHeader" virtual="true" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER"/>
 
         <Label name="ZO_KeybindingListLayerHeader" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" verticalAlignment="BOTTOM" virtual="true">
@@ -154,7 +178,7 @@
                 </Button>
             </Controls>
         </Control>
-        
+
         <TopLevelControl name="ZO_Keybindings" hidden="true">
             <Dimensions x="1665" y="750" />
             <Anchor point="LEFT" relativeTo="GuiRoot" offsetX="230" offsetY="20"/>
@@ -162,7 +186,7 @@
             <OnInitialized>
                 ZO_Keybindings_OnInitialize(self)
             </OnInitialized>
-          
+
             <Controls>
                 <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
                     <Dimensions x="1667" y="1024" />
@@ -172,12 +196,12 @@
                     <Dimensions x="64" y="1024" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
                 </Texture>
-                
+
                 <Label name="$(parent)PrimaryKeyHeader" inherits="ZO_KeybindingListHeader" text="SI_KEYBINDINGS_PRIMARY_HEADER">
                     <Dimensions x="306" y="0" />
                     <Anchor point="TOPLEFT" offsetX="345" offsetY="38" />
                 </Label>
-                
+
                 <Label name="$(parent)SecondaryKeyHeader" inherits="ZO_KeybindingListHeader" text="SI_KEYBINDINGS_SECONDARY_HEADER">
                     <Dimensions x="306" y="0" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryKeyHeader" relativePoint="TOPRIGHT" />
@@ -214,6 +238,10 @@
 
                 <Label name="$(parent)CurrentKeyboardLayout" inherits="ZO_KeybindingListHeader" font="ZoFontDialogKeybindDescription">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                </Label>
+
+                <Label name="$(parent)CurrentBindingsSaved" inherits="ZO_KeybindingListHeader" font="ZoFontDialogKeybindDescription">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CurrentKeyboardLayout" relativePoint="TOPLEFT" offsetX="-15" />
                 </Label>
             </Controls>
          </TopLevelControl>

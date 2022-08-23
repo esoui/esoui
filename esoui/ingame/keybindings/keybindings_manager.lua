@@ -89,6 +89,49 @@ function KeybindingsManager:IsBindableKey(key)
     return false
 end
 
+function KeybindingsManager:GetNumChangedSavedKeybindings(layerIndex, categoryIndex, actionIndex, bindingIndex, pendingKey, pendingMod1, pendingMod2, pendingMod3, pendingMod4)
+    local numChangedSavedKeybinds = 0
+
+    -- first check how changing the current keybind to the pending keybind will change what's saved
+    local currentKey, currentMod1, currentMod2, currentMod3, currentMod4 = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, bindingIndex)
+    local defaultKey, defaultMod1, defaultMod2, defaultMod3, defaultMod4 = GetActionDefaultBindingInfo(layerIndex, categoryIndex, actionIndex, bindingIndex)
+
+    local isCurrentDefault = currentKey == defaultKey and currentMod1 == defaultMod1 and currentMod2 == defaultMod2 and currentMod3 == defaultMod3 and currentMod4 == defaultMod4
+    local isPendingDefault = pendingKey == defaultKey and pendingMod1 == defaultMod1 and pendingMod2 == defaultMod2 and pendingMod3 == defaultMod3 and pendingMod4 == defaultMod4
+
+    if isCurrentDefault and not isPendingDefault then
+        -- current key was default, and setting it to pending will cause a save
+        numChangedSavedKeybinds = numChangedSavedKeybinds + 1
+    elseif not isCurrentDefault and isPendingDefault then
+        -- current key is not defualt, but pending key is, so we won't have to save it anymore
+        numChangedSavedKeybinds = numChangedSavedKeybinds - 1
+    end
+
+    -- then check if the pending key is already bound somewhere else and how unbinding it will affect what's saved
+    local existingCategoryIndex, existingActionIndex, existingBindingIndex = GetBindingIndicesFromKeys(layerIndex, pendingKey, pendingMod1, pendingMod2, pendingMod3, pendingMod4)
+    if existingCategoryIndex and existingActionIndex and existingBindingIndex and (existingCategoryIndex ~= categoryIndex or existingActionIndex ~= actionIndex or existingBindingIndex ~= bindingIndex) then
+        local existingDefaultKey, existingDefaultMod1, existingDefaultMod2, existingDefaultMod3, existingDefaultMod4 = GetActionDefaultBindingInfo(layerIndex, existingCategoryIndex, existingActionIndex, existingBindingIndex)
+
+        local isExistingDefault = pendingKey == existingDefaultKey and pendingMod1 == existingDefaultMod1 and pendingMod2 == existingDefaultMod2 and pendingMod3 == existingDefaultMod3 and pendingMod4 == existingDefaultMod4
+        if isExistingDefault then
+            -- The pending key is already bound as the default of something else, so unbinding it will increase the number of saved binds
+            numChangedSavedKeybinds = numChangedSavedKeybinds + 1
+        else
+            local isDefaultUnbound = existingDefaultKey == KEY_INVALID
+            if isDefaultUnbound then
+                -- Unbinding the pending key from the existing will set it to not bound, which is the default, removing a save
+                numChangedSavedKeybinds = numChangedSavedKeybinds - 1
+            end
+        end
+    end
+
+    return numChangedSavedKeybinds
+end
+
+function KeybindingsManager:GetNumChangedSavedKeybindingsIfUnbound(layerIndex, categoryIndex, actionIndex, bindingIndex)
+    return self:GetNumChangedSavedKeybindings(layerIndex, categoryIndex, actionIndex, bindingIndex, KEY_INVALID, KEY_INVALID, KEY_INVALID, KEY_INVALID, KEY_INVALID)
+end
+
 internalassert(GetMaxBindingsPerAction() == 4, "Max bindings per action changes, update KeybindingsManager:GetBindTypeTextFromIndex")
 
 function KeybindingsManager:GetBindTypeTextFromIndex(bindingIndex)

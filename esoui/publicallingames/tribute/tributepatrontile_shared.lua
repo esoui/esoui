@@ -12,14 +12,12 @@ function ZO_TributePatronTile_Shared:Initialize(...)
     ZO_ContextualActionsTile.Initialize(self, ...)
 
     self.iconTexture = self.control:GetNamedChild("Icon")
-    -- TODO Tribute: Implement shared content for each element
 end
 
 -- Begin ZO_Tile Overrides --
 
 function ZO_TributePatronTile_Shared:Layout(patronData)
     self.patronData = patronData
-    -- TODO Tribute: Implement shared content for each element
     self.iconTexture:SetTexture(patronData:GetPatronLargeIcon())
 
     ZO_ContextualActionsTile.Layout(self, patronData)
@@ -50,10 +48,6 @@ function ZO_TributePatronSelectionTile_Shared:Initialize(...)
             end,
             visible = function()
                 return self:CanSelect()
-            end,
-            enabled = function()
-                --TODO Tribute: Implement this
-                return true
             end,
         }
     }

@@ -15,10 +15,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_DISPLAY_NAME_DEFAULT_TEXT))
-                            </OnInitialized>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_REQUEST_DISPLAY_NAME_DEFAULT_TEXT">
                             <OnEffectivelyShown>
                                 self:TakeFocus()
                             </OnEffectivelyShown>
@@ -38,11 +35,7 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NoteHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="180"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="GIFT_NOTE_MAX_LENGTH">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_GIFT_INVENTORY_REQUEST_GIFT_MESSAGE_TEXT))
-                            </OnInitialized>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="GIFT_NOTE_MAX_LENGTH" defaultText="SI_GIFT_INVENTORY_REQUEST_GIFT_MESSAGE_TEXT" />
                     </Controls>
                 </Backdrop>
 

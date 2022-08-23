@@ -54,7 +54,6 @@ function ZO_HousingFurniturePlacement_Keyboard:InitializeThemeSelector()
 end
 
 function ZO_HousingFurniturePlacement_Keyboard:OnSearchTextChanged(editBox)
-    ZO_HousingFurnitureList.OnSearchTextChanged(self, editBox)
     SHARED_FURNITURE:SetPlaceableTextFilter(editBox:GetText())
 end
 

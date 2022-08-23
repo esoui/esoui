@@ -231,7 +231,7 @@
                             <Anchor point="TOPLEFT" />
                             <Dimensions x="60" y="36" />
                             <Controls>
-                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" />
+                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" />
                             </Controls>
                         </Backdrop>
                     </Controls>
@@ -249,7 +249,7 @@
                             <Anchor point="TOPLEFT" />
                             <Dimensions x="60" y="36" />
                             <Controls>
-                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" />
+                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" />
                             </Controls>
                         </Backdrop>
                     </Controls>

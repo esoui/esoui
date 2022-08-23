@@ -10,8 +10,7 @@ local function CreateGiftMessageEntryData()
         control.highlight:SetHidden(not selected)
 
         control.editBoxControl.textChangedCallback = data.textChangedCallback
-
-        ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GIFT_INVENTORY_REQUEST_GIFT_MESSAGE_TEXT))
+        control.editBoxControl:SetDefaultText(GetString(SI_GIFT_INVENTORY_REQUEST_GIFT_MESSAGE_TEXT))
         control.editBoxControl:SetMaxInputChars(GIFT_NOTE_MAX_LENGTH)
         control.editBoxControl:SetText(giftMessageEntryData.dialog.data.giftMessage)
     end

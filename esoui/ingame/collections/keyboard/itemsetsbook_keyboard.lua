@@ -82,8 +82,10 @@ function ZO_ItemSetsBook_Keyboard:OnContentHeaderMouseUp(control, button, upInsi
         local function ToggleHeaderExpansion()
             headerData.collapsed = not headerData.collapsed
             if headerData.collapsed then
+                PlaySound(SOUNDS.ITEM_SET_COLLAPSED)
                 self.collapsedSetIds[headerData:GetId()] = true
             else
+                PlaySound(SOUNDS.ITEM_SET_EXPANDED)
                 self.collapsedSetIds[headerData:GetId()] = nil
             end
             self.gridListPanelList:RecalculateVisibleEntries()
@@ -565,7 +567,6 @@ end
 ------------------------
 
 function ZO_ItemSetsBook_Keyboard_OnSearchTextChanged(editBox)
-    ZO_EditDefaultText_OnTextChanged(editBox)
     ITEM_SET_COLLECTIONS_DATA_MANAGER:SetSearchString(editBox:GetText())
 end
 

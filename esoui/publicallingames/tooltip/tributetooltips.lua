@@ -13,7 +13,7 @@ function ZO_Tooltip:LayoutTributeCard(cardData, optionalDockCardUpgradeContext)
     elseif isCurse then
         topSection:AddLine(zo_strformat(SI_TRIBUTE_CARD_TYPE_CURSE, cardTypeString))
     else
-        topSection:AddLine(cardTypeString)
+        topSection:AddLine(zo_strformat(SI_TRIBUTE_CARD_TYPE_FORMATTER, cardTypeString))
     end
 
     if not isCurse then
@@ -187,6 +187,8 @@ end
 function ZO_Tooltip:LayoutTributePatron(patronData, optionalArgs)
     local highlightActivePatronState = optionalArgs and optionalArgs.highlightActivePatronState or false
     local suppressNotCollectibleWarning = optionalArgs and optionalArgs.suppressNotCollectibleWarning or false
+    local showAcquireHint = optionalArgs and optionalArgs.showAcquireHint or false
+    local showLore = optionalArgs and optionalArgs.showLore or false
 
     -- Header
     local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
@@ -232,15 +234,28 @@ function ZO_Tooltip:LayoutTributePatron(patronData, optionalArgs)
     end
 
     -- Body
-    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
-    bodySection:AddLine(patronData:GetLoreDescription(), self:GetStyle("bodyDescription"))
-    self:AddSection(bodySection)
-
-    local infoSection = self:AcquireSection(self:GetStyle("bodySection"))
-    if collectionId == 0 and not suppressNotCollectibleWarning then
-        infoSection:AddLine(GetString(SI_TRIBUTE_PATRON_TOOLTIP_NO_COLLECTIBLE), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+    if showLore then
+        local loreDescription = patronData:GetLoreDescription()
+        if loreDescription ~= "" then
+            local loreSection = self:AcquireSection(self:GetStyle("bodySection"))
+            loreSection:AddLine(loreDescription, self:GetStyle("bodyDescription"))
+            self:AddSection(loreSection)
+        end
     end
-    self:AddSection(infoSection)
+
+    local collectibleSection = nil
+    if collectionId == 0 then
+        if not suppressNotCollectibleWarning then
+            collectibleSection = self:AcquireSection(self:GetStyle("bodySection"))
+            collectibleSection:AddLine(GetString(SI_TRIBUTE_PATRON_TOOLTIP_NO_COLLECTIBLE), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+        end
+    elseif showAcquireHint then
+        collectibleSection = self:AcquireSection(self:GetStyle("bodySection"))
+        collectibleSection:AddLine(patronData:GetTributePatronAcquireHint(), self:GetStyle("title"))
+    end
+    if collectibleSection then
+        self:AddSection(collectibleSection)
+    end
 end
 
 function ZO_Tooltip:LayoutTributeBoardLocationPatrons(boardLocationData)

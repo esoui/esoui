@@ -47,23 +47,10 @@ function ZO_GamepadGuildHub_OnInitialize(control)
     sectionThree:SetText(zo_strformat(SI_GUILD_CONCLUSION, ZO_GetPlatformAccountLabel()))
 end
 
-function ZO_GamepadGuildHub:New(...)
-    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
-end
-
 function ZO_GamepadGuildHub:Initialize(control)
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control)
-
     GAMEPAD_GUILD_HUB_SCENE = ZO_Scene:New(GAMEPAD_GUILD_HUB_SCENE_NAME, SCENE_MANAGER)
-    GAMEPAD_GUILD_HUB_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:OnSceneShowing()
-        elseif newState == SCENE_HIDDEN then
-            self:OnSceneHidden()
-        end
-
-        ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
-    end)
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_GUILD_HUB_SCENE)
 end
 
 ------------
@@ -88,6 +75,16 @@ function ZO_GamepadGuildHub:PerformDeferredInitializationHub()
     self:InitializeCreateGuildDialog()
     self:InitializeChangeAboutUsDialog()
     self:InitializeChangeMotdDialog()
+end
+
+function ZO_GamepadGuildHub:OnStateChanged(oldState, newState)
+    if newState == SCENE_SHOWING then
+        self:OnSceneShowing()
+    elseif newState == SCENE_HIDDEN then
+        self:OnSceneHidden()
+    end
+
+    ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
 end
 
 function ZO_GamepadGuildHub:PerformUpdate()
@@ -227,8 +224,8 @@ function ZO_GamepadGuildHub:InitializeChangeMotdDialog()
                         control.highlight:SetHidden(not selected)
 
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
-
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GAMEPAD_GUILD_MOTD_EMPTY_TEXT))
+                        
+                        control.editBoxControl:SetDefaultText(GetString(SI_GAMEPAD_GUILD_MOTD_EMPTY_TEXT))
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_MOTD_LENGTH)
                         control.editBoxControl:SetText(self.selectedMotd)
                     end,
@@ -346,8 +343,8 @@ function ZO_GamepadGuildHub:InitializeChangeAboutUsDialog()
                         control.highlight:SetHidden(not selected)
 
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
-
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GUILD_DESCRIPTION_HEADER))
+                        
+                        control.editBoxControl:SetDefaultText(GetString(SI_GUILD_DESCRIPTION_HEADER))
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_DESCRIPTION_LENGTH)
                         control.editBoxControl:SetText(self.selectedAboutUs)
                     end,
@@ -545,11 +542,8 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
 
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
-
-                        if self.selectedName == "" then
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GUILD_CREATE_DIALOG_NAME_DEFAULT_TEXT))
-                        end
-
+                        
+                        control.editBoxControl:SetDefaultText(GetString(SI_GUILD_CREATE_DIALOG_NAME_DEFAULT_TEXT))
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_NAME_LENGTH)
                         control.editBoxControl:SetText(self.selectedName)
                         self.createGuildEditBoxSelected = selected

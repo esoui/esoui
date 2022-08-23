@@ -577,9 +577,9 @@ function ZO_HousingSettingsList_Gamepad:InitializeSearchFilter()
     ZO_GamepadInteractiveSortFilterList.InitializeSearchFilter(self)
 
     if self.userGroup == HOUSE_PERMISSION_USER_GROUP_INDIVIDUAL then
-        ZO_EditDefaultText_Initialize(self.searchEdit, ZO_GetPlatformAccountLabel())
+        self.searchEdit:SetDefaultText(ZO_GetPlatformAccountLabel())
     else
-        ZO_EditDefaultText_Initialize(self.searchEdit, GetString(SI_GAMEPAD_HOUSING_PERMISSIONS_SEARCH_GUILD))
+        self.searchEdit:SetDefaultText(GetString(SI_GAMEPAD_HOUSING_PERMISSIONS_SEARCH_GUILD))
     end
 
     self.filterFunction = function(data)

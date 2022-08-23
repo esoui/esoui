@@ -129,10 +129,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" textType="ALPHABETIC_NO_FULLWIDTH_LATIN" maxInputCharacters="25">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_CREATE_CHARACTER_TITLE_NAME))
-                            </OnInitialized>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" textType="ALPHABETIC_NO_FULLWIDTH_LATIN" maxInputCharacters="25" defaultText="SI_CREATE_CHARACTER_TITLE_NAME">
                             <OnEffectivelyShown>
                                 self:TakeFocus()
                             </OnEffectivelyShown>

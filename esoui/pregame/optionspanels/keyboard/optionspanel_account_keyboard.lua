@@ -51,13 +51,11 @@ function ZO_Options_Account_ChangeEmail_Dialog_Keyboard_OnInitialized(control)
     -- Edit Email Addresses
     local emailEditBox = control:GetNamedChild("NewEmailEntryEdit")
     ZO_PreHookHandler(emailEditBox, "OnTextChanged", function(editControl)
-        ZO_EditDefaultText_OnTextChanged(editControl)
         ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(control)
     end)
 
     local confirmEmailEditBox = control:GetNamedChild("ConfirmNewEmailEntryEdit")
     ZO_PreHookHandler(confirmEmailEditBox, "OnTextChanged", function(editControl)
-        ZO_EditDefaultText_OnTextChanged(editControl)
         ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(control)
     end)
 

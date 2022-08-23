@@ -54,7 +54,6 @@ function ZO_TributePatronBookCardTile_Shared:Initialize(...)
     self.highlightControl = self.control:GetNamedChild("Highlight")
     self.lockOverlay = self.control:GetNamedChild("LockOverlay")
 
-    -- TODO Tribute: Implement shared content for each element
     self.keybindStripDescriptor =
     {
         {
@@ -93,8 +92,10 @@ function ZO_TributePatronBookCardTile_Shared:Layout(data)
         local cardTypeString = GetString("SI_TRIBUTECARDTYPE", self.cardData:GetCardType())
         if self.cardData:IsContract() then
             self.titleLabel:SetText(zo_strformat(SI_TRIBUTE_CARD_TYPE_CONTRACT, cardTypeString))
+        elseif self.cardData:IsCurse() then
+            self.titleLabel:SetText(zo_strformat(SI_TRIBUTE_CARD_TYPE_CURSE, cardTypeString))
         else
-            self.titleLabel:SetText(cardTypeString)
+            self.titleLabel:SetText(zo_strformat(SI_TRIBUTE_CARD_TYPE_FORMATTER, cardTypeString))
         end
     end
 

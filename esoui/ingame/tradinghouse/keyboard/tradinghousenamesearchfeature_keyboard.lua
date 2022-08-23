@@ -42,7 +42,6 @@ function ZO_TradingHouseNameSearchFeature_Keyboard:AttachToControl(itemNameSearc
 end
 
 function ZO_TradingHouseNameSearchFeature_Keyboard:OnNameSearchEditTextChanged()
-    ZO_EditDefaultText_OnTextChanged(self.nameSearchEdit)
     self.searchText = self.nameSearchEdit:GetText()
 
     if not self:IsSearchTextLongEnough() then

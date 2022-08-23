@@ -459,12 +459,8 @@ end
 do
     -- Used for diversification of animation visuals.
     local nextAnimationOffset = 0
-    local nextWaveAngle = math.rad(15)
-
-    local MAX_ANIMATION_OFFSET = 1000
-    local MAX_SHADER_PRECISION = 3600
-    local WAVE_OFFSET_COEFFICIENT = 10
-    local WAVE_ANGLE_INCREMENT = ZO_HALF_PI * 3
+    local MIN_WAVE_ANGLE = ZO_PI - ZO_HALF_PI
+    local MAX_WAVE_ANGLE = ZO_PI + ZO_HALF_PI
 
     function ZO_TributeCard_StateEffect:Setup(cardObject, cardState, cardLayer)
         self.cardObject = cardObject
@@ -476,39 +472,28 @@ do
         local controlTemplate = self:GetControlTemplate()
         ApplyTemplateToControl(control, controlTemplate)
 
-        local alphaAnimation = self.timeline:GetAnimation(1)
-        if cardLayer == TRIBUTE_CARD_STATE_EFFECT_LAYER_OVERLAY then
-            alphaAnimation:SetEndAlpha(0.75)
-        elseif cardLayer == TRIBUTE_CARD_STATE_EFFECT_LAYER_UNDERLAY then
-            alphaAnimation:SetEndAlpha(1.0)
-        end
-
         local parentControl = self.cardObject.control
         control:SetParent(parentControl)
         control:ClearAnchors()
         control:SetAnchor(CENTER, parentControl)
 
-        local animationOffset = nextAnimationOffset
-        nextAnimationOffset = (nextAnimationOffset + 1) % MAX_ANIMATION_OFFSET
-
-        local waveOffset = (animationOffset * WAVE_OFFSET_COEFFICIENT) % MAX_SHADER_PRECISION
-        control:SetWaveOffset(waveOffset)
-        local waveAngle = nextWaveAngle
-        nextWaveAngle = (nextWaveAngle + WAVE_ANGLE_INCREMENT) % ZO_TWO_PI
-        control:SetWaveAngle(waveAngle)
-
+        nextAnimationOffset = nextAnimationOffset + 1
+        local offset = ((nextAnimationOffset % 10) + 1) / 10
+        control:SetWaveOffset(offset * 20)
+        control:SetWaveAngle(zo_lerp(MIN_WAVE_ANGLE, MAX_WAVE_ANGLE, offset))
         control:SetHidden(false)
+
         self:SetActive(true)
     end
 end
 
 function ZO_TributeCard_StateEffect:Reset()
-    self.control:SetHidden(true)
-    self.timeline:Stop()
-
+    -- Order matters
     self.cardObject = nil
     self.cardState = nil
     self.cardLayer = nil
+    self.control:SetHidden(true)
+    self.timeline:PlayInstantlyToStart()
 end
 
 function ZO_TributeCard_StateEffect:GetCardObject()
@@ -693,7 +678,10 @@ function ZO_TributeCard:GetPopupType()
 end
 
 function ZO_TributeCard:SetPopupType(popupType)
-    self.popupType = popupType
+    if self.popupType ~= popupType then
+        self.popupType = popupType
+        self:RefreshStateFlags()
+    end
 end
 
 function ZO_TributeCard:PlayAlphaAnimation(playForward, animateInstantly)
@@ -781,7 +769,7 @@ function ZO_TributeCard:RefreshDefeatCost()
     self:SetDefeatCost(USE_CURRENT_QUANTITY)
 end
 
-function ZO_TributeCard:UpdateDefeatCost(newCost, costDelta)
+function ZO_TributeCard:UpdateDefeatCost(newCost, costDelta, suppressSound)
     -- Reflect the new defeat cost instantly.
     self:SetDefeatCost(newCost)
 
@@ -793,15 +781,17 @@ function ZO_TributeCard:UpdateDefeatCost(newCost, costDelta)
     -- Queue animation of the defeat cost delta.
     self.defeatCostAdjustmentObject:UpdateDefeatCost(newCost, costDelta)
 
-    -- Play the associated audio.
-    if costDelta < 0 then
-        if newCost > 0 then
-            PlaySound(SOUNDS.TRIBUTE_AGENT_DAMAGED)
-        else
-            PlaySound(SOUNDS.TRIBUTE_AGENT_KNOCKED_OUT)
+    if not suppressSound then
+        -- Play the associated audio.
+        if costDelta < 0 then
+            if newCost > 0 then
+                PlaySound(SOUNDS.TRIBUTE_AGENT_DAMAGED)
+            else
+                PlaySound(SOUNDS.TRIBUTE_AGENT_KNOCKED_OUT)
+            end
+        elseif costDelta > 0 then
+            PlaySound(SOUNDS.TRIBUTE_AGENT_HEALED)
         end
-    elseif costDelta > 0 then
-        PlaySound(SOUNDS.TRIBUTE_AGENT_HEALED)
     end
 end
 
@@ -815,12 +805,22 @@ function ZO_TributeCard:GetEffectiveStateFlags(currentStateFlags)
             -- Suppress all flags for World space cards (1) while the pile viewer, target viewer or mechanic
             -- selector is open or (2) that are in a stack that are not the top card in that stack.
             stateFlags = 0
+        elseif isStacked and isTopOfStack then
+            --Suppress playable and damageable for cards at the top of a stack
+            stateFlags = ZO_ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_DAMAGEABLE, TRIBUTE_CARD_STATE_FLAGS_PLAYABLE)
+        elseif ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingBoard() then
+            -- Don't allow the targetable and targeted state flags on world cards when viewing the board from the target viewer
+            stateFlags = ZO_ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_TARGETABLE, TRIBUTE_CARD_STATE_FLAGS_TARGETED)
         end
     else
         if self:GetPopupType() == ZO_TRIBUTE_CARD_POPUP_TYPE.MECHANIC then
             -- Suppress all flags for a Mechanic tile's popup card.
             stateFlags = 0
         else
+            if self:GetPopupType() == ZO_TRIBUTE_CARD_POPUP_TYPE.CARD and ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingBoard() then
+                -- Don't allow the targetable and targeted state flags on popup cards when viewing the board from the target viewer
+                stateFlags = ZO_ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_TARGETABLE, TRIBUTE_CARD_STATE_FLAGS_TARGETED)
+            end
             -- Suppress stack-related flags for non-Mechanic popup cards.
             stateFlags = ZO_ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_STACK_DAMAGEABLE, TRIBUTE_CARD_STATE_FLAGS_STACK_PLAYABLE)
         end
@@ -922,6 +922,14 @@ function ZO_TributeCard:Reset()
     control:SetScale(1)
     self.frontControl:SetHidden(false)
     self.backGlowableTexture:SetHidden(true)
+    -- Allow cleanup of big textures that aren't common among all cards, to gain back some memory
+    self.portraitGlowableTexture:SetTexture(nil)
+    self.portraitGlowableTexture.glowTexture:SetTexture(nil)
+    self.bgGlowableTexture:SetTexture(nil)
+    self.bgGlowableTexture.glowTexture:SetTexture(nil)
+    self.suitGlowableTexture:SetTexture(nil)
+    self.suitGlowableTexture.glowTexture:SetTexture(nil)
+
     self:SetMouseEnabled(true)
 
     self.cardDefId = nil

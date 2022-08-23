@@ -219,13 +219,12 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeSearchBar()
     end
 
     local function SearchEditTextChanged()
-        ZO_EditDefaultText_OnTextChanged(searchEdit)
         COLLECTIONS_BOOK_SINGLETON:SetSearchString(searchEdit:GetText())
     end
 
     searchEdit:SetHandler("OnFocusLost", SearchEditFocusLost)
     searchEdit:SetHandler("OnTextChanged", SearchEditTextChanged)
-    ZO_EditDefaultText_Initialize(searchEdit, GetString(SI_GAMEPAD_OUTFITS_DEFAULT_SEARCH_TEXT))
+    searchEdit:SetDefaultText(GetString(SI_GAMEPAD_OUTFITS_DEFAULT_SEARCH_TEXT))
 
     self.searchEdit = searchEdit
 

@@ -26,7 +26,6 @@
                     <Controls>
                         <EditBox name="$(parent)Edit" override="true">
                             <OnTextChanged>
-                                ZO_EditDefaultText_OnTextChanged(self)
                                 if(self.textChangedCallback) then
                                     self.textChangedCallback(self)
                                 end
@@ -73,9 +72,8 @@
                     <Controls>
                         <EditBox name="$(parent)Edit" override="true">
                             <OnTextChanged>
-                                ZO_EditDefaultText_OnTextChanged(self)
                                 if(self.textChangedCallback) then
-                                self.textChangedCallback(self)
+                                    self.textChangedCallback(self)
                                 end
                             </OnTextChanged>
                             <Controls>

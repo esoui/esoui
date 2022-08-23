@@ -35,7 +35,7 @@
                         <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
                             <AnchorFill/>
                         </Backdrop>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad">
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad">
                             <OnTextChanged>
                                 ZO_PregameGamepadTextEditTemplate_OnPossibleChange(self, self:GetParent():GetParent(), self:GetText())
                             </OnTextChanged>

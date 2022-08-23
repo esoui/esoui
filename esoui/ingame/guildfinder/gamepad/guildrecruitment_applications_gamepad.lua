@@ -238,7 +238,7 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeConfirmDeclineDialog
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
                         data.control = control
 
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GUILD_RECRUITMENT_APPLICATION_DECLINE_DEFAULT_RESPONSE))
+                        control.editBoxControl:SetDefaultText(GetString(SI_GUILD_RECRUITMENT_APPLICATION_DECLINE_DEFAULT_RESPONSE))
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_APPLICATION_DECLINE_MESSAGE_LENGTH)
                         if self.declineMessage then
                             control.editBoxControl:SetText(self.declineMessage)
@@ -314,7 +314,7 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeConfirmDeclineDialog
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
                         data.control = control
 
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GUILD_RECRUITMENT_BLACKLIST_NOTE_DEFAULT_TEXT))
+                        control.editBoxControl:SetDefaultText(GetString(SI_GUILD_RECRUITMENT_BLACKLIST_NOTE_DEFAULT_TEXT))
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_BLACKLIST_MESSAGE_LENGTH)
                         if self.blacklistNote then
                             control.editBoxControl:SetText(self.blacklistNote)

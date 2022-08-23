@@ -1,22 +1,42 @@
-CreditsScreen_Base = ZO_Object:Subclass()
+CreditsScreen_Base = ZO_InitializingObject:Subclass()
 
-function CreditsScreen_Base:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
-function CreditsScreen_Base:Initialize(control)
+function CreditsScreen_Base:Initialize(control, poolTemplates)
     self.control = control
     self.pools = {}
 
+    self.activeControls = {}
     self.currentEntryIndex = nil
     self.numCreditsEntries = 0
     self.scrollParent = control:GetNamedChild("Scroll")
 
+    self.fragment = ZO_FadeSceneFragment:New(control)
+    self.fragment:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:ShowCredits()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self:StopCredits()
+        end
+    end)
+
+    local function SetupTextControl(...)
+        return self:SetupTextControl(...)
+    end
+    self:AddPool(GAME_CREDITS_ENTRY_TYPE_DEPARTMENT_HEADER, poolTemplates[GAME_CREDITS_ENTRY_TYPE_DEPARTMENT_HEADER], SetupTextControl)
+    self:AddPool(GAME_CREDITS_ENTRY_TYPE_SECTION_HEADER, poolTemplates[GAME_CREDITS_ENTRY_TYPE_SECTION_HEADER], SetupTextControl)
+    self:AddPool(GAME_CREDITS_ENTRY_TYPE_SECTION_TEXT, poolTemplates[GAME_CREDITS_ENTRY_TYPE_SECTION_TEXT], SetupTextControl)
+    self:AddPool(GAME_CREDITS_ENTRY_TYPE_SECTION_TEXT_BLOCK, poolTemplates[GAME_CREDITS_ENTRY_TYPE_SECTION_TEXT_BLOCK], SetupTextControl)
+    self:AddPool(GAME_CREDITS_ENTRY_TYPE_COMPANY_LOGO, poolTemplates[GAME_CREDITS_ENTRY_TYPE_COMPANY_LOGO], function(...) return self:SetupLogoControl(...) end)
+    self:AddPool(GAME_CREDITS_ENTRY_TYPE_BACKGROUND_SWITCH, poolTemplates[GAME_CREDITS_ENTRY_TYPE_BACKGROUND_SWITCH], function(...) return self:SetupBackgroundSwitch(...) end)
+    self:AddPool(GAME_CREDITS_ENTRY_TYPE_PADDING_SECTION, poolTemplates[GAME_CREDITS_ENTRY_TYPE_PADDING_SECTION], function(...) return self:SetupPaddingSection(...) end)
+
     self:ResetScrollSpeedMultiplier()
 
     control:SetHandler("OnUpdate", function(control, timeS) self:OnUpdate(timeS) end)
+    control:RegisterForEvent(EVENT_GAME_CREDITS_READY, function() self:BeginCredits() end)
+end
+
+function CreditsScreen_Base:GetFragment()
+    return self.fragment
 end
 
 function CreditsScreen_Base:SetupTextControl(control, text)
@@ -168,13 +188,17 @@ do
     end
 end
 
+function CreditsScreen_Base:ShowCredits()
+    ShowCredits()
+end
+
 function CreditsScreen_Base:BeginCredits()
     if self:IsPreferredScreen() then
         self.numCreditsEntries = GetNumGameCreditsEntries()
         self.currentEntryIndex = 1
         g_currentDrawLevel = 1
         self.running = true
-        self.activeControls = {}
+        ZO_ClearNumericallyIndexedTable(self.activeControls)
         self.phase = 0
     end
 end

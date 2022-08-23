@@ -16,10 +16,7 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>
                             <Dimensions x="340" />
                             <Controls>
-                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
-                                    <OnInitialized>
-                                        ZO_EditDefaultText_Initialize(self, GetString(SI_ARMORY_BUILD_DIALOG_NAME_DEFAULT))
-                                    </OnInitialized>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ARMORY_BUILD_DIALOG_NAME_DEFAULT">
                                     <OnEffectivelyShown>
                                         self:TakeFocus()
                                     </OnEffectivelyShown>

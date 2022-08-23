@@ -345,7 +345,54 @@ function MainMenu_Keyboard:New(control)
 end
 
 function MainMenu_Keyboard:Initialize(control)
-    ADD_ON_MANAGER = ZO_AddOnManager:New(true)
+    local primaryKeybindDescriptor =
+    {
+        keybind = "ADDONS_PANEL_PRIMARY",
+        name = function()
+            if HasAgreedToEULA(EULA_TYPE_ADDON_EULA) then
+                return GetString(SI_ADDON_MANAGER_RELOAD)
+            else
+                return GetString(SI_ADDON_MANAGER_VIEW_EULA)
+            end
+        end,
+        enabled = function()
+            if HasAgreedToEULA(EULA_TYPE_ADDON_EULA) then
+                return ADD_ON_MANAGER:AllowReload()
+            end
+
+            return true
+        end,
+        callback = function()
+            if HasAgreedToEULA(EULA_TYPE_ADDON_EULA) then
+                ReloadUI("ingame")
+            else
+                CALLBACK_MANAGER:FireCallbacks("ShowAddOnEULAIfNecessary")
+            end
+        end,
+    }
+    local secondaryKeybindDescriptor =
+    {
+        keybind = "ADDONS_PANEL_SECONDARY",
+        name =  GetString(SI_CLEAR_UNUSED_KEYBINDS_KEYBIND),
+        callback = function()
+            ZO_Dialogs_ShowDialog("CONFIRM_CLEAR_UNUSED_KEYBINDS")
+        end,
+    }
+    ADD_ON_MANAGER = ZO_AddOnManager:New(primaryKeybindDescriptor, secondaryKeybindDescriptor)
+
+    local maxCustomBinds = GetMaxNumSavedKeybindings()
+
+    local function RefreshKeybindingsLabel(label)
+        local currentNumSavedBindings = GetNumSavedKeybindings()
+        label:SetText(zo_strformat(SI_KEYBINDINGS_CURRENT_SAVED_BIND_COUNT, currentNumSavedBindings, maxCustomBinds))
+
+        local color = ZO_NORMAL_TEXT
+        if currentNumSavedBindings >= maxCustomBinds then
+            color = ZO_ERROR_COLOR
+        end
+        label:SetColor(color:UnpackRGBA())
+    end
+    ADD_ON_MANAGER:SetRefreshSavedKeybindsLabelFunction(RefreshKeybindingsLabel)
 
     self.control = control
 

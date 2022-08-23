@@ -23,7 +23,6 @@ function GamepadChatContainer:Initialize(control, windowPool, tabPool)
     self:SetAllowSaveSettings(true)
     self:InitializeWindowManagement(control, windowPool, tabPool)
     self:InitializeScrolling(control)
-    self:FadeOut()
 end
 
 function GamepadChatContainer:ShowRemoveTabDialog(index)
@@ -75,7 +74,6 @@ end
 function GamepadChatContainer:PerformLayout()
     SharedChatContainer.PerformLayout(self)
 
-    self:UpdateOverflowArrow()
     self:ApplyInsertIndicator(insertIndex)
     self:SyncScrollToBuffer()
 end

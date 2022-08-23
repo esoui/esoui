@@ -63,14 +63,7 @@
                     <Anchor point="TOPLEFT"/>
                     <Dimensions x="262"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad" font="ZoFontGamepad34">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Disable(self)
-                            </OnInitialized>
-                            <Controls>
-                                <Label name="$(parent)Text" override="true" font="ZoFontGamepad34" />
-                            </Controls>
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad" />
                     </Controls>
                 </Control>
 

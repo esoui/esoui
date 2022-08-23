@@ -194,8 +194,9 @@ end
 
 function ZO_GamepadStats:Initialize(control)
     ZO_Stats_Common.Initialize(self, control)
+    GAMEPAD_STATS_ROOT_SCENE = ZO_Scene:New("gamepad_stats_root", SCENE_MANAGER)
     local ACTIVATE_ON_SHOW = true
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW)
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_STATS_ROOT_SCENE)
     self:SetListsUseTriggerKeybinds(true)
 
     self.mainList = self:GetMainList()
@@ -206,49 +207,47 @@ function ZO_GamepadStats:Initialize(control)
     --Only allow the window to update once every quarter second so if buffs are updating like crazy we're not tanking the frame rate
     self:SetUpdateCooldown(250)
 
-    GAMEPAD_STATS_ROOT_SCENE = ZO_Scene:New("gamepad_stats_root", SCENE_MANAGER)
-    GAMEPAD_STATS_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:PerformDeferredInitializationRoot()
-
-            self:TryResetScreenState()
-
-            self:RefreshEquipmentBonus()
-            self:RegisterForEvents()
-
-            self:Update()
-
-            TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED)
-            if GetAttributeUnspentPoints() > 0 then
-                TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED_AND_ATTRIBUTE_POINTS_UNSPENT)
-            end
-
-            ZO_OUTFITS_SELECTOR_GAMEPAD:SetCurrentActorCategory(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-        elseif newState == SCENE_HIDDEN then
-            self:DeactivateMainList()
-
-            if self.currentTitleDropdown ~= nil then
-                self.currentTitleDropdown:Deactivate(true)
-            end
-
-            if self.attributeTooltips then
-                self.attributeTooltips:Deactivate()
-            end
-
-            if self.advancedAttributesGridList then
-                self:ExitAdvancedGridList()
-            end
-
-            self:UnregisterForEvents()
-        end
-
-        ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
-    end)
-
     GAMEPAD_STATS_FRAGMENT = ZO_SimpleSceneFragment:New(control)
     GAMEPAD_STATS_FRAGMENT:SetHideOnSceneHidden(true)
 
     GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(control:GetNamedChild("RightPane"))
+end
+
+function ZO_GamepadStats:OnStateChanged(oldState, newState)
+    if newState == SCENE_SHOWING then
+        self:PerformDeferredInitializationRoot()
+
+        self:TryResetScreenState()
+
+        self:RefreshEquipmentBonus()
+        self:RegisterForEvents()
+
+        self:Update()
+
+        TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED)
+        if GetAttributeUnspentPoints() > 0 then
+            TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED_AND_ATTRIBUTE_POINTS_UNSPENT)
+        end
+
+        ZO_OUTFITS_SELECTOR_GAMEPAD:SetCurrentActorCategory(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+    elseif newState == SCENE_HIDDEN then
+        self:DeactivateMainList()
+
+        if self.currentTitleDropdown ~= nil then
+            self.currentTitleDropdown:Deactivate(true)
+        end
+
+        if self.attributeTooltips then
+            self.attributeTooltips:Deactivate()
+        end
+
+        if self.advancedAttributesGridList then
+            self:ExitAdvancedGridList()
+        end
+
+        self:UnregisterForEvents()
+    end
+    ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
 end
 
 do

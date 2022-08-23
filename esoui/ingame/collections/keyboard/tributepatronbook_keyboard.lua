@@ -23,7 +23,7 @@ function ZO_TributePatronBook_Keyboard:Initialize(control)
         {
             entryTemplate = "ZO_TributePatron_Keyboard_Description_Label",
             gridPaddingX = 0,
-            gridPaddingY = 0,
+            gridPaddingY = 10,
         },
         widePatronEntryData =
         {
@@ -346,7 +346,6 @@ end
 ------------------------
 
 function ZO_TributePatronBook_Keyboard_OnSearchTextChanged(editBox)
-    ZO_EditDefaultText_OnTextChanged(editBox)
     TRIBUTE_DATA_MANAGER:SetSearchString(editBox:GetText())
 end
 
