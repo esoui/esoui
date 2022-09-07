@@ -9255,6 +9255,8 @@ SafeAddString(SI_TRIBUTEMATCHEVENT74, "No puedes unirte mientras estás en una c
 SafeAddString(SI_TRIBUTEMATCHEVENT75, "Ya está en una cola del buscador de actividades.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT76, "Tu oponente ha rechazado la invitación para jugar a Historias de homenaje.", 1)
 SafeAddString(SI_TRIBUTEMATCHEVENT77, "No puedes jugar a Historias de homenaje.", 0)
+SafeAddString(SI_TRIBUTEMATCHEVENT78, "You cannot send a Tales of Tribute invite while in an active match.", 0)
+SafeAddString(SI_TRIBUTEMATCHEVENT79, "Target is in an active Tales of Tribute match.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT8, "<<1>> no está disponible para Historias de homenaje porque ha desafiado a otro jugador.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT9, "<<1>> no está disponible para Historias de homenaje porque está sopesando aceptar otro desafío.", 0)
 SafeAddString(SI_TRIBUTEMATCHTYPE1, "Partida competitiva", 1)
