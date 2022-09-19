@@ -333,53 +333,52 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
         local CONCISE_COOLDOWN_TEXT = false
 
         for _, location in ipairs(locationsByActivity) do
-            location:SetActive(true)
             location:SetLocked(true)
-            location:SetCountsForAverageRoleTime(activityRequiresRoles)
-            
-            local cooldownText
-            local applicableCooldowns = location:GetApplicableCooldownTypes()
-            if applicableCooldowns and applicableCooldowns.queueCooldownType then
-                cooldownText = self:GetLFGCooldownLockText(applicableCooldowns.queueCooldownType, CONCISE_COOLDOWN_TEXT)
-            end
 
-            if cooldownText then
-                location:SetLockReasonText(cooldownText)
-            elseif location:IsLockedByPlayerLocation() then
-                if IsActiveWorldBattleground() then
-                    location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_BATTLEGROUND)
-                elseif IsPlayerInAvAWorld() then
-                    location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_AVA)
-                else
-                    location:SetLockReasonText(SI_LFG_LOCK_REASON_INVALID_AREA)
+            local isLockedByAvailabilityRequirement, availabilityRequirementErrorStringId = location:IsLockedByAvailablityRequirementList()
+            if isLockedByAvailabilityRequirement then
+                local lockReasonText = GetErrorString(availabilityRequirementErrorStringId)
+                if lockReasonText == "" then
+                    lockReasonText = GetString("SI_ACTIVITYQUEUERESULT", ACTIVITY_QUEUE_RESULT_DESTINATION_NO_LONGER_VALID)
                 end
-            elseif location:IsLockedByCollectible() then
-                local collectibleId = location:GetFirstLockingCollectible()
-                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-                local lockReasonStringId = nil
-                if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                    lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED_UPGRADE
-                elseif collectibleData:IsPurchasable() then
-                    lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED_CROWN_STORE
-                else
-                    lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED
-                end
-                local lockReasonText = zo_strformat(lockReasonStringId, collectibleData:GetName(), collectibleData:GetCategoryData():GetName())
                 location:SetLockReasonText(lockReasonText)
                 location:SetCountsForAverageRoleTime(false)
+                location:SetActive(false)
             else
-                local isLockedByAvailabilityRequirement, availabilityRequirementErrorStringId = location:IsLockedByAvailablityRequirementList()
-                if isLockedByAvailabilityRequirement then
-                    local lockReasonText = GetErrorString(availabilityRequirementErrorStringId)
-                    if lockReasonText == "" then
-                        lockReasonText = GetString("SI_ACTIVITYQUEUERESULT", ACTIVITY_QUEUE_RESULT_DESTINATION_NO_LONGER_VALID)
+                location:SetActive(true)
+                location:SetCountsForAverageRoleTime(activityRequiresRoles)
+                local cooldownText
+                local applicableCooldowns = location:GetApplicableCooldownTypes()
+                if applicableCooldowns and applicableCooldowns.queueCooldownType then
+                    cooldownText = self:GetLFGCooldownLockText(applicableCooldowns.queueCooldownType, CONCISE_COOLDOWN_TEXT)
+                end
+
+                if cooldownText then
+                    location:SetLockReasonText(cooldownText)
+                elseif location:IsLockedByPlayerLocation() then
+                    if IsActiveWorldBattleground() then
+                        location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_BATTLEGROUND)
+                    elseif IsPlayerInAvAWorld() then
+                        location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_AVA)
+                    else
+                        location:SetLockReasonText(SI_LFG_LOCK_REASON_INVALID_AREA)
                     end
+                elseif location:IsLockedByCollectible() then
+                    local collectibleId = location:GetFirstLockingCollectible()
+                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                    local lockReasonStringId = nil
+                    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
+                        lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED_UPGRADE
+                    elseif collectibleData:IsPurchasable() then
+                        lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED_CROWN_STORE
+                    else
+                        lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED
+                    end
+                    local lockReasonText = zo_strformat(lockReasonStringId, collectibleData:GetName(), collectibleData:GetCategoryData():GetName())
                     location:SetLockReasonText(lockReasonText)
                     location:SetCountsForAverageRoleTime(false)
-                    location:SetActive(false)
                 else
                     local groupTooLarge = isGroupRelevant and self.groupSize > location:GetMaxGroupSize()
-
                     if groupTooLarge then
                         location:SetLockReasonText(SI_LFG_LOCK_REASON_GROUP_TOO_LARGE)
                     elseif not location:DoesPlayerMeetLevelRequirements() then
@@ -398,10 +397,10 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                         location:SetLockReasonText("")
                     end
                 end
-            end
 
-            if location:IsLocked() then
-                self:SetLocationSelected(location, false)
+                if location:IsLocked() then
+                    self:SetLocationSelected(location, false)
+                end
             end
         end
     end
