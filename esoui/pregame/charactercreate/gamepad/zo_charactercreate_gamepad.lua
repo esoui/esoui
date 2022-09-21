@@ -130,7 +130,6 @@ function ZO_CharacterCreate_Gamepad:Initialize(...)
             if ZO_CHARACTERCREATE_MANAGER:GetShouldPromptForTutorialSkip() and CanSkipTutorialArea() and (currentTemplateId == 0 or not templateSkipsTutorial) then
                 ZO_CHARACTERCREATE_MANAGER:SetShouldPromptForTutorialSkip(false)
                 -- color the character name white so it's highlighted in the dialog
-                local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
                 local genderDecoratedCharacterName = ZO_SELECTED_TEXT:Colorize(GetGrammarDecoratedName(self.characterName, CharacterCreateGetGender(characterMode)))
                 ZO_Dialogs_ShowGamepadDialog(SKIP_TUTORIAL_GAMEPAD_DIALOG, { characterName = self.characterName }, {mainTextParams = { genderDecoratedCharacterName }})
             else
@@ -247,12 +246,56 @@ function ZO_CharacterCreate_Gamepad:InitializeControls()
 
     self.customBucketControls =
     {
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER] = {control = self.genderSlider.control, updateFn = UpdateSlider, shouldAdd = IsAppearanceChangeEnabled},
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE] = {control = ZO_CharacterCreate_GamepadAlliance, updateFn = function() self:UpdateRaceControl() end, shouldAdd = IsAllianceChangeEnabled},
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE] = {control = ZO_CharacterCreate_GamepadRace, updateFn = function() self:UpdateRaceControl() end, shouldAdd = IsRaceChangeEnabled},
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS] = {control = ZO_CharacterCreate_GamepadClass, updateFn = function() self:UpdateClassControl() end, shouldAdd = IsClassChangeEnabled},
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_PHYSIQUE] = {control = physiqueTriangleControl, updateFn = UpdateSlider, randomizeFn = RandomizeSlider, shouldAdd = IsAppearanceChangeEnabled},
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_FACE] = {control = faceTriangleControl, updateFn = UpdateSlider, randomizeFn = RandomizeSlider, shouldAdd = IsAppearanceChangeEnabled},
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER] =
+        {
+            control = self.genderSlider.control,
+            updateFn = UpdateSlider,
+            narrationText = function(entryData, entryControl)
+                return entryData.control.sliderObject:GetNarrationText()
+            end,
+            shouldAdd = IsAppearanceChangeEnabled,
+        },
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE] =
+        {
+            control = ZO_CharacterCreate_GamepadAlliance,
+            updateFn = function() self:UpdateRaceControl() end,
+            narrationText = function(entryData, entryControl)
+                return entryData.control.sliderObject:GetNarrationText()
+            end,
+            shouldAdd = IsAllianceChangeEnabled,
+        },
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE] =
+        {
+            control = ZO_CharacterCreate_GamepadRace,
+            updateFn = function() self:UpdateRaceControl() end,
+            narrationText = function(entryData, entryControl)
+                return entryData.control.sliderObject:GetNarrationText()
+            end,
+            shouldAdd = IsRaceChangeEnabled,
+        },
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS] =
+        {
+            control = ZO_CharacterCreate_GamepadClass,
+            updateFn = function() self:UpdateClassControl() end,
+            narrationText = function(entryData, entryControl)
+                return entryData.control.sliderObject:GetNarrationText()
+            end,
+            shouldAdd = IsClassChangeEnabled,
+        },
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_PHYSIQUE] =
+        {
+            control = physiqueTriangleControl,
+            updateFn = UpdateSlider,
+            randomizeFn = RandomizeSlider,
+            shouldAdd = IsAppearanceChangeEnabled,
+        },
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_FACE] =
+        {
+            control = faceTriangleControl,
+            updateFn = UpdateSlider,
+            randomizeFn = RandomizeSlider,
+            shouldAdd = IsAppearanceChangeEnabled,
+        },
     }
 end
 
@@ -759,11 +802,6 @@ function ZO_CharacterCreate_Gamepad:UpdateRaceControl()
     self.raceRadioGroup:UpdateFromData(IsRaceClicked)
     ZO_CharacterCreate_GamepadRace.sliderObject:UpdateButtons()
 
-    -- if we're focused on race, refocus to update name
-    if ZO_CharacterCreate_GamepadRace.sliderObject.focused then
-        ZO_CharacterCreate_GamepadRace.sliderObject:FocusButton(true)
-    end
-
     local currentAlliance = CharacterCreateGetAlliance(characterMode)
 
     local function IsAllianceClicked(button)
@@ -883,6 +921,9 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
                     control = slider.control,
                     updateFn = UpdateSlider,
                     randomizeFn = RandomizeSlider,
+                    narrationText = function(entryData, entryControl)
+                        return entryData.control.sliderObject:GetNarrationText()
+                    end,
                 }
                 slider.info = info
                 controlData[#controlData + 1] = info
@@ -919,6 +960,9 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
                     control = slider.control,
                     updateFn = UpdateSlider,
                     randomizeFn = RandomizeSlider,
+                    narrationText = function(entryData, entryControl)
+                        return entryData.control.sliderObject:GetNarrationText()
+                    end,
                 }
                 slider.info = info
                 controlData[#controlData + 1] = info
@@ -954,6 +998,7 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
                             control = control,
                             updateFn = controlInfo.updateFn,
                             randomizeFn = controlInfo.randomizeFn,
+                            narrationText = controlInfo.narrationText,
                         }
 
                         control.sliderObject = control.sliderObject or {}
@@ -969,8 +1014,9 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
 
     table.sort(controlData, ControlComparator)
 
+    local NO_SUBCATEGORY_ID = nil
     for _, orderingData in ipairs(controlData) do
-        GAMEPAD_BUCKET_MANAGER:AddControl(orderingData.control, orderingData.bucketIndex, orderingData.updateFn, orderingData.randomizeFn)
+        GAMEPAD_BUCKET_MANAGER:AddControl(orderingData.control, orderingData.bucketIndex, orderingData.updateFn, orderingData.randomizeFn, NO_SUBCATEGORY_ID, orderingData.narrationText)
     end
 
     local appearanceControlsEnabled = self:DoesCurrentCharacterCreateModeAllowAppearanceChange()
@@ -1051,16 +1097,20 @@ function ZO_CharacterCreate_Gamepad:InitializeClassSelectors()
     -- TODO: Create these controls dynamically
     if numClasses <= 4 then
         -- 4 is the default number of classes and they are laid out
-        -- so that the fourth class is i nthe middle column
+        -- so that the fourth class is in the middle column
         layoutTable = {
             ZO_CharacterCreate_GamepadClassColumn11,
             ZO_CharacterCreate_GamepadClassColumn21,
             ZO_CharacterCreate_GamepadClassColumn31,
             ZO_CharacterCreate_GamepadClassColumn22,
         }
-    elseif numClasses <= 6 then
+    else
         -- if we have 5 or 6 classes, then we can lay them out normally
-        -- from left to right without worrying about centering one
+        -- from left to right without worrying about centering one.
+
+        -- We aren't dynamically creating controls so if we have more than 6 classes we won't have enough controls,
+        -- and more controls will have to be added to the XML and additional logic to correctly lay them out.
+        -- Rather than assert and break the whole UI, we'll just display what we can, and DevCharacterCreate will show a big red error label.
         layoutTable = {
             ZO_CharacterCreate_GamepadClassColumn11,
             ZO_CharacterCreate_GamepadClassColumn21,
@@ -1069,12 +1119,6 @@ function ZO_CharacterCreate_Gamepad:InitializeClassSelectors()
             ZO_CharacterCreate_GamepadClassColumn22,
             ZO_CharacterCreate_GamepadClassColumn32,
         }
-    else -- numClasses > CHARACTER_CREATE_MAX_SUPPORTED_CLASSES
-        -- we aren't dynamically creating controls and we are out of controls
-        -- more controls will have to be added to the XML and additional logic to correctly lay them out
-        -- this assert is also duplicated in the keyboard UI so that non-console builds will catch the issue as well
-        local errorString = string.format("The gamepad UI currently only supports up to %d classes, but there are currently %d classes used", CHARACTER_CREATE_MAX_SUPPORTED_CLASSES, numClasses)
-        assert(false, errorString)
     end
 
     -- Hide buttons
@@ -1087,9 +1131,11 @@ function ZO_CharacterCreate_Gamepad:InitializeClassSelectors()
         class.gamepadPosition = gamepadPosition -- TODO: This data is owned by the manager, not us
         local classButton = layoutTable[gamepadPosition]
         activeButtonControls[gamepadPosition] = classButton
-        assert(classButton ~= nil, "Unable to get class button for class #" .. gamepadPosition)
-        self:InitializeSelectorButton(classButton, class, self.classRadioGroup)
-        AddClassSelectionDataToSelector(classButton, class)
+        -- See comment on layoutTable above
+        if classButton then
+            self:InitializeSelectorButton(classButton, class, self.classRadioGroup)
+            AddClassSelectionDataToSelector(classButton, class)
+        end
     end
 
     ZO_CharacterCreate_GamepadClass.sliderObject:SetActiveButtonControls(activeButtonControls)
@@ -1437,6 +1483,16 @@ function ZO_CharacterCreate_Gamepad:InitializeForCharacterCreate()
     self.genderSlider:Update()
 end
 
+function ZO_CharacterCreate_Gamepad:GetCurrentGearPreviewInfo()
+    local gearPreviews
+    if ZO_CHARACTERCREATE_MANAGER:GetCharacterMode() == CHARACTER_MODE_CREATION then
+        gearPreviews = CHARACTER_CREATE_PREVIEW_GEAR_INFO
+    else
+        gearPreviews = CHARACTER_EDIT_PREVIEW_GEAR_INFO
+    end
+    return gearPreviews[self.currentGearPreviewIndex]
+end
+
 -- XML Handlers and global functions
 
 function ZO_CharacterCreate_Gamepad_RandomizeAppearance(randomizeType)
@@ -1472,11 +1528,13 @@ do
         [CHARACTER_CREATE_SELECTOR_RACE] =  function(button)
             GAMEPAD_CHARACTER_CREATE_MANAGER:SetRace(button.defId)
             GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
+            GAMEPAD_BUCKET_MANAGER:NarrateCurrentBucket()
         end,
 
         [CHARACTER_CREATE_SELECTOR_CLASS] = function(button)
             GAMEPAD_CHARACTER_CREATE_MANAGER:SetClass(button.defId)
             GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateClassControl()
+            GAMEPAD_BUCKET_MANAGER:NarrateCurrentBucket()
         end,
 
         [CHARACTER_CREATE_SELECTOR_ALLIANCE] =  function(button)
@@ -1493,6 +1551,7 @@ do
             end
 
             GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
+            GAMEPAD_BUCKET_MANAGER:NarrateCurrentBucket()
         end,
     }
 
@@ -1701,6 +1760,8 @@ function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
                         self.editBoxSelected = selected
                         self.editBoxControl = control.editBoxControl
                     end,
+
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
             -- Done menu item

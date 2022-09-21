@@ -155,6 +155,16 @@ function ZO_WorldMapInfoZoneStory_Gamepad:InitializeList()
     end
     self.list:SetOnTargetDataChangedCallback(OnTargetChanged)
     self.list:SetAlignToScreenCenter(true)
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return self:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return GAMEPAD_WORLD_MAP_INFO:GetHeaderNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.list, narrationInfo)
 end
 
 function ZO_WorldMapInfoZoneStory_Gamepad:InitializeKeybindDescriptor()
@@ -186,6 +196,7 @@ function ZO_WorldMapInfoZoneStory_Gamepad:InitializeKeybindDescriptor()
                 self.tooltipSelectedIndex = ZO_ZoneStories_Gamepad.GetValidatedTooltipIndex(targetData.zoneData, targetData.zoneCompletionType, self.tooltipSelectedIndex + 1)
 
                 self:UpdateTooltip()
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
             end,
         },
 
@@ -201,6 +212,7 @@ function ZO_WorldMapInfoZoneStory_Gamepad:InitializeKeybindDescriptor()
                 self.tooltipSelectedIndex = ZO_ZoneStories_Gamepad.GetValidatedTooltipIndex(targetData.zoneData, targetData.zoneCompletionType, self.tooltipSelectedIndex - 1)
 
                 self:UpdateTooltip()
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
             end,
         }
     }

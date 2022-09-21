@@ -44,12 +44,15 @@ function ZO_ItemSetCollectionsManager:InitializeOptionsDialog()
                     dropdown:SetNoSelectionText(noSelectionText)
                     dropdown:SetMultiSelectionTextFormatter(multiSelectionFormatter)
                     dropdown:LoadData(dropdownData)
+                    SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
                 end,
 
                 callback = function(dialog)
                     local targetControl = dialog.entryList:GetTargetControl()
                     targetControl.dropdown:Activate()
                 end,
+
+                narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
             },
         }
     end
@@ -103,6 +106,7 @@ function ZO_ItemSetCollectionsManager:InitializeOptionsDialog()
                     -- Called when the checkbox is toggled
                     setChecked = function(checkBox, checked)
                         checkBox.dialog.showLocked = checked
+                        SCREEN_NARRATION_MANAGER:QueueDialog(checkBox.dialog)
                     end,
 
                     -- Used during setup to determine if the data should be setup checked or unchecked
@@ -118,6 +122,11 @@ function ZO_ItemSetCollectionsManager:InitializeOptionsDialog()
                     callback = function(dialog)
                         local targetControl = dialog.entryList:GetTargetControl()
                         ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
+                    end,
+
+                    narrationText = function(entryData, entryControl)
+                        local isChecked = entryData.checked(entryData)
+                        return ZO_FormatToggleNarrationText(entryData.text, isChecked)
                     end,
                 },
 

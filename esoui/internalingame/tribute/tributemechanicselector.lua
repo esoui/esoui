@@ -37,7 +37,7 @@ do
         --Only show cards that have valid mechanics for the index they represent
         if self:HasValidMechanic() then
             self.control:SetHidden(false)
-            local mechanicText = self.cardData:GetMechanicText(TRIBUTE_MECHANIC_TRIGGER_ACTIVATION, self.mechanicIndex, PREPEND_ICON)
+            local mechanicText = self.cardData:GetMechanicText(TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ACTIVATION, self.mechanicIndex, PREPEND_ICON)
             self.mechanicText:SetText(mechanicText)
         end
     end
@@ -52,7 +52,7 @@ end
 
 function ZO_TributeMechanicCard:HasValidMechanic()
     if self.cardData then
-        return self.mechanicIndex <= self.cardData:GetNumMechanics(TRIBUTE_MECHANIC_TRIGGER_ACTIVATION)
+        return self.mechanicIndex <= self.cardData:GetNumMechanics(TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ACTIVATION)
     end
     return false
 end

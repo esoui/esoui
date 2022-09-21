@@ -80,6 +80,37 @@ function GroupList_Gamepad:RefreshTooltip()
     --Do nothing, because group list doesn't use a tooltip like other social lists
 end
 
+function GroupList_Gamepad:GetSelectedNarrationText()
+    local ROW_ENTRY_PAUSE_TIME_MS = 100
+    local narration = {}
+    local entryData = self:GetSelectedData()
+    if entryData then
+        --Indicate that this entry is the group leader
+        if entryData.leader then
+            table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GROUP_MENU_NARRATION_GROUP_LEADER)))
+        end
+
+        if entryData.displayName then
+            local narrationStrings = { ZO_GetPlatformAccountLabel(), ZO_FormatUserFacingDisplayName(entryData.displayName) }
+            table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+        end
+
+        local hideCharacterFields = not entryData.hasCharacter or (zo_strlen(entryData.characterName) <= 0)
+        if not hideCharacterFields then
+            local characterNarration = self:GetCharacterFieldsNarration(entryData)
+            ZO_CombineNumericallyIndexedTables(narration, characterNarration)
+
+            --Narrate the selected role icon
+            if entryData.selectedRole and entryData.selectedRole ~= LFG_ROLE_INVALID then
+                local narrationStrings = { GetString(SI_GROUP_LIST_PANEL_ROLES_HEADER), GetString("SI_LFGROLE", entryData.selectedRole) }
+                table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+            end
+        end
+    end
+
+    return narration
+end
+
 ----------------------------------
 -- ZO_SocialOptionsDialogGamepad--
 ----------------------------------

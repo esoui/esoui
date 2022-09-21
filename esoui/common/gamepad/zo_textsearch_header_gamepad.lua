@@ -13,6 +13,10 @@ function ZO_TextSearch_Header_Gamepad:Initialize(control, onTextChangedCallback)
     self.enabled = true
 
     self.headerTextFilterEditBox:SetHandler("OnTextChanged", onTextChangedCallback)
+    --When the edit box loses focus, fire off a callback that screen narration will listen for
+    self.headerTextFilterEditBox:SetHandler("OnFocusLost", function() self:FireCallbacks("EditBoxFocusLost") end, "TextSearchHeader")
+
+    SCREEN_NARRATION_MANAGER:RegisterTextSearchHeader(self)
 end
 
 function ZO_TextSearch_Header_Gamepad:IsActive()
@@ -64,4 +68,8 @@ end
 
 function ZO_TextSearch_Header_Gamepad:GetText()
     return self.headerTextFilterEditBox:GetText()
+end
+
+function ZO_TextSearch_Header_Gamepad:GetEditBox()
+    return self.headerTextFilterEditBox
 end

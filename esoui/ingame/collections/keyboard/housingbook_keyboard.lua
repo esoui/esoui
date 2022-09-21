@@ -31,6 +31,7 @@ function HousingBook_Keyboard:InitializeControls()
     local buttons = contents:GetNamedChild("HousingInteractButtons")
     self.travelToHouseButton = buttons:GetNamedChild("TravelToHouse")
     self.changeNicknameButton = buttons:GetNamedChild("ChangeNickname")
+    self.linkInChatButton = buttons:GetNamedChild("LinkInChat")
 
     self.previewHouseButton = contents:GetNamedChild("PreviewHouseButton")
 end
@@ -82,10 +83,13 @@ function HousingBook_Keyboard:RefreshDetails()
         end
 
         self.travelToHouseButton:SetHidden(not isUnlocked)
-        self.changeNicknameButton:SetHidden(not isUnlocked)
-        self.previewHouseButton:SetHidden(isUnlocked)
-
         self.travelToHouseButton:SetEnabled(canJumpToHouse)
+
+        self.changeNicknameButton:SetHidden(not isUnlocked)
+
+        self.linkInChatButton:SetHidden(not isUnlocked)
+
+        self.previewHouseButton:SetHidden(isUnlocked)
         self.previewHouseButton:SetEnabled(canJumpToHouse)
     end
 end
@@ -95,6 +99,17 @@ function HousingBook_Keyboard:RenameCurrentHouse()
     if collectibleData then
         ZO_CollectionsBook.ShowRenameDialog(collectibleData:GetId())
     end
+end
+
+function HousingBook_Keyboard:LinkInChat()
+    local collectibleData = self.navigationTree:GetSelectedData()
+    if not collectibleData then
+        return
+    end
+
+    local houseId = collectibleData:GetReferenceId()
+    local ownerDisplayName = GetDisplayName()
+    ZO_HousingBook_LinkHouseInChat(houseId, ownerDisplayName)
 end
 
 function HousingBook_Keyboard:RequestJumpToCurrentHouse()
@@ -138,6 +153,10 @@ end
 
 function ZO_HousingBook_Keyboard_OnChangNicknameClicked(control)
     HOUSING_BOOK_KEYBOARD:RenameCurrentHouse()
+end
+
+function ZO_HousingBook_Keyboard_OnLinkInChatClicked(control)
+    HOUSING_BOOK_KEYBOARD:LinkInChat()
 end
 
 function ZO_HousingBook_Keyboard_OnInitialized(control)

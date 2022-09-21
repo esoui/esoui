@@ -73,6 +73,14 @@ function ZO_HelpTutorialsEntries_Gamepad:AddHelpEntry(categoryIndex, helpIndex)
     if IsGamepadHelpOption(showOption) then
         local entryData = ZO_GamepadEntryData:New(helpName)
         entryData.helpIndex = helpIndex
+        entryData.helpCategoryIndex = categoryIndex
+        entryData.narrationText = function(helpEntryData, helpEntryControl)
+            --TODO XAR: Do we want to somehow narrate the image as well?
+            local _, description1, description2, image, gamepadDescription1, gamepadDescription2 = GetHelpInfo(helpEntryData.helpCategoryIndex, helpEntryData.helpIndex)
+            description1 = gamepadDescription1 == "" and description1 or gamepadDescription1
+            description2 = gamepadDescription2 == "" and description2 or gamepadDescription2
+            return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(helpEntryData.text), SCREEN_NARRATION_MANAGER:CreateNarratableObject(description1), SCREEN_NARRATION_MANAGER:CreateNarratableObject(description2) }
+        end
         self.itemList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
     end
 end

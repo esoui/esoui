@@ -155,6 +155,7 @@ function ZO_GuildHeraldryManager_Shared:InitializeColorCategories()
             g = g,
             b = b,
             sortKey = sortKey,
+            narrationText = colorName,
         }
         table.insert(self.colorListsByCategory[hueCategory], data)
     end
@@ -204,7 +205,8 @@ function ZO_GuildHeraldryManager_Shared:BuildStyleGridList()
                 icon = icon,
                 checked = viewingSelectedCategory and i == selectedStyle,
                 gridHeaderName = gridHeaderName,
-                gridHeaderTemplate = templateData.headerTemplate
+                gridHeaderTemplate = templateData.headerTemplate,
+                narrationText = styleName,
             }
 
             self.styleGridList:AddEntry(data, templateData.styleEntryTemplate)

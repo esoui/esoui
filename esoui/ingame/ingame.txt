@@ -249,6 +249,13 @@ EsoUI\Ingame\UtilityWheel\Keyboard\AssignableUtilityWheel_Keyboard.xml
 EsoUI\Ingame\UtilityWheel\Gamepad\AssignableUtilityWheel_Gamepad.lua
 EsoUI\Ingame\UtilityWheel\Gamepad\AssignableUtilityWheel_Gamepad.xml
 
+EsoUI\Ingame\TargetMarker\TargetMarkerWheel_Shared.lua
+EsoUI\Ingame\TargetMarker\Keyboard\TargetMarkerWheel_Keyboard.lua
+EsoUI\Ingame\TargetMarker\Keyboard\TargetMarkerWheel_Keyboard.xml
+EsoUI\Ingame\TargetMarker\Gamepad\TargetMarkerWheel_Gamepad.lua
+EsoUI\Ingame\TargetMarker\Gamepad\TargetMarkerWheel_Gamepad.xml
+EsoUI\Ingame\TargetMarker\TargetMarkerWheel_Manager.lua
+
 EsoUI\Ingame\ActionBar\AbilitySlot.lua
 EsoUI\Ingame\ActionBar\AbilitySlot.xml
 EsoUI\Ingame\ActionBar\ActionButton.lua
@@ -358,6 +365,8 @@ EsoUI\Ingame\Map\Gamepad\WorldMapAntiquities_Gamepad.lua
 EsoUI\Ingame\Map\Gamepad\WorldMapAntiquities_Gamepad.xml
 EsoUI\Ingame\Map\MapPin.lua
 EsoUI\Ingame\Map\MapPin.xml
+EsoUI\Ingame\Map\MapPin_Manager.lua
+EsoUI\Ingame\Map\WorldMapTiles_Manager.lua
 EsoUI\Ingame\Map\WorldMap.lua
 EsoUI\Ingame\Map\WorldMap.xml
 EsoUI\Ingame\Map\CMapHandlers.lua
@@ -1257,6 +1266,7 @@ EsoUI\Ingame\SCT\SCTAnimations.xml
 
 EsoUI\Ingame\ZO_GuildNameFooter\Gamepad\ZO_GuildNameFooter_Gamepad.xml
 
+EsoUI\Ingame\HousingEditor\HousingSocial_Manager.lua
 EsoUI\Ingame\HousingEditor\HousingEditorHud.lua
 EsoUI\Ingame\HousingEditor\HousingEditorHud.xml
 EsoUI\Ingame\HousingEditor\FurnitureClasses_Shared.lua
@@ -1265,6 +1275,8 @@ EsoUI\Ingame\HousingEditor\HouseSettings_Manager.lua
 EsoUI\Ingame\HousingEditor\HousingFurnitureSettings_Base.lua
 EsoUI\Ingame\HousingEditor\HousingFurnitureBrowser_Base.lua
 EsoUI\Ingame\HousingEditor\HouseInformation_Shared.lua
+EsoUI\Ingame\HousingEditor\HouseInformationTracker.lua
+EsoUI\Ingame\HousingEditor\HouseInformationTracker.xml
 EsoUI\Ingame\HousingEditor\Keyboard\FurnitureClasses_Keyboard.lua
 EsoUI\Ingame\HousingEditor\Gamepad\FurnitureClasses_Gamepad.lua
 EsoUI\Ingame\HousingEditor\Gamepad\FurnitureClasses_Gamepad.xml

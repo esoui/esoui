@@ -22,6 +22,10 @@ function ZO_GuildRankIconPicker_Gamepad:Initialize(control)
         entryHeight = ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_GAMEPAD_SIZE,
         entryPaddingX = ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_GAMEPAD_OFFSET,
         entryPaddingY = ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_GAMEPAD_OFFSET,
+        narrationText = function(entryData)
+            local formatter = entryData.isCurrent() and SI_GAMEPAD_GUILD_RANK_SELECTED_ICON_NARRATION_FORMATTER or SI_GAMEPAD_GUILD_RANK_ICON_NARRATION_FORMATTER
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(formatter, entryData.iconIndex))
+        end,
     }
 
     ZO_GuildRankIconPicker_Shared.Initialize(self, control, templateData)

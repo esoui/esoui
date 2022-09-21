@@ -184,6 +184,12 @@ function ZO_GamepadTooltip:SetStatusLabelText(tooltipType, stat, value, visualLa
 
     local tooltipContainer = self:GetTooltipContainer(tooltipType)
     if tooltipContainer then
+        --Set the status label narration text on the specified tooltip
+        local tooltip = self:GetTooltip(tooltipType)
+        if tooltip then
+            tooltip:SetStatusLabelNarrationText(stat, value, visualLayer)
+        end
+
         tooltipContainer.statusLabel:SetText(stat)
 
         if visualLayer ~= "" then
@@ -342,6 +348,30 @@ end
 
 function ZO_GamepadTooltip:GetTooltipInfo(tooltipType)
     return self.tooltips[tooltipType]
+end
+
+function ZO_GamepadTooltip:GetNarrationText(optionalTooltipType)
+    if self.tooltips[optionalTooltipType] then
+        --If a valid tooltip type was specified, grab the narration text for that one
+        local tooltip = self:GetTooltip(optionalTooltipType)
+        if tooltip then
+            return tooltip:GetNarrationText()
+        else
+            return ""
+        end
+    else
+        --If we didn't get a valid tooltip type, just get the narration text for every visible tooltip
+        local narrationText = {}
+        for tooltipType, tooltip in pairs(self.tooltips) do
+            if tooltip.fragment and tooltip.fragment:IsShowing() then
+                local tooltip = self:GetTooltip(tooltipType)
+                if tooltip then
+                    table.insert(narrationText, tooltip:GetNarrationText())
+                end
+            end
+        end
+        return narrationText
+    end
 end
 
 function ZO_GamepadTooltip_OnInitialized(control, dialogControl)

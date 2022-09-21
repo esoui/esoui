@@ -15,6 +15,8 @@ local function CreateGiftMessageEntryData()
         control.editBoxControl:SetText(giftMessageEntryData.dialog.data.giftMessage)
     end
 
+    giftMessageEntryData.narrationText = ZO_GetDefaultParametricListEditBoxNarrationText
+
     return giftMessageEntryData
 end
 
@@ -126,6 +128,7 @@ do
                     local targetControl = dialog.entryList:GetTargetControl()
                     if targetData.messageEntry and targetControl then
                         targetControl.editBoxControl:SetText(GetRandomGiftThankYouNoteText())
+                        SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                     end
                 end,
             },

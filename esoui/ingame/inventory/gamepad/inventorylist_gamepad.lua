@@ -187,6 +187,14 @@ function ZO_GamepadInventoryList:AddInventoryType(inventoryType)
     self:RefreshList()
 end
 
+function ZO_GamepadInventoryList:RegisterForScreenNarration(listScreen)
+    SCREEN_NARRATION_MANAGER:RegisterParametricListScreen(self.list, listScreen)
+end
+
+function ZO_GamepadInventoryList:UnregisterForScreenNarration()
+    SCREEN_NARRATION_MANAGER:UnregisterParametricList(self.list)
+end
+
 --[[
 Add a function called when the selected item is changed.
 ]]--
@@ -283,6 +291,13 @@ Returns the currently selected entry's data.
 ]]--
 function ZO_GamepadInventoryList:GetTargetData()
     return self.list:GetTargetData()
+end
+
+--[[
+Returns the currently selected entry's control.
+]]--
+function ZO_GamepadInventoryList:GetTargetControl()
+    return self.list:GetTargetControl()
 end
 
 --[[

@@ -76,7 +76,7 @@ end
 local function UpdateTextOrderingTextures(header, arrow, sortOrder)
     UpdateArrowTexture(arrow, sortOrder)
 
-    local nameControl = GetControl(header, "Name")
+    local nameControl = header:GetNamedChild("Name")
     local textWidth = nameControl:GetTextDimensions()
     local alignmentFn = sortArrowAlignments[nameControl:GetHorizontalAlignment()]
     if alignmentFn then
@@ -145,6 +145,10 @@ function ZO_SortHeaderGroup:IsCurrentSelectedHeader(header)
     return self.selectedSortHeader == header
 end
 
+function ZO_SortHeaderGroup:IsKeyCurrentSelectedIndex(key)
+    return self:HeaderForIndex(self.selectedIndex) == self:HeaderForKey(key)
+end
+
 function ZO_SortHeaderGroup:OnHeaderClicked(header, suppressCallbacks, forceReselect, forceSortDirection)
     if self:IsEnabled() then
         local resetSortDir = false
@@ -175,6 +179,10 @@ function ZO_SortHeaderGroup:HeaderForKey(key)
             return header
         end
     end
+end
+
+function ZO_SortHeaderGroup:HeaderForIndex(index)
+    return self.sortHeaders[index]
 end
 
 function ZO_SortHeaderGroup:SelectHeaderByKey(key, suppressCallbacks, forceReselect, forceSortDirection)
@@ -238,8 +246,34 @@ function ZO_SortHeaderGroup:SetHeaderNameForKey(key, name)
     end
 end
 
+function ZO_SortHeaderGroup:GetHeaderNameForKey(key)
+    local name = ""
+    local header = self:HeaderForKey(key)
+    if header then
+        --TODO XAR: Look into storing this information somewhere so we don't have to pull it directly from the control
+        name = header:GetNamedChild("Name"):GetText()
+    end
+    return name
+end
+
+function ZO_SortHeaderGroup:GetSortHeaderNarrationText(key)
+    local narrationText = ""
+    local header = self:HeaderForKey(key)
+    if header then
+        local name = self:GetHeaderNameForKey(key)
+        --If this header is the currently active sort, then include the direction
+        if header == self.selectedSortHeader then
+            local order = self.sortDirection == ZO_SORT_ORDER_DOWN and GetString(SI_SCREEN_NARRATION_SORT_ORDER_DOWN) or GetString(SI_SCREEN_NARRATION_SORT_ORDER_UP)
+            narrationText = zo_strformat(SI_SCREEN_NARRATION_SORT_HEADER, name, order)
+        else
+            narrationText = name
+        end
+    end
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationText)
+end
+
 function ZO_SortHeader_Initialize(control, name, key, initialDirection, alignment, font, highlightTemplate)
-    local nameControl = GetControl(control, "Name")
+    local nameControl = control:GetNamedChild("Name")
 
     if font then
         nameControl:SetFont(font)
@@ -435,6 +469,7 @@ function ZO_SortHeaderGroup:SetSelectedIndex(selectedIndex)
     local selectedControl = self.sortHeaders[selectedIndex]
     HighlightControl(self, selectedControl)
     self.selectedIndex = selectedIndex
+    self:FireCallbacks("HeaderSelected", selectedControl.key)
 end
 
 function ZO_SortHeaderGroup:MakeSelectedSortHeaderSelectedIndex()

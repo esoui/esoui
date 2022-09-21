@@ -80,7 +80,7 @@ function ZO_Armory_Keyboard:InitializeKeybindStripDescriptors()
             end,
             enabled = function()
                 local function disabledAlertText()
-                    return zo_strformat(SI_ARMORY_BUILD_OPERATION_COOLDOWN_ALERT, ZO_FormatTimeMilliseconds(ARMORY_OPERATION_COOLDOWN_DURATION_MS, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
+                    return zo_strformat(SI_ARMORY_BUILD_OPERATION_COOLDOWN_ALERT, ZO_FormatTimeMilliseconds(GetArmoryOperationsCooldownDurationMs(), TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
                 end
                 return not ZO_ARMORY_MANAGER:IsBuildOperationInProgress(), disabledAlertText
             end,
@@ -100,7 +100,7 @@ function ZO_Armory_Keyboard:InitializeKeybindStripDescriptors()
             end,
             enabled = function()
                 local function disabledAlertText()
-                    return zo_strformat(SI_ARMORY_BUILD_OPERATION_COOLDOWN_ALERT, ZO_FormatTimeMilliseconds(ARMORY_OPERATION_COOLDOWN_DURATION_MS, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
+                    return zo_strformat(SI_ARMORY_BUILD_OPERATION_COOLDOWN_ALERT, ZO_FormatTimeMilliseconds(GetArmoryOperationsCooldownDurationMs(), TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
                 end
                 return not ZO_ARMORY_MANAGER:IsBuildOperationInProgress(), disabledAlertText
             end,

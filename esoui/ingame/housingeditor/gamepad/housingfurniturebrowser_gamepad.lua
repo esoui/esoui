@@ -70,23 +70,41 @@ function ZO_HousingFurnitureBrowser_Gamepad:InitializeHeader()
             callback = function()
                 self:SetMode(HOUSING_BROWSER_MODE.PLACEMENT)
             end,
+            visible = function()
+                return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
+            end,
         },
         {
             text = GetString(SI_HOUSING_FURNITURE_TAB_PURCHASE),
             callback = function()
                 self:SetMode(HOUSING_BROWSER_MODE.PRODUCTS)
             end,
+            visible = function()
+                return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
+            end,
         },
         {
-            text = GetString(SI_HOUSING_FURNITURE_TAB_RETRIEVAL),
+            text = function()
+                if HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
+                    return GetString(SI_HOUSING_FURNITURE_TAB_RETRIEVAL)
+                else
+                    return GetString(SI_HOUSING_FURNITURE_TAB_FURNITURE_LIST)
+                end
+            end,
             callback = function()
                 self:SetMode(HOUSING_BROWSER_MODE.RETRIEVAL)
+            end,
+            visible = function()
+                return HOUSING_EDITOR_STATE:CanLocalPlayerBrowse()
             end,
         },
         {
             text = GetString(SI_HOUSING_FURNITURE_TAB_SETTINGS),
             callback = function()
                 self:SetMode(HOUSING_BROWSER_MODE.SETTINGS)
+            end,
+            visible = function()
+                return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
             end,
         },
     }
@@ -206,7 +224,7 @@ end
 do
     function ZO_HousingFurnitureBrowser_Gamepad:RefreshCategoryHeaderData()
         local mode = self.mode
-        if mode == HOUSING_BROWSER_MODE.PLACEMENT or mode == HOUSING_BROWSER_MODE.PRODUCTS or mode == HOUSING_BROWSER_MODE.RETRIEVAL then
+        if (mode == HOUSING_BROWSER_MODE.PLACEMENT or mode == HOUSING_BROWSER_MODE.PRODUCTS or mode == HOUSING_BROWSER_MODE.RETRIEVAL) and HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
             self.categoryHeaderData.data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY)
             self.categoryHeaderData.data1Text = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
         else

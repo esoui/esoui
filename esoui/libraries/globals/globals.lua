@@ -1,4 +1,17 @@
 --[[ A Generally Accessible place for global callback registration and dispersal ]]--
+
+local g_stadiaLoggingEnabled = false
+
+function ZO_SetStadiaLogging(enabled)
+    g_stadiaLoggingEnabled = enabled
+end
+
+function ZO_OutputStadiaLog(message)
+    if IsHeronUI() and WriteToInterfaceLog and g_stadiaLoggingEnabled then
+        WriteToInterfaceLog(message)
+    end
+end
+
 CALLBACK_MANAGER = ZO_CallbackObject:New()
 
 function NormalizePointToControl(x, y, control)

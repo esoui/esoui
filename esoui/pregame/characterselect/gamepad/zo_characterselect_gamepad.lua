@@ -22,13 +22,13 @@ function ZO_CharacterSelect_Gamepad_ReturnToCharacterList(activateViewPort)
     local self = ZO_CharacterSelect_Gamepad
 
     SCENE_MANAGER:AddFragment(CHARACTER_SELECT_CHARACTERS_GAMEPAD_FRAGMENT)
-    ZO_CharacterSelect_GamepadCharacterDetails:SetHidden(false)
 
     if activateViewPort then
         ZO_CharacterSelect_GamepadCharacterViewport.Activate()
     end
 
     self.characterList:Activate()
+    ZO_CharacterSelect_Gamepad_RefreshTooltip()
 end
 
 function ZO_CharacterSelect_Gamepad_InitConfirmDeleteCustomDialog()
@@ -55,6 +55,8 @@ function ZO_CharacterSelect_Gamepad_InitConfirmDeleteCustomDialog()
         control.editBoxControl:SetMaxInputChars(32) -- 32 is oversized, but gives wiggle-room
         control.editBoxControl:SetText(deleteCharacterText)
     end
+
+    deleteEntryData.narrationText = ZO_GetDefaultParametricListEditBoxNarrationText
 
     -- Submit entry
     local submitEntryData = ZO_GamepadEntryData:New(GetString(SI_OTP_DIALOG_SUBMIT))
@@ -172,11 +174,11 @@ local function GetClassIconGamepad(classIdRequested)
     return nil
 end
 
-local function AddCharacterListEntry(template, entryData, list, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding, selectedCenterOffset)
+local function AddCharacterListEntry(template, entryData, list, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding)
     entryData:SetFontScaleOnSelection(true)
     entryData:SetIconTintOnSelection(true)
 
-    list:AddEntry(template, entryData, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding, selectedCenterOffset)
+    list:AddEntry(template, entryData, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding)
 end
 
 local function CharacterListEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
@@ -285,12 +287,10 @@ local function CreateExtraInfoControls(self)
 
     if self.serviceMode == SERVICE_TOKEN_NONE then
         local function ServiceTokenTooltipFunction(tokenType)
-            ZO_CharacterSelect_GamepadCharacterDetails:SetHidden(true)
             GAMEPAD_TOOLTIPS:LayoutServiceTokenTooltip(GAMEPAD_LEFT_TOOLTIP, tokenType)
         end
 
         local function ServiceTokenHideTooltipFunction()
-            ZO_CharacterSelect_GamepadCharacterDetails:SetHidden(false)
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
         end
 
@@ -358,17 +358,20 @@ local function RefreshServiceHeaderVisibility(self)
 
     if headerVisible then
         local tokenCount = GetNumServiceTokens(self.serviceMode)
-        self.serviceTokensLabel:SetText(tokenCount)
 
         local instructions = ""
         if self.serviceMode ~= SERVICE_TOKEN_NONE then
             instructions = zo_strformat(SI_SERVICE_TOKEN_INSTRUCTIONS, GetString("SI_SERVICETOKENTYPE", self.serviceMode))
         end
 
-        self.serviceInstructions:SetText(instructions)
+        self.headerData.data1HeaderText = GetString(SI_SERVICE_TOKEN_COUNT_TOKENS_HEADER)
+        self.headerData.data1Text = tokenCount
+        self.headerData.messageText = instructions
+    else
+        self.headerData.data1HeaderText = ""
+        self.headerData.data1Text = ""
+        self.headerData.messageText = ""
     end
-
-    self.serviceHeader:SetHidden(not headerVisible)
 end
 
 -- End Extra Info functions
@@ -537,7 +540,7 @@ local function CreateList(self, scrollToBest)
 
                 slot = slot + 1
                 numCharacterSlotsAdded = numCharacterSlotsAdded + 1
-                AddCharacterListEntry(template, characterEntry, self.characterList, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding, selectedCenterOffset)
+                AddCharacterListEntry(template, characterEntry, self.characterList, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding)
             end
         end
     end
@@ -715,7 +718,6 @@ local function InitKeybindingDescriptor(self)
 
                 PlaySound(SOUNDS.DIALOG_ACCEPT)
                 SCENE_MANAGER:RemoveFragment(CHARACTER_SELECT_CHARACTERS_GAMEPAD_FRAGMENT)
-                ZO_CharacterSelect_GamepadCharacterDetails:SetHidden(true)
                 ZO_CharacterSelect_Gamepad_BeginRename()
             end,
         },
@@ -902,73 +904,18 @@ local function InitKeybindingDescriptor(self)
     }
 
     self.charListKeybindStripDescriptor = self.charListKeybindStripDescriptorDefault
-
-end
-
-local function ZO_CharacterSelect_Gamepad_GetFormattedRace(characterData)
-    local raceName = characterData.race and GetRaceName(characterData.gender, characterData.race) or GetString(SI_UNKNOWN_RACE)
-
-    return zo_strformat(SI_CHARACTER_SELECT_RACE, raceName)
-end
-
-function ZO_CharacterSelect_Gamepad_GetFormattedLevel(characterData)
-    local gamepadIconString = "EsoUI/Art/Champion/Gamepad/gp_champion_icon.dds"
-    local formattedIcon = zo_iconFormat(gamepadIconString, "100%", "100%")
-    if characterData.championPoints and characterData.championPoints > 0 then
-        return zo_strformat(SI_CHARACTER_SELECT_LEVEL_CHAMPION, formattedIcon, characterData.championPoints)
-    else
-        return zo_strformat(SI_CHARACTER_SELECT_LEVEL_VALUE, characterData.level)
-    end
-end
-
-local function ZO_CharacterSelect_Gamepad_GetFormattedClass(characterData)
-    local className = characterData.class and GetClassName(characterData.gender, characterData.class) or GetString(SI_UNKNOWN_CLASS)
-
-    return zo_strformat(SI_CHARACTER_SELECT_CLASS, className)
-end
-
-local function ZO_CharacterSelect_Gamepad_GetFormattedAlliance(characterData)
-    local allianceName = GetAllianceName(characterData.alliance) or GetString(SI_UNKNOWN_CLASS)
-
-    return zo_strformat(SI_CHARACTER_SELECT_ALLIANCE, allianceName)
-end
-
-local function ZO_CharacterSelect_Gamepad_GetFormattedLocation(characterData)
-    local locationName = characterData.location ~= 0 and GetLocationName(characterData.location) or GetString(SI_UNKNOWN_LOCATION)
-
-    return zo_strformat(SI_CHARACTER_SELECT_LOCATION, locationName)
 end
 
 local function SelectedListDataChanged(self, list, selectedData, oldSelectedData)
     if selectedData and selectedData.type == ENTRY_TYPE_EXTRA_INFO then
         g_canPlayCharacter = false
-        self.characterNeedsRename:SetHidden(true)
-        self.characterDetails:SetHidden(true)
         return
     end
 
-    local shouldShowCharacterDetails = false
     if selectedData then
         g_canPlayCharacter = false
         if selectedData.type == ENTRY_TYPE_CHARACTER then
-            local characterName = self.characterDetails:GetNamedChild("Name")
-            local characterRace = self.characterDetails:GetNamedChild("RaceContainer"):GetNamedChild("Race")
-            local characterLevel = self.characterDetails:GetNamedChild("LevelContainer"):GetNamedChild("Level")
-            local characterClass = self.characterDetails:GetNamedChild("ClassContainer"):GetNamedChild("Class")
-            local characterAlliance = self.characterDetails:GetNamedChild("AllianceContainer"):GetNamedChild("Alliance")
-            local characterLocation = self.characterDetails:GetNamedChild("LocationContainer"):GetNamedChild("Location")
-
-            characterName:SetText(ZO_CharacterSelect_Manager_GetFormattedCharacterName(selectedData))
-            characterRace:SetText(ZO_CharacterSelect_Gamepad_GetFormattedRace(selectedData))
-            characterLevel:SetText(ZO_CharacterSelect_Gamepad_GetFormattedLevel(selectedData))
-            characterClass:SetText(ZO_CharacterSelect_Gamepad_GetFormattedClass(selectedData))
-            characterAlliance:SetText(ZO_CharacterSelect_Gamepad_GetFormattedAlliance(selectedData))
-            characterLocation:SetText(ZO_CharacterSelect_Gamepad_GetFormattedLocation(selectedData))
-
             g_canPlayCharacter = true
-
-            -- Only show character details if the character is in a valid location
-            shouldShowCharacterDetails = selectedData.location and selectedData.location ~= 0
         end
 
         RefreshKeybindStripForCharacterList(self, selectedData)
@@ -976,14 +923,34 @@ local function SelectedListDataChanged(self, list, selectedData, oldSelectedData
         CHARACTER_SELECT_MANAGER:SetPlayerSelectedCharacterId(nil)
     end
 
-    ZO_CharacterSelect_GamepadCharacterDetails:SetHidden(not shouldShowCharacterDetails)
-
-    -- Handle needs rename text
-    local needsRename = selectedData and selectedData.needsRename
-    self.characterDetails:SetHidden(needsRename)
-    self.characterNeedsRename:SetHidden(not needsRename)
-
     g_lastSelectedEntryData = selectedData
+
+    ZO_CharacterSelect_Gamepad_RefreshTooltip()
+end
+
+function ZO_CharacterSelect_Gamepad_RefreshTooltip()
+    local self = ZO_CharacterSelect_Gamepad
+    if g_lastSelectedEntryData and g_lastSelectedEntryData.type == ENTRY_TYPE_EXTRA_INFO then
+        return
+    end
+
+    --Make sure the screen is actually showing before trying to do anything with the tooltips
+    if self.active then
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        local shouldShowCharacterDetails = false
+        if g_lastSelectedEntryData and g_lastSelectedEntryData.type == ENTRY_TYPE_CHARACTER then
+            -- Only show character details if the character is in a valid location
+            shouldShowCharacterDetails = g_lastSelectedEntryData.location and g_lastSelectedEntryData.location ~= 0 and not g_lastSelectedEntryData.needsRename
+        end
+
+        --Handle tooltips
+        local needsRename = g_lastSelectedEntryData and g_lastSelectedEntryData.needsRename
+        if needsRename then
+            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_CHARACTER_SELECT_GAMEPAD_RENAME_TEXT))
+        elseif shouldShowCharacterDetails then
+            GAMEPAD_TOOLTIPS:LayoutCharacterDetailsTooltip(GAMEPAD_LEFT_TOOLTIP, g_lastSelectedEntryData)
+        end
+    end
 end
 
 function ZO_CharacterSelect_Gamepad_RefreshCharacter()
@@ -1199,15 +1166,23 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
 
     self.UpdateDirectionalInput = ZO_CharacterSelect_Gamepad_UpdateDirectionalInput
     self.characterList:SetDirectionalInputEnabled(false)
-
-    self.characterDetails = self:GetNamedChild("CharacterDetails"):GetNamedChild("Container")
-    self.characterNeedsRename = self:GetNamedChild("CharacterDetails"):GetNamedChild("NeedsRename")
     self.header = self:GetNamedChild("Mask"):GetNamedChild("Characters"):GetNamedChild("HeaderContainer"):GetNamedChild("Header")
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
     self.headerData =
     {
         titleText = GetString(SI_CHARACTER_SELECT_GAMEPAD_SELECT_CHARACTER),
     }
+
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return CHARACTER_SELECT_CHARACTERS_GAMEPAD_FRAGMENT:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.characterList, narrationInfo)
 
     -- Extra Info controls
     self.extraInfoContainer = self:GetNamedChild("Mask"):GetNamedChild("Characters"):GetNamedChild("HeaderContainer"):GetNamedChild("ExtraInfo")
@@ -1218,6 +1193,7 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
     self.extraInfoFocus:SetFocusChangedCallback(function(focusItem)
         if focusItem then
             ZO_CharacterSelect_Gamepad_UpdateExtraInfoKeybinds(focusItem.control)
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.extraInfoFocus)
         end
     end)
 
@@ -1225,10 +1201,6 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
 
     -- Service header controls
     self.serviceMode = SERVICE_TOKEN_NONE
-
-    self.serviceHeader = self:GetNamedChild("Mask"):GetNamedChild("Characters"):GetNamedChild("HeaderContainer"):GetNamedChild("CurrentServiceInfo")
-    self.serviceTokensLabel = self.serviceHeader:GetNamedChild("Tokens")
-    self.serviceInstructions = self.serviceHeader:GetNamedChild("Instructions")
 
     InitKeybindingDescriptor(self) -- Depends on self.characterList since we bind to it.
 
@@ -1370,7 +1342,7 @@ function ZO_CharacterSelect_Gamepad_BeginRename()
         }
 
         ZO_Dialogs_ShowGamepadDialog("CHARACTER_SELECT_RENAME_CHARACTER_GAMEPAD", dialogData)
-        ZO_CharacterSelect_GamepadCharacterDetails:SetHidden(true)
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     end
 end
 

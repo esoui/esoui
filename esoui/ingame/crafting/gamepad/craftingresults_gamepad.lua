@@ -55,6 +55,14 @@ do
         end
     end
 
+    local function NarrationFunction(data)
+        local narration = SCREEN_NARRATION_MANAGER:CreateNarratableObject(data.text)
+        if data.stack and data.stack > 0 then
+            narration:AddNarrationText(data.stack)
+        end
+        return narration
+    end
+
     function ZO_CraftingResults_Gamepad:AreCraftingResultLinesEqual(oldLines, newLines)
         -- all old lines must be checked against all new lines, as they can show up in any order
         for _, oldLine in ipairs(oldLines) do
@@ -98,6 +106,7 @@ do
             headerTemplateName = "ZO_GamepadCraftingResultsHeaderTemplate",
             headerSetup = SetupHeader,
             headerEqualityCheck = AreHeadersEqual,
+            narrationText = NarrationFunction,
             displayOlderLinesFirst = true,
         }
         ZO_CraftingAlertAddTemplate_Gamepad(GAMEPAD_CRAFTING_RESULTS_TEMPLATE, templateData)

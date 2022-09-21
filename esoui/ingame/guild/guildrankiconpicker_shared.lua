@@ -16,6 +16,7 @@ function ZO_GuildRankIconPicker_Shared:Initialize(control, templateData)
         entryHeight - The height to be used for the entryTemplate,
         entryPaddingX - The padding in pixels between icons horizontally,
         entryPaddingY - The padding in pixels between icons vertically,
+        narrationText - Optional: The text used to narrate the entry when using screen narration. Can be a function or a string,
     ]]
     self.templateData = templateData
 end
@@ -58,7 +59,8 @@ function ZO_GuildRankIconPicker_Shared:CreateRankIconPickerDataObject(index)
         isCurrent = function()
             local selectedRank = self.getSelectedRankFunc and self.getSelectedRankFunc()
             return selectedRank and selectedRank:GetIconIndex() == index or false
-        end
+        end,
+        narrationText = self.templateData.narrationText,
     }
     return data
 end

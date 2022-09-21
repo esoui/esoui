@@ -1,9 +1,5 @@
 ZO_MapHouses_Gamepad = ZO_MapHouses_Shared:Subclass()
 
-function ZO_MapHouses_Gamepad:New(...)
-    return ZO_MapHouses_Shared.New(self,...)
-end
-
 function ZO_MapHouses_Gamepad:Initialize(control)
     ZO_MapHouses_Shared.Initialize(self, control, ZO_SimpleSceneFragment)
     self:SetNoHousesLabelControl(control:GetNamedChild("Main"):GetNamedChild("NoHouses"))
@@ -16,6 +12,16 @@ function ZO_MapHouses_Gamepad:InitializeList(control)
     self.list:AddDataTemplate("ZO_GamepadMenuEntryTemplateLowercase42", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplateLowercase42", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
     self.list:SetAlignToScreenCenter(true)
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return self:GetFragment():IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return GAMEPAD_WORLD_MAP_INFO:GetHeaderNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.list, narrationInfo)
 end
 
 function ZO_MapHouses_Gamepad:SetListEnabled(enabled)
@@ -83,7 +89,7 @@ function ZO_MapHouses_Gamepad:InitializeKeybindDescriptor()
 
             callback = function()
                 local targetData = self.list:GetTargetData()
-                ZO_WorldMap_SetMapByIndex(targetData.mapIndex)
+                WORLD_MAP_MANAGER:SetMapByIndex(targetData.mapIndex)
                 ZO_WorldMap_PanToWayshrine(targetData.nodeIndex)
                 PlaySound(SOUNDS.MAP_LOCATION_CLICKED)
             end,

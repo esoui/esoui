@@ -13,7 +13,8 @@ function ZO_ChatMenu_Gamepad:Initialize(control)
 
     ZO_InteractiveChatLog_Gamepad.Initialize(self, control, CHAT_MENU_GAMEPAD_SCENE)
 
-    self.currentLinkIndex = 1
+    self.activeLinks = ZO_GamepadLinks:New()
+    self.activeLinks:SetKeybindAlignment(KEYBIND_STRIP_ALIGN_RIGHT)
 
     self:InitializeRefreshGroup()
 end
@@ -46,6 +47,9 @@ function ZO_ChatMenu_Gamepad:InitializeTextEdit()
             if not self.textEdit:HasFocus() then
                 self.textEdit:TakeFocus()
             end
+        end,
+        activate = function()
+            SCREEN_NARRATION_MANAGER:QueueEditBox(self.textEdit, self.selectedChannelText)
         end,
         highlight = self.textControlHighlight,
         control = self.textEdit,
@@ -98,116 +102,18 @@ function ZO_ChatMenu_Gamepad:RegisterForEvents()
 end
 
 function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
-    local function LinkShouldersEnabled()
-        local targetData = self.list:GetTargetData()
-        if targetData then
-            local links = targetData.data.links
-            if links then
-                return #links > 1
-            end
-        end
-        return false
-    end
-
     self.chatEntryListKeybindDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
         -- Back to text input
         {
             name = GetString(SI_GAMEPAD_BACK_OPTION),
-
             keybind = "UI_SHORTCUT_NEGATIVE",
-
             callback = function()
                 self:FocusTextInput()
             end,
-
             sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
-
-        -- Open Link (super special keybind)
-        {
-            name = function()
-                local targetData = self.list:GetTargetData()
-                local currentLink = targetData.data.links[self.currentLinkIndex]
-                if currentLink.linkType == GUILD_LINK_TYPE then
-                    return GetString(SI_GAMEPAD_GUILD_LINK_KEYBIND)
-                elseif currentLink.linkType == HELP_LINK_TYPE then
-                    return GetString(SI_GAMEPAD_OPEN_HELP_LINK_KEYBIND)
-                end
-            end,
-
-            keybind = "UI_SHORTCUT_SECONDARY",
-
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-
-            callback = function()
-                local targetData = self.list:GetTargetData()
-                local currentLink = targetData.data.links[self.currentLinkIndex]
-                if currentLink.linkType == GUILD_LINK_TYPE then
-                    local text, color, linkType, guildId = ZO_LinkHandler_ParseLink(currentLink.link)
-                    GUILD_BROWSER_GUILD_INFO_GAMEPAD:ShowWithGuild(guildId)
-                elseif currentLink.linkType == HELP_LINK_TYPE then
-                    local helpCategoryIndex, helpIndex = GetHelpIndicesFromHelpLink(currentLink.link)
-                    if helpCategoryIndex and helpIndex then
-                        HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(helpCategoryIndex, helpIndex)
-                    end
-                end
-            end,
-
-            visible = function()
-                local targetData = self.list:GetTargetData()
-                if targetData.data.links then
-                    local currentLink = targetData.data.links[self.currentLinkIndex]
-                    if currentLink then
-                        return currentLink.linkType == GUILD_LINK_TYPE or currentLink.linkType == HELP_LINK_TYPE
-                    end
-                end
-                return false
-            end
-        },
-
-        -- cycle tooltip
-        {
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-
-            name = GetString(SI_GAMEPAD_CHAT_MENU_CYCLE_TOOLTIP_BINDING),
-
-            keybind = "UI_SHORTCUT_INPUT_RIGHT",
-
-            callback = function()
-                self.currentLinkIndex = self.currentLinkIndex + 1
-                local targetData = self.list:GetTargetData()
-                if self.currentLinkIndex > #targetData.data.links then
-                    self.currentLinkIndex = 1
-                end
-                self:RefreshTooltip(targetData)
-                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.chatEntryListKeybindDescriptor)
-            end,
-
-            visible = LinkShouldersEnabled,
-        },
-
-        {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = "Gamepad Chat Previous Link",
-
-            ethereal = true,
-
-            keybind = "UI_SHORTCUT_INPUT_LEFT",
-
-            callback = function()
-                self.currentLinkIndex = self.currentLinkIndex - 1
-                local targetData = self.list:GetTargetData()
-                if self.currentLinkIndex == 0 then
-                    self.currentLinkIndex = #targetData.data.links
-                end
-                self:RefreshTooltip(targetData)
-            end,
-
-            enabled = LinkShouldersEnabled,
-        }
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.chatEntryListKeybindDescriptor, self.list)
 
@@ -267,19 +173,24 @@ end
 function ZO_ChatMenu_Gamepad:OnShow()
     self.channelRefreshGroup:TryClean()
     self.list:RefreshVisible()
-    if not self.isFocusSetFromLink then
+
+    if not self.pendingLinkFocus then
         self:FocusTextInput()
     else
+        self:SelectMessageEntryByLinkInternal(self.pendingLinkFocus)
         local OLD_TARGET_DATA = nil
         local REACHED_TARGET = nil
         local targetData = self.list:GetTargetData()
         local targetSelectedIndex = self.list:GetSelectedIndex()
         self:OnTargetChanged(self.list, targetData, OLD_TARGET_DATA, REACHED_TARGET, targetSelectedIndex)
     end
-    self.isFocusSetFromLink = nil
+
+    self.pendingLinkFocus = nil
 end
 
 function ZO_ChatMenu_Gamepad:FocusTextInput()
+    self.activeLinks:ResetLinks()
+
     ZO_InteractiveChatLog_Gamepad.FocusTextInput(self)
 
     if self.scene:IsShowing() then
@@ -297,7 +208,7 @@ function ZO_ChatMenu_Gamepad:SetupLogMessage(control, data, selected, reselectin
     control.label:SetDesaturation(useSelectedColor and 0 or ZO_CHAT_MENU_GAMEPAD_DESATURATION_MODIFIER)
 end
 
-function ZO_ChatMenu_Gamepad:AddMessage(message, category, targetChannel, fromDisplayName, rawMessageText)
+function ZO_ChatMenu_Gamepad:AddMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
     if message ~= nil then
         local targetIndex = self.list:GetTargetIndex()
         local selectingMostRecent = targetIndex == #self.messageEntries
@@ -320,6 +231,7 @@ function ZO_ChatMenu_Gamepad:AddMessage(message, category, targetChannel, fromDi
             targetChannel = targetChannel,
             rawMessageText = rawMessageText,
             links = links,
+            narrationMessage = narrationMessage,
         }
 
         self.nextMessageId = self.nextMessageId + 1
@@ -340,13 +252,11 @@ function ZO_ChatMenu_Gamepad:AddMessage(message, category, targetChannel, fromDi
 end
 
 function ZO_ChatMenu_Gamepad:OnTargetChanged(list, targetData, ...)
-    self.currentLinkIndex = 1
+    self.activeLinks:ResetLinks()
 
     ZO_InteractiveChatLog_Gamepad.OnTargetChanged(self, list, targetData, ...)
 
-    if self.chatEntryPanelFocalArea:IsFocused() then
-        self:RefreshTooltip(targetData)
-    end
+    self:RefreshTooltip(targetData)
 end
 
 function ZO_ChatMenu_Gamepad:SetupOptions(entryData)
@@ -394,14 +304,13 @@ end
 function ZO_ChatMenu_Gamepad:OnChatEntryPanelActivated()
     ZO_InteractiveChatLog_Gamepad.OnChatEntryPanelActivated(self)
 
-    self.currentLinkIndex = 1
     self:RefreshTooltip()
 end
 
 function ZO_ChatMenu_Gamepad:OnChatEntryPanelDeactivated()
     ZO_InteractiveChatLog_Gamepad.OnChatEntryPanelDeactivated(self)
 
-    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    self.activeLinks:ResetLinks()
 end
 
 -- End ZO_InteractiveChatLog_Gamepad Overrides
@@ -415,6 +324,14 @@ function ZO_ChatMenu_Gamepad:InitializeChannelDropdown()
     channelDropdown:SetDontSetSelectedTextOnSelection(true)
     self.selectedChannelLabel = channelDropdownControl:GetNamedChild("SelectedItemText")
     self.selectedChannelFakeLabel = channelDropdownControl:GetNamedChild("SelectedItemFakeTextForResizing")
+
+    local function DropDownDeactivatedCallback()
+        local focus = self.textInputFocusSwitcher:GetFocusItem()
+        if focus and focus.control == channelDropdown then
+            SCREEN_NARRATION_MANAGER:OnComboBoxFocused(channelDropdown)
+        end
+    end
+    channelDropdown:SetDeactivatedCallback(DropDownDeactivatedCallback)
 
     -- Prepare switches for sorting
     -- These switches are the slash commands used to set the channel (e.g.:/zone)
@@ -433,6 +350,8 @@ function ZO_ChatMenu_Gamepad:InitializeChannelDropdown()
 
     table.sort(switches)
 
+    --The functionality that auto activates the dropdown upon focusing relies upon code in ZO_GamepadFocus.lua that will try to call active on the control if the focus data does not have an activate
+    --Adding an activate to this data would prevent that functionality from happening, so if we do, make sure that behavior is accounted for
     local channelFocusData =
     {
         keybindText = GetString(SI_GAMEPAD_SELECT_OPTION),
@@ -508,6 +427,7 @@ do
         else
             channelText = zo_strformat(SI_CHAT_ENTRY_GENERAL_FORMAT, GetChannelName(channelData.id))
         end
+        self.selectedChannelText = channelText
         self.selectedChannelLabel:SetText(channelText)
         local r, g, b = ZO_ChatSystem_GetCategoryColorFromChannel(channelData.id)
         self.selectedChannelLabel:SetColor(r, g, b, 1)
@@ -520,31 +440,16 @@ do
 end
 
 function ZO_ChatMenu_Gamepad:RefreshTooltip(targetData)
-    local targetData = targetData or self.list:GetTargetData()
-    if targetData then
-        local links = targetData.data.links
-        if links then
-            local currentLinkData = links[self.currentLinkIndex]
-            local linkType = currentLinkData.linkType
-            local link = currentLinkData.link
+    self.activeLinks:ResetLinks()
 
-            --TODO: Implement quest item links and maybe books (if we even care about books)
-            if linkType == COLLECTIBLE_LINK_TYPE then
-                GAMEPAD_TOOLTIPS:LayoutCollectibleFromLink(GAMEPAD_RIGHT_TOOLTIP, link)
-            elseif linkType == ACHIEVEMENT_LINK_TYPE then
-                GAMEPAD_TOOLTIPS:LayoutAchievementFromLink(GAMEPAD_RIGHT_TOOLTIP, link)
-            elseif linkType == ITEM_LINK_TYPE then
-                GAMEPAD_TOOLTIPS:LayoutItem(GAMEPAD_RIGHT_TOOLTIP, link)
-            elseif linkType == GUILD_LINK_TYPE then
-                GAMEPAD_TOOLTIPS:LayoutGuildLink(GAMEPAD_RIGHT_TOOLTIP, link)
-            elseif linkType == HELP_LINK_TYPE then
-                GAMEPAD_TOOLTIPS:LayoutHelpLink(GAMEPAD_RIGHT_TOOLTIP, link)
-            end
-
-            return
+    local currentTargetData = targetData or self.list:GetTargetData()
+    if currentTargetData then
+        if self.scene:GetState() == SCENE_SHOWN and self.chatEntryPanelFocalArea:IsFocused() then
+            local links = currentTargetData.data.links
+            self.activeLinks:AddLinksTable(links)
+            self.activeLinks:Show()
         end
     end
-    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
 end
 
 function ZO_ChatMenu_Gamepad:InitializeRefreshGroup()
@@ -567,6 +472,16 @@ function ZO_ChatMenu_Gamepad:DirtyActiveChannel()
 end
 
 function ZO_ChatMenu_Gamepad:SelectMessageEntryByLink(link)
+    if self.scene:GetState() == SCENE_SHOWN then
+        self:SelectMessageEntryByLinkInternal(link)
+    else
+        self.pendingLinkFocus = link
+    end
+end
+
+function ZO_ChatMenu_Gamepad:SelectMessageEntryByLinkInternal(link)
+    self.pendingLinkFocus = nil
+    self.activeLinks:ResetLinks()
     self:ActivateFocusArea(self.chatEntryPanelFocalArea)
 
     for messageIndex = 1, #self.messageEntries do
@@ -575,9 +490,6 @@ function ZO_ChatMenu_Gamepad:SelectMessageEntryByLink(link)
             for linkIndex, currentLink in ipairs(entry.data.links) do
                 if currentLink.link == link then
                     self.list:SetSelectedIndex(messageIndex)
-                    if self.scene:GetState() ~= SCENE_SHOWN then
-                        self.isFocusSetFromLink = true
-                    end
                     return
                 end
             end

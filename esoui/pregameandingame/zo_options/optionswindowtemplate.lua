@@ -14,7 +14,7 @@ local function GetControlType(control)
     return control.optionsManager:GetControlTypeFromControl(control)
 end
 
-local function GetSettingFromControl(control)
+function ZO_Options_GetSettingFromControl(control)
     local data = control.data
     if data.GetSettingOverride then
         return data.GetSettingOverride(control)
@@ -24,6 +24,37 @@ local function GetSettingFromControl(control)
         return GetSetting_Bool(data.system, data.settingId)
     end
     return GetSetting(data.system, data.settingId)
+end
+
+function ZO_Options_GetFormattedSliderValues(data, value)
+    local shownValue = tonumber(value)
+    local min = data.showValueMin or data.minValue
+    local max = data.showValueMax or data.maxValue
+
+    local formattedValueString
+    if data.showValueFunc then
+        formattedValueString = data.showValueFunc(shownValue)
+        min = data.showValueFunc(min)
+        max = data.showValueFunc(max)
+    else
+        if data.showValueMin and data.showValueMax and data.showValueMax > data.showValueMin then
+            local range = data.maxValue - data.minValue
+            local percentage = (shownValue - data.minValue) / range
+            local shownRange = data.showValueMax - data.showValueMin
+            shownValue = data.showValueMin + percentage * shownRange
+            shownValue = string.format("%d", shownValue)
+        end
+
+        if data.valueTextFormatter then
+            formattedValueString = zo_strformat(data.valueTextFormatter, shownValue)
+            min = zo_strformat(data.valueTextFormatter, min)
+            max = zo_strformat(data.valueTextFormatter, max)
+        else
+            formattedValueString = shownValue
+        end
+    end
+
+    return formattedValueString, min, max
 end
 
 local function SetSettingFromControl(control, value)
@@ -53,23 +84,23 @@ end
 local activateOptionControl =
 {
     [OPTIONS_DROPDOWN] =    function(control)
-                                local dropdown = GetControl(control, "Dropdown")
+                                local dropdown = control:GetNamedChild("Dropdown")
                                 ZO_ComboBox_Enable(dropdown)
-                                GetControl(dropdown, "SelectedItemText"):SetAlpha(ENABLED_STATE)
-                                GetControl(dropdown, "BG"):SetAlpha(ENABLED_STATE)
-                                GetControl(dropdown, "OpenDropdown"):SetAlpha(ENABLED_STATE)
+                                dropdown:GetNamedChild("SelectedItemText"):SetAlpha(ENABLED_STATE)
+                                dropdown:GetNamedChild("BG"):SetAlpha(ENABLED_STATE)
+                                dropdown:GetNamedChild("OpenDropdown"):SetAlpha(ENABLED_STATE)
                             end,
 
     [OPTIONS_CHECKBOX] =    function(control)
-                                local boxControl = GetControl(control, "Checkbox")
+                                local boxControl = control:GetNamedChild("Checkbox")
                                 ZO_CheckButton_Enable(boxControl)
                                 boxControl:SetAlpha(ENABLED_STATE)
                             end,
 
     [OPTIONS_SLIDER] =      function(control)
-                                GetControl(control, "Slider"):SetEnabled(true)
-                                GetControl(control, "SliderBackdrop"):SetAlpha(ENABLED_STATE)
-                                GetControl(control, "ValueLabel"):SetAlpha(ENABLED_STATE)
+                                control:GetNamedChild("Slider"):SetEnabled(true)
+                                control:GetNamedChild("SliderBackdrop"):SetAlpha(ENABLED_STATE)
+                                control:GetNamedChild("ValueLabel"):SetAlpha(ENABLED_STATE)
                             end,
 
     [OPTIONS_COLOR] =       function(control)
@@ -88,23 +119,23 @@ local activateOptionControl =
 local deactivateOptionControl =
 {
     [OPTIONS_DROPDOWN] =    function(control)
-                                local dropdown = GetControl(control, "Dropdown")
+                                local dropdown = control:GetNamedChild("Dropdown")
                                 ZO_ComboBox_Disable(dropdown)
-                                GetControl(dropdown, "SelectedItemText"):SetAlpha(DISABLED_STATE)
-                                GetControl(dropdown, "BG"):SetAlpha(DISABLED_STATE)
-                                GetControl(dropdown, "OpenDropdown"):SetAlpha(DISABLED_STATE)
+                                dropdown:GetNamedChild("SelectedItemText"):SetAlpha(DISABLED_STATE)
+                                dropdown:GetNamedChild("BG"):SetAlpha(DISABLED_STATE)
+                                dropdown:GetNamedChild("OpenDropdown"):SetAlpha(DISABLED_STATE)
                             end,
 
     [OPTIONS_CHECKBOX] =    function(control)
-                                local boxControl = GetControl(control, "Checkbox")
+                                local boxControl = control:GetNamedChild("Checkbox")
                                 ZO_CheckButton_Disable(boxControl)
                                 boxControl:SetAlpha(DISABLED_STATE)
                             end,
 
     [OPTIONS_SLIDER] =      function(control)
-                                GetControl(control, "Slider"):SetEnabled(false)
-                                GetControl(control, "SliderBackdrop"):SetAlpha(DISABLED_STATE)
-                                GetControl(control, "ValueLabel"):SetAlpha(DISABLED_STATE)
+                                control:GetNamedChild("Slider"):SetEnabled(false)
+                                control:GetNamedChild("SliderBackdrop"):SetAlpha(DISABLED_STATE)
+                                control:GetNamedChild("ValueLabel"):SetAlpha(DISABLED_STATE)
                             end,
 
     [OPTIONS_COLOR] =       function(control)
@@ -124,10 +155,12 @@ local deactivateOptionControl =
 local function UpdateOptionControlState(control, updateTable, stateType)
     local controlType = GetControlType(control)
     local updateFn = updateTable[controlType]
-    if updateFn then updateFn(control) end
+    if updateFn then
+        updateFn(control)
+    end
 
-    local nameControl = GetControl(control, "Name")
-    local boxControl = GetControl(control, "Checkbox")
+    local nameControl = control:GetNamedChild("Name")
+    local boxControl = control:GetNamedChild("Checkbox")
 
     if nameControl then
         if stateType == ENABLED_STATE then
@@ -231,7 +264,7 @@ end
 local function OptionsScrollListSelectionChanged(selectedData, oldData, reselectingDuringRebuild)
     if oldData ~= nil and reselectingDuringRebuild ~= true then
         local control = selectedData.parentControl
-        local oldValue = GetSettingFromControl(control)
+        local oldValue = ZO_Options_GetSettingFromControl(control)
 
         local value = selectedData.value
         SetSettingFromControl(control, value)
@@ -244,6 +277,11 @@ local function OptionsScrollListSelectionChanged(selectedData, oldData, reselect
         local callback = optionsData.scrollListChangedCallback
         if callback then
             callback(selectedData, oldData)
+        end
+
+        local optionsManager = control.optionsManager
+        if optionsManager and optionsManager:IsGamepadOptions() and optionsManager:IsShowing() then
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(optionsManager:GetCurrentList())
         end
 
         if optionsData.gamepadHasEnabledDependencies then
@@ -279,11 +317,11 @@ local updateControlFromSettings =
 {
     [OPTIONS_DROPDOWN] = function(control)
                                 local data = control.data
-                                local currentSetting = GetSettingFromControl(control)
+                                local currentSetting = ZO_Options_GetSettingFromControl(control)
                                 local currentChoice = tonumber(currentSetting) or currentSetting
                                 local isValidNumber = type(currentChoice) == "number"
 
-                                local dropdownControl = GetControl(control, "Dropdown")
+                                local dropdownControl = control:GetNamedChild("Dropdown")
                                 local dropdown = ZO_ComboBox_ObjectFromContainer(dropdownControl)
                                 if data.itemText then
                                     dropdown:SetSelectedItemText(data.itemText[GetValidIndexFromCurrentChoice(data.valid, currentChoice)])
@@ -299,7 +337,7 @@ local updateControlFromSettings =
 
     [OPTIONS_HORIZONTAL_SCROLL_LIST] = function(control)
                             local data = control.data
-                            local currentSetting = GetSettingFromControl(control)
+                            local currentSetting = ZO_Options_GetSettingFromControl(control)
                             local currentChoice = tonumber(currentSetting) or currentSetting
 
                             local index = 0
@@ -327,12 +365,12 @@ local updateControlFromSettings =
                         end,
 
     [OPTIONS_CHECKBOX] = function(control)
-                                local currentChoice = GetSettingFromControl(control)
-                                local checkBoxControl = GetControl(control, "Checkbox")
+                                local currentChoice = ZO_Options_GetSettingFromControl(control)
+                                local checkBoxControl = control:GetNamedChild("Checkbox")
                                 ZO_CheckButton_SetCheckState(checkBoxControl, currentChoice)
 
                                 local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
-                                local nameControl = GetControl(control, "Name")
+                                local nameControl = control:GetNamedChild("Name")
 
                                 local enabled = control.data.enabled
                                 if type(enabled) == "function" then
@@ -379,9 +417,9 @@ local updateControlFromSettings =
 
     [OPTIONS_SLIDER] =   function(control)
                                 local data = control.data
-                                local currentChoice = tonumber(GetSettingFromControl(control))
+                                local currentChoice = tonumber(ZO_Options_GetSettingFromControl(control))
                                 
-                                local slider = GetControl(control, "Slider")
+                                local slider = control:GetNamedChild("Slider")
 
                                 --We remove the OnValueChanged handler while we set up the slider because
                                 --SetMinMax, SetValue, and SetValueStep can all potentially fire the OnValueChanged event
@@ -399,33 +437,17 @@ local updateControlFromSettings =
 
                                 slider:SetHandler("OnValueChanged", ZO_Options_SliderOnValueChanged)
 
-                                local valueLabelControl = GetControl(control, "ValueLabel")
+                                local valueLabelControl = control:GetNamedChild("ValueLabel")
                                 if data.showValue and valueLabelControl then
-                                    if data.showValueFunc then
-                                        valueLabelControl:SetText(data.showValueFunc(currentChoice))
-                                    else
-                                        local shownVal = currentChoice
-                                        if data.showValueMin and data.showValueMax and data.showValueMax > data.showValueMin then
-                                            local range = data.maxValue - data.minValue
-                                            local percentage = (shownVal - data.minValue) / range
-
-                                            local shownRange = data.showValueMax - data.showValueMin
-                                            shownVal = data.showValueMin + percentage * shownRange
-                                            shownVal = string.format("%d", shownVal)
-                                        end
-                                        if data.valueTextFormatter then
-                                            valueLabelControl:SetText(zo_strformat(data.valueTextFormatter, shownVal))
-                                        else
-                                            valueLabelControl:SetText(shownVal)
-                                        end
-                                    end
+                                    local formattedValueString, min, max = ZO_Options_GetFormattedSliderValues(data, currentChoice)
+                                    valueLabelControl:SetText(formattedValueString)
                                 end
 
                                 return currentChoice
                             end,
 
     [OPTIONS_COLOR] =       function(control)
-                                local currentChoice = GetSettingFromControl(control)
+                                local currentChoice = ZO_Options_GetSettingFromControl(control)
                                 local color = ZO_ColorDef:New(currentChoice)
                                 if color then
                                     control:GetNamedChild("Color"):SetColor(color:UnpackRGB())
@@ -502,14 +524,14 @@ end
 -- Change the actual settings as they are changed...they are reverted if the player chooses not to save
 local function OptionsDropdown_SelectChoice(control, index)
     local data = control.data
-    local oldValueString = GetSettingFromControl(control)
+    local oldValueString = ZO_Options_GetSettingFromControl(control)
     
     local value = data.valid[index]
     local valueString = tostring(value)
     SetSettingFromControl(control, valueString)
     if data.mustPushApply then
         -- If this control needs to be applied, update the dropdown with the local value, because the setting hasn't been changed yet.
-        local dropdownControl = GetControl(control, "Dropdown")
+        local dropdownControl = control:GetNamedChild("Dropdown")
         local dropdown = ZO_ComboBox_ObjectFromContainer(dropdownControl)
         if data.itemText then
             dropdown:SetSelectedItemText(data.itemText[index])
@@ -537,16 +559,16 @@ end
 
 local function OptionsCheckBox_SelectChoice(control, boxIsChecked)
     local data = control.data
-    local oldValue = GetSettingFromControl(control)
+    local oldValue = ZO_Options_GetSettingFromControl(control)
     local value = boxIsChecked
 
     SetSettingFromControl(control, value)
     if data.mustPushApply then
-        local checkBoxControl = GetControl(control, "Checkbox")
+        local checkBoxControl = control:GetNamedChild("Checkbox")
         ZO_CheckButton_SetCheckState(checkBoxControl, boxIsChecked)
 
         local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
-        local nameControl = GetControl(control, "Name")
+        local nameControl = control:GetNamedChild("Name")
         
         if not IsGamepadOption(control) then
             if boxIsChecked then
@@ -566,6 +588,11 @@ local function OptionsCheckBox_SelectChoice(control, boxIsChecked)
     else
         ZO_Options_UpdateOption(control)
     end
+
+    local optionsManager = control.optionsManager
+    if optionsManager and optionsManager:IsGamepadOptions() and optionsManager:IsShowing() then
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(optionsManager:GetCurrentList())
+    end
     
     if data.mustReloadSettings then
         KEYBOARD_OPTIONS:UpdateCurrentPanelOptions(DONT_SAVE_CURRENT_VALUES)
@@ -574,7 +601,7 @@ end
 
 local function GetSliderOptionValues(control, value)
     local data = control.data
-    local oldValueString = GetSettingFromControl(control)
+    local oldValueString = ZO_Options_GetSettingFromControl(control)
     local valueFormat = data.valueFormat or "%d"
     local formattedValueString = string.format(valueFormat, value)
     local formattedValue = tonumber(formattedValueString)
@@ -588,32 +615,21 @@ local function OptionsSlider_SelectChoice(control, value, eventReason)
     local oldValueString, formattedValueString, formattedValue = GetSliderOptionValues(control, value)
     SetSettingFromControl(control, formattedValueString)
     if data.mustPushApply then
-        GetControl(control, "Slider"):SetValue(formattedValue)
+        control:GetNamedChild("Slider"):SetValue(formattedValue)
         CheckEnableApplyButton(control, oldValueString, formattedValueString)
     else
         ZO_Options_UpdateOption(control)
     end
 
-    local valueLabelControl = GetControl(control, "ValueLabel")
+    local valueLabelControl = control:GetNamedChild("ValueLabel")
     if data.showValue and valueLabelControl then
-        if data.showValueFunc then
-            valueLabelControl:SetText(data.showValueFunc(value))
-        else
-            local shownVal = formattedValue
-            if data.showValueMin and data.showValueMax and data.showValueMax > data.showValueMin then
-                local range = data.maxValue - data.minValue
-                local percentage = (shownVal - data.minValue) / range
+        local formattedShowValueString, min, max = ZO_Options_GetFormattedSliderValues(data, formattedValue)
+        valueLabelControl:SetText(formattedShowValueString)
+    end
 
-                local shownRange = data.showValueMax - data.showValueMin
-                shownVal = data.showValueMin + percentage * shownRange
-                shownVal = string.format("%d", shownVal)
-            end
-            if data.valueTextFormatter then
-                valueLabelControl:SetText(zo_strformat(data.valueTextFormatter, shownVal))
-            else
-                valueLabelControl:SetText(shownVal)
-            end
-        end
+    local optionsManager = control.optionsManager
+    if optionsManager and optionsManager:IsGamepadOptions() and optionsManager:IsShowing() then
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(optionsManager:GetCurrentList())
     end
 
     if data.mustReloadSettings then
@@ -647,7 +663,7 @@ function ZO_Options_SetupSlider(control, selected)
     data.minValue = data.minValue or 0
     data.maxValue = data.maxValue or 1
 
-    local slider = GetControl(control, "Slider")
+    local slider = control:GetNamedChild("Slider")
 
     if selected ~= nil then
         slider:SetActive(selected and control.data.enabled ~= false)    --TODO: Added Gamepad Slider Disabled state colors, needs design
@@ -670,7 +686,7 @@ end
 
 function ZO_Options_SetupDropdown(control)
     local data = control.data
-    local dropdownControl = GetControl(control, "Dropdown")
+    local dropdownControl = control:GetNamedChild("Dropdown")
     local dropdown = ZO_ComboBox_ObjectFromContainer(dropdownControl)
     dropdown:ClearItems()
     dropdown.m_sortOrder = false        -- Add the valid items in the order they are added in the xml file (don't sort them)
@@ -723,7 +739,7 @@ local function CheckBoxToggleFunction(checkBoxControl, boxIsChecked)
 end
 
 function ZO_Options_SetupCheckBox(control)
-    local checkBoxControl = GetControl(control, "Checkbox")
+    local checkBoxControl = control:GetNamedChild("Checkbox")
     ZO_CheckButton_SetToggleFunction(checkBoxControl, CheckBoxToggleFunction)
 end
 
@@ -762,13 +778,17 @@ end
 function ZO_Options_ColorOnClicked(control)
     local data = control.data
     if ZO_Options_IsOptionActive(control) then
-        local currentChoice = GetSettingFromControl(control)
+        local currentChoice = ZO_Options_GetSettingFromControl(control)
         local color = ZO_ColorDef:New(currentChoice)
         if color then
             local function OnColorSet(r, g, b)
                 control:GetNamedChild("Color"):SetColor(r, g, b)
                 local ARGBHexadecimal = ZO_ColorDef.FloatsToHex(r, g, b, 1)
                 SetSetting(data.system, data.settingId, ARGBHexadecimal)
+                local optionsManager = control.optionsManager
+                if optionsManager and optionsManager:IsGamepadOptions() and optionsManager:IsShowing() then
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(optionsManager:GetCurrentList())
+                end
             end
             SYSTEMS:GetObject("colorPicker"):Show(OnColorSet, color:UnpackRGB())
         end
@@ -794,6 +814,11 @@ do
                         for i = 1, #children do
                             SetChatCategoryColor(children[i], r, g, b)
                         end
+                    end
+
+                    local optionsManager = control.optionsManager
+                    if optionsManager and optionsManager:IsGamepadOptions() and optionsManager:IsShowing() then
+                        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(optionsManager:GetCurrentList())
                     end
                 end
                 local currentRed, currentGreen, currentBlue = GetChatCategoryColor(data.chatChannelCategory)

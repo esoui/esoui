@@ -53,6 +53,9 @@ function ZO_GuildKiosk_Purchase_Gamepad:SetupDialogLabels(control, data)
                 ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, self.guildBankedMoney, ZO_GAMEPAD_CURRENCY_OPTIONS)
                 return true
             end,
+            valueNarration = function()
+                return ZO_Currency_FormatGamepad(CURT_MONEY, self.guildBankedMoney, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            end,
             header = GetString(SI_GAMEPAD_GUILD_KIOSK_GUILD_BANK_BALANCE),
         },
 
@@ -61,6 +64,9 @@ function ZO_GuildKiosk_Purchase_Gamepad:SetupDialogLabels(control, data)
             value = function(control) 
                 ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, self.purchaseCost, ZO_GAMEPAD_CURRENCY_OPTIONS)
                 return true
+            end,
+            valueNarration = function()
+                return ZO_Currency_FormatGamepad(CURT_MONEY, self.purchaseCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
             end,
             header = GetString(SI_GAMEPAD_GUILD_KIOSK_PURCHASE_COST),
         },
@@ -89,18 +95,28 @@ function ZO_GuildKiosk_Purchase_Gamepad:PerformDeferredInitialize()
         return true
     end
 
+    local function GetGuildMoneyNarration()
+        return ZO_Currency_FormatGamepad(CURT_MONEY, self.guildBankedMoney, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+    end
+
     local function UpdateHireCost(control)
         ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, self.purchaseCost, ZO_GAMEPAD_CURRENCY_OPTIONS, nil, not self.canAffordPurchaseCost)
         return true
+    end
+
+    local function GetHireCostNarration()
+        return ZO_Currency_FormatGamepad(CURT_MONEY, self.purchaseCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
     end
 
     self.headerData = 
     {
         titleText = GetString(SI_GUILD_KIOSK_PURCHASE_TITLE),
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_GUILD_BANK_BALANCE),
-	    data1Text = UpdateGuildMoney,
+        data1Text = UpdateGuildMoney,
+        data1TextNarration = GetGuildMoneyNarration,
         data2HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_PURCHASE_COST),
-	    data2Text = UpdateHireCost,
+        data2Text = UpdateHireCost,
+        data2TextNarration = GetHireCostNarration,
     }
 
     ZO_Dialogs_RegisterCustomDialog("PURCHASE_KIOSK_GAMEPAD", 
@@ -319,6 +335,9 @@ function ZO_GuildKiosk_Bid_Gamepad:SetupDialogLabels(control, data)
                 ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, self.guildBankedMoney, ZO_GAMEPAD_CURRENCY_OPTIONS)
                 return true
             end,
+            valueNarration = function()
+                return ZO_Currency_FormatGamepad(CURT_MONEY, self.guildBankedMoney, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            end,
             header = GetString(SI_GAMEPAD_GUILD_KIOSK_GUILD_BANK_BALANCE),
         },
 
@@ -327,6 +346,9 @@ function ZO_GuildKiosk_Bid_Gamepad:SetupDialogLabels(control, data)
             value = function(control) 
                 ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, self.bidAmount, ZO_GAMEPAD_CURRENCY_OPTIONS)
                 return true
+            end,
+            valueNarration = function()
+                return ZO_Currency_FormatGamepad(CURT_MONEY, self.bidAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
             end,
             header = GetString(SI_GAMEPAD_GUILD_KIOSK_BID_AMOUNT_LABEL),
         },
@@ -415,6 +437,10 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
         return true
     end
 
+    local function GetGuildMoneyNarration()
+        return ZO_Currency_FormatGamepad(CURT_MONEY, self.guildBankedMoney, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+    end
+
     local function UpdateMinOrCurrentBidText(control)
         return self.hasBidOnThisTraderAlready and GetString(SI_GAMEPAD_GUILD_KIOSK_CURRENT_BID) or GetString(SI_GAMEPAD_GUILD_KIOSK_MINIMUM_BID)
     end
@@ -426,6 +452,10 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
         return true
     end
 
+    local function GetMinOrCurrentBidNarration()
+        return ZO_Currency_FormatGamepad(CURT_MONEY, self.hasBidOnThisTraderAlready and self.existingBidAmount or self.minBidAllowed, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+    end
+
     local function UpdateBiddingCloses(control)
         local secsRemaining = GetKioskBidWindowSecondsRemaining()
         local ownershipDuration = ZO_FormatTimeLargestTwo(secsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT)
@@ -435,28 +465,30 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
 
     local function UpdateWeeklyBids(control)
         local maxBids = GetMaxKioskBidsPerGuild()
-        control:SetText(ZO_FormatFraction(self.numTotalBids, maxBids))
+        local bidText = ZO_FormatFraction(self.numTotalBids, maxBids)
         local noNewBids = not (self.existingBidAmount > 0 or self.numTotalBids < maxBids)
         if noNewBids then
-            control:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+            return ZO_ERROR_COLOR:Colorize(bidText)
         else
-            control:SetColor(ZO_WHITE:UnpackRGBA())
+            return ZO_WHITE:Colorize(bidText)
         end
-        return true
     end
 
     self.headerData = 
     {
         titleText = GetString(SI_GUILD_KIOSK_BID_TITLE),
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_GUILD_BANK_BALANCE),
-	    data1Text = UpdateGuildMoney,
+        data1Text = UpdateGuildMoney,
+        data1TextNarration = GetGuildMoneyNarration,
         data2HeaderText = UpdateMinOrCurrentBidText,
-	    data2Text = UpdateMinOrCurrentBid,
+        data2Text = UpdateMinOrCurrentBid,
+        data2TextNarration = GetMinOrCurrentBidNarration,
         data3HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_WEEKLY_BIDS),
         data3Text = UpdateWeeklyBids,
     }
 
-    self.footerData = {
+    self.footerData = 
+    {
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_BIDDING_CLOSES),
         data1Text = UpdateBiddingCloses,
         data2HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_TRADER_HEADER),

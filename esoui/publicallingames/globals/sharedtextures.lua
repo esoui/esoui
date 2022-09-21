@@ -437,6 +437,8 @@ do
     end
 end
 
+-- Item trait information --
+
 do
     local ITEM_TRAIT_INFORMATION_KEYBOARD_ICON_PATHS =
     {
@@ -481,6 +483,48 @@ do
         if itemSellInformation then
             return ITEM_SELL_INFORMATION_ICON_PATHS[itemSellInformation]
         end
+    end
+end
+
+-- Target Markers --
+
+do
+    local TARGET_MARKER_KEYBOARD_ICON_PATHS =
+    {
+        [TARGET_MARKER_TYPE_ONE] = "EsoUI/Art/TargetMarkers/Target_Blue_Square_64.dds",
+        [TARGET_MARKER_TYPE_TWO] = "EsoUI/Art/TargetMarkers/Target_Gold_Star_64.dds",
+        [TARGET_MARKER_TYPE_THREE] = "EsoUI/Art/TargetMarkers/Target_Green_Circle_64.dds",
+        [TARGET_MARKER_TYPE_FOUR] = "EsoUI/Art/TargetMarkers/Target_Orange_Triangle_64.dds",
+        [TARGET_MARKER_TYPE_FIVE] = "EsoUI/Art/TargetMarkers/Target_Pink_Moons_64.dds",
+        [TARGET_MARKER_TYPE_SIX] = "EsoUI/Art/TargetMarkers/Target_Purple_Oblivion_64.dds",
+        [TARGET_MARKER_TYPE_SEVEN] = "EsoUI/Art/TargetMarkers/Target_Red_Weapons_64.dds",
+        [TARGET_MARKER_TYPE_EIGHT] = "EsoUI/Art/TargetMarkers/Target_White_Skull_64.dds",
+    }
+
+    local TARGET_MARKER_GAMEPAD_ICON_PATHS =
+    {
+        [TARGET_MARKER_TYPE_ONE] = "EsoUI/Art/TargetMarkers/Gamepad/Target_Blue_Square.dds",
+        [TARGET_MARKER_TYPE_TWO] = "EsoUI/Art/TargetMarkers/Gamepad/Target_Gold_Star.dds",
+        [TARGET_MARKER_TYPE_THREE] = "EsoUI/Art/TargetMarkers/Gamepad/Target_Green_Circle.dds",
+        [TARGET_MARKER_TYPE_FOUR] = "EsoUI/Art/TargetMarkers/Gamepad/Target_Orange_Triangle.dds",
+        [TARGET_MARKER_TYPE_FIVE] = "EsoUI/Art/TargetMarkers/Gamepad/Target_Pink_Moons.dds",
+        [TARGET_MARKER_TYPE_SIX] = "EsoUI/Art/TargetMarkers/Gamepad/Target_Purple_Oblivion.dds",
+        [TARGET_MARKER_TYPE_SEVEN] = "EsoUI/Art/TargetMarkers/Gamepad/Target_Red_Weapons.dds",
+        [TARGET_MARKER_TYPE_EIGHT] = "EsoUI/Art/TargetMarkers/Gamepad/Target_White_Skull.dds",
+    }
+
+    function GetPlatformTargetMarkerIcon(targetMarker)
+        if targetMarker then
+            if IsInGamepadPreferredMode() then
+                return TARGET_MARKER_GAMEPAD_ICON_PATHS[targetMarker]
+            else
+                return TARGET_MARKER_KEYBOARD_ICON_PATHS[targetMarker]
+            end
+        end
+    end
+
+    function GetPlatformTargetMarkerIconTable()
+        return IsInGamepadPreferredMode() and TARGET_MARKER_GAMEPAD_ICON_PATHS or TARGET_MARKER_KEYBOARD_ICON_PATHS
     end
 end
 

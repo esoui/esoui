@@ -17,32 +17,56 @@
         
         <Control name="ZO_GuildHomeInfo" virtual="true">
             <Anchor point="TOPLEFT"/>
+
             <Controls>
                 <Control name="$(parent)UpdatesDivider" inherits="ZO_GuildHomeSectionDivider">
                     <Anchor point="TOPLEFT"/>
                 </Control>
+
                 <Label name="$(parent)UpdatesHeader" font="ZoFontHeader3" modifyTextType="UPPERCASE" text="SI_GUILD_UPDATES_HEADER">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)UpdatesDivider" offsetX="15" offsetY="5"/>
                 </Label>
+
                 <Label name="$(parent)MotDHeader" font="ZoFontHeader2" text="SI_GUILD_MOTD_HEADER">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)UpdatesHeader" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="10"/>
                 </Label>
+
                 <Control name="$(parent)MotD" inherits="ZO_ScrollingSavingEditBox">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)MotDHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>
                     <Dimensions x="570" y="210"/>
+
+                    <Controls>
+                        <Label name="$(parent)Display" linkEnabled="true" mouseEnabled="true" override="true">
+                            <OnLinkClicked>
+                                ZO_LinkHandler_OnLinkMouseUp(linkText)
+                            </OnLinkClicked>
+                        </Label>
+                    </Controls>
                 </Control>
+
                 <Control name="$(parent)BackgroundDivider" inherits="ZO_GuildHomeSectionDivider">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)MotD" relativePoint="BOTTOMLEFT" offsetX="-30" offsetY="30"/>
                 </Control>
+
                 <Label name="$(parent)BackgroundHeader" font="ZoFontHeader3" modifyTextType="UPPERCASE" text="SI_GUILD_BACKGROUND_INFO_HEADER">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BackgroundDivider" offsetX="15" offsetY="5"/>
                 </Label>
+
                 <Label name="$(parent)DescriptionHeader" font="ZoFontHeader2" text="SI_GUILD_DESCRIPTION_HEADER">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BackgroundHeader" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="10"/>
                 </Label>
+
                 <Control name="$(parent)Description" inherits="ZO_ScrollingSavingEditBox">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>
                     <Dimensions x="570" y="175"/>
+
+                    <Controls>
+                        <Label name="$(parent)Display" linkEnabled="true" mouseEnabled="true" override="true">
+                            <OnLinkClicked>
+                                ZO_LinkHandler_OnLinkMouseUp(linkText)
+                            </OnLinkClicked>
+                        </Label>
+                    </Controls>
                 </Control>
             </Controls>
         </Control>

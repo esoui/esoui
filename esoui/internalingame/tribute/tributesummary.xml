@@ -168,18 +168,6 @@
             </Controls>
         </Control>
 
-        <Texture name="ZO_TributeSummary_Patron_Keyboard_Template" virtual="true">
-            <Controls>
-                <Label name="$(parent)Label" font="ZoFontCallout" />
-            </Controls>
-        </Texture>
-
-        <Texture name="ZO_TributeSummary_Patron_Gamepad_Template" virtual="true">
-            <Controls>
-                <Label name="$(parent)Label" font="ZoFontGamepad42" />
-            </Controls>
-        </Texture>
-
         <Texture name="ZO_TributeSummary_Patron" virtual="true">
             <Dimensions x="175" y="175" />
             <Anchor relativePoint="BOTTOM" />
@@ -189,9 +177,43 @@
                     <Anchor point="CENTER" />
                 </Texture>
 
-                <Label name="$(parent)Label" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                <Label name="$(parent)Label" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOP" relativePoint="BOTTOM" offsetY="30" />
                     <DimensionConstraints maxX="300" />
+                    <OnInitialized>
+                        local keyboardFonts =
+                        {
+                            {
+                                font = "ZoFontCallout",
+                                lineLimit = 2,
+                            },
+                            {
+                                font = "ZoFontWinH1",
+                                lineLimit = 2,
+                            },
+                            {
+                                font = "ZoFontAnnounce",
+                                lineLimit = 2,
+                            },
+                        }
+
+                        local gamepadFonts =
+                        {
+                            {
+                                font = "ZoFontGamepad42",
+                                lineLimit = 2,
+                            },
+                            {
+                                font = "ZoFontGamepad34",
+                                lineLimit = 2,
+                            },
+                            {
+                                font = "ZoFontGamepad27",
+                                lineLimit = 2,
+                            },
+                        }
+                        ZO_PlatformStyleFontAdjustingWrapLabel_OnInitialized(self, keyboardFonts, gamepadFonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
                 </Label>
             </Controls>
         </Texture>
@@ -398,10 +420,6 @@
                     </Controls>
                 </Texture>
 
-                <Label name="$(parent)PlayerLabel" font="ZoFontCallout2" />
-
-                <Label name="$(parent)OpponentLabel" font="ZoFontCallout2" />
-
                 <Control name ="$(parent)Prestige">
                     <Controls>
                         <Label name="$(parent)Divider" font="ZoFontCallout3" />
@@ -419,10 +437,6 @@
                         <Label name="$(parent)Text" font="ZoFontGamepadBold54" />
                     </Controls>
                 </Texture>
-
-                <Label name="$(parent)PlayerLabel" font="ZoFontGamepadBold54" />
-
-                <Label name="$(parent)OpponentLabel" font="ZoFontGamepadBold54" />
 
                 <Control name ="$(parent)Prestige">
                     <Controls>
@@ -455,11 +469,79 @@
                 <Label name="$(parent)PlayerLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetX="-250" offsetY="75"/>
                     <DimensionConstraints maxX="400" />
+                    <OnInitialized>
+                        local keyboardFonts =
+                        {
+                            {
+                                font = "ZoFontCallout2",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontCenterScreenAnnounceLarge",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontCallout",
+                                lineLimit = 1,
+                            },
+                        }
+
+                        local gamepadFonts =
+                        {
+                            {
+                                font = "ZoFontGamepadBold54",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontGamepadBold48",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontGamepadBold34",
+                                lineLimit = 1,
+                            },
+                        }
+                        ZO_PlatformStyleFontAdjustingWrapLabel_OnInitialized(self, keyboardFonts, gamepadFonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
                 </Label>
 
                 <Label name="$(parent)OpponentLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="250" offsetY="75" />
                     <DimensionConstraints maxX="400" />
+                    <OnInitialized>
+                        local keyboardFonts =
+                        {
+                            {
+                                font = "ZoFontCallout2",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontCenterScreenAnnounceLarge",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontCallout",
+                                lineLimit = 1,
+                            },
+                        }
+
+                        local gamepadFonts =
+                        {
+                            {
+                                font = "ZoFontGamepadBold54",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontGamepadBold48",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontGamepadBold34",
+                                lineLimit = 1,
+                            },
+                        }
+                        ZO_PlatformStyleFontAdjustingWrapLabel_OnInitialized(self, keyboardFonts, gamepadFonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
                 </Label>
 
                 <Control name="$(parent)Prestige" hidden="true">

@@ -114,6 +114,15 @@
                         <Label name="$(parent)Name" override="true" text="SI_PERMISSION_USER_GROUP_GUILD_TOTAL_HEADER" />
                     </Controls>
                 </Control>
+
+                <Button name="$(parent)LinkInChat" inherits="ZO_DefaultButton" text="SI_HOUSING_LINK_IN_CHAT">
+                    <Anchor point="TOP" relativeTo="$(parent)GuildPermissions" relativePoint="BOTTOM" offsetY="20" />
+                    <Dimensions x="250" />
+
+                    <OnClicked>
+                        ZO_HousingBook_LinkCurrentHouseInChat()
+                    </OnClicked>
+                </Button>
             </Controls>
         </TopLevelControl>
     </Controls>

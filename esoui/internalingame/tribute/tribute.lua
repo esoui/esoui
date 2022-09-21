@@ -89,6 +89,7 @@ function ZO_Tribute:Initialize(control)
             if previousState == TRIBUTE_GAME_FLOW_STATE_INACTIVE then
                 self:DeferredInitialize()
             elseif previousState == TRIBUTE_GAME_FLOW_STATE_PLAYING then
+                self.canSkipCurrentTributeTutorialStep = false
                 self:ResetDiscardCounters()
             elseif previousState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT then
                 --If we still have patronSelectionShowTime set, that means we are ending the drafting state before we actually began showing the selection screen.
@@ -241,6 +242,16 @@ function ZO_Tribute:DeferredInitialize()
                 end,
             },
             {
+                name = GetString(SI_TRIBUTE_SKIP_TUTORIAL_DIALOG_KEYBIND),
+                keybind = "UI_SHORTCUT_TERTIARY",
+                alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+                callback = TrySkipCurrentTributeTutorialStep,
+                enabled = function()
+                    return self.canSkipCurrentTributeTutorialStep
+                end,
+                visible = IsTributeTutorialGame
+            },
+            {
                 --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
                 name = "Tribute Negative",
                 keybind = "UI_SHORTCUT_NEGATIVE",
@@ -253,6 +264,10 @@ function ZO_Tribute:DeferredInitialize()
                     -- because we may not update the descriptor with every relevant action.
                     if TributeCanCancelCurrentMove() then
                         TributeCancelCurrentMove()
+                    else
+                        local NO_EVENT = nil
+                        local NOT_INTERCEPTING_CLOSE_ACTION = false
+                        self:RequestExitTribute(NO_EVENT, NOT_INTERCEPTING_CLOSE_ACTION)
                     end
                 end,
             },
@@ -297,7 +312,10 @@ function ZO_Tribute:RegisterDialogs()
             callback = function(dialog)
                 local targetControl = dialog.entryList:GetTargetControl()
                 ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
+                SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
             end,
+
+            narrationText = ZO_GetDefaultParametricListToggleNarrationText,
         },
     }
 
@@ -434,6 +452,49 @@ end
 do
     local ACCEPT = true
     local REJECT = false
+
+    function ZO_Tribute:RequestExitTribute(_, isInterceptingCloseAction)
+        if not TRIBUTE_SUMMARY_FRAGMENT:IsHidden() then
+            -- The game over display is up and we got here, just leave immediately
+            -- Typically ingame already knows if we're in GAME_OVER, so this should only happen if we manually brought up the summary with dev tools
+            TributeExitResponse(ACCEPT)
+            return
+        end
+
+        -- The game isn't over, so either close whatever is open, or attempt to concede the match
+        TributeExitResponse(REJECT)
+
+        local closedMenu = false
+        if isInterceptingCloseAction then
+            -- Only close whatever is up, and don't concede is something was up
+            if ZO_TRIBUTE_PILE_VIEWER_MANAGER:IsViewingPile() then
+                ZO_TRIBUTE_PILE_VIEWER_MANAGER:SetViewingPile(nil)
+                closedMenu = true
+            elseif ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() or TRIBUTE_MECHANIC_SELECTOR:IsSelectingMechanic() then
+                if TributeCanCancelCurrentMove() then
+                    TributeCancelCurrentMove()
+                end
+                closedMenu = true
+            end
+        end
+
+        if not closedMenu then
+            local opponentName, opponentPlayerType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
+            local dialogData =
+            {
+                autoPlay = self:IsAutoPlayChecked(),
+                opponentName = opponentName,
+                opponentPlayerType = opponentPlayerType,
+            }
+
+            if IsInGamepadPreferredMode() then
+                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_TRIBUTE_OPTIONS", dialogData)
+            else
+                ZO_Dialogs_ShowDialog("KEYBOARD_TRIBUTE_OPTIONS", dialogData)
+            end
+            self:RefreshInputState()
+        end
+    end
 
     function ZO_Tribute:RegisterForEvents()
         local control = self.control
@@ -596,6 +657,30 @@ do
             end
         end)
 
+        control:RegisterForEvent(EVENT_TRIBUTE_CARD_MECHANIC_RESOLUTION_STATE_CHANGED, function(_, cardInstanceId, mechanicActivationSource,
+            mechanicIndex, quantity, isResolved)
+            if (not isResolved) or mechanicActivationSource ~= TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ACTIVATION then
+                return
+            end
+
+            local cardObject = self.cardInstanceIdToCardObject[cardInstanceId]
+            if not cardObject:IsWorldCard() then
+                return
+            end
+
+            local triggerId = select(7, GetTributeCardMechanicInfo(cardObject:GetCardDefId(), mechanicActivationSource, mechanicIndex))
+            if triggerId == 0 then
+                return
+            end
+
+            local _, _, isStacked, isTopOfStack = cardObject:GetStackInfo()
+            if isStacked and not isTopOfStack then
+                return
+            end
+
+            cardObject:UpdateTriggerAnimation()
+        end)
+
         local function RefreshInputState()
             self:RefreshInputState()
         end
@@ -605,9 +690,11 @@ do
             self:RefreshInputState()
         end
 
-        HELP_MANAGER:RegisterCallback("OverlayVisibilityChanged", RefreshInputState)
+        ZO_HELP_OVERLAY_SYNC_OBJECT:SetHandler("OnShown", RefreshInputState, "tribute")
+        ZO_HELP_OVERLAY_SYNC_OBJECT:SetHandler("OnHidden", RefreshInputState, "tribute")
 
-        TUTORIAL_MANAGER:RegisterCallback("TriggeredTutorialChanged", RefreshInputState)
+        ZO_DIALOG_SYNC_OBJECT:SetHandler("OnShown", RefreshInputState, "tribute")
+        ZO_DIALOG_SYNC_OBJECT:SetHandler("OnHidden", RefreshInputState, "tribute")
     
         control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
 
@@ -665,48 +752,7 @@ do
         end
         TRIBUTE_PATRON_SELECTION_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", PatronSelectionStateChanged)
 
-        control:RegisterForEvent(EVENT_REQUEST_TRIBUTE_EXIT, function(_, isInterceptingCloseAction)
-            if not TRIBUTE_SUMMARY_FRAGMENT:IsHidden() then
-                -- The game over display is up and we got here, just leave immediately
-                -- Typically ingame already knows if we're in GAME_OVER, so this should only happen if we manually brought up the summary with dev tools
-                TributeExitResponse(ACCEPT)
-                return
-            end
-
-            -- The game isn't over, so either close whatever is open, or attempt to concede the match
-            TributeExitResponse(REJECT)
-
-            local closedMenu = false
-            if isInterceptingCloseAction then
-                -- Only close whatever is up, and don't concede is something was up
-                if ZO_TRIBUTE_PILE_VIEWER_MANAGER:IsViewingPile() then
-                    ZO_TRIBUTE_PILE_VIEWER_MANAGER:SetViewingPile(nil)
-                    closedMenu = true
-                elseif ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() or TRIBUTE_MECHANIC_SELECTOR:IsSelectingMechanic() then
-                    if TributeCanCancelCurrentMove() then
-                        TributeCancelCurrentMove()
-                    end
-                    closedMenu = true
-                end
-            end
-
-            if not closedMenu then
-                local opponentName, opponentPlayerType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
-                local dialogData =
-                {
-                    autoPlay = self:IsAutoPlayChecked(),
-                    opponentName = opponentName,
-                    opponentPlayerType = opponentPlayerType,
-                }
-
-                if IsInGamepadPreferredMode() then
-                    ZO_Dialogs_ShowGamepadDialog("GAMEPAD_TRIBUTE_OPTIONS", dialogData)
-                else
-                    ZO_Dialogs_ShowDialog("KEYBOARD_TRIBUTE_OPTIONS", dialogData)
-                end
-                self:RefreshInputState()
-            end
-        end)
+        control:RegisterForEvent(EVENT_REQUEST_TRIBUTE_EXIT, function(...) self:RequestExitTribute(...) end)
 
         self.gamepadCursor:RegisterCallback("ObjectUnderCursorChanged", function(object, objectType, previousObject, previousObjectType)
             if previousObjectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.CARD or previousObjectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.MECHANIC_TILE or previousObjectType == ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.DISCARD_COUNTER then
@@ -784,6 +830,16 @@ function ZO_Tribute:OnUpdate(frameTimeSeconds)
         end
     end
     self.turnTimerTimeRemainingLabel:SetHidden(not showTurnTimeRemaining)
+
+    -- This check is very fast, and will early out if we're not in a tutorial match
+    -- This makes it so we don't have to refresh the entire descriptor every update just to check this, though
+    if self.isPlayerInputEnabled then
+        local canSkipCurrentTributeTutorialStep = CanSkipCurrentTributeTutorialStep()
+        if self.canSkipCurrentTributeTutorialStep ~= canSkipCurrentTributeTutorialStep then
+            self.canSkipCurrentTributeTutorialStep = canSkipCurrentTributeTutorialStep
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end
 end
 
 function ZO_Tribute:TryTriggerInitialTutorials()
@@ -812,9 +868,8 @@ do
         local resetTargetObjects = true
         local refreshEffectiveCardStates = false
 
-        local isShowingDialog = ZO_Dialogs_IsShowingDialog()
         local isUsingViewer = ZO_TRIBUTE_PILE_VIEWER_MANAGER:IsViewingPile() or ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() or TRIBUTE_MECHANIC_SELECTOR:IsSelectingMechanic()
-        if isShowingDialog or isUsingViewer or TUTORIAL_MANAGER:IsTutorialTriggered() or HELP_MANAGER:IsHelpOverlayVisible() then
+        if isUsingViewer or ZO_DIALOG_SYNC_OBJECT:IsShown() or ZO_HELP_OVERLAY_SYNC_OBJECT:IsShown() then
             allowPlayerInput = false
             resetTargetObjects = false
         end

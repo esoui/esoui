@@ -48,41 +48,45 @@ function ZO_SharedOptions:GetControlType(controlType)
     return controlType
 end
 
+function ZO_SharedOptions:GetTextEntry(textEntry, control)
+    local text
+    if type(textEntry) == "string" then
+        text = textEntry
+    elseif type(textEntry) == "function" then
+        text = textEntry(control)
+    else
+        text = GetString(textEntry)
+    end
+    return text
+end
+
 function ZO_SharedOptions:InitializeControl(control, selected, isKeyboardControl)
     local data = control.data
-    local text = nil
-
-    if type(data.text) == "string" then
-        text = data.text
-    elseif type(data.text) == "function" then
-        text = data.text(control)
-    else
-        text = GetString(data.text)
-    end
+    local text = self:GetTextEntry(data.text, control)
 
     local controlType = self:GetControlTypeFromControl(control)
     control.optionsManager = self
 
     if controlType == OPTIONS_SECTION_TITLE then
-        GetControl(control, "Label"):SetText(text)
+        control:GetNamedChild("Label"):SetText(text)
     elseif controlType == OPTIONS_DROPDOWN then
-        GetControl(control, "Name"):SetText(text)
+        control:GetNamedChild("Name"):SetText(text)
         ZO_Options_SetupDropdown(control)
     elseif controlType == OPTIONS_HORIZONTAL_SCROLL_LIST then
-        GetControl(control, "Name"):SetText(text)
+        control:GetNamedChild("Name"):SetText(text)
         ZO_Options_SetupScrollList(control, selected)
     elseif controlType == OPTIONS_CHECKBOX then
-        GetControl(control, "Name"):SetText(text)
+        control:GetNamedChild("Name"):SetText(text)
         ZO_Options_SetupCheckBox(control)
     elseif controlType == OPTIONS_SLIDER then
-        GetControl(control, "Name"):SetText(text)
+        control:GetNamedChild("Name"):SetText(text)
         ZO_Options_SetupSlider(control, selected)
     elseif controlType == OPTIONS_INVOKE_CALLBACK  then
         ZO_Options_SetupInvokeCallback(control, selected, text)
     elseif controlType == OPTIONS_COLOR then
-        GetControl(control, "Name"):SetText(text)
+        control:GetNamedChild("Name"):SetText(text)
     elseif controlType == OPTIONS_CHAT_COLOR then
-        GetControl(control, "Name"):SetText(text)
+        control:GetNamedChild("Name"):SetText(text)
         data.customResetToDefaultsFunction = ZO_OptionsPanel_Social_ResetChatColorToDefault
     elseif controlType == OPTIONS_CUSTOM then
         if data.customSetupFunction then

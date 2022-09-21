@@ -672,10 +672,34 @@ function ZO_GamepadEnchantingInventory:AddListDataTypes()
             data.hasCraftingQuestPin = false
         end
 
+        local levelControl = control:GetNamedChild("Level")
+        local isCreationMode = self.owner:GetEnchantingMode() == ENCHANTING_MODE_CREATION
+        local _, _, runeType = GetItemCraftingInfo(data.bagId, data.slotIndex)
+        local isPotencyRune = runeType == ENCHANTING_RUNE_POTENCY
+        local shouldShowLevel = isCreationMode and isPotencyRune
+        levelControl:SetHidden(not shouldShowLevel)
+        if shouldShowLevel then
+            local levelText
+            local isRuneKnown = IsRuneKnown(itemId)
+            if isRuneKnown then
+                local level, championPoints = GetItemGlyphMinLevels(data.bagId, data.slotIndex)
+                if championPoints then
+                    levelText = zo_strformat(SI_ENCHANTING_GLYPH_CREATED_CHAMPION_LEVEL, championPoints)
+                else
+                    levelText = level
+                end
+                levelControl:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+            else
+                levelText = GetString(SI_ENCHANTING_TRANSLATION_UNKNOWN)
+                levelControl:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+            end
+            levelControl:SetText(levelText)
+        end
+
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
 
-    self:AddVerticalScrollDataTypes("ZO_GamepadItemSubEntry", MenuEntryTemplateSetup)
+    self:AddVerticalScrollDataTypes("ZO_GamepadEnchantingItemSubEntry", MenuEntryTemplateSetup)
 end
 
 function ZO_GamepadEnchantingInventory:IsLocked(bagId, slotIndex)
@@ -752,6 +776,13 @@ end
 
 function ZO_GamepadEnchanting_Initialize(control)
     GAMEPAD_ENCHANTING = ZO_GamepadEnchanting:New(control)
+end
+
+function ZO_GamepadEnchantingItemSubEntryTemplate_OnInitialized(control)
+    ZO_SharedGamepadEntry_OnInitialized(control)
+    ZO_SharedGamepadEntry_SetHeightFromLabels(control)
+    control.subLabel1 = control:GetNamedChild("SubLabel1")
+    control.subLabel2 = control:GetNamedChild("SubLabel2")
 end
 
 ZO_EnchantExtractionSlot_Gamepad = ZO_SharedEnchantExtractionSlot:Subclass()

@@ -393,11 +393,6 @@ end
 
 function ZO_CharacterCreate_Keyboard:InitializeClassSelectors()
         local classes = self.characterData:GetClassInfo()
-        if #classes > CHARACTER_CREATE_MAX_SUPPORTED_CLASSES then
-            -- this assert is duplicated from the gamepad UI so that non-console builds will catch the issue as well
-            local errorString = string.format("The gamepad UI currently only supports up to %d classes, but there are currently %d classes used", CHARACTER_CREATE_MAX_SUPPORTED_CLASSES, #classes)
-            internalassert(false, errorString)
-        end
 
         local parent = self.classSelectionControl:GetNamedChild("ButtonArea")
         local stride = 3

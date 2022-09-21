@@ -23,7 +23,7 @@ Initialize the parametric list screen.
 control should be the top-level-control derived from ZO_Gamepad_ParametricList_Screen.
 
 createTabBar should be a boolean for whether the header should create the tab-bar. If true,
-    the header data used for udpating the generic header may include tab data. If false, it
+    the header data used for updating the generic header may include tab data. If false, it
     may only provide titleText.
 
 activateOnShow specifies whether the screen should automatically activate its parameteric
@@ -94,6 +94,18 @@ end
 
 function ZO_Gamepad_ParametricList_Screen:GetHeaderContainer()
     return self.headerContainer
+end
+
+function ZO_Gamepad_ParametricList_Screen:GetHeaderNarration()
+    local headerData = self:GetHeaderData()
+    if self.header and headerData then
+        return ZO_GamepadGenericHeader_GetNarrationText(self.header, headerData)
+    end
+end
+
+--Any screens that store the header data elsewhere should override this function
+function ZO_Gamepad_ParametricList_Screen:GetHeaderData()
+    return self.headerData
 end
 
 function ZO_Gamepad_ParametricList_Screen:ActivateCurrentList(requestedByHeader)
@@ -194,9 +206,24 @@ function ZO_Gamepad_ParametricList_Screen:AddList(name, callbackParam, listClass
     local listContainer = CreateControlFromVirtual("$(parent)"..name, self.control.container, "ZO_Gamepad_ParametricList_Screen_ListContainer")
     local list = self:CreateAndSetupList(listContainer.list, callbackParam, listClass, ...)
     self.lists[name] = list
+    if list.RegisterForScreenNarration then
+        list:RegisterForScreenNarration(self)
+    else
+        SCREEN_NARRATION_MANAGER:RegisterParametricListScreen(list, self)
+    end
     local CREATE_HIDDEN = true
     self:CreateListFragment(name, CREATE_HIDDEN)
     return list
+end
+
+function ZO_Gamepad_ParametricList_Screen:UnregisterForNarration()
+    for _, list in pairs(self.lists) do
+        if list.UnregisterForScreenNarration then
+            list:UnregisterForScreenNarration()
+        else
+            SCREEN_NARRATION_MANAGER:UnregisterParametricList(list)
+        end
+    end
 end
 
 function ZO_Gamepad_ParametricList_Screen:GetMainList()

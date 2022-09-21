@@ -18,6 +18,10 @@ function ZO_ArmoryBuildIconPicker_Gamepad:Initialize(control)
         entryHeight = ZO_ARMORY_BUILD_ICON_PICKER_PICK_GAMEPAD_SIZE,
         entryPaddingX = ZO_ARMORY_BUILD_ICON_PICKER_PICK_GAMEPAD_OFFSET,
         entryPaddingY = ZO_ARMORY_BUILD_ICON_PICKER_PICK_GAMEPAD_OFFSET,
+        narrationText = function(entryData)
+            local formatter = entryData.isCurrent() and SI_GAMEPAD_ARMORY_SELECTED_BUILD_ICON_NARRATION_FORMATTER or SI_GAMEPAD_ARMORY_BUILD_ICON_NARRATION_FORMATTER
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(formatter, entryData.iconIndex))
+        end,
     }
 
     ZO_ArmoryBuildIconPicker_Shared.Initialize(self, control, templateData)
@@ -62,6 +66,8 @@ function ZO_ArmoryBuildIconPicker_Gamepad:OnArmoryBuildIconPickerGridListEntryCl
     local selectedData = self.armoryBuildIconPickerGridList:GetSelectedData()
     if selectedData then
         self:SetArmoryBuildIconPicked(selectedData.iconIndex)
+        --Re-narrate the current selection when an icon is picked
+        SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.armoryBuildIconPickerGridList)
     end
     self.armoryBuildIconPickerGridList:RefreshGridList()
 end

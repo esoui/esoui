@@ -40,14 +40,14 @@ function ZO_TributeCardMechanicContainerPool:CreateObject(objectKey)
     return control
 end
 
-function ZO_TributeCardMechanicContainerPool:AcquireObject(cardObject, trigger, mechanicIndex, ...)
+function ZO_TributeCardMechanicContainerPool:AcquireObject(cardObject, activationSource, mechanicIndex, ...)
     local control, objectKey = ZO_ControlPool.AcquireObject(self, ...)
 
     -- It's a control pool under the hood, for ease of creating the relationship between the control and the object,
     -- but consumers will want the object, not the control, to work with
     local object = control.object
     control:SetParent(cardObject:GetFrontControl())
-    object:Setup(cardObject, trigger, mechanicIndex)
+    object:Setup(cardObject, activationSource, mechanicIndex)
 
     return object, objectKey
 end
@@ -176,13 +176,13 @@ function ZO_TributeMechanicTilePool:CreateObject(objectKey)
     return control
 end
 
-function ZO_TributeMechanicTilePool:AcquireObject(parentControl, cardInstanceId, mechanicTrigger, mechanicIndex, isLocalPlayerOwner, quantity, isResolved, ...)
+function ZO_TributeMechanicTilePool:AcquireObject(parentControl, cardInstanceId, mechanicActivationSource, mechanicIndex, isLocalPlayerOwner, quantity, isResolved, ...)
     local control, objectKey = ZO_ControlPool.AcquireObject(self, ...)
 
     -- It's a control pool under the hood, for ease of creating the relationship between the control and the object,
     -- but consumers will want the object, not the control, to work with
     local object = control.object
-    object:Setup(parentControl, cardInstanceId, mechanicTrigger, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
+    object:Setup(parentControl, cardInstanceId, mechanicActivationSource, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
     return object, objectKey
 end
 
@@ -272,6 +272,9 @@ function ZO_Tribute_PoolManager:Initialize(control)
     -- Card State Effect Control Pool
     self.cardStateEffectPool = ZO_TributeCardStateEffectPool:New("ZO_TributeCard_StateEffect_Template", control, "CardStateEffect")
 
+    -- Card Trigger Animation Control Pool
+    self.cardTriggerAnimationPool = ZO_TributeCardStateEffectPool:New("ZO_TributeCard_TriggerAnimation_Template", control, "CardTriggerAnimation")
+
     -- Card Popup Animation Pool
     self.cardPopupAnimationPool = ZO_TributeCardPopupAnimationPool:New("ZO_TributeCard_PopupTimeline")
 
@@ -314,6 +317,10 @@ end
 
 function ZO_Tribute_PoolManager:GetCardStateEffectPool()
     return self.cardStateEffectPool
+end
+
+function ZO_Tribute_PoolManager:GetCardTriggerAnimationPool()
+    return self.cardTriggerAnimationPool
 end
 
 function ZO_Tribute_PoolManager:GetCardPopupAnimationPool()

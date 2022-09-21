@@ -234,6 +234,10 @@ function ZO_SceneManager_Leader:Show(sceneName, push, nextSceneClearsSceneStack,
     end
     --if a scene exists
     if currentScene then
+        if self:WillNextSceneConfirmHide(bypassHideSceneConfirmationReason) then
+            return
+        end
+
         if nextScene ~= currentScene then
             --If we need confirmation to hide this scene go request it unless we've already done that and this is the response
             if self:WillCurrentSceneConfirmHide(bypassHideSceneConfirmationReason) then
@@ -251,7 +255,7 @@ function ZO_SceneManager_Leader:Show(sceneName, push, nextSceneClearsSceneStack,
                     local FRAGMENT_COMPLETE_STATE_IGNORED = false
                     local nextSceneName = self.nextScene and self.nextScene:GetName() or ZO_REMOTE_SCENE_NO_SCENE_IDENTIFIER                        
                     SendLeaderToFollowerSync(ZO_REMOTE_SCENE_CHANGE_ORIGIN, REMOTE_SCENE_SYNC_TYPE_CHANGE_NEXT_SCENE, CURRENT_SCENE_IGNORED, nextSceneName, NO_SEQUENCE_NUMBER, FRAGMENT_COMPLETE_STATE_IGNORED)
-                    
+
                     self:OnNextSceneRemovedFromQueue(oldNextScene, nextScene)
                 end
             else
@@ -285,6 +289,11 @@ end
 function ZO_SceneManager_Leader:WillCurrentSceneConfirmHide(bypassHideSceneConfirmationReason)
     local currentScene = self.currentScene
     return currentScene and currentScene:HasHideSceneConfirmation() and bypassHideSceneConfirmationReason ~= ZO_BHSCR_ALREADY_SEEN and currentScene:IsShowing()
+end
+
+function ZO_SceneManager_Leader:WillNextSceneConfirmHide(bypassHideSceneConfirmationReason)
+    local nextScene = self.nextScene
+    return nextScene and nextScene:HasHideSceneConfirmation() and bypassHideSceneConfirmationReason ~= ZO_BHSCR_ALREADY_SEEN
 end
 
 function ZO_SceneManager_Leader:ShowScene(scene)
@@ -371,7 +380,7 @@ function ZO_SceneManager_Leader:OnSceneStateHidden(scene)
 
         self:SetCurrentScene(currentNextScene)
         self:ClearNextScene()
-        self:ShowScene(self:GetCurrentScene(), push)
+        self:ShowScene(self:GetCurrentScene())
     end
 end
 

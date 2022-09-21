@@ -50,7 +50,31 @@ do
 
         local specializedCollectibleType = GetSpecializedCollectibleType(collectibleId)
         if specializedCollectibleType == SPECIALIZED_COLLECTIBLE_TYPE_NONE then
-            topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType))
+            if categoryType == COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE then
+                local categoryText = GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType)
+                local overrideType = GetCollectiblePlayerFxOverrideType(collectibleId)
+                local overrideSubtype
+
+                if overrideType == PLAYER_FX_OVERRIDE_TYPE_HARVEST then
+                    overrideSubtype = GetCollectiblePlayerFxWhileHarvestingType(collectibleId)
+                    if overrideSubtype then
+                        local subcategoryText = GetString("SI_PLAYERFXWHILEHARVESTINGTYPE", overrideSubtype)
+                        topSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2, categoryText, subcategoryText))
+                    end
+                elseif overrideType == PLAYER_FX_OVERRIDE_TYPE_ABILITY then
+                    overrideSubtype = GetCollectiblePlayerFxOverrideAbilityType(collectibleId)
+                    if overrideSubtype then
+                        local subcategoryText = GetString("SI_PLAYERFXOVERRIDEABILITYTYPE", overrideSubtype)
+                        topSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2, categoryText, subcategoryText))
+                    end
+                end
+
+                if not overrideSubtype then
+                    topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType))
+                end
+            else
+                topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType))
+            end
         else
             topSection:AddLine(GetString("SI_SPECIALIZEDCOLLECTIBLETYPE", specializedCollectibleType))
         end
@@ -181,6 +205,23 @@ do
                     local text = zo_strformat(SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM, baseCollectibleName, GetCollectibleCategoryNameByCollectibleId(baseCollectibleId))
                     local colorStyle = IsCollectibleUnlocked(baseCollectibleId) and self:GetStyle("succeeded") or self:GetStyle("failed")
                     bodySection:AddLine(text, descriptionStyle, colorStyle)
+                end
+            end
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE then
+            local overrideType = GetCollectiblePlayerFxOverrideType(collectibleId)
+            local overrideSubtype
+
+            if overrideType == PLAYER_FX_OVERRIDE_TYPE_HARVEST then
+                overrideSubtype = GetCollectiblePlayerFxWhileHarvestingType(collectibleId)
+                if overrideSubtype then
+                    local subcategoryText = GetString("SI_PLAYERFXWHILEHARVESTINGTYPE", overrideSubtype)
+                    bodySection:AddLine(zo_strformat(SI_COLLECTIBLE_TOOLTIP_PLAYER_FX_OVERRIDDEN, subcategoryText), descriptionStyle, self:GetStyle("collectionsPlayerFXOverridden"))
+                end
+            elseif overrideType == PLAYER_FX_OVERRIDE_TYPE_ABILITY then
+                overrideSubtype = GetCollectiblePlayerFxOverrideAbilityType(collectibleId)
+                if overrideSubtype then
+                    local subcategoryText = GetString("SI_PLAYERFXOVERRIDEABILITYTYPE", overrideSubtype)
+                    bodySection:AddLine(zo_strformat(SI_COLLECTIBLE_TOOLTIP_PLAYER_FX_OVERRIDDEN, subcategoryText), descriptionStyle, self:GetStyle("collectionsPlayerFXOverridden"))
                 end
             end
         end

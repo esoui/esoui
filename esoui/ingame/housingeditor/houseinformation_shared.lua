@@ -91,17 +91,29 @@ do
 end
 
 function ZO_HouseInformation_Shared:UpdateHouseInformation()
-    local currentHouseId = GetCurrentZoneHouseId()
-    local houseCollectibleId = GetCollectibleIdForHouse(currentHouseId)
+    local currentHouseId = HOUSING_EDITOR_STATE:GetHouseId()
+    local houseCollectibleId = HOUSING_EDITOR_STATE:GetHouseCollectibleId()
     local houseCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(houseCollectibleId)
-
-    local isPrimaryHouse = IsPrimaryHouse(currentHouseId)
 
     self.nameRow.valueLabel:SetText(houseCollectibleData:GetFormattedName())
     self.locationRow.valueLabel:SetText(houseCollectibleData:GetFormattedHouseLocation())
-    self.primaryResidenceRow.valueLabel:SetText(isPrimaryHouse and GetString(SI_YES) or GetString(SI_NO))
 
-    local ownerDisplayName = GetCurrentHouseOwner()
+    self.currentVisitorsRow:ClearAnchors()
+    local isHouseOwner = HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
+    if isHouseOwner then
+        local isPrimaryHouse = IsPrimaryHouse(currentHouseId)
+        self.primaryResidenceRow.valueLabel:SetText(isPrimaryHouse and GetString(SI_YES) or GetString(SI_NO))
+        self.currentVisitorsRow:SetAnchor(TOPLEFT, self.primaryResidenceRow, BOTTOMLEFT, 0, 20)
+    else
+        self.currentVisitorsRow:SetAnchor(TOPLEFT, self.infoSection, BOTTOMLEFT, 0, 20)
+    end
+
+    local hideOwnerRows = not isHouseOwner
+    self.guildPermissionsRow:SetHidden(hideOwnerRows)
+    self.individualPermissionsRow:SetHidden(hideOwnerRows)
+    self.primaryResidenceRow:SetHidden(hideOwnerRows)
+
+    local ownerDisplayName = HOUSING_EDITOR_STATE:GetOwnerName()
     if ownerDisplayName ~= "" then
         self.ownerRow.valueLabel:SetText(ZO_FormatUserFacingDisplayName(ownerDisplayName))
         self.ownerRow:SetHidden(false)
@@ -150,4 +162,35 @@ do
             UpdateRow(self.limitRows[i], GetString("SI_HOUSINGFURNISHINGLIMITTYPE", i), zo_strformat(SI_HOUSE_INFORMATION_COUNT_FORMAT, currentlyPlaced, limit))
         end
     end
+end
+
+-- Links a specific house in chat.
+function ZO_HousingBook_LinkHouseInChat(houseId, ownerDisplayName)
+    if GetHouseZoneId(houseId) == 0 then
+        -- Invalid houseId.
+        return
+    end
+
+    if ownerDisplayName then
+        ownerDisplayName = DecorateDisplayName(ownerDisplayName)
+    end
+
+    local link = ZO_LinkHandler_CreateChatLink(GetHousingLink, houseId, ownerDisplayName)
+    if IsInGamepadPreferredMode() then
+        ZO_LinkHandler_InsertLinkAndSubmit(link)
+    else
+        ZO_LinkHandler_InsertLink(link)
+    end
+end
+
+-- Links the current house in chat, if any.
+function ZO_HousingBook_LinkCurrentHouseInChat()
+    local houseId = GetCurrentZoneHouseId()
+    if houseId == 0 then
+        -- Not currently in a house.
+        return
+    end
+
+    local ownerDisplayName = GetCurrentHouseOwner()
+    ZO_HousingBook_LinkHouseInChat(houseId, ownerDisplayName)
 end

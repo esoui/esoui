@@ -24,10 +24,6 @@ function ZO_SetDefaultCollectibleData:Initialize(categoryTypeToSetDefault)
     self.categoryTypeToSetDefault = categoryTypeToSetDefault
 end
 
-function ZO_SetDefaultCollectibleData.IsSetDefaultData()
-    return true
-end
-
 function ZO_SetDefaultCollectibleData:GetCategoryTypeToSetDefault()
     return self.categoryTypeToSetDefault
 end
@@ -82,14 +78,6 @@ end
 
 ZO_CollectibleData = ZO_InitializingObject:Subclass()
 
-function ZO_CollectibleData:Initialize()
-    self.isActiveByActorCategory = {}
-end
-
-function ZO_CollectibleData.IsSetDefaultData()
-    return false
-end
-
 function ZO_CollectibleData:Reset()
     self.cachedNameWithNickname = nil
 end
@@ -101,99 +89,49 @@ function ZO_CollectibleData:BuildData(categoryData, collectibleIndex)
 
     self.collectibleIndex = collectibleIndex
     self.collectibleId = collectibleId
-    self.name = GetCollectibleName(collectibleId)
-    self.icon = GetCollectibleIcon(collectibleId)
-    self.categoryType = GetCollectibleCategoryType(collectibleId)
-    local specializedCategoryType = GetSpecializedCollectibleType(collectibleId)
-    if specializedCategoryType == SPECIALIZED_COLLECTIBLE_TYPE_NONE then
-        specializedCategoryType = nil -- Very rare, this is a memory optimization
-    end
-    self.specializedCategoryType = specializedCategoryType
     self.referenceId = GetCollectibleReferenceId(collectibleId)
-    self.hasVisualAppearence = DoesCollectibleHaveVisibleAppearance(collectibleId)
-    self.hideMode = GetCollectibleHideMode(collectibleId)
+    self.name = GetCollectibleName(collectibleId)
+    -- Speed up sorts by caching
+    self.sortOrder = GetCollectibleSortOrder(collectibleId)
+    self.gridHeaderName = nil
 
-    self:SetStoriesData()
     self:SetHousingData()
     self:SetOutfitStyleData()
-
-    self:SetupGridCategoryName()
 
     self:Refresh()
     ZO_COLLECTIBLE_DATA_MANAGER:MapCollectibleData(self)
 end
 
-function ZO_CollectibleData:SetStoriesData()
-    if self:IsStory() then
-        self.unlockedViaSubscription = DoesESOPlusUnlockCollectible(self.collectibleId)
-        self.questName, self.questDescription = GetCollectibleQuestPreviewInfo(self.collectibleId)
-    else
-        self.unlockedViaSubscription = false
-        self.questName = nil
-        self.questDescription = nil
-    end
-end
-
 function ZO_CollectibleData:SetHousingData()
     if self:IsHouse() then
-        local referenceId = self.referenceId
-        local houseFoundInZoneId = GetHouseFoundInZoneId(referenceId)
-        self.houseLocation = GetZoneNameById(houseFoundInZoneId)
-        self.houseCategoryType = GetHouseCategoryType(referenceId)
-        self.isPrimaryResidence = IsPrimaryHouse(referenceId)
+        self.isPrimaryResidence = IsPrimaryHouse(self.referenceId) or nil -- Memory optimization
     else
-        self.houseLocation = nil
-        self.houseCategoryType = nil
         self.isPrimaryResidence = nil
     end
 end
 
 function ZO_CollectibleData:SetOutfitStyleData()
     if self:IsOutfitStyle() then
-        local referenceId = self.referenceId
-        self.isArmorStyle = IsOutfitStyleArmor(referenceId)
-        self.isWeaponStyle = IsOutfitStyleWeapon(referenceId)
-        self.visualArmorType = self.isArmorStyle and GetOutfitStyleVisualArmorType(referenceId) or nil
-        self.weaponModelType = self.isWeaponStyle and GetOutfitStyleWeaponModelType(referenceId) or nil
-        self.outfitStyleItemStyleId = GetOutfitStyleItemStyleId(referenceId)
-        self.outfitStyleFreeConversionCollectible = GetOutfitStyleFreeConversionCollectibleId(referenceId)
-    else
-        self.isArmorStyle = nil
-        self.isWeaponStyle = nil
-        self.visualArmorType = nil
-        self.weaponModelType = nil
-        self.outfitStyleItemStyleId = nil
-        self.outfitStyleFreeConversionCollectible = nil
-    end
-end
-
-function ZO_CollectibleData:SetupGridCategoryName()
-    if self:IsOutfitStyle() then
+        self.outfitStyleItemStyleId = GetOutfitStyleItemStyleId(self.referenceId)
+        -- Since a lot of oufit style checks look at "if armor else ..." we'll cache isArmorStyle when it's armor as a perf improvement
+        -- and not cache isArmorStyle or isWeaponStyle when it's not armor as a memory improvement
+        self.isArmorStyle = IsOutfitStyleArmor(self.referenceId) or nil
         if self.isArmorStyle then
-            self.gridHeaderName = GetString("SI_VISUALARMORTYPE", self.visualArmorType)
+            self.gridHeaderName = GetString("SI_VISUALARMORTYPE", self:GetVisualArmorType())
         else
-            self.gridHeaderName = GetString("SI_WEAPONMODELTYPE", self.weaponModelType)
+            self.gridHeaderName = GetString("SI_WEAPONMODELTYPE", self:GetWeaponModelType())
         end
     else
-        -- If we ever want to support more grid based layouts of collectibles, we can design layouts for the groupings and use categoryName to control it, based on the collectible types
-        self.gridHeaderName = nil
+        self.outfitStyleItemStyleId = nil
     end
 end
 
 function ZO_CollectibleData:Refresh()
     local collectibleId = self.collectibleId
     local previousUnlockState = self.unlockState
-    for actorCategory = GAMEPLAY_ACTOR_CATEGORY_ITERATION_BEGIN, GAMEPLAY_ACTOR_CATEGORY_ITERATION_END do
-        self.isActiveByActorCategory[actorCategory] = IsCollectibleActive(collectibleId, actorCategory)
-    end
-    self.nickname = GetCollectibleNickname(collectibleId)
     self.unlockState = GetCollectibleUnlockStateById(collectibleId)
     self:SetNew(IsCollectibleNew(collectibleId))
-    self.isRenameable = IsCollectibleRenameable(collectibleId)
-    self.isSlottable = IsCollectibleSlottable(collectibleId)
     self.cachedNameWithNickname = nil
-    self.isBlacklisted = IsCollectibleBlacklisted(collectibleId)
-    self.questState = GetCollectibleAssociatedQuestState(collectibleId)
 
     local categoryData = self:GetCategoryData()
     if categoryData then
@@ -207,7 +145,7 @@ end
 function ZO_CollectibleData:RefreshHousingData()
     if self:IsHouse() then
         local wasPrimaryResidence = self.isPrimaryResidence
-        self.isPrimaryResidence = IsPrimaryHouse(self.referenceId)
+        self.isPrimaryResidence = IsPrimaryHouse(self.referenceId) or nil -- Memory optimization
 
         local categoryData = self:GetCategoryData()
         if categoryData then
@@ -236,16 +174,16 @@ function ZO_CollectibleData:GetName()
 end
 
 function ZO_CollectibleData:GetFormattedName()
-    return ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, self.name)
+    return ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, self:GetName())
 end
 
 function ZO_CollectibleData:GetNameWithNickname()
     if not self.cachedNameWithNickname then
-        local nickname = self.nickname
+        local nickname = self:GetNickname()
         if nickname and nickname ~= "" then
-            self.cachedNameWithNickname = zo_strformat(SI_COLLECTIBLE_NAME_WITH_NICKNAME_FORMATTER, self.name, nickname)
+            self.cachedNameWithNickname = zo_strformat(SI_COLLECTIBLE_NAME_WITH_NICKNAME_FORMATTER, self:GetName(), nickname)
         else
-            self.cachedNameWithNickname = ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, self.name)
+            self.cachedNameWithNickname = self:GetFormattedName()
         end
     end
 
@@ -253,11 +191,11 @@ function ZO_CollectibleData:GetNameWithNickname()
 end
 
 function ZO_CollectibleData:GetRawNameWithNickname()
-    local nickname = self.nickname
+    local nickname = self:GetNickname()
     if nickname and nickname ~= "" then
-        return zo_strformat(SI_COLLECTIBLE_NAME_WITH_NICKNAME_RAW, self.name, nickname)
+        return zo_strformat(SI_COLLECTIBLE_NAME_WITH_NICKNAME_RAW, self:GetName(), nickname)
     else
-        return self.name
+        return self:GetName()
     end
 end
 
@@ -266,7 +204,7 @@ function ZO_CollectibleData:GetDescription()
 end
 
 function ZO_CollectibleData:GetIcon()
-    return self.icon
+    return GetCollectibleIcon(self.collectibleId)
 end
 
 function ZO_CollectibleData:GetUnlockState()
@@ -290,36 +228,37 @@ function ZO_CollectibleData:IsPurchasable()
 end
 
 function ZO_CollectibleData:IsActive(actorCategory)
-    local actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
-    return self.isActiveByActorCategory[actorCategory]
+    actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+    return IsCollectibleActive(self.collectibleId, actorCategory)
 end
 
 function ZO_CollectibleData:IsBlacklisted()
-    return self.isBlacklisted
+    return IsCollectibleBlacklisted(self.collectibleId)
 end
 
 function ZO_CollectibleData:GetCategoryType()
-    return self.categoryType
+    return GetCollectibleCategoryType(self.collectibleId)
 end
 
 function ZO_CollectibleData:GetSpecializedCategoryType()
-    return self.specializedCategoryType or SPECIALIZED_COLLECTIBLE_TYPE_NONE
+    return GetSpecializedCollectibleType(self.collectibleId)
 end
 
 function ZO_CollectibleData:GetCategoryTypeDisplayName()
-    if self.specializedCategoryType then
-        return GetString("SI_SPECIALIZEDCOLLECTIBLETYPE", self.specializedCategoryType)
+    local specializedCollectibleType = self:GetSpecializedCategoryType()
+    if specializedCollectibleType == SPECIALIZED_COLLECTIBLE_TYPE_NONE then
+        return GetString("SI_COLLECTIBLECATEGORYTYPE", self:GetCategoryType())
     else
-        return GetString("SI_COLLECTIBLECATEGORYTYPE", self.categoryType)
+        return GetString("SI_SPECIALIZEDCOLLECTIBLETYPE", specializedCollectibleType)
     end
 end
 
 function ZO_CollectibleData:IsCategoryType(categoryType)
-    return self.categoryType == categoryType
+    return self:GetCategoryType() == categoryType
 end
 
 function ZO_CollectibleData:GetCollectibleAssociatedQuestState()
-    return self.questState
+    return GetCollectibleAssociatedQuestState(self.collectibleId)
 end
 
 do
@@ -343,23 +282,24 @@ function ZO_CollectibleData:GetGamepadBackgroundImage()
 end
 
 function ZO_CollectibleData:GetNickname()
-    return self.nickname
+    return  GetCollectibleNickname(self.collectibleId)
 end
 
 function ZO_CollectibleData:GetFormattedNickname()
-    if self.nickname ~= "" then
-        return ZO_CachedStrFormat(SI_TOOLTIP_COLLECTIBLE_NICKNAME, self.nickname)
+    local nickname = self:GetNickname()
+    if nickname ~= "" then
+        return ZO_CachedStrFormat(SI_TOOLTIP_COLLECTIBLE_NICKNAME, nickname)
     else
         return ""
     end
 end
 
 function ZO_CollectibleData:IsRenameable()
-    return self.isRenameable
+    return IsCollectibleRenameable(self.collectibleId)
 end
 
 function ZO_CollectibleData:IsSlottable()
-    return self.isSlottable
+    return IsCollectibleSlottable(self.collectibleId)
 end
 
 function ZO_CollectibleData:IsNew()
@@ -367,6 +307,9 @@ function ZO_CollectibleData:IsNew()
 end
 
 function ZO_CollectibleData:SetNew(isNew)
+    if isNew == false then
+        isNew = nil -- Memory optimization
+    end
     if self.isNew ~= isNew then
         self.isNew = isNew
         local categoryData = self:GetCategoryData()
@@ -381,63 +324,67 @@ function ZO_CollectibleData:GetReferenceId()
 end
 
 function ZO_CollectibleData:GetSortOrder()
-    return GetCollectibleSortOrder(self.collectibleId)
+    return self.sortOrder
 end
 
 function ZO_CollectibleData:IsStory()
-    return self.categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or self.categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER
+    local categoryType = self:GetCategoryType()
+    return categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER
 end
 
 function ZO_CollectibleData:IsUnlockedViaSubscription()
-    return self.unlockedViaSubscription
+    return DoesESOPlusUnlockCollectible(self.collectibleId)
 end
 
 function ZO_CollectibleData:GetQuestName()
-    return self.questName
+    local questName = GetCollectibleQuestPreviewInfo(self.collectibleId)
+    return questName
 end
 
 function ZO_CollectibleData:GetQuestDescription()
-    return self.questDescription
+    local questDescription = select(2, GetCollectibleQuestPreviewInfo(self.collectibleId))
+    return questDescription
 end
 
 function ZO_CollectibleData:IsHouse()
-    return self.categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE
+    return self:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_HOUSE
 end
 
 function ZO_CollectibleData:GetHouseLocation()
-    return self.houseLocation
+    local houseFoundInZoneId = GetHouseFoundInZoneId(self.referenceId)
+    return GetZoneNameById(houseFoundInZoneId)
 end
 
 function ZO_CollectibleData:GetFormattedHouseLocation()
-    return ZO_CachedStrFormat(SI_ZONE_NAME, self.houseLocation)
+    return ZO_CachedStrFormat(SI_ZONE_NAME, self:GetHouseLocation())
 end
 
 function ZO_CollectibleData:GetHouseCategoryType()
-    return self.houseCategoryType
+    return GetHouseCategoryType(self.referenceId)
 end
 
 function ZO_CollectibleData:IsPrimaryResidence()
-    return self.isPrimaryResidence
+    return self.isPrimaryResidence or false -- Memory optimization
 end
 
 function ZO_CollectibleData:IsOutfitStyle()
-    return self.categoryType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE
+    return self:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE
 end
 
 function ZO_CollectibleData:IsArmorStyle()
-    return self.isArmorStyle
+    return self.isArmorStyle or false -- Memory/perf optimization, see ZO_CollectibleData:SetOutfitStyleData for details
 end
 
 function ZO_CollectibleData:IsWeaponStyle()
-    return self.isWeaponStyle
+    return IsOutfitStyleWeapon(self.referenceId)
 end
 
 function ZO_CollectibleData:GetVisualArmorType()
-    return self.visualArmorType
+    return self:IsArmorStyle() and GetOutfitStyleVisualArmorType(self.referenceId) or nil
 end
 
 function ZO_CollectibleData:GetWeaponModelType()
-    return self.weaponModelType
+    return self:IsWeaponStyle() and GetOutfitStyleWeaponModelType(self.referenceId) or nil
 end
 
 function ZO_CollectibleData:GetOutfitGearType()
@@ -449,16 +396,19 @@ function ZO_CollectibleData:GetOutfitStyleItemStyleId()
 end
 
 function ZO_CollectibleData:GetOutfitStyleItemStyleName()
-    return GetItemStyleName(self.outfitStyleItemStyleId)
+    return GetItemStyleName(self:GetOutfitStyleItemStyleId())
 end
 
 function ZO_CollectibleData:GetOutfitStyleCost()
     if self:IsOutfitStyle() then
         local outfitStyleCost = GetOutfitStyleCost(self.referenceId)
-        if outfitStyleCost ~= 0 and self.outfitStyleFreeConversionCollectible then
-            local freeConversionCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.outfitStyleFreeConversionCollectible)
-            if freeConversionCollectibleData and freeConversionCollectibleData:IsUnlocked() then
-                return 0
+        if outfitStyleCost ~= 0 then
+            local outfitStyleFreeConversionCollectible = self:GetOutfitStyleFreeConversionCollectible()
+            if outfitStyleFreeConversionCollectible then
+                local freeConversionCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(outfitStyleFreeConversionCollectible)
+                if freeConversionCollectibleData and freeConversionCollectibleData:IsUnlocked() then
+                    return 0
+                end
             end
         end
         return outfitStyleCost
@@ -467,7 +417,7 @@ function ZO_CollectibleData:GetOutfitStyleCost()
 end
 
 function ZO_CollectibleData:GetOutfitStyleFreeConversionCollectible()
-    return self.outfitStyleFreeConversionCollectible
+    return GetOutfitStyleFreeConversionCollectibleId(self.referenceId)
 end
 
 function ZO_CollectibleData:IsBlocked()
@@ -483,7 +433,7 @@ function ZO_CollectibleData:IsCollectibleAvailableToCompanion()
 end
 
 function ZO_CollectibleData:IsCollectibleCategoryUsable(actorCategory)
-    return IsCollectibleCategoryUsable(self.categoryType, actorCategory)
+    return IsCollectibleCategoryUsable(self:GetCategoryType(), actorCategory)
 end
 
 function ZO_CollectibleData:IsCollectibleCategoryCompanionUsable()
@@ -491,7 +441,7 @@ function ZO_CollectibleData:IsCollectibleCategoryCompanionUsable()
 end
 
 function ZO_CollectibleData:IsUsable(actorCategory)
-    local actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+    actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
     return IsCollectibleUsable(self.collectibleId, actorCategory)
 end
 
@@ -523,7 +473,7 @@ function ZO_CollectibleData:Use(actorCategory)
 end
 
 function ZO_CollectibleData:GetPrimaryInteractionStringId(actorCategory)
-    local categoryType = self.categoryType
+    local categoryType = self:GetCategoryType()
     if self:IsActive(actorCategory) then
         if categoryType == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET or categoryType == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or categoryType == COLLECTIBLE_CATEGORY_TYPE_COMPANION then
             return SI_COLLECTIBLE_ACTION_DISMISS
@@ -551,7 +501,7 @@ function ZO_CollectibleData:GetPrimaryInteractionStringId(actorCategory)
 end
 
 function ZO_CollectibleData:IsPlaceableFurniture()
-    return IsCollectibleCategoryPlaceableFurniture(self.categoryType)
+    return IsCollectibleCategoryPlaceableFurniture(self:GetCategoryType())
 end
 
 function ZO_CollectibleData:IsValidForPlayer()
@@ -559,7 +509,7 @@ function ZO_CollectibleData:IsValidForPlayer()
 end
 
 function ZO_CollectibleData:HasVisualAppearence()
-    return self.hasVisualAppearence
+    return DoesCollectibleHaveVisibleAppearance(self.collectibleId)
 end
 
 function ZO_CollectibleData:WouldBeHidden(actorCategory)
@@ -567,11 +517,11 @@ function ZO_CollectibleData:WouldBeHidden(actorCategory)
 end
 
 function ZO_CollectibleData:IsVisualLayerHidden(actorCategory)
-    return self.hasVisualAppearence and self:IsActive(actorCategory) and self:WouldBeHidden(actorCategory)
+    return self:HasVisualAppearence() and self:IsActive(actorCategory) and self:WouldBeHidden(actorCategory)
 end
 
 function ZO_CollectibleData:IsVisualLayerShowing(actorCategory)
-    return self.hasVisualAppearence and self:IsActive(actorCategory) and not self:WouldBeHidden(actorCategory)
+    return self:HasVisualAppearence() and self:IsActive(actorCategory) and not self:WouldBeHidden(actorCategory)
 end
 
 function ZO_CollectibleData:GetNotificationId()
@@ -585,15 +535,20 @@ end
 do
     local IS_HIDDEN_FROM_COLLECTION_MODE =
     {
-        [COLLECTIBLE_HIDE_MODE_NONE] = function() return false end,
-        [COLLECTIBLE_HIDE_MODE_ALWAYS] = function() return true end,
         [COLLECTIBLE_HIDE_MODE_WHEN_LOCKED] = function(collectibleData) return collectibleData:IsLocked() end,
         [COLLECTIBLE_HIDE_MODE_WHEN_LOCKED_REQUIREMENT] = function(collectibleData) return collectibleData:IsCollectibleDynamicallyHidden() end,
     }
 
     function ZO_CollectibleData:IsHiddenFromCollection()
-        local modeFunction = IS_HIDDEN_FROM_COLLECTION_MODE[self.hideMode]
-        return modeFunction(self)
+        local hideMode = GetCollectibleHideMode(self.collectibleId)
+        if hideMode == COLLECTIBLE_HIDE_MODE_NONE then
+            return false
+        elseif hideMode == COLLECTIBLE_HIDE_MODE_ALWAYS then
+            return true
+        else
+            local modeFunction = IS_HIDDEN_FROM_COLLECTION_MODE[hideMode]
+            return modeFunction(self)
+        end
     end
 end
 
@@ -629,10 +584,14 @@ do
     }
 
     function ZO_CollectibleData:GetOutfitStyleEquipSound()
-        if self.visualArmorType then
-            return ARMOR_VISUAL_TO_SOUND_ID[self.visualArmorType]
-        elseif self.weaponModelType then
-            return WEAPON_VISUAL_TO_SOUND_ID[self.weaponModelType]
+        local visualArmorType = self:GetVisualArmorType()
+        if visualArmorType then
+            return ARMOR_VISUAL_TO_SOUND_ID[visualArmorType]
+        end
+
+        local weaponModelType = self:GetWeaponModelType()
+        if weaponModelType then
+            return WEAPON_VISUAL_TO_SOUND_ID[weaponModelType]
         end
     end
 end
@@ -641,13 +600,7 @@ end
 -- Specialized Sorted Collectibles
 -----------------------------------
 
-ZO_SpecializedSortedCollectibles = ZO_Object:Subclass()
-
-function ZO_SpecializedSortedCollectibles:New(...)
-    local object = ZO_Object:New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_SpecializedSortedCollectibles = ZO_InitializingObject:Subclass()
 
 function ZO_SpecializedSortedCollectibles:Initialize()
     self.dirty = false
@@ -692,10 +645,6 @@ end
 
 ZO_DefaultSortedCollectibles = ZO_SpecializedSortedCollectibles:Subclass()
 
-function ZO_DefaultSortedCollectibles:New(...)
-    return ZO_SpecializedSortedCollectibles.New(self, ...)
-end
-
 function ZO_DefaultSortedCollectibles:Initialize(owner)
     ZO_SpecializedSortedCollectibles.Initialize(self)
     self.owner = owner
@@ -706,14 +655,11 @@ end
 
 function ZO_DefaultSortedCollectibles:InsertCollectible(collectibleData)
     table.insert(self.sortedCollectibles, collectibleData)
-
+    
     local collectibleId = collectibleData:GetId()
     if not self.collectibleNameLookupTable[collectibleId] then
-        self.collectibleNameLookupTable[collectibleId] =
-        {
-            name = collectibleData:GetName(),
-            id = collectibleId
-        }
+        -- This will be replaced with a number when the sort is concluded
+        self.collectibleNameLookupTable[collectibleId] = collectibleData
     end
 
     self.dirty = true
@@ -727,12 +673,22 @@ function ZO_DefaultSortedCollectibles:RefreshSort()
     if self.dirty then
         local collectibleNameLookupTable = self.collectibleNameLookupTable
         table.sort(self.sortedCollectibles, function(left, right) 
-            if left:IsUnlocked() ~= right:IsUnlocked() then
-                return left:IsUnlocked()
-            elseif left:GetSortOrder() ~= right:GetSortOrder() then
-                return left:GetSortOrder() < right:GetSortOrder()
-            elseif left:IsValidForPlayer() ~= right:IsValidForPlayer() then
-                return left:IsValidForPlayer()
+            local leftIsUnlocked = left:IsUnlocked()
+            local rightIsUnlocked = right:IsUnlocked()
+            if leftIsUnlocked ~= rightIsUnlocked then
+                return leftIsUnlocked
+            end
+
+            local leftSortOrder = left:GetSortOrder()
+            local rightSortOrder = right:GetSortOrder()
+            if leftSortOrder ~= rightSortOrder then
+                return leftSortOrder < rightSortOrder
+            end
+            
+            local leftIsValidForPlayer = left:IsValidForPlayer()
+            local rightIsValidForPlayer = right:IsValidForPlayer()
+            if leftIsValidForPlayer ~= rightIsValidForPlayer then
+                return leftIsValidForPlayer
             else
                 return collectibleNameLookupTable[left:GetId()] < collectibleNameLookupTable[right:GetId()]
             end
@@ -744,18 +700,19 @@ end
 
 function ZO_DefaultSortedCollectibles:OnInsertFinished()
     local tempTable = {}
-    for _, collectibleNameData in pairs(self.collectibleNameLookupTable) do
-        table.insert(tempTable, collectibleNameData)
+    for _, collectibleData in pairs(self.collectibleNameLookupTable) do
+        table.insert(tempTable, collectibleData)
     end
 
     table.sort(tempTable, function(left, right)
         return left.name < right.name
     end)
-
-    self.collectibleNameLookupTable = {}
     
-    for position, collectibleNameData in ipairs(tempTable) do
-        self.collectibleNameLookupTable[collectibleNameData.id] = position
+    -- We know that we start with a mapping of id to data and end with a mapping of id to position
+    -- So since these mappings have 1 to 1 keys, rather than wasting throwing out the old table and creating a new table, we can just replace everything
+    -- as another minor optimization
+    for position, collectibleData in ipairs(tempTable) do
+        self.collectibleNameLookupTable[collectibleData:GetId()] = position
     end
 end
 
@@ -764,10 +721,6 @@ end
 -------------------------------------------------------
 
 ZO_SpecializedSortedOutfitStyleTypes = ZO_SpecializedSortedCollectibles:Subclass()
-
-function ZO_SpecializedSortedOutfitStyleTypes:New(...)
-    return ZO_SpecializedSortedCollectibles.New(self, ...)
-end
 
 function ZO_SpecializedSortedOutfitStyleTypes:Initialize()
     ZO_SpecializedSortedCollectibles.Initialize(self)
@@ -783,9 +736,11 @@ function ZO_SpecializedSortedOutfitStyleTypes:InsertCollectible(collectibleData)
             styles = ZO_SpecializedSortedOutfitStyles:New(self)
             self.sortedCollectibles[type] = styles
         end
-
+        
         local itemStyleId = collectibleData:GetOutfitStyleItemStyleId()
         if not self.itemStyleNameLookupTable[itemStyleId] then
+            -- Cache this off here instead of just storing the collectibleData
+            -- so we don't have to fetch the name repeatedly in the sort function
             self.itemStyleNameLookupTable[itemStyleId] =
             {
                 name = collectibleData:GetOutfitStyleItemStyleName(),
@@ -825,7 +780,7 @@ function ZO_SpecializedSortedOutfitStyleTypes:OnInsertFinished()
     table.sort(tempTable, function(left, right)
         return left.name < right.name
     end)
-    
+
     for position, styleNameData in ipairs(tempTable) do
         self.itemStyleNameLookupTable[styleNameData.id] = position
     end
@@ -848,21 +803,27 @@ end
 
 ZO_SpecializedSortedOutfitStyles = ZO_DefaultSortedCollectibles:Subclass()
 
-function ZO_SpecializedSortedOutfitStyles:New(...)
-    return ZO_DefaultSortedCollectibles.New(self, ...)
-end
-
 function ZO_SpecializedSortedOutfitStyles:RefreshSort()
     if self.dirty then
         local itemStyleNameLookupTable = self.owner.itemStyleNameLookupTable
         local collectibleNameLookupTable = self.collectibleNameLookupTable
         table.sort(self.sortedCollectibles, function(left, right) 
-            if left:IsUnlocked() ~= right:IsUnlocked() then
-                return left:IsUnlocked()
-            elseif left:GetOutfitStyleItemStyleId() ~= right:GetOutfitStyleItemStyleId() then
-                return itemStyleNameLookupTable[left:GetOutfitStyleItemStyleId()] < itemStyleNameLookupTable[right:GetOutfitStyleItemStyleId()]
-            elseif left:GetSortOrder() ~= right:GetSortOrder() then
-                return left:GetSortOrder() < right:GetSortOrder()
+            local leftIsUnlocked = left:IsUnlocked()
+            local rightIsUnlocked = right:IsUnlocked()
+            if leftIsUnlocked ~= rightIsUnlocked then
+                return leftIsUnlocked
+            end
+
+            local leftOutfitStyleItemStyleId = left:GetOutfitStyleItemStyleId()
+            local rightOutfitStyleItemStyleId = right:GetOutfitStyleItemStyleId()
+            if leftOutfitStyleItemStyleId ~= rightOutfitStyleItemStyleId then
+                return itemStyleNameLookupTable[leftOutfitStyleItemStyleId] < itemStyleNameLookupTable[rightOutfitStyleItemStyleId]
+            end
+
+            local leftSortOrder = left:GetSortOrder()
+            local rightSortOrder = right:GetSortOrder()
+            if leftSortOrder ~= rightSortOrder then
+                return leftSortOrder < rightSortOrder
             else
                 return collectibleNameLookupTable[left:GetId()] < collectibleNameLookupTable[right:GetId()]
             end
@@ -878,10 +839,6 @@ end
 
 ZO_SpecializedSortedHouses = ZO_DefaultSortedCollectibles:Subclass()
 
-function ZO_SpecializedSortedHouses:New(...)
-    return ZO_DefaultSortedCollectibles.New(self, ...)
-end
-
 function ZO_SpecializedSortedHouses:HandlePrimaryResidenceChanged(collectibleData)
     self.dirty = true
 end
@@ -890,12 +847,22 @@ function ZO_SpecializedSortedHouses:RefreshSort()
     if self.dirty then
         local collectibleNameLookupTable = self.collectibleNameLookupTable
         table.sort(self.sortedCollectibles, function(left, right)
-            if left:IsPrimaryResidence() ~= right:IsPrimaryResidence() then
-                return left:IsPrimaryResidence()
-            elseif left:IsUnlocked() ~= right:IsUnlocked() then
-                return left:IsUnlocked()
-            elseif left:GetSortOrder() ~= right:GetSortOrder() then
-                return left:GetSortOrder() < right:GetSortOrder()
+            local leftIsPrimaryResidence = left:IsPrimaryResidence()
+            local rightIsPrimaryResidence = right:IsPrimaryResidence()
+            if leftIsPrimaryResidence ~= rightIsPrimaryResidence then
+                return leftIsPrimaryResidence
+            end
+
+            local leftIsUnlocked = left:IsUnlocked()
+            local rightIsUnlocked = right:IsUnlocked()
+            if leftIsUnlocked ~= rightIsUnlocked then
+                return leftIsUnlocked
+            end
+
+            local leftSortOrder = left:GetSortOrder()
+            local rightSortOrder = right:GetSortOrder()
+            if leftSortOrder ~= rightSortOrder then
+                return leftSortOrder < rightSortOrder
             else
                 return collectibleNameLookupTable[left:GetId()] < collectibleNameLookupTable[right:GetId()]
             end
@@ -911,10 +878,6 @@ end
 
 ZO_SpecializedSortedStories = ZO_DefaultSortedCollectibles:Subclass()
 
-function ZO_SpecializedSortedStories:New(...)
-    return ZO_DefaultSortedCollectibles.New(self, ...)
-end
-
 function ZO_SpecializedSortedStories:HandleLockStatusChanged(collectibleData)
     -- Do nothing, stories don't re-sort, their order is based on release date
 end
@@ -923,8 +886,10 @@ function ZO_SpecializedSortedStories:RefreshSort()
     if self.dirty then
         local collectibleNameLookupTable = self.collectibleNameLookupTable
         table.sort(self.sortedCollectibles, function(left, right)
-            if left:GetSortOrder() ~= right:GetSortOrder() then
-                return left:GetSortOrder() < right:GetSortOrder()
+            local leftSortOrder = left:GetSortOrder()
+            local rightSortOrder = right:GetSortOrder()
+            if leftSortOrder ~= rightSortOrder then
+                return leftSortOrder < rightSortOrder
             else
                 return collectibleNameLookupTable[left:GetId()] < collectibleNameLookupTable[right:GetId()]
             end
@@ -937,13 +902,7 @@ end
 -- Category Base --
 -------------------
 
-ZO_CollectibleCategoryData = ZO_Object:Subclass()
-
-function ZO_CollectibleCategoryData:New(...)
-    local object = ZO_Object:New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_CollectibleCategoryData = ZO_InitializingObject:Subclass()
 
 function ZO_CollectibleCategoryData:Initialize(masterCollectibleObjectPool, masterSubcategoryObjectPool)
     -- orderedCollectibles is the order they came from C in.  specializedSortedCollectibles is the sorted list, based on criterea set for the category type
@@ -1026,10 +985,6 @@ function ZO_CollectibleCategoryData:BuildData(categoryIndex, subcategoryIndex)
     self.categoryIndex, self.subcategoryIndex = categoryIndex, subcategoryIndex
     self.categoryId = GetCollectibleCategoryId(categoryIndex, subcategoryIndex)
 
-    self.name = GetCollectibleCategoryNameByCategoryId(self.categoryId)
-    self.keyboardNormalIcon, self.keyboardPressedIcon, self.keyboardMousedOverIcon, self.disabledIcon = GetCollectibleCategoryKeyboardIcons(categoryIndex, subcategoryIndex)
-    self.gamepadIcon = GetCollectibleCategoryGamepadIcon(categoryIndex, subcategoryIndex)
-
     if self.isTopLevelCategory then
         local numSubcategories = GetNumSubcategoriesInCollectibleCategory(categoryIndex)
         for loopSubcategoryIndex = 1, numSubcategories do
@@ -1070,19 +1025,19 @@ function ZO_CollectibleCategoryData:CreateSpecializedSortedCollectiblesTable()
 end
 
 function ZO_CollectibleCategoryData:GetName()
-    return self.name
+    return GetCollectibleCategoryNameByCategoryId(self.categoryId)
 end
 
 function ZO_CollectibleCategoryData:GetFormattedName()
-    return ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, self.name)
+    return ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, self:GetName())
 end
 
 function ZO_CollectibleCategoryData:GetKeyboardIcons()
-    return self.keyboardNormalIcon, self.keyboardPressedIcon, self.keyboardMousedOverIcon, self.disabledIcon
+    return GetCollectibleCategoryKeyboardIcons(self.categoryIndex, self.subcategoryIndex)
 end
 
 function ZO_CollectibleCategoryData:GetGamepadIcon()
-    return self.gamepadIcon
+    return GetCollectibleCategoryGamepadIcon(self.categoryIndex, self.subcategoryIndex)
 end
 
 function ZO_CollectibleCategoryData:GetNumSubcategories()

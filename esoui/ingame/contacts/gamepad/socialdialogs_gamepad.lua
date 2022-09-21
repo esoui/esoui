@@ -166,6 +166,7 @@ function ZO_GamepadSocialDialogs:InitializeEditNoteDialog()
                     callback = function(dialog)
                         SetActiveEdit(dialog)
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 
@@ -261,6 +262,7 @@ function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
                 callback = function(dialog)
                     SetActiveEdit(dialog)
                 end,
+                narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
             },
         },
         -- request
@@ -312,6 +314,7 @@ function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
                 callback = function(dialog)
                     SetActiveEdit(dialog)
                 end,
+                narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
             },
             visible = IsConsoleUI,
         })
@@ -419,6 +422,7 @@ function ZO_GamepadSocialDialogs:InitializeAddIgnoreDialog()
                     callback = function(dialog)
                         SetActiveEdit(dialog)
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
              -- ignore
@@ -511,6 +515,7 @@ function ZO_GamepadSocialDialogs:InitializeInviteMemberDialog()
                     callback = function(dialog)
                         SetActiveEdit(dialog)
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 
@@ -605,6 +610,7 @@ function ZO_GamepadSocialDialogs:InitializeGroupInviteDialog()
                     callback = function(dialog)
                         SetActiveEdit(dialog)
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 

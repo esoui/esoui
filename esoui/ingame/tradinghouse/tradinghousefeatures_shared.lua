@@ -204,9 +204,9 @@ function ZO_TradingHouseLevelRangeFeature_Shared:GetDescriptionFromTable(searchT
                 else
                     exactLevel = minLevel
                 end
-                return GetLevelOrChampionPointsString(exactLevel, exactChampionPoints, ICON_SIZE)
+                return ZO_GetLevelOrChampionPointsString(exactLevel, exactChampionPoints, ICON_SIZE)
             else
-                return GetLevelOrChampionPointsRangeString(minLevel, maxLevel, isChampionRank, ICON_SIZE)
+                return ZO_GetLevelOrChampionPointsRangeString(minLevel, maxLevel, isChampionRank, ICON_SIZE)
             end
         end
     end

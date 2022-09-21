@@ -23,11 +23,6 @@ function ZO_UiInfoBoxTutorial:Initialize()
         noChoiceCallback = function(dialog)
             dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
         end,
-        finishedCallback = function(dialog)
-            if dialog.data then
-                FireTutorialHiddenEvent(dialog.data.tutorialIndex)
-            end
-        end,
         buttons =
         {
             {
@@ -39,7 +34,7 @@ function ZO_UiInfoBoxTutorial:Initialize()
                     dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
                 end,
             },
-        }
+        },
     }
 
     ZO_Dialogs_RegisterCustomDialog("UI_TUTORIAL", self.dialogInfo)
@@ -69,9 +64,10 @@ function ZO_UiInfoBoxTutorial:Initialize()
             buttons =
             {
                 {
-                    -- Even though this is an ethereal keybind, the name will still be shown as the centered dialogs interact keybind
+                    -- Even though this is an ethereal keybind, the name will still be shown as the centered dialogs interact keybind and read during screen narration
                     name = GetString(SI_TUTORIAL_CONTINUE),
                     ethereal = true,
+                    narrateEthereal = true,
                     keybind = "DIALOG_PRIMARY",
                     clickSound = SOUNDS.DIALOG_ACCEPT,
                     callback = function(dialog)
@@ -82,11 +78,6 @@ function ZO_UiInfoBoxTutorial:Initialize()
             noChoiceCallback = function(dialog)
                 if dialog.data then
                     dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
-                end
-            end,
-            finishedCallback = function(dialog)
-                if dialog.data then
-                    FireTutorialHiddenEvent(dialog.data.tutorialIndex)
                 end
             end,
             removedFromQueueCallback = function(data)

@@ -113,7 +113,7 @@ function ZO_SocialList_SharedSocialSetup(control, data, selected)
     if data.hasCharacter then
         zoneLabel:SetText(data.formattedZone)
 
-        levelLabel:SetText(GetLevelOrChampionPointsStringNoIcon(data.level, data.championPoints))
+        levelLabel:SetText(ZO_GetLevelOrChampionPointsStringNoIcon(data.level, data.championPoints))
 
         if data.championPoints and data.championPoints > 0 then
             championIconControl:SetTexture(textureFunctions.championPointsIcon())

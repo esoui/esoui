@@ -199,6 +199,13 @@ function ZO_HousingPathSettings_Gamepad:InitializeLists()
     local USE_DEFAULT_COMPARISON = nil
     self.changeObjectList:AddDataTemplateWithHeader("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, USE_DEFAULT_COMPARISON, "ZO_GamepadMenuEntryHeaderTemplate")
     self.changeObjectList:SetNoItemText(GetString(SI_ANTIQUITY_EMPTY_LIST))
+
+    local function OnHouseChanged()
+        -- Refresh the Option List to show/hide the Change Object entry as appropriate.
+        self.dirty = true
+    end
+
+    HOUSING_EDITOR_STATE:RegisterCallback("HouseChanged", OnHouseChanged)
 end
 
 function ZO_HousingPathSettings_Gamepad:OnSettingsTargetChanged(list, targetData, oldTargetData)
@@ -211,10 +218,12 @@ end
 function ZO_HousingPathSettings_Gamepad:RefreshOptionList()
     self.mainList:Clear()
     for controlTypeIndex, controlInfo in ipairs(ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA) do
-        local entry = ZO_GamepadEntryData:New(GetString(controlInfo.text))
-        entry.generalInfo = controlInfo
-        entry.index = controlTypeIndex
-        self.mainList:AddEntry(controlInfo.gamepadTemplate, entry)
+        if controlInfo.visible == nil or controlInfo.visible() then
+            local entry = ZO_GamepadEntryData:New(GetString(controlInfo.text))
+            entry.generalInfo = controlInfo
+            entry.index = controlTypeIndex
+            self.mainList:AddEntry(controlInfo.gamepadTemplate, entry)
+        end
     end
     self.mainList:Commit()
 end

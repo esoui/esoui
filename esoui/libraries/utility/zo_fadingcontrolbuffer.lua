@@ -100,6 +100,8 @@ end
             headerTemplateName [optional, but required if a header is present in an entry]
             headerSetup = function(control, data) [optional, but required if a header is present in an entry]
             headerEqualityCheck = function(fadingControlBuffer, oldHeader, newHeader) [optional]
+            headerNarrationText = function(data) [optional, used when we want to specify special behavior for narrating header entries for this template]
+            narrationText = function(data) [optional, used when we want to specify special behavior for narrating line entries for this template]
 --]]
 function ZO_FadingControlBuffer:AddTemplate(templateName, templateData)
     self.templates[templateName] = templateData
@@ -197,6 +199,8 @@ function ZO_FadingControlBuffer:TryHandlingExistingEntry(templateName, templateD
                     -- Are all lines equal?
                     if activeEntry.lines and templateData.equalityCheck(activeEntry.lines, entry.lines) then
                         templateData.equalitySetup(self, activeEntry, entry)
+                        --Re-narrate the active entry when it is modified
+                        SCREEN_NARRATION_MANAGER:QueueFadingControlBuffer(activeEntry, templateData)
                         activeEntryControl.setupTime = GetFrameTimeMilliseconds()
                         handled = true
                     else
@@ -210,6 +214,8 @@ function ZO_FadingControlBuffer:TryHandlingExistingEntry(templateName, templateD
             -- Headers are either not equal or not present.  Are all lines equal?
             elseif activeEntry.lines and entry.lines and templateData.equalityCheck(activeEntry.lines, entry.lines) then
                 templateData.equalitySetup(self, activeEntry, entry)
+                --Re-narrate the active entry when it is modified
+                SCREEN_NARRATION_MANAGER:QueueFadingControlBuffer(activeEntry, templateData)
                 handled = true
             end
 
@@ -686,6 +692,8 @@ function ZO_FadingControlBuffer:AddLinesToExistingEntry(entryControl, newLines, 
     entryControl.height = entryControl.height + offsetY
     entryControl.targetBottomY = entryControl.targetBottomY + offsetY
     entryControl.setupTime = GetFrameTimeMilliseconds()
+    --Re-narrate the active entry when lines are added to it
+    SCREEN_NARRATION_MANAGER:QueueFadingControlBuffer(entry, templateData)
 
     self:MoveEntriesOrLines(self.activeEntries)
 end
@@ -717,6 +725,9 @@ end
 function ZO_FadingControlBuffer:DisplayEntry(templateName, entry)
     local entryControl = self:AcquireEntryObject(templateName)
     local templateData = self.templates[templateName]
+
+    --Narrate the entry we are going to display
+    SCREEN_NARRATION_MANAGER:QueueFadingControlBuffer(entry, templateData)
 
     -- Call the setup function for the header and each of the lines.
     local offsetY = 0

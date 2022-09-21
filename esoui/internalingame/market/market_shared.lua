@@ -26,7 +26,10 @@ function ZO_Market_Shared:New(...)
     return market
 end
 
-function ZO_Market_Shared:Initialize()
+function ZO_Market_Shared:Initialize(control, sceneName)
+    self.control = control
+    self.sceneName = sceneName
+
     -- Special buckets to contain MarketProducts in lieu of a Category/Subcategory
     self.featuredProducts = {}
     self.limitedTimedOfferProducts = {}
@@ -43,13 +46,21 @@ function ZO_Market_Shared:Initialize()
     self:InitializeMarketList()
     self:InitializeKeybindDescriptors()
     self:InitializeFilters()
-    self.control:RegisterForEvent(EVENT_TUTORIAL_HIDDEN, function()
-        if self.currentTutorial then
-            self.currentTutorial = nil
-            self:RestoreActionLayerForTutorial()
-            self:OnTutorialHidden()
+
+    ZO_DIALOG_SYNC_OBJECT:SetHandler("OnShown", function()
+        if self:IsShowing() then
+            self:OnDialogShowing()
+            self:RemoveActionLayerForDialog()
         end
-    end)
+    end, self.sceneName)
+
+    ZO_DIALOG_SYNC_OBJECT:SetHandler("OnHidden", function()
+        if self:IsShowing() then
+            self:RestoreActionLayerForDialog()
+            self:OnDialogHidden()
+        end
+    end, self.sceneName)
+
     self.refreshCategories = false
 
     self:RegisterForMarketSingletonCallbacks()
@@ -82,7 +93,6 @@ function ZO_Market_Shared:OnInitialInteraction()
 end
 
 function ZO_Market_Shared:OnEndInteraction()
-    self.currentTutorial = nil
     self:ResetSearch()
     SetSecureRenderModeEnabled(false)
     OnMarketClose()
@@ -646,17 +656,7 @@ end
 
 function ZO_Market_Shared:TriggerCrownGemTutorial()
     if self.marketState == MARKET_STATE_OPEN then
-        self:ShowTutorial(TUTORIAL_TRIGGER_CROWN_CRATE_UI_OPENED)
-    end
-end
-
-function ZO_Market_Shared:ShowTutorial(tutorial)
-    local tutorialId = GetTutorialId(tutorial)
-    if CanTutorialBeSeen(tutorialId) and (not HasSeenTutorial(tutorialId)) then
-        self.currentTutorial = tutorial
-        self:OnTutorialShowing()
-        self:RemoveActionLayerForTutorial()
-        TriggerTutorial(tutorial)
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_CROWN_CRATE_UI_OPENED)
     end
 end
 
@@ -671,18 +671,15 @@ function ZO_Market_Shared:OnShown()
         ZO_MARKET_MANAGER:SetActiveMarket(self)
 
         if self.marketOpenedTutorialTriggerType then
-            self:ShowTutorial(self.marketOpenedTutorialTriggerType)
+            TUTORIAL_MANAGER:ShowTutorial(self.marketOpenedTutorialTriggerType)
         else
-            self:ShowTutorial(TUTORIAL_TRIGGER_MARKET_OPENED)
+            TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_MARKET_OPENED)
         end
     end
 end
 
 function ZO_Market_Shared:OnHiding()
     ZO_MARKET_MANAGER:OnActiveMarketHidden(self)
-
-    --clear the current tutorial when hiding so we don't push an extra action layer
-    self.currentTutorial = nil
 
     self:EndCurrentPreview()
 end
@@ -833,10 +830,10 @@ end
 function ZO_Market_Shared:RefreshProducts()
 end
 
-function ZO_Market_Shared:OnTutorialShowing()
+function ZO_Market_Shared:OnDialogShowing()
 end
 
-function ZO_Market_Shared:OnTutorialHidden()
+function ZO_Market_Shared:OnDialogHidden()
 end
 
 function ZO_Market_Shared:GetCategoryData(targetId)
@@ -865,11 +862,19 @@ end
 function ZO_Market_Shared:RefreshEsoPlusPage()
 end
 
-function ZO_Market_Shared:RemoveActionLayerForTutorial()
-    assert(false) -- must be overridden
+function ZO_Market_Shared:RemoveActionLayerForDialog()
+    local actionLayerName = GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS)
+    if IsActionLayerActiveByName(actionLayerName) then
+        RemoveActionLayerByName(actionLayerName)
+        self.restoreActionLayerWhenDialogHides = true
+    end
 end
-function ZO_Market_Shared:RestoreActionLayerForTutorial()
-    assert(false) -- must be overridden
+
+function ZO_Market_Shared:RestoreActionLayerForDialog()
+    if self.restoreActionLayerWhenDialogHides then
+        PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))
+        self.restoreActionLayerWhenDialogHides = nil
+    end
 end
 
 function ZO_Market_Shared:RefreshActions()

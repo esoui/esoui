@@ -295,7 +295,7 @@ function ZO_WorldMapKeepInfo_Shared:HideKeep()
         SCENE_MANAGER:RemoveFragment(self.worldMapKeepInfoFragment)
         self:FireCallbacks("WorldMapKeepInfoHidden")
     end
-    ZO_WorldMap_InvalidateTooltip()
+    ZO_WorldMap_GetPinManager():InvalidateTooltip()
 end
 
 function ZO_WorldMapKeepInfo_Shared:GetFragment()

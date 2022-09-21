@@ -165,6 +165,14 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
                 self.owner:SelectTextFilter()
             end,
         },
+        -- Link House Invite in Chat
+        {
+            name = GetString(SI_HOUSING_LINK_IN_CHAT),
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            callback = ZO_HousingBook_LinkCurrentHouseInChat,
+            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            order = 100,
+        },
     }
 
     local function BackFunction()

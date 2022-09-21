@@ -5,15 +5,16 @@
             <Dimensions x="22" y="22" />
 
             <OnMouseDown>
-                if not ZO_WorldMap_WouldPinHandleClick(self, button, ctrl, alt, shift) then
+                if not ZO_WorldMap_GetPinManager():WouldPinHandleClick(self, button, ctrl, alt, shift) then
                     ZO_WorldMap_MouseDown(button, ctrl, alt, shift)
                 end
             </OnMouseDown>
 
             <OnMouseUp>
-                if ZO_WorldMap_WouldPinHandleClick(self, button, ctrl, alt, shift) then
+                local pinManager = ZO_WorldMap_GetPinManager()
+                if pinManager:WouldPinHandleClick(self, button, ctrl, alt, shift) then
                     if upInside then
-                        ZO_WorldMap_HandlePinClicked(self, button, ctrl, alt, shift)
+                        pinManager:HandlePinClicked(self, button, ctrl, alt, shift)
                     end
                 else
                     ZO_WorldMap_MouseUp(ZO_WorldMapContainer, button, MouseIsOver(ZO_WorldMapScroll))

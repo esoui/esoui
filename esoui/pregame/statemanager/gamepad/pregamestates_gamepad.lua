@@ -147,9 +147,7 @@ local pregameStates =
 
         GetStateTransitionData = function()
             if IsConsoleUI() then
-                -- TODO XAR Settings: Replace the following
-                -- return "FirstTimeAccessibilitySettings"
-                return "ScreenAdjustIntro"
+                return "FirstTimeAccessibilitySettings"
             else
                 return "ShowEULA"
             end

@@ -41,6 +41,9 @@
                         ZO_CampaignBonuses_CountInfo_OnMouseExit(self)
                     </OnMouseExit>
                 </Label>
+                <Label name="$(parent)CountDetails" inherits="ZO_CampaignBonusesRowLabel">
+                    <Anchor point="LEFT" relativeTo="$(parent)CountInfo" relativePoint="RIGHT" offsetX="20" />
+                </Label>
             </Controls>
         </Control>
 

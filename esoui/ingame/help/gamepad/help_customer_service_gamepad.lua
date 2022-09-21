@@ -99,9 +99,17 @@ function ZO_Help_Customer_Service_Gamepad:SubmitTicket()
     ResetCustomerServiceTicket()
     SetCustomerServiceTicketCategory(self:GetTicketCategoryForSubmission())
     SetCustomerServiceTicketBody(self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DESCRIPTION))
+
     local impactData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.IMPACT)
+    if impactData.detailsRegistrationFunction then
+        local text = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS)
+        if impactData.detailsFormatText then
+            text = impactData.detailsFormatText(text)
+        end
+        impactData.detailsRegistrationFunction(text)
+    end
+
     if impactData.id == CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER then
-        SetCustomerServiceTicketPlayerTarget(self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS))
         ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket()
     end
     SubmitCustomerServiceTicket()

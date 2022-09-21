@@ -136,6 +136,12 @@ function ZO_AssignableUtilityWheel_Keyboard:InitializeKeybindStripDescriptors()
     }
 end
 
+function ZO_AssignableUtilityWheel_Keyboard:Deactivate()
+    ZO_AssignableUtilityWheel_Shared.Deactivate(self)
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mouseOverKeybindStripDescriptor)
+end
+
+
 local INITIAL_ROTATION = 0
 function ZO_AssignableUtilityWheel_Keyboard:PerformSlotLayout()
     local width, height = self.control:GetDimensions()

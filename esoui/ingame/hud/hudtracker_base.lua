@@ -2,13 +2,7 @@
 --Initialization--
 ------------------
 
-ZO_HUDTracker_Base = ZO_CallbackObject:Subclass()
-
-function ZO_HUDTracker_Base:New(...)
-    local object = ZO_CallbackObject.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_HUDTracker_Base = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_HUDTracker_Base:Initialize(control)
     self.control = control
@@ -17,8 +11,6 @@ function ZO_HUDTracker_Base:Initialize(control)
     self.container = control:GetNamedChild("Container")
     self.headerLabel = self.container:GetNamedChild("Header")
     self.subLabel = self.container:GetNamedChild("SubLabel")
-
-    self:InitializeStyles()
 
     self.fragment = ZO_HUDFadeSceneFragment:New(self.container)
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
@@ -33,6 +25,18 @@ function ZO_HUDTracker_Base:Initialize(control)
         end
     end)
 
+    -- Defer remaining initialization until after all controls have loaded
+    -- in order to guarantee that all anchor references will be valid.
+    self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, function(_, name)
+        if name == "ZO_Ingame" then
+            self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+            self:DeferredInitialize()
+        end
+    end)
+end
+
+function ZO_HUDTracker_Base:DeferredInitialize()
+    self:InitializeStyles()
     self:RegisterEvents()
 end
 

@@ -52,6 +52,20 @@ panelBuilder:AddSetting({
     template = "ZO_Options_Video_Checkbox_IncludeRestartWarning",
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Video_Use_Background_FPS_Limit",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_USE_BACKGROUND_FPS_LIMIT,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+}) 
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_Background_FPS_Limit",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_BACKGROUND_FPS_LIMIT,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+})
+
 -- inline slider
 panelBuilder:AddSetting({
     controlName = "Options_Video_Gamma_Adjustment",

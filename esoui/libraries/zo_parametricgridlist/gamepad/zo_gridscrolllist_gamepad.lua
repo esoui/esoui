@@ -32,6 +32,8 @@ function ZO_AbstractGridScrollList_Gamepad:Initialize(control, selectionTemplate
 
     self.horizontalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     self.verticalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
+
+    SCREEN_NARRATION_MANAGER:RegisterGridList(self)
 end
 
 function ZO_AbstractGridScrollList_Gamepad:InitializeTriggerKeybinds()
@@ -156,6 +158,8 @@ function ZO_AbstractGridScrollList_Gamepad:Activate(foregoDirectionalInput)
         if not foregoDirectionalInput then
             self:SetDirectionalInputEnabled(true)
         end
+
+        self:FireCallbacks("OnActivated", self:GetSelectedData())
     end
 end
 

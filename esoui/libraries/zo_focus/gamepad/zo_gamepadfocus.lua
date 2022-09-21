@@ -234,6 +234,13 @@ function ZO_GamepadFocus:GetItemCount()
     return #self.data
 end
 
+function ZO_GamepadFocus:GetNarrationText()
+    local focusItem = self:GetFocusItem()
+    if focusItem and focusItem.narrationText then
+        return focusItem.narrationText()
+    end
+end
+
 function ZO_GamepadFocus:IsFocused(control)
     local isControlFocused = false
 

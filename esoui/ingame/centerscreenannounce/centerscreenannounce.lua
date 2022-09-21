@@ -234,6 +234,112 @@ function ZO_CenterScreenMessageParams:GetCategory()
     return self.category
 end
 
+--Can be used if a CSA needs a special implementation for its screen narration
+function ZO_CenterScreenMessageParams:SetNarrationTextFunction(narrationFunction)
+    self.narrationTextFunction = narrationFunction
+end
+
+function ZO_CenterScreenMessageParams:GetNarrationText()
+    --If a narration text function has been set use that, otherwise grab the narration text using the default methods
+    if self.narrationTextFunction then
+        return self.narrationTextFunction(self)
+    else
+        local category = self.category
+        if category == CSA_CATEGORY_SMALL_TEXT then
+            return self:GetMostUniqueMessage()
+        elseif category == CSA_CATEGORY_LARGE_TEXT then
+            local mainText = self:GetMainText()
+            local secondaryText = self:GetSecondaryText()
+            if mainText or secondaryText then
+                local narrationStrings = {}
+                if mainText then
+                    table.insert(narrationStrings, mainText)
+                end
+
+                if secondaryText then
+                    table.insert(narrationStrings, secondaryText)
+                end
+
+                return narrationStrings
+            end
+        elseif category == CSA_CATEGORY_NO_TEXT then
+            --TODO XAR: Implement
+        elseif category == CSA_CATEGORY_RAID_COMPLETE_TEXT then
+            local mainText = self:GetMainText()
+            local secondaryText = self:GetSecondaryText()
+            local raidData = self:GetEndOfRaidData()
+            if mainText or secondaryText or raidData then
+                local narrationStrings = {}
+                if mainText then
+                    table.insert(narrationStrings, mainText)
+                end
+
+                if secondaryText then
+                    table.insert(narrationStrings, secondaryText)
+                end
+
+                if raidData then
+                    local finalScore = raidData[ARG_BREAKDOWN_INDEX_SCORE]
+                    if finalScore then
+                        table.insert(narrationStrings, GetString(SI_TRIAL_COMPLETE_FINAL_SCORE))
+                        table.insert(narrationStrings, finalScore)
+                    end
+
+                    local totalTime = raidData[ARG_BREAKDOWN_INDEX_TIME]
+                    if totalTime then
+                        table.insert(narrationStrings, GetString(SI_TRIAL_COMPLETE_TOTAL_TIME))
+                        table.insert(narrationStrings, totalTime)
+                    end
+
+                    local vitalityBonus = raidData[ARG_BREAKDOWN_INDEX_VITALITY_AMOUNT]
+                    if vitalityBonus then
+                        table.insert(narrationStrings, GetString(SI_TRIAL_COMPLETE_VITALITY_BONUS))
+                        table.insert(narrationStrings, vitalityBonus)
+                    end
+
+                    local vitalityPercent = raidData[ARG_BREAKDOWN_INDEX_VITALITY_PERCENT]
+                    if vitalityPercent then
+                        table.insert(narrationStrings, GetString(SI_TRIAL_COMPLETE_REVIVES_USED))
+                        table.insert(narrationStrings, vitalityPercent)
+                    end
+                end
+                return narrationStrings
+            end
+        elseif category == CSA_CATEGORY_MAJOR_TEXT then
+            return self:GetMostUniqueMessage()
+        elseif category == CSA_CATEGORY_COUNTDOWN_TEXT then
+            --Countdown CSAs are narrated elsewhere so no need to do anything here
+            return ""
+        elseif category == CSA_CATEGORY_SCRYING_PROGRESS_TEXT then
+            local mainText = self:GetMainText()
+            local secondaryText = self:GetSecondaryText()
+            if mainText or secondaryText then
+                local narrationStrings = {}
+                if mainText then
+                    table.insert(narrationStrings, mainText)
+                end
+
+                if secondaryText then
+                    table.insert(narrationStrings, secondaryText)
+                end
+
+                local lastGoalsAchieved, goalsAchieved, goalsTotal = self:GetScryingProgressData()
+                if goalsAchieved and goalsTotal then
+                    table.insert(narrationStrings, zo_strformat(SI_ANTIQUITIES_SCRYING_PROGRESS_NARRATION, goalsAchieved, goalsTotal))
+                end
+                return narrationStrings
+            end
+        elseif category == CSA_CATEGORY_EXTERNAL_HANDLE then
+            --External handles do not need to narrate anything
+            return ""
+        else
+            internalassert(false, "Unhandled CSA Category type")
+        end
+
+        return ""
+    end
+end
+
 function ZO_CenterScreenMessageParams:SetObjectPoolKey(key)
     self.key = key
 end
@@ -861,6 +967,7 @@ end
 
 function ZO_CenterScreenAnnouncementCountdownLine:PlayCountdownLoopAnimation()
     self.countdownControl:SetText(self.currentCountdownTimeS)
+    SCREEN_NARRATION_MANAGER:QueueCountdownCSA(self.currentCountdownTimeS)
     PlaySound(SOUNDS.COUNTDOWN_TICK)
     self.countdownLoopAnimationTimeline:PlayFromStart()
 end
@@ -1533,6 +1640,8 @@ local setupFunctions =
 
         announcementSmallLine:SetAndPlayStartingAnimation(-initialLineOffset)
 
+        SCREEN_NARRATION_MANAGER:QueueCSA(messageParams)
+
         return announcementSmallLine
     end,
 
@@ -1592,6 +1701,7 @@ local setupFunctions =
 
         local icon, iconBg = messageParams:GetIconData()
         largeMessageLine:SetIcon(icon, iconBg, messageParams:GetSuppressIconFrame() == CSA_OPTION_SUPPRESS_ICON_FRAME)
+        SCREEN_NARRATION_MANAGER:QueueCSA(messageParams)
 
         return largeMessageLine
     end,
@@ -1607,7 +1717,7 @@ local setupFunctions =
         largeMessageLine:SetWipeTimelineLifespan(messageParams:GetLifespanMS())
         largeMessageLine:PlayWipeAnimation()
         self.isBeforeMessageExpiring = true
-
+        SCREEN_NARRATION_MANAGER:QueueCSA(messageParams)
         return largeMessageLine
     end,
 
@@ -1647,7 +1757,7 @@ local setupFunctions =
         lineControl:SetAnchor(TOP, self.majorLineContainer, TOP, 0, 0)
 
         announcementMajorLine:SetAndPlayStartingAnimation(messageParams:GetLifespanMS())
-
+        SCREEN_NARRATION_MANAGER:QueueCSA(messageParams)
         return announcementMajorLine
     end,
 
@@ -1677,7 +1787,7 @@ local setupFunctions =
         largeMessageLine:SetWipeTimelineLifespan(messageParams:GetLifespanMS())
         largeMessageLine:PlayWipeAnimation()
         self.isBeforeMessageExpiring = true
-
+        SCREEN_NARRATION_MANAGER:QueueCSA(messageParams)
         return largeMessageLine
     end,
 

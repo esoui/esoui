@@ -481,6 +481,14 @@ function ZO_GamepadInventory:InitializeSplitStackDialog()
             dialog.sliderValue2:SetText(value)
         end,
 
+        narrationText = function(dialog, itemName)
+            --The stack on the right
+            local stack2 = dialog.slider:GetValue()
+            --The stack on the left
+            local stack1 = dialog.data.stackSize - stack2
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_INVENTORY_SPLIT_STACK_NARRATION_FORMATTER, itemName, stack1, stack2))
+        end,
+
         buttons =
         {
             {
@@ -1431,6 +1439,7 @@ function ZO_GamepadInventory:RefreshHeader(blockCallback)
         headerData = self.itemListHeaderData
     end
 
+    self.headerData = headerData
     ZO_GamepadGenericHeader_Refresh(self.header, headerData, blockCallback)
 end
 
@@ -1471,6 +1480,7 @@ function ZO_GamepadInventory:InitializeHeader()
 
         data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_AVAILABLE_FUNDS),
         data1Text = UpdateGold,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
 
         data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
         data2Text = UpdateCapacityString,
@@ -1482,6 +1492,7 @@ function ZO_GamepadInventory:InitializeHeader()
 
         data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_AVAILABLE_FUNDS),
         data1Text = UpdateGold,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
     }
 
     self.itemListHeaderData =
@@ -1490,6 +1501,7 @@ function ZO_GamepadInventory:InitializeHeader()
 
         data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_AVAILABLE_FUNDS),
         data1Text = UpdateGold,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
 
         data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
         data2Text = UpdateCapacityString,

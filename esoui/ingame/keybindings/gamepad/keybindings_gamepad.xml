@@ -142,7 +142,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMLEFT" offsetY="20" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMRIGHT" offsetY="20" />
                     <Controls>
-                        <Texture name="$(parent)Background" color="FFFFFF" alpha="0.10" layer="CONTROLS">
+                        <Texture name="$(parent)Background" color="FFFFFF" alpha="0.10">
                             <Dimensions y="200" />
                             <Anchor point="LEFT" />
                             <Anchor point="RIGHT" />

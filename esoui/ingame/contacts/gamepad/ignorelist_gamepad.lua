@@ -50,6 +50,18 @@ function IgnoreList_Gamepad:RefreshTooltip()
     --overridden to do nothing
 end
 
+function IgnoreList_Gamepad:GetSelectedNarrationText()
+    local ROW_ENTRY_PAUSE_TIME_MS = 100
+    local narration = {}
+    local entryData = self:GetSelectedData()
+    if entryData and entryData.displayName then
+        local narrationStrings = { ZO_GetPlatformAccountLabel(), ZO_FormatUserFacingDisplayName(entryData.displayName) }
+        table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+    end
+
+    return narration
+end
+
 function ZO_IgnoreList_Gamepad_OnInitialized(self)
     ZO_IGNORE_LIST_GAMEPAD = IgnoreList_Gamepad:New(self)
 end

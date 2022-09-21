@@ -227,6 +227,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
         -- View Rewards
         {
             name = GetString(SI_LFG_VIEW_REWARDS),
+
             keybind = "UI_SHORTCUT_TERTIARY",
 
             callback = function()
@@ -243,6 +244,72 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                     local targetData = currentList:GetTargetData()
                     if targetData and targetData.data then
                         return targetData.data.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE
+                    end
+                end
+                return false
+            end,
+        },
+
+        -- Ungate
+        {
+            name = function()
+                local filterData = self:GetCurrentList():GetTargetData().data
+                local lockingCollectibleId = filterData:GetFirstLockingCollectible()
+                if lockingCollectibleId == 0 then
+                    return GetString(SI_LFG_ACCEPT_QUEST)
+                else
+                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockingCollectibleId)
+                    local categoryType = collectibleData:GetCategoryType()
+                    if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+                        return GetString(SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE)
+                    else
+                        return GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE)
+                    end
+                end
+            end,
+
+            keybind = "UI_SHORTCUT_QUATERNARY",
+
+            callback = function()
+                local filterData = self:GetCurrentList():GetTargetData().data
+                local lockingCollectibleId = filterData:GetFirstLockingCollectible()
+                if lockingCollectibleId == 0 then
+                    BestowActivityTypeGatingQuest(self:GetCurrentList():GetTargetData().data:GetActivityType())
+                else
+                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockingCollectibleId)
+                    local categoryType = collectibleData:GetCategoryType()
+                    if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+                        ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_ACTIVITY_FINDER)
+                    else
+                        local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+                        ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_ACTIVITY_FINDER)
+                    end
+                end
+            end,
+
+            enabled = function()
+                local filterData = self:GetCurrentList():GetTargetData().data
+                local lockingCollectibleId = filterData:GetFirstLockingCollectible()
+                if lockingCollectibleId == 0 then
+                    return not HasQuest(filterData:GetQuestToUnlock())
+                end
+                return true
+            end,
+
+            visible = function()
+                local currentList = self:GetCurrentList()
+                if currentList then
+                    local targetData = currentList:GetTargetData()
+                    local filterData = targetData and targetData.data
+                    if filterData and filterData.IsInstanceOf and filterData:IsInstanceOf(ZO_ActivityFinderLocation_Base) then
+                        local lockingCollectibleId = filterData:GetFirstLockingCollectible()
+                        if lockingCollectibleId == 0 then
+                            local questId = filterData:GetQuestToUnlock()
+                            return questId ~= 0
+                        else
+                            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockingCollectibleId)
+                            return collectibleData:IsStory()
+                        end
                     end
                 end
                 return false

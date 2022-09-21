@@ -110,6 +110,7 @@ function ZO_GroupList_Manager:BuildMasterList()
                 isDps = isDps,
                 isHeal = isHeal,
                 isTank = isTank,
+                selectedRole = selectedRole,
                 displayName = displayName,
                 status = status,
                 hasCharacter = true,

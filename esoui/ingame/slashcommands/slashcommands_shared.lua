@@ -100,6 +100,7 @@ SLASH_COMMANDS[GetString(SI_SLASH_GROUP_INVITE)] = function(txt)
     else
         GroupInviteByName(txt)
         CHAT_ROUTER:AddSystemMessage(zo_strformat(GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), txt))
+        ZO_OutputStadiaLog("SLASH_COMMANDS[GetString(SI_SLASH_GROUP_INVITE)], set ZO_Menu_SetLastCommandWasFromMenu == false")
         ZO_Menu_SetLastCommandWasFromMenu(false)
     end
 end
@@ -193,7 +194,7 @@ end
 
 function DoCommand(text)
     local command, arguments = zo_strmatch(text, "^(/%S+)%s?(.*)")
-
+    ZO_OutputStadiaLog("DoCommand(text), set ZO_Menu_SetLastCommandWasFromMenu == false")
     ZO_Menu_SetLastCommandWasFromMenu(false)
 
     command = zo_strlower(command or "")

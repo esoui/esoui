@@ -5,18 +5,19 @@ ZO_CharacterCreateSlider_Base = ZO_InitializingObject:Subclass()
 function ZO_CharacterCreateSlider_Base:Initialize(control)
     control.sliderObject = self
     self.control = control
-    self.slider = GetControl(control, "Slider")
-    self.name = GetControl(control, "Name")
-    self.padlock = GetControl(control, "Padlock")
+    self.slider = control:GetNamedChild("Slider")
+    self.nameLabel = control:GetNamedChild("Name")
+    self.padlock = control:GetNamedChild("Padlock")
     self.lockState = TOGGLE_BUTTON_OPEN
 end
 
 function ZO_CharacterCreateSlider_Base:SetName(displayName, enumNameFallback, enumValue)
     if displayName and displayName ~= "" then
-        self.name:SetText(displayName)
+        self.name = displayName
     else
-        self.name:SetText(GetString(enumNameFallback, enumValue))
+        self.name = GetString(enumNameFallback, enumValue)
     end
+    self.nameLabel:SetText(self.name)
 end
 
 function ZO_CharacterCreateSlider_Base:SetData(sliderIndex, name, category, steps, value, defaultValue)
@@ -231,4 +232,28 @@ end
 function ZO_CharacterCreateSlider_SetSlider(slider, value)
     OnCharacterCreateOptionChanged()
     slider:GetParent().sliderObject:SetValue(value)
+end
+
+do
+    -- Terrible first implementation
+    local voiceIdToNameId =
+    {
+        SI_CREATE_CHARACTER_VOICE_A,
+        SI_CREATE_CHARACTER_VOICE_B,
+        SI_CREATE_CHARACTER_VOICE_C,
+        SI_CREATE_CHARACTER_VOICE_D,
+        SI_CREATE_CHARACTER_VOICE_E,
+        SI_CREATE_CHARACTER_VOICE_F,
+        SI_CREATE_CHARACTER_VOICE_G,
+        SI_CREATE_CHARACTER_VOICE_H,
+    }
+
+    function ZO_CharacterCreateSlider_GetVoiceName(value)
+        local nameId = voiceIdToNameId[value]
+        if nameId then
+            return GetString(nameId)
+        end
+
+        return GetString(SI_CREATE_CHARACTER_VOICE_A)
+    end
 end

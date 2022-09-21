@@ -4,13 +4,7 @@ local function AreTutorialsEnabled()
     return GetSetting_Bool(SETTING_TYPE_TUTORIAL, TUTORIAL_ENABLED_SETTING_ID)
 end
 
-ZO_Tutorials = ZO_Object:Subclass()
-
-function ZO_Tutorials:New(...)
-    local tutorial = ZO_Object.New(self)
-    tutorial:Initialize(...)
-    return tutorial
-end
+ZO_Tutorials = ZO_InitializingObject:Subclass()
 
 function ZO_Tutorials:Initialize(control)
     self.control = control

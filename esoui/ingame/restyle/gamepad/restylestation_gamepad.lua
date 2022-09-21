@@ -731,6 +731,7 @@ function ZO_RestyleStation_Gamepad:InitializeOptionsDialog()
                 entryData.action = action
                 entryData.setup = action.setup or ZO_SharedGamepadEntry_OnSetup
                 entryData.callback = action.callback
+                entryData.narrationText = action.narrationText
 
                 local listItem =
                 {
@@ -838,11 +839,13 @@ do
                     control.dropdown:SetSortsItems(false)
                     table.insert(data.dialog.dropdowns, control.dropdown)
                     self:UpdateDyeSortingDropdownOptions(control.dropdown)
+                    SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, control.dropdown)
                 end,
                 callback = function(dialog)
                     local targetControl = dialog.entryList:GetTargetControl()
                     targetControl.dropdown:Activate()
                 end,
+                narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
                 isDropdown = true,
             }
         end
@@ -892,7 +895,9 @@ function ZO_RestyleStation_Gamepad:CreateOptionActionDataDyeingShowLocked(option
             if optionalCallback then
                 optionalCallback(dialog)
             end
+            SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
         end,
+        narrationText = ZO_GetDefaultParametricListToggleNarrationText,
     }
 end
 
@@ -916,7 +921,9 @@ function ZO_RestyleStation_Gamepad:CreateOptionActionDataOutfitStylesShowLocked(
             if optionalCallback then
                 optionalCallback(dialog)
             end
+            SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
         end,
+        narrationText = ZO_GetDefaultParametricListToggleNarrationText,
     }
 end
 
@@ -1686,6 +1693,9 @@ function ZO_RestyleStation_Gamepad:InitializeConfirmationDialog()
                 entryData.currencyLocation = CURRENCY_LOCATION_CHARACTER
                 entryData.value = slotCosts
                 entryData.useFlatCurrency = false
+                entryData.narrationText = function(entryData, entryControl)
+                    return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text), SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.value) }
+                end
 
                 local listItem =
                 {
@@ -1705,6 +1715,9 @@ function ZO_RestyleStation_Gamepad:InitializeConfirmationDialog()
                 entryData.setup = SetupOutfitApplyOption
                 entryData.value = flatCost
                 entryData.useFlatCurrency = true
+                entryData.narrationText = function(entryData, entryControl)
+                    return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text), SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.value) }
+                end
 
                 local listItem =
                 {

@@ -49,14 +49,29 @@ function ZO_GamepadTradingHouse:InitializeHeader()
 
     self.textSearchKeybindStripDescriptor =
     {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
             keybind = "UI_SHORTCUT_PRIMARY",
             name = function()
                 return GetString(SI_GAMEPAD_SELECT_OPTION)
             end,
             callback = function()
                 self:SetTextSearchFocused(true)
+            end,
+        },
+        {
+            name = GetString(SI_TRADING_HOUSE_GUILD_HEADER),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            callback = function()
+                ZO_Dialogs_ShowPlatformDialog("TRADING_HOUSE_CHANGE_ACTIVE_GUILD")
+            end,
+            visible = function()
+                local hasMultipleGuilds = GetNumTradingHouseGuilds() > 1
+                local list = self.currentListObject
+                if list then
+                    return list.itemList:GetNumItems() == 0 and hasMultipleGuilds
+                end
+                return false
             end,
         },
     }

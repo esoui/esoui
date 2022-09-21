@@ -163,6 +163,16 @@ function ZO_MapAntiquities_Gamepad:InitializeList(control)
     self.list:AddDataTemplateWithHeader("ZO_WorldMapAntiquitiesGamepadEntry", EntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, NO_EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate", NO_HEADER_SETUP_FUNCTION, NO_CONTROL_POOL_PREFIX, ResetEntry)
     self.list:SetAlignToScreenCenter(true)
     self.list:SetOnSelectedDataChangedCallback(function() self:RefreshKeybinds() end)
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return self:GetFragment():IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return GAMEPAD_WORLD_MAP_INFO:GetHeaderNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.list, narrationInfo)
 end
 
 function ZO_MapAntiquities_Gamepad:SetListEnabled(enabled)
@@ -286,8 +296,8 @@ function ZO_WorldMapAntiquitiesGamepadEntry_OnInitialize(control)
     control.label = control:GetNamedChild("Label")
     control.statusIndicator = control:GetNamedChild("StatusIndicator")
     control.starsContainer = control:GetNamedChild("Stars")
-    control.GetHeight = function(control)
-        local height = control.label:GetTextHeight() + control.starsContainer:GetHeight()
+    control.GetHeight = function(entryControl)
+        local height = entryControl.label:GetTextHeight() + entryControl.starsContainer:GetHeight()
         return height
     end
 end

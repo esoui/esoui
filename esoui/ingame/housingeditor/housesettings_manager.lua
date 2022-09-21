@@ -81,6 +81,7 @@ ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA =
         text = SI_HOUSING_PATH_SETTINGS_CHANGE_COLLECTIBLE_TEXT,
         buttonText = SI_HOUSING_PATH_SETTINGS_CHANGE_COLLECTIBLE_BUTTON_TEXT,
         tooltipFunction = function(...) return SYSTEMS:GetObject("path_settings"):ShowChangeCollectibleTooltip(...) end,
+        visible = function() return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() end,
         gamepadTemplate = "ZO_GamepadFullWidthLabelEntryTemplate",
     },
 }

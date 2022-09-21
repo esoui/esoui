@@ -283,6 +283,7 @@ local AlertHandlers =
 
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
         if response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER and response ~= GROUP_INVITE_RESPONSE_IGNORED then
+            ZO_OutputStadiaLog(string.format("AlertHandlers[EVENT_GROUP_INVITE_RESPONSE], ShouldShowGroupErrorInAlert(response) = %s", (ShouldShowGroupErrorInAlert(response) and "true" or "false")))
             if ShouldShowGroupErrorInAlert(response) then
                 local nameToUse
                 if response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED_CANT_JOIN then

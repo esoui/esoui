@@ -215,3 +215,37 @@ local function drawInfo(control)
 end
 
 di = drawInfo
+
+do
+    local memoryUsedBeforeKB = {}
+    local memoryUsedAfterKB = {}
+    local memoryDeltaKB = {}
+    function ZO_StartMemProfile(tag)
+        -- Don't want adding elements to the table to count the test
+        if not memoryUsedBeforeKB[tag] then
+            memoryUsedBeforeKB[tag] = 0
+            memoryUsedAfterKB[tag] = 0
+            memoryDeltaKB[tag] = 0
+        end
+
+        -- Manually run the garbage collector, to avoid measuring the garbage alongside the used memory
+        -- Supposedly garbage can take two full cycles to clear if you're using the __gc hook or weak tables or something such,
+        -- and that might be superstition but can't hurt
+        for i=1, 2 do collectgarbage('collect') end
+        memoryUsedBeforeKB[tag] = collectgarbage('count')
+    end
+
+    function ZO_StopMemProfile(tag)
+        for i=1, 2 do collectgarbage('collect') end
+        local afterKB = collectgarbage('count')
+        memoryUsedAfterKB[tag] = afterKB
+        local deltaKB = afterKB - memoryUsedBeforeKB[tag]
+        memoryDeltaKB[tag] = deltaKB
+        WriteToInterfaceLog(deltaKB)
+        return deltaKB
+    end
+
+    function ZO_GetLastMemProfileDelta(tag)
+        return memoryDeltaKB[tag]
+    end
+end

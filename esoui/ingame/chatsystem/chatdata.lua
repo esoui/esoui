@@ -1,3 +1,58 @@
+ZO_OFFICIAL_LANGUAGE_TO_CHAT_INFO =
+{
+    [OFFICIAL_LANGUAGE_ENGLISH] =
+    {
+        category = CHAT_CATEGORY_ZONE_ENGLISH,
+        channel = CHAT_CHANNEL_ZONE_LANGUAGE_1,
+        chatColorCustomSetting = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_ENG,
+        chatColorCustomSettingControlName = "Options_Social_ChatColor_Zone_English",
+    },
+    [OFFICIAL_LANGUAGE_FRENCH] = 
+    {
+        category = CHAT_CATEGORY_ZONE_FRENCH,
+        channel = CHAT_CHANNEL_ZONE_LANGUAGE_2,
+        chatColorCustomSetting = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_FRA,
+        chatColorCustomSettingControlName = "Options_Social_ChatColor_Zone_French",
+    },
+    [OFFICIAL_LANGUAGE_GERMAN] = 
+    {
+        category = CHAT_CATEGORY_ZONE_GERMAN,
+        channel = CHAT_CHANNEL_ZONE_LANGUAGE_3,
+        chatColorCustomSetting = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_GER,
+        chatColorCustomSettingControlName = "Options_Social_ChatColor_Zone_German",
+    },
+    [OFFICIAL_LANGUAGE_JAPANESE] = 
+    {
+        category = CHAT_CATEGORY_ZONE_JAPANESE,
+        channel = CHAT_CHANNEL_ZONE_LANGUAGE_4,
+        chatColorCustomSetting = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_JPN,
+        chatColorCustomSettingControlName = "Options_Social_ChatColor_Zone_Japanese",
+    },
+    [OFFICIAL_LANGUAGE_RUSSIAN] = 
+    {
+        category = CHAT_CATEGORY_ZONE_RUSSIAN,
+        channel = CHAT_CHANNEL_ZONE_LANGUAGE_5,
+        chatColorCustomSetting = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_RUS,
+        chatColorCustomSettingControlName = "Options_Social_ChatColor_Zone_Russian",
+    },
+    [OFFICIAL_LANGUAGE_SPANISH] =
+    {
+        category = CHAT_CATEGORY_ZONE_SPANISH,
+        channel = CHAT_CHANNEL_ZONE_LANGUAGE_6,
+        chatColorCustomSetting = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_SPA,
+        chatColorCustomSettingControlName = "Options_Social_ChatColor_Zone_Spanish",
+    },
+    [OFFICIAL_LANGUAGE_CHINESE_S] = 
+    {
+        category = CHAT_CATEGORY_ZONE_CHINESE_S,
+        channel = CHAT_CHANNEL_ZONE_LANGUAGE_7,
+        chatColorCustomSetting = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_SCN,
+        chatColorCustomSettingControlName = "Options_Social_ChatColor_Zone_Simplified_Chinese",
+    },
+}
+
+internalassert(OFFICIAL_LANGUAGE_MAX_VALUE == 6)
+
 local SimpleEventToCategoryMappings = {
     [EVENT_BROADCAST] = CHAT_CATEGORY_SYSTEM,
 
@@ -27,12 +82,6 @@ local MultiLevelEventToCategoryMappings = {
         [CHAT_CHANNEL_SAY] = GetChannelCategoryFromChannel(CHAT_CHANNEL_SAY),
         [CHAT_CHANNEL_YELL] = GetChannelCategoryFromChannel(CHAT_CHANNEL_YELL),
         [CHAT_CHANNEL_ZONE] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE),
-        [CHAT_CHANNEL_ZONE_LANGUAGE_1] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_1),
-        [CHAT_CHANNEL_ZONE_LANGUAGE_2] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_2),
-        [CHAT_CHANNEL_ZONE_LANGUAGE_3] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_3),
-        [CHAT_CHANNEL_ZONE_LANGUAGE_4] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_4),
-        [CHAT_CHANNEL_ZONE_LANGUAGE_5] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_5),
-        [CHAT_CHANNEL_ZONE_LANGUAGE_6] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_6),
         [CHAT_CHANNEL_WHISPER] = GetChannelCategoryFromChannel(CHAT_CHANNEL_WHISPER),
         [CHAT_CHANNEL_WHISPER_SENT] = GetChannelCategoryFromChannel(CHAT_CHANNEL_WHISPER_SENT),
         [CHAT_CHANNEL_PARTY] = GetChannelCategoryFromChannel(CHAT_CHANNEL_PARTY),
@@ -55,6 +104,11 @@ local MultiLevelEventToCategoryMappings = {
         [CHAT_CHANNEL_MONSTER_EMOTE] = GetChannelCategoryFromChannel(CHAT_CHANNEL_MONSTER_EMOTE),
     },
 }
+
+for language = OFFICIAL_LANGUAGE_ITERATION_BEGIN, OFFICIAL_LANGUAGE_ITERATION_END do
+    local channel = ZO_OFFICIAL_LANGUAGE_TO_CHAT_INFO[language].channel
+    MultiLevelEventToCategoryMappings[EVENT_CHAT_MESSAGE_CHANNEL][channel] = GetChannelCategoryFromChannel(channel)
+end
 
 local TrialEventMappings = {
     [TRIAL_RESTRICTION_CANNOT_ZONE_YELL] = true,
@@ -149,6 +203,7 @@ local ChannelInfo =
     [CHAT_CHANNEL_EMOTE] =
     {
         format = SI_CHAT_EMOTE,
+        narrationFormat = SI_CHAT_EMOTE_NARRATION,
         name = GetString(SI_CHAT_CHANNEL_NAME_EMOTE),
         playerLinkable = true,
         channelLinkable = false,
@@ -246,6 +301,7 @@ local ChannelInfo =
     [CHAT_CHANNEL_OFFICER_1] =
     {
         format = SI_CHAT_MESSAGE_GUILD,
+        narrationFormat = SI_CHAT_MESSAGE_GUILD_OFFICER_NARRATION,
         dynamicName = true,
         playerLinkable = true,
         channelLinkable = true,
@@ -257,6 +313,7 @@ local ChannelInfo =
     [CHAT_CHANNEL_OFFICER_2] =
     {
         format = SI_CHAT_MESSAGE_GUILD,
+        narrationFormat = SI_CHAT_MESSAGE_GUILD_OFFICER_NARRATION,
         dynamicName = true,
         playerLinkable = true,
         channelLinkable = true,
@@ -268,6 +325,7 @@ local ChannelInfo =
     [CHAT_CHANNEL_OFFICER_3] =
     {
         format = SI_CHAT_MESSAGE_GUILD,
+        narrationFormat = SI_CHAT_MESSAGE_GUILD_OFFICER_NARRATION,
         dynamicName = true,
         playerLinkable = true,
         channelLinkable = true,
@@ -279,6 +337,7 @@ local ChannelInfo =
     [CHAT_CHANNEL_OFFICER_4] =
     {
         format = SI_CHAT_MESSAGE_GUILD,
+        narrationFormat = SI_CHAT_MESSAGE_GUILD_OFFICER_NARRATION,
         dynamicName = true,
         playerLinkable = true,
         channelLinkable = true,
@@ -290,6 +349,7 @@ local ChannelInfo =
     [CHAT_CHANNEL_OFFICER_5] =
     {
         format = SI_CHAT_MESSAGE_GUILD,
+        narrationFormat = SI_CHAT_MESSAGE_GUILD_OFFICER_NARRATION,
         dynamicName = true,
         playerLinkable = true,
         channelLinkable = true,
@@ -302,60 +362,18 @@ local ChannelInfo =
 
 --TODO: Allow these in console when we implement tabs and filters
 if not IsConsoleUI() then
-    ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_1] =
-    {
-        format = SI_CHAT_MESSAGE_ZONE_ENGLISH,
-        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_ENGLISH),
-        playerLinkable = true,
-        channelLinkable = false,
-        supportCSIcon = true,
-        switches = GetString(SI_CHANNEL_SWITCH_ZONE_ENGLISH)
-    }
-    ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_2] =
-    {
-        format = SI_CHAT_MESSAGE_ZONE_FRENCH,
-        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_FRENCH),
-        playerLinkable = true,
-        channelLinkable = false,
-        supportCSIcon = true,
-        switches = GetString(SI_CHANNEL_SWITCH_ZONE_FRENCH)
-    }
-    ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_3] =
-    {
-        format = SI_CHAT_MESSAGE_ZONE_GERMAN,
-        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_GERMAN),
-        playerLinkable = true,
-        channelLinkable = false,
-        supportCSIcon = true,
-        switches = GetString(SI_CHANNEL_SWITCH_ZONE_GERMAN)
-    }
-    ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_4] =
-    {
-        format = SI_CHAT_MESSAGE_ZONE_JAPANESE,
-        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_JAPANESE),
-        playerLinkable = true,
-        channelLinkable = false,
-        supportCSIcon = true,
-        switches = GetString(SI_CHANNEL_SWITCH_ZONE_JAPANESE)
-    }
-    ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_5] =
-    {
-        format = SI_CHAT_MESSAGE_ZONE_RUSSIAN,
-        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_RUSSIAN),
-        playerLinkable = true,
-        channelLinkable = false,
-        supportCSIcon = true,
-        switches = GetString(SI_CHANNEL_SWITCH_ZONE_RUSSIAN)
-    }
-    ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_6] =
-    {
-        format = SI_CHAT_MESSAGE_ZONE_SPANISH,
-        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_SPANISH),
-        playerLinkable = true,
-        channelLinkable = false,
-        supportCSIcon = true,
-        switches = GetString(SI_CHANNEL_SWITCH_ZONE_SPANISH)
-    }
+    for language = OFFICIAL_LANGUAGE_ITERATION_BEGIN, OFFICIAL_LANGUAGE_ITERATION_END do
+        local channel = ZO_OFFICIAL_LANGUAGE_TO_CHAT_INFO[language].channel
+        ChannelInfo[channel] =
+        {
+            format = function() return GetString("SI_OFFICIALLANGUAGE_CHATMESSAGEZONEFORMATTER", language) end,
+            name = GetString("SI_OFFICIALLANGUAGE_ZONECHATCHANNELNAME", language),
+            playerLinkable = true,
+            channelLinkable = false,
+            supportCSIcon = true,
+            switches = GetString("SI_OFFICIALLANGUAGE_ZONECHATCHANNELSWITCH", language)
+        }
+    end
 end
 
 -- Build switch lookup table

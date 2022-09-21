@@ -94,6 +94,14 @@ do
     end)
 end
 
+function ZO_OptionsPanel_Video_BackgroundFPSLimit_RefreshEnabled(control)
+    if GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_USE_BACKGROUND_FPS_LIMIT) == "0" then
+        ZO_Options_SetOptionInactive(control)
+    else
+        ZO_Options_SetOptionActive(control)
+    end
+end
+
 function ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting()
     if IsConsoleUI() then
         local numValidOptions = 0
@@ -232,6 +240,42 @@ local ZO_OptionsPanel_Video_ControlData =
                     end
                 end,
             },
+        },
+        --Options_Video_Use_Background_FPS_Limit
+        [GRAPHICS_SETTING_USE_BACKGROUND_FPS_LIMIT] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_USE_BACKGROUND_FPS_LIMIT,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_USE_BACKGROUND_FPS_LIMIT,
+            tooltipText = SI_GRAPHICS_OPTIONS_USE_BACKGROUND_FPS_LIMIT_TOOLTIP,
+            exists = ZO_IsPCUI,
+            events = {
+                [true] = "UseBackgroundFPSLimitToggled",
+                [false] = "UseBackgroundFPSLimitToggled",
+            },
+        },
+        --Options_Video_Background_FPS_Limit
+        [GRAPHICS_SETTING_BACKGROUND_FPS_LIMIT] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_BACKGROUND_FPS_LIMIT,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_BACKGROUND_FPS_LIMIT,
+            tooltipText = SI_GRAPHICS_OPTIONS_BACKGROUND_FPS_LIMIT_TOOLTIP,
+            minValue = 10,
+            maxValue = 100,
+            valueFormat = "%d",
+            showValue = true,
+            showValueMin = 10,
+            showValueMax = 100,
+            exists = ZO_IsPCUI,
+            eventCallbacks =
+            {
+                ["UseBackgroundFPSLimitToggled"] = ZO_OptionsPanel_Video_BackgroundFPSLimit_RefreshEnabled,
+            }
         },
         --Options_Video_Gamma_Adjustment
         [GRAPHICS_SETTING_GAMMA_ADJUSTMENT] =
@@ -734,6 +778,9 @@ local ZO_OptionsPanel_Video_ControlData =
             valueFormat = "%.6f",
             minValue = GAMEPAD_CUSTOM_UI_SCALE_LOWER_BOUND,
             maxValue = GAMEPAD_CUSTOM_UI_SCALE_UPPER_BOUND,
+            showValueMin = 64,
+            showValueMax = 100,
+            valueTextFormatter = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE_PERCENT,
             gamepadIsEnabledCallback = function() 
                 return GetSetting(SETTING_TYPE_UI, UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE) ~= "0"
             end,

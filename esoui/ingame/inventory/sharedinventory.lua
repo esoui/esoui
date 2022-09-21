@@ -212,8 +212,20 @@ function ZO_SharedInventoryManager:Initialize()
         end
     end
 
+    local function OnEventTicketUpdated(eventCode, newEventTickets, difference, changeReason)
+        local isExcludedReason = changeReason == CURRENCY_CHANGE_REASON_PLAYER_INIT or
+                                 (changeReason == CURRENCY_CHANGE_REASON_VENDOR and difference < 0)
+
+        if not isExcludedReason then
+            if changeReason == CURRENCY_CHANGE_REASON_LOOT and difference > 0 then
+                PlaySound(SOUNDS.EVENT_TICKET_ACQUIRE)
+            end
+        end
+    end
+
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_MONEY_UPDATE, OnMoneyUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_TELVAR_STONE_UPDATE, OnTelvarStonesUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_EVENT_TICKET_UPDATE, OnEventTicketUpdated)
 
     local function OnSmithingTraitResearch()
         self:RefreshAllTraitInformation()

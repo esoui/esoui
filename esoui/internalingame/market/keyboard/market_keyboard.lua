@@ -17,11 +17,8 @@ function ZO_Market_Keyboard:New(...)
 end
 
 function ZO_Market_Keyboard:Initialize(control, sceneName)
-    self.control = control
-    self.sceneName = sceneName
-
-    self.messageLabel = self.control:GetNamedChild("MessageLabel")
-    self.messageLoadingIcon = self.control:GetNamedChild("MessageLoadingIcon")
+    self.messageLabel = control:GetNamedChild("MessageLabel")
+    self.messageLoadingIcon = control:GetNamedChild("MessageLoadingIcon")
 
     self:SetMarketCurrencyButtonType(ZO_MARKET_CURRENCY_BUTTON_TYPE_BUY_CROWNS)
 
@@ -43,13 +40,13 @@ function ZO_Market_Keyboard:Initialize(control, sceneName)
     self:SetMarketProductFilterTypes({})
     self:SetNewMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_NEW})
 
-    self.control:SetHandler("OnUpdate", function(control, currentTime) self:OnUpdate(currentTime) end)
+    control:SetHandler("OnUpdate", function(control, currentTime) self:OnUpdate(currentTime) end)
 
     -- MarketProductIcon Pool
     if not ZO_Market_Keyboard.masterMarketProductIconPool then
         local function CreateMarketProductIcon(objectPool)
             -- parent will be changed to the MarketProduct that uses the icon
-            return ZO_MarketProductIcon:New(objectPool:GetNextControlId(), self.control)
+            return ZO_MarketProductIcon:New(objectPool:GetNextControlId(), control)
         end
 
         -- this pool is shared with all instances of this class and other objects
@@ -59,20 +56,20 @@ function ZO_Market_Keyboard:Initialize(control, sceneName)
     local function OnBackLabelClicked(...) self:OnBackLabelClicked(...) end
 
     -- Bundle Contents
-    self.bundleContentsControl = CreateControlFromVirtual("$(parent)BundleContents", self.control, "ZO_KeyboardBundleContents")
+    self.bundleContentsControl = CreateControlFromVirtual("$(parent)BundleContents", control, "ZO_KeyboardBundleContents")
     self.bundleContentsControl:ClearAnchors()
-    self.bundleContentsControl:SetAnchor(TOPLEFT, self.control, TOPLEFT, 0, 5)
-    self.bundleContentsControl:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT, -5, 0)
+    self.bundleContentsControl:SetAnchor(TOPLEFT, control, TOPLEFT, 0, 5)
+    self.bundleContentsControl:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -5, 0)
     local bundleContentsBackLabel = self.bundleContentsControl:GetNamedChild("BackLabel")
     bundleContentsBackLabel.OnMouseUp = OnBackLabelClicked
 
     self.bundleContentFragment = ZO_MarketContentFragment_Keyboard:New(self, self.bundleContentsControl, self.masterMarketProductIconPool)
 
     -- Product List
-    self.productListControl = CreateControlFromVirtual("$(parent)ProductList", self.control, "ZO_KeyboardMarketProductList")
+    self.productListControl = CreateControlFromVirtual("$(parent)ProductList", control, "ZO_KeyboardMarketProductList")
     self.productListControl:ClearAnchors()
-    self.productListControl:SetAnchor(TOPLEFT, self.control, TOPLEFT, 0, 5)
-    self.productListControl:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT, -5, 0)
+    self.productListControl:SetAnchor(TOPLEFT, control, TOPLEFT, 0, 5)
+    self.productListControl:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -5, 0)
     local productListControlBackLabel = self.productListControl:GetNamedChild("BackLabel")
     productListControlBackLabel.OnMouseUp = OnBackLabelClicked
 
@@ -82,7 +79,7 @@ function ZO_Market_Keyboard:Initialize(control, sceneName)
 
     -- ZO_Market_Shared.Initialize needs to be called after the control declarations
     -- This is because several overridden functions such as InitializeCategories and InitializeFilters called during initialization reference them
-    ZO_Market_Shared.Initialize(self)
+    ZO_Market_Shared.Initialize(self, control, sceneName)
 end
 
 function ZO_Market_Keyboard:IsPreviewForMarketProductPreviewTypeVisible(previewType)
@@ -1049,6 +1046,12 @@ function ZO_Market_Keyboard:ShowHousePreviewDialog(marketProductData)
     ZO_Dialogs_ShowDialog("CROWN_STORE_PREVIEW_HOUSE", { marketProductData = marketProductData }, mainTextParams)
 end
 
+function ZO_Market_Keyboard:OnDialogShowing()
+    if self.searchBox:HasFocus() then
+        self.searchBox:LoseFocus()
+    end
+end
+
 function ZO_Market_Keyboard:OnMarketUpdate()
     if TREE_UNDERLAY_FRAGMENT then
         if self:GetState() == MARKET_STATE_OPEN and not self:IsMarketEmpty() then
@@ -1310,15 +1313,6 @@ function ZO_Market_Keyboard:RefreshCategoryTree()
     -- so when we call RefreshVisible we need to make sure not to reselect any nodes
     local NOT_USER_REQUESTED = false
     self.categoryTree:RefreshVisible(NOT_USER_REQUESTED)
-end
-
-function ZO_Market_Keyboard:RestoreActionLayerForTutorial()
-    PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))
-end
-
-function ZO_Market_Keyboard:RemoveActionLayerForTutorial()
-    -- we exit the keyboard tutorial by pressing "Alt"
-    RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))
 end
 
 function ZO_Market_Keyboard:ResetSearch()

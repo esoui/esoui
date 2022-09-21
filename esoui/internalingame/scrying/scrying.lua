@@ -1368,17 +1368,21 @@ function ZO_Scrying:Initialize(control)
         end
     end)
 
-    HELP_MANAGER:RegisterCallback("OverlayVisibilityChanged", function()
+    local function RefreshInputState()
         self:RefreshInputState()
-    end)
+    end
+    
+    ZO_HELP_OVERLAY_SYNC_OBJECT:SetHandler("OnShown", RefreshInputState, "Scrying")
+    ZO_HELP_OVERLAY_SYNC_OBJECT:SetHandler("OnHidden", RefreshInputState, "Scrying")
 
-    TUTORIAL_MANAGER:RegisterCallback("TriggeredTutorialChanged", function(isTutorialTriggered)
+    ZO_DIALOG_SYNC_OBJECT:SetHandler("OnShown", RefreshInputState, "Scrying")
+    ZO_DIALOG_SYNC_OBJECT:SetHandler("OnHidden", function()
         self:RefreshInputState()
-        if not isTutorialTriggered and self.waitingOnTutorialToEndGame then
+        if self.waitingOnDialogToEndGame then
             self:TryCompleteScrying()
-            self.waitingOnTutorialToEndGame = false
+            self.waitingOnDialogToEndGame = false
         end
-    end)
+    end, "Scrying")
 
     SCRYING_HEX_ANIMATION_PROVIDER:RegisterCallback("BlockingAnimationsCompleted", function()
         self:TryCompleteScrying()
@@ -1398,7 +1402,7 @@ function ZO_Scrying:CanFireActions()
 end
 
 function ZO_Scrying:RefreshInputState()
-    local allowPlayerInput = SCRYING_SCENE:IsShowing() and not TUTORIAL_MANAGER:IsTutorialTriggered() and not HELP_MANAGER:IsHelpOverlayVisible() and not ZO_Dialogs_IsShowingDialog()
+    local allowPlayerInput = SCRYING_SCENE:IsShowing() and not ZO_HELP_OVERLAY_SYNC_OBJECT:IsShown() and not ZO_DIALOG_SYNC_OBJECT:IsShown()
     if self.isPlayerInputEnabled ~= allowPlayerInput then
         if allowPlayerInput then
             PushActionLayerByName("ScryingActions")
@@ -1495,9 +1499,9 @@ function ZO_Scrying:TryCompleteScrying()
         return
     end
 
-    if TUTORIAL_MANAGER:IsTutorialTriggered() then
+    if ZO_DIALOG_SYNC_OBJECT:IsShown() then
         -- Wait until the user closes the tutorial
-        self.waitingOnTutorialToEndGame = true
+        self.waitingOnDialogToEndGame = true
         return
     end
 

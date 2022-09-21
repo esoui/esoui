@@ -494,14 +494,6 @@ local function LayoutForwardCamp(self, graveyardIndex, battlegroundContext, usab
     local text = zo_strformat(GetString(SI_TOOLTIP_KEEP_ALLIANCE_OWNER), allianceName)
     AddLine(self, text, KEEP_TOOLTIP_NORMAL_LINE)
 
-    if IsForwardCampGuildOwned(battlegroundContext, graveyardIndex) then
-        local guildNameText = GetForwardCampOwnerName(battlegroundContext, graveyardIndex)
-        if guildNameText ~= nil then
-            local fullText = zo_strformat(GetString(SI_TOOLTIP_KEEP_GUILD_OWNER), guildNameText)
-            AddLine(self, fullText, KEEP_TOOLTIP_NORMAL_LINE)
-        end
-    end
-
     if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_AVA_RESPAWN) then
         local tooltipText = SI_TOOLTIP_FORWARD_CAMP_RESPAWN
         local tooltipColor = KEEP_TOOLTIP_ACCESSIBLE
@@ -530,14 +522,6 @@ local function LayoutForwardCamp_Gamepad(self, graveyardIndex, battlegroundConte
     local allianceIcon = GetLargeAllianceSymbolIcon(playerAlliance)
     local allianceName = zo_strformat(SI_MAP_KEEP_INFO_ALLIANCE_TOOLTIP_FORMAT, GetColoredAllianceName(playerAlliance))
     LayoutKeepOwnerSection_Gamepad(self, campSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_ALLIANCE_OWNER), allianceIcon, allianceName, self.tooltip:GetStyle("mapLocationKeepClaimed"))
-
-    -- Guild Owner
-    if IsForwardCampGuildOwned(battlegroundContext, graveyardIndex) then
-        local guildName = GetForwardCampOwnerName(battlegroundContext, graveyardIndex)
-        if guildName then
-            LayoutKeepOwnerSection_Gamepad(self, campSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_GUILD_OWNER), nil, guildName, self.tooltip:GetStyle("mapLocationKeepClaimed"))
-        end
-    end
 
     self.tooltip:AddSection(campSection)
 end

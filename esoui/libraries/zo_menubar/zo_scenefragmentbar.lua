@@ -13,16 +13,20 @@ function ZO_SceneFragmentBar:Initialize(menuBar)
 end
 
 function ZO_SceneFragmentBar:SelectFragment(name)
-    local SKIP_ANIMATIONS = true 
-    ZO_MenuBar_SelectDescriptor(self.menuBar, name, SKIP_ANIMATIONS)
+    local SKIP_ANIMATIONS = true
+    return ZO_MenuBar_SelectDescriptor(self.menuBar, name, SKIP_ANIMATIONS)
 end
 
 function ZO_SceneFragmentBar:SetStartingFragment(name)
     self.lastFragmentName = name
 end
 
-function ZO_SceneFragmentBar:ShowLastFragment()
-    self:SelectFragment(self.lastFragmentName)
+function ZO_SceneFragmentBar:ShowLastFragment(useFirstVisibleAsFallback)
+    local isSelected = self:SelectFragment(self.lastFragmentName)
+    if not isSelected and useFirstVisibleAsFallback then
+        local SKIP_ANIMATIONS = true
+        ZO_MenuBar_SelectFirstVisibleButton(self.menuBar, SKIP_ANIMATIONS)
+    end
 end
 
 function ZO_SceneFragmentBar:GetLastFragment()
@@ -96,7 +100,7 @@ function ZO_SceneFragmentBar:Add(name, fragmentGroup, buttonData, keybindButton)
         end
 
         if self.label then
-            self.label:SetText(zo_strformat(SI_SCENE_FRAGMENT_BAR_TITLE, GetString(name)))
+            self.label:SetText(zo_strformat(SI_SCENE_FRAGMENT_BAR_TITLE, GetString(buttonData.categoryName)))
         end
 
         self.lastFragmentName = name

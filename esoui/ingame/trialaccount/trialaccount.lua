@@ -57,9 +57,10 @@ function TrialAccountSplashDialog:Initialize(control)
             buttons =
             {
                 {
-                    -- Even though this is an ethereal keybind, the name will still be shown as the centered dialogs interact keybind
+                    -- Even though this is an ethereal keybind, the name will still be shown as the centered dialogs interact keybind and read during screen narration
                     name = GetString(SI_TUTORIAL_CONTINUE),
                     ethereal = true,
+                    narrateEthereal = true,
                     keybind = "DIALOG_PRIMARY",
                     clickSound = SOUNDS.DIALOG_ACCEPT,
                     callback =  CloseDialog,

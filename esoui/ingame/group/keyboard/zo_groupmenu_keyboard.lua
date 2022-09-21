@@ -89,9 +89,6 @@ function GroupMenu_Keyboard:InitializeCategories()
         if categoryData then
             disabled = categoryData.activityFinderObject and (categoryData.activityFinderObject:GetLevelLockInfo() or categoryData.activityFinderObject:GetNumLocations() == 0) or false
             disabled = disabled or (categoryData.isZoneStories and ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil) or false
-            if not disabled and categoryData.isTribute then
-                disabled = ZO_IsTributeLocked()
-            end
         end
 
         local selected = node.selected or open
@@ -236,17 +233,6 @@ do
             end
         end
     end
-
-    function GroupMenu_Keyboard:OnTributeCategoryMouseEnter(control, data)
-        ZO_IconHeader_OnMouseEnter(control)
-        if not control.enabled then
-            local tooltipText = ZO_GetTributeLockReasonTooltipString(LOCK_TEXTURE)
-            if tooltipText then
-                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
-                SetTooltipText(InformationTooltip, tooltipText)
-            end
-        end
-    end
 end
 
 do
@@ -280,11 +266,7 @@ do
         end
 
         if nodeData.activityFinderObject then
-            if nodeData.isTribute then
-                node.control.OnMouseEnter = function(control) self:OnTributeCategoryMouseEnter(control, nodeData) end
-            else
-                node.control.OnMouseEnter = function(control) self:OnActivityCategoryMouseEnter(control, nodeData) end
-            end
+            node.control.OnMouseEnter = function(control) self:OnActivityCategoryMouseEnter(control, nodeData) end
         elseif nodeData.isZoneStories then
             node.control.OnMouseEnter = function(control) self:OnZoneStoriesCategoryMouseEnter(control, nodeData) end
         end
@@ -306,6 +288,7 @@ do
 
     function GroupMenu_Keyboard:AddCategory(data)
         self.navigationTree:Reset()
+        ZO_ClearTable(self.categoryFragmentToNodeLookup)
 
         table.insert(self.nodeList, data)
         self:AddCategoryTreeNodes(self.nodeList)

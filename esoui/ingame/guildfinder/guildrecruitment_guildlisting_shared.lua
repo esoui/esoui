@@ -221,6 +221,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
                 local RECRUITMENT_STATUS_CHANGED = true
                 self:Save(RECRUITMENT_STATUS_CHANGED)
             end,
+            narrationText = self.templateData.attributeSelection.narrationText
         },
         primaryFocus =
         {
@@ -236,6 +237,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             headerText = self.templateData.attributeSelection.primaryFocusHeaderText,
             onSelectionCallback = OnFocusSelected,
             updateFunction = function(...) SetGuildRecruitmentPrimaryFocus(...) end,
+            narrationText = self.templateData.attributeSelection.narrationText,
         },
         secondaryFocus =
         {
@@ -251,6 +253,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             headerText = self.templateData.attributeSelection.secondaryFocusHeaderText,
             onSelectionCallback = OnFocusSelected,
             updateFunction = function(...) SetGuildRecruitmentSecondaryFocus(...) end,
+            narrationText = self.templateData.attributeSelection.narrationText,
         },
         personality =
         {
@@ -262,6 +265,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             headerText = self.templateData.attributeSelection.personalityHeaderText,
             onSelectionCallback = OnDropdownSelected,
             updateFunction = function(...) SetGuildRecruitmentPersonality(...) end,
+            narrationText = self.templateData.attributeSelection.narrationText,
         },
         language =
         {
@@ -274,6 +278,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             headerText = self.templateData.attributeSelection.languageHeaderText,
             onSelectionCallback = OnDropdownSelected,
             updateFunction = function(...) SetGuildRecruitmentLanguage(...) end,
+            narrationText = self.templateData.attributeSelection.narrationText,
         },
         recruitmentHeadline =
         {
@@ -287,6 +292,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             stripMarkup = true,
             onEditCallback = OnTextEdited,
             updateFunction = function(...) SetGuildRecruitmentHeaderMessage(...) end,
+            narrationText = self.templateData.headlineEditBox.narrationText,
         },
         description =
         {
@@ -299,6 +305,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             emptyText = GetString(SI_GUILD_RECRUITMENT_DESCRIPTION_EMPTY_TEXT),
             onEditCallback = OnTextEdited,
             updateFunction = function(...) SetGuildRecruitmentRecruitmentMessage(...) end,
+            narrationText = self.templateData.descriptionEditBox.narrationText
         },
         roles =
         {
@@ -311,6 +318,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
                 dimensionsY = self.templateData.roleSelector.dimensionsY,
                 onSelectionCallback = OnRoleSelected,
                 updateFunction = function(...) SetGuildRecruitmentRoleValue(...) end,
+                narrationText = self.templateData.roleSelector.narrationText,
             },
             overrideData =
             {
@@ -343,6 +351,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             updateFunction = function(guildId, text)
                 SetGuildRecruitmentMinimumCP(guildId, tonumber(text) or 0)
             end,
+            narrationText = self.templateData.minimumCP.narrationText,
         },
         startTime =
         {
@@ -352,6 +361,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             headerText = self.templateData.attributeSelection.timeRangeHeaderText,
             onSelectionCallback = OnDropdownSelected,
             updateFunction = function(...) SetGuildRecruitmentStartTime(...) end,
+            narrationText = self.templateData.attributeSelection.narrationText,
         },
         endTime =
         {
@@ -361,6 +371,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             headerText = " ",
             onSelectionCallback = OnDropdownSelected,
             updateFunction = function(...) SetGuildRecruitmentEndTime(...) end,
+            narrationText = self.templateData.attributeSelection.narrationText,
         },
         activities =
         {
@@ -470,6 +481,7 @@ end
 function ZO_GuildRecruitment_GuildListing_Shared:BuildActivityCheckboxes()
     local attribute = GUILD_META_DATA_ATTRIBUTE_ACTIVITIES
     local headerText = self.templateData.activityCheckbox.headerText
+    local narrationText = self.templateData.activityCheckbox.narrationText
     self.attributeSelectionData.activities.entryData = {}
     for i = GUILD_ACTIVITY_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_ACTIVITY_ATTRIBUTE_VALUE_ITERATION_END do
         local data =
@@ -486,7 +498,8 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildActivityCheckboxes()
             end,
             onToggleFunction = function(...) self:OnActivityCheckboxToggle(...) end,
             gridHeaderName = headerText,
-            gridHeaderTemplate = self.templateData.headerTemplate
+            gridHeaderTemplate = self.templateData.headerTemplate,
+            narrationText = narrationText,
         }
         if i == GUILD_ACTIVITY_ATTRIBUTE_VALUE_ITERATION_END then
             self.gridList:AddEntry(data, self.templateData.activityCheckbox.endEntryTemplate)

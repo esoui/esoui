@@ -415,14 +415,20 @@ local function UpdatePostage(control)
     return true
 end
 
+local function GetPostageNarration()
+    return ZO_Currency_FormatGamepad(CURT_MONEY, GetQueuedMailPostage(), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+end
+
 function ZO_MailSend_Gamepad:InitializeHeader()
     self.mainHeaderData =
     {
         data1HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_PLAYER_GOLD),
         data1Text = UpdatePlayerGold,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
 
         data2HeaderText = GetString(SI_GAMEPAD_MAIL_SEND_POSTAGE_LABEL),
         data2Text = UpdatePostage,
+        data2TextNarration = GetPostageNarration,
 
         tabBarEntries = MAIL_MANAGER_GAMEPAD.tabBarEntries,
     }
@@ -431,9 +437,11 @@ function ZO_MailSend_Gamepad:InitializeHeader()
     {
         data1HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_PLAYER_GOLD),
         data1Text = UpdatePlayerGold,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
 
         data2HeaderText = GetString(SI_GAMEPAD_MAIL_SEND_POSTAGE_LABEL),
         data2Text = UpdatePostage,
+        data2TextNarration = GetPostageNarration,
     }
 end
 
@@ -469,11 +477,12 @@ function ZO_MailSend_Gamepad:InitializeInventoryList()
     self.inventoryListControl = self.inventoryList:GetControl()
 end
 
-function ZO_MailSend_Gamepad:AddMainListEntry(text, header, icon, callback, secondaryCallbackName, secondaryCallback)
+function ZO_MailSend_Gamepad:AddMainListEntry(text, header, icon, callback, secondaryCallbackName, secondaryCallback, narrationText)
     local newEntry = ZO_GamepadEntryData:New(text, icon)
     newEntry.actionFunction = callback
     newEntry.secondaryCallbackName = secondaryCallbackName
     newEntry.secondaryCallback = secondaryCallback
+    newEntry.narrationText = narrationText
 
     local template
     if header then
@@ -501,6 +510,11 @@ function ZO_MailSend_Gamepad:PopulateMainList()
         end
     end
 
+    local NO_HEADER = nil
+    local NO_ICON = nil
+    local NO_SECONDARY_CALLBACK_NAME = nil
+    local NO_SECONDARY_CALLBACK = nil
+
     do
         local userListCallback = function()
             local INCLUDE_ONLINE_FRIENDS = true
@@ -512,36 +526,56 @@ function ZO_MailSend_Gamepad:PopulateMainList()
             self.mailView.addressEdit.edit:TakeFocus()
         end
 
+        local mailSendNarrationText = function(entryData, entryControl)
+            return ZO_FormatEditBoxNarrationText(self.mailView.addressEdit.edit, entryData.text)
+        end
+
         if ZO_IsPlaystationPlatform() then
-            self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, userListCallback)
+            self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), NO_HEADER, NO_ICON, userListCallback, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailSendNarrationText)
         elseif GetUIPlatform() == UI_PLATFORM_XBOX then
             if GetNumberConsoleFriends() > 0 then
-                self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), userListCallback)
+                self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), NO_HEADER, NO_ICON, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), userListCallback, mailSendNarrationText)
             else
-                self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), nil)
+                self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), NO_HEADER, NO_ICON, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), NO_SECONDARY_CALLBACK, mailSendNarrationText)
             end
         else
-            self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, editBoxCallback)
+            self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), NO_HEADER, NO_ICON, editBoxCallback, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailSendNarrationText)
         end
     end
 
-    self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SUBJECT_LABEL), nil, nil, function() self.mailView.subjectEdit.edit:TakeFocus() end)
-    self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_BODY_LABEL), nil, nil, function() self.mailView.bodyEdit.edit:TakeFocus() end)
+    local mailSubjectNarrationText = function(entryData, entryControl)
+        return ZO_FormatEditBoxNarrationText(self.mailView.subjectEdit.edit, entryData.text)
+    end
+
+    local mailBodyNarrationText = function(entryData, entryControl)
+        return ZO_FormatEditBoxNarrationText(self.mailView.bodyEdit.edit, entryData.text)
+    end
+
+    self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SUBJECT_LABEL), NO_HEADER, NO_ICON, function() self.mailView.subjectEdit.edit:TakeFocus() end, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailSubjectNarrationText)
+    self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_BODY_LABEL), NO_HEADER, NO_ICON, function() self.mailView.bodyEdit.edit:TakeFocus() end, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailBodyNarrationText)
     self:AddMainListEntry(GetString(SI_MAIL_SEND_ATTACH_MONEY), GetString(SI_GAMEPAD_MAIL_SEND_GOLD_HEADER), SEND_GOLD_ICON, function() self:ShowSliderControl(ATTACHING_GOLD, GetQueuedMoneyAttachment(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)) end)
-    self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_COD), nil, REQUEST_GOLD_ICON, function() self:ShowSliderControl(REQUESTING_GOLD, GetQueuedCOD(), MAX_PLAYER_CURRENCY) end)
+    self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_COD), NO_HEADER, REQUEST_GOLD_ICON, function() self:ShowSliderControl(REQUESTING_GOLD, GetQueuedCOD(), MAX_PLAYER_CURRENCY) end)
 
     self.mailView.subjectEdit.edit:SetHandler("OnFocusLost", function(editBox)
-                                                                    RefreshKeybind()
-                                                                    ZO_GamepadEditBox_FocusLost(editBox)
-                                                             end)
+        RefreshKeybind()
+        ZO_GamepadEditBox_FocusLost(editBox)
+        --Re-narrate the edit box when we are done typing in it
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(MAIL_MANAGER_GAMEPAD:GetCurrentList())
+    end)
+
     self.mailView.addressEdit.edit:SetHandler("OnFocusLost", function(editBox)
-                                                                    RefreshKeybind()
-                                                                    ZO_GamepadEditBox_FocusLost(editBox)
-                                                             end)
+        RefreshKeybind()
+        ZO_GamepadEditBox_FocusLost(editBox)
+        --Re-narrate the edit box when we are done typing in it
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(MAIL_MANAGER_GAMEPAD:GetCurrentList())
+    end)
+
     self.mailView.bodyEdit.edit:SetHandler("OnFocusLost", function(editBox)
-                                                                    RefreshKeybind()
-                                                                    ZO_GamepadEditBox_FocusLost(editBox)
-                                                             end)
+        RefreshKeybind()
+        ZO_GamepadEditBox_FocusLost(editBox)
+        --Re-narrate the edit box when we are done typing in it
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(MAIL_MANAGER_GAMEPAD:GetCurrentList())
+    end)
 
     if not self.inventoryList:IsEmpty() then
         self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_ATTACH), GetString(SI_GAMEPAD_MAIL_SEND_ITEMS_HEADER), EMPTY_ATTACHMENT_ICON, function() self:EnterInventoryList() end)
@@ -595,7 +629,8 @@ function ZO_MailSend_Gamepad:HighlightActiveTextField()
         control.highlight:SetHidden(true)
     end
 
-    local currentEditControl = textFieldToControl[self.mainList:GetTargetData().text]
+    local textField = self.mainList:GetTargetData().text
+    local currentEditControl = textFieldToControl[textField]
     if currentEditControl then
         currentEditControl.highlight:SetHidden(false)
     end

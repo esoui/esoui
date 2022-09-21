@@ -37,6 +37,7 @@ function CodeRedemption_Gamepad:BuildList()
     local enterCodeEntryData = ZO_GamepadEntryData:New()
     enterCodeEntryData.entryType = ENTRY_TYPE_CODE_ENTRY
     enterCodeEntryData:SetHeader(GetString(SI_GAMEPAD_CODE_REDEMPTION_REDEEM_CODE_ENTRY_HEADER))
+    enterCodeEntryData.narrationText = ZO_GetDefaultParametricListEditBoxNarrationText
     self.list:AddEntryWithHeader("ZO_GamepadTextFieldItem", enterCodeEntryData)
 
     local submitEntryData = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_CODE_REDEMPTION_SUBMIT_ENTRY_NAME))
@@ -80,6 +81,10 @@ function CodeRedemption_Gamepad:SetupList(list)
 
         editBoxControl.textChangedCallback = function(editControl)
             self.codeToRedeem = editControl:GetText()
+        end
+
+        editBoxControl.focusLostCallback = function(editControl)
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(list)
         end
 
         editBoxControl:SetMaxInputChars(MAX_PROMO_CODE_LENGTH)

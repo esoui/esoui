@@ -9,6 +9,7 @@ end
 function EditContainerSizerManager:Initialize()
     self.sizers = {}
     EVENT_MANAGER:RegisterForEvent("EditContainerSizerManager", EVENT_ALL_GUI_SCREENS_RESIZED, function() self:OnAllGuiScreensResized() end)
+    EVENT_MANAGER:RegisterForEvent("EditContainerSizerManager", EVENT_INPUT_LANGUAGE_CHANGED, function() self:OnInputLanguageChanged() end)
 end
 
 function EditContainerSizerManager:Add(sizer)
@@ -16,8 +17,16 @@ function EditContainerSizerManager:Add(sizer)
 end
 
 function EditContainerSizerManager:OnAllGuiScreensResized()
+    self:RefreshAllSizers()
+end
+
+function EditContainerSizerManager:OnInputLanguageChanged()
+    self:RefreshAllSizers()
+end
+
+function EditContainerSizerManager:RefreshAllSizers()
     for _, sizer in ipairs(self.sizers) do
-        sizer:OnAllGuiScreensResized()
+        sizer:RefreshAllSizes()
     end
 end
 
@@ -77,7 +86,7 @@ function ZO_EditContainerSizer.ForceRefreshSize(backdrop, bufferTop, bufferBotto
     backdrop:SetHeight(ZO_EditContainerSizer.GetHeight(backdrop, bufferTop, bufferBottom))
 end
 
-function ZO_EditContainerSizer:OnAllGuiScreensResized()
+function ZO_EditContainerSizer:RefreshAllSizes()
     for _, backdrop in ipairs(self.backdrops) do
         backdrop:SetHeight(ZO_EditContainerSizer.GetHeight(backdrop, self.bufferTop, self.bufferBottom))
     end

@@ -9,23 +9,19 @@ end
 function ZO_LootInventory_Gamepad:Initialize(control)
     local DONT_CREATE_TABBAR = false
     ZO_Loot_Gamepad_Base.Initialize(self, GAMEPAD_LEFT_TOOLTIP)
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, DONT_CREATE_TABBAR)
+    LOOT_INVENTORY_SCENE_GAMEPAD = ZO_Scene:New("lootInventoryGamepad", SCENE_MANAGER)
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, DONT_CREATE_TABBAR, ACTIVATE_ON_SHOW, LOOT_INVENTORY_SCENE_GAMEPAD)
 
     self.initialLootUpdate = true
     self.keybindDirty = false
     self.isInitialized = false
     self.isResizable = false
 
-    self.headerData = {
+    self.headerData = 
+    {
         titleText = ""
     }
-
-    local function OnStateChanged(...)
-        self:OnStateChanged(...)
-    end
-
-    LOOT_INVENTORY_SCENE_GAMEPAD = ZO_Scene:New("lootInventoryGamepad", SCENE_MANAGER)
-    LOOT_INVENTORY_SCENE_GAMEPAD:RegisterCallback("StateChange", OnStateChanged)
 end
 
 function ZO_LootInventory_Gamepad:SetupList(list)
@@ -66,8 +62,6 @@ function ZO_LootInventory_Gamepad:SetTitle(title)
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end
 
-local TAKE_BUTTON_INDEX = 2
-local TAKE_ALL_BUTTON_INDEX = 3
 function ZO_LootInventory_Gamepad:UpdateKeybindDescriptor()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     self.keybindDirty = false

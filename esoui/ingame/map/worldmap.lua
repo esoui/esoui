@@ -1,10 +1,10 @@
-local g_mapTileManager
 local g_mapPinManager
 local g_mapLocationManager
 local g_mouseoverMapBlobManager
 local g_keepNetworkManager
+local g_stickyPin
 
-local g_ownsTooltip = false
+local g_ownsInformationTooltip = false
 local g_playerChoseCurrentMap = false
 local g_resizingMap = false
 local g_resizeIsWidthDriven
@@ -18,13 +18,17 @@ local g_mapRefresh
 local g_interactKeybindForceHidden = false
 local g_questPingData = nil
 
+ZO_MAP_CONSTANTS =
+{
+    MAP_HEIGHT = 690,
+    MAP_WIDTH = 690,
+}
+
 --- The list of locals was at the absolute size limit of what Lua can handle
 --- (any more and it was erroring with "too many registers" and "too complex".)
 --- I put all the local constants in a single table to prevent this.
 local CONSTANTS =
 {
-    MAP_HEIGHT = 690,
-    MAP_WIDTH = 690,
     MAP_MIN_SIZE = 200,
     KEYBOARD_MAP_PADDING_Y_PIXELS = 30,
     GAMEPAD_MAP_PADDING_Y_PIXELS = 75,
@@ -118,6 +122,18 @@ local function GetPlatformMapLocationTooltip()
     return GetMapLocationTooltip(IsInGamepadPreferredMode())
 end
 
+function ZO_WorldMap_GetTooltipForMode(mode)
+    if mode == ZO_MAP_TOOLTIP_MODE.INFORMATION then
+        return GetPlatformInformationTooltip()
+    elseif mode == ZO_MAP_TOOLTIP_MODE.KEEP then
+        return GetPlatformKeepTooltip()
+    elseif mode == ZO_MAP_TOOLTIP_MODE.MAP_LOCATION then
+        return GetPlatformMapLocationTooltip()
+    else
+        assert(false)
+    end
+end
+
 local g_mapOverflowX = 0
 local g_mapOverflowY = 0
 local g_mapOverflowMaxX = 0
@@ -135,8 +151,6 @@ local g_mapPanAndZoom
 
 local g_pinUpdateTime = nil
 local g_refreshUpdateTime = nil
-local g_activeGroupPins = {}
-local g_objectiveMovingPins = {}
 local g_nextRespawnTimeMS = 0
 
 MAP_FLOOR_CHANGE_DIRECTION_UP = 1
@@ -229,90 +243,8 @@ local function IsMouseOverMap()
     return false
 end
 
---[[
-    Pin management...
---]]
-
---[[
-    Map Tile Pool Object.  Creates the base tiles for the world map...controls must be able to be indexed by tile
---]]
-
-local ZO_WorldMapTiles = ZO_Object:Subclass()
-
-function ZO_WorldMapTiles:New(...)
-    local tiles = ZO_Object.New(self)
-    tiles:Initialize(...)
-    return tiles
-end
-
-function ZO_WorldMapTiles:Initialize(parent)
-    self.parent = parent
-    self.indexToTile = {}
-end
-
-function ZO_WorldMapTiles:GetTile(i)
-    return self.indexToTile[i]
-end
-
-function ZO_WorldMapTiles:GetOrCreateTile(i)
-    local tile = self:GetTile(i)
-    if tile == nil then
-        tile = CreateControlFromVirtual(self.parent:GetName(), self.parent, "ZO_MapTile", i)
-        self.indexToTile[i] = tile
-    end
-    return tile
-end
-
-function ZO_WorldMapTiles:ReleaseTiles()
-    for k, tile in ipairs(self.indexToTile) do
-        tile:SetHidden(true)
-    end
-end
-
-function ZO_WorldMapTiles:UpdateMapData()
-    local numHorizontalTiles, numVerticalTiles = GetMapNumTiles()
-
-    self.horizontalTiles = numHorizontalTiles
-    self.verticalTiles = numVerticalTiles
-end
-
-function ZO_WorldMapTiles:LayoutTiles()
-    if self.horizontalTiles == nil then
-        self:UpdateMapData()
-    end
-
-    local tileWidth = CONSTANTS.MAP_WIDTH / self.horizontalTiles
-    local tileHeight = CONSTANTS.MAP_HEIGHT / self.verticalTiles
-
-    local numHorizontalTiles, numVerticalTiles = self.horizontalTiles, self.verticalTiles
-    self:ReleaseTiles()
-
-    for i = 1, (numHorizontalTiles * numVerticalTiles) do
-        local tileControl = self:GetOrCreateTile(i)
-        tileControl:SetHidden(false)
-        tileControl:SetDimensions(tileWidth, tileHeight)
-        tileControl:ClearAnchors()
-        local xOffset = zo_mod(i - 1, numHorizontalTiles) * tileWidth
-        local yOffset = zo_floor((i - 1) / numHorizontalTiles) * tileHeight
-        tileControl:SetAnchor(TOPLEFT, ZO_WorldMapContainer, TOPLEFT, xOffset, yOffset)
-    end
-end
-
-function ZO_WorldMapTiles:UpdateTextures()
-    self:UpdateMapData()
-    self:LayoutTiles()
-
-    local totalTiles = self.horizontalTiles * self.verticalTiles
-    for i = 1, totalTiles do
-        local tileControl = self:GetTile(i)
-        tileControl:SetTexture(GetMapTileTexture(i))
-        tileControl:SetHidden(false)
-    end
-
-    for i = totalTiles + 1, #self.indexToTile do
-        local tileControl = self:GetTile(i)
-        tileControl:SetHidden(true)
-    end
+function ZO_WorldMap_IsMouseOverMap()
+    return IsMouseOverMap()
 end
 
 local InformationTooltipMixin = {}
@@ -428,213 +360,19 @@ function InformationTooltipMixin:AppendSuggestionActivity(pin)
     end
 end
 
-function ZO_WorldMap_GetTooltipForMode(mode)
-    if mode == ZO_MAP_TOOLTIP_MODE.INFORMATION then
-        return GetPlatformInformationTooltip()
-    elseif mode == ZO_MAP_TOOLTIP_MODE.KEEP then
-        return GetPlatformKeepTooltip()
-    elseif mode == ZO_MAP_TOOLTIP_MODE.MAP_LOCATION then
-        return GetPlatformMapLocationTooltip()
-    else
-        assert(false)
-    end
-end
-
 local tooltipOrder =
 {
     ZO_MAP_TOOLTIP_MODE.KEEP, ZO_MAP_TOOLTIP_MODE.MAP_LOCATION, ZO_MAP_TOOLTIP_MODE.INFORMATION
 }
-
---[[
-    Sticky Pin Utilities for gamepad map control (utilized by mouse over list construction)
---]]
-
-local WorldMapStickyPin = ZO_Object:Subclass()
-local g_stickyPin
-
-function WorldMapStickyPin:New(...)
-    local stickyPin = ZO_Object.New(self)
-    stickyPin:Initialize(...)
-    return stickyPin
-end
-
-function WorldMapStickyPin:Initialize()
-    self.BASE_STICKY_MIN_DISTANCE_UNITS = 50
-    self.BASE_STICKY_MAX_DISTANCE_UNITS = 75
-
-    self.m_thresholdDistanceSq = self.BASE_STICKY_MIN_DISTANCE_UNITS * self.BASE_STICKY_MIN_DISTANCE_UNITS
-    self.m_enabled = true
-end
-
-function WorldMapStickyPin:SetEnabled(enabled)
-    self.m_enabled = enabled
-end
-
-function WorldMapStickyPin:UpdateThresholdDistance(currentNormalizedZoom)
-    local stickyDistance = zo_lerp(self.BASE_STICKY_MIN_DISTANCE_UNITS, self.BASE_STICKY_MAX_DISTANCE_UNITS, currentNormalizedZoom)
-    self.m_thresholdDistanceSq = stickyDistance * stickyDistance
-end
-
-function WorldMapStickyPin:SetStickyPin(pin)
-    self.m_pin = pin
-end
-
-function WorldMapStickyPin:GetStickyPin()
-    return self.m_pin
-end
-
-function WorldMapStickyPin:ClearStickyPin(mover)
-    if self.m_movingToPin and self:GetStickyPin() then
-        mover:ClearTargetOffset()
-    end
-
-    self:SetStickyPin(nil)
-end
-
-function WorldMapStickyPin:MoveToStickyPin(mover)
-    local movingToPin = self:GetStickyPin()
-    if movingToPin then
-        self.m_movingToPin = movingToPin
-        local useCurrentZoom = true
-        mover:PanToPin(movingToPin, useCurrentZoom)
-    end
-end
-
-function WorldMapStickyPin:SetStickyPinFromNearestCandidate()
-    self:SetStickyPin(self.m_nearestCandidate)
-end
-
-function WorldMapStickyPin:ClearNearestCandidate()
-    self.m_nearestCandidate = nil
-    self.m_nearestCandidateDistanceSq = 0
-end
-
-function WorldMapStickyPin:ConsiderPin(pin, x, y)
-    if self.m_enabled then
-        local pinGroup = pin:GetPinGroup()
-        if pinGroup == nil or WORLD_MAP_MANAGER:AreStickyPinsEnabledForPinGroup(pinGroup) then
-            local distanceSq = pin:DistanceToSq(x, y)
-            if distanceSq < self.m_thresholdDistanceSq then
-                if not self.m_nearestCandidate or distanceSq < self.m_nearestCandidateDistanceSq then
-                    self.m_nearestCandidate = pin
-                    self.m_nearestCandidateDistanceSq = distanceSq
-                end
-            end
-        end
-    end
-end
-
---[[
-    Utilities to build lists of pins the mouse is currently over and was previously over so the world map knows how
-    to properly call the OnMouseExit and OnMouseEnter events on the pins.
---]]
-local currentMouseOverPins = {}
-local previousMouseOverPins = {}
-local mouseExitPins = {}
-local mousedOverPinWasReset = false
-local invalidateTooltip = false
-
-function ZO_WorldMap_InvalidateTooltip()
-    invalidateTooltip = true
-end
-
-local function ResetMouseOverPins()
-    for pin, mousedOver in pairs(currentMouseOverPins) do
-        if mousedOver then
-            pin:SetTargetScale(1)
-        end
-    end
-    currentMouseOverPins = {}
-    previousMouseOverPins = {}
-end
-
-local function BuildMouseOverPinLists(cursorPositionX, cursorPositionY)
-    -- Determine if the mouse is even over the world map
-    local mouseOverWorldMap = IsMouseOverMap()
-
-    -- Swap lists
-    previousMouseOverPins, currentMouseOverPins = currentMouseOverPins, previousMouseOverPins
-
-    -- Update any pins that were moused over in the current list that may no longer be in the active pins
-    for pin, mousedOver in pairs(currentMouseOverPins) do
-        if mousedOver then
-            currentMouseOverPins[pin] = mouseOverWorldMap and pin:MouseIsOver(cursorPositionX, cursorPositionY)
-        end
-    end
-
-    -- Update active list and determine the sticky pin!
-    g_stickyPin:ClearNearestCandidate()
-
-    local pins = g_mapPinManager:GetActiveObjects()
-    for k, pin in pairs(pins) do
-        local isMouseCurrentlyOverPin = mouseOverWorldMap and pin:MouseIsOver(cursorPositionX, cursorPositionY)
-        currentMouseOverPins[pin] = isMouseCurrentlyOverPin
-        g_stickyPin:ConsiderPin(pin, cursorPositionX, cursorPositionY)
-    end
-
-    g_stickyPin:SetStickyPinFromNearestCandidate()
-
-    -- Determine which pins need to have their mouse enter called and which need to have their mouse exit called.
-    -- Return whether or not the lists for current and previous changed so that nothing is updated unecessarily
-    local wasPreviouslyMousedOver, doMouseEnter, doMouseExit
-    local listsChanged = false
-    local needsContinuousTooltipUpdates = false
-
-    for pin, isMousedOver in pairs(currentMouseOverPins) do
-        wasPreviouslyMousedOver = previousMouseOverPins[pin]
-        doMouseEnter = isMousedOver and not wasPreviouslyMousedOver
-        doMouseExit = not isMousedOver and wasPreviouslyMousedOver
-
-        mouseExitPins[pin] = doMouseExit
-
-        listsChanged = listsChanged or doMouseEnter or doMouseExit
-        needsContinuousTooltipUpdates = needsContinuousTooltipUpdates or (isMousedOver and pin:NeedsContinuousTooltipUpdates())
-    end
-
-    return listsChanged, needsContinuousTooltipUpdates
-end
-
-local function DoMouseExitForPin(pin)
-    if pin:IsPOI() or pin:IsFastTravelWayShrine() then
-        --reset the status to show what part of the map we're over (except if it's the name of this zone)
-        if g_mouseoverMapBlobManager.m_currentLocation ~= ZO_WorldMap.zoneName then
-            ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, g_mouseoverMapBlobManager.m_currentLocation))
-            ZO_WorldMapMouseoverName.owner = "map"
-        else
-            ZO_WorldMapMouseoverName:SetText("")
-            ZO_WorldMapMouseoverName.owner = ""
-        end
-
-        ZO_WorldMapMouseOverDescription:SetText("")
-    end
-
-    local pinType = pin:GetPinType()
-    g_keybindStrips.mouseover:DoMouseExitForPinType(pinType)
-    g_keybindStrips.gamepad:DoMouseExitForPinType(pinType)
-end
-
-local function MouseOverPins_OnPinReset(pin)
-    if currentMouseOverPins[pin] then
-        mousedOverPinWasReset = true
-        DoMouseExitForPin(pin)
-    end
-    currentMouseOverPins[pin] = nil
-    previousMouseOverPins[pin] = nil
-
-    --If we are showing a menu to choose a pin action and one of those pins is removed from the map then we need to handle that here
-    WORLD_MAP_CHOICE_DIALOG_GAMEPAD:OnPinRemovedFromMap(pin)
-    if ZO_MapPin.pinsInKeyboardMapChoiceDialog and ZO_MapPin.pinsInKeyboardMapChoiceDialog[pin] then
-        ClearMenu()
-    end
-end
+ZO_WORLD_MAP_TOOLTIP_ORDER = tooltipOrder
 
 local usedTooltips = {}
 
 local function HideKeyboardTooltips()
     local NOT_GAMEPAD_MODE = false
-    if g_ownsTooltip then
+    if g_ownsInformationTooltip then
         ClearTooltip(GetInformationTooltip(NOT_GAMEPAD_MODE))
-        g_ownsTooltip = false
+        g_ownsInformationTooltip = false
     end
 
     GetKeepTooltip(NOT_GAMEPAD_MODE):SetHidden(true)
@@ -649,11 +387,7 @@ end
 
 local g_hideTooltipsAt
 
-local function ClearHideTooltipsLater()
-    g_hideTooltipsAt = nil
-end
-
-local function HideAllTooltipsLater()
+function ZO_WorldMap_HideAllTooltipsLater()
     if IsInGamepadPreferredMode() then
         g_hideTooltipsAt = GetGameTimeMilliseconds() + 1000
     else
@@ -670,7 +404,7 @@ local function HideAllTooltips()
     else
         HideKeyboardTooltips()
     end
-    ClearHideTooltipsLater()
+    g_hideTooltipsAt = nil
     for i = 1, #tooltipOrder do
         usedTooltips[i] = nil
     end
@@ -682,7 +416,7 @@ local function ShowGamepadTooltip(resetScroll)
     if g_hideTooltipsAt then
         -- If we are in the process of hiding the tooltips then treat it as a fresh tooltip
         ZO_MapLocationTooltip_Gamepad:ClearLines(resetScroll)
-        ClearHideTooltipsLater()
+        g_hideTooltipsAt = nil
     end
 
     if not usedTooltips[CONSTANTS.GAMEPAD_TOOLTIP_ID] then
@@ -692,366 +426,56 @@ local function ShowGamepadTooltip(resetScroll)
         ZO_MapLocationTooltip_Gamepad:ClearLines(resetScroll)
     end
 
-
     return ZO_MapLocationTooltip_Gamepad
 end
 
-local function GetValueOrExecute(value, ...)
-    if type(value) == "function" then
-        return value(...)
-    end
-    return value
-end
-
-local function CompareIgnoreNil(first, second)
-    if first == second then
-        return nil
-    elseif first and second then
-        return first < second
-    elseif first then
-        return true
-    else
-        return false
-    end
-end
-
-local function GamepadTooltipPinSortFunction(firstPin, secondPin)
-    local firstPinType = firstPin and firstPin:GetPinType()
-    local secondPinType = secondPin and secondPin:GetPinType()
-
-    -- We don't need to check the types for nil, as if they are nil, the following
-    --  infos will get nil, and that will produce the same result.
-
-    local firstTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[firstPinType]
-    local secondTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[secondPinType]
-
-    -- If either tooltip info is nil, that pin has no tooltip, and we just need
-    --  to make sure it sorts to a consistant place.
-    if not firstTooltipInfo then
-        return false
-    elseif not secondTooltipInfo then
-        return true
-    end
-
-    local firstCategoryId = GetValueOrExecute(firstTooltipInfo.categoryId, firstPin) or GetValueOrExecute(firstTooltipInfo.gamepadCategory, firstPin)
-    local secondCategoryId = GetValueOrExecute(secondTooltipInfo.categoryId, secondPin) or GetValueOrExecute(secondTooltipInfo.gamepadCategory, secondPin)
-
-    local idResult = CompareIgnoreNil(firstCategoryId, secondCategoryId)
-    if idResult ~= nil then
-        return idResult
-    end
-
-    local firstCategory = GetValueOrExecute(firstTooltipInfo.gamepadCategory, firstPin)
-    local secondCategory = GetValueOrExecute(secondTooltipInfo.gamepadCategory, secondPin)
-    idResult = CompareIgnoreNil(firstCategory, secondCategory)
-    if idResult ~= nil then
-        return idResult
-    end
-
-    local firstEntryName = GetValueOrExecute(firstTooltipInfo.entryName, firstPin)
-    local secondEntryName = GetValueOrExecute(secondTooltipInfo.entryName, secondPin)
-    idResult = CompareIgnoreNil(firstEntryName, secondEntryName)
-    if idResult ~= nil then
-        return idResult
-    end
-
-    return false
-end
-
-local function TooltipPinSortFunction(firstPin, secondPin)
-    local firstPinType = firstPin and firstPin:GetPinType()
-    local secondPinType = secondPin and secondPin:GetPinType()
-
-    -- We don't need to check the types for nil, as if they are nil, the following
-    --  infos will get nil, and that will produce the same result.
-
-    local firstTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[firstPinType]
-    local secondTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[secondPinType]
-
-    -- If either tooltip info is nil, that pin has no tooltip, and we just need
-    --  to make sure it sorts to a consistant place.
-    if not firstTooltipInfo then
-        return false
-    elseif not secondTooltipInfo then
-        return true
-    end
-
-    local firstCategoryId = GetValueOrExecute(firstTooltipInfo.categoryId, firstPin)
-    local secondCategoryId = GetValueOrExecute(secondTooltipInfo.categoryId, secondPin)
-
-    local idResult = CompareIgnoreNil(firstCategoryId, secondCategoryId)
-    if idResult ~= nil then
-        return idResult
-    end
-
-    local firstEntryName = GetValueOrExecute(firstTooltipInfo.entryName, firstPin)
-    local secondEntryName = GetValueOrExecute(secondTooltipInfo.entryName, secondPin)
-    idResult = CompareIgnoreNil(firstEntryName, secondEntryName)
-    if idResult ~= nil then
-        return idResult
-    end
-
-    return false
-end
-
-local tooltipMouseOverPins = {}
-local foundTooltipMouseOverPins = {}
-local function GetTooltipMouseOverPins()
-    ZO_ClearNumericallyIndexedTable(tooltipMouseOverPins)
-    ZO_ClearNumericallyIndexedTable(foundTooltipMouseOverPins)
-    for pin, isMousedOver in pairs(currentMouseOverPins) do
-        if pin then
-            table.insert(tooltipMouseOverPins, pin)
-        end
-    end
-
-    return tooltipMouseOverPins
-end
-
 local function UpdateMouseOverPins()
-    local isInGamepadPreferredMode = SCENE_MANAGER:IsCurrentSceneGamepad()
-
-    local cursorPositionX
-    local cursorPositionY
-    if isInGamepadPreferredMode then
-        cursorPositionX, cursorPositionY = ZO_WorldMapScroll:GetCenter()
-    else
-        cursorPositionX, cursorPositionY = GetUIMousePosition()
-    end
-
-    local mouseOverListChanged, needsContinuousTooltipUpdates = BuildMouseOverPinLists(cursorPositionX, cursorPositionY)
-    local needsTooltipUpdate = mouseOverListChanged or mousedOverPinWasReset or needsContinuousTooltipUpdates or invalidateTooltip
-    local needsTooltipScrollReset = mouseOverListChanged or mousedOverPinWasReset
-    invalidateTooltip = false
-    mousedOverPinWasReset = false
-
-    if not needsTooltipUpdate then
-        return
-    end
-
     local wasShowingTooltip = ZO_WorldMap_IsTooltipShowing()
-    HideAllTooltipsLater()
 
-    -- Iterate over the current pins, using the key as the actual pin to facilitate looking up whether or not it's appropriate to call mouseEnter/mouseExit
-    -- for the pins.
-    local tooltipMouseOverPins = GetTooltipMouseOverPins()
-
-    -- Do the exit pins first (so that ZO_WorldMapMouseoverName gets cleared then set in the correct order)
-    for index, pin in ipairs(tooltipMouseOverPins) do
-        if mouseExitPins[pin] then
-            DoMouseExitForPin(pin)
-        end
-    end
-
-    for index, pin in ipairs(tooltipMouseOverPins) do
-        local isMousedOver = currentMouseOverPins[pin]
-
-        -- Verify that control is still moused over due to OnUpdate/OnShow handler issues (prevents tooltip popping)
-        if isMousedOver and pin:MouseIsOver(cursorPositionX, cursorPositionY) then
-            table.insert(foundTooltipMouseOverPins, pin)
-        else
-            pin:SetTargetScale(1)
-        end
-    end
-
-    if IsInGamepadPreferredMode() then
-        table.sort(foundTooltipMouseOverPins, GamepadTooltipPinSortFunction)
-    else
-        table.sort(foundTooltipMouseOverPins, TooltipPinSortFunction)
-
-        if #foundTooltipMouseOverPins > 0 then
-            WORLD_MAP_MANAGER:HidePinPointerBox()
-        end
-    end
-
-    local MAX_QUEST_PINS = 10
-    local currentQuestPins = 0
-    local missedQuestPins = 0
-    local maxKeepTooltipPinLevel = 0
-    local informationTooltipAppendedTo = false
-    local lastGamepadCategory = nil
-    local informationTooltip = GetPlatformInformationTooltip()
-
-    for index, pin in ipairs(foundTooltipMouseOverPins) do
-        local pinType = pin:GetPinType()
-        local pinTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[pinType]
-
-        if pinTooltipInfo then
-            local layoutPinTooltip = true
-            if pin:IsQuest() then
-                if pin:IsAssisted() then
-                    --always allow assisted pins through
-                elseif currentQuestPins < MAX_QUEST_PINS then
-                    currentQuestPins = currentQuestPins + 1
-                else
-                    layoutPinTooltip = false
-                    missedQuestPins = missedQuestPins + 1
-                end
-            end
-
-            if layoutPinTooltip then
-                if not pin:IsAreaPin() or pin:ShowsPinAndArea() then
-                    pin:SetTargetScale(1.3)
-                end
-
-                local layoutTooltip = true
-                local usedTooltip = pinTooltipInfo.tooltip
-                if not isInGamepadPreferredMode and usedTooltip == ZO_MAP_TOOLTIP_MODE.KEEP then
-                    local pinLevel = pin:GetLevel()
-                    if pinLevel > maxKeepTooltipPinLevel then
-                        maxKeepTooltipPinLevel = pinLevel
-                    else
-                        layoutTooltip = false
-                    end
-                end
-
-                if layoutTooltip and pinTooltipInfo.hasTooltip then
-                    layoutTooltip = pinTooltipInfo.hasTooltip(pin)
-                end
-
-                if layoutTooltip then
-                    if usedTooltip then
-                        if not isInGamepadPreferredMode then
-                            for i = 1, #tooltipOrder do
-                                if tooltipOrder[i] == usedTooltip then
-                                    if not usedTooltips[i] then
-                                        usedTooltips[i] = true
-                                        if usedTooltip == ZO_MAP_TOOLTIP_MODE.KEEP then
-                                            GetPlatformKeepTooltip():SetHidden(false)
-                                        else
-                                            InitializeTooltip(ZO_WorldMap_GetTooltipForMode(usedTooltip), pin:GetControl())
-                                        end
-                                    end
-                                end
-                            end
-                        else
-                            if not ZO_WorldMap_IsWorldMapInfoShowing() and not ZO_WorldMap_IsKeepInfoShowing() then
-                                ShowGamepadTooltip(needsTooltipScrollReset)
-                            end
-                        end
-                    end
-
-                    if isInGamepadPreferredMode then
-                        local nextCategoryText = GetValueOrExecute(pinTooltipInfo.gamepadCategory, pin)
-                        if type(nextCategoryText) == "number" then
-                            nextCategoryText = GetString(nextCategoryText)
-                        end
-
-                        local nextCategory = nextCategoryText
-                        if not nextCategory then
-                            nextCategory = pinTooltipInfo.categoryId
-                        end
-
-                        local isDifferentCategory = (lastGamepadCategory ~= nextCategory)
-
-                        if nextCategoryText and isDifferentCategory then
-                            local categoryIcon = GetValueOrExecute(pinTooltipInfo.gamepadCategoryIcon, pin)
-                            local titleStyleName = pinTooltipInfo.gamepadCategoryStyleName
-                            titleStyleName = titleStyleName and informationTooltip.tooltip:GetStyle(titleStyleName)
-
-                            local groupSection = informationTooltip.tooltip:AcquireSection(titleStyleName, informationTooltip.tooltip:GetStyle("mapKeepCategorySpacing"))
-                            local mapIconTitleStyle = categoryIcon and informationTooltip.tooltip:GetStyle("mapIconTitle") or nil
-                            informationTooltip:LayoutGroupHeader(groupSection, categoryIcon, nextCategoryText, titleStyleName, mapIconTitleStyle, informationTooltip.tooltip:GetStyle("mapTitle"))
-                            informationTooltip.tooltip:AddSection(groupSection)
-                        elseif pinTooltipInfo.gamepadSpacing or isDifferentCategory then
-                            local groupSection = informationTooltip.tooltip:AcquireSection(informationTooltip.tooltip:GetStyle("mapKeepCategorySpacing"))
-                            informationTooltip.tooltip:AddSectionEvenIfEmpty(groupSection)
-                        end
-
-                        lastGamepadCategory = nextCategory
-                    end
-
-                    pinTooltipInfo.creator(pin)
-
-                    g_keybindStrips.mouseover:DoMouseEnterForPinType(pinType)
-                    g_keybindStrips.gamepad:DoMouseEnterForPinType(pinType)
-
-                    --space out the appended lines in the information tooltip
-                    if usedTooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION and not isInGamepadPreferredMode then
-                        informationTooltipAppendedTo = true
-                        informationTooltip:AddVerticalPadding(5)
-                    end
-                end
-            end
-        end
-        
-        -- For POIs, add name to the top of the map
-        local pinType = pin:GetPinType()
-        if pinType == MAP_PIN_TYPE_POI_COMPLETE or pinType == MAP_PIN_TYPE_POI_SEEN then
-            local poiIndex = pin:GetPOIIndex()
-            local zoneIndex = pin:GetPOIZoneIndex()
-
-            local poiName, _, poiStartDesc, poiFinishedDesc = GetPOIInfo(zoneIndex, poiIndex)
-
-            ZO_WorldMapMouseoverName.owner = "poi"
-            ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, poiName))
-
-            if pinType == MAP_PIN_TYPE_POI_COMPLETE then
-                ZO_WorldMapMouseOverDescription:SetText(poiFinishedDesc)
-            else
-                ZO_WorldMapMouseOverDescription:SetText(poiStartDesc)
-            end
-        end
-    end
-
-    if missedQuestPins > 0 then
-        local text = string.format(zo_strformat(SI_TOOLTIP_MAP_MORE_QUESTS, missedQuestPins))
+    if g_mapPinManager:UpdateMouseOverPins(usedTooltips) then
+        -- Gamepad handles its own layout
         if not IsInGamepadPreferredMode() then
-            informationTooltip:AddLine(text)
-        else
-            local lineSection = informationTooltip.tooltip:AcquireSection(informationTooltip.tooltip:GetStyle("mapMoreQuestsContentSection"))
-            lineSection:AddLine(text, informationTooltip.tooltip:GetStyle("mapLocationTooltipContentLabel"), informationTooltip.tooltip:GetStyle("gamepadElderScrollTooltipContent"))
-            informationTooltip.tooltip:AddSection(lineSection)
-        end
-    end
+            local prevControl = nil
+            local placeAbove = GuiMouse:GetTop() > (GuiRoot:GetHeight() / 2)
+            local placeLeft = GuiMouse:GetLeft() > (GuiRoot:GetWidth() / 2)
+            for i = 1, #tooltipOrder do
+                if usedTooltips[i] then
+                    local tooltip = tooltipOrder[i]
+                    local tooltipControl = ZO_WorldMap_GetTooltipForMode(tooltip)
 
-    --Remove the last bit of extra padding on the end
-    if informationTooltipAppendedTo and not isInGamepadPreferredMode then
-        informationTooltip:AddVerticalPadding(-5)
-    end
-
-    -- Gamepad handles its own layout
-    if not isInGamepadPreferredMode then
-        local prevControl = nil
-        local placeAbove = GuiMouse:GetTop() > (GuiRoot:GetHeight() / 2)
-        local placeLeft = GuiMouse:GetLeft() > (GuiRoot:GetWidth() / 2)
-        for i = 1, #tooltipOrder do
-            if usedTooltips[i] then
-                local tooltip = tooltipOrder[i]
-                local tooltipControl = ZO_WorldMap_GetTooltipForMode(tooltip)
-
-                if prevControl then
-                    if placeLeft then
-                        if placeAbove then
-                            tooltipControl:ClearAnchors()
-                            tooltipControl:SetAnchor(BOTTOMRIGHT, prevControl, TOPRIGHT, 0, -5)
+                    if prevControl then
+                        if placeLeft then
+                            if placeAbove then
+                                tooltipControl:ClearAnchors()
+                                tooltipControl:SetAnchor(BOTTOMRIGHT, prevControl, TOPRIGHT, 0, -5)
+                            else
+                                tooltipControl:ClearAnchors()
+                                tooltipControl:SetAnchor(TOPRIGHT, prevControl, BOTTOMRIGHT, 0, 5)
+                            end
                         else
-                            tooltipControl:ClearAnchors()
-                            tooltipControl:SetAnchor(TOPRIGHT, prevControl, BOTTOMRIGHT, 0, 5)
+                            if placeAbove then
+                                tooltipControl:ClearAnchors()
+                                tooltipControl:SetAnchor(BOTTOMLEFT, prevControl, TOPLEFT, 0, -5)
+                            else
+                                tooltipControl:ClearAnchors()
+                                tooltipControl:SetAnchor(TOPLEFT, prevControl, BOTTOMLEFT, 0, 5)
+                            end
                         end
                     else
-                        if placeAbove then
+                        if placeLeft then
                             tooltipControl:ClearAnchors()
-                            tooltipControl:SetAnchor(BOTTOMLEFT, prevControl, TOPLEFT, 0, -5)
+                            tooltipControl:SetAnchor(RIGHT, GuiMouse, LEFT, -32, 0)
                         else
                             tooltipControl:ClearAnchors()
-                            tooltipControl:SetAnchor(TOPLEFT, prevControl, BOTTOMLEFT, 0, 5)
+                            tooltipControl:SetAnchor(LEFT, GuiMouse, RIGHT, 32, 0)
                         end
                     end
-                else
-                    if placeLeft then
-                        tooltipControl:ClearAnchors()
-                        tooltipControl:SetAnchor(RIGHT, GuiMouse, LEFT, -32, 0)
-                    else
-                        tooltipControl:ClearAnchors()
-                        tooltipControl:SetAnchor(LEFT, GuiMouse, RIGHT, 32, 0)
+
+                    prevControl = tooltipControl
+
+                    if tooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION then
+                        g_ownsInformationTooltip = true
                     end
-                end
-
-                prevControl = tooltipControl
-
-                if tooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION then
-                    g_ownsTooltip = true
                 end
             end
         end
@@ -1072,644 +496,6 @@ local function OnGuildNameAvailable()
     if not keepTooltip:IsHidden() then
         keepTooltip:RefreshKeepInfo()
     end
-end
-
---Pin Click Handlers
-----------------------
-
-local function RemoveInvalidSpawnLocations(pinDatas)
-    for i = #pinDatas, 1, -1 do
-        local pin = pinDatas[i].pin
-        local pinHandler = pinDatas[i].handler
-
-        if ZO_MapPin.IsReviveLocation(pinHandler) and not ZO_MapPin.CanReviveAtPin(pin, pinHandler) then
-            table.remove(pinDatas, i)
-        end
-    end
-end
-
-local function GetShownHandlersForPin(pin, mouseButton)
-    if pin and ZO_MapPin.PIN_CLICK_HANDLERS[mouseButton] then
-        local handlers = ZO_MapPin.PIN_CLICK_HANDLERS[mouseButton][pin:GetPinType()]
-        if handlers then
-            for i = 1, #handlers do
-                local handler = handlers[i]
-                if handler.show == nil or handler.show(pin) then
-                    if handler.GetDynamicHandlers then
-                        return handler.GetDynamicHandlers(pin)
-                    else
-                        return { handler }
-                    end
-                end
-            end
-        end
-    end
-
-    return nil
-end
-
-local function GetFirstShownHandlerForPin(pin, mouseButton)
-    local handlers = GetShownHandlersForPin(pin, mouseButton)
-    if handlers then
-        return handlers[1]
-    end
-
-    return nil
-end
-
-function ZO_WorldMap_WouldPinHandleClick(pinControl, button, ctrl, alt, shift)
-    if ctrl or alt then
-        return false
-    end
-
-    if pinControl then
-        local pin = ZO_MapPin.GetMapPinForControl(pinControl)
-        local validPinHandler = GetFirstShownHandlerForPin(pin, button)
-        if validPinHandler then
-            return true
-        end
-    end
-
-    for pin, isMousedOver in pairs(currentMouseOverPins) do
-        if isMousedOver then
-            local validHandler = GetFirstShownHandlerForPin(pin, button)
-            if validHandler then
-                return true
-            end
-        end
-    end
-end
-
-function ZO_WorldMap_GetPinHandlers(mouseButton)
-    local pinDatas = ZO_MapPin.pinDatas
-    ZO_ClearNumericallyIndexedTable(pinDatas)
-
-    for pin, isMousedOver in pairs(currentMouseOverPins) do
-        if isMousedOver then
-            local shownHandlers = GetShownHandlersForPin(pin, mouseButton)
-            if shownHandlers then
-                for _, handler in ipairs(shownHandlers) do
-                    local duplicate = false
-                    local duplicatesFunction = handler.duplicates
-                    if duplicatesFunction then
-                        for _, pinData in ipairs(pinDatas) do
-                            --if these handlers are of the same type
-                            if handler == pinData.handler then
-                                if duplicatesFunction(pin, pinData.pin) then
-                                    duplicate = true
-                                    break
-                                end
-                            end
-                        end
-                    end
-
-                    if not duplicate then
-                        table.insert(pinDatas, {handler = handler, pin = pin})
-                    end
-                end
-            end
-        end
-    end
-
-    return pinDatas
-end
-
-function ZO_WorldMap_ChoosePinOption(pin, handler)
-    if handler.show and not handler.show(pin) then
-        --If something changed and we shouldn't be showing this option anymore then...
-        if handler.failedAfterBeingShownError then
-            --If we have some error text for this case then show it in a dialog
-            local text
-            if type(handler.failedAfterBeingShownError) == "function" then
-                text = handler.failedAfterBeingShownError(pin)
-            else
-                text = handler.failedAfterBeingShownError
-            end
-            ZO_Dialogs_ShowPlatformDialog("WORLD_MAP_CHOICE_FAILED", nil, { mainTextParams = { text } })
-        end
-        --Then skip doing the action
-        return
-    end
-    handler.callback(pin)
-end
-
-do
-    local function SortPinDatas(firstData, secondData)
-        local firstEntryName = GetValueOrExecute(firstData.handler.name, firstData.pin)
-        local secondEntryName = GetValueOrExecute(secondData.handler.name, secondData.pin)
-        local idResult = CompareIgnoreNil(firstEntryName, secondEntryName)
-        if idResult ~= nil then
-            return idResult
-        end
-
-        return false
-    end
-
-    local function OnMenuHiddenCallback()
-        ZO_MapPin.pinsInKeyboardMapChoiceDialog = nil
-    end
-
-    function ZO_WorldMap_SetupKeyboardChoiceMenu(pinDatas, pinControl)
-        ClearMenu()
-        ZO_MapPin.pinsInKeyboardMapChoiceDialog = { }
-
-        table.sort(pinDatas, SortPinDatas)
-
-        for i = 1, #pinDatas do
-            local handler = pinDatas[i].handler
-            local pin = pinDatas[i].pin
-            local name = handler.name
-            if type(name) == "function" then
-                name = name(pin)
-            end
-            AddMenuItem(name, function()
-                ZO_WorldMap_ChoosePinOption(pin, handler)
-            end)
-            ZO_MapPin.pinsInKeyboardMapChoiceDialog[pin] = true
-        end
-        SetMenuHiddenCallback(OnMenuHiddenCallback)
-        ShowMenu(pinControl)
-    end
-end
-
-function ZO_WorldMap_HandlePinClicked(pinControl, mouseButton, ctrl, alt, shift)
-    if ctrl or alt then
-        return
-    end
-
-    local pinDatas = ZO_WorldMap_GetPinHandlers(mouseButton)
-
-    RemoveInvalidSpawnLocations(pinDatas)
-
-    if #pinDatas == 1 then
-        pinDatas[1].handler.callback(pinDatas[1].pin)
-    elseif #pinDatas > 1 then
-        if IsInGamepadPreferredMode() then
-            ZO_WorldMap_SetupGamepadChoiceDialog(pinDatas)
-        else
-            ZO_WorldMap_SetupKeyboardChoiceMenu(pinDatas, pinControl)
-        end
-    end
-end
-
---Pins Manager
-
-ZO_WorldMapPins = ZO_ObjectPool:Subclass()
-
-function ZO_WorldMapPins:Initialize(parentControl)
-    local mouseInputGroup = ZO_MouseInputGroup:New(parentControl)
-
-    local function CreatePin(pool)
-        local pin = ZO_MapPin:New(parentControl)
-        mouseInputGroup:Add(pin:GetControl(), ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
-        return pin
-    end
-
-    local function ResetPin(pin)
-        MouseOverPins_OnPinReset(pin)
-
-        pin:Reset()
-    end
-
-    ZO_ObjectPool.Initialize(self, CreatePin, ResetPin)
-
-    self.mouseInputGroup = mouseInputGroup
-
-    -- Each of these tables holds a method of mapping pin lookup indices to the actual object pool keys needed to release the pins later
-    -- The reason this exists is because the game events will hold info like "remove this specific quest index", and at that point we
-    -- need to be able to lookup a pin for game-event data rather than pinTag data, without iterating over every single pin in the
-    -- active objects list.
-    self.m_keyToPinMapping =
-    {
-        ["poi"] = {},       -- { [zone index 1] = { [objective index 1] = pinKey1, [objective index 2] = pinKey2,  ... }, ... }
-        ["loc"] = {},
-        ["quest"] = {},     -- { [quest index 1] = { [quest pin tag 1] = pinKey1, [quest pin tag 2] = pinKey2, ... }, ... }
-        ["objective"] = {},
-        ["keep"] = {},
-        ["pings"] = {},
-        ["killLocation"] = {},
-        ["fastTravelKeep"] = {},
-        ["fastTravelWayshrine"] = {},
-        ["forwardCamp"] = {},
-        ["AvARespawn"] = {},
-        ["group"] = {},
-        ["restrictedLink"] = {},
-        ["suggestion"] = {},
-        ["worldEventUnit"] = {},
-        ["worldEventPOI"] = {},
-        ["antiquityDigSite"] = {},
-        ["companion"] = {},
-        ["skyshard"] = {},
-    }
-
-    self.nextCustomPinType = MAP_PIN_TYPE_INVALID
-    self.customPins = {}
-
-    self.pinBlobPool = ZO_ControlPool:New("ZO_PinBlob", parentControl, "PinBlob")
-
-    self.pinBlobPool:SetCustomResetBehavior(function(blobControl)
-        blobControl:SetAlpha(1)
-    end)
-
-    self.pinPolygonBlobPool = ZO_ControlPool:New("ZO_PinPolygonBlob", parentControl, "PinPolygonBlob")
-
-    self.pinPolygonBlobPool:SetCustomFactoryBehavior(function(blobControl)
-        mouseInputGroup:Add(blobControl, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
-    end)
-
-    self.pinPolygonBlobPool:SetCustomFactoryBehavior(function(blobControl)
-        blobControl:SetHandler("OnMouseUp", nil)
-        blobControl:SetHandler("OnMouseDown", nil)
-        blobControl:SetAlpha(1)
-    end)
-
-    self.pinFadeInAnimationPool = ZO_AnimationPool:New("ZO_WorldMapPinFadeIn")
-
-    local function OnAnimationTimelineStopped(timeline)
-        self.pinFadeInAnimationPool:ReleaseObject(timeline.key)
-    end
-
-    local function SetupTimeline(timeline)
-        timeline:SetHandler("OnStop", OnAnimationTimelineStopped)
-    end
-
-    self.pinFadeInAnimationPool:SetCustomFactoryBehavior(SetupTimeline)
-
-    local function ResetTimeline(animationTimeline)
-        local pinAnimation = animationTimeline:GetAnimation(1)
-        pinAnimation:SetAnimatedControl(nil)
-
-        local areaAnimation = animationTimeline:GetAnimation(2)
-        areaAnimation:SetAnimatedControl(nil)
-    end
-
-    self.pinFadeInAnimationPool:SetCustomResetBehavior(ResetTimeline)
-
-    --Wait until the map mode has been set before fielding these updates since adding a pin depends on the map having a mode.
-    local OnWorldMapModeChanged
-    OnWorldMapModeChanged = function(modeData)
-        if modeData then
-            WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestAvailable", function(...) self:OnQuestAvailable(...) end)
-            WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestRemoved", function(...) self:OnQuestRemoved(...) end)
-            CALLBACK_MANAGER:UnregisterCallback("OnWorldMapModeChanged", OnWorldMapModeChanged)
-        end
-    end
-    CALLBACK_MANAGER:RegisterCallback("OnWorldMapModeChanged", OnWorldMapModeChanged)
-end
-
-function ZO_WorldMapPins:AcquirePinBlob()
-    return self.pinBlobPool:AcquireObject()
-end
-
-function ZO_WorldMapPins:ReleasePinBlob(pinBlobKey)
-    self.pinBlobPool:ReleaseObject(pinBlobKey)
-end
-
-function ZO_WorldMapPins:AcquirePinPolygonBlob()
-    return self.pinPolygonBlobPool:AcquireObject()
-end
-
-function ZO_WorldMapPins:ReleasePinPolygonBlob(pinBlobKey)
-    self.pinPolygonBlobPool:ReleaseObject(pinBlobKey)
-end
-
-function ZO_WorldMapPins:AcquirePinFadeInAnimation()
-    local animation, key = self.pinFadeInAnimationPool:AcquireObject()
-    animation.key = key
-    return animation
-end
-
-function ZO_WorldMapPins:OnQuestAvailable(questIndex)
-    self:AddQuestPin(questIndex)
-end
-
-function ZO_WorldMapPins:OnQuestRemoved(questIndex)
-    self:RemovePins("quest", questIndex)
-    if g_questPingData and g_questPingData.questIndex then
-         self:RemovePins("pings", MAP_PIN_TYPE_QUEST_PING)
-    end
-end
-
-do
-    local MAPS_WITHOUT_QUEST_PINS =
-    {
-        [MAPTYPE_WORLD] = true,
-        [MAPTYPE_COSMIC] = true,
-    }
-
-    function ZO_WorldMap_DoesMapHideQuestPins()
-        return MAPS_WITHOUT_QUEST_PINS[GetMapType()]
-    end
-end
-
-function ZO_WorldMapPins:AddQuestPin(questIndex)
-    if ZO_WorldMap_DoesMapHideQuestPins() then
-        return
-    end
-
-    if not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_QUESTS) then
-        return
-    end
-
-    local questSteps = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
-    if questSteps then
-        for stepIndex, questConditions in pairs(questSteps) do
-            for conditionIndex, conditionData in pairs(questConditions) do
-                local xLoc, yLoc = conditionData.xLoc, conditionData.yLoc
-                if conditionData.insideCurrentMapWorld and ZO_WorldMap_IsNormalizedPointInsideMapBounds(xLoc, yLoc) then
-                    local tag = ZO_MapPin.CreateQuestPinTag(questIndex, stepIndex, conditionIndex)
-                    tag.isBreadcrumb = conditionData.isBreadcrumb
-                    local pin = self:CreatePin(conditionData.pinType, tag, xLoc, yLoc, conditionData.areaRadius)
-
-                    if pin:DoesQuestDataMatchQuestPingData() then
-                        local questPinTag = ZO_MapPin.CreateQuestPinTag(questIndex, stepIndex, conditionIndex)
-                        self:CreatePin(MAP_PIN_TYPE_QUEST_PING, questPinTag, xLoc, yLoc)
-                    end
-                end
-            end
-        end
-    end
-end
-
-function ZO_WorldMapPins:GetNextCustomPinType()
-    self.nextCustomPinType = self.nextCustomPinType + 1
-    return self.nextCustomPinType
-end
-
-function ZO_WorldMapPins:CreateCustomPinType(pinType)
-    local pinTypeId = self:GetNextCustomPinType()
-    _G[pinType] = pinTypeId
-    return pinTypeId
-end
-
-function ZO_WorldMapPins:AddCustomPin(pinType, pinTypeAddCallback, pinTypeOnResizeCallback, pinLayoutData, pinTooltipCreator)
-    if _G[pinType] ~= nil then return end
-
-    local pinTypeString = pinType
-    local pinTypeId = self:CreateCustomPinType(pinType)
-
-    self.m_keyToPinMapping[pinTypeString] = {}
-
-    self.customPins[pinTypeId] = { enabled = false, layoutCallback = pinTypeAddCallback, resizeCallback = pinTypeOnResizeCallback, pinTypeString = pinTypeString }
-    ZO_MapPin.TOOLTIP_CREATORS[pinTypeId] = pinTooltipCreator
-    ZO_MapPin.PIN_DATA[pinTypeId] = pinLayoutData
-end
-
-function ZO_WorldMapPins:SetCustomPinEnabled(pinType, enabled)
-    local pinData = self.customPins[pinType]
-    if pinData then
-        pinData.enabled = enabled
-    end
-end
-
-function ZO_WorldMapPins:IsCustomPinEnabled(pinType)
-    local pinData = self.customPins[pinType]
-    if pinData then
-        return pinData.enabled
-    end
-end
-
-function ZO_WorldMapPins:RefreshCustomPins(optionalPinType)
-    for pinTypeId, pinData in pairs(self.customPins) do
-        if optionalPinType == nil or optionalPinType == pinTypeId then
-            self:RemovePins(pinData.pinTypeString)
-
-            if pinData.enabled then
-                pinData.layoutCallback(self)
-            end
-        end
-    end
-end
-
-function ZO_WorldMapPins:MapPinLookupToPinKey(lookupType, majorIndex, keyIndex, pinKey)
-    local lookupTable = self.m_keyToPinMapping[lookupType]
-
-    local keys = lookupTable[majorIndex]
-    if not keys then
-        keys = {}
-        lookupTable[majorIndex] = keys
-    end
-
-    keys[keyIndex] = pinKey
-end
-
-function ZO_WorldMapPins:CreatePin(pinType, pinTag, xLoc, yLoc, radius, borderInformation)
-    local pin, pinKey = self:AcquireObject()
-    pin:SetData(pinType, pinTag)
-    pin:SetLocation(xLoc, yLoc, radius, borderInformation)
-
-    if pinType == MAP_PIN_TYPE_PLAYER then
-        pin:PingMapPin(ZO_MapPin.PulseAnimation)
-        self.playerPin = pin
-    end
-
-    if not pin:ValidatePvPPinAllowed() then
-        self:ReleaseObject(pinKey)
-        return
-    end
-
-    if pin:IsPOI() then
-        self:MapPinLookupToPinKey("poi", pin:GetPOIZoneIndex(), pin:GetPOIIndex(), pinKey)
-    elseif pin:IsLocation() then
-        self:MapPinLookupToPinKey("loc", pin:GetLocationIndex(), pin:GetLocationIndex(), pinKey)
-    elseif pin:IsQuest() then
-        self:MapPinLookupToPinKey("quest", pin:GetQuestIndex(), pinTag, pinKey)
-    elseif pin:IsObjective() then
-        self:MapPinLookupToPinKey("objective", pin:GetObjectiveKeepId(), pinTag, pinKey)
-    elseif pin:IsKeepOrDistrict() then
-        self:MapPinLookupToPinKey("keep", pin:GetKeepId(), pin:IsUnderAttackPin(), pinKey)
-    elseif pin:IsMapPing() then
-        self:MapPinLookupToPinKey("pings", pinType, pinTag, pinKey)
-    elseif pin:IsKillLocation() then
-        self:MapPinLookupToPinKey("killLocation", pinType, pinTag, pinKey)
-    elseif pin:IsFastTravelKeep() then
-        self:MapPinLookupToPinKey("fastTravelKeep", pin:GetFastTravelKeepId(), pin:GetFastTravelKeepId(), pinKey)
-    elseif pin:IsFastTravelWayShrine() then
-        self:MapPinLookupToPinKey("fastTravelWayshrine", pinType, pinTag, pinKey)
-    elseif pin:IsForwardCamp() then
-        self:MapPinLookupToPinKey("forwardCamp", pinType, pinTag, pinKey)
-    elseif pin:IsAvARespawn() then
-        self:MapPinLookupToPinKey("AvARespawn", pinType, pinTag, pinKey)
-    elseif pin:IsGroup() then
-        self:MapPinLookupToPinKey("group", pinType, pinTag, pinKey)
-    elseif pin:IsRestrictedLink() then
-        self:MapPinLookupToPinKey("restrictedLink", pinType, pinTag, pinKey)
-    elseif pin:IsSuggestion() then
-        self:MapPinLookupToPinKey("suggestion", pinType, pinTag, pinKey)
-    elseif pin:IsWorldEventUnitPin() then
-        self:MapPinLookupToPinKey("worldEventUnit", pin:GetWorldEventInstanceId(), pin:GetUnitTag(), pinKey)
-    elseif pin:IsWorldEventPOIPin() then
-        self:MapPinLookupToPinKey("worldEventPOI", pin:GetWorldEventInstanceId(), pinTag, pinKey)
-    elseif pin:IsAntiquityDigSitePin() then
-        self:MapPinLookupToPinKey("antiquityDigSite", pinType, pinTag, pinKey)
-    elseif pin:IsCompanion() then
-        self:MapPinLookupToPinKey("companion", pinType, pinTag, pinKey)
-    elseif pin:IsSkyshard() then
-        self:MapPinLookupToPinKey("skyshard", pinType, pinTag, pinKey)
-    else
-        local customPinData = self.customPins[pinType]
-        if customPinData then
-            self:MapPinLookupToPinKey(customPinData.pinTypeString, pinType, pinTag, pinKey)
-        end
-    end
-
-    g_mapPanAndZoom:OnPinCreated()
-
-    return pin
-end
-
-function ZO_WorldMapPins:PingQuest(questIndex, animation)
-    local pins = self:GetActiveObjects()
-    local pinQuestIndex
-
-    for pinKey, pin in pairs(pins) do
-        pinQuestIndex = pin:GetQuestIndex()
-
-        if pinQuestIndex > -1 then
-            if pinQuestIndex == questIndex then
-                pin:PingMapPin(animation)
-            else
-                pin:ResetAnimation(ZO_MapPin.ANIM_CONSTANTS.RESET_ANIM_HIDE_CONTROL)
-            end
-        end
-    end
-end
-
-function ZO_WorldMapPins:SetQuestPinsAssisted(questIndex, assisted)
-    local pins = self:GetActiveObjects()
-
-    for pinKey, pin in pairs(pins) do
-        local curIndex = pin:GetQuestIndex()
-        if curIndex == questIndex then
-            local currentPinType = pin:GetPinType()
-            local trackingLevel = GetTrackingLevel(TRACK_TYPE_QUEST, questIndex)
-            local newPinType = GetQuestPinTypeForTrackingLevel(currentPinType, trackingLevel)
-            pin:ChangePinType(newPinType)
-        end
-    end
-end
-
-function ZO_WorldMapPins:FindPin(lookupType, majorIndex, keyIndex)
-    local lookupTable = self.m_keyToPinMapping[lookupType]
-    local keys
-    if majorIndex then
-        keys = lookupTable[majorIndex]
-    else
-        keys = select(2, next(lookupTable))
-    end
-
-    if keys then
-        local pinKey
-        if keyIndex then
-            pinKey = keys[keyIndex]
-        else
-            pinKey = select(2, next(keys))
-        end
-
-        if pinKey then
-            return self:GetActiveObject(pinKey)
-        end
-    end
-end
-
-function ZO_WorldMapPins:AddPinsToArray(pins, lookupType, majorIndex)
-    local lookupTable = self.m_keyToPinMapping[lookupType]
-
-    local function AddPinsForKeys(keysTable)
-        if keysTable then
-            for _, pinKey in pairs(keysTable) do
-                local pin = self:GetActiveObject(pinKey)
-                if pin then
-                    table.insert(pins, pin)
-                end
-            end
-        end
-    end
-
-    if majorIndex then
-        local keys = lookupTable[majorIndex]
-        AddPinsForKeys(keys)
-    else
-        for _, keys in pairs(lookupTable) do
-            AddPinsForKeys(keys)
-        end
-    end
-
-    return pins
-end
-
-function ZO_WorldMapPins:RemovePins(lookupType, majorIndex, keyIndex)
-    local lookupTable = self.m_keyToPinMapping[lookupType]
-
-    if majorIndex then
-        local keys = lookupTable[majorIndex]
-        if keys then
-            if keyIndex then
-                 --Remove a specific pin
-                local pinKey = keys[keyIndex]
-                if pinKey then
-                    self:ReleaseObject(pinKey)
-                    keys[keyIndex] = nil
-                end
-            else
-                --Remove all pins in the major index
-                for _, pinKey in pairs(keys) do
-                    self:ReleaseObject(pinKey)
-                end
-
-                self.m_keyToPinMapping[lookupType][majorIndex] = {}
-            end
-        end
-    else
-        --Remove all pins of the lookup type
-        for _, keys in pairs(lookupTable) do
-            for _, pinKey in pairs(keys) do
-                self:ReleaseObject(pinKey)
-            end
-        end
-
-        self.m_keyToPinMapping[lookupType] = {}
-    end
-end
-
-function ZO_WorldMapPins:UpdatePinsForMapSizeChange()
-    local pins = self:GetActiveObjects()
-    for pinKey, pin in pairs(pins) do
-        pin:UpdateLocation()
-        pin:UpdateSize()
-    end
-
-    for pinTypeId, pinData in pairs(self.customPins) do
-        if pinData.enabled and pinData.resizeCallback then
-            pinData.resizeCallback(self, CONSTANTS.MAP_WIDTH, CONSTANTS.MAP_HEIGHT)
-        end
-    end
-end
-
-function ZO_WorldMapPins:GetWayshrinePin(nodeIndex)
-    local pins = self:GetActiveObjects()
-
-    for pinKey, pin in pairs(pins) do
-        local curIndex = pin:GetFastTravelNodeIndex()
-        if curIndex == nodeIndex then
-            return pin
-        end
-    end
-end
-
-function ZO_WorldMapPins:GetQuestConditionPin(questIndex)
-    local pins = self:GetActiveObjects()
-
-    for pinKey, pin in pairs(pins) do
-        local curIndex = pin:GetQuestIndex()
-        if curIndex == questIndex then
-            return pin
-        end
-    end
-end
-
-function ZO_WorldMapPins:GetPlayerPin()
-    return self.playerPin
 end
 
 --Map texture overlay management
@@ -1750,7 +536,7 @@ function ZO_MouseoverMapBlobManager:Initialize(blobContainer)
 end
 
 local function NormalizedBlobDataToUI(blobWidth, blobHeight, blobXOffset, blobYOffset)
-    return blobWidth * CONSTANTS.MAP_WIDTH, blobHeight * CONSTANTS.MAP_HEIGHT, blobXOffset * CONSTANTS.MAP_WIDTH, blobYOffset * CONSTANTS.MAP_HEIGHT
+    return blobWidth * ZO_MAP_CONSTANTS.MAP_WIDTH, blobHeight * ZO_MAP_CONSTANTS.MAP_HEIGHT, blobXOffset * ZO_MAP_CONSTANTS.MAP_WIDTH, blobYOffset * ZO_MAP_CONSTANTS.MAP_HEIGHT
 end
 
 function ZO_MouseoverMapBlobManager:Update(normalizedMouseX, normalizedMouseY, forceShowBlob)
@@ -1821,63 +607,6 @@ local function PrepareBlobManagersForZoneUpdate()
     g_mouseoverMapBlobManager:ClearLocation()
 end
 
---[[
-    Map Location Management (set up the place names text that appears on the map...)
---]]
-
-CONSTANTS.LOCATION_FONT = "$(BOLD_FONT)|%d|soft-shadow-thin"
-
-ZO_MapLocations = ZO_ControlPool:Subclass()
-
-function ZO_MapLocations:Initialize(container)
-    ZO_ControlPool.Initialize(self, "ZO_MapLocation", container, "Landmark")
-
-    self.m_minFontSize = 17
-    self.m_maxFontSize = 32
-    self.m_cachedFontStrings = {}
-
-    self:SetFontScale(1)
-end
-
-function ZO_MapLocations:SetFontScale(scale)
-    if scale ~= self.m_fontScale then
-        self.m_fontScale = scale
-        self.m_cachedFontStrings = {}
-    end
-end
-
-function ZO_MapLocations:GetFontString(size)
-    -- apply scale to the (unscaled) input size, clamp it, and arive at final font string.
-    -- unscale by global ui scale because we want the font to get a little bigger at smaller ui scales to approximately cover the same map area...
-    local fontString = self.m_cachedFontStrings[size]
-    if not fontString then
-        fontString = string.format(CONSTANTS.LOCATION_FONT, zo_round(size / GetUIGlobalScale()))
-        self.m_cachedFontStrings[size] = fontString
-    end
-
-    return fontString
-end
-
-function ZO_MapLocations:AddLocation(locationIndex)
-    if IsMapLocationVisible(locationIndex) then
-        local icon, x, y = GetMapLocationIcon(locationIndex)
-
-        if icon ~= "" and ZO_WorldMap_IsNormalizedPointInsideMapBounds(x, y) then
-            local tag = ZO_MapPin.CreateLocationPinTag(locationIndex, icon)
-            g_mapPinManager:CreatePin(MAP_PIN_TYPE_LOCATION, tag, x, y)
-        end
-    end
-end
-
-function ZO_MapLocations:RefreshLocations()
-    self:ReleaseAllObjects()
-    g_mapPinManager:RemovePins("loc")
-
-    for i = 1, GetNumMapLocations() do
-        self:AddLocation(i)
-    end
-end
-
 --Keep Fast Travel Network
 -----------------------------
 
@@ -1939,8 +668,8 @@ do
         local bgContext = ZO_WorldMap_GetBattlegroundQueryType()
         local numLinks = GetNumKeepTravelNetworkLinks(bgContext)
         local historyPercent = ZO_WorldMap_GetHistoryPercentToUse()
-        local mapWidth = CONSTANTS.MAP_WIDTH
-        local mapHeight = CONSTANTS.MAP_HEIGHT
+        local mapWidth = ZO_MAP_CONSTANTS.MAP_WIDTH
+        local mapHeight = ZO_MAP_CONSTANTS.MAP_HEIGHT
 
         for linkIndex = 1, numLinks do
             local linkType, linkOwner, restrictedToAlliance, startNX, startNY, endNX, endNY = GetHistoricalKeepTravelNetworkLinkInfo(linkIndex, bgContext, historyPercent)
@@ -1993,8 +722,8 @@ do
     end
 
     function ZO_KeepNetwork:UpdateLinkPostionsForNewMapSize()
-        local mapWidth = CONSTANTS.MAP_WIDTH
-        local mapHeight = CONSTANTS.MAP_HEIGHT
+        local mapWidth = ZO_MAP_CONSTANTS.MAP_WIDTH
+        local mapHeight = ZO_MAP_CONSTANTS.MAP_HEIGHT
 
         local links = self.linkPool:GetActiveObjects()
         for _, link in pairs(links) do
@@ -2047,58 +776,6 @@ end
 --[[
     World Map Logic
 --]]
-
-local function UpdateGroupPins()
-    for groupTag, groupPin in pairs(g_activeGroupPins) do
-        local x, y = GetMapPlayerPosition(groupTag)
-        groupPin:SetLocation(x, y)
-    end
-end
-
-local function UpdatePlayerPin()
-    local playerPin = g_mapPinManager:GetPlayerPin()
-    local x, y, _, isShownInCurrentMap = GetMapPlayerPosition("player")
-    playerPin:SetLocation(x, y)
-    -- Design rule, don't show player pin on cosmic, even if they're in the map
-    if isShownInCurrentMap and not IsShowingCosmicMap() then
-        playerPin:SetHidden(false)
-        playerPin:SetRotation(GetPlayerCameraHeading())
-    else
-        playerPin:SetHidden(true)
-    end
-end
-
-local function UpdateCompanionPins()
-    local companionPin = g_mapPinManager:FindPin("companion")
-    if companionPin then
-        local xLoc, yLoc = GetMapPlayerPosition(companionPin:GetUnitTag())
-        companionPin:SetLocation(xLoc, yLoc)
-    end
-end
-
-
-local UpdateMovingPins
-do
-    local g_worldEventUnitPins = {}
-    
-    function UpdateMovingPins()
-        UpdatePlayerPin()
-        UpdateGroupPins()
-        UpdateCompanionPins()
-
-        for _, pin in ipairs(g_objectiveMovingPins) do
-            local pinType, currentX, currentY = GetObjectivePinInfo(pin:GetObjectiveKeepId(), pin:GetObjectiveObjectiveId(), pin:GetBattlegroundContext())
-            pin:SetLocation(currentX, currentY)
-        end
-
-        g_mapPinManager:AddPinsToArray(g_worldEventUnitPins, "worldEventUnit")
-        for _, pin in ipairs(g_worldEventUnitPins) do
-            local xLoc, yLoc = GetMapPlayerPosition(pin:GetUnitTag())
-            pin:SetLocation(xLoc, yLoc)
-        end
-        ZO_ClearNumericallyIndexedTable(g_worldEventUnitPins)
-    end
-end
 
 --Map Sizing
 -------------------------
@@ -2190,8 +867,8 @@ local function SetMapWindowSize(newWidth, newHeight)
     local containerWidth = zo_floor(newWidth - horizontalPadding)
     local mapSize = zo_max(containerHeight, containerWidth) * g_mapPanAndZoom:GetCurrentCurvedZoom()
 
-    CONSTANTS.MAP_WIDTH = mapSize
-    CONSTANTS.MAP_HEIGHT = mapSize
+    ZO_MAP_CONSTANTS.MAP_WIDTH = mapSize
+    ZO_MAP_CONSTANTS.MAP_HEIGHT = mapSize
 
     local RAGGED_EDGE_OFFSET_X = 90
     local RAGGED_EDGE_OFFSET_Y = 95
@@ -2210,9 +887,9 @@ local function SetMapWindowSize(newWidth, newHeight)
     g_mapOverflowMaxY = g_mapOverflowY
 
     ZO_WorldMap:SetDimensions(newWidth, newHeight)
-    ZO_WorldMapContainer:SetDimensions(CONSTANTS.MAP_WIDTH, CONSTANTS.MAP_HEIGHT)
+    ZO_WorldMapContainer:SetDimensions(ZO_MAP_CONSTANTS.MAP_WIDTH, ZO_MAP_CONSTANTS.MAP_HEIGHT)
 
-    ZO_WorldMapContainerBackground:SetDimensions(CONSTANTS.MAP_WIDTH * 2, CONSTANTS.MAP_HEIGHT * 2)
+    ZO_WorldMapContainerBackground:SetDimensions(ZO_MAP_CONSTANTS.MAP_WIDTH * 2, ZO_MAP_CONSTANTS.MAP_HEIGHT * 2)
 
     ZO_WorldMapContainerRaggedEdge:SetAnchor(TOPLEFT, ZO_WorldMapContainer, TOPLEFT, -raggedEdgeScaledOffsetX, -raggedEdgeScaledOffsetY)
     ZO_WorldMapContainerRaggedEdge:SetAnchor(BOTTOMRIGHT, ZO_WorldMapContainer, BOTTOMRIGHT, raggedEdgeScaledOffsetX, raggedEdgeScaledOffsetY)
@@ -2222,12 +899,12 @@ local function SetMapWindowSize(newWidth, newHeight)
     ZO_WorldMapScroll:SetDimensions(containerWidth, containerHeight)
     ZO_WorldMapScroll:SetAnchor(TOPLEFT, ZO_WorldMap, TOPLEFT, LAYOUT.offsetX, LAYOUT.offsetY)
 
-    g_mapTileManager:LayoutTiles()
+    WORLD_MAP_TILES_MANAGER:LayoutTiles()
 
     g_mapScale = mapSize / (GuiRoot:GetHeight() - verticalPadding)
     g_mapLocationManager:SetFontScale(g_mapScale)
 
-    UpdateMovingPins()
+    g_mapPinManager:UpdateMovingPins()
     local normalizedX, normalizedY = NormalizePreferredMousePositionToMap()
     g_mouseoverMapBlobManager:Update(normalizedX, normalizedY)
     g_mapPinManager:UpdatePinsForMapSizeChange()
@@ -2394,15 +1071,11 @@ end
 
 --Pan and Zoom State
 
-local ZO_MapPanAndZoom = ZO_Object:Subclass()
-local LERP_FACTOR = 0.07
+local ZO_MapPanAndZoom = ZO_InitializingObject:Subclass()
+ZO_MapPanAndZoom.LERP_FACTOR = 0.07
 ZO_MapPanAndZoom.WHEN_AVAILABLE_LIMIT = 5
-
-function ZO_MapPanAndZoom:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_MapPanAndZoom.MAX_OVER_ZOOM = 1.3
+ZO_MapPanAndZoom.NAVIGATE_IN_OR_OUT_NORMALIZED_ZOOM_ADJUSTMENT = 0.1
 
 function ZO_MapPanAndZoom:Initialize(zoomControl)
     self.control = zoomControl
@@ -2465,9 +1138,6 @@ function ZO_MapPanAndZoom:SetTargetNormalizedZoom(normalizedZoom)
         self:RefreshZoomButtonsEnabled()
     end
 end
-
-ZO_MapPanAndZoom.MAX_OVER_ZOOM = 1.3
-ZO_MapPanAndZoom.NAVIGATE_IN_OR_OUT_NORMALIZED_ZOOM_ADJUSTMENT = 0.1
 
 function ZO_MapPanAndZoom:ComputeMinZoom()
     return 1
@@ -2823,7 +1493,7 @@ end
 function ZO_MapPanAndZoom:JumpToPinWhenAvailable(findPinFunction)
     local pin = findPinFunction()
     if pin then
-        g_mapPanAndZoom:JumpToPin(pin)
+        self:JumpToPin(pin)
     else
         self.jumpWhenAvailableFindPinFunction = findPinFunction
         self.jumpWhenAvailableExpiresAt = GetFrameTimeSeconds() + ZO_MapPanAndZoom.WHEN_AVAILABLE_LIMIT
@@ -2850,7 +1520,7 @@ function ZO_MapPanAndZoom:Update(currentTime)
             self:ClearTargetNormalizedZoom()
             self:ClearLockPoint()
         else
-            self:SetCurrentNormalizedZoomInternal(zo_deltaNormalizedLerp(self.currentNormalizedZoom, self.targetNormalizedZoom, LERP_FACTOR))
+            self:SetCurrentNormalizedZoomInternal(zo_deltaNormalizedLerp(self.currentNormalizedZoom, self.targetNormalizedZoom, ZO_MapPanAndZoom.LERP_FACTOR))
         end
 
         local ratio = self:GetCurrentCurvedZoom() / self:ComputeCurvedZoom(oldNormalizedZoom)
@@ -2878,7 +1548,7 @@ function ZO_MapPanAndZoom:Update(currentTime)
 
         ZO_WorldMapContainer:SetAnchor(CENTER, nil, CENTER, nextOffsetX, nextOffsetY)
     elseif self:HasTargetOffset() then
-        local amount = g_dragging and 1.0 or LERP_FACTOR
+        local amount = g_dragging and 1.0 or ZO_MapPanAndZoom.LERP_FACTOR
         self.reachedTargetOffset = true
 
         if self.targetOffsetX then
@@ -2947,13 +1617,7 @@ function ZO_MapPanAndZoom:OnWorldMapShowing()
 end
 
 local g_gamepadMap
-local GamepadMap = ZO_Object:Subclass()
-
-function GamepadMap:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+local GamepadMap = ZO_InitializingObject:Subclass()
 
 function GamepadMap:Initialize()
     self.GAMEPAD_MAP_MOVE_SCALE = 15
@@ -3128,7 +1792,7 @@ function ZO_WorldMapZoom_OnMouseWheel(delta)
 end
 
 function ZO_WorldMapZoom_OnInitialized(self)
-    g_stickyPin = WorldMapStickyPin:New()
+    g_stickyPin = ZO_WorldMapStickyPin:New()
     g_mapPanAndZoom = ZO_MapPanAndZoom:New(self)
     g_gamepadMap = GamepadMap:New()
 end
@@ -3168,7 +1832,7 @@ do
 
             --if we're resizing the map, we update this continuously
             if not g_resizingMap then
-                UpdateMovingPins()
+                g_mapPinManager:UpdateMovingPins()
             end
         end
 
@@ -3182,7 +1846,7 @@ do
                 SetMapWindowSize(windowWidth, windowHeight)
             end
 
-            UpdateMovingPins()
+            g_mapPinManager:UpdateMovingPins()
         end
 
         g_mapPanAndZoom:Update(currentTimeS)
@@ -3408,80 +2072,6 @@ do
     end
 end
 
-local function RefreshObjectives()
-    g_mapPinManager:RemovePins("objective")
-    ZO_ClearNumericallyIndexedTable(g_objectiveMovingPins)
-
-    local mapFilterType = GetMapFilterType()
-    if mapFilterType ~= MAP_FILTER_TYPE_AVA_CYRODIIL and mapFilterType ~= MAP_FILTER_TYPE_BATTLEGROUND then
-        return
-    end
-
-    local numObjectives = GetNumObjectives()
-
-    local worldMapAvAPinsShown = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_AVA_OBJECTIVES)
-
-    for i = 1, numObjectives do
-        local keepId, objectiveId, bgContext = GetObjectiveIdsForIndex(i)
-        local isEnabled = IsObjectiveEnabled(keepId, objectiveId, bgContext)
-
-        if isEnabled then
-            local isVisible = IsObjectiveObjectVisible(keepId, objectiveId, bgContext)
-            if ZO_WorldMap_IsObjectiveShown(keepId, objectiveId, bgContext) and IsMapShowingBattlegroundContext(bgContext) then
-                --spawn locations
-                local spawnPinType, spawnX, spawnY = GetObjectiveSpawnPinInfo(keepId, objectiveId, bgContext)
-                if spawnPinType ~= MAP_PIN_TYPE_INVALID then
-                    if worldMapAvAPinsShown then
-                        if ZO_WorldMap_IsNormalizedPointInsideMapBounds(spawnX, spawnY) then
-                            local spawnTag = ZO_MapPin.CreateObjectivePinTag(keepId, objectiveId, bgContext)
-                            g_mapPinManager:CreatePin(spawnPinType, spawnTag, spawnX, spawnY)
-                        end
-                    end
-                end
-
-                --return locations
-                local returnPinType, returnX, returnY, returnContinuousUpdate = GetObjectiveReturnPinInfo(keepId, objectiveId, bgContext)
-                if returnPinType ~= MAP_PIN_TYPE_INVALID then
-                    local returnTag = ZO_MapPin.CreateObjectivePinTag(keepId, objectiveId, bgContext)
-                    local returnPin = g_mapPinManager:CreatePin(returnPinType, returnTag, returnX, returnY)
-
-                    if returnContinuousUpdate then
-                        table.insert(g_objectiveMovingPins, returnPin)
-                    end
-                end
-
-                -- current locations
-                local pinType, currentX, currentY, continuousUpdate = GetObjectivePinInfo(keepId, objectiveId, bgContext)
-                if isVisible and pinType ~= MAP_PIN_TYPE_INVALID then
-                    if worldMapAvAPinsShown then
-                        if ZO_WorldMap_IsNormalizedPointInsideMapBounds(currentX, currentY) then
-                            local objectiveTag = ZO_MapPin.CreateObjectivePinTag(keepId, objectiveId, bgContext)
-                            local objectivePin = g_mapPinManager:CreatePin(pinType, objectiveTag, currentX, currentY)
-
-                            if objectivePin then
-                                local auraPinType = GetObjectiveAuraPinInfo(keepId, objectiveId, bgContext)
-                                local auraPin
-                                if auraPinType ~= MAP_PIN_TYPE_INVALID then
-                                    local auraTag = ZO_MapPin.CreateObjectivePinTag(keepId, objectiveId, bgContext)
-                                    auraPin = g_mapPinManager:CreatePin(auraPinType, auraTag, currentX, currentY)
-                                    objectivePin:AddScaleChild(auraPin)
-                                end
-
-                                if continuousUpdate then
-                                    table.insert(g_objectiveMovingPins, objectivePin)
-                                    if auraPin then
-                                        table.insert(g_objectiveMovingPins, auraPin)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-end
-
 function ZO_WorldMap_RefreshKillLocations()
     g_mapPinManager:RemovePins("killLocation")
     RemoveMapPinsInRange(MAP_PIN_TYPE_TRI_BATTLE_SMALL, MAP_PIN_TYPE_EBONHEART_VS_DAGGERFALL_LARGE)
@@ -3689,55 +2279,6 @@ function ZO_WorldMap_RefreshAccessibleAvAGraveyards()
     end
 end
 
-function ZO_WorldMap_RefreshGroupPins()
-    g_mapPinManager:RemovePins("group")
-    ZO_ClearTable(g_activeGroupPins)
-
-    if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_GROUP_MEMBERS) and not IsShowingCosmicMap() then
-        local isInDungeon = GetMapContentType() == MAP_CONTENT_DUNGEON
-        local isInHouse = GetCurrentZoneHouseId() ~= 0
-        for i = 1, GROUP_SIZE_MAX do
-            local groupTag = ZO_Group_GetUnitTagForGroupIndex(i)
-            local isBreadcrumbed = IsUnitWorldMapPositionBreadcrumbed(groupTag)
-            if DoesUnitExist(groupTag) and not AreUnitsEqual("player", groupTag) and IsUnitOnline(groupTag) then
-                local isGroupMemberHiddenByInstance = false
-                -- If we're in an instance and it has its own map, it's going to be a dungeon map or house. Don't show on the map if we're on different instances/layers
-                -- If it doesn't have its own map, we're okay to show the group member regardless of instance
-                if DoesCurrentMapMatchMapForPlayerLocation() and IsGroupMemberInSameWorldAsPlayer(groupTag) and (isInDungeon or isInHouse) then
-                    if not IsGroupMemberInSameInstanceAsPlayer(groupTag) then
-                        -- We're in the same world as the group member, but a different instance
-                        isGroupMemberHiddenByInstance = true
-                    elseif not IsGroupMemberInSameLayerAsPlayer(groupTag) then
-                        -- We're in the same instance as the group member, but a different layer
-                        isGroupMemberHiddenByInstance = not isBreadcrumbed 
-                    end
-                end
-
-                if not isGroupMemberHiddenByInstance then
-                    local x, y, _, isInCurrentMap = GetMapPlayerPosition(groupTag)
-                    if isInCurrentMap then
-                        local isLeader = IsUnitGroupLeader(groupTag)
-                        local tagData = groupTag
-                        if isBreadcrumbed then
-                            tagData =
-                            {
-                                groupTag = groupTag,
-                                isBreadcrumb = true
-                            }
-                        end
-
-                        local groupPin = g_mapPinManager:CreatePin(isLeader and MAP_PIN_TYPE_GROUP_LEADER or MAP_PIN_TYPE_GROUP, tagData)
-                        if groupPin then
-                            g_activeGroupPins[groupTag] = groupPin
-                            groupPin:SetLocation(x, y)
-                        end
-                    end
-                end
-            end
-        end
-    end
-end
-
 -- currently keeping this function around for backward compatibility
 function ZO_WorldMap_GetUnderAttackPinForKeepPin(keepPinType)
     return ZO_MapPin.GetUnderAttackPinForKeepPin(keepPinType)
@@ -3829,7 +2370,7 @@ function ZO_WorldMap_UpdateMap()
     PrepareBlobManagersForZoneUpdate()
 
     -- Set up base map
-    g_mapTileManager:UpdateTextures()
+    WORLD_MAP_TILES_MANAGER:UpdateTextures()
 
     ZO_WorldMap.zoneName = GetMapName()
 
@@ -4234,28 +2775,8 @@ function ZO_WorldMap_ShowAvAKeepRecall()
     ZO_WorldMap_ShowWorldMap()
 end
 
-function ZO_WorldMap_AddCustomPin(pinType, pinTypeAddCallback, pinTypeOnResizeCallback, pinLayoutData, pinTooltipCreator)
-    g_mapPinManager:AddCustomPin(pinType, pinTypeAddCallback, pinTypeOnResizeCallback, pinLayoutData, pinTooltipCreator)
-end
-
-function ZO_WorldMap_SetCustomPinEnabled(pinType, enabled)
-    g_mapPinManager:SetCustomPinEnabled(pinType, enabled)
-end
-
-function ZO_WorldMap_IsCustomPinEnabled(pinType)
-    return g_mapPinManager:IsCustomPinEnabled(pinType)
-end
-
-function ZO_WorldMap_ResetCustomPinsOfType(pinTypeString)
-    g_mapPinManager:RemovePins(pinTypeString)
-end
-
-function ZO_WorldMap_RefreshCustomPinsOfType(pinType)
-    g_mapPinManager:RefreshCustomPins(pinType)
-end
-
 function ZO_WorldMap_GetMapDimensions()
-    return CONSTANTS.MAP_WIDTH, CONSTANTS.MAP_HEIGHT
+    return ZO_MAP_CONSTANTS.MAP_WIDTH, ZO_MAP_CONSTANTS.MAP_HEIGHT
 end
 
 function ZO_WorldMap_SetCustomZoomLevels(minZoom, maxZoom)
@@ -4268,15 +2789,6 @@ end
 
 function ZO_WorldMap_GetBattlegroundQueryType()
     return g_queryType
-end
-
-function ZO_WorldMap_SetMapByIndex(mapIndex)
-    if WORLD_MAP_MANAGER:IsMapChangingAllowed() then
-        if SetMapToMapListIndex(mapIndex) == SET_MAP_RESULT_MAP_CHANGED then
-            g_playerChoseCurrentMap = true
-            CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
-        end
-    end
 end
 
 function ZO_WorldMap_PanToWayshrine(nodeIndex)
@@ -4324,17 +2836,11 @@ function ZO_WorldMap_ShowQuestOnMap(questIndex)
     --first try to set the map to one of the quest's step pins
     local result = SET_MAP_RESULT_FAILED
     for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(questIndex) do
-        --Loop through the conditions, if there are any. Prefer non-completed conditions to completed ones.
-        local requireNotCompleted = true
-        local conditionsExhausted = false
-        while result == SET_MAP_RESULT_FAILED and not conditionsExhausted do 
+        --Loop through the available steps and their conditions, if there are any, looking for non-complete conditions as the priority.
+        if result == SET_MAP_RESULT_FAILED then
             for conditionIndex = 1, GetJournalQuestNumConditions(questIndex, stepIndex) do
-                local tryCondition = true
-                if requireNotCompleted then
-                    local complete = select(4, GetJournalQuestConditionValues(questIndex, stepIndex, conditionIndex))
-                    tryCondition = not complete
-                end
-                if tryCondition then
+                local complete = select(4, GetJournalQuestConditionValues(questIndex, stepIndex, conditionIndex))
+                if not complete then
                     result = SetMapToQuestCondition(questIndex, stepIndex, conditionIndex)
                     if result ~= SET_MAP_RESULT_FAILED then
                         -- only set questIndex so all the steps and conditions for this quest shown on the map get pings
@@ -4345,11 +2851,6 @@ function ZO_WorldMap_ShowQuestOnMap(questIndex)
                         break
                     end
                 end
-            end
-            if requireNotCompleted then
-                requireNotCompleted = false
-            else
-                conditionsExhausted = true
             end
         end
 
@@ -4366,6 +2867,30 @@ function ZO_WorldMap_ShowQuestOnMap(questIndex)
                 {
                     questIndex = questIndex,
                 }
+                break
+            end
+        end
+    end
+
+    -- No non-complete conditions were found
+    if result == SET_MAP_RESULT_FAILED then
+        for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(questIndex) do
+            --Loop through the available steps and their conditions, if there are any, looking for complete conditions if no non-complete conditions were found.
+            if result == SET_MAP_RESULT_FAILED then
+                for conditionIndex = 1, GetJournalQuestNumConditions(questIndex, stepIndex) do
+                    result = SetMapToQuestCondition(questIndex, stepIndex, conditionIndex)
+                    if result ~= SET_MAP_RESULT_FAILED then
+                        -- only set questIndex so all the steps and conditions for this quest shown on the map get pings
+                        g_questPingData =
+                        {
+                            questIndex = questIndex,
+                        }
+                        break
+                    end
+                end
+            end
+
+            if result ~= SET_MAP_RESULT_FAILED then
                 break
             end
         end
@@ -4454,8 +2979,7 @@ end
 
 function ZO_WorldMap_RemovePlayerWaypoint()
     RemovePlayerWaypoint()
-    g_keybindStrips.mouseover:DoMouseExitForPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) -- this should have been called by the mouseover update, but it's not getting called
-    g_keybindStrips.gamepad:DoMouseExitForPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) -- this should have been called by the mouseover update, but it's not getting called
+    WORLD_MAP_MANAGER:DoMouseExitForPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) -- this should have been called by the mouseover update, but it's not getting called
 end
 
 function ZO_WorldMap_GetPinManager()
@@ -4466,16 +2990,20 @@ function ZO_WorldMap_GetPanAndZoom()
     return g_mapPanAndZoom
 end
 
+function ZO_WorldMap_GetStickyPin()
+    return g_stickyPin
+end
+
+function ZO_WorldMap_GetMouseOverMapBlobManager()
+    return g_mouseoverMapBlobManager
+end
+
 function ZO_WorldMap_GetQuestPingData()
     return g_questPingData
 end
 
 function ZO_WorldMap_GetGamepadMap()
     return g_gamepadMap
-end
-
-function ZO_WorldMap_GetFoundTooltipMouseOverPins()
-    return foundTooltipMouseOverPins
 end
 
 --Initialization
@@ -4506,12 +3034,16 @@ do
 
         g_mapRefresh:AddRefreshGroup("objective",
         {
-            RefreshAll = RefreshObjectives,
+            RefreshAll = function()
+                g_mapPinManager:RefreshObjectives()
+            end,
         })
 
         g_mapRefresh:AddRefreshGroup("group",
         {
-            RefreshAll = ZO_WorldMap_RefreshGroupPins,
+            RefreshAll = function()
+                g_mapPinManager:RefreshGroupPins()
+            end,
         })
 
         g_mapRefresh:AddRefreshGroup("location",
@@ -4532,10 +3064,10 @@ do
     ---------------
     function ZO_WorldMap_Initialize(control)
         local worldMapContainer = control:GetNamedChild("Container")
-        g_mapLocationManager = ZO_MapLocations:New(worldMapContainer)
+        g_mapLocationManager = ZO_MapLocationPins_Manager:New(worldMapContainer)
         g_mouseoverMapBlobManager = ZO_MouseoverMapBlobManager:New(worldMapContainer)
-        g_mapTileManager = ZO_WorldMapTiles:New(worldMapContainer)
-        g_mapPinManager = ZO_WorldMapPins:New(worldMapContainer)
+        WORLD_MAP_TILES_MANAGER = ZO_WorldMapTiles_Manager:New(worldMapContainer)
+        g_mapPinManager = ZO_WorldMapPins_Manager:New(worldMapContainer)
         InitializeRefreshGroups()
 
         g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER, "player")
@@ -4664,7 +3196,7 @@ end
 function ZO_WorldMap_UpdateInteractKeybind_Gamepad()
     if IsInGamepadPreferredMode() then
         if not ZO_WorldMap_IsWorldMapInfoShowing() then
-            local pinDatas = ZO_WorldMap_GetPinHandlers(MOUSE_BUTTON_INDEX_LEFT)
+            local pinDatas = g_mapPinManager:GetPinHandlers(MOUSE_BUTTON_INDEX_LEFT)
 
             if #pinDatas == 0 then
                 -- There are no actionable pins under the cursor.
@@ -4676,7 +3208,7 @@ function ZO_WorldMap_UpdateInteractKeybind_Gamepad()
                 -- We still want to display the invalid spawn location text, so use the first invalid handler
                 -- to access the buttonText callback
                 local firstHandler = pinDatas[1].handler
-                RemoveInvalidSpawnLocations(pinDatas)
+                g_mapPinManager:RemoveInvalidSpawnLocations(pinDatas)
 
                 -- Use the first valid handler if one exists
                 if #pinDatas > 0 then
@@ -4745,14 +3277,16 @@ function ZO_WorldMap_HideAllTooltips()
     CALLBACK_MANAGER:FireCallbacks("OnHideWorldMapTooltip")
 end
 
-function ZO_WorldMap_ShowGamepadTooltip(resetScroll)
+function ZO_WorldMap_ShowGamepadTooltip(resetScroll, suppressCallback)
     if not GetPlatformInformationTooltip() then -- Tooltips aren't active
         return
     end
 
     local tooltipControl = ShowGamepadTooltip(resetScroll)
 
-    CALLBACK_MANAGER:FireCallbacks("OnShowWorldMapTooltip")
+    if not suppressCallback then
+        CALLBACK_MANAGER:FireCallbacks("OnShowWorldMapTooltip")
+    end
 
     return tooltipControl
 end
@@ -4797,10 +3331,6 @@ function ZO_WorldMap_HideWorldMap()
     elseif SCENE_MANAGER:IsShowing("gamepad_worldMap") then
         SCENE_MANAGER:Hide("gamepad_worldMap")
     end
-end
-
-function ZO_WorldMap_SetupGamepadChoiceDialog(mouseOverPinHandlers)
-    ZO_Dialogs_ShowGamepadDialog("WORLD_MAP_CHOICE_GAMEPAD", { mouseOverPinHandlers = mouseOverPinHandlers })
 end
 
 --[[
@@ -5096,14 +3626,14 @@ function ZO_WorldMapManager:Initialize(control)
     WORLD_MAP_FRAGMENT = ZO_FadeSceneFragment:New(control)
     WORLD_MAP_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
-            UpdateMovingPins()
+            g_mapPinManager:UpdateMovingPins()
             g_dataRegistration:Refresh()
             g_mapPanAndZoom:OnWorldMapShowing()
             self:OnShowing()
             self:TryTriggeringTutorials()
         elseif newState == SCENE_FRAGMENT_HIDING then
             HideAllTooltips()
-            ResetMouseOverPins()
+            g_mapPinManager:ResetMouseOverPins()
             self:OnHiding()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             g_dataRegistration:Refresh()
@@ -5326,7 +3856,7 @@ do
         end,
 
         [EVENT_GROUP_MEMBER_SUBZONE_CHANGED] = function()
-            ZO_WorldMap_RefreshGroupPins()
+            g_mapPinManager:RefreshGroupPins()
         end,
     }
 
@@ -5369,8 +3899,6 @@ do
                     self.control:RegisterForEvent(event, handler)
                 end
 
-                FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", function(...) self:OnAssistStateChanged(...) end)
-
                 ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
 
                 CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function(wasNavigateIn)
@@ -5381,7 +3909,7 @@ do
                     local mouseoverDescriptionControl = self.control:GetNamedChild("MouseOverDescription")
                     mouseoverDescriptionControl:SetText("")
                 
-                    UpdateMovingPins()
+                    g_mapPinManager:UpdateMovingPins()
                     UpdateMapCampaign()
                     ZO_WorldMap_UpdateMap()
                     g_mapRefresh:RefreshAll("group")
@@ -5584,16 +4112,6 @@ function ZO_WorldMapManager:OnWorldMapChanged()
     self:HidePinPointerBox()
 end
 
-function ZO_WorldMapManager:OnAssistStateChanged(unassistedData, assistedData)
-    if unassistedData then
-        g_mapPinManager:SetQuestPinsAssisted(unassistedData:GetJournalIndex(), false)
-    end
-    if assistedData then
-        g_mapPinManager:SetQuestPinsAssisted(assistedData:GetJournalIndex(), true)
-    end
-    ZO_WorldMap_InvalidateTooltip()
-end
-
 function ZO_WorldMapManager:OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
     if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
         ZO_WorldMap_RefreshAllPOIs()
@@ -5755,13 +4273,13 @@ function ZO_WorldMapManager:InitializeKeybinds()
                 if WORLD_MAP_MANAGER:IsAnimatingDigSites() then
                     return true
                 end
-                return ZO_WorldMap_WouldPinHandleClick(nil, MOUSE_BUTTON_INDEX_LEFT) and not self:IsAutoNavigating()
+                return g_mapPinManager:WouldPinHandleClick(nil, MOUSE_BUTTON_INDEX_LEFT) and not self:IsAutoNavigating()
             end,
             callback = function()
                 if WORLD_MAP_MANAGER:IsAnimatingDigSites() then
                     EndDigSiteReveal()
                 else
-                    ZO_WorldMap_HandlePinClicked(nil, MOUSE_BUTTON_INDEX_LEFT)
+                    g_mapPinManager:HandlePinClicked(nil, MOUSE_BUTTON_INDEX_LEFT)
                 end
             end,
         },
@@ -5921,6 +4439,24 @@ function ZO_WorldMapManager:InitializeKeybinds()
     }
 
     g_keybindStrips.mouseover = ZO_MapMouseoverKeybindStrip:New(self.control, mouseoverDescriptor)
+end
+
+function ZO_WorldMapManager:SetMapByIndex(mapIndex)
+    if self:IsMapChangingAllowed() then
+        if SetMapToMapListIndex(mapIndex) == SET_MAP_RESULT_MAP_CHANGED then
+            g_playerChoseCurrentMap = true
+            CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
+        end
+    end
+end
+
+function ZO_WorldMapManager:SetMapById(mapId)
+    if self:IsMapChangingAllowed() then
+        if SetMapToMapId(mapId) == SET_MAP_RESULT_MAP_CHANGED then
+            g_playerChoseCurrentMap = true
+            CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
+        end
+    end
 end
 
 function ZO_WorldMapManager:ChangeFloor(direction)
@@ -6125,7 +4661,7 @@ do
                 local normalizedX, normalizedY, normalizedRadius, isShownInCurrentMap = GetNormalizedPositionForZoneStoryActivityId(zoneId, zoneCompletionType, activityId)
                 if isShownInCurrentMap then
                     if zoneCompletionType == ZONE_COMPLETION_TYPE_PRIORITY_QUESTS then
-                        if not ZO_WorldMap_DoesMapHideQuestPins() then
+                        if not ZO_WorldMapPins_Manager.DoesCurrentMapHideQuestPins() then
                             local questOfferTag = ZO_MapPin.CreateZoneStoryTag(zoneId, zoneCompletionType, activityId)
                             questOfferTag.isBreadcrumb = false -- TODO: Zone Stories: Hook up quest offer breadcrumbing
                             g_mapPinManager:CreatePin(MAP_PIN_TYPE_TRACKED_QUEST_OFFER_ZONE_STORY, questOfferTag, normalizedX, normalizedY, normalizedRadius)
@@ -6338,7 +4874,7 @@ function ZO_WorldMapManager:RefreshAllAntiquityDigSites()
     g_mapPinManager:RemovePins("antiquityDigSite")
     self:ClearDigSitePings()
 
-    if ZO_WorldMap_DoesMapHideQuestPins() or not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_DIG_SITES) then
+    if ZO_WorldMapPins_Manager.DoesCurrentMapHideQuestPins() or not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_DIG_SITES) then
         return false
     end
 
@@ -6690,6 +5226,16 @@ function ZO_WorldMapManager:AreStickyPinsEnabledForPinGroup(pinGroup)
         end
     end
     return true
+end
+
+function ZO_WorldMapManager:DoMouseEnterForPinType(pinType)
+    g_keybindStrips.mouseover:DoMouseEnterForPinType(pinType)
+    g_keybindStrips.gamepad:DoMouseEnterForPinType(pinType)
+end
+
+function ZO_WorldMapManager:DoMouseExitForPinType(pinType)
+    g_keybindStrips.mouseover:DoMouseExitForPinType(pinType)
+    g_keybindStrips.gamepad:DoMouseExitForPinType(pinType)
 end
 
 --

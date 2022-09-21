@@ -96,9 +96,9 @@ end
 function ZO_Stats_Common:UpdateTitleDropdownSelection(dropdown)
     local currentTitleIndex = GetCurrentTitleIndex()
     if currentTitleIndex then
-        dropdown:SetSelectedItemText(zo_strformat(GetTitle(currentTitleIndex), GetRawUnitName("player")))
+        dropdown:SelectItemByIndex(currentTitleIndex + 1, ZO_COMBOBOX_SUPPRESS_UPDATE)
     else
-        dropdown:SetSelectedItemText(GetString(SI_STATS_NO_TITLE))
+        dropdown:SelectItemByIndex(1, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
 end
 

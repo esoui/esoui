@@ -53,6 +53,7 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:Initialize(control)
             timeRangeHeaderText = GetString(SI_GUILD_FINDER_CORE_HOURS_LABEL),
             gridPaddingX = 20,
             gridPaddingY = 10,
+            narrationText = ZO_GetNarrationTextForGridListTile,
         },
         activityCheckbox =
         {
@@ -64,6 +65,10 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:Initialize(control)
             gridPaddingX = 20,
             gridPaddingY = 0,
             headerText = GetString(SI_GAMEPAD_GUILD_RECRUITMENT_ADDITIONAL_ACTIVITIES_HEADER),
+            narrationText = function(entryData)
+                local isChecked = entryData.isChecked()
+                return ZO_FormatToggleNarrationText(entryData.text, isChecked, entryData.gridHeaderName)
+            end,
         },
         headlineEditBox =
         {
@@ -72,6 +77,7 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:Initialize(control)
             dimensionsY = ZO_GUILD_RECRUITMENT_EDITBOX_GAMEPAD_HEADLINE_HEIGHT,
             headerText = GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_HEADER_MESSAGE),
             gridPaddingY = 10,
+            narrationText = ZO_GetNarrationTextForGridListTile,
         },
         descriptionEditBox =
         {
@@ -80,6 +86,7 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:Initialize(control)
             dimensionsY = ZO_GUILD_RECRUITMENT_EDITBOX_GAMEPAD_DESCRIPTION_HEIGHT,
             headerText = GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_RECRUITMENT_MESSAGE),
             gridPaddingY = 10,
+            narrationText = ZO_GetNarrationTextForGridListTile,
         },
         roleSelector =
         {
@@ -90,6 +97,7 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:Initialize(control)
             dimensionsY = ZO_GUILD_RECRUITMENT_ROLE_SELECTOR_GAMEPAD_HEIGHT,
             endDimensionsX = ZO_GUILD_RECRUITMENT_ROLE_END_GAMEPAD_WIDTH,
             gridPaddingY = 0,
+            narrationText = ZO_GetNarrationTextForGridListTile,
         },
         minimumCP =
         {
@@ -98,6 +106,7 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:Initialize(control)
             dimensionsX = ZO_GUILD_RECRUITMENT_NUMERIC_EDITBOX_GAMEPAD_WIDTH,
             dimensionsY = ZO_GUILD_RECRUITMENT_NUMERIC_EDITBOX_GAMEPAD_ENTRY_HEIGHT,
             gridPaddingY = 10,
+            narrationText = ZO_GetNarrationTextForGridListTile,
         },
     }
 
@@ -222,9 +231,13 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:InitializeKeybinds()
                     if selectedData.dataEntry.typeId == ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_ENTRY_TEMPLATE.CHECKBOX or
                        selectedData.dataEntry.typeId == ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_ENTRY_TEMPLATE.CHECKBOX_END then
                         selectedData.dataEntry.control.object:OnCheckboxToggle()
+                        --Re-narrate the selection when a checkbox is toggled
+                        SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.gridList)
                     elseif selectedData.dataEntry.typeId == ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_ENTRY_TEMPLATE.ROLE_SELECTOR or
                            selectedData.dataEntry.typeId == ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_ENTRY_TEMPLATE.ROLE_SELECTOR_END then
                         selectedData.dataEntry.control.object:OnRoleToggle()
+                        --Re-narrate the selection when a role is toggled
+                        SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.gridList)
                     else
                         self.currentGridListSelectedData = selectedData
                         self.gridList:Deactivate()

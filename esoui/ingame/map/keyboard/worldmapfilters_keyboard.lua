@@ -2,11 +2,6 @@
 
 local WorldMapFilterPanel = ZO_WorldMapFilterPanel_Shared:Subclass()
 
-function WorldMapFilterPanel:New(...)
-    local object = ZO_WorldMapFilterPanel_Shared.New(self, ...)
-    return object
-end
-
 function WorldMapFilterPanel:Initialize(control, mapFilterType, savedVars)
     ZO_WorldMapFilterPanel_Shared.Initialize(self, control, mapFilterType, savedVars)
     self:BuildControls()

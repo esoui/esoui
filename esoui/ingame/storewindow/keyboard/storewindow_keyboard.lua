@@ -44,12 +44,6 @@ function ZO_StoreManager:Initialize(control)
                                                         if self.windowMode == ZO_STORE_WINDOW_MODE_STABLE then
                                                             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                                                         end
-
-                                                        if not IsInGamepadPreferredMode() then
-                                                            TEXT_SEARCH_MANAGER:DeactivateTextSearch("storeTextSearch")
-                                                            local REMOVE_CONTEXT = nil
-                                                            PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
-                                                        end
                                                     end
                                                 end)
 

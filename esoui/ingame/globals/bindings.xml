@@ -281,10 +281,52 @@
 
         <Category name="SI_KEYBINDINGS_CATEGORY_TARGETING">
             <Action name="CYCLE_PREFERRED_ENEMY_TARGET">
+                <Down>
+                    TARGET_MARKERS:StartInteraction()
+                </Down>
+                <Up>
+                    if not TARGET_MARKERS:StopInteraction() then
+                        CycleGameCameraPreferredEnemyTarget()
+                    end
+                </Up>
+            </Action>
+
+            <Action name="GAMEPAD_CYCLE_PREFERRED_ENEMY_TARGET">
                 <Down>CycleGameCameraPreferredEnemyTarget()</Down>
             </Action>
+            
             <Action name="CLEAR_PREFERRED_ENEMY_TARGET">
                 <Down>ClearGameCameraPreferredTarget()</Down>
+            </Action>
+            
+            <Action name="GAMEPAD_TARGET_MARKER_INTERACT">
+                <Down>TARGET_MARKERS:StartInteraction()</Down>
+                <Up>TARGET_MARKERS:StopInteraction()</Up>
+            </Action>
+
+            <Action name="ASSIGN_TARGET_MARKER_ONE">
+                <Down>AssignTargetMarkerToReticleTarget(1)</Down>
+            </Action>
+            <Action name="ASSIGN_TARGET_MARKER_TWO">
+                <Down>AssignTargetMarkerToReticleTarget(2)</Down>
+            </Action>
+            <Action name="ASSIGN_TARGET_MARKER_THREE">
+                <Down>AssignTargetMarkerToReticleTarget(3)</Down>
+            </Action>
+            <Action name="ASSIGN_TARGET_MARKER_FOUR">
+                <Down>AssignTargetMarkerToReticleTarget(4)</Down>
+            </Action>
+            <Action name="ASSIGN_TARGET_MARKER_FIVE">
+                <Down>AssignTargetMarkerToReticleTarget(5)</Down>
+            </Action>
+            <Action name="ASSIGN_TARGET_MARKER_SIX">
+                <Down>AssignTargetMarkerToReticleTarget(6)</Down>
+            </Action>
+            <Action name="ASSIGN_TARGET_MARKER_SEVEN">
+                <Down>AssignTargetMarkerToReticleTarget(7)</Down>
+            </Action>
+            <Action name="ASSIGN_TARGET_MARKER_EIGHT">
+                <Down>AssignTargetMarkerToReticleTarget(8)</Down>
             </Action>
         </Category>
 
@@ -1271,6 +1313,11 @@
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
+
+			<Action name="HOUSING_EDITOR_CYCLE_TARGET_ACTION">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+			</Action>
 
             <Action name="HOUSING_EDITOR_TOGGLE_NODE_SPEED">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>

@@ -98,10 +98,17 @@ function ZO_TributePileViewer_Gamepad:InitializeKeybindStripDescriptors()
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
-            keybind = "UI_SHORTCUT_EXIT",
+            keybind = "UI_SHORTCUT_NEGATIVE",
             name = function()
                 return GetString(SI_GAMEPAD_BACK_OPTION)
             end,
+            callback = function()
+                ZO_TRIBUTE_PILE_VIEWER_MANAGER:SetViewingPile(nil)
+            end,
+        },
+        {
+            keybind = "UI_SHORTCUT_EXIT",
+            ethereal = true,
             callback = function()
                 ZO_TRIBUTE_PILE_VIEWER_MANAGER:SetViewingPile(nil)
             end,

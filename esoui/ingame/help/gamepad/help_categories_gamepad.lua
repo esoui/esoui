@@ -3,9 +3,9 @@ ZO_HelpTutorialsCategories_Gamepad = ZO_HelpTutorialsGamepad:Subclass()
 function ZO_HelpTutorialsCategories_Gamepad:Initialize(control)
     ZO_HelpTutorialsGamepad.Initialize(self, control)
 
-    local helpTutorialsFramgent = ZO_FadeSceneFragment:New(control)
+    local helpTutorialsFragment = ZO_FadeSceneFragment:New(control)
     HELP_TUTORIAL_CATEGORIES_SCENE_GAMEPAD = ZO_Scene:New("helpTutorialsCategoriesGamepad", SCENE_MANAGER)
-    HELP_TUTORIAL_CATEGORIES_SCENE_GAMEPAD:AddFragment(helpTutorialsFramgent)
+    HELP_TUTORIAL_CATEGORIES_SCENE_GAMEPAD:AddFragment(helpTutorialsFragment)
     self:SetScene(HELP_TUTORIAL_CATEGORIES_SCENE_GAMEPAD)
 end
 

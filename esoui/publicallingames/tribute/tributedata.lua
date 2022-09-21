@@ -1,5 +1,4 @@
-
-function ZO_GetTributeLockReasonTooltipString(lockTexture)
+function ZO_GetTributeLockReasonTooltipString()
     local collectibleId = GetTributeRequiredCollectibleId()
     local questId = GetTributeRequiredQuestId()
     local isCollectibleLocked = collectibleId ~= 0 and not IsCollectibleUnlocked(collectibleId)
@@ -13,7 +12,7 @@ function ZO_GetTributeLockReasonTooltipString(lockTexture)
         local zoneName = GetZoneNameById(TRIBUTE_CHAPTER_ZONE_ID)
         local colorizedZoneName = ZO_SELECTED_TEXT:Colorize(zoneName)
 
-        local questLockedText = zo_strformat(SI_TRIBUTE_TOOLTIP_UNAVAILABLE_REQUIREMENT, lockTexture, colorizedFeatureName, colorizedSubzoneName, colorizedZoneName)
+        local questLockedText = zo_strformat(SI_TRIBUTE_TOOLTIP_UNAVAILABLE_REQUIREMENT, colorizedFeatureName, colorizedSubzoneName, colorizedZoneName)
 
         if isCollectibleLocked then
             local collectibleName = GetCollectibleName(collectibleId)
@@ -54,26 +53,6 @@ ZO_TRIBUTE_ICONS_GAMEPAD =
     normal = "EsoUI/Art/Tribute/gamepad/gp_tribute_tabIcon_tribute.dds",
     disabled = "EsoUI/Art/Tribute/gamepad/gp_tribute_tabIcon_tribute_disabled.dds",
 }
-
-----------------------------------
--- Pooled Object Abstract Class --
-----------------------------------
-
--- This is depended on by TributeCard.lua and ZO_TributePatronStall.lua. TributeCard.lua is depended on by TributePoolManager.lua.
--- So this needs to be loaded before any of those files.
-
-ZO_Tribute_PooledObject = ZO_InitializingObject:Subclass()
-
-ZO_Tribute_PooledObject.Setup = ZO_Tribute_PooledObject:MUST_IMPLEMENT()
-
-function ZO_Tribute_PooledObject:SetPoolAndKey(pool, poolKey)
-    self.pool = pool
-    self.poolKey = poolKey
-end
-
-function ZO_Tribute_PooledObject:ReleaseObject()
-    self.pool:ReleaseObject(self.poolKey)
-end
 
 ------------------------------------------
 -- Tribute Patron Card Progression Data --
@@ -545,7 +524,7 @@ end
 ZO_TributeCardData = ZO_InitializingObject:Subclass()
 
 function ZO_TributeCardData:Initialize(patronDefId, cardDefId)
-    self.numMechanicsByTrigger = {}
+    self.numMechanicsByActivationSource = {}
     if cardDefId and patronDefId then
         self:Setup(patronDefId, cardDefId)
     end
@@ -555,10 +534,10 @@ function ZO_TributeCardData:Setup(patronDefId, cardDefId)
     self.cardDefId = cardDefId
     self.patronDefId = patronDefId
 
-    ZO_ClearTable(self.numMechanicsByTrigger)
+    ZO_ClearTable(self.numMechanicsByActivationSource)
 
-    for trigger = TRIBUTE_MECHANIC_TRIGGER_ITERATION_BEGIN, TRIBUTE_MECHANIC_TRIGGER_ITERATION_END do
-        self.numMechanicsByTrigger[trigger] = GetNumTributeCardMechanics(self.cardDefId, trigger)
+    for activationSource = TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ITERATION_BEGIN, TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ITERATION_END do
+        self.numMechanicsByActivationSource[activationSource] = GetNumTributeCardMechanics(self.cardDefId, activationSource)
     end
 end
 
@@ -607,6 +586,10 @@ function ZO_TributeCardData:DoesChooseOneMechanic()
     return DoesTributeCardChooseOneMechanic(self.cardDefId)
 end
 
+function ZO_TributeCardData:DoesHaveTriggerMechanic()
+    return DoesTributeCardHaveTriggerMechanic(self.cardDefId)
+end
+
 function ZO_TributeCardData:GetDefeatCost()
     return GetTributeCardDefeatCost(self.cardDefId)
 end
@@ -625,16 +608,16 @@ function ZO_TributeCardData:GetColorizedFormattedName()
     return qualityColor:Colorize(self:GetFormattedName())
 end
 
-function ZO_TributeCardData:GetNumMechanics(trigger)
-    return self.numMechanicsByTrigger[trigger] or 0
+function ZO_TributeCardData:GetNumMechanics(activationSource)
+    return self.numMechanicsByActivationSource[activationSource] or 0
 end
 
-function ZO_TributeCardData:GetMechanicInfo(trigger, mechanicIndex)
-    return GetTributeCardMechanicInfo(self.cardDefId, trigger, mechanicIndex)
+function ZO_TributeCardData:GetMechanicInfo(activationSource, mechanicIndex)
+    return GetTributeCardMechanicInfo(self.cardDefId, activationSource, mechanicIndex)
 end
 
-function ZO_TributeCardData:GetMechanicText(trigger, mechanicIndex, prependIcon)
-    return GetTributeCardMechanicText(self.cardDefId, trigger, mechanicIndex, prependIcon)
+function ZO_TributeCardData:GetMechanicText(activationSource, mechanicIndex, prependIcon)
+    return GetTributeCardMechanicText(self.cardDefId, activationSource, mechanicIndex, prependIcon)
 end
 
 function ZO_TributeCardData:GetFlavorText()

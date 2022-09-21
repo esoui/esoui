@@ -315,6 +315,42 @@ function ZO_GamepadCollectionsUpdateProvider:New(notificationManager)
     return ZO_CollectionsUpdateProvider.New(self, notificationManager)
 end
 
+function ZO_GamepadCollectionsUpdateProvider:AddCollectibleNotification(data)
+    local categoryData = data:GetCategoryData()
+
+    --use a formatter for when there's more information?
+    local hasMoreInfo = GetCollectibleHelpIndices(data:GetId()) ~= nil
+    local message = self:GetMessage(hasMoreInfo, ZO_SELECTED_TEXT:Colorize(categoryData:GetName()), ZO_SELECTED_TEXT:Colorize(data:GetName()))
+    self:AddNotification(message, data, hasMoreInfo)
+end
+
+function ZO_GamepadCollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo)
+    local categoryData = data:GetCategoryData()
+    local customLayoutFunction = nil
+    if hasMoreInfo then
+        customLayoutFunction = function(tooltip, entryData)
+            GAMEPAD_TOOLTIPS:LayoutKeybindNotification(tooltip, categoryData, entryData)
+        end
+    end
+
+    local newListEntry = {
+        dataType = NOTIFICATIONS_COLLECTIBLE_DATA,
+        notificationType = NOTIFICATION_TYPE_COLLECTIONS,
+        shortDisplayText = categoryData:GetName(),
+
+        message = message,
+        data = data,
+        moreInfo = hasMoreInfo,
+        customLayoutFunction = customLayoutFunction,
+
+        --For sorting
+        displayName = message,
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
+    }
+
+    table.insert(self.list, newListEntry)
+end
+
 function ZO_GamepadCollectionsUpdateProvider:Accept(entryData)
     ZO_CollectionsUpdateProvider.Accept(self, entryData)
 
@@ -328,7 +364,8 @@ end
 
 function ZO_GamepadCollectionsUpdateProvider:GetMessage(hasMoreInfo, categoryName, collectibleName)
     if hasMoreInfo then
-        return zo_strformat(SI_COLLECTIONS_UPDATED_NOTIFICATION_MESSAGE_MORE_INFO_GAMEPAD, categoryName, collectibleName, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_RIGHT_STICK))
+        local buttonText = ZO_WHITE:Colorize(ZO_Keybindings_GetHighestPriorityBindingStringFromAction("UI_SHORTCUT_RIGHT_STICK", KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP))
+        return zo_strformat(SI_COLLECTIONS_UPDATED_NOTIFICATION_MESSAGE_MORE_INFO_GAMEPAD, categoryName, collectibleName, buttonText)
     else
         return zo_strformat(SI_COLLECTIONS_UPDATED_NOTIFICATION_MESSAGE, categoryName, collectibleName)
     end
@@ -631,7 +668,17 @@ function ZO_GamepadNotificationManager:InitializeKeybindStripDescriptors()
             callback = function()
                 local data = self:GetTargetData()
                 if data ~= nil then
-                    self:DeclineRequest(data, nil, NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND)
+                    if data.dataType == NOTIFICATIONS_LFG_READY_CHECK_DATA then
+                        local dialogData =
+                        {
+                            data = data,
+                            control = nil,
+                            openedFromKeybind = NOTIFICATIONS_MENU_OPENED_FROM_MOUSE,
+                        }
+                        ZO_Dialogs_ShowPlatformDialog("LFG_DECLINE_READY_CHECK_CONFIRMATION", dialogData)
+                    else
+                        self:DeclineRequest(data, nil, NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND)
+                    end
                 end
             end,
 
@@ -708,8 +755,12 @@ end
 function ZO_GamepadNotificationManager:RefreshTooltip(entryData)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     if entryData and entryData.data then
-        local messageText = self:BuildMessageText(entryData.data)
-        GAMEPAD_TOOLTIPS:LayoutNotification(GAMEPAD_LEFT_TOOLTIP, entryData.data.note, messageText)
+        if entryData.data.customLayoutFunction then
+            entryData.data.customLayoutFunction(GAMEPAD_LEFT_TOOLTIP, entryData.data)
+        else
+            local messageText = self:BuildMessageText(entryData.data)
+            GAMEPAD_TOOLTIPS:LayoutNotification(GAMEPAD_LEFT_TOOLTIP, entryData.data.note, messageText)
+        end
         GAMEPAD_TOOLTIPS:ShowBg(GAMEPAD_LEFT_TOOLTIP)
     else
         GAMEPAD_TOOLTIPS:HideBg(GAMEPAD_LEFT_TOOLTIP)

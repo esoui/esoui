@@ -432,6 +432,9 @@ do
                 ZO_CurrencyControl_SetSimpleCurrency(control, currencyType, GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType)), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
                 return true
             end,
+            narrationText = function()
+                return ZO_Currency_FormatGamepad(currencyType, GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType)), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            end,
         }
         return currencyHeaderData
     end
@@ -446,12 +449,16 @@ do
     {
         headerText = ZO_Currency_GetAmountLabel(CURT_MONEY),
         text = UpdateGold,
+        narrationText = ZO_Currency_GetPlayerCarriedGoldNarration,
     }
 
     local RIDING_TRAINING_COST_HEADER_DATA =
     {
         headerText = GetString(SI_GAMEPAD_STABLE_TRAINING_COST_HEADER),
         text = UpdateRidingTrainingCost,
+        narrationText = function()
+            return ZO_Currency_FormatGamepad(CURT_MONEY, STABLE_MANAGER.trainingCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+        end,
     }
 
     local LAUNDER_TRANSACTION_HEADER_DATA =
@@ -519,15 +526,19 @@ do
         local data1 = g_pendingHeaderData[1]
         self.headerData.data1HeaderText = data1 and data1.headerText or nil
         self.headerData.data1Text = data1 and data1.text or nil
+        self.headerData.data1TextNarration = data1 and data1.narrationText or nil
         local data2 = g_pendingHeaderData[2]
         self.headerData.data2HeaderText = data2 and data2.headerText or nil
         self.headerData.data2Text = data2 and data2.text or nil
+        self.headerData.data2TextNarration = data2 and data2.narrationText or nil
         local data3 = g_pendingHeaderData[3]
         self.headerData.data3HeaderText = data3 and data3.headerText or nil
         self.headerData.data3Text = data3 and data3.text or nil
+        self.headerData.data3TextNarration = data3 and data3.narrationText or nil
         local data4 = g_pendingHeaderData[4]
         self.headerData.data4HeaderText = data4 and data4.headerText or nil
         self.headerData.data4Text = data4 and data4.text or nil
+        self.headerData.data4TextNarration = data4 and data4.narrationText or nil
 
         ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
     end

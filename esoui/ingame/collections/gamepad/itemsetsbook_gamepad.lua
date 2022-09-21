@@ -23,6 +23,10 @@ function ZO_ItemSetsBook_Gamepad_Base:InitializeHeader()
         return true
     end
 
+    local function GetInventoryCapacityNarration()
+        return zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
+    end
+
     local currencyType = CURT_CHAOTIC_CREATIA
     local currencyLocation = GetCurrencyPlayerStoredLocation(currencyType)
     local IS_ENOUGH = false
@@ -30,10 +34,22 @@ function ZO_ItemSetsBook_Gamepad_Base:InitializeHeader()
     {
         currencyCapAmount = GetMaxPossibleCurrency(currencyType, currencyLocation),
     }
+
     local function GetCurrencyBalance(control)
         local currentBalance = GetCurrencyAmount(currencyType, currencyLocation)
         ZO_CurrencyControl_SetSimpleCurrency(control, currencyType, currentBalance, ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT, CURRENCY_SHOW_ALL, IS_ENOUGH, CURRENCY_OPTIONS)
         return true
+    end
+
+    local CURRENCY_NARRATION_OPTIONS = 
+    {
+        showCap = true,
+        currencyLocation = currencyLocation,
+    }
+    
+    local function GetCurrencyBalanceNarration()
+        local currentBalance = GetCurrencyAmount(currencyType, currencyLocation)
+        return ZO_Currency_FormatGamepad(currencyType, currentBalance, ZO_CURRENCY_FORMAT_AMOUNT_ICON, CURRENCY_NARRATION_OPTIONS)
     end
 
     local IS_PLURAL = false
@@ -43,8 +59,10 @@ function ZO_ItemSetsBook_Gamepad_Base:InitializeHeader()
     {
         data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
         data1Text = GetInventoryCapacity,
+        data1TextNarration = GetInventoryCapacityNarration,
         data2HeaderText = currencyName,
         data2Text = GetCurrencyBalance,
+        data2TextNarration = GetCurrencyBalanceNarration,
     }
 end
 

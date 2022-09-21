@@ -1111,6 +1111,7 @@ ESO_Dialogs["LARGE_GROUP_INVITE_WARNING"] =
             callback =  function(dialog)
                             local characterOrDisplayName = dialog.data
                             GroupInviteByName(characterOrDisplayName)
+                            ZO_OutputStadiaLog("ESO_Dialogs[LARGE_GROUP_INVITE_WARNING], set ZO_Menu_SetLastCommandWasFromMenu == true")
                             ZO_Menu_SetLastCommandWasFromMenu(true)
                             ZO_Alert(ALERT, nil, zo_strformat(GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingDisplayName(characterOrDisplayName)))
                         end,
@@ -2336,6 +2337,70 @@ ESO_Dialogs["LFG_LEAVE_QUEUE_CONFIRMATION"] =
         [2] =
         {
             text = SI_NO,
+        }
+    }
+}
+
+ESO_Dialogs["LFG_DECLINE_READY_CHECK_CONFIRMATION"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_LFG_DIALOG_DECLINE_READY_CHECK_CONFIRMATION_TITLE,
+    },
+    mainText =
+    {
+        text = SI_LFG_DIALOG_DECLINE_READY_CHECK_CONFIRMATION_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_YES,
+            callback =  function(dialog)
+                local INTERACT_TYPE_LFG_READY_CHECK = 13
+                local queueEntry = PLAYER_TO_PLAYER:GetFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
+
+                if dialog.data then
+                    if dialog.data.openedFromKeybind then
+                        if IsInGamepadPreferredMode() then
+                            GAMEPAD_NOTIFICATIONS:DeclineRequest(dialog.data.data, dialog.data.control, dialog.data.openedFromKeybind)
+                        else
+                            NOTIFICATIONS:DeclineRequest(dialog.data.data, dialog.data.control, dialog.data.openedFromKeybind)
+                        end
+                        return
+                    else
+                        dialog.data.dontRemoveOnDecline = false
+                    end
+                else
+                    if queueEntry then
+                        queueEntry.dontRemoveOnDecline = false
+                    end
+                end
+
+                PLAYER_TO_PLAYER:Decline(dialog.data or queueEntry)
+                DeclineLFGReadyCheckNotification()
+            end,
+        },
+        {
+            text = SI_NO,
+            callback =  function(dialog)
+                if dialog.data and dialog.data.openedFromKeybind then
+                    -- We opened the dialog from notification, canceling will take us back to that screen.
+                    return
+                else
+                    local INTERACT_TYPE_LFG_READY_CHECK = 13
+                    local queueEntry = PLAYER_TO_PLAYER:GetFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
+                    if queueEntry then
+                        queueEntry.seen = false
+                        queueEntry.dontRemoveOnDecline = false
+                        PLAYER_TO_PLAYER:OnGroupingToolsReadyCheckUpdated()
+                    end
+                end
+            end,
         }
     }
 }
@@ -3587,7 +3652,7 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
                 return dialogData.declineText or GetString(SI_DIALOG_DECLINE)
             end,
             callback = function(dialog)
-                PLAYER_TO_PLAYER:Decline(dialog.data)
+               ZO_Dialogs_ShowPlatformDialog("LFG_DECLINE_READY_CHECK_CONFIRMATION", dialog.data)
             end,
             visible = function(dialog)
                 return PLAYER_TO_PLAYER:ShouldShowDecline(dialog.data)

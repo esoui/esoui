@@ -514,7 +514,7 @@ end
 
 function ZO_MinimizeChatFragment:Hide()
     local chatSystem = ZO_GetChatSystem()
-    if (self.wasChatMaximized or (chatSystem:IsPinnable() and chatSystem:IsWindowPinned())) and chatSystem:IsMinimized() then
+    if self.wasChatMaximized and chatSystem:IsMinimized() then
         chatSystem:Maximize()
     end
 

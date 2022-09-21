@@ -33,7 +33,10 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeControls()
 
     self.buttonContainer = self.control:GetNamedChild("ActionButtonContainer")
     self.joinQueueButton = self.buttonContainer:GetNamedChild("QueueButton")
-    self.viewRewardsButton = self.buttonContainer:GetNamedChild("ViewRewardsButton")
+    self.viewRewardsButton = self.buttonContainer:GetNamedChild("ViewRewards")
+    self.acceptQuestButton = self.buttonContainer:GetNamedChild("AcceptQuest")
+    self.unlockPermanentlyButton = self.buttonContainer:GetNamedChild("UnlockPermanently")
+    self.chapterUpgradeButton = self.buttonContainer:GetNamedChild("ChapterUpgrade")
     self.lockReasonLabel = self.control:GetNamedChild("LockReason")
 
     local function OnLockReasonLabelUpdate()
@@ -164,7 +167,7 @@ end
 
 function ZO_ActivityFinderTemplate_Keyboard:RegisterEvents()
     ZO_ActivityFinderTemplate_Shared.RegisterEvents(self)
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnSelectionsChanged", function(...) self:RefreshJoinQueueButton(...) end)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnSelectionsChanged", function(...) self:RefreshButtons(...) end)
 end
 
 -----------
@@ -185,6 +188,11 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
     self.clubRankObject:Refresh()
 
     local lockReasonText
+    
+    self.viewRewardsButton:SetHidden(true)
+    self.acceptQuestButton:SetHidden(true)
+    self.unlockPermanentlyButton:SetHidden(true)
+    self.chapterUpgradeButton:SetHidden(true)
 
     local selectedData = self.filterComboBox:GetSelectedItemData()
     if selectedData then
@@ -194,6 +202,21 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
             self:RefreshRewards(filterData)
             if filterData:IsLocked() then
                 lockReasonText = filterData:GetLockReasonText()
+
+                local lockingCollectibleId = filterData:GetFirstLockingCollectible()
+                if lockingCollectibleId ~= 0 then
+                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockingCollectibleId)
+                    local categoryType = collectibleData:GetCategoryType()
+                    if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+                        self.chapterUpgradeButton:SetHidden(false)
+                    elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
+                        self.unlockPermanentlyButton.searchTerm = collectibleData:GetName()
+                        self.unlockPermanentlyButton:SetHidden(false)
+                    end
+                else
+                    self.acceptQuestButton.questId = filterData:GetQuestToUnlock()
+                    self.acceptQuestButton:SetHidden(self.acceptQuestButton.questId == 0)
+                end
             end
 
             local HIDE_IF_NOT_COMPETITIVE = not filterData.isCompetitive
@@ -251,7 +274,7 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
 
     self.lockReasonLabel:SetHidden(self.shouldHideLockReason)
 
-    self:RefreshJoinQueueButton()
+    self:RefreshButtons()
 end
 
 do
@@ -367,11 +390,38 @@ function ZO_ActivityFinderTemplate_Keyboard:IsShowingTributeFinder()
     return false
 end
 
-function ZO_ActivityFinderTemplate_Keyboard:RefreshJoinQueueButton()
-    local isAnyLocationSelected = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsAnyLocationSelected()
-    local isJoinButtonEnabled = isAnyLocationSelected and not ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetIsCurrentlyInQueue()
-    self.joinQueueButton:SetEnabled(isJoinButtonEnabled)
-    self.viewRewardsButton:SetEnabled(HasActiveCampaignStarted())
+do
+    local optionalButtons = {}
+    function ZO_ActivityFinderTemplate_Keyboard:RefreshButtons()
+        local isAnyLocationSelected = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsAnyLocationSelected()
+        local isJoinButtonEnabled = isAnyLocationSelected and not ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetIsCurrentlyInQueue()
+        self.joinQueueButton:SetEnabled(isJoinButtonEnabled)
+
+        local acceptQuestButtonShown = not self.acceptQuestButton:IsControlHidden()
+        local viewRewardsButtonShown = not self.viewRewardsButton:IsControlHidden()
+        local unlockPermanentlyButtonShown = not self.unlockPermanentlyButton:IsControlHidden()
+        local chapterUpgradeButtonShown = not self.chapterUpgradeButton:IsControlHidden()
+        if acceptQuestButtonShown or viewRewardsButtonShown or unlockPermanentlyButtonShown or chapterUpgradeButtonShown then
+            ZO_ClearNumericallyIndexedTable(optionalButtons)
+            if chapterUpgradeButtonShown then
+                table.insert(optionalButtons, self.chapterUpgradeButton)
+            elseif unlockPermanentlyButtonShown then
+                table.insert(optionalButtons, self.unlockPermanentlyButton)
+            elseif acceptQuestButtonShown then
+                self.acceptQuestButton:SetEnabled(not HasQuest(self.acceptQuestButton.questId))
+                table.insert(optionalButtons, self.acceptQuestButton)
+            end
+
+            if viewRewardsButtonShown then
+                self.viewRewardsButton:SetEnabled(HasActiveCampaignStarted())
+                table.insert(optionalButtons, self.viewRewardsButton)
+            end
+            for index, button in ipairs(optionalButtons) do
+                local anchorTo = index == 1 and self.joinQueueButton or optionalButtons[index - 1]
+                button:SetAnchor(TOPLEFT, anchorTo, TOPRIGHT, 30, 0)
+            end
+        end
+    end
 end
 
 ----------
@@ -480,8 +530,14 @@ function ZO_ActivityFinderTemplate_Keyboard:OnHandleLFMPromptResponse()
     end
 end
 
-function ZO_ActivityFinderTemplate_Keyboard:OnViewRewards()
+function ZO_ActivityFinderTemplate_Keyboard:OnViewRewardsButtonClicked()
     ZO_Dialogs_ShowPlatformDialog("TRIBUTE_REWARDS_VIEW")
+end
+
+function ZO_ActivityFinderTemplate_Keyboard:OnAcceptQuestButtonClicked()
+    -- Can't get here without filterData existing and being singular
+    local filterData = self.filterComboBox:GetSelectedItemData().data
+    BestowActivityTypeGatingQuest(filterData:GetActivityType())
 end
 
 -------------
@@ -561,10 +617,21 @@ function ZO_ActivityFinderTemplateQueueButtonKeyboard_OnClicked(control)
     end
 end
 
-function ZO_ActivityFinderTemplateViewRewardsButtonKeyboard_OnClicked(control)
+function ZO_ActivityFinderTemplateViewRewardsKeyboard_OnClicked(control)
     local topLevelControl = control:GetParent():GetParent()
     local finderObjectKeyboard = topLevelControl.object
-    finderObjectKeyboard:OnViewRewards()
+    finderObjectKeyboard:OnViewRewardsButtonClicked()
+end
+
+function ZO_ActivityFinderTemplateAcceptQuestKeyboard_OnClicked(control)
+    local topLevelControl = control:GetParent():GetParent()
+    local finderObjectKeyboard = topLevelControl.object
+    finderObjectKeyboard:OnAcceptQuestButtonClicked()
+end
+
+function ZO_ActivityFinderTemplateUnlockPermanentlyKeyboard_OnClicked(control)
+    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, control.searchTerm)
+    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_ACTIVITY_FINDER)
 end
 
 function ZO_ActivityFinderTemplateNavigationEntryKeyboard_OnInitialized(control)

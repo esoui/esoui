@@ -190,6 +190,10 @@ function ZO_CraftingInventory:RefreshFilters()
     end
 end
 
+function ZO_CraftingInventory:SetLevelSort(levelDataGetFunction)
+    self.levelDataGetFunction = levelDataGetFunction
+end
+
 function ZO_CraftingInventory:SetCustomSort(customDataGetFunction)
     self.customDataGetFunction = customDataGetFunction
 end
@@ -198,7 +202,7 @@ function ZO_CraftingInventory:SetSortColumnHidden(columns, hidden)
     self.sortHeaders:SetHeadersHiddenFromKeyList(columns, hidden)
 end
 
-function ZO_CraftingInventory:AddItemData(bagId, slotIndex, totalStack, scrollDataType, data, customDataGetFunction, slotData)
+function ZO_CraftingInventory:AddItemData(bagId, slotIndex, totalStack, scrollDataType, data, customDataGetFunction, slotData, levelDataGetFunction)
     local icon, _, sellPrice, meetsUsageRequirements, _, _, _, functionalQuality, displayQuality = GetItemInfo(bagId, slotIndex)
     local newData = 
     {
@@ -212,6 +216,7 @@ function ZO_CraftingInventory:AddItemData(bagId, slotIndex, totalStack, scrollDa
         -- quality is deprecated, included here for addon backwards compatibility
         quality = displayQuality,
         meetsUsageRequirements = meetsUsageRequirements,
+        level = levelDataGetFunction and levelDataGetFunction(bagId, slotIndex),
         custom = customDataGetFunction and customDataGetFunction(bagId, slotIndex),
 
         bagId = bagId,
@@ -237,7 +242,8 @@ function ZO_CraftingInventory:EnumerateInventorySlotsAndAddToScrollData(predicat
 
     for itemId, itemInfo in pairs(list) do
         if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType) then
-            self:AddItemData(itemInfo.bag, itemInfo.index, itemInfo.stack, self:GetScrollDataType(itemInfo.bag, itemInfo.index), data, self.customDataGetFunction)
+            local NO_SLOT_DATA = nil
+            self:AddItemData(itemInfo.bag, itemInfo.index, itemInfo.stack, self:GetScrollDataType(itemInfo.bag, itemInfo.index), data, self.customDataGetFunction, NO_SLOT_DATA, self.levelDataGetFunction)
         end
         self.itemCounts[itemId] = itemInfo.stack
     end
@@ -262,7 +268,7 @@ function ZO_CraftingInventory:GetIndividualInventorySlotsAndAddToScrollData(pred
 
     for itemId, slotData in pairs(filteredDataTable) do
         if not filterFunction or filterFunction(slotData.bagId, slotData.slotIndex, filterType) then
-            self:AddItemData(slotData.bagId, slotData.slotIndex, slotData.stackCount, self:GetScrollDataType(slotData.bagId, slotData.slotIndex), data, self.customDataGetFunction, slotData)
+            self:AddItemData(slotData.bagId, slotData.slotIndex, slotData.stackCount, self:GetScrollDataType(slotData.bagId, slotData.slotIndex), data, self.customDataGetFunction, slotData, self.levelDataGetFunction)
         end
         self.itemCounts[itemId] = slotData.stackCount
     end
@@ -296,7 +302,8 @@ local sortKeys =
     statusSortOrder = { tiebreaker = "name", isNumeric = true },
     stackSellPrice = { tiebreaker = "name", isNumeric = true },
     traitInformationSortOrder = { tiebreaker = "name", isNumeric = true },
-    custom = { tiebreaker = "name"},
+    level = { tiebreaker = "name", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+    custom = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
 }
 
 function ZO_CraftingInventory:SortData()

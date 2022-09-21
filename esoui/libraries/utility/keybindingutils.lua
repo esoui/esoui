@@ -94,6 +94,23 @@ do
         end
     end
 
+    local function TranslateNarrationKeys(key, mod1, mod2, mod3, mod4)
+        if key ~= KEY_INVALID then
+            ZO_ClearNumericallyIndexedTable(keyNameTable)
+
+            if mod1 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyNarrationText(mod1)) end
+            if mod2 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyNarrationText(mod2)) end
+            if mod3 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyNarrationText(mod3)) end
+            if mod4 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyNarrationText(mod4)) end
+
+            table.insert(keyNameTable, GetKeyNarrationText(key))
+
+            return table.concat(keyNameTable, "-")
+        end
+    
+        return GetString(SI_ACTION_IS_NOT_BOUND)
+    end
+
     local function TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, scalePercent, useDisabledIcon)
         if key ~= KEY_INVALID then
             ZO_ClearNumericallyIndexedTable(keyNameTable)
@@ -128,11 +145,24 @@ do
         return TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, useDisabledIcon)
     end
 
+    function ZO_Keybindings_GetNarrationStringFromKeys(key, mod1, mod2, mod3, mod4)
+        return TranslateNarrationKeys(key, mod1, mod2, mod3, mod4)
+    end
+
     function ZO_Keybindings_GetBindingStringFromAction(actionName, textOptions, textureOptions, bindingIndex, textureWidthPercent, textureHeightPercent, useDisabledIcon)
         local layerIndex, categoryIndex, actionIndex = GetActionIndicesFromName(actionName)
         if layerIndex then
             local key, mod1, mod2, mod3, mod4 = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, bindingIndex or 1)
             return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, textureHeightPercent, useDisabledIcon)
+        end
+        return ""
+    end
+
+    function ZO_Keybindings_GetNarrationStringFromAction(actionName, bindingIndex)
+        local layerIndex, categoryIndex, actionIndex = GetActionIndicesFromName(actionName)
+        if layerIndex then
+            local key, mod1, mod2, mod3, mod4 = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, bindingIndex or 1)
+            return TranslateNarrationKeys(key, mod1, mod2, mod3, mod4)
         end
         return ""
     end
@@ -153,6 +183,26 @@ do
             end
         end
         return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, scalePercent, scalePercent, useDisabledIcon), key, mod1, mod2, mod3, mod4
+    end
+
+
+    -- Doesn't return the GetString(SI_ACTION_IS_NOT_BOUND) automatically, just nil if theres no binds
+    --TODO XAR: Determine if we need alwaysPreferGamepadMode and showAsHold
+    function ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(actionName, alwaysPreferGamepadMode, showAsHold)
+        local preferredKeybindType = ZO_Keybindings_GetPreferredKeyType(alwaysPreferGamepadMode)
+        local key, mod1, mod2, mod3, mod4 = GetHighestPriorityActionBindingInfoFromNameAndInputDevice(actionName, preferredKeybindType)
+
+        if key == KEY_INVALID then
+            return nil
+        end
+
+        if showAsHold then
+            local holdKey = ConvertKeyPressToHold(key)
+            if holdKey ~= KEY_INVALID then
+                key = holdKey
+            end
+        end
+        return TranslateNarrationKeys(key, mod1, mod2, mod3, mod4)
     end
 end
 

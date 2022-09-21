@@ -1222,11 +1222,11 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
 
                             -- Show tutorials from a purchased item first before showing the consumable tutorial
                             if data.tutorialTrigger then
-                                activeMarket:ShowTutorial(data.tutorialTrigger)
+                                TUTORIAL_MANAGER:ShowTutorial(data.tutorialTrigger)
                             end
 
                             if data.result == MARKET_PURCHASE_RESULT_SUCCESS and data.marketProductData:ContainsConsumables() then
-                                activeMarket:ShowTutorial(TUTORIAL_TRIGGER_CROWN_CONSUMABLE_PURCHASED)
+                                TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_CROWN_CONSUMABLE_PURCHASED)
                             end
                         end
                     end,

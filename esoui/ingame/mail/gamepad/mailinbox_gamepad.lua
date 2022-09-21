@@ -216,6 +216,7 @@ function ZO_MailInbox_Gamepad:InitializeHeader()
     self.mainHeaderData = {
         data1HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_PLAYER_GOLD),
         data1Text = UpdatePlayerGold,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
 
         data2HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_INVENTORY),
         data2Text = GetInventoryString,
@@ -437,6 +438,7 @@ function ZO_MailInbox_Gamepad:EnterLoading()
     MAIL_MANAGER_GAMEPAD:SwitchToKeybind(self.loadingKeybindDescriptor)
     self.loadingLabel:SetText(GetString(SI_GAMEPAD_MAIL_INBOX_LOADING))
     self.loadingBox:SetHidden(false)
+    self.inbox:SetHidden(true)
 end
 
 function ZO_MailInbox_Gamepad:EnterMailList()
@@ -721,6 +723,8 @@ function ZO_MailInbox_Gamepad:RefreshMailList()
 
     if #entries == 0 then
         self.inbox:SetHidden(true)
+    else
+        self.inbox:SetHidden(false)
     end
 end
 

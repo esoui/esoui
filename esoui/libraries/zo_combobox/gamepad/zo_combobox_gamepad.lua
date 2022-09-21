@@ -33,6 +33,7 @@ function ZO_ComboBox_Gamepad:Initialize(control)
     local _, unselectedSize = _G[self.m_font]:GetFontInfo()
     local _, selectedSize = _G[self.m_highlightFont]:GetFontInfo()
     self.m_fontRatio = unselectedSize / selectedSize
+    SCREEN_NARRATION_MANAGER:RegisterComboBox(self)
 end
 
 function ZO_ComboBox_Gamepad:ShowDropdownInternal()
@@ -141,7 +142,7 @@ function ZO_ComboBox_Gamepad:OnItemSelected(control, data)
 
     self.m_currentData = data
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor, self.m_keybindState)
-    self:FireCallbacks("OnItemSelected", control, data)
+    self:FireCallbacks("OnItemSelected", control, data, self)
     if data and data.onEnter then
         data.onEnter(control, data)
     end
@@ -176,11 +177,24 @@ function ZO_ComboBox_Gamepad:SetActive(active)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor, self.m_keybindState)
             KEYBIND_STRIP:PopKeybindGroupState()
             
-            if self.deactivatedCallback and not self.blockDeactivatedCallback then
-               self.deactivatedCallback(self.deactivatedCallbackArgs)
+            if not self.blockDeactivatedCallback then 
+                if self.deactivatedCallback then
+                    self.deactivatedCallback(self.deactivatedCallbackArgs)
+                end
+                self:FireCallbacks("OnDeactivated")
             end
         end
     end
+end
+
+--Sets the name used for screen narration
+function ZO_ComboBox_Gamepad:SetName(name)
+    self.name = name
+end
+
+--Sets the header used for screen narration
+function ZO_ComboBox_Gamepad:SetHeader(header)
+    self.header = header
 end
 
 function ZO_ComboBox_Gamepad:HighlightSelectedItem()
@@ -320,6 +334,25 @@ function ZO_ComboBox_Gamepad:UpdateAnchors(selectedControl)
     local offset = topControl:GetTop() - selectedControl:GetTop()
 
     self.m_dropdown:AnchorToControl(self.m_container, offset)
+end
+
+function ZO_ComboBox_Gamepad:GetNarrationText()
+    if self:IsActive() then
+        --If the dropdown is currently active, just give us the current selected value
+        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.m_currentData.name)
+    else
+        --If the dropdown is not currently active, indicate that this is a dropdown and include the current selected value
+        local selectedItemName = self.m_selectedItemData and self.m_selectedItemData.name or self.currentSelectedItemText
+        if self.name then
+            if self.header then
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_DROPDOWN_NAMED_WITH_HEADER, self.name, selectedItemName, self.header))
+            else
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_DROPDOWN_NAMED, self.name, selectedItemName))
+            end
+        else
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_DROPDOWN_UNNAMED, selectedItemName))
+        end
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -469,6 +502,37 @@ function ZO_MultiSelection_ComboBox_Gamepad:Initialize(control)
 end
 
 -- Overridden function
+function ZO_MultiSelection_ComboBox_Gamepad:GetNarrationText()
+    if self:IsActive() then
+        --If the dropdown is currently active, just give us the current selected value
+        --Multi-selection entries should be treated as toggles
+        return ZO_FormatToggleNarrationText(self.m_currentData.name, self.currentItemData:IsItemSelected(self.m_currentData))
+    else
+        --If the dropdown is not currently active, indicate that this is a dropdown and include the current selected text
+        --First, determine the current selected text
+        local currentSelectedText = ""
+        local numSelectedEntries = self:GetNumSelectedEntries()
+        if numSelectedEntries > 0 then
+            if self.multiSelectionTextFormatter then
+                currentSelectedText = zo_strformat(self.multiSelectionTextFormatter, numSelectedEntries)
+            end
+        elseif self.noSelectionText then
+            currentSelectedText = self.noSelectionText
+        end
+        
+        --Once the current selected text is determined, format the rest of the narration
+        if self.name then
+            if self.header then
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_MULTI_SELECT_DROPDOWN_NAMED_WITH_HEADER, self.name, currentSelectedText, self.header))
+            else
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_MULTI_SELECT_DROPDOWN_NAMED, self.name, currentSelectedText))
+            end
+        else
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_MULTI_SELECT_DROPDOWN_UNNAMED, currentSelectedText))
+        end
+    end
+end
+
 function ZO_MultiSelection_ComboBox_Gamepad:SelectHighlightedItem()
     local focusItem = self.m_focus:GetFocusItem()
     local focusIndex = self.m_focus:GetFocus()
@@ -502,6 +566,7 @@ function ZO_MultiSelection_ComboBox_Gamepad:SelectItem(item, ignoreCallback)
         item.callback(self, item.name, item, newSelectedState)
     end
     self:RefreshSelectedItemText()
+    SCREEN_NARRATION_MANAGER:QueueComboBox(self)
 
     return true
 end

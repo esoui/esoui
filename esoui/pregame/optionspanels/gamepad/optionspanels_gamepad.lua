@@ -221,7 +221,32 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_ACCESSIBILITY,
             system = SETTING_TYPE_ACCESSIBILITY,
-            settingId = ACCESSIBILITY_SETTING_TEXT_CHAT_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_TEXT_CHAT_NARRATION,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_ZONE_CHAT_NARRATION,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_SCREEN_NARRATION,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_NARRATION_VOLUME,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_NARRATION_VOICE_SPEED,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_NARRATION_VOICE_TYPE,
         },
     },
 }

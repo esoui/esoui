@@ -328,7 +328,8 @@ end
 function ZO_CampaignBrowser_Gamepad:InitializeHeader()
     local IS_PLURAL = false
     local IS_UPPER = false
-    self.headerData = {
+    self.headerData = 
+    {
         titleText = GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_CAMPAIGNS_HEADER),
 
         data1HeaderText = GetCurrencyName(CURT_ALLIANCE_POINTS, IS_PLURAL, IS_UPPER),
@@ -336,6 +337,10 @@ function ZO_CampaignBrowser_Gamepad:InitializeHeader()
         data1Text = function(control)
             ZO_CurrencyControl_SetSimpleCurrency(control, CURT_ALLIANCE_POINTS, GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
             return true
+        end,
+
+        data1TextNarration = function()
+            return ZO_Currency_FormatGamepad(CURT_ALLIANCE_POINTS, GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
         end,
     }
 

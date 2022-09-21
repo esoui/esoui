@@ -147,36 +147,42 @@ function ZO_TributePileData:TryTriggerHandAndDocksTutorials()
     local hasContract = false
     local hasAgent = false
     local hasChoice = false
+    local hasTrigger = false
 
-    --Loop through the cards in this pile and determine which tutorials we should try to trigger
+    -- Loop through the cards in this pile and determine which tutorials we should try to trigger
     for _, cardData in ipairs(cardList) do
         local cardDefId = cardData.cardId
 
         local isContract = IsTributeCardContract(cardDefId)
         local isAgent = GetTributeCardType(cardDefId) == TRIBUTE_CARD_TYPE_AGENT
 
-        --If the card is a contract or an agent
+        -- If the card is a contract or an agent
         if isContract or isAgent then
             hasContract = hasContract or isContract
             hasAgent = hasAgent or isAgent
-            --If the card is a contract agent
+            -- If the card is a contract agent
             if isAgent and isContract then
                 hasContractAgent = true
             end
         end
 
-        --If the card has taunt
+        -- If the card has taunt
         if DoesTributeCardTaunt(cardDefId) then
             hasTaunt = true
         end
 
-        --If the card is a choice card
+        -- If the card is a choice card
         if DoesTributeCardChooseOneMechanic(cardDefId) then
             hasChoice = true
         end
+
+        -- If the card has a trigger mechanic
+        if DoesTributeCardHaveTriggerMechanic(cardDefId) then
+            hasTrigger = true
+        end
     end
 
-    --Trigger the tutorials in the order of the priority we want them to show in
+    -- Trigger the tutorials in the order of the priority we want them to show in
     if hasContractAgent then
         TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_TRIBUTE_CONTRACT_AGENT_CARD_SEEN)
     end
@@ -196,26 +202,30 @@ function ZO_TributePileData:TryTriggerHandAndDocksTutorials()
     if hasChoice then
         TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_TRIBUTE_CHOICE_CARD_SEEN)
     end
+
+    if hasTrigger then
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_TRIBUTE_TRIGGER_CARD_SEEN)
+    end
 end
 
 function ZO_TributePileData:TryTriggerDeckAndCooldownTutorials()
     local cardList = self:GetCardList()
     local hasCurse = false
 
-    --Loop through the cards in this pile and determine which tutorials we should try to trigger
+    -- Loop through the cards in this pile and determine which tutorials we should try to trigger
     for _, cardData in ipairs(cardList) do
         local cardDefId = cardData.cardId
 
-        --If the card is a curse card
+        -- If the card is a curse card
         if IsTributeCardCurse(cardDefId) then
             hasCurse = true
-            --This is only doable because hasCurse is the only thing we are checking for right now.
-            --We should remove this line if we add more tutorial triggers to this function in the future
+            -- This is only doable because hasCurse is the only thing we are checking for right now.
+            -- We should remove this line if we add more tutorial triggers to this function in the future
             break
         end
     end
 
-    --Trigger the tutorials in the order of the priority we want them to show in
+    -- Trigger the tutorials in the order of the priority we want them to show in
     if hasCurse then
         TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_TRIBUTE_CURSE_CARD_SEEN)
     end

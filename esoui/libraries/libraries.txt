@@ -80,6 +80,8 @@ EsoUI\Libraries\ZO_Templates\Gamepad\StatusBarTemplates_Gamepad.xml
 EsoUI\Libraries\ZO_Templates\ObjectPoolTemplates.lua
 EsoUI\Libraries\ZO_Templates\ZO_ItemScreenTemplates.xml
 
+EsoUI\Libraries\ScreenNarration\ScreenNarrationManager.lua
+
 EsoUI\Libraries\ZO_KeybindButton\ZO_KeybindButton.lua
 EsoUI\Libraries\ZO_KeybindButton\ZO_KeybindButton.xml
 EsoUI\Libraries\ZO_KeybindButton\ZO_ClickableKeybindLabel.lua
@@ -292,3 +294,5 @@ EsoUI\Libraries\ZO_Horizontal_Menu\ZO_Horizontal_Menu.lua
 EsoUI\Libraries\ZO_Horizontal_Menu\ZO_Horizontal_Menu.xml
 
 EsoUI\Libraries\ZO_ProgressBar\ZO_MultiSegmentProgressBar.lua
+
+EsoUI\Libraries\ZO_GamepadLinks\ZO_GamepadLinks.lua

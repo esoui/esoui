@@ -357,17 +357,16 @@ local g_sharedPregameStates =
         end,
 
         GetStateTransitionData = function()
-            -- TODO XAR Settings: Replace the following:
-            -- return "FirstTimeAccessibilitySettings"
-            return "ScreenAdjustIntro"
+            return "FirstTimeAccessibilitySettings"
         end,
     },
 
-    -- TODO XAR Settings: To be integrated in next update
     ["FirstTimeAccessibilitySettings"] =
     {
         ShouldAdvance = function()
-            return GetCVar("PregameAccessibilitySettingMenuEnabled") ~= "1"
+            local accessibilityModeEnabled = IsConsoleUI() or GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE)
+            -- TODO XAR re-enable
+            return not ShouldShowChatNarrationSettings() or not accessibilityModeEnabled or GetCVar("PregameAccessibilitySettingMenuEnabled") ~= "1"
         end,
 
         OnEnter = function()
@@ -853,12 +852,9 @@ function ZO_Pregame_OnGamepadPreferredModeChanged()
     ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE)
 
     if currentState == "ShowAccessibilityModePrompt" then
-        -- TODO XAR Settings: Replace the following
-        -- PregameStateManager_SetState("FirstTimeAccessibilitySettings")
-        PregameStateManager_SetState("AccountLoginEntryPoint")
-    -- TODO XAR Settings: Replace the following
-    -- elseif currentState == "FirstTimeAccessibilitySettings" then
-        -- PregameStateManager_SetState("ShowAccessibilityModePrompt")
+        PregameStateManager_SetState("FirstTimeAccessibilitySettings")
+    elseif currentState == "FirstTimeAccessibilitySettings" then
+        PregameStateManager_SetState("ShowAccessibilityModePrompt")
     elseif not IsAccountLoggedIn() or IS_WORLD_SELECT_STATE[currentState] then -- While in world select, we're logged in but haven't yet started the character loading process
         PregameStateManager_SetState("AccountLoginEntryPoint")
     elseif not IsPregameCharacterConstructionReady() then

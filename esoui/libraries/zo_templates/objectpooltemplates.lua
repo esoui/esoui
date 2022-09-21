@@ -171,3 +171,21 @@ end
 function ZO_MetaPool:SetCustomResetBehavior(customeResetBehavior)
     self.customResetBehavior = customeResetBehavior
 end
+
+--[[
+    Pooled Object Abstract Class
+
+        Helper class for when you want the objects you'll be putting into a pool to be able to release themselves easily
+        rather than making the owner of the pool release everything all at once or manually track down objects to release
+--]]
+
+ZO_PooledObject = ZO_InitializingObject:Subclass()
+
+function ZO_PooledObject:SetPoolAndKey(pool, poolKey)
+    self.pool = pool
+    self.poolKey = poolKey
+end
+
+function ZO_PooledObject:ReleaseObject()
+    self.pool:ReleaseObject(self.poolKey)
+end

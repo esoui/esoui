@@ -318,6 +318,16 @@ local ZO_OptionsPanel_Nameplates_ControlData =
             text = SI_INTERFACE_OPTIONS_NAMEPLATES_GROUP_INDICATORS,
             tooltipText = SI_INTERFACE_OPTIONS_NAMEPLATES_GROUP_INDICATORS_TOOLTIP,
         },
+        --Options_Nameplates_TargetMarkers
+        [NAMEPLATE_TYPE_TARGET_MARKERS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_TARGET_MARKERS,
+            panel = SETTING_PANEL_NAMEPLATES,
+            text = SI_INTERFACE_OPTIONS_NAMEPLATES_TARGET_MARKERS,
+            tooltipText = SI_INTERFACE_OPTIONS_NAMEPLATES_TARGET_MARKERS_TOOLTIP,
+        },
         --Options_Nameplates_ResurrectIndicators
         [NAMEPLATE_TYPE_RESURRECT_INDICATORS] =
         {

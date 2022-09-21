@@ -151,6 +151,8 @@ function ZO_BankingCommon_Gamepad:InitializeFiltersDialog()
 
                         dropdown:UpdateItems()
 
+                        SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
+
                         control.dropdown:SelectItemByIndex(withdrawList.currentSortType)
                     end,
                     callback = function(dialog)
@@ -158,6 +160,7 @@ function ZO_BankingCommon_Gamepad:InitializeFiltersDialog()
                         local targetControl = dialog.entryList:GetTargetControl()
                         targetControl.dropdown:Activate()
                     end,
+                    narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
                 },
             },
             {
@@ -196,6 +199,8 @@ function ZO_BankingCommon_Gamepad:InitializeFiltersDialog()
 
                         dropdown:UpdateItems()
 
+                        SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
+
                         control.dropdown:SelectItemByIndex(withdrawList.currentSortOrderIndex)
                     end,
                     callback = function(dialog)
@@ -203,6 +208,7 @@ function ZO_BankingCommon_Gamepad:InitializeFiltersDialog()
                         local targetControl = dialog.entryList:GetTargetControl()
                         targetControl.dropdown:Activate()
                     end,
+                    narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
                 },
             },
             {
@@ -224,6 +230,8 @@ function ZO_BankingCommon_Gamepad:InitializeFiltersDialog()
                         dropdown:SetSortsItems(false)
                         dropdown:SetNoSelectionText(GetString(SI_GAMEPAD_BANK_FILTER_DEFAULT_TEXT))
                         dropdown:SetMultiSelectionTextFormatter(GetString(SI_GAMEPAD_BANK_FILTER_DROPDOWN_TEXT))
+
+                        SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
 
                         local dropdownData = ZO_MultiSelection_ComboBox_Data_Gamepad:New()
                         dropdownData:Clear()
@@ -251,6 +259,7 @@ function ZO_BankingCommon_Gamepad:InitializeFiltersDialog()
                         local targetControl = dialog.entryList:GetTargetControl()
                         targetControl.dropdown:Activate()
                     end,
+                    narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
                 },
             },
         },
@@ -408,9 +417,11 @@ function ZO_BankingCommon_Gamepad:InitializeHeader()
     {
         data1HeaderText = GetString(SI_GAMEPAD_BANK_BANK_FUNDS_LABEL),
         data1Text = function(...) return self:SetCurrentBankedAmount(...) end,
+        data1TextNarration = function(...) return self:GetCurrentBankedAmountNarration(...) end,
 
         data2HeaderText = GetString(SI_GAMEPAD_BANK_PLAYER_FUNDS_LABEL),
         data2Text = function(...) return self:SetCurrentCarriedAmount(...) end,
+        data2TextNarration = function(...) return self:GetCurrentCarriedAmountNarration(...) end,
 
         tabBarEntries = self.tabsTable
     }
@@ -622,9 +633,11 @@ function ZO_BankingCommon_Gamepad:RefreshHeaderData()
     if self.currencyType then
         headerData.data1HeaderText = GetString(SI_GAMEPAD_BANK_BANK_FUNDS_LABEL)
         headerData.data1Text = function(...) return self:SetCurrentBankedAmount(...) end
+        headerData.data1TextNarration = function(...) return self:GetCurrentBankedAmountNarration(...) end
 
         headerData.data2HeaderText = GetString(SI_GAMEPAD_BANK_PLAYER_FUNDS_LABEL)
         headerData.data2Text = function(...) return self:SetCurrentCarriedAmount(...) end
+        headerData.data2TextNarration = function(...) return self:GetCurrentCarriedAmountNarration(...) end
     else
         if GetBankingBag() == BAG_BANK then
             headerData.data1HeaderText = GetString(SI_GAMEPAD_BANK_BANK_CAPACITY_LABEL)
@@ -632,9 +645,11 @@ function ZO_BankingCommon_Gamepad:RefreshHeaderData()
             headerData.data1HeaderText = GetString(SI_GAMEPAD_BANK_HOUSE_BANK_CAPACITY_LABEL)
         end
         headerData.data1Text = function(...) return self:SetBankCapacityHeaderText(...) end
+        headerData.data1TextNarration = nil
 
         headerData.data2HeaderText = GetString(SI_GAMEPAD_BANK_PLAYER_CAPACITY_LABEL)
         headerData.data2Text = function(...) return self:SetPlayerCapacityHeaderText(...) end
+        headerData.data2TextNarration = nil
     end
 
     ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
@@ -659,6 +674,10 @@ function ZO_BankingCommon_Gamepad:SetCurrentCarriedAmount(control)
     return true
 end
 
+function ZO_BankingCommon_Gamepad:GetCurrentCarriedAmountNarration(control)
+    return ZO_Currency_FormatGamepad(self.currencyType, self:GetDepositMoneyAmount(), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+end
+
 function ZO_BankingCommon_Gamepad:SetCurrentBankedAmount(control)
     local moneyAmount = self:GetWithdrawMoneyAmount()
     local currencyOptions = self:GetWithdrawMoneyOptions()
@@ -667,6 +686,14 @@ function ZO_BankingCommon_Gamepad:SetCurrentBankedAmount(control)
     self:SetSimpleCurrency(control, moneyAmount, self.currencyType, BANKING_GAMEPAD_MODE_WITHDRAW, currencyOptions, obfuscateAmount)
     -- must return a non-nil value so that the control isn't auto-hidden
     return true
+end
+
+function ZO_BankingCommon_Gamepad:GetCurrentBankedAmountNarration(control)
+    local displayOptions =
+    {
+        obfuscateAmount = self:DoesObfuscateWithdrawAmount(),
+    }
+    return ZO_Currency_FormatGamepad(self.currencyType, self:GetWithdrawMoneyAmount(), ZO_CURRENCY_FORMAT_AMOUNT_ICON, displayOptions)
 end
 
 function ZO_BankingCommon_Gamepad:GetCurrencyType()

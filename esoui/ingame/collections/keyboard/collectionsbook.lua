@@ -55,7 +55,7 @@ function ZO_CollectionsBook:Initialize(control)
         end
     end)
 
-    self:UpdateCollection()
+    self:UpdateCollectionLater()
 
     SYSTEMS:RegisterKeyboardObject(ZO_COLLECTIONS_SYSTEM_NAME, self)
 end
@@ -476,7 +476,7 @@ function ZO_CollectionsBook:UpdateCollectible(collectibleId)
                 end
             end
         else
-            self:UpdateCollection()
+            self:UpdateCollectionLater()
         end
     end
 end

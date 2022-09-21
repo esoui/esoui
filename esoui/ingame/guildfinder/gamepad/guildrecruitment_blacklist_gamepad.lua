@@ -134,7 +134,7 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:InitializeBlacklistPlayerDialog()
         {
             -- user name
             {
-                template = "ZO_GamepadTextFieldItem",
+                template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
                 templateData = {
                     nameField = true,
                     textChangedCallback = function(control)
@@ -155,12 +155,13 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:InitializeBlacklistPlayerDialog()
                         local targetControl = dialog.entryList:GetTargetControl()
                         targetControl.editBoxControl:TakeFocus()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 
             -- note
             {
-                template = "ZO_GamepadTextFieldItem",
+                template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
                 templateData = {
                     nameField = true,
                     textChangedCallback = function(control)
@@ -181,6 +182,7 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:InitializeBlacklistPlayerDialog()
                         local targetControl = dialog.entryList:GetTargetControl()
                         targetControl.editBoxControl:TakeFocus()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 

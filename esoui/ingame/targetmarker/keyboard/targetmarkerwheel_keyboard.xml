@@ -1,0 +1,23 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TargetMarkerWheelMenuEntryTemplate_Keyboard" inherits="ZO_SelectableItemRadialMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_TargetMarkerWheelMenuEntryTemplate_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="ZO_TargetMarkerWheel_Keyboard_Template" inherits="ZO_RadialMenuBaseTemplate" hidden="true" virtual="true" />
+        
+        <TopLevelControl name="ZO_TargetMarkerWheel_Keyboard_TopLevel">
+            <AnchorFill/>
+
+            <OnInitialized>
+                ZO_TargetMarkerWheel_Keyboard_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Menu" inherits="ZO_TargetMarkerWheel_Keyboard_Template" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

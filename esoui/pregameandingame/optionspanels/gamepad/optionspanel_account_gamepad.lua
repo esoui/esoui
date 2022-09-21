@@ -24,14 +24,20 @@ function ZO_OptionsGamepad_EmailEditor:Initialize(control)
         setup = function(dialog, data)
             self.enteredText = ""
 
-            local tooltipText
             if ZO_IsPlaystationPlatform() then
-                tooltipText = zo_strformat(SI_GAMEPAD_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_TOOLTIP_PLAYSTATION, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_4))
+                local params = {
+                    "DIALOG_TERTIARY",
+                }
+                local keybindIndex = 1
+                GAMEPAD_TOOLTIPS:LayoutKeybindTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, SI_GAMEPAD_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_TOOLTIP_PLAYSTATION, params, keybindIndex)
             else
-                tooltipText = zo_strformat(SI_GAMEPAD_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_TOOLTIP, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_4), ZO_GetPlatformStoreName())
+                local params = {
+                    "DIALOG_TERTIARY",
+                    ZO_GetPlatformStoreName(),
+                }
+                local keybindIndex = 1
+                GAMEPAD_TOOLTIPS:LayoutKeybindTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, SI_GAMEPAD_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_TOOLTIP, params, keybindIndex)
             end
-
-            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipText)
 
             dialog.info.finishedCallback = data.finishedCallback
 
@@ -74,6 +80,8 @@ function ZO_OptionsGamepad_EmailEditor:Initialize(control)
                         local targetControl = dialog.entryList:GetTargetControl()
                         targetControl.editBoxControl:TakeFocus()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
+                    narrationTooltip = GAMEPAD_LEFT_TOOLTIP,
                 },
             },
             {

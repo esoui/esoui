@@ -1219,6 +1219,11 @@ ZO_TOOLTIP_STYLES =
         fontColorField = GENERAL_COLOR_WHITE,
     },
 
+    collectionsPlayerFXOverridden =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+
     -- Gamepad Crown Store Market
     instantUnlockIneligibilitySection =
     {
@@ -1780,6 +1785,25 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_34)",
         fontFace = "$(GAMEPAD_LIGHT_FONT)",
         fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+
+    --Character Select
+    characterDetailsHeader =
+    {
+        fontSize = "$(GP_54)",
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontStyle = "soft-shadow-thick",
+        customSpacing = 8,
+        fontColorField = GENERAL_COLOR_WHITE,
+        widthPercent = 100,
+    },
+
+    characterDetailsStatsSection =
+    {
+        statValuePairSpacing = 10,
+        childSpacing = 3,
+        customSpacing = 15,
+        widthPercent = 100,
     },
 }
 

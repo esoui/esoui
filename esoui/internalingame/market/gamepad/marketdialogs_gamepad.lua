@@ -39,6 +39,9 @@ local function GetAvailableCurrencyHeaderData(marketCurrencyType)
             ZO_CurrencyControl_SetSimpleCurrency(control, GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), GetPlayerMarketCurrency(marketCurrencyType), ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS)
             return true
         end,
+        valueNarration = function()
+            return ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), GetPlayerMarketCurrency(marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+        end,
         header = GetString(SI_GAMEPAD_MARKET_FUNDS_LABEL),
     }
 end
@@ -62,6 +65,9 @@ local function GetProductCostHeaderData(cost, marketCurrencyType, hasEsoPlusCost
             end
             return true
         end,
+        valueNarration = function()
+            return ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+        end,
         header = function(control)
             if hasEsoPlusCost then
                 return GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_NORMAL_COST_LABEL)
@@ -84,6 +90,9 @@ local function GetProductEsoPlusCostHeaderData(cost, marketCurrencyType)
             }
             ZO_CurrencyControl_SetSimpleCurrency(control, GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
             return true
+        end,
+        valueNarration = function()
+            return ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
         end,
         header = GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_ESO_PLUS_COST_LABEL),
     }
@@ -408,6 +417,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 g_dialogDiscountPercentControl:SetHidden(true)
             end
         end,
+        baseNarrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
         buttons =
         {
             -- Select Button
@@ -536,6 +546,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                     if targetData.recipientNameEntry and targetControl then
                         local function OnUserChosen(hasResult, displayName, consoleId)
                             if hasResult then
+                                SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                                 targetControl.editBoxControl:SetText(displayName)
                             end
                         end
@@ -544,6 +555,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                         PLAYER_CONSOLE_INFO_REQUEST_MANAGER:RequestIdFromUserListDialog(OnUserChosen, GetString(SI_GAMEPAD_CONSOLE_SELECT_FOR_SEND_GIFT), INCLUDE_ONLINE_FRIENDS, INCLUDE_OFFLINE_FRIENDS)
                     elseif targetData.messageEntry and targetControl then
                         targetControl.editBoxControl:SetText(GetRandomGiftSendNoteText())
+                        SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                     end
                 end,
             },
@@ -1265,9 +1277,12 @@ do
                     ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
                 end)
 
+                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(chooseAsGiftDropdownEntryData.dialog, dropdown)
+
                 GAMEPAD_TOOLTIPS:LayoutMarketProductListing(GAMEPAD_LEFT_DIALOG_TOOLTIP, self.marketProductData:GetId(), self.marketProductData:GetPresentationIndex())
                 ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
             end
+            chooseAsGiftDropdownEntryData.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
         end
         return chooseAsGiftDropdownEntryData
     end
@@ -1284,6 +1299,7 @@ do
                 local dropdown = control.dropdown
                 dropdown:SetSortsItems(false)
                 dropdown:ClearItems()
+                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(selectHouseTemplateDropdownEntryData.dialog, dropdown)
 
                 local function SetSelectedTemplateId(templateId)
                     if self.houseSelectionInfo.selectedTemplateId ~= templateId then
@@ -1343,6 +1359,8 @@ do
                     end
                 end
             end
+            selectHouseTemplateDropdownEntryData.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
+            selectHouseTemplateDropdownEntryData.narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP
         end
         return selectHouseTemplateDropdownEntryData
     end
@@ -1370,6 +1388,8 @@ do
                     control.editBoxControl:SetText(self.recipientDisplayName)
                 end
             end
+
+            recipientNameEntryData.narrationText = ZO_GetDefaultParametricListEditBoxNarrationText
         end
         return recipientNameEntryData
     end
@@ -1395,6 +1415,8 @@ do
                 control.editBoxControl:SetMaxInputChars(GIFT_NOTE_MAX_LENGTH)
                 control.editBoxControl:SetText(self.giftMessage)
             end
+
+            giftMessageEntryData.narrationText = ZO_GetDefaultParametricListEditBoxNarrationText
         end
         return giftMessageEntryData
     end
@@ -1459,6 +1481,15 @@ do
                 else
                     -- No maximum quantity requires input but no maximum limit label.
                     control.maximumControl:SetHidden(true)
+                end
+            end
+
+            itemQuantityEntryData.narrationText = function(entryData, entryControl)
+                local editBoxText = ZO_FormatEditBoxNarrationText(entryControl.editBoxControl)
+                if self.maxQuantity then
+                    return { editBoxText, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_MARKET_CONFIRM_PURCHASE_MAXIMUM_LABEL, self.maxQuantity)) }
+                else
+                    return editBoxText
                 end
             end
         end

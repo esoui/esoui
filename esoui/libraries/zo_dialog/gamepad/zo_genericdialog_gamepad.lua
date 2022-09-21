@@ -114,6 +114,14 @@ function DialogKeybindStripDescriptor:SetEthereal(ethereal)
     self.ethereal = ethereal
 end
 
+function DialogKeybindStripDescriptor:SetNarrateEthereal(narrateEthereal)
+    self.narrateEthereal = narrateEthereal
+end
+
+function DialogKeybindStripDescriptor:SetEtherealNarrationOrder(etherealNarrationOrder)
+    self.etherealNarrationOrder = etherealNarrationOrder
+end
+
 function DialogKeybindStripDescriptor:SetHandlesKeyUp(handlesKeyUp)
     self.handlesKeyUp = handlesKeyUp
 end
@@ -180,6 +188,8 @@ local function TryRefreshKeybind(dialog, keybindDesc, buttonData, twoOrMoreButto
     keybindDesc:SetButtonCallback(buttonData.callback)
     keybindDesc:SetVisible(buttonData.visible)
     keybindDesc:SetEthereal(buttonData.ethereal)
+    keybindDesc:SetNarrateEthereal(buttonData.narrateEthereal)
+    keybindDesc:SetEtherealNarrationOrder(buttonData.etherealNarrationOrder)
     keybindDesc:SetEnabled(buttonData.enabled)
     keybindDesc:SetOnShowCooldown(buttonData.onShowCooldown)
     keybindDesc:SetHandlesKeyUp(buttonData.handlesKeyUp)
@@ -322,6 +332,9 @@ local function OnDialogShown(dialog)
     if dialog.info.OnShownCallback then
         dialog.info.OnShownCallback(dialog)
     end
+
+    local NARRATE_BASE_TEXT = true
+    SCREEN_NARRATION_MANAGER:QueueDialog(dialog, NARRATE_BASE_TEXT)
 end
 
 local function OnDialogHiding(dialog)
@@ -409,38 +422,54 @@ function ZO_GenericGamepadDialog_RefreshHeaderData(dialog, data)
         headerData.headerLineCount = 0
         if data.data1 then
             headerData.data1HeaderText = data.data1.header
+            headerData.data1HeaderTextNarration = data.data1.headerNarration
             headerData.data1Text = data.data1.value
+            headerData.data1TextNarration = data.data1.valueNarration
             headerData.headerLineCount = headerData.headerLineCount + 1
         else
             headerData.data1HeaderText = nil
+            headerData.data1HeaderTextNarration = nil
             headerData.data1Text = nil
+            headerData.data1TextNarration = nil
         end
 
         if data.data2 then
             headerData.data2HeaderText = data.data2.header
+            headerData.data2HeaderTextNarration = data.data2.headerNarration
             headerData.data2Text = data.data2.value
+            headerData.data2TextNarration = data.data2.valueNarration
             headerData.headerLineCount = headerData.headerLineCount + 1
         else
             headerData.data2HeaderText = nil
+            headerData.data2HeaderTextNarration = nil
             headerData.data2Text = nil
+            headerData.data2TextNarration = nil
         end
 
         if data.data3 then
             headerData.data3HeaderText = data.data3.header
+            headerData.data3HeaderTextNarration = data.data3.headerNarration
             headerData.data3Text = data.data3.value
+            headerData.data3TextNarration = data.data3.valueNarration
             headerData.headerLineCount = headerData.headerLineCount + 1
         else
             headerData.data3HeaderText = nil
+            headerData.data3HeaderTextNarration = nil
             headerData.data3Text = nil
+            headerData.data3TextNarration = nil
         end
 
         if data.data4 then
             headerData.data4HeaderText = data.data4.header
+            headerData.data4HeaderTextNarration = data.data4.headerNarration
             headerData.data4Text = data.data4.value
+            headerData.data4TextNarration = data.data4.valueNarration
             headerData.headerLineCount = headerData.headerLineCount + 1
         else
             headerData.data4HeaderText = nil
+            headerData.data4HeaderTextNarration = nil
             headerData.data4Text = nil
+            headerData.data4TextNarration = nil
         end
 
         ZO_GamepadGenericHeader_Refresh(dialog.header, headerData)
@@ -591,6 +620,8 @@ end
 -- Parametric List Dialog Template --
 -------------------------------------
 
+local GAMEPAD_DIALOG_MAX_LINE_LIMIT = 4
+
 -- Dialog
 local GenericParametricListGamepadDialogTemplate_InitializeEntryList -- forward declare
 function ZO_GenericParametricListGamepadDialogTemplate_OnInitialized(dialog)
@@ -601,11 +632,11 @@ function ZO_GenericParametricListGamepadDialogTemplate_OnInitialized(dialog)
         {
             {
                 font = "ZoFontGamepadCondensed42",
-                lineLimit = 2,
+                lineLimit = GAMEPAD_DIALOG_MAX_LINE_LIMIT,
             },
             {
                 font = "ZoFontGamepadCondensed34",
-                lineLimit = 2,
+                lineLimit = GAMEPAD_DIALOG_MAX_LINE_LIMIT,
             },
         }
 
@@ -613,7 +644,7 @@ function ZO_GenericParametricListGamepadDialogTemplate_OnInitialized(dialog)
             local headerData = dialog.headerData
 
             if headerData and headerData.headerLineCount then
-                local lineLimit = 4 - headerData.headerLineCount
+                local lineLimit = GAMEPAD_DIALOG_MAX_LINE_LIMIT - headerData.headerLineCount
                 if lineLimit <= 0 then
                     lineLimit = 1
                 end
@@ -702,6 +733,8 @@ do
         -- Unregister all dropdown callbacks since the dialog control may be used for a different dialog
         local function ResetDropdownItem(control)
             control.dropdown:ClearCallbackRegistry()
+            --Re-register for narration after clearing the callback registry
+            SCREEN_NARRATION_MANAGER:RegisterComboBox(control.dropdown)
         end
 
         -- Custom data templates
@@ -709,6 +742,8 @@ do
         dialog.entryList:AddDataTemplate("ZO_GamepadDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, nil, ResetDropdownItem)
         dialog.entryList:AddDataTemplateWithHeader("ZO_GamepadMultiSelectionDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryFullWidthHeaderTemplate", nil, nil, ResetDropdownItem)
         dialog.entryList:AddDataTemplate("ZO_GamepadMultiSelectionDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, nil, ResetDropdownItem)
+
+        SCREEN_NARRATION_MANAGER:RegisterParametricListDialog(dialog)
     end
 
     function ZO_GenericParametricListGamepadDialogTemplate_RefreshVisibleEntries(dialog)
@@ -1001,9 +1036,10 @@ do
 
         local ValueChangedCallback = dialog.info.OnSliderValueChanged or DefaultOnSliderValueChanged
 
-        dialog.slider.valueChangedCallback =    function(sliderControl, value)
-                                                    ValueChangedCallback(dialog, sliderControl, value)
-                                                end
+        dialog.slider.valueChangedCallback = function(sliderControl, value)
+            SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
+            ValueChangedCallback(dialog, sliderControl, value)
+        end
 
         local dialogData = dialog.data
 
@@ -1040,6 +1076,7 @@ function ZO_GenericGamepadDialog_Parametric_TextFieldFocusLost(control)
     ZO_GamepadEditBox_FocusLost(control)
     local paraDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
     paraDialog.entryList:RefreshVisible()
+    SCREEN_NARRATION_MANAGER:QueueDialog(paraDialog)
 end
 
 function ZO_GamepadTextFieldItem_OnInitialized(control)
@@ -1051,6 +1088,7 @@ function ZO_GamepadTextFieldItem_OnInitialized(control)
 
     control.resetFunction = function()
         control.editBoxControl.textChangedCallback = nil
+        control.editBoxControl.focusLostCallback = nil
         control.editBoxControl:SetText("")
     end
 end

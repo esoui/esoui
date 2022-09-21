@@ -185,7 +185,11 @@ ESO_Dialogs["SHOW_REDEEM_CODE_CONSOLE"] =
         {
             text = SI_DIALOG_LOG_OUT_ENTER_CODE,
             callback = function(dialog)
-                ShowConsoleRedeemCodeUI()
+                if IsConsoleUI() then
+                    ShowConsoleRedeemCodeUI()
+                else -- It's intended that Heron do this as well
+                    OpenURLByType(APPROVED_URL_ESO_ACCOUNT)
+                end
             end,
         },
 

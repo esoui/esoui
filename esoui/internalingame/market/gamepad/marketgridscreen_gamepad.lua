@@ -617,7 +617,7 @@ end
 
 function ZO_GamepadMarket_GridScreen:OnShown()
     if self.queuedTutorial then
-        ZO_GAMEPAD_MARKET:ShowTutorial(self.queuedTutorial)
+        TUTORIAL_MANAGER:ShowTutorial(self.queuedTutorial)
         self.queuedTutorial = nil
     end
 end

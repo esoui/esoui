@@ -511,9 +511,9 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
                 local combination = data.combinations[value]
                 if combination.isChampionPoint then
                     if meetsRankRequirement then
-                        return zo_strformat(SI_SMITHING_CREATED_CHAMPION_POINTS, GetChampionIconMarkupString("100%"), ZO_WHITE:Colorize(combination.createsItemOfLevel))
+                        return zo_strformat(SI_SMITHING_CREATED_CHAMPION_POINTS, ZO_GetChampionIconMarkupString("100%"), ZO_WHITE:Colorize(combination.createsItemOfLevel))
                     else
-                        return ZO_ERROR_COLOR:Colorize(zo_strformat(SI_SMITHING_CREATED_CHAMPION_POINTS, GetChampionIconMarkupStringInheritColor("100%"), combination.createsItemOfLevel))
+                        return ZO_ERROR_COLOR:Colorize(zo_strformat(SI_SMITHING_CREATED_CHAMPION_POINTS, ZO_GetChampionIconMarkupStringInheritColor("100%"), combination.createsItemOfLevel))
                     end
                 else
                     if meetsRankRequirement then
@@ -569,7 +569,7 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
             local selectedLabelText
             local materialNameText = colorMaterialNameWhite and ZO_WHITE:Colorize(data.name) or data.name
             if data.isChampionPoint then
-                local championPointIcon = championPointRangeIconsInheritColor and GetChampionIconMarkupStringInheritColor("100%") or GetChampionIconMarkupString("100%")
+                local championPointIcon = championPointRangeIconsInheritColor and ZO_GetChampionIconMarkupStringInheritColor("100%") or ZO_GetChampionIconMarkupString("100%")
                 selectedLabelText = zo_strformat(SI_SMITHING_MATERIAL_CHAMPION_POINT_RANGE, materialNameText, championPointIcon, data.minCreatesItemOfLevel, championPointIcon, data.maxCreatesItemOfLevel)
             else
                 selectedLabelText = zo_strformat(SI_SMITHING_MATERIAL_LEVEL_RANGE, materialNameText, data.minCreatesItemOfLevel, data.maxCreatesItemOfLevel)

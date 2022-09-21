@@ -57,6 +57,7 @@ end
 
 function ZO_GamepadSocialListPanel:OnSelectionChanged(oldData, newData)
     ZO_GamepadInteractiveSortFilterList.OnSelectionChanged(self, oldData, newData)
+    SCREEN_NARRATION_MANAGER:OnSocialListSelectionChanged(self)
     self:SetupOptions(newData)
     self:RefreshTooltip()
 end
@@ -130,6 +131,7 @@ function ZO_GamepadSocialListPanel:InitializeDropdownFilter()
         local entry = ZO_ComboBox:CreateItemEntry(text, StatusSelect)
         self.filterDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
+    self.filterDropdown:SetName(GetString(SI_GAMEPAD_SOCIAL_LIST_FILTER_DROPDOWN_NARRATION_NAME))
 
     local function CachedStatusUpdate(_, currentFrameTimeSeconds)
         if self.cachedUpdateStatus then
@@ -234,3 +236,40 @@ function ZO_GamepadSocialListPanel:AddInviteToGuildOptionTemplates()
         end
     end
 end
+
+function ZO_GamepadSocialListPanel:GetCharacterFieldsNarration(entryData)
+    local ROW_ENTRY_PAUSE_TIME_MS = 100
+    local narration = {}
+    
+    if entryData.characterName then
+        local narrationStrings = { GetString(SI_SOCIAL_LIST_PANEL_HEADER_CHARACTER), entryData.characterName }
+        table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+    end
+
+    if entryData.formattedZone then
+        local narrationStrings = { GetString(SI_SOCIAL_LIST_PANEL_HEADER_ZONE), entryData.formattedZone }
+        table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+    end
+
+    if entryData.class then
+        local gender = entryData.gender or GENDER_MALE
+        local narrationStrings = { GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_CLASS), zo_strformat(SI_CLASS_NAME, GetClassName(gender, entryData.class)) }
+        table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+    end
+
+    if entryData.formattedAllianceName then
+        local narrationStrings = { GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_ALLIANCE), entryData.formattedAllianceName }
+        table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+    end
+
+    local levelString = ZO_GetLevelOrChampionPointsNarrationString(entryData.level, entryData.championPoints)
+    if levelString ~= "" then
+        local narrationStrings = { GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_LEVEL), levelString }
+        table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+    end
+
+    return narration
+end
+
+--This function must be implemented by any child classes in order for screen narration to function
+ZO_GamepadSocialListPanel.GetSelectedNarrationText = ZO_GamepadSocialListPanel:MUST_IMPLEMENT()

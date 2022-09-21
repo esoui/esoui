@@ -166,26 +166,9 @@ function ZO_CharacterCreateDropdownSlider_Keyboard:SetName(displayName, enumName
     -- nothing to do for now, the only dropdown in use has its own section
 end
 
--- Terrible first implementation
-local voiceIdToNameId =
-{
-    SI_CREATE_CHARACTER_VOICE_A,
-    SI_CREATE_CHARACTER_VOICE_B,
-    SI_CREATE_CHARACTER_VOICE_C,
-    SI_CREATE_CHARACTER_VOICE_D,
-    SI_CREATE_CHARACTER_VOICE_E,
-    SI_CREATE_CHARACTER_VOICE_F,
-    SI_CREATE_CHARACTER_VOICE_G,
-    SI_CREATE_CHARACTER_VOICE_H,
-}
-
 local function GetAppearanceItemName(appearanceName, value)
-    local nameId = voiceIdToNameId[value]
-    if nameId then
-        return GetString(nameId)
-    end
-
-    return GetString(SI_CREATE_CHARACTER_VOICE_A)
+    --TODO: Look into an approach that works for more than just voice name
+    return ZO_CharacterCreateSlider_GetVoiceName(value)
 end
 
 function ZO_CharacterCreateDropdownSlider_Keyboard:SetData(appearanceName, numValues, displayName)

@@ -14,6 +14,7 @@ local function CompleteGroupInvite(characterOrDisplayName, sentFromChat, display
     else
         GroupInviteByName(characterOrDisplayName)
 
+        ZO_OutputStadiaLog(string.format("GroupUtils:CompleteGroupInvite, set ZO_Menu_SetLastCommandWasFromMenu == %s", not sentFromChat and "true" or "false"))
         ZO_Menu_SetLastCommandWasFromMenu(not sentFromChat)
         if displayInvitedMessage then
             ZO_Alert(ALERT, nil, zo_strformat(GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))

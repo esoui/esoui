@@ -68,8 +68,12 @@ function ZO_GuildRecruitment_AttributeSelectionTile_Gamepad:Layout(attributeData
     end
 
     if attributeData.isTimeSelection then
+        --We have to manually specify the header text here as data.headerText is only set for the start time
+        self.comboBox:SetHeader(GetString(SI_GUILD_FINDER_CORE_HOURS_LABEL))
+        self.comboBox:SetName(GetString("SI_GUILDMETADATAATTRIBUTE", self.attribute))
         ZO_PopulateHoursSinceMidnightPerHourComboBox(self.comboBox, OnComboBoxSelection, attributeData.currentValue)
     else
+        self.comboBox:SetName(attributeData.headerText)
         GUILD_RECRUITMENT_MANAGER.PopulateDropdown(self.comboBox, attributeData.iterBegin, attributeData.iterEnd, attributeData.stringPrefix, OnComboBoxSelection, attributeData, attributeData.omittedIndex)
     end
 
@@ -78,6 +82,10 @@ end
 
 function ZO_GuildRecruitment_AttributeSelectionTile_Gamepad:UpdateVisualDisplay()
     self.comboBox:SetSelectedItemTextColor(self:IsSelected())
+end
+
+function ZO_GuildRecruitment_AttributeSelectionTile_Gamepad:GetNarrationText()
+    return self.comboBox:GetNarrationText()
 end
 
 -- XML functions

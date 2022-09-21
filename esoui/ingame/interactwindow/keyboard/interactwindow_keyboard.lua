@@ -158,16 +158,18 @@ local function EnableChatterOption(option)
     option.enabled = true
 end
 
-function ZO_Interaction:PopulateChatterOption(controlID, optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, importantOptions)
+function ZO_Interaction:PopulateChatterOption(controlID, optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, importantOptions, teleportNPCId, teleportWaypoinIndex)
     local optionControl = self.optionControls[controlID]
     optionControl:SetHidden(false)
 
-    local chatterData = self:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore)
+    local chatterData = self:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, teleportWaypoinIndex)
 
     optionControl.optionIndex = chatterData.optionIndex
     optionControl.optionType = chatterData.optionType
     optionControl.isImportant = chatterData.isImportant
     optionControl.chosenBefore = chatterData.chosenBefore
+    optionControl.teleportNPC = chatterData.teleportNPC
+    optionControl.teleportWaypointIndex = chatterData.teleportWaypointIndex
     optionControl.gold = chatterData.gold
     optionControl.optionText = chatterData.optionText
 
@@ -176,9 +178,9 @@ function ZO_Interaction:PopulateChatterOption(controlID, optionIndex, optionText
         TriggerTutorial(TUTORIAL_TRIGGER_IMPORTANT_DIALOGUE)
     end
 
-    if(chatterData.optionsEnabled) then
+    if chatterData.optionsEnabled then
 
-        if(chatterData.optionUsable) then
+        if chatterData.optionUsable then
             EnableChatterOption(optionControl)
         else
             DisableChatterOption(optionControl, chatterData.recolorIfUnusable, chatterData.optionUsable)
@@ -187,13 +189,13 @@ function ZO_Interaction:PopulateChatterOption(controlID, optionIndex, optionText
         optionControl:SetText(chatterData.optionText)
         optionControl:SetHandler("OnUpdate", chatterData.labelUpdateFunction)
 
-        local icon = GetControl(optionControl, "IconImage")
+        local icon = optionControl:GetNamedChild("IconImage")
 
-        icon:SetHidden((chatterData.iconFile == nil) or not USE_CHATTER_OPTION_ICON)
-
-        if(chatterData.iconFile) then
-            icon:SetTexture(chatterData.iconFile)
+        icon:ClearIcons()
+        for iconIndex, iconFile in pairs(chatterData.iconFiles) do
+            icon:AddIcon(iconFile)
         end
+        icon:Show()
 
         local _, textHeight = optionControl:GetTextDimensions()
         return textHeight

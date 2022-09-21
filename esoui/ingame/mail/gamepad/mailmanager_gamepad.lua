@@ -323,8 +323,8 @@ function MailManager_Gamepad:InitializeControls()
 end
 
 function MailManager_Gamepad:RefreshHeader()
-    if self.activeHeader then
-        ZO_GamepadGenericHeader_Refresh(self.header, self.activeHeader)
+    if self.headerData then
+        ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
     end
 end
 
@@ -342,7 +342,7 @@ function MailManager_Gamepad:ShowTab(tabIndex, pushScene)
 end
 
 function MailManager_Gamepad:SwitchToHeader(headerData, tabIndex)
-    self.activeHeader = headerData
+    self.headerData = headerData
     if headerData then
         ZO_GamepadGenericHeader_Refresh(self.header, headerData)
 

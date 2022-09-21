@@ -74,6 +74,14 @@ function ZO_Help_Root_Gamepad:InitializeKeybindStripDescriptors()
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self:GetMainList())
 end
 
+--Overridden from base
+function ZO_Help_Root_Gamepad:GetHeaderNarration()
+    local narration = ZO_Gamepad_ParametricList_Screen.GetHeaderNarration(self)
+    --TODO XAR: Look into potentially giving this its own narratable object
+    narration:AddNarrationText(GetString(SI_GAMEPAD_HELP_WEBSITE))
+    return narration
+end
+
 -- stuck event handling
 
 function ZO_Help_Root_Gamepad:OnPlayerActivated()
@@ -145,7 +153,7 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckConfirmDialog()
             text = function()
                 local cost = zo_min(GetRecallCost(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
                 local goldIcon = ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
-                local primaryButtonMarkup = ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)
+                local primaryButtonMarkup = ZO_WHITE:Colorize(ZO_Keybindings_GetHighestPriorityBindingStringFromAction("UI_SHORTCUT_PRIMARY", KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP))
 
                 local text
                 if DoesCurrentZoneHaveTelvarStoneBehavior() then
@@ -208,6 +216,13 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckCooldownDialog()
         mainText =
         {
             text = GetString(SI_GAMEPAD_HELP_UNSTUCK_COOLDOWN_HEADER),
+        },
+
+        loading =
+        {
+            text = function()
+                return ZO_FormatTimeMilliseconds(GetTimeUntilStuckAvailable(), TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT_SHOW_ZERO_SECS, TIME_FORMAT_PRECISION_SECONDS)
+            end,
         },
        
         buttons =

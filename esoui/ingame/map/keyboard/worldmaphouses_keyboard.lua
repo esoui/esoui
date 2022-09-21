@@ -6,10 +6,6 @@ ZO_MapHouses_Keyboard = ZO_MapHouses_Shared:Subclass()
 local HOUSE_HEADER = 1
 local HOUSE_DATA = 2
 
-function ZO_MapHouses_Keyboard:New(...)
-    return ZO_MapHouses_Shared.New(self,...)
-end
-
 function ZO_MapHouses_Keyboard:Initialize(control)
     ZO_MapHouses_Shared.Initialize(self, control, ZO_FadeSceneFragment)
     self:SetNoHousesLabelControl(control:GetNamedChild("NoHouses"))
@@ -102,7 +98,7 @@ function ZO_WorldMapHouseRow_OnMouseUp(label, button, upInside)
         label:SetAnchor(TOPLEFT, nil, TOPLEFT, ZO_MAP_HOUSES_KEYBOARD_ROW_PADDING_X, 0)
         if upInside then
             local data = ZO_ScrollList_GetData(label:GetParent())
-            ZO_WorldMap_SetMapByIndex(data.mapIndex)
+            WORLD_MAP_MANAGER:SetMapByIndex(data.mapIndex)
             ZO_WorldMap_PanToWayshrine(data.nodeIndex)
             PlaySound(SOUNDS.MAP_LOCATION_CLICKED)
         end

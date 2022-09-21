@@ -1165,11 +1165,6 @@ function ZO_TributeSummary:ApplyPlatformStyle()
     ApplyTemplateToControl(self.statisticsControl, ZO_GetPlatformTemplate("ZO_TributeSummary_Statistics"))
     ApplyTemplateToControl(self.keybindButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
     ApplyTemplateToControl(self.summaryControl, ZO_GetPlatformTemplate("ZO_TributeSummary_TributeStatus"))
-    local numPatrons = self.summaryPatrons:GetNumChildren()
-    for patronIndex = 1, numPatrons do
-        local patron = self.summaryPatrons:GetChild(patronIndex)
-        ApplyTemplateToControl(patron, ZO_GetPlatformTemplate("ZO_TributeSummary_Patron"))
-    end
     ApplyTemplateToControl(self.rewardsControl, ZO_GetPlatformTemplate("ZO_TributeSummary_TributeReward"))
     ApplyTemplateToControl(self.progressionControl, ZO_GetPlatformTemplate("ZO_TributeSummary_TributeProgression"))
 
@@ -1190,10 +1185,39 @@ function ZO_TributeSummary:ApplyPlatformStyle()
         reward:MarkStyleDirty()
     end
 
-    -- TODO Tribute: Other controls specific to this scene
-
     -- Reset the text here to handle the force uppercase on gamepad
     self.keybindButton:SetText(GetString(SI_TRIBUTE_SUMMARY_CONTINUE))
+end
+
+local function AreRewardsEqual(reward1, reward2)
+    local rewardType1 = reward1.rewardType
+    local rewardType2 = reward2.rewardType
+
+    if rewardType1 ~= rewardType2 then
+        return false
+    end
+
+    if rewardType1 == REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE then
+        return true
+    elseif rewardType1 == REWARD_ENTRY_TYPE_ADD_CURRENCY then
+        return reward1.currencyType == reward2.currencyType
+    elseif rewardType1 == REWARD_ENTRY_TYPE_COLLECTIBLE then
+        local collectibleId1 = GetCollectibleRewardCollectibleId(reward1:GetRewardId())
+        local collectibleId2 = GetCollectibleRewardCollectibleId(reward2:GetRewardId())
+        return collectibleId1 == collectibleId2
+    elseif rewardType1 == REWARD_ENTRY_TYPE_ITEM then
+        local rewardItemId1 = GetItemLinkItemId(reward1:GetItemLink())
+        local rewardItemId2 = GetItemLinkItemId(reward2:GetItemLink())
+        return rewardItemId1 == rewardItemId2 and reward1:GetItemDisplayQuality() == reward2:GetItemDisplayQuality() and reward1:GetItemFunctionalQuality() == reward2:GetItemFunctionalQuality()
+    elseif rewardType1 == REWARD_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE then
+        return false -- Tribute card upgrades don't stack
+    elseif rewardType1 == REWARD_ENTRY_TYPE_MAIL_ITEM then
+        return false -- System mails don't stack
+    elseif rewardType1 == ZO_REWARD_CUSTOM_ENTRY_TYPE.LFG_ACTIVITY then
+        return false -- These custom entries don't stack
+    else
+        internalassert(false, "Unexpected Tribute match reward type")
+    end
 end
 
 function ZO_TributeSummary:BeginEndOfGameFanfare()
@@ -1426,6 +1450,9 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     -- Rewards
     -- Club rank points don't get to us via reward list defs, so we have to create the reward item for it ourselves
     -- to display it as a reward.
+    -- Pay attention and be careful if we have to fake a reward like this for anything we may end up treating as an
+    -- actual RewardData object (currently this applies to collectibles; I can't imagine why we'd have to fake a collectible,
+    -- but better to be warned than not).
     local clubXPReward =
     {
         rewardType = REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE,
@@ -1448,6 +1475,17 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     local matchLFGRewards = REWARDS_MANAGER:GetAllRewardInfoForLFGActivityRewardUIData(lfgRewardUiDataId)
     local rankUpMailedRewards = false
     local rankUpRewards = {}
+
+    local function IsRewardOwnedCollectible(reward)
+        if reward.rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
+            local collectibleId = GetCollectibleRewardCollectibleId(reward:GetRewardId())
+            if GetCollectibleUnlockStateById(collectibleId) == COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED then
+                return true
+            end
+        end
+        return false
+    end
+
     if self.rankUp then
         for rank = self.playerRankCurrent, self.playerRankNew do
             local rankUpRewardListId = GetActiveTributeCampaignTierRewardListId(rank)
@@ -1457,7 +1495,19 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
             end
             if next(rankUpRewardList) then
                 for _, reward in ipairs(rankUpRewardList) do
-                    table.insert(rankUpRewards, reward)
+                    if not IsRewardOwnedCollectible(reward) then
+                        local stackableRewardAlreadyExists = false
+                        for _, innerReward in ipairs(rankUpRewards) do
+                            if AreRewardsEqual(reward, innerReward) then
+                                innerReward.quantity = innerReward.quantity + reward.quantity
+                                stackableRewardAlreadyExists = true
+                                break
+                            end
+                        end
+                        if not stackableRewardAlreadyExists then
+                            table.insert(rankUpRewards, reward)
+                        end
+                    end
                 end
             end
         end
@@ -1472,7 +1522,19 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
             end
             if next(clubRankRewardList) then
                 for _, reward in ipairs(clubRankRewardList) do
-                    table.insert(rankUpRewards, reward)
+                    if not IsRewardOwnedCollectible(reward) then
+                        local stackableRewardAlreadyExists = false
+                        for _, innerReward in ipairs(rankUpRewards) do
+                            if AreRewardsEqual(reward, innerReward) then
+                                innerReward.quantity = innerReward.quantity + reward.quantity
+                                stackableRewardAlreadyExists = true
+                                break
+                            end
+                        end
+                        if not stackableRewardAlreadyExists then
+                            table.insert(rankUpRewards, reward)
+                        end
+                    end
                 end
             end
         end
@@ -1483,6 +1545,21 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
 
     local matchCombinedRewards = {}
     ZO_CombineNumericallyIndexedTables(matchCombinedRewards, matchStandardRewards, matchLFGRewards)
+    for index = #matchCombinedRewards, 1, -1 do
+        local reward = matchCombinedRewards[index]
+        if IsRewardOwnedCollectible(reward) then
+            table.remove(matchCombinedRewards, index)
+        else
+            for innerIndex = 1, 1, index do
+                local innerReward = matchCombinedRewards[innerIndex]
+                if AreRewardsEqual(reward, innerReward) then
+                    innerReward.quantity = innerReward.quantity + reward.quantity
+                    table.remove(matchCombinedRewards, index)
+                end
+            end
+        end
+    end
+
     local MAX_REWARDS_PER_ROW = 4
 
     local function SetUpRewardsRow(rewardsTable, rowControl, rewardsControlPool)

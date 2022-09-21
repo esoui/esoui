@@ -277,7 +277,11 @@ ESO_Dialogs["CRAFTING_CREATE_MULTIPLE_GAMEPAD"] =
                     control.spinner:RegisterCallback("OnValueChanged", function(value)
                         dialogData.numIterations = value
                         ZO_GenericGamepadDialog_RefreshKeybinds(entryData.dialog)
+                        SCREEN_NARRATION_MANAGER:QueueDialog(entryData.dialog)
                     end)
+                end,
+                narrationText = function(entryData, entryControl)
+                    return ZO_FormatSpinnerNarrationText(entryData.text, entryData.dialog.data.numIterations)
                 end,
             },
         }
@@ -389,7 +393,11 @@ ESO_Dialogs["CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD"] =
                     control.spinner:RegisterCallback("OnValueChanged", function(value)
                         dialogData.iterations = value
                         ZO_GenericGamepadDialog_RefreshKeybinds(entryData.dialog)
+                        SCREEN_NARRATION_MANAGER:QueueDialog(entryData.dialog)
                     end)
+                end,
+                narrationText = function(entryData, entryControl)
+                    return ZO_FormatSpinnerNarrationText(entryData.text, entryData.dialog.data.iterations)
                 end,
             },
         }

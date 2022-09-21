@@ -179,6 +179,8 @@ function ZO_CraftingOptionsDialogGamepad:BuildFilter(filterIndex)
             local targetControl = self.filterControls[filterIndex]
             ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
             currentFilter.checked = ZO_CheckButton_IsChecked(targetControl.checkBox)
+            local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+            SCREEN_NARRATION_MANAGER:QueueDialog(parametricDialog)
         end
     end
 
@@ -200,10 +202,15 @@ function ZO_CraftingOptionsDialogGamepad:BuildFilter(filterIndex)
         self.filterControls[filterIndex] = control
     end
 
-    return self:BuildCheckboxEntry(header, label, CraftingFilterCheckboxEntrySetup, Callback)
+    local function CraftingFilterCheckboxEntryNarrationText(entryData, entryControl)
+        local isChecked = currentFilter.checked
+        return ZO_FormatToggleNarrationText(entryData.text, isChecked)
+    end
+
+    return self:BuildCheckboxEntry(header, label, CraftingFilterCheckboxEntrySetup, Callback, CraftingFilterCheckboxEntryNarrationText, GAMEPAD_LEFT_TOOLTIP)
 end
 
-function ZO_CraftingOptionsDialogGamepad:BuildCheckboxEntry(header, label, setupFunction, callback)
+function ZO_CraftingOptionsDialogGamepad:BuildCheckboxEntry(header, label, setupFunction, callback, narrationText, narrationTooltip)
     local entry = 
     {
         template = "ZO_CheckBoxTemplate_WithPadding_Gamepad",
@@ -213,6 +220,8 @@ function ZO_CraftingOptionsDialogGamepad:BuildCheckboxEntry(header, label, setup
             text = label,
             setup = setupFunction,
             callback = callback,
+            narrationText = narrationText,
+            narrationTooltip = narrationTooltip,
         },
     }
     return entry

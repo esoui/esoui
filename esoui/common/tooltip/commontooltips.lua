@@ -8,3 +8,9 @@ function ZO_Tooltip:LayoutTextBlockTooltip(text)
     section:AddLine(text, self:GetStyle("bodyDescription"))
     self:AddSection(section)
 end
+
+function ZO_Tooltip:LayoutKeybindTextBlockTooltip(formatString, formatStringParams, keybindIndex)
+    local section = self:AcquireSection(self:GetStyle("bodySection"))
+    section:AddParameterizedKeybindLine(formatString, formatStringParams, keybindIndex, self:GetStyle("bodyDescription"))
+    self:AddSection(section)
+end

@@ -45,6 +45,7 @@ local function InitializeCampaignQueueDialog()
                         return ZO_SharedGamepadEntry_OnSetup(control, data, ...)
                     end,
                     queueType = CAMPAIGN_QUEUE_TYPE_GROUP,
+                    narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
                 },
             },
             {
@@ -53,6 +54,7 @@ local function InitializeCampaignQueueDialog()
                     text = GetString(SI_CAMPAIGN_BROWSER_QUEUE_SOLO),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     queueType = CAMPAIGN_QUEUE_TYPE_INDIVIDUAL,
+                    narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
                 },
             },
         },

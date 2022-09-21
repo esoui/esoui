@@ -185,6 +185,7 @@ function ZO_GuildRanks_Shared:Initialize(control, templateData)
         headerTemplate - The name of the template control to be used for the permissions category header entry,
         headerHeight - The height to be used for the headerTemplate,
         highlightTemplate - Optional: highlight override template used for Gamepad (needed since checkboxes highlight the checkbox instead of the full control which is the default),
+        narrationText -- Optional: The text used to narrate the entry when using screen narration. Can be a function or a string
     ]]
     self.templateData = templateData
 
@@ -241,7 +242,8 @@ function ZO_GuildRanks_Shared:CreatePermissionDataObject(index, permission)
                 return not canPlayerEditPermissions or not canEditRankPermissions or disabledByRequisitePermissions
             end
             return false
-        end
+        end,
+        narrationText = self.templateData.narrationText,
     }
     return data
 end

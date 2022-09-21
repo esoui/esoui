@@ -61,7 +61,7 @@ do
     end
 end
 
-function ZO_CallbackObjectMixin:UnregisterCallback(eventName, callback)
+function ZO_CallbackObjectMixin:UnregisterCallback(eventName, callback, arg)
     if not self.callbackRegistry then
         return
     end
@@ -72,7 +72,7 @@ function ZO_CallbackObjectMixin:UnregisterCallback(eventName, callback)
         --find the entry
         for i = 1,#registry do
             local callbackInfo = registry[i]
-            if callbackInfo[CALLBACK_INDEX] == callback then
+            if callbackInfo[CALLBACK_INDEX] == callback and callbackInfo[ARGUMENT_INDEX] == arg then
                 callbackInfo[DELETED_INDEX] = true
                 self:Clean(eventName)
                 return

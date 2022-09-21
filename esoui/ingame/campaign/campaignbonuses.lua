@@ -1,32 +1,33 @@
 local BONUSES_HEADER_DATA = 1
 local BONUSES_DATA = 2
 
-local ZO_CampaignBonusesManager = ZO_SortFilterList:Subclass()
+ZO_CampaignBonusesManager = ZO_SortFilterList:Subclass()
 
-function ZO_CampaignBonusesManager:New(control)
-    local manager = ZO_SortFilterList.New(self, control)
-
-    manager.shown = false
+function ZO_CampaignBonusesManager:Initialize(control)
+    ZO_SortFilterList.Initialize(self, control)
 
     self.campaignBonuses = ZO_CampaignBonuses_Shared:New(control)
 
-    ZO_ScrollList_AddDataType(manager.list, BONUSES_HEADER_DATA, "ZO_CampaignBonusesHeaderRow", 50, function(control, data) manager:SetupBonusesHeaderEntry(control, data) end)
-    ZO_ScrollList_AddDataType(manager.list, BONUSES_DATA, "ZO_CampaignBonusesBonusRow", 80, function(control, data) manager:SetupBonusesEntry(control, data) end)
+    ZO_ScrollList_AddDataType(self.list, BONUSES_HEADER_DATA, "ZO_CampaignBonusesHeaderRow", 50, function(control, data) self:SetupBonusesHeaderEntry(control, data) end)
+    ZO_ScrollList_AddDataType(self.list, BONUSES_DATA, "ZO_CampaignBonusesBonusRow", 80, function(control, data) self:SetupBonusesEntry(control, data) end)
+
+    local function OnStateChange(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWN then
+            self:RefreshData()
+        end
+    end
 
     CAMPAIGN_BONUSES_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    CAMPAIGN_BONUSES_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                                    if newState == SCENE_FRAGMENT_SHOWN then
-                                                                        manager.shown = true
-                                                                        manager:RefreshData()
-                                                                    elseif newState == SCENE_FRAGMENT_HIDDEN then
-                                                                        manager.shown = false
-                                                                    end
-                                                                end)
+    CAMPAIGN_BONUSES_FRAGMENT:RegisterCallback("StateChange", OnStateChange)
 
-    control:RegisterForEvent(EVENT_KEEP_ALLIANCE_OWNER_CHANGED, function() if manager.shown then manager:RefreshData() end end)
-    control:RegisterForEvent(EVENT_OBJECTIVES_UPDATED, function() if manager.shown then manager:RefreshData() end end)
+    local function OnRefreshData()
+        if CAMPAIGN_BONUSES_FRAGMENT:IsShowing() then
+            self:RefreshData()
+        end
+    end
 
-    return manager
+    control:RegisterForEvent(EVENT_KEEP_ALLIANCE_OWNER_CHANGED, OnRefreshData)
+    control:RegisterForEvent(EVENT_OBJECTIVES_UPDATED, OnRefreshData)
 end
 
 function ZO_CampaignBonusesManager:SetCampaignAndQueryType(campaignId, queryType)
@@ -37,22 +38,24 @@ end
 function ZO_CampaignBonusesManager:SetupBonusesHeaderEntry(control, data)
     ZO_SortFilterList.SetupRow(self, control, data)
 
-    control.headerLabel = GetControl(control, "Header")
-    control.countInfoLabel = GetControl(control, "CountInfo")
+    control.headerLabel = control:GetNamedChild("Header")
+    control.countInfoLabel = control:GetNamedChild("CountInfo")
+    control.countDetailsLabel = control:GetNamedChild("CountDetails")
     control.countInfoLabel.bonusType = data.bonusType
 
     control.headerLabel:SetText(data.headerString)
     control.countInfoLabel:SetText(data.infoString)
+    control.countDetailsLabel:SetText(data.detailsString)
 end
 
 function ZO_CampaignBonusesManager:SetupBonusesEntry(control, data)
     ZO_SortFilterList.SetupRow(self, control, data)
 
-    control.typeIcon = GetControl(control, "TypeIcon")
-    control.count = GetControl(control, "Count")
-    control.ability = GetControl(control, "Ability")
-    control.icon = GetControl(control.ability, "Icon")
-    control.nameLabel = GetControl(control, "Name")
+    control.typeIcon = control:GetNamedChild("TypeIcon")
+    control.count = control:GetNamedChild("Count")
+    control.ability = control:GetNamedChild("Ability")
+    control.icon = control.ability:GetNamedChild("Icon")
+    control.nameLabel = control:GetNamedChild("Name")
     control.ability.index = data.index
     control.ability.bonusType = data.bonusType
 
@@ -88,7 +91,6 @@ function ZO_CampaignBonusesManager:FilterScrollList()
     end
 end
 
-
 function ZO_CampaignBonusesManager:BuildMasterList()
     self.campaignBonuses:BuildMasterList()
 end
@@ -109,9 +111,10 @@ function ZO_CampaignBonusesManager:ColorRow(control, data, mouseIsOver)
     local textColor = self:GetRowColors(data, mouseIsOver)
 
     if data.isHeader then
-        GetControl(control, "CountInfo"):SetColor(textColor:UnpackRGBA())
+        control:GetNamedChild("CountInfo"):SetColor(textColor:UnpackRGBA())
+        control:GetNamedChild("CountDetails"):SetColor(textColor:UnpackRGBA())
     else
-        GetControl(control, "Name"):SetColor(textColor:UnpackRGBA())
+        control:GetNamedChild("Name"):SetColor(textColor:UnpackRGBA())
     end
 end
 
@@ -124,7 +127,7 @@ function ZO_CampaignBonuses_AbilitySlot_OnMouseEnter(control)
     elseif control.bonusType == ZO_CAMPAIGN_BONUS_TYPE_OFFENSIVE_SCROLLS then
         SkillTooltip:SetScrollBonusAbility(GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE, control.index)
     elseif control.bonusType == ZO_CAMPAIGN_BONUS_TYPE_EMPEROR then
-        SkillTooltip:SetEmperorBonusAbility(CAMPAIGN_BONUSES.campaignBonuses:GetCurrentCampaignId(), GetUnitAlliance("player"))
+        SkillTooltip:SetEmperorBonusAbility(ZO_CampaignBonuses_GetEmperorBonusRank(CAMPAIGN_BONUSES.campaignBonuses:GetCurrentCampaignId()))
     elseif control.bonusType== ZO_CAMPAIGN_BONUS_TYPE_EDGE_KEEPS then
         SkillTooltip:SetEdgeKeepBonusAbility(control.index)
     else

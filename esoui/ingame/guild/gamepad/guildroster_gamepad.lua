@@ -158,6 +158,41 @@ function ZO_GamepadGuildRosterManager:OnHidden()
     ZO_GamepadSocialListPanel.OnHidden(self)
 end
 
+function ZO_GamepadGuildRosterManager:GetSelectedNarrationText()
+    local ROW_ENTRY_PAUSE_TIME_MS = 100
+    local narration = {}
+    local entryData = self:GetSelectedData()
+    if entryData then
+        --Do not include online status for pending invites
+        if entryData.status and entryData.rankId ~= DEFAULT_INVITED_RANK then
+            local narrationStrings = { GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_STATUS), GetString("SI_PLAYERSTATUS", entryData.status) }
+            table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+        end
+
+        local guildId = GUILD_ROSTER_MANAGER:GetGuildId()
+        if guildId and entryData.rankIndex then
+            local narrationStrings = { GetString(SI_GAMEPAD_GUILD_ROSTER_RANK_HEADER), GetFinalGuildRankName(guildId, entryData.rankIndex) }
+            table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+        end
+
+        if entryData.displayName then
+            local narrationStrings = { ZO_GetPlatformAccountLabel(), ZO_FormatUserFacingDisplayName(entryData.displayName) }
+            table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+        end
+
+        local hideCharacterFields = not entryData.hasCharacter or (zo_strlen(entryData.characterName) <= 0)
+        if not hideCharacterFields then
+            local characterNarration = self:GetCharacterFieldsNarration(entryData)
+            ZO_CombineNumericallyIndexedTables(narration, characterNarration)
+        elseif entryData.rankId == DEFAULT_INVITED_RANK then
+            --If the invite is pending read this instead of the character fields
+            table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_INVITED_PLAYER_LOCATION)))
+        end
+    end
+
+    return narration
+end
+
 -----------------
 -- Options
 -----------------
@@ -418,7 +453,9 @@ function ZO_GamepadGuildRosterManager:InitializeConfirmRemoveDialog()
 
                         local RESELECT_ENTRY = true
                         ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(dialog, nil, RESELECT_ENTRY)
+                        SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                     end,
+                    narrationText = ZO_GetDefaultParametricListToggleNarrationText,
                 },
             },
             -- Blacklist Note
@@ -448,6 +485,7 @@ function ZO_GamepadGuildRosterManager:InitializeConfirmRemoveDialog()
                         local targetControl = dialog.entryList:GetTargetControl()
                         targetControl.editBoxControl:TakeFocus()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
             -- Remove applicant
@@ -511,6 +549,11 @@ function ZO_GamepadGuildRosterManager:InitializeSetRankDialog()
         end
     end
 
+    local function GetRankNarrationText(entryData, entryControl)
+        local currentRankIndex = entryData.dialog.data.targetData.rankIndex
+        return ZO_FormatRadioButtonNarrationText(entryData.text, currentRankIndex == entryData.rankIndex)
+    end
+
     ZO_Dialogs_RegisterCustomDialog("GUILD_SET_RANK_GAMEPAD",
     {
         canQueue = true,
@@ -544,6 +587,7 @@ function ZO_GamepadGuildRosterManager:InitializeSetRankDialog()
                 rankEntry.rankIndex = rankIndex
                 rankEntry.setup = ZO_SharedGamepadEntry_OnSetup
                 rankEntry.callback = OnRankSelected
+                rankEntry.narrationText = GetRankNarrationText
                 
                 table.insert(dialog.info.parametricList,
                 {

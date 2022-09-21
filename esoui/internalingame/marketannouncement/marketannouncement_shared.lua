@@ -119,7 +119,7 @@ function ZO_MarketAnnouncement_Shared:OnShowing()
     RequestEventAnnouncements()
     self:LayoutActionTiles()
 
-    if GetMarketAnnouncementCrownStoreLocked() then
+    if ZO_MARKET_ANNOUNCEMENT_MANAGER:ShouldHideMarketProductAnnouncements() then
         self.carouselControl:SetHidden(true)
         self.crownStoreLockedControl:SetHidden(false)
         self.crownStoreLockedTexture:SetTexture(GetMarketAnnouncementCrownStoreLockedBackground())

@@ -68,7 +68,7 @@ function ZO_GuildRecruitment_ApplicationsList_Shared:SetupRow(control, data)
     local expirationLabel = control:GetNamedChild("Expires")
 
     nameLabel:SetText(data.name)
-    local levelText = GetLevelOrChampionPointsString(data.level, data.championPoints, data.iconSize)
+    local levelText = ZO_GetLevelOrChampionPointsString(data.level, data.championPoints, data.iconSize)
     levelLabel:SetText(levelText)
     local timeRemainingS = GetGuildFinderGuildApplicationDuration(self.guildId, data.index)
     expirationLabel:SetText(ZO_FormatCountdownTimer(timeRemainingS))

@@ -26,8 +26,8 @@ function ZO_CharacterCreateSlider_Gamepad:EnableFocus(enabled)
     end
 
     local r,g,b = GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, interfaceColor)
-    self.name:SetColor(r,g,b)
-    self.name:SetFont(fontString)
+    self.nameLabel:SetColor(r,g,b)
+    self.nameLabel:SetFont(fontString)
     self.slider:SetColor(r,g,b)
     self.slider:GetNamedChild("Left"):SetColor(r,g,b)
     self.slider:GetNamedChild("Right"):SetColor(r,g,b)
@@ -44,6 +44,7 @@ function ZO_CharacterCreateSlider_Gamepad:Move(delta)
     local oldValue = self:GetValue()
     self:ChangeValue(delta)
     if oldValue ~= self:GetValue() then
+        GAMEPAD_BUCKET_MANAGER:NarrateCurrentBucket()
         PlaySound(SOUNDS.DEFAULT_CLICK)
     end
 end
@@ -54,6 +55,17 @@ end
 
 function ZO_CharacterCreateSlider_Gamepad:MovePrevious()
     self:Move(-1)
+end
+
+function ZO_CharacterCreateSlider_Gamepad:GetNarrationText()
+    local min, max = self.slider:GetMinMax()
+    local value = self:GetValue()
+
+    local valueString = string.format("%.2f", value)
+    local minString = string.format("%.2f", min)
+    local maxString = string.format("%.2f", max)
+
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_CREATE_CHARACTER_GAMEPAD_SLIDER_NARRATION_FORMATTER, self.name, valueString, minString, maxString))
 end
 
 -- Character Create Appearance Slider
@@ -67,6 +79,9 @@ function ZO_CharacterCreateAppearanceSlider_Gamepad:New(control)
     return slider
 end
 
+function ZO_CharacterCreateAppearanceSlider_Gamepad:GetNarrationText()
+    return ZO_FormatSliderNarrationText(self.slider, self.name)
+end
 
 -- Character Create Color Slider: This is an appearance slider that sorts its values from lightest color to darkest color
 ZO_CharacterCreateColorSlider_Gamepad = ZO_CharacterCreateSlider_Gamepad:Subclass()
@@ -117,6 +132,10 @@ function ZO_CharacterCreateColorSlider_Gamepad:SetAppearanceValue(sortedIndex)
     end
 end
 
+function ZO_CharacterCreateColorSlider_Gamepad:GetNarrationText()
+    return ZO_FormatSliderNarrationText(self.slider, self.name)
+end
+
 -- Voice slider
 ZO_CharacterCreateVoiceSlider_Gamepad = ZO_CharacterCreateAppearanceSlider_Gamepad:Subclass()
 
@@ -136,8 +155,6 @@ function ZO_CharacterCreateVoiceSlider_Gamepad:MoveNext()
         return
     end
 
-    local oldValue = self.slider:GetValue()
-
     ZO_CharacterCreateAppearanceSlider_Gamepad.MoveNext(self)
 end
 
@@ -146,9 +163,13 @@ function ZO_CharacterCreateVoiceSlider_Gamepad:MovePrevious()
         return
     end
 
-    local oldValue = self.slider:GetValue()
-
     ZO_CharacterCreateAppearanceSlider_Gamepad.MovePrevious(self)
+end
+
+function ZO_CharacterCreateVoiceSlider_Gamepad:GetNarrationText()
+    local value = self:GetValue()
+    local valueString = ZO_CharacterCreateSlider_GetVoiceName(value)
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_SLIDER_FORMATTER_NO_RANGE, self.name, valueString))
 end
 
 -- Gender slider
@@ -213,4 +234,8 @@ function ZO_CharacterCreateGenderSlider_Gamepad:Update()
     local currentValue = CharacterCreateGetGender(characterMode)
     self.slider:SetValue(currentValue)
     self.initializing = nil
+end
+
+function ZO_CharacterCreateGenderSlider_Gamepad:GetNarrationText()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_SLIDER_FORMATTER_NO_RANGE, GetString(SI_CREATE_CHARACTER_GAMEPAD_GENDER_SLIDER_NAME), GetString("SI_GENDER", self:GetValue())))
 end
