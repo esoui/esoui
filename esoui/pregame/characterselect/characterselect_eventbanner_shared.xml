@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_CharacterSelect_EventBanner_Control" tier="MEDIUM" hidden="true" virtual="true">
+        <TopLevelControl name="ZO_CharacterSelect_EventBanner_Control" tier="MEDIUM" level="10" hidden="true" virtual="true">
             <AnchorFill />
 
             <Controls>

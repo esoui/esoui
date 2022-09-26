@@ -5421,6 +5421,8 @@ SafeAddString(SI_INTERFACE_OPTIONS_NAMEPLATES_SHOW_PLAYER_GUILDS, "Show Guild (E
 SafeAddString(SI_INTERFACE_OPTIONS_NAMEPLATES_SHOW_PLAYER_GUILDS_TOOLTIP, "Controls if the guild matching a player's tabard is shown under their name.", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_NAMEPLATES_SHOW_PLAYER_TITLES, "Show Title", 1)
 SafeAddString(SI_INTERFACE_OPTIONS_NAMEPLATES_SHOW_PLAYER_TITLES_TOOLTIP, "Controls if a player's title is shown as part of their name.", 0)
+SafeAddString(SI_INTERFACE_OPTIONS_NAMEPLATES_TARGET_MARKERS, "Target Markers", 0)
+SafeAddString(SI_INTERFACE_OPTIONS_NAMEPLATES_TARGET_MARKERS_TOOLTIP, "Controls the display of target marker symbols over friendly and enemy targets.", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_PERFORMANCE, "Performance", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_KEYBOARD, "Display Name (Keyboard)", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_TOOLTIP_KEYBOARD, "Determines which name should be displayed most prominently when viewing other players. (Gamepad mode can be changed separately in Gamepad settings)", 0)

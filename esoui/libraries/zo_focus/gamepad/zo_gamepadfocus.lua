@@ -67,15 +67,7 @@ function ZO_GamepadFocus:SetActive(active, retainFocus)
 
         if self.active then
             self:SetFocusByIndex(self.savedIndex ~= 0 and self.savedIndex or 1)
-            local data = self:GetFocusItem()
-            --The entry that was already focused is no longer eligble for focus
-            if data and data.canFocus and not data.canFocus(data.control) then
-                --Try to select the next thing
-                if not self:MoveNext() then
-                    --Nothing to select forward, so move backward
-                    self:MovePrevious()
-                end
-            end
+            self:ValidateFocus()
 
             if self.directionalInputEnabled then
                 DIRECTIONAL_INPUT:Activate(self, self.control)
@@ -398,4 +390,21 @@ function ZO_GamepadFocus:SetDirectionalInputEnabled(enabled)
     else
         DIRECTIONAL_INPUT:Deactivate(self)
     end
+end
+
+function ZO_GamepadFocus:ValidateFocus()
+    local data = self:GetFocusItem()
+    --The entry that was already focused is no longer eligible for focus
+    if data and data.canFocus and not data.canFocus(data.control) then
+        --Try to select the previous thing
+        if not self:MovePrevious() then
+            --Nothing to select backward, so move forward
+            if not self:MoveNext() then
+                --We failed to select anything forward or backwards, so there is no valid focus
+                return false
+            end
+        end
+    end
+
+    return true
 end

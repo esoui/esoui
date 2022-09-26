@@ -140,10 +140,13 @@ local g_sharedPregameStates =
             characterCreate:InitializeForCharacterCreate()
 
             if IsInGamepadPreferredMode() then
-                Pregame_ShowScene("gamepadCharacterCreate")
+                if DoesPlatformRequirePregamePEGI() and not HasAgreedToPEGI() then
+                    ZO_Dialogs_ShowGamepadDialog("PEGI_COUNTRY_SELECT_GAMEPAD")
+                else
+                    Pregame_ShowScene("gamepadCharacterCreate")
+                end
             else
                 Pregame_ShowScene("gameMenuCharacterCreate")
-                -- PEGI update currently only needs to be shown on PC
                 if DoesPlatformRequirePregamePEGI() and not HasAgreedToPEGI() then
                     ZO_Dialogs_ShowDialog("PEGI_COUNTRY_SELECT")
                 end

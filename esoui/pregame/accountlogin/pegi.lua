@@ -4,13 +4,7 @@ local SCROLL_TYPE_PEGI = 1
 ---- Lifecycle
 --]]
 
-ZO_PEGIAgreement = ZO_Object:Subclass()
-
-function ZO_PEGIAgreement:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_PEGIAgreement = ZO_InitializingObject:Subclass()
 
 function ZO_PEGIAgreement:Initialize()
     self.countryToRatingsBoard = {}
@@ -128,7 +122,7 @@ function ZO_PEGI_CountrySelectDialog_OnInitialized(self)
                                 PEGI_AGREEMENT:OnCountrySelectionConfirmed()
                             end,
             },
-        }                                   
+        }
     })
 end
 
@@ -213,5 +207,3 @@ function ZO_PEGI_CountrySelectDialog_OnDoubleClick()
 end
 
 PEGI_AGREEMENT = ZO_PEGIAgreement:New()
-
-
