@@ -1444,6 +1444,25 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     end,
                 },
             },
+            -- Link Invite in Mail (Housing)
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                templateData = {
+                    text = GetString(SI_HOUSING_LINK_IN_MAIL),
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        local houseId = dialog.data:GetReferenceId()
+                        local ownerDisplayName = GetDisplayName()
+                        local link = ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
+                        if link then
+                            MAIL_MANAGER_GAMEPAD.inbox:InsertBodyText(link)
+                        end
+                    end,
+                    visible = function(dialog)
+                        return IsChatSystemAvailableForCurrentPlatform() and (dialog.data:IsHouse() and dialog.data:IsUnlocked())
+                    end,
+                },
+            },
             -- Rename
             {
                 template = "ZO_GamepadMenuEntryTemplate",

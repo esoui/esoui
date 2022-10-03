@@ -259,7 +259,7 @@ function ZO_TributePatronData:GetTributePatronPlayStyleDescription()
 end
 
 function ZO_TributePatronData:GetTributePatronAcquireHint()
-    return GetTributePatronAcquireHint(self.patronId)
+    return zo_strformat(SI_TRIBUTE_ACQUIRE_HINT_FORMATTER, GetTributePatronAcquireHint(self.patronId))
 end
 
 function ZO_TributePatronData:GetUpgradeHintTextByIndex(cardIndex)

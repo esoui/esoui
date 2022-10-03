@@ -368,8 +368,7 @@ local g_sharedPregameStates =
     {
         ShouldAdvance = function()
             local accessibilityModeEnabled = IsConsoleUI() or GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE)
-            -- TODO XAR re-enable
-            return not ShouldShowChatNarrationSettings() or not accessibilityModeEnabled or GetCVar("PregameAccessibilitySettingMenuEnabled") ~= "1"
+            return not accessibilityModeEnabled or GetCVar("PregameAccessibilitySettingMenuEnabled") ~= "1"
         end,
 
         OnEnter = function()

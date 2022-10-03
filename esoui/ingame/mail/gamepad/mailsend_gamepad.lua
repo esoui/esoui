@@ -101,6 +101,11 @@ function ZO_MailSend_Gamepad:OnShowing()
         self.initialSubject = nil
     end
 
+    if self.initialBodyInsertText then
+        self.mailView.bodyEdit.edit:InsertText(self.initialBodyInsertText)
+        self.initialBodyInsertText = nil
+    end
+
     self:HighlightActiveTextField()
 end
 
@@ -193,6 +198,12 @@ end
 function ZO_MailSend_Gamepad:ComposeMailTo(address, subject)
     self.initialContact = address
     self.initialSubject = subject
+    local PUSH_SCENE = true
+    MAIL_MANAGER_GAMEPAD:ShowTab(SEND_TAB_INDEX, PUSH_SCENE)
+end
+
+function ZO_MailSend_Gamepad:InsertBodyText(text)
+    self.initialBodyInsertText = text
     local PUSH_SCENE = true
     MAIL_MANAGER_GAMEPAD:ShowTab(SEND_TAB_INDEX, PUSH_SCENE)
 end

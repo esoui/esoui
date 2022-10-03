@@ -164,11 +164,10 @@ do
     end
 end
 
--- Links a specific house in chat.
-function ZO_HousingBook_LinkHouseInChat(houseId, ownerDisplayName)
+function ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
     if GetHouseZoneId(houseId) == 0 then
         -- Invalid houseId.
-        return
+        return nil
     end
 
     if ownerDisplayName then
@@ -176,6 +175,17 @@ function ZO_HousingBook_LinkHouseInChat(houseId, ownerDisplayName)
     end
 
     local link = ZO_LinkHandler_CreateChatLink(GetHousingLink, houseId, ownerDisplayName)
+    return link
+end
+
+-- Links a specific house in chat.
+function ZO_HousingBook_LinkHouseInChat(houseId, ownerDisplayName)
+    local link = ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
+    if not link then
+        -- Invalid houseId.
+        return
+    end
+
     if IsInGamepadPreferredMode() then
         ZO_LinkHandler_InsertLinkAndSubmit(link)
     else

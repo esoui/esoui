@@ -49,6 +49,11 @@ function ZO_MailInbox_Gamepad:InitializeInbox(control)
     self.mailDataById = {}
     self.dirty = true
     self.dirtyMail = nil
+
+    self.activeLinks = ZO_GamepadLinks:New()
+    self.activeLinks:SetUseKeybind("UI_SHORTCUT_LEFT_STICK")
+    self.activeLinks:SetKeybindAlignment(KEYBIND_STRIP_ALIGN_RIGHT)
+
     self:InitializeFragment()
 end
 
@@ -64,8 +69,11 @@ function ZO_MailInbox_Gamepad:OnShowing()
     if self.dirty then
         self:RefreshMailList()
     end
+
     if self.dirtyMail then
-        self:ShowMailItem(self.dirtyMail)
+        -- Suppress link updating as this is initially handled by OnShown.
+        local SUPPRESS_LINK_UPDATE = true
+        self:ShowMailItem(self.dirtyMail, SUPPRESS_LINK_UPDATE)
     end
 end
 
@@ -73,6 +81,13 @@ function ZO_MailInbox_Gamepad:OnShown()
     if IsLocalMailboxFull() then
         TriggerTutorial(TUTORIAL_TRIGGER_MAIL_OPENED_AND_FULL)
     end
+
+    self:UpdateLinks()
+end
+
+function ZO_MailInbox_Gamepad:OnHiding()
+    self.activeLinks:ResetLinks()
+    self.activeLinks:Hide()
 end
 
 function ZO_MailInbox_Gamepad:OnHidden()
@@ -100,6 +115,8 @@ function ZO_MailInbox_Gamepad:InitializeFragment()
             self:OnShowing()
         elseif newState == SCENE_FRAGMENT_SHOWN then
             self:OnShown()
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            self:OnHiding()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             self:OnHidden()
         end
@@ -114,7 +131,9 @@ function ZO_MailInbox_Gamepad:InitializeControls()
     self.loadingLabel = self.loadingBox:GetNamedChild("ContainerText")
 
     -- Mail Display
-    self.inbox = self.inboxControl:GetNamedChild("RightPane"):GetNamedChild("Container"):GetNamedChild("Inbox")
+    self.inboxRightPane = self.inboxControl:GetNamedChild("RightPane")
+    self.inbox = self.inboxRightPane:GetNamedChild("Container"):GetNamedChild("Inbox")
+
     local IS_OUTBOX = false
     self.inbox:Initialize(GetString(SI_GAMEPAD_MAIL_INBOX_FROM), EMPTY_ATTACHMENT_ICON, IS_OUTBOX, ZO_MAIL_COD_MONEY_OPTIONS_GAMEPAD, ZO_MAIL_ATTACHED_MONEY_OPTIONS_GAMEPAD, MAX_READ_ATTACHMENTS)
 end
@@ -466,6 +485,13 @@ function ZO_MailInbox_Gamepad:Reply()
     PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
 end
 
+function ZO_MailInbox_Gamepad:InsertBodyText(text)
+    MAIL_MANAGER_GAMEPAD:GetSend():InsertBodyText(text)
+    MAIL_MANAGER_GAMEPAD:GetSend():SwitchToSendTab()
+
+    PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
+end
+
 function ZO_MailInbox_Gamepad:EnterViewAttachments()
     -- Populate the list.
     self.attachmentsList:Clear()
@@ -728,7 +754,9 @@ function ZO_MailInbox_Gamepad:RefreshMailList()
     end
 end
 
-function ZO_MailInbox_Gamepad:ShowMailItem(mailId)
+function ZO_MailInbox_Gamepad:ShowMailItem(mailId, suppressLinkUpdate)
+    self.activeLinks:ResetLinks()
+
     -- If the mail Id does not match the current selection, ignore the update. This could happen if the user
     --  changes active messages and the messages are still loading.
     if (not AreId64sEqual(mailId, self:GetActiveMailId())) then
@@ -786,4 +814,36 @@ function ZO_MailInbox_Gamepad:ShowMailItem(mailId)
 
     -- Update the mail list (mostly for unread icon update).
     self.mailList:RefreshVisible()
+
+    if not suppressLinkUpdate then
+        self:UpdateLinks()
+    end
+end
+
+------------------
+-- Active Links --
+------------------
+
+function ZO_MailInbox_Gamepad:UpdateLinks()
+    if self.inboxControl:IsHidden() then
+        self.activeLinks:Hide()
+        return
+    end
+
+    -- Extract and register any links found in the Guild's
+    -- Message of the Day and Description (About Us) text.
+    self.activeLinks:ResetLinks()
+
+    local bodyText = self.inbox.bodyEdit.edit:GetText()
+    if bodyText ~= "" then
+        self.activeLinks:AddLinksFromText(bodyText)
+    end
+
+    if self.activeLinks:HasLinks() then
+        self.inboxRightPane:SetWidth(ZO_GAMEPAD_QUADRANT_2_3_WIDTH)
+        self.activeLinks:Show()
+    else
+        self.inboxRightPane:SetWidth(ZO_GAMEPAD_QUADRANT_2_3_4_WIDTH)
+        self.activeLinks:Hide()
+    end
 end

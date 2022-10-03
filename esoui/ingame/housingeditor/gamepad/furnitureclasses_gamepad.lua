@@ -173,6 +173,21 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
             order = 100,
         },
+        -- Link House Invite in Mail
+        {
+            name = GetString(SI_HOUSING_LINK_IN_MAIL),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            callback = function()
+                local houseId = GetCurrentZoneHouseId()
+                local ownerDisplayName = GetCurrentHouseOwner()
+                local link = ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
+                if link then
+                    MAIL_MANAGER_GAMEPAD.inbox:InsertBodyText(link)
+                end
+            end,
+            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            order = 110,
+        },
     }
 
     local function BackFunction()

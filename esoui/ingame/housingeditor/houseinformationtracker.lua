@@ -6,6 +6,20 @@ function ZO_HouseInformationTracker:Initialize(control, ...)
     ZO_HUDTracker_Base.Initialize(self, control, ...)
 end
 
+function ZO_HouseInformationTracker:InitializeSetting()
+    self:UpdateVisibility()
+
+    local function OnInterfaceSettingChanged(eventCode, settingType, settingId)
+        if settingType == SETTING_TYPE_UI then
+            if settingId == UI_SETTING_SHOW_HOUSE_TRACKER then
+                self:UpdateVisibility()
+            end
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
+end
+
 function ZO_HouseInformationTracker:InitializeStyles()
     -- ZO_HUDTracker_Base override.
     self.styles =
@@ -88,18 +102,15 @@ end
 
 function ZO_HouseInformationTracker:RegisterEvents()
     ZO_HUDTracker_Base.RegisterEvents(self)
-
+    self:InitializeSetting()
     HOUSING_EDITOR_STATE:RegisterCallback("HouseSettingsChanged", self.Refresh, self)
 end
 
 function ZO_HouseInformationTracker:Refresh()
-    local fragment = self:GetFragment()
-    if not fragment then
-        return
-    end
-
     local housingEditorState = HOUSING_EDITOR_STATE
-    if not housingEditorState:IsHouseInstance() then
+    local houseInstance = housingEditorState:IsHouseInstance()
+    self:GetFragment():SetHiddenForReason("NonHouseZone", not houseInstance, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
+    if not houseInstance then
         return
     end
 
@@ -140,6 +151,12 @@ end
 function ZO_HouseInformationTracker:Update()
     -- ZO_HUDTracker_Base override.
     self:Refresh()
+end
+
+function ZO_HouseInformationTracker:UpdateVisibility()
+    local fragment = self:GetFragment()
+    local enabled = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_HOUSE_TRACKER)
+    fragment:SetHiddenForReason("DisabledBySetting", not enabled, 0, 0)
 end
 
 function ZO_HouseInformationTracker_OnInitialized(control)

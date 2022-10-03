@@ -62,14 +62,7 @@ local ZO_Panel_Accessibility_ControlData =
                 [false] = "OnTextChatNarrationDisabled",
             },
             gamepadHasEnabledDependencies = true,
-            -- TODO XAR re-enable
-            exists = function()
-                if IsChatSystemAvailableForCurrentPlatform then
-                    return ShouldShowChatNarrationSettings() and IsChatSystemAvailableForCurrentPlatform()
-                else
-                    return ShouldShowChatNarrationSettings()
-                end
-            end,
+            exists = IsChatSystemAvailableForCurrentPlatform,
             eventCallbacks =
             {
                 ["OnAccessibilityModeEnabled"] = ZO_Options_UpdateOption,
@@ -90,14 +83,7 @@ local ZO_Panel_Accessibility_ControlData =
             panel = SETTING_PANEL_ACCESSIBILITY,
             text = SI_ACCESSIBILITY_OPTIONS_ZONE_CHAT_NARRATION,
             tooltipText = SI_ACCESSIBILITY_OPTIONS_ZONE_CHAT_NARRATION_TOOLTIP,
-            -- TODO XAR re-enable
-            exists = function()
-                if IsChatSystemAvailableForCurrentPlatform then
-                    return ShouldShowChatNarrationSettings() and IsChatSystemAvailableForCurrentPlatform()
-                else
-                    return ShouldShowChatNarrationSettings()
-                end
-            end,
+            exists = IsChatSystemAvailableForCurrentPlatform,
             eventCallbacks =
             {
                 ["OnAccessibilityModeEnabled"] = ZO_Options_UpdateOption,
@@ -146,7 +132,6 @@ local ZO_Panel_Accessibility_ControlData =
             minValue = 0,
             maxValue = 100,
             showValue = true,
-            exists = ShouldShowChatNarrationSettings, -- TODO XAR re-enable
             eventCallbacks =
             {
                 ["OnAccessibilityModeEnabled"] = ZO_Options_UpdateOption,
@@ -169,7 +154,6 @@ local ZO_Panel_Accessibility_ControlData =
             tooltipText = SI_ACCESSIBILITY_OPTIONS_NARRATION_VOICE_SPEED_TOOLTIP,
             valid = {NARRATION_VOICE_SPEED_NORMAL, NARRATION_VOICE_SPEED_FAST, NARRATION_VOICE_SPEED_EXTRA_FAST, },
             valueStringPrefix = "SI_NARRATIONVOICESPEED",
-            exists = ShouldShowChatNarrationSettings, -- TODO XAR re-enable
             eventCallbacks =
             {
                 ["OnAccessibilityModeEnabled"] = ZO_Options_UpdateOption,
@@ -192,7 +176,6 @@ local ZO_Panel_Accessibility_ControlData =
             tooltipText = SI_ACCESSIBILITY_OPTIONS_NARRATION_VOICE_TYPE_TOOLTIP,
             valid = { NARRATION_VOICE_TYPE_FEMALE, NARRATION_VOICE_TYPE_MALE, },
             valueStringPrefix = "SI_NARRATIONVOICETYPE",
-            exists = ShouldShowChatNarrationSettings, -- TODO XAR re-enable
             eventCallbacks =
             {
                 ["OnAccessibilityModeEnabled"] = ZO_Options_UpdateOption,
