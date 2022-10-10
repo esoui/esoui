@@ -3,29 +3,29 @@
     <String name="MEDIUM_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf" />
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/Univers57.otf"/>
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.otf"/>
-    <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W3.otf"/>
+    <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf"/>
 
     <String name="BOLD_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf" />
     <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/Univers67.otf"/>
     <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/Univers67Cyrillic-CondensedBold.otf"/>
-    <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W3.otf"/>
+    <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf"/>
 
     <String name="CHAT_FONT" value="EsoUI/Common/Fonts/ESO_FWUDC_70-M.ttf" />
     <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/Univers57.otf"/>
     <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.otf"/>
-    <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W3.otf"/>
+    <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf"/>
 
     <String name="GAMEPAD_LIGHT_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf" />
     <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/FTN47.otf"/>
-    <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W3.otf"/>
+    <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf"/>
 
     <String name="GAMEPAD_MEDIUM_FONT" value="EsoUI/Common/Fonts/FTN57.otf" />
     <BackupFont originalFont="$(GAMEPAD_MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
-    <BackupFont originalFont="$(GAMEPAD_MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W3.otf"/>
+    <BackupFont originalFont="$(GAMEPAD_MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf"/>
 
     <String name="GAMEPAD_BOLD_FONT" value="EsoUI/Common/Fonts/FTN87.otf" />
     <BackupFont originalFont="$(GAMEPAD_BOLD_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
-    <BackupFont originalFont="$(GAMEPAD_BOLD_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W3.otf"/>
+    <BackupFont originalFont="$(GAMEPAD_BOLD_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf"/>
 
     <String name="ANTIQUE_FONT" value="EsoUI/Common/Fonts/ESO_KafuPenji-M.ttf" />
     
