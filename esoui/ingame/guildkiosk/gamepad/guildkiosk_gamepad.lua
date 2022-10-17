@@ -729,6 +729,7 @@ function ZO_GuildKiosk_Bid_Gamepad:OnHiding()
     end
 
     self:UnfocusBidSelector()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_GuildKiosk_Bid_Gamepad:InitializeKeybindStripDescriptors()
