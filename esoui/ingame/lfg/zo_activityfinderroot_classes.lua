@@ -53,9 +53,11 @@ function ZO_ActivityFinderLocation_Base:InitializeFormattedNames()
     self.nameGamepad = basicFormattedName
 end
 
-function ZO_ActivityFinderLocation_Base:AddActivitySearchEntry()
-    assert(false) -- Must be overriden
+function ZO_ActivityFinderLocation_Base:IsTributeActivity()
+    return self.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE or self.activityType == LFG_ACTIVITY_TRIBUTE_CASUAL
 end
+
+ZO_ActivityFinderLocation_Base.AddActivitySearchEntry = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
 
 do
     local TEAM_BASED_ACTIVITY_TYPES =
@@ -208,29 +210,17 @@ function ZO_ActivityFinderLocation_Base:ShouldForceFullPanelKeyboard()
     return self.forceFullPanelKeyboard
 end
 
-function ZO_ActivityFinderLocation_Base:IsLockedByPlayerLocation()
-    assert(false) -- Must be overrideen
-end
+ZO_ActivityFinderLocation_Base.IsLockedByPlayerLocation = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
 
-function ZO_ActivityFinderLocation_Base:IsLockedByCollectible()
-    assert(false) -- Must be overrideen
-end
+ZO_ActivityFinderLocation_Base.IsLockedByCollectible = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
 
-function ZO_ActivityFinderLocation_Base:GetFirstLockingCollectible()
-    assert(false) -- Must be overrideen
-end
+ZO_ActivityFinderLocation_Base.GetFirstLockingCollectible = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
 
-function ZO_ActivityFinderLocation_Base:IsLockedByAvailablityRequirementList()
-    return false
-end
+ZO_ActivityFinderLocation_Base.IsLockedByAvailablityRequirementList = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
 
-function ZO_ActivityFinderLocation_Base:GetEntryType()
-    assert(false) -- Must be overriden
-end
+ZO_ActivityFinderLocation_Base.GetEntryType = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
 
-function ZO_ActivityFinderLocation_Base:GetZoneId()
-    assert(false) -- Must be overriden
-end
+ZO_ActivityFinderLocation_Base.GetZoneId = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
 
 function ZO_ActivityFinderLocation_Base:IsSpecificEntryType()
     return self:GetEntryType() == ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SPECIFIC
@@ -278,6 +268,8 @@ function ZO_ActivityFinderLocation_Base:GetLockReasonText()
     return self.lockReasonText
 end
 
+ZO_ActivityFinderLocation_Base.GetQuestToUnlock = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
+
 function ZO_ActivityFinderLocation_Base:SetLockReasonTextOverride(lockReasonTextOverride)
     self.lockReasonTextOverride = lockReasonTextOverride
 end
@@ -294,13 +286,9 @@ function ZO_ActivityFinderLocation_Base:CountsForAverageRoleTime()
     return self.countsForAverageRoleTime
 end
 
-function ZO_ActivityFinderLocation_Base:DoesPlayerMeetLevelRequirements()
-    assert(false) -- Must be overriden
-end
+ZO_ActivityFinderLocation_Base.DoesPlayerMeetLevelRequirements = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
 
-function ZO_ActivityFinderLocation_Base:DoesGroupMeetLevelRequirements()
-    assert(false) -- Must be overriden
-end
+ZO_ActivityFinderLocation_Base.DoesGroupMeetLevelRequirements = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
 
 -----------------------
 -- Specific Activity --
@@ -364,6 +352,14 @@ function ZO_ActivityFinderLocation_Specific:GetFirstLockingCollectible()
     end
 
     return 0
+end
+
+function ZO_ActivityFinderLocation_Specific:IsLockedByAvailablityRequirementList()
+    return false -- Not currently supported for specifics
+end
+
+function ZO_ActivityFinderLocation_Specific:GetQuestToUnlock()
+    return 0 -- Not currently supported for specifics, as an optimization
 end
 
 function ZO_ActivityFinderLocation_Specific:HasRewardData()
@@ -517,6 +513,14 @@ function ZO_ActivityFinderLocation_Set:GetFirstLockingCollectible()
         end
     end
 
+    return 0
+end
+
+function ZO_ActivityFinderLocation_Set:GetQuestToUnlock()
+    local questId = GetActivityTypeGatingQuest(self.activityType)
+    if questId ~= 0 and not HasCompletedQuest(questId) then
+        return questId
+    end
     return 0
 end
 

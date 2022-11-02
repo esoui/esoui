@@ -646,7 +646,7 @@ function ZO_CrownCratesPackChoosing:InitializePackPool()
     end
 
     local function NextPageCallback()
-        self:RequestPreviousPage()
+        self:RequestNextPage()
     end
 
     self.leftArrowKeyboard = self.pageChangeFrameControl:GetNamedChild("LeftArrow_Keyboard")

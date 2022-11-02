@@ -87,16 +87,26 @@ function ZO_GamepadInteractiveSortFilterList:Initialize(control)
 
     self.listFragment = ZO_FadeSceneFragment:New(control)
     self.listFragment:RegisterCallback("StateChange", function(oldState, newState)
-                                                        if newState == SCENE_FRAGMENT_SHOWING then
-                                                            self:OnShowing()
-                                                        elseif newState == SCENE_FRAGMENT_SHOWN then
-                                                            self:OnShown()
-                                                        elseif newState == SCENE_FRAGMENT_HIDING then
-                                                            self:OnHiding()
-                                                        elseif newState == SCENE_FRAGMENT_HIDDEN then
-                                                            self:OnHidden()
-                                                        end
-                                                    end)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:OnShowing()
+        elseif newState == SCENE_FRAGMENT_SHOWN then
+            self:OnShown()
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            self:OnHiding()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self:OnHidden()
+        end
+    end)
+
+    local function OnSortHeaderClicked(key, order)
+        SCREEN_NARRATION_MANAGER:OnSortHeaderChanged(self, self.sortHeaderGroup, key)
+    end
+
+    local function OnSortHeaderSelected(key)
+        SCREEN_NARRATION_MANAGER:OnSortHeaderChanged(self, self.sortHeaderGroup, key)
+    end
+    self.sortHeaderGroup:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
+    self.sortHeaderGroup:RegisterCallback("HeaderSelected", OnSortHeaderSelected)
 end
 
 function ZO_GamepadInteractiveSortFilterList:InitializeSortFilterList(control)
@@ -209,6 +219,7 @@ function ZO_GamepadInteractiveSortFilterList:InitializeDropdownFilter()
         end,
         activate = function()
             self.filterDropdown:SetSelectedColor(ZO_SELECTED_TEXT)
+            SCREEN_NARRATION_MANAGER:OnComboBoxFocused(self.filterDropdown)
         end,
         deactivate = function()
             self.filterDropdown:SetSelectedColor(ZO_DISABLED_TEXT)
@@ -225,6 +236,7 @@ function ZO_GamepadInteractiveSortFilterList:InitializeSearchFilter()
 
     local function SearchEditFocusLost()
         ZO_GamepadEditBox_FocusLost(searchEdit)
+        SCREEN_NARRATION_MANAGER:QueueSearchEditBox(searchEdit)
         self:RefreshFilters()
     end
     searchEdit:SetHandler("OnFocusLost", SearchEditFocusLost)
@@ -234,6 +246,9 @@ function ZO_GamepadInteractiveSortFilterList:InitializeSearchFilter()
             if not searchEdit:HasFocus() then
                 searchEdit:TakeFocus()
             end
+        end,
+        activate = function()
+            SCREEN_NARRATION_MANAGER:QueueSearchEditBox(searchEdit)
         end,
         highlight = self.searchControl:GetNamedChild("Highlight"),
         canFocus = function() return not self.searchControl:IsHidden() and not searchEdit:IsHidden() end

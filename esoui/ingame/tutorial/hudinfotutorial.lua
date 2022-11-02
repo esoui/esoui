@@ -27,7 +27,6 @@ function ZO_HudInfoTutorial:SetupTutorial(parent, template, name)
     self.tutorialAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("HudInfoBoxTutorialAnimation", self.tutorial)
     self.tutorialAnimation:SetHandler("OnStop", function(timeline) 
         if not timeline:IsPlayingBackward() then
-            FireTutorialHiddenEvent(self.tutorialIndex)
             self:SetHiddenForReason("inactive", true)
             if #self.queue > 0 then
                 local nextTutorialIndex = table.remove(self.queue, 1)

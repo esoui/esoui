@@ -65,8 +65,8 @@ end
 function LoginManager_Keyboard:SwitchToLoginFragment()
     if self.showCreateLinkAccountFragment then
         self.currentFragment = LOGIN_FRAGMENT
-        SCENE_MANAGER:RemoveFragment(CREATE_LINK_ACCOUNT_FRAGMENT)
-        SCENE_MANAGER:AddFragment(LOGIN_FRAGMENT)
+        GAME_MENU_PREGAME_KEYBOARD:GetScene():RemoveFragment(CREATE_LINK_ACCOUNT_FRAGMENT)
+        GAME_MENU_PREGAME_KEYBOARD:GetScene():AddFragment(LOGIN_FRAGMENT)
         self.showCreateLinkAccountFragment = false
         LOGIN_KEYBOARD:SetLoginControlsHidden(false)
     end
@@ -75,8 +75,8 @@ end
 function LoginManager_Keyboard:SwitchToCreateLinkAccountFragment()
     if not self.showCreateLinkAccountFragment then
         self.currentFragment = CREATE_LINK_ACCOUNT_FRAGMENT
-        SCENE_MANAGER:RemoveFragment(LOGIN_FRAGMENT)
-        SCENE_MANAGER:AddFragment(CREATE_LINK_ACCOUNT_FRAGMENT)
+        GAME_MENU_PREGAME_KEYBOARD:GetScene():RemoveFragment(LOGIN_FRAGMENT)
+        GAME_MENU_PREGAME_KEYBOARD:GetScene():AddFragment(CREATE_LINK_ACCOUNT_FRAGMENT)
         self.showCreateLinkAccountFragment = true
         LOGIN_KEYBOARD:SetLoginControlsHidden(true)
     end

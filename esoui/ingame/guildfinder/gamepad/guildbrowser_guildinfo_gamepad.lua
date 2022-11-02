@@ -186,7 +186,7 @@ function ZO_GuildBrowser_GuildInfo_Gamepad:InitializeKeybindStripDescriptors()
         {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
 
-            name = GetString(SI_GAMEPAD_CHAT_MENU_CYCLE_TOOLTIP_BINDING),
+            name = GetString(SI_GAMEPAD_CYCLE_TOOLTIP_BINDING),
 
             keybind = "UI_SHORTCUT_INPUT_RIGHT",
 
@@ -301,7 +301,7 @@ function ZO_GuildBrowser_GuildInfo_Gamepad:InitializeSubmitDialog()
                 data2 =
                 {
                     header = GetString(SI_GUILD_BROWSER_SUBMIT_APPLICATION_DIALOG_LEVEL_LABEL),
-                    value = zo_strformat(SI_GAMEPAD_GUILD_BROWSER_GUILD_LIST_CONTEXTUAL_INFO_FORMATTER, GetLevelOrChampionPointsString(GetUnitLevel("player"), GetUnitChampionPoints("player"), ICON_SIZE))
+                    value = zo_strformat(SI_GAMEPAD_GUILD_BROWSER_GUILD_LIST_CONTEXTUAL_INFO_FORMATTER, ZO_GetLevelOrChampionPointsString(GetUnitLevel("player"), GetUnitChampionPoints("player"), ICON_SIZE))
                 },
                 data3 =
                 {
@@ -352,6 +352,7 @@ function ZO_GuildBrowser_GuildInfo_Gamepad:InitializeSubmitDialog()
 
                         edit:TakeFocus()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 

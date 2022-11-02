@@ -211,6 +211,14 @@ function zo_iconTextFormatNoSpace(path, width, height, text, inheritColor)
     return string.format("%s%s", iconFormatter(path, width, height), zo_strformat("<<1>>", text))
 end
 
+function zo_iconTextFormatNoSpaceAlignedRight(path, width, height, text, inheritColor)
+    local iconFormatter = zo_iconFormat
+    if inheritColor then
+        iconFormatter = zo_iconFormatInheritColor
+    end
+    return string.format("%s%s", zo_strformat("<<1>>", text), iconFormatter(path, width, height))
+end
+
 function zo_bulletFormat(label, text)
     local bulletSpacer = GetString(SI_FORMAT_BULLET_SPACING)
     local bulletSpacingWidth = label:GetStringWidth(bulletSpacer)

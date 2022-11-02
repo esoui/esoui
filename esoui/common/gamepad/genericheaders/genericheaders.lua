@@ -459,6 +459,26 @@ local function ProcessData(control, data)
     return data ~= nil
 end
 
+local function GetProcessedNarrationText(control, data)
+    if control == nil or data == nil then
+        return ""
+    end
+
+    if type(data) == "function" then
+        data = data(control)
+    end
+
+    if type(data) == "string" then
+        return data
+    elseif type(data) == "number" then
+        return tostring(data)
+    else
+        internalassert(false, "Unsupported data type. A custom narration function will need to be set for this control that returns a string or number.")
+    end
+
+    return ""
+end
+
 local function SetAnchorOffsetY(control, index, offsetY)
     local isValid, point, relTo, relPoint, offsetX = control:GetAnchor(index)
     if isValid then
@@ -559,6 +579,36 @@ function ZO_GamepadGenericHeader_RefreshData(control, data)
     ReflowLayout(control)
     AdjustHeaderFocusControlAnchors(control, g_refreshResults)
     AdjustMessageAnchors(control, g_refreshResults)
+end
+
+function ZO_GamepadGenericHeader_GetNarrationText(control, data)
+    local narration = SCREEN_NARRATION_MANAGER:CreateNarratableObject()
+    local controls = control.controls
+
+    if control.tabBar then
+        local selectedTabData = control.tabBar:GetSelectedData()
+        if selectedTabData then
+            local text = selectedTabData.text or ""
+            if type(text) == "function" then
+                text = text(selectedTabData)
+            end
+            narration:AddNarrationText(text)
+        end
+    end
+
+    narration:AddNarrationText(GetProcessedNarrationText(controls[TITLE], data.titleTextNarration or data.titleText))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[SUBTITLE], data.subtitleTextNarration or data.subtitleText))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA1HEADER], data.data1HeaderTextNarration or data.data1HeaderText))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA1], data.data1TextNarration or data.data1Text))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA2HEADER], data.data2HeaderTextNarration or data.data2HeaderText))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA2], data.data2TextNarration or data.data2Text))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA3HEADER], data.data3HeaderTextNarration or data.data3HeaderText))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA3], data.data3TextNarration or data.data3Text))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA4HEADER], data.data4HeaderTextNarration or data.data4HeaderText))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA4], data.data4TextNarration or data.data4Text))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[MESSAGE], data.messageTextNarration or data.messageText))
+
+    return narration
 end
 
 local function TabBar_OnDataChanged(control, newData, oldData, reselectingDuringRebuild)

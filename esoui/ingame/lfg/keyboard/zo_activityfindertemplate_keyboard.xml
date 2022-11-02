@@ -123,12 +123,39 @@
                             </OnClicked>
                         </Button>
 
-                        <Button name="$(parent)ViewRewardsButton" inherits="ZO_DefaultButton" text="SI_LFG_VIEW_REWARDS" hidden="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)QueueButton" relativePoint="TOPRIGHT" offsetX="50" />
+                        <Button name="$(parent)ViewRewards" inherits="ZO_DefaultButton" text="SI_LFG_VIEW_REWARDS" hidden="true">
+                            <Anchor point="TOPLEFT" />
                             <Dimensions x="200" />
 
                             <OnClicked>
-                                ZO_ActivityFinderTemplateViewRewardsButtonKeyboard_OnClicked(self, button)
+                                ZO_ActivityFinderTemplateViewRewardsKeyboard_OnClicked(self, button)
+                            </OnClicked>
+                        </Button>
+
+                        <Button name="$(parent)AcceptQuest" inherits="ZO_DefaultButton" text="SI_LFG_ACCEPT_QUEST" hidden="true">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="200" />
+
+                            <OnClicked>
+                                ZO_ActivityFinderTemplateAcceptQuestKeyboard_OnClicked(self, button)
+                            </OnClicked>
+                        </Button>
+
+                        <Button name="$(parent)UnlockPermanently" inherits="ZO_DefaultButton" text="SI_DLC_BOOK_ACTION_OPEN_CROWN_STORE" hidden="true">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="200" />
+
+                            <OnClicked>
+                                ZO_ActivityFinderTemplateUnlockPermanentlyKeyboard_OnClicked(self)
+                            </OnClicked>
+                        </Button>
+
+                        <Button name="$(parent)ChapterUpgrade" inherits="ZO_DefaultButton" text="SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE" hidden="true">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="200" />
+
+                            <OnClicked>
+                                ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_ACTIVITY_FINDER)
                             </OnClicked>
                         </Button>
                     </Controls>

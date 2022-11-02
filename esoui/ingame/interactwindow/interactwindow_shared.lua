@@ -1,6 +1,3 @@
--- Prototyping global, so we can evaluate icons versus no icons...
-USE_CHATTER_OPTION_ICON = false
-
 local SHOW_BACK_TO_TOC_OPTION = true
 local HIDE_BACK_TO_TOC_OPTION = false
 
@@ -148,7 +145,8 @@ function ZO_SharedInteraction:InitializeSharedEvents()
         self:OnScreenResized()
     end
 
-    self.eventCallbacks = {
+    self.eventCallbacks =
+    {
         [EVENT_CHATTER_BEGIN] = OnChatterBegin,
         [EVENT_CHATTER_END] = OnChatterEnd,
         [EVENT_CONVERSATION_UPDATED] = OnConversationUpdated,
@@ -259,26 +257,6 @@ end
 
 CHATTER_GENERIC_ACCEPT = 42
 CHATTER_COMPLETE_QUEST = 43
-local OPTION_TO_ICON =
-{
-    [CHATTER_START_TALK]                        = "EsoUI/Art/Interaction/ConversationAvailable.dds",
-    [CHATTER_TALK_CHOICE]                       = "EsoUI/Art/Interaction/ConversationAvailable.dds",
-    [CHATTER_TALK_CHOICE_MONEY]                 = "EsoUI/Art/Interaction/ConversationWithCost.dds",
-    [CHATTER_TALK_CHOICE_INTIMIDATE_DISABLED]   = "EsoUI/Art/Interaction/ConversationAvailable.dds",
-    [CHATTER_TALK_CHOICE_PERSUADE_DISABLED]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
-    [CHATTER_TALK_CHOICE_CLEMENCY_DISABLED]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
-    [CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
-    [CHATTER_TALK_CHOICE_BEGIN_SKILL_RESPEC]    = "EsoUI/Art/Interaction/ConversationWithCost.dds",
-    [CHATTER_TALK_CHOICE_ATTRIBUTE_RESPEC]      = "EsoUI/Art/Interaction/ConversationWithCost.dds",
-    [CHATTER_START_NEW_QUEST_BESTOWAL]          = "EsoUI/Art/Interaction/ConversationAvailable.dds",
-    [CHATTER_START_COMPLETE_QUEST]              = "EsoUI/Art/Interaction/QuestCompleteAvailable.dds",
-    [CHATTER_START_GIVE_ITEM]                   = "EsoUI/Art/Interaction/ConversationAvailable.dds",
-    [CHATTER_GUILDKIOSK_IN_TRANSITION]          = "EsoUI/Art/Interaction/ConversationAvailable.dds",
-    [CHATTER_START_SHOP]                        = "EsoUI/Art/Interaction/StoreAvailable.dds",
-    [CHATTER_GOODBYE]                           = "EsoUI/Art/Interaction/Goodbye.dds",
-    [CHATTER_GENERIC_ACCEPT]                    = "EsoUI/Art/Interaction/Accept.dds",
-    [CHATTER_COMPLETE_QUEST]                    = "EsoUI/Art/Interaction/Accept.dds",
-}
 
 local function UpdateFleeChatterOption(self)
     self:SetText(zo_strformat(SI_INTERACT_OPTION_FLEE_ARREST, GetSecondsUntilArrestTimeout()))
@@ -306,16 +284,19 @@ function ZO_SharedInteraction:UpdateShadowyConnectionsChatterOption(control, dat
     end
 end
 
-function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore)
+function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, teleportWaypointIndex)
     optionType = optionType or CHATTER_START_TALK
-    local chatterData = {
+    local chatterData =
+    {
         optionIndex = optionIndex,
         optionType = optionType,
         optionText = optionText,
         isImportant = isImportant,
         chosenBefore = chosenBefore,
+        teleportNPCId = teleportNPCId,
+        teleportWaypointIndex = teleportWaypointIndex,
         gold = nil,
-        iconFile = nil,
+        iconFiles = {},
         isChatterOption = true,
         optionEnabled = false,
         optionUsable = false,
@@ -379,13 +360,66 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
                 chatterData.optionUsable = false
             else
                 chatterData.labelUpdateFunction = function(control)
-                                                    self:UpdateShadowyConnectionsChatterOption(control, chatterData)
-                                                  end
+                    self:UpdateShadowyConnectionsChatterOption(control, chatterData)
+                end
                 chatterData.optionUsable = false
             end
-        end
+        elseif optionType == CHATTER_TALK_CHOICE and chatterData.teleportNPC ~= 0 and chatterData.teleportWaypointIndex ~= TELEPORT_WAYPOINT_INDEX_DEFAULT then
+            -- TODO: Handle zone guide quest tracked but not in journal
 
-        chatterData.iconFile = OPTION_TO_ICON[optionType]
+            -- Consider breadcrumb pathing for group members
+            for groupCharId, groupMember in pairs(WORLD_MAP_QUEST_BREADCRUMBS:GetGroupMemberBreadcrumbingData()) do
+                if groupMember.teleportNPCId == chatterData.teleportNPCId and groupMember.teleportWaypointIndex == chatterData.teleportWaypointIndex then
+                    if groupMember.isGroupLeader then
+                        if #chatterData.iconFiles == 0 then
+                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/groupLeader_door.dds")
+                        else
+                            chatterData.iconFiles[1] = "EsoUI/Art/Compass/groupLeader_door.dds"
+                        end
+                        break
+                    else
+                        if #chatterData.iconFiles == 0 then
+                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/groupMember_door.dds")
+                        end
+                    end
+                end
+            end
+
+            local previousIconCount = #chatterData.iconFiles
+            -- Consider breadcrumb pathing in journal quests
+            for questIndex = 1, GetNumJournalQuests() do
+                local stepsTable = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
+                for stepIndex, step in pairs(stepsTable) do
+                    for conditionIndex, condition in pairs(step) do
+                        if condition.teleportNPCId == chatterData.teleportNPCId and condition.teleportWaypointIndex == chatterData.teleportWaypointIndex then
+                             if GetJournalQuestInstanceDisplayType(questIndex) == INSTANCE_DISPLAY_TYPE_ZONE_STORY then
+                                if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
+                                    if #chatterData.iconFiles == previousIconCount then
+                                        table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds")
+                                    else
+                                        chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds"
+                                    end
+                                    break
+                                elseif #chatterData.iconFiles == previousIconCount then
+                                    table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door.dds")
+                                end
+                            else
+                                if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
+                                    if #chatterData.iconFiles == previousIconCount then
+                                        table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door_assisted.dds")
+                                    else
+                                        chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/quest_icon_door_assisted.dds"
+                                    end
+                                    break
+                                elseif #chatterData.iconFiles == previousIconCount then
+                                    table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door.dds")
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
     end
 
     return chatterData
@@ -394,10 +428,10 @@ end
 function ZO_SharedInteraction:PopulateChatterOptions(optionCount, backToTOCOption)
     local importantOptions = {}
 
-    for i=1, optionCount do
-        local optionString, optionType, optionalArg, isImportant, chosenBefore = GetChatterOption(i)
+    for i = 1, optionCount do
+        local optionString, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, teleportWaypoinIndex = GetChatterOption(i)
         local controlID = i
-        self:PopulateChatterOption(controlID, i, optionString, optionType, optionalArg, isImportant, chosenBefore, importantOptions)
+        self:PopulateChatterOption(controlID, i, optionString, optionType, optionalArg, isImportant, chosenBefore, importantOptions, teleportNPCId, teleportWaypoinIndex)
     end
 
     local backToTOC, farewell, isImportant = GetChatterFarewell()

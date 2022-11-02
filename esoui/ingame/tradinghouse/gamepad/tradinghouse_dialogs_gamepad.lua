@@ -220,6 +220,10 @@ end
 
 local GUILD_ENTRY_TEMPLATE = "ZO_GamepadSubMenuEntryWithStatusTemplate"
 
+local function GetGuildSelectionNarrationText(entryData, entryControl)
+    return ZO_FormatRadioButtonNarrationText(entryData.text, entryData.isCurrentGuild)
+end
+
 local function SetupGuildSelectionDialog(dialog)
     local currentGuildId = GetSelectedTradingHouseGuildId()
 
@@ -241,7 +245,8 @@ local function SetupGuildSelectionDialog(dialog)
                  allianceId = allianceId,
                  fontScaleOnSelection = false,
                  setup = SetupTradingHouseGuildItem,
-                 isCurrentGuild = guildId == currentGuildId
+                 isCurrentGuild = guildId == currentGuildId,
+                 narrationText = GetGuildSelectionNarrationText,
             },
             icon = icon,
             text = guildName,

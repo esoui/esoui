@@ -248,9 +248,10 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeConfirmDeclineDialog
                         local targetControl = dialog.entryList:GetTargetControl()
                         targetControl.editBoxControl:TakeFocus()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
-            -- Backlist checkbox
+            -- Blacklist checkbox
             {
                 template = "ZO_CheckBoxTemplate_WithoutIndent_Gamepad",
                 templateData = {
@@ -297,7 +298,9 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeConfirmDeclineDialog
 
                         local RESELECT_ENTRY = true
                         ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(dialog, nil, RESELECT_ENTRY)
+                        SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                     end,
+                    narrationText = ZO_GetDefaultParametricListToggleNarrationText,
                 },
             },
             -- Blacklist Note
@@ -327,6 +330,7 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeConfirmDeclineDialog
                         local targetControl = dialog.entryList:GetTargetControl()
                         targetControl.editBoxControl:TakeFocus()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
             -- Decline applicant

@@ -200,8 +200,9 @@ function ZO_ComboBox_Base:SetDontSetSelectedTextOnSelection(dontSetSelectedTextO
 end
 
 function ZO_ComboBox_Base:SetSelectedItemText(itemText)
-    if(self.m_selectedItemText) then
+    if self.m_selectedItemText then
         self.m_selectedItemText:SetText(itemText)
+        self.currentSelectedItemText = itemText
     end
 end
 

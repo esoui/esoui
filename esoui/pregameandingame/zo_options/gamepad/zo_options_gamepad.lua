@@ -457,6 +457,8 @@ do
             local tooltipText
             if type(data.tooltipText) == "number" then
                 tooltipText = GetString(data.tooltipText)
+            elseif type(data.tooltipText) == "function" then
+                tooltipText = data.tooltipText()
             else
                 tooltipText = data.tooltipText
             end
@@ -507,14 +509,6 @@ local function SetSelectedStateOnControl(control, selected)
     end
 end
 
-local function GetTextEntry(text)
-    if type(text) == "string" then
-        return text
-    else
-        return GetString(text)
-    end
-end
-
 function ZO_GamepadOptions:InitializeControl(control, selected)
     local label = control:GetNamedChild("Name")
 
@@ -529,12 +523,12 @@ function ZO_GamepadOptions:InitializeControl(control, selected)
     ZO_SharedOptions.InitializeControl(self, control, selected, IS_GAMEPAD_CONTROL)
 
     if not control.data.enabled and control.data.disabledText then
-        label:SetText(GetTextEntry(control.data.disabledText))
+        label:SetText(self:GetTextEntry(control.data.disabledText, control))
     else
         if IsConsoleUI() and control.data.consoleTextOverride then
-            label:SetText(GetTextEntry(control.data.consoleTextOverride))
+            label:SetText(self:GetTextEntry(control.data.consoleTextOverride, control))
         elseif control.data.gamepadTextOverride then
-            label:SetText(GetTextEntry(control.data.gamepadTextOverride))
+            label:SetText(self:GetTextEntry(control.data.gamepadTextOverride, control))
         end
     end
 
@@ -583,7 +577,10 @@ do
     local GAMEPAD_TYPE_HAS_SOUTHERN_LEFT_STICK = ZO_CreateSetFromArguments(GAMEPAD_TYPE_PS4, GAMEPAD_TYPE_PS4_NO_TOUCHPAD, GAMEPAD_TYPE_PS5, GAMEPAD_TYPE_HERON, GAMEPAD_TYPE_SWITCH)
     local GAMEPAD_TYPE_HAS_SWAPPED_FACE_BUTTONS = ZO_CreateSetFromArguments(GAMEPAD_TYPE_SWITCH)
     function ZO_GamepadOptions:RefreshGamepadInfoPanel()
-        if not self:HasInfoPanel() then return end --no infopanel in pregame
+        if not self:HasInfoPanel() then
+            --no infopanel in pregame
+            return
+        end
 
         local control = self.control:GetNamedChild("InfoPanel")
 
@@ -636,7 +633,7 @@ do
         local generalLayer = GetString(SI_KEYBINDINGS_LAYER_GENERAL)
         local isChordedKeySetupMap = {}
 
-        for key, control in pairs(self.keyCodeToLabelGroupControl) do
+        for key, labelGroupControl in pairs(self.keyCodeToLabelGroupControl) do
             local labelToUse = 1
             local linesUsed = 0
             local actionName = GetActionNameFromKey(generalLayer, key)
@@ -647,14 +644,14 @@ do
                 local localizedActionName = ZO_Keybinding_GetGamepadActionName(actionName)
                 if actionName == "GAME_CAMERA_GAMEPAD_ZOOM" then --special keybind that chords a button with a thumbstick direction and also can toggle camera
                     local NOT_HOLD_KEY = false
-                    labelToUse, linesUsed = SetupGameCameraZoomLabels(control, NOT_HOLD_KEY, labelToUse, linesUsed)
+                    labelToUse, linesUsed = SetupGameCameraZoomLabels(labelGroupControl, NOT_HOLD_KEY, labelToUse, linesUsed)
                 elseif actionName == "ACTION_BUTTON_9" then -- special keybind that handles hold functionality in lua to show a radial menu
-                    labelToUse, linesUsed = SetupQuickSlotLabels(control, labelToUse, linesUsed)
+                    labelToUse, linesUsed = SetupQuickSlotLabels(labelGroupControl, labelToUse, linesUsed)
                 else
                     localizedActionName = holdActionName and holdActionName ~= "" and zo_strformat(SI_BINDING_NAME_GAMEPAD_TAP_LEFT, localizedActionName) or localizedActionName 
-                    control:GetNamedChild("Label" .. labelToUse):SetText(localizedActionName)           
+                    labelGroupControl:GetNamedChild("Label" .. labelToUse):SetText(localizedActionName)           
                 end
-                linesUsed = linesUsed + control:GetNamedChild("Label" .. labelToUse):GetNumLines()
+                linesUsed = linesUsed + labelGroupControl:GetNamedChild("Label" .. labelToUse):GetNumLines()
                 labelToUse = labelToUse + 1
             end
 
@@ -663,11 +660,11 @@ do
                 local localizedActionName = ZO_Keybinding_GetGamepadActionName(holdActionName)           
                 if holdActionName == "GAME_CAMERA_GAMEPAD_ZOOM" then --special keybind that chords a button with a thumbstick direction
                     local HOLD_KEY = true
-                    labelToUse, linesUsed = SetupGameCameraZoomLabels(control, HOLD_KEY, labelToUse, linesUsed)
+                    labelToUse, linesUsed = SetupGameCameraZoomLabels(labelGroupControl, HOLD_KEY, labelToUse, linesUsed)
                 else
-                    control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(SI_BINDING_NAME_GAMEPAD_HOLD_LEFT, localizedActionName))           
+                    labelGroupControl:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(SI_BINDING_NAME_GAMEPAD_HOLD_LEFT, localizedActionName))           
                 end
-                linesUsed = linesUsed + control:GetNamedChild("Label" .. labelToUse):GetNumLines()
+                linesUsed = linesUsed + labelGroupControl:GetNamedChild("Label" .. labelToUse):GetNumLines()
                 labelToUse = labelToUse + 1
             end
 
@@ -680,12 +677,12 @@ do
                         if linesUsed < 4 and not isChordedKeySetupMap[chordedKey] then
                             local buttonMarkup = self:GetButtonMarkupFromActionName(actionName)
                             local localizedActionName = ZO_Keybinding_GetGamepadActionName(actionName)
-                            local chordedActionString = control.alignment == RIGHT and SI_BINDING_NAME_GAMEPAD_CHORD_LEFT or SI_BINDING_NAME_GAMEPAD_CHORD_RIGHT --put bind texture on left if right aligned
-                            control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(GetString(chordedActionString), localizedActionName, buttonMarkup))
+                            local chordedActionString = labelGroupControl.alignment == RIGHT and SI_BINDING_NAME_GAMEPAD_CHORD_LEFT or SI_BINDING_NAME_GAMEPAD_CHORD_RIGHT --put bind texture on left if right aligned
+                            labelGroupControl:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(GetString(chordedActionString), localizedActionName, buttonMarkup))
                             
-                            local numLines = control:GetNamedChild("Label" .. labelToUse):GetNumLines()
+                            local numLines = labelGroupControl:GetNamedChild("Label" .. labelToUse):GetNumLines()
                             if linesUsed == 3 and numLines > 1 then --the last label is using two lines
-                                 control:GetNamedChild("Label" .. labelToUse):SetText("") --unsetup the label and try on other key
+                                labelGroupControl:GetNamedChild("Label" .. labelToUse):SetText("") --unsetup the label and try on other key
                                 isChordedKeySetupMap[chordedKey] = false
                             else
                                 labelToUse = labelToUse + 1
@@ -701,7 +698,7 @@ do
 
             --clean up unused labels
             while labelToUse < 5 do
-                control:GetNamedChild("Label" .. labelToUse):SetText("")
+                labelGroupControl:GetNamedChild("Label" .. labelToUse):SetText("")
                 labelToUse = labelToUse + 1
             end
         end
@@ -761,10 +758,7 @@ function ZO_GamepadOptions:RefreshCategoryList()
     self:AddCategory(SETTING_PANEL_NAMEPLATES)
     self:AddCategory(SETTING_PANEL_SOCIAL)
     self:AddCategory(SETTING_PANEL_COMBAT)
-    -- TODO XAR Settings: Remove this condition
-    if not IsConsoleUI() then
-        self:AddCategory(SETTING_PANEL_ACCESSIBILITY)
-    end
+    self:AddCategory(SETTING_PANEL_ACCESSIBILITY)
 
     if ZO_OptionsPanel_IsAccountManagementAvailable() then
         self:AddCategory(SETTING_PANEL_ACCOUNT)
@@ -904,6 +898,36 @@ function ZO_GamepadOptions:RefreshOptionsList()
     end
 end
 
+function ZO_GamepadOptions:GetNarrationText(entryData, entryControl)
+    local textEntry = entryData.gamepadTextOverride or entryData.text
+    local defaultText = self:GetTextEntry(textEntry, entryControl)
+    if entryData.controlType then
+        local controlType = self:GetControlType(entryData.controlType)
+        if controlType == OPTIONS_HORIZONTAL_SCROLL_LIST then
+            --TODO XAR: Look into pulling this value a different way
+            local value = entryControl.horizontalListObject:GetCenterControl():GetText()
+            return ZO_FormatSpinnerNarrationText(defaultText, value)
+        elseif controlType == OPTIONS_CHECKBOX then
+            return ZO_FormatToggleNarrationText(defaultText, ZO_Options_GetSettingFromControl(entryControl))
+        elseif controlType == OPTIONS_SLIDER then
+            local value = ZO_Options_GetSettingFromControl(entryControl)
+            local formattedValueString, min, max = ZO_Options_GetFormattedSliderValues(entryData, value)
+            --TODO XAR: Include directional input for the slider
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_SLIDER_FORMATTER, defaultText, formattedValueString, min, max))
+        elseif controlType == OPTIONS_COLOR then
+            local currentValue = ZO_Options_GetSettingFromControl(entryControl)
+            local color = ZO_ColorDef:New(currentValue)
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_COLOR_PICKER_FORMATTER, defaultText, color:ToHex()))
+        elseif controlType == OPTIONS_CHAT_COLOR then
+            local currentRed, currentGreen, currentBlue = GetChatCategoryColor(entryData.chatChannelCategory)
+            local color = ZO_ColorDef:New(currentRed, currentGreen, currentBlue)
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_COLOR_PICKER_FORMATTER, defaultText, color:ToHex()))
+        end
+    end
+
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(defaultText)
+end
+
 function ZO_GamepadOptions:AddSettingGroup(panelId)
     local settings = GAMEPAD_SETTINGS_DATA[panelId]
     if settings then
@@ -911,6 +935,8 @@ function ZO_GamepadOptions:AddSettingGroup(panelId)
         for i, setting in ipairs(settings) do
             local data = self:GetSettingsData(setting.panel, setting.system, setting.settingId)
             local isVisible = data.visible == nil or data.visible
+            --Use a custom narration function for any options
+            data.narrationText = function(entryData, entryControl) return self:GetNarrationText(entryData, entryControl) end
 
             if not self:DoesSettingExist(data) then
                 -- This setting isn't available on this platform

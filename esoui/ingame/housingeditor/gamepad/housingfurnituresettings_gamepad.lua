@@ -140,7 +140,30 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                             self:TryShowCopyDialog()
                        end
-        }
+        },
+        -- Link House Invite in Chat
+        {
+            name = GetString(SI_HOUSING_LINK_IN_CHAT),
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            callback = ZO_HousingBook_LinkCurrentHouseInChat,
+            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            order = 100,
+        },
+        -- Link House Invite in Mail
+        {
+            name = GetString(SI_HOUSING_LINK_IN_MAIL),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            callback = function()
+                local houseId = GetCurrentZoneHouseId()
+                local ownerDisplayName = GetCurrentHouseOwner()
+                local link = ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
+                if link then
+                    MAIL_MANAGER_GAMEPAD.inbox:InsertBodyText(link)
+                end
+            end,
+            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            order = 110,
+        },
     }
 
     local function OnMainListBack()
@@ -498,6 +521,7 @@ do
             callback = function(dialog)
                 SetActiveEdit(dialog)
             end,
+            narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
         },
     }
 
@@ -523,7 +547,9 @@ do
                 ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
                 dialog.applyToAllHouses = ZO_GamepadCheckBoxTemplate_IsChecked(targetControl)
                 HOUSE_SETTINGS_MANAGER:SetApplyToAllHousesFlag(dialog.applyToAllHouses)
+                SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
             end,
+            narrationText = ZO_GetDefaultParametricListToggleNarrationText,
         },
     }
 
@@ -557,6 +583,8 @@ do
 
                 dropdown:UpdateItems()
 
+                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
+
                 control.dropdown:SelectItemByIndex(data.dialog.selectedPresetIndex)
             end,
             callback = function(dialog)
@@ -564,6 +592,7 @@ do
                 local targetControl = dialog.entryList:GetTargetControl()
                 targetControl.dropdown:Activate()
             end,
+            narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
         },
     }
 
@@ -606,6 +635,8 @@ do
 
                 dropdown:UpdateItems()
 
+                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
+
                 local IGNORE_CALLBACK = true
                 control.dropdown:SelectItemByIndex(data.dialog.selectedGuildIndex, IGNORE_CALLBACK)
             end,
@@ -614,6 +645,7 @@ do
                 local targetControl = dialog.entryList:GetTargetControl()
                 targetControl.dropdown:Activate()
             end,
+            narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
         },
     }
 
@@ -641,6 +673,8 @@ do
 
                 dropdown:UpdateItems()
 
+                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
+
                 local IGNORE_CALLBACK = true
                 if data.dialog.selectedHouseIndex > INVALID_COMBOBOX_INDEX then
                     control.dropdown:SelectItemByIndex(data.dialog.selectedHouseIndex, IGNORE_CALLBACK)
@@ -651,6 +685,7 @@ do
                 local targetControl = dialog.entryList:GetTargetControl()
                 targetControl.dropdown:Activate()
             end,
+            narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
         },
     }
 

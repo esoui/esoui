@@ -11,65 +11,6 @@ do
     end
 end
 
------------------------
---Scene Stack Fragments
------------------------
-
-ZO_StackFragmentGroup = ZO_Object:Subclass()
-
-function ZO_StackFragmentGroup:New(fragment, object)
-    local group = ZO_Object.New(self)
-    group.fragments = {}
-    group.objects = {}
-    group.activateAll = false
-    group:Add(fragment, object)
-    return group
-end
-
-function ZO_StackFragmentGroup:Add(fragment, object)
-    if(fragment) then
-        table.insert(self.fragments, fragment)
-        table.insert(self.objects, object or false)
-    end
-end
-
-function ZO_StackFragmentGroup:SetOnActivatedCallback(onActivatedCallback)
-    self.onActivatedCallback = onActivatedCallback
-end
-
-function ZO_StackFragmentGroup:SetOnDeactivatedCallback(onDeactivatedCallback)
-    self.onDeactivatedCallback = onDeactivatedCallback
-end
-
-function ZO_StackFragmentGroup:SetActivateAll(activateAll)
-    self.activateAll = activateAll
-end
-
-function ZO_StackFragmentGroup:GetFragments()
-    return self.fragments
-end
-
-function ZO_StackFragmentGroup:SetActive(active)
-    for i, object in ipairs(self.objects) do
-        if(object) then
-            object:SetActive(active)
-            if(not self.activateAll) then
-                break
-            end
-        end
-    end
-
-    if active then
-        if self.onActivatedCallback then
-            self.onActivatedCallback()
-        end
-    else
-        if self.onDeactivatedCallback then
-            self.onDeactivatedCallback()
-        end
-    end
-end
-
 ----------
 --Scene
 ----------
@@ -156,75 +97,6 @@ function ZO_Scene:RemoveTemporaryFragment(fragment)
     end
 end
 
-function ZO_Scene:HasStackFragmentGroup(stackFragmentGroup)
-    if(self.stackFragmentGroups) then
-        for i = 1, #self.stackFragmentGroups do
-            if(self.stackFragmentGroups[i] == stackFragmentGroup) then
-                return true
-            end
-        end
-    end
-    return false
-end
-
-function ZO_Scene:PushStackFragmentGroup(stackFragmentGroup, isBase)
-    if not self:HasStackFragmentGroup(stackFragmentGroup) then
-        local fragments = stackFragmentGroup:GetFragments()
-        for i, fragment in ipairs(fragments) do
-            if self:HasFragment(fragment) then
-                return
-            end
-        end
-
-        if(not self.stackFragmentGroups) then
-            self.stackFragmentGroups = {}
-        end
-
-        if(#self.stackFragmentGroups > 0) then
-            self.stackFragmentGroups[#self.stackFragmentGroups]:SetActive(false)
-        end
-        table.insert(self.stackFragmentGroups, stackFragmentGroup)
-        stackFragmentGroup:SetActive(true)
-
-        if isBase then
-            self.stackFragmentGroupBaseIndex = #self.stackFragmentGroups
-        end
-        
-        for i, fragment in ipairs(fragments) do
-            self:AddFragment(fragment)
-            fragment:SetSceneManager(self.sceneManager)
-            fragment:Refresh()
-        end
-    end
-end
-
-function ZO_Scene:PushBaseStackFragmentGroup(stackFragmentGroup)
-    self:PushStackFragmentGroup(stackFragmentGroup, true)
-end
-
-function ZO_Scene:PopStackFragmentGroup()
-    if(self.stackFragmentGroups and #self.stackFragmentGroups > 0) then
-        local stackFragmentGroup = self.stackFragmentGroups[#self.stackFragmentGroups]
-        stackFragmentGroup:SetActive(false)
-
-        if self.stackFragmentGroupBaseIndex == #self.stackFragmentGroups then
-            self.sceneManager:HideCurrentScene()
-        else
-            local fragments = stackFragmentGroup:GetFragments()
-            for i, fragment in ipairs(fragments) do
-                self:RemoveFragment(fragment)
-                fragment:Refresh()
-            end
-            self.stackFragmentGroups[#self.stackFragmentGroups] = nil
-            if #self.stackFragmentGroups > 0 then
-                self.stackFragmentGroups[#self.stackFragmentGroups]:SetActive(true)
-            end
-        end
-    else
-        self.sceneManager:HideCurrentScene()
-    end
-end
-
 function ZO_Scene:AddFragmentGroup(fragments)
     for _, fragment in pairs(fragments) do
         self:AddFragment(fragment)
@@ -285,9 +157,6 @@ function ZO_Scene:SetState(newState)
         self.sceneManager:OnSceneStateChange(self, oldState, newState)
         if self.state == SCENE_HIDDEN then
             self:RemoveTemporaryFragments()
-            if not SCENE_MANAGER:IsSceneOnStack(self.name) then
-                self:RemoveStackFragmentGroups()
-            end
         end
         self:AllowEvaluateTransitionComplete()
         local AS_A_RESULT_OF_SCENE_STATE_CHANGE = true
@@ -306,20 +175,6 @@ function ZO_Scene:RemoveTemporaryFragments()
             tempFragment:Refresh()
         end
         self.temporaryFragments = nil
-    end
-end
-
-function ZO_Scene:RemoveStackFragmentGroups()
-    if(self.stackFragmentGroups) then
-        for stackFragmentGroupIndex, stackFragmentGroup in ipairs(self.stackFragmentGroups) do
-            stackFragmentGroup:SetActive(false)
-            local fragments = stackFragmentGroup:GetFragments()
-            for fragmentIndex, fragment in ipairs(fragments) do
-                self:RemoveFragment(fragment)
-                fragment:Refresh()
-            end
-        end
-        ZO_ClearNumericallyIndexedTable(self.stackFragmentGroups)
     end
 end
 

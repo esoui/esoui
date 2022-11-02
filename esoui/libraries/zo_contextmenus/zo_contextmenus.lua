@@ -458,6 +458,7 @@ end
 
 function ZO_Menu_ClickItem(control, button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
+        ZO_OutputStadiaLog("ZO_Menu_ClickItem(control, button), set ZO_Menu_SetLastCommandWasFromMenu == true")
         ZO_Menu_SetLastCommandWasFromMenu(true)
         local menuEntry = ZO_Menu.items[control.menuIndex]
         if menuEntry and menuEntry.checkbox then

@@ -81,6 +81,12 @@ local MENU_ENTRY_DATA =
         postPadding = 70,
         showHeader = function() return IsESOPlusSubscriber() end,
         isNewCallback = IsAnySubMenuNewCallback,
+        subLabelsNarrationText = function(entryData, entryControl)
+            local narrations = {}
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIN_MENU_MARKET_BALANCE_TITLE)))
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_NUMBER_FORMAT, GetPlayerMarketCurrency(MKCT_CROWNS))))
+            return narrations
+        end,
         subMenu =
         {
             [MENU_CROWN_STORE_ENTRIES.CROWN_STORE] =
@@ -485,6 +491,7 @@ local function CreateEntry(data)
     end
 
     entry.canLevel = data.canLevel
+    entry.subLabelsNarrationText = data.subLabelsNarrationText
 
     entry.data = data
     return entry

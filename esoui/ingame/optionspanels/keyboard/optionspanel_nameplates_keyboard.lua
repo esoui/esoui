@@ -302,6 +302,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Nameplates_TargetMarkers",
+    settingType = SETTING_TYPE_NAMEPLATES,
+    settingId = NAMEPLATE_TYPE_TARGET_MARKERS,
+    header = SI_INTERFACE_OPTIONS_INDICATORS,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Nameplates_ResurrectIndicators",
     settingType = SETTING_TYPE_NAMEPLATES,
     settingId = NAMEPLATE_TYPE_RESURRECT_INDICATORS,

@@ -65,12 +65,18 @@
                 ZO_TributePatronBookTile_Keyboard_OnInitialized(self)
             </OnInitialized>
         </Control>
-        
+
         <Control name="ZO_TributePatronSelectionTile_Keyboard_Control" inherits="ZO_TributePatronTile_Keyboard_Control_Wide" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_TILE_WIDTH_KEYBOARD" y="ZO_TRIBUTE_PATRON_SELECTION_TILE_HEIGHT_KEYBOARD" />
             <OnInitialized>
                 ZO_TributePatronSelectionTile_Keyboard_OnInitialized(self)
             </OnInitialized>
             <Controls>
+                <Label name="$(parent)Title" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetX="30" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="-30" offsetY="-35" />
+                </Label>
+
                 <Texture name="$(parent)DraftedIcon" textureFile="EsoUI/Art/Tribute/tribute_icon_drafted.dds" level="3" hidden="true">
                     <Dimensions x="32" y="32" />
                     <Anchor point="TOPRIGHT" offsetX="-3" offsetY="3" />

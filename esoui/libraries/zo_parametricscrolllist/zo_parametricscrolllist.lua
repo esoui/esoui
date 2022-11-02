@@ -378,6 +378,7 @@ function ZO_ParametricScrollList:SetActive(active, fireActivatedCallback)
 
         if self.onActivatedChangedFunction and fireActivatedCallback ~= false then
             self.onActivatedChangedFunction(self, self.active)
+            self:FireCallbacks("ActivatedChanged", self, self.active)
         end
     end
 end
@@ -443,8 +444,13 @@ end
 function ZO_ParametricScrollList:SetNoItemText(text)
     if self.noItemsLabel then
         self.noItemsLabel:SetText(text)
+        self.noItemsText = text
         self:RefreshNoItemLabelPosition()
     end
+end
+
+function ZO_ParametricScrollList:GetNoItemText()
+    return self.noItemsText
 end
 
 function ZO_ParametricScrollList:IsMoving()
@@ -536,7 +542,7 @@ function ZO_ParametricScrollList:SetSelectedIndexWithoutAnimation(selectedIndex,
     self:EnableAnimation(true)
 end
 
-function ZO_ParametricScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisabled, forceAnimation, jumpType, blockSelectionChangedCallback)
+function ZO_ParametricScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisabled, forceAnimation, jumpType, blockSelectionChangedCallback, reselectingDuringRebuild)
     self:SetJumping(false)
 
     if self.enabled or allowEvenIfDisabled then
@@ -545,7 +551,7 @@ function ZO_ParametricScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisa
         local reachedTargetIndex = (self.targetSelectedIndex == self:CalculateSelectedIndexOffsetWithDrag())
 
         if not blockSelectionChangedCallback then
-            self:FireCallbacks("TargetDataChanged", self, self:GetDataForDataIndex(self.targetSelectedIndex), self:GetDataForDataIndex(oldTargetSelectedIndex), reachedTargetIndex, self.targetSelectedIndex)
+            self:FireCallbacks("TargetDataChanged", self, self:GetDataForDataIndex(self.targetSelectedIndex), self:GetDataForDataIndex(oldTargetSelectedIndex), reachedTargetIndex, self.targetSelectedIndex, reselectingDuringRebuild)
         end
 
         if self.targetSelectedIndex and self.selectedIndex then
@@ -768,10 +774,10 @@ function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallb
         local ALLOW_EVEN_IF_DISABLED = true
         local FORCE_ANIMATION = true
         local DEFAULT_JUMP_TYPE = nil
-        self:SetSelectedIndex(nextSelectedIndex, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION, DEFAULT_JUMP_TYPE, blockSelectionChangedCallback)
+        local RESELECTING_DURING_REBUILD = true
+        self:SetSelectedIndex(nextSelectedIndex, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION, DEFAULT_JUMP_TYPE, blockSelectionChangedCallback, RESELECTING_DURING_REBUILD)
 
         local INITIAL_UPDATE = true
-        local RESELECTING_DURING_REBUILD = true
         self:UpdateAnchors(self:CalculateSelectedIndexOffsetWithDrag(), INITIAL_UPDATE, RESELECTING_DURING_REBUILD, blockSelectionChangedCallback)
 
         -- If the selectedData is set in the setup function (such as for the header), the code above
@@ -1168,7 +1174,7 @@ function ZO_ParametricScrollList:RunSetupOnControl(control, dataIndex, selected,
     if dataTypeInfo.headerSetupFunction then
         dataTypeInfo.headerSetupFunction(control:GetNamedChild("Header"), data, selected, reselectingDuringRebuild, enabled, active)
     end
-end 
+end
 
 function ZO_ParametricScrollList:GetParametricFunctionForDataIndex(dataIndex)
     local templateName = self.templateList[dataIndex]

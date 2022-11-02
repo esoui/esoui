@@ -115,18 +115,15 @@ function ZO_GamepadTabBarScrollList:Deactivate()
 end
 
 function ZO_GamepadTabBarScrollList:InitializeKeybindStripDescriptors()
-    local control = self:GetControl()
-    local debugName = "Gamepad Tab Bar"
-    if control then
-        debugName = debugName .. " " .. control:GetName()
-    end
-
+    --TODO XAR: Look into making these not narrate if there is only one tab
     local leftShoulderKeybind =
     {
-        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-        name = debugName .. " Left Shoulder",
+        --Even though this is an ethereal keybind, the name will still be read during screen narration
+        name = GetString(SI_SCREEN_NARRATION_TABBAR_PREVIOUS_KEYBIND),
         keybind = "UI_SHORTCUT_LEFT_SHOULDER",
         ethereal = true,
+        narrateEthereal = true,
+        etherealNarrationOrder = 0,
         callback = function()
             if self.active then
                 self:MovePrevious()
@@ -136,10 +133,12 @@ function ZO_GamepadTabBarScrollList:InitializeKeybindStripDescriptors()
 
     local rightShoulderKeybind =
     {
-        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-        name = debugName .. " Right Shoulder",
+        --Even though this is an ethereal keybind, the name will still be read during screen narration
+        name = GetString(SI_SCREEN_NARRATION_TABBAR_NEXT_KEYBIND),
         keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
         ethereal = true,
+        narrateEthereal = true,
+        etherealNarrationOrder = 1,
         callback = function()
             if self.active then
                 self:MoveNext()

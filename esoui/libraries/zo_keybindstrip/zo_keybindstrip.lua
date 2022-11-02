@@ -240,11 +240,9 @@ local function GetDescriptorFromButton(buttonOrEtherealDescriptor)
 end
 
 local function GetValueFromRawOrFunction(keybindButtonDescriptor, key)
-    local value
-    if keybindButtonDescriptor[key] == nil then
-        value = keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonDescriptor.keybindButtonGroupDescriptor[key]
-    else
-        value = keybindButtonDescriptor[key]
+    local value = keybindButtonDescriptor[key]
+    if value == nil and keybindButtonDescriptor.keybindButtonGroupDescriptor then
+        value = keybindButtonDescriptor.keybindButtonGroupDescriptor[key]
     end
 
     if type(value) == "function" then
@@ -398,7 +396,7 @@ do
 
         keybindButtonDescriptor.addedForSceneName = currentSceneName
 
-        if keybindButtonDescriptor.ethereal then
+        if GetValueFromRawOrFunction(keybindButtonDescriptor, "ethereal") then
             self:RegisterKeybindButtonOrEtherealDescriptorInternal(keybindButtonDescriptor)
         else
             local button, key = self.keybindButtonPool:AcquireObject()
@@ -479,7 +477,7 @@ function ZO_KeybindStrip:UpdateKeybindButton(keybindButtonDescriptor, stateIndex
     local buttonOrEtherealDescriptor = self.keybinds[keybindButtonDescriptor.keybind]
     if type(buttonOrEtherealDescriptor) == "userdata" then
         local existingButton = buttonOrEtherealDescriptor
-        if existingButton.keybindButtonDescriptor == keybindButtonDescriptor then
+        if existingButton.keybindButtonDescriptor == keybindButtonDescriptor and not GetValueFromRawOrFunction(keybindButtonDescriptor, "ethereal") then
             local UPDATE_ONLY = true
             self:SetUpButton(existingButton, UPDATE_ONLY)
             if not self.batchUpdating then
@@ -491,7 +489,7 @@ function ZO_KeybindStrip:UpdateKeybindButton(keybindButtonDescriptor, stateIndex
         end
     elseif buttonOrEtherealDescriptor then
         local existingButtonDescriptor = buttonOrEtherealDescriptor
-        if keybindButtonDescriptor ~= existingButtonDescriptor then
+        if keybindButtonDescriptor ~= existingButtonDescriptor or not GetValueFromRawOrFunction(keybindButtonDescriptor, "ethereal") then
             self:RemoveKeybindButton(existingButtonDescriptor)
             self:AddKeybindButton(keybindButtonDescriptor)
         end
@@ -790,7 +788,7 @@ function ZO_KeybindStrip:UpdateCooldowns(time)
 
             local activeDescriptor = self.keybinds[descriptor.keybind]
             if activeDescriptor then
-                if not activeDescriptor.ethereal then
+                if not GetValueFromRawOrFunction(activeDescriptor, "ethereal") then
                     activeDescriptor = activeDescriptor.keybindButtonDescriptor
                 end
                 if descriptor == activeDescriptor then
@@ -1026,6 +1024,7 @@ do
         DIALOG_TERTIARY = 4,
         DIALOG_RESET = 5,
     }
+
     local function GetGamepadOrderFromKeybindDescriptor(keybindDescriptor)
         local order = GetValueFromRawOrFunction(keybindDescriptor, "gamepadOrder")
         if order then
@@ -1041,6 +1040,7 @@ do
         end
         return 0
     end
+
     local function GamepadSort(buttonLeft, buttonRight)
         local leftKeybindDescriptor = buttonLeft.keybindButtonDescriptor
         local rightKeybindDescriptor = buttonRight.keybindButtonDescriptor
@@ -1052,6 +1052,92 @@ do
             return buttonLeft.insertionOrder < buttonRight.insertionOrder
         end
         return leftOrder < rightOrder
+    end
+
+    local function EtherealSort(leftKeybindDescriptor, rightKeybindDescriptor)
+        local leftOrder = leftKeybindDescriptor.etherealNarrationOrder or 0
+        local rightOrder = rightKeybindDescriptor.etherealNarrationOrder or 0
+        if leftOrder == rightOrder then
+            return leftKeybindDescriptor.keybind < rightKeybindDescriptor.keybind
+        else
+            return leftOrder < rightOrder
+        end
+    end
+
+    local function GetKeybindButtonDescriptorNarrationInfo(keybindButtonDescriptor)
+        --TODO XAR: Any additional info we end up needing for narration should go here
+        local data = 
+        {
+            name = GetValueFromRawOrFunction(keybindButtonDescriptor, "name"),
+            keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(keybindButtonDescriptor.keybind) or GetString(SI_ACTION_IS_NOT_BOUND),
+        }
+
+        return data
+    end
+
+    function ZO_KeybindStrip:GetOrderedNarratableKeybindButtonInfo()
+        local buttonsByAlignment =
+        {
+            [KEYBIND_STRIP_ALIGN_LEFT] = {},
+            [KEYBIND_STRIP_ALIGN_CENTER] = {},
+            [KEYBIND_STRIP_ALIGN_RIGHT] = {},
+        }
+
+        for _, button in ipairs(self.keybindButtons) do
+            local isVisible = IsVisible(button.keybindButtonDescriptor)
+            if isVisible then
+                local alignment = GetValueFromRawOrFunction(button.keybindButtonDescriptor, "alignment") or KEYBIND_STRIP_ALIGN_RIGHT
+                table.insert(buttonsByAlignment[alignment], button)
+            end
+        end
+
+        for alignment, buttons in pairs(buttonsByAlignment) do
+            if IsInGamepadPreferredMode() then
+                table.sort(buttons, GamepadSort)
+            else
+                table.sort(buttons, KeyboardSort)
+            end
+        end
+
+        local keybinds = {}
+        for _, button in ipairs(buttonsByAlignment[KEYBIND_STRIP_ALIGN_LEFT]) do
+            table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(button.keybindButtonDescriptor))
+        end
+
+        for _, button in ipairs(buttonsByAlignment[KEYBIND_STRIP_ALIGN_CENTER]) do
+            table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(button.keybindButtonDescriptor))
+        end
+
+        --Iterate backwards through the right aligned keybinds so they are ordered left to right visually
+        for _, button in ZO_NumericallyIndexedTableReverseIterator(buttonsByAlignment[KEYBIND_STRIP_ALIGN_RIGHT]) do
+            table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(button.keybindButtonDescriptor))
+        end
+
+        local etherealDescriptors = {}
+        --Iterate through ethereal keybinds to see if we need to narrate any
+        for keybind, buttonOrEtherealDescriptor in pairs(self.keybinds) do
+            if type(buttonOrEtherealDescriptor) ~= "userdata" then
+                --If any ethereal descriptor are marked as something we want to narrate, include them here
+                if GetValueFromRawOrFunction(buttonOrEtherealDescriptor, "ethereal") then
+                    local narrateEthereal = buttonOrEtherealDescriptor.narrateEthereal
+                    if type(narrateEthereal) == "function" then
+                        narrateEthereal = narrateEthereal()
+                    end
+
+                    if narrateEthereal then
+                        table.insert(etherealDescriptors, buttonOrEtherealDescriptor)
+                    end
+                end
+            end
+        end
+
+        table.sort(etherealDescriptors, EtherealSort)
+
+        for _, descriptor in ipairs(etherealDescriptors) do
+            table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(descriptor))
+        end
+
+        return keybinds
     end
 
     function ZO_KeybindStrip:UpdateAnchorsInternal(anchorTable, parent, initialConstrainXAnchor, initialConstrainYAnchor, subsequentAnchor)

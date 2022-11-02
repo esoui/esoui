@@ -1,10 +1,4 @@
-ZO_MapLocations_Shared = ZO_Object:Subclass()
-
-function ZO_MapLocations_Shared:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_MapLocations_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_MapLocations_Shared:Initialize(control)
     self.control = control
@@ -43,12 +37,7 @@ function ZO_MapLocations_Shared:GetDisabled()
 end
 
 -- Singleton shared data
-ZO_MapLocationsData_Singleton = ZO_Object:Subclass()
-
-function ZO_MapLocationsData_Singleton:New(...)
-    local object = ZO_Object.New(self)
-    return object
-end
+ZO_MapLocationsData_Singleton = ZO_InitializingObject:Subclass()
 
 function ZO_MapLocationsData_Singleton:GetLocationList()
     if not self.mapData then

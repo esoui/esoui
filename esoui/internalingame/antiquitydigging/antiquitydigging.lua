@@ -173,9 +173,11 @@ function ZO_AntiquityDigging:Initialize(control)
         self:RefreshInputState()
     end
 
-    HELP_MANAGER:RegisterCallback("OverlayVisibilityChanged", RefreshInputState)
+    ZO_HELP_OVERLAY_SYNC_OBJECT:SetHandler("OnShown", RefreshInputState, "antiquityDigging")
+    ZO_HELP_OVERLAY_SYNC_OBJECT:SetHandler("OnHidden", RefreshInputState, "antiquityDigging")
 
-    TUTORIAL_MANAGER:RegisterCallback("TriggeredTutorialChanged", RefreshInputState)
+    ZO_DIALOG_SYNC_OBJECT:SetHandler("OnShown", RefreshInputState, "antiquityDigging")
+    ZO_DIALOG_SYNC_OBJECT:SetHandler("OnHidden", RefreshInputState, "antiquityDigging")
     
     control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, RefreshInputState)
 
@@ -312,7 +314,7 @@ function ZO_AntiquityDigging:RefreshActiveToolKeybinds()
 end
 
 function ZO_AntiquityDigging:RefreshInputState()
-    local allowPlayerInput = self:IsReadyToPlay() and not TUTORIAL_MANAGER:IsTutorialTriggered() and not HELP_MANAGER:IsHelpOverlayVisible() and not ZO_Dialogs_IsShowingDialog()
+    local allowPlayerInput = self:IsReadyToPlay() and not ZO_HELP_OVERLAY_SYNC_OBJECT:IsShown() and not ZO_DIALOG_SYNC_OBJECT:IsShown()
     if self.isPlayerInputEnabled ~= allowPlayerInput then
         if allowPlayerInput then
             PushActionLayerByName("AntiquityDiggingActions")

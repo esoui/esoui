@@ -1,10 +1,27 @@
 function ZO_Tooltip:LayoutAvABonus(data)
     local headerSection = self:AcquireSection(self:GetStyle("bodyHeader"))
     headerSection:AddLine(data.name, self:GetStyle("title"))
-    self:AddSection(headerSection)
-    
-    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
 
+    local infoData = data.dataSource.infoData
+    if infoData then
+        if infoData.stringId and infoData.value then
+            local bonusStatValuePair = headerSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+            bonusStatValuePair:SetStat(GetString(infoData.stringId), self:GetStyle("statValuePairStat"))
+            bonusStatValuePair:SetValue(infoData.value, self:GetStyle("statValuePairValue"))
+            headerSection:AddStatValuePair(bonusStatValuePair)
+        elseif infoData.stringId then
+            headerSection:AddLine(GetString(infoData.stringId), self:GetStyle("statValuePairStat"))
+        end
+    end
+
+    local detailsText = data.dataSource.detailsText
+    if detailsText ~= "" then
+        headerSection:AddLine(detailsText, self:GetStyle("statValuePairStat"))
+    end
+
+    self:AddSection(headerSection)
+
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
     local bonusIcon
     if IsInGamepadPreferredMode() then
         bonusIcon = zo_iconFormat(data.typeIconGamepad, 32, 32)

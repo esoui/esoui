@@ -1,33 +1,27 @@
 local MapLocations_Gamepad = ZO_MapLocations_Shared:Subclass()
 
-local LOCATION_DATA = 1
-
-function MapLocations_Gamepad:New(...)
-    local object = ZO_MapLocations_Shared.New(self,...)
-    return object
-end
-
 function MapLocations_Gamepad:Initialize(control)
     self.sideContent = control:GetNamedChild("SideContent")
 
-    local SHOWINGTOOLTIP = true
-    local NOT_SHOWINGTOOLTIP = false
-    CALLBACK_MANAGER:RegisterCallback("OnShowWorldMapTooltip", function() self:UpdateSideContentVisibility(SHOWINGTOOLTIP) end)
-    CALLBACK_MANAGER:RegisterCallback("OnHideWorldMapTooltip", function() self:UpdateSideContentVisibility(NOT_SHOWINGTOOLTIP) end)
+    local SHOWING_TOOLTIP = true
+    local NOT_SHOWING_TOOLTIP = false
+    CALLBACK_MANAGER:RegisterCallback("OnShowWorldMapTooltip", function() self:UpdateSideContentVisibility(SHOWING_TOOLTIP) end)
+    CALLBACK_MANAGER:RegisterCallback("OnHideWorldMapTooltip", function() self:UpdateSideContentVisibility(NOT_SHOWING_TOOLTIP) end)
 
+    --Order matters. Make the fragment before calling the parent class initialize
+    GAMEPAD_WORLD_MAP_LOCATIONS_FRAGMENT = ZO_SimpleSceneFragment:New(control)
     ZO_MapLocations_Shared.Initialize(self, control)
 
     self:InitializeKeybindDescriptor()
 
-    GAMEPAD_WORLD_MAP_LOCATIONS_FRAGMENT = ZO_SimpleSceneFragment:New(control)
     GAMEPAD_WORLD_MAP_LOCATIONS_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-        if(newState == SCENE_SHOWING) then
+        if newState == SCENE_SHOWING then
             if not self.listDisabled then
                 self.list:Activate()
             end
             self.list:RefreshVisible()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-        elseif(newState == SCENE_HIDDEN) then
+        elseif newState == SCENE_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             self.list:Deactivate()
         end
@@ -35,7 +29,7 @@ function MapLocations_Gamepad:Initialize(control)
 end
 
 function MapLocations_Gamepad:UpdateSideContentVisibility(showingTooltips)
-    if (showingTooltips ~= nil) then
+    if showingTooltips ~= nil then
         self.showingTooltips = showingTooltips
     end
 
@@ -46,6 +40,16 @@ function MapLocations_Gamepad:InitializeList(control)
     self.list = ZO_GamepadVerticalParametricScrollList:New(control:GetNamedChild("Main"):GetNamedChild("List"))
     self.list:AddDataTemplate("ZO_GamepadMenuEntryTemplateLowercase42", function(...) self:SetupLocation(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.list:SetAlignToScreenCenter(true)
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return GAMEPAD_WORLD_MAP_LOCATIONS_FRAGMENT:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return GAMEPAD_WORLD_MAP_INFO:GetHeaderNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.list, narrationInfo)
 end
 
 function MapLocations_Gamepad:UpdateSelectedMap()
@@ -119,7 +123,7 @@ function MapLocations_Gamepad:InitializeKeybindDescriptor()
 
             callback = function()
                 if self.selectedData then
-                    ZO_WorldMap_SetMapByIndex(self.selectedData.index)
+                    WORLD_MAP_MANAGER:SetMapByIndex(self.selectedData.index)
                     PlaySound(SOUNDS.MAP_LOCATION_CLICKED)
                 end
             end,

@@ -436,7 +436,17 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
                 local selectedRow = self:GetSelectedData()
                 if selectedRow then
                     local data = ZO_ScrollList_GetData(selectedRow)
-                    self:DeclineRequest(data, nil, NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND)
+                    if data.dataType == NOTIFICATIONS_LFG_READY_CHECK_DATA then
+                        local dialogData =
+                        {
+                            data = data,
+                            control = nil,
+                            openedFromKeybind = NOTIFICATIONS_MENU_OPENED_FROM_MOUSE,
+                        }
+                        ZO_Dialogs_ShowPlatformDialog("LFG_DECLINE_READY_CHECK_CONFIRMATION", dialogData)
+                    else
+                        self:DeclineRequest(data, control, NOTIFICATIONS_MENU_OPENED_FROM_MOUSE)
+                    end
                 end
             end,
 
@@ -644,7 +654,17 @@ end
 function ZO_KeyboardNotificationManager:Decline_OnClicked(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
     if data then
-        self:DeclineRequest(data, control, MENU_OPENED_FROM_MOUSE)
+        if data.dataType == NOTIFICATIONS_LFG_READY_CHECK_DATA then
+            local dialogData =
+            {
+                data = data,
+                control = control,
+                openedFromKeybind = NOTIFICATIONS_MENU_OPENED_FROM_MOUSE,
+            }
+            ZO_Dialogs_ShowPlatformDialog("LFG_DECLINE_READY_CHECK_CONFIRMATION", dialogData)
+        else
+            self:DeclineRequest(data, control, NOTIFICATIONS_MENU_OPENED_FROM_MOUSE)
+        end
     end
 end
 

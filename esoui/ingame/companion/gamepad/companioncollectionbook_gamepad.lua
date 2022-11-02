@@ -169,7 +169,7 @@ function ZO_CompanionCollectionBook_Gamepad:InitializeKeybindStripDescriptors()
             visible = function()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData then
-                    if collectibleData.IsSetDefaultData() then
+                    if collectibleData:IsInstanceOf(ZO_SetDefaultCollectibleData) then
                         --This is a set default data entry, not a regular ZO_CollectibleData
                         return not collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
                     else
@@ -181,7 +181,7 @@ function ZO_CompanionCollectionBook_Gamepad:InitializeKeybindStripDescriptors()
             end,
             enabled = function()
                 local collectibleData = self:GetCurrentTargetData()
-                if collectibleData.IsSetDefaultData() then
+                if collectibleData:IsInstanceOf(ZO_SetDefaultCollectibleData) then
                     --This is a set default data entry, not a regular ZO_CollectibleData
                     return true
                 else
@@ -259,7 +259,7 @@ function ZO_CompanionCollectionBook_Gamepad:SetupList(list)
     list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
     local function CollectibleEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        if not data.IsSetDefaultData() then
+        if not data:IsInstanceOf(ZO_SetDefaultCollectibleData) then
             local collectibleData = data.dataSource
             data:SetNew(collectibleData:IsNew())
             data:SetEnabled(not collectibleData:IsBlocked())
@@ -680,7 +680,7 @@ end
 function ZO_CompanionCollectionBook_Gamepad:RefreshStandardTooltip(collectibleData)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP, true)
 
-    if collectibleData.IsSetDefaultData() then
+    if collectibleData:IsInstanceOf(ZO_SetDefaultCollectibleData) then
         GAMEPAD_TOOLTIPS:LayoutSetDefaultCollectibleFromData(GAMEPAD_LEFT_TOOLTIP, collectibleData, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
     else
         local timeRemainingS = collectibleData:GetCooldownTimeRemainingMs() / 1000
@@ -740,7 +740,7 @@ end
 
 function ZO_CompanionCollectionBook_Gamepad:GetCurrentTargetCollectibleData()
     local targetData = self:GetCurrentTargetData()
-    if targetData and not targetData.IsSetDefaultData() then
+    if targetData and not targetData:IsInstanceOf(ZO_SetDefaultCollectibleData) then
         return targetData
     end
     return nil

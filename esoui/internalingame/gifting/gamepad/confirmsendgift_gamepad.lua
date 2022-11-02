@@ -58,6 +58,8 @@ do
                             control.editBoxControl:SetText(parametricDialog.data.recipientDisplayName)
                         end
                     end,
+
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 
@@ -80,6 +82,7 @@ do
                         control.editBoxControl:SetMaxInputChars(GIFT_NOTE_MAX_LENGTH)
                         control.editBoxControl:SetText(parametricDialog.data.giftMessage)
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 
@@ -201,6 +204,7 @@ do
                     if targetData.recipientNameEntry and targetControl then
                         local function OnUserChosen(hasResult, displayName, consoleId)
                             if hasResult then
+                                SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                                 targetControl.editBoxControl:SetText(displayName)
                             end
                         end
@@ -209,6 +213,7 @@ do
                         PLAYER_CONSOLE_INFO_REQUEST_MANAGER:RequestIdFromUserListDialog(OnUserChosen, GetString(SI_GAMEPAD_CONSOLE_SELECT_FOR_SEND_GIFT), INCLUDE_ONLINE_FRIENDS, INCLUDE_OFFLINE_FRIENDS)
                     elseif targetData.messageEntry and targetControl then
                         targetControl.editBoxControl:SetText(GetRandomGiftSendNoteText())
+                        SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                     end
                 end,
             },

@@ -143,9 +143,10 @@ function ZO_GamepadStoreBuy:ConfirmBuy()
         end
     else
         local maxItems = GetStoreEntryMaxBuyable(selectedData.slotIndex)
+        maxItems = zo_max(maxItems, 1) -- always attempt to let one item be bought, just to show the error
         if maxItems > 1 then
             self:SelectBuyItem()
-            STORE_WINDOW_GAMEPAD:SetupSpinner(zo_max(GetStoreEntryMaxBuyable(selectedData.slotIndex), 1), 1, selectedData.sellPrice, selectedData.currencyType1 or CURT_MONEY)
+            STORE_WINDOW_GAMEPAD:SetupSpinner(maxItems, 1, selectedData.sellPrice, selectedData.currencyType1 or CURT_MONEY)
         elseif maxItems == 1 then
             if not ZO_Currency_TryShowThresholdDialog(selectedData.slotIndex, maxItems, selectedData.dataSource) then
                 BuyStoreItem(selectedData.slotIndex, 1)

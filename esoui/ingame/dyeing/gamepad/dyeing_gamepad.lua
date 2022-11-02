@@ -154,6 +154,9 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeTools()
         toolData.icon = icon
         toolData.tooltipTitle = GetString(tool:GetToolActionString())
         toolData.tooltipDescription = GetString(tooltipDescription)
+        toolData.narrationText = function(entryData)
+            return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.tooltipTitle), SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.tooltipDescription) }
+        end
         return toolData
     end
 
@@ -325,7 +328,7 @@ do
         self.tooltipSwatch:SetHidden(true)
    
         local titleText = dyeData.dyeName
-        local bodyText = ZO_Dyeing_GetAchivementText(dyeData.known, dyeData.achievementId)
+        local bodyText = ZO_Dyeing_GetAchievementText(dyeData.known, dyeData.achievementId)
         ZO_DyeingUtils_SetSlotDyeSwatchDyeId(self.tooltipSwatch, dyeData.dyeId, IS_DYEABLE)
         self.tooltipSwatch:SetHidden(false)
 

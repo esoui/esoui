@@ -72,7 +72,10 @@ function ZO_HousingFurnitureBrowser_Keyboard:OnShowing()
     ZO_HousingFurnitureBrowser_Base.OnShowing(self)
 
     self.settingsPanel:UpdateLists()
-    self.menuBarFragment:ShowLastFragment()
+    self.menuBarFragment:UpdateButtons()
+
+    local USE_FIRST_VISIBLE_FRAGMENT_AS_FALLBACK = true
+    self.menuBarFragment:ShowLastFragment(USE_FIRST_VISIBLE_FRAGMENT_AS_FALLBACK)
 
     SCENE_MANAGER:AddFragmentGroup(self.houseInfoFragmentGroup)
 end
@@ -150,13 +153,22 @@ function ZO_HousingFurnitureBrowser_Keyboard.SetupFurnitureRow(rowControl, furni
 end
 
 function ZO_HousingFurnitureBrowser_Keyboard:CreateMenuBarTabs()
+    local function IsButtonVisible(buttonData)
+        local mode = buttonData.mode
+        if mode == HOUSING_BROWSER_MODE.RETRIEVAL then
+            return HOUSING_EDITOR_STATE:CanLocalPlayerBrowse()
+        end
+        return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
+    end
+
     local function CreateButtonData(normal, pressed, highlight, mode)
         return {
             normal = normal,
             pressed = pressed,
             highlight = highlight,
             mode = mode,
-            callback = function() self:SetMode(mode) end
+            callback = function() self:SetMode(mode) end,
+            visible = IsButtonVisible,
         }
     end
 
@@ -191,6 +203,26 @@ function ZO_HousingFurnitureBrowser_Keyboard:CreateMenuBarTabs()
     menuBarFragment:Add(SI_HOUSING_FURNITURE_TAB_SETTINGS, { self.settingsPanel:GetFragment() }, settingsButtonData)
     
     self.menuBarFragment = menuBarFragment
+
+    local function RefreshMenuBar()
+        if HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
+            retrievalButtonData.categoryName = SI_HOUSING_FURNITURE_TAB_RETRIEVAL
+            retrievalButtonData.normal = "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_recall_up.dds"
+            retrievalButtonData.pressed = "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_recall_down.dds"
+            retrievalButtonData.highlight = "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_recall_over.dds"
+        else
+            retrievalButtonData.categoryName = SI_HOUSING_FURNITURE_TAB_FURNITURE_LIST
+            retrievalButtonData.normal = "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_furnitureList_up.dds"
+            retrievalButtonData.pressed = "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_furnitureList_down.dds"
+            retrievalButtonData.highlight = "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_furnitureList_over.dds"
+        end
+
+        local FORCE_SELECTION = true
+        menuBarFragment:UpdateButtons(FORCE_SELECTION)
+    end
+
+    RefreshMenuBar()
+    HOUSING_EDITOR_STATE:RegisterCallback("HouseChanged", RefreshMenuBar)
 end
 
 --

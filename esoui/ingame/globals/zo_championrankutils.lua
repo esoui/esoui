@@ -1,6 +1,6 @@
 do
     local CHAMPION_CAP = GetMaxSpendableChampionPointsInAttribute() * 3
-    function GetLevelOrChampionPointsStringNoIcon(level, championPoints)
+    function ZO_GetLevelOrChampionPointsStringNoIcon(level, championPoints)
         if championPoints and championPoints > 0 then
             if championPoints > CHAMPION_CAP then
                 return tostring(CHAMPION_CAP)
@@ -15,7 +15,19 @@ do
     end
 end
 
-function GetChampionIconMarkupString(iconSize)
+function ZO_GetLevelOrChampionPointsNarrationString(level, championPoints)
+    local levelString = ZO_GetLevelOrChampionPointsStringNoIcon(level, championPoints)
+    if levelString ~= "" then
+        if championPoints and championPoints > 0 then
+            levelString = zo_strformat(SI_SCREEN_NARRATION_CHAMPION_LEVEL_FORMATTER, levelString)
+        end
+        return levelString
+    end
+
+    return ""
+end
+
+function ZO_GetChampionIconMarkupString(iconSize)
     if iconSize then
         local championIcon
         if IsInGamepadPreferredMode() then
@@ -28,7 +40,7 @@ function GetChampionIconMarkupString(iconSize)
     end
 end
 
-function GetChampionIconMarkupStringInheritColor(iconSize)
+function ZO_GetChampionIconMarkupStringInheritColor(iconSize)
     if iconSize then
         local championIcon
         if IsInGamepadPreferredMode() then
@@ -41,21 +53,21 @@ function GetChampionIconMarkupStringInheritColor(iconSize)
     end
 end
 
-function GetLevelOrChampionPointsString(level, championPoints, iconSize)
+function ZO_GetLevelOrChampionPointsString(level, championPoints, iconSize)
     local iconString = ""
     
     if championPoints and championPoints > 0 and iconSize then
-        iconString = GetChampionIconMarkupString(iconSize)
+        iconString = ZO_GetChampionIconMarkupString(iconSize)
     end
     
-    return iconString .. GetLevelOrChampionPointsStringNoIcon(level, championPoints)
+    return string.format("%s%s", iconString, ZO_GetLevelOrChampionPointsStringNoIcon(level, championPoints))
 end
 
-function GetLevelOrChampionPointsRangeString(minLevel, maxLevel, isChampionPoints, iconSize)
+function ZO_GetLevelOrChampionPointsRangeString(minLevel, maxLevel, isChampionPoints, iconSize)
     local iconString = ""
     
     if isChampionPoints and iconSize then
-        iconString = GetChampionIconMarkupString(iconSize)
+        iconString = ZO_GetChampionIconMarkupString(iconSize)
     end
 
     return string.format("%s%s-%s", iconString, minLevel, maxLevel)

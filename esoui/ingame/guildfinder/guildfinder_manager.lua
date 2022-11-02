@@ -45,7 +45,7 @@ function ZO_GuildFinder_Manager:ShowApplicationTooltipOnMouseEnter(data, control
     self.applicationKeyboardTooltipInfo.titleControl:SetText(fullName)
 
     local iconSize = data.iconSize or DEFAULT_ICON_SIZE
-    local levelText = zo_strformat(SI_GUILD_FINDER_APPLICATIONS_ATTRIBUTE_TOOLTIP_FORMATTER, GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_SORT_HEADER_LEVEL), GetLevelOrChampionPointsString(data.level, data.championPoints, iconSize))
+    local levelText = zo_strformat(SI_GUILD_FINDER_APPLICATIONS_ATTRIBUTE_TOOLTIP_FORMATTER, GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_SORT_HEADER_LEVEL), ZO_GetLevelOrChampionPointsString(data.level, data.championPoints, iconSize))
     self.applicationKeyboardTooltipInfo.levelControl:SetText(levelText)
 
     local classId = data.class

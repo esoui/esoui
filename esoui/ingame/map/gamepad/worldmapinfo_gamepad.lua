@@ -59,7 +59,8 @@ function WorldMapInfo_Gamepad:InitializeTabs()
     local USES_RIGHT_SIDE_CONTENT = true
     local DOESNT_USE_RIGHT_SIDE_CONTENT = false
     -- Table for the Window data. Each entry is a tab in the UI.
-    self.tabBarEntries = {
+    self.tabBarEntries = 
+    {
         {
             text = GetString(SI_MAP_INFO_MODE_QUESTS),
             callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_QUESTS_FRAGMENT, USES_RIGHT_SIDE_CONTENT) end,
@@ -100,7 +101,8 @@ function WorldMapInfo_Gamepad:InitializeTabs()
         },
     }
 
-    self.baseHeaderData = {
+    self.baseHeaderData = 
+    {
         tabBarEntries = self.tabBarEntries,
     }
 
@@ -129,6 +131,10 @@ function WorldMapInfo_Gamepad:OnHidden()
     ZO_WorldMap_UpdateInteractKeybind_Gamepad()
 
     CALLBACK_MANAGER:FireCallbacks("WorldMapInfo_Gamepad_Hidden")
+end
+
+function WorldMapInfo_Gamepad:GetHeaderNarration()
+    return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.baseHeaderData)
 end
 
 --Global

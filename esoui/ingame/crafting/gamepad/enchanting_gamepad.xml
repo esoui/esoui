@@ -1,5 +1,30 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_GamepadEnchantingItemSubEntryTemplate" inherits="ZO_GamepadItemSubEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_GamepadEnchantingItemSubEntryTemplate_OnInitialized(self)
+            </OnInitialized>
+            <Dimensions x="390" />
+            <Controls>
+                <Label name="$(parent)Level" font="ZoFontGamepad27" hidden="true">
+                    <Anchor point="TOPRIGHT" offsetX="-25" />
+                </Label>
+                <Label name="$(parent)Label" override="true">
+                    <ClearAnchors />
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Level" relativePoint="LEFT" constrains="X" />
+                </Label>
+                <Label name="$(parent)SubLabel1" inherits="ZO_GamepadMenuEntrySubLabelTemplateMain">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="RIGHT" constrains="X" />
+                </Label>
+                <Label name="$(parent)SubLabel2" inherits="ZO_GamepadMenuEntrySubLabelTemplateMain">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubLabel1" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel1" relativePoint="BOTTOMRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+            
         <Button name="ZO_GamepadEnchantingRuneCraftingSlot" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontGamepad34" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">

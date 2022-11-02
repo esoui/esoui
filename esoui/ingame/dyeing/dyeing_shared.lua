@@ -109,7 +109,7 @@ EVENT_MANAGER:RegisterForEvent("Dyeing_Shared", EVENT_DYEING_STATION_INTERACT_EN
 end)
 
 -- Shared Functions
-function ZO_Dyeing_GetAchivementText(dyeKnown, achievementId, nonPlayerDye)
+function ZO_Dyeing_GetAchievementText(dyeKnown, achievementId, nonPlayerDye)
     local achievementName = GetAchievementInfo(achievementId)
     if dyeKnown then
         if achievementName ~= "" then
@@ -539,7 +539,7 @@ do
             SetTooltipText(InformationTooltip, zo_strformat(SI_DYEING_SWATCH_TOOLTIP_TITLE, dyeName))
             InformationTooltip:AddVerticalPadding(INFORMATION_TOOLTIP_VERTICAL_PADDING)
 
-            local line1, line2 = ZO_Dyeing_GetAchivementText(isDyeKnown, achievementId, nonPlayerDye)
+            local line1, line2 = ZO_Dyeing_GetAchievementText(isDyeKnown, achievementId, nonPlayerDye)
             InformationTooltip:AddLine(line1, "", ZO_NORMAL_TEXT:UnpackRGB())
             if line2 then
                 InformationTooltip:AddLine(line2, "", ZO_NORMAL_TEXT:UnpackRGB())
@@ -702,6 +702,10 @@ function Dyeing_Manager:UpdateDyeData()
             g = g,
             b = b,
             dyeIndex = dyeIndex,
+            narrationText = function(entryData)
+                local bodyText = ZO_Dyeing_GetAchievementText(entryData.known, entryData.achievementId)
+                return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.dyeName), SCREEN_NARRATION_MANAGER:CreateNarratableObject(bodyText) }
+            end,
         }
         
         self.dyesById[dyeId] = dyeInfo
@@ -775,6 +779,10 @@ function Dyeing_Manager:GetOrCreateNonPlayerDyeInfoById(dyeId)
             r = r,
             g = g,
             b = b,
+            narrationText = function(entryData)
+                local bodyText = ZO_Dyeing_GetAchievementText(entryData.known, entryData.achievementId)
+                return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.dyeName), SCREEN_NARRATION_MANAGER:CreateNarratableObject(bodyText) }
+            end,
         }
 
         self.nonPlayerDyesById[dyeId] = dyeInfo

@@ -398,6 +398,21 @@ function ZO_EnchantingInventory:Initialize(owner, control, ...)
     self.owner = owner
     self.filterType = ENCHANTING_NO_FILTER
 
+    local function LevelSortOrder(bagId, slotIndex)
+        local itemId = GetItemId(bagId, slotIndex)
+        local isRuneKnown = IsRuneKnown(itemId)
+        if isRuneKnown then
+            local level, championPoints = GetItemGlyphMinLevels(bagId, slotIndex)
+            if championPoints then
+                level = 50 + championPoints
+            end
+            return level
+        end
+        return 0
+    end
+
+    self:SetLevelSort(LevelSortOrder)
+
     self.questFilterCheckButton = control:GetNamedChild("QuestItemsOnly")
     self.filterDivider = control:GetNamedChild("ButtonDivider")
     self.sortByControl = control:GetNamedChild("SortBy")
@@ -412,7 +427,7 @@ function ZO_EnchantingInventory:Initialize(owner, control, ...)
     self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 
     local SET_HIDDEN = true
-    self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true, sellInformationSortOrder = true, }, SET_HIDDEN)
+    self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true, sellInformationSortOrder = true, level = true, }, SET_HIDDEN)
     self:InitializeFilters()
 end
 
@@ -429,8 +444,28 @@ function ZO_EnchantingInventory:AddListDataTypes()
         else
             questPin:SetHidden(true)
         end
+        local isInPotencyView = self.filterType == ENCHANTING_RUNE_POTENCY
+        local levelControl = rowControl:GetNamedChild("Level")
+        local isRuneKnown = IsRuneKnown(itemId)
+        levelControl:SetHidden(not isInPotencyView)
+        if isInPotencyView then
+            local levelText
+            if isRuneKnown then
+                local level, championPoints = GetItemGlyphMinLevels(data.bagId, data.slotIndex)
+                if championPoints then
+                    levelText = zo_strformat(SI_ENCHANTING_GLYPH_CREATED_CHAMPION_LEVEL, championPoints)
+                else
+                    levelText = level
+                end
+                levelControl:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+            else
+                levelText = GetString(SI_ENCHANTING_TRANSLATION_UNKNOWN)
+                levelControl:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+            end
+            levelControl:SetText(levelText)
+        end
     end
-    ZO_ScrollList_AddDataType(self.list, self:GetScrollDataType(), "ZO_CraftingInventoryComponentRow", 52, RuneSetup, nil, nil, ZO_InventorySlot_OnPoolReset)
+    ZO_ScrollList_AddDataType(self.list, self:GetScrollDataType(), "ZO_EnchantingInventoryComponentRow", 52, RuneSetup, nil, nil, ZO_InventorySlot_OnPoolReset)
 end
 
 function ZO_EnchantingInventory:InitializeFilters()
@@ -496,14 +531,24 @@ function ZO_EnchantingInventory:ChangeFilter(filterData)
     else
         self.filterType = filterData.descriptor
 
-        if self.filterType == ENCHANTING_RUNE_ASPECT then
-            self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_ASPECT_RUNES))
-        elseif self.filterType == ENCHANTING_RUNE_ESSENCE then
-            self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_ESSENCE_RUNES))
-        elseif self.filterType == ENCHANTING_RUNE_POTENCY then
+        if self.filterType == ENCHANTING_RUNE_POTENCY then
             self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_POTENCY_RUNES))
+            local SET_HIDDEN = true
+            self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true, sellInformationSortOrder = true, }, SET_HIDDEN)
         else
-            self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_RUNES))
+            if self.filterType == ENCHANTING_RUNE_ASPECT then
+                self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_ASPECT_RUNES))
+            elseif self.filterType == ENCHANTING_RUNE_ESSENCE then
+                self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_ESSENCE_RUNES))
+            else
+                self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_RUNES))
+            end
+
+            if self.sortKey == "level" then
+                self.sortHeaders:SelectHeaderByKey("name")
+            end
+            local SET_HIDDEN = true
+            self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true, sellInformationSortOrder = true, level = true, }, SET_HIDDEN)
         end
     end
 
@@ -537,7 +582,8 @@ function ZO_EnchantingInventory:EnumerateInventorySlotsAndAddToScrollData(predic
 
     for itemId, itemInfo in pairs(list) do
         if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType, self.savedVars.questsOnlyChecked, self.questRunes) then
-            self:AddItemData(itemInfo.bag, itemInfo.index, itemInfo.stack, self:GetScrollDataType(itemInfo.bag, itemInfo.index), data, self.customDataGetFunction)
+            local NO_SLOT_DATA = nil
+            self:AddItemData(itemInfo.bag, itemInfo.index, itemInfo.stack, self:GetScrollDataType(itemInfo.bag, itemInfo.index), data, self.customDataGetFunction, NO_SLOT_DATA, self.levelDataGetFunction)
         end
         self.itemCounts[itemId] = itemInfo.stack
     end

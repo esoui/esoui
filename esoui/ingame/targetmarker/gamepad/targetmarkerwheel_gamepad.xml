@@ -1,0 +1,21 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TargetMarkerWheelMenuEntryTemplate_Gamepad" inherits="ZO_GamepadSelectableItemRadialMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_TargetMarkerWheelMenuEntryTemplate_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+        
+        <TopLevelControl name="ZO_TargetMarkerWheel_Gamepad_TopLevel">
+            <AnchorFill/>
+
+            <OnInitialized>
+                ZO_TargetMarkerWheel_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Menu" inherits="ZO_RadialMenuHUDSize_Gamepad" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

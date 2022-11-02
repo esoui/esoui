@@ -60,6 +60,30 @@
             </Animations>
         </AnimationTimeline>
 
+        <AnimationTimeline name="ZO_TributeCard_TriggerAnimationTimeline">
+            <OnStop>
+                ZO_TributeCard_StateEffectTimeline_OnStop(self, completedPlaying)
+            </OnStop>
+
+            <Animations>
+                <AlphaAnimation duration="1000" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <AlphaAnimation delay="1000" duration="1000" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <CustomAnimation duration="2000">
+                    <UpdateFunction>
+                        ZO_TributeCard_TriggerAnimation_ColorShift_SetProgress(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
         <AnimationTimeline name="ZO_TributeCard_PopupTimeline">
             <Animations>
                 <CustomAnimation duration="250">
@@ -108,6 +132,21 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_TributeCard_MechanicContainer_Large_SingleDigit_Trigger_Style" virtual="true">
+            <Dimensions x="64" y="64" />
+
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_trigger_large_single.dds" />
+
+                <Texture name="$(parent)TypeIcon">
+                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
+                    <Anchor point="CENTER" offsetX="-14" />
+                </Texture>
+
+                <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" />
+            </Controls>
+        </Control>
+
         <Control name="ZO_TributeCard_MechanicContainer_Large_DoubleDigit_Activation_Style" virtual="true">
             <Dimensions x="128" y="64" />
 
@@ -132,6 +171,21 @@
                 <Texture name="$(parent)TypeIcon">
                     <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
                     <Anchor point="CENTER" offsetX="-23" />
+                </Texture>
+
+                <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeCard_MechanicContainer_Large_DoubleDigit_Trigger_Style" virtual="true">
+            <Dimensions x="128" y="64" />
+
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_trigger_large_double.dds" />
+
+                <Texture name="$(parent)TypeIcon">
+                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
+                    <Anchor point="CENTER" offsetX="-22" />
                 </Texture>
 
                 <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" />
@@ -168,7 +222,22 @@
             </Controls>
         </Control>
 
-         <Control name="ZO_TributeCard_MechanicContainer_Small_DoubleDigit_Activation_Style" virtual="true">
+        <Control name="ZO_TributeCard_MechanicContainer_Small_SingleDigit_Trigger_Style" virtual="true">
+            <Dimensions x="64" y="64" />
+
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_trigger_small_single.dds" />
+
+                <Texture name="$(parent)TypeIcon">
+                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" />
+                    <Anchor point="CENTER" offsetX="-10" />
+                </Texture>
+
+                <Label name="$(parent)Quantity" font="ZoFontTributeAntique20NoShadow" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeCard_MechanicContainer_Small_DoubleDigit_Activation_Style" virtual="true">
             <Dimensions x="64" y="64" />
 
             <Controls>
@@ -188,6 +257,21 @@
 
             <Controls>
                 <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_combo_small_double.dds" />
+
+                <Texture name="$(parent)TypeIcon">
+                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" />
+                    <Anchor point="CENTER" offsetX="-16" />
+                </Texture>
+
+                <Label name="$(parent)Quantity" font="ZoFontTributeAntique20NoShadow" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeCard_MechanicContainer_Small_DoubleDigit_Trigger_Style" virtual="true">
+            <Dimensions x="64" y="64" />
+
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_trigger_small_double.dds" />
 
                 <Texture name="$(parent)TypeIcon">
                     <Dimensions x="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" />
@@ -349,6 +433,28 @@
 
         <Texture name="ZO_TributeCard_CalloutUnderlay_Template" inherits="ZO_TributeCard_StateEffectUnderlayWave_Template" textureFile="EsoUI/Art/Tribute/Overlays/tributeCardOverlay_callout.dds" virtual="true" />
 
+        <Texture name="ZO_TributeCard_TriggerAnimation_Template" inherits="ZO_TributeCard_FullTextureFootprint" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_CARD_UI_WIDTH" y="ZO_TRIBUTE_CARD_UI_HEIGHT" />
+
+            <OnInitialized>
+                ZO_TributeCard_TriggerAnimation_OnInitialized(self)
+            </OnInitialized>
+        </Texture>
+
+        <Texture name="ZO_TributeCard_TriggerAnimationOverlayWave_Template" inherits="ZO_TributeCard_TriggerAnimation_Template" shaderEffectType="WAVE" blendMode="ADD" color="222222" level="20" scale="1.2" virtual="true">
+            <Wave angle="0.0" frequency="5.0" offset="0.0" speed="5.0" />
+            <WaveBounds minX="0.0" maxX="0.0" minY="0.02" maxY="0.02" />
+        </Texture>
+
+        <Texture name="ZO_TributeCard_TriggerAnimationUnderlayWave_Template" inherits="ZO_TributeCard_TriggerAnimation_Template" shaderEffectType="WAVE" blendMode="ALPHA" color="ffffff" level="0" scale="1.2" virtual="true">
+            <Wave angle="0.0" frequency="7.0" offset="0.0" speed="5.0" />
+            <WaveBounds minX="0.0" maxX="0.0" minY="0.02" maxY="0.02" />
+        </Texture>
+
+        <Texture name="ZO_TributeCard_TriggerAnimationOverlay_Template" inherits="ZO_TributeCard_TriggerAnimationOverlayWave_Template" textureFile="EsoUI/Art/Tribute/Overlays/tributeCardOverlay_trigger.dds" color="8800ff" virtual="true" />
+
+        <Texture name="ZO_TributeCard_TriggerAnimationUnderlay_Template" inherits="ZO_TributeCard_TriggerAnimationUnderlayWave_Template" textureFile="EsoUI/Art/Tribute/Overlays/tributeCardOverlay_trigger.dds" color="440088" virtual="true" />
+
         <!-- End Card State Effect Templates -->
 
         <Control name="ZO_TributeCard_Base" mouseEnabled="true" virtual="true">
@@ -386,19 +492,19 @@
                         <Texture name="$(parent)Suit" inherits="ZO_TributeCard_SuitGlowableTexture" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" level="8" />
 
                         <Label name="$(parent)Name" font="ZoFontTributeAntique20NoShadow" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" verticalAlignment="CENTER" horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS" level="10">
-                            <Anchor point="TOP" offsetY="390" />
+                            <Anchor point="CENTER" relativePoint="TOP" offsetY="402" />
                             <Dimensions x="200" />
                             
                             <Controls>
                                 <Texture name="$(parent)Banner" textureFile="EsoUI/Art/Tribute/tributeCardNameBanner.dds" level="9" pixelRoundingEnabled="false">
                                     <Dimensions x="256" y="64" />
-                                    <Anchor point="TOP" offsetY="-5" />
+                                    <Anchor point="CENTER" offsetY="15" />
                                 </Texture>
                             </Controls>
                         </Label>
                         
                         <Label name="$(parent)Cost" font="ZoFontTributeAntique52" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_WHITE" verticalAlignment="CENTER" horizontalAlignment="CENTER" level="9">
-                            <Anchor point="TOP" offsetY="20" />
+                            <Anchor point="CENTER" relativePoint="TOP" offsetY="51" />
                             
                             <Controls>
                                 <Texture name="$(parent)Icon" level="8" pixelRoundingEnabled="false">
@@ -457,11 +563,11 @@
                         </Texture>
                         
                         <Label name="$(parent)DefeatCost" inherits="ZO_TributeCard_DefeatCost">
-                            <Anchor point="TOP" relativeTo="$(parent)NameBanner" offsetY="30" />
+                            <Anchor point="CENTER" relativePoint="TOP" relativeTo="$(parent)NameBanner" offsetY="61" />
 
                             <Controls>
                                 <Texture name="$(parent)Banner" override="true">
-                                    <Anchor point="TOP" offsetY="6" />
+                                    <Anchor point="CENTER" offsetY="7" />
                                 </Texture>
                             </Controls>
                         </Label>

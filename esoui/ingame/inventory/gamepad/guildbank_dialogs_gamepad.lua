@@ -15,6 +15,10 @@ end
 
 local GUILD_ENTRY_TEMPLATE = "ZO_GamepadSubMenuEntryWithStatusTemplate"
 
+local function GetGuildSelectionNarrationText(entryData, entryControl)
+    return ZO_FormatRadioButtonNarrationText(entryData.text, entryData.isCurrentGuild)
+end
+
 local function SetupGuildSelectionDialog(dialog)
     local currentGuildId = GetSelectedGuildBankId()
 
@@ -34,6 +38,7 @@ local function SetupGuildSelectionDialog(dialog)
         entryData.allianceId = allianceId
         entryData.setup = SetupGuildBankItem
         entryData.isCurrentGuild = guildId == currentGuildId
+        entryData.narrationText = GetGuildSelectionNarrationText
 
         local listItem = 
         {

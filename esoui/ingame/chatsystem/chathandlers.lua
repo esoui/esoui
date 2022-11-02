@@ -47,19 +47,45 @@ local BUILTIN_MESSAGE_FORMATTERS = {
                 text = zo_strformat(SI_CHAT_MESSAGE_FORMATTER, text)
             end
 
-            -- Channels with links will not have CS messages
-            local formattedText
-            if channelLink then
-                formattedText = string.format(GetString(channelInfo.format), channelLink, fromLink, text)
+            local channelInfoFormat
+            if type(channelInfo.format) == "function" then
+                channelInfoFormat = channelInfo.format()
             else
-                if channelInfo.supportCSIcon then
-                    formattedText = string.format(GetString(channelInfo.format), GetCustomerServiceIcon(isFromCustomerService), fromLink, text)
+                channelInfoFormat = GetString(channelInfo.format)
+            end
+
+            local channelInfoNarrationFormat
+            if channelInfo.narrationFormat then
+                if type(channelInfo.narrationFormat) == "function" then
+                    channelInfoNarrationFormat = channelInfo.narrationFormat()
                 else
-                    formattedText = string.format(GetString(channelInfo.format), fromLink, text)
+                    channelInfoNarrationFormat = GetString(channelInfo.narrationFormat)
                 end
             end
 
-            return formattedText, channelInfo.saveTarget, fromDisplayName, text
+            -- Channels with links will not have CS messages
+            local formattedText
+            local formattedNarrationText
+            if channelLink then
+                formattedText = string.format(channelInfoFormat, channelLink, fromLink, text)
+                if channelInfoNarrationFormat then
+                    formattedNarrationText = string.format(channelInfoNarrationFormat, channelLink, fromLink, text)
+                end
+            else
+                if channelInfo.supportCSIcon then
+                    formattedText = string.format(channelInfoFormat, GetCustomerServiceIcon(isFromCustomerService), fromLink, text)
+                    if channelInfoNarrationFormat then
+                        formattedNarrationText = string.format(channelInfoNarrationFormat, GetCustomerServiceIcon(isFromCustomerService), fromLink, text)
+                    end
+                else
+                    formattedText = string.format(channelInfoFormat, fromLink, text)
+                    if channelInfoNarrationFormat then
+                        formattedNarrationText = string.format(channelInfoNarrationFormat, fromLink, text)
+                    end
+                end
+            end
+
+            return formattedText, channelInfo.saveTarget, fromDisplayName, text, formattedNarrationText
         end
     end,
 
@@ -120,6 +146,7 @@ local BUILTIN_MESSAGE_FORMATTERS = {
             nameToDisplay = ZO_FormatUserFacingDisplayName(displayName)
         end
 
+        ZO_OutputStadiaLog(string.format("ChatHandlers[EVENT_GROUP_INVITE_RESPONSE], ShouldShowGroupErrorInChat(response) = %s", (ShouldShowGroupErrorInChat(response) and "true" or "false")))
         if not IsGroupErrorIgnoreResponse(response) and ShouldShowGroupErrorInChat(response) then
             local alertMessage = nameToDisplay ~= "" and zo_strformat(GetString("SI_GROUPINVITERESPONSE", response), nameToDisplay) or GetString(SI_PLAYER_BUSY)
 
@@ -257,14 +284,14 @@ do
 
         local messageFormatter = self.registeredMessageFormatters[eventKey]
         if messageFormatter then
-            local formattedEventText, targetChannel, fromDisplayName, rawMessageText = messageFormatter(...)
+            local formattedEventText, targetChannel, fromDisplayName, rawMessageText, formattedNarrationText = messageFormatter(...)
             if formattedEventText then
                 if targetChannel then
                     local target = select(2, ...)
                     self:FireCallbacks("TargetAddedToChannel", targetChannel, target)
                 end
 
-                self:FireCallbacks("FormattedChatMessage", formattedEventText, eventCategory, targetChannel, fromDisplayName, rawMessageText)
+                self:FireCallbacks("FormattedChatMessage", formattedEventText, eventCategory, targetChannel, fromDisplayName, rawMessageText, formattedNarrationText)
             end
         end
     end

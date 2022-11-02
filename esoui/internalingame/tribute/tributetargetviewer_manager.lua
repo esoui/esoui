@@ -10,7 +10,7 @@ function ZO_TributeTargetViewer_Manager:Initialize()
         if self:IsViewingTargets() then
             --ESO-773300: In the situation where this event fires at the same time as EVENT_TRIBUTE_END_TARGET_SELECTION, the information cached on the manager may have not yet been updated
             --As a result, we need to ask the C++ directly to make sure target selection is actually still active
-            if GetCurrentTributeTargetSelectionTriggerType() ~= TRIBUTE_TARGET_SELECTION_TRIGGER_TYPE_NONE then
+            if GetCurrentTributeTargetSelectionSourceType() ~= TRIBUTE_TARGET_SELECTION_SOURCE_TYPE_NONE then
                 local targetData = self:GetCurrentTargetData()
                 self:SetViewingTargets(nil)
                 self:SetViewingTargets(targetData)
@@ -52,7 +52,17 @@ function ZO_TributeTargetViewer_Manager:Initialize()
         {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
             name = GetString(SI_TRIBUTE_TARGET_VIEWER_CANCEL_ACTION),
+            keybind = "UI_SHORTCUT_NEGATIVE",
+            callback = function()
+                TributeCancelCurrentMove()
+            end,
+            visible = function()
+                return TributeCanCancelCurrentMove()
+            end,
+        },
+        {
             keybind = "UI_SHORTCUT_EXIT",
+            ethereal = true,
             callback = function()
                 TributeCancelCurrentMove()
             end,
@@ -125,17 +135,17 @@ end
 
 function ZO_TributeTargetViewer_Manager:GetInstructionText()
     local instructionText = ""
-    local triggerType = GetCurrentTributeTargetSelectionTriggerType()
-    if triggerType == TRIBUTE_TARGET_SELECTION_TRIGGER_TYPE_MECHANIC then
+    local sourceType = GetCurrentTributeTargetSelectionSourceType()
+    if sourceType == TRIBUTE_TARGET_SELECTION_SOURCE_TYPE_MECHANIC then
         local mechanicType, quantity, param1, param2, param3 = GetTributeTargetSelectionMechanicInfo()
         instructionText = GetTributeMechanicTargetingText(mechanicType, quantity, param1, param2, param3)
-    elseif triggerType == TRIBUTE_TARGET_SELECTION_TRIGGER_TYPE_PATRON_REQUIREMENT then
+    elseif sourceType == TRIBUTE_TARGET_SELECTION_SOURCE_TYPE_PATRON_REQUIREMENT then
         local requirementType, quantity, param1, param2 = GetTributeTargetSelectionRequirementInfo()
         instructionText = GetTributePatronRequirementTargetingText(requirementType, quantity, param1, param2)
-    elseif triggerType == TRIBUTE_TARGET_SELECTION_TRIGGER_TYPE_NONE then
+    elseif sourceType == TRIBUTE_TARGET_SELECTION_SOURCE_TYPE_NONE then
         internalassert(false, "Target selection is not active")
     else
-        internalassert(false, "Unimplemented target selection trigger type")
+        internalassert(false, "Unimplemented target selection source type")
     end
     return instructionText
 end

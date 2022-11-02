@@ -511,6 +511,7 @@ end
 function ZO_GuildRanks_Keyboard:OnGuildMemberRankChanged(displayName)
     if displayName == GetDisplayName() then
         self:RefreshRankInfo()
+        self:RefreshEditPermissions()
     end
 end
 

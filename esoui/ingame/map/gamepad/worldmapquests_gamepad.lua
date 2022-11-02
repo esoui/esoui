@@ -1,7 +1,6 @@
 local WorldMapQuests_Gamepad = ZO_WorldMapQuests_Shared:Subclass()
 
 local ASSISTED_TEXTURE = "EsoUI/Art/Journal/Gamepad/gp_trackedQuestIcon.dds"
-local QUEST_DATA = 1
 
 function WorldMapQuests_Gamepad:New(...)
     local object = ZO_WorldMapQuests_Shared.New(self, ...)
@@ -25,6 +24,17 @@ function WorldMapQuests_Gamepad:Initialize(control)
     end
     self.questList:AddDataTemplate("ZO_GamepadSubMenuEntryTemplateWithStatusLowercase42", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, equalityFunction)
     self.questList:SetOnSelectedDataChangedCallback(function() self:SetupQuestDetails() end)
+
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return GAMEPAD_WORLD_MAP_QUESTS_FRAGMENT:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return GAMEPAD_WORLD_MAP_INFO:GetHeaderNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.questList, narrationInfo)
 
     self.entriesByIndex = {}
 
@@ -108,7 +118,7 @@ function WorldMapQuests_Gamepad:SetupQuestDetails()
     local questColor = GetColorDefForCon(GetCon(questLevel))
 
     local titleStyle = tooltipControl.tooltip:GetStyle("mapQuestTitle")
-    local groupSection = tooltipControl.tooltip:AcquireSection(tooltipControl.tooltip:GetStyle("mapQuestTitle"), tooltipControl.tooltip:GetStyle("mapKeepCategorySpacing"))
+    local groupSection = tooltipControl.tooltip:AcquireSection(titleStyle, tooltipControl.tooltip:GetStyle("mapKeepCategorySpacing"))
     local icon, mapIconTitleStyle
     if isAssisted then
         icon = ASSISTED_TEXTURE

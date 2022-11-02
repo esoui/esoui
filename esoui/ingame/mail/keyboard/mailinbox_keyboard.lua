@@ -184,23 +184,19 @@ function MailInbox:RegisterForEvents()
     control:RegisterForEvent(EVENT_MAIL_REMOVED, function(_, mailId) self:OnMailRemoved(mailId) end)
     control:RegisterForEvent(EVENT_MAIL_NUM_UNREAD_CHANGED, function(_, numUnread) self:OnMailNumUnreadChanged(numUnread) end)
     control:RegisterForEvent(EVENT_MAIL_OPEN_MAILBOX, function()
-        --It's possible that the mail that's selected was selected after we closed the mail interaction (for example, deleting the current mail and
-        --rapidly closing the window). In that case we never sent a message to the server to get the mail contents so the details pane is empty.
-        --If we show the window again and the request hasn't be responsed to then self.requestedMailId will still be set so we know we have to query
-        --again now that the interaction is open again. We wait till shown for the interaction to be open.
+        -- It's possible that the mail that's selected was selected after we closed the mail interaction (for example, deleting the current mail and
+        -- rapidly closing the window). In that case we never sent a message to the server to get the mail contents so the details pane is empty.
+        -- If we show the window again and the request hasn't be responsed to then self.requestedMailId will still be set so we know we have to query
+        -- again now that the interaction is open again. We wait till shown for the interaction to be open.
         if self.pendingRequestMailId then
             self:RequestReadMessage(self.pendingRequestMailId)
         end
 
-        -- isFirstTimeShowing is set to false only when RefreshData() is called, not when the inbox is opened. Since we exit this "loading state"
-        -- when RefreshData is called, it's an appropriate variable to check against for purposes of our loading indicator.
-        if self.isFirstTimeOpening then
-            self.loadingIcon:Show()
-            self.unreadLabel:SetHidden(true)
-        else
-            self.loadingIcon:Hide()
-            self.unreadLabel:SetHidden(false)
-        end
+        -- These will get reset when RefreshData() is called, since we exit this "loading state" when RefreshData is called
+        self.loadingIcon:Show()
+        self.unreadLabel:SetHidden(true)
+        self.navigationContainer:SetHidden(true)
+        self.messageControl:SetHidden(true)
     end)
 end
 
@@ -383,7 +379,7 @@ do
         local systemMailNodeData = self.systemMailNodeData
         ZO_ClearTable(playerMailNodeData.unreadData)
         ZO_ClearTable(systemMailNodeData.unreadData)
-        
+
         local currentReadMailData = nil
 
         -- Accumulate data
@@ -485,7 +481,17 @@ do
             self:EndRead()
         end
 
-        self.fullLabel:SetHidden(not (IsLocalMailboxFull() or HasUnreceivedMail()))
+        self.navigationContainer:SetHidden(false)
+        self.messageControl:SetHidden(false)
+        if IsLocalMailboxFull() then
+            self.fullLabel:SetText(GetString(SI_MAIL_INBOX_FULL))
+            self.fullLabel:SetHidden(false)
+        elseif HasUnreceivedMail() then
+            self.fullLabel:SetText(GetString(SI_MAIL_INBOX_UNDELIVERED))
+            self.fullLabel:SetHidden(false)
+        else
+            self.fullLabel:SetHidden(true)
+        end
     end
 end
 

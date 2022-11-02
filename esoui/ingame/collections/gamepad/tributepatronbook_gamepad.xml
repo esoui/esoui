@@ -30,8 +30,8 @@
 
                                     <Controls>
                                         <Label name="$(parent)SetupLabel" inherits="ZO_TributePatron_Gamepad_Description_Label" hidden="true">
-                                            <Anchor point="TOPLEFT" />
-                                            <Anchor point="TOPRIGHT" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ContainerListContents"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ContainerListContents"/>
                                         </Label>
                                     </Controls>
                                 </Control>

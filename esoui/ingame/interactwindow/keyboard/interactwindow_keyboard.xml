@@ -32,7 +32,7 @@
                     </OnMouseExit>
 
                     <Controls>
-                        <Texture name="$(parent)Image" level="1">
+                        <Texture name="$(parent)Image" inherits="ZO_MultiIcon" level="1">
                             <AnchorFill />
                         </Texture>
                     </Controls>

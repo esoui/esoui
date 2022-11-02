@@ -3,8 +3,12 @@ local NUM_DIALOG_BUTTONS = 2
 local RELEASED_FROM_BUTTON_PRESS = true
 local BUTTON_SPACING = 20
 
-local displayedDialogs = {}
-local dialogQueue = {}
+-- This used to be a table of displayed dialogs, but more than one hasn't been supported since 2013.
+-- It has now been simplified to a single displayed dialog table (name and dialog object) but all of the existing
+-- functions have been maintained for backward compatibility. Some functions might seem odd in this context
+-- (i.e. ZO_Dialogs_FindDialog) but it's only to maintain that compatibility
+local g_displayedDialog = nil
+local g_dialogQueue = {}
 local g_currencyPool = nil
 local g_curInstanceId = 0
 
@@ -12,10 +16,22 @@ local QUEUED_DIALOG_INDEX_NAME = 1
 local QUEUED_DIALOG_INDEX_DATA = 2
 local QUEUED_DIALOG_INDEX_PARAMS = 3
 
+ZO_DIALOG_SYNC_OBJECT = GetOrCreateSynchronizingObject("dialog")
+
+local function ContainsName(testName, ...)
+    for i = 1, select("#", ...) do
+        local name = select(i, ...)
+        if name == testName then
+            return true
+        end
+    end
+    return false
+end
+
 local function QueueDialog(name, data, params, isGamepad, dialogInfo)
     if name and dialogInfo and dialogInfo.onlyQueueOnce then
         -- If the dialog is already queued and can only be queued once, don't requeue it
-        for _, dialog in pairs(dialogQueue) do
+        for _, dialog in ipairs(g_dialogQueue) do
             if dialog[QUEUED_DIALOG_INDEX_NAME] == name then
                 return
             end
@@ -25,25 +41,16 @@ local function QueueDialog(name, data, params, isGamepad, dialogInfo)
     name = name or ""
     data = data or {}
     params = params or {}
-    table.insert(dialogQueue, {name, data, params, isGamepad})
-end
-
-local function ContainsName(testName, ...)
-    for i = 1, select("#", ...) do
-        local name = select(i, ...)
-        if(name == testName) then
-            return true
-        end
-    end
+    table.insert(g_dialogQueue, {name, data, params, isGamepad})
 end
 
 local function RemoveQueuedDialogs(name, filterFunction)
     local i = 1
-    while i <= #dialogQueue do
-        local dialog = dialogQueue[i]
+    while i <= #g_dialogQueue do
+        local dialog = g_dialogQueue[i]
 
         if name == dialog[QUEUED_DIALOG_INDEX_NAME] and (not filterFunction or filterFunction(dialog[QUEUED_DIALOG_INDEX_DATA])) then
-            table.remove(dialogQueue, i)
+            table.remove(g_dialogQueue, i)
         else
             i = i + 1
         end
@@ -52,11 +59,11 @@ end
 
 local function RemoveQueuedDialogsExcept(...)
     local i = 1
-    while(i <= #dialogQueue) do
-        local dialog = dialogQueue[i]
+    while i <= #g_dialogQueue do
+        local dialog = g_dialogQueue[i]
 
-        if(not ContainsName(dialog[QUEUED_DIALOG_INDEX_NAME], ...)) then
-            table.remove(dialogQueue, i)
+        if not ContainsName(dialog[QUEUED_DIALOG_INDEX_NAME], ...) then
+            table.remove(g_dialogQueue, i)
         else
             i = i + 1
         end
@@ -64,9 +71,36 @@ local function RemoveQueuedDialogsExcept(...)
 end
 
 local function GetDisplayedDialog()
-    if(#displayedDialogs > 0) then
-        return displayedDialogs[1].dialog
+    return g_displayedDialog and g_displayedDialog.dialog or nil
+end
+
+function ZO_Dialogs_IsShowingDialog()
+    return g_displayedDialog ~= nil
+end
+
+function ZO_Dialogs_IsShowing(nameOrDialog)
+    if g_displayedDialog then
+        if type(nameOrDialog) == "string" then
+            return g_displayedDialog.name == nameOrDialog
+        else
+            return g_displayedDialog.dialog == nameOrDialog
+        end
     end
+
+    return false
+end
+
+function ZO_Dialogs_FindDialog(nameOrDialog, filterFunction)
+    if ZO_Dialogs_IsShowing(nameOrDialog) and (not filterFunction or filterFunction(g_displayedDialog.dialog.data)) then
+        return g_displayedDialog.dialog
+    end
+    return nil
+end
+
+function ZO_Dialogs_IsDialogHiding(nameOrDialog)
+    local dialog = ZO_Dialogs_FindDialog(nameOrDialog)
+
+    return dialog and dialog.hiding
 end
 
 local function HandleCallback(clickedButton)
@@ -121,7 +155,7 @@ local function GetFormattedDialogText(text, params)
     return text
 end
 
-local function GetFormattedText(dialog, textTable, params)
+function ZO_GetFormattedDialogText(dialog, textTable, params)
     if not textTable then
         return
     end
@@ -151,7 +185,7 @@ local function GetFormattedText(dialog, textTable, params)
 end
 
 local function SetDialogTextFormatted(dialog, textControl, textTable, params)
-    local formattedText = GetFormattedText(dialog, textTable, params)
+    local formattedText = ZO_GetFormattedDialogText(dialog, textTable, params)
 
     if not textControl or not formattedText then
         return
@@ -199,17 +233,6 @@ function ZO_Dialogs_SetDialogLoadingIcon(loadingIcon, textControl, showLoadingIc
     else
         loadingIcon:Hide()
     end
-end
-
-function ZO_Dialogs_FindDialog(name, filterFunction)
-    for _, displayedDialog in ipairs(displayedDialogs) do
-        if displayedDialog.name == name then
-            if not filterFunction or filterFunction(displayedDialog.dialog.data) then
-                return displayedDialog.dialog
-            end
-        end
-    end
-    return nil
 end
 
 local function ReanchorDialog(dialog, isGamepad)
@@ -271,10 +294,10 @@ local function RefreshMainText(dialog, dialogInfo, textParams)
 
     local isGamepadDialog = dialog.isGamepad and dialogInfo.gamepadInfo and dialogInfo.gamepadInfo.dialogType -- There is a legacy gamepad dialog still in use (for now).
     if isGamepadDialog then
-        local title = GetFormattedText(dialog, dialogInfo.title, textParams.titleParams)
-        mainText = GetFormattedText(dialog, dialogInfo.mainText, textParams.mainTextParams)
-        local warningText = GetFormattedText(dialog, dialogInfo.warning, textParams.warningParams)
-        local subText = GetFormattedText(dialog, dialogInfo.subText, textParams.subTextParams)
+        local title = ZO_GetFormattedDialogText(dialog, dialogInfo.title, textParams.titleParams)
+        mainText = ZO_GetFormattedDialogText(dialog, dialogInfo.mainText, textParams.mainTextParams)
+        local warningText = ZO_GetFormattedDialogText(dialog, dialogInfo.warning, textParams.warningParams)
+        local subText = ZO_GetFormattedDialogText(dialog, dialogInfo.subText, textParams.subTextParams)
         ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText, warningText, subText)
     else
         textControl = dialog:GetNamedChild("Text")
@@ -760,7 +783,9 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
 
     dialog:SetHandler("OnUpdate", dialogInfo.updateFn)
 
-    table.insert(displayedDialogs, {name = name, dialog = dialog})
+    g_displayedDialog = {name = name, dialog = dialog }
+    ZO_DIALOG_SYNC_OBJECT:Show()
+    ZO_DIALOG_SYNC_OBJECT:SetState(name)
 
     if not isGamepad then
         if(SCENE_MANAGER.RegisterTopLevel) then
@@ -837,43 +862,20 @@ function ZO_Dialogs_InitializeDialog(dialog, isGamepad)
     g_curInstanceId = g_curInstanceId + 1
 end
 
-function ZO_Dialogs_IsShowingDialog()
-    return #displayedDialogs > 0
-end
-
 function ZO_Dialogs_ReleaseAllDialogsOfName(name, filterFunction)
     RemoveQueuedDialogs(name, filterFunction)
 
-    local i = 1
-    while i <= #displayedDialogs do
-        local displayedDialog = displayedDialogs[i]
-        local released = false
-        if displayedDialog.name == name and (not filterFunction or filterFunction(displayedDialog.dialog.data)) then
-            released = ZO_Dialogs_ReleaseDialog(displayedDialog.dialog)
-        end
-
-        -- Gamepad dialogs don't get removed from the table until after they're done hiding, so we can safely advance the index
-        if not released or displayedDialog.dialog.isGamepad then
-            i = i + 1
-        end
+    local dialog = ZO_Dialogs_FindDialog(name, filterFunction)
+    if dialog then
+        ZO_Dialogs_ReleaseDialog(dialog)
     end
 end
 
 function ZO_Dialogs_ReleaseAllDialogsExcept(...)
     RemoveQueuedDialogsExcept(...)
 
-    local i = 1
-    while(i <= #displayedDialogs) do
-        local displayedDialog = displayedDialogs[i]
-        local released = false
-        if(not ContainsName(displayedDialog.name, ...)) then
-            released = ZO_Dialogs_ReleaseDialog(displayedDialog.dialog)
-        end
-
-        -- Gamepad dialogs don't get removed from the table until after they're done hiding, so we can safely advance the index
-        if not released or displayedDialog.dialog.isGamepad then
-            i = i + 1
-        end
+    if g_displayedDialog and not ContainsName(g_displayedDialog.name, ...) then
+        ZO_Dialogs_ReleaseDialog(g_displayedDialog.dialog)
     end
 end
 
@@ -882,12 +884,7 @@ function ZO_Dialogs_ReleaseDialogOnButtonPress(nameOrDialog)
 end
 
 function ZO_Dialogs_ReleaseDialog(nameOrDialog, releasedFromButton, filterFunction)
-    local dialog
-    if type(nameOrDialog) == "string" then
-        dialog = ZO_Dialogs_FindDialog(nameOrDialog, filterFunction)
-    else
-        dialog = nameOrDialog
-    end
+    local dialog = ZO_Dialogs_FindDialog(nameOrDialog, filterFunction)
 
     if dialog == nil then
         -- This dialog is not currently visible
@@ -922,7 +919,7 @@ function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
     local name = dialog.name
     local dialogInfo = dialog.info
 
-    if(not dialogInfo.customControl) then    
+    if not dialogInfo.customControl then
         dialog:SetHandler("OnUpdate", nil)
 
         for i = 1, NUM_DIALOG_BUTTONS do
@@ -946,18 +943,17 @@ function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
 
     dialog.name = nil
 
-    for i, displayedDialog in ipairs(displayedDialogs) do
-        if displayedDialog.name == name then
-            table.remove(displayedDialogs, i)
-            break
-        end
+    if ZO_Dialogs_IsShowing(dialog) then
+        g_displayedDialog = nil
+        ZO_DIALOG_SYNC_OBJECT:SetState(nil)
+        ZO_DIALOG_SYNC_OBJECT:Hide()
     end
 
-    if(dialogInfo.noChoiceCallback and not releasedFromButton) then
+    if dialogInfo.noChoiceCallback and not releasedFromButton then
         dialogInfo.noChoiceCallback(dialog)
     end
 
-    if next(dialogQueue) then
+    if next(g_dialogQueue) then
         local currentScene = SCENE_MANAGER:GetCurrentScene()
         local state = currentScene and currentScene:GetState()
         if state == SCENE_HIDING or state == SCENE_HIDDEN or not state then
@@ -970,12 +966,12 @@ function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
     end
 
     -- Show next dialog in queue
-    local queuedDialog = table.remove(dialogQueue, 1)
+    local queuedDialog = table.remove(g_dialogQueue, 1)
 
-    if(queuedDialog) then
+    if queuedDialog then
         ZO_Dialogs_ShowDialog(unpack(queuedDialog))
     else
-        if(not ZO_Dialogs_IsShowingDialog()) then
+        if not ZO_Dialogs_IsShowingDialog() then
             CALLBACK_MANAGER:FireCallbacks("AllDialogsHidden")
         end
     end
@@ -983,29 +979,19 @@ end
 
 
 function ZO_Dialogs_ReleaseAllDialogs(forceAll)
-    for _, dialog in pairs(dialogQueue) do
+    for _, dialog in ipairs(g_dialogQueue) do
         local dialogInfo = ESO_Dialogs[dialog[QUEUED_DIALOG_INDEX_NAME]]
         if dialogInfo and dialogInfo.removedFromQueueCallback then
             dialogInfo.removedFromQueueCallback(dialog[QUEUED_DIALOG_INDEX_DATA])
         end
     end
 
-    dialogQueue = {}
+    ZO_ClearNumericallyIndexedTable(g_dialogQueue)
 
-    for i = #displayedDialogs, 1, -1 do
-        local dialog = displayedDialogs[i].dialog
-        if dialog and (forceAll or not dialog.info.mustChoose) then
-            ZO_Dialogs_ReleaseDialog(dialog)
-        end
+    local dialog = GetDisplayedDialog()
+    if dialog and (forceAll or not dialog.info.mustChoose) then
+        ZO_Dialogs_ReleaseDialog(dialog)
     end
-end
-
-function ZO_Dialogs_IsDialogHiding(dialog)
-    if type(dialog) == "string" then
-        dialog = ZO_Dialogs_FindDialog(dialog)
-    end
-
-    return dialog and dialog.hiding
 end
 
 -- If textTable is nil, the default mainText table (defined in the ESO_Dialogs table) is used
@@ -1014,7 +1000,7 @@ function ZO_Dialogs_UpdateDialogMainText(dialog, textTable, params)
         if dialog.isGamepad then
             if dialog.info and dialog.headerData then
                 local mainTextTable = textTable or dialog.info.mainText
-                local mainText = GetFormattedText(dialog, mainTextTable, params)
+                local mainText = ZO_GetFormattedDialogText(dialog, mainTextTable, params)
                 if mainText and mainText ~= "" then
                     ZO_GenericGamepadDialog_RefreshText(dialog, dialog.headerData.titleText, mainText, dialog.warningTextControl:GetText(), dialog.subTextControl:GetText())
                 end
@@ -1047,7 +1033,7 @@ function ZO_Dialogs_UpdateDialogWarningText(dialog, textTable, params)
             if dialog.info and dialog.headerData then
                 textTable = textTable or dialog.info.warning
 
-                local warningText = GetFormattedText(dialog, textTable, params)
+                local warningText = ZO_GetFormattedDialogText(dialog, textTable, params)
                 if warningText and warningText ~= "" then
                     ZO_GenericGamepadDialog_RefreshText(dialog, dialog.headerData.titleText, dialog.mainTextControl:GetText(), warningText, dialog.subTextControl:GetText())
                 end
@@ -1204,16 +1190,6 @@ function ZO_Dialogs_UpdateButtonCost(dialog, buttonNumber, cost)
     end
 end
 
-function ZO_Dialogs_IsShowing(name)
-    for _, displayedDialog in ipairs(displayedDialogs) do
-        if(displayedDialog.name == name) then
-            return true
-        end
-    end
-
-    return false
-end
-
 function ZO_Dialogs_IsDialogRegistered(name)
     local dialogInfo = ESO_Dialogs[name]
     return dialogInfo and (type(dialogInfo) == "table")
@@ -1357,3 +1333,9 @@ function ZO_TwoButtonDialogEditBox_OnFocusLost(control)
         end
     end
 end
+
+EVENT_MANAGER:RegisterForEvent("ZO_Dialog", EVENT_GUI_UNLOADING, function()
+    if ZO_Dialogs_IsShowingDialog() then
+        ZO_DIALOG_SYNC_OBJECT:Hide()
+    end
+end)

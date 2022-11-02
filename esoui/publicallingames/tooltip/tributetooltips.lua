@@ -50,26 +50,59 @@ function ZO_Tooltip:LayoutTributeCard(cardData, optionalDockCardUpgradeContext)
     -- Activation Mechanics
     -- Even when there are no activation effects, add the header, cause we'll put a line saying there are no activation effects
     local activationSection = self:AcquireSection(self:GetStyle("bodySection"))
+    local triggerSection = nil
     activationSection:AddLine(GetString(SI_TRIBUTE_CARD_PLAY_EFFECT), self:GetStyle("bodyHeader"))
-    local ACTIVATION_TRIGGER = TRIBUTE_MECHANIC_TRIGGER_ACTIVATION
-    local numMechanics = cardData:GetNumMechanics(ACTIVATION_TRIGGER)
+    local ON_ACTIVATION = TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ACTIVATION
+    local numMechanics = cardData:GetNumMechanics(ON_ACTIVATION)
     if numMechanics > 0 then
+        local hasNonTriggerMechanics = false
+        local triggerMechanics = {}
         if cardData:DoesChooseOneMechanic() then
             activationSection:AddLine(GetString(SI_TRIBUTE_CARD_CHOOSE_ONE_MECHANIC), self:GetStyle("tributeBodyText"), self:GetStyle("tributeChooseOneText"))
         end
         local PREPEND_ICON = true
         for index = 1, numMechanics do
-            local mechanicText = cardData:GetMechanicText(ACTIVATION_TRIGGER, index, PREPEND_ICON)
-            activationSection:AddLine(mechanicText, self:GetStyle("tributeBodyText"))
+            local triggerId = select(7, cardData:GetMechanicInfo(ON_ACTIVATION, index))
+            if triggerId ~= 0 then
+                local triggerMechanicData =
+                {
+                    index = index,
+                    id = triggerId,
+                }
+                table.insert(triggerMechanics, triggerMechanicData)
+            else
+                local mechanicText = cardData:GetMechanicText(ON_ACTIVATION, index, PREPEND_ICON)
+                activationSection:AddLine(mechanicText, self:GetStyle("tributeBodyText"))
+                hasNonTriggerMechanics = true
+            end
+        end
+
+        if not hasNonTriggerMechanics then
+            activationSection:AddLine(GetString(SI_TRIBUTE_CARD_NO_PLAY_EFFECT_DESCRIPTION), self:GetStyle("tributeBodyText"))
+        end
+
+        if #triggerMechanics > 0 then
+            triggerSection = self:AcquireSection(self:GetStyle("bodySection"))
+            triggerSection:AddLine(GetString(SI_TRIBUTE_CARD_TRIGGER_EFFECT_HEADER), self:GetStyle("bodyHeader"))
+            for _, triggerMechanic in ipairs(triggerMechanics) do
+                local triggerText = GetTributeTriggerDescription(triggerMechanic.id)
+                triggerSection:AddLine(triggerText, self:GetStyle("tributeBodyText"))
+                local mechanicText = cardData:GetMechanicText(ON_ACTIVATION, triggerMechanic.index, PREPEND_ICON)
+                triggerSection:AddLine(mechanicText, self:GetStyle("tributeBodyText"))
+            end
         end
     else
         activationSection:AddLine(GetString(SI_TRIBUTE_CARD_NO_PLAY_EFFECT_DESCRIPTION), self:GetStyle("tributeBodyText"))
     end
     self:AddSection(activationSection)
 
+    if triggerSection then
+        self:AddSection(triggerSection)
+    end
+
     -- Combo mechanics
-    local COMBO_TRIGGER = TRIBUTE_MECHANIC_TRIGGER_COMBO
-    local numMechanics = cardData:GetNumMechanics(COMBO_TRIGGER)
+    local ON_COMBO = TRIBUTE_MECHANIC_ACTIVATION_SOURCE_COMBO
+    local numMechanics = cardData:GetNumMechanics(ON_COMBO)
     if numMechanics > 0 then
         local comboSection = nil
         -- We technically only support combo 2, combo 3, and combo 4 right now. Any more requires a different visual solution on the card itself.
@@ -82,7 +115,7 @@ function ZO_Tooltip:LayoutTributeCard(cardData, optionalDockCardUpgradeContext)
         for currentComboNum = MIN_COMBO_NUM, MAX_COMBO_NUM do
             local isHeaderShown = false
             for comboMechanicIndex = 1, numMechanics do
-                local mechanicComboNum = select(3, cardData:GetMechanicInfo(COMBO_TRIGGER, comboMechanicIndex))
+                local mechanicComboNum = select(3, cardData:GetMechanicInfo(ON_COMBO, comboMechanicIndex))
                 if currentComboNum == mechanicComboNum then
                     if not isHeaderShown then
                         local headerText = zo_strformat(SI_TRIBUTE_CARD_COMBO_EFFECT, currentComboNum)
@@ -93,7 +126,7 @@ function ZO_Tooltip:LayoutTributeCard(cardData, optionalDockCardUpgradeContext)
                         comboSection:AddLine(headerText, self:GetStyle("bodyHeader"))
                         isHeaderShown = true
                     end
-                    local mechanicText = cardData:GetMechanicText(COMBO_TRIGGER, comboMechanicIndex, PREPEND_ICON)
+                    local mechanicText = cardData:GetMechanicText(ON_COMBO, comboMechanicIndex, PREPEND_ICON)
                     comboSection:AddLine(mechanicText, self:GetStyle("tributeBodyText"))
 
                     mechanicsProcessed = mechanicsProcessed + 1

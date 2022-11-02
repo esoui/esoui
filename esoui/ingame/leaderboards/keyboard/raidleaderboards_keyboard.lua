@@ -58,6 +58,10 @@ function ZO_RaidLeaderboardsManager_Keyboard:UpdateRaidScore()
     self.scoringInfoHelpIcon:SetHidden(eligible)
 end
 
+function ZO_RaidLeaderboardsManager_Keyboard:GetFragment()
+    return RAID_LEADERBOARD_FRAGMENT
+end
+
 function ZO_RaidLeaderboardsInformationArea_CurrentRankHelp_OnMouseEnter(control)
     InitializeTooltip(InformationTooltip, control, TOPLEFT, 5, 0)
     SetTooltipText(InformationTooltip, GetString(SI_RAID_LEADERBOARDS_RANK_HELP_TOOLTIP))

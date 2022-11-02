@@ -357,6 +357,17 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             tooltipText = SI_INTERFACE_OPTIONS_FOOT_INVERSE_KINEMATICS_TOOLTIP,
         },
 
+        --Options_Gameplay_LimitFollowersInTowns
+        [IN_WORLD_UI_SETTING_LIMIT_FOLLOWERS_IN_TOWNS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_LIMIT_FOLLOWERS_IN_TOWNS,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_INTERFACE_OPTIONS_LIMIT_FOLLOWERS_IN_TOWNS,
+            tooltipText = SI_INTERFACE_OPTIONS_LIMIT_FOLLOWERS_IN_TOWNS_TOOLTIP,
+        },
+
         --Options_Gameplay_CompanionReactions
         [IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY] =
         {

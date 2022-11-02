@@ -362,6 +362,9 @@ function ZO_Achievements_Gamepad:InitializeOptionsDialog()
         newEntry.setup = ZO_SharedGamepadEntry_OnSetup
         newEntry.filterType = filterType
         newEntry.callback = SwitchToFilterMode
+        newEntry.narrationText = function(entryData, entryControl)
+            return ZO_FormatRadioButtonNarrationText(entryData.text, entryData.filterType == self.filterType)
+        end
         return newEntry
     end
 

@@ -2,7 +2,14 @@
 local g_expirationTime = nil
 
 local ZO_GAMEPAD_CHAT_SYSTEM_SECONDS_VISIBLE_UNPINNED = 20
-local ZO_GAMEPAD_CHAT_SYSTEM_SECONDS_VISIBLE_PINNED = 10
+
+local function IsChatNarrationEnabled()
+    return GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_TEXT_CHAT_NARRATION)
+end
+
+local function IsZoneChatNarrationEnabled()
+    return GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ZONE_CHAT_NARRATION)
+end
 
 --
 --[[ Chat Container ]]--
@@ -17,7 +24,6 @@ end
 function GamepadChatContainer:Initialize(control, windowPool, tabPool)
     SharedChatContainer.Initialize(self, control, windowPool, tabPool)
 
-    self.windowPinned = false
     self.hudEnabled = false
 
     self:SetAllowSaveSettings(true)
@@ -40,26 +46,8 @@ function GamepadChatContainer:UpdateInteractivity(isInteractive)
     self.control:SetMouseEnabled(false)
 end
 
-local TEXT_OPACITY_WHEN_CLIPPING_QUEST_TRACKER = 0.25
-do
-    local BG_OPACITY_WHEN_PINNED = 0.2
-
-    function GamepadChatContainer:HandleVisibleTimeExpired()
-        if GAMEPAD_CHAT_SYSTEM:IsWindowPinned() then
-            if GAMEPAD_CHAT_SYSTEM:HasFocus() then
-                -- Fade background to low opacity
-                local shouldFadeText = FOCUSED_QUEST_TRACKER:IsOverlappingTextChat()
-                GAMEPAD_CHAT_SYSTEM:HideWhenDeactivated(BG_OPACITY_WHEN_PINNED, shouldFadeText, shouldFadeText and TEXT_OPACITY_WHEN_CLIPPING_QUEST_TRACKER)
-
-                local KEEP_TEXT_ENTERED = true
-                GAMEPAD_CHAT_SYSTEM:CloseTextEntry(KEEP_TEXT_ENTERED)
-                GAMEPAD_CHAT_SYSTEM:SetPinnedAndFaded(true)
-            end
-        else
-            -- hide it, not pinned
-            GAMEPAD_CHAT_SYSTEM:Minimize()
-        end
-    end
+function GamepadChatContainer:HandleVisibleTimeExpired()
+    GAMEPAD_CHAT_SYSTEM:Minimize()
 end
 
 function GamepadChatContainer:FadeOutLines()
@@ -74,7 +62,7 @@ end
 function GamepadChatContainer:PerformLayout()
     SharedChatContainer.PerformLayout(self)
 
-    self:ApplyInsertIndicator(insertIndex)
+    self:ApplyInsertIndicator()
     self:SyncScrollToBuffer()
 end
 
@@ -97,10 +85,34 @@ function GamepadChatContainer:LoadSettings(settings)
     SharedChatContainer.LoadSettings(self, settings)
 end
 
-function GamepadChatContainer:AddEventMessageToWindow(...)
-    SharedChatContainer.AddEventMessageToWindow(self, ...)
-    self.windowContainer:SetHidden(false)
-    self.system:StartVisibilityTimer()
+do
+    --Any new language specific zone chat categories should be added to this table
+    internalassert(OFFICIAL_LANGUAGE_MAX_VALUE == 6)
+    local ZONE_CHAT_CATEGORIES =
+    {
+        [CHAT_CATEGORY_ZONE] = true,
+        [CHAT_CATEGORY_ZONE_ENGLISH] = true,
+        [CHAT_CATEGORY_ZONE_FRENCH] = true,
+        [CHAT_CATEGORY_ZONE_GERMAN] = true,
+        [CHAT_CATEGORY_ZONE_JAPANESE] = true,
+        [CHAT_CATEGORY_ZONE_RUSSIAN] = true,
+        [CHAT_CATEGORY_ZONE_SPANISH] = true,
+        [CHAT_CATEGORY_ZONE_CHINESE_S] = true,
+    }
+
+    function GamepadChatContainer:AddEventMessageToWindow(window, message, category, narrationMessage)
+        SharedChatContainer.AddEventMessageToWindow(self, window, message, category, narrationMessage)
+        self.windowContainer:SetHidden(false)
+        self.system:StartVisibilityTimer()
+        --Determine if this message will be visible in the chat
+        if self.currentBuffer == window.buffer then
+            --Only narrate zone chat if the zone chat narration setting is enabled
+            if IsZoneChatNarrationEnabled() or not ZONE_CHAT_CATEGORIES[category] then
+                local narration = narrationMessage or message
+                SCREEN_NARRATION_MANAGER:NarrateChatMessage(narration, category)
+            end
+        end
+    end
 end
 
 function GamepadChatContainer:SetAsPrimary()
@@ -161,7 +173,7 @@ function ZO_GamepadChatSystem:Initialize(control)
         local function OnUpdate()
             -- do not fade if the user is actively editing text
             if not IsVirtualKeyboardOnScreen() and not self.editControl:HasFocus() then
-                if g_expirationTime and (not self.isMinimized or (self.isMinimized and not self:IsWindowPinned())) then
+                if g_expirationTime then
                     if GetFrameTimeSeconds() > g_expirationTime then
                         g_expirationTime = nil
 
@@ -201,16 +213,6 @@ function ZO_GamepadChatSystem:InitializeSharedControlManagement(control)
     SharedChatSystem.InitializeSharedControlManagement(self, control, NewContainerHelper, "ZO_GamepadChatWindowTemplate", "ZO_ChatWindowTab_Gamepad")
 end
 
-function ZO_GamepadChatSystem:IsWindowPinned()
-    return self.windowPinned
-end
-
-function ZO_GamepadChatSystem:SetWindowPinned(setPinned)
-    self.windowPinned = setPinned
-
-    MAIN_MENU_GAMEPAD:RefreshLists()
-end
-
 function ZO_GamepadChatSystem:IsHUDEnabled()
     return self.hudEnabled
 end
@@ -237,15 +239,8 @@ function ZO_GamepadChatSystem:InitializeEventManagement()
             end
         end
 
-        local function OnPlayerActivated()
-            UpdateHUDEnabledFromSetting()
-            if GAMEPAD_CHAT_SYSTEM:IsWindowPinned() then
-                self:Maximize()
-            end
-        end
-
         local function OnChatMessageChannel()
-            if not GAMEPAD_CHAT_SYSTEM:IsWindowPinned() and GAMEPAD_CHAT_SYSTEM:IsMinimized() then
+            if GAMEPAD_CHAT_SYSTEM:IsMinimized() then
                 --Let the player know that a new chat message has arrived
                 self:StartNewChatNotification()
             end
@@ -256,7 +251,6 @@ function ZO_GamepadChatSystem:InitializeEventManagement()
             self:SetChannelInternal(channelData.id, channelTarget)
         end
 
-        EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
         EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_CHAT_MESSAGE_CHANNEL, OnChatMessageChannel)
         EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
         EVENT_MANAGER:AddFilterForEvent("GamepadChatSystem", EVENT_INTERFACE_SETTING_CHANGED, REGISTER_FILTER_SETTING_SYSTEM_TYPE, SETTING_TYPE_UI)
@@ -399,16 +393,7 @@ end
 
 function ZO_GamepadChatSystem:StartVisibilityTimer()
     local secondsToExpire = ZO_GAMEPAD_CHAT_SYSTEM_SECONDS_VISIBLE_UNPINNED
-
-    if self:IsWindowPinned() then
-        secondsToExpire = ZO_GAMEPAD_CHAT_SYSTEM_SECONDS_VISIBLE_PINNED
-    end
-
     g_expirationTime = GetFrameTimeSeconds() + secondsToExpire
-end
-
-function ZO_GamepadChatSystem:IsPinnable()
-    return true
 end
 
 do
@@ -420,12 +405,12 @@ do
         [CHAT_CATEGORY_MONSTER_WHISPER] = true,
     }
 
-    function ZO_GamepadChatSystem:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText)
+    function ZO_GamepadChatSystem:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
         if FILTERED_OUT_CATEGORIES[category] then
             return
         end
 
-        SharedChatSystem.OnFormattedChatMessage(self, message, category, targetChannel, fromDisplayName, rawMessageText)
+        SharedChatSystem.OnFormattedChatMessage(self, message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
 
         if not self.isMinimized then
             self:Maximize()
@@ -458,6 +443,15 @@ end
 -- override
 function ZO_GamepadChatSystem:ShouldOnlyShowOnHUD()
     return true
+end
+
+--override
+function ZO_GamepadChatSystem:OnPlayerActivated()
+    if not IsChatSystemAvailableForCurrentPlatform() then
+        return
+    end
+    local settingValue = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED)
+    self:SetHUDEnabled(settingValue)
 end
 
 -- override

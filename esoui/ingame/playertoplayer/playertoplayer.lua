@@ -1092,7 +1092,7 @@ do
         end
     end
 
-    function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, targetLabel, displayName, characterName)
+    function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, targetLabel, displayName, characterName, dontRemoveOnDecline)
         local formattedInviterName = nil
         if displayName and characterName then
             -- displayName and characterName don't always actually correspond with with the display name/character name of another player, but if both are defined they should.
@@ -1100,21 +1100,23 @@ do
             formattedInviterName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
         end
 
-        local data = {
+        local data =
+        {
             incomingType = incomingType,
             targetLabel = targetLabel,
             inviterName = formattedInviterName,
             pendingResponse = true,
             displayName = displayName,
             characterName = characterName,
+            dontRemoveOnDecline = dontRemoveOnDecline,
         }
         zo_binaryinsert(data, data, self.incomingQueue, IncomingEntryComparator)
         return data
     end
 end
 
-function ZO_PlayerToPlayer:AddPromptToIncomingQueue(interactType, characterName, displayName, targetLabel, acceptCallback, declineCallback, deferDecisionCallback)
-    local data = self:AddIncomingEntry(interactType, targetLabel, displayName, characterName)
+function ZO_PlayerToPlayer:AddPromptToIncomingQueue(interactType, characterName, displayName, targetLabel, acceptCallback, declineCallback, deferDecisionCallback, dontRemoveOnDecline)
+    local data = self:AddIncomingEntry(interactType, targetLabel, displayName, characterName, dontRemoveOnDecline)
     data.acceptCallback = acceptCallback
     data.declineCallback = declineCallback
     data.deferDecisionCallback = deferDecisionCallback
@@ -1245,7 +1247,15 @@ function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckUpdated()
                 messageParams = { activityTypeText, generalActivityText, roleIconFormat, GetString("SI_LFGROLE", role) }
             end
 
-            promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK, nil, nil, nil, AcceptLFGReadyCheckNotification, DeclineLFGReadyCheckNotification, DeferDecisionCallback)
+            local function DeclineReadyCheckConfirmation()
+                local readyCheckData = self:GetFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
+                if readyCheckData and readyCheckData.dontRemoveOnDecline then
+                    ZO_Dialogs_ShowPlatformDialog("LFG_DECLINE_READY_CHECK_CONFIRMATION")
+                end
+            end
+
+            local DONT_REMOVE_ON_DECLINE = true
+            promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK, nil, nil, nil, AcceptLFGReadyCheckNotification, DeclineReadyCheckConfirmation, DeferDecisionCallback, DONT_REMOVE_ON_DECLINE)
             promptData.acceptText = GetString(SI_LFG_READY_CHECK_ACCEPT)
             promptData.expiresAtS = GetFrameTimeSeconds() + timeRemainingSeconds
             promptData.messageFormat = messageFormat
@@ -1254,6 +1264,8 @@ function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckUpdated()
             promptData.dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_LFG)
 
             PlaySound(SOUNDS.LFG_READY_CHECK)
+        else
+            promptData.dontRemoveOnDecline = true
         end
     else
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)

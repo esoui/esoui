@@ -33,7 +33,7 @@ function ActivityTracker:InitializeStyles()
             FONT_SUBLABEL = "ZoFontGameShadow",
             TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
 
-            TOP_LEVEL_PRIMARY_ANCHOR_TO_ZONE_STORY_TRACKER = ZO_Anchor:New(TOPLEFT, ZO_ZoneStoryTracker, BOTTOMLEFT, 0, 10),
+            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_HouseInformationTrackerTopLevel, BOTTOMLEFT, 0, 10),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 10, ANCHOR_CONSTRAINS_X),
 
             CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
@@ -47,7 +47,7 @@ function ActivityTracker:InitializeStyles()
             FONT_SUBLABEL = "ZoFontGamepad34",
             TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
 
-            TOP_LEVEL_PRIMARY_ANCHOR_TO_ZONE_STORY_TRACKER = ZO_Anchor:New(TOPRIGHT, ZO_ZoneStoryTracker, BOTTOMRIGHT, 0, 20),
+            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, ZO_HouseInformationTrackerTopLevel, BOTTOMRIGHT, 0, 20),
 
             CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
 
@@ -93,7 +93,7 @@ function ActivityTracker:Update()
 end
 
 function ActivityTracker:GetPrimaryAnchor()
-    return self.currentStyle.TOP_LEVEL_PRIMARY_ANCHOR_TO_ZONE_STORY_TRACKER
+    return self.currentStyle.TOP_LEVEL_PRIMARY_ANCHOR
 end
 
 function ActivityTracker:GetSecondaryAnchor()

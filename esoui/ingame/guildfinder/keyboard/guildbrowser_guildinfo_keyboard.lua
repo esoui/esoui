@@ -258,7 +258,7 @@ local function SubmitApplicationDialogSetup(dialog, data)
 
     local ICON_SIZE = 24
     local levelNameLabel = dialog:GetNamedChild("Level")
-    levelNameLabel:SetText(zo_strformat(SI_GUILD_FINDER_GUILD_INFO_ATTRIBUTE_FORMATTER, GetString(SI_GUILD_BROWSER_SUBMIT_APPLICATION_DIALOG_LEVEL_LABEL), ZO_WHITE:Colorize(GetLevelOrChampionPointsString(GetUnitLevel("player"), GetUnitChampionPoints("player"), ICON_SIZE))))
+    levelNameLabel:SetText(zo_strformat(SI_GUILD_FINDER_GUILD_INFO_ATTRIBUTE_FORMATTER, GetString(SI_GUILD_BROWSER_SUBMIT_APPLICATION_DIALOG_LEVEL_LABEL), ZO_WHITE:Colorize(ZO_GetLevelOrChampionPointsString(GetUnitLevel("player"), GetUnitChampionPoints("player"), ICON_SIZE))))
 
     local classPointsNameLabel = dialog:GetNamedChild("Class")
     classPointsNameLabel:SetText(zo_strformat(SI_GUILD_FINDER_GUILD_INFO_ATTRIBUTE_FORMATTER, GetString(SI_GUILD_BROWSER_SUBMIT_APPLICATION_DIALOG_CLASS_LABEL), ZO_WHITE:Colorize(GetUnitClass("player"))))

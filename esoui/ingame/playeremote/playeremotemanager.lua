@@ -1,8 +1,12 @@
 ZO_PlayerEmote_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_PlayerEmote_Manager:Initialize()
-    EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmote_Manager", EVENT_PERSONALITY_CHANGED, function() self:BuildEmoteList() end)
-    EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmote_Manager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:BuildEmoteList() end)
+    local function MarkEmoteListDirty()
+        self:MarkEmoteListDirty()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmote_Manager", EVENT_PERSONALITY_CHANGED, MarkEmoteListDirty)
+    EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmote_Manager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, MarkEmoteListDirty)
     EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmote_Manager", EVENT_ADD_ON_LOADED, function(_, addOnName) self:OnAddOnLoaded(addOnName) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
@@ -11,7 +15,7 @@ function ZO_PlayerEmote_Manager:Initialize()
     self.emoteCategories = {}
     self.emoteCategoryTypes = {}
 
-    self:BuildEmoteList()
+    self:MarkEmoteListDirty()
 end
 
 function ZO_PlayerEmote_Manager:OnAddOnLoaded(addOnName)
@@ -23,13 +27,13 @@ end
 
 function ZO_PlayerEmote_Manager:OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
     if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
-        self:BuildEmoteList()
+        self:MarkEmoteListDirty()
         self:RefreshEmoteSlashCommands()
     else
         for _, unlockStateTable in pairs(collectiblesByNewUnlockState) do
             for _, collectibleData in ipairs(unlockStateTable) do
                 if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY) then
-                    self:BuildEmoteList()
+                    self:MarkEmoteListDirty()
                     self:RefreshEmoteSlashCommands()
                     return
                 end
@@ -41,7 +45,7 @@ end
 function ZO_PlayerEmote_Manager:OnCollectibleUpdated(collectibleId)
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
     if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY) then
-        self:BuildEmoteList()
+        self:MarkEmoteListDirty()
         self:RefreshEmoteSlashCommands()
     end
 end
@@ -99,10 +103,24 @@ local function CompareCategories(categoryA, categoryB)
 end
 
 function ZO_PlayerEmote_Manager:GetEmoteItemInfo(emoteId)
+    self:CleanEmoteList()
     return self.emoteList[emoteId]
 end
 
+function ZO_PlayerEmote_Manager:MarkEmoteListDirty()
+    self.listDirty = true
+    self:FireCallbacks("EmoteListUpdated")
+end
+
+function ZO_PlayerEmote_Manager:CleanEmoteList()
+    if self.listDirty then
+        self:BuildEmoteList()
+    end
+end
+
 function ZO_PlayerEmote_Manager:BuildEmoteList()
+    self.listDirty = false
+
     ZO_ClearTable(self.emoteList)
     ZO_ClearTable(self.emoteCategories)
     ZO_ClearNumericallyIndexedTable(self.emoteCategoryTypes)
@@ -164,14 +182,10 @@ function ZO_PlayerEmote_Manager:BuildEmoteList()
     end
 
     table.sort(self.emoteCategoryTypes, CompareCategories)
-
-    self:FireCallbacks("EmoteListUpdated")
 end
 
 function ZO_PlayerEmote_Manager:GetEmoteListForType(emoteType, optFilterFunction)
-    if not self.emoteCategories then
-        self:BuildEmoteList()
-    end
+    self:CleanEmoteList()
 
     local emoteCategory = self.emoteCategories[emoteType]
     if not optFilterFunction then
@@ -189,9 +203,7 @@ function ZO_PlayerEmote_Manager:GetEmoteListForType(emoteType, optFilterFunction
 end
 
 function ZO_PlayerEmote_Manager:GetEmoteCategories()
-    if not self.emoteCategoryTypes then
-        self:BuildEmoteList()
-    end
+    self:CleanEmoteList()
 
     return self.emoteCategoryTypes
 end

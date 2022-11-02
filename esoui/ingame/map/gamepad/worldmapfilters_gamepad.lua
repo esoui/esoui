@@ -2,11 +2,6 @@
 
 local WorldMapFilterPanel_Gamepad = ZO_WorldMapFilterPanel_Shared:Subclass()
 
-function WorldMapFilterPanel_Gamepad:New(...)
-    local object = ZO_WorldMapFilterPanel_Shared.New(self, ...)
-    return object
-end
-
 function WorldMapFilterPanel_Gamepad:Initialize(control, mapFilterType, savedVars)
     ZO_WorldMapFilterPanel_Shared.Initialize(self, control, mapFilterType, savedVars)
     self.list = ZO_GamepadVerticalParametricScrollList:New(control:GetNamedChild("List"))
@@ -14,11 +9,21 @@ function WorldMapFilterPanel_Gamepad:Initialize(control, mapFilterType, savedVar
     self.list:SetOnSelectedDataChangedCallback(function() GAMEPAD_WORLD_MAP_FILTERS:SelectKeybind() end)
     self.list:AddDataTemplate("ZO_GamepadWorldMapFilterCheckboxOptionTemplate", ZO_GamepadCheckboxOptionTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.list:AddDataTemplateWithHeader("ZO_GamepadWorldMapFilterComboBoxTemplate", function(...) self:SetupDropDown(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return GAMEPAD_WORLD_MAP_FILTERS_FRAGMENT:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return GAMEPAD_WORLD_MAP_INFO:GetHeaderNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.list, narrationInfo)
     self:BuildControls()
 end
 
 function WorldMapFilterPanel_Gamepad:SetMapMode(mapMode)
-    if(mapMode ~= self.mapMode) then
+    if mapMode ~= self.mapMode then
         self.mapMode = mapMode
         self.modeVars = self.savedVars[mapMode]
         self:BuildControls()
@@ -48,18 +53,23 @@ function WorldMapFilterPanel_Gamepad:AddPinFilterCheckBox(mapPinGroup, refreshFu
     local function ToggleFunction(data)
         data.currentValue = not data.currentValue
         self:SetPinFilter(mapPinGroup, data.currentValue)
-        if(refreshFunction) then
+        if refreshFunction then
             refreshFunction()
         end
         self:BuildControls()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
     end
 
-    local info = {
+    local info = 
+    {
         name = GetString("SI_MAPFILTER", mapPinGroup),
         onSelect = ToggleFunction,
         mapPinGroup = mapPinGroup,
         refreshFunction = refreshFunction,
         showSelectButton = true,
+        narrationText = function(entryData, entryControl)
+            return ZO_FormatToggleNarrationText(entryData.text, entryData.currentValue)
+        end,
     }
 
     local checkBox = ZO_GamepadEntryData:New(info.name)
@@ -88,7 +98,8 @@ function WorldMapFilterPanel_Gamepad:AddPinFilterComboBox(optionsPinGroup, refre
         end
     end
 
-    local info = {
+    local info = 
+    {
         callback = ChangedFunction,
         onSelect = function(data) self:FocusDropDown(data.dropDown) end,
         mapPinGroup = optionsPinGroup,
@@ -96,6 +107,9 @@ function WorldMapFilterPanel_Gamepad:AddPinFilterComboBox(optionsPinGroup, refre
         optionsEnumStringName = optionsEnumStringName,
         showSelectButton = true,
         comboItems = { ... },
+        narrationText = function(entryData, entryControl)
+            return entryData.dropDown:GetNarrationText()
+        end,
     }
 
     local comboBox = ZO_GamepadEntryData:New(info.name)
@@ -116,7 +130,7 @@ function WorldMapFilterPanel_Gamepad:SetupDropDown(control, data, selected, rese
 
     local function OnOptionChanged(_, entryText, entry)
         self:SetPinFilter(data.mapPinGroup, entry.index)
-        if(data.refreshFunction) then
+        if data.refreshFunction then
             data.refreshFunction()
         end
     end
@@ -146,6 +160,7 @@ end
 
 function WorldMapFilterPanel_Gamepad:UnfocusDropDown()
     if self.dropDown then
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
         self.dropDown = nil
     end
 end
@@ -216,11 +231,11 @@ function WorldMapFilters_Gamepad:Initialize(control)
 
     GAMEPAD_WORLD_MAP_FILTERS_FRAGMENT = ZO_SimpleSceneFragment:New(control)
     GAMEPAD_WORLD_MAP_FILTERS_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-        if(newState == SCENE_SHOWING) then
+        if newState == SCENE_SHOWING then
             self.currentPanel.list:Activate()
             self.currentPanel:BuildControls()
             self:SelectKeybind()
-        elseif(newState == SCENE_HIDDEN) then
+        elseif newState == SCENE_HIDDEN then
             self:SwitchToKeybind(nil)
             self.currentPanel:HideDropDown()
             self.currentPanel.list:Deactivate()

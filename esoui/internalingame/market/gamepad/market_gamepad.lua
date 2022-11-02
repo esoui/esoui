@@ -164,7 +164,7 @@ function GamepadMarket:Initialize(control)
 
     local EMPTY_TAB_HEADER = {}
     ZO_GamepadMarket_GridScreen.Initialize(self, control, EMPTY_TAB_HEADER)
-    ZO_Market_Shared.Initialize(self)
+    ZO_Market_Shared.Initialize(self, control, ZO_GAMEPAD_MARKET_SCENE_NAME)
 
     self:InitializeObjectPools()
     self:InitializeLabeledGroups()
@@ -1489,23 +1489,18 @@ function GamepadMarket:ShowHousePreviewDialog(marketProduct)
     ZO_Dialogs_ShowGamepadDialog("CROWN_STORE_PREVIEW_HOUSE", { marketProductData = marketProduct:GetMarketProductData() }, mainTextParams)
 end
 
-function GamepadMarket:OnTutorialShowing()
-    g_activeMarketScreen:RemoveKeybinds()
-    g_activeMarketScreen:Deactivate()
+function GamepadMarket:OnDialogShowing()
+    if g_activeMarketScreen then
+        g_activeMarketScreen:RemoveKeybinds()
+        g_activeMarketScreen:Deactivate()
+    end
 end
 
-function GamepadMarket:OnTutorialHidden()
-    g_activeMarketScreen:Activate()
-    g_activeMarketScreen:AddKeybinds()
-end
-
-function GamepadMarket:RestoreActionLayerForTutorial()
-    PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))
-end
-
-function GamepadMarket:RemoveActionLayerForTutorial()
-    -- we exit the gamepad tutorial by pressing "A"
-    RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))
+function GamepadMarket:OnDialogHidden()
+    if g_activeMarketScreen then
+        g_activeMarketScreen:Activate()
+        g_activeMarketScreen:AddKeybinds()
+    end
 end
 
 function GamepadMarket:ClearProducts()

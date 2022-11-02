@@ -39,6 +39,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_LimitFollowersInTowns",
+    settingType = SETTING_TYPE_IN_WORLD,
+    settingId = IN_WORLD_UI_SETTING_LIMIT_FOLLOWERS_IN_TOWNS,
+    header = SI_GAMEPLAY_OPTIONS_GENERAL,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Gameplay_CompanionReactions",
     settingType = SETTING_TYPE_IN_WORLD,
     settingId = IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY,

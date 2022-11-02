@@ -66,6 +66,9 @@ function ZO_GuildRanks_Gamepad:Initialize(control)
         headerTemplate = "ZO_GuildRanks_Permission_Gamepad_Header_Template",
         headerHeight = ZO_GUILD_RANK_PERMISSON_HEADER_TEMPLATE_GAMEPAD_HEIGHT,
         highlightTemplate = "ZO_GuildRanks_Permission_Gamepad_Highlight_Template",
+        narrationText = function(entryData)
+            return ZO_FormatToggleNarrationText(entryData.text, entryData.isChecked())
+        end,
     }
 
     ZO_GuildRanks_Shared.Initialize(self, control, templateData)
@@ -177,6 +180,8 @@ end
 function ZO_GuildRanks_Gamepad:OnPermissionGridListEntryToggle(...)
     self.selectedRank:SetPermission(...)
     self.permissionsGridList:RefreshGridList()
+    --Re-narrate the current selection when the entry is toggled
+    SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.permissionsGridList)
 end
 
 function ZO_GuildRanks_Gamepad:GetSelectedRank()
@@ -347,6 +352,7 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
                         
                         KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 
@@ -387,7 +393,9 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
                         control.dropdown:UpdateItems()
 
                         UpdateDropdownSelection()
+                        SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, control.dropdown)
                     end,
+                    narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
                 },
             },
 
@@ -520,6 +528,7 @@ function ZO_GuildRanks_Gamepad:InitializeRenameRankDialog()
                         
                         KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 

@@ -279,36 +279,66 @@ function ZO_Keybindings_Gamepad:ViewActionLayerCategories(actionLayerData)
     GAMEPAD_GENERIC_FOOTER:Refresh(self.currentKeyboardFooterData)
 end
 
-function ZO_Keybindings_Gamepad:UpdateKeybindingGridList()
-    self.keybindingGridList:ClearGridList()
+do
+    internalassert(GetMaxBindingsPerAction() == 4, "Max bindings per action changed, update switch case in GetKeybindingEntryNarrationText")
+    local function GetKeybindingEntryNarrationText(entryData)
+        local narrations = {}
 
-    local categoryData = self.categoryList:GetTargetData()
-    local actions = categoryData.actions
+        --Determine the row name
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.localizedActionName))
 
-    for actionLoopIndex, action in ipairs(actions) do
-        if actionLoopIndex ~= 1 then
-            self.keybindingGridList:AddEntry({}, "ZO_Keybindings_Gamepad_Divider_GridEntry_Template_Gamepad")
+        --Determine the column name
+        local bindingHeader
+        if entryData.bindingIndex == 1 then
+            bindingHeader = GetString(SI_KEYBINDINGS_PRIMARY_HEADER)
+        elseif entryData.bindingIndex == 2 then
+            bindingHeader = GetString(SI_KEYBINDINGS_SECONDARY_HEADER)
+        elseif entryData.bindingIndex == 3 then
+            bindingHeader = GetString(SI_KEYBINDINGS_TERTIARY_HEADER)
+        else
+            bindingHeader = GetString(SI_KEYBINDINGS_QUATERNARY_HEADER)
         end
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(bindingHeader))
 
-        self.keybindingGridList:AddEntry({ displayName = action.localizedActionName }, "ZO_Keybindings_Gamepad_ActionName_GridEntry_Template_Gamepad")
+        --Determine the value narration
+        local keybindNarration = ZO_Keybindings_GetNarrationStringFromAction(entryData.actionName, entryData.bindingIndex)
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(keybindNarration))
 
-        local actionName = action.actionName
-        for bindingIndex = 1, GetMaxBindingsPerAction() do
-            local keybindData =
-            {
-                actionName = actionName,
-                localizedActionName = action.localizedActionName,
-                layerIndex = action.layerIndex,
-                categoryIndex = action.categoryIndex,
-                actionIndex = action.actionIndex,
-                bindingIndex = bindingIndex,
-            }
-
-            self.keybindingGridList:AddEntry(keybindData, "ZO_Keybindings_Gamepad_Keybind_GridEntry_Template_Gamepad")
-        end
+        return narrations
     end
 
-    self.keybindingGridList:CommitGridList()
+    function ZO_Keybindings_Gamepad:UpdateKeybindingGridList()
+        self.keybindingGridList:ClearGridList()
+
+        local categoryData = self.categoryList:GetTargetData()
+        local actions = categoryData.actions
+
+        for actionLoopIndex, action in ipairs(actions) do
+            if actionLoopIndex ~= 1 then
+                self.keybindingGridList:AddEntry({}, "ZO_Keybindings_Gamepad_Divider_GridEntry_Template_Gamepad")
+            end
+
+            self.keybindingGridList:AddEntry({ displayName = action.localizedActionName }, "ZO_Keybindings_Gamepad_ActionName_GridEntry_Template_Gamepad")
+
+            local actionName = action.actionName
+            for bindingIndex = 1, GetMaxBindingsPerAction() do
+                local keybindData =
+                {
+                    actionName = actionName,
+                    localizedActionName = action.localizedActionName,
+                    layerIndex = action.layerIndex,
+                    categoryIndex = action.categoryIndex,
+                    actionIndex = action.actionIndex,
+                    bindingIndex = bindingIndex,
+                    narrationText = GetKeybindingEntryNarrationText,
+                }
+
+                self.keybindingGridList:AddEntry(keybindData, "ZO_Keybindings_Gamepad_Keybind_GridEntry_Template_Gamepad")
+            end
+        end
+
+        self.keybindingGridList:CommitGridList()
+    end
 end
 
 function ZO_Keybindings_Gamepad:EnterKeybindingGridList()
@@ -355,11 +385,13 @@ function ZO_BindKeyDialog_Gamepad:Initialize(control)
     -- and the custom keybind buttons that are displayed in the dialog control
     -- To avoid showing duplicate keybinds all descriptors are ethereal to hide them on
     -- the keybind strip.
-    -- Since the custom keybind buttons will still show, they need 'name' set (as opposed to 'text')
+    -- Since the custom keybind buttons will still show and narrate, they need 'name' set (as opposed to 'text')
     self.primaryKeybindDescriptor =
     {
         keybind = "DIALOG_PRIMARY",
         ethereal = true,
+        narrateEthereal = true,
+        etherealNarrationOrder = 1,
         name = GetString(SI_KEYBINDINGS_CHOOSE_BIND_BUTTON),
         enabled = function()
             return not self:IsBindBoxActive()
@@ -375,7 +407,9 @@ function ZO_BindKeyDialog_Gamepad:Initialize(control)
     {
         keybind = "DIALOG_SECONDARY",
         ethereal = true,
-        name = GetString(SI_KEYBINDINGS_BIND_BUTTON),
+        narrateEthereal = true,
+        etherealNarrationOrder = 3,
+        name = GetString(SI_DIALOG_CONFIRM),
         enabled = function()
             return self.canBeBound and not self:IsBindBoxActive()
         end,
@@ -396,6 +430,8 @@ function ZO_BindKeyDialog_Gamepad:Initialize(control)
     {
         keybind = "DIALOG_TERTIARY",
         ethereal = true,
+        narrateEthereal = true,
+        etherealNarrationOrder = 4,
         name = GetString(SI_KEYBINDINGS_UNBIND_BUTTON),
         enabled = function()
             return self.canBeUnbound and not self:IsBindBoxActive()
@@ -412,6 +448,8 @@ function ZO_BindKeyDialog_Gamepad:Initialize(control)
     {
         keybind = "DIALOG_RESET", -- There is no DIALOG_QUATERNARY, so we'll use RESET
         ethereal = true,
+        narrateEthereal = true,
+        etherealNarrationOrder = 5,
         name = GetString(SI_KEYBINDINGS_DEFAULT_BUTTON),
         enabled = function()
             return self.canDefault and not self:IsBindBoxActive()
@@ -419,6 +457,7 @@ function ZO_BindKeyDialog_Gamepad:Initialize(control)
         callback = function()
             self:SetCurrentKeys(self.defaultKey, self.defaultCtrl, self.defaultAlt, self.defaultShift, self.defaultCommand)
             self:RefreshKeybinds()
+            SCREEN_NARRATION_MANAGER:QueueDialog(self.control)
         end,
     }
 
@@ -428,6 +467,8 @@ function ZO_BindKeyDialog_Gamepad:Initialize(control)
     {
         keybind = "DIALOG_NEGATIVE",
         ethereal = true,
+        narrateEthereal = true,
+        etherealNarrationOrder = 2,
         name = GetString(SI_DIALOG_CANCEL),
         enabled = function()
             return not self:IsBindBoxActive()
@@ -455,6 +496,7 @@ function ZO_BindKeyDialog_Gamepad:Initialize(control)
         blockDialogReleaseOnPress = true,
         setup = function(...) self:SetupDialog(...) end,
         finishedCallback = function() self:OnDialogFinished() end,
+        narrationText = function(...) return self:GetNarrationText(...) end,
 
         buttons =
         {
@@ -467,15 +509,35 @@ function ZO_BindKeyDialog_Gamepad:Initialize(control)
     })
 end
 
+function ZO_BindKeyDialog_Gamepad:GetNarrationText(dialog)
+    local data = dialog.data
+    local narrations = {}
+    local bindingText = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("DIALOG_PRIMARY")
+    local bindingSlotText = KEYBINDINGS_MANAGER:GetBindTypeTextFromIndex(self.bindingIndex)
+    local localizedActionName = data.localizedActionName
+    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_KEYBINDINGS_PRESS_A_KEY_OR_CLICK_GAMEPAD, bindingText, bindingSlotText, localizedActionName)))
+    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_KEYBINDINGS_CURRENT_BIND_NARRATION_FORMATTER, self.currentBindNarration)))
+    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.overwriteWarning1))
+    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.overwriteWarning2))
+    return narrations
+end
+
 function ZO_BindKeyDialog_Gamepad:SetupDialog(dialog, data)
     self.layerIndex = data.layerIndex
     self.categoryIndex = data.categoryIndex
     self.actionIndex = data.actionIndex
     self.bindingIndex = data.bindingIndex
 
-    local pressToBindKeybindText = ZO_Keybindings_GetBindingStringFromAction("DIALOG_PRIMARY", KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP)
     local bindingSlotText = KEYBINDINGS_MANAGER:GetBindTypeTextFromIndex(self.bindingIndex)
-    self.instructionsLabel:SetText(zo_strformat(SI_KEYBINDINGS_PRESS_A_KEY_OR_CLICK_GAMEPAD, ZO_SELECTED_TEXT:Colorize(pressToBindKeybindText), ZO_SELECTED_TEXT:Colorize(bindingSlotText), ZO_SELECTED_TEXT:Colorize(data.localizedActionName)))
+    local function customTextFunction(label, bindingText)
+        label:SetText(zo_strformat(SI_KEYBINDINGS_PRESS_A_KEY_OR_CLICK_GAMEPAD, ZO_SELECTED_TEXT:Colorize(bindingText), ZO_SELECTED_TEXT:Colorize(bindingSlotText), ZO_SELECTED_TEXT:Colorize(data.localizedActionName)))
+    end
+    local SHOW_UNBOUND = true
+    local DEFAULT_GAMEPAD_ACTION_NAME = nil
+    local DONT_ALWAYS_PREFER_GAMEPAD = false
+    local DONT_SHOW_AS_HOLD = false
+    local scalePercent = 110
+    ZO_Keybindings_RegisterLabelForInLineBindingUpdate(self.instructionsLabel, "DIALOG_PRIMARY", SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, customTextFunction, DONT_ALWAYS_PREFER_GAMEPAD, DONT_SHOW_AS_HOLD, scalePercent)
 
     local key, mod1, mod2, mod3, mod4 = GetActionBindingInfo(self.layerIndex, self.categoryIndex, self.actionIndex, self.bindingIndex)
 
@@ -522,6 +584,7 @@ end
 function ZO_BindKeyDialog_Gamepad:OnDialogFinished()
     BlockAutomaticInputModeChange(false)
     self:SetBindBoxEnabled(false)
+    ZO_Keybindings_UnregisterLabelForBindingUpdate(self.instructionsLabel)
 end
 
 function ZO_BindKeyDialog_Gamepad:OnMouseDown(button, ctrl, alt, shift, command)
@@ -544,6 +607,7 @@ function ZO_BindKeyDialog_Gamepad:OnMouseUp(button, ctrl, alt, shift, command)
     if self.numMouseButtonsDown == 0 and mouseButtonAsKeyCode ~= KEY_MOUSE_LEFTRIGHT then
         self.forcedLmbRmb = false
         self:SetBindBoxEnabled(false)
+        SCREEN_NARRATION_MANAGER:QueueDialog(self.control)
     end
 end
 
@@ -551,6 +615,7 @@ function ZO_BindKeyDialog_Gamepad:OnMouseWheel(delta, ctrl, alt, shift, command)
     local mouseWheelAsKey = delta < 0 and KEY_MOUSEWHEEL_DOWN or KEY_MOUSEWHEEL_UP
     self:SetCurrentKeys(mouseWheelAsKey, ctrl, alt, shift, command)
     self:SetBindBoxEnabled(false)
+    SCREEN_NARRATION_MANAGER:QueueDialog(self.control)
 end
 
 function ZO_BindKeyDialog_Gamepad:OnKeyDown(key, ctrl, alt, shift, command)
@@ -573,6 +638,7 @@ function ZO_BindKeyDialog_Gamepad:OnKeyUp(key, ctrl, alt, shift, command)
         if self.numKeysDown == 0 and self.forcedComboKey ~= key then
             self.forcedComboKey = nil
             self:SetBindBoxEnabled(false)
+            SCREEN_NARRATION_MANAGER:QueueDialog(self.control)
         end
     end
 end
@@ -620,8 +686,10 @@ end
 
 function ZO_BindKeyDialog_Gamepad:UpdateCurrentKeyLabel()
     -- clear the text so the dialog resizes appropriately
-    self.overwriteWarning1Label:SetText("")
-    self.overwriteWarning2Label:SetText("")
+    self.overwriteWarning1 = ""
+    self.overwriteWarning2 = ""
+    self.overwriteWarning1Label:SetText(self.overwriteWarning1)
+    self.overwriteWarning2Label:SetText(self.overwriteWarning2)
 
     local key, mod1, mod2, mod3, mod4 = self:GetCurrentKeys() 
     local isCurrentKeyDefault = key == self.defaultKey and mod1 == self.defaultMod1 and mod2 == self.defaultMod2 and mod3 == self.defaultMod3 and mod4 == self.defaultMod4
@@ -647,6 +715,7 @@ function ZO_BindKeyDialog_Gamepad:UpdateCurrentKeyLabel()
             self.currentBindLabel:SetFont("ZoFontGamepadCondensed42")
         end
         self.currentBindLabel:SetText(bindingString)
+        self.currentBindNarration = ZO_Keybindings_GetNarrationStringFromKeys(key, mod1, mod2, mod3, mod4)
 
         local showSaveLimitWarning = willBindExceedLimit or (isCurrentKeyDefault and self.willUnbindExceedLimit)
 
@@ -660,32 +729,36 @@ function ZO_BindKeyDialog_Gamepad:UpdateCurrentKeyLabel()
 
             if isRebindable then
                 if showSaveLimitWarning then
-                    self.overwriteWarning1Label:SetText(ZO_ERROR_COLOR:Colorize(GetString(SI_KEYBINDINGS_WOULD_EXCEED_SAVE_LIMIT)))
+                    self.overwriteWarning1 = ZO_ERROR_COLOR:Colorize(GetString(SI_KEYBINDINGS_WOULD_EXCEED_SAVE_LIMIT))
+                    self.overwriteWarning1Label:SetText(self.overwriteWarning1)
                 else
                     local bindingSlotText = KEYBINDINGS_MANAGER:GetBindTypeTextFromIndex(bindingIndex)
-                    self.overwriteWarning1Label:SetText(zo_strformat(SI_KEYBINDINGS_ALREADY_BOUND, ZO_SELECTED_TEXT:Colorize(bindingSlotText), ZO_SELECTED_TEXT:Colorize(localizedActionName)))
-                    self.overwriteWarning2Label:SetText(zo_strformat(SI_KEYBINDINGS_WOULD_UNBIND, ZO_SELECTED_TEXT:Colorize(localizedActionName)))
+                    self.overwriteWarning1 = zo_strformat(SI_KEYBINDINGS_ALREADY_BOUND, ZO_SELECTED_TEXT:Colorize(bindingSlotText), ZO_SELECTED_TEXT:Colorize(localizedActionName))
+                    self.overwriteWarning1Label:SetText(self.overwriteWarning1)
+                    self.overwriteWarning2 = zo_strformat(SI_KEYBINDINGS_WOULD_UNBIND, ZO_SELECTED_TEXT:Colorize(localizedActionName))
+                    self.overwriteWarning2Label:SetText(self.overwriteWarning2)
                     self.overwriteWarning2Label:SetHidden(false)
                 end
             else
-                self.overwriteWarning1Label:SetText(zo_strformat(SI_KEYBINDINGS_CANNOT_BIND_TO, ZO_SELECTED_TEXT:Colorize(localizedActionName)))
+                self.overwriteWarning1 = zo_strformat(SI_KEYBINDINGS_CANNOT_BIND_TO, ZO_SELECTED_TEXT:Colorize(localizedActionName))
+                self.overwriteWarning1Label:SetText(self.overwriteWarning1)
                 self.overwriteWarning2Label:SetHidden(true)
                 self.canBeBound = false
             end
         else
-            self.overwriteWarning1Label:SetHidden(true)
             self.overwriteWarning2Label:SetHidden(true)
 
             if showSaveLimitWarning then
                 self.overwriteWarning1Label:SetHidden(false)
-                self.overwriteWarning1Label:SetText(ZO_ERROR_COLOR:Colorize(GetString(SI_KEYBINDINGS_WOULD_EXCEED_SAVE_LIMIT)))
+                self.overwriteWarning1 = ZO_ERROR_COLOR:Colorize(GetString(SI_KEYBINDINGS_WOULD_EXCEED_SAVE_LIMIT))
+                self.overwriteWarning1Label:SetText(self.overwriteWarning1)
             else
                 self.overwriteWarning1Label:SetHidden(true)
             end
-            self.overwriteWarning2Label:SetHidden(true)
         end
     else
         self.currentBindLabel:SetHidden(true)
+        self.currentBindNarration = GetString(SI_ACTION_IS_NOT_BOUND)
         self.overwriteWarning1Label:SetHidden(true)
         self.overwriteWarning2Label:SetHidden(true)
     end

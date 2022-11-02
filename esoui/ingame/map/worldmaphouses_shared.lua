@@ -1,10 +1,4 @@
-ZO_MapHouses_Shared = ZO_Object:Subclass()
-
-function ZO_MapHouses_Shared:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_MapHouses_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_MapHouses_Shared:Initialize(control, fragmentClass)
     self.control = control

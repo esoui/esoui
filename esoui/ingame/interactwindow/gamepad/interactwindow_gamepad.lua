@@ -45,36 +45,47 @@ local function SetupBodyText(control, data, selected, selectedDuringRebuild, ena
 end
 
 local function SetupOption(control, data, selected, selectedDuringRebuild, enabled, activated)
-    if(data.optionsEnabled) then
+    if data.optionsEnabled then
         data.enabled = data.optionUsable
-        control:SetText(data.optionText)
-        control.optionText = data.optionText
+
+        local label = control:GetNamedChild("Text")
         if selected then
             if data.recolorIfUnusable and not data.optionUsable then
-                control:SetColor(ZO_NORMAL_TEXT:UnpackRGB())
+                label:SetColor(ZO_NORMAL_TEXT:UnpackRGB())
             else
-                control:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+                label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
             end
         elseif data.isImportant then
-            control:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+            label:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
         elseif (data.recolorIfUnusable and not data.optionUsable) or data.chosenBefore then
-            control:SetColor(ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR:UnpackRGB())
+            label:SetColor(ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR:UnpackRGB())
         else
-            control:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+            label:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
         end
 
-        control:SetHandler("OnUpdate", data.labelUpdateFunction)
+        label:SetHandler("OnUpdate", data.labelUpdateFunction)
         if data.labelUpdateFunction then
-            data.labelUpdateFunction(control, data)
+            data.labelUpdateFunction(label, data)
         end
 
-        local icon = GetControl(control, "IconImage")
+        local icon = control:GetNamedChild("Icon")
 
-        icon:SetHidden((data.iconFile == nil) or not USE_CHATTER_OPTION_ICON)
+        control.optionText = data.optionText
 
-        if(data.iconFile) then
-            icon:SetTexture(data.iconFile)
+        if #data.iconFiles > 0 then
+            icon:ClearIcons()
+            for iconIndex, iconFile in pairs(data.iconFiles) do
+                icon:AddIcon(iconFile)
+            end
+            icon:Show()
+            label:SetAnchor(TOPLEFT, icon, TOPRIGHT)
+        else
+            icon:SetHidden(true)
+            label:SetAnchor(TOPLEFT)
         end
+
+        label:SetText(control.optionText)
+        control:SetHeight(label:GetHeight())
     end
 end
 
@@ -199,8 +210,8 @@ function ZO_GamepadInteraction:SelectLastChatterOption()
     self:SelectChatterOptionByIndex(#self.itemList.dataList)
 end
 
-function ZO_GamepadInteraction:PopulateChatterOption(controlID, optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore)
-    local chatterData = self:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore)
+function ZO_GamepadInteraction:PopulateChatterOption(controlID, optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, importantOptions, teleportNPCId, teleportWaypointIndex)
+    local chatterData = self:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, teleportWaypointIndex)
 
     if chatterData.isImportant then
         TriggerTutorial(TUTORIAL_TRIGGER_IMPORTANT_DIALOGUE)

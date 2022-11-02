@@ -17,6 +17,9 @@ function ZO_InteractiveChatLog_Gamepad:Initialize(control, scene)
     self:InitializeTextInputSection()
     self:InitializePassiveFocus()
     self:RegisterForEvents()
+
+    --This screen needs to manage the narration a bit differently, so unregister ourselves upon creation
+    SCREEN_NARRATION_MANAGER:UnregisterParametricList(self.list)
 end
 
 function ZO_InteractiveChatLog_Gamepad:InitializeHeader()
@@ -66,7 +69,6 @@ end
 
 function ZO_InteractiveChatLog_Gamepad:InitializeTextEdit()
     local function TextEditFocusGained()
-        self:FocusTextInput()
         self.textInputAreaFocalArea:Deactivate()
         ZO_GamepadEditBox_FocusGained(self.textEdit)
     end
@@ -245,6 +247,10 @@ function ZO_InteractiveChatLog_Gamepad:OnChatEntryPanelActivated()
         end
     end
 
+    --Wait until we are actually navigating the chat panel before we start caring about narrating it
+    SCREEN_NARRATION_MANAGER:RegisterParametricListScreen(self.list, self)
+    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
+
     --We want the chat entry list to wait a moment before it starts processing the input
     --Otherwise it will move immediately on the next frame after gaining focus
     zo_callLater(EnableChatDirectionalInputLater, 200)
@@ -253,6 +259,8 @@ function ZO_InteractiveChatLog_Gamepad:OnChatEntryPanelActivated()
 end
 
 function ZO_InteractiveChatLog_Gamepad:OnChatEntryPanelDeactivated()
+    --Once we leave the chat panel we no longer want to narrate anything in it, so unregister ourselves again
+    SCREEN_NARRATION_MANAGER:UnregisterParametricList(self.list)
     self.list:SetDirectionalInputEnabled(false)
     self.list:RefreshVisible()
     self.list:SetSoundEnabled(false)

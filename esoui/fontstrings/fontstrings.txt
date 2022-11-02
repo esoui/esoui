@@ -1,2 +1,3 @@
 EsoUI\FontStrings\Western\DefaultFontStrings_Western.xml
 EsoUI\FontStrings\Japanese\DefaultFontStrings_Japanese.xml
+EsoUI\FontStrings\SimplifiedChinese\DefaultFontStrings_SimplifiedChinese.xml

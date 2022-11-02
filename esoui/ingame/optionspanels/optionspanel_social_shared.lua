@@ -4,12 +4,6 @@ do
         [CHAT_CATEGORY_SAY] = CHAT_CHANNEL_SAY,
         [CHAT_CATEGORY_YELL] = CHAT_CHANNEL_YELL,
         [CHAT_CATEGORY_ZONE] = CHAT_CHANNEL_ZONE,
-        [CHAT_CATEGORY_ZONE_ENGLISH] = CHAT_CHANNEL_ZONE_LANGUAGE_1,
-        [CHAT_CATEGORY_ZONE_FRENCH] = CHAT_CHANNEL_ZONE_LANGUAGE_2,
-        [CHAT_CATEGORY_ZONE_GERMAN] = CHAT_CHANNEL_ZONE_LANGUAGE_3,
-        [CHAT_CATEGORY_ZONE_JAPANESE] = CHAT_CHANNEL_ZONE_LANGUAGE_4,
-        [CHAT_CATEGORY_ZONE_RUSSIAN] = CHAT_CHANNEL_ZONE_LANGUAGE_5,
-        [CHAT_CATEGORY_ZONE_SPANISH] = CHAT_CHANNEL_ZONE_LANGUAGE_6,
         [CHAT_CATEGORY_WHISPER_INCOMING] = CHAT_CHANNEL_WHISPER,
         [CHAT_CATEGORY_WHISPER_OUTGOING] = CHAT_CHANNEL_WHISPER,
         [CHAT_CATEGORY_PARTY] = CHAT_CHANNEL_PARTY,
@@ -25,6 +19,11 @@ do
         [CHAT_CATEGORY_OFFICER_4] = CHAT_CHANNEL_OFFICER_4,
         [CHAT_CATEGORY_OFFICER_5] = CHAT_CHANNEL_OFFICER_5,
     }
+
+    for language = OFFICIAL_LANGUAGE_ITERATION_BEGIN, OFFICIAL_LANGUAGE_ITERATION_END do
+        local chatInfo = ZO_OFFICIAL_LANGUAGE_TO_CHAT_INFO[language]
+        categoryToChannelMappings[chatInfo.category] = chatInfo.channel
+    end
 
     local switchLookupTable = ZO_ChatSystem_GetChannelSwitchLookupTable()
 
@@ -352,60 +351,6 @@ local ZO_OptionsPanel_Social_ControlData =
             chatChannelCategory = CHAT_CATEGORY_ZONE,
             tooltipText = SI_SOCIAL_OPTIONS_ZONE_COLOR_TOOLTIP,
         },
-        --Options_Social_ChatColor_Zone_English
-        [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_ENG] = 
-        {
-            controlType = OPTIONS_CHAT_COLOR,
-            text = ZO_OptionsPanel_Social_GetColorControlName,
-            panel = SETTING_PANEL_SOCIAL,
-            chatChannelCategory = CHAT_CATEGORY_ZONE_ENGLISH,
-            tooltipText = SI_SOCIAL_OPTIONS_ZONE_ENGLISH_COLOR_TOOLTIP,
-        },
-        --Options_Social_ChatColor_Zone_French
-        [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_FRA] = 
-        {
-            controlType = OPTIONS_CHAT_COLOR,
-            text = ZO_OptionsPanel_Social_GetColorControlName,
-            panel = SETTING_PANEL_SOCIAL,
-            chatChannelCategory = CHAT_CATEGORY_ZONE_FRENCH,
-            tooltipText = SI_SOCIAL_OPTIONS_ZONE_FRENCH_COLOR_TOOLTIP,
-        },
-        --Options_Social_ChatColor_Zone_German
-        [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_GER] = 
-        {
-            controlType = OPTIONS_CHAT_COLOR,
-            text = ZO_OptionsPanel_Social_GetColorControlName,
-            panel = SETTING_PANEL_SOCIAL,
-            chatChannelCategory = CHAT_CATEGORY_ZONE_GERMAN,
-            tooltipText = SI_SOCIAL_OPTIONS_ZONE_GERMAN_COLOR_TOOLTIP,
-        },
-        --Options_Social_ChatColor_Zone_Japanese
-        [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_JPN] = 
-        {
-            controlType = OPTIONS_CHAT_COLOR,
-            text = ZO_OptionsPanel_Social_GetColorControlName,
-            panel = SETTING_PANEL_SOCIAL,
-            chatChannelCategory = CHAT_CATEGORY_ZONE_JAPANESE,
-            tooltipText = SI_SOCIAL_OPTIONS_ZONE_JAPANESE_COLOR_TOOLTIP,
-        },
-        --Options_Social_ChatColor_Zone_Russian
-        [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_RUS] = 
-        {
-            controlType = OPTIONS_CHAT_COLOR,
-            text = ZO_OptionsPanel_Social_GetColorControlName,
-            panel = SETTING_PANEL_SOCIAL,
-            chatChannelCategory = CHAT_CATEGORY_ZONE_RUSSIAN,
-            tooltipText = SI_SOCIAL_OPTIONS_ZONE_RUSSIAN_COLOR_TOOLTIP,
-        },
-        --Options_Social_ChatColor_Zone_Spanish
-        [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_SPA] =
-        {
-            controlType = OPTIONS_CHAT_COLOR,
-            text = ZO_OptionsPanel_Social_GetColorControlName,
-            panel = SETTING_PANEL_SOCIAL,
-            chatChannelCategory = CHAT_CATEGORY_ZONE_SPANISH,
-            tooltipText = SI_SOCIAL_OPTIONS_ZONE_SPANISH_COLOR_TOOLTIP,
-        },
         --Options_Social_ChatColor_NPC
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_NPC] = 
         {
@@ -566,5 +511,18 @@ local ZO_OptionsPanel_Social_ControlData =
         },
     },
 }
+
+for language = OFFICIAL_LANGUAGE_ITERATION_BEGIN, OFFICIAL_LANGUAGE_ITERATION_END do
+    local chatInfo = ZO_OFFICIAL_LANGUAGE_TO_CHAT_INFO[language]
+    --Options_Social_ChatColor_Zone_<Language>
+    ZO_OptionsPanel_Social_ControlData[SETTING_TYPE_CUSTOM][chatInfo.chatColorCustomSetting] =
+    {
+        controlType = OPTIONS_CHAT_COLOR,
+        text = ZO_OptionsPanel_Social_GetColorControlName,
+        panel = SETTING_PANEL_SOCIAL,
+        chatChannelCategory = chatInfo.category,
+        tooltipText = function() return GetString("SI_OFFICIALLANGUAGE_SOCIALOPTIONSZONECOLORTOOLTIP", language) end,
+    }
+end
 
 ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_SOCIAL, ZO_OptionsPanel_Social_ControlData)

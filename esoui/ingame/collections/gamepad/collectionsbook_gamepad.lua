@@ -613,18 +613,10 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
                 local collectibleData = self:GetCurrentTargetData()
-
-                local dialogData = 
-                {
-                    collectibleId = collectibleData:GetId(),
-                    name = collectibleData:GetNickname(),
-                    active = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER),
-                }
-                ZO_Dialogs_ShowGamepadDialog(GAMEPAD_COLLECTIONS_ACTIONS_DIALOG_NAME, dialogData)
+                ZO_Dialogs_ShowGamepadDialog(GAMEPAD_COLLECTIONS_ACTIONS_DIALOG_NAME, collectibleData)
             end,
             visible = function()
                 local collectibleData = self:GetCurrentTargetData()
-
                 if collectibleData then
                     return IsChatSystemAvailableForCurrentPlatform() or collectibleData:IsRenameable() or self:CanPurchaseCurrentTarget() or self:CanUpgradeCurrentTarget()
                 else
@@ -1428,10 +1420,47 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     text = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
-                        local link = ZO_LinkHandler_CreateChatLink(GetCollectibleLink, dialog.data.collectibleId)
+                        local link = ZO_LinkHandler_CreateChatLink(GetCollectibleLink, dialog.data:GetId())
                         ZO_LinkHandler_InsertLinkAndSubmit(zo_strformat(SI_TOOLTIP_ITEM_NAME, link))
                     end,
-                    visible = IsChatSystemAvailableForCurrentPlatform
+                    visible = function(dialog)
+                        return IsChatSystemAvailableForCurrentPlatform() and not (dialog.data:IsHouse() and dialog.data:IsUnlocked())
+                    end,
+                },
+            },
+            -- Link Invite In Chat (Housing)
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                templateData = {
+                    text = GetString(SI_HOUSING_LINK_IN_CHAT),
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        local houseId = dialog.data:GetReferenceId()
+                        local ownerDisplayName = GetDisplayName()
+                        ZO_HousingBook_LinkHouseInChat(houseId, ownerDisplayName)
+                    end,
+                    visible = function(dialog)
+                        return IsChatSystemAvailableForCurrentPlatform() and (dialog.data:IsHouse() and dialog.data:IsUnlocked())
+                    end,
+                },
+            },
+            -- Link Invite in Mail (Housing)
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                templateData = {
+                    text = GetString(SI_HOUSING_LINK_IN_MAIL),
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        local houseId = dialog.data:GetReferenceId()
+                        local ownerDisplayName = GetDisplayName()
+                        local link = ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
+                        if link then
+                            MAIL_MANAGER_GAMEPAD.inbox:InsertBodyText(link)
+                        end
+                    end,
+                    visible = function(dialog)
+                        return IsChatSystemAvailableForCurrentPlatform() and (dialog.data:IsHouse() and dialog.data:IsUnlocked())
+                    end,
                 },
             },
             -- Rename
@@ -1441,11 +1470,10 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     text = GetString(SI_COLLECTIBLE_ACTION_RENAME),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
-                       ZO_Dialogs_ShowGamepadDialog(GAMEPAD_COLLECTIONS_RENAME_COLLECTIBLE_DIALOG_NAME, { collectibleId = dialog.data.collectibleId, name = dialog.data.name })
+                       ZO_Dialogs_ShowGamepadDialog(GAMEPAD_COLLECTIONS_RENAME_COLLECTIBLE_DIALOG_NAME, { collectibleId = dialog.data:GetId(), name = dialog.data:GetNickname() })
                     end,
                     visible = function(dialog)
-                        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(parametricDialog.data.collectibleId)
-                        return collectibleData and collectibleData:IsRenameable()
+                        return dialog.data:IsRenameable()
                     end
                 },
             },
@@ -1456,8 +1484,7 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     text = GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
-                        local collectibleData = self:GetCurrentTargetData()
-                        local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+                        local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, dialog.data:GetName())
                         ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
                     end,
                     visible = function()
@@ -1487,7 +1514,7 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                 text = SI_OK,
                 callback =  function(dialog)
                     local data = dialog.entryList:GetTargetData()
-                     data.callback(dialog)
+                    data.callback(dialog)
                 end,
             },
 
@@ -1568,12 +1595,15 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
         {
             -- user name
             {
-                template = "ZO_GamepadTextFieldItem",
+                template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
                 templateData = {
                     nameField = true,
                     textChangedCallback = function(control) 
                         inputText = control:GetText()
                         UpdateSelectedName(inputText)
+                        if parametricDialog.data then
+                            parametricDialog.data.name = inputText
+                        end
                     end,
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
@@ -1584,6 +1614,8 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
                             control.editBoxControl:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, parametricDialog.data.name))
                         end
                     end, 
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
+                    narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
                 },
                 
             },

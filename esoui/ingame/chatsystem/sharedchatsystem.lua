@@ -878,10 +878,10 @@ function SharedChatContainer:IsScrolledUp()
     end
 end
 
-function SharedChatContainer:AddEventMessageToContainer(formattedEvent, category)
+function SharedChatContainer:AddEventMessageToContainer(formattedEvent, category, narrationMessage)
     for i = 1, #self.windows do
         if IsChatContainerTabCategoryEnabled(self.id, i, category) then
-            self:AddEventMessageToWindow(self.windows[i], formattedEvent, category)
+            self:AddEventMessageToWindow(self.windows[i], formattedEvent, category, narrationMessage)
         end
     end
 end
@@ -915,7 +915,7 @@ function SharedChatContainer:AddMessageToWindow(window, message, r, g, b, catego
     end
 end
 
-function SharedChatContainer:AddEventMessageToWindow(window, message, category)
+function SharedChatContainer:AddEventMessageToWindow(window, message, category, narrationMessage)
     local r, g, b = GetChatCategoryColor(category)
     self:AddMessageToWindow(window, message, r, g, b, category)
 end
@@ -1340,8 +1340,8 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
 
     if IsChatSystemAvailableForCurrentPlatform() then
         -- Chat events
-        local function OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText)
-            self:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText)
+        local function OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
+            self:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
         end
         CHAT_ROUTER:RegisterCallback("FormattedChatMessage", OnFormattedChatMessage)
 
@@ -1491,11 +1491,11 @@ function SharedChatSystem:HandleNewTargetOnChannel(targetChannel, target)
     self.targets[targetChannel]:AddTarget(zo_strformat(SI_UNIT_NAME, target))
 end
 
-function SharedChatSystem:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText)
+function SharedChatSystem:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
     local containers = self.categories[category]
     if containers then
         for container, _ in pairs(containers) do
-            container:AddEventMessageToContainer(message, category)
+            container:AddEventMessageToContainer(message, category, narrationMessage)
         end
     end
 end
@@ -1690,6 +1690,7 @@ function SharedChatSystem:SubmitTextEntry()
                 self.commandPrefixes[prefix](text)
             else
                 if self:ValidateChatChannel() then
+                    ZO_OutputStadiaLog("SharedChatSystem:SubmitTextEntry, set ZO_Menu_SetLastCommandWasFromMenu == false")
                     ZO_Menu_SetLastCommandWasFromMenu(false)
                     SendChatMessage(text, self.currentChannel, self.currentTarget)
                 end
@@ -2246,11 +2247,6 @@ end
 
 function SharedChatSystem:IsMinimized()
     return self.isMinimized
-end
-
-function SharedChatSystem:IsPinnable()
-    -- intended to be overriden in subclasses if necessary
-    return false
 end
 
 function SharedChatSystem:SetupFonts()

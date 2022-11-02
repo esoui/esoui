@@ -5,7 +5,7 @@ ZO_MAP_TOOLTIP_MODE =
     MAP_LOCATION = 3,
 }
 
-ZO_MapPin = ZO_Object:Subclass()
+ZO_MapPin = ZO_InitializingObject:Subclass()
 
 local CONSTANTS =
 {
@@ -71,6 +71,14 @@ do
         return pin:GetWorldEventPOIIcon()
     end
 
+    local function GetWorldEventUnitPinTexture(pin)
+        return pin:GetWorldEventUnitIcon()
+    end
+
+    local function GetIsWorldEventUnitPinTextureAnimated(pin)
+        return pin:GetIsWorldEventUnitIconAnimated()
+    end
+
     local function GetFastTravelPinTextures(pin)
         return pin:GetFastTravelIcons()
     end
@@ -90,6 +98,7 @@ do
     -- How the texturing data works:
     -- The texture can come from a string or a callback function
     -- If it's a callback function it must return first the base icon texture, and second the pin's pulseTexture
+    -- isAnimated can come from a bool or a callback function
     ZO_MapPin.PIN_DATA =
     {
         [MAP_PIN_TYPE_PLAYER]                                       = { level = 170, texture = "EsoUI/Art/MapPins/UI-WorldMapPlayerPip.dds", size = CONSTANTS.PLAYER_PIN_SIZE, mouseLevel = 0 },
@@ -99,10 +108,10 @@ do
         [MAP_PIN_TYPE_GROUP_LEADER]                                 = { level = 151, size = 32, texture = GetGroupPinTexture },
         [MAP_PIN_TYPE_GROUP]                                        = { level = 150, size = 32, texture = GetGroupPinTexture },
         [MAP_PIN_TYPE_ACTIVE_COMPANION]                             = { level = 150, size = 32, texture = "EsoUI/Art/MapPins/activeCompanion_pin.dds" },
-        [MAP_PIN_TYPE_DRAGON_COMBAT_HEALTHY]                        = { level = 147, size = 64, texture = "EsoUI/Art/MapPins/Dragon_Fly_Combat.dds", isAnimated = true, framesWide = 16, framesHigh = 1, framesPerSecond = 12 },
-        [MAP_PIN_TYPE_DRAGON_COMBAT_WEAK]                           = { level = 147, size = 64, texture = "EsoUI/Art/MapPins/Dragon_Fly_Combat_Damaged.dds", isAnimated = true, framesWide = 16, framesHigh = 1, framesPerSecond = 12 },
-        [MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY]                          = { level = 147, size = 64, texture = "EsoUI/Art/MapPins/Dragon_Fly.dds" },
-        [MAP_PIN_TYPE_DRAGON_IDLE_WEAK]                             = { level = 147, size = 64, texture = "EsoUI/Art/MapPins/Dragon_Fly_Damaged.dds" },
+        [MAP_PIN_TYPE_UNIT_COMBAT_HEALTHY]                          = { level = 147, size = 64, texture = GetWorldEventUnitPinTexture, isAnimated = GetIsWorldEventUnitPinTextureAnimated, framesWide = 16, framesHigh = 1, framesPerSecond = 12 },
+        [MAP_PIN_TYPE_UNIT_COMBAT_WEAK]                             = { level = 147, size = 64, texture = GetWorldEventUnitPinTexture, isAnimated = GetIsWorldEventUnitPinTextureAnimated, framesWide = 16, framesHigh = 1, framesPerSecond = 12 },
+        [MAP_PIN_TYPE_UNIT_IDLE_HEALTHY]                            = { level = 147, size = 64, texture = GetWorldEventUnitPinTexture, isAnimated = GetIsWorldEventUnitPinTextureAnimated, framesWide = 16, framesHigh = 1, framesPerSecond = 12 },
+        [MAP_PIN_TYPE_UNIT_IDLE_WEAK]                               = { level = 147, size = 64, texture = GetWorldEventUnitPinTexture, isAnimated = GetIsWorldEventUnitPinTextureAnimated, framesWide = 16, framesHigh = 1, framesPerSecond = 12 },
         [MAP_PIN_TYPE_TRACKED_QUEST_OFFER_ZONE_STORY]               = { level = 145, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, hitInsetX = 7, hitInsetY = 4, showsPinAndArea = true},
         [MAP_PIN_TYPE_ASSISTED_QUEST_ZONE_STORY_CONDITION]          = { level = 145, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, hitInsetX = 7, hitInsetY = 4},
         [MAP_PIN_TYPE_ASSISTED_QUEST_ZONE_STORY_OPTIONAL_CONDITION] = { level = 145, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, hitInsetX = 7, hitInsetY = 4},
@@ -602,10 +611,10 @@ ZO_MapPin.AVA_RESTRICTED_LINK_PIN_TYPES =
 
 ZO_MapPin.WORLD_EVENT_UNIT_PIN_TYPES =
 {
-    [MAP_PIN_TYPE_DRAGON_COMBAT_HEALTHY] = true,
-    [MAP_PIN_TYPE_DRAGON_COMBAT_WEAK] = true,
-    [MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY] = true,
-    [MAP_PIN_TYPE_DRAGON_IDLE_WEAK] = true,
+    [MAP_PIN_TYPE_UNIT_COMBAT_HEALTHY] = true,
+    [MAP_PIN_TYPE_UNIT_COMBAT_WEAK] = true,
+    [MAP_PIN_TYPE_UNIT_IDLE_HEALTHY] = true,
+    [MAP_PIN_TYPE_UNIT_IDLE_WEAK] = true,
 }
 
 ZO_MapPin.WORLD_EVENT_POI_PIN_TYPES =
@@ -1227,10 +1236,10 @@ do
         [MAP_PIN_TYPE_BGPIN_MURDERBALL_PIT_DAEMONS]                 =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_MURDERBALL_STORM_LORDS]                 =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_MURDERBALL_SPAWN_NEUTRAL]               =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_DRAGON_COMBAT_HEALTHY]                        =   SHARED_TOOLTIP_CREATORS.WORLD_EVENT_UNIT,
-        [MAP_PIN_TYPE_DRAGON_COMBAT_WEAK]                           =   SHARED_TOOLTIP_CREATORS.WORLD_EVENT_UNIT,
-        [MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY]                          =   SHARED_TOOLTIP_CREATORS.WORLD_EVENT_UNIT,
-        [MAP_PIN_TYPE_DRAGON_IDLE_WEAK]                             =   SHARED_TOOLTIP_CREATORS.WORLD_EVENT_UNIT,
+        [MAP_PIN_TYPE_UNIT_COMBAT_HEALTHY]                          =   SHARED_TOOLTIP_CREATORS.WORLD_EVENT_UNIT,
+        [MAP_PIN_TYPE_UNIT_COMBAT_WEAK]                             =   SHARED_TOOLTIP_CREATORS.WORLD_EVENT_UNIT,
+        [MAP_PIN_TYPE_UNIT_IDLE_HEALTHY]                            =   SHARED_TOOLTIP_CREATORS.WORLD_EVENT_UNIT,
+        [MAP_PIN_TYPE_UNIT_IDLE_WEAK]                               =   SHARED_TOOLTIP_CREATORS.WORLD_EVENT_UNIT,
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_NEUTRAL]      =   SHARED_TOOLTIP_CREATORS.DAEDRIC_ARTIFACT,
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_ALDMERI]      =   SHARED_TOOLTIP_CREATORS.DAEDRIC_ARTIFACT,
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_EBONHEART]    =   SHARED_TOOLTIP_CREATORS.DAEDRIC_ARTIFACT,
@@ -1785,12 +1794,6 @@ ZO_MapPin.SelectedAnimation =
     duration = LOOP_INDEFINITELY,
     type = ZO_MapPin.ANIMATION_ALPHA,
 }
-
-function ZO_MapPin:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
 
 do
     local nextPinId = 0
@@ -2558,6 +2561,23 @@ function ZO_MapPin:GetWorldEventInstanceId()
     end
 end
 
+function ZO_MapPin:GetWorldEventUnitIcon()
+    if self:IsWorldEventUnitPin() then
+        local worldEventInstanceId = self.m_PinTag[1]
+        local unitTag = self.m_PinTag[2]
+        local REQUEST_ANIMATED_TEXTURE = false
+        return GetWorldEventInstanceUnitPinIcon(worldEventInstanceId, unitTag, REQUEST_ANIMATED_TEXTURE)
+    end
+end
+
+function ZO_MapPin:GetIsWorldEventUnitIconAnimated()
+    if self:IsWorldEventUnitPin() then
+        local worldEventInstanceId = self.m_PinTag[1]
+        local unitTag = self.m_PinTag[2]
+        return GetIsWorldEventInstanceUnitPinIconAnimated(worldEventInstanceId, unitTag)
+    end
+end
+
 function ZO_MapPin:GetAntiquityDigSiteId()
     if self:IsAntiquityDigSitePin() then
         return self.m_PinTag[1]
@@ -2709,6 +2729,14 @@ do
         return textureColor
     end
 
+    local function IsPinAnimated(self, isAnimated)
+        if type(isAnimated) == "boolean" then
+            return isAnimated
+        elseif type(isAnimated) == "function" then
+            return isAnimated(self)
+        end
+    end
+
     function ZO_MapPin.GetStaticPinTexture(pinType)
         local singlePinData = ZO_MapPin.PIN_DATA[pinType]
         if singlePinData then
@@ -2767,7 +2795,7 @@ do
             self.highlightControl:SetDrawLevel(pinLevel - 1)
             self.labelControl:SetDrawLevel(pinLevel + 1)
 
-            if singlePinData.isAnimated then
+            if IsPinAnimated(self, singlePinData.isAnimated) then
                 self:PlayTextureAnimation(singlePinData.framesWide, singlePinData.framesHigh, singlePinData.framesPerSecond)
             end
 

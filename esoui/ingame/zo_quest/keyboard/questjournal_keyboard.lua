@@ -69,16 +69,20 @@ function ZO_QuestJournal_Keyboard:RegisterTooltips()
 end
 
 function ZO_QuestJournal_Keyboard:SetIconTexture(iconControl, iconData, selected)
-    local texture = GetControl(iconControl, "Icon")
+    local texture = iconControl:GetNamedChild("Icon")
     texture.selected = selected
-    
+
+    local texturePath = self:GetIconTexture(iconData.questType, iconData.displayType)
     if selected then
-        texture:SetTexture("EsoUI/Art/Journal/journal_Quest_Selected.dds")
+        if texturePath then
+            texture:SetTexture(texturePath)
+        else
+            texture:SetTexture("EsoUI/Art/Journal/journal_Quest_Selected.dds")
+        end
+
         texture:SetAlpha(1)
         texture:SetHidden(false)
     else
-        local texturePath = self:GetIconTexture(iconData.questType, iconData.displayType)
-
         if texturePath then
             texture:SetTexture(texturePath)
             texture.tooltipText = self:GetTooltipText(iconData.questType, iconData.displayType, iconData.questIndex)

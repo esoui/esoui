@@ -836,6 +836,7 @@ function ZO_CompanionEquipment_Gamepad:RefreshHeader(blockCallback)
         headerData = self.itemListHeaderData
     end
 
+    self.headerData = headerData
     ZO_GamepadGenericHeader_Refresh(self.header, headerData, blockCallback)
 end
 

@@ -48,7 +48,7 @@ local function AddCharacterInfo(self, characterName, class, gender, guildId, gui
         local levelPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))
         levelPair:SetStat(GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_LEVEL), self:GetStyle("statValuePairStat"))
         local ICON_SIZE = 40
-        local levelString = GetLevelOrChampionPointsString(level, championPoints, ICON_SIZE)
+        local levelString = ZO_GetLevelOrChampionPointsString(level, championPoints, ICON_SIZE)
         levelPair:SetValue(levelString, self:GetStyle("socialStatsValue"))
         statsSection:AddStatValuePair(levelPair)
     end
@@ -116,21 +116,18 @@ function ZO_Tooltip:LayoutHelpLink(helpLink)
     headerSection:AddLine(GetString(SI_GAMEPAD_HELP_LINK_TOOLTIP_HEADER), self:GetStyle("title"))
     self:AddSection(headerSection)
 
-    local keybindString
-    local key, mod1, mod2, mod3, mod4 = GetHighestPriorityActionBindingInfoFromName("UI_SHORTCUT_SECONDARY", IsInGamepadPreferredMode())
-    if key ~= KEY_INVALID then
-        local TEXTURE_SCALE_PERCENT = 100
-        keybindString = ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, TEXTURE_SCALE_PERCENT)
-    else
-        keybindString = ZO_Keybindings_GenerateTextKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
-    end
-
     local helpCategoryIndex, helpIndex = GetHelpIndicesFromHelpLink(helpLink)
     local helpName = GetHelpInfo(helpCategoryIndex, helpIndex)
     local name, _, _, _, _, _, gamepadName = GetHelpCategoryInfo(helpCategoryIndex)
     local helpCategoryName = gamepadName ~= "" and gamepadName or name
 
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
-    bodySection:AddLine(zo_strformat(SI_GAMEPAD_HELP_LINK_TOOLTIP_DESCRIPTION, keybindString, ZO_WHITE:Colorize(helpCategoryName), ZO_WHITE:Colorize(helpName)), self:GetStyle("flavorText"))
+    params = {
+        "UI_SHORTCUT_SECONDARY",
+        ZO_WHITE:Colorize(helpCategoryName),
+        ZO_WHITE:Colorize(helpName),
+    }
+    local KEYBIND_INDEX = 1
+    bodySection:AddParameterizedKeybindLine(SI_GAMEPAD_HELP_LINK_TOOLTIP_DESCRIPTION, params, KEYBIND_INDEX, self:GetStyle("flavorText"))
     self:AddSection(bodySection)
 end

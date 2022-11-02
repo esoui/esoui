@@ -91,6 +91,10 @@ function MarketAnnouncement_Manager:GetProductInfoTable()
     return self.productInfoTable
 end
 
+function MarketAnnouncement_Manager:GetNumMarketProductAnnouncements()
+    return self.productInfoTable and #self.productInfoTable or 0
+end
+
 function MarketAnnouncement_Manager:GetMarketProductListingsForHouseTemplate(houseTemplateId, displayGroup)
     return { GetActiveAnnouncementMarketProductListingsForHouseTemplate(houseTemplateId) }
 end
@@ -148,6 +152,10 @@ function MarketAnnouncement_Manager:GetEventAnnouncementRemainingTimeByIndex(ind
     end
 
     return remainingTime
+end
+
+function MarketAnnouncement_Manager:ShouldHideMarketProductAnnouncements()
+    return GetMarketAnnouncementCrownStoreLocked() or self:GetNumMarketProductAnnouncements() == 0
 end
 
 ZO_MARKET_ANNOUNCEMENT_MANAGER = MarketAnnouncement_Manager:New()

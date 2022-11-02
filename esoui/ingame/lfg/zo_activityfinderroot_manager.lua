@@ -128,18 +128,18 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
         end
     end
 
-    function UpdateGroupStatus()
+    local function UpdateGroupStatus()
         self:UpdateGroupStatus()
     end
 
-    function OnLevelUpdate(eventCode, unitTag)
+    local function OnLevelUpdate(eventCode, unitTag)
         if unitTag == "player" or ZO_Group_IsGroupUnitTag(unitTag) then
             self:MarkDataDirty()
             self:FireCallbacks("OnLevelUpdate")
         end
     end
 
-    function OnCooldownsUpdate()
+    local function OnCooldownsUpdate()
         local dirty = false
         for cooldownType, cooldownData in pairs(self.cooldowns) do
             local wasOnCooldown = cooldownData.isOnCooldown
@@ -157,44 +157,49 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
         self:FireCallbacks("OnCooldownsUpdate")
     end
 
-    function OnCurrentCampaignChanged()
+    local function OnCurrentCampaignChanged()
         self:MarkDataDirty()
         self:FireCallbacks("OnCurrentCampaignChanged")
     end
 
-    function OnPlayerActivate()
+    local function OnPlayerActivate()
         UpdateGroupStatus()
         OnCooldownsUpdate()
     end
 
-    function OnTributeClubDataInitialized()
+    local function OnTributeClubDataInitialized()
         self:MarkDataDirty()
         self:FireCallbacks("OnTributeClubDataInitialized")
     end
 
-    function OnTributeCampaignDataInitialized()
+    local function OnTributeCampaignDataInitialized()
         self:MarkDataDirty()
         self:FireCallbacks("OnTributeCampaignDataInitialized")
     end
 
-    function OnTributeClubRankDataChanged()
+    local function OnTributeClubRankDataChanged()
         self:MarkDataDirty()
         self:FireCallbacks("OnTributeClubRankDataChanged")
     end
 
-    function OnTributeCampaignDataChanged()
+    local function OnTributeCampaignDataChanged()
         self:MarkDataDirty()
         self:FireCallbacks("OnTributeCampaignDataChanged")
     end
 
-        function OnTributeLeaderboardRankChanged()
+    local function OnTributeLeaderboardRankChanged()
         self:MarkDataDirty()
         self:FireCallbacks("OnTributeLeaderboardRankChanged")
     end
 
-    function OnHolidaysChanged()
+    local function OnHolidaysChanged()
         self:MarkDataDirty()
         self:FireCallbacks("OnHolidaysChanged")
+    end
+
+    local function OnQuestsChanged()
+        self:MarkDataDirty()
+        self:FireCallbacks("OnQuestsChanged")
     end
 
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, function(eventCode, ...) self:OnActivityFinderStatusUpdate(...) end)
@@ -216,6 +221,9 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CHAMPION_POINT_UPDATE, OnLevelUpdate)
 
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_HOLIDAYS_CHANGED, OnHolidaysChanged)
+
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_QUEST_ADDED, OnQuestsChanged)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_QUEST_REMOVED, OnQuestsChanged)
 
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_PLAYER_ACTIVATED, OnPlayerActivate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_GROUP_MEMBER_LEFT, UpdateGroupStatus)
@@ -326,6 +334,7 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
     --Determine lock status for each location
     local inAGroup = IsUnitGrouped("player")
     local isLeader = IsUnitGroupLeader("player")
+    local tributeLockText = ZO_IsTributeLocked() and ZO_GetTributeLockReasonTooltipString() or nil
 
     for activityType, locationsByActivity in pairs(self.sortedLocationsData) do
         local activityRequiresRoles = ZO_DoesActivityTypeRequireRoles(activityType)
@@ -363,6 +372,8 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                     else
                         location:SetLockReasonText(SI_LFG_LOCK_REASON_INVALID_AREA)
                     end
+                elseif location:IsTributeActivity() and tributeLockText then
+                    location:SetLockReasonText(tributeLockText)
                 elseif location:IsLockedByCollectible() then
                     local collectibleId = location:GetFirstLockingCollectible()
                     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)

@@ -30,6 +30,9 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
                         end
                         SCENE_MANAGER:HideCurrentScene()
                     end,
+        visible = function()
+            return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
+        end,
     })
 
     self:AddFurnitureListKeybind({    
@@ -45,6 +48,9 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
                         end
                         SCENE_MANAGER:HideCurrentScene()
                     end,
+        visible = function()
+            return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
+        end,
     })
 
     self:AddFurnitureListKeybind({    
@@ -66,6 +72,14 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
                             ZO_HousingFurnitureBrowser_Base.PutAwayNode(targetData.furnitureObject)
                         end
                     end,
+        visible = function()
+            local targetData = self.furnitureList.list:GetTargetData()
+            if targetData and targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+                return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
+            else
+                return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
+            end
+        end,
     })
 
     self:AddFurnitureListKeybind({
@@ -83,7 +97,7 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
             end
             local dataType = targetData.furnitureObject:GetDataType()
             return dataType == ZO_RECALLABLE_HOUSING_DATA_TYPE or dataType == ZO_HOUSING_PATH_NODE_DATA_TYPE
-        end
+        end,
     })
 
     self:AddFurnitureListKeybind({
@@ -96,7 +110,7 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
                     end,
         visible =   function()
                         local targetData = self.furnitureList.list:GetTargetData()
-                        return targetData and targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE and not targetData.furnitureObject:IsStartingPathNode()
+                        return targetData and targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE and not targetData.furnitureObject:IsStartingPathNode() and HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
                     end,
     })
 end

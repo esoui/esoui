@@ -15,14 +15,16 @@ URL_LINK_TYPE = "url"
 COLLECTIBLE_LINK_TYPE = "collectible"
 GUILD_LINK_TYPE = "guild"
 HELP_LINK_TYPE = "help"
+HOUSING_LINK_TYPE = "housing"
 
 ZO_VALID_LINK_TYPES_CHAT =
 {
-    [GUILD_LINK_TYPE] = true,
-    [ITEM_LINK_TYPE] = true,
     [ACHIEVEMENT_LINK_TYPE] = true,
     [COLLECTIBLE_LINK_TYPE] = true,
+    [GUILD_LINK_TYPE] = true,
     [HELP_LINK_TYPE] = true,
+    [HOUSING_LINK_TYPE] = true,
+    [ITEM_LINK_TYPE] = true,
 }
 
 function ZO_LinkHandler_InsertLink(link)
@@ -84,6 +86,11 @@ function ZO_LinkHandler_ParseLink(link)
         local linkStyle, data, text = link:match("|H(.-):(.-)|h(.-)|h")
         return text, linkStyle, zo_strsplit(':', data)
     end
+end
+
+function ZO_LinkHandler_ParseLinkData(link)
+    -- Discard the return values for link text, link style and link type
+    return select(4, ZO_LinkHandler_ParseLink(link))
 end
 
 function ZO_LinkHandler_CreatePlayerLink(displayOrCharacterName)

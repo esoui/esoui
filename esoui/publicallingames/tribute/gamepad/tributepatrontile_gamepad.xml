@@ -44,9 +44,23 @@
                     <Anchor point="TOP" />
                 </Texture>
 
-                <Label name="$(parent)Title" override="true" horizontalAlignment="CENTER" font="ZoFontGamepad36">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetY="-35"/>
+                <Label name="$(parent)Title" override="true" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetX="30" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="-30" offsetY="-35"/>
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontGamepad36",
+                                lineLimit = 2,
+                            },
+                            {
+                                font = "ZoFontGamepad27",
+                                lineLimit = 2,
+                            },
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
                 </Label>
             </Controls>
         </Control>

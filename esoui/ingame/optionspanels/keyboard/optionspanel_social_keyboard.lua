@@ -109,47 +109,15 @@ panelBuilder:AddSetting({
     header = SI_SOCIAL_OPTIONS_CHAT_COLORS,
 })
 
-panelBuilder:AddSetting({
-    controlName = "Options_Social_ChatColor_Zone_English",
-    settingType = SETTING_TYPE_CUSTOM,
-    settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_ENG,
-    header = SI_SOCIAL_OPTIONS_CHAT_COLORS,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Social_ChatColor_Zone_French",
-    settingType = SETTING_TYPE_CUSTOM,
-    settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_FRA,
-    header = SI_SOCIAL_OPTIONS_CHAT_COLORS,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Social_ChatColor_Zone_German",
-    settingType = SETTING_TYPE_CUSTOM,
-    settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_GER,
-    header = SI_SOCIAL_OPTIONS_CHAT_COLORS,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Social_ChatColor_Zone_Japanese",
-    settingType = SETTING_TYPE_CUSTOM,
-    settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_JPN,
-    header = SI_SOCIAL_OPTIONS_CHAT_COLORS,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Social_ChatColor_Zone_Russian",
-    settingType = SETTING_TYPE_CUSTOM,
-    settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_RUS,
-    header = SI_SOCIAL_OPTIONS_CHAT_COLORS,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Social_ChatColor_Zone_Spanish",
-    settingType = SETTING_TYPE_CUSTOM,
-    settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_SPA,
-    header = SI_SOCIAL_OPTIONS_CHAT_COLORS,
-})
+for language = OFFICIAL_LANGUAGE_ITERATION_BEGIN, OFFICIAL_LANGUAGE_ITERATION_END do
+    local chatInfo = ZO_OFFICIAL_LANGUAGE_TO_CHAT_INFO[language]
+    panelBuilder:AddSetting({
+        controlName = chatInfo.chatColorCustomSettingControlName,
+        settingType = SETTING_TYPE_CUSTOM,
+        settingId = chatInfo.chatColorCustomSetting,
+        header = SI_SOCIAL_OPTIONS_CHAT_COLORS,
+    })
+end
 
 panelBuilder:AddSetting({
     controlName = "Options_Social_ChatColor_NPC",

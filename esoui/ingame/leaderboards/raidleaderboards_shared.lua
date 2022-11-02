@@ -410,8 +410,7 @@ function ZO_RaidLeaderboardsManager_Shared:GenerateRequestData()
 end
 
 function ZO_RaidLeaderboardsManager_Shared:HandleWeeklyTurnover()
-    local isShowing = GAMEPAD_RAID_LEADERBOARD_FRAGMENT:IsShowing() or RAID_LEADERBOARD_FRAGMENT:IsShowing()
-    if isShowing and self.requestedRaidId == 0 then
+    if self:IsSystemShowing() and self.requestedRaidId == 0 then
         self:SendLeaderboardQuery()
     end
 end
@@ -421,8 +420,7 @@ function ZO_RaidLeaderboardsManager_Shared:HandleWeeklyInfoReceived()
         return
     end
 
-    local isShowing = GAMEPAD_RAID_LEADERBOARD_FRAGMENT:IsShowing() or RAID_LEADERBOARD_FRAGMENT:IsShowing()
-    if isShowing and self.selectedSubType.isWeekly then
+    if self:IsSystemShowing() and self.selectedSubType.isWeekly then
         local name = GetRaidOfTheWeekLeaderboardInfo(self.selectedSubType.raidCategory)
         local formattedName = zo_strformat(SI_RAID_LEADERBOARDS_WEEKLY_RAID, name)
         if IsInGamepadPreferredMode() then
@@ -439,4 +437,10 @@ function ZO_RaidLeaderboardsManager_Shared:HandleFilterDropdownChanged()
         return true
     end    
     return false
+end
+
+ZO_RaidLeaderboardsManager_Shared.GetFragment = ZO_RaidLeaderboardsManager_Shared:MUST_IMPLEMENT()
+
+function ZO_RaidLeaderboardsManager_Shared:IsSystemShowing()
+    return self:GetFragment():IsShowing()
 end

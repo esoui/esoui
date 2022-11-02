@@ -128,7 +128,11 @@ function ZO_CharacterCreateSelector_Gamepad:EnableFocus(enabled)
             local bannerText = self:GetBannerText(button)
             self.selectionName:SetText(bannerText)
         end
-        self.lastHighlight = self.currentHighlight
+
+        if self.currentHighlight ~= GAMEPAD_SELECTOR_IGNORE_POSITION then
+            self.lastHighlight = self.currentHighlight
+        end
+
         self:SetHighlight(GAMEPAD_SELECTOR_IGNORE_POSITION)
     end
 end
@@ -323,11 +327,13 @@ function ZO_CharacterCreateSelector_Gamepad:OnButtonHighlighted(buttonInfo)
         local title, description = self:GetInformationTooltipStrings(buttonInfo)
         if title ~= "" or description ~= "" then
             GAMEPAD_CHARACTER_CREATE_MANAGER:ShowInformationTooltip(title, description)
+            GAMEPAD_BUCKET_MANAGER:NarrateCurrentBucket()
             return
         end
     end
 
     GAMEPAD_CHARACTER_CREATE_MANAGER:HideInformationTooltip()
+    GAMEPAD_BUCKET_MANAGER:NarrateCurrentBucket()
 end
 
 --
@@ -360,6 +366,25 @@ function ZO_CharacterCreateAllianceSelector_Gamepad:EnableFocus(enabled)
     end
 
     ZO_CharacterCreateSelector_Gamepad.EnableFocus(self, enabled)
+end
+
+function ZO_CharacterCreateAllianceSelector_Gamepad:GetNarrationText()
+    local narrations = {}
+    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_CREATE_CHARACTER_ALLIANCE_LABEL)))
+
+    local isSelected = self.selectedPosition == self.currentHighlight
+    local currentButton = self:GetCurrentButton()
+    if currentButton then
+        table.insert(narrations, ZO_FormatRadioButtonNarrationText(self:GetBannerText(currentButton), isSelected))
+    end
+
+    local buttonInfo = self:GetButtonInfo(self.currentHighlight)
+    if buttonInfo then
+        if isSelected then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(buttonInfo.lore))
+        end
+    end
+    return narrations
 end
 
 --
@@ -462,6 +487,28 @@ function ZO_CharacterCreateRaceSelector_Gamepad:GetInformationTooltipStrings(but
     return title, description
 end
 
+function ZO_CharacterCreateRaceSelector_Gamepad:GetNarrationText()
+    local narrations = {}
+    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_CREATE_CHARACTER_RACE_LABEL)))
+
+    local isSelected = self.selectedPosition == self.currentHighlight
+    local currentButton = self:GetCurrentButton()
+    if currentButton then
+        table.insert(narrations, ZO_FormatRadioButtonNarrationText(self:GetBannerText(currentButton), isSelected))
+    end
+
+    local buttonInfo = self:GetButtonInfo(self.currentHighlight)
+    if buttonInfo then
+        local tooltipTitle, tooltipDescription = self:GetInformationTooltipStrings(buttonInfo)
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(tooltipTitle))
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(tooltipDescription))
+        if isSelected then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(buttonInfo.lore))
+        end
+    end
+    return narrations
+end
+
 --
 -- Character Creation Class
 --
@@ -518,4 +565,26 @@ function ZO_CharacterCreateClassSelector_Gamepad:GetInformationTooltipStrings(bu
     end
 
     return title, description
+end
+
+function ZO_CharacterCreateClassSelector_Gamepad:GetNarrationText()
+    local narrations = {}
+    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_CREATE_CHARACTER_GAMEPAD_CLASS_LABEL)))
+
+    local isSelected = self.selectedPosition == self.currentHighlight
+    local currentButton = self:GetCurrentButton()
+    if currentButton then
+        table.insert(narrations, ZO_FormatRadioButtonNarrationText(self:GetBannerText(currentButton), isSelected))
+    end
+
+    local buttonInfo = self:GetButtonInfo(self.currentHighlight)
+    if buttonInfo then
+        local tooltipTitle, tooltipDescription = self:GetInformationTooltipStrings(buttonInfo)
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(tooltipTitle))
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(tooltipDescription))
+        if isSelected then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(buttonInfo.lore))
+        end
+    end
+    return narrations
 end

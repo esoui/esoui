@@ -1,4 +1,5 @@
-SOUNDS = {
+SOUNDS =
+{
     -- Button sounds
     DEFAULT_CLICK                   = "Click",
     COMBO_CLICK                     = "Click_Combo",
@@ -238,6 +239,10 @@ SOUNDS = {
 
     -- Undaunted key sounds
     UNDAUNTED_KEY_TRANSACT           = "Undaunted_Transact",
+
+    -- Event Ticket sounds
+    EVENT_TICKET_ACQUIRE            = "EventTicket_Acquire",
+    EVENT_TICKET_TRANSACT           = "EventTicket_Transact",
 
     --Justice sounds
     JUSTICE_STATE_CHANGED           = "Justice_StateChanged",
@@ -1013,6 +1018,7 @@ SOUNDS = {
     TRIBUTE_AGENT_HEALED = "Tribute_AgentHealed",
     TRIBUTE_AGENT_KNOCKED_OUT = "Tribute_AgentKnockedOut",
     TRIBUTE_COMBO_TRIGGERED = "Tribute_ComboTriggered",
+    TRIBUTE_TRIGGER_TRIGGERED = "Tribute_TriggerTriggered",
     TRIBUTE_PATRON_DRAFTED = "Tribute_PatronDrafted",
     TRIBUTE_MECHANIC_CHOSEN = "Tribute_MechanicChosen",
     TRIBUTE_CARD_HIGHLIGHTED = "Tribute_CardHighlighted",

@@ -31,10 +31,10 @@ ADVANCED_STATS_FRAGMENT_GROUP =
 
 local helpModalUnderlayFragment = ZO_SimpleSceneFragment:New(HelpOverlayModal)
 helpModalUnderlayFragment:RegisterCallback("StateChange", function(oldState, newState)
-    local wasVisible = oldState ~= SCENE_FRAGMENT_HIDDEN
-    local isVisible = newState ~= SCENE_FRAGMENT_HIDDEN
-    if wasVisible ~= isVisible then
-        HELP_MANAGER:OnOverlayVisibilityChanged(isVisible)
+    if newState == SCENE_FRAGMENT_SHOWING then
+        HELP_MANAGER:GetOverlaySyncObject():Show()
+    elseif newState == SCENE_FRAGMENT_HIDDEN then
+        HELP_MANAGER:GetOverlaySyncObject():Hide()
     end
 end)
 

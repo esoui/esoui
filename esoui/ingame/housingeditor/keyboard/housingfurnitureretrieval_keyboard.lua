@@ -30,6 +30,9 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
                 end
                 return true
             end,
+            visible = function()
+                return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
+            end
         },
         {
             name = function()
@@ -55,6 +58,14 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
                     return false, GetString(SI_HOUSING_BROWSER_MUST_CHOOSE_TO_PUT_AWAY)
                 end
                 return true
+            end,
+            visible = function()
+                local mostRecentlySelectedData = self:GetMostRecentlySelectedData()
+                if mostRecentlySelectedData and mostRecentlySelectedData:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+                    return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
+                else
+                    return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
+                end
             end,
         },
         {
@@ -87,6 +98,9 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
                     return false, GetString(SI_HOUSING_BROWSER_MUST_CHOOSE_TO_MODIFY)
                 end
                 return true
+            end,
+            visible = function()
+                return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
             end
         },
         {
@@ -109,7 +123,7 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
             end,
             visible = function()
                 local recentlySelectedData = self:GetMostRecentlySelectedData()
-                return recentlySelectedData and recentlySelectedData:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE
+                return recentlySelectedData and recentlySelectedData:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE and not recentlySelectedData:IsStartingPathNode() and HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
             end,
         },
     }

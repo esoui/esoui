@@ -15,7 +15,8 @@ local GUILD_HUB_DISPLAY_MODE =
     SINGLE_GUILD_LIST = 2,
 }
 
-local GUILD_HUB_SINGLE_GUILD_LIST_OPTION = {
+local GUILD_HUB_SINGLE_GUILD_LIST_OPTION =
+{
     ROSTER = 1,
     RANKS = 2,
     RECRUITMENT = 3,
@@ -50,6 +51,12 @@ end
 function ZO_GamepadGuildHub:Initialize(control)
     GAMEPAD_GUILD_HUB_SCENE = ZO_Scene:New(GAMEPAD_GUILD_HUB_SCENE_NAME, SCENE_MANAGER)
     local ACTIVATE_ON_SHOW = true
+
+    self.isHidden = true
+    self.activeLinksGuildId = nil
+    self.activeLinks = ZO_GamepadLinks:New()
+    self.activeLinks:SetKeybindAlignment(KEYBIND_STRIP_ALIGN_CENTER)
+
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_GUILD_HUB_SCENE)
 end
 
@@ -97,6 +104,8 @@ function ZO_GamepadGuildHub:PerformUpdate()
 end
 
 function ZO_GamepadGuildHub:OnSceneShowing(oldState, newState)
+    self.isHidden = nil
+
     self.displayMode = self.enterInSingleGuildList and GUILD_HUB_DISPLAY_MODE.SINGLE_GUILD_LIST or GUILD_HUB_DISPLAY_MODE.GUILDS_LIST
     self.enterInSingleGuildList = false
 
@@ -107,8 +116,11 @@ function ZO_GamepadGuildHub:OnSceneShowing(oldState, newState)
 
     self:PerformDeferredInitializationHub()
     self:Update()
+    self:UpdateActiveLinks()
 
     local OnRefreshMatchGuildId = function(_, guildId)
+        self:InvalidateGuildLinks(guildId)
+
         if self.optionsGuildId == guildId then
             self:Update()
         end
@@ -130,6 +142,8 @@ function ZO_GamepadGuildHub:OnSceneShowing(oldState, newState)
 end
 
 function ZO_GamepadGuildHub:OnSceneHidden(oldState, newState)
+    self.isHidden = true
+
     local control = self.control
     control:UnregisterForEvent(EVENT_GUILD_DATA_LOADED)
     control:UnregisterForEvent(EVENT_PLAYER_STATUS_CHANGED)
@@ -141,6 +155,8 @@ function ZO_GamepadGuildHub:OnSceneHidden(oldState, newState)
     control:UnregisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED)
     control:UnregisterForEvent(EVENT_GUILD_KEEP_CLAIM_UPDATED)
     control:UnregisterForEvent(EVENT_GUILD_TRADER_HIRED_UPDATED)
+
+    self:UpdateActiveLinks()
 end
 
 function ZO_GamepadGuildHub:UpdateLists()
@@ -159,7 +175,10 @@ function ZO_GamepadGuildHub:UpdateContent()
     self:RefreshCreateGuildExplanation()
     self:RefreshGuildBrowserExplanation()
     self:RefreshGuildInfo()
+    self:UpdateKeybinds()
+end
 
+function ZO_GamepadGuildHub:UpdateKeybinds()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
@@ -229,6 +248,7 @@ function ZO_GamepadGuildHub:InitializeChangeMotdDialog()
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_MOTD_LENGTH)
                         control.editBoxControl:SetText(self.selectedMotd)
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 
@@ -348,6 +368,7 @@ function ZO_GamepadGuildHub:InitializeChangeAboutUsDialog()
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_DESCRIPTION_LENGTH)
                         control.editBoxControl:SetText(self.selectedAboutUs)
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 
@@ -506,6 +527,7 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
 
                         dropDown:SetSortsItems(false)
                         dropDown:ClearItems()
+                        SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropDown)
 
                         for i = 1, NUM_ALLIANCES do
                             local allianceText = zo_iconTextFormat(GetLargeAllianceSymbolIcon(i), 32, 32, GetAllianceName(i))
@@ -521,7 +543,9 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
                     callback = function()
                         self.allianceDropDown:Activate()
                         self.allianceDropDown:SetHighlightedItem(self.selectedAllianceIndex)
-                    end
+                    end,
+
+                    narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
                 },
             },
 
@@ -555,7 +579,9 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
                         local targetControl = dialog.entryList:GetTargetControl()
                         targetControl.editBoxControl:TakeFocus()
                         UpdateSelectedName(self.selectedName)
-                    end
+                    end,
+
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
 
                 controlReset = function(control, pool)
@@ -769,7 +795,7 @@ end
 function ZO_GamepadGuildHub:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor = { 
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
-        -- select or create guild
+        -- Select or Create Guild
         {
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
 
@@ -804,7 +830,7 @@ function ZO_GamepadGuildHub:InitializeKeybindStripDescriptors()
             end,
         },
 
-        -- back
+        -- Back
         {
             name = GetString(SI_GAMEPAD_BACK_OPTION),
             keybind = "UI_SHORTCUT_NEGATIVE",
@@ -826,6 +852,7 @@ end
 -----------------
 -- Option List --
 -----------------
+
 function ZO_GamepadGuildHub:SetupList(list)
     list:AddDataTemplate(GAMEPAD_GUILD_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, EqualityFunction)
     list:AddDataTemplateWithHeader(GAMEPAD_GUILD_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, EqualityFunction, "ZO_GamepadMenuEntryHeaderTemplate")
@@ -1042,24 +1069,31 @@ function ZO_GamepadGuildHub:OnTargetChanged(list, selectedData, oldSelectedData)
             end
         end
     end
+
+    self:UpdateActiveLinks()
 end
 
 function ZO_GamepadGuildHub:RefreshGuildList()
     self.guildList:Clear()
 
     -- Entries
+    local entryIndex = 0
     local numGuilds = GetNumGuilds()
-    for i = 1, numGuilds do
-        local guildId = GetGuildId(i)
-        local guildName = GetGuildName(guildId)
-        local guildAlliance = GetGuildAlliance(guildId)
 
-        local data = ZO_GamepadEntryData:New(guildName, GetLargeAllianceSymbolIcon(guildAlliance))
-        data:SetFontScaleOnSelection(false)
-        data:SetIconTintOnSelection(true)
-        data.guildId = guildId
+    for guildIndex = 1, numGuilds do
+        local guildId = GetGuildId(guildIndex)
+
         if self.filteredGuildId ~= guildId then
-            if i == 1 then
+            local guildName = GetGuildName(guildId)
+            local guildAlliance = GetGuildAlliance(guildId)
+            entryIndex = entryIndex + 1
+
+            local data = ZO_GamepadEntryData:New(guildName, GetLargeAllianceSymbolIcon(guildAlliance))
+            data:SetFontScaleOnSelection(false)
+            data:SetIconTintOnSelection(true)
+            data.guildId = guildId
+
+            if entryIndex == 1 then
                 data:SetHeader(GetString(SI_GAMEPAD_GUILD_LIST_MEMBERSHIP_HEADER))
                 self.guildList:AddEntryWithHeader(GAMEPAD_GUILD_LIST_ENTRY, data)
             else
@@ -1093,4 +1127,58 @@ function ZO_GamepadGuildHub:RefreshGuildList()
     self.guildList:Commit()
 
     self.filteredGuildId = nil
+end
+
+------------------
+-- Active Links --
+------------------
+
+function ZO_GamepadGuildHub:InvalidateGuildLinks(guildId)
+    if not guildId or self.activeLinksGuildId ~= guildId then
+        return
+    end
+
+    self.activeLinksGuildId = nil
+    self.activeLinks:ResetLinks()
+end
+
+function ZO_GamepadGuildHub:UpdateActiveLinks()
+    if self.isHidden or self.displayGuildBrowser or self.displayedCreateGuild then
+        -- The Guild Hub is not visible, the Create a Guild section is open or the Guild Finder section is open.
+        self.activeLinks:Hide()
+        return
+    end
+
+    local targetData = self.guildList:GetTargetData()
+    local guildId = targetData and targetData.guildId or nil
+
+    if not guildId then
+        -- No guild is currently selected.
+        self.activeLinksGuildId = nil
+        self.activeLinks:ResetLinks()
+        return
+    end
+
+    if guildId == self.activeLinksGuildId then
+        -- The active links are those of the currently selected guild.
+        self.activeLinks:Show()
+        return
+    end
+
+    -- Extract and register any links found in the Guild's
+    -- Message of the Day and Description (About Us) text.
+    self.activeLinks:ResetLinks()
+
+    local motdText = GetGuildMotD(guildId)
+    if motdText ~= "" then
+       self.activeLinks:AddLinksFromText(motdText)
+    end
+
+    local descriptionText = GetGuildDescription(guildId)
+    if descriptionText ~= "" then
+        self.activeLinks:AddLinksFromText(descriptionText)
+    end
+
+    self.activeLinksGuildId = guildId
+    self.activeLinks:Show()
 end

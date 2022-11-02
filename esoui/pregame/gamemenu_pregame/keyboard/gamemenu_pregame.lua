@@ -39,6 +39,10 @@ function ZO_GameMenu_PreGame_Keyboard:Initialize(control)
     OnHorizontalMenuItemSetup(quitOption, data)
 end
 
+function ZO_GameMenu_PreGame_Keyboard:GetScene()
+    return self.scene
+end
+
 function ZO_GameMenu_PreGame_Keyboard:BuildMenu()
     self.horizontalMenu:Reset()
 

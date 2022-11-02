@@ -168,7 +168,11 @@ function ZO_CharacterCreateBucket_Keyboard:AddSubCategories()
             subCategoryContainer:SetHidden(false)
             table.insert(self.subcategoryContainers, subCategoryContainer)
 
-            self:AddControl(subCategoryContainer, nil, nil, nil, subCatData.anchorYOffsetOverride)
+            local NO_UPDATE_FUNCTION = nil
+            local NO_RANDOMIZE_FUNCTION = nil
+            local NO_SUBCATEGORY_ID = nil
+            local NO_NARRATION_TEXT = nil
+            self:AddControl(subCategoryContainer, NO_UPDATE_FUNCTION, NO_RANDOMIZE_FUNCTION, NO_SUBCATEGORY_ID, NO_NARRATION_TEXT, subCatData.anchorYOffsetOverride)
         end
     end
 end
@@ -201,7 +205,7 @@ function ZO_CharacterCreateBucket_Keyboard:RemoveUnusedSubCategories()
     end
 end
 
-function ZO_CharacterCreateBucket_Keyboard:AddControl(control, updateFn, randomizeFn, subCategoryId, anchorYOffsetOverride)
+function ZO_CharacterCreateBucket_Keyboard:AddControl(control, updateFn, randomizeFn, subCategoryId, narrationText, anchorYOffsetOverride)
     control.bucket = self
     control:ClearAnchors()
     control:SetHidden(false)

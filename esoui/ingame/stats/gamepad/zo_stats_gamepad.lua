@@ -743,6 +743,9 @@ do
         self.titleEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.TITLE
         self.titleEntry.statsObject = self
         self.titleEntry:SetHeader(GetString(SI_STATS_TITLE))
+        self.titleEntry.narrationText = function(entryData, entryControl)
+            return self.currentTitleDropdown:GetNarrationText()
+        end
 
         --Advanced Stats Entry
         self.advancedStatsEntry = ZO_GamepadEntryData:New(GetString(SI_STATS_ADVANCED_ATTRIBUTES))
@@ -1188,9 +1191,11 @@ function ZO_GamepadStats:InitializeAdvancedAttributesPanel()
          local _, flatValue, percentValue = GetAdvancedStatValue(data.statType)
 
          if data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT then
+            data.formattedValue = tostring(flatValue)
             control.valueLabel:SetText(flatValue)
          elseif data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT or data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
-            control.valueLabel:SetText(zo_strformat(SI_STAT_VALUE_PERCENT, percentValue))
+            data.formattedValue = zo_strformat(SI_STAT_VALUE_PERCENT, percentValue)
+            control.valueLabel:SetText(data.formattedValue)
             if data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
                 data.flatValue = flatValue
             end
@@ -1203,15 +1208,18 @@ function ZO_GamepadStats:InitializeAdvancedAttributesPanel()
 
     local function SetupFlatValueEntry(control, data, list)
         local _, flatValue = GetAdvancedStatValue(data.statType)
+        data.formattedValue = tostring(flatValue)
         control.valueLabel:SetText(flatValue)
     end
 
     local function SetupPercentValueEntry(control, data, list)
         local _, _, percentValue = GetAdvancedStatValue(data.statType)
-        control.valueLabel:SetText(zo_strformat(SI_STAT_VALUE_PERCENT, percentValue))
+        data.formattedValue = zo_strformat(SI_STAT_VALUE_PERCENT, percentValue)
+        control.valueLabel:SetText(data.formattedValue)
     end
 
     local function SetupHeaderEntry(control, data, list)
+        data.formattedValue = nil
         control.nameLabel:SetText(zo_strformat(SI_STAT_NAME_FORMAT, data.displayName))
     end
 
@@ -1270,6 +1278,19 @@ function ZO_GamepadStats:SetupAdvancedStats()
                 flatDescription = flatValueDescription, --The description used for the flat value tooltip window when the stat is split into both flat and percent
                 percentDescription = percentValueDescription, --The description used for the percent value tooltip window when the stat is split into both flat and percent
                 formatType = statFormatType, --How are we formatting this stat?
+                narrationText = function(entryData) --How are we narrating this stat?
+                    --If we do not have a formatted value, just use the display name
+                    local narration = entryData.displayName
+                    if entryData.formattedValue then
+                        --Stats with entries for both flat and percent narrates both the name of the stat, and "Flat" or "Percent" depending on which entry is selected.
+                        if entryData.secondaryDisplayName then
+                            narration = zo_strformat(SI_STATS_ADVANCED_SCREEN_NARRATION_MULTI_ENTRY_FORMATTER, entryData.displayName, entryData.secondaryDisplayName, entryData.formattedValue)
+                        else
+                            narration = zo_strformat(SI_STATS_ADVANCED_SCREEN_NARRATION_FORMATTER, entryData.displayName, entryData.formattedValue)
+                        end
+                    end
+                    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(narration)
+                end,
             }
             table.insert(categoryData.stats, statData)
         end
@@ -1301,7 +1322,9 @@ function ZO_GamepadStats:SetupAdvancedStats()
 
                 --Overwrite the flat entry and percent entry descriptions with the more specific ones
                 flatEntryData.description = statEntry.flatDescription
+                flatEntryData.secondaryDisplayName = GetString(SI_STATS_ADVANCED_VALUE_TYPE_FLAT)
                 percentEntryData.description = statEntry.percentDescription
+                percentEntryData.secondaryDisplayName = GetString(SI_STATS_ADVANCED_VALUE_TYPE_PERCENT)
 
                 --Add the entries
                 self.advancedAttributesGridList:AddEntry(categoryEntryData, "ZO_AdvancedAttributes_CategoryHeader_Template_Gamepad")
@@ -1465,6 +1488,7 @@ end
 function ZO_GamepadStatTitleRow_Setup(control, data, selected, selectedDuringRebuild, enabled, activated)
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
     control.dropdown:SetSortsItems(false)
+    control.dropdown:SetName(GetString(SI_STATS_TITLE))
 
     data.statsObject:SetCurrentTitleDropdown(control.dropdown)
     data.statsObject:UpdateTitleDropdownTitles(control.dropdown)
@@ -1499,6 +1523,9 @@ function ZO_GamepadStatAttributeRow_Setup(control, data, selected, selectedDurin
     local function onValueChangedCallback(points, addedPoints)
         data.screen:SetAddedPoints(control.attributeType, addedPoints)
         SetAttributeText(points, addedPoints)
+        if data.onValueChangedCallback then
+            data.onValueChangedCallback(data, control)
+        end
     end
 
     local addedPoints = data.screen:GetAddedPoints(data.attributeType)

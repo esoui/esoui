@@ -1,5 +1,18 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_EnchantingInventoryComponentRow" inherits="ZO_CraftingInventoryComponentRow" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS" override="true">
+                    <Dimensions x="210" />
+                </Label>
+                
+                <Label name="$(parent)Level" maxLineCount="1" font="ZoFontGameShadow" horizontalAlignment="RIGHT" hidden="true">
+                    <Dimensions x="60" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)SellPrice" relativePoint="LEFT" offsetX="-45" />
+                </Label>
+            </Controls>
+        </Control>
+
         <Button name="ZO_EnchantingRuneCraftingSlot" inherits="ZO_CraftingSlot" virtual="true">
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontWinH4" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
@@ -102,6 +115,18 @@
 
                         <Control name="$(parent)SortBy" override="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)ButtonDivider" relativePoint="BOTTOMLEFT" offsetX="-13" />
+                            <Controls>
+                                <Control name="$(parent)Name" override="true">
+                                    <Dimensions x="226" />
+                                </Control>
+                                <Control name="$(parent)CraftLevel" inherits="ZO_SortHeader" hidden="true">
+                                    <Dimensions x="70" y="20" />
+                                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="45" />
+                                    <OnInitialized>
+                                        ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_CRAFT_LEVEL, TEXT_ALIGN_LEFT, "level", ZO_SORT_ORDER_DOWN)
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
                         </Control>
 
                         <Control name="$(parent)Backpack" override="true">

@@ -79,7 +79,11 @@ local function SellItemSetupFunction(control, data, selected, selectedDuringRebu
 end
 
 function ZO_GamepadTradingHouse_Sell:OnSelectionChanged(list, selectedData, oldSelectedData)
-    self:UpdateItemSelectedTooltip(selectedData) 
+    self:UpdateItemSelectedTooltip(selectedData)
+
+    if self.itemList.onRefreshListCallback then
+        self.itemList.onRefreshListCallback(self.itemList.list)
+    end
 end
 
 -- Overriden functions

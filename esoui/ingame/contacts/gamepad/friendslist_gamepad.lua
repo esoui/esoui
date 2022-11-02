@@ -168,6 +168,37 @@ function FriendsList_Gamepad:BuildOptionsList()
     self:AddInviteToGuildOptionTemplates()
 end
 
+function FriendsList_Gamepad:GetSelectedNarrationText()
+    local ROW_ENTRY_PAUSE_TIME_MS = 100
+    local narration = {}
+    local entryData = self:GetSelectedData()
+    if entryData then
+        if entryData.status then
+            local narrationStrings = { GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_STATUS), GetString("SI_PLAYERSTATUS", entryData.status) }
+            table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+        end
+
+        --Stadia has an extra column
+        if IsHeronUI() and entryData.isHeronUser then
+            table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_HERON_USER_INFO)))
+        end
+
+        if entryData.displayName then
+            local narrationStrings = { ZO_GetPlatformAccountLabel(), ZO_FormatUserFacingDisplayName(entryData.displayName) }
+            table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+        end
+
+        --Playstation does not show any of the character fields
+        local hideCharacterFields = ZO_IsPlaystationPlatform() or not entryData.hasCharacter or (zo_strlen(entryData.characterName) <= 0)
+        if not hideCharacterFields then
+            local characterNarration = self:GetCharacterFieldsNarration(entryData)
+            ZO_CombineNumericallyIndexedTables(narration, characterNarration)
+        end
+    end
+
+    return narration
+end
+
 -- Overriding from ZO_SocialOptionsDialogGamepad
 function FriendsList_Gamepad:GetDialogData()
     local data = ZO_SocialOptionsDialogGamepad.GetDialogData(self)

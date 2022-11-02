@@ -4,8 +4,8 @@ ZO_GamepadGuildHome = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ZO_GamepadGuildHome:Initialize(control)
     GAMEPAD_GUILD_HOME_SCENE = ZO_Scene:New(GAMEPAD_GUILD_HOME_SCENE_NAME, SCENE_MANAGER)
-    local ACTIVATE_ON_SHOW = true
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_GUILD_HOME_SCENE)
+    local DONT_ACTIVATE_ON_SHOW = false
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, DONT_ACTIVATE_ON_SHOW, GAMEPAD_GUILD_HOME_SCENE)
 
     self.headerData = {}
 end
@@ -164,7 +164,7 @@ function ZO_GamepadGuildHome:RemoveCurrentPage()
     end
 end
 
-function ZO_GamepadGuildHome:SetCurrentPage(fragment, screenObject)
+function ZO_GamepadGuildHome:SetCurrentPage(fragment, screenObject, activateCurrentList)
     if self.currentFragment ~= fragment then
         self:RemoveCurrentPage()
         self.currentFragment = fragment
@@ -187,7 +187,11 @@ function ZO_GamepadGuildHome:SetCurrentPage(fragment, screenObject)
 
             self.itemList:Clear()
             GAMEPAD_GUILD_HOME_SCENE:AddFragment(fragment)
-            self:SetCurrentList(self.itemList)
+
+            --Treat nil as true
+            if activateCurrentList ~= false then
+                self:SetCurrentList(self.itemList)
+            end
         end
 
         self:RefreshHeader()
@@ -195,7 +199,8 @@ function ZO_GamepadGuildHome:SetCurrentPage(fragment, screenObject)
 end
 
 function ZO_GamepadGuildHome:ShowRoster()
-    self:SetCurrentPage(GUILD_ROSTER_GAMEPAD:GetListFragment(), GUILD_ROSTER_MANAGER)
+    local DONT_ACTIVATE_CURRENT_LIST = false
+    self:SetCurrentPage(GUILD_ROSTER_GAMEPAD:GetListFragment(), GUILD_ROSTER_MANAGER, DONT_ACTIVATE_CURRENT_LIST)
 end
 
 function ZO_GamepadGuildHome:ShowRanks()
@@ -215,7 +220,8 @@ function ZO_GamepadGuildHome:ShowRecruitment()
 end
 
 function ZO_GamepadGuildHome:ShowWeeklyBids()
-    self:SetCurrentPage(GUILD_WEEKLY_BIDS_GAMEPAD:GetListFragment(), GUILD_WEEKLY_BIDS_GAMEPAD)
+    local DONT_ACTIVATE_CURRENT_LIST = false
+    self:SetCurrentPage(GUILD_WEEKLY_BIDS_GAMEPAD:GetListFragment(), GUILD_WEEKLY_BIDS_GAMEPAD, DONT_ACTIVATE_CURRENT_LIST)
 end
 
 --------------------

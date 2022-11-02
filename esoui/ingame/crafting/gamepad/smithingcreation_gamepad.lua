@@ -80,7 +80,6 @@ function ZO_GamepadSmithingCreation:Initialize(panelControl, floatingControl, ow
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             local tabBarEntries = self:GenerateTabBarEntries()
             self.focus:Activate()
-            self.focus:SetFocusByIndex(self.focus:GetFocus()) -- somehow this fixes the "move focus by 2 the first time" issue when entering the screen...remove when lower-level system fixed
 
             self.owner:SetEnableSkillBar(true)
 
@@ -481,6 +480,8 @@ do
         else
             self.focus:SetFocusByIndex(1)
         end
+        --Make sure the focus we set is valid
+        self.focus:ValidateFocus()
     end
 
     function ZO_GamepadSmithingCreation:InitializeScrollPanel()

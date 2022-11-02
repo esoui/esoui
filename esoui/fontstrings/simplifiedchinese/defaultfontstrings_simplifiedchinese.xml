@@ -1,0 +1,77 @@
+<GuiXml>
+    <!-- Faces -->
+    <String name="MEDIUM_FONT" value="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf" />
+    <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/Univers57.otf"/>
+    <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.otf"/>
+    <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
+
+    <String name="BOLD_FONT" value="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf" />
+    <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/Univers67.otf"/>
+    <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/Univers67Cyrillic-CondensedBold.otf"/>
+    <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
+
+    <String name="CHAT_FONT" value="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf" />
+    <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/Univers57.otf"/>
+    <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.otf"/>
+    <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWUDC_70-M.ttf"/>
+
+    <String name="GAMEPAD_LIGHT_FONT" value="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf" />
+    <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/FTN47.otf"/>
+    <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
+
+    <String name="GAMEPAD_MEDIUM_FONT" value="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf" />
+    <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/FTN57.otf"/>
+    <BackupFont originalFont="$(GAMEPAD_MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
+
+    <String name="GAMEPAD_BOLD_FONT" value="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf" />
+    <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/FTN87.otf"/>
+    <BackupFont originalFont="$(GAMEPAD_BOLD_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
+
+    <String name="ANTIQUE_FONT" value="EsoUI/Common/Fonts/MYoyoPRC-Medium.otf" />
+
+    <String name="HANDWRITTEN_FONT" value="EsoUI/Common/Fonts/MYoyoPRC-Medium.otf" />
+
+    <String name="STONE_TABLET_FONT" value="EsoUI/Common/Fonts/MYoyoPRC-Medium.otf" />
+
+    <!-- Sizes -->
+    <String name="KB_8" value="8"/>
+    <String name="KB_9" value="9"/>
+    <String name="KB_10" value="9"/>
+    <String name="KB_11" value="9"/>
+    <String name="KB_12" value="10"/>
+    <String name="KB_13" value="12"/>
+    <String name="KB_14" value="12"/>
+    <String name="KB_15" value="13"/>
+    <String name="KB_16" value="15"/>
+    <String name="KB_17" value="15"/>
+    <String name="KB_18" value="16"/>
+    <String name="KB_19" value="17"/>
+    <String name="KB_20" value="18"/>
+    <String name="KB_21" value="18"/>
+    <String name="KB_22" value="19"/>
+    <String name="KB_23" value="20"/>
+    <String name="KB_24" value="22"/>
+    <String name="KB_25" value="23"/>
+    <String name="KB_26" value="24"/>
+    <String name="KB_28" value="25"/>
+    <String name="KB_30" value="27"/>
+    <String name="KB_32" value="29"/>
+    <String name="KB_34" value="31"/>
+    <String name="KB_36" value="32"/>
+    <String name="KB_40" value="36"/>
+    <String name="KB_48" value="43"/>
+    <String name="KB_54" value="49"/>
+
+    <String name="GP_18" value="14"/>
+    <String name="GP_20" value="15"/>
+    <String name="GP_22" value="17"/>
+    <String name="GP_25" value="20"/>
+    <String name="GP_27" value="21"/>
+    <String name="GP_34" value="28"/>
+    <String name="GP_36" value="30"/>
+    <String name="GP_42" value="34"/>
+    <String name="GP_45" value="36"/>
+    <String name="GP_48" value="38"/>
+    <String name="GP_54" value="42"/>
+    <String name="GP_61" value="50"/>
+</GuiXml>

@@ -6,7 +6,6 @@ ZO_FullscreenEffectFragment = ZO_SceneFragment:Subclass()
 
 function ZO_FullscreenEffectFragment:New(effectType, ...)
     local fragment = ZO_SceneFragment.New(self)
-    fragment:SetCategory(FRAGMENT_CATEGORY_FULLSCREEN_EFFECT)
     fragment.effectType = effectType
     fragment.params = {...}
     fragment:SetHideOnSceneHidden(true)

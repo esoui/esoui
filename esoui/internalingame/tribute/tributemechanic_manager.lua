@@ -53,7 +53,7 @@ local g_BounceEase = ZO_GenerateCubicBezierEase(0.31, 1.2, 0.83, 1.1)
 -- ZO_TributeMechanicTile --
 ----------------------------
 
-ZO_TributeMechanicTile = ZO_Tribute_PooledObject:Subclass()
+ZO_TributeMechanicTile = ZO_PooledObject:Subclass()
 
 function ZO_TributeMechanicTile:Initialize(control)
     self.control = control
@@ -193,11 +193,12 @@ function ZO_TributeMechanicTile:Reset()
     self.comboNumber = nil
     self.isResolved = nil
     self.mechanicIndex = nil
-    self.mechanicTrigger = nil
+    self.mechanicActivationSource = nil
     self.mechanicType = nil
     self.param1 = nil
     self.param2 = nil
     self.param3 = nil
+    self.triggerId = nil
     self.predecessorTileControl = nil
     self.quantity = nil
 
@@ -223,11 +224,11 @@ function ZO_TributeMechanicTile:SetPosition(offsetX, offsetY)
     end
 end
 
-function ZO_TributeMechanicTile:Setup(parentControl, cardInstanceId, mechanicTrigger, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
+function ZO_TributeMechanicTile:Setup(parentControl, cardInstanceId, mechanicActivationSource, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
     self.cardInstanceId = cardInstanceId
     self.isLocalPlayerOwner = isLocalPlayerOwner
     self.mechanicIndex = mechanicIndex
-    self.mechanicTrigger = mechanicTrigger
+    self.mechanicActivationSource = mechanicActivationSource
     self.isResolved = isResolved
     self:SetQuantity(quantity)
 
@@ -235,16 +236,28 @@ function ZO_TributeMechanicTile:Setup(parentControl, cardInstanceId, mechanicTri
     local cardData = ZO_TributeCardData:New(patronDefId, cardDefId)
     local patronData = cardData:GetPatronData()
     local unusedQuantity = nil
-    self.mechanicType, unusedQuantity, self.comboNumber, self.param1, self.param2, self.param3 = GetTributeCardMechanicInfo(cardDefId, self.mechanicTrigger, self.mechanicIndex)
+    self.mechanicType, unusedQuantity, self.comboNumber, self.param1, self.param2, self.param3, self.triggerId = GetTributeCardMechanicInfo(cardDefId, self.mechanicActivationSource, self.mechanicIndex)
 
     local digitsSuffix = quantity >= 10 and "Double" or "Single"
-    local triggerSuffix = mechanicTrigger == TRIBUTE_MECHANIC_TRIGGER_COMBO and "Combo" or "Activation"
-    local mechanicControlTemplate = string.format("ZO_TributeCard_MechanicContainer_Small_%sDigit_%s_Style", digitsSuffix, triggerSuffix)
+    local activationSourceSuffix
+    if mechanicActivationSource == TRIBUTE_MECHANIC_ACTIVATION_SOURCE_COMBO then
+        activationSourceSuffix = "Combo"
+    elseif self.triggerId ~= 0 then
+        activationSourceSuffix = "Trigger"
+    else
+        activationSourceSuffix = "Activation"
+    end
+    local mechanicControlTemplate = string.format("ZO_TributeCard_MechanicContainer_Small_%sDigit_%s_Style", digitsSuffix, activationSourceSuffix)
     ApplyTemplateToControl(self.mechanicControl, mechanicControlTemplate)
     self.mechanicTypeIconTexture:SetTexture(self:GetIconTextureFile())
 
-    local suitAtlasImage, suitAtlasGlowImage = patronData:GetSuitAtlas(cardData:GetCardType())
-    self.patronTexture:SetTexture(suitAtlasImage)
+    if self.triggerId ~= 0 then
+        self.patronTexture:SetHidden(true)
+    else
+        local suitAtlasImage, suitAtlasGlowImage = patronData:GetSuitAtlas(cardData:GetCardType())
+        self.patronTexture:SetTexture(suitAtlasImage)
+        self.patronTexture:SetHidden(false)
+    end
 
     local portraitImage = cardData:GetPortrait()
     self.portraitTexture:SetTexture(portraitImage)
@@ -279,7 +292,7 @@ function ZO_TributeMechanicTile:ShowCardPopupAndTooltip()
     local VERTICAL_MARGIN = 0
     local _, top = self.control:GetCenter()
     cardPopup:ShowAsPopup(ZO_TRIBUTE_MECHANIC_TILE_UI_WIDTH, top, ZO_TRIBUTE_CARD_POPUP_TYPE.MECHANIC)
-    cardPopup:SetMechanicGlowHidden(self.mechanicTrigger, self.mechanicIndex, false)
+    cardPopup:SetMechanicGlowHidden(self.mechanicActivationSource, self.mechanicIndex, false)
 
     if isMouseMode then
         local tooltipControl = ItemTooltip
@@ -364,20 +377,20 @@ end
 
 ZO_TributeTriggeredMechanic = ZO_InitializingObject:Subclass()
 
-function ZO_TributeTriggeredMechanic:Initialize(mechanicTrigger, mechanicIndex, quantity, isResolved)
-    self.mechanicTrigger = mechanicTrigger
+function ZO_TributeTriggeredMechanic:Initialize(mechanicActivationSource, mechanicIndex, quantity, isResolved)
+    self.mechanicActivationSource = mechanicActivationSource
     self.mechanicIndex = mechanicIndex
     self.isPresenting = false
     self.isResolved = isResolved
     self.quantity = quantity
 end
 
-function ZO_TributeTriggeredMechanic:Equals(mechanicTrigger, mechanicIndex)
-    return self.mechanicTrigger == mechanicTrigger and self.mechanicIndex == mechanicIndex
+function ZO_TributeTriggeredMechanic:Equals(mechanicActivationSource, mechanicIndex)
+    return self.mechanicActivationSource == mechanicActivationSource and self.mechanicIndex == mechanicIndex
 end
 
-function ZO_TributeTriggeredMechanic:GetMechanicTriggerAndIndex()
-    return self.mechanicTrigger, self.mechanicIndex
+function ZO_TributeTriggeredMechanic:GetMechanicActivationSourceAndIndex()
+    return self.mechanicActivationSource, self.mechanicIndex
 end
 
 function ZO_TributeTriggeredMechanic:GetQuantity()
@@ -421,9 +434,9 @@ function ZO_TributeMechanicQueueEntry:AddTriggeredMechanic(triggeredMechanic)
     table.insert(self.triggeredMechanics, triggeredMechanic)
 end
 
-function ZO_TributeMechanicQueueEntry:FindTriggeredMechanic(mechanicTrigger, mechanicIndex)
+function ZO_TributeMechanicQueueEntry:FindTriggeredMechanic(mechanicActivationSource, mechanicIndex)
     for _, triggeredMechanic in ipairs(self.triggeredMechanics) do
-        if triggeredMechanic:Equals(mechanicTrigger, mechanicIndex) then
+        if triggeredMechanic:Equals(mechanicActivationSource, mechanicIndex) then
             return triggeredMechanic
         end
     end
@@ -465,9 +478,9 @@ end
 
 ZO_TributeMechanic_Manager = ZO_InitializingCallbackObject:Subclass()
 
-function ZO_TributeMechanic_Manager:AddMechanicHistory(cardInstanceId, mechanicTrigger, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
+function ZO_TributeMechanic_Manager:AddMechanicHistory(cardInstanceId, mechanicActivationSource, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
     local controlPool = isLocalPlayerOwner and TRIBUTE_POOL_MANAGER:GetMechanicTilePlayerPool() or TRIBUTE_POOL_MANAGER:GetMechanicTileOpponentPool()
-    local tileObject = controlPool:AcquireObject(self.scrollChildControl, cardInstanceId, mechanicTrigger, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
+    local tileObject = controlPool:AcquireObject(self.scrollChildControl, cardInstanceId, mechanicActivationSource, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
     local tileControl = tileObject:GetControl()
     table.insert(self.history, tileObject)
 
@@ -490,7 +503,11 @@ function ZO_TributeMechanic_Manager:AddMechanicHistory(cardInstanceId, mechanicT
 
     self:SetHeadingHidden(false)
     self:SetLastMechanicTile(tileObject)
-    PlaySound(SOUNDS.TRIBUTE_COMBO_TRIGGERED)
+    if mechanicActivationSource == TRIBUTE_MECHANIC_ACTIVATION_SOURCE_COMBO then
+        PlaySound(SOUNDS.TRIBUTE_COMBO_TRIGGERED)
+    elseif mechanicActivationSource == TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ACTIVATION then
+        PlaySound(SOUNDS.TRIBUTE_TRIGGER_TRIGGERED)
+    end
     return tileObject
 end
 
@@ -604,16 +621,21 @@ function ZO_TributeMechanic_Manager:IsLocalPlayersTurn()
     return self.isLocalPlayersTurn == true
 end
 
-function ZO_TributeMechanic_Manager:QueueMechanic(cardInstanceId, isLocalPlayerOwner, mechanicTrigger, mechanicIndex, quantity, isResolved)
-    if mechanicTrigger ~= TRIBUTE_MECHANIC_TRIGGER_COMBO then
-        -- Only Combo Mechanic activation tiles should appear in the history.
-        return
+function ZO_TributeMechanic_Manager:QueueMechanic(cardInstanceId, isLocalPlayerOwner, mechanicActivationSource, mechanicIndex, quantity, isResolved)
+    if mechanicActivationSource ~= TRIBUTE_MECHANIC_ACTIVATION_SOURCE_COMBO then
+        -- Only Combo Mechanic and Trigger activation tiles should appear in the history.
+        local cardDefId = GetTributeCardInstanceDefIds(cardInstanceId)
+        local triggerId = select(7, GetTributeCardMechanicInfo(cardDefId, mechanicActivationSource, mechanicIndex))
+
+        if triggerId == 0 then
+            return
+        end
     end
 
     for _, queueEntry in ipairs(self.queue) do
         -- Queue unique mechanics for the same player and card instance together.
         if cardInstanceId == queueEntry:GetCardInstanceId() and isLocalPlayerOwner == queueEntry:IsLocalPlayerOwner() then
-            local triggeredMechanic = queueEntry:FindTriggeredMechanic(mechanicTrigger, mechanicIndex)
+            local triggeredMechanic = queueEntry:FindTriggeredMechanic(mechanicActivationSource, mechanicIndex)
             if triggeredMechanic then
                 -- This triggered mechanic has already been queued in this queue entry.
                 if isResolved and not triggeredMechanic:IsResolved() then
@@ -624,7 +646,7 @@ function ZO_TributeMechanic_Manager:QueueMechanic(cardInstanceId, isLocalPlayerO
                 end
             elseif not queueEntry:IsPresenting() then
                 -- This queue entry has not yet begun presentation; append this triggered mechanic to the entry.
-                triggeredMechanic = ZO_TributeTriggeredMechanic:New(mechanicTrigger, mechanicIndex, quantity, isResolved)
+                triggeredMechanic = ZO_TributeTriggeredMechanic:New(mechanicActivationSource, mechanicIndex, quantity, isResolved)
                 queueEntry:AddTriggeredMechanic(triggeredMechanic)
                 return
             end
@@ -633,7 +655,7 @@ function ZO_TributeMechanic_Manager:QueueMechanic(cardInstanceId, isLocalPlayerO
 
     -- This triggered mechanic could not be added to any existing queue entries; create a new entry and add this mechanic to the entry.
     local newQueueEntry = ZO_TributeMechanicQueueEntry:New(cardInstanceId, isLocalPlayerOwner)
-    local triggeredMechanic = ZO_TributeTriggeredMechanic:New(mechanicTrigger, mechanicIndex, quantity, isResolved)
+    local triggeredMechanic = ZO_TributeTriggeredMechanic:New(mechanicActivationSource, mechanicIndex, quantity, isResolved)
     newQueueEntry:AddTriggeredMechanic(triggeredMechanic)
     table.insert(self.queue, newQueueEntry)
 end
@@ -791,9 +813,9 @@ function ZO_TributeMechanic_Manager:OnGameStateChanged(gameState)
     end
 end
 
-function ZO_TributeMechanic_Manager:OnCardMechanicResolutionStateChanged(cardInstanceId, mechanicTrigger, mechanicIndex, quantity, isResolved)
+function ZO_TributeMechanic_Manager:OnCardMechanicResolutionStateChanged(cardInstanceId, mechanicActivationSource, mechanicIndex, quantity, isResolved)
     local isLocalPlayerOwner = self:IsLocalPlayersTurn()
-    self:QueueMechanic(cardInstanceId, isLocalPlayerOwner, mechanicTrigger, mechanicIndex, quantity, isResolved)
+    self:QueueMechanic(cardInstanceId, isLocalPlayerOwner, mechanicActivationSource, mechanicIndex, quantity, isResolved)
 end
 
 function ZO_TributeMechanic_Manager:OnMouseWheel(delta, ctrl, alt, shift)
@@ -855,12 +877,12 @@ function ZO_TributeMechanic_Manager:OnUpdate()
         else
             local cardInstanceId = queueEntry:GetCardInstanceId()
             local isLocalPlayerOwner = queueEntry:IsLocalPlayerOwner()
-            local mechanicTrigger, mechanicIndex = triggeredMechanic:GetMechanicTriggerAndIndex()
+            local mechanicActivationSource, mechanicIndex = triggeredMechanic:GetMechanicActivationSourceAndIndex()
             local quantity = triggeredMechanic:GetQuantity()
             local isResolved = triggeredMechanic:IsResolved()
 
             -- Present this new mechanic.
-            self:AddMechanicHistory(cardInstanceId, mechanicTrigger, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
+            self:AddMechanicHistory(cardInstanceId, mechanicActivationSource, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
 
             if isResolved then
                 -- Dequeue the mechanic.

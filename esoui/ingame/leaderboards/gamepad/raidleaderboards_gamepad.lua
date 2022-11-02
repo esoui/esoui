@@ -71,6 +71,10 @@ function ZO_RaidLeaderboardsManager_Gamepad:UpdateRaidScore()
     ZO_GamepadGenericHeader_RefreshData(GAMEPAD_LEADERBOARD_LIST.contentHeader, headerData)
 end
 
+function ZO_RaidLeaderboardsManager_Gamepad:GetFragment()
+    return GAMEPAD_RAID_LEADERBOARD_FRAGMENT
+end
+
 function ZO_RaidLeaderboardsInformationArea_Gamepad_OnInitialized(self)
     GAMEPAD_RAID_LEADERBOARDS = ZO_RaidLeaderboardsManager_Gamepad:New(self)
 end

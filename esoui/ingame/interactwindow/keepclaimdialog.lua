@@ -390,6 +390,7 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
                         end
                         
                         control.dropdown:UpdateItems()
+                        SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, control.dropdown)
 
                         local function OnDropdownDeactivated()
                             KEYBIND_STRIP:PopKeybindGroupState()
@@ -397,6 +398,7 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
 
                         control.dropdown:SetDeactivatedCallback(OnDropdownDeactivated)
                     end,
+                    narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
                 },
             },
         },

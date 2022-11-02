@@ -15,13 +15,53 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_ACCESSIBILITY,
     settingId = ACCESSIBILITY_SETTING_VOICE_CHAT_ACCESSIBILITY,
     header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
-    exists = false, -- TODO XAR Settings: Remove this line
+    indentLevel = 1,
 })
 
 panelBuilder:AddSetting({
-    controlName = "Options_Accessibility_TextChatAccessibility",
+    controlName = "Options_Accessibility_TextChatNarration",
     settingType = SETTING_TYPE_ACCESSIBILITY,
-    settingId = ACCESSIBILITY_SETTING_TEXT_CHAT_ACCESSIBILITY,
+    settingId = ACCESSIBILITY_SETTING_TEXT_CHAT_NARRATION,
     header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
-    exists = false, -- TODO XAR Settings: Remove this line
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Accessibility_ZoneChatNarration",
+    settingType = SETTING_TYPE_ACCESSIBILITY,
+    settingId = ACCESSIBILITY_SETTING_ZONE_CHAT_NARRATION,
+    header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
+    indentLevel = 2,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Accessibility_ScreenNarration",
+    settingType = SETTING_TYPE_ACCESSIBILITY,
+    settingId = ACCESSIBILITY_SETTING_SCREEN_NARRATION,
+    header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Accessibility_NarrationVolume",
+    settingType = SETTING_TYPE_ACCESSIBILITY,
+    settingId = ACCESSIBILITY_SETTING_NARRATION_VOLUME,
+    header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Accessibility_NarrationVoiceSpeed",
+    settingType = SETTING_TYPE_ACCESSIBILITY,
+    settingId = ACCESSIBILITY_SETTING_NARRATION_VOICE_SPEED,
+    header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Accessibility_NarrationVoiceType",
+    settingType = SETTING_TYPE_ACCESSIBILITY,
+    settingId = ACCESSIBILITY_SETTING_NARRATION_VOICE_TYPE,
+    header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
+    indentLevel = 1,
 })

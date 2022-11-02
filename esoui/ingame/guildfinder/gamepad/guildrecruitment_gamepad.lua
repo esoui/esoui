@@ -365,6 +365,7 @@ function ZO_GuildRecruitment_Gamepad:InitializeResponseMessageDialog()
 
                         edit:TakeFocus()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 }
             },
 

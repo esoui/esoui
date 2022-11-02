@@ -30,7 +30,7 @@ function ZO_WorldMapChoiceDialog_Gamepad:Initialize()
                 end,
                 callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
-                    ZO_WorldMap_ChoosePinOption(targetData.pin, targetData.handler)
+                    ZO_WorldMapPins_Manager.ChoosePinOption(targetData.pin, targetData.handler)
                 end,
             },
             --Back

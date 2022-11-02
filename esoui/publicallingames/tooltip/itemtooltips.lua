@@ -31,7 +31,7 @@ function ZO_Tooltip:AddItemTitle(itemLink, name)
     self:AddLine(zo_strformat(SI_TOOLTIP_ITEM_NAME, name), qualityStyle, self:GetStyle("title"))
 end
 
-function ZO_Tooltip:AddTypeSlotUniqueLine(itemLink, itemType, section, text1, text2)
+function ZO_Tooltip:AddTypeSlotUniqueLine(itemLink, itemType, section, text1, text2, text3)
     if not text1 then
         return
     end
@@ -64,6 +64,8 @@ function ZO_Tooltip:AddTypeSlotUniqueLine(itemLink, itemType, section, text1, te
     elseif text2 then
         if showInTooltip and itemStyle > 0 then
             lineText = zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2_ITEMSTYLE, text1, text2, GetItemStyleName(itemStyle))
+        elseif text3 then
+            lineText = zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2_ITEMSTYLE, text1, text2, text3)
         else
             lineText = zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2, text1, text2)
         end
@@ -72,7 +74,7 @@ function ZO_Tooltip:AddTypeSlotUniqueLine(itemLink, itemType, section, text1, te
     if not lineText then
         lineText = zo_strformat(SI_ITEM_FORMAT_STR_TEXT1, text1)
     end
-    
+
     section:AddLine(lineText)
 end
 
@@ -99,14 +101,14 @@ function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
         end
     elseif itemType == ITEMTYPE_FURNISHING then
         local itemTypeText = GetString("SI_ITEMTYPE", itemType)
-        if specializedItemType ~= SPECIALIZED_ITEMTYPE_FURNISHING_ORNAMENTAL then
-            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, itemTypeText, specializedItemTypeText)
-        else
-            local furnitureDataId = GetItemLinkFurnitureDataId(itemLink)
-            local categoryId = GetFurnitureDataCategoryInfo(furnitureDataId)
-            local furnitureCategoryText = GetFurnitureCategoryName(categoryId)
-            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, itemTypeText, furnitureCategoryText)
+        local furnitureDataId = GetItemLinkFurnitureDataId(itemLink)
+        local categoryId, subcategoryId = GetFurnitureDataCategoryInfo(furnitureDataId)
+        local furnitureCategoryText = GetFurnitureCategoryName(categoryId)
+        local furnitureSubcategoryText = GetFurnitureCategoryName(subcategoryId)
+        if furnitureSubcategoryText == "" then
+            furnitureSubcategoryText = nil
         end
+        self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, itemTypeText, furnitureCategoryText, furnitureSubcategoryText)
     elseif(itemType ~= ITEMTYPE_NONE and equipType ~= EQUIP_TYPE_INVALID) then
         local weaponType = GetItemLinkWeaponType(itemLink)
         if itemType == ITEMTYPE_ARMOR and weaponType == WEAPONTYPE_NONE then

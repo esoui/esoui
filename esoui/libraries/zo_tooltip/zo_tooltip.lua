@@ -200,6 +200,8 @@ end
 function ZO_TooltipStatValuePair:SetStat(statText, ...)
     self:FormatLabel(self.statLabel, statText, ...)
     self:SetDimensions(self:ComputeDimensions())
+    --Used by screen narration
+    self.statText = tostring(statText)
 end
 
 --where ... is a list of styles
@@ -209,6 +211,8 @@ function ZO_TooltipStatValuePair:SetValue(valueText, ...)
     self.valueLabel:ClearAnchors()
     self.valueLabel:AnchorToBaseline(self:GetNamedChild("Stat"), spacing, RIGHT)
     self:SetDimensions(self:ComputeDimensions())
+    --Used by screen narration
+    self.valueText = tostring(valueText)
 end
 
 function ZO_TooltipStatValuePair:ComputeDimensions()
@@ -238,7 +242,7 @@ function ZO_TooltipStatValuePair:UpdateFontOffset()
 
     if statTop ~= valueTop then
         local heightDifference = statTop - valueTop
-        local isValid, point, relTo, relPoint, offsetX = self.statLabel:GetAnchor()
+        local _, point, relTo, relPoint, offsetX = self.statLabel:GetAnchor()
         self.statLabel:SetAnchor(point, relTo, relPoint, offsetX, heightDifference)
     end
 end
@@ -526,6 +530,10 @@ function ZO_TooltipSection:Reset()
     for _, pool in pairs(self.customControlPools) do
         pool:ReleaseAllObjects()
     end
+    --Variables used by screen narration
+    self.narrationText = {}
+    self.nextNarrationText = nil
+    self.currentRow = 0
 end
 
 --Layout Variables
@@ -681,6 +689,19 @@ function ZO_TooltipSection:AddControl(control, primarySize, secondarySize, ...)
         self.primaryCursor = 0
         self.firstInLine = true
         spacing = self:GetNextSpacing(...)
+
+        --If we are not vertical, the secondary cursor direction is either up or down, so advancing the secondary cursor means we added a new row
+        if not self:IsVertical() then
+            if self.secondaryCursorDirection == -1 then
+                --If the direction is up, then we need to insert the new row at the front
+                table.insert(self.narrationText, 1, {})
+                self.currentRow = 1
+            else
+                --If the direction is down, then we need to insert the new row at the end
+                table.insert(self.narrationText, {})
+                self.currentRow = self.currentRow + 1
+            end
+        end
     end
     self.primaryCursor = self.primaryCursor + spacing
     self.maxSecondarySizeOnLine = zo_max(self.maxSecondarySizeOnLine, secondarySize)
@@ -695,6 +716,16 @@ function ZO_TooltipSection:AddControl(control, primarySize, secondarySize, ...)
     if self:IsVertical() then
         control.offsetX = self.secondaryCursor * self.secondaryCursorDirection
         control.offsetY = self.primaryCursor * self.primaryCursorDirection
+        --If we are vertical, then our primary cursor direction is either up or down
+        if self.primaryCursorDirection == -1 then
+            --If the direction is up, then we need to insert the new row at the front
+            table.insert(self.narrationText, 1, {})
+            self.currentRow = 1
+        else
+            --If the direction is down, then we need to insert the new row at the end
+            table.insert(self.narrationText, {})
+            self.currentRow = self.currentRow + 1
+        end
     else
         control.offsetX = self.primaryCursor * self.primaryCursorDirection
         control.offsetY = self.secondaryCursor * self.secondaryCursorDirection
@@ -725,6 +756,25 @@ function ZO_TooltipSection:AddControl(control, primarySize, secondarySize, ...)
             end
         end
     end
+
+    --Only bother here if we actually have narration text waiting to be added
+    if self.nextNarrationText then
+        local horizontalDirection = self:IsVertical() and self.secondaryCursorDirection or self.primaryCursorDirection
+        --If we haven't added any rows yet, do it now, as adding something means there needs to be at least one row
+        if self.currentRow == 0 then
+            table.insert(self.narrationText, {})
+            self.currentRow = 1
+        end
+
+        if horizontalDirection == -1 then
+            --If the horizontal direction is left, then add the text to the front of the current row
+            table.insert(self.narrationText[self.currentRow], 1, self.nextNarrationText)
+        else
+            --If the horizontal direction right, then add the text to the end of the current row
+            table.insert(self.narrationText[self.currentRow], self.nextNarrationText)
+        end
+        self.nextNarrationText = nil
+    end
 end
 
 function ZO_TooltipSection:AddDimensionedControl(control)
@@ -742,30 +792,66 @@ function ZO_TooltipSection:AddLine(text, ...)
     local customFunction =
         function(label, ...)
             self:FormatLabel(label, text, ...)
+            --This will get added to the narrationText table once we add the control
+            self.nextNarrationText = text
         end
 
     self:AddCustomLabel(customFunction, ...)
 end
 
-function ZO_TooltipSection:AddKeybindLine(actionName, formatString, ...)
-    local styles = {...}
+do
     local DEFAULT_TEXT_OPTIONS = nil
-    local DEFALT_PREFER_GAMEPAD_MODE = nil
-    local DEFALT_SHOW_AS_HOLD = nil
+    local DEFAULT_PREFER_GAMEPAD_MODE = nil
+    local DEFAULT_SHOW_AS_HOLD = nil
     local scalePercent = 100
-    local function customFunction(label)
-        local bindingText, key, mod1, mod2, mod3, mod4 = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, DEFAULT_TEXT_OPTIONS, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, DEFALT_PREFER_GAMEPAD_MODE, DEFALT_SHOW_AS_HOLD, scalePercent)
-        bindingText = bindingText or ZO_Keybindings_GenerateTextKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
-        bindingText = ZO_WHITE:Colorize(bindingText)
-        local formattedKeybindString = zo_strformat(formatString, bindingText)
-        self:FormatLabel(label, formattedKeybindString, unpack(styles))
+    local NOT_BOUND_STRING = GetString(SI_ACTION_IS_NOT_BOUND)
+
+    function ZO_TooltipSection:AddKeybindLine(actionName, formatString, ...)
+        local styles = {...}
+        local function customFunction(label)
+            local bindingText = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, DEFAULT_TEXT_OPTIONS, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, DEFAULT_PREFER_GAMEPAD_MODE, DEFAULT_SHOW_AS_HOLD, scalePercent)
+            local bindingTextNarration = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(actionName, DEFAULT_PREFER_GAMEPAD_MODE, DEFAULT_SHOW_AS_HOLD) or NOT_BOUND_STRING
+            bindingText = bindingText or ZO_Keybindings_GenerateTextKeyMarkup(NOT_BOUND_STRING)
+            bindingText = ZO_WHITE:Colorize(bindingText)
+            local formattedKeybindString = zo_strformat(formatString, bindingText)
+            --This will get added to the narrationText table once we add the control
+            self.nextNarrationText = zo_strformat(formatString, bindingTextNarration)
+            self:FormatLabel(label, formattedKeybindString, unpack(styles))
+        end
+
+        local label = self.keyLabelPool:AcquireObject()
+        local SHOW_UNBOUND = true
+        local DEFAULT_GAMEPAD_ACTION_NAME = nil
+        ZO_Keybindings_RegisterLabelForInLineBindingUpdate(label, actionName, SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, customFunction)
+        self:AddCustomLabelInternal(label, customFunction, ...)
     end
-    
-    local label = self.keyLabelPool:AcquireObject()
-    local SHOW_UNBOUND = true
-    local DEFAULT_GAMEPAD_ACTION_NAME = nil
-    ZO_Keybindings_RegisterLabelForInLineBindingUpdate(label, actionName, SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, customFunction)
-    self:AddCustomLabelInternal(label, customFunction, ...)
+
+    -- formatStringParams is a table containing all the parameters the formatString requires in the correct order.
+    -- keybindIndex is the index within that table containing the keybind.
+    function ZO_TooltipSection:AddParameterizedKeybindLine(formatString, formatStringParams, keybindIndex, ...)
+        local styles = {...}
+        local actionName = formatStringParams[keybindIndex]
+        local function customFunction(label)
+            -- Do this first because we're going to replace formatStringParams[keybindIndex] with the shown string right after
+            formatStringParams[keybindIndex] = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(actionName, DEFAULT_PREFER_GAMEPAD_MODE, DEFAULT_SHOW_AS_HOLD) or NOT_BOUND_STRING
+            --This will get added to the narrationText table once we add the control
+            self.nextNarrationText = zo_strformat(formatString, unpack(formatStringParams))
+
+            local bindingText = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, DEFAULT_TEXT_OPTIONS, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, DEFAULT_PREFER_GAMEPAD_MODE, DEFAULT_SHOW_AS_HOLD, scalePercent)
+            bindingText = bindingText or ZO_Keybindings_GenerateTextKeyMarkup(NOT_BOUND_STRING)
+            bindingText = ZO_WHITE:Colorize(bindingText)
+            formatStringParams[keybindIndex] = bindingText
+            
+            local formattedKeybindString = zo_strformat(formatString, unpack(formatStringParams))
+            self:FormatLabel(label, formattedKeybindString, unpack(styles))
+        end
+
+        local label = self.keyLabelPool:AcquireObject()
+        local SHOW_UNBOUND = true
+        local DEFAULT_GAMEPAD_ACTION_NAME = nil
+        ZO_Keybindings_RegisterLabelForInLineBindingUpdate(label, actionName, SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, customFunction)
+        self:AddCustomLabelInternal(label, customFunction, ...)
+    end
 end
 
 function ZO_TooltipSection:AddCustomLabel(customFunction, ...)
@@ -813,6 +899,8 @@ function ZO_TooltipSection:AddSimpleCurrency(currencyType, amount, options, show
             if options.font then
                 label.fontString = options.font
             end
+            --This will get added to the narrationText table once we add the control
+            self.nextNarrationText = ZO_Currency_FormatGamepad(currencyType, amount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
         end
 
     self:AddCustomLabel(customFunction, ...)
@@ -841,6 +929,7 @@ function ZO_TooltipSection:BasicTextureSetup(texture, ...)
 end
 
 --where ... is the list of styles
+--TODO XAR: Handle narrating this case when necessary
 function ZO_TooltipSection:AddTexture(path, ...)
     local texture = self.texturePool:AcquireObject()
     texture:SetTexture(path)
@@ -885,7 +974,11 @@ function ZO_TooltipSection:AddColorAndTextSwatch(r, g, b, a, text, ...)
         control.backdrop:SetHidden(true)
     end
 
-    self:FormatLabel(control.label, zo_strformat(SI_ITEM_FORMAT_STR_COLOR_NAME, text), ...)
+    local formattedText = zo_strformat(SI_ITEM_FORMAT_STR_COLOR_NAME, text)
+    self:FormatLabel(control.label, formattedText, ...)
+
+    --This will get added to the narrationText table once we add the control
+    self.nextNarrationText = formattedText
 
     self:BasicTextureSetup(control, ...)
 end
@@ -893,6 +986,9 @@ end
 function ZO_TooltipSection:AddSectionEvenIfEmpty(section)
     section:CleanDimensions()
 
+    --Grab any narration text for the section we are adding so we can place it in its proper order for the full narration
+    --This will get added to the narrationText table once we add the control
+    self.nextNarrationText = section:GetNarrationText()
     if(self:IsVertical()) then
         if(section:IsVertical()) then
             self:AddControl(section, section:GetPrimaryDimension(), section:GetSecondaryDimension(), unpack(section:GetStyles()))
@@ -943,6 +1039,17 @@ function ZO_TooltipSection:AcquireStatValueSlider(...)
 end
 
 function ZO_TooltipSection:AddStatValuePair(statValuePair)
+    --Order matters, do this before calling AddDimensionedControl
+    local nextNarrationText = {}
+    if statValuePair.statText and statValuePair.statText ~= "" then
+        table.insert(nextNarrationText, statValuePair.statText)
+    end
+
+    if statValuePair.valueText and statValuePair.valueText ~= "" then
+        table.insert(nextNarrationText, statValuePair.valueText)
+    end
+    --This will get added to the narrationText table once we add the control
+    self.nextNarrationText = nextNarrationText
     self:AddDimensionedControl(statValuePair)
     statValuePair:UpdateFontOffset()
 end
@@ -963,6 +1070,7 @@ function ZO_TooltipSection:AcquireStatusBar(...)
     return bar
 end
 
+--TODO XAR: Handle narrating this case
 function ZO_TooltipSection:AddStatusBar(statusBar)
     self:AddDimensionedControl(statusBar)
 end
@@ -983,8 +1091,25 @@ function ZO_TooltipSection:AcquireCustomControl(...)
     return styledControl
 end
 
+--TODO XAR: Handle narrating this case
 function ZO_TooltipSection:AddCustomControl(control)
     self:AddDimensionedControl(control)
+end
+
+function ZO_TooltipSection:GetNarrationText()
+    if self.statusLabelNarrationText then
+        --The status label is always at the top, so place it at the front of the table regardless
+        return { self.statusLabelNarrationText, self.narrationText }
+    else
+        return self.narrationText
+    end
+end
+
+function ZO_TooltipSection:SetStatusLabelNarrationText(stat, value, visualLayer)
+    self.statusLabelNarrationText = nil
+    if stat ~= "" or value ~= "" or visualLayer ~= "" then
+        self.statusLabelNarrationText = { stat, value, visualLayer }
+    end
 end
 
 --Tooltip
@@ -1059,5 +1184,28 @@ function ZO_Tooltip:LayoutTitleAndMultiSectionDescriptionTooltip(title, ...)
         local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
         bodySection:AddLine(select(i, ...), self:GetStyle("bodyDescription"))
         self:AddSection(bodySection)
+    end
+end
+
+do
+    local LINK_LAYOUT_HANDLERS =
+    {
+        [LINK_TYPE_ACHIEVEMENT] = "LayoutAchievementFromLink",
+        [LINK_TYPE_COLLECTIBLE] = "LayoutCollectibleFromLink",
+        [LINK_TYPE_GUILD] = "LayoutGuildLink",
+        [LINK_TYPE_HELP] = "LayoutHelpLink",
+        [LINK_TYPE_HOUSING] = "LayoutHousingLink",
+        [LINK_TYPE_ITEM] = "LayoutItem",
+    }
+
+    function ZO_Tooltip:LayoutLink(link)
+        local linkType = GetLinkType(link)
+        local handlerKey = LINK_LAYOUT_HANDLERS[linkType]
+        local handlerFunction = self[handlerKey]
+        if handlerFunction then
+            handlerFunction(self, link)
+            return true
+        end
+        return false
     end
 end

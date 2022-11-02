@@ -285,13 +285,16 @@ function ZO_NumericallyIndexedTableIterator(t)
     return ipairs(t)
 end
 
-function ZO_NumericallyIndexedTableReverseIterator(t)
-    local i = #t + 1
-    return function()
+do
+    local function NumericallyIndexedTableReverseIterator(t, i)
         if i > 1 then
             i = i - 1
             return i, t[i]
         end
+    end
+
+    function ZO_NumericallyIndexedTableReverseIterator(t)
+        return NumericallyIndexedTableReverseIterator, t, #t + 1
     end
 end
 

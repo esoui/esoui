@@ -61,6 +61,7 @@ end
 function ZO_GuildRecruitment_EditBoxTile_Gamepad:Layout(data)
     ZO_ActivationTile.Layout(self, data)
 
+    self.data = data
     self.titleLabel:SetText(data.headerText)
 
     self.attribute = data.attribute
@@ -72,6 +73,10 @@ function ZO_GuildRecruitment_EditBoxTile_Gamepad:Layout(data)
     end
 
     self.control:SetDimensions(data.dimensionsX, data.dimensionsY)
+end
+
+function ZO_GuildRecruitment_EditBoxTile_Gamepad:GetNarrationText()
+    return ZO_FormatEditBoxNarrationText(self.edit, self.data.headerText)
 end
 
 -- XML functions

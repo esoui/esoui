@@ -67,7 +67,7 @@ end
 function ZO_MarketAnnouncement_Gamepad:UpdateVerticalNavigation()
     self.verticalFocus:RemoveAllEntries()
 
-    if not GetMarketAnnouncementCrownStoreLocked() then
+    if not ZO_MARKET_ANNOUNCEMENT_MANAGER:ShouldHideMarketProductAnnouncements() then
         self.verticalFocus:AddEntry(self.carousel:GetFocusEntryData())
     else
         self.carousel:UpdateKeybinds()

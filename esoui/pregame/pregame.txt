@@ -52,6 +52,8 @@ EsoUI\Pregame\AccountLogin\Gamepad\GameStartup_Gamepad.lua
 EsoUI\Pregame\AccountLogin\Gamepad\GameStartup_Gamepad.xml
 EsoUI\Pregame\AccountLogin\Gamepad\LegalAgreementsScreen_Gamepad.lua
 EsoUI\Pregame\AccountLogin\Gamepad\LegalAgreementsScreen_Gamepad.xml
+EsoUI\Pregame\AccountLogin\Gamepad\PEGI_Gamepad.lua
+EsoUI\Pregame\AccountLogin\Gamepad\PEGI_Gamepad.xml
 
 EsoUI\Pregame\AccountLogin\PEGI.lua
 EsoUI\Pregame\AccountLogin\PEGI.xml

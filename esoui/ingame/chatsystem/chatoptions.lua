@@ -47,8 +47,9 @@ local CHANNEL_ORDERING_WEIGHT = {
     [CHAT_CATEGORY_ZONE_JAPANESE] = 120,
     [CHAT_CATEGORY_ZONE_RUSSIAN] = 130,
     [CHAT_CATEGORY_ZONE_SPANISH] = 140,
+    [CHAT_CATEGORY_ZONE_CHINESE_S] = 150,
 }
-
+internalassert(OFFICIAL_LANGUAGE_MAX_VALUE == 6)
 
 --[[ Chat Options Panel ]]--
 local ChatOptions = ZO_Object:Subclass()

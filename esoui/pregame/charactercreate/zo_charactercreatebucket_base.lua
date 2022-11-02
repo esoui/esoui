@@ -61,10 +61,10 @@ function ZO_CharacterCreateBucketManager_Base:Reset()
     end
 end
 
-function ZO_CharacterCreateBucketManager_Base:AddControl(control, category, updateFn, randomizeFn, subCategoryId)
+function ZO_CharacterCreateBucketManager_Base:AddControl(control, category, updateFn, randomizeFn, subCategoryId, narrationText)
     local bucket = self:BucketForCategory(category)
     if bucket then
-        bucket:AddControl(control, updateFn, randomizeFn, subCategoryId)
+        bucket:AddControl(control, updateFn, randomizeFn, subCategoryId, narrationText)
     end
 end
 

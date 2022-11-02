@@ -1,27 +1,26 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_ChatterOption_Gamepad" font="ZoFontGamepad42" virtual="true" >
-            <Anchor point="TOP" relativePoint="CENTER"/>
-            <Dimensions x="590"/>
+        <Control name="ZO_ChatterOption_Gamepad" virtual="true">
+            <Dimensions x="590" />
             <Controls>
-                <Control name="$(parent)Icon" mouseEnabled="true">
+                <Texture name="$(parent)Icon" inherits="ZO_MultiIcon" level="1" hidden="true">
                     <Dimensions x="40" y="40" />
-                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5" />
-                    <Controls>
-                        <Texture name="$(parent)Image" level="1">
-                            <AnchorFill />
-                        </Texture>
-                    </Controls>
-                </Control>
+                    <Anchor point="TOPLEFT" offsetY="3" />
+                </Texture>
+
+                <Label name="$(parent)Text" font="ZoFontGamepad42">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
             </Controls>
-        </Label>
+        </Control>
 
         <Control name="ZO_QuestReward_Gamepad" virtual="true" inherits="ZO_GamepadMenuEntryTemplate">
             <Controls>
                 <Label name="$(parent)Label" override="true">
                     <Dimensions x="430"/>
                 </Label>
-            </Controls>          
+            </Controls>
         </Control>
 
         <Label name="ZO_GamepadQuestRewardEntryHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">

@@ -91,9 +91,11 @@ local TRIBUTE_PILE_TOOLTIP_BOARD_LOCATIONS =
     TRIBUTE_BOARD_LOCATION_PLAYER_DECK,
 }
 
+local IGNORE_ANIMATION_CALLBACKS = true
+
 -- Mechanic Container --
 
-ZO_TributeCard_MechanicContainer = ZO_Tribute_PooledObject:Subclass()
+ZO_TributeCard_MechanicContainer = ZO_PooledObject:Subclass()
 
 function ZO_TributeCard_MechanicContainer:Initialize(control)
     self.control = control
@@ -104,11 +106,11 @@ function ZO_TributeCard_MechanicContainer:Initialize(control)
 end
 
 do
-    internalassert(TRIBUTE_MECHANIC_TRIGGER_ITERATION_END == 1, "A new Tribute mechanic trigger has been added. Please add it to the MECHANIC_TRIGGER_SUFFIX table")
-    local MECHANIC_TRIGGER_SUFFIX =
+    internalassert(TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ITERATION_END == 1, "A new Tribute mechanic activation source has been added. Please add it to the MECHANIC_ACTIVATION_SOURCE_SUFFIX table")
+    local MECHANIC_ACTIVATION_SOURCE_SUFFIX =
     {
-        [TRIBUTE_MECHANIC_TRIGGER_ACTIVATION] = "Activation",
-        [TRIBUTE_MECHANIC_TRIGGER_COMBO] = "Combo",
+        [TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ACTIVATION] = "Activation",
+        [TRIBUTE_MECHANIC_ACTIVATION_SOURCE_COMBO] = "Combo",
     }
 
     internalassert(TRIBUTE_MECHANIC_ITERATION_END == 13, "A new Tribute mechanic has been added. Does the MECHANIC_PARAM_MODIFIERS need special modifiers for this mechanic?")
@@ -138,16 +140,17 @@ do
     local OVERSIZED_SCALE = 1.2
     local OVERSIZED_PADDING_Y = 6
 
-    function ZO_TributeCard_MechanicContainer:Setup(cardObject, trigger, mechanicIndex)
+    function ZO_TributeCard_MechanicContainer:Setup(cardObject, activationSource, mechanicIndex)
         local control = self.control
         self.cardDefId = cardObject:GetCardDefId()
-        self.trigger = trigger
+        self.activationSource = activationSource
         self.mechanicIndex = mechanicIndex
-        self.tributeMechanicType, self.quantity, self.comboNum, self.param1, self.param2, self.param3 = cardObject:GetMechanicInfo(trigger, mechanicIndex)
-        self.numSiblings = cardObject:GetNumMechanics(trigger)
-        local isActivationTrigger = trigger == TRIBUTE_MECHANIC_TRIGGER_ACTIVATION
-        local isComboTrigger = trigger == TRIBUTE_MECHANIC_TRIGGER_COMBO
-        local chooseOneMechanic = isActivationTrigger and cardObject:DoesChooseOneMechanic()
+        self.tributeMechanicType, self.quantity, self.comboNum, self.param1, self.param2, self.param3, triggerId = cardObject:GetMechanicInfo(activationSource, mechanicIndex)
+        self.numSiblings = cardObject:GetNumMechanics(activationSource)
+        local isOnActivation = activationSource == TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ACTIVATION
+        local isOnCombo = activationSource == TRIBUTE_MECHANIC_ACTIVATION_SOURCE_COMBO
+        local isOnTrigger = triggerId ~= 0
+        local chooseOneMechanic = isOnActivation and cardObject:DoesChooseOneMechanic()
         local isOversized = self.numSiblings <= 2
         local scale = isOversized and OVERSIZED_SCALE or 1
         control:SetScale(scale)
@@ -167,7 +170,7 @@ do
         end
 
         local isSmallContainer = self.numSiblings >= 4
-        local triggerSuffix = MECHANIC_TRIGGER_SUFFIX[trigger]
+        local activationSourceSuffix = isOnTrigger and "Trigger" or MECHANIC_ACTIVATION_SOURCE_SUFFIX[activationSource]
         local sizeSuffix = isSmallContainer and "Small" or "Large"
         local quantityDisplayValue = self.quantity
         local paramModifiers = MECHANIC_PARAM_MODIFIERS[self.tributeMechanicType]
@@ -187,16 +190,16 @@ do
         end
         local isDoubleDigitContainer = quantityDisplayValue >= 10
         local digitsSuffix = isDoubleDigitContainer and "Double" or "Single"
-        
-        ApplyTemplateToControl(control, string.format("ZO_TributeCard_MechanicContainer_%s_%sDigit_%s_Style", sizeSuffix, digitsSuffix, triggerSuffix))
+
+        ApplyTemplateToControl(control, string.format("ZO_TributeCard_MechanicContainer_%s_%sDigit_%s_Style", sizeSuffix, digitsSuffix, activationSourceSuffix))
         self.typeIconTexture:SetTexture(GetTributeMechanicIconPath(self.tributeMechanicType, self.param1, self.param2, self.param3))
         local quantityDisplayText = quantityDisplayValue == 0 and GetString(SI_TRIBUTE_MECHANIC_ANY_QUANTITY_SYMBOL) or quantityDisplayValue
         self.quantityLabel:SetText(quantityDisplayText)
-        self.frameGlowTextureFileName = string.format("EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_%s_%s_%s_glow.dds", triggerSuffix, sizeSuffix, digitsSuffix)
-        
+        self.frameGlowTextureFileName = string.format("EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_%s_%s_%s_glow.dds", activationSourceSuffix, sizeSuffix, digitsSuffix)
+
         -- Add pips to combo hexes.
         -- Combo 2 has no pips. Combo 3 has 1 pip. Combo 4 has 2 pips...
-        if isComboTrigger and self.comboNum > 2 then
+        if isOnCombo and self.comboNum > 2 then
             if not self.pipsLabel then
                 self.pipsLabel = CreateControlFromVirtual("$(parent)Pips", control, "ZO_TributeCard_MechanicComboPip_Template")
             end
@@ -213,10 +216,10 @@ do
         local height
         local paddingY
         if isSmallContainer then
-            height = isActivationTrigger and MECHANIC_CONTAINER_SMALL_ACTIVATION_HEIGHT or MECHANIC_CONTAINER_SMALL_COMBO_HEIGHT
+            height = isOnActivation and MECHANIC_CONTAINER_SMALL_ACTIVATION_HEIGHT or MECHANIC_CONTAINER_SMALL_COMBO_HEIGHT
             paddingY = SMALL_PADDING_Y
         else
-            height = isActivationTrigger and MECHANIC_CONTAINER_LARGE_ACTIVATION_HEIGHT or MECHANIC_CONTAINER_LARGE_COMBO_HEIGHT
+            height = isOnActivation and MECHANIC_CONTAINER_LARGE_ACTIVATION_HEIGHT or MECHANIC_CONTAINER_LARGE_COMBO_HEIGHT
             height = height * scale
             paddingY = LARGE_PADDING_Y
             if isDoubleDigitContainer then
@@ -226,7 +229,7 @@ do
         
         local firstCenterOffsetY = FIRST_TOP_OFFSET_Y + (height / 2)
         local offsetY = firstCenterOffsetY + ((height + paddingY) * (mechanicIndex - 1))
-        if isActivationTrigger then
+        if isOnActivation then
             control:SetAnchor(CENTER, nil, TOPLEFT, offsetX, offsetY)
         else
             control:SetAnchor(CENTER, nil, TOPRIGHT, -offsetX, offsetY)
@@ -240,7 +243,7 @@ function ZO_TributeCard_MechanicContainer:Reset()
         self.pipsLabel:SetText("")
     end
     self.cardDefId = nil
-    self.trigger = nil
+    self.activationSource = nil
     self.mechanicIndex = nil
     self.tributeMechanicType = nil
     self.quantity = nil
@@ -255,8 +258,8 @@ function ZO_TributeCard_MechanicContainer:GetControl()
     return self.control
 end
 
-function ZO_TributeCard_MechanicContainer:GetTriggerAndIndex()
-    return self.trigger, self.mechanicIndex
+function ZO_TributeCard_MechanicContainer:GetActivationSourceAndIndex()
+    return self.activationSource, self.mechanicIndex
 end
 
 function ZO_TributeCard_MechanicContainer:GetFrameGlowTextureFileName()
@@ -442,18 +445,22 @@ end
 
 -- Card State Effect --
 
-ZO_TributeCard_StateEffect = ZO_Tribute_PooledObject:Subclass()
+ZO_TributeCard_StateEffect = ZO_PooledObject:Subclass()
 
 function ZO_TributeCard_StateEffect:Initialize(control)
     self.control = control
     control.object = self
 
+    self:InitializeAnimation()
+
+    self:Reset()
+end
+
+function ZO_TributeCard_StateEffect:InitializeAnimation()
     local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeCard_StateEffectTimeline")
     self.timeline = timeline
     timeline.object = self
     timeline:ApplyAllAnimationsToControl(self.control)
-
-    self:Reset()
 end
 
 do
@@ -544,9 +551,59 @@ function ZO_TributeCard_StateEffect:OnStateEffectTimelineStopped(completedPlayin
     end
 end
 
+-- Trigger Animation --
+
+ZO_TributeCard_TriggerAnimation = ZO_TributeCard_StateEffect:Subclass()
+
+function ZO_TributeCard_TriggerAnimation:InitializeAnimation()
+    local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_TributeCard_TriggerAnimationTimeline")
+    self.timeline = timeline
+    timeline.object = self
+    timeline:ApplyAllAnimationsToControl(self.control)
+end
+
+function ZO_TributeCard_StateEffect:Reset()
+    -- Order matters
+    self.cardObject = nil
+    self.cardState = nil
+    self.cardLayer = nil
+    self.control:SetHidden(true)
+    self.timeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
+end
+
+function ZO_TributeCard_TriggerAnimation:GetControlTemplate()
+    local layer = self.cardLayer == TRIBUTE_CARD_STATE_EFFECT_LAYER_OVERLAY and "Overlay" or "Underlay"
+    local controlTemplate = string.format("ZO_TributeCard_TriggerAnimation%s_Template", layer)
+    return controlTemplate
+end
+
+function ZO_TributeCard_TriggerAnimation:IsValid()
+    return self.cardObject ~= nil and self.cardLayer ~= nil
+end
+
+function ZO_TributeCard_TriggerAnimation:IsActive()
+    return self.timeline:IsPlaying()
+end
+
+function ZO_TributeCard_TriggerAnimation:SetActive(active)
+    if self:IsValid() and active ~= self:IsActive() then
+        if active then
+            self.timeline:PlayFromStart()
+        else
+            self.timeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+        end
+    end
+end
+
+function ZO_TributeCard_TriggerAnimation:OnStateEffectTimelineStopped(completedPlaying)
+    if self:IsValid() then
+        self.cardObject:OnTriggerAnimationComplete(self, completedPlaying)
+    end
+end
+
 -- Card --
 
-ZO_TributeCard = ZO_InitializingObject:MultiSubclass(ZO_Tribute_PooledObject, ZO_TributeCardData)
+ZO_TributeCard = ZO_InitializingObject:MultiSubclass(ZO_PooledObject, ZO_TributeCardData)
 
 function ZO_TributeCard:Initialize(control)
     ZO_TributeCardData.Initialize(self)
@@ -571,8 +628,9 @@ function ZO_TributeCard:Initialize(control)
     self.backGlowableTexture = control:GetNamedChild("Back")
 
     self.mechanicContainers = {}
-    self.numMechanicsByTrigger = {}
+    self.numMechanicsByActivationSource = {}
     self.stateEffects = {}
+    self.triggerAnimations = {}
 
     self:Reset()
 end
@@ -642,9 +700,9 @@ function ZO_TributeCard:Setup(cardDefId, patronDefId, overrideSpace)
     self:RefreshDefeatCost()
 
     local mechanicContainerPool = TRIBUTE_POOL_MANAGER:GetMechanicContainerPool()
-    for trigger = TRIBUTE_MECHANIC_TRIGGER_ITERATION_BEGIN, TRIBUTE_MECHANIC_TRIGGER_ITERATION_END do
-        for mechanicIndex = 1, self.numMechanicsByTrigger[trigger] do
-            local mechanicContainer = mechanicContainerPool:AcquireObject(self, trigger, mechanicIndex)
+    for activationSource = TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ITERATION_BEGIN, TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ITERATION_END do
+        for mechanicIndex = 1, self.numMechanicsByActivationSource[activationSource] do
+            local mechanicContainer = mechanicContainerPool:AcquireObject(self, activationSource, mechanicIndex)
             table.insert(self.mechanicContainers, mechanicContainer)
         end
     end
@@ -663,10 +721,10 @@ function ZO_TributeCard:SetCardInstanceId(cardInstanceId)
     self:OnStateFlagsChanged(GetTributeCardStateFlags(cardInstanceId))
 end
 
-function ZO_TributeCard:GetMechanicContainer(mechanicTrigger, mechanicIndex)
+function ZO_TributeCard:GetMechanicContainer(mechanicActivationSource, mechanicIndex)
     for _, mechanicContainer in ipairs(self.mechanicContainers) do
-        local trigger, index = mechanicContainer:GetTriggerAndIndex()
-        if trigger == mechanicTrigger and index == mechanicIndex then
+        local activationSource, index = mechanicContainer:GetActivationSourceAndIndex()
+        if activationSource == mechanicActivationSource and index == mechanicIndex then
             return mechanicContainer
         end
     end
@@ -905,6 +963,27 @@ function ZO_TributeCard:OnStateEffectChanged(stateEffect, active)
     end
 end
 
+function ZO_TributeCard:OnTriggerAnimationComplete(triggerAnimation, completedPlaying)
+    if completedPlaying then
+        for index, animation in ipairs(self.triggerAnimations) do
+            if animation == triggerAnimation then
+                animation:ReleaseObject()
+                table.remove(self.triggerAnimations, index)
+                break
+            end
+        end
+    end
+end
+
+function ZO_TributeCard:UpdateTriggerAnimation()
+    local NO_CARD_STATE = nil
+    local triggerAnimationOverlay = TRIBUTE_POOL_MANAGER:GetCardTriggerAnimationPool():AcquireObject(self, NO_CARD_STATE, TRIBUTE_CARD_STATE_EFFECT_LAYER_OVERLAY)
+    local triggerAnimationUnderlay = TRIBUTE_POOL_MANAGER:GetCardTriggerAnimationPool():AcquireObject(self, NO_CARD_STATE, TRIBUTE_CARD_STATE_EFFECT_LAYER_UNDERLAY)
+    table.insert(self.triggerAnimations, triggerAnimationOverlay)
+    table.insert(self.triggerAnimations, triggerAnimationUnderlay)
+    -- TODO Tribute: Audio hook?
+end
+
 function ZO_TributeCard:Reset()
     self:HideBoardLocationPatronsTooltip()
     self:ReleaseAllObjects()
@@ -947,6 +1026,7 @@ function ZO_TributeCard:ReleaseAllObjects()
     self:ReleaseMechanics()
     self:ReleasePopupAnimation()
     self:ReleaseStateEffects()
+    self:ReleaseTriggerAnimations()
 end
 
 function ZO_TributeCard:ReleaseAlphaAnimation()
@@ -968,7 +1048,7 @@ function ZO_TributeCard:ReleaseGlowAnimation()
 end
 
 function ZO_TributeCard:ReleaseMechanics()
-    ZO_ClearTable(self.numMechanicsByTrigger)
+    ZO_ClearTable(self.numMechanicsByActivationSource)
     for _, mechanicContainer in ipairs(self.mechanicContainers) do
         mechanicContainer:ReleaseObject()
     end
@@ -991,6 +1071,13 @@ function ZO_TributeCard:ReleaseStateEffects()
         end
     end
     ZO_ClearTable(self.stateEffects)
+end
+
+function ZO_TributeCard:ReleaseTriggerAnimations()
+    for _, triggerAnimation in ipairs(self.triggerAnimations) do
+        triggerAnimation:ReleaseObject()
+    end
+    ZO_ClearTable(self.triggerAnimations)
 end
 
 function ZO_TributeCard:GetStackInfo()
@@ -1163,8 +1250,8 @@ function ZO_TributeCard:SetHighlighted(isHighlighted)
     end
 end
 
-function ZO_TributeCard:SetMechanicGlowHidden(mechanicTrigger, mechanicIndex, hidden)
-    local mechanicContainer = self:GetMechanicContainer(mechanicTrigger, mechanicIndex)
+function ZO_TributeCard:SetMechanicGlowHidden(mechanicActivationSource, mechanicIndex, hidden)
+    local mechanicContainer = self:GetMechanicContainer(mechanicActivationSource, mechanicIndex)
     if mechanicContainer then
         mechanicContainer:SetGlowHidden(hidden)
     end
@@ -1307,6 +1394,24 @@ end
 
 function ZO_TributeCard_StateEffect_OnInitialized(...)
     ZO_TributeCard_StateEffect:New(...)
+end
+
+function ZO_TributeCard_TriggerAnimation_OnInitialized(...)
+    ZO_TributeCard_TriggerAnimation:New(...)
+end
+
+do
+    local fromColor = ZO_ColorDef:New(0, 0, 0, 0)
+    local toColor = ZO_ColorDef:New(1, 1, 1, 1)
+
+    function ZO_TributeCard_TriggerAnimation_ColorShift_SetProgress(animation, progress)
+        local control = animation:GetAnimatedControl()
+        local topLeftColor = fromColor:Lerp(toColor, zo_clamp(math.sin(1.5 * progress * ZO_PI), 0, 1))
+        local bottomRightColor = fromColor:Lerp(toColor, zo_clamp(math.sin((1.5 * progress - 0.5) * ZO_PI), 0, 1))
+
+        control:SetVertexColors(VERTEX_POINTS_TOPLEFT, topLeftColor.r, topLeftColor.g, topLeftColor.b, topLeftColor.a)
+        control:SetVertexColors(VERTEX_POINTS_BOTTOMRIGHT, bottomRightColor.r, bottomRightColor.g, bottomRightColor.b, bottomRightColor.a)
+    end
 end
 
 function ZO_TributeCard_StateEffectTimeline_OnStop(timeline, completedPlaying)

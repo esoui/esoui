@@ -1,0 +1,32 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_PEGIDialog_Gamepad" inherits="ZO_GenericGamepadDialogBase" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Logo" textureFile="EsoUI/Art/Miscellaneous/PEGI_small.dds">
+                            <Anchor point="TOP" />
+                            <Dimensions x="128" y="128"/>
+                        </Texture>
+
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <!-- overriding the anchoring here so we can offset below the icons above -->
+                            <Anchor point="TOPLEFT" offsetY="128" />
+                            <Anchor point="TOPRIGHT" offsetY="128" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_PEGI_AgreementDialog_Gamepad" inherits="ZO_PEGIDialog_Gamepad">
+            <OnInitialized>
+                ZO_PEGI_AgreementDialog_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+        <TopLevelControl name="ZO_PEGI_AgreementDeclinedDialog_Gamepad" inherits="ZO_PEGIDialog_Gamepad">
+            <OnInitialized>
+                ZO_PEGI_AgreementDeclinedDialog_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

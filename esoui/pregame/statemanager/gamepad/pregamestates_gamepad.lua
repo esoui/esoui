@@ -147,9 +147,7 @@ local pregameStates =
 
         GetStateTransitionData = function()
             if IsConsoleUI() then
-                -- TODO XAR Settings: Replace the following
-                -- return "FirstTimeAccessibilitySettings"
-                return "ScreenAdjustIntro"
+                return "FirstTimeAccessibilitySettings"
             else
                 return "ShowEULA"
             end
@@ -449,7 +447,11 @@ local pregameStates =
                 local ACTIVATE_VIEWPORT = true
                 ZO_CharacterSelect_Gamepad_ReturnToCharacterList(ACTIVATE_VIEWPORT)
             else
-                Pregame_ShowScene("gamepadCharacterSelect")
+                if DoesPlatformRequirePregamePEGI() and not HasAgreedToPEGI() then
+                    ZO_Dialogs_ShowGamepadDialog("PEGI_COUNTRY_SELECT_GAMEPAD")
+                else
+                    Pregame_ShowScene("gamepadCharacterSelect")
+                end
             end
         end,
 

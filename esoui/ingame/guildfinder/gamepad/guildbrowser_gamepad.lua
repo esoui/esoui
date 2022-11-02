@@ -460,12 +460,14 @@ function ZO_GuildBrowser_Gamepad:CreateTimeBasedDropdown(attributeType, dataKey)
                 dropdown:UpdateItems()
 
                 control.dropdown:SelectItemByIndex(self.startEndTimePair[attributeType])
+                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
             end,
             callback = function(dialog)
                 local targetData = dialog.entryList:GetTargetData()
                 local targetControl = dialog.entryList:GetTargetControl()
                 targetControl.dropdown:Activate()
             end,
+            narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
         },
     }
 end
@@ -586,12 +588,14 @@ function ZO_GuildBrowser_Gamepad:CreateMultiSelectionBasedDropdown(attributeType
                 dropdown:SetMultiSelectionTextFormatter(multiSelectionText)
                 dropdown:RegisterCallback("OnHideDropdown", OnComboboxSelectionChanged)
                 dropdown:LoadData(dropdownData)
+                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
             end,
             callback = function(dialog)
                 local targetData = dialog.entryList:GetTargetData()
                 local targetControl = dialog.entryList:GetTargetControl()
                 targetControl.dropdown:Activate()
             end,
+            narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
         },
     }
 end
@@ -699,6 +703,8 @@ function ZO_GuildBrowser_Gamepad:InitializeFiltersDialog()
         end,
         callback = function(dialog)
             self:ResetFilters()
+            --Re-narrate the selection when the filters are reset
+            SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
             dialog.info.setup(dialog)
         end,
     }
@@ -733,7 +739,9 @@ function ZO_GuildBrowser_Gamepad:InitializeFiltersDialog()
                         ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
                         self.hasGuildTrader = ZO_GamepadCheckBoxTemplate_IsChecked(targetControl)
                         self.filterManager:SetFilterValueIsDefaultByAttributeType(GUILD_META_DATA_ATTRIBUTE_KIOSK, self.hasGuildTrader == self.filterManager:GetHasGuildTraderDefault())
+                        SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                     end,
+                    narrationText = ZO_GetDefaultParametricListToggleNarrationText,
                 },
             },
 
@@ -782,6 +790,7 @@ function ZO_GuildBrowser_Gamepad:InitializeFiltersDialog()
 
                         edit:TakeFocus()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 
@@ -821,6 +830,7 @@ function ZO_GuildBrowser_Gamepad:InitializeFiltersDialog()
 
                         edit:TakeFocus()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
 
@@ -905,6 +915,7 @@ function ZO_GuildBrowser_Gamepad:InitializeApplicationMessageDialog()
 
                         edit:TakeFocus()
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 }
             },
 

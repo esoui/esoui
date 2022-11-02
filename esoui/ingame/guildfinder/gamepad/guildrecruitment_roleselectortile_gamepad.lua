@@ -79,6 +79,12 @@ function ZO_GuildRecruitment_RoleSelectorTile_Gamepad:UpdateCheckedState()
     self.roleControl.pressedFrame:SetHidden(not self.isChecked)
 end
 
+function ZO_GuildRecruitment_RoleSelectorTile_Gamepad:GetNarrationText()
+    --We have to manually specify the header text here as data.headerText is only set for the first role
+    local headerText = GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ROLES)
+    return ZO_FormatToggleNarrationText(GetString("SI_LFGROLE", self.data.role), self.isChecked, headerText)
+end
+
 -- XML functions
 ----------------
 

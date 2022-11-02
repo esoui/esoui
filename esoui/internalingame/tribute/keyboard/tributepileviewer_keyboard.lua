@@ -61,11 +61,18 @@ function ZO_TributePileViewer_Keyboard:InitializeKeybindStripDescriptors()
     {
         {
             name = GetString(SI_DIALOG_CLOSE),
-            keybind = "UI_SHORTCUT_EXIT",
+            keybind = "UI_SHORTCUT_NEGATIVE",
             callback = function()
                 ZO_TRIBUTE_PILE_VIEWER_MANAGER:SetViewingPile(nil)
             end,
-        }
+        },
+        {
+            keybind = "UI_SHORTCUT_EXIT",
+            ethereal = true,
+            callback = function()
+                ZO_TRIBUTE_PILE_VIEWER_MANAGER:SetViewingPile(nil)
+            end,
+        },
     }
 end
 

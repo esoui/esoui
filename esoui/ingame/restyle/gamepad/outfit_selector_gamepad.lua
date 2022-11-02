@@ -135,6 +135,17 @@ function ZO_Outfit_Selector_Gamepad:PerformDeferredInitialization()
     self.outfitSelectorList:AddDataTemplateWithHeader("ZO_OutfitSelector_CheckBoxTemplate_Gamepad", SetupCheckBoxEntry, ZO_GamepadMenuEntryTemplateParametricListFunction, EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate")
     self.outfitSelectorList:SetOnSelectedDataChangedCallback(function(list, selectedData) self:OnListDataChanged(selectedData) end)
 
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return GAMEPAD_OUTFITS_SELECTOR_FRAGMENT:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.outfitSelectorList, narrationInfo)
+
     self.header = self.control:GetNamedChild("HeaderContainer"):GetNamedChild("Header")
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
 
@@ -151,6 +162,9 @@ function ZO_Outfit_Selector_Gamepad:PerformDeferredInitialization()
 
         data1HeaderText = zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(CURT_STYLE_STONES, IS_PLURAL, IS_UPPER)),
         data1Text = UpdateCarriedCurrencyControl,
+        data1TextNarration = function()
+            return ZO_Currency_FormatGamepad(CURT_STYLE_STONES, GetCurrencyAmount(CURT_STYLE_STONES, CURRENCY_LOCATION_ACCOUNT), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+        end,
     }
 end
 
@@ -207,16 +221,18 @@ function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
         {
             -- user name
             {
-                template = "ZO_GamepadTextFieldItem",
+                template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
                 templateData =
                 {
                     nameField = true,
                     textChangedCallback = function(control)
                         local inputText = control:GetText()
+                        if parametricDialog.data then
+                            parametricDialog.data.name = inputText
+                        end
                         UpdateSelectedName(inputText)
                     end,
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
-                        local dialog = data.dialog
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
                         control.editBoxControl:SetMaxInputChars(OUTFIT_NAME_MAX_LENGTH)
                         data.control = control
@@ -225,6 +241,7 @@ function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
                             control.editBoxControl:SetText(parametricDialog.data.name)
                         end
                     end,
+                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
                 },
             },
         },
@@ -306,6 +323,7 @@ function ZO_Outfit_Selector_Gamepad:UseCurrentSelection()
         self.currentActorCategory = currentlySelectedData.actorCategory
         self.currentOutfitIndex = currentlySelectedData.outfitIndex
         self:UpdateOutfitList()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.outfitSelectorList)
     end
 end
 
@@ -321,10 +339,11 @@ function ZO_Outfit_Selector_Gamepad:UpdateOutfitList()
     self.outfitSelectorList:Clear()
 
     -- No Outfit Entry
-    local data = ZO_GamepadEntryData:New(GetString(SI_NO_OUTFIT_EQUIP_ENTRY))
-    data.noOutfitEntry = true
-    data.actorCategory = self.currentActorCategory
-    self.outfitSelectorList:AddEntry("ZO_OutfitSelector_CheckBoxTemplate_Gamepad", data)
+    local noOutfitData = ZO_GamepadEntryData:New(GetString(SI_NO_OUTFIT_EQUIP_ENTRY))
+    noOutfitData.noOutfitEntry = true
+    noOutfitData.actorCategory = self.currentActorCategory
+    noOutfitData.narrationText = ZO_GetDefaultParametricListToggleNarrationText
+    self.outfitSelectorList:AddEntry("ZO_OutfitSelector_CheckBoxTemplate_Gamepad", noOutfitData)
 
     local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits(self.currentActorCategory)
     for i = 1, numOutfits do
@@ -336,6 +355,7 @@ function ZO_Outfit_Selector_Gamepad:UpdateOutfitList()
         local isHidden, highestPriorityVisualLayerThatIsShowing = WouldOutfitBeHidden(i, data.actorCategory)
         data.isHiddenByVisualLayer = isHidden
         data.hiddenVisualLayer = highestPriorityVisualLayerThatIsShowing
+        data.narrationText = ZO_GetDefaultParametricListToggleNarrationText
         if i == 1 then
             local maxOutfits = self.currentActorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION and MAX_COMPANION_OUTFITS or MAX_OUTFIT_UNLOCKS 
             data:SetHeader(zo_strformat(SI_GAMEPAD_OUTFITS_SELECTOR_ENTRY_HEADER, numOutfits, maxOutfits))

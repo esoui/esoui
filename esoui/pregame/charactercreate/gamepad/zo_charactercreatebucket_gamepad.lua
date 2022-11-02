@@ -163,12 +163,22 @@ function ZO_CharacterCreateBucket_Gamepad:Initialize(...)
     self.windowData = windowData
     self.container = container
 
-    self.scrollChild = ZO_GamepadVerticalParametricScrollList:New(GetControl(container, "List"))
+    self.scrollChild = ZO_GamepadVerticalParametricScrollList:New(container:GetNamedChild("List"))
     self.scrollChild:SetFixedCenterOffset(DEFAULT_OFFSET)
 
     -- Handle all the input through this screen
     -- (so the focused control gets first access then we pass the input to the scrollchild)
     self.scrollChild:SetDirectionalInputEnabled(false)
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return self.expanded
+        end,
+        headerNarrationFunction = function()
+            return GAMEPAD_BUCKET_MANAGER:GetHeaderNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.scrollChild, narrationInfo)
 end
 
 function ZO_CharacterCreateBucket_Gamepad:SetTabIndex(index)
@@ -187,12 +197,12 @@ function ZO_CharacterCreateBucket_Gamepad:Finalize()
     self:GetScrollChild():Commit()
 end
 
-function ZO_CharacterCreateBucket_Gamepad:AddControl(control, updateFn, randomizeFn)
+function ZO_CharacterCreateBucket_Gamepad:AddControl(control, updateFn, randomizeFn, subCategoryId, narrationText)
     control.bucket = self
     control:ClearAnchors()
 
     local list = self:GetScrollChild()
-    list:AddEntry("ZO_CharacterCreateEntry_Gamepad", { control = control }, control.prePadding, control.postPadding, control.preSelectedOffsetAdditionalPadding, control.postSelectedOffsetAdditionalPadding, control.selectedCenterOffset)
+    list:AddEntry("ZO_CharacterCreateEntry_Gamepad", { control = control, narrationText = narrationText }, control.prePadding, control.postPadding, control.preSelectedOffsetAdditionalPadding, control.postSelectedOffsetAdditionalPadding, control.selectedCenterOffset)
     control:SetHidden(true)
 
     self.controlData[control] = { updateFn = updateFn, randomizeFn = randomizeFn }
@@ -286,6 +296,10 @@ function ZO_CharacterCreateBucketManager_Gamepad:Initialize(container)
     self.headerData =
     {
         tabBarEntries = self.tabBarEntries,
+        --Hacky solution; pretend the gear preview info is part of the header for narration purposes. Some day we should actually make it part of the header
+        subtitleTextNarration = function()
+            return GAMEPAD_CHARACTER_CREATE_MANAGER:GetCurrentGearPreviewInfo().modeName
+        end,
     }
     ZO_CharacterCreateBucketManager_Base.Initialize(self, container, CHARACTER_CREATE_BUCKETS)
 
@@ -339,6 +353,7 @@ function ZO_CharacterCreateBucketManager_Gamepad:Activate()
     if not self.active then
         self.active = true
         if self.currentBucket then
+            self.currentBucket:Expand()
             self.currentBucket:GetScrollChild():SetOnTargetDataChangedCallback(self.onTargetDataChangedCallback)
             self.currentBucket:GetScrollChild():Activate()
             self.currentBucket:GetScrollChild():RefreshVisible()
@@ -350,6 +365,7 @@ function ZO_CharacterCreateBucketManager_Gamepad:Deactivate()
     if self.active then
         self.active = false
         if self.currentBucket then
+            self.currentBucket:Collapse()
             if self.onTargetDataChangedCallback then
                 self.currentBucket:GetScrollChild():RemoveOnTargetDataChangedCallback(self.onTargetDataChangedCallback)
             end
@@ -410,5 +426,22 @@ end
 function ZO_CharacterCreateBucketManager_Gamepad:Finalize()
     for _, bucket in pairs(self.buckets) do
         bucket:Finalize()
+    end
+end
+
+function ZO_CharacterCreateBucketManager_Gamepad:GetHeaderNarration()
+    return ZO_GamepadGenericHeader_GetNarrationText(GAMEPAD_CHARACTER_CREATE_MANAGER.header, self.headerData)
+end
+
+function ZO_CharacterCreateBucketManager_Gamepad:NarrateCurrentBucket()
+    if self.currentBucket then
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currentBucket:GetScrollChild())
+    end
+end
+
+function ZO_CharacterCreateBucketManager_Gamepad:Reset()
+    ZO_CharacterCreateBucketManager_Base.Reset(self)
+    if self.active and self.currentBucket then
+        self.currentBucket:Expand()
     end
 end

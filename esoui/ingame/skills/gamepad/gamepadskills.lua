@@ -1374,6 +1374,7 @@ do
                     {
                         setup = MorphConfirmSetup,
                         morphSlot = MORPH_SLOT_MORPH_1,
+                        narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
                     },
                 },
                 -- Morph 2
@@ -1383,6 +1384,7 @@ do
                     {
                         setup = MorphConfirmSetup,
                         morphSlot = MORPH_SLOT_MORPH_2,
+                        narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
                     },
                 },
             },
@@ -1608,6 +1610,15 @@ do
 
     function ZO_GamepadSkills:InitializeAttributeDialog()
         self:ResetAttributeData()
+
+        local function OnAttributeValueChanged(entryData, entryControl)
+            SCREEN_NARRATION_MANAGER:QueueDialog(entryData.dialog)
+        end
+
+        local function GetAttributeNarrationText(entryData, entryControl)
+            local totalPoints = entryControl.pointLimitedSpinner:GetPoints() + entryControl.pointLimitedSpinner:GetAllocatedPoints()
+            return ZO_FormatSpinnerNarrationText(entryData.text, totalPoints)
+        end
         
         ZO_Dialogs_RegisterCustomDialog("GAMEPAD_SKILLS_ATTRIBUTE_PURCHASE",
         {
@@ -1638,6 +1649,9 @@ do
                         setup = ZO_GamepadStatAttributeRow_Setup,
                         attributeType = ATTRIBUTE_MAGICKA,
                         screen = self,
+                        onValueChangedCallback = OnAttributeValueChanged,
+                        narrationText = GetAttributeNarrationText,
+                        narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
                     },
                     text = GetString("SI_ATTRIBUTES", ATTRIBUTE_MAGICKA),
                     icon = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_magickaIcon.dds",
@@ -1650,6 +1664,9 @@ do
                         setup = ZO_GamepadStatAttributeRow_Setup,
                         attributeType = ATTRIBUTE_HEALTH,
                         screen = self,
+                        onValueChangedCallback = OnAttributeValueChanged,
+                        narrationText = GetAttributeNarrationText,
+                        narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
                     },
                     text = GetString("SI_ATTRIBUTES", ATTRIBUTE_HEALTH),
                     icon = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_healthIcon.dds",
@@ -1662,6 +1679,9 @@ do
                         setup = ZO_GamepadStatAttributeRow_Setup,
                         attributeType = ATTRIBUTE_STAMINA,
                         screen = self,
+                        onValueChangedCallback = OnAttributeValueChanged,
+                        narrationText = GetAttributeNarrationText,
+                        narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
                     },
                     text = GetString("SI_ATTRIBUTES", ATTRIBUTE_STAMINA),
                     icon = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_staminaIcon.dds",

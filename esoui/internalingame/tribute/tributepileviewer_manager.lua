@@ -118,11 +118,9 @@ function ZO_TributePileViewer_Manager:Initialize()
         end
     end)
 
-    HELP_MANAGER:RegisterCallback("OverlayVisibilityChanged", function(isVisible)
-        if isVisible then
-            self:SetViewingPile(nil)
-        end
-    end)
+    ZO_HELP_OVERLAY_SYNC_OBJECT:SetHandler("OnShown", function(isVisible)
+        self:SetViewingPile(nil)
+    end, "tributePileViewer")
 end
 
 function ZO_TributePileViewer_Manager:GetPileData(boardLocation)

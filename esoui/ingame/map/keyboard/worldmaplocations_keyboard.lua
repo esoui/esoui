@@ -2,11 +2,6 @@ local MapLocations = ZO_MapLocations_Shared:Subclass()
 
 local LOCATION_DATA = 1
 
-function MapLocations:New(...)
-    local object = ZO_MapLocations_Shared.New(self,...)
-    return object
-end
-
 function MapLocations:Initialize(control)
     ZO_MapLocations_Shared.Initialize(self, control)
     WORLD_MAP_LOCATIONS_FRAGMENT = ZO_FadeSceneFragment:New(control)
@@ -62,7 +57,7 @@ function MapLocations:RowLocation_OnMouseUp(label, button, upInside)
         label:SetAnchor(LEFT, nil, LEFT, 0, 0)
         if(upInside) then
             local data = ZO_ScrollList_GetData(label:GetParent())
-            ZO_WorldMap_SetMapByIndex(data.index)
+            WORLD_MAP_MANAGER:SetMapByIndex(data.index)
             PlaySound(SOUNDS.MAP_LOCATION_CLICKED)
         end
     end

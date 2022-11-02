@@ -115,6 +115,13 @@ ESO_Dialogs["HELP_TUTORIALS_OVERLAY_DIALOG"] =
                         entryData.setup = ZO_SharedGamepadEntry_OnSetup
                         entryData.helpCategoryIndex = helpCategoryIndex
                         entryData.helpIndex = helpIndex
+                        entryData.narrationText = function(listEntryData, listEntryControl)
+                            --TODO XAR: Do we want to somehow narrate the image as well?
+                            local _, description1, description2, image, gamepadDescription1, gamepadDescription2 = GetHelpInfo(listEntryData.helpCategoryIndex, listEntryData.helpIndex)
+                            description1 = gamepadDescription1 == "" and description1 or gamepadDescription1
+                            description2 = gamepadDescription2 == "" and description2 or gamepadDescription2
+                            return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(listEntryData.text), SCREEN_NARRATION_MANAGER:CreateNarratableObject(description1), SCREEN_NARRATION_MANAGER:CreateNarratableObject(description2) }
+                        end
 
                         local listItem =
                         {
@@ -132,7 +139,7 @@ ESO_Dialogs["HELP_TUTORIALS_OVERLAY_DIALOG"] =
         end
 
         local IS_VISIBLE = true
-        HELP_MANAGER:OnOverlayVisibilityChanged(IS_VISIBLE)
+        HELP_MANAGER:GetOverlaySyncObject():Show()
 
         dialog:setupFunc()
     end,
@@ -149,7 +156,7 @@ ESO_Dialogs["HELP_TUTORIALS_OVERLAY_DIALOG"] =
     end,
     finishedCallback = function()
         local IS_NOT_VISIBLE = false
-        HELP_MANAGER:OnOverlayVisibilityChanged(IS_NOT_VISIBLE)
+        HELP_MANAGER:GetOverlaySyncObject():Hide()
     end,
     buttons =
     {

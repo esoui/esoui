@@ -13,6 +13,7 @@
                 highlight = Path to the image to use for the control when the mouse is over it, or its clicked
                 callback = A function to call when the user clicks the control (LMB down->up while still inside the control), the callback receives this table as an argument
                 statusIcon = Path to the image, or function returning the potential path, to use for the control to denote status of the contents the button links to
+                visible = An optional function to call to determine whether this button is currently visible; this function receives this table as its only argument
             }
 
             Example:

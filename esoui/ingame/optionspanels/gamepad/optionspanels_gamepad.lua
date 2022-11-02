@@ -355,6 +355,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_LIMIT_FOLLOWERS_IN_TOWNS,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_IN_WORLD,
             settingId = IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY,
         },
         {
@@ -481,7 +486,32 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_ACCESSIBILITY,
             system = SETTING_TYPE_ACCESSIBILITY,
-            settingId = ACCESSIBILITY_SETTING_TEXT_CHAT_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_TEXT_CHAT_NARRATION,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_ZONE_CHAT_NARRATION,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_SCREEN_NARRATION,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_NARRATION_VOLUME,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_NARRATION_VOICE_SPEED,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_NARRATION_VOICE_TYPE,
         },
     },
     [SETTING_PANEL_AUDIO] =
@@ -690,6 +720,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_SCN,
+        },
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_NPC,
         },
         {
@@ -775,6 +810,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_INTERFACE,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_RAID_LIVES,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_HOUSE_TRACKER,
         },
         {
             panel = SETTING_PANEL_INTERFACE,
@@ -1054,6 +1094,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_NAMEPLATES,
             system = SETTING_TYPE_NAMEPLATES,
             settingId = NAMEPLATE_TYPE_GROUP_INDICATORS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_TARGET_MARKERS,
         },
         {
             panel = SETTING_PANEL_NAMEPLATES,

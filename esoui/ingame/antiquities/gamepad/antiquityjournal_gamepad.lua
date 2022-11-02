@@ -240,11 +240,14 @@ do
                     dropdown:AddItem(entries[i])
                 end
 
+                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
+
                 dropdown:UpdateItems()
 
                 local IGNORE_CALLBACK = true
                 dropdown:TrySelectItemByData(entries[self.currentFilter], IGNORE_CALLBACK)
             end
+            optionsFilterDropdownEntryData.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
         end
         return optionsFilterDropdownEntryData
     end

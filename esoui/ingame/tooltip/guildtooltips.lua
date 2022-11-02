@@ -18,7 +18,7 @@ function ZO_Tooltip:LayoutGuildApplicationDetails(applicationData)
     local statValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))
     statValuePair:SetStat(GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_SORT_HEADER_LEVEL), self:GetStyle("statValuePairStat"))
     local ICON_SIZE = 40
-    local levelText = GetLevelOrChampionPointsString(applicationData.level, applicationData.championPoints, ICON_SIZE)
+    local levelText = ZO_GetLevelOrChampionPointsString(applicationData.level, applicationData.championPoints, ICON_SIZE)
     statValuePair:SetValue(levelText, self:GetStyle("socialStatsValue"))
     statsSection:AddStatValuePair(statValuePair)
 
@@ -56,16 +56,13 @@ do
         headerSection:AddLine(guildName, self:GetStyle("title"))
         self:AddSection(headerSection)
 
-        local keybindString
-        local key, mod1, mod2, mod3, mod4 = GetHighestPriorityActionBindingInfoFromName("UI_SHORTCUT_SECONDARY", IsInGamepadPreferredMode())
-        if key ~= KEY_INVALID then
-            keybindString = ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, TEXTURE_SCALE_PERCENT)
-        else
-            keybindString = ZO_Keybindings_GenerateTextKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
-        end
-
         local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
-        bodySection:AddLine(zo_strformat(SI_GAMEPAD_GUILD_LINK_TOOLTIP_DESCRIPTION, keybindString, ZO_WHITE:Colorize(guildName)), self:GetStyle("flavorText"))
+        local params = {
+            "UI_SHORTCUT_SECONDARY",
+            ZO_WHITE:Colorize(guildName),
+        }
+        local KEYBIND_INDEX = 1
+        bodySection:AddParameterizedKeybindLine(SI_GAMEPAD_GUILD_LINK_TOOLTIP_DESCRIPTION, params, KEYBIND_INDEX, self:GetStyle("flavorText"))
         self:AddSection(bodySection)
     end
 end

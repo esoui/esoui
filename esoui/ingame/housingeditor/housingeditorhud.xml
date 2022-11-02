@@ -59,6 +59,9 @@
                     <Anchor point="BOTTOMLEFT" relativePoint="CENTER" offsetX="40" offsetY="10" maxLineCount="2" />
                     <Dimensions x="400" />
                 </Label>
+                <Label name="$(parent)TargetDistance" tier="HIGH" verticalAlignment="TOP">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TargetName" relativePoint="BOTTOMLEFT" />
+                </Label>
             </Controls>
         </TopLevelControl>
 

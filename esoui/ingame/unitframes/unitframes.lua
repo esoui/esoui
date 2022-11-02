@@ -492,6 +492,32 @@ function ZO_UnitFrames_Manager:UpdateElectionIcons()
     end
 end
 
+function ZO_UnitFrames_Manager:UpdateNames()
+    local localCompanionFrame = self:GetFrame("companion")
+    if localCompanionFrame then
+        localCompanionFrame:UpdateName()
+    end
+
+    local targetFrame = self:GetFrame("reticleover")
+    if targetFrame then
+        targetFrame:UpdateName()
+    end
+
+    for i = 1, GROUP_SIZE_MAX do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        local companionTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
+        local unitFrame = unitTag and self:GetFrame(unitTag)
+        local companionUnitFrame = companionTag and self:GetFrame(companionTag)
+
+        if unitFrame then
+            unitFrame:UpdateName()
+        end
+        if companionUnitFrame then
+            companionUnitFrame:UpdateName()
+        end
+    end
+end
+
 --[[
     ZO_UnitFrameBar class...defines one bar in the unit frame, including background/glass textures, statusbar and text
 --]]
@@ -1703,7 +1729,20 @@ function ZO_UnitFrameObject:UpdateName()
         else
             name = GetUnitName(tag)
         end
-        self.nameLabel:SetText(name)
+
+        local nameText
+        local targetMarkerType = GetUnitTargetMarkerType(tag)
+        if targetMarkerType ~= TARGET_MARKER_TYPE_NONE then
+            local iconPath = GetPlatformTargetMarkerIcon(targetMarkerType)
+            if self.style == TARGET_UNIT_FRAME then
+                nameText = zo_iconTextFormatNoSpaceAlignedRight(iconPath, 20, 20, name)
+            else
+                nameText = zo_iconTextFormatNoSpace(iconPath, 20, 20, name)
+            end
+        else
+            nameText = name
+        end
+        self.nameLabel:SetText(nameText)
     end
 end
 
@@ -2594,6 +2633,10 @@ local function RegisterForEvents()
         UnitFrames:UpdateElectionInfo(resultType)
     end
 
+    local function OnTargetMarkerUpdate()
+        UnitFrames:UpdateNames()
+    end
+
     ZO_UnitFrames:RegisterForEvent(EVENT_TARGET_CHANGED, OnTargetChanged)
     ZO_UnitFrames:AddFilterForEvent(EVENT_TARGET_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_CHARACTER_NAME_CHANGED, OnUnitCharacterNameChanged)
@@ -2623,6 +2666,7 @@ local function RegisterForEvents()
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_REQUESTED, OnGroupElectionRequested)
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_NOTIFICATION_ADDED, OnGroupElectionRequested)
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_RESULT, OnGroupElectionUpdate)
+    ZO_UnitFrames:RegisterForEvent(EVENT_TARGET_MARKER_UPDATE, OnTargetMarkerUpdate)
 
     CALLBACK_MANAGER:RegisterCallback("TargetOfTargetEnabledChanged", OnTargetOfTargetEnabledChanged)
 end

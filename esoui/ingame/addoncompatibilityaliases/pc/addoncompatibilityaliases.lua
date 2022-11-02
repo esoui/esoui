@@ -513,6 +513,12 @@ MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_FIRE_DRAKES = MAP_PIN_TYPE_BGPIN_CAPTURE
 MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_PIT_DAEMONS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_PIT_DAEMONS
 MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_STORM_LORDS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_STORM_LORDS
 
+-- World Event Unit pin enum fixup
+MAP_PIN_TYPE_DRAGON_COMBAT_HEALTHY = MAP_PIN_TYPE_UNIT_COMBAT_HEALTHY
+MAP_PIN_TYPE_DRAGON_COMBAT_WEAK = MAP_PIN_TYPE_UNIT_COMBAT_WEAK
+MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY = MAP_PIN_TYPE_UNIT_IDLE_HEALTHY
+MAP_PIN_TYPE_DRAGON_IDLE_WEAK = MAP_PIN_TYPE_UNIT_IDLE_WEAK
+
 ZO_MapPin.PulseAninmation = ZO_MapPin.PulseAnimation
 
 --Added Tracking Level Map Pin Function
@@ -1102,3 +1108,76 @@ ZO_Gamepad_BookSet = ZO_LoreLibraryBookSetTopLevel_Gamepad
 ZO_Gamepad_LoreLibrary_OnInitialize = ZO_LoreLibrary_Gamepad_OnInitialize
 BOOK_SET_GAMEPAD = LORE_LIBRARY_BOOK_SET_GAMEPAD
 BOOKSET_SCENE_GAMEPAD = LORE_LIBRARY_BOOK_SET_SCENE_GAMEPAD
+
+--Armory refactor
+ARMORY_OPERATION_COOLDOWN_DURATION_MS = DEFAULT_ARMORY_OPERATION_COOLDOWN_DURATION_MS
+
+--Renaming functions in ZO_ChampionRankUtils.lua to fit standards
+GetLevelOrChampionPointsStringNoIcon = ZO_GetLevelOrChampionPointsStringNoIcon
+GetChampionIconMarkupString = ZO_GetChampionIconMarkupString
+GetChampionIconMarkupStringInheritColor = ZO_GetChampionIconMarkupStringInheritColor
+GetLevelOrChampionPointsString = ZO_GetLevelOrChampionPointsString
+GetLevelOrChampionPointsRangeString = ZO_GetLevelOrChampionPointsRangeString
+
+--Spelling correction for ZO_Dyeing_GetAchievementText
+ZO_Dyeing_GetAchivementText = ZO_Dyeing_GetAchievementText
+
+-- Refactoring WorldMap.lua
+ZO_WorldMapPins = ZO_WorldMapPins_Manager
+ZO_MapLocationPins_Manager = ZO_MapLocations
+
+function ZO_WorldMap_GetPinHandlers(mouseButton)
+    ZO_WorldMap_GetPinManager():GetPinHandlers(mouseButton)
+end
+
+function ZO_WorldMap_WouldPinHandleClick(pinControl, button, ctrl, alt, shift)
+    ZO_WorldMap_GetPinManager():WouldPinHandleClick(pinControl, button, ctrl, alt, shift)
+end
+
+function ZO_WorldMap_HandlePinClicked(pinControl, mouseButton, ctrl, alt, shift)
+    ZO_WorldMap_GetPinManager():HandlePinClicked(pinControl, mouseButton, ctrl, alt, shift)
+end
+
+function ZO_WorldMap_ChoosePinOption(pin, handler)
+    ZO_WorldMap_GetPinManager():ChoosePinOption(pin, handler)
+end
+
+function ZO_WorldMap_RefreshGroupPins()
+    ZO_WorldMap_GetPinManager():RefreshGroupPins()
+end
+
+function ZO_WorldMap_GetFoundTooltipMouseOverPins()
+    ZO_WorldMap_GetPinManager():GetFoundTooltipMouseOverPins()
+end
+
+function ZO_WorldMap_InvalidateTooltip()
+    ZO_WorldMap_GetPinManager():InvalidateTooltip()
+end
+
+function ZO_WorldMap_AddCustomPin(pinType, pinTypeAddCallback, pinTypeOnResizeCallback, pinLayoutData, pinTooltipCreator)
+    ZO_WorldMap_GetPinManager():AddCustomPin(pinType, pinTypeAddCallback, pinTypeOnResizeCallback, pinLayoutData, pinTooltipCreator)
+end
+
+function ZO_WorldMap_SetCustomPinEnabled(pinType, enabled)
+    ZO_WorldMap_GetPinManager():SetCustomPinEnabled(pinType, enabled)
+end
+
+function ZO_WorldMap_IsCustomPinEnabled(pinType)
+    ZO_WorldMap_GetPinManager():IsCustomPinEnabled(pinType)
+end
+
+function ZO_WorldMap_ResetCustomPinsOfType(pinTypeString)
+    ZO_WorldMap_GetPinManager():RemovePins(pinTypeString)
+end
+
+function ZO_WorldMap_RefreshCustomPinsOfType(pinType)
+    ZO_WorldMap_GetPinManager():RefreshCustomPins(pinType)
+end
+
+function ZO_WorldMap_DoesMapHideQuestPins()
+    return ZO_WorldMapPins_Manager.DoesCurrentMapHideQuestPins()
+end
+
+function ZO_WorldMap_SetMapByIndex(mapIndex)
+    WORLD_MAP_MANAGER:SetMapByIndex(mapIndex)
+end

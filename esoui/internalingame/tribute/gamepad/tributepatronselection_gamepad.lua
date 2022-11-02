@@ -111,19 +111,13 @@ function ZO_TributePatronSelection_Gamepad_FocusArea_Drafted:RefreshTooltips()
     end
 end
 
-local PATRON_TILE_GRID_PADDING_X = 15
---4 is the number of card slots in a row and 3 is the number of padded spaces between those cards
-ZO_TRIBUTE_PATRON_SELECTION_GAMEPAD_HEADER_WIDTH = (ZO_TRIBUTE_PATRON_SELECTION_TILE_WIDTH_GAMEPAD * 4) + (PATRON_TILE_GRID_PADDING_X * 3)
+local PATRON_TILE_GRID_PADDING_X = 12
+-- 5 is the number of card slots in a row and 4 is the number of padded spaces between those cards
+ZO_TRIBUTE_PATRON_SELECTION_GAMEPAD_HEADER_WIDTH = (ZO_TRIBUTE_PATRON_SELECTION_TILE_WIDTH_GAMEPAD * 5) + (PATRON_TILE_GRID_PADDING_X * 4)
 ZO_TRIBUTE_PATRON_SELECTION_GAMEPAD_GRID_WIDTH = ZO_TRIBUTE_PATRON_SELECTION_GAMEPAD_HEADER_WIDTH + ZO_SCROLL_BAR_WIDTH
 
 --TODO Tribute: Determine how much of this logic can be moved to shared
 ZO_TributePatronSelection_Gamepad = ZO_Object.MultiSubclass(ZO_GamepadMultiFocusArea_Manager, ZO_TributePatronSelection_Shared)
-
-function ZO_TributePatronSelection_Gamepad:New(...)
-    local object = ZO_TributePatronSelection_Shared.New(self, ...)
-    object:Initialize(...)
-    return object
-end
 
 function ZO_TributePatronSelection_Gamepad:Initialize(control)
     local TEMPLATE_DATA =
@@ -283,6 +277,15 @@ function ZO_TributePatronSelection_Gamepad:InitializeKeybindStripDescriptors()
             end,
             visible = function()
                 return self.draftArea:CanBeSelected()
+            end,
+        },
+        {
+            keybind = "UI_SHORTCUT_NEGATIVE",
+            ethereal = true,
+            callback = function()
+              local NO_EVENT = nil
+              local NOT_INTERCEPTING_CLOSE_ACTION = false
+              TRIBUTE:RequestExitTribute(NO_EVENT, NOT_INTERCEPTING_CLOSE_ACTION)
             end,
         },
     }

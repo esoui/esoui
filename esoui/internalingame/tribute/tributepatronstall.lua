@@ -11,7 +11,7 @@ ZO_TRIBUTE_SUIT_TAB_ICON_RIGHT_COORD = 1
 
 -- Patroin Requirement Container --
 
-ZO_TributePatron_RequirementContainer = ZO_Tribute_PooledObject:Subclass()
+ZO_TributePatron_RequirementContainer = ZO_PooledObject:Subclass()
 
 function ZO_TributePatron_RequirementContainer:Initialize(control)
     self.control = control

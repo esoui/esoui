@@ -10,7 +10,9 @@ function ZO_WorldMapQuestBreadcrumbs:Initialize()
     self.taskIdToConditionData = {}
     self.conditionDataToPosition = {}
     self.activeQuests = {}
+    self.charIdToGroupBreadcrumbingData = {}
 
+    EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_GROUP_MEMBER_POSITION_REQUEST_COMPLETE, function(_, ...) self:OnGroupMemberRequestComplete(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_POSITION_REQUEST_COMPLETE, function(_, ...) self:OnQuestPositionRequestComplete(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(_, ...) self:OnQuestConditionInfoChanged(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_ADDED, function(_, ...) self:OnQuestAdded(...) end)
@@ -164,9 +166,22 @@ function ZO_WorldMapQuestBreadcrumbs:RemoveQuest(questIndex)
     end
 end
 
+function ZO_WorldMapQuestBreadcrumbs:GetGroupMemberBreadcrumbingData()
+    return self.charIdToGroupBreadcrumbingData
+end
+
 --Events
 
-function ZO_WorldMapQuestBreadcrumbs:OnQuestPositionRequestComplete(taskId, pinType, xLoc, yLoc, areaRadius, insideCurrentMapWorld, isBreadcrumb)
+function ZO_WorldMapQuestBreadcrumbs:OnGroupMemberRequestComplete(taskId, charId, isGroupLeader, isBreadcrumb, teleportNPCId, teleportWaypointIndex)
+    self.charIdToGroupBreadcrumbingData[charId] =
+    {
+        isGroupLeader = isGroupLeader,
+        teleportNPCId = teleportNPCId,
+        teleportWaypointIndex = teleportWaypointIndex,
+    }
+end
+
+function ZO_WorldMapQuestBreadcrumbs:OnQuestPositionRequestComplete(taskId, pinType, xLoc, yLoc, areaRadius, insideCurrentMapWorld, isBreadcrumb, teleportNPCId, teleportWaypointIndex)
     local conditionData = self.taskIdToConditionData[taskId]
     if conditionData then
         self.taskIdToConditionData[taskId] = nil
@@ -178,6 +193,8 @@ function ZO_WorldMapQuestBreadcrumbs:OnQuestPositionRequestComplete(taskId, pinT
             areaRadius = areaRadius,
             insideCurrentMapWorld = insideCurrentMapWorld,
             isBreadcrumb = isBreadcrumb,
+            teleportNPCId = teleportNPCId,
+            teleportWaypointIndex = teleportWaypointIndex,
         }
         self:AddQuestConditionPosition(conditionData, positionData)
         self:AddQuest(conditionData.questIndex)

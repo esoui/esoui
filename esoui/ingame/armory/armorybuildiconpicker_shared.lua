@@ -16,6 +16,7 @@ function ZO_ArmoryBuildIconPicker_Shared:Initialize(control, templateData)
         entryHeight - The height to be used for the entryTemplate,
         entryPaddingX - The padding in pixels between icons horizontally,
         entryPaddingY - The padding in pixels between icons vertically,
+        narrationText - Optional: The text used to narrate the entry when using screen narration. Can be a function or a string
     ]]
     self.templateData = templateData
 end
@@ -62,7 +63,8 @@ function ZO_ArmoryBuildIconPicker_Shared:CreateArmoryBuildIconPickerDataObject(i
         isCurrent = function()
             local selectedIconIndex = self:GetSelectedArmoryBuildIconIndex()
             return selectedIconIndex and selectedIconIndex == index or false
-        end
+        end,
+        narrationText = self.templateData.narrationText,
     }
     return data
 end

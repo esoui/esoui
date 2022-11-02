@@ -122,6 +122,7 @@ ZO_IS_QUEST_TYPE_IN_OTHER_CATEGORY =
     [QUEST_TYPE_PROLOGUE] = true,
     [QUEST_TYPE_UNDAUNTED_PLEDGE] = true,
     [QUEST_TYPE_COMPANION] = true,
+    [QUEST_TYPE_TRIBUTE] = true,
 }
 
 function ZO_QuestJournal_Manager:GetQuestCategoryNameAndType(questType, zone)

@@ -242,7 +242,9 @@
                                     <Anchor point="LEFT" relativeTo="$(parent)VitalityLabel" relativePoint="RIGHT" offsetX="10" offsetY="-5"/>
                                 </Label>
 
-                                <Label name="$(parent)VitalityPercent" font="ZoFontGamepad42" />
+                                <Label name="$(parent)VitalityPercent" font="ZoFontGamepad42" >
+                                    <Anchor point="LEFT" relativeTo="$(parent)VitalityIcon" relativePoint="RIGHT" offsetX="10" />
+                                </Label>
                             </Controls>
                         </Control>
 

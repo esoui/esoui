@@ -246,6 +246,9 @@ function ZO_HousingPathSettings_Keyboard:UpdateButtonSettings(control)
     local buttonText = GetString(data.buttonText)
     buttonControl:SetText(buttonText)
 
+    local visible = data.visible == nil or data.visible()
+    buttonControl:SetHidden(not visible)
+
     local furnitureName = GetPlacedHousingFurnitureInfo(self.owner.targetFurnitureId)
     local labelText = zo_strformat(SI_HOUSING_FURNITURE_NAME_FORMAT, furnitureName)
     nameControl:SetText(labelText)
