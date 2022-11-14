@@ -4,9 +4,15 @@ ZO_LOGIN_EDITBOX_WIDTH = 500
 -- Login Base screen -- 
 ZO_LoginBase_Keyboard = ZO_Object:Subclass()
 
-local DMM_LOGIN_LOGO_DATA = {
+local DMM_LOGIN_LOGO_DATA =
+{
     leftSideTexturePath = "EsoUI/Art/Login/jp_login_logo_left.dds",
     rightSideTexturePath = "EsoUI/Art/Login/jp_login_logo_right.dds",
+}
+
+local LANGUAGE_OVERRIDES_LOGIN_LOGO =
+{
+    ["zh"] = true,
 }
 
 function ZO_LoginBase_Keyboard:New(...)
@@ -44,6 +50,15 @@ function ZO_LoginBase_Keyboard:UpdateEsoLogo()
         
         if serviceType == PLATFORM_SERVICE_TYPE_DMM then
             logoData = DMM_LOGIN_LOGO_DATA
+        else
+            local language = GetCVar("Language.2")
+            if LANGUAGE_OVERRIDES_LOGIN_LOGO[language] then
+                logoData =
+                {
+                    leftSideTexturePath = string.format("EsoUI/Art/Login/%s_login_logo_left.dds", language),
+                    rightSideTexturePath = string.format("EsoUI/Art/Login/%s_login_logo_right.dds", language),
+                }
+            end
         end
 
         if logoData then

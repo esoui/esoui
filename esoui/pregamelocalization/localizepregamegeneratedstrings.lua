@@ -1030,8 +1030,8 @@ EsoStrings =
     "http://forums.elderscrollsonline.com", -- SI_APPROVEDURLTYPESTEAM5
     "http://www.elderscrollsonline.com", -- SI_APPROVEDURLTYPEHERON0
     "https://account.elderscrollsonline.com", -- SI_APPROVEDURLTYPEHERON1
-    "http://notimplementedyet.com/", -- SI_APPROVEDURLTYPEHERON2
-    "http://notimplementedyet.com/", -- SI_APPROVEDURLTYPEHERON3
+    "https://account.elderscrollsonline.com/store", -- SI_APPROVEDURLTYPEHERON2
+    "https://account.elderscrollsonline.com/store/product/eso_plus", -- SI_APPROVEDURLTYPEHERON3
     "https://help.elderscrollsonline.com", -- SI_APPROVEDURLTYPEHERON4
     "http://forums.elderscrollsonline.com", -- SI_APPROVEDURLTYPEHERON5
     "",
@@ -10967,7 +10967,8 @@ SafeAddVersion(SI_EMOTECATEGORY8, 1)
 SafeAddVersion(SI_APPROVEDURLTYPE2, 1)
 SafeAddVersion(SI_APPROVEDURLTYPE3, 1)
 SafeAddVersion(SI_APPROVEDURLTYPESTEAM2, 1)
-SafeAddVersion(SI_APPROVEDURLTYPEHERON2, 1)
+SafeAddVersion(SI_APPROVEDURLTYPEHERON2, 2)
+SafeAddVersion(SI_APPROVEDURLTYPEHERON3, 1)
 SafeAddVersion(SI_PLATFORMSTORELABEL1, 1)
 SafeAddVersion(SI_PLATFORMSTORELABEL2, 1)
 SafeAddVersion(SI_CHARACTERCREATEOPTIONRESTRICTIONREASON1, 1)

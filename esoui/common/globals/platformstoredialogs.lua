@@ -42,6 +42,10 @@ function ZO_ShowBuyCrownsPlatformDialog()
     OnMarketPurchaseMoreCrowns()
     if DoesPlatformStoreUseExternalLinks() then 
         ZO_PlatformOpenApprovedURL(APPROVED_URL_ESO_ACCOUNT_STORE, ZO_GetPlatformStoreName(), GetString(SI_URL_APPLICATION_WEB))
+    elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
+        -- A temporary solution until Stadia goes away next update.
+        -- This will just redirect to the generic confirm url dialog
+        ShowPlatformESOCrownPacksUI()
     else
         ZO_Dialogs_ShowPlatformDialog("BUY_CROWNS_FROM_PLATFORM_STORE", nil, { mainTextParams = { ZO_Currency_FormatKeyboard(CURT_CROWNS, NO_AMOUNT, ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON), ZO_GetPlatformStoreName() } })
     end
@@ -92,6 +96,10 @@ ESO_Dialogs["BUY_ESO_PLUS_FROM_PLATFORM_STORE"] =
 function ZO_ShowBuySubscriptionPlatformDialog()
     if DoesPlatformStoreUseExternalLinks() then
         ZO_PlatformOpenApprovedURL(APPROVED_URL_ESO_ACCOUNT_SUBSCRIPTION, ZO_GetPlatformStoreName(), GetString(SI_URL_APPLICATION_WEB))
+    elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
+        -- A temporary solution until Stadia goes away next update.
+        -- This will just redirect to the generic confirm url dialog
+        ShowPlatformESOPlusSubscriptionUI()
     else
         ZO_Dialogs_ShowPlatformDialog("BUY_ESO_PLUS_FROM_PLATFORM_STORE")
     end

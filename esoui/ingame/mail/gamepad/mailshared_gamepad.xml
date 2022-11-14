@@ -56,7 +56,7 @@
                 self.edit = self:GetNamedChild("Label")
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Label" font="ZoFontGamepad34" minLineCount="1" maxLineCount="1">
+                <Label name="$(parent)Label" font="ZoFontGamepad34" minLineCount="1" maxLineCount="1" wrapMode="ELLIPSIS">
                     <Anchor point="TOPLEFT" offsetX="11" offsetY="6" />
                     <Anchor point="TOPRIGHT" offsetX="-11" offsetY="6" />
                 </Label>

@@ -62,7 +62,7 @@
                     <Anchor point="RIGHT"/>
                     
                     <Controls>
-                        <Label name="$(parent)Subject" font="ZoFontGame" maxLineCount="1">
+                        <Label name="$(parent)Subject" font="ZoFontGame" maxLineCount="1" wrapMode="ELLIPSIS">
                             <Anchor point="TOPLEFT" />
                             <Anchor point="TOPRIGHT"/>
                         </Label>
@@ -176,13 +176,14 @@
                         </Label>
                         <Label name="$(parent)Subject" font="ZoFontWinH4" linkEnabled="true" mouseEnabled="true">
                             <Anchor point="TOPLEFT" offsetY="82"/>
+                            <Anchor point="TOPRIGHT" offsetX="-10" offsetY="82"/>
                             <OnLinkMouseUp>
                                 ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
                             </OnLinkMouseUp>
                         </Label>
                         <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Subject" relativePoint="BOTTOMLEFT" offsetY="35"/>
-                            <Dimensions x="500" y="395"/>
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-10" offsetY="536"/>
                         </Control>
                         <Label name="$(parent)Body" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" linkEnabled="true" mouseEnabled="true">
                             <Dimensions x="480"/>
