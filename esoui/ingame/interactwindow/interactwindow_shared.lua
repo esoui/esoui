@@ -284,7 +284,7 @@ function ZO_SharedInteraction:UpdateShadowyConnectionsChatterOption(control, dat
     end
 end
 
-function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, teleportWaypointIndex)
+function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, waypointIdTable)
     optionType = optionType or CHATTER_START_TALK
     local chatterData =
     {
@@ -294,7 +294,7 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
         isImportant = isImportant,
         chosenBefore = chosenBefore,
         teleportNPCId = teleportNPCId,
-        teleportWaypointIndex = teleportWaypointIndex,
+        waypointIdTable = waypointIdTable,
         gold = nil,
         iconFiles = {},
         isChatterOption = true,
@@ -364,22 +364,26 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
                 end
                 chatterData.optionUsable = false
             end
-        elseif optionType == CHATTER_TALK_CHOICE and chatterData.teleportNPC ~= 0 and chatterData.teleportWaypointIndex ~= TELEPORT_WAYPOINT_INDEX_DEFAULT then
+        elseif (optionType == CHATTER_START_TALK or optionType == CHATTER_TALK_CHOICE) and chatterData.teleportNPCId ~= 0 and chatterData.waypointIdTable and #chatterData.waypointIdTable > 0 then
             -- TODO: Handle zone guide quest tracked but not in journal
 
             -- Consider breadcrumb pathing for group members
             for groupCharId, groupMember in pairs(WORLD_MAP_QUEST_BREADCRUMBS:GetGroupMemberBreadcrumbingData()) do
-                if groupMember.teleportNPCId == chatterData.teleportNPCId and groupMember.teleportWaypointIndex == chatterData.teleportWaypointIndex then
-                    if groupMember.isGroupLeader then
-                        if #chatterData.iconFiles == 0 then
-                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/groupLeader_door.dds")
-                        else
-                            chatterData.iconFiles[1] = "EsoUI/Art/Compass/groupLeader_door.dds"
-                        end
-                        break
-                    else
-                        if #chatterData.iconFiles == 0 then
-                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/groupMember_door.dds")
+                if groupMember.teleportNPCId == chatterData.teleportNPCId then
+                    for _, waypointId in pairs(chatterData.waypointIdTable) do
+                        if groupMember.waypointId == waypointId then
+                            if groupMember.isGroupLeader then
+                                if #chatterData.iconFiles == 0 then
+                                    table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/groupLeader_door.dds")
+                                else
+                                    chatterData.iconFiles[1] = "EsoUI/Art/Compass/groupLeader_door.dds"
+                                end
+                                break
+                            else
+                                if #chatterData.iconFiles == 0 then
+                                    table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/groupMember_door.dds")
+                                end
+                            end
                         end
                     end
                 end
@@ -389,30 +393,33 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
             -- Consider breadcrumb pathing in journal quests
             for questIndex = 1, GetNumJournalQuests() do
                 local stepsTable = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
-                for stepIndex, step in pairs(stepsTable) do
-                    for conditionIndex, condition in pairs(step) do
-                        if condition.teleportNPCId == chatterData.teleportNPCId and condition.teleportWaypointIndex == chatterData.teleportWaypointIndex then
-                             if GetJournalQuestInstanceDisplayType(questIndex) == INSTANCE_DISPLAY_TYPE_ZONE_STORY then
-                                if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
-                                    if #chatterData.iconFiles == previousIconCount then
-                                        table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds")
-                                    else
-                                        chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds"
+                -- Check against nil since not every quest is pathable
+                if stepsTable then
+                    for stepIndex, step in pairs(stepsTable) do
+                        for conditionIndex, condition in pairs(step) do
+                            if condition.teleportNPCId == chatterData.teleportNPCId and ZO_IsElementInNumericallyIndexedTable(chatterData.waypointIdTable, condition.waypointId) then
+                                if GetJournalQuestInstanceDisplayType(questIndex) == INSTANCE_DISPLAY_TYPE_ZONE_STORY then
+                                    if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
+                                        if #chatterData.iconFiles == previousIconCount then
+                                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds")
+                                        else
+                                            chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds"
+                                        end
+                                        break
+                                    elseif #chatterData.iconFiles == previousIconCount then
+                                        table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door.dds")
                                     end
-                                    break
-                                elseif #chatterData.iconFiles == previousIconCount then
-                                    table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door.dds")
-                                end
-                            else
-                                if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
-                                    if #chatterData.iconFiles == previousIconCount then
-                                        table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door_assisted.dds")
-                                    else
-                                        chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/quest_icon_door_assisted.dds"
+                                else
+                                    if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
+                                        if #chatterData.iconFiles == previousIconCount then
+                                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door_assisted.dds")
+                                        else
+                                            chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/quest_icon_door_assisted.dds"
+                                        end
+                                        break
+                                    elseif #chatterData.iconFiles == previousIconCount then
+                                        table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door.dds")
                                     end
-                                    break
-                                elseif #chatterData.iconFiles == previousIconCount then
-                                    table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door.dds")
                                 end
                             end
                         end
@@ -429,9 +436,10 @@ function ZO_SharedInteraction:PopulateChatterOptions(optionCount, backToTOCOptio
     local importantOptions = {}
 
     for i = 1, optionCount do
-        local optionString, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, teleportWaypoinIndex = GetChatterOption(i)
+        local optionString, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId = GetChatterOption(i)
+        local waypointIdTable = { GetChatterOptionWaypoints(i) }
         local controlID = i
-        self:PopulateChatterOption(controlID, i, optionString, optionType, optionalArg, isImportant, chosenBefore, importantOptions, teleportNPCId, teleportWaypoinIndex)
+        self:PopulateChatterOption(controlID, i, optionString, optionType, optionalArg, isImportant, chosenBefore, importantOptions, teleportNPCId, waypointIdTable)
     end
 
     local backToTOC, farewell, isImportant = GetChatterFarewell()

@@ -482,7 +482,7 @@ do
         end
 
         self.navigationContainer:SetHidden(false)
-        self.messageControl:SetHidden(false)
+        self.messageControl:SetHidden(self.mailId == nil)
         if IsLocalMailboxFull() then
             self.fullLabel:SetText(GetString(SI_MAIL_INBOX_FULL))
             self.fullLabel:SetHidden(false)

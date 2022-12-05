@@ -172,16 +172,16 @@ end
 
 --Events
 
-function ZO_WorldMapQuestBreadcrumbs:OnGroupMemberRequestComplete(taskId, charId, isGroupLeader, isBreadcrumb, teleportNPCId, teleportWaypointIndex)
+function ZO_WorldMapQuestBreadcrumbs:OnGroupMemberRequestComplete(taskId, charId, isGroupLeader, isBreadcrumb, teleportNPCId, waypointId)
     self.charIdToGroupBreadcrumbingData[charId] =
     {
         isGroupLeader = isGroupLeader,
         teleportNPCId = teleportNPCId,
-        teleportWaypointIndex = teleportWaypointIndex,
+        waypointId = waypointId,
     }
 end
 
-function ZO_WorldMapQuestBreadcrumbs:OnQuestPositionRequestComplete(taskId, pinType, xLoc, yLoc, areaRadius, insideCurrentMapWorld, isBreadcrumb, teleportNPCId, teleportWaypointIndex)
+function ZO_WorldMapQuestBreadcrumbs:OnQuestPositionRequestComplete(taskId, pinType, xLoc, yLoc, areaRadius, insideCurrentMapWorld, isBreadcrumb, teleportNPCId, waypointId)
     local conditionData = self.taskIdToConditionData[taskId]
     if conditionData then
         self.taskIdToConditionData[taskId] = nil
@@ -194,7 +194,7 @@ function ZO_WorldMapQuestBreadcrumbs:OnQuestPositionRequestComplete(taskId, pinT
             insideCurrentMapWorld = insideCurrentMapWorld,
             isBreadcrumb = isBreadcrumb,
             teleportNPCId = teleportNPCId,
-            teleportWaypointIndex = teleportWaypointIndex,
+            waypointId = waypointId,
         }
         self:AddQuestConditionPosition(conditionData, positionData)
         self:AddQuest(conditionData.questIndex)
