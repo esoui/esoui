@@ -33,7 +33,7 @@ function ZO_GamepadLinks:Initialize(supportedLinkTypes, gamepadTooltip)
     self.registeredKeybinds = nil
     self.showingLinkData = nil
 
-    self:SetSupportedLinkTypes(overrideLinkTypes or ZO_VALID_LINK_TYPES_CHAT)
+    self:SetSupportedLinkTypes(supportedLinkTypes or ZO_VALID_LINK_TYPES_CHAT)
     self:InitializeKeybindStripDescriptor()
     self:SetGamepadTooltip(gamepadTooltip or GAMEPAD_RIGHT_TOOLTIP)
 end
@@ -277,9 +277,11 @@ function ZO_GamepadLinks:Show()
     if linkData and linkData.linkType then
         local previousLink = self.showingLinkData
         local link = linkData.link
+        local useKeybindDescriptor = self.keybindStripDescriptor and self.keybindStripDescriptor[1] or nil
+        local actionName = useKeybindDescriptor and useKeybindDescriptor.keybind or nil
 
         -- Show current link.
-        if GAMEPAD_TOOLTIPS:LayoutLink(self.gamepadTooltip, link) then
+        if GAMEPAD_TOOLTIPS:LayoutLink(self.gamepadTooltip, link, actionName) then
             self.showingLinkData = linkData
             self:OnLinkShown(self.showingLinkData, previousLink)
             return

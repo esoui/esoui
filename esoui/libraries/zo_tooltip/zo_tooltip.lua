@@ -1198,12 +1198,12 @@ do
         [LINK_TYPE_ITEM] = "LayoutItem",
     }
 
-    function ZO_Tooltip:LayoutLink(link)
+    function ZO_Tooltip:LayoutLink(link, ...)
         local linkType = GetLinkType(link)
         local handlerKey = LINK_LAYOUT_HANDLERS[linkType]
         local handlerFunction = self[handlerKey]
         if handlerFunction then
-            handlerFunction(self, link)
+            handlerFunction(self, link, ...)
             return true
         end
         return false

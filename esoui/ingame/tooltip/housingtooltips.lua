@@ -17,7 +17,7 @@ function ZO_Tooltip:LayoutDefaultAccessTooltip(defaultAccess)
     self:AddSection(defaultVisitorAccessBodySection)
 end
 
-function ZO_Tooltip:LayoutHousingLink(link)
+function ZO_Tooltip:LayoutHousingLink(link, actionName)
     local headerSection = self:AcquireSection(self:GetStyle("topSection"))
     local linkText, _, _, houseId, ownerDisplayName = ZO_LinkHandler_ParseLink(link)
     if linkText == "" then
@@ -27,6 +27,6 @@ function ZO_Tooltip:LayoutHousingLink(link)
     self:AddSection(headerSection)
 
     local footerSection = self:AcquireSection(self:GetStyle("bodySection"))
-    footerSection:AddKeybindLine("UI_SHORTCUT_SECONDARY", SI_GAMEPAD_HOUSING_LINK_TOOLTIP_DESCRIPTION, self:GetStyle("flavorText"))
+    footerSection:AddKeybindLine(actionName or "UI_SHORTCUT_SECONDARY", SI_GAMEPAD_HOUSING_LINK_TOOLTIP_DESCRIPTION, self:GetStyle("flavorText"))
     self:AddSection(footerSection)
 end
