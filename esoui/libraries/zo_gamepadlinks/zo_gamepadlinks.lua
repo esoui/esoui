@@ -1,3 +1,4 @@
+-- Mapping of link type to the text that appears for their associated "Use" keybind button.
 local LINK_ACTION_NAMES =
 {
     [GUILD_LINK_TYPE] = GetString(SI_GAMEPAD_GUILD_LINK_KEYBIND),
@@ -5,6 +6,8 @@ local LINK_ACTION_NAMES =
     [HOUSING_LINK_TYPE] = GetString(SI_GAMEPAD_HOUSING_LINK_KEYBIND),
 }
 
+-- Mapping of link type to the custom handler that is called when used;
+-- the default handler is called for unmapped link types.
 local LINK_ACTION_HANDLERS =
 {
     [GUILD_LINK_TYPE] = function(link)
@@ -19,9 +22,19 @@ local LINK_ACTION_HANDLERS =
     end,
 }
 
+-- Mapping of link type to a variable return function that receives a reference
+-- to the calling ZO_GamepadLinks instance and returns any additional parameters
+-- to be passed to GAMEPAD_LINKS:LayoutLink.
+-- * Refer to ZO_GamepadLinks:Show() for additional information.
+local LINK_LAYOUT_PARAMETER_FUNCTIONS =
+{
+    [HOUSING_LINK_TYPE] = function(gamepadLinks)
+        return gamepadLinks:GetUseKeybind()
+    end,
+}
 
--- ZO_GamepadLinks presents the tooltips associated with one or more links using a carousel-style
--- presentation and manages the keybinds necessary for using and cycling between those links.
+-- ZO_GamepadLinks presents one or more links' tooltips with carousel-style navigation and,
+-- when appropriate, a customizable "Use" keybind for actionable links.
 
 ZO_GamepadLinks = ZO_InitializingCallbackObject:Subclass()
 
@@ -41,9 +54,10 @@ end
 function ZO_GamepadLinks:InitializeKeybindStripDescriptor()
     self.keybindStripDescriptor =
     { 
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
         -- Use Link
         {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
             order = 10,
             keybind = "UI_SHORTCUT_SECONDARY",
             name = function()
@@ -65,13 +79,12 @@ function ZO_GamepadLinks:InitializeKeybindStripDescriptor()
             end,
             visible = function()
                 local linkData = self:GetCurrentLink()
-                return linkData and LINK_ACTION_NAMES[linkData.linkType] ~= nil or false
+                return linkData ~= nil and LINK_ACTION_NAMES[linkData.linkType] ~= nil
             end,
         },
 
         -- Next Link
         {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
             order = 20,
             keybind = "UI_SHORTCUT_INPUT_RIGHT",
             name = GetString(SI_GAMEPAD_CYCLE_TOOLTIP_BINDING),
@@ -85,7 +98,7 @@ function ZO_GamepadLinks:InitializeKeybindStripDescriptor()
 
         -- Previous Link
         {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            -- Name does not require localization because ethereal binds do not appear in the UI.
             ethereal = true,
             keybind = "UI_SHORTCUT_INPUT_LEFT",
             name = "Gamepad Previous Link",
@@ -100,10 +113,10 @@ function ZO_GamepadLinks:InitializeKeybindStripDescriptor()
 end
 
 function ZO_GamepadLinks:AddKeybinds()
+    -- Order matters:
     self:RemoveKeybinds()
-
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-    self.registeredKeybinds = self.keybindStripDescriptor
+    self.registeredKeybinds = true
 end
 
 function ZO_GamepadLinks:AddLinksTable(links, replaceExistingLinks)
@@ -165,6 +178,10 @@ function ZO_GamepadLinks:GetSupportedLinkTypes()
     return self.supportedLinkTypes
 end
 
+function ZO_GamepadLinks:GetUseKeybind()
+    return self.keybindStripDescriptor[1].keybind
+end
+
 function ZO_GamepadLinks:HasLinks()
     return #self.links > 0
 end
@@ -198,7 +215,7 @@ function ZO_GamepadLinks:OnLinksUpdated(linkDataList)
 end
 
 function ZO_GamepadLinks:RemoveKeybinds()
-    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.registeredKeybinds)
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     self.registeredKeybinds = nil
 end
 
@@ -235,21 +252,16 @@ function ZO_GamepadLinks:SetHidden(hidden)
 end
 
 function ZO_GamepadLinks:SetKeybindAlignment(alignment)
+    -- Order matters:
     self:RemoveKeybinds()
-
-    for _, keybindDescriptor in ipairs(self.keybindStripDescriptor) do
-        keybindDescriptor.alignment = alignment
-    end
-
+    self.keybindStripDescriptor.alignment = alignment
     self:UpdateKeybinds()
 end
 
 function ZO_GamepadLinks:SetUseKeybind(keybind)
+    -- Order matters:
     self:RemoveKeybinds()
-
-    local useKeybindDescriptor = self.keybindStripDescriptor[1]
-    useKeybindDescriptor.keybind = keybind
-
+    self.keybindStripDescriptor[1].keybind = keybind
     self:UpdateKeybinds()
 end
 
@@ -258,14 +270,14 @@ function ZO_GamepadLinks:SetSupportedLinkTypes(linkTypes)
     ZO_ClearTable(self.supportedLinkTypes)
 
     if #linkTypes == 0 then
-        -- Import a mapping table.
+        -- Import a key/value pair table.
         for linkType, isSupported in pairs(linkTypes) do
             if isSupported ~= false then
                 self.supportedLinkTypes[linkType] = true
             end
         end
     else
-        -- Import a list table.
+        -- Import a numerically indexed table.
         for _, linkType in ipairs(linkTypes) do
             self.supportedLinkTypes[linkType] = true
         end
@@ -275,19 +287,20 @@ end
 function ZO_GamepadLinks:Show()
     local linkData = self:GetCurrentLink()
     if linkData and linkData.linkType then
-        local previousLink = self.showingLinkData
-        local link = linkData.link
-        local useKeybindDescriptor = self.keybindStripDescriptor and self.keybindStripDescriptor[1] or nil
-        local actionName = useKeybindDescriptor and useKeybindDescriptor.keybind or nil
+        -- Look up the parameter function for this link type.
+        -- If one exists then pass its variable return values as additional parameters for GAMEPAD_TOOLTIPS:LayoutLink.
+        local parameterFunction = LINK_LAYOUT_PARAMETER_FUNCTIONS[linkData.linkType]
 
         -- Show current link.
-        if GAMEPAD_TOOLTIPS:LayoutLink(self.gamepadTooltip, link, actionName) then
+        if GAMEPAD_TOOLTIPS:LayoutLink(self.gamepadTooltip, linkData.link, parameterFunction and parameterFunction(self)) then
+            local previousLinkData = self.showingLinkData
             self.showingLinkData = linkData
-            self:OnLinkShown(self.showingLinkData, previousLink)
+            self:OnLinkShown(self.showingLinkData, previousLinkData)
             return
         end
     end
 
+    -- No link was shown so the link apparatus must be hidden.
     self:Hide()
 end
 
@@ -329,8 +342,8 @@ function ZO_GamepadLinks:UpdateKeybinds()
     if self:IsHidden() then
         self:RemoveKeybinds()
     else
-        if self.registeredKeybinds == self.keybindStripDescriptor then
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.registeredKeybinds)
+        if self.registeredKeybinds then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         else
             self:AddKeybinds()
         end
