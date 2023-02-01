@@ -16,6 +16,7 @@ function ZO_TradingHouseSearchHistory_Gamepad:InitializeEvents()
     TRADING_HOUSE_SEARCH_HISTORY_MANAGER:RegisterCallback("HistoryUpdated", function()
         if self.fragment:IsShowing() then
             self:RefreshList()
+            self:UpdateDescriptionTooltip()
         end
     end)
 end
@@ -47,6 +48,9 @@ function ZO_TradingHouseSearchHistory_Gamepad:InitializeKeybindStripDescriptors(
             callback = function()
                 local targetData = self.itemList:GetTargetData()
                 TRADING_HOUSE_SEARCH_HISTORY_MANAGER:RemoveSearchTable(targetData.searchTable)
+                --Re-narrate when an entry is removed
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end,
             visible = function()
                 return self.itemList:GetTargetData() ~= nil
@@ -67,8 +71,14 @@ function ZO_TradingHouseSearchHistory_Gamepad:RefreshList()
     self.itemList:Clear()
 
     for _, searchEntry in TRADING_HOUSE_SEARCH_HISTORY_MANAGER:SearchEntryIterator() do
-        local entryData = {searchTable = searchEntry.searchTable}
-        self.itemList:AddEntry("ZO_GamepadGuildStoreSearchHistoryEntryTemplate", entryData)
+        local searchEntryData = 
+        {
+            searchTable = searchEntry.searchTable,
+            narrationText = function(entryData, entryControl)
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.formattedSearchTableDescription)
+            end,
+        }
+        self.itemList:AddEntry("ZO_GamepadGuildStoreSearchHistoryEntryTemplate", searchEntryData)
     end
 
     self.itemList:Commit()

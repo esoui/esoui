@@ -306,13 +306,13 @@ local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, subStatusIc
 
             if subStatusIcon then
                 subStatusIcon:ClearIcons()
-
+                local NO_TINT = nil
                 if data.isPlayerLocked then
-                    subStatusIcon:AddIcon(ZO_GAMEPAD_LOCKED_ICON_32)
+                    subStatusIcon:AddIcon(ZO_GAMEPAD_LOCKED_ICON_32, NO_TINT, GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION))
                 end
 
                 if data.isBoPTradeable then
-                    subStatusIcon:AddIcon(ZO_TRADE_BOP_ICON)
+                    subStatusIcon:AddIcon(ZO_TRADE_BOP_ICON, NO_TINT, GetString(SI_SCREEN_NARRATION_BIND_ON_PICKUP_TRADEABLE_ICON_NARRATION))
                 end
 
                 subStatusIcon:Show()
@@ -352,37 +352,39 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         statusIndicator:ClearIcons()
         
         if data.overrideStatusIndicatorIcons then
-            for _, iconTexture in ipairs(data.overrideStatusIndicatorIcons) do
-                statusIndicator:AddIcon(iconTexture)
+            for _, iconData in ipairs(data.overrideStatusIndicatorIcons) do
+                statusIndicator:AddIcon(iconData.iconTexture, iconData.iconTint, iconData.iconNarration)
             end
             statusIndicator:Show()
             return -- Don't show other multi-icons
         end
         
+        local NO_TINT = nil
+
         if data.isEquippedInCurrentCategory then
-            statusIndicator:AddIcon(EQUIPPED_THIS_SLOT_TEXTURE)
+            statusIndicator:AddIcon(EQUIPPED_THIS_SLOT_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_SELECTED_ICON_NARRATION))
         elseif data.isEquippedInAnotherCategory then
-            statusIndicator:AddIcon(EQUIPPED_OTHER_SLOT_TEXTURE)
+            statusIndicator:AddIcon(EQUIPPED_OTHER_SLOT_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_SELECTED_ICON_NARRATION))
         end
 
         if data.isHiddenByWardrobe then
-            statusIndicator:AddIcon(ITEM_IS_HIDDEN_TEXTURE)
+            statusIndicator:AddIcon(ITEM_IS_HIDDEN_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_HIDDEN_ICON_NARRATION))
         end
 
         if data:IsNew() and data.enabled then
-            statusIndicator:AddIcon(ZO_GAMEPAD_NEW_ICON_32)
+            statusIndicator:AddIcon(ZO_GAMEPAD_NEW_ICON_32, NO_TINT, GetString(SI_SCREEN_NARRATION_NEW_ICON_NARRATION))
         end
 
         if data.stolen then
-            statusIndicator:AddIcon(STOLEN_ICON_TEXTURE)
+            statusIndicator:AddIcon(STOLEN_ICON_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_STOLEN_ICON_NARRATION))
         end
 
         if data.isGemmable then
-            statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS))
+            statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS), NO_TINT, GetString(SI_SCREEN_NARRATION_GEMMABLE_ICON_NARRATION))
         end
 
         if data.isMailAttached then
-            statusIndicator:AddIcon(MAIL_ATTACHED_TEXTURE)
+            statusIndicator:AddIcon(MAIL_ATTACHED_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_MAIL_ATTACHED_ICON_NARRATION))
         end
 
         if data.isTradeItem then
@@ -390,49 +392,49 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         end
 
         if data.isEarnedAchievement then
-            statusIndicator:AddIcon(ACHIEVEMENT_EARNED_TEXTURE)
+            statusIndicator:AddIcon(ACHIEVEMENT_EARNED_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_ACHIEVEMENT_EARNED_ICON_NARRATION))
         end
 
         if data:CanLevel() then
-            statusIndicator:AddIcon(CAN_LEVEL_TEXTURE)
+            statusIndicator:AddIcon(CAN_LEVEL_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_AVAILABLE_ICON_NARRATION))
         end
 
         if data.isSkillTrainable then
-            statusIndicator:AddIcon(UPGRADE_SKILL_TEXTURE)
+            statusIndicator:AddIcon(UPGRADE_SKILL_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_TRAINABLE_ICON_NARRATION))
         end
         
         if data.isAssisted then
-            statusIndicator:AddIcon(ASSISTED_TEXTURE)
+            statusIndicator:AddIcon(ASSISTED_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_TRACKED_ICON_NARRATION))
         end
 
         if data.isChannelActive then
-            statusIndicator:AddIcon(SPEAKER_TEXTURE)
+            statusIndicator:AddIcon(SPEAKER_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_SPEAKER_ICON_NARRATION))
         end
 
         if data.isSelected then
-            statusIndicator:AddIcon(SELECTED_TEXTURE)
+            statusIndicator:AddIcon(SELECTED_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_SELECTED_ICON_NARRATION))
         end
 
         if data.isLocked then
-            statusIndicator:AddIcon(ZO_GAMEPAD_LOCKED_ICON_32)
+            statusIndicator:AddIcon(ZO_GAMEPAD_LOCKED_ICON_32, NO_TINT, GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION))
         end
 
         if data.traitInformation ~= ITEM_TRAIT_INFORMATION_NONE and not data.ignoreTraitInformation then
-            statusIndicator:AddIcon(GetPlatformTraitInformationIcon(data.traitInformation))
+            statusIndicator:AddIcon(ZO_GetPlatformTraitInformationIcon(data.traitInformation), NO_TINT, GetString("SI_ITEMTRAITINFORMATION", data.traitInformation))
         end
 
         if data.isTrackedAntiquity then
-            statusIndicator:AddIcon(TRACKED_ANTIQUITY_TEXTURE)
+            statusIndicator:AddIcon(TRACKED_ANTIQUITY_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_TRACKED_ICON_NARRATION))
         end
 
         if data.hasCraftingQuestPin then
-            statusIndicator:AddIcon(CRAFTING_QUEST_PIN_TEXTURE)
+            statusIndicator:AddIcon(CRAFTING_QUEST_PIN_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_CRAFTING_QUEST_PIN_ICON_NARRATION))
         elseif data.hasCraftingQuestPinDisabled then
-            statusIndicator:AddIcon(CRAFTING_QUEST_DISABLED_PIN_TEXTURE)
+            statusIndicator:AddIcon(CRAFTING_QUEST_DISABLED_PIN_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_DISABLED_CRAFTING_QUEST_PIN_ICON_NARRATION))
         end
 
         if data.isInArmory then
-            statusIndicator:AddIcon(ZO_IN_ARMORY_BUILD_ICON)
+            statusIndicator:AddIcon(ZO_IN_ARMORY_BUILD_ICON, NO_TINT, GetString(SI_SCREEN_NARRATION_IN_ARMORY_BUILD_ICON_NARRATION))
         end
 
         statusIndicator:Show()

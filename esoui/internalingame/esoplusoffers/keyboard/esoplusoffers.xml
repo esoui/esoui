@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_Market_SubscriptionBenefitLine" resizeToFitDescendents="true" virtual="true">
+        <Control name="ZO_Market_SubscriptionBenefitLine" resizeToFitConstrains="Y" virtual="true">
             <Dimensions x="ZO_ESO_PLUS_OFFERS_SCROLL_AREA_WIDTH" />
             <Controls>
                 <Texture name="$(parent)Icon">
@@ -55,7 +55,7 @@
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfoBanner" relativePoint="BOTTOMLEFT" offsetX="40" offsetY="10" />
                                     <Anchor point="BOTTOMRIGHT" />
                                     <Controls>
-                                        <Control name="$(parent)ScrollChild" override="true">
+                                        <Control name="$(parent)ScrollChild" resizeToFitConstrains="Y" override="true">
                                             <Dimensions x="ZO_ESO_PLUS_OFFERS_SCROLL_AREA_WIDTH" />
                                             <Controls>
                                                 <Label name="$(parent)Overview" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">

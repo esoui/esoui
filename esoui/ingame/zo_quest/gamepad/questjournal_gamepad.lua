@@ -151,12 +151,12 @@ end
 function ZO_QuestJournal_Gamepad:OnDeferredInitialize()
     -- this needs to be deferred because the background fragments don't exist yet
     self.questInfoFragmentGroup =
-        {
-            GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT,
-            GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT,
-            self.middlePaneFragment,
-            self.rightPaneFragment,
-        }
+    {
+        GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT,
+        GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT,
+        self.middlePaneFragment,
+        self.rightPaneFragment,
+    }
 
     self:SetListsUseTriggerKeybinds(true)
 end
@@ -286,12 +286,12 @@ function ZO_QuestJournal_Gamepad:SetupList(list)
     list:AddDataTemplateWithHeader(QUEST_TEMPLATE, QuestEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, QUEST_HEADER_TEMPLATE, nil, "HeaderEntry")
 end
 
-function ZO_QuestJournal_Gamepad:SetupOptionsList(list)
-    list:SetOnTargetDataChangedCallback(function(list, selectedData)
+function ZO_QuestJournal_Gamepad:SetupOptionsList(optionsList)
+    optionsList:SetOnTargetDataChangedCallback(function(list, selectedData)
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.optionsKeybindStripDescriptor)
     end)
 
-    list:AddDataTemplate("ZO_GamepadSubMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup)
+    optionsList:AddDataTemplate("ZO_GamepadSubMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup)
 end
 
 function ZO_QuestJournal_Gamepad:InitializeKeybindStripDescriptors()
@@ -486,6 +486,46 @@ function ZO_QuestJournal_Gamepad:RefreshDetails()
     self.listDirty = false
 end
 
+function ZO_QuestJournal_Gamepad:GetDetailsNarrationText()
+    local narrations = {}
+    table.insert(narrations, ZO_GamepadGenericHeader_GetNarrationText(self.contentHeader, self.contentHeaderData))
+    local questData = self:GetSelectedQuestData()
+    if questData ~= nil then
+        local _, bgText, stepText, stepType, stepOverrideText, completed = GetJournalQuestInfo(questData.questIndex)
+        --Determine the narration for the background and step text. This is pulled from different locations depending on if the quest is completed
+        if completed then
+            local _, _, _, _, goalBackgroundText, goalDescription = GetJournalQuestEnding(questData.questIndex)
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(goalBackgroundText))
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(goalDescription))
+        else
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(bgText))
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(stepText))
+        end
+
+        --If the condition text has entries, get the narration
+        if self.conditionTextBulletList:HasEntries() then
+            local showMultipleOrSteps = QUEST_JOURNAL_MANAGER:DoesShowMultipleOrSteps(stepOverrideText, stepType, questData.questIndex)
+            --The header text is dependent on whether or not the quest is showing multiple "or" steps
+            local headerText = showMultipleOrSteps and GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_OR_DESCRIPTION) or GetString(SI_QUEST_JOURNAL_QUEST_TASKS)
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(headerText))
+            ZO_CombineNumericallyIndexedTables(narrations, self.conditionTextBulletList:GetNarrationText())
+        end
+
+        --If the optional step text has entries, get the narration
+        if self.optionalStepTextBulletList:HasEntries() then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_QUEST_JOURNAL_OPTIONAL_STEPS_HEADER)))
+            ZO_CombineNumericallyIndexedTables(narrations, self.optionalStepTextBulletList:GetNarrationText())
+        end
+
+        --If the hint text has entries, get the narration
+        if self.hintTextBulletList:HasEntries() then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_QUEST_JOURNAL_HINT_HEADER)))
+            ZO_CombineNumericallyIndexedTables(narrations, self.hintTextBulletList:GetNarrationText())
+        end
+    end
+    return narrations
+end
+
 function ZO_QuestJournal_Gamepad:RefreshOptionsList()
     self.optionsList:Clear()
 
@@ -493,35 +533,35 @@ function ZO_QuestJournal_Gamepad:RefreshOptionsList()
     if self:CanShareQuest() then
         local shareQuest = ZO_GamepadEntryData:New(GetString(SI_QUEST_JOURNAL_SHARE))
         shareQuest.action = function()
-                    local selectedQuestIndex = self:GetSelectedQuestIndex()
-                    if selectedQuestIndex then
-                        QUEST_JOURNAL_MANAGER:ShareQuest(selectedQuestIndex)
-                    end
-                end
+            local selectedQuestIndex = self:GetSelectedQuestIndex()
+            if selectedQuestIndex then
+                QUEST_JOURNAL_MANAGER:ShareQuest(selectedQuestIndex)
+            end
+        end
         table.insert(options, shareQuest)
     end
     
     if self:CanAbandonQuest() then
         local abandonQuest = ZO_GamepadEntryData:New(GetString(SI_QUEST_JOURNAL_ABANDON))
         abandonQuest.action = function()
-                    local selectedQuestIndex = self:GetSelectedQuestIndex()
-                    if selectedQuestIndex then
-                        QUEST_JOURNAL_MANAGER:ConfirmAbandonQuest(selectedQuestIndex)
-                    end
-                end
+            local selectedQuestIndex = self:GetSelectedQuestIndex()
+            if selectedQuestIndex then
+                QUEST_JOURNAL_MANAGER:ConfirmAbandonQuest(selectedQuestIndex)
+            end
+        end
         table.insert(options, abandonQuest)
     end
 
     local reportQuest = ZO_GamepadEntryData:New(GetString(SI_ITEM_ACTION_REPORT_ITEM))
-    reportQuest.action =    function()
-                                local selectedQuestIndex = self:GetSelectedQuestIndex()
-                                if selectedQuestIndex then
-                                    local questName = GetJournalQuestInfo(selectedQuestIndex)
-                                    self:SetKeybindButtonGroup(nil)
-                                    HELP_QUEST_ASSISTANCE_GAMEPAD:InitWithDetails(questName)
-                                    SCENE_MANAGER:Push(HELP_QUEST_ASSISTANCE_GAMEPAD:GetSceneName())
-                                end
-                            end
+    reportQuest.action = function()
+        local selectedQuestIndex = self:GetSelectedQuestIndex()
+        if selectedQuestIndex then
+            local questName = GetJournalQuestInfo(selectedQuestIndex)
+            self:SetKeybindButtonGroup(nil)
+            HELP_QUEST_ASSISTANCE_GAMEPAD:InitWithDetails(questName)
+            SCENE_MANAGER:Push(HELP_QUEST_ASSISTANCE_GAMEPAD:GetSceneName())
+        end
+    end
     table.insert(options, reportQuest)
 
     for _, option in pairs(options) do
@@ -552,30 +592,46 @@ function ZO_QuestJournal_Gamepad:OnQuestsUpdated()
     ZO_QuestJournal_Shared.OnQuestsUpdated(self)
 end
 
-function ZO_QuestJournal_Gamepad:RefreshQuestList()
-    self.questList:Clear()
-
-    local lastCategoryName
-    local masterQuestList = QUEST_JOURNAL_MANAGER:GetQuestList()
-    for i, quest in ipairs(masterQuestList) do
-        local entry = ZO_GamepadEntryData:New(quest.name, self:GetIconTexture(quest.questType, quest.displayType))
-        entry:SetDataSource(quest)
-        entry:SetIconTintOnSelection(true)
-
-        if quest.categoryName ~= lastCategoryName then
-            lastCategoryName = quest.categoryName
-            entry:SetHeader(quest.categoryName)
-            self.questList:AddEntryWithHeader(QUEST_TEMPLATE, entry)
-        else
-            self.questList:AddEntry(QUEST_TEMPLATE, entry)
+do
+    local function GetQuestEntryNarrationText(entryData, entryControl)
+        local narrations = {}
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text))
+        ZO_CombineNumericallyIndexedTables(narrations, ZO_GetSharedGamepadEntrySubLabelNarrationText(entryData, entryControl))
+        --If this is the tracked quest, include that in the narration
+        if QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() == entryData.questIndex then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_TRACKED_ICON_NARRATION)))
         end
+        --Get the narration text for both the middle and right panels
+        ZO_CombineNumericallyIndexedTables(narrations, QUEST_JOURNAL_GAMEPAD:GetDetailsNarrationText())
+        return narrations
     end
 
-    self.questList:Commit()
+    function ZO_QuestJournal_Gamepad:RefreshQuestList()
+        self.questList:Clear()
 
-    self:RefreshDetails()
+        local lastCategoryName
+        local masterQuestList = QUEST_JOURNAL_MANAGER:GetQuestList()
+        for i, quest in ipairs(masterQuestList) do
+            local entry = ZO_GamepadEntryData:New(quest.name, self:GetIconTexture(quest.questType, quest.displayType))
+            entry:SetDataSource(quest)
+            entry:SetIconTintOnSelection(true)
+            entry.narrationText = GetQuestEntryNarrationText
 
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
+            if quest.categoryName ~= lastCategoryName then
+                lastCategoryName = quest.categoryName
+                entry:SetHeader(quest.categoryName)
+                self.questList:AddEntryWithHeader(QUEST_TEMPLATE, entry)
+            else
+                self.questList:AddEntry(QUEST_TEMPLATE, entry)
+            end
+        end
+
+        self.questList:Commit()
+
+        self:RefreshDetails()
+
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
+    end
 end
 
 function ZO_QuestJournal_Gamepad:FocusQuestWithIndex(index)

@@ -76,14 +76,26 @@ function ZO_HousingSocial_Manager:InitializeLinkHandlers()
 end
 
 function ZO_HousingSocial_Manager:GetHouseName(houseId)
+    houseId = zo_parseUnsignedInteger(houseId)
+    if not houseId then
+        -- Invalid houseId.
+        return ""
+    end
+
     local collectibleId = GetCollectibleIdForHouse(houseId)
+    if not collectibleId then
+        -- Invalid houseId.
+        return ""
+    end
+
     local houseName = GetCollectibleName(collectibleId)
     return houseName
 end
 
 function ZO_HousingSocial_Manager:VisitHouse(houseId, accountName)
-    houseId = tonumber(houseId) or nil
+    houseId = zo_parseUnsignedInteger(houseId)
     if not houseId then
+        -- Invalid houseId.
         return false
     end
 
@@ -114,6 +126,12 @@ function ZO_HousingSocial_Manager:OnHouseLinkClicked(link, houseId, accountName)
 end
 
 function ZO_HousingSocial_Manager:ShowVisitHouseLinkConfirmationDialog(houseId, optionalAccountName)
+    houseId = zo_parseUnsignedInteger(houseId)
+    if not houseId then
+        -- Invalid houseId.
+        return
+    end
+
     if not IsInGamepadPreferredMode() then
         -- Hide a preexisting tooltip that may occlude this confirmation dialog.
         ClearTooltip(InformationTooltip)

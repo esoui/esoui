@@ -361,7 +361,7 @@ local function GetStableItems()
             iconFile = STABLE_TRAINING_TEXTURES_GAMEPAD[trainingType],
             bestGamepadItemCategoryName = header,
             ignoreStoreVisualInit = true,
-            data = extraData
+            data = extraData,
         }
 
         table.insert(items, itemData)
@@ -420,9 +420,32 @@ function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOver
         local stableTrainingData = itemData.data
         if stableTrainingData then
             entry.trainingData = stableTrainingData
+            --Force the narration text here so we don't try to narrate the progress bar
+            entry.narrationText = itemData.name
             local MIN_BONUS = 0
             entry:SetBarValues(MIN_BONUS, stableTrainingData.maxBonus, stableTrainingData.bonus)
             entry:SetShowBarEvenWhenUnselected(true)
+        else
+            entry.narrationText = function(entryData, entryControl)
+                local narrations = {}
+                ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+                if self.storeMode == ZO_MODE_STORE_REPAIR then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ITEM_CONDITION_PERCENT, entryData.condition)))
+                end
+                ZO_AppendNarration(narrations, entryData:GetPriceNarration())
+
+                if ITEM_PREVIEW_GAMEPAD:IsPreviewEnabled() then
+                    ZO_AppendNarration(narrations, ITEM_PREVIEW_GAMEPAD:GetPreviewSpinnerNarrationText())
+                end
+                return narrations
+            end
+
+            entry.additionalInputNarrationFunction = function()
+                if ITEM_PREVIEW_GAMEPAD:IsPreviewEnabled() and ITEM_PREVIEW_GAMEPAD:HasVariations() then
+                    return ZO_GetHorizontalDirectionalInputNarrationData(GetString(SI_SCREEN_NARRATION_ITEM_PREVIEW_STATE_PREVIOUS), GetString(SI_SCREEN_NARRATION_ITEM_PREVIEW_STATE_NEXT))
+                end
+                return {}
+            end
         end
 
         if not itemData.ignoreStoreVisualInit then

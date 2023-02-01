@@ -10,16 +10,21 @@ function ChatContainer:Initialize(control, windowPool, tabPool)
 
     self.visualData = {}
     self.newWindowTab = control:GetNamedChild("NewWindowTab")
-    ZO_CreateUniformIconTabData(self.visualData, nil, 32, 32, "EsoUI/Art/ChatWindow/chat_addTab_down.dds", "EsoUI/Art/ChatWindow/chat_addTab_up.dds", "EsoUI/Art/ChatWindow/chat_addTab_over.dds", "EsoUI/Art/ChatWindow/chat_addTab_disabled.dds")
-    ZO_TabButton_Icon_Initialize(self.newWindowTab, "SimpleIconHighlight", self.visualData)
-    self.newWindowTab:SetHandler("OnMouseUp", function(tab, button, isUpInside) if isUpInside and not ZO_TabButton_IsDisabled(self.newWindowTab) then  self.system:CreateNewChatTab(self) end ZO_TabButton_Unselect(tab) end)
-    self.newWindowTab.container = self
-    self.overflowTab = control:GetNamedChild("OverflowTab")
-    ZO_CreateUniformIconTabData(self.visualData, nil, 32, 32, "EsoUI/Art/ChatWindow/chat_overflowArrow_down.dds", "EsoUI/Art/ChatWindow/chat_overflowArrow_up.dds", "EsoUI/Art/ChatWindow/chat_overflowArrow_over.dds")
-    ZO_TabButton_Icon_Initialize(self.overflowTab, "SimpleIconHighlight", self.visualData)
-    self.overflowTab:SetHandler("OnMouseUp", function(tab, button, isUpInside) if isUpInside then self:ShowOverflowedTabsDropdown() end ZO_TabButton_Unselect(tab) end)
-    self.overflowTab.container = self
-    self.overflowTab:SetAnchor(LEFT, self.newWindowTab, RIGHT, 0, 0)
+    if self.newWindowTab then
+        ZO_CreateUniformIconTabData(self.visualData, nil, 32, 32, "EsoUI/Art/ChatWindow/chat_addTab_down.dds", "EsoUI/Art/ChatWindow/chat_addTab_up.dds", "EsoUI/Art/ChatWindow/chat_addTab_over.dds", "EsoUI/Art/ChatWindow/chat_addTab_disabled.dds")
+        ZO_TabButton_Icon_Initialize(self.newWindowTab, "SimpleIconHighlight", self.visualData)
+        self.newWindowTab:SetHandler("OnMouseUp", function(tab, button, isUpInside) if isUpInside and not ZO_TabButton_IsDisabled(self.newWindowTab) then  self.system:CreateNewChatTab(self) end ZO_TabButton_Unselect(tab) end)
+        self.newWindowTab.container = self
+
+        self.overflowTab = control:GetNamedChild("OverflowTab")
+        if self.overflowTab then
+            ZO_CreateUniformIconTabData(self.visualData, nil, 32, 32, "EsoUI/Art/ChatWindow/chat_overflowArrow_down.dds", "EsoUI/Art/ChatWindow/chat_overflowArrow_up.dds", "EsoUI/Art/ChatWindow/chat_overflowArrow_over.dds")
+            ZO_TabButton_Icon_Initialize(self.overflowTab, "SimpleIconHighlight", self.visualData)
+            self.overflowTab:SetHandler("OnMouseUp", function(tab, button, isUpInside) if isUpInside then self:ShowOverflowedTabsDropdown() end ZO_TabButton_Unselect(tab) end)
+            self.overflowTab.container = self
+            self.overflowTab:SetAnchor(LEFT, self.newWindowTab, RIGHT, 0, 0)
+        end
+    end
 
     self:SetAllowSaveSettings(true)
     self:InitializeWindowManagement(control, windowPool, tabPool)
@@ -50,13 +55,14 @@ function ChatContainer:FadeIn(delay, fadeOption)
 end
 
 function ChatContainer:UpdateNewWindowTab()
-    if self.windows[self.hiddenTabStartIndex - 1] then
+    if self.newWindowTab and self.windows[self.hiddenTabStartIndex - 1] then
         local finalTab = self.windows[self.hiddenTabStartIndex - 1].tab
         self.newWindowTab:SetAnchor(LEFT, finalTab, RIGHT, 0, 0)
     end
 end
 
 function SharedChatContainer:ShowContextMenu(tabIndex)
+    local parentControl = self.control
     tabIndex = tabIndex or (self.currentBuffer and self.currentBuffer:GetParent() and self.currentBuffer:GetParent().tab and self.currentBuffer:GetParent().tab.index)
     local window = self.windows[tabIndex]
     if window then
@@ -64,13 +70,9 @@ function SharedChatContainer:ShowContextMenu(tabIndex)
 
         if not ZO_Dialogs_IsShowingDialog() then
             AddMenuItem(GetString(SI_CHAT_CONFIG_CREATE_NEW), function() self.system:CreateNewChatTab(self) end)
-        end
-
-        if not ZO_Dialogs_IsShowingDialog() and not window.combatLog and (not self:IsPrimary() or tabIndex ~= 1) then
-            AddMenuItem(GetString(SI_CHAT_CONFIG_REMOVE), function() self:ShowRemoveTabDialog(tabIndex) end)
-        end
-
-        if not ZO_Dialogs_IsShowingDialog() then
+            if not window.combatLog and (not self:IsPrimary() or tabIndex ~= 1) then
+                AddMenuItem(GetString(SI_CHAT_CONFIG_REMOVE), function() self:ShowRemoveTabDialog(tabIndex) end)
+            end
             AddMenuItem(GetString(SI_CHAT_CONFIG_OPTIONS), function() self:ShowOptions(tabIndex) end)
         end
 
@@ -89,9 +91,11 @@ function SharedChatContainer:ShowContextMenu(tabIndex)
                 AddMenuItem(GetString(SI_CHAT_CONFIG_SHOW_TIMESTAMP), function() self:SetTimestampsEnabled(tabIndex, true) end)
             end
         end
-
-        ShowMenu(window.tab)
+        parentControl = window.tab
     end
+    AddMenuItem(GetString(SI_CHAT_CONFIG_RESET), function() ZO_Dialogs_ShowDialog("CHAT_RESET") end)
+
+    ShowMenu(parentControl)
 end
 
 function ChatContainer:LoadSettings(settings)
@@ -108,7 +112,7 @@ function ChatContainer:GetChatFont()
 end
 
 function ChatContainer:IsMouseInside()
-    if MouseIsOver(self.control) or MouseIsOver(self.overflowTab) then
+    if MouseIsOver(self.control) or (self.overflowTab and MouseIsOver(self.overflowTab)) then
         return true
     end
 
@@ -145,7 +149,7 @@ function ChatContainer:ShowRemoveTabDialog(index)
 end
 
 function ChatContainer:ShowOverflowedTabsDropdown()
-    if self.hiddenTabStartIndex <= #self.windows then
+    if self.overflowTab and self.hiddenTabStartIndex <= #self.windows then
         ClearMenu()
 
         for i=self.hiddenTabStartIndex, #self.windows do
@@ -157,10 +161,12 @@ function ChatContainer:ShowOverflowedTabsDropdown()
 end
 
 function ChatContainer:UpdateOverflowArrow()
-    if self.hiddenTabStartIndex <= #self.windows then
-        self.overflowTab:SetHidden(false)
-    else
-        self.overflowTab:SetHidden(true)
+    if self.overflowTab then
+        if self.hiddenTabStartIndex <= #self.windows then
+            self.overflowTab:SetHidden(false)
+        else
+            self.overflowTab:SetHidden(true)
+        end
     end
 end
 
@@ -487,8 +493,12 @@ do
                     tab:SetHidden(true)
                 end
 
-                container.overflowTab:SetHidden(true)
-                container.newWindowTab:SetHidden(true)
+                if container.overflowTab then
+                    container.overflowTab:SetHidden(true)
+                end
+                if container.newWindowTab then
+                    container.newWindowTab:SetHidden(true)
+                end
             end
 
             -- Move the buttons to and show the minimized bar
@@ -512,12 +522,13 @@ do
                 for _, tab in pairs(container.tabGroup.m_Buttons) do
                     if tab.index < container.hiddenTabStartIndex then
                         tab:SetHidden(false)
-                    else
+                    elseif container.overflowTab then
                         container.overflowTab:SetHidden(false)
                     end
                 end
-                container.newWindowTab:SetHidden(false)
-
+                if container.newWindowTab then
+                    container.newWindowTab:SetHidden(false)
+                end
                 container:FadeIn()
             end
 
@@ -587,6 +598,11 @@ function ZO_ChatSystem:OnPlayerActivated()
             self.agentChatBurstTimeline:PlayFromStart()
         end
     end
+end
+
+function ZO_ChatSystem:ResetChat()
+    self.sv:ResetToDefaults()
+    SharedChatSystem.ResetChat(self)
 end
 
 --

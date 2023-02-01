@@ -19,8 +19,10 @@ function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(itemData, dial
     end
 
     local priceText = zo_strformat(SI_GAMEPAD_TRADING_HOUSE_ITEM_AMOUNT, ZO_CurrencyControl_FormatCurrency(price), ZO_Currency_GetGamepadFormattedCurrencyIcon(currencyType))
+    local priceNarrationText = ZO_Currency_FormatGamepad(currencyType, price, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
 
     local mainTextParams
+    local mainTextNarrationParams
     if stackCount > 1 then
         mainTextParams = 
         {
@@ -30,6 +32,15 @@ function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(itemData, dial
             stackCount,
             priceText,
         }
+
+        mainTextNarrationParams =
+        {
+            title,
+            "|c" .. nameColor:ToHex(),
+            itemName,
+            stackCount,
+            priceNarrationText,
+        }
     else
         mainTextParams =
         {
@@ -37,8 +48,15 @@ function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(itemData, dial
             nameColor:Colorize(itemName),
             priceText,
         }
+
+        mainTextNarrationParams =
+        {
+            title,
+            itemName,
+            priceNarrationText,
+        }
     end
-    ZO_Dialogs_ShowGamepadDialog(dialogName, { listingIndex = listingIndex, stackCount = stackCount, price = price }, { mainTextParams = mainTextParams })
+    ZO_Dialogs_ShowGamepadDialog(dialogName, { listingIndex = listingIndex, stackCount = stackCount, price = price }, { mainTextParams = mainTextParams, mainTextNarrationParams = mainTextNarrationParams })
 end
 
 ESO_Dialogs["TRADING_HOUSE_CONFIRM_REMOVE_LISTING"] =
@@ -233,7 +251,7 @@ local function SetupGuildSelectionDialog(dialog)
         local guildId = GetGuildId(i)
         local guildName = GetGuildName(guildId)
         local allianceId = GetGuildAlliance(guildId)
-        local icon = GetLargeAllianceSymbolIcon(allianceId)
+        local icon = ZO_GetLargeAllianceSymbolIcon(allianceId)
 
         local listItem = 
         {

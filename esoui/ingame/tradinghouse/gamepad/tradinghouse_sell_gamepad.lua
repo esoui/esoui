@@ -71,11 +71,19 @@ function ZO_GamepadTradingHouse_Sell:UpdateListForCurrentGuild()
     self:UpdateKeybind()
 end
 
+local function GetSellItemNarrationText(entryData, entryControl)
+    local narrations = {}
+    ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+    ZO_AppendNarration(narrations, entryData:GetPriceNarration())
+    return narrations
+end
+
 local function SellItemSetupFunction(control, data, selected, selectedDuringRebuild, enabled, activated)
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-
+    data.narrationText = GetSellItemNarrationText
     local PRICE_INVALID = false
     ZO_CurrencyControl_SetSimpleCurrency(control.price, CURT_MONEY, data.stackSellPrice, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, PRICE_INVALID)
+    data:SetPriceNarrationInfo(data.stackSellPrice, CURT_MONEY)
 end
 
 function ZO_GamepadTradingHouse_Sell:OnSelectionChanged(list, selectedData, oldSelectedData)
@@ -116,6 +124,20 @@ function ZO_GamepadTradingHouse_Sell:InitializeList()
     end)
     local parametricList = self.itemList:GetParametricList()
     parametricList:SetAlignToScreenCenter(true)
+    --Narrates the list
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return self:GetSubscene():IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return TRADING_HOUSE_GAMEPAD:GetHeaderNarration()
+        end,
+        footerNarrationFunction = function()
+            return TRADING_HOUSE_GAMEPAD:GetFooterNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(parametricList, narrationInfo)
 end
 
 function ZO_GamepadTradingHouse_Sell:UpdateList()

@@ -61,16 +61,12 @@ end
 -- Target Dummy Log Manager Object --
 -------------------------------------
 
-ZO_TargetDummyLog_Manager = ZO_Object:Subclass()
-
-function ZO_TargetDummyLog_Manager:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_TargetDummyLog_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_TargetDummyLog_Manager:Initialize()
     self.logObjects = {}
+    self.isEngagedWithTargetDummy = false
+
     self:RegisterEvents()
 end
 
@@ -87,6 +83,7 @@ function ZO_TargetDummyLog_Manager:RegisterEvents()
         local inCombat = IsUnitInCombat("player")
         self:OnCombatStateChange(inCombat)
     end
+
     EVENT_MANAGER:RegisterForEvent("TargetDummyLog", EVENT_COMBAT_EVENT, OnCombatEvent)
     EVENT_MANAGER:AddFilterForEvent("TargetDummyLog", EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_TARGET_DUMMY)
     EVENT_MANAGER:RegisterForEvent("TargetDummyLog", EVENT_PLAYER_COMBAT_STATE, OnCombatStateChange)
@@ -105,11 +102,25 @@ function ZO_TargetDummyLog_Manager:HandleCombatEvent(actionResult, isError, abil
 
         logObject:HandleCombatEvent(hitValue)
     end
+
+    if not self.isEngagedWithTargetDummy and isDPSEvent and (isFromMe or sourceType == COMBAT_UNIT_TYPE_GROUP) then
+        self.isEngagedWithTargetDummy = true
+        self:OnTargetDummyCombatStateChange()
+    end
+end
+
+function ZO_TargetDummyLog_Manager:OnTargetDummyCombatStateChange()
+    self:FireCallbacks("TargetDummyCombatStateChanged", self.isEngagedWithTargetDummy)
 end
 
 function ZO_TargetDummyLog_Manager:OnCombatStateChange(inCombat)
     if self.inCombat ~= inCombat then
         self.inCombat = inCombat
+        if not self.inCombat then
+            self.isEngagedWithTargetDummy = false
+        end
+
+        self:OnTargetDummyCombatStateChange()
 
         if not inCombat then
             ZO_ClearTableWithCallback(self.logObjects, ZO_DPSLog.OutputResults)

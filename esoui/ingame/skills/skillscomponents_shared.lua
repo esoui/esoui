@@ -37,6 +37,12 @@ function ZO_SkillInfoXPBar_SetValue(xpBar, level, lastRankXP, nextRankXP, curren
     end
 end
 
+function ZO_Skills_GetSkillInfoHeaderNarrationText(skillInfoHeaderControl)
+    if skillInfoHeaderControl.narrationTextFunction then
+        return skillInfoHeaderControl.narrationTextFunction()
+    end
+end
+
 function ZO_Skills_TieSkillInfoHeaderToCraftingSkill(skillInfoHeaderControl, craftingSkillType)
     local name = skillInfoHeaderControl.name
     local xpBar = skillInfoHeaderControl.xpBar
@@ -44,6 +50,16 @@ function ZO_Skills_TieSkillInfoHeaderToCraftingSkill(skillInfoHeaderControl, cra
     local glowContainer = skillInfoHeaderControl.glowContainer
 
     skillInfoHeaderControl.increaseAnimation = skillInfoHeaderControl.increaseAnimation or ANIMATION_MANAGER:CreateTimelineFromVirtual("SkillIncreasedBarAnimation", glowContainer)
+
+    skillInfoHeaderControl.narrationTextFunction = function()
+        local narrations = {}
+        local skillLineData = xpBar:GetControl().skillLineData
+        if skillLineData then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(skillLineData:GetFormattedName()))
+        end
+        ZO_CombineNumericallyIndexedTables(narrations, xpBar:GetNarrationText())
+        return narrations
+    end
 
     local hadUpdateWhileCrafting = false
     skillInfoHeaderControl.updateSkillInfoHeaderCallback = function(skillLineData)
@@ -106,6 +122,7 @@ function ZO_Skills_UntieSkillInfoHeaderToCraftingSkill(skillInfoHeaderControl)
     SKILLS_DATA_MANAGER:UnregisterCallback("FullSystemUpdated", skillInfoHeaderControl.updateSkillInfoHeaderCallback)
     CALLBACK_MANAGER:UnregisterCallback("CraftingAnimationsStopped", skillInfoHeaderControl.craftingAnimationsStoppedCallback)
     skillInfoHeaderControl.craftingAnimationsStoppedCallback = nil
+    skillInfoHeaderControl.narrationTextFunction = nil
 end
 
 -- Multiple Crafting Skills Xp Bar

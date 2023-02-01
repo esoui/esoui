@@ -102,6 +102,13 @@ function ZO_GamepadTradingHouse_Listings:RefreshData(dontReselect)
             local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
             entry:InitializeTradingHouseVisualData(itemData)
             entry:SetSubLabelTemplate("ZO_TradingHouse_ItemListSubLabelTemplate")
+            entry:SetPriceNarrationInfo(itemData.purchasePrice, CURT_MONEY)
+            entry.narrationText = function(entryData, entryControl)
+                local narrations = {}
+                ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+                ZO_AppendNarration(narrations, entryData:GetPriceNarration())
+                return narrations
+            end
 
             local timeRemainingString = zo_strformat(SI_TRADING_HOUSE_BROWSE_ITEM_REMAINING_TIME, ZO_FormatTime(itemData.timeRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING))
             entry:AddSubLabel(timeRemainingString)
@@ -204,6 +211,8 @@ function ZO_GamepadTradingHouse_Listings:CycleSortType()
     local DONT_RESELECT = true
     self.itemList:Commit(DONT_RESELECT)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    --Re-narrate when the sort type changes
+    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
 end
 
 do

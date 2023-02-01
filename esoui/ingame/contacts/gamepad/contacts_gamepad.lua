@@ -48,6 +48,10 @@ function ZO_GamepadContactsManager:RefreshFooter()
     GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
 end
 
+function ZO_GamepadContactsManager:GetNarrationText()
+    return GAMEPAD_GENERIC_FOOTER:GetNarrationText(self.footerData)
+end
+
 function ZO_GamepadContacts_OnInitialized(self)
     GAMEPAD_CONTACTS = ZO_GamepadContactsManager:New(self)
 end

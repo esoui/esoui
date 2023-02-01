@@ -128,14 +128,14 @@ function ZO_UpdateTraitInformationControlIcon(inventorySlot, slotData)
     traitInfoControl:ClearIcons()
 
     if slotData.traitInformation ~= ITEM_TRAIT_INFORMATION_NONE and not ZO_Store_IsShopping() then
-        traitInfoControl:AddIcon(GetPlatformTraitInformationIcon(slotData.traitInformation))
+        traitInfoControl:AddIcon(ZO_GetPlatformTraitInformationIcon(slotData.traitInformation))
         traitInfoControl:Show()
     end
 end
 
 function ZO_UpdateSellInformationControlIcon(inventorySlot, slotData)
     local sellInformationControl = inventorySlot:GetNamedChild("SellInformation")
-    local sellInformationTexture = GetItemSellInformationIcon(slotData.sellInformation)
+    local sellInformationTexture = ZO_GetItemSellInformationIcon(slotData.sellInformation)
 
     if sellInformationTexture then
         sellInformationControl:SetTexture(sellInformationTexture)

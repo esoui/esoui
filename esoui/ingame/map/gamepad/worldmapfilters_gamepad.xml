@@ -1,7 +1,6 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_GamepadWorldMapFilterCheckboxOptionTemplate" inherits="ZO_GamepadOptionsMenuEntryTemplate ZO_OptionsRightCheckbox_Gamepad" virtual="true">
-            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
             <Controls>
                 <Label name="$(parent)Label" maxLineCount="1" override="true">
                     <Anchor point="TOPLEFT"/>

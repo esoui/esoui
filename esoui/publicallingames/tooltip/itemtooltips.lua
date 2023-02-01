@@ -257,7 +257,7 @@ function ZO_Tooltip:AddBaseStats(itemLink, ignoreLevel)
             end
             if requiredChampionPoints > 0 then
                 local championStatValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-                championStatValuePair:SetStat(zo_iconTextFormatNoSpace(GetGamepadChampionPointsIcon(), 32, 32, GetString(SI_ITEM_FORMAT_STR_CHAMPION)), self:GetStyle("statValuePairStat"))
+                championStatValuePair:SetStat(zo_iconTextFormatNoSpace(ZO_GetGamepadChampionPointsIcon(), 32, 32, GetString(SI_ITEM_FORMAT_STR_CHAMPION)), self:GetStyle("statValuePairStat"))
                 local failedStyle = requiredChampionPoints > GetPlayerChampionPointsEarned() and self:GetStyle("failed") or nil
                 championStatValuePair:SetValue(requiredChampionPoints, failedStyle, self:GetStyle("statValuePairValue"))
                 statsSection:AddStatValuePair(championStatValuePair)
@@ -309,7 +309,20 @@ function ZO_Tooltip:AddItemValue(itemLink)
         else
             lineText = zo_strformat(SI_GAMEPAD_TOOLTIP_ITEM_VALUE_FORMAT, valueString, currencyIcon)
         end
-        statsSection:AddLine(lineText, self:GetStyle("statValuePairValue"))
+
+        local function GetValueNarration()
+            local IS_UPPER = false
+            if effectiveValue ~= value then
+                --Always use the plural form of the currency name when narrating effective value
+                local IS_PLURAL = false
+                local currencyName = GetCurrencyName(CURT_MONEY, IS_PLURAL, IS_UPPER)
+                return zo_strformat(SI_GAMEPAD_TOOLTIP_EFFECTIVE_ITEM_VALUE_NARRATION_FORMAT, ZO_CommaDelimitNumber(effectiveValue), valueString, currencyName)
+            else
+                local currencyName = GetCurrencyName(CURT_MONEY, IsCountSingularForm(value), IS_UPPER)
+                return zo_strformat(SI_GAMEPAD_TOOLTIP_ITEM_VALUE_NARRATION_FORMAT, valueString, currencyName)
+            end
+        end
+        statsSection:AddLineWithCustomNarration(lineText, GetValueNarration, self:GetStyle("statValuePairValue"))
     end
     self:AddSection(statsSection)
 end
@@ -347,8 +360,7 @@ function ZO_Tooltip:AddPoisonInfo(itemLink, equipSlot)
 end
 
 function ZO_Tooltip:AddConditionOrChargeBar(itemLink, value, maxValue, previewValueToAdd)
-    local bar = nil
-
+    local bar
     if previewValueToAdd then
         bar = self:AcquireItemImprovementStatusBar(itemLink, value, maxValue, previewValueToAdd)
     else
@@ -416,7 +428,7 @@ end
 function ZO_Tooltip:AddItemAbilityScalingRange(section, minLevel, maxLevel, isChampionPoints)
     local text
     if isChampionPoints then
-        text = zo_strformat(SI_ITEM_ABILITY_SCALING_CHAMPION_POINTS_RANGE, zo_iconFormat(GetGamepadChampionPointsIcon(), 40, 40), minLevel, maxLevel)
+        text = zo_strformat(SI_ITEM_ABILITY_SCALING_CHAMPION_POINTS_RANGE, zo_iconFormat(ZO_GetGamepadChampionPointsIcon(), 40, 40), minLevel, maxLevel)
     else
         text = zo_strformat(SI_ITEM_ABILITY_SCALING_LEVEL_RANGE, minLevel, maxLevel)
     end
@@ -507,7 +519,7 @@ function ZO_Tooltip:AddTrait(itemLink, extraData)
             if traitName ~= "" then
                 local traitSection = self:AcquireSection(self:GetStyle("bodySection"))
                 local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
-                local traitInformationIconPath = GetPlatformTraitInformationIcon(traitInformation)
+                local traitInformationIconPath = ZO_GetPlatformTraitInformationIcon(traitInformation)
 
                 local formattedTraitName
                 if traitInformationIconPath then
@@ -827,7 +839,7 @@ function ZO_Tooltip:LayoutBooster(itemLink, itemName, extraData)
 end
 
 do
-    local FORMATTED_CHAMPION_RANK_ICON = zo_iconFormat(GetGamepadChampionPointsIcon(), 40, 40)
+    local FORMATTED_CHAMPION_RANK_ICON = zo_iconFormat(ZO_GetGamepadChampionPointsIcon(), 40, 40)
     function ZO_Tooltip:LayoutInlineGlyph(itemLink, itemName)
         self:AddItemTitle(itemLink, itemName)
         self:AddEnchant(itemLink)
@@ -908,7 +920,7 @@ end
 do
     local function AddDyeSwatchSection(dyeId, section, entryStyle, swatchStyle)
         local entrySection = section:AcquireSection()
-        local dyeName, known, rarity, hueCategory, achievementId, r, g, b = GetDyeInfoById(dyeId)
+        local dyeName, _, _, _, _, r, g, b = GetDyeInfoById(dyeId)
         entrySection:AddColorAndTextSwatch(r, g, b, 1, dyeName, swatchStyle)
         section:AddSection(entrySection)
     end
@@ -1110,15 +1122,17 @@ function ZO_Tooltip:LayoutReagent(itemLink, itemName, extraData)
             end
             local displayName
             local knownStyle
+            local customNarration
             if known then
                 displayName = name
                 knownStyle = self:GetStyle("traitKnown")
             else
                 displayName = GetString(SI_CRAFTING_COMPONENT_TOOLTIP_UNKNOWN_TRAIT)
                 knownStyle = self:GetStyle("traitUnknown")
+                customNarration = zo_strformat(SI_NUMBERED_LIST_ENTRY, i, GetString(SI_CRAFTING_UNKNOWN_NAME))
             end
 
-            traitSection:AddLine(zo_strformat(SI_NUMBERED_LIST_ENTRY, i, displayName), knownStyle, self:GetStyle("bodyDescription")) 
+            traitSection:AddLineWithCustomNarration(zo_strformat(SI_NUMBERED_LIST_ENTRY, i, displayName), customNarration, knownStyle, self:GetStyle("bodyDescription"))
         end
     end
 
@@ -1695,7 +1709,7 @@ end
 function ZO_Tooltip:LayoutTradeItem(who, tradeIndex)
     local itemLink = GetTradeItemLink(who, tradeIndex, LINK_STYLE_DEFAULT)
     local equipped = false
-    local name, icon, stack, displayQuality, creator, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetTradeItemInfo(who, tradeIndex)
+    local _, _, stack, _, creator = GetTradeItemInfo(who, tradeIndex)
     local tradeBoPData
     if IsTradeItemBoPAndTradeable(who, tradeIndex) then
         tradeBoPData =
@@ -1752,7 +1766,12 @@ function ZO_Tooltip:LayoutPendingItemRepair(itemBagId, itemSlotIndex, improvemen
     self:LayoutPendingItemChargeOrRepair(itemBagId, itemSlotIndex, improvementKitBagId, improvementKitIndex, GetAmountRepairKitWouldRepairItem)
 end
 
-function ZO_Tooltip:LayoutImproveSourceSmithingItem(bagId, slotIndex)
+function ZO_Tooltip:LayoutImproveSourceSmithingItem(bagId, slotIndex, narrateAsCurrent)
+    --Only include this extra narration if we have added the item for improvement
+    if narrateAsCurrent then
+        self:AddNarrationLine(GetString(SI_GAMEPAD_SMITHING_IMPROVEMENT_TOOLTIP_CURRENT_ITEM_NARRATION))
+    end
+
     local itemLink = GetItemLink(bagId, slotIndex)
     local showPlayerLocked = IsItemPlayerLocked(bagId, slotIndex)
 
@@ -1774,6 +1793,7 @@ function ZO_Tooltip:LayoutImproveSourceSmithingItem(bagId, slotIndex)
 end
 
 function ZO_Tooltip:LayoutImproveResultSmithingItem(itemToImproveBagId, itemToImproveSlotIndex, craftingSkillType)
+    self:AddNarrationLine(GetString(SI_GAMEPAD_SMITHING_IMPROVEMENT_TOOLTIP_UPGRADED_ITEM_NARRATION))
     local _, icon = GetSmithingImprovedItemInfo(itemToImproveBagId, itemToImproveSlotIndex, craftingSkillType)
     local itemLink = GetSmithingImprovedItemLink(itemToImproveBagId, itemToImproveSlotIndex, craftingSkillType)
 
@@ -1853,7 +1873,12 @@ function ZO_Tooltip:LayoutItemSetCollectionSummary()
         local unlockedPieces, totalPieces = topLevelCategoryData:GetNumUnlockedAndTotalPieces()
         statusBar:SetMinMax(MIN_PIECES, totalPieces)
         statusBar:SetValue(unlockedPieces)
-        barSection:AddStatusBar(statusBar)
+        local function GetStatusBarNarrationText()
+            local percentage = (unlockedPieces / totalPieces) * 100
+            percentage = string.format("%.2f", percentage)
+            return zo_strformat(SI_SCREEN_NARRATION_PERCENT_FORMATTER, percentage)
+        end
+        barSection:AddStatusBar(statusBar, GetStatusBarNarrationText)
 
         categorySection:AddSection(barSection)
         self:AddSection(categorySection)
@@ -1958,17 +1983,17 @@ function ZO_Tooltip:LayoutBankCurrencies()
             local currencySection = self:AcquireSection(self:GetStyle("bankCurrencySection"))
             local name = GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)
             local bankedStatValuePair = currencySection:AcquireStatValuePair(self:GetStyle("currencyStatValuePair"))
-            local header = zo_strformat(SI_GAMEPAD_BANK_CURRENCY_AMOUNT_BANKED_HEADER_FORMAT, name)
-            local valueString = zo_strformat(SI_GAMEPAD_TOOLTIP_ITEM_VALUE_FORMAT, ZO_CommaDelimitNumber(GetCurrencyAmount(currencyType, CURRENCY_LOCATION_BANK)), ZO_Currency_GetPlatformFormattedCurrencyIcon(currencyType))
-            bankedStatValuePair:SetStat(header, self:GetStyle("currencyStatValuePairStat"))
-            bankedStatValuePair:SetValue(valueString, self:GetStyle("currencyStatValuePairValue"))
+            local bankedHeader = zo_strformat(SI_GAMEPAD_BANK_CURRENCY_AMOUNT_BANKED_HEADER_FORMAT, name)
+            local bankedValueString = zo_strformat(SI_GAMEPAD_TOOLTIP_ITEM_VALUE_FORMAT, ZO_CommaDelimitNumber(GetCurrencyAmount(currencyType, CURRENCY_LOCATION_BANK)), ZO_Currency_GetPlatformFormattedCurrencyIcon(currencyType))
+            bankedStatValuePair:SetStat(bankedHeader, self:GetStyle("currencyStatValuePairStat"))
+            bankedStatValuePair:SetValue(bankedValueString, self:GetStyle("currencyStatValuePairValue"))
             currencySection:AddStatValuePair(bankedStatValuePair)
 
             local carriedStatValuePair = currencySection:AcquireStatValuePair(self:GetStyle("currencyStatValuePair"))
-            local header = zo_strformat(SI_GAMEPAD_BANK_CURRENCY_AMOUNT_CARRIED_HEADER_FORMAT, name)
-            local valueString = zo_strformat(SI_GAMEPAD_TOOLTIP_ITEM_VALUE_FORMAT, ZO_CommaDelimitNumber(GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))), ZO_Currency_GetPlatformFormattedCurrencyIcon(currencyType))
-            carriedStatValuePair:SetStat(header, self:GetStyle("currencyStatValuePairStat"))
-            carriedStatValuePair:SetValue(valueString, self:GetStyle("currencyStatValuePairValue"))
+            local carriedHeader = zo_strformat(SI_GAMEPAD_BANK_CURRENCY_AMOUNT_CARRIED_HEADER_FORMAT, name)
+            local carriedValueString = zo_strformat(SI_GAMEPAD_TOOLTIP_ITEM_VALUE_FORMAT, ZO_CommaDelimitNumber(GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))), ZO_Currency_GetPlatformFormattedCurrencyIcon(currencyType))
+            carriedStatValuePair:SetStat(carriedHeader, self:GetStyle("currencyStatValuePairStat"))
+            carriedStatValuePair:SetValue(carriedValueString, self:GetStyle("currencyStatValuePairValue"))
             currencySection:AddStatValuePair(carriedStatValuePair)
 
             bankCurrencyMainSection:AddSection(currencySection)

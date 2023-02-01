@@ -1,7 +1,6 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_WorldMapKeepSummaryRow" resizeToFitDescendents="true" virtual="true">
-            <Dimensions x="310"/>
             <Controls>
                 <Texture name="$(parent)Alliance" mouseEnabled="true">
                     <Dimensions x="48" y="48"/>

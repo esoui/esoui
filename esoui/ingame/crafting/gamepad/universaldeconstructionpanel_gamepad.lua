@@ -8,6 +8,17 @@ function ZO_UniversalDeconstructionPanel_Gamepad:Initialize(panelControl, floati
     self.panelControl = panelControl
     self.floatingControl = floatingControl
     self.tooltip = floatingControl:GetNamedChild("Tooltip")
+    --Register the tooltip for narration
+    local tooltipNarrationInfo = 
+    {
+        canNarrate = function()
+            return not self.tooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return self.tooltip.tip:GetNarrationText()
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(tooltipNarrationInfo)
     local slotContainer = floatingControl:GetNamedChild("SlotContainer")
     self.slotContainer = slotContainer
     ZO_UniversalDeconstructionPanel_Shared.Initialize(self, panelControl, universalDeconstructionParent, slotContainer:GetNamedChild("ExtractionSlot"), nil)
@@ -22,6 +33,9 @@ function ZO_UniversalDeconstructionPanel_Gamepad:Initialize(panelControl, floati
             callback = function()
                 if not ZO_CraftingUtils_IsPerformingCraftProcess() then
                     self:SetFilterType(filterData.filter, filterData)
+                    --Re-narrate on tab change
+                    local NARRATE_HEADER = true
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list, NARRATE_HEADER)
                 end
             end,
         }
@@ -127,6 +141,34 @@ function ZO_UniversalDeconstructionPanel_Gamepad:InitializeInventory()
     self.inventory:SetCustomExtraData(function(bagId, slotIndex, data)
         ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, self.extractionSlot:ContainsBagAndSlot(data.bagId, data.slotIndex))
     end)
+
+    --Register the list for narration
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return SCENE_MANAGER:IsShowing("universalDeconstructionSceneGamepad")
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.universalDeconstructionParent.header, self.universalDeconstructionParent.headerData)
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.inventory.list, narrationInfo)
+end
+
+function ZO_UniversalDeconstructionPanel_Gamepad:InitExtractionSlot(sceneName)
+    ZO_UniversalDeconstructionPanel_Shared.InitExtractionSlot(self, sceneName)
+    --Register the extraction slot for narration
+    local tooltipNarrationInfo = 
+    {
+        canNarrate = function()
+            --If the fixed tooltip is showing, no need to narrate this, as it will be redundant information
+            return SCENE_MANAGER:IsShowing(sceneName) and self.tooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return self.extractionSlot:GetNarrationText()
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(tooltipNarrationInfo)
 end
 
 function ZO_UniversalDeconstructionPanel_Gamepad:InitializeFilters()
@@ -317,6 +359,8 @@ function ZO_UniversalDeconstructionPanel_Gamepad:InitializeKeybindStripDescripto
                     self:AddItemToCraft(self.inventory:CurrentSelectionBagAndSlot())
                 end
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+                --Re-narrate when adding or removing items
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
             end,
             enabled = function()
                 return self:IsCurrentSelected() or self:CanItemBeAddedToCraft(self.inventory:CurrentSelectionBagAndSlot())

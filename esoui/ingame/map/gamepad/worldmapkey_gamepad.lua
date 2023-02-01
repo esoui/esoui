@@ -20,7 +20,6 @@ end
 local NUM_COLUMNS = 4
 
 function WorldMapKey_Gamepad:Initialize(control)
-    ZO_GamepadGrid.Initialize(self, control)
     ZO_WorldMapKey_Shared.Initialize(self, control)
 
     self.symbolParams = SYMBOL_PARAMS
@@ -182,7 +181,6 @@ function WorldMapKey_Gamepad:RefreshKey()
                 symbol.tooltip = tooltip
 
                 symbol:SetParent(column)
-                symbol:SetAnchor(LEFT, column, LEFT)
                 symbol:SetAnchor(TOPLEFT, previousAnchor, BOTTOMLEFT, offsetX, params.SYMBOL_OFFSET_Y)
                 offsetX = 0
 

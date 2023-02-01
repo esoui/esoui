@@ -235,19 +235,7 @@ function ZO_StoreManager_DoPreviewAction(action, storeEntryIndex)
         local collectibleId = GetStoreCollectibleInfo(storeEntryIndex)
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
         if collectibleData  then
-            local collectibleCategory = collectibleData:GetCategoryType()
-            if collectibleCategory == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE then
-                if action == ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE then
-                    return true
-                elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then
-                    itemPreview:ClearPreviewCollection()
-                    itemPreview:PreviewOutfit(GAMEPLAY_ACTOR_CATEGORY_PLAYER, ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex())
-                    local NO_DYE = 0
-                    local outfitSlot = ZO_OUTFIT_MANAGER:GetPreferredOutfitSlotForStyle(collectibleData)
-                    AddOutfitSlotPreviewElementToPreviewCollection(outfitSlot, collectibleId, ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX, NO_DYE, NO_DYE, NO_DYE)
-                    ApplyChangesToPreviewCollectionShown()
-                end
-            elseif CanCollectibleBePreviewed(collectibleId) then
+            if CanCollectibleBePreviewed(collectibleId) then
                 if action == ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE then
                     return true
                 elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then

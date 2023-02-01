@@ -163,47 +163,61 @@ function ZO_DailyLoginRewards_Base:UpdateCurrentMonthName()
     local currentMonth = GetCurrentDailyLoginMonth()
     local currentMonthName = GetString("SI_GREGORIANCALENDARMONTHS", currentMonth)
     local currentESOMonthName = GetString("SI_GREGORIANCALENDARMONTHS_LORENAME", currentMonth)
-    self.currentMonthLabel:SetText(zo_strformat(SI_DAILY_LOGIN_REWARDS_MONTH_FORMATTER, currentESOMonthName, currentMonthName))
+    self.currentMonthText = zo_strformat(SI_DAILY_LOGIN_REWARDS_MONTH_FORMATTER, currentESOMonthName, currentMonthName)
+    self.currentMonthLabel:SetText(self.currentMonthText)
 end
 
-function ZO_DailyLoginRewards_Base:UpdateGridList()
-    local gridListPanelList = self.gridListPanelList
-    gridListPanelList:ClearGridList()
-    self.defaultSelectionData = nil
-
-    local numPreviewableRewards = 0
-    
-    if ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() then
-        self.lockedLabel:SetText(GetString(SI_DAILY_LOGIN_REWARDS_LOCKED))
-        self.lockedLabel:SetHidden(false)
-    elseif ZO_DAILYLOGINREWARDS_MANAGER:HasClaimableRewardInMonth() then
-        local numRewardsInMonth = GetNumRewardsInCurrentDailyLoginMonth()
-        for i = 1, numRewardsInMonth do
-            local rewardId, quantity, isMilestone = GetDailyLoginRewardInfoForCurrentMonth(i)
-            local rewardData = REWARDS_MANAGER:GetInfoForDailyLoginReward(rewardId, quantity)
-            if rewardData then
-                local dailyLoginRewardData = ZO_GridSquareEntryData_Shared:New(rewardData)
-                dailyLoginRewardData.day = i
-                dailyLoginRewardData.isMilestone = isMilestone
-                dailyLoginRewardData.quantity = quantity
-
-                if CanPreviewReward(dailyLoginRewardData:GetRewardId()) then
-                    numPreviewableRewards = numPreviewableRewards + 1
-                end
-
-                self.gridListPanelList:AddEntry(dailyLoginRewardData)
+do
+    local function GetDailyLoginRewardEntryNarrationText(entryData)
+        if not entryData.isEmptyCell then
+            local isRewardClaimed = IsDailyLoginRewardInCurrentMonthClaimed(entryData.day)
+            if isRewardClaimed then
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_DAILY_LOGIN_REWARDS_CLAIMED_TILE_NARRATION))
             end
         end
-
-        self.lockedLabel:SetHidden(true)
-    else
-        self.lockedLabel:SetHidden(false)
-        -- text for the lock label will be set in UpdateTimeToNextMonthText
     end
 
-    self.hasMultipleRewardPreviews = numPreviewableRewards > 1
+    function ZO_DailyLoginRewards_Base:UpdateGridList()
+        local gridListPanelList = self.gridListPanelList
+        gridListPanelList:ClearGridList()
+        self.defaultSelectionData = nil
 
-    gridListPanelList:CommitGridList()
+        local numPreviewableRewards = 0
+    
+        if ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() then
+            self.lockedLabelText = GetString(SI_DAILY_LOGIN_REWARDS_LOCKED)
+            self.lockedLabel:SetText(self.lockedLabelText)
+            self.lockedLabel:SetHidden(false)
+        elseif ZO_DAILYLOGINREWARDS_MANAGER:HasClaimableRewardInMonth() then
+            local numRewardsInMonth = GetNumRewardsInCurrentDailyLoginMonth()
+            for i = 1, numRewardsInMonth do
+                local rewardId, quantity, isMilestone = GetDailyLoginRewardInfoForCurrentMonth(i)
+                local rewardData = REWARDS_MANAGER:GetInfoForDailyLoginReward(rewardId, quantity)
+                if rewardData then
+                    local dailyLoginRewardData = ZO_GridSquareEntryData_Shared:New(rewardData)
+                    dailyLoginRewardData.day = i
+                    dailyLoginRewardData.isMilestone = isMilestone
+                    dailyLoginRewardData.quantity = quantity
+                    dailyLoginRewardData.narrationText = GetDailyLoginRewardEntryNarrationText
+
+                    if CanPreviewReward(dailyLoginRewardData:GetRewardId()) then
+                        numPreviewableRewards = numPreviewableRewards + 1
+                    end
+
+                    self.gridListPanelList:AddEntry(dailyLoginRewardData)
+                end
+            end
+
+            self.lockedLabel:SetHidden(true)
+        else
+            self.lockedLabel:SetHidden(false)
+            -- text for the lock label will be set in UpdateTimeToNextMonthText
+        end
+
+        self.hasMultipleRewardPreviews = numPreviewableRewards > 1
+
+        gridListPanelList:CommitGridList()
+    end
 end
 
 function ZO_DailyLoginRewards_Base:UpdateTimeToNextMonth()
@@ -299,7 +313,8 @@ end
 
 function ZO_DailyLoginRewards_Base:UpdateTimeToNextMonthText(formattedTime)
     if not ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() then
-        self.lockedLabel:SetText(zo_strformat(SI_DAILY_LOGIN_REWARDS_LOCKED_UNTIL_NEW_MONTH, ZO_WHITE:Colorize(formattedTime)))
+        self.lockedLabelText = zo_strformat(SI_DAILY_LOGIN_REWARDS_LOCKED_UNTIL_NEW_MONTH, ZO_WHITE:Colorize(formattedTime))
+        self.lockedLabel:SetText(self.lockedLabelText)
     end
 end
 

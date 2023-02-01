@@ -213,6 +213,30 @@ function ZO_Smithing_Gamepad:InitializeModeList()
     self.deconstructionModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_DECONSTRUCTION, SMITHING_MODE_DECONSTRUCTION, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_deconstruct.dds")
     self.improvementModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_IMPROVEMENT, SMITHING_MODE_IMPROVEMENT, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_improve.dds")
     self.researchModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_RESEARCH, SMITHING_MODE_RESEARCH, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_research.dds")
+
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return GAMEPAD_SMITHING_ROOT_SCENE:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
+        end,
+        footerNarrationFunction = function()
+            return self:GetFooterNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.modeList, narrationInfo)
+end
+
+function ZO_Smithing_Gamepad:GetFooterNarration()
+    local narrations = {}
+    local skillInfoNarration = ZO_Skills_GetSkillInfoHeaderNarrationText(self.skillInfoBar)
+    if skillInfoNarration then
+        ZO_CombineNumericallyIndexedTables(narrations, skillInfoNarration)
+    end
+    ZO_CombineNumericallyIndexedTables(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
+    return narrations
 end
 
 function ZO_Smithing_Gamepad:RefreshModeList(craftingType)
@@ -225,7 +249,7 @@ function ZO_Smithing_Gamepad:RefreshModeList(craftingType)
 
     local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(craftingType)
     local recipeCraftingSystemNameStringId = _G["SI_RECIPECRAFTINGSYSTEM"..recipeCraftingSystem]
-    local recipeModeEntry = self:CreateModeEntry(recipeCraftingSystemNameStringId, SMITHING_MODE_RECIPES, GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem))
+    local recipeModeEntry = self:CreateModeEntry(recipeCraftingSystemNameStringId, SMITHING_MODE_RECIPES, ZO_GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem))
     self:AddModeEntry(recipeModeEntry)
     self.modeList:Commit()
 end

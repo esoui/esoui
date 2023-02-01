@@ -52,6 +52,10 @@ ZO_AssignableUtilityWheel_Shared = ZO_InitializingObject:Subclass()
         -onSelectionChangedCallback: Function called when the selected entry on the wheel changes. Currently only supported for Gamepad
         -overrideGamepadTooltip: Overrides the tooltip used when an entry is selected. Currently only supported for Gamepad.
             -If this field is not set, GAMEPAD_QUAD1_TOOLTIP will be used
+        --customNarrationObjectName: The unique name to use when registering the wheel for narration. Currently only supported for Gamepad.
+            -This field is required to be set for gamepad wheels in order for narration to function
+        --headerNarrationFunction: Function used to determine the header narration for this wheel. Currently only supported for Gamepad.
+            -If this field is not set, no header narration will be included
 ]]
 function ZO_AssignableUtilityWheel_Shared:Initialize(control, data)
     self.control = control

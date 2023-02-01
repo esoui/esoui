@@ -17,10 +17,6 @@ local MENU_ENTRY_TYPE_LEAVE_INSTANCE = 9
 local CATEGORY_HEADER_TEMPLATE = "ZO_GamepadMenuEntryHeaderTemplate"
 local MENU_ENTRY_TEMPLATE = "ZO_GamepadMenuEntryTemplate"
 
-function ZO_GroupMenu_Gamepad:New(...)
-    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
-end
-
 --Initialization
 function ZO_GroupMenu_Gamepad:Initialize(control)
     --Order matters. We need to initialize the scene before the parametric list screen
@@ -41,6 +37,7 @@ function ZO_GroupMenu_Gamepad:PerformDeferredInitialization()
         titleText = GetString(SI_MAIN_MENU_GROUP),
     }
     ZO_GamepadGenericHeader_RefreshData(self.header, headerData)
+    self.headerData = headerData
 
     self.currentFragmentGroup = nil
     self.menuEntries[MENU_ENTRY_TYPE_CURRENT_GROUP].fragmentGroup = { GROUP_LIST_GAMEPAD:GetListFragment(), GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT }
@@ -323,6 +320,7 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
         local entry = CreateListEntry(textEnum, type, normalIcon)
         entry.normalIcon = normalIcon
         entry.veteranIcon = veteranIcon
+        entry.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
         return entry
     end
 
@@ -415,11 +413,16 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
 
     list:SetDefaultSelectedIndex(2) --don't select MENU_ENTRY_TYPE_ROLES by default
 
+    local roleEntry = CreateListEntry("", MENU_ENTRY_TYPE_ROLES)
+    roleEntry.narrationText = function(entryData, entryControl)
+        return GAMEPAD_GROUP_ROLES_BAR:GetNarrationText() or {}
+    end
+
     --Constant entries
     self.menuEntries = {
-        [MENU_ENTRY_TYPE_ROLES] = CreateListEntry("", MENU_ENTRY_TYPE_ROLES),
+        [MENU_ENTRY_TYPE_ROLES] = roleEntry,
         [MENU_ENTRY_TYPE_CURRENT_GROUP] = CreateListEntry(SI_GAMEPAD_GROUP_CURRENT_GROUP, MENU_ENTRY_TYPE_CURRENT_GROUP, "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_currentGroup.dds"),
-        [MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY] = CreateDifficultyListEntry("", MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY, GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL), GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_VETERAN)),
+        [MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY] = CreateDifficultyListEntry("", MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY, ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL), ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_VETERAN)),
         [MENU_ENTRY_TYPE_INVITE_PLAYER] = CreateListEntry(SI_GROUP_WINDOW_INVITE_PLAYER, MENU_ENTRY_TYPE_INVITE_PLAYER, "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_invitePlayer.dds"),
         [MENU_ENTRY_TYPE_INVITE_FRIEND] = CreateListEntry(SI_GROUP_WINDOW_INVITE_FRIEND, MENU_ENTRY_TYPE_INVITE_FRIEND, "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_invitePlayer.dds"),
         [MENU_ENTRY_TYPE_LEAVE_GROUP] = CreateListEntry(SI_GROUP_LIST_MENU_LEAVE_GROUP, MENU_ENTRY_TYPE_LEAVE_GROUP),

@@ -235,6 +235,10 @@ function ZO_SharedSmithingCreation:OnSelectedPatternChanged(patternData, selecte
     end
 end
 
+function ZO_SharedSmithingCreation:OnSelectedMaterialChanged(materialData, selectedDuringRebuild)
+    --Can be overridden
+end
+
 function ZO_SharedSmithingCreation:SelectValidKnowledgeIndices()
     local patternIndex = self:GetSelectedPatternIndex()
     local itemStyleId = self:GetSelectedItemStyleId()
@@ -457,7 +461,7 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
         --Store the last selected combination index (level) for this material
         self:SetLastListSelection(self:GetMaterialListMemoryKey(materialData.materialIndex), value)
 
-        local stackCount, currentSelectedQuality, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(materialData)
+        local _, _, _, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(materialData)
         local combination = materialData.combinations[value]
 
         if not meetsRankRequirement then
@@ -507,7 +511,7 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
         if self.materialList then
             local data = self.materialList:GetSelectedData()
             if data then
-                local stackCount, currentSelectedQuality, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(data)
+                local _, _, _, meetsRankRequirement = self:GetMaterialInformation(data)
                 local combination = data.combinations[value]
                 if combination.isChampionPoint then
                     if meetsRankRequirement then
@@ -540,7 +544,7 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
         control.patternIndex = data.patternIndex
         control.materialIndex = data.materialIndex
 
-        local stackCount, currentSelectedQuantity, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(data)
+        local stackCount, _, _, meetsRankRequirement, _, _, usable = self:GetMaterialInformation(data)
         ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, meetsRankRequirement, not enabled)
         ZO_ItemSlot_SetAlwaysShowStackCount(control, true)
 
@@ -613,6 +617,9 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
     self.materialList = scrollListClass:New(listContainer.listControl, listSlotTemplate, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction, OnMaterialHorizonalScrollListShown, OnMaterialHorizonalScrollListCleared)
     self.materialList:SetNoItemText(GetString(SI_SMITHING_NO_MATERIALS_FOUND))
     self.materialList:SetScaleExtents(MIN_SCALE, MAX_SCALE)
+    self.materialList:SetOnSelectedDataChangedCallback(function(selectedData, oldData, selectedDuringRebuild)
+        self:OnSelectedMaterialChanged(selectedData, selectedDuringRebuild)
+    end)
 
     ZO_CraftingUtils_ConnectHorizontalScrollListToCraftingProcess(self.materialList)
 end
@@ -630,11 +637,10 @@ function ZO_SharedSmithingCreation:InitializeStyleList(scrollListClass, styleUnk
         control.itemStyleId = data.itemStyleId
         local usesUniversalStyleItem = self:GetIsUsingUniversalStyleItem()
         local stackCount = GetCurrentSmithingStyleItemCount(data.itemStyleId)
-        local hasEnoughInInventory = stackCount > 0
         local universalStyleItemCount = GetCurrentSmithingStyleItemCount(GetUniversalStyleId())
         local isStyleKnown = IsSmithingStyleKnown(data.itemStyleId, self:GetSelectedPatternIndex())
         ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, isStyleKnown, not enabled)
-        local stackCountLabel = GetControl(control, "StackCount")
+        local stackCountLabel = control:GetNamedChild("StackCount")
         stackCountLabel:SetHidden(usesUniversalStyleItem)
 
         local questPinIcon = control:GetNamedChild("QuestPin")
@@ -917,7 +923,7 @@ function ZO_SharedSmithingCreation:GenerateMaterialDataForPattern(patternIndex)
     local instanceFilter = {}
     local _, _, _, numMaterials = GetSmithingPatternInfo(patternIndex)
     for materialIndex = 1, numMaterials do
-        local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemStyle, displayQuality, itemInstanceId, rankRequirement, createsItemOfLevel, isChampionPoint = GetSmithingPatternMaterialItemInfo(patternIndex, materialIndex)
+        local name, icon, stack, _, _, _, _, displayQuality, itemInstanceId, rankRequirement, createsItemOfLevel, isChampionPoint = GetSmithingPatternMaterialItemInfo(patternIndex, materialIndex)
         if instanceFilter[itemInstanceId] then
             local existingData = instanceFilter[itemInstanceId]
             existingData.min = zo_min(existingData.min, stack)
@@ -1066,7 +1072,7 @@ function ZO_SharedSmithingCreation:RefreshStyleList()
                 local styleItemLink = GetItemStyleMaterialLink(validItemStyleId)
                 local alwaysHideIfLocked = GetItemStyleInfo(validItemStyleId)
                 local name = GetItemLinkName(styleItemLink)
-                local icon, sellPrice, meetsUsageRequirement = GetItemLinkInfo(styleItemLink)
+                local icon, _, meetsUsageRequirement = GetItemLinkInfo(styleItemLink)
                 if meetsUsageRequirement and self:DoesStylePassFilter(validItemStyleId, alwaysHideIfLocked) then
                     self.styleList:AddEntry({ craftingType = craftingInteractionType, itemStyleId = validItemStyleId, name = name, icon = icon })
                 end
@@ -1322,7 +1328,7 @@ function ZO_SharedSmithingCreation:UpdateKeybindStrip()
 end
 
 function ZO_SharedSmithingCreation:DoesCurrentTabHaveQuest()
-    local doesFilterMatch = false
+    local doesFilterMatch
     --Since set and non-set items map to the same item filter, we need to do some shenanigans to differentiate between them
     if self.isSetQuest then
         doesFilterMatch = not ZO_CraftingUtils_IsBaseSmithingFilter(self.typeFilter)

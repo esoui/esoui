@@ -84,7 +84,7 @@ function ZO_CharacterSelect_EventBanner_Shared:PopulateCarousel()
             image = data.image,
             startTime = data.startTime,
             remainingTime = data.remainingTime,
-            callback = function() self.carousel:UpdateSelection(i) end
+            callback = function() self:OnSelectionChanged(i) end
         }
 
         self.carousel:AddEntry(entryData)
@@ -99,4 +99,8 @@ end
 function ZO_CharacterSelect_EventBanner_Shared:OnEventBannerCloseKeybind()
     PlaySound(SOUNDS.DIALOG_ACCEPT)
     SCENE_MANAGER:RemoveFragment(self:GetFragment())
+end
+
+function ZO_CharacterSelect_EventBanner_Shared:OnSelectionChanged(index)
+    self.carousel:UpdateSelection(index)
 end

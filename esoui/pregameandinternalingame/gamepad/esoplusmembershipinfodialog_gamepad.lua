@@ -49,12 +49,14 @@ function ZO_EsoPlusMembershipInfoDialog_Gamepad:BuildDialogInfo()
         {
             text = "", -- no main text
         },
+        narrationText = function(...) return self:GetNarrationText(...) end,
         buttons =
         {
             {
-                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                name = "Gamepad Membership Dialog Back",
+                --Even though this is an ethereal keybind, the name will still be read during screen narration
+                name = GetString(SI_GAMEPAD_BACK_OPTION),
                 ethereal = true,
+                narrateEthereal = true,
                 keybind = "DIALOG_NEGATIVE",
                 clickSound = SOUNDS.DIALOG_DECLINE,
                 callback = function(dialog)
@@ -97,6 +99,16 @@ function ZO_EsoPlusMembershipInfoDialog_Gamepad:Hide()
     ZO_Dialogs_ReleaseDialog("ESO_PLUS_MEMBERSHIP_INFO")
 end
 
+function ZO_EsoPlusMembershipInfoDialog_Gamepad:GetNarrationText(dialog)
+    local narrations = {}
+    local numLines = GetNumGamepadMarketSubscriptionBenefitLines()
+    for i = 1, numLines do
+        local lineText, headerText, icon = GetGamepadMarketSubscriptionBenefitLineInfo(i);
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(headerText))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(lineText))
+    end
+    return narrations
+end
 --
 --[[ XML Handlers ]]--
 --

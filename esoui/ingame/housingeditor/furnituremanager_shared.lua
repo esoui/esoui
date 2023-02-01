@@ -21,6 +21,34 @@ ZO_PLACEABLE_FURNITURE_BAGS =
     [BAG_HOUSE_BANK_TEN] = true,
 }
 
+ZO_HOUSING_FURNITURE_LOCATION_FILTER_BAGS =
+{
+    [HOUSING_FURNITURE_LOCATION_FILTER_ALL] = nil, -- nil is interpreted as "match any location"
+    [HOUSING_FURNITURE_LOCATION_FILTER_COLLECTIBLES] = nil,
+    [HOUSING_FURNITURE_LOCATION_FILTER_BACKPACK] =
+    {
+        [BAG_BACKPACK] = true,
+    },
+    [HOUSING_FURNITURE_LOCATION_FILTER_BANK] =
+    {
+        [BAG_BANK] = true,
+        [BAG_SUBSCRIBER_BANK] = true,
+    },
+    [HOUSING_FURNITURE_LOCATION_FILTER_STORAGE] =
+    {
+        [BAG_HOUSE_BANK_ONE] = true,
+        [BAG_HOUSE_BANK_TWO] = true,
+        [BAG_HOUSE_BANK_THREE] = true,
+        [BAG_HOUSE_BANK_FOUR] = true,
+        [BAG_HOUSE_BANK_FIVE] = true,
+        [BAG_HOUSE_BANK_SIX] = true,
+        [BAG_HOUSE_BANK_SEVEN] = true,
+        [BAG_HOUSE_BANK_EIGHT] = true,
+        [BAG_HOUSE_BANK_NINE] = true,
+        [BAG_HOUSE_BANK_TEN] = true,
+    },
+}
+
 -- Make sure no new bags have been added since the last time we updated ZO_PLACEABLE_FURNITURE_BAGS
 -- If a new bag was added and it's possible to place furniture from it add it to the table
 internalassert(BAG_MAX_VALUE == 18, "Update ZO_SharedFurnitureManager to handle new bag")
@@ -74,21 +102,20 @@ function ZO_SharedFurnitureManager:Initialize()
     self.isMarketFiltered = false
 
     self.pathableFurnitureCategoryTreeData = ZO_RootFurnitureCategory:New("pathable")
-
     self.pathNodesPerFurniture = {}
-
-    self.placementFurnitureTheme = FURNITURE_THEME_TYPE_ALL
-    self.purchaseFurnitureTheme = FURNITURE_THEME_TYPE_ALL
 
     self.housingMarketProductPool = ZO_ObjectPool:New(ZO_HousingMarketProduct, ZO_ObjectPool_DefaultResetObject)
 
+    -- Order matters
     self:RegisterForEvents()
+    self:ResetFurnitureFilters()
 end
 
 function ZO_SharedFurnitureManager:RegisterForEvents()
     SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", function(bagId) self:OnFullInventoryUpdate(bagId) end)
     SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", function(...) self:OnSingleSlotInventoryUpdate(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
+    HOUSING_EDITOR_STATE:RegisterCallback("HouseChanged", function(...) self:OnHouseChanged(...) end)
 
     local function ApplyFurnitureCommand(categoryTreeData, furnitureCommand)
         if furnitureCommand.command == FURNITURE_COMMAND_REMOVE then
@@ -195,8 +222,10 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
     local function InHouseOnUpdate()
         self:InHouseOnUpdate()
     end
+
     local function OnPlayerActivated()
-        self:InitializeFurnitureCaches()
+        self:RebuildFurnitureCaches()
+
         if GetCurrentZoneHouseId() ~= 0 then
             EVENT_MANAGER:RegisterForUpdate("SharedFurniture", 100, InHouseOnUpdate)
 
@@ -207,6 +236,7 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
         else
             EVENT_MANAGER:UnregisterForUpdate("SharedFurniture")
         end
+
         self.lastPlayerWorldX = nil
         self.lastPlayerWorldY = nil
         self.lastPlayerWorldZ = nil
@@ -226,14 +256,26 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
             self:BuildMarketProductCache()
         end
     end
-
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_MARKET_PRODUCT_AVAILABILITY_UPDATED, function(eventId, ...) OnMarketProductAvailabilityUpdated(...) end)
+
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) self:UpdateMarketProductCache() end)
-
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_BACKGROUND_LIST_FILTER_COMPLETE, function(eventId, ...) self:OnBackgroundListFilterComplete(...) end)
-
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_MAP_PING, function(eventId, ...) self:OnMapPing(...) end)
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_EDITOR_MODE_CHANGED, function(eventId, ...) self:OnHousingEditorModeChanged(...) end)
+end
+
+function ZO_SharedFurnitureManager:ResetFurnitureFilters()
+    self.isPlaceableFiltered = false
+    self.isMarketFiltered = false
+    self.isRetrievableFiltered = false
+
+    self:SetMarketProductTextFilter("")
+    self:SetPlaceableTextFilter("")
+    self:SetRetrievableTextFilter("")
+    self:SetPlacementFurnitureFilters(HOUSING_FURNITURE_BOUND_FILTER_ALL, HOUSING_FURNITURE_LOCATION_FILTER_ALL, ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL)
+    self:SetPlacementFurnitureTheme(FURNITURE_THEME_TYPE_ALL)
+    self:SetPurchaseFurnitureTheme(FURNITURE_THEME_TYPE_ALL)
+    self:SetRetrievableFurnitureFilters(HOUSING_FURNITURE_BOUND_FILTER_ALL, ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL)
 end
 
 function ZO_SharedFurnitureManager:SetPlayerWaypointTo(housingObject)
@@ -294,11 +336,15 @@ function ZO_SharedFurnitureManager:OnHousingEditorModeChanged(oldMode, newMode)
     end
 end
 
+function ZO_SharedFurnitureManager:OnHouseChanged()
+    self:ResetFurnitureFilters()
+end
+
 function ZO_SharedFurnitureManager:CreatePlacedFurnitureData(furnitureId)
     return ZO_RetrievableFurniture:New(furnitureId)
 end
 
-function ZO_SharedFurnitureManager:InitializeFurnitureCaches()
+function ZO_SharedFurnitureManager:RebuildFurnitureCaches()
     --setup just the placeable collections, SharedInventory will tell us when its ready to query placeable items
     self:CreateOrUpdateCollectibleCache()
     self:BuildMarketProductCache()
@@ -484,14 +530,34 @@ do
         categoryData:AddEntry(entry)
     end
 
+    -- Returns the current furniture filter values associated with the specified category tree data reference.
+    function ZO_SharedFurnitureManager:GetFurnitureFiltersForCategoryTree(categoryTreeData)
+        local boundFilters = HOUSING_FURNITURE_BOUND_FILTER_ALL
+        local locationFilters = HOUSING_FURNITURE_LOCATION_FILTER_ALL
+        local limitFilters = ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL
+
+        if categoryTreeData == self.placeableFurnitureCategoryTreeData then
+            boundFilters = self.placementFurnitureBoundFilters or boundFilters
+            locationFilters = self.placementFurnitureLocationFilters or locationFilters
+            limitFilters = self.placementFurnitureLimitFilters or limitFilters
+        elseif categoryTreeData == self.retrievableFurnitureCategoryTreeData then
+            boundFilters = self.retrievableFurnitureBoundFilters or boundFilters
+            limitFilters = self.retrievableFurnitureLimitFilters or limitFilters
+        end
+
+        return boundFilters, locationFilters, limitFilters
+    end
+
     function ZO_SharedFurnitureManager:BuildCategoryTreeData(categoryTreeData, data, theme, filterFunction)
         local furnitureTheme = theme or FURNITURE_THEME_TYPE_ALL
+        local boundFilters, locationFilters, limitFilters = self:GetFurnitureFiltersForCategoryTree(categoryTreeData)
+
         for _, furniture in pairs(data) do
             local passesOptionalFilter = true
             if filterFunction then
                 passesOptionalFilter = filterFunction(furniture) 
             end
-            if passesOptionalFilter and furniture:GetPassesTextFilter() and furniture:PassesTheme(furnitureTheme) then
+            if passesOptionalFilter and furniture:GetPassesTextFilter() and furniture:PassesTheme(furnitureTheme) and furniture:GetPassesFurnitureFilters(boundFilters, locationFilters, limitFilters) then
                 AddEntryToCategory(categoryTreeData, furniture)
             end
         end
@@ -865,27 +931,94 @@ do
     end
 end
 
+function ZO_SharedFurnitureManager:RefreshPlacementFilterState()
+    self.isPlaceableFiltered =
+        self:GetPlacementFurnitureBoundFilters() > HOUSING_FURNITURE_BOUND_FILTER_ALL
+     or self:GetPlacementFurnitureLocationFilters() > HOUSING_FURNITURE_LOCATION_FILTER_ALL
+     or self:GetPlacementFurnitureLimitFilters() > ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL
+     or self:GetPlacementFurnitureTheme() ~= FURNITURE_THEME_TYPE_ALL
+     or self:CanFilterByText(self.placeableTextFilter)
+end
+
+function ZO_SharedFurnitureManager:RefreshMarketFilterState()
+    self.isMarketFiltered =
+        self:GetPurchaseFurnitureTheme() ~= FURNITURE_THEME_TYPE_ALL
+        self:CanFilterByText(self.marketProductTextFilter)
+end
+
+function ZO_SharedFurnitureManager:RefreshRetrievableFilterState()
+    self.isRetrievableFiltered =
+        self:GetRetrievableFurnitureBoundFilters() > HOUSING_FURNITURE_BOUND_FILTER_ALL
+     or self:GetRetrievableFurnitureLimitFilters() > ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL
+     or self:CanFilterByText(self.retrievableTextFilter)
+end
+
+function ZO_SharedFurnitureManager:GetPlacementFurnitureBoundFilters()
+    return self.placementFurnitureBoundFilters or HOUSING_FURNITURE_BOUND_FILTER_ALL
+end
+
+function ZO_SharedFurnitureManager:GetPlacementFurnitureLocationFilters()
+    return self.placementFurnitureLocationFilters or HOUSING_FURNITURE_LOCATION_FILTER_ALL
+end
+
+function ZO_SharedFurnitureManager:GetPlacementFurnitureLimitFilters()
+    return self.placementFurnitureLimitFilters or ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL
+end
+
 function ZO_SharedFurnitureManager:GetPlacementFurnitureTheme()
-    return self.placementFurnitureTheme
+    return self.placementFurnitureTheme or FURNITURE_THEME_TYPE_ALL
+end
+
+function ZO_SharedFurnitureManager:OnPlacementFiltersChanged()
+    self:RefreshPlacementFilterState()
+    self.refreshGroups:RefreshAll("UpdatePlacementFurniture")
+    self:FireCallbacks("PlaceableFurnitureChanged")
+end
+
+function ZO_SharedFurnitureManager:SetPlacementFurnitureFilters(boundFilters, locationFilters, limitFilters)
+    local changed = false
+
+    if boundFilters ~= nil and self.placementFurnitureBoundFilters ~= boundFilters then
+        self.placementFurnitureBoundFilters = boundFilters
+        changed = true
+    end
+
+    if locationFilters ~= nil and self.placementFurnitureLocationFilters ~= locationFilters then
+        self.placementFurnitureLocationFilters = locationFilters
+        changed = true
+    end
+
+    if limitFilters ~= nil and self.placementFurnitureLimitFilters ~= limitFilters then
+        self.placementFurnitureLimitFilters = limitFilters
+        changed = true
+    end
+
+    if changed then
+        self:OnPlacementFiltersChanged()
+    end
 end
 
 function ZO_SharedFurnitureManager:SetPlacementFurnitureTheme(theme)
     if self.placementFurnitureTheme ~= theme then
         self.placementFurnitureTheme = theme
-        self.refreshGroups:RefreshAll("UpdatePlacementFurniture")
-        self:FireCallbacks("PlaceableFurnitureChanged")
+        self:OnPlacementFiltersChanged()
     end
 end
 
 function ZO_SharedFurnitureManager:GetPurchaseFurnitureTheme()
-    return self.purchaseFurnitureTheme
+    return self.purchaseFurnitureTheme or FURNITURE_THEME_TYPE_ALL
+end
+
+function ZO_SharedFurnitureManager:OnPurchaseFiltersChanged()
+    self:RefreshMarketFilterState()
+    self.refreshGroups:RefreshAll("UpdateMarketProducts")
+    self:FireCallbacks("MarketProductsChanged")
 end
 
 function ZO_SharedFurnitureManager:SetPurchaseFurnitureTheme(theme)
     if self.purchaseFurnitureTheme ~= theme then
         self.purchaseFurnitureTheme = theme
-        self.refreshGroups:RefreshAll("UpdateMarketProducts")
-        self:FireCallbacks("MarketProductsChanged")
+        self:OnPurchaseFiltersChanged()
     end
 end
 
@@ -895,8 +1028,40 @@ end
 
 function ZO_SharedFurnitureManager:SetPlaceableTextFilter(text)
     if text ~= self.placeableTextFilter then
-        self.placeableTextFilter = text    
+        self.placeableTextFilter = text
         self:RequestApplyPlaceableTextFilterToData()    
+    end
+end
+
+function ZO_SharedFurnitureManager:GetRetrievableFurnitureBoundFilters()
+    return self.retrievableFurnitureBoundFilters or HOUSING_FURNITURE_BOUND_FILTER_ALL
+end
+
+function ZO_SharedFurnitureManager:GetRetrievableFurnitureLimitFilters()
+    return self.retrievableFurnitureLimitFilters or ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL
+end
+
+function ZO_SharedFurnitureManager:OnRetrievableFiltersChanged()
+    self:RefreshRetrievableFilterState()
+    self.refreshGroups:RefreshAll("UpdateRetrievableFurniture")
+    self:FireCallbacks("RetrievableFurnitureChanged")
+end
+
+function ZO_SharedFurnitureManager:SetRetrievableFurnitureFilters(boundFilters, limitFilters)
+    local changed = false
+
+    if boundFilters ~= nil and self.retrievableFurnitureBoundFilters ~= boundFilters then
+        self.retrievableFurnitureBoundFilters = boundFilters
+        changed = true
+    end
+
+    if limitFilters ~= nil and self.retrievableFurnitureLimitFilters ~= limitFilters then
+        self.retrievableFurnitureLimitFilters = limitFilters
+        changed = true
+    end
+
+    if changed then
+        self:OnRetrievableFiltersChanged()
     end
 end
 
@@ -938,6 +1103,36 @@ function ZO_SharedFurnitureManager:CanAddFurnitureDataToRefresh(categoryTree, fu
     return canAddToRefresh
 end
 
+function ZO_SharedFurnitureManager:CanResetFurnitureFilters()
+    if  self:GetMarketProductTextFilter() ~= "" or
+        self:GetPlaceableTextFilter() ~= "" or
+        self:GetRetrievableTextFilter() ~= "" then
+        return true
+    end
+
+    if self:GetPlacementFurnitureBoundFilters() ~= HOUSING_FURNITURE_BOUND_FILTER_ALL then
+        return true
+    end
+    
+    if self:GetPlacementFurnitureLocationFilters() ~= HOUSING_FURNITURE_LOCATION_FILTER_ALL then
+        return true
+    end
+
+    if self:GetPlacementFurnitureLimitFilters() ~= ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL then
+        return true
+    end
+
+    if self:GetRetrievableFurnitureBoundFilters() ~= HOUSING_FURNITURE_BOUND_FILTER_ALL then
+        return true
+    end
+
+    if self:GetRetrievableFurnitureLimitFilters() ~= ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL then
+        return true
+    end
+
+    return false
+end
+
 --Starts a background task to filter the placeable list entries using the text input. This will eventually result in the category list being marked dirty
 --and others being notified to update once the filter completes.
 
@@ -951,11 +1146,11 @@ function ZO_SharedFurnitureManager:RequestApplyPlaceableTextFilterToData()
     for _, taskId in pairs(self.inProgressPlaceableFurnitureTextFilterTaskIds) do
         DestroyBackgroundListFilter(taskId)
     end
-        
+
+    self:RefreshPlacementFilterState()
+
     --If we have filter text than create the tasks
     if self:CanFilterByText(self.placeableTextFilter) then
-        self.isPlaceableFiltered = true
-
         --Inventory Items
         local itemTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, self.placeableTextFilter)
         self.inProgressPlaceableFurnitureTextFilterTaskIds[ZO_PLACEABLE_TYPE_ITEM] = itemTaskId
@@ -982,8 +1177,6 @@ function ZO_SharedFurnitureManager:RequestApplyPlaceableTextFilterToData()
         StartBackgroundListFilter(collectibleTaskId)
     --If we have no search text then everything passes, so set everything to true now.
     else
-        self.isPlaceableFiltered = false
-
         --Inventory Items
         for bagId, slots in pairs(self.placeableFurniture[ZO_PLACEABLE_TYPE_ITEM]) do
             for slotId, slotData in pairs(slots) do
@@ -1009,10 +1202,10 @@ function ZO_SharedFurnitureManager:RequestApplyRetrievableTextFilterToData()
         DestroyBackgroundListFilter(self.inProgressRetrievableTextFilterTaskId)
     end
 
+    self:RefreshRetrievableFilterState()
+
     --If we have filter text than create the task
     if self:CanFilterByText(self.retrievableTextFilter) then
-        self.isRetrievableFiltered = true
-
         local furnitureTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_FURNITURE_ID, self.retrievableTextFilter)
         self.inProgressRetrievableFurnitureTextFilterTaskId = furnitureTaskId
         AddBackgroundListFilterType(furnitureTaskId, BACKGROUND_LIST_FILTER_TYPE_NAME)
@@ -1024,8 +1217,6 @@ function ZO_SharedFurnitureManager:RequestApplyRetrievableTextFilterToData()
         StartBackgroundListFilter(furnitureTaskId)
     --If we have no search text then everything passes, so set everything to true now.
     else
-        self.isRetrievableFiltered = false
-
         for _, furnitureData in pairs(self.retrievableFurniture) do
             furnitureData:SetPassesTextFilter(true)
         end
@@ -1041,10 +1232,10 @@ function ZO_SharedFurnitureManager:RequestApplyMarketProductTextFilterToData()
         DestroyBackgroundListFilter(self.inProgressMarketProductTextFilterTaskId)
     end
 
+    self:RefreshMarketFilterState()
+
     --If we have filter text than create the task
     if self:CanFilterByText(self.marketProductTextFilter) then
-        self.isMarketFiltered = true
-
         local marketProductTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_MARKET_PRODUCT_ID, self.marketProductTextFilter)
         self.inProgressMarketProductTextFilterTaskId = marketProductTaskId
         AddBackgroundListFilterType(marketProductTaskId, BACKGROUND_LIST_FILTER_TYPE_NAME)
@@ -1059,8 +1250,6 @@ function ZO_SharedFurnitureManager:RequestApplyMarketProductTextFilterToData()
         StartBackgroundListFilter(marketProductTaskId)
     --If we have no search text then everything passes, so set everything to true now.
     else
-        self.isMarketFiltered = false
-
         for i, marketProductData in ipairs(self.marketProducts) do
             marketProductData:SetPassesTextFilter(true)
         end

@@ -32,6 +32,7 @@ function ZO_LevelUpRewardsUpcoming_Gamepad:LayoutReward(data, rewardContainer, p
 
     local name = ZO_LEVEL_UP_REWARDS_MANAGER:GetUpcomingRewardNameFromRewardData(data)
     rewardControl.nameControl:SetText(name)
+    rewardControl.narrationText = name
     local rewardType = data:GetRewardType()
     if rewardType then
         local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data:GetItemDisplayQuality())
@@ -95,6 +96,45 @@ end
 
 function ZO_LevelUpRewardsUpcoming_Gamepad:IsShowing()
     return ZO_GAMEPAD_UPCOMING_LEVEL_UP_REWARDS_FRAGMENT:IsShowing()
+end
+
+function ZO_LevelUpRewardsUpcoming_Gamepad:GetNarrationText()
+    local narrations = {}
+
+    -- Header
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_LEVEL_UP_REWARDS_UPCOMING_REWARDS_HEADER)))
+
+    -- Next level rewards
+    local nextRewardLevel = ZO_LEVEL_UP_REWARDS_MANAGER:GetUpcomingRewardLevel()
+    local isNextRewardLevelMilestone = IsLevelUpRewardMilestoneForLevel(nextRewardLevel)
+
+    if isNextRewardLevelMilestone then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_LEVEL_UP_REWARDS_NEXT_MILESTONE_REWARD_HEADER, nextRewardLevel)))
+    else
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_LEVEL_UP_REWARDS_NEXT_LEVEL_REWARD_HEADER)))
+    end
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(nextLevelTitle))
+
+    local milestoneRewards = {}
+    for _, reward in self.rewardPool:ActiveObjectIterator() do
+        if reward:GetParent() == self.nextLevelContainer.rewardsContainer then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(reward.narrationText))
+        else
+            table.insert(milestoneRewards, reward)
+        end
+    end
+
+    if not isNextRewardLevelMilestone then
+        -- Next milestone rewards; if the next level is the next milestone, we skip this
+        local nextMilestoneRewardLevel = ZO_LEVEL_UP_REWARDS_MANAGER:GetUpcomingMilestoneRewardLevel()
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_LEVEL_UP_REWARDS_NEXT_MILESTONE_REWARD_HEADER, nextMilestoneRewardLevel)))
+
+        for _, reward in ipairs(milestoneRewards) do
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(reward.narrationText))
+        end
+    end
+
+    return narrations
 end
 
 --

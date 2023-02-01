@@ -27,16 +27,12 @@
                 <Control name="$(parent)ProductDescription" inherits="ZO_ScrollContainer">
                     <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_WIDTH" />
                     <Controls>
-                        <Control name="$(parent)Scroll" override="true">
+                        <Control name="$(parent)ScrollChild" override="true">
                             <Controls>
-                                <Control name="$(parent)Child" override="true">
-                                    <Controls>
-                                        <Label name="$(parent)ProductDescriptionText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameMedium">
-                                            <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_WIDTH_WITH_SCROLLBAR" />
-                                            <Anchor point="TOPLEFT" />
-                                        </Label>
-                                    </Controls>
-                                </Control>
+                                <Label name="$(parent)ProductDescriptionText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameMedium">
+                                    <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_WIDTH_WITH_SCROLLBAR" />
+                                    <Anchor point="TOPLEFT" />
+                                </Label>
                             </Controls>
                         </Control>
                     </Controls>

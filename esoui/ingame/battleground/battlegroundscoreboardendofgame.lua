@@ -101,6 +101,32 @@ function ZO_Battleground_Scoreboard_End_Of_Game:InitializeKeybinds()
     self.nextPlayerButton = CreateKeybindButton("BATTLEGROUND_SCOREBOARD_NEXT", function() BATTLEGROUND_SCOREBOARD_FRAGMENT:SelectNextPlayerData() end, GetString(SI_BATTLEGROUND_SCOREBOARD_NEXT_PLAYER_KEYBIND))
 end
 
+function ZO_Battleground_Scoreboard_End_Of_Game:GetKeybindsNarrationData()
+    local narrationData = {}
+
+    local playerOptionsNarrationData = self.playerOptionsButton:GetKeybindButtonNarrationData()
+    if playerOptionsNarrationData then
+        table.insert(narrationData, playerOptionsNarrationData)
+    end
+
+    local leaveBattlegroundNarrationData = self.leaveBattlegroundKeybind:GetKeybindButtonNarrationData()
+    if leaveBattlegroundNarrationData then
+        table.insert(narrationData, leaveBattlegroundNarrationData)
+    end
+
+    local previousPlayerNarrationData = self.previousPlayerButton:GetKeybindButtonNarrationData()
+    if previousPlayerNarrationData then
+        table.insert(narrationData, previousPlayerNarrationData)
+    end
+
+    local nextPlayerNarrationData = self.nextPlayerButton:GetKeybindButtonNarrationData()
+    if nextPlayerNarrationData then
+        table.insert(narrationData, nextPlayerNarrationData)
+    end
+
+    return narrationData
+end
+
 do
     local KEYBOARD_PLATFORM_STYLE = 
     {
@@ -151,7 +177,9 @@ end
 
 function ZO_Battleground_Scoreboard_End_Of_Game:UpdateAll()
     local timeLeft = ZO_FormatTimeAsDecimalWhenBelowThreshold(GetCurrentBattlegroundStateTimeRemaining() / 1000)
-    self.closingTimerLabel:SetText(zo_strformat(SI_BATTLEGROUND_SCOREBOARD_END_OF_GAME_CLOSING_TIME, timeLeft))
+    -- Store time text for narration
+    self.closingTimerLabelText = zo_strformat(SI_BATTLEGROUND_SCOREBOARD_END_OF_GAME_CLOSING_TIME, timeLeft)
+    self.closingTimerLabel:SetText(self.closingTimerLabelText)
 end
 
 function ZO_Battleground_Scoreboard_End_Of_Game:RefreshMatchInfoFragments()

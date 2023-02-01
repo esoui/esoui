@@ -66,7 +66,7 @@ function ZO_KeyboardFriendRequestProvider:Decline(data, button, openedFromKeybin
                                                                         PlaySound(SOUNDS.DEFAULT_CLICK)
                                                                     end)
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_REPORT_SPAMMING), function()
-                                                                        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.displayName, IgnorePlayer)
+                                                                        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.displayName)
                                                                     end)
 
     if(openedFromKeybind == NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND) then
@@ -87,7 +87,7 @@ function ZO_KeyboardGuildInviteProvider:New(notificationManager)
 end
 
 function ZO_KeyboardGuildInviteProvider:CreateMessage(guildAlliance, guildName, inviterDisplayName)
-    local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), 24, 24)
+    local allianceIcon = zo_iconFormat(ZO_GetAllianceSymbolIcon(guildAlliance), 24, 24)
     return zo_strformat(SI_GUILD_INVITE_MESSAGE, allianceIcon, guildName, inviterDisplayName)
 end
 
@@ -104,7 +104,7 @@ function ZO_KeyboardGuildInviteProvider:Decline(data, button, openedFromKeybind)
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_DECLINE), function() RejectGuildInvite(data.guildId) end)
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_IGNORE_PLAYER), IgnorePlayer)
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_REPORT_SPAMMING), function()
-                                                                        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.displayName, IgnorePlayer)
+                                                                        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.displayName)
                                                                         RejectGuildInvite(data.guildId)
                                                                     end)
 

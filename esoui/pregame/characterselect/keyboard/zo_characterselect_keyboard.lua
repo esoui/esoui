@@ -398,6 +398,7 @@ function ZO_CharacterSelect_Initialize(self)
     ZO_ScrollList_AddResizeOnScreenResize(list)
 
     self:RegisterForEvent(EVENT_CHARACTER_SELECTED_FOR_PLAY, OnCharacterSelectedForPlay)
+    self:RegisterForEvent(EVENT_ENTITLEMENT_STATE_CHANGED, function() PopulateCarousel() end)
 
     CHARACTER_SELECT_MANAGER:RegisterCallback("CharacterListUpdated", function()
         SetupCharacterList()

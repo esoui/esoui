@@ -12,12 +12,23 @@ function ZO_HousingFurnitureSettings_Keyboard:Initialize(...)
     ZO_HousingBrowserList.Initialize(self, ...)
 
     self.settingsTreeData = ZO_RootFurnitureCategory:New()
-        
+
     for name,topLevelSetting in pairs(ZO_FURNITURE_SETTINGS) do
         local subsettingsTreeData = ZO_FurnitureCategory:New(self.settingsTreeData, name)
+        subsettingsTreeData:SetIsOwnerRestrictedCategory(false)
         self.settingsTreeData:AddSubcategory(name, subsettingsTreeData)
+
         for _,i in pairs(topLevelSetting) do
-            subsettingsTreeData:AddSubcategory(i, ZO_FurnitureCategory:New(subsettingsTreeData, i))
+            local subcategoryData = ZO_FurnitureCategory:New(subsettingsTreeData, i)
+            if name == HOUSE_PERMISSION_OPTIONS_CATEGORIES_SOCIAL_OPTIONS then
+                -- Access to all Settings subcategories is restricted to only the homeowner
+                -- excluding the Occupants subcategory (which is accessible to all role types).
+                local isRestricted = i ~= HOUSE_PERMISSION_OPTIONS_CATEGORIES_OCCUPANTS
+                subcategoryData:SetIsOwnerRestrictedCategory(isRestricted)
+            else
+                subcategoryData:SetIsOwnerRestrictedCategory(false)
+            end
+            subsettingsTreeData:AddSubcategory(i, subcategoryData)
         end
     end
 
@@ -62,6 +73,11 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeSettingsPanels()
     local restartPathsButtonLabel = self.restartPathsButton:GetLabelControl()
     restartPathsButtonLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
 
+    self.occupantsOptionsPanel = self.contents:GetNamedChild("Occupants")
+    self.occupantsSocialList = ZO_HousingSettingsOccupantList_Keyboard:New(self.occupantsOptionsPanel, self, ZO_SETTINGS_OCCUPANT_DATA_TYPE, "ZO_HousingSettings_WhiteList_Row")
+    self.occupantsOptionsPanel.list = self.occupantsSocialList
+    self.categoryIndexToPanel[HOUSE_PERMISSION_OPTIONS_CATEGORIES_OCCUPANTS] = self.occupantsOptionsPanel
+
     self.visitorsOptionsPanel = self.contents:GetNamedChild("Visitors")
     self.visitorsSocialList = ZO_HousingSettingsVisitorList_Keyboard:New(self.visitorsOptionsPanel, self, ZO_SETTINGS_VISITOR_DATA_TYPE, "ZO_HousingSettings_WhiteList_Row")
     self.visitorsOptionsPanel.list = self.visitorsSocialList
@@ -97,6 +113,7 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeKeybindStrip()
                             return GetString(SI_HOUSING_FURNITURE_SETTINGS_ADD_GUILD_KEYBIND)
                         end
                    end,
+
             keybind = "UI_SHORTCUT_SECONDARY",
         
             callback = function()
@@ -126,17 +143,22 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeKeybindStrip()
             end,
 
             visible = function()
-                return self.activePanel ~= self.generalOptionsPanel
+                return self.activePanel ~= self.generalOptionsPanel and self.activePanel ~= self.occupantsOptionsPanel
             end
         },
 
         -- Load Permissions
         {
             name = GetString(SI_HOUSING_FURNITURE_SETTINGS_LOAD_PERMISSIONS_KEYBIND),
+
             keybind = "UI_SHORTCUT_TERTIARY",
         
             callback = function()
                 self:TryShowCopyDialog()
+            end,
+
+            visible = function()
+                return self.activePanel ~= self.occupantsOptionsPanel
             end,
         },
     }
@@ -158,6 +180,10 @@ function ZO_HousingFurnitureSettings_Keyboard:UpdateGeneralSettings()
 
     local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouse)
     self.comboBox:SetSelectedItemText(GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING", defaultAccess))
+end
+
+function ZO_HousingFurnitureSettings_Keyboard:UpdateOccupantSettings()
+    self.occupantsSocialList:RefreshData()
 end
 
 function ZO_HousingFurnitureSettings_Keyboard:UpdateSingleVisitorSettings()
@@ -239,9 +265,7 @@ do
     function ZO_HousingFurnitureSettings_Keyboard:SetActivePanel(panel)
         if self.activePanel ~= panel then
             self.activePanel:SetHidden(IS_HIDDEN)
-
             self.activePanel = panel
-
             panel:SetHidden(not IS_HIDDEN)
 
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -289,7 +313,12 @@ function ZO_HousingSettingsRow_OnMouseUp(control, button, upInside)
         ClearMenu()
 
         local data = ZO_ScrollList_GetData(control)
-        if data.dataEntry.typeId == ZO_SETTINGS_VISITOR_DATA_TYPE or data.dataEntry.typeId == ZO_SETTINGS_GUILD_VISITOR_DATA_TYPE then
+        if data.dataEntry.typeId == ZO_SETTINGS_OCCUPANT_DATA_TYPE then
+            if IsOwnerOfCurrentHouse() then
+                AddMenuItem(GetString(SI_HOUSING_OCCUPANTS_KICK_OCCUPANT), function() ZO_Dialogs_ShowDialog("HOUSING_CONFIRM_KICK_OCCUPANT", data) end)
+                control.panel:ShowMenu(control)
+            end
+        elseif data.dataEntry.typeId == ZO_SETTINGS_VISITOR_DATA_TYPE or data.dataEntry.typeId == ZO_SETTINGS_GUILD_VISITOR_DATA_TYPE then
             AddMenuItem(GetString(SI_HOUSING_PERMISSIONS_OPTIONS_CHANGE_PERMISSIONS), function() ZO_Dialogs_ShowDialog("CHANGE_HOUSING_PERMISSIONS", data) end)
 
             local headerText
@@ -327,6 +356,43 @@ end
 
 -- Setting Dialogs --
 ---------------------
+
+function ZO_HousingConfirmKickOccupantDialog_OnInitialized(self)
+    ZO_Dialogs_RegisterCustomDialog("HOUSING_CONFIRM_KICK_OCCUPANT",
+    {
+        buttons =
+        {
+            {
+                control = self:GetNamedChild("Confirm"),
+                keybind = "DIALOG_PRIMARY",
+                text = SI_DIALOG_YES,
+                callback = function(dialog)
+                    local result = HousingEditorRequestKickOccupant(dialog.data.index)
+                    ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                end
+            },
+
+            {
+                control = self:GetNamedChild("Cancel"),
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_NO,
+            },
+        },
+
+        canQueue = true,
+
+        customControl = self,
+
+        setup = function(dialog)
+            dialog:GetNamedChild("Header"):SetText(zo_strformat(SI_DIALOG_TEXT_KICK_OCCUPANT, dialog.data.displayName))
+        end,
+
+        title =
+        {
+            text = SI_DIALOG_TITLE_KICK_OCCUPANT,
+        },
+    })
+end
 
 function ZO_HousingSettings_TogglePermission(control, state)
     control.parentDialog.changedData[control.permissionSetting] = state

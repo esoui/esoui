@@ -1595,12 +1595,12 @@ function ZO_UnitFrameObject:UpdateAssignment()
         if IsActiveWorldBattleground() then
             local battlegroundAlliance = GetUnitBattlegroundAlliance(unitTag)
             if battlegroundAlliance ~= BATTLEGROUND_ALLIANCE_NONE then
-                assignmentTexture = GetBattlegroundTeamIcon(battlegroundAlliance)
+                assignmentTexture = ZO_GetBattlegroundTeamIcon(battlegroundAlliance)
             end
         else
             local selectedRole = GetGroupMemberSelectedRole(unitTag)
             if selectedRole ~= LFG_ROLE_INVALID then
-                assignmentTexture = GetRoleIcon(selectedRole)
+                assignmentTexture = ZO_GetRoleIcon(selectedRole)
             end
         end
 
@@ -1733,7 +1733,7 @@ function ZO_UnitFrameObject:UpdateName()
         local nameText
         local targetMarkerType = GetUnitTargetMarkerType(tag)
         if targetMarkerType ~= TARGET_MARKER_TYPE_NONE then
-            local iconPath = GetPlatformTargetMarkerIcon(targetMarkerType)
+            local iconPath = ZO_GetPlatformTargetMarkerIcon(targetMarkerType)
             if self.style == TARGET_UNIT_FRAME then
                 nameText = zo_iconTextFormatNoSpaceAlignedRight(iconPath, 20, 20, name)
             else

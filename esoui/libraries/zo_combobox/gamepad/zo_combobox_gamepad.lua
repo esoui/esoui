@@ -197,6 +197,24 @@ function ZO_ComboBox_Gamepad:SetHeader(header)
     self.header = header
 end
 
+function ZO_ComboBox_Gamepad:SetNarrationTooltipType(tooltipType)
+    self.tooltipType = tooltipType
+end
+
+function ZO_ComboBox_Gamepad:GetNarrationTooltipType()
+    if type(self.tooltipType) == "function" then
+        return self.tooltipType(self.m_currentData)
+    else
+        return self.tooltipType
+    end
+end
+
+function ZO_ComboBox_Gamepad:ResetNarrationInfo()
+    self.name = nil
+    self.header = nil
+    self.tooltipType = nil
+end
+
 function ZO_ComboBox_Gamepad:HighlightSelectedItem()
     self:SetHighlightedItem(self.m_highlightedIndex)
 end

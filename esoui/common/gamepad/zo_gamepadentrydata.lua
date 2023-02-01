@@ -188,6 +188,17 @@ function ZO_GamepadEntryData:SetIgnoreTraitInformation(ignoreTraitInformation)
     self.ignoreTraitInformation = ignoreTraitInformation
 end
 
+function ZO_GamepadEntryData:SetPriceNarrationInfo(price, currencyType)
+    self.narrationPrice = price
+    self.narrationCurrencyType = currencyType
+end
+
+function ZO_GamepadEntryData:GetPriceNarration()
+    if self.narrationPrice and self.narrationCurrencyType then
+        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_Currency_FormatGamepad(self.narrationCurrencyType, self.narrationPrice, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
+    end
+end
+
 function ZO_GamepadEntryData:GetColorsBasedOnQuality(displayQuality)
     local selectedNameColor = GetItemQualityColor(displayQuality)
     local unselectedNameColor = GetDimItemQualityColor(displayQuality)

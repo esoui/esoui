@@ -144,7 +144,7 @@ function ZO_GuildBrowser_GuildList_Gamepad:Deactivate()
 end
 
 function ZO_GuildBrowser_GuildList_Gamepad:GetAllianceIcon(alliance)
-    return GetLargeAllianceSymbolIcon(alliance)
+    return ZO_GetLargeAllianceSymbolIcon(alliance)
 end
 
 function ZO_GuildBrowser_GuildList_Gamepad:OnShowing()
@@ -160,6 +160,37 @@ end
 
 function ZO_GuildBrowser_GuildList_Gamepad:OnHidden()
     ZO_GuildBrowser_GuildList_Shared.OnHidden(self)
+end
+
+--Overridden from base
+function ZO_GuildBrowser_GuildList_Gamepad:GetHeaderNarration()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_GUILD_BROWSER_GUILD_LIST_HEADER))
+end
+
+--Overridden from base
+function ZO_GuildBrowser_GuildList_Gamepad:GetNarrationText()
+    local selectedData = self:GetSelectedData()
+    if selectedData then
+        local narrations = {}
+        --Generate the narration for the alliance
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(selectedData.alliance))))
+
+        --Generate the narration for the guild name
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.guildName))
+
+        --Generate the narration for the active members
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_SIZE)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.size))
+
+        --Generate the contextual info narration
+        local contextualInfoHeader, contextualInfoValue = self:GetRowContextualInfo(selectedData)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(contextualInfoHeader))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(contextualInfoValue))
+
+        --Generate the narration for the guild message
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.headerMessage))
+        return narrations
+    end
 end
 
 -- XML Functions

@@ -144,6 +144,7 @@ function ZO_MailSend_Gamepad:InitializeControls()
     -- Gold Slider
     self.goldSliderControl = self.sendControl:GetNamedChild("GoldSliderBox")
     self.goldSlider = ZO_CurrencySelector_Gamepad:New(self.goldSliderControl:GetNamedChild("Selector"))
+    self.goldSlider:SetCurrencyType(CURT_MONEY)
     self.goldSlider:SetClampValues(true)
     self.goldSlider:RegisterCallback("OnValueChanged", function() MAIL_MANAGER_GAMEPAD:RefreshKeybind() end)
 end
@@ -380,6 +381,7 @@ function ZO_MailSend_Gamepad:InitializeKeybindDescriptors()
                         PlayItemSound(soundCategory, ITEM_SOUND_ACTION_EQUIP)
                     end
                 end
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventoryList.list)
             end,
             visible = function()
                 local selectedItem = self.inventoryList:GetTargetData()
@@ -427,7 +429,7 @@ local function UpdatePostage(control)
 end
 
 local function GetPostageNarration()
-    return ZO_Currency_FormatGamepad(CURT_MONEY, GetQueuedMailPostage(), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+    return ZO_Currency_FormatGamepad(CURT_MONEY, GetQueuedMailPostage(), ZO_CURRENCY_FORMAT_AMOUNT_NAME)
 end
 
 function ZO_MailSend_Gamepad:InitializeHeader()
@@ -435,7 +437,7 @@ function ZO_MailSend_Gamepad:InitializeHeader()
     {
         data1HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_PLAYER_GOLD),
         data1Text = UpdatePlayerGold,
-        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldCurrencyNameNarration,
 
         data2HeaderText = GetString(SI_GAMEPAD_MAIL_SEND_POSTAGE_LABEL),
         data2Text = UpdatePostage,
@@ -448,7 +450,7 @@ function ZO_MailSend_Gamepad:InitializeHeader()
     {
         data1HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_PLAYER_GOLD),
         data1Text = UpdatePlayerGold,
-        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldCurrencyNameNarration,
 
         data2HeaderText = GetString(SI_GAMEPAD_MAIL_SEND_POSTAGE_LABEL),
         data2Text = UpdatePostage,
@@ -562,10 +564,34 @@ function ZO_MailSend_Gamepad:PopulateMainList()
         return ZO_FormatEditBoxNarrationText(self.mailView.bodyEdit.edit, entryData.text)
     end
 
+    local mailGoldNarrationText = function(entryData, entryControl)
+        local narrations = {}
+        local queuedCOD = GetQueuedCOD()
+        local queuedMoney = GetQueuedMoneyAttachment()
+        local moneyHeader
+        local moneyText
+        if queuedMoney > 0 then
+            moneyHeader = GetString(SI_MAIL_READ_SENT_GOLD_LABEL)
+            moneyText = ZO_Currency_FormatGamepad(CURT_MONEY, queuedMoney, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+        elseif queuedCOD > 0 then
+            moneyHeader = GetString(SI_MAIL_READ_COD_LABEL)
+            moneyText = ZO_Currency_FormatGamepad(CURT_MONEY, queuedCOD, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+        else
+            moneyHeader = GetString(SI_MAIL_READ_SENT_GOLD_LABEL)
+            moneyText = GetString(SI_GAMEPAD_MAIL_INBOX_NO_ATTACHED_GOLD)
+        end
+
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(moneyHeader))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(moneyText))
+
+        return narrations
+    end
+
     self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SUBJECT_LABEL), NO_HEADER, NO_ICON, function() self.mailView.subjectEdit.edit:TakeFocus() end, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailSubjectNarrationText)
     self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_BODY_LABEL), NO_HEADER, NO_ICON, function() self.mailView.bodyEdit.edit:TakeFocus() end, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailBodyNarrationText)
-    self:AddMainListEntry(GetString(SI_MAIL_SEND_ATTACH_MONEY), GetString(SI_GAMEPAD_MAIL_SEND_GOLD_HEADER), SEND_GOLD_ICON, function() self:ShowSliderControl(ATTACHING_GOLD, GetQueuedMoneyAttachment(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)) end)
-    self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_COD), NO_HEADER, REQUEST_GOLD_ICON, function() self:ShowSliderControl(REQUESTING_GOLD, GetQueuedCOD(), MAX_PLAYER_CURRENCY) end)
+    self:AddMainListEntry(GetString(SI_MAIL_SEND_ATTACH_MONEY), GetString(SI_GAMEPAD_MAIL_SEND_GOLD_HEADER), SEND_GOLD_ICON, function() self:ShowSliderControl(ATTACHING_GOLD, GetQueuedMoneyAttachment(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)) end, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailGoldNarrationText)
+    self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_COD), NO_HEADER, REQUEST_GOLD_ICON, function() self:ShowSliderControl(REQUESTING_GOLD, GetQueuedCOD(), MAX_PLAYER_CURRENCY) end, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailGoldNarrationText)
 
     self.mailView.subjectEdit.edit:SetHandler("OnFocusLost", function(editBox)
         RefreshKeybind()
@@ -589,7 +615,33 @@ function ZO_MailSend_Gamepad:PopulateMainList()
     end)
 
     if not self.inventoryList:IsEmpty() then
-        self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_ATTACH), GetString(SI_GAMEPAD_MAIL_SEND_ITEMS_HEADER), EMPTY_ATTACHMENT_ICON, function() self:EnterInventoryList() end)
+        local mailAttachedItemsNarrationText = function(entryData, entryControl)
+            local narrations = {}
+
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text))
+
+            local totalAttachments = 0
+            for i = 1, MAIL_MAX_ATTACHED_ITEMS do
+                local queuedFromBag, slotIndex, icon, stack = GetQueuedItemAttachmentInfo(i)
+                if queuedFromBag ~= 0 then -- Slot is filled.
+                    totalAttachments = totalAttachments + stack
+                else
+                    break
+                end
+            end
+
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MAIL_ATTACHMENTS_HEADER)))
+
+            if totalAttachments > 0 then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(totalAttachments))
+            else
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_INBOX_NO_ATTACHMENTS)))
+            end
+
+            return narrations
+        end
+
+        self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_ATTACH), GetString(SI_GAMEPAD_MAIL_SEND_ITEMS_HEADER), EMPTY_ATTACHMENT_ICON, function() self:EnterInventoryList() end, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailAttachedItemsNarrationText)
     end
 
     local function AttemptSendMail()

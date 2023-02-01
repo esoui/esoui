@@ -235,6 +235,7 @@ do
                             data1 = {
                                         header = GetString(SI_GAMEPAD_PAY_FOR_CONVERSATION_AVAILABLE_FUNDS),
                                         value = UpdatePlayerGold,
+                                        valueNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
                                     },
                         },
                         {

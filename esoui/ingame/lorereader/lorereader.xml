@@ -44,7 +44,7 @@
                                         <Label name="$(parent)Title" horizontalAlignment="CENTER">
                                             <Anchor point="TOPLEFT" />
                                         </Label>
-                                        <Label name="$(parent)Body">
+                                        <Label name="$(parent)Body" storeLineEndingCharacterIndices="true">
                                             <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" />
                                         </Label>
                                     </Controls>
@@ -73,6 +73,13 @@
                     </Controls>
                 </Control>
 
+                <Texture name="$(parent)OverrideImage" resizeToFitFile="true" hidden="true">
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Label name="$(parent)Title" />
+                    </Controls>
+                </Texture>
+                
                 <Control name="$(parent)KeyStripMouseButtons">
                     <Dimensions x="98" y="54" />
                     <Controls>

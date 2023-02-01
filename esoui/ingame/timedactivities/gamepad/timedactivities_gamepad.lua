@@ -237,12 +237,12 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
     self.activityRewardPool = ZO_ControlPool:New("ZO_TimedActivityReward_Gamepad", self.control, "TimedActivityRewardGamepad")
     self.listControl = self:GetListControl()
 
-    local function SetupActivityRow(control, data)
-        self:SetupActivityRow(control, data)
+    local function SetupActivityRow(entryControl, data)
+        self:SetupActivityRow(entryControl, data)
     end
 
-    local function ResetActivityRow(control, data)
-        self:ResetActivityRow(control, data)
+    local function ResetActivityRow(entryControl, data)
+        self:ResetActivityRow(entryControl, data)
     end
 
     local NO_HIDE_CALLBACK = nil
@@ -279,6 +279,7 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
 end
 
 function ZO_TimedActivitiesList_Gamepad:RefreshTimeRemaining(timeRemaining)
+    self.timeRemainingText = timeRemaining
     self.timeRemaining:SetText(timeRemaining)
 end
 
@@ -318,11 +319,6 @@ function ZO_TimedActivitiesList_Gamepad:SetupActivityRow(control, data)
         control.activityRewardPool = ZO_MetaPool:New(self.activityRewardPool)
     end
 
-    local CURRENCY_FORMAT_OPTIONS =
-    {
-        showCap = false,
-        useShortFormat = true,
-    }
     local nextRewardAnchorTo = nil
     local rewardList = control.data:GetRewardList()
     for rewardIndex, rewardData in ZO_NumericallyIndexedTableReverseIterator(rewardList) do
@@ -394,7 +390,7 @@ function ZO_TimedActivitiesList_Gamepad:Deactivate(...)
 end
 
 function ZO_TimedActivitiesList_Gamepad:OnSelectionChanged(oldData, newData)
-    ZO_SortFilterList.OnSelectionChanged(self, oldData, newData)
+    ZO_SortFilterList_Gamepad.OnSelectionChanged(self, oldData, newData)
 
     if newData then
         local activityIndex = newData:GetIndex()
@@ -402,6 +398,13 @@ function ZO_TimedActivitiesList_Gamepad:OnSelectionChanged(oldData, newData)
     else
         self:ClearActivityTooltip()
     end
+end
+
+function ZO_TimedActivitiesList_Gamepad:GetHeaderNarration()
+    local narrations = {}
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TIMED_ACTIVITIES_ACTIVITY_TIME_REMAINING_HEADER)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.timeRemainingText))
+    return narrations
 end
 
 -- End ZO_SortFilterList Overrides --

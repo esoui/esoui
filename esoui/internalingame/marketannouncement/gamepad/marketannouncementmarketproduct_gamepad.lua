@@ -29,3 +29,15 @@ end
 function ZO_MarketAnnouncementMarketProduct_Gamepad:GetEsoPlusIcon()
     return zo_iconFormatInheritColor("EsoUI/Art/Market/Gamepad/gp_ESOPlus_Chalice_WHITE_64.dds", "100%", "100%")
 end
+
+--Overridden from base
+function ZO_MarketAnnouncementMarketProduct_Gamepad:GetNarrationText()
+    local narrations = {}
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MARKET_ANNOUNCEMENT_TITLE)))
+    ZO_AppendNarration(narrations, self:GetTitleNarrationText())
+    ZO_AppendNarration(narrations, self:GetCalloutNarrationText())
+    ZO_AppendNarration(narrations, self:GetPricingNarrationText())
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.descriptionText))
+    ZO_AppendNarration(narrations, self:GetBundleNarrationText())
+    return narrations
+end

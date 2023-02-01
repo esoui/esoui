@@ -195,7 +195,7 @@ end
 
 do
     local LOCK_TEXTURE = zo_iconFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", "100%", "100%")
-    local CHAMPION_ICON = zo_iconFormat(GetChampionPointsIcon(), "100%", "100%")
+    local CHAMPION_ICON = zo_iconFormat(ZO_GetChampionPointsIcon(), "100%", "100%")
 
     function GroupMenu_Keyboard:OnActivityCategoryMouseEnter(control, data)
         ZO_IconHeader_OnMouseEnter(control)

@@ -1,11 +1,32 @@
 ZO_PLACEABLE_HOUSING_DATA_TYPE = 1
 ZO_RECALLABLE_HOUSING_DATA_TYPE = 2
-ZO_SETTINGS_VISITOR_DATA_TYPE = 3
-ZO_SETTINGS_BANLIST_DATA_TYPE = 4
-ZO_SETTINGS_GUILD_VISITOR_DATA_TYPE = 5
-ZO_SETTINGS_GUILD_BANLIST_DATA_TYPE = 6
-ZO_HOUSING_MARKET_PRODUCT_DATA_TYPE = 7
-ZO_HOUSING_PATH_NODE_DATA_TYPE = 8
+ZO_SETTINGS_OCCUPANT_DATA_TYPE = 3
+ZO_SETTINGS_VISITOR_DATA_TYPE = 4
+ZO_SETTINGS_BANLIST_DATA_TYPE = 5
+ZO_SETTINGS_GUILD_VISITOR_DATA_TYPE = 6
+ZO_SETTINGS_GUILD_BANLIST_DATA_TYPE = 7
+ZO_HOUSING_MARKET_PRODUCT_DATA_TYPE = 8
+ZO_HOUSING_PATH_NODE_DATA_TYPE = 9
+
+ZO_HOUSING_FURNITURE_FILTER_CATEGORY =
+{
+    BOUND = 1,
+    LOCATION = 2,
+    LIMIT = 3,
+}
+
+ZO_HOUSING_FURNITURE_LIMIT_TYPE_ALL = 0
+ZO_HOUSING_FURNITURE_LIMIT_FILTERS = {}
+do
+    local limitFilterValue = 64 -- "All" filter type
+    ZO_HOUSING_FURNITURE_LIMIT_FILTERS[ZO_HOUSING_FURNITURE_LIMIT_TYPE_ALL] = limitFilterValue
+
+    for limitType = HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_BEGIN, HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_END do
+        limitFilterValue = limitFilterValue * 2
+        ZO_HOUSING_FURNITURE_LIMIT_FILTERS[limitType + 1] = limitFilterValue
+    end
+end
+ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL = ZO_HOUSING_FURNITURE_LIMIT_FILTERS[ZO_HOUSING_FURNITURE_LIMIT_TYPE_ALL]
 
 --
 --[[ FurnitureDataBase ]]--
@@ -79,12 +100,21 @@ function ZO_FurnitureDataBase:GetFormattedStackCount()
     return 1
 end
 
+function ZO_FurnitureDataBase:GetLimitType()
+    return self.limitType
+end
+
 function ZO_FurnitureDataBase:GetPassesTextFilter()
     return self.passesTextFilter
 end
 
 function ZO_FurnitureDataBase:SetPassesTextFilter(passesFilter)
     self.passesTextFilter = passesFilter
+end
+
+function ZO_FurnitureDataBase:GetPassesFurnitureFilters(boundFilters, locationFilters, limitFilters)
+    -- Subclasses may override if necessary.
+    return true
 end
 
 function ZO_FurnitureDataBase:IsPreviewable()
@@ -148,10 +178,11 @@ function ZO_PlaceableFurnitureItem:RefreshInfo(bagId, slotIndex)
     self.slotIndex = slotIndex
 
     self.furnitureDataId = GetItemFurnitureDataId(bagId, slotIndex)
-    local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(self.furnitureDataId)
+    local categoryId, subcategoryId, furnitureTheme, limitType = GetFurnitureDataInfo(self.furnitureDataId)
     self.categoryId = categoryId
     self.subcategoryId = subcategoryId
     self.theme = furnitureTheme
+    self.limitType = limitType
 
     self.slotData = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
 
@@ -243,6 +274,53 @@ function ZO_PlaceableFurnitureItem:GetFormattedStackCount()
     return self.formattedStackCount
 end
 
+function ZO_PlaceableFurnitureItem:GetPassesFurnitureFilters(boundFilters, locationFilters, limitFilters)
+    if boundFilters > HOUSING_FURNITURE_BOUND_FILTER_ALL then
+        local matchBound = ZO_MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_BOUND)
+        local matchUnbound = ZO_MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_UNBOUND)
+        if not (matchBound and matchUnbound) then
+            -- Verify that this item matches the specified bound state filter.
+            if IsItemBound(self.bagId, self.slotIndex) then
+                if not matchBound then
+                    return false
+                end
+            else
+                if not matchUnbound then
+                    return false
+                end
+            end
+        end
+    end
+
+    if locationFilters > HOUSING_FURNITURE_LOCATION_FILTER_ALL then
+        -- Verify that this item is in one of the specified bag filters.
+        local matchFound = false
+        for locationFlag in ZO_FlagIterator(HOUSING_FURNITURE_LOCATION_FILTER_ALL * 2, HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_END) do
+            if ZO_MaskHasFlag(locationFilters, locationFlag) then
+                local bagIds = ZO_HOUSING_FURNITURE_LOCATION_FILTER_BAGS[locationFlag]
+                if bagIds and bagIds[self.bagId] then
+                    matchFound = true
+                    break
+                end
+            end
+        end
+
+        if not matchFound then
+            return false
+        end
+    end
+
+    if limitFilters > ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL then
+        -- Verify that this item's limit type is one of the specified limit type filters.
+        local limitTypeFilterValue = ZO_HOUSING_FURNITURE_LIMIT_FILTERS[self.limitType + 1]
+        if not ZO_MaskHasFlag(limitFilters, limitTypeFilterValue) then
+            return false
+        end
+    end
+
+    return true
+end
+
 --
 --[[ PlaceableFurnitureCollectible ]]--
 --
@@ -267,10 +345,11 @@ function ZO_PlaceableFurnitureCollectible:RefreshInfo(collectibleId)
         self.icon = collectibleData:GetIcon()
 
         self.furnitureDataId = GetCollectibleFurnitureDataId(collectibleId)
-        local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(self.furnitureDataId)
+        local categoryId, subcategoryId, furnitureTheme, limitType = GetFurnitureDataInfo(self.furnitureDataId)
         self.categoryId = categoryId
         self.subcategoryId = subcategoryId
         self.theme = furnitureTheme
+        self.limitType = limitType
     end
 end
 
@@ -300,6 +379,27 @@ function ZO_PlaceableFurnitureCollectible:GetDataType()
     return ZO_PLACEABLE_HOUSING_DATA_TYPE
 end
 
+function ZO_PlaceableFurnitureCollectible:GetPassesFurnitureFilters(boundFilters, locationFilters, limitFilters)
+    if boundFilters == HOUSING_FURNITURE_BOUND_FILTER_UNBOUND then
+        -- Collectibles are bound by definition.
+        return false
+    end
+
+    if locationFilters > HOUSING_FURNITURE_LOCATION_FILTER_ALL and not ZO_MaskHasFlag(locationFilters, HOUSING_FURNITURE_LOCATION_FILTER_COLLECTIBLES) then
+        -- Collectibles only match either the location filter "Collectibles" or "All".
+        return false
+    end
+
+    if limitFilters > ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL then
+        local limitTypeFilterValue = ZO_HOUSING_FURNITURE_LIMIT_FILTERS[self.limitType + 1]
+        if not ZO_MaskHasFlag(limitFilters, limitTypeFilterValue) then
+            return false
+        end
+    end
+
+    return true
+end
+
 --
 --[[ RetrievableFurniture ]]--
 --
@@ -318,7 +418,7 @@ function ZO_RetrievableFurniture:RefreshInfo(retrievableFurnitureId)
     local rawName, icon, furnitureDataId = GetPlacedHousingFurnitureInfo(retrievableFurnitureId)
 
     --Only update these on id change.
-    if CompareId64s(retrievableFurnitureId, self.retrievableFurnitureId) ~= 0 then
+    if not self.retrievableFurnitureId or CompareId64s(retrievableFurnitureId, self.retrievableFurnitureId) ~= 0 then
         self.retrievableFurnitureId = retrievableFurnitureId
         self.icon = icon
         self.furnitureDataId = furnitureDataId
@@ -326,10 +426,11 @@ function ZO_RetrievableFurniture:RefreshInfo(retrievableFurnitureId)
         self.displayQuality = displayQuality
         --This value is deprecated, but we are leaving it here for backwards compatibility with add-ons
         self.quality = displayQuality
-        local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(furnitureDataId)
+        local categoryId, subcategoryId, furnitureTheme, limitType = GetFurnitureDataInfo(furnitureDataId)
         self.categoryId = categoryId
         self.subcategoryId = subcategoryId
         self.theme = furnitureTheme
+        self.limitType = limitType
 
         local playerWorldX, playerWorldY, playerWorldZ = GetPlayerWorldPositionInHouse()
         self:RefreshPositionalData(playerWorldX, playerWorldY, playerWorldZ, GetPlayerCameraHeading())
@@ -350,6 +451,15 @@ function ZO_RetrievableFurniture:RefreshInfo(retrievableFurnitureId)
     end
     self.rawName = rawName
     self.formattedName = nil
+
+    -- Refresh the bound state.
+    if itemLink ~= "" then
+        -- Item furnishings may either be bound or unbound.
+        self.isBound = IsItemLinkBound(itemLink)
+    else
+        -- Collectible furnishings are bound by definition.
+        self.isBound = true
+    end
 end
 
 function ZO_RetrievableFurniture:GetFurnitureId()
@@ -424,6 +534,33 @@ function ZO_RetrievableFurniture:CompareTo(other)
     return self:GetRawName() < other:GetRawName()
 end
 
+function ZO_RetrievableFurniture:GetPassesFurnitureFilters(boundFilters, locationFilters, limitFilters)
+    if boundFilters > HOUSING_FURNITURE_BOUND_FILTER_ALL then
+        local matchBound = ZO_MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_BOUND)
+        local matchUnbound = ZO_MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_UNBOUND)
+        if matchBound and matchUnbound then
+            -- All items meet this criteria.
+            return true
+        end
+
+        -- Verify that this item matches the specified bound state filter.
+        if self.isBound then
+            return matchBound
+        else
+            return matchUnbound
+        end
+    end
+
+    if limitFilters > ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL then
+        local limitTypeFilterValue = ZO_HOUSING_FURNITURE_LIMIT_FILTERS[self.limitType + 1]
+        if not ZO_MaskHasFlag(limitFilters, limitTypeFilterValue) then
+            return false
+        end
+    end
+
+    return true
+end
+
 --
 --[[ HousingMarketProduct ]]--
 --
@@ -463,10 +600,11 @@ function ZO_HousingMarketProduct:RefreshInfo(marketProductId, presentationIndex)
     self.quality = self.displayQuality
 
     self.furnitureDataId = GetMarketProductFurnitureDataId(marketProductId)
-    local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(self.furnitureDataId)
+    local categoryId, subcategoryId, furnitureTheme, limitType = GetFurnitureDataInfo(self.furnitureDataId)
     self.categoryId = categoryId
     self.subcategoryId = subcategoryId
     self.theme = furnitureTheme
+    self.limitType = limitType
 end
 
 function ZO_HousingMarketProduct:GetMarketProductId()
@@ -682,6 +820,14 @@ function ZO_FurnitureCategory:GetCategoryId()
     return self.categoryId
 end
 
+function ZO_FurnitureCategory:IsOwnerRestrictedCategory()
+    return self.isOwnerRestrictedCategory == true
+end
+
+function ZO_FurnitureCategory:SetIsOwnerRestrictedCategory(isOwnerRestrictedCategory)
+    self.isOwnerRestrictedCategory = isOwnerRestrictedCategory
+end
+
 function ZO_FurnitureCategory:Clear()
     ZO_ClearTable(self.entriesData)
     for _,subcategory in ipairs(self.subcategories) do
@@ -870,6 +1016,18 @@ function ZO_HousingSettings_FilterScrollList(list, masterList, rowDataType, filt
         if not filterFunction or (filterFunction and filterFunction(data)) then
             table.insert(scrollData, ZO_ScrollList_CreateDataEntry(rowDataType, data))
         end
+    end
+end
+
+function ZO_HousingSettings_BuildMasterList_Occupant(currentHouse, masterList, createScrollDataFunction)
+    ZO_ClearNumericallyIndexedTable(masterList)
+
+    local occupantNameKey = ZO_ShouldPreferUserId() and "accountName" or "characterName"
+    local occupantList = HOUSING_EDITOR_STATE:GetOccupants()
+    for occupantIndex, occupantData in ipairs(occupantList) do
+        local displayName = occupantData[occupantNameKey]
+        local nextData = createScrollDataFunction(displayName, currentHouse, occupantIndex)
+        table.insert(masterList, nextData)
     end
 end
 

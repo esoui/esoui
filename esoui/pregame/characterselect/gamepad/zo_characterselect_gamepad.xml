@@ -17,11 +17,22 @@
             </Controls>
         </Control>
 
-        <Label name="ZO_GamepadCharacterSelectMenuEntryHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderTemplate" hidden="true" virtual="true" resizeToFitDescendents="true">
+        <Label name="ZO_GamepadCharacterSelectMenuEntryHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderTemplate" hidden="true" virtual="true">
             <Controls>
                 <Label name="$(parent)SubHeader" font="ZoFontGamepadCondensed27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetY="25" />
-                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="25" />
+                    <Anchor point="TOPLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" offsetY="25" />
+                    <OnRectHeightChanged>
+                        -- Labels can't be resizeToFitDescendents, and we want the parent (which has to be a label) 
+                        -- to get taller when this sub label has text
+                        local parent = self:GetParent()
+                        if newHeight == 0 then
+                            parent:SetHeight(0)
+                        else
+                            local parentHeight = parent:GetHeight()
+                            parent:SetHeight(parentHeight + newHeight - oldHeight)
+                        end
+                    </OnRectHeightChanged>
                 </Label>
             </Controls>
         </Label>

@@ -45,6 +45,30 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
     self.resultTooltip = floatingControl:GetNamedChild("ResultTooltip")
     self.slotContainer = floatingControl:GetNamedChild("SlotContainer")
 
+    --Register the source tooltip for narration
+    local sourceTooltipNarrationInfo = 
+    {
+        canNarrate = function()
+            return not self.sourceTooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return self.sourceTooltip.tip:GetNarrationText()
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(sourceTooltipNarrationInfo)
+
+    --Register the result tooltip for narration
+    local resultTooltipNarrationInfo = 
+    {
+        canNarrate = function()
+            return not self.resultTooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return self.resultTooltip.tip:GetNarrationText()
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(resultTooltipNarrationInfo)
+
     -- Pre-init setup done
     ZO_SharedSmithingImprovement.Initialize(self, panelControl, floatingControl:GetNamedChild("BoosterContainer"), self.resultTooltip, owner)
 
@@ -60,9 +84,10 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         self.itemActions:SetInventorySlot(selectedData)
         if selectedData and selectedData.bagId and selectedData.slotIndex then
+            local hasSelections = self:HasSelections()
             self.sourceTooltip.scrollTooltip:ResetToTop()
             self.sourceTooltip.tip:ClearLines()
-            self.sourceTooltip.tip:LayoutImproveSourceSmithingItem(selectedData.bagId, selectedData.slotIndex)
+            self.sourceTooltip.tip:LayoutImproveSourceSmithingItem(selectedData.bagId, selectedData.slotIndex, hasSelections)
             self.sourceTooltip.icon:SetTexture(selectedData.pressedIcon)
             self.sourceTooltip:SetHidden(false)
 
@@ -74,7 +99,7 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
 
             self.selectedItem = selectedData
 
-            if not self:HasSelections() then
+            if not hasSelections then
                 self.resultTooltip:SetHidden(true)
                 self.slotContainer:SetHidden(true)
                 self:EnableQualityBridge(false)
@@ -105,6 +130,9 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             entry.text = GetString("SI_SMITHINGFILTERTYPE", filterType)
             entry.callback = function()
                 self:ChangeMode(filterType)
+                --Re-narrate when changing tabs
+                local NARRATE_HEADER = true
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list, NARRATE_HEADER)
             end
             entry.mode = filterType
 
@@ -204,6 +232,27 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         end
     end)
+
+    --Register the list of inventory items for narration
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return not self:IsCurrentSelected()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.owner.header, self.owner.headerData)
+        end,
+        footerNarrationFunction = function()
+            return self.owner:GetFooterNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.inventory.list, narrationInfo)
+
+    ZO_WRIT_ADVISOR_GAMEPAD:RegisterCallback("CycleActiveQuest", function()
+        if scene:IsShowing() and not self:IsCurrentSelected() then
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
+        end
+    end)
 end
 
 function ZO_GamepadSmithingImprovement:ChangeMode(mode)
@@ -253,6 +302,40 @@ function ZO_GamepadSmithingImprovement:InitializeSlots()
 
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end)
+
+    self.spinner:SetHeaderNarrationFunction(function()
+        local row = self:GetRowForSelection()
+        if row then
+            -- row.quality is deprecated, included here for addon backwards compatibility
+            local functionalQuality = row.functionalQuality or row.quality
+            local headerNarrationText = zo_strformat(SI_GAMEPAD_SMITHING_IMPROVEMENT_REAGENT_SELECTION_HEADER_NARRATION, GetString("SI_ITEMQUALITY", self.currentQuality), GetString("SI_ITEMQUALITY", functionalQuality))
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(headerNarrationText)
+        end
+    end)
+
+    self.spinner:SetCustomNarrationFunction(function(spinner)
+        local narrations = {}
+        local row = self:GetRowForSelection()
+        if row then
+            -- row.quality is deprecated, included here for addon backwards compatibility
+            local functionalQuality = row.functionalQuality or row.quality
+            local formattedValue = zo_strformat(SI_GAMEPAD_SMITHING_IMPROVEMENT_REAGENT_SELECTION, GetString("SI_ITEMQUALITY", functionalQuality), spinner:GetValue(), row.reagentName)
+            table.insert(narrations, ZO_FormatSpinnerNarrationText(GetString(SI_GAMEPAD_SMITHING_IMPROVEMENT_REAGENT_TITLE), formattedValue))
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_SMITHING_STACK_COUNT_NARRATION, row.currentStack)))
+        end
+
+        if self.improvementSlot:HasItem() then
+            local itemToImproveBagId, itemToImproveSlotIndex, craftingType = self:GetCurrentImprovementParams()
+            local numBoostersToApply = self:GetNumBoostersToApply()
+            local chance = GetSmithingImprovementChance(itemToImproveBagId, itemToImproveSlotIndex, numBoostersToApply, craftingType)
+            chance = zo_roundToNearest(chance, .1)
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SMITHING_IMPROVE_CHANCE_FORMAT, chance)))
+        end
+        return narrations
+    end)
+
+    --Register the spinner for narration
+    SCREEN_NARRATION_MANAGER:RegisterSpinner(self.spinner)
 
     ZO_CraftingUtils_ConnectSpinnerToCraftingProcess(self.spinner)
 end
@@ -605,15 +688,15 @@ function ZO_GamepadImprovementInventory:Initialize(owner, control, ...)
     self.owner = owner
     self.filterType = SMITHING_FILTER_TYPE_WEAPONS
     self:SetCustomSort(function(bagId, slotIndex) return bagId end) -- sort equipped items (BAG_WORN) to the top of the list
-    self:SetCustomBestItemCategoryNameFunction(function(slotData)                                                
-                                                    if slotData.bagId == BAG_WORN then
-                                                        local equipSlot = GetItemComparisonEquipSlots(slotData.bagId, slotData.slotIndex)
-                                                        local visualCategory = ZO_Character_GetEquipSlotVisualCategory(equipSlot)
-                                                        slotData.bestItemCategoryName = zo_strformat(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM, GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory))
-                                                    else
-                                                        slotData.bestItemCategoryName = ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(slotData)
-                                                    end
-                                               end)
+    self:SetCustomBestItemCategoryNameFunction(function(slotData)
+        if slotData.bagId == BAG_WORN then
+            local equipSlot = GetItemComparisonEquipSlots(slotData.bagId, slotData.slotIndex)
+            local visualCategory = ZO_Character_GetEquipSlotVisualCategory(equipSlot)
+            slotData.bestItemCategoryName = zo_strformat(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM, GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory))
+        else
+            slotData.bestItemCategoryName = ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(slotData)
+        end
+    end)
 end
 
 function ZO_GamepadImprovementInventory:GetCurrentFilterType()

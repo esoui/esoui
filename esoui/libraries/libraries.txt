@@ -81,6 +81,7 @@ EsoUI\Libraries\ZO_Templates\ObjectPoolTemplates.lua
 EsoUI\Libraries\ZO_Templates\ZO_ItemScreenTemplates.xml
 
 EsoUI\Libraries\ScreenNarration\ScreenNarrationManager.lua
+EsoUI\Libraries\ScreenNarration\ScreenNarrationUtils.lua
 
 EsoUI\Libraries\ZO_KeybindButton\ZO_KeybindButton.lua
 EsoUI\Libraries\ZO_KeybindButton\ZO_KeybindButton.xml

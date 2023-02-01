@@ -631,6 +631,10 @@ function ZO_GamepadGuildRosterManager:InitializeSetRankDialog()
     })
 end
 
+function ZO_GamepadGuildRosterManager:GetFooterNarration()
+    return GAMEPAD_GUILD_HOME:GetFooterNarrationText()
+end
+
 function ZO_GamepadGuildRoster_Initialize(control)
     GUILD_ROSTER_GAMEPAD = ZO_GamepadGuildRosterManager:New(control)
 end

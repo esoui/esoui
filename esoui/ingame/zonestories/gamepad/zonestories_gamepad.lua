@@ -47,19 +47,20 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
     local ACTIVATE_LIST_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_LIST_ON_SHOW, GAMEPAD_ZONE_STORIES_SCENE)
 
-    local function SubMenuEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+    local function SubMenuEntrySetup(entryControl, data, selected, reselectingDuringRebuild, enabled, active)
+        ZO_SharedGamepadEntry_OnSetup(entryControl, data, selected, reselectingDuringRebuild, enabled, active)
 
-        local iconControl = control.statusIndicator
+        local NO_TINT = nil
+        local iconControl = entryControl.statusIndicator
         local trackedZoneId = GetTrackedZoneStoryActivityInfo()
         local playerZoneId = ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(GetUnitZoneIndex("player"))
         iconControl:ClearIcons()
         if trackedZoneId == data.id then
-            iconControl:AddIcon(ZO_CHECK_ICON)
+            iconControl:AddIcon(ZO_CHECK_ICON, NO_TINT, GetString(SI_SCREEN_NARRATION_TRACKED_ICON_NARRATION))
         end
 
         if playerZoneId == data.id then
-            iconControl:AddIcon("EsoUI/Art/Icons/mapKey/mapKey_player.dds")
+            iconControl:AddIcon("EsoUI/Art/Icons/mapKey/mapKey_player.dds", NO_TINT, GetString(SI_SCREEN_NARRATION_CURRENT_ZONE_ICON_NARRATION))
         end
 
         iconControl:Show()
@@ -194,7 +195,7 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
             end,
 
             visible = function()
-                local zoneId, completionType, activityId = GetTrackedZoneStoryActivityInfo()
+                local zoneId  = GetTrackedZoneStoryActivityInfo()
                 return zoneId == self:GetSelectedZoneId()
             end,
         },

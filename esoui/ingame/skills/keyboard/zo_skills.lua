@@ -269,9 +269,7 @@ local function InitializeKeyboardUpgradeDialog()
     })
 end
 
-local function InitializeKeyboardRespecConfirmationGoldDialog()
-    local control = ZO_SkillsRespecConfirmationGoldDialog
-
+function ZO_InitializeKeyboardRespecConfirmationGoldDialog(control)
     local function SetupRespecConfirmationGoldDialog()
         local balance = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
         local cost = GetSkillRespecCost(SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode())
@@ -403,7 +401,6 @@ function ZO_SkillsManager:Initialize(control)
     InitializeKeyboardMorphDialog()
     InitializeKeyboardConfirmDialog()
     InitializeKeyboardUpgradeDialog()
-    InitializeKeyboardRespecConfirmationGoldDialog()
     InitializeKeyboardSkillRespecConfirmClearDialog()
 
     self:RegisterForEvents()
@@ -540,7 +537,7 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
 
             callback = function()
                 if SKILL_POINT_ALLOCATION_MANAGER:DoPendingChangesIncurCost() then
-                    if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillRespecPaymentType() == SKILL_RESPEC_PAYMENT_TYPE_GOLD then
+                    if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillRespecPaymentType() == RESPEC_PAYMENT_TYPE_GOLD then
                         ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_GOLD_KEYBOARD")
                     else
                         ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_SCROLL")

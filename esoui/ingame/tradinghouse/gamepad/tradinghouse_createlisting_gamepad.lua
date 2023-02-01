@@ -45,6 +45,7 @@ function ZO_GamepadTradingHouse_CreateListing:PerformDeferredInitialization()
     self:InitializeHeader()
     self:InitializeKeybindStripDescriptors()
     self:InitializeControls()
+    self:InitializeNarrationInfo()
     self.validPrice = true
     self.isInitialized = true
 end
@@ -136,6 +137,7 @@ function ZO_GamepadTradingHouse_CreateListing:InitializeHeader()
 
         data2HeaderText = GetString(SI_GAMEPAD_GUILD_BANK_AVAILABLE_FUNDS),
         data2Text = UpdateGold,
+        data2TextNarration =  ZO_Currency_GetPlayerCarriedGoldCurrencyNameNarration,
 
         data3HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
         data3Text = GetCapacityString,
@@ -150,6 +152,7 @@ function ZO_GamepadTradingHouse_CreateListing:InitializeControls()
     local mask = self.control:GetNamedChild("Mask"):GetNamedChild("Container")
     self.priceSelectorControl = mask:GetNamedChild("ListingPriceSelectorContainer")
     self.priceSelector = ZO_CurrencySelector_Gamepad:New(self.priceSelectorControl:GetNamedChild("Selector"))
+    self.priceSelector:SetCurrencyType(CURT_MONEY)
     self.priceSelector:SetClampValues(true)
     self.priceSelector:RegisterCallback("OnValueChanged", function() self:ValidatePriceSelectorValue(self.priceSelector:GetValue()) end)
     
@@ -170,6 +173,38 @@ function ZO_GamepadTradingHouse_CreateListing:InitializeControls()
     self.listingProfitAmountLabel = self.listingProfitControl:GetNamedChild("AmountLabel")   
 end
 
+function ZO_GamepadTradingHouse_CreateListing:InitializeNarrationInfo()
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return TRADING_HOUSE_CREATE_LISTING_GAMEPAD_SCENE:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
+        end,
+        selectedNarrationFunction = function()
+            local narrations = {}
+            --Generate the narration for the total price
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_TRADING_HOUSE_CREATE_LISTING_TOTAL_PRICE)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_Currency_FormatGamepad(CURT_MONEY, self.currentPrice, ZO_CURRENCY_FORMAT_AMOUNT_NAME)))
+
+            --Generate the narration for the listing fee
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRADING_HOUSE_POSTING_LISTING_FEE)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_Currency_FormatGamepad(CURT_MONEY, self.listingFee, ZO_CURRENCY_FORMAT_AMOUNT_NAME)))
+
+            --Generate the narration for the trading house cut
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRADING_HOUSE_POSTING_TH_CUT)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_Currency_FormatGamepad(CURT_MONEY, self.tradingHouseCut, ZO_CURRENCY_FORMAT_AMOUNT_NAME)))
+
+            --Generate the narration for the profit
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRADING_HOUSE_POSTING_PROFIT)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_Currency_FormatGamepad(CURT_MONEY, self.profit, ZO_CURRENCY_FORMAT_AMOUNT_NAME)))
+            return narrations
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("tradingHouseCreateListing", narrationInfo)
+end
+
 function ZO_GamepadTradingHouse_CreateListing:OnStateChanged(oldState, newState)
     if newState == SCENE_SHOWING then
         self:Showing()
@@ -184,6 +219,9 @@ function ZO_GamepadTradingHouse_CreateListing:Showing()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, self.itemBag, self.itemIndex)
     self:SetListingPrice(self.listingPrice)
+    --Narrate the header when first showing
+    local NARRATE_HEADER = true
+    SCREEN_NARRATION_MANAGER:QueueCustomEntry("tradingHouseCreateListing", NARRATE_HEADER)
 end
 
 function ZO_GamepadTradingHouse_CreateListing:Hiding()
@@ -211,6 +249,8 @@ function ZO_GamepadTradingHouse_CreateListing:UnfocusPriceSelector()
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
         self:SetListingPrice(self.listingPrice)
         self.settingPrice = false
+        --Re-narrate when closing the price selector
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("tradingHouseCreateListing")
     end
 end
 
@@ -230,7 +270,11 @@ function ZO_GamepadTradingHouse_CreateListing:SetListingPrice(price, isPreview)
     self.validPrice = (GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= listingFee) and (price > 0) and (price <= MAX_PLAYER_CURRENCY)
     local HAS_ERROR = not self.validPrice
 
+    self.currentPrice = price
     self.listingFee = listingFee
+    self.tradingHouseCut = tradingHouseCut
+    self.profit = profit
+
     self:SetControlAmountLabel(self.listingPriceAmountLabel, price, HAS_ERROR)
     self:SetControlAmountLabel(self.listingFeeAmountLabel, listingFee, HAS_ERROR)
     self:SetControlAmountLabel(self.listingHouseCutAmountLabel, tradingHouseCut, HAS_ERROR)

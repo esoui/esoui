@@ -1,10 +1,4 @@
-ZO_GamepadButtonTabBar = ZO_Object:Subclass()
-
-function ZO_GamepadButtonTabBar:New(...)
-    local obj = ZO_Object.New(self)
-    obj:Initialize(...)
-    return obj
-end
+ZO_GamepadButtonTabBar = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_GamepadButtonTabBar:Initialize(control, onSelectedCallback, onUnselectedCallback, onPressedCallback)
     self.control = control
@@ -19,6 +13,7 @@ function ZO_GamepadButtonTabBar:Initialize(control, onSelectedCallback, onUnsele
     self.buttons = {}
     self.selectedIndex = nil
     self.deactivatedIndex = nil
+    SCREEN_NARRATION_MANAGER:RegisterGamepadButtonTabBar(self)
 end
 
 function ZO_GamepadButtonTabBar:AddButton(control, data)
@@ -34,6 +29,7 @@ function ZO_GamepadButtonTabBar:Activate()
     self.isActivated = true
     DIRECTIONAL_INPUT:Activate(self, self.control)
     self:SetSelectedButton(self.deactivatedIndex or 1)
+    self:FireCallbacks("OnActivated")
 end
 
 function ZO_GamepadButtonTabBar:Deactivate()
@@ -81,10 +77,21 @@ function ZO_GamepadButtonTabBar:SetSelectedButton(index)
         self.selectedIndex = index
         if index then
             self.onSelectedCallback(self.buttons[index])
+            self:FireCallbacks("OnSelectionChanged")
         end
     end
 end
 
 function ZO_GamepadButtonTabBar:IsActivated()
     return self.isActivated
+end
+
+function ZO_GamepadButtonTabBar:GetNarrationText()
+    if self:IsActivated() and self.selectedIndex then
+        local selectedButton = self.buttons[self.selectedIndex]
+        local data = selectedButton.data
+        if data and data.narrationText then
+            return data.narrationText()
+        end
+    end
 end

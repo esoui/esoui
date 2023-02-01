@@ -28,12 +28,14 @@ function ZO_Tooltip:LayoutArmoryBuildAttributes(armoryBuildData)
     local spentAttributePoints = 0
     local armoryBuildSpentAttributePoints = 0
     for i, attribute in ipairs(attributeDataList) do
-        local attributeData = ZO_GamepadEntryData:New(GetString("SI_ATTRIBUTES", attribute.type), attribute.icon)
+        local attributeName = GetString("SI_ATTRIBUTES", attribute.type)
+        local attributeData = ZO_GamepadEntryData:New(attributeName, attribute.icon)
         local rowControl = self:AcquireCustomControl(self:GetStyle("armoryBuildAttributeEntryRow"))
         ZO_SharedGamepadEntry_OnSetup(rowControl, attributeData, SELECTED, NOT_SELECTED, DISABLED, NOT_ACTIVE)
         local spinnerDisplayControl = rowControl:GetNamedChild("SpinnerDisplay")
-        spinnerDisplayControl:SetText(armoryBuildData:GetAttributeSpentPoints(attribute.type))
-        attributeSection:AddCustomControl(rowControl)
+        local attributeSpentPoints = armoryBuildData:GetAttributeSpentPoints(attribute.type)
+        spinnerDisplayControl:SetText(attributeSpentPoints)
+        attributeSection:AddCustomControl(rowControl, { attributeName, tostring(attributeSpentPoints) })
 
         spentAttributePoints = spentAttributePoints + GetAttributeSpentPoints(attribute.type)
         armoryBuildSpentAttributePoints = armoryBuildSpentAttributePoints + armoryBuildData:GetAttributeSpentPoints(attribute.type)

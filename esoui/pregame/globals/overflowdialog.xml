@@ -13,7 +13,7 @@
                     <Anchor point="TOPRIGHT" offsetX="-50" offsetY="70" />
                 </Label>
 
-                <Control name="$(parent)DetailsList" resizeToFitDescendents="true">
+                <Control name="$(parent)DetailsList">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)MainText" relativePoint="BOTTOMLEFT" offsetY="30" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)MainText" relativePoint="BOTTOMRIGHT" offsetY="30" />
 

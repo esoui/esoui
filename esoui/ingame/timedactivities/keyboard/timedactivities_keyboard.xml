@@ -108,9 +108,8 @@
                             <Anchor point="BOTTOMRIGHT" offsetY="-40" />
 
                             <Controls>
-                                <Control name="$(parent)ScrollChild" override="true">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
+                                <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
+                                    <Dimensions x="100%" />
                                 </Control>
                             </Controls>
                         </Scroll>

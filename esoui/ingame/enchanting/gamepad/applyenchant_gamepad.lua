@@ -87,7 +87,7 @@ function ZO_ApplyEnchant_Gamepad:ResetTooltipToDefault()
 end
 
 do
-    local FORMATTED_CHAMPION_POINTS_ICON = zo_iconFormat(GetGamepadChampionPointsIcon(), 48, 48)
+    local FORMATTED_CHAMPION_POINTS_ICON = zo_iconFormat(ZO_GetGamepadChampionPointsIcon(), 48, 48)
     function ZO_ApplyEnchant_Gamepad:AddItemKitSubLabelsToCurrentEntry(itemLink)
         local minLevel, minChampionPoints = GetItemLinkGlyphMinLevels(itemLink)
         if minChampionPoints then

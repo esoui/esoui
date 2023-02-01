@@ -292,6 +292,7 @@ end
 function ZO_ObjectiveCaptureMeter:UpdateCaptureBar(progress)
     local captureBarFillPercentage = (progress * (self.capTimeline.endPct - self.capTimeline.startPct)) + self.capTimeline.startPct;
     local arrows = self:GetVisibleArrows()
+    local NO_LEADING_EDGE = false
     self.progressBar:StartFixedCooldown((captureBarFillPercentage * CAPTURE_BAR_LENGTH) + CAPTURE_BAR_BEGIN_OFFSET, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, NO_LEADING_EDGE) -- CD_TIME_TYPE_TIME_REMAINING causes clockwise scroll
     self:VelocityArrowUpdate(captureBarFillPercentage, arrows)
 end

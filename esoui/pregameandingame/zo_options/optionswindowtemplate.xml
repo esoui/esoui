@@ -336,7 +336,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_Options_Account_InvokeCallback_WithEmail" virtual="true" resizeToFitDescendents="true" >
+        <Control name="ZO_Options_Account_InvokeCallback_WithEmail" virtual="true" resizeToFitConstrains="Y">
             <Dimensions x="570" />
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontWinH4" text="SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER">

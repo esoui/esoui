@@ -57,7 +57,6 @@ end
 
 function ZO_GamepadSocialListPanel:OnSelectionChanged(oldData, newData)
     ZO_GamepadInteractiveSortFilterList.OnSelectionChanged(self, oldData, newData)
-    SCREEN_NARRATION_MANAGER:OnSocialListSelectionChanged(self)
     self:SetupOptions(newData)
     self:RefreshTooltip()
 end
@@ -126,7 +125,7 @@ function ZO_GamepadSocialListPanel:InitializeDropdownFilter()
             self:AttemptStatusUpdate(i, GetFrameTimeSeconds())
         end
 
-        local statusTexture = GetGamepadPlayerStatusIcon(i)
+        local statusTexture = ZO_GetGamepadPlayerStatusIcon(i)
         local text = zo_strformat(SI_GAMEPAD_GUILD_STATUS_SELECTOR_FORMAT, statusTexture, GetString("SI_PLAYERSTATUS", i))
         local entry = ZO_ComboBox:CreateItemEntry(text, StatusSelect)
         self.filterDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
@@ -217,7 +216,7 @@ function ZO_GamepadSocialListPanel:BuildGuildInviteOption(header, guildId)
             ZO_TryGuildInvite(guildId, self.socialData.displayName)
         end
 
-    return self:BuildOptionEntry(header, GetGuildName(guildId), inviteFunction, nil, GetLargeAllianceSymbolIcon(GetGuildAlliance(guildId)))
+    return self:BuildOptionEntry(header, GetGuildName(guildId), inviteFunction, nil, ZO_GetLargeAllianceSymbolIcon(GetGuildAlliance(guildId)))
 end
 
 function ZO_GamepadSocialListPanel:AddInviteToGuildOptionTemplates()
@@ -269,6 +268,11 @@ function ZO_GamepadSocialListPanel:GetCharacterFieldsNarration(entryData)
     end
 
     return narration
+end
+
+--Overridden from base
+function ZO_GamepadSocialListPanel:GetNarrationText()
+    return self:GetSelectedNarrationText()
 end
 
 --This function must be implemented by any child classes in order for screen narration to function

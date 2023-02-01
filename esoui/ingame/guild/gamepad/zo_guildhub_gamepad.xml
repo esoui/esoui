@@ -28,12 +28,9 @@
                                         ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
                                     </OnInitialized>
                                     <Controls>
-                                        <Scroll name="$(parent)Scroll" override="true">
-                                            <AnchorFill/>
-                                        </Scroll>
-                                        <Control name="$(parent)ScrollChild" override="true">
-                                            <Anchor point="TOPLEFT"/>
-                                            <Anchor point="TOPRIGHT"/>
+                                        <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
+                                            <Dimensions x="100%" />
+
                                             <Controls>
                                                 <Label name="$(parent)Section1" text="SI_GUILD_INTRODUCTION" inherits="ZO_GamepadGuildHubText">
                                                     <Anchor point="TOPLEFT"/>
@@ -64,12 +61,9 @@
                                         ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
                                     </OnInitialized>
                                     <Controls>
-                                        <Scroll name="$(parent)Scroll" override="true">
-                                            <AnchorFill/>
-                                        </Scroll>
-                                        <Control name="$(parent)ScrollChild" override="true">
-                                            <Anchor point="TOPLEFT"/>
-                                            <Anchor point="TOPRIGHT"/>
+                                        <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
+                                            <Dimensions x="100%" />
+
                                             <Controls>
                                                 <Label name="$(parent)Section1" text="SI_GAMEPAD_GUILD_BROWSER_DESCRIPTION" inherits="ZO_GamepadGuildHubText">
                                                     <Anchor point="TOPLEFT"/>

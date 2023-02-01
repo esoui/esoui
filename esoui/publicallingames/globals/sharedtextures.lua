@@ -7,7 +7,7 @@ do
         [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/AvA/AvA_HUD_emblem_daggerfall.dds",
     }
 
-    function GetAllianceTexture(alliance)
+    function ZO_GetAllianceTexture(alliance)
         return ALLIANCE_ICON_TEXTURES[alliance]
     end
 end
@@ -20,7 +20,7 @@ do
         [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Contacts/social_allianceIcon_daggerfall.dds",
     }
 
-    function GetAllianceSymbolIcon(alliance)
+    function ZO_GetAllianceSymbolIcon(alliance)
         return ALLIANCE_SYMBOL_ICONS[alliance]
     end
 end
@@ -33,7 +33,7 @@ do
         [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Stats/battleground_alliance_badge_Storm_Lords.dds",
     }
 
-    function GetLargeBattlegroundAllianceSymbolIcon(bgAlliance)
+    function ZO_GetLargeBattlegroundAllianceSymbolIcon(bgAlliance)
         return LARGE_BATTLEGROUND_ALLIANCE_ICONS[bgAlliance]
     end
 end
@@ -46,7 +46,7 @@ do
         [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_purple.dds",
     }
 
-    function GetCountdownBattlegroundAllianceSymbolIcon(bgAlliance)
+    function ZO_GetCountdownBattlegroundAllianceSymbolIcon(bgAlliance)
         return COUNTDOWN_BATTLEGROUND_ALLIANCE_ICONS[bgAlliance]
     end
 end
@@ -59,18 +59,18 @@ do
         [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Stats/allianceBadge_Daggerfall.dds",
     }
 
-    function GetLargeAllianceSymbolIcon(alliance)
+    function ZO_GetLargeAllianceSymbolIcon(alliance)
         return LARGE_ALLIANCE_SYMBOL_ICONS[alliance]
     end
 end
 
-function GetPlatformAllianceSymbolIcon(alliance)
+function ZO_GetPlatformAllianceSymbolIcon(alliance)
     local icon
 
     if IsInGamepadPreferredMode() then
-        icon = GetLargeAllianceSymbolIcon(alliance)
+        icon = ZO_GetLargeAllianceSymbolIcon(alliance)
     else
-        icon = GetAllianceSymbolIcon(alliance)
+        icon = ZO_GetAllianceSymbolIcon(alliance)
     end
 
     return icon
@@ -84,7 +84,7 @@ do
         [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Icons/AVA_Siege_UI_007.dds",
     }
 
-    function GetAllianceKeepRewardIcon(alliance)
+    function ZO_GetAllianceKeepRewardIcon(alliance)
         return ALLIANCE_KEEP_REWARD_ICONS[alliance]
     end
 end
@@ -104,7 +104,7 @@ do
         [INSTANCE_DISPLAY_TYPE_ZONE_STORY] = "EsoUI/Art/Icons/mapKey/mapKey_zoneStory.dds",
     }
 
-    function GetInstanceDisplayTypeIcon(instanceType)
+    function ZO_GetInstanceDisplayTypeIcon(instanceType)
         return INSTANCE_DISPLAY_TYPE_ICONS[instanceType]
     end
 end
@@ -120,7 +120,7 @@ do
         [SOCKET_TYPE_TOUGHNESS] = "EsoUI/Art/AvA/AvA_itemHighlight_toughness.dds",
     }
 
-    function GetSocketTexture(socketType)
+    function ZO_GetSocketTexture(socketType)
         return SOCKET_TEXTURES[socketType]
     end
 end
@@ -136,21 +136,21 @@ do
         GAMEPAD_CLASS_ICONS[classId] = gamepadIcon
     end 
 
-    function GetClassIcon(classId)
+    function ZO_GetClassIcon(classId)
         return CLASS_ICONS[classId]
     end
 
-    function GetGamepadClassIcon(classId)
+    function ZO_GetGamepadClassIcon(classId)
         return GAMEPAD_CLASS_ICONS[classId]
     end
 
-    function GetPlatformClassIcon(classId)
+    function ZO_GetPlatformClassIcon(classId)
         local icon
 
         if IsInGamepadPreferredMode() then
-            icon = GetGamepadClassIcon(classId)
+            icon = ZO_GetGamepadClassIcon(classId)
         else
-            icon = GetClassIcon(classId)
+            icon = ZO_GetClassIcon(classId)
         end
 
         return icon
@@ -167,7 +167,7 @@ do
         [PLAYER_STATUS_DO_NOT_DISTURB] = "EsoUI/Art/Contacts/social_status_dnd.dds",
     }
 
-    function GetPlayerStatusIcon(playerStatus)
+    function ZO_GetPlayerStatusIcon(playerStatus)
         return STATUS_ICONS[playerStatus]
     end
 end
@@ -181,7 +181,7 @@ do
         [PLAYER_STATUS_DO_NOT_DISTURB] = "EsoUI/Art/Contacts/Gamepad/gp_social_status_dnd.dds",
     }
 
-    function GetGamepadPlayerStatusIcon(playerStatus)
+    function ZO_GetGamepadPlayerStatusIcon(playerStatus)
         return GAMEPAD_STATUS_ICONS[playerStatus]
     end
 end
@@ -192,15 +192,15 @@ do
     local CHAMPION_POINT_ICON_SMALL = "EsoUI/Art/Champion/champion_icon_32.dds"
     local GAMEPAD_CHAMPION_POINT_ICON = "EsoUI/Art/Champion/Gamepad/gp_champion_icon.dds"
 
-    function GetChampionPointsIcon()
+    function ZO_GetChampionPointsIcon()
         return CHAMPION_POINT_ICON
     end
 
-    function GetChampionPointsIconSmall()
+    function ZO_GetChampionPointsIconSmall()
         return CHAMPION_POINT_ICON_SMALL
     end
 
-    function GetGamepadChampionPointsIcon()
+    function ZO_GetGamepadChampionPointsIcon()
         return GAMEPAD_CHAMPION_POINT_ICON
     end
 
@@ -232,7 +232,7 @@ do
         },
     }
 
-    function GetChampionBarDisciplineTextures(disciplineType)
+    function ZO_GetChampionBarDisciplineTextures(disciplineType)
         return ACTION_BAR_DISCIPLINE_TEXTURES[disciplineType]
     end
 end
@@ -242,17 +242,17 @@ do
     local VETERAN_ICON = "EsoUI/Art/UnitFrames/target_veteranRank_icon.dds"
     local GAMEPAD_VETERAN_ICON = "EsoUI/Art/Contacts/Gamepad/gp_social_levelIcon_veteran.dds"
 
-    function GetVeteranIcon()
+    function ZO_GetVeteranIcon()
         return VETERAN_ICON
     end
 
-    function GetGamepadVeteranIcon()
+    function ZO_GetGamepadVeteranIcon()
         return GAMEPAD_VETERAN_ICON
     end
 end
 
 -- AvA Rank --
-function GetColoredAvARankIconMarkup(avaRank, alliance, size)
+function ZO_GetColoredAvARankIconMarkup(avaRank, alliance, size)
     local rankIconMarkup = string.format("|t%d:%d:%s:inheritColor|t", size, size, GetAvARankIcon(avaRank))
     local coloredRankIconMarkup = GetAllianceColor(alliance):Colorize(rankIconMarkup)
     return coloredRankIconMarkup
@@ -267,7 +267,7 @@ do
         [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/LFG_icon_healer.dds",
     }
 
-    function GetKeyboardRoleIcon(role)
+    function ZO_GetKeyboardRoleIcon(role)
         return KEYBOARD_ROLE_ICONS[role]
     end
 end
@@ -280,16 +280,16 @@ do
         [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer.dds",
     }
 
-    function GetGamepadRoleIcon(role)
+    function ZO_GetGamepadRoleIcon(role)
         return GAMEPAD_ROLE_ICONS[role]
     end
 end
 
-function GetRoleIcon(role)
+function ZO_GetRoleIcon(role)
     if IsInGamepadPreferredMode() then
-        return GetGamepadRoleIcon(role)
+        return ZO_GetGamepadRoleIcon(role)
     else
-        return GetKeyboardRoleIcon(role)
+        return ZO_GetKeyboardRoleIcon(role)
     end
 end
 
@@ -302,7 +302,7 @@ do
         [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_purple.dds",
     }
 
-    function GetKeyboardBattlegroundTeamIcon(battlegroundAlliance)
+    function ZO_GetKeyboardBattlegroundTeamIcon(battlegroundAlliance)
         return KEYBOARD_BATTLEGROUND_TEAM_ICONS[battlegroundAlliance]
     end
 end
@@ -315,21 +315,21 @@ do
         [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_purple.dds",
     }
 
-    function GetGamepadBattlegroundTeamIcon(battlegroundAlliance)
+    function ZO_GetGamepadBattlegroundTeamIcon(battlegroundAlliance)
         return GAMEPAD_BATTLEGROUND_TEAM_ICONS[battlegroundAlliance]
     end
 end
 
-function GetBattlegroundTeamIcon(battlegroundAlliance)
+function ZO_GetBattlegroundTeamIcon(battlegroundAlliance)
     if IsInGamepadPreferredMode() then
-        return GetGamepadBattlegroundTeamIcon(battlegroundAlliance)
+        return ZO_GetGamepadBattlegroundTeamIcon(battlegroundAlliance)
     else
-        return GetKeyboardBattlegroundTeamIcon(battlegroundAlliance)
+        return ZO_GetKeyboardBattlegroundTeamIcon(battlegroundAlliance)
     end
 end
 
-function GetBattlegroundIconMarkup(battlegroundAlliance, size)
-    return zo_iconFormatInheritColor(GetBattlegroundTeamIcon(battlegroundAlliance), size, size)
+function ZO_GetBattlegroundIconMarkup(battlegroundAlliance, size)
+    return zo_iconFormatInheritColor(ZO_GetBattlegroundTeamIcon(battlegroundAlliance), size, size)
 end
 
 -- Difficulty --
@@ -340,7 +340,7 @@ do
         [DUNGEON_DIFFICULTY_VETERAN] = "EsoUI/Art/LFG/LFG_veteranDungeon_up.dds",
     }
 
-    function GetKeyboardDungeonDifficultyIcon(dungeonDifficulty)
+    function ZO_GetKeyboardDungeonDifficultyIcon(dungeonDifficulty)
         return KEYBOARD_DUNEGON_DIFFICULTY_ICONS[dungeonDifficulty]
     end
 end
@@ -352,7 +352,7 @@ do
         [DUNGEON_DIFFICULTY_VETERAN] = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_veteranDungeon.dds",
     }
 
-    function GetGamepadDungeonDifficultyIcon(dungeonDifficulty)
+    function ZO_GetGamepadDungeonDifficultyIcon(dungeonDifficulty)
         return GAMEPAD_DUNGEON_DIFFICULTY_ICONS[dungeonDifficulty]
     end
 end
@@ -412,7 +412,7 @@ do
         },
     }
 
-    function GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem)
+    function ZO_GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem)
         local textures = KEYBOARD_RECIPE_CRAFTING_SYSTEM_BUTTON_TEXTURES[recipeCraftingSystem]
         if textures then
             return textures.up, textures.down, textures.over, textures.disabled
@@ -432,7 +432,7 @@ do
         [RECIPE_CRAFTING_SYSTEM_JEWELRYCRAFTING_SKETCHES] = "EsoUI/Art/Crafting/Gamepad/gp_tabIcon_JewelryCraft_sketches.dds",
     }
 
-    function GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem)
+    function ZO_GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem)
         return GAMEPAD_RECIPE_CRAFTING_SYSTEM_MENU_TEXTURES[recipeCraftingSystem]
     end
 end
@@ -458,7 +458,7 @@ do
         [ITEM_TRAIT_INFORMATION_RECONSTRUCTED] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_reconstruct_icon.dds",
     }
 
-    function GetPlatformTraitInformationIcon(itemTraitInformation)
+    function ZO_GetPlatformTraitInformationIcon(itemTraitInformation)
         if itemTraitInformation then
             if IsInGamepadPreferredMode() then
                 return ITEM_TRAIT_INFORMATION_GAMEPAD_ICON_PATHS[itemTraitInformation]
@@ -479,7 +479,7 @@ do
         [ITEM_SELL_INFORMATION_RECONSTRUCTED] = "EsoUI/Art/Inventory/inventory_trait_reconstruct_icon.dds",
     }
 
-    function GetItemSellInformationIcon(itemSellInformation)
+    function ZO_GetItemSellInformationIcon(itemSellInformation)
         if itemSellInformation then
             return ITEM_SELL_INFORMATION_ICON_PATHS[itemSellInformation]
         end
@@ -513,7 +513,7 @@ do
         [TARGET_MARKER_TYPE_EIGHT] = "EsoUI/Art/TargetMarkers/Gamepad/Target_White_Skull.dds",
     }
 
-    function GetPlatformTargetMarkerIcon(targetMarker)
+    function ZO_GetPlatformTargetMarkerIcon(targetMarker)
         if targetMarker then
             if IsInGamepadPreferredMode() then
                 return TARGET_MARKER_GAMEPAD_ICON_PATHS[targetMarker]
@@ -523,7 +523,7 @@ do
         end
     end
 
-    function GetPlatformTargetMarkerIconTable()
+    function ZO_GetPlatformTargetMarkerIconTable()
         return IsInGamepadPreferredMode() and TARGET_MARKER_GAMEPAD_ICON_PATHS or TARGET_MARKER_KEYBOARD_ICON_PATHS
     end
 end

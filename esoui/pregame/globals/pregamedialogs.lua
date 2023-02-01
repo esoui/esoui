@@ -1264,7 +1264,11 @@ ESO_Dialogs["CHAPTER_UPGRADE_CONTINUE"] =
             local chapterUpgradeId = GetCurrentChapterUpgradeId()
             local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
             local chapterCollectibleName = GetCollectibleName(chapterCollectibleId)
-            return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT, GetString(upgradeMethodsStringId), ZO_GetPlatformStoreName(), chapterCollectibleName)
+            if platformServiceType == PLATFORM_SERVICE_TYPE_EPIC then
+                return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT_NO_RESTART, GetString(upgradeMethodsStringId), ZO_GetPlatformStoreName())
+            else
+                return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT, GetString(upgradeMethodsStringId), ZO_GetPlatformStoreName(), chapterCollectibleName)
+            end
         end,
     },
 

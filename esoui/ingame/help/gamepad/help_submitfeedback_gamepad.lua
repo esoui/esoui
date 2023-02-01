@@ -72,6 +72,10 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
         end
     end
 
+    local function OnDropdownDeactivated()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+    end
+
     local function SetupDropdownListEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, active)
 
@@ -133,6 +137,7 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
             AddEntry(entry)
         end
 
+        dropdown:SetDeactivatedCallback(OnDropdownDeactivated)
         dropdown:UpdateItems()
         dropdown:SelectItemByIndex(savedDropdownIndex)
 
@@ -141,6 +146,10 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
 
     local function OnTextChanged(control)
         self:SetSavedField(control.fieldType, control:GetText())
+    end
+
+    local function OnFocusLost()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
     end
 
     local function SetupTextBoxListEntry(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -156,12 +165,14 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
         editBox:SetText(self:GetSavedField(fieldType) or "")
         editBox:SetDefaultText(data.defaultText)
         control.highlight:SetHidden(not selected)
+        editBox.focusLostCallback = OnFocusLost
 
         self.editBoxes[fieldType] = editBox
     end
 
     local function OnCheckBoxToggled(control, checked)
         self:SetSavedField(control.fieldType, checked)
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
     end
 
     local function SetupCheckBoxEntry(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -266,6 +277,7 @@ function ZO_Help_SubmitFeedback_Gamepad:AddImpactEntry()
     local entryData = ZO_GamepadEntryData:New("")
     entryData.header = GetString(SI_GAMEPAD_HELP_FIELD_TITLE_IMPACT)
     entryData.fieldType = ZO_HELP_TICKET_FIELD_TYPE.IMPACT
+    entryData.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
 
     self.itemList:AddEntryWithHeader("ZO_Gamepad_Help_Dropdown_Item", entryData)
 end
@@ -274,6 +286,7 @@ function ZO_Help_SubmitFeedback_Gamepad:AddCategoriesEntry()
     local entryData = ZO_GamepadEntryData:New("")
     entryData.header = GetString(SI_GAMEPAD_HELP_FIELD_TITLE_CATEGORY)
     entryData.fieldType = ZO_HELP_TICKET_FIELD_TYPE.CATEGORY
+    entryData.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
 
     self.itemList:AddEntryWithHeader("ZO_Gamepad_Help_Dropdown_Item", entryData)
 end
@@ -282,6 +295,7 @@ function ZO_Help_SubmitFeedback_Gamepad:AddSubcategoriesEntry()
     local entryData = ZO_GamepadEntryData:New("")
     entryData.header = GetString(SI_GAMEPAD_HELP_FIELD_TITLE_SUBCATEGORY)
     entryData.fieldType = ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY
+    entryData.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
 
     self.itemList:AddEntryWithHeader("ZO_Gamepad_Help_Dropdown_Item", entryData)
 end
@@ -291,6 +305,7 @@ function ZO_Help_SubmitFeedback_Gamepad:AddDetailsEntry(headerText)
     entryData.header = headerText
     entryData.defaultText = GetString(SI_CUSTOMER_SERVICE_ENTER_NAME)
     entryData.fieldType = ZO_HELP_TICKET_FIELD_TYPE.DETAILS
+    entryData.narrationText = ZO_GetDefaultParametricListEditBoxNarrationText
 
     self.itemList:AddEntryWithHeader("ZO_GamepadTextFieldItem", entryData)
 end
@@ -300,6 +315,7 @@ function ZO_Help_SubmitFeedback_Gamepad:AddDescriptionEntry()
     entryData.header = GetString(SI_CUSTOMER_SERVICE_DESCRIPTION)
     entryData.defaultText = GetString(SI_CUSTOMER_SERVICE_DEFAULT_DESCRIPTION_TEXT_GENERIC)
     entryData.fieldType = ZO_HELP_TICKET_FIELD_TYPE.DESCRIPTION
+    entryData.narrationText = ZO_GetDefaultParametricListEditBoxNarrationText
 
     self.itemList:AddEntryWithHeader("ZO_GamepadTextFieldItem_Multiline", entryData)
 end
@@ -308,6 +324,7 @@ function ZO_Help_SubmitFeedback_Gamepad:AddAttachScreenshotEntry()
     local entryData = ZO_GamepadEntryData:New("")
     entryData.text = GetString(SI_CUSTOMER_SERVICE_ATTACH_SCREENSHOT)
     entryData.fieldType = ZO_HELP_TICKET_FIELD_TYPE.ATTACH_SCREENSHOT
+    entryData.narrationText = ZO_GetDefaultParametricListToggleNarrationText
 
     self.itemList:AddEntry("ZO_CheckBoxTemplate_WithoutIndent_Gamepad", entryData)
 end

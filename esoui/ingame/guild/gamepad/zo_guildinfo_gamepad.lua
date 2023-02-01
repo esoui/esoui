@@ -7,13 +7,7 @@ local GUILD_RESOURCE_ICONS =
     [RESOURCETYPE_FOOD] = "EsoUI/Art/Guild/Gamepad/gp_ownership_icon_farm.dds",
 }
 
-ZO_GamepadGuildInfo = ZO_Object:Subclass()
-
-function ZO_GamepadGuildInfo:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_GamepadGuildInfo = ZO_InitializingObject:Subclass()
 
 function ZO_GamepadGuildInfo:Initialize(control)
     if not self.initialized then
@@ -138,7 +132,8 @@ function ZO_GamepadGuildInfo:RefreshHeader()
 end
 
 function ZO_GamepadGuildInfo:InitializeFooter()
-    self.footerData = {
+    self.footerData = 
+    {
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_HEADER_MEMBERS_ONLINE_LABEL),
     }
 end
@@ -156,7 +151,8 @@ end
 
 function ZO_GamepadGuildInfo:RefreshGuildMaster()
     local guildMaster = select(3, GetGuildInfo(self.guildId))
-    self.guildMasterBodyLabel:SetText(ZO_FormatUserFacingDisplayName(guildMaster))
+    self.guildMasterText = ZO_FormatUserFacingDisplayName(guildMaster)
+    self.guildMasterBodyLabel:SetText(self.guildMasterText)
 end
 
 function ZO_GamepadGuildInfo:RefreshMOTD()
@@ -166,7 +162,8 @@ function ZO_GamepadGuildInfo:RefreshMOTD()
         text = GetString(SI_GUILD_MOTD_EMPTY_TEXT)
     end
 
-    self.motd:SetText(text)
+    self.motdText = text
+    self.motd:SetText(self.motdText)
 end
 
 function ZO_GamepadGuildInfo:RefreshDescription()
@@ -176,7 +173,8 @@ function ZO_GamepadGuildInfo:RefreshDescription()
         text = GetString(SI_GUILD_DESCRIPTION_EMPTY_TEXT)
     end
 
-    self.description:SetText(text)
+    self.descriptionText = text
+    self.description:SetText(self.descriptionText)
 end
 
 -----------
@@ -186,12 +184,12 @@ end
 function ZO_GamepadGuildInfo:RefreshKeepOwnership()
     local text = GetString(SI_GUILD_NO_CLAIMED_KEEP)
     local headerText = GetString(SI_GAMEPAD_GUILD_KEEP_OWNERSHIP_HEADER)
-    if(DoesGuildHaveClaimedKeep(self.guildId)) then
+    if DoesGuildHaveClaimedKeep(self.guildId) then
         local keepId, campaignId = GetGuildClaimedKeep(self.guildId)
         local keepType = GetKeepType(keepId)
 
         local icon = ICON_KEEP
-        if(keepType == KEEPTYPE_RESOURCE) then
+        if keepType == KEEPTYPE_RESOURCE then
             local resourceType = GetKeepResourceType(keepId)
             icon = GUILD_RESOURCE_ICONS[resourceType]
         end
@@ -200,18 +198,21 @@ function ZO_GamepadGuildInfo:RefreshKeepOwnership()
         self.keepIcon:SetAlpha(1)
         text = zo_strformat(SI_TOOLTIP_KEEP_NAME, GetKeepName(keepId))
         
+        self.campaignNameText = GetCampaignName(campaignId)
         self.campaignName:SetHidden(false)
-        self.campaignName:SetText(GetCampaignName(campaignId))
+        self.campaignName:SetText(self.campaignNameText)
     else
         self.keepIcon:SetTexture(ICON_KEEP)
         self.keepIcon:SetAlpha(0.2)
         text = ZO_DISABLED_TEXT:Colorize(text)
         headerText = ZO_DISABLED_TEXT:Colorize(headerText)
         self.campaignName:SetHidden(true)
+        self.campaignNameText = nil
     end
 
     self.keepTitle:SetText(headerText)
-    self.keepName:SetText(text)
+    self.keepNameText = text
+    self.keepName:SetText(self.keepNameText)
 end
 
 function ZO_GamepadGuildInfo:RefreshTraderOwnership()
@@ -219,7 +220,7 @@ function ZO_GamepadGuildInfo:RefreshTraderOwnership()
     local traderText = GetString(SI_GUILD_NO_HIRED_TRADER)
     
     local traderName = GetGuildOwnedKioskInfo(self.guildId)
-    if(traderName) then
+    if traderName then
         self.traderIcon:SetAlpha(1)
         traderText = zo_strformat(SI_GUILD_HIRED_TRADER, traderName)
     else
@@ -228,10 +229,57 @@ function ZO_GamepadGuildInfo:RefreshTraderOwnership()
         headerText = ZO_DISABLED_TEXT:Colorize(headerText)
     end
 
-    self.traderName:SetText(traderText)
+    self.traderNameText = traderText
+    self.traderName:SetText(self.traderNameText)
     self.traderTitle:SetText(headerText)
 end
 
+function ZO_GamepadGuildInfo:GetNarrationText()
+    local narrations = {}
+
+    --Generate the narration for the guild name
+    ZO_AppendNarration(narrations, ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData))
+
+    local enabledText = GetString(SI_GAMEPAD_GUILD_HEADER_ENABLED_NARRATION)
+    local disabledText = GetString(SI_GAMEPAD_GUILD_HEADER_DISABLED_NARRATION)
+
+    --Generate the narration for the guild bank enabled state
+    local bankEnabledText = DoesGuildHavePrivilege(self.guildId, GUILD_PRIVILEGE_BANK_DEPOSIT) and enabledText or disabledText
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_GUILD_HEADER_GUILD_SERVICES_BANK)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(bankEnabledText))
+
+    --Generate the narration for the guild heraldry enabled state
+    local heraldryEnabledText = DoesGuildHavePrivilege(self.guildId, GUILD_PRIVILEGE_HERALDRY) and enabledText or disabledText
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_GUILD_HEADER_GUILD_SERVICES_HERALDRY)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(heraldryEnabledText))
+
+    --Generate the narration for the guild store enabled state
+    local tradingHouseEnabledText = DoesGuildHavePrivilege(self.guildId, GUILD_PRIVILEGE_TRADING_HOUSE) and enabledText or disabledText
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_GUILD_HEADER_GUILD_SERVICES_STORE)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(tradingHouseEnabledText))
+
+    --Generate the narration for keep ownership
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_GUILD_KEEP_OWNERSHIP_HEADER)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.keepNameText))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.campaignNameText))
+
+    --Generate the narration for guild trader
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_TRADER_OWNERSHIP_HEADER)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.traderNameText))
+
+    --Generate the narration for guildmaster
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_GUILD_HEADER_GUILD_MASTER_LABEL)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.guildMasterText))
+
+    --Generate the narration for the message of the day
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_MOTD_HEADER)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.motdText))
+
+    --Generate the narration for the about us
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_DESCRIPTION_HEADER)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.descriptionText))
+    return narrations
+end
 --------------------
 
 function ZO_GuildInfo_Gamepad_Initialize(control)

@@ -210,7 +210,7 @@ end
 function ZO_KeyboardGuildRosterManager:ShowPromoteToGuildMasterDialog(guildId, currentRankIndex, targetDisplayName)
     local guildAlliance = GUILD_ROSTER_MANAGER:GetGuildAlliance()
     local guildName = GUILD_ROSTER_MANAGER:GetGuildName()
-    local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), "100%", "100%")
+    local allianceIcon = zo_iconFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%")
     local rankName = GetFinalGuildRankName(guildId, currentRankIndex)
     ZO_Dialogs_ShowDialog("PROMOTE_TO_GUILDMASTER", { guildId = guildId, displayName = targetDisplayName}, { mainTextParams = { targetDisplayName, allianceIcon, guildName, rankName }})
 end
@@ -254,7 +254,7 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
                 elseif IsGuildRankGuildMaster(guildId, playerData.rankIndex) then
                     AddMenuItem(GetString(SI_GUILD_PROMOTE),
                                 function()
-                                    local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), ALLIANCE_ICON_SIZE, ALLIANCE_ICON_SIZE)
+                                    local allianceIcon = zo_iconFormat(ZO_GetAllianceSymbolIcon(guildAlliance), ALLIANCE_ICON_SIZE, ALLIANCE_ICON_SIZE)
                                     local rankName = GetFinalGuildRankName(guildId, 2)
                                     ZO_Dialogs_ShowDialog("PROMOTE_TO_GUILDMASTER", { guildId = guildId, displayName = data.displayName}, { mainTextParams = { data.displayName, allianceIcon, guildName, rankName }})
                                 end)
@@ -278,7 +278,7 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
 
             if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_REMOVE) then
                 if playerIsPendingInvite then
-                    local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), "100%", "100%")
+                    local allianceIcon = zo_iconFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%")
                         AddMenuItem(GetString(SI_GUILD_UNINVITE), function()
                                                                     ZO_Dialogs_ShowDialog("UNINVITE_GUILD_PLAYER", { guildId = guildId,  displayName = data.displayName }, { mainTextParams = { data.displayName, allianceIcon, guildName } })
                                                                 end)

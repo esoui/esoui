@@ -108,8 +108,8 @@ GetItemRequiredVeteranRank = GetItemRequiredChampionPoints
 IsUnitVetBattleLeveled = IsUnitChampionBattleLeveled
 IsUnitVeteran = IsUnitChampion
 GetItemLinkRequiredVeteranRank = GetItemLinkRequiredChampionPoints
-GetGamepadVeteranRankIcon = GetGamepadChampionPointsIcon
-GetVeteranRankIcon = GetChampionPointsIcon
+GetGamepadVeteranRankIcon = ZO_GetGamepadChampionPointsIcon
+GetVeteranRankIcon = ZO_GetChampionPointsIcon
 GetMaxVeteranRank = GetChampionPointsPlayerProgressionCap
 
 VETERAN_POINTS_GAIN = EVENT_EXPERIENCE_GAIN
@@ -794,7 +794,7 @@ function SwitchGuestCampaign(campaignId)
     -- do nothing
 end
 
-GetAllianceBannerIcon = GetAllianceSymbolIcon
+GetAllianceBannerIcon = ZO_GetAllianceSymbolIcon
 
 -- GetCraftingSkillLineIndices removed
 function GetCraftingSkillLineIndices(tradeskillType)
@@ -1124,7 +1124,7 @@ ZO_Dyeing_GetAchivementText = ZO_Dyeing_GetAchievementText
 
 -- Refactoring WorldMap.lua
 ZO_WorldMapPins = ZO_WorldMapPins_Manager
-ZO_MapLocationPins_Manager = ZO_MapLocations
+ZO_MapLocations = ZO_MapLocationPins_Manager
 
 function ZO_WorldMap_GetPinHandlers(mouseButton)
     ZO_WorldMap_GetPinManager():GetPinHandlers(mouseButton)
@@ -1181,3 +1181,52 @@ end
 function ZO_WorldMap_SetMapByIndex(mapIndex)
     WORLD_MAP_MANAGER:SetMapByIndex(mapIndex)
 end
+
+--Renaming functions in SharedTexture.lua to fit standards
+GetAllianceTexture = ZO_GetAllianceTexture
+GetAllianceSymbolIcon = ZO_GetAllianceSymbolIcon
+GetLargeBattlegroundAllianceSymbolIcon = ZO_GetLargeBattlegroundAllianceSymbolIcon
+GetCountdownBattlegroundAllianceSymbolIcon = ZO_GetCountdownBattlegroundAllianceSymbolIcon
+GetLargeAllianceSymbolIcon = ZO_GetLargeAllianceSymbolIcon
+GetPlatformAllianceSymbolIcon = ZO_GetPlatformAllianceSymbolIcon
+GetAllianceKeepRewardIcon = ZO_GetAllianceKeepRewardIcon
+GetInstanceDisplayTypeIcon = ZO_GetInstanceDisplayTypeIcon
+GetSocketTexture = ZO_GetSocketTexture
+GetClassIcon = ZO_GetClassIcon
+GetGamepadClassIcon = ZO_GetGamepadClassIcon
+GetPlatformClassIcon = ZO_GetPlatformClassIcon
+GetPlayerStatusIcon = ZO_GetPlayerStatusIcon
+GetGamepadPlayerStatusIcon = ZO_GetGamepadPlayerStatusIcon
+GetChampionPointsIcon = ZO_GetChampionPointsIcon
+GetChampionPointsIconSmall = ZO_GetChampionPointsIconSmall
+GetGamepadChampionPointsIcon = ZO_GetGamepadChampionPointsIcon
+GetChampionBarDisciplineTextures = ZO_GetChampionBarDisciplineTextures
+GetVeteranIcon = ZO_GetVeteranIcon
+GetGamepadVeteranIcon = ZO_GetGamepadVeteranIcon
+GetColoredAvARankIconMarkup = ZO_GetColoredAvARankIconMarkup
+GetKeyboardRoleIcon = ZO_GetKeyboardRoleIcon
+GetGamepadRoleIcon = ZO_GetGamepadRoleIcon
+GetRoleIcon = ZO_GetRoleIcon
+GetKeyboardBattlegroundTeamIcon = ZO_GetKeyboardBattlegroundTeamIcon
+GetGamepadBattlegroundTeamIcon = ZO_GetGamepadBattlegroundTeamIcon
+GetBattlegroundTeamIcon = ZO_GetBattlegroundTeamIcon
+GetBattlegroundIconMarkup = ZO_GetBattlegroundIconMarkup
+GetKeyboardDungeonDifficultyIcon = ZO_GetKeyboardDungeonDifficultyIcon
+GetGamepadDungeonDifficultyIcon = ZO_GetGamepadDungeonDifficultyIcon
+GetKeyboardRecipeCraftingSystemButtonTextures = ZO_GetKeyboardRecipeCraftingSystemButtonTextures
+GetGamepadRecipeCraftingSystemMenuTextures = ZO_GetGamepadRecipeCraftingSystemMenuTextures
+GetPlatformTraitInformationIcon = ZO_GetPlatformTraitInformationIcon
+GetItemSellInformationIcon = ZO_GetItemSellInformationIcon
+GetPlatformTargetMarkerIcon = ZO_GetPlatformTargetMarkerIcon
+GetPlatformTargetMarkerIconTable = ZO_GetPlatformTargetMarkerIconTable
+
+-- Enum update for RespecPaymentType
+SKILLS_RESPEC_PAYMENT_TYPE_GOLD = RESPEC_PAYMENT_TYPE_GOLD
+SKILLS_RESPEC_PAYMENT_TYPE_RESPEC_SCROLL = RESPEC_PAYMENT_TYPE_RESPEC_SCROLL
+
+-- ZO_SharedFurnitureManager method alias
+function ZO_SharedFurnitureManager:InitializeFurnitureCaches()
+    self:RebuildFurnitureCaches()
+end
+
+ZO_MaskIterator = ZO_FlagIterator

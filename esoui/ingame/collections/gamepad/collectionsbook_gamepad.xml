@@ -35,9 +35,8 @@
                             </OnInitialized>
 
                             <Controls>
-                                <Control name="$(parent)ScrollChild" override="true">
-                                    <Anchor point="TOPLEFT"/>
-                                    <Anchor point="TOPRIGHT"/>
+                                <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
+                                    <Dimensions x="100%" />
 
                                     <Controls>
                                         <Label name="$(parent)Description" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">

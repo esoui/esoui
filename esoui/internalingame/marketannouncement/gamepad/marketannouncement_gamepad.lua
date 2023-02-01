@@ -25,12 +25,83 @@ function ZO_MarketAnnouncement_Gamepad:Initialize(control)
 
     ZO_MarketAnnouncement_Shared.Initialize(self, control, IsInGamepadPreferredMode)
 
+    self.headerNarrationFunction = function()
+        local narrations = {}
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MARKET_ANNOUNCEMENT_WELCOME)))
+        --If the crown store is locked or the carousel is empty, include that in the header narration
+        if ZO_MARKET_ANNOUNCEMENT_MANAGER:ShouldHideMarketProductAnnouncements() then
+            if GetMarketAnnouncementCrownStoreLocked() then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MARKET_ANNOUNCEMENT_LOCKED_CROWN_STORE_TITLE)))
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MARKET_ANNOUNCEMENT_LOCKED_CROWN_STORE_DESCRIPTION)))
+            else
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MARKET_ANNOUNCEMENT_NO_FEATURED_PRODUCTS_TITLE)))
+            end
+        end
+        return narrations
+    end
+
     local AUTO_SCROLL = true
     self.carousel = ZO_MarketProductCarousel_Gamepad:New(self.carouselControl, "ZO_MarketAnnouncementMarketProductTile_Gamepad_Control", AUTO_SCROLL)
     self.carousel:SetSelectKeybindButton(self.selectButton)
     self.carousel:SetHelpKeybindButton(self.helpButton)
     self.carousel:SetScrollKeybindButton(self.scrollButton)
     self.carousel:SetKeybindAnchorControl(self.closeButton)
+    self.carousel:SetHeaderNarrationFunction(self.headerNarrationFunction)
+    --Because the announcements are not using the keybind strip, we need to manually narrate the keybinds
+    self.carousel:SetAdditionalInputNarrationFunction(function()
+        local narrationData = {}
+        --Generate the narration for the scroll keybind if applicable
+        if not self.scrollButton:IsHidden() then
+            if ZO_Keybindings_ShouldShowGamepadKeybind() then
+                local scrollNarrationData =
+                {
+                    name = GetString(SI_MARKET_ANNOUNCEMENT_SCROLL_KEYBIND),
+                    --The gamepad scroll "keybind" isn't a real keybind so just use the key that gives us the narration we want here
+                    keybindName = ZO_Keybindings_GetNarrationStringFromKeys(KEY_GAMEPAD_RIGHT_STICK, KEY_INVALID, KEY_INVALID, KEY_INVALID, KEY_INVALID),
+                    enabled = true,
+                }
+                table.insert(narrationData, scrollNarrationData)
+            else
+                local scrollUpNarrationData =
+                {
+                    keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UI_SHORTCUT_RIGHT_STICK_UP") or GetString(SI_ACTION_IS_NOT_BOUND),
+                    enabled = true,
+                }
+                table.insert(narrationData, scrollUpNarrationData)
+
+                local scrollDownNarrationData =
+                {
+                    name = GetString(SI_MARKET_ANNOUNCEMENT_SCROLL_KEYBIND),
+                    keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UI_SHORTCUT_RIGHT_STICK_DOWN") or GetString(SI_ACTION_IS_NOT_BOUND),
+                    enabled = true,
+                }
+                table.insert(narrationData, scrollDownNarrationData)
+            end
+        end
+
+        --Generate the narration for the select button if it is visible
+        local selectButtonNarrationData = self.selectButton:GetKeybindButtonNarrationData()
+        if selectButtonNarrationData then
+            table.insert(narrationData, selectButtonNarrationData)
+        end
+
+        --Generate the narration for the help button if it is visible
+        local helpButtonNarrationData = self.helpButton:GetKeybindButtonNarrationData()
+        if helpButtonNarrationData then
+            table.insert(narrationData, helpButtonNarrationData)
+        end
+
+        --Generate the narration for the close button
+        table.insert(narrationData, self:GetCloseKeybindNarrationData())
+
+        --Only narrate the directional input if there is more than one market product
+        if self.carousel:CanScroll() then
+            local directionalInputNarrationData = ZO_GetHorizontalDirectionalInputNarrationData(GetString(SI_SCREEN_NARRATION_TABBAR_PREVIOUS_KEYBIND), GetString(SI_SCREEN_NARRATION_TABBAR_NEXT_KEYBIND))
+            ZO_CombineNumericallyIndexedTables(narrationData, directionalInputNarrationData)
+        end
+
+        return narrationData
+    end)
 
     -- Action Tile Focus object must be setup before vertical navigation
     self.actionTileListFocus = ZO_GamepadFocus:New(self.actionTileListControl, nil, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
@@ -41,8 +112,16 @@ end
 function ZO_MarketAnnouncement_Gamepad:AddTileTypeObjectPoolToMap(tileType)
     ZO_MarketAnnouncement_Shared.AddTileTypeObjectPoolToMap(self, tileType)
 
+    local function OnSelectionChanged(isSelected)
+        if isSelected then
+            --Re-narrate when the selection changes
+            self:NarrateSelection()
+        end
+    end
+
     local function FactoryFunction(control)
         control.object:SetKeybindButton(self.selectButton)
+        control.object:SetSelectionChangedCallback(OnSelectionChanged)
     end
 
     self.actionTileControlPoolMap[tileType]:SetCustomFactoryBehavior(FactoryFunction)
@@ -58,7 +137,23 @@ function ZO_MarketAnnouncement_Gamepad:SetupVerticalNavigation()
         end,
         deactivate = function()
             self.actionTileListFocus:SetActive(false)
-        end
+        end,
+        narrationText = function()
+            return self.actionTileListFocus:GetNarrationText()
+        end,
+        --Because the announcements are not using the keybind strip, we need to manually narrate the keybinds
+        additionalInputNarrationFunction = function()
+            local narrationData = {}
+            --Generate the narration for the select button if it's visible
+            local selectButtonNarrationData = self.selectButton:GetKeybindButtonNarrationData()
+            if selectButtonNarrationData then
+                table.insert(narrationData, selectButtonNarrationData)
+            end
+            --Generate the narration for the close button
+            table.insert(narrationData, self:GetCloseKeybindNarrationData())
+            return narrationData
+        end,
+        headerNarrationFunction = self.headerNarrationFunction,
     }
 
     self:UpdateVerticalNavigation()
@@ -76,6 +171,8 @@ function ZO_MarketAnnouncement_Gamepad:UpdateVerticalNavigation()
     if self.actionTileListFocus:GetItemCount() >= 1 then
         self.verticalFocus:AddEntry(self.actionTileListFocusData)
     end
+
+    self.verticalFocus:SetFocusToFirstEntry()
 end
 
 function ZO_MarketAnnouncement_Gamepad:OnShowing()
@@ -86,6 +183,8 @@ end
 
 function ZO_MarketAnnouncement_Gamepad:OnShown()
     self.verticalFocus:Activate()
+    local NARRATE_HEADER = true
+    self:NarrateSelection(NARRATE_HEADER)
 end
 
 function ZO_MarketAnnouncement_Gamepad:OnHidden()
@@ -162,6 +261,17 @@ end
 
 function ZO_MarketAnnouncement_Gamepad:CreateMarketProduct()
     return ZO_MarketAnnouncementMarketProduct_Gamepad:New()
+end
+
+function ZO_MarketAnnouncement_Gamepad:NarrateSelection(narrateHeader)
+    SCREEN_NARRATION_MANAGER:QueueFocus(self.verticalFocus, narrateHeader)
+end
+
+function ZO_MarketAnnouncement_Gamepad:GetCloseKeybindNarrationData()
+    local closeButtonNarrationData = self.closeButton:GetKeybindButtonNarrationData()
+    --The name for the close button is set separately from the keybind, so we need to manually add it to the narration data
+    closeButtonNarrationData.name = GetString(SI_DIALOG_EXIT)
+    return closeButtonNarrationData
 end
 
 --global XML functions

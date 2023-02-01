@@ -12,7 +12,7 @@ function ZO_Tooltip:LayoutRidingSkill(trainingType, bonus, maxBonus)
     skillBar:SetValueFormatString(valueFormat)
     skillBar:SetMinMax(MIN_BONUS, maxBonus)
     skillBar:SetValue(bonus)
-    barSection:AddStatusBar(skillBar)
+    barSection:AddStatusBar(skillBar, zo_strformat(valueFormat, bonus))
     self:AddSection(barSection)
 
     --Body

@@ -91,6 +91,20 @@ end
 function ZO_CompanionSkills_Gamepad:InitializeHeader()
     local actionBarControl = self.header:GetNamedChild("AssignableActionBar")
     self.assignableActionBar = ZO_AssignableActionBar:New(actionBarControl)
+    --Set override text used when narrating the header for the action bar entries.
+    self.assignableActionBar:SetHeaderNarrationOverrideName(GetString(SI_COMPANION_BAR_ABILITY_PRIORITY))
+
+    --Narration info for the action bar
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return COMPANION_SKILLS_GAMEPAD_SCENE:IsShowing() and self.assignableActionBar:IsActive()
+        end,
+        selectedNarrationFunction = function()
+            return self.assignableActionBar:GetNarrationText()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("companionAssignableActionBar", narrationInfo)
 
     local actionBarBackground = self.control:GetNamedChild("ActionBarBackground")
     actionBarBackground:SetAnchor(TOPLEFT, actionBarControl, TOPLEFT, 0, 0)
@@ -555,6 +569,8 @@ function ZO_CompanionSkills_Gamepad:RegisterForEvents()
         -- refresh action bar tooltips and keybinds
         self:RefreshTooltip()
         self:RefreshKeybinds()
+        --Re-narrate when the selection changes
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("companionAssignableActionBar")
     end
     self.assignableActionBar:RegisterCallback("SelectedButtonChanged", OnSelectedActionBarButtonChanged)
 

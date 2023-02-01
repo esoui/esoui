@@ -1,6 +1,7 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_ArmoryBuildChampion_Gamepad_AbilityRow" inherits="ZO_GamepadChampionSkillEntryTemplate" virtual="true">
+        <Control name="ZO_ArmoryBuildChampion_Gamepad_AbilityRow" inherits="ZO_GamepadChampionSkillEntryTemplate" resizeToFitDescendents="false" virtual="true">
+            <Dimensions y="60"/>
             <OnInitialized name="ArmoryChampionAbilityRow">
                 local fonts =
                 {
@@ -16,7 +17,6 @@
                 }
                 ZO_FontAdjustingWrapLabel_OnInitialized(self:GetNamedChild("Label"), fonts, TEXT_WRAP_MODE_ELLIPSIS)
             </OnInitialized>
-            <Dimensions y="60"/>
         </Control>
 
         <Control name="ZO_ArmoryBuildChampion_Gamepad_MenuEntryHeader" virtual="true">

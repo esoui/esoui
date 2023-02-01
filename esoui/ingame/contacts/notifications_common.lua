@@ -258,7 +258,7 @@ end
 
 function ZO_GuildMotDProvider:CreateMessage(guildAlliance, guildName)
     -- Overridden if necessary
-    local allianceIcon = zo_iconFormat(GetPlatformAllianceSymbolIcon(guildAlliance), 24, 24)
+    local allianceIcon = zo_iconFormat(ZO_GetPlatformAllianceSymbolIcon(guildAlliance), 24, 24)
     return zo_strformat(SI_GUILD_MOTD_CHANGED_NOTIFICATION, allianceIcon, guildName)
 end
 
@@ -1005,7 +1005,7 @@ function ZO_LFGUpdateProvider:AddReadyCheckNotification(data)
         messageParams = { activityTypeText, generalActivityText }
     else
         messageFormat = SI_LFG_READY_CHECK_TEXT
-        messageParams = { activityTypeText, generalActivityText, zo_iconFormat(GetRoleIcon(role), "100%", "100%"), GetString("SI_LFGROLE", role) }
+        messageParams = { activityTypeText, generalActivityText, zo_iconFormat(ZO_GetRoleIcon(role), "100%", "100%"), GetString("SI_LFGROLE", role) }
     end
 
     local newListEntry =

@@ -52,14 +52,20 @@ end
 
 function IgnoreList_Gamepad:GetSelectedNarrationText()
     local ROW_ENTRY_PAUSE_TIME_MS = 100
-    local narration = {}
+    local narrations = {}
     local entryData = self:GetSelectedData()
     if entryData and entryData.displayName then
         local narrationStrings = { ZO_GetPlatformAccountLabel(), ZO_FormatUserFacingDisplayName(entryData.displayName) }
-        table.insert(narration, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
     end
 
-    return narration
+    return narrations
+end
+
+function IgnoreList_Gamepad:GetFooterNarration()
+    if GAMEPAD_CONTACTS_FRAGMENT:IsShowing() then
+        return GAMEPAD_CONTACTS:GetNarrationText()
+    end
 end
 
 function ZO_IgnoreList_Gamepad_OnInitialized(self)

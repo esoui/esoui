@@ -42,6 +42,7 @@ function ZO_Help_MechanicAssistance_Gamepad:AddDescriptionEntry()
     local entryData = ZO_GamepadEntryData:New("")
     entryData.header = GetString(SI_CUSTOMER_SERVICE_DESCRIPTION)
     entryData.fieldType = ZO_HELP_TICKET_FIELD_TYPE.DESCRIPTION
+    entryData.narrationText = ZO_GetDefaultParametricListEditBoxNarrationText
 
     self.itemList:AddEntryWithHeader("ZO_GamepadTextFieldItem_Multiline", entryData)
 end
@@ -177,16 +178,21 @@ function ZO_Help_MechanicAssistance_Gamepad:SetupList(list)
         self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DESCRIPTION, control:GetText())
     end
 
+    local function OnFocusLost()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(list)
+    end
+
     local function SetupDescriptionFieldListEntry(control, data, selected, reselectingDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         local editContainer = control:GetNamedChild("TextField")
         local editBox = editContainer:GetNamedChild("Edit")
 
         editBox:SetHandler("OnTextChanged", OnDescriptionTextChanged)
+        editBox.focusLostCallback = OnFocusLost
 
         local savedText = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DESCRIPTION)
         editBox:SetText(savedText or "")
-        
+
         editBox:SetDefaultText(GetString(SI_CUSTOMER_SERVICE_DEFAULT_DESCRIPTION_TEXT_GENERIC))
         control.highlight:SetHidden(not selected)
 

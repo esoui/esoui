@@ -60,7 +60,7 @@
         </Control>
         
         <Control name="ZO_MenuBarTemplate" resizeToFitDescendents="true" virtual="true">
-            <Dimensions y="32" />
+            <DimensionConstraints minY="32" />
 
             <OnInitialized>
                 ZO_MenuBar_OnInitialized(self)

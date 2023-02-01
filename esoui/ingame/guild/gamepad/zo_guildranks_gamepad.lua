@@ -1015,45 +1015,59 @@ function ZO_GuildRanks_Gamepad:PopulateRanks()
     end
 end
 
-function ZO_GuildRanks_Gamepad:RefreshRankList()
-    self.rankList:Clear()
+do
+    local function GetRankNarration(entryData, entryControl)
+        local narrations = {}
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+        --Generate the narration for the permissions list
+        if entryData.permissionsList then
+            ZO_AppendNarration(narrations, GAMEPAD_GUILD_HOME:GetContentHeaderNarrationText())
+            ZO_AppendNarration(narrations, entryData.permissionsList:GetNarrationText())
+        end
+        return narrations
+    end
 
-    local rankPermission = DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_PERMISSION_EDIT)
+    function ZO_GuildRanks_Gamepad:RefreshRankList()
+        self.rankList:Clear()
 
-    for i = 1, #self.ranks do
-        local rankObject = self.ranks[i]
+        local rankPermission = DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_PERMISSION_EDIT)
 
-        local data = ZO_GamepadEntryData:New(rankObject:GetName(), rankObject:GetLargeIcon())
-        data:SetIconTintOnSelection(true)
-        data.rankObject = rankObject
+        for i = 1, #self.ranks do
+            local rankObject = self.ranks[i]
 
-        if i == 1 then
-            local headerText = GetString(SI_WINDOW_TITLE_GUILD_RANKS)
-            if rankPermission then
-                headerText = GetString(SI_GAMEPAD_GUILD_RANK_EDIT)
+            local data = ZO_GamepadEntryData:New(rankObject:GetName(), rankObject:GetLargeIcon())
+            data:SetIconTintOnSelection(true)
+            data.rankObject = rankObject
+            data.narrationText = GetRankNarration
+            data.permissionsList = self.permissionsGridList
+
+            if i == 1 then
+                local headerText = GetString(SI_WINDOW_TITLE_GUILD_RANKS)
+                if rankPermission then
+                    headerText = GetString(SI_GAMEPAD_GUILD_RANK_EDIT)
+                end
+                data:SetHeader(headerText)
+                self.rankList:AddEntryWithHeader(GAMEPAD_GUILD_RANKS_MENU_ENTRY_TEMPLATE, data)
+            else
+                self.rankList:AddEntry(GAMEPAD_GUILD_RANKS_MENU_ENTRY_TEMPLATE, data)
             end
-            data:SetHeader(headerText)
+        end
+
+        local addRankEnabled = #self.ranks < MAX_GUILD_RANKS and rankPermission
+        if addRankEnabled then
+            local data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_RANK_ADD), "EsoUI/Art/Buttons/Gamepad/gp_plus_large.dds")
+            data:SetIconTintOnSelection(true)
+            data.addRank = true
+            data.callback = function()
+                ZO_Dialogs_ShowGamepadDialog(ADD_RANK_DIALOG_NAME)
+            end
+            data:SetHeader(GetString(SI_GAMEPAD_GUILD_RANK_NEW_HEADER)) 
             self.rankList:AddEntryWithHeader(GAMEPAD_GUILD_RANKS_MENU_ENTRY_TEMPLATE, data)
-        else
-            self.rankList:AddEntry(GAMEPAD_GUILD_RANKS_MENU_ENTRY_TEMPLATE, data)
         end
-    end
 
-    local addRankEnabled = #self.ranks < MAX_GUILD_RANKS and rankPermission
-    if addRankEnabled then
-        local data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_RANK_ADD), "EsoUI/Art/Buttons/Gamepad/gp_plus_large.dds")
-        data:SetIconTintOnSelection(true)
-        data.addRank = true
-        data.callback = function()
-            ZO_Dialogs_ShowGamepadDialog(ADD_RANK_DIALOG_NAME)
-        end
-        data:SetHeader(GetString(SI_GAMEPAD_GUILD_RANK_NEW_HEADER)) 
-        self.rankList:AddEntryWithHeader(GAMEPAD_GUILD_RANKS_MENU_ENTRY_TEMPLATE, data)
+        self.rankList:Commit()
     end
-
-    self.rankList:Commit()
 end
-
 -- XML functions
 ----------------
 

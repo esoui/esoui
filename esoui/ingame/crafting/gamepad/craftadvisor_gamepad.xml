@@ -23,7 +23,6 @@
         </Label>
 
         <TopLevelControl name="ZO_CraftAdvisor_Gamepad_TopLevel" resizeToFitDescendents="true">
-            <Dimensions x="275"/>
             <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="-22" offsetY="100" />
             <OnInitialized>
                 ZO_CraftAdvisor_Gamepad_OnInitialized(self)

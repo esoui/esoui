@@ -105,6 +105,17 @@ function ZO_MarketProductCarousel_Gamepad:Initialize(...)
             local data = self:GetSelectedData()
             self:UpdateKeybinds(data)
         end,
+        narrationText = function()
+            local narrations = {}
+            local data = self:GetSelectedData()
+            if data then
+                local marketProduct = data.marketProduct
+                if marketProduct then
+                    ZO_AppendNarration(narrations, marketProduct:GetNarrationText())
+                end
+            end
+            return narrations
+        end,
         highlight = self.selection
     }
 end
@@ -137,6 +148,7 @@ function ZO_MarketProductCarousel_Gamepad:UpdateKeybinds(newData)
         else
             self.scrollKeybindButton:SetHidden(true)
             self.selectKeybindButton:SetAnchor(TOPRIGHT, self.keybindAnchorControl, TOPLEFT)
+            self.selectKeybindButton:SetHidden(not self.active)
             self.helpKeybindButton:SetHidden(true)
         end
     end
@@ -179,6 +191,14 @@ end
 
 function ZO_MarketProductCarousel_Gamepad:EntrySetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
     ZO_Carousel_Shared.EntrySetup(self, control, data, self.active and selected, reselectingDuringRebuild, enabled, activated)
+end
+
+function ZO_MarketProductCarousel_Gamepad:SetAdditionalInputNarrationFunction(additionalInputNarrationFunction)
+    self.focusData.additionalInputNarrationFunction = additionalInputNarrationFunction
+end
+
+function ZO_MarketProductCarousel_Gamepad:SetHeaderNarrationFunction(headerNarrationFunction)
+    self.focusData.headerNarrationFunction = headerNarrationFunction
 end
 
 do

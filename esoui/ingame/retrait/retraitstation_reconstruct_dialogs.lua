@@ -1,17 +1,17 @@
 -- Keyboard Dialogs
 
 function ZO_ConfirmItemReconstructionDialog_Keyboard_OnInitialized(control)
-    local function SetupCostLineItem(control, icon, name, quantity)
-        local nameLabel = control:GetNamedChild("NameLabel")
+    local function SetupCostLineItem(entryControl, icon, name, quantity)
+        local nameLabel = entryControl:GetNamedChild("NameLabel")
         nameLabel:SetText(name)
 
-        local iconTexture = control:GetNamedChild("IconTexture")
+        local iconTexture = entryControl:GetNamedChild("IconTexture")
         iconTexture:SetTexture(icon)
 
         local quantityLabel = iconTexture:GetNamedChild("QuantityLabel")
         quantityLabel:SetText(quantity)
 
-        control:SetHidden(false)
+        entryControl:SetHidden(false)
     end
 
     local function SetupDialog(dialog, itemSetPieceData)
@@ -150,6 +150,32 @@ function ZO_ConfirmItemReconstruction_Gamepad_OnInitialized(control)
         {
             text = "",
         },
+        narrationText = function(dialog)
+            local data = dialog.data
+            local itemSetPieceData = data.itemSetPieceData
+            local narrations = {}
+            --Get the narration for the item name
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(itemSetPieceData:GetFormattedName()))
+
+            --Get the narration for the dialog main text
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_RETRAIT_STATION_CONFIRM_ITEM_RECONSTRUCTION_DESCRIPTION)))
+
+            --Get the narration for the required currency
+            local currencyCosts, materialCosts = itemSetPieceData:GetCostInfo()
+            local currencyCost = currencyCosts[1]
+            if currencyCost then
+                local formattedCost = ZO_Currency_FormatGamepad(currencyCost.currencyType, currencyCost.currencyRequired, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(formattedCost))
+            end
+
+            --Get the narration for the required materials
+            for index, materialCost in ipairs(materialCosts) do
+                local name = GetItemLinkName(materialCost.reagentItemLink)
+                local stackCount = materialCost.reagentsRequired
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_RECONSTRUCT_REQUIRED_ITEM_NARRATION_FORMATTER, stackCount, name)))
+            end
+            return narrations
+        end,
         buttons =
         {
             -- Reconstruct Button

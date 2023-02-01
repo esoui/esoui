@@ -247,6 +247,7 @@ function ZO_RestyleStation_Gamepad:OnDeferredInitialize()
     {
         data1HeaderText = GetCurrencyName(CURT_MONEY, IS_PLURAL, IS_UPPER),
         data1Text = UpdateCarriedCurrencyControl,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration, 
     }
 
     self:UpdateCurrentOutfitIndex()
@@ -1123,6 +1124,13 @@ function ZO_RestyleStation_Gamepad:RefreshFooter()
         GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
     else
         GAMEPAD_GENERIC_FOOTER:Refresh({})
+    end
+end
+
+function ZO_RestyleStation_Gamepad:GetFooterNarration()
+    local currentMode = RESTYLE_GAMEPAD:GetMode()
+    if currentMode == RESTYLE_MODE_OUTFIT or currentMode == RESTYLE_MODE_COMPANION_OUTFIT then
+        return GAMEPAD_GENERIC_FOOTER:GetNarrationText(self.footerData)
     end
 end
 

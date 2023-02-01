@@ -102,6 +102,9 @@ function ZO_ArmoryBuildChampion_Gamepad:InitializeKeybinds()
 
     local function Back()
         self:Deactivate()
+        --Because the main build details list remains activated while we are in this one, we need to manually tell it to re-narrate when we leave
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(ARMORY_GAMEPAD:GetCurrentList(), NARRATE_HEADER)
         PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
     end
 
@@ -157,8 +160,9 @@ do
         local disciplineSection = nil
         for actionSlotIndex = startSlotIndex, endSlotIndex do
             local currentDisciplineId = GetRequiredChampionDisciplineIdForSlot(actionSlotIndex, HOTBAR_CATEGORY_CHAMPION)
+            local headerText = nil
             if lastDisciplineId ~= currentDisciplineId then
-                local headerText = ZO_CachedStrFormat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(currentDisciplineId))
+                headerText = ZO_CachedStrFormat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(currentDisciplineId))
                 local headerData = ZO_GamepadEntryData:New(headerText)
                 table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ARMORY_BUILD_CHAMPION_HEADER_DATA, headerData))
 
@@ -167,7 +171,8 @@ do
 
             local disciplineType = GetChampionDisciplineType(currentDisciplineId)
             local championSkillId = self.armoryBuildData:GetSlottedChampionSkillId(actionSlotIndex)
-            AddEntry(scrollData, disciplineType, championSkillId)
+            local entry = AddEntry(scrollData, disciplineType, championSkillId)
+            entry.headerText = headerText
         end
 
         ZO_ScrollList_Commit(self.list)
@@ -184,6 +189,21 @@ end
 
 function ZO_ArmoryBuildChampion_Gamepad:ArmoryBuildChampionTextDisplayTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     control.label:SetText(data.text)
+end
+
+--Overridden from base
+function ZO_ArmoryBuildChampion_Gamepad:GetNarrationText()
+    local narrations = {}
+    local selectedData = self:GetSelectedData()
+    if selectedData and not selectedData.isHeader then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.headerText))
+        if not selectedData.isEntryEmpty then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.text))
+        else
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ARMORY_EMPTY_ENTRY_NARRATION)))
+        end
+    end
+    return narrations
 end
 
 -----------------------------

@@ -358,7 +358,7 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
             if keepAlliance == ALLIANCE_NONE then
                 LayoutKeepOwnerSection_Gamepad(self, keepSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_ALLIANCE_OWNER), nil, GetString(SI_KEEP_UNCLAIMED), self.tooltip:GetStyle("mapLocationKeepUnclaimed"))
             else
-                local allianceIcon = GetLargeAllianceSymbolIcon(keepAlliance)
+                local allianceIcon = ZO_GetLargeAllianceSymbolIcon(keepAlliance)
                 local allianceName = zo_strformat(SI_MAP_KEEP_INFO_ALLIANCE_TOOLTIP_FORMAT, GetColoredAllianceName(keepAlliance))
                 LayoutKeepOwnerSection_Gamepad(self, keepSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_ALLIANCE_OWNER), allianceIcon, allianceName, self.tooltip:GetStyle("mapLocationKeepClaimed"))
             end
@@ -382,7 +382,7 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
 
                 -- Always show players alliance weapons.
                 local playerAlliance = GetUnitAlliance("player")
-                local playerAllianceIcon = GetLargeAllianceSymbolIcon(playerAlliance)
+                local playerAllianceIcon = ZO_GetLargeAllianceSymbolIcon(playerAlliance)
                 local playerAllianceName = zo_strformat(SI_MAP_KEEP_INFO_ALLIANCE_TOOLTIP_FORMAT, GetColoredAllianceName(playerAlliance))
 
                 local weaponsSection = keepSection:AcquireSection(self.tooltip:GetStyle("mapKeepGroupSection"))
@@ -398,7 +398,7 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
                     if(i ~= playerAlliance) then
                         local numSiegeWeapons = GetNumSieges(keepId, battlegroundContext, i)
                         if numSiegeWeapons > 0 then
-                            local allianceIcon = GetLargeAllianceSymbolIcon(i)
+                            local allianceIcon = ZO_GetLargeAllianceSymbolIcon(i)
                             local allianceName = zo_strformat(SI_MAP_KEEP_INFO_ALLIANCE_TOOLTIP_FORMAT, GetColoredAllianceName(i))
 
                             local siegeWeaponsText = zo_strformat(SI_GAMEPAD_WORLD_MAP_TOOLTIP_SIEGE, numSiegeWeapons, maxSiegeWeapons)
@@ -519,7 +519,7 @@ local function LayoutForwardCamp_Gamepad(self, graveyardIndex, battlegroundConte
 
     -- Alliance Owner
     local playerAlliance = GetUnitAlliance("player")
-    local allianceIcon = GetLargeAllianceSymbolIcon(playerAlliance)
+    local allianceIcon = ZO_GetLargeAllianceSymbolIcon(playerAlliance)
     local allianceName = zo_strformat(SI_MAP_KEEP_INFO_ALLIANCE_TOOLTIP_FORMAT, GetColoredAllianceName(playerAlliance))
     LayoutKeepOwnerSection_Gamepad(self, campSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_ALLIANCE_OWNER), allianceIcon, allianceName, self.tooltip:GetStyle("mapLocationKeepClaimed"))
 

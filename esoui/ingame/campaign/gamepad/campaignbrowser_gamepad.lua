@@ -436,7 +436,7 @@ function ZO_CampaignBrowser_Gamepad:RefreshContentHeader()
                 if DoesCampaignHaveEmperor(targetData.id) then
                     local alliance, characterName, displayName = GetCampaignEmperorInfo(targetData.id)
                     local userFacingName = ZO_GetPlatformUserFacingName(characterName, displayName)
-                    return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_EMPEROR_HEADER_NAME), GetLargeAllianceSymbolIcon(alliance), userFacingName)
+                    return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_EMPEROR_HEADER_NAME), ZO_GetLargeAllianceSymbolIcon(alliance), userFacingName)
                 else
                     return GetString(SI_CAMPAIGN_NO_EMPEROR)
                 end
@@ -519,6 +519,7 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                 elseif entryType == ENTRY_TYPES.SET_HOME then
                     self:DoSetHomeCampaign(targetData)
                 elseif entryType == ENTRY_TYPES.BONUSES then
+                    self:GetCurrentList():SetEnabled(false)
                     self:DeactivateCurrentList()
                     CAMPAIGN_BONUSES_GAMEPAD:Activate()
                     self:SetCurrentMode(CAMPAIGN_BROWSER_MODES.BONUSES)
@@ -579,6 +580,7 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                 if self.currentMode == CAMPAIGN_BROWSER_MODES.BONUSES then
                     CAMPAIGN_BONUSES_GAMEPAD:Deactivate()
+                    self:GetCurrentList():SetEnabled(true)
                     self:ActivateCurrentList()
                     self:SetCurrentMode(CAMPAIGN_BROWSER_MODES.CAMPAIGNS)
                     PlaySound(SOUNDS.GAMEPAD_MENU_BACK)

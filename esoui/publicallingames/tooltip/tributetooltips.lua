@@ -183,7 +183,9 @@ end
 function ZO_Tooltip:LayoutTributePatronFavorStateInfo(patronData, favorState, useDesaturatedText)
     local requirementsText = patronData:GetRequirementsText(favorState)
     local mechanicsText = patronData:GetMechanicsText(favorState)
-    if requirementsText ~= "" and mechanicsText ~= "" then
+    local numPassiveMechanics = patronData:GetNumPassiveMechanicsForFavorState(favorState)
+    local showActivationText = requirementsText ~= "" and mechanicsText ~= ""
+    if showActivationText or numPassiveMechanics > 0 then
         local favorSection = self:AcquireSection(self:GetStyle("bodySection"))
 
         --Layout the title of the favor state
@@ -200,19 +202,30 @@ function ZO_Tooltip:LayoutTributePatronFavorStateInfo(patronData, favorState, us
             internalassert(false, "Unsupported Favor State")
         end
 
-        local resultText = ""
+        local passiveFormatterStringId = useDesaturatedText and SI_TRIBUTE_PATRON_TOOLTIP_PASSIVE_MECHANIC_DISABLED_FORMATTER or SI_TRIBUTE_PATRON_TOOLTIP_PASSIVE_MECHANIC_FORMATTER
 
-        --Do not include the result string for neutral patrons
-        if not patronData:IsNeutral() then
-            local displayFavorState = favorState
-            if patronData:DoesSkipNeutralFavorState() and favorState == TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_OPPONENT then
-                displayFavorState = TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_NEUTRAL
-            end
-            resultText = GetString("SI_TRIBUTEPATRONPERSPECTIVEFAVORSTATE_RESULT", displayFavorState)
+        for mechanicIndex = 1, numPassiveMechanics do
+            local triggerId = select(6, patronData:GetPassiveMechanicInfo(favorState, mechanicIndex))
+            local triggerText = GetTributeTriggerDescription(triggerId)
+            local mechanicText = patronData:GetPassiveMechanicText(favorState, mechanicIndex)
+            favorSection:AddLine(zo_strformat(GetString(passiveFormatterStringId), triggerText, mechanicText), colorStyle or self:GetStyle("whiteFontColor"), self:GetStyle("bodyDescription"))
         end
 
-        local formatterStringId = useDesaturatedText and SI_TRIBUTE_PATRON_TOOLTIP_FAVOR_DESCRIPTION_DISABLED_FORMATTER or SI_TRIBUTE_PATRON_TOOLTIP_FAVOR_DESCRIPTION_FORMATTER
-        favorSection:AddLine(zo_strformat(GetString(formatterStringId), requirementsText, mechanicsText, resultText), colorStyle or self:GetStyle("whiteFontColor"), self:GetStyle("bodyDescription"))
+        if showActivationText then
+            local resultText = ""
+            --Do not include the result string for neutral patrons
+            if not patronData:IsNeutral() then
+                local displayFavorState = favorState
+                if patronData:DoesSkipNeutralFavorState() and favorState == TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_OPPONENT then
+                    displayFavorState = TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_NEUTRAL
+                end
+                resultText = GetString("SI_TRIBUTEPATRONPERSPECTIVEFAVORSTATE_RESULT", displayFavorState)
+            end
+
+            local formatterStringId = useDesaturatedText and SI_TRIBUTE_PATRON_TOOLTIP_FAVOR_DESCRIPTION_DISABLED_FORMATTER or SI_TRIBUTE_PATRON_TOOLTIP_FAVOR_DESCRIPTION_FORMATTER
+            favorSection:AddLine(zo_strformat(GetString(formatterStringId), requirementsText, mechanicsText, resultText), colorStyle or self:GetStyle("whiteFontColor"), self:GetStyle("bodyDescription"))
+        end
+
         self:AddSection(favorSection)
     end
 end

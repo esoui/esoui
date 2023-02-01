@@ -46,6 +46,7 @@ ZO_GamepadTooltip.metaTable =
     end,
 }
 
+--When adding a new one of these, make sure you update the TOOLTIP_NARRATION_ORDER table in this file as well
 GAMEPAD_LEFT_TOOLTIP = "GAMEPAD_LEFT_TOOLTIP"
 GAMEPAD_RIGHT_TOOLTIP = "GAMEPAD_RIGHT_TOOLTIP"
 GAMEPAD_MOVABLE_TOOLTIP = "GAMEPAD_MOVABLE_TOOLTIP"
@@ -68,6 +69,7 @@ function ZO_GamepadTooltip:Initialize(control, dialogControl)
     self.control = control
     self.dialogControl = dialogControl
     self.tooltips = {}
+    self.customTooltipNarrations = {}
 
     local AUTO_SHOW_BG = true
     local DONT_AUTO_SHOW_BG = false
@@ -273,6 +275,7 @@ end
 
 function ZO_GamepadTooltip:ShowGenericHeader(tooltipType, data)
     local tooltipInfo = self:GetTooltipInfo(tooltipType)
+    tooltipInfo.headerData = data
     ZO_GamepadGenericHeader_Refresh(tooltipInfo.headerControl, data)
     tooltipInfo.headerContainerControl:SetHidden(false)
 end
@@ -288,6 +291,7 @@ function ZO_GamepadTooltip:Reset(tooltipType)
     if tooltipInfo.headerContainerControl ~= nil then
         tooltipInfo.headerContainerControl:SetHidden(true)
     end
+    tooltipInfo.headerData = nil
     if tooltipType == GAMEPAD_MOVABLE_TOOLTIP then
         local HIDE_LEFT_DIVIDER = false
         local HIDE_RIGHT_DIVIDER = false
@@ -350,23 +354,66 @@ function ZO_GamepadTooltip:GetTooltipInfo(tooltipType)
     return self.tooltips[tooltipType]
 end
 
-function ZO_GamepadTooltip:GetNarrationText(optionalTooltipType)
-    if self.tooltips[optionalTooltipType] then
-        --If a valid tooltip type was specified, grab the narration text for that one
-        local tooltip = self:GetTooltip(optionalTooltipType)
-        if tooltip then
-            return tooltip:GetNarrationText()
-        else
-            return ""
-        end
-    else
-        --If we didn't get a valid tooltip type, just get the narration text for every visible tooltip
+function ZO_GamepadTooltip:RegisterCustomTooltipNarration(narrationInfo)
+    table.insert(self.customTooltipNarrations, narrationInfo)
+end
+
+do
+    --The order to narrate tooltips in. Should be ordered based on where the tooltip is located visually, from left to right
+    --If the tooltip is not included in this table, it will not be checked when attempting to narrate all visible tooltips
+    local TOOLTIP_NARRATION_ORDER =
+    {
+        GAMEPAD_QUAD1_TOOLTIP,
+        GAMEPAD_LEFT_TOOLTIP,
+        GAMEPAD_LEFT_DIALOG_TOOLTIP,
+        GAMEPAD_QUAD_2_3_TOOLTIP,
+        GAMEPAD_QUAD3_TOOLTIP,
+        GAMEPAD_RIGHT_TOOLTIP,
+        GAMEPAD_MOVABLE_TOOLTIP,
+    }
+
+    function ZO_GamepadTooltip:GetNarrationText(optionalTooltipType)
         local narrationText = {}
-        for tooltipType, tooltip in pairs(self.tooltips) do
-            if tooltip.fragment and tooltip.fragment:IsShowing() then
-                local tooltip = self:GetTooltip(tooltipType)
-                if tooltip then
-                    table.insert(narrationText, tooltip:GetNarrationText())
+        if self.tooltips[optionalTooltipType] then
+            local tooltipInfo = self:GetTooltipInfo(optionalTooltipType)
+            if tooltipInfo then
+                --If the tooltip has a generic header, get the narration for that first
+                if tooltipInfo.headerContainerControl and not tooltipInfo.headerContainerControl:IsHidden() and tooltipInfo.headerControl and tooltipInfo.headerData then
+                    table.insert(narrationText, ZO_GamepadGenericHeader_GetNarrationText(tooltipInfo.headerControl, tooltipInfo.headerData))
+                end
+
+                --Make sure the tooltip is actually showing
+                if tooltipInfo.fragment and tooltipInfo.fragment:IsShowing() then
+                    --If a valid tooltip type was specified, grab the narration text for that one
+                    local tooltip = self:GetTooltip(optionalTooltipType)
+                    if tooltip then
+                        table.insert(narrationText, tooltip:GetNarrationText())
+                    end
+                end
+            end
+        else
+            --If we didn't get a valid tooltip type, just get the narration text for every visible tooltip
+            for _, tooltipType in ipairs(TOOLTIP_NARRATION_ORDER) do
+                local tooltipInfo = self:GetTooltipInfo(tooltipType)
+                if tooltipInfo then
+                    --If the tooltip has a generic header, get the narration for that first
+                    if tooltipInfo.headerContainerControl and not tooltipInfo.headerContainerControl:IsHidden() and tooltipInfo.headerControl and tooltipInfo.headerData then
+                        table.insert(narrationText, ZO_GamepadGenericHeader_GetNarrationText(tooltipInfo.headerControl, tooltipInfo.headerData))
+                    end
+
+                    --Make sure the tooltip is actually showing
+                    if tooltipInfo.fragment and tooltipInfo.fragment:IsShowing() then
+                        local tooltip = self:GetTooltip(tooltipType)
+                        if tooltip then
+                            table.insert(narrationText, tooltip:GetNarrationText())
+                        end
+                    end
+                end
+            end
+
+            for _, narrationInfo in ipairs(self.customTooltipNarrations) do
+                if narrationInfo:canNarrate() then
+                    table.insert(narrationText, narrationInfo:tooltipNarrationFunction())
                 end
             end
         end

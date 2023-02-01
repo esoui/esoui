@@ -139,6 +139,7 @@ function ZO_GuildHeraldryManager_Gamepad:InitializeMultiFocusAreas()
 
         list:Activate()
         list.control.highlight:SetHidden(false)
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("guildHeraldryStyleSpinner")
     end
     local function StyleCategoryDeactivateCallback()
         local list = self.bgStyleCatList
@@ -164,6 +165,41 @@ function ZO_GuildHeraldryManager_Gamepad:InitializeMultiFocusAreas()
 
     self:AddNextFocusArea(self.styleCategoryArea)
     self:AddNextFocusArea(self.styleGridArea)
+
+    local narrationInfo =
+    {
+        canNarrate = function()
+            if GUILD_HERALDRY_GAMEPAD_FRAGMENT:IsShowing() then
+                local list = nil
+                if self.mode == ZO_HERALDRY_BG_STYLE_MODE then
+                    list = self.bgStyleCatList
+                elseif self.mode == ZO_HERALDRY_CREST_STYLE_MODE then
+                    list = self.crestStyleCatList
+                end
+                return list and list:IsActive() or false
+            end
+            return false
+        end,
+        selectedNarrationFunction = function()
+            local list = self.bgStyleCatList
+            if self.activeData.mode == ZO_HERALDRY_CREST_STYLE_MODE then
+                list = self.crestStyleCatList
+            end
+            local data = list:GetSelectedData()
+            if data then
+                return ZO_FormatSpinnerNarrationText(GetString(SI_GUILD_HERALDRY_TYPE_HEADER), data.categoryName)
+            end
+        end,
+        additionalInputNarrationFunction = function()
+            local list = self.bgStyleCatList
+            if self.activeData.mode == ZO_HERALDRY_CREST_STYLE_MODE then
+                list = self.crestStyleCatList
+            end
+            local narrationFunction = list:GetAdditionalInputNarrationFunction()
+            return narrationFunction()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("guildHeraldryStyleSpinner", narrationInfo)
 end
 
 function ZO_GuildHeraldryManager_Gamepad:PerformDeferredInitialization()
@@ -171,6 +207,19 @@ function ZO_GuildHeraldryManager_Gamepad:PerformDeferredInitialization()
     self.deferredInitialized = true
 
     self:InitializeStyleCategoryLists(ZO_HorizontalScrollList_Gamepad, "ZO_GuildHeraldry_StyleCategory_Gamepad")
+    local function OnSelectedBGStyleDataChangedCallback()
+        if self.bgStyleCatList:IsActive() then
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry("guildHeraldryStyleSpinner")
+        end
+    end
+    self.bgStyleCatList:SetOnSelectedDataChangedCallback(OnSelectedBGStyleDataChangedCallback)
+
+    local function OnSelectedCrestStyleDataChangedCallback()
+        if self.crestStyleCatList:IsActive() then
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry("guildHeraldryStyleSpinner")
+        end
+    end
+    self.crestStyleCatList:SetOnSelectedDataChangedCallback(OnSelectedCrestStyleDataChangedCallback)
     self:InitializeKeybindStripDescriptors()
 
     self.styleCategoryArea:SetKeybindDescriptor(self.styleCategoryKeybindStripDescriptor)
@@ -182,6 +231,9 @@ function ZO_GuildHeraldryManager_Gamepad:PerformDeferredInitialization()
     self.costFn = function(control)
         ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, self.selectedData.cost, self.currencyOptions)
         return true
+    end
+    self.costFnNarration = function(control)
+        return ZO_Currency_FormatGamepad(CURT_MONEY, self.selectedData.cost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
     end
 end
 
@@ -298,6 +350,15 @@ function ZO_GuildHeraldryManager_Gamepad:InitializeKeybindStripDescriptors()
                     else
                         return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_APPLY_CHANGES_NOT_ENOUGH, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(pendingCost)), gamepadGoldIconMarkup)
                     end
+                end
+            end,
+
+            narrationOverrideName  = function()
+                local pendingCost = GetPendingHeraldryCost()
+                if IsCreatingHeraldryForFirstTime() then
+                    return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_PURCHASE_HERALDRY, ZO_Currency_FormatGamepad(CURT_MONEY, pendingCost, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
+                else
+                    return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_APPLY_CHANGES, ZO_Currency_FormatGamepad(CURT_MONEY, pendingCost, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
                 end
             end,
 
@@ -446,10 +507,10 @@ end
 
 function ZO_GuildHeraldryManager_Gamepad:GetPurchaseCost()
     if self.selectedData ~= nil then
-        return GetString(SI_GAMEPAD_GUILD_HERALDRY_COST_LABEL), self.costFn
+        return GetString(SI_GAMEPAD_GUILD_HERALDRY_COST_LABEL), self.costFn, self.costFnNarration
     end
 
-    return nil, nil
+    return nil, nil, nil
 end
 
 do
@@ -470,6 +531,18 @@ do
         local colorIcon = "EsoUI/Art/Dye/Gamepad/dye_square.dds"
 
         local bgStyleCost, bgPrimaryColorCost, bgSecondaryColorCost, crestStyleCost, crestColorCost = GetHeraldryCustomizationCosts()
+
+        local function GetEntryNarrationText(entryData, entryControl)
+            local narrations = {}
+
+            -- Generate the standard parametric list entry narration
+            ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+            -- Treat the content header as a sort of tooltip for the list entry
+            ZO_AppendNarration(narrations, GAMEPAD_GUILD_HOME:GetContentHeaderNarrationText())
+
+            return narrations
+        end
 
         local bgStyleData = ZO_GamepadEntryData:New(GetString(SI_GUILD_HERALDRY_STYLE))
         bgStyleData:SetHeader(GetString(SI_GAMEPAD_GUILD_HERALDRY_BACKGROUND))
@@ -496,6 +569,7 @@ do
                 bgStyleData:AddIcon(icon)
             end
         end
+        bgStyleData.narrationText = GetEntryNarrationText
 
         self.categoryList:AddEntryWithHeader(CATEGORY_TEMPLATE_NAME, bgStyleData)
 
@@ -515,6 +589,7 @@ do
                 bgPrimaryColorData:AddIcon(colorIcon)
             end
         end
+        bgPrimaryColorData.narrationText = GetEntryNarrationText
 
         self.categoryList:AddEntry(CATEGORY_TEMPLATE_NAME, bgPrimaryColorData)
 
@@ -534,6 +609,7 @@ do
                 bgSecondaryColorData:AddIcon(colorIcon)
             end
         end
+        bgSecondaryColorData.narrationText = GetEntryNarrationText
 
         self.categoryList:AddEntry(CATEGORY_TEMPLATE_NAME, bgSecondaryColorData, nil, GAMEPAD_HEADER_DEFAULT_PADDING, nil, GAMEPAD_HEADER_SELECTED_PADDING)
 
@@ -562,6 +638,7 @@ do
                 crestStyleData:AddIcon(icon)
             end
         end
+        crestStyleData.narrationText = GetEntryNarrationText
 
         self.categoryList:AddEntryWithHeader(CATEGORY_TEMPLATE_NAME, crestStyleData, nil, nil, GAMEPAD_HEADER_SELECTED_PADDING)
 
@@ -581,6 +658,7 @@ do
                 crestColorData:AddIcon(colorIcon)
             end
         end
+        crestColorData.narrationText = GetEntryNarrationText
 
         self.categoryList:AddEntry(CATEGORY_TEMPLATE_NAME, crestColorData)
 
@@ -610,10 +688,16 @@ end
 
 function ZO_GuildHeraldryManager_Gamepad:SelectColor(...)
     ZO_GuildHeraldryManager_Shared.SelectColor(self, ...)
+    SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.colorGridList)
     local targetData = self.categoryList:GetTargetData()
     if targetData and targetData.mode == ZO_HERALDRY_COLOR_MODE then
         self.categoryList:RefreshVisible()
     end
+end
+
+function ZO_GuildHeraldryManager_Gamepad:SelectStyle(...)
+    ZO_GuildHeraldryManager_Shared.SelectStyle(self, ...)
+    SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.styleGridList)
 end
 
 --[[
@@ -632,6 +716,9 @@ function ZO_GuildHeraldryManager_Gamepad:SetupHeraldryDialog(control)
                 ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, heraldryFunds, ZO_GAMEPAD_CURRENCY_OPTIONS)
                 return true
             end,
+            valueNarration = function(control)
+                return ZO_Currency_FormatGamepad(CURT_MONEY, heraldryFunds, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+            end,
             header = GetString(SI_GUILD_HERALDRY_DIALOG_BANKED_GOLD_HEADER),
         },
 
@@ -640,6 +727,9 @@ function ZO_GuildHeraldryManager_Gamepad:SetupHeraldryDialog(control)
             value = function(control)
                 ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, pendingCost, ZO_GAMEPAD_CURRENCY_OPTIONS)
                 return true
+            end,
+            valueNarration = function(control)
+                return ZO_Currency_FormatGamepad(CURT_MONEY, pendingCost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
             end,
             header = GetString(SI_GUILD_HERALDRY_DIALOG_COST_HEADER),
         },

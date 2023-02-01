@@ -289,6 +289,9 @@ function ZO_GamepadStoreManager:InitializeKeybindStrip()
             end
             return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON))
         end,
+        narrationOverrideName = function()
+            return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, GetRepairAllCost(), ZO_CURRENCY_FORMAT_AMOUNT_NAME))
+        end,
         keybind = "UI_SHORTCUT_SECONDARY",
         visible = function() return CanStoreRepair() and GetRepairAllCost() > 0 end,
         enabled = function()
@@ -381,6 +384,18 @@ function ZO_GamepadStoreManager:HideActiveComponent()
     end
 end
 
+function ZO_GamepadStoreManager:OnUpdate()
+    self:RefreshScreenHeader()
+end
+
+function ZO_GamepadStoreManager:RefreshScreenHeader()
+    self:RefreshHeaderData()
+    if self.headerData then
+        local BLOCK_TABBAR_CALLBACK = true
+        ZO_GamepadGenericHeader_Refresh(self.header, self.headerData, BLOCK_TABBAR_CALLBACK)
+    end
+end
+
 do
     local function UpdateCapacityString()
         local mode = STORE_WINDOW_GAMEPAD:GetCurrentMode()
@@ -457,7 +472,20 @@ do
         headerText = GetString(SI_GAMEPAD_STABLE_TRAINING_COST_HEADER),
         text = UpdateRidingTrainingCost,
         narrationText = function()
-            return ZO_Currency_FormatGamepad(CURT_MONEY, STABLE_MANAGER.trainingCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            return ZO_Currency_FormatGamepad(CURT_MONEY, STABLE_MANAGER.trainingCost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+        end,
+    }
+
+    local RIDING_TRAINABLE_HEADER_DATA =
+    {
+        headerText = GetString(SI_GAMEPAD_STABLE_TRAINABLE_HEADER),
+        text = function()
+            local timeUntilCanBeTrained = GetTimeUntilCanBeTrained()
+            if timeUntilCanBeTrained == 0 then
+                return GetString(SI_GAMEPAD_STABLE_TRAINABLE_READY)
+            else
+                return ZO_FormatTimeMilliseconds(timeUntilCanBeTrained, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+            end
         end,
     }
 
@@ -517,6 +545,14 @@ do
 
         if isStable then
             table.insert(g_pendingHeaderData, RIDING_TRAINING_COST_HEADER_DATA)
+            if not STABLE_MANAGER:IsRidingSkillMaxedOut() then
+                table.insert(g_pendingHeaderData, RIDING_TRAINABLE_HEADER_DATA)
+                if GetTimeUntilCanBeTrained() ~= 0 then
+                    self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
+                else
+                    self.control:SetHandler("OnUpdate", nil)
+                end
+            end
         end
 
         if mode == ZO_MODE_STORE_SELL_STOLEN or mode == ZO_MODE_STORE_LAUNDER then

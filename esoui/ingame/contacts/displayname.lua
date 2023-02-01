@@ -27,7 +27,7 @@ end
 
 function PlayerStatusManager:Initialize()
     for i = 1, GetNumPlayerStatuses() do
-        local statusTexture = GetPlayerStatusIcon(i)
+        local statusTexture = ZO_GetPlayerStatusIcon(i)
         local statusName = GetString("SI_PLAYERSTATUS", i)
         local entryText = zo_iconTextFormat(statusTexture, 32, 32, statusName)
         local entry = self.comboBox:CreateItemEntry(entryText, self.OnStatusChanged)
@@ -41,7 +41,7 @@ end
 
 function PlayerStatusManager:SetSelectedStatus(status)
     self.status = status
-    local statusTexture = GetPlayerStatusIcon(status)
+    local statusTexture = ZO_GetPlayerStatusIcon(status)
     self.selectedItem:SetNormalTexture(statusTexture)
     self.selectedItem:SetPressedTexture(statusTexture)
 end

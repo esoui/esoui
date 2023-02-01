@@ -223,9 +223,12 @@ function ZO_ActivityFinderTemplate_Shared:RefreshTributeSeasonData(forceHide)
             else
                 formattedTime = ZO_FormatTimeLargestTwo(remainingTimeS, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
             end
-            self.seasonTimeRemainingLabel:SetText(zo_strformat(SI_TRIBUTE_FINDER_TIME_REMAINING, ZO_WHITE:Colorize(formattedTime)))
+            -- Cache these for narration
+            self.tributeSeasonTimeRemainingText = zo_strformat(SI_TRIBUTE_FINDER_TIME_REMAINING, ZO_WHITE:Colorize(formattedTime))
+            self.tributeSeasonRankText = GetString("SI_TRIBUTETIER", tierRank)
+            self.seasonTimeRemainingLabel:SetText(self.tributeSeasonTimeRemainingText)
 
-            self.progressStateLabel:SetText(GetString("SI_TRIBUTETIER", tierRank))
+            self.progressStateLabel:SetText(self.tributeSeasonRankText)
 
             if tierRank == TRIBUTE_TIER_UNRANKED then
                 local numRequiredPlacementMatches = GetNumRequiredPlacementMatches()
@@ -248,6 +251,8 @@ function ZO_ActivityFinderTemplate_Shared:RefreshTributeSeasonData(forceHide)
                     end
                 end
                 local formattedText = zo_strformat(SI_TRIBUTE_FINDER_PLACEMENT_STATUS, numWins, numLoses)
+                -- Cache this for narration
+                self.tributePlacementMatchNarrationText = zo_strformat(SI_TRIBUTE_FINDER_PLACEMENT_STATUS_NARRATION, numWins, numLoses)
                 self.progressValueLabel:SetText(formattedText)
 
                 self.placementMatchProgressBar:Clear()
@@ -270,6 +275,9 @@ function ZO_ActivityFinderTemplate_Shared:RefreshTributeSeasonData(forceHide)
 
                 local anchorRelativePoint = self.tributeSeasonProgressHeader
 
+                -- Cache this for narration
+                self.progressValueLabelText = nil
+
                 -- In leaderboard rank
                 if tierRank == TRIBUTE_TIER_PLATINUM then
                     local readyState = LEADERBOARD_DATA_RESPONSE_PENDING
@@ -288,7 +296,9 @@ function ZO_ActivityFinderTemplate_Shared:RefreshTributeSeasonData(forceHide)
                             colorizedFormattedLeaderboardRank = ZO_SELECTED_TEXT:Colorize(formattedLeaderboardRank)
                         end
 
-                        self.leaderboardRankLabel:SetText(zo_strformat(SI_TRIBUTE_FINDER_LEADERBOARD_RANK_LABEL, colorizedFormattedLeaderboardRank))
+                        --Cache this for narration
+                        self.leaderboardRankLabelText = zo_strformat(SI_TRIBUTE_FINDER_LEADERBOARD_RANK_LABEL, colorizedFormattedLeaderboardRank)
+                        self.leaderboardRankLabel:SetText(self.leaderboardRankLabelText)
 
                         anchorRelativePoint = self.leaderboardRankLabel
 
@@ -297,12 +307,14 @@ function ZO_ActivityFinderTemplate_Shared:RefreshTributeSeasonData(forceHide)
                         self.leaderboardRankLabel:SetHidden(true)
                     end
 
-                    self.progressValueLabel:SetText(GetString(SI_TRIBUTE_FINDER_LEADERBOARD_STATUS))
+                    self.progressValueLabelText = GetString(SI_TRIBUTE_FINDER_LEADERBOARD_STATUS)
+                    self.progressValueLabel:SetText(self.progressValueLabelText)
 
                     self.currentRankIcon:SetTexture(string.format(TRIBUTE_RANK_ICON_FORMATTER, tierRank))
                     self.nextRankIcon:SetTexture(string.format(TRIBUTE_RANK_ICON_FORMATTER, TRIBUTE_RANKS_COMPLETED_ICON_INDEX))
                 else
                     local formattedText = zo_strformat(SI_TRIBUTE_FINDER_RANKED_STATUS, experience, requiredExperience)
+                    self.progressValueLabelText = formattedText
                     self.progressValueLabel:SetText(formattedText)
 
                     self.currentRankIcon:SetTexture(string.format(TRIBUTE_RANK_ICON_FORMATTER, tierRank))

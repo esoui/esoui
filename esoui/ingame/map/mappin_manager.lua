@@ -89,7 +89,7 @@ function ZO_WorldMapPins_Manager:Initialize(parentControl)
         mouseInputGroup:Add(blobControl, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
     end)
 
-    self.pinPolygonBlobPool:SetCustomFactoryBehavior(function(blobControl)
+    self.pinPolygonBlobPool:SetCustomResetBehavior(function(blobControl)
         blobControl:SetHandler("OnMouseUp", nil)
         blobControl:SetHandler("OnMouseDown", nil)
         blobControl:SetAlpha(1)

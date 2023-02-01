@@ -327,6 +327,9 @@ local ZO_OptionsPanel_Nameplates_ControlData =
             panel = SETTING_PANEL_NAMEPLATES,
             text = SI_INTERFACE_OPTIONS_NAMEPLATES_TARGET_MARKERS,
             tooltipText = SI_INTERFACE_OPTIONS_NAMEPLATES_TARGET_MARKERS_TOOLTIP,
+
+            events = {[true] = "TargetMarkersEnabled_On", [false] = "TargetMarkersEnabled_Off",},
+            gamepadHasEnabledDependencies = true,
         },
         --Options_Nameplates_ResurrectIndicators
         [NAMEPLATE_TYPE_RESURRECT_INDICATORS] =
@@ -388,12 +391,12 @@ local ZO_OptionsPanel_Nameplates_ControlData =
             panel = SETTING_PANEL_NAMEPLATES,
             text = SI_INTERFACE_OPTIONS_TARGET_GLOWS_INTENSITY,
             tooltipText = SI_INTERFACE_OPTIONS_TARGET_GLOWS_INTENSITY_TOOLTIP,
-        
+
             valueFormat = "%f",
             showValue = true,
             showValueMin = 0,
             showValueMax = 100,
-        
+
             eventCallbacks =
             {
                 ["TargetGlowEnabled_On"]    = ZO_Options_SetOptionActive,
@@ -424,12 +427,12 @@ local ZO_OptionsPanel_Nameplates_ControlData =
             panel = SETTING_PANEL_NAMEPLATES,
             text = SI_INTERFACE_OPTIONS_INTERACTABLE_GLOWS_INTENSITY,
             tooltipText = SI_INTERFACE_OPTIONS_INTERACTABLE_GLOWS_INTENSITY_TOOLTIP,
-        
+
             valueFormat = "%f",
             showValue = true,
             showValueMin = 0,
             showValueMax = 100,
-        
+
             eventCallbacks =
             {
                 ["InteractableGlowEnabled_On"]    = ZO_Options_SetOptionActive,
@@ -437,6 +440,32 @@ local ZO_OptionsPanel_Nameplates_ControlData =
             },
             gamepadIsEnabledCallback = function() 
                                             return tonumber(GetSetting(SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_ENABLED)) ~= 0
+                                        end,
+        },
+        --Options_Nameplates_TargetMarkerSize
+        [IN_WORLD_UI_SETTING_TARGET_MARKER_SIZE] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_TARGET_MARKER_SIZE,
+            panel = SETTING_PANEL_NAMEPLATES,
+            text = SI_INTERFACE_OPTIONS_TARGET_MARKER_SIZE,
+            tooltipText = SI_INTERFACE_OPTIONS_TARGET_MARKER_SIZE_TOOLTIP,
+
+            minValue = 1.0,
+            maxValue = 3.0,
+            valueFormat = "%.2f",
+            showValue = true,
+            showValueMin = 1,
+            showValueMax = 100,
+
+            eventCallbacks =
+            {
+                ["TargetMarkersEnabled_On"]    = ZO_Options_SetOptionActive,
+                ["TargetMarkersEnabled_Off"]   = ZO_Options_SetOptionInactive,
+            },
+            gamepadIsEnabledCallback = function()
+                                            return tonumber(GetSetting(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_TARGET_MARKERS)) ~= 0
                                         end,
         },
     },

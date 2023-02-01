@@ -147,6 +147,13 @@ function ZO_GamepadCollectionsBook:InitializeUtilityWheel()
         numSlots = ACTION_BAR_UTILITY_BAR_SIZE,
         showPendingIcon = true,
         showCategoryLabel = true,
+        customNarrationObjectName = "CollectionsAssignableUtilityWheel",
+        headerNarrationFunction = function()
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_COLLECTIBLE_ASSIGN_INSTRUCTIONS)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.pendingUtilityWheelCollectibleData:GetFormattedName()))
+            return narrations
+        end,
     }
     self.wheel = ZO_AssignableUtilityWheel_Gamepad:New(self.wheelControl, wheelData)
 end
@@ -997,6 +1004,101 @@ function ZO_GamepadCollectionsBook:UpdateCollectionListVisualLayer()
 end
 
 function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
+    local function GetStoryNarrationText(entryData, entryControl)
+        local narrations = {}
+
+        -- Generate the standard parametric list entry narration
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+        -- Unlock state narration
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_COLLECTIBLEUNLOCKSTATE", entryData:GetUnlockState())))
+
+        -- DLC name narration
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData:GetFormattedName()))
+
+        -- Quest status narration
+        local isActive = entryData.isEquippedInCurrentCategory
+        local questAcceptLabelString = isActive and GetString(SI_DLC_BOOK_QUEST_STATUS_ACCEPTED) or GetString(SI_DLC_BOOK_QUEST_STATUS_NOT_ACCEPTED)
+        local questName = entryData:GetQuestName()
+        local questNameWithStatus = zo_strformat(SI_GAMEPAD_DLC_BOOK_QUEST_STATUS_INFO, questName, questAcceptLabelString)
+
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_DLC_BOOK_QUEST_STATUS_HEADER)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(questNameWithStatus))
+
+        -- DLC description narration
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData:GetDescription()))
+
+        -- Quest-related narration
+        local questAvailableText = nil
+        local questDescription = nil
+        local isUnlocked = entryData:IsUnlocked()
+        local showsQuest = isUnlocked and not isActive
+
+        if showsQuest then
+            questAvailableText = GetString(SI_COLLECTIONS_QUEST_AVAILABLE)
+            questDescription = entryData:GetQuestDescription()
+        elseif not isUnlocked then
+            local isChapter = entryData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER)
+            if entryData:IsPurchasable() or entryData:IsUnlockedViaSubscription() or isChapter then
+                questAvailableText = isChapter and GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UPGRADE) or GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
+            end
+        end
+
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(questAvailableText))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(questDescription))
+
+        return narrations
+    end
+
+    local function GetHouseNarrationText(entryData, entryControl)
+        local narrations = {}
+
+        -- Generate the standard parametric list entry narration
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+        -- Unlock state narration
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_COLLECTIBLEUNLOCKSTATE", entryData:GetUnlockState())))
+
+        -- House name narration
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData:GetFormattedName()))
+
+        -- House nickname narration
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData:GetFormattedNickname()))
+
+        -- House location narration
+        local locationName = entryData:GetFormattedHouseLocation()
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_LOCATION_HEADER)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(locationName))
+
+        -- House type narration
+        local houseType = zo_strformat(SI_HOUSE_TYPE_FORMATTER, GetString("SI_HOUSECATEGORYTYPE", entryData:GetHouseCategoryType()))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_HOUSE_TYPE_HEADER)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(houseType))
+
+        -- House description narration
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData:GetDescription()))
+
+        -- Additional narration (includes whether or not the house is the player's primary residence; if the player cannot teleport;
+        -- or an acquire hint; these three values are all mutually exclusive
+        local additionalHeaderText = nil
+        local additionalText = nil
+        local isUnlocked = entryData:IsUnlocked()
+
+        if not CanJumpToHouseFromCurrentLocation() then
+            additionalText = isUnlocked and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
+        elseif isUnlocked then
+            additionalHeaderText = GetString(SI_HOUSING_PRIMARY_RESIDENCE_HEADER)
+            additionalText = entryData:IsPrimaryResidence() and GetString(SI_YES) or GetString(SI_NO)
+        else
+            additionalText = zo_strformat(SI_COLLECTIBLE_ACQUIRE_HINT_FORMATTER, entryData:GetHint())
+        end
+
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(additionalHeaderText))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(additionalText))
+
+        return narrations
+    end
+
     local collectibleId = collectibleData:GetId()
 
     local entryData = ZO_GamepadEntryData:New(collectibleData:GetFormattedName(), collectibleData:GetIcon())
@@ -1006,6 +1108,10 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
     if collectibleData:IsStory() then
         local questState = collectibleData:GetCollectibleAssociatedQuestState()
         entryData.isEquippedInCurrentCategory = questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_ACCEPTED or questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_COMPLETED
+        entryData.narrationText = GetStoryNarrationText
+    elseif collectibleData:IsHouse() then
+        entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+        entryData.narrationText = GetHouseNarrationText
     else
         entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     end
@@ -1060,7 +1166,7 @@ function ZO_GamepadCollectionsBook:OnSelectionChanged(list, selectedData, oldSel
             end
         end
     end
-    
+
     if self.currentList and list == self.currentList.list then
         self:RefreshRightPanel(selectedData)
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentList.keybind)
@@ -1163,7 +1269,7 @@ function ZO_GamepadCollectionsBook:RefreshHousingTooltip(collectibleData)
     housingPanel.nicknameLabel:SetText(collectibleData:GetFormattedNickname())
 
     if not CanJumpToHouseFromCurrentLocation() then
-        local disableReason = isUnlocked and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
+        local disableReason = collectibleData:IsUnlocked() and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
         housingPanel.hintLabel:SetText(ZO_ERROR_COLOR:Colorize(disableReason))
         housingPanel.hintLabel:SetHidden(false)
         housingPanel.primaryResidenceHeaderLabel:SetHidden(true)

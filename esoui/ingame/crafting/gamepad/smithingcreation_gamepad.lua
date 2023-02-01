@@ -100,6 +100,9 @@ function ZO_GamepadSmithingCreation:Initialize(panelControl, floatingControl, ow
             GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(self:GetCreateTooltipSound())
 
             self:TriggerUSITutorial()
+
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.focus, NARRATE_HEADER)
         elseif newState == SCENE_HIDDEN then
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
             ZO_InventorySlot_RemoveMouseOverKeybinds()
@@ -134,13 +137,18 @@ function ZO_GamepadSmithingCreation:Initialize(panelControl, floatingControl, ow
                 ZO_GamepadGenericHeader_Activate(self.owner.header)
             end
 
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.focus, NARRATE_HEADER)
+
             self:RefreshUniversalStyleItemTooltip()
         end
     end)
 end
 
 function ZO_GamepadSmithingCreation:PerformDeferredInitialization()
-    if self.keybindStripDescriptor then return end
+    if self.keybindStripDescriptor then
+        return
+    end
 
     local scrollListControl = ZO_SmithingHorizontalScrollList_Gamepad
     local traitUnknownFont = "ZoFontGamepadCondensed34"
@@ -160,8 +168,20 @@ function ZO_GamepadSmithingCreation:PerformDeferredInitialization()
     self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
     self.resultTooltip = self.floatingControl:GetNamedChild("ResultTooltip")
     self.resultTooltip.ClearLines = function(tooltip)
-                                            tooltip.tip:ClearLines()
-                                       end
+        tooltip.tip:ClearLines()
+    end
+
+    local tooltipNarrationInfo = 
+    {
+        canNarrate = function()
+            return not self.resultTooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return self.resultTooltip.tip:GetNarrationText()
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(tooltipNarrationInfo)
+
 
     self:InitializeInventoryChangedCallback()
     self:SetupSavedVars()
@@ -178,23 +198,25 @@ do
     local selectedColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
     local disabledColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED))
 
-    local COLOR_TABLE = {
+    local COLOR_TABLE =
+    {
         [true] = selectedColor,
         [false] = disabledColor,
     }
 
-    local function ActivationChangedFn(list, activated)
+    local function ActivationChangedFuntion(list, activated)
         local parentControl = list:GetControl():GetParent()
 
         parentControl.selectedLabel:SetColor(COLOR_TABLE[activated]:UnpackRGBA())
     end
 
     function ZO_GamepadSmithingCreation:SetupListActivationFunctions()
-        local lists = {self.patternList, self.materialList, self.styleList, self.traitList}
+        local lists = { self.patternList, self.materialList, self.styleList, self.traitList }
 
-        for _, entry in pairs(lists) do
-            entry:SetOnActivatedChangedFunction(ActivationChangedFn)
-            ActivationChangedFn(entry, false)
+        for _, entry in ipairs(lists) do
+            entry:SetOnActivatedChangedFunction(ActivationChangedFuntion)
+            local NOT_ACTIVATED = false
+            ActivationChangedFuntion(entry, NOT_ACTIVATED)
         end
     end
 end
@@ -203,14 +225,17 @@ function ZO_GamepadSmithingCreation:GenerateTabBarEntries()
     local tabBarEntries = {}
     local function AddTabEntry(filterType)
         if ZO_CraftingUtils_CanSmithingFilterBeCraftedHere(filterType) then
-            local entry = {}
-            entry.text = GetString("SI_SMITHINGFILTERTYPE", filterType)
-            entry.callback = function()
-                self.typeFilter = filterType
-                self:DirtyAllLists()
-            end
-            entry.mode = filterType
-
+            local entry = 
+            {
+                text = GetString("SI_SMITHINGFILTERTYPE", filterType),
+                callback = function()
+                    self.typeFilter = filterType
+                    self:DirtyAllLists()
+                    local NARRATE_HEADER = true
+                    SCREEN_NARRATION_MANAGER:QueueFocus(self.focus, NARRATE_HEADER)
+                end,
+                mode = filterType,
+            }
             table.insert(tabBarEntries, entry)
         end
     end
@@ -234,7 +259,6 @@ function ZO_GamepadSmithingCreation:SetupTabBar(tabBarEntries, savedFilter)
         self.shouldActivateTabBar = true
 
         local filterFound = false
-
         for index, entry in pairs(tabBarEntries) do
             if savedFilter == entry.mode then
                 self.typeFilter = savedFilter
@@ -267,7 +291,8 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
     end
 
     -- back descriptors for screen / options screen
-    local startButton = {
+    local startButton = 
+    {
         --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
         name = "Gamepad Smithing Creation Default Exit",
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -282,7 +307,8 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
         ethereal = true,
     }
 
-    local backButton = {
+    local backButton = 
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         name = GetString(SI_GAMEPAD_BACK_OPTION),
         keybind = "UI_SHORTCUT_NEGATIVE",
@@ -292,10 +318,8 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
         end,
         visible = function()
             return not ZO_CraftingUtils_IsPerformingCraftProcess()
-        end
+        end,
     }
-
-    local optionsBackButton = KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor()
 
     local toggleTypeButton =
     {
@@ -303,15 +327,15 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
         name =  function()
-                    local universalStyleItemCount = GetCurrentSmithingStyleItemCount(GetUniversalStyleId())
-                    local universalStyleItemCountString = zo_strformat(GetString(SI_GAMEPAD_SMITHING_UNIVERSAL_STYLE_ITEM_COUNT), universalStyleItemCount)
+            local universalStyleItemCount = GetCurrentSmithingStyleItemCount(GetUniversalStyleId())
+            local universalStyleItemCountString = zo_strformat(GetString(SI_GAMEPAD_SMITHING_UNIVERSAL_STYLE_ITEM_COUNT), universalStyleItemCount)
 
-                    if universalStyleItemCount == 0 then
-                        universalStyleItemCountString = ZO_ERROR_COLOR:Colorize(universalStyleItemCountString)
-                    end
+            if universalStyleItemCount == 0 then
+                universalStyleItemCountString = ZO_ERROR_COLOR:Colorize(universalStyleItemCountString)
+            end
 
-                    return zo_strformat(GetString(SI_GAMEPAD_SMITHING_TOGGLE_UNIVERSAL_STYLE), universalStyleItemCountString)
-                end,
+            return zo_strformat(GetString(SI_GAMEPAD_SMITHING_TOGGLE_UNIVERSAL_STYLE), universalStyleItemCountString)
+        end,
 
         callback = function()
             local haveMaterialChecked = optionFilterMaterials.checked
@@ -346,7 +370,8 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
         end
     }
 
-    local multiCraftButton = {
+    local multiCraftButton =
+    {
         name = GetString(SI_GAMEPAD_CRAFT_MULTIPLE),
         keybind = "UI_SHORTCUT_QUATERNARY",
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -360,7 +385,8 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
         end,
     }
 
-    local optionsButton = {
+    local optionsButton =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         name = GetString(SI_GAMEPAD_CRAFTING_OPTIONS),
         keybind = "UI_SHORTCUT_TERTIARY",
@@ -390,7 +416,7 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
         visible = ShowUniversalItemKeybind
     }
 
-    self.keybindStripDescriptor = { }
+    self.keybindStripDescriptor = {}
     table.insert(self.keybindStripDescriptor, startButton)
     table.insert(self.keybindStripDescriptor, backButton)
     table.insert(self.keybindStripDescriptor, toggleTypeButton)
@@ -428,6 +454,7 @@ do
             self:UpdateKeybindStrip()
             self:UpdateBorderHighlight(focus, ACTIVE)
             self:RefreshUniversalStyleItemTooltip()
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.focus)
         end
 
         self.deactivateFocusFunction = function(focus, data)
@@ -435,9 +462,98 @@ do
             self:UpdateBorderHighlight(focus, not ACTIVE)
         end
 
-        local patternEntry = {control = self.patternList}
-        local materialEntry = {control = self.materialList}
-        local materialQuantityEntry = {
+        self.headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.owner.header, self.owner.headerData)
+        end
+
+        self.footerNarrationFunction = function()
+            return self.owner:GetFooterNarration()
+        end
+
+        self.directionalInputNarrationFunction = function()
+            --The material quantity spinner uses a different class than the rest, so we need to check it differently
+            if self.focus:IsFocused(self.materialQuantitySpinner) then
+                local narrationFunction = self.materialQuantitySpinner:GetAdditionalInputNarrationFunction()
+                return narrationFunction()
+            end
+
+            if self.selectedList then
+                local narrationFunction = self.selectedList:GetAdditionalInputNarrationFunction()
+                return narrationFunction()
+            end
+
+            return {}
+        end
+
+        local patternEntry =
+        {
+            --Despite its name, control is an object, not a control
+            control = self.patternList,
+            narrationText = function()
+                local narrations = {}
+                if self.patternList:IsEmpty() then
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SMITHING_HEADER_ITEM)))
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.patternList:GetNoItemText()))
+                else
+                    local data = self.patternList.selectedData
+                    --Generate the narration for the selected value
+                    table.insert(narrations, ZO_FormatSpinnerNarrationText(GetString(SI_SMITHING_HEADER_ITEM), zo_strformat(SI_SMITHING_SELECTED_PATTERN, data.patternName)))
+
+                    --Generate the narration for any extra info
+                    if data.numTraitsRequired > 0 then
+                        local meetsTraitRequirement = data.numTraitsRequired <= data.numTraitsKnown
+                        local extraInfoText
+                        if not meetsTraitRequirement then
+                            extraInfoText = zo_strformat(SI_SMITHING_SET_NOT_ENOUGH_TRAITS_ERROR, data.numTraitsRequired - data.numTraitsKnown)
+                        else
+                            extraInfoText = zo_strformat(SI_SMITHING_SET_ENOUGH_TRAITS, data.numTraitsRequired)
+                        end
+                        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(extraInfoText))
+                    end
+                end
+                return narrations
+            end,
+        }
+
+        local materialEntry = 
+        {
+            --Despite its name, control is an object, not a control
+            control = self.materialList,
+            narrationText = function()
+                local narrations = {}
+                if self.materialList:IsEmpty() then
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SMITHING_HEADER_MATERIAL)))
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.materialList:GetNoItemText()))
+                else
+                    local data = self.materialList.selectedData
+
+                    --Generate the narration for the selected value
+                    local formatter = data.isChampionPoint and SI_GAMEPAD_SMITHING_MATERIAL_CHAMPION_POINT_RANGE_NARRATION or SI_SMITHING_MATERIAL_LEVEL_RANGE
+                    local materialNameText = data.name
+                    table.insert(narrations, ZO_FormatSpinnerNarrationText(GetString(SI_SMITHING_HEADER_MATERIAL), zo_strformat(formatter, materialNameText, data.minCreatesItemOfLevel, data.maxCreatesItemOfLevel)))
+
+                    --Generate the narration for the stack count
+                    local stackCount, _, _, meetsRankRequirement = self:GetMaterialInformation(data)
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_SMITHING_STACK_COUNT_NARRATION, stackCount)))
+
+                    --Generate the narration for any extra info
+                    if not meetsRankRequirement then
+                        local craftingRankAbilityId = GetTradeskillLevelPassiveAbilityId(GetCraftingInteractionType())
+                        local craftingRankAbilityName = GetAbilityName(craftingRankAbilityId)
+
+                        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SMITHING_RANK_TOO_LOW, craftingRankAbilityName, data.rankRequirement)))
+                    else
+                        local combination = data.combinations[self.materialQuantitySpinner:GetValue()]
+                        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SMITHING_MATERIAL_REQUIRED, combination.stack, materialNameText)))
+                    end
+                end
+                return narrations
+            end,
+        }
+
+        local materialQuantityEntry =
+        {
+            --Despite its name, control is an object, not a control
             control = self.materialQuantitySpinner,
             canFocus = function(item) return not item:GetControl():IsHidden() end,
             activate = function(focus, data)
@@ -447,17 +563,126 @@ do
                 self:UpdateScrollPanel(focus)
                 self:UpdateBorderHighlight(focus, ACTIVE)
                 self:RefreshUniversalStyleItemTooltip()
+                SCREEN_NARRATION_MANAGER:QueueFocus(self.focus)
+            end,
+            narrationText = function()
+                local narrations = {}
+                if self.materialList:IsEmpty() then
+                    --We should never get here, but handle it just in case
+                    return narrations
+                end
+
+                local data = self.materialList.selectedData
+
+                --Generate the narration for the selected value
+                local valueText = self.materialQuantitySpinner:GetFormattedValueText()
+                local NO_NAME = nil
+                table.insert(narrations, ZO_FormatSpinnerNarrationText(NO_NAME, valueText))
+
+                --Generate the narration for any extra info
+                local _, _, _, meetsRankRequirement = self:GetMaterialInformation(data)
+                if not meetsRankRequirement then
+                    local craftingRankAbilityId = GetTradeskillLevelPassiveAbilityId(GetCraftingInteractionType())
+                    local craftingRankAbilityName = GetAbilityName(craftingRankAbilityId)
+
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SMITHING_RANK_TOO_LOW, craftingRankAbilityName, data.rankRequirement)))
+                else
+                    local combination = data.combinations[self.materialQuantitySpinner:GetValue()]
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SMITHING_MATERIAL_REQUIRED, combination.stack, data.name)))
+                end
+                return narrations
+            end
+        }
+
+        local styleEntry = 
+        {
+            --Despite its name, control is an object, not a control
+            control = self.styleList,
+            narrationText = function()
+                local narrations = {}
+                if self.styleList:IsEmpty() then
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SMITHING_HEADER_STYLE)))
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.styleList:GetNoItemText()))
+                else
+                    local data = self.styleList.selectedData
+
+                    --Generate the narration for the selected value
+                    table.insert(narrations, ZO_FormatSpinnerNarrationText(GetString(SI_SMITHING_HEADER_STYLE), data.localizedName))
+                    local usesUniversalStyleItem = self:GetIsUsingUniversalStyleItem()
+
+                    --If we are using a crown mimic stone, don't narrate stack count
+                    if not usesUniversalStyleItem then
+                        local stackCount = GetCurrentSmithingStyleItemCount(data.itemStyleId)
+                        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_SMITHING_STACK_COUNT_NARRATION, stackCount)))
+                    end
+
+                    --Generate the narration for any extra info
+                    local isStyleKnown = IsSmithingStyleKnown(data.itemStyleId, self:GetSelectedPatternIndex())
+                    if not isStyleKnown then
+                        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SMITHING_UNKNOWN_STYLE)))
+                    else
+                        local name = usesUniversalStyleItem and GetString(SI_SMITHING_UNIVERSAL_STYLE_ITEM_NAME) or data.name
+                        local NUM_MATERIAL_ITEMS_REQUIRED = "1"
+                        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SMITHING_MATERIAL_REQUIRED, NUM_MATERIAL_ITEMS_REQUIRED, name)))
+                    end
+                end
+                return narrations
             end,
         }
-        local styleEntry = {control = self.styleList}
-        local traitEntry = {control = self.traitList}
 
-        self.focusEntryData = {patternEntry, materialEntry, materialQuantityEntry, styleEntry, traitEntry}
+        local traitEntry = 
+        {
+            --Despite its name, control is an object, not a control
+            control = self.traitList,
+            narrationText = function()
+                local narrations = {}
+                if self.traitList:IsEmpty() then
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SMITHING_HEADER_TRAIT)))
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.traitList:GetNoItemText()))
+                else
+                    local data = self.traitList.selectedData
+
+                    --Generate the narration for the selected value
+                    table.insert(narrations, ZO_FormatSpinnerNarrationText(GetString(SI_SMITHING_HEADER_TRAIT), data.localizedName))
+
+                    --Only narrate the stack count and extra info if the trait type is not none
+                    if data.traitType ~= ITEM_TRAIT_TYPE_NONE then
+                        --Generate the narration for the stack count
+                        local stackCount = GetCurrentSmithingTraitItemCount(data.traitIndex)
+                        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_SMITHING_STACK_COUNT_NARRATION, stackCount)))
+
+                        --Generate the narration for any extra info
+                        local patternIndex = self:GetSelectedPatternIndex()
+                        local isTraitKnown = patternIndex ~= nil and IsSmithingTraitKnownForPattern(patternIndex, data.traitType)
+                        if not isTraitKnown then
+                            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SMITHING_TRAIT_MUST_BE_RESEARCHED)))
+                        else
+                            local NUM_MATERIAL_ITEMS_REQUIRED = "1"
+                            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SMITHING_MATERIAL_REQUIRED, NUM_MATERIAL_ITEMS_REQUIRED, data.name)))
+                        end
+                    end
+                end
+                return narrations
+            end,
+        }
+
+        self.focusEntryData = { patternEntry, materialEntry, materialQuantityEntry, styleEntry, traitEntry }
         for _, v in pairs(self.focusEntryData) do
             v.activate = v.activate or self.activateFocusFunction
             v.deactivate = self.deactivateFocusFunction
+            v.additionalInputNarrationFunction = self.directionalInputNarrationFunction
+            v.headerNarrationFunction = self.headerNarrationFunction
+            v.footerNarrationFunction = self.footerNarrationFunction
         end
-        self.focusEntryDataWithoutStyle = {patternEntry, materialEntry, materialQuantityEntry, traitEntry}
+        self.focusEntryDataWithoutStyle = { patternEntry, materialEntry, materialQuantityEntry, traitEntry }
+
+        --Re-narrate the current focus upon closing dialogs
+        CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", function()
+            if self.focus:IsActive() then
+                local NARRATE_HEADER = true
+                SCREEN_NARRATION_MANAGER:QueueFocus(self.focus, NARRATE_HEADER)
+            end
+        end)
 
         self:RefreshFocusItems()
     end
@@ -499,9 +724,9 @@ do
     function ZO_GamepadSmithingCreation:RefreshScrollPanel()
         local lists
         if self:ShouldIgnoreStyleItems() then
-            lists = {self.patternList, self.materialList, self.traitList}
+            lists = { self.patternList, self.materialList, self.traitList }
         else
-            lists = {self.patternList, self.materialList, self.styleList, self.traitList}
+            lists = { self.patternList, self.materialList, self.styleList, self.traitList }
         end
 
         for _, entry in pairs(lists) do
@@ -552,12 +777,12 @@ do
         local controlHeight = focusControlParent:GetHeight() + ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y
 
         if controlTop <= scrollTop then
-            while(controlTop <= scrollTop) do
+            while controlTop <= scrollTop do
                 ZO_ScrollRelative(self.scrollContainer, -controlHeight)
                 controlTop = controlTop + controlHeight
             end
         elseif controlBottom >= scrollBottom then
-            while(controlBottom >= scrollBottom) do
+            while controlBottom >= scrollBottom do
                 ZO_ScrollRelative(self.scrollContainer, controlHeight)
                 controlBottom = controlBottom - controlHeight
             end
@@ -672,8 +897,32 @@ function ZO_GamepadSmithingCreation:ActivateMaterialQuantitySpinner()
     end
 end
 
+--Overridden from base
+function ZO_GamepadSmithingCreation:OnSelectedPatternChanged(patternData, selectedDuringRebuild)
+    ZO_SharedSmithingCreation.OnSelectedPatternChanged(self, patternData, selectedDuringRebuild)
+    if not selectedDuringRebuild then
+        SCREEN_NARRATION_MANAGER:QueueFocus(self.focus)
+    end
+end
+
+--Overridden from base
+function ZO_GamepadSmithingCreation:OnSelectedMaterialChanged(materialData, selectedDuringRebuild)
+    ZO_SharedSmithingCreation.OnSelectedMaterialChanged(self, materialData, selectedDuringRebuild)
+    if not selectedDuringRebuild then
+        SCREEN_NARRATION_MANAGER:QueueFocus(self.focus)
+    end
+end
+
+--Overridden from base
+function ZO_GamepadSmithingCreation:OnResultParametersChanged()
+    ZO_SharedSmithingCreation.OnResultParametersChanged(self)
+    --This should handle narrating when changing the selected style, trait, or material level
+    SCREEN_NARRATION_MANAGER:QueueFocus(self.focus)
+end
+
 do
-    local KEYBOARD_TO_GAMEPAD_LOOKUP = {
+    local KEYBOARD_TO_GAMEPAD_LOOKUP =
+    {
         [SI_SMITHING_SELECTED_PATTERN] = SI_GAMEPAD_SMITHING_SELECTED_PATTERN,
         [SI_SMITHING_MATERIAL_QUANTITY] = SI_GAMEPAD_SMITHING_MATERIAL_QUANTITY,
         [SI_SMITHING_STYLE_DESCRIPTION] = SI_GAMEPAD_SMITHING_STYLE_DESCRIPTION,

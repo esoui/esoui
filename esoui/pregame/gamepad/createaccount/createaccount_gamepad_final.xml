@@ -19,13 +19,7 @@
                             </OnInitialized>
 
                             <Controls>
-                                <Scroll name="$(parent)Scroll" override="true">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="BOTTOMRIGHT"/>
-                                </Scroll>
-
                                 <Control name="$(parent)ScrollChild" override="true">
-                                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
                                     <Controls>
                                         <Label name="$(parent)FillText" font="ZoFontGamepadCondensed42" text="SI_CREATEACCOUNT_SUCCESS_HEADER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                                             <Anchor point="TOPLEFT"/>

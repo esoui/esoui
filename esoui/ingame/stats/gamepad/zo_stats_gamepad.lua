@@ -8,7 +8,7 @@ ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_SECTION_SPACING = 40
 
 --Attribute Spinner
 
-local ZO_AttributeSpinner_Gamepad = ZO_AttributeSpinner_Shared:Subclass()
+ZO_AttributeSpinner_Gamepad = ZO_AttributeSpinner_Shared:Subclass()
 
 function ZO_AttributeSpinner_Gamepad:New(attributeControl, attributeType, attributeManager, valueChangedCallback)
     local attributeSpinner = ZO_AttributeSpinner_Shared.New(self, attributeControl, attributeType, attributeManager, valueChangedCallback)
@@ -22,13 +22,7 @@ end
 
 --ZO_AttributeItem
 
-local ZO_AttributeItem_Gamepad = ZO_Object:Subclass()
-
-function ZO_AttributeItem_Gamepad:New(...)
-    local attribute = ZO_Object.New(self)
-    attribute:Initialize(...)
-    return attribute
-end
+ZO_AttributeItem_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_AttributeItem_Gamepad:Initialize(control)
     self.control = control
@@ -47,6 +41,7 @@ end
 function ZO_AttributeItem_Gamepad:RefreshHeaderText()
     local text = GetString("SI_DERIVEDSTATS", self.statType)
     self.header:SetText(text)
+    self.headerText = text
 end
 
 function ZO_AttributeItem_Gamepad:RefreshDataText()
@@ -65,15 +60,24 @@ function ZO_AttributeItem_Gamepad:RefreshDataText()
     end
 
     self.data:SetText(text)
+    self.valueText = text
 end
 
 function ZO_AttributeItem_Gamepad:RefreshBonusText()
     local bonusValue = GAMEPAD_STATS:GetPendingStatBonuses(self.statType)
     local hideBonus = bonusValue == 0 or bonusValue == nil
     self.bonus:SetHidden(hideBonus)
+    self.bonusText = nil
     if not hideBonus then
-        self.bonus:SetText(zo_strformat(SI_STAT_PENDING_BONUS_FORMAT, bonusValue))
-        self.bonus:SetColor(STAT_HIGHER_COLOR:UnpackRGBA())
+        if bonusValue > 0 then
+            self.bonusText = zo_strformat(SI_STAT_PENDING_BONUS_FORMAT, bonusValue)
+            self.bonus:SetText(self.bonusText)
+            self.bonus:SetColor(STAT_HIGHER_COLOR:UnpackRGBA())
+        else
+            self.bonusText = zo_strformat(SI_STAT_PENDING_CHANGE_FORMAT, bonusValue)
+            self.bonus:SetText(self.bonusText)
+            self.bonus:SetColor(STAT_LOWER_COLOR:UnpackRGBA())
+        end
     end
 end
 
@@ -81,6 +85,13 @@ function ZO_AttributeItem_Gamepad:RefreshText()
     self:RefreshHeaderText()
     self:RefreshDataText()
     self:RefreshBonusText()
+end
+
+function ZO_AttributeItem_Gamepad:GetNarrationText()
+    local headerNarration = SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.headerText)
+    local bonusNarration = SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.bonusText)
+    local valueNarration = SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.valueText)
+    return { headerNarration, bonusNarration, valueNarration }
 end
 
 --ZO_AttributeTooltipsGrid_Gamepad
@@ -149,13 +160,12 @@ function ZO_AttributeTooltipsGrid_Gamepad:RefreshGridHighlight()
 end
 
 function ZO_AttributeTooltipsGrid_Gamepad:Activate()
-    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-    DIRECTIONAL_INPUT:Activate(self, self.control)
-
+    ZO_GamepadGrid.Activate(self)
     self:RefreshGridHighlight()
 end
 
 function ZO_AttributeTooltipsGrid_Gamepad:Deactivate()
+    ZO_GamepadGrid.Deactivate(self)
     if self.currentItemColumn and self.currentItemRow then
         local NOT_VISIBLE = false
         self:SetItemHighlightVisible(self.currentItemColumn, self.currentItemRow, NOT_VISIBLE)
@@ -163,14 +173,37 @@ function ZO_AttributeTooltipsGrid_Gamepad:Deactivate()
 
     local DO_NOT_RETAIN_FRAGMENT = false
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP, DO_NOT_RETAIN_FRAGMENT)
+end
 
-    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-    DIRECTIONAL_INPUT:Deactivate(self)
+function ZO_AttributeTooltipsGrid_Gamepad:GetNarrationText()
+    if self.currentItemColumn and self.currentItemRow then
+        local currentAttributeItem = self.attributeItems[self.currentItemRow][self.currentItemColumn]
+        local currentStatType = currentAttributeItem.statType
+        if currentStatType ~= STAT_NONE then
+            return GAMEPAD_STATS:GetAttributeItem(currentStatType):GetNarrationText()
+        else
+            local bonusValue = GAMEPAD_STATS:GetEquipmentBonusInfo()
+            local narrations = { SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STATS_EQUIPMENT_BONUS))}
+            local bonusNarrationText
+            if bonusValue == EQUIPMENT_BONUS_MAX_VALUE then
+                bonusNarrationText = zo_strformat(SI_STAT_GAMEPAD_EQUIPMENT_BONUS_NARRATION, bonusValue, EQUIPMENT_BONUS_MAX_VALUE)
+            else
+                bonusNarrationText = zo_strformat(SI_STAT_GAMEPAD_EQUIPMENT_BONUS_NARRATION, bonusValue, EQUIPMENT_BONUS_MAX_VALUE - 1)
+            end
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(bonusNarrationText))
+            return narrations
+        end
+    end
+end
+
+function ZO_AttributeTooltipsGrid_Gamepad:GetHeaderNarration()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STATS_ATTRIBUTES))
 end
 
 --Stats
 
 local GAMEPAD_STATS_COMMIT_POINTS_DIALOG_NAME = "GAMEPAD_STATS_COMMIT_POINTS"
+local GAMEPAD_STATS_RESPEC_ATTRIBUTES_DIALOG_NAME = "GAMEPAD_STATS_RESPEC_ATTRIBUTES"
 
 local GAMEPAD_STATS_DISPLAY_MODE = 
 {
@@ -184,17 +217,11 @@ local GAMEPAD_STATS_DISPLAY_MODE =
     ADVANCED_ATTRIBUTES = 8,
 }
 
-ZO_GamepadStats = ZO_Object.MultiSubclass(ZO_Stats_Common, ZO_Gamepad_ParametricList_Screen)
-
-function ZO_GamepadStats:New(...)
-    local gamepadStats = ZO_Object.New(self)
-    gamepadStats:Initialize(...)
-    return gamepadStats
-end
+ZO_GamepadStats = ZO_InitializingObject.MultiSubclass(ZO_Stats_Common, ZO_Gamepad_ParametricList_Screen)
 
 function ZO_GamepadStats:Initialize(control)
     ZO_Stats_Common.Initialize(self, control)
-    GAMEPAD_STATS_ROOT_SCENE = ZO_Scene:New("gamepad_stats_root", SCENE_MANAGER)
+    GAMEPAD_STATS_ROOT_SCENE = ZO_InteractScene:New("gamepad_stats_root", SCENE_MANAGER, ZO_ATTRIBUTE_RESPEC_INTERACT_INFO)
     local ACTIVATE_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_STATS_ROOT_SCENE)
     self:SetListsUseTriggerKeybinds(true)
@@ -211,6 +238,33 @@ function ZO_GamepadStats:Initialize(control)
     GAMEPAD_STATS_FRAGMENT:SetHideOnSceneHidden(true)
 
     GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(control:GetNamedChild("RightPane"))
+
+    GAMEPAD_STATS_ROOT_SCENE:SetHideSceneConfirmationCallback(ZO_GamepadStats.OnConfirmHideScene)
+
+    local function OnActivatedChanged()
+        if self.mainList:IsActive() then
+            local selectedControl = self.mainList:GetSelectedControl()
+            if selectedControl and selectedControl.pointLimitedSpinner then
+                selectedControl.pointLimitedSpinner:SetActive(true)
+            end
+        end
+    end
+    self.mainList:RegisterCallback("ActivatedChanged", OnActivatedChanged)
+
+    self:InitializeRespecConfirmationGoldDialog()
+end
+
+function ZO_GamepadStats.OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
+    if bypassHideSceneConfirmationReason == nil and GAMEPAD_STATS:DoesAttributePointAllocationModeBatchSave() then
+
+        ZO_Dialogs_ShowGamepadDialog("CONFIRM_REVERT_CHANGES",
+        {
+            confirmCallback = function() scene:AcceptHideScene() end,
+            declineCallback = function() scene:RejectHideScene() end,
+        })
+    else
+        scene:AcceptHideScene()
+    end
 end
 
 function ZO_GamepadStats:OnStateChanged(oldState, newState)
@@ -245,9 +299,21 @@ function ZO_GamepadStats:OnStateChanged(oldState, newState)
             self:ExitAdvancedGridList()
         end
 
+        self:ResetAttributeData()
+        self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
+
         self:UnregisterForEvents()
     end
     ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
+end
+
+function ZO_GamepadStats:SelectAttributes()
+    local attributeData = self.attributeEntries and self.attributeEntries[1]
+    if attributeData then
+        local UNSPECIFIED_TEMPLATE = nil
+        local attributeIndex = self.mainList:GetIndexForData(UNSPECIFIED_TEMPLATE, attributeData)
+        self.mainList:SetSelectedIndex(attributeIndex)
+    end
 end
 
 do
@@ -378,18 +444,38 @@ function ZO_GamepadStats:DeactivateViewAttributes()
     self:ActivateMainList()
 end
 
+function ZO_GamepadStats:GetUnspentAttributePoints()
+    local availablePoints = GetAttributeUnspentPoints()
+
+    for attributeType = 1, GetNumAttributes() do
+        availablePoints = availablePoints - self.attributeData[attributeType].addedPoints
+    end
+
+    return availablePoints
+end
+
 function ZO_GamepadStats:ResetAttributeData()
     self.attributeData = {}
 
     for attributeType = 1, GetNumAttributes() do
-        self.attributeData[attributeType] = {
-            addedPoints = 0
+        self.attributeData[attributeType] =
+        {
+            addedPoints = 0,
         }
     end
 
     for attributeType, statType in pairs(STAT_TYPES) do
         self:UpdatePendingStatBonuses(statType, 0)
     end
+end
+
+function ZO_GamepadStats:DoesChangeIncurCost()
+    for attributeType = 1, GetNumAttributes() do
+        if self.attributeData[attributeType].addedPoints < 0 then
+            return true
+        end
+    end
+    return false
 end
 
 function ZO_GamepadStats:ResetDisplayState()
@@ -420,11 +506,13 @@ function ZO_GamepadStats:PerformDeferredInitializationRoot()
 
     self:InitializeHeader()
     self:InitializeCommitPointsDialog()
+    self:InitializeRespecAttributesDialog()
     self:InitializeMainListEntries()
 end
 
 function ZO_GamepadStats:InitializeKeybindStripDescriptors()
-    self.keybindStripDescriptor = { 
+    self.keybindStripDescriptor =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
         -- Select / Commit Points
@@ -435,7 +523,11 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
                     return GetString(SI_GAMEPAD_SELECT_OPTION)
                 else
-                    return GetString(SI_STAT_GAMEPAD_COMMIT_POINTS)
+                    if self:DoesAttributePointAllocationModeBatchSave() then
+                        return GetString(SI_STATS_CONFIRM_ATTRIBUTES_BUTTON)
+                    else
+                        return GetString(SI_STAT_GAMEPAD_COMMIT_POINTS)
+                    end
                 end
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
@@ -452,7 +544,7 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
                     return true
                 else
-                    return self:GetNumPointsAdded() > 0
+                    return self:DoesAttributePointAllocationModeBatchSave() or self:GetNumPointsAdded() > 0
                 end
             end,
             callback = function()
@@ -463,12 +555,20 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
                     self:ShowLevelUpRewards()
                 else
-                    ZO_Dialogs_ShowGamepadDialog(GAMEPAD_STATS_COMMIT_POINTS_DIALOG_NAME)
+                    if self:DoesAttributePointAllocationModeBatchSave() and self:DoesChangeIncurCost() then
+                        if self:IsPaymentTypeScroll() then
+                            ZO_Dialogs_ShowPlatformDialog("STAT_EDIT_CONFIRM")
+                        else
+                            ZO_Dialogs_ShowPlatformDialog("ATTRIBUTE_RESPEC_CONFIRM_GOLD_GAMEPAD")
+                        end
+                    else
+                        ZO_Dialogs_ShowGamepadDialog(GAMEPAD_STATS_COMMIT_POINTS_DIALOG_NAME)
+                    end
                 end
             end,
         },
         -- Remove Buff / View Attributes
-        { 
+        {
             name = function()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.EFFECTS then
                     return GetString(SI_STAT_GAMEPAD_EFFECTS_REMOVE)
@@ -501,13 +601,29 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                 end
             end,
         },
+        -- Clear Attributes
+        {
+            name = GetString(SI_STATS_CLEAR_ALL_ATTRIBUTES_BUTTON),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            visible = function()
+                return self:DoesAttributePointAllocationModeBatchSave() and self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
+            end,
+            callback = function()
+                self:ResetAttributeData()
+                for index, attributeData in ipairs(self.attributeEntries) do
+                    local control = self.mainList:GetControlFromData(attributeData)
+                    control.pointLimitedSpinner:RefreshSpinnerMax()
+                    control.pointLimitedSpinner.pointsSpinner:SetValue(0)
+                end
+            end,
+        },
     }
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 
     self.advancedStatsKeybindStripDescriptor = {}
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.advancedStatsKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
-        self:ExitAdvancedGridList() 
+        self:ExitAdvancedGridList()
         self:ActivateMainList()
     end)
 end
@@ -535,11 +651,27 @@ function ZO_GamepadStats:GetNumPointsAdded()
     return addedPoints
 end
 
+function ZO_GamepadStats:SetAttributePointAllocationMode(attributePointAllocationMode)
+    ZO_Stats_Common.SetAttributePointAllocationMode(self, attributePointAllocationMode)
+
+    if self:IsShowing() then
+        self:RefreshMainList()
+    end
+end
+
 function ZO_GamepadStats:PurchaseAttributes()
     PlaySound(SOUNDS.STATS_PURCHASE)
     PurchaseAttributes(self.attributeData[ATTRIBUTE_HEALTH].addedPoints, self.attributeData[ATTRIBUTE_MAGICKA].addedPoints, self.attributeData[ATTRIBUTE_STAMINA].addedPoints)
     self:ResetAttributeData()
-        end
+    self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
+end
+
+function ZO_GamepadStats:RespecAttributes()
+    PlaySound(SOUNDS.STATS_PURCHASE)
+    SendAttributePointAllocationRequest(self.attributeRespecPaymentType, self.attributeData[ATTRIBUTE_HEALTH].addedPoints, self.attributeData[ATTRIBUTE_MAGICKA].addedPoints, self.attributeData[ATTRIBUTE_STAMINA].addedPoints)
+    self:ResetAttributeData()
+    self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
+end
 
 function ZO_GamepadStats:UpdateScreenVisibility()
     local isAttributesHidden = true
@@ -633,7 +765,8 @@ end
 function ZO_GamepadStats:InitializeCommitPointsDialog()
     ZO_Dialogs_RegisterCustomDialog(GAMEPAD_STATS_COMMIT_POINTS_DIALOG_NAME,
     {
-        gamepadInfo = {
+        gamepadInfo =
+        {
             dialogType = GAMEPAD_DIALOGS.BASIC,
         },
 
@@ -642,11 +775,11 @@ function ZO_GamepadStats:InitializeCommitPointsDialog()
             text = SI_STAT_GAMEPAD_CHANGE_ATTRIBUTES,
         },
 
-        mainText = 
+        mainText =
         {
             text = SI_STAT_GAMEPAD_COMMIT_POINTS_QUESTION,
         },
-       
+
         buttons =
         {
             {
@@ -654,6 +787,7 @@ function ZO_GamepadStats:InitializeCommitPointsDialog()
                 text = SI_GAMEPAD_DIALOG_YES_BUTTON,
                 callback = function()
                     self:PurchaseAttributes()
+                    self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
                 end,
             },
 
@@ -664,7 +798,47 @@ function ZO_GamepadStats:InitializeCommitPointsDialog()
         }
     })
 end
-                 
+
+--------------------------
+-- Respec Attributes Dialog --
+--------------------------
+
+function ZO_GamepadStats:InitializeRespecAttributesDialog()
+    ZO_Dialogs_RegisterCustomDialog(GAMEPAD_STATS_RESPEC_ATTRIBUTES_DIALOG_NAME,
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+
+        title =
+        {
+            text = SI_STAT_GAMEPAD_CHANGE_ATTRIBUTES,
+        },
+
+        mainText = 
+        {
+            text = SI_STAT_GAMEPAD_COMMIT_POINTS_CONFIRM_CHANGES,
+        },
+
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_GAMEPAD_DIALOG_YES_BUTTON,
+                callback = function()
+                    self:RespecAttributes()
+                end,
+            },
+
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_GAMEPAD_DIALOG_NO_BUTTON,
+            },
+        }
+    })
+end
+
 ------------
 -- Header --
 ------------
@@ -737,6 +911,16 @@ do
         -- entry that shows the upcoming rewards when selected
         self.upcomingRewardsEntry = ZO_GamepadEntryData:New(GetString(SI_LEVEL_UP_REWARDS_UPCOMING_REWARDS_HEADER))
         self.upcomingRewardsEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.UPCOMING_LEVEL_UP_REWARDS
+        self.upcomingRewardsEntry.narrationText = function(entryData, entryControl)
+            local narrations = {}
+            -- Generate the standard parametric list entry narration
+            ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+            -- Append the upcoming level up text
+            ZO_AppendNarration(narrations, ZO_GAMEPAD_UPCOMING_LEVEL_UP_REWARDS:GetNarrationText())
+
+            return narrations
+        end
 
         --Title Entry
         self.titleEntry = ZO_GamepadEntryData:New("")
@@ -755,6 +939,108 @@ do
         --Character Entry
         self.characterEntry = ZO_GamepadEntryData:New(GetString(SI_STAT_GAMEPAD_CHARACTER_SHEET_DESCRIPTION))
         self.characterEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.CHARACTER
+        self.characterEntry.narrationText = function(entryData, entryControl)
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_CHARACTER_SHEET_DESCRIPTION)))
+
+            --Get the narration for the player's race
+            local unitRace = GetUnitRace("player")
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_RACE_LABEL)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_STAT_GAMEPAD_RACE_NAME, unitRace)))
+
+            --Get the narration for the player's alliance
+            local allianceName = GetAllianceName(GetUnitAlliance("player"))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_ALLIANCE_LABEL)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ALLIANCE_NAME, allianceName)))
+
+            --Get the narration for the player's class
+            local unitClass = GetUnitClass("player")
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_CLASS_LABEL)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_STAT_GAMEPAD_CLASS_NAME, unitClass)))
+
+            --Get the narration for the player's AVA Rank
+            local rank, subRank = GetUnitAvARank("player")
+            local rankName = GetAvARankName(GetUnitGender("player"), rank)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_RANK_LABEL)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_STAT_RANK_NAME_FORMAT, rankName)))
+
+            --Get the narration for the player's champion level if applicable
+            if IsChampionSystemUnlocked() then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_CHAMPION_POINTS_LABEL)))
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetPlayerChampionPointsEarned()))
+            end
+
+            --Get the narration for the player's current bounty if applicable
+            local bountyNarration = GAMEPAD_STATS_BOUNTY_DISPLAY:GetNarrationText()
+            if bountyNarration then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_BOUNTY_LABEL)))
+                ZO_AppendNarration(narrations, bountyNarration)
+            end
+
+            local speedBonus, _, staminaBonus, _, inventoryBonus = STABLE_MANAGER:GetStats()
+            --Get the narration for the player's riding speed
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_RIDING_HEADER_SPEED)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_MOUNT_ATTRIBUTE_SPEED_FORMAT, speedBonus)))
+
+            --Get the narration for the player's riding stamina
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_RIDING_HEADER_STAMINA)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(staminaBonus))
+
+            --Get the narration for the player's riding capacity
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_RIDING_HEADER_CAPACITY)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(inventoryBonus))
+
+            --Get the narration for whether riding training is available if it isn't already maxed out
+            if not STABLE_MANAGER:IsRidingSkillMaxedOut() then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_RIDING_HEADER_TRAINING)))
+                local timeUntilCanBeTrained = GetTimeUntilCanBeTrained()
+                --Either narrate that riding training is ready, or the time remaining until it's ready
+                if timeUntilCanBeTrained == 0 then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_STABLE_TRAINABLE_READY)))
+                else
+                    local timeLeft = ZO_FormatTimeMilliseconds(timeUntilCanBeTrained, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR)
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(timeLeft))
+                end
+            end
+
+            local currentLevel
+            local currentXP
+            local totalXP
+            local hideEnlightenment = true
+            if CanUnitGainChampionPoints("player") then
+                currentLevel = GetPlayerChampionPointsEarned()
+                currentXP = GetPlayerChampionXP()
+                totalXP = GetNumChampionXPInChampionPoint(currentLevel)
+                hideEnlightenment = false
+            else
+                currentLevel = GetUnitLevel("player")
+                currentXP = GetUnitXP("player")
+                totalXP = GetNumExperiencePointsInLevel(currentLevel)
+            end
+
+            --Get the narration for the player's xp progress
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STAT_GAMEPAD_EXPERIENCE_LABEL)))
+            --This is for when the XP limit has been reached
+            if not totalXP then
+                hideEnlightenment = true
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_EXPERIENCE_LIMIT_REACHED)))
+            else
+                local percentageXP = zo_floor(currentXP / totalXP * 100)
+                local experienceProgress = zo_strformat(SI_EXPERIENCE_CURRENT_MAX_PERCENT, ZO_CommaDelimitNumber(currentXP), ZO_CommaDelimitNumber(totalXP), percentageXP)
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(experienceProgress))
+            end
+
+            --Get the narration for the player being enlightened if applicable
+            if not hideEnlightenment then
+                local poolSize = self:GetEnlightenedPool()
+                if poolSize > 0 then
+                    local enlightenmentText = zo_strformat(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP, ZO_CommaDelimitNumber(poolSize))
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(enlightenmentText))
+                end
+            end
+
+            return narrations
+        end
 
         local function CanSpendAttributePoints()
             return GetAttributeUnspentPoints() > 0
@@ -769,6 +1055,20 @@ do
             data.screen = self
             data.attributeType = attributeType
             data.displayMode = GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
+
+            data.onValueChangedCallback = function()
+                -- Renarrate the list entry when points are added or removed
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
+            end
+
+            data.narrationText = function(entryData, entryControl)
+                local narrations = {}
+                local displayedPoints = entryControl.pointLimitedSpinner:GetPoints() + self:GetAddedPoints(attributeType)
+                ZO_AppendNarration(narrations, ZO_FormatSpinnerNarrationText(entryData.text, displayedPoints))
+                ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryStatusIndicatorNarrationText(entryData, entryControl))
+
+                return narrations
+            end
 
             if index == 1 then
                 data:SetHeader(GetString(SI_STATS_ATTRIBUTES))
@@ -806,7 +1106,7 @@ do
 end
 
 function ZO_GamepadStats:OnSelectionChanged(list, selectedData, oldSelectedData)
-    if not self.outfitSelectorHeaderFocus:IsActive() then
+    if not (self.outfitSelectorHeaderFocus:IsActive() or self.attributeTooltips:IsActive()) then
         self.displayMode = selectedData.displayMode
     end
 
@@ -867,6 +1167,21 @@ do
         -- Active Effects--
         self.numActiveEffects = 0
 
+        local function GetActiveEffectNarration(entryData, entryControl)
+            local narrations = {}
+
+            -- Generate the standard parametric list entry narration
+            ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+            -- Right panel header
+            ZO_AppendNarration(narrations, ZO_GamepadGenericHeader_GetNarrationText(self.contentHeader, self.contentHeaderData))
+
+            -- Right panel description
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.effectDescNarrationText))
+
+            return narrations
+        end
+
         --Artificial effects
         local sortedArtificialEffectsTable = {}
         for effectId in ZO_GetNextActiveArtificialEffectIdIter do
@@ -885,6 +1200,8 @@ do
                 local timeLeft = (endTime * 1000.0) - GetFrameTimeMilliseconds()
                 data:SetCooldown(timeLeft, duration * 1000.0)
             end
+
+            data.narrationText = GetActiveEffectNarration
 
             table.insert(sortedArtificialEffectsTable, data)
         end
@@ -915,6 +1232,8 @@ do
                         local timeLeft = (endTime * 1000.0) - GetFrameTimeMilliseconds()
                         data:SetCooldown(timeLeft, duration * 1000.0)
                     end
+
+                    data.narrationText = GetActiveEffectNarration
 
                     self:AddActiveEffectData(data)
                 end
@@ -998,6 +1317,7 @@ function ZO_GamepadStats:RefreshCharacterEffects()
     end
 
     self.effectDesc:SetText(contentDescription)
+    self.effectDescNarrationText = contentDescription
     self:RefreshContentHeader(contentTitle)
 end
 
@@ -1182,6 +1502,10 @@ function ZO_GamepadStats:RefreshAttributesPanel()
     self:RefreshContentHeader(GetString(SI_STATS_ATTRIBUTES))
 end
 
+function ZO_GamepadStats:GetAttributeItem(statType)
+    return self.attributeItems[statType]
+end
+
 function ZO_GamepadStats:InitializeAdvancedAttributesPanel()
     self.advancedAttributesPanel = self.infoPanel:GetNamedChild("AdvancedAttributesPanel")
     self.advancedAttributesGridList = ZO_GridScrollList_Gamepad:New(self.advancedAttributesPanel)
@@ -1256,7 +1580,7 @@ function ZO_GamepadStats:SetupAdvancedStats()
         local categoryId = GetAdvancedStatsCategoryId(categoryIndex)
         local displayName, numStats = GetAdvancedStatCategoryInfo(categoryId)
 
-        local categoryData = 
+        local categoryData =
         {
             header = displayName, --This field is not used on gamepad, but keeping it here in case we choose to show it later
             stats = {},
@@ -1481,6 +1805,58 @@ function ZO_GamepadStats:SetCurrentTitleDropdown(dropdown)
     self.currentTitleDropdown = dropdown
 end
 
+function ZO_GamepadStats:InitializeRespecConfirmationGoldDialog()
+    local dialogData =
+    {
+        data1 =
+        {
+            header = GetString(SI_GAMEPAD_SKILL_RESPEC_CONFIRM_DIALOG_BALANCE_HEADER),
+        },
+        data2 = 
+        {
+            header = GetString(SI_GAMEPAD_SKILL_RESPEC_CONFIRM_DIALOG_COST_HEADER),
+        },
+    }
+
+    ZO_Dialogs_RegisterCustomDialog("ATTRIBUTE_RESPEC_CONFIRM_GOLD_GAMEPAD",
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+        title =
+        {
+            text = SI_ATTRIBUTE_RESPEC_CONFIRM_DIALOG_TITLE,
+        },
+        mainText = 
+        {
+            text = SI_ATTRIBUTE_RESPEC_CONFIRM_DIALOG_BODY_INTRO,
+        },
+        setup = function(dialog)
+            local balance = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+            local cost = GetAttributeRespecGoldCost()
+            local IS_GAMEPAD = true
+            dialogData.data1.value = ZO_Currency_Format(balance, CURT_MONEY, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_GAMEPAD)
+            dialogData.data2.value = ZO_Currency_Format(cost, CURT_MONEY, balance > cost and ZO_CURRENCY_FORMAT_AMOUNT_ICON or ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON, IS_GAMEPAD)
+            dialog.setupFunc(dialog, dialogData)
+        end,
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_DIALOG_CONFIRM,
+                callback = function()
+                    GAMEPAD_STATS:RespecAttributes()
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_CANCEL,
+            },
+        },
+    })
+end
+
 ------------------------------
 -- Stat Title Attribute Row --
 ------------------------------
@@ -1504,7 +1880,12 @@ end
 function ZO_GamepadStatAttributeRow_Setup(control, data, selected, selectedDuringRebuild, enabled, active)
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, active)
 
-    local availablePoints = GetAttributeUnspentPoints()
+    local availablePoints = 0
+    if data.screen.GetUnspentAttributePoints then
+        availablePoints = data.screen:GetUnspentAttributePoints()
+    else
+        availablePoints = GetAttributeUnspentPoints()
+    end
     local showSpinnerArrows = (availablePoints > 0)
 
     control.spinnerDecrease:SetHidden(not showSpinnerArrows)
@@ -1515,6 +1896,8 @@ function ZO_GamepadStatAttributeRow_Setup(control, data, selected, selectedDurin
     local function SetAttributeText(points, addedPoints)
         if addedPoints > 0 then
             control.pointLimitedSpinner.pointsSpinner:SetNormalColor(STAT_HIGHER_COLOR)
+        elseif addedPoints < 0 then
+            control.pointLimitedSpinner.pointsSpinner:SetNormalColor(STAT_LOWER_COLOR)
         else
             control.pointLimitedSpinner.pointsSpinner:SetNormalColor(ZO_SELECTED_TEXT)
         end
@@ -1537,7 +1920,22 @@ function ZO_GamepadStatAttributeRow_Setup(control, data, selected, selectedDurin
         control.pointLimitedSpinner:Reinitialize(control.attributeType, addedPoints, onValueChangedCallback)
     end
 
-    control.pointLimitedSpinner:SetActive(selected)
+    if active then
+        control.pointLimitedSpinner:SetActive(selected)
+    end
 
     SetAttributeText(control.pointLimitedSpinner:GetPoints(), addedPoints)
+
+    local function GetDirectionalInputNarrationData()
+        --Only narrate directional input if there is more than one possible value
+        if control.pointLimitedSpinner.pointsSpinner:GetMin() ~= control.pointLimitedSpinner.pointsSpinner:GetMax() then
+            local decreaseEnabled = control.pointLimitedSpinner.pointsSpinner:IsDecreaseEnabled()
+            local increaseEnabled = control.pointLimitedSpinner.pointsSpinner:IsIncreaseEnabled()
+            return ZO_GetNumericHorizontalDirectionalInputNarrationData(decreaseEnabled, increaseEnabled)
+        else
+            return {}
+        end
+    end
+
+    data.additionalInputNarrationFunction = GetDirectionalInputNarrationData
 end

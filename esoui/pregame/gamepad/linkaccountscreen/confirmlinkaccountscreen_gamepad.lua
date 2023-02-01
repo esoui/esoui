@@ -35,10 +35,11 @@ function ZO_ConfirmLinkAccount_Gamepad:Initialize(control)
             confirmation3Text = GetString(SI_KEYBOARD_LINKACCOUNT_CROWN_LOSS_WARNING)
         end
 
-        local PLATFORM_SERVICE_ICONS = 
+        local PLATFORM_SERVICE_ICONS =
         {
             [PLATFORM_SERVICE_TYPE_DMM] = "EsoUI/Art/Login/link_Login_DMM.dds",
             [PLATFORM_SERVICE_TYPE_STEAM] = "EsoUI/Art/Login/link_Login_Steam.dds",
+            [PLATFORM_SERVICE_TYPE_EPIC] = "EsoUI/Art/Login/link_Login_Epic.dds",
         }
         accountIcon = PLATFORM_SERVICE_ICONS[serviceType]
     end

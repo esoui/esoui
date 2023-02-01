@@ -6,10 +6,10 @@ end
 
 function HousingPreviewDialog_Keyboard:Initialize(control)
     ZO_HousingPreviewDialog_Shared.Initialize(self, control, "HOUSE_PREVIEW_PURCHASE")
+    self.returnToEntranceButton = control:GetNamedChild("GoToEntrance")
 
     SYSTEMS:RegisterKeyboardObject("HOUSING_PREVIEW", self)
     self:InitializePurchaseButtons()
-    self.returnToEntranceButton = control:GetNamedChild("GoToEntrance") 
 end
 
 function HousingPreviewDialog_Keyboard:InitializeTemplateComboBox()
@@ -53,9 +53,9 @@ function HousingPreviewDialog_Keyboard:RefreshTemplateComboBox()
 
     self.returnToEntranceButton:ClearAnchors()
     if self.notAvailableLabel:IsControlHidden() then
-        self.returnToEntranceButton:SetAnchor(TOPLEFT, self.templatePreviewButton, BOTTOMLEFT, 0, 10)
+        self.returnToEntranceButton:SetAnchor(TOPLEFT, self.templateFurnitureButton, TOPRIGHT, 5, 0)
     else
-        self.returnToEntranceButton:SetAnchor(TOP, self.notAvailableLabel, BOTTOM, 0, 50)
+        self.returnToEntranceButton:SetAnchor(BOTTOM, nil, nil, 0, -30)
     end
 end
 
@@ -68,6 +68,20 @@ end
 function ZO_HousingPreviewDialog_Keyboard_PreviewButton_OnClicked(control, button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         ZO_HOUSING_PREVIEW_DIALOG_KEYBOARD:PreviewSelectedTemplate()
+    end
+end
+
+function ZO_HousingPreviewDialog_Keyboard_FurnitureButton_OnClicked(control, button)
+    if button == MOUSE_BUTTON_INDEX_LEFT then
+        ZO_HOUSING_PREVIEW_DIALOG_KEYBOARD:PreviewSelectedTemplate()
+        HOUSING_EDITOR_SHARED:ShowFurnitureBrowser()
+    end
+end
+
+function ZO_HousingPreviewDialog_Keyboard_GoToEntrance_OnClick(control, button)
+    if button == MOUSE_BUTTON_INDEX_LEFT then
+        ZO_HOUSING_PREVIEW_DIALOG_KEYBOARD:ReleaseDialog()
+        HousingEditorJumpToSafeLocation()
     end
 end
 

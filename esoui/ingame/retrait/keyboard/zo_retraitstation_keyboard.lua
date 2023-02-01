@@ -2,10 +2,6 @@ local KEYBOARD_RETRAIT_ROOT_SCENE_NAME = "retrait_keyboard_root"
 
 ZO_RetraitStation_Keyboard = ZO_RetraitStation_Base:Subclass()
 
-function ZO_RetraitStation_Keyboard:New(...)
-    return ZO_RetraitStation_Base.New(self, ...)
-end
-
 function ZO_RetraitStation_Keyboard:Initialize(control)
     ZO_RetraitStation_Base.Initialize(self, control, KEYBOARD_RETRAIT_ROOT_SCENE_NAME)
 

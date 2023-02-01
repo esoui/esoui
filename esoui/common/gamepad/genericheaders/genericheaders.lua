@@ -466,6 +466,9 @@ local function GetProcessedNarrationText(control, data)
 
     if type(data) == "function" then
         data = data(control)
+        if data == nil then
+            return ""
+        end
     end
 
     if type(data) == "string" then

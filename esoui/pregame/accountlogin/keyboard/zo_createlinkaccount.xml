@@ -15,7 +15,7 @@
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)AccountSetup" resizeToFitDescendents="true">
+                <Control name="$(parent)AccountSetup" resizeToFitConstrains="Y">
                     <Dimensions x="500" />
                     <Anchor point="TOP" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOM" offsetY="-40" />
 

@@ -90,6 +90,8 @@ function Market_Manager:InitializePlatformErrors()
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), ZO_GetPlatformStoreName())
     elseif platformServiceType == PLATFORM_SERVICE_TYPE_STEAM then
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_STEAM, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS))
+    elseif platformServiceType == PLATFORM_SERVICE_TYPE_EPIC then
+        self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_EPIC, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS))
     else -- _ZOS and _DMM
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_WEB, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), ZO_GetPlatformStoreName())
     end

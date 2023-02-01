@@ -315,7 +315,7 @@ end
 
 function ZO_ActivityFinderLocation_Specific:InitializeFormattedNames()
     if self:GetActivityType() == LFG_ACTIVITY_MASTER_DUNGEON then
-        self:SetNameKeyboard(zo_iconTextFormat(GetVeteranIcon(), "100%", "100%", self:GetRawName()))
+        self:SetNameKeyboard(zo_iconTextFormat(ZO_GetVeteranIcon(), "100%", "100%", self:GetRawName()))
         self:SetNameGamepad(zo_strformat(GetString(SI_GAMEPAD_ACTIVITY_FINDER_VETERAN_LOCATION_FORMAT), self:GetRawName()))
     else
         ZO_ActivityFinderLocation_Base.InitializeFormattedNames(self)
@@ -453,8 +453,8 @@ end
 
 function ZO_ActivityFinderLocation_Set:InitializeFormattedNames()
     if self:GetActivityType() == LFG_ACTIVITY_BATTLE_GROUND_CHAMPION then
-        self:SetNameKeyboard(zo_iconTextFormat(GetChampionPointsIcon(), "100%", "100%", self:GetRawName()))
-        self:SetNameGamepad(zo_iconTextFormat(GetGamepadChampionPointsIcon(), "100%", "100%", self:GetRawName()))
+        self:SetNameKeyboard(zo_iconTextFormat(ZO_GetChampionPointsIcon(), "100%", "100%", self:GetRawName()))
+        self:SetNameGamepad(zo_iconTextFormat(ZO_GetGamepadChampionPointsIcon(), "100%", "100%", self:GetRawName()))
     else
         ZO_ActivityFinderLocation_Base.InitializeFormattedNames(self)
     end

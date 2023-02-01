@@ -155,7 +155,14 @@ function ZO_GuildHeraldryManager_Shared:InitializeColorCategories()
             g = g,
             b = b,
             sortKey = sortKey,
-            narrationText = colorName,
+            narrationText = function(entryData)
+                local narrations = {}
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(colorName))
+                if entryData.checked then 
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_SELECTED_ICON_NARRATION)))
+                end
+                return narrations
+            end,
         }
         table.insert(self.colorListsByCategory[hueCategory], data)
     end
@@ -206,7 +213,14 @@ function ZO_GuildHeraldryManager_Shared:BuildStyleGridList()
                 checked = viewingSelectedCategory and i == selectedStyle,
                 gridHeaderName = gridHeaderName,
                 gridHeaderTemplate = templateData.headerTemplate,
-                narrationText = styleName,
+                narrationText = function(entryData)
+                    local narrations = {}
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(styleName))
+                    if entryData.checked then 
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_SELECTED_ICON_NARRATION)))
+                    end
+                    return narrations
+                end,
             }
 
             self.styleGridList:AddEntry(data, templateData.styleEntryTemplate)

@@ -110,7 +110,8 @@ function ZO_Help_Customer_Service_Gamepad:SubmitTicket()
     end
 
     if impactData.id == CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER then
-        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket()
+        local displayName = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS)
+        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket(displayName)
     end
     SubmitCustomerServiceTicket()
 end
@@ -171,11 +172,12 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
                                                         editControl:SetVirtualKeyboardType(VIRTUAL_KEYBOARD_TYPE_EMAIL)
                                                         self.activeEditBox = editControl
                                                     end)
-        
+
         control.editBox:SetHandler("OnFocusLost", function(editControl)
                                                         self:OnTextFieldFocusLost(editControl, data.fieldType)
                                                         self.activeEditBox = nil
                                                         list:RefreshVisible()
+                                                        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(list)
                                                     end)
 
         local savedText = self:GetSavedField(data.fieldType)
@@ -203,6 +205,7 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
         local savedText = self:GetSavedField(data.fieldType)
         if savedText then
             control.lockedLabel:SetText(savedText)
+            data.editBoxNarration = savedText
         else
             control.lockedLabel:SetText("")
         end
@@ -220,11 +223,17 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     end
 
+    local function OnDropdownDeactivated()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(list)
+    end
+
     local function SetupDropdownListEntry(control, data, selected, selectedDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, active)
         control.dropdown:SetSortsItems(false)
         control.dropdown:RegisterCallback("OnItemSelected", OnDropdownItemSelected)
         control.dropdown:RegisterCallback("OnItemDeselected", OnDropdownItemDeselected)
+        control.dropdown:SetDeactivatedCallback(OnDropdownDeactivated)
+        control.dropdown:SetNarrationTooltipType(GAMEPAD_LEFT_TOOLTIP)
 
         self:BuildDropdownList(control.dropdown, data)
         if selected then
@@ -312,10 +321,20 @@ function ZO_Help_Customer_Service_Gamepad:AddTextFieldEntry(fieldType, header, r
     entryData.isTextField = true
     entryData.isRequired = required
     entryData.isLocked = locked
+    -- This will get set in the setup function if applicable
+    entryData.editBoxNarration = nil
 
     if locked then
+        local function narrationFunction(entryData, entryControl)
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.editBoxNarration))
+            return narrations
+        end
+        entryData.narrationText = narrationFunction
         self.itemList:AddEntryWithHeader("ZO_Gamepad_Help_EditLockedEntry_MultiLine", entryData)
     else
+        entryData.narrationText = ZO_GetDefaultParametricListEditBoxNarrationText
         self.itemList:AddEntryWithHeader("ZO_GamepadTextFieldItem_Multiline", entryData)
     end
 end
@@ -328,6 +347,7 @@ function ZO_Help_Customer_Service_Gamepad:AddDropdownEntry(fieldType, header, li
     entryData.fieldType = fieldType
     entryData.header = header
     entryData.isDropdown = true
+    entryData.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
 
     self.itemList:AddEntryWithHeader("ZO_Gamepad_Help_Dropdown_Item", entryData)
 end

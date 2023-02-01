@@ -293,12 +293,24 @@ end
 function GamepadMarket:OnSelectionChanged(selectedData)
     ZO_GamepadMarket_GridScreen.OnSelectionChanged(self, selectedData)
     local previouslySelectedEntry = self.selectedGridEntry
+    local previouslySelectedCategoryName = self.selectedGridEntryCategoryName
     if selectedData then
         self.selectedGridEntry = selectedData.object
+        self.selectedGridEntryCategoryName = selectedData.categoryName
         self:LayoutSelectedGridEntryTooltip()
+        if previouslySelectedCategoryName ~= self.selectedGridEntryCategoryName then
+            --If the category name changed, re-narrate the subheader
+            local DONT_NARRATE_HEADER = false
+            local NARRATE_SUB_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.focusList, DONT_NARRATE_HEADER, NARRATE_SUB_HEADER)
+        else
+            --Re-narrate when the selection changes
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.focusList)
+        end
     elseif not self.isLockedForCategoryRefresh then
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
         self.selectedGridEntry = nil
+        self.selectedGridEntryCategoryName = nil
     end
 
     self:UpdatePreviousAndNewlySelectedProducts(previouslySelectedEntry, self.selectedGridEntry)
@@ -832,6 +844,16 @@ do
             end
         end
 
+        local nameNarrationFunction = function()
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(formattedBaseName))
+            --If this category contains new products, include that in the narration
+            if containsNewProductsFunction and containsNewProductsFunction() then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_NEW_ICON_NARRATION)))
+            end
+            return narrations
+        end
+
         local categoryData = CreateCategoryData(formattedBaseName, self.contentContainer.scrollChild, categoryIndex, tabIndex, numSubcategories, categoryType)
 
         local hasChildren = numSubcategories > 0
@@ -866,9 +888,14 @@ do
         local tabEntry =
         {
             text = nameFunction,
+            narrationText = nameNarrationFunction,
             categoryData = categoryData,
             callback = function()
                 self:OnCategorySelected(categoryData)
+                --Re-narrate on tab change
+                local NARRATE_HEADER = true
+                local NARRATE_SUB_HEADER = true
+                SCREEN_NARRATION_MANAGER:QueueFocus(self.focusList, NARRATE_HEADER, NARRATE_SUB_HEADER)
             end,
         }
 
@@ -1115,21 +1142,21 @@ function GamepadMarket:AddLabel(labeledGroupName, parentControl, yPadding)
     labeledGroupLabel:SetAnchor(BOTTOMLEFT, parentControl, TOPLEFT, 0, yPadding)
 end
 
-function GamepadMarket:FinishRowWithBlankTiles()
+function GamepadMarket:FinishRowWithBlankTiles(labeledGroupName)
     local currentItemRowIndex = #self.gridEntries % self.itemsPerRow
     if currentItemRowIndex > 0 then
         for i = currentItemRowIndex, self.itemsPerRow - 1 do
             local blankTile = self.currentCategoryBlankProductPool:AcquireObject()
             blankTile:Show()
-            self:AddEntry(blankTile, blankTile:GetControl())
+            self:AddEntry(blankTile, blankTile:GetControl(), labeledGroupName)
         end
     end
 end
 
 function GamepadMarket:FinishCurrentLabeledGroup()
-    self:FinishRowWithBlankTiles()
-
     local currentLabeledGroup = self.labeledGroups[#self.labeledGroups]
+    self:FinishRowWithBlankTiles(currentLabeledGroup.name)
+
     if currentLabeledGroup.numEntries > 0 then
         self.gridYPaddingOffset = self.gridYPaddingOffset + LABELED_GROUP_PADDING
     end
@@ -1144,7 +1171,7 @@ function GamepadMarket:AddLabeledGroupTable(labeledGroupName, labeledGroupTable)
     table.insert(self.labeledGroups, { name = labeledGroupName, table = labeledGroupTable, numEntries = numEntries })
 
     for i, entry in ipairs(labeledGroupTable) do
-        self:AddEntry(entry.object, entry.control)
+        self:AddEntry(entry.object, entry.control, labeledGroupName)
 
         if i == 1 and labeledGroupName then
             self:AddLabel(labeledGroupName, entry.control, LABELED_GROUP_LABEL_PADDING)
@@ -1299,7 +1326,7 @@ do
                     if subcategoryIndex == 0 or self:DoesCategoryContainFilteredProducts(displayGroup, categoryIndex, subcategoryIndex, self.esoPlusOfferFilterTypes) then
                         local marketProductPresentations = { self:GetCategoryProductIds(categoryIndex, subcategoryIndex, DoesMarketProductHaveEsoPlusPrice) }
 
-                        for index, productData in ipairs(marketProductPresentations) do
+                        for productIndex, productData in ipairs(marketProductPresentations) do
                             local shouldAddProduct = true
                             if productData:IsLimitedTimeProduct() then
                                 for index, value in ipairs(self.limitedTimedOfferProducts) do
@@ -1507,6 +1534,7 @@ function GamepadMarket:ClearProducts()
     ZO_GamepadMarket_GridScreen.ClearProducts(self)
     self:ReleaseAllProducts()
     self.selectedGridEntry = nil
+    self.selectedGridEntryCategoryName = nil
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptors)
 end
 
@@ -1895,6 +1923,8 @@ function GamepadMarketBundleContents:OnSelectionChanged(selectedData)
 
     self:UpdatePreviousAndNewlySelectedProducts(previouslySelectedEntry, self.selectedGridEntry)
     self:RefreshKeybinds()
+    --Re-narrate on selection changed
+    SCREEN_NARRATION_MANAGER:QueueFocus(self.focusList)
 end
 
 function GamepadMarketBundleContents:ReleaseAllProducts()

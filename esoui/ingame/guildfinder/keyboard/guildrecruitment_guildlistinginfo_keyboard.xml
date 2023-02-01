@@ -57,26 +57,22 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TopSection" relativePoint="BOTTOMLEFT" offsetY="ZO_GUILD_RECRUITMENT_GUILD_INFO_RECRUITMENT_MESSAGE_BASE_OFFSET_Y" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-35" />
                     <Controls>
-                        <Control name="$(parent)Scroll" override="true">
+                        <Control name="$(parent)ScrollChild" override="true">
                             <Controls>
-                                <Control name="$(parent)Child" override="true">
-                                    <Controls>
-                                        <Label name="$(parent)HeaderMessage" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                                            <Dimensions x="600" />
-                                            <Anchor point="TOPLEFT" />
-                                        </Label>
+                                <Label name="$(parent)HeaderMessage" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Dimensions x="600" />
+                                    <Anchor point="TOPLEFT" />
+                                </Label>
 
-                                        <Label name="$(parent)Activities" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
-                                            <Dimensions x="600" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderMessage" relativePoint="BOTTOMLEFT" offsetY="20" />
-                                        </Label>
+                                <Label name="$(parent)Activities" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                                    <Dimensions x="600" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderMessage" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                </Label>
 
-                                        <Label name="$(parent)RecruitmentMessage" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                                            <Dimensions x="600" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Activities" relativePoint="BOTTOMLEFT" offsetY="20" />
-                                        </Label>
-                                    </Controls>
-                                </Control>
+                                <Label name="$(parent)RecruitmentMessage" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Dimensions x="600" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Activities" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                </Label>
                             </Controls>
                         </Control>
                     </Controls>

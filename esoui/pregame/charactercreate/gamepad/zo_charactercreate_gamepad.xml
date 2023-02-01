@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_CharacterCreateEntry_Gamepad" resizeToFitDescendents="true" virtual="true" />
+        <Control name="ZO_CharacterCreateEntry_Gamepad" virtual="true" />
 
         <Label name="CCLabel_Gamepad" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
 
@@ -14,10 +14,8 @@
             </OnInitialized>
         </Button>
 
-
-        <Control name="RaceSelector_Gamepad" resizeToFitDescendents="true" virtual="true">
+        <Control name="RaceSelector_Gamepad" resizeToFitConstrains="Y" virtual="true">
             <Dimensions x="120"/>
-
             <Controls>
                 <Button name="$(parent)1" inherits="RaceSelectorButton_Gamepad">
                     <Anchor point="TOP" />
@@ -63,7 +61,7 @@
             </OnInitialized>
         </Button>
 
-        <Control name="ClassSelector_Gamepad" resizeToFitDescendents="true" virtual="true">
+        <Control name="ClassSelector_Gamepad" resizeToFitConstrains="Y" virtual="true">
             <Dimensions x="120"/>
 
             <Controls>

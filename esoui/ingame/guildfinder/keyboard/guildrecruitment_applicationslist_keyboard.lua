@@ -46,19 +46,7 @@ function ZO_GuildRecruitment_ApplicationsList_Keyboard:InitializeKeybindDescript
                 return self.currentData ~= nil
             end,
             callback = function()
-                local data = self.currentData
-                local function ReportCallback()
-                    -- If the player was reported then decline their application 
-                    local NO_MESSAGE = ""
-                    local BLACKLIST = true
-                    local declineApplicationResult, blacklistResult = DeclineGuildApplication(data.guildId, data.index, NO_MESSAGE, BLACKLIST, reportPlayerNote)
-                    if ZO_GuildFinder_Manager.IsFailedApplicationResult(declineApplicationResult) then
-                        ZO_Dialogs_ShowPlatformDialog("GUILD_FINDER_APPLICATION_DECLINED_FAILED", nil, { mainTextParams = { GetString("SI_GUILDPROCESSAPPLICATIONRESPONSE", declineApplicationResult) } })
-                    elseif not ZO_GuildRecruitment_Manager.IsAddedToBlacklistSuccessful(blacklistResult) then
-                        ZO_Dialogs_ShowPlatformDialog("GUILD_FINDER_BLACKLIST_FAILED", nil, { mainTextParams = { blacklistResult } })
-                    end
-                end
-                ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.name, ReportCallback)
+                ZO_GuildRecruitment_ApplicationsList_Keyboard.ReportPlayer(self.currentData)
             end,
         },
         -- Decline Application
@@ -92,6 +80,21 @@ function ZO_GuildRecruitment_ApplicationsList_Keyboard:InitializeKeybindDescript
             end,
         },
     }
+end
+
+function ZO_GuildRecruitment_ApplicationsList_Keyboard.ReportPlayer(data)
+    local function ReportCallback()
+        -- If the player was reported then decline their application 
+        local NO_MESSAGE = ""
+        local BLACKLIST = true
+        local declineApplicationResult, blacklistResult = DeclineGuildApplication(data.guildId, data.index, NO_MESSAGE, BLACKLIST)
+        if ZO_GuildFinder_Manager.IsFailedApplicationResult(declineApplicationResult) then
+            ZO_Dialogs_ShowPlatformDialog("GUILD_FINDER_APPLICATION_DECLINED_FAILED", nil, { mainTextParams = { GetString("SI_GUILDPROCESSAPPLICATIONRESPONSE", declineApplicationResult) } })
+        elseif not ZO_GuildRecruitment_Manager.IsAddedToBlacklistSuccessful(blacklistResult) then
+            ZO_Dialogs_ShowPlatformDialog("GUILD_FINDER_BLACKLIST_FAILED", nil, { mainTextParams = { blacklistResult } })
+        end
+    end
+    ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.name, ReportCallback)
 end
 
 function ZO_GuildRecruitment_ApplicationsList_Keyboard:FilterScrollList()
@@ -137,7 +140,7 @@ function ZO_GuildRecruitment_ApplicationsList_Keyboard:Row_OnMouseUp(control, bu
             if DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_MANAGE_APPLICATIONS) then
                 AddMenuItem(GetString(SI_GUILD_RECRUITMENT_APPLICATION_ACCEPT), function() ZO_Dialogs_ShowPlatformDialog("GUILD_ACCEPT_APPLICATION", data, {mainTextParams = { data.name }}) end)
                 AddMenuItem(GetString(SI_GUILD_RECRUITMENT_APPLICATION_DECLINE), function() ZO_Dialogs_ShowPlatformDialog("GUILD_DECLINE_APPLICATION_KEYBOARD", data, {mainTextParams = { data.name }}) end)
-                AddMenuItem(GetString(SI_GUILD_FINDER_REPORT_ACTION), function() ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.name) end)
+                AddMenuItem(GetString(SI_GUILD_FINDER_REPORT_ACTION), function() ZO_GuildRecruitment_ApplicationsList_Keyboard.ReportPlayer(data) end)
             end
             AddMenuItem(GetString(SI_SOCIAL_MENU_SEND_MAIL), function() MAIL_SEND:ComposeMailTo(data.name) end)
         end

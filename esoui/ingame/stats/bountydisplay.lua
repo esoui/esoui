@@ -51,3 +51,9 @@ function ZO_BountyDisplay:OnBountyUpdated()
         ZO_CurrencyControl_SetSimpleCurrency(self.control, CURT_MONEY, GetFullBountyPayoffAmount(), self.currencyOptions, CURRENCY_SHOW_ALL, true) 
     end
 end
+
+function ZO_BountyDisplay:GetNarrationText()
+    if IsJusticeEnabled() then
+        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_Currency_FormatGamepad(CURT_MONEY, GetFullBountyPayoffAmount(), ZO_CURRENCY_FORMAT_AMOUNT_NAME))
+    end
+end

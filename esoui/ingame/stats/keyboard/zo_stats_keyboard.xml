@@ -331,7 +331,37 @@
         <Button name="ZO_AdvancedStatsButton" inherits="ZO_DefaultButton" text="SI_STATS_ADVANCED_ATTRIBUTES" virtual="true">
             <Dimensions x="220"/>
         </Button>
-        
+
+        <TopLevelControl name="ZO_AttributesRespecConfirmationGoldDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_InitializeKeyboardRespecConfirmationGoldDialog(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Label name="$(parent)Balance" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                </Label>
+
+                <Label name="$(parent)BalanceHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_KEYBOARD_SKILL_RESPEC_CONFIRM_DIALOG_BALANCE_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Balance" relativePoint="TOPLEFT" offsetX="-10"/>
+                </Label>
+
+                <Label name="$(parent)Cost" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Balance" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Label>
+
+                <Label name="$(parent)CostHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_KEYBOARD_SKILL_RESPEC_CONFIRM_DIALOG_COST_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceHeader" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Cost" relativePoint="TOPLEFT" offsetX="-10"/>
+                </Label>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
         <TopLevelControl name="ZO_StatsPanel" inherits="ZO_StatsFootPrint" hidden="true">
             <OnInitialized>
                 ZO_Stats_Initialize(self)

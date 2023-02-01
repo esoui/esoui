@@ -1,7 +1,6 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_ColorPicker_Keyboard_TopLevel" inherits="ZO_ColorPicker_Shared ZO_CustomDialogBase">
-            <Dimensions x="512" y="256" />
             <Anchor point="CENTER" relativeTo="GuiRoot" offsetY="-45" />
 
             <OnInitialized>

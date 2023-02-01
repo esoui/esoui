@@ -19,7 +19,8 @@ function ZO_Tooltip:LayoutGuildApplicationDetails(applicationData)
     statValuePair:SetStat(GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_SORT_HEADER_LEVEL), self:GetStyle("statValuePairStat"))
     local ICON_SIZE = 40
     local levelText = ZO_GetLevelOrChampionPointsString(applicationData.level, applicationData.championPoints, ICON_SIZE)
-    statValuePair:SetValue(levelText, self:GetStyle("socialStatsValue"))
+    local levelNarrationText = ZO_GetLevelOrChampionPointsNarrationString(applicationData.level, applicationData.championPoints)
+    statValuePair:SetValueWithCustomNarration(levelText, levelNarrationText, self:GetStyle("socialStatsValue"))
     statsSection:AddStatValuePair(statValuePair)
 
     -- Player Class

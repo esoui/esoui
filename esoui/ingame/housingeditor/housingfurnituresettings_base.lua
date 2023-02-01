@@ -25,8 +25,15 @@ function ZO_HousingFurnitureSettings_Base:Initialize(control, owner)
         end
     end
 
+    local function OnOccupantsChanged()
+        if self.owner:IsShowing() and self.owner:GetMode() == HOUSING_BROWSER_MODE.SETTINGS then
+            self:UpdateOccupantSettings()
+        end
+    end
+
     self.control:RegisterForEvent(EVENT_HOUSING_PERMISSIONS_CHANGED, OnPermissionsChanged)
     self.control:RegisterForEvent(EVENT_HOUSING_PRIMARY_RESIDENCE_SET, OnPrimaryResidenceSet)
+    self.control:RegisterForEvent(EVENT_HOUSING_POPULATION_CHANGED, OnOccupantsChanged)
 end
 
 function ZO_HousingFurnitureSettings_Base:OnPermissionsChanged(eventId, userGroup)
@@ -60,6 +67,7 @@ end
 
 function ZO_HousingFurnitureSettings_Base:UpdateLists()
     self:UpdateGeneralSettings()
+    self:UpdateOccupantSettings()
     self:UpdateSingleVisitorSettings()
     self:UpdateGuildVisitorSettings()
     self:BuildCategories()
@@ -107,6 +115,10 @@ function ZO_HousingFurnitureSettings_Base:UpdateGuildVisitorSettings()
 end
 
 function ZO_HousingFurnitureSettings_Base:UpdateGeneralSettings()
+    assert(false) -- override in derived classes
+end
+
+function ZO_HousingFurnitureSettings_Base:UpdateOccupantSettings()
     assert(false) -- override in derived classes
 end
 

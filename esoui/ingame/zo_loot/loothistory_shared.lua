@@ -364,7 +364,7 @@ end
 function ZO_LootHistory_Shared:AddKeepTickEntry(keepId, reason)
     if self:CanShowItemsInHistory() then
         local keepName = GetKeepName(keepId)
-        local entryIcon = GetAllianceKeepRewardIcon(GetUnitAlliance("player"))
+        local entryIcon = ZO_GetAllianceKeepRewardIcon(GetUnitAlliance("player"))
         local textId = reason == CURRENCY_CHANGE_REASON_DEFENSIVE_KEEP_REWARD and SI_LOOT_HISTORY_KEEP_REWARD_DEFENSE_TITLE or SI_LOOT_HISTORY_KEEP_REWARD_OFFENSE_TITLE
         local lootData =
         {

@@ -7,6 +7,10 @@ ZO_GAMEPAD_LFG_OPTION_INFO =
         iconDown = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps_down.dds",
         role = LFG_ROLE_DPS,
         tooltip = GetString(SI_GROUP_PREFERRED_ROLE_DPS_TOOLTIP),
+        narrationText = function()
+            local selectedRole = GetSelectedLFGRole()
+            return ZO_FormatRadioButtonNarrationText(GetString("SI_LFGROLE", LFG_ROLE_DPS), selectedRole == LFG_ROLE_DPS, GetString(SI_GAMEPAD_GROUP_PREFERRED_ROLES_HEADER))
+        end,
     },
 
     [LFG_ROLE_HEAL] =
@@ -16,6 +20,10 @@ ZO_GAMEPAD_LFG_OPTION_INFO =
         iconDown = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer_down.dds",
         role = LFG_ROLE_HEAL,
         tooltip = GetString(SI_GROUP_PREFERRED_ROLE_HEAL_TOOLTIP),
+        narrationText = function()
+            local selectedRole = GetSelectedLFGRole()
+            return ZO_FormatRadioButtonNarrationText(GetString("SI_LFGROLE", LFG_ROLE_HEAL), selectedRole == LFG_ROLE_HEAL, GetString(SI_GAMEPAD_GROUP_PREFERRED_ROLES_HEADER))
+        end,
     },
 
     [LFG_ROLE_TANK] =
@@ -25,6 +33,10 @@ ZO_GAMEPAD_LFG_OPTION_INFO =
         iconDown = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank_down.dds",
         role = LFG_ROLE_TANK,
         tooltip = GetString(SI_GROUP_PREFERRED_ROLE_TANK_TOOLTIP),
+        narrationText = function()
+            local selectedRole = GetSelectedLFGRole()
+            return ZO_FormatRadioButtonNarrationText(GetString("SI_LFGROLE", LFG_ROLE_TANK), selectedRole == LFG_ROLE_TANK, GetString(SI_GAMEPAD_GROUP_PREFERRED_ROLES_HEADER))
+        end,
     },
 }
 
@@ -37,30 +49,27 @@ ZO_GAMEPAD_ROLES_BAR_ADDITIONAL_HEADER_SPACE = ROLES_HEADER_HEIGHT + ZO_GAMEPAD_
 -- GroupRolesBarGamepad Gamepad
 --------------------------------------------
 
-local ZO_GroupRolesBar_Gamepad = ZO_GamepadButtonTabBar:Subclass()
-
-function ZO_GroupRolesBar_Gamepad:New(...)
-    return ZO_GamepadButtonTabBar.New(self, ...)
-end
+ZO_GroupRolesBar_Gamepad = ZO_GamepadButtonTabBar:Subclass()
 
 function ZO_GroupRolesBar_Gamepad:Initialize(control)
-    local function OnSelected(control)
-        control.selectedFrame:SetHidden(false)
+    local function OnSelected(buttonControl)
+        buttonControl.selectedFrame:SetHidden(false)
         
-        local roleData = control.data
+        local roleData = buttonControl.data
         local roleType = roleData.role
         local lowestAverage = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetAverageRoleTime(roleType)
         GAMEPAD_TOOLTIPS:LayoutGroupRole(GAMEPAD_LEFT_TOOLTIP, roleData.optionName, roleData.tooltip, lowestAverage)
     end
 
-    local function OnUnselected(control)
-        control.selectedFrame:SetHidden(true)
+    local function OnUnselected(buttonControl)
+        buttonControl.selectedFrame:SetHidden(true)
     end
 
-    local function OnPressed(control)
-        UpdateSelectedLFGRole(control.data.role)
+    local function OnPressed(buttonControl)
+        UpdateSelectedLFGRole(buttonControl.data.role)
         ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
         self:RefreshRoles()
+        SCREEN_NARRATION_MANAGER:QueueGamepadButtonTabBar(self)
     end
 
     ZO_GamepadButtonTabBar.Initialize(self, control, OnSelected, OnUnselected, OnPressed)
@@ -83,7 +92,7 @@ function ZO_GroupRolesBar_Gamepad:Initialize(control)
     GAMEPAD_GROUP_ROLES_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:RefreshRoles()
-        elseif(newState == SCENE_HIDDEN) then
+        elseif newState == SCENE_HIDDEN then
             self:Deactivate()
         end
     end)
@@ -151,10 +160,6 @@ function ZO_GroupRolesBar_Gamepad:SetupListAnchorsBelowGroupBar(listControl)
 end
 
 --ZO_GamepadButtonTabBar Overrides
-function ZO_GroupRolesBar_Gamepad:Activate()
-    ZO_GamepadButtonTabBar.Activate(self)
-end
-
 function ZO_GroupRolesBar_Gamepad:Deactivate()
     if self:IsActivated() then
         ZO_GamepadButtonTabBar.Deactivate(self)

@@ -229,7 +229,35 @@ end
 function ZO_GamepadFocus:GetNarrationText()
     local focusItem = self:GetFocusItem()
     if focusItem and focusItem.narrationText then
-        return focusItem.narrationText()
+        return focusItem.narrationText(focusItem)
+    end
+end
+
+function ZO_GamepadFocus:GetAdditionalInputNarrationFunction()
+    local focusItem = self:GetFocusItem()
+    if focusItem then
+        return focusItem.additionalInputNarrationFunction
+    end
+end
+
+function ZO_GamepadFocus:GetHeaderNarration()
+    local focusItem = self:GetFocusItem()
+    if focusItem and focusItem.headerNarrationFunction then
+        return focusItem.headerNarrationFunction()
+    end
+end
+
+function ZO_GamepadFocus:GetSubHeaderNarration()
+    local focusItem = self:GetFocusItem()
+    if focusItem and focusItem.subHeaderNarrationFunction then
+        return focusItem.subHeaderNarrationFunction(focusItem)
+    end
+end
+
+function ZO_GamepadFocus:GetFooterNarration()
+    local focusItem = self:GetFocusItem()
+    if focusItem and focusItem.footerNarrationFunction then
+        return focusItem.footerNarrationFunction()
     end
 end
 

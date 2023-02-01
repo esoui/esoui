@@ -15,6 +15,10 @@ function ZO_ChatMenu_Gamepad:Initialize(control)
 
     self.activeLinks = ZO_GamepadLinks:New()
     self.activeLinks:SetKeybindAlignment(KEYBIND_STRIP_ALIGN_RIGHT)
+    self.activeLinks:RegisterCallback("CycleLinks", function()
+        --Re-narrate when cycling between multiple links
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
+    end)
 
     self:InitializeRefreshGroup()
 end
@@ -49,7 +53,10 @@ function ZO_ChatMenu_Gamepad:InitializeTextEdit()
             end
         end,
         activate = function()
-            SCREEN_NARRATION_MANAGER:QueueEditBox(self.textEdit, self.selectedChannelText)
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.textInputFocusSwitcher)
+        end,
+        narrationText = function()
+            return ZO_FormatEditBoxNarrationText(self.textEdit, self.selectedChannelText)
         end,
         highlight = self.textControlHighlight,
         control = self.textEdit,
@@ -326,10 +333,7 @@ function ZO_ChatMenu_Gamepad:InitializeChannelDropdown()
     self.selectedChannelFakeLabel = channelDropdownControl:GetNamedChild("SelectedItemFakeTextForResizing")
 
     local function DropDownDeactivatedCallback()
-        local focus = self.textInputFocusSwitcher:GetFocusItem()
-        if focus and focus.control == channelDropdown then
-            SCREEN_NARRATION_MANAGER:OnComboBoxFocused(channelDropdown)
-        end
+        SCREEN_NARRATION_MANAGER:QueueFocus(self.textInputFocusSwitcher)
     end
     channelDropdown:SetDeactivatedCallback(DropDownDeactivatedCallback)
 
@@ -357,6 +361,9 @@ function ZO_ChatMenu_Gamepad:InitializeChannelDropdown()
         keybindText = GetString(SI_GAMEPAD_SELECT_OPTION),
         callback = function()
             channelDropdown:Activate()
+        end,
+        narrationText = function()
+            return channelDropdown:GetNarrationText()
         end,
         highlight = channelControl:GetNamedChild("Highlight"),
         control = channelDropdown,

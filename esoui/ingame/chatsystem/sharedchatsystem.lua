@@ -1287,7 +1287,7 @@ function SharedChatSystem:InitializeSharedControlManagement(control, newContaine
     self.insertIndicator = control:GetNamedChild("InsertIndicator")
 
     local function CreateContainer(objectPool)
-        local containerControl = ZO_ObjectPool_CreateControl("ZO_ChatContainerTemplate", objectPool, GuiRoot)
+        local containerControl = ZO_ObjectPool_CreateNamedControl(self.control:GetName() .. "ZO_ChatContainerTemplate", "ZO_ChatContainerTemplate", objectPool, GuiRoot)
         return newContainerFn(self, containerControl, self.windowPool, self.tabPool)
     end
 
@@ -2032,9 +2032,7 @@ function SharedChatSystem:ShowPlayerContextMenu(playerName, rawName)
 
     -- Ignore
     local function IgnoreSelectedPlayer()
-        if not IsIgnored(playerName) then
-            AddIgnore(playerName)
-        end
+        ZO_PlatformIgnorePlayer(playerName)
     end
 
     if not IsIgnored(playerName) then
@@ -2048,7 +2046,7 @@ function SharedChatSystem:ShowPlayerContextMenu(playerName, rawName)
 
     -- Report player
     AddMenuItem(zo_strformat(SI_CHAT_PLAYER_CONTEXT_REPORT, rawName), function()
-        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(playerName, IgnoreSelectedPlayer)
+        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(playerName)
     end)
 
     if ZO_Menu_GetNumMenuItems() > 0 then
@@ -2277,6 +2275,11 @@ end
 
 function SharedChatSystem:RefreshVisibility()
     self.control:SetHidden(self:IsHidden())
+end
+
+function SharedChatSystem:ResetChat()
+    ResetChatToDefaults()
+    ReloadUI("ingame")
 end
 
 function StartChatInput(text, channel, target)

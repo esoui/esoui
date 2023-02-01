@@ -241,7 +241,7 @@ do
         memoryUsedAfterKB[tag] = afterKB
         local deltaKB = afterKB - memoryUsedBeforeKB[tag]
         memoryDeltaKB[tag] = deltaKB
-        WriteToInterfaceLog(deltaKB)
+        WriteToInterfaceLog(string.format("Lua mem profile '%s' result: %.3f kb", tag, deltaKB))
         return deltaKB
     end
 

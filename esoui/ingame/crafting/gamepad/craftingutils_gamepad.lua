@@ -4,6 +4,24 @@ ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_PADDING_Y = 50
 ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_SLOT_STANDARD_HEIGHT = 190
 ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_BOTTOM_OFFSET = ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET - ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_PADDING_Y
 
+ZO_TRACKED_PIN_STATUS_ICON_OVERRIDE = 
+{
+    iconTexture = "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds",
+    iconNarration = GetString(SI_SCREEN_NARRATION_CRAFTING_QUEST_PIN_ICON_NARRATION),
+}
+
+ZO_DISABLED_TRACKED_PIN_STATUS_ICON_OVERRIDE =
+{
+    iconTexture = "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon_disabled.dds",
+    iconNarration = GetString(SI_SCREEN_NARRATION_DISABLED_CRAFTING_QUEST_PIN_ICON_NARRATION),
+}
+
+ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE =
+{
+    iconTexture = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds",
+    iconNarration = GetString(SI_SCREEN_NARRATION_SELECTED_ICON_NARRATION),
+}
+
 -- Note: call this towards the end of your keybind setup function...if you call this before you do something like self.keybindStripDescriptor = {keybinds} you'll destroy these
 function ZO_GamepadCraftingUtils_AddGenericCraftingBackKeybindsToDescriptor(keybindDescriptor)
     if keybindDescriptor == nil then
@@ -279,6 +297,14 @@ ESO_Dialogs["CRAFTING_CREATE_MULTIPLE_GAMEPAD"] =
                         ZO_GenericGamepadDialog_RefreshKeybinds(entryData.dialog)
                         SCREEN_NARRATION_MANAGER:QueueDialog(entryData.dialog)
                     end)
+                    entryData.additionalInputNarrationFunction = function()
+                        --Only narrate directional input if there is more than one possible value
+                        if control.spinner:GetMin() ~= control.spinner:GetMax() then
+                            return ZO_GetNumericHorizontalDirectionalInputNarrationData(control.spinner:IsDecreaseEnabled(), control.spinner:IsIncreaseEnabled())
+                        else
+                            return {}
+                        end
+                    end
                 end,
                 narrationText = function(entryData, entryControl)
                     return ZO_FormatSpinnerNarrationText(entryData.text, entryData.dialog.data.numIterations)
@@ -395,6 +421,14 @@ ESO_Dialogs["CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD"] =
                         ZO_GenericGamepadDialog_RefreshKeybinds(entryData.dialog)
                         SCREEN_NARRATION_MANAGER:QueueDialog(entryData.dialog)
                     end)
+                    entryData.additionalInputNarrationFunction = function()
+                        --Only narrate directional input if there is more than one possible value
+                        if control.spinner:GetMin() ~= control.spinner:GetMax() then
+                            return ZO_GetNumericHorizontalDirectionalInputNarrationData(control.spinner:IsDecreaseEnabled(), control.spinner:IsIncreaseEnabled())
+                        else
+                            return {}
+                        end
+                    end
                 end,
                 narrationText = function(entryData, entryControl)
                     return ZO_FormatSpinnerNarrationText(entryData.text, entryData.dialog.data.iterations)
@@ -495,12 +529,13 @@ function ZO_GamepadCraftingIngredientBar:Clear()
     end
 end
 
-function ZO_GamepadCraftingIngredientBar:AddDataTemplate(templateName, setupFunction)
+function ZO_GamepadCraftingIngredientBar:AddDataTemplate(templateName, setupFunction, narrationFunction)
     if not self.dataTypes[templateName] then
         local dataTypeInfo =
         {
             pool = ZO_ControlPool:New(templateName, self.slotCenterControl),
             setupFunction = setupFunction,
+            narrationFunction = narrationFunction,
         }
         self.dataTypes[templateName] = dataTypeInfo
     end
@@ -516,6 +551,7 @@ function ZO_GamepadCraftingIngredientBar:AddEntry(templateName, data)
         control.templateName = templateName
 
         data.control = control
+        data.narrationFunction = dataTypeInfo.narrationFunction
 
         dataTypeInfo.setupFunction(control, data)
     end
@@ -533,14 +569,21 @@ function ZO_GamepadCraftingIngredientBar:Commit()
     end
 end
 
-do
-    local IS_SLOTTED_STATUS_ICON_OVERRIDE = {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"} -- check mark
-    function ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, isSlotted)
-        -- data should be used with ZO_SharedGamepadEntry_OnSetup
-        if isSlotted then
-            data.overrideStatusIndicatorIcons = IS_SLOTTED_STATUS_ICON_OVERRIDE
-        else
-            data.overrideStatusIndicatorIcons = nil
+function ZO_GamepadCraftingIngredientBar:GetNarrationText()
+    local narrations = {}
+    for i, data in ipairs(self.dataList) do
+        if data.narrationFunction then
+            table.insert(narrations, data.narrationFunction(data.control, data))
         end
+    end
+    return narrations
+end
+
+function ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, isSlotted)
+    -- data should be used with ZO_SharedGamepadEntry_OnSetup
+    if isSlotted then
+        data.overrideStatusIndicatorIcons = { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE }
+    else
+        data.overrideStatusIndicatorIcons = nil
     end
 end

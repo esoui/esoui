@@ -27,6 +27,8 @@ function ZO_GamepadInventory:Initialize(control)
 
     -- need this earlier than deferred init so trade can split stacks before inventory is possibly viewed
     self:InitializeSplitStackDialog()
+    self:InitializeConfirmDestroyDialog()
+    self:InitializeConfirmDestroyArmoryItemDialog()
 
     local function OnCancelDestroyItemRequest()
         if self.listWaitingOnDestroyRequest then
@@ -82,9 +84,6 @@ function ZO_GamepadInventory:OnDeferredInitialize()
     self:InitializeHeader()
 
     self:InitializeKeybindStrip()
-
-    self:InitializeConfirmDestroyDialog()
-    self:InitializeConfirmDestroyArmoryItemDialog()
 
     self:InitializeItemActions()
 
@@ -487,6 +486,10 @@ function ZO_GamepadInventory:InitializeSplitStackDialog()
             --The stack on the left
             local stack1 = dialog.data.stackSize - stack2
             return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_INVENTORY_SPLIT_STACK_NARRATION_FORMATTER, itemName, stack1, stack2))
+        end,
+
+        additionalInputNarrationFunction = function()
+            return ZO_GetHorizontalDirectionalInputNarrationData(GetString(SI_GAMEPAD_INVENTORY_SPLIT_STACK_LEFT_NARRATION), GetString(SI_GAMEPAD_INVENTORY_SPLIT_STACK_RIGHT_NARRATION))
         end,
 
         buttons =
@@ -1074,7 +1077,7 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry)
 
                 local function DoesNewItemMatchEquipSlot(itemData)
                     -- ESO-752569: Companion items use the same equip slots, but they're categorized as "supplies" (see above), so we need to filter them out here.
-                    return ZO_Character_DoesEquipSlotUseEquipType(equipSlot, itemData.equipType) and not itemData.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION
+                    return ZO_Character_DoesEquipSlotUseEquipType(equipSlot, itemData.equipType) and itemData.actorCategory ~= GAMEPLAY_ACTOR_CATEGORY_COMPANION
                 end
 
                 local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(DoesNewItemMatchEquipSlot, nil, BAG_BACKPACK)

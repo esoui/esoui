@@ -79,9 +79,80 @@ function ZO_GuildBrowser_GuildInfo_Gamepad:IsShown()
     GAMEPAD_GUILD_BROWSER_GUILD_INFO_FRAGMENT:IsShowing()
 end
 
+function ZO_GuildBrowser_GuildInfo_Gamepad:GetInfoPanelNarrationText()
+    if not self.refreshMessageLabel:IsHidden() then
+        --If the refresh message is showing, narrate that instead
+        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.refreshMessageText)
+    elseif not self.infoPanel:IsHidden() then
+        local guildData = GUILD_BROWSER_MANAGER:GetGuildData(self.currentGuildId)
+        if guildData then
+            local narrations = {}
+            --Generate the narration for the alliance
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(guildData.alliance))))
+
+            --Generate the narration for the guild name
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(guildData.guildName))
+
+            --Generate the narration for the active members
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_SIZE)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(guildData.size))
+
+            --Generate the narration for the founded date
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_FOUNDED_DATE)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(guildData.foundedDateText))
+
+            --Generate the narration for the play style
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_PERSONALITIES)))
+            local personalityString = zo_strformat(SI_GAMEPAD_GUILD_FINDER_GUILD_INFO_ATTRIBUTE_FORMATTER, GetString("SI_GUILDPERSONALITYATTRIBUTEVALUE", guildData.personality))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(personalityString))
+
+            --Generate the narration for the language
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_LANGUAGES)))
+            local languageString = zo_strformat(SI_GAMEPAD_GUILD_FINDER_GUILD_INFO_ATTRIBUTE_FORMATTER, GetString("SI_GUILDLANGUAGEATTRIBUTEVALUE", guildData.language))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(languageString))
+
+            --Generate the narration for the playtime
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_FINDER_GUILD_INFO_PLAYTIME_HEADER)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_GuildFinder_Manager.CreatePlaytimeRangeText(guildData)))
+
+            --Generate the narration for the roles
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ROLES)))
+            for _, role in ipairs(guildData.roles) do
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_LFGROLE", role)))
+            end
+
+            --Generate the narration for the min champion points
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_MINIMUM_CP)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(guildData.minimumCP))
+
+            --Generate the narration for the guild trader
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_KIOSK)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_GUILD_FINDER_GUILD_INFO_ATTRIBUTE_FORMATTER, guildData.guildTraderText)))
+
+            --Generate the narration for the guild header Message
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(guildData.headerMessage))
+
+            --Generate the activities narration
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ACTIVITIES)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(guildData.activitiesText))
+
+            --Generate the narration for the recruitment message
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(guildData.recruitmentMessage))
+            return narrations
+        end
+    end
+end
+
 function ZO_GuildBrowser_GuildInfo_Gamepad:BuildActionList()
     local list = self:GetMainList()
     list:Clear()
+
+    local function GetEntryNarrationText(entryData, entryControl)
+        local narrations = {}
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text))
+        ZO_AppendNarration(narrations, self:GetInfoPanelNarrationText())
+        return narrations
+    end
 
     if GetGuildRecruitmentStatusAttribute(self.currentGuildId) == GUILD_RECRUITMENT_STATUS_ATTRIBUTE_VALUE_LISTED then
         local applyEntry = ZO_GamepadEntryData:New(GetString(SI_GUILD_BROWSER_GUILD_INFO_APPLY_TO_GUILD))
@@ -98,10 +169,12 @@ function ZO_GuildBrowser_GuildInfo_Gamepad:BuildActionList()
                 ZO_Dialogs_ShowPlatformDialog("GUILD_FINDER_APPLICATION_STALE", data, { mainTextParams = { GetString("SI_GUILDAPPLICATIONRESPONSE", GUILD_APP_RESPONSE_GUILD_DATA_OUT_OF_DATE) } })
             end
         end
+        applyEntry.narrationText = GetEntryNarrationText
         list:AddEntry("ZO_GamepadItemSubEntryTemplate", applyEntry)
     else
         local exitEntry = ZO_GamepadEntryData:New(GetString(SI_GUILD_BROWSER_GUILD_INFO_EXIT))
         exitEntry.onSelectFunction = function() SCENE_MANAGER:HideCurrentScene() end
+        exitEntry.narrationText = GetEntryNarrationText
         list:AddEntry("ZO_GamepadItemSubEntryTemplate", exitEntry)
     end
 
@@ -210,7 +283,7 @@ function ZO_GuildBrowser_GuildInfo_Gamepad:ShowWithGuild(guildId)
 end
 
 function ZO_GuildBrowser_GuildInfo_Gamepad:GetAllianceIcon(alliance)
-    return GetLargeAllianceSymbolIcon(alliance)
+    return ZO_GetLargeAllianceSymbolIcon(alliance)
 end
 
 function ZO_GuildBrowser_GuildInfo_Gamepad:RefreshInfoPanel()
@@ -222,7 +295,7 @@ function ZO_GuildBrowser_GuildInfo_Gamepad:RefreshInfoPanel()
     }
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 
-    local guildData = GUILD_BROWSER_MANAGER:GetGuildData(self.currentGuildId, self.guildDisplayType)
+    local guildData = GUILD_BROWSER_MANAGER:GetGuildData(self.currentGuildId)
     if guildData then
         self.sizeLabelPair.value:SetText(guildData.size)
         self.personalitiesLabelPair.value:SetText(zo_strformat(SI_GAMEPAD_GUILD_FINDER_GUILD_INFO_ATTRIBUTE_FORMATTER, GetString("SI_GUILDPERSONALITYATTRIBUTEVALUE", guildData.personality)))

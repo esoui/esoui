@@ -124,40 +124,54 @@ function ZO_AntiquityLoreGamepad:RefreshHeader()
     ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 end
 
-function ZO_AntiquityLoreGamepad:RefreshLoreList()
-    local antiquityOrSetData = self.currentAntiquityOrSetData
-    self.loreList:Clear()
-    self:ReleaseAllLoreEntryControls()
+do
+    local function GetLoreEntryNarrationText(entryData, entryControl)
+        local narrations = {}
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
 
-    if antiquityOrSetData then
-        local numEntries = antiquityOrSetData:GetNumLoreEntries()
-        local numUnlockedEntries = antiquityOrSetData:GetNumUnlockedLoreEntries()
-        local controlIndex = 1
-        local previousControl
-
-        for _, loreEntryData in ipairs(antiquityOrSetData:GetLoreEntries()) do
-            local entryTitle = loreEntryData.displayName
-            local iconTexture = loreEntryData.unlocked and ZO_CHECK_ICON or nil
-            local entryData = ZO_GamepadEntryData:New(entryTitle, iconTexture)
-
-            if loreEntryData.fragmentName then
-                entryData:AddSubLabels({ ZO_CachedStrFormat(SI_ANTIQUITY_NAME_FORMATTER, loreEntryData.fragmentName) })
-                entryData:SetSubLabelColors(ZO_NORMAL_TEXT)
-            end
-
-            entryData:SetDataSource(loreEntryData)
-            entryData:SetIconTintOnSelection(true)
-            self.loreList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
-
-            previousControl = self:AddLoreEntry(previousControl, controlIndex, entryData)
-            controlIndex = controlIndex + 1
+        --If the entry is unlocked, get the narration for the lore
+        if entryData.unlocked then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.description))
         end
-
-        self:RefreshHeader()
+        return narrations
     end
 
-    self.loreList:Commit()
-    self:RefreshLoreEntries()
+    function ZO_AntiquityLoreGamepad:RefreshLoreList()
+        local antiquityOrSetData = self.currentAntiquityOrSetData
+        self.loreList:Clear()
+        self:ReleaseAllLoreEntryControls()
+
+        if antiquityOrSetData then
+            local numEntries = antiquityOrSetData:GetNumLoreEntries()
+            local numUnlockedEntries = antiquityOrSetData:GetNumUnlockedLoreEntries()
+            local controlIndex = 1
+            local previousControl
+
+            for _, loreEntryData in ipairs(antiquityOrSetData:GetLoreEntries()) do
+                local entryTitle = loreEntryData.displayName
+                local iconTexture = loreEntryData.unlocked and ZO_CHECK_ICON or nil
+                local entryData = ZO_GamepadEntryData:New(entryTitle, iconTexture)
+
+                if loreEntryData.fragmentName then
+                    entryData:AddSubLabels({ ZO_CachedStrFormat(SI_ANTIQUITY_NAME_FORMATTER, loreEntryData.fragmentName) })
+                    entryData:SetSubLabelColors(ZO_NORMAL_TEXT)
+                end
+
+                entryData.narrationText = GetLoreEntryNarrationText
+                entryData:SetDataSource(loreEntryData)
+                entryData:SetIconTintOnSelection(true)
+                self.loreList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+
+                previousControl = self:AddLoreEntry(previousControl, controlIndex, entryData)
+                controlIndex = controlIndex + 1
+            end
+
+            self:RefreshHeader()
+        end
+
+        self.loreList:Commit()
+        self:RefreshLoreEntries()
+    end
 end
 
 function ZO_AntiquityLoreGamepad:RefreshLoreEntries()

@@ -467,6 +467,9 @@ function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
                 end
                 return zo_strformat(SI_BANK_UPGRADE_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON))
             end,
+            narrationOverrideName = function()
+                return zo_strformat(SI_BANK_UPGRADE_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, GetNextBankUpgradePrice(), ZO_CURRENCY_FORMAT_AMOUNT_NAME))
+            end,
             visible = function()
                 return IsBankUpgradeAvailable() and GetBankingBag() == BAG_BANK
             end,
@@ -559,6 +562,15 @@ function ZO_GamepadBanking:OnCategoryChangedCallback(selectedData)
     ZO_BankingCommon_Gamepad.OnCategoryChangedCallback(self)
 
     self:UpdateKeybinds()
+end
+
+function ZO_GamepadBanking:OnTargetChangedCallback(...)
+    ZO_BankingCommon_Gamepad.OnTargetChangedCallback(self, ...)
+    --Always narrate the header when changing selection in the currencies list
+    if self:IsCurrentList(self.currenciesList) then
+       local NARRATE_HEADER = true
+       SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currenciesList, NARRATE_HEADER)
+    end
 end
 
 function ZO_GamepadBanking:GetWithdrawMoneyAmount()

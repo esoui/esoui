@@ -61,7 +61,7 @@ function ZO_StatEntry_Keyboard:UpdateStatValue()
         local displayValue = self:GetDisplayValue()
         local pendingBonusAmount = self:GetPendingStatBonuses()
 
-        if pendingBonusAmount and pendingBonusAmount > 0 then       
+        if pendingBonusAmount and pendingBonusAmount > 0 then
             self.control.pendingBonus:SetHidden(false)
             self.control.pendingBonus:SetText(zo_strformat(SI_STAT_PENDING_BONUS_FORMAT, pendingBonusAmount))
         else
@@ -71,7 +71,7 @@ function ZO_StatEntry_Keyboard:UpdateStatValue()
         local valueLabel = self.control.value
         local statChanged = displayValue ~= valueLabel:GetText()
 
-        if statChanged then 
+        if statChanged then
             valueLabel:SetText(displayValue)
         end
         self.control.name:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())

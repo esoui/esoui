@@ -60,6 +60,8 @@ local TEXTURE_ARROW_DIRECTION_INVERSE = "EsoUI/Art/Housing/translation_inverse_a
 local TEXTURE_ARROW_ROTATION_FORWARD = "EsoUI/Art/Housing/dual_rotation_arrow.dds"
 local TEXTURE_ARROW_ROTATION_REVERSE = "EsoUI/Art/Housing/dual_rotation_arrow_reverse.dds"
 
+local SHOW_TARGET_DEFERRAL_TIME_MS = 150
+
 local function AngleDistance(angle1, angle2)
     local delta = math.abs(angle1 - angle2) % TWO_PI
     return delta < PI and delta or (TWO_PI - delta)
@@ -73,23 +75,35 @@ ZO_HousingEditorState = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_HousingEditorState:Initialize()
     self.editorMode = HOUSING_EDITOR_MODE_DISABLED
+    self.occupants = {}
     self.population = 0
     self.maxPopulation = 0
 
     self:RegisterForEvent(EVENT_HOUSING_EDITOR_MODE_CHANGED, function(_, ...) self:OnEditorModeChanged(...) end)
+    self:RegisterForEvent(EVENT_HOUSING_OCCUPANT_ARRIVED, function(_, ...) self:OnOccupantArrived(...) end)
+    self:RegisterForEvent(EVENT_HOUSING_OCCUPANT_DEPARTED, function(_, ...) self:OnOccupantDeparted(...) end)
     self:RegisterForEvent(EVENT_HOUSING_PLAYER_INFO_CHANGED, function(_, ...) self:OnPlayerInfoChanged(...) end)
     self:RegisterForEvent(EVENT_HOUSING_POPULATION_CHANGED, function(_, ...) self:OnPopulationChanged(...) end)
     self:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function(_, ...) self:OnPlayerActivated(...) end)
 end
 
-function ZO_HousingEditorState:CanLocalPlayerBrowse()
-    -- All players can access the Browse menu for any owned house instance.
-    return self:IsHouseInstance()
+function ZO_HousingEditorState:CanCycleTarget()
+    return (self.editorMode ~= HOUSING_EDITOR_MODE_DISABLED and self:IsHouseInstance()) or self:IsHousePreview()
+end
+
+function ZO_HousingEditorState:CanLocalPlayerBrowseFurniture()
+    -- All players can access the Browse Furniture menu while in any house instance or house preview.
+    return self:IsHouse()
 end
 
 function ZO_HousingEditorState:CanLocalPlayerEditHouse()
-    -- All owners and guest decorators can edit for any owned house instance.
+    -- All owners and guest decorators can edit any house instance.
     return self:IsHouseInstance() and (self.isOwner == true or self.hasEditPermission == true)
+end
+
+function ZO_HousingEditorState:CanLocalPlayerViewSettings()
+    -- All players can view the Settings menu while in any house instance.
+    return self:IsHouseInstance()
 end
 
 function ZO_HousingEditorState:GetEditorMode()
@@ -123,6 +137,10 @@ function ZO_HousingEditorState:GetMaxPopulation()
     return self.maxPopulation
 end
 
+function ZO_HousingEditorState:GetOccupants()
+    return self.occupants
+end
+
 function ZO_HousingEditorState:GetOwnerName()
     return self.ownerName
 end
@@ -154,17 +172,63 @@ function ZO_HousingEditorState:OnEditorModeChanged(previousEditorMode, editorMod
     self:FireCallbacks("EditorModeChanged", editorMode, previousEditorMode)
 end
 
+function ZO_HousingEditorState:OnHouseChanged(currentHouseId, currentIsOwner, currentOwnerName, previousHouseId, previousIsOwner, previousOwnerName)
+    self:RefreshState()
+    self:FireCallbacks("HouseChanged", currentHouseId, currentIsOwner, currentOwnerName, previousHouseId, previousIsOwner, previousOwnerName)
+end
+
+function ZO_HousingEditorState:OnOccupantArrived(accountName, characterName)
+    if not IsPlayerActivated() then
+        -- Disregard arrival events while jumping.
+        return
+    end
+
+    self:FireCallbacks("OccupantArrived", accountName, characterName)
+    local preferredName = ZO_ShouldPreferUserId() and accountName or characterName
+    local message = zo_strformat(SI_HOUSING_PLAYER_ARRIVED, ZO_SELECTED_TEXT:Colorize(preferredName))
+    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
+end
+
+function ZO_HousingEditorState:OnOccupantDeparted(accountName, characterName)
+    if not IsPlayerActivated() then
+        -- Disregard departure events while jumping.
+        return
+    end
+
+    self:FireCallbacks("OccupantDeparted", accountName, characterName)
+    local preferredName = ZO_ShouldPreferUserId() and accountName or characterName
+    local message = zo_strformat(SI_HOUSING_PLAYER_DEPARTED, ZO_SELECTED_TEXT:Colorize(preferredName))
+    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
+end
+
 function ZO_HousingEditorState:OnPlayerActivated(isInitialActivation)
-    self:RefreshSettings()
+    self:RefreshState()
     self:FireCallbacks("PlayerActivated", isInitialActivation)
 end
 
 function ZO_HousingEditorState:OnPlayerInfoChanged(wasOwner, arePermissionsChanged, previousVisitorRole)
-    self:RefreshSettings()
+    self:RefreshState()
 end
 
-function ZO_HousingEditorState:OnPopulationChanged(population)
-    self:RefreshSettings()
+function ZO_HousingEditorState:OnPopulationChanged(population, previousPopulation)
+    self:RefreshState()
+end
+
+function ZO_HousingEditorState:RefreshOccupants()
+    ZO_ClearNumericallyIndexedTable(self.occupants)
+
+    local numOccupants = GetCurrentHousePopulation()
+    self.population = numOccupants
+
+    for occupantIndex = 1, numOccupants do
+        local accountName, characterName = GetHouseOccupantName(occupantIndex)
+        local occupantData =
+        {
+            accountName = accountName,
+            characterName = characterName,
+        }
+        table.insert(self.occupants, occupantData)
+    end
 end
 
 do
@@ -182,7 +246,7 @@ do
         return state
     end
 
-    function ZO_HousingEditorState:RefreshSettings()
+    function ZO_HousingEditorState:RefreshState()
         local currentHouseId = GetCurrentZoneHouseId()
         local previousHouseId = self.houseId
         self.houseId = currentHouseId
@@ -211,24 +275,27 @@ do
         self.maxPopulation = GetCurrentHousePopulationCap()
 
         local changed = false
+        local houseChanged = false
 
         if currentHouseId ~= previousHouseId or currentIsOwner ~= previousIsOwner or currentOwnerName ~= previousOwnerName then
             changed = true
-            self:FireCallbacks("HouseChanged", currentHouseId, currentIsOwner, currentOwnerName, previousHouseId, previousIsOwner, previousOwnerName)
+            houseChanged = true
+            self:OnHouseChanged(currentHouseId, currentIsOwner, currentOwnerName, previousHouseId, previousIsOwner, previousOwnerName)
         end
 
-        if currentVisitorRole ~= previousVisitorRole then
+        if houseChanged or currentVisitorRole ~= previousVisitorRole then
             changed = true
             self:FireCallbacks("HouseVisitorRoleChanged", currentVisitorRole, previousVisitorRole)
         end
 
-        if currentHasEditPermission ~= previousHasEditPermission then
+        if houseChanged or currentHasEditPermission ~= previousHasEditPermission then
             changed = true
             self:FireCallbacks("HouseEditPermissionChanged", currentHasEditPermission, previousHasEditPermission)
         end
 
-        if previousPopulation ~= self.population or previousMaxPopulation ~= self.maxPopulation then
+        if houseChanged or previousPopulation ~= self.population or previousMaxPopulation ~= self.maxPopulation then
             changed = true
+            self:RefreshOccupants()
             self:FireCallbacks("HousePopulationChanged", self.population, self.maxPopulation, previousPopulation, previousMaxPopulation)
         end
 
@@ -288,29 +355,110 @@ end
 function HousingHUDFragment:Initialize(control)
     ZO_HUDFadeSceneFragment.Initialize(self, control)
 
+    self.inCombat = false
+    self.inTargetDummyCombat = false
+    self.nextCombatUpdateTimeMS = 0
+
     self.keybindButton = self.control:GetNamedChild("KeybindButton")
-    ZO_KeybindButtonTemplate_Setup(self.keybindButton, "SHOW_HOUSING_PANEL", function(...) self:OnHousingHUDButtonPressed(...) end, GetString(SI_HOUSING_HUD_FRAGMENT_EDITOR_KEYBIND))
+    self.cycleTargetKeybindButton = self.control:GetNamedChild("CycleTargetKeybindButton")
 
-    HOUSING_EDITOR_STATE:RegisterCallback("HouseChanged", function(...) self:OnHouseChanged(...) end)
-    HOUSING_EDITOR_STATE:RegisterCallback("HouseSettingsChanged", function(...) self:OnHouseSettingsChanged(...) end)
+    self.OnCycleTargetKeybindButtonPressed = function()
+        local result = HousingEditorCycleTarget()
+        ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+        if result == HOUSING_REQUEST_RESULT_SUCCESS then
+            PlaySound(SOUNDS.RADIAL_MENU_SELECTION)
+        end
+    end
 
+    self.OnDeferredCombatUpdate = function()
+        if GetFrameTimeMilliseconds() < self.nextCombatUpdateTimeMS then
+            return
+        end
+
+        self.control:SetHandler("OnUpdate", nil)
+        if not self.inCombat then
+            self.inTargetDummyCombat = false
+        end
+        self:UpdateKeybind()
+    end
+
+    -- Order matters
+    self:InitializeKeybinds()
+    self:InitializeEvents()
     self:InitializePlatformStyle()
 end
 
+function HousingHUDFragment:InitializeEvents()
+    HOUSING_EDITOR_STATE:RegisterCallback("HouseChanged", function(...) self:OnHouseChanged(...) end)
+    HOUSING_EDITOR_STATE:RegisterCallback("HouseSettingsChanged", function(...) self:OnHouseSettingsChanged(...) end)
+
+    self.control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, function(_, ...) self:OnCombatStateChanged(...) end)
+
+    local function OnAddOnLoaded(event, addOnName)
+        if addOnName == "ZO_Ingame" then
+            EVENT_MANAGER:UnregisterForEvent("HousingHUD", EVENT_ADD_ON_LOADED)
+
+            ZO_TARGET_DUMMY_LOGS:RegisterCallback("TargetDummyCombatStateChanged", function(...)
+                self:OnTargetDummyCombatStateChanged(...)
+            end)
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("HousingHUD", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+end
+
+function HousingHUDFragment:OnCombatStateChanged(inCombat)
+    self.inCombat = inCombat
+    self:QueueDeferredCombatUpdate()
+end
+
+function HousingHUDFragment:OnTargetDummyCombatStateChanged(inCombat)
+    if inCombat then
+        self.inTargetDummyCombat = inCombat
+        self:QueueDeferredCombatUpdate()
+    end
+end
+
+function HousingHUDFragment:QueueDeferredCombatUpdate()
+    local DEFERRAL_INTERVAL_MS = 500
+    self.nextCombatUpdateTimeMS = GetFrameTimeMilliseconds() + DEFERRAL_INTERVAL_MS
+    self.control:SetHandler("OnUpdate", self.OnDeferredCombatUpdate)
+end
+
+function HousingHUDFragment:InitializeKeybinds()
+    local function OnKeybindButtonPressed(...)
+        self:OnHousingHUDButtonPressed(...)
+    end
+
+    ZO_KeybindButtonTemplate_Setup(self.keybindButton, "SHOW_HOUSING_PANEL", OnKeybindButtonPressed, GetString(SI_HOUSING_HUD_FRAGMENT_EDITOR_KEYBIND))
+end
+
 do
+    local DEFAULT_RELATIVE_TO = nil
+
     local KEYBOARD_PLATFORM_STYLE =
     {
         keybindButtonTemplate = "ZO_KeybindButton_Keyboard_Template",
-        keybindButtonAnchor = ZO_Anchor:New(BOTTOMRIGHT, nil, BOTTOMRIGHT, -80, -25),
+        keybindButtonAnchor = ZO_Anchor:New(BOTTOMRIGHT, DEFAULT_RELATIVE_TO, BOTTOMRIGHT, -80, -25),
+
+        cycleTargetKeybindButtonTemplate = "ZO_KeybindButton_Keyboard_Template",
+        cycleTargetKeybindButtonAnchor = ZO_Anchor:New(RIGHT, DEFAULT_RELATIVE_TO, LEFT, -25, 0),
+        cycleTargetKeybindButtonAction = "CYCLE_PREFERRED_ENEMY_TARGET",
     }
 
     local GAMEPAD_PLATFORM_STYLE =
     {
         keybindButtonTemplate = "ZO_KeybindButton_Gamepad_Template",
-        keybindButtonAnchor = ZO_Anchor:New(BOTTOMLEFT, nil, BOTTOMLEFT, 80, -40),
+        keybindButtonAnchor = ZO_Anchor:New(BOTTOMLEFT, DEFAULT_RELATIVE_TO, BOTTOMLEFT, 80, -40),
+
+        cycleTargetKeybindButtonTemplate = "ZO_KeybindButton_Gamepad_Template",
+        cycleTargetKeybindButtonAnchor = ZO_Anchor:New(BOTTOMRIGHT, DEFAULT_RELATIVE_TO, BOTTOMRIGHT, -80, -40),
+        cycleTargetKeybindButtonAction = "GAMEPAD_CYCLE_PREFERRED_ENEMY_TARGET",
     }
 
     function HousingHUDFragment:InitializePlatformStyle()
+        KEYBOARD_PLATFORM_STYLE.cycleTargetKeybindButtonAnchor:SetTarget(self.keybindButton)
+
         self.platformStyle = ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_PLATFORM_STYLE, GAMEPAD_PLATFORM_STYLE)
     end
 end
@@ -318,40 +466,61 @@ end
 function HousingHUDFragment:ApplyPlatformStyle(style)
     ApplyTemplateToControl(self.keybindButton, style.keybindButtonTemplate)
     style.keybindButtonAnchor:Set(self.keybindButton)
+
+    ApplyTemplateToControl(self.cycleTargetKeybindButton, style.cycleTargetKeybindButtonTemplate)
+    style.cycleTargetKeybindButtonAnchor:Set(self.cycleTargetKeybindButton)
+    local buttonLabelString = GetString(SI_BINDING_NAME_HOUSING_EDITOR_CYCLE_TARGET_ACTION)
+    ZO_KeybindButtonTemplate_Setup(self.cycleTargetKeybindButton, style.cycleTargetKeybindButtonAction, self.OnCycleTargetKeybindButtonPressed, buttonLabelString)
+    self.cycleTargetKeybindButton:SetText(buttonLabelString)
+
     self:UpdateKeybind()
 end
 
 function HousingHUDFragment:OnShown()
     ZO_HUDFadeSceneFragment.OnShown(self)
+
     self:UpdateKeybind()
 end
 
 function HousingHUDFragment:OnHousingHUDButtonPressed()
     if self:IsShowing() then
-        if HOUSING_EDITOR_STATE:CanLocalPlayerBrowse() then
-            local result = HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
-            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-
-            if HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() and IsESOPlusSubscriber() then
-                TriggerTutorial(TUTORIAL_TRIGGER_ENTERED_OWNED_HOUSING_EDITOR_AS_SUBSCRIBER)
-            end
-        elseif HOUSING_EDITOR_STATE:IsHousePreview() then
-            SYSTEMS:GetObject("HOUSING_PREVIEW"):ShowDialog()
+        if self.inCombat and self.inTargetDummyCombat then
+            HousingEditorRequestResetEngagedTargetDummies()
+            PlaySound(SOUNDS.HOUSING_EDITOR_CLOSED)
         else
-            HousingEditorJumpToSafeLocation()
+            if HOUSING_EDITOR_STATE:IsHousePreview() then
+                SYSTEMS:GetObject("HOUSING_PREVIEW"):ShowDialog()
+            elseif HOUSING_EDITOR_STATE:CanLocalPlayerBrowseFurniture() then
+                local result = HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
+                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+
+                if HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() and IsESOPlusSubscriber() then
+                    TriggerTutorial(TUTORIAL_TRIGGER_ENTERED_OWNED_HOUSING_EDITOR_AS_SUBSCRIBER)
+                end
+            else
+                HousingEditorJumpToSafeLocation()
+            end
+
+            PlaySound(SOUNDS.HOUSING_EDITOR_OPEN)
         end
-        PlaySound(SOUNDS.HOUSING_EDITOR_OPEN)
     end
 end
 
 function HousingHUDFragment:UpdateKeybind()
-    local keybindStringId
-    if HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() then
-        keybindStringId = SI_HOUSING_HUD_FRAGMENT_EDITOR_KEYBIND
-    elseif HOUSING_EDITOR_STATE:CanLocalPlayerBrowse() then
-        keybindStringId = SI_HOUSING_HUD_FRAGMENT_INSPECTION_MODE_KEYBIND
+    if not HOUSING_EDITOR_STATE:IsHouse() then
+        return
+    end
+
+    -- Order matters:
+    local keybindStringId = nil
+    if self.inCombat and self.inTargetDummyCombat then
+        keybindStringId = SI_HOUSING_HUD_FRAGMENT_RESET_TARGET_DUMMIES
     elseif HOUSING_EDITOR_STATE:IsHousePreview() then
         keybindStringId = SI_HOUSING_HUD_FRAGMENT_PURCHASE_KEYBIND
+    elseif HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() then
+        keybindStringId = SI_HOUSING_HUD_FRAGMENT_EDITOR_KEYBIND
+    elseif HOUSING_EDITOR_STATE:CanLocalPlayerBrowseFurniture() then
+        keybindStringId = SI_HOUSING_HUD_FRAGMENT_INSPECTION_MODE_KEYBIND
     else
         keybindStringId = SI_HOUSING_EDITOR_SAFE_LOC
     end
@@ -384,6 +553,7 @@ end
 
 function HousingHUDFragment:OnHouseSettingsChanged(currentState, previousState)
     self:UpdateKeybind()
+
     if currentState.houseId ~= 0 and not currentState.isOwner and currentState.hasEditPermission ~= previousState.hasEditPermission then
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(SI_HOUSING_PLAYER_PERMISSIONS_CHANGED))
     end
@@ -408,6 +578,8 @@ function ZO_HousingEditorHud:Initialize(control)
     self.precisionRotateButtons = self.precisionRotateButtonContainer:GetNamedChild("PrecisionRotateButtons")
     self.precisionRotateUnitsLabel = self.precisionRotateButtonContainer:GetNamedChild("PrecisionRotateUnitsLabel")
     self.precisionOrientationLabel = self.precisionRotateButtonContainer:GetNamedChild("PrecisionOrientationLabel")
+
+    self.showTargetDeferredUntilMS = 0
 
     self:RefreshConstants()
     self:InitializeHudControls()
@@ -522,6 +694,7 @@ function ZO_HousingEditorHud:Initialize(control)
     local function OnAddOnLoaded(event, addOnName)
         if addOnName == "ZO_Ingame" then
             EVENT_MANAGER:UnregisterForEvent("HousingEditor", EVENT_ADD_ON_LOADED)
+
             local defaults =
             {
                 moveUnitsCentimeters = 10,
@@ -635,65 +808,28 @@ function ZO_HousingEditorHud:SetKeybindPaletteHidden(hidden)
     end
 end
 
-function ZO_HousingEditorHud:SetTargetData(furnitureId, pathIndex)
-    HOUSING_EDITOR_KEYBIND_PALETTE:SetTargetData(furnitureId, pathIndex)
-end
-
-function ZO_HousingEditorHud:ClearTargetData()
-    local NO_VALID_FURNITURE_ID = 0
-    local NO_VALID_PATH_INDEX = nil
-    self:SetTargetData(NO_VALID_FURNITURE_ID, NO_VALID_PATH_INDEX)
-end
-
-function ZO_HousingEditorHud:UpdateTargetData()
-    if GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT then
-        self:SetTargetData(HousingEditorGetSelectedFurnitureId())
-    else
-        local furnitureId, pathIndex = HousingEditorGetTargetInfo()
-        if CompareId64ToNumber(furnitureId, 0) > 0 then
-            self:SetTargetData(furnitureId, pathIndex)
-        else
-            self:ClearTargetData()
-        end
-    end
-end
-
-do
-    local function OnTargetFurnitureChanged(event)
-        HOUSING_EDITOR_SHARED:UpdateTargetData()
-    end
-
-    function ZO_HousingEditorHud:SetLiveTargetingEnabled(enabled)
-        if enabled then
-            EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_TARGET_FURNITURE_CHANGED, OnTargetFurnitureChanged)
-        else
-            EVENT_MANAGER:UnregisterForEvent("HousingEditor", EVENT_HOUSING_TARGET_FURNITURE_CHANGED)
-        end
-    end
-end
-
 function ZO_HousingEditorHud:OnHousingModeEnabled()
     OpenMarket(MARKET_DISPLAY_GROUP_HOUSE_EDITOR)
     self:CleanDirty()
+
     SCENE_MANAGER:SetHUDScene("housingEditorHud")
     SCENE_MANAGER:SetHUDUIScene("housingEditorHudUI", true)
-    self:SetLiveTargetingEnabled(true)
 end
 
 function ZO_HousingEditorHud:OnHousingModeDisabled(oldMode)
     OnMarketClose()
+
     if oldMode == HOUSING_EDITOR_MODE_PATH then
         if SCENE_MANAGER:GetCurrentScene() ~= nil then
             SCENE_MANAGER:ShowBaseScene()
         end
     end
-    self:SetLiveTargetingEnabled(false)
+
     SCENE_MANAGER:RestoreHUDScene()
     SCENE_MANAGER:RestoreHUDUIScene()
 end
 
 function ZO_HousingEditorHud:OnHousingModeChanged(oldMode, newMode)
-    self:UpdateTargetData()
     self:SetKeybindPaletteHidden(false)
 
     if newMode == HOUSING_EDITOR_MODE_DISABLED then
@@ -712,12 +848,9 @@ function ZO_HousingEditorHud:OnHousingModeChanged(oldMode, newMode)
 
     if newMode == HOUSING_EDITOR_MODE_BROWSE then
         HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
-        SYSTEMS:PushScene("housing_furniture_browser")
-        self:SetKeybindPaletteHidden(true)
+        self:ShowFurnitureBrowser()
     elseif oldMode == HOUSING_EDITOR_MODE_BROWSE then -- If something external exited the housing mode hide everything.
-        if SYSTEMS:IsShowing("housing_furniture_browser") then
-            SCENE_MANAGER:HideCurrentScene()
-        end
+        self:HideFurnitureBrowser()
     end
 
     if newMode == HOUSING_EDITOR_MODE_NODE_PLACEMENT then
@@ -754,6 +887,17 @@ function ZO_HousingEditorHud:OnFurnitureStateChanged(furnitureId, stateIndex, pr
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, NO_SOUND_ID, zo_strformat(SI_HOUSING_MUTUAL_EXCLUSION_FURNITURE_STATE_CHANGE, activatedFurnitureName, deactivatedFurnitureName))
         end
     end
+end
+
+function ZO_HousingEditorHud:HideFurnitureBrowser()
+    if SYSTEMS:IsShowing("housing_furniture_browser") then
+        SCENE_MANAGER:HideCurrentScene()
+    end
+end
+
+function ZO_HousingEditorHud:ShowFurnitureBrowser()
+    SYSTEMS:PushScene("housing_furniture_browser")
+    self:SetKeybindPaletteHidden(true)
 end
 
 function ZO_HousingEditorHud:UpdateKeybinds()
@@ -2120,11 +2264,7 @@ do
             end,
             keybind = "HOUSING_EDITOR_CYCLE_TARGET_ACTION",
             callback = function()
-                local result = HousingEditorCycleTarget()
-                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-                if result == HOUSING_REQUEST_RESULT_SUCCESS then
-                    PlaySound(SOUNDS.RADIAL_MENU_SELECTION)
-                end
+                self:HandleCycleTarget()
             end,
             order = 10,
             ethereal = function()
@@ -2159,10 +2299,10 @@ do
                 keybind = "HOUSING_EDITOR_SECONDARY_ACTION",
                 -- Palette descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
                 enabled = function()
-                              return HOUSING_EDITOR_STATE:CanLocalPlayerBrowse()
+                              return HOUSING_EDITOR_STATE:CanLocalPlayerBrowseFurniture()
                           end,
                 visible = function() 
-                              return HOUSING_EDITOR_STATE:CanLocalPlayerBrowse()
+                              return HOUSING_EDITOR_STATE:CanLocalPlayerBrowseFurniture()
                           end,
                 callback = function()
                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_BROWSE)
@@ -3505,10 +3645,35 @@ do
                 active = true
             end
 
+            -- Continue to hide the Keybind Palette and Inspection HUD elements
+            -- for a brief period after any activity to avoid flickering.
+            local currentMS = GetFrameTimeMilliseconds()
+            if active then
+                self.showTargetDeferredUntilMS = currentMS + SHOW_TARGET_DEFERRAL_TIME_MS
+            elseif currentMS < self.showTargetDeferredUntilMS then
+                active = true
+            end
+
             HOUSING_EDITOR_SHARED:SetKeybindPaletteHidden(active)
+            HOUSING_EDITOR_INSPECTION_HUD_FRAGMENT:SetEditorActive(active)
+
             self:RefreshPlacementKeyPresses()
         end
     end
+end
+
+function ZO_HousingEditorHud:HandleCycleTarget()
+    if not HOUSING_EDITOR_STATE:CanCycleTarget() then
+        return false
+    end
+
+    local result = HousingEditorCycleTarget()
+    ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+    if result == HOUSING_REQUEST_RESULT_SUCCESS then
+        PlaySound(SOUNDS.RADIAL_MENU_SELECTION)
+    end
+
+    return true
 end
 
 function ZO_HousingEditorHud:GetPathNodeInfo(furnitureId, nodeIndex)
@@ -3721,32 +3886,14 @@ end
 -- Housing Editor Keybind Palette
 ---------------------------------
 
-ZO_HousingEditorKeybindPalette = ZO_Object:Subclass()
-
-function ZO_HousingEditorKeybindPalette:New(...)
-    local instance = ZO_Object.New(self)
-    instance:Initialize(...)
-    return instance
-end
+ZO_HousingEditorKeybindPalette = ZO_InitializingObject:Subclass()
 
 function ZO_HousingEditorKeybindPalette:Initialize(control)
     self.control = control
-    self.targetDistance = self.control:GetNamedChild("TargetDistance")
-    self.targetName = self.control:GetNamedChild("TargetName")
 
     self.numActiveKeybindButtons = 0
     self.keybindButtons = {}
     self:InitializePlatformStyle()
-
-    local function OnUpdate()
-        local furnitureId = self.targetFurnitureId or 0
-        if furnitureId ~= 0 then
-            self.targetFurnitureDistanceM = HousingEditorGetSelectedOrTargetObjectDistanceM()
-            self.targetDistance:SetText(zo_strformat(SI_HOUSING_BROWSER_DISTANCE_AWAY_FORMAT, self.targetFurnitureDistanceM))
-        end
-    end
-
-    self.control:SetHandler("OnUpdate", OnUpdate)
 
     local ALWAYS_ANIMATE = true
     local ANIMATION_DURATION_MS = 250
@@ -3756,15 +3903,11 @@ end
 do
     local KEYBOARD_PLATFORM_STYLE =
     {
-        targetDistanceFont = "ZoFontGameLargeBold",
-        targetNameFont = "ZoInteractionPrompt",
         keybindButtonTemplate = "ZO_KeybindButton_Keyboard_Template",
     }
 
     local GAMEPAD_PLATFORM_STYLE =
     {
-        targetDistanceFont = "ZoFontGamepad27",
-        targetNameFont = "ZoFontGamepad42",
         keybindButtonTemplate = "ZO_KeybindButton_Gamepad_Template",
     }
 
@@ -3780,8 +3923,6 @@ end
 function ZO_HousingEditorKeybindPalette:ApplyPlatformStyle(style)
     style = style or self.currentPlatformStyle
     self.currentPlatformStyle = style
-    self.targetDistance:SetFont(style.targetDistanceFont)
-    self.targetName:SetFont(style.targetNameFont)
 
     local previousKeybindButton
     for keybindButtonIndex, keybindButton in ipairs(self.keybindButtons) do
@@ -3789,9 +3930,9 @@ function ZO_HousingEditorKeybindPalette:ApplyPlatformStyle(style)
 
         keybindButton:ClearAnchors()
         if previousKeybindButton then
-            keybindButton:SetAnchor(TOPLEFT, previousKeybindButton, BOTTOMLEFT, nil, 10)
+            keybindButton:SetAnchor(TOPLEFT, previousKeybindButton, BOTTOMLEFT, 0, 10)
         else
-            keybindButton:SetAnchor(TOPLEFT, self.targetDistance, BOTTOMLEFT, 80, 10)
+            keybindButton:SetAnchor(TOPLEFT)
         end
 
         previousKeybindButton = keybindButton
@@ -3908,28 +4049,176 @@ function ZO_HousingEditorKeybindPalette:RefreshKeybinds()
     self:AddKeybinds(self.keybindDescriptors)
 end
 
-function ZO_HousingEditorKeybindPalette:GetVisibleTargetData()
-    return self.targetFurnitureId, self.targetFurniturePathIndex, self.targetFurnitureName
+--------------------------------
+-- Housing Editor Inspection HUD
+--------------------------------
+
+ZO_HousingEditorInspectionHUDFragment = ZO_HUDFadeSceneFragment:Subclass()
+
+function ZO_HousingEditorInspectionHUDFragment:Initialize(control)
+    ZO_HUDFadeSceneFragment.Initialize(self, control)
+
+    self.targetDistanceLabel = control:GetNamedChild("TargetDistance")
+    self.targetNameLabel = control:GetNamedChild("TargetName")
+
+    self.editorMode = HOUSING_EDITOR_MODE_DISABLED
+    self.isHousePreview = false
+    self.targetId = 0
+    self.targetDistanceM = nil
+    self.targetName = ""
+    self.targetPathIndex = nil
+
+    self:InitializeEvents()
+    self:InitializeKeybinds()
+    self:InitializePlatformStyle()
 end
 
-function ZO_HousingEditorKeybindPalette:SetTargetData(furnitureId, pathIndex)
-    local itemName, icon, furnitureDataId = GetPlacedHousingFurnitureInfo(furnitureId)
-    if pathIndex then
-        itemName = zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_NAME, pathIndex, itemName or "")
-    elseif itemName then
-        itemName = zo_strformat(SI_HOUSING_FURNITURE_NAME_FORMAT, itemName)
-    else
-        itemName = ""
+function ZO_HousingEditorInspectionHUDFragment:InitializeEvents()
+    local function OnEditorModeChanged(...)
+        self:OnEditorModeChanged(...)
     end
 
-    self.targetFurnitureId = furnitureId
-    self.targetFurniturePathIndex = pathIndex
-    self.targetFurnitureName = itemName
+    local function OnHouseChanged()
+        self:OnHouseChanged()
+    end
 
-    self.targetDistance:SetText("")
-    self.targetName:SetText(self.targetFurnitureName)
+    local function OnTargetChanged()
+        self:OnTargetChanged()
+    end
 
-    self:RefreshKeybinds()
+    local function OnUpdate()
+        self:OnUpdate()
+    end
+
+    HOUSING_EDITOR_STATE:RegisterCallback("EditorModeChanged", OnEditorModeChanged)
+    HOUSING_EDITOR_STATE:RegisterCallback("HouseChanged", OnHouseChanged)
+
+    self.control:RegisterForEvent(EVENT_HOUSING_TARGET_FURNITURE_CHANGED, OnTargetChanged)
+    self.control:SetHandler("OnUpdate", OnUpdate)
+end
+
+function ZO_HousingEditorInspectionHUDFragment:InitializeKeybinds()
+    self.keybindStripDescriptor =
+    {
+        -- Cycle Target / Node
+        {
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            name = GetString(SI_BINDING_NAME_HOUSING_EDITOR_CYCLE_TARGET_ACTION),
+            keybind = "HOUSING_EDITOR_CYCLE_TARGET_ACTION",
+            callback = function()
+                HOUSING_EDITOR_SHARED:HandleCycleTarget()
+            end,
+            order = 10,
+            ethereal = true,
+        },
+    }
+end
+
+do
+    local KEYBOARD_PLATFORM_STYLE =
+    {
+        targetDistanceFont = "ZoFontGameLargeBold",
+        targetNameFont = "ZoInteractionPrompt",
+    }
+
+    local GAMEPAD_PLATFORM_STYLE =
+    {
+        targetDistanceFont = "ZoFontGamepad27",
+        targetNameFont = "ZoFontGamepad42",
+    }
+
+    function ZO_HousingEditorInspectionHUDFragment:InitializePlatformStyle()
+        local function ApplyPlatformStyle(style)
+            self.currentPlatformStyle = style
+            self.targetDistanceLabel:SetFont(style.targetDistanceFont)
+            self.targetNameLabel:SetFont(style.targetNameFont)
+        end
+
+        self.platformStyle = ZO_PlatformStyle:New(ApplyPlatformStyle, KEYBOARD_PLATFORM_STYLE, GAMEPAD_PLATFORM_STYLE)
+    end
+end
+
+function ZO_HousingEditorInspectionHUDFragment:OnEditorModeChanged(newMode, oldMode)
+    self:UpdateVisibility()
+end
+
+function ZO_HousingEditorInspectionHUDFragment:OnHouseChanged()
+    self:UpdateVisibility()
+end
+
+function ZO_HousingEditorInspectionHUDFragment:OnTargetChanged()
+    local furnitureId = nil
+    local pathIndex = nil
+    if self.editorMode == HOUSING_EDITOR_MODE_PLACEMENT then
+        furnitureId = HousingEditorGetSelectedFurnitureId()
+    else
+        furnitureId, pathIndex = HousingEditorGetTargetInfo()
+    end
+
+    self:SetTarget(furnitureId, pathIndex)
+end
+
+function ZO_HousingEditorInspectionHUDFragment:OnUpdate()
+    if self.targetId ~= 0 then
+        local targetDistanceM = HousingEditorGetSelectedOrTargetObjectDistanceM()
+        if targetDistanceM ~= self.targetDistanceM then
+            self.targetDistanceM = targetDistanceM
+            self.targetDistanceLabel:SetText(zo_strformat(SI_HOUSING_BROWSER_DISTANCE_AWAY_FORMAT, targetDistanceM))
+        end
+    end
+end
+
+function ZO_HousingEditorInspectionHUDFragment:SetEditorActive(active)
+    self:SetHiddenForReason("HousingEditor", active)
+end
+
+function ZO_HousingEditorInspectionHUDFragment:SetTarget(furnitureId, pathIndex)
+    self.targetId = furnitureId
+    self.targetDistanceM = nil
+    self.targetPathIndex = pathIndex
+    self.targetName, self.targetIcon, self.targetFurnitureDataId = GetPlacedHousingFurnitureInfo(self.targetId)
+
+    if not self.targetName then
+        self.targetName = ""
+    elseif self.targetPathIndex then
+        self.targetName = zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_NAME, self.targetPathIndex, self.targetName)
+    else
+        self.targetName = zo_strformat(SI_HOUSING_FURNITURE_NAME_FORMAT, self.targetName)
+    end
+
+    local itemLink, collectibleLink = GetPlacedFurnitureLink(self.targetId)
+    self.targetLink = itemLink ~= "" and itemLink or collectibleLink
+    self.targetQuality = GetItemLinkFunctionalQuality(self.targetLink)
+
+    self.targetDistanceLabel:SetText("")
+    self.targetNameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, self.targetQuality))
+    self.targetNameLabel:SetText(self.targetName)
+
+    HOUSING_EDITOR_KEYBIND_PALETTE:RefreshKeybinds()
+end
+
+function ZO_HousingEditorInspectionHUDFragment:UpdateVisibility()
+    self.editorMode = HOUSING_EDITOR_STATE:GetEditorMode()
+    self.isHousePreview = HOUSING_EDITOR_STATE:IsHousePreview()
+    self:OnTargetChanged()
+
+    local hidden = true
+    if self.isHousePreview or (self.editorMode ~= HOUSING_EDITOR_MODE_DISABLED and self.editorMode ~= HOUSING_EDITOR_MODE_BROWSE) then
+        hidden = false
+    end
+
+    if not hidden then
+        self:OnTargetChanged()
+    end
+
+    self:SetHiddenForReason("HouseState", hidden)
+    self:SetEditorActive(false) -- Reset any prior request to hide while actively editing.
+
+    if not hidden and self.isHousePreview and self.editorMode == HOUSING_EDITOR_MODE_DISABLED then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    else
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    end
 end
 
 --[[ Globals ]]--
@@ -3949,6 +4238,10 @@ end
 
 function ZO_HousingEditorHistory_Initialize(control)
     HOUSING_EDITOR_UNDO_STACK = ZO_HousingEditorHistory:New(control)
+end
+
+function ZO_HousingEditorInspectionHUDFragment_Initialize(control)
+    HOUSING_EDITOR_INSPECTION_HUD_FRAGMENT = ZO_HousingEditorInspectionHUDFragment:New(control)
 end
 
 function ZO_HousingEditorHistory_Entry_OnInitialized(control)

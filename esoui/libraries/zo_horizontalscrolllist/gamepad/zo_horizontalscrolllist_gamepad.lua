@@ -10,6 +10,32 @@ function ZO_HorizontalScrollList_Gamepad:Initialize(control, templateName, numVi
     ZO_HorizontalScrollList.Initialize(self, control, templateName, numVisibleEntries, setupFunction, equalityFunction, onCommitWithItemsFunction, onClearedFunction)
     self:SetActive(false)
     self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
+    local function GetDirectionalInputNarrationData()
+        --Only narrate directional input if there is more than one possible value
+        if self.active and self:CanScroll() then
+            local numItems = self:GetNumItems()
+            local selectedIndex = self:GetSelectedIndex()
+            local disableArrows = numItems == 0 or (numItems == 1 and not self.allowWrapping)
+
+            if disableArrows then
+                --Don't include directional input if both arrows are disabled
+                return {}
+            elseif selectedIndex and not self.allowWrapping then
+                --Only include enabled state if we are not allowed to wrap
+                local DEFAULT_LEFT_TEXT = nil
+                local DEFAULT_RIGHT_TEXT = nil
+                local leftArrowEnabled = selectedIndex ~= 0
+                local rightArrowEnabled = zo_abs(selectedIndex) ~= numItems - 1
+                return ZO_GetHorizontalDirectionalInputNarrationData(DEFAULT_LEFT_TEXT, DEFAULT_RIGHT_TEXT, leftArrowEnabled, rightArrowEnabled)
+            else
+                return ZO_GetHorizontalDirectionalInputNarrationData()
+            end
+        else
+            return {}
+        end
+    end
+
+    self.directionalInputNarrationFunction = GetDirectionalInputNarrationData
 end
 
 function ZO_HorizontalScrollList_Gamepad:SetOnActivatedChangedFunction(onActivatedChangedFunction)
@@ -40,6 +66,10 @@ function ZO_HorizontalScrollList_Gamepad:SetActive(active)
             self.onActivatedChangedFunction(self, self.active)
         end
     end
+end
+
+function ZO_HorizontalScrollList_Gamepad:IsActive()
+    return self.active
 end
 
 function ZO_HorizontalScrollList_Gamepad:UpdateArrows()
@@ -95,4 +125,8 @@ end
 -- Optionally you can return true to consume the result before the list processes it
 function ZO_HorizontalScrollList_Gamepad:SetCustomDirectionInputHandler(handler)
     self.customDirectionalInputHandler = handler
+end
+
+function ZO_HorizontalScrollList_Gamepad:GetAdditionalInputNarrationFunction()
+    return self.directionalInputNarrationFunction
 end

@@ -2,14 +2,25 @@
 
 function ZO_Tooltip:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP)
     local bar = self:AcquireStatusBar(self:GetStyle("abilityProgressBar"))
+    local maxValue = 1
+    local currentValue = 1
     if nextRankXP == 0 then
-        bar:SetMinMax(0, 1)
-        bar:SetValue(1)
+        bar:SetMinMax(0, maxValue)
+        bar:SetValue(currentValue)
     else
-        bar:SetMinMax(0, nextRankXP - lastRankXP)
-        bar:SetValue(currentXP - lastRankXP)
+        maxValue = nextRankXP - lastRankXP
+        currentValue = currentXP - lastRankXP
+        bar:SetMinMax(0, maxValue)
+        bar:SetValue(currentValue)
     end
-    self:AddStatusBar(bar)
+
+    local narrationText = function()
+        local range = maxValue - 0
+        local percentage = (currentValue - 0) / range
+        percentage = string.format("%.2f", percentage * 100)
+        return zo_strformat(SI_SCREEN_NARRATION_PROGRESS_BAR_PERCENT_FORMATTER, percentage)
+    end
+    self:AddStatusBar(bar, narrationText)
 end
 
 do
@@ -150,20 +161,24 @@ do
 
         --Roles
         local isTankRole, isHealerRole, isDamageRole = GetAbilityRoles(abilityId)
+        local roleNarrationText = {}
         if isTankRole then
             table.insert(g_roleIconTable, TANK_ROLE_ICON)
+            table.insert(roleNarrationText, GetString("SI_LFGROLE", LFG_ROLE_TANK))
         end
         if isHealerRole then
             table.insert(g_roleIconTable, HEALER_ROLE_ICON)
+            table.insert(roleNarrationText, GetString("SI_LFGROLE", LFG_ROLE_HEAL))
         end
         if isDamageRole then
             table.insert(g_roleIconTable, DAMAGE_ROLE_ICON)
+            table.insert(roleNarrationText, GetString("SI_LFGROLE", LFG_ROLE_DPS))
         end
         if #g_roleIconTable > 0 then
             local rolesPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             rolesPair:SetStat(GetString(SI_ABILITY_TOOLTIP_ROLE_LABEL), self:GetStyle("statValuePairStat"))
             local finalIconText = table.concat(g_roleIconTable, "")
-            rolesPair:SetValue(finalIconText, self:GetStyle("abilityStatValuePairValue"))
+            rolesPair:SetValueWithCustomNarration(finalIconText, roleNarrationText, self:GetStyle("abilityStatValuePairValue"))
             statsSection:AddStatValuePair(rolesPair)
             ZO_ClearNumericallyIndexedTable(g_roleIconTable)
         end

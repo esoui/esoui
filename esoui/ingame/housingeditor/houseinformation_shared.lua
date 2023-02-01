@@ -165,6 +165,12 @@ do
 end
 
 function ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
+    houseId = tonumber(houseId)
+    if not houseId then
+        -- Invalid houseId.
+        return nil
+    end
+
     if GetHouseZoneId(houseId) == 0 then
         -- Invalid houseId.
         return nil

@@ -1,16 +1,16 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_WorldMapKeySymbol_Gamepad" virtual="true" resizeToFitDescendents="true">
+        <Control name="ZO_WorldMapKeySymbol_Gamepad" virtual="true" resizeToFitConstrains="Y">
             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
             <Controls>
                 <Texture name="$(parent)Symbol" layer="CONTROLS">
-                    <Anchor point="LEFT"/>
+                    <Anchor point="TOPLEFT"/>
                     <Dimensions x="64" y="64" />
                 </Texture>
 
                 <Label name="$(parent)Name" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="321" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Symbol" relativePoint="TOPRIGHT" offsetX="5"/>
+                    <Anchor point="TOPRIGHT" />
                 </Label>
             </Controls>
         </Control>

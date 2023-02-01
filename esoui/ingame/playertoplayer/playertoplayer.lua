@@ -111,6 +111,34 @@ do
         SHARED_INFORMATION_AREA:AddPlayerToPlayer(self.container)
 
         ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
+
+        --Set up narration for the player to player prompts
+        local narrationInfo =
+        {
+            canNarrate = function()
+                return not self:IsHidden() and not SHARED_INFORMATION_AREA:IsSuppressed()
+            end,
+            selectedNarrationFunction = function()
+                local narrations = {}
+                if not self.targetLabel:IsHidden() then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.targetText))
+                end
+
+                if not self.pendingResurrectInfo:IsHidden() then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.pendingResurrectText))
+                end
+                return narrations
+            end,
+            additionalInputNarrationFunction = function()
+                local narrationData =  {}
+                if not self.actionKeybindButton:IsHidden() then
+                    table.insert(narrationData, self.actionKeybindButton:GetKeybindButtonNarrationData())
+                end
+                return narrationData
+            end,
+            narrationType = NARRATION_TYPE_HUD,
+        }
+        SCREEN_NARRATION_MANAGER:RegisterCustomObject("PlayerToPlayerPrompt", narrationInfo)
     end
 end
 
@@ -127,6 +155,38 @@ function ZO_PlayerToPlayer:CreateGamepadRadialMenu()
     self.gamepadMenu:SetOnClearCallback(function()
         self:StopInteraction()
     end)
+
+    self.gamepadMenu:SetOnSelectionChangedCallback(function(selectedEntry)
+        --Re-narrate when the selection changes
+        if selectedEntry then
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry("PlayerToPlayerWheel")
+        end
+    end)
+
+    --Set up narration for the player interact wheels
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return self.showingPlayerInteractMenu or self.showingGamepadResponseMenu
+        end,
+        selectedNarrationFunction = function()
+            local narrations = {}
+            local selectedEntry = self.gamepadMenu.selectedEntry
+            if selectedEntry then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedEntry.name))
+            end
+            return narrations
+        end,
+        headerNarrationFunction = function()
+            if self.showingPlayerInteractMenu then
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_PLAYER_TO_PLAYER_INTERACT_WHEEL_NARRATION))
+            elseif self.showingGamepadResponseMenu then
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_PLAYER_TO_PLAYER_RESPONSE_WHEEL_NARRATION))
+            end
+        end,
+        narrationType = NARRATION_TYPE_HUD,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("PlayerToPlayerWheel", narrationInfo)
 end
 
 function ZO_PlayerToPlayer:CreateKeyboardRadialMenu()
@@ -222,6 +282,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         data.dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_DUEL)
         data.expiresAtS = GetFrameTimeSeconds() + (timeRemainingMS / ZO_ONE_SECOND_IN_MILLISECONDS)
         data.expirationCallback = DeferDecisionCallback
+        data.noDeclineConfirmation = true
     end
 
     local function OnDuelInviteRemoved()
@@ -244,6 +305,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         data.dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_TRIBUTE_INVITE)
         data.expiresAtS = GetFrameTimeSeconds() + (timeRemainingMS / ZO_ONE_SECOND_IN_MILLISECONDS)
         data.expirationCallback = DeferDecisionCallback
+        data.noDeclineConfirmation = true
     end
 
     local function OnTributeInviteRemoved()
@@ -373,7 +435,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
 
         local formattedInviterName = ZO_FormatUserFacingDisplayName(inviterName)
-        local guildNameAlliance = zo_iconTextFormat(GetPlatformAllianceSymbolIcon(guildAlliance), allianceIconSize, allianceIconSize, ZO_SELECTED_TEXT:Colorize(guildName))
+        local guildNameAlliance = zo_iconTextFormat(ZO_GetPlatformAllianceSymbolIcon(guildAlliance), allianceIconSize, allianceIconSize, ZO_SELECTED_TEXT:Colorize(guildName))
         local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_GUILD_INVITE, nil, formattedInviterName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_GUILD_REQUEST, ZO_SELECTED_TEXT:Colorize(formattedInviterName), guildNameAlliance),
             function()
                 AcceptGuildInvite(guildId)
@@ -474,6 +536,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         promptData.dialogTitle = campaignQueueData.dialogTitle
         promptData.acceptText = GetString(SI_CAMPAIGN_QUEUE_JOINED_AS_GROUP_OPEN_CAMPAIGNS_BUTTON)
         promptData.declineText = GetString(SI_CAMPAIGN_QUEUE_JOINED_AS_GROUP_DISMISS_BUTTON)
+        promptData.noDeclineConfirmation = true
     end
 
     local function OnCampaignQueueLeft(_, campaignId, group)
@@ -977,6 +1040,22 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_LOGOUT_DEFERRED, OnLogoutDeferred)
 end
 
+function ZO_PlayerToPlayer:SetTopLevelHidden(hidden)
+    local isTopLevelHidden = self.control:IsHidden()
+    if isTopLevelHidden ~= hidden then
+        if not self:IsHidden() then
+            if hidden then
+                --Clear out any in progress HUD narration when hiding
+                ClearNarrationQueue(NARRATION_TYPE_HUD)
+            else
+                --Re-narrate the prompt when showing
+                SCREEN_NARRATION_MANAGER:QueueCustomEntry("PlayerToPlayerPrompt")
+            end
+        end
+        self.control:SetHidden(hidden)
+    end
+end
+
 function ZO_PlayerToPlayer:SetHidden(hidden)
     SHARED_INFORMATION_AREA:SetHidden(self.container, hidden)
 end
@@ -1073,6 +1152,9 @@ function ZO_PlayerToPlayer:ShowGamepadResponseMenu(data)
     menu:Show()
     self.showingGamepadResponseMenu = true
     self.isLastRadialMenuGamepad = true
+    --Narrate the wheel when first showing it
+    local NARRATE_HEADER = true
+    SCREEN_NARRATION_MANAGER:QueueCustomEntry("PlayerToPlayerWheel", NARRATE_HEADER)
 end
 
 do
@@ -1240,7 +1322,7 @@ function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckUpdated()
                 messageFormat = SI_LFG_READY_CHECK_NO_ROLE_TEXT
                 messageParams = { activityTypeText, generalActivityText }
             else
-                local roleIconPath = GetRoleIcon(role)
+                local roleIconPath = ZO_GetRoleIcon(role)
                 local roleIconFormat = zo_iconFormat(roleIconPath, "100%", "100%")
 
                 messageFormat = SI_LFG_READY_CHECK_TEXT
@@ -1371,6 +1453,14 @@ function ZO_PlayerToPlayer:StopInteraction(clearSelection)
                 end
                 radialMenu:SelectCurrentEntry()
             end
+
+            if not self:IsHidden() then
+                --Re-narrate the prompt when closing the wheel
+                SCREEN_NARRATION_MANAGER:QueueCustomEntry("PlayerToPlayerPrompt")
+            elseif self.isLastRadialMenuGamepad then
+                --Clear out any in progress HUD narration when exiting the wheel
+                ClearNarrationQueue(NARRATION_TYPE_HUD)
+            end
         end
     elseif self.showingGamepadResponseMenu then
         self.showingGamepadResponseMenu = false
@@ -1383,6 +1473,14 @@ function ZO_PlayerToPlayer:StopInteraction(clearSelection)
                 radialMenu:ClearSelection()
             end
             radialMenu:SelectCurrentEntry()
+        end
+
+        if not self:IsHidden() then
+            --Re-narrate the prompt when closing the wheel
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry("PlayerToPlayerPrompt")
+        elseif self.isLastRadialMenuGamepad then
+            --Clear out any in progress HUD narration when exiting the wheel
+            ClearNarrationQueue(NARRATION_TYPE_HUD)
         end
     end
 
@@ -1486,6 +1584,7 @@ end
 
 local RAID_LIFE_ICON_MARKUP = "|t32:32:EsoUI/Art/Trials/VitalityDepletion.dds|t"
 function ZO_PlayerToPlayer:TryShowingResurrectLabel(unitTag)
+    local wasResurrectInfoHidden = self.pendingResurrectInfo:IsHidden()
     if IsUnitResurrectableByPlayer(unitTag) then
         self:SetTargetIdentification(unitTag)
 
@@ -1493,23 +1592,40 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel(unitTag)
 
         self.targetLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
         if unitTag == P2C_UNIT_TAG then
-            self.targetLabel:SetText(GetUnitName(unitTag))
+            self.targetText = GetUnitName(unitTag)
+            self.targetLabel:SetText(self.targetText)
         else
-            self.targetLabel:SetText(ZO_GetPrimaryPlayerNameWithSecondary(self.currentTargetDisplayName, self.currentTargetCharacterName))
+            self.targetText = ZO_GetPrimaryPlayerNameWithSecondary(self.currentTargetDisplayName, self.currentTargetCharacterName)
+            self.targetLabel:SetText(self.targetText)
         end
 
         self.isBeingResurrected = IsUnitBeingResurrected(unitTag)
         self.hasResurrectPending = DoesUnitHaveResurrectPending(unitTag)
         if self.isBeingResurrected or self.hasResurrectPending then
+            if wasResurrectInfoHidden then
+                self.pendingResurrectInfoChanged = true
+            end
+
             self.pendingResurrectInfo:SetHidden(false)
+            local pendingResurrectText
             if self.isBeingResurrected then
-                self.pendingResurrectInfo:SetText(GetString(SI_PLAYER_TO_PLAYER_RESURRECT_BEING_RESURRECTED))
+                pendingResurrectText = GetString(SI_PLAYER_TO_PLAYER_RESURRECT_BEING_RESURRECTED)
             else
-                self.pendingResurrectInfo:SetText(GetString(SI_PLAYER_TO_PLAYER_RESURRECT_HAS_RESURRECT_PENDING))
+                pendingResurrectText = GetString(SI_PLAYER_TO_PLAYER_RESURRECT_HAS_RESURRECT_PENDING)
+            end
+
+            if pendingResurrectText ~= self.pendingResurrectText then 
+                self.pendingResurrectInfoChanged = true
+                self.pendingResurrectText = pendingResurrectText
+                self.pendingResurrectInfo:SetText(self.pendingResurrectText)
             end
         else
             self.pendingResurrectInfo:SetHidden(true)
             self.actionKeybindButton:SetHidden(false)
+
+            if not wasResurrectInfoHidden then
+                self.pendingResurrectInfoChanged = true
+            end
 
             local targetLevel = GetUnitEffectiveLevel(unitTag)
             local _, _, stackCount = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, targetLevel)
@@ -1520,16 +1636,23 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel(unitTag)
             self.actionKeybindButton:SetEnabled(self.hasRequiredSoulGem and not self.failedRaidRevives)
 
             local finalText
+            local narrationText
             if ZO_Death_DoesReviveCostRaidLife() then
                 finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE_FAILED, coloredFilledText, coloredSoulGemIconMarkup, RAID_LIFE_ICON_MARKUP)
+                narrationText = GetString(SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE_NARRATION)
             else
                 finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_FAILED, coloredFilledText, coloredSoulGemIconMarkup)
+                narrationText = GetString(SI_PLAYER_TO_PLAYER_RESURRECT_GEM_NARRATION)
             end
 
-            self.actionKeybindButton:SetText(finalText)
+            self.actionKeybindButton:SetText(finalText, narrationText)
         end
 
         return true
+    end
+
+    if not wasResurrectInfoHidden then
+        self.pendingResurrectInfoChanged = true
     end
     self.pendingResurrectInfo:SetHidden(true)
     return false
@@ -1549,7 +1672,8 @@ function ZO_PlayerToPlayer:TryShowingStandardInteractLabel()
 
         self.actionKeybindButton:SetHidden(false)
         self.targetLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-        self.targetLabel:SetText(zo_strformat(interactLabel, ZO_GetPrimaryPlayerNameWithSecondary(self.currentTargetDisplayName, self.currentTargetCharacterName)))
+        self.targetText = zo_strformat(interactLabel, ZO_GetPrimaryPlayerNameWithSecondary(self.currentTargetDisplayName, self.currentTargetCharacterName))
+        self.targetLabel:SetText(self.targetText)
         self.actionKeybindButton:SetText(GetString(SI_PLAYER_TO_PLAYER_ACTION_MENU))
 
         return true
@@ -1597,7 +1721,8 @@ function ZO_PlayerToPlayer:TryShowingResponseLabel()
             -- Set text on the label
             local displayText = ZO_PlayerToPlayer_GetIncomingEntryDisplayText(incomingEntry)
             local font = IsInGamepadPreferredMode() and "ZoFontGamepad42" or "ZoInteractionPrompt"
-            self.targetLabel:SetText(displayText)
+            self.targetText = displayText
+            self.targetLabel:SetText(self.targetText)
             self.targetLabel:SetFont(font)
             self.targetLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
 
@@ -1687,6 +1812,7 @@ function ZO_PlayerToPlayer:OnUpdate()
         self.additionalInfo:SetHidden(true)
         self.promptKeybindButton1.shouldHide = true
         self.promptKeybindButton2.shouldHide = true
+        self.pendingResurrectInfoChanged = false
 
         if (not self.isInteracting) or (not IsConsoleUI()) then
             self.gamerID:SetHidden(true)
@@ -1726,12 +1852,22 @@ function ZO_PlayerToPlayer:OnUpdate()
             hideTargetLabel = true
         end
 
+        local wasSelfHidden = self:IsHidden()
         -- These must be called after we've determined what state they should be in
         -- Because if we simply hide and re-show them, the Chroma behavior will not function correctly
         self:SetHidden(hideSelf)
         self.targetLabel:SetHidden(hideTargetLabel)
         self.promptKeybindButton1:SetHidden(self.promptKeybindButton1.shouldHide)
         self.promptKeybindButton2:SetHidden(self.promptKeybindButton2.shouldHide)
+
+        if wasSelfHidden ~= hideSelf or self.pendingResurrectInfoChanged then
+            if hideSelf then
+                --Clear out any in progress HUD narration when hiding the target prompt
+                ClearNarrationQueue(NARRATION_TYPE_HUD)
+            else
+                SCREEN_NARRATION_MANAGER:QueueCustomEntry("PlayerToPlayerPrompt")
+            end
+        end
 
         -- SetHidden isn't guaranteed to unhide us, so if something else is showing in the shared information
         -- area, we shouldn't push our keybind layer
@@ -2076,6 +2212,10 @@ do
         self:GetRadialMenu():Show()
         self.showingPlayerInteractMenu = true
         self.isLastRadialMenuGamepad = IsInGamepadPreferredMode()
+        if self.isLastRadialMenuGamepad then
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry("PlayerToPlayerWheel", NARRATE_HEADER)
+        end
     end
 end
 

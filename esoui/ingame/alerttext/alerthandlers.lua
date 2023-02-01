@@ -1033,6 +1033,13 @@ local AlertHandlers =
         end
     end,
 
+    [EVENT_ATTRIBUTE_RESPEC_RESULT] = function(result)
+        local message = GetString("SI_RESPECRESULT", result)
+        if message and message ~= "" then
+            return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
     [EVENT_CHAMPION_PURCHASE_RESULT] = function(result)
         local message = GetString("SI_CHAMPIONPURCHASERESULT", result)
         if message and message ~= "" then

@@ -76,6 +76,21 @@ function ZO_ArmorySkillsActionBar:AddSlotsToMouseInputGroup(inputGroup, inputTyp
     end
 end
 
+function ZO_ArmorySkillsActionBar:GetNarrationText()
+    local narrations = {}
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_ARMORY_SKILL_BAR_FORMATTER, GetString("SI_HOTBARCATEGORY", self.hotbarCategory))))
+    if self:GetLocked() then
+        --If the bar is locked, just narrate that it's locked, and don't bother narrating the individual slots
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION)))
+    else
+        --Get the narration for each slot
+        for _, slot in ipairs(self.slots) do
+            ZO_AppendNarration(narrations, slot:GetNarrationText())
+        end
+    end
+    return narrations
+end
+
 ZO_ArmorySkillsActionBarSlot = ZO_InitializingObject:Subclass()
 
 function ZO_ArmorySkillsActionBarSlot:Initialize(control, actionBar, actionSlotIndex)
@@ -150,6 +165,28 @@ end
 
 function ZO_ArmorySkillsActionBarSlot:OnMouseExit()
     ClearTooltip(SkillTooltip)
+end
+
+do
+    local NOT_BOUND_ACTION_STRING = GetString(SI_ACTION_IS_NOT_BOUND)
+    local DEFAULT_SHOW_AS_HOLD = nil
+
+    function ZO_ArmorySkillsActionBarSlot:GetNarrationText()
+        local narrations = {}
+
+        --Get the binding narration
+        local keyboardActionName, gamepadActionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetKeyboardAndGamepadActionNameForSlot(self.slotIndex, self.bar:GetHotbarCategory())
+        local bindingTextNarration = ZO_Keybindings_GetPreferredHighestPriorityNarrationStringFromActions(keyboardActionName, gamepadActionName, DEFAULT_SHOW_AS_HOLD) or NOT_BOUND_ACTION_STRING
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(bindingTextNarration))
+        
+        --Get the narration for the contents of the slot
+        if self.skillProgressionData then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.skillProgressionData:GetFormattedName()))
+        else
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ARMORY_EMPTY_ENTRY_NARRATION)))
+        end
+        return narrations
+    end
 end
 
 function ZO_ArmoryActionButton_Keyboard_OnMouseEnter(control)

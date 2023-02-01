@@ -103,6 +103,10 @@ function ZO_Gamepad_ParametricList_Screen:GetHeaderNarration()
     end
 end
 
+function ZO_Gamepad_ParametricList_Screen:GetFooterNarration()
+    --Should be overridden if we want to narrate the footer
+end
+
 --Any screens that store the header data elsewhere should override this function
 function ZO_Gamepad_ParametricList_Screen:GetHeaderData()
     return self.headerData

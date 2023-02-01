@@ -85,26 +85,65 @@ function ZO_GamepadTradeWindow:OnDeferredInitialize()
     -- Gold Slider
     self.goldSliderControl = self.control:GetNamedChild("Mask"):GetNamedChild("GoldSliderBox")
     self.goldSlider = ZO_CurrencySelector_Gamepad:New(self.goldSliderControl:GetNamedChild("Selector"))
+    self.goldSlider:SetCurrencyType(CURT_MONEY)
     self.goldSlider:SetClampValues(true)
 
     self:InitializeOfferLists()
     self:InitializeInventoryList()
     self:InitializeHeaders()
+    self:InitializeNarration()
 end
 
 function ZO_GamepadTradeWindow:InitializeOfferLists()
     -- Offer Lists
-    self.lists = {}
+    self.offerLists = {}
     self.listTradeItemCount = {}
     self.offeredMoney = {}
 
     self:SetupOfferList(TRADE_ME)
     self:SetupOfferList(TRADE_THEM)
 
-    self.lists[TRADE_ME]:SetDirectionalInputEnabled(false)
-    self.lists[TRADE_THEM]:SetDirectionalInputEnabled(false)
+    self.offerLists[TRADE_ME]:SetDirectionalInputEnabled(false)
+    self.offerLists[TRADE_THEM]:SetDirectionalInputEnabled(false)
     self.listMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
     self.activeListType = TRADE_ME
+end
+
+function ZO_GamepadTradeWindow:InitializeNarration()
+    --Unregister for narration so we can register it manually
+    self:UnregisterForNarration()
+
+    --Manually register each of the offer lists for narration
+    for tradeType, list in pairs(self.offerLists) do
+        local narrationInfo =
+        {
+            canNarrate = function()
+                return self:IsShowing() and self.activeListType == tradeType
+            end,
+            headerNarrationFunction = function()
+                return self:GetHeaderNarration()
+            end,
+            footerNarrationFunction = function()
+                return self:GetFooterNarration()
+            end,
+        }
+        SCREEN_NARRATION_MANAGER:RegisterParametricList(list, narrationInfo)
+    end
+
+    local inventoryListNarrationInfo =
+    {
+        canNarrate = function()
+            return self:IsShowing() and self.view == VIEW_INVENTORY
+        end,
+        headerNarrationFunction = function()
+            return self:GetHeaderNarration()
+        end,
+        footerNarrationFunction = function()
+            return self:GetFooterNarration()
+        end,
+    }
+    --self.inventoryList is not an actual list, so we need to register self.inventoryList.list instead
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.inventoryList.list, inventoryListNarrationInfo)
 end
 
 function ZO_GamepadTradeWindow:ActivateTextSearch()
@@ -139,7 +178,7 @@ do
         list:SetNoItemText(GetString(SI_GAMEPAD_TRADE_NO_ITEMS_OFFERED))
         list.tradetype = tradetype
         list:Activate()
-        self.lists[tradetype] = list
+        self.offerLists[tradetype] = list
     end
 end
 
@@ -218,7 +257,7 @@ end
 --Updates
 ---------
 function ZO_GamepadTradeWindow:UpdateDirectionalInput()
-    local list = self.lists[self.activeListType]
+    local list = self.offerLists[self.activeListType]
     local result = self.listMovementController:CheckMovement()
 
     -- Pass the movement to the correct list
@@ -270,6 +309,9 @@ function ZO_GamepadTradeWindow:SetOfferFocus(listType)
         GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:ClearFocus()
         GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:TakeFocus()
         PlaySound(SOUNDS.GAMEPAD_PAGE_BACK)
+        --Re-narrate when changing focus between offers
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.offerLists[listType], NARRATE_HEADER)
     else
         if self.view == VIEW_INVENTORY then
             return
@@ -277,6 +319,9 @@ function ZO_GamepadTradeWindow:SetOfferFocus(listType)
         GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:ClearFocus()
         GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:TakeFocus()
         PlaySound(SOUNDS.GAMEPAD_PAGE_FORWARD)
+        --Re-narrate when changing focus between offers
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.offerLists[listType], NARRATE_HEADER)
     end
 
     self.activeListType = listType
@@ -299,6 +344,10 @@ do
         return true
     end
 
+    function ZO_GamepadTradeWindow:GetGoldOfferValueNarration(tradeType)
+        return ZO_Currency_FormatGamepad(CURT_MONEY, self.offeredMoney[tradeType] or 0, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+    end
+
     function ZO_GamepadTradeWindow:UpdateHeaders()
         self.myName = ZO_GetPrimaryPlayerName(GetUnitDisplayName("player"), GetUnitName("player"))
         local myTitle
@@ -309,7 +358,7 @@ do
         end
 
         --The other trader doesn't say not ready and doesn't say 0 gold offered
-        local theirTitle, theirGoldHeader, theirGoldValue
+        local theirTitle, theirGoldHeader, theirGoldValue, theirGoldValueNarration
         
         if self.confirm[TRADE_THEM] == TRADE_CONFIRM_EDIT then
             theirTitle = zo_strformat(SI_GAMEPAD_TRADE_USERNAME, TRADE_WINDOW.target)
@@ -321,6 +370,9 @@ do
             theirGoldHeader = GetString(SI_GAMEPAD_TRADE_OFFERED_GOLD)
             theirGoldValue = function(control)
                 return self:UpdateGoldOfferValue(control, TRADE_THEM)
+            end
+            theirGoldValueNarration = function()
+                return self:GetGoldOfferValueNarration(TRADE_THEM)
             end
         end
 
@@ -335,10 +387,14 @@ do
             
                 data2HeaderText = GetString(SI_GAMEPAD_TRADE_PLAYER_GOLD),
                 data2Text = UpdatePlayerGold,
+                data2TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
 
                 data3HeaderText = GetString(SI_GAMEPAD_TRADE_OFFERED_GOLD),
                 data3Text = function(control)
                     return self:UpdateGoldOfferValue(control, TRADE_ME)
+                end,
+                data3TextNarration = function()
+                    return self:GetGoldOfferValueNarration(TRADE_ME)
                 end,
             },
             [TRADE_THEM] =
@@ -347,6 +403,7 @@ do
 
                 data1HeaderText = theirGoldHeader,
                 data1Text = theirGoldValue,
+                data1TextNarration = theirGoldValueNarration,
             },
         }
 
@@ -374,7 +431,7 @@ end
 function ZO_GamepadTradeWindow:ShowGoldSliderControl(value, maxValue)
     PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
 
-    local currentGold = self.lists[TRADE_ME]:GetTargetControl()
+    local currentGold = self.offerLists[TRADE_ME]:GetTargetControl()
     currentGold:SetHidden(true)
 
     self.goldSlider:SetMaxValue(maxValue)
@@ -386,13 +443,15 @@ function ZO_GamepadTradeWindow:ShowGoldSliderControl(value, maxValue)
 end
 
 function ZO_GamepadTradeWindow:HideGoldSliderControl()
-    local currentGold = self.lists[TRADE_ME]:GetTargetControl()
+    local currentGold = self.offerLists[TRADE_ME]:GetTargetControl()
     currentGold:SetHidden(false)
 
     self.goldSlider:Deactivate()
     self.goldSliderControl:SetHidden(true)
 
     self:SwitchToKeybind(self.keybindStripDescriptorOffer)
+    --Re-narrate when closing the gold slider
+    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.offerLists[TRADE_ME])
 end
 
 function ZO_GamepadTradeWindow:OnSelectionChanged(list, item)
@@ -418,16 +477,16 @@ function ZO_GamepadTradeWindow:RefreshTooltips()
         if self.view == VIEW_INVENTORY then
             self:InventorySelectionChanged(self.inventoryList:GetTargetData())
         else
-            self:OnSelectionChanged(self.lists[TRADE_ME], self.lists[TRADE_ME]:GetTargetData())
+            self:OnSelectionChanged(self.offerLists[TRADE_ME], self.offerLists[TRADE_ME]:GetTargetData())
         end
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
-        self:OnSelectionChanged(self.lists[TRADE_THEM], self.lists[TRADE_THEM]:GetTargetData())
+        self:OnSelectionChanged(self.offerLists[TRADE_THEM], self.offerLists[TRADE_THEM]:GetTargetData())
     end
 end
 
 function ZO_GamepadTradeWindow:RefreshOfferList(tradetype, list)
-    list = list or self.lists[tradetype]
+    list = list or self.offerLists[tradetype]
     local isMyEdit = tradetype == TRADE_ME and self.confirm[tradetype] == TRADE_CONFIRM_EDIT
 
     local lastSelectedIndex = list.selectedIndex or 1
@@ -520,6 +579,8 @@ function ZO_GamepadTradeWindow:EnterConfirmation(tradetype)
         self:RefreshKeybind()
         GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:SetHighlightHidden(false)
         name = zo_strformat(SI_GAMEPAD_TRADE_USERNAME, TRADE_WINDOW.target)
+        --Re-narrate if the local player pressed submit
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.offerLists[self.activeListType])
     else
         GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:SetHighlightHidden(false)
         name = self.myName
@@ -529,6 +590,8 @@ function ZO_GamepadTradeWindow:EnterConfirmation(tradetype)
         ZO_Trade_GamepadWaiting.name:SetText(name)
     end
 
+    self.waitingName = name
+
     self:RefreshOfferList(tradetype)
 
     PlaySound(SOUNDS.TRADE_PARTICIPANT_READY)
@@ -537,9 +600,11 @@ end
 function ZO_GamepadTradeWindow:ExitConfirmation(tradetype)
     ZO_Trade_GamepadWaiting:SetHidden(true)
     if tradetype == TRADE_ME then
-        self.lists[TRADE_ME]:RefreshVisible()
+        self.offerLists[TRADE_ME]:RefreshVisible()
         self:RefreshKeybind()
         GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:ClearHighlight()
+        --Re-narrate if the local player cancelled their current offer
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.offerLists[self.activeListType])
     else
         GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:ClearHighlight()
     end
@@ -574,15 +639,21 @@ function ZO_GamepadTradeWindow:SwitchView(view)
         if self.inventoryList.list:IsEmpty() then
             self:RequestEnterHeader()
         end
+        --Re-narrate when switching to the inventory view
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventoryList.list, NARRATE_HEADER)
     else --- VIEW_OFFER
         self:DeactivateTextSearch()
         if self:IsHeaderActive() then
             self:ExitHeader()
         end
-        self:SetCurrentList(self.lists[TRADE_ME])
-        self.lists[TRADE_ME]:RefreshVisible()
+        self:SetCurrentList(self.offerLists[TRADE_ME])
+        self.offerLists[TRADE_ME]:RefreshVisible()
 
         self:SwitchToKeybind(self.keybindStripDescriptorOffer)  -- inventoryControl removes conflicting keybinds so this must be done last
+        --Re-narrate when leaving inventory view
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.offerLists[TRADE_ME], NARRATE_HEADER)
     end
     self:RefreshTooltips()
     self:RefreshCanSwitchFocus()
@@ -624,37 +695,35 @@ function ZO_GamepadTradeWindow:InitializeKeybindDescriptor()
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         -- Review My Offer
         {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = "Gamepad Trade Review My Offer",
-
+            --Even though this is an ethereal keybind, the name will still be read during screen narration
+            name = GetString(SI_GAMEPAD_TRADE_VIEW_MY_OFFER_KEYBIND),
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
-
             callback = function()
                 self:SetOfferFocus(TRADE_ME)
             end,
-
             ethereal = true,
+            narrateEthereal = function()
+                return self.canSwitchFocus
+            end,
+            etherealNarrationOrder = 1,
         },
         -- Edit Trade
         {
             keybind = "UI_SHORTCUT_PRIMARY",
-
             name = function()
-                local selectedData = self.lists[TRADE_ME]:GetTargetData()
+                local selectedData = self.offerLists[TRADE_ME]:GetTargetData()
                 if selectedData and selectedData.tradeIndex then
                     return GetString(SI_GAMEPAD_TRADE_REMOVE)
                 else
                     return GetString(SI_GAMEPAD_TRADE_ADD)
                 end
             end,
-
             callback = function()
-                local selectedData = self.lists[TRADE_ME]:GetTargetData()
+                local selectedData = self.offerLists[TRADE_ME]:GetTargetData()
                 if selectedData and selectedData.actionFunction then
                     selectedData:actionFunction()
                 end
             end,
-
             visible = function()
                 return self.activeListType == TRADE_ME and self.confirm[TRADE_ME] == TRADE_CONFIRM_EDIT
             end,
@@ -662,7 +731,6 @@ function ZO_GamepadTradeWindow:InitializeKeybindDescriptor()
         -- Cancel Trade
         {
             keybind = "UI_SHORTCUT_NEGATIVE",
-
             name = function()
                 if self.confirm[TRADE_ME] == TRADE_CONFIRM_ACCEPT then
                     return GetString(SI_GAMEPAD_TRADE_CANCEL_OFFER)
@@ -670,7 +738,6 @@ function ZO_GamepadTradeWindow:InitializeKeybindDescriptor()
                     return GetString(SI_GAMEPAD_TRADE_CANCEL_TRADE)
                 end
             end,
-
             callback = function()
                 if self.confirm[TRADE_ME] == TRADE_CONFIRM_ACCEPT then
                     TradeEdit()
@@ -680,34 +747,31 @@ function ZO_GamepadTradeWindow:InitializeKeybindDescriptor()
                     SCENE_MANAGER:HideCurrentScene()
                 end
             end,
-
             sound = SOUNDS.DIALOG_DECLINE,
         },
         -- Confirm Trade
         {
             keybind = "UI_SHORTCUT_SECONDARY",
-            
             name = GetString(SI_GAMEPAD_TRADE_SUBMIT),
-
             visible = function()
                 return self.confirm[TRADE_ME] == TRADE_CONFIRM_EDIT and self:IsModifyConfirmationLevelEnabled() and not IsUnitDead("player")
             end,
-
             callback = TradeAccept,
             sound = SOUNDS.DIALOG_ACCEPT,
         },
         -- Review Their Offer
         {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = "Gamepad Trade Review Their Offer",
-
+            --Even though this is an ethereal keybind, the name will still be read during screen narration
+            name = GetString(SI_GAMEPAD_TRADE_VIEW_THEIR_OFFER_KEYBIND),
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
-
             callback = function()
                 self:SetOfferFocus(TRADE_THEM)
             end,
-
             ethereal = true,
+            narrateEthereal = function()
+                return self.canSwitchFocus
+            end,
+            etherealNarrationOrder = 2,
         }
     }
 
@@ -809,7 +873,7 @@ function ZO_GamepadTradeWindow:OnShowing()
 
     KEYBIND_STRIP:RemoveDefaultExit()
     self.activeListType = TRADE_ME
-    self:SetCurrentList(self.lists[TRADE_ME])
+    self:SetCurrentList(self.offerLists[TRADE_ME])
     GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:ClearFocus()
     self:BeginTrade()
 end
@@ -826,6 +890,26 @@ function ZO_GamepadTradeWindow:OnHide()
     GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:ClearHighlight()
     GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:ClearHighlight()
     ZO_Trade_GamepadWaiting:SetHidden(true)
+end
+
+--Overridden from base
+function ZO_GamepadTradeWindow:GetHeaderNarration()
+    --Normally we'd override ZO_Gamepad_ParametricList_Screen:GetHeaderData instead, but because we have two header controls, that isn't sufficient here
+    local headerData = self.headerData[self.activeListType]
+    local header = self.headers[self.activeListType]
+    if header and headerData then
+        return ZO_GamepadGenericHeader_GetNarrationText(header, headerData)
+    end
+end
+
+--Overridden from base
+function ZO_GamepadTradeWindow:GetFooterNarration()
+    local narrations = {}
+    if not ZO_Trade_GamepadWaiting:IsHidden() then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_TRADE_WAITING_MESSAGE)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.waitingName))
+    end
+    return narrations
 end
 
 ----------------------------
@@ -863,6 +947,12 @@ function ZO_GamepadTradeWindow:OnTradeWindowMoneyChanged(eventCode, who, money)
     self:RefreshOfferList(who)
 
     PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
+
+    --Re-narrate and include the header if the gold change was for the currently active list
+    if who == self.activeListType then
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.offerLists[who], NARRATE_HEADER)
+    end
 end
 
 --

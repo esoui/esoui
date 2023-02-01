@@ -1,9 +1,10 @@
 local WARNING_COLOR = ZO_ColorDef:New("DC8122")
 
-local PARTNER_ICONS = 
+local PARTNER_ICONS =
 {
     [PLATFORM_SERVICE_TYPE_DMM] = "EsoUI/Art/Login/link_Login_DMM.dds",
     [PLATFORM_SERVICE_TYPE_STEAM] = "EsoUI/Art/Login/link_Login_Steam.dds",
+    [PLATFORM_SERVICE_TYPE_EPIC] = "EsoUI/Art/Login/link_Login_Epic.dds",
 }
 
 local function LinkAccountsDialogSetup(dialog, data)

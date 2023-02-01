@@ -67,6 +67,10 @@ function ZO_AssignableActionBar:RefreshAllButtons()
     end
 end
 
+function ZO_AssignableActionBar:SetHeaderNarrationOverrideName(overrideHeaderName)
+    self.overrideHeaderName = overrideHeaderName
+end
+
 function ZO_AssignableActionBar:RefreshHeaderLabel()
     if self.headerLabel then
         local hotbarName = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarName()
@@ -297,6 +301,30 @@ function ZO_AssignableActionBar:IsActive()
     return self.active
 end
 
+--Gets the narration for the currently selected slot
+function ZO_AssignableActionBar:GetSelectedSlotNarrationText()
+    local selectedButton = self.buttons[self.selectedButtonIndex]
+    if selectedButton then
+        return selectedButton:GetNarrationText()
+    end
+end
+
+--Gets the narration for the bar
+function ZO_AssignableActionBar:GetNarrationText()
+    local narrations = {}
+    --If an overrideHeaderName was specified, use that, otherwise use the name of the current hotbar
+    local headerName
+    if self.overrideHeaderName then
+        headerName = self.overrideHeaderName
+    else
+        headerName = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarName()
+    end
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(headerName))
+    --Narration for the selected slot
+    ZO_AppendNarration(narrations, self:GetSelectedSlotNarrationText())
+    return narrations
+end
+
 ZO_GamepadAssignableActionBarButton = ZO_InitializingObject:Subclass()
 
 function ZO_GamepadAssignableActionBarButton:Initialize(control, actionSlotIndex)
@@ -418,6 +446,57 @@ function ZO_GamepadAssignableActionBarButton:AssignSkill(skillData)
     end
 end
 
+do
+    local DEFAULT_SHOW_AS_HOLD = nil
+    local NOT_BOUND_ACTION_STRING = GetString(SI_ACTION_IS_NOT_BOUND)
+
+    function ZO_GamepadAssignableActionBarButton:GetNarrationText()
+        local narrations = {}
+
+        --Get the binding narration
+        if self.keybindLabel then
+            local hotbarData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
+            local currentHotbarCategory = hotbarData:GetHotbarCategory()
+            local keyboardActionName, gamepadActionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetKeyboardAndGamepadActionNameForSlot(self.actionSlotIndex, currentHotbarCategory)
+            local actionPriority = ACTION_BAR_ASSIGNMENT_MANAGER:GetAutomaticCastPriorityForSlot(self.actionSlotIndex, currentHotbarCategory)
+
+            local bindingTextNarration = nil
+            --If we found an action name for the slot, use that for narrating
+            if gamepadActionName then
+                bindingTextNarration = ZO_Keybindings_GetPreferredHighestPriorityNarrationStringFromActions(keyboardActionName, gamepadActionName, DEFAULT_SHOW_AS_HOLD) or NOT_BOUND_ACTION_STRING
+            elseif actionPriority then
+                --If there was no action name and we have an action priority, use that for narrating the binding text
+                bindingTextNarration = tostring(actionPriority)
+            end
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(bindingTextNarration))
+        end
+
+        --Narration for the slotted entry
+        local slotData = self:GetSlotData()
+        if slotData then
+            local actionType = slotData:GetSlottableActionType()
+            --The skillData lives in different spots depending on the action type
+            if actionType == ZO_SLOTTABLE_ACTION_TYPE_PLAYER_SKILL then
+                local skillData = slotData:GetPlayerSkillData()
+                local progressionData = skillData:GetPointAllocatorProgressionData()
+                if progressionData then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(progressionData:GetFormattedName()))
+                end
+            elseif actionType == ZO_SLOTTABLE_ACTION_TYPE_COMPANION_SKILL then
+                local skillData = slotData:GetCompanionSkillData()
+                local progressionData = skillData:GetPointAllocatorProgressionData()
+                if progressionData then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(progressionData:GetFormattedName()))
+                end
+            else
+                --If we get here, assume the slot is empty
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_ACTION_BAR_EMPTY_ENTRY_NARRATION)))
+            end
+        end
+        return narrations
+    end
+end
+
 ZO_GamepadAssignableActionBar_QuickMenu_Base = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_GamepadAssignableActionBar_QuickMenu_Base:SetupListTemplates()
@@ -529,6 +608,19 @@ function ZO_GamepadAssignableActionBar_QuickMenu_Base:Initialize(control, assign
         end
     end
     self.assignableActionBar:RegisterCallback("SelectedButtonChanged", OnSelectedButtonChanged)
+
+    --Narrates the list
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return self.fragment:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            --Treat the associated assignable action bar as the header for this list
+            return self.assignableActionBar:GetNarrationText()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.list, narrationInfo)
 end
 
 function ZO_GamepadAssignableActionBar_QuickMenu_Base:GetListControl()
@@ -553,26 +645,56 @@ function ZO_GamepadAssignableActionBar_QuickMenu_Base:RefreshVisible()
     self.list:RefreshVisible()
 end
 
-function ZO_GamepadAssignableActionBar_QuickMenu_Base:RefreshList()
-    self.list:Clear()
+do
+    local DEFAULT_SHOW_AS_HOLD = nil
+    local NOT_BOUND_ACTION_STRING = GetString(SI_ACTION_IS_NOT_BOUND)
 
-    local lastSkillLineData = nil
-    self:ForEachSlottableSkill(function(skillTypeData, skillLineData, skillData)
-        local skillEntry = ZO_GamepadEntryData:New()
-        skillEntry:SetFontScaleOnSelection(false)
-        skillEntry.skillData = skillData
+    function ZO_GamepadAssignableActionBar_QuickMenu_Base:RefreshList()
+        self.list:Clear()
 
-        if skillLineData ~= lastSkillLineData then
-            skillEntry:SetHeader(skillLineData:GetFormattedName())
-            self.list:AddEntry("ZO_GamepadSimpleAbilityEntryTemplateWithHeader", skillEntry)
-        else
-            self.list:AddEntry("ZO_GamepadSimpleAbilityEntryTemplate", skillEntry)
-        end
+        local lastSkillLineData = nil
+        self:ForEachSlottableSkill(function(skillTypeData, skillLineData, skillData)
+            local skillEntry = ZO_GamepadEntryData:New()
+            skillEntry:SetFontScaleOnSelection(false)
+            skillEntry.skillData = skillData
 
-        lastSkillLineData = skillLineData
-    end)
+            if skillLineData ~= lastSkillLineData then
+                skillEntry:SetHeader(skillLineData:GetFormattedName())
+                --Override the entry's header narration to include the rank
+                skillEntry.headerNarrationFunction = function(entryData, entryControl)
+                    local narrations = {}
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(skillLineData:GetCurrentRank()))
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.header))
+                    return narrations
+                end
+                self.list:AddEntry("ZO_GamepadSimpleAbilityEntryTemplateWithHeader", skillEntry)
+            else
+                self.list:AddEntry("ZO_GamepadSimpleAbilityEntryTemplate", skillEntry)
+            end
 
-    self.list:Commit()
+            skillEntry.narrationText = function(entryData, entryControl)
+                local narrations = {}
+                --Generate the default entry narration
+                ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+                --Include the narration for the keybinding if applicable
+                if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY and skillData:IsActive() then
+                    local actionSlotIndex = skillData:GetSlotOnCurrentHotbar()
+                    if actionSlotIndex then
+                        local keyboardActionName, gamepadActionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetKeyboardAndGamepadActionNameForSlot(actionSlotIndex, ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarCategory())
+                        if gamepadActionName then
+                            local bindingTextNarration = ZO_Keybindings_GetPreferredHighestPriorityNarrationStringFromActions(keyboardActionName, gamepadActionName, DEFAULT_SHOW_AS_HOLD) or NOT_BOUND_ACTION_STRING
+                            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(bindingTextNarration))
+                        end
+                    end
+                end
+                return narrations
+            end
+
+            lastSkillLineData = skillLineData
+        end)
+
+        self.list:Commit()
+    end
 end
 
 function ZO_GamepadAssignableActionBar_QuickMenu_Base:RefreshTooltip()

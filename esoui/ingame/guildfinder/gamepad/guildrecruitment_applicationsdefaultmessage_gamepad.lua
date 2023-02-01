@@ -17,6 +17,10 @@ function ZO_GuildRecruitment_ApplicationsDefaultMessage_Gamepad:Initialize(contr
     self:InitializeDefaultMessageDefaults()
 end
 
+function ZO_GuildRecruitment_ApplicationsDefaultMessage_Gamepad:GetDefaultMessageText()
+    return self.savedMessageFunction()
+end
+
 function ZO_GuildRecruitment_ApplicationsDefaultMessage_Gamepad:UpdateText(savedMessage, messageLabel)
     if type(savedMessage) == "function" then
         savedMessage = savedMessage()

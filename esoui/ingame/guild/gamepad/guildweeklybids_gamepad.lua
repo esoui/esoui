@@ -88,6 +88,38 @@ function ZO_GuildWeeklyBids_Gamepad:SetWeeklyBidLimitText(text)
     self:RefreshHeader()
 end
 
+function ZO_GuildWeeklyBids_Gamepad:GetNarrationText()
+    local narrations = {}
+    local entryData = self:GetSelectedData()
+    if entryData then
+        if entryData.order then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_WEEKLY_BIDS_HEADER_ORDER)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.order))
+        end
+
+        if entryData.kioskName then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_WEEKLY_BIDS_HEADER_TRADER)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.kioskName))
+        end
+
+        if entryData.displayName then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_WEEKLY_BIDS_HEADER_PLACED_BY)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_FormatUserFacingDisplayName(entryData.displayName)))
+        end
+
+        if entryData.bidAmount then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_WEEKLY_BIDS_HEADER_BID_AMOUNT)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_Currency_FormatGamepad(CURT_MONEY, entryData.bidAmount, ZO_CURRENCY_FORMAT_AMOUNT_NAME)))
+        end
+    end
+
+    return narrations
+end
+
+function ZO_GuildWeeklyBids_Gamepad:GetFooterNarration()
+    return GAMEPAD_GUILD_HOME:GetFooterNarrationText()
+end
+
 function ZO_GuildWeeklyBidsTopLevel_Gamepad_OnInitialized(self)
     GUILD_WEEKLY_BIDS_GAMEPAD = ZO_GuildWeeklyBids_Gamepad:New(self)
 end

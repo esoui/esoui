@@ -15,10 +15,6 @@ local MODE_TO_SCENE_NAME =
 
 ZO_RetraitStation_Gamepad = ZO_RetraitStation_Base:Subclass()
 
-function ZO_RetraitStation_Gamepad:New(...)
-    return ZO_RetraitStation_Base.New(self, ...)
-end
-
 function ZO_RetraitStation_Gamepad:Initialize(control)
     ZO_RetraitStation_Base.Initialize(self, control, GAMEPAD_RETRAIT_ROOT_SCENE_NAME)
 
@@ -105,6 +101,18 @@ function ZO_RetraitStation_Gamepad:InitializeModeList()
     self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", reconstructModeEntry)
 
     self.modeList:Commit()
+
+    --Narrates the mode list
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return GAMEPAD_RETRAIT_ROOT_SCENE:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.modeList, narrationInfo)
 end
 
 function ZO_RetraitStation_Gamepad:ResetMode()

@@ -155,7 +155,7 @@ function ZO_GuildBrowser_GuildInfo_Keyboard:RefreshInfoPanel()
 end
 
 function ZO_GuildBrowser_GuildInfo_Keyboard:GetAllianceIcon(alliance)
-    return GetAllianceSymbolIcon(alliance)
+    return ZO_GetAllianceSymbolIcon(alliance)
 end
 
 function ZO_GuildBrowser_GuildInfo_Keyboard:Close()

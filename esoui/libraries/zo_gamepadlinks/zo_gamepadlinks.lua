@@ -24,7 +24,7 @@ local LINK_ACTION_HANDLERS =
 
 -- Mapping of link type to a variable return function that receives a reference
 -- to the calling ZO_GamepadLinks instance and returns any additional parameters
--- to be passed to GAMEPAD_LINKS:LayoutLink.
+-- to be passed to GAMEPAD_TOOLTIPS:LayoutLink.
 -- * Refer to ZO_GamepadLinks:Show() for additional information.
 local LINK_LAYOUT_PARAMETER_FUNCTIONS =
 {
@@ -124,13 +124,25 @@ function ZO_GamepadLinks:AddLinksTable(links, replaceExistingLinks)
         self:ResetLinks()
     end
 
-    if links == nil then
+    if not links then
         -- Disregard a nil reference as a matter of convenience for the caller.
         return
     end
 
-    if #links > 0 then
-        ZO_CombineNumericallyIndexedTables(self.links, links)
+    local addedLink = false
+    for linkIndex, link in ipairs(links) do
+        if link.link then
+            local linkType = GetLinkType(link.link)
+            local linkHandlerName = GetLinkLayoutHandlerName(linkType)
+            if GAMEPAD_TOOLTIPS[linkHandlerName] then
+                -- Add the validated link.
+                table.insert(self.links, link)
+                addedLink = true
+            end
+        end
+    end
+
+    if addedLink then
         self:OnLinksUpdated(self.links)
     end
 end
@@ -147,11 +159,7 @@ function ZO_GamepadLinks:AddLinksFromText(text, replaceExistingLinks)
 
     local links = {}
     ZO_ExtractLinksFromText(text, self.supportedLinkTypes, links)
-
-    if #links > 0 then
-        ZO_CombineNumericallyIndexedTables(self.links, links)
-        self:OnLinksUpdated(self.links)
-    end
+    self:AddLinksTable(links, replaceExistingLinks)
 end
 
 function ZO_GamepadLinks:GetCurrentLink()
@@ -252,7 +260,6 @@ function ZO_GamepadLinks:SetHidden(hidden)
 end
 
 function ZO_GamepadLinks:SetKeybindAlignment(alignment)
-    -- Order matters:
     self:RemoveKeybinds()
     self.keybindStripDescriptor.alignment = alignment
     self:UpdateKeybinds()
@@ -316,8 +323,8 @@ function ZO_GamepadLinks:ShowNextLink()
         nextIndex = 1
     end
 
-    -- TODO XAR: Look into potentially narrating this again.
     self.currentLinkIndex = nextIndex
+    self:FireCallbacks("CycleLinks", self.currentLinkIndex)
     self:Show()
 end
 
@@ -333,8 +340,8 @@ function ZO_GamepadLinks:ShowPreviousLink()
         nextIndex = numLinks
     end
 
-    -- TODO XAR: Look into potentially narrating this again.
     self.currentLinkIndex = nextIndex
+    self:FireCallbacks("CycleLinks", self.currentLinkIndex)
     self:Show()
 end
 

@@ -156,11 +156,11 @@ function ZO_GamepadOptions:RefreshHeader()
         headerText = GetString("SI_SETTINGSYSTEMPANEL", self.currentCategory)
     end
 
-    local headerData =
+    self.headerData =
     {
         titleText = headerText,
     }
-    ZO_GamepadGenericHeader_RefreshData(self.header, headerData)
+    ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 end
 
 function ZO_GamepadOptions:OnOptionWithDependenciesChanged()
@@ -912,7 +912,6 @@ function ZO_GamepadOptions:GetNarrationText(entryData, entryControl)
         elseif controlType == OPTIONS_SLIDER then
             local value = ZO_Options_GetSettingFromControl(entryControl)
             local formattedValueString, min, max = ZO_Options_GetFormattedSliderValues(entryData, value)
-            --TODO XAR: Include directional input for the slider
             return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_SLIDER_FORMATTER, defaultText, formattedValueString, min, max))
         elseif controlType == OPTIONS_COLOR then
             local currentValue = ZO_Options_GetSettingFromControl(entryControl)
@@ -961,6 +960,20 @@ function ZO_GamepadOptions:AddSettingGroup(panelId)
                 end
 
                 local controlType = self:GetControlType(data.controlType)
+                if controlType == OPTIONS_SLIDER then
+                    data.additionalInputNarrationFunction = ZO_GetNumericHorizontalDirectionalInputNarrationData
+                elseif controlType == OPTIONS_HORIZONTAL_SCROLL_LIST then
+                    data.additionalInputNarrationFunction = function()
+                        local selectedControl = self.optionsList:GetSelectedControl()
+                        if selectedControl and selectedControl.horizontalListObject then
+                            local narrationFunction = selectedControl.horizontalListObject:GetAdditionalInputNarrationFunction()
+                            return narrationFunction()
+                        else
+                            return {}
+                        end
+                    end
+                end
+
                 if controlType == OPTIONS_CUSTOM then
                     controlType = data.customControlType
                 end

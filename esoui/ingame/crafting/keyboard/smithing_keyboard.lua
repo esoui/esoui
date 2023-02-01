@@ -242,7 +242,7 @@ function ZO_Smithing:AddTabsToMenuBar(craftingType, isCraftingTypeDifferent)
     
     local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(craftingType)
     local recipeCraftingSystemNameStringId = _G["SI_RECIPECRAFTINGSYSTEM"..recipeCraftingSystem]
-    local normal, pressed, highlight, disabled = GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem)
+    local normal, pressed, highlight, disabled = ZO_GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem)
 
     local recipeTab = self.recipeTab
     recipeTab.categoryName = recipeCraftingSystemNameStringId

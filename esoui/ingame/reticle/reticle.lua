@@ -217,7 +217,7 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
             if additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE then
                 local instanceType = context
                 if instanceType ~= INSTANCE_DISPLAY_TYPE_NONE then 
-                    local instanceTypeString = zo_iconTextFormat(GetInstanceDisplayTypeIcon(instanceType), 34, 34, GetString("SI_INSTANCEDISPLAYTYPE", instanceType))
+                    local instanceTypeString = zo_iconTextFormat(ZO_GetInstanceDisplayTypeIcon(instanceType), 34, 34, GetString("SI_INSTANCEDISPLAYTYPE", instanceType))
                     interactContextString = zo_strformat(SI_ZONE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, instanceTypeString)
                 end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_HOUSE_BANK then
@@ -237,7 +237,7 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
                 end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_HOUSE_INSTANCE_DOOR then
                 local instanceType = INSTANCE_DISPLAY_TYPE_HOUSING
-                local instanceTypeString = zo_iconTextFormat(GetInstanceDisplayTypeIcon(instanceType), 34, 34, GetString("SI_INSTANCEDISPLAYTYPE", instanceType))
+                local instanceTypeString = zo_iconTextFormat(ZO_GetInstanceDisplayTypeIcon(instanceType), 34, 34, GetString("SI_INSTANCEDISPLAYTYPE", instanceType))
                 local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(context)
                 if collectibleData then
                     local nickname = collectibleData:GetNickname()

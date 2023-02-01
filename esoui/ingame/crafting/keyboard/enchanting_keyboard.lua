@@ -97,7 +97,7 @@ function ZO_Enchanting:InitializeModes()
     local recipeTab = CreateButtonData(
         recipeCraftingSystemNameStringId,
         ENCHANTING_MODE_RECIPES,
-        GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem))
+        ZO_GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem))
     self.recipeButton = ZO_MenuBar_AddButton(self.modeBar, recipeTab)
 
     ZO_MenuBar_SelectDescriptor(self.modeBar, ENCHANTING_MODE_CREATION)

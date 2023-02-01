@@ -1,12 +1,6 @@
-local ZO_GamepadHelpLegal = ZO_Object:Subclass()
+local ZO_GamepadHelpLegal = ZO_InitializingObject:Subclass()
 
 local URL_LABEL_Y_OFFSET = 55
-
-function ZO_GamepadHelpLegal:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object    
-end
 
 function ZO_GamepadHelpLegal:Initialize(control)
     self.control = control
@@ -16,17 +10,33 @@ function ZO_GamepadHelpLegal:Initialize(control)
         titleText = GetString(SI_GAMEPAD_HELP_LEGAL_HEADER),
         messageText = GetString(SI_GAMEPAD_HELP_LEGAL_TEXT),
     }
-    
+
     self:SetupText()
     self:InitializeKeybindDescriptors()
 
     self.scene:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindDescriptors)
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry("helpLegal")
         elseif newState == SCENE_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindDescriptors)
         end
     end)
+
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return self.scene:IsShowing()
+        end,
+        selectedNarrationFunction = function()
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_HELP_LEGAL_HEADER)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_HELP_LEGAL_TEXT)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_TOS_WEBSITE)))
+            return narrations
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("helpLegal", narrationInfo)
 end
 
 function ZO_GamepadHelpLegal:InitializeKeybindDescriptors()

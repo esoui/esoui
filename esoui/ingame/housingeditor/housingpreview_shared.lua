@@ -11,13 +11,7 @@ ZO_HOUSING_PREVIEW_INFO_PADDING_X = 20
 ZO_HOUSING_PREVIEW_INFO_WIDTH = ZO_HOUSING_PREVIEW_IMAGE_CANVAS_WIDTH - (ZO_HOUSING_PREVIEW_INFO_PADDING_X * 2)
 ZO_HOUSING_PREVIEW_ERROR_LABEL_PADDING_X = 10
 
-ZO_HousingPreviewDialog_Shared = ZO_Object:Subclass()
-
-function ZO_HousingPreviewDialog_Shared:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_HousingPreviewDialog_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_HousingPreviewDialog_Shared:Initialize(control, dialogName)
     self.control = control
@@ -28,8 +22,12 @@ function ZO_HousingPreviewDialog_Shared:Initialize(control, dialogName)
     self.notAvailableLabel = control:GetNamedChild("NotAvailableText")
     self.templateContainer = control:GetNamedChild("Template")
     self.templateComboBoxControl = self.templateContainer:GetNamedChild("ComboBox")
-    self.templatePreviewButton = self.templateContainer:GetNamedChild("PreviewButton")
+    self.templateOptionsContainer = control:GetNamedChild("TemplateOptions")
+    self.templatePreviewButton = self.templateOptionsContainer:GetNamedChild("PreviewButton")
+    self.templateFurnitureButton = self.templateOptionsContainer:GetNamedChild("FurnitureButton")
     self.purchaseOptionsControl = control:GetNamedChild("PurchaseOptions")
+    self.templatePreviewButton.text = GetString(SI_HOUSE_TEMPLATE_PREVIEW_BUTTON_TEXT)
+    self.templateFurnitureButton.text = GetString(SI_HOUSING_PREVIEW_TEMPLATE_FURNISHINGS)
 
     local function SetupPurchaseOptionControl(rootName)
         local purchaseOptionControl = self.purchaseOptionsControl:GetNamedChild(rootName)
@@ -83,6 +81,18 @@ function ZO_HousingPreviewDialog_Shared:BuildDialogInfo()
         {
             text = "",
         },
+        headerNarrationFunction = function()
+            local narrations = {}
+
+            -- Header
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.dialogInfo.title.text))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_LOCATION_HEADER)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_CachedStrFormat(SI_ZONE_NAME, ZO_HOUSE_PREVIEW_MANAGER.displayInfo.houseFoundInLocation)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_HOUSE_TYPE_HEADER)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_HOUSE_TYPE_FORMATTER, ZO_HOUSE_PREVIEW_MANAGER.displayInfo.houseCategory)))
+
+            return narrations
+        end,
     }
 end
 
@@ -137,6 +147,7 @@ do
         local hasTemplateEntries = NonContiguousCount(templateData) > 0
         self.notAvailableLabel:SetHidden(hasTemplateEntries)
         self.templateContainer:SetHidden(not hasTemplateEntries)
+        self.templateOptionsContainer:SetHidden(not hasTemplateEntries)
         if hasTemplateEntries then
             if currentlyPreviewedItemEntryIndex then
                 comboBox:SelectItemByIndex(currentlyPreviewedItemEntryIndex)
@@ -348,7 +359,11 @@ function ZO_HousingPreviewDialog_Shared:PreviewSelectedTemplate()
     if self.houseTemplateIdToPreview then
         HousingEditorPreviewTemplate(self.houseTemplateIdToPreview)
     end
+
     self:ReleaseDialog()
+
+    -- Force the cached furniture data to refresh to reflect the new template preview, if any.
+    SHARED_FURNITURE:RebuildFurnitureCaches()
 end
 
 function ZO_HousingPreviewDialog_Shared:BuyForGold(control)
@@ -359,9 +374,21 @@ function ZO_HousingPreviewDialog_Shared:BuyForGold(control)
     else
         self:ReleaseDialog()
         RequestOpenHouseStore()
-        local priceText = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(control.price, DONT_USE_SHORT_FORMAT, CURT_MONEY, IsInGamepadPreferredMode())
+
         local displayInfo = ZO_HOUSE_PREVIEW_MANAGER:GetDisplayInfo()
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_BUY_HOUSE_FOR_GOLD", { goldStoreEntryIndex = control.goldStoreEntryIndex }, { mainTextParams={ displayInfo.houseName, control.templateName, priceText }})
+        local mainTextParams =
+        {
+            displayInfo.houseName,
+            control.templateName,
+            ZO_CurrencyControl_FormatCurrencyAndAppendIcon(control.price, DONT_USE_SHORT_FORMAT, CURT_MONEY, IsInGamepadPreferredMode()),
+        }
+        local mainTextNarrationParams =
+        {
+            displayInfo.houseName,
+            control.templateName,
+            ZO_Currency_FormatGamepad(CURT_MONEY, control.price, ZO_CURRENCY_FORMAT_AMOUNT_NAME),
+        }
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_BUY_HOUSE_FOR_GOLD", { goldStoreEntryIndex = control.goldStoreEntryIndex }, { mainTextParams = mainTextParams, mainTextNarrationParams = mainTextNarrationParams })
     end
 end
 

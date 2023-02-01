@@ -121,7 +121,7 @@ function CampaignEmperor_Shared:RefreshEmperor()
             local alliance, characterName, displayName = GetCampaignEmperorInfo(self.campaignId)
             local userFacingName = ZO_GetPlatformUserFacingName(characterName, displayName)
             self.emperorName:SetText(userFacingName)
-            self.emperorAlliance:SetTexture(GetPlatformAllianceSymbolIcon(alliance))
+            self.emperorAlliance:SetTexture(ZO_GetPlatformAllianceSymbolIcon(alliance))
             self.emperorAlliance:SetHidden(false)
             self:SetReignDurationEnabled(true)
         else
@@ -210,7 +210,7 @@ function CampaignEmperor_Shared:SetupLeaderboardEntry(control, data)
     control.nameLabel:SetText(userFacingName)
     control.pointsLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, data.points))
     
-    local allianceTexture = GetPlatformAllianceSymbolIcon(data.alliance)
+    local allianceTexture = ZO_GetPlatformAllianceSymbolIcon(data.alliance)
     if allianceTexture then
         control.allianceIcon:SetHidden(false)
         control.allianceIcon:SetTexture(allianceTexture)

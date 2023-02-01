@@ -54,7 +54,7 @@ if AreUserAddOnsSupported() or IsInternalBuild() then
             PrintLineTypeInfo("UNIT_REMOVED", "unitId")
             PrintLineTypeInfo("EFFECT_CHANGED", "changeType", "stackCount", "castTrackId", "abilityId", "<sourceUnitState>", "<targetUnitState>", "playerInitiatedRemoveCastTrackId:optional")
             PrintLineTypeInfo("ABILITY_INFO", "abilityId", "name", "iconPath", "interruptible", "blockable")
-            PrintLineTypeInfo("EFFECT_INFO", "abilityId", "effectType", "statusEffectType", "noEffectBar", "grantsSynergyAbilityId:optional")
+            PrintLineTypeInfo("EFFECT_INFO", "abilityId", "effectType", "statusEffectType", "effectBarDisplayBehaviour", "grantsSynergyAbilityId:optional")
             PrintLineTypeInfo("MAP_INFO", "id", "name", "texturePath")
             PrintLineTypeInfo("ZONE_INFO", "id", "name", "dungeonDifficulty")
             PrintLineTypeInfo("TRIAL_INIT", "id", "inProgress", "completed", "startTimeMS", "durationMS", "success", "finalScore")

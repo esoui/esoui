@@ -14,22 +14,22 @@ local function GammaDialogInitialize(dialogControl)
         buttons =
         {
             {
-                control = GetControl(dialogControl, "KeyContainerConfirmGamma"),
+                control = dialogControl:GetNamedChild("KeyContainerConfirmGamma"),
                 text = SI_GAMMA_CONFIRM,
                 noReleaseOnClick = true, -- Don't release because the scene needs to fade out, will release later
-                callback =  function(dialog)
-                                SetCVar("GAMMA_ADJUSTMENT", tostring(g_currentGamma))
-                                SCENE_MANAGER:Hide("gammaAdjust")
-                                ZO_SavePlayerConsoleProfile()
-                            end,
+                callback = function(dialog)
+                    SetCVar("GAMMA_ADJUSTMENT", tostring(g_currentGamma))
+                    SCENE_MANAGER:Hide("gammaAdjust")
+                    ZO_SavePlayerConsoleProfile()
+                end,
             },
             {
-                control = GetControl(dialogControl, "KeyContainerDeclineGamma"),
+                control = dialogControl:GetNamedChild("KeyContainerDeclineGamma"),
                 text = SI_GAMMA_DECLINE,
                 noReleaseOnClick = true, -- Don't release because the scene needs to fade out, will release later
-                callback =  function(dialog)
-                                SCENE_MANAGER:Hide("gammaAdjust")
-                            end,
+                callback = function(dialog)
+                    SCENE_MANAGER:Hide("gammaAdjust")
+                end,
                 visible = function() return not ZO_GammaAdjust_NeedsFirstSetup() end,
             },
         }
@@ -58,21 +58,25 @@ do
 
     ZO_GammaAdjustFragment = ZO_FadeSceneFragment:Subclass()
 
-    function ZO_GammaAdjustFragment:New(control)
-        local fragment = ZO_FadeSceneFragment.New(self, control, 1500)
-        fragment.dialog = control
-        fragment.mainText = control:GetNamedChild("MainText")
-        fragment.subText = control:GetNamedChild("SubText")
-        fragment.keyContainer = control:GetNamedChild("KeyContainer")
-        fragment.confirmGamma = fragment.keyContainer:GetNamedChild("ConfirmGamma")
-        fragment.declineGamma = fragment.keyContainer:GetNamedChild("DeclineGamma")
+    function ZO_GammaAdjustFragment:New(...)
+        return ZO_FadeSceneFragment.New(self, ...)
+    end
 
-        local oldStop = fragment.animationReverseOnStop
-        fragment.animationReverseOnStop =   function()
-                                                --Have to release the dialog before the stop handler hides it or it won't decrease the number of top levels
-                                                ZO_Dialogs_ReleaseDialog("ADJUST_GAMMA_DIALOG")
-                                                oldStop()
-                                            end
+    function ZO_GammaAdjustFragment:Initialize(...)
+        ZO_FadeSceneFragment.Initialize(self, ...)
+        self.dialog = self.control
+        self.mainText = self.control:GetNamedChild("MainText")
+        self.subText = self.control:GetNamedChild("SubText")
+        self.keyContainer = self.control:GetNamedChild("KeyContainer")
+        self.confirmGamma = self.keyContainer:GetNamedChild("ConfirmGamma")
+        self.declineGamma = self.keyContainer:GetNamedChild("DeclineGamma")
+
+        local oldStop = self.animationReverseOnStop
+        self.animationReverseOnStop = function()
+            --Have to release the dialog before the stop handler hides it or it won't decrease the number of top levels
+            ZO_Dialogs_ReleaseDialog("ADJUST_GAMMA_DIALOG")
+            oldStop()
+        end
 
         local function ZO_GammaAdjustSlider_OnInitialized(slider)
             slider:SetMinMax(75, 150)
@@ -81,19 +85,59 @@ do
             slider:SetHandler("OnValueChanged", ZO_GammaAdjust_SetGamma)
         end
 
-        local gamepadSlider = control:GetNamedChild("GamepadSlider")
+        --Order matters. Initialize the narration info before the sliders
+        self:InitializeNarrationInfo()
+
+        local gamepadSlider = self.control:GetNamedChild("GamepadSlider")
         self.gamepadSlider = gamepadSlider
         ZO_GammaAdjustSlider_OnInitialized(gamepadSlider)
 
-        local keyboardSlider = control:GetNamedChild("Slider")
+        local keyboardSlider = self.control:GetNamedChild("Slider")
         self.keyboardSlider = keyboardSlider
         self.rightArrow = keyboardSlider:GetNamedChild("Increment")
         self.leftArrow = keyboardSlider:GetNamedChild("Decrement")
         ZO_GammaAdjustSlider_OnInitialized(keyboardSlider)
         self:UpdateVisibility()
 
-        ZO_PlatformStyle:New(function(style) fragment:ApplyPlatformStyle(style) end, GAMMA_KEYBOARD_STYLE, GAMMA_GAMEPAD_STYLE)
-        return fragment
+        ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, GAMMA_KEYBOARD_STYLE, GAMMA_GAMEPAD_STYLE)
+    end
+
+    function ZO_GammaAdjustFragment:InitializeNarrationInfo()
+        local narrationInfo =
+        {
+            canNarrate = function()
+                return self:IsShowing()
+            end,
+            headerNarrationFunction = function()
+                local narrations = {}
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMMA_MAIN_TEXT)))
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMMA_SUB_TEXT)))
+                return narrations
+            end,
+            selectedNarrationFunction = function()
+                return ZO_FormatSliderNarrationText(self.gamepadSlider, GetString(SI_GAMMA_SLIDER_HEADER_NARRATION))
+            end,
+            additionalInputNarrationFunction = function()
+                local narrationData = {}
+
+                --Narration for the confirm keybind
+                local confirmData = self.confirmGamma:GetKeybindButtonNarrationData()
+                if confirmData then
+                    table.insert(narrationData, confirmData)
+                end
+
+                --Narration for the decline keybind
+                local declineData = self.declineGamma:GetKeybindButtonNarrationData()
+                if declineData then
+                    table.insert(narrationData, declineData)
+                end
+
+                --Narration for the directional input
+                ZO_CombineNumericallyIndexedTables(narrationData, ZO_GetNumericHorizontalDirectionalInputNarrationData())
+                return narrationData
+            end,
+        }
+        SCREEN_NARRATION_MANAGER:RegisterCustomObject("gammaAdjust", narrationInfo)
     end
 
     function ZO_GammaAdjustFragment:Show()
@@ -125,6 +169,10 @@ do
 
         -- Call base class for animations after everything has been tweaked
         ZO_FadeSceneFragment.Show(self)
+
+        --Narrate the header when first showing
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("gammaAdjust", NARRATE_HEADER)
     end
 
     function ZO_GammaAdjustFragment:IncrementSliderValue(delta)
@@ -203,6 +251,8 @@ do
     function ZO_GammaAdjust_SetGamma(slider, value)
         g_currentGamma = value
         ZO_GammaAdjust_ColorTexturesWithGamma(g_currentGamma)
+        --Re-narrate when the slider value changes
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("gammaAdjust")
     end
 
     function ZO_GammaAdjust_ColorTexturesWithGamma(gamma)

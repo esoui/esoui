@@ -187,6 +187,14 @@ function zo_floatsAreEqual(a, b, epsilon)
     return(zo_abs(a - b) <= epsilon)
 end
 
+-- Parses the first unsigned integer from a string or returns s if s is not a string.
+function zo_parseUnsignedInteger(s)
+    if type(s) == "string" then
+        return tonumber(s:match("(%d+)"))
+    end
+    return s
+end
+
 function zo_iconFormat(path, width, height)
     return string.format("|t%s:%s:%s|t", tostring(width), tostring(height), path)
 end
@@ -344,7 +352,6 @@ function ZO_ScaleAndRotateTextureCoords(control, angle, originX, originY, scaleX
     end
 
     local scaleCoefficientX, scaleCoefficientY = 1 / scaleX, 1 / scaleY
-
     local topLeftX, topLeftY = ZO_Rotate2D(angle, -0.5 * scaleCoefficientX, -0.5 * scaleCoefficientY)
     local topRightX, topRightY = ZO_Rotate2D(angle,  0.5 * scaleCoefficientX, -0.5 * scaleCoefficientY)
     local bottomLeftX, bottomLeftY = ZO_Rotate2D(angle, -0.5 * scaleCoefficientX,  0.5 * scaleCoefficientY)
@@ -356,12 +363,56 @@ function ZO_ScaleAndRotateTextureCoords(control, angle, originX, originY, scaleX
     control:SetVertexUV(VERTEX_POINTS_BOTTOMRIGHT, originX + bottomRightX, originY + bottomRightY)
 end
 
-function ZO_MaskIterator(iterationBegin, iterationEnd)
-    local iter = iterationBegin
+-- Updates the control's texture coordinates to show a single cell of a texture atlas that is composed of uniformly sized cells.
+-- Note that cellIndex is 0-based.
+function ZO_SetTextureCell(control, numColumns, numRows, cellIndex)
+    local cellX = cellIndex % numColumns
+    local cellY = zo_floor(cellIndex / numColumns)
+    local x1, x2 = cellX / numColumns, (cellX + 1) / numColumns
+    local y1, y2 = cellY / numRows, (cellY + 1) / numRows
+    control:SetTextureCoords(x1, x2, y1, y2)
+end
+
+-- Updates the control's texture coordinates to show a single cell of a texture atlas that is composed of uniformly sized cells,
+-- based upon the number of cells, the interval of the animation loop and the number of seconds that have elapsed.
+function ZO_SetTextureCellAnimation(control, numColumns, numRows, intervalSeconds, elapsedSeconds)
+    local cellInterval = (elapsedSeconds % intervalSeconds) / intervalSeconds
+    local cellIndex = zo_floor(numColumns * numRows * cellInterval)
+    ZO_SetTextureCell(control, numColumns, numRows, cellIndex)
+end
+
+-- Iterator returns each sequential flag in the inclusive range defined by iterationBegin and iterationEnd.
+-- For example:
+--
+--  for bitValue in ZO_FlagIterator(1, 4) do
+--      d(bitValue)
+--  end
+--
+-- Produces the output:
+--  1
+--  2
+--  4
+--
+-- The same output is also produced by:
+--
+--  for bitValue in ZO_FlagIterator(4) do
+--      d(bitValue)
+--  end
+function ZO_FlagIterator(iterationBeginOrEnd, iterationEnd)
+    local iter = iterationBeginOrEnd
+    if not iterationEnd then
+        -- If iterationEnd is omitted then we can infer that:
+        --  iterationBeginOrEnd is the desired ending bit value; and,
+        --  iterationBeginOrEnd assumes the implicit value of 1.
+        iterationEnd = iterationBeginOrEnd
+        iter = 1
+    end
+    assert(iter > 0)
+    assert(iter <= iterationEnd)
     return function()
         if iter <= iterationEnd then
             local ret = iter
-            iter = BitLShift(iter, 1)
+            iter = iter * 2 -- BitLShift(iter, 1)
             return ret
         end
     end
@@ -369,6 +420,32 @@ end
 
 function ZO_MaskHasFlag(mask, flag)
     return BitAnd(mask, flag) == flag
+end
+
+-- Iterator returns each flag set in the specified mask.
+-- For example:
+--
+--  local mask = 11 -- 1011 in binary
+--  for flag in ZO_MaskHasFlagsIterator(mask) do
+--      d(flag)
+--  end
+--
+-- Produces the output:
+--  1
+--  2
+--  8
+function ZO_MaskHasFlagsIterator(mask)
+    local iter = 1
+    return function()
+        while iter <= mask do
+            local currentFlag = iter
+            iter = iter * 2 -- BitLShift(iter, 1)
+            if BitAnd(mask, currentFlag) == currentFlag then
+                return currentFlag
+            end
+        end
+        return nil
+    end
 end
 
 function ZO_ClearMaskFlag(mask, flag)

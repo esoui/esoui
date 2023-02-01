@@ -152,6 +152,11 @@ local function GetGoldString(amount)
     return zo_strformat(SI_GUILD_EVENT_GOLD_FORMAT, color:Colorize(ZO_CurrencyControl_FormatCurrency(amount)), formattedGoldIcon)
 end
 
+--Generate an alternative gold string to use for screen narration
+local function GetGoldNarrationString(amount)
+    return ZO_Currency_FormatGamepad(CURT_MONEY, amount, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+end
+
 local function IsInvalidParam(param)
     return not param or param == "" or param == GetString(SI_GUILD_HISTORY_DEFAULT_PARSED_TEXT)
 end
@@ -196,6 +201,11 @@ local function BankGoldEventFormat(eventType, displayName, gold)
                                         GetGoldString(gold))
 end
 
+local function BankGoldEventNarrationFormat(eventType, displayName, gold)
+    local formatString = GetString("SI_GUILDEVENTTYPE", eventType)
+    return zo_strformat(formatString, ZO_FormatUserFacingDisplayName(displayName), GetGoldNarrationString(gold))
+end
+
 local function KioskBuyOrBidEventFormat(eventType, displayName, gold, kioskName)
     local contrastColor = GetContrastTextColor()
     local formatString = GetString("SI_GUILDEVENTTYPE", eventType)
@@ -205,12 +215,22 @@ local function KioskBuyOrBidEventFormat(eventType, displayName, gold, kioskName)
                                         contrastColor:Colorize(kioskName))
 end
 
+local function KioskBuyOrBidEventNarrationFormat(eventType, displayName, gold, kioskName)
+    local formatString = GetString("SI_GUILDEVENTTYPE", eventType)
+    return zo_strformat(formatString, ZO_FormatUserFacingDisplayName(displayName), GetGoldNarrationString(gold), kioskName)
+end
+
 local function KioskRefundEventFormat(eventType, kiosk, gold)
     local contrastColor = GetContrastTextColor()
     local formatString = GetString("SI_GUILDEVENTTYPE", eventType)
 
     return zo_strformat(formatString,   contrastColor:Colorize(kiosk),
                                         GetGoldString(gold))
+end
+
+local function KioskRefundEventNarrationFormat(eventType, kiosk, gold)
+    local formatString = GetString("SI_GUILDEVENTTYPE", eventType)
+    return zo_strformat(formatString, kiosk, GetGoldNarrationString(gold))
 end
 
 local function GuildJoinedEventFormat(eventType, joinerDisplayName, optionalInviterDisplayName)
@@ -270,6 +290,22 @@ GUILD_EVENT_EVENT_FORMAT =
                                             itemLink,
                                             GetGoldString(price),
                                             GetGoldString(tax))
+    end,
+}
+
+--Any events that need to be formatted differently for narration should be defined here.
+--Any event not included here will use GUILD_EVENT_EVENT_FORMAT for narration
+GUILD_EVENT_EVENT_NARRATION_FORMAT =
+{
+    [GUILD_EVENT_BANKGOLD_ADDED] = BankGoldEventNarrationFormat,                     -- (eventType, displayName, goldQuantity)
+    [GUILD_EVENT_BANKGOLD_REMOVED] = BankGoldEventNarrationFormat,                   -- (eventType, displayName, goldQuantity)
+    [GUILD_EVENT_BANKGOLD_KIOSK_BID_REFUND] = KioskRefundEventNarrationFormat,       -- (eventType, kioskName, goldQuantity)
+    [GUILD_EVENT_BANKGOLD_KIOSK_BID] = KioskBuyOrBidEventNarrationFormat,            -- (eventType, displayName, goldQuantity, kioskName)
+    [GUILD_EVENT_GUILD_KIOSK_PURCHASED] = KioskBuyOrBidEventNarrationFormat,         -- (eventType, displayName, goldQuantity, kioskName)
+    [GUILD_EVENT_HERALDRY_EDITED] = BankGoldEventNarrationFormat,                    -- (eventType, displayName, goldCost)
+    [GUILD_EVENT_ITEM_SOLD] = function(eventType, seller, buyer, quantity, itemLink, price, tax)
+        local formatString = GetString("SI_GUILDEVENTTYPE", eventType)
+        return zo_strformat(formatString, ZO_FormatUserFacingDisplayName(seller), ZO_FormatUserFacingDisplayName(buyer), quantity, itemLink, GetGoldNarrationString(price), GetGoldNarrationString(tax))
     end,
 }
 

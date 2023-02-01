@@ -48,8 +48,10 @@ function ZO_KeybindButtonMixin:SetClickSound(clickSound)
     self.clickSound = clickSound
 end
 
-function ZO_KeybindButtonMixin:SetText(text)
-    self.nameLabel:SetText(text)
+function ZO_KeybindButtonMixin:SetText(text, narrationText)
+    self.nameText = text
+    self.nameTextNarration = narrationText
+    self.nameLabel:SetText(self.nameText)
 end
 
 function ZO_KeybindButtonMixin:SetCustomKeyText(keyText)
@@ -141,6 +143,25 @@ end
 
 function ZO_KeybindButtonMixin:GetKeybindButtonDescriptorReference()
     return self.keybindDescriptorReference
+end
+
+--Generate narration data for this keybind button
+--If the keybind is not visible, nothing will be returned
+function ZO_KeybindButtonMixin:GetKeybindButtonNarrationData()
+    local visible = self.keybindDescriptorReference and self.keybindDescriptorReference.visible or true
+    if type(visible) == "function" then
+        visible = visible()
+    end
+
+    if visible then
+        local narrationData =
+        {
+            name = self.nameTextNarration or self.nameText,
+            keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(self:GetKeybind()) or GetString(SI_ACTION_IS_NOT_BOUND),
+            enabled = self.enabled,
+        }
+        return narrationData
+    end
 end
 
 function ZO_KeybindButtonMixin:SetKeybindButtonDescriptor(keybindDescriptor)

@@ -449,5 +449,5 @@ end
 
 function ZO_CampaignBrowser_FormatPlatformAllianceIconAndName(alliance)
     local ICON_SIZE = "100%"
-    return zo_iconTextFormatNoSpace(GetPlatformAllianceSymbolIcon(alliance), ICON_SIZE, ICON_SIZE, GetAllianceName(alliance))
+    return zo_iconTextFormatNoSpace(ZO_GetPlatformAllianceSymbolIcon(alliance), ICON_SIZE, ICON_SIZE, GetAllianceName(alliance))
 end

@@ -26,13 +26,15 @@ end
 ZO_VoiceChatChannelsGamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ZO_VoiceChatChannelsGamepad:Initialize(control)
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
+    GAMEPAD_VOICECHAT_CHANNELS_SCENE = ZO_Scene:New("gamepad_voice_chat", SCENE_MANAGER)
+
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_VOICECHAT_CHANNELS_SCENE)
     self:SetListsUseTriggerKeybinds(true)
 
-    self.control = control
-    
+    GAMEPAD_VOICECHAT_CHANNELS_FRAGMENT = ZO_FadeSceneFragment:New(control)
+
     self:InitializeHeaders()
-    self:InitializeFragment(control)
     self:InitializeEvents()
 end
 
@@ -47,6 +49,9 @@ function ZO_VoiceChatChannelsGamepad:InitializeHeaders()
         self.currentList = LIST_CHANNELS
         self:Update()
         KEYBIND_STRIP:AddKeybindButtonGroup(self.channelKeybinds)
+
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list, NARRATE_HEADER)
     end
     local function OnTabChangedToHistory()
         if self:IsHidden() then
@@ -58,6 +63,9 @@ function ZO_VoiceChatChannelsGamepad:InitializeHeaders()
         self.currentList = LIST_HISTORY
         self:Update()
         KEYBIND_STRIP:AddKeybindButtonGroup(self.historyKeybinds)
+
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list, NARRATE_HEADER)
     end
 
     local channelsHeader =
@@ -80,16 +88,6 @@ function ZO_VoiceChatChannelsGamepad:InitializeHeaders()
     }
 
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
-end
-
-function ZO_VoiceChatChannelsGamepad:InitializeFragment(control)
-    local function OnStateChange(oldState, newState)
-        ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
-    end
-
-    GAMEPAD_VOICECHAT_CHANNELS_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    self.fragment = GAMEPAD_VOICECHAT_CHANNELS_FRAGMENT
-    self.fragment:RegisterCallback("StateChange", OnStateChange)
 end
 
 function ZO_VoiceChatChannelsGamepad:InitializeEvents()
@@ -129,6 +127,17 @@ do
         local newEntry = ZO_GamepadEntryData:New(channel.name, icon)
         newEntry.channel = channel
         newEntry:SetChannelActive(channel.isTransmitting)
+
+        newEntry.narrationText = function(entryData, entryControl)
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text))
+            ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntrySubLabelNarrationText(entryData, entryControl))
+            if channel.isJoined then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_JOINED_CHANNEL_ICON_NARRATION)))
+            end
+            ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryStatusIndicatorNarrationText(entryData, entryControl))
+            return narrations
+        end
 
         if headerText then
             newEntry:SetHeader(headerText)

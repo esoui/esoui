@@ -12,7 +12,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_BuffDebuffAllCenteredStyle_Template" resizeToFitDescendents="true" virtual="true">
+        <Control name="ZO_BuffDebuffAllCenteredStyle_Template" resizeToFitConstrains="X" virtual="true">
             <Controls>
                 <Control name="$(parent)Container1">
                     <Anchor point="LEFT" />

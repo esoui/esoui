@@ -108,9 +108,9 @@
                                 ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
                             </OnInitialized>
                             <Controls>
-                                <Control name="$(parent)ScrollChild" override="true" resizeToFitDescendents="true">
-                                    <Anchor point="TOPRIGHT" />
-                                    <Anchor point="TOPLEFT" />
+                                <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
+                                    <Dimensions x="100%" />
+
                                     <Controls>
                                         <Control name="$(parent)Keep" inherits="ZO_GuildInfoGamepad_InfoIcon">
                                             <Anchor point="TOPLEFT"/>

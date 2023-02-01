@@ -732,6 +732,17 @@ function ZO_GamepadSkills:InitializeAssignableActionBar()
     self.actionBarAnimation:GetAnimation(2):SetAnimatedControl(actionBarBg)
 
     self.actionBarAnimation:PlayInstantlyToStart()
+    --Narration info for the action bar
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return GAMEPAD_SKILLS_SCENE_GROUP:IsShowing() and self.assignableActionBar:IsActive()
+        end,
+        selectedNarrationFunction = function()
+            return self.assignableActionBar:GetNarrationText()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("skillAssignableActionBar", narrationInfo)
 end
 
 function ZO_GamepadSkills:ActivateAssignableActionBarFromList()
@@ -1005,6 +1016,10 @@ function ZO_GamepadSkills:InitializeEvents()
     local function OnCurrentHotbarUpdated()
         --To refresh tooltip if an action slot is selected
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
+        --Re-narrate when the current hotbar changes (if active)
+        if self.assignableActionBar:IsActive() then
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry("skillAssignableActionBar")
+        end
     end
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, FullRebuild)
@@ -1054,6 +1069,8 @@ function ZO_GamepadSkills:InitializeEvents()
 
     local function OnSelectedActionBarButtonChanged(selectedSlotIndex, didSlotTypeChange)
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
+        --Re-narrate when the selected action bar slot changes
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("skillAssignableActionBar")
     end
     self.assignableActionBar:RegisterCallback("SelectedButtonChanged", OnSelectedActionBarButtonChanged)
 end
@@ -1087,12 +1104,33 @@ function ZO_GamepadSkills:TrySetClearNewSkillLineFlag(callId)
 end
 
 do
+    local function SkillLineGamepadEntryProgressBarNarrationText(entryData)
+        local barMax = entryData.nextRankXP
+        if barMax then
+            local barMin = entryData.lastRankXP or 0
+            local barValue = entryData.currentXP or 0
+            return ZO_GetProgressBarNarrationText(barMin, barMax, barValue)
+        end
+    end
     local function IsSkillLineAvailableOrAdvised(skillLineData)
         return skillLineData:IsAvailable() or skillLineData:IsAdvised()
     end
     local SKILL_LINE_FILTERS = { IsSkillLineAvailableOrAdvised }
     function ZO_GamepadSkills:RefreshCategoryList()
         self.categoryList:Clear()
+
+        local skillLineNarrationText = function(entryData, entryControl)
+            local narrations = {}
+            local skillLineData = entryData.skillLineData
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SKILLS_GAMEPAD_RANK_NARRATION)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(skillLineData.currentRank))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text))
+            ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntrySubLabelNarrationText(entryData, entryControl))
+            ZO_AppendNarration(narrations, SkillLineGamepadEntryProgressBarNarrationText(skillLineData))
+            ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryStackCountNarrationText(entryData, entryControl))
+            ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryStatusIndicatorNarrationText(entryData, entryControl))
+            return narrations
+        end
 
         local skillsAdvisorEntryData = ZO_GamepadEntryData:New(zo_strformat(SI_SKILLS_ENTRY_NAME_FORMAT, GetString(SI_SKILLS_ADVISOR_TITLE)))
         skillsAdvisorEntryData.isSkillsAdvisor = true
@@ -1108,6 +1146,7 @@ do
                 local data = ZO_GamepadEntryData:New()
                 data:SetNew(IsSkillLineNew)
                 data.skillLineData = skillLineData
+                data.narrationText = skillLineNarrationText
 
                 if isHeader then
                     data:SetHeader(skillTypeData:GetName())  
@@ -1474,7 +1513,7 @@ end
 
 function ZO_GamepadSkills:ShowConfirmRespecDialog()
     if SKILL_POINT_ALLOCATION_MANAGER:DoPendingChangesIncurCost() then
-        if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillRespecPaymentType() == SKILL_RESPEC_PAYMENT_TYPE_GOLD then
+        if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillRespecPaymentType() == RESPEC_PAYMENT_TYPE_GOLD then
             ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_GOLD_GAMEPAD")
         else
             ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_SCROLL")
@@ -1698,6 +1737,8 @@ do
                     if selectedControl and selectedControl.pointLimitedSpinner then
                         selectedControl.pointLimitedSpinner:SetActive(false)
                     end
+                else
+                    list:RefreshVisible()
                 end
             end,
 

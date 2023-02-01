@@ -289,6 +289,7 @@ end
 
 do
     local function Start(self, remainingTimeMs)
+        local NO_LEADING_EDGE = false
         self:StartCooldown(remainingTimeMs, remainingTimeMs, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, NO_LEADING_EDGE)
         local nowS = GetFrameTimeSeconds()
         self.endTimeS = nowS + (remainingTimeMs / 1000)

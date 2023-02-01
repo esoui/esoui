@@ -106,7 +106,7 @@ function CampaignEmperor_Gamepad:SetupLeaderboardAllianceEntry(control, data)
 
     control.nameLabel:SetText(zo_strformat(SI_GAMEPAD_EMPERORSHIP_LEADERBOARD_HEADER, data.name))
     
-    local allianceTexture = GetLargeAllianceSymbolIcon(data.alliance)
+    local allianceTexture = ZO_GetLargeAllianceSymbolIcon(data.alliance)
     control.allianceIcon:SetHidden(false)
     control.allianceIcon:SetTexture(allianceTexture)
 

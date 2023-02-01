@@ -271,7 +271,6 @@
         </TopLevelControl>
 
         <Control name="SkillTooltipUpgradeLine" virtual="true" layer="1" resizeToFitDescendents="true">
-            <Dimensions y="16"/>
             <Controls>
                 <Texture name="$(parent)ArrowTex" textureFile="EsoUI/Art/Tooltips/greenArrow.dds" layer="1">
                     <Anchor point="CENTER" />

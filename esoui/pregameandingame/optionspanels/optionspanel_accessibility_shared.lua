@@ -108,7 +108,6 @@ local ZO_Panel_Accessibility_ControlData =
             panel = SETTING_PANEL_ACCESSIBILITY,
             text = SI_ACCESSIBILITY_OPTIONS_SCREEN_NARRATION,
             tooltipText = SI_ACCESSIBILITY_OPTIONS_SCREEN_NARRATION_TOOLTIP,
-            exists = ShouldShowScreenNarrationSetting,
             eventCallbacks =
             {
                 ["OnAccessibilityModeEnabled"] = ZO_Options_UpdateOption,

@@ -12,7 +12,7 @@ function ZO_GamepadEnchanting:Initialize(control)
 
     self.modeList = ZO_GamepadVerticalItemParametricScrollList:New(self.containerControl:GetNamedChild("Mode"))
     self.modeList:SetAlignToScreenCenter(true)
-    self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, MenuEntryTemplateEquality)
+    self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self:InitializeModes()
 
     ZO_SharedEnchanting.Initialize(self, control)
@@ -33,6 +33,31 @@ function ZO_GamepadEnchanting:Initialize(control)
     ZO_GamepadCraftingUtils_InitializeGenericHeader(self, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
 
     SYSTEMS:RegisterGamepadObject(ZO_ENCHANTING_SYSTEM_NAME, self)
+
+    --Narrates the mode list
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return GAMEPAD_ENCHANTING_MODE_SCENE_ROOT:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
+        end,
+        footerNarrationFunction = function()
+            return self:GetFooterNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.modeList, narrationInfo)
+end
+
+function ZO_GamepadEnchanting:GetFooterNarration()
+    local narrations = {}
+    local skillInfoNarration = ZO_Skills_GetSkillInfoHeaderNarrationText(self.skillInfo)
+    if skillInfoNarration then
+        ZO_CombineNumericallyIndexedTables(narrations, skillInfoNarration)
+    end
+    ZO_CombineNumericallyIndexedTables(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
+    return narrations
 end
 
 function ZO_GamepadEnchanting:InitializeModes()
@@ -47,7 +72,7 @@ function ZO_GamepadEnchanting:InitializeModes()
 
     local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(CRAFTING_TYPE_ENCHANTING)
     local recipeCraftingSystemName = GetString("SI_RECIPECRAFTINGSYSTEM", recipeCraftingSystem)
-    data = ZO_GamepadEntryData:New(recipeCraftingSystemName, GetGamepadRecipeCraftingSystemMenuTextures(CRAFTING_TYPE_ENCHANTING))
+    data = ZO_GamepadEntryData:New(recipeCraftingSystemName, ZO_GetGamepadRecipeCraftingSystemMenuTextures(CRAFTING_TYPE_ENCHANTING))
     data.mode = ENCHANTING_MODE_RECIPES
     self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data)
 
@@ -72,7 +97,7 @@ function ZO_GamepadEnchanting:InitializeInventory()
                 local itemLink = GetItemLink(bagId, slotIndex)
                 local known, name = GetItemLinkEnchantingRuneName(itemLink)
                 local _, _, runeType, rankRequirement, rarityRequirement = GetItemCraftingInfo(bagId, slotIndex)
-                
+
                 data.meetsUsageRequirement = DoesRunePassRequirements(runeType, rankRequirement, rarityRequirement)
                 local requirementString = ""
                 if known == true then
@@ -90,13 +115,16 @@ function ZO_GamepadEnchanting:InitializeInventory()
                     requirementString = zo_strformat(SI_ENCHANTING_REQUIRES_ASPECT_IMPROVEMENT, rarityRequirement)
                 end
 
-                if(requirementString ~= "") then
+                if requirementString ~= "" then
                     if data.meetsUsageRequirement then
                         data:AddSubLabel(ZO_SUCCEEDED_TEXT:Colorize(requirementString))
                     else
                         data:AddSubLabel(ZO_ERROR_COLOR:Colorize(requirementString))
                     end
                 end
+
+                --Store this off so we access it for narration purposes
+                data.requirementString = requirementString
             end
         end
     )
@@ -219,7 +247,8 @@ function ZO_GamepadEnchanting:InitializeCreationSlots()
 
     self.runeSlots = {}
 
-    local potencyData = {
+    local potencyData =
+    {
         owner = self,
         slotIcon = "EsoUI/Art/Crafting/Gamepad/gp_crafting_runestone01_slot.dds",
         slotIconDrag = "EsoUI/Art/Crafting/Gamepad/gp_crafting_runestone01_drag.dds",
@@ -234,7 +263,8 @@ function ZO_GamepadEnchanting:InitializeCreationSlots()
     self.creationCraftingBar:AddEntry("ZO_GamepadEnchantingRuneCraftingSlot", potencyData)
     self.runeSlots[ENCHANTING_RUNE_POTENCY] = potencyData.slot
 
-    local essenceData = {
+    local essenceData =
+    {
         owner = self,
         slotIcon = "EsoUI/Art/Crafting/Gamepad/gp_crafting_runestone02_slot.dds",
         slotIconDrag = "EsoUI/Art/Crafting/Gamepad/gp_crafting_runestone02_drag.dds",
@@ -248,7 +278,8 @@ function ZO_GamepadEnchanting:InitializeCreationSlots()
     self.creationCraftingBar:AddEntry("ZO_GamepadEnchantingRuneCraftingSlot", essenceData)
     self.runeSlots[ENCHANTING_RUNE_ESSENCE] = essenceData.slot
 
-    local aspectData = {
+    local aspectData =
+    {
         owner = self,
         slotIcon = "EsoUI/Art/Crafting/Gamepad/gp_crafting_runestone03_slot.dds",
         slotIconDrag = "EsoUI/Art/Crafting/Gamepad/gp_crafting_runestone03_drag.dds",
@@ -271,6 +302,17 @@ function ZO_GamepadEnchanting:InitializeCreationSlots()
     end)
 
     self.resultTooltip = self.control:GetNamedChild("Tooltip")
+    --Narrates the result tooltip in creation and extraction
+    local tooltipNarrationInfo = 
+    {
+        canNarrate = function()
+            return not self.resultTooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return self.resultTooltip.tip:GetNarrationText()
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(tooltipNarrationInfo)
 
     self.creationSlotAnimation = ZO_SharedEnchantingSlotAnimation:New(self.slotCreationAnimationName, function() return self.enchantingMode == ENCHANTING_MODE_CREATION end)
     self.creationSlotAnimation:AddSlot(self.runeSlots[ENCHANTING_RUNE_POTENCY])
@@ -287,9 +329,6 @@ function ZO_GamepadEnchanting:DataSelectionCallback(list, selectedData)
     local _, _, runeType, _, _ = GetItemCraftingInfo(bagId, slotIndex)
     if self.enchantingMode == ENCHANTING_MODE_CREATION then
         if self.activeSlot ~= runeType then
-            if self.activeSlot > 0 then
-                local slot = self.runeSlots[self.activeSlot]
-            end
             if runeType ~= nil then
                 self.activeSlot = runeType
             else
@@ -330,7 +369,8 @@ function ZO_GamepadEnchanting:InitializeExtractionSlots()
 
     self.extractionCraftingBar:Clear()
 
-    local newData = {
+    local newData =
+    {
         inventory = self.inventory,
         owner = self,
     }
@@ -341,6 +381,18 @@ function ZO_GamepadEnchanting:InitializeExtractionSlots()
     self.extractionSlotAnimation:AddSlot(self.extractionSlot)
 
     self.extractionCraftingBar:Commit()
+    --Narrates the extraction slot when the result tooltip is not visible
+    local tooltipNarrationInfo = 
+    {
+        canNarrate = function()
+            --If the fixed tooltip is showing, no need to narrate this, as it will be redundant information
+            return GAMEPAD_ENCHANTING_EXTRACTION_SCENE:IsShowing() and self.resultTooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return self.extractionSlot:GetNarrationText()
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(tooltipNarrationInfo)
 end
 
 function ZO_GamepadEnchanting:InitializeKeybindStripDescriptors()
@@ -367,8 +419,9 @@ function ZO_GamepadEnchanting:InitializeKeybindStripDescriptors()
                 else
                     self:Select()
                 end
-
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindEnchantingStripDescriptor)
+                --Re-narrate when something is added or removed
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
             end,
             enabled = function() 
                 if ZO_CraftingUtils_IsPerformingCraftProcess() then
@@ -457,6 +510,8 @@ function ZO_GamepadEnchanting:InitializeKeybindStripDescriptors()
                 self:ClearSelections()
                 self:UpdateSelection()
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindEnchantingStripDescriptor)
+                --Re-narrate when clearing all selections
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
             end,
             visible = function()
                 return not ZO_CraftingUtils_IsPerformingCraftProcess()
@@ -474,6 +529,8 @@ function ZO_GamepadEnchanting:InitializeKeybindStripDescriptors()
                 self.inventory:ToggleQuestFilter()
                 self.inventory:PerformFullRefresh()
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindEnchantingStripDescriptor)
+                --Re-narrate when the filter changes
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
             end,
             visible = function()
                 return self.enchantingMode == ENCHANTING_MODE_CREATION
@@ -629,7 +686,7 @@ function ZO_GamepadEnchantingInventory:New(...)
 end
 
 function ZO_GamepadEnchantingInventory:Initialize(owner, control, ...)
-    local inventory = ZO_GamepadCraftingInventory.Initialize(self, control, ...)
+    ZO_GamepadCraftingInventory.Initialize(self, control, ...)
     self.owner = owner
     self.filterType = ENCHANTING_NO_FILTER
     self.runeSlots = self.owner.runeSlots
@@ -640,6 +697,29 @@ function ZO_GamepadEnchantingInventory:Initialize(owner, control, ...)
         end
     end
     self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+
+    --Narrates the inventory list for creation and extraction
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            local mode = self.owner:GetEnchantingMode()
+            return mode == ENCHANTING_MODE_CREATION or mode == ENCHANTING_MODE_EXTRACTION
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.owner.header, self.owner.headerData)
+        end,
+        footerNarrationFunction = function()
+            return self.owner:GetFooterNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.list, narrationInfo)
+
+
+    ZO_WRIT_ADVISOR_GAMEPAD:RegisterCallback("CycleActiveQuest", function()
+        if self.owner:IsSceneShowing() and self.owner:GetEnchantingMode() == ENCHANTING_MODE_CREATION then
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
+        end
+    end)
 end
 
 function ZO_GamepadEnchantingInventory:SetupSavedVars()
@@ -666,17 +746,19 @@ function ZO_GamepadEnchantingInventory:AddListDataTypes()
             data.hasCraftingQuestPin = DoesPlayerHaveRunesForEnchanting(self.questRunes.aspect, self.questRunes.essence, self.questRunes.potency)
             --If there is an override status indicator icon, we need to explicitly add the quest pin here
             if data.overrideStatusIndicatorIcons and data.hasCraftingQuestPin then
-                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"}
+                data.overrideStatusIndicatorIcons =  { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE, ZO_TRACKED_PIN_STATUS_ICON_OVERRIDE }
             end
         else
             data.hasCraftingQuestPin = false
         end
 
+        data.enchantingMode = self.owner:GetEnchantingMode()
         local levelControl = control:GetNamedChild("Level")
-        local isCreationMode = self.owner:GetEnchantingMode() == ENCHANTING_MODE_CREATION
+        local isCreationMode = data.enchantingMode == ENCHANTING_MODE_CREATION
         local _, _, runeType = GetItemCraftingInfo(data.bagId, data.slotIndex)
         local isPotencyRune = runeType == ENCHANTING_RUNE_POTENCY
         local shouldShowLevel = isCreationMode and isPotencyRune
+        data.shouldShowLevel = shouldShowLevel
         levelControl:SetHidden(not shouldShowLevel)
         if shouldShowLevel then
             local levelText
@@ -745,24 +827,72 @@ function ZO_GamepadEnchantingInventory:Refresh(data)
     end
 end
 
-function ZO_GamepadEnchantingInventory:EnumerateInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data)
-    local list = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, predicate)
-    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, predicate, list)
-    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_CRAFT_BAG, predicate, list)
-
-    ZO_ClearTable(self.itemCounts)
-
-    local filteredDataTable = {}
-    for itemId, itemInfo in pairs(list) do
-        if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType, self.savedVars.shouldFilterQuests, self.questRunes) then
-            filteredDataTable[#filteredDataTable + 1] = self:GenerateCraftingInventoryEntryData(itemInfo.bag, itemInfo.index, itemInfo.stack)
+do
+    --Custom logic for narrating the sub labels
+    local function GetSubLabelsNarrationText(entryData, entryControl)
+        local narrations = {}
+        --Only need to narrate sub labels for creation
+        if entryData.enchantingMode == ENCHANTING_MODE_CREATION then
+            local _, name = GetItemLinkEnchantingRuneName(GetItemLink(entryData.bagId, entryData.slotIndex))
+            local traitSubLabel = name and zo_strformat(name) or GetString(SI_GAMEPAD_ENCHANTING_TRANSLATION_UNKNOWN_NARRATION)
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(traitSubLabel))
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.requirementString))
         end
-        self.itemCounts[itemId] = itemInfo.stack
+        return narrations
     end
 
-    self:AddFilteredDataToList(filteredDataTable)
+    local function GetNarrationText(entryData, entryControl)
+        local narrations = {}
+        --Get the narration for the standard entry text
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text))
 
-    return list
+        --Get the narration for the sublabels
+        ZO_CombineNumericallyIndexedTables(narrations, ZO_GetSharedGamepadEntrySubLabelNarrationText(entryData, entryControl))
+
+        --Generate the narration for the level if necessary
+        if entryData.shouldShowLevel then
+            local isRuneKnown = IsRuneKnown(GetItemId(entryData.bagId, entryData.slotIndex))
+            --If the rune is known, narrate the level
+            if isRuneKnown then
+                local level, championPoints = GetItemGlyphMinLevels(entryData.bagId, entryData.slotIndex)
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ENCHANTING_HEADER_LEVEL_NARRATION)))
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_GetLevelOrChampionPointsNarrationString(level, championPoints)))
+            else
+                --If the rune is unknown, narrate that the level is unknown
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ENCHANTING_LEVEL_UNKNOWN_NARRATION)))
+            end
+        end
+
+        --Generate the narration for the stack count
+        table.insert(narrations, ZO_GetSharedGamepadEntryStackCountNarrationText(entryData, entryControl))
+
+        --Generate the narration for any status indicators
+        ZO_CombineNumericallyIndexedTables(narrations, ZO_GetSharedGamepadEntryStatusIndicatorNarrationText(entryData, entryControl))
+        return narrations
+    end
+
+    function ZO_GamepadEnchantingInventory:EnumerateInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data)
+        local list = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, predicate)
+        PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, predicate, list)
+        PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_CRAFT_BAG, predicate, list)
+
+        ZO_ClearTable(self.itemCounts)
+
+        local filteredDataTable = {}
+        for itemId, itemInfo in pairs(list) do
+            if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType, self.savedVars.shouldFilterQuests, self.questRunes) then
+                local entryData = self:GenerateCraftingInventoryEntryData(itemInfo.bag, itemInfo.index, itemInfo.stack)
+                entryData.narrationText = GetNarrationText
+                entryData.subLabelsNarrationText = GetSubLabelsNarrationText
+                filteredDataTable[#filteredDataTable + 1] = entryData
+            end
+            self.itemCounts[itemId] = itemInfo.stack
+        end
+
+        self:AddFilteredDataToList(filteredDataTable)
+
+        return list
+    end
 end
 
 function ZO_GamepadEnchantingInventory:ShowAppropriateSlotDropCallouts(bagId, slotIndex)
@@ -802,7 +932,7 @@ function ZO_EnchantExtractionSlot_Gamepad:ClearDropCalloutTexture()
 end
 
 function ZO_EnchantExtractionSlot_Gamepad:SetBackdrop(bagId, slotIndex)
-    local usedInCraftingType, craftingSubItemType, runeType = GetItemCraftingInfo(bagId, slotIndex)
+    local _, craftingSubItemType = GetItemCraftingInfo(bagId, slotIndex)
 
     if self.previousGlyph ~= craftingSubItemType then
         if craftingSubItemType == ITEMTYPE_GLYPH_WEAPON then
@@ -816,5 +946,15 @@ function ZO_EnchantExtractionSlot_Gamepad:SetBackdrop(bagId, slotIndex)
         end
 
         self.previousGlyph = craftingSubItemType
+    end
+end
+
+function ZO_EnchantExtractionSlot_Gamepad:GetNarrationText()
+    if self:HasItems() then
+        if self:HasMultipleItems() then
+            return zo_strformat(SI_CRAFTING_SLOT_MULTIPLE_SELECTED, ZO_CommaDelimitNumber(self:GetStackCount()))
+        end
+    else
+        return GetString(SI_ENCHANTING_SELECT_ITEMS_TO_EXTRACT)
     end
 end

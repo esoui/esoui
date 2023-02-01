@@ -28,6 +28,10 @@ function CreateControlRangeFromVirtual(name, parent, templateName, rangeMinSuffi
     end
 end
 
+function GetUIMousePosition()
+    return WINDOW_MANAGER:GetUIMousePosition()
+end
+
 -- 
 -- GetControl now calls into C++ to avoid memory allocations resulting from string concatenation.
 -- Previously this would do a lookup like: _G[controlName..suffix].  The problem is this function is

@@ -150,6 +150,7 @@ function ZO_HUDTelvarMeter:AnimateMeter(progress)
 end
 
 function ZO_HUDTelvarMeter:SetBarValue(percentFilled)
+    local NO_LEADING_EDGE = false
     self.meterBarFill:StartFixedCooldown(percentFilled, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, NO_LEADING_EDGE) -- CD_TIME_TYPE_TIME_REMAINING causes clockwise scroll
     self.meterBarHighlight:StartFixedCooldown(percentFilled, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, NO_LEADING_EDGE)
 end

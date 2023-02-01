@@ -99,14 +99,31 @@ function ZO_GamepadInteractiveSortFilterList:Initialize(control)
     end)
 
     local function OnSortHeaderClicked(key, order)
-        SCREEN_NARRATION_MANAGER:OnSortHeaderChanged(self, self.sortHeaderGroup, key)
+        SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, key)
     end
 
     local function OnSortHeaderSelected(key)
-        SCREEN_NARRATION_MANAGER:OnSortHeaderChanged(self, self.sortHeaderGroup, key)
+        SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, key)
     end
     self.sortHeaderGroup:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
     self.sortHeaderGroup:RegisterCallback("HeaderSelected", OnSortHeaderSelected)
+
+    --Re-narrate the current focus upon closing dialogs
+    CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", function()
+        if self:IsActivated() then
+            local NARRATE_HEADER = true
+            --Determine if we need to narrate the filter switcher, sort header group, or list entry
+            if self:IsCurrentFocusArea(self.filtersFocalArea) then
+                SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher, NARRATE_HEADER)
+            elseif self:IsCurrentFocusArea(self.headersFocalArea) then
+                if self.sortHeaderGroup then
+                    SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, self.sortHeaderGroup:GetCurrentSortKey(), NARRATE_HEADER)
+                end
+            elseif self:IsCurrentFocusArea(self.panelFocalArea) then
+                SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, NARRATE_HEADER)
+            end
+        end
+    end)
 end
 
 function ZO_GamepadInteractiveSortFilterList:InitializeSortFilterList(control)
@@ -219,10 +236,19 @@ function ZO_GamepadInteractiveSortFilterList:InitializeDropdownFilter()
         end,
         activate = function()
             self.filterDropdown:SetSelectedColor(ZO_SELECTED_TEXT)
-            SCREEN_NARRATION_MANAGER:OnComboBoxFocused(self.filterDropdown)
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher)
         end,
         deactivate = function()
             self.filterDropdown:SetSelectedColor(ZO_DISABLED_TEXT)
+        end,
+        narrationText = function()
+            return self.filterDropdown:GetNarrationText()
+        end,
+        headerNarrationFunction = function()
+            return self:GetHeaderNarration()
+        end,
+        footerNarrationFunction = function()
+            return self:GetFooterNarration()
         end,
         highlight = self.filterControl:GetNamedChild("Highlight"),
         canFocus = function() return not self.filterControl:IsHidden() and not filterDropdownControl:IsHidden() end,
@@ -236,7 +262,7 @@ function ZO_GamepadInteractiveSortFilterList:InitializeSearchFilter()
 
     local function SearchEditFocusLost()
         ZO_GamepadEditBox_FocusLost(searchEdit)
-        SCREEN_NARRATION_MANAGER:QueueSearchEditBox(searchEdit)
+        SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher)
         self:RefreshFilters()
     end
     searchEdit:SetHandler("OnFocusLost", SearchEditFocusLost)
@@ -248,7 +274,16 @@ function ZO_GamepadInteractiveSortFilterList:InitializeSearchFilter()
             end
         end,
         activate = function()
-            SCREEN_NARRATION_MANAGER:QueueSearchEditBox(searchEdit)
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher)
+        end,
+        narrationText = function()
+            return ZO_FormatEditBoxNarrationText(searchEdit, GetString(SI_SCREEN_NARRATION_EDIT_BOX_SEARCH_NAME))
+        end,
+        headerNarrationFunction = function()
+            return self:GetHeaderNarration()
+        end,
+        footerNarrationFunction = function()
+            return self:GetFooterNarration()
         end,
         highlight = self.searchControl:GetNamedChild("Highlight"),
         canFocus = function() return not self.searchControl:IsHidden() and not searchEdit:IsHidden() end
@@ -373,13 +408,21 @@ end
 
 function ZO_GamepadInteractiveSortFilterList:Activate()
     self:SetDirectionalInputEnabled(true)
-    local activeFocus = self:HasEntries() and self.panelFocalArea or self.headersFocalArea
+    local hasEntries = self:HasEntries()
+    local activeFocus = hasEntries and self.panelFocalArea or self.headersFocalArea
     if not activeFocus then
         self:Deactivate()
     else
         self:ActivateFocusArea(activeFocus)
         self.isActive = true
         ZO_GamepadOnDefaultActivatedChanged(self.list, self.isActive)
+        if hasEntries then
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, NARRATE_HEADER)
+        elseif self.sortHeaderGroup then
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, self.sortHeaderGroup:GetCurrentSortKey(), NARRATE_HEADER)
+        end
     end
 end
 
@@ -577,6 +620,11 @@ end
 function ZO_GamepadInteractiveSortFilterList:DeselectListData()
     ZO_ScrollList_SelectData(self.list, nil)
     ZO_ScrollList_ResetAutoSelectIndex(self.list)
+end
+
+--Overridden from base
+function ZO_GamepadInteractiveSortFilterList:GetHeaderNarration()
+    return ZO_GamepadGenericHeader_GetNarrationText(self.contentHeader, self.contentHeaderData)
 end
 
 

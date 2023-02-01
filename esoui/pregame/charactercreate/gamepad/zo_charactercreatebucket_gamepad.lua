@@ -197,12 +197,12 @@ function ZO_CharacterCreateBucket_Gamepad:Finalize()
     self:GetScrollChild():Commit()
 end
 
-function ZO_CharacterCreateBucket_Gamepad:AddControl(control, updateFn, randomizeFn, subCategoryId, narrationText)
+function ZO_CharacterCreateBucket_Gamepad:AddControl(control, updateFn, randomizeFn, subCategoryId, narrationText, directionalInputNarrationFunction)
     control.bucket = self
     control:ClearAnchors()
 
     local list = self:GetScrollChild()
-    list:AddEntry("ZO_CharacterCreateEntry_Gamepad", { control = control, narrationText = narrationText }, control.prePadding, control.postPadding, control.preSelectedOffsetAdditionalPadding, control.postSelectedOffsetAdditionalPadding, control.selectedCenterOffset)
+    list:AddEntry("ZO_CharacterCreateEntry_Gamepad", { control = control, narrationText = narrationText, additionalInputNarrationFunction = directionalInputNarrationFunction }, control.prePadding, control.postPadding, control.preSelectedOffsetAdditionalPadding, control.postSelectedOffsetAdditionalPadding, control.selectedCenterOffset)
     control:SetHidden(true)
 
     self.controlData[control] = { updateFn = updateFn, randomizeFn = randomizeFn }

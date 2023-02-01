@@ -1,7 +1,5 @@
 ZO_GAMEPAD_PROVISIONER_INGREDIENTS_BAR_OFFSET_X = (ZO_GAMEPAD_QUADRANT_1_RIGHT_OFFSET + ZO_GAMEPAD_UI_REFERENCE_WIDTH) / 2
 
-local GAMEPAD_PROVISIONER_OPTIONS_TEMPLATE = "ZO_GamepadLeftCheckboxOptionTemplate"
-
 local GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS = 1
 local GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS = 2
 local GAMEPAD_PROVISIONER_OPTION_FILTER_QUESTS = 3
@@ -120,13 +118,8 @@ end
 
 --Settings
 
-ZO_GamepadProvisioner.PROVISIONING_SETTINGS =
-{
-}
-
-ZO_GamepadProvisioner.EMBEDDED_SETTINGS =
-{
-}
+ZO_GamepadProvisioner.PROVISIONING_SETTINGS = {}
+ZO_GamepadProvisioner.EMBEDDED_SETTINGS = {}
 
 function ZO_GamepadProvisioner:InitializeSettings()
     local function GenerateTab(filterType)
@@ -134,6 +127,8 @@ function ZO_GamepadProvisioner:InitializeSettings()
             text = GetString("SI_PROVISIONERSPECIALINGREDIENTTYPE", filterType),
             callback = function()
                 self:OnTabFilterChanged(filterType)
+                local NARRATE_HEADER = true
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.recipeList, NARRATE_HEADER)
             end,
         }
     end
@@ -143,7 +138,7 @@ function ZO_GamepadProvisioner:InitializeSettings()
     local furnishingsTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING)
 
     local provisioningSettings = ZO_GamepadProvisioner.PROVISIONING_SETTINGS
-    provisioningSettings.tabs = {foodTab, drinkTab, furnishingsTab}
+    provisioningSettings.tabs = { foodTab, drinkTab, furnishingsTab }
 
     local embeddedSettings = ZO_GamepadProvisioner.EMBEDDED_SETTINGS
     embeddedSettings.tabs = { furnishingsTab }
@@ -176,7 +171,8 @@ end
 
 function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
     -- back descriptors for screen / options screen
-    local startButton = {
+    local startButton = 
+    {
         --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
         name = "Gamepad Provisioner Default Exit",
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -191,7 +187,8 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
         ethereal = true,
     }
 
-    local backButton = {
+    local backButton = 
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         name = GetString(SI_GAMEPAD_BACK_OPTION),
         keybind = "UI_SHORTCUT_NEGATIVE",
@@ -201,10 +198,8 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
         end,
         visible = function()
             return not ZO_CraftingUtils_IsPerformingCraftProcess()
-        end
+        end,
     }
-
-    local optionsBackButton = KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor()
 
     -- recipe list keybinds
     self.mainKeybindStripDescriptor =
@@ -353,6 +348,32 @@ function ZO_GamepadProvisioner:InitializeRecipeList()
     self.recipeList:SetOnSelectedDataChangedCallback(function(list, selectedData)
         self:RefreshRecipeDetails(selectedData)
     end)
+
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return GAMEPAD_PROVISIONER_ROOT_SCENE:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
+        end,
+        footerNarrationFunction = function()
+            local narrations = {}
+            local skillInfoNarration = ZO_Skills_GetSkillInfoHeaderNarrationText(self.control:GetNamedChild("SkillInfo"))
+            if skillInfoNarration then
+                ZO_CombineNumericallyIndexedTables(narrations, skillInfoNarration)
+            end
+            ZO_CombineNumericallyIndexedTables(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
+            return narrations
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.recipeList, narrationInfo)
+
+    ZO_WRIT_ADVISOR_GAMEPAD:RegisterCallback("CycleActiveQuest", function()
+        if GAMEPAD_PROVISIONER_ROOT_SCENE:IsShowing() then
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.recipeList)
+        end
+    end)
 end
 
 function ZO_GamepadProvisioner:SaveFilters()
@@ -371,7 +392,34 @@ function ZO_GamepadProvisioner:InitializeDetails()
     local PROVISIONER_INGREDIENT_SLOT_SPACING = 211
     self.ingredientsBar = ZO_GamepadCraftingIngredientBar:New(self.control:GetNamedChild("IngredientsBar"), PROVISIONER_INGREDIENT_SLOT_SPACING)
 
-    self.ingredientsBar:AddDataTemplate("ZO_ProvisionerIngredientBarSlotTemplate", ZO_ProvisionerIngredientBarSlotTemplateSetup)
+    self.ingredientsBar:AddDataTemplate("ZO_ProvisionerIngredientBarSlotTemplate", ZO_ProvisionerIngredientBarSlotTemplateSetup, ZO_ProvisionerIngredientBarSlotTemplateGetNarration)
+
+    --Narration info for the tooltip for the item we are crafting
+    local tooltipNarrationInfo =
+    {
+        canNarrate = function()
+            return not self.resultTooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return self.resultTooltip.tip:GetNarrationText()
+        end,
+    }
+    --Order matters. We register this BEFORE we register narration for the ingredients, so this gets narrated first.
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(tooltipNarrationInfo)
+
+    --Narration info for the ingredients for the item we are crafting
+    local ingredientsNarrationInfo = 
+    {
+        canNarrate = function()
+            -- We don't use the visibility of ingredients bar here, as it seems to sometimes rely on the visibility of parent controls. 
+            -- Instead, we use the result tooltip, as it should always be visible if the ingredients are
+            return not self.resultTooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return { GetString(SI_GAMEPAD_PROVISIONER_INGREDIENT_BAR_HEADER_NARRATION), self.ingredientsBar:GetNarrationText() }
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(ingredientsNarrationInfo)
 end
 
 function ZO_GamepadProvisioner:SetDetailsEnabled(enabled)
@@ -511,7 +559,8 @@ function ZO_GamepadProvisioner:RefreshRecipeDetails(selectedData)
 
         self.ingredientsBar:Clear()
         for i = 1, numIngredients do
-            local newData = {
+            local newData =
+            {
                 recipeListIndex = recipeListIndex,
                 recipeIndex = recipeIndex,
                 ingredientIndex = i,
@@ -566,4 +615,10 @@ function ZO_ProvisionerIngredientBarSlotTemplateSetup(control, data)
     ZO_ItemSlot_SetupIconUsableAndLockedColor(control.countLabel, ingredientCount >= requiredQuantity, NOT_LOCKED)
     ZO_ItemSlot_SetupIconUsableAndLockedColor(control.iconControl, ingredientCount >= requiredQuantity, NOT_LOCKED)
     ZO_ItemSlot_SetupIconUsableAndLockedColor(control.nameLabel, ingredientCount >= requiredQuantity, NOT_LOCKED)
+end
+
+function ZO_ProvisionerIngredientBarSlotTemplateGetNarration(control, data)
+    local name, _, requiredQuantity = GetRecipeIngredientItemInfo(data.recipeListIndex, data.recipeIndex, data.ingredientIndex)
+    local ingredientCount = GetCurrentRecipeIngredientCount(data.recipeListIndex, data.recipeIndex, data.ingredientIndex)
+    return zo_strformat(SI_GAMEPAD_PROVISIONER_INGREDIENT_BAR_SLOT_NARRATION, requiredQuantity, ingredientCount, name)
 end

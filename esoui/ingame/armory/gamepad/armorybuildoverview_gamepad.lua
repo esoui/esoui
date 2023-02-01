@@ -37,6 +37,7 @@ function ZO_ArmoryBuildOverview_Gamepad:Initialize(control)
     self.headerPool = ZO_ControlPool:New("ZO_ArmoryStatValuePair", self.scrollChild, "Header")
     self.equipmentPool:SetCustomResetBehavior(ResetControl)
     self.headerPool:SetCustomResetBehavior(ResetControl)
+    self.equipmentEntryData = {}
 end
 
 do
@@ -63,6 +64,8 @@ do
         if self.armoryBuildData then
             self:ReleaseAllHeaderControls()
             self:ReleaseAllEquipmentControls()
+
+            ZO_ClearNumericallyIndexedTable(self.equipmentEntryData)
 
             -- Setup the skills row data
             local totalSkillPoints = self.armoryBuildData:GetSkillsTotalSpentPoints()
@@ -129,6 +132,9 @@ do
                 end
 
                 if not shouldHideEquipType then
+                    local slotName = zo_strformat(SI_GAMEPAD_ARMORY_EQUIPMENT_FORMATTER, GetString("SI_EQUIPSLOT", equipmentType))
+                    entryData.slotState = slotState
+                    entryData.slotName = slotName
                     if slotState == ARMORY_BUILD_EQUIP_SLOT_STATE_VALID then
                         entryData:AddIcon(GetItemLinkIcon(itemLink))
                         entryData:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(itemLink)))
@@ -140,11 +146,11 @@ do
                         local unselectedErrorColor = ZO_ERROR_COLOR:GetDim()
                         entryData:AddIcon(ZO_Character_GetEmptyEquipSlotTexture(equipmentType))
                         entryData:SetIconTint(ZO_ERROR_COLOR, unselectedErrorColor)
-                        entryData:SetText(zo_strformat(SI_GAMEPAD_ARMORY_EQUIPMENT_FORMATTER, GetString("SI_EQUIPSLOT", equipmentType)))
+                        entryData:SetText(slotName)
                         entryData:SetNameColors(ZO_ERROR_COLOR, unselectedErrorColor)
                     else
                         entryData:AddIcon(ZO_Character_GetEmptyEquipSlotTexture(equipmentType))
-                        entryData:SetText(zo_strformat(SI_GAMEPAD_ARMORY_EQUIPMENT_FORMATTER, GetString("SI_EQUIPSLOT", equipmentType)))
+                        entryData:SetText(slotName)
                     end
 
                     --Headers for Equipment Visual Categories (Weapons, Apparel): display header for the first equip slot of a category to be visible
@@ -152,7 +158,9 @@ do
                     local visualCategory = ZO_Character_GetEquipSlotVisualCategory(equipmentType)
                     if headersUsed[visualCategory] == nil then
                         local headerControl = self:AcquireHeaderControl()
-                        headerControl:GetNamedChild("Stat"):SetText(GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory))
+                        local headerText = GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory)
+                        entryData.headerText = headerText
+                        headerControl:GetNamedChild("Stat"):SetText(headerText)
                         ZO_SharedGamepadEntry_OnSetup(equipmentControl, entryData)
                         if previousControl then
                             headerControl:SetAnchor(TOPLEFT, previousControl, BOTTOMLEFT, 0, 5)
@@ -171,6 +179,7 @@ do
                         equipmentControl:SetAnchor(TOPLEFT, self.attributes, BOTTOMLEFT, 0, 10)
                     end
                     previousControl = equipmentControl
+                    table.insert(self.equipmentEntryData, entryData)
                 end
             end
 
@@ -223,6 +232,68 @@ end
 
 function ZO_ArmoryBuildOverview_Gamepad:SetSelectedArmoryBuildData(armoryBuildData)
     self.armoryBuildData = armoryBuildData
+end
+
+function ZO_ArmoryBuildOverview_Gamepad:GetNarrationText()
+    local narrations = {}
+    if self.armoryBuildData then
+        --Skill points
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ARMORY_SKILLS_CATEGORY)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.armoryBuildData:GetSkillsTotalSpentPoints()))
+
+        --Skill bars
+        ZO_AppendNarration(narrations, self.skillBarRow1:GetNarrationText())
+        ZO_AppendNarration(narrations, self.skillBarRow2:GetNarrationText())
+
+        --Champion Points
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ARMORY_CHAMPION_CATEGORY)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.armoryBuildData:GetChampionTotalSpentPoints()))
+
+        --Champion Bar
+        ZO_AppendNarration(narrations, self.championBar:GetNarrationText())
+
+        --Attributes
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ARMORY_ATTRIBUTES_CATEGORY)))
+
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_ATTRIBUTES", ATTRIBUTE_MAGICKA)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.armoryBuildData:GetAttributeSpentPoints(ATTRIBUTE_MAGICKA)))
+
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_ATTRIBUTES", ATTRIBUTE_HEALTH)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.armoryBuildData:GetAttributeSpentPoints(ATTRIBUTE_HEALTH)))
+
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_ATTRIBUTES", ATTRIBUTE_STAMINA)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.armoryBuildData:GetAttributeSpentPoints(ATTRIBUTE_STAMINA)))
+
+
+        --Equipment
+        for _, equipmentData in ipairs(self.equipmentEntryData) do
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(equipmentData.headerText))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(equipmentData.slotName))
+            if equipmentData.slotState == ARMORY_BUILD_EQUIP_SLOT_STATE_VALID then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(equipmentData.text))
+            elseif equipmentData.slotState == ARMORY_BUILD_EQUIP_SLOT_STATE_MISSING or equipmentData.slotState == ARMORY_BUILD_EQUIP_SLOT_STATE_INACCESSIBLE then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ARMORY_MISSING_ENTRY_NARRATION)))
+            else
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ARMORY_EMPTY_ENTRY_NARRATION)))
+            end
+        end
+
+        --Mundus
+        local mundusStoneList = self.armoryBuildData:GetEquippedMundusStoneNames()
+        for _, mundusName in ipairs(mundusStoneList) do
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ARMORY_MUNDUS_HEADER)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(mundusName))
+        end
+
+        --Curse
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ARMORY_CURSE_HEADER)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_CURSETYPE", self.armoryBuildData:GetCurseType())))
+
+        --Outfit
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_OUTFIT_SELECTOR_TITLE)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.armoryBuildData:GetEquippedOutfitName()))
+    end
+    return narrations
 end
 
 -----------------------------

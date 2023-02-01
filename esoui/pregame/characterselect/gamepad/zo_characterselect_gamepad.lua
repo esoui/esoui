@@ -1229,6 +1229,7 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
     CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", ContextFilter(OnPregameFullyLoaded))
 
     self:RegisterForEvent(EVENT_CHARACTER_DELETED, ContextFilter(CharacterDeleted))
+    self:RegisterForEvent(EVENT_ENTITLEMENT_STATE_CHANGED, function() RecreateList(self) end)
 
     CHARACTER_SELECT_MANAGER:RegisterCallback("EventAnnouncementsReceived", function()
         if PregameIsFullyLoaded() then

@@ -27,6 +27,13 @@ function ZO_ItemPreview_Gamepad:Initialize(control)
     self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
 end
 
+function ZO_ItemPreview_Gamepad:GetPreviewSpinnerNarrationText()
+    if self:HasVariations() then
+        return ZO_FormatSpinnerNarrationText(GetString(SI_SCREEN_NARRATION_ITEM_PREVIEW_STATE_TITLE), self.currentPreviewTypeObject:GetVariationName(self.previewVariationIndex))
+    end
+    return nil
+end
+
 function ZO_ItemPreview_Gamepad:SetCanChangePreview(canChangePreview)
     ZO_ItemPreview_Shared.SetCanChangePreview(self, canChangePreview)
 

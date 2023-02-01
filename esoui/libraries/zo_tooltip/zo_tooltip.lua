@@ -1,6 +1,22 @@
 --Tooltip Style
 ------------------------------
 
+do
+    local LINK_LAYOUT_HANDLERS =
+    {
+        [LINK_TYPE_ACHIEVEMENT] = "LayoutAchievementFromLink",
+        [LINK_TYPE_COLLECTIBLE] = "LayoutCollectibleFromLink",
+        [LINK_TYPE_GUILD] = "LayoutGuildLink",
+        [LINK_TYPE_HELP] = "LayoutHelpLink",
+        [LINK_TYPE_HOUSING] = "LayoutHousingLink",
+        [LINK_TYPE_ITEM] = "LayoutItem",
+    }
+
+    function GetLinkLayoutHandlerName(linkType)
+        return LINK_LAYOUT_HANDLERS[linkType]
+    end
+end
+
 local DEFAULT_TEXTURE_SIZE = 24
 
 function ZO_Tooltip_CopyStyle(style)
@@ -201,7 +217,7 @@ function ZO_TooltipStatValuePair:SetStat(statText, ...)
     self:FormatLabel(self.statLabel, statText, ...)
     self:SetDimensions(self:ComputeDimensions())
     --Used by screen narration
-    self.statText = tostring(statText)
+    self.statTextNarration = tostring(statText)
 end
 
 --where ... is a list of styles
@@ -212,7 +228,21 @@ function ZO_TooltipStatValuePair:SetValue(valueText, ...)
     self.valueLabel:AnchorToBaseline(self:GetNamedChild("Stat"), spacing, RIGHT)
     self:SetDimensions(self:ComputeDimensions())
     --Used by screen narration
-    self.valueText = tostring(valueText)
+    self.valueTextNarration = tostring(valueText)
+end
+
+--where ... is a list of styles
+function ZO_TooltipStatValuePair:SetStatWithCustomNarration(statText, narration, ...)
+    self:SetStat(statText, ...)
+    --Used by screen narration
+    self.statTextNarration = narration or tostring(statText)
+end
+
+--where ... is a list of styles
+function ZO_TooltipStatValuePair:SetValueWithCustomNarration(valueText, narration, ...)
+    self:SetValue(valueText, ...)
+    --Used by screen narration
+    self.valueTextNarration = narration or tostring(valueText)
 end
 
 function ZO_TooltipStatValuePair:ComputeDimensions()
@@ -757,6 +787,10 @@ function ZO_TooltipSection:AddControl(control, primarySize, secondarySize, ...)
         end
     end
 
+    self:AddNextNarrationText()
+end
+
+function ZO_TooltipSection:AddNextNarrationText()
     --Only bother here if we actually have narration text waiting to be added
     if self.nextNarrationText then
         local horizontalDirection = self:IsVertical() and self.secondaryCursorDirection or self.primaryCursorDirection
@@ -770,7 +804,7 @@ function ZO_TooltipSection:AddControl(control, primarySize, secondarySize, ...)
             --If the horizontal direction is left, then add the text to the front of the current row
             table.insert(self.narrationText[self.currentRow], 1, self.nextNarrationText)
         else
-            --If the horizontal direction right, then add the text to the end of the current row
+            --If the horizontal direction is right, then add the text to the end of the current row
             table.insert(self.narrationText[self.currentRow], self.nextNarrationText)
         end
         self.nextNarrationText = nil
@@ -797,6 +831,23 @@ function ZO_TooltipSection:AddLine(text, ...)
         end
 
     self:AddCustomLabel(customFunction, ...)
+end
+
+--where ... is the list of styles
+function ZO_TooltipSection:AddLineWithCustomNarration(text, narration, ...)
+    local customFunction =
+        function(label, ...)
+            self:FormatLabel(label, text, ...)
+            --This will get added to the narrationText table once we add the control
+            self.nextNarrationText = narration or text
+        end
+
+    self:AddCustomLabel(customFunction, ...)
+end
+
+function ZO_TooltipSection:AddNarrationLine(text)
+    self.nextNarrationText = text
+    self:AddNextNarrationText()
 end
 
 do
@@ -929,7 +980,6 @@ function ZO_TooltipSection:BasicTextureSetup(texture, ...)
 end
 
 --where ... is the list of styles
---TODO XAR: Handle narrating this case when necessary
 function ZO_TooltipSection:AddTexture(path, ...)
     local texture = self.texturePool:AcquireObject()
     texture:SetTexture(path)
@@ -951,6 +1001,13 @@ function ZO_TooltipSection:AddTexture(path, ...)
     texture:SetTextureCoords(left, right, top, bottom)
 
     self:BasicTextureSetup(texture, ...)
+end
+
+--where ... is the list of styles
+function ZO_TooltipSection:AddTextureWithCustomNarration(path, narration, ...)
+    --This will get added to the narrationText table once we add the control
+    self.nextNarrationText = narration
+    self:AddTexture(path, ...)
 end
 
 --where ... is the list of styles
@@ -1041,12 +1098,12 @@ end
 function ZO_TooltipSection:AddStatValuePair(statValuePair)
     --Order matters, do this before calling AddDimensionedControl
     local nextNarrationText = {}
-    if statValuePair.statText and statValuePair.statText ~= "" then
-        table.insert(nextNarrationText, statValuePair.statText)
+    if statValuePair.statTextNarration and statValuePair.statTextNarration ~= "" then
+        table.insert(nextNarrationText, statValuePair.statTextNarration)
     end
 
-    if statValuePair.valueText and statValuePair.valueText ~= "" then
-        table.insert(nextNarrationText, statValuePair.valueText)
+    if statValuePair.valueTextNarration and statValuePair.valueTextNarration ~= "" then
+        table.insert(nextNarrationText, statValuePair.valueTextNarration)
     end
     --This will get added to the narrationText table once we add the control
     self.nextNarrationText = nextNarrationText
@@ -1070,8 +1127,9 @@ function ZO_TooltipSection:AcquireStatusBar(...)
     return bar
 end
 
---TODO XAR: Handle narrating this case
-function ZO_TooltipSection:AddStatusBar(statusBar)
+function ZO_TooltipSection:AddStatusBar(statusBar, narrationText)
+    --This will get added to the narrationText table once we add the control
+    self.nextNarrationText = narrationText
     self:AddDimensionedControl(statusBar)
 end
 
@@ -1091,8 +1149,9 @@ function ZO_TooltipSection:AcquireCustomControl(...)
     return styledControl
 end
 
---TODO XAR: Handle narrating this case
-function ZO_TooltipSection:AddCustomControl(control)
+function ZO_TooltipSection:AddCustomControl(control, narrationText)
+    --This will get added to the narrationText table once we add the control
+    self.nextNarrationText = narrationText
     self:AddDimensionedControl(control)
 end
 
@@ -1187,25 +1246,13 @@ function ZO_Tooltip:LayoutTitleAndMultiSectionDescriptionTooltip(title, ...)
     end
 end
 
-do
-    local LINK_LAYOUT_HANDLERS =
-    {
-        [LINK_TYPE_ACHIEVEMENT] = "LayoutAchievementFromLink",
-        [LINK_TYPE_COLLECTIBLE] = "LayoutCollectibleFromLink",
-        [LINK_TYPE_GUILD] = "LayoutGuildLink",
-        [LINK_TYPE_HELP] = "LayoutHelpLink",
-        [LINK_TYPE_HOUSING] = "LayoutHousingLink",
-        [LINK_TYPE_ITEM] = "LayoutItem",
-    }
-
-    function ZO_Tooltip:LayoutLink(link, ...)
-        local linkType = GetLinkType(link)
-        local handlerKey = LINK_LAYOUT_HANDLERS[linkType]
-        local handlerFunction = self[handlerKey]
-        if handlerFunction then
-            handlerFunction(self, link, ...)
-            return true
-        end
-        return false
+function ZO_Tooltip:LayoutLink(link, ...)
+    local linkType = GetLinkType(link)
+    local handlerKey = GetLinkLayoutHandlerName(linkType)
+    local handlerFunction = self[handlerKey]
+    if handlerFunction then
+        handlerFunction(self, link, ...)
+        return true
     end
+    return false
 end

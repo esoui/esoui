@@ -49,6 +49,12 @@ function ZO_TradingHouseNameSearchFeature_Gamepad:SetupNameSearchField(control, 
             end
         end
     end
+
+    control.editBoxControl.focusLostCallback = function(editBoxControl)
+        if data.onFocusLostCallback then
+            data.onFocusLostCallback(editBoxControl)
+        end
+    end
     
     control.editBoxControl:SetDefaultText(GetString(SI_TRADING_HOUSE_BROWSE_ITEM_NAME_SEARCH_EDIT_DEFAULT))
     if control.editBoxControl:GetText() ~= self.searchText then
@@ -80,6 +86,9 @@ function ZO_TradingHouseNameSearchFeature_Gamepad:GetOrCreateAutoCompleteEntryDa
                 local numResults = self.lastCompletedMatchNumResults
                 return numResults ~= nil and numResults ~= 0
             end,
+            narrationText = function(entryData, entryControl)
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.labelText())
+            end,
         }
     end
     return self.autocompleteEntryData
@@ -89,6 +98,7 @@ function ZO_TradingHouseNameSearchFeature_Gamepad:AddEntries(itemList)
     local nameSearchData = ZO_GamepadEntryData:New("GuildStoreNameSearch")
     nameSearchData.feature = self
     nameSearchData:SetHeader(self:GetDisplayName())
+    nameSearchData.narrationText = ZO_GetDefaultParametricListEditBoxNarrationText
     itemList:AddEntryWithHeader("ZO_GamepadTextFieldItem", nameSearchData)
 
     itemList:AddEntry("ZO_GamepadGuildStoreBrowseSelectableEntryTemplate", self:GetOrCreateAutoCompleteEntryData())

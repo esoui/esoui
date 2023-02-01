@@ -246,97 +246,66 @@ function ZO_CenterScreenMessageParams:GetNarrationText()
     else
         local category = self.category
         if category == CSA_CATEGORY_SMALL_TEXT then
-            return self:GetMostUniqueMessage()
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetMostUniqueMessage())
         elseif category == CSA_CATEGORY_LARGE_TEXT then
-            local mainText = self:GetMainText()
-            local secondaryText = self:GetSecondaryText()
-            if mainText or secondaryText then
-                local narrationStrings = {}
-                if mainText then
-                    table.insert(narrationStrings, mainText)
-                end
-
-                if secondaryText then
-                    table.insert(narrationStrings, secondaryText)
-                end
-
-                return narrationStrings
-            end
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetMainText()))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetSecondaryText()))
+            return narrations
         elseif category == CSA_CATEGORY_NO_TEXT then
             --TODO XAR: Implement
         elseif category == CSA_CATEGORY_RAID_COMPLETE_TEXT then
-            local mainText = self:GetMainText()
-            local secondaryText = self:GetSecondaryText()
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetMainText()))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetSecondaryText()))
             local raidData = self:GetEndOfRaidData()
-            if mainText or secondaryText or raidData then
-                local narrationStrings = {}
-                if mainText then
-                    table.insert(narrationStrings, mainText)
+            if raidData then
+                local finalScore = raidData[ARG_BREAKDOWN_INDEX_SCORE]
+                if finalScore then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRIAL_COMPLETE_FINAL_SCORE)))
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(finalScore))
                 end
 
-                if secondaryText then
-                    table.insert(narrationStrings, secondaryText)
+                local totalTime = raidData[ARG_BREAKDOWN_INDEX_TIME]
+                if totalTime then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRIAL_COMPLETE_TOTAL_TIME)))
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(totalTime))
                 end
 
-                if raidData then
-                    local finalScore = raidData[ARG_BREAKDOWN_INDEX_SCORE]
-                    if finalScore then
-                        table.insert(narrationStrings, GetString(SI_TRIAL_COMPLETE_FINAL_SCORE))
-                        table.insert(narrationStrings, finalScore)
-                    end
-
-                    local totalTime = raidData[ARG_BREAKDOWN_INDEX_TIME]
-                    if totalTime then
-                        table.insert(narrationStrings, GetString(SI_TRIAL_COMPLETE_TOTAL_TIME))
-                        table.insert(narrationStrings, totalTime)
-                    end
-
-                    local vitalityBonus = raidData[ARG_BREAKDOWN_INDEX_VITALITY_AMOUNT]
-                    if vitalityBonus then
-                        table.insert(narrationStrings, GetString(SI_TRIAL_COMPLETE_VITALITY_BONUS))
-                        table.insert(narrationStrings, vitalityBonus)
-                    end
-
-                    local vitalityPercent = raidData[ARG_BREAKDOWN_INDEX_VITALITY_PERCENT]
-                    if vitalityPercent then
-                        table.insert(narrationStrings, GetString(SI_TRIAL_COMPLETE_REVIVES_USED))
-                        table.insert(narrationStrings, vitalityPercent)
-                    end
+                local vitalityBonus = raidData[ARG_BREAKDOWN_INDEX_VITALITY_AMOUNT]
+                if vitalityBonus then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRIAL_COMPLETE_VITALITY_BONUS)))
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(vitalityBonus))
                 end
-                return narrationStrings
+
+                local vitalityPercent = raidData[ARG_BREAKDOWN_INDEX_VITALITY_PERCENT]
+                if vitalityPercent then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRIAL_COMPLETE_REVIVES_USED)))
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(vitalityPercent))
+                end
             end
+            return narrations
         elseif category == CSA_CATEGORY_MAJOR_TEXT then
-            return self:GetMostUniqueMessage()
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetMostUniqueMessage())
         elseif category == CSA_CATEGORY_COUNTDOWN_TEXT then
             --Countdown CSAs are narrated elsewhere so no need to do anything here
-            return ""
+            return nil
         elseif category == CSA_CATEGORY_SCRYING_PROGRESS_TEXT then
-            local mainText = self:GetMainText()
-            local secondaryText = self:GetSecondaryText()
-            if mainText or secondaryText then
-                local narrationStrings = {}
-                if mainText then
-                    table.insert(narrationStrings, mainText)
-                end
-
-                if secondaryText then
-                    table.insert(narrationStrings, secondaryText)
-                end
-
-                local lastGoalsAchieved, goalsAchieved, goalsTotal = self:GetScryingProgressData()
-                if goalsAchieved and goalsTotal then
-                    table.insert(narrationStrings, zo_strformat(SI_ANTIQUITIES_SCRYING_PROGRESS_NARRATION, goalsAchieved, goalsTotal))
-                end
-                return narrationStrings
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetMainText()))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetSecondaryText()))
+            local lastGoalsAchieved, goalsAchieved, goalsTotal = self:GetScryingProgressData()
+            if goalsAchieved and goalsTotal then
+                local progressionText = zo_strformat(SI_ANTIQUITIES_SCRYING_PROGRESS_NARRATION, goalsAchieved, goalsTotal)
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(progressionText))
             end
+            return narrations
         elseif category == CSA_CATEGORY_EXTERNAL_HANDLE then
             --External handles do not need to narrate anything
-            return ""
+            return nil
         else
             internalassert(false, "Unhandled CSA Category type")
         end
-
-        return ""
     end
 end
 

@@ -16,7 +16,12 @@ function ZO_Tooltip:LayoutAchievementSummary()
         local statusBar = self:AcquireStatusBar(self:GetStyle("achievementCriteriaBar"))
         statusBar:SetMinMax(0, totalPoints)
         statusBar:SetValue(earnedPoints)
-        barSection:AddStatusBar(statusBar)
+        local function GetStatusBarNarrationText()
+            local percentage = (earnedPoints / totalPoints) * 100
+            percentage = string.format("%.2f", percentage)
+            return zo_strformat(SI_SCREEN_NARRATION_PERCENT_FORMATTER, percentage)
+        end
+        barSection:AddStatusBar(statusBar, GetStatusBarNarrationText)
         categorySection:AddSection(barSection)
 
         self:AddSection(categorySection)

@@ -43,6 +43,20 @@
                 ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_HOUSING_FURNITURE_SETTINGS_SOCIAL_LIST_PERMISSIONS), "permissionPresetName", TEXT_ALIGN_RIGHT)
             </OnInitialized>
         </Control>
+
+        <Control name="ZO_HousingOccupants_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors ZO_GamepadInteractiveSortFilterListControl" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)Headers" override="true">
+                            <Controls>
+                                <Control name="$(parent)DisplayName" inherits="ZO_Furniture_Setting_Panel_Header_DisplayName_Gamepad" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
     
         <Control name="ZO_HousingPermissionsVisitors_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors ZO_GamepadInteractiveSortFilterListControl" hidden="true" virtual="true">
             <Controls>
@@ -53,12 +67,12 @@
                                 <Control name="$(parent)DisplayName" inherits="ZO_Furniture_Setting_Panel_Header_DisplayName_Gamepad" />
 
                                 <Control name="$(parent)Permission" inherits="ZO_Furniture_Setting_Panel_Header_Permissions_Gamepad" />
-                        </Controls>
-                    </Control>
-                </Controls>
-            </Control>
-        </Controls>
-    </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
         
         <Control name="ZO_HousingPermissionsBanList_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors ZO_GamepadInteractiveSortFilterListControl" hidden="true" virtual="true">
             <Controls>

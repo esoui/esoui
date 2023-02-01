@@ -34,7 +34,7 @@
                                     <AnchorFill />
                                 </Texture>
                                 
-                                <Label name="$(parent)TitleText" text="SI_MARKET_ANNOUNCEMENT_LOCKED_CROWN_STORE_TITLE">
+                                <Label name="$(parent)TitleText">
                                     <Dimensions x="220" />
                                     <Anchor point="TOPLEFT" offsetX="50" offsetY="100" />
                                 </Label>

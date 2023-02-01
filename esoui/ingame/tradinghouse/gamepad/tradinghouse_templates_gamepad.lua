@@ -168,6 +168,20 @@ end
 
 function ZO_GamepadTradingHouse_ItemList:InitializeList()
     self.itemList = ZO_GamepadVerticalItemParametricScrollList:New(self.control:GetNamedChild("List"))
+    --Narrates the list
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return self:GetSubscene():IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return TRADING_HOUSE_GAMEPAD:GetHeaderNarration()
+        end,
+        footerNarrationFunction = function()
+            return TRADING_HOUSE_GAMEPAD:GetFooterNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.itemList, narrationInfo)
 end
 
 function ZO_GamepadTradingHouse_ItemList:OnLockedForInput()
@@ -178,9 +192,9 @@ function ZO_GamepadTradingHouse_ItemList:OnLockedForInput()
     end
 end
 
-function ZO_GamepadTradingHouse_ItemList:OnUnlockedForInput()
+function ZO_GamepadTradingHouse_ItemList:OnUnlockedForInput(activateList)
     self.listControl:SetHidden(false)
-    if not self.control:IsHidden() then
+    if not self.control:IsHidden() and activateList then
         self.itemList:Activate()
         self:UpdateKeybind()
     end

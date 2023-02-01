@@ -14,7 +14,7 @@ end
 
 function ZO_TargetMarkerWheel_Shared:PopulateMenu()
     local icons = IsInGamepadPreferredMode() and TARGET_MARKER_ICONS_GAMEPAD or TARGET_MARKER_ICONS_KEYBOARD
-    for iconIndex, iconPath in ipairs(GetPlatformTargetMarkerIconTable()) do
+    for iconIndex, iconPath in ipairs(ZO_GetPlatformTargetMarkerIconTable()) do
         self.menu:AddEntry("", iconPath, iconPath, function() AssignTargetMarkerToReticleTarget(iconIndex) end, iconIndex)
     end
 end
