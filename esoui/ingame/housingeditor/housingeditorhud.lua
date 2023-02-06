@@ -691,6 +691,14 @@ function ZO_HousingEditorHud:Initialize(control)
         self:InitializePlacementSettings()
     end
 
+    local function OnPlayerActivated()
+        OnApplySavedOptions()
+        --loading screens finishing will take us out of UIMode, so we need to clean things up accordingly
+        if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_DISABLED then
+            HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
+        end
+    end
+
     local function OnAddOnLoaded(event, addOnName)
         if addOnName == "ZO_Ingame" then
             EVENT_MANAGER:UnregisterForEvent("HousingEditor", EVENT_ADD_ON_LOADED)
@@ -710,7 +718,7 @@ function ZO_HousingEditorHud:Initialize(control)
     end
 
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
-    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_PLAYER_ACTIVATED, OnApplySavedOptions)
+    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_EDITOR_MODE_CHANGED, OnHousingModeChanged)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadModeChanged)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_PLACED, OnFurnitureChanged)
