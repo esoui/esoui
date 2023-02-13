@@ -1229,7 +1229,12 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
     CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", ContextFilter(OnPregameFullyLoaded))
 
     self:RegisterForEvent(EVENT_CHARACTER_DELETED, ContextFilter(CharacterDeleted))
-    self:RegisterForEvent(EVENT_ENTITLEMENT_STATE_CHANGED, function() RecreateList(self) end)
+    self:RegisterForEvent(EVENT_ENTITLEMENT_STATE_CHANGED, function()
+        -- Need the game data to be loaded before we can recreate the list, which is handled by OnPregameFullyLoaded()
+        if PregameIsFullyLoaded() then
+            RecreateList(self)
+        end
+    end)
 
     CHARACTER_SELECT_MANAGER:RegisterCallback("EventAnnouncementsReceived", function()
         if PregameIsFullyLoaded() then

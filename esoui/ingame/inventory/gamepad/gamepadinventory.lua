@@ -646,6 +646,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                 elseif IsCompareModeEnabled() then
                     self.savedVars.useStatComparisonTooltip = not self.savedVars.useStatComparisonTooltip
                     self:UpdateRightTooltip()
+                    --Re-narrate when the stat comparison tooltip is toggled
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
                 end
             end,
         },

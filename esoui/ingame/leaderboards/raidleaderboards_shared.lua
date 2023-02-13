@@ -395,6 +395,8 @@ function ZO_RaidLeaderboardsManager_Shared:SendLeaderboardQuery()
         else
             self.requestedClassId = LEADERBOARDS:GetSelectedClassFilter()
         end
+    else
+        self.requestedClassId = nil
     end
     LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(PENDING_LEADERBOARD_DATA_TYPE.RAID, self:GenerateRequestData())
 end

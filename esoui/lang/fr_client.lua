@@ -5454,7 +5454,7 @@ SafeAddString(SI_INTERFACE_OPTIONS_HIDE_MOUNT_INVENTORY_UPGRADE, "Cacher les am�
 SafeAddString(SI_INTERFACE_OPTIONS_HIDE_MOUNT_INVENTORY_UPGRADE_TOOLTIP, "Détermine si la monture de ce personnage affiche visuellement ou non les améliorations apportées à sa capacité de port.", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_HIDE_MOUNT_SPEED_UPGRADE, "Cacher les améliorations de vitesse de la monture", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_HIDE_MOUNT_SPEED_UPGRADE_TOOLTIP, "Détermine si la monture de ce personnage affiche visuellement ou non les améliorations apportées à sa vitesse.", 0)
-SafeAddString(SI_INTERFACE_OPTIONS_HIDE_MOUNT_STAMINA_UPGRADE, "Cacher les améliorations de Vigueur de la monture", 0)
+SafeAddString(SI_INTERFACE_OPTIONS_HIDE_MOUNT_STAMINA_UPGRADE, "Cacher les améliorations de vigueur de la monture", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_HIDE_MOUNT_STAMINA_UPGRADE_TOOLTIP, "Détermine si la monture de ce personnage affiche visuellement ou non les améliorations apportées à sa Vigueur.", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_HIDE_POLYMORPH_HELM, "Cacher le heaume du polymorphe", 0)
 SafeAddString(SI_INTERFACE_OPTIONS_HIDE_POLYMORPH_HELM_TOOLTIP, "Cache vos heaumes de polymorphes pouvant être cachés. Votre heaume équipé peut être caché grâce à un chapeau de collection ou auprès d'un atelier de tenue.", 0)

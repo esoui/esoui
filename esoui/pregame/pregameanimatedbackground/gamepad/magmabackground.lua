@@ -67,13 +67,14 @@ ZO_BACKGROUND_DANDELION_SPAWN_INTERVAL_SECONDS = 0.65
 
 -- Ouroboros
 
-ZO_BACKGROUND_OUROBOROS_INTERVAL_SECONDS = 8
+ZO_BACKGROUND_OUROBOROS_ACTIVE_INTERVAL_SECONDS = 8
+ZO_BACKGROUND_OUROBOROS_INACTIVE_INTERVAL_SECONDS = 96
 ZO_BACKGROUND_OUROBOROS_MASK_THRESHOLD_MIN = 0.9
 ZO_BACKGROUND_OUROBOROS_NORMALIZED_ORIGINS =
 {
-    { centerOffsetX = -0.19, centerOffsetY = 0.15, radiusX = 0.01, radiusY = 0.01 },
-    { centerOffsetX = 0, centerOffsetY = 0.15, radiusX = 0.03, radiusY = 0.03 },
-    { centerOffsetX = 0.4, centerOffsetY = 0.12, radiusX = 0.04, radiusY = 0.07 },
+    { centerOffsetX = -0.19, centerOffsetY = 0.15, radiusX = 0.01, radiusY = 0.01, soundFxId = 1 },
+    { centerOffsetX = 0, centerOffsetY = 0.15, radiusX = 0.03, radiusY = 0.03, soundFxId = 3 },
+    { centerOffsetX = 0.4, centerOffsetY = 0.12, radiusX = 0.04, radiusY = 0.07, soundFxId = 2 },
 }
 
 -- Sky
@@ -411,9 +412,6 @@ end
 function MagmaBackground:UpdateFloraAnimation(intervalSeconds)
     local waveIntervalSeconds = (intervalSeconds * ZO_BACKGROUND_FLORA_WAVE_INTERVAL_COEFFICIENT) % 3600
     local grassOffset = waveIntervalSeconds * ZO_BACKGROUND_GRASS_WAVE_TIME_COEFFICIENT
-    local totalInnerInterval = ZO_BACKGROUND_OUROBOROS_INTERVAL_SECONDS * 10
-    local innerInterval = zo_max(((intervalSeconds % totalInnerInterval) / totalInnerInterval) - 0.9, 0) * 10
-    local innerCell = zo_floor(innerInterval * 256)
     local textureIndices = ZO_BACKGROUND_FOREGROUND_TEXTURE_INDICES
 
     for index, sceneControl in ipairs(self.sceneControls) do
@@ -426,31 +424,38 @@ function MagmaBackground:UpdateFloraAnimation(intervalSeconds)
 
         local ouroborosInnerTexture = sceneControl.ouroborosInnerTexture
         if ouroborosInnerTexture then
-            if innerInterval <= 0 then
+            local totalInnerInterval = ZO_BACKGROUND_OUROBOROS_ACTIVE_INTERVAL_SECONDS + ZO_BACKGROUND_OUROBOROS_INACTIVE_INTERVAL_SECONDS
+            local normalizedInnerInterval = zo_max((intervalSeconds % totalInnerInterval) - ZO_BACKGROUND_OUROBOROS_INACTIVE_INTERVAL_SECONDS, 0) / ZO_BACKGROUND_OUROBOROS_ACTIVE_INTERVAL_SECONDS
+            if zo_floatsAreEqual(normalizedInnerInterval, 0) then
+                self.suppressNextMoraEyeSpawn = nil
                 ouroborosInnerTexture:SetHidden(true)
-            else
+            elseif not self.suppressNextMoraEyeSpawn then
+                local innerCell = zo_floor(normalizedInnerInterval * 256)
                 ZO_SetTextureCell(sceneControl.ouroborosInnerTexture, 16, 16, innerCell)
 
-                local maskInterval = ZO_EaseOutQuartic(innerInterval < 0.5 and (innerInterval * 2) or (1.0 - (innerInterval - 0.5) * 2))
+                local maskInterval = ZO_EaseOutQuartic(normalizedInnerInterval < 0.5 and (normalizedInnerInterval * 2) or (1.0 - (normalizedInnerInterval - 0.5) * 2))
                 local maskThreshold = zo_lerp(1, ZO_BACKGROUND_OUROBOROS_MASK_THRESHOLD_MIN, zo_min(1, maskInterval * 2))
                 ouroborosInnerTexture:SetMaskThresholdZeroAlphaEdge(maskThreshold)
                 ouroborosInnerTexture:SetAlpha(1)
 
                 if ouroborosInnerTexture:IsControlHidden() then
-                    local normalizedOriginIndex = zo_floor(zo_lerp(0, #ZO_BACKGROUND_OUROBOROS_NORMALIZED_ORIGINS - 0.01, zo_random())) + 1
-                    local normalizedOrigin = ZO_BACKGROUND_OUROBOROS_NORMALIZED_ORIGINS[normalizedOriginIndex]
-                    local originOffsetX = normalizedOrigin.centerOffsetX + zo_lerp(-normalizedOrigin.radiusX, normalizedOrigin.radiusX, zo_random())
-                    local originOffsetY = normalizedOrigin.centerOffsetY + zo_lerp(-normalizedOrigin.radiusY, normalizedOrigin.radiusY, zo_random())
-                    local x = self.guiWidth * (0.5 + (originOffsetX * self.screenWidthScale))
-                    local y = self.guiHeight * (0.5 + (originOffsetY * self.screenHeightScale))
-                    ouroborosInnerTexture:ClearAnchors()
-                    ouroborosInnerTexture:SetAnchor(CENTER, GuiRoot, TOPLEFT, x, y)
-                    ouroborosInnerTexture:SetHidden(false)
-
-                    if x < GuiRoot:GetWidth() * 0.5 then
-                        PlayPregameAnimatedBackgroundSoundFX(1) -- Left-dominant audio clip
+                    if parentAlpha < 0.25 then
+                        -- Suppress this instance because we want these to spawn, including the accompanying audio,
+                        -- only when the containing scene has not fully interpolated toward zero alpha.
+                        self.suppressNextMoraEyeSpawn = true
                     else
-                        PlayPregameAnimatedBackgroundSoundFX(2) -- Right-dominant audio clip
+                        local numOrigins = #ZO_BACKGROUND_OUROBOROS_NORMALIZED_ORIGINS
+                        local normalizedOriginIndex = zo_clamp(zo_ceil(numOrigins * zo_random()), 1, numOrigins)
+                        local normalizedOrigin = ZO_BACKGROUND_OUROBOROS_NORMALIZED_ORIGINS[normalizedOriginIndex]
+                        local originOffsetX = normalizedOrigin.centerOffsetX + zo_lerp(-normalizedOrigin.radiusX, normalizedOrigin.radiusX, zo_random())
+                        local originOffsetY = normalizedOrigin.centerOffsetY + zo_lerp(-normalizedOrigin.radiusY, normalizedOrigin.radiusY, zo_random())
+                        local x = self.guiWidth * (0.5 + (originOffsetX * self.screenWidthScale))
+                        local y = self.guiHeight * (0.5 + (originOffsetY * self.screenHeightScale))
+                        ouroborosInnerTexture:ClearAnchors()
+                        ouroborosInnerTexture:SetAnchor(CENTER, GuiRoot, TOPLEFT, x, y)
+                        ouroborosInnerTexture:SetHidden(false)
+
+                        PlayPregameAnimatedBackgroundSoundFX(normalizedOrigin.soundFxId)
                     end
                 end
             end
@@ -484,7 +489,7 @@ function MagmaBackground:UpdateDandelionAnimation(intervalSeconds)
                 origin.z = z
 
                 local scaleFactor = z * z * z * z
-                particle.maxAlpha = zo_lerp(0.6, 1.0, scaleFactor)
+                particle.maxAlpha = zo_lerp(0.5, 0.3, scaleFactor)
 
                 local scale = zo_lerp(ZO_BACKGROUND_DANDELION_SCALE_MIN, ZO_BACKGROUND_DANDELION_SCALE_MAX, scaleFactor)
                 particle:SetScale(scale)
@@ -500,11 +505,11 @@ function MagmaBackground:UpdateDandelionAnimation(intervalSeconds)
                 forward.x = zo_random() * 0.5 - 0.25
                 forward.y = zo_random() * 0.5 - 0.25
 
-                particle.startAxisDistance = zo_random() * 0.2 - 0.1
-                particle.endAxisDistance = zo_random() * 0.2 - 0.1
+                particle.startAxisDistance = zo_random() * 0.15 - 0.075
+                particle.endAxisDistance = zo_random() * 0.15 - 0.075
 
-                particle.startAxisAngle = zo_random() * ZO_TWO_PI
-                particle.endAxisAngle = zo_random() * ZO_TWO_PI
+                particle.startAxisAngle = zo_random() * ZO_FOUR_PI
+                particle.endAxisAngle = zo_random() * ZO_FOUR_PI
 
                 particle.startTimeSeconds = intervalSeconds
                 particle.lifetimeSeconds = zo_lerp(ZO_BACKGROUND_DANDELION_LIFETIME_SECONDS_MIN, ZO_BACKGROUND_DANDELION_LIFETIME_SECONDS_MAX, zo_random())

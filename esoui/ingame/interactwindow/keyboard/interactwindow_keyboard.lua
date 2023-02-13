@@ -72,8 +72,8 @@ function ZO_Interaction:InitInteraction()
     end
 
     --create rewards
-    self.givenRewardPool = ZO_ControlPool:New(self.questRewardName, self.control:GetNamedChild("RewardArea"), "Given")
-    self.currencyRewardPool = ZO_ControlPool:New(self.currencyTemplateName, self.control:GetNamedChild("RewardArea"), "Currency")
+    self.givenRewardPool = ZO_ControlPool:New(self.questRewardName, self.control:GetNamedChild("CollapseContainerRewardArea"), "Given")
+    self.currencyRewardPool = ZO_ControlPool:New(self.currencyTemplateName, self.control:GetNamedChild("CollapseContainerRewardArea"), "Currency")
 end
 
 function ZO_Interaction:ResetInteraction(bodyText)
@@ -91,8 +91,8 @@ function ZO_Interaction:ResetInteraction(bodyText)
     self.givenRewardPool:ReleaseAllObjects()
     self.currencyRewardPool:ReleaseAllObjects()
 
-    self.control:GetNamedChild("RewardArea"):SetHidden(true)
-    self.control:GetNamedChild("RewardArea"):SetHeight(0)
+    self.control:GetNamedChild("CollapseContainerRewardArea"):SetHidden(true)
+    self.control:GetNamedChild("CollapseContainerRewardArea"):SetHeight(0)
 end
 
 local INTERACTION_AREA_PERC_WIDTH = 0.4
@@ -237,7 +237,7 @@ end
 
 function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
     local anchorIndex = 0
-    local ROOT_REWARD_ANCHOR = ZO_Anchor:New(TOPLEFT, self.control:GetNamedChild("RewardAreaHeader"), BOTTOMLEFT, 0, 0)
+    local ROOT_REWARD_ANCHOR = ZO_Anchor:New(TOPLEFT, self.control:GetNamedChild("CollapseContainerRewardAreaHeader"), BOTTOMLEFT, 0, 0)
     local rewardCurrencyOptions =
     {
         showTooltips = true,
@@ -246,7 +246,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
         iconSide = LEFT
     }
 
-    local moneyAnchorControl = ZO_InteractWindowRewardAreaHeader
+    local moneyAnchorControl = ZO_InteractWindowCollapseContainerRewardAreaHeader
     local moneyControls = {}
 
     local IS_KEYBOARD = false
@@ -319,8 +319,8 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
         initialMoneyControl:SetAnchor(TOPLEFT, moneyAnchorControl, BOTTOMLEFT, 0, 28)
     end
 
-    ZO_InteractWindowRewardArea:SetHidden(numRewards == 0)
-    ZO_InteractWindowRewardArea:SetHeight(rewardWindowHeight)
+    ZO_InteractWindowCollapseContainerRewardArea:SetHidden(numRewards == 0)
+    ZO_InteractWindowCollapseContainerRewardArea:SetHeight(rewardWindowHeight)
 
     return confirmError
 end
