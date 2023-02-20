@@ -368,14 +368,20 @@ end
 function ZO_ZoneStories_Gamepad:OnGridSelectionChanged(oldSelectedData, selectedData)
     -- Deselect previous tile
     if oldSelectedData and oldSelectedData.dataSource and oldSelectedData.dataEntry then
-        oldSelectedData.dataEntry.control.object:SetSelected(false)
+        if oldSelectedData.dataEntry.control then
+            oldSelectedData.dataEntry.control.object:SetSelected(false)
+        end
+        oldSelectedData.isSelected = false
     end
 
     self.tooltipSelectedIndex = COMPLETION_ACTIVITY_DESCRIPTION_TOOLTIP_INDEX
 
     -- Select newly selected tile.
     if selectedData and selectedData.dataEntry then
-        selectedData.dataEntry.control.object:SetSelected(true)
+        if selectedData.dataEntry.control then
+            selectedData.dataEntry.control.object:SetSelected(true)
+        end
+        selectedData.isSelected = true
 
         local completionType = selectedData.completionType
         if completionType == ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS then

@@ -518,9 +518,9 @@ end
 function ZO_BankingCommon_Gamepad:ShowSelector()
     self:UpdateInput()
     self.selectorContainer:SetHidden(false)
+    self:DeactivateCurrentList()
+
     local currentList = self:GetCurrentList()
-    currentList:Deactivate()
-    
     local targetControl = currentList:GetTargetControl()
     if targetControl then
         targetControl:SetHidden(true)
@@ -549,8 +549,9 @@ function ZO_BankingCommon_Gamepad:HideSelector()
         self.selectorContainer:SetHidden(true)
         self.selector:Clear()
         self.selector:Deactivate()
+        self:ActivateCurrentList()
+
         local currentList = self:GetCurrentList()
-        currentList:Activate()
         currentList:GetTargetControl():SetHidden(false)
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.selectorKeybindStripDescriptor)
         self:AddKeybinds()

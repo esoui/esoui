@@ -3049,8 +3049,8 @@ EsoStrings =
     "Normal", -- SI_NARRATIONVOICESPEED0
     "Fast", -- SI_NARRATIONVOICESPEED1
     "Extra Fast", -- SI_NARRATIONVOICESPEED2
-    "Female", -- SI_NARRATIONVOICETYPE0
-    "Male", -- SI_NARRATIONVOICETYPE1
+    "Feminine", -- SI_NARRATIONVOICETYPE0
+    "Masculine", -- SI_NARRATIONVOICETYPE1
     "", -- Sync id for EsoGameDataEnums_Settings last entry
     "",
     "",
@@ -10596,6 +10596,8 @@ SafeAddVersion(SI_GAMEPADCHATTEXTSIZESETTING22, 1)
 SafeAddVersion(SI_GAMEPADCHATTEXTSIZESETTING27, 1)
 SafeAddVersion(SI_ANTIALIASINGTYPE3, 1)
 SafeAddVersion(SI_ANTIALIASINGTYPE4, 1)
+SafeAddVersion(SI_NARRATIONVOICETYPE0, 1)
+SafeAddVersion(SI_NARRATIONVOICETYPE1, 1)
 SafeAddVersion(SI_OUTFITSLOT20, 1)
 SafeAddVersion(SI_OUTFITSLOT21, 1)
 SafeAddVersion(SI_OUTFITSLOT24, 1)
