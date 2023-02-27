@@ -98,17 +98,18 @@ end
 
 function ZO_HousingPreviewDialog_Shared:RegisterForCallbacks()
     local function OnHouseTemplateDataUpdated()
-        if self.control:IsHidden() then
-            self.houseTemplatesDirty = true
-        else
+        self.houseTemplatesDirty = true
+
+        if not self.control:IsHidden() then
             self:RefreshTemplateComboBox()
         end
     end
 
     local function OnPlayerActivated()
-        if self.control:IsHidden() then
-            self.displayInfoDirty = true
-        else
+        self.displayInfoDirty = true
+        self.houseTemplatesDirty = true
+
+        if not self.control:IsHidden() then
             self:RefreshDisplayInfo()
         end
     end
@@ -122,18 +123,16 @@ do
 
     function ZO_HousingPreviewDialog_Shared:RefreshTemplateComboBox()
         local comboBox = self.templateComboBox
-
         local currentlyPreviewedTemplateId = GetCurrentHousePreviewTemplateId()
 
         comboBox:ClearItems()
-
-        local templateData = ZO_HOUSE_PREVIEW_MANAGER:GetFullHouseTemplateData()
 
         local function OnFilterChanged(comboBox, entryText, entry)
             self:OnFilterChanged(entry.data)
         end
 
-        local currentlyPreviewedItemEntryIndex
+        local templateData = ZO_HOUSE_PREVIEW_MANAGER:GetFullHouseTemplateData()
+        local currentlyPreviewedItemEntryIndex = nil
         for i, data in ipairs(templateData) do
             local formattedName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_TEMPLATE_NAME_FORMAT, data.name)
             local entry = comboBox:CreateItemEntry(formattedName, OnFilterChanged)
@@ -145,10 +144,18 @@ do
         end
 
         local hasTemplateEntries = NonContiguousCount(templateData) > 0
+        self:OnTemplatesChanged(hasTemplateEntries, currentlyPreviewedItemEntryIndex)
+        self.houseTemplatesDirty = false
+    end
+
+    function ZO_HousingPreviewDialog_Shared:OnTemplatesChanged(hasTemplateEntries, currentlyPreviewedItemEntryIndex)
         self.notAvailableLabel:SetHidden(hasTemplateEntries)
         self.templateContainer:SetHidden(not hasTemplateEntries)
         self.templateOptionsContainer:SetHidden(not hasTemplateEntries)
+        self.hasValidTemplates = hasTemplateEntries
+
         if hasTemplateEntries then
+            local comboBox = self.templateComboBox
             if currentlyPreviewedItemEntryIndex then
                 comboBox:SelectItemByIndex(currentlyPreviewedItemEntryIndex)
             else
@@ -157,8 +164,6 @@ do
         else
             self:OnFilterChanged(NO_DATA)
         end
-
-        self.houseTemplatesDirty = false
     end
 end
 
@@ -328,7 +333,7 @@ function ZO_HousingPreviewDialog_Shared:ShowDialog()
     if self.displayInfoDirty then
         self:RefreshDisplayInfo()
     end
-    
+
     ZO_Dialogs_ShowPlatformDialog(self.dialogName)
 
     if self.houseTemplatesDirty then

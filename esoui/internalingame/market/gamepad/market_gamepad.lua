@@ -594,7 +594,7 @@ function GamepadMarket:InitializeKeybindDescriptors()
                     elseif previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
                         self:ShowHousePreviewDialog(selectedEntry)
                     else -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
-                        self:BeginPreview()
+                        self:BeginPreview(selectedEntry)
                     end
                 elseif selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MEMBERSHIP_INFO_TILE then
                     ZO_ESO_PLUS_MEMBERSHIP_DIALOG:Show()
@@ -610,11 +610,12 @@ function GamepadMarket:GetPrimaryButtonDescriptor()
     return self.primaryButtonDescriptor
 end
 
-function GamepadMarket:BeginPreview()
+function GamepadMarket:BeginPreview(selectedEntry)
+    self:Deactivate()
     self.isLockedForCategoryRefresh = true
     self.currentCategoryData.fragment:SetDirection(ZO_GAMEPAD_MARKET_PAGE_NO_DIRECTION)
     g_activeMarketScreen = ZO_GAMEPAD_MARKET_PREVIEW
-    ZO_GamepadMarket_GridScreen.BeginPreview(self)
+    ZO_GamepadMarket_GridScreen.BeginPreview(self, selectedEntry)
 end 
 
 function GamepadMarket:OnCategorySelected(data)
@@ -1825,7 +1826,7 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
                         if previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
                             self:ShowHousePreviewDialog(selectedEntry)
                         elseif previewType == ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE then
-                            self:BeginPreview()
+                            self:BeginPreview(selectedEntry)
                         end
                     end
                 end,

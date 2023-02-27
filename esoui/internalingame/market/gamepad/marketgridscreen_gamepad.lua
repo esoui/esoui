@@ -303,7 +303,14 @@ function GamepadMarket_TabBarScrollList:InitializeKeybindStripDescriptors()
         end,
         etherealNarrationOrder = 100,
         enabled = function() return self:GetNumItems() > 0 end,
-        callback = function()
+        handlesKeyUp = true,
+        callback = function(isUp)
+            -- handled on up due to the potential chord with GAMEPAD_BUTTON_3 causing ordering issues
+            -- when previewing and attempting to change categories
+            if not isUp then
+                return
+            end
+
             self:MoveRight()
             PlaySound(SOUNDS.GAMEPAD_PAGE_BACK)
         end,
@@ -320,7 +327,14 @@ function GamepadMarket_TabBarScrollList:InitializeKeybindStripDescriptors()
         end,
         etherealNarrationOrder = 101,
         enabled = function() return self:GetNumItems() > 0 end,
-        callback = function()
+        handlesKeyUp = true,
+        callback = function(isUp)
+            -- handled on up due to the potential chord with GAMEPAD_BUTTON_3 causing ordering issues
+            -- when previewing and attempting to change categories
+            if not isUp then
+                return
+            end
+
             self:MoveLeft()
             PlaySound(SOUNDS.GAMEPAD_PAGE_FORWARD)
         end,
@@ -558,9 +572,9 @@ function ZO_GamepadMarket_GridScreen:ClearLastPreviewedMarketProductId()
     self.lastPreviewedMarketProductId = nil
 end
 
-function ZO_GamepadMarket_GridScreen:BeginPreview()
-    if self.selectedGridEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
-        local previewIndex = self.selectedGridEntry:GetPreviewIndex()
+function ZO_GamepadMarket_GridScreen:BeginPreview(selectedEntry)
+    if selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
+        local previewIndex = selectedEntry:GetPreviewIndex()
         ZO_MARKET_PREVIEW_GAMEPAD:BeginPreview(self.previewProductIds, previewIndex, function(...) self:OnPreviewChanged(...) end)
     end
 end

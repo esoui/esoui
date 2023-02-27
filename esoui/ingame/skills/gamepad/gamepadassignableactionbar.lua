@@ -594,7 +594,9 @@ function ZO_GamepadAssignableActionBar_QuickMenu_Base:Initialize(control, assign
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("HotbarSwapVisibleStateChanged", OnHotbarSwapVisibleStateChanged)
 
     local function OnSlotAssignmentsChanged()
-        self.list:RefreshVisible()
+        if self:IsShowing() then
+            self.list:RefreshVisible()
+        end
     end
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotUpdated", OnSlotAssignmentsChanged)
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("CurrentHotbarUpdated", OnSlotAssignmentsChanged)

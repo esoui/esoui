@@ -1133,6 +1133,11 @@ local AlertHandlers =
     [EVENT_TRIBUTE_INVITE_CANCELED] = function()
         return ALERT, GetString(SI_TRIBUTE_INVITE_CANCELED), SOUNDS.GENERAL_ALERT_ERROR
     end,
+
+    [EVENT_HOUSING_PREVIEW_INSPECTION_STATE_CHANGED] = function()
+        local stringId = HousingEditorIsPreviewInspectionEnabled() and SI_HOUSING_PREVIEW_INSPECTION_MODE_ENABLED or SI_HOUSING_PREVIEW_INSPECTION_MODE_DISABLED
+        return ALERT, GetString(stringId)
+    end,
 }
 
 ZO_AntiquityScryingResultsToAlert =

@@ -75,8 +75,8 @@
 
             <Controls>
                 <Button name="$(parent)Close" inherits="ZO_CloseButton" excludeFromResizeToFitExtents="true">
-                    <Dimensions x="16" y="16" />
-                    <Anchor point="TOPRIGHT" offsetX="-8" offsetY="6" />
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="TOPRIGHT" offsetX="-16" offsetY="12" />
 
                     <OnClicked>
                         ZO_HOUSING_PREVIEW_DIALOG_KEYBOARD:ReleaseDialog()
@@ -110,6 +110,10 @@
                         <Control name="$(parent)ComboBox" override="true" inherits="ZO_ComboBox">
                             <Dimensions x="300" y="32" />
                         </Control>
+
+                        <Button name="$(parent)EnableInspectionCheckBox" inherits="ZO_CheckButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)ComboBox" relativePoint="RIGHT" offsetX="30" />
+                        </Button>
                     </Controls>
                 </Control>
 

@@ -238,8 +238,20 @@ function HousingPreviewDialog_Gamepad:OnPurchaseSelectionChanged(selectionData)
     SCREEN_NARRATION_MANAGER:QueueDialog(self.control)
 end
 
+function HousingPreviewDialog_Gamepad:OnTemplatesChanged(hasTemplateEntries, currentlyPreviewedItemEntryIndex)
+    ZO_HousingPreviewDialog_Shared.OnTemplatesChanged(self, hasTemplateEntries, currentlyPreviewedItemEntryIndex)
+
+    -- Alias is required for generic gamepad dialog methods.
+    self.info = self.dialogInfo
+    ZO_GenericGamepadDialog_RefreshKeybinds(self)
+end
+
 function HousingPreviewDialog_Gamepad:BuildDialogInfo()
     ZO_HousingPreviewDialog_Shared.BuildDialogInfo(self)
+
+    local function HasValidTemplates()
+        return self.hasValidTemplates
+    end
 
     self.dialogInfo.gamepadInfo =
     {
@@ -256,6 +268,7 @@ function HousingPreviewDialog_Gamepad:BuildDialogInfo()
             text = SI_GAMEPAD_SELECT_OPTION,
             clickSound = SOUNDS.DIALOG_ACCEPT,
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            visible = HasValidTemplates,
             callback = function(dialog)
                 if self.purchaseOptionsFocusSwitcher:IsActive() then
                     self:SelectFocusedPurchaseOption()
@@ -292,6 +305,16 @@ function HousingPreviewDialog_Gamepad:BuildDialogInfo()
             callback = function(dialog)
                 self:ReleaseDialog()
                 HousingEditorJumpToSafeLocation()
+            end,
+        },
+        {
+            keybind = "DIALOG_TERTIARY",
+            text = SI_HOUSING_TOGGLE_PREVIEW_INSPECTION_MODE_ACTION,
+            clickSound = SOUNDS.POSITIVE_CLICK,
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            visible = HasValidTemplates,
+            callback = function(dialogControl)
+                HousingEditorTogglePreviewInspectionEnabled()
             end,
         },
     }
