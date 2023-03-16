@@ -47,19 +47,20 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
     local ACTIVATE_LIST_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_LIST_ON_SHOW, GAMEPAD_ZONE_STORIES_SCENE)
 
-    local function SubMenuEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+    local function SubMenuEntrySetup(entryControl, data, selected, reselectingDuringRebuild, enabled, active)
+        ZO_SharedGamepadEntry_OnSetup(entryControl, data, selected, reselectingDuringRebuild, enabled, active)
 
-        local iconControl = control.statusIndicator
+        local NO_TINT = nil
+        local iconControl = entryControl.statusIndicator
         local trackedZoneId = GetTrackedZoneStoryActivityInfo()
         local playerZoneId = ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(GetUnitZoneIndex("player"))
         iconControl:ClearIcons()
         if trackedZoneId == data.id then
-            iconControl:AddIcon(ZO_CHECK_ICON)
+            iconControl:AddIcon(ZO_CHECK_ICON, NO_TINT, GetString(SI_SCREEN_NARRATION_TRACKED_ICON_NARRATION))
         end
 
         if playerZoneId == data.id then
-            iconControl:AddIcon("EsoUI/Art/Icons/mapKey/mapKey_player.dds")
+            iconControl:AddIcon("EsoUI/Art/Icons/mapKey/mapKey_player.dds", NO_TINT, GetString(SI_SCREEN_NARRATION_CURRENT_ZONE_ICON_NARRATION))
         end
 
         iconControl:Show()
@@ -194,7 +195,7 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
             end,
 
             visible = function()
-                local zoneId, completionType, activityId = GetTrackedZoneStoryActivityInfo()
+                local zoneId  = GetTrackedZoneStoryActivityInfo()
                 return zoneId == self:GetSelectedZoneId()
             end,
         },
@@ -367,14 +368,20 @@ end
 function ZO_ZoneStories_Gamepad:OnGridSelectionChanged(oldSelectedData, selectedData)
     -- Deselect previous tile
     if oldSelectedData and oldSelectedData.dataSource and oldSelectedData.dataEntry then
-        oldSelectedData.dataEntry.control.object:SetSelected(false)
+        if oldSelectedData.dataEntry.control then
+            oldSelectedData.dataEntry.control.object:SetSelected(false)
+        end
+        oldSelectedData.isSelected = false
     end
 
     self.tooltipSelectedIndex = COMPLETION_ACTIVITY_DESCRIPTION_TOOLTIP_INDEX
 
     -- Select newly selected tile.
     if selectedData and selectedData.dataEntry then
-        selectedData.dataEntry.control.object:SetSelected(true)
+        if selectedData.dataEntry.control then
+            selectedData.dataEntry.control.object:SetSelected(true)
+        end
+        selectedData.isSelected = true
 
         local completionType = selectedData.completionType
         if completionType == ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS then

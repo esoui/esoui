@@ -9,11 +9,79 @@ function ZO_UtilityWheel_Gamepad:Initialize(...)
     ZO_UtilityWheel_Shared.Initialize(self, ...)
     ZO_Keybindings_RegisterLabelForBindingUpdate(self.cycleLeftKeybindLabel, "UTILITY_WHEEL_GAMEPAD_CYCLE_LEFT")
     ZO_Keybindings_RegisterLabelForBindingUpdate(self.cycleRightKeybindLabel, "UTILITY_WHEEL_GAMEPAD_CYCLE_RIGHT")
+    self:InitializeNarrationInfo()
+end
+
+function ZO_UtilityWheel_Gamepad:InitializeNarrationInfo()
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return self:IsInteracting()
+        end,
+        selectedNarrationFunction = function()
+            local narrations = {}
+            local selectedEntry = self.menu.selectedEntry
+            if selectedEntry then
+                local name = selectedEntry.name
+                if type(name) == "table" then
+                    name = name[1]
+                end
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(name))
+            end
+            return narrations
+        end,
+        headerNarrationFunction = function()
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_HOTBARCATEGORY", self:GetHotbarCategory()))
+        end,
+        additionalInputNarrationFunction = function()
+            local cycleLeftNarrationData =
+            {
+                name = GetString("SI_HOTBARCATEGORY", self:GetPreviousHotbarCategory()),
+                keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UTILITY_WHEEL_GAMEPAD_CYCLE_LEFT") or GetString(SI_ACTION_IS_NOT_BOUND),
+                enabled = true,
+            }
+
+            local cycleRightNarrationData =
+            {
+                name = GetString("SI_HOTBARCATEGORY", self:GetNextHotbarCategory()),
+                keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UTILITY_WHEEL_GAMEPAD_CYCLE_RIGHT") or GetString(SI_ACTION_IS_NOT_BOUND),
+                enabled = true,
+            }
+
+            return { cycleLeftNarrationData, cycleRightNarrationData }
+        end,
+        narrationType = NARRATION_TYPE_HUD,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("UtilityWheelHUD", narrationInfo)
 end
 
 function ZO_UtilityWheel_Gamepad:SetupEntryControl(entryControl, data)
     ZO_UtilityWheel_Shared.SetupEntryControl(self, entryControl, data)
     ZO_GamepadUtilityWheelCooldownSetup(entryControl, data.slotNum, self:GetHotbarCategory())
+end
+
+function ZO_UtilityWheel_Gamepad:OnSelectionChangedCallback(selectedEntry)
+    ZO_UtilityWheel_Shared.OnSelectionChangedCallback(self, selectedEntry)
+    --Re-narrate on selection changed
+    if selectedEntry then
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("UtilityWheelHUD")
+    end
+end
+
+function ZO_UtilityWheel_Gamepad:ShowMenu()
+    ZO_UtilityWheel_Shared.ShowMenu(self)
+    --Narrate the header when first showing
+    local NARRATE_HEADER = true
+    SCREEN_NARRATION_MANAGER:QueueCustomEntry("UtilityWheelHUD", NARRATE_HEADER)
+end
+
+function ZO_UtilityWheel_Gamepad:StopInteraction(...)
+    local wasShowing = ZO_UtilityWheel_Shared.StopInteraction(self, ...)
+    if wasShowing then
+        --Clear out any in progress HUD narration when exiting the wheel
+        ClearNarrationQueue(NARRATION_TYPE_HUD)
+    end
+    return wasShowing
 end
 
 function ZO_GamepadUtilityWheelCooldownSetup(control, slotNum, hotbarCategory)

@@ -97,6 +97,7 @@ function ZO_GamepadTradingHouse_BrowseResults:SetupResultItemRow(control, itemDa
 end
 
 function ZO_GamepadTradingHouse_BrowseResults:OnSelectionChanged(oldItemData, newItemData)
+    ZO_GamepadInteractiveSortFilterList.OnSelectionChanged(self, oldItemData, newItemData)
     self:UpdateItemSelectedTooltip(newItemData)
 end
 
@@ -279,6 +280,11 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializeKeybinds()
                 local purchasePriceText = ZO_Currency_FormatGamepad(CURT_MONEY, postedItem.purchasePrice, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
                 return zo_strformat(SI_GAMEPAD_TRADING_HOUSE_BUY_ITEM, purchasePriceText)
             end,
+            narrationOverrideName = function()
+                local postedItem = getItemDataCallback()
+                local purchasePriceText = ZO_Currency_FormatGamepad(CURT_MONEY, postedItem.purchasePrice, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+                return zo_strformat(SI_GAMEPAD_TRADING_HOUSE_BUY_ITEM, purchasePriceText)
+            end,
             keybind = "UI_SHORTCUT_PRIMARY",
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
@@ -420,10 +426,25 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializePreview()
         end
     end
 
+    local function OnRefreshActions()
+        --Re-narrate when the preview state changes
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("TradingHousePreviewGamepad")
+    end
+
+    local function OnCanChangePreviewChanged(canChangePreview)
+        --Re-narrate the header when the preview state is enabled
+        if canChangePreview then
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry("TradingHousePreviewGamepad", NARRATE_HEADER)
+        end
+    end
+
     TRADING_HOUSE_PREVIEW_GAMEPAD_SCENE = ZO_InteractScene:New("tradingHousePreview_Gamepad", SCENE_MANAGER, ZO_TRADING_HOUSE_INTERACTION)
     TRADING_HOUSE_PREVIEW_GAMEPAD_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             ITEM_PREVIEW_LIST_HELPER_GAMEPAD:RegisterCallback("OnPreviewChanged", UpdatePreviewItemData)
+            ITEM_PREVIEW_LIST_HELPER_GAMEPAD:RegisterCallback("RefreshActions", OnRefreshActions)
+            ITEM_PREVIEW_LIST_HELPER_GAMEPAD:RegisterCallback("CanChangePreviewChanged", OnCanChangePreviewChanged)
             ITEM_PREVIEW_GAMEPAD:SetInteractionCameraPreviewEnabled(true, FRAME_TARGET_CENTERED_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_2_3_FURNITURE_ITEM_PREVIEW_OPTIONS_FRAGMENT)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.previewKeybindStripDescriptor)
         elseif newState == SCENE_SHOWN then
@@ -436,10 +457,38 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializePreview()
             ITEM_PREVIEW_GAMEPAD:SetInteractionCameraPreviewEnabled(false, FRAME_TARGET_CENTERED_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_2_3_FURNITURE_ITEM_PREVIEW_OPTIONS_FRAGMENT)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.previewKeybindStripDescriptor)
             ITEM_PREVIEW_LIST_HELPER_GAMEPAD:UnregisterCallback("OnPreviewChanged", UpdatePreviewItemData)
+            ITEM_PREVIEW_LIST_HELPER_GAMEPAD:UnregisterCallback("RefreshActions", OnRefreshActions)
+            ITEM_PREVIEW_LIST_HELPER_GAMEPAD:UnregisterCallback("CanChangePreviewChanged", OnCanChangePreviewChanged)
         end
     end)
 
     TRADING_HOUSE_GAMEPAD_SCENE:GetSceneGroup():AddScene("tradingHousePreview_Gamepad")
+    self:InitializePreviewNarrationInfo()
+end
+
+function ZO_GamepadTradingHouse_BrowseResults:InitializePreviewNarrationInfo()
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return TRADING_HOUSE_PREVIEW_GAMEPAD_SCENE:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            local itemData = self:GetItemDataBeingPreviewed()
+            if itemData and ITEM_PREVIEW_LIST_HELPER_GAMEPAD:HasVariations() then
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_TradingHouse_GetItemDataFormattedName(itemData))
+            end
+        end,
+        selectedNarrationFunction = function()
+            return ITEM_PREVIEW_LIST_HELPER_GAMEPAD:GetPreviewNarrationText()
+        end,
+        additionalInputNarrationFunction = function()
+            local narrationFunction = ITEM_PREVIEW_LIST_HELPER_GAMEPAD:GetAdditionalInputNarrationFunction()
+            if narrationFunction then
+                return narrationFunction()
+            end
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("TradingHousePreviewGamepad", narrationInfo)
 end
 
 function ZO_GamepadTradingHouse_BrowseResults:UpdatePreviewForChangedData()
@@ -461,6 +510,43 @@ end
 
 function ZO_GamepadTradingHouse_BrowseResults:GetItemDataBeingPreviewed()
     return self.previewItemData
+end
+
+--Overridden from base
+function ZO_GamepadTradingHouse_BrowseResults:GetNarrationText()
+    local narrations = {}
+    local entryData = self:GetSelectedData()
+
+    if entryData then
+        --Generate the narration for the item column
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRADING_HOUSE_COLUMN_ITEM)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_TradingHouse_GetItemDataFormattedName(entryData)))
+        --If the item has more than 1, include stack count in the narration
+        if entryData.stackCount and entryData.stackCount > 1 then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_STACK_COUNT_FORMATTER, entryData.stackCount)))
+        end
+
+        --Generate the narration for the time column
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_TRADINGHOUSESORTFIELD", TRADING_HOUSE_SORT_EXPIRY_TIME)))
+        --If the item is a guild specific item (meaning it's permanent), use a special narration for the time column
+        if entryData.isGuildSpecificItem then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRADING_HOUSE_RESULTS_NO_TIME_NARRATION)))
+        else
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_TradingHouse_GetItemDataFormattedTime(entryData)))
+        end
+
+        --Generate the narration for the unit price column
+        local unitPriceString = ZO_Currency_FormatGamepad(CURT_MONEY, entryData.purchasePricePerUnit, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_TRADINGHOUSESORTFIELD", TRADING_HOUSE_SORT_SALE_PRICE_PER_UNIT)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(unitPriceString))
+
+        --Generate the narration for the total price column
+        local totalPriceString = ZO_Currency_FormatGamepad(CURT_MONEY, entryData.purchasePrice, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_TRADINGHOUSESORTFIELD", TRADING_HOUSE_SORT_SALE_PRICE)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(totalPriceString))
+    end
+
+    return narrations
 end
 
 -- Global functions

@@ -35,6 +35,20 @@ function ZO_GamepadQuantitySpinner:InitializeSpinner(valueChangedCallback, direc
     self.spinner:RegisterCallback("OnValueChanged", function(newValue) self:OnValueChanged(newValue) end)
     self.currencyControl = self:GetNamedChild("Price")
     self.valueChangedCallback = valueChangedCallback
+    SCREEN_NARRATION_MANAGER:RegisterSpinner(self.spinner)
+    self.spinner:SetName(GetString(SI_GAMEPAD_QUANTITY_SPINNER_TEMPLATE_LABEL))
+    self.spinner:SetCanNarrateTooltips(false)
+    local function GetSpinnerNarrationText()
+        local narrations = {}
+        ZO_AppendNarration(narrations, ZO_FormatSpinnerNarrationText(self.spinner:GetName(), self.spinner:GetFormattedValueText()))
+        if self.unitPrice then
+            local totalCost = self:GetValue() * self.unitPrice
+            local costText = ZO_Currency_FormatGamepad(self.currencyType, totalCost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(costText))
+        end
+        return narrations
+    end
+    self.spinner:SetCustomNarrationFunction(GetSpinnerNarrationText)
 end
 
 function ZO_GamepadQuantitySpinner:SetValueChangedCallback(callback)
@@ -129,7 +143,9 @@ function ZO_GamepadQuantitySpinner:DetachFromListEntry()
         if targetData then
             targetData.gamepadQuantitySpinner = nil
         end
-		self.anchoredToList:SetMouseEnabled(true)
+        self.anchoredToList:SetMouseEnabled(true)
+        --Re-narrate the list we are anchored to when the spinner is detached
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.anchoredToList)
         self.anchoredToList = nil
     end
 end

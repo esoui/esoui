@@ -51,6 +51,21 @@ function ZO_ScreenshotMode_Gamepad:Initialize(control)
     self.fragment = ZO_SimpleSceneFragment:New(control)
     GAMEPAD_SCREENSHOT_MODE_SCENE:AddFragment(self.fragment)
 
+    local narrationInfo =
+    {
+        narrationType = NARRATION_TYPE_HUD,
+        canNarrate = function()
+            return self:IsShowing()
+        end,
+        additionalInputNarrationFunction = function()
+            local narrationData = {}
+            table.insert(narrationData, self.toggleNameplatesButton:GetKeybindButtonNarrationData())
+            table.insert(narrationData, self.exitButton:GetKeybindButtonNarrationData())
+            return narrationData
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("screenshotMode", narrationInfo)
+
     control:RegisterForEvent(EVENT_CONTROLLER_DISCONNECTED, function() self:OnControllerDisconnected() end)
 end
 
@@ -61,12 +76,14 @@ end
 function ZO_ScreenshotMode_Gamepad:Show()
     if SCENE_MANAGER:SetInUIMode(false) then
         SCENE_MANAGER:SetHUDScene("gamepadScreenshotMode")
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("screenshotMode")
     end
 end
 
 function ZO_ScreenshotMode_Gamepad:Hide()
     if self:IsShowing() then
         SCENE_MANAGER:RestoreHUDScene()
+        ClearNarrationQueue(NARRATION_TYPE_HUD)
     end
 end
 
@@ -79,6 +96,7 @@ function ZO_ScreenshotMode_Gamepad:ExitKeybind()
         SetGuiHidden("ingame", false)
         self.hideKeybindsAtS = GetGameTimeSeconds() + HIDE_DURATION_S
         self.control:SetAlpha(1)
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("screenshotMode")
     else
         self:Hide()
     end
@@ -90,6 +108,7 @@ function ZO_ScreenshotMode_Gamepad:ShowUIKeybind()
     end
     self.hideKeybindsAtS = GetGameTimeSeconds() + HIDE_DURATION_S
     self.control:SetAlpha(1)
+    SCREEN_NARRATION_MANAGER:QueueCustomEntry("screenshotMode")
 end
 
 function ZO_ScreenshotMode_Gamepad:ToggleNameplatesKeybind()

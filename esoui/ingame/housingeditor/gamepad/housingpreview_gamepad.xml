@@ -17,7 +17,7 @@
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border" offsetX="3" offsetY="3" />
                         </Backdrop>
 
-                        <Texture name="$(parent)Background" color="00000000" alpha="1" excludeFromResizeToFitExtents="true">
+                        <Texture name="$(parent)Background" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" alpha="1" excludeFromResizeToFitExtents="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Border" />
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border" />
                         </Texture>
@@ -59,8 +59,8 @@
                 </Control>
 
                 <Texture name="$(parent)HouseImage" override="true" layer="CONTROLS">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)EdgeFrame" />
                     <Dimensions x="ZO_GAMEPAD_HOUSING_PREVIEW_IMAGE_TEXTURE_WIDTH" y="ZO_GAMEPAD_HOUSING_PREVIEW_IMAGE_TEXTURE_HEIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EdgeFrame" />
                 </Texture>
 
                 <Label name="$(parent)Title" override="true" font="ZoFontGamepad42" />
@@ -90,7 +90,7 @@
                         <Label name="$(parent)Header" override="true" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSING_TEMPLATE_HEADER" />
 
                         <Control name="$(parent)ComboBox" override="true" inherits="ZO_GamepadFocusDropdown" tier="HIGH" layer="OVERLAY">
-                            <Dimensions x="459" y="ZO_GAMEPAD_HOUSING_PREVIEW_COMBO_BOX_HEIGHT" />
+                            <Dimensions x="ZO_GAMEPAD_HOUSING_PREVIEW_COMBO_BOX_WIDTH" y="ZO_GAMEPAD_HOUSING_PREVIEW_COMBO_BOX_HEIGHT" />
                             <Anchor point="LEFT" relativeTo="$(parent)Header" relativePoint="RIGHT" offsetX="20" />
 
                             <Controls>
@@ -99,6 +99,7 @@
                                         <Texture name="$(parent)OpenDropdown" override="true">
                                             <Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="-3" offsetY="31"/>
                                         </Texture>
+
                                         <Label name="$(parent)SelectedItemText" override="true" maxLineCount="2">
                                             <Anchor point="RIGHT" relativeTo="$(parent)OpenDropdown" relativePoint="LEFT" offsetX="-3" constrains="X"/>
                                             <Anchor point="LEFT"/>
@@ -107,23 +108,52 @@
                                 </Control>
                             </Controls>
                         </Control>
+                    </Controls>
+                </Control>
 
+                <Control name="$(parent)TemplateOptions" override="true" resizeToFitDescendents="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)TemplateComboBox" constrains="X" />
+                    <Anchor point="TOP" relativeTo="$(parent)Template" relativePoint="BOTTOM" constrains="Y" />
+
+                    <Controls>
                         <Button name="$(parent)PreviewButton" override="true" font="ZoFontGamepad34" modifyTextType="UPPERCASE" verticalAlignment="CENTER">
-                            <Dimensions x="200" y="ZO_GAMEPAD_HOUSING_PREVIEW_COMBO_BOX_HEIGHT"/>
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)ComboBox" relativePoint="TOPRIGHT" offsetX="30" />
+                            <Dimensions x="ZO_GAMEPAD_HOUSING_PREVIEW_BUTTON_WIDTH" y="ZO_GAMEPAD_HOUSING_PREVIEW_COMBO_BOX_HEIGHT"/>
+                            <Anchor point="TOPLEFT" />
 
                             <Controls>
-                                <Backdrop name="$(parent)Border" inherits="ZO_GamepadGreyOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD">
+                                <Backdrop name="$(parent)Border" inherits="ZO_GamepadGreyOutlineHighlight" tier="HIGH" layer="OVERLAY" level="0" blendMode="ADD">
                                     <Anchor point="TOPLEFT" offsetX="-10" offsetY="-2" />
                                     <Anchor point="BOTTOMRIGHT" offsetX="10" offsetY="2" />
                                 </Backdrop>
 
-                                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineThick" tier="HIGH" layer="OVERLAY" blendMode="ADD" hidden="true" excludeFromResizeToFitExtents="true">
+                                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineThick" tier="HIGH" layer="OVERLAY" level="1" blendMode="ADD" hidden="true" excludeFromResizeToFitExtents="true">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)Border" offsetX="-3" offsetY="-3" />
                                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border" offsetX="3" offsetY="3" />
                                 </Backdrop>
 
-                                <Texture name="$(parent)Background" color="00000000" alpha="1" excludeFromResizeToFitExtents="true">
+                                <Texture name="$(parent)Background" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" alpha="1" level="2" excludeFromResizeToFitExtents="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Border" />
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border" />
+                                </Texture>
+                            </Controls>
+                        </Button>
+
+                        <Button name="$(parent)FurnitureButton" override="true" font="ZoFontGamepad34" modifyTextType="UPPERCASE" verticalAlignment="CENTER">
+                            <Dimensions x="ZO_GAMEPAD_HOUSING_PREVIEW_BUTTON_WIDTH" y="ZO_GAMEPAD_HOUSING_PREVIEW_COMBO_BOX_HEIGHT"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PreviewButton" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_HOUSING_PREVIEW_BUTTON_MARGIN" />
+
+                            <Controls>
+                                <Backdrop name="$(parent)Border" inherits="ZO_GamepadGreyOutlineHighlight" tier="HIGH" layer="OVERLAY" level="0" blendMode="ADD">
+                                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="-2" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="10" offsetY="2" />
+                                </Backdrop>
+
+                                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineThick" tier="HIGH" layer="OVERLAY" level="1" blendMode="ADD" hidden="true" excludeFromResizeToFitExtents="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Border" offsetX="-3" offsetY="-3" />
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border" offsetX="3" offsetY="3" />
+                                </Backdrop>
+
+                                <Texture name="$(parent)Background" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" alpha="1" level="2" excludeFromResizeToFitExtents="true">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)Border" />
                                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border" />
                                 </Texture>
@@ -133,7 +163,8 @@
                 </Control>
 
                 <Control name="$(parent)PurchaseOptions" override="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Template" relativePoint="BOTTOM" offsetY="80" />
+                    <Anchor point="TOP" constrains="X" />
+                    <Anchor point="TOP" relativeTo="$(parent)TemplateOptions" relativePoint="BOTTOM" offsetY="90" constrains="Y" />
 
                     <Controls>
                         <Control name="$(parent)Gold" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Gamepad" />

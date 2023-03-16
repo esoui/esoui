@@ -407,11 +407,109 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
     end
 
     local function AddLocationEntry(location)
-        local entryData = ZO_GamepadEntryData:New(location:GetNameGamepad(), self.categoryData.menuIcon)
+        local name = location:GetNameGamepad()
+        local entryData = ZO_GamepadEntryData:New(name, self.categoryData.menuIcon)
         entryData.data = location
         entryData.data:SetLockReasonTextOverride(lockReasonTextOverride)
         entryData:SetEnabled(not location:IsLocked() and not isSearching)
         entryData:SetSelected(location:IsSelected())
+
+        entryData.narrationText = function()
+            local narrations = {}
+
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(name))
+
+            -- Group size indicator
+            local TEAM_BASED_ACTIVITY_TYPES =
+            {
+                [LFG_ACTIVITY_BATTLE_GROUND_CHAMPION] = true,
+                [LFG_ACTIVITY_BATTLE_GROUND_NON_CHAMPION] = true,
+                [LFG_ACTIVITY_BATTLE_GROUND_LOW_LEVEL] = true,
+            }
+            local activityType = location:GetActivityType()
+
+            if activityType ~= LFG_ACTIVITY_TRIBUTE_COMPETITIVE and activityType ~= LFG_ACTIVITY_TRIBUTE_CASUAL then
+                local minGroupSize, maxGroupSize = location:GetGroupSizeRange()
+                if TEAM_BASED_ACTIVITY_TYPES[activityType] then
+                    -- HARD CODING TO four to make it clear the player will be put on a four person team even when entering solo
+                    maxGroupSize = 4
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_TEAM_FORMAT, maxGroupSize)))
+                elseif minGroupSize ~= maxGroupSize then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_ACTIVITY_FINDER_GROUP_SIZE_RANGE_NARRATION, minGroupSize, maxGroupSize)))
+                else
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_ACTIVITY_FINDER_GROUP_SIZE_NARRATION, minGroupSize)))
+                end
+            end
+
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(location:GetDescription()))
+
+            -- Game type list for Battlegrounds
+            if location:IsSetEntryType() then
+                local setTypesHeaderText = location:GetSetTypesHeaderText()
+                local setTypesListText = location:GetSetTypesListText()
+                if setTypesHeaderText ~= "" and setTypesListText ~= "" then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(setTypesHeaderText))
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(setTypesListText))
+                end
+            end
+
+            -- Rewards
+            local currentSelectionHasRewardsData = location:HasRewardData()
+            if currentSelectionHasRewardsData then
+                if location:IsEligibleForDailyReward() then
+                    if activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE then
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_ACTIVITY_FINDER_FIRST_DAILY_REWARD_HEADER)))
+                    else
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_ACTIVITY_FINDER_DAILY_REWARD_HEADER)))
+                    end
+                else
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_ACTIVITY_FINDER_STANDARD_REWARD_HEADER)))
+                end
+
+                local rewardUIDataId, xpReward = location:GetRewardData()
+
+                if rewardUIDataId ~= 0 then
+                    numShownRewards = GetNumLFGActivityRewardUINodes(rewardUIDataId)
+                    for rewardIndex = 1, numShownRewards do
+                        local displayName = GetLFGActivityRewardUINodeInfo(rewardUIDataId, rewardIndex)
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ACTIVITY_FINDER_REWARD_NAME_FORMAT, displayName)))
+                    end
+                end
+
+                if xpReward > 0 then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ACTIVITY_FINDER_REWARD_XP_FORMAT, ZO_CommaDelimitNumber(xpReward))))
+                end
+            end
+
+            -- Tribute ranked match seasonal progression information
+            if activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE then
+                local tierRank = GetTributePlayerCampaignRank()
+                if tierRank ~= TRIBUTE_TIER_INVALID then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString((SI_TRIBUTE_FINDER_SEASON_PROGRESS_HEADER))))
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.tributeSeasonTimeRemainingText))
+
+                    if tierRank == TRIBUTE_TIER_UNRANKED then
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.tributeSeasonRankText))
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.tributePlacementMatchNarrationText))
+                    elseif tierRank ~= TRIBUTE_TIER_PLATINUM then
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.tributeSeasonRankText))
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.progressValueLabelText))
+
+                        local experience, requiredExperience = GetTributePlayerExperienceInCurrentCampaignRank()
+                        ZO_AppendNarration(narrations, ZO_GetProgressBarNarrationText(0, requiredExperience, experience))
+                    else
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.leaderboardRankLabelText))
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.tributeSeasonRankText))
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.progressValueLabelText))
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRIBUTE_SEASON_EXPERIENCE_LIMIT_REACHED)))
+                    end
+                end
+            end
+
+            return narrations
+        end
+
         self.entryList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
     end
 
@@ -469,7 +567,12 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshSpecificFilters()
             local tabData =
             {
                 text = activityData.name,
-                callback = function() self:FilterByActivity(activityData.activityType) end,
+                callback = function()
+                    self:FilterByActivity(activityData.activityType)
+                    -- Re-narrate on tab change
+                    local NARRATE_HEADER = true
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.entryList, NARRATE_HEADER)
+                end,
             }
             table.insert(tabBarEntries, tabData)
         end
@@ -480,6 +583,9 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshSpecificFilters()
         {
             titleText = validActivityTypes[1].name,
         }
+    else
+        -- Shouldn't get here, but if the header data is nil it can cause a UI error
+        specificHeaderData = {}
     end
 
     self.specificHeaderData = specificHeaderData
@@ -697,4 +803,38 @@ end
 
 function ZO_ActivityFinderTemplate_Gamepad:IsShowing()
     return self.scene:IsShowing()
+end
+
+----------------------------------------------
+--ZO_Gamepad_ParametricList_Screen Overrides--
+----------------------------------------------
+
+function ZO_ActivityFinderTemplate_Gamepad:GetFooterNarration()
+    if self:IsShowing() then
+        local narrations = {}
+        ZO_AppendNarration(narrations, GAMEPAD_GENERIC_FOOTER:GetNarrationText(GAMEPAD_ACTIVITY_QUEUE_DATA:GetFooterData()))
+
+        local activityType = nil
+        local currentList = self:GetCurrentList()
+        if currentList then
+            local targetData = currentList:GetTargetData()
+            if targetData and targetData.data then
+                activityType = targetData.data.activityType
+            end
+        end
+
+        if activityType and (activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE or activityType == LFG_ACTIVITY_TRIBUTE_CASUAL) then
+            local clubRank = GetTributePlayerClubRank()
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_TRIBUTECLUBRANK", clubRank)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(clubRank + 1))
+
+            local currentClubExperienceForRank, maxClubExperienceForRank = GetTributePlayerExperienceInCurrentClubRank()
+            if maxClubExperienceForRank == 0 then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRIBUTE_CLUB_EXPERIENCE_LIMIT_REACHED)))
+            else
+                ZO_AppendNarration(narrations, ZO_GetProgressBarNarrationText(0, maxClubExperienceForRank, currentClubExperienceForRank))
+            end
+        end
+        return narrations
+    end
 end

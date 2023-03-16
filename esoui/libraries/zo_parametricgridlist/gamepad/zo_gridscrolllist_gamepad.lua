@@ -218,6 +218,16 @@ function ZO_AbstractGridScrollList_Gamepad:SelectNextCategory(direction)
     ZO_ScrollList_SelectFirstIndexInCategory(self.list, direction)
 end
 
+function ZO_AbstractGridScrollList_Gamepad:SetHeaderNarrationFunction(headerNarrationFunction)
+    self.headerNarrationFunction = headerNarrationFunction
+end
+
+function ZO_AbstractGridScrollList_Gamepad:GetHeaderNarration()
+    if self.headerNarrationFunction then
+        return self.headerNarrationFunction()
+    end
+end
+
 -- ZO_GridScrollList_Gamepad --
 
 ZO_GridScrollList_Gamepad = ZO_Object.MultiSubclass(ZO_AbstractGridScrollList_Gamepad, ZO_AbstractGridScrollList)
@@ -229,4 +239,32 @@ end
 function ZO_GridScrollList_Gamepad:Initialize(control, selectionTemplate, autofillRows)
     ZO_AbstractGridScrollList.Initialize(self, control, autofillRows)
     ZO_AbstractGridScrollList_Gamepad.Initialize(self, control, selectionTemplate)
+end
+
+--Gets the narration text for the entirety of the grid list
+function ZO_GridScrollList_Gamepad:GetNarrationText()
+    local narrations = {}
+    local dataList = self:GetData()
+    for _, data in ipairs(dataList) do
+        local entryData = data.data
+        if entryData.header then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.header))
+        end
+
+        if entryData.narrationText then
+            if type(entryData.narrationText) == "function" then
+                local narration = entryData.narrationText(entryData)
+                if narration then
+                    if ZO_IsNarratableObject(narration) then
+                        table.insert(narrations, narration)
+                    else
+                        ZO_CombineNumericallyIndexedTables(narrations, narration)
+                    end
+                end
+            else
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.narrationText))
+            end
+        end
+    end
+    return narrations
 end

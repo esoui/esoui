@@ -73,7 +73,7 @@
 
                 <Control name="$(parent)CampaignInfo" inherits="ZO_CampaignBrowserContentAnchor" hidden="true">
                     <Controls>
-                        <Control name="$(parent)Rules" resizeToFitDescendents="true">
+                        <Control name="$(parent)Rules" resizeToFitConstrains="Y">
                             <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" />
                             <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING_WIDE"/>
                             <Controls>

@@ -18,6 +18,7 @@
                             <Controls>
                                 <Control name="$(parent)Spinner">
                                     <Dimensions y="36" />
+                                    <DimensionConstraints maxX="ZO_GAMEPAD_CONTENT_WIDTH" />
                                     <Anchor point="TOP" relativeTo="$(parent)List" relativePoint="BOTTOM" offsetY="4"/>
                                     <Controls>
                                         <Button name="$(parent)Decrease">
@@ -81,9 +82,8 @@
                     </OnInitialized>
 
                     <Controls>
-                        <Control name="$(parent)ScrollChild" override="true">
-                            <Anchor point="TOPLEFT"/>
-                            <Anchor point="TOPRIGHT"/>
+                        <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
+                            <Dimensions x="100%" />
                             <!-- controls are parented to this in lua, see ZO_GamepadSmithingCreation:InitializeScrollPanel() -->
                         </Control>
                     </Controls>

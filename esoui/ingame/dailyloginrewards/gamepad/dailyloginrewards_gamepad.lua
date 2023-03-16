@@ -60,6 +60,24 @@ function ZO_DailyLoginRewards_Gamepad:InitializeGridListPanel()
     self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
     self.gridListPanelList:SetHeaderPrePadding(ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_SPACING_GAMEPAD * 3)
     self.gridListPanelList:SetOnSelectedDataChangedCallback(function(previousData, newData) self:OnGridListSelectedDataChanged(previousData, newData) end)
+
+    local function GetHeaderNarration()
+        local narrations = {}
+        if not self.currentMonthLabel:IsHidden() then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.currentMonthText))
+        end
+
+        if not self:ShouldChangeTimerBeHidden() then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_DAILY_LOGIN_REWARDS_MONTH_CHANGE_TITLE)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.changeTimerValueText))
+        end
+
+        if not self.lockedLabel:IsHidden() then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.lockedLabelText))
+        end
+        return narrations
+    end
+    self.gridListPanelList:SetHeaderNarrationFunction(GetHeaderNarration)
 end
 
 function ZO_DailyLoginRewards_Gamepad:SetupGridEntryBorderAndMilestone(control, data, controlPool)
@@ -149,7 +167,8 @@ end
 function ZO_DailyLoginRewards_Gamepad:UpdateTimeToNextMonthText(formattedTime)
     ZO_DailyLoginRewards_Base.UpdateTimeToNextMonthText(self, formattedTime)
 
-    self.changeTimerValueLabel:SetText(formattedTime)
+    self.changeTimerValueText = formattedTime
+    self.changeTimerValueLabel:SetText(self.changeTimerValueText)
 end
 
 function ZO_DailyLoginRewards_Gamepad:UpdateTimeToNextMonthVisibility()

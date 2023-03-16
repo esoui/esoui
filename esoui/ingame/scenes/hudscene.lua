@@ -22,7 +22,7 @@ function ZO_HUDFragment:UpdateVisibility()
 
     COMPASS_FRAME:SetCompassHidden(playerDead)
 
-    ZO_PlayerToPlayerArea:SetHidden(fragmentHidden)
+    PLAYER_TO_PLAYER:SetTopLevelHidden(fragmentHidden)
     TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, fragmentHidden, TUTORIAL_SUPPRESSED_BY_SCENE)
     INSTANCE_KICK_WARNING_DEAD:SetHiddenForReason("hudScene", fragmentHidden)
     HUD_RAID_LIFE:SetHiddenForReason("hudScene", fragmentHidden)
@@ -62,12 +62,12 @@ function ZO_ReticleModeFragment:New()
 end
 
 function ZO_ReticleModeFragment:Show()
-    ZO_PlayerToPlayerArea:SetHidden(false)
+    PLAYER_TO_PLAYER:SetTopLevelHidden(false)
     self:OnShown()
 end
 
 function ZO_ReticleModeFragment:Hide()
-    ZO_PlayerToPlayerArea:SetHidden(true)
+    PLAYER_TO_PLAYER:SetTopLevelHidden(true)
     self:OnHidden()
 end
 
@@ -104,6 +104,7 @@ local HUD_FRAGMENT_GROUP =
     BATTLEGROUND_HUD_ACTION_LAYER_FRAGMENT,
     ZONE_STORY_TRACKER_FRAGMENT,
     HOUSE_INFORMATION_TRACKER_FRAGMENT,
+    HOUSING_EDITOR_INSPECTION_HUD_FRAGMENT,
 }
 
 local NO_DEAD_FRAGMENTS =
@@ -121,6 +122,7 @@ local NO_DEAD_FRAGMENTS =
     BUFF_DEBUFF_FRAGMENT,
     HOUSING_HUD_ACTION_LAYER_FRAGMENT,
     HOUSE_INFORMATION_TRACKER_FRAGMENT,
+    HOUSING_EDITOR_INSPECTION_HUD_FRAGMENT,
 }
 
 local DEAD_ONLY_FRAGMENTS =
@@ -145,6 +147,7 @@ local HOUSING_ONLY_FRAGMENTS =
 {
     HOUSING_HUD_FRAGMENT,
     HOUSING_HUD_ACTION_LAYER_FRAGMENT,
+    HOUSING_EDITOR_INSPECTION_HUD_FRAGMENT,
     HOUSE_INFORMATION_TRACKER_FRAGMENT,
 }
 

@@ -24,8 +24,14 @@ function ZO_Help_GenericTicketSubmission_Manager:Initialize()
 end
 
 function ZO_Help_GenericTicketSubmission_Manager:OnCustomerServiceTicketSubmitted(eventCode, response, success)
-    if success and self.isAttemptingToSubmitReportPlayerTicket and self.reportPlayerTicketSubmittedCallback then
-        self.reportPlayerTicketSubmittedCallback()
+    if success and self.isAttemptingToSubmitReportPlayerTicket then
+        if self.reportPlayerTicketSubmittedCallback then
+            self.reportPlayerTicketSubmittedCallback()
+        else
+            -- On console we always assume the report player name is a display name
+            -- elsewhere we can rely on decoration to determine
+            ZO_PlatformIgnorePlayer(self.reportPlayerName)
+        end
     end
 
     if success and self.reportGuildTicketSubmittedCallback then
@@ -40,6 +46,7 @@ function ZO_Help_GenericTicketSubmission_Manager:OnCustomerServiceTicketSubmitte
     self.isAttemptingToSubmitReportPlayerTicket = false
     self.reportPlayerTicketSubmittedCallback = nil
     self.reportGuildTicketSubmittedCallback = nil
+    self.reportPlayerName = nil
 
     if IsInGamepadPreferredMode() then
         local dialogParams = {}
@@ -134,8 +141,9 @@ function ZO_Help_GenericTicketSubmission_Manager:OpenReportGuildTicketScene(name
     self:SetReportGuildTicketSubmittedCallback(ticketSubmittedCallback)
 end
 
-function ZO_Help_GenericTicketSubmission_Manager:MarkAttemptingToSubmitReportPlayerTicket()
+function ZO_Help_GenericTicketSubmission_Manager:MarkAttemptingToSubmitReportPlayerTicket(reportPlayerName)
     self.isAttemptingToSubmitReportPlayerTicket = true
+    self.reportPlayerName = reportPlayerName
 end
 
 function ZO_Help_GenericTicketSubmission_Manager:SetReportPlayerTicketSubmittedCallback(reportSubmittedCallback)

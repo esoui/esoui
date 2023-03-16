@@ -305,7 +305,7 @@
             A template for adding a static entry to a parameteric scroll list.
         -->
 
-        <Control name="ZO_GamepadDisplayEntryTemplate" resizeToFitDescendents="true" virtual="true">
+        <Control name="ZO_GamepadDisplayEntryTemplate" resizeToFitConstrains="Y" virtual="true">
             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
 
             <Controls>

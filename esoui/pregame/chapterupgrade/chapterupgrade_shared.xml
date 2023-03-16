@@ -38,7 +38,7 @@
                     <Anchor point="CENTER" relativeTo="GuiRoot" />
                 </Texture>
 
-                <Control name="$(parent)TextContainer" resizeToFitDescendents="true">
+                <Control name="$(parent)TextContainer" resizeToFitConstrains="Y">
                     <Dimensions x="860" />
                     <DimensionConstraints minY="350" />
                     <Anchor point="LEFT" relativePoint="CENTER" offsetY="-100" />

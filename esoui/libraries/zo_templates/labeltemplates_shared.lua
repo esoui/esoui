@@ -313,9 +313,9 @@ do
     local function GetTexture(allianceId, forceGamepad)
         if allianceId <= ALLIANCE_MAX_VALUE then
             if forceGamepad then
-                return GetLargeAllianceSymbolIcon(allianceId)
+                return ZO_GetLargeAllianceSymbolIcon(allianceId)
             else
-                return GetPlatformAllianceSymbolIcon(allianceId)
+                return ZO_GetPlatformAllianceSymbolIcon(allianceId)
             end
         end
     end

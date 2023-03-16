@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_WorldMapKeepSummaryRow_Gamepad" resizeToFitDescendents="true" virtual="true">
+        <Control name="ZO_WorldMapKeepSummaryRow_Gamepad" resizeToFitConstrains="Y" virtual="true">
             <OnInitialized>
                 local levelWidth = self:GetNamedChild("Level"):GetTextWidth()
                 local iconWidth = self:GetNamedChild("Alliance"):GetWidth()

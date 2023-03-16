@@ -150,7 +150,6 @@
 
                         <Control name="$(parent)LoadingIcon" inherits="ZO_Loading">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="TOPLEFT" offsetX="-10"/>
-                            <Dimensions x="64" y="64"/>
                             <OnInitialized>
                                 ZO_Loading_Initialize(self)
                             </OnInitialized>

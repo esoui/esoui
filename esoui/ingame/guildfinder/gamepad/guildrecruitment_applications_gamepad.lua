@@ -49,6 +49,7 @@ function ZO_GuildRecruitment_Applications_Gamepad:SetupRow(control, data)
 end
 
 function ZO_GuildRecruitment_Applications_Gamepad:OnSelectionChanged(previousData, selectedData)
+    ZO_GuildFinder_ListPanel_GamepadBehavior.OnSelectionChanged(self, previousData, selectedData)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
 
     if selectedData then
@@ -116,6 +117,32 @@ end
 
 function ZO_GuildRecruitment_Applications_Gamepad:OnShowing()
     ZO_GuildRecruitment_ApplicationsList_Shared.OnShowing(self)
+end
+
+function ZO_GuildRecruitment_Applications_Gamepad:GetSelectedNarrationText()
+    local narrations = {}
+    local selectedData = self:GetSelectedData()
+    if selectedData then
+        --Get the narration for the user id column
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_GetPlatformAccountLabel()))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.name))
+
+        --Get the narration for the level column
+        local levelString = ZO_GetLevelOrChampionPointsNarrationString(selectedData.level, selectedData.championPoints)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_SORT_HEADER_LEVEL)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(levelString))
+
+        --Get the narration for the expiration column
+        local timeRemainingS = GetGuildFinderGuildApplicationDuration(self.guildId, selectedData.index)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_FINDER_APPLICATIONS_SORT_HEADER_EXPIRATION)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_FormatCountdownTimer(timeRemainingS)))
+    end
+    return narrations
+end
+
+--Overridden from base
+function ZO_GuildRecruitment_Applications_Gamepad:GetHeaderNarration()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_RECRUITMENT_CATEGORY_APPLICATIONS))
 end
 
 -------------

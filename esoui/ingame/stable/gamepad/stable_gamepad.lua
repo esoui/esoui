@@ -35,23 +35,9 @@ function ZO_Stable_Gamepad:InitializeControls()
     ZO_Stable_Base.InitializeControls(self)
 
     self.notifications = self.stableControl:GetNamedChild("Notifications")
-    self.trainableHeader = self.notifications:GetNamedChild("TrainableHeader")
-    self.trainableReady = self.notifications:GetNamedChild("TrainableReady")
-    self.timerText = self.notifications:GetNamedChild("TrainableTimer")
     self.warning = self.notifications:GetNamedChild("NoSkinWarning")
     local listControl = self.list:GetControl()
     listControl:SetAnchor(TOPLEFT, self.notifications, BOTTOMLEFT)
-
-    local function OnTimerUpdate()
-        local timeUntilCanBeTrained = GetTimeUntilCanBeTrained()
-        if timeUntilCanBeTrained == 0 then
-            self:UpdateMountInfo()
-        else
-            self.timerText:SetText(ZO_FormatTimeMilliseconds(timeUntilCanBeTrained, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR))
-        end
-    end
-
-    self.timerText:SetHandler("OnUpdate", OnTimerUpdate)
 end
 
 function ZO_Stable_Gamepad:InitializeKeybindStrip()
@@ -71,11 +57,6 @@ end
 --Class Functions
 -----------------
 function ZO_Stable_Gamepad:UpdateMountInfo()
-    local ridingSkillMaxedOut = STABLE_MANAGER:IsRidingSkillMaxedOut()
-    local hideTimer = GetTimeUntilCanBeTrained() == 0
-    self.trainableHeader:SetHidden(ridingSkillMaxedOut)
-    self.timerText:SetHidden(ridingSkillMaxedOut or hideTimer)
-    self.trainableReady:SetHidden(ridingSkillMaxedOut or not hideTimer)
     self:RefreshActiveMount()
     self.list:UpdateList()
     KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
@@ -94,6 +75,9 @@ function ZO_Stable_Gamepad:TrainSelected()
     local targetControl = self.list:GetTargetControl()
     if targetControl then
         ZO_Stable_TrainButtonClicked(targetControl)
+
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list, NARRATE_HEADER)
     end
 end
 

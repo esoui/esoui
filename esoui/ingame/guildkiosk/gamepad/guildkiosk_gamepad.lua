@@ -418,6 +418,7 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
     self.normalSelectedColor = { GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED) }
     self.bidSelectorControl = self.control:GetNamedChild("BidSelectorContainer")
     self.bidSelector = ZO_CurrencySelector_Gamepad:New(self.bidSelectorControl:GetNamedChild("Selector"))
+    self.bidSelector:SetCurrencyType(CURT_MONEY)
     self.bidSelector:SetClampValues(true)
     self.bidSelector:RegisterCallback("OnValueChanged", function() self:ValidateBidSelectorValue(self.bidSelector:GetValue()) end)
     
@@ -438,7 +439,7 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
     end
 
     local function GetGuildMoneyNarration()
-        return ZO_Currency_FormatGamepad(CURT_MONEY, self.guildBankedMoney, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+        return ZO_Currency_FormatGamepad(CURT_MONEY, self.guildBankedMoney, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
     end
 
     local function UpdateMinOrCurrentBidText(control)
@@ -453,7 +454,7 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
     end
 
     local function GetMinOrCurrentBidNarration()
-        return ZO_Currency_FormatGamepad(CURT_MONEY, self.hasBidOnThisTraderAlready and self.existingBidAmount or self.minBidAllowed, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+        return ZO_Currency_FormatGamepad(CURT_MONEY, self.hasBidOnThisTraderAlready and self.existingBidAmount or self.minBidAllowed, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
     end
 
     local function UpdateBiddingCloses(control)
@@ -550,11 +551,15 @@ function ZO_GuildKiosk_Bid_Gamepad:RepopulateItemList(createBidSelector)
 
     local data = ZO_GamepadEntryData:New("GuildSelector")
     data:SetHeader(GetString(SI_GAMEPAD_GUILD_KIOSK_GUILD_LABEL))
+    data.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
     self.itemList:AddEntryWithHeader("ZO_GamepadGuildSelectorTemplate", data)
 
     if createBidSelector then
         local data = ZO_GamepadEntryData:New("BidSelector")
         data:SetHeader(GetString(SI_GAMEPAD_GUILD_KIOSK_BID_AMOUNT_LABEL))
+        data.narrationText = function()
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_Currency_FormatGamepad(CURT_MONEY, self.bidAmount, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
+        end
         self.itemList:AddEntryWithHeader("ZO_GamepadBidSelectorTemplate", data)
     end
 
@@ -575,6 +580,7 @@ function ZO_GuildKiosk_Bid_Gamepad:UnfocusDropDown()
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
         self.selectingGuild = false
         self.itemList:Activate()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
     end
 end
 
@@ -599,6 +605,7 @@ function ZO_GuildKiosk_Bid_Gamepad:UnfocusBidSelector()
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.bidSelectorKeybindStripDescriptor)
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
         self.settingBid = false
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
     end
 end
 
@@ -781,6 +788,11 @@ end
 function ZO_GuildKiosk_Bid_Gamepad:SetTitle(title)
     self.headerData.titleText = title
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+end
+
+-- ParametricList_Screen override
+function ZO_GuildKiosk_Bid_Gamepad:GetFooterNarration()
+    return GAMEPAD_GENERIC_FOOTER:GetNarrationText(self.footerData)
 end
 
 function ZO_Gamepad_GuildKiosk_Bid_OnInitialize(control)

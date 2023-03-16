@@ -263,7 +263,13 @@ function GetMenuPadding()
     return ZO_Menu.menuPad
 end
 
+--onSelect is a required field
 function AddMenuItem(labelText, onSelect, itemType, labelFont, normalColor, highlightColor, itemYPad, horizontalAlignment, isHighlighted, onEnter, onExit, enabled)
+    if not internalassert(onSelect, "AddMenuItem requires a valid onSelect function") then
+        -- ESO-804925
+        return
+    end
+
     local isEnabled = enabled
     if isEnabled == nil then
         -- Evaluate nil to be equivalent to true for backwards compatibility.
@@ -466,7 +472,13 @@ function ZO_Menu_ClickItem(control, button)
             ZO_CheckButton_OnClicked(menuEntry.checkbox, button)
         else
             -- Treat it like the label was clicked
-            control.OnSelect()
+            if control.OnSelect then
+                control.OnSelect()
+            else
+                -- ESO-804925
+                internalassert(false, string.format("Attempting to click menu entry [%s] but it has no OnSelect behavior defined.", control.nameLabel:GetText()))
+            end
+            
             if control.enabled ~= false then
                 if ZO_Menu.menuType == MENU_TYPE_MULTISELECT_COMBO_BOX then
                     control.isHighlighted = not control.isHighlighted

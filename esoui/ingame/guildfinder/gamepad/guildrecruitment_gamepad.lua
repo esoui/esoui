@@ -198,6 +198,24 @@ function ZO_GuildRecruitment_Gamepad:InitializeCategoryListData()
     responseMessageData:SetIconTintOnSelection(true)
     responseMessageData.category = ZO_GUILD_RECRUITMENT_CATEGORY_GAMEPAD_RESPONSE_MESSAGE
     responseMessageData.visible =  function() return DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_MANAGE_APPLICATIONS) end
+    responseMessageData.narrationText = function(entryData, entryControl)
+        local narrations = {}
+
+        -- Generate the standard parametric list entry narration
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+        -- Helper panel
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_RECRUITMENT_DEFAULT_RESPONSE_HEADER)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_RECRUITMENT_DEFAULT_RESPONSE_DESCRIPTION)))
+
+        local defaultResponseMessageText = GUILD_RECRUITMENT_RESPONSE_MESSAGE_GAMEPAD:GetDefaultMessageText()
+        if defaultResponseMessageText == "" then
+            defaultResponseMessageText = GetString(SI_GUILD_RECRUITMENT_DEFAULT_RESPONSE_DEFAULT_TEXT)
+        end
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(defaultResponseMessageText))
+
+        return narrations
+    end
     table.insert(self.categoryData, responseMessageData)
     self.categoryToHelperPanel[ZO_GUILD_RECRUITMENT_CATEGORY_GAMEPAD_RESPONSE_MESSAGE] = GUILD_RECRUITMENT_RESPONSE_MESSAGE_GAMEPAD
 

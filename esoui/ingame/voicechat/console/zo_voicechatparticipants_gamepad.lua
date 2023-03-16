@@ -8,20 +8,16 @@
 
 ZO_VoiceChatParticipantsGamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
-function ZO_VoiceChatParticipantsGamepad:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
 function ZO_VoiceChatParticipantsGamepad:Initialize(control)
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control)
+    GAMEPAD_VOICECHAT_PARTICIPANTS_SCENE = ZO_Scene:New("gamepad_voice_chat_participants", SCENE_MANAGER)
+
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_DO_NOT_CREATE_TAB_BAR, ACTIVATE_ON_SHOW, GAMEPAD_VOICECHAT_PARTICIPANTS_SCENE)
     self:SetListsUseTriggerKeybinds(true)
 
-    self:InitializeHeader()
+    GAMEPAD_VOICECHAT_PARTICIPANTS_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
-    self.control = control
-    self:InitializeFragment(control)
+    self:InitializeHeader()
 
     self.channel = nil --the channel set externally that we'll update for
 
@@ -34,16 +30,6 @@ function ZO_VoiceChatParticipantsGamepad:InitializeHeader()
         titleText = GetString(SI_GAMEPAD_VOICECHAT_PARTICIPANT_OPTIONS_TITLE)
     }
     ZO_GamepadGenericHeader_Refresh(self.header, headerData)
-end
-
-function ZO_VoiceChatParticipantsGamepad:InitializeFragment(control)
-    local function OnStateChange(oldState, newState)
-        ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
-    end
-
-    GAMEPAD_VOICECHAT_PARTICIPANTS_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    self.fragment = GAMEPAD_VOICECHAT_PARTICIPANTS_FRAGMENT
-    self.fragment:RegisterCallback("StateChange", OnStateChange)
 end
 
 function ZO_VoiceChatParticipantsGamepad:InitializeEvents()

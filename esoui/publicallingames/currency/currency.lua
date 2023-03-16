@@ -575,6 +575,10 @@ function ZO_Currency_GetPlayerCarriedGoldNarration()
     return ZO_Currency_FormatGamepad(CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
 end
 
+function ZO_Currency_GetPlayerCarriedGoldCurrencyNameNarration()
+    return ZO_Currency_FormatGamepad(CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+end
+
 function ZO_Currency_GetPlatformColor(currencyType)
     local isGamepad = IsInGamepadPreferredMode()
     return GetCurrencyColor(currencyType, isGamepad)

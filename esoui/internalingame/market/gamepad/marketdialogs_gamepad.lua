@@ -40,7 +40,7 @@ local function GetAvailableCurrencyHeaderData(marketCurrencyType)
             return true
         end,
         valueNarration = function()
-            return ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), GetPlayerMarketCurrency(marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            return ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), GetPlayerMarketCurrency(marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_NAME)
         end,
         header = GetString(SI_GAMEPAD_MARKET_FUNDS_LABEL),
     }
@@ -66,7 +66,7 @@ local function GetProductCostHeaderData(cost, marketCurrencyType, hasEsoPlusCost
             return true
         end,
         valueNarration = function()
-            return ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            return ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), cost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
         end,
         header = function(control)
             if hasEsoPlusCost then
@@ -92,7 +92,7 @@ local function GetProductEsoPlusCostHeaderData(cost, marketCurrencyType)
             return true
         end,
         valueNarration = function()
-            return ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            return ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(marketCurrencyType), cost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
         end,
         header = GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_ESO_PLUS_COST_LABEL),
     }
@@ -1185,6 +1185,8 @@ do
             chooseAsGiftDropdownEntryData.dropdownEntry = true
             chooseAsGiftDropdownEntryData.setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                 local dropdown = control.dropdown
+                --Order matters. Make sure to register the dialog dropdown BEFORE clearing the items
+                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(chooseAsGiftDropdownEntryData.dialog, dropdown)
                 dropdown:SetSortsItems(false)
                 dropdown:ClearItems()
 
@@ -1277,10 +1279,33 @@ do
                     ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
                 end)
 
-                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(chooseAsGiftDropdownEntryData.dialog, dropdown)
+                dropdown:SetNarrationTooltipType(function(selectedItemData)
+                    if selectedItemData then
+                        if selectedItemData.expectedResult ~= MARKET_PURCHASE_RESULT_SUCCESS  or (selectedItemData.warningStrings and #selectedItemData.warningStrings > 0) then
+                            return GAMEPAD_LEFT_DIALOG_TOOLTIP
+                        end
+                    end
+                end)
 
-                GAMEPAD_TOOLTIPS:LayoutMarketProductListing(GAMEPAD_LEFT_DIALOG_TOOLTIP, self.marketProductData:GetId(), self.marketProductData:GetPresentationIndex())
-                ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
+                local isValid, result
+                if self.isGift then
+                    isValid, result = self.marketProductData:IsGiftQuantityValid(self.quantity)
+                else
+                    isValid, result = self.marketProductData:IsPurchaseQuantityValid(self.quantity)
+                end
+                if isValid then
+                    GAMEPAD_TOOLTIPS:LayoutMarketProductListing(GAMEPAD_LEFT_DIALOG_TOOLTIP, self.marketProductData:GetId(), self.marketProductData:GetPresentationIndex())
+                    ZO_GenericGamepadDialog_ShowTooltip(self)
+                else
+                    local errorText
+                    if result == MARKET_PURCHASE_RESULT_EXCEEDS_MAX_QUANTITY then
+                        errorText = zo_strformat(GetString("SI_MARKETPURCHASABLERESULT", result), self.maxQuantity)
+                    else
+                        errorText = GetString("SI_MARKETPURCHASABLERESULT", result)
+                    end
+                    GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, errorText)
+                    ZO_GenericGamepadDialog_ShowTooltip(self)
+                    end
             end
             chooseAsGiftDropdownEntryData.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
         end
@@ -1297,9 +1322,10 @@ do
             selectHouseTemplateDropdownEntryData.dropdownEntry = true
             selectHouseTemplateDropdownEntryData.setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                 local dropdown = control.dropdown
+                --Order matters. Make sure to register the dialog dropdown BEFORE clearing the items
+                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(selectHouseTemplateDropdownEntryData.dialog, dropdown)
                 dropdown:SetSortsItems(false)
                 dropdown:ClearItems()
-                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(selectHouseTemplateDropdownEntryData.dialog, dropdown)
 
                 local function SetSelectedTemplateId(templateId)
                     if self.houseSelectionInfo.selectedTemplateId ~= templateId then
@@ -1316,6 +1342,9 @@ do
                             data3 = data3,
                         }
                         ZO_GenericGamepadDialog_RefreshHeaderData(dialog, headerData)
+                        --Re-narrate the header when the price changes
+                        local NARRATE_HEADER = true
+                        SCREEN_NARRATION_MANAGER:QueueDialog(dialog, NARRATE_HEADER)
                     end
                 end
 
@@ -1467,11 +1496,18 @@ do
                 ZO_GenericGamepadDialog_RefreshKeybinds(itemQuantityEntryData.dialog)
             end
 
+            itemQuantityEntryData.focusLostCallback = function()
+                --Editing the quantity can impact the price, so re-narrate the header when we're done
+                local NARRATE_HEADER = true
+                SCREEN_NARRATION_MANAGER:QueueDialog(itemQuantityEntryData.dialog, NARRATE_HEADER)
+            end
+
             itemQuantityEntryData.setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                 itemQuantityEntryData.control = control
                 control.highlight:SetHidden(not selected)
                 control.editBoxControl.textChangedCallback = data.textChangedCallback
                 control.editBoxControl:SetText(self.quantity or 1)
+                control.editBoxControl.focusLostCallback = data.focusLostCallback
                 local maxQuantity = self.maxQuantity
                 if maxQuantity then
                     -- Maximum quantity of greater than one requires input and maximum limit label.

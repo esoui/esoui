@@ -386,13 +386,16 @@ do
 
         -- Apply filter to headers
         local rulesetType = GetCampaignRulesetType(self.rulesetIdFilter)
-        local hiddenColumns = HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE[rulesetType]
-        local HIDDEN = true
-        self.sortHeaderGroup:SetHeadersHiddenFromKeyList(hiddenColumns, HIDDEN)
+        -- ESO-808426: Speculative fix. Theoretically, if encountered during a load screen we can get an invalid value of 0
+        if rulesetType ~= 0 then
+            local hiddenColumns = HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE[rulesetType]
+            local HIDDEN = true
+            self.sortHeaderGroup:SetHeadersHiddenFromKeyList(hiddenColumns, HIDDEN)
 
-        if hiddenColumns[self.sortHeaderGroup:GetCurrentSortKey()] then
-            -- Table was sorted by a column that is gone now: fallback to name
-            self.sortHeaderGroup:SelectHeaderByKey("name")
+            if hiddenColumns[self.sortHeaderGroup:GetCurrentSortKey()] then
+                -- Table was sorted by a column that is gone now: fallback to name
+                self.sortHeaderGroup:SelectHeaderByKey("name")
+            end
         end
     end
 

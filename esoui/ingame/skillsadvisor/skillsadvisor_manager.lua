@@ -210,12 +210,12 @@ function SkillsAdvisor_Manager:GetSkillBuildRoleLinesById(skillBuildId)
         end
 
         if #selectedRoles == 1 then
-            local text = zo_strformat(SI_TOOLTIP_ITEM_ROLE, GetString("SI_LFGROLE", selectedRoles[1]), zo_iconFormat(GetRoleIcon(selectedRoles[1]), "100%", "100%"))
+            local text = zo_strformat(SI_TOOLTIP_ITEM_ROLE, GetString("SI_LFGROLE", selectedRoles[1]), zo_iconFormat(ZO_GetRoleIcon(selectedRoles[1]), "100%", "100%"))
             table.insert(results, zo_strformat(SI_TOOLTIP_ITEM_ROLE_FORMAT, text))
         elseif #selectedRoles > 1 then
             table.insert(results, GetString(SI_TOOLTIP_ITEM_ROLES_FORMAT))
             for i, role in ipairs(selectedRoles) do
-                local text = zo_strformat(SI_TOOLTIP_ITEM_ROLE, GetString("SI_LFGROLE", role), zo_iconFormat(GetRoleIcon(role), "100%", "100%"))
+                local text = zo_strformat(SI_TOOLTIP_ITEM_ROLE, GetString("SI_LFGROLE", role), zo_iconFormat(ZO_GetRoleIcon(role), "100%", "100%"))
                 table.insert(results, text)
             end
         end

@@ -999,9 +999,6 @@ SOUNDS =
     UNIVERSAL_DECONSTRUCTION_SUCCESS = "Universal_Deconstruction_Success",
     UNIVERSAL_DECONSTRUCTION_FAIL = "Universal_Deconstruction_Fail",
 
-    -- Pregame Animated Background
-    PREGAME_ANIMATEDBACKGROUND_HIGHISLE_GEM_SPARKLE = "Pregame_AnimatedBackground_HighIsle_Gem_Sparkle",
-
     -- Tribute
     TRIBUTE_TURN_START = "Tribute_TurnStart",
     TRIBUTE_TURN_START_OPPONENT_PENULTIMATE_FAVOR = "Tribute_TurnStart_OpponentPenultimateFavor",

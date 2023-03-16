@@ -16,7 +16,8 @@ end
 
 function ChapterUpgrade_Keyboard:UpgradeButtonClicked()
     local IS_STANDARD_EDITION = false
-    local SHOW_LOGOUT_WARNING = true
+    local serviceType = GetPlatformServiceType()
+    local SHOW_LOGOUT_WARNING = serviceType ~= PLATFORM_SERVICE_TYPE_EPIC
     ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION, CHAPTER_UPGRADE_SOURCE_PREGAME, SHOW_LOGOUT_WARNING)
 end
 

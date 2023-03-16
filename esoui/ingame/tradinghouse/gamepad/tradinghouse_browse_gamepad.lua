@@ -28,7 +28,12 @@ function ZO_GamepadTradingHouse_Browse:InitializeFeatures()
         priceRangeFeature = ZO_TradingHouse_CreateGamepadFeature("PriceRange"),
         qualityFeature = ZO_TradingHouse_CreateGamepadFeature("Quality"),
     }
-    self.features.priceRangeFeature:AttachToControl(self.control:GetNamedChild("PriceSelectorContainer"))
+
+    local function PriceRangeFocusLost()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+    end
+
+    self.features.priceRangeFeature:AttachToControl(self.control:GetNamedChild("PriceSelectorContainer"), PriceRangeFocusLost)
     self.features.nameSearchFeature:RegisterCallback("OnNameMatchComplete", function(...) self:OnNameMatchComplete(...) end)
 
     local function FilterForGamepadEvents(callback)
@@ -194,6 +199,9 @@ do
         onSelectedCallback = function()
             TRADING_HOUSE_GAMEPAD:EnterSearchHistory()
         end,
+        narrationText = function(entryData, entryControl)
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.labelText)
+        end,
     }
 
     function ZO_GamepadTradingHouse_Browse:AddEnterSearchHistoryEntry(itemList)
@@ -256,6 +264,8 @@ do
         -- Dropdown Templates
         local function OnDropdownDeactivated()
             self:UnfocusDropDown()
+            --Re-narrate when closing the dropdown
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
         end
 
         local function SetupDropdownTemplate(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -279,6 +289,10 @@ do
 
         -- Level Range Templates
         local function SetupSlider(control, data, selected, reselectingDuringRebuild, enabled, active)
+            data.onValueChangedCallback = function()
+                --Re-narrate when the slider value changes
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+            end
             data.feature:SetupSlider(control, data, selected)
         end
 
@@ -294,6 +308,10 @@ do
 
         -- Name Search Template
         local function SetupNameSearchField(control, data, selected, reselectingDuringRebuild, enabled, active)
+            data.onFocusLostCallback = function()
+                --Re-narrate when exiting the name search field
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+            end
             data.feature:SetupNameSearchField(control, data, selected, reselectingDuringRebuild, enabled, active)
         end
         self.itemList:AddDataTemplateWithHeader("ZO_GamepadTextFieldItem", SetupNameSearchField, ZO_GamepadMenuEntryTemplateParametricListFunction, NO_EQUALITY_FUNCTION, "ZO_GamepadGuildStoreBrowseHeaderTemplate")

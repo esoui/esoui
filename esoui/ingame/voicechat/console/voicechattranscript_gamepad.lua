@@ -13,8 +13,12 @@ function ZO_VoiceChatTranscript_Gamepad:Initialize(control)
     
     self.textInputLabel = control:GetNamedChild("MaskTextInputChannel")
     self.textInputField = control:GetNamedChild("MaskTextInputText")
+    self.inputChannelName = nil
+    self.isTextFieldVisible = true
 
     self:SetTextFieldVisibility(VOICE_CHAT_MANAGER:HasActiveTransmitChannel())
+
+    self:InitializeNarrationInfo()
 end
 
 -- ZO_InteractiveChatLog_Gamepad Overrides
@@ -25,6 +29,23 @@ function ZO_VoiceChatTranscript_Gamepad:InitializeHeader()
         titleText = GetString(SI_GAMEPAD_VOICECHAT_TRANSCRIPT_HEADER),
     }
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+end
+
+function ZO_VoiceChatTranscript_Gamepad:InitializeNarrationInfo()
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return VOICE_CHAT_TRANSCRIPT_GAMEPAD_SCENE:IsShowing() and self.textInputAreaFocalArea:IsFocused()
+        end,
+        selectedNarrationFunction = function()
+            -- the text field can be focused, but not visible
+            -- we don't want to narrat eth field, but still want to narrate the keybinds
+            if self.isTextFieldVisible then
+                return ZO_FormatEditBoxNarrationText(self.textEdit, self.inputChannelName)
+            end
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("voiceChatTranscriptTextEdit", narrationInfo)
 end
 
 function ZO_VoiceChatTranscript_Gamepad:RegisterForEvents()
@@ -41,7 +62,8 @@ function ZO_VoiceChatTranscript_Gamepad:RegisterForEvents()
         self:SetTextFieldVisibility(hasActiveTransmitChannel)
         if hasActiveTransmitChannel then
             local channel = VOICE_CHAT_MANAGER:GetActiveChannel()
-            self.textInputLabel:SetText(zo_strformat(SI_GAMEPAD_VOICECHAT_FORMAT_CHANNEL, channel.name))
+            self.inputChannelName = zo_strformat(SI_GAMEPAD_VOICECHAT_FORMAT_CHANNEL, channel.name)
+            self.textInputLabel:SetText(self.inputChannelName)
         end
     end
 
@@ -116,6 +138,7 @@ function ZO_VoiceChatTranscript_Gamepad:InitializeFocusKeybinds()
             callback = function()
                 RequestReadTextOverVoiceChat(self.textEdit:GetText())
                 self.textEdit:Clear()
+                SCREEN_NARRATION_MANAGER:QueueCustomEntry("voiceChatTranscriptTextEdit")
             end,
 
             enabled = function()
@@ -215,6 +238,7 @@ function ZO_VoiceChatTranscript_Gamepad:SetupOptions(entryData)
 end
 
 function ZO_VoiceChatTranscript_Gamepad:SetTextFieldVisibility(visible)
+    self.isTextFieldVisible = visible
     self.textInputField:SetHidden(not visible)
     self.textInputLabel:SetHidden(not visible)
 end
@@ -235,6 +259,8 @@ function ZO_VoiceChatTranscript_Gamepad:OnTextInputAreaActivated()
     ZO_InteractiveChatLog_Gamepad.OnTextInputAreaActivated(self)
 
     self.textControlHighlight:SetHidden(false)
+
+    SCREEN_NARRATION_MANAGER:QueueCustomEntry("voiceChatTranscriptTextEdit")
 end
 
 function ZO_VoiceChatTranscript_Gamepad:OnTextInputAreaDeactivated()

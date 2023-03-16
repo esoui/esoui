@@ -126,10 +126,13 @@ do
         local hasCategory = false
         local categoryTreeData = self:GetCategoryTreeData()
         if categoryTreeData then
+            local isOwner = IsOwnerOfCurrentHouse()
             local allTopLevelCategories = categoryTreeData:GetAllSubcategories()
             for index, categoryObject in ipairs(allTopLevelCategories) do
-                self:AddTopLevelCategory(categoryObject)
-                hasCategory = true
+                if isOwner or not categoryObject:IsOwnerRestrictedCategory() then
+                    self:AddTopLevelCategory(categoryObject)
+                    hasCategory = true
+                end
             end
         end
 
@@ -187,12 +190,14 @@ function ZO_HousingBrowserList:AddTopLevelCategory(categoryObject)
 
     local NO_PARENT = nil
     local parent = self:AddCategory(tree, nodeTemplate, NO_PARENT, categoryId, categoryObject)
-        
     if hasChildren then
+        local isOwner = IsOwnerOfCurrentHouse()
         local allSubcategories = categoryObject:GetAllSubcategories()
         for index, subcategoryObject in ipairs(allSubcategories) do
-            local subcategoryId = subcategoryObject:GetCategoryId()
-            self:AddCategory(tree, self.subCategoryTemplate, parent, subcategoryId, subcategoryObject)
+            if isOwner or not subcategoryObject:IsOwnerRestrictedCategory() then
+                local subcategoryId = subcategoryObject:GetCategoryId()
+                self:AddCategory(tree, self.subCategoryTemplate, parent, subcategoryId, subcategoryObject)
+            end
         end
     end
 
@@ -548,6 +553,15 @@ function ZO_HousingSettingsList:GetUserGroup()
     return self.userGroup
 end
 
+function ZO_HousingSettingsList_CreateOccupantScrollData(displayName, currentHouse, index)
+    return { 
+                displayName = displayName, 
+                index = index,
+                currentHouse = currentHouse, 
+                online = true, -- Assumed because this player is currently occupying this house.
+           }
+end
+
 function ZO_HousingSettingsList_CreateScrollData(displayName, currentHouse, userGroup, index, permissionPresetName)
     return { 
                 displayName = displayName, 
@@ -557,6 +571,93 @@ function ZO_HousingSettingsList_CreateScrollData(displayName, currentHouse, user
                 permissionPresetName = permissionPresetName,
                 online = true, -- since we are using this data in a social list, and we don't know the status of the individual or guild, we are default to true so that the text is properly colorized
            }
+end
+
+function ZO_HousingSettingsFilters_SetupDropdown(dropdown, includeLocationFilters, callback)
+    local comboBox = ZO_ComboBox_ObjectFromContainer(dropdown)
+    -- Subcategory options are disabled but we do not want them to have the disabled visuals.
+    comboBox:SetDisabledColor(ZO_DEFAULT_ENABLED_COLOR)
+    comboBox:SetFont("ZoFontWinT1")
+    comboBox:SetSortsItems(false)
+    comboBox:SetSpacing(4)
+    comboBox:SetNoSelectionText(zo_strformat(SI_HOUSING_FURNITURE_FILTER_DROPDOWN_TEXT, 0))
+    comboBox:SetMultiSelectionTextFormatter(SI_HOUSING_FURNITURE_FILTER_DROPDOWN_TEXT)
+
+    local onDropdownHidden = function()
+        callback(comboBox)
+    end
+
+    comboBox:SetHideDropdownCallback(onDropdownHidden)
+
+    local function DisableHighlightOnMouseEnter(control)
+        -- Suppress the highlight for subcategory entries.
+        ZO_Menu_UnselectItem(control)
+    end
+
+    local DISABLED = false
+    local NO_CALLBACK = nil
+
+    -- Add Location filters starting with the subcategory entry.
+    if includeLocationFilters then
+        do
+            local subcategoryName = GetString(SI_HOUSING_FURNITURE_LOCATION_FILTER_DROPDOWN_LABEL)
+            local entry = comboBox:CreateItemEntry(subcategoryName, NO_CALLBACK, DISABLED)
+            entry.highlightColor = ZO_DEFAULT_ENABLED_COLOR
+            entry.onEnter = DisableHighlightOnMouseEnter
+            comboBox:AddItem(entry)
+        end
+
+        local locationFilterEntries = {}
+        for filterValue in ZO_FlagIterator(HOUSING_FURNITURE_LOCATION_FILTER_ALL * 2, HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_END) do
+            local filterName = zo_strformat(SI_HOUSING_FURNITURE_FILTER_LIST_ITEM_FORMATTER, GetString("SI_HOUSINGFURNITURELOCATIONFILTER", filterValue))
+            local entry = comboBox:CreateItemEntry(filterName)
+            entry.filterValue = filterValue
+            entry.filterCategory = ZO_HOUSING_FURNITURE_FILTER_CATEGORY.LOCATION
+            table.insert(locationFilterEntries, entry)
+        end
+
+        local function CompareLocationFilters(left, right)
+            return left.name < right.name
+        end
+        table.sort(locationFilterEntries, CompareLocationFilters)
+
+        for _, entry in ipairs(locationFilterEntries) do
+            comboBox:AddItem(entry)
+        end
+    end
+
+    -- Add Bound State filters starting with the subcategory entry.
+    do
+        local entry = comboBox:CreateItemEntry(GetString(SI_HOUSING_FURNITURE_BOUND_FILTER_DROPDOWN_LABEL), NO_CALLBACK, DISABLED)
+        entry.highlightColor = ZO_DEFAULT_ENABLED_COLOR
+        entry.onEnter = DisableHighlightOnMouseEnter
+        comboBox:AddItem(entry)
+    end
+
+    for filterValue = HOUSING_FURNITURE_BOUND_FILTER_ALL + 1, HOUSING_FURNITURE_BOUND_FILTER_ITERATION_END do
+        local filterName = zo_strformat(SI_HOUSING_FURNITURE_FILTER_LIST_ITEM_FORMATTER, GetString("SI_HOUSINGFURNITUREBOUNDFILTER", filterValue))
+        local entry = comboBox:CreateItemEntry(filterName)
+        entry.filterValue = filterValue
+        entry.filterCategory = ZO_HOUSING_FURNITURE_FILTER_CATEGORY.BOUND
+        comboBox:AddItem(entry)
+    end
+
+    -- Add Limit Type filters starting with the subcategory entry.
+    do
+        local entry = comboBox:CreateItemEntry(GetString(SI_TOOLTIP_FURNISHING_LIMIT_TYPE), NO_CALLBACK, DISABLED)
+        entry.highlightColor = ZO_DEFAULT_ENABLED_COLOR
+        entry.onEnter = DisableHighlightOnMouseEnter
+        comboBox:AddItem(entry)
+    end
+
+    for limitType = HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_BEGIN, HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_END do
+        local filterValue = ZO_HOUSING_FURNITURE_LIMIT_FILTERS[limitType + 1]
+        local filterName = zo_strformat(SI_HOUSING_FURNITURE_FILTER_LIST_ITEM_FORMATTER, GetString("SI_HOUSINGFURNISHINGLIMITTYPE", limitType))
+        local entry = comboBox:CreateItemEntry(filterName)
+        entry.filterValue = filterValue
+        entry.filterCategory = ZO_HOUSING_FURNITURE_FILTER_CATEGORY.LIMIT
+        comboBox:AddItem(entry)
+    end
 end
 
 function ZO_HousingSettingsTheme_SetupDropdown(dropdown, callback)
@@ -575,6 +676,21 @@ function ZO_HousingSettingsTheme_SetupDropdown(dropdown, callback)
     end
 
     comboBox:SelectItemByIndex(1)
+end
+
+--
+--[[ ZO_HousingSettingsOccupantList_Keyboard ]]--
+--
+ZO_HousingSettingsOccupantList_Keyboard = ZO_HousingSettingsList:Subclass()
+
+function ZO_HousingSettingsOccupantList_Keyboard:New(...)
+    local NO_PERMISSION_USER_GROUP = 0
+    return ZO_HousingSettingsList.New(self, NO_PERMISSION_USER_GROUP, ...)
+end
+
+function ZO_HousingSettingsOccupantList_Keyboard:BuildMasterList()
+    self.currentHouse = GetCurrentZoneHouseId()
+    ZO_HousingSettings_BuildMasterList_Occupant(self.currentHouse, self.masterList, ZO_HousingSettingsList_CreateOccupantScrollData)
 end
 
 --

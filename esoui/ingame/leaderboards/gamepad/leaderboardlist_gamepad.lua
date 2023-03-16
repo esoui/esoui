@@ -93,7 +93,36 @@ function LeaderboardList_Gamepad:RefreshLeaderboardType(leaderboardType)
             self.currentSortOrder = ZO_SORT_ORDER_UP
             self.sortHeaderGroup:SelectHeaderByKey(self.currentSortKey, false, true)
         end
+    else
+        local SHOWN = false
+        self.sortHeaderGroup:SetHeadersHiddenFromKeyList({}, SHOWN)
     end
+end
+
+function LeaderboardList_Gamepad:GetNarrationText()
+    local narrations = {}
+    local selectedData = self:GetSelectedData()
+    if selectedData then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_LEADERBOARDS_RANK_HEADER_NARRATION)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.rank))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_GetPlatformAccountLabel()))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.displayName))
+        if selectedData.characterName and selectedData.characterName ~= "" then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_LEADERBOARDS_HEADER_CHARACTER_NAME)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.characterName))
+        end
+        if selectedData.class then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_LEADERBOARDS_HEADER_CLASS)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_CLASS_NAME, GetClassName(GENDER_MALE, selectedData.class))))
+        end
+        if selectedData.alliance then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_LEADERBOARDS_HEADER_ALLIANCE)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_ALLIANCE", selectedData.alliance)))
+        end
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GAMEPAD_LEADERBOARDS.headerPointsText))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.points))
+    end
+    return narrations
 end
 
 function LeaderboardList_Gamepad:GetBackKeybindCallback()

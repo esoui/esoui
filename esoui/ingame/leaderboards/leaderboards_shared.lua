@@ -295,7 +295,8 @@ function ZO_LeaderboardsManager_Shared:OnLeaderboardSelected(data)
     self:SetActiveLeaderboardTitle(titleName)
     self:RefreshLeaderboardType(data.leaderboardRankType)
 
-    self.pointsHeaderLabel:SetText(data.pointsHeaderString or GetString(SI_LEADERBOARDS_HEADER_POINTS))
+    self.headerPointsText = data.pointsHeaderString or GetString(SI_LEADERBOARDS_HEADER_POINTS)
+    self.pointsHeaderLabel:SetText(self.headerPointsText)
 end
 
 function ZO_LeaderboardsManager_Shared:OnLeaderboardDataChanged(leaderboardObject)
@@ -327,7 +328,7 @@ function ZO_LeaderboardsManager_Shared:SetupLeaderboardPlayerEntry(control, data
         control.allianceIcon:SetHidden(true)
     --Class/Alliance
     else
-        local classTexture = GetPlatformClassIcon(data.class)
+        local classTexture = ZO_GetPlatformClassIcon(data.class)
         if(classTexture) then
             control.classIcon:SetHidden(false)
             control.classIcon:SetTexture(classTexture)
@@ -335,7 +336,7 @@ function ZO_LeaderboardsManager_Shared:SetupLeaderboardPlayerEntry(control, data
             control.classIcon:SetHidden(true)
         end
 
-        local allianceTexture = GetPlatformAllianceSymbolIcon(data.alliance)
+        local allianceTexture = ZO_GetPlatformAllianceSymbolIcon(data.alliance)
         if(allianceTexture) then
             control.allianceIcon:SetHidden(false)
             control.allianceIcon:SetTexture(allianceTexture)

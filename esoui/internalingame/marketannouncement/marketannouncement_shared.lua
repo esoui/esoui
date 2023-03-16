@@ -46,6 +46,8 @@ function ZO_MarketAnnouncement_Shared:Initialize(control, fragmentConditionFunct
     self.scrollContainer = container:GetNamedChild("ScrollContainer")
     self.actionTileListControl = container:GetNamedChild("ActionTileList")
     self.crownStoreLockedControl = container:GetNamedChild("LockedCrownStore")
+    self.crownStoreLockedTitleControl = self.crownStoreLockedControl:GetNamedChild("TitleText")
+    self.crownStoreLockedDescriptionControl = self.crownStoreLockedControl:GetNamedChild("DescriptionText")
     self.crownStoreLockedTexture = self.crownStoreLockedControl:GetNamedChild("Background")
 
     self.controlContainer = container
@@ -120,6 +122,13 @@ function ZO_MarketAnnouncement_Shared:OnShowing()
     self:LayoutActionTiles()
 
     if ZO_MARKET_ANNOUNCEMENT_MANAGER:ShouldHideMarketProductAnnouncements() then
+        if GetMarketAnnouncementCrownStoreLocked() then
+            self.crownStoreLockedTitleControl:SetText(GetString(SI_MARKET_ANNOUNCEMENT_LOCKED_CROWN_STORE_TITLE))
+            self.crownStoreLockedDescriptionControl:SetHidden(false)
+        else
+            self.crownStoreLockedTitleControl:SetText(GetString(SI_MARKET_ANNOUNCEMENT_NO_FEATURED_PRODUCTS_TITLE))
+            self.crownStoreLockedDescriptionControl:SetHidden(true)
+        end
         self.carouselControl:SetHidden(true)
         self.crownStoreLockedControl:SetHidden(false)
         self.crownStoreLockedTexture:SetTexture(GetMarketAnnouncementCrownStoreLockedBackground())

@@ -101,8 +101,9 @@ function ZO_GamepadGuildHome:RefreshHeader(blockTabBarCallbacks)
 
     contentHeaderData.data1HeaderText = nil
     contentHeaderData.data1Text = nil
+    contentHeaderData.data1TextNarration = nil
     if(self.currentFragment == GUILD_HERALDRY_GAMEPAD_FRAGMENT) then
-        contentHeaderData.data1HeaderText, contentHeaderData.data1Text = GUILD_HERALDRY_GAMEPAD:GetPurchaseCost()
+        contentHeaderData.data1HeaderText, contentHeaderData.data1Text, contentHeaderData.data1TextNarration = GUILD_HERALDRY_GAMEPAD:GetPurchaseCost()
     end
 
     ZO_GamepadGenericHeader_Refresh(self.contentHeader, contentHeaderData)
@@ -222,6 +223,14 @@ end
 function ZO_GamepadGuildHome:ShowWeeklyBids()
     local DONT_ACTIVATE_CURRENT_LIST = false
     self:SetCurrentPage(GUILD_WEEKLY_BIDS_GAMEPAD:GetListFragment(), GUILD_WEEKLY_BIDS_GAMEPAD, DONT_ACTIVATE_CURRENT_LIST)
+end
+
+function ZO_GamepadGuildHome:GetContentHeaderNarrationText()
+    return ZO_GamepadGenericHeader_GetNarrationText(self.contentHeader, self.contentHeaderData)
+end
+
+function ZO_GamepadGuildHome:GetFooterNarrationText()
+    return GAMEPAD_GENERIC_FOOTER:GetNarrationText(self.footerData)
 end
 
 --------------------

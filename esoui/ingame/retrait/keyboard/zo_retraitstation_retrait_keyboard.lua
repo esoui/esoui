@@ -4,10 +4,6 @@ local TRAIT_LIST_TRAIT_ENTRY = 1
 
 ZO_RetraitStation_Retrait_Keyboard = ZO_RetraitStation_Retrait_Base:Subclass()
 
-function ZO_RetraitStation_Retrait_Keyboard:New(...)
-    return ZO_RetraitStation_Retrait_Base.New(self, ...)
-end
-
 function ZO_RetraitStation_Retrait_Keyboard:Initialize(control, owner)
     ZO_RetraitStation_Retrait_Base.Initialize(self, control)
     self.owner = owner

@@ -66,6 +66,8 @@ function ZO_IngameSceneManager:SetInUIMode(inUIMode, bypassHideSceneConfirmation
                 self:SetBaseScene(self.hudUISceneName)
                 ZO_RadialMenu.ForceActiveMenuClosed()
                 DIRECTIONAL_INPUT:Activate(self, GuiRoot)
+                --Clear out any in progress HUD narration when entering the UI
+                ClearNarrationQueue(NARRATION_TYPE_HUD)
                 return true
             else
                 if not self:IsLockedInUIMode() and DoesGameHaveFocus() and IsSafeForSystemToCaptureMouseCursor() then
@@ -78,6 +80,8 @@ function ZO_IngameSceneManager:SetInUIMode(inUIMode, bypassHideSceneConfirmation
                             DIRECTIONAL_INPUT:Deactivate(self)
                             MAIN_MENU_MANAGER:ForceClearBlockingScenes()
                             self:SetBaseScene(self.hudSceneName)
+                            --Clear out any in progress UI narration when entering the HUD
+                            ClearNarrationQueue(NARRATION_TYPE_UI_SCREEN)
                         end
                     end
                     --Showing the hud scene may fail if the current scene needs confirmation before closing. So we wait to do all of the other parts until after the hide of the current scene succeeds.
@@ -486,7 +490,7 @@ function ZO_IngameSceneManager:OnToggleUIModeBinding()
                 --disable housing if going to a menu, but not a from mouse mode back to crosshair
                 HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
             end
-            if self.currentScene:DoesSceneRestoreHUDSceneFromToggleUIMode() then
+            if self.currentScene and self.currentScene:DoesSceneRestoreHUDSceneFromToggleUIMode() then
                 self:RestoreHUDScene()
                 self:RestoreHUDUIScene()
                 return
@@ -543,7 +547,7 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
         return
     end
 
-    if self.currentScene:DoesSceneRestoreHUDSceneFromToggleGameMenu() then
+    if self.currentScene and self.currentScene:DoesSceneRestoreHUDSceneFromToggleGameMenu() then
         self:RestoreHUDScene()
         self:RestoreHUDUIScene()
         return

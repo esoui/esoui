@@ -42,21 +42,80 @@ function ZO_GetNextActiveArtificialEffectIdIter(state, lastActiveEffectId)
     return GetNextActiveArtificialEffectId(lastActiveEffectId)
 end
 
+-- respec attribute interaction info
+ZO_ATTRIBUTE_RESPEC_INTERACT_INFO =
+{
+    type = "Attribute Respec Shrine",
+    OnInteractSwitch = function()
+        internalassert(false, "OnInteractSwitch is being called.")
+        SCENE_MANAGER:ShowBaseScene()
+    end,
+    interactTypes = { INTERACTION_ATTRIBUTE_RESPEC },
+}
+
 ------------------
 -- Stats Common --
 ------------------
 
-ZO_Stats_Common = ZO_Object:Subclass()
+ZO_Stats_Common = ZO_InitializingCallbackObject:Subclass()
 
-function ZO_Stats_Common:New(...)
-    local statsCommon = ZO_Object.New(self)
-    statsCommon:Initialize(...)
-    return statsCommon
-end
+function ZO_Stats_Common:Initialize(control)
+    self.control = control
 
-function ZO_Stats_Common:Initialize()
     self.availablePoints = 0
     self.statBonuses = {}
+
+    self.attributePointAllocationMode = ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY
+    self.attributeRespecPaymentType = RESPEC_PAYMENT_TYPE_GOLD
+
+    self.control:RegisterForEvent(EVENT_START_ATTRIBUTE_RESPEC, function(_, ...) self:OnStartAttributeRespec(...) end)
+end
+
+function ZO_Stats_Common:GetAttributePointAllocationMode()
+    return self.attributePointAllocationMode
+end
+
+function ZO_Stats_Common:SetAttributePointAllocationMode(attributePointAllocationMode)
+    if attributePointAllocationMode ~= self.attributePointAllocationMode then
+        local oldAttributePointAllocationMode = self.attributePointAllocationMode
+        self.attributePointAllocationMode = attributePointAllocationMode
+        self:FireCallbacks("AttributePointAllocationModeChanged", attributePointAllocationMode, oldAttributePointAllocationMode)
+    end
+end
+
+function ZO_Stats_Common:GetAttributeRespecPaymentType()
+    return self.attributeRespecPaymentType
+end
+
+function ZO_Stats_Common:SetAttributeRespecPaymentType(attributeRespecPaymentType)
+    if attributeRespecPaymentType ~= self.attributeRespecPaymentType then
+        local oldAttributeRespecPaymentType = self.attributeRespecPaymentType
+        self.attributeRespecPaymentType = attributeRespecPaymentType
+        self:FireCallbacks("AttributeRespecPaymentTypeChanged", attributeRespecPaymentType, oldAttributeRespecPaymentType)
+    end
+end
+
+function ZO_Stats_Common:DoesAttributePointAllocationModeAllowDecrease()
+    return self.attributePointAllocationMode ~= ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY
+end
+
+function ZO_Stats_Common:DoesAttributePointAllocationModeBatchSave()
+    return self.attributePointAllocationMode ~= ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY
+end
+
+function ZO_Stats_Common:IsPaymentTypeScroll()
+    return self.attributeRespecPaymentType == RESPEC_PAYMENT_TYPE_RESPEC_SCROLL
+end
+
+function ZO_Stats_Common:OnStartAttributeRespec(allocationMode, paymentType)
+    self:SetAttributeRespecPaymentType(paymentType)
+    self:SetAttributePointAllocationMode(allocationMode)
+    if IsInGamepadPreferredMode() then
+        SCENE_MANAGER:Push("gamepad_stats_root")
+        GAMEPAD_STATS:SelectAttributes()
+    else
+        SCENE_MANAGER:Push("stats")
+    end
 end
 
 function ZO_Stats_Common:GetAvailablePoints()
@@ -261,7 +320,6 @@ function ZO_AttributeSpinner_Shared:New(attributeControl, attributeType, attribu
     attributeSpinner.points = 0
     attributeSpinner.addedPoints = 0
     attributeSpinner.attributeManager = attributeManager
-    
     attributeSpinner:SetValueChangedCallback(valueChangedCallback)
     attributeSpinner:SetAttributeType(attributeType)
 
@@ -296,8 +354,8 @@ end
 
 function ZO_AttributeSpinner_Shared:OnValueChanged(points)
     self:SetAddedPointsByTotalPoints(points)
-    
-    if(self.valueChangedCallback ~= nil) then
+
+    if self.valueChangedCallback ~= nil then
         self.valueChangedCallback(self.points, self.addedPoints)
     end
 
@@ -305,17 +363,21 @@ function ZO_AttributeSpinner_Shared:OnValueChanged(points)
 end
 
 function ZO_AttributeSpinner_Shared:RefreshSpinnerMax()
-    self.pointsSpinner:SetMinMax(self.points, self.points + self.addedPoints + self.attributeManager:GetAvailablePoints())
+    local minPoints = self.points
+    if self.attributeManager.DoesAttributePointAllocationModeBatchSave and self.attributeManager:DoesAttributePointAllocationModeBatchSave() then
+        minPoints = 0
+    end
+    self.pointsSpinner:SetMinMax(minPoints, self.points + self.addedPoints + self.attributeManager:GetAvailablePoints())
 end
 
 function ZO_AttributeSpinner_Shared:RefreshPoints()
     self.points = GetAttributeSpentPoints(self.attributeType)
-	self:RefreshSpinnerMax()
+    self:RefreshSpinnerMax()
     self.pointsSpinner:SetValue(self.points)
 end
 
 function ZO_AttributeSpinner_Shared:ResetAddedPoints()
-    self.addedPoints = 0    
+    self.addedPoints = 0
     self:RefreshPoints()
 end
 
@@ -332,12 +394,14 @@ function ZO_AttributeSpinner_Shared:SetAddedPointsByTotalPoints(totalPoints)
 end
 
 function ZO_AttributeSpinner_Shared:SetAddedPoints(points, force)
-    points = zo_max(points, 0)
-    
+    if not self.attributeManager.DoesAttributePointAllocationModeBatchSave or not self.attributeManager:DoesAttributePointAllocationModeBatchSave() then
+        points = zo_max(points, 0)
+    end
+
     local diff = points - self.addedPoints
     local availablePoints = self.attributeManager:GetAvailablePoints()
 
-    if(force) then
+    if force then
         diff = 0
     elseif diff > availablePoints then
         diff = availablePoints
@@ -346,7 +410,7 @@ function ZO_AttributeSpinner_Shared:SetAddedPoints(points, force)
 
     self.addedPoints = points
 
-    if(diff ~= 0) then
+    if diff ~= 0 then
         self.attributeManager:SpendAvailablePoints(diff)
     end
     self.attributeManager:UpdatePendingStatBonuses(STAT_TYPES[self.attributeType], self.perPoint * self.addedPoints)

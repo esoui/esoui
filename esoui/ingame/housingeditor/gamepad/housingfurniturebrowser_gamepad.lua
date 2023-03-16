@@ -11,10 +11,15 @@ function ZO_HousingFurnitureBrowser_Gamepad:Initialize(control)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_HOUSING_FURNITURE_BROWSER_SCENE)
     SYSTEMS:RegisterGamepadRootScene("housing_furniture_browser", GAMEPAD_HOUSING_FURNITURE_BROWSER_SCENE)
 
+    self.occupantControl = control:GetNamedChild("Occupants")
     self.visitorPermissionsControl = control:GetNamedChild("Visitors")
     self.banListPermissionsControl = control:GetNamedChild("BanList")
     self.guildVisitorPermissionsControl = control:GetNamedChild("GuildVisitors")
     self.guildBanListPermissionsControl = control:GetNamedChild("GuildBanList")
+
+    self.OnRefreshActions = function()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
+    end
 
     self.nextListId = 0
 
@@ -95,7 +100,7 @@ function ZO_HousingFurnitureBrowser_Gamepad:InitializeHeader()
                 self:SetMode(HOUSING_BROWSER_MODE.RETRIEVAL)
             end,
             visible = function()
-                return HOUSING_EDITOR_STATE:CanLocalPlayerBrowse()
+                return HOUSING_EDITOR_STATE:CanLocalPlayerBrowseFurniture()
             end,
         },
         {
@@ -104,12 +109,12 @@ function ZO_HousingFurnitureBrowser_Gamepad:InitializeHeader()
                 self:SetMode(HOUSING_BROWSER_MODE.SETTINGS)
             end,
             visible = function()
-                return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
+                return HOUSING_EDITOR_STATE:CanLocalPlayerViewSettings()
             end,
         },
     }
 
-    self.categoryHeaderData =
+    self.headerData =
     {
         tabBarEntries = tabBarEntries,
     }
@@ -170,6 +175,7 @@ function ZO_HousingFurnitureBrowser_Gamepad:OnShowing()
     self:RefreshCategoryHeaderData()
     ZO_GamepadGenericHeader_Activate(self.header)
     self.settingsPanel:UpdateLists()
+    ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", self.OnRefreshActions)
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:OnHiding()
@@ -180,6 +186,7 @@ end
 
 function ZO_HousingFurnitureBrowser_Gamepad:OnHide()
     self:SetMode(HOUSING_BROWSER_MODE.NONE)
+    ITEM_PREVIEW_GAMEPAD:UnregisterCallback("RefreshActions", self.OnRefreshActions)
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:SetMode(mode)
@@ -217,6 +224,22 @@ function ZO_HousingFurnitureBrowser_Gamepad:SetMode(mode)
     end
 end
 
+function ZO_HousingFurnitureBrowser_Gamepad:GetTextFilter()
+    local textFilter = ""
+    if self.mode == HOUSING_BROWSER_MODE.PLACEMENT then
+        textFilter = SHARED_FURNITURE:GetPlaceableTextFilter()
+    elseif self.mode == HOUSING_BROWSER_MODE.RETRIEVAL then
+        textFilter = SHARED_FURNITURE:GetRetrievableTextFilter()
+    elseif self.mode == HOUSING_BROWSER_MODE.PRODUCTS then
+        textFilter = SHARED_FURNITURE:GetMarketProductTextFilter()
+    end
+    return textFilter
+end
+
+function ZO_HousingFurnitureBrowser_Gamepad:ResetTextFilter()
+    self.headerTextFilterEditBox:SetText("")
+end
+
 function ZO_HousingFurnitureBrowser_Gamepad:SelectTextFilter()
     self.headerTextFilterEditBox:TakeFocus()
 end
@@ -225,13 +248,13 @@ do
     function ZO_HousingFurnitureBrowser_Gamepad:RefreshCategoryHeaderData()
         local mode = self.mode
         if (mode == HOUSING_BROWSER_MODE.PLACEMENT or mode == HOUSING_BROWSER_MODE.PRODUCTS or mode == HOUSING_BROWSER_MODE.RETRIEVAL) and HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
-            self.categoryHeaderData.data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY)
-            self.categoryHeaderData.data1Text = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
+            self.headerData.data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY)
+            self.headerData.data1Text = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
         else
-            self.categoryHeaderData.data1HeaderText = nil
-            self.categoryHeaderData.data1Text = nil
+            self.headerData.data1HeaderText = nil
+            self.headerData.data1Text = nil
         end
-        ZO_GamepadGenericHeader_Refresh(self.header, self.categoryHeaderData)
+        ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
     end
 end
 

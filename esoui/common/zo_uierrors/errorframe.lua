@@ -32,6 +32,7 @@ function ZO_ErrorFrame:Initialize(control)
     ZO_CheckButton_SetCheckState(self.moreInfoButton, self.moreInfo)
 
     self:InitializePlatformStyles()
+    self:InitializeNarrationInfo()
 
     EVENT_MANAGER:RegisterForEvent("ErrorFrame", EVENT_LUA_ERROR, function(eventCode, ...) self:OnUIError(...) end)
 end
@@ -45,6 +46,32 @@ end
 
 function ZO_ErrorFrame:InitializePlatformStyles()
     ZO_PlatformStyle:New(function(...) self:UpdatePlatformStyles(...) end)
+end
+
+function ZO_ErrorFrame:InitializeNarrationInfo()
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return self.displayingError
+        end,
+        selectedNarrationFunction = function()
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_WINDOW_TITLE_UI_ERROR))
+        end,
+        additionalInputNarrationFunction = function()
+            local narrationData = {}
+
+            local dismissButtonNarrationData =
+            {
+                name = GetString(SI_DISMISS_UI_ERROR),
+                keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UI_SHORTCUT_PRIMARY") or GetString(SI_ACTION_IS_NOT_BOUND),
+                enabled = true,
+            }
+            table.insert(narrationData, dismissButtonNarrationData)
+
+            return narrationData
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("errorFrame", narrationInfo)
 end
 
 function ZO_ErrorFrame:GetNextQueuedError()
@@ -76,6 +103,7 @@ function ZO_ErrorFrame:OnUIError(errorString)
             self.simpleError = string.gsub(fullError, "<Locals>.-</Locals>\n?", "")
 
             self:RefreshErrorText()
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry("errorFrame")
         end
     end
 end

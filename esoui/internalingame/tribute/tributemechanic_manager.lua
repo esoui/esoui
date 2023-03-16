@@ -511,12 +511,22 @@ function ZO_TributeMechanic_Manager:AddMechanicHistory(cardInstanceId, mechanicA
     return tileObject
 end
 
-function ZO_TributeMechanic_Manager:AdjustVerticalScrollOffset(offset)
-    local _, currentVerticalOffset = self.scrollControl:GetScrollOffsets()
-    local _, currentHeight = self.scrollControl:GetScrollExtents()
-    local newVerticalOffset = zo_clamp(currentVerticalOffset + offset, 0, currentHeight)
-    self.scrollControl:SetVerticalScroll(newVerticalOffset)
-    self:UpdateScrollFadeGradient()
+do
+    local LOWER_VERTICAL_SCROLL_MARGIN = 20
+    function ZO_TributeMechanic_Manager:AdjustVerticalScrollOffset(offset)
+        local _, currentVerticalOffset = self.scrollControl:GetScrollOffsets()
+        local _, currentHeight = self.scrollControl:GetScrollExtents()
+        -- Include a small margin for the lower vertical scroll boundary
+        -- to allow the bottommost tile to fully scroll into view.
+        local scrollMargin = 0
+        if currentHeight > 0 then
+            scrollMargin = LOWER_VERTICAL_SCROLL_MARGIN
+        end
+        local maxHeight = zo_max(0, currentHeight + scrollMargin)
+        local newVerticalOffset = zo_clamp(currentVerticalOffset + offset, 0, maxHeight)
+        self.scrollControl:SetVerticalScroll(newVerticalOffset)
+        self:UpdateScrollFadeGradient()
+    end
 end
 
 function ZO_TributeMechanic_Manager:CanScrollToTop()
@@ -539,8 +549,10 @@ function ZO_TributeMechanic_Manager:Initialize(control)
     self.control = control
     control.object = self
 
+    self.continuousScrollingDirection = 0
     self.gameState = TRIBUTE_GAME_FLOW_STATE_INACTIVE
     self.gamepadCursorX, self.gamepadCursorY = 0, 0
+    self.isContinuousScrollingEnabled = false
     self.mouseCursorX, self.mouseCursorY = 0, 0
     self.history = {}
     self.queue = {}
@@ -604,7 +616,7 @@ end
 
 function ZO_TributeMechanic_Manager:OnScrollExtentsChanged()
     local _, currentHeight = self.scrollControl:GetScrollExtents()
-    local previousHeight= self.previousScrollHeight or currentHeight
+    local previousHeight = self.previousScrollHeight or currentHeight
     self.previousScrollHeight = currentHeight
 
     if self.isScrollOffsetLocked then
@@ -615,10 +627,6 @@ function ZO_TributeMechanic_Manager:OnScrollExtentsChanged()
     end
 
     self:UpdateScrollFadeGradient()
-end
-
-function ZO_TributeMechanic_Manager:IsLocalPlayersTurn()
-    return self.isLocalPlayersTurn == true
 end
 
 function ZO_TributeMechanic_Manager:QueueMechanic(cardInstanceId, isLocalPlayerOwner, mechanicActivationSource, mechanicIndex, quantity, isResolved)
@@ -692,18 +700,10 @@ function ZO_TributeMechanic_Manager:SetContinuousScrollingEnabled(enabled, direc
         return
     end
 
+    -- Both a direction and an enabled flag are maintained in order to allow an
+    -- ongoing continous scroll operation to be cancelled with the mouse wheel.
     self.isContinuousScrollingEnabled = enabled
-
-    if enabled then
-        local function OnUpdate()
-            local offset = direction * ZO_TRIBUTE_MECHANIC_CONTINUOUS_SCROLL_DISTANCE_PER_SECOND * GetFrameDeltaTimeSeconds()
-            self:AdjustVerticalScrollOffset(offset)
-        end
-
-        self.control:SetHandler("OnUpdate", OnUpdate, "ContinuousScrolling")
-    else
-        self.control:SetHandler("OnUpdate", nil, "ContinuousScrolling")
-    end
+    self.continuousScrollingDirection = enabled and direction or 0
 end
 
 function ZO_TributeMechanic_Manager:SetHeadingHidden(hidden)
@@ -814,8 +814,11 @@ function ZO_TributeMechanic_Manager:OnGameStateChanged(gameState)
 end
 
 function ZO_TributeMechanic_Manager:OnCardMechanicResolutionStateChanged(cardInstanceId, mechanicActivationSource, mechanicIndex, quantity, isResolved)
-    local isLocalPlayerOwner = self:IsLocalPlayersTurn()
-    self:QueueMechanic(cardInstanceId, isLocalPlayerOwner, mechanicActivationSource, mechanicIndex, quantity, isResolved)
+    local ownerPlayerPerspective = GetTributeCardInstanceOwner(cardInstanceId)
+    if ownerPlayerPerspective then
+        local isLocalPlayerOwner = ownerPlayerPerspective == TRIBUTE_PLAYER_PERSPECTIVE_SELF
+        self:QueueMechanic(cardInstanceId, isLocalPlayerOwner, mechanicActivationSource, mechanicIndex, quantity, isResolved)
+    end
 end
 
 function ZO_TributeMechanic_Manager:OnMouseWheel(delta, ctrl, alt, shift)
@@ -823,15 +826,11 @@ function ZO_TributeMechanic_Manager:OnMouseWheel(delta, ctrl, alt, shift)
     local offset = delta * offsetMultiplier * ZO_TRIBUTE_MECHANIC_TILE_UI_HEIGHT
     self:AdjustVerticalScrollOffset(offset)
 
-    if self.isContinuousScrollingEnabled then
-        -- Receiving mouse wheel input cancels any continuous scrolling.
-        self.control:SetHandler("OnUpdate", nil, "ContinuousScrolling")
-    end
+    -- Receiving mouse wheel input cancels any continuous scrolling.
+    self.continuousScrollingDirection = 0
 end
 
 function ZO_TributeMechanic_Manager:OnPlayerTurnStarted(isLocalPlayer)
-    self.isLocalPlayersTurn = isLocalPlayer
-
     if not isLocalPlayer then
         -- Reset the mechanic history stream when the local player finishes their turn.
         self:ResetHistory()
@@ -841,6 +840,12 @@ end
 
 function ZO_TributeMechanic_Manager:OnUpdate()
     self:UpdateMouseCursor()
+
+    local scrollingDirection = self.continuousScrollingDirection
+    if scrollingDirection ~= 0 then
+        local offset = scrollingDirection * ZO_TRIBUTE_MECHANIC_CONTINUOUS_SCROLL_DISTANCE_PER_SECOND * GetFrameDeltaTimeSeconds()
+        self:AdjustVerticalScrollOffset(offset)
+    end
 
     local frameTimeMS = GetFrameTimeMilliseconds()
     if self.nextQueueUpdateTimeMS > frameTimeMS then

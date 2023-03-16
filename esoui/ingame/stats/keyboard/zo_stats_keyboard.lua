@@ -21,20 +21,57 @@ end
 local SHOW_HIDE_INSTANT = 1
 local SHOW_HIDE_ANIMATED = 2
 
-ZO_Stats = ZO_Stats_Common:Subclass()
+function ZO_InitializeKeyboardRespecConfirmationGoldDialog(control)
+    local function SetupRespecConfirmationGoldDialog()
+        local balance = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+        local cost = GetAttributeRespecGoldCost()
 
-function ZO_Stats:New(...)
-    local stats = ZO_Stats_Common.New(self)
-    stats:Initialize(...)
-    return stats
+        local balanceControl = control:GetNamedChild("Balance")
+        ZO_CurrencyControl_SetSimpleCurrency(balanceControl, CURT_MONEY, balance, CURRENCY_OPTIONS)
+
+        local costControl = control:GetNamedChild("Cost")
+        ZO_CurrencyControl_SetSimpleCurrency(costControl, CURT_MONEY, cost, CURRENCY_OPTIONS)
+    end
+
+    ZO_Dialogs_RegisterCustomDialog("ATTRIBUTE_RESPEC_CONFIRM_GOLD_KEYBOARD",
+    {
+        customControl = control,
+        setup = SetupRespecConfirmationGoldDialog,
+        title =
+        {
+            text = SI_ATTRIBUTE_RESPEC_CONFIRM_DIALOG_TITLE,
+        },
+        mainText =
+        {
+            text = SI_ATTRIBUTE_RESPEC_CONFIRM_DIALOG_BODY_INTRO,
+        },
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                control = control:GetNamedChild("Confirm"),
+                text = SI_DIALOG_CONFIRM,
+                callback =  function()
+                    STATS:RespecAttributes()
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                control = control:GetNamedChild("Cancel"),
+                text = SI_DIALOG_CANCEL,
+            },
+        }
+    })
 end
+
+ZO_Stats = ZO_Stats_Common:Subclass()
 
 function ZO_Stats:Initialize(control)
     ZO_Stats_Common.Initialize(self, control)
-    self.control = control
+
     self.previewAvailable = true
 
-    STATS_SCENE = ZO_Scene:New("stats", SCENE_MANAGER)
+    STATS_SCENE = ZO_InteractScene:New("stats", SCENE_MANAGER, ZO_ATTRIBUTE_RESPEC_INTERACT_INFO)
     STATS_FRAGMENT = ZO_FadeSceneFragment:New(control)
     STATS_SCENE:AddFragment(STATS_FRAGMENT)
 
@@ -47,6 +84,8 @@ function ZO_Stats:Initialize(control)
             self:OnHidden()
         end
     end)
+
+    STATS_SCENE:SetHideSceneConfirmationCallback(function(...) self:OnConfirmHideScene(...) end)
 end
 
 function ZO_Stats:OnShowing()
@@ -74,8 +113,8 @@ function ZO_Stats:OnShowing()
         self:InitializeKeybindButtons()
 
         local function OnPlayerActivated()
-            self.resetAddedPoints = true 
-            self:UpdateSpendablePoints() 
+            self.resetAddedPoints = true
+            self:UpdateSpendablePoints()
             self:RefreshTitleSection()
         end
 
@@ -122,6 +161,22 @@ end
 
 function ZO_Stats:OnHidden()
     ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:Hide()
+
+    self.resetAddedPoints = true
+    self:UpdateSpendablePoints()
+    self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
+end
+
+function ZO_Stats:OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
+    if bypassHideSceneConfirmationReason == nil and self:DoesAttributePointAllocationModeBatchSave() then
+        ZO_Dialogs_ShowDialog("CONFIRM_REVERT_CHANGES",
+        {
+            confirmCallback = function() scene:AcceptHideScene() end,
+            declineCallback = function() scene:RejectHideScene() end,
+        })
+    else
+        scene:AcceptHideScene()
+    end
 end
 
 function ZO_Stats:OnUpdate()
@@ -151,19 +206,55 @@ function ZO_Stats:OnUpdate()
 end
 
 function ZO_Stats:InitializeKeybindButtons()
-    self.keybindButtons = {
-        alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-
+    self.keybindButtons =
+    {
         -- Commit
         {
-            name = GetString(SI_STATS_COMMIT_ATTRIBUTES_BUTTON),
+            alignment = function()
+                if self:DoesAttributePointAllocationModeBatchSave() then
+                    return KEYBIND_STRIP_ALIGN_CENTER
+                else
+                    return KEYBIND_STRIP_ALIGN_RIGHT
+                end
+            end,
+            name = function()
+                if self:DoesAttributePointAllocationModeBatchSave() then
+                    return GetString(SI_STATS_CONFIRM_ATTRIBUTES_BUTTON)
+                else
+                    return GetString(SI_STATS_COMMIT_ATTRIBUTES_BUTTON)
+                end
+            end,
             keybind = "UI_SHORTCUT_PRIMARY",
             visible = function()
-                            return self:GetTotalAddedPoints() > 0
-                       end,
+                return self:DoesAttributePointAllocationModeBatchSave() or self:GetTotalAddedPoints() > 0
+            end,
             callback = function()
-                            self:PurchaseAttributes()
-                        end,
+                if self:DoesAttributePointAllocationModeBatchSave() and self:DoesChangeIncurCost() then
+                    if self:IsPaymentTypeScroll(self) then
+                        ZO_Dialogs_ShowDialog("STAT_EDIT_CONFIRM")
+                    else
+                        ZO_Dialogs_ShowDialog("ATTRIBUTE_RESPEC_CONFIRM_GOLD_KEYBOARD")
+                    end
+                else
+                     ZO_Dialogs_ShowDialog("STAT_ASSIGNMENT_CONFIRM")
+                end
+            end,
+        },
+        -- Clear All
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            name = GetString(SI_STATS_CLEAR_ALL_ATTRIBUTES_BUTTON),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            visible = function()
+                return self:DoesAttributePointAllocationModeBatchSave()
+            end,
+            callback = function()
+                for i, attributeControl in ipairs(self.attributeControls) do
+                    attributeControl.pointLimitedSpinner:SetAddedPointsByTotalPoints(0)
+                    attributeControl.pointLimitedSpinner:RefreshSpinnerMax()
+                    attributeControl.pointLimitedSpinner.pointsSpinner:SetValue(0)
+                end
+            end,
         },
          -- Level Up Help
         {
@@ -185,7 +276,7 @@ function ZO_Stats:InitializeKeybindButtons()
             name = "Close Advanced Stats",
             ethereal = true,
             keybind = "UI_SHORTCUT_NEGATIVE",
-            callback = function()             
+            callback = function()
                 STATS_SCENE:RemoveFragmentGroup(ADVANCED_STATS_FRAGMENT_GROUP)
                 STATS_SCENE:AddFragment(STATS_BG_FRAGMENT) 
             end,
@@ -261,7 +352,7 @@ end
 
 function ZO_Stats:RefreshTitleSection()
     local playerAlliance = GetUnitAlliance("player")
-    self.allianceIconControl:SetTexture(GetLargeAllianceSymbolIcon(playerAlliance))
+    self.allianceIconControl:SetTexture(ZO_GetLargeAllianceSymbolIcon(playerAlliance))
 end
 
 function ZO_Stats:CreateBackgroundSection()
@@ -308,7 +399,7 @@ function ZO_Stats:CreateBackgroundSection()
     -- Alliance Ranks --
 
     local iconRow = self:AddIconRow(GetString(SI_STATS_ALLIANCE_RANK))
-    
+
     local function UpdateRank()
         local rank, subRank = GetUnitAvARank("player")
 
@@ -470,9 +561,18 @@ function ZO_Stats:UpdateSpendablePoints()
     self:SetAvailablePoints(availablePoints)
 
     for i, attributeControl in ipairs(self.attributeControls) do
-        attributeControl.pointLimitedSpinner:SetButtonsHidden(totalSpendablePoints == 0)
+        attributeControl.pointLimitedSpinner:SetButtonsHidden(totalSpendablePoints == 0 and not self:DoesAttributePointAllocationModeBatchSave())
         attributeControl.increaseHighlight:SetHidden(availablePoints == 0)
     end
+end
+
+function ZO_Stats:DoesChangeIncurCost()
+    for i, attributeControl in ipairs(self.attributeControls) do
+        if attributeControl.pointLimitedSpinner:GetAllocatedPoints() < 0 then
+            return true
+        end
+    end
+    return false
 end
 
 function ZO_Stats:UpdateAttributesHeader(forceUpdate)
@@ -532,12 +632,21 @@ function ZO_Stats:PurchaseAttributes()
     PlaySound(SOUNDS.STATS_PURCHASE)
     PurchaseAttributes(self.attributeControls[ATTRIBUTE_HEALTH].pointLimitedSpinner.addedPoints, self.attributeControls[ATTRIBUTE_MAGICKA].pointLimitedSpinner.addedPoints, self.attributeControls[ATTRIBUTE_STAMINA].pointLimitedSpinner.addedPoints)
     self.resetAddedPoints = true
+    self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
     zo_callLater(function()
         if SCENE_MANAGER:IsShowing("stats") and self:GetTotalSpendablePoints() == 0 then
             MAIN_MENU_KEYBOARD:ShowScene("skills")
         end
     end, 1000)
 end
+
+function ZO_Stats:RespecAttributes()
+    PlaySound(SOUNDS.STATS_PURCHASE)
+    SendAttributePointAllocationRequest(self.attributeRespecPaymentType, self.attributeControls[ATTRIBUTE_HEALTH].pointLimitedSpinner.addedPoints, self.attributeControls[ATTRIBUTE_MAGICKA].pointLimitedSpinner.addedPoints, self.attributeControls[ATTRIBUTE_STAMINA].pointLimitedSpinner.addedPoints)
+    self.resetAddedPoints = true
+    self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
+end
+
 
 function ZO_Stats:RefreshAllAttributes()
     for _, statEntry in pairs(self.statEntries) do
@@ -619,6 +728,7 @@ function ZO_Stats:CreateMountSection()
             stableRow.readyForTrain:SetHidden(true)
             stableRow.timer:SetHidden(ridingSkillMaxedOut)
             if not ridingSkillMaxedOut then
+                local NO_LEADING_EDGE = false
                 stableRow.timerOverlay:StartCooldown(timeUntilCanBeTrained, totalTrainedWaitDuration, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, NO_LEADING_EDGE)
                 self.isTimerActive = true
             end

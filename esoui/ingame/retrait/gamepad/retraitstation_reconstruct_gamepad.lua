@@ -31,6 +31,48 @@ function ZO_RetraitStation_Reconstruct_Gamepad:Initialize(control, scene)
     self.itemName = self.itemHeader:GetNamedChild("Label")
     self.resultTooltip = self.control:GetNamedChild("ResultTooltip")
 
+    --Register the result tooltip for narration
+    local tooltipNarrationInfo = 
+    {
+        canNarrate = function()
+            return not self.resultTooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return self.resultTooltip.tip:GetNarrationText()
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(tooltipNarrationInfo)
+
+    --Register the cost for narration
+    local costTooltipNarrationInfo =
+    {
+        canNarrate = function()
+            return self.costFragment:IsShowing()
+        end,
+        tooltipNarrationFunction = function()
+            local narrations = {}
+            --Get the header narration
+            table.insert(narrations, GetString(SI_ITEM_RECONSTRUCTION_TOTAL_COST))
+
+            --Get the currency cost narration
+            local currencyCosts, materialCosts = self.itemSetPieceData:GetCostInfo()
+            local currencyCost = currencyCosts[1]
+            if currencyCost then
+                table.insert(narrations, ZO_Currency_FormatGamepad(currencyCost.currencyType, currencyCost.currencyRequired, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
+            end
+
+            --Get the required materials narrations
+            for index, materialCost in ipairs(materialCosts) do
+                local itemName = GetItemLinkName(materialCost.reagentItemLink)
+                local stackCount = materialCost.reagentsRequired
+                table.insert(narrations, zo_strformat(SI_GAMEPAD_RECONSTRUCT_REQUIRED_ITEM_NARRATION_FORMATTER, stackCount, itemName))
+            end
+
+            return narrations
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(costTooltipNarrationInfo)
+
     self.materialContainer = self.costContainer:GetNamedChild("SummaryMaterials")
     self.materialPool = ZO_ControlPool:New("ZO_GamepadDisplayEntryTemplateLowercase34", self.materialContainer)
 
@@ -91,6 +133,10 @@ function ZO_RetraitStation_Reconstruct_Gamepad:InitializeTraitList(scrollListCla
         self.isTraitValid = selectedData.traitKnown
         self.itemSetPieceData:SetOverrideTraitType(selectedData.type)
         self:RefreshResultTooltip()
+        --Do not try to narrate if a craft is in progress, as the screen will close once it's done
+        if not self.isCraftInProgress then
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.focus)
+        end
     end)
 
     ZO_CraftingUtils_ConnectHorizontalScrollListToCraftingProcess(self.traitList)
@@ -140,6 +186,10 @@ function ZO_RetraitStation_Reconstruct_Gamepad:InitializeQualityList(scrollListC
         self.itemSetPieceData:SetUpgradeFunctionalQuality(selectedData.quality)
         self:RefreshResultTooltip()
         self:RefreshCostSummary()
+        --Do not try to narrate if a craft is in progress, as the screen will close once it's done
+        if not self.isCraftInProgress then
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.focus)
+        end
     end)
 
     ZO_CraftingUtils_ConnectHorizontalScrollListToCraftingProcess(self.qualityList)
@@ -173,7 +223,8 @@ end
 
 function ZO_RetraitStation_Reconstruct_Gamepad:RefreshItemData()
     self.itemIcon:SetTexture(self.itemSetPieceData:GetIcon())
-    self.itemName:SetText(self.itemSetPieceData:GetFormattedColorizedName())
+    self.currentItemName = self.itemSetPieceData:GetFormattedColorizedName()
+    self.itemName:SetText(self.currentItemName)
 end
 
 function ZO_RetraitStation_Reconstruct_Gamepad:RefreshTraitList()
@@ -268,6 +319,7 @@ function ZO_RetraitStation_Reconstruct_Gamepad:InitializeFocusItems()
         focus:Activate()
         local ACTIVE = true
         self:UpdateBorderHighlight(focus, ACTIVE)
+        SCREEN_NARRATION_MANAGER:QueueFocus(self.focus)
     end
 
     local function DeactivateFocus(focus, data)
@@ -281,6 +333,10 @@ function ZO_RetraitStation_Reconstruct_Gamepad:InitializeFocusItems()
         return minimumUpgradeQuality < ITEM_FUNCTIONAL_QUALITY_LEGENDARY and self.itemSetPieceData:GetDisplayQuality() ~= ITEM_DISPLAY_QUALITY_MYTHIC_OVERRIDE
     end
 
+    local function GetHeaderNarrationText()
+        return { ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData), SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.currentItemName) }
+    end
+
     self.focusEntryData =
     {
         -- Trait selection
@@ -288,6 +344,25 @@ function ZO_RetraitStation_Reconstruct_Gamepad:InitializeFocusItems()
             activate = ActivateFocus,
             deactivate = DeactivateFocus,
             control = self.traitList,
+            narrationText = function()
+                local narrations = {}
+                local data = self.traitList.selectedData
+                --Generate the narration for the selected value
+                table.insert(narrations, ZO_FormatSpinnerNarrationText(GetString(SI_SMITHING_HEADER_TRAIT), data.localizedName))
+                local traitCategory = GetItemTraitTypeCategory(data.type)
+                --Only narrate the extra info if the trait type is not none
+                if traitCategory ~= ITEM_TRAIT_TYPE_NONE then
+                    if not data.traitKnown then
+                        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SMITHING_TRAIT_MUST_BE_RESEARCHED)))
+                    end
+                end
+                return narrations
+            end,
+            additionalInputNarrationFunction = function()
+                local narrationFunction = self.traitList:GetAdditionalInputNarrationFunction()
+                return narrationFunction()
+            end,
+            headerNarrationFunction = GetHeaderNarrationText,
         },
         -- Upgrade selection
         {
@@ -295,8 +370,32 @@ function ZO_RetraitStation_Reconstruct_Gamepad:InitializeFocusItems()
             deactivate = DeactivateFocus,
             control = self.qualityList,
             visible = UpgradeVisibility,
+            narrationText = function()
+                local narrations = {}
+                local data = self.qualityList.selectedData
+                --Generate the narration for the selected value
+                table.insert(narrations, ZO_FormatSpinnerNarrationText(GetString(SI_GAMEPAD_SMITHING_IMPROVEMENT_REAGENT_TITLE), data.description))
+                --Generate the narration for any extra info
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(data.extraInfo))
+                return narrations
+            end,
+            additionalInputNarrationFunction = function()
+                local narrationFunction = self.qualityList:GetAdditionalInputNarrationFunction()
+                return narrationFunction()
+            end,
+            headerNarrationFunction = GetHeaderNarrationText,
         },
     }
+
+    --Re-narrate the current focus upon closing dialogs
+    CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", function()
+        --Do not try to narrate if a craft is in progress, as the screen will close once it's done
+        if self.focus:IsActive() and not self.isCraftInProgress then
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.focus, NARRATE_HEADER)
+        end
+    end)
+
     self:RefreshFocusItems()
 end
 
@@ -522,6 +621,8 @@ function ZO_RetraitStation_Reconstruct_Gamepad:ShowReconstructOptions()
         self.resultTooltip:SetHidden(false)
 
         SCENE_MANAGER:AddFragmentGroup(self.costFragmentGroup)
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueFocus(self.focus, NARRATE_HEADER)
     end
 end
 

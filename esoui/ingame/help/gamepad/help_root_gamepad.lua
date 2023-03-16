@@ -76,10 +76,10 @@ end
 
 --Overridden from base
 function ZO_Help_Root_Gamepad:GetHeaderNarration()
-    local narration = ZO_Gamepad_ParametricList_Screen.GetHeaderNarration(self)
-    --TODO XAR: Look into potentially giving this its own narratable object
-    narration:AddNarrationText(GetString(SI_GAMEPAD_HELP_WEBSITE))
-    return narration
+    local narrations = {}
+    ZO_AppendNarration(narrations, ZO_Gamepad_ParametricList_Screen.GetHeaderNarration(self))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_HELP_WEBSITE)))
+    return narrations
 end
 
 -- stuck event handling

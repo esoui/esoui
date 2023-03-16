@@ -1,18 +1,13 @@
-ZO_CraftAdvisor_Gamepad = ZO_Object:Subclass()
+ZO_CraftAdvisor_Gamepad = ZO_InitializingCallbackObject:Subclass()
 
 local DEFAULT_DISPLAYED_QUEST_INDEX = 1
-
-function ZO_CraftAdvisor_Gamepad:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
 
 function ZO_CraftAdvisor_Gamepad:Initialize(control)
     self.control = control
     self.questContainer = self.control:GetNamedChild("QuestContainer")
     self.questHeader = self.questContainer:GetNamedChild("QuestName")
     self.currentlyDisplayedQuestIndex = DEFAULT_DISPLAYED_QUEST_INDEX
+    self.questConditionText = {}
 
     self.questConditionControlPool = ZO_ControlPool:New("ZO_Gamepad_ActiveWritCondition", self.questContainer)
     self.questConditionControlPool:SetCustomFactoryBehavior(function(control)
@@ -48,9 +43,12 @@ function ZO_CraftAdvisor_Gamepad:InitializeKeybinds()
     self.keybindStripDescriptor =
     {
         {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = "Cycle Active Writs",
+            --Even though this is an ethereal keybind, the name will still be read during screen narration
+            name = GetString(SI_GAMEPAD_CRAFT_ADVISOR_CYCLE_ACTIVE_WRIT_NARRATION),
             ethereal = true,
+            narrateEthereal = function()
+                return self.questMasterList and #self.questMasterList > 1
+            end,
             keybind = "UI_SHORTCUT_LEFT_STICK",
             callback = function() self:CycleActiveQuest() end,
             enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self.questMasterList and #self.questMasterList > 1 end,
@@ -77,6 +75,7 @@ function ZO_CraftAdvisor_Gamepad:CycleActiveQuest()
 
     CRAFT_ADVISOR_MANAGER:OnSelectionChanged(self.questMasterList[self.currentlyDisplayedQuestIndex].questIndex)
     self:RefreshQuestList()
+    self:FireCallbacks("CycleActiveQuest")
 end
 
 function ZO_CraftAdvisor_Gamepad:OnShown()
@@ -109,6 +108,7 @@ end
 
 function ZO_CraftAdvisor_Gamepad:RebuildConditions(questInfo)
     self.questConditionControlPool:ReleaseAllObjects()
+    ZO_ClearNumericallyIndexedTable(self.questConditionText)
     if questInfo then
         local _, _, _, _, conditionCount = GetJournalQuestStepInfo(questInfo.questIndex, QUEST_MAIN_STEP_INDEX)
         local previousControl = nil
@@ -122,6 +122,7 @@ function ZO_CraftAdvisor_Gamepad:RebuildConditions(questInfo)
                 local control = self.questConditionControlPool:AcquireObject()
                 control:ClearAnchors()
                 control:SetText(conditionText)
+                table.insert(self.questConditionText, conditionText)
                 control:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
                 
                 --Determine if we need to anchor to the header or to a previous condition
@@ -140,6 +141,7 @@ function ZO_CraftAdvisor_Gamepad:RebuildConditions(questInfo)
                         local missingControl = self.questConditionControlPool:AcquireObject()
                         missingControl:ClearAnchors()
                         missingControl:SetText(missingMessage)
+                        table.insert(self.questConditionText, missingMessage)
                         missingControl:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
                         missingControl:SetAnchor(TOPRIGHT, previousControl, BOTTOMRIGHT)
                         previousControl = missingControl
@@ -158,11 +160,13 @@ function ZO_CraftAdvisor_Gamepad:RefreshQuestList()
 
             local quests = self.questMasterList
             local questInfo = quests[self.currentlyDisplayedQuestIndex]
+            self.questHeaderText = questInfo.name
             self.questHeader:SetText(questInfo.name)
 
             self:RebuildConditions(questInfo)
             CRAFT_ADVISOR_MANAGER:UpdateQuestConditionInfo()
         else
+            self.questHeaderText = nil
             self.questHeader:SetHidden(true)
             self:RebuildConditions()
         end
@@ -181,6 +185,18 @@ end
 
 function ZO_CraftAdvisor_Gamepad:GetControl()
     return self.control
+end
+
+function ZO_CraftAdvisor_Gamepad:GetNarrationText()
+    local narrations = {}
+    --Only narrate if the craft advisor is actually showing
+    if GAMEPAD_CRAFT_ADVISOR_FRAGMENT:IsShowing() then
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.questHeaderText))
+        for _, conditionText in ipairs(self.questConditionText) do
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(conditionText))
+        end
+    end
+    return narrations
 end
 
 function ZO_CraftAdvisor_Gamepad_OnInitialized(control)

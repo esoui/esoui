@@ -5,11 +5,14 @@ function ZO_Tooltip:LayoutCurrency(currencyType, amount)
         local location = GetCurrencyPlayerStoredLocation(currencyType)
         local heldAmount = GetCurrencyAmount(currencyType, location)
         local topSubsection = topSection:AcquireSection(self:GetStyle("topSubsectionItemDetails"))
-        local heldCurrencyString = ZO_Currency_FormatGamepad(currencyType, heldAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON, {
+        local currencyOptions =
+        {
             showCap = true,
             currencyLocation = location,
-        })
-        topSubsection:AddLine(zo_strformat(SI_GAMEPAD_CURRENCY_INDICATOR, heldCurrencyString))
+        }
+        local heldCurrencyString = ZO_Currency_FormatGamepad(currencyType, heldAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON, currencyOptions)
+        local heldCurrencyNarrationString = ZO_Currency_FormatGamepad(currencyType, heldAmount, ZO_CURRENCY_FORMAT_AMOUNT_NAME, currencyOptions)
+        topSubsection:AddLineWithCustomNarration(zo_strformat(SI_GAMEPAD_CURRENCY_INDICATOR, heldCurrencyString), zo_strformat(SI_GAMEPAD_CURRENCY_INDICATOR, heldCurrencyNarrationString))
         topSection:AddSection(topSubsection)
 
         self:AddSection(topSection)

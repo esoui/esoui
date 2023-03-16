@@ -15,6 +15,10 @@ function ZO_LevelUpRewardsUpcoming_Base:Initialize(control, rewardTemplate)
     self.nextMilestoneContainer = self.scrollChild:GetNamedChild("NextMilestoneContainer")
 
     self.rewardPool = ZO_ControlPool:New(rewardTemplate, control, "Reward")
+
+    self.rewardPool:SetCustomResetBehavior(function(control)
+        control.narrationText = nil
+    end)
 end
 
 function ZO_LevelUpRewardsUpcoming_Base:LayoutUpcomingRewards()

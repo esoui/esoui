@@ -360,8 +360,9 @@ function HelpAskForHelp_Keyboard:AttemptToSendTicket()
     SetCustomerServiceTicketCategory(self:GetSelectedTicketCategory())
 
     local impactData = self.helpImpactComboBox:GetSelectedItemData().data
+    local detailsText = self.details:GetText()
     if impactData.detailsRegistrationFunction then
-        local text = self.details:GetText()
+        local text = detailsText
         if impactData.detailsFormatText then
             text = impactData.detailsFormatText(text)
         end
@@ -373,7 +374,7 @@ function HelpAskForHelp_Keyboard:AttemptToSendTicket()
     ZO_Dialogs_ShowDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
 
     if impactData.id == CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER then
-        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket()
+        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket(detailsText)
     end
 
     ZO_DefaultEdit_SetEnabled(self.details, true)

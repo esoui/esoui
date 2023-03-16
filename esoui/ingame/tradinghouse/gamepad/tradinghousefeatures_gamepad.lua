@@ -52,6 +52,7 @@ function ZO_TradingHouseDropDownFeature_Gamepad:GetOrCreateEntryData()
 
     local entryData = ZO_GamepadEntryData:New(string.format("GuildStore%sDropdown", self.featureParams:GetKey()))
     entryData.setupCallback = SetupFeatureDropdown
+    entryData.narrationText = function() return self.comboBox:GetNarrationText() end
     self.entryData = entryData
     return entryData
 end
@@ -242,6 +243,9 @@ do
             self.minSlider = slider
             self.minSlider:SetHandler("OnValueChanged", function(minSliderControl, value)
                 self:SetMinLevel(value)
+                if data.onValueChangedCallback then
+                    data.onValueChangedCallback(minSliderControl, value)
+                end
             end)
             self.minSlider:SetValueConstraints(NO_MIN, function()
                 return self.maxLevel
@@ -254,6 +258,9 @@ do
             self.maxSlider = slider
             self.maxSlider:SetHandler("OnValueChanged", function(maxSliderControl, value)
                 self:SetMaxLevel(value)
+                if data.onValueChangedCallback then
+                    data.onValueChangedCallback(maxSliderControl, value)
+                end
             end)
             self.maxSlider:SetValueConstraints(function()
                 return self.minLevel
@@ -308,6 +315,7 @@ function ZO_TradingHouseLevelRangeFeature_Gamepad:GetOrCreateLevelTypeData()
 
     local levelTypeData = ZO_GamepadEntryData:New("GuildStoreLevelTypeDropdown")
     levelTypeData.setupCallback = SetupLevelTypeDropdown
+    levelTypeData.narrationText = function() return self.levelTypeDropdown:GetNarrationText() end
     self.levelTypeData = levelTypeData
     return levelTypeData
 end
@@ -320,8 +328,27 @@ function ZO_TradingHouseLevelRangeFeature_Gamepad:GetOrCreateSliderData(sliderMo
     local sliderData = ZO_GamepadEntryData:New(string.format("GuildStoreLevelRangeSlider%d", sliderMode))
     sliderData.sliderMode = sliderMode
     sliderData.feature = self
+    sliderData.narrationText = function(...) return self:GetNarrationText(...) end
+    sliderData.additionalInputNarrationFunction = function() return self:GetDirectionalInputNarrationData() end
     self.sliderModeToSliderData[sliderMode] = sliderData
     return sliderData
+end
+
+function ZO_TradingHouseLevelRangeFeature_Gamepad:GetNarrationText(entryData, entryControl)
+    if entryData.sliderMode == MIN_LEVEL_SLIDER_MODE then
+        return ZO_FormatSliderNarrationText(self.minSlider, GetString(SI_GAMEPAD_TRADING_HOUSE_BROWSE_MIN_LEVEL))
+    elseif entryData.sliderMode == MAX_LEVEL_SLIDER_MODE then
+        return ZO_FormatSliderNarrationText(self.maxSlider, GetString(SI_GAMEPAD_TRADING_HOUSE_BROWSE_MAX_LEVEL))
+    end
+end
+
+function ZO_TradingHouseLevelRangeFeature_Gamepad:GetDirectionalInputNarrationData()
+    --Only include directional input if the sliders are actually enabled
+    if self:ShouldEnableSliders() then
+        return ZO_GetNumericHorizontalDirectionalInputNarrationData()
+    else
+        return {}
+    end
 end
 
 function ZO_TradingHouseLevelRangeFeature_Gamepad:AddEntries(itemList)
@@ -377,11 +404,18 @@ function ZO_TradingHousePriceRangeFeature_Gamepad:Initialize()
     self.maxPrice = MAX_PLAYER_CURRENCY
 end
 
-function ZO_TradingHousePriceRangeFeature_Gamepad:AttachToControl(priceSelectorControl)
+function ZO_TradingHousePriceRangeFeature_Gamepad:AttachToControl(priceSelectorControl, focusLostCallback)
     self.priceSelectorControl = priceSelectorControl
     self.priceSelector = ZO_CurrencySelector_Gamepad:New(priceSelectorControl:GetNamedChild("Selector"))
+    self.priceSelector:SetCurrencyType(CURT_MONEY)
     self.priceSelector:RegisterCallback("OnValueChanged", function()
         self:ValidatePriceSelectorValue(self.priceSelector:GetValue())
+    end)
+
+    self.priceSelector:RegisterCallback("OnDeactivated", function()
+        if focusLostCallback then
+            focusLostCallback()
+        end
     end)
 end
 
@@ -490,12 +524,24 @@ function ZO_TradingHousePriceRangeFeature_Gamepad:AddEntries(itemList)
     minPriceData.priceSelectorMode = MIN_PRICE_SELECTOR_MODE
     minPriceData.feature = self
     minPriceData:SetHeader(GetString(SI_GAMEPAD_TRADING_HOUSE_ITEM_PRICE_RANGE_HEADER))
+    minPriceData.narrationText = function(entryData, entryControl)
+        local narrations = {}
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_Currency_FormatGamepad(CURT_MONEY, self.minPrice, ZO_CURRENCY_FORMAT_AMOUNT_NAME)))
+        return narrations
+    end
     itemList:AddEntryWithHeader("ZO_GamepadPriceSelectorTemplate", minPriceData)
 
     local maxPriceData = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_TRADING_HOUSE_BROWSE_MAX_PRICE))
     maxPriceData:SetFontScaleOnSelection(false)
     maxPriceData.priceSelectorMode = MAX_PRICE_SELECTOR_MODE
     maxPriceData.feature = self
+    maxPriceData.narrationText = function(entryData, entryControl)
+        local narrations = {}
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_Currency_FormatGamepad(CURT_MONEY, self.maxPrice, ZO_CURRENCY_FORMAT_AMOUNT_NAME)))
+        return narrations
+    end
     itemList:AddEntry("ZO_GamepadPriceSelectorTemplate", maxPriceData)
 end
 

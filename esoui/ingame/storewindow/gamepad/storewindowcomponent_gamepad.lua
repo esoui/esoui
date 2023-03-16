@@ -114,7 +114,7 @@ function ZO_GamepadStoreListComponent:SetupStoreItem(control, data, selected, se
     if not useDefaultCurrency then
         currencyType = data.currencyType1
     end
-
+    data:SetPriceNarrationInfo(price, currencyType)
     self:SetupPrice(control, price, forceValid, mode, currencyType)
 end
 

@@ -207,6 +207,13 @@ function GamepadMarketProductListScene:PerformUpdate()
     self.dirty = false
 end
 
+--Overridden from base
+function GamepadMarketProductListScene:GetFooterNarration()
+    if MARKET_CURRENCY_GAMEPAD_FRAGMENT:IsShowing() then
+        return MARKET_CURRENCY_GAMEPAD:GetNarrationText()
+    end
+end
+
 function ZO_GamepadMarketProductList_OnInitialized(control)
     ZO_GAMEPAD_MARKET_PRODUCT_LIST = GamepadMarketProductListScene:New(control)
 end

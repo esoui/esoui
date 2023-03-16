@@ -2,13 +2,7 @@ ZO_RETRAIT_MODE_ROOT = 0
 ZO_RETRAIT_MODE_RETRAIT = 1
 ZO_RETRAIT_MODE_RECONSTRUCT = 2
 
-ZO_RetraitStation_Base = ZO_Object:Subclass()
-
-function ZO_RetraitStation_Base:New(...)
-    local obj = ZO_Object.New(self)
-    obj:Initialize(...)
-    return obj
-end
+ZO_RetraitStation_Base = ZO_InitializingObject:Subclass()
 
 function ZO_RetraitStation_Base:Initialize(control, interactSceneName)
     self.control = control

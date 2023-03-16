@@ -191,9 +191,7 @@ function ZO_Market_Shared:OnCollectiblesUnlockStateChanged()
 end
 
 function ZO_Market_Shared:OnShowMarketProduct(marketProductId)
-    if not internalassert(marketProductId ~= 0, "OnShowMarketProduct called with market product id: 0") then
-        return
-    end
+    internalassert(marketProductId ~= 0, "OnShowMarketProduct called with market product id: 0")
 
     local useCrownStore = IsInGamepadPreferredMode() -- The Crown Store handles requests for all Gamepad products.
     useCrownStore = useCrownStore or
@@ -209,7 +207,11 @@ function ZO_Market_Shared:OnShowMarketProduct(marketProductId)
         SCENE_MANAGER:Show(ENDEAVOR_SEAL_STORE_KEYBOARD.sceneName)
         ENDEAVOR_SEAL_STORE_KEYBOARD:RequestShowMarketProduct(marketProductId)
     else
-        internalassert(false, string.format("OnShowMarketProduct could not find a valid market for product id: %u", marketProductId))
+        -- If we couldn't figure out where to go, just fall back to opening the crown store
+        -- This can happen if we haven't fully initialized crown store data, meaning that DoesAnyMarketProductPresentationMatchFilter may not be able to give us the right answer
+        -- If the market product is listed for seals of endeavor only, this will fail to navigate to it, but should work in all other cases
+        SCENE_MANAGER:Show("show_market")
+        self:RequestShowMarketProduct(marketProductId)
     end
 end
 

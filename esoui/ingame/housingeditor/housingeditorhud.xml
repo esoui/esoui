@@ -49,30 +49,45 @@
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_HousingEditorKeybindPaletteTopLevel" hidden="true">
-            <AnchorFill />
+        <TopLevelControl name="ZO_HousingEditorInspectionHUDFragmentTL" hidden="true">
+            <Anchor point="TOPLEFT" relativePoint="CENTER" offsetX="40" offsetY="10" />
+
             <OnInitialized>
-                ZO_HousingEditorKeybindPalette_Initialize(self)
+                ZO_HousingEditorInspectionHUDFragment_Initialize(self)
             </OnInitialized>
+
             <Controls>
                 <Label name="$(parent)TargetName" tier="HIGH" verticalAlignment="TOP">
-                    <Anchor point="BOTTOMLEFT" relativePoint="CENTER" offsetX="40" offsetY="10" maxLineCount="2" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" maxLineCount="2" />
                     <Dimensions x="400" />
                 </Label>
+
                 <Label name="$(parent)TargetDistance" tier="HIGH" verticalAlignment="TOP">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TargetName" relativePoint="BOTTOMLEFT" />
                 </Label>
             </Controls>
         </TopLevelControl>
 
+        <TopLevelControl name="ZO_HousingEditorKeybindPaletteTopLevel" hidden="true" resizeToFitDescendents="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_HousingEditorInspectionHUDFragmentTLTargetDistance" relativePoint="BOTTOMLEFT" offsetX="80" offsetY="10" />
+
+            <OnInitialized>
+                ZO_HousingEditorKeybindPalette_Initialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+
         <TopLevelControl name="ZO_HousingHUDFragmentTopLevel" hidden="true">
             <AnchorFill />
+
             <OnInitialized>
                 ZO_HousingHUDFragmentTopLevel_Initialize(self)
             </OnInitialized>
+
             <Controls>
-                <!-- This control will largely be setup by the fragment -->
+                <!-- These controls will largely be setup by the fragment -->
                 <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true" />
+
+                <Control name="$(parent)CycleTargetKeybindButton" inherits="ZO_KeybindButton" hidden="true" excludeFromResizeToFitExtents="true" />
             </Controls>
         </TopLevelControl>
 

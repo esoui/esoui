@@ -1,10 +1,12 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_GamepadEnchantingItemSubEntryTemplate" inherits="ZO_GamepadItemSubEntryTemplate" virtual="true">
+        <Control name="ZO_GamepadEnchantingItemSubEntryTemplate" inherits="ZO_GamepadItemSubEntryTemplate" resizeToFitConstrains="Y" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
+            
             <OnInitialized>
                 ZO_GamepadEnchantingItemSubEntryTemplate_OnInitialized(self)
             </OnInitialized>
-            <Dimensions x="390" />
+            
             <Controls>
                 <Label name="$(parent)Level" font="ZoFontGamepad27" hidden="true">
                     <Anchor point="TOPRIGHT" offsetX="-25" />

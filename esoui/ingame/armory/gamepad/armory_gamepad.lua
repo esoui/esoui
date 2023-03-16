@@ -386,6 +386,14 @@ do
         [EQUIP_SLOT_BACKUP_POISON] = true,
     }
 
+    local function GetBuildEntryNarrationText(entryData, entryControl)
+        local narrations = {}
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+        ZO_AppendNarration(narrations, GAMEPAD_ARMORY_BUILD_OVERVIEW:GetNarrationText())
+        return narrations
+    end
+
     function ZO_Armory_Gamepad:RefreshBuildList()
         local list = self.buildList
         list:Clear()
@@ -396,6 +404,7 @@ do
             entryData.data = buildData
             entryData:SetIconTintOnSelection(true)
             entryData:SetIconDisabledTintOnSelection(true)
+            entryData.narrationText = GetBuildEntryNarrationText
             list:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
         end
 

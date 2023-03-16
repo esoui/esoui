@@ -18,5 +18,16 @@ function ZO_Tooltip:LayoutTimedActivityTooltip(activityIndex)
             rewardsSection:AddLine(zo_iconTextFormat(rewardData:GetGamepadIcon(), "100%", "100%", rewardData:GetFormattedNameWithStackGamepad()), self:GetStyle("timedActivityReward"))
         end
         self:AddSection(rewardsSection)
+
+        local function GetProgressNarration()
+            if activityData:IsCompleted() then
+                return GetString(SI_GAMEPAD_TIMED_ACTIVTY_COMPLETED_NARRATION)
+            else
+                local maxProgress = activityData:GetMaxProgress()
+                local progress = activityData:GetProgress()
+                return zo_strformat(SI_SCREEN_NARRATION_PROGRESS_BAR_FRACTION_FORMATTER, progress, maxProgress)
+            end
+        end
+        self:AddNarrationLine(GetProgressNarration)
     end
 end

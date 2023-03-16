@@ -1,10 +1,4 @@
-ZO_RetraitStation_Retrait_Base = ZO_Object:Subclass()
-
-function ZO_RetraitStation_Retrait_Base:New(...)
-    local obj = ZO_Object.New(self)
-    obj:Initialize(...)
-    return obj
-end
+ZO_RetraitStation_Retrait_Base = ZO_InitializingObject:Subclass()
 
 function ZO_RetraitStation_Retrait_Base:Initialize(control)
     self.control = control

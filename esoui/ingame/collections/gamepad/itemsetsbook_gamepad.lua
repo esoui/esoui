@@ -446,6 +446,27 @@ function ZO_ItemSetsBook_Gamepad_Base:GetGridHeaderEntryDataObjectPool()
     return self.headerEntryDataObjectPool
 end
 
+function ZO_ItemSetsBook_Gamepad_Base:GetItemSetHeaderNarrationText(headerData)
+    local narrations = {}
+    --Narrate the name of the set
+    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(headerData:GetFormattedName()))
+
+    --Narrate the percent completion of the set
+    local percentage = headerData:GetNumUnlockedPieces() / headerData:GetNumPieces()
+    percentage = string.format("%.2f", percentage * 100)
+    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_PROGRESS_BAR_PERCENT_FORMATTER, percentage)))
+
+    -- API supports multiple currency options, but UI design only supports 1 for now, so hardcode to 1 for now
+    local reconstructionCurrencyType, reconstructionCurrencyCost = headerData:GetReconstructionCurrencyOptionInfo(1)
+    if reconstructionCurrencyCost then
+        --Narrate the cost to reconstruct if applicable
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_ITEM_RECONSTRUCTION_COST_HEADER)))
+        local formattedCost = ZO_Currency_FormatGamepad(reconstructionCurrencyType, reconstructionCurrencyCost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(formattedCost))
+    end
+    return narrations
+end
+
 -- Do not call this directly, instead call self.categoriesRefreshGroup:MarkDirty("List")
 function ZO_ItemSetsBook_Gamepad_Base:RefreshCategories()
     local categoryList = self.categoryListDescriptor.list

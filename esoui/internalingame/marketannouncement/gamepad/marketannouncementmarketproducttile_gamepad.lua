@@ -30,6 +30,10 @@ function ZO_MarketAnnouncementMarketProductTile_Gamepad:SetSelected(isSelected)
     if self.marketProduct then
         self.marketProduct:SetIsFocused(isSelected)
     end
+
+    if isSelected then
+        ZO_GAMEPAD_MARKET_ANNOUNCEMENT:NarrateSelection()
+    end
 end
 
 -----

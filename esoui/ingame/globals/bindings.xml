@@ -215,44 +215,74 @@
             </Action>
 
             <Action name="GAMEPAD_ACTION_BUTTON_3" hideAction="true">
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(3)
+                    end
+                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDownAndUp(3)
+                        OnSlotUp(3)
                     end
                 </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_4" hideAction="true">
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(4)
+                    end
+                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDownAndUp(4)
+                        OnSlotUp(4)
                     end
                 </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_5" hideAction="true">
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(5)
+                    end
+                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDownAndUp(5)
+                        OnSlotUp(5)
                     end
                 </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_6" hideAction="true">
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(6)
+                    end
+                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDownAndUp(6)
+                        OnSlotUp(6)
                     end
                 </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_7" hideAction="true">
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(7)
+                    end
+                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDownAndUp(7)
+                        OnSlotUp(7)
                     end
                 </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_8" hideAction="true">
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(8)
+                    end
+                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDownAndUp(8)
+                        OnSlotUp(8)
                     end
                 </Up>
             </Action>
@@ -286,13 +316,19 @@
                 </Down>
                 <Up>
                     if not TARGET_MARKERS:StopInteraction() then
-                        CycleGameCameraPreferredEnemyTarget()
+                        if not HOUSING_EDITOR_SHARED:HandleCycleTarget() then
+                            CycleGameCameraPreferredEnemyTarget()
+                        end
                     end
                 </Up>
             </Action>
 
             <Action name="GAMEPAD_CYCLE_PREFERRED_ENEMY_TARGET">
-                <Down>CycleGameCameraPreferredEnemyTarget()</Down>
+                <Down>
+                    if not HOUSING_EDITOR_SHARED:HandleCycleTarget() then
+                        CycleGameCameraPreferredEnemyTarget()
+                    end
+                </Down>
             </Action>
             
             <Action name="CLEAR_PREFERRED_ENEMY_TARGET">

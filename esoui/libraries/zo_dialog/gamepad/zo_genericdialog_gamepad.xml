@@ -105,7 +105,7 @@
 
         <!-- Static List Item -->
 
-        <Control name="ZO_GamepadStaticListIconEntry" inherits="ZO_GamepadMenuEntryDimensionsTemplate" resizeToFitDescendents="true" virtual="true" hidden="true">
+        <Control name="ZO_GamepadStaticListIconEntry" inherits="ZO_GamepadMenuEntryDimensionsTemplate" hidden="true" virtual="true">
             <OnInitialized>
                 self.iconControl = self:GetNamedChild("Icon")
                 self.labelControl = self:GetNamedChild("Label")
@@ -127,8 +127,7 @@
             </Controls>
         </Control>
         
-        <Control name="ZO_GamepadStaticListHeader" inherits="ZO_GamepadMenuEntryDimensionsTemplate" resizeToFitDescendents="true" virtual="true" hidden="true">
-            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+        <Control name="ZO_GamepadStaticListHeader" inherits="ZO_GamepadMenuEntryDimensionsTemplate" hidden="true" virtual="true">
             <OnInitialized>
                 self.labelControl = self:GetNamedChild("Label")
             </OnInitialized>
@@ -174,9 +173,9 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="34" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-40" />
                     <Controls>
-                        <Control name="$(parent)ScrollChild" override="true" >
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="TOPRIGHT" />
+                        <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
+                            <Dimensions x="100%" />
+                            
                             <Controls>
                                 <Label name="$(parent)MainText" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                                     <Anchor point="TOPLEFT" />
@@ -326,7 +325,6 @@
                             <Anchor point="CENTER" relativePoint="RIGHT" relativeTo="$(grandparent)" offsetX="-1"/>
                         </Texture>
                         <Control name="$(parent)ScrollChild" override="true">
-                            <Anchor point="TOPLEFT" />
                             <Controls>
                                 <Label name="$(parent)MainText" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGamepadCondensed42"  lineSpacing="9" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
                                     <Anchor point="TOPLEFT" />

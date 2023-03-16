@@ -907,7 +907,7 @@ do
     local CHAMPION_UNLOCKED_LIFESPAN_MS = 12000
     CENTER_SCREEN_EVENT_HANDLERS[EVENT_CHAMPION_LEVEL_ACHIEVED] = function(wasChampionSystemUnlocked)
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CHAMPION_POINT_GAINED)
-        local formattedIcon = zo_iconFormat(GetChampionPointsIcon(), "100%", "100%")
+        local formattedIcon = zo_iconFormat(ZO_GetChampionPointsIcon(), "100%", "100%")
         messageParams:SetText(zo_strformat(SI_CHAMPION_ANNOUNCEMENT_UNLOCKED, formattedIcon))
         if wasChampionSystemUnlocked then
             local championPoints = GetPlayerChampionPointsEarned()

@@ -317,7 +317,7 @@ function ZO_GuildBrowser_GuildList_Keyboard:OnAdditionalFiltersClicked()
 end
 
 function ZO_GuildBrowser_GuildList_Keyboard:GetAllianceIcon(alliance)
-    return GetAllianceSymbolIcon(alliance)
+    return ZO_GetAllianceSymbolIcon(alliance)
 end
 
 function ZO_GuildBrowser_GuildList_Keyboard:OnShowing()

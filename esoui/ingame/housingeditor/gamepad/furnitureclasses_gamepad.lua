@@ -22,7 +22,10 @@ end
 
 function ZO_HousingFurnitureList_Gamepad:Initialize(owner)
     self.owner = owner
+    self.optionsDialogLayoutInfo = nil
 
+    -- Order matters
+    self:InitializeOptionsDialogLayoutInfo()
     self:InitializeKeybindStripDescriptors()
 
     self.categoryList =
@@ -54,12 +57,13 @@ function ZO_HousingFurnitureList_Gamepad:Initialize(owner)
 
         local statusIndicator = control.statusIndicator
         if statusIndicator then
+            local NO_TINT = nil
             if data.isFromCrownStore and not data.furnitureObject.marketProductId then
-                statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS))
+                statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS), NO_TINT, GetString(SI_SCREEN_NARRATION_CROWN_STORE_ITEM_ICON_NARRATION))
             end
 
             if data.isStartingPathNode then
-                statusIndicator:AddIcon(ZO_HOUSING_PATH_STARTING_NODE_ICON_GAMEPAD)
+                statusIndicator:AddIcon(ZO_HOUSING_PATH_STARTING_NODE_ICON_GAMEPAD, NO_TINT, GetString(SI_SCREEN_NARRATION_STARTING_NODE_ICON_NARRATION))
             end
 
             statusIndicator:Show()
@@ -76,7 +80,9 @@ function ZO_HousingFurnitureList_Gamepad:Initialize(owner)
 
         local furnitureObject = data.furnitureObject
 
-        ZO_CurrencyControl_SetSimpleCurrency(control.priceLabel, GetCurrencyTypeFromMarketCurrencyType(furnitureObject.currencyType), furnitureObject.costAfterDiscount, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL)
+        local currencyType = GetCurrencyTypeFromMarketCurrencyType(furnitureObject.currencyType)
+        ZO_CurrencyControl_SetSimpleCurrency(control.priceLabel, currencyType, furnitureObject.costAfterDiscount, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL)
+        data:SetPriceNarrationInfo(furnitureObject.costAfterDiscount, currencyType)
         
         local priceWidth = control.priceLabel:GetTextWidth()
         control.label:SetDimensions(ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT - PRICE_LABEL_PADDING_X - priceWidth)
@@ -132,9 +138,24 @@ function ZO_HousingFurnitureList_Gamepad:Initialize(owner)
     self.CompareFurnitureEntriesFunction = function(a, b)
         return self:CompareFurnitureEntries(a, b)
     end
+
+    self:InitializeOptionsDialog()
 end
 
 function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
+    local optionsDialogName = self.optionsDialogLayoutInfo and self.optionsDialogLayoutInfo.dialogName or nil
+
+    local function ShowOptionsDialog()
+        local boundFilterValue, locatonFiltersValue, limitFiltersValue = self.optionsDialogLayoutInfo:getFiltersFunction()
+        local dialogData =
+        {
+            boundFilter = boundFilterValue,
+            locationFilters = locatonFiltersValue,
+            limitFilters = limitFiltersValue,
+        }
+        ZO_Dialogs_ShowGamepadDialog(optionsDialogName, dialogData)
+    end
+
     --Category List Keybinds
 
     self.categoryKeybindStripDescriptor =
@@ -157,12 +178,22 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
             end,
             sound = SOUNDS.GAMEPAD_MENU_FORWARD,
         },
-        -- Search
+        -- Options
         {
-            name = GetString(SI_GAMEPAD_FURNITURE_TEXT_FILTER_KEYBIND_TEXT),
+            name = function()
+                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
+                    return GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND)
+                else
+                    return GetString(SI_GAMEPAD_FURNITURE_TEXT_FILTER_KEYBIND_TEXT)
+                end
+            end,
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
-                self.owner:SelectTextFilter()
+                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
+                    ShowOptionsDialog()
+                else
+                    self.owner:SelectTextFilter()
+                end
             end,
         },
         -- Link House Invite in Chat
@@ -172,6 +203,9 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
             callback = ZO_HousingBook_LinkCurrentHouseInChat,
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
             order = 100,
+            visible = function()
+                return not HOUSING_EDITOR_STATE:IsHousePreview()
+            end,
         },
         -- Link House Invite in Mail
         {
@@ -187,6 +221,9 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
             end,
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
             order = 110,
+            visible = function()
+                return not HOUSING_EDITOR_STATE:IsHousePreview()
+            end,
         },
     }
 
@@ -213,13 +250,23 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
     self.furnitureKeybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
-        -- Search
+
+        -- Options
         {
-            name = GetString(SI_GAMEPAD_FURNITURE_TEXT_FILTER_KEYBIND_TEXT),
+            name = function()
+                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
+                    return GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND)
+                else
+                    return GetString(SI_GAMEPAD_FURNITURE_TEXT_FILTER_KEYBIND_TEXT)
+                end
+            end,
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
-                self:SwitchActiveList(self.categoryList)
-                self.owner:SelectTextFilter()
+                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
+                    ShowOptionsDialog()
+                else
+                    self.owner:SelectTextFilter()
+                end
             end,
         },
 
@@ -238,6 +285,358 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
     end
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.furnitureKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnFurnitureListBack)
+end
+
+function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialog()
+    local optionsDialogLayoutInfo = self.optionsDialogLayoutInfo
+    if not optionsDialogLayoutInfo then
+        -- This list does not require an Options dialog.
+        return
+    end
+
+    local optionsDialogName = optionsDialogLayoutInfo.dialogName
+    local boundFilterEnabled = optionsDialogLayoutInfo.boundFilterEnabled
+    local locationFilterEnabled = optionsDialogLayoutInfo.locationFilterEnabled
+    local limitFilterEnabled = optionsDialogLayoutInfo.limitFilterEnabled
+
+    local boundFilterTypesData = nil
+    if boundFilterEnabled then
+        boundFilterTypesData = {}
+        for filterValue = HOUSING_FURNITURE_BOUND_FILTER_ITERATION_BEGIN, HOUSING_FURNITURE_BOUND_FILTER_ITERATION_END do
+            local function OnBoundFilterSelected()
+                optionsDialogLayoutInfo.updateFiltersHandler(filterValue)
+            end
+
+            local entryName = nil
+            if filterValue == HOUSING_FURNITURE_BOUND_FILTER_ALL then
+                entryName = GetString(SI_HOUSING_FURNITURE_BOUND_FILTER_ALL_TEXT)
+            else
+                entryName = GetString("SI_HOUSINGFURNITUREBOUNDFILTER", filterValue)
+            end
+
+            local newEntry = ZO_ComboBox_Base:CreateItemEntry(entryName, OnBoundFilterSelected)
+            newEntry.filterValue = filterValue
+            table.insert(boundFilterTypesData, newEntry)
+        end
+    end
+
+    local locationFilterTypesData = nil
+    if locationFilterEnabled then
+        local locationFilterEntries = {}
+        for filterValue in ZO_FlagIterator(HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_BEGIN * 2, HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_END) do
+            local newEntry = ZO_ComboBox_Base:CreateItemEntry(GetString("SI_HOUSINGFURNITURELOCATIONFILTER", filterValue))
+            newEntry.filterValue = filterValue
+
+            newEntry.callback = function(control, name, item, isSelected)
+                local boundFiltersValue, locationFiltersValue, limitFiltersValue = optionsDialogLayoutInfo:getFiltersFunction()
+                if isSelected then
+                    locationFiltersValue = ZO_SetMaskFlag(locationFiltersValue, filterValue)
+                else
+                    locationFiltersValue = ZO_ClearMaskFlag(locationFiltersValue, filterValue)
+                end
+                optionsDialogLayoutInfo.updateFiltersHandler(boundFiltersValue, locationFiltersValue, limitFiltersValue)
+            end
+
+            table.insert(locationFilterEntries, newEntry)
+        end
+
+        local function CompareLocationFilters(left, right)
+            return left.name < right.name
+        end
+        table.sort(locationFilterEntries, CompareLocationFilters)
+
+        locationFilterTypesData = ZO_MultiSelection_ComboBox_Data_Gamepad:New()
+        for _, entry in ipairs(locationFilterEntries) do
+            locationFilterTypesData:AddItem(entry)
+        end
+    end
+
+    local limitFilterTypesData = nil
+    if limitFilterEnabled then
+        -- In order to match the House Information panel layout these limit filters are not sorted.
+        limitFilterTypesData = ZO_MultiSelection_ComboBox_Data_Gamepad:New()
+        for limitType = HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_BEGIN, HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_END do
+            local newEntry = ZO_ComboBox_Base:CreateItemEntry(GetString("SI_HOUSINGFURNISHINGLIMITTYPE", limitType))
+            local filterValue = ZO_HOUSING_FURNITURE_LIMIT_FILTERS[limitType + 1]
+            newEntry.filterValue = filterValue
+
+            newEntry.callback = function(control, name, item, isSelected)
+                local boundFiltersValue, locationFiltersValue, limitFiltersValue = optionsDialogLayoutInfo:getFiltersFunction()
+                if isSelected then
+                    limitFiltersValue = ZO_SetMaskFlag(limitFiltersValue, filterValue)
+                else
+                    limitFiltersValue = ZO_ClearMaskFlag(limitFiltersValue, filterValue)
+                end
+                optionsDialogLayoutInfo.updateFiltersHandler(boundFiltersValue, locationFiltersValue, limitFiltersValue)
+            end
+
+            limitFilterTypesData:AddItem(newEntry)
+        end
+    end
+
+    local boundFilterTypesDropdownEntry = nil
+    if boundFilterEnabled then
+        boundFilterTypesDropdownEntry =
+        {
+            template = "ZO_GamepadDropdownItem",
+            templateData = 
+            {
+                setup = function(control, data, selected)
+                    local dropdown = control.dropdown
+                    boundFilterTypesData.dropdownInstance = dropdown
+
+                    dropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                    dropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                    dropdown:SetSelectedItemTextColor(selected)
+                    dropdown:SetSortsItems(false)
+                    dropdown:ClearItems()
+                    for _, entry in ipairs(boundFilterTypesData) do
+                        dropdown:AddItem(entry)
+                    end
+                    dropdown:UpdateItems()
+
+                    local boundFilterValue = optionsDialogLayoutInfo:getFiltersFunction()
+                    boundFilterValue = boundFilterValue or HOUSING_FURNITURE_BOUND_FILTER_ALL
+                    local isAllBoundSelected = false
+                    if boundFilterValue == HOUSING_FURNITURE_BOUND_FILTER_ALL then
+                        isAllBoundSelected = true
+                    elseif boundFilterValue == (HOUSING_FURNITURE_BOUND_FILTER_BOUND + HOUSING_FURNITURE_BOUND_FILTER_UNBOUND) then
+                        isAllBoundSelected = true
+                    end
+
+                    if isAllBoundSelected then
+                        dropdown:SelectItemByIndex(1)
+                    else
+                        if ZO_MaskHasFlag(boundFilterValue, HOUSING_FURNITURE_BOUND_FILTER_BOUND) then
+                            dropdown:SelectItemByIndex(2)
+                        end
+                        if ZO_MaskHasFlag(boundFilterValue, HOUSING_FURNITURE_BOUND_FILTER_UNBOUND) then
+                            dropdown:SelectItemByIndex(3)
+                        end
+                    end
+
+                    SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
+                end,
+
+                callback = function(dialog)
+                    local targetControl = dialog.entryList:GetTargetControl()
+                    if targetControl then
+                        targetControl.dropdown:Activate()
+                    end
+                end,
+
+                narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
+            },
+        }
+    end
+
+    local limitFilterTypesDropdownEntry = nil
+    if limitFilterEnabled then
+        limitFilterTypesDropdownEntry =
+        {
+            template = "ZO_GamepadMultiSelectionDropdownItem",
+            templateData = 
+            {
+                setup = function(control, data, selected)
+                    local dropdown = control.dropdown
+                    limitFilterTypesData.dropdownInstance = dropdown
+
+                    local _, _, limitFilterValue = optionsDialogLayoutInfo:getFiltersFunction()
+                    local entries = limitFilterTypesData:GetAllItems()
+                    limitFilterTypesData:ClearAllSelections()
+
+                    for _, entry in ipairs(entries) do
+                        local isSelected = ZO_MaskHasFlag(limitFilterValue, entry.filterValue)
+                        limitFilterTypesData:SetItemSelected(entry, isSelected)
+                    end
+
+                    dropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                    dropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                    dropdown:SetSelectedItemTextColor(selected)
+                    dropdown:SetSortsItems(false)
+
+                    dropdown:SetNoSelectionText(GetString(SI_GAMEPAD_HOUSING_FURNITURE_LIMIT_FILTER_ALL_TEXT))
+                    dropdown:SetMultiSelectionTextFormatter(SI_HOUSING_FURNITURE_LIMIT_FILTER_DROPDOWN_TEXT)
+                    dropdown:LoadData(limitFilterTypesData)
+
+                    SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
+                end,
+
+                callback = function(dialog)
+                    local targetControl = dialog.entryList:GetTargetControl()
+                    if targetControl then
+                        targetControl.dropdown:Activate()
+                    end
+                end,
+
+                narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
+            },
+        }
+    end
+
+    local locationFilterTypesDropdownEntry = nil
+    if locationFilterEnabled then
+        locationFilterTypesDropdownEntry =
+        {
+            template = "ZO_GamepadMultiSelectionDropdownItem",
+            templateData = 
+            {
+                setup = function(control, data, selected)
+                    local dropdown = control.dropdown
+                    locationFilterTypesData.dropdownInstance = dropdown
+
+                    local _, locationFilterValue = optionsDialogLayoutInfo:getFiltersFunction()
+                    local entries = locationFilterTypesData:GetAllItems()
+                    locationFilterTypesData:ClearAllSelections()
+
+                    for _, entry in ipairs(entries) do
+                        local isSelected = ZO_MaskHasFlag(locationFilterValue, entry.filterValue)
+                        locationFilterTypesData:SetItemSelected(entry, isSelected)
+                    end
+
+                    dropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                    dropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                    dropdown:SetSelectedItemTextColor(selected)
+                    dropdown:SetSortsItems(false)
+
+                    dropdown:SetNoSelectionText(GetString(SI_GAMEPAD_HOUSING_FURNITURE_LOCATION_FILTER_ALL_TEXT))
+                    dropdown:SetMultiSelectionTextFormatter(SI_HOUSING_FURNITURE_LOCATION_FILTER_DROPDOWN_TEXT)
+                    dropdown:LoadData(locationFilterTypesData)
+
+                    SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
+                end,
+
+                callback = function(dialog)
+                    local targetControl = dialog.entryList:GetTargetControl()
+                    if targetControl then
+                        targetControl.dropdown:Activate()
+                    end
+                end,
+
+                narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
+            },
+        }
+    end
+
+    local dialogInfo =
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        },
+
+        setup = function(dialog)
+            ZO_GenericGamepadDialog_RefreshText(dialog, GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND))
+            dialog:setupFunc()
+        end,
+
+        parametricList =
+        {
+            -- Text search
+            {
+                template = "ZO_GamepadFullWidthLeftLabelEntryTemplate",
+
+                templateData =
+                {
+                    text = GetString(SI_GAMEPAD_FURNITURE_TEXT_FILTER_KEYBIND_TEXT),
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+
+                    callback = function(dialog)
+                        ZO_Dialogs_ReleaseDialogOnButtonPress(optionsDialogName)
+                        self.owner:SelectTextFilter()
+                    end,
+                },
+            },
+        },
+
+        blockDialogReleaseOnPress = true,
+
+        buttons =
+        {
+            -- Select
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_GAMEPAD_SELECT_OPTION,
+
+                callback = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    if targetData and targetData.callback then
+                        targetData.callback(dialog)
+                    end
+                end,
+            },
+
+            -- Back
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_CANCEL,
+
+                callback = function()
+                    ZO_Dialogs_ReleaseDialogOnButtonPress(optionsDialogName)
+                end,
+            },
+
+            -- Reset Filters
+            {
+                keybind = "DIALOG_RESET",
+                text = SI_HOUSING_FURNITURE_RESET_FILTERS_KEYBIND,
+
+                enabled = function(dialog)
+                    return SHARED_FURNITURE:CanResetFurnitureFilters()
+                end,
+
+                callback = function(dialog)
+                    SHARED_FURNITURE:ResetFurnitureFilters()
+                    dialog:setupFunc()
+                end,
+            },
+        },
+
+        onHidingCallback = function(dialog)
+            local boundFilterValue = HOUSING_FURNITURE_BOUND_FILTER_ALL
+            if boundFilterTypesData then
+                boundFilterTypesData.dropdownInstance:Deactivate()
+
+                local boundFilterData = boundFilterTypesData.dropdownInstance:GetSelectedItemData()
+                if boundFilterData and boundFilterData.filterValue then
+                    boundFilterValue = boundFilterData.filterValue
+                end
+            end
+
+            local locationFilterValues = 0
+            if locationFilterTypesData then
+                locationFilterTypesData.dropdownInstance:Deactivate()
+
+                for _, item in ipairs(locationFilterTypesData:GetSelectedItems()) do
+                    locationFilterValues = locationFilterValues + item.filterValue
+                end
+            end
+
+            local limitFilterValues = 0
+            if limitFilterTypesData then
+                limitFilterTypesData.dropdownInstance:Deactivate()
+
+                for _, item in ipairs(limitFilterTypesData:GetSelectedItems()) do
+                    limitFilterValues = limitFilterValues + item.filterValue
+                end
+            end
+
+            optionsDialogLayoutInfo.updateFiltersHandler(boundFilterValue, locationFilterValues, limitFilterValues)
+        end,
+    }
+
+    -- Filters
+    if locationFilterEnabled then
+        table.insert(dialogInfo.parametricList, locationFilterTypesDropdownEntry)
+    end
+    if limitFilterEnabled then
+        table.insert(dialogInfo.parametricList, limitFilterTypesDropdownEntry)
+    end
+    if boundFilterEnabled then
+        table.insert(dialogInfo.parametricList, boundFilterTypesDropdownEntry)
+    end
+
+    ZO_Dialogs_RegisterCustomDialog(optionsDialogName, dialogInfo)
 end
 
 function ZO_HousingFurnitureList_Gamepad:AddFurnitureListKeybind(keybindDescriptor)
@@ -383,8 +782,10 @@ function ZO_HousingFurnitureList_Gamepad:SetFurnitureRightInfoState(rightInfoSta
         self.rightInfoState = rightInfoState
 
         if rightInfoState == RIGHT_INFO_STATE.HOUSE_INFO then
-            SCENE_MANAGER:AddFragment(HOUSE_INFORMATION_FRAGMENT_GAMEPAD)
-            SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+            if not HOUSING_EDITOR_STATE:IsHousePreview() then
+                SCENE_MANAGER:AddFragment(HOUSE_INFORMATION_FRAGMENT_GAMEPAD)
+                SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+            end
         elseif rightInfoState == RIGHT_INFO_STATE.FURNITURE_INFO then
             SCENE_MANAGER:RemoveFragment(HOUSE_INFORMATION_FRAGMENT_GAMEPAD)
             SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
@@ -431,10 +832,13 @@ do
 
         local categoryTreeData = self:GetCategoryTreeDataRoot()
         if categoryTreeData then
+            local isOwner = IsOwnerOfCurrentHouse()
             local allTopLevelCategories = categoryTreeData:GetAllSubcategories()
             for i, categoryData in ipairs(allTopLevelCategories) do
-                local nextCategoryEntry = CreateCategoryEntryData(categoryData)
-                categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", nextCategoryEntry)
+                if isOwner or not categoryData:IsOwnerRestrictedCategory() then
+                    local nextCategoryEntry = CreateCategoryEntryData(categoryData)
+                    categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", nextCategoryEntry)
+                end
             end
         end
 
@@ -461,6 +865,22 @@ function ZO_HousingFurnitureList_Gamepad:BuildFurnitureEntry(furnitureObject)
     entry.stolen = furnitureObject:IsStolen()
     entry.isFromCrownStore = furnitureObject:IsFromCrownStore()
     entry.isStartingPathNode = furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE and furnitureObject:IsStartingPathNode()
+    entry.narrationText = function(entryData, entryControl)
+        local narrations = {}
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+        ZO_AppendNarration(narrations, entryData:GetPriceNarration())
+        if ITEM_PREVIEW_GAMEPAD:IsPreviewEnabled() then
+            ZO_AppendNarration(narrations, ITEM_PREVIEW_GAMEPAD:GetPreviewSpinnerNarrationText())
+        end
+        return narrations
+    end
+
+    entry.additionalInputNarrationFunction = function()
+        if ITEM_PREVIEW_GAMEPAD:IsPreviewEnabled() and ITEM_PREVIEW_GAMEPAD:HasVariations() then
+            return ZO_GetHorizontalDirectionalInputNarrationData(GetString(SI_SCREEN_NARRATION_ITEM_PREVIEW_STATE_PREVIOUS), GetString(SI_SCREEN_NARRATION_ITEM_PREVIEW_STATE_NEXT))
+        end
+        return {}
+    end
 
     if furnitureObject:GetDataType() == ZO_RECALLABLE_HOUSING_DATA_TYPE then
         entry:SetShowUnselectedSublabels(true)
@@ -552,6 +972,10 @@ function ZO_HousingFurnitureList_Gamepad:GetCategoryTreeDataRoot()
     assert(false) -- override in derived classes
 end
 
+function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialogLayoutInfo()
+    -- Override in derived classes that implement an options dialog.
+end
+
 function ZO_HousingFurnitureList_Gamepad:OnFurnitureTargetChanged(list, targetData, oldTargetData)
     self:RefreshFurnitureTooltip()
     self:UpdateCurrentKeybinds()
@@ -626,6 +1050,10 @@ end
 function ZO_HousingSettingsList_Gamepad:BuildOptionsList()
     local groupingId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
 
+    local function BuildKickOccupantOption()
+        return self:BuildKickOccupantOption()
+    end
+
     local function BuildRemoveUserGroupOption()
         return self:BuildRemoveUserGroupOption()
     end
@@ -639,8 +1067,17 @@ function ZO_HousingSettingsList_Gamepad:BuildOptionsList()
     end
 
     self:AddOptionTemplate(groupingId, BuildChangeUserGroupPermissionsOption, ZO_HousingSettingsList_Gamepad.SelectedDataHasPreset)
-    self:AddOptionTemplate(groupingId, BuildRemoveUserGroupOption)
+    self:AddOptionTemplate(groupingId, BuildKickOccupantOption, ZO_HousingSettingsList_Gamepad.IsOccupantsListAndHomeowner)
+    self:AddOptionTemplate(groupingId, BuildRemoveUserGroupOption, ZO_HousingSettingsList_Gamepad.IsNotOccupantsList)
     self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, ShouldShowGamerCardOption)
+end
+
+function ZO_HousingSettingsList_Gamepad:IsOccupantsListAndHomeowner()
+    return self.rowDataType == ZO_SETTINGS_OCCUPANT_DATA_TYPE and HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
+end
+
+function ZO_HousingSettingsList_Gamepad:IsNotOccupantsList()
+    return self.rowDataType ~= ZO_SETTINGS_OCCUPANT_DATA_TYPE
 end
 
 function ZO_HousingSettingsList_Gamepad:SelectedDataHasPreset()
@@ -692,13 +1129,23 @@ function ZO_HousingSettingsList_Gamepad:OnSelectionChanged(oldData, newData)
     self:SetupOptions(newData)
 end
 
+function ZO_HousingSettingsList_Gamepad:BuildKickOccupantOption()
+    local callback = function()
+        local data = self.socialData
+        if data.dataEntry.typeId == ZO_SETTINGS_OCCUPANT_DATA_TYPE then
+            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_CONFIRM_KICK_OCCUPANT", { currentHouse = data.currentHouse, displayName = data.displayName, index = data.index }) 
+        end
+    end
+    return self:BuildOptionEntry(nil, GetString(SI_HOUSING_OCCUPANTS_KICK_OCCUPANT), callback)
+end
+
 function ZO_HousingSettingsList_Gamepad:BuildRemoveUserGroupOption()
     local callback = function()
         local data = self.socialData
 
         local headerText
         local titleText
-        if data.dataEntry.typeId == ZO_SETTINGS_VISITOR_DATA_TYPE  then
+        if data.dataEntry.typeId == ZO_SETTINGS_VISITOR_DATA_TYPE then
             headerText = zo_strformat(SI_DIALOG_TEXT_REMOVE_INDIVIDUAL_PERMISSION, data.displayName)
             titleText = GetString(SI_DIALOG_TITLE_REMOVE_INDIVIDUAL_PERMISSION)
         elseif data.dataEntry.typeId == ZO_SETTINGS_GUILD_VISITOR_DATA_TYPE then
@@ -756,15 +1203,41 @@ function ZO_HousingSettingsList_Gamepad:DoesEntryPassFilter(data)
     return self:IsMatch(self:GetCurrentSearch(), data)
 end
 
+function ZO_HousingSettingsList_Gamepad_CreateOccupantScrollData(displayName, currentHouse, index)
+    return
+    { 
+        displayName = displayName, 
+        currentHouse = currentHouse, 
+        index = index,
+        type = ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_SEARCH_TYPE_NAMES,
+    }
+end
+
 function ZO_HousingSettingsList_Gamepad_CreateScrollData(displayName, currentHouse, userGroup, index, permissionPresetName)
-    return { 
-                displayName = displayName, 
-                userGroup = userGroup,
-                currentHouse = currentHouse, 
-                index = index,
-                permissionPresetName = permissionPresetName,
-                type = ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_SEARCH_TYPE_NAMES,
-           }
+    return
+    {
+        displayName = displayName, 
+        userGroup = userGroup,
+        currentHouse = currentHouse, 
+        index = index,
+        permissionPresetName = permissionPresetName,
+        type = ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_SEARCH_TYPE_NAMES,
+    }
+end
+
+--
+--[[ ZO_HousingSettingsOccupantList_Gamepad ]]--
+--
+
+ZO_HousingSettingsOccupantList_Gamepad = ZO_HousingSettingsList_Gamepad:Subclass()
+
+function ZO_HousingSettingsOccupantList_Gamepad:New(...)
+    return ZO_HousingSettingsList_Gamepad.New(self, HOUSE_PERMISSION_USER_GROUP_INDIVIDUAL, ...)
+end
+
+function ZO_HousingSettingsOccupantList_Gamepad:BuildMasterList()
+    self.currentHouse = GetCurrentZoneHouseId()
+    ZO_HousingSettings_BuildMasterList_Occupant(self.currentHouse, self.masterList, ZO_HousingSettingsList_Gamepad_CreateOccupantScrollData)
 end
 
 --
@@ -786,7 +1259,6 @@ end
 function ZO_HousingSettingsVisitorList_Gamepad:GetAddUserGroupDialogTitle()
     return GetString(SI_DIALOG_TITLE_ADD_INDIVIDUAL_PERMISSION)
 end
-
 
 --
 --[[ ZO_HousingSettingsBanList_Gamepad ]]--

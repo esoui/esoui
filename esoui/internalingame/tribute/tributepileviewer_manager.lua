@@ -118,6 +118,14 @@ function ZO_TributePileViewer_Manager:Initialize()
         end
     end)
 
+    EVENT_MANAGER:RegisterForEvent("TributePileViewer_Manager", EVENT_TRIBUTE_BEGIN_MECHANIC_SELECTION, function(_, cardInstanceId)
+        --Close the viewer if mechanic selection begins
+        if self:IsViewingPile() then
+            local NO_PILE = nil
+            self:SetViewingPile(NO_PILE)
+        end
+    end)
+
     ZO_HELP_OVERLAY_SYNC_OBJECT:SetHandler("OnShown", function(isVisible)
         self:SetViewingPile(nil)
     end, "tributePileViewer")

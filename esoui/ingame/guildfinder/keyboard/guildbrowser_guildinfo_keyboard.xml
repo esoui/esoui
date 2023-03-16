@@ -85,32 +85,28 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TopSection" relativePoint="BOTTOMLEFT" offsetY="ZO_GUILD_BROWSER_GUILD_INFO_RECRUITMENT_MESSAGE_BASE_OFFSET_Y" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-10" />
                     <Controls>
-                        <Control name="$(parent)Scroll" override="true">
+                        <Control name="$(parent)ScrollChild" override="true">
                             <Controls>
-                                <Control name="$(parent)Child" override="true">
-                                    <Controls>
-                                        <Label name="$(parent)HeaderMessage" font="ZoFontGameBold" linkEnabled="true" mouseEnabled="true">
-                                            <Dimensions x="600" />
-                                            <Anchor point="TOPLEFT" />
-                                            <OnLinkMouseUp>
-                                                ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
-                                            </OnLinkMouseUp>
-                                        </Label>
-                                        
-                                        <Label name="$(parent)Activities" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
-                                            <Dimensions x="600" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderMessage" relativePoint="BOTTOMLEFT" offsetY="20" />
-                                        </Label>
+                                <Label name="$(parent)HeaderMessage" font="ZoFontGameBold" linkEnabled="true" mouseEnabled="true">
+                                    <Dimensions x="600" />
+                                    <Anchor point="TOPLEFT" />
+                                    <OnLinkMouseUp>
+                                        ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
+                                    </OnLinkMouseUp>
+                                </Label>
 
-                                        <Label name="$(parent)RecruitmentMessage" font="ZoFontGameBold" linkEnabled="true" mouseEnabled="true">
-                                            <Dimensions x="600" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Activities" relativePoint="BOTTOMLEFT" offsetY="20" />
-                                            <OnLinkMouseUp>
-                                                ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
-                                            </OnLinkMouseUp>
-                                        </Label>
-                                    </Controls>
-                                </Control>
+                                <Label name="$(parent)Activities" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                                    <Dimensions x="600" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderMessage" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                </Label>
+
+                                <Label name="$(parent)RecruitmentMessage" font="ZoFontGameBold" linkEnabled="true" mouseEnabled="true">
+                                    <Dimensions x="600" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Activities" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                    <OnLinkMouseUp>
+                                        ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
+                                    </OnLinkMouseUp>
+                                </Label>
                             </Controls>
                         </Control>
                     </Controls>

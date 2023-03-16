@@ -844,6 +844,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_INTERFACE,
             system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_COMPASS_TARGET_MARKERS,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_WEAPON_INDICATOR,
         },
         {
@@ -1099,6 +1104,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_NAMEPLATES,
             system = SETTING_TYPE_NAMEPLATES,
             settingId = NAMEPLATE_TYPE_TARGET_MARKERS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_TARGET_MARKER_SIZE,
         },
         {
             panel = SETTING_PANEL_NAMEPLATES,

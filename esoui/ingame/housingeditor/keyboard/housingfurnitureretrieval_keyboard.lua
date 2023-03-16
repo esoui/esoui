@@ -10,6 +10,8 @@ function ZO_HousingFurnitureRetrieval_Keyboard:Initialize(...)
     self.CompareRetrievableEntriesFunction = function(a, b)
         return a.data:CompareTo(b.data)
     end
+
+    self:InitializeFiltersSelector()
 end
 
 function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
@@ -129,6 +131,41 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
     }
 end
 
+function ZO_HousingFurnitureRetrieval_Keyboard:InitializeFiltersSelector()
+    self.retrievalFiltersDropdown = self.contents:GetNamedChild("FiltersDropdown")
+
+    local filterValues = {}
+    local function OnFiltersChanged(comboBox, entryText, entry)
+        -- Initialize the filter value 'buckets' for bound and location both to the 'All' value,
+        -- indicating that no filter has effectively been selected for either as a baseline.
+        -- Note that the bound filterValues {0, 1, 2} are being treated as a bit mask for the
+        -- purpose of this all-in-one drop down.
+        filterValues[ZO_HOUSING_FURNITURE_FILTER_CATEGORY.BOUND] = HOUSING_FURNITURE_BOUND_FILTER_ALL
+        filterValues[ZO_HOUSING_FURNITURE_FILTER_CATEGORY.LIMIT] = ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL
+
+        -- Iterate through the drop down items, adding each selected items' filterValues to their
+        -- respective bound or location bucket.
+        -- Because the initial 'All' value for either bucket acts as a non-selection, the addition
+        -- operations occuring below are effectively expressions of the mathematical Identity property
+        -- whereby 0 + x = x.
+        local selectedItems = comboBox:GetSelectedItemData()
+        for _, item in ipairs(selectedItems) do
+            local filterCategory = item.filterCategory
+            if filterCategory then
+                filterValues[filterCategory] = filterValues[filterCategory] + item.filterValue
+            end
+        end
+
+        -- Retrieve the cumulative bitmask for each bucket and update the retrievable filters accordingly.
+        local boundFilterValue = filterValues[ZO_HOUSING_FURNITURE_FILTER_CATEGORY.BOUND]
+        local limitFilterValue = filterValues[ZO_HOUSING_FURNITURE_FILTER_CATEGORY.LIMIT]
+        SHARED_FURNITURE:SetRetrievableFurnitureFilters(boundFilterValue, limitFilterValue)
+    end
+
+    local EXCLUDE_LOCATION_FILTERS = false
+    ZO_HousingSettingsFilters_SetupDropdown(self.retrievalFiltersDropdown, EXCLUDE_LOCATION_FILTERS, OnFiltersChanged)
+end
+
 function ZO_HousingFurnitureRetrieval_Keyboard:OnSearchTextChanged(editBox)
     SHARED_FURNITURE:SetRetrievableTextFilter(editBox:GetText())
 end
@@ -149,6 +186,37 @@ function ZO_HousingFurnitureRetrieval_Keyboard:AddListDataTypes()
 
     self:AddDataType(ZO_RECALLABLE_HOUSING_DATA_TYPE, "ZO_RetrievableFurnitureSlot", ZO_HOUSING_FURNITURE_LIST_ENTRY_HEIGHT, function(...) self:SetupRetrievableFurnitureRow(...) end, ZO_HousingFurnitureBrowser_Keyboard.OnHideFurnitureRow)
     self:AddDataType(ZO_HOUSING_PATH_NODE_DATA_TYPE, "ZO_RetrievableFurnitureSlot", ZO_HOUSING_FURNITURE_LIST_ENTRY_HEIGHT, function(...) self:SetupRetrievableFurnitureRow(...) end, ZO_HousingFurnitureBrowser_Keyboard.OnHideFurnitureRow)
+end
+
+function ZO_HousingFurnitureRetrieval_Keyboard:RefreshFilters()
+    -- Get the current filter state.
+    local boundFilters = SHARED_FURNITURE:GetRetrievableFurnitureBoundFilters()
+    local limitFilters = SHARED_FURNITURE:GetRetrievableFurnitureLimitFilters()
+    local textFilter = SHARED_FURNITURE:GetRetrievableTextFilter()
+
+    -- Update the Text Search filter to reflect the filter state.
+    self.searchEditBox:SetText(textFilter)
+
+    if HOUSING_EDITOR_STATE:IsHousePreview() then
+        self.retrievalFiltersDropdown:SetHidden(true)
+    else
+        -- Update the Furniture filters to reflect the filter state.
+        local filtersList = ZO_ComboBox_ObjectFromContainer(self.retrievalFiltersDropdown)
+        filtersList:ClearAllSelections()
+        for _, filterItem in ipairs(filtersList:GetItems()) do
+            if filterItem.filterCategory == ZO_HOUSING_FURNITURE_FILTER_CATEGORY.BOUND then
+                if ZO_MaskHasFlag(boundFilters, filterItem.filterValue) then
+                    filtersList:SelectItem(filterItem)
+                end
+            elseif filterItem.filterCategory == ZO_HOUSING_FURNITURE_FILTER_CATEGORY.LIMIT then
+                if ZO_MaskHasFlag(limitFilters, filterItem.filterValue) then
+                    filtersList:SelectItem(filterItem)
+                end
+            end
+        end
+
+        self.retrievalFiltersDropdown:SetHidden(false)
+    end
 end
 
 function ZO_HousingFurnitureRetrieval_Keyboard:Retrieve(data)
@@ -177,6 +245,12 @@ function ZO_HousingFurnitureRetrieval_Keyboard:SetupRetrievableFurnitureRow(cont
 
     local directionTexture = control:GetNamedChild("Direction")
     directionTexture:SetTextureRotation(data:GetAngleFromPlayerHeadingRadians())
+end
+
+--Overridden from ZO_HousingFurnitureList
+function ZO_HousingFurnitureRetrieval_Keyboard:OnShowing()
+    ZO_HousingFurnitureList.OnShowing(self)
+    self:RefreshFilters()
 end
 
 --Overridden from ZO_HousingFurnitureList

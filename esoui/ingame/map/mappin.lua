@@ -813,7 +813,7 @@ do
         if not IsInGamepadPreferredMode() then
             mapLocationTooltip:AddLine(zo_strformat(SI_TOOLTIP_ALLIANCE_RESTRICTED_LINK, allianceName), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
         else
-            local allianceIcon = GetPlatformAllianceSymbolIcon(alliance)
+            local allianceIcon = ZO_GetPlatformAllianceSymbolIcon(alliance)
             local allianceColorFormat = {
                 fontColorType = INTERFACE_COLOR_TYPE_ALLIANCE,
                 fontColorField = alliance,

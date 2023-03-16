@@ -91,6 +91,13 @@ function ZO_Gamepad_GuildNameFooterFragment:SetGuildName(guildName)
     self.guildNameControl:SetText(guildName)
 end
 
+function ZO_Gamepad_GuildNameFooterFragment:GetNarrationText()
+    local narrations = {}
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_GUILD_BANK_GUILD_FOOTER_LABEL)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.guildName))
+    return narrations
+end
+
 function ZO_Gamepad_GuildNameFooterFragment:Show()
     ZO_FadeSceneFragment.Show(self)
 end

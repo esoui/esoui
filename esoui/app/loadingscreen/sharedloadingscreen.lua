@@ -24,7 +24,7 @@ local INSTANCE_DISPLAY_TYPE_ICONS =
     [INSTANCE_DISPLAY_TYPE_ZONE_STORY] = "EsoUI/Art/Icons/mapKey/mapKey_zoneStory.dds",
 }
 
-function GetInstanceDisplayTypeIcon(instanceDisplayType)
+function ZO_GetInstanceDisplayTypeIcon(instanceDisplayType)
     return INSTANCE_DISPLAY_TYPE_ICONS[instanceDisplayType]
 end
 
@@ -181,8 +181,12 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, inst
     if self:IsPreferredScreen() then
         self:Log("Load Screen - Show")
         self.lastUpdate = GetFrameTimeMilliseconds()
+        --Some of the logic in this file can cause use to briefly hide the load screen, so we set this to make sure we dont clear narration due to a hide while this function is running
+        self.dontClearNarration = true
 
         local wasAppGuiHidden = GetGuiHidden("app")
+        --If the app gui was previously hidden, mark the narration dirty
+        self.isNarrationDirty = wasAppGuiHidden
 
         --First configure the visuals
         self:SizeLoadingTexture()
@@ -213,7 +217,13 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, inst
                 local gameTypeString = GetString("SI_BATTLEGROUNDGAMETYPE", gameType)
                 local battlegroundDescription = GetBattlegroundDescription(self.battlegroundId)
 
-                self.zoneName:SetText(LocalizeString("<<C:1>>", gameTypeString))
+                local zoneNameText = LocalizeString("<<C:1>>", gameTypeString)
+                --If the zone name text changed, mark narration dirty
+                if zoneNameText ~= self.zoneNameText then
+                    self.zoneNameText = zoneNameText
+                    self.isNarrationDirty = true
+                end
+                self.zoneName:SetText(self.zoneNameText)
                 self:SetZoneDescription(LocalizeString("<<1>>", battlegroundDescription))
 
                 local activityAlliance = GetLatestActivityAlliance()
@@ -228,18 +238,36 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, inst
                         teamIcon = BATTLEGROUND_TEAM_TEXTURES[activityAlliance]
                     end
 
-                    self.instanceType:SetText(LocalizeString("<<1>>", battlegroundTeamName))
+                    local instanceTypeText = LocalizeString("<<1>>", battlegroundTeamName)
+                    --If the instance type text changed, mark narration dirty
+                    if instanceTypeText ~= self.instanceTypeText then
+                        self.instanceTypeText = instanceTypeText
+                        self.isNarrationDirty = true
+                    end
+                    self.instanceType:SetText(self.instanceTypeText)
                     self.instanceType:SetHidden(false)
                     self.instanceTypeIcon:SetTexture(teamIcon)
                     self.instanceTypeIcon:SetHidden(false)
                 end
             else
                 if showInstanceDisplayType then
-                    self.instanceTypeIcon:SetTexture(GetInstanceDisplayTypeIcon(instanceDisplayType))
-                    self.instanceType:SetText(GetString("SI_INSTANCEDISPLAYTYPE", instanceDisplayType))
+                    self.instanceTypeIcon:SetTexture(ZO_GetInstanceDisplayTypeIcon(instanceDisplayType))
+                    local instanceTypeText = GetString("SI_INSTANCEDISPLAYTYPE", instanceDisplayType)
+                    --If the instance type text changed, mark narration dirty
+                    if instanceTypeText ~= self.instanceTypeText then
+                        self.instanceTypeText = instanceTypeText
+                        self.isNarrationDirty = true
+                    end
+                    self.instanceType:SetText(self.instanceTypeText)
                 end
 
-                self.zoneName:SetText(LocalizeString("<<C:1>>", zoneName))
+                local zoneNameText = LocalizeString("<<C:1>>", zoneName)
+                --If the zone name text changed, mark narration dirty
+                if zoneNameText ~= self.zoneNameText then
+                    self.zoneNameText = zoneNameText
+                    self.isNarrationDirty = true
+                end
+                self.zoneName:SetText(self.zoneNameText)
 
                 --Only do this random roll once when the load screen is first brought up, not everytime the info changes
                 if wasAppGuiHidden then
@@ -299,6 +327,9 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, inst
         --For the main animation that brings in the art (as well as some other things) we are waiting until the texture is loaded in memory. This
         --is checked continuously in update
         self.loadScreenTextureLoaded = false
+
+        --Now that we are done showing the load screen, allow clearing the narration again
+        self.dontClearNarration = false
     end
 end
 
@@ -365,6 +396,11 @@ function LoadingScreen_Base:OnZoneDescriptionNewUserAreaCreated(control, areaDat
 end
 
 function LoadingScreen_Base:SetZoneDescription(tip)
+    --If the zone description text changed, mark narration dirty
+    if tip ~= self.zoneDescriptionText then
+        self.zoneDescriptionText = tip
+        self.isNarrationDirty = true
+    end
     self.zoneDescription:SetText(tip)
     ReleaseAllKeyEdgeFiles()
 end

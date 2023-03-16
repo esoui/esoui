@@ -16,7 +16,7 @@ function ZO_HousingFurnitureBrowser_Keyboard:Initialize(control)
         -- selecting the list data will preview the furniture, so we will need to show/hide the house info as appropriate
         if data and data:IsPreviewable() and IsCharacterPreviewingAvailable() then
             SCENE_MANAGER:RemoveFragmentGroup(self.houseInfoFragmentGroup)
-        else
+        elseif HOUSING_EDITOR_STATE:IsHouseInstance() then
             SCENE_MANAGER:AddFragmentGroup(self.houseInfoFragmentGroup)
         end
     end
@@ -77,7 +77,9 @@ function ZO_HousingFurnitureBrowser_Keyboard:OnShowing()
     local USE_FIRST_VISIBLE_FRAGMENT_AS_FALLBACK = true
     self.menuBarFragment:ShowLastFragment(USE_FIRST_VISIBLE_FRAGMENT_AS_FALLBACK)
 
-    SCENE_MANAGER:AddFragmentGroup(self.houseInfoFragmentGroup)
+    if HOUSING_EDITOR_STATE:IsHouseInstance() then
+        SCENE_MANAGER:AddFragmentGroup(self.houseInfoFragmentGroup)
+    end
 end
 
 --Overridden
@@ -156,7 +158,9 @@ function ZO_HousingFurnitureBrowser_Keyboard:CreateMenuBarTabs()
     local function IsButtonVisible(buttonData)
         local mode = buttonData.mode
         if mode == HOUSING_BROWSER_MODE.RETRIEVAL then
-            return HOUSING_EDITOR_STATE:CanLocalPlayerBrowse()
+            return HOUSING_EDITOR_STATE:CanLocalPlayerBrowseFurniture()
+        elseif mode == HOUSING_BROWSER_MODE.SETTINGS then
+            return HOUSING_EDITOR_STATE:CanLocalPlayerViewSettings()
         end
         return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
     end

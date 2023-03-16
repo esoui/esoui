@@ -1,6 +1,6 @@
 --[[ Grid Selector Code ]]--
--- The user should call DIRECTIONAL_INPUT:Activate(self) and DIRECTIONAL_INPUT:Deactivate(self) as appropriate
-ZO_GamepadGrid = ZO_InitializingObject:Subclass()
+-- The user should call ZO_GamepadGrid:Activate() and ZO_GamepadGrid:Deactivate() as appropriate
+ZO_GamepadGrid = ZO_InitializingCallbackObject:Subclass()
 
 -- rowMajor = true specifies that you have a grid of rows with a potentially variable number of columns in each row
 -- rowMajor = false specifies that you have a grid of columns with a potentially variable number of rows in each column
@@ -9,10 +9,13 @@ function ZO_GamepadGrid:Initialize(control, rowMajor)
     self.focusX = 1
     self.focusY = 1
     self.rowMajor = rowMajor
+    self.active = false
 
     self.verticalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
     self.horizontalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     self.directionalMovementSound = SOUNDS.HOR_LIST_ITEM_SELECTED
+
+    SCREEN_NARRATION_MANAGER:RegisterGamepadGrid(self)
 end
 
 function ZO_GamepadGrid:GetIsRowMajor()
@@ -87,11 +90,37 @@ function ZO_GamepadGrid:UpdateDirectionalInput()
         PlaySound(self.directionalMovementSound)
 
         self:RefreshGridHighlight()
+        self:FireCallbacks("FocusChanged")
     end
 end
 
 function ZO_GamepadGrid:SetDirectionalMovementSound(sound)
     self.directionalMovementSound = sound
+end
+
+function ZO_GamepadGrid:IsActive()
+    return self.active
+end
+
+function ZO_GamepadGrid:Activate()
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    DIRECTIONAL_INPUT:Activate(self, self.control)
+    self.active = true
+    self:FireCallbacks("OnActivated")
+end
+
+function ZO_GamepadGrid:Deactivate()
+    DIRECTIONAL_INPUT:Deactivate(self)
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    self.active = false
+end
+
+function ZO_GamepadGrid:GetNarrationText()
+    --This should be overridden to get the narration text (if there is any)
+end
+
+function ZO_GamepadGrid:GetHeaderNarration()
+    --This should be overridden to get the header narration text (if there is any)
 end
 
 --
@@ -174,6 +203,10 @@ function ZO_GamepadPagedGrid:GetCurrentPage()
     return self.currentPage
 end
 
+function ZO_GamepadPagedGrid:GetCurrentPageNarration()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_PAGED_LIST_PAGE_NUMBER_NARRATION, self.currentPage))
+end
+
 function ZO_GamepadPagedGrid:GetNumPages()
     return self.numPages
 end
@@ -183,6 +216,8 @@ function ZO_GamepadPagedGrid:NextPage()
         self.currentPage = self.currentPage + 1
         self:UpdateForPageChange()
         PlaySound(SOUNDS.GAMEPAD_PAGE_FORWARD)
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueGamepadGridEntry(self, NARRATE_HEADER)
     end
 end
 
@@ -191,17 +226,25 @@ function ZO_GamepadPagedGrid:PreviousPage()
         self.currentPage = self.currentPage - 1
         self:UpdateForPageChange()
         PlaySound(SOUNDS.GAMEPAD_PAGE_BACK)
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueGamepadGridEntry(self, NARRATE_HEADER)
     end
 end
 
 function ZO_GamepadPagedGrid:InitializeKeybindStripDescriptors()
+    local function ShouldNarrateKeybinds()
+        return self.currentPage ~= 1 or self.currentPage ~= self.numPages
+    end
+
     self.keybindStripDescriptor = {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = "Gamepad Paged Grid Previous",
+            --Even though this is an ethereal keybind, the name will still be read during screen narration
+            name = GetString(SI_GAMEPAD_PAGED_LIST_PAGE_LEFT_NARRATION),
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             ethereal = true,
+            narrateEthereal = ShouldNarrateKeybinds,
+            etherealNarrationOrder = 1,
             callback = function()
                 self:PreviousPage()
             end,
@@ -211,10 +254,12 @@ function ZO_GamepadPagedGrid:InitializeKeybindStripDescriptors()
         },
 
         {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = "Gamepad Paged Grid Next",
+            --Even though this is an ethereal keybind, the name will still be read during screen narration
+            name = GetString(SI_GAMEPAD_PAGED_LIST_PAGE_RIGHT_NARRATION),
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             ethereal = true,
+            narrateEthereal = ShouldNarrateKeybinds,
+            etherealNarrationOrder = 2,
             callback = function()
                 self:NextPage()
             end,
@@ -224,16 +269,6 @@ function ZO_GamepadPagedGrid:InitializeKeybindStripDescriptors()
         },
     }
 
-end
-
-function ZO_GamepadPagedGrid:Activate()
-    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-    DIRECTIONAL_INPUT:Activate(self, self.control)
-end
-
-function ZO_GamepadPagedGrid:Deactivate()
-    DIRECTIONAL_INPUT:Deactivate(self)
-    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_GamepadPagedGrid:RefreshGrid()

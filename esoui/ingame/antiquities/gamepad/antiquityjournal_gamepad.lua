@@ -1126,7 +1126,7 @@ function ZO_AntiquityJournalListGamepad:ClearSelection()
 end
 
 function ZO_AntiquityJournalListGamepad:OnSelectionChanged(oldData, newData)
-    ZO_SortFilterList.OnSelectionChanged(self, oldData, newData)
+    ZO_SortFilterList_Gamepad.OnSelectionChanged(self, oldData, newData)
 
     self:UpdateKeybinds()
     if newData then
@@ -1157,6 +1157,18 @@ function ZO_AntiquityJournalListGamepad:OnSelectionChanged(oldData, newData)
     end
 end
 
+--Overridden from base
+function ZO_AntiquityJournalListGamepad:GetHeaderNarration()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.headerText)
+end
+
+function ZO_AntiquityJournalListGamepad:GetNarrationText()
+    local selectedData = self:GetCurrentAntiquityData()
+    if selectedData and selectedData.narrationText then
+        return selectedData.narrationText(selectedData)
+    end
+end
+
 function ZO_AntiquityJournalListGamepad:GetCurrentAntiquityData()
     return ZO_ScrollList_GetSelectedData(self.list)
 end
@@ -1171,13 +1183,135 @@ do
         [ZO_ANTIQUITY_SECTION_TYPE.REQUIRES_SKILL] = SCRYABLE_ANTIQUITY_ROW_DATA,
     }
 
+    --Gets the base narration text common among all antiquity row types
+    local function GetAntiquityBaseRowNarration(entryData)
+        local narrations = {}
+        local hasDiscovered = entryData:HasDiscovered()
+        
+        --Get the narration for the name of the antiquity
+        local name = hasDiscovered and entryData:GetColorizedFormattedName() or GetString(SI_ANTIQUITY_NAME_HIDDEN)
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(name))
+
+        --If the antiquity is new, include narration text for it
+        if entryData:HasNewLead() then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_NEW_ICON_NARRATION)))
+        end
+
+        if hasDiscovered then
+            --Get the narration for the antiquity type
+            if entryData:HasReward() then
+                local rewardContextualTypeString = REWARDS_MANAGER:GetRewardContextualTypeString(entryData:GetRewardId()) or GetString(SI_ANTIQUITY_TYPE_FALLBACK)
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ANTIQUITY_TYPE, rewardContextualTypeString)))
+            end
+
+            --Get the narration for the number found
+            if entryData:IsRepeatable() then
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ANTIQUITY_TIMES_ACQUIRED, entryData:GetNumRecovered())))
+            end
+        end
+        return narrations
+    end
+
+    --Get the narrations common to logbook antiquity rows
+    local function GetAntiquityBaseLogbookRowNarration(entryData)
+        local narrations = {}
+        local numLoreEntries = entryData:GetNumLoreEntries()
+        --Get the narration for the number of codex entries
+        if numLoreEntries > 0 and entryData:HasDiscovered() then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ANTIQUITY_CODEX_ENTRIES_FOUND, entryData:GetNumUnlockedLoreEntries(), numLoreEntries)))
+        end
+        return narrations
+    end
+
+    --Get the narration for a standard antiquity row
+    local function GetAntiquityRowNarrationText(entryData)
+        local narrations = {}
+        --First generate the base narration
+        ZO_CombineNumericallyIndexedTables(narrations, GetAntiquityBaseRowNarration(entryData))
+        --Then generate the logbook specific narration
+        ZO_CombineNumericallyIndexedTables(narrations, GetAntiquityBaseLogbookRowNarration(entryData))
+        return narrations
+    end
+
+    --Get the narration for an antiquity set row
+    local function GetAntiquitySetRowNarrationText(entryData)
+        local narrations = {}
+        --Get the base narration
+        ZO_CombineNumericallyIndexedTables(narrations, GetAntiquityBaseRowNarration(entryData))
+        --Get the narration for the number of set pieces found
+        local piecesFoundText = zo_strformat(SI_ANTIQUITY_PIECES_FOUND, entryData:GetNumAntiquitiesRecovered(), entryData:GetNumAntiquities())
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(piecesFoundText))
+        --Get the logbook specific narration
+        ZO_CombineNumericallyIndexedTables(narrations, GetAntiquityBaseLogbookRowNarration(entryData))
+        return narrations
+    end
+
+    --Gets the narration text for an antiquity row in the scryables section
+    local function GetScryableAntiquityRowNarrationText(entryData)
+        local narrations = {}
+        --Get the header narration if applicable
+        if entryData.headerNarrationText then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.headerNarrationText))
+        end
+
+        --Get the base narration
+        ZO_CombineNumericallyIndexedTables(narrations, GetAntiquityBaseRowNarration(entryData))
+
+        if entryData:HasDiscovered() then
+            --Get the narration for the difficulty
+            local difficultyText = zo_strformat(SI_ANTIQUITY_DIFFICULTY_FORMATTER, GetString("SI_ANTIQUITYDIFFICULTY", entryData:GetDifficulty()))
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(difficultyText))
+
+            --Get the narration for the zone
+            local zoneId = entryData:GetZoneId()
+            if zoneId ~= 0 then
+                local zoneName = GetZoneNameById(zoneId)
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ANTIQUITY_ZONE, zoneName)))
+            end
+        end
+
+        --If the antiquity lead has an expiration time, get the narration for that
+        local leadTimeRemainingS = entryData:GetLeadTimeRemainingS()
+        if leadTimeRemainingS > 0 then
+            local leadTimeRemainingText = ZO_FormatAntiquityLeadTime(leadTimeRemainingS)
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ANTIQUITY_TOOLTIP_LEAD_EXPIRATION, leadTimeRemainingText)))
+        end
+        return narrations
+    end
+
+    --Gets the narration text for an in progress antiquity in the scryables section
+    local function GetInProgressAntiquityRowNarrationText(entryData)
+        local narrations = {}
+        --Get the scryable row narration
+        ZO_CombineNumericallyIndexedTables(narrations, GetScryableAntiquityRowNarrationText(entryData))
+
+        --Get the narration for the scrying progress
+        local numGoalsAchieved = entryData:GetNumGoalsAchieved()
+        if numGoalsAchieved > 0 then
+            local progressText = zo_strformat(SI_ANTIQUITIES_SCRYING_PROGRESS_NARRATION, numGoalsAchieved, entryData:GetTotalNumGoals())
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(progressText))
+        end
+        return narrations
+    end
+
+    local SECTION_TYPE_TO_NARRATION_FUNCTION =
+    {
+        [ZO_ANTIQUITY_SECTION_TYPE.IN_PROGRESS] = GetInProgressAntiquityRowNarrationText,
+        [ZO_ANTIQUITY_SECTION_TYPE.AVAILABLE] = GetScryableAntiquityRowNarrationText,
+        [ZO_ANTIQUITY_SECTION_TYPE.REQUIRES_LEAD] = GetScryableAntiquityRowNarrationText,
+        [ZO_ANTIQUITY_SECTION_TYPE.ACTIVE_LEAD] = GetScryableAntiquityRowNarrationText,
+        [ZO_ANTIQUITY_SECTION_TYPE.REQUIRES_SKILL] = GetScryableAntiquityRowNarrationText,
+    }
+
     local function AddAntiquitySectionList(scrollDataList, headingText, antiquitySection)
         if #antiquitySection.list > 0 then
             table.sort(antiquitySection.list, antiquitySection.sortFunction)
             table.insert(scrollDataList, ZO_ScrollList_CreateDataEntry(ANTIQUITY_SECTION_ROW_DATA, {label = headingText}))
             local rowTemplate = SECTION_TYPE_TO_ROW_TEMPLATE[antiquitySection.sectionType]
+            --Determine which narration function to use
+            local narrationFunction = SECTION_TYPE_TO_NARRATION_FUNCTION[antiquitySection.sectionType]
 
-            for _, antiquityData in ipairs(antiquitySection.list) do
+            for i, antiquityData in ipairs(antiquitySection.list) do
                 local antiquityRowTemplate = rowTemplate
                 local leadTimeRemainingS = antiquityData:GetLeadTimeRemainingS()
                 if leadTimeRemainingS > 0 then
@@ -1187,6 +1321,11 @@ do
                 -- Add this scryable antiquity as a tile.
                 if antiquityRowTemplate then
                     local entryData = ZO_EntryData:New(antiquityData)
+                    entryData.narrationText = narrationFunction
+                    --Since the heading itself can't be selected, include the heading text as part of the narration for the first entry in this section
+                    if i == 1 then
+                        entryData.headerNarrationText = headingText
+                    end
                     table.insert(scrollDataList, ZO_ScrollList_CreateDataEntry(antiquityRowTemplate, entryData))
                 else
                     internalassert(false, string.format("Row template '%s' has no 'Near Expiration' template mapped.", tostring(rowTemplate) or "nil"))
@@ -1204,11 +1343,13 @@ do
         local scrollDataList = ZO_ScrollList_GetDataList(listControl)
 
         if not currentSubcategoryData then
-            self.titleLabel:SetText("")
+            self.headerText = ""
+            self.titleLabel:SetText(self.headerText)
             SCENE_MANAGER:RemoveFragment(ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT)
         else
             -- Refresh the header.
-            self.titleLabel:SetText(ZO_CachedStrFormat(SI_ZONE_NAME, currentSubcategoryData:GetName()))
+            self.headerText = ZO_CachedStrFormat(SI_ZONE_NAME, currentSubcategoryData:GetName())
+            self.titleLabel:SetText(self.headerText)
 
             if ZO_IsAntiquityScryableSubcategory(currentSubcategoryData) then
                 local scryableAntiquitySections = ANTIQUITY_MANAGER:GetOrCreateAntiquitySectionList()
@@ -1254,6 +1395,7 @@ do
                     local antiquitySetData = antiquityData:GetAntiquitySetData()
                     local entryTemplate = ANTIQUITY_ROW_DATA
                     local filterFunction = ANTIQUITY_DATA_MANAGER:GetAntiquityFilterFunction(ANTIQUITY_JOURNAL_GAMEPAD:GetCurrentFilterSelection())
+                    local narrationFunction = GetAntiquityRowNarrationText
                     local antiquityOrSetData
 
                     if not filterFunction or filterFunction(antiquityData, antiquitySetData) then
@@ -1271,6 +1413,7 @@ do
                                     end
 
                                     entryTemplate = rowTemplate
+                                    narrationFunction = GetAntiquitySetRowNarrationText
                                 end
 
                                 for _, antiquitySetAntiquityData in antiquitySetData:AntiquityIterator({ ZO_Antiquity.IsVisible }) do
@@ -1286,6 +1429,7 @@ do
 
                         if antiquityOrSetData then
                             local entryData = ZO_EntryData:New(antiquityOrSetData)
+                            entryData.narrationText = narrationFunction
                             table.insert(scrollDataList, ZO_ScrollList_CreateDataEntry(entryTemplate, entryData))
                         end
                     end

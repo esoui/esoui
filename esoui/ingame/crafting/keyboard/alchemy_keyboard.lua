@@ -121,7 +121,7 @@ function ZO_Alchemy:InitializeModeBar()
     local recipeTab = CreateButtonData(
         recipeCraftingSystemNameStringId,
         ZO_ALCHEMY_MODE_RECIPES,
-        GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem))
+        ZO_GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem))
 
     self.recipeButton = ZO_MenuBar_AddButton(self.modeBar, recipeTab)
 

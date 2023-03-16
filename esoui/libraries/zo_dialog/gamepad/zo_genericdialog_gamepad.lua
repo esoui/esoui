@@ -67,6 +67,21 @@ function DialogKeybindStripDescriptor:Initialize(control)
             end
         end
     end
+
+    self.narrationOverrideName = function()
+        if self.narrationOverrideText then
+            if type(self.narrationOverrideText) == "function" then
+                return self.narrationOverrideText(self.dialog)
+            elseif type(self.narrationOverrideText) == "number" then
+                return GetString(self.narrationOverrideText)
+            else
+                return self.narrationOverrideText
+            end
+        else
+            return self.name()
+        end
+    end
+
     self:Reset()
 end
 
@@ -75,6 +90,7 @@ function DialogKeybindStripDescriptor:Reset()
     self.buttonCallback = nil
     self.buttonEnabled = nil
     self.buttonText = nil
+    self.narrationOverrideText = nil
     self.dialog = nil
     self.keybind = nil
     self.sound = nil
@@ -116,6 +132,10 @@ end
 
 function DialogKeybindStripDescriptor:SetNarrateEthereal(narrateEthereal)
     self.narrateEthereal = narrateEthereal
+end
+
+function DialogKeybindStripDescriptor:SetNarrationOverrideText(narrationOverrideText)
+    self.narrationOverrideText = narrationOverrideText
 end
 
 function DialogKeybindStripDescriptor:SetEtherealNarrationOrder(etherealNarrationOrder)
@@ -190,6 +210,7 @@ local function TryRefreshKeybind(dialog, keybindDesc, buttonData, twoOrMoreButto
     keybindDesc:SetEthereal(buttonData.ethereal)
     keybindDesc:SetNarrateEthereal(buttonData.narrateEthereal)
     keybindDesc:SetEtherealNarrationOrder(buttonData.etherealNarrationOrder)
+    keybindDesc:SetNarrationOverrideText(buttonData.narrationOverrideText)
     keybindDesc:SetEnabled(buttonData.enabled)
     keybindDesc:SetOnShowCooldown(buttonData.onShowCooldown)
     keybindDesc:SetHandlesKeyUp(buttonData.handlesKeyUp)
@@ -733,6 +754,7 @@ do
         -- Unregister all dropdown callbacks since the dialog control may be used for a different dialog
         local function ResetDropdownItem(control)
             control.dropdown:ClearCallbackRegistry()
+            control.dropdown:ResetNarrationInfo()
             --Re-register for narration after clearing the callback registry
             SCREEN_NARRATION_MANAGER:RegisterComboBox(control.dropdown)
         end

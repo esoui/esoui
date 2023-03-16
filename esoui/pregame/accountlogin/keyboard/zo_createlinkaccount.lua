@@ -333,6 +333,7 @@ function ZO_CreateLinkAccount_ToggleCheckButtonFromLabel(labelControl)
     local checkButton = labelControl:GetParent()
 
     ZO_CheckButton_SetCheckState(checkButton, not ZO_CheckButton_IsChecked(checkButton))
+    CREATE_LINK_ACCOUNT_KEYBOARD:UpdateCreateAccountButton()
 end
 
 function ZO_CreateLinkAccount_CheckAccountNameValidity()

@@ -28,7 +28,7 @@ local function SetupGuildSelectionDialog(dialog)
         local guildId = GetGuildId(i)
         local guildName = GetGuildName(guildId)
         local allianceId = GetGuildAlliance(guildId)
-        local icon = GetLargeAllianceSymbolIcon(allianceId)
+        local icon = ZO_GetLargeAllianceSymbolIcon(allianceId)
 
         local entryData = ZO_GamepadEntryData:New(guildName, icon)
         entryData:SetFontScaleOnSelection(false)

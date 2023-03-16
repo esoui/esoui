@@ -145,7 +145,7 @@ function ZO_GamepadGuildInviteProvider:Decline(data, button, openedFromKeybind)
         end,
 
         reportFunction = function()
-            ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.displayName, IgnorePlayer)
+            ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.displayName)
             RejectGuildInvite(data.guildId)
             PlaySound(SOUNDS.DIALOG_DECLINE)
         end,

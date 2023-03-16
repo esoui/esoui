@@ -96,7 +96,7 @@ do
         return false
     end
 
-    local function AddIcon(self, iconTexture, iconTint)
+    local function AddIcon(self, iconTexture, iconTint, iconNarration)
         if iconTexture then
             if not self.iconData then
                 self.iconData = {}
@@ -106,9 +106,20 @@ do
             {
                 iconTexture = iconTexture,
                 iconTint = iconTint,
+                iconNarration = iconNarration,
             }
             table.insert(self.iconData, iconData)
         end
+    end
+
+    local function GetNarrationText(self)
+        local narrations = {}
+        if self.iconData then
+            for _, iconData in ipairs(self.iconData) do
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(iconData.iconNarration))
+            end
+        end
+        return narrations
     end
 
     local function SetMaxAlpha(self, maxAlpha)
@@ -147,6 +158,7 @@ do
         self.ClearIcons = ClearIcons
         self.AddIcon = AddIcon
         self.HasIcon = HasIcon
+        self.GetNarrationText = GetNarrationText
         self.Show = Show
         self.Hide = Hide
         self.SetMaxAlpha = SetMaxAlpha

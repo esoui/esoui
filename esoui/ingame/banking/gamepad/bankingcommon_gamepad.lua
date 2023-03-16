@@ -491,6 +491,7 @@ end
 
 function ZO_BankingCommon_Gamepad:SetSelectorCurrency(currencyType)
     self.selectorCurrency:SetTexture(ZO_Currency_GetGamepadCurrencyIcon(currencyType))
+    self.selector:SetCurrencyType(currencyType)
 end
 
 function ZO_BankingCommon_Gamepad:UpdateInput()
@@ -517,9 +518,9 @@ end
 function ZO_BankingCommon_Gamepad:ShowSelector()
     self:UpdateInput()
     self.selectorContainer:SetHidden(false)
+    self:DeactivateCurrentList()
+
     local currentList = self:GetCurrentList()
-    currentList:Deactivate()
-    
     local targetControl = currentList:GetTargetControl()
     if targetControl then
         targetControl:SetHidden(true)
@@ -548,8 +549,9 @@ function ZO_BankingCommon_Gamepad:HideSelector()
         self.selectorContainer:SetHidden(true)
         self.selector:Clear()
         self.selector:Deactivate()
+        self:ActivateCurrentList()
+
         local currentList = self:GetCurrentList()
-        currentList:Activate()
         currentList:GetTargetControl():SetHidden(false)
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.selectorKeybindStripDescriptor)
         self:AddKeybinds()
@@ -675,7 +677,7 @@ function ZO_BankingCommon_Gamepad:SetCurrentCarriedAmount(control)
 end
 
 function ZO_BankingCommon_Gamepad:GetCurrentCarriedAmountNarration(control)
-    return ZO_Currency_FormatGamepad(self.currencyType, self:GetDepositMoneyAmount(), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+    return ZO_Currency_FormatGamepad(self.currencyType, self:GetDepositMoneyAmount(), ZO_CURRENCY_FORMAT_AMOUNT_NAME)
 end
 
 function ZO_BankingCommon_Gamepad:SetCurrentBankedAmount(control)
@@ -693,7 +695,7 @@ function ZO_BankingCommon_Gamepad:GetCurrentBankedAmountNarration(control)
     {
         obfuscateAmount = self:DoesObfuscateWithdrawAmount(),
     }
-    return ZO_Currency_FormatGamepad(self.currencyType, self:GetWithdrawMoneyAmount(), ZO_CURRENCY_FORMAT_AMOUNT_ICON, displayOptions)
+    return ZO_Currency_FormatGamepad(self.currencyType, self:GetWithdrawMoneyAmount(), ZO_CURRENCY_FORMAT_AMOUNT_NAME, displayOptions)
 end
 
 function ZO_BankingCommon_Gamepad:GetCurrencyType()

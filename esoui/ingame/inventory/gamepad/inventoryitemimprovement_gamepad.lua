@@ -190,7 +190,7 @@ function ZO_InventoryItemImprovement_Gamepad:AddItemKitSubLabelsToCurrentEntry(i
     if requiredChampionPoints > 0 then
         local failed = requiredChampionPoints > GetPlayerChampionPointsEarned()
         local pointsString = failed and ZO_ERROR_COLOR:Colorize(requiredChampionPoints) or ZO_DEFAULT_ENABLED_COLOR:Colorize(requiredChampionPoints)
-        self:AddSubLabel(zo_iconFormat(GetChampionPointsIcon(), "40", "40"))
+        self:AddSubLabel(zo_iconFormat(ZO_GetChampionPointsIcon(), "40", "40"))
         self:AddSubLabel(pointsString)
     elseif requiredLevel > 0 then
         local failed = requiredLevel > GetUnitLevel("player")

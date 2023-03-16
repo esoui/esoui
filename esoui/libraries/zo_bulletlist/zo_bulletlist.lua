@@ -39,13 +39,14 @@ function ZO_BulletList:AddLine(text, useSecondaryBullet)
 
     label:SetText(text)
 
-    if(self.lastLabel) then
+    if self.lastLabel then
         label:SetAnchor(TOPLEFT, self.lastLabel, BOTTOMLEFT, 0, self.linePaddingY)
         label:SetAnchor(TOPRIGHT, self.lastLabel, BOTTOMRIGHT, 0, self.linePaddingY)
         bullet:SetAnchor(TOPRIGHT, label, TOPLEFT, -self.bulletPaddingX, bulletOffsetY)
         local textWidth, textHeight = label:GetTextDimensions()
         self.height = self.height + textHeight + self.linePaddingY
     else
+        self.entryText = {}
         bullet:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, bulletOffsetY)
         label:SetAnchor(TOPLEFT, bullet, TOPRIGHT, self.bulletPaddingX, -bulletOffsetY)
         label:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, 0)
@@ -53,6 +54,7 @@ function ZO_BulletList:AddLine(text, useSecondaryBullet)
         self.height = textHeight
     end
 
+    table.insert(self.entryText, text)
     self.control:SetHeight(self.height)
     self.lastLabel = label
     self.lastBullet = bullet
@@ -68,4 +70,19 @@ function ZO_BulletList:Clear()
     if self.secondaryBulletPool then
         self.secondaryBulletPool:ReleaseAllObjects()
     end
+    self.entryText = nil
+end
+
+function ZO_BulletList:HasEntries()
+    return self.entryText and #self.entryText > 0
+end
+
+function ZO_BulletList:GetNarrationText()
+    local narrations = {}
+    if self.entryText then
+        for _, text in ipairs(self.entryText) do
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(text))
+        end
+    end
+    return narrations
 end

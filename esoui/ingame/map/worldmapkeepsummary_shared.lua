@@ -109,7 +109,7 @@ function ZO_MapKeepSummary_Shared:RefreshAlliance()
     local alliance = self.keepUpgradeObject:GetAlliance()
     local allianceControl = self.control:GetNamedChild("Alliance")
     allianceControl.alliance = alliance
-    allianceControl:SetTexture(GetLargeAllianceSymbolIcon(alliance))
+    allianceControl:SetTexture(ZO_GetLargeAllianceSymbolIcon(alliance))
 end
 
 function ZO_MapKeepSummary_Shared:RefreshGuildOwner()
@@ -149,7 +149,7 @@ function ZO_MapKeepSummary_Shared:RefreshTimeDependentControls()
             local alliance = GetKeepAlliance(resourceKeepId, self.keepUpgradeObject:GetBGQueryType())
             row.allianceTexture:SetHidden(false)
             row.allianceTexture.alliance = alliance
-            row.allianceTexture:SetTexture(GetLargeAllianceSymbolIcon(alliance))
+            row.allianceTexture:SetTexture(ZO_GetLargeAllianceSymbolIcon(alliance))
         else
             row.allianceTexture:SetHidden(true)
         end

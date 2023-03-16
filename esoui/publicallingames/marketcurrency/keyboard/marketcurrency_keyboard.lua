@@ -23,7 +23,8 @@ function ZO_MarketCurrency_Keyboard:InitializeControls()
 
         local controlLabel = control:GetNamedChild("Label")
         controlLabel:SetText(ZO_Currency_GetAmountLabel(data.currencyType))
-        control:GetNamedChild("Amount"):SetWidth(control:GetWidth() - controlLabel:GetWidth())
+        local TOTAL_CURRENCY_LABEL_WIDTH = 250
+        control:GetNamedChild("Amount"):SetWidth(TOTAL_CURRENCY_LABEL_WIDTH - controlLabel:GetWidth())
 
         control:SetHandler("OnMouseEnter", function(...) self:OnCurrencyLabelMouseEnter(data.tooltip, ...) end, "tooltip")
         control:SetHandler("OnMouseExit", function(...) self:OnCurrencyLabelMouseExit(...) end, "tooltip")

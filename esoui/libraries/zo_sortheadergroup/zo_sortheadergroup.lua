@@ -242,6 +242,7 @@ end
 function ZO_SortHeaderGroup:SetHeaderNameForKey(key, name)
     local header = self:HeaderForKey(key)
     if header then
+        header.name = name
         header:GetNamedChild("Name"):SetText(name)
     end
 end
@@ -250,8 +251,7 @@ function ZO_SortHeaderGroup:GetHeaderNameForKey(key)
     local name = ""
     local header = self:HeaderForKey(key)
     if header then
-        --TODO XAR: Look into storing this information somewhere so we don't have to pull it directly from the control
-        name = header:GetNamedChild("Name"):GetText()
+        name = header.name
     end
     return name
 end
@@ -285,6 +285,7 @@ function ZO_SortHeader_Initialize(control, name, key, initialDirection, alignmen
     control.initialDirection = initialDirection or ZO_SORT_ORDER_DOWN
     control.usesArrow = true
     control.highlightTemplate = highlightTemplate
+    control.name = name
 end
 
 function ZO_SortHeader_InitializeIconHeader(control, icon, sortUpIcon, sortDownIcon, mouseoverIcon, key, initialDirection)

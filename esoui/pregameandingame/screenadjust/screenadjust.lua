@@ -49,6 +49,55 @@ function ScreenAdjust:Initialize(control)
             saveButton:SetEnabled(true)
         end
     end)
+
+    self:InitializeNarrationInfo()
+end
+
+function ScreenAdjust:InitializeNarrationInfo()
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return SCREEN_ADJUST_SCENE_FRAGMENT:IsShowing()
+        end,
+        selectedNarrationFunction = function()
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_ADJUST_INSTRUCTIONS)))
+            return narrations
+        end,
+        additionalInputNarrationFunction = function()
+            local narrationData = {}
+
+            if ZO_Keybindings_ShouldShowGamepadKeybind() then
+                --Get the narration data for adjusting the screen
+                local screenAdjustNarrationData =
+                {
+                    name = GetString(SI_SCREEN_ADJUST),
+                    --The gamepad keybind for screen adjust isn't a real keybind so just use the key that gives us the narration we want here
+                    keybindName = ZO_Keybindings_GetNarrationStringFromKeys(KEY_GAMEPAD_LEFT_STICK, KEY_INVALID, KEY_INVALID, KEY_INVALID, KEY_INVALID),
+                    enabled = true,
+                }
+                table.insert(narrationData, screenAdjustNarrationData)
+            else
+                --Get the narration data for adjusting the screen
+                local NO_NAME = nil
+                ZO_CombineNumericallyIndexedTables(narrationData, ZO_GetCombinedDirectionalInputNarrationData(NO_NAME, NO_NAME, NO_NAME, GetString(SI_SCREEN_ADJUST)))
+            end
+
+            --Narration for the save keybind
+            local saveButtonData = self.gamepadSaveButton:GetKeybindButtonNarrationData()
+            if saveButtonData then
+                table.insert(narrationData, saveButtonData)
+            end
+
+            --Narration for the cancel keybind
+            local cancelData = self.gamepadCancelButton:GetKeybindButtonNarrationData()
+            if cancelData then
+                table.insert(narrationData, cancelData)
+            end
+            return narrationData
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("screenAdjust", narrationInfo)
 end
 
 function ScreenAdjust:InitializeInstructions()
@@ -72,11 +121,11 @@ function ScreenAdjust:InitializeInstructions()
             self:Save()
         end)
 
-        local cancelButton = gamepadButtons:GetNamedChild("Cancel")
-        cancelButton:SetText(GetString(SI_CANCEL))
-        cancelButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
-        cancelButton:SetKeybind("SCREEN_ADJUST_CANCEL")
-        cancelButton:SetCallback(function()
+        self.gamepadCancelButton = gamepadButtons:GetNamedChild("Cancel")
+        self.gamepadCancelButton:SetText(GetString(SI_CANCEL))
+        self.gamepadCancelButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
+        self.gamepadCancelButton:SetKeybind("SCREEN_ADJUST_CANCEL")
+        self.gamepadCancelButton:SetCallback(function()
             self:Cancel()
         end)
     end
@@ -128,6 +177,7 @@ function ScreenAdjust:OnShown()
 
     if SCENE_MANAGER:IsCurrentSceneGamepad() then
         DIRECTIONAL_INPUT:Activate(self, self.control)
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("screenAdjust")
     end
     self.control:SetHandler("OnUpdate", function()
         self:UpdateSize()

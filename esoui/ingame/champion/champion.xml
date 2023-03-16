@@ -108,28 +108,6 @@
 
         <!-- Set each of these virtual textures to a concrete texture on load so their texture files are loaded into memory -->
         <Texture name="ZO_ChampionPreloadTextures" hidden="true" inherits="ZO_ConstellationStarSpiral ZO_ConstellationSkyCloudInner ZO_ConstellationSkyCloudOuter"/>
-
-        <TopLevelControl name="ZO_ChampionPerksChosenAttributePointCounter_Base" virtual="true" resizeToFitDescendents="true" hidden="true" tier="HIGH"  level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
-            <Dimensions x="100" y="48"/>
-            <OnInitialized>
-                self.iconTexture = self:GetNamedChild("Icon")
-                self.pointsLabel = self:GetNamedChild("Points")
-                self.pointsHeaderLabel = self:GetNamedChild("PointsHeader")
-            </OnInitialized>
-            <Controls>
-                <Label name="$(parent)PointsHeader" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT"/>
-                    <Dimensions y="48"/>
-                </Label>
-                <Texture name="$(parent)Icon">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)PointsHeader" relativePoint="TOPRIGHT" offsetX="10"/>
-                    <Dimensions x="48" y="48"/>
-                </Texture>
-                <Label name="$(parent)Points">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="8"/>
-                </Label>
-            </Controls>
-        </TopLevelControl>
         
         <TopLevelControl name="ZO_ChampionRespecConfirmationDialog" inherits="ZO_CustomDialogBase" >
             <Controls>

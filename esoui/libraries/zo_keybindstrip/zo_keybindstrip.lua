@@ -1065,11 +1065,17 @@ do
     end
 
     local function GetKeybindButtonDescriptorNarrationInfo(keybindButtonDescriptor)
-        --TODO XAR: Any additional info we end up needing for narration should go here
+        local enabled = GetValueFromRawOrFunction(keybindButtonDescriptor, "enabled")
+        if enabled == nil then
+            enabled = true
+        end
+
+        --Any additional info we end up needing for narration should go here
         local data = 
         {
-            name = GetValueFromRawOrFunction(keybindButtonDescriptor, "name"),
+            name = GetValueFromRawOrFunction(keybindButtonDescriptor, "narrationOverrideName") or GetValueFromRawOrFunction(keybindButtonDescriptor, "name"),
             keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(keybindButtonDescriptor.keybind) or GetString(SI_ACTION_IS_NOT_BOUND),
+            enabled = enabled,
         }
 
         return data

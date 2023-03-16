@@ -77,6 +77,21 @@ function ZO_SmithingExtractionSlot:ShowDropCallout()
     self.dropCallout:SetTexture("EsoUI/Art/Crafting/crafting_alchemy_goodSlot.dds")
 end
 
+function ZO_SmithingExtractionSlot:GetNarrationText()
+    if self:HasOneItem() then
+        local bagId, slotIndex = self:GetItemBagAndSlot(1)
+        return zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bagId, slotIndex))
+    elseif self:HasMultipleItems() then
+        return zo_strformat(SI_CRAFTING_SLOT_MULTIPLE_SELECTED, ZO_CommaDelimitNumber(self:GetStackCount()))
+    else
+        if self:IsInRefineMode() then
+            return zo_strformat(SI_SMITHING_NEED_MORE_TO_EXTRACT, GetRequiredSmithingRefinementStackSize())
+        else
+            return GetString(SI_SMITHING_SELECT_ITEMS_TO_DECONSTRUCT)
+        end
+    end
+end
+
 ZO_SharedSmithingExtraction = ZO_Object:Subclass()
 
 function ZO_SharedSmithingExtraction:New(...)

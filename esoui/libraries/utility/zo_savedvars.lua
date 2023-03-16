@@ -269,21 +269,25 @@ local function ExposeMethods(interface, namespace, rawSavedTable, defaults, prof
 
         return cachedInterfaces[displayName][playerName]
     end
+    interface.ResetToDefaults = function(self)
+        local sv = getmetatable(self).__index
+        if sv then
+            local version = sv.version
+            ZO_ClearTable(sv)
+            sv.version = version
+            if self.default then
+                CopyDefaults(sv, self.default)
+            end
+        end
+    end
 end
 
 function CreateExposedInterface(rawSavedTable, version, namespace, defaults, profile, displayName, playerName, cachedInterfaces)
     local current, container, containerKey = InitializeRawTable(rawSavedTable, profile, namespace, displayName, playerName)
 
     --if the data is unversioned or out of date, nuke the data first
-    if(current.version == nil) then
-        --if there is actually data to nuke...      
-        if(next(current)) then
-            current = {}
-            container[containerKey] = current
-        end        
-    elseif(current.version < version) then
-        current = {}
-        container[containerKey] = current
+    if current.version == nil or current.version < version then
+        ZO_ClearTable(current)
     end
 
     current.version = version
@@ -306,7 +310,7 @@ function CreateExposedInterface(rawSavedTable, version, namespace, defaults, pro
 
     cachedInterfaces = cachedInterfaces or {}
 
-    ExposeMethods(interface, namespace, rawSavedTable, defaults, cachedInterfaces)
+    ExposeMethods(interface, namespace, rawSavedTable, defaults, profile, cachedInterfaces)
 
     return setmetatable(interface, interfaceMT)
 end

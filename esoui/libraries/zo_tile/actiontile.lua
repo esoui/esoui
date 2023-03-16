@@ -33,7 +33,8 @@ function ZO_ActionTile:Initialize(control)
 end
 
 function ZO_ActionTile:SetHeaderText(headerText)
-    self.headerLabel:SetText(headerText)
+    self.headerText = headerText
+    self.headerLabel:SetText(self.headerText)
 end
 
 function ZO_ActionTile:SetHeaderColor(headerColor)
@@ -41,7 +42,8 @@ function ZO_ActionTile:SetHeaderColor(headerColor)
 end
 
 function ZO_ActionTile:SetTitle(titleText)
-    self.titleLabel:SetText(titleText)
+    self.titleText = titleText
+    self.titleLabel:SetText(self.titleText)
 end
 
 function ZO_ActionTile:SetTitleColor(titleColor)

@@ -1,0 +1,199 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_MagmaBackgroundAnimation_Intro">
+            <Animations>
+                <CustomAnimation delay="1500" duration="2000">
+                    <OnPlay>
+                        ZO_MagmaBackgroundAnimation_Intro_OnPlay(...)
+                    </OnPlay>
+
+                    <OnStop>
+                        ZO_MagmaBackgroundAnimation_Intro_OnStop(...)
+                    </OnStop>
+
+                    <UpdateFunction>
+                        ZO_MagmaBackgroundAnimation_Intro_OnUpdate(...)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_MagmaBackgroundAnimation_FloraLoop" loopCount="LOOP_INDEFINITELY" playbackType="LOOP">
+            <Animations>
+                <CustomAnimation duration="10000">
+                    <UpdateFunction>
+                        ZO_MagmaBackgroundAnimation_FloraLoop_OnUpdate(...)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_MagmaBackgroundAnimation_ParticleLoop" loopCount="LOOP_INDEFINITELY" playbackType="LOOP">
+            <Animations>
+                <CustomAnimation duration="10000">
+                    <UpdateFunction>
+                        ZO_MagmaBackgroundAnimation_ParticleLoop_OnUpdate(...)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_MagmaBackgroundAnimation_SceneTimeLoop" loopCount="LOOP_INDEFINITELY" playbackType="LOOP">
+            <Animations>
+                <CustomAnimation duration="10000">
+                    <UpdateFunction>
+                        ZO_MagmaBackgroundAnimation_SceneTimeLoop_OnUpdate(...)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Texture name="ZO_MagmaBackgroundTexture" alpha="0" pixelRoundingEnabled="false" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" virtual="true">
+            <Anchor point="CENTER" />
+        </Texture>
+
+        <Texture name="ZO_MagmaBackgroundWaveTextureLeft" inherits="ZO_MagmaBackgroundTexture" shaderEffectType="WAVE" virtual="true">
+            <WaveBounds minX="0.002" maxX="0.0" minY="0.00025" maxY="0.0" />
+            <Wave angleRadians="0.6" frequency="0.4" speed="3.0" offset="0.0" />
+        </Texture>
+
+        <Texture name="ZO_MagmaBackgroundWaveTextureRight" inherits="ZO_MagmaBackgroundTexture" shaderEffectType="WAVE" virtual="true">
+            <WaveBounds minX="0.0" maxX="0.005" minY="0.00025" maxY="0.0" />
+            <Wave angleRadians="0.6" frequency="0.3" speed="5.0" offset="0.0" />
+        </Texture>
+
+        <Texture name="ZO_MagmaBackgroundDandelion" inherits="ZO_MagmaBackgroundTexture" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\dandelion.dds" virtual="true">
+            <Dimensions x="ZO_BACKGROUND_DANDELION_WIDTH" y="ZO_BACKGROUND_DANDELION_HEIGHT" />
+        </Texture>
+
+        <Texture name="ZO_MagmaBackgroundTorchbug1" inherits="ZO_MagmaBackgroundTexture" blendMode="ALPHA" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\torchbug1.dds" virtual="true">
+            <Dimensions x="92" y="92" />
+        </Texture>
+
+        <Texture name="ZO_MagmaBackgroundTorchbug2" inherits="ZO_MagmaBackgroundTexture" blendMode="ALPHA" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\torchbug2.dds" virtual="true">
+            <Dimensions x="92" y="92" />
+        </Texture>
+
+        <Control name="ZO_MagmaBackgroundLayeredScene" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Terrain" inherits="ZO_MagmaBackgroundTexture" level="10" />
+
+                <Texture name="$(parent)Grass" inherits="ZO_MagmaBackgroundTexture" level="11" />
+
+                <Texture name="$(parent)Ouroboros1" inherits="ZO_MagmaBackgroundTexture" level="20" />
+
+                <Texture name="$(parent)Ouroboros2" inherits="ZO_MagmaBackgroundTexture" level="30" />
+
+                <Texture name="$(parent)Foreground1" inherits="ZO_MagmaBackgroundTexture" level="40" />
+
+                <Texture name="$(parent)Foreground2" inherits="ZO_MagmaBackgroundTexture" level="50" />
+
+                <Texture name="$(parent)Foreground3" inherits="ZO_MagmaBackgroundTexture" level="60" />
+
+                <Texture name="$(parent)Foreground4" inherits="ZO_MagmaBackgroundTexture" level="70" />
+
+                <Texture name="$(parent)Foreground5" inherits="ZO_MagmaBackgroundWaveTextureLeft" level="80" />
+
+                <Texture name="$(parent)Foreground6" inherits="ZO_MagmaBackgroundTexture" level="100" />
+
+                <Texture name="$(parent)Foreground7" inherits="ZO_MagmaBackgroundTexture" level="110" />
+
+                <Texture name="$(parent)Foreground8" inherits="ZO_MagmaBackgroundWaveTextureRight" level="120" />
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_MagmaBackground" hidden="true" layer="BACKGROUND" level="1" tier="LOW">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_MagmaBackground_OnInitialized(self)
+            </OnInitialized>
+
+            <OnEffectivelyHidden>
+                self.owner:Stop()
+            </OnEffectivelyHidden>
+
+            <Controls>
+                <Control name="$(parent)DayScene" inherits="ZO_MagmaBackgroundLayeredScene">
+                    <Anchor point="CENTER" />
+
+                    <Controls>
+                        <Texture name="$(parent)Terrain" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\bg_DAY.dds" />
+
+                        <Texture name="$(parent)Grass" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\grass_DAY.dds" />
+
+                        <Texture name="$(parent)Ouroboros1" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\03_OuroborosActual_DAY.dds" />
+
+                        <Texture name="$(parent)Ouroboros2" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\02_OuroborosGrass_DAY.dds" />
+
+                        <Texture name="$(parent)Foreground1" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\09_StringyShroom_DAY.dds" />
+
+                        <Texture name="$(parent)Foreground2" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\09_BigRightShroom_DAY.dds" />
+
+                        <Texture name="$(parent)Foreground3" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\08_SmallInkyShrooms_DAY.dds" />
+
+                        <Texture name="$(parent)Foreground4" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\04_LandscapeRock_DAY.dds" />
+
+                        <Texture name="$(parent)Foreground5" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\05_PurpleFlowers1_DAY.dds" />
+
+                        <Texture name="$(parent)Foreground6" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\07_OvalShroom_DAY.dds" />
+
+                        <Texture name="$(parent)Foreground7" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\07_OrangeShroom_DAY.dds" />
+
+                        <Texture name="$(parent)Foreground8" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\06_YellowShrooms_DAY.dds" />
+
+                        <Texture name="$(parent)Sky" inherits="ZO_MagmaBackgroundTexture" blendMode="ADD" level="143" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\sky_DAY.dds">
+                            <Dimensions x="1920" y="256" />
+                            <TextureCoords left="0.0" right="0.9375" top="0.0" bottom="1.0" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)NightScene" inherits="ZO_MagmaBackgroundLayeredScene">
+                    <Anchor point="CENTER" />
+
+                    <Controls>
+                        <Texture name="$(parent)Terrain" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\bg_NIGHT.dds" />
+
+                        <Texture name="$(parent)Grass" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\grass_NIGHT.dds" />
+
+                        <Texture name="$(parent)Ouroboros1" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\03_OuroborosActual_NIGHT.dds" />
+
+                        <Texture name="$(parent)Ouroboros2" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\02_OuroborosGrass_NIGHT.dds" />
+
+                        <Texture name="$(parent)Foreground1" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\09_StringyShroom_NIGHT.dds" />
+
+                        <Texture name="$(parent)Foreground2" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\09_BigRightShroom_NIGHT.dds" />
+
+                        <Texture name="$(parent)Foreground3" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\08_SmallInkyShrooms_NIGHT.dds" />
+
+                        <Texture name="$(parent)Foreground4" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\04_LandscapeRock_NIGHT.dds" />
+
+                        <Texture name="$(parent)Foreground5" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\05_PurpleFlowers1_NIGHT.dds" />
+
+                        <Texture name="$(parent)Foreground6" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\07_OvalShroom_NIGHT.dds" />
+
+                        <Texture name="$(parent)Foreground7" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\07_OrangeShroom_NIGHT.dds" />
+
+                        <Texture name="$(parent)Foreground8" override="true" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\06_YellowShrooms_NIGHT.dds" />
+
+                        <Texture name="$(parent)OuroborosInner" inherits="ZO_MagmaBackgroundTexture" alpha="0" color="c0c0c0" hidden="true" level="25" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\ouroborosInner.dds"
+                            maskMode="THRESHOLD" maskTextureFile="EsoUI\Art\PregameAnimatedBackground\Magma\ouroborosInnerMask.dds" maskThresholdNormalizedZeroAlphaEdge="0.0" maskThresholdNormalizedThickness="0.0" maskTextureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <Dimensions x="32" y="28" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)TitleDay" inherits="ZO_MagmaBackgroundTexture" level="141" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\title_text_day.dds">
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)TitleNight" inherits="ZO_MagmaBackgroundTexture" level="142" textureFile="EsoUI\Art\PregameAnimatedBackground\Magma\title_text_night.dds">
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -36,6 +36,8 @@ function ZO_SortFilterList_Gamepad:Activate(animateInstantly, scrollAutoSelected
 
         self:SetDirectionalInputEnabled(true)
         ZO_ScrollList_AutoSelectData(self.list, animateInstantly, scrollAutoSelectedDataIntoView)
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, NARRATE_HEADER)
     end
 end
 
@@ -75,5 +77,22 @@ end
 
 function ZO_SortFilterList_Gamepad:SetEmptyText(emptyText)
     self.emptyRow = CreateControlFromVirtual("$(parent)EmptyRow", self.list, "ZO_SortFilterListEmptyRow_Gamepad")
-    GetControl(self.emptyRow, "Message"):SetText(emptyText)
+    self.emptyRow:GetNamedChild("Message"):SetText(emptyText)
+end
+
+function ZO_SortFilterList_Gamepad:OnSelectionChanged(previouslySelected, selected)
+   ZO_SortFilterList.OnSelectionChanged(self, previouslySelected, selected)
+   SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self)
+end
+
+function ZO_SortFilterList_Gamepad:GetHeaderNarration()
+    --Can be overridden
+end
+
+function ZO_SortFilterList_Gamepad:GetFooterNarration()
+    --Can be overridden
+end
+
+function ZO_SortFilterList_Gamepad:GetNarrationText()
+    --Can be overridden
 end

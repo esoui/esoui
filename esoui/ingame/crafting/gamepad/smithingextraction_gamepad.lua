@@ -27,12 +27,22 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
     ZO_SharedSmithingExtraction.Initialize(self, slotContainer:GetNamedChild("ExtractionSlot"), nil, owner, isRefinementOnly)
 
     self.tooltip = floatingControl:GetNamedChild("Tooltip")
+    local tooltipNarrationInfo = 
+    {
+        canNarrate = function()
+            return not self.tooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return self.tooltip.tip:GetNarrationText()
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(tooltipNarrationInfo)
 
     local ADDITIONAL_MOUSEOVER_BINDS = nil
     local DONT_USE_KEYBIND_STRIP = false
     self.itemActions = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_LEFT, ADDITIONAL_MOUSEOVER_BINDS, DONT_USE_KEYBIND_STRIP)
 
-    self:InitializeInventory(isRefinementOnly)
+    self:InitializeInventory(isRefinementOnly, scene)
     self:InitExtractionSlot(scene.name)
 
     if isRefinementOnly then
@@ -68,6 +78,8 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
             entry.callback = function()
                 if not ZO_CraftingUtils_IsPerformingCraftProcess() then
                     self:SetFilterType(filterType)
+                    local NARRATE_HEADER = true
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list, NARRATE_HEADER)
                 end
             end
             entry.filterType = filterType
@@ -167,7 +179,22 @@ function ZO_GamepadSmithingExtraction:SetCraftingType(craftingType, oldCraftingT
     self.inventory:HandleDirtyEvent()
 end
 
-function ZO_GamepadSmithingExtraction:InitializeInventory(isRefinementOnly)
+function ZO_GamepadSmithingExtraction:InitExtractionSlot(sceneName)
+    ZO_SharedSmithingExtraction.InitExtractionSlot(self, sceneName)
+    local tooltipNarrationInfo = 
+    {
+        canNarrate = function()
+            --If this fixed tooltip is showing, no need to narrate this, as it will be redundant information
+            return SCENE_MANAGER:IsShowing(sceneName) and self.tooltip:IsHidden()
+        end,
+        tooltipNarrationFunction = function()
+            return self.extractionSlot:GetNarrationText()
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(tooltipNarrationInfo)
+end
+
+function ZO_GamepadSmithingExtraction:InitializeInventory(isRefinementOnly, scene)
     local inventory = self.panelControl:GetNamedChild("Inventory")
     self.inventory = ZO_GamepadExtractionInventory:New(self, inventory, isRefinementOnly, SLOT_TYPE_CRAFTING_COMPONENT)
 
@@ -181,13 +208,33 @@ function ZO_GamepadSmithingExtraction:InitializeInventory(isRefinementOnly)
             data.hasCraftingQuestPin = self:CanRefineToQuestItem(bagId, slotIndex)
             --If there is an override status indicator icon, we need to explicitly add the quest pin here
             if data.overrideStatusIndicatorIcons and data.hasCraftingQuestPin then
-                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"}
+                data.overrideStatusIndicatorIcons =  { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE, ZO_TRACKED_PIN_STATUS_ICON_OVERRIDE }
             end
         else
             data.hasCraftingQuestPin = false
         end
     end
     )
+
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return scene:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.owner.header, self.owner.headerData)
+        end,
+        footerNarrationFunction = function()
+            return self.owner:GetFooterNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.inventory.list, narrationInfo)
+
+    ZO_WRIT_ADVISOR_GAMEPAD:RegisterCallback("CycleActiveQuest", function()
+        if scene:IsShowing() then
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
+        end
+    end)
 end
 
 function ZO_GamepadSmithingExtraction:IsCurrentSelected()
@@ -202,7 +249,7 @@ function ZO_GamepadSmithingExtraction:UpdateSelection()
             data.hasCraftingQuestPin = self:CanRefineToQuestItem(data.bagId, data.slotIndex)
             --If there is an override status indicator icon, we need to explicitly add the quest pin here
             if data.overrideStatusIndicatorIcons and data.hasCraftingQuestPin then
-                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"}
+                data.overrideStatusIndicatorIcons =  { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE, ZO_TRACKED_PIN_STATUS_ICON_OVERRIDE }
             end
         else
             data.hasCraftingQuestPin = false
@@ -307,6 +354,7 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
                     self:AddItemToCraft(self.inventory:CurrentSelectionBagAndSlot())
                 end
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
             end,
             enabled = function()
                 return self:IsCurrentSelected() or self:CanItemBeAddedToCraft(self.inventory:CurrentSelectionBagAndSlot())

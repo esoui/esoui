@@ -43,6 +43,7 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:SetupRow(control, data)
 end
 
 function ZO_GuildRecruitment_Blacklist_Gamepad:OnSelectionChanged(previousData, selectedData)
+    ZO_GuildFinder_ListPanel_GamepadBehavior.OnSelectionChanged(self, previousData, selectedData)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
 
     if selectedData then
@@ -94,6 +95,21 @@ end
 
 function ZO_GuildRecruitment_Blacklist_Gamepad:OnShowing()
     ZO_GuildRecruitment_Blacklist_Shared.OnShowing(self)
+end
+
+function ZO_GuildRecruitment_Blacklist_Gamepad:GetSelectedNarrationText()
+    local narrations = {}
+    local selectedData = self:GetSelectedData()
+    if selectedData then
+        --The name will be narrated in the tooltip, so only narrate the column header here
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_GetPlatformAccountLabel()))
+    end
+    return narrations
+end
+
+--Overridden from base
+function ZO_GuildRecruitment_Blacklist_Gamepad:GetHeaderNarration()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_RECRUITMENT_CATEGORY_BLACKLIST))
 end
 
 -------------

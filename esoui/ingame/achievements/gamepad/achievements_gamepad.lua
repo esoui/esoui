@@ -103,10 +103,11 @@ function ZO_Achievements_Gamepad:SetupList(list)
             control.statusIndicator:ClearIcons()
 
             if data.isEarnedAchievement then
-                control.statusIndicator:AddIcon("EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds")
+                local NO_TINT = nil
+                control.statusIndicator:AddIcon("EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", NO_TINT, GetString(SI_SCREEN_NARRATION_ACHIEVEMENT_EARNED_ICON_NARRATION))
             end
 
-            control.statusIndicator:AddIcon("EsoUI/Art/Miscellaneous/Gamepad/gp_charNameIcon.dds", characterPersistentColor)
+            control.statusIndicator:AddIcon("EsoUI/Art/Miscellaneous/Gamepad/gp_charNameIcon.dds", characterPersistentColor, GetString(SI_GAMEPAD_ACHIEVEMENTS_CHARACTER_PERSISTENT))
             control.statusIndicator:Show()
 
             local iconFrameBorder
@@ -160,7 +161,7 @@ local function AchievementControlActivate(control)
     control.frame:SetEdgeColor(ZO_SELECTED_TEXT:UnpackRGB())
 end
 
-local function AchievementControlDectivate(control)
+local function AchievementControlDeactivate(control)
     control.frame:SetEdgeColor(ZO_NORMAL_TEXT:UnpackRGB())
 end
 
@@ -183,8 +184,14 @@ local function SetupAchievementList(parentControl, numEntries, controllers, canF
             control = control,
             canFocus = canFocusFunction,
             activate = AchievementControlActivate,
-            deactivate = AchievementControlDectivate,
+            deactivate = AchievementControlDeactivate,
             iconScaleAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_Gamepad_Achievement_FocusIconScaleAnimation", control.icon),
+            headerNarrationFunction = function()
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_ACHIEVEMENTS_RECENT))
+            end,
+            footerNarrationFunction = function()
+                return ACHIEVEMENTS_GAMEPAD:GetFooterNarration()
+            end,
         }
 
         focus:AddEntry(focusEntry)
@@ -253,6 +260,8 @@ end
 function ZO_Achievements_Gamepad:OnEnterHeader()
     PlaySound(SOUNDS.GAMEPAD_MENU_UP)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    local NARRATE_HEADER = true
+    SCREEN_NARRATION_MANAGER:QueueFocus(self.recentAchievementFocus, NARRATE_HEADER)
 end
 
 function ZO_Achievements_Gamepad:OnLeaveHeader()
@@ -272,6 +281,12 @@ function ZO_Achievements_Gamepad:AchievementListSelectionChanged(list, entry)
             self:ShowAchievementTooltip(recentAchievementId)
         else
             self:ShowNoAchievementTooltip()
+        end
+        if list == self.recentAchievementFocus then
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueFocus(list, NARRATE_HEADER)
+        else
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
         end
     elseif (self.visibleCategoryId == nil) and (list == self.recentAchievementFocus) then
         self:HideTooltip()
@@ -451,6 +466,9 @@ function ZO_Achievements_Gamepad:InitializeKeybindStripDescriptors()
                 self.achievementId = nil
                 self:Update()
                 PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+                --This screen seems to use the same list for both the top level and the subcategories. As a result, we need to manually tell it to re-narrate the header when switching between them
+                local NARRATE_HEADER = true
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList, NARRATE_HEADER)
             else
                 SCENE_MANAGER:HideCurrentScene()
             end
@@ -463,6 +481,9 @@ function ZO_Achievements_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                 local targetData = self.itemList:GetTargetData()
                 self:SwitchToCategoryAndAchievement(targetData.categoryIndex, targetData.achievementId)
+                --This screen seems to use the same list for both the top level and the subcategories. As a result, we need to manually tell it to re-narrate the header when switching between them
+                local NARRATE_HEADER = true
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList, NARRATE_HEADER)
             end,
             visible = function()
                 if self.recentAchievementFocus.active then
@@ -558,13 +579,14 @@ function ZO_Achievements_Gamepad:SetupLineList(achievementId)
 
     while chainId ~= 0 do
         local chainControl = self.chainControls[chainIndex]
-        local icon, completed = select(4, GetAchievementInfo(chainId))
+        local name, _, _, icon, completed = GetAchievementInfo(chainId)
         local iconDesaturation = completed and 0 or 1
 
         chainControl.icon:ClearIcons()
         chainControl.icon:AddIcon(icon)
         chainControl.icon:SetDesaturation(iconDesaturation)
         chainControl.achievementId = chainId
+        chainControl.name = name
         if chainId == achievementId then
             self.chainFocus:SetFocusByIndex(chainIndex)
         end
@@ -633,7 +655,12 @@ function ZO_Achievements_Gamepad:PopulateCategories()
     local MIN_POINTS = 0
     local totalPoints = GetTotalAchievementPoints()
     local earnedPoints = GetEarnedAchievementPoints()
-    self.footerBarName:SetText(GetString(SI_GAMEPAD_ACHIEVEMENTS_POINTS_LABEL))
+
+    self.footerBarNameText = GetString(SI_GAMEPAD_ACHIEVEMENTS_POINTS_LABEL)
+    self.footerBarEarnedPoints = earnedPoints
+    self.footerBarTotalPoints = totalPoints
+
+    self.footerBarName:SetText(self.footerBarNameText)
     self.footerBarValue:SetText(earnedPoints)
     self.footerBarBar:SetMinMax(MIN_POINTS, totalPoints)
     self.footerBarBar:SetValue(earnedPoints)
@@ -647,7 +674,7 @@ function ZO_Achievements_Gamepad:PopulateCategories()
     self.itemList:AddEntry("ZO_GamepadMenuEntryWithBarTemplate", entryData)
 
     -- Populate actual categories.
-    for categoryIndex=1, GetNumAchievementCategories() do
+    for categoryIndex = 1, GetNumAchievementCategories() do
         local categoryName, _, _, earnedPoints, totalPoints = GetAchievementCategoryInfo(categoryIndex)
         if totalPoints > 0 then
             local gamepadIcon = GetAchievementCategoryGamepadIcon(categoryIndex)
@@ -707,6 +734,10 @@ end
 
 function ZO_Achievements_Gamepad:PopulateAchievements(categoryIndex)
     local categoryName, numSubCategories, numAchievements, earnedPoints, totalPoints = GetAchievementCategoryInfo(categoryIndex)
+    self.footerBarNameText = categoryName
+    self.footerBarEarnedPoints = earnedPoints
+    self.footerBarTotalPoints = totalPoints
+
     self.footerBarName:SetText(categoryName)
     self.footerBarValue:SetText(earnedPoints)
     self.footerBarBar:SetMinMax(0, totalPoints)
@@ -804,6 +835,19 @@ function ZO_Achievements_Gamepad:PerformUpdate()
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+end
+
+--Overridden from base
+function ZO_Achievements_Gamepad:GetFooterNarration()
+    local narrations = {}
+    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.footerBarNameText))
+    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.footerBarEarnedPoints))
+    local progressNarration = ZO_GetProgressBarNarrationText(0, self.footerBarTotalPoints, self.footerBarEarnedPoints)
+    if progressNarration then
+        table.insert(narrations, progressNarration)
+    end
+
+    return narrations
 end
 
 function ZO_Achievements_Gamepad_OnInitialize(control)

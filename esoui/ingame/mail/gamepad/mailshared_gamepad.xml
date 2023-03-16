@@ -83,9 +83,9 @@
                                 <Texture name="$(parent)ScrollIndicator" override="true">
                                     <Anchor point="CENTER" relativePoint="RIGHT" offsetX="3" />
                                 </Texture>
-                                <Control name="$(parent)ScrollChild" override="true">
-                                    <Anchor point="TOPLEFT"/>
-                                    <Anchor point="TOPRIGHT"/>
+                                <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
+                                    <Dimensions x="100%" />
+
                                     <Controls>
                                         <Label name="$(parent)Label" font="ZoFontGamepad34">
                                             <Anchor point="TOPLEFT"/>

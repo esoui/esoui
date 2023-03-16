@@ -94,10 +94,9 @@
                     <Dimensions y="18" />
                 </Label>
 
-                <Label name="$(parent)Duration" font="ZoFontGameOutline" horizontalAlignment="CENTER" >
+                <Label name="$(parent)Duration" font="ZoFontGameOutline" horizontalAlignment="CENTER" maxLineCount="2">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Frame" relativePoint="BOTTOMLEFT" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Frame" relativePoint="BOTTOMRIGHT" />
-                    <Dimensions y="18"/>
                 </Label>
             </Controls>
         </Control>

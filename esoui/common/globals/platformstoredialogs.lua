@@ -128,6 +128,8 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
             if dialog.data.isPreRelease then
                 if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_STEAM then
                     return SI_OPEN_CHAPTER_PREPURCHASE_STEAM
+                elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_EPIC then
+                    return SI_OPEN_CHAPTER_PREPURCHASE_EPIC
                 elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
                     return SI_OPEN_CHAPTER_PREPURCHASE_HERON
                 elseif DoesPlatformStoreUseExternalLinks() then
@@ -139,6 +141,8 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
                 local mainText
                 if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_STEAM then
                     mainText = GetString(SI_OPEN_CHAPTER_UPGRADE_STEAM)
+                elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_EPIC then
+                    mainText = GetString(SI_OPEN_CHAPTER_UPGRADE_EPIC)
                 elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
                     mainText = GetString(SI_OPEN_CHAPTER_UPGRADE_HERON)
                 elseif DoesPlatformStoreUseExternalLinks() then

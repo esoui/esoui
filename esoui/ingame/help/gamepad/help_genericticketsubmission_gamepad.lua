@@ -52,7 +52,17 @@ function ZO_Help_GenericTicketSubmission_Gamepad:InitializeKeybindStripDescripto
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
             -- Back
-            KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function() SCENE_MANAGER:HideCurrentScene() end, nil, SOUNDS.DIALOG_DECLINE),
+            KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
+                local targetData = self.itemList:GetTargetData()
+                if targetData.isTextField then
+                    local editBox = self.itemList:GetTargetControl().editBox
+                    if editBox and editBox:HasFocus() then
+                        editBox:LoseFocus()
+                        return
+                    end
+                end
+                SCENE_MANAGER:HideCurrentScene()
+            end, nil, SOUNDS.DIALOG_DECLINE),
             -- Select
             self:GenerateSelectKeybindStripDescriptor(),
         },

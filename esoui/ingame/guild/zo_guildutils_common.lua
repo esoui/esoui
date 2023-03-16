@@ -12,7 +12,7 @@ local function GetGuildDialogFunction(playerGuildId, data, isGamepad)
     local _,_,rankIndex,_,_ = GetGuildMemberInfo(playerGuildId, playerIndex)
     local playerIsGuildmaster = IsGuildRankGuildMaster(playerGuildId, rankIndex)
     local guildAlliance = GetGuildAlliance(playerGuildId)
-    local allianceIcon = zo_iconFormat(GetPlatformAllianceSymbolIcon(guildAlliance), allianceIconSize, allianceIconSize)
+    local allianceIcon = zo_iconFormat(ZO_GetPlatformAllianceSymbolIcon(guildAlliance), allianceIconSize, allianceIconSize)
     local isLastMemberOfGuild = (numGuildMembers == 1)
 
     if(data == nil) then
@@ -64,7 +64,7 @@ end
 
 function ZO_UpdateGuildStatusDropdownSelection(dropdown)
     local status = GetPlayerStatus()
-    local statusTexture = GetPlayerStatusIcon(status)
+    local statusTexture = ZO_GetPlayerStatusIcon(status)
     local text = zo_strformat(SI_GAMEPAD_GUILD_STATUS_SELECTOR_FORMAT, statusTexture, GetString("SI_PLAYERSTATUS", status))
     dropdown:SetSelectedItemText(text)
 end
@@ -79,7 +79,7 @@ function ZO_UpdateGuildStatusDropdown(dropdown)
             SelectPlayerStatus(i)
         end
 
-        local statusTexture = GetPlayerStatusIcon(i)
+        local statusTexture = ZO_GetPlayerStatusIcon(i)
         local text = zo_strformat(SI_GAMEPAD_GUILD_STATUS_SELECTOR_FORMAT, statusTexture, GetString("SI_PLAYERSTATUS", i))
         local entry = ZO_ComboBox:CreateItemEntry(text, GuildStatusSelect)
         dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)

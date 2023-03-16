@@ -63,6 +63,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Interface_CompassTargetMarkers",
+    settingType = SETTING_TYPE_UI,
+    settingId = UI_SETTING_COMPASS_TARGET_MARKERS,
+    header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Interface_ShowWeaponIndicator",
     settingType = SETTING_TYPE_UI,
     settingId = UI_SETTING_SHOW_WEAPON_INDICATOR,

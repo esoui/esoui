@@ -1,5 +1,9 @@
 local LoadingScreen_Gamepad = {}
 
+local function IsScreenNarrationEnabled()
+    return GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_SCREEN_NARRATION)
+end
+
 function LoadingScreen_Gamepad:InitializeAnimations()
     self.spinnerFadeAnimation = GetAnimationManager():CreateTimelineFromVirtual("SpinnerFadeAnimation", GamepadLoadingScreenSpinner)
 
@@ -37,12 +41,47 @@ end
 
 function LoadingScreen_Gamepad:OnShown()
     self.longLoadAnimation:Stop()
+    if IsScreenNarrationEnabled() and self.isNarrationDirty then
+        --First, clear out any in progress narration
+        ClearAllNarrationQueues()
+
+        --Add the narration for the loading text
+        AddPendingNarrationText(GetString(SI_SCREEN_NARRATION_LOADING_NARRATION))
+
+        --If there is a zone name visible, narrate it
+        if not self.zoneName:IsHidden() then
+            if self.zoneNameText and self.zoneNameText ~= "" then
+                AddPendingNarrationText(self.zoneNameText)
+            end
+        end
+
+        --If there is an instance type visible, narrate it
+        if not self.instanceType:IsHidden() then
+            if self.instanceTypeText and self.instanceTypeText ~= "" then
+                AddPendingNarrationText(self.instanceTypeText)
+            end
+        end
+
+        --If there is a zone description visible, narrate it
+        if not self.zoneDescription:IsHidden() then
+            if self.zoneDescriptionText and self.zoneDescriptionText ~= "" then
+                AddPendingNarrationText(self.zoneDescriptionText)
+            end
+        end
+
+        RequestReadPendingNarrationTextToClient(NARRATION_TYPE_UI_SCREEN)
+    end
+    self.isNarrationDirty = false
     GamepadLoadingScreenTopMungeLongLoadMessage:SetAlpha(0)
 end
 
 function LoadingScreen_Gamepad:OnHidden()
     self.longLoadAnimation:Stop()
     CheckForControllerDisconnect()
+    if not self.dontClearNarration then
+        --Clear out any in progress narration from the loading screen when we finish
+        ClearNarrationQueue(NARRATION_TYPE_UI_SCREEN)
+    end
 
     if IsConsoleUI() then
         StopLongLoadTimer()

@@ -81,6 +81,24 @@ function ZO_MarketCurrency_Gamepad:OnMarketCurrencyUpdated(marketCurrencyType)
     self:FireCallbacks("OnCurrencyUpdated")
 end
 
+function ZO_MarketCurrency_Gamepad:GetNarrationText()
+    local narrations = {}
+    --The market currencies are laid out right to left, so iterate backwards so they can be narrated left to right
+    for index, data in ZO_NumericallyIndexedTableReverseIterator(self.marketCurrencyTypes) do
+        local marketCurrencyType = data.marketCurrencyType
+        if self:IsMarketCurrencyTypeVisible(marketCurrencyType) then
+            local currencyType = data.currencyType
+            --Get the narration for the currency name
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_Currency_GetAmountLabel(currencyType)))
+            --Get the narration for the currency amount
+            local currencyAmount = GetPlayerMarketCurrency(marketCurrencyType)
+            local currencyString = ZO_Currency_FormatGamepad(currencyType, currencyAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(currencyString))
+        end
+    end
+    return narrations
+end
+
 function ZO_MarketCurrency_Gamepad_OnInitialized(control)
     MARKET_CURRENCY_GAMEPAD = ZO_MarketCurrency_Gamepad:New(control)
 end

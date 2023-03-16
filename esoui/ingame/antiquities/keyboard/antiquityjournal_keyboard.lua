@@ -509,7 +509,7 @@ function ZO_ScryableAntiquityTile_Keyboard:Initialize(control)
             label = GetString(SI_ANTIQUITY_VIEW_IN_CODEX),
             execute = function()
                 local categoryData = self.tileData:GetAntiquityCategoryData()
-                ANTIQUITY_JOURNAL_KEYBOARD:ShowCategory(categoryData:GetId(), self.tileData:GetName())
+                ANTIQUITY_JOURNAL_KEYBOARD:ShowCategory(categoryData:GetId(), self.tileData:GetFormattedName())
             end,
         },
         ["primary"] =

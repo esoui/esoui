@@ -161,7 +161,7 @@ end
 
 do
     local LOCK_TEXTURE = zo_iconFormat(ZO_GAMEPAD_LOCKED_ICON_32, "100%", "100%")
-    local CHAMPION_ICON = zo_iconFormat(GetGamepadChampionPointsIcon(), "100%", "100%")
+    local CHAMPION_ICON = zo_iconFormat(ZO_GetGamepadChampionPointsIcon(), "100%", "100%")
 
     function ActivityFinderRoot_Gamepad:RefreshTooltip(data)
         if self.scene:IsShowing() and not data.isRoleSelector then
@@ -290,6 +290,16 @@ function ActivityFinderRoot_Gamepad:ShowCategory(categoryData)
             SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME)
         end
         self:SelectCategory(categoryData)
+    end
+end
+
+----------------------------------------------
+--ZO_Gamepad_ParametricList_Screen Overrides--
+----------------------------------------------
+
+function ActivityFinderRoot_Gamepad:GetFooterNarration()
+    if GAMEPAD_ACTIVITY_QUEUE_DATA:IsShowing() then
+        return GAMEPAD_GENERIC_FOOTER:GetNarrationText(GAMEPAD_ACTIVITY_QUEUE_DATA:GetFooterData())
     end
 end
 

@@ -33,6 +33,9 @@ function ZO_GamepadMarketProduct:Initialize(controlId, parent, controlName)
         control = self.control,
         highlight = self.control.highlight,
         object = self,
+        narrationText = function()
+            return self:GetNarrationText()
+        end,
     }
 end
 
@@ -142,6 +145,17 @@ function ZO_GamepadMarketProduct:AnchorLabelBetweenBundleIndicatorAndCost(label)
     end
 end
 
+--Overridden from base
+function ZO_GamepadMarketProduct:GetNarrationText()
+    local narrations = {}
+    ZO_AppendNarration(narrations, self:GetTitleNarrationText())
+    ZO_AppendNarration(narrations, self:GetCalloutNarrationText())
+    ZO_AppendNarration(narrations, self:GetBundleNarrationText())
+    ZO_AppendNarration(narrations, self:GetPricingNarrationText())
+    ZO_AppendNarration(narrations, self:GetPurchasedNarrationText())
+    return narrations
+end
+
 --
 --[[ Gamepad Market Product Bundle Attachment ]]--
 --
@@ -171,10 +185,12 @@ function ZO_GamepadMarketProductBundleAttachment:Show(...)
     local allCollectiblesOwned = self:AreAllCollectiblesUnlocked()
 
     local control = self.control
+    self.purchasedText = nil
     control.purchaseLabelControl:SetHidden(not allCollectiblesOwned)
 
     if allCollectiblesOwned then
-        control.purchaseLabelControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED))
+        self.purchasedText = GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED)
+        control.purchaseLabelControl:SetText(self.purchasedText)
     end
 
     -- hide all the price info
@@ -199,6 +215,15 @@ end
 function ZO_GamepadMarketProductBundleAttachment:Reset()
     ZO_GamepadMarketProduct.Reset(self)
     self.bundleMarketProductId = nil
+end
+
+--Overridden from base
+function ZO_GamepadMarketProductBundleAttachment:GetNarrationText()
+    local narrations = {}
+    ZO_AppendNarration(narrations, self:GetTitleNarrationText())
+    ZO_AppendNarration(narrations, self:GetBundleNarrationText())
+    ZO_AppendNarration(narrations, self:GetPurchasedNarrationText())
+    return narrations
 end
 
 --
@@ -283,6 +308,9 @@ function ZO_GamepadMarketGenericTile:Initialize(control)
         control = control,
         highlight = control.highlight,
         object = self,
+        narrationText = function()
+            return self:GetNarrationText()
+        end,
     }
 
     self:Reset()
@@ -461,6 +489,13 @@ function ZO_GamepadMarketGenericTile:Reset()
     self.textUnselectedColor = ZO_MARKET_DIMMED_COLOR
     self.textPurchasedSelectedColor = ZO_MARKET_PRODUCT_PURCHASED_COLOR
     self.textPurchasedUnselectedColor = ZO_MARKET_PRODUCT_PURCHASED_DIMMED_COLOR
+end
+
+function ZO_GamepadMarketGenericTile:GetNarrationText()
+    local narrations = {}
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetTitle()))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetText()))
+    return narrations
 end
 
 --

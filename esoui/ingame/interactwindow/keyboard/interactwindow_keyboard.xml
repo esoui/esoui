@@ -105,20 +105,26 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)RewardArea">
+                <Control name="$(parent)CollapseContainer" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TargetArea" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="40" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)TargetArea" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="40" />
                     <Controls>
-                        <Label name="$(parent)Header" font="ZoFontConversationQuestReward" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CHATTER_NPC" text="SI_INTERACT_REWARDS_GIVEN">
+                        <Control name="$(parent)RewardArea">
                             <Anchor point="TOPLEFT" />
                             <Anchor point="TOPRIGHT" />
-                        </Label>
+                            <Controls>
+                                <Label name="$(parent)Header" font="ZoFontConversationQuestReward" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CHATTER_NPC" text="SI_INTERACT_REWARDS_GIVEN">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                </Label>
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Control>
 
                 <Control name="$(parent)PlayerArea" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RewardArea" relativePoint="BOTTOMLEFT" offsetY="15" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RewardArea" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CollapseContainer" relativePoint="BOTTOMLEFT" offsetY="15" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CollapseContainer" relativePoint="BOTTOMRIGHT" offsetY="15" />
 
                     <Controls>
                         <Control name="$(parent)Highlight" inherits="ZO_LineBorderHighlight" hidden="true"/>

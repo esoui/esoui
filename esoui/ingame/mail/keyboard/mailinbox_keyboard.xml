@@ -114,17 +114,11 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)Loading">
+                <Control name="$(parent)LoadingIcon" inherits="ZO_Loading" tier="HIGH">
                     <Anchor point="LEFT" relativeTo="$(parent)UnreadLabel" relativePoint="LEFT" offsetX="-5" />
-                    <Controls>
-                        <Control name="$(parent)Icon" inherits="ZO_Loading" tier="HIGH">
-                            <Anchor point="LEFT" />
-                            <Dimensions x="64" y="64" />
-                            <OnInitialized>
-                                ZO_Loading_Initialize(self, GetString(SI_MAIL_INBOX_LOADING))
-                            </OnInitialized>
-                        </Control>
-                    </Controls>
+                    <OnInitialized>
+                        ZO_Loading_Initialize(self, GetString(SI_MAIL_INBOX_LOADING))
+                    </OnInitialized>
                 </Control>
 
                 <Label name="$(parent)Full" font="ZoFontGame" text="SI_MAIL_INBOX_FULL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">

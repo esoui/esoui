@@ -274,6 +274,10 @@ function ZO_TributePatronData:GetNumMechanicsForFavorState(favorState)
     return GetNumTributePatronMechanicsForFavorState(self.patronId, favorState)
 end
 
+function ZO_TributePatronData:GetNumPassiveMechanicsForFavorState(favorState)
+    return GetNumTributePatronPassiveMechanicsForFavorState(self.patronId, favorState)
+end
+
 function ZO_TributePatronData:GetRequirementText(favorState, requirementIndex)
     return GetTributePatronRequirementText(self.patronId, favorState, requirementIndex)
 end
@@ -284,6 +288,18 @@ end
 
 function ZO_TributePatronData:GetMechanicText(favorState, mechanicIndex, prependIcon)
     return GetTributePatronMechanicText(self.patronId, favorState, mechanicIndex, prependIcon)
+end
+
+function ZO_TributePatronData:GetMechanicInfo(favorState, mechanicIndex)
+    return GetTributePatronMechanicInfo(self.patronId, favorState, mechanicIndex)
+end
+
+function ZO_TributePatronData:GetPassiveMechanicText(favorState, mechanicIndex, prependIcon)
+    return GetTributePatronPassiveMechanicText(self.patronId, favorState, mechanicIndex, prependIcon)
+end
+
+function ZO_TributePatronData:GetPassiveMechanicInfo(favorState, mechanicIndex)
+    return GetTributePatronPassiveMechanicInfo(self.patronId, favorState, mechanicIndex)
 end
 
 function ZO_TributePatronData:GetRequirementsText(favorState)

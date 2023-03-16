@@ -106,7 +106,8 @@ end
 function ZO_GamepadAlchemy:UpdateThirdAlchemySlot()
 
     self.craftingBar:Clear()
-    local newData = {
+    local newData = 
+    {
         icon = "EsoUI/Art/Crafting/Gamepad/gp_alchemy_emptySlot_solvent.dds",
         placedSound = SOUNDS.ALCHEMY_SOLVENT_PLACED, 
         removedSound = SOUNDS.ALCHEMY_SOLVENT_REMOVED,
@@ -126,7 +127,8 @@ function ZO_GamepadAlchemy:UpdateThirdAlchemySlot()
     local reagents = ZO_Alchemy_IsThirdAlchemySlotUnlocked() and 3 or 2
     self.reagentSlots = {}
     for i = 1, reagents do
-        local newData = {
+        local newReagentData = 
+        {
             icon = "EsoUI/Art/Crafting/Gamepad/gp_alchemy_emptySlot_reagent.dds",
             placedSound = SOUNDS.ALCHEMY_REAGENT_PLACED, 
             removedSound = SOUNDS.ALCHEMY_REAGENT_REMOVED,
@@ -134,12 +136,12 @@ function ZO_GamepadAlchemy:UpdateThirdAlchemySlot()
             owner = self,
             emptySlotIcon = "EsoUI/Art/Crafting/Gamepad/gp_alchemy_emptySlot_reagent.dds",
         }
-        self.craftingBar:AddEntry("ZO_GamepadAlchemyCraftingSlotWithTraits", newData)
-        newData.slot:RegisterCallback("ItemsChanged", function()
+        self.craftingBar:AddEntry("ZO_GamepadAlchemyCraftingSlotWithTraits", newReagentData)
+        newReagentData.slot:RegisterCallback("ItemsChanged", function()
             self:OnSlotChanged()
             self:UpdateReagentTraits()
         end)
-        self.reagentSlots[i] = newData.slot
+        self.reagentSlots[i] = newReagentData.slot
     end
 
     self.craftingBar:Commit()
@@ -148,7 +150,7 @@ end
 function ZO_GamepadAlchemy:InitializeModeList()
     self.modeList = ZO_GamepadVerticalItemParametricScrollList:New(self.control:GetNamedChild("ContainerMode"))
     self.modeList:SetAlignToScreenCenter(true)
-    self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, MenuEntryTemplateEquality)
+    self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
     local data = ZO_GamepadEntryData:New(GetString(SI_ENCHANTING_CREATION), "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_create.dds")
     data.mode = ZO_ALCHEMY_MODE_CREATION
@@ -156,11 +158,35 @@ function ZO_GamepadAlchemy:InitializeModeList()
 
     local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(CRAFTING_TYPE_ALCHEMY)
     local recipeCraftingSystemName = GetString("SI_RECIPECRAFTINGSYSTEM", recipeCraftingSystem)
-    data = ZO_GamepadEntryData:New(recipeCraftingSystemName, GetGamepadRecipeCraftingSystemMenuTextures(CRAFTING_TYPE_ALCHEMY))
+    data = ZO_GamepadEntryData:New(recipeCraftingSystemName, ZO_GetGamepadRecipeCraftingSystemMenuTextures(CRAFTING_TYPE_ALCHEMY))
     data.mode = ZO_ALCHEMY_MODE_RECIPES
     self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data)
 
     self.modeList:Commit()
+    --Narrates the mode list
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return GAMEPAD_ALCHEMY_ROOT_SCENE:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
+        end,
+        footerNarrationFunction = function()
+            return self:GetFooterNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.modeList, narrationInfo)
+end
+
+function ZO_GamepadAlchemy:GetFooterNarration()
+    local narrations = {}
+    local skillInfoNarration = ZO_Skills_GetSkillInfoHeaderNarrationText(self.skillInfo)
+    if skillInfoNarration then
+        ZO_CombineNumericallyIndexedTables(narrations, skillInfoNarration)
+    end
+    ZO_CombineNumericallyIndexedTables(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
+    return narrations
 end
 
 function ZO_GamepadAlchemy:InitializeInventory()
@@ -175,7 +201,7 @@ function ZO_GamepadAlchemy:InitializeInventory()
     end)
 
     -- Override the default parametric offset calculation
-    self.inventory:GetList().CalculateParametricOffset = function(self, startAdditionalPadding, endAdditionalPadding, distanceFromCenter, continuousParametricOffset)
+    self.inventory:GetList().CalculateParametricOffset = function(list, startAdditionalPadding, endAdditionalPadding, distanceFromCenter, continuousParametricOffset)
         local additionalPaddingEasingFunc
 
         -- Use linear easing during transition between rows with small and large padding.
@@ -184,14 +210,12 @@ function ZO_GamepadAlchemy:InitializeInventory()
             additionalPaddingEasingFunc = ZO_LinearEase
         end
 
-        return ZO_ParametricScrollList.CalculateParametricOffset(self, startAdditionalPadding, endAdditionalPadding, distanceFromCenter, continuousParametricOffset, additionalPaddingEasingFunc)
+        return ZO_ParametricScrollList.CalculateParametricOffset(list, startAdditionalPadding, endAdditionalPadding, distanceFromCenter, continuousParametricOffset, additionalPaddingEasingFunc)
     end
 
-    self.inventory:SetCustomExtraData(
-        function(bagId, slotIndex, data)
-            self:UpdateItemOnWorkbench(data)
-        end
-    )
+    self.inventory:SetCustomExtraData(function(bagId, slotIndex, data)
+        self:UpdateItemOnWorkbench(data)
+    end)
 end
 
 function ZO_GamepadAlchemy:InitializeKeybindStripDescriptors()
@@ -239,6 +263,8 @@ function ZO_GamepadAlchemy:InitializeKeybindStripDescriptors()
                 end
 
                 self:OnWorkbenchUpdated()
+                --Re-narrate when something is added or removed
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
             end,
         },
 
@@ -281,6 +307,8 @@ function ZO_GamepadAlchemy:InitializeKeybindStripDescriptors()
             callback = function()
                 self:ClearSelections()
                 self:OnWorkbenchUpdated()
+                --Re-narrate when selections are cleared
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
             end,
             visible = function()
                 return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections()
@@ -295,6 +323,8 @@ function ZO_GamepadAlchemy:InitializeKeybindStripDescriptors()
                 self.inventory:ToggleQuestFilter()
                 self.inventory:PerformFullRefresh()
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
+                --Re-narrate when the filter changes
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
             end,
             enabled = function()
                 return not ZO_CraftingUtils_IsPerformingCraftProcess()
@@ -320,8 +350,42 @@ function ZO_GamepadAlchemy:SelectMode()
     end
 end
 
+function ZO_GamepadAlchemy:GetMode()
+    return self.mode
+end
+
 function ZO_GamepadAlchemy:InitializeTooltip()
     self.tooltip = self.control:GetNamedChild("Tooltip")
+    --Narrates the result tooltip/matching traits
+    local tooltipNarrationInfo = 
+    {
+        canNarrate = function()
+            return GAMEPAD_ALCHEMY_CREATION_SCENE:IsShowing()
+        end,
+        tooltipNarrationFunction = function()
+            local narrations = {}
+            --Narrate the result tooltip if it's visible
+            if not self.tooltip:IsHidden() then
+                table.insert(narrations, self.tooltip.tip:GetNarrationText())
+            end
+
+            --Narrate any matching traits
+            if self.matchingTraits then
+                local matchFound = false
+                for traitName, matching in pairs(self.matchingTraits) do
+                    if matching then
+                        if not matchFound then
+                            matchFound = true
+                            table.insert(narrations, GetString(SI_GAMEPAD_ALCHEMY_MATCHING_TRAITS_NARRATION))
+                        end
+                        table.insert(narrations, traitName)
+                    end
+                end
+            end
+            return narrations
+        end,
+    }
+    GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(tooltipNarrationInfo)
 end
 
 -- Checks whether the currently selected item has been added to the crafting workbench
@@ -487,6 +551,27 @@ function ZO_GamepadAlchemyInventory:Initialize(owner, control, ...)
     self:SetOverrideItemSort(function(left, right)
         return ZO_TableOrderingFunction(left, right, "customSortData", GAMEPAD_CRAFTING_ALCHEMY_ITEM_SORT, ZO_SORT_ORDER_UP)
     end)
+
+    --Narrates the inventory list
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return self.owner:GetMode() == ZO_ALCHEMY_MODE_CREATION
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.owner.header, self.owner.headerData)
+        end,
+        footerNarrationFunction = function()
+            return self.owner:GetFooterNarration()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.list, narrationInfo)
+
+    ZO_WRIT_ADVISOR_GAMEPAD:RegisterCallback("CycleActiveQuest", function()
+        if self.owner:IsSystemShowing() and self.owner:GetMode() == ZO_ALCHEMY_MODE_CREATION then
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
+        end
+    end)
 end
 
 function ZO_GamepadAlchemyInventory:SetupSavedVars()
@@ -519,34 +604,34 @@ function ZO_GamepadAlchemyInventory:AddListDataTypes()
         local itemId = GetItemId(data.bagId, data.slotIndex)
         local pinState = self.owner:GetPinStateForItem(itemId, self.alchemyQuestInfo, ZO_ALCHEMY_DATA_TYPE_SOLVENT)
         if pinState == ZO_ALCHEMY_PIN_STATE_VALID then
-           data.hasCraftingQuestPinDisabled = false
-           data.hasCraftingQuestPin = true  
+            data.hasCraftingQuestPinDisabled = false
+            data.hasCraftingQuestPin = true  
         elseif pinState == ZO_ALCHEMY_PIN_STATE_INVALID then
-           data.hasCraftingQuestPinDisabled = true
-           data.hasCraftingQuestPin = false  
+            data.hasCraftingQuestPinDisabled = true
+            data.hasCraftingQuestPin = false  
         else
-           data.hasCraftingQuestPinDisabled = false
-           data.hasCraftingQuestPin = false  
+            data.hasCraftingQuestPinDisabled = false
+            data.hasCraftingQuestPin = false  
         end
 
         --If there is an override status indicator icon, we need to explicitly add the quest pin here
         if data.overrideStatusIndicatorIcons and pinState ~= ZO_ALCHEMY_PIN_STATE_HIDDEN then
             if pinState == ZO_ALCHEMY_PIN_STATE_INVALID then
-                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon_disabled.dds"}
+                data.overrideStatusIndicatorIcons = { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE, ZO_DISABLED_TRACKED_PIN_STATUS_ICON_OVERRIDE }
             elseif pinState == ZO_ALCHEMY_PIN_STATE_VALID then
-                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"}
+                data.overrideStatusIndicatorIcons = { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE, ZO_TRACKED_PIN_STATUS_ICON_OVERRIDE }
             end
         end
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
 
         local descriptionLabel = control.descriptionLabel
+        local descriptionText
         descriptionLabel:SetHidden(not selected)
 
         if selected then
             local usedInCraftingType, craftingSubItemType, tradeskillRankRequirement, resultingItemLevel, requiredChampionPoints = GetItemCraftingInfo(data.bagId, data.slotIndex)
 
             if not tradeskillRankRequirement or tradeskillRankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
-                local descriptionText
                 local itemTypeString = GetString((craftingSubItemType == ITEMTYPE_POTION_BASE) and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
 
                 if requiredChampionPoints and requiredChampionPoints > 0 then
@@ -558,17 +643,22 @@ function ZO_GamepadAlchemyInventory:AddListDataTypes()
                 descriptionLabel:SetText(descriptionText)
                 descriptionLabel:SetColor(1, 1, 1, 1)
             else
-                descriptionLabel:SetText(zo_strformat(SI_REQUIRES_ALCHEMY_SOLVENT_PURIFICATION, tradeskillRankRequirement))
+                descriptionText = zo_strformat(SI_REQUIRES_ALCHEMY_SOLVENT_PURIFICATION, tradeskillRankRequirement)
+                descriptionLabel:SetText(descriptionText)
                 descriptionLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
             end
         else
             descriptionLabel:SetText(nil)
         end
+
+        data.descriptionText = descriptionText
     end
 
     local function SetupTrait(traits, locked, isOnWorkbench, ...)
         local numTraits = select("#", ...) / ALCHEMY_TRAIT_STRIDE
+        local traitData = {}
         for i, traitControl in ipairs(traits) do
+            local traitInfo = {}
             if i > numTraits then
                 traitControl:SetHidden(true)
             else
@@ -584,21 +674,29 @@ function ZO_GamepadAlchemyInventory:AddListDataTypes()
                         label:SetText(traitName)
                     end
 
-                   GAMEPAD_ALCHEMY:SetupTraitIcon(iconControl, traitName, traitIcon, traitMatchIcon, traitConflictIcon, GAMEPAD_UNKNOWN_TRAIT_TEXTURE)
+                    GAMEPAD_ALCHEMY:SetupTraitIcon(iconControl, traitName, traitIcon, traitMatchIcon, traitConflictIcon, GAMEPAD_UNKNOWN_TRAIT_TEXTURE)
+                    traitInfo.name = traitName
+                    traitInfo.hasTraitMatch = GAMEPAD_ALCHEMY:HasTraitMatch(traitName)
                 else
+                    local unknownName = GetString(SI_CRAFTING_UNKNOWN_NAME)
                     if label then
                         label:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_INACTIVE_BONUS))
-                        label:SetText(GetString(SI_CRAFTING_UNKNOWN_NAME))
+                        label:SetText(unknownName)
                     end
 
                     iconControl:SetTexture(GAMEPAD_UNKNOWN_TRAIT_TEXTURE)
+                    traitInfo.name = unknownName
+                    --If the trait is unknown then it can't be a matching trait
+                    traitInfo.hasTraitMatch = false
                 end
 
+                table.insert(traitData, traitInfo)
                 if label then
                     ZO_ItemSlot_SetupTextUsableAndLockedColor(label, true, false)
                 end
             end
         end
+        return traitData
     end
 
     local function SetupReagentListEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
@@ -606,22 +704,22 @@ function ZO_GamepadAlchemyInventory:AddListDataTypes()
 
         local pinState = self.owner:GetPinStateForItem(itemId, self.alchemyQuestInfo, ZO_ALCHEMY_DATA_TYPE_REAGENT)
         if pinState == ZO_ALCHEMY_PIN_STATE_VALID then
-           data.hasCraftingQuestPinDisabled = false
-           data.hasCraftingQuestPin = true  
+            data.hasCraftingQuestPinDisabled = false
+            data.hasCraftingQuestPin = true  
         elseif pinState == ZO_ALCHEMY_PIN_STATE_INVALID then
-           data.hasCraftingQuestPinDisabled = true
-           data.hasCraftingQuestPin = false  
+            data.hasCraftingQuestPinDisabled = true
+            data.hasCraftingQuestPin = false  
         else
-           data.hasCraftingQuestPinDisabled = false
-           data.hasCraftingQuestPin = false  
+            data.hasCraftingQuestPinDisabled = false
+            data.hasCraftingQuestPin = false  
         end
 
         --If there is an override status indicator icon, we need to explicitly add the quest pin here
         if data.overrideStatusIndicatorIcons and pinState ~= ZO_ALCHEMY_PIN_STATE_HIDDEN then
             if pinState == ZO_ALCHEMY_PIN_STATE_INVALID then
-                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon_disabled.dds"}
+                data.overrideStatusIndicatorIcons = { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE, ZO_DISABLED_TRACKED_PIN_STATUS_ICON_OVERRIDE }
             elseif pinState == ZO_ALCHEMY_PIN_STATE_VALID then
-                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"}
+                data.overrideStatusIndicatorIcons = { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE, ZO_TRACKED_PIN_STATUS_ICON_OVERRIDE }
             end
         end
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
@@ -632,7 +730,7 @@ function ZO_GamepadAlchemyInventory:AddListDataTypes()
         local isOnWorkbench = data.isOnWorkbench
 
         if selected then
-            SetupTrait(control.selectedItems.traits, locked, isOnWorkbench, GetAlchemyItemTraits(data.bagId, data.slotIndex))
+            data.traitInfo = SetupTrait(control.selectedItems.traits, locked, isOnWorkbench, GetAlchemyItemTraits(data.bagId, data.slotIndex))
         end
 
         SetupTrait(control.unselectedItems.traits, locked, isOnWorkbench, GetAlchemyItemTraits(data.bagId, data.slotIndex))
@@ -674,26 +772,49 @@ function ZO_GamepadAlchemyInventory:Refresh(data)
     ZO_GamepadCraftingUtils_RefreshGenericHeader(self.owner)
 end
 
-function ZO_GamepadAlchemyInventory:EnumerateInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data)
-    local list = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, predicate)
-    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, predicate, list)
-    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_CRAFT_BAG, predicate, list)
+do
+    --Custom logic for narrating the sub labels
+    local function GetSubLabelsNarrationText(entryData, entryControl)
+        local narrations = {}
+        --entryData.descriptionText should only be populated for solvents
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.descriptionText))
 
-    self.owner:UpdatePotentialQuestItems(list, self.alchemyQuestInfo)
-
-    ZO_ClearTable(self.itemCounts)
-
-    local filteredDataTable = {}
-    for itemId, itemInfo in pairs(list) do
-        if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType, self.savedVars.shouldFilterQuests, self.owner.questItems) then
-            filteredDataTable[#filteredDataTable + 1] = self:GenerateCraftingInventoryEntryData(itemInfo.bag, itemInfo.index, itemInfo.stack)
+        --entryData.traitInfo should only be populated for reagents
+        if entryData.traitInfo then
+            for _, traitInfo in ipairs(entryData.traitInfo) do
+                table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(traitInfo.name))
+                --If the trait has a match, include that in the narration
+                if traitInfo.hasTraitMatch then
+                    table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ALCHEMY_MATCHING_TRAIT_NARRATION)))
+                end
+            end
         end
-        self.itemCounts[itemId] = itemInfo.stack
+        return narrations
     end
 
-    self:AddFilteredDataToList(filteredDataTable)
+    function ZO_GamepadAlchemyInventory:EnumerateInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data)
+        local list = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, predicate)
+        PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, predicate, list)
+        PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_CRAFT_BAG, predicate, list)
 
-    return list
+        self.owner:UpdatePotentialQuestItems(list, self.alchemyQuestInfo)
+
+        ZO_ClearTable(self.itemCounts)
+
+        local filteredDataTable = {}
+        for itemId, itemInfo in pairs(list) do
+            if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType, self.savedVars.shouldFilterQuests, self.owner.questItems) then
+                local entryData = self:GenerateCraftingInventoryEntryData(itemInfo.bag, itemInfo.index, itemInfo.stack)
+                entryData.subLabelsNarrationText = GetSubLabelsNarrationText
+                filteredDataTable[#filteredDataTable + 1] = entryData
+            end
+            self.itemCounts[itemId] = itemInfo.stack
+        end
+
+        self:AddFilteredDataToList(filteredDataTable)
+
+        return list
+    end
 end
 
 function ZO_GamepadAlchemyInventory:ShowAppropriateSlotDropCallouts(bagId, slotIndex)

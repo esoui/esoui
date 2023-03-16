@@ -70,7 +70,7 @@ end
 
 --Gamepad and mouse keys use icons instead of text (with the exception of mouse button 4 and 5)
 function ZO_Keybindings_ShouldUseIconKeyMarkup(key)
-    return (IsKeyCodeMouseKey(key) and not (key == KEY_MOUSE_4 or key == KEY_MOUSE_5)) or IsKeyCodeGamepadKey(key) or IsKeyCodeArrowKey(key)
+    return ShouldKeyCodeUseKeyMarkup(key)
 end
 
 function ZO_Keybindings_GenerateIconKeyMarkup(key, scalePercent, useDisabledIcon)
@@ -187,9 +187,28 @@ do
 
 
     -- Doesn't return the GetString(SI_ACTION_IS_NOT_BOUND) automatically, just nil if theres no binds
-    --TODO XAR: Determine if we need alwaysPreferGamepadMode and showAsHold
     function ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(actionName, alwaysPreferGamepadMode, showAsHold)
         local preferredKeybindType = ZO_Keybindings_GetPreferredKeyType(alwaysPreferGamepadMode)
+        local key, mod1, mod2, mod3, mod4 = GetHighestPriorityActionBindingInfoFromNameAndInputDevice(actionName, preferredKeybindType)
+
+        if key == KEY_INVALID then
+            return nil
+        end
+
+        if showAsHold then
+            local holdKey = ConvertKeyPressToHold(key)
+            if holdKey ~= KEY_INVALID then
+                key = holdKey
+            end
+        end
+        return TranslateNarrationKeys(key, mod1, mod2, mod3, mod4)
+    end
+
+    -- Doesn't return the GetString(SI_ACTION_IS_NOT_BOUND) automatically, just nil if there's no binds
+    -- Returns the highest priority narration string from either the keyboard or gamepad action, depending on preferred key type
+    function ZO_Keybindings_GetPreferredHighestPriorityNarrationStringFromActions(keyboardActionName, gamepadActionName, showAsHold)
+        local preferredKeybindType = ZO_Keybindings_GetPreferredKeyType()
+        local actionName = preferredKeybindType == PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD and gamepadActionName or keyboardActionName
         local key, mod1, mod2, mod3, mod4 = GetHighestPriorityActionBindingInfoFromNameAndInputDevice(actionName, preferredKeybindType)
 
         if key == KEY_INVALID then

@@ -116,6 +116,26 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
 end
 
 --Overridden from ZO_HousingFurnitureList_Gamepad
+function ZO_HousingFurnitureRetrieval_Gamepad:InitializeOptionsDialogLayoutInfo()
+    self.optionsDialogLayoutInfo =
+    {
+        dialogName = "GAMEPAD_FURNITURE_RETRIEVAL_OPTIONS",
+        boundFilterEnabled = true,
+        locationFilterEnabled = false,
+        limitFilterEnabled = true,
+        getFiltersFunction = function()
+            local boundFilters = SHARED_FURNITURE:GetRetrievableFurnitureBoundFilters()
+            local locationFilters = nil
+            local limitFilters = SHARED_FURNITURE:GetRetrievableFurnitureLimitFilters()
+            return boundFilters, locationFilters, limitFilters
+        end,
+        updateFiltersHandler = function(boundFilterValues, locationFilterValues, limitFilterValues)
+            SHARED_FURNITURE:SetRetrievableFurnitureFilters(boundFilterValues, limitFilterValues)
+        end,
+    }
+end
+
+--Overridden from ZO_HousingFurnitureList_Gamepad
 function ZO_HousingFurnitureRetrieval_Gamepad:GetCategoryTreeDataRoot()
     return SHARED_FURNITURE:GetRetrievableFurnitureCategoryTreeData()
 end

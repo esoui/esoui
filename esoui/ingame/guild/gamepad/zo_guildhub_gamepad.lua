@@ -56,6 +56,10 @@ function ZO_GamepadGuildHub:Initialize(control)
     self.activeLinksGuildId = nil
     self.activeLinks = ZO_GamepadLinks:New()
     self.activeLinks:SetKeybindAlignment(KEYBIND_STRIP_ALIGN_CENTER)
+    self.activeLinks:RegisterCallback("CycleLinks", function()
+        --Re-narrate when cycling between multiple links
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.guildList)
+    end)
 
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_GUILD_HUB_SCENE)
 end
@@ -530,7 +534,7 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
                         SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropDown)
 
                         for i = 1, NUM_ALLIANCES do
-                            local allianceText = zo_iconTextFormat(GetLargeAllianceSymbolIcon(i), 32, 32, GetAllianceName(i))
+                            local allianceText = zo_iconTextFormat(ZO_GetLargeAllianceSymbolIcon(i), 32, 32, GetAllianceName(i))
                             local entry = dropDown:CreateItemEntry(allianceText, OnAllianceSelected)
                             entry.allianceIndex = i
                             dropDown:AddItem(entry)
@@ -1073,62 +1077,105 @@ function ZO_GamepadGuildHub:OnTargetChanged(list, selectedData, oldSelectedData)
     self:UpdateActiveLinks()
 end
 
-function ZO_GamepadGuildHub:RefreshGuildList()
-    self.guildList:Clear()
+do
+    local function GetGuildEntryNarrationText(entryData, entryControl)
+        local narrations = {}
+        --Generate the standard parametric list entry narration
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
 
-    -- Entries
-    local entryIndex = 0
-    local numGuilds = GetNumGuilds()
+        --Generate the narration for the guild info
+        ZO_AppendNarration(narrations, GAMEPAD_GUILD_INFO:GetNarrationText())
+        return narrations
+    end
 
-    for guildIndex = 1, numGuilds do
-        local guildId = GetGuildId(guildIndex)
+    function ZO_GamepadGuildHub:RefreshGuildList()
+        self.guildList:Clear()
 
-        if self.filteredGuildId ~= guildId then
-            local guildName = GetGuildName(guildId)
-            local guildAlliance = GetGuildAlliance(guildId)
-            entryIndex = entryIndex + 1
+        -- Entries
+        local entryIndex = 0
+        local numGuilds = GetNumGuilds()
 
-            local data = ZO_GamepadEntryData:New(guildName, GetLargeAllianceSymbolIcon(guildAlliance))
-            data:SetFontScaleOnSelection(false)
-            data:SetIconTintOnSelection(true)
-            data.guildId = guildId
+        for guildIndex = 1, numGuilds do
+            local guildId = GetGuildId(guildIndex)
 
-            if entryIndex == 1 then
-                data:SetHeader(GetString(SI_GAMEPAD_GUILD_LIST_MEMBERSHIP_HEADER))
-                self.guildList:AddEntryWithHeader(GAMEPAD_GUILD_LIST_ENTRY, data)
-            else
-                self.guildList:AddEntry(GAMEPAD_GUILD_LIST_ENTRY, data)
+            if self.filteredGuildId ~= guildId then
+                local guildName = GetGuildName(guildId)
+                local guildAlliance = GetGuildAlliance(guildId)
+                entryIndex = entryIndex + 1
+
+                local data = ZO_GamepadEntryData:New(guildName, ZO_GetLargeAllianceSymbolIcon(guildAlliance))
+                data:SetFontScaleOnSelection(false)
+                data:SetIconTintOnSelection(true)
+                data.guildId = guildId
+                data.narrationText = GetGuildEntryNarrationText
+
+                if entryIndex == 1 then
+                    data:SetHeader(GetString(SI_GAMEPAD_GUILD_LIST_MEMBERSHIP_HEADER))
+                    self.guildList:AddEntryWithHeader(GAMEPAD_GUILD_LIST_ENTRY, data)
+                else
+                    self.guildList:AddEntry(GAMEPAD_GUILD_LIST_ENTRY, data)
+                end
             end
         end
+
+        local function GetGuildBrowserEntryNarrationText(entryData, entryControl)
+            local narrations = {}
+            --Generate the standard parametric list entry narration
+            ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+            --Generate the content header narration
+            ZO_AppendNarration(narrations, ZO_GamepadGenericHeader_GetNarrationText(self.contentHeader, self.contentHeaderData))
+
+            --Generate the narration for the guild finder description
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_GUILD_BROWSER_DESCRIPTION)))
+            return narrations
+        end
+
+        local guildBrowserData = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_GUILD_FINDER), "EsoUI/Art/GuildFinder/Gamepad/gp_guild_menuIcon_guildBrowser.dds")
+        guildBrowserData:SetIconTintOnSelection(true)
+        guildBrowserData:SetFontScaleOnSelection(false)
+        guildBrowserData.isGuildBrowser = true
+        guildBrowserData:SetHeader(GetString(SI_GAMEPAD_GUILD_LIST_NEW_HEADER))
+        guildBrowserData.narrationText = GetGuildBrowserEntryNarrationText
+        self.guildList:AddEntryWithHeader(GAMEPAD_GUILD_LIST_ENTRY, guildBrowserData)
+
+
+        local function GetCreateNewGuildEntryNarrationText(entryData, entryControl)
+            local narrations = {}
+            --Generate the standard parametric list entry narration
+            ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+            --Generate the content header narration
+            ZO_AppendNarration(narrations, ZO_GamepadGenericHeader_GetNarrationText(self.contentHeader, self.contentHeaderData))
+
+            --Generate the create new guild info narration
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_INTRODUCTION)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_BENEFITS_LIST)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GUILD_CONCLUSION, ZO_GetPlatformAccountLabel())))
+            return narrations
+        end
+
+        local createNewGuildData = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_CREATE_NEW_GUILD), "EsoUI/Art/Buttons/Gamepad/gp_plus_large.dds")
+        createNewGuildData:SetIconTintOnSelection(true)
+        createNewGuildData:SetIconDisabledTintOnSelection(true)
+        createNewGuildData:SetFontScaleOnSelection(false)
+        createNewGuildData:SetEnabled(ZO_CanPlayerCreateGuild())
+
+        createNewGuildData.isCreateGuild = true
+        local createError
+        if self.displayMode == GUILD_HUB_DISPLAY_MODE.GUILDS_LIST then
+            createError = ZO_GetGuildCreateError()
+        end
+        createNewGuildData.subLabels = {createError}
+        createNewGuildData.GetSubLabelColor = function() return ZO_ERROR_COLOR end
+        createNewGuildData.narrationText = GetCreateNewGuildEntryNarrationText
+        self.guildList:AddEntry(GAMEPAD_CREATE_GUILD_LIST_ENTRY, createNewGuildData)
+
+        self.guildList:Commit()
+
+        self.filteredGuildId = nil
     end
-
-    local guildBrowserData = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_GUILD_FINDER), "EsoUI/Art/GuildFinder/Gamepad/gp_guild_menuIcon_guildBrowser.dds")
-    guildBrowserData:SetIconTintOnSelection(true)
-    guildBrowserData:SetFontScaleOnSelection(false)
-    guildBrowserData.isGuildBrowser = true
-    guildBrowserData:SetHeader(GetString(SI_GAMEPAD_GUILD_LIST_NEW_HEADER))
-    self.guildList:AddEntryWithHeader(GAMEPAD_GUILD_LIST_ENTRY, guildBrowserData)
-
-    local createNewGuildData = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_CREATE_NEW_GUILD), "EsoUI/Art/Buttons/Gamepad/gp_plus_large.dds")
-    createNewGuildData:SetIconTintOnSelection(true)
-    createNewGuildData:SetIconDisabledTintOnSelection(true)
-    createNewGuildData:SetFontScaleOnSelection(false)
-    createNewGuildData:SetEnabled(ZO_CanPlayerCreateGuild())
-
-    createNewGuildData.isCreateGuild = true
-    local createError
-    if self.displayMode == GUILD_HUB_DISPLAY_MODE.GUILDS_LIST then
-        createError = ZO_GetGuildCreateError()
-    end
-    createNewGuildData.subLabels = {createError}
-    createNewGuildData.GetSubLabelColor = function() return ZO_ERROR_COLOR end
-    self.guildList:AddEntry(GAMEPAD_CREATE_GUILD_LIST_ENTRY, createNewGuildData)
-
-    self.guildList:Commit()
-
-    self.filteredGuildId = nil
 end
-
 ------------------
 -- Active Links --
 ------------------

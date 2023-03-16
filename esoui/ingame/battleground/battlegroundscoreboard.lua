@@ -89,6 +89,7 @@ function Battleground_Scoreboard_Fragment:Initialize(control)
     end
 
     self:InitializePlatformStyle()
+    self:InitializeNarrationInfo()
 
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:UpdateBattlegroundStatus() end)
     control:RegisterForEvent(EVENT_GROUPING_TOOLS_LFG_JOINED, function() self:UpdateBattlegroundStatus() end)
@@ -105,6 +106,7 @@ function Battleground_Scoreboard_Fragment:Initialize(control)
             if self.dirty then
                 self:UpdateAll()
             end
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.customNarrationObjectName)
         end
     end)
 
@@ -163,6 +165,87 @@ function Battleground_Scoreboard_Fragment:ApplyPlatformStyle(style)
         self.alliancePanels[i]:ApplyPlatformStyle(style)
     end
     self:UpdateAll()
+end
+
+function Battleground_Scoreboard_Fragment:InitializeNarrationInfo()
+    self.customNarrationObjectName = "BattlegroundsScoreboard"
+
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return self:IsShowing()
+        end,
+        selectedNarrationFunction = function()
+            local narrations = {}
+            local selectedData = self.selectedPlayerData
+
+            -- Team Info for Selected Row
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_BATTLEGROUNDALLIANCE", selectedData.battlegroundAlliance)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.alliancePanels[selectedData.battlegroundAlliance]:GetScore()))
+
+            -- Selected Row
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_GetPrimaryPlayerNameHeader()))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.displayName))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_SCORETRACKERENTRYTYPE", SCORE_TRACKER_TYPE_SCORE)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.medalScore))
+
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_NARRATION)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.kills))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_DEATHS_NARRATION)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.assists))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_ASSISTS_NARRATION)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.deaths))
+
+            -- Selection Side Panel
+            local matchInfo = SYSTEMS:GetObject("matchInfo")
+
+            -- Header
+            local classId = GetScoreboardEntryClassId(selectedData.entryIndex)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_CLASS_NAME, GetClassName(GENDER_MALE, classId))))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.displayName))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_MATCH_INFO_PANEL_TITLE)))
+
+            -- Stats
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(matchInfo.damageDealtLabelText))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(matchInfo.scoreRowValueTable[SCORE_TRACKER_TYPE_DAMAGE_DONE]))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(matchInfo.healingLabelText))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(matchInfo.scoreRowValueTable[SCORE_TRACKER_TYPE_HEALING_DONE]))
+
+            -- Medals
+            local numMedals = matchInfo.scoreboardEntryRawMedalData and #matchInfo.scoreboardEntryRawMedalData or 0
+            if numMedals > 0 then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_MATCH_INFO_PANEL_MEDALS_HEADER)))
+                for i = 1, numMedals do
+                    local medalData = matchInfo.scoreboardEntryRawMedalData[i]
+                    if medalData then
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(medalData.name))
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(medalData.count))
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_BATTLEGROUND_SCOREBOARD_POINTS_FORMATTER_NARRATION, medalData.count * medalData.scoreReward)))
+                    end
+                end
+            else
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_MATCH_INFO_PANEL_NO_MEDALS_TEXT)))
+            end
+
+            return narrations
+        end,
+        additionalInputNarrationFunction = function()
+            if BATTLEGROUND_SCOREBOARD_END_OF_GAME.scene:IsShowing() then
+                return BATTLEGROUND_SCOREBOARD_END_OF_GAME:GetKeybindsNarrationData()
+            end
+        end,
+        footerNarrationFunction = function()
+            local narrations = {}
+            if BATTLEGROUND_SCOREBOARD_END_OF_GAME.scene:IsShowing() then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(BATTLEGROUND_SCOREBOARD_END_OF_GAME.closingTimerLabelText))
+            else
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(BATTLEGROUND_HUD_FRAGMENT:GetStateText()))
+            end
+            return narrations
+        end
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject(self.customNarrationObjectName, narrationInfo)
 end
 
 function Battleground_Scoreboard_Fragment:OnUpdate(control, timeS)
@@ -433,12 +516,14 @@ end
 function Battleground_Scoreboard_Fragment:SelectPreviousPlayerData()
     if self.selectedPlayerData and self.selectedPlayerData.previousData and self:CanCyclePlayerSelection() then
         self:SetSelectedPlayerData(self.selectedPlayerData.previousData, ANIMATE_PLAYER_ROW_HIGHLIGHT)
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.customNarrationObjectName)
     end
 end
 
 function Battleground_Scoreboard_Fragment:SelectNextPlayerData()
     if self.selectedPlayerData and self.selectedPlayerData.nextData and self:CanCyclePlayerSelection() then
         self:SetSelectedPlayerData(self.selectedPlayerData.nextData, ANIMATE_PLAYER_ROW_HIGHLIGHT)
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.customNarrationObjectName)
     end
 end
 
@@ -453,7 +538,7 @@ do
 
     function Battleground_Scoreboard_SocialOptionsDialogGamepad:BuildOptionsList()
         local groupId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
-    
+
         self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
         self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption)
         self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
@@ -538,7 +623,7 @@ function Battleground_Scoreboard_Alliance_Panel:Initialize(control, battleground
     self.battlegroundAlliance = battlegroundAlliance
     self.score = 0
 
-    self.iconControl:SetTexture(GetLargeBattlegroundAllianceSymbolIcon(battlegroundAlliance))
+    self.iconControl:SetTexture(ZO_GetLargeBattlegroundAllianceSymbolIcon(battlegroundAlliance))
     self.nameControl:SetText(zo_strformat(SI_ALLIANCE_NAME, GetString("SI_BATTLEGROUNDALLIANCE", battlegroundAlliance)))
 
     local function PlayerRowFactory(pool)

@@ -7,6 +7,10 @@ end
 function ZO_GamepadStoreBuy:Initialize(scene)
     ZO_GamepadStoreListComponent.Initialize(self, scene, ZO_MODE_STORE_BUY, GetString(SI_STORE_MODE_BUY))
 
+    local function OnRefreshActions()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
+    end
+
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:RegisterEvents()
@@ -14,6 +18,7 @@ function ZO_GamepadStoreBuy:Initialize(scene)
             STORE_WINDOW_GAMEPAD:UpdateRightTooltip(self.list, ZO_MODE_STORE_BUY)
             self:SetVendorBlurActive(true)
             self:UpdatePreview(self.list:GetSelectedData())
+            ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", OnRefreshActions)
         elseif newState == SCENE_HIDING then
             self:UnregisterEvents()
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
@@ -21,6 +26,7 @@ function ZO_GamepadStoreBuy:Initialize(scene)
             if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
                 self:TogglePreviewMode()
             end
+            ITEM_PREVIEW_GAMEPAD:UnregisterCallback("RefreshActions", OnRefreshActions)
         end
     end)
 
@@ -68,7 +74,8 @@ function ZO_GamepadStoreBuy:InitializeKeybindStrip()
     local repairAllKeybind = STORE_WINDOW_GAMEPAD:GetRepairAllKeybind()
 
         -- Buy screen keybind
-    self.keybindStripDescriptor = {
+    self.keybindStripDescriptor =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         repairAllKeybind,
         {
@@ -244,6 +251,7 @@ function ZO_GamepadStoreBuy:TogglePreviewMode()
     local targetData = self.list:GetTargetData()
     self:UpdatePreview(targetData)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
 end
 
 function ZO_GamepadStoreBuy:CanPreviewStoreEntry(data)

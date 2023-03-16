@@ -61,11 +61,15 @@ function ZO_BattlegroundMatchInfo_Shared:Initialize(control, medalControlTemplat
     local statsControl = container:GetNamedChild("Stats")
     local damageControl = statsControl:GetNamedChild("DamageDealt")
     local damageDealtHeaderLabel = damageControl:GetNamedChild("Header")
-    damageDealtHeaderLabel:SetText(GetString("SI_SCORETRACKERENTRYTYPE", SCORE_TRACKER_TYPE_DAMAGE_DONE))
+    -- Save off text for narration
+    self.damageDealtLabelText = GetString("SI_SCORETRACKERENTRYTYPE", SCORE_TRACKER_TYPE_DAMAGE_DONE)
+    damageDealtHeaderLabel:SetText(self.damageDealtLabelText)
     self.damageDealtValueLabel =  damageControl:GetNamedChild("Value")
     local healingControl = statsControl:GetNamedChild("HealingDone")
     local healingDoneHeaderLabel = healingControl:GetNamedChild("Header")
-    healingDoneHeaderLabel:SetText(GetString("SI_SCORETRACKERENTRYTYPE", SCORE_TRACKER_TYPE_HEALING_DONE))
+    -- Save off text for narration
+    self.healingLabelText = GetString("SI_SCORETRACKERENTRYTYPE", SCORE_TRACKER_TYPE_HEALING_DONE)
+    healingDoneHeaderLabel:SetText(self.healingLabelText)
     self.healingDoneValueLabel =  healingControl:GetNamedChild("Value")
 
     local medalsContainer = container:GetNamedChild("Medals")
@@ -111,18 +115,20 @@ do
         return leftTotalValue > rightTotalValue
     end
 
-    local function SetupScoreTypeRow(entryIndex, scoreType, rowValueLabel)
+    function ZO_BattlegroundMatchInfo_Shared:SetupScoreTypeRow(entryIndex, scoreType, rowValueLabel)
         local score = GetScoreboardEntryScoreByType(entryIndex, scoreType)
         local USE_LOWERCASE_NUMBER_SUFFIXES = false
-        rowValueLabel:SetText(ZO_AbbreviateAndLocalizeNumber(score, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+        self.scoreRowValueTable[scoreType] = ZO_AbbreviateAndLocalizeNumber(score, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
+        rowValueLabel:SetText(self.scoreRowValueTable[scoreType])
     end
 
     function ZO_BattlegroundMatchInfo_Shared:SetupForScoreboardEntry(entryIndex)
-        SetupScoreTypeRow(entryIndex, SCORE_TRACKER_TYPE_DAMAGE_DONE, self.damageDealtValueLabel)
-        SetupScoreTypeRow(entryIndex, SCORE_TRACKER_TYPE_HEALING_DONE, self.healingDoneValueLabel)
+        self.scoreRowValueTable = {}
+        self:SetupScoreTypeRow(entryIndex, SCORE_TRACKER_TYPE_DAMAGE_DONE, self.damageDealtValueLabel)
+        self:SetupScoreTypeRow(entryIndex, SCORE_TRACKER_TYPE_HEALING_DONE, self.healingDoneValueLabel)
 
         local classId = GetScoreboardEntryClassId(entryIndex)
-        self.playerClassTexture:SetTexture(GetPlatformClassIcon(classId))
+        self.playerClassTexture:SetTexture(ZO_GetPlatformClassIcon(classId))
 
         local characterName, displayName = GetScoreboardEntryInfo(entryIndex)
         local primaryName = ZO_GetPrimaryPlayerName(ZO_FormatUserFacingDisplayName(displayName), characterName)

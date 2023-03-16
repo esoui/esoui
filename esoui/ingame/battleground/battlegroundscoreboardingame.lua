@@ -109,7 +109,7 @@ function ZO_Battleground_Scoreboard_In_Game:InitializePlatformStyle()
 end
 
 function ZO_Battleground_Scoreboard_In_Game:ApplyPlatformStyle(style)
-    ApplyTemplateToControl(self.inGameTimer, ZO_GetPlatformTemplate("ZO_BattlegroundScoreboard_Timer"))
+    ApplyTemplateToControl(self.inGameTimerLabel, ZO_GetPlatformTemplate("ZO_BattlegroundScoreboard_Timer"))
 end
 
 function ZO_Battleground_Scoreboard_In_Game:CloseScoreboard()

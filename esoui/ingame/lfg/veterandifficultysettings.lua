@@ -43,7 +43,7 @@ local function UpdateVeteranStateVisuals(self, isVeteranDifficulty)
         self.difficultyLabel:SetHidden(false)
 
         local dungeonDifficulty = ZO_GetEffectiveDungeonDifficulty()
-        local icon = GetKeyboardDungeonDifficultyIcon(dungeonDifficulty)
+        local icon = ZO_GetKeyboardDungeonDifficultyIcon(dungeonDifficulty)
         local text = GetString("SI_DUNGEONDIFFICULTY", dungeonDifficulty)
         self.difficultyLabel:SetText(zo_iconTextFormat(icon, 32, 32, text))
     end

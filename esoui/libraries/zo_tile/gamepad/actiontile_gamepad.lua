@@ -43,6 +43,13 @@ end
 
 function ZO_ActionTile_Gamepad:OnSelectionChanged()
     self:OnFocusChanged(self:IsSelected())
+    if self.selectionChangedCallback then
+        self.selectionChangedCallback(self:IsSelected())
+    end
+end
+
+function ZO_ActionTile_Gamepad:SetSelectionChangedCallback(selectionChangedCallback)
+    self.selectionChangedCallback = selectionChangedCallback
 end
 
 function ZO_ActionTile_Gamepad:SetSelected(isSelected)
@@ -107,6 +114,12 @@ function ZO_ActionTile_Gamepad:GetFocusEntryData()
                 self:SetSelected(false)
             end,
             highlight = self.selection,
+            narrationText = function()
+                local narrations = {}
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.headerText))
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.titleText))
+                return narrations
+            end,
         }
     end
     return self.focusEntryData

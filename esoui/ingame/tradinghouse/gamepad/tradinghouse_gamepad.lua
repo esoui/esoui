@@ -123,6 +123,7 @@ function ZO_GamepadTradingHouse:InitializeHeader()
     {
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_BANK_AVAILABLE_FUNDS),
         data1Text = UpdateGold,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldCurrencyNameNarration,
 
         data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
         data2Text = GetCapacityString,
@@ -134,6 +135,7 @@ function ZO_GamepadTradingHouse:InitializeHeader()
     {
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_BANK_AVAILABLE_FUNDS),
         data1Text = UpdateGold,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldCurrencyNameNarration,
 
         data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
         data2Text = GetCapacityString,
@@ -420,10 +422,23 @@ function ZO_GamepadTradingHouse:RefreshHeader()
     end
 end
 
+function ZO_GamepadTradingHouse:GetHeaderNarration()
+    --Determine which header data we are using
+    local replacementActive = self.currentListObject:GetHeaderReplacementInfo()
+    local headerData = replacementActive and self.noTabHeaderData or self.tabHeaderData
+    return ZO_GamepadGenericHeader_GetNarrationText(self.header, headerData)
+end
+
 function ZO_GamepadTradingHouse:RefreshGuildNameFooter()
     local _, guildName = GetCurrentTradingHouseGuildDetails()
 
     ZO_GUILD_NAME_FOOTER_FRAGMENT:SetGuildName(guildName)
+end
+
+function ZO_GamepadTradingHouse:GetFooterNarration()
+    if ZO_GUILD_NAME_FOOTER_FRAGMENT:IsShowing() then
+        return ZO_GUILD_NAME_FOOTER_FRAGMENT:GetNarrationText()
+    end
 end
 
 function ZO_GamepadTradingHouse:RegisterForSceneEvents()
@@ -536,7 +551,8 @@ function ZO_GamepadTradingHouse:UnlockForInput()
     if self.lockedForInput then
         self.lockedForInput = false
         self.loading:SetHidden(true)
-        self:FireCallbacks("OnUnlockedForInput")
+        local resultsActive = GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS:IsActive()
+        self:FireCallbacks("OnUnlockedForInput", not resultsActive)
 
         if not self.header:IsHidden() then
             ZO_GamepadGenericHeader_Activate(self.header)

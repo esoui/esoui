@@ -1,7 +1,6 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_AddOnEulaTemplate" layer="OVERLAY" tier="HIGH" inherits="ZO_CustomDialogBase" virtual="true">
-            <Dimensions x="730" y="400" />
             <Anchor point="CENTER" />
 
             <OnInitialized>

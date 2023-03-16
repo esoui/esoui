@@ -31,9 +31,9 @@ function ZO_GetChampionIconMarkupString(iconSize)
     if iconSize then
         local championIcon
         if IsInGamepadPreferredMode() then
-            championIcon = GetGamepadChampionPointsIcon()
+            championIcon = ZO_GetGamepadChampionPointsIcon()
         else
-            championIcon = GetChampionPointsIconSmall()
+            championIcon = ZO_GetChampionPointsIconSmall()
         end
 
         return zo_iconFormat(championIcon, iconSize, iconSize)
@@ -44,9 +44,9 @@ function ZO_GetChampionIconMarkupStringInheritColor(iconSize)
     if iconSize then
         local championIcon
         if IsInGamepadPreferredMode() then
-            championIcon = GetGamepadChampionPointsIcon()
+            championIcon = ZO_GetGamepadChampionPointsIcon()
         else
-            championIcon = GetChampionPointsIconSmall()
+            championIcon = ZO_GetChampionPointsIconSmall()
         end
 
         return zo_iconFormatInheritColor(championIcon, iconSize, iconSize)

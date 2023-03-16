@@ -42,6 +42,8 @@ function ZO_GamepadSmithingResearch:Initialize(panelContent, owner, scene)
             self:SetupTabBar(tabBarEntries, savedFilter)
 
             self:Refresh()
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.focus, NARRATE_HEADER)
         elseif newState == SCENE_HIDING then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             self.focus:Deactivate()
@@ -126,6 +128,8 @@ function ZO_GamepadSmithingResearch:GenerateTabBarEntries()
             entry.callback = function()
                 self.typeFilter = filterType
                 self:HandleDirtyEvent()
+                local NARRATE_HEADER = true
+                SCREEN_NARRATION_MANAGER:QueueFocus(self.focus, NARRATE_HEADER)
             end
             entry.mode = filterType
 
@@ -377,20 +381,55 @@ function ZO_GamepadSmithingResearch:InitializeConfirmList()
     self.confirmList:SetOnSelectedDataChangedCallback(OnEntryChanged)
 
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.confirmKeybindStripDescriptor, self.confirmList)
+
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return GAMEPAD_SMITHING_RESEARCH_CONFIRM_SCENE:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            --Use the "choose an item to research" text as the header instead of the actual header here, as the actual header isn't actually active
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_SMITHING_RESEARCH_SELECT_ITEM))
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.confirmList, narrationInfo)
 end
 
 function ZO_GamepadSmithingResearch:InitializeFocusItems()
     self.focus = ZO_GamepadFocus:New(self.panelContent)
+
+    --Narrate the current focus when the focused item changes
+    self.focus:SetFocusChangedCallback(function(focusItem)
+        if focusItem then
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.focus)
+        end
+    end)
+
+    --Re-narrate the current focus upon closing a dialog
+    CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", function()
+        if self.focus:IsActive() then
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.focus, NARRATE_HEADER)
+        end
+    end)
 end
 
 function ZO_GamepadSmithingResearch:RefreshFocusItems(focusIndex)
-    local function AddEntry(control, highlight, activate, deactivate)
+    local function AddEntry(control, highlight, activate, deactivate, narrationText, directionalInputNarrationFunction)
         self.focus:AddEntry(
         {
             control = control,
             highlight = highlight,
             activate = activate,
             deactivate = deactivate,
+            narrationText = narrationText,
+            additionalInputNarrationFunction = directionalInputNarrationFunction,
+            headerNarrationFunction = function()
+                return ZO_GamepadGenericHeader_GetNarrationText(self.owner.header, self.owner.headerData)
+            end,
+            footerNarrationFunction = function()
+                return self.owner:GetFooterNarration()
+            end,
         })
     end
 
@@ -411,7 +450,27 @@ function ZO_GamepadSmithingResearch:RefreshFocusItems(focusIndex)
         UpdateBorderHighlight(control:GetControl():GetParent(), not ACTIVE)
     end
 
-    AddEntry(self.researchLineList, self.control:GetNamedChild("ResearchLineList").focusTexture, ListActivate, ListDeactivate)
+    local function ListNarrationText(focusItem)
+        local narrations = {}
+        table.insert(narrations, ZO_FormatSpinnerNarrationText(GetString(SI_SMITHING_RESEARCH_LINE_HEADER), self.traitLineText))
+        if self.timer and self.timer:IsStarted() then
+            table.insert(narrations, self.timer:GetNarrationText())
+        else
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.extraInfoText))
+        end
+        return narrations
+    end
+
+    local function GetListDirectionalInputNarrationData()
+        if self.researchLineList then
+            local narrationFunction = self.researchLineList:GetAdditionalInputNarrationFunction()
+            return narrationFunction()
+        end
+
+        return {}
+    end
+
+    AddEntry(self.researchLineList, self.control:GetNamedChild("ResearchLineList").focusTexture, ListActivate, ListDeactivate, ListNarrationText, GetListDirectionalInputNarrationData)
 
     local function Activate(control)
         self:OnResearchRowActivate(control)
@@ -421,9 +480,21 @@ function ZO_GamepadSmithingResearch:RefreshFocusItems(focusIndex)
         self:OnResearchRowDeactivate(control)
     end
 
+    local function TraitNarrationText(focusItem)
+        local traitType = focusItem.control.traitType
+        local narrations = {}
+        --Include the "Trait Progress" text in the narration if this is the first trait in the list
+        if focusItem.control.traitIndex == 1 then
+            table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SMITHING_RESEARCH_PROGRESS_HEADER)))
+        end
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_ITEMTRAITTYPE", traitType)))
+        table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(focusItem.control.statusText))
+        return narrations
+    end
+
     local entries = self.slotPool:GetActiveObjects()
     for _, v in pairs(entries) do
-        AddEntry(v, v:GetNamedChild("Highlight"), Activate, Deactivate)
+        AddEntry(v, v:GetNamedChild("Highlight"), Activate, Deactivate, TraitNarrationText)
     end
 
     if focusIndex then
@@ -472,12 +543,13 @@ function ZO_GamepadSmithingResearch:GetExtraInfoColor()
 end
 
 function ZO_GamepadSmithingResearch:SetupTraitDisplay(slotControl, researchLine, known, duration, traitIndex)
-    local iconControl = GetControl(slotControl, "Icon")
+    local iconControl = slotControl:GetNamedChild("Icon")
 
     if known then
         slotControl.nameLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
 
         slotControl.statusLabel:SetText("")
+        slotControl.statusText = ""
 
         slotControl.timerIcon:SetHidden(true)
 
@@ -486,7 +558,8 @@ function ZO_GamepadSmithingResearch:SetupTraitDisplay(slotControl, researchLine,
     elseif duration then
         slotControl.nameLabel:SetColor(ZO_SECOND_CONTRAST_TEXT:UnpackRGBA())
 
-        slotControl.statusLabel:SetText(GetString(SI_SMITHING_RESEARCH_IN_PROGRESS))
+        slotControl.statusText = GetString(SI_SMITHING_RESEARCH_IN_PROGRESS)
+        slotControl.statusLabel:SetText(slotControl.statusText)
         slotControl.statusLabel:SetColor(ZO_SECOND_CONTRAST_TEXT:UnpackRGBA())
 
         slotControl.timerIcon:SetHidden(false)
@@ -497,7 +570,8 @@ function ZO_GamepadSmithingResearch:SetupTraitDisplay(slotControl, researchLine,
     elseif researchLine.itemTraitCounts and researchLine.itemTraitCounts[traitIndex] then
         slotControl.nameLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
 
-        slotControl.statusLabel:SetText(GetString(SI_SMITHING_RESEARCH_RESEARCHABLE))
+        slotControl.statusText = GetString(SI_SMITHING_RESEARCH_RESEARCHABLE)
+        slotControl.statusLabel:SetText(slotControl.statusText)
         slotControl.statusLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
 
         slotControl.timerIcon:SetHidden(true)
@@ -509,7 +583,8 @@ function ZO_GamepadSmithingResearch:SetupTraitDisplay(slotControl, researchLine,
     else
         slotControl.nameLabel:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
 
-        slotControl.statusLabel:SetText(GetString(SI_SMITHING_RESEARCH_UNKNOWN))
+        slotControl.statusText = GetString(SI_SMITHING_RESEARCH_UNKNOWN)
+        slotControl.statusLabel:SetText(slotControl.statusText)
         slotControl.statusLabel:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
 
         slotControl.timerIcon:SetHidden(true)

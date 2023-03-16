@@ -6,10 +6,20 @@ end
 
 function HousingPreviewDialog_Keyboard:Initialize(control)
     ZO_HousingPreviewDialog_Shared.Initialize(self, control, "HOUSE_PREVIEW_PURCHASE")
+    self.returnToEntranceButton = control:GetNamedChild("GoToEntrance")
+
+    self.enableInspectionCheckBox = self.templateContainer:GetNamedChild("EnableInspectionCheckBox")
+    ZO_CheckButton_SetToggleFunction(self.enableInspectionCheckBox, function() HousingEditorTogglePreviewInspectionEnabled() end)
+    ZO_CheckButton_SetLabelText(self.enableInspectionCheckBox, GetString(SI_HOUSING_ENABLE_PREVIEW_INSPECTION_MODE_CHECKBOX))
+    ZO_CheckButton_SetTooltipEnabledState(self.enableInspectionCheckBox, true)
+    ZO_CheckButton_SetTooltipAnchor(self.enableInspectionCheckBox, TOP, self.enableInspectionCheckBox)
+    ZO_CheckButton_SetTooltipText(self.enableInspectionCheckBox, GetString(SI_HOUSING_ENABLE_PREVIEW_INSPECTION_MODE_TOOLTIP))
+    self:OnPreviewInspectionStateChanged()
 
     SYSTEMS:RegisterKeyboardObject("HOUSING_PREVIEW", self)
     self:InitializePurchaseButtons()
-    self.returnToEntranceButton = control:GetNamedChild("GoToEntrance") 
+
+    self.control:RegisterForEvent(EVENT_HOUSING_PREVIEW_INSPECTION_STATE_CHANGED, function() self:OnPreviewInspectionStateChanged() end)
 end
 
 function HousingPreviewDialog_Keyboard:InitializeTemplateComboBox()
@@ -53,10 +63,20 @@ function HousingPreviewDialog_Keyboard:RefreshTemplateComboBox()
 
     self.returnToEntranceButton:ClearAnchors()
     if self.notAvailableLabel:IsControlHidden() then
-        self.returnToEntranceButton:SetAnchor(TOPLEFT, self.templatePreviewButton, BOTTOMLEFT, 0, 10)
+        self.returnToEntranceButton:SetAnchor(TOPLEFT, self.templateFurnitureButton, TOPRIGHT, 5, 0)
     else
-        self.returnToEntranceButton:SetAnchor(TOP, self.notAvailableLabel, BOTTOM, 0, 50)
+        self.returnToEntranceButton:SetAnchor(BOTTOM, nil, nil, 0, -30)
     end
+end
+
+function HousingPreviewDialog_Keyboard:OnPreviewInspectionStateChanged()
+    ZO_CheckButton_SetCheckState(self.enableInspectionCheckBox, HousingEditorIsPreviewInspectionEnabled())
+end
+
+function HousingPreviewDialog_Keyboard:OnTemplatesChanged(hasTemplateEntries, currentlyPreviewedItemEntryIndex)
+    ZO_HousingPreviewDialog_Shared.OnTemplatesChanged(self, hasTemplateEntries, currentlyPreviewedItemEntryIndex)
+
+    self.enableInspectionCheckBox:SetHidden(not hasTemplateEntries)
 end
 
 -- Global XML functions
@@ -68,6 +88,20 @@ end
 function ZO_HousingPreviewDialog_Keyboard_PreviewButton_OnClicked(control, button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         ZO_HOUSING_PREVIEW_DIALOG_KEYBOARD:PreviewSelectedTemplate()
+    end
+end
+
+function ZO_HousingPreviewDialog_Keyboard_FurnitureButton_OnClicked(control, button)
+    if button == MOUSE_BUTTON_INDEX_LEFT then
+        ZO_HOUSING_PREVIEW_DIALOG_KEYBOARD:PreviewSelectedTemplate()
+        HOUSING_EDITOR_SHARED:ShowFurnitureBrowser()
+    end
+end
+
+function ZO_HousingPreviewDialog_Keyboard_GoToEntrance_OnClick(control, button)
+    if button == MOUSE_BUTTON_INDEX_LEFT then
+        ZO_HOUSING_PREVIEW_DIALOG_KEYBOARD:ReleaseDialog()
+        HousingEditorJumpToSafeLocation()
     end
 end
 

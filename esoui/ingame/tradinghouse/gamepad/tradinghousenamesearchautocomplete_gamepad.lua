@@ -52,7 +52,14 @@ function ZO_TradingHouseNameSearchAutoComplete_Gamepad:RefreshList()
         if internalassert(numResults, "match results not available for given nameMatchId") then
             for resultIndex = 1, numResults do
                 local name, _ = GetMatchTradingHouseItemNamesResult(nameMatchId, resultIndex)
-                self.itemList:AddEntry("ZO_GamepadGuildStoreNameMatchEntryTemplate", {name = name})
+                local entryData =
+                {
+                    name = name,
+                    narrationText = function()
+                        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(name)
+                    end,
+                }
+                self.itemList:AddEntry("ZO_GamepadGuildStoreNameMatchEntryTemplate", entryData)
             end
         end
     end

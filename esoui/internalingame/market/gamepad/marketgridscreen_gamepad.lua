@@ -294,12 +294,23 @@ end
 function GamepadMarket_TabBarScrollList:InitializeKeybindStripDescriptors()
     local leftShoulderKeybind =
     {
-        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-        name = "Gampad Market Tab Bar Back",
+        --Even though this is an ethereal keybind, the name will still be read during screen narration
+        name = GetString(SI_SCREEN_NARRATION_TABBAR_PREVIOUS_KEYBIND),
         keybind = "UI_SHORTCUT_LEFT_SHOULDER",
         ethereal = true,
+        narrateEthereal = function()
+            return self:GetNumItems() > 0
+        end,
+        etherealNarrationOrder = 100,
         enabled = function() return self:GetNumItems() > 0 end,
-        callback = function()
+        handlesKeyUp = true,
+        callback = function(isUp)
+            -- handled on up due to the potential chord with GAMEPAD_BUTTON_3 causing ordering issues
+            -- when previewing and attempting to change categories
+            if not isUp then
+                return
+            end
+
             self:MoveRight()
             PlaySound(SOUNDS.GAMEPAD_PAGE_BACK)
         end,
@@ -307,12 +318,23 @@ function GamepadMarket_TabBarScrollList:InitializeKeybindStripDescriptors()
 
     local rightShoulderKeybind =
     {
-        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-        name = "Gamepad Market Tab Bar Forward",
+        --Even though this is an ethereal keybind, the name will still be read during screen narration
+        name = GetString(SI_SCREEN_NARRATION_TABBAR_NEXT_KEYBIND),
         keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
         ethereal = true,
+        narrateEthereal = function()
+            return self:GetNumItems() > 0
+        end,
+        etherealNarrationOrder = 101,
         enabled = function() return self:GetNumItems() > 0 end,
-        callback = function()
+        handlesKeyUp = true,
+        callback = function(isUp)
+            -- handled on up due to the potential chord with GAMEPAD_BUTTON_3 causing ordering issues
+            -- when previewing and attempting to change categories
+            if not isUp then
+                return
+            end
+
             self:MoveLeft()
             PlaySound(SOUNDS.GAMEPAD_PAGE_FORWARD)
         end,
@@ -326,6 +348,23 @@ function GamepadMarket_TabBarScrollList:InitializeKeybindStripDescriptors()
 
     self.leftIcon:SetKeybindButtonDescriptor(leftShoulderKeybind)
     self.rightIcon:SetKeybindButtonDescriptor(rightShoulderKeybind)
+end
+
+function GamepadMarket_TabBarScrollList:GetNarrationText()
+    local selectedData = self:GetSelectedData()
+    if selectedData then
+        --If the selected data has a custom narration function, use that
+        if selectedData.narrationText then
+            return selectedData.narrationText()
+        else
+            --Otherwise just form a narration from the text
+            local text = selectedData.text or ""
+            if type(text) == "function" then
+                text = text(selectedData)
+            end
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(text)
+        end
+    end
 end
 
 --
@@ -361,6 +400,23 @@ function ZO_GamepadMarket_GridScreen:Initialize(control, initialTabBarEntries)
     self.headerContainer = self.fullPane:GetNamedChild("ContainerHeaderContainer")
     self.header = self.headerContainer.header
     self:InitializeHeader(initialTabBarEntries)
+
+    self.headerNarrationFunction = function()
+        local narrations = {}
+        ZO_AppendNarration(narrations, self.header.tabBar:GetNarrationText())
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.headerData.titleText))
+        return narrations
+    end
+
+    self.subHeaderNarrationFunction = function(focusItem)
+        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(focusItem.categoryName)
+    end
+
+    self.footerNarrationFunction = function()
+        if MARKET_CURRENCY_GAMEPAD_FRAGMENT:IsShowing() then
+            return MARKET_CURRENCY_GAMEPAD:GetNarrationText()
+        end
+    end
 end
 
 -- calculate offset needed to scroll grid entries to the absolute screen center instead of the relative container center
@@ -377,6 +433,10 @@ function ZO_GamepadMarket_GridScreen:Activate()
         self.focusList:Activate()
         self.header.tabBar:Activate()
         self.selectingItem = true
+        --Narrate both the header and subheader when the screen is activated
+        local NARRATE_HEADER = true
+        local NARRATE_SUB_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueFocus(self.focusList, NARRATE_HEADER, NARRATE_SUB_HEADER)
     end
 end
 
@@ -420,7 +480,7 @@ function ZO_GamepadMarket_GridScreen:ResetGrid()
     self.gridYHeight = 0
 end
 
-function ZO_GamepadMarket_GridScreen:AddEntry(entryObject, control)
+function ZO_GamepadMarket_GridScreen:AddEntry(entryObject, control, categoryName)
     control:ClearAnchors()
     local row, col, _, gridYHeight = ZO_Anchor_BoxLayout(self.currentItemAnchor, control, #self.gridEntries, self.itemsPerRow, self.itemPadding, self.itemPadding, self.itemWidth, self.itemHeight, ZO_GAMEPAD_MARKET_GRID_INITIAL_X_OFFSET, self.gridYPaddingOffset)
     self.gridYHeight = gridYHeight
@@ -432,6 +492,10 @@ function ZO_GamepadMarket_GridScreen:AddEntry(entryObject, control)
     focusData.gridY = row + 1
     focusData.gridX = col + 1
     focusData.centerScrollHeight = gridYHeight + INDIVIDUAL_PRODUCT_HALF_HEIGHT
+    focusData.categoryName = categoryName
+    focusData.headerNarrationFunction = self.headerNarrationFunction
+    focusData.subHeaderNarrationFunction = self.subHeaderNarrationFunction
+    focusData.footerNarrationFunction = self.footerNarrationFunction
     self.focusList:AddEntry(focusData)
     self.itemsPerColumn = row + 1
 
@@ -508,9 +572,9 @@ function ZO_GamepadMarket_GridScreen:ClearLastPreviewedMarketProductId()
     self.lastPreviewedMarketProductId = nil
 end
 
-function ZO_GamepadMarket_GridScreen:BeginPreview()
-    if self.selectedGridEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
-        local previewIndex = self.selectedGridEntry:GetPreviewIndex()
+function ZO_GamepadMarket_GridScreen:BeginPreview(selectedEntry)
+    if selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
+        local previewIndex = selectedEntry:GetPreviewIndex()
         ZO_MARKET_PREVIEW_GAMEPAD:BeginPreview(self.previewProductIds, previewIndex, function(...) self:OnPreviewChanged(...) end)
     end
 end

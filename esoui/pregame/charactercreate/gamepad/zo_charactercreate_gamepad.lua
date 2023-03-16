@@ -253,6 +253,7 @@ function ZO_CharacterCreate_Gamepad:InitializeControls()
             narrationText = function(entryData, entryControl)
                 return entryData.control.sliderObject:GetNarrationText()
             end,
+            directionalInputNarrationFunction = ZO_GetHorizontalDirectionalInputNarrationData,
             shouldAdd = IsAppearanceChangeEnabled,
         },
         [GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE] =
@@ -924,6 +925,7 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
                     narrationText = function(entryData, entryControl)
                         return entryData.control.sliderObject:GetNarrationText()
                     end,
+                    directionalInputNarrationFunction = ZO_GetNumericHorizontalDirectionalInputNarrationData,
                 }
                 slider.info = info
                 controlData[#controlData + 1] = info
@@ -963,6 +965,7 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
                     narrationText = function(entryData, entryControl)
                         return entryData.control.sliderObject:GetNarrationText()
                     end,
+                    directionalInputNarrationFunction = ZO_GetHorizontalDirectionalInputNarrationData,
                 }
                 slider.info = info
                 controlData[#controlData + 1] = info
@@ -999,6 +1002,7 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
                             updateFn = controlInfo.updateFn,
                             randomizeFn = controlInfo.randomizeFn,
                             narrationText = controlInfo.narrationText,
+                            directionalInputNarrationFunction = controlInfo.directionalInputNarrationFunction,
                         }
 
                         control.sliderObject = control.sliderObject or {}
@@ -1016,7 +1020,7 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
 
     local NO_SUBCATEGORY_ID = nil
     for _, orderingData in ipairs(controlData) do
-        GAMEPAD_BUCKET_MANAGER:AddControl(orderingData.control, orderingData.bucketIndex, orderingData.updateFn, orderingData.randomizeFn, NO_SUBCATEGORY_ID, orderingData.narrationText)
+        GAMEPAD_BUCKET_MANAGER:AddControl(orderingData.control, orderingData.bucketIndex, orderingData.updateFn, orderingData.randomizeFn, NO_SUBCATEGORY_ID, orderingData.narrationText, orderingData.directionalInputNarrationFunction)
     end
 
     local appearanceControlsEnabled = self:DoesCurrentCharacterCreateModeAllowAppearanceChange()

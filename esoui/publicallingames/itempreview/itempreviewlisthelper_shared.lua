@@ -27,6 +27,10 @@ function ZO_ItemPreviewListHelper_Shared:Initialize(control)
         self:RefreshActions()
     end
 
+    self.CanChangePreviewChangedCallback = function(...)
+        self:FireCallbacks("CanChangePreviewChanged", ...)
+    end
+
     self.EndCurrentPreviewCallback = function()
         self:ClearPreviewData()
         self:RefreshActions()
@@ -189,12 +193,17 @@ function ZO_ItemPreviewListHelper_Shared:HasMultiplePreviewDatas()
     return self.previewListEntries and #self.previewListEntries > 1
 end
 
+function ZO_ItemPreviewListHelper_Shared:HasVariations()
+    return self:GetPreviewObject():HasVariations()
+end
+
 function ZO_ItemPreviewListHelper_Shared:RefreshActions()
     self:FireCallbacks("RefreshActions")
 end
 
 function ZO_ItemPreviewListHelper_Shared:OnShowing()
     self:GetPreviewObject():RegisterCallback("RefreshActions", self.RefreshActionsCallback)
+    self:GetPreviewObject():RegisterCallback("CanChangePreviewChanged", self.CanChangePreviewChangedCallback)
     self:GetPreviewObject():RegisterCallback("EndCurrentPreview", self.EndCurrentPreviewCallback)
 end
 
@@ -202,6 +211,7 @@ function ZO_ItemPreviewListHelper_Shared:OnHidden()
     self:ClearPreviewData()
 
     self:GetPreviewObject():UnregisterCallback("RefreshActions", self.RefreshActionsCallback)
+    self:GetPreviewObject():UnregisterCallback("CanChangePreviewChanged", self.CanChangePreviewChangedCallback)
     self:GetPreviewObject():UnregisterCallback("EndCurrentPreview", self.EndCurrentPreviewCallback)
 end
 

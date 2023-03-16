@@ -375,7 +375,12 @@ end
 function ZO_RadialMenu:ClearSelection()
     self.virtualMouseX = 0
     self.virtualMouseY = 0
-    self.selectedEntry = nil
+    if self.selectedEntry ~= nil then
+        self.selectedEntry = nil
+        if self.onSelectionChangedCallback then
+            self.onSelectionChangedCallback(nil)
+        end
+    end
     self:UpdateSelectedEntryFromVirtualMousePosition()
 end
 

@@ -61,7 +61,7 @@ function ZO_HousingFurnitureProducts_Keyboard:InitializeKeybindStrip()
 end
 
 function ZO_HousingFurnitureProducts_Keyboard:InitializeThemeSelector()
-    self.purchaseThemeDropdown = self.contents:GetNamedChild("Dropdown")
+    self.purchaseThemeDropdown = self.contents:GetNamedChild("ThemeDropdown")
 
     local function OnThemeChanged(comboBox, entryText, entry)
         SHARED_FURNITURE:SetPurchaseFurnitureTheme(entry.furnitureTheme)
@@ -70,11 +70,24 @@ function ZO_HousingFurnitureProducts_Keyboard:InitializeThemeSelector()
     ZO_HousingSettingsTheme_SetupDropdown(self.purchaseThemeDropdown, OnThemeChanged)
 end
 
+function ZO_HousingFurnitureProducts_Keyboard:RefreshFilters()
+    -- Get the current filter state.
+    local themeFilter = SHARED_FURNITURE:GetPurchaseFurnitureTheme()
+    local textFilter = SHARED_FURNITURE:GetPlaceableTextFilter()
 
-function ZO_HousingFurnitureProducts_Keyboard:OnShowing()
-    ZO_HousingFurnitureList.OnShowing(self)
+    -- Update the Text Search filter to reflect the filter state.
+    self.searchEditBox:SetText(textFilter)
 
-    UpdateMarketDisplayGroup(MARKET_DISPLAY_GROUP_HOUSE_EDITOR)
+    -- Update the Theme filter to reflect the filter state.
+    do
+        local themesList = ZO_ComboBox_ObjectFromContainer(self.purchaseThemeDropdown)
+        for _, themeItem in ipairs(themesList:GetItems()) do
+            if themeItem.furnitureTheme == themeFilter then
+                themesList:SelectItem(themeItem)
+                break
+            end
+        end
+    end
 end
 
 function ZO_HousingFurnitureProducts_Keyboard:OnSearchTextChanged(editBox)
@@ -190,10 +203,20 @@ do
     end
 end
 
+--Overridden from ZO_HousingFurnitureList
+function ZO_HousingFurnitureProducts_Keyboard:OnShowing()
+    ZO_HousingFurnitureList.OnShowing(self)
+
+    UpdateMarketDisplayGroup(MARKET_DISPLAY_GROUP_HOUSE_EDITOR)
+    self:RefreshFilters()
+end
+
+--Overridden from ZO_HousingFurnitureList
 function ZO_HousingFurnitureProducts_Keyboard:GetCategoryTreeData()
     return SHARED_FURNITURE:GetMarketProductCategoryTreeData()
 end
 
+--Overridden from ZO_HousingFurnitureList
 function ZO_HousingFurnitureProducts_Keyboard:GetNoItemText()
     if SHARED_FURNITURE:AreThereMarketProducts() then
         return GetString(SI_HOUSING_FURNITURE_NO_SEARCH_RESULTS)

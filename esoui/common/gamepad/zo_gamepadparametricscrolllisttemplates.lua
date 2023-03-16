@@ -115,15 +115,16 @@ function ZO_GamepadTabBarScrollList:Deactivate()
 end
 
 function ZO_GamepadTabBarScrollList:InitializeKeybindStripDescriptors()
-    --TODO XAR: Look into making these not narrate if there is only one tab
     local leftShoulderKeybind =
     {
         --Even though this is an ethereal keybind, the name will still be read during screen narration
         name = GetString(SI_SCREEN_NARRATION_TABBAR_PREVIOUS_KEYBIND),
         keybind = "UI_SHORTCUT_LEFT_SHOULDER",
         ethereal = true,
-        narrateEthereal = true,
-        etherealNarrationOrder = 0,
+        narrateEthereal = function()
+            return #self.dataList > 1
+        end,
+        etherealNarrationOrder = 100,
         callback = function()
             if self.active then
                 self:MovePrevious()
@@ -137,8 +138,10 @@ function ZO_GamepadTabBarScrollList:InitializeKeybindStripDescriptors()
         name = GetString(SI_SCREEN_NARRATION_TABBAR_NEXT_KEYBIND),
         keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
         ethereal = true,
-        narrateEthereal = true,
-        etherealNarrationOrder = 1,
+        narrateEthereal = function()
+            return #self.dataList > 1
+        end,
+        etherealNarrationOrder = 101,
         callback = function()
             if self.active then
                 self:MoveNext()

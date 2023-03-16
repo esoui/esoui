@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 101036
+h1. ESO UI Documentation for API Version 101037
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -734,6 +734,7 @@ h5. PlatformAccountLabel
 
 h5. PlatformStoreLabel
 * PLATFORM_STORE_LABEL_DMM
+* PLATFORM_STORE_LABEL_EPIC
 * PLATFORM_STORE_LABEL_HERON
 * PLATFORM_STORE_LABEL_PSN
 * PLATFORM_STORE_LABEL_STEAM
@@ -930,6 +931,15 @@ h5. SceneManagerMessageOrigin
 * SCENE_MANAGER_MESSAGE_ORIGIN_INGAME
 * SCENE_MANAGER_MESSAGE_ORIGIN_INTERNAL
 * SCENE_MANAGER_MESSAGE_ORIGIN_PREGAME
+
+
+h5. ScreenReaderNarrationType
+* NARRATION_TYPE_ALERT
+* NARRATION_TYPE_CENTER_SCREEN_ANNOUNCEMENT
+* NARRATION_TYPE_EDIT_BOX
+* NARRATION_TYPE_HUD
+* NARRATION_TYPE_TEXT_CHAT
+* NARRATION_TYPE_UI_SCREEN
 
 
 h5. SocialActionResult
@@ -1532,9 +1542,9 @@ h5. AbilityType
 * ABILITY_TYPE_DAMAGESHIELD
 * ABILITY_TYPE_DAMAGETRANSFER
 * ABILITY_TYPE_DEFEND
-* ABILITY_TYPE_DEPRECATED
 * ABILITY_TYPE_DERIVEDSTATCACHE
 * ABILITY_TYPE_DESPAWNOVERRIDE
+* ABILITY_TYPE_DIRECTEDMOVEMENTABILITY
 * ABILITY_TYPE_DISABLECLIENTTURNING
 * ABILITY_TYPE_DISABLEITEMSETS
 * ABILITY_TYPE_DISARM
@@ -2852,6 +2862,11 @@ h5. AdvancedStatDisplayType
 * ADVANCED_STAT_DISPLAY_TYPE_ULTIMATE_REGEN_COMBAT
 
 
+h5. AttributePointAllocationMode
+* ATTRIBUTE_POINT_ALLOCATION_MODE_FULL
+* ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY
+
+
 h5. Attributes
 * ATTRIBUTE_HEALTH
 * ATTRIBUTE_MAGICKA
@@ -3202,6 +3217,7 @@ h5. SCTEventType
 * SCT_EVENT_TYPE_BLADETURN
 * SCT_EVENT_TYPE_BLOCKED
 * SCT_EVENT_TYPE_BLOCKED_DAMAGE
+* SCT_EVENT_TYPE_CHARMED
 * SCT_EVENT_TYPE_DAMAGE
 * SCT_EVENT_TYPE_DAMAGE_CRIT
 * SCT_EVENT_TYPE_DAMAGE_IMMUNE
@@ -3318,6 +3334,11 @@ h5. StealthState
 * STEALTH_STATE_NONE
 * STEALTH_STATE_STEALTH
 * STEALTH_STATE_STEALTH_ALMOST_DETECTED
+
+
+h5. TriggerExcludeType
+* TRIGGER_EXCLUDE_TYPE_NONE
+* TRIGGER_EXCLUDE_TYPE_TRANSFER_DAMAGE
 
 
 h5. TriggerSourceIdentifier
@@ -3966,6 +3987,7 @@ h5. HousePermissionOptionsCategories
 * HOUSE_PERMISSION_OPTIONS_CATEGORIES_GENERAL
 * HOUSE_PERMISSION_OPTIONS_CATEGORIES_GUILD_BANLIST
 * HOUSE_PERMISSION_OPTIONS_CATEGORIES_GUILD_VISITORS
+* HOUSE_PERMISSION_OPTIONS_CATEGORIES_OCCUPANTS
 * HOUSE_PERMISSION_OPTIONS_CATEGORIES_SOCIAL_OPTIONS
 * HOUSE_PERMISSION_OPTIONS_CATEGORIES_TEMPLATES
 * HOUSE_PERMISSION_OPTIONS_CATEGORIES_VISITORS
@@ -4061,6 +4083,20 @@ h5. HousingFurnishingLimitType
 * HOUSING_FURNISHING_LIMIT_TYPE_LOW_IMPACT_ITEM
 
 
+h5. HousingFurnitureBoundFilter
+* HOUSING_FURNITURE_BOUND_FILTER_ALL
+* HOUSING_FURNITURE_BOUND_FILTER_BOUND
+* HOUSING_FURNITURE_BOUND_FILTER_UNBOUND
+
+
+h5. HousingFurnitureLocationFilter
+* HOUSING_FURNITURE_LOCATION_FILTER_ALL
+* HOUSING_FURNITURE_LOCATION_FILTER_BACKPACK
+* HOUSING_FURNITURE_LOCATION_FILTER_BANK
+* HOUSING_FURNITURE_LOCATION_FILTER_COLLECTIBLES
+* HOUSING_FURNITURE_LOCATION_FILTER_STORAGE
+
+
 h5. HousingLoadPermissionsResult
 * HOUSING_LOAD_PERMISSIONS_RESULT_NO_CHANGE
 * HOUSING_LOAD_PERMISSIONS_RESULT_SUCCESS
@@ -4117,6 +4153,7 @@ h5. HousingRequestResult
 * HOUSING_REQUEST_RESULT_ITEM_REMOVE_FAILED_ALREADY_OWN_UNIQUE
 * HOUSING_REQUEST_RESULT_ITEM_REMOVE_FAILED_INVENTORY_FULL
 * HOUSING_REQUEST_RESULT_ITEM_STOLEN
+* HOUSING_REQUEST_RESULT_KICK_OCCUPANT_SELF
 * HOUSING_REQUEST_RESULT_LINK_ALREADY_HAS_PARENT
 * HOUSING_REQUEST_RESULT_LINK_ALREADY_LINKED
 * HOUSING_REQUEST_RESULT_LINK_FAILED
@@ -5126,6 +5163,7 @@ h5. ItemUISoundCategory
 
 
 h5. ItemUseType
+* ITEM_USE_TYPE_ATTRIBUTE_RESPEC
 * ITEM_USE_TYPE_BOOK
 * ITEM_USE_TYPE_COLLECTIBLE_GRANT
 * ITEM_USE_TYPE_COMBINATION
@@ -5507,9 +5545,11 @@ h5. QuestRemovedType
 h5. QuestRepeatableType
 * QUEST_REPEAT_DAILY
 * QUEST_REPEAT_EVENT_RESET
+* QUEST_REPEAT_MONTHLY
 * QUEST_REPEAT_NOT_REPEATABLE
 * QUEST_REPEAT_REPEATABLE
 * QUEST_REPEAT_REPEATABLE_PER_DURATION
+* QUEST_REPEAT_WEEKLY
 
 
 h5. QuestShareResult
@@ -5816,6 +5856,7 @@ h5. InWorldUISetting
 * IN_WORLD_UI_SETTING_LIMIT_FOLLOWERS_IN_TOWNS
 * IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED
 * IN_WORLD_UI_SETTING_TARGET_GLOW_INTENSITY
+* IN_WORLD_UI_SETTING_TARGET_MARKER_SIZE
 
 
 h5. KeybindDisplayMode
@@ -6102,6 +6143,7 @@ h5. UISetting
 * UI_SETTING_COMPASS_GROUP_MEMBER_GENERAL
 * UI_SETTING_COMPASS_GROUP_MEMBER_RAID
 * UI_SETTING_COMPASS_QUEST_GIVERS
+* UI_SETTING_COMPASS_TARGET_MARKERS
 * UI_SETTING_CUSTOM_SCALE
 * UI_SETTING_DEPRECATED3
 * UI_SETTING_FADE_PLAYER_BARS
@@ -6443,6 +6485,11 @@ h5. HotBarResult
 * HOT_BAR_RESULT_SUCCESS
 
 
+h5. RespecPaymentType
+* RESPEC_PAYMENT_TYPE_GOLD
+* RESPEC_PAYMENT_TYPE_RESPEC_SCROLL
+
+
 h5. RespecResult
 * RESPEC_RESULT_ACTIVE_ABILITY_IS_AUTOGRANT
 * RESPEC_RESULT_ACTIVE_ABILITY_NOT_FOUND
@@ -6467,7 +6514,9 @@ h5. RespecResult
 * RESPEC_RESULT_INVALID_PROGRESSION_LINE
 * RESPEC_RESULT_INVALID_SKILL_LINE
 * RESPEC_RESULT_IS_IN_COMBAT
+* RESPEC_RESULT_IS_IN_COMBAT_ATTRIBUTE
 * RESPEC_RESULT_NOT_AT_SKILL_RESPEC_SHRINE
+* RESPEC_RESULT_NOT_ENOUGH_ATTRIBUTE_POINTS
 * RESPEC_RESULT_NOT_ENOUGH_GOLD
 * RESPEC_RESULT_NOT_ENOUGH_GOLD_FOR_MORPHS
 * RESPEC_RESULT_NOT_ENOUGH_MORPH_XP
@@ -6520,11 +6569,6 @@ h5. SkillPointReason
 * SKILL_POINT_CHANGE_REASON_SKILL_RESPEC
 * SKILL_POINT_CHANGE_REASON_SKYSHARD
 * SKILL_POINT_CHANGE_REASON_SKYSHARD_INSTANT_UNLOCK
-
-
-h5. SkillRespecPaymentType
-* SKILL_RESPEC_PAYMENT_TYPE_GOLD
-* SKILL_RESPEC_PAYMENT_TYPE_RESPEC_SCROLL
 
 
 h5. SkillType
@@ -7079,6 +7123,7 @@ h5. MarketingPreferencesRequestResult
 
 h5. PlatformServiceType
 * PLATFORM_SERVICE_TYPE_DMM
+* PLATFORM_SERVICE_TYPE_EPIC
 * PLATFORM_SERVICE_TYPE_HERON
 * PLATFORM_SERVICE_TYPE_PSN
 * PLATFORM_SERVICE_TYPE_STEAM
@@ -7088,6 +7133,7 @@ h5. PlatformServiceType
 
 h5. PlayerPlatformType
 * PLAYER_PLATFORM_DMM
+* PLAYER_PLATFORM_EPIC
 * PLAYER_PLATFORM_PC
 * PLAYER_PLATFORM_PLAYSTATION
 * PLAYER_PLATFORM_STADIA
@@ -8532,6 +8578,7 @@ h5. ActionResult
 * ACTION_RESULT_CANT_SWAP_HOTBAR_IS_OVERRIDDEN
 * ACTION_RESULT_CANT_SWAP_WHILE_CHANGING_GEAR
 * ACTION_RESULT_CASTER_DEAD
+* ACTION_RESULT_CHARMED
 * ACTION_RESULT_CRITICAL_DAMAGE
 * ACTION_RESULT_CRITICAL_HEAL
 * ACTION_RESULT_DAMAGE
@@ -9390,8 +9437,11 @@ h5. ScrollBounding
 
 h5. ShaderEffectType
 * SHADER_EFFECT_TYPE_CAUSTIC
+* SHADER_EFFECT_TYPE_GAUSSIAN_BLUR
 * SHADER_EFFECT_TYPE_HALO
+* SHADER_EFFECT_TYPE_MOTION_BLUR
 * SHADER_EFFECT_TYPE_NONE
+* SHADER_EFFECT_TYPE_RADIAL_BLUR
 * SHADER_EFFECT_TYPE_WAVE
 
 
@@ -9955,6 +10005,9 @@ h2. Game API
 * GetFrameTimeSeconds()
 ** _Returns:_ *number* _frameTimeInSeconds_
 
+* GetTimeStamp32()
+** _Returns:_ *integer* _timestamp_
+
 * GetFrameDeltaTimeSeconds()
 ** _Returns:_ *number* _frameDeltaTimeInSeconds_
 
@@ -9996,6 +10049,30 @@ h2. Game API
 
 * GetNumGuildHistoryCategories()
 ** _Returns:_ *integer* _numCategories_
+
+* DoesGuildHistoryCategoryHaveMoreEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *bool* _hasMoreEvents_
+
+* HasGuildHistoryCategoryEverBeenRequested(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *bool* _hasEverBeenRequested_
+
+* DoesGuildHistoryCategoryHaveOutstandingRequest(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *bool* _hasOutstandingRequest_
+
+* IsGuildHistoryCategoryRequestQueued(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *bool* _isQueued_
+
+* RequestMoreGuildHistoryCategoryEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *bool* _queueRequestIfOnCooldown_)
+** _Returns:_ *bool* _requested_
+
+* GetNumGuildEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *integer* _numEvents_
+
+* GetGuildEventInfo(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *luaindex* _eventIndex_)
+** _Returns:_ *[GuildEventType|#GuildEventType]* _eventType_, *integer* _secsSinceEvent_, *variant* _param1_, *variant* _param2_, *variant* _param3_, *variant* _param4_, *variant* _param5_, *variant* _param6_, *integer* _eventId_
+
+* GetGuildEventId(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *luaindex* _eventIndex_)
+** _Returns:_ *id64* _guildEventId_
 
 * GetAvARankName(*[Gender|#Gender]* _gender_, *integer* _rank_)
 ** _Returns:_ *string* _rankName_
@@ -10095,9 +10172,6 @@ h2. Game API
 
 * ShouldShowFSRSetting()
 ** _Returns:_ *bool* _shouldShowFSRSetting_
-
-* ShouldShowScreenNarrationSetting()
-** _Returns:_ *bool* _shouldShowScreenNarrationSetting_
 
 * GetEULADetails(*[EULAType|#EULAType]* _eulaType_)
 ** _Returns:_ *string* _message_, *string* _agreeText_, *string* _disagreeText_, *bool* _hasAgreed_, *string* _dialogText_, *string* _readCheckText_
@@ -10387,30 +10461,6 @@ h2. Game API
 ** _Returns:_ *integer* _newPermissions_
 
 * RequestOfflineGuildMembers(*integer* _guildId_)
-
-* DoesGuildHistoryCategoryHaveMoreEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
-** _Returns:_ *bool* _hasMoreEvents_
-
-* HasGuildHistoryCategoryEverBeenRequested(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
-** _Returns:_ *bool* _hasEverBeenRequested_
-
-* DoesGuildHistoryCategoryHaveOutstandingRequest(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
-** _Returns:_ *bool* _hasOutstandingRequest_
-
-* IsGuildHistoryCategoryRequestQueued(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
-** _Returns:_ *bool* _isQueued_
-
-* RequestMoreGuildHistoryCategoryEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *bool* _queueRequestIfOnCooldown_)
-** _Returns:_ *bool* _requested_
-
-* GetNumGuildEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
-** _Returns:_ *integer* _numEvents_
-
-* GetGuildEventInfo(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *luaindex* _eventIndex_)
-** _Returns:_ *[GuildEventType|#GuildEventType]* _eventType_, *integer* _secsSinceEvent_, *variant* _param1_, *variant* _param2_, *variant* _param3_, *variant* _param4_, *variant* _param5_, *variant* _param6_, *integer* _eventId_
-
-* GetGuildEventId(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *luaindex* _eventIndex_)
-** _Returns:_ *id64* _guildEventId_
 
 * SetGuildMemberNote(*integer* _guildId_, *luaindex* _memberIndex_, *string* _note_)
 
@@ -10719,6 +10769,9 @@ h2. Game API
 * AreUserAddOnsSupported()
 ** _Returns:_ *bool* _areUserAddOnsSupported_
 
+* ShouldKeyCodeUseKeyMarkup(*[KeyCode|#KeyCode]* _keyCode_)
+** _Returns:_ *bool* _shouldUseKeyMarkup_
+
 * UpdatePlayerPresenceInformation *private* ()
 
 * UpdatePlayerPresenceName *private* ()
@@ -10949,15 +11002,21 @@ h2. Game API
 
 * AddPendingNarrationText(*string* _text_)
 
-* RequestReadPendingNarrationTextToClient()
+* AddPartialPendingNarrationText(*string* _text_)
+
+* FinalizePartialPendingNarrationText(*integer* _pauseBetweenTextMs_)
+
+* RequestReadPendingNarrationTextToClient(*[ScreenReaderNarrationType|#ScreenReaderNarrationType]* _narrationType_)
 
 * RequestReadTextChatToClient(*string* _text_)
 
-* ClearReadTextChatToClientQueue()
+* ClearNarrationQueue(*[ScreenReaderNarrationType|#ScreenReaderNarrationType]* _narrationType_)
 
-* ClearReadUITextToClientQueue()
+* ClearAllNarrationQueues()
 
-* SetReadTextChatToClientQueueEnabled(*bool* _enabled_)
+* SetTextChatNarrationQueueEnabled(*bool* _enabled_)
+
+* SetCenterScreenAnnounceNarrationQueueEnabled(*bool* _enabled_)
 
 
 * ToggleShowIngameGui()
@@ -12695,6 +12754,8 @@ h2. Game API
 
 * SetChatContainerColors(*luaindex* _chatContainerIndex_, *number* _bgRed_, *number* _bgGreen_, *number* _bgBlue_, *number* _bgMinAlpha_, *number* _bgMaxAlpha_)
 
+* ResetChatToDefaults()
+
 * ResetChatContainerColorsToDefault(*luaindex* _chatContainerIndex_)
 
 * AddChatContainer()
@@ -12770,7 +12831,11 @@ h2. Game API
 ** _Returns:_ *bool* _inBonus_, *bool* _isHostile_, *integer* _percentChance_, *[PickpocketDifficultyType|#PickpocketDifficultyType]* _difficulty_, *bool* _isEmpty_, *[ProspectivePickpocketResult|#ProspectivePickpocketResult]* _prospectiveResult_, *string* _monsterSocialClassString_, *[MonsterSocialClass|#MonsterSocialClass]* _monsterSocialClass_
 
 * GetChatterOption(*luaindex* _optionIndex_)
-** _Returns:_ *string* _optionString_, *integer* _optionType_, *integer* _optionalArgument_, *bool* _isImportant_, *bool* _chosenBefore_, *integer* _teleportNPC_, *integer* _teleportWaypointIndex_
+** _Returns:_ *string* _optionString_, *integer* _optionType_, *integer* _optionalArgument_, *bool* _isImportant_, *bool* _chosenBefore_, *integer* _teleportNPC_
+
+* GetChatterOptionWaypoints(*luaindex* _optionIndex_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _waypointId_
 
 * SelectChatterOption(*luaindex* _optionIndex_)
 
@@ -14387,7 +14452,7 @@ h2. Game API
 * GetPendingSkillRespecScrollItemLink()
 ** _Returns:_ *string* _itemLink_
 
-* PrepareSkillPointAllocationRequest(*[SkillPointAllocationMode|#SkillPointAllocationMode]* _allocationMode_, *[SkillRespecPaymentType|#SkillRespecPaymentType]* _respecPaymentType_)
+* PrepareSkillPointAllocationRequest(*[SkillPointAllocationMode|#SkillPointAllocationMode]* _allocationMode_, *[RespecPaymentType|#RespecPaymentType]* _respecPaymentType_)
 
 * AddActiveChangeToAllocationRequest(*integer* _skillLineId_, *integer* _progressionId_, *[MorphSlot|#MorphSlot]* _morphSlot_, *bool* _isPurchased_)
 
@@ -14719,11 +14784,19 @@ h2. Game API
 
 * PurchaseAttributes(*integer* _health_, *integer* _magicka_, *integer* _stamina_)
 
+* SendAttributePointAllocationRequest(*[RespecPaymentType|#RespecPaymentType]* _respecPaymentType_, *integer* _healthDelta_, *integer* _magickaDelta_, *integer* _staminaDelta_)
+
 * GetAttributeSpentPoints(*integer* _attributeType_)
 ** _Returns:_ *integer* _points_
 
 * GetAttributeUnspentPoints()
 ** _Returns:_ *integer* _points_
+
+* GetPendingAttributeRespecScrollItemLink()
+** _Returns:_ *string* _itemLink_
+
+* GetAttributeRespecGoldCost()
+** _Returns:_ *integer* _cost_
 
 * GetNumScriptedEventInvites()
 ** _Returns:_ *integer* _eventCount_
@@ -14775,6 +14848,9 @@ h2. Game API
 
 * GetLoreBookCollectionLinkedAchievement(*luaindex* _categoryIndex_, *luaindex* _collectionIndex_)
 ** _Returns:_ *integer* _achievementId_
+
+* GetLoreBookOverrideImageFromBookId(*integer* _bookId_)
+** _Returns:_ *textureName:nilable* _overrideImage_, *[AnchorPosition|#AnchorPosition]:nilable* _overrideImageTitlePosition_
 
 * GetGameCameraNonInteractableName()
 ** _Returns:_ *string:nilable* _name_
@@ -16141,6 +16217,13 @@ h2. Game API
 * DoesFurnitureThemeShowInBrowser(*[FurnitureThemeType|#FurnitureThemeType]* _furnitureTheme_)
 ** _Returns:_ *bool* _showInBrowser_
 
+* HousingEditorIsPreviewInspectionEnabled()
+** _Returns:_ *bool* _enabled_
+
+* HousingEditorSetPreviewInspectionEnabled(*bool* _enabled_)
+
+* HousingEditorTogglePreviewInspectionEnabled()
+
 * HousingEditorTogglePlacementType()
 
 * HousingEditorSetPlacementType(*[HousingEditorPlacementType|#HousingEditorPlacementType]* _placementType_)
@@ -16169,6 +16252,12 @@ h2. Game API
 
 * HousingEditorIsSurfaceDragModeEnabled()
 ** _Returns:_ *bool* _enabled_
+
+* HousingEditorRequestResetEngagedTargetDummies()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorRequestKickOccupant(*luaindex* _occupantIndex_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
 
 * HousingEditorRequestSelectedPlacement()
 ** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
@@ -16376,6 +16465,9 @@ h2. Game API
 
 * GetCurrentHousePopulation()
 ** _Returns:_ *integer* _population_
+
+* GetHouseOccupantName(*luaindex* _index_)
+** _Returns:_ *string* _displayName_, *string* _characterName_
 
 * UndoLastHousingEditorCommand()
 
@@ -19851,13 +19943,13 @@ h2. Game API
 * GetTributeCardRarity(*integer* _cardDefId_)
 ** _Returns:_ *[ItemDisplayQuality|#ItemDisplayQuality]* _itemRarity_
 
-* GetNumTributeCardMechanics(*integer* _cardDefId_, *[TributeMechanicActivationSource|#TributeMechanicActivationSource]* _trigger_)
+* GetNumTributeCardMechanics(*integer* _cardDefId_, *[TributeMechanicActivationSource|#TributeMechanicActivationSource]* _activationSource_)
 ** _Returns:_ *integer* _numMechanics_
 
 * GetTributeCardMechanicInfo(*integer* _cardDefId_, *[TributeMechanicActivationSource|#TributeMechanicActivationSource]* _activationSource_, *luaindex* _mechanicIndex_)
 ** _Returns:_ *[TributeMechanic|#TributeMechanic]* _mechanicType_, *integer* _quantity_, *integer* _comboNum_, *integer* _param1_, *integer* _param2_, *integer* _param3_, *integer* _triggerId_
 
-* GetTributeCardMechanicText(*integer* _cardDefId_, *[TributeMechanicActivationSource|#TributeMechanicActivationSource]* _trigger_, *luaindex* _mechanicIndex_, *bool* _prependIcon_)
+* GetTributeCardMechanicText(*integer* _cardDefId_, *[TributeMechanicActivationSource|#TributeMechanicActivationSource]* _activationSource_, *luaindex* _mechanicIndex_, *bool* _prependIcon_)
 ** _Returns:_ *string* _mechanicText_
 
 * GetTributeTriggerDescription(*integer* _triggerId_)
@@ -19917,11 +20009,23 @@ h2. Game API
 * GetNumTributePatronMechanicsForFavorState(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_)
 ** _Returns:_ *integer* _numMechanics_
 
+* GetTributePatronMechanicInfo(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_, *luaindex* _mechanicIndex_)
+** _Returns:_ *[TributeMechanic|#TributeMechanic]* _mechanicType_, *integer* _quantity_, *integer* _param1_, *integer* _param2_, *integer* _param3_
+
 * GetTributePatronMechanicText(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_, *luaindex* _mechanicIndex_, *bool* _prependIcon_)
 ** _Returns:_ *string* _mechanicText_
 
 * GetTributePatronMechanicsText(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_)
 ** _Returns:_ *string* _mechanicsText_
+
+* GetNumTributePatronPassiveMechanicsForFavorState(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_)
+** _Returns:_ *integer* _numPassiveMechanics_
+
+* GetTributePatronPassiveMechanicInfo(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_, *luaindex* _mechanicIndex_)
+** _Returns:_ *[TributeMechanic|#TributeMechanic]* _mechanicType_, *integer* _quantity_, *integer* _param1_, *integer* _param2_, *integer* _param3_, *integer* _triggerId_
+
+* GetTributePatronPassiveMechanicText(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_, *luaindex* _mechanicIndex_, *bool* _prependIcon_)
+** _Returns:_ *string* _passiveMechanicText_
 
 * GetTributePatronNumStarterCards(*integer* _patronId_)
 ** _Returns:_ *integer* _numStarterCards_
@@ -20825,6 +20929,10 @@ Objects that inherit behavior from *Control*
 
 * ClearRectangularClip()
 
+* ClearShaderEffectOptions()
+
+* ClearSuggestedDimensions *protected-attributes* ()
+
 * ClearTransform()
 
 * ClearTransformOffset()
@@ -20834,8 +20942,6 @@ Objects that inherit behavior from *Control*
 * ClearTransformScale()
 
 * ClearTransformSkew()
-
-* ClearWaveEffect()
 
 * Convert3DLocalOrientationToWorldOrientation(*number* _localPitch_, *number* _localYaw_, *number* _localRoll_)
 ** _Returns:_ *number* _worldPitch_, *number* _worldYaw_, *number* _worldRoll_
@@ -20858,6 +20964,9 @@ Objects that inherit behavior from *Control*
 
 * Does3DRenderSpaceUseDepthBuffer()
 ** _Returns:_ *bool* _usesDepthBuffer_
+
+* DoesControlDescendFrom(*object* _root_)
+** _Returns:_ *bool* _doesControlDescendFromRoot_
 
 * Get3DRenderSpaceAxisRotationOrder()
 ** _Returns:_ *[AxisRotationOrder|#AxisRotationOrder]* _axisRotationOrder_
@@ -20985,6 +21094,9 @@ Objects that inherit behavior from *Control*
 * GetFlexShrink()
 ** _Returns:_ *number* _shrink_
 
+* GetGaussianBlur()
+** _Returns:_ *integer* _kernelSize_, *number* _factor_
+
 * GetHandler(*string* _handlerName_, *string* _name_)
 ** _Returns:_ *function* _functionRef_
 
@@ -21012,6 +21124,9 @@ Objects that inherit behavior from *Control*
 * GetMaskThresholdZeroAlphaEdge()
 ** _Returns:_ *number* _normalizedEdge_
 
+* GetMotionBlur()
+** _Returns:_ *number* _blurVectorXAsAPercentageOfControlWidth_, *number* _blurVectorYAsAPercentageOfControlHeight_, *integer* _numSamples_
+
 * GetName()
 ** _Returns:_ *string* _name_
 
@@ -21029,6 +21144,9 @@ Objects that inherit behavior from *Control*
 
 * GetParent()
 ** _Returns:_ *object* _ret1_
+
+* GetRadialBlur()
+** _Returns:_ *number* _originX_, *number* _originY_, *integer* _numSamples_, *number* _blurRadius_, *number* _offsetRadius_
 
 * GetResizeToFitConstrains()
 ** _Returns:_ *[AnchorConstrains|#AnchorConstrains]* _constrains_
@@ -21050,6 +21168,15 @@ Objects that inherit behavior from *Control*
 
 * GetSpace()
 ** _Returns:_ *[Space|#Space]* _space_
+
+* GetSuggestedDimensions()
+** _Returns:_ *number* _width_, *number* _height_
+
+* GetSuggestedHeight()
+** _Returns:_ *number* _height_
+
+* GetSuggestedWidth()
+** _Returns:_ *number* _width_
 
 * GetTop()
 ** _Returns:_ *number* _top_
@@ -21220,6 +21347,8 @@ Objects that inherit behavior from *Control*
 
 * SetFlexShrink(*number* _shrink_)
 
+* SetGaussianBlur(*integer* _kernelSize_, *number* _factor_)
+
 * SetHandler(*string* _handlerName_, *function* _functionRef_, *string* _name_, *[ControlHandlerOrder|#ControlHandlerOrder]* _controlHandlerOrder_, *string* _targetName_)
 
 * SetHeight *protected-attributes* (*layout_measurement* _height_)
@@ -21246,11 +21375,15 @@ Objects that inherit behavior from *Control*
 
 * SetMaskThresholdZeroAlphaEdge(*number* _normalizedEdge_)
 
+* SetMotionBlur(*number* _blurVectorXAsAPercentageOfControlWidth_, *number* _blurVectorYAsAPercentageOfControlHeight_, *integer* _numSamples_)
+
 * SetMouseEnabled *protected-attributes* (*bool* _enabled_)
 
 * SetMovable(*bool* _isMovable_)
 
 * SetParent *protected-attributes* (*object* _newParent_)
+
+* SetRadialBlur(*number* _originX_, *number* _originY_, *integer* _numSamples_, *number* _blurRadius_, *number* _offsetRadius_)
 
 * SetRectangularClip(*number* _left_, *number* _top_, *number* _right_, *number* _bottom_)
 
@@ -21260,7 +21393,7 @@ Objects that inherit behavior from *Control*
 
 * SetResizeToFitDescendents *protected-attributes* (*bool* _resize_)
 
-* SetResizeToFitPadding(*number* _width_, *number* _height_)
+* SetResizeToFitPadding(*layout_measurement* _width_, *layout_measurement* _height_)
 
 * SetScale *protected-attributes* (*number* _scale_)
 
@@ -21324,6 +21457,12 @@ Objects that inherit behavior from *Control*
 ** _Returns:_ *bool* _isMoving_
 
 * StopMovingOrResizing *protected-attributes* ()
+
+* SuggestDimensions *protected-attributes* (*number* _width_, *number* _height_)
+
+* SuggestHeight *protected-attributes* (*number* _height_)
+
+* SuggestWidth *protected-attributes* (*number* _width_)
 
 * ToggleHidden *protected-attributes* ()
 
@@ -21531,6 +21670,9 @@ h3. LabelControl
 * GetNumLines()
 ** _Returns:_ *integer* _numLines_
 
+* GetShaderEffectType()
+** _Returns:_ *[ShaderEffectType|#ShaderEffectType]* _shaderEffectType_
+
 * GetStringWidth(*string* _text_)
 ** _Returns:_ *number* _scaledWidthTextLayoutNative_
 
@@ -21542,6 +21684,9 @@ h3. LabelControl
 
 * GetTextDimensions()
 ** _Returns:_ *number* _stringWidthUIUnits_, *number* _stringHeightUIUnits_
+
+* GetTextForLines(*luaindex* _startLine_, *luaindex* _endLine_)
+** _Returns:_ *string* _apRet_
 
 * GetTextHeight()
 ** _Returns:_ *number* _stringHeightUIUnits_
@@ -21573,6 +21718,10 @@ h3. LabelControl
 * SetNewLineX(*layout_measurement* _newLineX_)
 
 * SetPixelRoundingEnabled(*bool* _pixelRoundingEnabled_)
+
+* SetShaderEffectType(*[ShaderEffectType|#ShaderEffectType]* _shaderEffectType_)
+
+* SetStoreLineEndingCharacterIndices(*bool* _storeLineEndingCharacterIndices_)
 
 * SetStyleColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
 
@@ -22339,6 +22488,9 @@ h3. WindowManager
 * GetControlByName(*string* _name_, *string* _suffix_)
 ** _Returns:_ *object* _ret_
 
+* GetCursorPosition(*integer* _cursorId_)
+** _Returns:_ *number* _x_, *number* _y_
+
 * GetFocusControl()
 ** _Returns:_ *object* _focusControl_
 
@@ -22356,6 +22508,9 @@ h3. WindowManager
 
 * GetNumIMECandidates()
 ** _Returns:_ *integer* _numCandidates_
+
+* GetUIMousePosition()
+** _Returns:_ *number* _x_, *number* _y_
 
 * HasFocusControl()
 ** _Returns:_ *bool* _hasFocusControl_
@@ -22394,9 +22549,6 @@ h3. WindowManager
 
 * MouseIsInside(*object* _control_, *number* _leftOffset_, *number* _topOffset_, *number* _rightOffset_, *number* _bottomOffset_)
 ** _Returns:_ *bool* _isInside_
-
-* GetUIMousePosition()
-** _Returns:_ *number* _x_, *number* _y_
 
 * GetUIMouseDeltas()
 ** _Returns:_ *number* _deltaX_, *number* _deltaY_
@@ -22564,6 +22716,7 @@ h2. Events
 * EVENT_ARTIFICIAL_EFFECT_ADDED (*integer* _artificialEffectId_)
 * EVENT_ARTIFICIAL_EFFECT_REMOVED (*integer* _artificialEffectId_)
 * EVENT_ASSIGNED_CAMPAIGN_CHANGED (*integer* _newAssignedCampaignId_)
+* EVENT_ATTRIBUTE_RESPEC_RESULT (*[RespecResult|#RespecResult]* _result_)
 * EVENT_ATTRIBUTE_UPGRADE_UPDATED
 * EVENT_AUTO_MAP_NAVIGATION_TARGET_SET
 * EVENT_AVENGE_KILL (*string* _avengedCharacterName_, *string* _killedCharacterName_, *string* _avengedDisplayName_, *string* _killedDisplayName_)
@@ -22765,7 +22918,7 @@ h2. Events
 * EVENT_GROUP_MEMBER_IN_REMOTE_REGION (*string* _unitTag_, *bool* _isInRemoteRegion_)
 * EVENT_GROUP_MEMBER_JOINED (*string* _memberCharacterName_, *string* _memberDisplayName_, *bool* _isLocalPlayer_)
 * EVENT_GROUP_MEMBER_LEFT (*string* _memberCharacterName_, *[GroupLeaveReason|#GroupLeaveReason]* _reason_, *bool* _isLocalPlayer_, *bool* _isLeader_, *string* _memberDisplayName_, *bool* _actionRequiredVote_)
-* EVENT_GROUP_MEMBER_POSITION_REQUEST_COMPLETE (*integer* _taskId_, *id64* _charId_, *bool* _isGroupLeader_, *bool* _isBreadcrumb_, *integer* _teleportNPCId_, *integer* _teleportWaypointIndex_)
+* EVENT_GROUP_MEMBER_POSITION_REQUEST_COMPLETE (*integer* _taskId_, *id64* _charId_, *bool* _isGroupLeader_, *bool* _isBreadcrumb_, *integer* _teleportNPCId_, *integer* _waypointId_)
 * EVENT_GROUP_MEMBER_ROLE_CHANGED (*string* _unitTag_, *[LFGRole|#LFGRole]* _newRole_)
 * EVENT_GROUP_MEMBER_SUBZONE_CHANGED
 * EVENT_GROUP_NOTIFICATION_MESSAGE (*integer* _messageId_)
@@ -22838,10 +22991,13 @@ h2. Events
 * EVENT_HOUSING_FURNITURE_REMOVED (*id64* _furnitureId_, *integer* _collectibleId_)
 * EVENT_HOUSING_FURNITURE_STATE_CHANGED (*id64* _furnitureId_, *integer* _objectStateIndex_, *integer* _previousObjectStateId_, *id64* _triggeredByFurnitureId_, *[HousingSetStateReason|#HousingSetStateReason]* _reason_)
 * EVENT_HOUSING_LOAD_PERMISSIONS_RESULT (*[HousingLoadPermissionsResult|#HousingLoadPermissionsResult]* _loadResult_)
+* EVENT_HOUSING_OCCUPANT_ARRIVED (*string* _accountName_, *string* _characterName_)
+* EVENT_HOUSING_OCCUPANT_DEPARTED (*string* _accountName_, *string* _characterName_)
 * EVENT_HOUSING_PATH_NODE_SELECTION_CHANGED
 * EVENT_HOUSING_PERMISSIONS_CHANGED (*[HousePermissionUserGroup|#HousePermissionUserGroup]* _userGroup_)
 * EVENT_HOUSING_PLAYER_INFO_CHANGED (*bool* _wasOwner_, *bool* _permissionsChanged_, *[HousingVisitorRole|#HousingVisitorRole]* _oldVisitorRole_)
-* EVENT_HOUSING_POPULATION_CHANGED (*integer* _newPopulation_)
+* EVENT_HOUSING_POPULATION_CHANGED (*integer* _newPopulation_, *integer* _previousPopulation_)
+* EVENT_HOUSING_PREVIEW_INSPECTION_STATE_CHANGED (*bool* _isPreviewInspectionEnabled_)
 * EVENT_HOUSING_PRIMARY_RESIDENCE_SET (*integer* _houseId_)
 * EVENT_HOUSING_TARGET_FURNITURE_CHANGED
 * EVENT_IMPACTFUL_HIT
@@ -23006,7 +23162,7 @@ h2. Events
 * EVENT_QUEST_LOG_IS_FULL
 * EVENT_QUEST_OFFERED
 * EVENT_QUEST_OPTIONAL_STEP_ADVANCED (*string* _text_)
-* EVENT_QUEST_POSITION_REQUEST_COMPLETE (*integer* _taskId_, *[MapDisplayPinType|#MapDisplayPinType]* _pinType_, *number* _xLoc_, *number* _yLoc_, *number* _areaRadius_, *bool* _insideCurrentMapWorld_, *bool* _isBreadcrumb_, *integer* _teleportNPCId_, *integer* _teleportWaypointIndex_)
+* EVENT_QUEST_POSITION_REQUEST_COMPLETE (*integer* _taskId_, *[MapDisplayPinType|#MapDisplayPinType]* _pinType_, *number* _xLoc_, *number* _yLoc_, *number* _areaRadius_, *bool* _insideCurrentMapWorld_, *bool* _isBreadcrumb_, *integer* _teleportNPCId_, *integer* _waypointId_)
 * EVENT_QUEST_REMOVED (*bool* _isCompleted_, *luaindex* _journalIndex_, *string* _questName_, *luaindex* _zoneIndex_, *luaindex* _poiIndex_, *integer* _questID_)
 * EVENT_QUEST_SHARED (*integer* _questId_)
 * EVENT_QUEST_SHARE_REMOVED (*integer* _questId_)
@@ -23095,11 +23251,12 @@ h2. Events
 * EVENT_STABLE_INTERACT_END
 * EVENT_STABLE_INTERACT_START
 * EVENT_STACKED_ALL_ITEMS_IN_BAG (*[Bag|#Bag]* _bagId_)
+* EVENT_START_ATTRIBUTE_RESPEC (*[AttributePointAllocationMode|#AttributePointAllocationMode]* _allocationMode_, *[RespecPaymentType|#RespecPaymentType]* _paymentType_)
 * EVENT_START_FAST_TRAVEL_INTERACTION (*luaindex* _nodeIndex_)
 * EVENT_START_FAST_TRAVEL_KEEP_INTERACTION (*integer* _keepId_)
 * EVENT_START_KEEP_GUILD_CLAIM_INTERACTION
 * EVENT_START_KEEP_GUILD_RELEASE_INTERACTION
-* EVENT_START_SKILL_RESPEC (*[SkillPointAllocationMode|#SkillPointAllocationMode]* _allocationMode_, *[SkillRespecPaymentType|#SkillRespecPaymentType]* _paymentType_)
+* EVENT_START_SKILL_RESPEC (*[SkillPointAllocationMode|#SkillPointAllocationMode]* _allocationMode_, *[RespecPaymentType|#RespecPaymentType]* _paymentType_)
 * EVENT_START_SOUL_GEM_RESURRECTION (*integer* _durationMs_)
 * EVENT_STATS_UPDATED (*string* _unitTag_)
 * EVENT_STEALTH_STATE_CHANGED (*string* _unitTag_, *[StealthState|#StealthState]* _stealthState_)
@@ -23384,12 +23541,12 @@ h4. Attributes:
 * deltaV *number*
 * deltaX *number*
 * deltaX *layout_measurement*
-* deltaXFromEnd *layout_measurement*
 * deltaXFromEnd *number*
+* deltaXFromEnd *layout_measurement*
 * deltaY *layout_measurement*
 * deltaY *number*
-* deltaYFromEnd *layout_measurement*
 * deltaYFromEnd *number*
+* deltaYFromEnd *layout_measurement*
 * deltaZ *number*
 * deltaZFromEnd *number*
 * desaturation *number*
@@ -23516,14 +23673,15 @@ h4. Attributes:
 * startSkewX *number*
 * startSkewY *number*
 * startWidth *number*
-* startX *layout_measurement*
 * startX *number*
+* startX *layout_measurement*
 * startY *number*
 * startY *layout_measurement*
 * startYaw *number*
 * startZ *layout_measurement*
 * startZ *number*
 * step *number*
+* storeLineEndingCharacterIndices *bool*
 * styleColor *string*
 * text *string*
 * textType *[TextType|#TextType]*
@@ -23533,6 +23691,7 @@ h4. Attributes:
 * thickness *layout_measurement*
 * tier *[DrawTier|#DrawTier]*
 * topmost *bool*
+* value *number*
 * verticalAlignment *[TextAlignment|#TextAlignment]*
 * wrapMode *[TextWrapMode|#TextWrapMode]*
 
@@ -23768,7 +23927,9 @@ h5. Control
 * [Child: Dimensions|#Dimensions]
 * [Child: FadeGradient|#FadeGradient]
 * [Child: FlexMargin|#FlexMargin]
+* [Child: GaussianBlur|#GaussianBlur]
 * [Child: HitInsets|#HitInsets]
+* [Child: MotionBlur|#MotionBlur]
 * [Child: OnChar|#OnChar]
 * [Child: OnDragStart|#OnDragStart]
 * [Child: OnEffectivelyHidden|#OnEffectivelyHidden]
@@ -23794,6 +23955,7 @@ h5. Control
 * [Child: OnResizedToFit|#OnResizedToFit]
 * [Child: OnShow|#OnShow]
 * [Child: OnUpdate|#OnUpdate]
+* [Child: RadialBlur|#RadialBlur]
 * [Child: RectangularClip|#RectangularClip]
 * [Child: ResizeToFitPadding|#ResizeToFitPadding]
 * [Child: TransformOffset|#TransformOffset]
@@ -23962,6 +24124,10 @@ h5. FontColors
 * [Child: normalColor|#Attributes]
 * [Child: pressedColor|#Attributes]
 
+h5. GaussianBlur
+* _attribute:_ *integer* _kernelSize_
+* _attribute:_ *number* _factor_
+
 h5. GuiXml
 * [Child: Animations|#Animations]
 * [Child: BackupFont|#BackupFont]
@@ -23998,6 +24164,8 @@ h5. Label
 * [Child: modifyTextType|#Attributes]
 * [Child: newLineIndent|#Attributes]
 * [Child: pixelRoundingEnabled|#Attributes]
+* [Child: shaderEffectType|#Attributes]
+* [Child: storeLineEndingCharacterIndices|#Attributes]
 * [Child: styleColor|#Attributes]
 * [Child: text|#Attributes]
 * [Child: verticalAlignment|#Attributes]
@@ -24063,6 +24231,11 @@ h5. MapPinType
 * _attribute:_ *string* _addedAnimation_
 * _attribute:_ *string* _removedAnimation_
 * _attribute:_ *[MapPinAnimationTarget|#MapPinAnimationTarget]* _animationTarget_
+
+h5. MotionBlur
+* _attribute:_ *number* _blurVectorXAsAPercentageOfControlWidth_
+* _attribute:_ *number* _blurVectorYAsAPercentageOfControlHeight_
+* _attribute:_ *integer* _numSamples_
 
 h5. MouseButton
 * _attribute:_ *[MouseButtonIndex|#MouseButtonIndex]* _button_
@@ -24346,6 +24519,13 @@ h5. PressedOffset
 * _attribute:_ *layout_measurement* _x_
 * _attribute:_ *layout_measurement* _y_
 
+h5. RadialBlur
+* _attribute:_ *number* _originX_
+* _attribute:_ *number* _originY_
+* _attribute:_ *integer* _numSamples_
+* _attribute:_ *number* _blurRadius_
+* _attribute:_ *number* _offsetRadius_
+
 h5. RadialCooldownGradient
 * _attribute:_ *number* _startAlpha_
 * _attribute:_ *number* _angularDistance_
@@ -24357,8 +24537,8 @@ h5. RectangularClip
 * _attribute:_ *number* _bottom_
 
 h5. ResizeToFitPadding
-* _attribute:_ *number* _width_
-* _attribute:_ *number* _height_
+* _attribute:_ *layout_measurement* _width_
+* _attribute:_ *layout_measurement* _height_
 
 h5. Rotate3DAnimation
 * [Inherits: AnimationBase|#AnimationBase]
@@ -24424,6 +24604,7 @@ h5. StatusBar
 * [Child: fadeOutTextureFile|#Attributes]
 * [Child: orientation|#Attributes]
 * [Child: textureFile|#Attributes]
+* [Child: value|#Attributes]
 
 h5. String
 * _attribute:_ *string* _name_

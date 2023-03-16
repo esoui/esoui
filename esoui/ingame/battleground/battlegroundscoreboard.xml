@@ -1,23 +1,17 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_BattlegroundScoreboard_Timer_Keyboard_Template" virtual="true">
+        <Label name="ZO_BattlegroundScoreboard_Timer_Keyboard_Template" font="ZoFontKeybindStripDescription" virtual="true">
             <ClearAnchors/>
             <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="32" offsetY="-12" />
-            <Controls>
-                <Label name="$(parent)Timer" font="ZoFontKeybindStripDescription" />
-            </Controls>
-        </Control>
+        </Label>
 
-        <Control name="ZO_BattlegroundScoreboard_Timer_Gamepad_Template" virtual="true">
+        <Label name="ZO_BattlegroundScoreboard_Timer_Gamepad_Template" font="ZoFontGamepad42" virtual="true">
             <ClearAnchors/>
             <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
-            <Controls>
-                <Label name="$(parent)Timer" font="ZoFontGamepad42" />
-            </Controls>
-        </Control>
+        </Label>
 
         <Label name="ZO_Battleground_Scoreboard_Score_Template" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true"/>
-        
+
         <Control name="ZO_Battleground_Scoreboard_Player_Row" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Label name="$(parent)Name" maxLineCount="1" wrapMode="ELLIPSIS">
@@ -238,7 +232,7 @@
             </Controls>
         </TopLevelControl>
         
-        <TopLevelControl name="ZO_BattlegroundScoreboard_Timer_TopLevel" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" hidden="true">
+        <TopLevelControl name="ZO_BattlegroundScoreboard_Timer_TopLevel" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" hidden="true">
             <OnInitialized>
                 ZO_Battleground_Scoreboard_In_Game_Timer_OnInitialize(self)
             </OnInitialized>

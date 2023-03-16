@@ -44,6 +44,14 @@ function ZO_GuildHistory_Gamepad:Initialize(control)
     self.initialized = false
     self.guildEvents = {}
     self.selectFirstIndexOnPage = false
+    self.headerNarrationFunction = function()
+        local narrations = {}
+        ZO_AppendNarration(narrations, GAMEPAD_GUILD_HOME:GetContentHeaderNarrationText())
+        if self.currPageNum then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_PAGED_LIST_PAGE_NUMBER_NARRATION, self.currPageNum)))
+        end
+        return narrations
+    end
 
     self.tooltipHeaderData = {
         titleText = GetString(SI_GAMEPAD_GUILD_HISTORY_GUILD_EVENT_TITLE),
@@ -133,6 +141,9 @@ function ZO_GuildHistory_Gamepad:NextPage()
     else
         self:RequestMoreEvents()
     end
+    --Re-narrate the header when changing pages
+    local NARRATE_HEADER = true
+    SCREEN_NARRATION_MANAGER:QueueFocus(self.activityList, NARRATE_HEADER)
 end
 
 function ZO_GuildHistory_Gamepad:PreviousPage()
@@ -147,6 +158,9 @@ function ZO_GuildHistory_Gamepad:PreviousPage()
     self.activityList:SetFocusToMatchingEntry(self.activityListItems[selectItemIndex])
     self.refreshGroup:MarkDirty("EventList")
     self.selectFirstIndexOnPage = false
+    --Re-narrate the header when changing pages
+    local NARRATE_HEADER = true
+    SCREEN_NARRATION_MANAGER:QueueFocus(self.activityList, NARRATE_HEADER)
 end
 
 local function CreateActivityItem(parent, previous, index)
@@ -162,11 +176,15 @@ end
 function ZO_GuildHistory_Gamepad:OnActivityTargetChanged(focusedItem)
     if(focusedItem ~= nil and focusedItem.control.description ~= nil) then
         self.tooltipHeaderData.messageText = focusedItem.control.description
+        self.tooltipHeaderData.messageTextNarration = focusedItem.control.descriptionNarration
 
         GAMEPAD_TOOLTIPS:ShowGenericHeader(GAMEPAD_RIGHT_TOOLTIP, self.tooltipHeaderData)
 
         GAMEPAD_TOOLTIPS:SetBgType(GAMEPAD_RIGHT_TOOLTIP, GAMEPAD_TOOLTIP_NORMAL_BG)
         GAMEPAD_TOOLTIPS:ShowBg(GAMEPAD_RIGHT_TOOLTIP)
+
+        --Re-narrate when selecting a new entry
+        SCREEN_NARRATION_MANAGER:QueueFocus(self.activityList)
     else
         GAMEPAD_TOOLTIPS:HideBg(GAMEPAD_RIGHT_TOOLTIP)
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
@@ -204,6 +222,11 @@ function ZO_GuildHistory_Gamepad:InitializeActivityList()
                                         control = control,
                                         highlight = control:GetNamedChild("Highlight"),
                                         canFocus = function(control) return itemIndexInternal <= self.displayedItems end,
+                                        headerNarrationFunction = self.headerNarrationFunction,
+                                        narrationText = function()
+                                            --The narration for the description is handled by the tooltip, so just narrate the time here
+                                            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(control.timeText)
+                                        end,
                                   })
     end
     self.itemsPerPage = itemIndex
@@ -237,13 +260,19 @@ function ZO_GuildHistory_Gamepad:InitializeKeybindStripDescriptors()
     end)
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.categoryKeybindStripDescriptor, self.categoryList)
 
+    local function ShouldNarrateKeybinds()
+        return self:CanPageLeft() or self:CanPageRight()
+    end
+
     -- The keybind descriptor for when focus is on the activity log list.
     self.logKeybindStripDescriptor = {
         {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = "Gamepad Guild History Previous Page",
+            --Even though this is an ethereal keybind, the name will still be read during screen narration
+            name = GetString(SI_GAMEPAD_PAGED_LIST_PAGE_LEFT_NARRATION),
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             ethereal = true,
+            narrateEthereal = ShouldNarrateKeybinds,
+            etherealNarrationOrder = 1,
             sound = SOUNDS.GAMEPAD_PAGE_BACK,
             enabled = function()
                 return self:CanPageLeft()
@@ -257,10 +286,12 @@ function ZO_GuildHistory_Gamepad:InitializeKeybindStripDescriptors()
             end,
         },
         {
-            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-            name = "Gamepad Guild History Next Page",
+            --Even though this is an ethereal keybind, the name will still be read during screen narration
+            name = GetString(SI_GAMEPAD_PAGED_LIST_PAGE_RIGHT_NARRATION),
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             ethereal = true,
+            narrateEthereal = ShouldNarrateKeybinds,
+            etherealNarrationOrder = 2,
             sound = SOUNDS.GAMEPAD_PAGE_FORWARD,
             enabled = function()
                 return self:CanPageRight()
@@ -318,6 +349,9 @@ function ZO_GuildHistory_Gamepad:SelectLogList()
     self.categoryList:Deactivate()
     self.activityList:Activate()
     GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:ClearFocus()
+    --Narrate the header when first entering the list
+    local NARRATE_HEADER = true
+    SCREEN_NARRATION_MANAGER:QueueFocus(self.activityList, NARRATE_HEADER)
 end
 
 function ZO_GuildHistory_Gamepad:SetGuildId(guildId)
@@ -403,6 +437,7 @@ function ZO_GuildHistory_Gamepad:PopulateEventList()
                         eventId = eventId,
                         eventType = eventType,
                         formatFunction = formatFunction,
+                        narrationFormatFunction = GUILD_EVENT_EVENT_NARRATION_FORMAT[eventType],
                         secsSinceEvent = secsSinceEvent,
                         param1 = param1,
                         param2 = param2,
@@ -448,12 +483,18 @@ function ZO_GuildHistory_Gamepad:PopulateEventList()
         local displayItem = self.activityListItems[eventIndex]
         local eventData = self.guildEvents[self.startIndex + eventIndex - 1]
         local description = eventData.formatFunction(eventData.eventType, eventData.param1, eventData.param2, eventData.param3, eventData.param4, eventData.param5, eventData.param6)
+        local descriptionNarration = nil
+        if eventData.narrationFormatFunction then
+            descriptionNarration = eventData.narrationFormatFunction(eventData.eventType, eventData.param1, eventData.param2, eventData.param3, eventData.param4, eventData.param5, eventData.param6)
+        end
         local time = ZO_FormatDurationAgo(eventData.secsSinceEvent)
 
         displayItem:SetHidden(false)
         displayItem.text:SetText(description)
         displayItem.time:SetText(time)
+        displayItem.timeText = time
         displayItem.description = description
+        displayItem.descriptionNarration = descriptionNarration
     end
 
     if self.displayedItems == 0 and self.startIndex == 1 and not self:IsTryingToGetMoreEvents() then
@@ -463,7 +504,9 @@ function ZO_GuildHistory_Gamepad:PopulateEventList()
         local noEntriesText = ZO_GuildHistory_GetNoEntriesText(categoryId, subcategoryId, self.guildId)
         displayItem.text:SetText(noEntriesText)
         displayItem.time:SetText("")
+        displayItem.timeText = nil
         displayItem.description = nil
+        displayItem.descriptionNarration = nil
     end
 end
 

@@ -1107,6 +1107,7 @@ local function CanUseItemWithOnUseType(onUseType)
        or onUseType == ITEM_USE_TYPE_KEEP_RECALL_STONE
        or onUseType == ITEM_USE_TYPE_SKILL_RESPEC
        or onUseType == ITEM_USE_TYPE_MORPH_RESPEC
+       or onUseType == ITEM_USE_TYPE_ATTRIBUTE_RESPEC
     then
         return false
     end
@@ -1150,6 +1151,10 @@ local function TryShowRecallMap(inventorySlot)
 end
 
 local function TryStartSkillRespec(inventorySlot)
+    TryUseItem(inventorySlot)
+end
+
+local function TryStartAttributeRespec(inventorySlot)
     TryUseItem(inventorySlot)
 end
 
@@ -1959,6 +1964,14 @@ local actionHandlers =
         end
     end,
 
+    ["start_attribute_respec"] = function(inventorySlot, slotActions)
+        local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        local itemUseType = GetItemUseType(bag, slot)
+        if itemUseType == ITEM_USE_TYPE_ATTRIBUTE_RESPEC then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_START_ATTRIBUTE_RESPEC, function() TryStartAttributeRespec(inventorySlot) end, "primary")
+        end
+    end,
+
     ["bind"] =  function(inventorySlot, slotActions)
         if not IsSlotLocked(inventorySlot) then
             local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
@@ -1989,7 +2002,7 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 local potentialActionsForSlotType =
 {
     [SLOT_TYPE_QUEST_ITEM] =                           { "quickslot", "use", "link_to_chat" },
-    [SLOT_TYPE_ITEM] =                                 { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall", "start_skill_respec", "split_stack", "enchant", "preview", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_ITEM] =                                 { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall", "start_skill_respec", "start_attribute_respec", "split_stack", "enchant", "preview", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_EQUIPMENT] =                            { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                             { "trade_remove", "link_to_chat", "report_item" },
     [SLOT_TYPE_THEIR_TRADE] =                          NON_INTERACTABLE_ITEM_ACTIONS,
@@ -2016,7 +2029,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_SMITHING_BOOSTER] =                     NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_DYEABLE_EQUIPMENT] =                    NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_GUILD_SPECIFIC_ITEM] =                  { "buy_guild_specific_item", "link_to_chat" },
-    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =               { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "start_skill_respec", "show_map_keep_recall", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =               { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "start_skill_respec", "start_attribute_respec", "show_map_keep_recall", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =                { "quickslot", "use", "rename", "link_to_chat" },
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                       { "move_to_inventory", "use", "link_to_chat", "report_item" },
     [SLOT_TYPE_PENDING_RETRAIT_ITEM] =                 { "remove_from_craft", "link_to_chat", "report_item" },

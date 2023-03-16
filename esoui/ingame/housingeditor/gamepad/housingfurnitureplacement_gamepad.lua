@@ -32,7 +32,26 @@ function ZO_HousingFurniturePlacement_Gamepad:InitializeKeybindStripDescriptors(
                         end,
         }
     )
+end
 
+--Overridden from ZO_HousingFurnitureList_Gamepad
+function ZO_HousingFurniturePlacement_Gamepad:InitializeOptionsDialogLayoutInfo()
+    self.optionsDialogLayoutInfo =
+    {
+        dialogName = "GAMEPAD_FURNITURE_PLACEMENT_OPTIONS",
+        boundFilterEnabled = true,
+        locationFilterEnabled = true,
+        limitFilterEnabled = true,
+        getFiltersFunction = function()
+            local boundFilters = SHARED_FURNITURE:GetPlacementFurnitureBoundFilters()
+            local locationFilters = SHARED_FURNITURE:GetPlacementFurnitureLocationFilters()
+            local limitFilters = SHARED_FURNITURE:GetPlacementFurnitureLimitFilters()
+            return boundFilters, locationFilters, limitFilters
+        end,
+        updateFiltersHandler = function(boundFilterValues, locationFilterValues, limitFilterValues)
+            SHARED_FURNITURE:SetPlacementFurnitureFilters(boundFilterValues, locationFilterValues, limitFilterValues)
+        end,
+    }
 end
 
 function ZO_HousingFurniturePlacement_Gamepad:GetCategoryTreeDataRoot()

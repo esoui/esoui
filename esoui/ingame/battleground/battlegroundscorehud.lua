@@ -82,7 +82,7 @@ end
 
 function ZO_BattlegroundTeamSection:ApplyStyle(style)
     self.scoreLabel:SetFont(style.scoreFont)
-    self.iconTexture:SetTexture(GetBattlegroundTeamIcon(self.battlegroundAlliance))
+    self.iconTexture:SetTexture(ZO_GetBattlegroundTeamIcon(self.battlegroundAlliance))
     ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_BattlegroundTeamSection"))
     ApplyTemplateToControl(self.attributeBarControl:GetNamedChild("BgLeft"), ZO_GetPlatformTemplate("ZO_PlayerAttributeBgLeft"))
     ApplyTemplateToControl(self.attributeBarControl:GetNamedChild("BgRight"), ZO_GetPlatformTemplate("ZO_PlayerAttributeBgRightArrow"))

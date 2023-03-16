@@ -24,17 +24,9 @@ end
 function ZO_PEGIAgreement:PopulateCountries()
     if not self.countriesPopulated then
         -- Set up list
-        local listTemplate = ZO_PEGI_CountrySelectDialog_ListItem
         self.control = ZO_PEGI_CountrySelectDialog
         self.list = self.control:GetNamedChild("CountryList")
         ZO_ScrollList_SetHeight(self.list, self.list:GetHeight())
-
-        local function OnMouseUp(rowControl, button, upInside)
-            if upInside then
-                local data = ZO_ScrollList_GetData(rowControl)
-                ZO_ScrollList_SelectData(self.list, data, rowControl)
-            end
-        end
 
         local function SetupListItem(rowControl, data)
             rowControl.name:SetText(data.countryName)
@@ -154,7 +146,7 @@ function ZO_PEGI_AgreementDialog_OnInitialized(self)
                                 ZO_Dialogs_ShowDialog("PEGI_NOTIFICATION_DECLINE")
                             end,
             },
-        }                                   
+        }
     })
 end
 
@@ -181,7 +173,7 @@ function ZO_PEGI_AgreementDeclinedDialog_OnInitialized(self)
                                 ZO_Dialogs_ShowDialog("PEGI_NOTIFICATION")
                             end,
             },
-        }                                   
+        }
     })
 end
 
@@ -202,6 +194,10 @@ function ZO_PEGI_CountrySelectDialog_OnMouseUp(control)
 end
 
 function ZO_PEGI_CountrySelectDialog_OnDoubleClick()
+    local selectedData = ZO_ScrollList_GetSelectedData(PEGI_AGREEMENT.list)
+    if selectedData == nil then
+        return
+    end
     PEGI_AGREEMENT:OnCountrySelectionConfirmed()
     ZO_Dialogs_ReleaseDialog("PEGI_COUNTRY_SELECT")
 end

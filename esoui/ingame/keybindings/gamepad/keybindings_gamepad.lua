@@ -105,6 +105,12 @@ function ZO_Keybindings_Gamepad:PerformUpdate()
     self.dirty = false
 end
 
+function ZO_Keybindings_Gamepad:GetFooterNarration()
+    if GAMEPAD_GENERIC_FOOTER_FRAGMENT:IsShowing() then
+        return GAMEPAD_GENERIC_FOOTER:GetNarrationText(self.currentKeyboardFooterData)
+    end
+end
+
 function ZO_Keybindings_Gamepad:InitializeKeybindStripDescriptors()
     local resetKeyboardKeybindsKeybind =
     {

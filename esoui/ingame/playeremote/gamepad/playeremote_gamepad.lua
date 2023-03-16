@@ -258,6 +258,14 @@ function ZO_GamepadEmoteGrid:Deactivate()
     self.footer.control:SetHidden(true)
 end
 
+function ZO_GamepadEmoteGrid:GetNarrationText()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetSelectedEmoteName())
+end
+
+function ZO_GamepadEmoteGrid:GetHeaderNarration()
+    return { GAMEPAD_PLAYER_EMOTE:GetContentHeaderNarrationText(), self:GetCurrentPageNarration() }
+end
+
 --
 -- ZO_GamepadPlayerEmote class. This class creates our gamepad scene and emote category list and contains
 -- a ZO_GamepadEmoteGrid object and quickslot radial menu
@@ -407,6 +415,13 @@ function ZO_GamepadPlayerEmote:InitializeRadialMenu()
         hotbarCategories = { HOTBAR_CATEGORY_EMOTE_WHEEL, HOTBAR_CATEGORY_QUICKSLOT_WHEEL },
         numSlots = ACTION_BAR_UTILITY_BAR_SIZE,
         showCategoryLabel = true,
+        customNarrationObjectName = "EmoteAssignableUtilityWheel",
+        headerNarrationFunction = function()
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_EMOTE_ASSIGN_INSTRUCTIONS)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.emoteListGrid:GetSelectedEmoteName()))
+            return narrations
+        end,
     }
     self.wheel = ZO_AssignableUtilityWheel_Gamepad:New(self.wheelControl, wheelData)
 end
@@ -428,6 +443,10 @@ function ZO_GamepadPlayerEmote:RefreshHeader()
 
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
     ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
+end
+
+function ZO_GamepadPlayerEmote:GetContentHeaderNarrationText()
+    return ZO_GamepadGenericHeader_GetNarrationText(self.contentHeader, self.contentHeaderData)
 end
 
 function ZO_GamepadPlayerEmote:InitializeKeybindStripDescriptors()

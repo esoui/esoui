@@ -102,6 +102,9 @@ function ZO_ArmoryBuildSkills_Gamepad:InitializeKeybinds()
 
     local function Back()
         self:Deactivate()
+        --Because the main build details list remains activated while we are in this one, we need to manually tell it to re-narrate when we leave
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(ARMORY_GAMEPAD:GetCurrentList(), NARRATE_HEADER)
         PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
     end
 
@@ -145,17 +148,21 @@ function ZO_ArmoryBuildSkills_Gamepad:SortScrollList()
             local entryData = ZO_GamepadEntryData:New(infoText)
             entryData.isEntryEmpty = true
             entryData.showLock = true
+            entryData.headerText = zo_strformat(SI_GAMEPAD_ARMORY_SKILL_BAR_FORMATTER, GetString("SI_HOTBARCATEGORY", hotbarCategory))
             table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ARMORY_BUILD_SKILLS_DATA, entryData))
         else
             local skillsAdded = 0
             for slotIndex = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1, ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 do
                 local abilityId = self.armoryBuildData:GetSlottedAbilityId(slotIndex, hotbarCategory)
+                local headerText = nil
                 if abilityId == 0 then
                     if skillsAdded == 0 then
                         self:AddSkillsCategoryHeader(scrollData, hotbarCategory)
+                        headerText = zo_strformat(SI_GAMEPAD_ARMORY_SKILL_BAR_FORMATTER, GetString("SI_HOTBARCATEGORY", hotbarCategory))
                     end
                     local entryData = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_ARMORY_EMPTY_ENTRY_TEXT))
                     entryData.isEntryEmpty = true
+                    entryData.headerText = headerText
                     table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ARMORY_BUILD_SKILLS_DATA, entryData))
                     skillsAdded = skillsAdded + 1
                 else
@@ -163,6 +170,7 @@ function ZO_ArmoryBuildSkills_Gamepad:SortScrollList()
                     if skillProgressionData then
                         if skillsAdded == 0 then
                             self:AddSkillsCategoryHeader(scrollData, hotbarCategory)
+                            headerText = zo_strformat(SI_GAMEPAD_ARMORY_SKILL_BAR_FORMATTER, GetString("SI_HOTBARCATEGORY", hotbarCategory))
                         end
 
                         local name = skillProgressionData:GetFormattedName()
@@ -170,6 +178,7 @@ function ZO_ArmoryBuildSkills_Gamepad:SortScrollList()
                         entryData.hotbarCategory = hotbarCategory
                         entryData.slotIndex = slotIndex
                         entryData.skillProgressionData = skillProgressionData
+                        entryData.headerText = headerText
                         table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ARMORY_BUILD_SKILLS_DATA, entryData))
 
                         skillsAdded = skillsAdded + 1
@@ -201,16 +210,45 @@ function ZO_ArmoryBuildSkills_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup
         control.lock:SetHidden(true)
         control.icon:SetHidden(true)
         control.edgeFrame:SetHidden(true)
+        control.keybind:SetHidden(true)
     else
         -- Unlock at level
         control.lock:SetHidden(false)
         control.icon:SetHidden(true)
         control.edgeFrame:SetHidden(true)
+        control.keybind:SetHidden(true)
     end
 end
 
 function ZO_ArmoryBuildSkills_Gamepad:ArmoryBuildSkillsTextDisplayTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     control.label:SetText(data.text)
+end
+
+do
+    local NOT_BOUND_ACTION_STRING = GetString(SI_ACTION_IS_NOT_BOUND)
+    local DEFAULT_SHOW_AS_HOLD = nil
+
+    --Overridden from base
+    function ZO_ArmoryBuildSkills_Gamepad:GetNarrationText()
+        local narrations = {}
+        local selectedData = self:GetSelectedData()
+        if selectedData and not selectedData.isHeader then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.headerText))
+            if not selectedData.isEntryEmpty then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.text))
+
+                local keyboardActionName, gamepadActionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetKeyboardAndGamepadActionNameForSlot(selectedData.slotIndex, selectedData.hotbarCategory)
+                local bindingTextNarration = ZO_Keybindings_GetPreferredHighestPriorityNarrationStringFromActions(keyboardActionName, gamepadActionName, DEFAULT_SHOW_AS_HOLD) or NOT_BOUND_ACTION_STRING
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(bindingTextNarration))
+            elseif selectedData.showLock then
+                local infoText = zo_strformat(SI_WEAPON_SWAP_UNEARNED_TOOLTIP, GetWeaponSwapUnlockedLevel())
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(infoText))
+            else
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ARMORY_EMPTY_ENTRY_NARRATION)))
+            end
+        end
+        return narrations
+    end
 end
 
 -----------------------------

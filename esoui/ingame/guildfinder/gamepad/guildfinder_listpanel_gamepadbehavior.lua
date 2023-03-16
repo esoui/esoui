@@ -52,3 +52,11 @@ end
 function ZO_GuildFinder_ListPanel_GamepadBehavior:OnCommitComplete()
     -- To be overridden
 end
+
+--Overridden from base
+function ZO_GuildFinder_ListPanel_GamepadBehavior:GetNarrationText()
+    return self:GetSelectedNarrationText()
+end
+
+--This function must be implemented by any child classes in order for screen narration to function
+ZO_GuildFinder_ListPanel_GamepadBehavior.GetSelectedNarrationText = ZO_GuildFinder_ListPanel_GamepadBehavior:MUST_IMPLEMENT()

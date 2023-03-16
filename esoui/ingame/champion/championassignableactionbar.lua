@@ -214,7 +214,7 @@ function ZO_ChampionAssignableActionBarSlot:Initialize(control, assignableAction
     self.starVisuals = ZO_ChampionStarVisuals:New(self.starControl)
 
     self.dragAndDropCallout = control:GetNamedChild("DragAndDropCallout")
-    self.textures = GetChampionBarDisciplineTextures(GetChampionDisciplineType(self:GetRequiredDisciplineId()))
+    self.textures = ZO_GetChampionBarDisciplineTextures(GetChampionDisciplineType(self:GetRequiredDisciplineId()))
 
     self.starControl:SetHandler("OnUpdate", function(_, timeSecs)
         self.starVisuals:Update(timeSecs)
@@ -726,57 +726,75 @@ function ZO_ChampionAssignableActionBar_GamepadQuickMenu:SetupList(list)
     list:SetOnSelectedDataChangedCallback(OnSelectedDataChangedCallback)
 end
 
-function ZO_ChampionAssignableActionBar_GamepadQuickMenu:PerformUpdate()
-    local list = self:GetMainList()
-    list:Clear()
+do
+    local FOCUSED_SKILL_STATUS_ICON_OVERRIDE = 
+    {
+        {
+            iconTexture = ZO_CHAMPION_FOCUSED_SKILL_STATUS_INDICATOR,
+            iconNarration = GetString(SI_SCREEN_NARRATION_CHAMPION_EQUIPPED),
+        }
+    }
 
-    local canBeSlottedFilter = { ZO_ChampionSkillData.CanBeSlotted }
-    local currentSlot = self.editor:GetCurrentSlot()
-    local currentSlotIndex = currentSlot:GetSlotIndices()
+    local EQUIPPED_STATUS_ICON_OVERRIDE =
+    {
+        {
+            iconTexture = ZO_CHAMPION_EQUIPPED_STATUS_INDICATOR,
+            iconNarration = GetString(SI_SCREEN_NARRATION_CHAMPION_EQUIPPED),
+        }
+    }
 
-    local isDisciplinePermittedFilter = {}
-    local requiredDisciplineId = currentSlot:GetRequiredDisciplineId()
-    if requiredDisciplineId then
-        table.insert(isDisciplinePermittedFilter, function(disciplineData)
-            return disciplineData:GetId() == requiredDisciplineId
-        end)
-    end
+    function ZO_ChampionAssignableActionBar_GamepadQuickMenu:PerformUpdate()
+        local list = self:GetMainList()
+        list:Clear()
 
-    for _, disciplineData in CHAMPION_DATA_MANAGER:ChampionDisciplineDataIterator(isDisciplinePermittedFilter) do
-        local newDiscipline = true
-        local disciplineIcon = CHAMPION_SKILL_DISCIPLINE_ICONS[disciplineData:GetType()]
-        for _, skillData in disciplineData:ChampionSkillDataIterator(canBeSlottedFilter) do
-            local entryName = zo_strformat(SI_CHAMPION_TOOLTIP_CLUSTER_CHILD_FORMAT, skillData:GetRawName(), skillData:GetNumPendingPoints(), skillData:GetMaxPossiblePoints())
-            local entryData = ZO_GamepadEntryData:New(entryName)
-            entryData:AddIcon(disciplineIcon)
-            entryData.championSkillData = skillData
+        local canBeSlottedFilter = { ZO_ChampionSkillData.CanBeSlotted }
+        local currentSlot = self.editor:GetCurrentSlot()
+        local currentSlotIndex = currentSlot:GetSlotIndices()
 
-            local matchingSlot = self.bar:FindSlotMatchingChampionSkill(skillData)
-            --Mark any entry that is already slotted
-            if matchingSlot then
-                local matchingSlotIndex = matchingSlot:GetSlotIndices()
-                if currentSlotIndex == matchingSlotIndex then
-                    entryData.isSelected = true
-                    entryData.overrideStatusIndicatorIcons = {ZO_CHAMPION_FOCUSED_SKILL_STATUS_INDICATOR}
-                else
-                    entryData.overrideStatusIndicatorIcons = {ZO_CHAMPION_EQUIPPED_STATUS_INDICATOR}
-                end
-            end
-
-            if newDiscipline then
-                self.bar:ShowDisciplineCallout(disciplineData:GetType())
-                self.bar:ShowSlotCalloutsByDisciplineType(disciplineData:GetType())
-                entryData:SetHeader(disciplineData:GetFormattedName())
-                list:AddEntryWithHeader("ZO_GamepadChampionSkillEntryTemplate", entryData)
-            else
-                list:AddEntry("ZO_GamepadChampionSkillEntryTemplate", entryData)
-            end
-
-            newDiscipline = false
+        local isDisciplinePermittedFilter = {}
+        local requiredDisciplineId = currentSlot:GetRequiredDisciplineId()
+        if requiredDisciplineId then
+            table.insert(isDisciplinePermittedFilter, function(disciplineData)
+                return disciplineData:GetId() == requiredDisciplineId
+            end)
         end
-    end
 
-    list:Commit()
+        for _, disciplineData in CHAMPION_DATA_MANAGER:ChampionDisciplineDataIterator(isDisciplinePermittedFilter) do
+            local newDiscipline = true
+            local disciplineIcon = CHAMPION_SKILL_DISCIPLINE_ICONS[disciplineData:GetType()]
+            for _, skillData in disciplineData:ChampionSkillDataIterator(canBeSlottedFilter) do
+                local entryName = zo_strformat(SI_CHAMPION_TOOLTIP_CLUSTER_CHILD_FORMAT, skillData:GetRawName(), skillData:GetNumPendingPoints(), skillData:GetMaxPossiblePoints())
+                local entryData = ZO_GamepadEntryData:New(entryName)
+                entryData:AddIcon(disciplineIcon)
+                entryData.championSkillData = skillData
+
+                local matchingSlot = self.bar:FindSlotMatchingChampionSkill(skillData)
+                --Mark any entry that is already slotted
+                if matchingSlot then
+                    local matchingSlotIndex = matchingSlot:GetSlotIndices()
+                    if currentSlotIndex == matchingSlotIndex then
+                        entryData.isSelected = true
+                        entryData.overrideStatusIndicatorIcons = FOCUSED_SKILL_STATUS_ICON_OVERRIDE
+                    else
+                        entryData.overrideStatusIndicatorIcons = EQUIPPED_STATUS_ICON_OVERRIDE
+                    end
+                end
+
+                if newDiscipline then
+                    self.bar:ShowDisciplineCallout(disciplineData:GetType())
+                    self.bar:ShowSlotCalloutsByDisciplineType(disciplineData:GetType())
+                    entryData:SetHeader(disciplineData:GetFormattedName())
+                    list:AddEntryWithHeader("ZO_GamepadChampionSkillEntryTemplate", entryData)
+                else
+                    list:AddEntry("ZO_GamepadChampionSkillEntryTemplate", entryData)
+                end
+
+                newDiscipline = false
+            end
+        end
+
+        list:Commit()
+    end
 end
 
 function ZO_ChampionAssignableActionBar_GamepadQuickMenu:Show()

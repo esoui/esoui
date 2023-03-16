@@ -163,13 +163,39 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_HousingFurnitureBrowserListWithSearchAndBoundFilters_Keyboard" inherits="ZO_HousingFurnitureBrowserListWithSearch_Keyboard" virtual="true">
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Control name="$(parent)FiltersDropdown" inherits="ZO_MultiselectComboBox">
+                            <Dimensions x="200" />
+                            <Anchor point="TOPRIGHT" offsetX="-9" offsetY="32" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
         <Control name="ZO_HousingFurnitureBrowserListWithSearchAndTheme_Keyboard" inherits="ZO_HousingFurnitureBrowserListWithSearch_Keyboard" virtual="true">
             <Controls>
                 <Control name="$(parent)Contents" override="true">
                     <Controls>
-                        <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
-                            <Dimensions x="200"/>
-                            <Anchor point="TOPRIGHT" offsetX="-9" offsetY="32"/>
+                        <Control name="$(parent)ThemeDropdown" inherits="ZO_ComboBox">
+                            <Dimensions x="200" />
+                            <Anchor point="TOPRIGHT" offsetX="-9" offsetY="32" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HousingFurnitureBrowserListWithSearchAndFilters_Keyboard" inherits="ZO_HousingFurnitureBrowserListWithSearchAndTheme_Keyboard" virtual="true">
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Control name="$(parent)FiltersDropdown" inherits="ZO_MultiselectComboBox">
+                            <Dimensions x="200" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ThemeDropdown" relativePoint="TOPLEFT" offsetX="-9" />
                         </Control>
                     </Controls>
                 </Control>

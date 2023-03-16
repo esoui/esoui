@@ -301,6 +301,10 @@ function ZO_CampaignBonuses_Shared:BuildMasterList()
         local startIndex = info.startIndex or 1
         local score = info.scoreFunction(self.campaignId)
         local index = score and score ~= 0 and score + startIndex - 1 or startIndex
+        -- Code only supports 10 bonuses even though the player's alliance could have acquired up to 12 keeps
+        -- so cap the keep index to the max count allowed by the bonus data info
+        local count = type(info.count) == "function" and info.count(self.campaignId) or info.count
+        index = zo_min(index, count)
         local scoreIndex = index - startIndex + 1
         local countText = scoreIndex
         local abilityId = info.abilityFunction(index, self.campaignId)

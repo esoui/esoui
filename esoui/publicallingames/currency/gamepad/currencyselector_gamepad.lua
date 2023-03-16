@@ -47,11 +47,7 @@ end
 -- Digit Spinner
 -----------------------
 
-local ZO_CurrencySelectorDigitSpinner_Gamepad = ZO_Spinner_Gamepad:Subclass()
-
-function ZO_CurrencySelectorDigitSpinner_Gamepad:New(...)
-    return ZO_Spinner_Gamepad.New(self, ...)
-end
+ZO_CurrencySelectorDigitSpinner_Gamepad = ZO_Spinner_Gamepad:Subclass()
 
 function ZO_CurrencySelectorDigitSpinner_Gamepad:Initialize(control, min, max, isGamepad, spinnerMode, accelerationTime, magnitudeQueryFunction, owner)
     ZO_Spinner_Gamepad.Initialize(self, control, min, max, isGamepad, spinnerMode, accelerationTime, magnitudeQueryFunction)
@@ -72,13 +68,7 @@ end
 -- Digit
 -----------------------
 
-local ZO_CurrencySelectorDigit_Gamepad = ZO_Object:Subclass()
-
-function ZO_CurrencySelectorDigit_Gamepad:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_CurrencySelectorDigit_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_CurrencySelectorDigit_Gamepad:Initialize(control, valueChangedCallback)
     self.control = control
@@ -92,6 +82,8 @@ function ZO_CurrencySelectorDigit_Gamepad:Initialize(control, valueChangedCallba
     local ACCELERATION_TIME = 250
     self.spinner = ZO_CurrencySelectorDigitSpinner_Gamepad:New(self.control, 0, 9, GAMEPAD_SPINNER_DIRECTION_VERTICAL, SPINNER_MODE_WRAP, ACCELERATION_TIME, MagnitudeQuery, self)
     self.spinner:SetValue(0)
+    --Ignore tooltip narration when narrating these spinners
+    self.spinner:SetCanNarrateTooltips(false)
 
     self.buttonUpAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_GamepadCurrencySelector_ButtonBumpUpAnimation", self.increase)
     self.buttonDownAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_GamepadCurrencySelector_ButtonBumpDownAnimation", self.decrease)
@@ -101,6 +93,8 @@ function ZO_CurrencySelectorDigit_Gamepad:Initialize(control, valueChangedCallba
     self.spinner:RegisterCallback("OnValueChanged", valueChangedCallback)
 
     self:Deactivate()
+    --Register the spinner for narration
+    SCREEN_NARRATION_MANAGER:RegisterSpinner(self.spinner)
 end
 
 function ZO_CurrencySelectorDigit_Gamepad:SetHidden(hidden)
@@ -182,17 +176,33 @@ function ZO_CurrencySelectorDigit_Gamepad:AnimateButtons(previousValue, newValue
     end
 end
 
+function ZO_CurrencySelectorDigit_Gamepad:SetCustomNarrationFunction(narrationFunction)
+    self.spinner:SetCustomNarrationFunction(narrationFunction)
+end
+
+function ZO_CurrencySelectorDigit_Gamepad:SetName(name)
+    self.spinner:SetName(name)
+end
+
 -----------------------
 -- Currency Selector
 -----------------------
 
-ZO_CurrencySelector_Gamepad = ZO_CallbackObject:Subclass()
+local DIGIT_NAMES =
+{
+    GetString(SI_GAMEPAD_CURRENCY_SELECTOR_ONES_NARRATION),
+    GetString(SI_GAMEPAD_CURRENCY_SELECTOR_TENS_NARRATION),
+    GetString(SI_GAMEPAD_CURRENCY_SELECTOR_HUNDREDS_NARRATION),
+    GetString(SI_GAMEPAD_CURRENCY_SELECTOR_THOUSANDS_NARRATION),
+    GetString(SI_GAMEPAD_CURRENCY_SELECTOR_TEN_THOUSANDS_NARRATION),
+    GetString(SI_GAMEPAD_CURRENCY_SELECTOR_HUNDRED_THOUSANDS_NARRATION),
+    GetString(SI_GAMEPAD_CURRENCY_SELECTOR_MILLIONS_NARRATION),
+    GetString(SI_GAMEPAD_CURRENCY_SELECTOR_TEN_MILLIONS_NARRATION),
+    GetString(SI_GAMEPAD_CURRENCY_SELECTOR_HUNDRED_MILLIONS_NARRATION),
+    GetString(SI_GAMEPAD_CURRENCY_SELECTOR_BILLIONS_NARRATION),
+}
 
-function ZO_CurrencySelector_Gamepad:New(...)
-    local object = ZO_CallbackObject.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_CurrencySelector_Gamepad = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_CurrencySelector_Gamepad:Initialize(control)
     self.control = control
@@ -218,6 +228,7 @@ function ZO_CurrencySelector_Gamepad:Initialize(control)
         self:FireCallbacks("OnValueChanged")
     end
 
+    --When adding or removing values from this table, make sure the DIGIT_NAMES table is updated accordingly
     self.digits =
     {
         ZO_CurrencySelectorDigit_Gamepad:New(self.control:GetNamedChild("Ones"), OnValueChangedCallback),
@@ -231,6 +242,7 @@ function ZO_CurrencySelector_Gamepad:Initialize(control)
         ZO_CurrencySelectorDigit_Gamepad:New(self.control:GetNamedChild("HundredMillions"), OnValueChangedCallback),
         ZO_CurrencySelectorDigit_Gamepad:New(self.control:GetNamedChild("Billions"), OnValueChangedCallback),
     }
+
     self.spacers =
     {
         self.control:GetNamedChild("Spacer1"),
@@ -245,24 +257,46 @@ function ZO_CurrencySelector_Gamepad:Initialize(control)
     self.movementController:SetAccelerationMagnitudeFactor(ACCELERATION_MAGNITUDE_FACTOR)
 
     self.previousValue = 0
+
+    local function GetNarrationText(spinner)
+        if self.currencyType == nil then
+            internalassert(false, "Attempting to narrate a currency selector with no currency type set")
+        end
+
+        local narrations = {}
+        --Get the narration text for the spinner itself
+        ZO_AppendNarration(narrations, ZO_FormatVerticalSpinnerNarrationText(spinner:GetName(), spinner:GetFormattedValueText()))
+
+        --Get the narration text for the total set value of the currency selector
+        local currencyString = ZO_Currency_FormatGamepad(self.currencyType, self:GetValue(), ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_CURRENCY_SELECTOR_TOTAL_VALUE_NARRATION)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(currencyString))
+        return narrations
+    end
+
+    --Set up the necessary information for narration
+    for i, digit in ipairs(self.digits) do
+        digit:SetCustomNarrationFunction(GetNarrationText)
+        digit:SetName(DIGIT_NAMES[i])
+    end
 end
 
 function ZO_CurrencySelector_Gamepad:SetTextColor(color)
-    for _, digit in pairs(self.digits) do
+    for _, digit in ipairs(self.digits) do
         digit:SetTextColor(color)
     end
 end
 
 function ZO_CurrencySelector_Gamepad:SetValue(value)
     if self.clampGreaterThanMax and value > self.maxValue then
-        self.value = self.maxValue
-    else
-        self.value = value
+        value = self.maxValue
     end
 
-    for i=1, #self.digits do
+    self.value = value
+
+    for _, digit in ipairs(self.digits) do
         local thisDigit = value % 10
-        self.digits[i]:SetValue(thisDigit)
+        digit:SetValue(thisDigit)
         value = (value - thisDigit) / 10
     end
 
@@ -273,9 +307,9 @@ function ZO_CurrencySelector_Gamepad:GetValue()
     if self.valueIsDirty then
         local total = 0
         local digitValue = 1
-        for i=1, #self.digits do
-            if self.digits[i]:GetValue() ~= 0 then
-                total = total + self.digits[i]:GetValue() * digitValue
+        for _, digit in ipairs(self.digits) do
+            if digit:GetValue() ~= 0 then
+                total = total + digit:GetValue() * digitValue
             end
             digitValue = digitValue * 10
         end
@@ -289,20 +323,20 @@ local DISABLED_DIGIT_ALPHA = 0.2
 
 function ZO_CurrencySelector_Gamepad:UpdateDigits()
     local firstEnabledDigit = 1
-    for i=#self.digits, 2, -1 do
+    for i = #self.digits, 2, -1 do
         if self.digits[i]:GetValue() ~= 0 then
             firstEnabledDigit = i
             break
         end
     end
 
-    for i=1, #self.digits do
-        self.digits[i]:SetAlpha(firstEnabledDigit >= i and ENABLED_DIGIT_ALPHA or DISABLED_DIGIT_ALPHA)
+    for i, digit in ipairs(self.digits) do
+        digit:SetAlpha(firstEnabledDigit >= i and ENABLED_DIGIT_ALPHA or DISABLED_DIGIT_ALPHA)
     end
 
-    for i=1, #self.spacers do
+    for i, spacer in ipairs(self.spacers) do
         local nextDigit = i * 3 + 1
-        self.spacers[i]:SetColor(1, 1, 1, firstEnabledDigit >= nextDigit and ENABLED_DIGIT_ALPHA or DISABLED_DIGIT_ALPHA)
+        spacer:SetColor(1, 1, 1, firstEnabledDigit >= nextDigit and ENABLED_DIGIT_ALPHA or DISABLED_DIGIT_ALPHA)
     end
 end
 
@@ -346,19 +380,19 @@ function ZO_CurrencySelector_Gamepad:CalculateNumDigits()
 end
 
 function ZO_CurrencySelector_Gamepad:UpdateDigitVisibility()
-    for i=1, #self.digits do
-        self.digits[i]:SetHidden(i > self.maxDigits)
+    for i, digit in ipairs(self.digits) do
+        digit:SetHidden(i > self.maxDigits)
     end
 
-    for i=1, #self.spacers do
+    for i, spacer in ipairs(self.spacers) do
         local nextDigit = i * 3 + 1
-        self.spacers[i]:SetHidden(nextDigit > self.maxDigits)
+        spacer:SetHidden(nextDigit > self.maxDigits)
     end
 end
 
 function ZO_CurrencySelector_Gamepad:Clear()
-    for i=1, #self.digits do
-        self.digits[i]:SetValue(0)
+    for _, digit in ipairs(self.digits) do
+        digit:SetValue(0)
     end
 end
 
@@ -379,6 +413,7 @@ function ZO_CurrencySelector_Gamepad:Deactivate()
         self.currentDigit = nil
     end
     DIRECTIONAL_INPUT:Deactivate(self)
+    self:FireCallbacks("OnDeactivated")
 end
 
 function ZO_CurrencySelector_Gamepad:SetActiveDigit(index)
@@ -408,4 +443,8 @@ function ZO_CurrencySelector_Gamepad:UpdateDirectionalInput()
     elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
         self:SetActiveDigit(self.currentDigitIndex + 1)
     end
+end
+
+function ZO_CurrencySelector_Gamepad:SetCurrencyType(currencyType)
+    self.currencyType = currencyType
 end

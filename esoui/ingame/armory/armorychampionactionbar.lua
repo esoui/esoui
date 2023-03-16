@@ -69,6 +69,24 @@ function ZO_ArmoryChampionActionBar:GetLinkedArmoryBuildData()
     return self.buildData
 end
 
+function ZO_ArmoryChampionActionBar:GetFirstSlotIndexForDiscipline(disciplineId)
+    return self.firstSlotPerDiscipline[disciplineId]
+end
+
+function ZO_ArmoryChampionActionBar:GetNarrationText()
+    local narrations = {}
+    if IsChampionSystemUnlocked() then
+        --Get the narration for each slot
+        for _, slot in ipairs(self.slots) do
+            ZO_AppendNarration(narrations, slot:GetNarrationText())
+        end
+    else
+        --If the champion system is locked, narrate that, and don't bother to narrate the individual slots
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION)))
+    end
+    return narrations
+end
+
 ZO_ArmoryChampionActionBarSlot = ZO_InitializingObject:Subclass()
 
 function ZO_ArmoryChampionActionBarSlot:Initialize(control, actionBar, actionSlotIndex)
@@ -85,7 +103,7 @@ function ZO_ArmoryChampionActionBarSlot:Initialize(control, actionBar, actionSlo
     self.starControl = control:GetNamedChild("Star")
     self.starVisuals = ZO_ChampionStarVisuals:New(self.starControl)
 
-    self.textures = GetChampionBarDisciplineTextures(GetChampionDisciplineType(self:GetRequiredDisciplineId()))
+    self.textures = ZO_GetChampionBarDisciplineTextures(GetChampionDisciplineType(self:GetRequiredDisciplineId()))
 
     self.starControl:SetHandler("OnUpdate", function(_, timeSecs)
         self.starVisuals:Update(timeSecs)
@@ -173,6 +191,23 @@ function ZO_ArmoryChampionActionBarSlot:ShowTooltip()
         InitializeTooltip(ChampionSkillTooltip, self.button, TOP, 0, 15, BOTTOM)
         ChampionSkillTooltip:SetAbilityId(GetChampionAbilityId(championSkillId))
     end
+end
+
+function ZO_ArmoryChampionActionBarSlot:GetNarrationText()
+    local narrations = {}
+    local disciplineId = self:GetRequiredDisciplineId()
+    --If this is the first slot for its discipline, include the discipline name in the narration
+    if self.bar:GetFirstSlotIndexForDiscipline(disciplineId) == self.slotIndex then
+        local disciplineName = ZO_CachedStrFormat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(disciplineName))
+    end
+
+    if self.championSkillData then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.championSkillData:GetFormattedName()))
+    else
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_ARMORY_EMPTY_ENTRY_NARRATION)))
+    end
+    return narrations
 end
 
 function ZO_ArmoryChampionActionBarSlot:HideTooltip()

@@ -147,7 +147,7 @@
                         </Button>
 
                         <!-- Cost -->
-                        <Control name="$(parent)Cost" inherits="ZO_CampaignChangeCost" resizeToFitDescendents="true">
+                        <Control name="$(parent)Cost" inherits="ZO_CampaignChangeCost">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)UseGold" relativePoint="BOTTOMLEFT" offsetY="15" offsetX="-20"/>
                             <Controls>
                                 <Label name="$(parent)Free" override="true" text="SI_ABANDON_HOME_CAMPAIGN_FREE" />

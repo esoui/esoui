@@ -133,9 +133,12 @@
         </TopLevelControl>
 
         <TopLevelControl name="ZO_SkillsRespecConfirmationGoldDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_InitializeKeyboardRespecConfirmationGoldDialog(self)
+            </OnInitialized>
             <Controls>
                 <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-                
+
                 <Label name="$(parent)Balance" inherits="ZO_CurrencyTemplate">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="20" />
                 </Label>

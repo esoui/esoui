@@ -69,9 +69,11 @@ end
 
 function ZO_GuildBrowser_GuildInfo_Shared:UpdateRefreshMessage(hasGuildData)
     if hasGuildData and GetGuildRecruitmentStatusAttribute(self.currentGuildId) == GUILD_RECRUITMENT_STATUS_ATTRIBUTE_VALUE_NOT_LISTED then
-        self.refreshMessageLabel:SetText(GetString(SI_GUILD_INFO_DATA_UNAVAILABLE))
+        self.refreshMessageText = GetString(SI_GUILD_INFO_DATA_UNAVAILABLE)
+        self.refreshMessageLabel:SetText(self.refreshMessageText)
     else
-        self.refreshMessageLabel:SetText(GetString(SI_GUILD_INFO_FETCHING_DATA))
+        self.refreshMessageText = GetString(SI_GUILD_INFO_FETCHING_DATA)
+        self.refreshMessageLabel:SetText(self.refreshMessageText)
     end
 end
 

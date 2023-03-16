@@ -45,7 +45,7 @@ function ZO_ChapterUpgrade_Shared:Initialize(control, sceneName)
         end
     end)
 
-    self.continueDialogData = 
+    self.continueDialogData =
     {
         finishedCallback = function(dialog)
             if dialog.data.continue then
@@ -55,6 +55,14 @@ function ZO_ChapterUpgrade_Shared:Initialize(control, sceneName)
     }
 
     control:RegisterForEvent(EVENT_SCREEN_RESIZED, function(...) self:ResizeBackground(...) end)
+    control:RegisterForEvent(EVENT_ENTITLEMENT_STATE_CHANGED, function() self:OnChapterUpgradeDataUpdated() end)
+end
+
+function ZO_ChapterUpgrade_Shared:OnChapterUpgradeDataUpdated()
+    local chapterUpgradeId = GetCurrentChapterUpgradeId()
+    if IsChapterOwned(chapterUpgradeId) then
+        self:Hide()
+    end
 end
 
 function ZO_ChapterUpgrade_Shared:PerformDeferredInitialize()

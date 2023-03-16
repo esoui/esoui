@@ -91,7 +91,6 @@
 
                     <Controls>
                         <Control name="$(parent)ScrollChild">
-                            <Anchor point="TOP" />
                             <Dimensions x="1300" />
                         </Control>
                     </Controls>

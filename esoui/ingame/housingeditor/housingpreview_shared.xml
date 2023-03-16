@@ -78,15 +78,21 @@
                         <Control name="$(parent)ComboBox">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="TOPRIGHT" offsetX="20" offsetY="-5" />
                         </Control>
+                    </Controls>
+                </Control>
 
-                        <Button name="$(parent)PreviewButton" text="SI_HOUSE_TEMPLATE_PREVIEW_BUTTON_TEXT" excludeFromResizeToFitExtents="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)ComboBox" relativePoint="TOPRIGHT" offsetX="10" />
-                        </Button>
+                <Control name="$(parent)TemplateOptions" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Template" relativePoint="BOTTOMLEFT" offsetY="20" />
+
+                    <Controls>
+                        <Button name="$(parent)PreviewButton" text="SI_HOUSE_TEMPLATE_PREVIEW_BUTTON_TEXT" />
+
+                        <Button name="$(parent)FurnitureButton" text="SI_HOUSING_PREVIEW_TEMPLATE_FURNISHINGS" />
                     </Controls>
                 </Control>
 
                 <Control name="$(parent)PurchaseOptions" resizeToFitDescendents="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Template" relativePoint="BOTTOM" offsetY="20" />
+                    <Anchor point="TOP" relativeTo="$(parent)TemplateOptions" relativePoint="BOTTOM" offsetY="20" />
 
                     <Controls>
                         <Control name="$(parent)Gold" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection">

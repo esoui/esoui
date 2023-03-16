@@ -57,6 +57,51 @@ function ZO_ColorPicker_Gamepad:Initialize(control)
         setup = function() self:OnDialogShowing() end,
         finishedCallback = OnDialogReleased,
         noChoiceCallback = OnDialogReleased,
+        additionalInputNarrationFunction = function()
+            local narrationData = {}
+            if ZO_Keybindings_ShouldShowGamepadKeybind() then
+                --Get the narration data for navigating the color wheel
+                local colorNarrationData =
+                {
+                    name = GetString(SI_SCREEN_NARRATION_COLOR_PICKER_CHANGE_COLOR_NARRATION),
+                    --The gamepad keybind for choosing color isn't a real keybind so just use the key that gives us the narration we want here
+                    keybindName = ZO_Keybindings_GetNarrationStringFromKeys(KEY_GAMEPAD_LEFT_STICK, KEY_INVALID, KEY_INVALID, KEY_INVALID, KEY_INVALID),
+                    enabled = true,
+                }
+                table.insert(narrationData, colorNarrationData)
+
+                --Get the narration data for the saturation slider
+                local saturationNarrationData =
+                {
+                    name = GetString(SI_SCREEN_NARRATION_COLOR_PICKER_CHANGE_SATURATION_NARRATION),
+                    --The gamepad keybind for choosing saturation isn't a real keybind so just use the key that gives us the narration we want here
+                    keybindName = ZO_Keybindings_GetNarrationStringFromKeys(KEY_GAMEPAD_RIGHT_STICK, KEY_INVALID, KEY_INVALID, KEY_INVALID, KEY_INVALID),
+                    enabled = true,
+                }
+                table.insert(narrationData, saturationNarrationData)
+            else
+                --Get the narration data for navigating the color wheel
+                local NO_NAME = nil
+                ZO_CombineNumericallyIndexedTables(narrationData, ZO_GetCombinedDirectionalInputNarrationData(NO_NAME, NO_NAME, NO_NAME, GetString(SI_SCREEN_NARRATION_COLOR_PICKER_CHANGE_COLOR_NARRATION)))
+
+                --Get the narration data for the saturation slider
+                local saturationUpNarrationData =
+                {
+                    keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UI_SHORTCUT_RIGHT_STICK_UP") or GetString(SI_ACTION_IS_NOT_BOUND),
+                    enabled = true,
+                }
+                table.insert(narrationData, saturationUpNarrationData)
+
+                local saturationDownNarrationData =
+                {
+                    name = GetString(SI_SCREEN_NARRATION_COLOR_PICKER_CHANGE_SATURATION_NARRATION),
+                    keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UI_SHORTCUT_RIGHT_STICK_DOWN") or GetString(SI_ACTION_IS_NOT_BOUND),
+                    enabled = true,
+                }
+                table.insert(narrationData, saturationDownNarrationData)
+            end
+            return narrationData
+        end,
 
         buttons =
         {

@@ -270,6 +270,7 @@ function ZO_CraftingOptionsDialogGamepad:BuildMultiSelectionFilter(filterIndex)
                 dropdown:SetMultiSelectionTextFormatter(multiSelectionTextFormatter)
                 dropdown:RegisterCallback("OnHideDropdown", OnCraftingFilterComboBoxSelectionChanged)
                 dropdown:LoadData(dropdownData)
+                SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
             end,
 
             callback = function(dialog)
@@ -283,6 +284,10 @@ function ZO_CraftingOptionsDialogGamepad:BuildMultiSelectionFilter(filterIndex)
                     GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, label, tooltip)
                 end
             end,
+            narrationText = function(entryData, entryControl)
+                return entryControl.dropdown:GetNarrationText()
+            end,
+            narrationTooltip = GAMEPAD_LEFT_TOOLTIP,
         },
     }
     return entry

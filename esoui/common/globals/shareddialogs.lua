@@ -101,7 +101,10 @@ ESO_Dialogs["CONFIRM_OPEN_URL_BY_TYPE"] =
     {
         text = function(dialog)
             if ShouldOpenURLTypeInOverlay(dialog.data.urlType) then
-                return SI_CONFIRM_OPEN_STEAM_STORE
+                local serviceType = GetPlatformServiceType()
+                if serviceType == PLATFORM_SERVICE_TYPE_STEAM then
+                    return SI_CONFIRM_OPEN_STEAM_STORE
+                end
             else
                 return SI_CONFIRM_OPEN_URL_TEXT
             end

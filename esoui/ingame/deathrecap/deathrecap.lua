@@ -296,14 +296,14 @@ function DeathRecap:SetupAttacks()
                 end
 
                 if battlegroundAlliance == BATTLEGROUND_ALLIANCE_NONE then
-                    local coloredRankIconMarkup = GetColoredAvARankIconMarkup(attackerAvARank, alliance, 32)
+                    local coloredRankIconMarkup = ZO_GetColoredAvARankIconMarkup(attackerAvARank, alliance, 32)
                     if minionName == "" then
                         attackerNameLine = zo_strformat(SI_DEATH_RECAP_RANK_ATTACKER_NAME, coloredRankIconMarkup, attackerAvARank, nameToShow)
                     else
                         attackerNameLine = zo_strformat(SI_DEATH_RECAP_RANK_ATTACKER_NAME_MINION, coloredRankIconMarkup, attackerAvARank, nameToShow, minionName)
                     end
                 else
-                    local battlegroundAllianceIconMarkup = GetBattlegroundIconMarkup(battlegroundAlliance, 32)
+                    local battlegroundAllianceIconMarkup = ZO_GetBattlegroundIconMarkup(battlegroundAlliance, 32)
                     if minionName == "" then
                         attackerNameLine = zo_strformat(SI_DEATH_RECAP_BATTLEGROUND_ALLIANCE_ATTACKER_NAME, battlegroundAllianceIconMarkup, nameToShow)
                     else

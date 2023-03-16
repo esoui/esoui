@@ -7,6 +7,39 @@ function ZO_AssignableUtilityWheel_Gamepad:Initialize(control, data)
     self.tooltipScrollEnabled = true
     self.tooltipType = data.overrideGamepadTooltip or GAMEPAD_QUAD1_TOOLTIP
     ZO_CreateSparkleAnimation(control)
+    self:InitializeNarrationInfo()
+end
+
+function ZO_AssignableUtilityWheel_Gamepad:InitializeNarrationInfo()
+    local data = self.data
+
+    if data.customNarrationObjectName then
+        local narrationInfo =
+        {
+            canNarrate = function()
+                return self.radialMenu:IsShown()
+            end,
+            selectedNarrationFunction = function()
+                local narrations = {}
+                local selectedEntry = self:GetSelectedRadialEntry()
+                if selectedEntry then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedEntry.name))
+                else
+                    --If an entry is not selected, just narrate the current category name for the wheel
+                    local hotbarCategory = self:GetHotbarCategory()
+                    if hotbarCategory ~= ZO_UTILITY_WHEEL_HOTBAR_CATEGORY_HIDDEN then
+                        local categoryName = GetString("SI_HOTBARCATEGORY", hotbarCategory)
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(categoryName))
+                    end
+                end
+                return narrations
+            end,
+            headerNarrationFunction = data.headerNarrationFunction,
+        }
+        SCREEN_NARRATION_MANAGER:RegisterCustomObject(data.customNarrationObjectName, narrationInfo)
+    else
+        internalassert(false, "Gamepad assignable utility wheels must be given a unique customNarrationObjectName in order for narration to function")
+    end
 end
 
 function ZO_AssignableUtilityWheel_Gamepad:InitializeRadialMenu()
@@ -38,41 +71,49 @@ function ZO_AssignableUtilityWheel_Gamepad:InitializeRadialMenu()
     self.radialMenu:SetCustomControlSetUpFunction(SetupEntryControl)
 
     local function OnSelectionChanged(selectedEntry)
-        local slotIndex = selectedEntry.data.slotIndex
-        local hotbarCategory = self:GetHotbarCategory()
-        local slotType = GetSlotType(slotIndex, hotbarCategory)
+        if selectedEntry then
+            local slotIndex = selectedEntry.data.slotIndex
+            local hotbarCategory = self:GetHotbarCategory()
+            local slotType = GetSlotType(slotIndex, hotbarCategory)
 
-        if slotType ~= ACTION_TYPE_NOTHING then
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.tooltipKeybindStripDescriptor)
+            if slotType ~= ACTION_TYPE_NOTHING then
+                KEYBIND_STRIP:AddKeybindButtonGroup(self.tooltipKeybindStripDescriptor)
+            else
+                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.tooltipKeybindStripDescriptor)
+            end
+
+            --tooltip update on active item
+            if slotType == ACTION_TYPE_COLLECTIBLE then
+                local itemLink = GetSlotItemLink(slotIndex, hotbarCategory)
+                GAMEPAD_TOOLTIPS:LayoutCollectibleFromLink(self.tooltipType, itemLink)
+            elseif slotType == ACTION_TYPE_ITEM then
+                local itemLink = GetSlotItemLink(slotIndex, hotbarCategory)
+                GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(self.tooltipType, itemLink, ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT)
+            elseif slotType == ACTION_TYPE_QUEST_ITEM then
+                local questItemId = GetSlotBoundId(slotIndex, hotbarCategory)
+                GAMEPAD_TOOLTIPS:LayoutQuestItem(self.tooltipType, questItemId)
+            elseif slotType == ACTION_TYPE_EMOTE then
+                local emoteId = GetSlotBoundId(slotIndex, hotbarCategory)
+                GAMEPAD_TOOLTIPS:LayoutUtilityWheelEmote(self.tooltipType, emoteId)
+            elseif slotType == ACTION_TYPE_QUICK_CHAT then
+                local quickChatId = GetSlotBoundId(slotIndex, hotbarCategory)
+                GAMEPAD_TOOLTIPS:LayoutUtilityWheelQuickChat(self.tooltipType, quickChatId)
+            elseif slotType == ACTION_TYPE_NOTHING then
+                GAMEPAD_TOOLTIPS:ClearTooltip(self.tooltipType)
+            else
+                internalassert(false, "Unsupported slot type")
+            end
         else
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.tooltipKeybindStripDescriptor)
-        end
-
-        --tooltip update on active item
-        if slotType == ACTION_TYPE_COLLECTIBLE then
-            local itemLink = GetSlotItemLink(slotIndex, hotbarCategory)
-            GAMEPAD_TOOLTIPS:LayoutCollectibleFromLink(self.tooltipType, itemLink)
-        elseif slotType == ACTION_TYPE_ITEM then
-            local itemLink = GetSlotItemLink(slotIndex, hotbarCategory)
-            GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(self.tooltipType, itemLink, ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT)
-        elseif slotType == ACTION_TYPE_QUEST_ITEM then
-            local questItemId = GetSlotBoundId(slotIndex, hotbarCategory)
-            GAMEPAD_TOOLTIPS:LayoutQuestItem(self.tooltipType, questItemId)
-        elseif slotType == ACTION_TYPE_EMOTE then
-            local emoteId = GetSlotBoundId(slotIndex, hotbarCategory)
-            GAMEPAD_TOOLTIPS:LayoutUtilityWheelEmote(self.tooltipType, emoteId)
-        elseif slotType == ACTION_TYPE_QUICK_CHAT then
-            local quickChatId = GetSlotBoundId(slotIndex, hotbarCategory)
-            GAMEPAD_TOOLTIPS:LayoutUtilityWheelQuickChat(self.tooltipType, quickChatId)
-        elseif slotType == ACTION_TYPE_NOTHING then
             GAMEPAD_TOOLTIPS:ClearTooltip(self.tooltipType)
-        else
-            internalassert(false, "Unsupported slot type")
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.tooltipKeybindStripDescriptor)
         end
 
         if self.data.onSelectionChangedCallback then
             self.data:onSelectionChangedCallback(selectedEntry)
         end
+
+        --Re-narrate when the selection changes
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.data.customNarrationObjectName)
     end
     self.radialMenu:SetOnSelectionChangedCallback(OnSelectionChanged)
 end
@@ -182,6 +223,8 @@ end
 function ZO_AssignableUtilityWheel_Gamepad:CycleHotbarCategory()
     ZO_AssignableUtilityWheel_Shared.CycleHotbarCategory(self)
     GAMEPAD_TOOLTIPS:ClearTooltip(self.tooltipType)
+    --Re-narrate when cycling between hotbar categories
+    SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.data.customNarrationObjectName)
 end
 
 function ZO_AssignableUtilityWheel_Gamepad:Show(unslotPendingEntry)
@@ -231,6 +274,13 @@ function ZO_AssignableUtilityWheel_Gamepad:Hide()
     self:Deactivate()
 end
 
+function ZO_AssignableUtilityWheel_Gamepad:Activate()
+    ZO_AssignableUtilityWheel_Shared.Activate(self)
+    --Narrate the header when the utility wheel is first activated
+    local NARRATE_HEADER = true
+    SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.data.customNarrationObjectName, NARRATE_HEADER)
+end
+
 function ZO_AssignableUtilityWheel_Gamepad:TryAssignPendingToSelectedEntry(clearPending)
     local selectedEntry = self:GetSelectedRadialEntry()
     local pendingSlotData = self.pendingSlotData
@@ -249,6 +299,9 @@ function ZO_AssignableUtilityWheel_Gamepad:TryAssignPendingToSelectedEntry(clear
             self.pendingSlotData = nil
         end
         PlaySound(SOUNDS.RADIAL_MENU_SELECTION)
+
+        --Re-narrate when the pending entry is assigned to a slot
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.data.customNarrationObjectName)
 
         --No need to refresh the pending icon if we aren't showing it in the first place
         if self.data.showPendingIcon then

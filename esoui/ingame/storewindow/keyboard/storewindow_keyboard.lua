@@ -213,13 +213,13 @@ function ZO_StoreManager:Initialize(control)
     end
 
     local function OnInventoryUpdated()
-        if not STORE_FRAGMENT:IsHidden() then
+        if self.scene:IsShowing() then
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
 
+        if not STORE_FRAGMENT:IsHidden() then
             self:UpdateFreeSlots()
         elseif not INVENTORY_FRAGMENT:IsHidden() then
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-
             self.modeBar:UpdateActiveKeybind()
         end
     end
@@ -240,22 +240,22 @@ function ZO_StoreManager:Initialize(control)
         ZO_InventoryLandingArea_SetHidden(self.landingArea, true)
     end
 
-    local storeScene = ZO_InteractScene:New("store", SCENE_MANAGER, STORE_INTERACTION)
-    storeScene:RegisterCallback("StateChange",   function(oldState, newState)
-                                                    if newState == SCENE_SHOWING then
-                                                        self:InitializeStore()
-                                                        PLAYER_INVENTORY:SelectAndChangeSort(INVENTORY_BACKPACK, ITEMFILTERTYPE_ALL, "sellInformationSortOrder", ZO_SORT_ORDER_UP)
-                                                    elseif newState == SCENE_HIDDEN then
-                                                        ZO_InventorySlot_RemoveMouseOverKeybinds()
-                                                        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-                                                        self.modeBar:Clear()
+    self.scene = ZO_InteractScene:New("store", SCENE_MANAGER, STORE_INTERACTION)
+    self.scene:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            self:InitializeStore()
+            PLAYER_INVENTORY:SelectAndChangeSort(INVENTORY_BACKPACK, ITEMFILTERTYPE_ALL, "sellInformationSortOrder", ZO_SORT_ORDER_UP)
+        elseif newState == SCENE_HIDDEN then
+            ZO_InventorySlot_RemoveMouseOverKeybinds()
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            self.modeBar:Clear()
 
-                                                        PLAYER_INVENTORY:SelectAndChangeSort(INVENTORY_BACKPACK, ITEMFILTERTYPE_ALL, "statusSortOrder", ZO_SORT_ORDER_DOWN)
-                                                        if GetCursorContentType() == MOUSE_CONTENT_STORE_ITEM then
-                                                            ClearCursor()
-                                                        end
-                                                    end
-                                                end)
+            PLAYER_INVENTORY:SelectAndChangeSort(INVENTORY_BACKPACK, ITEMFILTERTYPE_ALL, "statusSortOrder", ZO_SORT_ORDER_DOWN)
+            if GetCursorContentType() == MOUSE_CONTENT_STORE_ITEM then
+                ClearCursor()
+            end
+        end
+    end)
 
     control:RegisterForEvent(EVENT_OPEN_STORE, ShowStoreWindow)
     control:RegisterForEvent(EVENT_CLOSE_STORE, CloseStoreWindow)
@@ -296,8 +296,9 @@ function ZO_StoreManager:InitializeStore(overrideMode)
             self.modeBar:SelectFragment(SI_STORE_MODE_SELL)
         else
             self.modeBar:SelectFragment(SI_STORE_MODE_BUY)
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
         end
+
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     end
 
     ZO_ScrollList_ResetToTop(self.list)

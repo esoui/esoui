@@ -524,7 +524,7 @@ function ZO_TradingHouseManager:InitializeSearchResults(control)
             local traitInformation = GetItemTraitInformationFromItemLink(result.itemLink)
 
             if traitInformation ~= ITEM_TRAIT_INFORMATION_NONE then
-                traitInformationControl:AddIcon(GetPlatformTraitInformationIcon(traitInformation))
+                traitInformationControl:AddIcon(ZO_GetPlatformTraitInformationIcon(traitInformation))
                 traitInformationControl:Show()
             end
         end

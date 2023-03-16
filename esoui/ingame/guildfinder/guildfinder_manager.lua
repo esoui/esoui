@@ -49,13 +49,13 @@ function ZO_GuildFinder_Manager:ShowApplicationTooltipOnMouseEnter(data, control
     self.applicationKeyboardTooltipInfo.levelControl:SetText(levelText)
 
     local classId = data.class
-    local classIcon = zo_iconFormatInheritColor(GetClassIcon(classId), iconSize, iconSize)
+    local classIcon = zo_iconFormatInheritColor(ZO_GetClassIcon(classId), iconSize, iconSize)
     local classValue = ZO_CachedStrFormat(SI_GUILD_FINDER_APPLICATIONS_ATTRIBUTE_ICON_VALUE_TOOLTIP_FORMATTER, classIcon, GetClassName(GENDER_MALE, classId))
     local classText = zo_strformat(SI_GUILD_FINDER_APPLICATIONS_ATTRIBUTE_TOOLTIP_FORMATTER, GetString(SI_GUILD_RECRUITMENT_CLASS_HEADER), classValue)
     self.applicationKeyboardTooltipInfo.classControl:SetText(classText)
 
     local allianceId = data.alliance
-    local allianceIcon = zo_iconFormatInheritColor(GetAllianceSymbolIcon(allianceId), iconSize, iconSize)
+    local allianceIcon = zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(allianceId), iconSize, iconSize)
     local allianceValue = ZO_CachedStrFormat(SI_GUILD_FINDER_APPLICATIONS_ATTRIBUTE_ICON_VALUE_TOOLTIP_FORMATTER, allianceIcon, GetAllianceName(allianceId))
     local allianceText = zo_strformat(SI_GUILD_FINDER_APPLICATIONS_ATTRIBUTE_TOOLTIP_FORMATTER, GetString(SI_GUILD_RECRUITMENT_ALLIANCE_HEADER), allianceValue)
     self.applicationKeyboardTooltipInfo.allianceControl:SetText(allianceText)
@@ -122,7 +122,7 @@ function ZO_GuildFinder_Manager.GetRoleIconsText(roles)
 
     for i = 1, MAX_ROLES do
         if i <= #roles then
-            iconTexts[i] = zo_iconFormat(GetRoleIcon(roles[i]), "100%", "100%")
+            iconTexts[i] = zo_iconFormat(ZO_GetRoleIcon(roles[i]), "100%", "100%")
         else
             iconTexts[i] = ""
         end

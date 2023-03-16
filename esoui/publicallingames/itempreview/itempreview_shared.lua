@@ -375,13 +375,7 @@ ZO_ITEM_PREVIEW_INVENTORY_ITEM = 10
 
 ZO_ITEM_PREVIEW_WAIT_TIME_MS = 500
 
-ZO_ItemPreview_Shared = ZO_CallbackObject:Subclass()
-
-function ZO_ItemPreview_Shared:New(...)
-    local preview = ZO_CallbackObject.New(self)
-    preview:Initialize(...)
-    return preview
-end
+ZO_ItemPreview_Shared = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_ItemPreview_Shared:Initialize(control)
     self.control = control
@@ -465,6 +459,10 @@ do
 
         self:SetupPreview()
     end
+end
+
+function ZO_ItemPreview_Shared:IsPreviewEnabled()
+    return self.enabledPreview
 end
 
 function ZO_ItemPreview_Shared:SetupPreview()
@@ -577,7 +575,7 @@ function ZO_ItemPreview_Shared:SharedPreviewSetup(previewType, ...)
     end
     self.currentPreviewTypeObject = self:GetPreviewTypeObject(previewType)
     self.currentPreviewTypeObject:SetStaticParameters(...)
-    
+
     self.previewVariationIndex = 1
 
     if IsCharacterPreviewingAvailable() then
@@ -676,10 +674,12 @@ function ZO_ItemPreview_Shared:Apply()
     self.lastSetChangeTime = GetFrameTimeMilliseconds()
     ApplyChangesToPreviewCollectionShown()
     PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)
+    self.oldPreviewVariationIndex = nil
 end
 
 function ZO_ItemPreview_Shared:SetCanChangePreview(canChangePreview)
     self.canChangePreview = canChangePreview
+    self:FireCallbacks("CanChangePreviewChanged", canChangePreview)
 end
 
 function ZO_ItemPreview_Shared:CanChangePreview()
@@ -688,6 +688,7 @@ end
 
 function ZO_ItemPreview_Shared:PreviewNextVariation()
     if self.numPreviewVariations > 0 then
+        self.oldPreviewVariationIndex = self.previewVariationIndex
         self.previewVariationIndex = self.previewVariationIndex + 1
 
         if self.previewVariationIndex > self.numPreviewVariations then
@@ -702,6 +703,7 @@ end
 
 function ZO_ItemPreview_Shared:PreviewPreviousVariation()
     if self.numPreviewVariations > 0 then
+        self.oldPreviewVariationIndex = self.previewVariationIndex
         self.previewVariationIndex = self.previewVariationIndex - 1
 
         if self.previewVariationIndex < 1 then
@@ -712,6 +714,10 @@ function ZO_ItemPreview_Shared:PreviewPreviousVariation()
     end
 
     self:SetVariationLabel(self.currentPreviewTypeObject:GetVariationName(self.previewVariationIndex))
+end
+
+function ZO_ItemPreview_Shared:HasVariations()
+    return self.numPreviewVariations > 0
 end
 
 function ZO_ItemPreview_Shared:SetForcePreparePreview(forcePreparePreview)

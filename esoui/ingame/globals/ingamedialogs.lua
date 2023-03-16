@@ -55,6 +55,34 @@ ESO_Dialogs["CHAT_TAB_RESET"] =
     }
 }
 
+ESO_Dialogs["CHAT_RESET"] = 
+{
+    title =
+    {
+        text = SI_PROMPT_TITLE_RESET_CHAT,
+    },
+    mainText = 
+    {
+        text = SI_CHAT_DIALOG_RESET_CHAT,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text =      SI_DIALOG_ACCEPT,
+            callback =  function()
+                            CHAT_SYSTEM:ResetChat()
+                        end,
+        },
+        
+        [2] =
+        {
+            text =      SI_DIALOG_DECLINE,
+        }
+    }
+}
+
 ESO_Dialogs["ABANDON_QUEST"] = 
 {
     gamepadInfo =
@@ -438,6 +466,12 @@ ESO_Dialogs["REPAIR_ALL"] =
                     return zo_strformat(SI_GAMEPAD_REPAIR_ALL_ACCEPT, costString, ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)) 
                 else
                     return GetString(SI_DIALOG_ACCEPT)
+                end
+            end,
+            narrationOverrideText = function(dialog)
+                if IsInGamepadPreferredMode() then
+                    local costString = ZO_Currency_FormatGamepad(CURT_MONEY, dialog.data.cost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+                    return zo_strformat(SI_GAMEPAD_REPAIR_ALL_ACCEPT, costString) 
                 end
             end,
             callback =  function(dialog)
@@ -3652,7 +3686,11 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
                 return dialogData.declineText or GetString(SI_DIALOG_DECLINE)
             end,
             callback = function(dialog)
-               ZO_Dialogs_ShowPlatformDialog("LFG_DECLINE_READY_CHECK_CONFIRMATION", dialog.data)
+                if not dialog.data.noDeclineConfirmation then
+                    ZO_Dialogs_ShowPlatformDialog("LFG_DECLINE_READY_CHECK_CONFIRMATION", dialog.data)
+                elseif dialog.data.declineCallback then
+                    dialog.data.declineCallback()
+                end
             end,
             visible = function(dialog)
                 return PLAYER_TO_PLAYER:ShouldShowDecline(dialog.data)
@@ -4167,6 +4205,82 @@ ESO_Dialogs["SKILL_RESPEC_CONFIRM_SCROLL"] =
         },
 
         [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["STAT_ASSIGNMENT_CONFIRM"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_STATS_ASSIGNMENT_CONFIRM_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_STATS_ASSIGNMENT_CONFIRM_DIALOG_BODY,
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback = function()
+                STATS:PurchaseAttributes()
+            end,
+        },
+
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["STAT_EDIT_CONFIRM"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_STATS_ASSIGNMENT_CONFIRM_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = function()
+            local introText = GetString(SI_STATS_ASSIGNMENT_CONFIRM_DIALOG_BODY)
+            local scrollItemLink = GetPendingAttributeRespecScrollItemLink()
+            local scrollName = GetItemLinkName(scrollItemLink)
+            local scrollDisplayQuality = GetItemLinkDisplayQuality(scrollItemLink)
+            local qualityColor = GetItemQualityColor(scrollDisplayQuality)
+            local costText = zo_strformat(SI_ATTRIBUTE_RESPEC_CONFIRM_DIALOG_BODY_COST_SCROLL, qualityColor:Colorize(scrollName))
+            return ZO_GenerateParagraphSeparatedList({ introText, costText })
+        end,
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback = function()
+                if IsInGamepadPreferredMode() then
+                    GAMEPAD_STATS:RespecAttributes()
+                else
+                    STATS:RespecAttributes()
+                end
+            end,
+        },
+
         {
             text = SI_DIALOG_CANCEL,
         },

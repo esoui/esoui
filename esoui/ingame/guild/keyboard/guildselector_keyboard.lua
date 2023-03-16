@@ -118,7 +118,7 @@ function GuildSelector:InitializeGuilds()
         local guildId = GetGuildId(i)
         local guildName = GetGuildName(guildId)
         local guildAlliance = GetGuildAlliance(guildId)
-        local entryText = zo_strformat(SI_GUILD_SELECTOR_FORMAT, GetAllianceSymbolIcon(guildAlliance), i, guildName)
+        local entryText = zo_strformat(SI_GUILD_SELECTOR_FORMAT, ZO_GetAllianceSymbolIcon(guildAlliance), i, guildName)
         local entry = self.comboBox:CreateItemEntry(entryText, self.OnGuildChanged)
         entry.guildId = guildId
         entry.selectedText = guildName
@@ -168,7 +168,7 @@ function GuildSelector:SetGuildIcon(guildId)
     local validGuildId = guildId ~= nil
     if validGuildId then
         local allianceId = GetGuildAlliance(guildId)
-        self.allianceIconControl:SetTexture(GetLargeAllianceSymbolIcon(allianceId))
+        self.allianceIconControl:SetTexture(ZO_GetLargeAllianceSymbolIcon(allianceId))
     end
 
     self.allianceIconControl:SetHidden(not validGuildId)

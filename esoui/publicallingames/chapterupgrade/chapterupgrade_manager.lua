@@ -9,13 +9,7 @@ ZO_CHAPTER_UPGRADE_REWARD_TYPE =
     PRE_ORDER = 3,
 }
 
-ZO_ChapterUpgrade_Data = ZO_Object:Subclass()
-
-function ZO_ChapterUpgrade_Data:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_ChapterUpgrade_Data = ZO_InitializingObject:Subclass()
 
 function ZO_ChapterUpgrade_Data:Initialize(chapterUpgradeId)
     local _
@@ -24,15 +18,21 @@ function ZO_ChapterUpgrade_Data:Initialize(chapterUpgradeId)
     self.collectibleId = GetChapterCollectibleId(chapterUpgradeId)
     self.name, _, self.collectibleIcon = GetCollectibleInfo(self.collectibleId)
     self.summary = GetChapterSummary(chapterUpgradeId)
-    self.isPreRelease = IsChapterPreRelease(chapterUpgradeId)
-    if self.isPreRelease then
-        self.releaseDateString = GetChapterReleaseDateString(chapterUpgradeId)
-    end
+    self:RefreshChapterUpgradeState()
     self.marketBackgroundImage = GetChapterMarketBackgroundFileImage(chapterUpgradeId)
-    self.isOwned = IsChapterOwned(chapterUpgradeId)
     self.isNew = false
     self.discountPercent = 0
     self:PopulateRewardsData()
+end
+
+function ZO_ChapterUpgrade_Data:RefreshChapterUpgradeState()
+    self.isPreRelease = IsChapterPreRelease(self.chapterUpgradeId)
+    if self.isPreRelease then
+        self.releaseDateString = GetChapterReleaseDateString(self.chapterUpgradeId)
+    else
+        self.releaseDateString = nil
+    end
+    self.isOwned = IsChapterOwned(self.chapterUpgradeId)
 end
 
 do
@@ -199,13 +199,7 @@ end
 -- Manager --
 -------------
 
-local ChapterUpgrade_Manager = ZO_CallbackObject:Subclass()
-
-function ChapterUpgrade_Manager:New(...)
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize(...)
-    return manager
-end
+local ChapterUpgrade_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ChapterUpgrade_Manager:Initialize()
     local currentChapterId = GetCurrentChapterUpgradeId()
@@ -224,7 +218,13 @@ function ChapterUpgrade_Manager:Initialize()
         end
     end
 
+    local function OnCollectiblesUnlockStateChanged()
+        self.currentChapterData:RefreshChapterUpgradeState()
+        self:RefreshChapterUpgradeData()
+    end
+
     EVENT_MANAGER:RegisterForEvent("ChapterUpgrade_Manager", EVENT_MARKET_STATE_UPDATED, OnMarketStateUpdated)
+    EVENT_MANAGER:RegisterForEvent("ChapterUpgrade_Manager", EVENT_COLLECTIBLES_UNLOCK_STATE_CHANGED, OnCollectiblesUnlockStateChanged)
 end
 
 do

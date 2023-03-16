@@ -232,6 +232,10 @@ function ZO_ItemSetsBook_Shared:RefreshCategoryProgress()
     -- Can be overridden
 end
 
+function ZO_ItemSetsBook_Shared:GetItemSetHeaderNarrationText(headerData)
+    -- Can be overridden
+end
+
 function ZO_ItemSetsBook_Shared:RefreshFilters()
     self:RefreshPieceFilters()
 
@@ -305,6 +309,7 @@ function ZO_ItemSetsBook_Shared:RefreshCategoryContentList()
             local headerEntryData = headerEntryDataObjectPool:AcquireObject()
             headerEntryData:SetDataSource(itemSetCollectionData)
             headerEntryData.collapsed = self:IsSetHeaderCollapsed(itemSetCollectionData:GetId())
+            headerEntryData.headerNarrationFunction = function(...) return self:GetItemSetHeaderNarrationText(...) end
             ZO_ClearNumericallyIndexedTable(tempUnlockedEntriesForRefresh)
             ZO_ClearNumericallyIndexedTable(tempLockedEntriesForRefresh)
             for _, itemSetCollectionPieceData in itemSetCollectionData:PieceIterator(self.pieceFilters) do

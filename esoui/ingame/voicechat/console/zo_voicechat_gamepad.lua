@@ -104,19 +104,10 @@ end
 --      Manages creation of voice chat related scenes and objects.
 ----------------------------------------------------------------------------------------
 
-ZO_VoiceChat_Gamepad = ZO_Object:Subclass()
-
-function ZO_VoiceChat_Gamepad:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_VoiceChat_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_VoiceChat_Gamepad:Initialize(control)
     self.control = control
-
-    GAMEPAD_VOICECHAT_CHANNELS_SCENE = ZO_Scene:New("gamepad_voice_chat", SCENE_MANAGER)
-    GAMEPAD_VOICECHAT_PARTICIPANTS_SCENE = ZO_Scene:New("gamepad_voice_chat_participants", SCENE_MANAGER)
 
     VOICE_CHAT_CHANNELS_GAMEPAD = ZO_VoiceChatChannelsGamepad:New(self.control:GetNamedChild("Channels"))
     VOICE_CHAT_PARTICIPANTS_GAMEPAD = ZO_VoiceChatParticipantsGamepad:New(self.control:GetNamedChild("Participants"))

@@ -114,7 +114,7 @@ do
     end
 
     function ZO_StatusBar_GetTargetValue(statusBar)
-        return statusBar.animation:GetFirstAnimation().endValue or statusBar:GetValue()
+        return (statusBar.animation and statusBar.animation:GetFirstAnimation().endValue) or statusBar:GetValue()
     end
 end
 
@@ -232,6 +232,26 @@ function ZO_WrappingStatusBar:OnAnimationFinished(completedPlaying)
             end
         end
     end
+end
+
+function ZO_WrappingStatusBar:GetLevel()
+    return self.level
+end
+
+function ZO_WrappingStatusBar:GetNarrationText()
+    local narration = SCREEN_NARRATION_MANAGER:CreateNarratableObject()
+    local barMax = self.statusBar.max
+    if barMax then
+        local barMin = self.statusBar.min or 0
+        if barMax > barMin then
+            local barValue = self:GetValue()
+            local range = barMax - barMin
+            local percentage = (barValue - barMin) / range
+            percentage = string.format("%.2f", percentage * 100)
+            narration:AddNarrationText(zo_strformat(SI_SCREEN_NARRATION_PROGRESS_BAR_PERCENT_FORMATTER, percentage))
+        end
+    end
+    return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetLevel()), narration }
 end
 
 --[[

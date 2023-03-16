@@ -9,11 +9,11 @@
                             <Dimensions x="128" y="128"/>
                         </Texture>
 
-                        <Control name="$(parent)ScrollChild" override="true">
+                        <Scroll name="$(parent)Scroll" override="true">
                             <!-- overriding the anchoring here so we can offset below the icons above -->
                             <Anchor point="TOPLEFT" offsetY="128" />
-                            <Anchor point="TOPRIGHT" offsetY="128" />
-                        </Control>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Scroll>
                     </Controls>
                 </Control>
             </Controls>

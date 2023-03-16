@@ -309,6 +309,14 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Nameplates_TargetMarkerSize",
+    settingType = SETTING_TYPE_IN_WORLD,
+    settingId = IN_WORLD_UI_SETTING_TARGET_MARKER_SIZE,
+    header = SI_INTERFACE_OPTIONS_INDICATORS,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Nameplates_ResurrectIndicators",
     settingType = SETTING_TYPE_NAMEPLATES,
     settingId = NAMEPLATE_TYPE_RESURRECT_INDICATORS,

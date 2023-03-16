@@ -35,6 +35,7 @@
                     <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT" offsetX="-5"/>
                 </Control>
                 <Label name="$(parent)State" override="true" font="ZoFontGamepad34">
+                    <DimensionConstraints maxX="210" />
                     <ClearAnchors/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                 </Label>

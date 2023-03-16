@@ -49,6 +49,7 @@ function ZO_Spinner:Initialize(control, min, max, isGamepad, spinnerMode, accele
     else 
         self.constrainRangeFunc = ClampInt
     end
+    self.spinnerMode = spinnerMode or SPINNER_MODE_CLAMP
 
     self.step = 1
     self.value = math.huge
@@ -250,13 +251,9 @@ function ZO_Spinner:UpdateButtons()
     else
         self.increaseButton:SetHidden(false)
         self.decreaseButton:SetHidden(false)
-        if not self.enabled then
-            self.increaseButton:SetEnabled(false)
-            self.decreaseButton:SetEnabled(false)
-        else
-            self.increaseButton:SetEnabled(self.value + self.step <= self:GetMax())
-            self.decreaseButton:SetEnabled(self.value - self.step >= self:GetMin())
-        end
+
+        self.increaseButton:SetEnabled(self:IsIncreaseEnabled())
+        self.decreaseButton:SetEnabled(self:IsDecreaseEnabled())
     end    
 
     if self.display then
@@ -272,6 +269,22 @@ function ZO_Spinner:UpdateButtons()
     self.control:SetMouseEnabled(self.mouseEnabled)
     self.increaseButton:SetMouseEnabled(self.mouseEnabled)
     self.decreaseButton:SetMouseEnabled(self.mouseEnabled)
+end
+
+function ZO_Spinner:IsIncreaseEnabled()
+    if not self.enabled then
+        return false
+    else
+        return self.value + self.step <= self:GetMax()
+    end
+end
+
+function ZO_Spinner:IsDecreaseEnabled()
+    if not self.enabled then
+        return false
+    else
+        return self.value - self.step >= self:GetMin()
+    end
 end
 
 function ZO_Spinner:SetMouseEnabled(mouseEnabled)
@@ -326,6 +339,19 @@ function ZO_Spinner:UpdateDisplay()
             self.display:SetColor(self.normalColor:UnpackRGBA())
         end
     end
+end
+
+function ZO_Spinner:GetFormattedValueText()
+    local valueText
+    if self.displayTextOverride then
+        valueText = self.displayTextOverride
+    elseif self.valueFormatFunction then
+        valueText = self.valueFormatFunction(self.value)
+    else
+        valueText = self.value
+    end
+
+    return valueText
 end
 
 function ZO_Spinner:SetValueFormatFunction(valueFormatFunction)
@@ -386,12 +412,7 @@ function ZO_SpinnerWithLabels:UpdateButtons()
     ZO_Spinner.UpdateButtons(self)
 
     if not self.hideButtons then
-        if not self.enabled then
-            self.increaseKeyLabel:SetEnabled(false)
-            self.decreaseKeyLabel:SetEnabled(false)
-        else
-            self.increaseKeyLabel:SetEnabled(self.value + self.step <= self:GetMax())
-            self.decreaseKeyLabel:SetEnabled(self.value - self.step >= self:GetMin())
-        end
+        self.increaseKeyLabel:SetEnabled(self:IsIncreaseEnabled())
+        self.decreaseKeyLabel:SetEnabled(self:IsDecreaseEnabled())
     end
 end

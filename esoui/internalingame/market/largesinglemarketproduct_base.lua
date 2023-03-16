@@ -42,6 +42,7 @@ function ZO_LargeSingleMarketProduct_Base:SetTitle(title)
         formattedTitle = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, title)
     end
 
+    self.titleText = formattedTitle
     self.control.title:SetText(formattedTitle)
 end
 

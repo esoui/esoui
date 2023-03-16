@@ -136,8 +136,13 @@ end
 
 function ZO_HorizontalScrollList:SetNoItemText(text)
     if self.noItemsLabel then
+        self.noItemsText = text
         self.noItemsLabel:SetText(text)
     end
+end
+
+function ZO_HorizontalScrollList:GetNoItemText()
+    return self.noItemsText
 end
 
 function ZO_HorizontalScrollList:SetDisplayEntryType(displayEntryType)
@@ -311,6 +316,10 @@ end
 
 function ZO_HorizontalScrollList:GetNumItems()
     return #self.list
+end
+
+function ZO_HorizontalScrollList:IsEmpty()
+    return #self.list == 0
 end
 
 function ZO_HorizontalScrollList:CanScroll()

@@ -8,7 +8,7 @@ end
 
 function ZO_SkillsAndActionBarManager:Initialize()
     self.skillPointAllocationMode = SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY
-    self.skillRespecPaymentType = SKILL_RESPEC_PAYMENT_TYPE_GOLD
+    self.skillRespecPaymentType = RESPEC_PAYMENT_TYPE_GOLD
 
     self.managers = {}
 
@@ -33,12 +33,12 @@ function ZO_SkillsAndActionBarManager:SetSkillPointAllocationMode(skillPointAllo
 end
 
 function ZO_SkillsAndActionBarManager:ResetInterface()
-    self:SetSkillRespecPaymentType(SKILL_RESPEC_PAYMENT_TYPE_GOLD)
+    self:SetSkillRespecPaymentType(RESPEC_PAYMENT_TYPE_GOLD)
     self:SetSkillPointAllocationMode(SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
 end
 
 function ZO_SkillsAndActionBarManager:ResetRespecState()
-    self:SetSkillRespecPaymentType(SKILL_RESPEC_PAYMENT_TYPE_GOLD)
+    self:SetSkillRespecPaymentType(RESPEC_PAYMENT_TYPE_GOLD)
     self:SetSkillPointAllocationMode(SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
     self:FireCallbacks("RespecStateReset")
 end
@@ -89,7 +89,7 @@ function ZO_SkillsAndActionBarManager:OnStartRespec(allocationMode, paymentType)
 end
 
 do
-    internalassert(RESPEC_RESULT_MAX_VALUE == 38, "Update EXPECTED_RESPEC_FAILURES")
+    internalassert(RESPEC_RESULT_MAX_VALUE == 40, "Update EXPECTED_RESPEC_FAILURES")
     local EXPECTED_RESPEC_FAILURES =
     {
         [RESPEC_RESULT_IS_IN_COMBAT] = true,

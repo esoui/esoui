@@ -45,7 +45,8 @@ function ZO_MarketAnnouncementMarketProduct_Shared:Show(...)
         descriptionText = description
     end
 
-    self.control.descriptionTextControl:SetText(zo_strformat(SI_MARKET_PRODUCT_DESCRIPTION_FORMATTER, descriptionText))
+    self.descriptionText = zo_strformat(SI_MARKET_PRODUCT_DESCRIPTION_FORMATTER, descriptionText)
+    self.control.descriptionTextControl:SetText(self.descriptionText)
 end
 
 function ZO_MarketAnnouncementMarketProduct_Shared:SetOnInteractWithScrollCallback(onInteractWithScrollCallback)

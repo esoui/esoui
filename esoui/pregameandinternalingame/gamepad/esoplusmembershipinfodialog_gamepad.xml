@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_GamepadMembershipInfoDialog_BenefitLine" resizeToFitDescendents="true" virtual="true">
+        <Control name="ZO_GamepadMembershipInfoDialog_BenefitLine" resizeToFitConstrains="Y" virtual="true">
             <Dimensions x="830" />
             <Controls>
                 <Texture name="$(parent)Icon">
@@ -39,7 +39,7 @@
                         <Texture name="$(parent)ScrollIndicator" override="true">
                             <Anchor point="CENTER" relativeTo="$(grandparent)" relativePoint="RIGHT" offsetX="1"/>
                         </Texture>
-                        <Control name="$(parent)ScrollChild" override="true">
+                        <Control name="$(parent)ScrollChild" resizeToFitConstrains="Y" override="true">
                             <Dimensions x="830" />
                         </Control>
                     </Controls>

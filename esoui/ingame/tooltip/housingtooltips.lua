@@ -21,7 +21,12 @@ function ZO_Tooltip:LayoutHousingLink(link, actionName)
     local headerSection = self:AcquireSection(self:GetStyle("topSection"))
     local linkText, _, _, houseId, ownerDisplayName = ZO_LinkHandler_ParseLink(link)
     if linkText == "" then
-        linkText = GetHousingLink(houseId, ownerDisplayName)
+        -- zo_parseUnsignedInteger will parse out the integer house id from some malformed links
+        -- as opposed to tonumber which would fail and return nil.
+        houseId = zo_parseUnsignedInteger(houseId)
+        if houseId then
+            linkText = GetHousingLink(houseId, ownerDisplayName)
+        end
     end
     headerSection:AddLine(linkText, self:GetStyle("title"))
     self:AddSection(headerSection)

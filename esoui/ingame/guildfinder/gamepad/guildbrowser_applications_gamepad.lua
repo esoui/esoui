@@ -50,6 +50,7 @@ function ZO_GuildBrowser_Applications_Gamepad:OnCommitComplete()
 end
 
 function ZO_GuildBrowser_Applications_Gamepad:OnSelectionChanged(previousData, selectedData)
+    ZO_GuildFinder_ListPanel_GamepadBehavior.OnSelectionChanged(self, previousData, selectedData)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
 
     if selectedData then
@@ -81,6 +82,27 @@ end
 
 function ZO_GuildBrowser_Applications_Gamepad:OnHidden()
     ZO_GuildBrowser_Applications_Shared.OnHidden(self)
+end
+
+function ZO_GuildBrowser_Applications_Gamepad:GetSelectedNarrationText()
+    local narrations = {}
+    local selectedData = self:GetSelectedData()
+    if selectedData then
+        --Get the narration for the guild name column
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_NAME)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.guildName))
+
+        --Get the narration for the expiration column
+        local timeRemainingS = GetGuildFinderAccountApplicationDuration(selectedData.index)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_FINDER_APPLICATIONS_SORT_HEADER_EXPIRATION)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_FormatCountdownTimer(timeRemainingS)))
+    end
+    return narrations
+end
+
+--Overridden from base
+function ZO_GuildBrowser_Applications_Gamepad:GetHeaderNarration()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GUILD_BROWSER_CATEGORY_APPLICATIONS))
 end
 
 -- XML Functions

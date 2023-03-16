@@ -228,6 +228,7 @@ function ZO_GuildBrowser_Gamepad:OnDeferredInitialize()
     end
     guildListData:SetHeader(GetString(SI_GUILD_BROWSER_CATEGORY_BROWSE_GUILDS))
     guildListData.category = ZO_GUILD_BROWSER_CATEGORY_GUILD_LIST
+    guildListData.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
     self.categoryList:AddEntryWithHeader("ZO_Gamepad_Dropdown_Item_Indented", guildListData)
 
     self.categoryList:Commit()

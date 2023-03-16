@@ -46,18 +46,18 @@ end
 
 local KEYBOARD_FUNCTIONS =
 {
-    playerStatusIcon = GetPlayerStatusIcon,
-    championPointsIcon = GetChampionPointsIconSmall,
-    allianceIcon = GetAllianceSymbolIcon,
-    classIcon = GetClassIcon,
+    playerStatusIcon = ZO_GetPlayerStatusIcon,
+    championPointsIcon = ZO_GetChampionPointsIconSmall,
+    allianceIcon = ZO_GetAllianceSymbolIcon,
+    classIcon = ZO_GetClassIcon,
 }
 
 local GAMEPAD_FUNCTIONS =
 {
-    playerStatusIcon = GetGamepadPlayerStatusIcon,
-    championPointsIcon = GetGamepadChampionPointsIcon,
-    allianceIcon = GetLargeAllianceSymbolIcon,
-    classIcon = GetGamepadClassIcon,
+    playerStatusIcon = ZO_GetGamepadPlayerStatusIcon,
+    championPointsIcon = ZO_GetGamepadChampionPointsIcon,
+    allianceIcon = ZO_GetLargeAllianceSymbolIcon,
+    classIcon = ZO_GetGamepadClassIcon,
 }
 
 function ZO_SocialList_GetPlatformTextureFunctions()

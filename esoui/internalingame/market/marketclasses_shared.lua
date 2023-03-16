@@ -281,7 +281,7 @@ end
 
 function ZO_MarketProductBase:SetupCalloutsDisplay()
     local hideCallouts = true
-
+    self.textCalloutText = nil
     -- setup the callouts for new, on sale, and LTO
     if self:ShouldShowCallouts() then
         local calloutUpdateHandler = nil
@@ -298,7 +298,8 @@ function ZO_MarketProductBase:SetupCalloutsDisplay()
             end
         elseif self.productData:IsNew() then
             hideCallouts = false
-            self.control.textCallout:SetText(GetString(SI_MARKET_TILE_CALLOUT_NEW))
+            self.textCalloutText = GetString(SI_MARKET_TILE_CALLOUT_NEW)
+            self.control.textCallout:SetText(self.textCalloutText)
             self.control.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         end
 
@@ -385,6 +386,7 @@ end
 
 function ZO_MarketProductBase:SetupPurchaseLabelDisplay()
     local purchaseLabelControl = self.control.purchaseLabelControl
+    self.purchasedText = nil
     local canBePurchased = self:CanBePurchased()
     if not canBePurchased then
         local purchasedString
@@ -403,7 +405,8 @@ function ZO_MarketProductBase:SetupPurchaseLabelDisplay()
             end
         end
 
-        purchaseLabelControl:SetText(purchasedString)
+        self.purchasedText = purchasedString
+        purchaseLabelControl:SetText(self.purchasedText)
         ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(purchaseLabelControl, self:IsFocused(), self.displayState)
 
         self:AnchorPurchaseLabel()
@@ -537,11 +540,12 @@ function ZO_MarketProductBase:UpdateLTORemainingTimeCalloutText()
     if remainingTime > 0 then
         if remainingTime >= ZO_ONE_DAY_IN_SECONDS then
             self.control.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
-            self.control.textCallout:SetText(zo_strformat(SI_TIME_DURATION_LEFT, ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS)))
+            self.textCalloutText = zo_strformat(SI_TIME_DURATION_LEFT, ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
         else
             self.control.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_NONE)
-            self.control.textCallout:SetText(zo_strformat(SI_TIME_DURATION_LEFT, ZO_FormatTimeLargestTwo(remainingTime, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)))
+            self.textCalloutText = zo_strformat(SI_TIME_DURATION_LEFT, ZO_FormatTimeLargestTwo(remainingTime, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
         end
+        self.control.textCallout:SetText(self.textCalloutText)
     end
 end
 
@@ -559,9 +563,10 @@ function ZO_MarketProductBase:UpdateSaleRemainingTimeCalloutText(discountPercent
             self.control.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_NONE)
             remainingTimeText = ZO_FormatTimeLargestTwo(remainingTime, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
         end
-        local calloutText = string.format("%s %s", discountPercentText, remainingTimeText)
-        self.control.textCallout:SetText(calloutText)
+        self.textCalloutText = string.format("%s %s", discountPercentText, remainingTimeText)
+        self.control.textCallout:SetText(self.textCalloutText)
     else
+        self.textCalloutText = discountPercentText
         self.control.textCallout:SetText(discountPercentText)
     end
 end
@@ -656,6 +661,7 @@ end
 
 function ZO_MarketProductBase:Reset()
     self.control:SetHidden(true)
+    self.textCalloutText = nil
     self.control.textCallout:SetHidden(true)
     -- Clear the background's texture so that it can be cleared at zero references
     self.control.background:SetTexture("")
@@ -668,7 +674,86 @@ function ZO_MarketProductBase:Refresh()
 end
 
 function ZO_MarketProductBase:SetTitle(title)
-    self.control.title:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, title))
+    self.titleText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, title)
+    self.control.title:SetText(self.titleText)
+end
+
+--Get the narration for the title of this market product
+function ZO_MarketProductBase:GetTitleNarrationText()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.titleText)
+end
+
+--Get the narration for the callouts section of this market product
+function ZO_MarketProductBase:GetCalloutNarrationText()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.textCalloutText)
+end
+
+--Get the narration for the pricing of this market product
+function ZO_MarketProductBase:GetPricingNarrationText()
+    local narrations = {}
+
+    --Do the narration for the regular cost
+    if self:HasCost() and not self:IsPromo() then
+        --If the product has a discounted price, narrate the original price first
+        if self:IsOnSale() and not self:IsFree() then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MARKET_ORIGINAL_PRICE_NARRATION)))
+            local currencyString = ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(self.currencyType), self.cost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(currencyString))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MARKET_CURRENT_PRICE_NARRATION)))
+        end
+
+        --Narrate the current price
+        if not self:IsFree() then
+            local currencyString
+            --If the product has more than 1 pricing option, we need to format the currency narration a bit differently
+            if self.hasMultiplePriceOptions then
+                local IS_UPPER = false
+                local currencyName = GetCurrencyName(GetCurrencyTypeFromMarketCurrencyType(self.currencyType), IsCountSingularForm(self.costAfterDiscount), IS_UPPER)
+                currencyString = string.format("%s + %s", zo_strformat(SI_NUMBER_FORMAT, self.costAfterDiscount), currencyName)
+            else
+                currencyString = ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(self.currencyType), self.costAfterDiscount, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+            end
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(currencyString))
+        else
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MARKET_FREE_LABEL)))
+        end
+    end
+
+    --Do the narration for the eso plus specific cost
+    if self:HasEsoPlusCost() then
+        --Narrate the cost
+        if not self:IsFreeForEsoPlus() then
+            local currencyString = ZO_Currency_FormatGamepad(GetCurrencyTypeFromMarketCurrencyType(self.currencyType), self.esoPlusCost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(currencyString))
+        else
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MARKET_FREE_LABEL)))
+        end
+
+        --Narrate what type of deal this is
+        if self:CanBePurchased() then
+            local dealText = self:HasCost() and GetString(SI_MARKET_ESO_PLUS_DEAL_NARRATION) or GetString(SI_MARKET_ESO_PLUS_EXCLUSIVE_NARRATION)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(dealText))
+        end
+    end
+    return narrations
+end
+
+--Get the narration for the bundle information of this market product
+function ZO_MarketProductBase:GetBundleNarrationText()
+    local narrations = {}
+    if self:IsBundle() then
+        local numBundledProducts = self.productData:GetNumBundledProducts()
+        if numBundledProducts > 1 then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MARKET_PRODUCT_TOTAL_LABEL)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(numBundledProducts))
+        end
+    end
+    return narrations
+end
+
+--Get the narration for the purchased state of this market product
+function ZO_MarketProductBase:GetPurchasedNarrationText()
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.purchasedText)
 end
 
 -- MarketProduct Preview functions
@@ -705,6 +790,10 @@ end
 function ZO_MarketProductBase:GetEsoPlusIcon()
     -- to be overridden, default behavior
     return nil
+end
+
+function ZO_MarketProductBase:GetNarrationText()
+    -- to be overridden
 end
 
 -- global functions

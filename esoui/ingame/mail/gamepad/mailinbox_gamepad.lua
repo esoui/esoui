@@ -53,6 +53,10 @@ function ZO_MailInbox_Gamepad:InitializeInbox(control)
     self.activeLinks = ZO_GamepadLinks:New()
     self.activeLinks:SetUseKeybind("UI_SHORTCUT_LEFT_STICK")
     self.activeLinks:SetKeybindAlignment(KEYBIND_STRIP_ALIGN_RIGHT)
+    self.activeLinks:RegisterCallback("CycleLinks", function()
+        --Re-narrate when cycling between multiple links
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.mailList)
+    end)
 
     self:InitializeFragment()
 end
@@ -235,7 +239,7 @@ function ZO_MailInbox_Gamepad:InitializeHeader()
     self.mainHeaderData = {
         data1HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_PLAYER_GOLD),
         data1Text = UpdatePlayerGold,
-        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldCurrencyNameNarration,
 
         data2HeaderText = GetString(SI_GAMEPAD_MAIL_INBOX_INVENTORY),
         data2Text = GetInventoryString,
@@ -251,14 +255,26 @@ function ZO_MailInbox_Gamepad:InitializeHeader()
         return true
     end
 
-    self.confirmCODDialogData = {
-        data1 = {
+    local function GetCODAmountNarration()
+        local mailData = self:GetActiveMailData()
+        if mailData then
+            return ZO_Currency_FormatGamepad(CURT_MONEY, mailData.codAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+        end
+    end
+
+    self.confirmCODDialogData = 
+    {
+        data1 = 
+        {
             header = GetString(SI_GAMEPAD_MAIL_INBOX_PLAYER_GOLD),
             value = UpdatePlayerGold,
+            valueNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
         },
-        data2 = {
+        data2 = 
+        {
             header = GetString(SI_MAIL_READ_COD_LABEL),
             value = UpdateCODAmount,
+            valueNarration = GetCODAmountNarration,
         },
         callback = function() self:TakeAll() end,
     }
@@ -388,6 +404,7 @@ function ZO_MailInbox_Gamepad:InitializeEvents()
         self:ShowMailItem(mailId)
         MAIL_MANAGER_GAMEPAD:RefreshKeybind()
         MAIL_MANAGER_GAMEPAD:RefreshHeader()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.mailList)
     end
 
     local function OnMoneyUpdated()
@@ -567,7 +584,7 @@ end
 function ZO_MailInbox_Gamepad:ReportPlayer()
     if IsMailReportable(self:GetActiveMailData()) then
         local displayName = self:GetActiveMailSender()
-        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(displayName, function() ZO_PlatformIgnorePlayer(displayName) end)
+        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(displayName)
     else
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GAMEPAD_MAIL_INBOX_CANNOT_REPORT))
     end
@@ -684,6 +701,65 @@ local function SortFunction(left, right)
     return ZO_TableOrderingFunction(left, right, MAIL_ENTRY_FIRST_SORT_KEY, MAIL_ENTRY_SORT_KEYS, ZO_SORT_ORDER_UP)
 end
 
+local function GetMailNarrationText(entryData, entryControl)
+    local narrations = {}
+    ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+    local moneyHeader
+    local moneyText
+    local hasAttachedMoney = entryData.attachedMoney > 0
+    local hasCod = entryData.codAmount > 0
+
+    --Generate the COD Fee/Sent Gold text
+    if hasAttachedMoney then
+        moneyHeader = GetString(SI_MAIL_READ_SENT_GOLD_LABEL)
+        moneyText = ZO_Currency_FormatGamepad(CURT_MONEY, entryData.attachedMoney, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+    elseif hasCod then
+        moneyHeader = GetString(SI_MAIL_READ_COD_LABEL)
+        moneyText = ZO_Currency_FormatGamepad(CURT_MONEY, entryData.codAmount, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+        --If this mail has a COD Fee, include the narration for the COD notice
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_INBOX_COD_NOTICE)))
+    else
+        moneyHeader = GetString(SI_MAIL_READ_SENT_GOLD_LABEL)
+        moneyText = GetString(SI_GAMEPAD_MAIL_INBOX_NO_ATTACHED_GOLD)
+    end
+
+    --Generate the narration for the From section
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_INBOX_FROM)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.senderDisplayName))
+
+    --Generate the narration for the Subject section
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_SUBJECT_LABEL)))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData:GetFormattedSubject()))
+
+    --Generate the narration for the Message section
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_BODY_LABEL)))
+    local body = ReadMail(entryData.mailId)
+    if body == "" then
+        body = GetString(SI_MAIL_READ_NO_BODY)
+    end
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(body))
+
+    --Generate the narration for the attached money/cod fee
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(moneyHeader))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(moneyText))
+
+    --Generate the narration for the attachments
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MAIL_ATTACHMENTS_HEADER)))
+    if entryData.numAttachments > 0 then
+        local totalAttachments = 0
+        for i = 1, entryData.numAttachments do
+            local icon, stack, creator = GetAttachedItemInfo(entryData.mailId, i)
+            totalAttachments = totalAttachments + stack
+        end
+        --Narrate the total stack count of all the attachments, not just the number of unique attachments
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(totalAttachments))
+    else
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_INBOX_NO_ATTACHMENTS)))
+    end
+    return narrations
+end
+
 function ZO_MailInbox_Gamepad:RefreshMailList()
     if not GAMEPAD_MAIL_INBOX_FRAGMENT:IsShowing() then
         self.dirty = true
@@ -715,6 +791,7 @@ function ZO_MailInbox_Gamepad:RefreshMailList()
         entryData:SetNameColors(selectedColor, unselectedColor)
         entryData:SetSubLabelColors(selectedColor, unselectedColor)
         entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_MAIL_INBOX_RECEIVED_TEXT, mailData:GetReceivedText()))
+        entryData.narrationText = GetMailNarrationText
         local expiresText = zo_strformat(SI_MAIL_INBOX_EXPIRES_TEXT, mailData:GetExpiresText())
         if mailData:IsExpirationImminent() then
             expiresText = ZO_ERROR_COLOR:Colorize(expiresText)

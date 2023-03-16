@@ -85,6 +85,26 @@ local function ProcessData(control, textData, anchorToBaselineControl, anchorToB
     return textData ~= nil
 end
 
+local function GetProcessedNarrationText(control, data)
+    if control == nil or data == nil then
+        return ""
+    end
+
+    if type(data) == "function" then
+        data = data(control)
+    end
+
+    if type(data) == "string" then
+        return data
+    elseif type(data) == "number" then
+        return tostring(data)
+    else
+        internalassert(false, "Unsupported data type. A custom narration function will need to be set for this control that returns a string or number.")
+    end
+
+    return ""
+end
+
 function GenericFooter:Refresh(data)
     local controls = self.controls
 
@@ -109,6 +129,21 @@ function GenericFooter:GetChildControl(index)
     end
 
     return nil
+end
+
+function GenericFooter:GetNarrationText(data)
+    local narration = SCREEN_NARRATION_MANAGER:CreateNarratableObject()
+    local controls = self.controls
+
+    -- We narrate these in reverse numerical order because they're laid out from right to left
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA3HEADER], data.data3HeaderTextNarration or data.data3HeaderText))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA3], data.data3TextNarration or data.data3Text))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA2HEADER], data.data2HeaderTextNarration or data.data2HeaderText))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA2], data.data2TextNarration or data.data2Text))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA1HEADER], data.data1HeaderTextNarration or data.data1HeaderText))
+    narration:AddNarrationText(GetProcessedNarrationText(controls[DATA1], data.data1TextNarration or data.data1Text))
+
+    return narration
 end
 
 function ZO_GenericFooter_Gamepad_OnInitialized(self)

@@ -16,7 +16,8 @@
             </Controls>
         </TopLevelControl>
 
-        <Control name="ZO_GamepadArmoryBuildStatAttributeRow" inherits="ZO_GamepadStatAttributeRow" virtual="true">
+        <Control name="ZO_GamepadArmoryBuildStatAttributeRow" inherits="ZO_GamepadStatAttributeRow" resizeToFitDescendents="false" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="51" />
             <Controls>
                 <Control name="$(parent)Spinner" override="true">
                     <Anchor point="RIGHT" offsetX="40" />
