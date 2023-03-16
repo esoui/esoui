@@ -16217,6 +16217,13 @@ h2. Game API
 * DoesFurnitureThemeShowInBrowser(*[FurnitureThemeType|#FurnitureThemeType]* _furnitureTheme_)
 ** _Returns:_ *bool* _showInBrowser_
 
+* HousingEditorIsPreviewInspectionEnabled()
+** _Returns:_ *bool* _enabled_
+
+* HousingEditorSetPreviewInspectionEnabled(*bool* _enabled_)
+
+* HousingEditorTogglePreviewInspectionEnabled()
+
 * HousingEditorTogglePlacementType()
 
 * HousingEditorSetPlacementType(*[HousingEditorPlacementType|#HousingEditorPlacementType]* _placementType_)
@@ -22990,6 +22997,7 @@ h2. Events
 * EVENT_HOUSING_PERMISSIONS_CHANGED (*[HousePermissionUserGroup|#HousePermissionUserGroup]* _userGroup_)
 * EVENT_HOUSING_PLAYER_INFO_CHANGED (*bool* _wasOwner_, *bool* _permissionsChanged_, *[HousingVisitorRole|#HousingVisitorRole]* _oldVisitorRole_)
 * EVENT_HOUSING_POPULATION_CHANGED (*integer* _newPopulation_, *integer* _previousPopulation_)
+* EVENT_HOUSING_PREVIEW_INSPECTION_STATE_CHANGED (*bool* _isPreviewInspectionEnabled_)
 * EVENT_HOUSING_PRIMARY_RESIDENCE_SET (*integer* _houseId_)
 * EVENT_HOUSING_TARGET_FURNITURE_CHANGED
 * EVENT_IMPACTFUL_HIT

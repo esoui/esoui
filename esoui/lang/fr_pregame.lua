@@ -2071,7 +2071,7 @@ SafeAddString(SI_GUILDEVENTTYPE45, "<<1>> a accepté la candidature de <<2>>.", 
 SafeAddString(SI_GUILDEVENTTYPE46, "<<1>> a ajouté <<2>> à la liste noire.", 1)
 SafeAddString(SI_GUILDEVENTTYPE47, "<<1>> a retiré <<2>> de la liste noire.", 1)
 SafeAddString(SI_GUILDEVENTTYPE48, "<<1>> a désinvité <<2>> de la guilde.", 1)
-SafeAddString(SI_GUILDEVENTTYPE49, "<<1>> a modifié la liste noire de <<2>>.", 1)
+SafeAddString(SI_GUILDEVENTTYPE49, "<<1>> a modifié la note de liste noire de <<2>>.", 1)
 SafeAddString(SI_GUILDEVENTTYPE5, "<<C:1>> a créé la guilde.", 1)
 SafeAddString(SI_GUILDEVENTTYPE50, "<<1>> a listé la guilde dans l'outil de recherche de guilde.", 1)
 SafeAddString(SI_GUILDEVENTTYPE51, "<<1>> a délisté la guilde de l'outil de recherche de guilde.", 0)

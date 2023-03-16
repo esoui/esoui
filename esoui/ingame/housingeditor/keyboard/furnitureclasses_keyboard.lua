@@ -583,6 +583,12 @@ function ZO_HousingSettingsFilters_SetupDropdown(dropdown, includeLocationFilter
     comboBox:SetNoSelectionText(zo_strformat(SI_HOUSING_FURNITURE_FILTER_DROPDOWN_TEXT, 0))
     comboBox:SetMultiSelectionTextFormatter(SI_HOUSING_FURNITURE_FILTER_DROPDOWN_TEXT)
 
+    local onDropdownHidden = function()
+        callback(comboBox)
+    end
+
+    comboBox:SetHideDropdownCallback(onDropdownHidden)
+
     local function DisableHighlightOnMouseEnter(control)
         -- Suppress the highlight for subcategory entries.
         ZO_Menu_UnselectItem(control)
@@ -604,7 +610,7 @@ function ZO_HousingSettingsFilters_SetupDropdown(dropdown, includeLocationFilter
         local locationFilterEntries = {}
         for filterValue in ZO_FlagIterator(HOUSING_FURNITURE_LOCATION_FILTER_ALL * 2, HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_END) do
             local filterName = zo_strformat(SI_HOUSING_FURNITURE_FILTER_LIST_ITEM_FORMATTER, GetString("SI_HOUSINGFURNITURELOCATIONFILTER", filterValue))
-            local entry = comboBox:CreateItemEntry(filterName, callback)
+            local entry = comboBox:CreateItemEntry(filterName)
             entry.filterValue = filterValue
             entry.filterCategory = ZO_HOUSING_FURNITURE_FILTER_CATEGORY.LOCATION
             table.insert(locationFilterEntries, entry)
@@ -630,7 +636,7 @@ function ZO_HousingSettingsFilters_SetupDropdown(dropdown, includeLocationFilter
 
     for filterValue = HOUSING_FURNITURE_BOUND_FILTER_ALL + 1, HOUSING_FURNITURE_BOUND_FILTER_ITERATION_END do
         local filterName = zo_strformat(SI_HOUSING_FURNITURE_FILTER_LIST_ITEM_FORMATTER, GetString("SI_HOUSINGFURNITUREBOUNDFILTER", filterValue))
-        local entry = comboBox:CreateItemEntry(filterName, callback)
+        local entry = comboBox:CreateItemEntry(filterName)
         entry.filterValue = filterValue
         entry.filterCategory = ZO_HOUSING_FURNITURE_FILTER_CATEGORY.BOUND
         comboBox:AddItem(entry)
@@ -647,7 +653,7 @@ function ZO_HousingSettingsFilters_SetupDropdown(dropdown, includeLocationFilter
     for limitType = HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_BEGIN, HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_END do
         local filterValue = ZO_HOUSING_FURNITURE_LIMIT_FILTERS[limitType + 1]
         local filterName = zo_strformat(SI_HOUSING_FURNITURE_FILTER_LIST_ITEM_FORMATTER, GetString("SI_HOUSINGFURNISHINGLIMITTYPE", limitType))
-        local entry = comboBox:CreateItemEntry(filterName, callback)
+        local entry = comboBox:CreateItemEntry(filterName)
         entry.filterValue = filterValue
         entry.filterCategory = ZO_HOUSING_FURNITURE_FILTER_CATEGORY.LIMIT
         comboBox:AddItem(entry)
