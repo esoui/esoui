@@ -850,11 +850,14 @@ ESO_Dialogs["FAST_TRAVEL_CONFIRM"] =
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
     canQueue = true,
+    setup = function(dialog, data)
+        data.confirmedFastTravel = false
+    end,
     title =
     {
         text = SI_PROMPT_TITLE_FAST_TRAVEL_CONFIRM,
     },
-    mainText = 
+    mainText =
     {
         text = SI_FAST_TRAVEL_DIALOG_MAIN_TEXT,
     },
@@ -864,14 +867,28 @@ ESO_Dialogs["FAST_TRAVEL_CONFIRM"] =
             text = SI_DIALOG_CONFIRM,
             callback = function(dialog)
                 local data = dialog.data
-                FastTravelToNode(data.nodeIndex)
-                SCENE_MANAGER:ShowBaseScene()
+                data.confirmedFastTravel = true
             end,
-        },        
+        },
         {
             text = SI_DIALOG_CANCEL,
+            callback = function(dialog)
+                local data = dialog.data
+                data.confirmedFastTravel = false
+            end,
         },
     },
+    finishedCallback = function(dialog)
+        -- ESO-796774
+        -- defer the call to FastTravelToNode until the dialog is hidden
+        -- to avoid an issue where the dialog can hide after the load screen
+        -- appears, resulting in the dialog action layer not getting removed
+        local data = dialog.data
+        if data.confirmedFastTravel then
+            FastTravelToNode(data.nodeIndex)
+            SCENE_MANAGER:ShowBaseScene()
+        end
+    end
 }
 
 ESO_Dialogs["RECALL_CONFIRM"] = 
@@ -914,6 +931,8 @@ ESO_Dialogs["RECALL_CONFIRM"] =
         {
             text = SI_DIALOG_CONFIRM,
             callback = function(dialog)
+                -- this call to FastTravelToNode will play a player animation before the jump occurs
+                -- so we don't need to defer the call until the dialog hides
                 local data = dialog.data
                 FastTravelToNode(data.nodeIndex)
                 SCENE_MANAGER:ShowBaseScene()
@@ -985,6 +1004,8 @@ ESO_Dialogs["TRAVEL_TO_HOUSE_CONFIRM"] =
         {
             text = SI_DIALOG_CONFIRM,
             callback = function(dialog)
+                -- RequestJumpToHouse will play a player animation before the jump occurs
+                -- so we don't need to defer the call until the dialog hides
                 local data = dialog.data
                 RequestJumpToHouse(data.houseId, data.travelOutside)
                 SCENE_MANAGER:ShowBaseScene()

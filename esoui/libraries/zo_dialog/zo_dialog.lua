@@ -1339,3 +1339,11 @@ EVENT_MANAGER:RegisterForEvent("ZO_Dialog", EVENT_GUI_UNLOADING, function()
         ZO_DIALOG_SYNC_OBJECT:Hide()
     end
 end)
+
+EVENT_MANAGER:RegisterForEvent("ZO_Dialog", EVENT_PLAYER_ACTIVATED, function()
+    if not ZO_Dialogs_IsShowingDialog() then
+        -- Catch-all to ensure the dialog action layer was correctly removed
+        -- in case the remove action layer failed due to being in the middle of loading
+        RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
+    end
+end)
