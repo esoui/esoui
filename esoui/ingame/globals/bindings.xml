@@ -215,74 +215,44 @@
             </Action>
 
             <Action name="GAMEPAD_ACTION_BUTTON_3" hideAction="true">
-                <Down>
-                    if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(3)
-                    end
-                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(3)
+                        OnSlotDownAndUp(3)
                     end
                 </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_4" hideAction="true">
-                <Down>
-                    if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(4)
-                    end
-                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(4)
+                        OnSlotDownAndUp(4)
                     end
                 </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_5" hideAction="true">
-                <Down>
-                    if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(5)
-                    end
-                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(5)
+                        OnSlotDownAndUp(5)
                     end
                 </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_6" hideAction="true">
-                <Down>
-                    if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(6)
-                    end
-                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(6)
+                        OnSlotDownAndUp(6)
                     end
                 </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_7" hideAction="true">
-                <Down>
-                    if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(7)
-                    end
-                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(7)
+                        OnSlotDownAndUp(7)
                     end
                 </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_8" hideAction="true">
-                <Down>
-                    if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(8)
-                    end
-                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(8)
+                        OnSlotDownAndUp(8)
                     end
                 </Up>
             </Action>
