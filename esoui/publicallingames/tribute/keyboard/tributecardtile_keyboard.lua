@@ -204,3 +204,27 @@ end
 function ZO_TributeTargetViewerCardTile_Keyboard_OnInitialized(control)
     ZO_TributeTargetViewerCardTile_Keyboard:New(control)
 end
+
+------------------------------------------
+-- Tribute Confinement Viewer Card Tile --
+------------------------------------------
+
+-- Primary logic class must be subclassed after the platform class so that platform specific functions will have priority over the logic class functionality
+ZO_TributeConfinementViewerCardTile_Keyboard = ZO_Object.MultiSubclass(ZO_TributeCardTile_Keyboard, ZO_TributeConfinementViewerCardTile_Shared)
+
+function ZO_TributeConfinementViewerCardTile_Keyboard:New(...)
+    return ZO_TributeConfinementViewerCardTile_Shared.New(self, ...)
+end
+
+function ZO_TributeConfinementViewerCardTile_Keyboard:PostInitializePlatform(...)
+    ZO_TributeCardTile_Keyboard.PostInitializePlatform(self, ...)
+    --This needs to be done manually to override logic in ZO_ContextualActionsTile_Keyboard
+    self.keybindStripDescriptor.alignment = KEYBIND_STRIP_ALIGN_CENTER
+end
+
+-- XML functions
+----------------
+
+function ZO_TributeConfinementViewerCardTile_Keyboard_OnInitialized(control)
+    ZO_TributeConfinementViewerCardTile_Keyboard:New(control)
+end

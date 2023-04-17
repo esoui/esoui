@@ -1,6 +1,7 @@
 local SETUP_MODE_NONE = 0
 local SETUP_MODE_NEW = 1
 local SETUP_MODE_LINK = 2
+local SETUP_MODE_ACTIVATE = 3
 
 local MINIMUM_AGE = 13      -- TODO: We should fetch this from the client instead...
 
@@ -15,27 +16,28 @@ function CreateLinkAccount_Keyboard:Initialize(control)
 
     self.accountSetupContainer = control:GetNamedChild("AccountSetup")
     self.createRadio = self.accountSetupContainer:GetNamedChild("CreateRadio")
-    self.linkRadio = self.accountSetupContainer:GetNamedChild("LinkRadio")
+    self.activateRadio = self.accountSetupContainer:GetNamedChild("ActivateRadio")
 
     self.radioGroup = ZO_RadioButtonGroup:New()
     self.radioGroup:Add(self.createRadio)
-    self.radioGroup:Add(self.linkRadio)
+    self.radioGroup:Add(self.activateRadio)
 
     -- Create Account controls
     self.newAccountContainer = control:GetNamedChild("NewAccount")
-    self.accountNameEntry = self.newAccountContainer:GetNamedChild("AccountNameEntry")
+    local newAccountScrollChild = self.newAccountContainer:GetNamedChild("ScrollChild")
+    self.accountNameEntry = newAccountScrollChild:GetNamedChild("AccountNameEntry")
     self.accountNameEntryEdit = self.accountNameEntry:GetNamedChild("Edit")
     self.accountNameInstructionsControl = self.accountNameEntry:GetNamedChild("Instructions")
-    self.countryLabel = self.newAccountContainer:GetNamedChild("CountryLabel")
-    self.countryDropdown = self.newAccountContainer:GetNamedChild("CountryDropdown")
+    self.countryLabel = newAccountScrollChild:GetNamedChild("CountryLabel")
+    self.countryDropdown = newAccountScrollChild:GetNamedChild("CountryDropdown")
     self.countryDropdownDefaultText = self.countryDropdown:GetNamedChild("DefaultText")
-    self.emailLabel = self.newAccountContainer:GetNamedChild("EmailLabel")
-    self.emailEntry = self.newAccountContainer:GetNamedChild("EmailEntry")
+    self.emailLabel = newAccountScrollChild:GetNamedChild("EmailLabel")
+    self.emailEntry = newAccountScrollChild:GetNamedChild("EmailEntry")
     self.emailEntryEdit = self.emailEntry:GetNamedChild("Edit")
-    self.ageCheckbox = self.newAccountContainer:GetNamedChild("Age")
+    self.ageCheckbox = newAccountScrollChild:GetNamedChild("Age")
     self.ageLabel = self.ageCheckbox:GetNamedChild("Label")
-    self.subscribeCheckbox = self.newAccountContainer:GetNamedChild("Subscribe")
-    self.createAccountButton = self.newAccountContainer:GetNamedChild("CreateAccount")
+    self.subscribeCheckbox = newAccountScrollChild:GetNamedChild("Subscribe")
+    self.createAccountButton = newAccountScrollChild:GetNamedChild("CreateAccount")
 
     ZO_CheckButton_SetToggleFunction(self.ageCheckbox, function() self:UpdateCreateAccountButton() end)
 
@@ -55,6 +57,15 @@ function CreateLinkAccount_Keyboard:Initialize(control)
     self.passwordEdit = self.password:GetNamedChild("Edit")
     self.capsLockWarning = self.linkAccountContainer:GetNamedChild("CapsLockWarning")
     self.linkAccountButton = self.linkAccountContainer:GetNamedChild("LinkAccount")
+
+    -- Activate Account controls
+    self.activateAccountContainer = control:GetNamedChild("ActivateAccount")
+    self.activateAccountInstructionsLabel = self.activateAccountContainer:GetNamedChild("Instructions")
+    self.activateAccountCodeLabel = self.activateAccountContainer:GetNamedChild("Code")
+
+    local activationURLText = GetURLTextByType(APPROVED_URL_ESO_ACCOUNT_LINKING)
+    local activationLink = ZO_URL_LINK_COLOR:Colorize(ZO_LinkHandler_CreateURLLink(activationURLText, activationURLText))
+    self.activateAccountInstructionsLabel:SetText(zo_strformat(SI_LINKACCOUNT_ACTIVATION_MESSAGE, activationLink))
 
     self.ageLabel:SetText(zo_strformat(SI_CREATEACCOUNT_AGE, MINIMUM_AGE))
     self.mode = SETUP_MODE_NONE
@@ -77,11 +88,28 @@ function CreateLinkAccount_Keyboard:Initialize(control)
     self.capsLockWarning:SetHidden(not IsCapsLockOn())
 
     CREATE_LINK_ACCOUNT_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    
+    CREATE_LINK_ACCOUNT_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            if self.mode == SETUP_MODE_ACTIVATE then
+                LOGIN_MANAGER_KEYBOARD:RequestAccountActivationCode()
+            end
+        end
+    end)
+
     if IsUsingLinkedLogin() then
         LoadCountryData()
         self.control:RegisterForEvent(EVENT_COUNTRY_DATA_LOADED, function() self:PopulateCountryDropdown() end)
     end
+
+     local function OnActivationCodeReceived(eventId, activationCode)
+        self.activateAccountCodeLabel:SetText(activationCode)
+
+        if CREATE_LINK_ACCOUNT_FRAGMENT:IsShowing() then
+            RegisterForLinkAccountActivationProgress()
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_ACCOUNT_LINK_ACTIVATION_CODE_RECEIVED, OnActivationCodeReceived)
 end
 
 function CreateLinkAccount_Keyboard:GetControl()
@@ -124,8 +152,8 @@ function CreateLinkAccount_Keyboard:SetRadioFromMode(mode)
     if mode ~= self.mode then
         if mode == SETUP_MODE_NEW then
             self.radioGroup:SetClickedButton(self.createRadio)
-        elseif mode == SETUP_MODE_LINK then
-            self.radioGroup:SetClickedButton(self.linkRadio)
+        elseif mode == SETUP_MODE_ACTIVATE then
+            self.radioGroup:SetClickedButton(self.activateRadio)
         end
     end
 end
@@ -133,8 +161,12 @@ end
 function CreateLinkAccount_Keyboard:ChangeMode(newMode)
     self.mode = newMode
 
+    if self.mode == SETUP_MODE_ACTIVATE then
+        LOGIN_MANAGER_KEYBOARD:RequestAccountActivationCode()
+    end
+
     self.newAccountContainer:SetHidden(newMode ~= SETUP_MODE_NEW)
-    self.linkAccountContainer:SetHidden(newMode ~= SETUP_MODE_LINK)
+    self.activateAccountContainer:SetHidden(newMode ~= SETUP_MODE_ACTIVATE)
 end
 
 function CreateLinkAccount_Keyboard:IsRequestedAccountNameValid()
@@ -288,12 +320,12 @@ function ZO_CreateLinkAccount_SetNewAccountModeFromLabel()
     CREATE_LINK_ACCOUNT_KEYBOARD:SetRadioFromMode(SETUP_MODE_NEW)
 end
 
-function ZO_CreateLinkAccount_SetLinkAccountMode()
-    CREATE_LINK_ACCOUNT_KEYBOARD:ChangeMode(SETUP_MODE_LINK)
+function ZO_CreateLinkAccount_SetActivateAccountMode()
+    CREATE_LINK_ACCOUNT_KEYBOARD:ChangeMode(SETUP_MODE_ACTIVATE)
 end
 
-function ZO_CreateLinkAccount_SetLinkAccountModeFromLabel()
-    CREATE_LINK_ACCOUNT_KEYBOARD:SetRadioFromMode(SETUP_MODE_LINK)
+function ZO_CreateLinkAccount_SetActivateAccountModeFromLabel()
+    CREATE_LINK_ACCOUNT_KEYBOARD:SetRadioFromMode(SETUP_MODE_ACTIVATE)
 end
 
 function ZO_CreateLinkAccount_AttemptCreateAccount()

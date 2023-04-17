@@ -29,10 +29,6 @@
         <Control name="ZO_TributeMechanicTileBase" mouseEnabled="true" virtual="true">
             <DimensionConstraints minX="ZO_TRIBUTE_MECHANIC_TILE_UI_WIDTH" minY="ZO_TRIBUTE_MECHANIC_TILE_UI_HEIGHT" />
 
-            <OnInitialized>
-                ZO_TributeMechanicTile_OnInitialized(self)
-            </OnInitialized>
-
             <OnMouseEnter>
                 self.object:OnMouseEnter()
             </OnMouseEnter>
@@ -40,7 +36,7 @@
             <OnMouseExit>
                 self.object:OnCursorExit()
             </OnMouseExit>
-
+            
             <Controls>
                 <Texture name="$(parent)Backdrop" excludeFromResizeToFitExtents="true" level="1" textureFile="EsoUI/Art/Tribute/tributeMechanicTileBackdrop.dds">
                     <Anchor point="TOPLEFT" offsetX="-15" offsetY="8" />
@@ -48,9 +44,35 @@
                 </Texture>
 
                 <Control name="$(parent)Container" excludeFromResizeToFitExtents="true">
-                    <Anchor point="CENTER" offsetX="8" />
                     <Dimensions x="ZO_TRIBUTE_MECHANIC_TILE_CONTAINER_UI_WIDTH" y="ZO_TRIBUTE_MECHANIC_TILE_CONTAINER_UI_HEIGHT" />
 
+                    <Controls>
+                        <Control name="$(parent)Mechanic" level="9">
+                            <Controls>
+                                <Texture name="$(parent)Frame" level="10">
+                                    <AnchorFill />
+                                </Texture>
+
+                                <Texture name="$(parent)TypeIcon" level="11" />
+
+                                <Label name="$(parent)Quantity" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" verticalAlignment="CENTER" level="12">
+                                    <Anchor point="LEFT" relativeTo="$(parent)TypeIcon" relativePoint="RIGHT" offsetY="-1" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_TributeMechanicCardTileBase" inherits="ZO_TributeMechanicTileBase" virtual="true">
+            <OnInitialized>
+                ZO_TributeMechanicCardTile_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Anchor point="CENTER" offsetX="8" />
                     <Controls>
                         <Texture name="$(parent)Portrait" level="5" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                             <Dimensions x="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_UI_WIDTH" y="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_UI_HEIGHT" />
@@ -69,26 +91,12 @@
                             <Dimensions x="36" y="36" />
                             <TextureCoords left="ZO_TRIBUTE_SUIT_ICON_LEFT_COORD" right="ZO_TRIBUTE_SUIT_ICON_RIGHT_COORD" top="ZO_TRIBUTE_SUIT_ICON_TOP_COORD" bottom="ZO_TRIBUTE_SUIT_ICON_BOTTOM_COORD" />
                         </Texture>
-
-                        <Control name="$(parent)Mechanic" level="9">
-                            <Controls>
-                                <Texture name="$(parent)Frame" level="10">
-                                    <AnchorFill />
-                                </Texture>
-
-                                <Texture name="$(parent)TypeIcon" level="11" />
-
-                                <Label name="$(parent)Quantity" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" verticalAlignment="CENTER" level="12">
-                                    <Anchor point="LEFT" relativeTo="$(parent)TypeIcon" relativePoint="RIGHT" offsetY="-1" />
-                                </Label>
-                            </Controls>
-                        </Control>
                     </Controls>
                 </Control>
             </Controls>
         </Control>
 
-        <Control name="ZO_TributeMechanicTilePlayer" inherits="ZO_TributeMechanicTileBase" virtual="true">
+        <Control name="ZO_TributeMechanicCardTilePlayer" inherits="ZO_TributeMechanicCardTileBase" virtual="true">
             <Controls>
                 <Texture name="$(parent)Backdrop" color="082244" alpha="0.5" override="true" />
 
@@ -114,7 +122,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_TributeMechanicTileOpponent" inherits="ZO_TributeMechanicTileBase" virtual="true">
+        <Control name="ZO_TributeMechanicCardTileOpponent" inherits="ZO_TributeMechanicCardTileBase" virtual="true">
             <Controls>
                 <Texture name="$(parent)Backdrop" color="441104" alpha="0.5" override="true" />
 
@@ -134,6 +142,75 @@
 
                         <Control name="$(parent)Mechanic" override="true">
                             <Anchor point="RIGHT" relativeTo="$(parent)Portrait" relativePoint="LEFT" offsetX="20" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeMechanicPatronTileBase" inherits="ZO_TributeMechanicTileBase" virtual="true">
+            <OnInitialized>
+                ZO_TributeMechanicPatronTile_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Texture name="$(parent)Portrait" level="5" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <Dimensions x="64" y="64" />
+
+                            <Controls>
+                                <Texture name="$(parent)Frame" level="3" textureFile="EsoUI/Art/Tribute/tributePatronMechanicTileFrame.dds">
+                                    <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
+                                </Texture>
+                            </Controls>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeMechanicPatronTilePlayer" inherits="ZO_TributeMechanicPatronTileBase" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Backdrop" color="082244" alpha="0.5" override="true" />
+
+                <Control name="$(parent)Container" override="true">
+                    <Anchor point="CENTER" offsetX="2" />
+                    <Controls>
+                        <Texture name="$(parent)Portrait" override="true">
+                            <Anchor point="LEFT" />
+
+                            <Controls>
+                                <Texture name="$(parent)Frame" color="2266bb" override="true" />
+                            </Controls>
+                        </Texture>
+
+                        <Control name="$(parent)Mechanic" override="true">
+                            <Anchor point="LEFT" relativeTo="$(parent)Portrait" relativePoint="RIGHT" offsetX="-30" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeMechanicPatronTileOpponent" inherits="ZO_TributeMechanicPatronTileBase" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Backdrop" color="441104" alpha="0.5" override="true" />
+                <Control name="$(parent)Container" override="true">
+                    <Anchor point="CENTER" offsetX="13" />
+                    <Controls>
+                        <Texture name="$(parent)Portrait" override="true">
+                            <Anchor point="RIGHT" />
+
+                            <Controls>
+                                <Texture name="$(parent)Frame" color="bb4411" override="true" />
+                            </Controls>
+                        </Texture>
+
+                        <Control name="$(parent)Mechanic" override="true">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Portrait" relativePoint="LEFT" offsetX="30" />
                         </Control>
                     </Controls>
                 </Control>
@@ -173,6 +250,11 @@
                         </Control>
                     </Controls>
                 </Scroll>
+
+                <Texture name="$(parent)PatronPopup" clampedToScreen="true" hidden="true">
+                    <Dimensions x="275" y="275" />
+                    <Anchor relativePoint="BOTTOM" />
+                </Texture>
             </Controls>
         </TopLevelControl>
     </Controls>

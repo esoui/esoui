@@ -271,17 +271,7 @@ function GamepadMarket:LayoutSelectedGridEntryTooltip()
                 end)
             end
         elseif selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_FREE_TRIAL_TILE then
-             -- the keybind here should match the actual keybind in the keybind strip to start the free trial
-            local PREFER_GAMEPAD_MODE = true
-            local TEXTURE_SCALE_PERCENT = 100
-            local keybindString
-            local key, mod1, mod2, mod3, mod4 = GetIngameHighestPriorityActionBindingInfoFromName("UI_SHORTCUT_PRIMARY", PREFER_GAMEPAD_MODE)
-            if key ~= KEY_INVALID then
-                keybindString = ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, TEXTURE_SCALE_PERCENT)
-            else
-                keybindString = ZO_Keybindings_GenerateTextKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
-            end
-            GAMEPAD_TOOLTIPS:LayoutEsoPlusTrialNotification(GAMEPAD_RIGHT_TOOLTIP, ZO_MARKET_MANAGER:GetFreeTrialProductData():GetId(), keybindString)
+            GAMEPAD_TOOLTIPS:LayoutEsoPlusTrialNotification(GAMEPAD_RIGHT_TOOLTIP, ZO_MARKET_MANAGER:GetFreeTrialProductData():GetId())
         else
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
         end
@@ -620,11 +610,15 @@ end
 
 function GamepadMarket:OnCategorySelected(data)
     if self.marketScene:IsShowing() and self.marketState == MARKET_STATE_OPEN then
-        self.lastCategoryData, self.currentCategoryData = self.currentCategoryData, data
-        local lastCategoryControl = self.currentCategoryControl
+        local categoryControlWasNil = self.currentCategoryControl == nil
+
+        self.lastCategoryData = self.currentCategoryData
+        self.currentCategoryData = data
         self.currentCategoryControl = data.control
 
-        if self.lastCategoryData ~= self.currentCategoryData then
+        local categoryDataChanged = self.lastCategoryData ~= self.currentCategoryData
+
+        if categoryDataChanged then
             self.isLockedForCategoryRefresh = false
         end
 
@@ -642,11 +636,14 @@ function GamepadMarket:OnCategorySelected(data)
             self:UpdateScrollbarAlpha()
         end
 
-        if lastCategoryControl ~= self.currentCategoryControl then
+        -- When the scene hides, the temporary fragment for the category is removed and we set self.currentCategoryControl to nil 
+        -- so the category control being nil indicates we need to re-show the current category
+        if categoryDataChanged or categoryControlWasNil then
             -- This temporarily disables scrolling for the old and new categories, but allows for the paging animation to work correctly.
             -- The category controls will be re-anchored to the scroll child if/when they are shown
             if self.lastCategoryData then
                 if not self.isLockedForCategoryRefresh then
+                    local lastCategoryControl = self.lastCategoryData.control
                     lastCategoryControl:ClearAnchors()
                     lastCategoryControl:SetAnchorFill(self.contentContainer)
                 end

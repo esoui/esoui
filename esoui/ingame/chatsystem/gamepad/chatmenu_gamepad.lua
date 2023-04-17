@@ -171,7 +171,17 @@ function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
                 local text = self.textEdit:GetText()
                 return text and text ~= ""
             end,
-        }
+        },
+
+        {
+            name = GetString(SI_RANDOM_ROLL_KEYBIND),
+
+            keybind = "UI_SHORTCUT_TERTIARY",
+
+            callback = function()
+                ZO_RandomRollCommand()
+            end,
+        },
     }
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.textInputAreaKeybindDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
     self.textInputAreaFocalArea:SetKeybindDescriptor(self.textInputAreaKeybindDescriptor)

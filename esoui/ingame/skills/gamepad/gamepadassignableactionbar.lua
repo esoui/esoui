@@ -28,6 +28,8 @@ function ZO_AssignableActionBar:Initialize(control)
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotUpdated", function(...) self:OnSlotUpdated(...) end)
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("SlotNewStatusChanged", function(...) self:OnSlotUpdated(...) end)
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("CurrentHotbarUpdated", function(...) self:OnCurrentHotbarUpdated(...) end)
+
+    self.control:SetHandler("OnEffectivelyShown", function() self:Refresh() end)
 end
 
 function ZO_AssignableActionBar:OnSkillsHidden()
@@ -36,18 +38,16 @@ function ZO_AssignableActionBar:OnSkillsHidden()
 end
 
 function ZO_AssignableActionBar:OnCurrentHotbarUpdated()
-    if not self.control:IsControlHidden() then
+    if not self.control:IsHidden() then
         self:Refresh()
     end
 end
 
 function ZO_AssignableActionBar:OnSlotUpdated(hotbarCategory, actionSlotIndex)
-    if not self.control:IsControlHidden() then
-        if hotbarCategory == ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarCategory() then
-            local button = self.buttons[ZO_AssignableActionBar.ConvertActionSlotIndexToButtonIndex(actionSlotIndex)]
-            if button then
-                button:Refresh()
-            end
+    if not self.control:IsHidden() and hotbarCategory == ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarCategory() then
+        local button = self.buttons[ZO_AssignableActionBar.ConvertActionSlotIndexToButtonIndex(actionSlotIndex)]
+        if button then
+            button:Refresh()
         end
     end
 end
@@ -283,13 +283,21 @@ end
 function ZO_AssignableActionBar:LayoutAssignableSkillLineAbilityTooltip(tooltipType, skillData)
     local skillProgressionData = skillData:GetPointAllocatorProgressionData()
     local abilityId = skillProgressionData:GetAbilityId()
+    local slottedActionBarIndex = nil
     -- Mark the ability as already slotted if it is
     for i = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1, ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 do
         if abilityId == GetSlotBoundId(i) then
-            SetupTooltipStatusLabel(tooltipType, i)
+            slottedActionBarIndex = i
             break
         end
-    end 
+    end
+
+    if slottedActionBarIndex then
+        SetupTooltipStatusLabel(tooltipType, slottedActionBarIndex)
+    else
+        GAMEPAD_TOOLTIPS:ClearStatusLabel(tooltipType)
+    end
+
     if skillData:IsPlayerSkill() then
         GAMEPAD_TOOLTIPS:LayoutSkillProgression(tooltipType, skillProgressionData)
     elseif skillData:IsCompanionSkill() then

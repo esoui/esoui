@@ -628,10 +628,10 @@ local function UpdateOTPDuration(dialog)
     local timeLeft = dialog.data.otpExpirationMs - GetFrameTimeMilliseconds()
     if timeLeft >= 0 then
         ZO_ClearNumericallyIndexedTable(otpTextParams)
-        table.insert(otpTextParams, timeLeft)
         if dialog.data.otpReason == LOGIN_STATUS_OTP_PENDING then
-            table.insert(otpTextParams, 1, GetString(SI_OTP_DIALOG_SUBMIT))
+            table.insert(otpTextParams, GetString(SI_OTP_DIALOG_SUBMIT))
         end
+        table.insert(otpTextParams, timeLeft)
         ZO_Dialogs_UpdateDialogMainText(dialog, nil, otpTextParams)
     else
         ZO_Dialogs_ReleaseDialog(dialog)

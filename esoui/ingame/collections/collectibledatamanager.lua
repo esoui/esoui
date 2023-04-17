@@ -10,25 +10,31 @@ ZO_COLLECTION_UPDATE_TYPE =
 {
     REBUILD = 1,
     FORCE_REINITIALIZE = 2,
-    UNLOCK_STATE_CHANGES = 3,
+    UNLOCK_STATE_CHANGED = 3,
     BLACKLIST_CHANGED = 4,
+    USER_FLAGS_CHANGED = 5,
+    RANDOM_MOUNT_SETTING_CHANGED = 6,
 }
 
 ----------------------------------
 -- Set Default Collectible Data --
 ----------------------------------
 
-ZO_SetDefaultCollectibleData = ZO_InitializingObject:Subclass()
+ZO_SetToDefaultCollectibleData = ZO_InitializingObject:Subclass()
 
-function ZO_SetDefaultCollectibleData:Initialize(categoryTypeToSetDefault)
+function ZO_SetToDefaultCollectibleData:Initialize(categoryTypeToSetDefault)
     self.categoryTypeToSetDefault = categoryTypeToSetDefault
 end
 
-function ZO_SetDefaultCollectibleData:GetCategoryTypeToSetDefault()
+function ZO_SetToDefaultCollectibleData:GetCategoryTypeToSetDefault()
     return self.categoryTypeToSetDefault
 end
 
-function ZO_SetDefaultCollectibleData:GetName()
+function ZO_SetToDefaultCollectibleData:GetCategoryType()
+    return self:GetCategoryTypeToSetDefault()
+end
+
+function ZO_SetToDefaultCollectibleData:GetName()
     return ZO_CachedStrFormat(SI_SET_DEFAULT_COLLECTIBLE_NAME_FORMAT, GetString("SI_COLLECTIBLECATEGORYTYPE", self:GetCategoryTypeToSetDefault()))
 end
 
@@ -38,7 +44,7 @@ do
         [GAMEPLAY_ACTOR_CATEGORY_COMPANION] = SI_COMPANION_SET_DEFAULT_COLLECTIBLE_DESCRIPTION_FORMAT,
     }
 
-    function ZO_SetDefaultCollectibleData:GetDescription(actorCategory)
+    function ZO_SetToDefaultCollectibleData:GetDescription(actorCategory)
         local descriptionFormatter = DESCRIPTION_FORMATTERS[actorCategory]
         if descriptionFormatter then
             return ZO_CachedStrFormat(descriptionFormatter, GetString("SI_COLLECTIBLECATEGORYTYPE", self:GetCategoryTypeToSetDefault()))
@@ -53,23 +59,174 @@ do
         [COLLECTIBLE_CATEGORY_TYPE_MOUNT] = "EsoUI/Art/Collections/Default/collections_default_mount.dds",
     }
 
-    function ZO_SetDefaultCollectibleData:GetIcon()
+    function ZO_SetToDefaultCollectibleData:GetIcon()
         return COLLECTIBLE_CATEGORY_TYPE_DEFAULT_ICONS[self.categoryTypeToSetDefault]
     end
 end
 
-function ZO_SetDefaultCollectibleData:IsActive(actorCategory)
+function ZO_SetToDefaultCollectibleData:IsActive(actorCategory)
     return IsCollectibleCategoryTypeSetToDefault(self.categoryTypeToSetDefault, actorCategory)
 end
 
-function ZO_SetDefaultCollectibleData:Use(actorCategory)
+function ZO_SetToDefaultCollectibleData:IsLocked()
+    return false
+end
+
+function ZO_SetToDefaultCollectibleData:IsBlocked(actorCategory)
+    return false
+end
+
+function ZO_SetToDefaultCollectibleData:GetBlockReason(actorCategory)
+    return ""
+end
+
+function ZO_SetToDefaultCollectibleData:IsUsable(actorCategory)
+    actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+    return self:IsActiveStateSuppressed(actorCategory) or not self:IsActive(actorCategory)
+end
+
+function ZO_SetToDefaultCollectibleData:Use(actorCategory)
+    if self:IsActiveStateSuppressed(actorCategory) then
+        -- If default mount is being suppressed, then using it should just clear the suppression (disable random mount)
+        if self:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_MOUNT then
+            SetRandomMountType(RANDOM_MOUNT_TYPE_NONE, actorCategory)
+        end
+        return
+    end
+
     SetCollectibleCategoryTypeToDefault(self.categoryTypeToSetDefault, actorCategory)
 end
 
-function ZO_SetDefaultCollectibleData:GetPrimaryInteractionStringId(actorCategory)
+function ZO_SetToDefaultCollectibleData:GetPrimaryInteractionStringId(actorCategory)
     -- Function signature mirrors the one on ZO_CollectibleData,
     -- but right now there's no support for anything other than Set Active variants
     return SI_COLLECTIBLE_ACTION_SET_ACTIVE
+end
+
+function ZO_SetToDefaultCollectibleData:ShouldSuppressActiveState(actorCategory)
+    return GetRandomMountType(actorCategory) ~= RANDOM_MOUNT_TYPE_NONE
+end
+
+function ZO_SetToDefaultCollectibleData:IsActiveStateSuppressed(actorCategory)
+    if not self:IsActive(actorCategory) then
+        return false
+    end
+
+    return self:ShouldSuppressActiveState(actorCategory)
+end
+
+---------------------------------------
+-- Set Random Mount Collectible Data --
+---------------------------------------
+
+ZO_RandomMountCollectibleData = ZO_InitializingObject:Subclass()
+
+function ZO_RandomMountCollectibleData:Initialize(randomMountType)
+    self.randomMountType = randomMountType
+end
+
+function ZO_RandomMountCollectibleData:GetRandomMountType()
+    return self.randomMountType
+end
+
+function ZO_RandomMountCollectibleData:GetCategoryType()
+    return COLLECTIBLE_CATEGORY_TYPE_MOUNT
+end
+
+function ZO_RandomMountCollectibleData:GetName()
+    return GetString("SI_RANDOMMOUNTTYPE", self.randomMountType)
+end
+
+function ZO_RandomMountCollectibleData:GetDescription()
+    return GetString("SI_RANDOMMOUNTTYPE_DESCRIPTION", self.randomMountType)
+end
+
+do
+    local RANDOM_MOUNT_TYPE_ICONS =
+    {
+        [RANDOM_MOUNT_TYPE_FAVORITE] = "EsoUI/Art/Collections/Random_FavoriteMount.dds",
+        [RANDOM_MOUNT_TYPE_ANY] = "EsoUI/Art/Collections/Random_AnyMount.dds",
+    }
+
+    function ZO_RandomMountCollectibleData:GetIcon()
+        return RANDOM_MOUNT_TYPE_ICONS[self.randomMountType]
+    end
+end
+
+function ZO_RandomMountCollectibleData:IsActive(actorCategory)
+    return GetRandomMountType(actorCategory) == self.randomMountType
+end
+
+function ZO_RandomMountCollectibleData:IsLocked()
+    return false
+end
+
+function ZO_RandomMountCollectibleData:IsBlocked(actorCategory)
+    if self.randomMountType == RANDOM_MOUNT_TYPE_FAVORITE and not ZO_COLLECTIBLE_DATA_MANAGER:HasAnyFavoriteMounts() then
+        return true
+    elseif self.randomMountType == RANDOM_MOUNT_TYPE_ANY and not HasAnyUnlockedCollectiblesAvailableToActorCategoryByCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT, actorCategory) then
+        return true
+    end
+
+    return false
+end
+
+function ZO_RandomMountCollectibleData:GetBlockReason(actorCategory)
+    if self.randomMountType == RANDOM_MOUNT_TYPE_FAVORITE and not ZO_COLLECTIBLE_DATA_MANAGER:HasAnyFavoriteMounts() then
+        return zo_strformat(SI_COLLECTIBLE_REQUIRES_FAVORITE, GetString("SI_COLLECTIBLECATEGORYTYPE", self:GetCategoryType()))
+    elseif self.randomMountType == RANDOM_MOUNT_TYPE_ANY and not  HasAnyUnlockedCollectiblesAvailableToActorCategoryByCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT, actorCategory) then
+        return zo_strformat(SI_COLLECTIBLE_REQUIRES_UNLOCKED_COLLECTIBLE, GetString("SI_COLLECTIBLECATEGORYTYPE", self:GetCategoryType()))
+    end
+
+    return ""
+end
+
+function ZO_RandomMountCollectibleData:IsUsable(actorCategory)
+    return not self:IsActive(actorCategory)
+end
+
+function ZO_RandomMountCollectibleData:Use(actorCategory)
+    if self:IsBlocked(actorCategory) then
+        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, self:GetBlockReason(actorCategory))
+        return
+    end
+
+    SetRandomMountType(self.randomMountType, actorCategory)
+end
+
+function ZO_RandomMountCollectibleData:GetActiveCollectibleText(actorCategory)
+    if actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+        return
+    end
+
+    if not IsMounted() then
+        return
+    end
+
+    local activeMountId = GetActiveCollectibleByType(self:GetCategoryType(), actorCategory)
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(activeMountId)
+    if collectibleData then
+        local activeMountName = collectibleData:GetName()
+        return zo_strformat(SI_COLLECTIBLE_ACTIVE_RANDOM_MOUNT_FORMATTER, ZO_SELECTED_TEXT:Colorize(activeMountName))
+    end
+end
+
+function ZO_RandomMountCollectibleData:GetPrimaryInteractionStringId(actorCategory)
+    -- Function signature mirrors the one on ZO_CollectibleData,
+    -- but right now there's no support for anything other than Set Active variants
+    return SI_COLLECTIBLE_ACTION_SET_ACTIVE
+end
+
+function ZO_RandomMountCollectibleData:ShouldSuppressActiveState(actorCategory)
+    return false
+end
+
+function ZO_RandomMountCollectibleData:IsActiveStateSuppressed(actorCategory)
+    if not self:IsActive(actorCategory) then
+        return false
+    end
+
+    return self:ShouldSuppressActiveState(actorCategory)
 end
 
 ----------------------
@@ -130,6 +287,11 @@ function ZO_CollectibleData:Refresh()
     local collectibleId = self.collectibleId
     local previousUnlockState = self.unlockState
     self.unlockState = GetCollectibleUnlockStateById(collectibleId)
+
+    local previousUserFlags = self:GetUserFlags()
+    local newUserFlags = GetCollectibleUserFlags(collectibleId)
+    self.userFlags = newUserFlags > 0 and newUserFlags or nil
+
     self:SetNew(IsCollectibleNew(collectibleId))
     self.cachedNameWithNickname = nil
 
@@ -138,6 +300,8 @@ function ZO_CollectibleData:Refresh()
         local specializedSortedCollectibles = categoryData:GetSpecializedSortedCollectiblesObject()
         if previousUnlockState ~= self.unlockState then
             specializedSortedCollectibles:HandleLockStatusChanged(self)
+        elseif previousUserFlags ~= newUserFlags then
+            specializedSortedCollectibles:HandleUserFlagsChanged(self)
         end
     end
 end
@@ -227,6 +391,10 @@ function ZO_CollectibleData:IsPurchasable()
     return IsCollectiblePurchasable(self.collectibleId)
 end
 
+function ZO_CollectibleData:CanAcquire()
+    return CanAcquireCollectibleByDefId(self.collectibleId)
+end
+
 function ZO_CollectibleData:IsActive(actorCategory)
     actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
     return IsCollectibleActive(self.collectibleId, actorCategory)
@@ -234,6 +402,22 @@ end
 
 function ZO_CollectibleData:IsBlacklisted()
     return IsCollectibleBlacklisted(self.collectibleId)
+end
+
+function ZO_CollectibleData:IsFavorite()
+    return self:IsUserFlagSet(COLLECTIBLE_USER_FLAG_FAVORITE)
+end
+
+function ZO_CollectibleData:IsFavoritable()
+    return self:IsUnlocked() and IsCollectibleCategoryFavoritable(self:GetCategoryType())
+end
+
+function ZO_CollectibleData:IsUserFlagSet(userFlag)
+    return ZO_MaskHasFlag(self:GetUserFlags(), userFlag)
+end
+
+function ZO_CollectibleData:GetUserFlags()
+    return self.userFlags or 0
 end
 
 function ZO_CollectibleData:GetCategoryType()
@@ -282,7 +466,11 @@ function ZO_CollectibleData:GetGamepadBackgroundImage()
 end
 
 function ZO_CollectibleData:GetNickname()
-    return  GetCollectibleNickname(self.collectibleId)
+    return GetCollectibleNickname(self.collectibleId)
+end
+
+function ZO_CollectibleData:GetDefaultNickname()
+    return GetCollectibleDefaultNickname(self.collectibleId)
 end
 
 function ZO_CollectibleData:GetFormattedNickname()
@@ -420,7 +608,7 @@ function ZO_CollectibleData:GetOutfitStyleFreeConversionCollectible()
     return GetOutfitStyleFreeConversionCollectibleId(self.referenceId)
 end
 
-function ZO_CollectibleData:IsBlocked()
+function ZO_CollectibleData:IsBlocked(actorCategory)
     return IsCollectibleBlocked(self.collectibleId)
 end
 
@@ -442,10 +630,18 @@ end
 
 function ZO_CollectibleData:IsUsable(actorCategory)
     actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
-    return IsCollectibleUsable(self.collectibleId, actorCategory)
+    return self:IsActiveStateSuppressed(actorCategory) or IsCollectibleUsable(self.collectibleId, actorCategory)
 end
 
 function ZO_CollectibleData:Use(actorCategory)
+    if self:IsActiveStateSuppressed(actorCategory) then
+        -- If the active mount is being suppressed, then using it should just clear the suppression (disable random mount)
+        if self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT) then
+            SetRandomMountType(RANDOM_MOUNT_TYPE_NONE, actorCategory)
+        end
+        return
+    end
+
     -- combination fragment collectibles can consume collectibles on use
     -- so we want to show a confirmation dialog if it consumes a non-fragment collectible
     if self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT) then
@@ -474,14 +670,18 @@ end
 
 function ZO_CollectibleData:GetPrimaryInteractionStringId(actorCategory)
     local categoryType = self:GetCategoryType()
-    if self:IsActive(actorCategory) then
+    if self:IsActive(actorCategory) and not self:ShouldSuppressActiveState(actorCategory) then
         if categoryType == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET or categoryType == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or categoryType == COLLECTIBLE_CATEGORY_TYPE_COMPANION then
             return SI_COLLECTIBLE_ACTION_DISMISS
         else
             return SI_COLLECTIBLE_ACTION_PUT_AWAY
         end
     else
-        if categoryType == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
+        if categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+            return SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+            return self:IsUnlocked() and SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE or SI_HOUSING_BOOK_ACTION_PREVIEW_HOUSE
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
             return SI_COLLECTIBLE_ACTION_USE
         elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT then
             return SI_COLLECTIBLE_ACTION_COMBINE
@@ -493,7 +693,7 @@ function ZO_CollectibleData:GetPrimaryInteractionStringId(actorCategory)
                 return nil
             else
                 return SI_COLLECTIBLE_ACTION_SET_ACTIVE
-            end               
+            end
         else
             return SI_COLLECTIBLE_ACTION_SET_ACTIVE
         end
@@ -596,6 +796,18 @@ do
     end
 end
 
+function ZO_CollectibleData:ShouldSuppressActiveState(actorCategory)
+    return self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT) and GetRandomMountType(actorCategory) ~= RANDOM_MOUNT_TYPE_NONE
+end
+
+function ZO_CollectibleData:IsActiveStateSuppressed(actorCategory)
+    if not self:IsActive(actorCategory) then
+        return false
+    end
+
+    return self:ShouldSuppressActiveState(actorCategory)
+end
+
 -----------------------------------
 -- Specialized Sorted Collectibles
 -----------------------------------
@@ -639,6 +851,10 @@ function ZO_SpecializedSortedCollectibles:HandlePrimaryResidenceChanged(collecti
     -- By default, do nothing
 end
 
+function ZO_SpecializedSortedCollectibles:HandleUserFlagsChanged(collectibleData)
+    -- By default, do nothing
+end
+
 -----------------------------
 -- Default Sorted Collectible
 -----------------------------
@@ -651,7 +867,6 @@ function ZO_DefaultSortedCollectibles:Initialize(owner)
 
     self.collectibleNameLookupTable = {}
 end
-
 
 function ZO_DefaultSortedCollectibles:InsertCollectible(collectibleData)
     table.insert(self.sortedCollectibles, collectibleData)
@@ -669,10 +884,20 @@ function ZO_DefaultSortedCollectibles:HandleLockStatusChanged(collectibleData)
     self.dirty = true
 end
 
+function ZO_DefaultSortedCollectibles:HandleUserFlagsChanged()
+    self.dirty = true
+end
+
 function ZO_DefaultSortedCollectibles:RefreshSort()
     if self.dirty then
         local collectibleNameLookupTable = self.collectibleNameLookupTable
         table.sort(self.sortedCollectibles, function(left, right) 
+            local leftIsFavorite = left:IsFavorite()
+            local rightIsFavorite = right:IsFavorite()
+            if leftIsFavorite ~= rightIsFavorite then
+                return leftIsFavorite
+            end
+
             local leftIsUnlocked = left:IsUnlocked()
             local rightIsUnlocked = right:IsUnlocked()
             if leftIsUnlocked ~= rightIsUnlocked then
@@ -851,6 +1076,12 @@ function ZO_SpecializedSortedHouses:RefreshSort()
             local rightIsPrimaryResidence = right:IsPrimaryResidence()
             if leftIsPrimaryResidence ~= rightIsPrimaryResidence then
                 return leftIsPrimaryResidence
+            end
+
+            local leftIsFavorite = left:IsFavorite()
+            local rightIsFavorite = right:IsFavorite()
+            if leftIsFavorite ~= rightIsFavorite then
+                return leftIsFavorite
             end
 
             local leftIsUnlocked = left:IsUnlocked()
@@ -1256,7 +1487,7 @@ ZO_CollectibleDataManager = ZO_InitializingCallbackObject:Subclass()
 function ZO_CollectibleDataManager:Initialize()
     self.collectibleIdToDataMap = {}
     self.collectibleCategoryIdToDataMap = {}
-    self.collectibleCategoryTypeToSetDefaultCollectibleDataMap = {}
+    self.collectibleCategoryTypeToSetToDefaultCollectibleDataMap = {}
 
     ZO_COLLECTIBLE_DATA_MANAGER = self
 
@@ -1286,11 +1517,14 @@ function ZO_CollectibleDataManager:Initialize()
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, function(_, ...) self:OnESOPlusFreeTrialStatusChanged(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLES_UNLOCK_STATE_CHANGED, function(_, ...) self:OnCollectiblesUnlockStateChanged(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_BLACKLIST_UPDATED, function(_, ...) self:OnCollectibleBlacklistUpdated(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_USER_FLAGS_UPDATED, function(_, ...) self:OnCollectibleUserFlagsUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_NEW_STATUS_CLEARED, function(_, ...) self:OnCollectibleNewStatusCleared(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_CATEGORY_NEW_STATUS_CLEARED, function(_, ...) self:OnCollectibleCategoryNewStatusCleared(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_NOTIFICATION_NEW, function(_, ...) self:OnCollectibleNotificationNew(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_NOTIFICATION_REMOVED, function(_, ...) self:OnCollectibleNotificationRemoved(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_HOUSING_PRIMARY_RESIDENCE_SET, function(_, ...) self:OnPrimaryResidenceSet(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_RANDOM_MOUNT_SETTING_CHANGED, function(_, ...) self:RandomMountSettingUpdated(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_PLAYER_ACTIVATED, function(_, ...) self:OnPlayerActivated(...) end)
 
     self:RebuildCollection()
 end
@@ -1371,7 +1605,7 @@ do
             ProcessCollectibleDataForUnlockStateChange(collectibleData, collectiblesByNewUnlockState)
         end
 
-        self:FinalizeCollectionUpdates(ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGES, collectiblesByNewUnlockState)
+        self:FinalizeCollectionUpdates(ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGED, collectiblesByNewUnlockState)
     end
 
     local function GetNextDirtyUnlockStateCollectibleIdIter(_, lastCollectibleId)
@@ -1394,7 +1628,7 @@ do
             end
         end
 
-        self:FinalizeCollectionUpdates(ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGES, collectiblesByNewUnlockState)
+        self:FinalizeCollectionUpdates(ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGED, collectiblesByNewUnlockState)
     end
 
     function ZO_CollectibleDataManager:OnCollectibleBlacklistUpdated()
@@ -1419,7 +1653,9 @@ function ZO_CollectibleDataManager:FinalizeCollectionUpdates(collectionUpdateTyp
         end
     end
 
-    if hasUnlockStateChanges or collectionUpdateType ~= ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGES then
+    self:ValidateRandomMountSettings()
+
+    if hasUnlockStateChanges or collectionUpdateType ~= ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGED then
         self:MapNotifications()
 
         self:FireCallbacks("OnCollectionUpdated", collectionUpdateType, collectiblesByNewUnlockState)
@@ -1485,6 +1721,45 @@ function ZO_CollectibleDataManager:OnPrimaryResidenceSet(houseId)
     end
 
     self:FireCallbacks("PrimaryResidenceSet", houseId)
+end
+
+function ZO_CollectibleDataManager:OnCollectibleUserFlagsUpdated(collectibleId, oldUserFlags, newUserFlags)
+    if oldUserFlags ~= newUserFlags then
+        local collectibleData = self:GetCollectibleDataById(collectibleId)
+        collectibleData.userFlags = newUserFlags > 0 and newUserFlags or nil -- Memory optimization
+        local categoryData = collectibleData:GetCategoryData()
+        if categoryData then
+            local specializedSortedCollectibles = categoryData:GetSpecializedSortedCollectiblesObject()
+            specializedSortedCollectibles:HandleUserFlagsChanged(self)
+        end
+
+        self:ValidateRandomMountSettings()
+
+        self:FireCallbacks("OnCollectibleUserFlagsUpdated", collectibleId)
+    end
+end
+
+function ZO_CollectibleDataManager:RandomMountSettingUpdated()
+    local collectiblesByNewUnlockState = {}
+    self:FinalizeCollectionUpdates(ZO_COLLECTION_UPDATE_TYPE.RANDOM_MOUNT_SETTING_CHANGED, collectiblesByNewUnlockState)
+end
+
+function ZO_CollectibleDataManager:OnPlayerActivated()
+    self:ValidateRandomMountSettings()
+end
+
+function ZO_CollectibleDataManager:ValidateRandomMountSettings()
+    local playerRandomMountType = GetRandomMountType(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+    if playerRandomMountType ~= RANDOM_MOUNT_TYPE_NONE and not self:HasAnyUnlockedMounts() then
+        SetRandomMountType(RANDOM_MOUNT_TYPE_NONE, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+    elseif playerRandomMountType == RANDOM_MOUNT_TYPE_FAVORITE and not self:HasAnyFavoriteMounts() then
+        SetRandomMountType(RANDOM_MOUNT_TYPE_ANY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+    end
+
+    local companionRandomMountType = GetRandomMountType(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+    if companionRandomMountType ~= RANDOM_MOUNT_TYPE_NONE and not self:HasAnyUnlockedCompanionMounts() then
+        SetRandomMountType(RANDOM_MOUNT_TYPE_NONE, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+    end
 end
 
 function ZO_CollectibleDataManager:MapNotifications()
@@ -1604,13 +1879,25 @@ function ZO_CollectibleDataManager:HasAnyUnlockedCollectibles()
     return false
 end
 
-function ZO_CollectibleDataManager:GetSetDefaultCollectibleData(categoryTypeToSetDefault, actorCategory)
-    local setDefaultCollectibleData = self.collectibleCategoryTypeToSetDefaultCollectibleDataMap[categoryTypeToSetDefault]
-    if not setDefaultCollectibleData and DoesCollectibleCategoryTypeHaveDefault(categoryTypeToSetDefault, actorCategory) then
-        setDefaultCollectibleData = ZO_SetDefaultCollectibleData:New(categoryTypeToSetDefault)
-        self.collectibleCategoryTypeToSetDefaultCollectibleDataMap[categoryTypeToSetDefault] = setDefaultCollectibleData
+function ZO_CollectibleDataManager:GetSetToDefaultCollectibleData(categoryTypeToSetDefault, actorCategory)
+    local setToDefaultCollectibleData = self.collectibleCategoryTypeToSetToDefaultCollectibleDataMap[categoryTypeToSetDefault]
+    if not setToDefaultCollectibleData and DoesCollectibleCategoryTypeHaveDefault(categoryTypeToSetDefault, actorCategory) then
+        setToDefaultCollectibleData = ZO_SetToDefaultCollectibleData:New(categoryTypeToSetDefault)
+        self.collectibleCategoryTypeToSetToDefaultCollectibleDataMap[categoryTypeToSetDefault] = setToDefaultCollectibleData
     end
-    return setDefaultCollectibleData
+    return setToDefaultCollectibleData
+end
+
+function ZO_CollectibleDataManager:HasAnyUnlockedMounts()
+    return HasAnyUnlockedCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT)
+end
+
+function ZO_CollectibleDataManager:HasAnyUnlockedCompanionMounts()
+    return HasAnyUnlockedCollectiblesAvailableToActorCategoryByCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+end
+
+function ZO_CollectibleDataManager:HasAnyFavoriteMounts()
+    return DoesCollectibleCategoryContainAnyCollectiblesWithUserFlags(COLLECTIBLE_CATEGORY_TYPE_MOUNT, COLLECTIBLE_USER_FLAG_FAVORITE)
 end
 
 ZO_CollectibleDataManager:New()

@@ -140,10 +140,11 @@ function ZO_UniversalDeconstructionPanel_Gamepad:InitializeInventory()
     self.inventory = ZO_UniversalDeconstructionInventory_Gamepad:New(self, inventoryControl, SLOT_TYPE_GAMEPAD_INVENTORY_ITEM)
     self.inventory:SetCustomExtraData(function(bagId, slotIndex, data)
         ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, self.extractionSlot:ContainsBagAndSlot(data.bagId, data.slotIndex))
+        ZO_GamepadCraftingUtils_AddOverridesEntryData(data)
     end)
 
     --Register the list for narration
-    local narrationInfo = 
+    local narrationInfo =
     {
         canNarrate = function()
             return SCENE_MANAGER:IsShowing("universalDeconstructionSceneGamepad")
@@ -272,6 +273,7 @@ end
 function ZO_UniversalDeconstructionPanel_Gamepad:UpdateSelection()
     for _, data in pairs(self.inventory.list.dataList) do
         ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, self.extractionSlot:ContainsBagAndSlot(data.bagId, data.slotIndex))
+        ZO_GamepadCraftingUtils_AddOverridesEntryData(data)
     end
 
     self:RefreshTooltip()
@@ -526,6 +528,7 @@ function ZO_UniversalDeconstructionPanel_Gamepad:SaveFilters()
     savedVars.craftingTypes = self:GetSelectedCraftingTypeFilters()
 
     self:RefreshFilter()
+    ZO_SavePlayerConsoleProfile()
 end
 
 ZO_UniversalDeconstructionInventory_Gamepad = ZO_GamepadCraftingInventory:Subclass()

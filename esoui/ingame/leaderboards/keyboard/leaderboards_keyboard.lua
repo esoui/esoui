@@ -282,6 +282,10 @@ function ZO_LeaderboardsManager_Keyboard:SetLoadingSpinnerVisibility(show)
     end
 end
 
+function ZO_LeaderboardsManager_Keyboard:RefreshPointsHeader()
+    self.pointsHeaderLabel:SetText(self.headerPointsText)
+end
+
 --Global XML Handlers
 -----------------------
 

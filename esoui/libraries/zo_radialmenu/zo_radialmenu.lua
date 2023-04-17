@@ -1,3 +1,18 @@
+-- Ordinal indices are mapped beginning from the entry positioned nearest to this angle in either direction.
+--   0 deg = bottom-most entry
+--  90 deg = left-most entry
+-- 180 deg = top-most entry
+-- 270 deg = right-most entry
+-- Note that preference can be given to the entry slightly to the left or right of an exact angle;
+-- For example, 179 degrees would give preference to the right, top-most entry when there are an
+-- odd number of entries in the radial menu.
+ZO_RADIAL_MENU_PREFERRED_ORDINAL_STARTING_ANGLE_RADIANS = math.rad(179)
+
+-- The rotational direction in which ordinal indices increment.
+--  -1 = Clockwise
+--   1 = Counter-clockwise
+ZO_RADIAL_MENU_ORDINAL_DIRECTION = -1
+
 ZO_RadialMenu = ZO_Object:Subclass()
 
 function ZO_RadialMenu:New(...)
@@ -16,7 +31,7 @@ function ZO_RadialMenu.ForceActiveMenuClosed()
     end
 end
 
-function ZO_RadialMenu:Initialize(control, entryTemplate, animationTemplate, entryAnimationTemplate, actionLayerName, directionInputs, enableMouse, selectIfCentered)
+function ZO_RadialMenu:Initialize(control, entryTemplate, animationTemplate, entryAnimationTemplate, actionLayerName, directionInputs, enableMouse, selectIfCentered, showKeybinds)
     self.control = control
 
     self.selectedBackground = control:GetNamedChild("SelectedBackground")
@@ -26,6 +41,7 @@ function ZO_RadialMenu:Initialize(control, entryTemplate, animationTemplate, ent
     self.enableMouse = (enableMouse ~= false) -- nil should be true.
     self.selectIfCentered = (selectIfCentered ~= false) -- nil should be true.
     self.activateOnShow = true
+    self.showKeybinds = showKeybinds
 
     self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
 
@@ -35,10 +51,15 @@ function ZO_RadialMenu:Initialize(control, entryTemplate, animationTemplate, ent
         if entryControl.animation then
             entryControl.animation:PlayBackward()
         end
+
+        if entryControl.keybindLabel then
+            ZO_Keybindings_UnregisterLabelForBindingUpdate(entryControl.keybindLabel)
+            entryControl.keybindLabel:SetHidden(true)
+        end
     end
     
     local function CreateEntryControl(objectPool)
-        local entryControl = ZO_ObjectPool_CreateNamedControl(control:GetName() .. entryTemplate, entryTemplate, objectPool, control)
+        local entryControl = ZO_ObjectPool_CreateNamedControl(control:GetName() .. "Entry", entryTemplate, objectPool, control)
         entryControl.icon = entryControl:GetNamedChild("Icon")
         if entryAnimationTemplate then
             entryControl.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual(entryAnimationTemplate, entryControl)
@@ -211,6 +232,23 @@ function ZO_RadialMenu:SetOnUpdateRotationFunction(rotationFunc)
     self.onUpdateRotationFunc = rotationFunc
 end
 
+function ZO_RadialMenu:SetShowKeybinds(showKeybinds)
+    self.showKeybinds = showKeybinds
+end
+
+--Specifies an action layer to push specifically when showing the keybinds on the wheel
+function ZO_RadialMenu:SetKeybindActionLayer(keybindActionLayer)
+    self.keybindActionLayer = keybindActionLayer
+end
+
+function ZO_RadialMenu:ShouldShowKeybinds()
+    if type(self.showKeybinds) == "function" then
+        return self.showKeybinds()
+    else
+        return self.showKeybinds
+    end
+end
+
 do
     local atan2 = math.atan2
     local ROTATION_OFFSET = 3 * ZO_HALF_PI
@@ -243,22 +281,81 @@ do
         if self:UpdateVirtualMousePositionFromGamepad() then
             self:UpdateSelectedEntryFromVirtualMousePosition()
         end
-    end 
+    end
+end
+
+-- Returns the angle (radians) alloted per Entry and
+-- the starting Entry's offset angle (radians).
+function ZO_RadialMenu:GetArcAnglePerEntryAndStartingOffsetAngle()
+    local numEntries = #self.entries
+    if numEntries == 0 then
+        return 0, 0
+    end
+
+    local arcAnglePerEntryRadians = ZO_TWO_PI / numEntries
+    local startingOffsetAngleRadians = (numEntries == 2 and ZO_HALF_PI or 0) + arcAnglePerEntryRadians
+    return arcAnglePerEntryRadians, startingOffsetAngleRadians
+end
+
+-- Returns the Entry at the ordinal position [1..n] beginning with the entry nearest to
+-- ZO_RADIAL_MENU_PREFERRED_ORDINAL_STARTING_ANGLE_RADIANS and progressing clockwise or
+-- counter-clockwise as defined by ZO_RADIAL_MENU_ORDINAL_DIRECTION.
+function ZO_RadialMenu:GetOrdinalEntry(ordinalIndex)
+    local numEntries = #self.entries
+    if ordinalIndex > numEntries then
+        -- Invalid ordinal index and/or no entries exist.
+        return nil
+    end
+
+    -- Determine the shortest arc distance between the positional angle
+    -- of the first entry and the preferred starting ordinal angle.
+    local arcAnglePerEntryRadians, startingOffsetAngleRadians = self:GetArcAnglePerEntryAndStartingOffsetAngle()
+    local preferredStartingAngleDistanceRadians = (ZO_RADIAL_MENU_PREFERRED_ORDINAL_STARTING_ANGLE_RADIANS - startingOffsetAngleRadians) % ZO_TWO_PI
+
+    -- Determine the entry index offset of the starting ordinal index.
+    local startingOrdinalEntryIndexOffset = zo_round(preferredStartingAngleDistanceRadians / arcAnglePerEntryRadians)
+
+    -- Determine the final entry index associated with the requested ordinal
+    -- index and clamp within the range [1..n] for n entries.
+    local ordinalEntryIndex = startingOrdinalEntryIndexOffset + ((ordinalIndex - 1) * ZO_RADIAL_MENU_ORDINAL_DIRECTION)
+    ordinalEntryIndex = (ordinalEntryIndex % numEntries) + 1
+
+    return self.entries[ordinalEntryIndex]
+end
+
+-- Returns an iterator that iterates over each Entry in the ordinal
+-- order defined by ZO_RadialMenu:GetOrdinalEntry.
+function ZO_RadialMenu:OrdinalEntryIterator()
+    local ordinalIndex = 0
+    return function()
+        ordinalIndex = ordinalIndex + 1
+        local entry = self:GetOrdinalEntry(ordinalIndex)
+        if entry then
+            return ordinalIndex, entry
+        end
+        return nil, nil
+    end
+end
+
+-- Invokes callbackFunction once for each Entry in the ordinal
+-- order defined by ZO_RadialMenu:GetOrdinalEntry.
+function ZO_RadialMenu:ForEachOrdinalEntry(callbackFunction)
+    for ordinalIndex, entry in self:OrdinalEntryIterator() do
+        callbackFunction(ordinalIndex, entry)
+    end
 end
 
 function ZO_RadialMenu:PerformLayout()
     local width, height = self.control:GetDimensions()
     local halfWidth, halfHeight = width / 2 / self.control:GetScale(), height / 2 / self.control:GetScale()
-    local numEntries = #self.entries
-    local halfSliceSize = ZO_TWO_PI / numEntries / 2
+    local arcAnglePerEntryRadians, initialRotation = self:GetArcAnglePerEntryAndStartingOffsetAngle()
+    local halfArcAnglePerEntryRadians = arcAnglePerEntryRadians * 0.5
 
     self.entryPool:ReleaseAllObjects()
 
-    local initialRotation = #self.entries == 2 and ZO_HALF_PI or 0
-
     -- For this circle, 0 rotation points straight down from the circle's center and rotation is in CCW direction.
     for i, entry in ipairs(self.entries) do
-        local centerAngle = initialRotation + i / numEntries * ZO_TWO_PI
+        local centerAngle = initialRotation + (i - 1) * arcAnglePerEntryRadians
         local x = math.sin(centerAngle)
         local y = math.cos(centerAngle)
 
@@ -292,14 +389,37 @@ function ZO_RadialMenu:PerformLayout()
         entryControl:SetAnchor(CENTER, nil, CENTER, x * halfWidth, y * halfHeight)
         entryControl:SetHidden(false)
 
-        entryControl.startX = math.sin(centerAngle - halfSliceSize)
-        entryControl.startY = math.cos(centerAngle - halfSliceSize)
+        entryControl.startX = math.sin(centerAngle - halfArcAnglePerEntryRadians)
+        entryControl.startY = math.cos(centerAngle - halfArcAnglePerEntryRadians)
 
-        entryControl.endX = math.sin(centerAngle + halfSliceSize)
-        entryControl.endY = math.cos(centerAngle + halfSliceSize)
+        entryControl.centerX = x
+        entryControl.centerY = y
+
+        entryControl.endX = math.sin(centerAngle + halfArcAnglePerEntryRadians)
+        entryControl.endY = math.cos(centerAngle + halfArcAnglePerEntryRadians)
 
         entryControl.entry = entry
         entry.control = entryControl
+    end
+
+    --If we're showing keybinds, do the layout for those now
+    --We need to do this *after* the rest of the layout has been completed so we can correctly calculate the ordinal indices
+    if self:ShouldShowKeybinds() then
+        self:LayoutOrdinalKeybinds()
+    end
+end
+
+do
+    local function LayoutOrdinalKeybind(ordinalIndex, entry)
+        local control = entry.control
+        if control and control.keybindLabel then
+            ZO_Keybindings_RegisterLabelForBindingUpdate(control.keybindLabel, ZO_GetRadialMenuActionNameForOrdinalIndex(ordinalIndex))
+            control.keybindLabel:SetHidden(false)
+        end
+    end
+
+    function ZO_RadialMenu:LayoutOrdinalKeybinds()
+        self:ForEachOrdinalEntry(LayoutOrdinalKeybind)
     end
 end
 
@@ -338,6 +458,33 @@ function ZO_RadialMenu:UpdateFirstEntryByFilter(filterFunction, name, inactiveIc
     end
 
     self:Refresh()
+end
+
+function ZO_RadialMenu:SelectFirstEntryByFilter(filterFunction)
+    for i, entry in ipairs(self.entries) do
+        if filterFunction(entry) then
+            --Set the virtual mouse position to the center of the control we are trying to select
+            self.virtualMouseX = entry.control.centerX
+            self.virtualMouseY = entry.control.centerY
+            self:UpdateSelectedEntryFromVirtualMousePosition()
+            return true
+        end
+    end
+
+    return false
+end
+
+function ZO_RadialMenu:SelectOrdinalEntry(ordinalIndex)
+    local entry = self:GetOrdinalEntry(ordinalIndex)
+    if entry then
+        --Set the virtual mouse position to the center of the control we are trying to select
+        self.virtualMouseX = entry.control.centerX
+        self.virtualMouseY = entry.control.centerY
+        self:UpdateSelectedEntryFromVirtualMousePosition()
+        return true
+    end
+
+    return false
 end
 
 function ZO_RadialMenu:OnAnimationStopped()
@@ -414,6 +561,10 @@ function ZO_RadialMenu:FinalizeClear()
         end
     end
 
+    if self:ShouldShowKeybinds() and self.keybindActionLayer then
+        RemoveActionLayerByName(self.keybindActionLayer)
+    end
+
     self:ClearSelection()
     self:Deactivate()
 end
@@ -446,6 +597,10 @@ function ZO_RadialMenu:Show(suppressSound)
         end
     end
 
+    if self:ShouldShowKeybinds() and self.keybindActionLayer then
+        PushActionLayerByName(self.keybindActionLayer)
+    end
+
     if self.activateOnShow then
         self:Activate()
     end
@@ -468,4 +623,16 @@ end
 
 function ZO_RadialMenu:GetEntries()
     return self.entries
+end
+
+--Helper function that gets the corresponding action name for a given ordinal index
+function ZO_GetRadialMenuActionNameForOrdinalIndex(ordinalIndex)
+    internalassert(ordinalIndex <= 10, "Invalid ordinal index")
+    internalassert(ZO_IsIngameUI(), "Radial menu action hotkeys do not exist in this GUI")
+    return "ACCESSIBLE_WHEEL_HOTKEY_SLOT_" .. ordinalIndex
+end
+
+--Helper function that gets whether or not togglable wheels are enabled
+function ZO_AreTogglableWheelsEnabled()
+    return GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS)
 end

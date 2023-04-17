@@ -536,8 +536,11 @@ function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativ
             if rewardType == REWARD_ENTRY_TYPE_ITEM then
                 local USE_RELATIVE_ANCHORS = true
                 ItemTooltip:ShowComparativeTooltips()
-                ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
-                ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
+                if ZO_PlayShowAnimationOnComparisonTooltip then
+                    -- These tooltip animations are not available for internal ingame.
+                    ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
+                    ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
+                end
                 ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2, USE_RELATIVE_ANCHORS)
             end
         end

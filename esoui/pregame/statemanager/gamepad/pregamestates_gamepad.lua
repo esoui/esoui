@@ -195,9 +195,9 @@ local pregameStates =
                 end
 
                 CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", Login, GetString(SI_GAMEPAD_PREGAME_LOADING))
-            elseif ZO_IsForceConsoleOrHeronFlow() then
+            elseif ZO_IsForceConsoleFlow() then
                 -- login using the username/password in user settings
-                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", ZO_FakeConsoleOrHeronLogin, GetString(SI_GAMEPAD_PREGAME_LOADING))
+                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", ZO_FakeConsoleLogin, GetString(SI_GAMEPAD_PREGAME_LOADING))
             else
                 CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", PregameBeginLinkedLogin, GetString(SI_GAMEPAD_PREGAME_LOADING))
             end
@@ -327,7 +327,25 @@ local pregameStates =
         end,
 
         GetStateTransitionData = function()
-            return "ConfirmLinkAccount", LINK_ACCOUNT_GAMEPAD.username, LINK_ACCOUNT_GAMEPAD.password
+            return "ConfirmLinkAccount", LINK_ACCOUNT_GAMEPAD:GetEnteredUserName(), LINK_ACCOUNT_GAMEPAD:GetEnteredPassword()
+        end,
+    },
+
+    ["LinkAccountActivation"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function()
+            SCENE_MANAGER:Show("LinkAccount_Activation_Gamepad")
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "LinkAccountFinished"
         end,
     },
 
@@ -358,7 +376,7 @@ local pregameStates =
 
         OnEnter = function(username, password)
             local function LinkAccount()
-                if ZO_IsForceConsoleOrHeronFlow() then
+                if ZO_IsForceConsoleFlow() then
                     PregameStateManager_AdvanceState()
                 else
                     PregameLinkAccount(username, password)
@@ -382,7 +400,7 @@ local pregameStates =
             return false
         end,
 
-        OnEnter = function(username, password)
+        OnEnter = function()
             SCENE_MANAGER:Show("LinkAccountScreen_Gamepad_Final")
         end,
 

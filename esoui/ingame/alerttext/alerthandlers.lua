@@ -283,7 +283,6 @@ local AlertHandlers =
 
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
         if response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER and response ~= GROUP_INVITE_RESPONSE_IGNORED then
-            ZO_OutputStadiaLog(string.format("AlertHandlers[EVENT_GROUP_INVITE_RESPONSE], ShouldShowGroupErrorInAlert(response) = %s", (ShouldShowGroupErrorInAlert(response) and "true" or "false")))
             if ShouldShowGroupErrorInAlert(response) then
                 local nameToUse
                 if response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED_CANT_JOIN then
@@ -1132,6 +1131,17 @@ local AlertHandlers =
 
     [EVENT_TRIBUTE_INVITE_CANCELED] = function()
         return ALERT, GetString(SI_TRIBUTE_INVITE_CANCELED), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_GUILD_KEEP_ATTACK_UPDATE] = function(_, numGuardsKilled, numAttackers, location)
+        if tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_AVA_NOTIFICATIONS)) ~= AVA_NOTIFICATIONS_SETTING_CHOICE_DONT_SHOW and
+            tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_GUILD_KEEP_NOTICES)) == GUILD_KEEP_NOTICES_SETTING_CHOICE_ALERT then
+            if numGuardsKilled > 0 then
+                return ALERT, zo_strformat(SI_GUILD_KEEP_ATTACK_UPDATE, numGuardsKilled, location, numAttackers)
+            else
+                return ALERT, zo_strformat(SI_GUILD_KEEP_ATTACK_END, location)
+            end
+        end
     end,
 
     [EVENT_HOUSING_PREVIEW_INSPECTION_STATE_CHANGED] = function()

@@ -159,11 +159,20 @@ function ZO_SpecializedCollectionsBook_Keyboard:Initialize(control, sceneName, c
     self:InitializeControls()
     self:InitializeNavigationList()
     self:InitializeEvents()
+    self:InitializeKeybindStripDescriptors()
 
     local specializedBookScene = ZO_Scene:New(self.sceneName, SCENE_MANAGER)
     specializedBookScene:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWN then
+        if newState == SCENE_SHOWING then
+            if self.keybindStripDescriptor then
+                KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            end
+        elseif newState == SCENE_SHOWN then
             self:OnSceneShown()
+        elseif newState == SCENE_HIDDEN then
+            if self.keybindStripDescriptor then
+                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            end
         end
     end)
 
@@ -230,8 +239,20 @@ function ZO_SpecializedCollectionsBook_Keyboard:InitializeNavigationList()
         control:SetText(data:GetFormattedName())
         control:SetSelected(node:IsSelected())
 
-        control.statusIcon = control:GetNamedChild("StatusIcon")
-        control.statusIcon:SetHidden(not data:IsNew())
+        control.statusMultiIcon = control:GetNamedChild("StatusIcon")
+        control.statusMultiIcon:ClearIcons()
+
+        if data:IsNew() then
+            control.statusMultiIcon:AddIcon("EsoUI/Art/Miscellaneous/new_icon.dds")
+        end
+        if data:IsPrimaryResidence() then
+            control.statusMultiIcon:AddIcon("EsoUI/Art/Collections/PrimaryHouse.dds")
+        end
+        if data:IsFavorite() then
+            control.statusMultiIcon:AddIcon("EsoUI/Art/Collections/Favorite_StarOnly.dds")
+        end
+
+        control.statusMultiIcon:Show()
     end
 
     local function TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
@@ -249,6 +270,10 @@ function ZO_SpecializedCollectionsBook_Keyboard:InitializeNavigationList()
             end
 
             ClearCollectibleNewStatus(data:GetId())
+
+            if self.keybindStripDescriptor then
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+            end
         end
     end
 
@@ -262,6 +287,7 @@ function ZO_SpecializedCollectionsBook_Keyboard:InitializeNavigationList()
     self.navigationTree:AddTemplate("ZO_SpecializedCollection_Book_NavigationEntry_Keyboard", TreeEntrySetup, TreeEntryOnSelected, TreeEntryEquality)
     self.navigationTree:SetOpenAnimation("ZO_TreeOpenAnimation")
     self.navigationTree:SetExclusive(true)
+    self.navigationTree.owner = self
     self.categoryLayoutObject = self.categoryLayoutClass:New(self)
 
     self.headerNodes = {}
@@ -275,6 +301,10 @@ function ZO_SpecializedCollectionsBook_Keyboard:InitializeEvents()
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function(...) self:OnCollectibleNotificationRemoved(...) end)
+end
+
+function ZO_SpecializedCollectionsBook_Keyboard:InitializeKeybindStripDescriptors()
+    -- Intentionally left blank, override in children if required.
 end
 
 function ZO_SpecializedCollectionsBook_Keyboard:GetSelectedData()
@@ -373,6 +403,10 @@ function ZO_SpecializedCollectionsBook_Keyboard:UpdateCollectibleTreeEntry(colle
     end
 end
 
+function ZO_SpecializedCollectionsBook_Keyboard:TreeEntry_OnMouseUp(control, upInside, button)
+    -- Additional functionality can be added here or in derived classes, as in HousingBook_Keyboard:TreeEntry_OnMouseUp
+end
+
 function ZO_SpecializedCollectionsBook_Keyboard:OnCollectibleNotificationRemoved(notificationId, collectibleId)
     self:UpdateCollectibleTreeEntry(collectibleId)
 end
@@ -406,4 +440,8 @@ end
 
 function ZO_SpecializedCollectionsBook_Keyboard:IsCollectibleRelevant(collectibleData)
     assert(false) -- override in derived classes
+end
+
+function ZO_SpecializedCollection_Book_NavigationEntry_Keyboard_OnMouseUp(control, ...)
+    control.node:GetTree().owner:TreeEntry_OnMouseUp(control, ...)
 end

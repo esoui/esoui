@@ -29,17 +29,11 @@ local function TryAddOffline(self, offline, secsSinceLogoff, timeStamp)
     end
 end
 
-local function AddCharacterInfo(self, characterName, class, gender, guildId, guildRankIndex, level, championPoints, alliance, zone, heronName)
+local function AddCharacterInfo(self, characterName, class, gender, guildId, guildRankIndex, level, championPoints, alliance, zone)
     if characterName then
         local characterSection = self:AcquireSection(self:GetStyle("characterNameSection"))
         characterSection:AddLine(ZO_FormatUserFacingCharacterName(characterName), self:GetStyle("socialStatsValue"))
         self:AddSection(characterSection)
-    end
-
-    if heronName then
-        local heronSection = self:AcquireSection(self:GetStyle("heronNameSection"))
-        heronSection:AddLine(ZO_FormatUserFacingHeronName(heronName), self:GetStyle("socialStatsValue"))
-        self:AddSection(heronSection)
     end
     
     local statsSection = self:AcquireSection(self:GetStyle("socialStatsSection"))
@@ -87,18 +81,17 @@ local function AddCharacterInfo(self, characterName, class, gender, guildId, gui
     self:AddSection(statsSection)
 end
 
-function ZO_Tooltip:LayoutFriend(displayName, characterName, class, gender, level, championPoints, alliance, zone, offline, secsSinceLogoff, timeStamp, heronName)
+function ZO_Tooltip:LayoutFriend(displayName, characterName, class, gender, level, championPoints, alliance, zone, offline, secsSinceLogoff, timeStamp)
     AddHeader(self, displayName)
     local NO_GUILD_ID = nil
     local NO_GUILD_RANK = nil
-    AddCharacterInfo(self, characterName, class, gender, NO_GUILD_ID, NO_GUILD_RANK, level, championPoints, alliance, zone, heronName)
+    AddCharacterInfo(self, characterName, class, gender, NO_GUILD_ID, NO_GUILD_RANK, level, championPoints, alliance, zone)
     TryAddOffline(self, offline, secsSinceLogoff, timeStamp)
 end
 
 function ZO_Tooltip:LayoutGuildMember(displayName, characterName, class, gender, guildId, guildRankIndex, note, level, championPoints, alliance, zone, offline, secsSinceLogoff, timeStamp)
     AddHeader(self, displayName)
-    local NO_HERON_NAME = nil
-    AddCharacterInfo(self, characterName, class, gender, guildId, guildRankIndex, level, championPoints, alliance, zone, NO_HERON_NAME)
+    AddCharacterInfo(self, characterName, class, gender, guildId, guildRankIndex, level, championPoints, alliance, zone)
     AddNote(self, note)
     TryAddOffline(self, offline, secsSinceLogoff, timeStamp)
 end

@@ -541,4 +541,3 @@ ZO_GAMEPAD_LOCKED_ICON_32 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dd
 ZO_KEYBOARD_IS_EQUIPPED_ICON = "EsoUI/Art/Inventory/inventory_icon_equipped.dds"
 ZO_GAMEPAD_IS_EQUIPPED_ICON = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 ZO_CHECK_ICON = "EsoUI/Art/Miscellaneous/check_icon_32.dds"
-ZO_GAMEPAD_HERON_NAME_ICON = "EsoUI/Art/Miscellaneous/Gamepad/gp_heronNameIcon.dds"

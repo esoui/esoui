@@ -47,12 +47,13 @@ function KeybindingsManager:InitializeKeybindData()
             for actionIndex = 1, numActions do
                 local actionName, isRebindable, isHidden = GetActionInfo(layerIndex, categoryIndex, actionIndex)
                 if not isHidden then
-                    local localizedActionName = GetString(_G["SI_BINDING_NAME_"..actionName])
+                    local localizedActionName = GetString(_G["SI_BINDING_NAME_" .. actionName])
                     if localizedActionName ~= "" then
                         local data =
                         {
                             actionName = actionName,
                             localizedActionName = localizedActionName,
+                            localizedActionNameNarration = GetString(_G["SI_SCREEN_NARRATION_BINDING_NAME_" .. actionName]),
                             isRebindable = isRebindable,
 
                             layerIndex = layerIndex,

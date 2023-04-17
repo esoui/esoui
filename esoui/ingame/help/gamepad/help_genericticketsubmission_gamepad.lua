@@ -150,6 +150,10 @@ function ZO_Help_GenericTicketSubmission_Gamepad:ChangeTicketState(ticketState, 
             self:GetMainList():Commit()
 
             self:SubmitTicket()
+
+            --Re-narrate once the submission starts
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetMainList(), NARRATE_HEADER)
         end
 
         ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)

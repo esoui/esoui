@@ -339,6 +339,31 @@ function ZO_Gamepad_ParametricList_Screen:AddSearch(textSearchKeybindStripDescri
     self:SetupHeaderFocus(self.textSearchHeaderFocus)
 
     ZO_GamepadGenericHeader_SetHeaderFocusControl(self.header, self.textSearchHeaderControl)
+
+    --Register the text search header for narration
+    local textSearchHeaderNarrationInfo =
+    {
+        headerNarrationFunction = function()
+            return self:GetHeaderNarration()
+        end,
+        resultsNarrationFunction = function()
+            local narrations = {}
+            local currentList = self:GetCurrentList()
+            if currentList then
+                --If current list is not a parametric list, ask it to give us the parametric list
+                if not currentList:IsInstanceOf(ZO_ParametricScrollList) then
+                    currentList = currentList:GetParametricList()
+                end
+
+                --If the list is empty, include the empty text as part of the results narration
+                if currentList:IsEmpty() then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(currentList:GetNoItemText()))
+                end
+            end
+            return narrations
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterTextSearchHeader(self.textSearchHeaderFocus, textSearchHeaderNarrationInfo)
 end
 
 function ZO_Gamepad_ParametricList_Screen:IsTextSearchEntryHidden()

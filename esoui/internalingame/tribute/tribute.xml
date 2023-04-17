@@ -16,6 +16,10 @@
             <Anchor point="CENTER" />
         </Label>
 
+        <Label name="ZO_TributePatronUsageDisplay_Control" font="ZoFontTributeAntique52" scale="1.5" horizontalAlignment="CENTER" virtual="true">
+            <Anchor point="CENTER" />
+        </Label>
+
         <Control name="ZO_TributeDiscardCountDisplay_Control" resizeToFitDescendents="true" scale="1.5" mouseEnabled="true" hidden="true" virtual="true">
             <Anchor point="CENTER" />
             <OnMouseEnter>
@@ -52,6 +56,50 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="TOPRIGHT"/>
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMRIGHT"/>
                 </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TributeConfinedCardTile" hidden="true" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_MECHANIC_TILE_CONTAINER_UI_WIDTH" y="ZO_TRIBUTE_MECHANIC_TILE_CONTAINER_UI_HEIGHT" />
+            
+            <OnInitialized>
+                self.portrait = self:GetNamedChild("Portrait")
+                self.quantity = self.portrait:GetNamedChild("Quantity")
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Portrait" level="5" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <Dimensions x="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_UI_WIDTH" y="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_UI_HEIGHT" />
+                    <TextureCoords left="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_LEFT_COORD" right="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_RIGHT_COORD" top="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_TOP_COORD" bottom="ZO_TRIBUTE_MECHANIC_TILE_PORTRAIT_BOTTOM_COORD" />
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Texture name="$(parent)Frame" level="3" color="000000" textureFile="EsoUI/Art/Tribute/tributeMechanicTileFrame.dds">
+                            <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
+                        </Texture>
+
+                        <Label name="$(parent)Quantity" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" font="ZoFontTributeAntique20NoShadow" horizontalAlignment="CENTER" verticalAlignment="CENTER" level="12" hidden="true">
+                            <Dimensions x="20" y="24" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-5" offsetY="-4"/>
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Control name="$(parent)MechanicContainer" level="10" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Portrait" relativePoint="TOPRIGHT" />
+
+                    <Controls>
+                        <Texture name="$(parent)Frame" level="11" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_activation_small_single.dds">
+                            <AnchorFill />
+                        </Texture>
+
+                        <Texture name="$(parent)TypeIcon" level="12" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardDisplay_confineCards.dds">
+                            <Dimensions x="24" y="24" />
+                            <Anchor point="CENTER" />
+                        </Texture>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
         
@@ -115,6 +163,19 @@
                 <Control name="$(parent)Cards" space="WORLD" />
 
                 <Control name="$(parent)Confirm" layer="BACKGROUND" inherits="ZO_KeybindButton" hidden="true">
+                    <Controls>
+                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop_white.dds" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" offsetX="-50" offsetY="-5"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="50" offsetY="5"/>
+                            <TextureCoords left="0" right="1" top="0" bottom="0.78125" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ConfinedCards" resizeToFitDescendents="true" hidden="true" />
+
+                <Control name="$(parent)ConfinedCardsButton" inherits="ZO_KeybindButton" hidden="true">
+                    <DimensionConstraints minY="ZO_TRIBUTE_CONFINED_CARDS_KEYBIND_HEIGHT" maxY="ZO_TRIBUTE_CONFINED_CARDS_KEYBIND_HEIGHT" />
                     <Controls>
                         <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop_white.dds" excludeFromResizeToFitExtents="true">
                             <Anchor point="TOPLEFT" offsetX="-50" offsetY="-5"/>

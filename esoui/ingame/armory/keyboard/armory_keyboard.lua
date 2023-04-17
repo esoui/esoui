@@ -37,6 +37,10 @@ function ZO_Armory_Keyboard:Initialize(control)
     ARMORY_KEYBOARD_SCENE:SetHideSceneConfirmationCallback(function(scene, nextSceneName, bypassHideSceneConfirmationReason)
         if ZO_ARMORY_MANAGER:IsBuildOperationInProgress() then
             ARMORY_KEYBOARD_SCENE:RejectHideScene()
+            --If we tried to hide the scene because the gamepad preferred mode changed, close the armory when the build operation completes to prevent the user from getting stuck in a bad state
+            if bypassHideSceneConfirmationReason == ZO_BHSCR_GAMEPAD_MODE_CHANGED then
+                ZO_ARMORY_MANAGER:SetHideOnBuildOperationComplete(true)
+            end
         else
             ARMORY_KEYBOARD_SCENE:AcceptHideScene()
         end

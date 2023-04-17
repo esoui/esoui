@@ -101,6 +101,19 @@ function ZO_ParametricScrollList:HasDataTemplate(templateName)
     return self.dataTypes[templateName] ~= nil
 end
 
+function ZO_ParametricScrollList:AddMouseBehaviorToControl(control)
+    if not IsConsoleUI() then
+        control:SetMouseEnabled(true)
+        control:SetHandler("OnMouseUp", function(_, button, upInside)
+            if self:IsActive() and self.enabled then
+                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+                    self:SetSelectedIndex(control.dataIndex)
+                end
+            end
+        end)
+    end
+end
+
 function ZO_ParametricScrollList:AddDataTemplate(templateName, setupFunction, parametricFunction, equalityFunction, controlPoolPrefix, controlPoolResetFunction)
     if not self.dataTypes[templateName] then
         local controlPool = ZO_ControlPool:New(templateName, self.scrollControl, controlPoolPrefix)
@@ -111,9 +124,17 @@ function ZO_ParametricScrollList:AddDataTemplate(templateName, setupFunction, pa
             equalityFunction = equalityFunction or DefaultEqualityFunction,
             hasHeader = false,
         }
+
+        if not IsConsoleUI() then
+            controlPool:SetCustomFactoryBehavior(function(control)
+                self:AddMouseBehaviorToControl(control)
+            end)
+        end
+
         if controlPoolResetFunction then
             controlPool:SetCustomResetBehavior(controlPoolResetFunction)
         end
+
         self.dataTypes[templateName] = dataTypeInfo
     end
 end
@@ -170,6 +191,7 @@ function ZO_ParametricScrollList:AddDataTemplateWithHeader(templateName, setupFu
                 end
             end
             control.headerControl = headerControl
+            self:AddMouseBehaviorToControl(control)
         end)
 
         dataTypeInfo.pool:SetCustomResetBehavior(function(control)

@@ -437,6 +437,14 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(ZO_IN_ARMORY_BUILD_ICON, NO_TINT, GetString(SI_SCREEN_NARRATION_IN_ARMORY_BUILD_ICON_NARRATION))
         end
 
+        if data.isFavorite then
+            statusIndicator:AddIcon("EsoUI/Art/Collections/Favorite_StarOnly.dds", NO_TINT)
+        end
+
+        if data.isPrimaryResidence then
+            statusIndicator:AddIcon("EsoUI/Art/Collections/PrimaryHouse.dds", NO_TINT)
+        end
+
         statusIndicator:Show()
     end
 end

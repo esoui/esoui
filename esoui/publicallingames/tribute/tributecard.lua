@@ -113,7 +113,7 @@ do
         [TRIBUTE_MECHANIC_ACTIVATION_SOURCE_COMBO] = "Combo",
     }
 
-    internalassert(TRIBUTE_MECHANIC_ITERATION_END == 13, "A new Tribute mechanic has been added. Does the MECHANIC_PARAM_MODIFIERS need special modifiers for this mechanic?")
+    internalassert(TRIBUTE_MECHANIC_ITERATION_END == 15, "A new Tribute mechanic has been added. Does the MECHANIC_PARAM_MODIFIERS need special modifiers for this mechanic?")
     local MECHANIC_PARAM_MODIFIERS =
     {
         [TRIBUTE_MECHANIC_HEAL_AGENT] =
@@ -145,6 +145,7 @@ do
         self.cardDefId = cardObject:GetCardDefId()
         self.activationSource = activationSource
         self.mechanicIndex = mechanicIndex
+        local triggerId
         self.tributeMechanicType, self.quantity, self.comboNum, self.param1, self.param2, self.param3, triggerId = cardObject:GetMechanicInfo(activationSource, mechanicIndex)
         self.numSiblings = cardObject:GetNumMechanics(activationSource)
         local isOnActivation = activationSource == TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ACTIVATION
@@ -721,6 +722,16 @@ function ZO_TributeCard:SetCardInstanceId(cardInstanceId)
     self:OnStateFlagsChanged(GetTributeCardStateFlags(cardInstanceId))
 end
 
+function ZO_TributeCard:GetNumConfinedCards()
+    return GetNumConfinedTributeCards(self:GetCardInstanceId())
+end
+
+function ZO_TributeCard:ShowConfinedCards(previousViewer)
+    if self:GetNumConfinedCards() > 0 then
+        ZO_TRIBUTE_CONFINEMENT_VIEWER_MANAGER:SetViewingAgent(self:GetCardInstanceId(), previousViewer)
+    end
+end
+
 function ZO_TributeCard:GetMechanicContainer(mechanicActivationSource, mechanicIndex)
     for _, mechanicContainer in ipairs(self.mechanicContainers) do
         local activationSource, index = mechanicContainer:GetActivationSourceAndIndex()
@@ -1027,6 +1038,7 @@ function ZO_TributeCard:ReleaseAllObjects()
     self:ReleasePopupAnimation()
     self:ReleaseStateEffects()
     self:ReleaseTriggerAnimations()
+    self:ReleaseStackedCardBackTextures()
 end
 
 function ZO_TributeCard:ReleaseAlphaAnimation()
@@ -1053,6 +1065,16 @@ function ZO_TributeCard:ReleaseMechanics()
         mechanicContainer:ReleaseObject()
     end
     ZO_ClearNumericallyIndexedTable(self.mechanicContainers)
+end
+
+function ZO_TributeCard:ReleaseStackedCardBackTextures()
+    if self.stackedCardBackTextures and #self.stackedCardBackTextures > 0 then
+        local cardBackPool = TRIBUTE_POOL_MANAGER:GetStackedCardBackTexturePool()
+        for _, texture in ipairs(self.stackedCardBackTextures) do
+            cardBackPool:ReleaseObject(texture.key)
+        end
+        ZO_ClearNumericallyIndexedTable(self.stackedCardBackTextures)
+    end
 end
 
 function ZO_TributeCard:ReleasePopupAnimation()
@@ -1166,6 +1188,11 @@ function ZO_TributeCard:IsInteractive()
         return false
     end
 
+    if IsTributeCardConfined(self:GetCardInstanceId()) then
+        --Suppress interaction for confined cards
+        return false
+    end
+
     return true
 end
 
@@ -1191,8 +1218,8 @@ end
 
 function ZO_TributeCard:OnMouseUp(button, upInside)
     if TRIBUTE:IsInputStyleMouse() and upInside and button == MOUSE_BUTTON_INDEX_LEFT and self.cardInstanceId then
-        -- Don't allow interaction with cards while the target viewer is up
-        if ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() then
+        -- Don't allow interaction with cards while a viewer is up
+        if TRIBUTE:GetActiveViewer() ~= nil then
             return
         end
         InteractWithTributeCard(self.cardInstanceId)
@@ -1277,17 +1304,57 @@ function ZO_TributeCard:ShowAsPopup(screenX, screenY, popupType)
             self.popupTimeline = timeline
         end
         timeline:PlayForward()
+        --If this card has confined cards and will be showing a keybind for it, we need to adjust the inset to account for the keybind underneath
+        if TRIBUTE:CanShowConfineKeybind() and self:GetNumConfinedCards() > 0 then
+            local BOTTOM_INSET = ZO_TRIBUTE_CONFINED_CARDS_KEYBIND_HEIGHT + ZO_TRIBUTE_CONFINED_CARDS_KEYBIND_OFFSET_Y
+            control:SetClampedToScreenInsets(0, 0, 0, BOTTOM_INSET)
+        end
+        --Only the CARD popup type should show a confined stack
+        self:RefreshConfinedStack()
     elseif popupType == ZO_TRIBUTE_CARD_POPUP_TYPE.MECHANIC then
         control:SetAnchor(LEFT, GuiRoot, TOPLEFT, screenX, screenY)
     end
 
-    if ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() then
-        local bottom = IsInGamepadPreferredMode() and ZO_KEYBIND_STRIP_GAMEPAD_VISUAL_HEIGHT or ZO_KEYBIND_STRIP_KEYBOARD_VISUAL_HEIGHT
-        control:SetClampedToScreenInsets(0, 0, 0, bottom)
+    --If there is a viewer up, check to see if we need to adjust the insets to account for a keybind strip
+    local activeViewer = TRIBUTE:GetActiveViewer()
+    if activeViewer and activeViewer:IsKeybindStripVisible() then
+        local BOTTOM_INSET = IsInGamepadPreferredMode() and ZO_KEYBIND_STRIP_GAMEPAD_VISUAL_HEIGHT or ZO_KEYBIND_STRIP_KEYBOARD_VISUAL_HEIGHT
+        control:SetClampedToScreenInsets(0, 0, 0, BOTTOM_INSET)
     end
     control:SetClampedToScreen(true)
     control:SetHidden(false)
     self:SetMouseEnabled(false)
+end
+
+do
+    local ADDITIONAL_CARDS_CONFINED_ICON = "EsoUI/Art/Tribute/tribute_icon_additionalCardsConfined.dds"
+    function ZO_TributeCard:PopulateConfinedCards(cardControls)
+        local numConfined = self:GetNumConfinedCards()
+        local numControls = #cardControls
+
+        for i, cardControl in ipairs(cardControls) do
+            if i > numConfined then
+                --If the index for this card control exceeds the number of cards we actually have confined, hide it
+                cardControl:SetHidden(true)
+            else
+                if i == numControls and numConfined > numControls then
+                    --Special case: If we have more confined cards than we do controls to show it, we use the last control to represent that instead of showing it as an individual card
+                    local additionalQuantity = numConfined - (numControls - 1)
+                    cardControl.portrait:SetTexture(ADDITIONAL_CARDS_CONFINED_ICON)
+                    --Calculate and show the number of non-visible confined cards
+                    cardControl.quantity:SetText(additionalQuantity)
+                    cardControl.quantity:SetHidden(false)
+                else
+                    --Get the portrait for the confined card in question and set it
+                    local confinedInstanceId = GetConfinedTributeCardInstanceId(self:GetCardInstanceId(), i)
+                    local cardId, patronId = GetTributeCardInstanceDefIds(confinedInstanceId)
+                    cardControl.portrait:SetTexture(GetTributeCardPortrait(cardId))
+                    cardControl.quantity:SetHidden(true)
+                end
+                cardControl:SetHidden(false)
+            end
+        end
+    end
 end
 
 function ZO_TributeCard:OnAlphaTimelineStopped(timeline)
@@ -1334,6 +1401,44 @@ end
 function ZO_TributeCard:GetScreenAnchorPosition(anchor)
     local screenX, screenY = self.control:ProjectRectToScreenAndComputeAABBPoint(anchor)
     return screenX, screenY
+end
+
+function ZO_TributeCard:RefreshConfinedStack()
+    self:ReleaseStackedCardBackTextures()
+    local numConfinedCards = self:GetNumConfinedCards()
+    if numConfinedCards > 0 then
+        --Only create this table if we need it
+        if not self.stackedCardBackTextures then
+            self.stackedCardBackTextures = {}
+        end
+
+        local maxCardsInStack = GetMaxTributeCardsInStack()
+        local previousControl = nil
+
+        for i = 1, numConfinedCards do
+            --Only show individual card back textures up to the maximum number of cards we can show in a stack
+            --We do < instead of <= because the jailer itself counts towards this number
+            if i < maxCardsInStack then
+                local cardBackTexture, key = TRIBUTE_POOL_MANAGER:GetStackedCardBackTexturePool():AcquireObject()
+                cardBackTexture.key = key
+
+                cardBackTexture:SetParent(self.control)
+                --Each card back texture should be one level lower than the last
+                cardBackTexture:SetDrawLevel(maxCardsInStack - i)
+
+                --Anchor the cards slightly differently depending on how many there are
+                if numConfinedCards > 1 then
+                    cardBackTexture:SetAnchor(TOPLEFT, previousControl, TOPLEFT, 10, -10)
+                else
+                    cardBackTexture:SetAnchor(TOPLEFT, previousControl, TOPLEFT, 15, -15)
+                end
+                cardBackTexture:SetHidden(false)
+
+                previousControl = cardBackTexture
+                table.insert(self.stackedCardBackTextures, cardBackTexture)
+            end
+        end
+    end
 end
 
 -- Global Functions --

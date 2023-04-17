@@ -1166,7 +1166,6 @@ ESO_Dialogs["LARGE_GROUP_INVITE_WARNING"] =
             callback =  function(dialog)
                             local characterOrDisplayName = dialog.data
                             GroupInviteByName(characterOrDisplayName)
-                            ZO_OutputStadiaLog("ESO_Dialogs[LARGE_GROUP_INVITE_WARNING], set ZO_Menu_SetLastCommandWasFromMenu == true")
                             ZO_Menu_SetLastCommandWasFromMenu(true)
                             ZO_Alert(ALERT, nil, zo_strformat(GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingDisplayName(characterOrDisplayName)))
                         end,
@@ -2409,7 +2408,14 @@ ESO_Dialogs["LFG_DECLINE_READY_CHECK_CONFIRMATION"] =
     },
     mainText =
     {
-        text = SI_LFG_DIALOG_DECLINE_READY_CHECK_CONFIRMATION_BODY,
+        text = function(dialog)
+            local INTERACT_TYPE_GROUP_ELECTION = 11
+            if dialog.data and dialog.data.incomingType == INTERACT_TYPE_GROUP_ELECTION then
+                return GetString(SI_LFG_DIALOG_DECLINE_GROUP_ELECTION_READY_CHECK_CONFIRMATION_BODY)
+            else
+                return GetString(SI_LFG_DIALOG_DECLINE_READY_CHECK_CONFIRMATION_BODY)
+            end
+        end,
     },
     buttons =
     {
@@ -2546,53 +2552,6 @@ ESO_Dialogs["CHAMPION_CONFIRM_CHANGES"] =
         [2] =
         {
             text = SI_NO,
-        }
-    }
-}
-
-ESO_Dialogs["COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE"] =
-{
-    title =
-    {
-        text = SI_COLLECTIONS_INVENTORY_DIALOG_RENAME_COLLECTIBLE_TITLE,
-    },
-    mainText = 
-    {
-        text = SI_COLLECTIONS_INVENTORY_DIALOG_RENAME_COLLECTIBLE_MAIN,
-    },
-    editBox =
-    {
-        defaultText = "",
-        maxInputCharacters = COLLECTIBLE_NAME_MAX_LENGTH,
-        textType = TEXT_TYPE_ALL,
-        specialCharacters = {'\'', '-', ' '},
-        validatesText = true,
-        validator = IsValidCollectibleName,
-        instructions = nil,
-        selectAll = true,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            requiresTextInput = true,
-            text = SI_OK,
-            noReleaseOnClick = true,
-            callback = function (dialog)
-                            local inputText = ZO_Dialogs_GetEditBoxText(dialog)
-                            if(inputText and inputText ~= "") then
-                                local violations = {IsValidCollectibleName(inputText)}
-                                if #violations == 0 then
-                                    local collectibleId = dialog.data.collectibleId
-                                    RenameCollectible(collectibleId, inputText)
-                                    ZO_Dialogs_ReleaseDialog("COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE")
-                                end
-                            end
-                        end
-        },
-        [2] =
-        {
-            text = SI_DIALOG_CANCEL,
         }
     }
 }
@@ -2837,7 +2796,7 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_SUBMIT_TICKET_ERROR_DIALOG"] =
         {
             text = SI_CUSTOMER_SERVICE_OPEN_WEB_BROWSER,
             visible = function()
-                return not IsConsoleUI() and not IsHeronUI()
+                return not IsConsoleUI()
             end,
             callback = function(...)
                 ZO_PlatformOpenApprovedURL(APPROVED_URL_ESO_HELP, GetString(SI_CUSTOMER_SERVICE_ESO_HELP_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB))
@@ -4667,7 +4626,6 @@ ESO_Dialogs["GUILD_FINDER_SAVE_FROM_RECRUITMENT_STATUS_UNLISTED"] =
         },
     },
 }
-
 ESO_Dialogs["CONFIRM_CLEAR_UNUSED_KEYBINDS"] =
 {
     canQueue = true,
@@ -4697,6 +4655,53 @@ ESO_Dialogs["CONFIRM_CLEAR_UNUSED_KEYBINDS"] =
         },
         {
             text = SI_DIALOG_DECLINE,
+        }
+    },
+}
+
+ESO_Dialogs["CONFIRM_COMPLETE_QUEST_MAX_WARNINGS"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_QUEST_COMPLETE_CONFIRM_TITLE,
+    },
+
+    mainText =
+    {
+        text = function(dialog)
+            if dialog.data then
+                local questName = GetJournalQuestInfo(dialog.data.journalQuestIndex)
+                local questionText = zo_strformat(SI_QUEST_COMPLETE_CONFIRM_QUESTION, ZO_WHITE:Colorize(questName))
+
+                local capacityList = ZO_GenerateCommaSeparatedListWithAnd(dialog.data.currenciesWithMaxWarning)
+                local capacityText = zo_strformat(SI_QUEST_COMPLETE_CONFIRM_CAPACITY, capacityList)
+
+                local acquireList = ZO_GenerateCommaSeparatedListWithAnd(dialog.data.amountsAcquiredWithMaxWarning)
+                local acquireText = zo_strformat(SI_QUEST_COMPLETE_CONFIRM_ACQUIRE, acquireList)
+
+                return ZO_GenerateParagraphSeparatedList({questionText, ZO_ERROR_COLOR:Colorize(capacityText), ZO_ERROR_COLOR:Colorize(acquireText)})
+            end
+            return ""
+        end,
+    },
+
+    buttons =
+    {
+        {
+            onShowCooldown = 2000,
+            text = SI_DIALOG_YES,
+            callback = function(dialog)
+                CompleteQuest()
+            end,
+        },
+        {
+            text = SI_DIALOG_NO,
         }
     },
 }

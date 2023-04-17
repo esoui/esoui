@@ -208,7 +208,7 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
                         end,
             callback =  function()
                             if self.productListFragment:IsShowing() then
-                                self:PreviewMarketProduct(self.productListFragment:GetSelectedProductId())
+                                self:PreviewData(self.productListFragment:GetSelectedData())
                             elseif self:HasActiveCustomPreview() then
                                 self:PerformCustomPreview()
                             else
@@ -1322,22 +1322,45 @@ function ZO_Market_Keyboard:ResetSearch()
     self.searchBox:SetText("")
 end
 
+function ZO_Market_Keyboard:PreviewData(data)
+    if data then
+        -- Order matters
+        if data.rewardId then
+            self:PreviewReward(data.rewardId)
+        elseif data.productId then
+            self:PreviewMarketProduct(data.productId)
+        end
+    end
+end
+
 function ZO_Market_Keyboard:PreviewMarketProduct(productId)
     ZO_Market_Shared.PreviewMarketProduct(ITEM_PREVIEW_KEYBOARD, productId)
 end
 
-function ZO_Market_Keyboard:PerformPreview(marketProductData)
-    local previewType = marketProductData:GetMarketProductPreviewType()
-    if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE then
-        self:ShowBundleContents(marketProductData)
-    elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
-        self:ShowCrownCrateContents(marketProductData)
-    elseif previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
-        self:ShowBundleContentsAsList(marketProductData)
-    elseif previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
-        self:ShowHousePreviewDialog(marketProductData)
-    else -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
-        self:PreviewMarketProduct(marketProductData:GetId())
+function ZO_Market_Keyboard:PreviewReward(rewardId)
+    ZO_Market_Shared.PreviewReward(ITEM_PREVIEW_KEYBOARD, rewardId)
+end
+
+function ZO_Market_Keyboard:PerformPreview(previewData)
+    if previewData then
+        -- Order matters
+        if previewData.rewardId then
+            self:PreviewReward(previewData.rewardId)
+        elseif previewData.marketProductId then
+            local marketProductData = previewData
+            local previewType = marketProductData:GetMarketProductPreviewType()
+            if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE then
+                self:ShowBundleContents(marketProductData)
+            elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
+                self:ShowCrownCrateContents(marketProductData)
+            elseif previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+                self:ShowBundleContentsAsList(marketProductData)
+            elseif previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
+                self:ShowHousePreviewDialog(marketProductData)
+            else -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
+                self:PreviewMarketProduct(marketProductData:GetId())
+            end
+        end
     end
 end
 

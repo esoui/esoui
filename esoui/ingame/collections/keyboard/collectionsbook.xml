@@ -72,5 +72,50 @@
                 </Label>
             </Controls>
         </TopLevelControl>
+
+        <TopLevelControl name="ZO_CollectibleRenameDialog" inherits="ZO_CustomDialogBase">
+            <ResizeToFitPadding width="50" height="33" />
+            <OnInitialized>
+                ZO_CollectibleRenameDialog_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ContentContainer" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="30" />
+                    <Controls>
+                        <Label name="$(parent)NameHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_COLLECTIONS_INVENTORY_DIALOG_RENAME_COLLECTIBLE_MAIN">
+                            <Anchor point="TOPLEFT" offsetX="-12" />
+                        </Label>
+
+                        <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Dimensions x="340" />
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop">
+                                    <OnEffectivelyShown>
+                                        self:TakeFocus()
+                                    </OnEffectivelyShown>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Keybinds" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)ContentContainer" relativePoint="BOTTOM" offsetY="20" />
+                    <Controls>
+                        <Control name="$(parent)Default" inherits="ZO_DialogButton">
+                            <Anchor point="LEFT" />
+                        </Control>
+                        <Control name="$(parent)Ok" inherits="ZO_DialogButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)Default" relativePoint="RIGHT" offsetX="20"/>
+                        </Control>
+                        <Control name="$(parent)Cancel" inherits="ZO_DialogButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)Ok" relativePoint="RIGHT" offsetX="20"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
     </Controls>   
 </GuiXml>

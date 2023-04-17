@@ -977,6 +977,7 @@ function ZO_RestyleCompanionOutfitSlotsSheet:Initialize(...)
 
     local ALWAYS_HIDE = true
     ZO_WeaponSwap_SetPermanentlyHidden(self.control:GetNamedChild("SecondaryWeaponSwap"), ALWAYS_HIDE)
+    self.noWeaponsLabel:SetText(GetString(SI_OUTFIT_STYLE_SHEET_NO_WEAPONS_COMPANION_WARNING))
 end
 
 function ZO_RestyleCompanionOutfitSlotsSheet:RegisterForEvents()
@@ -1035,7 +1036,7 @@ function ZO_RestyleCompanionOutfitSlotsSheet:RefreshView()
 
     self.headers[ZO_RESTYLE_SHEET_CONTAINER.SECONDARY]:SetText(GetString(SI_RESTYLE_SHEET_EQUIPMENT_WEAPONS_SET_1))
 
-    self.noWeaponsLabel:SetHidden(ZO_OUTFIT_MANAGER:HasWeaponsCurrentlyHeldToOverride())
+    self.noWeaponsLabel:SetHidden(ZO_OUTFIT_MANAGER:HasWeaponsCurrentlyHeldToOverride(GAMEPLAY_ACTOR_CATEGORY_COMPANION))
 end
 
 -------------------------------------

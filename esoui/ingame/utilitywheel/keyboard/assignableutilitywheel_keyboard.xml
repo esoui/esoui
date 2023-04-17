@@ -42,6 +42,10 @@
                 <Label name="$(parent)Label" font="ZoFontWinH5" horizontalAlignment="CENTER" hidden="true">
                     <Anchor point="TOP" relativeto="$(parent)Icon" relativePoint="BOTTOM" offsetY="5" />
                 </Label>
+
+                <Label name="$(parent)KeyLabel" tier="HIGH" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGame" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" />
+                </Label>
             </Controls>
         </Control>
 
@@ -52,7 +56,7 @@
             <Controls>
                 <Label name="$(parent)Category" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS" hidden="true">
                     <Dimensions x="250" />
-                    <Anchor point="CENTER"/>
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="75" />
                 </Label>
                 
                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/Quickslots/quickslot_mapping_bg.dds">

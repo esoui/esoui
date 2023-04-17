@@ -11,6 +11,7 @@ function GroupMenu_Keyboard:Initialize(control)
     self.control = control
     self.headerControl = self.control:GetNamedChild("Header")
     self.categoriesControl = self.control:GetNamedChild("Categories")
+    self.rolesDividerControl = self.control:GetNamedChild("RolesCategoriesDivider")
 
     local function OnStateChange(oldState, newState)
         if newState == SCENE_SHOWING  then
@@ -135,7 +136,9 @@ function GroupMenu_Keyboard:InitializeCategories()
     end
 
     local CHILD_SPACING = 0
-    self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_StatusIconHeader", SetupParentNode, nil, nil, ZO_GROUP_MENU_KEYBOARD_TREE_SUBCATEGORY_INDENT, CHILD_SPACING)
+    local NO_SELECTION_FUNCTION = nil
+    local NO_EQUALITY_FUNCTION = nil
+    self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_StatusIconHeader", SetupParentNode, NO_SELECTION_FUNCTION, NO_EQUALITY_FUNCTION, ZO_GROUP_MENU_KEYBOARD_TREE_SUBCATEGORY_INDENT, CHILD_SPACING)
     self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_StatusIconChildlessHeader", SetupNode, OnNodeSelected)
     self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_Subcategory", SetupChildNode, OnNodeSelected)
     self.navigationTree:SetExclusive(true)
@@ -157,7 +160,7 @@ function GroupMenu_Keyboard:InitializeKeybindDescriptors()
 
         visible = function()
             local playerIsGrouped, playerIsLeader, groupSize = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetGroupStatus()
-            return IsGroupModificationAvailable() and (not playerIsGrouped or (playerIsLeader and groupSize < GROUP_SIZE_MAX))
+            return IsGroupModificationAvailable() and (not playerIsGrouped or (playerIsLeader and groupSize < MAX_GROUP_SIZE_THRESHOLD))
         end
     }
 end
@@ -251,7 +254,7 @@ do
         local nodeTemplate
         if parentNode then
             nodeTemplate = "ZO_GroupMenuKeyboard_Subcategory"
-        elseif nodeData.children then
+        elseif nodeData.children or (nodeData.getChildrenFunction and #(nodeData.getChildrenFunction()) > 0) then
             nodeTemplate = "ZO_GroupMenuKeyboard_StatusIconHeader"
         else
             nodeTemplate = "ZO_GroupMenuKeyboard_StatusIconChildlessHeader"
@@ -263,6 +266,9 @@ do
             if not existingFragmentNode or existingFragmentNode:GetData().priority > nodeData.priority then
                 self.categoryFragmentToNodeLookup[nodeData.categoryFragment] = node
             end
+        end
+        if nodeData.getChildrenFunction then
+            node.getChildrenFunction = nodeData.getChildrenFunction
         end
 
         if nodeData.activityFinderObject then
@@ -280,8 +286,13 @@ do
         for index, nodeData in ipairs(nodeDataList) do
             local node = self:AddCategoryTreeNode(nodeData, parentNode)
 
-            if nodeData.children then
-                self:AddCategoryTreeNodes(nodeData.children, node)
+            local children = nodeData.children
+            if nodeData.getChildrenFunction then
+                children = nodeData.getChildrenFunction()
+            end
+
+            if children then
+                self:AddCategoryTreeNodes(children, node)
             end
         end
     end
@@ -295,6 +306,44 @@ do
 
         self.navigationTree:Commit()
     end
+end
+
+function GroupMenu_Keyboard:RebuildCategories()
+    local selectedParentData = nil
+    local selectedNode = self.navigationTree:GetSelectedNode()
+    if selectedNode then
+        local parentNode = selectedNode:GetParent()
+        if parentNode then
+            selectedParentData = parentNode:GetData()
+        end
+    end
+
+    self.navigationTree:Reset()
+    ZO_ClearTable(self.categoryFragmentToNodeLookup)
+
+    self:AddCategoryTreeNodes(self.nodeList)
+    self.navigationTree:Commit()
+
+    if selectedParentData then
+        local selectNode = self.navigationTree:GetTreeNodeByData(selectedParentData)
+        if selectNode then
+            self.navigationTree:SelectFirstChild(selectNode)
+        end
+    end
+end
+
+function GroupMenu_Keyboard:HideTree()
+    self.navigationTree:SetEnabled(false)
+    self.navigationTree.control:SetHidden(true)
+    PREFERRED_ROLES.control:SetHidden(true)
+    self.rolesDividerControl:SetHidden(true)
+end
+
+function GroupMenu_Keyboard:ShowTree()
+    self.navigationTree:SetEnabled(true)
+    self.navigationTree.control:SetHidden(false)
+    PREFERRED_ROLES.control:SetHidden(false)
+    self.rolesDividerControl:SetHidden(false)
 end
 
 function GroupMenu_Keyboard:RefreshCategories()

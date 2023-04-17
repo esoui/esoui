@@ -23,7 +23,7 @@ function ZO_TributeRewardsList_Keyboard:Initialize(control, ...)
         statusHighlight:SetHidden(not data:IsAttained())
     end
 
-    local function RowHide(control, data)
+    local function RowHide(control)
         local statusHighlight = control:GetNamedChild("StatusHighlight")
         statusHighlight:SetHidden(true)
     end

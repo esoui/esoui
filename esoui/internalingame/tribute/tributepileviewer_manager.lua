@@ -2,7 +2,7 @@
 -- Tribute Pile Viewer Manager
 -----------------------------
 
-internalassert(TRIBUTE_BOARD_LOCATION_ITERATION_END == 18, "New TRIBUTE_BOARD_LOCATION added, check if it should be added to the PILE_FAMILIES table")
+internalassert(TRIBUTE_BOARD_LOCATION_ITERATION_END == 20, "New TRIBUTE_BOARD_LOCATION added, check if it should be added to the PILE_FAMILIES table")
 local PILE_FAMILIES =
 {
     { TRIBUTE_BOARD_LOCATION_PLAYER_DECK, TRIBUTE_BOARD_LOCATION_PLAYER_HAND, TRIBUTE_BOARD_LOCATION_PLAYER_COOLDOWN },
@@ -25,9 +25,10 @@ local COMPOSITE_PILE_GROUPINGS =
     },
 }
 
-ZO_TributePileViewer_Manager = ZO_InitializingCallbackObject:Subclass()
+ZO_TributePileViewer_Manager = ZO_TributeViewer_Manager_Base:Subclass()
 
 function ZO_TributePileViewer_Manager:Initialize()
+    ZO_TributeViewer_Manager_Base.Initialize(self)
     local function FindFamily(boardLocations)
         for _, boardLocation in ipairs(boardLocations) do
             for _, family in ipairs(PILE_FAMILIES) do
@@ -67,18 +68,25 @@ function ZO_TributePileViewer_Manager:Initialize()
     end
 
     self.pilesData = pilesData
-    EVENT_MANAGER:RegisterForEvent("TributePileViewer_Manager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:SetViewingPile(nil) end)
-    EVENT_MANAGER:RegisterForEvent("TributePileViewer_Manager", EVENT_TRIBUTE_PILE_UPDATED, function(_, boardLocation)
+
+    ZO_HELP_OVERLAY_SYNC_OBJECT:SetHandler("OnShown", function(isVisible)
+        self:RequestClose()
+    end, "tributePileViewer")
+end
+
+function ZO_TributePileViewer_Manager:RegisterForEvents(systemName)
+    ZO_TributeViewer_Manager_Base.RegisterForEvents(self, systemName)
+    EVENT_MANAGER:RegisterForEvent(systemName, EVENT_TRIBUTE_PILE_UPDATED, function(_, boardLocation)
         local viewingPileChanged = false
-        local compositePileData = compositePilesData[boardLocation]
+        local compositePileData = self:GetCompositePileData(boardLocation)
         if compositePileData then
             compositePileData:MarkDirty()
-            if compositePileData.overrideViewer and self.isViewingPileLocation and ZO_IsElementInNumericallyIndexedTable(compositePileData:GetBoardLocations(), self.isViewingPileLocation) then 
+            if compositePileData.overrideViewer and self.viewingPileLocation and ZO_IsElementInNumericallyIndexedTable(compositePileData:GetBoardLocations(), self.viewingPileLocation) then 
                 viewingPileChanged = true
             end
         end
 
-        local pileData = self.pilesData[boardLocation]
+        local pileData = self:GetPileData(boardLocation)
         if pileData then
             pileData:MarkDirty()
             if self.viewingPileLocation == boardLocation then
@@ -91,44 +99,66 @@ function ZO_TributePileViewer_Manager:Initialize()
         end
     end)
 
-    EVENT_MANAGER:RegisterForEvent("TributePileViewer_Manager", EVENT_TRIBUTE_VIEW_PILE, function(_, boardLocation)
+    --Mark all pile data dirty when the board is cleared
+    EVENT_MANAGER:RegisterForEvent(systemName, EVENT_TRIBUTE_CLEAR_BOARD_CARDS, function()
+        local viewingPileChanged = false
+        for _, compositePileData in pairs(self.compositePilesData) do
+            compositePileData:MarkDirty()
+            if compositePileData.overrideViewer and self.viewingPileLocation and ZO_IsElementInNumericallyIndexedTable(compositePileData:GetBoardLocations(), self.viewingPileLocation) then 
+                viewingPileChanged = true
+            end
+        end
+
+        for boardLocation, pileData in pairs(self.pilesData) do
+            pileData:MarkDirty()
+            if self.viewingPileLocation == boardLocation then
+                viewingPileChanged = true
+            end
+        end
+
+        if viewingPileChanged then
+            self:FireCallbacks("ViewingPileChanged", self.viewingPileLocation)
+        end
+    end)
+
+    EVENT_MANAGER:RegisterForEvent(systemName, EVENT_TRIBUTE_VIEW_PILE, function(_, boardLocation)
         local pileData = self:GetPileData(boardLocation)
         if pileData then
             self:SetViewingPile(boardLocation)
         end
     end)
 
-    EVENT_MANAGER:RegisterForEvent("TributePileViewer_Manager", EVENT_TRIBUTE_CARD_STATE_FLAGS_CHANGED, function(_, cardInstanceId, stateFlags)
-        if self:IsViewingPile() then
+    EVENT_MANAGER:RegisterForEvent(systemName, EVENT_TRIBUTE_CARD_STATE_FLAGS_CHANGED, function(_, cardInstanceId, stateFlags)
+        if self:IsActive() then
             self:FireCallbacks("CardStateFlagsChanged", cardInstanceId, stateFlags)
         end
     end)
 
-    EVENT_MANAGER:RegisterForEvent("TributePileViewer_Manager", EVENT_TRIBUTE_AGENT_DEFEAT_COST_CHANGED, function(_, cardInstanceId, delta, newDefeatCost, shouldPlayFx)
-        if self:IsViewingPile() then
+    EVENT_MANAGER:RegisterForEvent(systemName, EVENT_TRIBUTE_AGENT_DEFEAT_COST_CHANGED, function(_, cardInstanceId, delta, newDefeatCost, shouldPlayFx)
+        if self:IsActive() then
             self:FireCallbacks("AgentDefeatCostChanged", cardInstanceId, delta, newDefeatCost, shouldPlayFx)
         end
     end)
 
-    EVENT_MANAGER:RegisterForEvent("TributePileViewer_Manager", EVENT_TRIBUTE_BEGIN_TARGET_SELECTION, function(_, needsTargetViewer)
+    EVENT_MANAGER:RegisterForEvent(systemName, EVENT_TRIBUTE_AGENT_CONFINEMENTS_CHANGED, function(_, agentInstanceId)
+        if self:IsActive() then
+            self:FireCallbacks("ConfinedCardsChanged", agentInstanceId)
+        end
+    end)
+
+    EVENT_MANAGER:RegisterForEvent(systemName, EVENT_TRIBUTE_BEGIN_TARGET_SELECTION, function(_, needsTargetViewer)
         --Close the viewer if target selection begins
-        if self:IsViewingPile() then
-            local NO_PILE = nil
-            self:SetViewingPile(NO_PILE)
+        if self:IsActive() then
+            self:RequestClose()
         end
     end)
 
-    EVENT_MANAGER:RegisterForEvent("TributePileViewer_Manager", EVENT_TRIBUTE_BEGIN_MECHANIC_SELECTION, function(_, cardInstanceId)
+    EVENT_MANAGER:RegisterForEvent(systemName, EVENT_TRIBUTE_BEGIN_MECHANIC_SELECTION, function(_, cardInstanceId)
         --Close the viewer if mechanic selection begins
-        if self:IsViewingPile() then
-            local NO_PILE = nil
-            self:SetViewingPile(NO_PILE)
+        if self:IsActive() then
+            self:RequestClose()
         end
     end)
-
-    ZO_HELP_OVERLAY_SYNC_OBJECT:SetHandler("OnShown", function(isVisible)
-        self:SetViewingPile(nil)
-    end, "tributePileViewer")
 end
 
 function ZO_TributePileViewer_Manager:GetPileData(boardLocation)
@@ -155,15 +185,65 @@ function ZO_TributePileViewer_Manager:GetCurrentPileData()
     end
 end
 
-function ZO_TributePileViewer_Manager:IsViewingPile()
+function ZO_TributePileViewer_Manager:SetViewingPile(boardLocation)
+    if self.viewingPileLocation ~= boardLocation then
+        --Order matters. Set the pile location before firing the activation state change
+        self.viewingPileLocation = boardLocation
+        self:FireActivationStateChanged()
+        self:FireCallbacks("ViewingPileChanged", self.viewingPileLocation)
+    end
+end
+
+function ZO_TributePileViewer_Manager:OpenConfinementViewer(cardData)
+    --Cache which pile we are currently looking at before closing the pile viewer and opening the confinement viewer
+    self.cachedViewingPileLocation = self.viewingPileLocation
+    self:RequestClose()
+    cardData:ShowConfinedCards(self)
+end
+
+function ZO_TributePileViewer_Manager:OpenFromConfinementViewer(isInterceptingCloseAction)
+    --Once the confinement viewer closes, if we had a cached pile we were previously looking at, try to re-open it
+    if self.cachedViewingPileLocation then
+        --Do not try to re-open the pile viewer if the user pressed escape
+        if not isInterceptingCloseAction then
+            self:SetViewingPile(self.cachedViewingPileLocation)
+        end
+        self.cachedViewingPileLocation = nil
+    end
+end
+
+-- Required Overrides
+
+function ZO_TributePileViewer_Manager:GetSystemName()
+    return "TributePileViewer_Manager"
+end
+
+function ZO_TributePileViewer_Manager:OnGamepadPreferredModeChanged()
+    --If the viewer is already up, we need to close and reopen it to make sure it switches to the correct UI
+    if self:IsActive() then
+        local pileLocation = self.viewingPileLocation
+        self:RequestClose()
+        self:SetViewingPile(pileLocation)
+    end
+end
+
+--The pile viewer does not have functionality for viewing the board while it's open
+function ZO_TributePileViewer_Manager:IsViewingBoard()
+    return false
+end
+
+function ZO_TributePileViewer_Manager:IsActive()
     return self.viewingPileLocation ~= nil
 end
 
-function ZO_TributePileViewer_Manager:SetViewingPile(boardLocation)
-    if self.viewingPileLocation ~= boardLocation then
-        self.viewingPileLocation = boardLocation
-        self:FireCallbacks("ViewingPileChanged", self.viewingPileLocation)
-    end
+--The pile viewer always has a visible keybind strip
+function ZO_TributePileViewer_Manager:IsKeybindStripVisible()
+    return true
+end
+
+function ZO_TributePileViewer_Manager:RequestClose()
+    local NO_PILE = nil
+    self:SetViewingPile(NO_PILE)
 end
 
 ZO_TRIBUTE_PILE_VIEWER_MANAGER = ZO_TributePileViewer_Manager:New()

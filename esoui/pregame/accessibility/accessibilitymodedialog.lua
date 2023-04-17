@@ -90,9 +90,7 @@ function ZO_AccessibilityModePrompt_OnContinueClicked()
     if ACCESSIBILITY_MODE_PROMPT_FRAGMENT.accessibilityModeEnabled then
         SetSetting(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE, "true")
     else
-        if not IsHeronUI() then
-            SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE, INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD)
-        end
+        SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE, INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD)
         SetCVar("PregameAccessibilityPromptEnabled", "false")
         PregameStateManager_SetState("ScreenAdjustIntro")
     end

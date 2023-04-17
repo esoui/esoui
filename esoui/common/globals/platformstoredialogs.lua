@@ -42,10 +42,6 @@ function ZO_ShowBuyCrownsPlatformDialog()
     OnMarketPurchaseMoreCrowns()
     if DoesPlatformStoreUseExternalLinks() then 
         ZO_PlatformOpenApprovedURL(APPROVED_URL_ESO_ACCOUNT_STORE, ZO_GetPlatformStoreName(), GetString(SI_URL_APPLICATION_WEB))
-    elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
-        -- A temporary solution until Stadia goes away next update.
-        -- This will just redirect to the generic confirm url dialog
-        ShowPlatformESOCrownPacksUI()
     else
         ZO_Dialogs_ShowPlatformDialog("BUY_CROWNS_FROM_PLATFORM_STORE", nil, { mainTextParams = { ZO_Currency_FormatKeyboard(CURT_CROWNS, NO_AMOUNT, ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON), ZO_GetPlatformStoreName() } })
     end
@@ -66,22 +62,14 @@ ESO_Dialogs["BUY_ESO_PLUS_FROM_PLATFORM_STORE"] =
     mainText =
     {
         text = function()
-            if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
-                return SI_OPEN_STORE_TO_BUY_PLUS_TEXT_HERON
-            else
-                return zo_strformat(SI_OPEN_STORE_TO_BUY_PLUS_TEXT, ZO_GetPlatformStoreName())
-            end
+            return zo_strformat(SI_OPEN_STORE_TO_BUY_PLUS_TEXT, ZO_GetPlatformStoreName())
         end,
     },
     buttons =
     {
         {
             text = function()
-                if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
-                    return GetString(SI_START_HERON_PURCHASE_FLOW)
-                else
-                    return zo_strformat(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, ZO_GetPlatformStoreName())
-                end
+                return zo_strformat(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, ZO_GetPlatformStoreName())
             end,
             callback =  function(dialog)
                 ShowPlatformESOPlusSubscriptionUI()
@@ -96,10 +84,6 @@ ESO_Dialogs["BUY_ESO_PLUS_FROM_PLATFORM_STORE"] =
 function ZO_ShowBuySubscriptionPlatformDialog()
     if DoesPlatformStoreUseExternalLinks() then
         ZO_PlatformOpenApprovedURL(APPROVED_URL_ESO_ACCOUNT_SUBSCRIPTION, ZO_GetPlatformStoreName(), GetString(SI_URL_APPLICATION_WEB))
-    elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
-        -- A temporary solution until Stadia goes away next update.
-        -- This will just redirect to the generic confirm url dialog
-        ShowPlatformESOPlusSubscriptionUI()
     else
         ZO_Dialogs_ShowPlatformDialog("BUY_ESO_PLUS_FROM_PLATFORM_STORE")
     end
@@ -130,8 +114,6 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
                     return SI_OPEN_CHAPTER_PREPURCHASE_STEAM
                 elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_EPIC then
                     return SI_OPEN_CHAPTER_PREPURCHASE_EPIC
-                elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
-                    return SI_OPEN_CHAPTER_PREPURCHASE_HERON
                 elseif DoesPlatformStoreUseExternalLinks() then
                     return zo_strformat(SI_OPEN_CHAPTER_PREPURCHASE_WEB, ZO_GetPlatformStoreName())
                 else
@@ -143,8 +125,6 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
                     mainText = GetString(SI_OPEN_CHAPTER_UPGRADE_STEAM)
                 elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_EPIC then
                     mainText = GetString(SI_OPEN_CHAPTER_UPGRADE_EPIC)
-                elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
-                    mainText = GetString(SI_OPEN_CHAPTER_UPGRADE_HERON)
                 elseif DoesPlatformStoreUseExternalLinks() then
                     mainText = zo_strformat(SI_OPEN_CHAPTER_UPGRADE_WEB, ZO_GetPlatformStoreName())
                 else
@@ -164,11 +144,7 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
     {
         {
             text = function()
-                if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
-                    return GetString(SI_START_HERON_PURCHASE_FLOW)
-                else
-                    return GetString(SI_DIALOG_UPGRADE)
-                end
+                return GetString(SI_DIALOG_UPGRADE)
             end,
             callback = function(dialog)
                 if DoesPlatformStoreUseExternalLinks() then

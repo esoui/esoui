@@ -59,9 +59,13 @@ function ZO_ChapterUpgrade_Shared:Initialize(control, sceneName)
 end
 
 function ZO_ChapterUpgrade_Shared:OnChapterUpgradeDataUpdated()
-    local chapterUpgradeId = GetCurrentChapterUpgradeId()
-    if IsChapterOwned(chapterUpgradeId) then
-        self:Hide()
+    -- Note that EVENT_ENTITLEMENT_STATE_CHANGED could happen before we've fully loaded data
+    -- If we're showing then we should be fine, plus we only want to handle this if we're showing to begin with
+    if SCENE_MANAGER:IsShowing(self.sceneName) then
+        local chapterUpgradeId = GetCurrentChapterUpgradeId()
+        if IsChapterOwned(chapterUpgradeId) then
+            self:Hide()
+        end
     end
 end
 

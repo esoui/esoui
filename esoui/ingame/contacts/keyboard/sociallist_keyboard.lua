@@ -18,11 +18,6 @@ end
 function ZO_SocialListKeyboard:ColorRow(control, data, mouseIsOver)
     local textColor, iconColor = self:GetRowColors(data, mouseIsOver)
     ZO_SocialList_ColorRow(control, data, textColor, iconColor, textColor)
-
-    local heronUserInfoTexture = control:GetNamedChild("HeronUserInfoIcon")
-    if heronUserInfoTexture then
-        heronUserInfoTexture:SetColor(iconColor:UnpackRGBA())
-    end
 end
 
 function ZO_SocialListKeyboard:SharedSocialSetup(control, data)
@@ -79,24 +74,6 @@ function ZO_SocialListKeyboard:DisplayName_OnMouseEnter(control)
 end
 
 function ZO_SocialListKeyboard:DisplayName_OnMouseExit(control)
-    ClearTooltip(InformationTooltip)
-    local row = control:GetParent()
-    self:ExitRow(row)
-end
-
-function ZO_SocialListKeyboard:HeronUserInfo_OnMouseEnter(control)
-    local row = control:GetParent()
-    local data = ZO_ScrollList_GetData(row)
-    
-    if data.isHeronUser then
-        InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
-        SetTooltipText(InformationTooltip, ZO_FormatUserFacingHeronName(data.heronName))
-    end
-
-    self:EnterRow(row)
-end
-
-function ZO_SocialListKeyboard:HeronUserInfo_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
     local row = control:GetParent()
     self:ExitRow(row)

@@ -9,14 +9,14 @@
     OnSelected(entryData)
 ]]--
 
--- Heron server select behaves like PC server select; it lists all platforms from platforms.xml directly.
-local ZO_HeronServerSelector = ZO_InitializingObject:Subclass()
+-- PC server select lists all platforms from platforms.xml directly.
+local ZO_PCServerSelector = ZO_InitializingObject:Subclass()
 
-function ZO_HeronServerSelector:Initialize(owner)
+function ZO_PCServerSelector:Initialize(owner)
     self.owner = owner
 end
 
-function ZO_HeronServerSelector:OnDeferredInitialize()
+function ZO_PCServerSelector:OnDeferredInitialize()
     local entries = {}
 
     for platformIndex = 1, GetNumPlatforms() do
@@ -30,15 +30,15 @@ function ZO_HeronServerSelector:OnDeferredInitialize()
     self.entries = entries
 end
 
-function ZO_HeronServerSelector:OnShowing()
+function ZO_PCServerSelector:OnShowing()
     self.selectedPlatformName = GetCVar("LastPlatform")
 end
 
-function ZO_HeronServerSelector:GetServerEntries()
+function ZO_PCServerSelector:GetServerEntries()
     return self.entries
 end
 
-function ZO_HeronServerSelector:GetCurrentlySelectedEntry()
+function ZO_PCServerSelector:GetCurrentlySelectedEntry()
     local entries = self:GetServerEntries()
     for _, entry in ipairs(entries) do
         if entry.platformName == self.selectedPlatformName then
@@ -48,11 +48,11 @@ function ZO_HeronServerSelector:GetCurrentlySelectedEntry()
     return nil
 end
 
-function ZO_HeronServerSelector:OnPlayButtonPressed()
+function ZO_PCServerSelector:OnPlayButtonPressed()
     -- do nothing, we already saved/applied our choice
 end
 
-function ZO_HeronServerSelector:OnSelectedFromInitialList(entryData)
+function ZO_PCServerSelector:OnSelectedFromInitialList(entryData)
     -- Called when selecting a server for the first time
     SetCVar("IsServerSelected", "true")
     SetCVar("LastPlatform", entryData.platformName)
@@ -60,7 +60,7 @@ function ZO_HeronServerSelector:OnSelectedFromInitialList(entryData)
     self.selectedPlatformName = entryData.platformName
 end
 
-function ZO_HeronServerSelector:OnSelected(entryData)
+function ZO_PCServerSelector:OnSelected(entryData)
     if entryData.platformName ~= self.selectedPlatformName then
         SetCVar("LastPlatform", entryData.platformName)
         SetSelectedPlatform(entryData.platformIndex)
@@ -186,8 +186,8 @@ function ZO_GameStartup_Gamepad:Initialize(control)
     self.profileSaveInProgress = false
     if IsConsoleUI() then
         self.serverSelector = ZO_ConsoleServerSelector:New(self)
-    elseif IsHeronUI() or ZO_IsPCUI() then -- TODO pregame: rename ZO_HeronServerSelector?
-        self.serverSelector = ZO_HeronServerSelector:New(self)
+    elseif ZO_IsPCUI() then
+        self.serverSelector = ZO_PCServerSelector:New(self)
     elseif IsGamepadUISupported() then
         internalassert(false, "Server selection not implemented")
     end
@@ -281,7 +281,7 @@ end
 
 function ZO_GameStartup_Gamepad:RefreshHeader(titleText)
     local accountName
-    if ZO_IsForceConsoleOrHeronFlow() then
+    if ZO_IsForceConsoleFlow() then
         accountName = DecorateDisplayName(GetCVar("AccountName"))
     elseif ZO_IsPCUI() then
         -- PC UI will not show account name in the header since we need to specify a username and password

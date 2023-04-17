@@ -1,13 +1,4 @@
-
-----------------
---Initialization
-----------------
-
 ZO_GamepadFenceComponent = ZO_GamepadStoreListComponent:Subclass()
-
-function ZO_GamepadFenceComponent:New(...)
-    return ZO_GamepadStoreListComponent.New(self, ...)
-end
 
 function ZO_GamepadFenceComponent:Initialize(mode, title)
     ZO_GamepadStoreListComponent.Initialize(self, STORE_WINDOW_GAMEPAD, mode, title)

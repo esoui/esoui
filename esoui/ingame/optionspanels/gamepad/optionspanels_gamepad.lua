@@ -513,6 +513,23 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_ACCESSIBILITY,
             settingId = ACCESSIBILITY_SETTING_NARRATION_VOICE_TYPE,
         },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY,
+            header = SI_ACCESSIBILITY_OPTIONS_ARCANIST,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_MOUSE_AIM_ASSIST_INTENSITY,
+            header = SI_ACCESSIBILITY_OPTIONS_ARCANIST,
+        },
     },
     [SETTING_PANEL_AUDIO] =
     {
@@ -655,6 +672,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_AVA_NOTIFICATIONS,
+        },
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_GUILD_KEEP_NOTICES,
         },
         {
             panel = SETTING_PANEL_SOCIAL,
@@ -820,6 +842,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_INTERFACE,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_QUEST_TRACKER,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_AUTOMATIC_QUEST_TRACKING,
         },
         {
             panel = SETTING_PANEL_INTERFACE,

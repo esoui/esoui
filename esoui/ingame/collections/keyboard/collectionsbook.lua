@@ -75,6 +75,8 @@ function ZO_CollectionsBook:InitializeWheel()
         numSlots = ACTION_BAR_UTILITY_BAR_SIZE,
         includeHiddenState = true,
         showCategoryLabel = true,
+        --Display the accessibility keybinds on the wheel if the setting is enabled
+        showKeybinds = ZO_AreTogglableWheelsEnabled,
     }
     self.wheel = ZO_AssignableUtilityWheel_Keyboard:New(self.wheelControl, wheelData)
 end
@@ -92,6 +94,7 @@ function ZO_CollectionsBook:InitializeEvents()
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUserFlagsUpdated", function(...) self:OnCollectibleUserFlagsUpdated(...) end)
 
     self.refreshGroups = ZO_Refresh:New()
     self.refreshGroups:AddRefreshGroup("FullUpdate",
@@ -210,13 +213,15 @@ function ZO_CollectionsBook:InitializeGridListPanel()
 
     local gridListPanel = self.control:GetNamedChild("List")
     self.gridListPanelControl = gridListPanel
-    self.gridListPanelList = ZO_SingleTemplateGridScrollList_Keyboard:New(gridListPanel, ZO_GRID_SCROLL_LIST_AUTOFILL)
+    self.gridListPanelList = ZO_GridScrollList_Keyboard:New(gridListPanel, ZO_GRID_SCROLL_LIST_AUTOFILL)
 
     local HIDE_CALLBACK = nil
     local CENTER_ENTRIES = true --TODO: Remove this when it's the default
     local HEADER_HEIGHT = 30
-    self.gridListPanelList:SetGridEntryTemplate("ZO_CollectibleTile_Keyboard_Control", ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X, ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, COLLECTIBLE_TILE_GRID_PADDING, COLLECTIBLE_TILE_GRID_PADDING, CENTER_ENTRIES)
-    self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
+    self.gridListPanelList:AddEntryTemplate("ZO_CollectibleTile_Keyboard_Control", ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X, ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, COLLECTIBLE_TILE_GRID_PADDING, COLLECTIBLE_TILE_GRID_PADDING, CENTER_ENTRIES)
+    self.gridListPanelList:AddEntryTemplate("ZO_CollectibleImitationTile_Keyboard_Control", ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X, ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, COLLECTIBLE_TILE_GRID_PADDING, COLLECTIBLE_TILE_GRID_PADDING, CENTER_ENTRIES)
+    self.gridListPanelList:SetAutoFillEntryTemplate("ZO_CollectibleTile_Keyboard_Control")
+    self.gridListPanelList:AddHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
     self.gridListPanelList:SetHeaderPrePadding(COLLECTIBLE_TILE_GRID_PADDING * 3)
 end
 
@@ -403,19 +408,47 @@ do
         if categoryData then
             local SORTED = true
             local collectiblesData = GetCollectiblesDataFromCategory(categoryData, SORTED)
+            local randomSelectionTilesProcessed = false
 
             for _, collectibleData in ipairs(collectiblesData) do
                 if ShouldAddCollectible(self.categoryFilterComboBox.filterType, collectibleData) then
+                    if not randomSelectionTilesProcessed then
+                        local collectibleCategoryTypesInCategory = categoryData:GetCollectibleCategoryTypesInCategory()
+                        if collectibleCategoryTypesInCategory[COLLECTIBLE_CATEGORY_TYPE_MOUNT] then
+                            local randomMountEntryData = self.entryDataObjectPool:AcquireObject()
+                            local setRandomFavoriteMountData = ZO_RandomMountCollectibleData:New(RANDOM_MOUNT_TYPE_FAVORITE)
+                            randomMountEntryData:SetDataSource(setRandomFavoriteMountData)
+                            randomMountEntryData.gridHeaderTemplate = ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD
+                            randomMountEntryData.gridHeaderName = ""
+                            gridListPanelList:AddEntry(randomMountEntryData, "ZO_CollectibleImitationTile_Keyboard_Control")
+
+                            randomMountEntryData = self.entryDataObjectPool:AcquireObject()
+                            local setAnyRandomMountData = ZO_RandomMountCollectibleData:New(RANDOM_MOUNT_TYPE_ANY)
+                            randomMountEntryData:SetDataSource(setAnyRandomMountData)
+                            randomMountEntryData.gridHeaderTemplate = ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD
+                            randomMountEntryData.gridHeaderName = ""
+                            gridListPanelList:AddEntry(randomMountEntryData, "ZO_CollectibleImitationTile_Keyboard_Control")
+                        end
+
+                        randomSelectionTilesProcessed = true
+                    end
+
                     local entryData = self.entryDataObjectPool:AcquireObject()
                     entryData:SetDataSource(collectibleData)
-                    local headerState = collectibleData:IsUnlocked() and COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED or COLLECTIBLE_UNLOCK_STATE_LOCKED
-                    entryData.gridHeaderName = GetString("SI_COLLECTIBLEUNLOCKSTATE", headerState)
+                    entryData.gridHeaderTemplate = ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD
+                    if collectibleData:IsFavorite() then
+                        entryData.gridHeaderName = GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER)
+                    else
+                        local headerState = collectibleData:IsUnlocked() and COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED or COLLECTIBLE_UNLOCK_STATE_LOCKED
+                        entryData.gridHeaderName = GetString("SI_COLLECTIBLEUNLOCKSTATE", headerState)
+                    end
+                    
                     if self.hotbarCategory then
                         entryData.utilityWheel = self.wheel
                     else
                         entryData.utilityWheel = nil
                     end
-                    gridListPanelList:AddEntry(entryData)
+                    gridListPanelList:AddEntry(entryData, "ZO_CollectibleTile_Keyboard_Control")
                 end
             end
         end
@@ -490,6 +523,20 @@ function ZO_CollectionsBook:OnCollectibleNewStatusCleared(collectibleId)
     self:OnCollectibleStatusUpdated(collectibleId)
 end
 
+function ZO_CollectionsBook:OnCollectibleUserFlagsUpdated(collectibleId)
+    -- Please update handling as further flags are added
+    internalassert(COLLECTIBLE_USER_FLAG_MAX_VALUE == 1)
+    
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+    if collectibleData then
+        local categoryData = collectibleData:GetCategoryData()
+        local selectedCategoryData = self.categoryTree:GetSelectedData()
+        if categoryData == selectedCategoryData  then
+            self:BuildContentList(categoryData)
+        end
+    end
+end
+
 function ZO_CollectionsBook:BrowseToCollectible(collectibleId)
     self.refreshGroups:UpdateRefreshGroups() --In case we need to rebuild the categories before we select a category
 
@@ -528,7 +575,7 @@ end
 function ZO_CollectionsBook:GetEntryByCollectibleId(collectibleId)
     local entries = self.entryDataObjectPool:GetActiveObjects()
     for _, entry in pairs(entries) do
-        if entry:GetId() == collectibleId then
+        if entry.GetId and entry:GetId() == collectibleId then
             return entry
         end
     end
@@ -549,7 +596,13 @@ function ZO_CollectionsBook.ShowRenameDialog(collectibleId)
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
         if collectibleData then
             local nickname = collectibleData:GetNickname()
-            ZO_Dialogs_ShowDialog("COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE", { collectibleId = collectibleId }, { initialEditText = nickname })
+            local defaultNickname = collectibleData:GetDefaultNickname()
+            --Only pre-fill the edit text if it's different from the default nickname
+            local initialEditText = ""
+            if nickname ~= defaultNickname then
+                initialEditText = nickname
+            end
+            ZO_Dialogs_ShowDialog("COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE", { collectibleId = collectibleId }, { initialEditText = initialEditText, initialDefaultText = defaultNickname})
         end
     end
 end
@@ -563,4 +616,70 @@ end
 
 function ZO_CollectionsBook_OnSearchTextChanged(editBox)
     COLLECTIONS_BOOK_SINGLETON:SetSearchString(editBox:GetText())
+end
+
+function ZO_CollectibleRenameDialog_OnInitialized(control)
+    ZO_Dialogs_RegisterCustomDialog("COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE",
+    {
+        title =
+        {
+            text = SI_COLLECTIONS_INVENTORY_DIALOG_RENAME_COLLECTIBLE_TITLE,
+        },
+        mainText =
+        {
+            text = "",
+        },
+        setup = function(dialog, data, textParams)
+            --Set up the rules for the edit box
+            local editControl = dialog:GetNamedChild("ContentContainerEditBox")
+            editControl:SetTextType(TEXT_TYPE_ALL)
+            editControl:SetMaxInputChars(COLLECTIBLE_NAME_MAX_LENGTH)
+
+            local defaultText = textParams.initialDefaultText or ""
+            editControl:SetDefaultText(defaultText)
+
+            if textParams.initialEditText then
+                editControl:SetText(textParams.initialEditText)
+            end
+
+            editControl:SelectAll()
+        end,
+        customControl = control,
+        buttons =
+        {
+            {
+                noReleaseOnClick = true,
+                control = control:GetNamedChild("KeybindsOk"),
+                text = SI_OK,
+                callback = function(dialog)
+                    local editControl = dialog:GetNamedChild("ContentContainerEditBox")
+                    local inputText = editControl:GetText()
+                    if inputText then
+                        local violations = { IsValidCollectibleName(inputText) }
+                        if #violations == 0 then
+                            local collectibleId = dialog.data.collectibleId
+                            RenameCollectible(collectibleId, inputText)
+                            ZO_Dialogs_ReleaseDialog("COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE")
+                        end
+                    end
+                end
+            },
+            {
+                control = control:GetNamedChild("KeybindsCancel"),
+                text = SI_DIALOG_CANCEL,
+            },
+            {
+                control = control:GetNamedChild("KeybindsDefault"),
+                text = SI_COLLECTIONS_INVENTORY_DIALOG_DEFAULT_NAME,
+                keybind = "DIALOG_SECONDARY",
+                noReleaseOnClick = true,
+                callback = function(dialog)
+                    local editControl = dialog:GetNamedChild("ContentContainerEditBox")
+                    if editControl then
+                        editControl:SetText("")
+                    end
+                end
+            }
+        }
+    })
 end

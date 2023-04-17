@@ -109,9 +109,20 @@ function ZO_GamepadGuildHome:RefreshHeader(blockTabBarCallbacks)
     ZO_GamepadGenericHeader_Refresh(self.contentHeader, contentHeaderData)
 
     -- list header
-    self.headerData.messageText = nil;
-    if(self.currentFragment == GUILD_RANKS_GAMEPAD_FRAGMENT) then
+    self.headerData.messageText = nil
+    self.headerData.data1HeaderText = nil
+    self.headerData.data1Text = nil
+    self.headerData.data2HeaderText = nil
+    self.headerData.data2Text = nil
+
+    if self.currentFragment == GUILD_RANKS_GAMEPAD_FRAGMENT then
         self.headerData.messageText = GUILD_RANKS_GAMEPAD:GetMessageText()
+    elseif self.currentFragment == GUILD_RECRUITMENT_GAMEPAD_FRAGMENT then
+        local headerData = GUILD_RECRUITMENT_GAMEPAD:GetHeaderData()
+        self.headerData.data1HeaderText = headerData.data1HeaderText
+        self.headerData.data1Text = headerData.data1Text
+        self.headerData.data2HeaderText = headerData.data2HeaderText
+        self.headerData.data2Text = headerData.data2Text
     end
 
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData, blockTabBarCallbacks)

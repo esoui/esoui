@@ -30,7 +30,10 @@ function ZO_GamepadTradingHouse_Browse:InitializeFeatures()
     }
 
     local function PriceRangeFocusLost()
-        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+        --Only re-activate the list if we are still showing
+        if self:GetFragment():IsShowing() then
+            self:Activate()
+        end
     end
 
     self.features.priceRangeFeature:AttachToControl(self.control:GetNamedChild("PriceSelectorContainer"), PriceRangeFocusLost)
@@ -142,6 +145,7 @@ end
 
 function ZO_GamepadTradingHouse_Browse:FocusPriceSelector(priceSelectorData)
     self.features.priceRangeFeature:FocusPriceSelector(priceSelectorData)
+    self:Deactivate()
 end
 
 function ZO_GamepadTradingHouse_Browse:UnfocusPriceSelector()

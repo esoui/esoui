@@ -11,7 +11,6 @@ FRIENDS_LIST_ENTRY_SORT_KEYS =
 {
     ["displayName"] = { },
     ["characterName"] = { },
-    ["isHeronUser"] = { tiebreaker = "status" },
     ["status"]  = { tiebreaker = "normalizedLogoffSort", isNumeric = true  },
     ["class"]  = { tiebreaker = "displayName" },
     ["formattedZone"]  = { tiebreaker = "displayName" },
@@ -53,9 +52,6 @@ function ZO_FriendsList:Initialize()
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_CHARACTER_CHAMPION_POINTS_CHANGED, function(_, displayName, characterName, championPoints) self:OnFriendCharacterChampionPointsChanged(displayName, characterName, championPoints) end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_NOTE_UPDATED, function(_, displayName, note) self:OnFriendNoteUpdated(displayName, note) end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_PLAYER_STATUS_CHANGED, function(_, displayName, characterName, oldStatus, newStatus) self:OnFriendPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
-    if IsHeronUI() then
-        EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_HERON_INFO_BATCH_UPDATED, function(_) self:OnHeronInfoBatchUpdated() end)
-    end
 end
 
 function ZO_FriendsList:GetNumOnline()
@@ -87,11 +83,6 @@ end
 function ZO_FriendsList:CreateFriendData(friendIndex, displayName, note, status)
     local hasCharacter, characterName, zone, class, alliance, level, championPoints, zoneId, consoleId = GetFriendCharacterInfo(friendIndex)
 
-    local heronName
-    if IsHeronUI() then
-        heronName = GetFriendHeronName(friendIndex)
-    end
-
     local data =
     {
         friendIndex = friendIndex,
@@ -109,8 +100,6 @@ function ZO_FriendsList:CreateFriendData(friendIndex, displayName, note, status)
         note = note,
         type = SOCIAL_NAME_SEARCH,
         status = status,
-        heronName = heronName,
-        isHeronUser = heronName ~= nil,
     }
 
     return data
@@ -269,10 +258,6 @@ function ZO_FriendsList:OnFriendPlayerStatusChanged(displayName, characterName, 
 
         self:RefreshFilters()
     end
-end
-
-function ZO_FriendsList:OnHeronInfoBatchUpdated()
-    self:RefreshData()
 end
 
 function ZO_FriendsList:OnNumTotalFriendsChanged()

@@ -34,6 +34,32 @@ function ZO_ColorPicker_Gamepad:Initialize(control)
     alphaSliderBackgroundTextureSizing:AddAnchor(TOPLEFT, self.alphaSlider, TOPLEFT, -6, -6)
     alphaSliderBackgroundTextureSizing:AddAnchor(BOTTOMRIGHT, self.alphaSlider, BOTTOMRIGHT, 6, 6)
 
+    -- Handle action bind switching
+    self.colorSelectGamepadBinding = self.colorSelect:GetNamedChild("Binding")
+    self.colorSelectKeyboardBinding = self.colorSelect:GetNamedChild("KeyboardBinding")
+
+    self.valueSliderGamepadBinding = self.valueSlider:GetNamedChild("Binding")
+    self.valueSliderKeyboardBinding = self.valueSlider:GetNamedChild("KeyboardBinding")
+    self.valueSliderKeyboardUp = self.valueSliderKeyboardBinding:GetNamedChild("ScrollKeyUp")
+    self.valueSliderKeyboardDown = self.valueSliderKeyboardBinding:GetNamedChild("ScrollKeyDown")
+
+    local function OnInputChanged()
+        if IsInGamepadPreferredMode() then
+            local shouldShowGamepadBind = ZO_Keybindings_ShouldShowGamepadKeybind()
+            self.colorSelectGamepadBinding:SetHidden(not shouldShowGamepadBind)
+            self.valueSliderGamepadBinding:SetHidden(not shouldShowGamepadBind)
+            self.colorSelectKeyboardBinding:SetHidden(shouldShowGamepadBind)
+            self.valueSliderKeyboardBinding:SetHidden(shouldShowGamepadBind)
+        end
+    end
+
+    local SHOW_UNBOUND = true
+    local DEFAULT_GAMEPAD_ACTION_NAME = nil
+    ZO_Keybindings_RegisterLabelForBindingUpdate(self.valueSliderKeyboardUp, "UI_SHORTCUT_RIGHT_STICK_UP", SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, OnInputChanged)
+    ZO_Keybindings_RegisterLabelForBindingUpdate(self.valueSliderKeyboardDown, "UI_SHORTCUT_RIGHT_STICK_DOWN")
+    -- We only need to register one of the above with OnInputChanged because one call of that function does everything we need.
+    -- The color picker displays hard-coded arrow keys to match screen narration, rather than being based on any rebindable action.
+
     local function OnDialogReleased()
         self:OnDialogReleased()
     end
@@ -41,11 +67,11 @@ function ZO_ColorPicker_Gamepad:Initialize(control)
     ZO_Dialogs_RegisterCustomDialog("GAMEPAD_COLOR_PICKER",
     {
         customControl = control,
-        title = 
+        title =
         {
             text = SI_WINDOW_TITLE_COLOR_PICKER,
         },
-        gamepadInfo = 
+        gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.CUSTOM,
             allowShowOnNextScene = true,
@@ -165,5 +191,5 @@ end
 
 --[[ XML Handlers ]]--
 function ZO_ColorPicker_Gamepad_TopLevel_OnInitialized(self)
-	COLOR_PICKER_GAMEPAD = ZO_ColorPicker_Gamepad:New(self)
+    COLOR_PICKER_GAMEPAD = ZO_ColorPicker_Gamepad:New(self)
 end

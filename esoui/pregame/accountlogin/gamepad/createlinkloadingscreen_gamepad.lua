@@ -82,12 +82,7 @@ local function OnWorldListReceived()
 end
 
 local function OnNoLink()
-    if IsHeronUI() then
-        -- Account linking will be handled in an overlay, jump back to login so the user can manually continue once that's done
-        PregameStateManager_SetState("AccountLogin")
-    else
-        PregameStateManager_SetState("CreateLinkAccount")
-    end
+    PregameStateManager_SetState("CreateLinkAccount")
 end
 
 do
@@ -122,14 +117,6 @@ do
     end
 end
 
-local function OnCreateAccountFailure(eventId, failureReason)
-    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_GAMEPAD_GENERIC_LOGIN_ERROR), zo_strformat(SI_CREATEACCOUNT_FAILURE_MESSAGE, failureReason))
-end
-
-local function OnLinkAccountFailure(eventId, failureReason)
-    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_GAMEPAD_GENERIC_LOGIN_ERROR), zo_strformat(SI_LINKACCOUNT_FAILURE_MESSAGE, failureReason))
-end
-
 local function OnServerMaintenance(eventID, requeryTime)
     PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_SERVER_MAINTENANCE_DIALOG_TITLE), GetString(SI_SERVER_MAINTENANCE_DIALOG_TEXT))
 end
@@ -144,10 +131,6 @@ local function OnInvalidCredentials(eventId, errorCode, accountPageURL)
         badLoginString = GetString(SI_BAD_LOGIN_ZOS)
     end
     PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_GAMEPAD_GENERIC_LOGIN_ERROR), badLoginString)
-end
-
-local function OnPaymentExpired(eventId, errorCode, accountPageURL)
-    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_DIALOG_TITLE_PAYMENT_EXPIRED), GetString(SI_DIALOG_TEXT_PAYMENT_EXPIRED))
 end
 
 local function OnBadClientVersion()
@@ -215,10 +198,8 @@ local function OnCreateLinkLoadingError(eventId, loginError, linkingError, debug
         dialogText = GetString(SI_UNEXPECTED_ERROR)
     end
 
-    if IsConsoleUI() then
-        if not LINK_ACCOUNT_GAMEPAD:IsAccountValidForLinking(linkingError) then
-            LINK_ACCOUNT_GAMEPAD:ClearCredentials()
-        end
+    if not LINK_ACCOUNT_GAMEPAD:IsAccountValidForLinking(linkingError) then
+        LINK_ACCOUNT_GAMEPAD:ClearCredentials()
     end
 
     local errorString = zo_strformat(dialogText, GetString(SI_HELP_URL))
@@ -347,7 +328,7 @@ function ZO_CreateLinkLoading_Gamepad:InitializeOtpDialog()
                 entryData = submitEntryData,
             },
         },
-        updateFn = function()
+        updateFn = function(dialog)
             local dialogData = parametricDialog.data
             local timeLeftMs = dialogData.otpExpirationMs - GetFrameTimeMilliseconds()
             if timeLeftMs >= 0 then
@@ -409,6 +390,8 @@ function ZO_CreateLinkLoading_Gamepad:InitializeOtpDialog()
     })
 end
 
-function CreateLinkLoadingScreen_Gamepad_Initialize(self)
+-- XML Handlers --
+
+function ZO_CreateLinkLoadingScreen_Gamepad_Initialize(self)
     CREATE_LINK_LOADING_SCREEN_GAMEPAD = ZO_CreateLinkLoading_Gamepad:New(self)
 end

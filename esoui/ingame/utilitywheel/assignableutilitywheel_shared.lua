@@ -46,16 +46,25 @@ ZO_AssignableUtilityWheel_Shared = ZO_InitializingObject:Subclass()
             startSlotIndex = ACTION_BAR_FIRST_UTILITY_BAR_SLOT
         -overrideShowNameLabels: Whether or not to show the names of each slot. This overrides the default behavior for all hotbar categories used in this wheel. 
             -By default, the emote wheel category will show name labels and the rest will not.
+        -showKeybinds: Whether or not to show the accessibility keybinds underneath each slot. Can be a boolean or a function that returns a boolean
+            -If this field is not set, we will not show the keybinds
+            -If this is set to true, we will not display name labels, regardless of what overrideShowNameLabels is set to
         -showPendingIcon: Whether or not to show the icon of the item being slotted in the center of the wheel. Currently only supported for Gamepad
         -showCategoryLabel: Whether nor not to show the name of the wheel currently being displayed
         -includeHiddenState: Set this to true if we want one of the "Cycle Wheel" options to hide the wheel entirely
         -onSelectionChangedCallback: Function called when the selected entry on the wheel changes. Currently only supported for Gamepad
+        -onHotbarCategoryChangedCallback: Function called when the current hotbar category on the wheel changes.
         -overrideGamepadTooltip: Overrides the tooltip used when an entry is selected. Currently only supported for Gamepad.
             -If this field is not set, GAMEPAD_QUAD1_TOOLTIP will be used
-        --customNarrationObjectName: The unique name to use when registering the wheel for narration. Currently only supported for Gamepad.
+        -overrideTooltipScrollEnabled: Can be set to a boolean to indicate whether or not tooltip scrolling is enabled for this wheel. Currently only supported for Gamepad.
+            -If this field is not set, whether or not tooltip scrolling is enabled will be controlled via a keybind that only appears if this field has not been set.
+        -overrideActivateOnShow: Can be set to a boolean to indicate whether or not the radial menu for this wheel should activate on showing. Currently only supported for Gamepad.
+            -If this field is not set, we assume true
+        -customNarrationObjectName: The unique name to use when registering the wheel for narration. Currently only supported for Gamepad.
             -This field is required to be set for gamepad wheels in order for narration to function
-        --headerNarrationFunction: Function used to determine the header narration for this wheel. Currently only supported for Gamepad.
+        -headerNarrationFunction: Function used to determine the header narration for this wheel. Currently only supported for Gamepad.
             -If this field is not set, no header narration will be included
+            -If customNarrationObjectName is not set, this will do nothing
 ]]
 function ZO_AssignableUtilityWheel_Shared:Initialize(control, data)
     self.control = control
@@ -121,6 +130,9 @@ function ZO_AssignableUtilityWheel_Shared:CycleHotbarCategory()
     if nextHotbarCategoryIndex ~= self.currentHotbarCategoryIndex then
         self.currentHotbarCategoryIndex = nextHotbarCategoryIndex
         self:RefreshHotbarCategory()
+        if self.data.onHotbarCategoryChangedCallback then
+            self.data:onHotbarCategoryChangedCallback(nextHotbarCategoryIndex)
+        end
     end
 end
 
@@ -174,6 +186,10 @@ function ZO_AssignableUtilityWheel_Shared:SetHotbarCategories(hotbarCategories)
             self.data.hotbarCategories = hotbarCategories
             self:RefreshHotbarCategory()
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+            --If we are setting the hotbar categories this wheel supports to something new, assume the hotbar category changed
+            if self.data.onHotbarCategoryChangedCallback then
+                self.data:onHotbarCategoryChangedCallback(self.currentHotbarCategoryIndex)
+            end
         end
     end
 end
@@ -198,14 +214,20 @@ function ZO_AssignableUtilityWheel_Shared:Activate()
         end
     end
 
-    if self:IsActionTypeSupported(ACTION_TYPE_ITEM) then
-        self:UpdateAllSlots()
-    end
+    self:UpdateAllSlots()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_AssignableUtilityWheel_Shared:Deactivate()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_AssignableUtilityWheel_Shared:ShouldShowKeybinds()
+    if type(self.data.showKeybinds) == "function" then
+        return self.data.showKeybinds()
+    else
+        return self.data.showKeybinds
+    end
 end
 
 function ZO_AssignableUtilityWheel_Shared:CreateSlots()

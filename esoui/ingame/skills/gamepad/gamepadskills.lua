@@ -1,5 +1,3 @@
-ZO_GamepadSkills = ZO_Gamepad_ParametricList_Screen:Subclass()
-
 ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE = 1
 ZO_SKILL_ABILITY_DISPLAY_VIEW = 2
 
@@ -15,7 +13,7 @@ ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE = 3
 ZO_GamepadAssignableActionBar_PlayerQuickMenu = ZO_GamepadAssignableActionBar_QuickMenu_Base:Subclass()
 
 function ZO_GamepadAssignableActionBar_PlayerQuickMenu:SetupListTemplates()
-    local function MenuAbilityEntryTemplateSetup(control, skillEntry, selected, reselectingDuringRebuild, enabled, activated)ZO_GamepadSkillEntryTemplate_SetEntryInfoFromAllocator(skillEntry)
+    local function MenuAbilityEntryTemplateSetup(control, skillEntry, selected, reselectingDuringRebuild, enabled, activated)
         ZO_GamepadSkillEntryTemplate_SetEntryInfoFromAllocator(skillEntry)
         ZO_SharedGamepadEntry_OnSetup(control, skillEntry, selected, reselectingDuringRebuild, enabled, activated)
         ZO_GamepadSkillEntryTemplate_Setup(control, skillEntry, selected, activated, ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE)
@@ -25,6 +23,10 @@ function ZO_GamepadAssignableActionBar_PlayerQuickMenu:SetupListTemplates()
         control.header:SetText(skillEntry:GetHeader())
         local skillData = skillEntry.skillData
         control.skillRankHeader:SetText(skillData:GetSkillLineData():GetCurrentRank())
+    end
+
+    local function IsSkillEqual(leftSkillEntry, rightSkillEntry)
+        return leftSkillEntry.skillData == rightSkillEntry.skillData
     end
 
     self.list:AddDataTemplate("ZO_GamepadSimpleAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsSkillEqual)
@@ -64,10 +66,7 @@ end
 -- Gamepad Skills --
 --------------------
 
-function ZO_GamepadSkills:New(...)
-    local gamepadSkills = ZO_Gamepad_ParametricList_Screen.New(self, ...)
-    return gamepadSkills
-end
+ZO_GamepadSkills = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ZO_GamepadSkills:Initialize(control)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
@@ -92,7 +91,6 @@ function ZO_GamepadSkills:Initialize(control)
             self:SetMode(ZO_GAMEPAD_SKILLS_SKILL_LIST_BROWSE_MODE)
             self:RefreshHeader(GetString(SI_MAIN_MENU_SKILLS))
             self.categoryListRefreshGroup:TryClean()
-            self.assignableActionBar:Refresh()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.categoryKeybindStripDescriptor)
 
             if self.returnToAdvisor then
@@ -149,7 +147,6 @@ function ZO_GamepadSkills:Initialize(control)
             local targetSkillLineData = self.categoryList:GetTargetData().skillLineData
             self:SetMode(ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE)
             self:RefreshHeader(targetSkillLineData:GetFormattedName())
-            self.assignableActionBar:Refresh()
             --To pick up the new skill line that was just selected
             self.lineFilterListRefreshGroup:MarkDirty("List")
             self.lineFilterListRefreshGroup:TryClean()
@@ -527,7 +524,6 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             end
         elseif actionType == ZO_SKILL_POINT_ACTION.MORPH or actionType == ZO_SKILL_POINT_ACTION.REMORPH then
             local morphSkillData = skillProgressionData:GetSkillData()
-            local baseMorphSkillProgressionData = morphSkillData:GetMorphData(MORPH_SLOT_BASE)
             local mainTextData = { titleParams = { availablePoints } }
             local dialogData = { morphSkillData = morphSkillData }
 
@@ -814,17 +810,17 @@ function ZO_GamepadSkills:InitializeCategoryList()
     end)
 end
 
-local function MenuAbilityEntryTemplateSetup(control, skillEntry, selected, reselectingDuringRebuild, enabled, activated)
-    ZO_GamepadSkillEntryTemplate_SetEntryInfoFromAllocator(skillEntry)
-    ZO_SharedGamepadEntry_OnSetup(control, skillEntry, selected, reselectingDuringRebuild, enabled, activated)
-    ZO_GamepadSkillEntryTemplate_Setup(control, skillEntry, selected, activated, ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE)
-end
-
-local function IsSkillEqual(leftSkillEntry, rightSkillEntry)
-    return leftSkillEntry.skillData == rightSkillEntry.skillData
-end
-
 function ZO_GamepadSkills:InitializeLineFilterList()
+    local function MenuAbilityEntryTemplateSetup(control, skillEntry, selected, reselectingDuringRebuild, enabled, activated)
+        ZO_GamepadSkillEntryTemplate_SetEntryInfoFromAllocator(skillEntry)
+        ZO_SharedGamepadEntry_OnSetup(control, skillEntry, selected, reselectingDuringRebuild, enabled, activated)
+        ZO_GamepadSkillEntryTemplate_Setup(control, skillEntry, selected, activated, ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE)
+    end
+
+    local function IsSkillEqual(leftSkillEntry, rightSkillEntry)
+        return leftSkillEntry.skillData == rightSkillEntry.skillData
+    end
+
     local function SetupLineFilterList(list)
         list:SetHandleDynamicViewProperties(true)
         list:AddDataTemplate("ZO_GamepadAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsSkillEqual)
@@ -841,12 +837,6 @@ function ZO_GamepadSkills:InitializeLineFilterList()
     lineFilterRespecBindingsControl:SetAnchor(BOTTOMLEFT, lineFilterListControl, TOPLEFT, 0, 0)
     lineFilterRespecBindingsControl:SetAnchor(BOTTOMRIGHT, lineFilterListControl, TOPRIGHT, 0, 0)
     self.lineFilterRespecBindingsControl = lineFilterRespecBindingsControl
-end
-
-local function MenuEntryHeaderTemplateSetup(control, skillEntry, selected, selectedDuringRebuild, enabled, activated)
-    control.header:SetText(skillEntry:GetHeader())
-    local skillData = skillEntry.skillData
-    control.skillRankHeader:SetText(skillData:GetSkillLineData():GetCurrentRank())
 end
 
 function ZO_GamepadSkills:InitializeQuickMenu()

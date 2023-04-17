@@ -386,6 +386,19 @@ function ZO_Achievements_Gamepad:InitializeOptionsDialog()
     local showAllAchievements = CreateEntry(SI_ACHIEVEMENT_FILTER_SHOW_ALL)
     local showEarnedAchievements = CreateEntry(SI_ACHIEVEMENT_FILTER_SHOW_EARNED)
     local showUnearnedAchievements = CreateEntry(SI_ACHIEVEMENT_FILTER_SHOW_UNEARNED)
+    local linkAchievement = ZO_GamepadEntryData:New(zo_strformat(SI_ITEM_ACTION_LINK_TO_CHAT))
+    linkAchievement.setup = ZO_SharedGamepadEntry_OnSetup
+    linkAchievement.callback = function(entryData)
+        local achievement = entryData.dialog.data.selectedAchievement
+        ZO_LinkHandler_InsertLinkAndSubmit(ZO_LinkHandler_CreateChatLink(GetAchievementLink, achievement.achievementId))
+        ZO_Dialogs_ReleaseDialogOnButtonPress("ACHIEVEMENTS_OPTIONS_GAMEPAD")
+    end
+    linkAchievement.visible = function(dialog)
+        if IsChatSystemAvailableForCurrentPlatform() then
+            return dialog.data.selectedAchievement ~= nil
+        end
+        return false
+    end
 
     self.dialogFilterEntries =
     {
@@ -414,7 +427,7 @@ function ZO_Achievements_Gamepad:InitializeOptionsDialog()
         {
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                header = SI_GAMEPAD_OPTIONS_MENU,
+                header = SI_GAMEPAD_ITEM_SETS_BOOK_OPTIONS_FILTERS,
                 entryData = showAllAchievements,
             },
             {
@@ -424,6 +437,11 @@ function ZO_Achievements_Gamepad:InitializeOptionsDialog()
             {
                 template = "ZO_GamepadMenuEntryTemplate",
                 entryData = showUnearnedAchievements,
+            },
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                header = GetString(SI_GAMEPAD_ITEM_SETS_BOOK_OPTIONS_ACTIONS),
+                entryData = linkAchievement,
             },
         },
         buttons =
@@ -501,7 +519,8 @@ function ZO_Achievements_Gamepad:InitializeKeybindStripDescriptors()
             name = GetString(SI_GAMEPAD_DYEING_OPTIONS),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
-                ZO_Dialogs_ShowGamepadDialog("ACHIEVEMENTS_OPTIONS_GAMEPAD")
+                local targetData = self.itemList:GetTargetData()
+                ZO_Dialogs_ShowGamepadDialog("ACHIEVEMENTS_OPTIONS_GAMEPAD", {selectedAchievement = targetData})
             end,
             visible = function()
                 return self.visibleCategoryId ~= nil

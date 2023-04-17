@@ -12,8 +12,6 @@ function ZO_LeaderboardsManager_Gamepad:Initialize(control)
     ZO_LeaderboardsManager_Shared.Initialize(self, control)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_LEADERBOARDS_SCENE)
 
-    self.pointsHeaderLabel = GAMEPAD_LEADERBOARD_LIST:GetHeaderControl("PointsName")
-
     self.leaderboardSystemObjects = {}
     self:InitializeCategoryList(control)
 end
@@ -85,11 +83,11 @@ end
 
 function ZO_LeaderboardsManager_Gamepad:PerformUpdate()
     if self.campaignName then
-        self.categoryHeaderData.messageText = zo_strformat(SI_GAMEPAD_CAMPAIGN_LEADERBOARDS_ACTIVE_CAMPAIGN, self.campaignIcon, self.campaignName)
+        self.headerData.messageText = zo_strformat(SI_GAMEPAD_CAMPAIGN_LEADERBOARDS_ACTIVE_CAMPAIGN, self.campaignIcon, self.campaignName)
     else
-        self.categoryHeaderData.messageText = ""
+        self.headerData.messageText = ""
     end
-    ZO_GamepadGenericHeader_RefreshData(self.header, self.categoryHeaderData)
+    ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 end
 
 function ZO_LeaderboardsManager_Gamepad:OnShowing()
@@ -108,10 +106,10 @@ function ZO_LeaderboardsManager_Gamepad:OnHiding()
 end
 
 function ZO_LeaderboardsManager_Gamepad:InitializeHeader()
-    self.categoryHeaderData = {
+    self.headerData = {
         titleText = GetString(SI_JOURNAL_MENU_LEADERBOARDS),
     }
-    ZO_GamepadGenericHeader_RefreshData(self.header, self.categoryHeaderData)
+    ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 end
 
 function ZO_LeaderboardsManager_Gamepad:OnDeferredInitialize()
@@ -144,6 +142,14 @@ function ZO_LeaderboardsManager_Gamepad:AddEntry(leaderboardObject, name, titleN
     entryData.consoleIdRequestParamsFunction = consoleIdRequestParamsFunction
     entryData.leaderboardRankType = leaderboardRankType
     entryData.playerInfoUpdateFunction = playerInfoUpdateFunction
+    entryData.narrationText = function(listEntryData, listEntryControl)
+        local narrations = {}
+        -- Generate the standard parametric list entry narration
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(listEntryData, listEntryControl))
+        --Generate the narration for the leaderboard being empty
+        ZO_AppendNarration(narrations, GAMEPAD_LEADERBOARD_LIST:GetEmptyRowNarration())
+        return narrations
+    end
 
     entryData:AddIcon(iconPath, iconPath)
     entryData:SetIconTintOnSelection(true)
@@ -310,6 +316,10 @@ end
 
 function ZO_LeaderboardsManager_Gamepad:SetLoadingSpinnerVisibility(show)
     GAMEPAD_LEADERBOARD_LIST:SetLoadingSpinnerVisibility(show)
+end
+
+function ZO_LeaderboardsManager_Gamepad:RefreshPointsHeader()
+    GAMEPAD_LEADERBOARD_LIST:SetHeaderNameForKey("points", self.headerPointsText)
 end
 
 --Global XML Handlers

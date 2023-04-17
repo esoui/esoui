@@ -301,8 +301,12 @@ function ZO_SortFilterList:SetupRow(control, data)
         end
     end
 
+    self:SetupRowBG(control, data)
+end
+
+function ZO_SortFilterList:SetupRowBG(control, data)
     if self.alternateRowBackgrounds then
-        local bg = GetControl(control, "BG")
+        local bg = control:GetNamedChild("BG")
         local hidden = (data.sortIndex % 2) == 0
         bg:SetHidden(hidden)
     end

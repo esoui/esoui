@@ -74,6 +74,19 @@ function ZO_LootPickup_Gamepad:DeferredInitialize()
     self.control:RegisterForEvent(EVENT_PLAYER_DEAD, OnPlayerDead)
 
     self.isInitialized = true
+
+    --Register the list of items for narration
+    local narrationInfo = 
+    {
+        canNarrate = function()
+            return LOOT_SCENE_GAMEPAD:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
+        end,
+        narrationType = NARRATION_TYPE_HUD,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.itemList, narrationInfo)
 end
 
 function ZO_LootPickup_Gamepad:OnShowing()
@@ -100,16 +113,13 @@ function ZO_LootPickup_Gamepad:SetTitle(title)
 end
 
 function ZO_LootPickup_Gamepad:UpdateButtonTextOnSelection(selectedData)
-    if selectedData then
-        local actionStringId = selectedData.isStolen and SI_LOOT_STEAL or SI_LOOT_TAKE
-        self.takeControl:SetText(GetString(actionStringId))
-    end
+    self.takeControl:SetText(self:GetTakeSelectedText())
 end
 
 function ZO_LootPickup_Gamepad:UpdateAllControlText()
     if self.itemCount > 0 then
         -- update the take all / steal all text depending on the situation
-        self.takeAllControl:SetText(GetString(self.nonStolenItemsPresent and SI_LOOT_TAKE_ALL or SI_LOOT_STEAL_ALL))
+        self.takeAllControl:SetText(self:GetTakeAllText())
     end
 end
 
@@ -123,6 +133,8 @@ function ZO_LootPickup_Gamepad:Hide()
     else
         SCENE_MANAGER:RestoreHUDUIScene()
     end
+    --Clear out any in progress HUD narration when exiting
+    ClearNarrationQueue(NARRATION_TYPE_HUD)
 end
 
 function ZO_LootPickup_Gamepad:Show()
@@ -160,6 +172,20 @@ function ZO_LootPickup_Gamepad:InitializeHeader(title)
         data1HeaderText = GetString(SI_GAMEPAD_LOOT_INVENTORY_CAPACITY),
         data1Text = UpdateCapacityString,
     }
+end
+
+
+function ZO_LootPickup_Gamepad:GetTakeSelectedText()
+    local selectedData = self.itemList:GetSelectedData()
+    if selectedData and selectedData.isStolen then
+        return GetString(SI_LOOT_STEAL)
+    else
+        return GetString(SI_LOOT_TAKE)
+    end
+end
+
+function ZO_LootPickup_Gamepad:GetTakeAllText()
+    return GetString(self.nonStolenItemsPresent and SI_LOOT_TAKE_ALL or SI_LOOT_STEAL_ALL)
 end
 
 --[[ Global Handlers ]]--

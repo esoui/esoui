@@ -2,7 +2,7 @@
     <!-- Faces -->
     <String name="MEDIUM_FONT" value="EsoUI/Common/Fonts/Univers57.otf" />
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.otf"/>
-    <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWUDC_70-M.ttf"/>
+    <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf"/>
 
     <String name="BOLD_FONT" value="EsoUI/Common/Fonts/Univers67.otf" />

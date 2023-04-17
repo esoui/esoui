@@ -127,7 +127,7 @@ GROUP_LIST_MANAGER = ZO_GroupList_Manager:New()
 do
     local groupUnitTags = setmetatable({}, {__index = function(self, key)
         local groupIndex = tonumber(key:match("^group(%d+)$"))
-        if groupIndex and groupIndex >= 1 and groupIndex <= GROUP_SIZE_MAX then
+        if groupIndex and groupIndex >= 1 and groupIndex <= MAX_GROUP_SIZE_THRESHOLD then
             self[key] = groupIndex
         else
             self[key] = false
@@ -149,7 +149,7 @@ do
         return groupIndices[groupIndex]
     end
 
-    for i = 1, GROUP_SIZE_MAX do
+    for i = 1, MAX_GROUP_SIZE_THRESHOLD do
         groupIndices[i] = "group" .. i
     end
 end

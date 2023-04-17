@@ -393,6 +393,11 @@ end
 
 function ZO_CharacterCreate_Keyboard:InitializeClassSelectors()
         local classes = self.characterData:GetClassInfo()
+        local numClasses = #classes
+        -- This is how many classes overflow into the last line without filling it up
+        local numOverflowClasses = numClasses % 3
+        -- This is how many classes fill up our class grid without spilling onto an additional unfilled line
+        local numGridClasses = numClasses - numOverflowClasses
 
         local parent = self.classSelectionControl:GetNamedChild("ButtonArea")
         local stride = 3
@@ -416,7 +421,20 @@ function ZO_CharacterCreate_Keyboard:InitializeClassSelectors()
             selector.defId = classData.class
 
             self:InitializeSelectorButton(selector, classData, self.classRadioGroup)
-            ZO_Anchor_BoxLayout(anchor, selector, i - 1, stride, padX, padY, controlWidth, controlHeight, initialX, initialY, GROW_DIRECTION_DOWN_RIGHT)
+
+            local controlIndex = i - 1
+            if i > numGridClasses then
+                -- If the last line has only one class in it, we want to center that class
+                if numOverflowClasses % 2 == 1 then
+                    controlIndex = i
+                -- If the last line has two classes, we want to offset them by half their width so the whole thing is still symmetrical.
+                else
+                    -- The decimal value is valid because this value is only used to calculate anchor offsets.
+                    controlIndex = i - 0.5
+                end
+            end
+
+            ZO_Anchor_BoxLayout(anchor, selector, controlIndex, stride, padX, padY, controlWidth, controlHeight, initialX, initialY, GROW_DIRECTION_DOWN_RIGHT)
         end
     end
 

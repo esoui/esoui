@@ -309,14 +309,6 @@ function ZO_FriendsListRowDisplayName_OnMouseExit(control)
     FRIENDS_LIST:DisplayName_OnMouseExit(control)
 end
 
-function ZO_FriendsListRowHeronUserInfo_OnMouseEnter(control)
-    FRIENDS_LIST:HeronUserInfo_OnMouseEnter(control)
-end
-
-function ZO_FriendsListRowHeronUserInfo_OnMouseExit(control)
-    FRIENDS_LIST:HeronUserInfo_OnMouseExit(control)
-end
-
 function ZO_FriendsListRowAlliance_OnMouseEnter(control)
     FRIENDS_LIST:Alliance_OnMouseEnter(control)
 end
@@ -351,15 +343,8 @@ end
 
 function ZO_FriendsList_OnInitialized(self)
     -- set up columns before initializing the social list
-    local rowTemplate
-    local headersControl
-    if IsHeronUI() then
-        rowTemplate = "ZO_FriendsListRow_Heron"
-        headersControl = CreateControlFromVirtual("$(parent)Headers", self, "ZO_FriendsListHeaders_Heron")
-    else
-        rowTemplate = "ZO_FriendsListRow"
-        headersControl = CreateControlFromVirtual("$(parent)Headers", self, "ZO_FriendsListHeaders")
-    end
+    local rowTemplate = "ZO_FriendsListRow"
+    local headersControl = CreateControlFromVirtual("$(parent)Headers", self, "ZO_FriendsListHeaders")
     local listControl = self:GetNamedChild("List")
     listControl:SetAnchor(TOPLEFT, headersControl, BOTTOMLEFT, 0, 3)
     listControl:SetAnchor(BOTTOMRIGHT, self, BOTTOMRIGHT, -35, -32)

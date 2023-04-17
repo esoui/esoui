@@ -41,6 +41,8 @@ local CHARACTER_EDIT_PREVIEW_GEAR_INFO =
 -- Slider Randomization Helper...all sliders share the sliderObject from the top control, so this just helps cut down on duplicate functions
 local function RandomizeSlider(control, randomizeType)
     control.sliderObject:Randomize(randomizeType)
+    --Re-narrate after randomizing
+    GAMEPAD_BUCKET_MANAGER:NarrateCurrentBucket()
 end
 
 -- Character Create Slider and Appearance Slider Managers
@@ -289,6 +291,9 @@ function ZO_CharacterCreate_Gamepad:InitializeControls()
             updateFn = UpdateSlider,
             randomizeFn = RandomizeSlider,
             shouldAdd = IsAppearanceChangeEnabled,
+            narrationText = function(entryData, entryControl)
+                return self.physiqueTriangle:GetNarrationText()
+            end,
         },
         [GAMEPAD_BUCKET_CUSTOM_CONTROL_FACE] =
         {
@@ -296,6 +301,9 @@ function ZO_CharacterCreate_Gamepad:InitializeControls()
             updateFn = UpdateSlider,
             randomizeFn = RandomizeSlider,
             shouldAdd = IsAppearanceChangeEnabled,
+            narrationText = function(entryData, entryControl)
+                return self.faceTriangle:GetNarrationText()
+            end,
         },
     }
 end
@@ -336,7 +344,7 @@ function ZO_CharacterCreate_Gamepad:OnStateChanged(oldState, newState)
         -- that may change our focus control which will impact the keybinds
         self:RefreshKeybindStrip()
     elseif newState == SCENE_HIDDEN then
-        -- Save unsaved settings to manager so they can be applied on a platform swap for stadia
+        -- Save unsaved settings to manager so they can be applied on a platform swap
         for i, controlList in pairs(self.controls) do
             for j, control in pairs(controlList) do
                 local controlInfo = control.info
@@ -510,6 +518,8 @@ function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
                     self.focusControl:ToggleLocked()
                     PlaySound(callbackSound)
                     self:RefreshKeybindStrip()
+                    --Re-narrate when the lock state changes
+                    GAMEPAD_BUCKET_MANAGER:NarrateCurrentBucket()
                 end,
             }
         end
@@ -542,6 +552,10 @@ function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
             self:UpdateCollectibleBlockingInfoTooltip(selectedInfo)
 
             self:RefreshKeybindStrip()
+
+            --Re-narrate when the preview state changes
+            local NARRATE_HEADER = true
+            GAMEPAD_BUCKET_MANAGER:NarrateCurrentBucket(NARRATE_HEADER)
         end,
     }
 
@@ -925,7 +939,14 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
                     narrationText = function(entryData, entryControl)
                         return entryData.control.sliderObject:GetNarrationText()
                     end,
-                    directionalInputNarrationFunction = ZO_GetNumericHorizontalDirectionalInputNarrationData,
+                    directionalInputNarrationFunction = function()
+                        --Exclude directional input when locked
+                        if slider:IsLocked() then
+                            return {}
+                        else
+                            return ZO_GetNumericHorizontalDirectionalInputNarrationData()
+                        end
+                    end,
                 }
                 slider.info = info
                 controlData[#controlData + 1] = info
@@ -965,7 +986,14 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
                     narrationText = function(entryData, entryControl)
                         return entryData.control.sliderObject:GetNarrationText()
                     end,
-                    directionalInputNarrationFunction = ZO_GetHorizontalDirectionalInputNarrationData,
+                    directionalInputNarrationFunction = function()
+                        --Exclude directional input when locked
+                        if slider:IsLocked() then
+                            return {}
+                        else
+                            return ZO_GetHorizontalDirectionalInputNarrationData()
+                        end
+                    end,
                 }
                 slider.info = info
                 controlData[#controlData + 1] = info
@@ -1103,25 +1131,39 @@ function ZO_CharacterCreate_Gamepad:InitializeClassSelectors()
         -- 4 is the default number of classes and they are laid out
         -- so that the fourth class is in the middle column
         layoutTable = {
-            ZO_CharacterCreate_GamepadClassColumn11,
-            ZO_CharacterCreate_GamepadClassColumn21,
-            ZO_CharacterCreate_GamepadClassColumn31,
-            ZO_CharacterCreate_GamepadClassColumn22,
+            ZO_CharacterCreate_GamepadClassColumn1Row1,
+            ZO_CharacterCreate_GamepadClassColumn2Row1,
+            ZO_CharacterCreate_GamepadClassColumn3Row1,
+            ZO_CharacterCreate_GamepadClassColumn2Row2,
+        }
+        -- If we have 7 classes, we need to add the seventh in the center column
+    elseif numClasses == 7 then
+        layoutTable = {
+            ZO_CharacterCreate_GamepadClassColumn1Row1,
+            ZO_CharacterCreate_GamepadClassColumn2Row1,
+            ZO_CharacterCreate_GamepadClassColumn3Row1,
+            ZO_CharacterCreate_GamepadClassColumn1Row2,
+            ZO_CharacterCreate_GamepadClassColumn2Row2,
+            ZO_CharacterCreate_GamepadClassColumn3Row2,
+            ZO_CharacterCreate_GamepadClassColumn2Row3,
         }
     else
-        -- if we have 5 or 6 classes, then we can lay them out normally
+        -- if we have 5 or 6 classes, or 8 or 9, then we can lay them out normally
         -- from left to right without worrying about centering one.
 
-        -- We aren't dynamically creating controls so if we have more than 6 classes we won't have enough controls,
+        -- We aren't dynamically creating controls so if we have more than 9 classes we won't have enough controls,
         -- and more controls will have to be added to the XML and additional logic to correctly lay them out.
         -- Rather than assert and break the whole UI, we'll just display what we can, and DevCharacterCreate will show a big red error label.
         layoutTable = {
-            ZO_CharacterCreate_GamepadClassColumn11,
-            ZO_CharacterCreate_GamepadClassColumn21,
-            ZO_CharacterCreate_GamepadClassColumn31,
-            ZO_CharacterCreate_GamepadClassColumn12,
-            ZO_CharacterCreate_GamepadClassColumn22,
-            ZO_CharacterCreate_GamepadClassColumn32,
+            ZO_CharacterCreate_GamepadClassColumn1Row1,
+            ZO_CharacterCreate_GamepadClassColumn2Row1,
+            ZO_CharacterCreate_GamepadClassColumn3Row1,
+            ZO_CharacterCreate_GamepadClassColumn1Row2,
+            ZO_CharacterCreate_GamepadClassColumn2Row2,
+            ZO_CharacterCreate_GamepadClassColumn3Row2,
+            ZO_CharacterCreate_GamepadClassColumn1Row3,
+            ZO_CharacterCreate_GamepadClassColumn2Row3,
+            ZO_CharacterCreate_GamepadClassColumn3Row3,
         }
     end
 
@@ -1650,15 +1692,15 @@ function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
             parametricDialog.noViolations = #parametricDialog.nameViolations == 0
 
             parametricDialog.selectedName = CorrectCharacterNameCase(parametricDialog.selectedName)
+            parametricDialog.violationText = nil
             
             if not parametricDialog.noViolations then
                 if suppressErrors then
                     SCENE_MANAGER:RemoveFragment(params.errorFragment)
                 else
                     local HIDE_UNVIOLATED_RULES = true
-                    local violationString = ZO_ValidNameInstructions_GetViolationString(parametricDialog.selectedName, parametricDialog.nameViolations, HIDE_UNVIOLATED_RULES, SI_CREATE_CHARACTER_GAMEPAD_INVALID_NAME_DIALOG_INSTRUCTION_FORMAT)
-
-                    self.errorLabel:SetText(violationString)
+                    parametricDialog.violationText = ZO_ValidNameInstructions_GetViolationString(parametricDialog.selectedName, parametricDialog.nameViolations, HIDE_UNVIOLATED_RULES, SI_CREATE_CHARACTER_GAMEPAD_INVALID_NAME_DIALOG_INSTRUCTION_FORMAT)
+                    self.errorLabel:SetText(parametricDialog.violationText)
                     SCENE_MANAGER:AddFragment(params.errorFragment)
                 end
             else
@@ -1703,6 +1745,13 @@ function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
         data:SetEnabled(enabled)
 
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+    end
+
+    doneEntry.narrationText = function(entryData, entryControl)
+        local narrations = {}
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(parametricDialog.violationText))
+        return narrations
     end
 
 
@@ -1765,7 +1814,12 @@ function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
                         self.editBoxControl = control.editBoxControl
                     end,
 
-                    narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
+                    narrationText = function(entryData, entryControl)
+                        local narrations = {}
+                        ZO_AppendNarration(narrations, ZO_FormatEditBoxNarrationText(entryControl.editBoxControl))
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(parametricDialog.violationText))
+                        return narrations
+                    end,
                 },
             },
             -- Done menu item

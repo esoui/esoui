@@ -616,7 +616,7 @@ do
         },
     }
 
-    internalassert(PROVISIONER_SPECIAL_INGREDIENT_TYPE_MAX_VALUE == 3, "Update trading house recipe categories")
+    internalassert(PROVISIONER_SPECIAL_INGREDIENT_TYPE_MAX_VALUE == 4, "Update trading house recipe categories")
     local SPECIALIZED_ITEM_TYPES_FOR_SPECIAL_INGREDIENT_TYPE = 
     {
         [PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES] =

@@ -1068,18 +1068,16 @@ ZO_TOOLTIP_STYLES =
 
     cadwellTextureContainer = 
     {
-        layoutPrimaryDirection = "down",
-        layoutSecondaryDirection = "right",
         paddingTop = 9,
-        widthPercent = 10,
+        -- widthPercent slightly under 10 to fix ESO-786098.
+        widthPercent = 9,
     },
 
-    cadwellObjectiveSection = 
+    cadwellObjectiveText = 
     {
         fontSize = "$(GP_34)",
-        layoutPrimaryDirection = "right",
-        layoutSecondaryDirection = "down",
-        widthPercent = 90
+        -- widthPercent slightly under 90 to fix ESO-786098.
+        widthPercent = 89,
     },
 
     cadwellObjectiveContainerSection = 
@@ -1097,19 +1095,16 @@ ZO_TOOLTIP_STYLES =
 
     cadwellObjectiveActive = 
     {
-        width = 312,
         fontColorField = GAMEPAD_TOOLTIP_COLOR_ACTIVE
     },
 
     cadwellObjectiveInactive = 
     {
-        width = 312,
         fontColorField = GAMEPAD_TOOLTIP_COLOR_INACTIVE
     },
 
     cadwellObjectiveComplete = 
     {
-        width = 312,
         fontColorField = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_3,
     },
 
@@ -1143,12 +1138,6 @@ ZO_TOOLTIP_STYLES =
     },
 
     characterNameSection =
-    {
-        customSpacing = 5,
-        widthPercent = 100,
-    },
-
-    heronNameSection =
     {
         customSpacing = 5,
         widthPercent = 100,

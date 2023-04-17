@@ -32,21 +32,24 @@ function ZO_Loot_Gamepad_Base:InitializeKeybindStripDescriptorsMixin(areEthereal
             ethereal = true
         },
         { -- Take Selected
-            name = GetString(SI_LOOT_TAKE),
+            name = function() return self:GetTakeSelectedText() end,
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
                 self:LootTargeted()
             end,
-
-            ethereal = areEthereal
+            ethereal = areEthereal,
+            narrateEthereal = areEthereal,
+            etherealNarrationOrder = 1,
         },
         { -- Take All
-            name = GetString(SI_LOOT_TAKE_ALL),
+            name = function() return self:GetTakeAllText() end,
             keybind = "UI_SHORTCUT_SECONDARY",
             callback =  function()
                 LOOT_SHARED:LootAllItems()
             end,
-            ethereal = areEthereal
+            ethereal = areEthereal,
+            narrateEthereal = areEthereal,
+            etherealNarrationOrder = 2,
         },
         lootBackupKeybind
     }
@@ -190,6 +193,9 @@ function ZO_Loot_Gamepad_Base:UpdateLootWindow(name, actionName, isOwned)
         self:Show()
     elseif not self:HasLootItems() then
         self:Hide()
+    else
+        --If the loot window is already showing and something updated, we need to re-narrate
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
     end
 end
 
@@ -204,6 +210,14 @@ function ZO_Loot_Gamepad_Base:UpdateButtonTextOnSelection(selectedData)
 end
 
 function ZO_Loot_Gamepad_Base:UpdateAllControlText()
+end
+
+function ZO_Loot_Gamepad_Base:GetTakeSelectedText()
+    return GetString(SI_LOOT_TAKE)
+end
+
+function ZO_Loot_Gamepad_Base:GetTakeAllText()
+    return GetString(SI_LOOT_TAKE_ALL)
 end
 
 --------------------------

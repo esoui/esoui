@@ -10,11 +10,19 @@
     <Controls>
         <Control name="ZO_PlayerToPlayerMenuEntryTemplate_Keyboard" scale=".75" virtual="true">
             <Dimensions x="128" y="128"/>
+            <OnInitialized>
+                self.keybindLabel = self:GetNamedChild("KeyLabel")
+                ZO_KeyMarkupLabel_SetCustomOffsets(self.keybindLabel, -5, 5, -2, 3)
+            </OnInitialized>
             <Controls>
                 <Texture name="$(parent)Icon" pixelRoundingEnabled="false">
                     <Dimensions x="128" y="128" />
                     <Anchor point="TOP" />
                 </Texture>
+
+                <Label name="$(parent)KeyLabel" tier="HIGH" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGame" inheritScale="false" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="-25"/>
+                </Label>
             </Controls>
         </Control>
 

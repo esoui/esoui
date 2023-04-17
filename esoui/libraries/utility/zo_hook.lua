@@ -81,21 +81,53 @@ end
 -- ZO_PropagateHandler(self:GetParent(), "OnMouseUp", button, upInside)
 function ZO_PropagateHandler(propagateTo, handlerName, ...)
     if propagateTo then
+        -- TODO: Determine whether handlers of any namespace should be called;
+        --       new Control methods - GetNumHandlers and GetHandlerByIndex - would be required to do so.
         local handler = propagateTo:GetHandler(handlerName)
         if handler then
             handler(propagateTo, ...)
+            return true
         end
+    end
+    return false
+end
+
+-- Propagates a call to the specified handler name from a control to each ancestor control
+-- that defines a corresponding handler function until and excluding the owning window.
+-- ZO_PropagateHandlerToAllAncestors("OnMouseUp", ...)
+function ZO_PropagateHandlerToAllAncestors(handlerName, propagateFromControl, ...)
+    local owningWindow = propagateFromControl:GetOwningWindow()
+    local ancestorControl = propagateFromControl:GetParent()
+    -- No semaphore mechanism is currently required to suppress reentrant calls when
+    -- ancestor controls also inherit ZO_PropagateMouseOverBehaviorToAllAncestors
+    -- because, at present, ZO_PropagateHandler only propagates events to handlers
+    -- that have no namespace. A gating mechanism would be required should this
+    -- paradigm ever change.
+    while ancestorControl and ancestorControl ~= owningWindow do
+        ZO_PropagateHandler(ancestorControl, handlerName, ...)
+        ancestorControl = ancestorControl:GetParent()
+    end
+end
+
+-- Propagates a call to the specified handler name from a control to the nearest ancestor control
+-- that defines a corresponding handler function until and excluding the owning window.
+-- ZO_PropagateHandlerToNearestAncestor("OnMouseUp", ...)
+function ZO_PropagateHandlerToNearestAncestor(handlerName, propagateFromControl, ...)
+    local owningWindow = propagateFromControl:GetOwningWindow()
+    local ancestorControl = propagateFromControl:GetParent()
+    while ancestorControl and ancestorControl ~= owningWindow and not ZO_PropagateHandler(ancestorControl, handlerName, ...) do
+        ancestorControl = ancestorControl:GetParent()
     end
 end
 
 -- For when you want to propagate to the control's parent without breaking self out of the args
 -- ZO_PropagateHandlerToParent("OnMouseUp", ...)
-function ZO_PropagateHandlerToParent(handlerName, propagateFrom, ...)
-    ZO_PropagateHandler(propagateFrom:GetParent(), handlerName, ...)
+function ZO_PropagateHandlerToParent(handlerName, propagateFromControl, ...)
+    ZO_PropagateHandler(propagateFromControl:GetParent(), handlerName, ...)
 end
 
 -- For when you want to propagate without breaking self out of the args
 -- ZO_PropagateHandlerFromControl(self:GetParent():GetParent(), "OnMouseUp", ...)
-function ZO_PropagateHandlerFromControl(propagateTo, handlerName, propagateFrom, ...)
-    ZO_PropagateHandler(propagateTo, handlerName, ...)
+function ZO_PropagateHandlerFromControl(propagateToControl, handlerName, propagateFromControl, ...)
+    ZO_PropagateHandler(propagateToControl, handlerName, ...)
 end

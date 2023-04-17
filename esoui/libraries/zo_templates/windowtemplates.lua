@@ -418,6 +418,10 @@ function ZO_SelectableItemRadialMenuEntryTemplate_OnInitialized(self)
     self.icon = self:GetNamedChild("Icon")
     self.count = self:GetNamedChild("CountText")
     self.cooldown = self:GetNamedChild("Cooldown")
+    self.keybindLabel = self:GetNamedChild("KeyLabel")
+    if self.keybindLabel then
+        ZO_KeyMarkupLabel_SetCustomOffsets(self.keybindLabel, -5, 5, -2, 3)
+    end
 end
 
 function ZO_ScalableBackgroundWithEdge_SetSize(background, width, height)

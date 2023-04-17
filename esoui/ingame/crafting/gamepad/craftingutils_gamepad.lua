@@ -22,6 +22,12 @@ ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE =
     iconNarration = GetString(SI_SCREEN_NARRATION_SELECTED_ICON_NARRATION),
 }
 
+ZO_IS_IN_ARMORY_STATUS_ICON_OVERRIDE =
+{
+    iconTexture = ZO_IN_ARMORY_BUILD_ICON,
+    iconNarration = GetString(SI_SCREEN_NARRATION_IN_ARMORY_BUILD_ICON_NARRATION),
+}
+
 -- Note: call this towards the end of your keybind setup function...if you call this before you do something like self.keybindStripDescriptor = {keybinds} you'll destroy these
 function ZO_GamepadCraftingUtils_AddGenericCraftingBackKeybindsToDescriptor(keybindDescriptor)
     if keybindDescriptor == nil then
@@ -585,5 +591,22 @@ function ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, isSlotted)
         data.overrideStatusIndicatorIcons = { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE }
     else
         data.overrideStatusIndicatorIcons = nil
+    end
+end
+
+function ZO_GamepadCraftingUtils_AddOverridesEntryData(data)
+    -- Check if item is in armory or is researchable and add icons as appropriate
+    if data.overrideStatusIndicatorIcons then
+        if data.isInArmory then
+            table.insert(data.overrideStatusIndicatorIcons, ZO_IS_IN_ARMORY_STATUS_ICON_OVERRIDE)
+        end
+        if data.traitInformation ~= ITEM_TRAIT_INFORMATION_NONE and not data.ignoreTraitInformation then
+            local traitData =
+            {
+                iconTexture = ZO_GetPlatformTraitInformationIcon(data.traitInformation),
+                iconNarration = GetString("SI_ITEMTRAITINFORMATION", data.traitInformation),
+            }
+            table.insert(data.overrideStatusIndicatorIcons, traitData)
+        end
     end
 end

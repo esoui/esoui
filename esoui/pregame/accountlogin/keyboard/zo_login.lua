@@ -16,11 +16,7 @@ end
 local function OnLinkClicked(link, button, text, color, linkType, ...)
     if not ZO_PEGI_IsDeclineNotificationShowing() and linkType == URL_LINK_TYPE then
         local url = table.concat({...}, ':')
-        if IsHeronUI() then
-            ConfirmOpenURL(url)
-        else
-            RequestOpenURL(url, text)
-        end
+        RequestOpenURL(url, text)
         return true
     end
 end

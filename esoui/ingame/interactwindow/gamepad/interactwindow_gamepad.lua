@@ -63,15 +63,18 @@ local function SetupOption(control, data, selected, selectedDuringRebuild, enabl
             label:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
         end
 
+        --Order matters, some label update functions use label.optionText so we neeed to set it before calling those
+        label.optionText = data.optionText
+
+        --Order matters, do this before running the label update function so we don't overwrite any changes made there
+        label:SetText(label.optionText)
+
         label:SetHandler("OnUpdate", data.labelUpdateFunction)
         if data.labelUpdateFunction then
             data.labelUpdateFunction(label, data)
         end
 
         local icon = control:GetNamedChild("Icon")
-
-        control.optionText = data.optionText
-
         if #data.iconFiles > 0 then
             icon:ClearIcons()
             for iconIndex, iconFile in pairs(data.iconFiles) do
@@ -84,7 +87,6 @@ local function SetupOption(control, data, selected, selectedDuringRebuild, enabl
             label:SetAnchor(TOPLEFT)
         end
 
-        label:SetText(control.optionText)
         control:SetHeight(label:GetHeight())
     end
 end
@@ -240,6 +242,7 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
     local parametricListRewards = {}
     local goldReward
     local currenciesWithMaxWarning = {}
+    local amountsAcquiredWithMaxWarning = {}
     for i, data in ipairs(rewardDataList) do
         if self:IsCurrencyReward(data.rewardType) then
             if data.rewardType == REWARD_TYPE_MONEY then
@@ -249,8 +252,15 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
             end
 
             if self:WouldCurrencyExceedMax(data.rewardType, data.amount) then
-                local currency = self:GetCurrencyTypeFromReward(data.rewardType)
-                table.insert(currenciesWithMaxWarning, GetCurrencyName(currency))
+                local currencyType = self:GetCurrencyTypeFromReward(data.rewardType)
+                local currencyText = GetCurrencyName(currencyType)
+                table.insert(currenciesWithMaxWarning, currencyText)
+
+                local playerStoredLocation = GetCurrencyPlayerStoredLocation(currencyType)
+                local currencyAmount = zo_max(0, GetMaxPossibleCurrency(currencyType, playerStoredLocation) - (GetCurrencyAmount(currencyType, playerStoredLocation)))
+                local isSingular = currencyAmount == 1
+                currencyText = GetCurrencyName(currencyType, isSingular)
+                table.insert(amountsAcquiredWithMaxWarning, string.format('%s %s', currencyAmount, currencyText))
             end
         end
     end
@@ -309,7 +319,7 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
         self.itemList:AddEntry("ZO_QuestReward_Gamepad", entry)
     end
 
-    return confirmError
+    return confirmError, currenciesWithMaxWarning, amountsAcquiredWithMaxWarning
 end
 
 function ZO_GamepadInteraction:RefreshList()

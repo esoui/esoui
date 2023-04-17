@@ -58,6 +58,7 @@ function ZO_CharacterCreateSlider_Gamepad:MovePrevious()
 end
 
 function ZO_CharacterCreateSlider_Gamepad:GetNarrationText()
+    local narrations = {}
     local min, max = self.slider:GetMinMax()
     local value = self:GetValue()
 
@@ -65,7 +66,12 @@ function ZO_CharacterCreateSlider_Gamepad:GetNarrationText()
     local minString = string.format("%.2f", min)
     local maxString = string.format("%.2f", max)
 
-    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_CREATE_CHARACTER_GAMEPAD_SLIDER_NARRATION_FORMATTER, self.name, valueString, minString, maxString))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_CREATE_CHARACTER_GAMEPAD_SLIDER_NARRATION_FORMATTER, self.name, valueString, minString, maxString)))
+    if self:IsLocked() then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION)))
+    end
+
+    return narrations
 end
 
 -- Character Create Appearance Slider
@@ -80,7 +86,12 @@ function ZO_CharacterCreateAppearanceSlider_Gamepad:New(control)
 end
 
 function ZO_CharacterCreateAppearanceSlider_Gamepad:GetNarrationText()
-    return ZO_FormatSliderNarrationText(self.slider, self.name)
+    local narrations = {}
+    ZO_AppendNarration(narrations, ZO_FormatSliderNarrationText(self.slider, self.name))
+    if self:IsLocked() then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION)))
+    end
+    return narrations
 end
 
 -- Character Create Color Slider: This is an appearance slider that sorts its values from lightest color to darkest color
@@ -133,7 +144,12 @@ function ZO_CharacterCreateColorSlider_Gamepad:SetAppearanceValue(sortedIndex)
 end
 
 function ZO_CharacterCreateColorSlider_Gamepad:GetNarrationText()
-    return ZO_FormatSliderNarrationText(self.slider, self.name)
+    local narrations = {}
+    ZO_AppendNarration(narrations, ZO_FormatSliderNarrationText(self.slider, self.name))
+    if self:IsLocked() then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION)))
+    end
+    return narrations
 end
 
 -- Voice slider
@@ -167,9 +183,14 @@ function ZO_CharacterCreateVoiceSlider_Gamepad:MovePrevious()
 end
 
 function ZO_CharacterCreateVoiceSlider_Gamepad:GetNarrationText()
+    local narrations = {}
     local value = self:GetValue()
     local valueString = ZO_CharacterCreateSlider_GetVoiceName(value)
-    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_SLIDER_FORMATTER_NO_RANGE, self.name, valueString))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_SLIDER_FORMATTER_NO_RANGE, self.name, valueString)))
+    if self:IsLocked() then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION)))
+    end
+    return narrations
 end
 
 -- Gender slider

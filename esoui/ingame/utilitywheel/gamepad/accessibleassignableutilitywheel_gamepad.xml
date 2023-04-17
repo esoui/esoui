@@ -1,0 +1,32 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_AccessibleAssignableUtilityWheel_Gamepad_MenuEntryTemplate" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_AccessibleAssignableUtilityWheel_Gamepad_MenuEntryTemplate_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Keybind" inherits="ZO_LargeKeyMarkupLabel_Gamepad" excludeFromResizeToFitExtents="true" tier="HIGH" verticalAlignment="CENTER">
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_AccessibleAssignableUtilityWheelTopLevel_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_AccessibleAssignableUtilityWheelTopLevel_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Quickslot" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
+                    <Controls>
+                        <Control name="$(parent)Wheel" inherits="ZO_AssignableUtilityWheel_Gamepad_Template">
+                            <Anchor point="CENTER" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

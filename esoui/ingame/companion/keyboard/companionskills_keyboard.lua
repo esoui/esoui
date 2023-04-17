@@ -1,6 +1,10 @@
 -----------------------------
 -- Companion Skills
 -----------------------------
+ZO_COMPANION_SKILLS_KEYBOARD_SKILL_LINE_CONTAINER_WIDTH = 330
+ZO_COMPANION_SKILLS_KEYBOARD_SKILL_LINE_ENTRY_INDENT = 74
+ZO_COMPANION_SKILLS_KEYBOARD_SKILL_LINE_ENTRY_LABEL_WIDTH = ZO_COMPANION_SKILLS_KEYBOARD_SKILL_LINE_CONTAINER_WIDTH - ZO_COMPANION_SKILLS_KEYBOARD_SKILL_LINE_ENTRY_INDENT - ZO_SCROLL_BAR_WIDTH
+
 ZO_CompanionSkills_Keyboard = ZO_InitializingObject:Subclass()
 
 function ZO_CompanionSkills_Keyboard:Initialize(control)
@@ -34,7 +38,10 @@ end
 
 function ZO_CompanionSkills_Keyboard:InitializeSkillLinesTree()
     local container = self.control:GetNamedChild("SkillLinesContainer")
-    local skillLinesTree = ZO_Tree:New(container:GetNamedChild("ScrollChild"), 74, -10, 300)
+
+    local DEFAULT_SPACING = -10
+    local TREE_WIDTH = ZO_COMPANION_SKILLS_KEYBOARD_SKILL_LINE_CONTAINER_WIDTH - ZO_SCROLL_BAR_WIDTH
+    local skillLinesTree = ZO_Tree:New(container:GetNamedChild("ScrollChild"), ZO_COMPANION_SKILLS_KEYBOARD_SKILL_LINE_ENTRY_INDENT, DEFAULT_SPACING, TREE_WIDTH)
 
     local NEW_COMPANION_SKILLS_FILTER = { ZO_CompanionSkillLineData.IsNew }
     local function TreeHeaderSetup(node, control, skillTypeData, open)
@@ -57,7 +64,11 @@ function ZO_CompanionSkills_Keyboard:InitializeSkillLinesTree()
         ZO_IconHeader_Setup(control, open)
     end
 
-    skillLinesTree:AddTemplate("ZO_SkillIconHeader", TreeHeaderSetup, nil, nil, nil, 0)
+    local NO_SELECTION_FUNCTION = nil
+    local NO_EQUALITY_FUNCTION = nil
+    local DEFAULT_CHILD_INDENT = nil
+    local childSpacing = 0
+    skillLinesTree:AddTemplate("ZO_SkillIconHeader", TreeHeaderSetup, NO_SELECTION_FUNCTION, NO_EQUALITY_FUNCTION, DEFAULT_CHILD_INDENT, childSpacing)
 
     local function TreeEntrySetup(node, control, skillLineData, open)
         control:SetText(skillLineData:GetFormattedName())
@@ -81,7 +92,7 @@ function ZO_CompanionSkills_Keyboard:InitializeSkillLinesTree()
         end
     end
 
-    skillLinesTree:AddTemplate("ZO_SkillsNavigationEntry", TreeEntrySetup, TreeEntryOnSelected)
+    skillLinesTree:AddTemplate("ZO_CompanionSkills_SkillLineEntry", TreeEntrySetup, TreeEntryOnSelected)
 
     skillLinesTree:SetExclusive(true)
     skillLinesTree:SetOpenAnimation("ZO_TreeOpenAnimation")
@@ -188,7 +199,7 @@ do
                 if not parent then
                     parent = self.skillLinesTree:AddNode("ZO_SkillIconHeader", skillTypeData)
                 end
-                self.skillLinesTree:AddNode("ZO_SkillsNavigationEntry", skillLineData, parent)
+                self.skillLinesTree:AddNode("ZO_CompanionSkills_SkillLineEntry", skillLineData, parent)
             end
         end
 

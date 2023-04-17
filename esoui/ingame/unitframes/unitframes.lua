@@ -14,7 +14,7 @@ local COMPANION_RAID_UNIT_FRAME = "ZO_CompanionRaidUnitFrame"
 local TARGET_UNIT_FRAME = "ZO_TargetUnitFrame"
 local COMPANION_GROUP_UNIT_FRAME = "ZO_CompanionGroupUnitFrame"
 
-local NUM_SUBGROUPS = GROUP_SIZE_MAX / SMALL_GROUP_SIZE_THRESHOLD
+local NUM_SUBGROUPS = MAX_GROUP_SIZE_THRESHOLD / STANDARD_GROUP_SIZE_THRESHOLD
 local COMPANION_HEALTH_GRADIENT = { ZO_ColorDef:New("00484F"), ZO_ColorDef:New("278F7B"), }
 local COMPANION_HEALTH_GRADIENT_LOSS = ZO_ColorDef:New("621018")
 local COMPANION_HEALTH_GRADIENT_GAIN = ZO_ColorDef:New("D0FFBC")
@@ -82,7 +82,7 @@ local KEYBOARD_CONSTANTS =
 {
     GROUP_LEADER_ICON = "EsoUI/Art/UnitFrames/groupIcon_leader.dds",
 
-    GROUP_FRAMES_PER_COLUMN = SMALL_GROUP_SIZE_THRESHOLD,
+    GROUP_FRAMES_PER_COLUMN = STANDARD_GROUP_SIZE_THRESHOLD,
     NUM_COLUMNS = NUM_SUBGROUPS,
 
     GROUP_STRIDE = NUM_SUBGROUPS,
@@ -128,7 +128,7 @@ local GAMEPAD_CONSTANTS =
     GROUP_LEADER_ICON = "EsoUI/Art/UnitFrames/Gamepad/gp_Group_Leader.dds",
 
     GROUP_FRAMES_PER_COLUMN = 6,
-    NUM_COLUMNS = GROUP_SIZE_MAX / 6, --The denominator should be the same value as GROUP_FRAMES_PER_COLUMN
+    NUM_COLUMNS = MAX_GROUP_SIZE_THRESHOLD / 6, --The denominator should be the same value as GROUP_FRAMES_PER_COLUMN
 
     GROUP_STRIDE = 3,
 
@@ -184,7 +184,7 @@ end
 local function GetPlatformBarFont()
     local groupSize = UnitFrames:GetCombinedGroupSize()
     local constants = GetPlatformConstants()
-    if groupSize > SMALL_GROUP_SIZE_THRESHOLD then
+    if groupSize > STANDARD_GROUP_SIZE_THRESHOLD then
         return constants.RAID_BAR_FONT
     else
         return constants.GROUP_BAR_FONT
@@ -202,7 +202,7 @@ local function GetGroupFrameAnchor(groupIndex, groupSize, previousFrame, previou
     local column = zo_floor((groupIndex - 1) / constants.GROUP_FRAMES_PER_COLUMN)
     local row = zo_mod(groupIndex - 1, constants.GROUP_FRAMES_PER_COLUMN)
 
-    if groupSize > SMALL_GROUP_SIZE_THRESHOLD then
+    if groupSize > STANDARD_GROUP_SIZE_THRESHOLD then
         if IsInGamepadPreferredMode() then
             column = zo_mod(groupIndex - 1, constants.NUM_COLUMNS)
             row = zo_floor((groupIndex - 1) / 2)
@@ -287,7 +287,7 @@ function ZO_UnitFrames_Manager:GetUnitFrameLookupTable(unitTag)
         local isCompanionTag = IsGroupCompanionUnitTag(unitTag)
 
         if isGroupTag or isCompanionTag then
-            if self:GetCombinedGroupSize() <= SMALL_GROUP_SIZE_THRESHOLD then
+            if self:GetCombinedGroupSize() <= STANDARD_GROUP_SIZE_THRESHOLD then
                 return self.groupFrames
             else
                 return isCompanionTag and self.companionRaidFrames or self.raidFrames
@@ -401,7 +401,7 @@ end
 
 function ZO_UnitFrames_Manager:UpdateGroupAnchorFrames()
     -- Only the raid frame anchors need updates for now and it's only for whether or not the group name labels are showing and which one is highlighted
-    if self:GetCombinedGroupSize() <= SMALL_GROUP_SIZE_THRESHOLD or self.groupAndRaidHiddenReasons:IsHidden() then
+    if self:GetCombinedGroupSize() <= STANDARD_GROUP_SIZE_THRESHOLD or self.groupAndRaidHiddenReasons:IsHidden() then
         -- Small groups never show the raid frame anchors
         for subgroupIndex = 1, NUM_SUBGROUPS do
             GetControl("ZO_LargeGroupAnchorFrame"..subgroupIndex):SetHidden(true)
@@ -409,7 +409,7 @@ function ZO_UnitFrames_Manager:UpdateGroupAnchorFrames()
     else
         local groupSizeWithCompanions = self:GetCombinedGroupSize()
         for subgroupIndex = 1, NUM_SUBGROUPS do
-            local subgroupThreshold = (subgroupIndex - 1) * SMALL_GROUP_SIZE_THRESHOLD
+            local subgroupThreshold = (subgroupIndex - 1) * STANDARD_GROUP_SIZE_THRESHOLD
             local frameIsHidden = groupSizeWithCompanions <= subgroupThreshold
 
             local anchorFrame = GetControl("ZO_LargeGroupAnchorFrame"..subgroupIndex)
@@ -430,13 +430,17 @@ function ZO_UnitFrames_Manager:SetEnableTargetOfTarget(enableFlag)
 end
 
 function ZO_UnitFrames_Manager:BeginGroupElection()
-    self.activeElection = true
+    local electionType, _, descriptor = GetGroupElectionInfo()
 
-    if self.endElectionCallback then
-        zo_removeCallLater(self.endElectionCallback)
+    if ZO_IsGroupElectionTypeCustom(electionType) and descriptor == ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK then
+        self.activeElection = true
+
+        if self.endElectionCallback then
+            zo_removeCallLater(self.endElectionCallback)
+        end
+
+        self:UpdateElectionIcons()
     end
-
-    self:UpdateElectionIcons()
 end
 
 function ZO_UnitFrames_Manager:UpdateElectionInfo(resultType)
@@ -471,7 +475,7 @@ function ZO_UnitFrames_Manager:EndGroupElection(resultType)
 end
 
 function ZO_UnitFrames_Manager:HideElectionIcons()
-    for i = 1, GROUP_SIZE_MAX do
+    for i = 1, MAX_GROUP_SIZE_THRESHOLD do
         local unitTag = GetGroupUnitTagByIndex(i)
         local unitFrame = unitTag and self:GetFrame(unitTag)
 
@@ -482,7 +486,7 @@ function ZO_UnitFrames_Manager:HideElectionIcons()
 end
 
 function ZO_UnitFrames_Manager:UpdateElectionIcons()
-    for i = 1, GROUP_SIZE_MAX do
+    for i = 1, MAX_GROUP_SIZE_THRESHOLD do
         local unitTag = GetGroupUnitTagByIndex(i)
         local unitFrame = unitTag and self:GetFrame(unitTag)
 
@@ -503,7 +507,7 @@ function ZO_UnitFrames_Manager:UpdateNames()
         targetFrame:UpdateName()
     end
 
-    for i = 1, GROUP_SIZE_MAX do
+    for i = 1, MAX_GROUP_SIZE_THRESHOLD do
         local unitTag = GetGroupUnitTagByIndex(i)
         local companionTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
         local unitFrame = unitTag and self:GetFrame(unitTag)
@@ -1851,7 +1855,7 @@ function ZO_UnitFrameObject:RefreshElectionIcon()
             if not UnitFrames.activeElection and not UnitFrames.endElectionCallback then
                 electionIcon:SetHidden(true)
             else
-                local electionIconInfo = UnitFrames:GetCombinedGroupSize() > SMALL_GROUP_SIZE_THRESHOLD and LARGE_GROUP_ELECTION_ICON_INFO or SMALL_GROUP_ELECTION_ICON_INFO
+                local electionIconInfo = UnitFrames:GetCombinedGroupSize() > STANDARD_GROUP_SIZE_THRESHOLD and LARGE_GROUP_ELECTION_ICON_INFO or SMALL_GROUP_ELECTION_ICON_INFO
                 local vote = GetGroupElectionVoteByUnitTag(self.unitTag)
                 if vote ~= GROUP_VOTE_CHOICE_FOR and not UnitFrames.activeElection then
                     vote = GROUP_VOTE_CHOICE_AGAINST
@@ -1885,7 +1889,7 @@ local function CreateGroupAnchorFrames()
 
     -- Create small group anchor frame
     local smallFrame = CreateControlFromVirtual("ZO_SmallGroupAnchorFrame", ZO_UnitFramesGroups, "ZO_GroupFrameAnchor")
-    smallFrame:SetDimensions(constants.GROUP_FRAME_SIZE_X, (constants.GROUP_FRAME_SIZE_Y + constants.GROUP_FRAME_PAD_Y) * SMALL_GROUP_SIZE_THRESHOLD)
+    smallFrame:SetDimensions(constants.GROUP_FRAME_SIZE_X, (constants.GROUP_FRAME_SIZE_Y + constants.GROUP_FRAME_PAD_Y) * STANDARD_GROUP_SIZE_THRESHOLD)
     smallFrame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, constants.GROUP_FRAME_BASE_OFFSET_X, constants.GROUP_FRAME_BASE_OFFSET_Y)
 
     -- Create raid group anchor frames, these are positioned at the default locations
@@ -1904,7 +1908,7 @@ end
 local function UpdateLeaderIndicator()
     ZO_UnitFrames_Leader:SetHidden(true)
 
-    for i = 1, GROUP_SIZE_MAX do
+    for i = 1, MAX_GROUP_SIZE_THRESHOLD do
         local unitTag = GetGroupUnitTagByIndex(i)
         local unitFrame = unitTag and UnitFrames:GetFrame(unitTag)
 
@@ -2110,7 +2114,7 @@ local function CreateGroupMember(frameIndex, unitTag, groupSize)
     end
 
     local frameStyle = GROUP_UNIT_FRAME
-    if groupSize > SMALL_GROUP_SIZE_THRESHOLD then
+    if groupSize > STANDARD_GROUP_SIZE_THRESHOLD then
         frameStyle = RAID_UNIT_FRAME
     end
 
@@ -2135,7 +2139,7 @@ local function CreateGroupsAfter(startIndex)
     local groupSize = GetGroupSize()
     local combinedGroupSize = UnitFrames:GetCombinedGroupSize()
 
-    for i = startIndex, GROUP_SIZE_MAX do
+    for i = startIndex, MAX_GROUP_SIZE_THRESHOLD do
         local unitTag = GetGroupUnitTagByIndex(i)
 
         if unitTag then
@@ -2143,9 +2147,9 @@ local function CreateGroupsAfter(startIndex)
         end
     end
 
-    if combinedGroupSize > SMALL_GROUP_SIZE_THRESHOLD then
+    if combinedGroupSize > STANDARD_GROUP_SIZE_THRESHOLD then
         local numCompanionFrames = 0
-        local maxCompanionFrames = zo_min(UnitFrames:GetCompanionGroupSize(), GROUP_SIZE_MAX - groupSize)
+        local maxCompanionFrames = zo_min(UnitFrames:GetCompanionGroupSize(), MAX_GROUP_SIZE_THRESHOLD - groupSize)
         if maxCompanionFrames > 0 then
 
             --We want to prioritize showing the local player's companion, so do that one first
@@ -2197,8 +2201,8 @@ local function UpdateGroupFrameStyle(groupIndex)
 
     local combinedGroupSize = UnitFrames:GetCombinedGroupSize()
 
-    local oldLargeGroup = (oldCombinedGroupSize ~= nil) and (oldCombinedGroupSize > SMALL_GROUP_SIZE_THRESHOLD);
-    local newLargeGroup = combinedGroupSize > SMALL_GROUP_SIZE_THRESHOLD;
+    local oldLargeGroup = (oldCombinedGroupSize ~= nil) and (oldCombinedGroupSize > STANDARD_GROUP_SIZE_THRESHOLD);
+    local newLargeGroup = combinedGroupSize > STANDARD_GROUP_SIZE_THRESHOLD;
 
     -- In cases where no UI has been setup, the group changes between large and small group sizes, or when
     -- members are removed, we need to run a full update of the UI. These could also be optimized to only
@@ -2233,7 +2237,7 @@ local function UpdateGroupFramesVisualStyle()
 
     -- Note: Small group anchor frame is currently the same for all platforms.
     local groupFrame = ZO_SmallGroupAnchorFrame
-    groupFrame:SetDimensions(constants.GROUP_FRAME_SIZE_X, (constants.GROUP_FRAME_SIZE_Y + constants.GROUP_FRAME_PAD_Y) * SMALL_GROUP_SIZE_THRESHOLD)
+    groupFrame:SetDimensions(constants.GROUP_FRAME_SIZE_X, (constants.GROUP_FRAME_SIZE_Y + constants.GROUP_FRAME_PAD_Y) * STANDARD_GROUP_SIZE_THRESHOLD)
     SetAnchorOffsets(groupFrame, constants.GROUP_FRAME_BASE_OFFSET_X, constants.GROUP_FRAME_BASE_OFFSET_Y)
 
     -- Raid group anchor frames.
@@ -2262,11 +2266,11 @@ local function UpdateGroupFramesVisualStyle()
     local previousUnitTag = nil
     local previousCompanionTag = nil
     local numCompanionFrames = 0
-    local maxCompanionFrames = zo_min(UnitFrames:GetCompanionGroupSize(), GROUP_SIZE_MAX - groupSize)
+    local maxCompanionFrames = zo_min(UnitFrames:GetCompanionGroupSize(), MAX_GROUP_SIZE_THRESHOLD - groupSize)
     local playerGroupTag = GetLocalPlayerGroupUnitTag()
     local playerCompanionTag = GetCompanionUnitTagByGroupUnitTag(playerGroupTag)
     --If we are in a large group, make sure we prioritize sorting the player's local companion to the front
-    if combinedGroupSize > SMALL_GROUP_SIZE_THRESHOLD and numCompanionFrames < maxCompanionFrames then
+    if combinedGroupSize > STANDARD_GROUP_SIZE_THRESHOLD and numCompanionFrames < maxCompanionFrames then
         if playerCompanionTag and (DoesUnitExist(playerCompanionTag) or HasPendingCompanion()) then
             numCompanionFrames = numCompanionFrames + 1
             local companionUnitFrame = UnitFrames:GetFrame(playerCompanionTag)
@@ -2277,15 +2281,15 @@ local function UpdateGroupFramesVisualStyle()
         end
     end
 
-    for i = 1, GROUP_SIZE_MAX do
+    for i = 1, MAX_GROUP_SIZE_THRESHOLD do
         local unitTag = GetGroupUnitTagByIndex(i)
         local companionTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
         if unitTag then
-            local unitFrame = UnitFrames:GetFrame(unitTag)            
+            local unitFrame = UnitFrames:GetFrame(unitTag)
             local companionUnitFrame = UnitFrames:GetFrame(companionTag)
             local groupUnitAnchor = GetGroupFrameAnchor(i, combinedGroupSize, UnitFrames:GetFrame(previousUnitTag), UnitFrames:GetFrame(previousCompanionTag))
             unitFrame:SetAnchor(groupUnitAnchor)
-            if combinedGroupSize > SMALL_GROUP_SIZE_THRESHOLD then
+            if combinedGroupSize > STANDARD_GROUP_SIZE_THRESHOLD then
                 if companionTag ~= playerCompanionTag and numCompanionFrames < maxCompanionFrames and DoesUnitExist(companionTag) then
                     numCompanionFrames = numCompanionFrames + 1
                     local companionAnchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, combinedGroupSize)
@@ -2346,7 +2350,7 @@ end
 local function RefreshGroups()
     DoGroupUpdate()
 
-    for i = 1, GROUP_SIZE_MAX do
+    for i = 1, MAX_GROUP_SIZE_THRESHOLD do
         local unitTag = ZO_Group_GetUnitTagForGroupIndex(i)
         local companionTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
         ZO_UnitFrames_UpdateWindow(unitTag)

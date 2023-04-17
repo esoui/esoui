@@ -180,6 +180,8 @@ function ZO_Market_Shared:UpdateCurrentCategory()
     if self.currentCategoryData then
         if self.currentCategoryData.categoryIndex == ZO_MARKET_ESO_PLUS_CATEGORY_INDEX then
             self:RefreshEsoPlusPage()
+        elseif self.currentCategoryData.type == ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE then
+            self:RefreshChapterUpgradePage()
         else
             self:RefreshProducts()
         end
@@ -383,14 +385,16 @@ end
 do
     local MARKET_PRODUCT_SORT_KEYS =
         {
+            isRewardEntry = { tiebreaker = "isBundle", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
             isBundle = { tiebreaker = "isValidForPlayer", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
-            isValidForPlayer = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+            isValidForPlayer = { tiebreaker = "headerName", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+            headerName = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
             name = { tiebreaker = "stackCount", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
-            stackCount = {},
+            stackCount = { isNumeric = true },
         }
 
     function ZO_Market_Shared.CompareBundleMarketProducts(entry1, entry2)
-        return ZO_TableOrderingFunction(entry1, entry2, "isBundle", MARKET_PRODUCT_SORT_KEYS, ZO_SORT_ORDER_DOWN)
+        return ZO_TableOrderingFunction(entry1, entry2, "isRewardEntry", MARKET_PRODUCT_SORT_KEYS, ZO_SORT_ORDER_UP)
     end
 end
 
@@ -464,10 +468,9 @@ do
     function ZO_Market_Shared.GetCrownCrateContentsProductInfo(marketProductId)
         ZO_ClearTable(addedMarketProductsMapping)
         local marketProducts = {}
-
         local crateId = GetMarketProductCrownCrateId(marketProductId)
-
         local crateTierIds = { GetCrownCrateTierIds(crateId) }
+
         for tierIndex, tierId in ipairs(crateTierIds) do
             local tierOrdering = GetCrownCrateTierOrdering(tierId)
             local tierDisplayName = GetCrownCrateTierDisplayName(tierId)
@@ -506,30 +509,67 @@ end
 
 function ZO_Market_Shared.GetMarketProductBundleChildProductInfo(marketProductId)
     local marketProducts = {}
-
     local numChildren = GetMarketProductNumChildren(marketProductId)
-    if numChildren > 0 then
-        for childIndex = 1, numChildren do
-            local childMarketProductId = GetMarketProductChildId(marketProductId, childIndex)
 
-            local productType = GetMarketProductType(childMarketProductId)
-            local isBundle = productType == MARKET_PRODUCT_TYPE_BUNDLE
+    if numChildren == 0 then
+        return marketProducts
+    end
+
+    for childIndex = 1, numChildren do
+        local childMarketProductId = GetMarketProductChildId(marketProductId, childIndex)
+        local productType = GetMarketProductType(childMarketProductId)
+        local productName = GetMarketProductDisplayName(childMarketProductId)
+        local productStackCount = GetMarketProductStackCount(childMarketProductId)
+        local productDisplayQuality = GetMarketProductDisplayQuality(childMarketProductId)
+        local productRewardListId = GetMarketProductItemRewardListId(childMarketProductId)
+
+        if productRewardListId == 0 then
+            local isBundle = false
             local isValidForPlayer = true
-            if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+            if productType == MARKET_PRODUCT_TYPE_BUNDLE then
+                isBundle = true
+            elseif productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
                 local collectibleId = GetMarketProductCollectibleId(childMarketProductId)
                 isValidForPlayer = IsCollectibleValidForPlayer(collectibleId)
             end
 
+            -- Add a MarketProduct row.
             local productInfo =
             {
-                productId = childMarketProductId,
-                name = GetMarketProductDisplayName(childMarketProductId),
-                stackCount = GetMarketProductStackCount(childMarketProductId),
+                displayQuality = productDisplayQuality,
+                headerName = "",
                 isBundle = isBundle,
+                isRewardEntry = false,
                 isValidForPlayer = isValidForPlayer,
-                displayQuality = GetMarketProductDisplayQuality(childMarketProductId),
+                name = productName,
+                productId = childMarketProductId,
+                stackCount = productStackCount,
             }
             table.insert(marketProducts, productInfo)
+        else
+            -- GetAllRewardInfoForRewardList returns a table containing new ZO_Reward instances.
+            local rewardInfoList = REWARDS_MANAGER:GetAllRewardInfoForRewardList(productRewardListId)
+            local headerColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, productDisplayQuality))
+
+            for _, rewardInfo in ipairs(rewardInfoList) do
+                -- Add a RewardInfo row for each reward in this reward container.
+                rewardInfo.headerColor = headerColor
+                rewardInfo.headerName = productName
+                rewardInfo.isBundle = false
+                rewardInfo.isRewardEntry = true
+                rewardInfo.name = rewardInfo:GetFormattedName()
+                rewardInfo.productId = childMarketProductId
+                rewardInfo.stackCount = productStackCount
+
+                if rewardInfo:GetRewardType() == REWARD_ENTRY_TYPE_COLLECTIBLE then
+                    local collectibleId = GetCollectibleRewardCollectibleId(rewardInfo:GetRewardId())
+                    rewardInfo.isValidForPlayer = IsCollectibleValidForPlayer(collectibleId)
+                else
+                    rewardInfo.isValidForPlayer = true
+                end
+
+                table.insert(marketProducts, rewardInfo)
+            end
         end
     end
 
@@ -789,6 +829,19 @@ function ZO_Market_Shared.PreviewMarketProduct(previewObject, marketProductId)
     previewObject:PreviewMarketProduct(marketProductId)
 end
 
+function ZO_Market_Shared.PreviewReward(previewObject, rewardId)
+    local QUANTITY = 1
+    local rewardInfo = REWARDS_MANAGER:GetInfoForReward(rewardId, QUANTITY)
+    if not rewardInfo then
+        return false
+    end
+
+    local previewInEmptyWorld = rewardInfo:GetRewardType() == REWARD_TYPE_ITEM
+    previewObject:SetPreviewInEmptyWorld(previewInEmptyWorld)
+    previewObject:PreviewReward(rewardId)
+    return true
+end
+
 function ZO_Market_Shared:GetDisplayGroup()
     return self.displayGroup
 end
@@ -862,6 +915,10 @@ function ZO_Market_Shared:BuildMarketProductList(data)
 end
 
 function ZO_Market_Shared:RefreshEsoPlusPage()
+end
+
+function ZO_Market_Shared:RefreshChapterUpgradePage()
+    -- To be overridden
 end
 
 function ZO_Market_Shared:RemoveActionLayerForDialog()

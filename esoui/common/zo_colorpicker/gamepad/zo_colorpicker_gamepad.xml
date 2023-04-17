@@ -44,7 +44,7 @@
                                 </Label>
                             </Controls>
                         </Control>
-                            
+
                         <ColorSelect name="$(parent)ColorSelect" override="true" mouseEnabled="true">
                             <Anchor point="LEFT" relativeTo="$(parent)Preview" relativePoint="RIGHT" offsetX="40"/>
                             <Dimensions x="204" y="204" />
@@ -62,6 +62,39 @@
                                         self:SetTextureSource(GetGamepadLeftStickSlideAndScrollIcon)
                                     </OnInitialized>
                                 </Texture>
+
+                                <Control name="$(parent)KeyboardBinding" hidden="true" >
+                                    <Anchor point="TOP" relativePoint="BOTTOM"/>
+                                    <Controls>
+                                        <Label name="$(parent)ScrollKeyUp" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                                            <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/>
+                                            <OnInitialized>
+                                                self:SetText(ZO_Keybindings_GenerateIconKeyMarkup(KEY_UPARROW, 180))
+                                            </OnInitialized>
+                                        </Label>
+
+                                        <Label name="$(parent)ScrollKeyDown" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                                            <Anchor point="TOP" relativeTo="$(parent)ScrollKeyUp" relativePoint="BOTTOM" offsetY="5" />
+                                            <OnInitialized>
+                                                self:SetText(ZO_Keybindings_GenerateIconKeyMarkup(KEY_DOWNARROW, 180))
+                                            </OnInitialized>
+                                        </Label>
+
+                                        <Label name="$(parent)ScrollKeyLeft" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                                            <Anchor point="RIGHT" relativeTo="$(parent)ScrollKeyDown" relativePoint="LEFT" />
+                                            <OnInitialized>
+                                                self:SetText(ZO_Keybindings_GenerateIconKeyMarkup(KEY_LEFTARROW, 180))
+                                            </OnInitialized>
+                                        </Label>
+
+                                        <Label name="$(parent)ScrollKeyRight" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                                            <Anchor point="LEFT" relativeTo="$(parent)ScrollKeyDown" relativePoint="RIGHT" />
+                                            <OnInitialized>
+                                                self:SetText(ZO_Keybindings_GenerateIconKeyMarkup(KEY_RIGHTARROW, 180))
+                                            </OnInitialized>
+                                        </Label>
+                                    </Controls>
+                                </Control>
                             </Controls>
                         </ColorSelect>
 
@@ -90,6 +123,19 @@
                                         self:SetTextureSource(GetGamepadRightStickScrollIcon)
                                     </OnInitialized>
                                 </Texture>
+
+                                <Control name="$(parent)KeyboardBinding" hidden="true" >
+                                    <Anchor point="TOP" relativePoint="BOTTOM"/>
+                                    <Controls>
+                                        <Label name="$(parent)ScrollKeyUp" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                                            <Anchor point="TOP" relativePoint="BOTTOM" offsetY="16"/>
+                                        </Label>
+
+                                        <Label name="$(parent)ScrollKeyDown" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                                            <Anchor point="TOP" relativeTo="$(parent)ScrollKeyUp" relativePoint="BOTTOM" offsetY="5" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
                             </Controls>
                         </Slider>
 

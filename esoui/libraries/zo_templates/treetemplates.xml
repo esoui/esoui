@@ -82,7 +82,7 @@
                     </Controls>
                 </Texture>
                 <Label name="$(parent)Text" font="ZoFontHeader3" inherits="ZO_SelectableLabel ZO_IconHeaderMouseArea" wrapMode="ELLIPSIS">
-                    <Anchor point="TOPLEFT" offsetX="55" offsetY="9"/>
+                    <Anchor point="TOPLEFT" offsetX="ZO_TREE_ENTRY_ICON_HEADER_TEXT_OFFSET_X" offsetY="9"/>
                     <DimensionConstraints maxX="230"/>
                 </Label>
                 <!-- Fills the space between the text and the icon -->

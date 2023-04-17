@@ -1,0 +1,43 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_FishFilletPanel" virtual="true">
+            <Controls>
+                <Control name="$(parent)SlotContainer">
+                    <Dimensions x="512" y="256" />
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100"/>
+                    <Controls>
+                        <Texture name="$(parent)Bg" inherits="ZO_CraftingContainerBackground" />
+
+                        <Label name="$(parent)FilletLabel" inherits="ZO_CraftingContainerHeader">
+                            <Anchor point="TOP" offsetX="-100" offsetY="64" />
+                        </Label>
+
+                        <Button name="$(parent)FilletSlot" inherits="ZO_CraftingSlot">
+                            <Anchor point="TOP" relativeTo="$(parent)FilletLabel" relativePoint="BOTTOM" offsetY="20" />
+                            <Controls>
+                                <Label name="$(parent)Name" font="ZoFontWinH4" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Dimensions x="185" />
+                                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                                </Label>
+                                <Label name="$(parent)NeedMoreLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                                </Label>
+                            </Controls>
+                        </Button>
+
+                        <Label name="$(parent)QuantityLabel" inherits="ZO_CraftingContainerHeader" text="SI_CRAFTING_QUANTITY_HEADER">
+                            <Anchor point="LEFT" relativeTo="$(parent)FilletLabel" relativePoint="RIGHT" offsetX="100" />
+                        </Label>
+
+                        <Control name="$(parent)Spinner" inherits="ZO_MultiCraftSpinner">
+                            <Anchor point="TOP" relativeTo="$(parent)QuantityLabel" relativePoint="BOTTOM" offsetY="34" />
+                        </Control>
+
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

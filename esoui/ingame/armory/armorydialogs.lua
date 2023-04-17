@@ -49,7 +49,10 @@ ESO_Dialogs["ARMORY_BUILD_RESTORE_FAILED_DIALOG"] =
             keybind = "DIALOG_NEGATIVE",
             clickSound = SOUNDS.DIALOG_ACCEPT,
         }
-    }
+    },
+    finishedCallback = function()
+        ZO_ARMORY_MANAGER:OnBuildOperationResultClosed()
+    end,
 }
 
 ESO_Dialogs["ARMORY_BUILD_RESTORE_SUCCESS_DIALOG"] =
@@ -78,14 +81,7 @@ ESO_Dialogs["ARMORY_BUILD_RESTORE_SUCCESS_DIALOG"] =
         },
     },
     finishedCallback = function()
-        if IsInGamepadPreferredMode() then
-            ARMORY_GAMEPAD:UpdateKeybinds()
-        end
-    end,
-    noChoiceCallback = function()
-        if IsInGamepadPreferredMode() then
-            ARMORY_GAMEPAD:UpdateKeybinds()
-        end
+        ZO_ARMORY_MANAGER:OnBuildOperationResultClosed()
     end,
 }
 
@@ -199,7 +195,10 @@ ESO_Dialogs["ARMORY_BUILD_SAVE_FAILED_DIALOG"] =
             keybind = "DIALOG_NEGATIVE",
             clickSound = SOUNDS.DIALOG_ACCEPT,
         }
-    }
+    },
+    finishedCallback = function()
+        ZO_ARMORY_MANAGER:OnBuildOperationResultClosed()
+    end,
 }
 
 ESO_Dialogs["ARMORY_BUILD_SAVE_SUCCESS_DIALOG"] =
@@ -228,14 +227,7 @@ ESO_Dialogs["ARMORY_BUILD_SAVE_SUCCESS_DIALOG"] =
         }
     },
     finishedCallback = function()
-        if IsInGamepadPreferredMode() then
-            ARMORY_GAMEPAD:UpdateKeybinds()
-        end
-    end,
-    noChoiceCallback = function()
-        if IsInGamepadPreferredMode() then
-            ARMORY_GAMEPAD:UpdateKeybinds()
-        end
+        ZO_ARMORY_MANAGER:OnBuildOperationResultClosed()
     end,
 }
 

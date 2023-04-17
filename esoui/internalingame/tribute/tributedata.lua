@@ -148,6 +148,8 @@ function ZO_TributePileData:TryTriggerHandAndDocksTutorials()
     local hasAgent = false
     local hasChoice = false
     local hasTrigger = false
+    local hasConfine = false
+    local hasDonate = false
 
     -- Loop through the cards in this pile and determine which tutorials we should try to trigger
     for _, cardData in ipairs(cardList) do
@@ -180,6 +182,15 @@ function ZO_TributePileData:TryTriggerHandAndDocksTutorials()
         if DoesTributeCardHaveTriggerMechanic(cardDefId) then
             hasTrigger = true
         end
+
+        --The confine mechanic is only on agents so we can skip the check if this card isn't an agent
+        if isAgent and DoesTributeCardHaveMechanicType(cardDefId, TRIBUTE_MECHANIC_CONFINE_CARDS) then
+            hasConfine = true
+        end
+
+        if DoesTributeCardHaveMechanicType(cardDefId, TRIBUTE_MECHANIC_DONATE_CARDS) then
+            hasDonate = true
+        end
     end
 
     -- Trigger the tutorials in the order of the priority we want them to show in
@@ -205,6 +216,14 @@ function ZO_TributePileData:TryTriggerHandAndDocksTutorials()
 
     if hasTrigger then
         TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_TRIBUTE_TRIGGER_CARD_SEEN)
+    end
+
+    if hasConfine then
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_TRIBUTE_CONFINE_CARD_SEEN)
+    end
+
+    if hasDonate then
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_TRIBUTE_DONATE_CARD_SEEN)
     end
 end
 

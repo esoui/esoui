@@ -163,6 +163,10 @@ local function DoesPlatformNotUseGamepadChatSystem()
     return not ZO_ChatSystem_DoesPlatformUseGamepadChatSystem()
 end
 
+local function AreAvANotificationsEnabled()
+    return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_AVA_NOTIFICATIONS)) ~= 0
+end
+
 local ZO_OptionsPanel_Social_ControlData =
 {
     --Language Settings
@@ -236,6 +240,26 @@ local ZO_OptionsPanel_Social_ControlData =
             tooltipText = SI_SOCIAL_OPTIONS_SHOW_AVA_NOTIFICATIONS_TOOLTIP,
             valid = {AVA_NOTIFICATIONS_SETTING_CHOICE_DONT_SHOW, AVA_NOTIFICATIONS_SETTING_CHOICE_AUTOMATIC, AVA_NOTIFICATIONS_SETTING_CHOICE_ALWAYS_SHOW,},
             valueStringPrefix = "SI_AVANOTIFICATIONSSETTINGCHOICE",
+            events = {[AVA_NOTIFICATIONS_SETTING_CHOICE_DONT_SHOW] = "AvANotifications_Off", [AVA_NOTIFICATIONS_SETTING_CHOICE_AUTOMATIC] = "AvANotifications_On", [AVA_NOTIFICATIONS_SETTING_CHOICE_ALWAYS_SHOW] = "AvANotifications_On",},
+            gamepadHasEnabledDependencies = true,
+        },
+        --Options_Social_GuildKeepNotices
+        [UI_SETTING_SHOW_GUILD_KEEP_NOTICES] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_UI,
+            panel = SETTING_PANEL_SOCIAL,
+            settingId = UI_SETTING_SHOW_GUILD_KEEP_NOTICES,
+            text = SI_SOCIAL_OPTIONS_SHOW_GUILD_KEEP_NOTICES,
+            tooltipText = SI_SOCIAL_OPTIONS_SHOW_GUILD_KEEP_NOTICES_TOOLTIP,
+            valid = {GUILD_KEEP_NOTICES_SETTING_CHOICE_DONT_SHOW, GUILD_KEEP_NOTICES_SETTING_CHOICE_CHAT, GUILD_KEEP_NOTICES_SETTING_CHOICE_ALERT,},
+            valueStringPrefix = "SI_GUILDKEEPNOTICESSETTINGCHOICE",
+            gamepadIsEnabledCallback = AreAvANotificationsEnabled,
+            eventCallbacks =
+            {
+                ["AvANotifications_Off"]   = ZO_Options_SetOptionInactive,
+                ["AvANotifications_On"]    = ZO_Options_SetOptionActive,
+            },
         },
         [UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED] =
         {

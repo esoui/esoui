@@ -143,6 +143,13 @@ function ZO_GamepadEntryData:InitializeLootVisualData(lootId, count, displayQual
     end
 end
 
+function ZO_GamepadEntryData:InitializeCollectibleVisualData(collectibleData, actorCategory)
+    self:SetNew(collectibleData:IsNew())
+    self:SetEnabled(not collectibleData:IsBlocked(actorCategory))
+    self.isFavorite = collectibleData:IsFavorite()
+    -- Don't need to specify data.isPrimaryResidence because it's already on the collectibleData
+end
+
 --[[ Setters for specific fields and options ]]--
 function ZO_GamepadEntryData:SetHeader(header)
     self.header = header

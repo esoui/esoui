@@ -263,7 +263,7 @@ do
             text = GetCurrencyString,
             icon = icon,
             stackCount = currencyAdded,
-            color = ZO_SELECTED_TEXT,
+            color = currencyType == CURT_EVENT_TICKETS and ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, ITEM_DISPLAY_QUALITY_LEGENDARY)) or ZO_SELECTED_TEXT,
             currencyType = currencyType,
             entryType = LOOT_ENTRY_TYPE_CURRENCY,
             iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,

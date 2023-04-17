@@ -29,10 +29,10 @@ ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
         controls =
         {
             -- <Type of controls (GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM, GAMEPAD_BUCKET_CONTROL_TYPE_APPEARANCE or GAMEPAD_BUCKET_CONTROL_TYPE_SLIDER)>, <enum of control>
+            { GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM, GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS },
             { GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM, GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER },
             { GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM, GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE },
             { GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM, GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE },
-            { GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM, GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS },
         },
     },
 
@@ -325,7 +325,6 @@ function ZO_CharacterCreateBucketManager_Gamepad:AddBucket(bucketCategory)
     local tabBarParams = {
                             text = bucket.windowData.title,
                             bucket = bucket.windowData,
-                            canSelect = true,
                             callback = function() self:OnTabBarCategoryChanged(bucket.category) end,
                          }
     table.insert(self.tabBarEntries, tabBarParams)
@@ -338,7 +337,7 @@ end
 
 function ZO_CharacterCreateBucketManager_Gamepad:EnableTabBarCategory(bucket, enabled)
     local tabBarParams = self.tabBarEntries[bucket:GetTabIndex()]
-    tabBarParams.canSelect = enabled
+    tabBarParams.visible = enabled
 
     local header = GAMEPAD_CHARACTER_CREATE_MANAGER.header
     ZO_GamepadGenericHeader_Refresh(header, self.headerData)
@@ -433,9 +432,9 @@ function ZO_CharacterCreateBucketManager_Gamepad:GetHeaderNarration()
     return ZO_GamepadGenericHeader_GetNarrationText(GAMEPAD_CHARACTER_CREATE_MANAGER.header, self.headerData)
 end
 
-function ZO_CharacterCreateBucketManager_Gamepad:NarrateCurrentBucket()
+function ZO_CharacterCreateBucketManager_Gamepad:NarrateCurrentBucket(narrateHeader)
     if self.currentBucket then
-        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currentBucket:GetScrollChild())
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currentBucket:GetScrollChild(), narrateHeader)
     end
 end
 

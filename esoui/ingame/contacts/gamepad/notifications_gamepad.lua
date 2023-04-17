@@ -30,7 +30,7 @@ ZO_GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GUILD_NEW_APPLICATIONS] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_guild.dds",
     [NOTIFICATION_TYPE_PLAYER_APPLICATIONS] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_guild.dds",
     [NOTIFICATION_TYPE_MARKET_PRODUCT_AVAILABLE] = "EsoUI/Art/Notifications/Gamepad/gp_notification_crownStore.dds",
-    [NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds.dds",
+    [NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_tribute.dds",
 }
 
@@ -625,6 +625,11 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
 end
 
 function ZO_GamepadNotificationManager:InitializeKeybindStripDescriptors()
+    --ESO-807711: In some cases, accepting or declining can trigger an alert.
+    --If the re-narration has already started by the time the alert comes in, the alert will stomp it (since alerts take priority) and can occasionally make it seem like no re-narration occurred at all
+    --In order to help mitigate this, we let the narration of the parametric list sit in the queue a bit longer than usual before sending it into the API. This will not solve all cases, but will significantly reduce the likelihood of hitting it.
+    local OVERRIDE_NARRATION_DELAY_MS = 350
+
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -645,6 +650,9 @@ function ZO_GamepadNotificationManager:InitializeKeybindStripDescriptors()
                 local data = self:GetTargetData()
                 if data ~= nil then
                     self:AcceptRequest(data)
+                    --Re-narrate when a request is accepted
+                    local DEFAULT_NARRATE_HEADER = nil
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list, DEFAULT_NARRATE_HEADER, OVERRIDE_NARRATION_DELAY_MS)
                 end
             end,
 
@@ -678,6 +686,9 @@ function ZO_GamepadNotificationManager:InitializeKeybindStripDescriptors()
                         ZO_Dialogs_ShowPlatformDialog("LFG_DECLINE_READY_CHECK_CONFIRMATION", dialogData)
                     else
                         self:DeclineRequest(data, nil, NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND)
+                        --Re-narrate when a request is declined
+                        local DEFAULT_NARRATE_HEADER = nil
+                        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list, DEFAULT_NARRATE_HEADER, OVERRIDE_NARRATION_DELAY_MS)
                     end
                 end
             end,
@@ -933,7 +944,7 @@ function ZO_GamepadNotificationManager:SetupWaiting(control, entryData, selected
     ZO_SharedGamepadEntry_OnSetup(control, entryData, selected)
     local data = entryData.data
     self:SetupBaseRow(control, data, selected)
-    local loadingText = GetControl(control, "Text")
+    local loadingText = control:GetNamedChild("Text")
     loadingText:SetText(data.loadText)
 end
 

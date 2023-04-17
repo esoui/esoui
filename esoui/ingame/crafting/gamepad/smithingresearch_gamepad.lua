@@ -356,6 +356,7 @@ function ZO_GamepadSmithingResearch:SaveFilters()
     if filterChanged then
         self.savedVars.includeBankedItemsChecked = g_filters[GAMEPAD_SMITHING_RESEARCH_FILTER_INCLUDE_BANKED].checked 
         self:HandleDirtyEvent()
+        ZO_SavePlayerConsoleProfile()
     end
 end
 

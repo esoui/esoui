@@ -337,6 +337,11 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
             return zo_strformat(GetString(SI_GAMEPAD_SMITHING_TOGGLE_UNIVERSAL_STYLE), universalStyleItemCountString)
         end,
 
+        narrationOverrideName = function()
+            local universalStyleItemCount = GetCurrentSmithingStyleItemCount(GetUniversalStyleId())
+            return zo_strformat(SI_GAMEPAD_SMITHING_TOGGLE_UNIVERSAL_STYLE_NARRATION, universalStyleItemCount)
+        end,
+
         callback = function()
             local haveMaterialChecked = optionFilterMaterials.checked
             local haveKnowledgeChecked = optionFilterKnowledge.checked
@@ -884,6 +889,7 @@ function ZO_GamepadSmithingCreation:SaveFilters()
         self.savedVars.haveKnowledgeChecked = optionFilterKnowledge.checked
         self.savedVars.questsOnlyChecked = optionFilterQuests.checked
         self:OnFilterChanged(haveMaterialChecked, haveKnowledgeChecked, self:GetIsUsingUniversalStyleItem(), questOnlyChecked)
+        ZO_SavePlayerConsoleProfile()
     end
 end
 

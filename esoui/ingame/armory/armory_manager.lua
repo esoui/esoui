@@ -122,6 +122,21 @@ function ZO_Armory_Manager:IsBuildOperationInProgress()
     return self.currentBuildOperation ~= ARMORY_BUILD_OPERATION_TYPE_NONE
 end
 
+function ZO_Armory_Manager:SetHideOnBuildOperationComplete(hideOnComplete)
+    self.hideOnBuildOperationComplete = hideOnComplete
+end
+
+function ZO_Armory_Manager:OnBuildOperationResultClosed()
+    if self.hideOnBuildOperationComplete then
+        self.hideOnBuildOperationComplete = false
+        SCENE_MANAGER:ShowBaseScene()
+    else
+        if IsInGamepadPreferredMode() then
+            ARMORY_GAMEPAD:UpdateKeybinds()
+        end
+    end
+end
+
 do
     local GAMPAD_EQUIPMENT_SLOT_TYPES =
     {

@@ -65,3 +65,27 @@ panelBuilder:AddSetting({
     header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
     indentLevel = 1,
 })
+
+panelBuilder:AddSetting({
+    controlName = "Options_Accessibility_AccessibleQuickwheels",
+    settingType = SETTING_TYPE_ACCESSIBILITY,
+    settingId = ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS,
+    header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
+})
+
+------------------------------------------
+-- Accessibility -> Arcanist Aim Assist --
+------------------------------------------
+panelBuilder:AddSetting({
+    controlName = "Options_Accessibility_GamepadAimAssistIntensity",
+    settingType = SETTING_TYPE_ACCESSIBILITY,
+    settingId = ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY,
+    header = SI_ACCESSIBILITY_OPTIONS_ARCANIST,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Accessibility_MouseAimAssistIntensity",
+    settingType = SETTING_TYPE_ACCESSIBILITY,
+    settingId = ACCESSIBILITY_SETTING_MOUSE_AIM_ASSIST_INTENSITY,
+    header = SI_ACCESSIBILITY_OPTIONS_ARCANIST,
+})

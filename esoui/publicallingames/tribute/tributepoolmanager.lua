@@ -166,17 +166,17 @@ function ZO_TributeCardPool:ResetObject(control)
     control:SetParent(self.parent)
 end
 
--- Mechanic Tile Pool --
+-- Mechanic Card Tile Pool --
 
-ZO_TributeMechanicTilePool = ZO_ControlPool:Subclass()
+ZO_TributeMechanicCardTilePool = ZO_ControlPool:Subclass()
 
-function ZO_TributeMechanicTilePool:CreateObject(objectKey)
+function ZO_TributeMechanicCardTilePool:CreateObject(objectKey)
     local control = ZO_ControlPool.CreateObject(self, objectKey)
     control.object:SetPoolAndKey(self, objectKey)
     return control
 end
 
-function ZO_TributeMechanicTilePool:AcquireObject(parentControl, cardInstanceId, mechanicActivationSource, mechanicIndex, isLocalPlayerOwner, quantity, isResolved, ...)
+function ZO_TributeMechanicCardTilePool:AcquireObject(parentControl, cardInstanceId, mechanicActivationSource, mechanicIndex, isLocalPlayerOwner, quantity, isResolved, ...)
     local control, objectKey = ZO_ControlPool.AcquireObject(self, ...)
 
     -- It's a control pool under the hood, for ease of creating the relationship between the control and the object,
@@ -186,10 +186,38 @@ function ZO_TributeMechanicTilePool:AcquireObject(parentControl, cardInstanceId,
     return object, objectKey
 end
 
-function ZO_TributeMechanicTilePool:ResetObject(control)
+function ZO_TributeMechanicCardTilePool:ResetObject(control)
     ZO_ControlPool.ResetObject(self, control)
 
     -- When waiting in the pool, parent to the pool's parent, instead of the card
+    control:SetParent(self.parent)
+    control.object:Reset()
+end
+
+-- Mechanic Patron Tile Pool --
+
+ZO_TributeMechanicPatronTilePool = ZO_ControlPool:Subclass()
+
+function ZO_TributeMechanicPatronTilePool:CreateObject(objectKey)
+    local control = ZO_ControlPool.CreateObject(self, objectKey)
+    control.object:SetPoolAndKey(self, objectKey)
+    return control
+end
+
+function ZO_TributeMechanicPatronTilePool:AcquireObject(parentControl, patronDraftId, favorState, isPassive, mechanicIndex, isLocalPlayerOwner, quantity, isResolved, ...)
+    local control, objectKey = ZO_ControlPool.AcquireObject(self, ...)
+
+    -- It's a control pool under the hood, for ease of creating the relationship between the control and the object,
+    -- but consumers will want the object, not the control, to work with
+    local object = control.object
+    object:Setup(parentControl, patronDraftId, favorState, isPassive, mechanicIndex, isLocalPlayerOwner, quantity, isResolved)
+    return object, objectKey
+end
+
+function ZO_TributeMechanicPatronTilePool:ResetObject(control)
+    ZO_ControlPool.ResetObject(self, control)
+
+    -- When waiting in the pool, parent to the pool's parent, instead of the patron
     control:SetParent(self.parent)
     control.object:Reset()
 end
@@ -286,17 +314,33 @@ function ZO_Tribute_PoolManager:Initialize(control)
         [TRIBUTE_CARD_TYPE_AGENT] = ZO_TributeCardPool:New("ZO_TributeCard_Agent", control, "AgentCard"),
     }
 
-    -- Mechanic Tile Player Control Pool
-    self.mechanicTilePlayerPool = ZO_TributeMechanicTilePool:New("ZO_TributeMechanicTilePlayer", control, "TributeMechanicTilePlayer")
+    -- Mechanic Card Tile Player Control Pool
+    self.mechanicCardTilePlayerPool = ZO_TributeMechanicCardTilePool:New("ZO_TributeMechanicCardTilePlayer", control, "TributeMechanicCardTilePlayer")
 
-    -- Mechanic Tile Opponent Control Pool
-    self.mechanicTileOpponentPool = ZO_TributeMechanicTilePool:New("ZO_TributeMechanicTileOpponent", control, "TributeMechanicTileOpponent")
+    -- Mechanic Card Tile Opponent Control Pool
+    self.mechanicCardTileOpponentPool = ZO_TributeMechanicCardTilePool:New("ZO_TributeMechanicCardTileOpponent", control, "TributeMechanicCardTileOpponent")
+
+    --Mechanic Patron Tile Player Control Pool
+    self.mechanicPatronTilePlayerPool = ZO_TributeMechanicPatronTilePool:New("ZO_TributeMechanicPatronTilePlayer", control, "TributeMechanicPatronTilePlayer")
+
+    --Mechanic Patron Tile Opponent Control Pool
+    self.mechanicPatronTileOpponentPool = ZO_TributeMechanicPatronTilePool:New("ZO_TributeMechanicPatronTileOpponent", control, "TributeMechanicPatronTileOpponent")
 
     -- Mechanic Tile Animation Pool
     self.mechanicTileAnimationPool = ZO_TributeMechanicTileAnimationPool:New("ZO_TributeMechanicTile_Timeline")
 
     -- Patron Requirement Control Pool
     self.patronRequirementContainerPool = ZO_TributePatronRequirementContainerPool:New("ZO_TributePatronStall_RequirementContainer_Template", control, "Requirement")
+
+    -- Stacked Card Back Texture Control Pool
+    local function ResetStackedCardBack(stackedCardBack)
+        stackedCardBack:SetHidden(true)
+        stackedCardBack:ClearAnchors()
+        stackedCardBack:SetParent(control)
+        stackedCardBack:SetDrawLevel(0)
+    end
+    self.stackedCardBackTexturePool = ZO_ControlPool:New("ZO_TributeCard_StackedCardBack", control, "StackedCardBack")
+    self.stackedCardBackTexturePool:SetCustomResetBehavior(ResetStackedCardBack)
 end
 
 function ZO_Tribute_PoolManager:GetAlphaAnimationPool()
@@ -331,12 +375,20 @@ function ZO_Tribute_PoolManager:GetCardPool(cardType)
     return self.cardTypeToPool[cardType]
 end
 
-function ZO_Tribute_PoolManager:GetMechanicTilePlayerPool()
-    return self.mechanicTilePlayerPool
+function ZO_Tribute_PoolManager:GetMechanicCardTilePlayerPool()
+    return self.mechanicCardTilePlayerPool
 end
 
-function ZO_Tribute_PoolManager:GetMechanicTileOpponentPool()
-    return self.mechanicTileOpponentPool
+function ZO_Tribute_PoolManager:GetMechanicCardTileOpponentPool()
+    return self.mechanicCardTileOpponentPool
+end
+
+function ZO_Tribute_PoolManager:GetMechanicPatronTilePlayerPool()
+    return self.mechanicPatronTilePlayerPool
+end
+
+function ZO_Tribute_PoolManager:GetMechanicPatronTileOpponentPool()
+    return self.mechanicPatronTileOpponentPool
 end
 
 function ZO_Tribute_PoolManager:GetMechanicTileAnimationPool()
@@ -363,6 +415,10 @@ end
 
 function ZO_Tribute_PoolManager:GetPatronRequirementContainerPool()
     return self.patronRequirementContainerPool
+end
+
+function ZO_Tribute_PoolManager:GetStackedCardBackTexturePool()
+    return self.stackedCardBackTexturePool
 end
 
 function ZO_Tribute_PoolManager_OnInitialized(...)

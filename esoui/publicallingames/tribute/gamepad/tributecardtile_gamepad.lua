@@ -169,3 +169,32 @@ end
 function ZO_TributeTargetViewerCardTile_Gamepad_OnInitialized(control)
     ZO_TributeTargetViewerCardTile_Gamepad:New(control)
 end
+
+------------------------------------------
+-- Tribute Confinement Viewer Card Tile --
+------------------------------------------
+
+-- Primary logic class must be subclassed after the platform class so that platform specific functions will have priority over the logic class functionality
+ZO_TributeConfinementViewerCardTile_Gamepad = ZO_Object.MultiSubclass(ZO_TributeCardTile_Gamepad, ZO_TributeConfinementViewerCardTile_Shared)
+
+function ZO_TributeConfinementViewerCardTile_Gamepad:New(...)
+    return ZO_TributeConfinementViewerCardTile_Shared.New(self, ...)
+end
+
+function ZO_TributeConfinementViewerCardTile_Gamepad:PostInitializePlatform(...)
+    ZO_TributeCardTile_Gamepad.PostInitializePlatform(self, ...)
+    --This needs to be done manually to override logic in ZO_ContextualActionsTile_Gamepad
+    self.keybindStripDescriptor.alignment = KEYBIND_STRIP_ALIGN_CENTER
+end
+
+function ZO_TributeConfinementViewerCardTile_Gamepad:SetHighlightHidden(hidden, instant)
+    ZO_ContextualActionsTile.SetHighlightHidden(self, hidden, instant)
+    ZO_TributeConfinementViewerCardTile_Shared.SetHighlightHidden(self, hidden, instant)
+end
+
+-- XML functions
+----------------
+
+function ZO_TributeConfinementViewerCardTile_Gamepad_OnInitialized(control)
+    ZO_TributeConfinementViewerCardTile_Gamepad:New(control)
+end

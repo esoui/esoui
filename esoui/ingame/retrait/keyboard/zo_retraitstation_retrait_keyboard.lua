@@ -301,7 +301,7 @@ function ZO_RetraitStation_Retrait_Keyboard:SetupTraitRow(rowControl, data)
     end
 end
 
-function ZO_RetraitStation_Retrait_Keyboard:OnTraitRowReset(rowControl, data)
+function ZO_RetraitStation_Retrait_Keyboard:OnTraitRowReset(rowControl)
     rowControl.data = nil
 
     ZO_ObjectPool_DefaultResetControl(rowControl)

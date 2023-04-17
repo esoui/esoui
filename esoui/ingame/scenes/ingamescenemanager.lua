@@ -65,6 +65,7 @@ function ZO_IngameSceneManager:SetInUIMode(inUIMode, bypassHideSceneConfirmation
                 SetGameCameraUIMode(true)
                 self:SetBaseScene(self.hudUISceneName)
                 ZO_RadialMenu.ForceActiveMenuClosed()
+                INTERACTIVE_WHEEL_MANAGER:CancelCurrentInteraction()
                 DIRECTIONAL_INPUT:Activate(self, GuiRoot)
                 --Clear out any in progress HUD narration when entering the UI
                 ClearNarrationQueue(NARRATION_TYPE_HUD)

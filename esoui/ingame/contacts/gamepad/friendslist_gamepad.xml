@@ -44,32 +44,6 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_GamepadFriendsListRow_Heron" inherits="ZO_GamepadFriendsListRow" virtual="true">
-            <Controls>
-                <Control name="$(parent)HeronUserInfo" inherits="ZO_GamepadInteractiveSortFilterListIcon">
-                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_HERON_USER_INFO_WIDTH" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Status" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
-                    <Controls>
-                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Contacts/Gamepad/gp_social_heronIcon.dds" override="true" />
-                    </Controls>
-                </Control>
-
-                <Label name="$(parent)DisplayName" override="true">
-                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_HERON_USER_FACING_NAME_WIDTH"/>
-                    <ClearAnchors/>
-                    <Anchor point="LEFT" relativeTo="$(parent)HeronUserInfo" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
-                </Label>
-
-                <Label name="$(parent)CharacterName" override="true">
-                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_HERON_CHARACTER_NAME_WIDTH"/>
-                </Label>
-
-                <Label name="$(parent)Zone" override="true">
-                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_HERON_ZONE_WIDTH" />
-                </Label>
-            </Controls>
-        </Control>
-
         <Control name="ZO_GamepadFriendsListRow_Playstation" inherits="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
             <Controls>
                 <Control name="$(parent)Status" inherits="ZO_GamepadInteractiveSortFilterListIcon">
@@ -84,7 +58,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_GamepadFriendsListHeaders_Heron" virtual="true">
+        <Control name="ZO_GamepadFriendsListHeaders" virtual="true">
             <Controls>
                 <Control name="$(parent)Status" inherits="ZO_GamepadInteractiveFilterHeader">
                     <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_STATUS_WIDTH" />
@@ -94,24 +68,16 @@
                     </OnInitialized>
                 </Control>
 
-                <Control name="$(parent)HeronUserInfo" inherits="ZO_GamepadInteractiveFilterHeader">
-                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_HERON_USER_INFO_WIDTH" />
-                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Status" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
-                    <OnInitialized>
-                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_HERON_USER_INFO), "isHeronUser", TEXT_ALIGN_CENTER)
-                    </OnInitialized>
-                </Control>
-
                 <Control name="$(parent)DisplayName" inherits="ZO_GamepadInteractiveFilterHeader">
-                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_HERON_USER_FACING_NAME_WIDTH" />
-                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)HeronUserInfo" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_USER_FACING_NAME_WIDTH" />
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Status" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                     <OnInitialized>
                         ZO_GamepadInteractiveSortFilterHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "displayName", TEXT_ALIGN_LEFT)
                     </OnInitialized>
                 </Control>
 
                 <Control name="$(parent)CharacterName" inherits="ZO_GamepadInteractiveFilterHeader">
-                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_HERON_CHARACTER_NAME_WIDTH" />
+                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_CHARACTER_NAME_WIDTH" />
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DisplayName" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                     <OnInitialized>
                         ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_CHARACTER), "characterName", TEXT_ALIGN_LEFT)
@@ -119,7 +85,7 @@
                 </Control>
 
                 <Control name="$(parent)Zone" inherits="ZO_GamepadInteractiveFilterHeader">
-                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_HERON_ZONE_WIDTH" />
+                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_ZONE_WIDTH" />
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)CharacterName" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                     <OnInitialized>
                         ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_ZONE), "formattedZone", TEXT_ALIGN_LEFT)
@@ -148,30 +114,6 @@
                     <OnInitialized>
                         ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_LEVEL), "level", TEXT_ALIGN_CENTER)
                     </OnInitialized>
-                </Control>
-            </Controls>
-        </Control>
-
-        <!--
-            The "normal" headers are implemented in terms of the heron headers instead of on their own to preserve the order each header is added in the SortHeaderGroup.
-            ZO_SortHeaderGroup:AddHeadersFromContainer() will add each header in the order it's added to the control, so we need the user info header to be added immediately after the status header.
-            To remove it from the normal header list we'll just mark it hidden, which will skip it in the SortHeaderGroup.
-        -->
-        <Control name="ZO_GamepadFriendsListHeaders" inherits="ZO_GamepadFriendsListHeaders_Heron" virtual="true">
-            <Controls>
-                <Control name="$(parent)HeronUserInfo" override="true" hidden="true" />
-
-                <Control name="$(parent)DisplayName" override="true">
-                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_USER_FACING_NAME_WIDTH" />
-                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Status" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
-                </Control>
-
-                <Control name="$(parent)CharacterName" override="true">
-                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_CHARACTER_NAME_WIDTH" />
-                </Control>
-
-                <Control name="$(parent)Zone" override="true">
-                    <Dimensions x="ZO_GAMEPAD_FRIENDS_LIST_ZONE_WIDTH" />
                 </Control>
             </Controls>
         </Control>

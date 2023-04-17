@@ -186,7 +186,7 @@ function ZO_CompanionCollectionBook_Keyboard:InitializeGridListPanel()
     local CENTER_ENTRIES = true --TODO: Remove this when it's the default
     local HEADER_HEIGHT = 30
     self.gridListPanelList:AddEntryTemplate("ZO_CollectibleTile_Keyboard_Control", ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X, ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, COLLECTIBLE_TILE_GRID_PADDING, COLLECTIBLE_TILE_GRID_PADDING, CENTER_ENTRIES)
-    self.gridListPanelList:AddEntryTemplate("ZO_CollectibleSetDefaultTile_Keyboard_Control", ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X, ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, COLLECTIBLE_TILE_GRID_PADDING, COLLECTIBLE_TILE_GRID_PADDING, CENTER_ENTRIES)
+    self.gridListPanelList:AddEntryTemplate("ZO_CollectibleImitationTile_Keyboard_Control", ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X, ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, COLLECTIBLE_TILE_GRID_PADDING, COLLECTIBLE_TILE_GRID_PADDING, CENTER_ENTRIES)
     self.gridListPanelList:SetAutoFillEntryTemplate("ZO_CollectibleTile_Keyboard_Control")
     self.gridListPanelList:AddHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
     self.gridListPanelList:SetHeaderPrePadding(COLLECTIBLE_TILE_GRID_PADDING * 3)
@@ -239,13 +239,15 @@ do
             local categoryIndex = categoryData:GetCategoryIndicies()
             local hasChildren = NonContiguousCount(searchResults[categoryIndex]) > 1 or searchResults[categoryIndex][ZO_COLLECTIONS_SEARCH_ROOT] == nil
             local nodeTemplate = hasChildren and "ZO_CompanionCollectionsBook_StatusIconHeader" or "ZO_CompanionCollectionsBook_StatusIconChildlessHeader"
-
-            local parentNode = self:AddCategory(nodeTemplate, categoryData)
+            local parentNode = nil
 
             for subcategoryIndex, _ in pairs(searchResults[categoryIndex]) do
                 if subcategoryIndex ~= ZO_COLLECTIONS_SEARCH_ROOT then
                     local subcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataByIndicies(categoryIndex, subcategoryIndex)
                     if subcategoryData:HasAnyCompanionUsableCollectibles() then
+                        if not parentNode then
+                            parentNode = self:AddCategory(nodeTemplate, categoryData)
+                        end
                         self:AddCategory("ZO_CompanionCollectionsBook_SubCategory", subcategoryData, parentNode)
                     end
                 end
@@ -354,24 +356,33 @@ do
         if categoryData then
             local SORTED = true
             local collectiblesData = GetCollectiblesDataFromCategory(categoryData, SORTED)
-            local defaultTilesProcessed = false
+            local imitationTilesProcessed = false
 
             for _, collectibleData in ipairs(collectiblesData) do
                 if ShouldAddCollectible(self.categoryFilterComboBox.filterType, collectibleData) then
-                    if not defaultTilesProcessed then
+                    if not imitationTilesProcessed then
                         local collectibleCategoryTypesInCategory = categoryData:GetCollectibleCategoryTypesInCategory()
                         for categoryType in pairs(collectibleCategoryTypesInCategory) do
-                            local setDefaultCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetSetDefaultCollectibleData(categoryType, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
-                            if setDefaultCollectibleData then
+                            local setToDefaultCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetSetToDefaultCollectibleData(categoryType, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+                            if setToDefaultCollectibleData then
                                 local defaultEntryData = self.entryDataObjectPool:AcquireObject()
-                                defaultEntryData:SetDataSource(setDefaultCollectibleData)
+                                defaultEntryData:SetDataSource(setToDefaultCollectibleData)
                                 defaultEntryData.gridHeaderTemplate = ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD
                                 defaultEntryData.gridHeaderName = ""
-                                gridListPanelList:AddEntry(defaultEntryData, "ZO_CollectibleSetDefaultTile_Keyboard_Control")
+                                gridListPanelList:AddEntry(defaultEntryData, "ZO_CollectibleImitationTile_Keyboard_Control")
                             end
                         end
 
-                        defaultTilesProcessed = true
+                        if collectibleCategoryTypesInCategory[COLLECTIBLE_CATEGORY_TYPE_MOUNT] then
+                            local randomMountEntryData = self.entryDataObjectPool:AcquireObject()
+                            local setAnyRandomMountData = ZO_RandomMountCollectibleData:New(RANDOM_MOUNT_TYPE_ANY)
+                            randomMountEntryData:SetDataSource(setAnyRandomMountData)
+                            randomMountEntryData.gridHeaderTemplate = ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD
+                            randomMountEntryData.gridHeaderName = ""
+                            gridListPanelList:AddEntry(randomMountEntryData, "ZO_CollectibleImitationTile_Keyboard_Control")
+                        end
+
+                        imitationTilesProcessed = true
                     end
                     local entryData = self.entryDataObjectPool:AcquireObject()
                     entryData:SetDataSource(collectibleData)
@@ -400,7 +411,24 @@ end
 function ZO_CompanionCollectionBook_Keyboard:UpdateCollection()
     self:BuildCategories()
     local searchResults = COLLECTIONS_BOOK_SINGLETON:GetSearchResults()
-    local foundNoMatches = searchResults and NonContiguousCount(searchResults) == 0
+    local searchResultsHaveCompanionUsableCollectibles = false
+    if searchResults then
+        for categoryIndex, _ in pairs(searchResults) do
+            for subcategoryIndex, _ in pairs(searchResults[categoryIndex]) do
+                if subcategoryIndex ~= ZO_COLLECTIONS_SEARCH_ROOT then
+                    local subcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataByIndicies(categoryIndex, subcategoryIndex)
+                    if subcategoryData:HasAnyCompanionUsableCollectibles() then
+                        searchResultsHaveCompanionUsableCollectibles = true
+                        break
+                    end
+                end
+            end
+            if searchResultsHaveCompanionUsableCollectibles then
+                break
+            end
+        end
+    end
+    local foundNoMatches = searchResults and not searchResultsHaveCompanionUsableCollectibles
     self.categoryFilterComboBox:SetHidden(foundNoMatches)
     self.noMatches:SetHidden(not foundNoMatches)
     self.gridListPanelControl:SetHidden(foundNoMatches)

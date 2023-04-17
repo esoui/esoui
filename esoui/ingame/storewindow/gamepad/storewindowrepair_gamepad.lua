@@ -1,9 +1,5 @@
 ZO_GamepadStoreRepair = ZO_GamepadStoreListComponent:Subclass()
 
-function ZO_GamepadStoreRepair:New(...)
-    return ZO_GamepadStoreListComponent.New(self, ...)
-end
-
 function ZO_GamepadStoreRepair:Initialize(scene)
     ZO_GamepadStoreListComponent.Initialize(self, scene, ZO_MODE_STORE_REPAIR, GetString(SI_STORE_MODE_REPAIR))
 
@@ -17,12 +13,12 @@ function ZO_GamepadStoreRepair:Initialize(scene)
     end)
 
     self:InitializeKeybindStrip()
-    self:CreateModeData(SI_STORE_MODE_REPAIR, ZO_MODE_STORE_REPAIR, "EsoUI/Art/Vendor/vendor_tabIcon_repair_up.dds", fragment, self.keybindStripDescriptor)
+    self:CreateModeData(SI_STORE_MODE_REPAIR, ZO_MODE_STORE_REPAIR, "EsoUI/Art/Vendor/vendor_tabIcon_repair_up.dds", self.fragment, self.keybindStripDescriptor)
     self.list:SetNoItemText(GetString(SI_GAMEPAD_NO_DAMAGED_ITEMS))
 end
 
 function ZO_GamepadStoreRepair:RegisterEvents()
-    local OnInventoryUpdated = function(eventId, bagId, slotId, isNewItem, soundCategory, reason)
+    local function OnInventoryUpdated(eventId, bagId, slotId, isNewItem, soundCategory, reason)
         if reason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then
             self.isCurrentSelectionDirty = true
             self:Refresh()
@@ -33,7 +29,7 @@ function ZO_GamepadStoreRepair:RegisterEvents()
     self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnInventoryUpdated)
     self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdated)
 
-    local OnCurrencyChanged = function()
+    local function OnCurrencyChanged()
         self.list:RefreshVisible()
     end
 
@@ -99,11 +95,11 @@ end
 function ZO_GamepadStoreRepair:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
     self:SetupStoreItem(control, data, selected, selectedDuringRebuild, enabled, activated, data.repairCost, not ZO_STORE_FORCE_VALID_PRICE, ZO_MODE_STORE_REPAIR)
 
-	local conditionControl = control:GetNamedChild("Condition")
-	if conditionControl then
-		conditionControl:SetHidden(false)
-		conditionControl:SetText(zo_strformat(SI_ITEM_CONDITION_PERCENT, data.condition))
-	end
+    local conditionControl = control:GetNamedChild("Condition")
+    if conditionControl then
+        conditionControl:SetHidden(false)
+        conditionControl:SetText(zo_strformat(SI_ITEM_CONDITION_PERCENT, data.condition))
+    end
 end
 
 function ZO_GamepadStoreRepair:OnSelectedItemChanged(inventoryData)

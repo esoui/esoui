@@ -17,12 +17,12 @@
             <Controls>
                 <Label name="$(parent)Category" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS">
                     <Dimensions x="250" />
-                    <Anchor point="CENTER" offsetY="-40" />
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="100" />
                 </Label>
                 
                 <Label name="$(parent)Action" font="ZoFontHeader3" horizontalAlignment="CENTER" verticalAlignment="CENTER" maxLineCount="3" wrapMode="ELLIPSIS" inheritScale="false">
-                    <Dimensions x="250" />
-                    <Anchor point="TOP" relativeTo="$(parent)Category" relativePoint="BOTTOM" offsetY="5" />
+                    <Dimensions x="225" />
+                    <Anchor point="CENTER" />
                 </Label>
             </Controls>
         </Control>

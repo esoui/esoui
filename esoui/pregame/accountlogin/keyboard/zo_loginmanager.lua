@@ -93,6 +93,7 @@ function LoginManager_Keyboard:AttemptLinkedLogin()
 end
 
 function LoginManager_Keyboard:AttemptCreateAccount(email, ageValid, emailSignup, country, requestedAccountName)
+    self.isLinking = nil
     ZO_Dialogs_ShowDialog("CREATING_ACCOUNT_KEYBOARD")
     PregameSetAccountCreationInfo(email, ageValid, emailSignup, country, requestedAccountName)
     PregameCreateAccount()
@@ -102,6 +103,11 @@ function LoginManager_Keyboard:AttemptAccountLink(username, password)
     self.isLinking = true
     ZO_Dialogs_ShowDialog("LINKING_ACCOUNTS_KEYBOARD")
     PregameLinkAccount(username, password)
+end
+
+function LoginManager_Keyboard:RequestAccountActivationCode()
+    self.isLinking = true
+    RequestLinkAccountActivationCode()
 end
 
 function LoginManager_Keyboard:OnCreateLinkAccountSuccessful()
@@ -182,9 +188,7 @@ end
 
 function LoginManager_Keyboard:OnProfileNotLinked()
     ZO_Dialogs_ReleaseDialog("LINKED_LOGIN_KEYBOARD")
-    if not IsHeronUI() then
-        self:SwitchToCreateLinkAccountFragment()
-    end
+    self:SwitchToCreateLinkAccountFragment()
 end
 
 function LoginManager_Keyboard:OnLoginSuccessful()
@@ -261,7 +265,7 @@ function LoginManager_Keyboard:OnOTPPending(otpReason, otpType, otpDurationInSec
     local dialogName, textParams
     if otpReason == LOGIN_STATUS_OTP_PENDING then
         dialogName = "PROVIDE_OTP_INITIAL"
-        textParams = { GetString(OTP_DIALOG_SUBMIT), otpDurationMs }
+        textParams = { GetString(SI_OTP_DIALOG_SUBMIT), otpDurationMs }
     elseif otpReason == LOGIN_STATUS_OTP_FAILED then
         dialogName = "PROVIDE_OTP_SUBSEQUENT"
         textParams = { otpDurationMs }

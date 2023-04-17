@@ -2012,7 +2012,7 @@ local function RefreshMapPings()
 
     if not IsShowingCosmicMap() then
         -- We don't want these manual player pings showing up on the Aurbis
-        for i = 1, GROUP_SIZE_MAX do
+        for i = 1, MAX_GROUP_SIZE_THRESHOLD do
             local unitTag = ZO_Group_GetUnitTagForGroupIndex(i)
             local x, y = GetMapPing(unitTag)
 

@@ -50,7 +50,7 @@ function ZO_CharacterSelect_EventBanner_Gamepad:InitializeKeybinds()
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
     }
-    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() self:OnEventBannerCloseKeybind() end)
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() self:OnEventBannerCloseKeybind() end, GetString(SI_DIALOG_CLOSE))
 end
 
 function ZO_CharacterSelect_EventBanner_Gamepad:SetSelectedIndex(selectedIndex)

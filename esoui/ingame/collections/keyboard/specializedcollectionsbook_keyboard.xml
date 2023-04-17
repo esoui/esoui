@@ -9,8 +9,12 @@
         <Label name="ZO_SpecializedCollection_Book_NavigationEntry_Keyboard"  inherits="ZO_SelectableTooltipIfTruncatedLabel ZO_TreeEntry" font="ZoFontHeader" verticalAlignment="CENTER" virtual="true">
             <Dimensions x="210" y="22" />
 
+            <OnMouseUp name="SpecializedCollection_Book_OnMouseUp">
+                ZO_SpecializedCollection_Book_NavigationEntry_Keyboard_OnMouseUp(self, upInside, button)
+            </OnMouseUp>
+            
             <Controls>
-                <Texture name="$(parent)StatusIcon" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" hidden="true">
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon" hidden="true">
                     <Dimensions x="24" y="24" />
                     <Anchor point="RIGHT" relativePoint="LEFT" />
                 </Texture>

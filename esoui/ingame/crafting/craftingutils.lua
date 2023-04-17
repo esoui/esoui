@@ -1,9 +1,5 @@
 --[[ Crafting Create Screen Base ]]--
-ZO_CraftingCreateScreenBase = ZO_Object:Subclass()
-
-function ZO_CraftingCreateScreenBase:New()
-    return ZO_Object.New(self)
-end
+ZO_CraftingCreateScreenBase = ZO_InitializingObject:Subclass()
 
 function ZO_CraftingCreateScreenBase:Create(numIterations)
     assert(false, "Override me")

@@ -1259,6 +1259,8 @@ local function CanItemBeAddedToCraft(inventorySlot)
         return SYSTEMS:GetObject(ZO_ALCHEMY_SYSTEM_NAME):CanItemBeAddedToCraft(bag, slot)
     elseif ZO_Enchanting_IsSceneShowing() then
         return ZO_Enchanting_GetVisibleEnchanting():CanItemBeAddedToCraft(bag, slot)
+    elseif ZO_FishFillet_IsSceneShowing() then
+        return ZO_FishFillet_GetVisibleFishFillet():CanItemBeAddedToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
         return ZO_Smithing_GetActiveObject():CanItemBeAddedToCraft(bag, slot)
     elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
@@ -1274,6 +1276,8 @@ local function IsItemAlreadySlottedToCraft(inventorySlot)
         return SYSTEMS:GetObject(ZO_ALCHEMY_SYSTEM_NAME):IsItemAlreadySlottedToCraft(bag, slot)
     elseif ZO_Enchanting_IsSceneShowing() then
         return ZO_Enchanting_GetVisibleEnchanting():IsItemAlreadySlottedToCraft(bag, slot)
+    elseif ZO_FishFillet_IsSceneShowing() then
+        return ZO_FishFillet_GetVisibleFishFillet():IsItemAlreadySlottedToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
         return ZO_Smithing_GetActiveObject():IsItemAlreadySlottedToCraft(bag, slot)
     elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
@@ -1288,6 +1292,8 @@ local function TryAddItemToCraft(inventorySlot)
         SYSTEMS:GetObject(ZO_ALCHEMY_SYSTEM_NAME):AddItemToCraft(bag, slot)
     elseif ZO_Enchanting_IsSceneShowing() then
         ZO_Enchanting_GetVisibleEnchanting():AddItemToCraft(bag, slot)
+    elseif ZO_FishFillet_IsSceneShowing() then
+        ZO_FishFillet_GetVisibleFishFillet():AddItemToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
         ZO_Smithing_GetActiveObject():AddItemToCraft(bag, slot)
     elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
@@ -1306,6 +1312,8 @@ local function TryRemoveItemFromCraft(inventorySlot)
         ZO_Smithing_GetActiveObject():RemoveItemFromCraft(bag, slot)
     elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
         SYSTEMS:GetObject("retrait"):RemoveItemFromCraft(bag, slot)
+    elseif ZO_FishFillet_IsSceneShowing() then
+        ZO_FishFillet_GetActiveObject():RemoveItemFromCraft(bag, slot)
     end
     UpdateMouseoverCommand(inventorySlot)
 end
@@ -2772,6 +2780,8 @@ local InventoryDragStart =
                         ZO_Enchanting_GetVisibleEnchanting():RemoveItemFromCraft(bag, index)
                     elseif ZO_Smithing_IsSceneShowing() then
                         ZO_Smithing_GetActiveObject():RemoveItemFromCraft(bag, index)
+                   elseif ZO_FishFillet_IsSceneShowing() then
+                        ZO_FishFillet_GetActiveObject():RemoveItemFromCraft(bag, index)
                     end
                     PickupInventoryItem(bag, index)
                 end
@@ -2914,6 +2924,8 @@ local InventoryReceiveDrag =
                         SYSTEMS:GetObject(ZO_ALCHEMY_SYSTEM_NAME):OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
                     elseif SCENE_MANAGER:IsShowing("enchanting") then
                         ENCHANTING:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
+                    elseif SCENE_MANAGER:IsShowing("provisioner") then
+                        PROVISIONER.filletPanel:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
                     elseif ZO_Smithing_IsSceneShowing() then
                         ZO_Smithing_GetActiveObject():OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
                     end

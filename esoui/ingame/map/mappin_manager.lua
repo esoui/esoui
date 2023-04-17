@@ -588,7 +588,7 @@ function ZO_WorldMapPins_Manager:RefreshGroupPins()
     if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_GROUP_MEMBERS) and GetMapType() ~= MAPTYPE_COSMIC then
         local isInDungeon = GetMapContentType() == MAP_CONTENT_DUNGEON
         local isInHouse = GetCurrentZoneHouseId() ~= 0
-        for i = 1, GROUP_SIZE_MAX do
+        for i = 1, MAX_GROUP_SIZE_THRESHOLD do
             local groupTag = ZO_Group_GetUnitTagForGroupIndex(i)
             local isBreadcrumbed = IsUnitWorldMapPositionBreadcrumbed(groupTag)
             if DoesUnitExist(groupTag) and not AreUnitsEqual("player", groupTag) and IsUnitOnline(groupTag) then

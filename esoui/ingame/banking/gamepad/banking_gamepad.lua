@@ -497,7 +497,13 @@ function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
                     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
                     if collectibleData then
                         local nickname = collectibleData:GetNickname()
-                        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE", { collectibleId = collectibleId, name = nickname })
+                        local defaultNickname = collectibleData:GetDefaultNickname()
+                        --Only pre-fill the edit text if it's different from the default nickname
+                        local initialEditText = ""
+                        if nickname ~= defaultNickname then
+                            initialEditText = nickname
+                        end
+                        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE", { collectibleId = collectibleId, name = initialEditText, defaultName = defaultNickname })
                     end
                 end
             end

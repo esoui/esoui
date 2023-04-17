@@ -83,7 +83,7 @@ do
 
             -- Description
             local bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
-            bodySection:AddLine(GetMarketProductDescription(productId), self:GetStyle("bodyDescription"))
+            bodySection:AddLine(zo_strformat(GetMarketProductDescription(productId)), self:GetStyle("bodyDescription"))
             self:AddSection(bodySection)
         end
     end
@@ -133,7 +133,7 @@ function ZO_Tooltip:LayoutMarketProductListing(marketProductId, presentationInde
     end
 end
 
-function ZO_Tooltip:LayoutEsoPlusTrialNotification(marketProductId, keybindIcon)
+function ZO_Tooltip:LayoutEsoPlusTrialNotification(marketProductId)
     local legendaryColor = GetItemQualityColor(ITEM_DISPLAY_QUALITY_LEGENDARY)
     local coloredHeader = legendaryColor:Colorize(GetString(SI_MARKET_FREE_TRIAL_TOOLTIP_HEADER))
     self:AddLine(coloredHeader, self:GetStyle("title"))
@@ -146,8 +146,8 @@ function ZO_Tooltip:LayoutEsoPlusTrialNotification(marketProductId, keybindIcon)
     if not IsOnESOPlusFreeTrial() then
         -- using a second body section here to separate out the start instruction from the description
         local bodySection2 = self:AcquireSection(self:GetStyle("bodySection"))
-        local startInstructionString = zo_strformat(SI_MARKET_FREE_TRIAL_TOOLTIP_START_INSTRUCTIONS, keybindIcon)
-        bodySection2:AddLine(startInstructionString, self:GetStyle("bodyDescription"))
+        -- the action here should match the actual action in the keybind strip to start the free trial
+        bodySection2:AddKeybindLine("UI_SHORTCUT_PRIMARY", SI_MARKET_FREE_TRIAL_TOOLTIP_START_INSTRUCTIONS, self:GetStyle("bodyDescription"))
         self:AddSection(bodySection2)
     end
 end

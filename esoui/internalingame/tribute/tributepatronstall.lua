@@ -22,7 +22,7 @@ function ZO_TributePatron_RequirementContainer:Initialize(control)
 end
 
 do
-    internalassert(TRIBUTE_PATRON_REQUIREMENT_ITERATION_END == 2, "A new Tribute Patron requirement has been added. Does the REQUIREMENT_PARAM_MODIFIERS need special modifiers for this requirement?")
+    internalassert(TRIBUTE_PATRON_REQUIREMENT_ITERATION_END == 3, "A new Tribute Patron requirement has been added. Does the REQUIREMENT_PARAM_MODIFIERS need special modifiers for this requirement?")
     local REQUIREMENT_PARAM_MODIFIERS =
     {
         -- Add quantity overrides for TRIBUTE_PATRON_REQUIREMENTs here. Supports displayParam, displayFunction, indexing by param1

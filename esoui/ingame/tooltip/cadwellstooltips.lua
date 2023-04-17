@@ -49,13 +49,11 @@ function ZO_Tooltip:LayoutCadwells(progressionLevel, zoneIndex)
 
         -- Add the bullet icon to the tooltip.
         local textureContainerSection = objectiveContainerSection:AcquireSection(self:GetStyle("cadwellTextureContainer"))
-        textureContainerSection:AddTexture(icon, self:GetStyle("achievementCriteriaCheck"))
+        textureContainerSection:AddTexture(icon, self:GetStyle("achievementCriteriaCheckComplete"))
         objectiveContainerSection:AddSection(textureContainerSection)
 
         -- Add the information to the tooltip.
-        local objectiveSection = objectiveContainerSection:AcquireSection(self:GetStyle("cadwellObjectiveSection"))
-        objectiveSection:AddLine(zo_strformat(SI_CADWELL_OBJECTIVE_FORMAT, name, text), self:GetStyle(style))
-        objectiveContainerSection:AddSection(objectiveSection)
+        objectiveContainerSection:AddLine(zo_strformat(SI_CADWELL_OBJECTIVE_FORMAT, name, text), self:GetStyle(style), self:GetStyle("cadwellObjectiveText"))
 
         objectivesSection:AddSection(objectiveContainerSection)
     end

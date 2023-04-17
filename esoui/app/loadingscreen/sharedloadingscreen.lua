@@ -91,7 +91,11 @@ function LoadingScreen_Base:Initialize()
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_DISCONNECTED_FROM_SERVER, function(...) self:OnDisconnectedFromServer(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_RESUME_FROM_SUSPEND, function(...) self:OnResumeFromSuspend(...) end)
 
-    local function OnSubsystemLoadComplete(eventCode, system)
+    local function OnSubsystemLoadStateChanged(eventCode, system, isComplete)
+        if not isComplete then
+            return
+        end
+
         self:Log(string.format("Load Screen - %s Complete", GetLoadingSystemName(system)))
         if GetNumTotalSubsystemsToLoad() == GetNumLoadedSubsystems() then
             if not IsWaitingForTeleport() then
@@ -103,7 +107,7 @@ function LoadingScreen_Base:Initialize()
             end
         else
             local remainingText = "Load Screen - Waiting On: "
-            for i = 1, GetNumTotalSubsystemsToLoad() do
+            for i = LOADING_SYSTEM_ITERATION_BEGIN, LOADING_SYSTEM_ITERATION_END do
                 if not IsSystemLoaded(i) then
                     remainingText = remainingText .. GetLoadingSystemName(i) .. ", "
                 end
@@ -112,7 +116,7 @@ function LoadingScreen_Base:Initialize()
         end
     end
 
-    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_SUBSYSTEM_LOAD_COMPLETE, OnSubsystemLoadComplete)
+    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_SUBSYSTEM_LOAD_STATE_CHANGED, OnSubsystemLoadStateChanged)
 
     self:SizeLoadingTexture()
     self:InitializeAnimations()

@@ -199,7 +199,7 @@ function ZO_BankingCommon_Gamepad:InitializeFiltersDialog()
 
                         dropdown:UpdateItems()
 
-                        SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
+                        SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(dialog, dropdown)
 
                         control.dropdown:SelectItemByIndex(withdrawList.currentSortOrderIndex)
                     end,
@@ -231,7 +231,7 @@ function ZO_BankingCommon_Gamepad:InitializeFiltersDialog()
                         dropdown:SetNoSelectionText(GetString(SI_GAMEPAD_BANK_FILTER_DEFAULT_TEXT))
                         dropdown:SetMultiSelectionTextFormatter(GetString(SI_GAMEPAD_BANK_FILTER_DROPDOWN_TEXT))
 
-                        SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(data.dialog, dropdown)
+                        SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(dialog, dropdown)
 
                         local dropdownData = ZO_MultiSelection_ComboBox_Data_Gamepad:New()
                         dropdownData:Clear()

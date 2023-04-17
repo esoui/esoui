@@ -26,7 +26,8 @@ local CONTROL_TYPE_ITEM = 2
 
 -- Note: maxHeight, maxDisplayedEntries, and maxLinesPerEntry can be nil, which means they will be ignored.  maxLinesPerEntry does not include the entry header, if any. 
 -- maxHeight can be nil, a number, or a function. If it's nil, it will be ignored. If it's a function, it will be evaluated before being used.
-function ZO_FadingControlBuffer:Initialize(control, maxDisplayedEntries, maxHeight, maxLinesPerEntry, fadeAnimationName, translateAnimationName, anchor)
+-- If narrateAllEntries is true, every active entry will be narrated any time we add or update an entry. Otherwise, we will only narrate the most recent entry added/updated
+function ZO_FadingControlBuffer:Initialize(control, maxDisplayedEntries, maxHeight, maxLinesPerEntry, fadeAnimationName, translateAnimationName, anchor, narrateAllEntries)
     self.control = control
     self.entryPools = {}
     self.headerPools = {}
@@ -49,6 +50,9 @@ function ZO_FadingControlBuffer:Initialize(control, maxDisplayedEntries, maxHeig
     self.additionalVerticalSpacing = 0
     self.pushDirection = FCB_PUSH_DIRECTION_DOWN
     self.holdDisplayingEntries = false
+    self.narrateAllEntries = narrateAllEntries
+
+    SCREEN_NARRATION_MANAGER:RegisterFadingControlBuffer(self)
 end
 
 function ZO_FadingControlBuffer:SetTranslateDuration(translateDuration)
@@ -199,8 +203,8 @@ function ZO_FadingControlBuffer:TryHandlingExistingEntry(templateName, templateD
                     -- Are all lines equal?
                     if activeEntry.lines and templateData.equalityCheck(activeEntry.lines, entry.lines) then
                         templateData.equalitySetup(self, activeEntry, entry)
-                        --Re-narrate the active entry when it is modified
-                        SCREEN_NARRATION_MANAGER:QueueFadingControlBuffer(activeEntry, templateData)
+                        self.lastHandledEntry = activeEntry
+                        self:FireCallbacks("OnEntryUpdated")
                         activeEntryControl.setupTime = GetFrameTimeMilliseconds()
                         handled = true
                     else
@@ -214,8 +218,8 @@ function ZO_FadingControlBuffer:TryHandlingExistingEntry(templateName, templateD
             -- Headers are either not equal or not present.  Are all lines equal?
             elseif activeEntry.lines and entry.lines and templateData.equalityCheck(activeEntry.lines, entry.lines) then
                 templateData.equalitySetup(self, activeEntry, entry)
-                --Re-narrate the active entry when it is modified
-                SCREEN_NARRATION_MANAGER:QueueFadingControlBuffer(activeEntry, templateData)
+                self.lastHandledEntry = activeEntry
+                self:FireCallbacks("OnEntryUpdated")
                 handled = true
             end
 
@@ -692,8 +696,9 @@ function ZO_FadingControlBuffer:AddLinesToExistingEntry(entryControl, newLines, 
     entryControl.height = entryControl.height + offsetY
     entryControl.targetBottomY = entryControl.targetBottomY + offsetY
     entryControl.setupTime = GetFrameTimeMilliseconds()
-    --Re-narrate the active entry when lines are added to it
-    SCREEN_NARRATION_MANAGER:QueueFadingControlBuffer(entry, templateData)
+
+    self.lastHandledEntry = entry
+    self:FireCallbacks("OnEntryUpdated")
 
     self:MoveEntriesOrLines(self.activeEntries)
 end
@@ -726,8 +731,8 @@ function ZO_FadingControlBuffer:DisplayEntry(templateName, entry)
     local entryControl = self:AcquireEntryObject(templateName)
     local templateData = self.templates[templateName]
 
-    --Narrate the entry we are going to display
-    SCREEN_NARRATION_MANAGER:QueueFadingControlBuffer(entry, templateData)
+    self.lastHandledEntry = entry
+    self:FireCallbacks("OnEntryUpdated")
 
     -- Call the setup function for the header and each of the lines.
     local offsetY = 0
@@ -840,4 +845,56 @@ function ZO_FadingControlBuffer:MoveEntriesOrLinesCalculations(control, targetBo
     end
 
     return targetBottomY
+end
+
+--Get the narration text for the given entry data
+function ZO_FadingControlBuffer:GetEntryNarrationText(entryData)
+    local narrations = {}
+    local templateData = self.templates[entryData._templateName]
+    if templateData then
+        --Generate the narration for the header if there is one
+        if entryData.header then
+            if templateData.headerNarrationText then
+                ZO_AppendNarration(narrations, templateData.headerNarrationText(entryData))
+            else
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.header.text))
+            end
+        end
+
+        --Iterate through each line of the entry and get the narration
+        local lines = entryData.lines
+        if lines then
+            local narrationFunction = templateData.narrationText
+            for _, line in ipairs(lines) do
+                if narrationFunction then
+                    ZO_AppendNarration(narrations, narrationFunction(line))
+                else
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(line.text))
+                end
+            end
+        end
+    end
+    return narrations
+end
+
+--Gets the narration text for the fading control buffer
+function ZO_FadingControlBuffer:GetNarrationText(entryData)
+    local narrations = {}
+
+    --If we want to narrate all entries, loop through each active entry and add it to the narration
+    if self.narrateAllEntries then
+        for _, entryControl in ipairs(self.activeEntries) do
+            local entryData = entryControl.entry
+            if entryData then
+                ZO_AppendNarration(narrations, self:GetEntryNarrationText(entryData))
+            end
+        end
+    else
+        --If we are not narrating all entries at once, just grab the narration for the entry that was most recently updated
+        local entryData = self.lastHandledEntry
+        if entryData then
+            ZO_AppendNarration(narrations, self:GetEntryNarrationText(entryData))
+        end
+    end
+    return narrations
 end

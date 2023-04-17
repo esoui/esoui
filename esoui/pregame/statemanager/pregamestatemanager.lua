@@ -1,5 +1,5 @@
 function ZO_Pregame_CanSkipVideos()
-    return GetCVar("HasPlayedPregameVideo") ~= "0" or ZO_IsConsoleOrHeronUI()
+    return GetCVar("HasPlayedPregameVideo") ~= "0" or ZO_IsConsoleUI()
 end
 
 function ZO_Pregame_ShouldSkipVideos()
@@ -607,7 +607,7 @@ local initialStateOverrideFn --= SetupUIReloadAfterLogin -- normally this is nil
 function UnregisterForLoadingUpdates()
     if g_loadingUpdates then
         EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_AREA_LOAD_STARTED)
-        EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_SUBSYSTEM_LOAD_COMPLETE)
+        EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_SUBSYSTEM_LOAD_STATE_CHANGED)
         EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_LUA_ERROR)
         g_loadingUpdates = false
     end
@@ -649,7 +649,11 @@ function AttemptToAdvancePastCharacterSelectCinematic()
     end
 end
 
-local function OnSubsystemLoadComplete(_, subSystem)
+local function OnSubsystemLoadStateChanged(_, subSystem, isComplete)
+    if not isComplete then
+        return
+    end
+
     if subSystem == LOADING_SYSTEM_GAME_DATA or subSystem == LOADING_SYSTEM_SHARED_CHARACTER_OBJECT then
         AttemptToFireCharacterConstructionReady()
         -- LOADING_SYSTEM_GAME_DATA loads before LOADING_SYSTEM_SHARED_CHARACTER_OBJECT so if we hit either
@@ -687,7 +691,7 @@ end
 function RegisterForLoadingUpdates()
     if not g_loadingUpdates then
         EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_AREA_LOAD_STARTED, OnAreaLoadStarted)
-        EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SUBSYSTEM_LOAD_COMPLETE, OnSubsystemLoadComplete)
+        EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SUBSYSTEM_LOAD_STATE_CHANGED, OnSubsystemLoadStateChanged)
         EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_LUA_ERROR, OnLuaErrorWhileLoading)
         g_loadingUpdates = true
     end

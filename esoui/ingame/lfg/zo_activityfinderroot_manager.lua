@@ -316,14 +316,15 @@ end
 function ActivityFinderRoot_Manager:UpdateGroupStatus()
     local wasGrouped = self.playerIsGrouped
     local wasLeader = self.playerIsLeader
+    local previousGroupSize = self.groupSize
     self.playerIsGrouped = IsUnitGrouped("player")
     self.playerIsLeader = IsUnitGroupLeader("player")
     self.groupSize = GetGroupSize()
-    local groupStateChanged = wasGrouped ~= self.playerIsGrouped or wasLeader ~= self.playerIsLeader
+    local groupStateChanged = wasGrouped ~= self.playerIsGrouped or wasLeader ~= self.playerIsLeader or previousGroupSize ~= self.groupSize
     if groupStateChanged then
         self:FireCallbacks("OnUpdateGroupStatus", wasGrouped, self.playerIsGrouped, wasLeader, self.playerIsLeader)
+        self:MarkDataDirty()
     end
-    self:MarkDataDirty()
 end
 
 function ActivityFinderRoot_Manager:GetGroupStatus()

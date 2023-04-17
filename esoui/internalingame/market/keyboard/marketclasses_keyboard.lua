@@ -598,7 +598,7 @@ function ZO_MarketProductIcon:Show(marketProduct, marketProductId, showAsPurchas
         local collectibleId = GetMarketProductCollectibleId(marketProductId)
         -- even if a bundle isn't marked as purchased, a collectible may still be unlocked/purchased unlike items
         if not showAsPurchased then
-            showAsPurchased = IsCollectibleOwnedByDefId(collectibleId)
+            showAsPurchased = not CanAcquireCollectibleByDefId(collectibleId)
         end
     elseif productType == MARKET_PRODUCT_TYPE_BUNDLE then
         if not showAsPurchased then

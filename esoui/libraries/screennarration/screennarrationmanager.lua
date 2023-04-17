@@ -256,8 +256,9 @@ function ZO_ScreenNarrationParams:GetGamepadButtonTabBar()
     return self.gamepadButtonTabBar
 end
 
-function ZO_ScreenNarrationParams:SetTextSearchHeader(textSearchHeader)
+function ZO_ScreenNarrationParams:SetTextSearchHeader(textSearchHeader, narrateHeader)
     self.textSearchHeader = textSearchHeader
+    self.narrateHeader = narrateHeader
 end
 
 function ZO_ScreenNarrationParams:GetTextSearchHeader(textSearchHeader)
@@ -277,17 +278,12 @@ function ZO_ScreenNarrationParams:GetNarrateDialogBaseText()
     return self.narrateDialogBaseText
 end
 
-function ZO_ScreenNarrationParams:SetFadingControlBufferData(entryData, templateData)
-    self.fadingControlBufferEntryData = entryData
-    self.fadingControlBufferTemplateData = templateData
+function ZO_ScreenNarrationParams:SetFadingControlBuffer(fadingControlBuffer)
+    self.fadingControlBuffer = fadingControlBuffer
 end
 
-function ZO_ScreenNarrationParams:GetFadingControlBufferEntryData()
-    return self.fadingControlBufferEntryData
-end
-
-function ZO_ScreenNarrationParams:GetFadingControlBufferTemplateData()
-    return self.fadingControlBufferTemplateData
+function ZO_ScreenNarrationParams:GetFadingControlBuffer()
+    return self.fadingControlBuffer
 end
 
 function ZO_ScreenNarrationParams:SetFocus(focus, narrateHeader, narrateSubHeader)
@@ -382,6 +378,7 @@ function ZO_ScreenNarrationManager:Initialize()
 
     self.parametricListNarrationInfo = {}
     self.customObjectNarrationInfo = {}
+    self.textSearchHeaderNarrationInfo = {}
     self.queuedNarrations = {}
     self.isLoading = not GetGuiHidden("app")
 
@@ -522,14 +519,18 @@ function ZO_ScreenNarrationManager:RegisterParametricListDialog(dialog)
     end)
 end
 
-function ZO_ScreenNarrationManager:RegisterTextSearchHeader(textSearchHeader)
+function ZO_ScreenNarrationManager:RegisterTextSearchHeader(textSearchHeader, narrationInfo)
     textSearchHeader:RegisterCallback("EditBoxFocusLost", function()
         self:QueueTextSearchHeader(textSearchHeader)
     end)
 
     textSearchHeader:RegisterCallback("FocusActivated", function()
-        self:QueueTextSearchHeader(textSearchHeader)
+        local NARRATE_HEADER = true
+        self:QueueTextSearchHeader(textSearchHeader, NARRATE_HEADER)
     end)
+
+    --Store off the associated text search header narration info for this text search header, so we can access it later
+    self.textSearchHeaderNarrationInfo[textSearchHeader] = narrationInfo
 end
 
 function ZO_ScreenNarrationManager:RegisterGridList(gridList)
@@ -606,6 +607,12 @@ function ZO_ScreenNarrationManager:RegisterGamepadButtonTabBar(tabBar)
         if tabBar:IsActivated() then
             self:QueueGamepadButtonTabBar(tabBar)
         end
+    end)
+end
+
+function ZO_ScreenNarrationManager:RegisterFadingControlBuffer(fadingControlBuffer)
+    fadingControlBuffer:RegisterCallback("OnEntryUpdated", function()
+        self:QueueFadingControlBuffer(fadingControlBuffer)
     end)
 end
 
@@ -687,16 +694,18 @@ function ZO_ScreenNarrationManager:TryNarration(narrationParams)
             end
         elseif narrationEntryType == NARRATION_ENTRY_TYPE_TEXT_SEARCH_HEADER then
             local textSearchHeader = narrationParams:GetTextSearchHeader()
+            local narrationInfo = self.textSearchHeaderNarrationInfo[textSearchHeader]
             if textSearchHeader:IsActive() then
-                self:NarrateEditBox(textSearchHeader:GetEditBox(), GetString(SI_SCREEN_NARRATION_EDIT_BOX_SEARCH_NAME), narrationType)
+                self:NarrateTextSearchHeader(textSearchHeader, narrationInfo, narrationParams:GetNarrateHeader(), narrationType)
             end
         elseif narrationEntryType == NARRATION_ENTRY_TYPE_DIALOG then
             local dialog = narrationParams:GetDialog()
-            if ZO_Dialogs_IsShowing(dialog.name) then
+            --ZO_Dialogs_IsShowing will continue to return true until the dialog is hidden, so we need to check if it's in the process of hiding separately
+            if ZO_Dialogs_IsShowing(dialog.name) and not ZO_Dialogs_IsDialogHiding(dialog.name) then
                 self:NarrateDialog(dialog, narrationParams:GetNarrateDialogBaseText(), narrationType)
             end
         elseif narrationEntryType == NARRATION_ENTRY_TYPE_FADING_CONTROL_BUFFER then
-            self:NarrateFadingControlBuffer(narrationParams:GetFadingControlBufferEntryData(), narrationParams:GetFadingControlBufferTemplateData(), narrationType)
+            self:NarrateFadingControlBuffer(narrationParams:GetFadingControlBuffer(), narrationType)
         elseif narrationEntryType == NARRATION_ENTRY_TYPE_FOCUS_ENTRY then
             local focus = narrationParams:GetFocus()
             if focus:IsActive() then
@@ -724,9 +733,13 @@ function ZO_ScreenNarrationManager:TryNarration(narrationParams)
     end
 end
 
-function ZO_ScreenNarrationManager:QueueParametricListEntry(list, narrateHeader)
+function ZO_ScreenNarrationManager:QueueParametricListEntry(list, narrateHeader, overrideQueueDelayMs)
     if IsScreenNarrationEnabled() then
-        local queuedNarration = self:GetQueuedNarration(GetDefaultNarrationType(NARRATION_ENTRY_TYPE_PARAMETRIC_LIST_ENTRY))
+        local narrationInfo = self.parametricListNarrationInfo[list]
+        local narrationParams = self:CreateNarrationParams(NARRATION_ENTRY_TYPE_PARAMETRIC_LIST_ENTRY, overrideQueueDelayMs or SCREEN_NARRATION_QUEUE_DELAY_MS)
+        narrationParams:SetNarrationType(narrationInfo.narrationType)
+
+        local queuedNarration = self:GetQueuedNarration(narrationParams:GetNarrationType())
         local narrationBlocked = false
         if queuedNarration and queuedNarration:GetNarrationEntryType() == NARRATION_ENTRY_TYPE_PARAMETRIC_LIST_ENTRY then
             local queuedList = queuedNarration:GetParametricList()
@@ -742,7 +755,6 @@ function ZO_ScreenNarrationManager:QueueParametricListEntry(list, narrateHeader)
                 narrationBlocked = queuedNarrationBlocked
             end
         end
-        local narrationParams = self:CreateNarrationParams(NARRATION_ENTRY_TYPE_PARAMETRIC_LIST_ENTRY, SCREEN_NARRATION_QUEUE_DELAY_MS)
         narrationParams:SetParametricList(list, narrateHeader)
         narrationParams:SetNarrationBlocked(narrationBlocked)
         self:SetQueuedNarration(narrationParams)
@@ -823,10 +835,19 @@ function ZO_ScreenNarrationManager:QueueGamepadGridEntry(gamepadGrid, narrateHea
     end
 end
 
-function ZO_ScreenNarrationManager:QueueTextSearchHeader(textSearchHeader)
+function ZO_ScreenNarrationManager:QueueTextSearchHeader(textSearchHeader, narrateHeader)
     if IsScreenNarrationEnabled() then
+        local queuedNarration = self:GetQueuedNarration(GetDefaultNarrationType(NARRATION_ENTRY_TYPE_TEXT_SEARCH_HEADER))
+        if queuedNarration and queuedNarration:GetNarrationEntryType() == NARRATION_ENTRY_TYPE_TEXT_SEARCH_HEADER then
+            local queuedTextSearchHeader = queuedNarration:GetTextSearchHeader()
+            local queuedNarrateHeader = queuedNarration:GetNarrateHeader()
+            --If the text search header we are queueing is the same one we are overwriting, then make sure we still read the header if necessary
+            if queuedTextSearchHeader == textSearchHeader and queuedNarrateHeader then
+                narrateHeader = queuedNarrateHeader
+            end
+        end
         local narrationParams = self:CreateNarrationParams(NARRATION_ENTRY_TYPE_TEXT_SEARCH_HEADER, SCREEN_NARRATION_QUEUE_DELAY_MS)
-        narrationParams:SetTextSearchHeader(textSearchHeader)
+        narrationParams:SetTextSearchHeader(textSearchHeader, narrateHeader)
         self:SetQueuedNarration(narrationParams)
     end
 end
@@ -848,10 +869,10 @@ function ZO_ScreenNarrationManager:QueueDialog(dialog, narrateBaseText)
     end
 end
 
-function ZO_ScreenNarrationManager:QueueFadingControlBuffer(entryData, templateData)
+function ZO_ScreenNarrationManager:QueueFadingControlBuffer(fadingControlBuffer)
     if IsScreenNarrationEnabled() then
         local narrationParams = self:CreateNarrationParams(NARRATION_ENTRY_TYPE_FADING_CONTROL_BUFFER, SCREEN_NARRATION_QUEUE_DELAY_MS)
-        narrationParams:SetFadingControlBufferData(entryData, templateData)
+        narrationParams:SetFadingControlBuffer(fadingControlBuffer)
         self:SetQueuedNarration(narrationParams)
     end
 end
@@ -1117,9 +1138,12 @@ function ZO_ScreenNarrationManager:NarrateSortFilterListEntry(list, narrateHeade
         local headerNarration = list:GetHeaderNarration()
         ZO_AppendNarration(narrations, headerNarration)
     end
+
     ZO_AppendNarration(narrations, list:GetNarrationText())
     ZO_AppendNarration(narrations, self:GetTooltipNarration())
-    ZO_AppendNarration(narrations, self:GetKeybindNarration())
+
+    local additionalInputNarrationFunction = list:GetAdditionalInputNarrationFunction()
+    ZO_AppendNarration(narrations, self:GetKeybindNarration(additionalInputNarrationFunction))
     ZO_AppendNarration(narrations, list:GetFooterNarration())
     self:NarrateText(narrations, narrationType)
 end
@@ -1131,6 +1155,7 @@ function ZO_ScreenNarrationManager:NarrateSelectedSortHeader(list, sortHeaderGro
         ZO_AppendNarration(narrations, headerNarration)
     end
     ZO_AppendNarration(narrations, sortHeaderGroup:GetSortHeaderNarrationText(key))
+    ZO_AppendNarration(narrations, list:GetEmptyRowNarration())
     ZO_AppendNarration(narrations, self:GetKeybindNarration())
     ZO_AppendNarration(narrations, list:GetFooterNarration())
     self:NarrateText(narrations, narrationType)
@@ -1150,9 +1175,24 @@ function ZO_ScreenNarrationManager:NarrateComboBox(comboBox, narrationType)
     self:NarrateText(narrations, narrationType)
 end
 
-function ZO_ScreenNarrationManager:NarrateEditBox(editControl, name, narrationType)
+function ZO_ScreenNarrationManager:NarrateTextSearchHeader(textSearchHeader, narrationInfo, narrateHeader, narrationType)
     local narrations = {}
-    ZO_AppendNarration(narrations, ZO_FormatEditBoxNarrationText(editControl, name))
+
+    --If we have a narration for the header, include if applicable
+    if narrateHeader and narrationInfo.headerNarrationFunction then
+        local headerNarration = narrationInfo:headerNarrationFunction()
+        ZO_AppendNarration(narrations, headerNarration)
+    end
+
+    --Get the main narration for the text search header
+    ZO_AppendNarration(narrations, textSearchHeader:GetNarrationText())
+
+    --If we have a narration for the results, include that
+    if narrationInfo.resultsNarrationFunction then
+        local resultsNarration = narrationInfo.resultsNarrationFunction()
+        ZO_AppendNarration(narrations, resultsNarration)
+    end
+
     ZO_AppendNarration(narrations, self:GetKeybindNarration())
     self:NarrateText(narrations, narrationType)
 end
@@ -1369,28 +1409,9 @@ function ZO_ScreenNarrationManager:NarrateDialog(dialog, narrateBaseText, narrat
     end
 end
 
-function ZO_ScreenNarrationManager:NarrateFadingControlBuffer(entryData, templateData, narrationType)
+function ZO_ScreenNarrationManager:NarrateFadingControlBuffer(fadingControlBuffer, narrationType)
     local narrations = {}
-    if entryData.header then
-        if templateData.headerNarrationText then
-            ZO_AppendNarration(narrations, templateData.headerNarrationText(entryData))
-        else
-            ZO_AppendNarration(narrations, self:CreateNarratableObject(entryData.header.text))
-        end
-    end
-
-    local lines = entryData.lines
-    if lines then
-        local narrationFunction = templateData.narrationText
-        for _, line in ipairs(lines) do
-            if narrationFunction then
-                ZO_AppendNarration(narrations, narrationFunction(line))
-            else
-                ZO_AppendNarration(narrations, self:CreateNarratableObject(line.text))
-            end
-        end
-    end
-
+    ZO_AppendNarration(narrations, fadingControlBuffer:GetNarrationText())
     self:NarrateText(narrations, narrationType)
 end
 

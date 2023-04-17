@@ -777,7 +777,7 @@ function ZO_TreeNode:GetChildContainer()
 end
 
 function ZO_TreeNode:IsLeaf()
-    return self.children == nil
+    return self:GetChildren() == nil
 end
 
 function ZO_TreeNode:GetTree()

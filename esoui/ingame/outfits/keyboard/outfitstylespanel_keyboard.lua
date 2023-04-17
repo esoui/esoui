@@ -408,7 +408,8 @@ function ZO_OutfitStylesPanel_Keyboard:RefreshVisible(retainScrollPosition)
             local entryData = self.entryDataObjectPool:AcquireObject()
             entryData:SetDataSource(collectibleData)
             if not collectibleData.clearAction then
-                ZO_UpdateCollectibleEntryDataIconVisuals(entryData)
+                local actorCategory = self.restyleSlotData and ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleSlotData.restyleMode) or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+                ZO_UpdateCollectibleEntryDataIconVisuals(entryData, actorCategory)
             end
             gridListPanelList:AddEntry(entryData)
         end

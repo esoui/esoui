@@ -47,7 +47,8 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeSettingsPanels()
     local generalOptionsScrollChild = GetControl(self.generalOptionsScrollList, "ScrollChild")
 
     local function OnPrimaryResidenceClicked(button)
-        self:SetPrimaryResidence()
+        local currentHouse = GetCurrentZoneHouseId()
+        COLLECTIONS_BOOK_SINGLETON:SetPrimaryResidence(currentHouse)
     end
 
     self.primaryResidenceSetting = self.generalOptionsPanel:GetNamedChild("PrimaryResidence")
@@ -169,16 +170,16 @@ function ZO_HousingFurnitureSettings_Keyboard:ShowCopyDialog(data)
 end
 
 function ZO_HousingFurnitureSettings_Keyboard:UpdateGeneralSettings()
-    self.primaryResidence = GetHousingPrimaryHouse()
-    local currentHouse = GetCurrentZoneHouseId()
+    local primaryResidenceId = COLLECTIONS_BOOK_SINGLETON:GetPrimaryResidence()
+    local currentHouseId = GetCurrentZoneHouseId()
 
     self:UpdateButtonSettings(self.primaryResidenceSetting)
-    self.primaryResidenceButton:SetEnabled(self.primaryResidence ~= currentHouse)
+    self.primaryResidenceButton:SetEnabled(primaryResidenceId ~= currentHouseId)
 
     self:UpdateButtonSettings(self.restartPathsSetting)
     self.restartPathsButton:SetEnabled(SHARED_FURNITURE:HasAnyPathNodes())
 
-    local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouse)
+    local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouseId)
     self.comboBox:SetSelectedItemText(GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING", defaultAccess))
 end
 

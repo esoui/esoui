@@ -48,7 +48,7 @@ function PregameInitialScreen_Gamepad:Initialize(control)
 
             KEYBIND_STRIP:RemoveDefaultExit()
             self.currentKeybindStripDescriptor = self.pressAnyKeybindsDescriptor
-            if not IsHeronUI() and self:IsShowingVerificationError() then
+            if self:IsShowingVerificationError() then
                 self.currentKeybindStripDescriptor = self.verifyEmailKeybindsDescriptor
             end
             KEYBIND_STRIP:AddKeybindButtonGroup(self.currentKeybindStripDescriptor)
@@ -240,7 +240,7 @@ function PregameInitialScreen_Gamepad:ContinueFunction()
             self.pressTextAnimation:PlayFromEnd()
         end
 
-        if IsConsoleUI() and not ZO_IsForceConsoleOrHeronFlow() then
+        if IsConsoleUI() and not ZO_IsForceConsoleFlow() then
             if not PregameHasProfileSelected() then
                 WriteToInterfaceLog(string.format("PregameInitialScreen_Gamepad:ContinueFunction Selecting profile"))
                 PregameSelectProfile()

@@ -21,6 +21,13 @@
                 <Texture name="$(parent)Icon" override="true" level="3" hidden="true" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                     <Dimensions x="ZO_COLLECTIBLE_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_COLLECTIBLE_TILE_KEYBOARD_ICON_DIMENSIONS"/>
                     <Anchor point="CENTER" offsetY="41" relativePoint="TOP"/>
+
+                    <Controls>
+                        <Texture name="$(parent)FavoriteIcon" level="4" textureFile="/EsoUI/Art/Collections/Favorite_StarOnly.dds" hidden="true">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="7" offsetY="7" />
+                        </Texture>
+                    </Controls>
                 </Texture>
                         
                 <Label name="$(parent)Title" override="true" inherits="ZO_CollectibleTileDefaultLabel">

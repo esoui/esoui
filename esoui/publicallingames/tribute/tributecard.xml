@@ -282,19 +282,19 @@
             </Controls>
         </Control>
         
-        <Control name="ZO_TributeCard_MechanicContainer_Template" level="10" virtual="true">
+        <Control name="ZO_TributeCard_MechanicContainer_Template" level="110" virtual="true">
             <OnInitialized>
                 ZO_TributeCard_MechanicContainer_OnInitialized(self)
             </OnInitialized>
 
             <Controls>
-                <Texture name="$(parent)Frame" level="11">
+                <Texture name="$(parent)Frame" level="111">
                     <AnchorFill />
                 </Texture>
 
-                <Texture name="$(parent)TypeIcon" level="12" />
+                <Texture name="$(parent)TypeIcon" level="112" />
 
-                <Label name="$(parent)Quantity" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" verticalAlignment="CENTER" level="12">
+                <Label name="$(parent)Quantity" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" verticalAlignment="CENTER" level="112">
                     <Anchor point="LEFT" relativeTo="$(parent)TypeIcon" relativePoint="RIGHT" offsetY="-1" />
                 </Label>
             </Controls>
@@ -302,9 +302,9 @@
 
         <!-- End Mechanic Container Templates -->
 
-        <Texture name="ZO_TributeCard_MechanicGlow_Template" blendMode="ADD" color="00c8ff" level="11" pixelRoundingEnabled="false" virtual="true" />
+        <Texture name="ZO_TributeCard_MechanicGlow_Template" blendMode="ADD" color="00c8ff" level="111" pixelRoundingEnabled="false" virtual="true" />
 
-        <Label name="ZO_TributeCard_MechanicComboPip_Template" font="ZoFontTributeAntique20NoShadow" level="12" virtual="true" />
+        <Label name="ZO_TributeCard_MechanicComboPip_Template" font="ZoFontTributeAntique20NoShadow" level="112" virtual="true" />
             
         <Texture name="ZO_TributeCard_FullTextureFootprint" pixelRoundingEnabled="false" virtual="true">
             <AnchorFill />
@@ -354,9 +354,9 @@
             </Controls>
         </Texture>
 
-        <Label name="ZO_TributeCard_DefeatCost" font="ZoFontTributeAntique52" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_WHITE" level="9" horizontalAlignment="CENTER" verticalAlignment="CENTER" virtual="true">
+        <Label name="ZO_TributeCard_DefeatCost" font="ZoFontTributeAntique52" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_WHITE" level="109" horizontalAlignment="CENTER" verticalAlignment="CENTER" virtual="true">
             <Controls>
-                <Texture name="$(parent)Banner" level="8" pixelRoundingEnabled="false">
+                <Texture name="$(parent)Banner" level="108" pixelRoundingEnabled="false">
                     <Dimensions x="64" y="64" />
                 </Texture>
             </Controls>
@@ -371,6 +371,12 @@
             </Controls>
         </Label>
 
+        <Texture name="ZO_TributeCard_StackedCardBack" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Tribute/tributeCardBack.dds" virtual="true">
+            <Dimensions x="ZO_TRIBUTE_CARD_UI_WIDTH" y="ZO_TRIBUTE_CARD_UI_HEIGHT" />
+            <!-- Reverse left and right to "flip" the texture" -->
+            <TextureCoords left="ZO_TRIBUTE_CARD_RIGHT_COORD" right="ZO_TRIBUTE_CARD_LEFT_COORD" top="ZO_TRIBUTE_CARD_TOP_COORD" bottom="ZO_TRIBUTE_CARD_BOTTOM_COORD" />
+        </Texture>
+
         <!-- Begin Card State Effect Templates -->
 
         <Texture name="ZO_TributeCard_StateEffect_Template" inherits="ZO_TributeCard_FullTextureFootprint" virtual="true">
@@ -381,9 +387,9 @@
             </OnInitialized>
         </Texture>
 
-        <Texture name="ZO_TributeCard_StateEffectOverlay_Template" inherits="ZO_TributeCard_StateEffect_Template" blendMode="ADD" color="222222" level="20" scale="1.2" virtual="true" />
+        <Texture name="ZO_TributeCard_StateEffectOverlay_Template" inherits="ZO_TributeCard_StateEffect_Template" blendMode="ADD" color="222222" level="120" scale="1.2" virtual="true" />
 
-        <Texture name="ZO_TributeCard_StateEffectUnderlay_Template" inherits="ZO_TributeCard_StateEffect_Template" blendMode="ALPHA" color="ffffff" level="0" scale="1.2" virtual="true" />
+        <Texture name="ZO_TributeCard_StateEffectUnderlay_Template" inherits="ZO_TributeCard_StateEffect_Template" blendMode="ALPHA" color="ffffff" level="100" scale="1.2" virtual="true" />
 
         <Texture name="ZO_TributeCard_StateEffectOverlayWave_Template" inherits="ZO_TributeCard_StateEffectOverlay_Template" shaderEffectType="WAVE" virtual="true">
             <Wave angle="0.0" frequency="5.0" offset="0.0" speed="5.0" />
@@ -441,12 +447,12 @@
             </OnInitialized>
         </Texture>
 
-        <Texture name="ZO_TributeCard_TriggerAnimationOverlayWave_Template" inherits="ZO_TributeCard_TriggerAnimation_Template" shaderEffectType="WAVE" blendMode="ADD" color="222222" level="20" scale="1.2" virtual="true">
+        <Texture name="ZO_TributeCard_TriggerAnimationOverlayWave_Template" inherits="ZO_TributeCard_TriggerAnimation_Template" shaderEffectType="WAVE" blendMode="ADD" color="222222" level="120" scale="1.2" virtual="true">
             <Wave angle="0.0" frequency="5.0" offset="0.0" speed="5.0" />
             <WaveBounds minX="0.0" maxX="0.0" minY="0.02" maxY="0.02" />
         </Texture>
 
-        <Texture name="ZO_TributeCard_TriggerAnimationUnderlayWave_Template" inherits="ZO_TributeCard_TriggerAnimation_Template" shaderEffectType="WAVE" blendMode="ALPHA" color="ffffff" level="0" scale="1.2" virtual="true">
+        <Texture name="ZO_TributeCard_TriggerAnimationUnderlayWave_Template" inherits="ZO_TributeCard_TriggerAnimation_Template" shaderEffectType="WAVE" blendMode="ALPHA" color="ffffff" level="100" scale="1.2" virtual="true">
             <Wave angle="0.0" frequency="7.0" offset="0.0" speed="5.0" />
             <WaveBounds minX="0.0" maxX="0.0" minY="0.02" maxY="0.02" />
         </Texture>
@@ -477,37 +483,37 @@
                     <AnchorFill />
                     
                     <Controls>
-                        <Texture name="$(parent)BG" inherits="ZO_TributeCard_FullGlowableTexture" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" level="1" />
+                        <Texture name="$(parent)BG" inherits="ZO_TributeCard_FullGlowableTexture" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" level="101" />
                         
-                        <Texture name="$(parent)Portrait" inherits="ZO_TributeCard_FrameGlowableTexture" maskMode="BASIC" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" level="3">
+                        <Texture name="$(parent)Portrait" inherits="ZO_TributeCard_FrameGlowableTexture" maskMode="BASIC" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" level="103">
                             <Controls>
                                 <Texture name="$(parent)Glow" override="true" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" />
                             </Controls>
                         </Texture>
 
-                        <Texture name="$(parent)Frame" inherits="ZO_TributeCard_FrameGlowableTexture" level="5" />
+                        <Texture name="$(parent)Frame" inherits="ZO_TributeCard_FrameGlowableTexture" level="105" />
 
-                        <Texture name="$(parent)ContractOrCurseBanner" inherits="ZO_TributeCard_FullTextureFootprint" hidden="true" level="7" />
+                        <Texture name="$(parent)ContractOrCurseBanner" inherits="ZO_TributeCard_FullTextureFootprint" hidden="true" level="107" />
                         
-                        <Texture name="$(parent)Suit" inherits="ZO_TributeCard_SuitGlowableTexture" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" level="8" />
+                        <Texture name="$(parent)Suit" inherits="ZO_TributeCard_SuitGlowableTexture" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" level="108" />
 
-                        <Label name="$(parent)Name" font="ZoFontTributeAntique20NoShadow" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" verticalAlignment="CENTER" horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS" level="10">
+                        <Label name="$(parent)Name" font="ZoFontTributeAntique20NoShadow" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_BLACK" verticalAlignment="CENTER" horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS" level="110">
                             <Anchor point="CENTER" relativePoint="TOP" offsetY="402" />
                             <Dimensions x="200" />
                             
                             <Controls>
-                                <Texture name="$(parent)Banner" textureFile="EsoUI/Art/Tribute/tributeCardNameBanner.dds" level="9" pixelRoundingEnabled="false">
+                                <Texture name="$(parent)Banner" textureFile="EsoUI/Art/Tribute/tributeCardNameBanner.dds" level="109" pixelRoundingEnabled="false">
                                     <Dimensions x="256" y="64" />
                                     <Anchor point="CENTER" offsetY="15" />
                                 </Texture>
                             </Controls>
                         </Label>
                         
-                        <Label name="$(parent)Cost" font="ZoFontTributeAntique52" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_WHITE" verticalAlignment="CENTER" horizontalAlignment="CENTER" level="9">
+                        <Label name="$(parent)Cost" font="ZoFontTributeAntique52" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_WHITE" verticalAlignment="CENTER" horizontalAlignment="CENTER" level="109">
                             <Anchor point="CENTER" relativePoint="TOP" offsetY="51" />
                             
                             <Controls>
-                                <Texture name="$(parent)Icon" level="8" pixelRoundingEnabled="false">
+                                <Texture name="$(parent)Icon" level="108" pixelRoundingEnabled="false">
                                     <Dimensions x="128" y="128" />
                                     <Anchor point="CENTER" offsetY="2" />
                                 </Texture>
@@ -516,7 +522,7 @@
                     </Controls>
                 </Control>
 
-                <Texture name="$(parent)Back" inherits="ZO_TributeCard_FullGlowableTexture" textureFile="EsoUI/Art/Tribute/tributeCardBack.dds" hidden="true" level="1">
+                <Texture name="$(parent)Back" inherits="ZO_TributeCard_FullGlowableTexture" textureFile="EsoUI/Art/Tribute/tributeCardBack.dds" hidden="true" level="101">
                     <!-- Reverse left and right to "flip" the texture" -->
                     <TextureCoords left="ZO_TRIBUTE_CARD_RIGHT_COORD" right="ZO_TRIBUTE_CARD_LEFT_COORD" top="ZO_TRIBUTE_CARD_TOP_COORD" bottom="ZO_TRIBUTE_CARD_BOTTOM_COORD" />
                     <Controls>

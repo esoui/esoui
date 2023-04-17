@@ -51,7 +51,7 @@
                     if not IsBlockActive() then  --don't allow Interactions or Jumps while blocking on Gamepad as it will trigger a roll anyway.
                         if interactPromptVisible and not isInactiveClickableFixture then
                             ZO_SetJumpOrInteractDownAction(ZO_JUMP_OR_INTERACT_DID_INTERACT)
-                            if not FISHING_MANAGER:StartInteraction() then GameCameraInteractStart() end
+                            if not INTERACTIVE_WHEEL_MANAGER:StartInteraction(ZO_INTERACTIVE_WHEEL_TYPE_FISHING) then GameCameraInteractStart() end
                         else
                             ZO_SetJumpOrInteractDownAction(ZO_JUMP_OR_INTERACT_DID_JUMP)
                             JumpAscendStart()
@@ -61,7 +61,7 @@
                 <Up>
                     local downAction = ZO_GetJumpOrInteractDownAction()
                     if downAction == ZO_JUMP_OR_INTERACT_DID_INTERACT then
-                        if not FISHING_MANAGER:StopInteraction() then GameCameraInteractStart() end
+                        if not INTERACTIVE_WHEEL_MANAGER:HandleUpAction(ZO_INTERACTIVE_WHEEL_TYPE_FISHING) then GameCameraInteractStart() end
                     elseif downAction == ZO_JUMP_OR_INTERACT_DID_JUMP then
                         AscendStop()
                     end
@@ -258,9 +258,9 @@
             </Action>
             <!-- This is the action for the quickslot wheel. The name isn't great, but changing it at this point would be too much of a pain, so we just kind of have to live with it -->
             <Action name="ACTION_BUTTON_9">
-                <Down>UTILITY_WHEEL_MANAGER:StartInteraction()</Down>
+                <Down>INTERACTIVE_WHEEL_MANAGER:StartInteraction(ZO_INTERACTIVE_WHEEL_TYPE_UTILITY)</Down>
                 <Up>
-                    if not UTILITY_WHEEL_MANAGER:StopInteraction() then
+                    if not INTERACTIVE_WHEEL_MANAGER:HandleUpAction(ZO_INTERACTIVE_WHEEL_TYPE_UTILITY) then
                         if ZO_ActionBar_CanUseActionSlots() then
                             OnSlotUp(GetCurrentQuickslot(), HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
                             ZO_ActionBar_OnActionButtonUp(GetCurrentQuickslot(), HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
@@ -282,10 +282,10 @@
         <Category name="SI_KEYBINDINGS_CATEGORY_TARGETING">
             <Action name="CYCLE_PREFERRED_ENEMY_TARGET">
                 <Down>
-                    TARGET_MARKERS:StartInteraction()
+                    INTERACTIVE_WHEEL_MANAGER:StartInteraction(ZO_INTERACTIVE_WHEEL_TYPE_TARGET_MARKER)
                 </Down>
                 <Up>
-                    if not TARGET_MARKERS:StopInteraction() then
+                    if not INTERACTIVE_WHEEL_MANAGER:HandleUpAction(ZO_INTERACTIVE_WHEEL_TYPE_TARGET_MARKER) then
                         if not HOUSING_EDITOR_SHARED:HandleCycleTarget() then
                             CycleGameCameraPreferredEnemyTarget()
                         end
@@ -306,33 +306,34 @@
             </Action>
             
             <Action name="GAMEPAD_TARGET_MARKER_INTERACT">
-                <Down>TARGET_MARKERS:StartInteraction()</Down>
-                <Up>TARGET_MARKERS:StopInteraction()</Up>
+                <Down>INTERACTIVE_WHEEL_MANAGER:StartInteraction(ZO_INTERACTIVE_WHEEL_TYPE_TARGET_MARKER)</Down>
+                <Up>INTERACTIVE_WHEEL_MANAGER:HandleUpAction(ZO_INTERACTIVE_WHEEL_TYPE_TARGET_MARKER)</Up>
             </Action>
 
-            <Action name="ASSIGN_TARGET_MARKER_ONE">
-                <Down>AssignTargetMarkerToReticleTarget(1)</Down>
-            </Action>
-            <Action name="ASSIGN_TARGET_MARKER_TWO">
-                <Down>AssignTargetMarkerToReticleTarget(2)</Down>
+            <!-- These binds are intentionally ordered this way so the order matches the layout of the wheel -->
+            <Action name="ASSIGN_TARGET_MARKER_FOUR">
+                <Down>AssignTargetMarkerToReticleTarget(TARGET_MARKER_TYPE_FOUR)</Down>
             </Action>
             <Action name="ASSIGN_TARGET_MARKER_THREE">
-                <Down>AssignTargetMarkerToReticleTarget(3)</Down>
+                <Down>AssignTargetMarkerToReticleTarget(TARGET_MARKER_TYPE_THREE)</Down>
             </Action>
-            <Action name="ASSIGN_TARGET_MARKER_FOUR">
-                <Down>AssignTargetMarkerToReticleTarget(4)</Down>
+            <Action name="ASSIGN_TARGET_MARKER_TWO">
+                <Down>AssignTargetMarkerToReticleTarget(TARGET_MARKER_TYPE_TWO)</Down>
             </Action>
-            <Action name="ASSIGN_TARGET_MARKER_FIVE">
-                <Down>AssignTargetMarkerToReticleTarget(5)</Down>
-            </Action>
-            <Action name="ASSIGN_TARGET_MARKER_SIX">
-                <Down>AssignTargetMarkerToReticleTarget(6)</Down>
-            </Action>
-            <Action name="ASSIGN_TARGET_MARKER_SEVEN">
-                <Down>AssignTargetMarkerToReticleTarget(7)</Down>
+            <Action name="ASSIGN_TARGET_MARKER_ONE">
+                <Down>AssignTargetMarkerToReticleTarget(TARGET_MARKER_TYPE_ONE)</Down>
             </Action>
             <Action name="ASSIGN_TARGET_MARKER_EIGHT">
-                <Down>AssignTargetMarkerToReticleTarget(8)</Down>
+                <Down>AssignTargetMarkerToReticleTarget(TARGET_MARKER_TYPE_EIGHT)</Down>
+            </Action>
+            <Action name="ASSIGN_TARGET_MARKER_SEVEN">
+                <Down>AssignTargetMarkerToReticleTarget(TARGET_MARKER_TYPE_SEVEN)</Down>
+            </Action>
+            <Action name="ASSIGN_TARGET_MARKER_SIX">
+                <Down>AssignTargetMarkerToReticleTarget(TARGET_MARKER_TYPE_SIX)</Down>
+            </Action>
+            <Action name="ASSIGN_TARGET_MARKER_FIVE">
+                <Down>AssignTargetMarkerToReticleTarget(TARGET_MARKER_TYPE_FIVE)</Down>
             </Action>
         </Category>
 
@@ -358,13 +359,13 @@
 
         <Category name="SI_KEYBINDINGS_CATEGORY_INTERACTION">
             <Action name="GAME_CAMERA_INTERACT" holdAndChordInteraction="RUN_ANYWAY">
-                <Down>if not FISHING_MANAGER:StartInteraction() then GameCameraInteractStart() end</Down>
-                <Up>if not FISHING_MANAGER:StopInteraction() then GameCameraInteractStart() end</Up>
+                <Down>if not INTERACTIVE_WHEEL_MANAGER:StartInteraction(ZO_INTERACTIVE_WHEEL_TYPE_FISHING) then GameCameraInteractStart() end</Down>
+                <Up>if not INTERACTIVE_WHEEL_MANAGER:HandleUpAction(ZO_INTERACTIVE_WHEEL_TYPE_FISHING) then GameCameraInteractStart() end</Up>
             </Action>
 
             <Action name="PLAYER_TO_PLAYER_INTERACT">
                 <Down>PLAYER_TO_PLAYER:StartInteraction()</Down>
-                <Up>PLAYER_TO_PLAYER:StopInteraction()</Up>
+                <Up>PLAYER_TO_PLAYER:HandleUpAction()</Up>
             </Action>
         </Category>
 
@@ -513,6 +514,10 @@
                     end
                 </Down>
             </Action>
+
+            <Action name="CLEAR_ACTIVE_NARRATION">
+                <Down>ClearActiveNarration()</Down>
+            </Action>
         </Category>
     </Layer>
     <!-- This layer should not be player facing -->
@@ -528,6 +533,7 @@
             <AllowAction name="TOGGLE_GAME_CAMERA_UI_MODE"/>
             <AllowAction name="TAKE_SCREENSHOT"/>
             <AllowAction name="TOGGLE_GAMEPAD_MODE"/>
+            <AllowAction name="CLEAR_ACTIVE_NARRATION"/>
 
             <AllowAction name="TOGGLE_MARKET"/>
             <AllowAction name="TOGGLE_INVENTORY"/>
@@ -708,6 +714,7 @@
             <AllowAction name="CHAT_REPLY_TO_LAST_WHISPER"/>
             <AllowAction name="TOGGLE_HUD_UI"/>
             <AllowAction name="GAME_CAMERA_GAMEPAD_ZOOM"/>
+            <AllowAction name="CLEAR_ACTIVE_NARRATION"/>
         </Category>
     </Layer>
     <Layer name="SI_KEYBINDINGS_LAYER_DIALOG" allowFallthrough="false">
@@ -735,6 +742,7 @@
             <AllowAction name="START_CHAT_SLASH"/>
             <AllowAction name="TAKE_SCREENSHOT"/>
             <AllowAction name="TOGGLE_FULLSCREEN"/>
+            <AllowAction name="CLEAR_ACTIVE_NARRATION"/>
         </Category>
     </Layer>
     <Layer name="SI_KEYBINDINGS_LAYER_NOTIFICATIONS">
@@ -752,22 +760,215 @@
     <Layer name="SI_KEYBINDINGS_LAYER_UTILITY_WHEEL">
         <Category name="SI_KEYBINDINGS_CATEGORY_UTILITY_WHEEL_KEYBOARD">
             <Action name="UTILITY_WHEEL_KEYBOARD_CYCLE_LEFT">
-                <Down>if not IsInGamepadPreferredMode() then UTILITY_WHEEL_MANAGER:CycleLeft() end</Down>
+                <Down>
+                    if not IsInGamepadPreferredMode() then 
+                        return INTERACTIVE_WHEEL_MANAGER:CycleLeft(ZO_INTERACTIVE_WHEEL_TYPE_UTILITY)
+                    end
+                    return false
+                </Down>
             </Action>
 
             <Action name="UTILITY_WHEEL_KEYBOARD_CYCLE_RIGHT">
-                <Down>if not IsInGamepadPreferredMode() then UTILITY_WHEEL_MANAGER:CycleRight() end</Down>
+                <Down>
+                    if not IsInGamepadPreferredMode() then 
+                        return INTERACTIVE_WHEEL_MANAGER:CycleRight(ZO_INTERACTIVE_WHEEL_TYPE_UTILITY)
+                    end
+                    return false
+                </Down>
             </Action>
         </Category>
 
         <Category name="SI_KEYBINDINGS_CATEGORY_UTILITY_WHEEL_GAMEPAD">
             <Action name="UTILITY_WHEEL_GAMEPAD_CYCLE_LEFT">
-                <Down>if IsInGamepadPreferredMode() then UTILITY_WHEEL_MANAGER:CycleLeft() end</Down>
+                <Down>
+                    if IsInGamepadPreferredMode() then
+                        return INTERACTIVE_WHEEL_MANAGER:CycleLeft(ZO_INTERACTIVE_WHEEL_TYPE_UTILITY)
+                    end
+                    return false
+                </Down>
             </Action>
 
             <Action name="UTILITY_WHEEL_GAMEPAD_CYCLE_RIGHT">
-                <Down>if IsInGamepadPreferredMode() then UTILITY_WHEEL_MANAGER:CycleRight() end</Down>
+                <Down>
+                    if IsInGamepadPreferredMode() then
+                        return INTERACTIVE_WHEEL_MANAGER:CycleRight(ZO_INTERACTIVE_WHEEL_TYPE_UTILITY)
+                    end
+                    return false
+                </Down>
             </Action>
+        </Category>
+    </Layer>
+
+    <Layer name="SI_KEYBINDINGS_LAYER_ACCESSIBLE_QUICKWHEEL" allowFallthrough="false">
+        <Category>
+            <Action name="ACCESSIBLE_WHEEL_HOTKEY_SLOT_1">
+                <Down>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyDownAction(1)</Down>
+                <Up>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyUpAction(1)</Up>
+            </Action>
+
+            <Action name="ACCESSIBLE_WHEEL_HOTKEY_SLOT_2">
+                <Down>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyDownAction(2)</Down>
+                <Up>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyUpAction(2)</Up>
+            </Action>
+
+            <Action name="ACCESSIBLE_WHEEL_HOTKEY_SLOT_3">
+                <Down>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyDownAction(3)</Down>
+                <Up>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyUpAction(3)</Up>
+            </Action>
+
+            <Action name="ACCESSIBLE_WHEEL_HOTKEY_SLOT_4">
+                <Down>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyDownAction(4)</Down>
+                <Up>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyUpAction(4)</Up>
+            </Action>
+
+            <Action name="ACCESSIBLE_WHEEL_HOTKEY_SLOT_5">
+                <Down>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyDownAction(5)</Down>
+                <Up>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyUpAction(5)</Up>
+            </Action>
+
+            <Action name="ACCESSIBLE_WHEEL_HOTKEY_SLOT_6">
+                <Down>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyDownAction(6)</Down>
+                <Up>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyUpAction(6)</Up>
+            </Action>
+
+            <Action name="ACCESSIBLE_WHEEL_HOTKEY_SLOT_7">
+                <Down>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyDownAction(7)</Down>
+                <Up>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyUpAction(7)</Up>
+            </Action>
+
+            <Action name="ACCESSIBLE_WHEEL_HOTKEY_SLOT_8">
+                <Down>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyDownAction(8)</Down>
+                <Up>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyUpAction(8)</Up>
+            </Action>
+
+            <Action name="ACCESSIBLE_WHEEL_HOTKEY_SLOT_9">
+                <Down>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyDownAction(9)</Down>
+                <Up>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyUpAction(9)</Up>
+            </Action>
+
+            <Action name="ACCESSIBLE_WHEEL_HOTKEY_SLOT_10">
+                <Down>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyDownAction(10)</Down>
+                <Up>return INTERACTIVE_WHEEL_MANAGER:HandleHotkeyUpAction(10)</Up>
+            </Action>
+
+            <Action name="ACCESSIBLE_WHEEL_HIDE" hideAction="true" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" rebindable="false">
+                <Down>return INTERACTIVE_WHEEL_MANAGER:CancelCurrentInteraction()</Down>
+            </Action>
+
+            <!-- Utility Wheel -->
+            <AllowAction name="UTILITY_WHEEL_KEYBOARD_CYCLE_LEFT"/>
+            <AllowAction name="UTILITY_WHEEL_KEYBOARD_CYCLE_RIGHT"/>
+            <AllowAction name="UTILITY_WHEEL_GAMEPAD_CYCLE_LEFT"/>
+            <AllowAction name="UTILITY_WHEEL_GAMEPAD_CYCLE_RIGHT"/>
+
+            <!-- Chat -->
+            <AllowAction name="START_CHAT_ENTER" />
+            <AllowAction name="START_CHAT_SLASH" />
+            <AllowAction name="CHAT_REPLY_TO_LAST_WHISPER" />
+            
+            <!-- Utility -->
+            <AllowAction name="TAKE_SCREENSHOT" />
+            <AllowAction name="TOGGLE_SYSTEM" />
+            <AllowAction name="TOGGLE_GAMEPAD_MODE" />
+            <AllowAction name="CLEAR_ACTIVE_NARRATION"/>
+
+            <!-- Do not block movement related binds -->
+            <AllowAction name="MOVE_FORWARD"/>
+            <AllowAction name="MOVE_BACKWARD"/>
+            <AllowAction name="TOGGLE_WALK"/>
+            <AllowAction name="TURN_LEFT"/>
+            <AllowAction name="TURN_RIGHT"/>
+            <AllowAction name="MOVE_JUMPASCEND"/>
+            <AllowAction name="AUTORUN"/>
+            <AllowAction name="ROLL_DODGE"/>
+            <AllowAction name="TOGGLE_MOUNT"/>
+            <AllowAction name="GAMEPAD_JUMP_OR_INTERACT"/>
+        </Category>
+    </Layer>
+
+    <!-- Not player facing -->
+    <!-- Unlike other wheels, the player to player wheel does not use the interaction manager, so we need a different keybind layer for the accessible hotkeys -->
+    <Layer name="PlayerToPlayerAccessibleLayer" allowFallthrough="false">
+        <Category>
+            <Action name="PLAYER_TO_PLAYER_ACCESSIBLE_WHEEL_HOTKEY_SLOT_1" hideAction="true" inheritsBindFrom="ACCESSIBLE_WHEEL_HOTKEY_SLOT_1">
+                <Down>return PLAYER_TO_PLAYER:HandleHotkeyDownAction(1)</Down>
+                <Up>return PLAYER_TO_PLAYER:HandleHotkeyUpAction(1)</Up>
+            </Action>
+
+            <Action name="PLAYER_TO_PLAYER_ACCESSIBLE_WHEEL_HOTKEY_SLOT_2" hideAction="true" inheritsBindFrom="ACCESSIBLE_WHEEL_HOTKEY_SLOT_2">
+                <Down>return PLAYER_TO_PLAYER:HandleHotkeyDownAction(2)</Down>
+                <Up>return PLAYER_TO_PLAYER:HandleHotkeyUpAction(2)</Up>
+            </Action>
+
+            <Action name="PLAYER_TO_PLAYER_ACCESSIBLE_WHEEL_HOTKEY_SLOT_3" hideAction="true" inheritsBindFrom="ACCESSIBLE_WHEEL_HOTKEY_SLOT_3">
+                <Down>return PLAYER_TO_PLAYER:HandleHotkeyDownAction(3)</Down>
+                <Up>return PLAYER_TO_PLAYER:HandleHotkeyUpAction(3)</Up>
+            </Action>
+
+            <Action name="PLAYER_TO_PLAYER_ACCESSIBLE_WHEEL_HOTKEY_SLOT_4" hideAction="true" inheritsBindFrom="ACCESSIBLE_WHEEL_HOTKEY_SLOT_4">
+                <Down>return PLAYER_TO_PLAYER:HandleHotkeyDownAction(4)</Down>
+                <Up>return PLAYER_TO_PLAYER:HandleHotkeyUpAction(4)</Up>
+            </Action>
+
+            <Action name="PLAYER_TO_PLAYER_ACCESSIBLE_WHEEL_HOTKEY_SLOT_5" hideAction="true" inheritsBindFrom="ACCESSIBLE_WHEEL_HOTKEY_SLOT_5">
+                <Down>return PLAYER_TO_PLAYER:HandleHotkeyDownAction(5)</Down>
+                <Up>return PLAYER_TO_PLAYER:HandleHotkeyUpAction(5)</Up>
+            </Action>
+
+            <Action name="PLAYER_TO_PLAYER_ACCESSIBLE_WHEEL_HOTKEY_SLOT_6" hideAction="true" inheritsBindFrom="ACCESSIBLE_WHEEL_HOTKEY_SLOT_6">
+                <Down>return PLAYER_TO_PLAYER:HandleHotkeyDownAction(6)</Down>
+                <Up>return PLAYER_TO_PLAYER:HandleHotkeyUpAction(6)</Up>
+            </Action>
+
+            <Action name="PLAYER_TO_PLAYER_ACCESSIBLE_WHEEL_HOTKEY_SLOT_7" hideAction="true" inheritsBindFrom="ACCESSIBLE_WHEEL_HOTKEY_SLOT_7">
+                <Down>return PLAYER_TO_PLAYER:HandleHotkeyDownAction(7)</Down>
+                <Up>return PLAYER_TO_PLAYER:HandleHotkeyUpAction(7)</Up>
+            </Action>
+
+            <Action name="PLAYER_TO_PLAYER_ACCESSIBLE_WHEEL_HOTKEY_SLOT_8" hideAction="true" inheritsBindFrom="ACCESSIBLE_WHEEL_HOTKEY_SLOT_8">
+                <Down>return PLAYER_TO_PLAYER:HandleHotkeyDownAction(8)</Down>
+                <Up>return PLAYER_TO_PLAYER:HandleHotkeyUpAction(8)</Up>
+            </Action>
+
+            <Action name="PLAYER_TO_PLAYER_ACCESSIBLE_WHEEL_HOTKEY_SLOT_9" hideAction="true" inheritsBindFrom="ACCESSIBLE_WHEEL_HOTKEY_SLOT_9">
+                <Down>return PLAYER_TO_PLAYER:HandleHotkeyDownAction(9)</Down>
+                <Up>return PLAYER_TO_PLAYER:HandleHotkeyUpAction(9)</Up>
+            </Action>
+
+            <Action name="PLAYER_TO_PLAYER_ACCESSIBLE_WHEEL_HOTKEY_SLOT_10" hideAction="true" inheritsBindFrom="ACCESSIBLE_WHEEL_HOTKEY_SLOT_10">
+                <Down>return PLAYER_TO_PLAYER:HandleHotkeyDownAction(10)</Down>
+                <Up>return PLAYER_TO_PLAYER:HandleHotkeyUpAction(10)</Up>
+            </Action>
+            
+            <Action name="PLAYER_TO_PLAYER_ACCESSIBLE_WHEEL_HIDE" hideAction="true" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE">
+                <Down>
+                    local CLEAR_SELECTION = true
+                    PLAYER_TO_PLAYER:StopInteraction(CLEAR_SELECTION)
+                </Down>
+            </Action>
+
+            <!-- Chat -->
+            <AllowAction name="START_CHAT_ENTER" />
+            <AllowAction name="START_CHAT_SLASH" />
+            <AllowAction name="CHAT_REPLY_TO_LAST_WHISPER" />
+
+            <!-- Utility -->
+            <AllowAction name="TAKE_SCREENSHOT" />
+            <AllowAction name="TOGGLE_SYSTEM" />
+            <AllowAction name="TOGGLE_GAMEPAD_MODE" />
+            <AllowAction name="CLEAR_ACTIVE_NARRATION"/>
+
+            <!-- Do not block movement related binds -->
+            <AllowAction name="MOVE_FORWARD"/>
+            <AllowAction name="MOVE_BACKWARD"/>
+            <AllowAction name="TOGGLE_WALK"/>
+            <AllowAction name="TURN_LEFT"/>
+            <AllowAction name="TURN_RIGHT"/>
+            <AllowAction name="MOVE_JUMPASCEND"/>
+            <AllowAction name="AUTORUN"/>
+            <AllowAction name="ROLL_DODGE"/>
+            <AllowAction name="TOGGLE_MOUNT"/>
+            <AllowAction name="GAMEPAD_JUMP_OR_INTERACT"/>
         </Category>
     </Layer>
     
@@ -797,6 +998,52 @@
             </Action>
         </Category>
     </Layer>
+
+    <!-- Not player facing -->
+    <Layer name="UIError">
+        <Category>
+            <Action name="UI_ERROR_DISMISS" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
+                <Down>return ZO_UIErrors_Dismiss()</Down>
+            </Action>
+            <Action name="UI_ERROR_RELOAD_UI" hideAction="true" inheritsBindFrom="UI_SHORTCUT_SECONDARY">
+                <Down>ReloadUI()</Down>
+            </Action>
+            <Action name="UI_ERROR_SUPPRESS" hideAction="true" inheritsBindFrom="UI_SHORTCUT_TERTIARY">
+                <Down>return ZO_UIErrors_Suppress()</Down>
+            </Action>
+            <Action name="UI_ERROR_COPY" hideAction="true" inheritsBindFrom="UI_SHORTCUT_QUATERNARY">
+                <Down>return ZO_UIErrors_CopyError()</Down>
+            </Action>
+            <Action name="UI_ERROR_MORE_INFO" hideAction="true" inheritsBindFrom="UI_SHORTCUT_QUINARY">
+                <Down>
+                    if IsInGamepadPreferredMode() then
+                        return ZO_UIErrors_ToggleMoreInfo()
+                    else
+                        return false
+                    end
+                </Down>
+            </Action>
+            <Action name="UI_ERROR_PAGE_LEFT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_LEFT_TRIGGER">
+                <Down>
+                    if IsInGamepadPreferredMode() then
+                        return ZO_UIErrors_PageLeft()
+                    else
+                        return false
+                    end
+                </Down>
+            </Action>
+            <Action name="UI_ERROR_PAGE_RIGHT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_RIGHT_TRIGGER">
+                <Down>
+                    if IsInGamepadPreferredMode() then
+                        return ZO_UIErrors_PageRight()
+                    else
+                        return false
+                    end
+                </Down>
+            </Action>
+        </Category>
+    </Layer>
+    
     <!-- Not player facing -->
     <Layer name="Conversation">
         <Category>
@@ -1222,6 +1469,7 @@
             <AllowAction name="TURN_LEFT" />
             <AllowAction name="TURN_RIGHT" />
             <AllowAction name="TAKE_SCREENSHOT" />
+            <AllowAction name="CLEAR_ACTIVE_NARRATION"/>
 
             <Action name="SCREENSHOT_MODE_EXIT" hideAction="true" rebindable="false">
                 <Down>
@@ -1284,6 +1532,7 @@
             <AllowAction name="TOGGLE_HUD_UI" />
             <AllowAction name="TOGGLE_GAMEPAD_MODE" />
             <AllowAction name="TOGGLE_HELP" />
+            <AllowAction name="CLEAR_ACTIVE_NARRATION" />
 
             <Action name="HOUSING_EDITOR_PRIMARY_ACTION">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>

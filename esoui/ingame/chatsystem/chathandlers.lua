@@ -146,7 +146,6 @@ local BUILTIN_MESSAGE_FORMATTERS = {
             nameToDisplay = ZO_FormatUserFacingDisplayName(displayName)
         end
 
-        ZO_OutputStadiaLog(string.format("ChatHandlers[EVENT_GROUP_INVITE_RESPONSE], ShouldShowGroupErrorInChat(response) = %s", (ShouldShowGroupErrorInChat(response) and "true" or "false")))
         if not IsGroupErrorIgnoreResponse(response) and ShouldShowGroupErrorInChat(response) then
             local alertMessage = nameToDisplay ~= "" and zo_strformat(GetString("SI_GROUPINVITERESPONSE", response), nameToDisplay) or GetString(SI_PLAYER_BUSY)
 
@@ -174,6 +173,27 @@ local BUILTIN_MESSAGE_FORMATTERS = {
 
     [EVENT_BATTLEGROUND_INACTIVITY_WARNING] = function()
         return GetString(SI_BATTLEGROUND_INACTIVITY_WARNING)
+    end,
+
+    [EVENT_GUILD_KEEP_ATTACK_UPDATE] = function(channel, numGuardsKilled, numAttackers, location)
+        if tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_AVA_NOTIFICATIONS)) ~= AVA_NOTIFICATIONS_SETTING_CHOICE_DONT_SHOW and
+            tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_GUILD_KEEP_NOTICES)) == GUILD_KEEP_NOTICES_SETTING_CHOICE_CHAT then
+            local channelInfo = ChannelInfo[channel]
+
+            if channelInfo then
+                local text
+                if numGuardsKilled > 0 then
+                    text = zo_strformat(SI_GUILD_KEEP_ATTACK_UPDATE, numGuardsKilled, location, numAttackers)
+                else
+                    text = zo_strformat(SI_GUILD_KEEP_ATTACK_END, location)
+                end
+                local channelInfoFormat = GetString(SI_CHAT_MESSAGE_GUILD_NO_SENDER)
+                local channelLink = CreateChannelLink(channelInfo)
+                local formattedText = string.format(channelInfoFormat, channelLink, text)
+
+                return formattedText
+            end
+        end
     end,
 
     ["AddSystemMessage"] = function(messageText)
@@ -351,7 +371,7 @@ function ZO_ChatSystem_ShouldUseKeyboardChatSystem()
         return false
     end
 
-    local useKeyboardChat = GetSetting_Bool(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_USE_KEYBOARD_CHAT) and not IsHeronUI()
+    local useKeyboardChat = GetSetting_Bool(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_USE_KEYBOARD_CHAT)
     return IsInGamepadPreferredMode() == false or useKeyboardChat == true
 end
 

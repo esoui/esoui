@@ -5,7 +5,7 @@ function ZO_TributeTargetViewer_Shared:Initialize(control, templateData)
     self.templateData = templateData
     self.hasTargets = false
 
-    ZO_TRIBUTE_TARGET_VIEWER_MANAGER:RegisterCallback("ViewingTargetsChanged", function(...) self:OnViewingTargetsChanged(...) end)
+    ZO_TRIBUTE_TARGET_VIEWER_MANAGER:RegisterCallback("ActivationStateChanged", function(...) self:OnActivationStateChanged(...) end)
     ZO_TRIBUTE_TARGET_VIEWER_MANAGER:RegisterCallback("CardStateFlagsChanged", function(...) self:OnCardStateFlagsChanged(...) end)
     ZO_TRIBUTE_TARGET_VIEWER_MANAGER:RegisterCallback("ViewingBoardChanged", function(...) self:OnViewingBoardChanged(...) end)
 
@@ -82,7 +82,7 @@ function ZO_TributeTargetViewer_Shared:RefreshGridList(resetToTop, reselectData)
     end
 end
 
-function ZO_TributeTargetViewer_Shared:OnViewingTargetsChanged(hasTargets)
+function ZO_TributeTargetViewer_Shared:OnActivationStateChanged(viewer, hasTargets)
     if self.hasTargets ~= hasTargets then
         if hasTargets then
             if self:CanShow() then
@@ -105,7 +105,18 @@ function ZO_TributeTargetViewer_Shared:OnCardStateFlagsChanged(cardInstanceId, s
         if data.cardInstanceId == cardInstanceId then
             local cardObject = control.object.cardData
             if cardObject then
+                local wasTargeted = cardObject:IsTargeted()
                 cardObject:OnStateFlagsChanged(stateFlags)
+                local isTargeted = cardObject:IsTargeted()
+                --If there is no associated board object for this card, we need to handle playing the sound effects ourselves
+                --Otherwise the board object will handle playing the sound for us
+                if not TRIBUTE:GetCardByInstanceId(cardInstanceId) and wasTargeted ~= isTargeted then
+                    if isTargeted then
+                        PlaySound(SOUNDS.TRIBUTE_CARD_TARGETED)
+                    else
+                        PlaySound(SOUNDS.TRIBUTE_CARD_UNTARGETED)
+                    end
+                end
             end
             KEYBIND_STRIP:UpdateKeybindButtonGroup(control.object.keybindStripDescriptor)
         end

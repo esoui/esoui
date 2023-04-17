@@ -241,8 +241,8 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
         self:SetupActivityRow(entryControl, data)
     end
 
-    local function ResetActivityRow(entryControl, data)
-        self:ResetActivityRow(entryControl, data)
+    local function ResetActivityRow(entryControl)
+        self:ResetActivityRow(entryControl)
     end
 
     local NO_HIDE_CALLBACK = nil
@@ -283,7 +283,7 @@ function ZO_TimedActivitiesList_Gamepad:RefreshTimeRemaining(timeRemaining)
     self.timeRemaining:SetText(timeRemaining)
 end
 
-function ZO_TimedActivitiesList_Gamepad:ResetActivityRow(control, data)
+function ZO_TimedActivitiesList_Gamepad:ResetActivityRow(control)
     control:SetHidden(true)
     control.activityRewardPool:ReleaseAllObjects()
 end

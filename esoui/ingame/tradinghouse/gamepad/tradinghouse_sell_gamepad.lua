@@ -88,9 +88,10 @@ end
 
 function ZO_GamepadTradingHouse_Sell:OnSelectionChanged(list, selectedData, oldSelectedData)
     self:UpdateItemSelectedTooltip(selectedData)
-
-    if self.itemList.onRefreshListCallback then
-        self.itemList.onRefreshListCallback(self.itemList.list)
+    
+    --ESO-815112: If the item list is empty, enter the header
+    if self.itemList:GetNumItems() == 0 then
+        TRADING_HOUSE_GAMEPAD:RequestEnterHeader()
     end
 end
 

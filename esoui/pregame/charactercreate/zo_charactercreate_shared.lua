@@ -29,7 +29,7 @@ CHARACTER_CREATE_SELECTOR_CLASS = "class"
 CHARACTER_CREATE_SELECTOR_ALLIANCE = "alliance"
 CHARACTER_CREATE_SELECTOR_GENDER = "gender"
 
-CHARACTER_CREATE_MAX_SUPPORTED_CLASSES = 6
+CHARACTER_CREATE_MAX_SUPPORTED_CLASSES = 9
 
 --[[ Character Create Manager]]--
 
@@ -79,12 +79,6 @@ function ZO_CharacterCreate_Manager:Initialize()
         ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_SAVE_ERROR", nil, dialogParams)
     end
 
-    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_LOGOUT_SUCCESSFUL, OnLogoutSuccessful)
-    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_CHARACTER_CREATED, OnCharacterCreated)
-    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_CHARACTER_CREATE_FAILED, OnCharacterCreateFailed)
-    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_CHARACTER_EDIT_SUCCEEDED, OnCharacterEditSucceeded)
-    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_CHARACTER_EDIT_FAILED, OnCharacterEditFailed)
-
     local function OnCharacterConstructionReady()
         self.characterData:PerformDeferredInitialization()
 
@@ -124,6 +118,19 @@ function ZO_CharacterCreate_Manager:Initialize()
         local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
         characterCreate:OnCharacterCreateRequested()
     end
+
+    local function OnChapterUpgraded()
+        if IsPregameCharacterConstructionReady() then
+            OnCharacterConstructionReady()
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_LOGOUT_SUCCESSFUL, OnLogoutSuccessful)
+    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_CHARACTER_CREATED, OnCharacterCreated)
+    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_CHARACTER_CREATE_FAILED, OnCharacterCreateFailed)
+    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_CHARACTER_EDIT_SUCCEEDED, OnCharacterEditSucceeded)
+    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_CHARACTER_EDIT_FAILED, OnCharacterEditFailed)
+    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_ENTITLEMENT_STATE_CHANGED, OnChapterUpgraded)
 
     CALLBACK_MANAGER:RegisterCallback("OnCharacterConstructionReady", OnCharacterConstructionReady)
     CALLBACK_MANAGER:RegisterCallback("CharacterCreateRequested", OnCharacterCreateRequested)

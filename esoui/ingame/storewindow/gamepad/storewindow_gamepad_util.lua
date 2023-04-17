@@ -254,8 +254,7 @@ local function GetBuybackItems(searchContext)
 end
 
 local function GatherDamagedEquipmentFromBag(searchContext, bagId, itemTable)
-    local bagSlots = GetBagSize(bagId)
-    for slotIndex = 0, bagSlots - 1 do
+    for slotIndex in ZO_IterateBagSlots(bagId) do
         if searchContext and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, slotIndex) then
             local condition = GetItemCondition(bagId, slotIndex)
             if condition < 100 and not IsItemStolen(bagId, slotIndex) then

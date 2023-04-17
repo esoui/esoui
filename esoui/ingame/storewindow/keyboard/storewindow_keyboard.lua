@@ -180,20 +180,12 @@ function ZO_StoreManager:Initialize(control)
 
     local function ShowStoreWindow()
         if not IsInGamepadPreferredMode() then
-            PLAYER_INVENTORY:SetContextForInventories("storeTextSearch", INVENTORY_TYPE_LIST)
-            TEXT_SEARCH_MANAGER:ActivateTextSearch("storeTextSearch")
             SCENE_MANAGER:Show("store")
         end
     end
 
     local function CloseStoreWindow()
         if not IsInGamepadPreferredMode() then
-            if TEXT_SEARCH_MANAGER:IsActiveTextSearch("storeTextSearch") then
-                TEXT_SEARCH_MANAGER:DeactivateTextSearch("storeTextSearch")
-                local REMOVE_CONTEXT = nil
-                PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
-            end
-
             -- Ensure that all dialogs related to the store also close when interaction ends
             ZO_Dialogs_ReleaseDialog("REPAIR_ALL")
             ZO_Dialogs_ReleaseDialog("BUY_MULTIPLE")
@@ -244,8 +236,15 @@ function ZO_StoreManager:Initialize(control)
     self.scene:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:InitializeStore()
+            PLAYER_INVENTORY:SetContextForInventories("storeTextSearch", INVENTORY_TYPE_LIST)
+            TEXT_SEARCH_MANAGER:ActivateTextSearch("storeTextSearch")
             PLAYER_INVENTORY:SelectAndChangeSort(INVENTORY_BACKPACK, ITEMFILTERTYPE_ALL, "sellInformationSortOrder", ZO_SORT_ORDER_UP)
         elseif newState == SCENE_HIDDEN then
+            if TEXT_SEARCH_MANAGER:IsActiveTextSearch("storeTextSearch") then
+                TEXT_SEARCH_MANAGER:DeactivateTextSearch("storeTextSearch")
+                local REMOVE_CONTEXT = nil
+                PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
+            end
             ZO_InventorySlot_RemoveMouseOverKeybinds()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             self.modeBar:Clear()

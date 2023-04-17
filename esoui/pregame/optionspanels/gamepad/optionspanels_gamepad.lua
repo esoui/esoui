@@ -248,6 +248,23 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_ACCESSIBILITY,
             settingId = ACCESSIBILITY_SETTING_NARRATION_VOICE_TYPE,
         },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY,
+            header = SI_ACCESSIBILITY_OPTIONS_ARCANIST,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_MOUSE_AIM_ASSIST_INTENSITY,
+            header = SI_ACCESSIBILITY_OPTIONS_ARCANIST,
+        },
     },
 }
 

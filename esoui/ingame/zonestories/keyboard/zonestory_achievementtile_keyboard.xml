@@ -25,6 +25,10 @@
                             <Anchor point="TOPLEFT" offsetX="-9" offsetY="-9" />
                             <Anchor point="BOTTOMRIGHT" offsetX="9" offsetY="9" />
                         </Texture>
+
+                        <Texture name="$(parent)Overlay" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds" blendMode="ADD" layer="OVERLAY" level="2" hidden="true">
+                            <AnchorFill />
+                        </Texture>
                     </Controls>
                 </Texture>
 

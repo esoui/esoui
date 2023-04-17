@@ -551,12 +551,24 @@ function ZO_ItemPreview_Shared:GetFragment()
     return self.fragment
 end
 
+function ZO_ItemPreview_Shared:GetPreviewTypeAndData(previewType, ...)
+    local previewData = {...}
+    if previewType == nil then
+        -- For lists that contain list entries of different preview types, the previewType
+        -- argument should be nil and each list entry should be a numerically indexed table,
+        -- the first element of which must be the individual element's previewType.
+        previewType = previewData[1]
+        table.remove(previewData, 1)
+    end
+    return previewType, previewData
+end
+
 function ZO_ItemPreview_Shared:SharedPreviewSetup(previewType, ...)
     if self.waitingForPreviewBegin then
         self.queuedPreviewData = 
         {
             previewType = previewType,
-            data = { ... }
+            data = {...},
         }
         return
     end
@@ -569,12 +581,16 @@ function ZO_ItemPreview_Shared:SharedPreviewSetup(previewType, ...)
         return
     end
 
+    local data
+    previewType, data = self:GetPreviewTypeAndData(previewType, ...)
+
     self.currentPreviewType = previewType
     if self.currentPreviewTypeObject then
         self.currentPreviewTypeObject:ResetStaticParameters()
     end
+
     self.currentPreviewTypeObject = self:GetPreviewTypeObject(previewType)
-    self.currentPreviewTypeObject:SetStaticParameters(...)
+    self.currentPreviewTypeObject:SetStaticParameters(unpack(data))
 
     self.previewVariationIndex = 1
 
@@ -595,9 +611,12 @@ function ZO_ItemPreview_Shared:SharedPreviewSetup(previewType, ...)
 end
 
 function ZO_ItemPreview_Shared:IsCurrentlyPreviewing(previewType, ...)
+    local data
+    previewType, data = self:GetPreviewTypeAndData(previewType, ...)
+
     return previewType == self.currentPreviewType
            and self.currentPreviewTypeObject
-           and self.currentPreviewTypeObject:HasStaticParameters(...)
+           and self.currentPreviewTypeObject:HasStaticParameters(unpack(data))
            and self.previewVariationIndex == 1
 end
 

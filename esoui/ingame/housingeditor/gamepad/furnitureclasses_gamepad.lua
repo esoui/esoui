@@ -307,7 +307,7 @@ function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialog()
                 optionsDialogLayoutInfo.updateFiltersHandler(filterValue)
             end
 
-            local entryName = nil
+            local entryName
             if filterValue == HOUSING_FURNITURE_BOUND_FILTER_ALL then
                 entryName = GetString(SI_HOUSING_FURNITURE_BOUND_FILTER_ALL_TEXT)
             else
@@ -1003,7 +1003,7 @@ function ZO_HousingSettingsList_Gamepad:Initialize(userGroup, control, owner, da
     self.masterList = {}
     ZO_GamepadInteractiveSortFilterList.Initialize(self, control)
     ZO_SocialOptionsDialogGamepad.Initialize(self)
-    ZO_ScrollList_AddDataType(self.list, dataType, "ZO_HousingPermissionsRow_Gamepad", ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT, function(control, data) self:SetupRow(control, data) end)
+    ZO_ScrollList_AddDataType(self.list, dataType, "ZO_HousingPermissionsRow_Gamepad", ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT, function(entryControl, data) self:SetupRow(entryControl, data) end)
     self:SetEmptyText(GetString(SI_GAMEPAD_HOUSING_PERMISSIONS_NO_ENTRIES))
     self:SetupSort(ZO_HOUSING_SETTINGS_LIST_ENTRY_SORT_KEYS, "displayName", ZO_SORT_ORDER_UP)
 end
@@ -1122,6 +1122,30 @@ function ZO_HousingSettingsList_Gamepad:InitializeDropdownFilter()
     local filterDropdownControl = self.filterControl:GetNamedChild("Dropdown")
     self.filterDropdown = ZO_ComboBox_ObjectFromContainer(filterDropdownControl)
     self.filterControl:SetHidden(true)
+end
+
+--ZO_GamepadInteractiveSortFilterList override
+function ZO_HousingSettingsList_Gamepad:GetNarrationText()
+    local narrations = {}
+    local entryData = self:GetSelectedData()
+
+    if entryData then
+        --Get the narration for the display name column
+        if self.userGroup == HOUSE_PERMISSION_USER_GROUP_INDIVIDUAL then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_GetPlatformAccountLabel()))
+        else
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_FURNITURE_SETTINGS_SOCIAL_LIST_GUILD)))
+        end
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.displayName))
+
+        --Get the narration for the permissions column if present
+        if entryData.permissionPresetName then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_FURNITURE_SETTINGS_SOCIAL_LIST_PERMISSIONS)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.permissionPresetName))
+        end
+    end
+
+    return narrations
 end
 
 function ZO_HousingSettingsList_Gamepad:OnSelectionChanged(oldData, newData)

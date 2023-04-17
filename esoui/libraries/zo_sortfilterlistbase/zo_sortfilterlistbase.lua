@@ -1,8 +1,5 @@
 ZO_SortFilterListBase = ZO_InitializingObject:Subclass()
 
-function ZO_SortFilterListBase:Initialize()
-end
-
 function ZO_SortFilterListBase:RefreshVisible()
 end
 

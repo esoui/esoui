@@ -27,6 +27,8 @@ function ZO_PlayerEmote_Keyboard:Initialize(control)
         hotbarCategories = { HOTBAR_CATEGORY_EMOTE_WHEEL, HOTBAR_CATEGORY_QUICKSLOT_WHEEL },
         numSlots = ACTION_BAR_UTILITY_BAR_SIZE,
         showCategoryLabel = true,
+        --Display the accessibility keybinds on the wheel if the setting is enabled
+        showKeybinds = ZO_AreTogglableWheelsEnabled,
     }
     self.wheel = ZO_AssignableUtilityWheel_Keyboard:New(self.wheelControl, wheelData)
 

@@ -1,5 +1,9 @@
 <GuiXml>
     <Controls>
+        <Label name="ZO_CompanionSkills_SkillLineEntry" virtual="true" inherits="ZO_SkillsNavigationEntry">
+            <DimensionConstraints maxX="ZO_COMPANION_SKILLS_KEYBOARD_SKILL_LINE_ENTRY_LABEL_WIDTH"/>
+        </Label>
+        
         <TopLevelControl name="ZO_CompanionSkills_Panel_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_CompanionSkills_Keyboard_OnInitialize(self)
@@ -7,7 +11,7 @@
             <Controls>
                 <!-- Left side: Skill lines tree -->
                 <Control name="$(parent)SkillLinesContainer" inherits="ZO_ScrollContainer">
-                    <Dimensions x="330"/>
+                    <Dimensions x="ZO_COMPANION_SKILLS_KEYBOARD_SKILL_LINE_CONTAINER_WIDTH"/>
                     <Anchor point="TOPLEFT" offsetX="-28" offsetY="72" />
                     <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-55" />
                 </Control>

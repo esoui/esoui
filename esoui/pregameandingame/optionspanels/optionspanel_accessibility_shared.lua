@@ -186,6 +186,45 @@ local ZO_Panel_Accessibility_ControlData =
                 GAMEPAD_TOOLTIPS:LayoutSettingAccessibilityTooltipWarning(tooltip, GetString(SI_ACCESSIBILITY_OPTIONS_NARRATION_VOICE_TYPE_TOOLTIP), GetString(SI_OPTIONS_ACCESSIBILITY_MODE_REQUIRED_WARNING), not IsAccessibilityModeEnabled())
             end,
         },
+        -- Options_Accessibility_AccessibleQuickwheels
+        [ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS,
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            text = SI_ACCESSIBILITY_OPTIONS_ACCESSIBLE_QUICKWHEELS,
+            tooltipText = SI_ACCESSIBILITY_OPTIONS_ACCESSIBLE_QUICKWHEELS_TOOLTIP,
+        },
+        --Options_Accessibility_GamepadAimAssistIntensity
+        [ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY,
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            text = SI_ACCESSIBILITY_OPTIONS_GAMEPAD_AIM_ASSIST_INTENSITY,
+            tooltipText = SI_ACCESSIBILITY_OPTIONS_GAMEPAD_AIM_ASSIST_INTENSITY_TOOLTIP,
+            minValue = 0,
+            maxValue = 100,
+            showValue = true,
+        },
+        --Options_Accessibility_MouseAimAssistIntensity
+        [ACCESSIBILITY_SETTING_MOUSE_AIM_ASSIST_INTENSITY] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_MOUSE_AIM_ASSIST_INTENSITY,
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            text = SI_ACCESSIBILITY_OPTIONS_MOUSE_AIM_ASSIST_INTENSITY,
+            tooltipText = SI_ACCESSIBILITY_OPTIONS_MOUSE_AIM_ASSIST_INTENSITY_TOOLTIP,
+            minValue = 0,
+            maxValue = 100,
+            showValue = true,
+            exists = function()
+                return not IsConsoleUI()
+            end,
+        },
     }
 }
 

@@ -111,9 +111,14 @@ end
 --- Use MUST_IMPLEMENT to create a field that must be implemented by
 -- subclasses. If a concrete class does not implement a field that contains a
 -- MUST_IMPLEMENT, it will cause an error after the entire addon has been loaded.
-function ZO_Object:MUST_IMPLEMENT()
+-- Example A: ZO_MyAbstractClass.MyAbstractFunction = ZO_MyAbstractClass:MUST_IMPLEMENT()
+-- Example B: ZO_MyAbstractClass:MUST_IMPLEMENT("MyAbstractFunction")
+function ZO_Object:MUST_IMPLEMENT(fieldName)
     self.__isAbstractClass = true
     RemoveConcreteClass(self)
+    if fieldName then
+        self[fieldName] = MUST_IMPLEMENT_SENTINEL
+    end
     return MUST_IMPLEMENT_SENTINEL
 end
 

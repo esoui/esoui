@@ -9,12 +9,11 @@ local function CompleteGroupInvite(characterOrDisplayName, sentFromChat, display
     local isLeader = IsUnitGroupLeader("player")
     local groupSize = GetGroupSize()
     
-    if isLeader and groupSize == SMALL_GROUP_SIZE_THRESHOLD then
-        ZO_Dialogs_ShowPlatformDialog("LARGE_GROUP_INVITE_WARNING", characterOrDisplayName, { mainTextParams = { SMALL_GROUP_SIZE_THRESHOLD } })
+    if isLeader and groupSize == STANDARD_GROUP_SIZE_THRESHOLD then
+        ZO_Dialogs_ShowPlatformDialog("LARGE_GROUP_INVITE_WARNING", characterOrDisplayName, { mainTextParams = { STANDARD_GROUP_SIZE_THRESHOLD } })
     else
         GroupInviteByName(characterOrDisplayName)
 
-        ZO_OutputStadiaLog(string.format("GroupUtils:CompleteGroupInvite, set ZO_Menu_SetLastCommandWasFromMenu == %s", not sentFromChat and "true" or "false"))
         ZO_Menu_SetLastCommandWasFromMenu(not sentFromChat)
         if displayInvitedMessage then
             ZO_Alert(ALERT, nil, zo_strformat(GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))

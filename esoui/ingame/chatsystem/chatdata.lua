@@ -103,6 +103,13 @@ local MultiLevelEventToCategoryMappings = {
         [CHAT_CHANNEL_MONSTER_WHISPER] = GetChannelCategoryFromChannel(CHAT_CHANNEL_MONSTER_WHISPER),
         [CHAT_CHANNEL_MONSTER_EMOTE] = GetChannelCategoryFromChannel(CHAT_CHANNEL_MONSTER_EMOTE),
     },
+    [EVENT_GUILD_KEEP_ATTACK_UPDATE] = {
+        [CHAT_CHANNEL_GUILD_1] = GetChannelCategoryFromChannel(CHAT_CHANNEL_GUILD_1),
+        [CHAT_CHANNEL_GUILD_2] = GetChannelCategoryFromChannel(CHAT_CHANNEL_GUILD_2),
+        [CHAT_CHANNEL_GUILD_3] = GetChannelCategoryFromChannel(CHAT_CHANNEL_GUILD_3),
+        [CHAT_CHANNEL_GUILD_4] = GetChannelCategoryFromChannel(CHAT_CHANNEL_GUILD_4),
+        [CHAT_CHANNEL_GUILD_5] = GetChannelCategoryFromChannel(CHAT_CHANNEL_GUILD_5),
+    },
 }
 
 for language = OFFICIAL_LANGUAGE_ITERATION_BEGIN, OFFICIAL_LANGUAGE_ITERATION_END do

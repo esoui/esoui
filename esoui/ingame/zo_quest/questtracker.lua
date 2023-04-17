@@ -436,13 +436,12 @@ function ZO_Tracker:SetEnabled(enabled)
     self:UpdateVisibility()
 end
 
-local function IsFocusQuestTrackerVisible()
-    return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_TRACKER)
-end
-
 function ZO_Tracker:UpdateVisibility()
-    FOCUSED_QUEST_TRACKER_FRAGMENT:SetHiddenForReason("NoTrackedQuests", self:GetNumTracked() == 0, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
-    FOCUSED_QUEST_TRACKER_FRAGMENT:SetHiddenForReason("DisabledBySetting", not IsFocusQuestTrackerVisible(), 0, 0)
+    local numTrackedQuests = self:GetNumTracked()
+    FOCUSED_QUEST_TRACKER_FRAGMENT:SetHiddenForReason("NoTrackedQuests", numTrackedQuests == 0, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
+
+    local isTrackerVisible = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_TRACKER)
+    FOCUSED_QUEST_TRACKER_FRAGMENT:SetHiddenForReason("DisabledBySetting", not isTrackerVisible, 0, 0)
 end
 
 function ZO_Tracker:ForceAssist(questIndex)
@@ -765,7 +764,9 @@ function ZO_Tracker:OnQuestConditionUpdated(questIndex)
 end
 
 function ZO_Tracker:OnQuestAdded(questIndex)
-    self:BeginTracking(TRACK_TYPE_QUEST, questIndex)
+    if self:GetNumTracked() == 0 or GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_AUTOMATIC_QUEST_TRACKING) then
+        self:BeginTracking(TRACK_TYPE_QUEST, questIndex)
+    end
     self:UpdateAssistedVisibility()
 end
 

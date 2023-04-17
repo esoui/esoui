@@ -33,8 +33,13 @@ function ZO_MarketPreview_Gamepad:InitializePreviewScene()
             ITEM_PREVIEW_LIST_HELPER_GAMEPAD:RegisterCallback("RefreshActions", OnRefreshActionsFunction)
             ITEM_PREVIEW_LIST_HELPER_GAMEPAD:RegisterCallback("CanChangePreviewChanged", OnCanChangePreviewChangedFunction)
         elseif newState == SCENE_SHOWN then
-            --Preventing an out of order issue with the begin preview mode
-            ITEM_PREVIEW_LIST_HELPER_GAMEPAD:PreviewList(ZO_ITEM_PREVIEW_MARKET_PRODUCT, self.previewListEntries, self.startingIndex)
+            -- Preventing an out of order issue with the begin preview mode.
+            local previewType = ZO_ITEM_PREVIEW_MARKET_PRODUCT
+            if type(self.previewListEntries[1]) == "table" then
+                -- Pass a previewType of nil to indicate that each list entry specifies its own previewType.
+                previewType = nil
+            end
+            ITEM_PREVIEW_LIST_HELPER_GAMEPAD:PreviewList(previewType, self.previewListEntries, self.startingIndex)
         elseif newState == SCENE_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.previewKeybindStripDesciptor)
             ITEM_PREVIEW_LIST_HELPER_GAMEPAD:UnregisterCallback("OnPreviewChanged", OnPreviewChangedFunction)
@@ -54,10 +59,25 @@ function ZO_MarketPreview_Gamepad:InitializeNarrationInfo()
             return GAMEPAD_MARKET_PREVIEW_SCENE:IsShowing()
         end,
         headerNarrationFunction = function()
-            local marketProductId = self:GetCurrentPreviewData()
-            if marketProductId and ITEM_PREVIEW_LIST_HELPER_GAMEPAD:HasVariations() then
-                local name = GetMarketProductInfo(marketProductId)
-                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name))
+            local previewType, previewObjectId = self:GetCurrentPreviewTypeAndData()
+            if previewObjectId and ITEM_PREVIEW_LIST_HELPER_GAMEPAD:HasVariations() then
+                local formattedName = nil
+                if previewType == ZO_ITEM_PREVIEW_REWARD then
+                    -- Reward preview
+                    local QUANTITY = 1
+                    local rewardInfo = REWARDS_MANAGER:GetInfoForReward(previewObjectId, QUANTITY)
+                    if rewardInfo then
+                        formattedName = rewardInfo:GetFormattedName()
+                    end
+                else
+                    -- Market product preview
+                    local name = GetMarketProductInfo(previewObjectId)
+                    if name then
+                        formattedName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name)
+                    end
+                end
+
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(formattedName)
             end
         end,
         selectedNarrationFunction = function()
@@ -92,14 +112,20 @@ function ZO_MarketPreview_Gamepad:OnCanChangePreviewChanged(canChangePreview)
 end
 
 function ZO_MarketPreview_Gamepad:RefreshTooltip()
-    local marketProductId = self:GetCurrentPreviewData()
-    if marketProductId then
-        GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, marketProductId)
+    local previewType, previewObjectId = self:GetCurrentPreviewTypeAndData()
+    if previewType == ZO_ITEM_PREVIEW_REWARD then
+        GAMEPAD_TOOLTIPS:LayoutReward(GAMEPAD_RIGHT_TOOLTIP, previewObjectId)
+    elseif previewType == ZO_ITEM_PREVIEW_MARKET_PRODUCT then
+        GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, previewObjectId)
     end
 end
 
 function ZO_MarketPreview_Gamepad:GetCurrentPreviewData()
     return ITEM_PREVIEW_LIST_HELPER_GAMEPAD:GetCurrentPreviewData()
+end
+
+function ZO_MarketPreview_Gamepad:GetCurrentPreviewTypeAndData()
+    return ITEM_PREVIEW_LIST_HELPER_GAMEPAD:GetCurrentPreviewTypeAndData()
 end
 
 function ZO_MarketPreview_Gamepad:BeginPreview(previewListEntries, startingIndex, onPreviewChangedCallback)

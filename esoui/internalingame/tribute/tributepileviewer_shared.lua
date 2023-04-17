@@ -7,6 +7,7 @@ function ZO_TributePileViewer_Shared:Initialize(control, templateData)
     ZO_TRIBUTE_PILE_VIEWER_MANAGER:RegisterCallback("ViewingPileChanged", function(...) self:OnViewingPileChanged(...) end)
     ZO_TRIBUTE_PILE_VIEWER_MANAGER:RegisterCallback("CardStateFlagsChanged", function(...) self:OnCardStateFlagsChanged(...) end)
     ZO_TRIBUTE_PILE_VIEWER_MANAGER:RegisterCallback("AgentDefeatCostChanged", function(...) self:OnAgentDefeatCostChanged(...) end)
+    ZO_TRIBUTE_PILE_VIEWER_MANAGER:RegisterCallback("ConfinedCardsChanged", function(...) self:OnConfinedCardsChanged(...) end)
 
     self:InitializeControls()
     self:InitializeGridList()
@@ -85,6 +86,24 @@ function ZO_TributePileViewer_Shared:OnCardStateFlagsChanged(cardInstanceId, sta
             local cardObject = control.object.cardData
             if cardObject then
                 cardObject:OnStateFlagsChanged(stateFlags)
+            end
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(control.object.keybindStripDescriptor)
+        end
+    end
+    self.gridList:RefreshGridListEntryData(ALL_ENTRIES, RefreshCardObject)
+end
+
+function ZO_TributePileViewer_Shared:OnConfinedCardsChanged(cardInstanceId)
+    if not self:CanShow() then
+        return
+    end
+
+    local ALL_ENTRIES = nil
+    local function RefreshCardObject(control, data)
+        if data.cardInstanceId == cardInstanceId then
+            local cardObject = control.object.cardData
+            if cardObject then
+                cardObject:RefreshConfinedStack()
             end
             KEYBIND_STRIP:UpdateKeybindButtonGroup(control.object.keybindStripDescriptor)
         end
