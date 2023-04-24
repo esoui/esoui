@@ -163,7 +163,7 @@ do
     end
 
     function ZO_LootHistory_Shared:CreateFadingStationaryControlBuffer(control, fadeLabelAnimationName, fadeIconAnimationName, fadeContainerAnimation, anchor, maxEntries, containerShowTime, containerType)
-        local lootStream = ZO_FadingStationaryControlBuffer:New(control, maxEntries, fadeLabelAnimationName,  fadeIconAnimationName, fadeContainerAnimation, anchor, containerType)
+        local lootStream = ZO_FadingStationaryControlBuffer:New(control, maxEntries, fadeLabelAnimationName, fadeIconAnimationName, fadeContainerAnimation, anchor, containerType)
         lootStream:AddTemplate(self.entryTemplate, {setup = LootSetupFunction, equalityCheck = AreEntriesEqual, equalitySetup = EqualitySetup })
         lootStream:SetContainerShowTime(containerShowTime or 5000)
 
@@ -459,7 +459,7 @@ function ZO_LootHistory_Shared:AddTributeCardUpgradeEntry(cardData)
     end
 end
 
-function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual, isStolen)
+function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual, isStolen, bonusDropSource)
     if self:CanShowItemsInHistory() then
         local itemName
         local icon
@@ -485,13 +485,19 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
             color = GetItemQualityColor(displayQuality)
         end
 
-        local statusIcon
-        local highlight
+        local statusIcon = self:GetBonusDropSourceIcon(bonusDropSource)
+        if not statusIcon then
+            if isVirtual then
+                statusIcon = self:GetCraftBagIcon()
+            elseif isStolen then
+                statusIcon = self:GetStolenIcon()
+            end
+        end
+
+        local highlight = nil
         if isVirtual then
-            statusIcon = self:GetCraftBagIcon()
             highlight = self:GetCraftBagHighlight()
         elseif isStolen then
-            statusIcon = self:GetStolenIcon()
             highlight = self:GetStolenHighlight()
         end
 
@@ -661,28 +667,15 @@ end
 
 -- functions to be overridden
 
-function ZO_LootHistory_Shared:SetEntryTemplate()
-    assert(false)
-end
-
-function ZO_LootHistory_Shared:InitializeFragment()
-    -- To be overridden
-end
-
-function ZO_LootHistory_Shared:InitializeFadingControlBuffer(control)
-    -- To be overridden
-end
+ZO_LootHistory_Shared.GetBonusDropSourceIcon = ZO_LootHistory_Shared:MUST_IMPLEMENT()
+ZO_LootHistory_Shared.GetHighlight = ZO_LootHistory_Shared:MUST_IMPLEMENT()
+ZO_LootHistory_Shared.GetStatusIcon = ZO_LootHistory_Shared:MUST_IMPLEMENT()
+ZO_LootHistory_Shared.InitializeFadingControlBuffer = ZO_LootHistory_Shared:MUST_IMPLEMENT()
+ZO_LootHistory_Shared.InitializeFragment = ZO_LootHistory_Shared:MUST_IMPLEMENT()
+ZO_LootHistory_Shared.SetEntryTemplate = ZO_LootHistory_Shared:MUST_IMPLEMENT()
 
 function ZO_LootHistory_Shared:CanShowItemsInHistory()
     return false -- default value
-end
-
-function ZO_LootHistory_Shared:GetStatusIcon(displayType)
-    -- To be overridden
-end
-
-function ZO_LootHistory_Shared:GetHighlight(displayType)
-    -- To be overridden
 end
 
 -- legacy functions

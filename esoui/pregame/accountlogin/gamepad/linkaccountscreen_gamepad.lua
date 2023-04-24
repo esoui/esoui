@@ -34,6 +34,7 @@ function LinkAccount_Gamepad:PerformDeferredInitialize()
     self:InitializeErrorDialog()
 
     local function OnActivationCodeReceived(eventId, activationCode)
+        self.activationCode = activationCode
         self.codeLabel:SetText(activationCode)
 
         if LINK_ACCOUNT_ACTIVATION_SCENE:IsShowing() then
@@ -89,6 +90,19 @@ function LinkAccount_Gamepad:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        -- Copy Code
+        {
+            name = GetString(SI_LINKACCOUNT_ACTIVATION_COPY_CODE_KEYBIND),
+            keybind = "UI_SHORTCUT_PRIMARY",
+            callback = function()
+                if self.activationCode then
+                    CopyToClipboard(self.activationCode)
+                end
+            end,
+            visible = function()
+                return not IsConsoleUI()
+            end,
+        },
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
             PregameStateManager_SetState("CreateLinkAccount")

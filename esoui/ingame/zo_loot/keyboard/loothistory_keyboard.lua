@@ -94,6 +94,18 @@ do
     end
 end
 
+do
+    internalassert(BONUS_DROP_SOURCE_MAX_VALUE == 1, "Add icons for new Bonus Drop Source values.")
+    local BONUS_DROP_SOURCE_ICONS =
+    {
+        [BONUS_DROP_SOURCE_COMPANION] = "EsoUI/Art/HUD/lootHistory_bonusDropSourceIcon_companion.dds",
+    }
+
+    function ZO_LootHistory_Keyboard:GetBonusDropSourceIcon(bonusDropSource)
+        return BONUS_DROP_SOURCE_ICONS[bonusDropSource]
+    end
+end
+
 function ZO_LootHistory_Keyboard_OnInitialized(control)
     LOOT_HISTORY_KEYBOARD = ZO_LootHistory_Keyboard:New(control)
     SYSTEMS:RegisterKeyboardObject(ZO_LOOT_HISTORY_NAME, LOOT_HISTORY_KEYBOARD)

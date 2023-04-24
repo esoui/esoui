@@ -62,7 +62,7 @@ function LootHistory_Manager:Initialize()
         end
     end
 
-    local function OnInventorySlotUpdate(bagId, slotId, isNewItem, itemSound, inventoryUpdateReason, stackCountChange)
+    local function OnInventorySlotUpdate(bagId, slotId, isNewItem, itemSound, inventoryUpdateReason, stackCountChange, _, _, _, bonusDropSource)
         -- This includes any inventory item update, only display if the item was new
         if isNewItem and stackCountChange > 0 then
             local itemLink = GetItemLink(bagId, slotId)
@@ -75,7 +75,7 @@ function LootHistory_Manager:Initialize()
                 local isVirtual = bagId == BAG_VIRTUAL
                 local isStolen = IsItemStolen(bagId, slotId)
                 local NO_QUEST_ITEM_ICON = nil
-                OnNewItemReceived(itemLink, stackCountChange, itemSound, lootType, NO_QUEST_ITEM_ICON, itemId, isVirtual, isStolen)
+                OnNewItemReceived(itemLink, stackCountChange, itemSound, lootType, NO_QUEST_ITEM_ICON, itemId, isVirtual, isStolen, bonusDropSource)
             end
         end
     end
@@ -85,7 +85,7 @@ function LootHistory_Manager:Initialize()
             local NO_ITEM_SOUND = nil
             local IS_NOT_VIRTUAL = false
             local IS_NOT_STOLEN = false
-            OnNewItemReceived(questItemName, countDelta, NO_ITEM_SOUND, LOOT_TYPE_QUEST_ITEM, questItemIcon, questItemId, IS_NOT_VIRTUAL, IS_NOT_STOLEN)
+            OnNewItemReceived(questItemName, countDelta, NO_ITEM_SOUND, LOOT_TYPE_QUEST_ITEM, questItemIcon, questItemId, IS_NOT_VIRTUAL, IS_NOT_STOLEN, BONUS_DROP_SOURCE_NONE)
         end
     end
 

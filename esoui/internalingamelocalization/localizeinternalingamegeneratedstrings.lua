@@ -772,9 +772,9 @@ EsoStrings =
     "Togglable Quickwheels", -- SI_ACCESSIBILITY_OPTIONS_ACCESSIBLE_QUICKWHEELS
     "When enabled, quickwheels may be toggled on or off and are navigable via hotkeys.", -- SI_ACCESSIBILITY_OPTIONS_ACCESSIBLE_QUICKWHEELS_TOOLTIP
     "Gamepad Aim Assist Intensity", -- SI_ACCESSIBILITY_OPTIONS_GAMEPAD_AIM_ASSIST_INTENSITY
-    "Adjusts aim assist intensity for supported abilities while using a gamepad. Sliding to zero eliminates aim assist.", -- SI_ACCESSIBILITY_OPTIONS_GAMEPAD_AIM_ASSIST_INTENSITY_TOOLTIP
+    "Adjusts aim assist intensity for Arcanist beam abilities while using a gamepad. Setting to zero eliminates aim assist.", -- SI_ACCESSIBILITY_OPTIONS_GAMEPAD_AIM_ASSIST_INTENSITY_TOOLTIP
     "Mouse Aim Assist Intensity", -- SI_ACCESSIBILITY_OPTIONS_MOUSE_AIM_ASSIST_INTENSITY
-    "Adjusts aim assist intensity for supported abilities while using a mouse. Sliding to zero eliminates aim assist.", -- SI_ACCESSIBILITY_OPTIONS_MOUSE_AIM_ASSIST_INTENSITY_TOOLTIP
+    "Adjusts aim assist intensity for Arcanist beam abilities while using a mouse. Setting to zero eliminates aim assist.", -- SI_ACCESSIBILITY_OPTIONS_MOUSE_AIM_ASSIST_INTENSITY_TOOLTIP
     "<<X:1>> Remaining", -- SI_EVENT_ANNOUNCEMENT_TIME
     "", -- Sync id for ClientSharedStrings last entry
     "", -- Sync id for EsoGameDataEnums first entry
@@ -10295,6 +10295,8 @@ SafeAddVersion(SI_AUDIO_OPTIONS_SFX_VOLUME_TOOLTIP, 1)
 SafeAddVersion(SI_AUDIO_OPTIONS_AMBIENT_VOLUME_TOOLTIP, 1)
 SafeAddVersion(SI_AUDIO_OPTIONS_UI_VOLUME_TOOLTIP, 1)
 SafeAddVersion(SI_AUDIO_OPTIONS_FOOTSTEPS_VOLUME_TOOLTIP, 1)
+SafeAddVersion(SI_ACCESSIBILITY_OPTIONS_GAMEPAD_AIM_ASSIST_INTENSITY_TOOLTIP, 1)
+SafeAddVersion(SI_ACCESSIBILITY_OPTIONS_MOUSE_AIM_ASSIST_INTENSITY_TOOLTIP, 1)
 SafeAddVersion(SI_CHARACTERSLIDERNAME5, 1)
 SafeAddVersion(SI_CHARACTERSLIDERNAME8, 1)
 SafeAddVersion(SI_CHARACTERSLIDERNAME14, 1)

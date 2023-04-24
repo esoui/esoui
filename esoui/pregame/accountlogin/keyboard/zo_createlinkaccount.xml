@@ -276,6 +276,28 @@
                         <Label name="$(parent)Code" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMLEFT" offsetY="10" />
                         </Label>
+
+                        <Button name="$(parent)CopyCode" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Code" relativePoint="RIGHT" offsetX="5" />
+
+                            <Textures normal="EsoUI/Art/Miscellaneous/clipboard_up.dds"
+                                      pressed="EsoUI/Art/Miscellaneous/clipboard_down.dds"
+                                      mouseOver="EsoUI/Art/Miscellaneous/clipboard_over.dds"
+                                      disabled="EsoUI/Art/Miscellaneous/clipboard_up.dds" />
+
+                            <OnMouseEnter>
+                                ZO_CreateLinkAccount_OnCopyActivationCodeEnter(self)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_CreateLinkAccount_OnCopyActivationCodeExit(self)
+                            </OnMouseExit>
+
+                            <OnClicked>
+                                ZO_CreateLinkAccount_CopyActivationCode()
+                            </OnClicked>
+                        </Button>
                     </Controls>
                 </Control>
             </Controls>

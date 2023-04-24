@@ -457,7 +457,7 @@ ESO_Dialogs["BAD_LOGIN"] =
             if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_ZOS then
                 return GetString(SI_BAD_LOGIN_ZOS)
             else
-                return GetString(SI_BAD_LOGIN)
+                return GetString(SI_BAD_LOGIN_FIRST_PARTY)
             end
         end,
         align = TEXT_ALIGN_LEFT,

@@ -126,10 +126,8 @@ local function OnServerLocked()
 end
 
 local function OnInvalidCredentials(eventId, errorCode, accountPageURL)
-    local badLoginString = GetString(SI_BAD_LOGIN)
-    if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_ZOS then
-        badLoginString = GetString(SI_BAD_LOGIN_ZOS)
-    end
+    local badLoginStringId = (GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_ZOS) and SI_BAD_LOGIN_ZOS or SI_BAD_LOGIN_FIRST_PARTY
+    local badLoginString = GetString(badLoginStringId)
     PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_GAMEPAD_GENERIC_LOGIN_ERROR), badLoginString)
 end
 

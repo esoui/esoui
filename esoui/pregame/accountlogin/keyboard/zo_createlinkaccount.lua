@@ -102,6 +102,7 @@ function CreateLinkAccount_Keyboard:Initialize(control)
     end
 
      local function OnActivationCodeReceived(eventId, activationCode)
+        self.activationCode = activationCode
         self.activateAccountCodeLabel:SetText(activationCode)
 
         if CREATE_LINK_ACCOUNT_FRAGMENT:IsShowing() then
@@ -306,6 +307,12 @@ function CreateLinkAccount_Keyboard:HideAccountNameInstructions()
     self.accountNameInstructions:Hide()
 end
 
+function CreateLinkAccount_Keyboard:CopyActivationCodeToClipboard()
+    if self.activationCode then
+        CopyToClipboard(self.activationCode)
+    end
+end
+
 -- XML Handlers --
 
 function ZO_CreateLinkAccount_Initialize(control)
@@ -374,4 +381,17 @@ end
 
 function ZO_CreateLinkAccount_OnAccountNameFocusLost()
     CREATE_LINK_ACCOUNT_KEYBOARD:HideAccountNameInstructions()
+end
+
+function ZO_CreateLinkAccount_OnCopyActivationCodeEnter(control)
+    InitializeTooltip(InformationTooltip, control, LEFT, 0, 0, RIGHT)
+    SetTooltipText(InformationTooltip, GetString(SI_KEYBOARD_LINKACCOUNT_ACTIVATION_COPY_ACTIVATION_CODE_TOOLTIP))
+end
+
+function ZO_CreateLinkAccount_OnCopyActivationCodeExit(control)
+    ClearTooltip(InformationTooltip)
+end
+
+function ZO_CreateLinkAccount_CopyActivationCode()
+    CREATE_LINK_ACCOUNT_KEYBOARD:CopyActivationCodeToClipboard()
 end

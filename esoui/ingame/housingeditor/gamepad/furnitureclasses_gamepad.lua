@@ -241,6 +241,8 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
         else
             self:SetFurnitureRightInfoState(RIGHT_INFO_STATE.HOUSE_INFO)
         end
+
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.furnitureList.list)
     end
 
     local function ToggleViewKeybindEnabled()

@@ -802,7 +802,7 @@ function ZO_GamepadCollectionsBook:SelectCollectibleEntry(collectibleId)
         local list = self.collectionList.list
         for i = 1, list:GetNumItems() do
             local collectibleData = list:GetDataForDataIndex(i)
-            if collectibleData:GetId() == collectibleId then
+            if collectibleData:IsInstanceOf(ZO_CollectibleData) and collectibleData:GetId() == collectibleId then
                 list:SetSelectedIndexWithoutAnimation(i)
                 break
             end
