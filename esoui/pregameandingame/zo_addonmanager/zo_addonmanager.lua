@@ -43,6 +43,7 @@ function ZO_AddOnManager:Initialize(control, primaryKeybindDescriptor, secondary
     self.advancedErrorCheck = self.control:GetNamedChild("AdvancedUIErrors")
     ZO_CheckButton_SetToggleFunction(self.advancedErrorCheck, function(checkButton, isChecked) SetCVar("UIErrorAdvancedView", isChecked and "1" or "0") end)
     ZO_CheckButton_SetCheckState(self.advancedErrorCheck, GetCVar("UIErrorAdvancedView") == "1")
+    ZO_CheckButton_SetLabelText(self.advancedErrorCheck, GetString(SI_ADDON_MANAGER_ADVANCED_UI_ERRORS))
 
     self.characterDropdown = ZO_ComboBox:New(self.control:GetNamedChild("CharacterSelectDropdown"))
     self.characterDropdown:SetSortsItems(false)

@@ -10182,8 +10182,8 @@ EsoStrings =
     "Random Roll", -- SI_RANDOM_ROLL_KEYBIND
     "For more information use: <<1>>", -- SI_RANDOM_ROLL_HELP_HINT
     "Roll a random number for you and your group.\nSome examples:", -- SI_RANDOM_ROLL_HELP_HEADER
-    "<<1>> rolls <<2>> with <<3>> x <<4>>-sided dice", -- SI_RANDOM_ROLL_DICE_RESULT
-    "<<1>> rolls <<2>> with <<3>> x <<4>>-sided dice <<5>>", -- SI_RANDOM_ROLL_DICE_WITH_MODIFIER_RESULT
+    "<<1>> rolls <<2>> with <<3>> x <<4>>-sided <<3[die/dice]>>", -- SI_RANDOM_ROLL_DICE_RESULT
+    "<<1>> rolls <<2>> with <<3>> x <<4>>-sided <<3[die/dice]>> <<5>>", -- SI_RANDOM_ROLL_DICE_WITH_MODIFIER_RESULT
     "<<1>> rolls <<2>> out of <<3>> - <<4>>", -- SI_RANDOM_ROLL_RANGE_RESULT
     "",
     "",
@@ -23104,6 +23104,8 @@ SafeAddVersion(SI_KEYBINDINGS_CURRENT_SAVED_BIND_COUNT_GAMEPAD_FORMAT, 1)
 SafeAddVersion(SI_TRIBUTE_OPPONENT_FAVOR_ANNOUNCEMENT_BODY, 1)
 SafeAddVersion(SI_TRIBUTE_TOOLTIP_UNAVAILABLE_REQUIREMENT, 3)
 SafeAddVersion(SI_TRIBUTE_TOOLTIP_CITY_NAME, 1)
+SafeAddVersion(SI_RANDOM_ROLL_DICE_RESULT, 1)
+SafeAddVersion(SI_RANDOM_ROLL_DICE_WITH_MODIFIER_RESULT, 1)
 SafeAddVersion(SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE, 1)
 SafeAddVersion(SI_MARKET_ANNOUNCEMENT_TITLE, 1)
 SafeAddVersion(SI_MARKET_ANNOUNCEMENT_ACTIVITY_FINDER_ACTION, 1)

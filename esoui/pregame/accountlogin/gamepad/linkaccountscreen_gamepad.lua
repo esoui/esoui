@@ -35,7 +35,11 @@ function LinkAccount_Gamepad:PerformDeferredInitialize()
 
     local function OnActivationCodeReceived(eventId, activationCode)
         self.activationCode = activationCode
-        self.codeLabel:SetText(activationCode)
+
+        local DELIMITER = " "
+        local SEGMENT_LENGTH = 4
+        local formattedCode = ZO_GenerateDelimiterSegmentedString(activationCode, SEGMENT_LENGTH, DELIMITER)
+        self.codeLabel:SetText(formattedCode)
 
         if LINK_ACCOUNT_ACTIVATION_SCENE:IsShowing() then
             RegisterForLinkAccountActivationProgress()

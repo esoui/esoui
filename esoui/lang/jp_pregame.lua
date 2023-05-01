@@ -2144,7 +2144,7 @@ SafeAddString(SI_GUILDHISTORYMILESTONEEVENT7, "ギルドに、ギルド商人の
 SafeAddString(SI_GUILDHISTORYROSTEREVENT0, "<<1>>が<<2>>をギルドに招待しました。", 0)
 SafeAddString(SI_GUILDHISTORYROSTEREVENT10, "<<1>>が<<2>>の応募を受け入れました。", 0)
 SafeAddString(SI_GUILDHISTORYROSTEREVENT11, "<<1>>が<<2>>の応募を断りました。", 0)
-SafeAddString(SI_GUILDHISTORYROSTEREVENT2, "(<<2>>が招待して)<<1>>がギルドに加入しました。", 1)
+SafeAddString(SI_GUILDHISTORYROSTEREVENT2, "<<1>>がギルドに加入しました。", 1)
 SafeAddString(SI_GUILDHISTORYROSTEREVENT3, "<<1>>が<<2>>を<<3>>に昇格させた。", 0)
 SafeAddString(SI_GUILDHISTORYROSTEREVENT4, "<<1>>が<<2>>を<<3>>に降格させた。", 0)
 SafeAddString(SI_GUILDHISTORYROSTEREVENT5, "<<1>>がギルドを脱退した。", 0)

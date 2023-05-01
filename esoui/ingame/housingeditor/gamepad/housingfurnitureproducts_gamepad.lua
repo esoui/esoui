@@ -82,6 +82,20 @@ function ZO_HousingFurnitureProducts_Gamepad:GetCategoryTreeDataRoot()
     return SHARED_FURNITURE:GetMarketProductCategoryTreeData()
 end
 
+function ZO_HousingFurnitureProducts_Gamepad:CompareFurnitureEntries(a, b)
+    -- Primary order: New products before existing products.
+    if a.isNew then
+        if not b.isNew then
+            return true
+        end
+    elseif b.isNew then
+        return false
+    end
+
+    -- Secondary order: Product name in ascending alphabetical order.
+    return ZO_HousingFurnitureList_Gamepad.CompareFurnitureEntries(self, a, b)
+end
+
 function ZO_HousingFurnitureProducts_Gamepad:OnFurnitureTargetChanged(list, targetData, oldTargetData)
     ZO_HousingFurnitureList_Gamepad.OnFurnitureTargetChanged(self, list, targetData, oldTargetData)
 

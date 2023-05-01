@@ -4,7 +4,7 @@ do
     local FORCE_FULL_DURABILITY = true
     local NO_PREVIEW_VALUE = nil
 
-    function ZO_Tooltip:LayoutReward(rewardId, amount)
+    function ZO_Tooltip:LayoutReward(rewardId, amount, displayFlags)
         local rewardType = GetRewardType(rewardId)
         -- For some market product types we can just use other tooltip layouts
         if rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
@@ -18,7 +18,7 @@ do
             return
         elseif rewardType == REWARD_ENTRY_TYPE_ITEM then
             local stackCount = amount
-            local itemLink = GetItemRewardItemLink(rewardId, amount)
+            local itemLink = GetItemRewardItemLink(rewardId, amount, displayFlags)
             self:LayoutItemWithStackCount(itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, stackCount, EQUIP_SLOT_NONE)
             return
         elseif rewardType == REWARD_ENTRY_TYPE_LOOT_CRATE then
@@ -42,7 +42,7 @@ do
     local g_dailyLoginRewardtimerStatValuePair
     function ZO_Tooltip:LayoutDailyLoginReward(rewardIndex)
         local rewardId, quantity = GetDailyLoginRewardInfoForCurrentMonth(rewardIndex)
-        self:LayoutReward(rewardId, quantity)
+        self:LayoutReward(rewardId, quantity, REWARD_DISPLAY_FLAGS_NONE)
 
         g_dailyLoginRewardtimerStatValuePair = nil
         local claimableRewardIndex = GetDailyLoginClaimableRewardIndex()
@@ -79,5 +79,8 @@ do
 end
 
 function ZO_Tooltip:LayoutRewardData(rewardData)
-    self:LayoutReward(rewardData:GetRewardId(), rewardData:GetQuantity())
+    local rewardId = rewardData:GetRewardId()
+    local quantity = rewardData:GetQuantity()
+    local displayFlags = rewardData:GetDisplayFlags()
+    self:LayoutReward(rewardId, quantity, displayFlags)
 end

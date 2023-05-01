@@ -225,7 +225,7 @@ function GamepadMarketProductListScene:OnTargetChanged(list, targetData, oldTarg
 
     if targetData then
         if targetData.rewardId and targetData.rewardId ~= 0 then
-            GAMEPAD_TOOLTIPS:LayoutReward(GAMEPAD_LEFT_TOOLTIP, targetData.rewardId)
+            GAMEPAD_TOOLTIPS:LayoutReward(GAMEPAD_LEFT_TOOLTIP, targetData.rewardId, targetData.stackCount, REWARD_DISPLAY_FLAGS_FROM_CROWN_STORE_CONTAINER)
         else
             GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_LEFT_TOOLTIP, targetData.marketProductId)
         end

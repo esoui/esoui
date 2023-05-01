@@ -200,11 +200,20 @@ do
     local RANDOM_ROLL_COMMAND_HELP_HINT = zo_strformat(SI_RANDOM_ROLL_HELP_HINT, string.format("%s ?|r", RANDOM_ROLL_COMMAND_FORMATTED))
     local RANDOM_ROLL_TEXTURE = zo_iconFormat("EsoUI/Art/Miscellaneous/roll_dice.dds")
 
-    local g_offeredHelp = false
+    local g_savedVars = nil
+    local function SetupSavedVars()
+        local savedVarsDefaults = 
+        {
+            helpHintShown = nil,
+        }
+        local SAVED_VARS_VERSION = 1
+        g_savedVars = ZO_SavedVars:NewAccountWide("ZO_Ingame_SavedVariables", SAVED_VARS_VERSION, "RandomRollCommand", savedVarsDefaults)
+    end
+
     local function OutputCommandHelpHint()
-        if not g_offeredHelp then
+        if g_savedVars and not g_savedVars.helpHintShown then
             CHAT_ROUTER:AddSystemMessage(RANDOM_ROLL_COMMAND_HELP_HINT)
-            g_offeredHelp = true
+            g_savedVars.helpHintShown = true
         end
     end
 
@@ -245,7 +254,8 @@ do
             -- Underflow and overflow conditions must be checked prior to invoking the API.
             if numRolls > RANDOM_ROLL_MAX_NUM_ROLLS then
                 result = RANDOM_ROLL_RESULT_INVALID_NUM_ROLLS
-            elseif maxRoll > RANDOM_ROLL_MAX_RESULT or modifier < RANDOM_ROLL_MIN_RESULT or modifier > RANDOM_ROLL_MAX_RESULT then
+            elseif maxRoll < 1 or maxRoll > RANDOM_ROLL_MAX_RESULT or
+                modifier < RANDOM_ROLL_MIN_RESULT or modifier > RANDOM_ROLL_MAX_RESULT then
                 result = RANDOM_ROLL_RESULT_INVALID_RESULT
             else
                 result = RandomDiceRoll(maxRoll, numRolls, modifier)
@@ -269,8 +279,8 @@ do
                 minValue = 1
             end
 
-            if minValue > RANDOM_ROLL_MAX_RESULT or maxValue > RANDOM_ROLL_MAX_RESULT then
-                -- Overflow conditions must be checked prior to invoking the API.
+            if minValue < 1 or maxValue < 1 or minValue > RANDOM_ROLL_MAX_RESULT or maxValue > RANDOM_ROLL_MAX_RESULT then
+                -- Check domain conditions prior to invoking the API.
                 result = RANDOM_ROLL_RESULT_INVALID_RESULT
             else
                 result = RandomRangeRoll(minValue, maxValue)
@@ -318,6 +328,7 @@ do
             EVENT_MANAGER:UnregisterForEvent("ZO_RandomRoll", EVENT_ADD_ON_LOADED)
             EVENT_MANAGER:RegisterForEvent("ZO_RandomRoll", EVENT_RANDOM_DICE_ROLL, OnRandomDiceRoll)
             EVENT_MANAGER:RegisterForEvent("ZO_RandomRoll", EVENT_RANDOM_RANGE_ROLL, OnRandomRangeRoll)
+            SetupSavedVars()
         end
     end
 

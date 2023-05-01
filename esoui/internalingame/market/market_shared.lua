@@ -553,6 +553,7 @@ function ZO_Market_Shared.GetMarketProductBundleChildProductInfo(marketProductId
 
             for _, rewardInfo in ipairs(rewardInfoList) do
                 -- Add a RewardInfo row for each reward in this reward container.
+                rewardInfo:SetDisplayFlags(REWARD_DISPLAY_FLAGS_FROM_CROWN_STORE_CONTAINER)
                 rewardInfo.headerColor = headerColor
                 rewardInfo.headerName = productName
                 rewardInfo.isBundle = false

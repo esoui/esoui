@@ -122,13 +122,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="5" />
                 </Control>
 
-                <Button name="$(parent)AdvancedUIErrors" inherits="ZO_CheckButton">
-                    <Controls>
-                        <Label name="$(parent)Text" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_ADDON_MANAGER_ADVANCED_UI_ERRORS">
-                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="5" />
-                        </Label>
-                    </Controls>
-                </Button>
+                <Button name="$(parent)AdvancedUIErrors" inherits="ZO_CheckButton" />
 
                 <!-- AddOn List -->
                 <Control name="$(parent)List" inherits="ZO_ScrollList">

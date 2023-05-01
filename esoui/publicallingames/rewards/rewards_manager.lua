@@ -213,6 +213,14 @@ function ZO_RewardData:GetAnnouncementBackground()
     return self.announcementBackground
 end
 
+function ZO_RewardData:SetDisplayFlags(displayFlags)
+    self.displayFlags = displayFlags
+end
+
+function ZO_RewardData:GetDisplayFlags()
+    return self.displayFlags
+end
+
 ---------------------
 -- Rewards Manager
 ---------------------
@@ -530,8 +538,9 @@ function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativ
             anchorOffsetY = anchorOffsetY or 0
             local rewardId = rewardData:GetRewardId()
             local quantity = rewardData:GetQuantity()
+            local displayFlags = rewardData:GetDisplayFlags()
             InitializeTooltip(ItemTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
-            ItemTooltip:SetReward(rewardId, quantity)
+            ItemTooltip:SetReward(rewardId, quantity, displayFlags)
             ItemTooltip:HideComparativeTooltips()
             if rewardType == REWARD_ENTRY_TYPE_ITEM then
                 local USE_RELATIVE_ANCHORS = true

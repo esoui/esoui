@@ -103,7 +103,11 @@ function CreateLinkAccount_Keyboard:Initialize(control)
 
      local function OnActivationCodeReceived(eventId, activationCode)
         self.activationCode = activationCode
-        self.activateAccountCodeLabel:SetText(activationCode)
+
+        local DELIMITER = " "
+        local SEGMENT_LENGTH = 4
+        local formattedCode = ZO_GenerateDelimiterSegmentedString(activationCode, SEGMENT_LENGTH, DELIMITER)
+        self.activateAccountCodeLabel:SetText(formattedCode)
 
         if CREATE_LINK_ACCOUNT_FRAGMENT:IsShowing() then
             RegisterForLinkAccountActivationProgress()

@@ -114,7 +114,8 @@ end
 function ZO_MarketPreview_Gamepad:RefreshTooltip()
     local previewType, previewObjectId = self:GetCurrentPreviewTypeAndData()
     if previewType == ZO_ITEM_PREVIEW_REWARD then
-        GAMEPAD_TOOLTIPS:LayoutReward(GAMEPAD_RIGHT_TOOLTIP, previewObjectId)
+        local DEFAULT_QUANTITY = nil
+        GAMEPAD_TOOLTIPS:LayoutReward(GAMEPAD_RIGHT_TOOLTIP, previewObjectId, DEFAULT_QUANTITY, REWARD_DISPLAY_FLAGS_FROM_CROWN_STORE_CONTAINER)
     elseif previewType == ZO_ITEM_PREVIEW_MARKET_PRODUCT then
         GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, previewObjectId)
     end
