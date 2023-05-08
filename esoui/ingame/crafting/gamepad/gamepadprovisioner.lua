@@ -90,6 +90,8 @@ function ZO_GamepadProvisioner:Initialize(control, scene)
             local NARRATE_HEADER = true
             SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.modeList, NARRATE_HEADER)
 
+            self:RefreshAnimationSounds()
+
             self.resetUIs = nil
         elseif newState == SCENE_HIDDEN then
             ZO_InventorySlot_RemoveMouseOverKeybinds()
@@ -233,6 +235,20 @@ function ZO_GamepadProvisioner:SetMode(mode)
             SCENE_MANAGER:Push(GAMEPAD_PROVISIONER_FILLET_SCENE_NAME)
         end
         self:UpdateKeybindStrip()
+    end
+
+    -- Always refresh the audio to handle scene state changes.
+    self:RefreshAnimationSounds()
+end
+
+function ZO_GamepadProvisioner:RefreshAnimationSounds()
+    local mode = self.mode
+    if mode == PROVISIONER_MODE_CREATION then
+        local recipeData = self:GetRecipeData()
+        local soundId = recipeData and recipeData.createSound or nil
+        GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(soundId)
+    elseif mode == PROVISIONER_MODE_FILLET then
+        GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.PROVISIONING_FILLET)
     end
 end
 
@@ -764,14 +780,13 @@ function ZO_GamepadProvisioner:RefreshRecipeDetails(selectedData)
         end
 
         self.ingredientsBar:Commit()
-
-        GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(selectedData.createSound)
     else
         self.resultTooltip:SetHidden(true)
 
         self.ingredientsBar:Clear()
     end
 
+    self:RefreshAnimationSounds()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
 end
 

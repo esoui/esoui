@@ -5,12 +5,15 @@ function ZO_FishFillet_Keyboard:Initialize(control, owner)
     self.control = control
     ZO_FishFillet_Shared.Initialize(self, slotContainer:GetNamedChild("FilletSlot"), slotContainer:GetNamedChild("FilletLabel"), owner)
 
+    control:SetHandler("OnEffectivelyHidden", function() self:OnHidden() end)
+    control:SetHandler("OnEffectivelyShown", function() self:OnShown() end)
+
     self.inventory = ZO_FishFilletInventory:New(self, self.control:GetNamedChild("Inventory"))
     self:InitFilletSlot("provisioner")
-
+    
     self.multiFilletSpinner = ZO_MultiCraftSpinner:New(control:GetNamedChild("SlotContainerSpinner"))
 
-    -- connect fillet spinner to crafting process
+    -- Connect fillet spinner to crafting process
     local function UpdateMultiFilletSpinner()
         if not self.control:IsHidden() then
             self:UpdateMultiFillet()
@@ -18,6 +21,8 @@ function ZO_FishFillet_Keyboard:Initialize(control, owner)
     end
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", UpdateMultiFilletSpinner)
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", UpdateMultiFilletSpinner)
+
+    ZO_CraftingUtils_ConnectSpinnerToCraftingProcess(self.multiFilletSpinner)
 end
 
 function ZO_FishFillet_Keyboard_FilterOnMouseExit(control)
@@ -32,9 +37,14 @@ function ZO_FishFillet_Keyboard:SetCraftingType(craftingType, oldCraftingType, i
     self.inventory:HandleDirtyEvent()
 end
 
-function ZO_FishFillet_Keyboard:SetHidden(hidden)
-    self.control:SetHidden(hidden)
+function ZO_FishFillet_Keyboard:OnHidden()
     self.inventory:HandleDirtyEvent()
+    CRAFTING_RESULTS:SetTooltipAnimationSounds(nil)
+end
+
+function ZO_FishFillet_Keyboard:OnShown()
+    self.inventory:HandleDirtyEvent()
+    CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.PROVISIONING_FILLET)
 end
 
 function ZO_FishFillet_Keyboard:OnFilterChanged()

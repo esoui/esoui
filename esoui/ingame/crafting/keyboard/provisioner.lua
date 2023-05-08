@@ -26,7 +26,6 @@ function ZO_Provisioner:Initialize(control)
                 end
 
                 AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), AddLink)
-
                 ShowMenu(self)
             end
         end
@@ -81,6 +80,8 @@ function ZO_Provisioner:Initialize(control)
             self:ResetMultiCraftNumIterations()
             SYSTEMS:GetObject("craftingResults"):SetCraftingTooltip(self.resultTooltip)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.mainKeybindStripDescriptor)
+        elseif newState == SCENE_FRAGMENT_SHOWN then
+            self:RefreshRecipeDetails()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             SYSTEMS:GetObject("craftingResults"):SetCraftingTooltip(nil)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mainKeybindStripDescriptor)
@@ -558,7 +559,9 @@ function ZO_Provisioner:RefreshRecipeDetails()
             end
         end
 
-        CRAFTING_RESULTS:SetTooltipAnimationSounds(recipeData.createSound)
+        if self.filletPanel.control:IsHidden() then
+            CRAFTING_RESULTS:SetTooltipAnimationSounds(recipeData.createSound)
+        end
 
         if ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() and self:CanPreviewRecipe(recipeData) then
             self:PreviewRecipe(recipeData)

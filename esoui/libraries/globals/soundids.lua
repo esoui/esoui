@@ -630,6 +630,8 @@ SOUNDS =
     PROVISIONING_OPENED                     = "Provisioning_Opened",
     PROVISIONING_CLOSED                     = "Provisioning_Closed",
 
+    PROVISIONING_FILLET                     = "Provisioning_Fillet",
+
     RECIPE_LEARNED                          = "Recipe_Learned",
     DEFAULT_RECIPE_CRAFTED                  = "Default_Recipe_Crafted",
 

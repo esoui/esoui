@@ -235,9 +235,12 @@ function ZO_StoreManager:Initialize(control)
     self.scene = ZO_InteractScene:New("store", SCENE_MANAGER, STORE_INTERACTION)
     self.scene:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
-            self:InitializeStore()
+            -- set search context before calling InitializeStore, since that can add the
+            -- inventory fragment which will set a search context on showing (which is immediate)
             PLAYER_INVENTORY:SetContextForInventories("storeTextSearch", INVENTORY_TYPE_LIST)
             TEXT_SEARCH_MANAGER:ActivateTextSearch("storeTextSearch")
+
+            self:InitializeStore()
             PLAYER_INVENTORY:SelectAndChangeSort(INVENTORY_BACKPACK, ITEMFILTERTYPE_ALL, "sellInformationSortOrder", ZO_SORT_ORDER_UP)
         elseif newState == SCENE_HIDDEN then
             if TEXT_SEARCH_MANAGER:IsActiveTextSearch("storeTextSearch") then

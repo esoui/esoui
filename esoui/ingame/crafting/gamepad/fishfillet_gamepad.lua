@@ -57,11 +57,13 @@ function ZO_FishFillet_Gamepad:Initialize(panelControl, floatingControl, owner, 
             ZO_GamepadCraftingUtils_SetupGenericHeader(GAMEPAD_PROVISIONER, GetString(SI_GAMEPAD_PROVISIONING_TAB_FILLET))
             ZO_GamepadCraftingUtils_RefreshGenericHeader(GAMEPAD_PROVISIONER)
 
-            -- TODO Fillet: Reevaluate the need for these lines once filleting is working.
+            self.inventory:HandleDirtyEvent()
+        elseif newState == SCENE_SHOWN then
             GAMEPAD_CRAFTING_RESULTS:SetForceCenterResultsText(true)
             GAMEPAD_CRAFTING_RESULTS:ModifyAnchor(ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, -310, -175))
-
-            self.inventory:HandleDirtyEvent()
+        elseif newState == SCENE_HIDING then
+            GAMEPAD_CRAFTING_RESULTS:SetForceCenterResultsText(false)
+            GAMEPAD_CRAFTING_RESULTS:RestoreAnchor()
         elseif newState == SCENE_HIDDEN then
             self.itemActions:SetInventorySlot(nil)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -71,9 +73,6 @@ function ZO_FishFillet_Gamepad:Initialize(panelControl, floatingControl, owner, 
             self.tooltip:SetHidden(true)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
             ZO_GamepadGenericHeader_Deactivate(self.owner.header)
-
-            GAMEPAD_CRAFTING_RESULTS:SetForceCenterResultsText(false)
-            GAMEPAD_CRAFTING_RESULTS:RestoreAnchor()
         end
     end)
 

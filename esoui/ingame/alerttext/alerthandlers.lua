@@ -220,7 +220,7 @@ local AlertHandlers =
     end,
 
     [EVENT_MAIL_SEND_SUCCESS] = function(playerName)
-        return ALERT, zo_strformat(SI_MAIL_SEND_SUCCESS, playerName)
+        return ALERT, zo_strformat(SI_MAIL_SEND_SUCCESS, ZO_FormatUserFacingDisplayName(playerName))
     end,
 
     [EVENT_MAIL_SEND_FAILED] = function(reason)
@@ -332,11 +332,11 @@ local AlertHandlers =
     end,
 
     [EVENT_GUILD_INVITE_TO_BLACKLISTED_PLAYER] = function(playerName, guildId)
-        return ALERT, zo_strformat(SI_GUILD_INVITE_BLACKISTED_ALERT, playerName, GetGuildName(guildId))
+        return ALERT, zo_strformat(SI_GUILD_INVITE_BLACKISTED_ALERT, ZO_FormatUserFacingDisplayName(playerName), GetGuildName(guildId))
     end,
 
     [EVENT_GUILD_INVITE_PLAYER_SUCCESSFUL] = function(playerName, guildId)
-        return ALERT, zo_strformat(SI_GUILD_ROSTER_INVITED_MESSAGE, playerName, GetGuildName(guildId))
+        return ALERT, zo_strformat(SI_GUILD_ROSTER_INVITED_MESSAGE, ZO_FormatUserFacingDisplayName(playerName), GetGuildName(guildId))
     end,
 
     [EVENT_GROUP_INVITE_ACCEPT_RESPONSE_TIMEOUT] = function()
