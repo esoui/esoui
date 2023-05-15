@@ -216,11 +216,11 @@ function PregameInitialScreen_Gamepad:SetupStartupButtons()
             keybind = "UI_SHORTCUT_SECONDARY",
             name = GetString(SI_CONSOLE_RESEND_VERIFY_EMAIL_KEYBIND),
             callback = function()
-                PregameAttemptResendVerificationEmail() -- Console Only Function
+                PregameAttemptResendVerificationEmail()
                 self:ResetScreenState()
             end,
             visible = function()
-                return IsConsoleUI() and self.verificationState == VERIFICATION_STATE.OFFER
+                return self.verificationState == VERIFICATION_STATE.OFFER
             end
         },
     }

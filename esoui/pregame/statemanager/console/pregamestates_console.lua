@@ -49,7 +49,7 @@ local function OnProfileLoginResult(event, isSuccess, profileError)
             errorStringFormat = GetString("SI_PROFILELOGINERROR", PROFILE_LOGIN_ERROR_UNKNOWN_ERROR)
         end
 
-        local errorString = zo_strformat(errorStringFormat, GetString(SI_HELP_URL))
+        local errorString = zo_strformat(errorStringFormat, GetURLTextByType(APPROVED_URL_ESO_HELP))
 
         PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_PROFILE_LOAD_FAILED_TITLE), errorString)
     end

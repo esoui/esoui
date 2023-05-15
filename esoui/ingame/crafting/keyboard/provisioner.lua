@@ -510,7 +510,10 @@ function ZO_Provisioner:RefreshRecipeList()
 end
 
 function ZO_Provisioner:GetRecipeData()
-    return self.recipeTree:GetSelectedData()
+    if self.filterType ~= PROVISIONER_SPECIAL_INGREDIENT_TYPE_FILLET then
+        return self.recipeTree:GetSelectedData()
+    end
+    return nil
 end
 
 function ZO_Provisioner:GetSelectedRecipeListIndex()

@@ -133,7 +133,9 @@ function LoginManager_Keyboard:OnCreateLinkLoadingError(loginError, linkingError
     ZO_Dialogs_ReleaseDialog("LINKED_LOGIN_KEYBOARD")
 
     local dialogName
-    local dialogText
+    local errorString
+    local formattedErrorString
+    local dialogData = nil
 
     if loginError ~= LOGIN_AUTH_ERROR_NO_ERROR then
         if loginError == LOGIN_AUTH_ERROR_ACCOUNT_NOT_LINKED then
@@ -141,12 +143,17 @@ function LoginManager_Keyboard:OnCreateLinkLoadingError(loginError, linkingError
             self:OnProfileNotLinked()
         else
             dialogName = "LINKED_LOGIN_ERROR_KEYBOARD"
-            dialogText = GetString("SI_LOGINAUTHERROR", loginError)
+            errorString = GetString("SI_LOGINAUTHERROR", loginError)
 
             if loginError == LOGIN_AUTH_ERROR_MISSING_DMM_TOKEN or loginError == LOGIN_AUTH_ERROR_BAD_DMM_TOKEN then
                 -- If the issue was with the token, kinda have to restart, since that's supplied from the launcher
                 self.mustRelaunch = true
                 LOGIN_KEYBOARD:ShowRelaunchGameLabel()
+             elseif loginError == LOGIN_AUTH_ERROR_ACCOUNT_NOT_VERIFIED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_NOT_VERIFIED then
+                dialogData =
+                {
+                    showResendVerificationEmail = true,
+                }
             end
 
             -- In any case, show the normal login fragment so that the user can attempt to manually login again if a
@@ -160,9 +167,10 @@ function LoginManager_Keyboard:OnCreateLinkLoadingError(loginError, linkingError
         if linkingError == ACCOUNT_CREATE_LINK_ERROR_EXTERNAL_REFERENCE_ALREADY_USED or linkingError == ACCOUNT_CREATE_LINK_ERROR_USER_ALREADY_LINKED then
             local serviceType = GetPlatformServiceType()
             local accountTypeName = GetString("SI_PLATFORMSERVICETYPE", serviceType)
-            dialogText = zo_strformat(SI_LINKACCOUNT_ALREADY_LINKED_ERROR_FORMAT, accountTypeName)
+            errorString = GetString(SI_LINKACCOUNT_ALREADY_LINKED_ERROR_FORMAT)
+            formattedErrorString = zo_strformat(errorString, accountTypeName)
         else
-            dialogText = GetString("SI_ACCOUNTCREATELINKERROR", linkingError)
+            errorString = GetString("SI_ACCOUNTCREATELINKERROR", linkingError)
         end
 
         CREATE_LINK_ACCOUNT_KEYBOARD:GetPasswordEdit():Clear()
@@ -173,12 +181,15 @@ function LoginManager_Keyboard:OnCreateLinkLoadingError(loginError, linkingError
     end
 
     if dialogName then
-        if dialogText == nil or dialogText == "" then
-            dialogText = zo_strformat(SI_UNEXPECTED_ERROR, GetString(SI_HELP_URL))
+        if errorString == nil or errorString == "" then
+            errorString = GetString(SI_UNEXPECTED_ERROR)
         end
 
-        local dialogData = nil
-        local textParams = { mainTextParams = { dialogText .. debugInfo }}
+        if formattedErrorString == nil then
+            formattedErrorString = zo_strformat(errorString, GetURLTextByType(APPROVED_URL_ESO_HELP))
+        end
+
+        local textParams = { mainTextParams = { formattedErrorString .. debugInfo }}
 
         ZO_Dialogs_ShowDialog(dialogName, dialogData, textParams)
     end

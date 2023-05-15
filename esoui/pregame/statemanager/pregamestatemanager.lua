@@ -795,7 +795,7 @@ function ZO_Pregame_DisplayServerDisconnectedError()
 
     if errorString == nil or errorString == "" then
         if IsInGamepadPreferredMode() then
-            errorString = zo_strformat(SI_UNEXPECTED_ERROR, GetString(SI_HELP_URL))
+            errorString = zo_strformat(SI_UNEXPECTED_ERROR, GetURLTextByType(APPROVED_URL_ESO_HELP))
         else
             errorString = GetString(SI_UNKNOWN_ERROR)
         end

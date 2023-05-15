@@ -63,18 +63,18 @@ function LinkAccount_Gamepad:PerformDeferredInitialize()
 
         -- TODO Account Linking are there more errors we need to handle?
 
-        local errorString
+        local formattedErrorString
         if linkingError == ACCOUNT_CREATE_LINK_ERROR_EXTERNAL_REFERENCE_ALREADY_USED or linkingError == ACCOUNT_CREATE_LINK_ERROR_USER_ALREADY_LINKED then
             local serviceType = GetPlatformServiceType()
             local accountTypeName = GetString("SI_PLATFORMSERVICETYPE", serviceType)
-            errorString = zo_strformat(SI_LINKACCOUNT_ALREADY_LINKED_ERROR_FORMAT, accountTypeName)
+            formattedErrorString = zo_strformat(SI_LINKACCOUNT_ALREADY_LINKED_ERROR_FORMAT, accountTypeName)
         else
             local linkErrorString = GetString("SI_ACCOUNTCREATELINKERROR", linkingError)
-            errorString = zo_strformat(linkErrorString, GetString(SI_HELP_URL))
+            formattedErrorString = zo_strformat(linkErrorString, GetURLTextByType(APPROVED_URL_ESO_HELP))
         end
 
         -- debugInfo will be empty in public, non-debug builds
-        local message = errorString .. debugInfo
+        local message = formattedErrorString .. debugInfo
         self:ShowError(message)
     end
 

@@ -145,9 +145,9 @@ local function OnGlobalError(eventID, errorCode, helpLinkURL, errorText)
     end
 
     if errorStringFormat ~= "" then
-        errorString = zo_strformat(errorStringFormat, errorText, GetString(SI_HELP_URL))
+        errorString = zo_strformat(errorStringFormat, errorText, GetURLTextByType(APPROVED_URL_ESO_HELP))
     else
-        errorString = zo_strformat(SI_UNKNOWN_ERROR, GetString(SI_HELP_URL))
+        errorString = zo_strformat(SI_UNKNOWN_ERROR, GetURLTextByType(APPROVED_URL_ESO_HELP))
     end
 
     PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_PROMPT_TITLE_ERROR), errorString)
@@ -163,7 +163,8 @@ end
 
 local function OnCreateLinkLoadingError(eventId, loginError, linkingError, debugInfo)
     local dialogTitle = ""
-    local dialogText = ""
+    local errorString = ""
+    local formattedErrorString
 
     if loginError == LOGIN_AUTH_ERROR_SERVER_PSN_FREE_TRIAL_END then
         local PSN_FREE_TRIAL_END = true
@@ -173,36 +174,40 @@ local function OnCreateLinkLoadingError(eventId, loginError, linkingError, debug
 
     if loginError ~= LOGIN_AUTH_ERROR_NO_ERROR then
         dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_LOGIN_FAILED)
-        dialogText = GetString("SI_LOGINAUTHERROR", loginError)
+        errorString = GetString("SI_LOGINAUTHERROR", loginError)
     elseif linkingError ~= ACCOUNT_CREATE_LINK_ERROR_NO_ERROR then
         dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_LINK_FAILED)
         if linkingError == ACCOUNT_CREATE_LINK_ERROR_EXTERNAL_REFERENCE_ALREADY_USED or linkingError == ACCOUNT_CREATE_LINK_ERROR_USER_ALREADY_LINKED then
             local serviceType = GetPlatformServiceType()
             local accountTypeName = GetString("SI_PLATFORMSERVICETYPE", serviceType)
-            dialogText = zo_strformat(SI_LINKACCOUNT_ALREADY_LINKED_ERROR_FORMAT, accountTypeName)
+            errorString = GetString(SI_LINKACCOUNT_ALREADY_LINKED_ERROR_FORMAT)
+            formattedErrorString = zo_strformat(errorString, accountTypeName)
         else
-            dialogText = GetString("SI_ACCOUNTCREATELINKERROR", linkingError)
+            errorString = GetString("SI_ACCOUNTCREATELINKERROR", linkingError)
         end
     end
 
-    if loginError == LOGIN_AUTH_ERROR_ACCOUNT_NOT_VERIFIED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_NOT_VERIFIED or linkingError == ACCOUNT_CREATE_LINK_ERROR_ACCOUNT_NOT_VERIFIED then
-        PREGAME_INITIAL_SCREEN_GAMEPAD:ShowEmailVerificationError(dialogTitle, dialogText)
-        return
-    end
-
-    if dialogText == "" then
+    if errorString == "" then
         -- generic error message
         dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_LOGIN_FAILED)
-        dialogText = GetString(SI_UNEXPECTED_ERROR)
+        errorString = GetString(SI_UNEXPECTED_ERROR)
+    end
+
+    if formattedErrorString == nil then
+        formattedErrorString = zo_strformat(errorString, GetURLTextByType(APPROVED_URL_ESO_HELP))
+    end
+
+    if loginError == LOGIN_AUTH_ERROR_ACCOUNT_NOT_VERIFIED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_NOT_VERIFIED or linkingError == ACCOUNT_CREATE_LINK_ERROR_ACCOUNT_NOT_VERIFIED then
+        PREGAME_INITIAL_SCREEN_GAMEPAD:ShowEmailVerificationError(dialogTitle, formattedErrorString)
+        return
     end
 
     if not LINK_ACCOUNT_GAMEPAD:IsAccountValidForLinking(linkingError) then
         LINK_ACCOUNT_GAMEPAD:ClearCredentials()
     end
 
-    local errorString = zo_strformat(dialogText, GetString(SI_HELP_URL))
     -- debugInfo will be empty in public, non-debug builds
-    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(dialogTitle, errorString .. debugInfo)
+    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(dialogTitle, formattedErrorString .. debugInfo)
 end
 
 function ZO_CreateLinkLoading_Gamepad:RegisterForEvent(eventId, callback)

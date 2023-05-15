@@ -1097,7 +1097,7 @@ EsoStrings =
     "http://www.elderscrollsonline.com/link", -- SI_APPROVEDURLTYPESTEAM6
     "http://www.elderscrollsonline.com", -- SI_APPROVEDURLTYPEEPIC0
     "https://account.elderscrollsonline.com", -- SI_APPROVEDURLTYPEEPIC1
-    "com.epicgames.launcher://store/product/fortnite", -- SI_APPROVEDURLTYPEEPIC2
+    "com.epicgames.launcher://store/all-dlc/elder-scrolls-online", -- SI_APPROVEDURLTYPEEPIC2
     "https://account.elderscrollsonline.com/store/product/eso_plus?utm_source=ESO%20In-Game&utm_campaign=ESO%20Plus", -- SI_APPROVEDURLTYPEEPIC3
     "https://help.elderscrollsonline.com", -- SI_APPROVEDURLTYPEEPIC4
     "http://forums.elderscrollsonline.com", -- SI_APPROVEDURLTYPEEPIC5
@@ -3649,7 +3649,7 @@ EsoStrings =
     "Unable to create account because screen name contains inappropriate language.", -- SI_ACCOUNTCREATELINKERROR12040
     "Incorrect User ID or Password.", -- SI_ACCOUNTCREATELINKERROR12100
     "That account has been deactivated. Please contact customer service at <<1>> or link to a different account.", -- SI_ACCOUNTCREATELINKERROR12101
-    "Your account must be verified in order to continue to play.  Check the email you used to create an ESO account for instruction on how to complete the verification process.", -- SI_ACCOUNTCREATELINKERROR12102
+    "Your account must be verified in order to continue to play. Check the email you used to create an ESO account for instruction on how to complete the verification process. If you do not receive an email, contact customer service at <<1>>.", -- SI_ACCOUNTCREATELINKERROR12102
     "That account has been permanently banned. Contact customer service at <<1>> for more information or link to a different account.", -- SI_ACCOUNTCREATELINKERROR12104
     "Connection to server timed out. Please try again later.", -- SI_LOGINAUTHERROR2
     "Unable to connect to the PlayStation™Network. Please confirm you are connected to the PlayStation™Network or try again later.", -- SI_LOGINAUTHERROR3
@@ -3659,11 +3659,11 @@ EsoStrings =
     "The servers are temporarily down for maintenance. Please try again later.", -- SI_LOGINAUTHERROR3000
     "Your account has been suspended. Contact customer service at <<1>> for more information.", -- SI_LOGINAUTHERROR8004
     "Your account has been permanently banned. Contact customer service at <<1>> for more information.", -- SI_LOGINAUTHERROR8005
-    "Your account must be verified in order to continue to play. Check the email you used to create an ESO account for instruction on how to complete the verification process.", -- SI_LOGINAUTHERROR8007
+    "Your account must be verified in order to continue to play. Check the email you used to create an ESO account for instruction on how to complete the verification process. If you do not receive an email, contact customer service at <<1>>.", -- SI_LOGINAUTHERROR8007
     "Game account not found", -- SI_LOGINAUTHERROR8008
     "Your account has been suspended. Contact customer service at <<1>> for more information.", -- SI_LOGINAUTHERROR8009
     "Your account has been permanently banned. Contact customer service at <<1>> for more information.", -- SI_LOGINAUTHERROR8010
-    "Your account must be verified in order to continue to play. Check the email you used to create an ESO account for instruction on how to complete the verification process.", -- SI_LOGINAUTHERROR8011
+    "Your account must be verified in order to continue to play. Check the email you used to create an ESO account for instruction on how to complete the verification process. If you do not receive an email, contact customer service at <<1>>.", -- SI_LOGINAUTHERROR8011
     "Your account has restricted authentication.  Please contact customer service at <<1>>.", -- SI_LOGINAUTHERROR8012
     "The servers are temporarily down for maintenance. Please try again later.", -- SI_LOGINAUTHERROR8013
     "Could not connect to the Xbox network", -- SI_LOGINAUTHERROR13000
@@ -21475,7 +21475,7 @@ SafeAddVersion(SI_EMOTECATEGORY8, 1)
 SafeAddVersion(SI_APPROVEDURLTYPE2, 1)
 SafeAddVersion(SI_APPROVEDURLTYPE3, 1)
 SafeAddVersion(SI_APPROVEDURLTYPESTEAM2, 1)
-SafeAddVersion(SI_APPROVEDURLTYPEEPIC2, 2)
+SafeAddVersion(SI_APPROVEDURLTYPEEPIC2, 3)
 SafeAddVersion(SI_APPROVEDURLTYPEEPIC3, 1)
 SafeAddVersion(SI_PLATFORMSTORELABEL1, 1)
 SafeAddVersion(SI_PLATFORMSTORELABEL2, 1)
@@ -21940,8 +21940,11 @@ SafeAddVersion(SI_STOREFAILURE4, 1)
 SafeAddVersion(SI_STOREFAILURE8, 1)
 SafeAddVersion(SI_STOREFAILURE19, 1)
 SafeAddVersion(SI_ACCOUNTCREATELINKERROR12004, 1)
+SafeAddVersion(SI_ACCOUNTCREATELINKERROR12102, 1)
 SafeAddVersion(SI_LOGINAUTHERROR3, 2)
 SafeAddVersion(SI_LOGINAUTHERROR4, 2)
+SafeAddVersion(SI_LOGINAUTHERROR8007, 1)
+SafeAddVersion(SI_LOGINAUTHERROR8011, 1)
 SafeAddVersion(SI_LOGINAUTHERROR13000, 2)
 SafeAddVersion(SI_LOGINAUTHERROR13002, 1)
 SafeAddVersion(SI_LOGINAUTHERROR13003, 1)

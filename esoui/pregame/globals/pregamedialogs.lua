@@ -883,9 +883,23 @@ ESO_Dialogs["LINKED_LOGIN_ERROR_KEYBOARD"] =
     buttons =
     {
         {
+            keybind = "DIALOG_TERTIARY",
+            text = GetString(SI_CONSOLE_RESEND_VERIFY_EMAIL_KEYBIND),
+            visible = function(dialog)
+                local dialogData = dialog.data
+                if dialogData == nil then
+                    return false
+                end
+                return dialogData.showResendVerificationEmail
+            end,
+            callback = function(dialog)
+                PregameAttemptResendVerificationEmail()
+            end,
+        },
+        {
             text = SI_DIALOG_CLOSE,
             keybind = "DIALOG_NEGATIVE",
-        }
+        },
     }
 }
 
@@ -1261,20 +1275,20 @@ ESO_Dialogs["CHAPTER_UPGRADE_CONTINUE"] =
         text = function()
             local platformServiceType = GetPlatformServiceType()
             local upgradeMethodsStringId = ZO_PLATFORM_ALLOWS_CHAPTER_CODE_ENTRY[platformServiceType] and SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_OR_CODE or SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_ONLY
-            local chapterUpgradeId = GetCurrentChapterUpgradeId()
-            local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
-            local chapterCollectibleName = GetCollectibleName(chapterCollectibleId)
+            local coloredPlatformStoreName = ZO_SELECTED_TEXT:Colorize(ZO_GetPlatformStoreName())
             if platformServiceType == PLATFORM_SERVICE_TYPE_EPIC then
-                return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT_NO_RESTART, GetString(upgradeMethodsStringId), ZO_GetPlatformStoreName())
+                return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT_NO_RESTART, GetString(upgradeMethodsStringId), coloredPlatformStoreName)
             else
-                return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT, GetString(upgradeMethodsStringId), ZO_GetPlatformStoreName(), chapterCollectibleName)
+                local chapterUpgradeId = GetCurrentChapterUpgradeId()
+                local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
+                local chapterCollectibleName = ZO_SELECTED_TEXT:Colorize(GetCollectibleName(chapterCollectibleId))
+                return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT, GetString(upgradeMethodsStringId), coloredPlatformStoreName, chapterCollectibleName)
             end
         end,
     },
 
     buttons =
     {
-        [1] =
         {
             text = SI_DIALOG_CONFIRM,
             callback = function(dialog)
@@ -1283,8 +1297,6 @@ ESO_Dialogs["CHAPTER_UPGRADE_CONTINUE"] =
                             end
                         end,
         },
-
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
             callback = function(dialog)
