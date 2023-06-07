@@ -91,6 +91,11 @@ h5. BackgroundListFilterType
 * BACKGROUND_LIST_FILTER_TYPE_SEARCH_KEYWORDS
 
 
+h5. BonusDropSource
+* BONUS_DROP_SOURCE_COMPANION
+* BONUS_DROP_SOURCE_NONE
+
+
 h5. BookMedium
 * BOOK_MEDIUM_ANIMAL_SKIN
 * BOOK_MEDIUM_LETTER
@@ -6361,6 +6366,12 @@ h5. InstantUnlockRewardType
 * INSTANT_UNLOCK_SKYSHARD_ZONE
 * INSTANT_UNLOCK_VAMPIRE_BITE
 * INSTANT_UNLOCK_WEREWOLF_BITE
+
+
+h5. RewardDisplayFlags
+* REWARD_DISPLAY_FLAGS_FROM_CONTAINER
+* REWARD_DISPLAY_FLAGS_FROM_CROWN_STORE
+* REWARD_DISPLAY_FLAGS_FROM_CROWN_STORE_CONTAINER
 
 
 h5. RewardEntryType
@@ -19520,7 +19531,7 @@ h2. Game API
 * GetTributeCardUpgradeRewardTributeCardUpgradeInfo(*integer* _rewardId_)
 ** _Returns:_ *integer* _tributePatronDefId_, *luaindex* _tributeCardIndex_
 
-* GetItemRewardItemLink(*integer* _rewardId_, *integer* _quantity_, *[LinkStyle|#LinkStyle]* _linkStyle_)
+* GetItemRewardItemLink(*integer* _rewardId_, *integer* _quantity_, *[RewardDisplayFlags|#RewardDisplayFlags]* _displayFlags_, *[LinkStyle|#LinkStyle]* _linkStyle_)
 ** _Returns:_ *string* _link_
 
 * GetItemRewardItemId(*integer* _rewardId_)
@@ -22497,7 +22508,7 @@ h3. TooltipControl
 
 * SetQuestTool(*luaindex* _questIndex_, *luaindex* _toolIndex_)
 
-* SetReward(*integer* _rewardId_, *integer* _quantity_)
+* SetReward(*integer* _rewardId_, *integer* _quantity_, *[RewardDisplayFlags|#RewardDisplayFlags]* _displayFlags_)
 
 * SetScrollBonusAbility(*[Alliance|#Alliance]* _alliance_, *[ObjectiveType|#ObjectiveType]* _artifactType_, *luaindex* _bonusIndex_)
 
@@ -23128,7 +23139,7 @@ h2. Events
 * EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG
 * EVENT_INVENTORY_ITEM_DESTROYED (*[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_)
 * EVENT_INVENTORY_ITEM_USED (*[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_)
-* EVENT_INVENTORY_SINGLE_SLOT_UPDATE (*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *bool* _isNewItem_, *[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_, *integer* _inventoryUpdateReason_, *integer* _stackCountChange_, *string:nilable* _triggeredByCharacterName_, *string:nilable* _triggeredByDisplayName_, *bool* _isLastUpdateForMessage_)
+* EVENT_INVENTORY_SINGLE_SLOT_UPDATE (*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *bool* _isNewItem_, *[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_, *integer* _inventoryUpdateReason_, *integer* _stackCountChange_, *string:nilable* _triggeredByCharacterName_, *string:nilable* _triggeredByDisplayName_, *bool* _isLastUpdateForMessage_, *[BonusDropSource|#BonusDropSource]* _bonusDropSource_)
 * EVENT_INVENTORY_SLOT_LOCKED (*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 * EVENT_INVENTORY_SLOT_UNLOCKED (*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 * EVENT_ITEM_COMBINATION_RESULT (*[ItemCombinationResult|#ItemCombinationResult]* _itemCombinationResult_)

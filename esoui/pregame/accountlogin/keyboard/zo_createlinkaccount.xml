@@ -103,8 +103,6 @@
                                                 ZO_CreateLinkAccount_CheckAccountNameValidity()
                                             </OnTextChanged>
                                         </EditBox>
-
-                                        <Control name="$(parent)Instructions" inherits="ZO_TextInstructionsTemplate" tier="HIGH" excludeFromResizeToFitExtents="true" />
                                     </Controls>
                                 </Backdrop>
 
@@ -190,6 +188,8 @@
                                 </Button>
                             </Controls>
                         </Control>
+
+                        <Control name="$(parent)Instructions" inherits="ZO_TextInstructionsTemplate" tier="HIGH" excludeFromResizeToFitExtents="true" />
                     </Controls>
                 </Control>
 
