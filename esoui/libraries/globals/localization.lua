@@ -255,7 +255,22 @@ function ZO_GenerateParagraphSeparatedList(argumentTable)
     return ZO_GenerateDelimiterSeparatedList(argumentTable, "\n\n")
 end
 
-
 function ZO_FormatFraction(numerator, denominator)
     return string.format("%d/%d", numerator, denominator)
+end
+
+-- Takes a given text and generates a string with the text broken into segments of
+-- the specified length and separated by the given delimiter
+-- For example a text of "12345678" with a space delimiter and a segment length of 4
+-- would yield "1234 5678"
+function ZO_GenerateDelimiterSegmentedString(text, segmentLength, delimiter)
+    local stringLength = zo_strlen(text)
+
+    local textSegments = {}
+    for i = 1, stringLength, segmentLength do
+        table.insert(textSegments, zo_strsub(text, i, i + segmentLength - 1))
+    end
+
+    local formattedText = table.concat(textSegments, delimiter)
+    return formattedText
 end

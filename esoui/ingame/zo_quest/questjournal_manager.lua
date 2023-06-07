@@ -195,6 +195,8 @@ function ZO_QuestJournal_Manager:BuildQuestListData()
 
             local level = GetJournalQuestLevel(i)
             local instanceDisplayType = GetJournalQuestInstanceDisplayType(i)
+            local repeatableType = GetJournalQuestRepeatType(i)
+            local repeatable = repeatableType ~= QUEST_REPEAT_NOT_REPEATABLE
 
             table.insert(self.quests,
                 {
@@ -204,7 +206,9 @@ function ZO_QuestJournal_Manager:BuildQuestListData()
                     categoryName = categoryName,
                     categoryType = categoryType,
                     questType = questType,
-                    displayType = instanceDisplayType
+                    displayType = instanceDisplayType,
+                    repeatableType = repeatableType,
+                    repeatable = repeatable,
                 }
             )
         end

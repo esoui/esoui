@@ -412,6 +412,14 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         parametricList = {}, --we'll generate the entries on setup
         blockDialogReleaseOnPress = true, -- We need to manually control when we release so we can use the select keybind to activate entries
         mustChoose = true,
+        onHidingCallback = function(dialog)
+            local targetData = dialog.entryList:GetTargetData()
+            if targetData and targetData.dropdownEntry then
+                local targetControl = dialog.entryList:GetTargetControl()
+                local dropdown = targetControl.dropdown
+                dropdown:Deactivate()
+            end
+        end,
         finishedCallback = function()
             if g_dialogDiscountPercentControl then
                 g_dialogDiscountPercentControl:SetHidden(true)
@@ -959,6 +967,14 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         parametricList = {}, --we'll generate the entries on setup
         blockDialogReleaseOnPress = true, -- We need to manually control when we release so we can use the select keybind to activate entries
         mustChoose = true,
+        onHidingCallback = function(dialog)
+            local targetData = dialog.entryList:GetTargetData()
+            if targetData and targetData.dropdownEntry then
+                local targetControl = dialog.entryList:GetTargetControl()
+                local dropdown = targetControl.dropdown
+                dropdown:Deactivate()
+            end
+        end,
         finishedCallback = function()
             if g_dialogDiscountPercentControl then
                 g_dialogDiscountPercentControl:SetHidden(true)
@@ -972,8 +988,8 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 text = GetString(SI_GAMEPAD_SELECT_OPTION),
                 callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
-                    local targetControl = dialog.entryList:GetTargetControl()
                     if targetData.dropdownEntry then
+                        local targetControl = dialog.entryList:GetTargetControl()
                         local dropdown = targetControl.dropdown
                         dropdown:Activate()
                     end

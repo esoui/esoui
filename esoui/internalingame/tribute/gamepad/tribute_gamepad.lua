@@ -7,6 +7,7 @@ ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES =
     TURN_TIMER = 4,
     RESOURCE_TOKEN = 5,
     DISCARD_COUNTER = 6,
+    PATRON_USAGE_COUNTER = 7,
 }
 
 ZO_TRIBUTE_GAMEPAD_CURSOR_FRICTION_FACTORS =
@@ -19,12 +20,14 @@ ZO_TRIBUTE_GAMEPAD_CURSOR_FRICTION_FACTORS =
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.TURN_TIMER] = 0.5,
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.RESOURCE_TOKEN] = 0.25,
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.DISCARD_COUNTER] = 0.5,
+    [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.PATRON_USAGE_COUNTER] = 0.25,
 }
 
 ZO_TRIBUTE_GAMEPAD_CURSOR_MANUAL_TARGET_TYPES =
 {
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.PATRON_STALL] = true,
     [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.RESOURCE_TOKEN] = true,
+    [ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.PATRON_USAGE_COUNTER] = true,
 }
 
 ZO_TRIBUTE_GAMEPAD_CURSOR_SPEED = 20
@@ -204,7 +207,9 @@ function ZO_TributeCursor_Gamepad:IsObjectUnderCursor()
 end
 
 function ZO_TributeCursor_Gamepad:RefreshInsets()
-    if ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() then
+    --If there is a viewer up, check to see if we need to adjust the insets to account for a keybind strip
+    local activeViewer = TRIBUTE:GetActiveViewer()
+    if activeViewer and activeViewer:IsKeybindStripVisible() then
         self.control:SetClampedToScreenInsets(0, 0, 0, ZO_KEYBIND_STRIP_GAMEPAD_VISUAL_HEIGHT)
     else
         self.control:SetClampedToScreenInsets(0, 0, 0, 0)
@@ -380,6 +385,62 @@ function ZO_TributeBoardLocationPatronsTooltip_Gamepad_Initialize(tooltipControl
     ScreenResizeHandler(g_boardLocationPatronsTooltipControl)
 end
 
+---------------------------------------
+-- Tribute Patron Usage Tooltip Gamepad --
+---------------------------------------
+
+local g_patronUsageTooltipControl
+
+function ZO_TributePatronUsageTooltip_Gamepad_Hide()
+    local control = g_patronUsageTooltipControl
+    if not internalassert(control, "ZO_TributePatronUsageTooltip_Gamepad failed to initialize.") then
+        return false
+    end
+
+    control:SetHidden(true)
+    control:ClearAnchors()
+    control.scrollTooltip:ClearLines()
+    return true
+end
+
+function ZO_TributePatronUsageTooltip_Gamepad_Show(anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)
+    if not ZO_TributePatronUsageTooltip_Gamepad_Hide() then
+        return
+    end
+
+    -- Order matters
+    local control = g_patronUsageTooltipControl
+    control.tip:LayoutTributePatronUsage()
+    control:ClearAnchors()
+    if anchorPoint then
+        control:SetAnchor(anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)
+    end
+
+    if ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingBoard() then
+        control:SetClampedToScreenInsets(0, -25, 0, ZO_KEYBIND_STRIP_GAMEPAD_VISUAL_HEIGHT)
+    else
+        control:SetClampedToScreenInsets(0, -25, 0, 25)
+    end
+    control:SetHidden(false)
+end
+
+function ZO_TributePatronUsageTooltip_Gamepad_GetControl()
+    return g_patronUsageTooltipControl
+end
+
+function ZO_TributePatronUsageTooltip_Gamepad_Initialize(tooltipControl)
+    g_patronUsageTooltipControl = tooltipControl
+
+    local function ScreenResizeHandler(control)
+        local maxHeight = GuiRoot:GetHeight() - (ZO_GAMEPAD_PANEL_FLOATING_HEIGHT_DISCOUNT * 2)
+        control:SetDimensionConstraints(0, 0, 0, maxHeight)
+    end
+
+    local DEFAULT_TOOLTIP_STYLES = nil
+    ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized(g_patronUsageTooltipControl, DEFAULT_TOOLTIP_STYLES, ScreenResizeHandler, LEFT)
+    ScreenResizeHandler(g_patronUsageTooltipControl)
+end
+
 ----------------------------------
 -- Tribute Resource Tooltip Gamepad --
 ----------------------------------
@@ -459,7 +520,7 @@ function ZO_TributeDiscardCounterTooltip_Gamepad_Hide()
 end
 
 function ZO_TributeDiscardCounterTooltip_Gamepad_Show(anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)
-    if not ZO_TributeResourceTooltip_Gamepad_Hide() then
+    if not ZO_TributeDiscardCounterTooltip_Gamepad_Hide() then
         return
     end
 

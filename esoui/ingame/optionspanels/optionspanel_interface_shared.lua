@@ -104,6 +104,26 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_SHOW_QUEST_TRACKER,
             tooltipText = SI_INTERFACE_OPTIONS_SHOW_QUEST_TRACKER_TOOLTIP,
+            events = {[true] = "QuestTracker_On", [false] = "QuestTracker_Off",},
+            gamepadHasEnabledDependencies = true,
+        },
+        --UI_Settings_AutomaticQuestTracking
+        [UI_SETTING_AUTOMATIC_QUEST_TRACKING] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_AUTOMATIC_QUEST_TRACKING,
+            panel = SETTING_PANEL_INTERFACE,
+            text = SI_INTERFACE_OPTIONS_AUTOMATIC_QUEST_TRACKING,
+            tooltipText = SI_INTERFACE_OPTIONS_AUTOMATIC_QUEST_TRACKING_TOOLTIP,
+            eventCallbacks =
+            {
+                ["QuestTracker_Off"]   = ZO_Options_SetOptionInactive,
+                ["QuestTracker_On"]    = ZO_Options_SetOptionActive,
+            },
+            gamepadIsEnabledCallback = function() 
+                return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_TRACKER)) ~= 0
+            end,
         },
         --Options_Interface_FramerateCheck
         [UI_SETTING_SHOW_FRAMERATE] =
@@ -315,7 +335,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_CHAT_SAY,
             tooltipText = SI_INTERFACE_OPTIONS_SAY_TOOLTIP,
-            exists = ZO_IsPCOrHeronUI,
+            exists = ZO_IsPCUI,
             
             channelCategories = { CHAT_CATEGORY_SAY },
         },
@@ -326,7 +346,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_CHAT_YELL,
             tooltipText = SI_INTERFACE_OPTIONS_YELL_TOOLTIP,
-            exists = ZO_IsPCOrHeronUI,
+            exists = ZO_IsPCUI,
             
             channelCategories = { CHAT_CATEGORY_YELL },
         },
@@ -337,7 +357,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_CHAT_TELL,
             tooltipText = SI_INTERFACE_OPTIONS_TELL_TOOLTIP,
-            exists = ZO_IsPCOrHeronUI,
+            exists = ZO_IsPCUI,
             
             channelCategories = { CHAT_CATEGORY_WHISPER_INCOMING, CHAT_CATEGORY_WHISPER_OUTGOING },
         },
@@ -348,7 +368,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_CHAT_GROUP,
             tooltipText = SI_INTERFACE_OPTIONS_GROUP_TOOLTIP,
-            exists = ZO_IsPCOrHeronUI,
+            exists = ZO_IsPCUI,
             
             channelCategories = { CHAT_CATEGORY_PARTY },
         },
@@ -359,7 +379,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_CHAT_EMOTE,
             tooltipText = SI_INTERFACE_OPTIONS_EMOTE_TOOLTIP,
-            exists = ZO_IsPCOrHeronUI,
+            exists = ZO_IsPCUI,
             
             channelCategories = { CHAT_CATEGORY_EMOTE },
         },

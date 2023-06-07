@@ -326,7 +326,7 @@ end
 
 do
     local function IsAnyGroupMemberOffline()
-        for i = 1, GROUP_SIZE_MAX do
+        for i = 1, MAX_GROUP_SIZE_THRESHOLD do
             local unitTag = ZO_Group_GetUnitTagForGroupIndex(i)
             if not IsUnitOnline(unitTag) then
                 return true

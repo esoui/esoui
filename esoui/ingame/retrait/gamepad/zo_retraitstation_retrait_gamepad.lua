@@ -48,12 +48,8 @@ function ZO_RetraitStation_Retrait_Gamepad:Initialize(control, interactScene)
     }
     GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(resultTooltipNarrationInfo)
 
-    self:InitializeHeader()
-
-    self.currentFilter = SMITHING_FILTER_TYPE_WEAPONS
-    self:InitializeTraitList()
-
     --Register the list of inventory items for narration
+    --Order matters, do this before we initialize the header
     local narrationInfo = 
     {
         canNarrate = function()
@@ -64,6 +60,11 @@ function ZO_RetraitStation_Retrait_Gamepad:Initialize(control, interactScene)
         end,
     }
     SCREEN_NARRATION_MANAGER:RegisterParametricList(self.inventory.list, narrationInfo)
+
+    self:InitializeHeader()
+
+    self.currentFilter = SMITHING_FILTER_TYPE_WEAPONS
+    self:InitializeTraitList()
 end
 
 function ZO_RetraitStation_Retrait_Gamepad:InitializeInventory()

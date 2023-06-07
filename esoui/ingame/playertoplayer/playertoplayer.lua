@@ -105,6 +105,8 @@ do
         self.msToDelayToShowPrompt = 500
         self.lastFailedPromptTime = GetFrameTimeMilliseconds()
 
+        self.hotkeyBeginHolds = {}
+
         EVENT_MANAGER:RegisterForUpdate(control:GetName() .. "OnUpdate", 0, function() self:OnUpdate() end)
         control:RegisterForEvent(EVENT_DUEL_STARTED, function() self:OnDuelStarted() end)
 
@@ -151,7 +153,10 @@ function ZO_PlayerToPlayer:OnTributeStarted()
 end
 
 function ZO_PlayerToPlayer:CreateGamepadRadialMenu()
-    self.gamepadMenu = ZO_RadialMenu:New(ZO_PlayerToPlayerMenu_Gamepad, "ZO_RadialMenuHUDEntryTemplate_Gamepad", "DefaultRadialMenuAnimation", "DefaultRadialMenuEntryAnimation", "RadialMenu")
+    local USE_DEFAULT_DIRECTIONAL_INPUTS = nil
+    local DEFAULT_ENABLE_MOUSE = nil
+    local DEFAULT_SELECT_IF_CENTERED = nil
+    self.gamepadMenu = ZO_RadialMenu:New(ZO_PlayerToPlayerMenu_Gamepad, "ZO_RadialMenuHUDEntryTemplate_Gamepad", "DefaultRadialMenuAnimation", "DefaultRadialMenuEntryAnimation", "RadialMenu", USE_DEFAULT_DIRECTIONAL_INPUTS, DEFAULT_ENABLE_MOUSE, DEFAULT_SELECT_IF_CENTERED, ZO_AreTogglableWheelsEnabled)
     self.gamepadMenu:SetOnClearCallback(function()
         self:StopInteraction()
     end)
@@ -162,6 +167,8 @@ function ZO_PlayerToPlayer:CreateGamepadRadialMenu()
             SCREEN_NARRATION_MANAGER:QueueCustomEntry("PlayerToPlayerWheel")
         end
     end)
+
+    self.gamepadMenu:SetKeybindActionLayer("PlayerToPlayerAccessibleLayer")
 
     --Set up narration for the player interact wheels
     local narrationInfo =
@@ -184,16 +191,37 @@ function ZO_PlayerToPlayer:CreateGamepadRadialMenu()
                 return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_PLAYER_TO_PLAYER_RESPONSE_WHEEL_NARRATION))
             end
         end,
+        additionalInputNarrationFunction = function()
+            local narrationData = {}
+            if self.gamepadMenu:ShouldShowKeybinds() then
+                self.gamepadMenu:ForEachOrdinalEntry(function(ordinalIndex, entry)
+                    local actionName = ZO_GetRadialMenuActionNameForOrdinalIndex(ordinalIndex)
+                    local entryNarrationData =
+                    {
+                        name = entry.name,
+                        keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(actionName) or GetString(SI_ACTION_IS_NOT_BOUND),
+                        enabled = true,
+                    }
+
+                    table.insert(narrationData, entryNarrationData)
+                end)
+            end
+            return narrationData
+        end,
         narrationType = NARRATION_TYPE_HUD,
     }
     SCREEN_NARRATION_MANAGER:RegisterCustomObject("PlayerToPlayerWheel", narrationInfo)
 end
 
 function ZO_PlayerToPlayer:CreateKeyboardRadialMenu()
-    self.keyboardMenu = ZO_RadialMenu:New(ZO_PlayerToPlayerMenu_Keyboard, "ZO_PlayerToPlayerMenuEntryTemplate_Keyboard", "DefaultRadialMenuAnimation", "DefaultRadialMenuEntryAnimation", "RadialMenu")
+    local USE_DEFAULT_DIRECTIONAL_INPUTS = nil
+    local DEFAULT_ENABLE_MOUSE = nil
+    local DEFAULT_SELECT_IF_CENTERED = nil
+    self.keyboardMenu = ZO_RadialMenu:New(ZO_PlayerToPlayerMenu_Keyboard, "ZO_PlayerToPlayerMenuEntryTemplate_Keyboard", "DefaultRadialMenuAnimation", "DefaultRadialMenuEntryAnimation", "RadialMenu", USE_DEFAULT_DIRECTIONAL_INPUTS, DEFAULT_ENABLE_MOUSE, DEFAULT_SELECT_IF_CENTERED, ZO_AreTogglableWheelsEnabled)
     self.keyboardMenu:SetOnClearCallback(function()
         self:StopInteraction()
     end)
+    self.keyboardMenu:SetKeybindActionLayer("PlayerToPlayerAccessibleLayer")
 end
 
 --Gets or creates the radial menu for the current keyboard/gamepad mode
@@ -358,7 +386,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
     local function OnQuestShared(eventCode, questId)
         PlaySound(SOUNDS.QUEST_SHARED)
-        local questName, characterName, timeSinceRequestMs, displayName = GetOfferedQuestShareInfo(questId)
+        local questName, characterName, _, displayName = GetOfferedQuestShareInfo(questId)
         local name = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
         local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_QUEST_SHARE, characterName, displayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_QUEST_SHARE, ZO_SELECTED_TEXT:Colorize(name), questName),
             function()
@@ -848,8 +876,8 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
                         self:RemoveFromIncomingQueue(INTERACT_TYPE_TRAVEL_TO_LEADER)
 
                         local function AcceptCallback()
-                            local groupLeaderUnitTag = GetGroupLeaderUnitTag()
-                            JumpToGroupMember(GetUnitName(groupLeaderUnitTag))
+                            local leaderUnitTag = GetGroupLeaderUnitTag()
+                            JumpToGroupMember(GetUnitName(leaderUnitTag))
                             self:RemoveFromIncomingQueue(INTERACT_TYPE_TRAVEL_TO_LEADER)
                         end
 
@@ -905,12 +933,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
     local function OnGroupMemberLeft(eventCode, characterName, reason, isLocalPlayer, amLeader)
         if isLocalPlayer then
-            for i, incomingEntry in ipairs(self.incomingQueue) do
-                if incomingEntry.incomingType == INTERACT_TYPE_TRAVEL_TO_LEADER then
-                    self:RemoveEntryFromIncomingQueueTable(i)
-                    break
-                end
-            end
+            self:RemoveFromIncomingQueue(INTERACT_TYPE_TRAVEL_TO_LEADER)
         end
     end
     self.control:RegisterForEvent(EVENT_UNIT_CREATED, function(event, ...) OnUnitCreated(...) end)
@@ -925,12 +948,12 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             OnDuelInviteReceived(nil, duelPartnerCharacterName, duelPartnerDisplayName, timeRemainingMS)
         end
         
-        local tributeInviteState, tributePartnerCharacterName, tributePartnerDisplayName, timeRemainingMS = GetTributeInviteInfo()
+        local tributeInviteState, tributePartnerCharacterName, tributePartnerDisplayName, tributeInviteTimeRemainingMS = GetTributeInviteInfo()
         if tributeInviteState == TRIBUTE_INVITE_STATE_INVITE_CONSIDERING then
-            OnTributeInviteReceived(nil, tributePartnerCharacterName, tributePartnerDisplayName, timeRemainingMS)
+            OnTributeInviteReceived(nil, tributePartnerCharacterName, tributePartnerDisplayName, tributeInviteTimeRemainingMS)
         end
 
-        local inviterCharaterName, millisecondsSinceRequest, inviterDisplayName = GetGroupInviteInfo()
+        local inviterCharaterName, _, inviterDisplayName = GetGroupInviteInfo()
 
         if inviterCharaterName ~= "" or inviterDisplayName ~= "" then
             OnGroupInviteReceived(nil, inviterCharaterName, inviterDisplayName)
@@ -1019,6 +1042,11 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GAME_CAMERA_UI_MODE_CHANGED, OnGameCameraUIModeChanged)
 
     self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
+        local CLEAR_SELECTION = true
+        self:StopInteraction(CLEAR_SELECTION)
+    end)
+
+    self.control:RegisterForEvent(EVENT_GUI_UNLOADING, function()
         local CLEAR_SELECTION = true
         self:StopInteraction(CLEAR_SELECTION)
     end)
@@ -1231,11 +1259,7 @@ do
     function ZO_PlayerToPlayer:RemoveFromIncomingQueue(incomingType, characterName, displayName)
         for i, incomingEntry in ipairs(self.incomingQueue) do
             if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
-                local incomingEntry = self:RemoveEntryFromIncomingQueueTable(i)
-
-                if i == 1 and (self.showingResponsePrompt or self.showingGamepadResponseMenu) then
-                    self:StopInteraction()
-                end
+                self:RemoveEntryFromIncomingQueueTable(i)
                 break
             end
         end
@@ -1244,11 +1268,7 @@ do
     function ZO_PlayerToPlayer:RemoveAllFromIncomingQueue(incomingType, characterName, displayName)
         for i, incomingEntry in ipairs(self.incomingQueue) do
             if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
-                local incomingEntry = self:RemoveEntryFromIncomingQueueTable(i)
-
-                if i == 1 and (self.showingResponsePrompt or self.showingGamepadResponseMenu) then
-                    self:StopInteraction()
-                end
+                self:RemoveEntryFromIncomingQueueTable(i)
             end
         end
     end
@@ -1285,10 +1305,6 @@ function ZO_PlayerToPlayer:RemoveScriptedWorldEventFromIncomingQueue(eventId, qu
     for i, incomingEntry in ipairs(self.incomingQueue) do
         if incomingEntry.incomingType == INTERACT_TYPE_WORLD_EVENT_INVITE and (incomingEntry.eventId == eventId or incomingEntry.questName == questName) then
             self:RemoveEntryFromIncomingQueueTable(i)
-
-            if i == 1 and self.showingResponsePrompt then
-                self:StopInteraction()
-            end
             break
         end
     end
@@ -1436,6 +1452,8 @@ end
 function ZO_PlayerToPlayer:StopInteraction(clearSelection)
     self.targetLabel:SetHidden(false)
 
+    ZO_ClearTable(self.hotkeyBeginHolds)
+
     if self.isInteracting then
         self.isInteracting = false
         RETICLE:RequestHidden(false)
@@ -1486,6 +1504,55 @@ function ZO_PlayerToPlayer:StopInteraction(clearSelection)
 
     if self.showingResponsePrompt then
         self.showingResponsePrompt = false
+    end
+end
+
+function ZO_PlayerToPlayer:HandleUpAction()
+    if ZO_AreTogglableWheelsEnabled() then
+        --This also handles behaviors just as soul gem resurrection, so we need to make sure we behave normally if we aren't using any wheels
+        if not (self.showingPlayerInteractMenu or self.showingGamepadResponseMenu) then
+            self:StopInteraction()
+        end
+    else
+        --Just behave normally if the togglable wheels are not enabled
+        self:StopInteraction()
+    end
+end
+
+function ZO_PlayerToPlayer:HandleHotkeyDownAction(ordinalIndex)
+    --First check to see if there's a radial menu currently up
+    if self.showingPlayerInteractMenu or self.showingGamepadResponseMenu then
+        local radialMenu = self:GetLastActiveRadialMenu()
+        if radialMenu then
+            --Select the corresponding entry and store off when we began the hold
+            if radialMenu:SelectOrdinalEntry(ordinalIndex) then
+                self.hotkeyBeginHolds[ordinalIndex] = GetFrameTimeMilliseconds()
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+do
+    local TIME_TO_HOLD_KEY_MS = 250
+    function ZO_PlayerToPlayer:HandleHotkeyUpAction(ordinalIndex)
+        local beginHoldMs = self.hotkeyBeginHolds[ordinalIndex]
+        if beginHoldMs then
+            self.hotkeyBeginHolds[ordinalIndex] = nil
+            --If we were not holding the hotkey long enough to leave the wheel open, we need to close it
+            if GetFrameTimeMilliseconds() < beginHoldMs + TIME_TO_HOLD_KEY_MS then
+                local radialMenu = self:GetLastActiveRadialMenu()
+                --Re-select the correct ordinal entry here in case it happened to change after we initially pressed the keybind
+                if radialMenu and radialMenu:SelectOrdinalEntry(ordinalIndex) then
+                    self:StopInteraction()
+                    return true
+                end
+            end
+        end
+
+        return false
     end
 end
 
@@ -1546,9 +1613,8 @@ do
     end
 end
 
---With proper timing, both of these events can fire in the same frame, making it possible to be responding but having already cleared the incoming queue
 function ZO_PlayerToPlayer:OnPromptAccepted()
-    if self.showingResponsePrompt and #self.incomingQueue > 0 then
+    if self.showingResponsePrompt then
         local incomingEntryToRespondTo = self.incomingQueue[1]
         if not incomingEntryToRespondTo.dontRemoveOnAccept then
             self:RemoveEntryFromIncomingQueueTable(1)
@@ -1558,7 +1624,7 @@ function ZO_PlayerToPlayer:OnPromptAccepted()
 end
 
 function ZO_PlayerToPlayer:OnPromptDeclined()
-    if self.showingResponsePrompt and #self.incomingQueue > 0 then
+    if self.showingResponsePrompt then
         local incomingEntryToRespondTo = self.incomingQueue[1]
         if not incomingEntryToRespondTo.dontRemoveOnDecline then
             self:RemoveEntryFromIncomingQueueTable(1)
@@ -1573,6 +1639,11 @@ function ZO_PlayerToPlayer:RemoveEntryFromIncomingQueueTable(index)
         ZO_Dialogs_ReleaseAllDialogsOfName("PTP_TIMED_RESPONSE_PROMPT", function(dialogData) return dialogData == incomingEntry end)
         CancelTaskbarWindowFlash("PTP_TIMED_RESPONSE_PROMPT")
     end
+
+    if index == 1 and (self.showingResponsePrompt or self.showingGamepadResponseMenu) then
+        self:StopInteraction()
+    end
+
     return incomingEntry
 end
 
@@ -1791,7 +1862,7 @@ function ZO_PlayerToPlayer:OnUpdate()
             incomingEntry.updateFn(incomingEntry, isActive)
         end
 
-        if TIMED_PROMPTS[incomingEntry.incomingType] and not incomingEntry.seen and SCENE_MANAGER:IsInUIMode() then
+        if TIMED_PROMPTS[incomingEntry.incomingType] and not incomingEntry.seen and (not IsGameCameraActive() or SCENE_MANAGER:IsInUIMode()) then
             -- For time sensitive prompts, the player probably won't see them if they are currently in a UI menu. Let's throw up a dialog before it's too late to respond
             ZO_Dialogs_ShowPlatformDialog("PTP_TIMED_RESPONSE_PROMPT", incomingEntry)
             incomingEntry.seen = true
@@ -1820,15 +1891,16 @@ function ZO_PlayerToPlayer:OnUpdate()
 
         self.shouldShowNotificationKeybindLayer = false
 
-        local hideSelf, hideTargetLabel
+        local hideSelf
+        local hideTargetLabel
         local isReticleTargetInteractable = self:IsReticleTargetInteractable()
         local isReticleTargetCompanionInteractable = self:IsReticleTargetCompanionInteractable()
         if ZO_Dialogs_IsShowing("PTP_TIMED_RESPONSE_PROMPT") then
             -- Dialogs are prioritized above interact labels, so we don't accidentally show the same p2p notification that a dialog is currently showing
             hideSelf = true
             hideTargetLabel = true
-        elseif UTILITY_WHEEL_MANAGER:IsInteracting() then
-            --We should not be showing this if any utility wheels are in use
+        elseif INTERACTIVE_WHEEL_MANAGER:IsInteracting() then
+            --We should not be showing this if any wheels are in use
             hideSelf = true
             hideTargetLabel = true
         elseif self:TryShowingResurrectLabel(P2P_UNIT_TAG) and isReticleTargetInteractable then
@@ -2103,7 +2175,7 @@ do
 
         if isInGroup then
             local groupKickEnabled = isGroupModificationAvailable and isSoloOrLeader and not groupModicationRequiresVoting
-            local groupKickFunction = nil
+            local groupKickFunction
             if groupKickEnabled then
                 groupKickFunction = function() GroupKickByName(currentTargetCharacterNameRaw) end
             else
@@ -2113,7 +2185,7 @@ do
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_REMOVE_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_REMOVE_GROUP], groupKickEnabled, groupKickFunction)
         else
             local groupInviteEnabled = ENABLED_IF_NOT_IGNORED and isGroupModificationAvailable and isSoloOrLeader
-            local groupInviteFunction = nil
+            local groupInviteFunction
             if groupInviteEnabled then
                 groupInviteFunction = function()
                     local NOT_SENT_FROM_CHAT = false
@@ -2147,7 +2219,7 @@ do
         end
 
         if isInGroup then
-            local mountedState, isRidingGroupMount, hasFreePassengerSlot = GetTargetMountedStateInfo(currentTargetCharacterNameRaw)
+            local mountedState, isRidingGroupMount = GetTargetMountedStateInfo(currentTargetCharacterNameRaw)
             local isPassengerForTarget = IsGroupMountPassengerForTarget(currentTargetCharacterNameRaw)
             local groupMountEnabled = (mountedState == MOUNTED_STATE_MOUNT_RIDER and isRidingGroupMount and (not IsMounted() or isPassengerForTarget))
             local function MountOption() UseMountAsPassenger(currentTargetCharacterNameRaw) end
@@ -2165,10 +2237,10 @@ do
         --Duel--
         local duelState, partnerCharacterName, partnerDisplayName = GetDuelInfo()
         if duelState ~= DUEL_STATE_IDLE then
-            local function AlreadyDuelingWarning(duelState, characterName, displayName)
+            local function AlreadyDuelingWarning(state, characterName, displayName)
                 return function()
                     local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
-                    local statusString = GetString("SI_DUELSTATE", duelState)
+                    local statusString = GetString("SI_DUELSTATE", state)
                     statusString = zo_strformat(statusString, userFacingPartnerName)
                     ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)
                 end
@@ -2182,17 +2254,17 @@ do
         end
 
        -- Play Tribute --
-        local tributeInviteState, partnerCharacterName, partnerDisplayName = GetTributeInviteInfo()
+        local tributeInviteState, tributePartnerCharacterName, tributePartnerDisplayName = GetTributeInviteInfo()
         if tributeInviteState ~= TRIBUTE_INVITE_STATE_NONE then
-            local function TributeInviteFailWarning(tributeInviteState, characterName, displayName)
+            local function TributeInviteFailWarning(inviteState, characterName, displayName)
                 return function()
                     local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
-                    local statusString = GetString("SI_TRIBUTEINVITESTATE", tributeInviteState)
+                    local statusString = GetString("SI_TRIBUTEINVITESTATE", inviteState)
                     statusString = zo_strformat(statusString, userFacingPartnerName)
                     ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)
                 end
             end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], DISABLED, TributeInviteFailWarning(tributeInviteState, partnerCharacterName, partnerDisplayName))
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], DISABLED, TributeInviteFailWarning(tributeInviteState, tributePartnerCharacterName, tributePartnerDisplayName))
         else
             local function TributeInviteOption()
                 ChallengeTargetToTribute(currentTargetCharacterName)

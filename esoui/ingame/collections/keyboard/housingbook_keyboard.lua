@@ -38,13 +38,57 @@ end
 
 function HousingBook_Keyboard:InitializeEvents()
     ZO_SpecializedCollectionsBook_Keyboard.InitializeEvents(self)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("PrimaryResidenceSet", function() self:RefreshList() end)
+
+    local function OnDataUpdated()
+        self.categoryLayoutObject:BuildData()
+        self:RefreshList()
+    end
+    
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("PrimaryResidenceSet", OnDataUpdated)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUserFlagsUpdated", OnDataUpdated)
 
     local function OnZoneChanged()
         self.refreshGroups:RefreshSingle("ZoneChanged")
     end
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnZoneChanged)
     self.control:RegisterForEvent(EVENT_ZONE_CHANGED, OnZoneChanged)
+end
+
+function HousingBook_Keyboard:InitializeKeybindStripDescriptors()
+    self.keybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        -- Add/Remove Favorite
+        {
+            name = function()
+                local data = self:GetSelectedData()
+                return data:IsFavorite() and GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) or GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE)
+            end,
+            keybind = "UI_SHORTCUT_TERTIARY",
+            callback = function()
+                local data = self:GetSelectedData()
+                local shouldSetAsFavorite = not data:IsFavorite()
+                SetOrClearCollectibleUserFlag(data:GetId(), COLLECTIBLE_USER_FLAG_FAVORITE, shouldSetAsFavorite)
+            end,
+            visible = function()
+                local data = self:GetSelectedData()
+                return data:IsUnlocked()
+            end,
+        },
+        -- Set as Primary Residence
+        {
+            name = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_BUTTON_TEXT),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            callback = function()
+                local data = self:GetSelectedData()
+                COLLECTIONS_BOOK_SINGLETON:SetPrimaryResidence(data:GetReferenceId())
+            end,
+            visible = function()
+                local data = self:GetSelectedData()
+                return data:IsUnlocked() and not data:IsPrimaryResidence()
+            end,
+        },
+    }
 end
 
 function HousingBook_Keyboard:RefreshDetails()
@@ -145,6 +189,26 @@ end
 
 function HousingBook_Keyboard:IsCollectibleRelevant(collectibleData)
     return collectibleData:IsHouse()
+end
+
+function HousingBook_Keyboard:TreeEntry_OnMouseUp(control, upInside, button)
+    if button == MOUSE_BUTTON_INDEX_RIGHT and upInside then
+        local entryString = control.node.data:IsFavorite() and GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) or GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE)
+        local shouldSetAsFavorite = not control.node.data:IsFavorite()
+
+        ClearMenu()
+        AddMenuItem(entryString, function()
+            SetOrClearCollectibleUserFlag(control.node.data:GetId(), COLLECTIBLE_USER_FLAG_FAVORITE, shouldSetAsFavorite)
+        end)
+        if control.node.data:IsUnlocked() and not control.node.data:IsPrimaryResidence() then
+            AddMenuItem(GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_BUTTON_TEXT), function()
+                COLLECTIONS_BOOK_SINGLETON:SetPrimaryResidence(control.node.data:GetReferenceId())
+            end)
+        end
+        ShowMenu(control)
+    else
+        ZO_SpecializedCollectionsBook_Keyboard.TreeEntry_OnMouseUp(self, control, upInside, button)
+    end
 end
 
 function ZO_HousingBook_Keyboard_OnRequestJumpToHouseClicked(control)

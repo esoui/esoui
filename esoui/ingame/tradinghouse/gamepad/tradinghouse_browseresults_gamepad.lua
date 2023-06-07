@@ -42,6 +42,35 @@ function ZO_GamepadTradingHouse_BrowseResults:Initialize(control)
 
     self:RemoveFilters()
     self:RefreshPagingControls()
+
+    self.pageControlInputNarrationFunction = function()
+        local narrationData = {}
+
+        if self:IsPanelFocused() then
+            local hasPreviousPage = TRADING_HOUSE_SEARCH:HasPreviousPage()
+            local hasNextPage = TRADING_HOUSE_SEARCH:HasNextPage()
+            --If we are showing the pages, include the binds in the narration
+            if hasPreviousPage or hasNextPage then
+                local previousPageNarrationData =
+                {
+                    name = GetString(SI_GAMEPAD_PAGED_LIST_PAGE_LEFT_NARRATION),
+                    keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UI_SHORTCUT_LEFT_TRIGGER") or GetString(SI_ACTION_IS_NOT_BOUND),
+                    enabled = hasPreviousPage,
+                }
+                table.insert(narrationData, previousPageNarrationData)
+
+                local nextPageNarrationData =
+                {
+                    name = GetString(SI_GAMEPAD_PAGED_LIST_PAGE_RIGHT_NARRATION),
+                    keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UI_SHORTCUT_RIGHT_TRIGGER") or GetString(SI_ACTION_IS_NOT_BOUND),
+                    enabled = hasNextPage,
+                }
+                table.insert(narrationData, nextPageNarrationData)
+            end
+        end
+
+        return narrationData
+    end
 end
 
 local PRICE_THRESHOLD_DIGITS = 6
@@ -370,10 +399,16 @@ end
 
 function ZO_GamepadTradingHouse_BrowseResults:OnLeftTrigger()
     TRADING_HOUSE_SEARCH:SearchPreviousPage()
+    --Re-narrate when changing pages
+    local NARRATE_HEADER = true
+    SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, NARRATE_HEADER)
 end
 
 function ZO_GamepadTradingHouse_BrowseResults:OnRightTrigger()
     TRADING_HOUSE_SEARCH:SearchNextPage()
+    --Re-narrate when changing pages
+    local NARRATE_HEADER = true
+    SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, NARRATE_HEADER)
 end
 
 -- Overrides ZO_SortFilterList
@@ -544,6 +579,26 @@ function ZO_GamepadTradingHouse_BrowseResults:GetNarrationText()
         local totalPriceString = ZO_Currency_FormatGamepad(CURT_MONEY, entryData.purchasePrice, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_TRADINGHOUSESORTFIELD", TRADING_HOUSE_SORT_SALE_PRICE)))
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(totalPriceString))
+    end
+
+    return narrations
+end
+
+--Overridden from base
+function ZO_GamepadTradingHouse_BrowseResults:GetAdditionalInputNarrationFunction()
+    return self.pageControlInputNarrationFunction
+end
+
+--Overridden from base
+function ZO_GamepadTradingHouse_BrowseResults:GetHeaderNarration()
+    local narrations = {}
+
+    --First grab the standard header narration
+    ZO_AppendNarration(narrations, ZO_GamepadInteractiveSortFilterList.GetHeaderNarration(self))
+
+    --If we are showing the page number, include that in the header narration
+    if TRADING_HOUSE_SEARCH:HasPreviousPage() or TRADING_HOUSE_SEARCH:HasNextPage() then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_PAGED_LIST_PAGE_NUMBER_NARRATION, TRADING_HOUSE_SEARCH:GetPage() + 1)))
     end
 
     return narrations

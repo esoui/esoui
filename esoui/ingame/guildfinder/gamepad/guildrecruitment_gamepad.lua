@@ -22,15 +22,11 @@ function ZO_GuildRecruitment_Gamepad:Initialize(control)
         self:DeactiveCurrentPanel()
     end
 
-    self.contentHeader = control:GetNamedChild("MaskContainerHeaderContainer")
-    self.header = self.contentHeader.header
-
     local function GetGuildRecruitmentStatus()
         local recruitmentMessage, headerMessage, recruitmentStatus = GetGuildRecruitmentInfo(self.guildId)
         return GetString("SI_GUILDRECRUITMENTSTATUSATTRIBUTEVALUE", recruitmentStatus)
     end
 
-    ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE)
     self.headerData =
     {
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_RECRUITMENT_HEADER_GUILD_LABEL),
@@ -38,7 +34,6 @@ function ZO_GuildRecruitment_Gamepad:Initialize(control)
         data2HeaderText = GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_RECRUITMENT_STATUS),
         data2Text = GetGuildRecruitmentStatus,
     }
-    ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 
     GUILD_RECRUITMENT_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(self.control, true)
     GUILD_RECRUITMENT_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", function(oldState, state)
@@ -189,7 +184,18 @@ function ZO_GuildRecruitment_Gamepad:InitializeCategoryListData()
     local applicationsData = ZO_GamepadEntryData:New(GetString(SI_GUILD_RECRUITMENT_CATEGORY_APPLICATIONS), "EsoUI/Art/GuildFinder/Gamepad/gp_guildRecruitment_menuIcon_applications.dds")
     applicationsData:SetIconTintOnSelection(true)
     applicationsData.category = ZO_GUILD_RECRUITMENT_CATEGORY_GAMEPAD_APPLICATIONS
-    applicationsData.visible =  function() return DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_MANAGE_APPLICATIONS) end
+    applicationsData.visible = function() return DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_MANAGE_APPLICATIONS) end
+    applicationsData.narrationText = function(entryData, entryControl)
+        local narrations = {}
+
+        -- Generate the standard parametric list entry narration
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+        --Generate the narration for the applications list being empty
+        ZO_AppendNarration(narrations, GUILD_RECRUITMENT_APPLICATIONS_GAMEPAD:GetEmptyRowNarration())
+
+        return narrations
+    end
     table.insert(self.categoryData, applicationsData)
     self.categoryToHelperPanel[ZO_GUILD_RECRUITMENT_CATEGORY_GAMEPAD_APPLICATIONS] = GUILD_RECRUITMENT_APPLICATIONS_GAMEPAD
 
@@ -197,7 +203,7 @@ function ZO_GuildRecruitment_Gamepad:InitializeCategoryListData()
     local responseMessageData = ZO_GamepadEntryData:New(GetString(SI_GUILD_RECRUITMENT_DEFAULT_RESPONSE_HEADER), "EsoUI/Art/GuildFinder/Gamepad/gp_guildRecruitment_menuIcon_response_message.dds")
     responseMessageData:SetIconTintOnSelection(true)
     responseMessageData.category = ZO_GUILD_RECRUITMENT_CATEGORY_GAMEPAD_RESPONSE_MESSAGE
-    responseMessageData.visible =  function() return DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_MANAGE_APPLICATIONS) end
+    responseMessageData.visible = function() return DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_MANAGE_APPLICATIONS) end
     responseMessageData.narrationText = function(entryData, entryControl)
         local narrations = {}
 
@@ -224,6 +230,17 @@ function ZO_GuildRecruitment_Gamepad:InitializeCategoryListData()
     blackListData:SetIconTintOnSelection(true)
     blackListData.category = ZO_GUILD_RECRUITMENT_CATEGORY_GAMEPAD_BLACKLIST
     blackListData.visible =  function() return DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_MANAGE_BLACKLIST) end
+    blackListData.narrationText = function(entryData, entryControl)
+        local narrations = {}
+
+        -- Generate the standard parametric list entry narration
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+        --Generate the narration for the blacklist being empty
+        ZO_AppendNarration(narrations, GUILD_RECRUITMENT_BLACKLIST_GAMEPAD:GetEmptyRowNarration())
+
+        return narrations
+    end
     table.insert(self.categoryData, blackListData)
     self.categoryToHelperPanel[ZO_GUILD_RECRUITMENT_CATEGORY_GAMEPAD_BLACKLIST] = GUILD_RECRUITMENT_BLACKLIST_GAMEPAD
 end
@@ -234,8 +251,6 @@ function ZO_GuildRecruitment_Gamepad:SetGuildId(guildId)
     if self.deferredInitialized then
         self:RefreshGuildListingView()
     end
-
-    ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 end
 
 function ZO_GuildRecruitment_Gamepad:RefreshGuildPermissionsState()
@@ -424,6 +439,10 @@ function ZO_GuildRecruitment_Gamepad:InitializeResponseMessageDialog()
             },
         },
     })
+end
+
+function ZO_GuildRecruitment_Gamepad:GetHeaderData()
+    return self.headerData
 end
 
 -- XML Functions

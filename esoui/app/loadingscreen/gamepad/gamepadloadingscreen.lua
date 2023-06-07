@@ -36,6 +36,11 @@ end
 function LoadingScreen_Gamepad:OnLongLoadTime(event)
     if not self:IsHidden() then
         self.longLoadAnimation:PlayFromStart()
+        if IsScreenNarrationEnabled() then
+            --Add the narration for the long load text
+            AddPendingNarrationText(GetString(SI_LONG_LOAD_TIME))
+            RequestReadPendingNarrationTextToClient(NARRATION_TYPE_UI_SCREEN)
+        end
     end
 end
 

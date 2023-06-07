@@ -72,7 +72,10 @@ local ZO_Panel_Account_ControlData =
             gamepadCustomTooltipFunction = function(tooltip, text)
                 GAMEPAD_TOOLTIPS:LayoutSettingAccountResendActivation(tooltip, HasActivatedEmail(), ZO_OptionsPanel_GetAccountEmail())
             end,
+            -- If this setting doesn't exist, we won't attempt to load it, which would mean
+            -- OPTIONS_CUSTOM_SETTING_RESEND_EMAIL_ACTIVATION could never be able to show
             exists = ZO_OptionsPanel_IsAccountManagementAvailable,
+            visible = false,
             callback = function()
                 if IsInGamepadPreferredMode() then
                     local data =

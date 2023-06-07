@@ -102,25 +102,6 @@ end
 
 local panelBuilder = ZO_KeyboardOptionsPanelBuilder:New(SETTING_PANEL_ACCOUNT)
 
-------------------------------
--- Account -> Email Address --
-------------------------------
-panelBuilder:AddSetting({
-    controlName = "Options_Account_ChangeEmail",
-    template = "ZO_Options_Account_InvokeCallback_WithEmail",
-    settingType = SETTING_TYPE_ACCOUNT,
-    settingId = ACCOUNT_SETTING_ACCOUNT_EMAIL,
-    header = SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Account_ResendActivation",
-    template = "ZO_Options_InvokeCallback_Wide",
-    settingType = SETTING_TYPE_CUSTOM,
-    settingId = OPTIONS_CUSTOM_SETTING_RESEND_EMAIL_ACTIVATION,
-    header = SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER,
-})
-
 --------------------------------------
 -- Account -> Marketing Preferences --
 --------------------------------------

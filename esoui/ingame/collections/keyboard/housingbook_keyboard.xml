@@ -55,7 +55,7 @@
                                 </Button>
 
                                 <Button name="$(parent)ChangeNickname" inherits="ZO_DefaultButton" text="SI_COLLECTIBLE_ACTION_RENAME">
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TravelToHouse"  relativePoint="BOTTOMRIGHT" />
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TravelToHouse"  relativePoint="BOTTOMRIGHT" offsetX="20" />
                                     <Dimensions x="200" />
 
                                     <OnClicked>

@@ -11,17 +11,6 @@ local function Dot(x1, y1, x2, y2)
     return x1 * x2 + y1 * y2
 end
 
-local sqrt = math.sqrt
-
-local function Length(x, y)
-    return sqrt((x * x) + (y * y))
-end
-
-local function Normalize(x, y, length)
-    local length = length or Length(x, y)
-    return x / length, y / length
-end
-
 --[[ ZO_Triangle: 
     A simple collection of 3 verts that allows point testing to determine if a user-supplied point is inside or outside
     the triangle and facilities to clamp a user-supplied point to the nearest edge.
@@ -48,6 +37,26 @@ end
 
 function ZO_Triangle:GetPreviousPoint(pointIndex)
     return pointIndex == 1 and self.m_points[3] or self.m_points[pointIndex - 1]
+end
+
+function ZO_Triangle:GetBarycentricCoordinates(x, y)
+    local a = self:GetPoint(1)
+    local b = self:GetPoint(2)
+    local c = self:GetPoint(3)
+
+    local v0 = { x = b.x - a.x, y = b.y - a.y }
+    local v1 = { x = c.x - a.x, y = c.y - a.y }
+    local v2 = { x = x - a.x, y = y - a.y }
+
+    local denominator = v0.x * v1.y - v1.x * v0.y
+    local factor = 1 / denominator
+
+    --Calculate each value and clamp between 0 and 1
+    local right = zo_clamp((v2.x * v1.y - v1.x * v2.y) * factor, 0.0, 1.0)
+    local top = zo_clamp((v0.x * v2.y - v2.x * v0.y) * factor, 0.0, 1.0)
+    local left = zo_clamp(1 - right - top, 0.0, 1.0)
+
+    return left, right, top
 end
 
 function ZO_Triangle:GetClosestPointOnTriangle(x, y)
@@ -332,6 +341,10 @@ function ZO_TrianglePicker:OnMouseExit()
         self:SetUpdateHandlerEnabled(false)
         WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
     end
+end
+
+function ZO_TrianglePicker:GetBarycentricCoordinates()
+    return self.triangle:GetBarycentricCoordinates(self:GetThumbPosition())
 end
 
 --[[ XML Handlers ]]--

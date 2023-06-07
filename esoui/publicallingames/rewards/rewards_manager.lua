@@ -213,6 +213,14 @@ function ZO_RewardData:GetAnnouncementBackground()
     return self.announcementBackground
 end
 
+function ZO_RewardData:SetDisplayFlags(displayFlags)
+    self.displayFlags = displayFlags
+end
+
+function ZO_RewardData:GetDisplayFlags()
+    return self.displayFlags
+end
+
 ---------------------
 -- Rewards Manager
 ---------------------
@@ -530,14 +538,18 @@ function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativ
             anchorOffsetY = anchorOffsetY or 0
             local rewardId = rewardData:GetRewardId()
             local quantity = rewardData:GetQuantity()
+            local displayFlags = rewardData:GetDisplayFlags()
             InitializeTooltip(ItemTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
-            ItemTooltip:SetReward(rewardId, quantity)
+            ItemTooltip:SetReward(rewardId, quantity, displayFlags)
             ItemTooltip:HideComparativeTooltips()
             if rewardType == REWARD_ENTRY_TYPE_ITEM then
                 local USE_RELATIVE_ANCHORS = true
                 ItemTooltip:ShowComparativeTooltips()
-                ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
-                ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
+                if ZO_PlayShowAnimationOnComparisonTooltip then
+                    -- These tooltip animations are not available for internal ingame.
+                    ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
+                    ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
+                end
                 ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2, USE_RELATIVE_ANCHORS)
             end
         end

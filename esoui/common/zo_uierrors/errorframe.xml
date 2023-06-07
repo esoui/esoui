@@ -2,81 +2,161 @@
     <Controls>
         <!-- Keyboard templates-->
         <EditBox name="ZO_ErrorFrameTextEdit_Keyboard_Template" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="32000" editEnabled="false" virtual="true" />
-        <Label name="ZO_ErrorFrameTitle_Keyboard_Template" inherits="ZO_WindowTitle" text="SI_WINDOW_TITLE_UI_ERROR" virtual="true" />
-        <Button name="ZO_ErrorFrameDismiss_Keyboard_Template" inherits="ZO_DefaultButton" text="SI_DISMISS_UI_ERROR" virtual="true">
-            <Dimensions x="156" y="28" />
-            <Anchor point="BOTTOM" offsetY="-3" />
-            <OnClicked>
-                ZO_UIErrors_HideCurrent()
-            </OnClicked>
-        </Button>
+        <Label name="ZO_ErrorFrameTitle_Keyboard_Template" inherits="ZO_WindowTitle" virtual="true" />
+        <Control name="ZO_ErrorFrameMoreInfo_Keyboard_Template" virtual="true">
+            <Controls>
+                <Button name="$(parent)CheckButton" hidden="false" />
+                <Control name="$(parent)KeybindButton" hidden="true" />
+            </Controls>
+        </Control>
         
         <!-- Gamepad Templates-->
-        <EditBox name="ZO_ErrorFrameTextEdit_Gamepad_Template" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad" maxInputCharacters="32000" editEnabled="false" virtual="true" />
-        <Label name="ZO_ErrorFrameTitle_Gamepad_Template" font="ZoFontGamepadBold34" text="SI_WINDOW_TITLE_UI_ERROR" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" virtual="true">
-            <Dimensions y="28" />
-            <Anchor point="TOP" offsetY="-7" />
+        <EditBox name="ZO_ErrorFrameTextEdit_Gamepad_Template" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad" font="ZoFontGamepad22" maxInputCharacters="32000" editEnabled="false" virtual="true" />
+        <Label name="ZO_ErrorFrameTitle_Gamepad_Template" font="ZoFontGamepadBold34" virtual="true">
+            <Dimensions y="34" />
         </Label>
-        <Button name="ZO_ErrorFrameDismiss_Gamepad_Template" inherits="ZO_DefaultButton ZO_ButtonBehaviorClickSound" font="ZoFontGamepadBold22" text="SI_DISMISS_UI_ERROR" endCapWidth="9" verticalAlignment="CENTER" mouseOverBlendMode="ADD" virtual="true">
-            <Dimensions x="156" y="28" />
-            <Anchor point="BOTTOM" offsetY="-3" />
-            <OnClicked>
-                ZO_UIErrors_HideCurrent()
-            </OnClicked>
-        </Button>
+        <Control name="ZO_ErrorFrameMoreInfo_Gamepad_Template" virtual="true">
+            <Controls>
+                <Button name="$(parent)CheckButton" hidden="true" />
+                <Control name="$(parent)KeybindButton" hidden="false" />
+            </Controls>
+        </Control>
         
-        <TopLevelControl name="ZO_UIErrors" clampedToScreen="true" mouseEnabled="true" movable="true" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_UI_ERRORS">
-            <Dimensions x="930" y="500" />
+        <TopLevelControl name="ZO_UIErrors" clampedToScreen="true" mouseEnabled="true" movable="true" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_UI_ERRORS" resizeToFitDescendents="true">
+            <ResizeToFitPadding width="2" height="2" />
             <Anchor point="CENTER" relativeTo="GuiRoot" />
             <OnInitialized>
                 ZO_UIErrors_Init(self)
             </OnInitialized>
             
             <Controls>
-                <Label name="$(parent)Title" inherits="ZO_WindowTitle" text="SI_WINDOW_TITLE_UI_ERROR" />
-              
-                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" />
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true" />
 
-                <Button name="$(parent)Close" inherits="ZO_CloseButton">
+                <Button name="$(parent)Close" inherits="ZO_CloseButton" excludeFromResizeToFitExtents="true" hidden="true">
                     <Anchor point="TOPRIGHT" offsetY="3" />
                     <OnClicked>
-                        ZO_UIErrors_HideAll()
+                        ZO_UIErrors_Dismiss()
+                    </OnClicked>
+                </Button>
+
+                <Control name="$(parent)Header" resizeToFitDescendents="true">
+                    <Anchor point="TOP" />
+                    <Controls>
+                        <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS">
+                            <Anchor point="TOP" offsetY="-7" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)CopyCode" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD" excludeFromResizeToFitExtents="true" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Header" relativePoint="RIGHT" offsetX="5" offsetY="-2"/>
+
+                    <Textures normal="EsoUI/Art/Miscellaneous/clipboard_up.dds"
+                              pressed="EsoUI/Art/Miscellaneous/clipboard_down.dds"
+                              mouseOver="EsoUI/Art/Miscellaneous/clipboard_over.dds"
+                              disabled="EsoUI/Art/Miscellaneous/clipboard_up.dds" />
+
+                    <OnMouseEnter>
+                        ZO_UIErrors_OnCopyCodeEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_UIErrors_OnCopyCodeExit(self)
+                    </OnMouseExit>
+                    
+                    <OnClicked>
+                        ZO_UIErrors_CopyCode()
                     </OnClicked>
                 </Button>
 
                 <Backdrop name="$(parent)Text" inherits="ZO_MultiLineEditBackdrop_Keyboard">
-                    <Anchor point="TOPLEFT" offsetY="30"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-40"/>
+                    <Dimensions x="928" y="430" />
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="2" />
                     <Controls>
                         <EditBox name="$(parent)Edit" allowMarkupType="COLOR_ONLY"/>
                     </Controls>
                 </Backdrop>
 
-                <Button name="$(parent)Dismiss" keyboardEnabled="true">
-                    <OnKeyDown>
-                        local layerIndex, categoryIndex, actionIndex = GetActionIndicesFromName("UI_SHORTCUT_PRIMARY")
-                        for bindingIndex = 1, GetMaxBindingsPerAction() do
-                            local guiKey = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, bindingIndex)
-                            if key == guiKey then
-                                ZO_UIErrors_HideCurrent()
-                                return
-                            end
-                        end
-                    </OnKeyDown>
-
+                <Control name="$(parent)FooterRow1" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="10" offsetX="-5"/>
                     <Controls>
-                        <Control name="$(parent)Keybind" inherits="ZO_KeybindButton">
-                            <Anchor point="RIGHT" relativePoint="LEFT" />
+                        <Control name="$(parent)MoreInfo" resizeToFitDescendents="true">
+                            <Anchor point="LEFT" />
+                            <Controls>
+                                <Button name="$(parent)CheckButton" inherits="ZO_CheckButton" hidden="true">
+                                    <Anchor point="LEFT" />
+                                    <OnInitialized>
+                                        ZO_CheckButton_SetLabelText(self, GetString(SI_UI_ERROR_MORE_INFO))
+                                    </OnInitialized>
+                                </Button>
+
+                                <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton_Gamepad" hidden="true">
+                                    <Anchor point="LEFT" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)PageSpinner" inherits="ZO_SpinnerButtons ZO_SpinnerKeyLabels" resizeToFitDescendents="true" hidden="true">
+                            <Anchor point="CENTER" />
+                            <Controls>
+                                <Label name="$(parent)Display" font="ZoFontGamepad34" horizontalAlignment="CENTER">
+                                    <Anchor point="CENTER" />
+                                </Label>
+                                <Button name="$(parent)Decrease" override="true">
+                                    <Dimensions x="64" y="64" />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Display" relativePoint="LEFT" />
+                                    <Textures normal="EsoUI/Art/Buttons/large_leftArrow_up.dds"
+                                              pressed="EsoUI/Art/Buttons/large_leftArrow_down.dds"
+                                              mouseOver="EsoUI/Art/Buttons/large_leftArrow_over.dds"
+                                              disabled="EsoUI/Art/Buttons/large_leftArrow_disabled.dds"/>
+                                </Button>
+                                <Button name="$(parent)Increase" override="true">
+                                    <Dimensions x="64" y="64" />
+                                    <Anchor point="LEFT" relativeTo="$(parent)Display" relativePoint="RIGHT" />
+                                    <Textures normal="EsoUI/Art/Buttons/large_rightArrow_up.dds"
+                                              pressed="EsoUI/Art/Buttons/large_rightArrow_down.dds"
+                                              mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds"
+                                              disabled="EsoUI/Art/Buttons/large_rightArrow_disabled.dds"/>
+                                </Button>
+                                <Label name="$(parent)DecreaseKeyLabel" override="true" hidden="true">
+                                    <Anchor point="CENTER" relativeTo="$(parent)Decrease" />
+                                </Label>
+                                <Label name="$(parent)IncreaseKeyLabel" override="true" hidden="true">
+                                    <Anchor point="CENTER" relativeTo="$(parent)Increase" />
+                                </Label>
+                            </Controls>
                         </Control>
                     </Controls>
-                </Button>
-            
-                <Button name="$(parent)MoreInfo" inherits="ZO_CheckButton">
-                    <Anchor point="BOTTOMLEFT" offsetY="-11"/>
-                    <OnInitialized>
-                        ZO_CheckButton_SetLabelText(self, GetString(SI_UI_ERROR_MORE_INFO))
-                    </OnInitialized>
-                </Button>
+                </Control>
+
+                <Control name="$(parent)FooterRow2" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FooterRow1" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)FooterRow1" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                    <Controls>
+                        <Control name="$(parent)Copy" inherits="ZO_KeybindButton" hidden="true">
+                            <Anchor point="LEFT" />
+                        </Control>
+
+                        <Control name="$(parent)CenterParent" resizeToFitDescendents="true">
+                            <Anchor point="CENTER" />
+                            <Controls>
+                                <Control name="$(parent)Dismiss" inherits="ZO_KeybindButton">
+                                    <Anchor point="LEFT" />
+                                </Control>
+
+                                <Control name="$(parent)Suppress" inherits="ZO_KeybindButton" hidden="true">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Dismiss" relativePoint="RIGHT" offsetX="15"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Reload" inherits="ZO_KeybindButton" hidden="true">
+                            <Anchor point="RIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

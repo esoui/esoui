@@ -2,21 +2,17 @@ local MIN_PURCHASE_QUANTITY = 1
 
 local function LogPurchaseClose(dialog)
     if dialog.data then
-        if not dialog.data.dontLogClose then
-            if dialog.data.logPurchasedMarketId then
-                OnMarketEndPurchase(dialog.data.marketProductData:GetId())
-            else
-                OnMarketEndPurchase()
-            end
+        if dialog.data.logPurchasedMarketId then
+            OnMarketEndPurchase(dialog.data.marketProductData:GetId())
+        else
+            OnMarketEndPurchase()
         end
-        dialog.data.dontLogClose = false
         dialog.data.logPurchasedMarketId = false
     end
 end
 
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] = 
 {
-    finishedCallback = LogPurchaseClose,
     canQueue = true,
     title =
     {
@@ -30,18 +26,19 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] =
     {
         {
             text = SI_MARKET_PURCHASE_ERROR_CONTINUE,
-            callback =  function(dialog)
-                            dialog.data.dontLogClose = true
-                            -- the MARKET_PURCHASE_CONFIRMATION dialog will be queued to show once this one is hidden
-                            ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", dialog.data)
-                        end,
             keybind = "DIALOG_PRIMARY",
+            callback =function(dialog)
+                -- the MARKET_PURCHASE_CONFIRMATION dialog will be queued to show once this one is hidden
+                ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", dialog.data)
+            end,
         },
         {
             text = SI_DIALOG_EXIT,
             keybind = "DIALOG_NEGATIVE",
+            callback = LogPurchaseClose,
         },
     },
+    noChoiceCallback = LogPurchaseClose,
 }
 
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS"] =
@@ -1196,6 +1193,9 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
                     control = self:GetNamedChild("UseProduct"),
                     keybind = "DIALOG_RESET",
                     callback = function(dialog)
+                        dialog.data.logPurchasedMarketId = true
+                        LogPurchaseClose(dialog)
+
                         ZO_Market_Shared.GoToUseProductLocation(dialog.data.marketProductData)
                     end,
                 },
@@ -1216,6 +1216,8 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
                             ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", restartData)
                             return
                         end
+
+                        data.logPurchasedMarketId = true
                         LogPurchaseClose(dialog)
                         if data.wasGift == false then
                             local activeMarket = ZO_MARKET_MANAGER:GetActiveMarket()

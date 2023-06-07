@@ -2,6 +2,12 @@ ZO_Fishing = ZO_InteractiveRadialMenuController:Subclass()
 
 -- Overridden from base
 
+function ZO_Fishing:Initialize(...)
+    ZO_InteractiveRadialMenuController.Initialize(self, ...)
+    self.menu:SetShowKeybinds(function() return ZO_AreTogglableWheelsEnabled() end)
+    self.menu:SetKeybindActionLayer(GetString(SI_KEYBINDINGS_LAYER_ACCESSIBLE_QUICKWHEEL))
+end
+
 function ZO_Fishing:PrepareForInteraction()
     if not SCENE_MANAGER:IsInUIMode() then
         local additionalInfo = select(5, GetGameCameraInteractableActionInfo())
@@ -31,30 +37,3 @@ function ZO_Fishing:PopulateMenu()
         end
     end
 end
-
---Fishing Manager
-
-local FishingManager = ZO_Object:Subclass()
-
-function FishingManager:New()
-    return ZO_Object.New(self)
-end
-
-function FishingManager:StartInteraction()
-    self.gamepad = IsInGamepadPreferredMode()
-    if self.gamepad then
-        return FISHING_GAMEPAD:StartInteraction()
-    else
-        return FISHING_KEYBOARD:StartInteraction()
-    end
-end
-
-function FishingManager:StopInteraction()
-    if self.gamepad then
-        return FISHING_GAMEPAD:StopInteraction()
-    else
-        return FISHING_KEYBOARD:StopInteraction()
-    end
-end
-
-FISHING_MANAGER = FishingManager:New()

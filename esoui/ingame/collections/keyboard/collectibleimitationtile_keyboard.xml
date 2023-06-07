@@ -1,10 +1,10 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_CollectibleSetDefaultTile_Keyboard_Control" inherits="ZO_ContextualActionsTile_Control ZO_ContextualActionsTile_Keyboard_Control" virtual="true">
+        <Control name="ZO_CollectibleImitationTile_Keyboard_Control" inherits="ZO_ContextualActionsTile_Control ZO_ContextualActionsTile_Keyboard_Control" virtual="true">
             <Dimensions x="ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X" y="ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y" />
 
             <OnInitialized>
-                ZO_CollectibleSetDefaultTile_Keyboard_OnInitialized(self)
+                ZO_CollectibleImitationTile_Keyboard_OnInitialized(self)
             </OnInitialized>
 
             <Controls>

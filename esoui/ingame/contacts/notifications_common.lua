@@ -879,7 +879,7 @@ function ZO_CollectionsUpdateProvider:New(notificationManager)
 
     local function OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
         -- Typical unlock changes go through a direct notification event flow
-        if collectionUpdateType ~= ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGES then
+        if collectionUpdateType ~= ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGED then
             provider.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_NEW)
         end
     end

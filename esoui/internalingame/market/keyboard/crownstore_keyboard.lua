@@ -200,6 +200,12 @@ function ZO_CrownStore_Keyboard:CreateMarketScene()
     SYSTEMS:RegisterKeyboardRootScene(ZO_MARKET_NAME, self.marketScene)
 end
 
+function ZO_CrownStore_Keyboard:RefreshChapterUpgradePage()
+    if not self.chapterUpgradePage:IsHidden() then
+        self:DisplayChapterUpgrade(self.currentCategoryData)
+    end
+end
+
 -- End ZO_Market_Keyboard overrides
 
 --

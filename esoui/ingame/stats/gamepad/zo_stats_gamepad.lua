@@ -1580,46 +1580,49 @@ function ZO_GamepadStats:SetupAdvancedStats()
         local categoryId = GetAdvancedStatsCategoryId(categoryIndex)
         local displayName, numStats = GetAdvancedStatCategoryInfo(categoryId)
 
-        local categoryData =
-        {
-            header = displayName, --This field is not used on gamepad, but keeping it here in case we choose to show it later
-            stats = {},
-        }
-
-        for statIndex = 1, numStats do
-            local statType, statDisplayName, description, flatValueDescription, percentValueDescription = GetAdvancedStatInfo(categoryId, statIndex)
-
-            --We need the format type ahead of time so we know what type of control(s) to create for this stat
-            --We don't bother with the flat and percent values returned here, as they get refreshed every time we set up the control
-            --The stat format type never changes, so it is safe to get it here
-            local statFormatType = GetAdvancedStatValue(statType)
-
-            local statData =
+        --ESO-819006: Only include categories with at least one stat in it
+        if numStats > 0 then
+            local categoryData =
             {
-                statType = statType, --Used to calculate the value of the stat
-                displayName = statDisplayName, --The name shown to the users for the stat
-                description = description, --The description used in the tooltip window
-                flatDescription = flatValueDescription, --The description used for the flat value tooltip window when the stat is split into both flat and percent
-                percentDescription = percentValueDescription, --The description used for the percent value tooltip window when the stat is split into both flat and percent
-                formatType = statFormatType, --How are we formatting this stat?
-                narrationText = function(entryData) --How are we narrating this stat?
-                    --If we do not have a formatted value, just use the display name
-                    local narration = entryData.displayName
-                    if entryData.formattedValue then
-                        --Stats with entries for both flat and percent narrates both the name of the stat, and "Flat" or "Percent" depending on which entry is selected.
-                        if entryData.secondaryDisplayName then
-                            narration = zo_strformat(SI_STATS_ADVANCED_SCREEN_NARRATION_MULTI_ENTRY_FORMATTER, entryData.displayName, entryData.secondaryDisplayName, entryData.formattedValue)
-                        else
-                            narration = zo_strformat(SI_STATS_ADVANCED_SCREEN_NARRATION_FORMATTER, entryData.displayName, entryData.formattedValue)
-                        end
-                    end
-                    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(narration)
-                end,
+                header = displayName, --This field is not used on gamepad, but keeping it here in case we choose to show it later
+                stats = {},
             }
-            table.insert(categoryData.stats, statData)
-        end
 
-        table.insert(advancedStatData, categoryData)
+            for statIndex = 1, numStats do
+                local statType, statDisplayName, description, flatValueDescription, percentValueDescription = GetAdvancedStatInfo(categoryId, statIndex)
+
+                --We need the format type ahead of time so we know what type of control(s) to create for this stat
+                --We don't bother with the flat and percent values returned here, as they get refreshed every time we set up the control
+                --The stat format type never changes, so it is safe to get it here
+                local statFormatType = GetAdvancedStatValue(statType)
+
+                local statData =
+                {
+                    statType = statType, --Used to calculate the value of the stat
+                    displayName = statDisplayName, --The name shown to the users for the stat
+                    description = description, --The description used in the tooltip window
+                    flatDescription = flatValueDescription, --The description used for the flat value tooltip window when the stat is split into both flat and percent
+                    percentDescription = percentValueDescription, --The description used for the percent value tooltip window when the stat is split into both flat and percent
+                    formatType = statFormatType, --How are we formatting this stat?
+                    narrationText = function(entryData) --How are we narrating this stat?
+                        --If we do not have a formatted value, just use the display name
+                        local narration = entryData.displayName
+                        if entryData.formattedValue then
+                            --Stats with entries for both flat and percent narrates both the name of the stat, and "Flat" or "Percent" depending on which entry is selected.
+                            if entryData.secondaryDisplayName then
+                                narration = zo_strformat(SI_STATS_ADVANCED_SCREEN_NARRATION_MULTI_ENTRY_FORMATTER, entryData.displayName, entryData.secondaryDisplayName, entryData.formattedValue)
+                            else
+                                narration = zo_strformat(SI_STATS_ADVANCED_SCREEN_NARRATION_FORMATTER, entryData.displayName, entryData.formattedValue)
+                            end
+                        end
+                        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(narration)
+                    end,
+                }
+                table.insert(categoryData.stats, statData)
+            end
+
+            table.insert(advancedStatData, categoryData)
+        end
     end
 
     --Now, set up the actual list of stats based on the data we just grabbed

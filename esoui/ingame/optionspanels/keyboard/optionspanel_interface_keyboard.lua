@@ -32,6 +32,14 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "UI_Settings_AutomaticQuestTracking",
+    settingType = SETTING_TYPE_UI,
+    settingId = UI_SETTING_AUTOMATIC_QUEST_TRACKING,
+    header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Interface_QuestBestowerIndicators",
     settingType = SETTING_TYPE_UI,
     settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,

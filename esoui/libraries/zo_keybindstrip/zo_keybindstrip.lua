@@ -1082,65 +1082,68 @@ do
     end
 
     function ZO_KeybindStrip:GetOrderedNarratableKeybindButtonInfo()
-        local buttonsByAlignment =
-        {
-            [KEYBIND_STRIP_ALIGN_LEFT] = {},
-            [KEYBIND_STRIP_ALIGN_CENTER] = {},
-            [KEYBIND_STRIP_ALIGN_RIGHT] = {},
-        }
-
-        for _, button in ipairs(self.keybindButtons) do
-            local isVisible = IsVisible(button.keybindButtonDescriptor)
-            if isVisible then
-                local alignment = GetValueFromRawOrFunction(button.keybindButtonDescriptor, "alignment") or KEYBIND_STRIP_ALIGN_RIGHT
-                table.insert(buttonsByAlignment[alignment], button)
-            end
-        end
-
-        for alignment, buttons in pairs(buttonsByAlignment) do
-            if IsInGamepadPreferredMode() then
-                table.sort(buttons, GamepadSort)
-            else
-                table.sort(buttons, KeyboardSort)
-            end
-        end
-
         local keybinds = {}
-        for _, button in ipairs(buttonsByAlignment[KEYBIND_STRIP_ALIGN_LEFT]) do
-            table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(button.keybindButtonDescriptor))
-        end
+        --Do not include anything if the keybind strip is currently hidden
+        if not self.control:IsHidden() then
+            local buttonsByAlignment =
+            {
+                [KEYBIND_STRIP_ALIGN_LEFT] = {},
+                [KEYBIND_STRIP_ALIGN_CENTER] = {},
+                [KEYBIND_STRIP_ALIGN_RIGHT] = {},
+            }
 
-        for _, button in ipairs(buttonsByAlignment[KEYBIND_STRIP_ALIGN_CENTER]) do
-            table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(button.keybindButtonDescriptor))
-        end
+            for _, button in ipairs(self.keybindButtons) do
+                local isVisible = IsVisible(button.keybindButtonDescriptor)
+                if isVisible then
+                    local alignment = GetValueFromRawOrFunction(button.keybindButtonDescriptor, "alignment") or KEYBIND_STRIP_ALIGN_RIGHT
+                    table.insert(buttonsByAlignment[alignment], button)
+                end
+            end
 
-        --Iterate backwards through the right aligned keybinds so they are ordered left to right visually
-        for _, button in ZO_NumericallyIndexedTableReverseIterator(buttonsByAlignment[KEYBIND_STRIP_ALIGN_RIGHT]) do
-            table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(button.keybindButtonDescriptor))
-        end
+            for alignment, buttons in pairs(buttonsByAlignment) do
+                if IsInGamepadPreferredMode() then
+                    table.sort(buttons, GamepadSort)
+                else
+                    table.sort(buttons, KeyboardSort)
+                end
+            end
 
-        local etherealDescriptors = {}
-        --Iterate through ethereal keybinds to see if we need to narrate any
-        for keybind, buttonOrEtherealDescriptor in pairs(self.keybinds) do
-            if type(buttonOrEtherealDescriptor) ~= "userdata" then
-                --If any ethereal descriptor are marked as something we want to narrate, include them here
-                if GetValueFromRawOrFunction(buttonOrEtherealDescriptor, "ethereal") then
-                    local narrateEthereal = buttonOrEtherealDescriptor.narrateEthereal
-                    if type(narrateEthereal) == "function" then
-                        narrateEthereal = narrateEthereal()
-                    end
+            for _, button in ipairs(buttonsByAlignment[KEYBIND_STRIP_ALIGN_LEFT]) do
+                table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(button.keybindButtonDescriptor))
+            end
 
-                    if narrateEthereal then
-                        table.insert(etherealDescriptors, buttonOrEtherealDescriptor)
+            for _, button in ipairs(buttonsByAlignment[KEYBIND_STRIP_ALIGN_CENTER]) do
+                table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(button.keybindButtonDescriptor))
+            end
+
+            --Iterate backwards through the right aligned keybinds so they are ordered left to right visually
+            for _, button in ZO_NumericallyIndexedTableReverseIterator(buttonsByAlignment[KEYBIND_STRIP_ALIGN_RIGHT]) do
+                table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(button.keybindButtonDescriptor))
+            end
+
+            local etherealDescriptors = {}
+            --Iterate through ethereal keybinds to see if we need to narrate any
+            for keybind, buttonOrEtherealDescriptor in pairs(self.keybinds) do
+                if type(buttonOrEtherealDescriptor) ~= "userdata" then
+                    --If any ethereal descriptor are marked as something we want to narrate, include them here
+                    if GetValueFromRawOrFunction(buttonOrEtherealDescriptor, "ethereal") then
+                        local narrateEthereal = buttonOrEtherealDescriptor.narrateEthereal
+                        if type(narrateEthereal) == "function" then
+                            narrateEthereal = narrateEthereal()
+                        end
+
+                        if narrateEthereal then
+                            table.insert(etherealDescriptors, buttonOrEtherealDescriptor)
+                        end
                     end
                 end
             end
-        end
 
-        table.sort(etherealDescriptors, EtherealSort)
+            table.sort(etherealDescriptors, EtherealSort)
 
-        for _, descriptor in ipairs(etherealDescriptors) do
-            table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(descriptor))
+            for _, descriptor in ipairs(etherealDescriptors) do
+                table.insert(keybinds, GetKeybindButtonDescriptorNarrationInfo(descriptor))
+            end
         end
 
         return keybinds

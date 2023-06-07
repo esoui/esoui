@@ -120,6 +120,8 @@ EsoUI\InternalIngame\AntiquityDigging\AntiquityDigging.lua
 EsoUI\InternalIngame\AntiquityDigging\AntiquityDigging.xml
 
 EsoUI\InternalIngame\Tribute\TributeData.lua
+EsoUI\InternalIngame\Tribute\TributeViewer_Manager_Base.lua
+EsoUI\InternalIngame\Tribute\TributeConfinementViewer_Manager.lua
 EsoUI\InternalIngame\Tribute\TributePileViewer_Manager.lua
 EsoUI\InternalIngame\Tribute\TributeTargetViewer_Manager.lua
 EsoUI\InternalIngame\Tribute\TributePatronSelection_Manager.lua
@@ -127,11 +129,14 @@ EsoUI\InternalIngame\Tribute\TributeMechanic_Manager.lua
 EsoUI\InternalIngame\Tribute\TributeMechanic_Manager.xml
 EsoUI\InternalIngame\Tribute\TributeSummary.lua
 EsoUI\InternalIngame\Tribute\TributeSummary.xml
+EsoUI\InternalIngame\Tribute\TributeConfinementViewer_Shared.lua
 EsoUI\InternalIngame\Tribute\TributePileViewer_Shared.lua
 EsoUI\InternalIngame\Tribute\TributeTargetViewer_Shared.lua
 EsoUI\InternalIngame\Tribute\TributeMechanicSelector.lua
 EsoUI\InternalIngame\Tribute\TributeMechanicSelector.xml
 EsoUI\InternalIngame\Tribute\TributePatronSelection_Shared.lua
+EsoUI\InternalIngame\Tribute\Keyboard\TributeConfinementViewer_Keyboard.lua
+EsoUI\InternalIngame\Tribute\Keyboard\TributeConfinementViewer_Keyboard.xml
 EsoUI\InternalIngame\Tribute\Keyboard\TributePileViewer_Keyboard.lua
 EsoUI\InternalIngame\Tribute\Keyboard\TributePileViewer_Keyboard.xml
 EsoUI\InternalIngame\Tribute\Keyboard\TributeTargetViewer_Keyboard.lua
@@ -142,6 +147,8 @@ EsoUI\InternalIngame\Tribute\Keyboard\TributeDialogs_Keyboard.lua
 EsoUI\InternalIngame\Tribute\Keyboard\TributeDialogs_Keyboard.xml
 EsoUI\InternalIngame\Tribute\Gamepad\Tribute_Gamepad.lua
 EsoUI\InternalIngame\Tribute\Gamepad\Tribute_Gamepad.xml
+EsoUI\InternalIngame\Tribute\Gamepad\TributeConfinementViewer_Gamepad.lua
+EsoUI\InternalIngame\Tribute\Gamepad\TributeConfinementViewer_Gamepad.xml
 EsoUI\InternalIngame\Tribute\Gamepad\TributePileViewer_Gamepad.lua
 EsoUI\InternalIngame\Tribute\Gamepad\TributePileViewer_Gamepad.xml
 EsoUI\InternalIngame\Tribute\Gamepad\TributeTargetViewer_Gamepad.lua

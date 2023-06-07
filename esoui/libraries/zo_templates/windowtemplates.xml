@@ -802,6 +802,10 @@
                 <Texture name="$(parent)Icon" tier ="MEDIUM">
                     <AnchorFill/>
                 </Texture>
+
+                <Label name="$(parent)KeyLabel" tier="HIGH" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGame" inheritScale="false" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" />
+                </Label>
             </Controls>
         </Control>
 

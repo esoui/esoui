@@ -216,6 +216,7 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeSearchBar()
 
     local function SearchEditFocusLost()
         ZO_GamepadEditBox_FocusLost(searchEdit)
+        SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher)
     end
 
     local function SearchEditTextChanged()
@@ -233,7 +234,9 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeSearchBar()
     local searchData = 
     {
         highlight = searchControl:GetNamedChild("Highlight"),
-        canFocus = function() return not searchControl:IsHidden() and not searchEdit:IsHidden() end
+        canFocus = function() return not searchControl:IsHidden() and not searchEdit:IsHidden() end,
+        activate = function() SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher) end,
+        narrationText = function() return ZO_FormatEditBoxNarrationText(self.searchEdit, GetString(SI_SCREEN_NARRATION_EDIT_BOX_SEARCH_NAME)) end,
     }
     self.filterSwitcher:AddEntry(searchData)
 end
@@ -397,7 +400,8 @@ function ZO_Outfit_Slots_Panel_Gamepad:UpdateGridList()
 
     local function InsertEntryIntoTable(tempTable, data)
         local collectibleEntryData = ZO_GridSquareEntryData_Shared:New(data)
-        ZO_UpdateCollectibleEntryDataIconVisuals(collectibleEntryData)
+        local actorCategory = self.currentOutfitManipulator and self.currentOutfitManipulator:GetActorCategory() or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+        ZO_UpdateCollectibleEntryDataIconVisuals(collectibleEntryData, actorCategory)
         FindSelectedData(collectibleEntryData)
         table.insert(tempTable, collectibleEntryData)
     end

@@ -1049,33 +1049,36 @@ function ZO_AdvancedStats_Keyboard:SetupAdvancedStats()
         local categoryId = GetAdvancedStatsCategoryId(categoryIndex)
         local displayName, numStats = GetAdvancedStatCategoryInfo(categoryId)
 
-        local categoryData = 
-        {
-            header = displayName,
-            stats = {},
-        }
-
-        for statIndex = 1, numStats do
-            local statType, statDisplayName, description, flatValueDescription, percentValueDescription = GetAdvancedStatInfo(categoryId, statIndex)
-
-            --We need the format type ahead of time so we know what type of control to create for this stat
-            --We don't bother with the flat and percent values returned here, as they get refreshed every time we set up the control
-            --The stat format type never changes, so it is safe to get it here
-            local statFormatType = GetAdvancedStatValue(statType)
-
-            local statData =
+        --ESO-819006: Only include categories with at least one stat in it
+        if numStats > 0 then
+            local categoryData = 
             {
-                statType = statType, --Used to calculate the value of the stat
-                displayName = statDisplayName, --The name shown to the users for the stat
-                description = description, --The description used in the tooltip
-                flatDescription = flatValueDescription, --The description used for the flat value tooltip when the stat is split into both flat and percent
-                percentDescription = percentValueDescription, --The description used for the percent value tooltip when the stat is split into both flat and percent
-                formatType = statFormatType, --How are we formatting this stat?
+                header = displayName,
+                stats = {},
             }
-            table.insert(categoryData.stats, statData)
-        end
 
-        table.insert(advancedStatData, categoryData)
+            for statIndex = 1, numStats do
+                local statType, statDisplayName, description, flatValueDescription, percentValueDescription = GetAdvancedStatInfo(categoryId, statIndex)
+
+                --We need the format type ahead of time so we know what type of control to create for this stat
+                --We don't bother with the flat and percent values returned here, as they get refreshed every time we set up the control
+                --The stat format type never changes, so it is safe to get it here
+                local statFormatType = GetAdvancedStatValue(statType)
+
+                local statData =
+                {
+                    statType = statType, --Used to calculate the value of the stat
+                    displayName = statDisplayName, --The name shown to the users for the stat
+                    description = description, --The description used in the tooltip
+                    flatDescription = flatValueDescription, --The description used for the flat value tooltip when the stat is split into both flat and percent
+                    percentDescription = percentValueDescription, --The description used for the percent value tooltip when the stat is split into both flat and percent
+                    formatType = statFormatType, --How are we formatting this stat?
+                }
+                table.insert(categoryData.stats, statData)
+            end
+
+            table.insert(advancedStatData, categoryData)
+        end
     end
 
     --Now, set up the actual list of stats based on the data we just grabbed

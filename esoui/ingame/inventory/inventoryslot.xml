@@ -56,7 +56,7 @@
             />
         </Button>
 
-        <Button name="ZO_ItemSlot_Gamepad" inherits="ZO_ItemSlot_Shared" virtual="true">
+        <Button name="ZO_ItemSlot_Gamepad" inherits="ZO_ItemSlot_Shared" virtual="true" mouseEnabled="false">
             <Controls>
                 <Label name="$(parent)StackCount" override="true" font="ZoFontGamepad27" />
             </Controls>

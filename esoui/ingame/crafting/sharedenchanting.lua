@@ -1,11 +1,5 @@
 ZO_SharedEnchanting = ZO_CraftingCreateScreenBase:Subclass()
 
-function ZO_SharedEnchanting:New(...)
-    local enchanting = ZO_CraftingCreateScreenBase.New(self)
-    enchanting:Initialize(...)
-    return enchanting
-end
-
 ENCHANTING_MODE_NONE = 0
 ENCHANTING_MODE_CREATION = 1
 ENCHANTING_MODE_EXTRACTION = 2

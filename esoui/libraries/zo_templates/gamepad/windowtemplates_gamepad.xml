@@ -41,11 +41,17 @@
                 <Cooldown name="$(parent)Cooldown" inherits="ZO_DefaultCooldown" alpha="1" tier="HIGH">
                     <AnchorFill/>
                 </Cooldown>
+                <Label name="$(parent)KeyLabel" tier="HIGH" inherits="ZO_LargeKeyMarkupLabel_Gamepad" inheritScale="false" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="-5" />
+                </Label>
             </Controls>
         </Control>
         
         <Control name="ZO_RadialMenuHUDEntryTemplate_Gamepad" scale="0.75" virtual="true">
             <Dimensions x="64" y="64"/>
+            <OnInitialized>
+                self.keybindLabel = self:GetNamedChild("KeyLabel")
+            </OnInitialized>
             <Controls>
                 <Texture name="$(parent)Icon" pixelRoundingEnabled="false" tier="MEDIUM">
                     <Dimensions x="64" y="64" />
@@ -55,6 +61,9 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-8" offsetY="-8"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="8" offsetY="8"/>
                 </Backdrop>
+                <Label name="$(parent)KeyLabel" tier="HIGH" inherits="ZO_LargeKeyMarkupLabel_Gamepad" inheritScale="false" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="-10" />
+                </Label>
             </Controls>
         </Control>
 

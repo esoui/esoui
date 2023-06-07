@@ -1154,7 +1154,7 @@ do
     function ZO_CrownCratesCard:CanActivateCollectible()
         if self.rewardProductType == MARKET_PRODUCT_TYPE_COLLECTIBLE and not self:IsGemified() then
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.rewardReferenceDataId)
-            if collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) and collectibleData:IsValidForPlayer() and not collectibleData:IsBlocked() then
+            if collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) and collectibleData:IsValidForPlayer() and not collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
                 return not (collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) or DISALLOWED_EQUIPPABLE_COLLECTIBLE_TYPES[collectibleData:GetCategoryType()])
             end
         end

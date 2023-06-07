@@ -114,7 +114,7 @@ local ITEM_TYPE_DISPLAY_CATEGORY_ICONS =
     {
         up = "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_styleMaterial_up.dds",
         down = "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_styleMaterial_down.dds",
-        over = "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_styleMaterial_over",
+        over = "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_styleMaterial_over.dds",
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_TRAIT_ITEM] =
     {

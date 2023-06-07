@@ -104,6 +104,8 @@ ESO_Dialogs["CONFIRM_OPEN_URL_BY_TYPE"] =
                 local serviceType = GetPlatformServiceType()
                 if serviceType == PLATFORM_SERVICE_TYPE_STEAM then
                     return SI_CONFIRM_OPEN_STEAM_STORE
+                elseif serviceType == PLATFORM_SERVICE_TYPE_EPIC then
+                    return SI_CONFIRM_OPEN_EPIC_STORE
                 end
             else
                 return SI_CONFIRM_OPEN_URL_TEXT
@@ -190,7 +192,7 @@ ESO_Dialogs["SHOW_REDEEM_CODE_CONSOLE"] =
             callback = function(dialog)
                 if IsConsoleUI() then
                     ShowConsoleRedeemCodeUI()
-                else -- It's intended that Heron do this as well
+                else
                     OpenURLByType(APPROVED_URL_ESO_ACCOUNT)
                 end
             end,

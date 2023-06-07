@@ -212,6 +212,8 @@ function ZO_ItemSetCollectionsManager:InitializeOptionsDialog()
                     apparelFilterTypesData:ClearAllSelections()
                     weaponFilterTypesData:ClearAllSelections()
                     dialog:setupFunc()
+                    --Re-narrate the selection when the filters are reset
+                    SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                 end,
             },
         },

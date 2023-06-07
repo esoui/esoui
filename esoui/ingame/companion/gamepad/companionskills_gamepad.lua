@@ -618,7 +618,6 @@ function ZO_CompanionSkills_Gamepad:OnShowing()
 
     self:TryClean()
     self:RefreshTooltip()
-    self.assignableActionBar:Refresh()
     self:RefreshFooter()
 end
 

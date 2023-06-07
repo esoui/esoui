@@ -188,9 +188,10 @@ do
                 applyCost = 0
             end
             local applyCostString = ZO_Currency_FormatGamepad(CURT_MONEY, applyCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            local applyCostNarrationString = ZO_Currency_FormatGamepad(CURT_MONEY, applyCost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
             local statValuePair = bodySection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             statValuePair:SetStat(GetString(SI_TOOLTIP_COLLECTIBLE_OUTFIT_STYLE_APPLICATION_COST_GAMEPAD), self:GetStyle("statValuePairStat"))
-            statValuePair:SetValue(applyCostString, descriptionStyle, self:GetStyle("currencyStatValuePairValue"))
+            statValuePair:SetValueWithCustomNarration(applyCostString, applyCostNarrationString, descriptionStyle, self:GetStyle("currencyStatValuePairValue"))
             bodySection:AddStatValuePair(statValuePair)
         elseif  categoryType == COLLECTIBLE_CATEGORY_TYPE_POLYMORPH then
             if isActive and params.showVisualLayerInfo then
@@ -281,9 +282,11 @@ do
                 local companionId = GetCollectibleReferenceId(collectibleId)
                 local introQuestId = GetCompanionIntroQuestId(companionId)
                 local zoneId = GetQuestZoneId(introQuestId)
-                local zoneCollectibleId = GetCollectibleIdForZone(GetZoneIndex(zoneId))
-                if zoneCollectibleId > 0 and not IsCollectibleUnlocked(zoneCollectibleId) then
-                    local formattedBlockReason = zo_strformat(SI_COLLECTIBLE_TOOLTIP_COMPANION_BLOCKED_BY_QUEST_AND_DLC, GetQuestName(introQuestId), GetZoneNameById(zoneId), GetString("SI_COLLECTIBLECATEGORYTYPE", GetCollectibleCategoryType(zoneCollectibleId)))
+                local zoneIndex = GetZoneIndex(zoneId)
+                local isZoneLocked = IsZoneCollectibleLocked(zoneIndex)
+                if isZoneLocked then
+                    local lockedZoneCollectibleId = GetCollectibleIdForZone(zoneIndex)
+                    local formattedBlockReason = zo_strformat(SI_COLLECTIBLE_TOOLTIP_COMPANION_BLOCKED_BY_QUEST_AND_DLC, GetQuestName(introQuestId), GetZoneNameById(zoneId), GetString("SI_COLLECTIBLECATEGORYTYPE", GetCollectibleCategoryType(lockedZoneCollectibleId)))
                     bodySection:AddLine(formattedBlockReason, descriptionStyle, self:GetStyle("failed"))
                 else
                     local formattedBlockReason = zo_strformat(SI_COLLECTIBLE_TOOLTIP_COMPANION_BLOCKED_BY_QUEST, GetQuestName(introQuestId))
@@ -306,15 +309,28 @@ do
     end
 end
 
-function ZO_Tooltip:LayoutSetDefaultCollectibleFromData(setDefaultCollectibleData, actorCategory)
+function ZO_Tooltip:LayoutImitationCollectibleFromData(imitationCollectibleData, actorCategory)
     local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
-    topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", setDefaultCollectibleData:GetCategoryTypeToSetDefault()))
+    topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", imitationCollectibleData:GetCategoryType()))
     self:AddSection(topSection)
 
-    self:AddLine(setDefaultCollectibleData:GetName(), self:GetStyle("title"))
+    self:AddLine(imitationCollectibleData:GetName(), self:GetStyle("title"))
 
     local bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
-    bodySection:AddLine(setDefaultCollectibleData:GetDescription(actorCategory), self:GetStyle("bodyDescription"))
+    bodySection:AddLine(imitationCollectibleData:GetDescription(actorCategory), self:GetStyle("bodyDescription"))
+
+    if imitationCollectibleData:IsActive(actorCategory) and imitationCollectibleData.GetActiveCollectibleText then
+        local activeCollectibleText = imitationCollectibleData:GetActiveCollectibleText(actorCategory)
+        if activeCollectibleText ~= nil and activeCollectibleText ~= "" then
+            bodySection:AddLine(activeCollectibleText, self:GetStyle("bodyDescription"))
+        end
+    end
+
+    local blockReason = imitationCollectibleData:IsBlocked(actorCategory) and imitationCollectibleData:GetBlockReason(actorCategory) or nil
+    if blockReason ~= nil and blockReason ~= "" then
+        bodySection:AddLine(blockReason, self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+    end
+
     self:AddSection(bodySection)
 end
 

@@ -68,12 +68,12 @@
                 <Control name="$(parent)PlayerCallout">
                     <AnchorFill/>
                     <Controls>
-                        <Texture name="$(parent)Left" textureFile="EsoUI/Art/Campaign/emporer_playerBG_left.dds">
+                        <Texture name="$(parent)Left" textureFile="EsoUI/Art/Campaign/emperor_playerBG_left.dds">
                             <Dimensions x="506" y="30"/>
                             <TextureCoords top="0.0625" bottom="0.5625" left="0" right="1" />
                             <Anchor point="TOPLEFT"/>
                         </Texture>
-                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Campaign/emporer_playerBG_right.dds">
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Campaign/emperor_playerBG_right.dds">
                             <Dimensions x="122" y="30"/>
                             <TextureCoords top="0.0625" bottom="0.5625" left="0" right="1" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />

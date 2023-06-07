@@ -30,7 +30,6 @@ GUILD_HISTORY_CATEGORIES =
             {
                 gamepadIcon = "EsoUI/Art/Guild/gamepad/gp_guild_menuIcon_customization.dds",
                 events = {
-                    [GUILD_EVENT_BANKGOLD_PURCHASE_HERALDRY] = true,
                     [GUILD_EVENT_HERALDRY_EDITED] = true,
                     [GUILD_EVENT_MOTD_EDITED] = true,
                     [GUILD_EVENT_ABOUT_US_EDITED] = true,
@@ -80,7 +79,6 @@ GUILD_HISTORY_CATEGORIES =
                     [GUILD_EVENT_BANKITEM_REMOVED] = true,
                     [GUILD_EVENT_BANKGOLD_REMOVED] = true,
                     [GUILD_EVENT_BANKGOLD_KIOSK_BID] = true,
-                    [GUILD_EVENT_BANKGOLD_PURCHASE_HERALDRY] = true,
                     [GUILD_EVENT_GUILD_KIOSK_PURCHASED] = true,
                     [GUILD_EVENT_HERALDRY_EDITED] = true,
                 },
@@ -259,7 +257,6 @@ GUILD_EVENT_EVENT_FORMAT =
     [GUILD_EVENT_BANKGOLD_KIOSK_BID_REFUND] = KioskRefundEventFormat,       -- (eventType, kioskName, goldQuantity)
     [GUILD_EVENT_BANKGOLD_KIOSK_BID] = KioskBuyOrBidEventFormat,            -- (eventType, displayName, goldQuantity, kioskName)
     [GUILD_EVENT_GUILD_KIOSK_PURCHASED] = KioskBuyOrBidEventFormat,         -- (eventType, displayName, goldQuantity, kioskName)
-    [GUILD_EVENT_BANKGOLD_GUILD_STORE_TAX] = DefaultEventFormatNoParams,    -- (eventType)
     [GUILD_EVENT_MOTD_EDITED] = DefaultEventFormatWithDisplayName,          -- (eventType, displayName)
     [GUILD_EVENT_ABOUT_US_EDITED] = DefaultEventFormatWithDisplayName,      -- (eventType, displayName)
     [GUILD_EVENT_KEEP_CLAIMED] = DefaultEventFormatWithDisplayName,         -- (eventType, displayName, keepName, campaignName)

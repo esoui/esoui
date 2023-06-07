@@ -88,6 +88,7 @@ function ZO_Stable_Keyboard:InitializeEvents()
         elseif newState == SCENE_HIDDEN then
             self:UnregisterUpdateEvents()
             self.modeBar:Clear()
+            ZO_InventorySlot_RemoveMouseOverKeybinds()
 
             if GetCursorContentType() == MOUSE_CONTENT_STORE_ITEM then 
                 ClearCursor()

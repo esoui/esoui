@@ -415,6 +415,9 @@ function ZO_GamepadPlayerEmote:InitializeRadialMenu()
         hotbarCategories = { HOTBAR_CATEGORY_EMOTE_WHEEL, HOTBAR_CATEGORY_QUICKSLOT_WHEEL },
         numSlots = ACTION_BAR_UTILITY_BAR_SIZE,
         showCategoryLabel = true,
+        onSelectionChangedCallback = function()
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.emoteAssignmentKeybindStripDescriptor)
+        end,
         customNarrationObjectName = "EmoteAssignableUtilityWheel",
         headerNarrationFunction = function()
             local narrations = {}
@@ -491,10 +494,20 @@ function ZO_GamepadPlayerEmote:InitializeKeybindStripDescriptors()
 
     -- keybinds when assigning emotes
     self.emoteAssignmentKeybindStripDescriptor = {}
+
+    local function OnAssignPendingData()
+        self.wheel:TryAssignPendingToSelectedEntry()
+    end
+
+    local function ShouldShowAssignKeybind()
+        return self.wheel:GetSelectedRadialEntry() ~= nil
+    end
+
     ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.emoteAssignmentKeybindStripDescriptor,
                                             GAME_NAVIGATION_TYPE_BUTTON, 
-                                            function() self.wheel:TryAssignPendingToSelectedEntry() end,
-                                            GetString(SI_GAMEPAD_ITEM_ACTION_QUICKSLOT_ASSIGN))
+                                            OnAssignPendingData,
+                                            GetString(SI_GAMEPAD_ITEM_ACTION_QUICKSLOT_ASSIGN),
+                                            ShouldShowAssignKeybind)
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.emoteAssignmentKeybindStripDescriptor,
                                                 GAME_NAVIGATION_TYPE_BUTTON,
@@ -541,8 +554,6 @@ function ZO_GamepadPlayerEmote:SelectMode(mode)
         self.emoteListGrid:SetAllowHighlight(true)
         self.emoteListGrid:Activate()
     elseif self.mode == MODE_EMOTE_ASSIGNMENT then
-        self.emoteListGridControl:SetHidden(true)
-        KEYBIND_STRIP:AddKeybindButtonGroup(self.emoteAssignmentKeybindStripDescriptor)
         self:ShowAssignableUtilityWheel()
     end
 end
@@ -556,21 +567,31 @@ function ZO_GamepadPlayerEmote:ChangeCurrentMode(mode)
 end
 
 function ZO_GamepadPlayerEmote:ShowAssignableUtilityWheel()
+    local useAccessibleWheel = GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS)
     local actionId = self.emoteListGrid:GetSelectedEmoteId()
+    local slotType = nil
     local activeEntryType = self.emoteListGrid:GetSelectedEmoteType()
 
     if activeEntryType == EMOTE_GRID_ENTRY_TYPE_EMOTE then
-        self.wheel:SetPendingSimpleAction(ACTION_TYPE_EMOTE, actionId)
+        slotType = ACTION_TYPE_EMOTE
     elseif activeEntryType == EMOTE_GRID_ENTRY_TYPE_QUICK_CHAT then
-        self.wheel:SetPendingSimpleAction(ACTION_TYPE_QUICK_CHAT, actionId)
+        slotType = ACTION_TYPE_QUICK_CHAT
     end
 
-    self.assignLabel:SetHidden(false)
-    self.selectedEmoteNameLabel:SetHidden(false)
-    self.selectedEmoteNameLabel:SetText(self.emoteListGrid:GetSelectedEmoteName())
+    if useAccessibleWheel then
+        ACCESSIBLE_ASSIGNABLE_UTILITY_WHEEL_GAMEPAD:SetPendingSimpleAction(slotType, actionId)
+        ACCESSIBLE_ASSIGNABLE_UTILITY_WHEEL_GAMEPAD:Show({ HOTBAR_CATEGORY_EMOTE_WHEEL, HOTBAR_CATEGORY_QUICKSLOT_WHEEL })
+    else
+        self.emoteListGridControl:SetHidden(true)
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.emoteAssignmentKeybindStripDescriptor)
+        self.wheel:SetPendingSimpleAction(slotType, actionId)
+        self.assignLabel:SetHidden(false)
+        self.selectedEmoteNameLabel:SetHidden(false)
+        self.selectedEmoteNameLabel:SetText(self.emoteListGrid:GetSelectedEmoteName())
 
-    -- This will Activate the menu and show it
-    self.wheel:Show()
+        -- This will Activate the menu and show it
+        self.wheel:Show()
+    end
 end
 
 function ZO_GamepadPlayerEmote:HideAssignableUtilityWheel()

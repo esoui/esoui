@@ -1690,7 +1690,6 @@ function SharedChatSystem:SubmitTextEntry()
                 self.commandPrefixes[prefix](text)
             else
                 if self:ValidateChatChannel() then
-                    ZO_OutputStadiaLog("SharedChatSystem:SubmitTextEntry, set ZO_Menu_SetLastCommandWasFromMenu == false")
                     ZO_Menu_SetLastCommandWasFromMenu(false)
                     SendChatMessage(text, self.currentChannel, self.currentTarget)
                 end

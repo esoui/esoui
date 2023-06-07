@@ -34,12 +34,33 @@ function ZO_UtilityWheel_Gamepad:InitializeNarrationInfo()
             return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_HOTBARCATEGORY", self:GetHotbarCategory()))
         end,
         additionalInputNarrationFunction = function()
+            local narrationData = {}
+            if self.menu:ShouldShowKeybinds() then
+                self.menu:ForEachOrdinalEntry(function(ordinalIndex, entry)
+                    local actionName = ZO_GetRadialMenuActionNameForOrdinalIndex(ordinalIndex)
+                    local name = entry.name
+                    if type(name) == "table" then
+                        name = name[1]
+                    end
+
+                    local entryNarrationData =
+                    {
+                        name = name,
+                        keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(actionName) or GetString(SI_ACTION_IS_NOT_BOUND),
+                        enabled = true,
+                    }
+
+                    table.insert(narrationData, entryNarrationData)
+                end)
+            end
+
             local cycleLeftNarrationData =
             {
                 name = GetString("SI_HOTBARCATEGORY", self:GetPreviousHotbarCategory()),
                 keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UTILITY_WHEEL_GAMEPAD_CYCLE_LEFT") or GetString(SI_ACTION_IS_NOT_BOUND),
                 enabled = true,
             }
+            table.insert(narrationData, cycleLeftNarrationData)
 
             local cycleRightNarrationData =
             {
@@ -47,8 +68,9 @@ function ZO_UtilityWheel_Gamepad:InitializeNarrationInfo()
                 keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UTILITY_WHEEL_GAMEPAD_CYCLE_RIGHT") or GetString(SI_ACTION_IS_NOT_BOUND),
                 enabled = true,
             }
+            table.insert(narrationData, cycleRightNarrationData)
 
-            return { cycleLeftNarrationData, cycleRightNarrationData }
+            return narrationData
         end,
         narrationType = NARRATION_TYPE_HUD,
     }

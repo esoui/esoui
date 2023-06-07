@@ -6,6 +6,8 @@
         <Control name="ZO_GamepadDropdownItem" inherits="ZO_Gamepad_Dropdown_Item_FullWidth" virtual="true"/>
         
         <Control name="ZO_GamepadMultiSelectionDropdownItem" inherits="ZO_Gamepad_MultiSelection_Dropdown_Item_FullWidth" virtual="true"/>
+
+        <Control name="ZO_GamepadMultiSelectionDropdownItem_Indented" inherits="ZO_Gamepad_MultiSelection_Dropdown_Item_Indented" virtual="true"/>
         
         <Control name="ZO_GamepadIconSelectorItem" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryControlSizedTemplate ZO_GamepadIconSelectorTemplate" virtual="true" />
 

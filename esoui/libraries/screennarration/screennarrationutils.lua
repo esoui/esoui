@@ -30,9 +30,17 @@ function ZO_GetNarrationTextForGridListTile(entryData)
     end
 end
 
---Generates narration text for a toggle control. The header parameter is optional
-function ZO_FormatToggleNarrationText(name, isChecked, header)
-    local isCheckedText = isChecked and GetString(SI_SCREEN_NARRATION_TOGGLE_ON) or GetString(SI_SCREEN_NARRATION_TOGGLE_OFF)
+--Generates narration text for a toggle control. The header and enabled parameters are optional
+--If nothing is passed in for enabled, assume true
+function ZO_FormatToggleNarrationText(name, isChecked, header, enabled)
+    local isCheckedText
+    if enabled == nil or enabled then
+        isCheckedText = isChecked and GetString(SI_SCREEN_NARRATION_TOGGLE_ON) or GetString(SI_SCREEN_NARRATION_TOGGLE_OFF)
+    else
+        --If the toggle is disabled, narrate that instead of the on/off state
+        isCheckedText = GetString(SI_SCREEN_NARRATION_TOGGLE_DISABLED)
+    end
+
     if header then
         return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_TOGGLE_WITH_HEADER_FORMATTER, name, isCheckedText, header))
     else
@@ -205,6 +213,12 @@ function ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl)
     ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryStackCountNarrationText(entryData, entryControl))
     ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryStatusIndicatorNarrationText(entryData, entryControl))
     return narrations
+end
+
+--Function for getting a narratable object for a vertex of a triangle picker, given a name and a value
+function ZO_GetTrianglePickerVertexNarrationText(name, value)
+    local percentage = string.format("%d", value * 100)
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_TRIANGLE_PICKER_PERCENT_FORMATTER, name, percentage))
 end
 
 do

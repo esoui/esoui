@@ -363,7 +363,7 @@ function ZO_ActivityFinderTemplate_Shared:OnTributeClubRankDataChanged()
 end
 
 function ZO_ActivityFinderTemplate_Shared:OnTributeCampaignDataChanged()
-    self.isTributeCampaignDataInitialized = true
+    --Can be overridden
 end
 
 function ZO_ActivityFinderTemplate_Shared:OnTributeLeaderboardRankChanged()

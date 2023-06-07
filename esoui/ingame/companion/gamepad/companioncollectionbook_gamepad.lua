@@ -169,33 +169,28 @@ function ZO_CompanionCollectionBook_Gamepad:InitializeKeybindStripDescriptors()
             visible = function()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData then
-                    if collectibleData:IsInstanceOf(ZO_SetDefaultCollectibleData) then
-                        --This is a set default data entry, not a regular ZO_CollectibleData
-                        return not collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
-                    else
-                        return collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
-                    end
+                    return collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
                 else
                     return false
                 end
             end,
             enabled = function()
                 local collectibleData = self:GetCurrentTargetData()
-                if collectibleData:IsInstanceOf(ZO_SetDefaultCollectibleData) then
-                    --This is a set default data entry, not a regular ZO_CollectibleData
-                    return true
-                else
+                if collectibleData:IsInstanceOf(ZO_CollectibleData) then
                     local remainingMs = GetCollectibleCooldownAndDuration(collectibleData:GetId())
                     if collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_COMPANION) then
                         return true
                     elseif remainingMs > 0 then
                         return false, GetString(SI_COLLECTIONS_COOLDOWN_ERROR)
-                    elseif collectibleData:IsBlocked() then
+                    elseif collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_COMPANION) then
                         -- TODO: Determine if companion collectible actions can be blocked
                         return false, GetString(SI_COLLECTIONS_BLOCKED_ERROR)
                     else
                         return true
                     end
+                else
+                    --This is an imitation collectible data
+                    return not collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_COMPANION), collectibleData:GetBlockReason(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
                 end
             end
         },
@@ -259,12 +254,13 @@ function ZO_CompanionCollectionBook_Gamepad:SetupList(list)
     list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
     local function CollectibleEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        if not data:IsInstanceOf(ZO_SetDefaultCollectibleData) then
-            local collectibleData = data.dataSource
+        local collectibleData = data.dataSource
+        if collectibleData:IsInstanceOf(ZO_CollectibleData) then
             data:SetNew(collectibleData:IsNew())
-            data:SetEnabled(not collectibleData:IsBlocked())
-            ZO_SetDefaultIconSilhouette(control.icon, collectibleData:IsLocked())
         end
+        data:SetEnabled(not collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_COMPANION))
+        ZO_SetDefaultIconSilhouette(control.icon, collectibleData:IsLocked())
+
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
 
@@ -426,9 +422,13 @@ function ZO_CompanionCollectionBook_Gamepad:HideCurrentList()
     self.currentList = nil
 end
 
-function ZO_CompanionCollectionBook_Gamepad:OnCollectionUpdated()
+function ZO_CompanionCollectionBook_Gamepad:OnCollectionUpdated(collectionUpdateType)
     if not self.control:IsHidden() then
-        if self.categoryList then
+        if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.RANDOM_MOUNT_SETTING_CHANGED then
+            -- if random mount changed, we really just want to update the current list just like
+            -- OnCollectibleUpdated does.
+            self:OnCollectibleUpdated()
+        elseif self.categoryList then
             self:ShowList(self.categoryList)
             self.categoryList.list:SetSelectedIndex(1)
             self:BuildCategoryList()
@@ -545,11 +545,18 @@ function ZO_CompanionCollectionBook_Gamepad:BuildCollectionList(categoryData, re
         -- Add defaults
         local collectibleCategoryTypesInCategory = categoryData:GetCollectibleCategoryTypesInCategory()
         for categoryType in pairs(collectibleCategoryTypesInCategory) do
-            local setDefaultCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetSetDefaultCollectibleData(categoryType, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
-            if setDefaultCollectibleData then
-                local defaultEntryData = self:BuildCollectibleCategorySetDefaultData(setDefaultCollectibleData)
+            local setToDefaultCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetSetToDefaultCollectibleData(categoryType, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+            if setToDefaultCollectibleData then
+                local defaultEntryData = self:BuildCollectibleCategorySetToDefaultData(setToDefaultCollectibleData)
                 collectionList:AddEntry("ZO_GamepadCompanionCollectible", defaultEntryData)
             end
+        end
+
+        if collectibleCategoryTypesInCategory[COLLECTIBLE_CATEGORY_TYPE_MOUNT] then
+            local setRandomMountData = ZO_RandomMountCollectibleData:New(RANDOM_MOUNT_TYPE_ANY)
+            local randomMountEntryData = self:BuildCollectibleCategorySetRandomSelectionData(setRandomMountData)
+            ZO_UpdateCollectibleEntryDataIconVisuals(randomMountEntryData, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+            collectionList:AddEntry("ZO_GamepadCompanionCollectible", randomMountEntryData)
         end
     end
 
@@ -570,9 +577,9 @@ function ZO_CompanionCollectionBook_Gamepad:UpdateCollectionListVisualLayer()
     for i = 1, list:GetNumItems() do
         local collectibleData = list:GetDataForDataIndex(i)
 
-        -- ESO-725038: ZO_SetDefaultCollectibleData doesn't implement IsVisualLayerHidden
-        -- so if the visual layer updates while a collectibleData of this type is show we don't
-        -- want to attempt to show it. Should we run into other instanciations of ZO_SetDefaultCollectibleData
+        -- ESO-725038: ZO_SetToDefaultCollectibleData doesn't implement IsVisualLayerHidden
+        -- so if the visual layer updates while a collectibleData of this type is shown we don't
+        -- want to attempt to show it. Should we run into other instantiations of ZO_SetToDefaultCollectibleData
         -- besides "Default Mount" that have a visual layer we should implement the function on that class.
         -- An example of this happening is when werewolf ends while viewing the
         -- companion mount subcategory which has a default collectible entry of "Default Mount"
@@ -583,11 +590,20 @@ function ZO_CompanionCollectionBook_Gamepad:UpdateCollectionListVisualLayer()
     self:RefreshRightPanel(self.collectionList.list:GetTargetData())
 end
 
-function ZO_CompanionCollectionBook_Gamepad:BuildCollectibleCategorySetDefaultData(setDefaultCollectibleData)
-    local entryData = ZO_GamepadEntryData:New(setDefaultCollectibleData:GetName(), setDefaultCollectibleData:GetIcon())
-    entryData:SetDataSource(setDefaultCollectibleData)
+function ZO_CompanionCollectionBook_Gamepad:BuildCollectibleCategorySetToDefaultData(setToDefaultCollectibleData)
+    local entryData = ZO_GamepadEntryData:New(setToDefaultCollectibleData:GetName(), setToDefaultCollectibleData:GetIcon())
+    entryData:SetDataSource(setToDefaultCollectibleData)
     entryData.actorCategory = GAMEPLAY_ACTOR_CATEGORY_COMPANION
-    entryData.isEquippedInCurrentCategory = setDefaultCollectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+    entryData.isEquippedInCurrentCategory = setToDefaultCollectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_COMPANION) and not setToDefaultCollectibleData:ShouldSuppressActiveState(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+
+    return entryData
+end
+
+function ZO_CompanionCollectionBook_Gamepad:BuildCollectibleCategorySetRandomSelectionData(collectibleData)
+    local entryData = ZO_GamepadEntryData:New(collectibleData:GetName(), collectibleData:GetIcon())
+    entryData:SetDataSource(collectibleData)
+    entryData.actorCategory = GAMEPLAY_ACTOR_CATEGORY_COMPANION
+    entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
 
     return entryData
 end
@@ -600,11 +616,11 @@ function ZO_CompanionCollectionBook_Gamepad:BuildCollectibleData(collectibleData
     entryData:SetCooldownIcon(collectibleData:GetIcon())
 
     entryData.actorCategory = GAMEPLAY_ACTOR_CATEGORY_COMPANION
-    entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+    entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_COMPANION) and not collectibleData:ShouldSuppressActiveState(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
 
     entryData:SetIsHiddenByWardrobe(collectibleData:IsVisualLayerHidden(GAMEPLAY_ACTOR_CATEGORY_COMPANION))
 
-    ZO_UpdateCollectibleEntryDataIconVisuals(entryData)
+    ZO_UpdateCollectibleEntryDataIconVisuals(entryData, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
 
     local remainingMs, durationMs = GetCollectibleCooldownAndDuration(collectibleId)
     if remainingMs > 0 and durationMs > 0 then
@@ -680,13 +696,13 @@ end
 function ZO_CompanionCollectionBook_Gamepad:RefreshStandardTooltip(collectibleData)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP, true)
 
-    if collectibleData:IsInstanceOf(ZO_SetDefaultCollectibleData) then
-        GAMEPAD_TOOLTIPS:LayoutSetDefaultCollectibleFromData(GAMEPAD_LEFT_TOOLTIP, collectibleData, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
-    else
+    if collectibleData:IsInstanceOf(ZO_CollectibleData) then
         local timeRemainingS = collectibleData:GetCooldownTimeRemainingMs() / 1000
         local SHOW_VISUAL_LAYER_INFO = true
         local SHOW_BLOCK_REASON = true
         GAMEPAD_TOOLTIPS:LayoutCollectibleFromData(GAMEPAD_LEFT_TOOLTIP, collectibleData, SHOW_VISUAL_LAYER_INFO, timeRemainingS, SHOW_BLOCK_REASON, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+    else
+        GAMEPAD_TOOLTIPS:LayoutImitationCollectibleFromData(GAMEPAD_LEFT_TOOLTIP, collectibleData, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
     end
 end
 
@@ -740,7 +756,7 @@ end
 
 function ZO_CompanionCollectionBook_Gamepad:GetCurrentTargetCollectibleData()
     local targetData = self:GetCurrentTargetData()
-    if targetData and not targetData:IsInstanceOf(ZO_SetDefaultCollectibleData) then
+    if targetData and targetData:IsInstanceOf(ZO_CollectibleData) then
         return targetData
     end
     return nil
@@ -749,7 +765,7 @@ end
 function ZO_CompanionCollectionBook_Gamepad:CanPurchaseCurrentTarget()
     if self:IsViewingCollectionsList() then
         local collectibleData = self:GetCurrentTargetCollectibleData()
-        return collectibleData and collectibleData:IsPurchasable() and not collectibleData:IsOwned() and not collectibleData:IsHouse()
+        return collectibleData and collectibleData:IsPurchasable() and collectibleData:CanAcquire() and not collectibleData:IsHouse()
     end
     return false
 end

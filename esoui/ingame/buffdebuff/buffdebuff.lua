@@ -193,7 +193,7 @@ end
 
 function ZO_BuffDebuff_ContainerObject:ShouldContextuallyShow()
     --Don't show while the wheels are up
-    if UTILITY_WHEEL_MANAGER:IsInteracting() then
+    if INTERACTIVE_WHEEL_MANAGER:IsInteracting(ZO_INTERACTIVE_WHEEL_TYPE_UTILITY) then
         return false
     end
 

@@ -235,6 +235,10 @@ function ZO_GamepadInventory:OnInventoryShown()
     if AreAnyItemsStolen(INVENTORY_BACKPACK) then
         TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_STOLEN_ITEMS_PRESENT)
     end
+
+    if HasFishInBag(INVENTORY_BACKPACK) then
+        TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_FISH_PRESENT)
+    end
 end
 
 function ZO_GamepadInventory:OnUpdatedSearchResults()
@@ -1620,6 +1624,7 @@ end
 
 function ZO_GamepadInventory:ShowQuickslot()
     local targetData = self.itemList:GetTargetData()
+    local useAccessibleWheel = GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS)
     if targetData then
         if ZO_InventoryUtils_DoesNewItemMatchFilterType(targetData, ITEMFILTERTYPE_QUEST) then
             local questItemId
@@ -1628,11 +1633,25 @@ function ZO_GamepadInventory:ShowQuickslot()
             else
                 questItemId = GetQuestConditionQuestItemId(targetData.questIndex, targetData.stepIndex, targetData.conditionIndex)
             end
-            GAMEPAD_QUICKSLOT:SetQuestItemToQuickslot(questItemId)
+
+            if useAccessibleWheel then
+                ACCESSIBLE_ASSIGNABLE_UTILITY_WHEEL_GAMEPAD:SetPendingSimpleAction(QUICKSLOT_ASSIGNMENT_TYPE_QUEST_ITEM, questItemId)
+            else
+                GAMEPAD_QUICKSLOT:SetQuestItemToQuickslot(questItemId)
+            end
         else
-            GAMEPAD_QUICKSLOT:SetItemToQuickslot(targetData.bagId, targetData.slotIndex)
+            if useAccessibleWheel then
+                ACCESSIBLE_ASSIGNABLE_UTILITY_WHEEL_GAMEPAD:SetPendingItem(targetData.bagId, targetData.slotIndex)
+            else
+                GAMEPAD_QUICKSLOT:SetItemToQuickslot(targetData.bagId, targetData.slotIndex)
+            end
         end
-        SCENE_MANAGER:Push("gamepad_quickslot")
+
+        if useAccessibleWheel then
+            ACCESSIBLE_ASSIGNABLE_UTILITY_WHEEL_GAMEPAD:Show({ HOTBAR_CATEGORY_QUICKSLOT_WHEEL })
+        else
+            SCENE_MANAGER:Push("gamepad_quickslot")
+        end
     end
 end
 

@@ -22,16 +22,12 @@ function LoreReader:Initialize(control)
 
     local function OnShowBook(eventCode, title, body, medium, showTitle, bookId)
         local overrideImage, overrideImageTitlePosition = GetLoreBookOverrideImageFromBookId(bookId)
-        local willShow = self:Show(title, body, medium, showTitle, overrideImage, overrideImageTitlePosition)
-        if willShow then
-            PlaySound(self.OpenSound)
-        else
-            EndInteraction(INTERACTION_BOOK)
-        end
+        self:Show(title, body, medium, showTitle, overrideImage, overrideImageTitlePosition)
+        PlaySound(self.OpenSound)
     end
 
     local function OnHideBook()
-        SCENE_MANAGER:Hide("loreReaderInteraction")
+        SCENE_MANAGER:Hide("loreReaderDefault")
     end
 
     local function OnAllGuiScreensResized()
@@ -49,10 +45,10 @@ function LoreReader:Initialize(control)
 
     LORE_READER_INVENTORY_SCENE = ZO_Scene:New("loreReaderInventory", SCENE_MANAGER)
     LORE_READER_LORE_LIBRARY_SCENE = ZO_Scene:New("loreReaderLoreLibrary", SCENE_MANAGER)
-    LORE_READER_INTERACTION_SCENE = ZO_Scene:New("loreReaderInteraction", SCENE_MANAGER)
+    LORE_READER_DEFAULT_SCENE = ZO_Scene:New("loreReaderDefault", SCENE_MANAGER)
     GAMEPAD_LORE_READER_INVENTORY_SCENE = ZO_Scene:New("gamepad_loreReaderInventory", SCENE_MANAGER)
     GAMEPAD_LORE_READER_LORE_LIBRARY_SCENE = ZO_Scene:New("gamepad_loreReaderLoreLibrary", SCENE_MANAGER)
-    GAMEPAD_LORE_READER_INTERACTION_SCENE = ZO_Scene:New("gamepad_loreReaderInteraction", SCENE_MANAGER)
+    GAMEPAD_LORE_READER_DEFAULT_SCENE = ZO_Scene:New("gamepad_loreReaderDefault", SCENE_MANAGER)
 
     local function OnPCSceneStateChange(oldState, newState)
         if newState == SCENE_SHOWING then
@@ -77,15 +73,15 @@ function LoreReader:Initialize(control)
 
     LORE_READER_INVENTORY_SCENE:RegisterCallback("StateChange", OnPCSceneStateChange)
     LORE_READER_LORE_LIBRARY_SCENE:RegisterCallback("StateChange", OnPCSceneStateChange)
-    LORE_READER_INTERACTION_SCENE:RegisterCallback("StateChange", OnPCSceneStateChange)
+    LORE_READER_DEFAULT_SCENE:RegisterCallback("StateChange", OnPCSceneStateChange)
     GAMEPAD_LORE_READER_INVENTORY_SCENE:RegisterCallback("StateChange", OnGamepadSceneStateChange)
     GAMEPAD_LORE_READER_LORE_LIBRARY_SCENE:RegisterCallback("StateChange", OnGamepadSceneStateChange)
-    GAMEPAD_LORE_READER_INTERACTION_SCENE:RegisterCallback("StateChange", OnGamepadSceneStateChange)
+    GAMEPAD_LORE_READER_DEFAULT_SCENE:RegisterCallback("StateChange", OnGamepadSceneStateChange)
 
     local narrationInfo =
     {
         canNarrate = function()
-            return GAMEPAD_LORE_READER_INVENTORY_SCENE:IsShowing() or GAMEPAD_LORE_READER_LORE_LIBRARY_SCENE:IsShowing() or GAMEPAD_LORE_READER_INTERACTION_SCENE:IsShowing()
+            return GAMEPAD_LORE_READER_INVENTORY_SCENE:IsShowing() or GAMEPAD_LORE_READER_LORE_LIBRARY_SCENE:IsShowing() or GAMEPAD_LORE_READER_DEFAULT_SCENE:IsShowing()
         end,
         selectedNarrationFunction = function()
             return self:GetNarrationText()
@@ -152,35 +148,25 @@ function LoreReader:InitializeKeybindStripDescriptors()
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.gamepadKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 end
 
+function LoreReader:GetCustomSceneName(currentSceneName)
+    if currentSceneName == "loreLibrary" or currentSceneName == "bookSetGamepad" then
+        return IsInGamepadPreferredMode() and "gamepad_loreReaderLoreLibrary" or "loreReaderLoreLibrary"
+    elseif currentSceneName == "inventory" or currentSceneName == "gamepad_inventory_item_filter" or currentSceneName == "gamepad_inventory_root" then
+        return IsInGamepadPreferredMode() and "gamepad_loreReaderInventory" or "loreReaderInventory"
+    end
+end
+
 function LoreReader:Show(title, body, medium, showTitle, overrideImage, overrideImageTitlePosition)
     local isGamepad = IsInGamepadPreferredMode()
     self:SetupBook(title, body, medium, showTitle, isGamepad, overrideImage, overrideImageTitlePosition)
-    if SCENE_MANAGER:IsShowingBaseScene() then
-        if isGamepad then
-            SCENE_MANAGER:Show("gamepad_loreReaderInteraction")
-        else
-            SCENE_MANAGER:Show("loreReaderInteraction")
-        end
+    local customSceneName = self:GetCustomSceneName(SCENE_MANAGER:GetCurrentScene():GetName())
+    if customSceneName then
+        SCENE_MANAGER:Push(customSceneName)
     else
-        local currentSceneName = SCENE_MANAGER:GetCurrentScene():GetName()
-        if currentSceneName == "loreLibrary" or currentSceneName == "bookSetGamepad" then
-            if isGamepad then
-                SCENE_MANAGER:Push("gamepad_loreReaderLoreLibrary")
-            else
-                SCENE_MANAGER:Push("loreReaderLoreLibrary")
-            end
-        elseif currentSceneName == "inventory" or currentSceneName == "gamepad_inventory_item_filter" or currentSceneName == "gamepad_inventory_root" then
-            if isGamepad then
-                SCENE_MANAGER:Push("gamepad_loreReaderInventory")
-            else
-                SCENE_MANAGER:Push("loreReaderInventory")
-            end
-        else
-            return false
-        end
+        --If we are not pushing a custom scene, just fall back to the default
+        local defaultSceneName = isGamepad and "gamepad_loreReaderDefault" or "loreReaderDefault"
+        SCENE_MANAGER:Show(defaultSceneName)
     end
-
-    return true
 end
 
 function LoreReader:SetupBook(title, body, medium, showTitle, isGamepad, overrideImage, overrideImageTitlePosition)

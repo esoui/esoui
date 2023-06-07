@@ -56,7 +56,7 @@ function ZO_KeepClaimDialog:New(control)
         return DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_CLAIM_AVA_RESOURCE)
     end)
     dialog:SetButtonText(1, SI_GUILD_CLAIM_KEEP_ACCEPT)
-    dialog.errorTextLabel = GetControl(control, "ErrorText")
+    dialog.errorTextLabel = control:GetNamedChild("ErrorText")
     dialog.lastUpdateTime = 0
     
     dialog:InitializeGamepadDialogs()
@@ -70,7 +70,7 @@ function ZO_KeepClaimDialog:New(control)
         end
     end
 
-    dialog:SetDialogUpdateFn(function(control, time) dialog:OnUpdate(time) end)
+    dialog:SetDialogUpdateFn(function(_, time) dialog:OnUpdate(time) end)
 
     control:RegisterForEvent(EVENT_KEEP_GUILD_CLAIM_UPDATE, function() self:OnGuildInformationChanged() end)
     control:RegisterForEvent(EVENT_START_KEEP_GUILD_CLAIM_INTERACTION, function() OnStartKeepGuildClaimInteraction() end)
@@ -201,17 +201,30 @@ function ZO_KeepClaimDialog:InitializeGamepadReleaseKeepDialog()
             local keepId = dialog.data.keepId
             local keepName = GetKeepName(keepId) 
             local cooldown = GetSecondsUntilKeepClaimAvailable(keepId, BGQUERY_LOCAL)
+            local isClaimAvailable = cooldown == 0
+            local textParams
 
-            if cooldown == 0 then
+            if isClaimAvailable then
                 dialog.info.mainText.text = SI_GUILD_RELEASE_KEEP_CONFIRM_PROMPT
-                ZO_Dialogs_RefreshDialogText(dialogName, dialog, { mainTextParams = { keepName } } )
+                textParams = { mainTextParams = { keepName } }
+                ZO_Dialogs_RefreshDialogText(dialogName, dialog, textParams)
                 ZO_GenericGamepadDialog_RefreshKeybinds(dialog)
+                --Re-narrate once the cooldown ends
+                if not dialog.wasClaimAvailableLastUpdate then
+                    local NARRATE_HEADER = true
+                    SCREEN_NARRATION_MANAGER:QueueDialog(dialog, NARRATE_HEADER)
+                end
             else
                 dialog.info.mainText.text = SI_GUILD_RELEASE_KEEP_COOLDOWN
-                ZO_Dialogs_RefreshDialogText(dialogName, dialog, { mainTextParams = { keepName, ZO_FormatTime(cooldown, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR) } } )
+                textParams = { mainTextParams = { keepName, ZO_FormatTime(cooldown, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR) } }
+                ZO_Dialogs_RefreshDialogText(dialogName, dialog, textParams)
             end
 
+            --Set the new text params on the dialog so narration can use them
+            dialog.textParams = textParams
+
             KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
+            dialog.wasClaimAvailableLastUpdate = isClaimAvailable
         end,
     })
 end
@@ -307,8 +320,11 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
             local keepId = GetGuildClaimInteractionKeepId()
             local isClaimAvailable = GetSecondsUntilKeepClaimAvailable(keepId, BGQUERY_LOCAL) == 0
             
-            if(isClaimAvailable and not dialog.wasClaimAvailableLastUpdate) then
+            if isClaimAvailable and not dialog.wasClaimAvailableLastUpdate then
                 dialog:setupFunc()
+                --Re-narrate once the cooldown ends
+                local NARRATE_HEADER = true
+                SCREEN_NARRATION_MANAGER:QueueDialog(dialog, NARRATE_HEADER)
             end
 
             UpdateViolations()

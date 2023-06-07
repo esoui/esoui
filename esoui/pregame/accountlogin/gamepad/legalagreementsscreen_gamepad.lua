@@ -6,19 +6,19 @@
     OnDocsFinished()
 ]]--
 
--- Heron legal docs behave as PC EULAs do and are loaded from disk
-local ZO_HeronLegalDocsProvider = ZO_Object:Subclass()
+-- PC EULAs are loaded from disk
+local ZO_PCLegalDocsProvider = ZO_Object:Subclass()
 
-function ZO_HeronLegalDocsProvider:New(...)
+function ZO_PCLegalDocsProvider:New(...)
     local object = ZO_Object.New(self)
     return object
 end
 
-function ZO_HeronLegalDocsProvider:ShouldShowEULA()
+function ZO_PCLegalDocsProvider:ShouldShowEULA()
     return self:GetNextEULAType() ~= nil
 end
 
-function ZO_HeronLegalDocsProvider:GetNextEULAType()
+function ZO_PCLegalDocsProvider:GetNextEULAType()
     for _, eulaType in ipairs(ZO_PREGAME_EULAS) do
         if ShouldShowEULA(eulaType) then
             return eulaType
@@ -27,7 +27,7 @@ function ZO_HeronLegalDocsProvider:GetNextEULAType()
     return nil
 end
 
-function ZO_HeronLegalDocsProvider:NextLegalDoc()
+function ZO_PCLegalDocsProvider:NextLegalDoc()
     local eulaType = self:GetNextEULAType()
     if eulaType then
         local eulaText, agreeText, disagreeText, hasAgreed, eulaTitle, readCheckText = GetEULADetails(eulaType)
@@ -47,12 +47,12 @@ function ZO_HeronLegalDocsProvider:NextLegalDoc()
     return nil
 end
 
-function ZO_HeronLegalDocsProvider:PreviousLegalDoc()
+function ZO_PCLegalDocsProvider:PreviousLegalDoc()
     -- not supported
     return nil
 end
 
-function ZO_HeronLegalDocsProvider:OnDocsFinished()
+function ZO_PCLegalDocsProvider:OnDocsFinished()
     -- log in
     PregameStateManager_AdvanceState()
 end
@@ -146,8 +146,8 @@ function ZO_LegalAgreementsScreen_Gamepad:Initialize(control)
     self.docData = nil
     if IsConsoleUI() then
         self.docProvider = ZO_ConsoleLegalDocsProvider:New()
-    elseif IsHeronUI() or ZO_IsPCUI() then -- TODO pregame: rename ZO_HeronLegalDocsProvider?
-        self.docProvider = ZO_HeronLegalDocsProvider:New()
+    elseif ZO_IsPCUI() then
+        self.docProvider = ZO_PCLegalDocsProvider:New()
     elseif IsGamepadUISupported() then
         internalassert(false, "platform eulas not supported")
     end

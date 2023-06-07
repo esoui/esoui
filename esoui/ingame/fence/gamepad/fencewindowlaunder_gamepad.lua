@@ -1,14 +1,10 @@
 ZO_GamepadFenceLaunder = ZO_GamepadFenceComponent:Subclass()
 
-function ZO_GamepadFenceLaunder:New(...)
-    return ZO_GamepadFenceComponent.New(self, ...)
-end
-
 function ZO_GamepadFenceLaunder:Initialize()
     ZO_GamepadFenceComponent.Initialize(self, ZO_MODE_STORE_LAUNDER, GetString(SI_FENCE_LAUNDER_TAB))
 
     self:InitializeKeybindStrip(GetString(SI_ITEM_ACTION_LAUNDER))
-    self:CreateModeData(SI_FENCE_LAUNDER_TAB, self.mode, "EsoUI/Art/Vendor/vendor_tabIcon_fence_up.dds", fragment, self.keybindStripDescriptor)
+    self:CreateModeData(SI_FENCE_LAUNDER_TAB, self.mode, "EsoUI/Art/Vendor/vendor_tabIcon_fence_up.dds", self.fragment, self.keybindStripDescriptor)
     self.list:SetNoItemText(GetString(SI_GAMEPAD_NO_STOLEN_ITEMS_LAUNDER))
 end
 

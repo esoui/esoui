@@ -559,22 +559,12 @@ end
 function ZO_GamepadOptions:InitializeGamepadInfoPanel()
     if not self:HasInfoPanel() then return end --no infopanel in pregame
 
-    if IsHeronUI() then
-        OPTIONS_MENU_INFO_PANEL_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-            if newState == SCENE_FRAGMENT_SHOWING then
-                if GetMostRecentGamepadType() ~= GAMEPAD_TYPE_HERON then
-                    TriggerTutorial(TUTORIAL_TRIGGER_HERON_THIRD_PARTY_CONTROLLER_SHOWING)
-                end
-            end
-        end)
-    end
-
     self:RefreshGamepadInfoPanel()
 end
 
 do
     internalassert(GAMEPAD_TYPE_MAX_VALUE == 7, "Make sure every gamepad type is properly handled in ZO_GamepadOptions:RefreshGamepadInfoPanel()")
-    local GAMEPAD_TYPE_HAS_SOUTHERN_LEFT_STICK = ZO_CreateSetFromArguments(GAMEPAD_TYPE_PS4, GAMEPAD_TYPE_PS4_NO_TOUCHPAD, GAMEPAD_TYPE_PS5, GAMEPAD_TYPE_HERON, GAMEPAD_TYPE_SWITCH)
+    local GAMEPAD_TYPE_HAS_SOUTHERN_LEFT_STICK = ZO_CreateSetFromArguments(GAMEPAD_TYPE_PS4, GAMEPAD_TYPE_PS4_NO_TOUCHPAD, GAMEPAD_TYPE_PS5, GAMEPAD_TYPE_STADIA, GAMEPAD_TYPE_SWITCH)
     local GAMEPAD_TYPE_HAS_SWAPPED_FACE_BUTTONS = ZO_CreateSetFromArguments(GAMEPAD_TYPE_SWITCH)
     function ZO_GamepadOptions:RefreshGamepadInfoPanel()
         if not self:HasInfoPanel() then
@@ -908,7 +898,12 @@ function ZO_GamepadOptions:GetNarrationText(entryData, entryControl)
             local value = entryControl.horizontalListObject:GetCenterControl():GetText()
             return ZO_FormatSpinnerNarrationText(defaultText, value)
         elseif controlType == OPTIONS_CHECKBOX then
-            return ZO_FormatToggleNarrationText(defaultText, ZO_Options_GetSettingFromControl(entryControl))
+            local DEFAULT_HEADER = nil
+            local isEnabled = entryData.enabled
+            if type(isEnabled) == "function" then
+                isEnabled = isEnabled()
+            end
+            return ZO_FormatToggleNarrationText(defaultText, ZO_Options_GetSettingFromControl(entryControl), DEFAULT_HEADER, isEnabled)
         elseif controlType == OPTIONS_SLIDER then
             local value = ZO_Options_GetSettingFromControl(entryControl)
             local formattedValueString, min, max = ZO_Options_GetFormattedSliderValues(entryData, value)
@@ -961,7 +956,18 @@ function ZO_GamepadOptions:AddSettingGroup(panelId)
 
                 local controlType = self:GetControlType(data.controlType)
                 if controlType == OPTIONS_SLIDER then
-                    data.additionalInputNarrationFunction = ZO_GetNumericHorizontalDirectionalInputNarrationData
+                    data.additionalInputNarrationFunction = function()
+                        local selectedControl = self.optionsList:GetSelectedControl()
+                        if selectedControl and selectedControl.data then
+                            local enabled = selectedControl.data.enabled
+                            if type(enabled) == "function" then
+                                enabled = enabled()
+                            end
+                            return ZO_GetNumericHorizontalDirectionalInputNarrationData(enabled, enabled)
+                        else
+                            return {}
+                        end
+                    end
                 elseif controlType == OPTIONS_HORIZONTAL_SCROLL_LIST then
                     data.additionalInputNarrationFunction = function()
                         local selectedControl = self.optionsList:GetSelectedControl()

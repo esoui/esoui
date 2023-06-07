@@ -28,11 +28,13 @@ function ZO_MarketAnnouncementMarketProduct_Shared:Show(...)
 
     local descriptionText = ""
     local description = self.productData:GetMarketProductDescription()
+    description = zo_strformat(description)
     local itemLink = GetMarketProductItemLink(self:GetId())
     if itemLink ~= "" then
         local hasAbility, _, abilityDescription = GetItemLinkOnUseAbilityInfo(itemLink)
 
         if hasAbility then
+            abilityDescription = zo_strformat(SI_ITEM_FORMAT_STR_ON_USE, abilityDescription)
             if description ~= "" then
                 descriptionText = string.format("%s\n\n%s", abilityDescription, description)
             else
@@ -45,7 +47,7 @@ function ZO_MarketAnnouncementMarketProduct_Shared:Show(...)
         descriptionText = description
     end
 
-    self.descriptionText = zo_strformat(SI_MARKET_PRODUCT_DESCRIPTION_FORMATTER, descriptionText)
+    self.descriptionText = descriptionText
     self.control.descriptionTextControl:SetText(self.descriptionText)
 end
 

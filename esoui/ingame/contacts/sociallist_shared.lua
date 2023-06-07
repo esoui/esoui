@@ -72,11 +72,6 @@ function ZO_SocialList_SharedSocialSetup(control, data, selected)
         displayNameLabel:SetText(ZO_FormatUserFacingDisplayName(data.displayName))
     end
 
-    local heronUserInfoTextureControl = control:GetNamedChild("HeronUserInfoIcon")
-    if heronUserInfoTextureControl then
-        heronUserInfoTextureControl:SetHidden(not data.isHeronUser)
-    end
-
     local statusIconControl = control:GetNamedChild("StatusIcon")
     if statusIconControl then
         statusIconControl:SetTexture(textureFunctions.playerStatusIcon(data.status))

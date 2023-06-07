@@ -1261,6 +1261,7 @@ function ChampionPerks:RegisterEvents()
 
     self.championBar:RegisterCallback("GamepadFocusChanged", function()
         self.refreshGroup:MarkDirty("SelectedStarData")
+        self.refreshGroup:TryClean()
     end)
 end
 

@@ -792,7 +792,7 @@ function ZO_MailSend_Gamepad:EnterContactsList()
 end
 
 function ZO_MailSend_Gamepad:ShowSliderControl(mode, value, maxValue)
-    self.mainList:Deactivate()
+    MAIL_MANAGER_GAMEPAD:DeactivateCurrentList()
     self.mainList:WhenInactiveSetTargetControlHidden(true)
 
     self.goldSlider:SetMaxValue(maxValue)

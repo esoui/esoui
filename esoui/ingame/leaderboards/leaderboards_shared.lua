@@ -278,6 +278,10 @@ function ZO_LeaderboardsManager_Shared:SetLoadingSpinnerVisibility(show)
     -- Should be overridden
 end
 
+function ZO_LeaderboardsManager_Shared:RefreshPointsHeader()
+    -- Should be overridden
+end
+
 function ZO_LeaderboardsManager_Shared:GetLeaderboardTitleName(titleName, subType)
     return type(titleName) == "function" and titleName(subType) or titleName
 end
@@ -296,7 +300,7 @@ function ZO_LeaderboardsManager_Shared:OnLeaderboardSelected(data)
     self:RefreshLeaderboardType(data.leaderboardRankType)
 
     self.headerPointsText = data.pointsHeaderString or GetString(SI_LEADERBOARDS_HEADER_POINTS)
-    self.pointsHeaderLabel:SetText(self.headerPointsText)
+    self:RefreshPointsHeader()
 end
 
 function ZO_LeaderboardsManager_Shared:OnLeaderboardDataChanged(leaderboardObject)

@@ -331,13 +331,13 @@ local MIN_CONDITION_OR_CHARGE = 0
 local MAX_CONDITION = 100
 function ZO_Tooltip:AddConditionBar(itemLink, previewConditionToAdd)
     local condition = GetItemLinkCondition(itemLink)
-    self:AddConditionOrChargeBar(itemLink, condition, MAX_CONDITION, previewConditionToAdd)
+    self:AddConditionOrChargeBar(itemLink, condition, MAX_CONDITION, previewConditionToAdd, SI_GAMEPAD_TOOLTIP_DURABILITY_NARRATION_FORMAT)
 end
 
 function ZO_Tooltip:AddEnchantChargeBar(itemLink, forceFullDurability, previewChargeToAdd)
     local maxCharges = GetItemLinkMaxEnchantCharges(itemLink)
     local charges = forceFullDurability and maxCharges or GetItemLinkNumEnchantCharges(itemLink)
-    self:AddConditionOrChargeBar(itemLink, charges, maxCharges, previewChargeToAdd)
+    self:AddConditionOrChargeBar(itemLink, charges, maxCharges, previewChargeToAdd, SI_GAMEPAD_TOOLTIP_ENCHANT_CHARGE_NARRATION_FORMAT)
 end
 
 function ZO_Tooltip:AddPoisonInfo(itemLink, equipSlot)
@@ -359,7 +359,7 @@ function ZO_Tooltip:AddPoisonInfo(itemLink, equipSlot)
     end
 end
 
-function ZO_Tooltip:AddConditionOrChargeBar(itemLink, value, maxValue, previewValueToAdd)
+function ZO_Tooltip:AddConditionOrChargeBar(itemLink, value, maxValue, previewValueToAdd, narrationFormatter)
     local bar
     if previewValueToAdd then
         bar = self:AcquireItemImprovementStatusBar(itemLink, value, maxValue, previewValueToAdd)
@@ -369,8 +369,13 @@ function ZO_Tooltip:AddConditionOrChargeBar(itemLink, value, maxValue, previewVa
         bar:SetValue(value)
     end
 
+    local function GetStatusBarNarrationText()
+        local percentage = (value / maxValue) * 100
+        percentage = string.format("%.2f", percentage)
+        return zo_strformat(narrationFormatter, percentage)
+    end
     local barSection = self:AcquireSection(self:GetStyle("conditionOrChargeBarSection"))
-    barSection:AddStatusBar(bar)
+    barSection:AddStatusBar(bar, GetStatusBarNarrationText)
     self:AddSection(barSection)
 end
 

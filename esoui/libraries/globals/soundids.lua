@@ -630,6 +630,8 @@ SOUNDS =
     PROVISIONING_OPENED                     = "Provisioning_Opened",
     PROVISIONING_CLOSED                     = "Provisioning_Closed",
 
+    PROVISIONING_FILLET                     = "Provisioning_Fillet",
+
     RECIPE_LEARNED                          = "Recipe_Learned",
     DEFAULT_RECIPE_CRAFTED                  = "Default_Recipe_Crafted",
 
@@ -1016,6 +1018,7 @@ SOUNDS =
     TRIBUTE_AGENT_KNOCKED_OUT = "Tribute_AgentKnockedOut",
     TRIBUTE_COMBO_TRIGGERED = "Tribute_ComboTriggered",
     TRIBUTE_TRIGGER_TRIGGERED = "Tribute_TriggerTriggered",
+    TRIBUTE_PATRON_PASSIVE_TRIGGERED = "Tribute_PatronPassiveTriggered",
     TRIBUTE_PATRON_DRAFTED = "Tribute_PatronDrafted",
     TRIBUTE_MECHANIC_CHOSEN = "Tribute_MechanicChosen",
     TRIBUTE_CARD_HIGHLIGHTED = "Tribute_CardHighlighted",

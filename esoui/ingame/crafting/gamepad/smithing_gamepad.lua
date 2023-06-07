@@ -214,7 +214,7 @@ function ZO_Smithing_Gamepad:InitializeModeList()
     self.improvementModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_IMPROVEMENT, SMITHING_MODE_IMPROVEMENT, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_improve.dds")
     self.researchModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_RESEARCH, SMITHING_MODE_RESEARCH, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_research.dds")
 
-    local narrationInfo = 
+    local narrationInfo =
     {
         canNarrate = function()
             return GAMEPAD_SMITHING_ROOT_SCENE:IsShowing()
@@ -232,10 +232,8 @@ end
 function ZO_Smithing_Gamepad:GetFooterNarration()
     local narrations = {}
     local skillInfoNarration = ZO_Skills_GetSkillInfoHeaderNarrationText(self.skillInfoBar)
-    if skillInfoNarration then
-        ZO_CombineNumericallyIndexedTables(narrations, skillInfoNarration)
-    end
-    ZO_CombineNumericallyIndexedTables(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
+    ZO_AppendNarration(narrations, skillInfoNarration)
+    ZO_AppendNarration(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
     return narrations
 end
 

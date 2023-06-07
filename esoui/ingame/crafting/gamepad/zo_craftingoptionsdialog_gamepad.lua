@@ -248,7 +248,7 @@ function ZO_CraftingOptionsDialogGamepad:BuildMultiSelectionFilter(filterIndex)
     local multiSelectionTextFormatter = currentFilter.multiSelectionTextFormatter
     local entry =
     {
-        template = "ZO_GamepadMultiSelectionDropdownItem",
+        template = "ZO_GamepadMultiSelectionDropdownItem_Indented",
         text = label,
         header = header,
         templateData = 

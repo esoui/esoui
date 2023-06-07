@@ -29,8 +29,6 @@ EsoUI\Common\Console\AutoSaving_Console.xml
 EsoUI\Common\Console\ZO_PlayerConsoleInfoRequestManager.lua
 EsoUI\Common\Console\ZO_PlayerConsoleRequestsUtils.lua
 
-EsoUI\Common\Heron\HeronURLManager.lua
-
 EsoUI\Common\Gamepad\GenericHeaders\GenericHeaders.lua
 EsoUI\Common\Gamepad\GenericHeaders\GenericHeaders.xml
 EsoUI\Common\Gamepad\GenericFooters\GenericFooters.lua

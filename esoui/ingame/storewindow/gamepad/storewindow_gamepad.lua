@@ -232,9 +232,13 @@ function ZO_GamepadStoreManager:OnStateChanged(oldState, newState)
     if newState == SCENE_SHOWING then
         self:OnShowing(self)
         self:InitializeStore()
-    elseif newState == SCENE_SHOWN then
+        -- We SetMode on SCENE_SHOWING to ensure that we're on the correct scene by the time
+        -- the player sees it, so we don't accidentally show the transition.
+        -- deferredStartingMode is set when the stable interact starts, so we're assuming
+        -- that that event fires before the store scene hits SCENE_SHOWING.
         self:SetMode(self.deferredStartingMode or self.activeComponents[1]:GetStoreMode())
         self.deferredStartingMode = nil
+    elseif newState == SCENE_SHOWN then
         ZO_GamepadGenericHeader_Activate(self.header)
     elseif newState == SCENE_HIDING then
         self:OnHiding()

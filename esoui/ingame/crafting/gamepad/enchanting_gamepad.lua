@@ -53,10 +53,8 @@ end
 function ZO_GamepadEnchanting:GetFooterNarration()
     local narrations = {}
     local skillInfoNarration = ZO_Skills_GetSkillInfoHeaderNarrationText(self.skillInfo)
-    if skillInfoNarration then
-        ZO_CombineNumericallyIndexedTables(narrations, skillInfoNarration)
-    end
-    ZO_CombineNumericallyIndexedTables(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
+    ZO_AppendNarration(narrations, skillInfoNarration)
+    ZO_AppendNarration(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
     return narrations
 end
 
@@ -221,6 +219,7 @@ function ZO_GamepadEnchanting:InitializeEnchantingScenes()
             HideCraftingScene()
             self.runeSlotContainer:SetHidden(true)
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
+            ZO_SavePlayerConsoleProfile()
         end
     end)
 

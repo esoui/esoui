@@ -105,7 +105,6 @@ function TrialAccountSplashDialog:ShowSplash()
         local descriptionHeight = self.dialogDescription:GetTextHeight()
         local contentHeight = descriptionHeight + 6
         self.dialogPane:SetHeight(contentHeight)
-        self.dialogScrollChild:SetHeight(contentHeight)
         ZO_Dialogs_ShowDialog("TRIAL_ACCOUNT_SPLASH_KEYBOARD")
     end
 end

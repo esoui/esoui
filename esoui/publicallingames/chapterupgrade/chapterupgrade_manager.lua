@@ -205,7 +205,7 @@ function ChapterUpgrade_Manager:Initialize()
     local currentChapterId = GetCurrentChapterUpgradeId()
     self.currentChapterData = ZO_ChapterUpgrade_Data:New(currentChapterId)
 
-    self.chaperUpgradeDataList = {}
+    self.chapterUpgradeDataList = {}
     self.chapterUpgradeDataById = {}
 
     self.marketState = GetMarketState(MARKET_DISPLAY_GROUP_CHAPTER_UPGRADE)
@@ -220,7 +220,9 @@ function ChapterUpgrade_Manager:Initialize()
 
     local function OnCollectiblesUnlockStateChanged()
         self.currentChapterData:RefreshChapterUpgradeState()
-        self:RefreshChapterUpgradeData()
+        for _, data in ipairs(self.chapterUpgradeDataList) do
+            data:RefreshChapterUpgradeState()
+        end
     end
 
     EVENT_MANAGER:RegisterForEvent("ChapterUpgrade_Manager", EVENT_MARKET_STATE_UPDATED, OnMarketStateUpdated)
@@ -241,7 +243,7 @@ do
     end
 
     function ChapterUpgrade_Manager:RefreshChapterUpgradeData()
-        ZO_ClearNumericallyIndexedTable(self.chaperUpgradeDataList)
+        ZO_ClearNumericallyIndexedTable(self.chapterUpgradeDataList)
         ZO_ClearTable(self.chapterUpgradeDataById)
 
         local marketProductIds = { GetActiveChapterUpgradeMarketProductListings(MARKET_DISPLAY_GROUP_CHAPTER_UPGRADE) }
@@ -252,25 +254,25 @@ do
             if not self.chapterUpgradeDataById[chapterUpgradeId] then
                 local chapterUpgradeData = ZO_ChapterUpgrade_Data:New(chapterUpgradeId)
                 chapterUpgradeData:SetMarketProductId(marketProductId)
-                table.insert(self.chaperUpgradeDataList, chapterUpgradeData)
+                table.insert(self.chapterUpgradeDataList, chapterUpgradeData)
                 self.chapterUpgradeDataById[chapterUpgradeId] = chapterUpgradeData
             end
         end
 
         if #marketProductIds == 0 then
             --static fallback data
-            table.insert(self.chaperUpgradeDataList, self.currentChapterData)
+            table.insert(self.chapterUpgradeDataList, self.currentChapterData)
             self.chapterUpgradeDataById[self.currentChapterData:GetChapterUpgradeId()] = self.currentChapterData
         end
 
-        table.sort(self.chaperUpgradeDataList, ChapterUpgradeDataSort)
+        table.sort(self.chapterUpgradeDataList, ChapterUpgradeDataSort)
 
         self:FireCallbacks("ChapterUpgradeDataUpdated")
     end
 end
 
 function ChapterUpgrade_Manager:GetChapterUpgradeDataByIndex(index)
-    return self.chaperUpgradeDataList[index]
+    return self.chapterUpgradeDataList[index]
 end
 
 function ChapterUpgrade_Manager:GetChapterUpgradeDataById(chapterUpgradeId)
@@ -278,7 +280,7 @@ function ChapterUpgrade_Manager:GetChapterUpgradeDataById(chapterUpgradeId)
 end
 
 function ChapterUpgrade_Manager:GetNumChapterUpgrades()
-    return #self.chaperUpgradeDataList
+    return #self.chapterUpgradeDataList
 end
 
 function ChapterUpgrade_Manager:RequestPrepurchaseData()

@@ -53,7 +53,7 @@ function CreateLinkAccount_Console:SetupOptions()
     self.optionsList:AddDataTemplate("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
     self:AddOption(GetString(SI_CREATEACCOUNT_HEADER), "CreateAccountSetup")
-    self:AddOption(GetString(SI_CONSOLE_LINKACCOUNT_HEADER), "LinkAccount")
+    self:AddOption(GetString(SI_CONSOLE_LINKACCOUNT_HEADER), "LinkAccountActivation")
 
     self.optionsList:Commit()
 end
@@ -64,7 +64,7 @@ function CreateLinkAccount_Console:InitKeybindingDescriptor()
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
         -- Select
-        {    
+        {
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
@@ -83,7 +83,8 @@ function CreateLinkAccount_Console:InitKeybindingDescriptor()
             end)
     }
 end
----------------------------------------
+
+-- XML Handlers --
 
 function CreateLinkAccountScreen_Gamepad_Initialize(self)
     CREATE_LINK_ACCOUNT_CONSOLE = CreateLinkAccount_Console:New(self)

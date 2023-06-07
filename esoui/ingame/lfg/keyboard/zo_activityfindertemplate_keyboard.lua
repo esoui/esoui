@@ -367,8 +367,7 @@ do
         end
 
         if reselectedEntry then
-            local IGNORE_CALLBACK = false
-            self.filterComboBox:SelectItem(reselectedEntry, IGNORE_CALLBACK)
+            self.filterComboBox:SelectItem(reselectedEntry)
         else
             if not self.filterComboBox:SetSelectedItemByEval(ShouldAutoSelectEntry) then
                 self.filterComboBox:SelectFirstItem()
@@ -481,6 +480,11 @@ function ZO_ActivityFinderTemplate_Keyboard:OnTributeClubRankDataChanged()
     self.clubRankObject:Refresh()
 end
 
+function ZO_ActivityFinderTemplate_Keyboard:OnTributeCampaignDataInitialized()
+    ZO_ActivityFinderTemplate_Shared.OnTributeCampaignDataInitialized(self)
+    self:RefreshView()
+end
+
 function ZO_ActivityFinderTemplate_Keyboard:OnTributeCampaignDataChanged()
     ZO_ActivityFinderTemplate_Shared.OnTributeCampaignDataChanged(self)
 
@@ -493,8 +497,6 @@ function ZO_ActivityFinderTemplate_Keyboard:OnTributeCampaignDataChanged()
         end
     end
     self:RefreshTributeSeasonData(hideIfNotCompetitive)
-
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:MarkDataDirty()
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:ShowPrimaryControls()

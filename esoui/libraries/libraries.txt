@@ -12,6 +12,7 @@ EsoUI\Libraries\Globals\CommonConstants.lua
 EsoUI\Libraries\Utility\BaseObject.lua
 EsoUI\Libraries\Utility\ZO_CallbackObject.lua
 EsoUI\Libraries\Utility\ZO_Anchor.lua
+EsoUI\Libraries\Utility\ZO_AuditObject.lua
 EsoUI\Libraries\Utility\ZO_ColorDef.lua
 EsoUI\Libraries\Utility\ZO_TableUtils.lua
 EsoUI\Libraries\Utility\ZO_ObjectPool.lua
@@ -60,6 +61,7 @@ EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Keyboard.xml
 EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Gamepad.lua
 EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Gamepad.xml
 
+EsoUI\Libraries\ZO_Templates\ControlTemplates.lua
 EsoUI\Libraries\ZO_Templates\ControlTemplates.xml
 EsoUI\Libraries\ZO_Templates\LabelTemplates_Shared.lua
 EsoUI\Libraries\ZO_Templates\LabelTemplates_Shared.xml

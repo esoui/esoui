@@ -227,8 +227,7 @@ function ZO_PEGI_AgreementDeclinedDialog_Gamepad_OnInitialized(control)
         },
         baseNarrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
         OnShownCallback = function(dialog)
-            local linkColor = ZO_ColorDef:New("76BCC3")
-            local colorizedLinkText = linkColor:Colorize(GetString("SI_APPROVEDURLTYPE", APPROVED_URL_ESO_HELP))
+            local colorizedLinkText = ZO_URL_LINK_COLOR:Colorize(GetString("SI_APPROVEDURLTYPE", APPROVED_URL_ESO_HELP))
             GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, GetString(SI_PEGI_AGREEMENT_CUSTOMER_SERVICE), colorizedLinkText)
             ZO_GenericGamepadDialog_ShowTooltip(dialog)
         end,

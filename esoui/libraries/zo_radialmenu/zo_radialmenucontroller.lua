@@ -84,6 +84,14 @@ function ZO_InteractiveRadialMenuController:StopInteraction(clearSelection)
     return wasShowingRadial
 end
 
+function ZO_InteractiveRadialMenuController:SelectOrdinalIndex(ordinalIndex)
+    if self.isInteracting then
+        return self.menu:SelectOrdinalEntry(ordinalIndex)
+    end
+
+    return false
+end
+
 function ZO_InteractiveRadialMenuController:IsInteracting()
     return self.isInteracting
 end

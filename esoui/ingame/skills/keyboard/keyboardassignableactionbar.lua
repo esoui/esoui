@@ -321,7 +321,7 @@ function ZO_KeyboardAssignableActionBarButton:ShowActionMenu()
     local hotbarData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
     local slotData = hotbarData:GetSlotData(self.slotId)
 
-    if slotData and not slotData:IsEmpty() then
+    if slotData and not slotData:IsEmpty() and not IsActionSlotRestricted(self.slotId, hotbarData:GetHotbarCategory()) then
         ClearMenu()
         AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function()
             if hotbarData:ClearSlot(self.slotId) then

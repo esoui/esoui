@@ -253,6 +253,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
     local rewardData = self:GetRewardData(journalQuestIndex, IS_KEYBOARD)
     local numRewards = #rewardData
     local currenciesWithMaxWarning = {}
+    local amountsAcquiredWithMaxWarning = {}
     for i, reward in ipairs(rewardData) do
         local creatorFunc = self:GetRewardCreateFunc(reward.rewardType)
         if creatorFunc then
@@ -270,8 +271,15 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                 --warn the player they aren't going to get their money when they hit complete
 
                 if self:WouldCurrencyExceedMax(reward.rewardType, reward.amount) then
-                    local currency = self:GetCurrencyTypeFromReward(reward.rewardType)
-                    table.insert(currenciesWithMaxWarning, GetCurrencyName(currency))
+                    local currencyType = self:GetCurrencyTypeFromReward(reward.rewardType)
+                    local currencyText = GetCurrencyName(currencyType)
+                    table.insert(currenciesWithMaxWarning, currencyText)
+
+                    local playerStoredLocation = GetCurrencyPlayerStoredLocation(currencyType)
+                    local currencyAmount = zo_max(0, GetMaxPossibleCurrency(currencyType, playerStoredLocation) - (GetCurrencyAmount(currencyType, playerStoredLocation)))
+                    local isSingular = currencyAmount == 1
+                    currencyText = GetCurrencyName(currencyType, isSingular)
+                    table.insert(amountsAcquiredWithMaxWarning, string.format('%s %s', currencyAmount, currencyText))
                 end
             else
                 local control = self.givenRewardPool:AcquireObject()
@@ -322,7 +330,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
     ZO_InteractWindowCollapseContainerRewardArea:SetHidden(numRewards == 0)
     ZO_InteractWindowCollapseContainerRewardArea:SetHeight(rewardWindowHeight)
 
-    return confirmError
+    return confirmError, currenciesWithMaxWarning, amountsAcquiredWithMaxWarning
 end
 
 function ZO_SharedInteraction:UpdateClemencyOnTimeComplete(control, data)

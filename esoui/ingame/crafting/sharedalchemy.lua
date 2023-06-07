@@ -58,12 +58,6 @@ end
 
 ZO_SharedAlchemy = ZO_CraftingCreateScreenBase:Subclass()
 
-function ZO_SharedAlchemy:New(...)
-    local alchemy = ZO_CraftingCreateScreenBase.New(self)
-    alchemy:Initialize(...)
-    return alchemy
-end
-
 ZO_SharedAlchemy.initializedEvents = false
 
 function ZO_SharedAlchemy:Initialize(control)
@@ -93,14 +87,7 @@ function ZO_SharedAlchemy:Initialize(control)
 
     self:InitializeScenes()
 
-    local function OnCraftCompleted()
-        if not self.control:IsHidden() then
-            self:UpdateTooltip()
-            self:UpdateMultiCraft()
-        end
-    end
-
-    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", OnCraftCompleted)
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function() self:OnCraftCompleted() end)
 end
 
 function ZO_SharedAlchemy:InitializeSharedEvents()
@@ -203,6 +190,13 @@ end
 
 function ZO_SharedAlchemy:UpdateMultiCraft()
     -- Should be overidden
+end
+
+function ZO_SharedAlchemy:OnCraftCompleted()
+    if not self.control:IsHidden() then
+        self:UpdateTooltip()
+        self:UpdateMultiCraft()
+    end
 end
 
 function ZO_SharedAlchemy:CanItemBeAddedToCraft(bagId, slotIndex)

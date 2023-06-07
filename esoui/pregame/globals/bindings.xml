@@ -196,6 +196,49 @@
         </Action>
       </Category>
     </Layer>
+
+    <!-- Not player facing -->
+    <Layer name="UIError">
+        <Category>
+            <Action name="UI_ERROR_DISMISS" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
+                <Down>return ZO_UIErrors_Dismiss()</Down>
+            </Action>
+            <Action name="UI_ERROR_SUPPRESS" hideAction="true" inheritsBindFrom="UI_SHORTCUT_TERTIARY">
+                <Down>return ZO_UIErrors_Suppress()</Down>
+            </Action>
+            <Action name="UI_ERROR_COPY" hideAction="true" inheritsBindFrom="UI_SHORTCUT_QUATERNARY">
+                <Down>return ZO_UIErrors_CopyError()</Down>
+            </Action>
+            <Action name="UI_ERROR_MORE_INFO" hideAction="true" inheritsBindFrom="UI_SHORTCUT_QUINARY">
+                <Down>
+                    if IsInGamepadPreferredMode() then
+                        return ZO_UIErrors_ToggleMoreInfo()
+                    else
+                        return false
+                    end
+                </Down>
+            </Action>
+            <Action name="UI_ERROR_PAGE_LEFT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_LEFT_TRIGGER">
+                <Down>
+                    if IsInGamepadPreferredMode() then
+                        return ZO_UIErrors_PageLeft()
+                    else
+                        return false
+                    end
+                </Down>
+            </Action>
+            <Action name="UI_ERROR_PAGE_RIGHT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_RIGHT_TRIGGER">
+                <Down>
+                    if IsInGamepadPreferredMode() then
+                        return ZO_UIErrors_PageRight()
+                    else
+                        return false
+                    end
+                </Down>
+            </Action>
+        </Category>
+    </Layer>
+
     <Layer name="SI_KEYBINDINGS_LAYER_DIALOG" allowFallthrough="false">
         <Category>
             <Action name="DIALOG_PRIMARY">

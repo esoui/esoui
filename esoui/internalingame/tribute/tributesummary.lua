@@ -1190,8 +1190,8 @@ function ZO_TributeSummary:ApplyPlatformStyle()
 end
 
 local function AreRewardsEqual(reward1, reward2)
-    local rewardType1 = reward1.rewardType
-    local rewardType2 = reward2.rewardType
+    local rewardType1 = reward1:GetRewardType()
+    local rewardType2 = reward2:GetRewardType()
 
     if rewardType1 ~= rewardType2 then
         return false
@@ -1200,7 +1200,7 @@ local function AreRewardsEqual(reward1, reward2)
     if rewardType1 == REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE then
         return true
     elseif rewardType1 == REWARD_ENTRY_TYPE_ADD_CURRENCY then
-        return reward1.currencyType == reward2.currencyType
+        return reward1:GetCurrencyType() == reward2:GetCurrencyType()
     elseif rewardType1 == REWARD_ENTRY_TYPE_COLLECTIBLE then
         local collectibleId1 = GetCollectibleRewardCollectibleId(reward1:GetRewardId())
         local collectibleId2 = GetCollectibleRewardCollectibleId(reward2:GetRewardId())
@@ -1450,18 +1450,12 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     -- Rewards
     -- Club rank points don't get to us via reward list defs, so we have to create the reward item for it ourselves
     -- to display it as a reward.
-    -- Pay attention and be careful if we have to fake a reward like this for anything we may end up treating as an
-    -- actual RewardData object (currently this applies to collectibles; I can't imagine why we'd have to fake a collectible,
-    -- but better to be warned than not).
-    local clubXPReward =
-    {
-        rewardType = REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE,
-        quantity = self.playerClubXP,
-    }
-    local mailedReward =
-    {
-        rewardType = REWARD_ENTRY_TYPE_MAIL_ITEM,
-    }
+    local clubXPReward = ZO_RewardData:New()
+    clubXPReward:SetRewardType(REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE)
+    clubXPReward:SetQuantity(self.playerClubXP)
+
+    local mailedReward = ZO_RewardData:New()
+    mailedReward:SetRewardType(REWARD_ENTRY_TYPE_MAIL_ITEM)
 
     local standardRewardListId = GetTributeGeneralMatchRewardListId()
     local lfgRewardUiDataId = GetTributeGeneralMatchLFGRewardUIDataId()
@@ -1476,11 +1470,17 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     local rankUpMailedRewards = false
     local rankUpRewards = {}
 
-    local function IsRewardOwnedCollectible(reward)
-        if reward.rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
-            local collectibleId = GetCollectibleRewardCollectibleId(reward:GetRewardId())
-            if GetCollectibleUnlockStateById(collectibleId) == COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED then
+    local function IsRewardAcquired(reward)
+        local rewardId = reward:GetRewardId()
+        if rewardId then
+            if HasClaimedAccountReward(rewardId) then
                 return true
+            end
+            if reward:GetRewardType() == REWARD_ENTRY_TYPE_COLLECTIBLE then
+                local collectibleId = GetCollectibleRewardCollectibleId(rewardId)
+                if not CanAcquireCollectibleByDefId(collectibleId) then
+                    return true
+                end
             end
         end
         return false
@@ -1495,11 +1495,11 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
             end
             if next(rankUpRewardList) then
                 for _, reward in ipairs(rankUpRewardList) do
-                    if not IsRewardOwnedCollectible(reward) then
+                    if not IsRewardAcquired(reward) then
                         local stackableRewardAlreadyExists = false
                         for _, innerReward in ipairs(rankUpRewards) do
                             if AreRewardsEqual(reward, innerReward) then
-                                innerReward.quantity = innerReward.quantity + reward.quantity
+                                innerReward:SetQuantity(innerReward:GetQuantity() + reward:GetQuantity())
                                 stackableRewardAlreadyExists = true
                                 break
                             end
@@ -1522,7 +1522,7 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
             end
             if next(clubRankRewardList) then
                 for _, reward in ipairs(clubRankRewardList) do
-                    if not IsRewardOwnedCollectible(reward) then
+                    if not IsRewardAcquired(reward) then
                         local stackableRewardAlreadyExists = false
                         for _, innerReward in ipairs(rankUpRewards) do
                             if AreRewardsEqual(reward, innerReward) then
@@ -1547,13 +1547,13 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     ZO_CombineNumericallyIndexedTables(matchCombinedRewards, matchStandardRewards, matchLFGRewards)
     for index = #matchCombinedRewards, 1, -1 do
         local reward = matchCombinedRewards[index]
-        if IsRewardOwnedCollectible(reward) then
+        if IsRewardAcquired(reward) then
             table.remove(matchCombinedRewards, index)
         else
             for innerIndex = 1, 1, index do
                 local innerReward = matchCombinedRewards[innerIndex]
                 if AreRewardsEqual(reward, innerReward) then
-                    innerReward.quantity = innerReward.quantity + reward.quantity
+                    innerReward:SetQuantity(innerReward:GetQuantity() + reward:GetQuantity())
                     table.remove(matchCombinedRewards, index)
                 end
             end
@@ -1568,33 +1568,34 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
         for rewardIndex, reward in ipairs(rewardsTable) do
             local control = rewardsControlPool:AcquireObject()
             if not overflow or rewardIndex < MAX_REWARDS_PER_ROW then
-                local rewardType = reward.rewardType
-                local name = reward.formattedName
-                local icon = reward.icon
+                local rewardType = reward:GetRewardType()
+                local name = reward:GetFormattedName()
+                local icon = reward:GetKeyboardIcon()
                 local qualityColorDef = nil
                 local countText = ""
+                local quantity = reward:GetQuantity()
                 if rewardType == REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE then
                     name = zo_strformat(SI_TRIBUTE_CLUB_EXPERIENCE, self.playerClubXP)
                     icon = "EsoUI/Art/Tribute/tributeRankPoints.dds"
-                    if reward.quantity > 1 then
-                        countText = reward.quantity
+                    if quantity > 1 then
+                        countText = quantity
                     end
                 elseif rewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
-                    local currencyType = reward.currencyType
+                    local currencyType = reward:GetCurrencyType()
                     name = zo_strformat(SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT, ZO_Currency_GetAmountLabel(currencyType))
                     icon = ZO_Currency_GetPlatformCurrencyLootIcon(currencyType)
                     local USE_SHORT_FORMAT = true
-                    countText = ZO_CurrencyControl_FormatAndLocalizeCurrency(reward.quantity, USE_SHORT_FORMAT)
+                    countText = ZO_CurrencyControl_FormatAndLocalizeCurrency(quantity, USE_SHORT_FORMAT)
                 elseif rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
                     -- No extra steps needed
                 elseif rewardType == REWARD_ENTRY_TYPE_ITEM then
-                    qualityColorDef = GetItemQualityColor(reward.quality)
+                    qualityColorDef = GetItemQualityColor(reward:GetItemDisplayQuality())
 
-                    if reward.quantity > 1 then
-                        countText = reward.quantity
+                    if quantity > 1 then
+                        countText = quantity
                     end
                 elseif rewardType == REWARD_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE then
-                    qualityColorDef = GetItemQualityColor(reward.quality)
+                    qualityColorDef = GetItemQualityColor(reward:GetItemDisplayQuality())
                 elseif rewardType == REWARD_ENTRY_TYPE_MAIL_ITEM then
                     name = GetString(SI_TRIBUTE_SUMMARY_REWARD_MAIL)
                     icon = "EsoUI/Art/Icons/Quest_Container_001.dds"

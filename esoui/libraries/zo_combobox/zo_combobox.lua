@@ -20,7 +20,8 @@ do
         for i = 1, #self.m_sortedItems do
             -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
             local item = self.m_sortedItems[i]
-            AddMenuItem(item.name, function() self:ItemSelectedClickHelper(item) end, MENU_ADD_OPTION_LABEL, self.m_font, item.normalColor or self.m_normalColor, item.highlightColor or self.m_highlightColor, NO_PADDING_Y, self.horizontalAlignment, item.onEnter, item.onExit, item.enabled)
+            local NOT_HIGHLIGHTED = false
+            AddMenuItem(item.name, function() self:ItemSelectedClickHelper(item) end, MENU_ADD_OPTION_LABEL, self.m_font, item.normalColor or self.m_normalColor, item.highlightColor or self.m_highlightColor, NO_PADDING_Y, self.horizontalAlignment, NOT_HIGHLIGHTED, item.onEnter, item.onExit, item.enabled)
         end
     end
 end

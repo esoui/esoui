@@ -18,6 +18,7 @@ function ZO_CollectibleTile_Keyboard:InitializePlatform()
 
     self.statusMultiIcon = self.control:GetNamedChild("Status")
     self.cornerTagTexture = self.control:GetNamedChild("CornerTag")
+    self.favoriteIcon = self.control:GetNamedChild("IconFavoriteIcon")
     self.cooldownIcon = self.control:GetNamedChild("CooldownIcon")
     self.cooldownIconDesaturated = self.control:GetNamedChild("CooldownIconDesaturated")
     self.cooldownTimeLabel = self.control:GetNamedChild("CooldownTime")
@@ -140,7 +141,7 @@ function ZO_CollectibleTile_Keyboard:RefreshMouseoverVisuals()
 end
 
 function ZO_CollectibleTile_Keyboard:GetPrimaryInteractionStringId()
-    if self.isCooldownActive ~= true and not self.collectibleData:IsBlocked() then
+    if self.isCooldownActive ~= true and not self.collectibleData:IsBlocked(self:GetActorCategory()) then
         return self.collectibleData:GetPrimaryInteractionStringId(self:GetActorCategory())
     end
     return nil
@@ -207,6 +208,18 @@ function ZO_CollectibleTile_Keyboard:AddMenuOptions()
                         SelectSlotSimpleAction(ACTION_TYPE_COLLECTIBLE, collectibleId, validSlot, hotbarCategory)
                     end)
                 end
+            end
+        end
+
+        if self:GetActorCategory() == GAMEPLAY_ACTOR_CATEGORY_PLAYER and collectibleData:IsFavoritable() then
+            if collectibleData:IsFavorite() then
+                AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE), function()
+                    SetOrClearCollectibleUserFlag(collectibleId, COLLECTIBLE_USER_FLAG_FAVORITE, false)
+                end)
+            else
+                AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE), function()
+                    SetOrClearCollectibleUserFlag(collectibleId, COLLECTIBLE_USER_FLAG_FAVORITE, true)
+                end)
             end
         end
     end
@@ -360,7 +373,7 @@ function ZO_CollectibleTile_Keyboard:LayoutPlatform(data)
     local iconTexture = self:GetIconTexture()
     iconTexture:SetTexture(iconFile)
         
-    local desaturation = (collectibleData:IsLocked() or collectibleData:IsBlocked()) and 1 or 0
+    local desaturation = (collectibleData:IsLocked() or collectibleData:IsBlocked(self:GetActorCategory())) and 1 or 0
     self:GetHighlightControl():SetDesaturation(desaturation)
 
     local isLocked = collectibleData:IsLocked()
@@ -369,12 +382,15 @@ function ZO_CollectibleTile_Keyboard:LayoutPlatform(data)
 
     iconTexture:SetHidden(false)
 
+    self:SetFavoriteIconVisibility(collectibleData:IsFavorite())
+
     -- Status
     local statusMultiIcon = self.statusMultiIcon
     statusMultiIcon:ClearIcons()
 
     if collectibleData:IsUnlocked() then
-        if collectibleData:IsActive(self:GetActorCategory()) then
+        local actorCategory = self:GetActorCategory()
+        if collectibleData:IsActive(actorCategory) and not collectibleData:ShouldSuppressActiveState(actorCategory) then
             statusMultiIcon:AddIcon(ZO_CHECK_ICON)
 
             if collectibleData:WouldBeHidden() then
@@ -421,6 +437,10 @@ function ZO_CollectibleTile_Keyboard:OnDragStart(button)
             PickupCollectible(self.collectibleData:GetId())
         end
     end
+end
+
+function ZO_CollectibleTile_Keyboard:SetFavoriteIconVisibility(visible)
+    self.favoriteIcon:SetHidden(not visible)
 end
 
 -- End ZO_ContextualActionsTile_Keyboard Overrides --

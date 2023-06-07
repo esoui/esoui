@@ -48,5 +48,11 @@
                 ZO_TributeTargetViewerCardTile_Gamepad_OnInitialized(self)
             </OnInitialized>
         </Control>
+
+        <Control name="ZO_TributeConfinementViewerCardTile_Gamepad_Control" inherits="ZO_TributeCardTile_Shared_Control ZO_TributeCardTile_Gamepad_Control" virtual="true">
+            <OnInitialized>
+                ZO_TributeConfinementViewerCardTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </Control>
     </Controls>
 </GuiXml>

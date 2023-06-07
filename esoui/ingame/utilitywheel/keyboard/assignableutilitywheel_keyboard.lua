@@ -141,18 +141,17 @@ function ZO_AssignableUtilityWheel_Keyboard:Deactivate()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mouseOverKeybindStripDescriptor)
 end
 
-
-local INITIAL_ROTATION = 0
 function ZO_AssignableUtilityWheel_Keyboard:PerformSlotLayout()
     local width, height = self.control:GetDimensions()
     local scale = self.control:GetScale()
     local halfWidth, halfHeight = width * scale * 0.5, height * scale * 0.5
     local numSlots = self.data.numSlots
     local actionBarOffset = self.data.startSlotIndex or 0
+    local arcAnglePerSlotRadians, startingOffsetAngleRadians = self:GetArcAnglePerSlotAndStartingOffsetAngle()
 
     for i = 1, numSlots do
         local control = self.slots[i + actionBarOffset]
-        local centerAngle = INITIAL_ROTATION + i / numSlots * ZO_TWO_PI
+        local centerAngle = startingOffsetAngleRadians + (i - 1) * arcAnglePerSlotRadians
         local x = math.sin(centerAngle)
         local y = math.cos(centerAngle)
 
@@ -176,11 +175,17 @@ function ZO_AssignableUtilityWheel_Keyboard:PerformSlotLayout()
         control:SetAnchor(CENTER, nil, CENTER, x * halfWidth, y * halfHeight)
         control:SetHidden(false)
     end
+
+    --We need to do this *after* the rest of the layout has been completed so we can correctly calculate the ordinal indices
+    for ordinalIndex, slot in self:OrdinalSlotIterator() do
+        ZO_Keybindings_RegisterLabelForBindingUpdate(slot.keybindLabel, ZO_GetRadialMenuActionNameForOrdinalIndex(ordinalIndex))
+    end
 end
 
 function ZO_AssignableUtilityWheel_Keyboard:InitializeSlots()
     local numSlots = self.data.numSlots
     local actionBarOffset = self.data.startSlotIndex or 0
+    local showKeybinds = self:ShouldShowKeybinds()
     for i = actionBarOffset + 1, actionBarOffset + numSlots do
         local slot = CreateControlFromVirtual("$(parent)WheelSlot" .. i, self.control, "ZO_AssignableUtilityWheelSlot_Keyboard_Template")
 
@@ -191,10 +196,16 @@ function ZO_AssignableUtilityWheel_Keyboard:InitializeSlots()
         slot.icon = slot:GetNamedChild("Icon")
         slot.countText = slot:GetNamedChild("CountText")
         slot.nameLabel = slot:GetNamedChild("Label")
+        slot.keybindLabel = slot:GetNamedChild("KeyLabel")
 
-        if self.data.overrideShowNameLabels ~= nil then
-            slot.nameLabel:SetHidden(not self.data.overrideShowNameLabels)
+        ZO_KeyMarkupLabel_SetCustomOffsets(slot.keybindLabel, -5, 5, -2, 3)
+
+        --If we are showing keybinds, do not show name labels in any circumstance
+        if self.data.overrideShowNameLabels ~= nil or showKeybinds then
+            slot.nameLabel:SetHidden(showKeybinds or not self.data.overrideShowNameLabels)
         end
+
+        slot.keybindLabel:SetHidden(not showKeybinds)
 
         ZO_ActionSlot_SetupSlot(slot.icon, slot.button, ZO_UTILITY_SLOT_EMPTY_TEXTURE)
         ZO_CreateSparkleAnimation(slot)
@@ -210,12 +221,16 @@ function ZO_AssignableUtilityWheel_Keyboard:DoSlotUpdate(physicalSlot, playAnima
         local physicalSlotType = GetSlotType(physicalSlot, hotbarCategory)
         slot.nameLabel:SetText("")
 
-        if self.data.overrideShowNameLabels ~= nil then
-            slot.nameLabel:SetHidden(not self.data.overrideShowNameLabels)
+        local showKeybinds = self:ShouldShowKeybinds()
+        --If we are showing keybinds, do not show name labels in any circumstance
+        if self.data.overrideShowNameLabels ~= nil or showKeybinds then
+            slot.nameLabel:SetHidden(showKeybinds or not self.data.overrideShowNameLabels)
         else
             --Only the emote wheel shows name labels by default
             slot.nameLabel:SetHidden(hotbarCategory ~= HOTBAR_CATEGORY_EMOTE_WHEEL)
         end
+
+        slot.keybindLabel:SetHidden(not showKeybinds)
 
         local slotIcon = GetSlotTexture(physicalSlot, hotbarCategory)
 
@@ -272,6 +287,57 @@ function ZO_AssignableUtilityWheel_Keyboard:DoSlotUpdate(physicalSlot, playAnima
                 SetCurrentQuickslot(physicalSlot)
             end
         end
+    end
+end
+
+do
+    local INITIAL_ROTATION = 0
+    function ZO_AssignableUtilityWheel_Keyboard:GetArcAnglePerSlotAndStartingOffsetAngle()
+        local numSlots = self.data.numSlots
+        local arcAnglePerSlotRadians = ZO_TWO_PI / numSlots
+        local startingOffsetAngleRadians = INITIAL_ROTATION + arcAnglePerSlotRadians
+        return arcAnglePerSlotRadians, startingOffsetAngleRadians
+    end
+end
+
+-- Returns the Slot at the ordinal position [1..n] beginning with the slot nearest to
+-- ZO_RADIAL_MENU_PREFERRED_ORDINAL_STARTING_ANGLE_RADIANS and progressing clockwise or
+-- counter-clockwise as defined by ZO_RADIAL_MENU_ORDINAL_DIRECTION.
+function ZO_AssignableUtilityWheel_Keyboard:GetOrdinalSlot(ordinalIndex)
+    local numSlots = self.data.numSlots
+    if ordinalIndex > numSlots then
+        -- Invalid ordinal index and/or no slots exist.
+        return nil
+    end
+
+    -- Determine the shortest arc distance between the positional angle
+    -- of the first slot and the preferred starting ordinal angle.
+    local arcAnglePerSlotRadians, startingOffsetAngleRadians = self:GetArcAnglePerSlotAndStartingOffsetAngle()
+    local preferredStartingAngleDistanceRadians = (ZO_RADIAL_MENU_PREFERRED_ORDINAL_STARTING_ANGLE_RADIANS - startingOffsetAngleRadians) % ZO_TWO_PI
+
+    -- Determine the slot index offset of the starting ordinal index.
+    local startingOrdinalSlotIndexOffset = zo_round(preferredStartingAngleDistanceRadians / arcAnglePerSlotRadians)
+
+    -- Determine the final slot index associated with the requested ordinal
+    -- index and clamp within the range [1..n] for n slots.
+    local ordinalSlotIndex = startingOrdinalSlotIndexOffset + ((ordinalIndex - 1) * ZO_RADIAL_MENU_ORDINAL_DIRECTION)
+    ordinalSlotIndex = (ordinalSlotIndex % numSlots) + 1
+
+    local actionBarOffset = self.data.startSlotIndex or 0
+    return self.slots[ordinalSlotIndex + actionBarOffset]
+end
+
+-- Returns an iterator that iterates over each Slot in the ordinal
+-- order defined by ZO_AssignableUtilityWheel_Keyboard:GetOrdinalSlot.
+function ZO_AssignableUtilityWheel_Keyboard:OrdinalSlotIterator()
+    local ordinalIndex = 0
+    return function()
+        ordinalIndex = ordinalIndex + 1
+        local slot = self:GetOrdinalSlot(ordinalIndex)
+        if slot then
+            return ordinalIndex, slot
+        end
+        return nil, nil
     end
 end
 

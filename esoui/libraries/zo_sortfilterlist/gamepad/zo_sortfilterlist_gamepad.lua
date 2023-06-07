@@ -76,8 +76,11 @@ function ZO_SortFilterList_Gamepad:UpdateDirectionalInput()
 end
 
 function ZO_SortFilterList_Gamepad:SetEmptyText(emptyText)
-    self.emptyRow = CreateControlFromVirtual("$(parent)EmptyRow", self.list, "ZO_SortFilterListEmptyRow_Gamepad")
+    if not self.emptyRow then
+        self.emptyRow = CreateControlFromVirtual("$(parent)EmptyRow", self.list, "ZO_SortFilterListEmptyRow_Gamepad")
+    end
     self.emptyRow:GetNamedChild("Message"):SetText(emptyText)
+    self.emptyText = emptyText
 end
 
 function ZO_SortFilterList_Gamepad:OnSelectionChanged(previouslySelected, selected)
@@ -95,4 +98,16 @@ end
 
 function ZO_SortFilterList_Gamepad:GetNarrationText()
     --Can be overridden
+end
+
+function ZO_SortFilterList_Gamepad:GetAdditionalInputNarrationFunction()
+    --Can be overridden
+end
+
+function ZO_SortFilterList_Gamepad:GetEmptyRowNarration()
+    local narrations = {}
+    if self.emptyRow and not self.emptyRow:IsHidden() then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.emptyText))
+    end
+    return narrations
 end

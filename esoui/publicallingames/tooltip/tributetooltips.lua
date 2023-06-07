@@ -235,6 +235,7 @@ function ZO_Tooltip:LayoutTributePatron(patronData, optionalArgs)
     local suppressNotCollectibleWarning = optionalArgs and optionalArgs.suppressNotCollectibleWarning or false
     local showAcquireHint = optionalArgs and optionalArgs.showAcquireHint or false
     local showLore = optionalArgs and optionalArgs.showLore or false
+    local overrideFavorState = optionalArgs and optionalArgs.overrideFavorState
 
     -- Header
     local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
@@ -258,7 +259,10 @@ function ZO_Tooltip:LayoutTributePatron(patronData, optionalArgs)
     self:AddSection(titleSection)
 
     local currentFavorState = nil
-    if highlightActivePatronState and TRIBUTE.GetGameFlowState and TRIBUTE:GetGameFlowState() ~= TRIBUTE_GAME_FLOW_STATE_INACTIVE then
+    --If an override favor state was set, highlight that instead of the active favor state
+    if overrideFavorState then
+        currentFavorState = overrideFavorState
+    elseif highlightActivePatronState and TRIBUTE.GetGameFlowState and TRIBUTE:GetGameFlowState() ~= TRIBUTE_GAME_FLOW_STATE_INACTIVE then
         -- Highlight the active Favor state only if requested and if a Tribute game is currently active.
         local patronStall = TRIBUTE:GetPatronStallByPatronId(patronData:GetId())
         if patronStall then
@@ -326,6 +330,18 @@ function ZO_Tooltip:LayoutTributeBoardLocationPatrons(boardLocationData)
             patronsSection:AddLine(zo_strformat(GetString(SI_TRIBUTE_PATRON_NAME_WITH_COUNT_AND_SUIT_ICON_FORMATTER), numCards, patronSuitIcon, patronName), self:GetStyle("whiteFontColor"), self:GetStyle("bodyDescription"))
         end
         self:AddSection(patronsSection)
+
+        --If we are looking at either player's agent pile, we need to include any confined cards as well
+        local boardLocation = boardLocationData:GetBoardLocation()
+        if boardLocation == TRIBUTE_BOARD_LOCATION_PLAYER_BOARD_AGENT or boardLocation == TRIBUTE_BOARD_LOCATION_OPPONENT_BOARD_AGENT then
+            local confinedLocation = boardLocation == TRIBUTE_BOARD_LOCATION_PLAYER_BOARD_AGENT and TRIBUTE_BOARD_LOCATION_PLAYER_PRISON or TRIBUTE_BOARD_LOCATION_OPPONENT_PRISON
+            local numConfined = GetNumTributeCardsAtBoardLocation(confinedLocation)
+            if numConfined > 0 then
+                local confinedSection = self:AcquireSection(self:GetStyle("bodySection"))
+                confinedSection:AddLine(zo_strformat(GetString(SI_TRIBUTE_CONFINED_COUNT_FORMATTER), numConfined), self:GetStyle("whiteFontColor"), self:GetStyle("bodyDescription"))
+                self:AddSection(confinedSection)
+            end
+        end
     end
 end
 
@@ -346,5 +362,15 @@ function ZO_Tooltip:LayoutTributeDiscardCounter()
 
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
     bodySection:AddLine(GetString(SI_TRIBUTE_DISCARD_COUNTER_TOOLTIP_DESCRIPTION), self:GetStyle("bodyDescription"))
+    self:AddSection(bodySection)
+end
+
+function ZO_Tooltip:LayoutTributePatronUsage()
+    local titleSection = self:AcquireSection(self:GetStyle("title"))
+    titleSection:AddLine(GetString(SI_TRIBUTE_PATRON_USAGE_COUNTER_TOOLTIP_TITLE))
+    self:AddSection(titleSection)
+
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    bodySection:AddLine(GetString(SI_TRIBUTE_PATRON_USAGE_COUNTER_TOOLTIP_DESCRIPTION), self:GetStyle("bodyDescription"))
     self:AddSection(bodySection)
 end

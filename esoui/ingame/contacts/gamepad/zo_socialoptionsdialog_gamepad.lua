@@ -299,7 +299,7 @@ function ZO_SocialOptionsDialogGamepad:BuildIgnoreOption()
     local stringId
     local callback
     local platform = GetUIPlatform()
-    if platform == UI_PLATFORM_PC or platform == UI_PLATFORM_HERON then
+    if platform == UI_PLATFORM_PC then
         stringId = SI_FRIEND_MENU_IGNORE
         callback = function()
             ZO_Dialogs_ShowGamepadDialog("CONFIRM_IGNORE_FRIEND", self.socialData, {mainTextParams={ ZO_FormatUserFacingDisplayName(self.socialData.displayName) }}) 

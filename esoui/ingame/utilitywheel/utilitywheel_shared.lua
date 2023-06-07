@@ -27,6 +27,9 @@ function ZO_UtilityWheel_Shared:Initialize(control, entryTemplate, animationTemp
 
     self.categoryLabel = control:GetNamedChild("MenuCategory")
     self.currentHotbarCategoryIndex = 1
+
+    self.menu:SetShowKeybinds(function() return ZO_AreTogglableWheelsEnabled() end)
+    self.menu:SetKeybindActionLayer(GetString(SI_KEYBINDINGS_LAYER_ACCESSIBLE_QUICKWHEEL))
 end
 
 function ZO_UtilityWheel_Shared:GetHotbarCategory()
@@ -58,7 +61,9 @@ function ZO_UtilityWheel_Shared:CycleRight()
     if nextHotbarCategoryIndex ~= self.currentHotbarCategoryIndex then
         self.currentHotbarCategoryIndex = nextHotbarCategoryIndex
         self:ShowMenu()
+        return true
     end
+    return false
 end
 
 function ZO_UtilityWheel_Shared:CycleLeft()
@@ -66,7 +71,9 @@ function ZO_UtilityWheel_Shared:CycleLeft()
     if previousHotbarCategoryIndex ~= self.currentHotbarCategoryIndex then
         self.currentHotbarCategoryIndex = previousHotbarCategoryIndex
         self:ShowMenu()
+        return true
     end
+    return false
 end
 
 function ZO_UtilityWheel_Shared:RefreshCategories()
@@ -108,7 +115,8 @@ function ZO_UtilityWheel_Shared:SetupEntryControl(entryControl, data)
     if entryControl.label then
         entryControl.label:SetText(data.name)
         --Only the emote wheel shows labels for its entries
-        entryControl.label:SetHidden(hotbarCategory ~= HOTBAR_CATEGORY_EMOTE_WHEEL)
+        --Do not show labels for the entries while the togglable wheel is enabled
+        entryControl.label:SetHidden(ZO_AreTogglableWheelsEnabled() or hotbarCategory ~= HOTBAR_CATEGORY_EMOTE_WHEEL)
     end
 end
 

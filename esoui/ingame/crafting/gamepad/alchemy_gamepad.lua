@@ -65,6 +65,7 @@ function ZO_GamepadAlchemy:InitializeScenes()
             self.inventory:HandleDirtyEvent()
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
             self.tooltip:SetHidden(true)
+            ZO_SavePlayerConsoleProfile()
         end
     end)
 
@@ -182,16 +183,14 @@ end
 function ZO_GamepadAlchemy:GetFooterNarration()
     local narrations = {}
     local skillInfoNarration = ZO_Skills_GetSkillInfoHeaderNarrationText(self.skillInfo)
-    if skillInfoNarration then
-        ZO_CombineNumericallyIndexedTables(narrations, skillInfoNarration)
-    end
-    ZO_CombineNumericallyIndexedTables(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
+    ZO_AppendNarration(narrations, skillInfoNarration)
+    ZO_AppendNarration(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
     return narrations
 end
 
 function ZO_GamepadAlchemy:InitializeInventory()
     self.inventory = ZO_GamepadAlchemyInventory:New(self.control:GetNamedChild("ContainerInventory"), self)
-   
+
     self.activeSlotIndex = 0
 
     self.inventory:SetOnTargetDataChangedCallback(function(list, selectedData)
@@ -475,6 +474,15 @@ function ZO_GamepadAlchemy:UpdateTooltip()
         self.tooltip.tip:LayoutAlchemyPreview(itemLink, itemTypeString, prospectiveAlchemyResult)
     else
         self.tooltip:SetHidden(true)
+    end
+end
+
+--Overridden from base
+function ZO_GamepadAlchemy:OnCraftCompleted()
+    ZO_SharedAlchemy.OnCraftCompleted(self)
+    if GAMEPAD_ALCHEMY_CREATION_SCENE:IsShowing() then
+        --Re-narrate when a craft completes
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
     end
 end
 

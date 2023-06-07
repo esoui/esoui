@@ -1,14 +1,10 @@
 ZO_GamepadFenceSell = ZO_GamepadFenceComponent:Subclass()
 
-function ZO_GamepadFenceSell:New(...)
-    return ZO_GamepadFenceComponent.New(self, ...)
-end
-
 function ZO_GamepadFenceSell:Initialize()
     ZO_GamepadFenceComponent.Initialize(self, ZO_MODE_STORE_SELL_STOLEN, GetString(SI_STORE_MODE_SELL))
 
     self:InitializeKeybindStrip(GetString(SI_ITEM_ACTION_SELL))
-    self:CreateModeData(SI_STORE_MODE_SELL, self.mode, "EsoUI/Art/Vendor/vendor_tabIcon_sell_up.dds", fragment, self.keybindStripDescriptor)
+    self:CreateModeData(SI_STORE_MODE_SELL, self.mode, "EsoUI/Art/Vendor/vendor_tabIcon_sell_up.dds", self.fragment, self.keybindStripDescriptor)
     self.list:SetNoItemText(GetString(SI_GAMEPAD_NO_STOLEN_ITEMS_SELL))
 end
 

@@ -235,7 +235,7 @@ local ZO_OptionsPanel_Combat_ControlData =
             panel = SETTING_PANEL_COMBAT,
             text = SI_INTERFACE_OPTIONS_COMBAT_ENCOUNTER_LOG_APPEAR_ANONYMOUS,
             tooltipText = SI_INTERFACE_OPTIONS_COMBAT_ENCOUNTER_LOG_APPEAR_ANONYMOUS_TOOLTIP,
-            exists = ZO_IsPCOrHeronUI,
+            exists = ZO_IsPCUI,
         },
         [COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED] =
         {

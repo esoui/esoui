@@ -658,7 +658,12 @@ function ZO_GamepadGenericHeader_Refresh(control, data, blockTabBarCallbacks)
         control.tabBar:Clear()
         if data.tabBarEntries then
             for i, tabData in ipairs(data.tabBarEntries) do
-                if (tabData.visible == nil) or tabData.visible() then
+                local visible = tabData.visible
+                if type(visible) == "function" then
+                    visible = visible()
+                end
+
+                if visible ~= false then
                     if tabData.template then
                         control.tabBar:AddEntry(tabData.template, tabData)
                     else

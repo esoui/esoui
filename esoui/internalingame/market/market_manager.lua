@@ -86,7 +86,7 @@ function Market_Manager:InitializePlatformErrors()
     local consoleStoreName
     local platformServiceType = GetPlatformServiceType()
 
-    if IsConsoleUI() or IsHeronUI() then
+    if IsConsoleUI() then
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), ZO_GetPlatformStoreName())
     elseif platformServiceType == PLATFORM_SERVICE_TYPE_STEAM then
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_STEAM, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS))

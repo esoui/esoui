@@ -796,7 +796,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             settingId = OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST,
             text = SI_SETTING_SHOW_SCREEN_ADJUST,
-            exists = ZO_IsConsoleOrHeronUI,
+            exists = ZO_IsConsoleUI,
             gamepadIsEnabledCallback = function() 
                 -- only allow resizing once the previous one has been completed.
                 return not IsGUIResizing()

@@ -17,9 +17,13 @@ ZO_TRIBUTE_CARD_POPUP_TYPE =
 ZO_TRIBUTE_SHOW_CARD_POPUP_DELAY_SECONDS = 0
 ZO_TRIBUTE_SHOW_CARD_TOOLTIP_DELAY_SECONDS = 0.35
 ZO_TRIBUTE_SHOW_RESOURCE_TOOLTIP_DELAY_SECONDS = 0.5
+ZO_TRIBUTE_SHOW_PATRON_USAGE_TOOLTIP_DELAY_SECONDS = 0.5
 
 ZO_TRIBUTE_PATRON_TOOLTIP_OFFSET_X = -40
 ZO_TRIBUTE_PATRON_TOOLTIP_OFFSET_Y = 0
+
+ZO_TRIBUTE_CONFINED_CARDS_KEYBIND_HEIGHT = 35
+ZO_TRIBUTE_CONFINED_CARDS_KEYBIND_OFFSET_Y = 20
 
 -- We want to cover 2 meters of board, but also the orient is scaled down since it houses labels.
 -- So for the final result to cover the world area we want, we need to set its actual meters to 2 meters inversed by the scale we're going to apply
@@ -64,6 +68,7 @@ function ZO_Tribute:Initialize(control)
             end
 
             self:ResetResourceTooltip()
+            self:ResetPatronUsageTooltip()
             self:ResetDiscardCounters()
             self:ResetCardPopupAndTooltip(ANY_ACTIVE_CARD)
             self:RefreshInputState()
@@ -128,6 +133,7 @@ function ZO_Tribute:InitializeControls()
     self.cardInstanceIdToCardObject = {}
 
     self.resourceDisplayControls = {}
+    self.patronUsageDisplayControls = {}
     self.discardCounters = {}
 
     self.activeCardPopup = {}
@@ -135,6 +141,7 @@ function ZO_Tribute:InitializeControls()
     self.queuedCardPopup = {}
     self.queuedCardTooltip = {}
     self.queuedResourceTooltip = {}
+    self.queuedPatronUsageTooltip = {}
     self.activeBoardLocationPatronsTooltipCardObject = nil
 
     self.boardOrientControl = control:GetNamedChild("BoardOrient")
@@ -142,6 +149,7 @@ function ZO_Tribute:InitializeControls()
     for perspective = TRIBUTE_PLAYER_PERSPECTIVE_ITERATION_BEGIN, TRIBUTE_PLAYER_PERSPECTIVE_ITERATION_END do
         local discardCounter = CreateControlFromVirtual("$(parent)DiscardCountDisplay", self.boardOrientControl, "ZO_TributeDiscardCountDisplay_Control", perspective)
         self.discardCounters[perspective] = ZO_TributeDiscardCountDisplay:New(discardCounter, perspective)
+        self.patronUsageDisplayControls[perspective] = CreateControlFromVirtual("$(parent)PatronUsageDisplay", self.boardOrientControl, "ZO_TributePatronUsageDisplay_Control", perspective)
         local perspectiveResourceDisplayControls = {}
         self.resourceDisplayControls[perspective] = perspectiveResourceDisplayControls
         for resource = TRIBUTE_RESOURCE_ITERATION_BEGIN, TRIBUTE_RESOURCE_ITERATION_END do
@@ -168,6 +176,35 @@ function ZO_Tribute:InitializeControls()
     self.confirmButton:SetTransformOffset(0, 0, 0)
     self.confirmButton:SetKeybindButtonDescriptor(confirmButtonDescriptor)
     self.confirmButton:GetNamedChild("Bg"):SetColor(ZO_BLACK:UnpackRGB())
+
+    local confinedCardsButtonDescriptor =
+    {
+        name = GetString(SI_TRIBUTE_VIEW_CONFINED_CARDS_ACTION),
+        keybind = "UI_SHORTCUT_TERTIARY",
+        --This descriptor is just used for visual purposes, so we do not need to specify a callback. The actual logic is handled elsewhere
+    }
+    self.confinedCardsButton = control:GetNamedChild("ConfinedCardsButton")
+    self.confinedCardsButton:SetKeybindButtonDescriptor(confinedCardsButtonDescriptor)
+    self.confinedCardsButton:SetClampedToScreen(true)
+    self.confinedCardsButton:GetNamedChild("Bg"):SetColor(ZO_BLACK:UnpackRGB())
+
+    self.confinedCardsContainer = control:GetNamedChild("ConfinedCards")
+
+    local lastConfinedCardControl = nil
+    local confinedCardTiles = {}
+    local MAX_VISIBLE_CONFINED_CARDS = 5
+    --Populate and anchor the children for the confined card container
+    for index = 1, MAX_VISIBLE_CONFINED_CARDS do
+        local confinedCardTile = CreateControlFromVirtual("$(parent)Card", self.confinedCardsContainer, "ZO_TributeConfinedCardTile", index)
+        if lastConfinedCardControl then
+            confinedCardTile:SetAnchor(TOP, lastConfinedCardControl, BOTTOM, 0, 15)
+        else
+            confinedCardTile:SetAnchor(TOPLEFT)
+        end
+        table.insert(confinedCardTiles, confinedCardTile)
+        lastConfinedCardControl = confinedCardTile
+    end
+    self.confinedCardsContainer.cardControls = confinedCardTiles
 
     self.instruction = control:GetNamedChild("Instruction")
     -- ZoFontTributeAntique40 is a rarely used font, so defer loading it until it's actually becomes necessary
@@ -242,14 +279,39 @@ function ZO_Tribute:DeferredInitialize()
                 end,
             },
             {
-                name = GetString(SI_TRIBUTE_SKIP_TUTORIAL_DIALOG_KEYBIND),
-                keybind = "UI_SHORTCUT_TERTIARY",
-                alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-                callback = TrySkipCurrentTributeTutorialStep,
-                enabled = function()
-                    return self.canSkipCurrentTributeTutorialStep
+                name = function()
+                    if IsTributeTutorialGame() then
+                        return GetString(SI_TRIBUTE_SKIP_TUTORIAL_DIALOG_KEYBIND)
+                    else
+                        return GetString(SI_TRIBUTE_VIEW_CONFINED_CARDS_ACTION)
+                    end
                 end,
-                visible = IsTributeTutorialGame
+                keybind = "UI_SHORTCUT_TERTIARY",
+                ethereal = function()
+                    --Treat this keybind as ethereal if we aren't in a tutorial
+                    return not IsTributeTutorialGame()
+                end,
+                alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+                callback = function()
+                    if IsTributeTutorialGame() then
+                        TrySkipCurrentTributeTutorialStep()
+                    else
+                        --This only works properly because we can assume this keybind is ethereal if we get here
+                        --Otherwise we'd have to add additional logic to enabled or visible
+                        local popupObject = self.activeCardPopup.popupObject
+                        if popupObject then
+                            popupObject:ShowConfinedCards()
+                        end
+                    end
+                end,
+                enabled = function()
+                    if IsTributeTutorialGame() then
+                        return self.canSkipCurrentTributeTutorialStep
+                    else
+                        --We wait until we fire the callback until we actually check the number of confined cards, as the keybinds are not refreshed often enough to do it here
+                        return self:CanShowConfineKeybind()
+                    end
+                end,
             },
             {
                 --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
@@ -464,21 +526,18 @@ do
         -- The game isn't over, so either close whatever is open, or attempt to concede the match
         TributeExitResponse(REJECT)
 
-        local closedMenu = false
+        local intercepted = false
         if isInterceptingCloseAction then
-            -- Only close whatever is up, and don't concede is something was up
-            if ZO_TRIBUTE_PILE_VIEWER_MANAGER:IsViewingPile() then
-                ZO_TRIBUTE_PILE_VIEWER_MANAGER:SetViewingPile(nil)
-                closedMenu = true
-            elseif ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() or TRIBUTE_MECHANIC_SELECTOR:IsSelectingMechanic() then
-                if TributeCanCancelCurrentMove() then
-                    TributeCancelCurrentMove()
-                end
-                closedMenu = true
+            -- Only close whatever is up, and don't concede if something was up
+            local activeViewer = self:GetActiveViewer()
+            if activeViewer then
+                local INTERCEPTING_CLOSE_ACTION = true
+                activeViewer:RequestClose(INTERCEPTING_CLOSE_ACTION)
+                intercepted = true
             end
         end
 
-        if not closedMenu then
+        if not intercepted then
             local opponentName, opponentPlayerType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
             local dialogData =
             {
@@ -532,12 +591,29 @@ do
             end
         end)
 
+        control:RegisterForEvent(EVENT_TRIBUTE_PATRON_USAGE_COUNT_CHANGED, function(_, perspective, newAmount)
+            local perspectivePatronUsageDisplayControl = self.patronUsageDisplayControls[perspective]
+            if perspectivePatronUsageDisplayControl then
+                perspectivePatronUsageDisplayControl:SetText(newAmount)
+            end
+        end)
+
         control:RegisterForEvent(EVENT_TRIBUTE_RESOURCE_TOKEN_HIGHLIGHTED, function(_, perspective, resource)
             if perspective and resource then
                 self:QueueResourceTooltip(perspective, resource)
                 self.gamepadCursor:SetObjectUnderCursor(resource, ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.RESOURCE_TOKEN, true)
             else
                 self:ResetResourceTooltip()
+                self.gamepadCursor:ResetObjectUnderCursor()
+            end
+        end)
+
+        control:RegisterForEvent(EVENT_TRIBUTE_PATRON_USAGE_COUNTER_HIGHLIGHTED, function(_, perspective)
+            if perspective then
+                self:QueuePatronUsageTooltip(perspective)
+                self.gamepadCursor:SetObjectUnderCursor(perspective, ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.PATRON_USAGE_COUNTER, true)
+            else
+                self:ResetPatronUsageTooltip()
                 self.gamepadCursor:ResetObjectUnderCursor()
             end
         end)
@@ -698,7 +774,20 @@ do
     
         control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
 
-        local function PileViewerStateChanged(oldState, newState)
+        local function ViewerActivationStateChanged(viewer, isActive)
+            if isActive then
+                self:SetActiveViewer(viewer)
+            else
+                local activeViewer = self:GetActiveViewer()
+                --Only try to clear the active viewer if the one we are trying to clear matches
+                if viewer == activeViewer then
+                    self:SetActiveViewer(nil)
+                end
+            end
+        end
+
+        --Register the pile viewer callbacks
+        local function PileViewerFragmentStateChanged(oldState, newState)
             if newState == SCENE_FRAGMENT_SHOWING then
                 self:RefreshInputState()
             elseif newState == SCENE_FRAGMENT_HIDDEN then
@@ -707,38 +796,68 @@ do
         end
 
         if not IsConsoleUI() then
-            TRIBUTE_PILE_VIEWER_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", PileViewerStateChanged)
+            TRIBUTE_PILE_VIEWER_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", PileViewerFragmentStateChanged)
         end
-        TRIBUTE_PILE_VIEWER_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", PileViewerStateChanged)
+        TRIBUTE_PILE_VIEWER_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", PileViewerFragmentStateChanged)
+        ZO_TRIBUTE_PILE_VIEWER_MANAGER:RegisterCallback("ActivationStateChanged", ViewerActivationStateChanged)
 
-        local function TargetViewerStateChanged(oldState, newState)
+        --Register the target viewer callbacks
+        local function TargetViewerFragmentStateChanged(oldState, newState)
+            --In some situations, we will get here before the activation state change fires.
+            --As a result, we need to manually call the ViewerActivationStateChanged function before we refresh input to make sure it's still accurate
             if newState == SCENE_FRAGMENT_SHOWING then
+                ViewerActivationStateChanged(ZO_TRIBUTE_TARGET_VIEWER_MANAGER, ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsActive())
                 self:RefreshInputState()
             elseif newState == SCENE_FRAGMENT_HIDDEN then
+                ViewerActivationStateChanged(ZO_TRIBUTE_TARGET_VIEWER_MANAGER, ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsActive())
                 self:RefreshInputState()
             end
         end
 
         if not IsConsoleUI() then
-            TRIBUTE_TARGET_VIEWER_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", TargetViewerStateChanged)
+            TRIBUTE_TARGET_VIEWER_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", TargetViewerFragmentStateChanged)
         end
-        TRIBUTE_TARGET_VIEWER_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", TargetViewerStateChanged)
 
-        ZO_TRIBUTE_TARGET_VIEWER_MANAGER:RegisterCallback("ViewingTargetsChanged", function(hasTargets)
-            if not hasTargets then
+        TRIBUTE_TARGET_VIEWER_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", TargetViewerFragmentStateChanged)
+        ZO_TRIBUTE_TARGET_VIEWER_MANAGER:RegisterCallback("ActivationStateChanged", function(viewer, isActive)
+            ViewerActivationStateChanged(viewer, isActive)
+            --This is necessary specifically for the case where we cancel target selection while viewing the board. 
+            --Since the target viewer fragment is already hidden in this case, we wont get the state change callback for it, so we need to refresh the input state manually here
+            if not isActive then
                 self:RefreshInputState()
             end
             self.gamepadCursor:RefreshInsets()
         end)
 
-        local function MechanicSelectorStateChanged(oldState, newState)
+        --Register the mechanic selector callbacks
+        local function MechanicSelectorFragmentStateChanged(oldState, newState)
             if newState == SCENE_FRAGMENT_SHOWING then
                 self:RefreshInputState()
             elseif newState == SCENE_FRAGMENT_HIDDEN then
                 self:RefreshInputState()
             end
         end
-        TRIBUTE_MECHANIC_SELECTOR_FRAGMENT:RegisterCallback("StateChange", MechanicSelectorStateChanged)
+        TRIBUTE_MECHANIC_SELECTOR_FRAGMENT:RegisterCallback("StateChange", MechanicSelectorFragmentStateChanged)
+        TRIBUTE_MECHANIC_SELECTOR:RegisterCallback("ActivationStateChanged", ViewerActivationStateChanged)
+
+        --Register the confinement viewer callbacks
+        local function ConfinementViewerFragmentStateChanged(oldState, newState)
+            --In some situations, we will get here before the activation state change fires.
+            --As a result, we need to manually call the ViewerActivationStateChanged function before we refresh input to make sure it's still accurate
+            if newState == SCENE_FRAGMENT_SHOWING then
+                ViewerActivationStateChanged(ZO_TRIBUTE_CONFINEMENT_VIEWER_MANAGER, ZO_TRIBUTE_CONFINEMENT_VIEWER_MANAGER:IsActive())
+                self:RefreshInputState()
+            elseif newState == SCENE_FRAGMENT_HIDDEN then
+                ViewerActivationStateChanged(ZO_TRIBUTE_CONFINEMENT_VIEWER_MANAGER, ZO_TRIBUTE_CONFINEMENT_VIEWER_MANAGER:IsActive())
+                self:RefreshInputState()
+            end
+        end
+
+        if not IsConsoleUI() then
+            TRIBUTE_CONFINEMENT_VIEWER_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", ConfinementViewerFragmentStateChanged)
+        end
+        TRIBUTE_CONFINEMENT_VIEWER_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", ConfinementViewerFragmentStateChanged)
+        ZO_TRIBUTE_CONFINEMENT_VIEWER_MANAGER:RegisterCallback("ActivationStateChanged", ViewerActivationStateChanged)
 
         local function PatronSelectionStateChanged(oldState, newState)
             if newState == SCENE_FRAGMENT_SHOWING then
@@ -804,6 +923,9 @@ function ZO_Tribute:OnUpdate(frameTimeSeconds)
         self.queuedCardTooltip.cardObject = nil
         self.queuedCardTooltip.showTimeSeconds = nil
         self:ShowCardTooltip(tooltipCardObject)
+        --Once the card tooltip is showing, refresh the confine keybind and card controls
+        self:RefreshConfineKeybind()
+        self:RefreshConfinedCardsContainer()
     end
 
     if self.queuedResourceTooltip.showTimeSeconds and self.queuedResourceTooltip.showTimeSeconds <= frameTimeSeconds then
@@ -813,6 +935,13 @@ function ZO_Tribute:OnUpdate(frameTimeSeconds)
         self.queuedResourceTooltip.resource = nil
         self.queuedResourceTooltip.showTimeSeconds = nil
         self:ShowResourceTooltip(perspective, resource)
+    end
+
+    if self.queuedPatronUsageTooltip.showTimeSeconds and self.queuedPatronUsageTooltip.showTimeSeconds <= frameTimeSeconds then
+        local perspective = self.queuedPatronUsageTooltip.perspective
+        self.queuedPatronUsageTooltip.perspective = nil
+        self.queuedPatronUsageTooltip.showTimeSeconds = nil
+        self:ShowPatronUsageTooltip(perspective)
     end
 
     if self.patronSelectionShowTime and self.patronSelectionShowTime <= frameTimeSeconds then
@@ -868,8 +997,10 @@ do
         local resetTargetObjects = true
         local refreshEffectiveCardStates = false
 
-        local isUsingViewer = ZO_TRIBUTE_PILE_VIEWER_MANAGER:IsViewingPile() or ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() or TRIBUTE_MECHANIC_SELECTOR:IsSelectingMechanic()
-        if isUsingViewer or ZO_DIALOG_SYNC_OBJECT:IsShown() or ZO_HELP_OVERLAY_SYNC_OBJECT:IsShown() then
+        local activeViewer = self:GetActiveViewer()
+        local isUsingViewer = activeViewer ~= nil
+        local isShowingDialog = ZO_DIALOG_SYNC_OBJECT:IsShown()
+        if isUsingViewer or isShowingDialog or ZO_HELP_OVERLAY_SYNC_OBJECT:IsShown() then
             allowPlayerInput = false
             resetTargetObjects = false
         end
@@ -885,7 +1016,7 @@ do
         end
 
         local inputStyle = TRIBUTE_INPUT_STYLE_NONE
-        if allowPlayerInput or ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingBoard() then
+        if allowPlayerInput or (isUsingViewer and activeViewer:IsViewingBoard()) then
             inputStyle = IsInGamepadPreferredMode() and TRIBUTE_INPUT_STYLE_GAMEPAD or TRIBUTE_INPUT_STYLE_MOUSE
         end
 
@@ -978,11 +1109,12 @@ function ZO_Tribute:IsInputStyleGamepad()
 end
 
 function ZO_Tribute:CanInteractWithCards()
-    if ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() and not ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingBoard() then
-        return false
+    local activeViewer = self:GetActiveViewer()
+    if activeViewer then
+        return activeViewer:IsViewingBoard()
+    else
+        return true
     end
-    local isViewerOpen = ZO_TRIBUTE_PILE_VIEWER_MANAGER:IsViewingPile() or TRIBUTE_MECHANIC_SELECTOR:IsSelectingMechanic()
-    return not isViewerOpen
 end
 
 function ZO_Tribute:IsAutoPlayChecked()
@@ -999,8 +1131,8 @@ end
 
 function ZO_Tribute:OnBoardClicked(button, upInside)
     if self:IsInputStyleMouse() and upInside then
-        --Disallow interacting with the board while the target viewer is up
-        if ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingTargets() then
+        --Disallow interacting with the board while a viewer is up
+        if self:GetActiveViewer() ~= nil then
             return
         end
 
@@ -1026,6 +1158,10 @@ function ZO_Tribute:SetupGame()
         for _, resourceDisplayControl in pairs(perspectiveResourceDisplayControls) do
             resourceDisplayControl:SetText("0")
         end
+    end
+
+    for _, perspectivePatronUsageDisplayControl in pairs(self.patronUsageDisplayControls) do
+        perspectivePatronUsageDisplayControl:SetText(TRIBUTE_DEFAULT_PATRON_USAGE_COUNT)
     end
 end
 
@@ -1070,6 +1206,12 @@ function ZO_Tribute:LayoutBoard()
         end
     end
 
+    for perspective, perspectivePatronUsageDisplayControl in pairs(self.patronUsageDisplayControls) do
+        renderPositionX, renderPositionY, renderPositionZ, rotationXRadians, rotationYRadians, rotationZRadians = GetTributePatronUsageCountDisplayTransformInfo(perspective)
+        perspectivePatronUsageDisplayControl:SetTransformOffset(renderPositionX, renderPositionY, renderPositionZ)
+        perspectivePatronUsageDisplayControl:SetTransformRotation(rotationXRadians, rotationYRadians, rotationZRadians)
+    end
+
     renderPositionX, renderPositionY, renderPositionZ, rotationXRadians, rotationYRadians, rotationZRadians = GetTributeTurnTimerLabelTransformInfo()
     self.turnTimerTextLabel:SetTransformOffset(renderPositionX, renderPositionY, renderPositionZ)
     self.turnTimerTextLabel:SetTransformRotation(rotationXRadians, rotationYRadians, rotationZRadians)
@@ -1111,6 +1253,8 @@ function ZO_Tribute:ResetCardPopupAndTooltip(cardObject)
 
     self:HideCardPopup(cardObject)
     self:HideCardTooltip(cardObject)
+    self:RefreshConfineKeybind()
+    self:RefreshConfinedCardsContainer()
 end
 
 function ZO_Tribute:HideCardPopup(cardObject)
@@ -1247,6 +1391,84 @@ function ZO_Tribute:ShowCardTooltip(cardObject, anchorPoint, anchorControl, anch
     end
 end
 
+function ZO_Tribute:RefreshConfineKeybind()
+    self.confinedCardsButton:SetHidden(true)
+    self.confinedCardsButton:ClearAnchors()
+
+    --If we shouldn't be showing the confine keybind, early out
+    if not self:CanShowConfineKeybind() then
+        return
+    end
+
+    local popupObject = self.activeCardPopup.popupObject
+    if popupObject and popupObject:GetNumConfinedCards() > 0 then
+        local anchorControl = popupObject.control
+        if not anchorControl then
+            return
+        end
+
+        --Anchor the the button underneath the card popup
+        local anchorPoint, anchorRelativePoint = TOP, BOTTOM
+        local anchorOffsetX, anchorOffsetY = 0, ZO_TRIBUTE_CONFINED_CARDS_KEYBIND_OFFSET_Y
+        self.confinedCardsButton:SetAnchor(anchorPoint, anchorControl, anchorRelativePoint, anchorOffsetX, anchorOffsetY)
+        self.confinedCardsButton:SetHidden(false)
+    end
+end
+
+function ZO_Tribute:RefreshConfinedCardsContainer()
+    self.confinedCardsContainer:SetHidden(true)
+    self.confinedCardsContainer:ClearAnchors()
+
+    local popupObject = self.activeCardPopup.popupObject
+    if popupObject then
+        local anchorControl = popupObject.control
+        if not anchorControl then
+            return
+        end
+
+        --Tell the popup to set the visuals for the confined cards
+        popupObject:PopulateConfinedCards(self.confinedCardsContainer.cardControls)
+
+        --Anchor the container left of the card popup
+        self.confinedCardsContainer:SetAnchor(RIGHT, anchorControl, LEFT, -5)
+        self.confinedCardsContainer:SetHidden(false)
+    end
+end
+
+function ZO_Tribute:QueuePatronUsageTooltip(perspective)
+    local currentTimeSeconds = GetFrameTimeSeconds()
+    self.queuedPatronUsageTooltip.perspective = perspective
+    self.queuedPatronUsageTooltip.showTimeSeconds = currentTimeSeconds + ZO_TRIBUTE_SHOW_PATRON_USAGE_TOOLTIP_DELAY_SECONDS
+end
+
+function ZO_Tribute:ResetPatronUsageTooltip()
+    self.queuedPatronUsageTooltip.perspective = nil
+    self.queuedPatronUsageTooltip.showTimeSeconds = nil
+    self:HidePatronUsageTooltip()
+end
+
+function ZO_Tribute:HidePatronUsageTooltip()
+    ClearTooltip(InformationTooltip)
+    ZO_TributePatronUsageTooltip_Gamepad_Hide()
+end
+
+function ZO_Tribute:ShowPatronUsageTooltip(perspective)
+    self:HidePatronUsageTooltip()
+    local perspectivePatronUsageDisplayControl = self.patronUsageDisplayControls[perspective]
+    if perspectivePatronUsageDisplayControl then
+        local offsetX, offsetY = perspectivePatronUsageDisplayControl:ProjectRectToScreenAndComputeAABBPoint(LEFT)
+        offsetX = offsetX - 30
+
+        if IsInGamepadPreferredMode() then
+            ZO_TributePatronUsageTooltip_Gamepad_Show(RIGHT, GuiRoot, TOPLEFT, offsetX, offsetY)
+        else
+            InitializeTooltip(InformationTooltip, GuiRoot, RIGHT, offsetX, offsetY, TOPLEFT)
+            InformationTooltip:AddLine(GetString(SI_TRIBUTE_PATRON_USAGE_COUNTER_TOOLTIP_TITLE), "", ZO_NORMAL_TEXT:UnpackRGBA())
+            InformationTooltip:AddLine(GetString(SI_TRIBUTE_PATRON_USAGE_COUNTER_TOOLTIP_DESCRIPTION))
+        end
+    end
+end
+
 function ZO_Tribute:QueueResourceTooltip(perspective, resource)
     local currentTimeSeconds = GetFrameTimeSeconds()
     self.queuedResourceTooltip.perspective = perspective
@@ -1351,6 +1573,38 @@ function ZO_Tribute:GetCardByInstanceId(cardInstanceId)
     return self.cardInstanceIdToCardObject[cardInstanceId]
 end
 
+function ZO_Tribute:SetActiveViewer(activeViewer)
+    self.activeViewer = activeViewer
+end
+
+function ZO_Tribute:GetActiveViewer()
+    return self.activeViewer
+end
+
+function ZO_Tribute:CanShowConfineKeybind()
+    if not self:CanInteractWithCards() then
+        return false
+    end
+
+    --We cannot bring up the confinement viewer in tutorial games
+    if IsTributeTutorialGame() then
+        return false
+    end
+
+    --Do not display the confine keybind when a viewer is active
+    local activeViewer = self:GetActiveViewer()
+    if activeViewer then
+        return false
+    end
+
+    --Do not display the confine keybind when target selection is active
+    if self.showTargetInstructions then
+        return false
+    end
+
+    return true
+end
+
 -----------------------------------
 -- Tribute Discard Count Display --
 -----------------------------------
@@ -1367,8 +1621,8 @@ function ZO_TributeDiscardCountDisplay:Initialize(control, perspective)
     self.text:SetFont("ZoFontTributeAntique52")
     self.count = 0
 
-    self.control:RegisterForEvent(EVENT_TRIBUTE_FORCE_DISCARD_COUNT_CHANGED, function(_, perspective, newCount)
-        if perspective == self.perspective then
+    self.control:RegisterForEvent(EVENT_TRIBUTE_FORCE_DISCARD_COUNT_CHANGED, function(_, playerPerspective, newCount)
+        if playerPerspective == self.perspective then
             self:SetCount(newCount)
         end
     end)

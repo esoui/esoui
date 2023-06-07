@@ -82,15 +82,14 @@ end
 
 function ZO_ZoneStories_Shared.IsZoneCollectibleUnlocked(zoneId)
     local zoneIndex = GetZoneIndex(zoneId)
-    local zoneCollectibleId = GetCollectibleIdForZone(zoneIndex)
-    return zoneCollectibleId == 0 or IsCollectibleUnlocked(zoneCollectibleId)
+    return not IsZoneCollectibleLocked(zoneIndex)
 end
 
 function ZO_ZoneStories_Shared.GetZoneCollectibleUnlockText(zoneId)
-    local zoneIndex = GetZoneIndex(zoneId)
-    local zoneCollectibleId = GetCollectibleIdForZone(zoneIndex)
-    if zoneCollectibleId ~= 0 then
-        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(zoneCollectibleId)
+    if not ZO_ZoneStories_Shared.IsZoneCollectibleUnlocked(zoneId) then
+        local zoneIndex = GetZoneIndex(zoneId)
+        local lockedZoneCollectibleId = GetCollectibleIdForZone(zoneIndex)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedZoneCollectibleId)
         local categoryType = collectibleData:GetCategoryType()
         if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
             return zo_strformat(SI_ZONE_STORY_UPGRADE_ACTION)
@@ -169,9 +168,8 @@ function ZO_ZoneStories_Shared:TrackNextActivity()
             local COMPLETION_TYPE_ALL = nil
             TrackNextActivityForZoneStory(zoneId, COMPLETION_TYPE_ALL, SET_AUTO_MAP_NAVIGATION_TARGET)
         else
-            local zoneIndex = GetZoneIndex(zoneId)
-            local zoneCollectibleId = GetCollectibleIdForZone(zoneIndex)
-            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(zoneCollectibleId)
+            local lockedZoneCollectibleId = GetCollectibleIdForZone(GetZoneIndex(zoneId))
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedZoneCollectibleId)
             local categoryType = collectibleData:GetCategoryType()
             if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
                 ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_ZONE_STORIES)

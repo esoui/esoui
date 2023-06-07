@@ -56,8 +56,9 @@ KEYBIND_STRIP_WITH_GENERIC_FOOTER_GAMEPAD_STYLE.rightAnchorRelativePoint = LEFT
 KEYBIND_STRIP_WITH_GENERIC_FOOTER_GAMEPAD_STYLE.rightAnchorOffset = -24
 
 function ZO_KeybindStrip_OnInitialized(control)
+    local style = IsInGamepadPreferredMode() and KEYBIND_STRIP_GAMEPAD_STYLE or KEYBIND_STRIP_STANDARD_STYLE
 
-    KEYBIND_STRIP = ZO_KeybindStrip:New(control, "ZO_KeybindStripButtonTemplate", KEYBIND_STRIP_STANDARD_STYLE)
+    KEYBIND_STRIP = ZO_KeybindStrip:New(control, "ZO_KeybindStripButtonTemplate", style)
 
     local defaultExit = {
         name = GetString(SI_EXIT_BUTTON),

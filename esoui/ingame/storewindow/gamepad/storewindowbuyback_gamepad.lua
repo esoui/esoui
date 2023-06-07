@@ -1,9 +1,5 @@
 ZO_GamepadStoreBuyback = ZO_GamepadStoreListComponent:Subclass()
 
-function ZO_GamepadStoreBuyback:New(...)
-    return ZO_GamepadStoreListComponent.New(self, ...)
-end
-
 function ZO_GamepadStoreBuyback:Initialize(scene)
     ZO_GamepadStoreListComponent.Initialize(self, scene, ZO_MODE_STORE_BUY_BACK, GetString(SI_STORE_MODE_BUY_BACK))
 
@@ -18,7 +14,7 @@ function ZO_GamepadStoreBuyback:Initialize(scene)
     end)
 
     self:InitializeKeybindStrip()
-    self:CreateModeData(SI_STORE_MODE_BUY_BACK, ZO_MODE_STORE_BUY_BACK, "EsoUI/Art/Vendor/vendor_tabIcon_buyBack_up.dds", fragment, self.keybindStripDescriptor)
+    self:CreateModeData(SI_STORE_MODE_BUY_BACK, ZO_MODE_STORE_BUY_BACK, "EsoUI/Art/Vendor/vendor_tabIcon_buyBack_up.dds", self.fragment, self.keybindStripDescriptor)
     self.list:SetNoItemText(GetString(SI_GAMEPAD_NO_BUYBACK_ITEMS))
 end
 

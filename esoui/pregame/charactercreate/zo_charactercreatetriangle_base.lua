@@ -7,23 +7,27 @@ function ZO_CharacterCreateTriangle_Base:New(...)
 end
 
 function ZO_CharacterCreateTriangle_Base:Initialize(triangleControl, setterFn, updaterFn, triangleStringId, topStringId, leftStringId, rightStringId)
-    GetControl(triangleControl, "LabelTop"):SetText(GetString(topStringId))
-    GetControl(triangleControl, "LabelLeft"):SetText(GetString(leftStringId))
-    GetControl(triangleControl, "LabelRight"):SetText(GetString(rightStringId))
+    self.topText = GetString(topStringId)
+    self.leftText = GetString(leftStringId)
+    self.rightText = GetString(rightStringId)
 
-    local pickerControl = GetControl(triangleControl, "Picker")
+    triangleControl:GetNamedChild("LabelTop"):SetText(self.topText)
+    triangleControl:GetNamedChild("LabelLeft"):SetText(self.leftText)
+    triangleControl:GetNamedChild("LabelRight"):SetText(self.rightText)
+
+    local pickerControl = triangleControl:GetNamedChild("Picker")
     self.width, self.height = pickerControl:GetDimensions()
 
     local picker = ZO_TrianglePicker:New(self.width, self.height, pickerControl:GetParent(), pickerControl)
-    local thumb = GetControl(pickerControl, "Thumb")
+    local thumb = pickerControl:GetNamedChild("Thumb")
     thumb:SetDrawLevel(1)
     picker:SetThumb(thumb)
     picker:SetThumbPosition(pickerControl:GetWidth() * 0.5, pickerControl:GetHeight() * 0.67) -- put the thumb in the "center" of the triangle for now.
-    picker:SetUpdateCallback(function(picker, x, y) self:SetValue(x, y) end)
+    picker:SetUpdateCallback(function(_, x, y) self:SetValue(x, y) end)
 
     triangleControl.sliderObject = self
     self.control = triangleControl
-    self.padlock = GetControl(triangleControl, "Padlock")
+    self.padlock = triangleControl:GetNamedChild("Padlock")
     self.thumb = thumb
     self.picker = picker
     self.setterFn = setterFn
@@ -54,10 +58,6 @@ function ZO_CharacterCreateTriangle_Base:Initialize(triangleControl, setterFn, u
     }
 
     -- Create control points
-    local baseName = triangleControl:GetName().."Point"
-    local width = pickerControl:GetWidth()
-    local height = pickerControl:GetHeight()
-
     self.subTriangles = {}
     local points = {}
 

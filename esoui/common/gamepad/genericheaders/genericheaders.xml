@@ -10,7 +10,7 @@
         <Label name="ZO_GamepadHeaderDataTextTemplate" maxLineCount="1" font="ZoFontGamepadHeaderDataValue" wrapMode="ELLIPSIS" virtual="true" />
 
         <!-- End Font Templates -->
-        
+
         <Control name="ZO_GamepadHeaderAnchors" resizeToFitDescendents="true" virtual="true">
             <Anchor point="TOPLEFT" />
             <Anchor point="TOPRIGHT" />
@@ -23,19 +23,19 @@
 
         <Control name="ZO_GamepadHeaderHorizontalDivider" resizeToFitConstrains="Y" virtual="true">
             <Controls>
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="2">
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="4">
                     <Anchor point="LEFT" />
                     <Dimensions x="4" y="8" />
                     <TextureCoords left="0" right="0.25" top=".25" bottom=".75" />
                 </Texture>
 
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="2">
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="4">
                     <Anchor point="RIGHT" />
                     <Dimensions x="4" y="8" />
                     <TextureCoords left="0.75" right="1" top=".25" bottom=".75" />
                 </Texture>
 
-                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="2">
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="4">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
                     <TextureCoords left="0.25" right="0.75" top=".25" bottom=".75" />

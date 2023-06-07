@@ -1,4 +1,3 @@
-
 -- Returns an array of all versions of this screen
 local PROVISIONER_SCENE_NAMES = {}
 
@@ -24,12 +23,6 @@ end
 
 -- ZO_SharedProvisioner class
 ZO_SharedProvisioner = ZO_CraftingCreateScreenBase:Subclass()
-
-function ZO_SharedProvisioner:New(...)
-    local provisioner = ZO_CraftingCreateScreenBase.New(self)
-    provisioner:Initialize(...)
-    return provisioner
-end
 
 function ZO_SharedProvisioner:Initialize(control)
     ZO_Provisioner_AddSceneName(self.mainSceneName)
@@ -184,15 +177,15 @@ function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, should
     if craftingInteractionType ~= requiredCraftingStationType then
         return false
     end
-    
+
     if self.filterType ~= specialIngredientType then
         return false
     end
-    
+
     if shouldRequireIngredients then
         if maxIterationsForIngredients == 0 then
             return false
-        end 
+        end
     end
 
     if shouldRequireSkills then
@@ -206,7 +199,7 @@ function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, should
             return false
         end
     end
-   
+
     return true
 end
 
@@ -233,8 +226,8 @@ function ZO_SharedProvisioner:IsCraftable()
     local recipeData = self:GetRecipeData()
     if recipeData then
         return recipeData.maxIterationsForIngredients > 0 
-           and self:PassesTradeskillLevelReqs(recipeData.tradeskillsLevelReqs) 
-           and self:PassesQualityLevelReq(recipeData.qualityReq)
+            and self:PassesTradeskillLevelReqs(recipeData.tradeskillsLevelReqs) 
+            and self:PassesQualityLevelReq(recipeData.qualityReq)
     end
     return false
 end

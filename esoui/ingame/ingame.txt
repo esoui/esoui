@@ -241,7 +241,6 @@ EsoUI\Ingame\UtilityWheel\Keyboard\UtilityWheel_Keyboard.lua
 EsoUI\Ingame\UtilityWheel\Keyboard\UtilityWheel_Keyboard.xml
 EsoUI\Ingame\UtilityWheel\Gamepad\UtilityWheel_Gamepad.lua
 EsoUI\Ingame\UtilityWheel\Gamepad\UtilityWheel_Gamepad.xml
-EsoUI\Ingame\UtilityWheel\UtilityWheel_Manager.lua
 
 EsoUI\Ingame\UtilityWheel\AssignableUtilityWheel_Shared.lua
 EsoUI\Ingame\UtilityWheel\Keyboard\AssignableUtilityWheel_Keyboard.lua
@@ -249,12 +248,14 @@ EsoUI\Ingame\UtilityWheel\Keyboard\AssignableUtilityWheel_Keyboard.xml
 EsoUI\Ingame\UtilityWheel\Gamepad\AssignableUtilityWheel_Gamepad.lua
 EsoUI\Ingame\UtilityWheel\Gamepad\AssignableUtilityWheel_Gamepad.xml
 
+EsoUI\Ingame\UtilityWheel\Gamepad\AccessibleAssignableUtilityWheel_Gamepad.lua
+EsoUI\Ingame\UtilityWheel\Gamepad\AccessibleAssignableUtilityWheel_Gamepad.xml
+
 EsoUI\Ingame\TargetMarker\TargetMarkerWheel_Shared.lua
 EsoUI\Ingame\TargetMarker\Keyboard\TargetMarkerWheel_Keyboard.lua
 EsoUI\Ingame\TargetMarker\Keyboard\TargetMarkerWheel_Keyboard.xml
 EsoUI\Ingame\TargetMarker\Gamepad\TargetMarkerWheel_Gamepad.lua
 EsoUI\Ingame\TargetMarker\Gamepad\TargetMarkerWheel_Gamepad.xml
-EsoUI\Ingame\TargetMarker\TargetMarkerWheel_Manager.lua
 
 EsoUI\Ingame\ActionBar\AbilitySlot.lua
 EsoUI\Ingame\ActionBar\AbilitySlot.xml
@@ -266,8 +267,8 @@ EsoUI\Ingame\ActionBar\ActionBar.xml
 
 EsoUI\Ingame\Collections\Keyboard\CollectibleTile_Keyboard.lua
 EsoUI\Ingame\Collections\Keyboard\CollectibleTile_Keyboard.xml
-EsoUI\Ingame\Collections\Keyboard\CollectibleSetDefaultTile_Keyboard.lua
-EsoUI\Ingame\Collections\Keyboard\CollectibleSetDefaultTile_Keyboard.xml
+EsoUI\Ingame\Collections\Keyboard\CollectibleImitationTile_Keyboard.lua
+EsoUI\Ingame\Collections\Keyboard\CollectibleImitationTile_Keyboard.xml
 
 EsoUI\Ingame\Collections\CollectionsBook_Manager.lua
 EsoUI\Ingame\Collections\Keyboard\CollectionsBook.lua
@@ -816,16 +817,6 @@ EsoUI\Ingame\Crafting\Keyboard\Alchemy_Keyboard.xml
 EsoUI\Ingame\Crafting\Gamepad\Alchemy_Gamepad.lua
 EsoUI\Ingame\Crafting\Gamepad\Alchemy_Gamepad.xml
 
-EsoUI\Ingame\Crafting\Provisioner_Manager.lua
-EsoUI\Ingame\Crafting\SharedProvisioner.lua
-EsoUI\Ingame\Crafting\SharedProvisioner.xml
-
-EsoUI\Ingame\Crafting\Keyboard\Provisioner.lua
-EsoUI\Ingame\Crafting\Keyboard\Provisioner.xml
-
-EsoUI\Ingame\Crafting\Gamepad\GamepadProvisioner.lua
-EsoUI\Ingame\Crafting\Gamepad\GamepadProvisioner.xml
-
 EsoUI\Ingame\Crafting\SharedEnchanting.lua
 EsoUI\Ingame\Crafting\Keyboard\Enchanting_Keyboard.lua
 EsoUI\Ingame\Crafting\Keyboard\Enchanting_Keyboard.xml
@@ -914,6 +905,24 @@ EsoUI\Ingame\Fishing\Keyboard\Fishing_Keyboard.lua
 EsoUI\Ingame\Fishing\Keyboard\Fishing_Keyboard.xml
 EsoUI\Ingame\Fishing\Gamepad\Fishing_Gamepad.lua
 EsoUI\Ingame\Fishing\Gamepad\Fishing_Gamepad.xml
+
+EsoUI\Ingame\InteractiveWheel\InteractiveWheel_Manager.lua
+
+EsoUI\Ingame\Crafting\FishFillet_Shared.lua
+EsoUI\Ingame\Crafting\Keyboard\FishFillet_Keyboard.lua
+EsoUI\Ingame\Crafting\Keyboard\FishFillet_Keyboard.xml
+EsoUI\Ingame\Crafting\Gamepad\FishFillet_Gamepad.lua
+EsoUI\Ingame\Crafting\Gamepad\FishFillet_Gamepad.xml
+
+EsoUI\Ingame\Crafting\Provisioner_Manager.lua
+EsoUI\Ingame\Crafting\SharedProvisioner.lua
+EsoUI\Ingame\Crafting\SharedProvisioner.xml
+
+EsoUI\Ingame\Crafting\Keyboard\Provisioner.lua
+EsoUI\Ingame\Crafting\Keyboard\Provisioner.xml
+
+EsoUI\Ingame\Crafting\Gamepad\GamepadProvisioner.lua
+EsoUI\Ingame\Crafting\Gamepad\GamepadProvisioner.xml
 
 EsoUI\Ingame\Inventory\Gamepad\InventoryItemImprovement_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\InventoryItemImprovement_Gamepad.xml

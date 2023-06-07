@@ -1,5 +1,9 @@
 SLASH_COMMANDS = {}
 
+local function OutputSystemMessage(messageOrFormatter, ...)
+    CHAT_ROUTER:AddSystemMessage(string.format(messageOrFormatter or "", ...))
+end
+
 if AreUserAddOnsSupported() or IsInternalBuild() then
     SLASH_COMMANDS[GetString(SI_SLASH_SCRIPT)] = function (txt)
         local f = assert(zo_loadstring(txt))
@@ -100,7 +104,6 @@ SLASH_COMMANDS[GetString(SI_SLASH_GROUP_INVITE)] = function(txt)
     else
         GroupInviteByName(txt)
         CHAT_ROUTER:AddSystemMessage(zo_strformat(GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), txt))
-        ZO_OutputStadiaLog("SLASH_COMMANDS[GetString(SI_SLASH_GROUP_INVITE)], set ZO_Menu_SetLastCommandWasFromMenu == false")
         ZO_Menu_SetLastCommandWasFromMenu(false)
     end
 end
@@ -191,10 +194,149 @@ if IsSubmitFeedbackSupported() then
     end
 end
 
+do
+    local RANDOM_ROLL_COMMAND = GetString(SI_SLASH_ROLL)
+    local RANDOM_ROLL_COMMAND_FORMATTED = string.format("|c88d8ff%s", RANDOM_ROLL_COMMAND)
+    local RANDOM_ROLL_COMMAND_HELP_HINT = zo_strformat(SI_RANDOM_ROLL_HELP_HINT, string.format("%s ?|r", RANDOM_ROLL_COMMAND_FORMATTED))
+    local RANDOM_ROLL_TEXTURE = zo_iconFormat("EsoUI/Art/Miscellaneous/roll_dice.dds")
+
+    local g_savedVars = nil
+    local function SetupSavedVars()
+        local savedVarsDefaults = 
+        {
+            helpHintShown = nil,
+        }
+        local SAVED_VARS_VERSION = 1
+        g_savedVars = ZO_SavedVars:NewAccountWide("ZO_Ingame_SavedVariables", SAVED_VARS_VERSION, "RandomRollCommand", savedVarsDefaults)
+    end
+
+    local function OutputCommandHelpHint()
+        if g_savedVars and not g_savedVars.helpHintShown then
+            CHAT_ROUTER:AddSystemMessage(RANDOM_ROLL_COMMAND_HELP_HINT)
+            g_savedVars.helpHintShown = true
+        end
+    end
+
+    function ZO_RandomRollCommand(args)
+        if args then
+            args = string.lower(args)
+        else
+            args = ""
+        end
+
+        if args == "?" then
+            local characterNameParam = GetCharacterNameById(StringToId64(GetCurrentCharacterId()))
+            CHAT_ROUTER:AddSystemMessage(GetString(SI_RANDOM_ROLL_HELP_HEADER))
+            OutputSystemMessage("%s|r", RANDOM_ROLL_COMMAND_FORMATTED)
+            OutputSystemMessage(" %s %s", RANDOM_ROLL_TEXTURE, zo_strformat(SI_RANDOM_ROLL_RANGE_RESULT, characterNameParam, ZO_SELECTED_TEXT:Colorize("44"), ZO_SELECTED_TEXT:Colorize("1"), ZO_SELECTED_TEXT:Colorize("100")))
+            OutputSystemMessage("%s 50|r", RANDOM_ROLL_COMMAND_FORMATTED)
+            OutputSystemMessage(" %s %s", RANDOM_ROLL_TEXTURE, zo_strformat(SI_RANDOM_ROLL_RANGE_RESULT, characterNameParam, ZO_SELECTED_TEXT:Colorize("39"), ZO_SELECTED_TEXT:Colorize("1"), ZO_SELECTED_TEXT:Colorize("50")))
+            OutputSystemMessage("%s 2-12|r", RANDOM_ROLL_COMMAND_FORMATTED)
+            OutputSystemMessage(" %s %s", RANDOM_ROLL_TEXTURE, zo_strformat(SI_RANDOM_ROLL_RANGE_RESULT, characterNameParam, ZO_SELECTED_TEXT:Colorize("7"), ZO_SELECTED_TEXT:Colorize("2"), ZO_SELECTED_TEXT:Colorize("12")))
+            return
+        end
+
+        OutputCommandHelpHint()
+
+        local result = nil
+        if string.find(args, "d") then
+            -- Match any of the following patterns and disregard ancillary whitespace:
+            --  #d
+            --  #d#
+            --  #d#-#
+            --  #d#+#
+
+            local numRolls, maxRoll, modifier = zo_strmatch(args, "(%d*)%s*d%s*(%d*)%s*([+-]?%d*)")
+            numRolls = tonumber(numRolls) or 1
+            maxRoll = tonumber(maxRoll) or 6
+            modifier = tonumber(modifier) or 0
+
+            -- Underflow and overflow conditions must be checked prior to invoking the API.
+            if numRolls > RANDOM_ROLL_MAX_NUM_ROLLS then
+                result = RANDOM_ROLL_RESULT_INVALID_NUM_ROLLS
+            elseif maxRoll < 1 or maxRoll > RANDOM_ROLL_MAX_RESULT or
+                modifier < RANDOM_ROLL_MIN_RESULT or modifier > RANDOM_ROLL_MAX_RESULT then
+                result = RANDOM_ROLL_RESULT_INVALID_RESULT
+            else
+                result = RandomDiceRoll(maxRoll, numRolls, modifier)
+            end
+        else
+            -- Match any of the following patterns and disregard ancillary whitespace:
+            --  #
+            --  # #
+            --  #-#
+
+            local minValue, maxValue = zo_strmatch(args, "(%d*)%s*%-*%s*(%d*)")
+            minValue = tonumber(minValue)
+            maxValue = tonumber(maxValue)
+
+            if not maxValue then
+                -- Either zero or one arguments were received; assume the argument, if specified, is the maximum value.
+                maxValue = minValue or 100
+                minValue = 1 -- Default to a minimum value of 1.
+            elseif not minValue then
+                -- Only a maximum argument was received; default to a minimum value of 1.
+                minValue = 1
+            end
+
+            if minValue < 1 or maxValue < 1 or minValue > RANDOM_ROLL_MAX_RESULT or maxValue > RANDOM_ROLL_MAX_RESULT then
+                -- Check domain conditions prior to invoking the API.
+                result = RANDOM_ROLL_RESULT_INVALID_RESULT
+            else
+                result = RandomRangeRoll(minValue, maxValue)
+            end
+        end
+
+        if result ~= RANDOM_ROLL_RESULT_SUCCESS then
+            CHAT_ROUTER:AddSystemMessage(GetString("SI_RANDOMROLLRESULT", result))
+            OutputCommandHelpHint()
+        end
+
+        return result
+    end
+
+    SLASH_COMMANDS[RANDOM_ROLL_COMMAND] = ZO_RandomRollCommand
+
+    local function OnRandomDiceRoll(_, displayName, characterName, maxValue, numRolls, modifier, rollResult)
+        local playerName = ZO_GetPrimaryPlayerName(displayName, characterName)
+        local maxValueParam = ZO_SELECTED_TEXT:Colorize(maxValue)
+        local numRollsParam = ZO_SELECTED_TEXT:Colorize(numRolls)
+        local rollResultParam = ZO_SELECTED_TEXT:Colorize(rollResult)
+
+        local message
+        if modifier ~= 0 then
+            local modifierParam = ZO_SELECTED_TEXT:Colorize(string.format("%s%d", modifier > 0 and "+" or "-", zo_abs(modifier)))
+            message = zo_strformat(SI_RANDOM_ROLL_DICE_WITH_MODIFIER_RESULT, playerName, rollResultParam, numRollsParam, maxValueParam, modifierParam)
+        else
+            message = zo_strformat(SI_RANDOM_ROLL_DICE_RESULT, playerName, rollResultParam, numRollsParam, maxValueParam)
+        end
+
+        OutputSystemMessage("%s %s", RANDOM_ROLL_TEXTURE, message)
+    end
+
+    local function OnRandomRangeRoll(_, displayName, characterName, minValue, maxValue, rollResult)
+        local playerName = ZO_GetPrimaryPlayerName(displayName, characterName)
+        local minValueParam = ZO_SELECTED_TEXT:Colorize(minValue)
+        local maxValueParam = ZO_SELECTED_TEXT:Colorize(maxValue)
+        local rollResultParam = ZO_SELECTED_TEXT:Colorize(rollResult)
+        local message = zo_strformat(SI_RANDOM_ROLL_RANGE_RESULT, playerName, rollResultParam, minValueParam, maxValueParam)
+        OutputSystemMessage("%s %s", RANDOM_ROLL_TEXTURE, message)
+    end
+
+    local function OnAddOnLoaded(_, addonName)
+        if addonName == "ZO_Ingame" then
+            EVENT_MANAGER:UnregisterForEvent("ZO_RandomRoll", EVENT_ADD_ON_LOADED)
+            EVENT_MANAGER:RegisterForEvent("ZO_RandomRoll", EVENT_RANDOM_DICE_ROLL, OnRandomDiceRoll)
+            EVENT_MANAGER:RegisterForEvent("ZO_RandomRoll", EVENT_RANDOM_RANGE_ROLL, OnRandomRangeRoll)
+            SetupSavedVars()
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("ZO_RandomRoll", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+end
 
 function DoCommand(text)
     local command, arguments = zo_strmatch(text, "^(/%S+)%s?(.*)")
-    ZO_OutputStadiaLog("DoCommand(text), set ZO_Menu_SetLastCommandWasFromMenu == false")
     ZO_Menu_SetLastCommandWasFromMenu(false)
 
     command = zo_strlower(command or "")

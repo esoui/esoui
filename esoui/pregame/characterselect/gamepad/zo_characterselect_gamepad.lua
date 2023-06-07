@@ -966,11 +966,7 @@ function ZO_CharacterSelect_Gamepad_RefreshHeader()
 
     local profileNameString = nil
     local profileLabelString = nil
-    if IsHeronUI() then
-        -- Use player's heron name
-        profileNameString = GetExternalName()
-        profileLabelString = GetString(SI_CHARACTER_SELECT_HERON_PROFILE_LABEL)
-    elseif IsConsoleUI() then
+    if IsConsoleUI() then
         -- Use the console's active profile name
         profileNameString = GetOnlineIdForActiveProfile()
         profileLabelString = GetString(SI_CHARACTER_SELECT_PROFILE_LABEL)

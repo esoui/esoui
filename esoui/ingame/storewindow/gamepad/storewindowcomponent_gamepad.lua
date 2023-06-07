@@ -61,10 +61,8 @@ ZO_STORE_FORCE_VALID_PRICE = true
 ZO_GamepadStoreListComponent = ZO_GamepadStoreComponent:Subclass()
 
 function ZO_GamepadStoreListComponent:Initialize(scene, storeMode, tabText, overrideTemplate, overrideHeaderTemplateSetupFunction, templateControlPrefix, templateWithHeaderControlPrefix)
-    self:SetSearchContext("storeTextSearch")
     self.list = self:CreateItemList(scene, storeMode, overrideTemplate, overrideHeaderTemplateSetupFunction, templateControlPrefix, templateWithHeaderControlPrefix)
-    self.list:SetSearchContext(self.searchContext)
-    self.list:UpdateList()
+    self:SetSearchContext("storeTextSearch")
     local control = self.list:GetControl()
     ZO_GamepadStoreComponent.Initialize(self, control, storeMode, tabText)
 end

@@ -94,10 +94,12 @@ end
 --Tribute Mechanic Selector --
 ------------------------------
 
-ZO_TributeMechanicSelector = ZO_InitializingObject:Subclass()
+ZO_TributeMechanicSelector = ZO_TributeViewer_Manager_Base:Subclass()
 
 function ZO_TributeMechanicSelector:Initialize(control)
+    --Order matters. Set self.control before calling the base class initialize
     self.control = control
+    ZO_TributeViewer_Manager_Base.Initialize(self)
 
     TRIBUTE_MECHANIC_SELECTOR_FRAGMENT = ZO_FadeSceneFragment:New(control)
     TRIBUTE_MECHANIC_SELECTOR_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
@@ -114,8 +116,6 @@ function ZO_TributeMechanicSelector:Initialize(control)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         end
     end)
-
-    self:RegisterForEvents()
 end
 
 function ZO_TributeMechanicSelector:DeferredInitialize()
@@ -173,20 +173,9 @@ function ZO_TributeMechanicSelector:InitializeKeybindStripDescriptors()
     }
 end
 
-function ZO_TributeMechanicSelector:RegisterForEvents()
+function ZO_TributeMechanicSelector:RegisterForEvents(systemName)
+    ZO_TributeViewer_Manager_Base.RegisterForEvents(self, systemName)
     local control = self.control
-    control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
-        --No need to do anything if the screen isn't up in the first place
-        if TRIBUTE_MECHANIC_SELECTOR_FRAGMENT:IsShowing() then
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-            self:RefreshAll()
-            if IsInGamepadPreferredMode() then
-                self.focus:Activate()
-            else
-                self.focus:Deactivate()
-            end
-        end
-    end)
 
     control:RegisterForEvent(EVENT_TRIBUTE_BEGIN_MECHANIC_SELECTION, function(_, cardInstanceId)
         self:DeferredInitialize()
@@ -220,16 +209,15 @@ function ZO_TributeMechanicSelector:OnBeginMechanicSelection(patronDefId, cardDe
     self:Show()
 end
 
-function ZO_TributeMechanicSelector:IsSelectingMechanic()
-    return self.cardData ~= nil
-end
-
 function ZO_TributeMechanicSelector:Show()
+    self:FireActivationStateChanged()
     SCENE_MANAGER:AddFragment(TRIBUTE_MECHANIC_SELECTOR_FRAGMENT)
 end
 
 function ZO_TributeMechanicSelector:Hide()
+    --Order matters. Make sure we clear the card data before firing the activation state changed
     self.cardData = nil
+    self:FireActivationStateChanged()
     SCENE_MANAGER:RemoveFragment(TRIBUTE_MECHANIC_SELECTOR_FRAGMENT)
 end
 
@@ -237,6 +225,45 @@ function ZO_TributeMechanicSelector:RefreshAll()
     for _, mechanic in ipairs(self.mechanicCards) do
         mechanic:Reset()
         mechanic:AttachCardData(self.cardData)
+    end
+end
+
+-- Required Overrides
+
+function ZO_TributeMechanicSelector:GetSystemName()
+    return "TributeMechanicSelector"
+end
+
+function ZO_TributeMechanicSelector:OnGamepadPreferredModeChanged()
+    --No need to do anything if the screen isn't up in the first place
+    if TRIBUTE_MECHANIC_SELECTOR_FRAGMENT:IsShowing() then
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        self:RefreshAll()
+        if IsInGamepadPreferredMode() then
+            self.focus:Activate()
+        else
+            self.focus:Deactivate()
+        end
+    end
+end
+
+--The mechanic selector does not have functionality for viewing the board while it's open
+function ZO_TributeMechanicSelector:IsViewingBoard()
+    return false
+end
+
+function ZO_TributeMechanicSelector:IsActive()
+    return self.cardData ~= nil
+end
+
+--The mechanic selector does not have a visible keybind strip
+function ZO_TributeMechanicSelector:IsKeybindStripVisible()
+    return false
+end
+
+function ZO_TributeMechanicSelector:RequestClose()
+    if TributeCanCancelCurrentMove() then
+        TributeCancelCurrentMove()
     end
 end
 

@@ -75,10 +75,11 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
                     end,
             keybind = "UI_SHORTCUT_PRIMARY",
             callback =  function() 
-                            local targetData = self.mainList:GetTargetData()
+                            local targetData = self.mainList:GetTargetData()    
                             if targetData.permissionOption == HOUSE_PERMISSION_OPTIONS_CATEGORIES_GENERAL then
                                 if targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_PRIMARY_RESIDENCE] then
-                                    self:SetPrimaryResidence()
+                                    local currentHouseId = GetCurrentZoneHouseId()
+                                    COLLECTIONS_BOOK_SINGLETON:SetPrimaryResidence(currentHouseId)
                                 elseif targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_RESTART_PATHS] then
                                     self:RestartPaths()
                                 end
@@ -92,7 +93,8 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
                             local targetData = self.mainList:GetTargetData()
                             if targetData.permissionOption == HOUSE_PERMISSION_OPTIONS_CATEGORIES_GENERAL then
                                 if targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_PRIMARY_RESIDENCE] then
-                                    return self.primaryResidence ~= GetCurrentZoneHouseId()
+                                    local primaryResidenceId = COLLECTIONS_BOOK_SINGLETON:GetPrimaryResidence()
+                                    return primaryResidenceId ~= GetCurrentZoneHouseId()
                                 elseif targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_RESTART_PATHS] then
                                     return SHARED_FURNITURE:HasAnyPathNodes()
                                 end
@@ -398,7 +400,6 @@ function ZO_HousingFurnitureSettings_Gamepad:UpdateGuildVisitorSettings()
 end
 
 function ZO_HousingFurnitureSettings_Gamepad:UpdateGeneralSettings()
-    self.primaryResidence = GetHousingPrimaryHouse()
     local currentHouseId = GetCurrentZoneHouseId()
     local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouseId)
 

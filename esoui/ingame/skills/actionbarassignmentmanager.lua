@@ -500,6 +500,11 @@ function ZO_ActionBarAssignmentManager_Hotbar:ResetSlot(actionSlotIndex)
             self.slots[actionSlotIndex] = ZO_SlottableAbility:New(abilityId)
             return
         end
+
+        if ActionSlotHasEffectiveSlotAbilityData(actionSlotIndex, self.hotbarCategory) then
+            self.slots[actionSlotIndex] = ZO_SlottableAbility:New(abilityId)
+            return
+        end
     end
 end
 
@@ -540,6 +545,10 @@ function ZO_ActionBarAssignmentManager_Hotbar:IsSlotLocked(actionSlotIndex)
     return IsActionSlotLocked(actionSlotIndex, self.hotbarCategory)
 end
 
+function ZO_ActionBarAssignmentManager_Hotbar:IsSlotMutable(actionSlotIndex)
+    return IsActionSlotMutable(actionSlotIndex, self.hotbarCategory)
+end
+
 function ZO_ActionBarAssignmentManager_Hotbar:GetSlotUnlockText(actionSlotIndex)
     return GetActionSlotUnlockText(actionSlotIndex, self.hotbarCategory)
 end
@@ -557,7 +566,7 @@ function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedSlotEditResult(actionSl
         return HOT_BAR_RESULT_SLOT_LOCKED
     end
 
-    if self:GetOverrideSkillDataForSlot(actionSlotIndex) then
+    if self:GetOverrideSkillDataForSlot(actionSlotIndex) or not self:IsSlotMutable(actionSlotIndex) then
         return HOT_BAR_RESULT_CANNOT_EDIT_SLOT
     end
 

@@ -122,6 +122,8 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="5" />
                 </Control>
 
+                <Button name="$(parent)AdvancedUIErrors" inherits="ZO_CheckButton" />
+
                 <!-- AddOn List -->
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
                     <Dimensions x="885" y="660" />

@@ -16,7 +16,7 @@ function GamepadMarketProductListScene:Initialize(control)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, ZO_GAMEPAD_MARKET_LIST_SCENE)
     self.list = self:GetMainList()
     self:InitializeHeader()
-    self.previewProductIds = {}
+    self.previewInfos = {}
 end
 
 function GamepadMarketProductListScene:OnDeferredInitialize()
@@ -124,34 +124,60 @@ function GamepadMarketProductListScene:ShowMarketProductBundleContents(marketPro
     self:ShowMarketProducts(marketProducts)
 end
 
--- marketProducts is a table of Market Product info
-function GamepadMarketProductListScene:ShowMarketProducts(marketProducts)
+-- objectList is a table of MarketProduct and Reward objects
+function GamepadMarketProductListScene:ShowMarketProducts(objectList)
     self.list:Clear()
 
-    ZO_ClearNumericallyIndexedTable(self.previewProductIds)
+    ZO_ClearNumericallyIndexedTable(self.previewInfos)
 
+    local numObjects = #objectList
     local lastHeaderName = nil
 
-    for i = 1, #marketProducts do
-        local productInfo = marketProducts[i]
-        local productId = productInfo.productId
-        local name, description, icon, isNew, isFeatured = GetMarketProductInfo(productId)
+    for i = 1, numObjects do
+        local objectInfo = objectList[i]
+        local isReward = objectInfo.isRewardEntry
+        local rewardId = objectInfo.rewardId
+        local productId = objectInfo.productId
+        local productName = nil
+        local iconTextureFile = nil
+        local stackCount = nil
+        local displayQuality = nil
 
-        local entryData = ZO_GamepadEntryData:New(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name), icon)
+        if isReward then
+            productName = objectInfo:GetFormattedName()
+            iconTextureFile = objectInfo:GetGamepadIcon()
+            stackCount = objectInfo:GetQuantity()
+            displayQuality = objectInfo:GetItemDisplayQuality()
+        else
+            local _
+            productName, _, iconTextureFile = GetMarketProductInfo(productId)
+            productName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, productName)
+            stackCount = objectInfo.stackCount
+            displayQuality = objectInfo.displayQuality
+        end
+
+        local entryData = ZO_GamepadEntryData:New(productName, iconTextureFile)
         entryData.marketProductId = productId
+        entryData.rewardId = rewardId
         entryData.listIndex = i
-        entryData:SetStackCount(productInfo.stackCount)
-
-        entryData.displayQuality = productInfo.displayQuality or ITEM_DISPLAY_QUALITY_NORMAL
-        entryData:SetNameColors(entryData:GetColorsBasedOnQuality(entryData.displayQuality))
+        entryData:SetStackCount(stackCount)
+        entryData.displayQuality = displayQuality or ITEM_DISPLAY_QUALITY_NORMAL
+        entryData:SetNameColors(entryData:GetColorsBasedOnQuality(displayQuality))
 
         -- check if we should add a header
-        local productHeader = productInfo.headerName
+        local productHeader = objectInfo.headerName
         if productHeader and lastHeaderName ~= productHeader then
             local headerString = productHeader
-            if productInfo.headerColor then
-                headerString = productInfo.headerColor:Colorize(headerString)
+            if isReward and numObjects > 1 and objectInfo.stackCount and objectInfo.stackCount > 1 then
+                headerString = zo_strformat(SI_MARKET_LIST_ENTRY_HEADER_AND_STACK_COUNT_FORMATTER, headerString, objectInfo.stackCount)
+            else
+                headerString = zo_strformat(SI_MARKET_LIST_ENTRY_HEADER_FORMATTER, headerString)
             end
+
+            if objectInfo.headerColor then
+                headerString = objectInfo.headerColor:Colorize(headerString)
+            end
+
             entryData:SetHeader(headerString)
             self.list:AddEntryWithHeader("ZO_GamepadMenuEntryTemplate", entryData)
             lastHeaderName = productHeader
@@ -159,11 +185,34 @@ function GamepadMarketProductListScene:ShowMarketProducts(marketProducts)
             self.list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
         end
 
-        local hasPreview = CanPreviewMarketProduct(productId)
+        local hasPreview = nil
+        -- Order matters
+        if isReward then
+            hasPreview = CanPreviewReward(rewardId)
+        else
+            hasPreview = CanPreviewMarketProduct(productId)
+        end
+
         entryData.hasPreview = hasPreview
         if hasPreview then
-            table.insert(self.previewProductIds, productId)
-            entryData.previewIndex = #self.previewProductIds
+            local previewType = nil
+            local previewObjectId = nil
+
+            if isReward then
+                previewType = ZO_ITEM_PREVIEW_REWARD
+                previewObjectId = rewardId
+            else
+                previewType = ZO_ITEM_PREVIEW_MARKET_PRODUCT
+                previewObjectId = productId
+            end
+
+            local previewEntry =
+            {
+                previewType,
+                previewObjectId,
+            }
+            table.insert(self.previewInfos, previewEntry)
+            entryData.previewIndex = #self.previewInfos
         end
     end
 
@@ -175,8 +224,11 @@ function GamepadMarketProductListScene:OnTargetChanged(list, targetData, oldTarg
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
 
     if targetData then
-        local productId = targetData.marketProductId
-        GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_LEFT_TOOLTIP, productId)
+        if targetData.rewardId and targetData.rewardId ~= 0 then
+            GAMEPAD_TOOLTIPS:LayoutReward(GAMEPAD_LEFT_TOOLTIP, targetData.rewardId, targetData.stackCount, REWARD_DISPLAY_FLAGS_FROM_CROWN_STORE_CONTAINER)
+        else
+            GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_LEFT_TOOLTIP, targetData.marketProductId)
+        end
     end
 end
 
@@ -188,7 +240,7 @@ function GamepadMarketProductListScene:BeginPreview()
     local targetData = self.list:GetTargetData()
     if targetData then
         local previewIndex = targetData.previewIndex
-        ZO_MARKET_PREVIEW_GAMEPAD:BeginPreview(self.previewProductIds, previewIndex, function(...) self:OnPreviewChanged(...) end)
+        ZO_MARKET_PREVIEW_GAMEPAD:BeginPreview(self.previewInfos, previewIndex, function(...) self:OnPreviewChanged(...) end)
     end
 end
 

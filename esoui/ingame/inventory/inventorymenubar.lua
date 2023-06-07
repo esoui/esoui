@@ -152,7 +152,7 @@ end
 function ZO_InventoryMenuBar:AddTab(tabType, keybinds, additionalFragment)
     --Although it is not in a keyboard folder, this file is technically only used on keyboard
     --Actually moving this file to a keyboard folder is a bit of a rabbit hole, so instead just don't do anything here if we know we aren't loading the keyboard files
-    if ZO_IsPCOrHeronUI() then
+    if ZO_IsPCUI() then
         if tabType == INVENTORY_MENU_INVENTORY_BUTTON then
             self.modeBar:Add(SI_INVENTORY_MODE_ITEMS, { INVENTORY_FRAGMENT, additionalFragment }, self.inventoryButtonData, keybinds)
         elseif tabType == INVENTORY_MENU_CRAFT_BAG_BUTTON then
@@ -318,8 +318,8 @@ function PlayerInventoryMenuBar:OnFragmentShown()
         TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_STOLEN_ITEMS_PRESENT)
     end
 
-    if HasPoisonInBag(INVENTORY_BACKPACK) then
-        TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_POISONS_PRESENT)
+    if HasFishInBag(INVENTORY_BACKPACK) then
+        TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_FISH_PRESENT)
     end
 end
 

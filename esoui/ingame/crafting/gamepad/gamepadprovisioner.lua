@@ -1,18 +1,25 @@
 ZO_GAMEPAD_PROVISIONER_INGREDIENTS_BAR_OFFSET_X = (ZO_GAMEPAD_QUADRANT_1_RIGHT_OFFSET + ZO_GAMEPAD_UI_REFERENCE_WIDTH) / 2
 
+local GAMEPAD_PROVISIONER_ROOT_SCENE_NAME = "gamepad_provisioner_root"
+local GAMEPAD_PROVISIONER_FILLET_SCENE_NAME = "gamepad_provisioner_fillet"
+local GAMEPAD_PROVISIONER_CREATION_SCENE_NAME = "gamepad_provisioner_creation"
+
+PROVISIONER_MODE_ROOT = 0
+PROVISIONER_MODE_FILLET = 1
+PROVISIONER_MODE_CREATION = 2
+
 local GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS = 1
 local GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS = 2
 local GAMEPAD_PROVISIONER_OPTION_FILTER_QUESTS = 3
 
-
-local optionFilterIngredients = 
+local optionFilterIngredients =
 {
     header = GetString(SI_GAMEPAD_PROVISIONER_OPTIONS),
     filterName = GetString(SI_PROVISIONER_HAVE_INGREDIENTS),
     filterTooltip = GetString(SI_CRAFTING_HAVE_INGREDIENTS_TOOLTIP),
     checked = false,
 }
-local optionFilterSkills  =
+local optionFilterSkills =
 {
     filterName = GetString(SI_PROVISIONER_HAVE_SKILLS),
     filterTooltip = GetString(SI_CRAFTING_HAVE_SKILLS_TOOLTIP),
@@ -27,20 +34,77 @@ local optionFilterQuests =
 
 ZO_GamepadProvisioner = ZO_SharedProvisioner:Subclass()
 
-function ZO_GamepadProvisioner:New(...)
-    return ZO_SharedProvisioner.New(self, ...)
-end
-
-function ZO_GamepadProvisioner:Initialize(control)
-    self.mainSceneName = "gamepad_provisioner_root"
+function ZO_GamepadProvisioner:Initialize(control, scene)
+    self.mainSceneName = GAMEPAD_PROVISIONER_ROOT_SCENE_NAME
     ZO_SharedProvisioner.Initialize(self, control)
 
-    local skillLineXPBarFragment = ZO_FadeSceneFragment:New(ZO_GamepadProvisionerTopLevelSkillInfo)
+    self.skillInfoBar = ZO_GamepadProvisionerTopLevelSkillInfo
+    local skillLineXPBarFragment = ZO_FadeSceneFragment:New(self.skillInfoBar)
+    local function MakeScene(name, mode)
+        local scene = self:CreateInteractScene(name)
+        scene:AddFragment(skillLineXPBarFragment)
+        scene:RegisterCallback("StateChange", function(oldState, newState)
+            -- TODO: Determine if any action is needed here
+        end)
 
-    GAMEPAD_PROVISIONER_ROOT_SCENE = self:CreateInteractScene(self.mainSceneName)
+        return scene
+    end
+
+    GAMEPAD_PROVISIONER_ROOT_SCENE = MakeScene(GAMEPAD_PROVISIONER_ROOT_SCENE_NAME, PROVISIONER_MODE_ROOT)
     GAMEPAD_PROVISIONER_ROOT_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
-    GAMEPAD_PROVISIONER_ROOT_SCENE:AddFragment(skillLineXPBarFragment)
+    GAMEPAD_PROVISIONER_FILLET_SCENE = MakeScene(GAMEPAD_PROVISIONER_FILLET_SCENE_NAME, PROVISIONER_MODE_FILLET)
+    GAMEPAD_PROVISIONER_FILLET_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
+    GAMEPAD_PROVISIONER_CREATION_SCENE = MakeScene(GAMEPAD_PROVISIONER_CREATION_SCENE_NAME, PROVISIONER_MODE_CREATION)
+    GAMEPAD_PROVISIONER_CREATION_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
+
     GAMEPAD_PROVISIONER_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            local craftingType = GetCraftingInteractionType()
+
+            self:RefreshModeList(craftingType)
+
+            self.resetUIs = self.resetUIs or self.oldCraftingType ~= craftingType
+
+            self.filletPanel:SetCraftingType(craftingType, self.oldCraftingType, self.resetUIs)
+            self.oldCraftingType = craftingType
+
+            self:ResetMode()
+            if self.resetUIs then
+                self.modeList:SetSelectedIndexWithoutAnimation(PROVISIONER_MODE_FILLET)
+            end
+
+            self:SetEnableSkillBar(true)
+
+            self.control:GetNamedChild("IngredientsBar"):SetHidden(true)
+            self.resultTooltip:SetHidden(true)
+
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            self.modeList.control:SetHidden(false)
+            self.modeList:Activate()
+
+            local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(craftingType)
+
+            ZO_GamepadCraftingUtils_SetupGenericHeader(self, titleString)
+            ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
+
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.modeList, NARRATE_HEADER)
+
+            self:RefreshAnimationSounds()
+
+            self.resetUIs = nil
+        elseif newState == SCENE_HIDDEN then
+            ZO_InventorySlot_RemoveMouseOverKeybinds()
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            self.modeList:Deactivate()
+            self.modeList.control:SetHidden(true)
+
+            self:SetEnableSkillBar(false)
+        end
+    end)
+
+    GAMEPAD_PROVISIONER_CREATION_SCENE:AddFragment(skillLineXPBarFragment)
+    GAMEPAD_PROVISIONER_CREATION_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.control:GetNamedChild("SkillInfo"), GetCraftingInteractionType())
 
@@ -48,7 +112,16 @@ function ZO_GamepadProvisioner:Initialize(control)
                 TriggerTutorial(TUTORIAL_TRIGGER_PROVISIONING_OPENED)
             end
 
+            -- Reset provisioning heading within provisioning station
+            if self.mode == PROVISIONER_MODE_CREATION and self.settings then
+                self.settings = nil
+                self:SetDefaultProvisioningSettings()
+            end
+            self.control:GetNamedChild("IngredientsBar"):SetHidden(false)
+            self.resultTooltip:SetHidden(false)
+
             SYSTEMS:GetObject("craftingResults"):SetCraftingTooltip(self.resultTooltip)
+            self.recipeList.control:SetHidden(false)
             self.recipeList:Activate()
 
             KEYBIND_STRIP:RemoveDefaultExit()
@@ -66,12 +139,14 @@ function ZO_GamepadProvisioner:Initialize(control)
             SYSTEMS:GetObject("craftingResults"):SetCraftingTooltip(nil)
             ZO_GamepadGenericHeader_Deactivate(self.header)
             self.recipeList:Deactivate()
+            self.recipeList.control:SetHidden(true)
 
             -- refresh the recipe details passing nil in to appropriately hide/clear the tooltip and ingredient list
             local NO_RECIPE = nil
             self:RefreshRecipeDetails(NO_RECIPE)
 
-            self.control:GetNamedChild("IngredientsBar"):SetHidden(false)
+            self.control:GetNamedChild("IngredientsBar"):SetHidden(true)
+            self.resultTooltip:SetHidden(true)
 
             self:EndRecipePreview()
 
@@ -79,6 +154,9 @@ function ZO_GamepadProvisioner:Initialize(control)
             KEYBIND_STRIP:RestoreDefaultExit()
         end
     end)
+
+    local maskControl = control:GetNamedChild("Mask")
+    self.filletPanel = ZO_FishFillet_Gamepad:New(maskControl:GetNamedChild("Fillet"), control:GetNamedChild("Fillet"), self, GAMEPAD_PROVISIONER_FILLET_SCENE)
 
     self:InitializeSettings()
 
@@ -91,20 +169,20 @@ function ZO_GamepadProvisioner:Initialize(control)
     self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 
     self:InitializeRecipeList()
-    
+    self:InitializeModeList()
     self:InitializeKeybindStripDescriptors()
     self:InitializeDetails()
 
     ZO_GamepadCraftingUtils_InitializeGenericHeader(self, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() 
-        if SCENE_MANAGER:IsShowing(self.mainSceneName) then
+        if SCENE_MANAGER:IsShowing(GAMEPAD_PROVISIONER_CREATION_SCENE_NAME) then
             self.recipeList:SetActive(false)
         end
     end)
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function() 
-        if SCENE_MANAGER:IsShowing(self.mainSceneName) then
+        if SCENE_MANAGER:IsShowing(GAMEPAD_PROVISIONER_CREATION_SCENE_NAME) then
             self.recipeList:SetActive(true)
         end
     end)
@@ -144,10 +222,103 @@ function ZO_GamepadProvisioner:InitializeSettings()
     embeddedSettings.tabs = { furnishingsTab }
 end
 
+function ZO_GamepadProvisioner:ResetMode()
+    self.mode = PROVISIONER_MODE_ROOT
+end
+
+function ZO_GamepadProvisioner:SetMode(mode)
+    if self.mode ~= mode then
+        self.mode = mode
+        if mode == PROVISIONER_MODE_CREATION then
+            SCENE_MANAGER:Push(GAMEPAD_PROVISIONER_CREATION_SCENE_NAME)
+        else
+            SCENE_MANAGER:Push(GAMEPAD_PROVISIONER_FILLET_SCENE_NAME)
+        end
+        self:UpdateKeybindStrip()
+    end
+
+    -- Always refresh the audio to handle scene state changes.
+    self:RefreshAnimationSounds()
+end
+
+function ZO_GamepadProvisioner:RefreshAnimationSounds()
+    local mode = self.mode
+    if mode == PROVISIONER_MODE_CREATION then
+        local recipeData = self:GetRecipeData()
+        local soundId = recipeData and recipeData.createSound or nil
+        GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(soundId)
+    elseif mode == PROVISIONER_MODE_FILLET then
+        GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.PROVISIONING_FILLET)
+    end
+end
+
+function ZO_GamepadProvisioner:SetEnableSkillBar(enable)
+    if enable then
+        local craftingType = GetCraftingInteractionType()
+        ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.skillInfoBar, craftingType)
+    else
+        ZO_Skills_UntieSkillInfoHeaderToCraftingSkill(self.skillInfoBar)
+    end
+end
+
+function ZO_GamepadProvisioner:UpdateKeybindStrip()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadProvisioner:AddModeEntry(entry)
+    self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", entry)
+end
+
+function ZO_GamepadProvisioner:InitializeModeList()
+    self.modeList = ZO_GamepadVerticalItemParametricScrollList:New(self.control:GetNamedChild("MaskContainerList"))
+    self.modeList:SetAlignToScreenCenter(true)
+    self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+
+    self.filletModeEntry = self:CreateModeEntry(SI_GAMEPAD_PROVISIONING_TAB_FILLET, PROVISIONER_MODE_FILLET, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_fillet.dds")
+
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return GAMEPAD_PROVISIONER_ROOT_SCENE:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
+        end,
+        footerNarrationFunction = function()
+            local narrations = {}
+            ZO_AppendNarration(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
+            return narrations
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.modeList, narrationInfo)
+end
+
+function ZO_GamepadProvisioner:CreateModeEntry(name, mode, icon)
+    local data = ZO_GamepadEntryData:New(GetString(name), icon)
+    data:SetIconTintOnSelection(true)
+    data.mode = mode
+    return data
+end
+
+function ZO_GamepadProvisioner:IsSceneShowing()
+    return SCENE_MANAGER:IsShowing(GAMEPAD_PROVISIONER_ROOT_SCENE_NAME) or SCENE_MANAGER:IsShowing(GAMEPAD_PROVISIONER_FILLET_SCENE_NAME) or SCENE_MANAGER:IsShowing(GAMEPAD_PROVISIONER_CREATION_SCENE_NAME)
+end
+
+function ZO_GamepadProvisioner:RefreshModeList(craftingType)
+    self.modeList:Clear()
+    self:AddModeEntry(self.filletModeEntry)
+
+    local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(craftingType)
+    local recipeCraftingSystemNameStringId = _G["SI_RECIPECRAFTINGSYSTEM"..recipeCraftingSystem]
+    local recipeModeEntry = self:CreateModeEntry(recipeCraftingSystemNameStringId, PROVISIONER_MODE_CREATION, ZO_GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem))
+    self:AddModeEntry(recipeModeEntry)
+    self.modeList:Commit()
+end
+
 function ZO_GamepadProvisioner:ConfigureFromSettings(settings)
     if self.settings ~= settings then
         self.settings = settings
-        
+
         ZO_GamepadCraftingUtils_SetupGenericHeader(self, nil, settings.tabs)
         ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
 
@@ -157,21 +328,21 @@ end
 
 function ZO_GamepadProvisioner:SetDefaultProvisioningSettings()
     self:ConfigureFromSettings(ZO_GamepadProvisioner.PROVISIONING_SETTINGS)
-    GAMEPAD_PROVISIONER_ROOT_SCENE:SetInteractionInfo(self.provisionerStationInteraction)
+    GAMEPAD_PROVISIONER_CREATION_SCENE:SetInteractionInfo(self.provisionerStationInteraction)
 end
 
 function ZO_GamepadProvisioner:EmbedInCraftingScene(interactionInfo)
     --Set the provisioner interact scenes to have the interaction of the current crafting station so it doesn't terminate the crafting interaction
     --when we go into the provisioning UI
-    GAMEPAD_PROVISIONER_ROOT_SCENE:SetInteractionInfo(interactionInfo)
-    SCENE_MANAGER:Push(self.mainSceneName)
+    GAMEPAD_PROVISIONER_CREATION_SCENE:SetInteractionInfo(interactionInfo)
+    SCENE_MANAGER:Push(GAMEPAD_PROVISIONER_CREATION_SCENE_NAME)
 
     self:ConfigureFromSettings(ZO_GamepadProvisioner.EMBEDDED_SETTINGS)
 end
 
 function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
     -- back descriptors for screen / options screen
-    local startButton = 
+    local startButton =
     {
         --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
         name = "Gamepad Provisioner Default Exit",
@@ -187,14 +358,18 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
         ethereal = true,
     }
 
-    local backButton = 
+    local backButton =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         name = GetString(SI_GAMEPAD_BACK_OPTION),
         keybind = "UI_SHORTCUT_NEGATIVE",
         order = -10000,
         callback = function()
-            SCENE_MANAGER:HideCurrentScene()
+            if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
+                self:TogglePreviewMode()
+            else
+                SCENE_MANAGER:HideCurrentScene()
+            end
         end,
         visible = function()
             return not ZO_CraftingUtils_IsPerformingCraftProcess()
@@ -286,19 +461,44 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
     table.insert(self.mainKeybindStripDescriptor, backButton)
 
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.mainKeybindStripDescriptor)
+
+    self.keybindStripDescriptor =
+    {
+        -- Select mode
+        {
+            keybind = "UI_SHORTCUT_PRIMARY",
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+            name = function()
+                return GetString(SI_GAMEPAD_SELECT_OPTION)
+            end,
+
+            callback = function()
+                local targetData = self.modeList:GetTargetData()
+                self:SetMode(targetData.mode)
+            end,
+        },
+    }
+
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
+    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.modeList)
+end
+
+function ZO_GamepadProvisioner:OnFilletSlotChanged()
+    -- Needs to be overridden
 end
 
 function ZO_GamepadProvisioner:ShowOptionsMenu()
-    local dialogData = 
+    local dialogData =
     {
         targetData = self.recipeList:GetTargetData(),
-        filters = 
+        filters =
         {
             [GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS] = optionFilterIngredients,
             [GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS] = optionFilterSkills,
             [GAMEPAD_PROVISIONER_OPTION_FILTER_QUESTS] = optionFilterQuests,
         },
-        finishedCallback =  function()
+        finishedCallback = function()
             self:SaveFilters()
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
         end
@@ -310,18 +510,18 @@ function ZO_GamepadProvisioner:ShowOptionsMenu()
 end
 
 function ZO_GamepadProvisioner:SetupSavedVars()
-    local defaults = 
-    { 
+    local defaults =
+    {
         haveIngredientsChecked = false, 
         haveSkillsChecked = false, 
         questsOnlyChecked = false,
     }
     self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 3, "GamepadProvisioner", defaults)
-    
+
     optionFilterIngredients.checked = self.savedVars.haveIngredientsChecked
     optionFilterSkills.checked = self.savedVars.haveSkillsChecked
     optionFilterQuests.checked = self.savedVars.questsOnlyChecked
-    
+
     self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
 end
 
@@ -349,10 +549,10 @@ function ZO_GamepadProvisioner:InitializeRecipeList()
         self:RefreshRecipeDetails(selectedData)
     end)
 
-    local narrationInfo = 
+    local narrationInfo =
     {
         canNarrate = function()
-            return GAMEPAD_PROVISIONER_ROOT_SCENE:IsShowing()
+            return GAMEPAD_PROVISIONER_CREATION_SCENE:IsShowing()
         end,
         headerNarrationFunction = function()
             return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
@@ -360,20 +560,24 @@ function ZO_GamepadProvisioner:InitializeRecipeList()
         footerNarrationFunction = function()
             local narrations = {}
             local skillInfoNarration = ZO_Skills_GetSkillInfoHeaderNarrationText(self.control:GetNamedChild("SkillInfo"))
-            if skillInfoNarration then
-                ZO_CombineNumericallyIndexedTables(narrations, skillInfoNarration)
-            end
-            ZO_CombineNumericallyIndexedTables(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
+            ZO_AppendNarration(narrations, skillInfoNarration)
+            ZO_AppendNarration(narrations, ZO_WRIT_ADVISOR_GAMEPAD:GetNarrationText())
             return narrations
         end,
     }
     SCREEN_NARRATION_MANAGER:RegisterParametricList(self.recipeList, narrationInfo)
 
     ZO_WRIT_ADVISOR_GAMEPAD:RegisterCallback("CycleActiveQuest", function()
-        if GAMEPAD_PROVISIONER_ROOT_SCENE:IsShowing() then
-            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.recipeList)
+        if GAMEPAD_PROVISIONER_CREATION_SCENE:IsShowing() then
+            if self.mode == PROVISIONER_MODE_CREATION or self.settings == ZO_GamepadProvisioner.EMBEDDED_SETTINGS then
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.recipeList)
+            else
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.modeList)
+            end
         end
     end)
+
+    self.recipeList.control:SetHidden(true)
 end
 
 function ZO_GamepadProvisioner:SaveFilters()
@@ -385,6 +589,7 @@ function ZO_GamepadProvisioner:SaveFilters()
         self.savedVars.haveSkillsChecked = optionFilterSkills.checked
         self.savedVars.questsOnlyChecked = optionFilterQuests.checked
         self:DirtyRecipeList()
+        ZO_SavePlayerConsoleProfile()
     end
 end
 
@@ -408,7 +613,7 @@ function ZO_GamepadProvisioner:InitializeDetails()
     GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(tooltipNarrationInfo)
 
     --Narration info for the ingredients for the item we are crafting
-    local ingredientsNarrationInfo = 
+    local ingredientsNarrationInfo =
     {
         canNarrate = function()
             -- We don't use the visibility of ingredients bar here, as it seems to sometimes rely on the visibility of parent controls. 
@@ -531,6 +736,8 @@ function ZO_GamepadProvisioner:TogglePreviewMode()
     ITEM_PREVIEW_GAMEPAD:ToggleInteractionCameraPreview(FRAME_TARGET_CRAFTING_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_2_3_4_FURNITURE_ITEM_PREVIEW_OPTIONS_FRAGMENT)
     if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
         self.control:GetNamedChild("IngredientsBar"):SetHidden(true)
+    elseif self.settings == ZO_GamepadProvisioner.PROVISIONING_SETTINGS and self.mode ~= PROVISIONER_MODE_CREATION then
+        self.control:GetNamedChild("IngredientsBar"):SetHidden(true)
     else
         self.control:GetNamedChild("IngredientsBar"):SetHidden(false)
     end
@@ -540,13 +747,17 @@ end
 
 function ZO_GamepadProvisioner:RefreshRecipeDetails(selectedData)
     if selectedData then
-        if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
-            if self:CanPreviewRecipe(selectedData) then
-                self:PreviewRecipe(selectedData)
+        if self.mode == PROVISIONER_MODE_CREATION or self.settings == ZO_GamepadProvisioner.EMBEDDED_SETTINGS then
+            if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
+                if self:CanPreviewRecipe(selectedData) then
+                    self:PreviewRecipe(selectedData)
+                end
+                self.resultTooltip:SetHidden(true)
+            else
+                self.resultTooltip:SetHidden(false)
             end
-            self.resultTooltip:SetHidden(true)
         else
-            self.resultTooltip:SetHidden(false)
+            self.resultTooltip:SetHidden(true)
         end
 
         --update recipe tooltip
@@ -569,19 +780,23 @@ function ZO_GamepadProvisioner:RefreshRecipeDetails(selectedData)
         end
 
         self.ingredientsBar:Commit()
-
-        GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(selectedData.createSound)
     else
         self.resultTooltip:SetHidden(true)
 
         self.ingredientsBar:Clear()
     end
 
+    self:RefreshAnimationSounds()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
 end
 
 function ZO_GamepadProvisioner:GetRecipeData()
     return self.recipeList:GetTargetData()
+end
+
+--Overridden from base
+function ZO_GamepadProvisioner:StartHide()
+    self:ResetMode()
 end
 
 function ZO_GamepadProvisioner_Initialize(control)

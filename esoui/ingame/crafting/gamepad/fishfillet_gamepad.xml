@@ -1,0 +1,41 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_FishFillet_Gamepad_PanelContent" virtual="true">
+            <Controls>
+                <Control name="$(parent)Inventory" inherits="ZO_GamepadCraftingInventoryTemplate" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_GamepadProvisionerTopLevelHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_GamepadProvisionerTopLevelMask" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_FishFillet_Gamepad_FloatingContent" virtual="true">
+            <Controls>
+                <Control name="$(parent)SlotContainer" >
+                    <Dimensions y="ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_SLOT_STANDARD_HEIGHT"/>
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" relativePoint="BOTTOMLEFT" offsetX="ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_2_SHOWN" offsetY="ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_BOTTOM_OFFSET"/>
+                    <Controls>
+                        <Button name="$(parent)FilletSlot" inherits="ZO_CraftingSlot_Gamepad">
+                            <Anchor point="TOP" offsetY="64"/>
+                            <Controls>
+                                <Backdrop name="$(parent)Bg" override="true">
+                                    <Anchor point="TOPLEFT" offsetX="-218" offsetY="-64" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="218" offsetY="64" />
+                                </Backdrop>
+
+                                <Label name="$(parent)Name" font="ZoFontGamepad34" horizontalAlignment="CENTER">
+                                    <Dimensions x="400" />
+                                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-2" />
+                                </Label>
+                            </Controls>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Tooltip" hidden="true" inherits="ZO_CraftingTooltip_Gamepad">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)SlotContainer" relativePoint="TOP" offsetY="-ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_PADDING_Y"/>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

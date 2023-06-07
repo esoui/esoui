@@ -242,7 +242,10 @@ function ZO_GamepadInteractiveSortFilterList:InitializeDropdownFilter()
             self.filterDropdown:SetSelectedColor(ZO_DISABLED_TEXT)
         end,
         narrationText = function()
-            return self.filterDropdown:GetNarrationText()
+            local narrations = {}
+            ZO_AppendNarration(narrations, self.filterDropdown:GetNarrationText())
+            ZO_AppendNarration(narrations, self:GetEmptyRowNarration())
+            return narrations
         end,
         headerNarrationFunction = function()
             return self:GetHeaderNarration()
@@ -277,7 +280,10 @@ function ZO_GamepadInteractiveSortFilterList:InitializeSearchFilter()
             SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher)
         end,
         narrationText = function()
-            return ZO_FormatEditBoxNarrationText(searchEdit, GetString(SI_SCREEN_NARRATION_EDIT_BOX_SEARCH_NAME))
+            local narrations = {}
+            ZO_AppendNarration(narrations, ZO_FormatEditBoxNarrationText(searchEdit, GetString(SI_SCREEN_NARRATION_EDIT_BOX_SEARCH_NAME)))
+            ZO_AppendNarration(narrations, self:GetEmptyRowNarration())
+            return narrations
         end,
         headerNarrationFunction = function()
             return self:GetHeaderNarration()
@@ -507,6 +513,12 @@ function ZO_GamepadInteractiveSortFilterList:GetHeaderControl(headerName)
     return self.headersContainer:GetNamedChild(headerName)
 end
 
+function ZO_GamepadInteractiveSortFilterList:SetHeaderNameForKey(key, name)
+    if self.sortHeaderGroup then
+        self.sortHeaderGroup:SetHeaderNameForKey(key, name)
+    end
+end
+
 function ZO_GamepadInteractiveSortFilterList:GetContentHeaderData()
     return self.contentHeaderData
 end
@@ -620,6 +632,17 @@ end
 function ZO_GamepadInteractiveSortFilterList:DeselectListData()
     ZO_ScrollList_SelectData(self.list, nil)
     ZO_ScrollList_ResetAutoSelectIndex(self.list)
+end
+
+--Overridden from base
+function ZO_GamepadInteractiveSortFilterList:GetEmptyRowNarration()
+    local narrations = {}
+    if self.emptyRow and not self.emptyRow:IsHidden() then
+        --Narrate a different string if there are no results to find than if your filters eliminated all results
+        local emptyMessage = #self.masterList == 0 and self.emptyText or GetString(SI_SORT_FILTER_LIST_NO_RESULTS)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(emptyMessage))
+    end
+    return narrations
 end
 
 --Overridden from base

@@ -442,6 +442,7 @@ function ZO_QuestJournal_Gamepad:RefreshDetails()
        
             self.bgText:SetText(goalBackgroundText)
             self.stepText:SetText(goalDescription)
+            self.conditionTextLabel:SetText(GetString(SI_QUEST_JOURNAL_QUEST_TASKS))
             self.conditionTextBulletList:AddLine(goalCondition)
             self.optionalStepTextLabel:SetHidden(true)
             if self.hintTextLabel then
@@ -612,7 +613,12 @@ do
         local lastCategoryName
         local masterQuestList = QUEST_JOURNAL_MANAGER:GetQuestList()
         for i, quest in ipairs(masterQuestList) do
-            local entry = ZO_GamepadEntryData:New(quest.name, self:GetIconTexture(quest.questType, quest.displayType))
+            local iconTexture = self:GetIconTexture(quest.questType, quest.displayType)
+            if not iconTexture and quest.repeatable then
+                iconTexture = "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_repeatable.dds"
+            end
+
+            local entry = ZO_GamepadEntryData:New(quest.name, iconTexture)
             entry:SetDataSource(quest)
             entry:SetIconTintOnSelection(true)
             entry.narrationText = GetQuestEntryNarrationText

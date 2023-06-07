@@ -196,7 +196,7 @@ local ZO_OptionsPanel_Audio_ControlData =
             panel = SETTING_PANEL_AUDIO,
             text = SI_AUDIO_OPTIONS_BACKGROUND_AUDIO,
             tooltipText = SI_AUDIO_OPTIONS_BACKGROUND_AUDIO_TOOLTIP,
-            exists = ZO_IsPCOrHeronUI,
+            exists = ZO_IsPCUI,
         },
         --Options_Audio_VoiceChatVolume
         [AUDIO_SETTING_VOICE_CHAT_VOLUME] =

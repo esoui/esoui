@@ -565,10 +565,6 @@ function ZO_ChampionAssignableActionBar_GamepadEditor:UnfocusBar()
         self.currentSlotIndex = nil
         self.isFocused = false
 
-        if CHAMPION_PERKS:GetChosenConstellation() then
-            CHAMPION_PERKS:GetChosenConstellation():SelectStar(self.lastSelectedStar)
-        end
-
         self.bar:RefreshAllSlots()
 
         CHAMPION_PERKS:GetGamepadCursor():UpdateVisibility()

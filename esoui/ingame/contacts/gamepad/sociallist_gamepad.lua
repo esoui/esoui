@@ -69,12 +69,6 @@ end
 function ZO_GamepadSocialListPanel:ColorRow(control, data, selected)
     local textColor, iconColor, textColor2 = self:GetRowColors(data, selected)
     ZO_SocialList_ColorRow(control, data, textColor, iconColor, textColor2)
-
-    local heronUserInfoTexture = control:GetNamedChild("HeronUserInfoIcon")
-    if heronUserInfoTexture then
-        local heronIconColor = data.online and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
-        heronUserInfoTexture:SetColor(heronIconColor:UnpackRGBA())
-    end
 end
 
 function ZO_GamepadSocialListPanel:GetRowColors(data, selected)

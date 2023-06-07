@@ -60,7 +60,8 @@ function ZO_CraftingAlertText_Gamepad:Initialize(control)
 
     self.defaultMaxHeight = MAX_HEIGHT_GAMEPAD
 
-    self.alerts = ZO_FadingControlBuffer:New(control, MAX_DISPLAYED_ENTRIES_GAMEPAD, MAX_HEIGHT_GAMEPAD, NO_MAX_LINES_PER_ENTRY_GAMEPAD, "AlertFadeGamepad", "AlertTranslateGamepad", anchor)
+    local NARRATE_ALL_ENTRIES = true
+    self.alerts = ZO_FadingControlBuffer:New(control, MAX_DISPLAYED_ENTRIES_GAMEPAD, MAX_HEIGHT_GAMEPAD, NO_MAX_LINES_PER_ENTRY_GAMEPAD, "AlertFadeGamepad", "AlertTranslateGamepad", anchor, NARRATE_ALL_ENTRIES)
     self.alerts:AddTemplate(DEFAULT_GAMEPAD_ALERT_TEMPLATE, {setup = SetupFunction})
 
     self.alerts:SetTranslateDuration(1500)

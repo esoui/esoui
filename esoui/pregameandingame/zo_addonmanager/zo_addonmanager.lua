@@ -40,6 +40,11 @@ function ZO_AddOnManager:Initialize(control, primaryKeybindDescriptor, secondary
     ZO_ScrollList_AddDataType(self.list, ADDON_DATA, "ZO_AddOnRow", ZO_ADDON_ROW_HEIGHT, self:GetRowSetupFunction())
     ZO_ScrollList_AddDataType(self.list, SECTION_HEADER_DATA, "ZO_AddOnSectionHeaderRow", ZO_ADDON_SECTION_HEADER_ROW_HEIGHT, function(...) self:SetupSectionHeaderRow(...) end)
 
+    self.advancedErrorCheck = self.control:GetNamedChild("AdvancedUIErrors")
+    ZO_CheckButton_SetToggleFunction(self.advancedErrorCheck, function(checkButton, isChecked) SetCVar("UIErrorAdvancedView", isChecked and "1" or "0") end)
+    ZO_CheckButton_SetCheckState(self.advancedErrorCheck, GetCVar("UIErrorAdvancedView") == "1")
+    ZO_CheckButton_SetLabelText(self.advancedErrorCheck, GetString(SI_ADDON_MANAGER_ADVANCED_UI_ERRORS))
+
     self.characterDropdown = ZO_ComboBox:New(self.control:GetNamedChild("CharacterSelectDropdown"))
     self.characterDropdown:SetSortsItems(false)
 
@@ -356,6 +361,16 @@ function ZO_AddOnManager:BuildCharacterDropdown()
     end
 end
 
+function ZO_AddOnManager:LayoutAdvancedErrorCheck()
+    self.advancedErrorCheck:ClearAnchors()
+    --Adjust the anchoring of the checkbox depending on if the character dropdown is showing
+    if self.characterData then
+        self.advancedErrorCheck:SetAnchor(LEFT, self.characterDropdown:GetContainer(), RIGHT, 15)
+    else
+        self.advancedErrorCheck:SetAnchor(TOPLEFT, self.control:GetNamedChild("Divider"), BOTTOMLEFT, 0, 5)
+    end
+end
+
 function ZO_AddOnManager:ChangeEnabledState(index, checkState)
     AddOnManager:SetAddOnEnabled(index, checkState == TRISTATE_CHECK_BUTTON_CHECKED)
     self:RefreshData()
@@ -506,6 +521,7 @@ end
 
 function ZO_AddOnManager:OnShow()
     self:BuildCharacterDropdown()
+    self:LayoutAdvancedErrorCheck()
     self:RefreshData()
     self:RefreshKeybinds()
     CALLBACK_MANAGER:FireCallbacks("ShowAddOnEULAIfNecessary")

@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="CreateLinkLoadingScreen_Gamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
             <OnInitialized>
-                CreateLinkLoadingScreen_Gamepad_Initialize(self)
+                ZO_CreateLinkLoadingScreen_Gamepad_Initialize(self)
             </OnInitialized>
 
             <Controls>

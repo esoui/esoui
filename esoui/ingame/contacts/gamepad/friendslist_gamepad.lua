@@ -3,12 +3,6 @@ ZO_GAMEPAD_FRIENDS_LIST_USER_FACING_NAME_WIDTH = 310 - ZO_GAMEPAD_INTERACTIVE_FI
 ZO_GAMEPAD_FRIENDS_LIST_CHARACTER_NAME_WIDTH = 205 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 ZO_GAMEPAD_FRIENDS_LIST_ZONE_WIDTH = 260 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 
-ZO_GAMEPAD_FRIENDS_LIST_HERON_USER_INFO_WIDTH = 100 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
--- Remove 100px from existing columns to make room for the heron user info column. These should add up to 100 so the overall layout is the same width whether or not the heron column is visible
-ZO_GAMEPAD_FRIENDS_LIST_HERON_USER_FACING_NAME_WIDTH = ZO_GAMEPAD_FRIENDS_LIST_USER_FACING_NAME_WIDTH - 20
-ZO_GAMEPAD_FRIENDS_LIST_HERON_CHARACTER_NAME_WIDTH = ZO_GAMEPAD_FRIENDS_LIST_CHARACTER_NAME_WIDTH - 20
-ZO_GAMEPAD_FRIENDS_LIST_HERON_ZONE_WIDTH = ZO_GAMEPAD_FRIENDS_LIST_ZONE_WIDTH - 60
-
 -----------------
 -- Friend List
 -----------------
@@ -66,7 +60,7 @@ function FriendsList_Gamepad:GetAddKeybind()
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
-                if ZO_IsPCOrHeronUI() then
+                if ZO_IsPCUI() then
                     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_ADD_FRIEND_DIALOG")
                 else
                     ZO_ShowConsoleAddFriendDialogFromUserListSelector()
@@ -80,7 +74,7 @@ end
 function FriendsList_Gamepad:LayoutTooltip(tooltipManager, tooltip, data)
     -- PlayStation will not show a tooltip here, we will show the tooltip if the player opens the social options dialog
     if not ZO_IsPlaystationPlatform() then
-        tooltipManager:LayoutFriend(tooltip, ZO_FormatUserFacingDisplayName(data.displayName), data.characterName, data.class, data.gender, data.level, data.championPoints, data.formattedAllianceName, data.formattedZone, not data.online, data.secsSinceLogoff, data.timeStamp, data.heronName)
+        tooltipManager:LayoutFriend(tooltip, ZO_FormatUserFacingDisplayName(data.displayName), data.characterName, data.class, data.gender, data.level, data.championPoints, data.formattedAllianceName, data.formattedZone, not data.online, data.secsSinceLogoff, data.timeStamp)
     end
 end
 
@@ -178,11 +172,6 @@ function FriendsList_Gamepad:GetSelectedNarrationText()
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
         end
 
-        --Stadia has an extra column
-        if IsHeronUI() and entryData.isHeronUser then
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_HERON_USER_INFO)))
-        end
-
         if entryData.displayName then
             local narrationStrings = { ZO_GetPlatformAccountLabel(), ZO_FormatUserFacingDisplayName(entryData.displayName) }
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationStrings, ROW_ENTRY_PAUSE_TIME_MS))
@@ -226,10 +215,7 @@ function ZO_FriendsList_Gamepad_OnInitialized(control)
     -- Set up columns before initializing panel
     local rowTemplate
     local headersTemplate
-    if IsHeronUI() then
-        rowTemplate = "ZO_GamepadFriendsListRow_Heron"
-        headersTemplate = "ZO_GamepadFriendsListHeaders_Heron"
-    elseif ZO_IsPlaystationPlatform() then
+    if ZO_IsPlaystationPlatform() then
         rowTemplate = "ZO_GamepadFriendsListRow_Playstation"
         headersTemplate = "ZO_GamepadFriendsListHeaders_Playstation"
     else

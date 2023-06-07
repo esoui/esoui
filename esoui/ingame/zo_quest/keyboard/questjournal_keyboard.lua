@@ -72,7 +72,13 @@ function ZO_QuestJournal_Keyboard:SetIconTexture(iconControl, iconData, selected
     local texture = iconControl:GetNamedChild("Icon")
     texture.selected = selected
 
+    local tooltipText = nil
     local texturePath = self:GetIconTexture(iconData.questType, iconData.displayType)
+    if not texturePath and iconData.repeatable then
+        texturePath = "EsoUI/Art/Journal/journal_Quest_Repeat.dds"
+        tooltipText = GetString(SI_QUEST_JOURNAL_REPEATABLE_TOOLTIP)
+    end
+
     if selected then
         if texturePath then
             texture:SetTexture(texturePath)
@@ -85,7 +91,7 @@ function ZO_QuestJournal_Keyboard:SetIconTexture(iconControl, iconData, selected
     else
         if texturePath then
             texture:SetTexture(texturePath)
-            texture.tooltipText = self:GetTooltipText(iconData.questType, iconData.displayType, iconData.questIndex)
+            texture.tooltipText = tooltipText or self:GetTooltipText(iconData.questType, iconData.displayType, iconData.questIndex)
 
             texture:SetAlpha(0.50)
             texture:SetHidden(false)
@@ -346,7 +352,8 @@ function ZO_QuestJournal_Keyboard:RefreshDetails()
         self.questIcon:SetHidden(true)
     end
 
-    if repeatableType ~= QUEST_REPEAT_NOT_REPEATABLE then
+    local repeatable = repeatableType ~= QUEST_REPEAT_NOT_REPEATABLE
+    if repeatable then
         self.repeatableText:SetText(GetString(SI_QUEST_JOURNAL_REPEATABLE_TEXT))
         self.repeatableText:SetHidden(false)
         self.repeatableIcon:SetHidden(false)

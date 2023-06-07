@@ -15,9 +15,15 @@
             </OnInitialized>
 
             <Controls>
+                <Texture name="$(parent)Background" tier="LOW" layer="BACKGROUND" textureFile="EsoUI/Art/Login/Keyboard/Login_AccountCreate_BG.dds">
+                    <Dimensions x="670" y="730" />
+                    <Anchor point="TOP" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOM" offsetY="-120" />
+                    <TextureCoords left="0" right="0.654" top="0" bottom="0.713"/>
+                </Texture>
+                
                 <Control name="$(parent)AccountSetup" resizeToFitConstrains="Y">
                     <Dimensions x="500" />
-                    <Anchor point="TOP" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOM" offsetY="-40" />
+                    <Anchor point="TOP" relativeTo="$(parent)Background" offsetY="80" />
 
                     <Controls>
                         <Label name="$(parent)Header" font="ZoFontWinH2" text="SI_KEYBOARD_ACCOUNTSETUP_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
@@ -41,18 +47,18 @@
                             </Controls>
                         </Button>
 
-                        <Button name="$(parent)LinkRadio" inherits="ZO_CreateLinkAccountRadioButton_Keyboard">
+                        <Button name="$(parent)ActivateRadio" inherits="ZO_CreateLinkAccountRadioButton_Keyboard">
                             <Anchor point="LEFT" relativeTo="$(parent)CreateRadio" constrains="X" />
                             <Anchor point="TOP" relativeTo="$(parent)CreateRadioLabel" relativePoint="BOTTOM" offsetY="15" constrains="Y" />
                             
                             <OnClicked>
-                                ZO_CreateLinkAccount_SetLinkAccountMode()
+                                ZO_CreateLinkAccount_SetActivateAccountMode()
                             </OnClicked>
 
                             <Controls>
                                 <Label name="$(parent)Label" override="true" text="SI_KEYBOARD_ACCOUNTSETUP_EXISTING_ACCOUNT">
                                     <OnMouseDown>
-                                        ZO_CreateLinkAccount_SetLinkAccountModeFromLabel()
+                                        ZO_CreateLinkAccount_SetActivateAccountModeFromLabel()
                                     </OnMouseDown>
                                 </Label>
                             </Controls>
@@ -60,129 +66,130 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)NewAccount" hidden="true">
+                <Control name="$(parent)NewAccount" inherits="ZO_ScrollContainer" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)AccountSetup" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" offsetX="-46" offsetY="-70" />
 
                     <Controls>
-                        <Label name="$(parent)Header" inherits="ZO_LoginMenuSectionHeader" text="SI_CREATEACCOUNT_HEADER">
-                            <Anchor point="TOPLEFT" />
-                        </Label>
-
-                        <Label name="$(parent)AccountNameLabel" inherits="ZO_LoginMenuEditLabel" text="SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_LABEL">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="15" />
-                        </Label>
-
-                        <Backdrop name="$(parent)AccountNameEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
-                            <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameLabel" relativePoint="BOTTOMLEFT" />
-
+                        <Control name="$(parent)ScrollChild" override="true">
                             <Controls>
-                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontWinH4">
-                                    <OnTab>
-                                        ZO_CreateLinkAccount_EmailEdit_TakeFocus()
-                                    </OnTab>
-                                        
-                                    <OnEnter>
-                                        ZO_CreateLinkAccount_EmailEdit_TakeFocus()
-                                    </OnEnter>
-
-                                    <OnFocusGained>
-                                        ZO_CreateLinkAccount_CheckAccountNameValidity()
-                                    </OnFocusGained>
-
-                                    <OnFocusLost>
-                                        ZO_CreateLinkAccount_OnAccountNameFocusLost()
-                                    </OnFocusLost>
-
-                                    <OnTextChanged>
-                                        ZO_CreateLinkAccount_CheckAccountNameValidity()
-                                    </OnTextChanged>
-                                </EditBox>
-
-                                <Control name="$(parent)Instructions" inherits="ZO_TextInstructionsTemplate" tier="HIGH" excludeFromResizeToFitExtents="true" />
-                            </Controls>
-                        </Backdrop>
-
-                        <Label name="$(parent)AccountNameDescription" inherits="ZO_LoginMenuInfoLabel" text="SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_DESCRIPTION">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameEntry" relativePoint="BOTTOMLEFT" offsetY="10" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)AccountNameEntry" relativePoint="BOTTOMRIGHT" offsetY="10" />
-                        </Label>
-
-                        <Label name="$(parent)CountryLabel" inherits="ZO_LoginMenuEditLabel" text="SI_CREATEACCOUNT_REGION">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameDescription" relativePoint="BOTTOMLEFT" offsetY="15" />
-                        </Label>
-
-                        <Control name="$(parent)CountryDropdown" inherits="ZO_ScrollableComboBox">
-                            <Dimensions x="300" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)CountryLabel" relatviePoint="BOTTOMLEFT" offsetY="25" />
-
-                            <Controls>
-                                <Label name="$(parent)DefaultText" inherits="ZO_LoginMenuInfoLabel" text="SI_CREATEACCOUNT_SELECT_REGION">
-                                    <Anchor point="LEFT" offsetX="4" />
+                                <Label name="$(parent)AccountNameLabel" inherits="ZO_LoginMenuEditLabel" text="SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_LABEL">
+                                    <Anchor point="TOPLEFT" />
                                 </Label>
+
+                                <Backdrop name="$(parent)AccountNameEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
+                                    <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameLabel" relativePoint="BOTTOMLEFT" />
+
+                                    <Controls>
+                                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontWinH4">
+                                            <OnTab>
+                                                ZO_CreateLinkAccount_EmailEdit_TakeFocus()
+                                            </OnTab>
+
+                                            <OnEnter>
+                                                ZO_CreateLinkAccount_EmailEdit_TakeFocus()
+                                            </OnEnter>
+
+                                            <OnFocusGained>
+                                                ZO_CreateLinkAccount_CheckAccountNameValidity()
+                                            </OnFocusGained>
+
+                                            <OnFocusLost>
+                                                ZO_CreateLinkAccount_OnAccountNameFocusLost()
+                                            </OnFocusLost>
+
+                                            <OnTextChanged>
+                                                ZO_CreateLinkAccount_CheckAccountNameValidity()
+                                            </OnTextChanged>
+                                        </EditBox>
+                                    </Controls>
+                                </Backdrop>
+
+                                <Label name="$(parent)AccountNameDescription" inherits="ZO_LoginMenuInfoLabel" text="SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_DESCRIPTION">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameEntry" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)AccountNameEntry" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                                </Label>
+
+                                <Label name="$(parent)CountryLabel" inherits="ZO_LoginMenuEditLabel" text="SI_CREATEACCOUNT_REGION">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameDescription" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                </Label>
+
+                                <Control name="$(parent)CountryDropdown" inherits="ZO_ScrollableComboBox">
+                                    <Dimensions x="300" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CountryLabel" relatviePoint="BOTTOMLEFT" offsetY="25" />
+
+                                    <Controls>
+                                        <Label name="$(parent)DefaultText" inherits="ZO_LoginMenuInfoLabel" text="SI_CREATEACCOUNT_SELECT_REGION">
+                                            <Anchor point="LEFT" offsetX="4" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+
+                                <Label name="$(parent)EmailLabel" inherits="ZO_LoginMenuEditLabel" text="SI_CREATEACCOUNT_EMAIL">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CountryDropdown" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                </Label>
+
+                                <Backdrop name="$(parent)EmailEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
+                                    <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)EmailLabel" relativePoint="BOTTOMLEFT" />
+
+                                    <Controls>
+                                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontWinH4">
+                                            <OnTab>
+                                                ZO_CreateLinkAccount_AccountNameEdit_TakeFocus()
+                                            </OnTab>
+
+                                            <OnEnter>
+                                                ZO_CreateLinkAccount_AttemptCreateAccount()
+                                            </OnEnter>
+
+                                            <OnTextChanged>
+                                                ZO_CreateLinkAccount_UpdateCreateAccountButton()
+                                            </OnTextChanged>
+                                        </EditBox>
+                                    </Controls>
+                                </Backdrop>
+
+                                <Button name="$(parent)Age" inherits="ZO_CheckButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)EmailEntry" relativePoint="BOTTOMLEFT" offsetY="20" />
+
+                                    <Controls>
+                                        <Label name="$(parent)Label" inherits="ZO_LoginMenuInfoLabel" mouseEnabled="true">
+                                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" offsetX="10" offsetY="5" />
+
+                                            <OnMouseDown>
+                                                ZO_CreateLinkAccount_ToggleCheckButtonFromLabel(self)
+                                            </OnMouseDown>
+                                        </Label>
+                                    </Controls>
+                                </Button>
+
+                                <Button name="$(parent)Subscribe" inherits="ZO_CheckButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Age" relativePoint="BOTTOMLEFT" offsetY="15" />
+
+                                    <Controls>
+                                        <Label name="$(parent)Label" inherits="ZO_LoginMenuInfoLabel" text="SI_CREATEACCOUNT_EMAIL_SIGNUP" mouseEnabled="true">
+                                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" offsetX="10" offsetY="-4" />
+                                            <DimensionConstraints maxX="475" />
+
+                                            <OnMouseDown>
+                                                ZO_CreateLinkAccount_ToggleCheckButtonFromLabel(self)
+                                            </OnMouseDown>
+                                        </Label>
+                                    </Controls>
+                                </Button>
+
+                                <Button name="$(parent)CreateAccount" inherits="ZO_LoginMenuButton" text="SI_CREATEACCOUNT_CREATE_ACCOUNT_BUTTON">
+                                    <Anchor point="TOP" relativeTo="$(parent)Subscribe" relativePoint="BOTTOMLEFT" offsetX="250" offsetY="50" />
+                                    <OnClicked>
+                                        ZO_CreateLinkAccount_AttemptCreateAccount()
+                                    </OnClicked>
+                                </Button>
                             </Controls>
                         </Control>
 
-                        <Label name="$(parent)EmailLabel" inherits="ZO_LoginMenuEditLabel" text="SI_CREATEACCOUNT_EMAIL">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)CountryDropdown" relativePoint="BOTTOMLEFT" offsetY="15" />
-                        </Label>
-
-                        <Backdrop name="$(parent)EmailEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
-                            <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)EmailLabel" relativePoint="BOTTOMLEFT" />
-
-                            <Controls>
-                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontWinH4">
-                                    <OnTab>
-                                        ZO_CreateLinkAccount_AccountNameEdit_TakeFocus()
-                                    </OnTab>
-                                    
-                                    <OnEnter>
-                                        ZO_CreateLinkAccount_AttemptCreateAccount()
-                                    </OnEnter>
-
-                                    <OnTextChanged>
-                                        ZO_CreateLinkAccount_UpdateCreateAccountButton()
-                                    </OnTextChanged>
-                                </EditBox>
-                            </Controls>
-                        </Backdrop>
-
-                        <Button name="$(parent)Age" inherits="ZO_CheckButton">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)EmailEntry" relativePoint="BOTTOMLEFT" offsetY="20" />
-                            
-                            <Controls>
-                                <Label name="$(parent)Label" inherits="ZO_LoginMenuInfoLabel" mouseEnabled="true">
-                                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" offsetX="10" offsetY="5" />
-
-                                    <OnMouseDown>
-                                        ZO_CreateLinkAccount_ToggleCheckButtonFromLabel(self)
-                                    </OnMouseDown>
-                                </Label>
-                            </Controls>
-                        </Button>
-
-                        <Button name="$(parent)Subscribe" inherits="ZO_CheckButton">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Age" relativePoint="BOTTOMLEFT" offsetY="15" />
-
-                            <Controls>
-                                <Label name="$(parent)Label" inherits="ZO_LoginMenuInfoLabel" text="SI_CREATEACCOUNT_EMAIL_SIGNUP" mouseEnabled="true">
-                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" offsetX="10" offsetY="-4" />
-                                    <DimensionConstraints maxX="475" />
-
-                                    <OnMouseDown>
-                                        ZO_CreateLinkAccount_ToggleCheckButtonFromLabel(self)
-                                    </OnMouseDown>
-                                </Label>
-                            </Controls>
-                        </Button>
-
-                        <Button name="$(parent)CreateAccount" inherits="ZO_LoginMenuButton" text="SI_CREATEACCOUNT_CREATE_ACCOUNT_BUTTON">
-                            <Anchor point="TOP" relativeTo="$(parent)Subscribe" relativePoint="BOTTOMLEFT" offsetX="250" offsetY="50" />
-                            <OnClicked>
-                                ZO_CreateLinkAccount_AttemptCreateAccount()
-                            </OnClicked>
-                        </Button>
+                        <Control name="$(parent)Instructions" inherits="ZO_TextInstructionsTemplate" tier="HIGH" excludeFromResizeToFitExtents="true" />
                     </Controls>
                 </Control>
 
@@ -190,14 +197,10 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)AccountSetup" relativePoint="BOTTOMLEFT" offsetY="20" />
 
                     <Controls>
-                        <Label name="$(parent)Header" inherits="ZO_LoginMenuSectionHeader" text="SI_KEYBOARD_LINKACCOUNT_LABEL">
+                        <Label name="$(parent)AccountNameLabel" inherits="ZO_LoginMenuEditLabel" text="SI_ACCOUNT_NAME">
                             <Anchor point="TOPLEFT" />
                         </Label>
 
-                        <Label name="$(parent)AccountNameLabel" inherits="ZO_LoginMenuEditLabel" text="SI_ACCOUNT_NAME">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="15" />
-                        </Label>
-                        
                         <Backdrop name="$(parent)AccountName" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
                             <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameLabel" relativePoint="BOTTOMLEFT" />
@@ -257,11 +260,46 @@
                     </Controls>
                 </Control>
 
-                <Texture name="$(parent)Background" tier="LOW" layer="BACKGROUND" textureFile="EsoUI/Art/Login/Keyboard/Login_AccountCreate_BG.dds">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)AccountSetup" offsetX="-100" offsetY="-80" />
-                    <Dimensions x="670" y="730" />
-                    <TextureCoords left="0" right="0.654" top="0" bottom="0.713"/>
-                </Texture>
+                <Control name="$(parent)ActivateAccount" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AccountSetup" relativePoint="BOTTOMLEFT" offsetY="20" />
+
+                    <Controls>
+                        <Label name="$(parent)Instructions" inherits="ZO_LoginMenuInfoLabel" mouseEnabled="true" linkEnabled="true">
+                            <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH" />
+                            <Anchor point="TOPLEFT" />
+
+                            <OnLinkClicked>
+                                ZO_LinkHandler_OnLinkClicked(linkText, button)
+                            </OnLinkClicked>
+                        </Label>
+
+                        <Label name="$(parent)Code" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Label>
+
+                        <Button name="$(parent)CopyCode" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Code" relativePoint="RIGHT" offsetX="5" />
+
+                            <Textures normal="EsoUI/Art/Miscellaneous/clipboard_up.dds"
+                                      pressed="EsoUI/Art/Miscellaneous/clipboard_down.dds"
+                                      mouseOver="EsoUI/Art/Miscellaneous/clipboard_over.dds"
+                                      disabled="EsoUI/Art/Miscellaneous/clipboard_up.dds" />
+
+                            <OnMouseEnter>
+                                ZO_CreateLinkAccount_OnCopyActivationCodeEnter(self)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_CreateLinkAccount_OnCopyActivationCodeExit(self)
+                            </OnMouseExit>
+
+                            <OnClicked>
+                                ZO_CreateLinkAccount_CopyActivationCode()
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

@@ -65,12 +65,16 @@
             <Dimensions x="120"/>
 
             <Controls>
-                <Button name="$(parent)1" inherits="ClassSelectorButton_Gamepad">
+                <Button name="$(parent)Row1" inherits="ClassSelectorButton_Gamepad">
                     <Anchor point="TOP" />
                 </Button>
 
-                <Button name="$(parent)2" inherits="ClassSelectorButton_Gamepad">
-                    <Anchor point="TOP" relativeTo="$(parent)1" relativePoint="BOTTOM" offsetY="36" />
+                <Button name="$(parent)Row2" inherits="ClassSelectorButton_Gamepad">
+                    <Anchor point="TOP" relativeTo="$(parent)Row1" relativePoint="BOTTOM" offsetY="36" />
+                </Button>
+
+                <Button name="$(parent)Row3" inherits="ClassSelectorButton_Gamepad">
+                    <Anchor point="TOP" relativeTo="$(parent)Row2" relativePoint="BOTTOM" offsetY="36" />
                 </Button>
             </Controls>
         </Control>
@@ -224,7 +228,7 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)Alliance" resizeToFitDescendents="true">
+                <Control name="$(parent)Alliance" resizeToFitDescendents="true" hidden="true">
                     <OnInitialized>
                         ZO_CharacterCreate_Gamepad_CreateAllianceSelector(self)
                     </OnInitialized>
@@ -246,7 +250,7 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)Race" resizeToFitDescendents="true">
+                <Control name="$(parent)Race" resizeToFitDescendents="true" hidden="true">
                     <OnInitialized>
                         ZO_CharacterCreate_Gamepad_CreateRaceSelector(self)
                     </OnInitialized>
@@ -280,7 +284,7 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)Class" resizeToFitDescendents="true">
+                <Control name="$(parent)Class" resizeToFitDescendents="true" hidden="true">
                     <OnInitialized>
                         ZO_CharacterCreate_Gamepad_CreateClassSelector(self)
                     </OnInitialized>

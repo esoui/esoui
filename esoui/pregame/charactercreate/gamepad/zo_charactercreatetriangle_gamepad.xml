@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
 
-        <Control name="ZO_CharacterCreateTriangleTemplate_Gamepad" virtual="true">
+        <Control name="ZO_CharacterCreateTriangleTemplate_Gamepad" hidden="true" virtual="true">
             <Anchor point="TOP" />
             <Controls>
                 <Texture name="$(parent)BG" textureFile="EsoUI/Art/CharacterCreate/Gamepad/selectorTriangle.dds">

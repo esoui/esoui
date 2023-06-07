@@ -97,9 +97,27 @@ function ZO_ChapterUpgradePane_Gamepad:UpdateKeybinds()
     ZO_CHAPTER_UPGRADE_GAMEPAD:RefreshKeybinds()
 end
 
-function ZO_ChapterUpgradePane_Gamepad:OnSelectionChanged()
+function ZO_ChapterUpgradePane_Gamepad:OnSelectionChanged(oldData, newData)
+    ZO_SortFilterList_Gamepad.OnSelectionChanged(self, oldData, newData)
     local RETAIN_FRAGMENT = true
     ZO_CHAPTER_UPGRADE_GAMEPAD:RefreshTooltip(RETAIN_FRAGMENT)
+end
+
+function ZO_ChapterUpgradePane_Gamepad:GetNarrationText()
+    local narrations = {}
+    local selectedData = self:GetSelectedData()
+    if selectedData then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.text))
+
+        if selectedData.isStandardReward then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_CHAPTER_UPGRADE_STANDARD_REWARDS_HEADER)))
+        end
+
+        if selectedData.isCollectorsReward then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_CHAPTER_UPGRADE_COLLECTORS_REWARDS_HEADER)))
+        end
+    end
+    return narrations
 end
 
 -- End ZO_SortFilterList Overrides --
@@ -168,6 +186,7 @@ function ZO_ChapterUpgrade_Gamepad:Initialize(control)
     end
 
     EVENT_MANAGER:RegisterForEvent("ZO_ChapterUpgrade_Gamepad", EVENT_REQUEST_SHOW_GAMEPAD_CHAPTER_UPGRADE, OnRequestShowGamepadChapterUpgrade)
+    EVENT_MANAGER:RegisterForEvent("ZO_ChapterUpgrade_Gamepad", EVENT_COLLECTIBLES_UNLOCK_STATE_CHANGED, function() self:Update() end)
 
     self.selectionMode = SELECTION_MODE.CHAPTER
 

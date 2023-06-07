@@ -44,8 +44,8 @@ function ZO_Disconnect()
     PregameStateManager_SetState("Disconnect")
 end
 
-function ZO_IsForceConsoleOrHeronFlow()
-    if IsConsoleUI() or IsHeronUI() then
+function ZO_IsForceConsoleFlow()
+    if IsConsoleUI() then
         return GetUIPlatform() == UI_PLATFORM_PC
     end
     return false

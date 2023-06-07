@@ -15,6 +15,7 @@ end
 
 function CollectionsBook_Singleton:Initialize()
     self.ownedHouses = {}
+    self.primaryResidenceId = GetHousingPrimaryHouse()
     self.searchString = ""
     self.searchResults = {}
     self.searchSpecializationFilters = {}
@@ -23,6 +24,7 @@ function CollectionsBook_Singleton:Initialize()
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLES_SEARCH_RESULTS_READY, function() self:UpdateSearchResults() end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_REQUEST_BROWSE_TO, function(eventId, ...) self:BrowseToCollectible(...) end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_ACTION_UPDATE_COOLDOWNS, function(eventId, ...) self:OnUpdateCooldowns(...) end)
+    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_HOUSING_PRIMARY_RESIDENCE_SET, function(eventId, ...) self:OnPrimaryResidenceSet(...) end)
 
     local function OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
         if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
@@ -172,9 +174,28 @@ function CollectionsBook_Singleton:MarkHouseCollectiblePermissionLoadDialogShown
     end
 end
 
-function ZO_UpdateCollectibleEntryDataIconVisuals(entryData)
+function CollectionsBook_Singleton:OnPrimaryResidenceSet(houseId)
+    self.primaryResidenceId = houseId
+    self:FireCallbacks("PrimaryResidenceSet", houseId)
+end
+
+function CollectionsBook_Singleton:GetPrimaryResidence()
+    return self.primaryResidenceId
+end
+
+function CollectionsBook_Singleton:SetPrimaryResidence(houseId)
+    if self.primaryResidenceId == 0 then
+        SetHousingPrimaryHouse(houseId)
+    elseif houseId ~= self.primaryResidenceId then
+        local collectibleId = GetCollectibleIdForHouse(self.primaryResidenceId)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_PRIMARY_RESIDENCE", { currentHouse = houseId }, { mainTextParams = { collectibleData:GetName(), collectibleData:GetNickname()}})
+    end
+end
+
+function ZO_UpdateCollectibleEntryDataIconVisuals(entryData, actorCategory)
     local locked = entryData:IsLocked()
-    if locked or entryData:IsBlocked() then
+    if locked or entryData:IsBlocked(actorCategory) then
         entryData:SetIconDesaturation(1)
     else
         entryData:SetIconDesaturation(0)

@@ -1230,3 +1230,32 @@ function ZO_SharedFurnitureManager:InitializeFurnitureCaches()
 end
 
 ZO_MaskIterator = ZO_FlagIterator
+
+--Error Frame Refactor
+ZO_UIErrors_ToggleSupressDialog = ZO_UIErrors_ToggleSuppressDialog
+ZO_UIErrors_HideAll = ZO_UIErrors_Dismiss
+ZO_UIErrors_HideCurrent = ZO_UIErrors_Dismiss
+ZO_ERROR_FRAME.dismissControl = ZO_ERROR_FRAME.dismissKeybind
+ZO_ERROR_FRAME.HideAllErrors = function(self)
+    self:HideErrorFrame()
+end
+ZO_ERROR_FRAME.HideCurrentError = function(self)
+    self:HideErrorFrame()
+end
+ZO_ERROR_FRAME.ToggleSupressDialog = function(self)
+    self:ToggleSuppressDialog()
+end
+
+-- ZO_SetDefaultCollectibleData rename
+ZO_SetDefaultCollectibleData = ZO_SetToDefaultCollectibleData
+ZO_CollectibleDataManager.GetSetDefaultCollectibleData = ZO_CollectibleDataManager.GetSetToDefaultCollectibleData
+ZO_CompanionCollectionBook_Gamepad.BuildCollectibleCategorySetDefaultData = ZO_CompanionCollectionBook_Gamepad.BuildCollectibleCategorySetToDefaultData
+
+--LoreReader.lua scene rename
+LORE_READER_INTERACTION_SCENE = LORE_READER_DEFAULT_SCENE
+GAMEPAD_LORE_READER_INTERACTION_SCENE = GAMEPAD_LORE_READER_DEFAULT_SCENE
+
+-- Group Size Constants
+SMALL_GROUP_SIZE_THRESHOLD = STANDARD_GROUP_SIZE_THRESHOLD
+RAID_GROUP_SIZE_THRESHOLD = LARGE_GROUP_SIZE_THRESHOLD
+GROUP_SIZE_MAX = MAX_GROUP_SIZE_THRESHOLD

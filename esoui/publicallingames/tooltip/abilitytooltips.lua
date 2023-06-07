@@ -4,7 +4,7 @@ function ZO_Tooltip:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP)
     local bar = self:AcquireStatusBar(self:GetStyle("abilityProgressBar"))
     local maxValue = 1
     local currentValue = 1
-    if nextRankXP == 0 then
+    if nextRankXP == lastRankXP or currentXP >= nextRankXP then
         bar:SetMinMax(0, maxValue)
         bar:SetValue(currentValue)
     else
@@ -15,8 +15,8 @@ function ZO_Tooltip:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP)
     end
 
     local narrationText = function()
-        local range = maxValue - 0
-        local percentage = (currentValue - 0) / range
+        local range = maxValue
+        local percentage = currentValue / range
         percentage = string.format("%.2f", percentage * 100)
         return zo_strformat(SI_SCREEN_NARRATION_PROGRESS_BAR_PERCENT_FORMATTER, percentage)
     end

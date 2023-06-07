@@ -21,22 +21,6 @@ do
     end
 end
 
-do
-    local HERON_NAME_ICON_SIZE = "70%"
-
-    function ZO_FormatUserFacingHeronName(name)
-        if name ~= "" then
-            if IsInGamepadPreferredMode() then
-                return zo_iconTextFormat(ZO_GAMEPAD_HERON_NAME_ICON, HERON_NAME_ICON_SIZE, HERON_NAME_ICON_SIZE, name)
-            else
-                return name
-            end
-        else
-            return ""
-        end
-    end
-end
-
 function ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)
     return IsDecoratedDisplayName(characterOrDisplayName) and ZO_FormatUserFacingDisplayName(characterOrDisplayName) or ZO_FormatUserFacingCharacterName(characterOrDisplayName)
 end
@@ -102,25 +86,18 @@ function ZO_PlatformIgnorePlayer(displayName, idRequestType, ...)
 end
 
 function ZO_PlatformOpenApprovedURL(approvedUrlType, linkText, externalApplicationText)
-    if IsHeronUI() then
-        OpenURLByType(approvedUrlType)
-    else
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = approvedUrlType }, { mainTextParams = { linkText, externalApplicationText } })
-    end
+    ZO_Dialogs_ShowPlatformDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = approvedUrlType }, { mainTextParams = { linkText, externalApplicationText } })
 end
 
 do
     internalassert(UI_PLATFORM_MAX_VALUE == 4, "Do these functions still do what they say they do?")
-    function ZO_IsPCOrHeronUI()
+
+    function ZO_IsPCUI()
         return not IsConsoleUI()
     end
 
-    function ZO_IsPCUI()
-        return not IsConsoleUI() and not IsHeronUI()
-    end
-
-    function ZO_IsConsoleOrHeronUI()
-        return IsHeronUI() or IsConsoleUI()
+    function ZO_IsConsoleUI()
+        return IsConsoleUI()
     end
 
     function ZO_IsPlaystationPlatform()
@@ -140,4 +117,8 @@ end
 
 function ZO_IsPregameUI()
     return IsInUI("pregame")
+end
+
+function ZO_IsInternalIngameUI()
+    return IsInUI("internal_ingame")
 end

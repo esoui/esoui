@@ -183,6 +183,16 @@ function ZO_TributePileViewerCardTile_Shared:Initialize(...)
             visible = function()
                 return self.cardData:IsPlayable() or self.cardData:IsDamageable()
             end,
+        },
+        {
+            keybind = "UI_SHORTCUT_TERTIARY",
+            name = GetString(SI_TRIBUTE_VIEW_CONFINED_CARDS_ACTION),
+            callback = function()
+                ZO_TRIBUTE_PILE_VIEWER_MANAGER:OpenConfinementViewer(self.cardData)
+            end,
+            visible = function()
+                return self.cardData:GetNumConfinedCards() > 0
+            end,
         }
     }
 end
@@ -191,6 +201,7 @@ function ZO_TributePileViewerCardTile_Shared:Layout(data)
     self.data = data
     self.cardData = TRIBUTE_POOL_MANAGER:AcquireCardByInstanceId(data.cardInstanceId, self.control, SPACE_INTERFACE)
     self.cardData.control:SetMouseEnabled(false)
+    self.cardData:RefreshConfinedStack()
 
     ZO_Tile.Layout(self, data)
 end
@@ -238,11 +249,56 @@ function ZO_TributeTargetViewerCardTile_Shared:Initialize(...)
                 local targetsRemaining = GetMaxAllowedTributeTargets() - GetNumTargetedTributeCards()
                 return self.cardData:IsTargeted() or targetsRemaining > 0
             end,
+        },
+        {
+            keybind = "UI_SHORTCUT_TERTIARY",
+            name = GetString(SI_TRIBUTE_VIEW_CONFINED_CARDS_ACTION),
+            callback = function()
+                ZO_TRIBUTE_TARGET_VIEWER_MANAGER:OpenConfinementViewer(self.cardData)
+            end,
+            visible = function()
+                return self.cardData:GetNumConfinedCards() > 0
+            end,
         }
     }
 end
 
 function ZO_TributeTargetViewerCardTile_Shared:Layout(data)
+    self.data = data
+    self.cardData = TRIBUTE_POOL_MANAGER:AcquireCardByInstanceId(data.cardInstanceId, self.control, SPACE_INTERFACE)
+    self.cardData.control:SetMouseEnabled(false)
+    self.cardData:RefreshConfinedStack()
+
+    ZO_Tile.Layout(self, data)
+end
+
+-- Begin ZO_ContextualActionsTile Overrides --
+
+function ZO_TributeTargetViewerCardTile_Shared:SetHighlightHidden(hidden, instant)
+    if self.data and self.cardData then
+        local cardInstanceId = self.data.cardInstanceId or 0
+        if hidden then
+            local NO_CARD = 0
+            SetHighlightedTributeCard(NO_CARD)
+        else
+            SetHighlightedTributeCard(cardInstanceId)
+        end
+    end
+end
+
+-- End ZO_ContextualActionsTile Overrides --
+
+------------------------------------------
+-- Tribute Confinement Viewer Card Tile --
+------------------------------------------
+
+ZO_TributeConfinementViewerCardTile_Shared = ZO_TributeCardTile_Shared:Subclass()
+
+function ZO_TributeConfinementViewerCardTile_Shared:New(...)
+    return ZO_TributeCardTile_Shared.New(self, ...)
+end
+
+function ZO_TributeConfinementViewerCardTile_Shared:Layout(data)
     self.data = data
     self.cardData = TRIBUTE_POOL_MANAGER:AcquireCardByInstanceId(data.cardInstanceId, self.control, SPACE_INTERFACE)
     self.cardData.control:SetMouseEnabled(false)
@@ -252,7 +308,7 @@ end
 
 -- Begin ZO_ContextualActionsTile Overrides --
 
-function ZO_TributeTargetViewerCardTile_Shared:SetHighlightHidden(hidden, instant)
+function ZO_TributeConfinementViewerCardTile_Shared:SetHighlightHidden(hidden, instant)
     if self.data and self.cardData then
         local cardInstanceId = self.data.cardInstanceId or 0
         if hidden then

@@ -66,5 +66,15 @@
                 <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true" />
             </Controls>
         </Control>
+
+        <Control name="ZO_TributeConfinementViewerCardTile_Keyboard_Control" inherits="ZO_TributeCardTile_Shared_Control ZO_TributeCardTile_Keyboard_Control" virtual="true">
+            <Dimensions y="ZO_TRIBUTE_CARD_TILE_TALL_HEIGHT_KEYBOARD" />
+            <OnInitialized>
+                ZO_TributeConfinementViewerCardTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true" />
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

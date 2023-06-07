@@ -108,6 +108,16 @@ end
 function ZO_ZoneStories_Gamepad:InitializeGridList()
     ZO_ZoneStories_Shared.InitializeGridList(self)
 
+    local function GetHeaderNarration()
+        local narrations = {}
+        local data = self:GetSelectedStoryData()
+        local zoneData = ZONE_STORIES_MANAGER:GetZoneData(data.id)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zoneData.name))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zoneData.description))
+        return narrations
+    end
+
+    self.gridList:SetHeaderNarrationFunction(GetHeaderNarration)
     self.gridList:SetOnSelectedDataChangedCallback(function(...) self:OnGridSelectionChanged(...) end)
 end
 
@@ -237,6 +247,8 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
                     local completionType = selectedData.completionType
                     self.tooltipSelectedIndex = ZO_ZoneStories_Gamepad.GetValidatedTooltipIndex(zoneData, completionType, self.tooltipSelectedIndex + 1)
                     ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, completionType, self.tooltipSelectedIndex)
+                    --Re-narrate when cycling the tooltip
+                    SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.gridList)
                 end
             end,
         },
@@ -266,6 +278,8 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
                     local completionType = selectedData.completionType
                     self.tooltipSelectedIndex = ZO_ZoneStories_Gamepad.GetValidatedTooltipIndex(zoneData, completionType, self.tooltipSelectedIndex - 1)
                     ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, completionType, self.tooltipSelectedIndex)
+                    --Re-narrate when cycling the tooltip
+                    SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.gridList)
                 end
             end,
         },

@@ -793,14 +793,14 @@ function ZO_ChampionStar_OnMouseWheel(control, delta)
 end
 
 function ZO_ChampionStar_OnMouseUp(control, button, upInside)
-    if IsInGamepadPreferredMode() or control.star:OnClicked(button, upInside) == HANDLED then
+    if not control.star or IsInGamepadPreferredMode() or control.star:OnClicked(button, upInside) == HANDLED then
         return
     end
     CHAMPION_PERKS:OnCanvasMouseUp(button)
 end
 
 function ZO_ChampionStar_OnDragStart(control, button)
-    if not IsInGamepadPreferredMode() and button == MOUSE_BUTTON_INDEX_LEFT and GetCursorContentType() == MOUSE_CONTENT_EMPTY then
+    if control.star and not IsInGamepadPreferredMode() and button == MOUSE_BUTTON_INDEX_LEFT and GetCursorContentType() == MOUSE_CONTENT_EMPTY then
         control.star:OnDragStart()
     end
 end

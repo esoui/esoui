@@ -15,7 +15,7 @@ function ZO_GamepadStoreSell:Initialize(scene)
     end)
 
     self:InitializeKeybindStrip()
-    self:CreateModeData(SI_STORE_MODE_SELL, ZO_MODE_STORE_SELL, "EsoUI/Art/Vendor/vendor_tabIcon_sell_up.dds", fragment, self.keybindStripDescriptor)
+    self:CreateModeData(SI_STORE_MODE_SELL, ZO_MODE_STORE_SELL, "EsoUI/Art/Vendor/vendor_tabIcon_sell_up.dds", self.fragment, self.keybindStripDescriptor)
     self.list:SetNoItemText(GetString(SI_GAMEPAD_NO_SELL_ITEMS))
 end
 

@@ -64,6 +64,13 @@ panelBuilder:AddSetting({
     header = SI_SOCIAL_OPTIONS_NOTIFICATIONS,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Social_GuildKeepNotices",
+    settingType = SETTING_TYPE_UI,
+    settingId = UI_SETTING_SHOW_GUILD_KEEP_NOTICES,
+    header = SI_SOCIAL_OPTIONS_NOTIFICATIONS,
+})
+
 ---------------------------
 -- Social -> Chat Colors --
 ---------------------------

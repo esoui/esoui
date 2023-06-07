@@ -1,9 +1,5 @@
 ZO_GamepadStoreBuy = ZO_GamepadStoreListComponent:Subclass()
 
-function ZO_GamepadStoreBuy:New(...)
-    return ZO_GamepadStoreListComponent.New(self, ...)
-end
-
 function ZO_GamepadStoreBuy:Initialize(scene)
     ZO_GamepadStoreListComponent.Initialize(self, scene, ZO_MODE_STORE_BUY, GetString(SI_STORE_MODE_BUY))
 
@@ -31,7 +27,7 @@ function ZO_GamepadStoreBuy:Initialize(scene)
     end)
 
     self:InitializeKeybindStrip()
-    self:CreateModeData(SI_STORE_MODE_BUY, ZO_MODE_STORE_BUY, "EsoUI/Art/Vendor/vendor_tabIcon_buy_up.dds", fragment, self.keybindStripDescriptor)
+    self:CreateModeData(SI_STORE_MODE_BUY, ZO_MODE_STORE_BUY, "EsoUI/Art/Vendor/vendor_tabIcon_buy_up.dds", self.fragment, self.keybindStripDescriptor)
 end
 
 function ZO_GamepadStoreBuy:RegisterEvents()

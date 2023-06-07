@@ -1,11 +1,5 @@
 ZO_SharedSmithingCreation = ZO_CraftingCreateScreenBase:Subclass()
 
-function ZO_SharedSmithingCreation:New(...)
-    local smithingCreation = ZO_CraftingCreateScreenBase.New(self)
-    smithingCreation:Initialize(...)
-    return smithingCreation
-end
-
 local function GetCurrentCraftingLevel()
     local craftingType = GetCraftingInteractionType()
     if craftingType == CRAFTING_TYPE_BLACKSMITHING then

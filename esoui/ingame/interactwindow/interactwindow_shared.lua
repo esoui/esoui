@@ -97,14 +97,22 @@ function ZO_SharedInteraction:InitializeSharedEvents()
         if(declineComplete == "") then  declineComplete = GetString(SI_DEFAULT_QUEST_COMPLETE_DECLINE_TEXT) end
 
         self:InitializeInteractWindow(endDialog)
-        
-        local confirmError = self:ShowQuestRewards(journalQuestIndex)
+
+        local confirmError, currenciesWithMaxWarning, amountsAcquiredWithMaxWarning = self:ShowQuestRewards(journalQuestIndex)
         if confirmError then
             confirmComplete = zo_strformat(SI_QUEST_COMPLETE_FORMAT_STRING, confirmComplete, confirmError)
         end
 
+        local function OnCompleteQuest()
+            if confirmError then
+                ZO_Dialogs_ShowPlatformDialog("CONFIRM_COMPLETE_QUEST_MAX_WARNINGS", { journalQuestIndex = journalQuestIndex, currenciesWithMaxWarning = currenciesWithMaxWarning, amountsAcquiredWithMaxWarning = amountsAcquiredWithMaxWarning })
+            else
+                CompleteQuest()
+            end
+        end
+
         self.importantOptions = {}
-        self:PopulateChatterOption(1, CompleteQuest, confirmComplete, CHATTER_COMPLETE_QUEST)
+        self:PopulateChatterOption(1, OnCompleteQuest, confirmComplete, CHATTER_COMPLETE_QUEST)
         self:PopulateChatterOption(2, function() self:CloseChatter() end, declineComplete, CHATTER_GOODBYE)
 
         self:FinalizeChatterOptions(2)

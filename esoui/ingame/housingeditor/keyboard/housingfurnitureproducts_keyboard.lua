@@ -90,6 +90,20 @@ function ZO_HousingFurnitureProducts_Keyboard:RefreshFilters()
     end
 end
 
+function ZO_HousingFurnitureProducts_Keyboard:CompareFurnitureEntries(a, b)
+    -- Primary order: New products before existing products.
+    if a.isNew then
+        if not b.isNew then
+            return true
+        end
+    elseif b.isNew then
+        return false
+    end
+
+    -- Secondary order: Product name in ascending alphabetical order.
+    return ZO_HousingFurnitureList.CompareFurnitureEntries(self, a, b)
+end
+
 function ZO_HousingFurnitureProducts_Keyboard:OnSearchTextChanged(editBox)
     SHARED_FURNITURE:SetMarketProductTextFilter(editBox:GetText())
 end

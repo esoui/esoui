@@ -45,7 +45,7 @@ function ZO_ItemPreviewListHelper_Shared:ClearPreviewData()
 end
 
 function ZO_ItemPreviewListHelper_Shared:PreviewList(previewType, previewListEntries, startingIndex, dontWrap)
-    assert(previewType and previewListEntries and #previewListEntries > 0)
+    assert(previewListEntries and #previewListEntries > 0)
 
     self:ClearPreviewData()
     for previewIndex, previewData in ipairs(previewListEntries) do
@@ -83,10 +83,6 @@ function ZO_ItemPreviewListHelper_Shared:UpdatePreviewList(newPreviewList, dontR
 end
 
 function ZO_ItemPreviewListHelper_Shared:CanPreviewNext()
-    if self.previewType == nil then
-        return false
-    end
-
     if not self:HasMultiplePreviewDatas() then
         return false
     end
@@ -111,10 +107,6 @@ function ZO_ItemPreviewListHelper_Shared:PreviewNext()
 end
 
 function ZO_ItemPreviewListHelper_Shared:CanPreviewPrevious()
-    if self.previewType == nil then
-        return false
-    end
-
     if not self:HasMultiplePreviewDatas() then
         return false
     end
@@ -174,8 +166,28 @@ function ZO_ItemPreviewListHelper_Shared:GetCurrentPreviewData()
     return self:GetPreviewData(self.previewIndex)
 end
 
+function ZO_ItemPreviewListHelper_Shared:GetCurrentPreviewTypeAndData()
+    local data = self:GetCurrentPreviewData()
+    local previewType = self.previewType
+    local previewData = nil
+
+    -- A previewType of nil indicates that the previewType is specified
+    -- per list entry as the first element in the data array.
+    if previewType == nil and type(data) == "table" then
+        previewType = data[1]
+        previewData = {select(2, unpack(data))}
+    else
+        previewData = data
+    end
+
+    if type(previewData) == "table" then
+        return previewType, unpack(previewData)
+    end
+    return previewType, previewData
+end
+
 function ZO_ItemPreviewListHelper_Shared:IsValidPreviewIndex(previewIndex)
-    if self.previewType and previewIndex >= 1 and previewIndex <= #self.previewListEntries then
+    if previewIndex >= 1 and previewIndex <= #self.previewListEntries then
         return true
     end
     return false

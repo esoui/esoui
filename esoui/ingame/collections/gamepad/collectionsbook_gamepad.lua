@@ -83,6 +83,7 @@ function ZO_GamepadCollectionsBook:Initialize(control)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("PrimaryResidenceSet", OnCollectibleUpdated)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function(...) self:OnCollectibleNotificationRemoved(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUserFlagsUpdated", function(...) self:OnCollectibleUserFlagsUpdated(...) end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnUpdateCooldowns", function(...) self:OnUpdateCooldowns(...) end)
     EVENT_MANAGER:RegisterForUpdate("ZO_GamepadCollectionsBook", 250, function() self:UpdateActiveCollectibleCooldownTimer() end)
     self.control:SetHandler("OnUpdate", function()
@@ -147,6 +148,9 @@ function ZO_GamepadCollectionsBook:InitializeUtilityWheel()
         numSlots = ACTION_BAR_UTILITY_BAR_SIZE,
         showPendingIcon = true,
         showCategoryLabel = true,
+        onSelectionChangedCallback = function()
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.utilityAssignmentKeybindStripDescriptor)
+        end,
         customNarrationObjectName = "CollectionsAssignableUtilityWheel",
         headerNarrationFunction = function()
             local narrations = {}
@@ -233,10 +237,12 @@ function ZO_GamepadCollectionsBook:SetupList(list)
 
     local function CollectibleEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         local collectibleData = data.dataSource
-        data:SetNew(collectibleData:IsNew())
-        data:SetEnabled(not collectibleData:IsBlocked())
+        if collectibleData:IsInstanceOf(ZO_CollectibleData) then
+            data:InitializeCollectibleVisualData(collectibleData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+            ZO_SetDefaultIconSilhouette(control.icon, collectibleData:IsLocked())
+        end
+
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        ZO_SetDefaultIconSilhouette(control.icon, collectibleData:IsLocked())
     end
 
     list:AddDataTemplate("ZO_GamepadCollectibleEntryTemplate", CollectibleEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
@@ -269,18 +275,18 @@ function ZO_GamepadCollectionsBook:OnShowing()
     elseif self.savedOutfitStyleIndex then
         self:ShowList(self.subcategoryList)
         self.subcategoryList.list:SetSelectedIndexWithoutAnimation(self.savedOutfitStyleIndex)
-    elseif self.savedEmoteCollectibleData then
-        local categoryData = self.savedEmoteCollectibleData:GetCategoryData()
+    elseif self.savedCollectibleData then
+        local categoryData = self.savedCollectibleData:GetCategoryData()
         if categoryData:IsSubcategory() then
             self:ViewSubcategory(categoryData)
         else
             self:ViewCategory(categoryData)
         end
-        self:SelectCollectibleEntry(self.savedEmoteCollectibleData:GetId())
+        self:SelectCollectibleEntry(self.savedCollectibleData:GetId())
     end
     
     self.savedOutfitStyleIndex = nil
-    self.savedEmoteCollectibleData = nil
+    self.savedCollectibleData = nil
 end
 
 function ZO_GamepadCollectionsBook:OnHiding()
@@ -357,6 +363,8 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
     local function ClearPreviewList()
         self:ClearAllCurrentSlotPreviews()
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.subcategoryKeybindStripDescriptor)
+        --Re-narrate when the previews are cleared
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currentList.list)
     end
 
     local showLockedOption = ZO_RESTYLE_STATION_GAMEPAD:CreateOptionActionDataOutfitStylesShowLocked(RefreshGridList)
@@ -424,6 +432,8 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
     local function ClearPreviewGrid()
         self:ClearAllCurrentSlotPreviews()
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.gridKeybindStripDescriptor)
+        --Re-narrate when the previews are cleared
+        SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.gridListPanelList)
     end
 
     -- Grid Keybind
@@ -478,32 +488,13 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
         {
             name = function()
                 local collectibleData = self:GetCurrentTargetData()
-                local nameStringId
-                if collectibleData:IsStory() then
-                    nameStringId = SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
-                elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MEMENTO) then
-                    nameStringId = SI_COLLECTIBLE_ACTION_USE
-                elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT) then
-                    nameStringId = SI_COLLECTIBLE_ACTION_COMBINE
-                elseif collectibleData:IsHouse() then
-                    nameStringId = collectibleData:IsUnlocked() and SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE or SI_HOUSING_BOOK_ACTION_PREVIEW_HOUSE
-                elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMPANION) and collectibleData:GetCollectibleAssociatedQuestState() == COLLECTIBLE_ASSOCIATED_QUEST_STATE_INACTIVE then
-                    nameStringId = SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
-                elseif collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
-                    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_VANITY_PET) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMPANION) then
-                        nameStringId = SI_COLLECTIBLE_ACTION_DISMISS
-                    else
-                        nameStringId = SI_COLLECTIBLE_ACTION_PUT_AWAY
-                    end
-                else
-                    nameStringId = SI_COLLECTIBLE_ACTION_SET_ACTIVE
-                end
+                local nameStringId = collectibleData:GetPrimaryInteractionStringId(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                 return GetString(nameStringId)
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
                 local collectibleData = self:GetCurrentTargetData()
-                if collectibleData:IsHouse() then
+                if collectibleData.IsHouse and collectibleData:IsHouse() then
                     if collectibleData:IsLocked() then
                         -- Preview, behavior will always be inside
                         RequestJumpToHouse(collectibleData:GetReferenceId())
@@ -513,12 +504,14 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     end
                 else
                     collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                    --Re-narrate after using the collectible
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currentList.list)
                 end
             end,
             visible = function()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData then
-                    if collectibleData:IsHouse() then
+                     if collectibleData.IsHouse and collectibleData:IsHouse() then
                         return true
                     else
                         return collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
@@ -530,7 +523,10 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             sound = SOUNDS.DEFAULT_CLICK,
             enabled = function()
                 local collectibleData = self:GetCurrentTargetData()
-                if collectibleData:IsHouse() then
+                if collectibleData:IsInstanceOf(ZO_RandomMountCollectibleData) then
+                    --This is a random mount data entry, not a regular ZO_CollectibleData
+                    return not collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER), collectibleData:GetBlockReason(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                elseif collectibleData.IsHouse and collectibleData:IsHouse() then
                     local cannotJumpString = collectibleData:IsUnlocked() and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
                     return CanJumpToHouseFromCurrentLocation(), cannotJumpString
                 else -- IsUsable
@@ -539,7 +535,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                         return true
                     elseif remainingMs > 0 then
                         return false, GetString(SI_COLLECTIONS_COOLDOWN_ERROR)
-                    elseif collectibleData:IsBlocked() then
+                    elseif collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
                         local blockReason = GetCollectibleBlockReason(collectibleData:GetId())
                         return false, zo_strformat(GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", blockReason))
                     else
@@ -575,7 +571,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                         }
                         GAMEPAD_PLAYER_EMOTE:QueueBrowseToCategoryData(data)
                     end
-                    self.savedEmoteCollectibleData = collectibleData
+                    self.savedCollectibleData = collectibleData
                     SCENE_MANAGER:Push("gamepad_player_emote")
                 elseif self:CanPurchaseCurrentTarget() then
                     local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
@@ -587,7 +583,9 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             visible = function()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData then
-                    if collectibleData:IsSlottable() then
+                    if not collectibleData:IsInstanceOf(ZO_CollectibleData) then
+                        return false
+                    elseif collectibleData:IsSlottable() then
                         return true
                     elseif collectibleData:IsUnlocked() and collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE) then
                         return true
@@ -625,10 +623,16 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             visible = function()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData then
-                    return IsChatSystemAvailableForCurrentPlatform() or collectibleData:IsRenameable() or self:CanPurchaseCurrentTarget() or self:CanUpgradeCurrentTarget()
-                else
-                    return false
+                    if not collectibleData:IsInstanceOf(ZO_CollectibleData) then
+                        return false
+                    end
+
+                    local isHouse = collectibleData:IsHouse()
+                    local isPrimaryResidence = collectibleData:IsPrimaryResidence()
+                    return IsChatSystemAvailableForCurrentPlatform() or collectibleData:IsRenameable() or self:CanPurchaseCurrentTarget() or self:CanUpgradeCurrentTarget() or collectibleData:IsFavoritable() or (isHouse and not isPrimaryResidence)
                 end
+
+                return false
             end,
         },
         --Subscribe
@@ -641,7 +645,15 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             end,
             visible = function()
                 local collectibleData = self:GetCurrentTargetData()
-                return collectibleData and collectibleData:IsStory() and collectibleData:IsUnlockedViaSubscription() and not IsESOPlusSubscriber()
+                if collectibleData then
+                    if not collectibleData:IsInstanceOf(ZO_CollectibleData) then
+                        return false
+                    else
+                        return collectibleData:IsStory() and collectibleData:IsUnlockedViaSubscription() and not IsESOPlusSubscriber()
+                    end
+                end
+
+                return false
             end,
         },
     }
@@ -657,6 +669,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
     
     --Utility Wheel Keybinds
     self.utilityAssignmentKeybindStripDescriptor = {}
+
     local function OnUtilityWheelBack()
         self:HideAssignableUtilityWheel()
     end
@@ -664,12 +677,19 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
     local function OnAssignPendingData()
         self.wheel:TryAssignPendingToSelectedEntry()
     end
-    ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.utilityAssignmentKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnAssignPendingData, GetString(SI_GAMEPAD_ITEM_ACTION_QUICKSLOT_ASSIGN))
+
+    local function ShouldShowAssignKeybind()
+        return self.wheel:GetSelectedRadialEntry() ~= nil
+    end
+
+    ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.utilityAssignmentKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnAssignPendingData, GetString(SI_GAMEPAD_ITEM_ACTION_QUICKSLOT_ASSIGN), ShouldShowAssignKeybind)
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.utilityAssignmentKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnUtilityWheelBack)
 
 end
 
 function ZO_GamepadCollectionsBook:ShowAssignableUtilityWheel(collectibleData)
+    local useAccessibleWheel = GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS)
+
     local categoryData = collectibleData:GetCategoryData()
     local hotbarCategory = GetHotbarForCollectibleCategoryId(categoryData.categoryId)
     --Determine which wheels we want to show
@@ -679,26 +699,34 @@ function ZO_GamepadCollectionsBook:ShowAssignableUtilityWheel(collectibleData)
     else
         hotbarCategories = { HOTBAR_CATEGORY_QUICKSLOT_WHEEL }
     end
-    self.wheel:SetHotbarCategories(hotbarCategories)
 
-    --Disable the current collections list before bringing up the wheel
-    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentList.keybind)
-    self:DeactivateCurrentList()
+    --Either show the accessible or regular utility wheel
+    if useAccessibleWheel then
+        self.savedCollectibleData = collectibleData
+        local actionId = collectibleData:GetId()
+        ACCESSIBLE_ASSIGNABLE_UTILITY_WHEEL_GAMEPAD:SetPendingSimpleAction(ACTION_TYPE_COLLECTIBLE, actionId)
+        ACCESSIBLE_ASSIGNABLE_UTILITY_WHEEL_GAMEPAD:Show(hotbarCategories)
+    else
+        self.wheel:SetHotbarCategories(hotbarCategories)
+        --Disable the current collections list before bringing up the wheel
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentList.keybind)
+        self:DeactivateCurrentList()
 
-    local actionId = collectibleData:GetId()
-    self.wheel:SetPendingSimpleAction(ACTION_TYPE_COLLECTIBLE, actionId)
+        local actionId = collectibleData:GetId()
+        self.wheel:SetPendingSimpleAction(ACTION_TYPE_COLLECTIBLE, actionId)
 
-    self.assignLabel:SetHidden(false)
-    self.selectedCollectibleNameLabel:SetHidden(false)
-    self.selectedCollectibleNameLabel:SetText(collectibleData:GetFormattedName())
-    self.pendingUtilityWheelCollectibleData = collectibleData
+        self.assignLabel:SetHidden(false)
+        self.selectedCollectibleNameLabel:SetHidden(false)
+        self.selectedCollectibleNameLabel:SetText(collectibleData:GetFormattedName())
+        self.pendingUtilityWheelCollectibleData = collectibleData
 
-    KEYBIND_STRIP:AddKeybindButtonGroup(self.utilityAssignmentKeybindStripDescriptor)
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.utilityAssignmentKeybindStripDescriptor)
 
-    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
-    GAMEPAD_COLLECTIONS_BOOK_SCENE:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT)
-    -- This will Activate the menu and show it
-    self.wheel:Show()
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        GAMEPAD_COLLECTIONS_BOOK_SCENE:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT)
+        -- This will Activate the menu and show it
+        self.wheel:Show()
+    end
 end
 
 function ZO_GamepadCollectionsBook:HideAssignableUtilityWheel()
@@ -774,7 +802,7 @@ function ZO_GamepadCollectionsBook:SelectCollectibleEntry(collectibleId)
         local list = self.collectionList.list
         for i = 1, list:GetNumItems() do
             local collectibleData = list:GetDataForDataIndex(i)
-            if collectibleData:GetId() == collectibleId then
+            if collectibleData:IsInstanceOf(ZO_CollectibleData) and collectibleData:GetId() == collectibleId then
                 list:SetSelectedIndexWithoutAnimation(i)
                 break
             end
@@ -815,14 +843,16 @@ function ZO_GamepadCollectionsBook:ShowList(list, dontUpdateTitle)
     if self:IsViewingCollectionsList() then
         local collectibleData = self:GetCurrentTargetData()
         if collectibleData then
-            self.notificationIdToClear = collectibleData.notificationId
-            if self.notificationIdToClear or collectibleData:IsNew() then
-                self.clearNewStatusOnSelectionChanged = true
-            end
+            if collectibleData:IsInstanceOf(ZO_CollectibleData) then
+                self.notificationIdToClear = collectibleData.notificationId
+                if self.notificationIdToClear or collectibleData:IsNew() then
+                    self.clearNewStatusOnSelectionChanged = true
+                end
 
-            if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_DLC) then
-                if IsESOPlusSubscriber() then
-                    TriggerTutorial(TUTORIAL_TRIGGER_COLLECTIONS_DLC_OPENED_AS_SUBSCRIBER)
+                if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_DLC) then
+                    if IsESOPlusSubscriber() then
+                        TriggerTutorial(TUTORIAL_TRIGGER_COLLECTIONS_DLC_OPENED_AS_SUBSCRIBER)
+                    end
                 end
             end
         end
@@ -858,13 +888,17 @@ function ZO_GamepadCollectionsBook:HideCurrentList()
     self.currentList = nil
 end
 
-function ZO_GamepadCollectionsBook:OnCollectionUpdated()
+function ZO_GamepadCollectionsBook:OnCollectionUpdated(collectionUpdateType)
     if not self.control:IsHidden() then
         if self.gridListPanelList and self.gridListPanelList:IsActive() then
             self:ExitGridList()
         end
 
-        if self.categoryList then
+        if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.RANDOM_MOUNT_SETTING_CHANGED then
+            -- if random mount changed, we really just want to update the current list just like
+            -- OnCollectibleUpdated does.
+            self:OnCollectibleUpdated()
+        elseif self.categoryList then
             self:ShowList(self.categoryList)
             self.categoryList.list:SetSelectedIndex(1)
             self:BuildCategoryList()
@@ -911,6 +945,10 @@ end
 
 function ZO_GamepadCollectionsBook:OnCollectibleNewStatusCleared(collectibleId)
     self:OnCollectibleStatusUpdated()
+end
+
+function ZO_GamepadCollectionsBook:OnCollectibleUserFlagsUpdated(collectibleId)
+    self:OnCollectibleUpdated(collectibleId)
 end
 
 function ZO_GamepadCollectionsBook:BuildCategoryList()
@@ -968,13 +1006,21 @@ function ZO_GamepadCollectionsBook:BuildCollectionList(categoryData, resetSelect
     collectionList:Clear()
     collectionListInfo.titleText = nil
 
+    local favoriteData = {}
     local unlockedData = {}
     local lockedData = {}
+    self.updateList = {}
 
     for _, collectibleData in categoryData:SortedCollectibleIterator({ ZO_CollectibleData.IsShownInCollection }) do
         local entryData = self:BuildCollectibleData(collectibleData)
         if collectibleData:IsUnlocked() then
-            table.insert(unlockedData, entryData)
+            if collectibleData:IsFavorite() then
+                table.insert(favoriteData, entryData)
+            else
+                table.insert(unlockedData, entryData)
+            end
+
+            table.insert(self.updateList, entryData)
         else
             table.insert(lockedData, entryData)
         end
@@ -982,6 +1028,23 @@ function ZO_GamepadCollectionsBook:BuildCollectionList(categoryData, resetSelect
 
     collectionListInfo.titleText = categoryData:GetFormattedName()
 
+    if #unlockedData > 0 or #lockedData > 0 then
+        -- Add Random Selections
+        local collectibleCategoryTypesInCategory = categoryData:GetCollectibleCategoryTypesInCategory()
+        if collectibleCategoryTypesInCategory[COLLECTIBLE_CATEGORY_TYPE_MOUNT] then
+            local setRandomFavoriteMountData = ZO_RandomMountCollectibleData:New(RANDOM_MOUNT_TYPE_FAVORITE)
+            local randomFavoriteMountEntryData = self:BuildCollectibleCategorySetRandomSelectionData(setRandomFavoriteMountData)
+            ZO_UpdateCollectibleEntryDataIconVisuals(randomFavoriteMountEntryData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+            collectionList:AddEntry("ZO_GamepadCollectibleEntryTemplate", randomFavoriteMountEntryData)
+
+            local setRandomMountData = ZO_RandomMountCollectibleData:New(RANDOM_MOUNT_TYPE_ANY)
+            local randomMountEntryData = self:BuildCollectibleCategorySetRandomSelectionData(setRandomMountData)
+            ZO_UpdateCollectibleEntryDataIconVisuals(randomMountEntryData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+            collectionList:AddEntry("ZO_GamepadCollectibleEntryTemplate", randomMountEntryData)
+        end
+    end
+
+    self:BuildListFromTable(collectionList, favoriteData, GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
     self:BuildListFromTable(collectionList, unlockedData, GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED))
     self:BuildListFromTable(collectionList, lockedData, GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_LOCKED))
 
@@ -990,17 +1053,28 @@ function ZO_GamepadCollectionsBook:BuildCollectionList(categoryData, resetSelect
     KEYBIND_STRIP:UpdateKeybindButtonGroup(collectionListInfo.keybind)
 
     self.currentCategoryData = categoryData
-
-    self.updateList = unlockedData
 end
 
 function ZO_GamepadCollectionsBook:UpdateCollectionListVisualLayer()
     local list = self.collectionList.list
     for i = 1, list:GetNumItems() do
-        local collectibleData = list:GetDataForDataIndex(i)
-        collectibleData:SetIsHiddenByWardrobe(collectibleData:IsVisualLayerHidden(GAMEPLAY_ACTOR_CATEGORY_PLAYER))
+        local entryData = list:GetDataForDataIndex(i)
+
+        if entryData.IsVisualLayerHidden then
+            entryData:SetIsHiddenByWardrobe(entryData:IsVisualLayerHidden(GAMEPLAY_ACTOR_CATEGORY_PLAYER))
+        end
     end
+
     self:RefreshRightPanel(self.collectionList.list:GetTargetData())
+end
+
+function ZO_GamepadCollectionsBook:BuildCollectibleCategorySetRandomSelectionData(collectibleData)
+    local entryData = ZO_GamepadEntryData:New(collectibleData:GetName(), collectibleData:GetIcon())
+    entryData:SetDataSource(collectibleData)
+    entryData.actorCategory = GAMEPLAY_ACTOR_CATEGORY_PLAYER
+    entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+
+    return entryData
 end
 
 function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
@@ -1113,12 +1187,12 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
         entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
         entryData.narrationText = GetHouseNarrationText
     else
-        entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+        entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) and not collectibleData:ShouldSuppressActiveState(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     end
 
     entryData:SetIsHiddenByWardrobe(collectibleData:IsVisualLayerHidden(GAMEPLAY_ACTOR_CATEGORY_PLAYER))
 
-    ZO_UpdateCollectibleEntryDataIconVisuals(entryData)
+    ZO_UpdateCollectibleEntryDataIconVisuals(entryData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
 
     local remainingMs, durationMs = GetCollectibleCooldownAndDuration(collectibleId)
     if remainingMs > 0 and durationMs > 0 then
@@ -1182,7 +1256,9 @@ end
 function ZO_GamepadCollectionsBook:RefreshRightPanel(entryData)
     if self:IsViewingCollectionsList() then
         if entryData then
-            if entryData:IsStory() then
+            if entryData.dataSource:IsInstanceOf(ZO_RandomMountCollectibleData) then
+                self:RefreshRandomMountTooltip(entryData)
+            elseif entryData:IsStory() then
                 self:RefreshDLCTooltip(entryData)
             elseif entryData:IsHouse() then
                 self:RefreshHousingTooltip(entryData)
@@ -1292,6 +1368,13 @@ function ZO_GamepadCollectionsBook:RefreshHousingTooltip(collectibleData)
     SCENE_MANAGER:AddFragment(GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT)
 end
 
+function ZO_GamepadCollectionsBook:RefreshRandomMountTooltip(collectibleData)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP, true)
+
+    GAMEPAD_TOOLTIPS:LayoutImitationCollectibleFromData(GAMEPAD_LEFT_TOOLTIP, collectibleData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+end
+
+
 function ZO_GamepadCollectionsBook:UpdateGridPanelVisibility(categoryData)
     if categoryData and categoryData:IsOutfitStylesCategory() and categoryData:GetNumCollectibles() > 0 then
         self:RefreshGridListPanel(categoryData)
@@ -1363,6 +1446,8 @@ function ZO_GamepadCollectionsBook:TogglePreviewSelectedOutfitStyle()
             ApplyChangesToPreviewCollectionShown()
         end
         self.gridListPanelList:RefreshGridList()
+        --Re-narrate when the preview state is toggled
+        SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.gridListPanelList)
     end
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.gridKeybindStripDescriptor)
@@ -1439,7 +1524,7 @@ function ZO_GamepadCollectionsBook:RefreshGridListPanel(categoryData)
 
     local function InsertEntryIntoTable(tempTable, data)
         local entryData = ZO_GridSquareEntryData_Shared:New(data)
-        ZO_UpdateCollectibleEntryDataIconVisuals(entryData)
+        ZO_UpdateCollectibleEntryDataIconVisuals(entryData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
         table.insert(tempTable, entryData)
     end
 
@@ -1484,7 +1569,7 @@ end
 function ZO_GamepadCollectionsBook:CanPurchaseCurrentTarget()
     if self:IsViewingCollectionsList() then
         local collectibleData = self:GetCurrentTargetData()
-        return collectibleData and collectibleData:IsPurchasable() and not collectibleData:IsOwned() and not collectibleData:IsHouse()
+        return collectibleData and collectibleData:IsPurchasable() and collectibleData:CanAcquire() and not collectibleData:IsHouse()
     end
     return false
 end
@@ -1502,7 +1587,6 @@ end
 -----------------
 
 function ZO_GamepadCollectionsBook:InitializeActionsDialog()
-    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
     ZO_Dialogs_RegisterCustomDialog(GAMEPAD_COLLECTIONS_ACTIONS_DIALOG_NAME,
     {
         gamepadInfo = 
@@ -1576,7 +1660,14 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     text = GetString(SI_COLLECTIBLE_ACTION_RENAME),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
-                       ZO_Dialogs_ShowGamepadDialog(GAMEPAD_COLLECTIONS_RENAME_COLLECTIBLE_DIALOG_NAME, { collectibleId = dialog.data:GetId(), name = dialog.data:GetNickname() })
+                       local nickname = dialog.data:GetNickname()
+                       local defaultNickname = dialog.data:GetDefaultNickname()
+                       --Only pre-fill the edit text if it's different from the default nickname
+                       local initialEditText = ""
+                       if nickname ~= defaultNickname then
+                           initialEditText = nickname
+                       end
+                       ZO_Dialogs_ShowGamepadDialog(GAMEPAD_COLLECTIONS_RENAME_COLLECTIBLE_DIALOG_NAME, { collectibleId = dialog.data:GetId(), name = initialEditText, defaultName = defaultNickname })
                     end,
                     visible = function(dialog)
                         return dialog.data:IsRenameable()
@@ -1612,13 +1703,43 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     end
                 },
             },
+            -- Add/Remove Favorite
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                text = function(dialog)
+                    return dialog.data:IsFavorite() and GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) or GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE)
+                end,
+                templateData = {
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        SetOrClearCollectibleUserFlag(dialog.data:GetId(), COLLECTIBLE_USER_FLAG_FAVORITE, not dialog.data:IsFavorite())
+                    end,
+                    visible = function(dialog)
+                        return dialog.data:IsFavoritable()
+                    end
+                },
+            },
+            -- Set as Primary Residence
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                text = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_BUTTON_TEXT),
+                templateData = {
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        COLLECTIONS_BOOK_SINGLETON:SetPrimaryResidence(dialog.data:GetReferenceId())
+                    end,
+                    visible = function(dialog)
+                        return dialog.data:IsHouse() and not dialog.data:IsPrimaryResidence()
+                    end
+                },
+            },
         },
         buttons =
         {
             {
                 keybind = "DIALOG_PRIMARY",
                 text = SI_OK,
-                callback =  function(dialog)
+                callback = function(dialog)
                     local data = dialog.entryList:GetTargetData()
                     data.callback(dialog)
                 end,
@@ -1718,6 +1839,7 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
 
                         if parametricDialog.data then
                             control.editBoxControl:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, parametricDialog.data.name))
+                            control.editBoxControl:SetDefaultText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, parametricDialog.data.defaultName))
                         end
                     end, 
                     narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
@@ -1732,7 +1854,7 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
             {
                 keybind = "DIALOG_PRIMARY",
                 text = SI_GAMEPAD_SELECT_OPTION,
-                callback =  function(dialog)
+                callback = function(dialog)
                     local data = dialog.entryList:GetTargetData()
                     SetActiveEdit(data.control.editBoxControl)
                 end,
@@ -1740,7 +1862,7 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
             {
                 keybind = "DIALOG_SECONDARY",
                 text = SI_GAMEPAD_COLLECTIONS_SAVE_NAME_OPTION,
-                callback =  function(dialog)
+                callback = function(dialog)
                                 local collectibleId = dialog.data.collectibleId
                                 RenameCollectible(collectibleId, inputText)
                                 ReleaseDialog()
@@ -1750,11 +1872,19 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
                 end,
                 clickSound = SOUNDS.DIALOG_ACCEPT,
             },
+            {
+                keybind = "DIALOG_TERTIARY",
+                text = SI_COLLECTIONS_INVENTORY_DIALOG_DEFAULT_NAME,
+                callback = function(dialog)
+                    local data = dialog.entryList:GetTargetData()
+                    data.control.editBoxControl:SetText("")
+                end,
+            },
 
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_DIALOG_CANCEL,
-                callback =  function(dialog)
+                callback = function(dialog)
                     ReleaseDialog()
                 end,
             },

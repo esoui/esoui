@@ -802,6 +802,8 @@ do
                         if entryDataText ~= nil then
                             if type(entryDataText) == "number" then
                                 entryDataText = GetString(entryDataText)
+                            elseif type(entryDataText) == "function" then
+                                entryDataText = entryDataText(dialog)
                             end
                         else -- default entry text
                             entryDataText = "EntryItem" .. tostring(i)

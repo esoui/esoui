@@ -1482,7 +1482,7 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
         callbackManager = ZO_COLLECTIBLE_DATA_MANAGER,
         callbackRegistration = "OnCollectionUpdated",
         callbackFunction = function(collectionUpdateType, collectiblesByUnlockState)
-            if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGES then
+            if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGED then
                 local nowOwnedCollectibles = collectiblesByUnlockState[COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED]
                 if nowOwnedCollectibles then
                     if #nowOwnedCollectibles > MAX_INDIVIDUAL_COLLECTIBLE_UPDATES then

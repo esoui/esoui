@@ -155,6 +155,27 @@ function ZO_GamepadTradingHouse:AddSearch(textSearchKeybindStripDescriptor, onTe
     self:SetupHeaderFocus(self.textSearchHeaderFocus)
 
     ZO_GamepadGenericHeader_SetHeaderFocusControl(self.header, self.textSearchHeaderControl)
+
+    --Register the text search header for narration
+    local textSearchHeaderNarrationInfo =
+    {
+        headerNarrationFunction = function()
+            return self:GetHeaderNarration()
+        end,
+        resultsNarrationFunction = function()
+            local narrations = {}
+            local listObject = self.currentListObject
+            if listObject then
+                local list = listObject.itemList:GetParametricList()
+                --If the item list is empty, narrate the empty text as part of the results
+                if list:IsEmpty() then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(list:GetNoItemText()))
+                end
+            end
+            return narrations
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterTextSearchHeader(self.textSearchHeaderFocus, textSearchHeaderNarrationInfo)
 end
 
 function ZO_GamepadTradingHouse:IsTextSearchEntryHidden()
@@ -513,6 +534,7 @@ function ZO_GamepadTradingHouse:InitializeEvents()
             self:RegisterForSceneEvents()
             if self:IsInSellMode() then
                 DIRECTIONAL_INPUT:Activate(self, self.control)
+                self:ActivateTextSearch()
             end
             self.currentListObject:Show()
             ZO_GamepadGenericHeader_Activate(self.header)
@@ -527,6 +549,7 @@ function ZO_GamepadTradingHouse:InitializeEvents()
             self:UnregisterForSceneEvents()
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
             self.currentListObject:Hide()
+            ZO_SavePlayerConsoleProfile()
         end
     end)
 

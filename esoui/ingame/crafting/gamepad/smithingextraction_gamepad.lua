@@ -165,6 +165,10 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
         if SCENE_MANAGER:IsShowing("gamepad_smithing_refine") or SCENE_MANAGER:IsShowing("gamepad_smithing_deconstruct") then
             self:RefreshTooltip()
             ZO_GamepadGenericHeader_Activate(self.owner.header)
+            --Only re-narrate for the currently showing scene
+            if scene:IsShowing() then
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.inventory.list)
+            end
         end
     end)
 end
@@ -208,15 +212,16 @@ function ZO_GamepadSmithingExtraction:InitializeInventory(isRefinementOnly, scen
             data.hasCraftingQuestPin = self:CanRefineToQuestItem(bagId, slotIndex)
             --If there is an override status indicator icon, we need to explicitly add the quest pin here
             if data.overrideStatusIndicatorIcons and data.hasCraftingQuestPin then
-                data.overrideStatusIndicatorIcons =  { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE, ZO_TRACKED_PIN_STATUS_ICON_OVERRIDE }
+                data.overrideStatusIndicatorIcons = { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE, ZO_TRACKED_PIN_STATUS_ICON_OVERRIDE }
             end
         else
+            ZO_GamepadCraftingUtils_AddOverridesEntryData(data)
             data.hasCraftingQuestPin = false
         end
     end
     )
 
-    local narrationInfo = 
+    local narrationInfo =
     {
         canNarrate = function()
             return scene:IsShowing()
@@ -249,9 +254,10 @@ function ZO_GamepadSmithingExtraction:UpdateSelection()
             data.hasCraftingQuestPin = self:CanRefineToQuestItem(data.bagId, data.slotIndex)
             --If there is an override status indicator icon, we need to explicitly add the quest pin here
             if data.overrideStatusIndicatorIcons and data.hasCraftingQuestPin then
-                data.overrideStatusIndicatorIcons =  { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE, ZO_TRACKED_PIN_STATUS_ICON_OVERRIDE }
+                data.overrideStatusIndicatorIcons = { ZO_IS_SLOTTED_STATUS_ICON_OVERRIDE, ZO_TRACKED_PIN_STATUS_ICON_OVERRIDE }
             end
         else
+            ZO_GamepadCraftingUtils_AddOverridesEntryData(data)
             data.hasCraftingQuestPin = false
         end
     end
@@ -482,6 +488,7 @@ function ZO_GamepadSmithingExtraction:SaveFilters()
     if filterChanged then
         self.savedVars.includeBankedItemsChecked = g_filters[GAMEPAD_SMITHING_EXTRACTION_FILTER_INCLUDE_BANKED].checked
         self.inventory:PerformFullRefresh()
+        ZO_SavePlayerConsoleProfile()
     end
 end
 
@@ -546,7 +553,7 @@ function ZO_GamepadExtractionInventory:Refresh(data)
     end
     self.owner:OnInventoryUpdate(validItems, self.filterType)
 
-    -- if we don't have any items to show, make sure out NoItemLabel is updated
+    -- if we don't have any items to show, make sure our NoItemLabel is updated
     if #data == 0 then
         self:SetNoItemLabelText(GetString("SI_SMITHINGFILTERTYPE_EXTRACTNONE", self.filterType))
     end
