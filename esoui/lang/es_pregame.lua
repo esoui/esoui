@@ -5220,7 +5220,7 @@ SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE7, "Destruyes y eliminas de la
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE8, "Adquieres hasta |cffffff<<X:1>>|r <<1[carta/cartas]>> de la Taberna con un coste de hasta |cffffff<<2>>|r<<1[/cada una]>>.", 1)
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE9, "Obtienes |cffffff<<X:1>>|r <<1[interacción adicional/interacciones adicionales]>> con benefactores para este turno.", 1)
 SafeAddString(SI_TRIBUTEMECHANIC_TARGETING1, "Sustituyes hasta |cffffff<<X:1>>|r <<1[carta/cartas]>>.", 2)
-SafeAddString(SI_TRIBUTEMECHANIC_TARGETING10, "Recuperas hasta |cffffff<<X:1>>|r <<1[carta/cartas]>> al <<z:2>>.", 4)
+SafeAddString(SI_TRIBUTEMECHANIC_TARGETING10, "Recuperas hasta |cffffff<<X:1>>|r <<1[carta/cartas]>> a tu <<z:2>>.", 4)
 SafeAddString(SI_TRIBUTEMECHANIC_TARGETING12, "Desechar: Mueves hasta |cffffff<<X:1>>|r <<1[carta/cartas]>> al montón de reutilización<<1[/ (en orden descendente)]>>.", 5)
 SafeAddString(SI_TRIBUTEMECHANIC_TARGETING14, "Confinas hasta |cffffff<<X:1>>|r <<1[carta/cartas]>>.", 1)
 SafeAddString(SI_TRIBUTEMECHANIC_TARGETING15, "Donas hasta |cffffff<<X:1>>|r <<1[carta/cartas]>>.", 0)

@@ -231,8 +231,8 @@ end
 function ZO_IngameSceneManager:SafelyAttemptToExitUIMode()
     if IsGameCameraActive() and IsPlayerActivated() then
         if not self.manuallyEnteredHUDUIMode then
-            local mousedOverControl = WINDOW_MANAGER:GetMouseOverControl()
-            if not mousedOverControl or mousedOverControl == GuiRoot then
+            local focusedControl = WINDOW_MANAGER:GetMouseFocusControl() or WINDOW_MANAGER:GetMouseOverControl()
+            if focusedControl == GuiRoot then
                 if self:IsInUIMode() and IsSafeForSystemToCaptureMouseCursor() then
                     self:ConsiderExitingUIMode(self:IsShowingBaseScene())
                 end
