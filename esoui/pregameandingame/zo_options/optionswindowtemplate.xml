@@ -127,6 +127,16 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_Options_Video_Checkbox_IncludeApplyScreenWarning" inherits="ZO_Options_Checkbox_DynamicWarning" virtual="true">
+            <Controls>
+                <Texture name="$(parent)WarningIcon" override="true">
+                    <OnInitialized>
+                        self.data = { tooltipText = SI_OPTIONS_APPLY_WARNING }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+
         <Control name="ZO_Options_Dropdown" mouseEnabled="true" hidden="true" virtual="true">
             <Dimensions x="510" y="26" />
             <OnMouseEnter>

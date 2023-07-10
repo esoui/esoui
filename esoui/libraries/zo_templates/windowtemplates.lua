@@ -91,10 +91,30 @@ function ZO_PlayColorSparkleAnimation(slotControl, color)
     animData.sparkle:SetHidden(false)
 end
 
+do
+    local ABBREVIATION_THRESHOLD = 1000
+    local MAX_DISPLAYED_COUNT = 9000
+    function ZO_AbbreviateAndLocalizeRadialMenuEntryCount(amount, useUppercaseSuffixes)
+        if amount < ABBREVIATION_THRESHOLD then
+            return amount
+        end
+
+        if amount > MAX_DISPLAYED_COUNT then
+            local thousandsSuffixStringId = useUppercaseSuffixes and SI_NUMBER_SUFFIX_ONE_THOUSAND_UPPERCASE or SI_NUMBER_SUFFIX_ONE_THOUSAND_LOWERCASE
+            return string.format("9%s+", GetString(thousandsSuffixStringId))
+        end
+
+        return ZO_AbbreviateAndLocalizeNumber(amount, NUMBER_ABBREVIATION_PRECISION_TENTHS, useUppercaseSuffixes)
+    end
+end
+
 function ZO_SetupSelectableItemRadialMenuEntryTemplate(template, selected, itemCount)
     if itemCount then
         template.count:SetHidden(false)
-        template.count:SetText(itemCount)
+
+        local USE_LOWERCASE_NUMBER_SUFFIXES = false
+        local abbreviatedItemCount = ZO_AbbreviateAndLocalizeRadialMenuEntryCount(itemCount, USE_LOWERCASE_NUMBER_SUFFIXES)
+        template.count:SetText(abbreviatedItemCount)
 
         if itemCount == 0 then
             template.icon:SetDesaturation(1)

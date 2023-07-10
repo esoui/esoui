@@ -194,6 +194,8 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                         self:SetNavigationMode(navigationMode)
                     else
                         ZO_ACTIVITY_FINDER_ROOT_MANAGER:ToggleLocationSelected(entryData)
+                        --Re-narrate when toggling selection
+                        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
                     end
                 end
             end,
@@ -333,6 +335,8 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                 else
                     ZO_ACTIVITY_FINDER_ROOT_MANAGER:StartSearch()
                     PlaySound(SOUNDS.DIALOG_ACCEPT)
+                    --Re-narrate when joining a queue
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
                 end
             end,
 
@@ -408,16 +412,16 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
 
     local function AddLocationEntry(location)
         local name = location:GetNameGamepad()
-        local entryData = ZO_GamepadEntryData:New(name, self.categoryData.menuIcon)
-        entryData.data = location
-        entryData.data:SetLockReasonTextOverride(lockReasonTextOverride)
-        entryData:SetEnabled(not location:IsLocked() and not isSearching)
-        entryData:SetSelected(location:IsSelected())
+        local locationEntryData = ZO_GamepadEntryData:New(name, self.categoryData.menuIcon)
+        locationEntryData.data = location
+        locationEntryData.data:SetLockReasonTextOverride(lockReasonTextOverride)
+        locationEntryData:SetEnabled(not location:IsLocked() and not isSearching)
+        locationEntryData:SetSelected(location:IsSelected())
 
-        entryData.narrationText = function()
+        locationEntryData.narrationText = function(entryData, entryControl)
             local narrations = {}
 
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text))
+            ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(name))
 
             -- Group size indicator
@@ -470,7 +474,7 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
                 local rewardUIDataId, xpReward = location:GetRewardData()
 
                 if rewardUIDataId ~= 0 then
-                    numShownRewards = GetNumLFGActivityRewardUINodes(rewardUIDataId)
+                    local numShownRewards = GetNumLFGActivityRewardUINodes(rewardUIDataId)
                     for rewardIndex = 1, numShownRewards do
                         local displayName = GetLFGActivityRewardUINodeInfo(rewardUIDataId, rewardIndex)
                         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ACTIVITY_FINDER_REWARD_NAME_FORMAT, displayName)))
@@ -510,7 +514,7 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
             return narrations
         end
 
-        self.entryList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
+        self.entryList:AddEntry("ZO_GamepadItemSubEntryTemplate", locationEntryData)
     end
 
     if self.navigationMode == NAVIGATION_MODES.RANDOM_ENTRIES then

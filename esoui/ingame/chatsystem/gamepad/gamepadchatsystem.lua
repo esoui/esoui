@@ -100,8 +100,8 @@ do
         [CHAT_CATEGORY_ZONE_CHINESE_S] = true,
     }
 
-    function GamepadChatContainer:AddEventMessageToWindow(window, message, category, narrationMessage)
-        SharedChatContainer.AddEventMessageToWindow(self, window, message, category, narrationMessage)
+    function GamepadChatContainer:AddEventMessageToWindow(window, message, category, narrationMessage, overrideColorDef)
+        SharedChatContainer.AddEventMessageToWindow(self, window, message, category, narrationMessage, overrideColorDef)
         self.windowContainer:SetHidden(false)
         self.system:StartVisibilityTimer()
         --Determine if this message will be visible in the chat
@@ -405,12 +405,12 @@ do
         [CHAT_CATEGORY_MONSTER_WHISPER] = true,
     }
 
-    function ZO_GamepadChatSystem:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
+    function ZO_GamepadChatSystem:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage, overrideColorDef)
         if FILTERED_OUT_CATEGORIES[category] then
             return
         end
 
-        SharedChatSystem.OnFormattedChatMessage(self, message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
+        SharedChatSystem.OnFormattedChatMessage(self, message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage, overrideColorDef)
 
         if not self.isMinimized then
             self:Maximize()

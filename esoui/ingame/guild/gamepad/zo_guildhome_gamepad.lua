@@ -1,21 +1,14 @@
-GAMEPAD_GUILD_HOME_SCENE_NAME = "gamepad_guild_home"
-
 ZO_GamepadGuildHome = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ZO_GamepadGuildHome:Initialize(control)
-    GAMEPAD_GUILD_HOME_SCENE = ZO_Scene:New(GAMEPAD_GUILD_HOME_SCENE_NAME, SCENE_MANAGER)
+    GAMEPAD_GUILD_HOME_SCENE = ZO_Scene:New("gamepad_guild_home", SCENE_MANAGER)
     local DONT_ACTIVATE_ON_SHOW = false
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, DONT_ACTIVATE_ON_SHOW, GAMEPAD_GUILD_HOME_SCENE)
 
     self.headerData = {}
 end
 
-function ZO_GamepadGuildHome:PerformDeferredInitializationHome()
-    if self.deferredInitialized then 
-        return
-    end
-    self.deferredInitialized = true
-
+function ZO_GamepadGuildHome:OnDeferredInitialize()
     self.itemList = self:GetMainList()
     self.optionsList = self:AddList("Options")
 
@@ -23,32 +16,38 @@ function ZO_GamepadGuildHome:PerformDeferredInitializationHome()
     self:InitializeFooter()
 end
 
-function ZO_GamepadGuildHome:OnStateChanged(oldState, newState)
-    if newState == SCENE_SHOWING then
-        self:PerformDeferredInitializationHome()
-        self:PerformUpdate()
-        if self.activeScreenCallback then
-            self.activeScreenCallback()
-        end
-        ZO_GamepadGenericHeader_Activate(self.header)
-            
-        self.control:RegisterForEvent(EVENT_GUILD_DATA_LOADED, function() self:Update() end)
-        self.control:RegisterForEvent(EVENT_GUILD_MEMBER_REMOVED, function(_, guildId, displayName) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
-        self.control:RegisterForEvent(EVENT_GUILD_MEMBER_ADDED, function(_, guildId, displayName) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
-        self.control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, function(_, guildId, displayName, rankIndex) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
-        self.control:RegisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, guildId, displayName, oldStatus, newStatus) if(self:IsCurrentGuildId(guildId)) then self:Update() end end)
-    elseif newState == SCENE_HIDDEN then
-        ZO_GamepadGenericHeader_Deactivate(self.header)
+function ZO_GamepadGuildHome:OnShowing()
+    ZO_Gamepad_ParametricList_Screen.OnShowing(self)
 
-        self:RemoveCurrentPage()
-            
-        self.control:UnregisterForEvent(EVENT_GUILD_DATA_LOADED)
-        self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_REMOVED)
-        self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_ADDED)
-        self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED)
-        self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED)
+    if self.activeScreenCallback then
+        self.activeScreenCallback()
     end
-    ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
+    ZO_GamepadGenericHeader_Activate(self.header)
+
+    local function UpdateIfGuildMatches(_, guildId)
+        if self:IsCurrentGuildId(guildId) then
+            self:Update()
+        end
+    end
+    self.control:RegisterForEvent(EVENT_GUILD_DATA_LOADED, function() self:Update() end)
+    self.control:RegisterForEvent(EVENT_GUILD_MEMBER_REMOVED, UpdateIfGuildMatches)
+    self.control:RegisterForEvent(EVENT_GUILD_MEMBER_ADDED, UpdateIfGuildMatches)
+    self.control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, UpdateIfGuildMatches)
+    self.control:RegisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, UpdateIfGuildMatches)
+end
+
+function ZO_GamepadGuildHome:OnHide()
+    ZO_Gamepad_ParametricList_Screen.OnHide(self)
+
+    ZO_GamepadGenericHeader_Deactivate(self.header)
+
+    self:RemoveCurrentPage()
+            
+    self.control:UnregisterForEvent(EVENT_GUILD_DATA_LOADED)
+    self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_REMOVED)
+    self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_ADDED)
+    self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED)
+    self.control:UnregisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED)
 end
 
 function ZO_GamepadGuildHome:PerformUpdate()
@@ -71,9 +70,9 @@ function ZO_GamepadGuildHome:IsCurrentGuildId(guildId)
 end
 
 function ZO_GamepadGuildHome:ValidateGuildId()
-    if(not ZO_ValidatePlayerGuildId(self.guildId)) then
+    if not ZO_ValidatePlayerGuildId(self.guildId) then
         self.guildId = nil
-        SCENE_MANAGER:Hide(GAMEPAD_GUILD_HOME_SCENE_NAME)
+        SCENE_MANAGER:Hide("gamepad_guild_home")
     end
 end
 
@@ -102,7 +101,7 @@ function ZO_GamepadGuildHome:RefreshHeader(blockTabBarCallbacks)
     contentHeaderData.data1HeaderText = nil
     contentHeaderData.data1Text = nil
     contentHeaderData.data1TextNarration = nil
-    if(self.currentFragment == GUILD_HERALDRY_GAMEPAD_FRAGMENT) then
+    if self.currentFragment == GUILD_HERALDRY_GAMEPAD_FRAGMENT then
         contentHeaderData.data1HeaderText, contentHeaderData.data1Text, contentHeaderData.data1TextNarration = GUILD_HERALDRY_GAMEPAD:GetPurchaseCost()
     end
 
@@ -135,7 +134,8 @@ function ZO_GamepadGuildHome:RefreshHeader(blockTabBarCallbacks)
 end
 
 function ZO_GamepadGuildHome:InitializeFooter()
-    self.footerData = {
+    self.footerData =
+    {
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_HEADER_MEMBERS_ONLINE_LABEL),
     }
 end
@@ -160,7 +160,7 @@ end
 ----------
 
 function ZO_GamepadGuildHome:OnTargetChanged(list, selectedData, oldSelectedData)
-    if(self.currentScreenObject ~= nil and self.currentScreenObject.OnTargetChanged ~= nil) then
+    if self.currentScreenObject ~= nil and self.currentScreenObject.OnTargetChanged ~= nil then
         self.currentScreenObject:OnTargetChanged(list, selectedData, oldSelectedData)
     end
 end
@@ -170,9 +170,10 @@ end
 -----------
 
 function ZO_GamepadGuildHome:RemoveCurrentPage()
-    if(self.currentFragment ~= nil) then
+    if self.currentFragment ~= nil then
         GAMEPAD_GUILD_HOME_SCENE:RemoveFragment(self.currentFragment)
         self.currentFragment = nil
+        self.currentScreenObject = nil
     end
 end
 
@@ -182,18 +183,18 @@ function ZO_GamepadGuildHome:SetCurrentPage(fragment, screenObject, activateCurr
         self.currentFragment = fragment
         self.currentScreenObject = screenObject
     
-        if(fragment ~= nil and screenObject ~= nil) then
+        if fragment ~= nil and screenObject ~= nil then
             screenObject:SetGuildId(self.guildId)
 
-            if(screenObject.SetMainList ~= nil) then
+            if screenObject.SetMainList ~= nil then
                 screenObject:SetMainList(self.itemList)
             end
 
-            if(screenObject.SetOptionsList ~= nil) then
+            if screenObject.SetOptionsList ~= nil then
                 screenObject:SetOptionsList(self.optionsList)
             end
 
-            if(screenObject.SetOwningScreen ~= nil) then
+            if screenObject.SetOwningScreen ~= nil then
                 screenObject:SetOwningScreen(self)
             end
 

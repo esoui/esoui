@@ -475,12 +475,14 @@ function ZO_SharedFurnitureManager:OnSingleSlotInventoryUpdate(bagId, slotIndex,
             local bag = self.placeableFurniture[ZO_PLACEABLE_TYPE_ITEM][bagId]
             if bag then
                 local itemToRemove = bag[slotIndex]
-                if self:CanAddFurnitureDataToRefresh(self.placeableFurnitureCategoryTreeData, itemToRemove) then
-                    self.refreshGroups:RefreshSingle("UpdatePlacementFurniture", { target = itemToRemove, command = FURNITURE_COMMAND_REMOVE })
+                if itemToRemove then
+                    if self:CanAddFurnitureDataToRefresh(self.placeableFurnitureCategoryTreeData, itemToRemove) then
+                        self.refreshGroups:RefreshSingle("UpdatePlacementFurniture", { target = itemToRemove, command = FURNITURE_COMMAND_REMOVE })
+                    end
+                    bag[slotIndex] = nil
+                    --No need to run the text filter since this is just a remove. We can notify others immediately.
+                    self:FireCallbacks("PlaceableFurnitureChanged")
                 end
-                bag[slotIndex] = nil
-                --No need to run the text filter since this is just a remove. We can notify others immediately.
-                self:FireCallbacks("PlaceableFurnitureChanged")
             end
         end
     end
@@ -568,9 +570,13 @@ do
     end
 
     function ZO_SharedFurnitureManager:RemoveFurnitureFromCategory(categoryTreeData, furniture)
+        if not furniture then
+            return
+        end
+
         local isPathableFurnitureCategory = categoryTreeData == self.pathableFurnitureCategoryTreeData
         if isPathableFurnitureCategory and not furniture:IsPathable() then
-            -- this furniture could not have been added to the pathableFurnitureCategory, so no point trying to remove
+            -- Non-pathable furniture could not have been added to the pathable category.
             return
         end
 
@@ -1082,12 +1088,16 @@ end
 
 function ZO_SharedFurnitureManager:SetMarketProductTextFilter(text)
     if text ~= self.marketProductTextFilter then
-        self.marketProductTextFilter = text    
+        self.marketProductTextFilter = text
         self:RequestApplyMarketProductTextFilterToData()    
     end
 end
 
 function ZO_SharedFurnitureManager:CanAddFurnitureDataToRefresh(categoryTree, furnitureData)
+    if not furnitureData then
+        return
+    end
+
     local canAddToRefresh = true
     local categoryId, subcategoryId = furnitureData:GetCategoryInfo()
     if categoryId and categoryId > 0 then

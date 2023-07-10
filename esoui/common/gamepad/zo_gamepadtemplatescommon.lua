@@ -427,7 +427,12 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(TRACKED_ANTIQUITY_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_TRACKED_ICON_NARRATION))
         end
 
-        if data.hasCraftingQuestPin then
+        local hasCraftingQuestPin = data.hasCraftingQuestPin
+        if type(hasCraftingQuestPin) == "function" then
+            hasCraftingQuestPin = hasCraftingQuestPin()
+        end
+
+        if hasCraftingQuestPin then
             statusIndicator:AddIcon(CRAFTING_QUEST_PIN_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_CRAFTING_QUEST_PIN_ICON_NARRATION))
         elseif data.hasCraftingQuestPinDisabled then
             statusIndicator:AddIcon(CRAFTING_QUEST_DISABLED_PIN_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_DISABLED_CRAFTING_QUEST_PIN_ICON_NARRATION))

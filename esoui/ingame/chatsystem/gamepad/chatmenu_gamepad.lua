@@ -218,14 +218,19 @@ end
 function ZO_ChatMenu_Gamepad:SetupLogMessage(control, data, selected, reselectingDuringRebuild, enabled, active)
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     local entryData = data.data
-    local r, g, b = GetChatCategoryColor(entryData.category)
+    local r, g, b
+    if entryData.overrideColorDef then
+        r, g, b = entryData.overrideColorDef:UnpackRGB()
+    else
+        r, g, b = GetChatCategoryColor(entryData.category)
+    end
     local useSelectedColor = selected and self.chatEntryPanelFocalArea:IsFocused()
     local colorSelectedModifier = useSelectedColor and 1 or ZO_CHAT_MENU_GAMEPAD_COLOR_MODIFIER
     control.label:SetColor(r * colorSelectedModifier, g * colorSelectedModifier, b * colorSelectedModifier, 1)
     control.label:SetDesaturation(useSelectedColor and 0 or ZO_CHAT_MENU_GAMEPAD_DESATURATION_MODIFIER)
 end
 
-function ZO_ChatMenu_Gamepad:AddMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
+function ZO_ChatMenu_Gamepad:AddMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage, overrideColorDef)
     if message ~= nil then
         local targetIndex = self.list:GetTargetIndex()
         local selectingMostRecent = targetIndex == #self.messageEntries
@@ -249,6 +254,7 @@ function ZO_ChatMenu_Gamepad:AddMessage(message, category, targetChannel, fromDi
             rawMessageText = rawMessageText,
             links = links,
             narrationMessage = narrationMessage,
+            overrideColorDef = overrideColorDef,
         }
 
         self.nextMessageId = self.nextMessageId + 1

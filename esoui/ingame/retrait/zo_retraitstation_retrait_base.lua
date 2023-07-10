@@ -43,11 +43,28 @@ function ZO_RetraitStation_Retrait_Base:ShowRetraitDialog(bagId, slotIndex, sele
     local itemDisplayQualityColor = GetItemQualityColor(itemDisplayQuality)
     local itemName = itemDisplayQualityColor:Colorize(GetItemName(bagId, slotIndex))
     local traitName = ZO_SELECTED_TEXT:Colorize(GetString("SI_ITEMTRAITTYPE", selectedTrait))
-    local retraitCost, retraitCurrency, retraitCurrencyLocation = GetItemRetraitCost()
+    local retraitCost, retraitCurrency = GetItemRetraitCost()
     local formattedRetraitCost = ZO_Currency_FormatPlatform(retraitCurrency, retraitCost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON)
+    local formattedRetraitCostNarration = ZO_Currency_FormatPlatform(retraitCurrency, retraitCost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+
+    local mainTextParams =
+    {
+        itemName,
+        traitName,
+        formattedRetraitCost,
+        GetString(SI_PERFORM_ACTION_CONFIRMATION)
+    }
+
+    local mainTextNarrationParams =
+    {
+        itemName,
+        traitName,
+        formattedRetraitCostNarration,
+        GetString(SI_PERFORM_ACTION_CONFIRMATION)
+    }
 
     local function ShowRetraitDialog()
-        ZO_Dialogs_ShowPlatformDialog(dialogName, { bagId = bagId, slotIndex = slotIndex, trait = selectedTrait, }, { mainTextParams = { itemName, traitName, formattedRetraitCost, GetString(SI_PERFORM_ACTION_CONFIRMATION) } })
+        ZO_Dialogs_ShowPlatformDialog(dialogName, { bagId = bagId, slotIndex = slotIndex, trait = selectedTrait, }, { mainTextParams = mainTextParams, mainTextNarrationParams = mainTextNarrationParams })
     end
 
     if IsItemBoPAndTradeable(bagId, slotIndex) then
@@ -58,7 +75,7 @@ function ZO_RetraitStation_Retrait_Base:ShowRetraitDialog(bagId, slotIndex, sele
 end
 
 function ZO_RetraitStation_Retrait_Base:UpdateRequireResearchTooltipString(bagId, slotIndex)
-    local tradeskillType, researchLineName = GetRearchLineInfoFromRetraitItem(bagId, slotIndex)
+    local tradeskillType = GetRearchLineInfoFromRetraitItem(bagId, slotIndex)
     local tradeskillName = GetCraftingSkillName(tradeskillType)
     self.requiredResearchTooltipString = zo_strformat(SI_RETRAIT_STATION_MUST_RESEARCH_TRAIT, tradeskillName)
 end

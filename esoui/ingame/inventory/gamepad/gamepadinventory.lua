@@ -1635,7 +1635,7 @@ function ZO_GamepadInventory:ShowQuickslot()
             end
 
             if useAccessibleWheel then
-                ACCESSIBLE_ASSIGNABLE_UTILITY_WHEEL_GAMEPAD:SetPendingSimpleAction(QUICKSLOT_ASSIGNMENT_TYPE_QUEST_ITEM, questItemId)
+                ACCESSIBLE_ASSIGNABLE_UTILITY_WHEEL_GAMEPAD:SetPendingSimpleAction(ACTION_TYPE_QUEST_ITEM, questItemId)
             else
                 GAMEPAD_QUICKSLOT:SetQuestItemToQuickslot(questItemId)
             end

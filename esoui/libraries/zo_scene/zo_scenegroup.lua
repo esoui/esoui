@@ -1,15 +1,10 @@
-SCENE_GROUP_SHOWING = "scene_group_showing"
-SCENE_GROUP_SHOWN = "scene_group_shown"
-SCENE_GROUP_HIDING = "scene_group_hiding"
-SCENE_GROUP_HIDDEN = "scene_group_hidden"
+-- Alias
+SCENE_GROUP_SHOWING = ZO_STATE.SHOWING
+SCENE_GROUP_SHOWN = ZO_STATE.SHOWN
+SCENE_GROUP_HIDING = ZO_STATE.HIDING
+SCENE_GROUP_HIDDEN = ZO_STATE.HIDDEN
 
-ZO_SceneGroup = ZO_CallbackObject:Subclass()
-
-function ZO_SceneGroup:New(...)
-    local group = ZO_CallbackObject.New(self)
-    group:Initialize(...)
-    return group
-end
+ZO_SceneGroup = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_SceneGroup:Initialize(...)
     self.state = SCENE_GROUP_HIDDEN

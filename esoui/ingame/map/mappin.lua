@@ -719,11 +719,12 @@ ZO_MapPin.PIN_TYPE_TO_PIN_GROUP =
 ZO_MapPin.PIN_ORDERS =
 {
     DESTINATIONS = 10,
-    AVA_KEEP = 20,
-    AVA_OUTPOST = 21,
-    AVA_TOWN = 22,
-    AVA_RESOURCE = 23,
-    AVA_GATE = 24,
+    AVA_KEEP = 19,
+    AVA_OUTPOST = 20,
+    AVA_TOWN = 21,
+    AVA_RESOURCE = 22,
+    AVA_GATE = 23,
+    AVA_KILL_LOCATION = 24,
     AVA_ARTIFACT = 25,
     AVA_IMPERIAL_CITY = 26,
     AVA_FORWARD_CAMP = 27,
@@ -757,6 +758,16 @@ do
         -- Currently, delves and public dungeons are the only POIs which use this tooltip flow
         if IsDelveOrPublicDungeon(pin) then
             ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION):AppendDelveInfo(pin)
+        end
+    end
+
+    local function IsKillLocation(pin)
+        return pin:IsKillLocation()
+    end
+
+    local function AppendKillLocationInfo(pin)
+        if IsKillLocation(pin) then
+            ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION):AppendKillLocationInfo(pin)
         end
     end
 
@@ -1074,6 +1085,14 @@ do
             categoryId = ZO_MapPin.PIN_ORDERS.ANTIQUITIES,
             gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ANTIQUITIES,
         },
+        KILL_LOCATION =
+        {
+            creator = AppendKillLocationInfo,
+            tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION,
+            hasTooltip = IsKillLocation,
+            categoryId = ZO_MapPin.PIN_ORDERS.AVA_KILL_LOCATION,
+            gamepadSpacing = true,
+        },
     }
 
     ZO_MapPin.TOOLTIP_CREATORS =
@@ -1245,6 +1264,18 @@ do
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_EBONHEART]    =   SHARED_TOOLTIP_CREATORS.DAEDRIC_ARTIFACT,
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_DAGGERFALL]   =   SHARED_TOOLTIP_CREATORS.DAEDRIC_ARTIFACT,
         [MAP_PIN_TYPE_ACTIVE_COMPANION]                             =   SHARED_TOOLTIP_CREATORS.COMPANION_PIN,
+        [MAP_PIN_TYPE_ALDMERI_VS_EBONHEART_SMALL]                   =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
+        [MAP_PIN_TYPE_ALDMERI_VS_EBONHEART_MEDIUM]                  =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
+        [MAP_PIN_TYPE_ALDMERI_VS_EBONHEART_LARGE]                   =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
+        [MAP_PIN_TYPE_ALDMERI_VS_DAGGERFALL_SMALL]                  =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
+        [MAP_PIN_TYPE_ALDMERI_VS_DAGGERFALL_MEDIUM]                 =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
+        [MAP_PIN_TYPE_ALDMERI_VS_DAGGERFALL_LARGE]                  =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
+        [MAP_PIN_TYPE_EBONHEART_VS_DAGGERFALL_SMALL]                =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
+        [MAP_PIN_TYPE_EBONHEART_VS_DAGGERFALL_MEDIUM]               =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
+        [MAP_PIN_TYPE_EBONHEART_VS_DAGGERFALL_LARGE]                =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
+        [MAP_PIN_TYPE_TRI_BATTLE_SMALL]                             =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
+        [MAP_PIN_TYPE_TRI_BATTLE_MEDIUM]                            =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
+        [MAP_PIN_TYPE_TRI_BATTLE_LARGE]                             =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
     }
 end
 
@@ -2287,6 +2318,16 @@ do
             return groupPinTextures[self:GetPinType()]
         end
     end
+end
+
+function ZO_MapPin:GetNumAllianceKills(alliance)
+    if not self:IsKillLocation() then
+        return 0
+    end
+
+    local killLocationIndex = self.m_PinTag
+    local numAllianceKills = GetNumKillLocationAllianceKills(killLocationIndex, alliance)
+    return numAllianceKills
 end
 
 function ZO_MapPin:GetPOIIndex()

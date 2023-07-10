@@ -292,3 +292,24 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendDelveInfo(pin)
     end
     self.tooltip:AddSection(delveSection)
 end
+
+function ZO_MapInformationTooltip_Gamepad_Mixin:AppendKillLocationInfo(pin)
+    local tooltip = self.tooltip
+    local headingSection = tooltip:AcquireSection(tooltip:GetStyle("killLocationSection"))
+    local headingText = GetString(SI_KILL_LOCATION_TOOLTIP_HEADING)
+    self:LayoutStringLine(headingSection, headingText, tooltip:GetStyle("killLocationHeading"))
+    tooltip:AddSection(headingSection)
+
+    local statsSection = tooltip:AcquireSection(tooltip:GetStyle("killLocationKillsSection"))
+    local statsStyle = tooltip:GetStyle("killLocationKills")
+    for alliance = ALLIANCE_ITERATION_BEGIN, ALLIANCE_ITERATION_END do
+        local numKills = pin:GetNumAllianceKills(alliance)
+        if numKills > 0 then
+            local allianceColor = GetAllianceColor(alliance)
+            local allianceIcon = allianceColor:Colorize(zo_iconFormatInheritColor(ZO_GetAllianceIcon(alliance), 24, 48))
+            local allianceName = allianceColor:Colorize(GetAllianceName(alliance))
+            self:LayoutStringLine(statsSection, zo_strformat(SI_KILL_LOCATION_TOOLTIP_ALLIANCE_KILLS, allianceIcon, allianceName, numKills), statsStyle)
+        end
+    end
+    tooltip:AddSection(statsSection)
+end

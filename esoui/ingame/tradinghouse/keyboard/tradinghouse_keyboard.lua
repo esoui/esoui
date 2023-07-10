@@ -23,12 +23,12 @@ do
             elseif newState == SCENE_HIDING then
                 SetPendingItemPost(BAG_BACKPACK, 0, 0)
                 ClearMenu()
-                ZO_InventorySlot_RemoveMouseOverKeybinds()
             elseif newState == SCENE_HIDDEN then
                 TEXT_SEARCH_MANAGER:DeactivateTextSearch("guildTraderTextSearch")
                 local REMOVE_CONTEXT = nil
                 PLAYER_INVENTORY:SetContextForInventories(REMOVE_CONTEXT, INVENTORY_TYPE_LIST)
                 self:ClearSearchResults()
+                ZO_InventorySlot_RemoveMouseOverKeybinds()
                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                 self.keybindStripDescriptor = nil
             end

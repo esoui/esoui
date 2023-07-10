@@ -653,7 +653,7 @@ function ZO_HousingEditorHud:Initialize(control)
     SCENE_MANAGER:SetSceneRestoresBaseSceneOnGameMenuToggle("housingEditorHudUI", true)
 
     HOUSING_EDITOR_HUD_SCENE_GROUP = ZO_SceneGroup:New("housingEditorHud", "housingEditorHudUI")
-    HOUSING_EDITOR_HUD_SCENE_GROUP:RegisterCallback("StateChange", function(oldState, newState)
+    HOUSING_EDITOR_HUD_SCENE_GROUP:RegisterCallback("StateChange", function(_, newState)
         if newState == SCENE_GROUP_HIDDEN then
             local currentMode = GetHousingEditorMode()
             if currentMode ~= HOUSING_EDITOR_MODE_BROWSE and currentMode ~= HOUSING_EDITOR_MODE_PATH then

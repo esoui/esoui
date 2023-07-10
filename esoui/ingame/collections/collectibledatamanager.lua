@@ -295,13 +295,17 @@ function ZO_CollectibleData:Refresh()
     self:SetNew(IsCollectibleNew(collectibleId))
     self.cachedNameWithNickname = nil
 
-    local categoryData = self:GetCategoryData()
-    if categoryData then
-        local specializedSortedCollectibles = categoryData:GetSpecializedSortedCollectiblesObject()
-        if previousUnlockState ~= self.unlockState then
-            specializedSortedCollectibles:HandleLockStatusChanged(self)
-        elseif previousUserFlags ~= newUserFlags then
-            specializedSortedCollectibles:HandleUserFlagsChanged(self)
+    local unlockStateChanged = previousUnlockState ~= self.unlockState
+    local userFlagsChanged = previousUserFlags ~= newUserFlags
+    if unlockStateChanged or userFlagsChanged then
+        local categoryData = self:GetCategoryData()
+        if categoryData then
+            local specializedSortedCollectibles = categoryData:GetSpecializedSortedCollectiblesObject()
+            if unlockStateChanged then
+                specializedSortedCollectibles:HandleLockStatusChanged(self)
+            elseif userFlagsChanged then
+                specializedSortedCollectibles:HandleUserFlagsChanged(self)
+            end
         end
     end
 end
@@ -311,10 +315,10 @@ function ZO_CollectibleData:RefreshHousingData()
         local wasPrimaryResidence = self.isPrimaryResidence
         self.isPrimaryResidence = IsPrimaryHouse(self.referenceId) or nil -- Memory optimization
 
-        local categoryData = self:GetCategoryData()
-        if categoryData then
-            local specializedSortedCollectibles = categoryData:GetSpecializedSortedCollectiblesObject()
-            if wasPrimaryResidence ~= self.isPrimaryResidence then
+        if wasPrimaryResidence ~= self.isPrimaryResidence then
+            local categoryData = self:GetCategoryData()
+            if categoryData then
+                local specializedSortedCollectibles = categoryData:GetSpecializedSortedCollectiblesObject()
                 specializedSortedCollectibles:HandlePrimaryResidenceChanged(self)
             end
         end
@@ -450,7 +454,7 @@ do
 
     function ZO_CollectibleData:GetHint()
         local hint = GetCollectibleHint(self.collectibleId)
-        if self:IsHouse() and hint == "" then
+        if hint == "" and self:IsHouse() then
             hint = DEFAULT_HOUSE_HINT
         end
         return hint
@@ -808,6 +812,11 @@ function ZO_CollectibleData:IsActiveStateSuppressed(actorCategory)
     return self:ShouldSuppressActiveState(actorCategory)
 end
 
+-- Determines whether the collectible is a placeable furnishing that can be placed in the current house.
+function ZO_CollectibleData:CanPlaceInCurrentHouse()
+    return self:IsPlaceableFurniture() and ZO_CanPlaceFurnitureInCurrentHouse() and HousingEditorCanPlaceCollectible(self.collectibleId)
+end
+
 -----------------------------------
 -- Specialized Sorted Collectibles
 -----------------------------------
@@ -934,8 +943,8 @@ function ZO_DefaultSortedCollectibles:OnInsertFinished()
     end)
     
     -- We know that we start with a mapping of id to data and end with a mapping of id to position
-    -- So since these mappings have 1 to 1 keys, rather than wasting throwing out the old table and creating a new table, we can just replace everything
-    -- as another minor optimization
+    -- So since these mappings have 1 to 1 keys, rather than wasting the old table and creating a new table,
+    -- we can just replace everything as another minor optimization
     for position, collectibleData in ipairs(tempTable) do
         self.collectibleNameLookupTable[collectibleData:GetId()] = position
     end
@@ -980,9 +989,12 @@ end
 
 function ZO_SpecializedSortedOutfitStyleTypes:HandleLockStatusChanged(collectibleData)
     local type = collectibleData:GetOutfitGearType()
-    if type and self.sortedCollectibles[type] then
-        self.sortedCollectibles[type]:HandleLockStatusChanged(collectibleData)
-        self.dirty = true
+    if type then
+        local sortedCollectibles = self.sortedCollectibles[type]
+        if sortedCollectibles then
+            sortedCollectibles:HandleLockStatusChanged(collectibleData)
+            self.dirty = true
+        end
     end
 end
 
@@ -1369,7 +1381,7 @@ function ZO_CollectibleCategoryData:HasAnyNewTributePatronCollectibles()
         return true
     end
 
-       if self.isTopLevelCategory then
+    if self.isTopLevelCategory then
         for _, subcategoryData in ipairs(self.orderedSubcategories) do
             if subcategoryData:HasAnyNewTributePatronCollectibles() then
                 return true

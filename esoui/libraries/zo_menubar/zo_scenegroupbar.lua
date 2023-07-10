@@ -46,7 +46,7 @@ function ZO_SceneGroupBar:CreateSceneGroup(name, tabDataList, activeSceneName)
     self.sceneGroup = SCENE_MANAGER:GetSceneGroup(name)
     local isInitialized = false
 
-    self.sceneGroup:RegisterCallback("StateChange", function(oldState, newState)
+    self.sceneGroup:RegisterCallback("StateChange", function(_, newState)
         if newState == SCENE_GROUP_SHOWING then
             local nextScene = SCENE_MANAGER:GetNextScene():GetName()
             -- this update can be called before the scene itself is set to showing,

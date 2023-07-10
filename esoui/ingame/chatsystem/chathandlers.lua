@@ -1,3 +1,14 @@
+local DEFAULT_FROM_DISPLAY_NAME = nil
+local DEFAULT_RAW_MESSAGE_TEXT = nil
+local DEFAULT_TARGET_CHANNEL = nil
+
+local g_pvpKillFeedDeathRecurrenceTracker = nil
+do
+    local EXPIRATION_MS = 10000 -- 10 seconds
+    local EXTENSION_MS = 0
+    g_pvpKillFeedDeathRecurrenceTracker = ZO_RecurrenceTracker:New(EXPIRATION_MS, EXTENSION_MS)
+end
+
 local ChannelInfo = ZO_ChatSystem_GetChannelInfo()
 
 local function CreateChannelLink(channelInfo, overrideName)
@@ -196,8 +207,72 @@ local BUILTIN_MESSAGE_FORMATTERS = {
         end
     end,
 
+    [EVENT_PVP_KILL_FEED_DEATH] = function(killLocation, killerDisplayName, killerCharacterName, killerAlliance, killerRank, victimDisplayName, victimCharacterName, victimAlliance, victimRank)
+        local showKillFeedNotifications = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_PVP_KILL_FEED_NOTIFICATIONS)
+        if not showKillFeedNotifications then
+            return nil
+        end
+
+        local isBattleground = IsActiveWorldBattleground()
+        local killerAllianceColor
+        local victimAllianceColor
+        if isBattleground then
+            killerAllianceColor = GetBattlegroundAllianceColor(killerAlliance):GetBright()
+            victimAllianceColor = GetBattlegroundAllianceColor(victimAlliance):GetBright()
+        else
+            killerAllianceColor = GetAllianceColor(killerAlliance):GetBright()
+            victimAllianceColor = GetAllianceColor(victimAlliance):GetBright()
+        end
+
+        local ICON_SIZE = 24
+        local killerIcon
+        local victimIcon
+        if isBattleground then
+            killerIcon = ZO_GetBattlegroundIconMarkup(killerAlliance, ICON_SIZE)
+            victimIcon = ZO_GetBattlegroundIconMarkup(victimAlliance, ICON_SIZE)
+        else
+            killerIcon = ZO_GetColoredAvARankIconMarkup(killerRank, killerAlliance, ICON_SIZE)
+            victimIcon = ZO_GetColoredAvARankIconMarkup(victimRank, victimAlliance, ICON_SIZE)
+        end
+
+        local killerAllianceName
+        local victimAllianceName
+        if isBattleground then
+            killerAllianceName = GetString("SI_BATTLEGROUNDALLIANCE", killerAlliance)
+            victimAllianceName = GetString("SI_BATTLEGROUNDALLIANCE", victimAlliance)
+        else
+            killerAllianceName = ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(killerAlliance))
+            victimAllianceName = ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(victimAlliance))
+        end
+
+        local killerName = ZO_GetPrimaryPlayerName(killerDisplayName, killerCharacterName)
+        local victimName = ZO_GetPrimaryPlayerName(victimDisplayName, victimCharacterName)
+
+        local killerGender = GetGenderFromNameDescriptor(killerCharacterName)
+        local victimGender = GetGenderFromNameDescriptor(victimCharacterName)
+
+        local killerRankName = GetAvARankName(killerGender, killerRank)
+        local victimRankName = GetAvARankName(victimGender, victimRank)
+
+        local messageKey = string.format("%s___%s", killerDisplayName, victimDisplayName)
+        local numOccurrences = g_pvpKillFeedDeathRecurrenceTracker:AddValue(messageKey)
+        if numOccurrences > 1 then
+            -- Suppress redundant notifications that would otherwise result
+            -- from duplicate client- and server-sourced death events.
+            return nil
+        end
+
+        local hasLocation = killLocation and killLocation ~= ""
+        local messageStringId = hasLocation and SI_PVP_KILL_FEED_DEATH_AND_LOCATION or SI_PVP_KILL_FEED_DEATH
+        local message = zo_strformat(messageStringId, killerAllianceColor:Colorize(killerName), killerIcon, victimAllianceColor:Colorize(victimName), victimIcon, killLocation)
+
+        local narrationStringId = hasLocation and SI_PVP_KILL_FEED_DEATH_AND_LOCATION_NARRATION or SI_PVP_KILL_FEED_DEATH_NARRATION
+        local narrationMessage = zo_strformat(narrationStringId, killerAllianceName, killerRankName, killerName, victimAllianceName, victimRankName, victimName, killLocation)
+        return message, DEFAULT_TARGET_CHANNEL, DEFAULT_FROM_DISPLAY_NAME, DEFAULT_RAW_MESSAGE_TEXT, narrationMessage, ZO_WHITE
+    end,
+
     ["AddSystemMessage"] = function(messageText)
-        -- system messages will already be formatted by the time they get here
+        -- System messages will already be formatted by the time they get here
         return messageText
     end,
 
@@ -304,14 +379,14 @@ do
 
         local messageFormatter = self.registeredMessageFormatters[eventKey]
         if messageFormatter then
-            local formattedEventText, targetChannel, fromDisplayName, rawMessageText, formattedNarrationText = messageFormatter(...)
+            local formattedEventText, targetChannel, fromDisplayName, rawMessageText, formattedNarrationText, overrideColorDef = messageFormatter(...)
             if formattedEventText then
                 if targetChannel then
                     local target = select(2, ...)
                     self:FireCallbacks("TargetAddedToChannel", targetChannel, target)
                 end
 
-                self:FireCallbacks("FormattedChatMessage", formattedEventText, eventCategory, targetChannel, fromDisplayName, rawMessageText, formattedNarrationText)
+                self:FireCallbacks("FormattedChatMessage", formattedEventText, eventCategory, targetChannel, fromDisplayName, rawMessageText, formattedNarrationText, overrideColorDef)
             end
         end
     end
@@ -358,6 +433,7 @@ end
 CHAT_ROUTER = ZO_ChatRouter:New()
 
 --- Global functions ---
+
 function ZO_ChatSystem_DoesPlatformUseGamepadChatSystem()
     return IsGamepadUISupported()
 end
@@ -382,4 +458,3 @@ function ZO_GetChatSystem()
         return SYSTEMS:GetGamepadObject("ChatSystem")
     end
 end
-

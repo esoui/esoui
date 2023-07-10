@@ -579,9 +579,9 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_SECONDARY",
             visible = function()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.EFFECTS then
-                    local selectedData = self.mainList:GetTargetData()
-                    if selectedData ~= nil and selectedData.buffSlot ~= nil then
-                        return selectedData.canClickOff
+                    local targetData = self.mainList:GetTargetData()
+                    if targetData ~= nil and targetData.buffSlot ~= nil then
+                        return targetData.canClickOff
                     end
                     return false
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ADVANCED_ATTRIBUTES then
@@ -591,8 +591,8 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
             end,
             callback = function()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.EFFECTS then
-                    local selectedData = self.mainList:GetTargetData()
-                    CancelBuff(selectedData.buffSlot)
+                    local targetData = self.mainList:GetTargetData()
+                    CancelBuff(targetData.buffSlot)
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ADVANCED_ATTRIBUTES then
                     self:DeactivateMainList()
                     self:EnterAdvancedGridList()
@@ -727,12 +727,12 @@ function ZO_GamepadStats:PerformUpdate()
 
     self:RefreshMainList()
 
-    local selectedData = self.mainList:GetTargetData()
+    local targetData = self.mainList:GetTargetData()
 
     if self.outfitSelectorHeaderFocus:IsActive() then
         self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
-    elseif selectedData.displayMode ~= nil then
-        self.displayMode = selectedData.displayMode
+    elseif targetData.displayMode ~= nil then
+        self.displayMode = targetData.displayMode
     end
 
     self:UpdateScreenVisibility()
@@ -1105,9 +1105,9 @@ do
     end
 end
 
-function ZO_GamepadStats:OnSelectionChanged(list, selectedData, oldSelectedData)
+function ZO_GamepadStats:OnTargetChanged(list, targetData, oldTargetData)
     if not (self.outfitSelectorHeaderFocus:IsActive() or self.attributeTooltips:IsActive()) then
-        self.displayMode = selectedData.displayMode
+        self.displayMode = targetData.displayMode
     end
 
     self:UpdateScreenVisibility()
@@ -1285,16 +1285,16 @@ function ZO_GamepadStats:InitializeCharacterEffects()
 end
 
 function ZO_GamepadStats:RefreshCharacterEffects()
-    local selectedData = self.mainList:GetTargetData()
+    local targetData = self.mainList:GetTargetData()
 
     local contentTitle, contentDescription, contentStartTime, contentEndTime, _
 
-    if selectedData.isArtificial then
-        contentTitle, _, _, _, contentStartTime, contentEndTime = GetArtificialEffectInfo(selectedData.artificialEffectId)
-        contentDescription = GetArtificialEffectTooltipText(selectedData.artificialEffectId)
+    if targetData.isArtificial then
+        contentTitle, _, _, _, contentStartTime, contentEndTime = GetArtificialEffectInfo(targetData.artificialEffectId)
+        contentDescription = GetArtificialEffectTooltipText(targetData.artificialEffectId)
     else
         local buffSlot, abilityId
-        contentTitle, contentStartTime, contentEndTime, buffSlot, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", selectedData.buffIndex)
+        contentTitle, contentStartTime, contentEndTime, buffSlot, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", targetData.buffIndex)
 
         if DoesAbilityExist(abilityId) then
             contentDescription = GetAbilityEffectDescription(buffSlot)

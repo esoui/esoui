@@ -8,6 +8,7 @@
             <OnMouseEnter>
                 ZO_SelectableLabel_OnMouseEnter(self)
             </OnMouseEnter>
+
             <OnMouseExit>
                 ZO_SelectableLabel_OnMouseExit(self)
             </OnMouseExit>
@@ -22,6 +23,7 @@
             <OnMouseEnter>
                 ZO_TooltipIfTruncatedLabel_OnMouseEnter(self)
             </OnMouseEnter>
+
             <OnMouseExit>
                 ZO_TooltipIfTruncatedLabel_OnMouseExit(self)
             </OnMouseExit>
@@ -37,6 +39,7 @@
                     SetTooltipText(InformationTooltip, self:GetText())
                 end
             </OnMouseEnter>
+
             <OnMouseExit>
                 ZO_SelectableLabel_OnMouseExit(self)
                 
@@ -60,6 +63,7 @@
             <OnTextChanged>
                 ZO_LargeKeyMarkupLabel_OnTextChanged(...)
             </OnTextChanged>
+
             <OnUserAreaCreated>
                 ZO_LargeKeyMarkupLabel_OnNewUserAreaCreated(...)
             </OnUserAreaCreated>
@@ -75,9 +79,34 @@
             <OnTextChanged>
                 ZO_SmallKeyMarkupLabel_OnTextChanged(...)
             </OnTextChanged>
+
             <OnUserAreaCreated>
                 ZO_SmallKeyMarkupLabel_OnNewUserAreaCreated(...)
             </OnUserAreaCreated>
         </Label>
+
+        <Control name="ZO_RollingMeterLabel" autoRectClipChildren="true" virtual="true">
+            <OnInitialized name="RollingMeterLabel">
+                ZO_RollingMeterLabel_OnInitialized(self)
+            </OnInitialized>
+
+            <OnUpdate name="RollingMeterLabel">
+                self:OnUpdate(time)
+            </OnUpdate>
+
+            <Controls>
+                <Label name="$(parent)InLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <OnRectChanged>
+                        self:GetParent():OnLabelRectChanged()
+                    </OnRectChanged>
+                </Label>
+
+                <Label name="$(parent)OutLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <OnRectChanged>
+                        self:GetParent():OnLabelRectChanged()
+                    </OnRectChanged>
+                </Label>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

@@ -67,6 +67,20 @@ end
 function ZO_CadwellManager_Gamepad:PerformUpdate()
     self.itemList:Clear()
 
+    local function GetEntryNarrationText(entryData, entryControl)
+        local narrations = {}
+
+        --Get the default list entry narration
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+        --Get the narration for the center panel header
+        ZO_AppendNarration(narrations, ZO_GamepadGenericHeader_GetNarrationText(self.entryHeader, self.entryHeaderData))
+
+        --Get the narration for the center panel body
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.entryBodyText))
+        return narrations
+    end
+
     for progressionLevel = CADWELL_PROGRESSION_LEVEL_SILVER, CADWELL_PROGRESSION_LEVEL_GOLD do
         if GetCadwellProgressionLevel() < progressionLevel then
             break
@@ -95,6 +109,7 @@ function ZO_CadwellManager_Gamepad:PerformUpdate()
             
             local entryData = ZO_GamepadEntryData:New(zo_strformat(SI_CADWELL_ZONE_NAME_FORMAT, zoneInfo.name))
             entryData.zoneInfo = zoneInfo
+            entryData.narrationText = GetEntryNarrationText
 
             local template
             if zoneIndex == 1 then
@@ -129,11 +144,10 @@ function ZO_CadwellManager_Gamepad:RefreshEntryHeaderDescriptionAndObjectives()
 
     local progressionLevel = zoneInfo.progressionLevel
     local zoneIndex = zoneInfo.index
-    local numObjectives = zoneInfo.numObjectives
-    local numCompletedObjectives = zoneInfo.numCompletedObjectives
 
     local zoneName, zoneDescription = GetCadwellZoneInfo(progressionLevel, zoneIndex)
-    self.entryBody:SetText(zo_strformat(SI_CADWELL_ZONE_DESC_FORMAT, zoneDescription))
+    self.entryBodyText = zo_strformat(SI_CADWELL_ZONE_DESC_FORMAT, zoneDescription)
+    self.entryBody:SetText(self.entryBodyText)
     
     self.entryHeaderData.titleText = zo_strformat(SI_CADWELL_ZONE_NAME_FORMAT, zoneName)
 

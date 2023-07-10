@@ -43,7 +43,7 @@ function ZO_IngameSceneManager:IsInUIMode()
         return IsGameCameraUIModeActive()
     end
 
-    return false
+    return true
 end
 
 function ZO_IngameSceneManager:IsLockedInUIMode()

@@ -221,10 +221,16 @@ function ActionButton:SetupCount()
 
     if stackCount and stackCount >= 0 then
         self.countText:SetHidden(false)
-        self.countText:SetText(stackCount)
+        local formattedCount = self:FormatCount(stackCount)
+        self.countText:SetText(formattedCount)
     else
         self:ClearCount()
     end
+end
+
+-- Optional override for any action button that wants specific formatting of their count
+function ActionButton:FormatCount(count)
+    return count
 end
 
 function ActionButton:ClearCount()
@@ -615,7 +621,6 @@ do
     local SHRINK_SCALE = 0.9
     local ICON_SHRINK_SCALE = 0.8
     local GROW_SCALE = 1.1
-    local ICON_COOLDOWN_SCALE = 0.9
     local FRAME_RESET_TIME_MS = 167
     local ICON_RESET_TIME_MS = 100
 

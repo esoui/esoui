@@ -1,12 +1,6 @@
 ZO_REMOTE_SCENE_NO_SCENE_IDENTIFIER = "INVALID_SCENE"
 
-ZO_SceneManager_Base = ZO_CallbackObject:Subclass()
-
-function ZO_SceneManager_Base:New()
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize()
-    return manager
-end
+ZO_SceneManager_Base = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_SceneManager_Base:Initialize()
     self.scenes = {}

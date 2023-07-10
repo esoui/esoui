@@ -50,6 +50,24 @@ function SlashCommandAutoComplete:InvalidateSlashCommandCache()
     self.possibleMatches = {}
 end
 
+function SlashCommandAutoComplete:AddCommandsToPossibleResults(tableOfCommands)
+    if tableOfCommands == nil then
+        return
+    end
+
+    for command, info in pairs(tableOfCommands) do
+        if #command > 0 then
+            self.possibleMatches[command:lower()] = command
+            -- add in the command aliases, if any, as well
+            if info.aliases then
+                for index, alias in ipairs(info.aliases) do
+                    self.possibleMatches[alias:lower()] = alias
+                end
+            end
+        end
+    end
+end
+
 function SlashCommandAutoComplete:GetAutoCompletionResults(text)
     if #text < 3 then
         return
@@ -77,13 +95,8 @@ function SlashCommandAutoComplete:GetAutoCompletionResults(text)
             end
         end
 
-        if SERVER_BRACKET_COMMANDS then
-            for command in pairs(SERVER_BRACKET_COMMANDS) do
-                if #command > 0 then
-                    self.possibleMatches[command:lower()] = command
-                end
-            end
-        end
+        self:AddCommandsToPossibleResults(ZO_REGIONCOMMANDS)
+        self:AddCommandsToPossibleResults(ZO_CLIENTCOMMANDS)
 
         local switchLookup = ZO_ChatSystem_GetChannelSwitchLookupTable()
         for channelId, switchString in ipairs(switchLookup) do

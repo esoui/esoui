@@ -131,3 +131,93 @@ end
 function ZO_PropagateHandlerFromControl(propagateToControl, handlerName, propagateFromControl, ...)
     ZO_PropagateHandler(propagateToControl, handlerName, ...)
 end
+
+--[[
+  Updates the metatable of the specified control to forward calls to any umimplemented
+  methods to any of the specified control(s) that have a corresponding implementation.
+
+  Invocation of a relayed method will return the return value of each target objects'
+  implementation in the order that the target objects were specified.
+
+  For example:
+
+  -- Forward unimplemented method calls to the container control's child label control.
+  local containerControl = self.control:GetNamedChild("PlayerContainer")
+  local labelControl = containerControl:GetNamedChild("Name")
+  ZO_ForwardUnimplementedMethodsForControl(containerControl, labelControl)
+
+  -- Call label control-specific methods of the child label control via its parent container control.
+  containerControl:SetFont("ZoFontGameBold")
+  containerControl:SetText(playerName)
+]]
+do
+    local UNIMPLEMENTED_METHOD_SENTINEL = {}
+
+    local function GetOrCreateMethodRelayOrUnimplementedSentinel(key, targetObjects)
+        -- Identify any target objects with a corresponding method implementation for this key.
+        local objectsWithImplementations = {}
+        for _, targetObject in ipairs(targetObjects) do
+            local targetMethod = targetObject[key]
+            if targetMethod and type(targetMethod) == "function" then
+                table.insert(objectsWithImplementations, targetObject)
+            end
+        end
+
+        if not next(objectsWithImplementations) then
+            -- No target objects have a corresponding method implementation for this key.
+            return UNIMPLEMENTED_METHOD_SENTINEL
+        end
+
+        -- Create a relay method that will forward the invocation of this method to
+        -- the supporting target objects and return the first non-nil return value.
+        return function(...)
+            local returnValues = {}
+            for index, targetObject in ipairs(objectsWithImplementations) do
+                -- Relay the call to the target object with a reference to the
+                -- target object substituted in place of the 'self' parameter.
+                local targetMethod = targetObject[key]
+                returnValues[index] = targetMethod(targetObject, select(2, ...))
+            end
+            return unpack(returnValues)
+        end
+    end
+
+    function ZO_ForwardUnimplementedMethodsForControl(sourceControl, ...)
+        -- Wrap the source control's existing metatable indexer method so that keys not found
+        -- in the source control are subsequently searched for within the target object(s).
+        -- A relay method is created, cached, and returned for any target objects that have a
+        -- method implementation for a given key; if no method implementations are found,
+        -- a sentinel value is cached to prevent unnecessary lookups for that key.
+        local targetObjects = {...}
+        local relayMethods = {}
+        local metaTable = getmetatable(sourceControl)
+        local originalIndex = rawget(metaTable, "__index")
+        local indexWrapper = function(tbl, key)
+            if originalIndex then
+                local value = originalIndex[key]
+                if value ~= nil then
+                    -- Return the corresponding value for existing keys.
+                    return value
+                end
+            end
+
+            local relayMethod = relayMethods[key]
+            if relayMethod == nil then
+                -- Create either a relay method that forwards this invocation to
+                -- supporting target objects or a sentinel value that signals that
+                -- no target objects have a corresponding implementation.
+                relayMethod = GetOrCreateMethodRelayOrUnimplementedSentinel(key, targetObjects)
+                relayMethods[key] = relayMethod
+            end
+
+            if relayMethod == UNIMPLEMENTED_METHOD_SENTINEL then
+                -- An attempt was already made to index this key but no
+                -- implementation was found. Suppress further attempts.
+                return nil
+            end
+
+            return relayMethod
+        end
+        rawset(metaTable, "__index", indexWrapper)
+    end
+end

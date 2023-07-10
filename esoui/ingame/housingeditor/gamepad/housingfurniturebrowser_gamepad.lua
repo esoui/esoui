@@ -67,6 +67,13 @@ function ZO_HousingFurnitureBrowser_Gamepad:UpdateProductsPanel()
     self.productsPanel:UpdateLists()
 end
 
+--Overridden
+function  ZO_HousingFurnitureBrowser_Gamepad:GetFooterNarration()
+    if HOUSE_INFORMATION_FRAGMENT_GAMEPAD:IsShowing() then
+        return HOUSE_INFORMATION_GAMEPAD:GetNarrationText()
+    end
+end
+
 function ZO_HousingFurnitureBrowser_Gamepad:InitializeHeader()
     local tabBarEntries =
     {

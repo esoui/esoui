@@ -1,16 +1,10 @@
-local ZO_GuildHistory_Gamepad = ZO_Object:Subclass()
+local GuildHistory_Gamepad = ZO_InitializingObject:Subclass()
 
-function ZO_GuildHistory_Gamepad:New(...)
-    local guildHistory = ZO_Object.New(self)
-    guildHistory:Initialize(...)
-    return guildHistory
-end
-
-function ZO_GuildHistory_Gamepad:SetMainList(list)
+function GuildHistory_Gamepad:SetMainList(list)
     self.categoryList = list
 end
 
-function ZO_GuildHistory_Gamepad:Initialize(control)
+function GuildHistory_Gamepad:Initialize(control)
     self.control = control
     control.owner = self
 
@@ -53,17 +47,19 @@ function ZO_GuildHistory_Gamepad:Initialize(control)
         return narrations
     end
 
-    self.tooltipHeaderData = {
+    self.tooltipHeaderData =
+    {
         titleText = GetString(SI_GAMEPAD_GUILD_HISTORY_GUILD_EVENT_TITLE),
     }
 
     self.loading = control:GetNamedChild("Loading")
 
     self.footer = ZO_PagedListSetupFooter(control:GetNamedChild("Footer"))
+    
+    local ALWAYS_ANIMATE = true
+    GUILD_HISTORY_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(self.control, ALWAYS_ANIMATE)
 
-    GUILD_HISTORY_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(self.control, true)
-
-    EVENT_MANAGER:RegisterForUpdate("ZO_GuildHistory_Gamepad", 60000, function()
+    EVENT_MANAGER:RegisterForUpdate("GuildHistory_Gamepad", 60000, function()
         self.refreshGroup:MarkDirty("EventList")
     end)
 
@@ -86,7 +82,7 @@ function ZO_GuildHistory_Gamepad:Initialize(control)
     end)
 end
 
-function ZO_GuildHistory_Gamepad:InitializeGuildHistory()
+function GuildHistory_Gamepad:InitializeGuildHistory()
     if not self.initialized then
         self.initialized = true
         self:InitializeActivityList()
@@ -95,24 +91,24 @@ function ZO_GuildHistory_Gamepad:InitializeGuildHistory()
     end
 end
 
-function ZO_GuildHistory_Gamepad:OnTargetChanged(list, selectedData, oldSelectedData)
+function GuildHistory_Gamepad:OnTargetChanged(list, selectedData, oldSelectedData)
     self.startIndex = 1
     self.activityList:SetFocusToMatchingEntry(self.activityListItems[1])
     self:RequestInitialEvents()
     self.refreshGroup:MarkDirty("EventList")
 end
 
-function ZO_GuildHistory_Gamepad:IsTryingToGetMoreEvents()
+function GuildHistory_Gamepad:IsTryingToGetMoreEvents()
     local targetData = self.categoryList:GetTargetData()
     local categoryId = targetData.categoryId
     return DoesGuildHistoryCategoryHaveOutstandingRequest(self.guildId, categoryId) or IsGuildHistoryCategoryRequestQueued(self.guildId, categoryId)
 end
 
-function ZO_GuildHistory_Gamepad:CanPageLeft()
+function GuildHistory_Gamepad:CanPageLeft()
     return not (self.startIndex <= 1)
 end
 
-function ZO_GuildHistory_Gamepad:CanPageRight()
+function GuildHistory_Gamepad:CanPageRight()
     local targetData = self.categoryList:GetTargetData()
     local categoryId = targetData.categoryId
     local numEvents = #self.guildEvents
@@ -124,7 +120,7 @@ function ZO_GuildHistory_Gamepad:CanPageRight()
     end
 end
 
-function ZO_GuildHistory_Gamepad:NextPage()
+function GuildHistory_Gamepad:NextPage()
     if not self:CanPageRight() then
         return
     end
@@ -146,7 +142,7 @@ function ZO_GuildHistory_Gamepad:NextPage()
     SCREEN_NARRATION_MANAGER:QueueFocus(self.activityList, NARRATE_HEADER)
 end
 
-function ZO_GuildHistory_Gamepad:PreviousPage()
+function GuildHistory_Gamepad:PreviousPage()
     if not self:CanPageLeft() then
         return
     end
@@ -164,7 +160,7 @@ function ZO_GuildHistory_Gamepad:PreviousPage()
 end
 
 local function CreateActivityItem(parent, previous, index)
-    local PADDING = 0
+    local PADDING = 20
 
     local newControl = CreateControlFromVirtual("$(parent)ActivityItem", parent, "ZO_GuildHistory_Gamepad_ActivityItem", index)
     newControl:SetAnchor(TOPLEFT, previous, BOTTOMLEFT, 0, PADDING)
@@ -173,8 +169,8 @@ local function CreateActivityItem(parent, previous, index)
     return newControl
 end
 
-function ZO_GuildHistory_Gamepad:OnActivityTargetChanged(focusedItem)
-    if(focusedItem ~= nil and focusedItem.control.description ~= nil) then
+function GuildHistory_Gamepad:OnActivityTargetChanged(focusedItem)
+    if focusedItem ~= nil and focusedItem.control.description ~= nil then
         self.tooltipHeaderData.messageText = focusedItem.control.description
         self.tooltipHeaderData.messageTextNarration = focusedItem.control.descriptionNarration
 
@@ -192,7 +188,7 @@ function ZO_GuildHistory_Gamepad:OnActivityTargetChanged(focusedItem)
     end
 end
 
-function ZO_GuildHistory_Gamepad:InitializeActivityList()
+function GuildHistory_Gamepad:InitializeActivityList()
     self.activityList = ZO_GamepadFocus:New(self.control)
     local function OnTargetChanged(...)
         self:OnActivityTargetChanged(...)
@@ -201,10 +197,12 @@ function ZO_GuildHistory_Gamepad:InitializeActivityList()
     self.activityListItems = {}
 
     -- Add the hidden "previous page" item.
-    self.activityList:AddEntry({
-                        activate = function() self:PreviousPage() end,
-                        canFocus = function(control) return self.startIndex ~= 1 end,
-                })
+    local previousEntry =
+    {
+        activate = function() self:PreviousPage() end,
+        canFocus = function(control) return self.startIndex ~= 1 end,
+    }
+    self.activityList:AddEntry(previousEntry)
 
     -- Add the main items.
     local parent = self.control:GetNamedChild("ActivityLog")
@@ -218,42 +216,46 @@ function ZO_GuildHistory_Gamepad:InitializeActivityList()
         previous = control
 
         local itemIndexInternal = itemIndex -- Needs to be local to the loop for the capture just below.
-        self.activityList:AddEntry({
-                                        control = control,
-                                        highlight = control:GetNamedChild("Highlight"),
-                                        canFocus = function(control) return itemIndexInternal <= self.displayedItems end,
-                                        headerNarrationFunction = self.headerNarrationFunction,
-                                        narrationText = function()
-                                            --The narration for the description is handled by the tooltip, so just narrate the time here
-                                            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(control.timeText)
-                                        end,
-                                  })
+        local entry =
+        {
+            control = control,
+            highlight = control:GetNamedChild("Highlight"),
+            canFocus = function(control) return itemIndexInternal <= self.displayedItems end,
+            headerNarrationFunction = self.headerNarrationFunction,
+            narrationText = function()
+                --The narration for the description is handled by the tooltip, so just narrate the time here
+                return SCREEN_NARRATION_MANAGER:CreateNarratableObject(control.timeText)
+            end,
+        }
+        self.activityList:AddEntry(entry)
     end
     self.itemsPerPage = itemIndex
 
     -- Add the hidden "next page" item.
-    self.activityList:AddEntry({
-                        activate = function() self:NextPage() end,
-                        canFocus = function(control) return self:CanPageRight() end,
-                    })
+    local nextEntry =
+    {
+        activate = function() self:NextPage() end,
+        canFocus = function(control) return self:CanPageRight() end,
+    }
+    self.activityList:AddEntry(nextEntry)
 end
 
-function ZO_GuildHistory_Gamepad:InitializeEvents()
+function GuildHistory_Gamepad:InitializeEvents()
     self.control:RegisterForEvent(EVENT_GUILD_HISTORY_CATEGORY_UPDATED, function(_, guildId, category) self:OnGuildHistoryCategoryUpdated(guildId, category) end)
     self.control:RegisterForEvent(EVENT_GUILD_HISTORY_RESPONSE_RECEIVED, function() self:OnGuildHistoryResponseReceived() end)
 end
 
-function ZO_GuildHistory_Gamepad:InitializeKeybindStripDescriptors()
+function GuildHistory_Gamepad:InitializeKeybindStripDescriptors()
     -- The keybind descriptor for when focus is on the category list.
     self.categoryKeybindStripDescriptor = {}
 
     ZO_Gamepad_AddForwardNavigationKeybindDescriptorsWithSound(self.categoryKeybindStripDescriptor,
-                                                      GAME_NAVIGATION_TYPE_BUTTON,
-                                                      function() self:SelectLogList() end,
-                                                      nil, -- default name
-                                                      nil, -- always visible
-                                                      function() return #self.guildEvents > 0 end -- Potentially disabled
-                                                    )
+        GAME_NAVIGATION_TYPE_BUTTON,
+        function() self:SelectLogList() end,
+        nil, -- default name
+        nil, -- always visible
+        function() return #self.guildEvents > 0 end -- Potentially disabled
+    )
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.categoryKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
         GAMEPAD_GUILD_HUB:SetEnterInSingleGuildList(true)
         SCENE_MANAGER:HideCurrentScene()
@@ -265,7 +267,8 @@ function ZO_GuildHistory_Gamepad:InitializeKeybindStripDescriptors()
     end
 
     -- The keybind descriptor for when focus is on the activity log list.
-    self.logKeybindStripDescriptor = {
+    self.logKeybindStripDescriptor =
+    {
         {
             --Even though this is an ethereal keybind, the name will still be read during screen narration
             name = GetString(SI_GAMEPAD_PAGED_LIST_PAGE_LEFT_NARRATION),
@@ -306,13 +309,13 @@ function ZO_GuildHistory_Gamepad:InitializeKeybindStripDescriptors()
     ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.logKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() self:SelectCategoryList() end)
 end
 
-function ZO_GuildHistory_Gamepad:RefreshKeybinds()
+function GuildHistory_Gamepad:RefreshKeybinds()
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
 end
 
-function ZO_GuildHistory_Gamepad:UpdateLogTriggerButtons()
+function GuildHistory_Gamepad:UpdateLogTriggerButtons()
     if self.keybindStripDescriptor ~= self.logKeybindStripDescriptor then
          -- We are not showing the log, the buttons are hidden.
         self.footer.control:SetHidden(true)
@@ -321,7 +324,7 @@ function ZO_GuildHistory_Gamepad:UpdateLogTriggerButtons()
     end
 end
 
-function ZO_GuildHistory_Gamepad:SelectCategoryList()
+function GuildHistory_Gamepad:SelectCategoryList()
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     end
@@ -336,7 +339,7 @@ function ZO_GuildHistory_Gamepad:SelectCategoryList()
     self.categoryList:Activate()
 end
 
-function ZO_GuildHistory_Gamepad:SelectLogList()
+function GuildHistory_Gamepad:SelectLogList()
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     end
@@ -354,7 +357,7 @@ function ZO_GuildHistory_Gamepad:SelectLogList()
     SCREEN_NARRATION_MANAGER:QueueFocus(self.activityList, NARRATE_HEADER)
 end
 
-function ZO_GuildHistory_Gamepad:SetGuildId(guildId)
+function GuildHistory_Gamepad:SetGuildId(guildId)
     if guildId ~= self.guildId then 
         self.guildId = guildId
         if self:IsShowing() then
@@ -365,7 +368,7 @@ function ZO_GuildHistory_Gamepad:SetGuildId(guildId)
     end
 end
 
-function ZO_GuildHistory_Gamepad:RequestInitialEvents()
+function GuildHistory_Gamepad:RequestInitialEvents()
     local targetData = self.categoryList:GetTargetData()
     local categoryId = targetData.categoryId
 
@@ -374,7 +377,7 @@ function ZO_GuildHistory_Gamepad:RequestInitialEvents()
     end
 end
 
-function ZO_GuildHistory_Gamepad:RequestMoreEvents()
+function GuildHistory_Gamepad:RequestMoreEvents()
     if GUILD_HISTORY_GAMEPAD_FRAGMENT:IsShowing() then
         local targetData = self.categoryList:GetTargetData()
         local categoryId = targetData.categoryId
@@ -387,19 +390,19 @@ function ZO_GuildHistory_Gamepad:RequestMoreEvents()
     end
 end
 
-function ZO_GuildHistory_Gamepad:ShowLoading()
+function GuildHistory_Gamepad:ShowLoading()
     self.loading:SetHidden(false)
 end
 
-function ZO_GuildHistory_Gamepad:HideLoading()
+function GuildHistory_Gamepad:HideLoading()
     self.loading:SetHidden(true)
 end
 
-function ZO_GuildHistory_Gamepad:IsShowing()
+function GuildHistory_Gamepad:IsShowing()
     return GUILD_HISTORY_GAMEPAD_FRAGMENT and GUILD_HISTORY_GAMEPAD_FRAGMENT:IsShowing()
 end
 
-function ZO_GuildHistory_Gamepad:OnGuildHistoryCategoryUpdated(guildId, category)
+function GuildHistory_Gamepad:OnGuildHistoryCategoryUpdated(guildId, category)
     if self.guildId == guildId then
         if self:IsShowing() then
             local targetData = self.categoryList:GetTargetData()
@@ -414,12 +417,12 @@ function ZO_GuildHistory_Gamepad:OnGuildHistoryCategoryUpdated(guildId, category
     end
 end
 
-function ZO_GuildHistory_Gamepad:OnGuildHistoryResponseReceived()
+function GuildHistory_Gamepad:OnGuildHistoryResponseReceived()
     self:RefreshKeybinds()
     self:UpdateLogTriggerButtons()
 end
 
-function ZO_GuildHistory_Gamepad:PopulateEventList()
+function GuildHistory_Gamepad:PopulateEventList()
     local targetData = self.categoryList:GetTargetData()
     local categoryId = targetData.categoryId
     local subcategoryId = targetData.subcategoryId
@@ -433,19 +436,20 @@ function ZO_GuildHistory_Gamepad:PopulateEventList()
         if (subcategoryId == nil) or (subcategoryId == eventSubcategoryID) then
             local formatFunction = GUILD_EVENT_EVENT_FORMAT[eventType]
             if formatFunction then
-                local eventData = {
-                        eventId = eventId,
-                        eventType = eventType,
-                        formatFunction = formatFunction,
-                        narrationFormatFunction = GUILD_EVENT_EVENT_NARRATION_FORMAT[eventType],
-                        secsSinceEvent = secsSinceEvent,
-                        param1 = param1,
-                        param2 = param2,
-                        param3 = param3,
-                        param4 = param4,
-                        param5 = param5,
-                        param6 = param6,
-                    }
+                local eventData = 
+                {
+                    eventId = eventId,
+                    eventType = eventType,
+                    formatFunction = formatFunction,
+                    narrationFormatFunction = GUILD_EVENT_EVENT_NARRATION_FORMAT[eventType],
+                    secsSinceEvent = secsSinceEvent,
+                    param1 = param1,
+                    param2 = param2,
+                    param3 = param3,
+                    param4 = param4,
+                    param5 = param5,
+                    param6 = param6,
+                }
                 table.insert(self.guildEvents, eventData)
             end
         end
@@ -510,7 +514,7 @@ function ZO_GuildHistory_Gamepad:PopulateEventList()
     end
 end
 
-function ZO_GuildHistory_Gamepad:PopulateCategoryList()
+function GuildHistory_Gamepad:PopulateCategoryList()
     self.categoryList:Clear()
 
     for categoryId = 1, GetNumGuildHistoryCategories() do
@@ -541,7 +545,7 @@ function ZO_GuildHistory_Gamepad:PopulateCategoryList()
     self.categoryList:Commit()
 end
 
-function ZO_GuildHistory_Gamepad:RefreshFooter()
+function GuildHistory_Gamepad:RefreshFooter()
     local currPageNum
     if self.currPageNum then
         currPageNum = self.currPageNum
@@ -561,5 +565,5 @@ function ZO_GuildHistory_Gamepad:RefreshFooter()
 end
 
 function ZO_GuildHistory_Gamepad_Initialize(control)
-    GUILD_HISTORY_GAMEPAD = ZO_GuildHistory_Gamepad:New(control)
+    GUILD_HISTORY_GAMEPAD = GuildHistory_Gamepad:New(control)
 end

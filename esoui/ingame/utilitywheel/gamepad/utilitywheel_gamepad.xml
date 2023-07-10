@@ -33,7 +33,7 @@
                 <!-- Cycle Keybinds -->
                 <Control name="$(parent)PreviousCategory" hidden="true">
                     <Controls>
-                        <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                        <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad" font="ZoFontGamepad22">
                             <Anchor point="TOPRIGHT" relativeTo="$(grandparent)Menu" relativePoint="BOTTOMLEFT" offsetY="50" />
                         </Label>
 
@@ -45,7 +45,7 @@
 
                 <Control name="$(parent)NextCategory" hidden="true">
                     <Controls>
-                        <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
+                        <Label name="$(parent)KeybindLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad" font="ZoFontGamepad22">
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)Menu" relativePoint="BOTTOMRIGHT" offsetY="50" />
                         </Label>
 

@@ -56,13 +56,17 @@ function ZO_Synergy:ApplyTextStyle(constants)
 end
 
 function ZO_Synergy:OnSynergyAbilityChanged()
-    local synergyName, iconFilename = GetSynergyInfo()
+    local hasSynergy, synergyName, iconFilename, prompt = GetCurrentSynergyInfo()
 
-    if synergyName and iconFilename then
+    if hasSynergy then
         if self.lastSynergyName ~= synergyName then
             PlaySound(SOUNDS.ABILITY_SYNERGY_READY)
 
-            self.action:SetText(zo_strformat(SI_USE_SYNERGY, synergyName))
+            if prompt == "" then
+                prompt = zo_strformat(SI_USE_SYNERGY, synergyName)
+            end
+            self.action:SetText(prompt)
+            self.lastSynergyName = synergyName
         end
         
         self.icon:SetTexture(iconFilename)
@@ -70,9 +74,8 @@ function ZO_Synergy:OnSynergyAbilityChanged()
         SHARED_INFORMATION_AREA:SetHidden(self, false)
     else
         SHARED_INFORMATION_AREA:SetHidden(self, true)
+        self.lastSynergyName = nil
     end
-
-    self.lastSynergyName = synergyName
 end
 
 function ZO_Synergy:SetHidden(hidden)

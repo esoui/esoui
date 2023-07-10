@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_GuildHistory_Gamepad_ActivityItem" virtual="true" hidden="true">
-            <Dimensions x="50" y="80" />
+            <Dimensions y="60" />
 
             <OnInitialized>
                 self.text = self:GetNamedChild("Text")
@@ -10,19 +10,19 @@
 
             <Controls>
                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
-                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="10"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="-10"/>
+                    <Anchor point="TOPLEFT" offsetX="-20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" />
                 </Backdrop>
                 
                 <Label name="$(parent)Text" verticalAlignment="CENTER" font="ZoFontGamepadCondensed34" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" offsetY="10" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-155" offsetY="-10" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-155" />
                 </Label>
 
                 <Label name="$(parent)Time" verticalAlignment="CENTER" horizontalAlignment="RIGHT" font="ZoFontGamepadCondensed34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
                     <Dimensions x="150" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="TOPRIGHT" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetX="6" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="TOPRIGHT" offsetX="5" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetX="5" />
                 </Label>
             </Controls>
         </Control>

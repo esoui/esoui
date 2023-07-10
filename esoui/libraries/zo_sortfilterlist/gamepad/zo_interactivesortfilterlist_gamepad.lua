@@ -117,7 +117,7 @@ function ZO_GamepadInteractiveSortFilterList:Initialize(control)
                 SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher, NARRATE_HEADER)
             elseif self:IsCurrentFocusArea(self.headersFocalArea) then
                 if self.sortHeaderGroup then
-                    SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, self.sortHeaderGroup:GetCurrentSortKey(), NARRATE_HEADER)
+                    SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, self.sortHeaderGroup:GetKeyForCurrentSelectedIndex(), NARRATE_HEADER)
                 end
             elseif self:IsCurrentFocusArea(self.panelFocalArea) then
                 SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, NARRATE_HEADER)
@@ -412,8 +412,10 @@ function ZO_GamepadInteractiveSortFilterList:OnHidden()
     --To be overriden
 end
 
-function ZO_GamepadInteractiveSortFilterList:Activate()
-    self:SetDirectionalInputEnabled(true)
+function ZO_GamepadInteractiveSortFilterList:Activate(foregoDirectionalInput)
+    if not foregoDirectionalInput then
+        self:SetDirectionalInputEnabled(true)
+    end
     local hasEntries = self:HasEntries()
     local activeFocus = hasEntries and self.panelFocalArea or self.headersFocalArea
     if not activeFocus then
@@ -427,13 +429,15 @@ function ZO_GamepadInteractiveSortFilterList:Activate()
             SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, NARRATE_HEADER)
         elseif self.sortHeaderGroup then
             local NARRATE_HEADER = true
-            SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, self.sortHeaderGroup:GetCurrentSortKey(), NARRATE_HEADER)
+            SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, self.sortHeaderGroup:GetKeyForCurrentSelectedIndex(), NARRATE_HEADER)
         end
     end
 end
 
-function ZO_GamepadInteractiveSortFilterList:Deactivate()
-    self:SetDirectionalInputEnabled(false)
+function ZO_GamepadInteractiveSortFilterList:Deactivate(foregoDirectionalInput)
+    if not foregoDirectionalInput then
+        self:SetDirectionalInputEnabled(false)
+    end
 
     if self.filterDropdown and self.filterDropdown:IsActive() then
         local BLOCK_CALLBACK = true
@@ -458,6 +462,10 @@ end
 
 function ZO_GamepadInteractiveSortFilterList:IsPanelFocused()
     return self:IsCurrentFocusArea(self.panelFocalArea)
+end
+
+function ZO_GamepadInteractiveSortFilterList:IsHeaderFocused()
+    return self:IsCurrentFocusArea(self.headersFocalArea)
 end
 
 function ZO_GamepadInteractiveSortFilterList:CanChangeSortKey()

@@ -61,16 +61,23 @@ function ZO_AddOnManager:Initialize(control, primaryKeybindDescriptor, secondary
     CALLBACK_MANAGER:RegisterCallback("AddOnEULAHidden", OnAddOnEulaHidden)
 
     ADDONS_FRAGMENT = ZO_FadeSceneFragment:New(self.control)
-    ADDONS_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
-                                                if newState == SCENE_FRAGMENT_SHOWING then
-                                                    PushActionLayerByName("Addons")
-                                                elseif newState == SCENE_FRAGMENT_HIDING then
-                                                    RemoveActionLayerByName("Addons")
-                                                end
-                                            end)
+    ADDONS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            PushActionLayerByName("Addons")
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            RemoveActionLayerByName("Addons")
+        end
+    end)
 
     --Uses a namespace event registration because ZO_ReanchorControlForLeftSidePanel registers EVENT_SCREEN_RESIZED on the control
     EVENT_MANAGER:RegisterForEvent("AddOnManager", EVENT_SCREEN_RESIZED, function() self:RefreshData() end)
+
+    local function OnForceDisabledAddonsUpdated()
+        if ADDONS_FRAGMENT:IsShowing() then
+            self:RefreshData()
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("AddOnManager", EVENT_FORCE_DISABLED_ADDONS_UPDATED, OnForceDisabledAddonsUpdated)
     ZO_ReanchorControlForLeftSidePanel(self.control)
 end
 

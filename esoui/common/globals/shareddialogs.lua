@@ -136,10 +136,13 @@ ESO_Dialogs["CONFIRM_OPEN_URL_BY_TYPE"] =
 
 ESO_Dialogs["SHOW_REDEEM_CODE"] = 
 {
+    mustChoose = true,
+
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
+
     title =
     {
         text = SI_ENTER_CODE_DIALOG_TITLE,
@@ -152,7 +155,6 @@ ESO_Dialogs["SHOW_REDEEM_CODE"] =
 
     buttons =
     {
-        [1] =
         {
             text = SI_DIALOG_LOG_OUT_ENTER_CODE,
             callback = function(dialog)
@@ -160,7 +162,6 @@ ESO_Dialogs["SHOW_REDEEM_CODE"] =
             end,
         },
 
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
         },
@@ -169,6 +170,8 @@ ESO_Dialogs["SHOW_REDEEM_CODE"] =
 
 ESO_Dialogs["SHOW_REDEEM_CODE_CONSOLE"] = 
 {
+    mustChoose = true,
+
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -186,7 +189,6 @@ ESO_Dialogs["SHOW_REDEEM_CODE_CONSOLE"] =
 
     buttons =
     {
-        [1] =
         {
             text = SI_DIALOG_LOG_OUT_ENTER_CODE,
             callback = function(dialog)
@@ -198,7 +200,6 @@ ESO_Dialogs["SHOW_REDEEM_CODE_CONSOLE"] =
             end,
         },
 
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
         },

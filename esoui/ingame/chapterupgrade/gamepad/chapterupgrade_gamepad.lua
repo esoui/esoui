@@ -165,7 +165,12 @@ function ZO_ChapterUpgrade_Gamepad:Initialize(control)
     local ACTIVATE_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, ZO_GAMEPAD_CHAPTER_UPGRADE_SCENE)
 
-    ZO_GamepadGenericHeader_RefreshData(self.header, { titleText = GetString(SI_MAIN_MENU_CHAPTERS), })
+    self.headerData =
+    {
+        titleText = GetString(SI_MAIN_MENU_CHAPTERS),
+    }
+
+    ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 
     self.categoryList = self:GetMainList()
     local rightPaneContentsControl = control:GetNamedChild("RightPaneContents")
@@ -192,15 +197,15 @@ function ZO_ChapterUpgrade_Gamepad:Initialize(control)
 
     self:InitializePreviewScene()
 
-    local chapterUpgradSceneGroup = ZO_SceneGroup:New("chapterUpgradeGamepad", "chapterUpgradePreviewGamepad")
-    chapterUpgradSceneGroup:RegisterCallback("StateChange", function(oldState, newState)
+    local chapterUpgradeSceneGroup = ZO_SceneGroup:New("chapterUpgradeGamepad", "chapterUpgradePreviewGamepad")
+    chapterUpgradeSceneGroup:RegisterCallback("StateChange", function(_, newState)
         if newState == SCENE_GROUP_SHOWING then
             self:OnSceneGroupShowing()
         elseif newState == SCENE_GROUP_HIDDEN then
             self:OnSceneGroupHidden()
         end
     end)
-    SCENE_MANAGER:AddSceneGroup("gamepad_chapterUpgrade_scenegroup", chapterUpgradSceneGroup)
+    SCENE_MANAGER:AddSceneGroup("gamepad_chapterUpgrade_scenegroup", chapterUpgradeSceneGroup)
 end
 
 function ZO_ChapterUpgrade_Gamepad:InitializeKeybindStripDescriptors()

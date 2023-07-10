@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 101038
+h1. ESO UI Documentation for API Version 101039
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -684,6 +684,7 @@ h5. NotificationType
 * NOTIFICATION_TYPE_COLLECTIONS
 * NOTIFICATION_TYPE_CRAFT_BAG_AUTO_TRANSFER
 * NOTIFICATION_TYPE_CUSTOMER_SERVICE
+* NOTIFICATION_TYPE_DISABLED_ADDON
 * NOTIFICATION_TYPE_DUEL
 * NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION
 * NOTIFICATION_TYPE_FRIEND
@@ -1554,7 +1555,6 @@ h5. AbilityType
 * ABILITY_TYPE_CREATEINTERACTABLE
 * ABILITY_TYPE_CREATEINVENTORYITEM
 * ABILITY_TYPE_CUSTOMTARGETAREA
-* ABILITY_TYPE_DEPRECATED3
 * ABILITY_TYPE_DAMAGE
 * ABILITY_TYPE_DAMAGEIMMUNE
 * ABILITY_TYPE_DAMAGELIMIT
@@ -1613,6 +1613,7 @@ h5. AbilityType
 * ABILITY_TYPE_PACIFY
 * ABILITY_TYPE_PARRY
 * ABILITY_TYPE_PATHLINE
+* ABILITY_TYPE_PERSISTENTRADIUS
 * ABILITY_TYPE_PHASETHROUGH
 * ABILITY_TYPE_RANDOMBRANCH
 * ABILITY_TYPE_RECALL
@@ -2803,6 +2804,7 @@ h5. PlayerFxOverrideType
 
 h5. SpecializedCollectibleType
 * SPECIALIZED_COLLECTIBLE_TYPE_BUST
+* SPECIALIZED_COLLECTIBLE_TYPE_HOUSEGUEST
 * SPECIALIZED_COLLECTIBLE_TYPE_KEEPSAKE
 * SPECIALIZED_COLLECTIBLE_TYPE_NONE
 * SPECIALIZED_COLLECTIBLE_TYPE_TOOL
@@ -3646,6 +3648,7 @@ h5. GuildBankResult
 * GUILD_BANK_BAD_ITEM
 * GUILD_BANK_CANT_BE_STORED
 * GUILD_BANK_GUILD_TOO_SMALL
+* GUILD_BANK_INVENTORY_FULL
 * GUILD_BANK_ITEM_NOT_FOUND
 * GUILD_BANK_NOT_A_MEMBER
 * GUILD_BANK_NOT_ENOUGH_BANK_SPACE_FOR_GOLD
@@ -6193,6 +6196,7 @@ h5. UISetting
 * UI_SETTING_SHOW_HOUSE_TRACKER
 * UI_SETTING_SHOW_LATENCY
 * UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS
+* UI_SETTING_SHOW_PVP_KILL_FEED_NOTIFICATIONS
 * UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS
 * UI_SETTING_SHOW_QUEST_TRACKER
 * UI_SETTING_SHOW_RAID_LIVES
@@ -6566,6 +6570,7 @@ h5. RespecResult
 * RESPEC_RESULT_REMOVED_ABILITIES_DURING_PURCHASE_MODE
 * RESPEC_RESULT_REMOVED_NON_MORPH_DURING_MORPH_MODE
 * RESPEC_RESULT_SUCCESS
+* RESPEC_RESULT_UNKNOWN_REPEC_REQUEST_TYPE
 
 
 h5. RespecType
@@ -7194,6 +7199,13 @@ h5. Globals
 * MAX_PROMO_CODE_LENGTH
 
 
+h5. ForcedZoneExitCause
+* INSTANCE_KICK_REASON_INSTANCE_SHUTDOWN
+* INSTANCE_KICK_REASON_NONE
+* INSTANCE_KICK_REASON_NOT_IN_REQUIRED_GROUP
+* INSTANCE_KICK_REASON_WANT_TO_LEAVE
+
+
 h5. GroupDifficultyChangeReason
 * GROUP_DIFFICULTY_CHANGE_REASON_IN_DUNGEON
 * GROUP_DIFFICULTY_CHANGE_REASON_IN_LFG_GROUP
@@ -7745,6 +7757,7 @@ h5. CompanionState
 
 h5. CompanionSummonResult
 * COMPANION_SUMMON_RESULT_ADDED_FOR_GROUP_PLAYER
+* COMPANION_SUMMON_RESULT_BLOCKED_BY_ASSISTANT
 * COMPANION_SUMMON_RESULT_BLOCKED_BY_FOLLOWER
 * COMPANION_SUMMON_RESULT_BLOCKED_BY_SUBZONE
 * COMPANION_SUMMON_RESULT_BLOCKED_BY_WORLD_BOSS
@@ -7754,6 +7767,7 @@ h5. CompanionSummonResult
 * COMPANION_SUMMON_RESULT_EFFECT_LIMIT
 * COMPANION_SUMMON_RESULT_EXPECTED_DIFFERENT_COMPANION
 * COMPANION_SUMMON_RESULT_GROUP_FULL
+* COMPANION_SUMMON_RESULT_REMOVED_FOR_ASSISTANT
 * COMPANION_SUMMON_RESULT_REMOVED_FOR_FOLLOWER
 * COMPANION_SUMMON_RESULT_REMOVED_FOR_GROUP_PLAYER
 * COMPANION_SUMMON_RESULT_REMOVED_FOR_PERF
@@ -9797,6 +9811,19 @@ h5. PreferredInputDeviceType
 h5. VirtualKeyboardType
 * VIRTUAL_KEYBOARD_TYPE_DEFAULT
 * VIRTUAL_KEYBOARD_TYPE_EMAIL
+
+
+h5. Globals
+
+
+h5. OfficialLanguage
+* OFFICIAL_LANGUAGE_CHINESE_S
+* OFFICIAL_LANGUAGE_ENGLISH
+* OFFICIAL_LANGUAGE_FRENCH
+* OFFICIAL_LANGUAGE_GERMAN
+* OFFICIAL_LANGUAGE_JAPANESE
+* OFFICIAL_LANGUAGE_RUSSIAN
+* OFFICIAL_LANGUAGE_SPANISH
 
 
 h5. Globals
@@ -12131,8 +12158,8 @@ h2. Game API
 * ArePlayerWeaponsSheathed()
 ** _Returns:_ *bool* _weaponsAreSheathed_
 
-* GetSynergyInfo()
-** _Returns:_ *string:nilable* _synergyName_, *textureName:nilable* _iconFilename_, *integer:nilable* _priority_
+* GetCurrentSynergyInfo()
+** _Returns:_ *bool* _hasSynergy_, *string* _synergyName_, *textureName* _iconFilename_, *string* _prompt_, *integer* _priority_
 
 * HasSynergyEffects()
 ** _Returns:_ *bool* _hasSynergy_
@@ -12198,6 +12225,9 @@ h2. Game API
 
 * GetInstanceKickTime()
 ** _Returns:_ *integer:nilable* _remainingTimeMs_, *integer:nilable* _totalTimeMs_
+
+* GetInstanceKickReason()
+** _Returns:_ *[ForcedZoneExitCause|#ForcedZoneExitCause]* _reason_
 
 * IsGroupMemberInRemoteRegion(*string* _unitTag_)
 ** _Returns:_ *bool* _inRemoteRegion_
@@ -13369,9 +13399,6 @@ h2. Game API
 * IsInJusticeEnabledZone()
 ** _Returns:_ *bool* _isInJusticeZone_
 
-* IsInTutorialZone()
-** _Returns:_ *bool* _isInTutorialZone_
-
 * CanLeaveCurrentLocationViaTeleport()
 ** _Returns:_ *bool* _canLeaveCurrentLocationViaTeleport_
 
@@ -13896,6 +13923,9 @@ h2. Game API
 
 * GetNumKillLocations()
 ** _Returns:_ *integer* _numLocations_
+
+* GetNumKillLocationAllianceKills(*luaindex* _index_, *[Alliance|#Alliance]* _alliance_)
+** _Returns:_ *integer* _numKills_
 
 * GetKillLocationPinInfo(*luaindex* _index_)
 ** _Returns:_ *integer* _pinType_, *number* _normalizedX_, *number* _normalizedY_
@@ -15522,9 +15552,9 @@ h2. Game API
 
 * AddActivityFinderSpecificSearchEntry(*integer* _activityId_)
 
-* ClearGroupFinderSearch()
+* ClearActivityFinderSearch()
 
-* StartGroupFinderSearch()
+* StartActivityFinderSearch()
 ** _Returns:_ *[ActivityQueueResult|#ActivityQueueResult]* _result_
 
 * CanSendLFMRequest()
@@ -17657,13 +17687,13 @@ h2. Game API
 * GetUnitZoneIndex(*string* _unitTag_)
 ** _Returns:_ *luaindex:nilable* _zoneIndex_
 
-* ExecuteChatCommand(*string* _text_)
-
 * IsLockedWeaponSlot(*[EquipSlot|#EquipSlot]* _equipSlot_)
 ** _Returns:_ *bool* _locked_
 
 * GetLinkType(*string* _itemLink_)
 ** _Returns:_ *[LinkType|#LinkType]* _linkType_
+
+* ExecuteChatCommand(*string* _text_)
 
 * GetNumCharacterSlotsPerUpgrade()
 ** _Returns:_ *integer* _numSlots_
@@ -18294,7 +18324,7 @@ h2. Game API
 ** _Returns:_ *bool* _itemStackable_
 
 * GetItemLinkStacks(*string* _itemLink_)
-** _Returns:_ *integer* _stackCountBackpack_, *integer* _stackCountBank_, *integer* _stackCountCraftBag_
+** _Returns:_ *integer* _stackCountBackpack_, *integer* _stackCountBank_, *integer* _stackCountCraftBag_, *integer* _stackCountHouseBanks_
 
 * CanItemLinkBeVirtual(*string* _itemLink_)
 ** _Returns:_ *bool* _canBeVirtual_
@@ -19903,6 +19933,12 @@ h2. Game API
 * GetSkillLineDetailedIconById(*integer* _skillLineId_)
 ** _Returns:_ *textureName* _detailedIcon_
 
+* GetNumAttainSkillLineRanksInAchievement(*integer* _achievementId_)
+** _Returns:_ *integer* _numAttainSkillLineRanks_
+
+* GetNumSkyshardsInAchievement(*integer* _achievementId_)
+** _Returns:_ *integer* _numSkyshards_
+
 * GetNumUnlockedArmoryBuilds()
 ** _Returns:_ *integer* _numBuilds_
 
@@ -20258,6 +20294,8 @@ h3. AddOnManager
 * AreAddOnsEnabled()
 ** _Returns:_ *bool* _areAddOnsEnabled_
 
+* ClearForceDisabledAddOnNotification(*luaindex* _disabledAddonIndex_)
+
 * ClearWarnOutOfDateAddOns()
 
 * GetAddOnDependencyInfo(*luaindex* _addOnIndex_, *luaindex* _addOnDependencyIndex_)
@@ -20278,11 +20316,17 @@ h3. AddOnManager
 * GetAddOnVersion(*luaindex* _addOnIndex_)
 ** _Returns:_ *integer* _version_
 
+* GetForceDisabledAddOnInfo(*luaindex* _disabledAddonIndex_)
+** _Returns:_ *string* _addonName_, *bool* _shouldShowNotification_
+
 * GetLoadOutOfDateAddOns()
 ** _Returns:_ *bool* _loadOutOfDateAddons_
 
 * GetNumAddOns()
 ** _Returns:_ *integer* _numAddOns_
+
+* GetNumForceDisabledAddOns()
+** _Returns:_ *integer* _numDisabledAddons_
 
 * RemoveAddOnFilter()
 
@@ -20298,6 +20342,9 @@ h3. AddOnManager
 
 * ShouldWarnOutOfDateAddOns()
 ** _Returns:_ *bool* _warnOutOfDateAddons_
+
+* WasAddOnDetected(*string* _addOnName_)
+** _Returns:_ *bool* _wasDetected_
 
 
 h3. AnimationManager
@@ -22623,6 +22670,9 @@ h3. WindowManager
 * GetIMECandidatePageInfo()
 ** _Returns:_ *luaindex* _selectedIndex_, *luaindex* _pageStartIndex_, *integer* _pageSize_
 
+* GetMouseFocusControl()
+** _Returns:_ *object* _mouseFocusControl_
+
 * GetMouseOverControl()
 ** _Returns:_ *object* _mouseOverControl_
 
@@ -22679,7 +22729,7 @@ h3. WindowManager
 * GetUICustomScale()
 ** _Returns:_ *number* _scale_
 
-* LocalizeString(*string* _formatString_, *string* _arg1_, *string* _arg2_, *string* _arg3_, *string* _arg4_, *string* _arg5_, *string* _arg6_)
+* LocalizeString(*string* _formatString_, *string* _arg1_, *string* _arg2_, *string* _arg3_, *string* _arg4_, *string* _arg5_, *string* _arg6_, *string* _arg7_)
 ** _Returns:_ *string* _localizedString_
 
 * GetAnimationManager()
@@ -23273,6 +23323,7 @@ h2. Events
 * EVENT_POI_DISCOVERED (*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
 * EVENT_POI_UPDATED (*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
 * EVENT_POWER_UPDATE (*string* _unitTag_, *luaindex* _powerIndex_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *integer* _powerValue_, *integer* _powerMax_, *integer* _powerEffectiveMax_)
+* EVENT_PVP_KILL_FEED_DEATH (*string* _killLocation_, *string* _killerPlayerCharacterName_, *string* _killerPlayerDisplayName_, *[Alliance|#Alliance]* _killerPlayerAlliance_, *integer* _killerPlayerRank_, *string* _victimPlayerCharacterName_, *string* _victimPlayerDisplayName_, *[Alliance|#Alliance]* _victimPlayerAlliance_, *integer* _victimPlayerRank_)
 * EVENT_QUEST_ADDED (*luaindex* _journalIndex_, *string* _questName_, *string* _objectiveName_)
 * EVENT_QUEST_ADVANCED (*luaindex* _journalIndex_, *string* _questName_, *bool* _isPushed_, *bool* _isComplete_, *bool* _mainStepChanged_)
 * EVENT_QUEST_COMPLETE (*string* _questName_, *integer* _level_, *integer* _previousExperience_, *integer* _currentExperience_, *integer* _championPoints_, *[QuestType|#QuestType]* _questType_, *[InstanceDisplayType|#InstanceDisplayType]* _instanceDisplayType_)
@@ -23532,6 +23583,7 @@ h2. Events
 * EVENT_COLLECTIBLE_UPDATED (*integer* _id_)
 * EVENT_DEFERRED_SETTING_REQUEST_COMPLETED (*[SettingSystemType|#SettingSystemType]* _settingSystemType_, *integer* _settingId_, *bool* _success_, *integer* _result_)
 * EVENT_FOLLOWER_SCENE_FINISHED_FRAGMENT_TRANSITION (*[SceneManagerMessageOrigin|#SceneManagerMessageOrigin]* _messageOrigin_, *string* _sceneName_, *integer* _sequenceNumber_)
+* EVENT_FORCE_DISABLED_ADDONS_UPDATED
 * EVENT_FRIEND_ADDED (*string* _displayName_)
 * EVENT_FRIEND_CHARACTER_CHAMPION_POINTS_CHANGED (*string* _displayName_, *string* _characterName_, *integer* _championRank_)
 * EVENT_FRIEND_CHARACTER_LEVEL_CHANGED (*string* _displayName_, *string* _characterName_, *integer* _level_)

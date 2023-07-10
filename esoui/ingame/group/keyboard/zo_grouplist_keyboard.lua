@@ -72,6 +72,13 @@ function ZO_GroupList_Keyboard:Initialize(control)
         mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_group_over.dds",
     }
     GROUP_MENU_KEYBOARD:AddCategory(groupCategoryData)
+
+    local function OnCombatStateChanged()
+        if GROUP_LIST_FRAGMENT:IsShowing() then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end
+    control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, OnCombatStateChanged)
 end
 
 function ZO_GroupList_Keyboard:InitializeKeybindDescriptors()

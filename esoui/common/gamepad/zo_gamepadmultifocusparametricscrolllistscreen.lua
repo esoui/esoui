@@ -103,7 +103,7 @@ end
 
 -- A function which should be called as the StateChanged callback for the scene.
 function ZO_Gamepad_MultiFocus_ParametricList_Screen:OnStateChanged(oldState, newState)
-    if newState == SCENE_SHOWING or newState == SCENE_GROUP_SHOWING then
+    if newState == ZO_STATE.SHOWING then
         self:PerformDeferredInitialize()
         if self.activateOnShow then
             self:SetCurrentList(self:GetMainList())
@@ -111,12 +111,12 @@ function ZO_Gamepad_MultiFocus_ParametricList_Screen:OnStateChanged(oldState, ne
         
         SCENE_MANAGER:AddFragment(self.headerFragment)
         self:OnShowing()
-    elseif newState == SCENE_HIDING then
+    elseif newState == ZO_STATE.HIDING then
         self:OnHiding()
-    elseif newState == SCENE_HIDDEN or newState == SCENE_GROUP_HIDDEN then
+    elseif newState == ZO_STATE.HIDDEN then
         self:OnHide()
         self:Deactivate()
-    elseif newState == SCENE_SHOWN or newState == SCENE_GROUP_SHOWN then
+    elseif newState == ZO_STATE.SHOWN then
         self:OnShow()
     end
 end

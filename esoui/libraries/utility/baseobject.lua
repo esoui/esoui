@@ -242,3 +242,82 @@ end
 function ZO_InitializingObject:Initialize()
     -- To be overridden
 end
+
+--
+-- ZO_DeferredInitializingObject is a ZO_InitializingObject wrapper that standardizes the logic around deferring some of the initialization until later.
+-- Use of this abstract class requires passing in a fragment and implementing OnDeferredInitialize
+-- OnDeferredInitialize will be called when the fragment is showing before calling self:OnShowing()
+
+ZO_DeferredInitializingObject = {}
+zo_mixin(ZO_DeferredInitializingObject, ZO_InitializingObject)
+ZO_DeferredInitializingObject.__index = ZO_DeferredInitializingObject
+
+---
+-- Override this initialization function to define how your object should be constructed. 
+-- You must create a fragment, scene, or scene group and call this base Initialize function, passing the fragment, scene, or scene group. example:
+--     function MyClass:Initialize(control, argument1, argument2)
+--         ZO_DeferredInitializingObject:Initialize(self, ZO_FadeSceneFragment:New(control))
+--         self.myField = argument1
+--     end
+function ZO_DeferredInitializingObject:Initialize(sceneStateObject)
+    assert(sceneStateObject)
+    self.sceneStateObject = sceneStateObject
+    self.sceneStateObject:RegisterCallback("StateChange", function(...) self:OnStateChanged(...) end)
+    if self.sceneStateObject:IsInstanceOf(ZO_Scene) then
+        self.scene = sceneStateObject
+    elseif self.sceneStateObject:IsInstanceOf(ZO_SceneFragment) then
+        self.fragment = sceneStateObject
+    elseif self.sceneStateObject:IsInstanceOf(ZO_SceneGroup) then
+        self.sceneGroup = sceneStateObject
+    end
+end
+
+function ZO_DeferredInitializingObject:OnStateChanged(_, newState)
+    if newState == ZO_STATE.SHOWING then
+        if not self.initialized then
+            self.initialized = true
+            self:OnDeferredInitialize()
+        end
+        self:OnShowing()
+    elseif newState == ZO_STATE.SHOWN then
+        self:OnShown()
+    elseif newState == ZO_STATE.HIDING then
+        self:OnHiding()
+    elseif newState == ZO_STATE.HIDDEN then
+        self:OnHidden()
+    end
+end
+
+function ZO_DeferredInitializingObject:OnShowing()
+    -- To be overridden
+end
+
+function ZO_DeferredInitializingObject:OnShown()
+    -- To be overridden
+end
+
+function ZO_DeferredInitializingObject:OnHiding()
+    -- To be overridden
+end
+
+function ZO_DeferredInitializingObject:OnHidden()
+    -- To be overridden
+end
+
+function ZO_DeferredInitializingObject:GetScene()
+    return self.scene
+end
+
+function ZO_DeferredInitializingObject:GetFragment()
+    return self.fragment
+end
+
+function ZO_DeferredInitializingObject:GetSceneGroup()
+    return self.sceneGroup
+end
+
+function ZO_DeferredInitializingObject:IsShowing()
+    return self.sceneStateObject:IsShowing()
+end
+
+ZO_DeferredInitializingObject:MUST_IMPLEMENT("OnDeferredInitialize")

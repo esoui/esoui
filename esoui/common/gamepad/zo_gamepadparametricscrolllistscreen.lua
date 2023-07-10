@@ -500,8 +500,8 @@ function ZO_Gamepad_ParametricList_Screen:UpdateDirectionalInput()
 end
 
 -- A function which should be called as the StateChanged callback for the scene.
-function ZO_Gamepad_ParametricList_Screen:OnStateChanged(oldState, newState)
-    if newState == SCENE_SHOWING or newState == SCENE_GROUP_SHOWING or newState == SCENE_FRAGMENT_SHOWING then
+function ZO_Gamepad_ParametricList_Screen:OnStateChanged(_, newState)
+    if newState == ZO_STATE.SHOWING then
         self:PerformDeferredInitialize()
         if self.keybindStripDescriptor then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
@@ -513,19 +513,15 @@ function ZO_Gamepad_ParametricList_Screen:OnStateChanged(oldState, newState)
         
         SCENE_MANAGER:AddFragment(self.headerFragment)
         self:OnShowing()
-    elseif newState == SCENE_SHOWN or newState == SCENE_GROUP_SHOWN or newState == SCENE_FRAGMENT_SHOWN then
+    elseif newState == ZO_STATE.SHOWN then
         self:OnShow()
-    elseif newState == SCENE_HIDING or newState == SCENE_GROUP_HIDING or newState == SCENE_FRAGMENT_HIDING then
-        if newState ~= SCENE_GROUP_HIDING and self.keybindStripDescriptor then
+    elseif newState == ZO_STATE.HIDING then
+        if self.keybindStripDescriptor then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         end
         self:HideFragmentsIfNeeded()
         self:OnHiding()
-    elseif newState == SCENE_HIDDEN or newState == SCENE_GROUP_HIDDEN or newState == SCENE_FRAGMENT_HIDDEN then
-        if newState == SCENE_GROUP_HIDDEN and self.keybindStripDescriptor then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-        end
-
+    elseif newState == ZO_STATE.HIDDEN then
         if DIRECTIONAL_INPUT:IsListening(self) then
             DIRECTIONAL_INPUT:Deactivate(self)
         end

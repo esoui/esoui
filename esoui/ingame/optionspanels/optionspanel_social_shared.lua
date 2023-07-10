@@ -261,6 +261,16 @@ local ZO_OptionsPanel_Social_ControlData =
                 ["AvANotifications_On"]    = ZO_Options_SetOptionActive,
             },
         },
+        --Options_Social_PvPKillFeedNotifications
+        [UI_SETTING_SHOW_PVP_KILL_FEED_NOTIFICATIONS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            panel = SETTING_PANEL_SOCIAL,
+            settingId = UI_SETTING_SHOW_PVP_KILL_FEED_NOTIFICATIONS,
+            text = SI_SOCIAL_OPTIONS_SHOW_PVP_KILL_FEED_NOTIFICATIONS,
+            tooltipText = SI_SOCIAL_OPTIONS_SHOW_PVP_KILL_FEED_NOTIFICATIONS_TOOLTIP,
+        },
         [UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED] =
         {
             controlType = OPTIONS_CHECKBOX,

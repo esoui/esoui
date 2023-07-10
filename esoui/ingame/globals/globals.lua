@@ -125,3 +125,8 @@ function ZO_FormatResourceBarCurrentAndMax(current, maximum, overrideSetting)
 
     return returnValue
 end
+
+-- Determines whether any item or collectible furnishing can be placed in the current house.
+function ZO_CanPlaceFurnitureInCurrentHouse()
+    return GetCurrentZoneHouseId() ~= 0 and IsOwnerOfCurrentHouse()
+end

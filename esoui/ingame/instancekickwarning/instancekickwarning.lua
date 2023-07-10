@@ -79,10 +79,15 @@ function ZO_InstanceKickWarning:OnInstanceKickTimeUpdate(timeRemaining, totalTim
         self:UpdateVisibility()
         
         -- give an alert text to explain why being removed from the instance
-        if(IsUnitGrouped("player")) then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, GetString(SI_INSTANCE_KICK_WARNING_GROUPED))
+        local kickReason = GetInstanceKickReason()
+        if GetInstanceKickReason() == INSTANCE_KICK_REASON_NOT_IN_REQUIRED_GROUP then
+            if IsUnitGrouped("player") then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, GetString(SI_INSTANCE_KICK_WARNING_GROUPED))
+            else
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, GetString(SI_INSTANCE_KICK_WARNING_UNGROUPED))
+            end
         else
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, GetString(SI_INSTANCE_KICK_WARNING_UNGROUPED))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, GetString(SI_INSTANCE_KICK_WARNING_SHUTDOWN))
         end
     else
         self.timerCooldown:Stop()

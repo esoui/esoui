@@ -11,7 +11,6 @@ function GroupMenu_Keyboard:Initialize(control)
     self.control = control
     self.headerControl = self.control:GetNamedChild("Header")
     self.categoriesControl = self.control:GetNamedChild("Categories")
-    self.rolesDividerControl = self.control:GetNamedChild("RolesCategoriesDivider")
 
     local function OnStateChange(oldState, newState)
         if newState == SCENE_SHOWING  then
@@ -124,7 +123,7 @@ function GroupMenu_Keyboard:InitializeCategories()
 
                 -- Order matters:
                 if categoryData.onTreeEntrySelected then
-                    categoryData.onTreeEntrySelected()
+                    categoryData.onTreeEntrySelected(categoryData)
                 end
                 SCENE_MANAGER:AddFragment(categoryData.categoryFragment)
             end
@@ -322,28 +321,25 @@ function GroupMenu_Keyboard:RebuildCategories()
     ZO_ClearTable(self.categoryFragmentToNodeLookup)
 
     self:AddCategoryTreeNodes(self.nodeList)
-    self.navigationTree:Commit()
 
+    --Order matters: Do this after the category nodes have been added
+    local nodeToSelect
     if selectedParentData then
-        local selectNode = self.navigationTree:GetTreeNodeByData(selectedParentData)
-        if selectNode then
-            self.navigationTree:SelectFirstChild(selectNode)
+        local parentNode = self.navigationTree:GetTreeNodeByData(selectedParentData)
+        if parentNode then
+            nodeToSelect = parentNode:GetChild(1)
         end
     end
+
+    self.navigationTree:Commit(nodeToSelect)
 end
 
 function GroupMenu_Keyboard:HideTree()
-    self.navigationTree:SetEnabled(false)
-    self.navigationTree.control:SetHidden(true)
-    PREFERRED_ROLES.control:SetHidden(true)
-    self.rolesDividerControl:SetHidden(true)
+    self.categoriesControl:SetHidden(true)
 end
 
 function GroupMenu_Keyboard:ShowTree()
-    self.navigationTree:SetEnabled(true)
-    self.navigationTree.control:SetHidden(false)
-    PREFERRED_ROLES.control:SetHidden(false)
-    self.rolesDividerControl:SetHidden(false)
+    self.categoriesControl:SetHidden(false)
 end
 
 function GroupMenu_Keyboard:RefreshCategories()

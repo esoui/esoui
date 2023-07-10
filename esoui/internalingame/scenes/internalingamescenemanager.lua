@@ -28,7 +28,7 @@ function ZO_InternalIngameSceneManager:IsInUIMode()
         return IsGameCameraUIModeActive()
     end
 
-    return false
+    return true
 end
 
 function ZO_InternalIngameSceneManager:HideTopLevel(topLevel)

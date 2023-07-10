@@ -299,3 +299,5 @@ EsoUI\Libraries\ZO_Horizontal_Menu\ZO_Horizontal_Menu.xml
 EsoUI\Libraries\ZO_ProgressBar\ZO_MultiSegmentProgressBar.lua
 
 EsoUI\Libraries\ZO_GamepadLinks\ZO_GamepadLinks.lua
+
+EsoUI\Libraries\ZO_RecurrenceTracker\ZO_RecurrenceTracker.lua

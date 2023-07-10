@@ -43,15 +43,37 @@ function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
         keybind = "UI_SHORTCUT_PRIMARY",
 
         name = function()
-            return GetString(self:GetPrimaryInteractionStringId())
+            local collectibleData = self.collectibleData
+            if collectibleData then
+                if collectibleData:IsUsable(self:GetActorCategory()) and self:GetPrimaryInteractionStringId() ~= nil then
+                    return GetString(self:GetPrimaryInteractionStringId())
+                elseif collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse() then
+                    return GetString(SI_ITEM_ACTION_PLACE_FURNITURE)
+                end
+            end
         end,
 
         callback = function()
-            self.collectibleData:Use(self:GetActorCategory())
+            local collectibleData = self.collectibleData
+            if collectibleData then
+                if collectibleData:IsUsable(self:GetActorCategory()) and self:GetPrimaryInteractionStringId() ~= nil then
+                    collectibleData:Use(self:GetActorCategory())
+                elseif collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse() then
+                    COLLECTIONS_BOOK_SINGLETON.TryPlaceCollectibleFurniture(collectibleData)
+                end
+            end
         end,
 
         visible = function()
-            return self.collectibleData and self.collectibleData:IsUsable(self:GetActorCategory()) and self:GetPrimaryInteractionStringId() ~= nil
+            local collectibleData = self.collectibleData
+            if collectibleData then
+                if collectibleData:IsUsable(self:GetActorCategory()) and self:GetPrimaryInteractionStringId() ~= nil then
+                    return true
+                elseif collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse() then
+                    return true
+                end
+            end
+            return false
         end,
     })
 
@@ -169,8 +191,13 @@ function ZO_CollectibleTile_Keyboard:AddMenuOptions()
 
     local collectibleId = collectibleData:GetId()
 
+    --Place Furniture
+    if collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse() then
+        AddMenuItem(GetString(SI_ITEM_ACTION_PLACE_FURNITURE), function() COLLECTIONS_BOOK_SINGLETON.TryPlaceCollectibleFurniture(collectibleData) end)
+    end
+
+    --Link in chat
     if IsChatSystemAvailableForCurrentPlatform() then
-        --Link in chat
         AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(GetCollectibleLink(collectibleId, LINK_STYLE_BRACKETS)) end)
     end
 
@@ -393,7 +420,7 @@ function ZO_CollectibleTile_Keyboard:LayoutPlatform(data)
         if collectibleData:IsActive(actorCategory) and not collectibleData:ShouldSuppressActiveState(actorCategory) then
             statusMultiIcon:AddIcon(ZO_CHECK_ICON)
 
-            if collectibleData:WouldBeHidden() then
+            if collectibleData:WouldBeHidden(actorCategory) then
                 statusMultiIcon:AddIcon("EsoUI/Art/Inventory/inventory_icon_hiddenBy.dds")
             end
         end

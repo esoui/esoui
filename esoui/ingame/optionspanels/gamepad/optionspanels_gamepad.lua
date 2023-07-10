@@ -202,6 +202,12 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_OCCLUSION_CULLING_ENABLED,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_CLUTTER_2D_QUALITY,
             header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
         },
@@ -677,6 +683,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_GUILD_KEEP_NOTICES,
+        },
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_PVP_KILL_FEED_NOTIFICATIONS,
         },
         {
             panel = SETTING_PANEL_SOCIAL,

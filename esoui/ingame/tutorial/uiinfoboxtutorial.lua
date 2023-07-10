@@ -132,7 +132,7 @@ function ZO_UiInfoBoxTutorial:DisplayTutorial(tutorialIndex)
 end
 
 function ZO_UiInfoBoxTutorial:OnDisplayTutorial(tutorialIndex, priority)
-    if not IsGameCameraActive() or SCENE_MANAGER:IsInUIMode() then
+    if SCENE_MANAGER:IsInUIMode() then
         if not self:IsTutorialDisplayedOrQueued(tutorialIndex) then
             if self:CanShowTutorial() then
                 self:DisplayTutorial(tutorialIndex)

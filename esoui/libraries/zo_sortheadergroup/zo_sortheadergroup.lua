@@ -149,6 +149,13 @@ function ZO_SortHeaderGroup:IsKeyCurrentSelectedIndex(key)
     return self:HeaderForIndex(self.selectedIndex) == self:HeaderForKey(key)
 end
 
+function ZO_SortHeaderGroup:GetKeyForCurrentSelectedIndex()
+    local header = self:HeaderForIndex(self.selectedIndex)
+    if header then
+        return header.key
+    end
+end
+
 function ZO_SortHeaderGroup:OnHeaderClicked(header, suppressCallbacks, forceReselect, forceSortDirection)
     if self:IsEnabled() then
         local resetSortDir = false

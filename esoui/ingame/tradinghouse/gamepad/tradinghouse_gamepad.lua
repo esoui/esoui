@@ -553,7 +553,7 @@ function ZO_GamepadTradingHouse:InitializeEvents()
         end
     end)
 
-    TRADING_HOUSE_GAMEPAD_SCENE:GetSceneGroup():RegisterCallback("StateChange", function(oldState, newState)
+    TRADING_HOUSE_GAMEPAD_SCENE:GetSceneGroup():RegisterCallback("StateChange", function(_, newState)
         if newState == SCENE_GROUP_HIDDEN then
             self:UnlockForInput()
         end

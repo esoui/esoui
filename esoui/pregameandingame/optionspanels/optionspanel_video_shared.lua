@@ -202,9 +202,7 @@ local ZO_OptionsPanel_Video_ControlData =
             text = SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_RENDER_THREAD_TOOLTIP,
             mustRestartToApply = true,
-            exists = function()
-                return ZO_IsPCUI() and not IsMacUI()
-            end
+            exists = ZO_IsWindowsUI,
         },
         --Options_Video_AntiAliasing_Type
         [GRAPHICS_SETTING_ANTIALIASING_TYPE] =
@@ -513,6 +511,18 @@ local ZO_OptionsPanel_Video_ControlData =
                     or {AMBIENT_OCCLUSION_TYPE_NONE, AMBIENT_OCCLUSION_TYPE_SSAO, AMBIENT_OCCLUSION_TYPE_HBAO, AMBIENT_OCCLUSION_TYPE_LSAO, AMBIENT_OCCLUSION_TYPE_SSGI},
             valueStringPrefix = "SI_AMBIENTOCCLUSIONTYPE",
             exists = ZO_IsPCUI,
+        },
+        --Options_Video_Occlusion_Culling_Enabled
+        [GRAPHICS_SETTING_OCCLUSION_CULLING_ENABLED] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_OCCLUSION_CULLING_ENABLED,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_OCCLUSION_CULLING_ENABLED,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_OCCLUSION_CULLING_ENABLED_TOOLTIP,
+            mustPushApply = true,
+            exists = ZO_IsWindowsUI,
         },
         --Options_Video_Clutter_2D_Quality
         [GRAPHICS_SETTING_CLUTTER_2D_QUALITY] =

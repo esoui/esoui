@@ -17,18 +17,13 @@ end
 
 local g_loggingEnabled = false
 
-ZO_Scene = ZO_CallbackObject:Subclass()
+-- Alias
+SCENE_SHOWING = ZO_STATE.SHOWING
+SCENE_SHOWN = ZO_STATE.SHOWN
+SCENE_HIDING = ZO_STATE.HIDING
+SCENE_HIDDEN = ZO_STATE.HIDDEN
 
-SCENE_SHOWN = "shown"
-SCENE_HIDDEN = "hidden"
-SCENE_SHOWING = "showing"
-SCENE_HIDING = "hiding"
-
-function ZO_Scene:New(...)
-    local scene = ZO_CallbackObject.New(self)
-    scene:Initialize(...)
-    return scene
-end
+ZO_Scene = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_Scene:Initialize(name, sceneManager)
     self.name = name

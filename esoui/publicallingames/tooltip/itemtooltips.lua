@@ -21,6 +21,7 @@ ZO_ITEM_TOOLTIP_BANK_TITLE_COUNT = "bank"
 ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_TITLE_COUNT = "inventoryAndBank"
 ZO_ITEM_TOOLTIP_CRAFTBAG_TITLE_COUNT = "craftbag"
 ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_AND_CRAFTBAG_TITLE_COUNT = "inventoryAndBankAndCraftbag"
+ZO_ITEM_TOOLTIP_HOUSE_BANKS_TITLE_COUNT = "houseBanks"
 
 --Section Generators
 
@@ -194,7 +195,7 @@ function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLock
     end
 
     --Item counts
-    local bagCount, bankCount, craftBagCount = GetItemLinkStacks(itemLink)
+    local bagCount, bankCount, craftBagCount, houseBanksCount = GetItemLinkStacks(itemLink)
     if bagCount > 0 then
         topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_bag.dds", 24, 24, bagCount))
     end
@@ -205,6 +206,10 @@ function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLock
 
     if craftBagCount > 0 then
         topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_craft_bag.dds", 24, 24, craftBagCount))
+    end
+
+    if houseBanksCount > 0 then
+        topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_house_bank.dds", 24, 24, houseBanksCount))
     end
 
     topSection:AddSectionEvenIfEmpty(topSubsection)
@@ -1609,7 +1614,7 @@ function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, fo
     local isValidItemLink = itemLink ~= ""
     if isValidItemLink then
         local stackCount
-        local bagCount, bankCount, craftBagCount = GetItemLinkStacks(itemLink)
+        local bagCount, bankCount, craftBagCount, houseBanksCount = GetItemLinkStacks(itemLink)
         if customOrBagStackCount == ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT then
             stackCount = bagCount
         elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_BANK_TITLE_COUNT then
@@ -1620,6 +1625,8 @@ function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, fo
             stackCount = craftBagCount
         elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_AND_CRAFTBAG_TITLE_COUNT then
             stackCount = bagCount + bankCount + craftBagCount
+        elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_HOUSE_BANKS_TITLE_COUNT then
+            stackCount = houseBanksCount
         else
             stackCount = customOrBagStackCount
         end
