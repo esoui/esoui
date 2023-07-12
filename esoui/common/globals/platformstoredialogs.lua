@@ -82,8 +82,14 @@ ESO_Dialogs["BUY_ESO_PLUS_FROM_PLATFORM_STORE"] =
 }
 
 function ZO_ShowBuySubscriptionPlatformDialog()
+    -- When buying crowns we want to rely on DoesPlatformStoreUseExternalLinks() returning true for Epic, but in this
+    -- case where we are buying a subscription we want Epic to use the ESO store.
     if DoesPlatformStoreUseExternalLinks() then
-        ZO_PlatformOpenApprovedURL(APPROVED_URL_ESO_ACCOUNT_SUBSCRIPTION, ZO_GetPlatformStoreName(), GetString(SI_URL_APPLICATION_WEB))
+        local linkText = ZO_GetPlatformStoreName()
+        if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_EPIC then
+            linkText = GetString("SI_PLATFORMSTORELABEL", PLATFORM_STORE_LABEL_ZOS)
+        end
+        ZO_PlatformOpenApprovedURL(APPROVED_URL_ESO_ACCOUNT_SUBSCRIPTION, linkText, GetString(SI_URL_APPLICATION_WEB))
     else
         ZO_Dialogs_ShowPlatformDialog("BUY_ESO_PLUS_FROM_PLATFORM_STORE")
     end

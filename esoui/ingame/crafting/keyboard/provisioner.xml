@@ -194,7 +194,7 @@
 
                 <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
                     <Dimensions x="535"/>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ProvisioningFiltersNavigationDivider" relativePoint="BOTTOMLEFT" offsetX="40"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ProvisioningFiltersNavigationDivider" relativePoint="BOTTOMLEFT" offsetX="-3"/>
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)DetailsDivider" relativePoint="TOPLEFT" offsetY="-5" constrains="Y"/>
 
                     <Controls>

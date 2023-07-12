@@ -5215,7 +5215,7 @@ EsoStrings =
     "LiveUpdate Defs", -- SI_PATCHOPTION_LIVE
     "Cached Defs", -- SI_PATCHOPTION_PATCH
     "Options", -- SI_PREGAME_OPEN_OPTIONS
-    "Login failed. Your username or password may be incorrect or inactive at this time. If you purchased the game through Steam, please start the game via the Steam Client to login.", -- SI_BAD_LOGIN_ZOS
+    "Login failed. Your username or password may be incorrect or inactive at this time. If you purchased the game through Steam or Epic Games, please start the game on that platform.", -- SI_BAD_LOGIN_ZOS
     "Login failed. Your username or password may be incorrect or inactive at this time.", -- SI_BAD_LOGIN_FIRST_PARTY
     "Quit", -- SI_QUIT
     "Version", -- SI_VERSION_MENU_ENTRY
@@ -12008,7 +12008,7 @@ SafeAddVersion(SI_DELETE_CHARACTER_DIALOG_TEXT, 3)
 SafeAddVersion(SI_CHARACTER_SELECT_LEVEL_CLASS, 1)
 SafeAddVersion(SI_CHARACTER_SELECT_LEVEL_CHAMPION_CLASS, 1)
 SafeAddVersion(SI_CHARACTER_SELECT_NAME, 2)
-SafeAddVersion(SI_BAD_LOGIN_ZOS, 4)
+SafeAddVersion(SI_BAD_LOGIN_ZOS, 5)
 SafeAddVersion(SI_VERSION, 2)
 SafeAddVersion(SI_LOGIN_REQUESTED, 1)
 SafeAddVersion(SI_LOGIN_ACCOUNT_REQUIRED, 1)
