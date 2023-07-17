@@ -28,6 +28,19 @@ function ZO_HousingFurnitureProducts_Keyboard:InitializeKeybindStrip()
                 return true
             end,
         },
+        -- placement preview
+        {
+            name = GetString(SI_HOUSING_EDITOR_PREVIEW_PLACEMENT),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            callback = function()
+                local mostRecentlySelectedData = self:GetMostRecentlySelectedData()
+                self:PreviewMarketProductPlacement(mostRecentlySelectedData)
+            end,
+            visible = function()
+                local mostRecentlySelectedData = self:GetMostRecentlySelectedData()
+                return mostRecentlySelectedData ~= nil and mostRecentlySelectedData:CanPreviewPlacement()
+            end,
+        },
         -- gift
         {
             name = GetString(SI_HOUSING_FURNITURE_BROWSER_GIFT_KEYBIND),

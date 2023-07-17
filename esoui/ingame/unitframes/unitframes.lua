@@ -2629,7 +2629,7 @@ local function RegisterForEvents()
         end
     end
 
-    local function OnGroupElectionRequested()
+    local function OnGroupElectionStarted()
         UnitFrames:BeginGroupElection()
     end
 
@@ -2667,8 +2667,9 @@ local function RegisterForEvents()
     ZO_UnitFrames:RegisterForEvent(EVENT_GUILD_NAME_AVAILABLE, OnGuildNameAvailable)
     ZO_UnitFrames:RegisterForEvent(EVENT_GUILD_ID_CHANGED, OnGuildIdChanged)
     ZO_UnitFrames:AddFilterForEvent(EVENT_GUILD_ID_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
-    ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_REQUESTED, OnGroupElectionRequested)
-    ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_NOTIFICATION_ADDED, OnGroupElectionRequested)
+    ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_REQUESTED, OnGroupElectionStarted)
+    ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_NOTIFICATION_ADDED, OnGroupElectionStarted)
+    ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_PROGRESS_UPDATED, OnGroupElectionUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_RESULT, OnGroupElectionUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_TARGET_MARKER_UPDATE, OnTargetMarkerUpdate)
 

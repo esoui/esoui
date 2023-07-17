@@ -1160,9 +1160,14 @@ function ZO_Market_Keyboard:StartPurchaseFlow(marketProductData, errorInfoFuncti
     PlaySound(selectionSound)
 
     local hasErrors, dialogParams, allowContinue, expectedPurchaseResult = errorInfoFunction(marketProductData)
-
     if not self:ShowExpectedErrorDialog(hasErrors, dialogParams, allowContinue, expectedPurchaseResult, marketProductData) then
-        ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", { marketProductData = marketProductData, isGift = isGift })
+        local dialogData =
+        {
+            marketProductData = marketProductData,
+            isGift = isGift,
+            isPreviewingMarketProductPlacement = IsHousingEditorPreviewingMarketProductPlacement(),
+        }
+        ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", dialogData)
     end
 
     OnMarketStartPurchase(marketProductData:GetId())

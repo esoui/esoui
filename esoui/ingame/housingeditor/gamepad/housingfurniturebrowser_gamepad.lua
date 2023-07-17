@@ -185,6 +185,14 @@ function ZO_HousingFurnitureBrowser_Gamepad:OnShowing()
     ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", self.OnRefreshActions)
 end
 
+function ZO_HousingFurnitureBrowser_Gamepad:OnShow()
+    ZO_Gamepad_ParametricList_Screen.OnShow(self)
+    
+    if self.currentPanel then
+        self.currentPanel:UpdateCurrentKeybinds()
+    end
+end
+
 function ZO_HousingFurnitureBrowser_Gamepad:OnHiding()
     ZO_Gamepad_ParametricList_Screen.OnHiding(self)
     ZO_HousingFurnitureBrowser_Base.OnHiding(self)

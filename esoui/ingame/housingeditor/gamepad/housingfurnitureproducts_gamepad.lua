@@ -47,6 +47,29 @@ function ZO_HousingFurnitureProducts_Gamepad:InitializeKeybindStripDescriptors()
         }
     )
 
+    -- placement preview
+    self:AddFurnitureListKeybind(
+        {
+            name = GetString(SI_HOUSING_EDITOR_PREVIEW_PLACEMENT),
+            keybind = "UI_SHORTCUT_QUINARY",
+            callback = function()
+                local targetData = self.furnitureList.list:GetTargetData()
+                if targetData then
+                    local furnitureObject = targetData.furnitureObject
+                    self:PreviewMarketProductPlacement(furnitureObject)
+                end
+            end,
+            visible = function()
+                local targetData = self.furnitureList.list:GetTargetData()
+                if targetData then
+                    local furnitureObject = targetData.furnitureObject
+                    return furnitureObject:CanPreviewPlacement()
+                end
+                return false
+            end,
+        }
+    )
+
     -- gift
     self:AddFurnitureListKeybind(
         {
@@ -117,12 +140,25 @@ function ZO_HousingFurnitureProducts_Gamepad:OnShowing()
     UpdateMarketDisplayGroup(MARKET_DISPLAY_GROUP_HOUSE_EDITOR)
     MARKET_CURRENCY_GAMEPAD:SetVisibleMarketCurrencyTypes({MKCT_CROWNS, MKCT_CROWN_GEMS})
     MARKET_CURRENCY_GAMEPAD:Show()
+
+    self:UpdateCurrentKeybinds()
+end
+
+function ZO_HousingFurnitureProducts_Gamepad:UpdateCurrentKeybinds()
+    ZO_HousingFurnitureList_Gamepad.UpdateCurrentKeybinds(self)
+
     local currencyStyle = MARKET_CURRENCY_GAMEPAD:ModifyKeybindStripStyleForCurrency(KEYBIND_STRIP_GAMEPAD_STYLE)
     KEYBIND_STRIP:SetStyle(currencyStyle)
 end
 
 function ZO_HousingFurnitureProducts_Gamepad:OnHiding()
     ZO_HousingFurnitureList_Gamepad.OnHiding(self)
+
     MARKET_CURRENCY_GAMEPAD:Hide()
     KEYBIND_STRIP:SetStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
+end
+
+function ZO_HousingFurnitureProducts_Gamepad:RequestPurchase(data, isGift)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    RequestPurchaseMarketProduct(data.marketProductId, data.presentationIndex, isGift)
 end

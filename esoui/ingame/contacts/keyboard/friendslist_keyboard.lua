@@ -78,7 +78,7 @@ function ZO_KeyboardFriendsListManager:InitializeKeybindDescriptors()
         {
             name = GetString(SI_SOCIAL_LIST_PANEL_WHISPER),
             keybind = "UI_SHORTCUT_SECONDARY",
-        
+
             callback = function()
                 local data = ZO_ScrollList_GetData(self.mouseOverRow)
                 StartChatInput("", CHAT_CHANNEL_WHISPER, data.displayName)
@@ -87,7 +87,7 @@ function ZO_KeyboardFriendsListManager:InitializeKeybindDescriptors()
             visible = function()
                 if(self.mouseOverRow and IsChatSystemAvailableForCurrentPlatform()) then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-                    return data.hasCharacter and data.online
+                    return data and data.hasCharacter and data.online
                 end
                 return false
             end
@@ -108,7 +108,7 @@ function ZO_KeyboardFriendsListManager:InitializeKeybindDescriptors()
             visible = function()
                 if IsGroupModificationAvailable() and self.mouseOverRow then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-                    if data.hasCharacter and data.online then
+                    if data and data.hasCharacter and data.online then
                         return true
                     end
                 end

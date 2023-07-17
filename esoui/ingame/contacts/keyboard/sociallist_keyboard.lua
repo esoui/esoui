@@ -41,8 +41,10 @@ end
 
 function ZO_SocialListKeyboard:Note_OnMouseEnter(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-    InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
-    SetTooltipText(InformationTooltip, data.note)
+    if data then
+        InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
+        SetTooltipText(InformationTooltip, data.note)
+    end
 
     self:EnterRow(control:GetParent())
 end
@@ -55,14 +57,16 @@ end
 
 function ZO_SocialListKeyboard:Note_OnClicked(control, noteEditedFunction)
     local data = ZO_ScrollList_GetData(control:GetParent())
-    ZO_Dialogs_ShowDialog("EDIT_NOTE", {displayName = data.displayName, note = data.note, changedCallback = noteEditedFunction})
+    if data then
+        ZO_Dialogs_ShowDialog("EDIT_NOTE", {displayName = data.displayName, note = data.note, changedCallback = noteEditedFunction})
+    end
 end
 
 function ZO_SocialListKeyboard:DisplayName_OnMouseEnter(control)
     local row = control:GetParent()
     local data = ZO_ScrollList_GetData(row)
-    
-    if(data.hasCharacter) then
+
+    if data and data.hasCharacter then
         InitializeTooltip(InformationTooltip)
         local textWidth = control:GetTextDimensions()
         InformationTooltip:ClearAnchors()
@@ -82,8 +86,8 @@ end
 function ZO_SocialListKeyboard:CharacterName_OnMouseEnter(control)
     local row = control:GetParent()
     local data = ZO_ScrollList_GetData(row)
-    
-    if data.displayName then
+
+    if data and data.displayName then
         InitializeTooltip(InformationTooltip)
         local textWidth = control:GetTextDimensions()
         InformationTooltip:ClearAnchors()
@@ -104,7 +108,7 @@ function ZO_SocialListKeyboard:Alliance_OnMouseEnter(control)
     local row = control:GetParent()
     local data = ZO_ScrollList_GetData(row)
 
-    if(data.alliance) then
+    if data and data.alliance then
         InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
         SetTooltipText(InformationTooltip, data.formattedAllianceName)
     end
@@ -121,9 +125,9 @@ function ZO_SocialListKeyboard:Status_OnMouseEnter(control)
     local row = control:GetParent()
     local data = ZO_ScrollList_GetData(row)
 
-    if(data.status) then
+    if data and data.status then
         InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)        
-        if(data.status == PLAYER_STATUS_OFFLINE) then
+        if data.status == PLAYER_STATUS_OFFLINE then
             SetTooltipText(InformationTooltip, zo_strformat(SI_SOCIAL_LIST_LAST_ONLINE, ZO_FormatDurationAgo(data.secsSinceLogoff + GetFrameTimeSeconds() - data.timeStamp)))
         else
             SetTooltipText(InformationTooltip, GetString("SI_PLAYERSTATUS", data.status))
@@ -147,7 +151,7 @@ function ZO_SocialListKeyboard:Class_OnMouseEnter(control)
     local row = control:GetParent()
     local data = ZO_ScrollList_GetData(row)
 
-    if(data.class) then
+    if data and data.class then
         InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
         SetTooltipText(InformationTooltip, GetClassNameFromData(data))
     end

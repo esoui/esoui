@@ -92,7 +92,7 @@ function ZO_KeyboardGuildRosterManager:InitializeKeybindDescriptor()
             visible = function()
                 if(self.mouseOverRow and IsChatSystemAvailableForCurrentPlatform()) then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-                    return data.hasCharacter and data.online and not data.isLocalPlayer
+                    return data and data.hasCharacter and data.online and not data.isLocalPlayer
                 end
                 return false
             end
@@ -114,7 +114,7 @@ function ZO_KeyboardGuildRosterManager:InitializeKeybindDescriptor()
             visible = function()
                 if IsGroupModificationAvailable() and self.mouseOverRow then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-                    if data.hasCharacter and data.online and not data.isLocalPlayer and data.rankId ~= DEFAULT_INVITED_RANK then
+                    if data and data.hasCharacter and data.online and not data.isLocalPlayer and data.rankId ~= DEFAULT_INVITED_RANK then
                         return true
                     end
                 end
@@ -140,11 +140,13 @@ function ZO_KeyboardGuildRosterManager:InitializeKeybindDescriptor()
             visible = function()
                 if self.mouseOverRow then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-                    local guildId = GUILD_ROSTER_MANAGER:GetGuildId()
-                    local masterList = GUILD_ROSTER_MANAGER:GetMasterList()
-                    local playerIndex = GetPlayerGuildMemberIndex(guildId)
-                    local playerData = masterList[playerIndex]
-                    return ZO_GuildRosterManager.CanSetPlayerRank(guildId, playerData.rankIndex, data.rankIndex, data.rankId)
+                    if data then
+                        local guildId = GUILD_ROSTER_MANAGER:GetGuildId()
+                        local masterList = GUILD_ROSTER_MANAGER:GetMasterList()
+                        local playerIndex = GetPlayerGuildMemberIndex(guildId)
+                        local playerData = masterList[playerIndex]
+                        return ZO_GuildRosterManager.CanSetPlayerRank(guildId, playerData.rankIndex, data.rankIndex, data.rankId)
+                    end
                 end
                 return false
             end

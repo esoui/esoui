@@ -616,16 +616,14 @@ do
     function ZO_Market_Shared.GetUseProductInfo(marketProductData)
         if marketProductData:ContainsServiceToken() then
             return SERVICE_TOKEN
-        elseif GetCurrentZoneHouseId() ~= 0 and marketProductData:GetFurnitureDataId() ~= 0
-            and HasAnyEditingPermissionsForCurrentHouse() and GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_DISABLED then
+        elseif marketProductData:GetFurnitureDataId() ~= 0 and CanPlaceMarketProductInCurrentHouse(marketProductData:GetId()) then
             local furniturePlacementInfo =
             {
                 buttonText = GetString(SI_MARKET_PLACE_IN_HOUSE_KEYBIND_LABEL),
                 transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT),
                 GoToUseProductLocation = function()
-                    if HousingEditorCreateFurnitureForPlacementFromMarketProduct(marketProductData:GetId()) then
-                        SCENE_MANAGER:RequestShowLeaderBaseScene()
-                    end
+                    HousingEditorCreateFurnitureForPlacementFromMarketProduct(marketProductData:GetId())
+                    SCENE_MANAGER:RequestShowLeaderBaseScene()
                 end,
             }
             return furniturePlacementInfo
@@ -644,7 +642,6 @@ do
                         SCENE_MANAGER:RequestShowLeaderBaseScene()
                     end,
                 }
-
                 return houseInfo
             elseif marketProductType == MARKET_PRODUCT_TYPE_INSTANT_UNLOCK then
                 local instantUnlockType = marketProductData:GetInstantUnlockType()
@@ -1013,4 +1010,15 @@ function ZO_GetNextFilteredMarketProductIterFunction(displayGroup, matchAllFilte
     return function(_, lastProductId)
         return GetNextFilteredMarketProduct(lastProductId, displayGroup, matchAllFilterTypes, matchAnyFilterTypes)
     end
+end
+
+function ZO_ReturnToHousingEditorBrowseMode()
+    zo_callLater(function()
+        local mode = GetHousingEditorMode()
+        if mode ~= HOUSING_EDITOR_MODE_BROWSE then
+            -- Reopen the Housing Editor Browse menu.
+            HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
+            HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_BROWSE)
+        end
+    end, 500)
 end
