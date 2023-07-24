@@ -239,10 +239,14 @@ function ZO_GamepadCollectionsBook:SetupList(list)
         local collectibleData = data.dataSource
         if collectibleData:IsInstanceOf(ZO_CollectibleData) then
             data:InitializeCollectibleVisualData(collectibleData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-            ZO_SetDefaultIconSilhouette(control.icon, collectibleData:IsLocked())
         end
 
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+
+        if collectibleData:IsInstanceOf(ZO_CollectibleData) then
+            --Order matters. This needs to be run *after* ZO_SharedGamepadEntry_OnSetup
+            ZO_SetDefaultIconSilhouette(control.icon, collectibleData:IsLocked())
+        end
     end
 
     list:AddDataTemplate("ZO_GamepadCollectibleEntryTemplate", CollectibleEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction)

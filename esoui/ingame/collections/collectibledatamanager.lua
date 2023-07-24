@@ -638,11 +638,9 @@ function ZO_CollectibleData:IsUsable(actorCategory)
 end
 
 function ZO_CollectibleData:Use(actorCategory)
-    if self:IsActiveStateSuppressed(actorCategory) then
+    if self:IsActiveStateSuppressed(actorCategory) and self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT) then
         -- If the active mount is being suppressed, then using it should just clear the suppression (disable random mount)
-        if self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT) then
-            SetRandomMountType(RANDOM_MOUNT_TYPE_NONE, actorCategory)
-        end
+        SetRandomMountType(RANDOM_MOUNT_TYPE_NONE, actorCategory)
         return
     end
 
@@ -801,7 +799,12 @@ do
 end
 
 function ZO_CollectibleData:ShouldSuppressActiveState(actorCategory)
-    return self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT) and GetRandomMountType(actorCategory) ~= RANDOM_MOUNT_TYPE_NONE
+    if self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT) and GetRandomMountType(actorCategory) ~= RANDOM_MOUNT_TYPE_NONE then
+        return true
+    elseif self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMPANION) and HasSuppressedCompanion() then
+        return true
+    end
+    return false
 end
 
 function ZO_CollectibleData:IsActiveStateSuppressed(actorCategory)

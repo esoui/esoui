@@ -1,10 +1,4 @@
-ZO_Loot_Gamepad_Base = ZO_Object:Subclass()
-
-function ZO_Loot_Gamepad_Base:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_Loot_Gamepad_Base = ZO_InitializingObject:Subclass()
 
 function ZO_Loot_Gamepad_Base:Initialize(tooltipType)
     self.tooltipType = tooltipType
