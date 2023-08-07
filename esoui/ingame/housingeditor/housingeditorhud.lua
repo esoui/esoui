@@ -936,19 +936,22 @@ function ZO_HousingEditorHud:ShowFurnitureBrowser()
 end
 
 function ZO_HousingEditorHud:UpdateKeybinds()
-    if not HOUSING_EDITOR_HUD_UI_SCENE:IsShowing() then
-        HOUSING_EDITOR_KEYBIND_PALETTE:RemoveKeybinds()
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindDescriptor)
+    -- Remove any existing keybinds in both the strip and the palette.
+    HOUSING_EDITOR_KEYBIND_PALETTE:RemoveKeybinds()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindDescriptor)
 
-        local currentMode = GetHousingEditorMode()
-        local currentModeStripDescriptor, currentModePaletteDescriptor = self:GetKeybindStripDescriptorForMode(currentMode)
+    -- Fetch the new keybind descriptors for the current editor mode.
+    local currentMode = GetHousingEditorMode()
+    self.currentKeybindDescriptor, self.currentPaletteKeybindDescriptor = self:GetKeybindStripDescriptorForMode(currentMode)
 
-        self.currentPaletteKeybindDescriptor = currentModePaletteDescriptor
+    if HOUSING_EDITOR_HUD_SCENE:IsShowing() then
+        -- Only add strip and palette keybinds when the HUD scene is showing
+        -- in order to avoid conflicts with other housing-related scenes.
+
         if self.currentPaletteKeybindDescriptor then
             HOUSING_EDITOR_KEYBIND_PALETTE:AddKeybinds(self.currentPaletteKeybindDescriptor)
         end
 
-        self.currentKeybindDescriptor = currentModeStripDescriptor
         if self.currentKeybindDescriptor then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.currentKeybindDescriptor)
         end

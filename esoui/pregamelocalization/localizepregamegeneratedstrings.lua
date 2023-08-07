@@ -1102,7 +1102,7 @@ EsoStrings =
     "http://www.elderscrollsonline.com/link", -- SI_APPROVEDURLTYPESTEAM6
     "http://www.elderscrollsonline.com", -- SI_APPROVEDURLTYPEEPIC0
     "https://account.elderscrollsonline.com", -- SI_APPROVEDURLTYPEEPIC1
-    "com.epicgames.launcher://store/all-dlc/elder-scrolls-online", -- SI_APPROVEDURLTYPEEPIC2
+    "com.epicgames.launcher://store/all-dlc/the-elder-scrolls-online", -- SI_APPROVEDURLTYPEEPIC2
     "https://account.elderscrollsonline.com/store/product/eso_plus?utm_source=ESO%20In-Game&utm_campaign=ESO%20Plus", -- SI_APPROVEDURLTYPEEPIC3
     "https://help.elderscrollsonline.com", -- SI_APPROVEDURLTYPEEPIC4
     "http://forums.elderscrollsonline.com", -- SI_APPROVEDURLTYPEEPIC5
@@ -11319,7 +11319,7 @@ SafeAddVersion(SI_EMOTECATEGORY8, 1)
 SafeAddVersion(SI_APPROVEDURLTYPE2, 1)
 SafeAddVersion(SI_APPROVEDURLTYPE3, 1)
 SafeAddVersion(SI_APPROVEDURLTYPESTEAM2, 1)
-SafeAddVersion(SI_APPROVEDURLTYPEEPIC2, 3)
+SafeAddVersion(SI_APPROVEDURLTYPEEPIC2, 4)
 SafeAddVersion(SI_APPROVEDURLTYPEEPIC3, 1)
 SafeAddVersion(SI_PLATFORMSTORELABEL1, 1)
 SafeAddVersion(SI_PLATFORMSTORELABEL2, 1)
