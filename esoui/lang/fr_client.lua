@@ -10068,7 +10068,7 @@ SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE0, "Gain |cffffff<<X:1>>|r <<t
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE1, "Retirez jusqu'à |cffffff<<X:1>>|r <<1[carte/cartes]>> de la Taverne.", 1)
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE10, "<<3>> Rafraîchir - Renvoyez jusqu'à |cffffff<<X:1>>|r <<z:2>> <<1[carte/cartes]>> de votre défausse vers votre <<z:3 >>.", 6)
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE11, "Créez |cffffff<<X:1>>|r <<C:2>> <<1[carte/cartes]>> et placez <<1[la/les]>> dans votre <<z:3>> .", 0)
-SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE12, "Lancer - Regardez <<2[la prochaine carte/|cffffff<<X:2>>|r cartes]>> depuis votre défausse. <<1[Vous pouvez déplacer cette carte/Choisissez jusqu'à |cffffff%d|r de ces cartes à déplacer]>> jusqu'à votre pioche.", 4)
+SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE12, "Lancer - Regardez <<2[la prochaine carte/|cffffff<<X:2>>|r cartes]>> depuis votre pioche. <<1[Vous pouvez déplacer cette carte/Choisissez jusqu'à |cffffff%d|r de ces cartes à déplacer]>> jusqu'à votre défausse.", 4)
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE13, "Soignez cet agent pour |cffffff<<X:1>>|r de Santé.", 1)
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE14, "Confiner - Placez |cffffff<<X:1>>|r <<1[carte/cartes]>> de votre <<z:2>> sous cette carte jusqu'à ce que cette carte soit retirée du jeu.", 2)
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE15, "Faire un don - Défaussez jusqu'à |cffffff<<X:1>>|r <<1[carte/cartes]>> de votre main puis piochez autant de cartes.", 1)

@@ -188,7 +188,10 @@ end
 function ZO_HousingFurnitureBrowser_Gamepad:OnShow()
     ZO_Gamepad_ParametricList_Screen.OnShow(self)
     
-    if self.currentPanel then
+    if self.currentPanel and self.currentPanel.UpdateCurrentKeybinds then
+        -- Only attempt to call UpdateCurrentKeybinds if the current panel
+        -- has such a function; the Settings panel manages its own keybinds
+        -- via different events internally.
         self.currentPanel:UpdateCurrentKeybinds()
     end
 end

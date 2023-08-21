@@ -16759,6 +16759,21 @@ h2. Game API
 
 * HousingEditorEndLocalPlayerPairedFurnitureInteraction()
 
+* CanHousingEditorPlacementPreviewMarketProduct(*integer* _marketProductId_)
+** _Returns:_ *bool* _canPreview_
+
+* HousingEditorClearPreviewMarketProductTransform *private* ()
+
+* HousingEditorEndMarketProductPlacementPreview *private* ()
+
+* IsHousingEditorPreviewingMarketProductPlacement()
+** _Returns:_ *bool* _isPreviewingMarketProductPlacement_
+
+* HousingEditorRequestMarketProductPlacementPreview *private* (*integer* _marketProductId_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorSavePreviewMarketProductTransform *private* ()
+
 * GetItemUniqueIdFromFurnitureId(*id64* _furnitureId_)
 ** _Returns:_ *id64* _itemUniqueId_
 
@@ -17479,6 +17494,9 @@ h2. Game API
 
 * HasBlockedCompanion()
 ** _Returns:_ *bool* _hasBlockedCompanion_
+
+* HasSuppressedCompanion()
+** _Returns:_ *bool* _hasSuppressedCompanion_
 
 * GetActiveCompanionDefId()
 ** _Returns:_ *integer* _activeCompanionDefId_
@@ -23079,6 +23097,7 @@ h2. Events
 * EVENT_GROUP_ELECTION_FAILED (*[GroupElectionFailure|#GroupElectionFailure]* _failureReason_, *string* _descriptor_)
 * EVENT_GROUP_ELECTION_NOTIFICATION_ADDED
 * EVENT_GROUP_ELECTION_NOTIFICATION_REMOVED
+* EVENT_GROUP_ELECTION_PROGRESS_UPDATED
 * EVENT_GROUP_ELECTION_REQUESTED (*string* _descriptor_)
 * EVENT_GROUP_ELECTION_RESULT (*[GroupElectionResult|#GroupElectionResult]* _electionResult_, *string* _descriptor_)
 * EVENT_GROUP_INVITE_ACCEPT_RESPONSE_TIMEOUT

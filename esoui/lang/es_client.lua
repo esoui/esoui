@@ -1086,7 +1086,7 @@ SafeAddString(SI_CAMPAIGN_BROWSER_TOOLTIP_NUM_GROUP_MEMBERS, "<<1[$d miembro del
 SafeAddString(SI_CAMPAIGN_BROWSER_TOOLTIP_NUM_GUILD_MEMBERS, "<<1[$d miembro del gremio/$d miembros del gremio]>>", 1)
 SafeAddString(SI_CAMPAIGN_CLAIM_KEEP_EVENT, "(<<1>>) ¡<<4>> ha reclamado <<2>> para <<3>>!", 0)
 SafeAddString(SI_CAMPAIGN_CORONATE_EMPEROR, "(<<1>>) ¡<<2{El jugador/La jugadora}>> <<2>> de <<3>> ha sido <<2{coronado emperador/coronada emperatriz}>>!", 0)
-SafeAddString(SI_CAMPAIGN_DEPOSE_EMPEROR, "(<<1>>) ¡<<2{El jugador/La jugadora}>> <<2>> de <<3>> ha sido <2{destituido como emperador/destituida como emperatriz}>>!", 0)
+SafeAddString(SI_CAMPAIGN_DEPOSE_EMPEROR, "(<<1>>) ¡<<2{El jugador/La jugadora}>> <<2>> de <<3>> ha sido <<2{destituido como emperador/destituida como emperatriz}>>!", 0)
 SafeAddString(SI_CAMPAIGN_EMPEROR_CHARACTER_INELIGIBLE_SYMBOL, "*", 0)
 SafeAddString(SI_CAMPAIGN_EMPEROR_CHARACTER_INELIGIBLE_TEXT, "Este personaje no puede ser <<player{emperador/emperatriz}>> porque ya has obtenido ese título durante la campaña actual en otra alianza.", 0)
 SafeAddString(SI_CAMPAIGN_EMPEROR_KEEPS_HEADER, "Estado del bastión imperial", 0)
