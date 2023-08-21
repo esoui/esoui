@@ -80,7 +80,7 @@ function ZO_GamepadTradingHouse_Listings:InitializeEvents()
     end
     TRADING_HOUSE_SEARCH:RegisterCallback("OnResponseReceived", FilterForGamepadEvents(OnResponseReceived))
 
-    local function OnSceneGroupStateChanged(oldState, newState)
+    local function OnSceneGroupStateChanged(_, newState)
         if newState == SCENE_GROUP_SHOWING then
             self.itemList:Clear()
         end

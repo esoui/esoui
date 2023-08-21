@@ -218,7 +218,7 @@ end
 
 function GamepadMarket:SetupSceneGroupCallback()
     self.marketSceneGroup = self.marketScene:GetSceneGroup()
-    self.marketSceneGroup:RegisterCallback("StateChange", function(oldState, newState)
+    self.marketSceneGroup:RegisterCallback("StateChange", function(_, newState)
         self:PerformDeferredInitialization()
         if newState == SCENE_GROUP_SHOWING then
             self:OnInitialInteraction()

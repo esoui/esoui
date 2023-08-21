@@ -193,17 +193,21 @@ end
 
 function HousingBook_Keyboard:TreeEntry_OnMouseUp(control, upInside, button)
     if button == MOUSE_BUTTON_INDEX_RIGHT and upInside then
-        local entryString = control.node.data:IsFavorite() and GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) or GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE)
-        local shouldSetAsFavorite = not control.node.data:IsFavorite()
+        local nodeData = control.node.data
 
         ClearMenu()
-        AddMenuItem(entryString, function()
-            SetOrClearCollectibleUserFlag(control.node.data:GetId(), COLLECTIBLE_USER_FLAG_FAVORITE, shouldSetAsFavorite)
-        end)
-        if control.node.data:IsUnlocked() and not control.node.data:IsPrimaryResidence() then
-            AddMenuItem(GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_BUTTON_TEXT), function()
-                COLLECTIONS_BOOK_SINGLETON:SetPrimaryResidence(control.node.data:GetReferenceId())
+        if nodeData:IsUnlocked() then
+            local entryString = nodeData:IsFavorite() and GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) or GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE)
+            local shouldSetAsFavorite = not nodeData:IsFavorite()
+            AddMenuItem(entryString, function()
+                SetOrClearCollectibleUserFlag(nodeData:GetId(), COLLECTIBLE_USER_FLAG_FAVORITE, shouldSetAsFavorite)
             end)
+
+            if not nodeData:IsPrimaryResidence() then
+                AddMenuItem(GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_BUTTON_TEXT), function()
+                    COLLECTIONS_BOOK_SINGLETON:SetPrimaryResidence(nodeData:GetReferenceId())
+                end)
+            end
         end
         ShowMenu(control)
     else

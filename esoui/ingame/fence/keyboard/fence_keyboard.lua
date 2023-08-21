@@ -171,10 +171,12 @@ function ZO_Fence_Keyboard:OnEnterLaunder(totalLaunders, laundersUsed)
 
     local function ColorCost(control, data, scrollList)
         local priceControl = control:GetNamedChild("SellPrice")
-        ZO_CurrencyControl_SetCurrencyData(priceControl, CURT_MONEY, data.stackLaunderPrice, CURRENCY_DONT_SHOW_ALL, (GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) < data.stackLaunderPrice))
+        ZO_CurrencyControl_SetCurrencyData(priceControl, CURT_MONEY, data.stackLaunderPrice, CURRENCY_SHOW_ALL, (GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) < data.stackLaunderPrice))
         ZO_CurrencyControl_SetCurrency(priceControl, ZO_KEYBOARD_CURRENCY_OPTIONS)
     end
 
+    -- Because we're passing in a custom callback, we will not call the default setup
+    -- function when refreshing.
     PLAYER_INVENTORY:RefreshBackpackWithFenceData(ColorCost)
     ZO_PlayerInventorySortByPriceName:SetText(GetString(SI_LAUNDER_SORT_TYPE_COST))
     self:RefreshFooter()

@@ -105,17 +105,17 @@ end
 
 local function HandleCallback(clickedButton)
     local dialog = GetDisplayedDialog()
-    local instanceId = dialog.instanceId
-    if(dialog) then
-        if(clickedButton.m_callback) then
+    if dialog then
+        local instanceId = dialog.instanceId
+        if clickedButton.m_callback then
             clickedButton.m_callback(dialog)
         end
 
         --Make sure the dialog wasn't released and then reshown
-        if(clickedButton.m_noReleaseOnClick == nil and dialog.instanceId == instanceId) then
+        if clickedButton.m_noReleaseOnClick == nil and dialog.instanceId == instanceId then
             ZO_Dialogs_ReleaseDialog(dialog, RELEASED_FROM_BUTTON_PRESS)
         end
-    end   
+    end
 end
 
 function ZO_Dialogs_SetupCustomButton(button, text, keybind, clickSound, callback)
@@ -1072,7 +1072,7 @@ function ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(dialog)
     local buttonInfos = dialog.info.buttons
     local numButtonInfos = buttonInfos and #buttonInfos or 0
     dialog.numButtons = numButtonInfos
-    if numButtonInfos > 0 and not isGamepadDialog then
+    if numButtonInfos > 0 and not dialog.isGamepad then
         for i = 1, numButtonInfos do
             local buttonInfo = buttonInfos[i]
             local button = GetButtonControl(dialog, i)

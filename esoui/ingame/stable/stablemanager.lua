@@ -46,9 +46,7 @@ function ZO_Stable_Manager:RegisterForEvents()
     end
 
     local function ActiveMountChanged()
-        if not IsInTutorialZone() then
-            TriggerTutorial(TUTORIAL_TRIGGER_MOUNT_SET)
-        end
+        TriggerTutorial(TUTORIAL_TRIGGER_MOUNT_SET)
         self:FireCallbacks("ActiveMountChanged")
     end
 

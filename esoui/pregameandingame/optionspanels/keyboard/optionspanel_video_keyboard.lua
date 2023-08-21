@@ -256,6 +256,15 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Video_Occlusion_Culling_Enabled",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_OCCLUSION_CULLING_ENABLED,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+    template = "ZO_Options_Video_Checkbox_IncludeApplyScreenWarning",
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Video_Clutter_2D_Quality",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_CLUTTER_2D_QUALITY,

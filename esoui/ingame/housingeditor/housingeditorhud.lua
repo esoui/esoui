@@ -591,6 +591,7 @@ function ZO_HousingEditorHud:Initialize(control)
     end
 
     HOUSING_EDITOR_STATE:RegisterCallback("EditorModeChanged", self.OnEditorModeChanged, self)
+    HOUSING_EDITOR_STATE:RegisterCallback("HouseChanged", self.OnHouseChanged, self)
 
     HOUSING_EDITOR_HUD_SCENE = ZO_Scene:New("housingEditorHud", SCENE_MANAGER)
     HOUSING_EDITOR_HUD_SCENE:RegisterCallback("StateChange", function(oldState, newState)
@@ -653,7 +654,7 @@ function ZO_HousingEditorHud:Initialize(control)
     SCENE_MANAGER:SetSceneRestoresBaseSceneOnGameMenuToggle("housingEditorHudUI", true)
 
     HOUSING_EDITOR_HUD_SCENE_GROUP = ZO_SceneGroup:New("housingEditorHud", "housingEditorHudUI")
-    HOUSING_EDITOR_HUD_SCENE_GROUP:RegisterCallback("StateChange", function(oldState, newState)
+    HOUSING_EDITOR_HUD_SCENE_GROUP:RegisterCallback("StateChange", function(_, newState)
         if newState == SCENE_GROUP_HIDDEN then
             local currentMode = GetHousingEditorMode()
             if currentMode ~= HOUSING_EDITOR_MODE_BROWSE and currentMode ~= HOUSING_EDITOR_MODE_PATH then
@@ -789,6 +790,18 @@ function ZO_HousingEditorHud:RefreshConstants()
     end
 end
 
+function ZO_HousingEditorHud:ClearCurrentPreviewMarketProduct()
+    self.currentPreviewMarketProductData = nil
+end
+
+function ZO_HousingEditorHud:GetCurrentPreviewMarketProduct()
+    return self.currentPreviewMarketProductData
+end
+
+function ZO_HousingEditorHud:SetCurrentPreviewMarketProduct(marketProductData)
+    self.currentPreviewMarketProductData = marketProductData
+end
+
 function ZO_HousingEditorHud:InitializePlacementSettings()
     HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
     HousingEditorSetPrecisionMoveUnits(self.savedOptions.moveUnitsCentimeters)
@@ -816,6 +829,10 @@ function ZO_HousingEditorHud:SetKeybindPaletteHidden(hidden)
     end
 end
 
+function ZO_HousingEditorHud:OnHouseChanged()
+    self:ClearCurrentPreviewMarketProduct()
+end
+
 function ZO_HousingEditorHud:OnHousingModeEnabled()
     OpenMarket(MARKET_DISPLAY_GROUP_HOUSE_EDITOR)
     self:CleanDirty()
@@ -840,6 +857,11 @@ end
 function ZO_HousingEditorHud:OnHousingModeChanged(oldMode, newMode)
     self:SetKeybindPaletteHidden(false)
 
+    if not IsHousingEditorPreviewingMarketProductPlacement() then
+        -- Reset the preview market product.
+        self:ClearCurrentPreviewMarketProduct()
+    end
+
     if newMode == HOUSING_EDITOR_MODE_DISABLED then
         self:OnHousingModeDisabled(oldMode)
         self:SetKeybindPaletteHidden(true)
@@ -852,6 +874,11 @@ function ZO_HousingEditorHud:OnHousingModeChanged(oldMode, newMode)
         self:SetKeybindPaletteHidden(false)
     elseif oldMode == HOUSING_EDITOR_MODE_SELECTION or oldMode == HOUSING_EDITOR_MODE_PATH then
         SCENE_MANAGER:RemoveFragment(ZO_HOUSING_EDITOR_HISTORY_FRAGMENT)
+    end
+
+    if newMode == HOUSING_EDITOR_MODE_PLACEMENT then
+        local SHOWING_HUD_UI = true
+        SCENE_MANAGER:ConsiderExitingUIMode(SHOWING_HUD_UI)
     end
 
     if newMode == HOUSING_EDITOR_MODE_BROWSE then
@@ -909,19 +936,22 @@ function ZO_HousingEditorHud:ShowFurnitureBrowser()
 end
 
 function ZO_HousingEditorHud:UpdateKeybinds()
-    if not HOUSING_EDITOR_HUD_UI_SCENE:IsShowing() then
-        HOUSING_EDITOR_KEYBIND_PALETTE:RemoveKeybinds()
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindDescriptor)
+    -- Remove any existing keybinds in both the strip and the palette.
+    HOUSING_EDITOR_KEYBIND_PALETTE:RemoveKeybinds()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindDescriptor)
 
-        local currentMode = GetHousingEditorMode()
-        local currentModeStripDescriptor, currentModePaletteDescriptor = self:GetKeybindStripDescriptorForMode(currentMode)
+    -- Fetch the new keybind descriptors for the current editor mode.
+    local currentMode = GetHousingEditorMode()
+    self.currentKeybindDescriptor, self.currentPaletteKeybindDescriptor = self:GetKeybindStripDescriptorForMode(currentMode)
 
-        self.currentPaletteKeybindDescriptor = currentModePaletteDescriptor
+    if HOUSING_EDITOR_HUD_SCENE:IsShowing() then
+        -- Only add strip and palette keybinds when the HUD scene is showing
+        -- in order to avoid conflicts with other housing-related scenes.
+
         if self.currentPaletteKeybindDescriptor then
             HOUSING_EDITOR_KEYBIND_PALETTE:AddKeybinds(self.currentPaletteKeybindDescriptor)
         end
 
-        self.currentKeybindDescriptor = currentModeStripDescriptor
         if self.currentKeybindDescriptor then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.currentKeybindDescriptor)
         end
@@ -2388,6 +2418,9 @@ do
                             end,
                 order = 10,
                 ethereal = true,
+                visible = function()
+                    return not IsHousingEditorPreviewingMarketProductPlacement()
+                end,
             },
         }
 
@@ -2397,28 +2430,69 @@ do
 
             --Negative
             {
-                name = GetString(SI_HOUSING_EDITOR_CANCEL),
+                name = function()
+                           if IsHousingEditorPreviewingMarketProductPlacement() then
+                               return GetString(SI_HOUSING_EDITOR_END_PREVIEW_PLACEMENT)
+                           end
+                           return GetString(SI_HOUSING_EDITOR_CANCEL)
+                       end,
                 keybind = "HOUSING_EDITOR_NEGATIVE_ACTION",
                 callback = function()
+                                -- Order matters
+                                local isPreviewingMarketProductPlacement = IsHousingEditorPreviewingMarketProductPlacement()
                                 HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
+                                if isPreviewingMarketProductPlacement then
+                                    -- A market product placement preview was active; return to the Browse menu.
+                                    HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_BROWSE)
+                                end
                             end,
                 alignment = KEYBIND_STRIP_ALIGN_LEFT,
             },
 
             --Secondary 
             {
-                name = GetString(SI_HOUSING_EDITOR_PUT_AWAY),
+                name = function()
+                    if self:GetCurrentPreviewMarketProduct() then
+                        return GetString(SI_HOUSING_FURNITURE_BROWSER_PURCHASE_KEYBIND)
+                    end
+                    return GetString(SI_HOUSING_EDITOR_PUT_AWAY)
+                end,
                 keybind = "HOUSING_EDITOR_SECONDARY_ACTION",
-                visible = function() 
-                              return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
-                          end,
+                visible = function()
+                    return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
+                end,
                 callback = function()
-                               local result = HousingEditorRequestRemoveSelectedFurniture()
-                               ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-                               if result == HOUSING_REQUEST_RESULT_SUCCESS then
-                                   PlaySound(SOUNDS.HOUSING_EDITOR_RETRIEVE_ITEM)
-                               end
-                           end,
+                    local previewMarketProductData = self:GetCurrentPreviewMarketProduct()
+                    if previewMarketProductData then
+                        -- Store the current transform for the previewed product so that it can
+                        -- be placed where it was left before entering the purchase workflow.
+                        HousingEditorSavePreviewMarketProductTransform()
+                        self:ClearCurrentPreviewMarketProduct()
+
+                        local IS_PURCHASE = false
+                        if IsInGamepadPreferredMode() then
+                            GAMEPAD_HOUSING_FURNITURE_BROWSER.productsPanel:RequestPurchase(previewMarketProductData, IS_PURCHASE)
+                        else
+                            KEYBOARD_HOUSING_FURNITURE_BROWSER.productsPanel:RequestPurchase(previewMarketProductData, IS_PURCHASE)
+                        end
+                    else
+                        local result = HousingEditorRequestRemoveSelectedFurniture()
+                        ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                        if result == HOUSING_REQUEST_RESULT_SUCCESS then
+                            PlaySound(SOUNDS.HOUSING_EDITOR_RETRIEVE_ITEM)
+                        end
+                    end
+                end,
+                enabled = function()
+                    local previewMarketProductData = self:GetCurrentPreviewMarketProduct()
+                    if previewMarketProductData then
+                        if not previewMarketProductData:CanBePurchased() then
+                            local expectedPurchaseResult = CouldPurchaseMarketProduct(previewMarketProductData.marketProductId, previewMarketProductData.presentationIndex)
+                            return false, GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult)
+                        end
+                    end
+                    return true
+                end,
                 order = 20,
             },
 
@@ -2565,6 +2639,9 @@ do
                             end,
                 order = 10,
                 ethereal = true,
+                visible = function()
+                    return not IsHousingEditorPreviewingMarketProductPlacement()
+                end,
             },
         }
 
@@ -2745,6 +2822,9 @@ do
                             end,
                 order = 10,
                 ethereal = true,
+                visible = function()
+                    return not IsHousingEditorPreviewingMarketProductPlacement()
+                end,
             },
         }
 

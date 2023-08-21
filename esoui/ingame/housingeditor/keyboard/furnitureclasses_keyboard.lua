@@ -28,8 +28,12 @@ function ZO_HousingBrowserList:Initialize(control, owner)
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:OnShowing()
+        elseif newState == SCENE_FRAGMENT_SHOWN then
+            self:OnShown()
         elseif newState == SCENE_FRAGMENT_HIDING then
             self:OnHiding()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self:OnHidden()
         end
     end)
 
@@ -46,10 +50,18 @@ function ZO_HousingBrowserList:OnShowing()
     end
 end
 
+function ZO_HousingBrowserList:OnShown()
+    -- Can override
+end
+
 function ZO_HousingBrowserList:OnHiding()
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     end
+end
+
+function ZO_HousingBrowserList:OnHidden()
+    -- Can override
 end
 
 function ZO_HousingBrowserList:GetCategoryInfo(categoryId, categoryObject)
@@ -349,10 +361,18 @@ function ZO_HousingFurnitureList:OnShowing()
     self:UpdateFreeSlots()
 end
 
+function ZO_HousingFurnitureList:OnShown()
+    ZO_HousingBrowserList.OnShown(self)
+
+    self:RestoreMarketProductPreview()
+end
+
 function ZO_HousingFurnitureList:OnHiding()
     ZO_HousingBrowserList.OnHiding(self)
 
-    self:ClearSelection()
+    if not IsHousingEditorPreviewingMarketProductPlacement() then
+        self:ClearSelection()
+    end
 end
 
 function ZO_HousingFurnitureList:OnSearchTextChanged(editBox)
@@ -474,6 +494,26 @@ end
 
 function ZO_HousingFurnitureList:InitializeThemeSelector()
     --Override
+end
+
+function ZO_HousingFurnitureList:PreviewMarketProductPlacement(marketProductData)
+    if not marketProductData then
+        return
+    end
+    
+    self:ClearSelection()
+
+    if HousingEditorRequestMarketProductPlacementPreview(marketProductData.marketProductId) == HOUSING_REQUEST_RESULT_SUCCESS then
+        HOUSING_EDITOR_SHARED:SetCurrentPreviewMarketProduct(marketProductData)
+    end
+end
+
+function ZO_HousingFurnitureList:RestoreMarketProductPreview()
+    local marketProductData = HOUSING_EDITOR_SHARED:GetCurrentPreviewMarketProduct()
+    if marketProductData then
+        HOUSING_EDITOR_SHARED:ClearCurrentPreviewMarketProduct()
+        ZO_ScrollList_SelectData(self:GetList(), marketProductData)
+    end
 end
 
 --

@@ -345,7 +345,7 @@ function ZO_ZoneStories_Gamepad:UpdateBackgroundTexture()
 end
 
 function ZO_ZoneStories_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
-    if selectedData and selectedData.dataSource then
+    if GAMEPAD_ZONE_STORIES_SCENE:IsShowing() and selectedData and selectedData.dataSource then
         self:UpdateZoneStory(selectedData.dataSource)
     end
 end

@@ -1,4 +1,4 @@
-local MainMenu_Keyboard = ZO_CallbackObject:Subclass()
+local MainMenu_Keyboard = ZO_InitializingCallbackObject:Subclass()
 
 -- If you disable a category in MainMenu.lua you should also disable it in PlayerMenu.lua
 ZO_CATEGORY_LAYOUT_INFO =
@@ -338,12 +338,6 @@ function MainMenu_Keyboard:SetCategoriesEnabled(categoryFilterFunction, shouldBe
     end
 end
 
-function MainMenu_Keyboard:New(control)
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize(control)
-    return manager
-end
-
 function MainMenu_Keyboard:Initialize(control)
     local primaryKeybindDescriptor =
     {
@@ -591,7 +585,7 @@ function MainMenu_Keyboard:AddSceneGroup(category, sceneGroupName, menuBarIconDa
     local categoryInfo = self.categoryInfo[category]
 
     local sceneGroup = SCENE_MANAGER:GetSceneGroup(sceneGroupName)
-    sceneGroup:RegisterCallback("StateChange", function(oldState, newState)
+    sceneGroup:RegisterCallback("StateChange", function(_, newState)
         if newState == SCENE_GROUP_SHOWING then
             self.sceneShowGroupName = sceneGroupName
             local nextScene = SCENE_MANAGER:GetNextScene():GetName()

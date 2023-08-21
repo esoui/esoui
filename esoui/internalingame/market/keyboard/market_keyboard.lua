@@ -1,10 +1,9 @@
 ZO_MARKET_LIST_ENTRY_HEIGHT = 52
 ZO_MARKET_CATEGORY_CONTAINER_WIDTH = 298
-local scrollBarOffset = 16
 -- 75 is the inset from the multiIcon plus the icon and spacing from ZO_IconHeader
-ZO_MARKET_CATEGORY_LABEL_WIDTH = ZO_MARKET_CATEGORY_CONTAINER_WIDTH - 75 - scrollBarOffset
+ZO_MARKET_CATEGORY_LABEL_WIDTH = ZO_MARKET_CATEGORY_CONTAINER_WIDTH - 75 - ZO_SCROLL_BAR_WIDTH
 ZO_MARKET_SUBCATEGORY_LABEL_INDENT = 76
-ZO_MARKET_SUBCATEGORY_LABEL_WIDTH = ZO_MARKET_CATEGORY_CONTAINER_WIDTH - ZO_MARKET_SUBCATEGORY_LABEL_INDENT - scrollBarOffset
+ZO_MARKET_SUBCATEGORY_LABEL_WIDTH = ZO_MARKET_CATEGORY_CONTAINER_WIDTH - ZO_MARKET_SUBCATEGORY_LABEL_INDENT - ZO_SCROLL_BAR_WIDTH
 
 --
 --[[ ZO_Market_Keyboard ]]--
@@ -1161,9 +1160,14 @@ function ZO_Market_Keyboard:StartPurchaseFlow(marketProductData, errorInfoFuncti
     PlaySound(selectionSound)
 
     local hasErrors, dialogParams, allowContinue, expectedPurchaseResult = errorInfoFunction(marketProductData)
-
     if not self:ShowExpectedErrorDialog(hasErrors, dialogParams, allowContinue, expectedPurchaseResult, marketProductData) then
-        ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", { marketProductData = marketProductData, isGift = isGift })
+        local dialogData =
+        {
+            marketProductData = marketProductData,
+            isGift = isGift,
+            isPreviewingMarketProductPlacement = IsHousingEditorPreviewingMarketProductPlacement(),
+        }
+        ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", dialogData)
     end
 
     OnMarketStartPurchase(marketProductData:GetId())

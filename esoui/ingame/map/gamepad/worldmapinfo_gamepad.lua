@@ -1,9 +1,5 @@
 local WorldMapInfo_Gamepad = ZO_WorldMapInfo_Shared:Subclass()
 
-function WorldMapInfo_Gamepad:New(...)
-    return ZO_WorldMapInfo_Shared.New(self, ...)
-end
-
 function WorldMapInfo_Gamepad:Initialize(control)
     ZO_WorldMapInfo_Shared.Initialize(self, control, ZO_TranslateFromLeftSceneFragment)
 
@@ -123,13 +119,15 @@ function WorldMapInfo_Gamepad:OnShowing()
     self:ShowCurrentFragments()
 end
 
-function WorldMapInfo_Gamepad:OnHidden()
+function WorldMapInfo_Gamepad:OnHiding()
     ZO_GamepadGenericHeader_Deactivate(self.header)
     --The fragments must hide immediately on removal otherwise they won't have removed their keybinds before the world map keybinds are restored on the line below.
     self:RemoveCurrentFragments()
     ZO_WorldMap_SetGamepadKeybindsShown(true)
     ZO_WorldMap_UpdateInteractKeybind_Gamepad()
+end
 
+function WorldMapInfo_Gamepad:OnHidden()
     CALLBACK_MANAGER:FireCallbacks("WorldMapInfo_Gamepad_Hidden")
 end
 

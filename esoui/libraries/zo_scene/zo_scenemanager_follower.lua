@@ -2,10 +2,6 @@ local g_loggingEnabled = false
 
 ZO_SceneManager_Follower = ZO_SceneManager_Base:Subclass()
 
-function ZO_SceneManager_Follower:New(...)
-    return ZO_SceneManager_Base.New(self, ...)
-end
-
 function ZO_SceneManager_Follower:Initialize(...)
     ZO_SceneManager_Base.Initialize(self, ...)
 

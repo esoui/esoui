@@ -1,6 +1,6 @@
 
 ZO_ARMORY_BUILD_ICON_TEXTURE_FORMATTER = "EsoUI/Art/Armory/BuildIcons/buildIcon_%d.dds"
-ZO_ARMORY_NUM_BUILD_ICONS = 74
+ZO_ARMORY_NUM_BUILD_ICONS = 78
 
 -----------------------------
 -- Armory Manager

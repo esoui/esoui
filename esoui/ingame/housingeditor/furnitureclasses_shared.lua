@@ -616,6 +616,10 @@ function ZO_HousingMarketProduct:Preview()
     SYSTEMS:GetObject("itemPreview"):PreviewFurnitureMarketProduct(self.marketProductId)
 end
 
+function ZO_HousingMarketProduct:CanPreviewPlacement()
+    return IsCurrentlyPreviewing() and HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() and CanHousingEditorPlacementPreviewMarketProduct(self.marketProductId)
+end
+
 function ZO_HousingMarketProduct:Reset()
     self.marketProductId = nil
     self.presentationIndex = nil

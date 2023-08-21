@@ -73,7 +73,15 @@ local IS_GREATER_THAN = 1
 
 function ZO_TableOrderingFunction(entry1, entry2, sortKey, sortKeys, sortOrder)
     local value1 = entry1[sortKey]
+    if type(value1) == "function" then
+        value1 = value1(entry1)
+    end
+
     local value2 = entry2[sortKey]
+    if type(value2) == "function" then
+        value2 = value2(entry2)
+    end
+
     local value1Type = type(value1)
 
     if value1Type ~= type(value2) or not validOrderingTypes[value1Type] then

@@ -13,16 +13,12 @@ local function InitializeKeyboardMorphDialog()
     local morphAbility1 = dialogControl:GetNamedChild("MorphAbility1")
     morphAbility1.icon = morphAbility1:GetNamedChild("Icon")
     morphAbility1.selectedCallout = morphAbility1:GetNamedChild("SelectedCallout")
-    --Hardcoded to one because we want to show the baseline values
-    morphAbility1.overrideRank = 1
     morphAbility1.advised = false
     dialogControl.morphAbility1 = morphAbility1
 
     local morphAbility2 = dialogControl:GetNamedChild("MorphAbility2")
     morphAbility2.icon = morphAbility2:GetNamedChild("Icon")
     morphAbility2.selectedCallout = morphAbility2:GetNamedChild("SelectedCallout")
-    --Hardcoded to one because we want to show the baseline values
-    morphAbility2.overrideRank = 1
     morphAbility2.advised = false
     dialogControl.morphAbility2 = morphAbility2
 

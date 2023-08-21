@@ -67,6 +67,13 @@ function ZO_HousingFurnitureBrowser_Gamepad:UpdateProductsPanel()
     self.productsPanel:UpdateLists()
 end
 
+--Overridden
+function  ZO_HousingFurnitureBrowser_Gamepad:GetFooterNarration()
+    if HOUSE_INFORMATION_FRAGMENT_GAMEPAD:IsShowing() then
+        return HOUSE_INFORMATION_GAMEPAD:GetNarrationText()
+    end
+end
+
 function ZO_HousingFurnitureBrowser_Gamepad:InitializeHeader()
     local tabBarEntries =
     {
@@ -176,6 +183,17 @@ function ZO_HousingFurnitureBrowser_Gamepad:OnShowing()
     ZO_GamepadGenericHeader_Activate(self.header)
     self.settingsPanel:UpdateLists()
     ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", self.OnRefreshActions)
+end
+
+function ZO_HousingFurnitureBrowser_Gamepad:OnShow()
+    ZO_Gamepad_ParametricList_Screen.OnShow(self)
+    
+    if self.currentPanel and self.currentPanel.UpdateCurrentKeybinds then
+        -- Only attempt to call UpdateCurrentKeybinds if the current panel
+        -- has such a function; the Settings panel manages its own keybinds
+        -- via different events internally.
+        self.currentPanel:UpdateCurrentKeybinds()
+    end
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:OnHiding()

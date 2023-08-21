@@ -1,9 +1,9 @@
 QuickslotActionButton = ActionButton:Subclass()
 
-function QuickslotActionButton:New(...)
-    local newB = ActionButton.New(self, ...)
-    newB.button.tooltip = ItemTooltip
-    return newB
+function QuickslotActionButton:Initialize(...)
+    ActionButton.Initialize(self, ...)
+
+    self.button.tooltip = ItemTooltip
 end
 
 function QuickslotActionButton:GetSlot()
@@ -29,4 +29,10 @@ function QuickslotActionButton:ApplyStyle(template)
 
     self:SetCooldownPercentComplete(cooldownPercent)
     self:SetCooldownEdgeState(self.showingCooldown)
+end
+
+function QuickslotActionButton:FormatCount(count)
+    local USE_LOWERCASE_NUMBER_SUFFIXES = false
+    local abbreviatedCount = ZO_AbbreviateAndLocalizeRadialMenuEntryCount(count, USE_LOWERCASE_NUMBER_SUFFIXES)
+    return abbreviatedCount
 end

@@ -74,7 +74,7 @@ function ZO_Smithing_Gamepad:Initialize(control)
 
     --Whenever we leave a specific mode scene (either through back or pressing start) reset to the root mode
     local specificModeSceneGroup = ZO_SceneGroup:New(GAMEPAD_SMITHING_REFINE_SCENE_NAME, GAMEPAD_SMITHING_CREATION_SCENE_NAME, GAMEPAD_SMITHING_DECONSTRUCT_SCENE_NAME, GAMEPAD_SMITHING_IMPROVEMENT_SCENE_NAME, GAMEPAD_SMITHING_RESEARCH_SCENE_NAME)
-    specificModeSceneGroup:RegisterCallback("StateChange", function(oldState, newState)
+    specificModeSceneGroup:RegisterCallback("StateChange", function(_, newState)
         if newState == SCENE_GROUP_HIDDEN then
             self:ResetMode()
         end
@@ -167,6 +167,12 @@ function ZO_Smithing_Gamepad:Initialize(control)
 
     self.control:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_STARTED, HandleDirtyEvent)
     self.control:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED, HandleDirtyEvent)
+
+    ZO_WRIT_ADVISOR_GAMEPAD:RegisterCallback("CycleActiveQuest", function()
+        if GAMEPAD_SMITHING_ROOT_SCENE:IsShowing() then
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.modeList)
+        end
+    end)
 end
 
 function ZO_Smithing_Gamepad:InitializeKeybindStripDescriptors()
@@ -192,10 +198,11 @@ function ZO_Smithing_Gamepad:InitializeKeybindStripDescriptors()
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.modeList)
 end
 
-function ZO_Smithing_Gamepad:CreateModeEntry(name, mode, icon)
+function ZO_Smithing_Gamepad:CreateModeEntry(name, mode, icon, shouldShowQuestPin)
     local data = ZO_GamepadEntryData:New(GetString(name), icon)
     data:SetIconTintOnSelection(true)
     data.mode = mode
+    data.hasCraftingQuestPin = shouldShowQuestPin
     return data
 end
 
@@ -208,10 +215,10 @@ function ZO_Smithing_Gamepad:InitializeModeList()
     self.modeList:SetAlignToScreenCenter(true)
     self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
-    self.refinementModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_REFINEMENT, SMITHING_MODE_REFINEMENT, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_refine.dds")
-    self.creationModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_CREATION, SMITHING_MODE_CREATION, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_create.dds")
+    self.refinementModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_REFINEMENT, SMITHING_MODE_REFINEMENT, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_refine.dds", function() return self.shouldRefineForQuest end)
+    self.creationModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_CREATION, SMITHING_MODE_CREATION, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_create.dds", function() return self.shouldCraftForQuest end)
     self.deconstructionModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_DECONSTRUCTION, SMITHING_MODE_DECONSTRUCTION, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_deconstruct.dds")
-    self.improvementModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_IMPROVEMENT, SMITHING_MODE_IMPROVEMENT, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_improve.dds")
+    self.improvementModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_IMPROVEMENT, SMITHING_MODE_IMPROVEMENT, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_improve.dds", function() return self.shouldImproveForQuest end)
     self.researchModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_RESEARCH, SMITHING_MODE_RESEARCH, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_research.dds")
 
     local narrationInfo =
@@ -247,7 +254,7 @@ function ZO_Smithing_Gamepad:RefreshModeList(craftingType)
 
     local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(craftingType)
     local recipeCraftingSystemNameStringId = _G["SI_RECIPECRAFTINGSYSTEM"..recipeCraftingSystem]
-    local recipeModeEntry = self:CreateModeEntry(recipeCraftingSystemNameStringId, SMITHING_MODE_RECIPES, ZO_GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem))
+    local recipeModeEntry = self:CreateModeEntry(recipeCraftingSystemNameStringId, SMITHING_MODE_RECIPES, ZO_GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem), function() return self.usesProvisioningForQuest end)
     self:AddModeEntry(recipeModeEntry)
     self.modeList:Commit()
 end
@@ -279,6 +286,12 @@ end
 
 function ZO_Smithing_Gamepad:UpdateKeybindStrip()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_Smithing_Gamepad:UpdateQuestPins()
+    if GAMEPAD_SMITHING_ROOT_SCENE:IsShowing() then
+        self:RefreshModeList(GetCraftingInteractionType())
+    end
 end
 
 function ZO_Smithing_Gamepad_Initialize(control)

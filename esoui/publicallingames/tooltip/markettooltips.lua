@@ -103,7 +103,13 @@ function ZO_Tooltip:LayoutMarketProductListing(marketProductId, presentationInde
 
         if completedAchievement and IsMarketProductPurchased(marketProductId) then
             local purchasableOnAltSection = self:AcquireSection(self:GetStyle("bodySection"))
-            purchasableOnAltSection:AddLine(GetString(SI_MARKET_PRODUCT_TOOLTIP_PURCHASABLE_ON_ALT_CHARACTER_DESCRIPTION), self:GetStyle("bodyDescription"), self:GetStyle("whiteFontColor"))
+            if GetNumSkyshardsInAchievement(achievementId) > 0 then
+                purchasableOnAltSection:AddLine(GetString(SI_MARKET_PRODUCT_TOOLTIP_SKYSHARD_PURCHASABLE_ON_ALT_CHARACTER_DESCRIPTION), self:GetStyle("bodyDescription"), self:GetStyle("whiteFontColor"))
+            elseif GetNumAttainSkillLineRanksInAchievement(achievementId) > 0 then
+                purchasableOnAltSection:AddLine(GetString(SI_MARKET_PRODUCT_TOOLTIP_SKILL_LINE_PURCHASABLE_ON_ALT_CHARACTER_DESCRIPTION), self:GetStyle("bodyDescription"), self:GetStyle("whiteFontColor"))
+            else
+                purchasableOnAltSection:AddLine(GetString(SI_MARKET_PRODUCT_TOOLTIP_PURCHASABLE_ON_ALT_CHARACTER_DESCRIPTION), self:GetStyle("bodyDescription"), self:GetStyle("whiteFontColor"))
+            end
             self:AddSection(purchasableOnAltSection)
         end
     end

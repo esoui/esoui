@@ -152,6 +152,8 @@ ITEM_SLOT_CURRENCY_OPTIONS =
     iconSide = RIGHT,
 }
 
+-- When switching fence tabs, this function can be called before the fencing mode switch is done,
+-- causing IsLaundering() to return an incorrect result.
 local function GetDefaultSlotSellValue(slot)
     return (FENCE_MANAGER and SYSTEMS:GetObject("fence"):IsLaundering()) and slot.stackLaunderPrice or slot.stackSellPrice
 end

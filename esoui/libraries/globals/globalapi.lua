@@ -3,6 +3,7 @@
 ZO_PI = math.pi
 ZO_TWO_PI = ZO_PI * 2
 ZO_HALF_PI = ZO_PI / 2
+ZO_INTEGER_53_MAX_BITS = 53
 
 zo_strlower         = LocaleAwareToLower
 zo_strupper         = LocaleAwareToUpper
@@ -449,35 +450,27 @@ function ZO_MaskHasFlagsIterator(mask)
 end
 
 function ZO_ClearMaskFlag(mask, flag)
-    if BitAnd(mask, flag) == flag then
-        return mask - flag
-    end
-    return mask
+    local flagInverse = BitNot(flag, ZO_INTEGER_53_MAX_BITS)
+    return BitAnd(mask, flagInverse)
 end
 
 function ZO_ClearMaskFlags(mask, ...)
     local flags = {...}
+    local flagsToClear = 0
     for _, flag in ipairs(flags) do
-        if BitAnd(mask, flag) == flag then
-            mask = mask - flag
-        end
+        flagsToClear = BitOr(flagsToClear, flag)
     end
-    return mask
+    return ZO_ClearMaskFlag(mask, flagsToClear)
 end
 
 function ZO_SetMaskFlag(mask, flag)
-    if BitAnd(mask, flag) ~= flag then
-        return mask + flag
-    end
-    return mask
+    return BitOr(mask, flag)
 end
 
 function ZO_SetMaskFlags(mask, ...)
     local flags = {...}
     for _, flag in ipairs(flags) do
-        if BitAnd(mask, flag) ~= flag then
-            mask = mask + flag
-        end
+        mask = BitOr(mask, flag)
     end
     return mask
 end
@@ -517,4 +510,26 @@ function ZO_CompareMaskFlags(flagsBefore, flagsAfter)
     end
 
     return changedFlags
+end
+
+-- Returns a numerically indexed table containing the names of the functions
+-- in the callstack, in order from the top to the bottom of the callstack.
+-- Specify an optional 'numTopmostFunctionsToExclude' to exclude one or more
+-- function names starting from the top of the callstack (default is 0).
+function ZO_GetCallstackFunctionNames(numTopmostFunctionsToExclude)
+    local minFunctionIndex = (numTopmostFunctionsToExclude or 0) + 1
+    local stackTrace = debug.traceback()
+    local functionNames = {}
+    local functionIndex = 0
+
+    for functionName in zo_strgmatch(stackTrace, "in function '(%S*)'") do
+        if functionName ~= "ZO_GetCallstackFunctionNames" then
+            functionIndex = functionIndex + 1
+            if functionIndex >= minFunctionIndex then
+                table.insert(functionNames, functionName)
+            end
+        end
+    end
+
+    return functionNames
 end

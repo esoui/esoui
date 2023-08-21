@@ -34,6 +34,7 @@ do
         ["ZO_Options_Color"] = 4,
         ["ZO_Options_Social_ChatColor"] = 8,
         ["ZO_Options_Social_GuildLabel"] = 30,
+        ["ZO_Options_Video_Checkbox_IncludeApplyScreenWarning"] = 6,
     }
     local INDENT_X_OFFSET = 20
     local HEADER_Y_OFFSET = 15

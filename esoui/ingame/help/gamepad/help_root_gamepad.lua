@@ -34,8 +34,8 @@ function ZO_Help_Root_Gamepad:Initialize(control)
 
     local websiteText = CreateControlFromVirtual("$(parent)HelpWebsite", control, "ZO_Gamepad_HelpWebsiteTemplate")
     websiteText:SetParent(self.header)
-    local websiteAnchor = ZO_Anchor:New(TOP, headerMessageControl, BOTTOM, 0, 55)
-    websiteAnchor:AddToControl(websiteText)
+    websiteText:SetAnchor(TOPLEFT, headerMessageControl, BOTTOMLEFT, 0, 55)
+    websiteText:SetAnchor(TOPRIGHT, headerMessageControl, BOTTOMRIGHT, 0, 55)
     
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 

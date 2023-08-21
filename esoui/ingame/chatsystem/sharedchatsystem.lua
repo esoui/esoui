@@ -878,10 +878,10 @@ function SharedChatContainer:IsScrolledUp()
     end
 end
 
-function SharedChatContainer:AddEventMessageToContainer(formattedEvent, category, narrationMessage)
+function SharedChatContainer:AddEventMessageToContainer(formattedEvent, category, narrationMessage, overrideColorDef)
     for i = 1, #self.windows do
         if IsChatContainerTabCategoryEnabled(self.id, i, category) then
-            self:AddEventMessageToWindow(self.windows[i], formattedEvent, category, narrationMessage)
+            self:AddEventMessageToWindow(self.windows[i], formattedEvent, category, narrationMessage, overrideColorDef)
         end
     end
 end
@@ -915,8 +915,13 @@ function SharedChatContainer:AddMessageToWindow(window, message, r, g, b, catego
     end
 end
 
-function SharedChatContainer:AddEventMessageToWindow(window, message, category, narrationMessage)
-    local r, g, b = GetChatCategoryColor(category)
+function SharedChatContainer:AddEventMessageToWindow(window, message, category, narrationMessage, overrideColorDef)
+    local r, g, b
+    if overrideColorDef then
+        r, g, b = overrideColorDef:UnpackRGB()
+    else
+        r, g, b = GetChatCategoryColor(category)
+    end
     self:AddMessageToWindow(window, message, r, g, b, category)
 end
 
@@ -1340,8 +1345,8 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
 
     if IsChatSystemAvailableForCurrentPlatform() then
         -- Chat events
-        local function OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
-            self:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
+        local function OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage, overrideColorDef)
+            self:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage, overrideColorDef)
         end
         CHAT_ROUTER:RegisterCallback("FormattedChatMessage", OnFormattedChatMessage)
 
@@ -1491,11 +1496,11 @@ function SharedChatSystem:HandleNewTargetOnChannel(targetChannel, target)
     self.targets[targetChannel]:AddTarget(zo_strformat(SI_UNIT_NAME, target))
 end
 
-function SharedChatSystem:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage)
+function SharedChatSystem:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage, overrideColorDef)
     local containers = self.categories[category]
     if containers then
         for container, _ in pairs(containers) do
-            container:AddEventMessageToContainer(message, category, narrationMessage)
+            container:AddEventMessageToContainer(message, category, narrationMessage, overrideColorDef)
         end
     end
 end
@@ -2320,48 +2325,70 @@ end
 
 function ZO_ChatSystem_OnMouseWheel(control, delta, ctrl, alt, shift)
     local container = control.container
-    if shift then
-        delta = delta * (container.currentBuffer and container.currentBuffer:GetNumVisibleLines() or 0)
-    elseif ctrl then
-        delta = delta * (container.currentBuffer and container.currentBuffer:GetNumHistoryLines() or 0)
+    if container then
+        if shift then
+            delta = delta * (container.currentBuffer and container.currentBuffer:GetNumVisibleLines() or 0)
+        elseif ctrl then
+            delta = delta * (container.currentBuffer and container.currentBuffer:GetNumHistoryLines() or 0)
+        end
+        container:ScrollByOffset(delta)
     end
-    container:ScrollByOffset(delta)
 end
 
 function ZO_ChatSystem_SetScroll(control, value)
-    control.container:SetScroll(value)
+    if control.container then
+        control.container:SetScroll(value)
+    end
 end
 
 function ZO_ChatSystem_ScrollByOffset(control, offset)
-    control.container:ScrollByOffset(offset)
+    if control.container then
+        control.container:ScrollByOffset(offset)
+    end
 end
 
 function ZO_ChatSystem_ScrollToBottom(control)
-    control.container:ScrollToBottom()
+    if control.container then
+        control.container:ScrollToBottom()
+    end
 end
 
 function ZO_ChatSystem_OnDragStart(control)
-    control.container:StartDraggingTab(control.index)
+    if control.container then
+        control.container:StartDraggingTab(control.index)
+    end
 end
 
 function ZO_ChatSystem_OnDragStop(control)
-    control.container:StopDraggingTab()
+    if control.container then
+        control.container:StopDraggingTab()
+    end
 end
 
 function ZO_ChatSystem_OnResizeStart(control)
-    control.container:OnResizeStart()
+    if control.container then
+        control.container:OnResizeStart()
+    end
 end
 
 function ZO_ChatSystem_OnResizeStop(control)
-    control.container:OnResizeStop()
+    if control.container then
+        control.container:OnResizeStop()
+    end
 end
 
 function ZO_ChatSystem_OnMoveStop(control)
-    control.container:OnMoveStop()
+    if control.container then
+        control.container:OnMoveStop()
+    end
 end
 
 function ZO_ChatSystem_OnMouseEnter(control)
-    control.container:OnMouseEnter()
+    -- ESO-830211: Live players were hitting this, though as far as the code seems it should be impossible
+    -- However they're getting into this situation, this will prevent the error
+    if control.container then
+        control.container:OnMouseEnter()
+    end
 end
 
 function ZO_ChatTextEntry_PreviousCommand(control)

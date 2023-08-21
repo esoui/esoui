@@ -190,17 +190,25 @@ function ZO_GroupMenu_Gamepad:InitializeEvents()
         end
     end
 
-    self.control:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, function(eventCode, ...) OnGroupMemberJoined(...) end)
+    local function OnCombatStateChanged()
+        if not self.control:IsControlHidden() then
+            self:UpdateMenuList()
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, function(eventCode, ...) OnGroupMemberLeft(...) end)
-    self.control:RegisterForEvent(EVENT_GROUP_UPDATE, function(eventCode, ...) OnGroupUpdate(...) end)
-    self.control:RegisterForEvent(EVENT_LEADER_UPDATE, function(eventCode, ...) OnLeaderUpdate(...) end)
+    self.control:RegisterForEvent(EVENT_GROUP_UPDATE, OnGroupUpdate)
+    self.control:RegisterForEvent(EVENT_LEADER_UPDATE, OnLeaderUpdate)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_CONNECTED_STATUS, function(eventCode, ...) OnGroupMemberConnectedStatus(...) end)
 
-    self.control:RegisterForEvent(EVENT_GROUP_VETERAN_DIFFICULTY_CHANGED, function(eventCode, ...) OnGroupVeteranDifficultyChanged(...) end)
-    self.control:RegisterForEvent(EVENT_VETERAN_DIFFICULTY_CHANGED,function(eventCode,...) OnGroupVeteranDifficultyChanged(...) end)
+    self.control:RegisterForEvent(EVENT_GROUP_VETERAN_DIFFICULTY_CHANGED, OnGroupVeteranDifficultyChanged)
+    self.control:RegisterForEvent(EVENT_VETERAN_DIFFICULTY_CHANGED, function(eventCode,...) OnGroupVeteranDifficultyChanged(...) end)
     self.control:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, function(eventCode, ...) OnChampionPointsChanged(...) end)
 
     self.control:RegisterForEvent(EVENT_ZONE_UPDATE, function(eventCode, ...) OnZoneUpdate(...) end)
+    self.control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, OnCombatStateChanged)
 end
 
 

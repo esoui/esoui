@@ -1862,7 +1862,7 @@ function ZO_PlayerToPlayer:OnUpdate()
             incomingEntry.updateFn(incomingEntry, isActive)
         end
 
-        if TIMED_PROMPTS[incomingEntry.incomingType] and not incomingEntry.seen and (not IsGameCameraActive() or SCENE_MANAGER:IsInUIMode()) then
+        if TIMED_PROMPTS[incomingEntry.incomingType] and not incomingEntry.seen and SCENE_MANAGER:IsInUIMode() then
             -- For time sensitive prompts, the player probably won't see them if they are currently in a UI menu. Let's throw up a dialog before it's too late to respond
             ZO_Dialogs_ShowPlatformDialog("PTP_TIMED_RESPONSE_PROMPT", incomingEntry)
             incomingEntry.seen = true

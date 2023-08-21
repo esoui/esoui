@@ -2,7 +2,10 @@
     <!-- Faces -->
     <String name="MEDIUM_FONT" value="EsoUI/Common/Fonts/Univers57.otf" />
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.otf"/>
-    <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
+    <!-- ESO-829122: In Japanese, MEDIUM_FONT would normally be ESO_FWNTLGUDC70-DB.ttf. However, due to the nature of backup fonts, 
+    since both MEDIUM_FONT and CHAT_FONT Western are based on Univers57, doing that here would mean CHAT_FONT would load
+    70-DB glyphs before loading 70-M glyphs, which is undesirable. This is a compromise until backup fonts can be augmented to correct for this. -->
+    <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWUDC_70-M.ttf"/>
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.otf"/>
 
     <String name="BOLD_FONT" value="EsoUI/Common/Fonts/Univers67.otf" />

@@ -1794,6 +1794,33 @@ ZO_TOOLTIP_STYLES =
         customSpacing = 15,
         widthPercent = 100,
     },
+
+    -- Cyrodiil Kill Location
+    killLocationSection =
+    {
+        childSpacing = 5,
+        paddingTop = 40,
+        widthPercent = 100,
+    },
+    killLocationHeading =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+        fontSize = "$(GP_34)",
+        width = 305,
+    },
+    killLocationKillsSection =
+    {
+        customSpacing = 15,
+        horizontalAlignment = TEXT_ALIGN_LEFT,
+        paddingTop = 30,
+        widthPercent = 100,
+    },
+    killLocationKills =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+        fontSize = "$(GP_34)",
+        widthPercent = 100,
+    },
 }
 
 ZO_GAMEPAD_DYEING_TOOLTIP_STYLES =

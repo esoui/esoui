@@ -3,7 +3,7 @@
 --showAdvisedLine: adds a line if the skill progression is advised
 --showRespecToFixBadMorphLine: adds a line telling the player to respec if the player has chosen the incorrect (not-advised) morph
 --showUpgradeInfoBlock: adds a block of text explaining what upgrading the skill does. For passives it adds the next rank description below the current. For morphs it adds text explaining what the morph changes.
---shouldOverrideRankForComparison: changes the tooltip to reference rank 1 instead of the rank the player has and removes the skill XP bar to aid in morph comparison.
+--shouldOverrideRankForComparison: changes the tooltip to reference rank 1 instead of the rank the player has and removes the skill XP bar.
 function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededLine, showPointSpendLine, showAdvisedLine, showRespecToFixBadMorphLine, showUpgradeInfoBlock, shouldOverrideRankForComparison)
     local skillData = skillProgressionData:GetSkillData()
     local skillLineData = skillData:GetSkillLineData()

@@ -864,6 +864,14 @@ function ZO_TreeNode:GetChildren()
     return self.children
 end
 
+function ZO_TreeNode:GetChild(index)
+    if self.children then
+        return self.children[index]
+    else
+        return nil
+    end
+end
+
 function ZO_TreeNode:GetChildSpacing()
     return self.childSpacing
 end

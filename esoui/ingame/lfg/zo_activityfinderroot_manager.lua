@@ -616,7 +616,7 @@ function ActivityFinderRoot_Manager:StartSearch()
         return
     end
 
-    ClearGroupFinderSearch()
+    ClearActivityFinderSearch()
 
     --Add locations
     for _, locationsByActivity in pairs(self.sortedLocationsData) do
@@ -627,7 +627,7 @@ function ActivityFinderRoot_Manager:StartSearch()
         end
     end
 
-    local result = StartGroupFinderSearch()
+    local result = StartActivityFinderSearch()
     if result ~= ACTIVITY_QUEUE_RESULT_SUCCESS then
         ZO_AlertEvent(EVENT_ACTIVITY_QUEUE_RESULT, result)
     end

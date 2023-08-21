@@ -1647,6 +1647,45 @@ function ZO_OutOfDateAddonsProvider:Decline(data)
     self.notificationManager:RefreshNotificationList()
 end
 
+-- Disabled Addons Provider
+------------------------------
+
+ZO_DisabledAddonsProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_DisabledAddonsProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_FORCE_DISABLED_ADDONS_UPDATED)
+
+    return provider
+end
+
+function ZO_DisabledAddonsProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    local addOnManager = GetAddOnManager()
+    local numDisabledAddOns = addOnManager:GetNumForceDisabledAddOns()
+    for i = 1, numDisabledAddOns do
+        local addonName, shouldShowNotification = addOnManager:GetForceDisabledAddOnInfo(i)
+        if shouldShowNotification then
+            table.insert(self.list,
+            {
+                dataType = NOTIFICATIONS_ALERT_DATA,
+                notificationType = NOTIFICATION_TYPE_DISABLED_ADDON,
+                shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_DISABLED_ADDON),
+                message = zo_strformat(SI_NOTIFICATIONS_DISABLED_ADDON_MESSAGE, ZO_SELECTED_TEXT:Colorize(addonName)),
+                secsSinceRequest = ZO_NormalizeSecondsSince(0),
+                addonIndex = i,
+            })
+        end
+    end
+end
+
+function ZO_DisabledAddonsProvider:Decline(data)
+    GetAddOnManager():ClearForceDisabledAddOnNotification(data.addonIndex)
+    self.notificationManager:RefreshNotificationList()
+end
+
 -- Tribute Invite Provider
 ------------------------------
 

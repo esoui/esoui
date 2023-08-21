@@ -294,6 +294,21 @@ function InformationTooltipMixin:AppendDelveInfo(pin)
     end
 end
 
+function InformationTooltipMixin:AppendKillLocationInfo(pin)
+    local informationTooltip = GetPlatformInformationTooltip()
+    informationTooltip:AddLine(GetString(SI_KILL_LOCATION_TOOLTIP_HEADING))
+    
+    for alliance = ALLIANCE_ITERATION_BEGIN, ALLIANCE_ITERATION_END do
+        local numKills = pin:GetNumAllianceKills(alliance)
+        if numKills > 0 then
+            local allianceColor = GetAllianceColor(alliance)
+            local allianceIcon = allianceColor:Colorize(zo_iconFormatInheritColor(ZO_GetAllianceIcon(alliance), 16, 32))
+            local allianceName = allianceColor:Colorize(GetAllianceName(alliance))
+            InformationTooltip:AddLine(zo_strformat(SI_KILL_LOCATION_TOOLTIP_ALLIANCE_KILLS, allianceIcon, allianceName, numKills), "", 1, 1, 1, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_LEFT)
+        end
+    end
+end    
+
 function InformationTooltipMixin:AppendWayshrineTooltip(pin)
     local nodeIndex = pin:GetFastTravelNodeIndex()
     local informationTooltip = GetPlatformInformationTooltip()
@@ -2077,7 +2092,8 @@ function ZO_WorldMap_RefreshKillLocations()
     RemoveMapPinsInRange(MAP_PIN_TYPE_TRI_BATTLE_SMALL, MAP_PIN_TYPE_EBONHEART_VS_DAGGERFALL_LARGE)
 
     --spawn locations
-    for i = 1, GetNumKillLocations() do
+    local numKillLocations = GetNumKillLocations()
+    for i = 1, numKillLocations do
         local pinType, normalizedX, normalizedY = GetKillLocationPinInfo(i)
         if pinType ~= MAP_PIN_TYPE_INVALID then
             if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_KILL_LOCATIONS) then

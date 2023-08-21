@@ -148,7 +148,7 @@ function ZO_GuildRecruitment_Gamepad:InitializeKeybindStripDescriptors()
 
             callback = function()
                 GAMEPAD_GUILD_HUB:SetEnterInSingleGuildList(true)
-                SCENE_MANAGER:Hide(GAMEPAD_GUILD_HOME_SCENE_NAME)
+                SCENE_MANAGER:Hide("gamepad_guild_home")
             end,
         },
     }

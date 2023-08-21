@@ -1,13 +1,23 @@
 local MIN_PURCHASE_QUANTITY = 1
 
-local function LogPurchaseClose(dialog)
+local function OnPurchaseResolved(dialog)
     if dialog.data then
+        -- Did we come from an in-house placement preview?
+        local isPreviewingMarketProductPlacement = dialog.data.isPreviewingMarketProductPlacement
+        dialog.data.isPreviewingMarketProductPlacement = nil
+
         if dialog.data.logPurchasedMarketId then
             OnMarketEndPurchase(dialog.data.marketProductData:GetId())
         else
             OnMarketEndPurchase()
         end
+
         dialog.data.logPurchasedMarketId = false
+
+        if isPreviewingMarketProductPlacement then
+            -- We did come from an in-house placement preview; let's go back to the Housing Editor Browse mode.
+            ZO_ReturnToHousingEditorBrowseMode()
+        end
     end
 end
 
@@ -27,7 +37,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] =
         {
             text = SI_MARKET_PURCHASE_ERROR_CONTINUE,
             keybind = "DIALOG_PRIMARY",
-            callback =function(dialog)
+            callback = function(dialog)
                 -- the MARKET_PURCHASE_CONFIRMATION dialog will be queued to show once this one is hidden
                 ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", dialog.data)
             end,
@@ -35,15 +45,15 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] =
         {
             text = SI_DIALOG_EXIT,
             keybind = "DIALOG_NEGATIVE",
-            callback = LogPurchaseClose,
+            callback = OnPurchaseResolved,
         },
     },
-    noChoiceCallback = LogPurchaseClose,
+    noChoiceCallback = OnPurchaseResolved,
 }
 
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS"] =
 {
-    finishedCallback = LogPurchaseClose,
+    finishedCallback = OnPurchaseResolved,
     canQueue = true,
     title =
     {
@@ -77,7 +87,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS"] =
 
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS"] =
 {
-    finishedCallback = LogPurchaseClose,
+    finishedCallback = OnPurchaseResolved,
     canQueue = true,
     title =
     {
@@ -105,7 +115,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS"] =
 
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_NOT_ALLOWED"] =
 {
-    finishedCallback = LogPurchaseClose,
+    finishedCallback = OnPurchaseResolved,
     canQueue = true,
     title =
     {
@@ -133,7 +143,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_NOT_ALLOWED"] =
 
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD"] =
 {
-    finishedCallback = LogPurchaseClose,
+    finishedCallback = OnPurchaseResolved,
     updateFn = function(dialog)
         ZO_MarketDialogs_Shared_UpdateGiftingGracePeriodTimer(dialog)
     end,
@@ -164,7 +174,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD"] =
 
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVENTORY"] =
 {
-    finishedCallback = LogPurchaseClose,
+    finishedCallback = OnPurchaseResolved,
     canQueue = true,
     title =
     {
@@ -256,10 +266,9 @@ ESO_Dialogs["RESEND_GIFT_PARTIALLY_OWNED_KEYBOARD"] =
     },
 }
 
-
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT"] =
 {
-    finishedCallback = LogPurchaseClose,
+    finishedCallback = OnPurchaseResolved,
     canQueue = true,
     title =
     {
@@ -279,7 +288,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT"] =
 
 ESO_Dialogs["MARKET_FREE_TRIAL_PURCHASE_CONFIRMATION"] =
 {
-    finishedCallback = LogPurchaseClose,
+    finishedCallback = OnPurchaseResolved,
     title =
     {
         text = SI_MARKET_PURCHASE_FREE_TRIAL_TITLE
@@ -873,10 +882,10 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
                 {
                     control = control:GetNamedChild("Cancel"),
                     text = SI_DIALOG_DECLINE,
-                    callback = LogPurchaseClose,
+                    callback = OnPurchaseResolved,
                 },
             },
-            noChoiceCallback = LogPurchaseClose,
+            noChoiceCallback = OnPurchaseResolved,
             finishedCallback = function(dialog)
                 ClearTooltipImmediately(InformationTooltip)
             end,
@@ -1161,6 +1170,7 @@ local function MarketPurchasingDialogSetup(dialog, data)
     data.loadingDelayTimeMS = nil
     data.currentState = MARKET_PURCHASING_STATE_DELAY
     data.quantity = data.quantity or 1
+    data.isPreviewingMarketProductPlacement = IsHousingEditorPreviewingMarketProductPlacement()
     EVENT_MANAGER:RegisterForEvent("MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(data, ...) end)
 
     dialog:GetNamedChild("Confirm"):SetHidden(true)
@@ -1193,10 +1203,18 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
                     control = self:GetNamedChild("UseProduct"),
                     keybind = "DIALOG_RESET",
                     callback = function(dialog)
+                        -- Order matters:
                         dialog.data.logPurchasedMarketId = true
-                        LogPurchaseClose(dialog)
-
+                        -- Ensure that we don't try to return to Housing Editor Browse mode again when the scene hides:
+                        dialog.data.isPreviewingMarketProductPlacement = nil
+                        OnPurchaseResolved(dialog)
                         ZO_Market_Shared.GoToUseProductLocation(dialog.data.marketProductData)
+                        if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_PLACEMENT then
+                            -- Manually return to Housing Editor Browse mode unless we are left in Placement mode;
+                            -- this occurs when the relevant furnishing limit had already been reached or when this
+                            -- purchase did not originate from in-house placement preview.
+                            ZO_ReturnToHousingEditorBrowseMode()
+                        end
                     end,
                 },
                 {
@@ -1218,7 +1236,8 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
                         end
 
                         data.logPurchasedMarketId = true
-                        LogPurchaseClose(dialog)
+                        OnPurchaseResolved(dialog)
+
                         if data.wasGift == false then
                             local activeMarket = ZO_MARKET_MANAGER:GetActiveMarket()
 

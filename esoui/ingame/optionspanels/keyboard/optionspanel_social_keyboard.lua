@@ -71,6 +71,13 @@ panelBuilder:AddSetting({
     header = SI_SOCIAL_OPTIONS_NOTIFICATIONS,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Social_PvPKillFeedNotifications",
+    settingType = SETTING_TYPE_UI,
+    settingId = UI_SETTING_SHOW_PVP_KILL_FEED_NOTIFICATIONS,
+    header = SI_SOCIAL_OPTIONS_NOTIFICATIONS,
+})
+
 ---------------------------
 -- Social -> Chat Colors --
 ---------------------------

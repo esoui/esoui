@@ -16,10 +16,6 @@ ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("INTERACT_ENDED")
 
 --class
 
-function ZO_SceneManager_Leader:New(...)
-    return ZO_SceneManager_Base.New(self, ...)
-end
-
 function ZO_SceneManager_Leader:Initialize(...)
     ZO_SceneManager_Base.Initialize(self, ...)
 

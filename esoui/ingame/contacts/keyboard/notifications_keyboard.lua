@@ -32,6 +32,7 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_PLAYER_APPLICATIONS] = "EsoUI/Art/Notifications/notificationIcon_guild.dds",
     [NOTIFICATION_TYPE_MARKET_PRODUCT_AVAILABLE] = "EsoUI/Art/Notifications/notificationIcon_crownStore.dds",
     [NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
+    [NOTIFICATION_TYPE_DISABLED_ADDON] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/notificationIcon_tribute.dds",
 }
 
@@ -390,6 +391,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_PlayerApplicationsProvider:New(self),
         ZO_KeyboardMarketProductUnlockedProvider:New(self),
         ZO_OutOfDateAddonsProvider:New(self),
+        ZO_DisabledAddonsProvider:New(self),
         ZO_TributeInviteProvider:New(self),
     }
 

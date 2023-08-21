@@ -193,6 +193,24 @@ function CollectionsBook_Singleton:SetPrimaryResidence(houseId)
     end
 end
 
+-- Attempts to begin placement of the specified collectible furnishing in the current house.
+function CollectionsBook_Singleton.TryPlaceCollectibleFurniture(collectibleData)
+    if not (collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse()) then
+        return false
+    end
+
+    if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_SELECTION then
+        SCENE_MANAGER:ShowBaseScene()
+
+        if HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION) ~= HOUSING_REQUEST_RESULT_SUCCESS then
+            return false
+        end
+    end
+
+    local success = HousingEditorCreateCollectibleFurnitureForPlacement(collectibleData:GetId())
+    return success
+end
+
 function ZO_UpdateCollectibleEntryDataIconVisuals(entryData, actorCategory)
     local locked = entryData:IsLocked()
     if locked or entryData:IsBlocked(actorCategory) then

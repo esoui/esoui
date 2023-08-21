@@ -650,6 +650,14 @@ function ZO_MultiSelection_ComboBox_Gamepad:GetNumSelectedEntries()
     return 0
 end
 
+function ZO_MultiSelection_ComboBox_Gamepad:IsItemSelected(item)
+    if self.currentItemData then
+        return self.currentItemData:IsItemSelected(item)
+    end
+
+    return false
+end
+
 -- ZO_MultiSelection_ComboBox_Data_Gamepad
 -------------------------------------------
 

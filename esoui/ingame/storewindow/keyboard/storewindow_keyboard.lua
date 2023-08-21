@@ -805,10 +805,6 @@ function ZO_Store_OnReceiveDrag()
     end
 end
 
-function ZO_Store_IsShopping()
-    return GetInteractionType() == INTERACTION_VENDOR
-end
-
 function ZO_Store_OnInitialize(control)
     STORE_WINDOW = ZO_StoreManager:New(control)
 end

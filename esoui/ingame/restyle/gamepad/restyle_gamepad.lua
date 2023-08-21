@@ -88,13 +88,16 @@ function ZO_Restyle_Gamepad:InitializeModeList()
         self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data)
     end
 
-    self.modeList:SetOnSelectedDataChangedCallback(
-        function(list, selectedData)
+
+    local function OnSelectedDataChanged(list, selectedData)
+        if GAMEPAD_RESTYLE_ROOT_SCENE:IsShowing() then
             self.currentlySelectedOptionData = selectedData
             self:UpdateOptionLeftTooltip(selectedData.mode)
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptorRoot)
         end
-    )
+    end
+
+    self.modeList:SetOnSelectedDataChangedCallback(OnSelectedDataChanged)
 
     self.modeList:Clear()
     AddEntry(SI_DYEING_DYE_EQUIPMENT_TAB, RESTYLE_MODE_EQUIPMENT, "EsoUI/Art/Restyle/Gamepad/gp_dyes_tabIcon_outfitStyleDye.dds", "gamepad_restyle_station")

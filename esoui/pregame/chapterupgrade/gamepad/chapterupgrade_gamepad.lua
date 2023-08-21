@@ -89,7 +89,11 @@ function ChapterUpgrade_Gamepad:UpgradeButtonClicked()
 end
 
 function ChapterUpgrade_Gamepad:EnterCodeButtonClicked()
-    ZO_Dialogs_ShowGamepadDialog("SHOW_REDEEM_CODE_CONSOLE")
+    if IsConsoleUI() then
+        ZO_Dialogs_ShowGamepadDialog("SHOW_REDEEM_CODE_CONSOLE")
+    else
+        ZO_Dialogs_ShowGamepadDialog("SHOW_REDEEM_CODE")
+    end
 end
 
 function ChapterUpgrade_Gamepad:OnShowing()

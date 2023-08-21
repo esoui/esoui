@@ -49,23 +49,14 @@
 
                 <Control name="$(parent)NameRow" inherits="ZO_HouseInformation_Keyboard_Row_Header" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="25" />
-                    <Controls>
-                        <Label name="$(parent)Name" override="true" text="SI_HOUSING_NAME_HEADER" />
-                    </Controls>
                 </Control>
 
                 <Control name="$(parent)LocationRow" inherits="ZO_HouseInformation_Keyboard_Row_Header" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameRow" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Controls>
-                        <Label name="$(parent)Name" override="true" text="SI_HOUSING_LOCATION_HEADER" />
-                    </Controls>
                 </Control>
 
                 <Control name="$(parent)OwnerRow" inherits="ZO_HouseInformation_Keyboard_Row_Header" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)LocationRow" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Controls>
-                        <Label name="$(parent)Name" override="true" text="SI_HOUSING_OWNER_HEADER" />
-                    </Controls>
                 </Control>
 
                 <Control name="$(parent)InfoSection" resizeToFitDescendents="true" >
@@ -78,15 +69,11 @@
 
                 <Control name="$(parent)PrimaryResidenceRow" inherits="ZO_HouseInformation_Keyboard_Row" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)InfoSection" relativePoint="BOTTOMLEFT" offsetY="20" />
-                    <Controls>
-                        <Label name="$(parent)Name" override="true" text="SI_HOUSING_PRIMARY_RESIDENCE_HEADER" />
-                    </Controls>
                 </Control>
                 
                 <Control name="$(parent)CurrentVisitorsRow" inherits="ZO_HouseInformation_Keyboard_Row" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryResidenceRow" relativePoint="BOTTOMLEFT" offsetY="20" />
                     <Controls>
-                        <Label name="$(parent)Name" override="true" text="SI_HOUSING_CURRENT_RESIDENTS_HEADER" />
                         <Texture name="$(parent)Help" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" mouseEnabled="true" layer="OVERLAY">
                             <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-5"/>
                             <Dimensions x="32" y="32"/>
@@ -103,16 +90,10 @@
 
                 <Control name="$(parent)IndividualPermissions" inherits="ZO_HouseInformation_Keyboard_Row" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)CurrentVisitorsRow" relativePoint="BOTTOMLEFT" offsetY="20" />
-                    <Controls>
-                        <Label name="$(parent)Name" override="true" text="SI_PERMISSION_USER_GROUP_INDIVIDUAL_TOTAL_HEADER" />
-                    </Controls>
                 </Control>
 
                 <Control name="$(parent)GuildPermissions" inherits="ZO_HouseInformation_Keyboard_Row" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)IndividualPermissions" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Controls>
-                        <Label name="$(parent)Name" override="true" text="SI_PERMISSION_USER_GROUP_GUILD_TOTAL_HEADER" />
-                    </Controls>
                 </Control>
 
                 <Button name="$(parent)LinkInChat" inherits="ZO_DefaultButton" text="SI_HOUSING_LINK_IN_CHAT">

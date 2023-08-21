@@ -853,7 +853,7 @@ function ZO_GuildRanks_Gamepad:InitializeKeybindStrip()
             callback = function()
                 if self:IsDisplayingRankList() then
                     GAMEPAD_GUILD_HUB:SetEnterInSingleGuildList(true)
-                    SCENE_MANAGER:Hide(GAMEPAD_GUILD_HOME_SCENE_NAME)
+                    SCENE_MANAGER:Hide("gamepad_guild_home")
                 elseif self:IsDisplayingRankIconPicker() or self:IsDisplayingChangePermissions() then
                     if self:NeedsSave() then
                         PlaySound(SOUNDS.GUILD_RANK_SAVED)

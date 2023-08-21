@@ -95,7 +95,7 @@ end
 function ZO_MouseInputGroup:RefreshMouseOver()
     local currentMouseOverControlInGroup = false
     --there seems to be a weird case where 3D controls can be mouse entered when exiting UI mode. So we prevent this from registering enters when not in UI mode
-    if not IsGameCameraActive() or SCENE_MANAGER:IsInUIMode() then
+    if SCENE_MANAGER:IsInUIMode() then
        currentMouseOverControlInGroup = self:IsControlInGroup(WINDOW_MANAGER:GetMouseOverControl(), ZO_MOUSE_INPUT_GROUP_MOUSE_OVER) 
     end
     if currentMouseOverControlInGroup ~= self.over then

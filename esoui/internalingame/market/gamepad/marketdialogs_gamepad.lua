@@ -7,7 +7,6 @@ local FLOW_CONFIRMATION_PARTIAL_BUNDLE = 5
 local FLOW_SUCCESS = 6
 local FLOW_FAILED = 7
 
-
 local DIALOG_FLOW =
 {
     [FLOW_WARNING] = "GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE",
@@ -113,6 +112,11 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             local queuedDialogInfo = self.queuedDialogInfo
             if queuedDialogInfo then
                 ZO_Dialogs_ShowGamepadDialog(queuedDialogInfo.dialogName, queuedDialogInfo.dialogData, queuedDialogInfo.dialogParams)
+            end
+        elseif newState == SCENE_HIDDEN then
+            if self.isPreviewingMarketProductPlacement then
+                self.isPreviewingMarketProductPlacement = nil
+                ZO_ReturnToHousingEditorBrowseMode()
             end
         end
     end)
@@ -665,6 +669,8 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
     local function MarketPurchasingDialogSetup(dialog, data)
         dialog:setupFunc()
+        dialog.isPreviewingMarketProductPlacement = IsHousingEditorPreviewingMarketProductPlacement()
+
         EVENT_MANAGER:RegisterForEvent("GAMEPAD_MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(dialog, ...) end)
         if data and data.shouldSendPartiallyOwnedGift then
             RespondToSendPartiallyOwnedGift(true)
@@ -838,12 +844,21 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                     end
                 end,
                 callback = function()
-                    local marketProductData = self.marketProductData -- cache off the productData, because reset state will clear it
-                    -- since we are trying to logout/go to another scene we don't want to trigger any of the scene changes
-                    -- or try to show tutorials, however we want to clean up after ourselves
-                    -- in case we don't actually logout
+                    -- Order matters:
+                    -- Cache off the productData, because reset state will clear it:
+                    local marketProductData = self.marketProductData
+                    -- Since we are trying to logout/go to another scene we don't want to trigger any of the scene changes
+                    -- or try to show tutorials, however we want to clean up after ourselves in case we don't actually logout
                     self:ResetState()
+                    -- Ensure that we don't try to return to Housing Editor Browse mode again when the scene hides:
+                    self.isPreviewingMarketProductPlacement = nil
                     ZO_Market_Shared.GoToUseProductLocation(marketProductData)
+                    if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_PLACEMENT then
+                        -- Manually return to Housing Editor Browse mode unless we are left in Placement mode;
+                        -- this occurs when the relevant furnishing limit had already been reached or when this
+                        -- purchase did not originate from in-house placement preview.
+                        ZO_ReturnToHousingEditorBrowseMode()
+                    end
                 end,
             },
         },
@@ -1629,7 +1644,7 @@ function ZO_GamepadMarketPurchaseManager:BeginPurchaseBase(marketProductData, is
     self.purchaseFromIngame = isPurchaseFromIngame
     self.onPurchaseSuccessCallback = onPurchaseSuccessCallback
     self.onPurchaseEndCallback = onPurchaseEndCallback
-
+    self.isPreviewingMarketProductPlacement = IsHousingEditorPreviewingMarketProductPlacement()
     self.itemName = marketProductData:GetColorizedDisplayName()
 
     local selectionSound = isGift and SOUNDS.MARKET_GIFT_SELECTED or SOUNDS.MARKET_PURCHASE_SELECTED

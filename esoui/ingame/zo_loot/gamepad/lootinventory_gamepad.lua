@@ -1,15 +1,10 @@
-local ZO_LootInventory_Gamepad = ZO_Object.MultiSubclass(ZO_Loot_Gamepad_Base, ZO_Gamepad_ParametricList_Screen)
-
-function ZO_LootInventory_Gamepad:New(...)
-    local screen = ZO_Object.New(self)
-    screen:Initialize(...)
-    return screen
-end
+local ZO_LootInventory_Gamepad = ZO_InitializingObject.MultiSubclass(ZO_Loot_Gamepad_Base, ZO_Gamepad_ParametricList_Screen)
 
 function ZO_LootInventory_Gamepad:Initialize(control)
     local DONT_CREATE_TABBAR = false
     ZO_Loot_Gamepad_Base.Initialize(self, GAMEPAD_LEFT_TOOLTIP)
-    LOOT_INVENTORY_SCENE_GAMEPAD = ZO_Scene:New("lootInventoryGamepad", SCENE_MANAGER)
+
+    LOOT_INVENTORY_SCENE_GAMEPAD = ZO_LootScene:New("lootInventoryGamepad", SCENE_MANAGER)
     local ACTIVATE_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, DONT_CREATE_TABBAR, ACTIVATE_ON_SHOW, LOOT_INVENTORY_SCENE_GAMEPAD)
 
@@ -22,6 +17,12 @@ function ZO_LootInventory_Gamepad:Initialize(control)
     {
         titleText = ""
     }
+end
+
+-- Overridden from base
+function ZO_LootInventory_Gamepad:OnHiding()
+    ZO_Gamepad_ParametricList_Screen.OnHiding()
+    EndLooting()
 end
 
 function ZO_LootInventory_Gamepad:SetupList(list)

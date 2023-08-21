@@ -1258,12 +1258,13 @@ ESO_Dialogs["CHARACTER_CREATE_CONFIRM_REVERT_CHANGES"] =
 
 ESO_Dialogs["CHAPTER_UPGRADE_CONTINUE"] = 
 {
+    canQueue = true,
+    mustChoose = true,
+
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
-
-    canQueue = true,
 
     title =
     {

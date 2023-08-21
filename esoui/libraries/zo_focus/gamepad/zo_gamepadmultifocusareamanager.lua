@@ -131,13 +131,7 @@ end
 -- MultiFocusArea Manager --
 ----------------------------
 
-ZO_GamepadMultiFocusArea_Manager = ZO_Object:Subclass()
-
-function ZO_GamepadMultiFocusArea_Manager:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
+ZO_GamepadMultiFocusArea_Manager = ZO_InitializingObject:Subclass()
 
 function ZO_GamepadMultiFocusArea_Manager:Initialize()
 	self.focusAreas = {}

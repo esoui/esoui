@@ -191,7 +191,7 @@ function ZO_GamepadSkills:Initialize(control)
     end)
 
     GAMEPAD_SKILLS_SCENE_GROUP = ZO_SceneGroup:New("gamepad_skills_root", "gamepad_skills_line_filter")
-    GAMEPAD_SKILLS_SCENE_GROUP:RegisterCallback("StateChange", function(oldState, newState)
+    GAMEPAD_SKILLS_SCENE_GROUP:RegisterCallback("StateChange", function(_, newState)
         if newState == SCENE_GROUP_SHOWING then
             self:PerformDeferredInitialization()
             self.showAttributeDialog = GetAttributeUnspentPoints() > 0 and not SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave()
@@ -1427,8 +1427,7 @@ do
                                                             local SHOW_ADVISED_LINE = true
                                                             local DONT_SHOW_RESPEC_TO_FIX_BAD_MORPH_LINE = false
                                                             local SHOW_UPGRADE_INFO_BLOCK = true
-                                                            local SHOULD_OVERRIDE_RANK_FOR_COMPARISON = true                               
-                                                            GAMEPAD_TOOLTIPS:LayoutSkillProgression(GAMEPAD_LEFT_DIALOG_TOOLTIP, morphSkillProgressionData, SHOW_RANK_NEEDED_LINE, SHOW_POINT_SPEND_LINE, SHOW_ADVISED_LINE, DONT_SHOW_RESPEC_TO_FIX_BAD_MORPH_LINE, SHOW_UPGRADE_INFO_BLOCK, SHOULD_OVERRIDE_RANK_FOR_COMPARISON)
+                                                            GAMEPAD_TOOLTIPS:LayoutSkillProgression(GAMEPAD_LEFT_DIALOG_TOOLTIP, morphSkillProgressionData, SHOW_RANK_NEEDED_LINE, SHOW_POINT_SPEND_LINE, SHOW_ADVISED_LINE, DONT_SHOW_RESPEC_TO_FIX_BAD_MORPH_LINE, SHOW_UPGRADE_INFO_BLOCK)
                                                        end,
             buttons =
             {

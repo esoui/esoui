@@ -10,7 +10,18 @@ local function LayoutFunction(self, tooltipType, ...)
 
     local tooltipFunction = tooltipContainerTip.tooltip[self.currentLayoutFunctionName] or nil
     if tooltipFunction == nil then
-        return nil -- if this line fired you called a function that does not exist on ZO_GamepadTooltip or ZO_Tooltip
+        local newTooltipFunction = ZO_Tooltip[self.currentLayoutFunctionName] or nil
+        if newTooltipFunction ~= nil then
+            --If we got here, that means the layout function was added to ZO_Tooltip after we initialized this tooltip
+            --In that case, update the tooltip to have that function too
+            --This will only update standard gamepad tooltips. Any custom tooltips (such as ones created with ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized) 
+            --will still only have functions that existed at the time of initialization
+            tooltipContainerTip.tooltip[self.currentLayoutFunctionName] = newTooltipFunction
+            tooltipFunction = newTooltipFunction
+        else
+            -- if this line fired you called a function that does not exist on ZO_GamepadTooltip or ZO_Tooltip
+            return nil 
+        end
     end
 
     -- Always default the border to hidden so that tooltips to which it is not relevant don't have to deal with it.
@@ -72,7 +83,6 @@ function ZO_GamepadTooltip:Initialize(control, dialogControl)
     self.customTooltipNarrations = {}
 
     local AUTO_SHOW_BG = true
-    local DONT_AUTO_SHOW_BG = false
     self:InitializeTooltip(GAMEPAD_LEFT_TOOLTIP, self.control, "Left", AUTO_SHOW_BG, RIGHT)
     self:InitializeTooltip(GAMEPAD_RIGHT_TOOLTIP, self.control, "Right", AUTO_SHOW_BG, LEFT)
     self:InitializeTooltip(GAMEPAD_MOVABLE_TOOLTIP, self.control, "Movable", AUTO_SHOW_BG, RIGHT)
@@ -125,7 +135,6 @@ function ZO_GamepadTooltip:InitializeTooltip(tooltipType, baseControl, prefix, a
         darkBgControl = darkBgControl,
         headerContainerControl = headerContainerControl,
         headerControl = headerControl,
-        gamepadTooltipContainerBorderControl = gamepadTooltipContainerBorderControl,
 
         fragment = ZO_FadeSceneFragment:New(control, true),
         bgFragment = bgFragment,

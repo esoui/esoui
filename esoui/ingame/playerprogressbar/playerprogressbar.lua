@@ -312,11 +312,6 @@ local PPB_MODE_INCREASE = 1
 local PPB_MODE_CURRENT = 2
 local PPB_MODE_WAITING_FOR_INCREASE = 3
 
-local PPB_STATE_SHOWING = "showing"
-local PPB_STATE_SHOWN = "shown"
-local PPB_STATE_HIDING = "hiding"
-local PPB_STATE_HIDDEN = "hidden"
-
 local PROGRESS_BAR_KEYBOARD_STYLE = 
 {
     template = "ZO_PlayerProgressTemplate",
@@ -348,7 +343,7 @@ function PlayerProgressBar:Initialize(control)
     self.glowTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_PlayerProgressBarGlow", self.glowContainer)
     self.glowFadeOutTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_PlayerProgressBarGlowFadeOut", self.glowContainer)
 
-    self.barState = PPB_STATE_HIDDEN
+    self.barState = ZO_STATE.HIDDEN
     self.fadeAlpha = 0
     self.suppressAlpha = 0
     self.nextBarType = 1
@@ -546,25 +541,25 @@ end
 --Base Type
 
 function PlayerProgressBar:SetBaseType(newBaseType)
-    if(self.baseType ~= newBaseType) then
+    if self.baseType ~= newBaseType then
         self.baseType = newBaseType
-        if(not self.pendingShowIncrease) then
-            if(self.barMode == PPB_MODE_CURRENT) then
-                if(self.baseType ~= self.barType) then
-                    if(self.barState == PPB_STATE_HIDDEN) then
-                        if(self.baseType ~= nil) then
+        if not self.pendingShowIncrease then
+            if self.barMode == PPB_MODE_CURRENT then
+                if self.baseType ~= self.barType then
+                    if self.barState == ZO_STATE.HIDDEN then
+                        if self.baseType ~= nil then
                             self:ShowCurrent(self.baseType)
                         end
                     else
                         self:Hide()
                     end
                 else
-                    if(self.barState == PPB_STATE_HIDING) then
+                    if self.barState == ZO_STATE.HIDING then
                         self:ShowCurrent(self.baseType)
                     end
                 end
-            elseif(self.barMode == nil) then
-                if(self.baseType ~= nil) then
+            elseif self.barMode == nil then
+                if self.baseType ~= nil then
                     self:ShowCurrent(self.baseType)
                 end
             end
@@ -579,7 +574,7 @@ end
 --Show
 
 function PlayerProgressBar:Show()
-    self:SetBarState(PPB_STATE_SHOWING)
+    self:SetBarState(ZO_STATE.SHOWING)
 
     local barTypeInfo = self:GetBarTypeInfo()
     
@@ -631,11 +626,11 @@ function PlayerProgressBar:UpdateBar(overrideLevel)
 end
 
 function PlayerProgressBar:Hide()
-    if(self.barState ~= PPB_STATE_HIDDEN and self.barState ~= PPB_STATE_HIDING) then
+    if(self.barState ~= ZO_STATE.HIDDEN and self.barState ~= ZO_STATE.HIDING) then
         self.fadeTimeline:PlayBackward()
         self.lastHideTraceback = string.format("(%d) %s", GetGameTimeMilliseconds(), debug.traceback())
         CALLBACK_MANAGER:FireCallbacks("PlayerProgressBarFadingOut")
-        self:SetBarState(PPB_STATE_HIDING)
+        self:SetBarState(ZO_STATE.HIDING)
     end
 end
 
@@ -672,7 +667,7 @@ function PlayerProgressBar:RefreshCurrentType(barType)
 end
 
 function PlayerProgressBar:RefreshCurrentBar()
-    if(self.barMode == PPB_MODE_CURRENT and self.barState ~= PPB_STATE_HIDING) then
+    if(self.barMode == PPB_MODE_CURRENT and self.barState ~= ZO_STATE.HIDING) then
         self.bar:Reset()
         local level, current, max = self:GetMostRecentlyShownInfo()
         self:SetBarValue(level, current, max)
@@ -749,7 +744,7 @@ function PlayerProgressBar:OnWaitBeforeShowComplete()
     local barType, startLevel, start, stop, sound, owner = unpack(self.pendingShowIncrease)
     self.pendingShowIncrease = nil
 
-    local needsShow = self.barState == PPB_STATE_HIDING or self.barState == PPB_STATE_HIDDEN
+    local needsShow = self.barState == ZO_STATE.HIDING or self.barState == ZO_STATE.HIDDEN
     self.barType = barType
     self:SetBarMode(PPB_MODE_INCREASE)
 
@@ -851,7 +846,7 @@ function PlayerProgressBar:SetHoldBeforeFadeOut(holdBeforeFadeOut)
 end
 
 function PlayerProgressBar:RefreshDoneShowing()
-    if(self.barState == PPB_STATE_SHOWN) then
+    if(self.barState == ZO_STATE.SHOWN) then
         if(self:IsDoneShowing()) then
             self:OnDoneShowing()
         end
@@ -897,7 +892,7 @@ end
 --General Events
 
 function PlayerProgressBar:OnFadeInComplete()
-    self:SetBarState(PPB_STATE_SHOWN)
+    self:SetBarState(ZO_STATE.SHOWN)
 
     if(self.barMode == PPB_MODE_INCREASE) then
         self:WaitBeforeFill()
@@ -910,7 +905,7 @@ function PlayerProgressBar:OnFadeOutComplete()
     self:SetBarMode(nil)
     self.barType = nil
    
-    self:SetBarState(PPB_STATE_HIDDEN)
+    self:SetBarState(ZO_STATE.HIDDEN)
     self.control:SetHidden(true)
 
     local nextAnnouncementHasBar = CENTER_SCREEN_ANNOUNCE:DoesNextMessageHaveBarParams()

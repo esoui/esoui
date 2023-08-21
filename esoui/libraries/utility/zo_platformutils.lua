@@ -100,6 +100,10 @@ do
         return IsConsoleUI()
     end
 
+    function ZO_IsWindowsUI()
+        return ZO_IsPCUI() and not IsMacUI()
+    end
+
     function ZO_IsPlaystationPlatform()
         local platform = GetUIPlatform()
         return platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_PS5

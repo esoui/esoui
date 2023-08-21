@@ -158,7 +158,7 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializeEvents()
     TRADING_HOUSE_SEARCH:RegisterCallback("OnSearchStateChanged", FilterForGamepadEvents(function(...) self:OnSearchStateChanged(...) end))
     TRADING_HOUSE_SEARCH:RegisterCallback("OnResponseReceived", FilterForGamepadEvents(function(...) self:OnResponseReceived(...) end))
 
-    local function OnSceneGroupStateChanged(oldState, newState)
+    local function OnSceneGroupStateChanged(_, newState)
         if newState == SCENE_GROUP_SHOWING then
             self:RefreshData()
         elseif newState == SCENE_GROUP_HIDING then

@@ -1,10 +1,4 @@
-ZO_WorldMapInfo_Shared = ZO_Object:Subclass()
-
-function ZO_WorldMapInfo_Shared:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_WorldMapInfo_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_WorldMapInfo_Shared:Initialize(control, fragmentClass)
     self.control = control
@@ -13,6 +7,10 @@ function ZO_WorldMapInfo_Shared:Initialize(control, fragmentClass)
     self.worldMapInfoFragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:OnShowing()
+        elseif newState == SCENE_FRAGMENT_SHOWN then
+            self:OnShown()
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            self:OnHiding()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             self:OnHidden()
         end
@@ -26,9 +24,17 @@ function ZO_WorldMapInfo_Shared:GetFragment()
 end
 
 function ZO_WorldMapInfo_Shared:OnShowing()
-    -- To be overridden
+    -- Optional override
+end
+
+function ZO_WorldMapInfo_Shared:OnShown()
+    -- Optional override
+end
+
+function ZO_WorldMapInfo_Shared:OnHiding()
+    -- Optional override
 end
 
 function ZO_WorldMapInfo_Shared:OnHidden()
-    -- To be overridden
+    -- Optional override
 end

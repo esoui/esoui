@@ -98,12 +98,13 @@ end
 -- Chapter upgrade/prepurchase
 ESO_Dialogs["CHAPTER_UPGRADE_STORE"] = 
 {
+    canQueue = true,
+    mustChoose = true,
+
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
-
-    canQueue = true,
 
     title =
     {

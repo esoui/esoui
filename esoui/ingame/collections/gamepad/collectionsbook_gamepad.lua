@@ -239,10 +239,14 @@ function ZO_GamepadCollectionsBook:SetupList(list)
         local collectibleData = data.dataSource
         if collectibleData:IsInstanceOf(ZO_CollectibleData) then
             data:InitializeCollectibleVisualData(collectibleData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-            ZO_SetDefaultIconSilhouette(control.icon, collectibleData:IsLocked())
         end
 
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+
+        if collectibleData:IsInstanceOf(ZO_CollectibleData) then
+            --Order matters. This needs to be run *after* ZO_SharedGamepadEntry_OnSetup
+            ZO_SetDefaultIconSilhouette(control.icon, collectibleData:IsLocked())
+        end
     end
 
     list:AddDataTemplate("ZO_GamepadCollectibleEntryTemplate", CollectibleEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
@@ -488,8 +492,12 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
         {
             name = function()
                 local collectibleData = self:GetCurrentTargetData()
-                local nameStringId = collectibleData:GetPrimaryInteractionStringId(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-                return GetString(nameStringId)
+                if collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) or (collectibleData.IsHouse and collectibleData:IsHouse()) then
+                    local nameStringId = collectibleData:GetPrimaryInteractionStringId(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                    return GetString(nameStringId)
+                elseif collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse() then
+                    return GetString(SI_ITEM_ACTION_PLACE_FURNITURE)
+                end
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
@@ -502,10 +510,12 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     else
                         ZO_Dialogs_ShowGamepadDialog("GAMEPAD_TRAVEL_TO_HOUSE_OPTIONS_DIALOG", collectibleData)
                     end
-                else
+                elseif collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
                     collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                     --Re-narrate after using the collectible
                     SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currentList.list)
+                elseif collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse() then
+                    COLLECTIONS_BOOK_SINGLETON.TryPlaceCollectibleFurniture(collectibleData)
                 end
             end,
             visible = function()
@@ -513,8 +523,10 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 if collectibleData then
                      if collectibleData.IsHouse and collectibleData:IsHouse() then
                         return true
-                    else
-                        return collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                    elseif collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+                        return true
+                    elseif collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse() then
+                        return true
                     end
                 else
                     return false
@@ -529,7 +541,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 elseif collectibleData.IsHouse and collectibleData:IsHouse() then
                     local cannotJumpString = collectibleData:IsUnlocked() and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
                     return CanJumpToHouseFromCurrentLocation(), cannotJumpString
-                else -- IsUsable
+                elseif collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
                     local remainingMs = GetCollectibleCooldownAndDuration(collectibleData:GetId())
                     if collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
                         return true
@@ -541,6 +553,8 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     else
                         return true
                     end
+                elseif collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse() then
+                    return true
                 end
             end
         },
@@ -1011,6 +1025,8 @@ function ZO_GamepadCollectionsBook:BuildCollectionList(categoryData, resetSelect
     local lockedData = {}
     self.updateList = {}
 
+    local hasAnyCollectibles = false
+
     for _, collectibleData in categoryData:SortedCollectibleIterator({ ZO_CollectibleData.IsShownInCollection }) do
         local entryData = self:BuildCollectibleData(collectibleData)
         if collectibleData:IsUnlocked() then
@@ -1024,11 +1040,13 @@ function ZO_GamepadCollectionsBook:BuildCollectionList(categoryData, resetSelect
         else
             table.insert(lockedData, entryData)
         end
+
+        hasAnyCollectibles = true
     end
 
     collectionListInfo.titleText = categoryData:GetFormattedName()
 
-    if #unlockedData > 0 or #lockedData > 0 then
+    if hasAnyCollectibles then
         -- Add Random Selections
         local collectibleCategoryTypesInCategory = categoryData:GetCollectibleCategoryTypesInCategory()
         if collectibleCategoryTypesInCategory[COLLECTIBLE_CATEGORY_TYPE_MOUNT] then
@@ -1603,6 +1621,59 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
         },
         parametricList =
         {
+            -- Primary Interaction
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                text = function(dialog)
+                    local collectibleData = dialog.data
+                    local nameStringId = collectibleData:GetPrimaryInteractionStringId(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                    return GetString(nameStringId)
+                end,
+                templateData = {
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        local collectibleData = dialog.data
+                        collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                    end,
+                    visible = function(dialog)
+                        local collectibleData = dialog.data
+                        if not collectibleData then
+                            return false
+                        end
+                        return collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                    end,
+                    enabled = function(dialog)
+                        local collectibleData = dialog.data
+                        if collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+                            return true
+                        end
+                        local remainingMs = GetCollectibleCooldownAndDuration(collectibleData:GetId())
+                        if remainingMs > 0 then
+                            return false
+                        end
+                        if collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+                            return false
+                        end
+                        return true
+                    end,
+                },
+            },
+            -- Place Furniture
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                templateData = {
+                    text = GetString(SI_ITEM_ACTION_PLACE_FURNITURE),
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        local collectibleData = dialog.data
+                        COLLECTIONS_BOOK_SINGLETON.TryPlaceCollectibleFurniture(collectibleData)
+                    end,
+                    visible = function(dialog)
+                        local collectibleData = dialog.data
+                        return collectibleData and collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse()
+                    end,
+                },
+            },
             -- Link In Chat
             {
                 template = "ZO_GamepadMenuEntryTemplate",
@@ -1729,7 +1800,7 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                         COLLECTIONS_BOOK_SINGLETON:SetPrimaryResidence(dialog.data:GetReferenceId())
                     end,
                     visible = function(dialog)
-                        return dialog.data:IsHouse() and not dialog.data:IsPrimaryResidence()
+                        return dialog.data:IsUnlocked() and dialog.data:IsHouse() and not dialog.data:IsPrimaryResidence()
                     end
                 },
             },

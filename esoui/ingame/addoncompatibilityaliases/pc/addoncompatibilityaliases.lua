@@ -1259,3 +1259,22 @@ GAMEPAD_LORE_READER_INTERACTION_SCENE = GAMEPAD_LORE_READER_DEFAULT_SCENE
 SMALL_GROUP_SIZE_THRESHOLD = STANDARD_GROUP_SIZE_THRESHOLD
 RAID_GROUP_SIZE_THRESHOLD = LARGE_GROUP_SIZE_THRESHOLD
 GROUP_SIZE_MAX = MAX_GROUP_SIZE_THRESHOLD
+
+-- Rewrite GetSynergyInfo to not rely on optionals
+function GetSynergyInfo()
+    local hasSynergy, synergyName, iconFilename, prompt, priority = GetCurrentSynergyInfo()
+    if hasSynergy then
+        return synergyName, iconFilename, priority, prompt
+    end
+    return nil, nil, nil, nil
+end
+
+SCENE_GROUP_SHOWING = SCENE_SHOWING
+SCENE_GROUP_SHOWN = SCENE_SHOWN
+SCENE_GROUP_HIDING = SCENE_HIDING
+SCENE_GROUP_HIDDEN = SCENE_HIDDEN
+
+GAMEPAD_GUILD_HOME_SCENE_NAME = "gamepad_guild_home"
+
+ClearGroupFinderSearch = ClearActivityFinderSearch
+StartGroupFinderSearch = StartActivityFinderSearch

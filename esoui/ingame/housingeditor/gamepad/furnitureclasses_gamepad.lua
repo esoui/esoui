@@ -988,6 +988,16 @@ function ZO_HousingFurnitureList_Gamepad:GetNoItemText()
     assert(false) --Override
 end
 
+function ZO_HousingFurnitureList_Gamepad:PreviewMarketProductPlacement(marketProductData)
+    if not marketProductData then
+        return
+    end
+
+    if HousingEditorRequestMarketProductPlacementPreview(marketProductData.marketProductId) == HOUSING_REQUEST_RESULT_SUCCESS then
+        HOUSING_EDITOR_SHARED:SetCurrentPreviewMarketProduct(marketProductData)
+    end
+end
+
 ------------------------------------
 -- Housing Permissions List Gamepad
 ------------------------------------

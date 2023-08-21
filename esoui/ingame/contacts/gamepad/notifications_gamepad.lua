@@ -31,6 +31,7 @@ ZO_GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_PLAYER_APPLICATIONS] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_guild.dds",
     [NOTIFICATION_TYPE_MARKET_PRODUCT_AVAILABLE] = "EsoUI/Art/Notifications/Gamepad/gp_notification_crownStore.dds",
     [NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
+    [NOTIFICATION_TYPE_DISABLED_ADDON] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_tribute.dds",
 }
 
@@ -620,6 +621,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_PlayerApplicationsProvider:New(self),
         ZO_GamepadMarketProductUnlockedProvider:New(self),
         ZO_OutOfDateAddonsProvider:New(self),
+        ZO_DisabledAddonsProvider:New(self),
         ZO_GamepadTributeInviteProvider:New(self),
     }
 end

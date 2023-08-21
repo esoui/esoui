@@ -97,14 +97,7 @@ function ZO_AssignableUtilityWheel_Keyboard:RegisterForEvents()
                 local slotType = GetSlotType(slotNum, hotbarCategory)
                 if slotType == ACTION_TYPE_ITEM then
                     local itemCount = GetSlotItemCount(slotNum, hotbarCategory)
-                    if itemCount then
-                        slot.icon:SetDesaturation(itemCount == 0 and 1 or 0)
-                        slot.countText:SetText(itemCount)
-                        slot.countText:SetHidden(false)
-                    else
-                        slot.icon:SetDesaturation(0)
-                        slot.countText:SetHidden(true)
-                    end
+                    self:SetSlotItemCount(slot, itemCount)
                 end
             end
         end
@@ -267,14 +260,7 @@ function ZO_AssignableUtilityWheel_Keyboard:DoSlotUpdate(physicalSlot, playAnima
         end
 
         local itemCount = GetSlotItemCount(physicalSlot, hotbarCategory)
-        if itemCount then
-            slot.icon:SetDesaturation(itemCount == 0 and 1 or 0)
-            slot.countText:SetText(itemCount)
-            slot.countText:SetHidden(false)
-        else
-            slot.icon:SetDesaturation(0)
-            slot.countText:SetHidden(true)
-        end
+        self:SetSlotItemCount(slot, itemCount)
 
         local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
         if mouseOverControl == slot.button then
@@ -287,6 +273,19 @@ function ZO_AssignableUtilityWheel_Keyboard:DoSlotUpdate(physicalSlot, playAnima
                 SetCurrentQuickslot(physicalSlot)
             end
         end
+    end
+end
+
+function ZO_AssignableUtilityWheel_Keyboard:SetSlotItemCount(slotControl, itemCount)
+    if itemCount then
+        slotControl.icon:SetDesaturation(itemCount == 0 and 1 or 0)
+        local USE_LOWERCASE_NUMBER_SUFFIXES = false
+        local abbreviatedItemCount = ZO_AbbreviateAndLocalizeRadialMenuEntryCount(itemCount, USE_LOWERCASE_NUMBER_SUFFIXES)
+        slotControl.countText:SetText(abbreviatedItemCount)
+        slotControl.countText:SetHidden(false)
+    else
+        slotControl.icon:SetDesaturation(0)
+        slotControl.countText:SetHidden(true)
     end
 end
 

@@ -304,7 +304,6 @@ local function QuestItemUpdateCooldown(inventorySlot)
         local remaining, duration = GetQuestToolCooldownInfo(inventorySlot.questIndex, inventorySlot.toolIndex)
         UpdateCooldown(inventorySlot, remaining, duration)
     end
-
     return true
 end
 
@@ -325,21 +324,21 @@ local InventoryUpdateCooldown =
 {
     [SLOT_TYPE_ITEM] =
     {
-        [1] =   function(inventorySlot)
-                    return ItemUpdateCooldown(inventorySlot)
-                end,
+        function(inventorySlot)
+            return ItemUpdateCooldown(inventorySlot)
+        end
     },
     [SLOT_TYPE_QUEST_ITEM] =
     {
-        [1] =   function(inventorySlot)
-                    return QuestItemUpdateCooldown(inventorySlot)
-                end,
+        function(inventorySlot)
+            return QuestItemUpdateCooldown(inventorySlot)
+        end
     },
     [SLOT_TYPE_COLLECTIONS_INVENTORY] = 
     {
-        [1] =   function(inventorySlot)
-                    return CollectibleItemUpdateCooldown(inventorySlot)
-                end,
+        function(inventorySlot)
+            return CollectibleItemUpdateCooldown(inventorySlot)
+        end
     }
 }
 
@@ -356,6 +355,29 @@ end
 --
 -- Actions that can be performed on InventorySlots (via various clicks and context menus)
 --
+
+-- Determines whether the specified item furnishing can be placed in the current house.
+function ZO_CanPlaceItemInCurrentHouse(bagId, slotIndex)
+    return HasItemInSlot(bagId, slotIndex) and IsItemPlaceableFurniture(bagId, slotIndex) and (not IsItemStolen(bagId, slotIndex)) and ZO_CanPlaceFurnitureInCurrentHouse()
+end
+
+-- Attempts to begin placement of the specified item furnishing in the current house.
+function ZO_TryPlaceFurnitureFromInventorySlot(bagId, slotIndex)
+    if not ZO_CanPlaceItemInCurrentHouse(bagId, slotIndex) then
+        return false
+    end
+
+    if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_SELECTION then
+        SCENE_MANAGER:ShowBaseScene()
+
+        if HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION) ~= HOUSING_REQUEST_RESULT_SUCCESS then
+            return false
+        end
+    end
+
+    local success = HousingEditorCreateItemFurnitureForPlacement(bagId, slotIndex)
+    return success
+end
 
 local function IsSendingMail()
     if MAIL_SEND and not MAIL_SEND:IsHidden() then
@@ -1383,37 +1405,36 @@ end
 
 local useActions =
 {
-    [SLOT_TYPE_QUEST_ITEM] =    function(inventorySlot, slotActions)
-                                    if CanUseItemQuestItem(inventorySlot) then
-                                        slotActions:AddSlotAction(SI_ITEM_ACTION_USE, function() TryUseQuestItem(inventorySlot) end, "primary", nil, {visibleWhenDead = true})
-                                    end
-                                end,
-
+    [SLOT_TYPE_QUEST_ITEM] = function(inventorySlot, slotActions)
+        if CanUseItemQuestItem(inventorySlot) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_USE, function() TryUseQuestItem(inventorySlot) end, "primary", nil, {visibleWhenDead = true})
+        end
+    end,
     [SLOT_TYPE_ITEM] = DefaultUseItemFunction,
     [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] = DefaultUseItemFunction,
     [SLOT_TYPE_CRAFT_BAG_ITEM] = DefaultUseItemFunction,
     [SLOT_TYPE_COLLECTIONS_INVENTORY] = function(inventorySlot, slotActions)
-                                            local textEnum
-                                            local category = inventorySlot.categoryType
-                                            if category == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
-                                                textEnum = SI_COLLECTIBLE_ACTION_USE
-                                            elseif inventorySlot.active then
-                                                if category == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or category == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET or category == COLLECTIBLE_CATEGORY_TYPE_COMPANION then
-                                                    textEnum = SI_COLLECTIBLE_ACTION_DISMISS
-                                                else
-                                                    textEnum = SI_COLLECTIBLE_ACTION_PUT_AWAY
-                                                end
-                                            else
-                                                textEnum = SI_COLLECTIBLE_ACTION_SET_ACTIVE
-                                            end
+        local textEnum
+        local category = inventorySlot.categoryType
+        if category == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
+            textEnum = SI_COLLECTIBLE_ACTION_USE
+        elseif inventorySlot.active then
+            if category == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or category == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET or category == COLLECTIBLE_CATEGORY_TYPE_COMPANION then
+                textEnum = SI_COLLECTIBLE_ACTION_DISMISS
+            else
+                textEnum = SI_COLLECTIBLE_ACTION_PUT_AWAY
+            end
+        else
+            textEnum = SI_COLLECTIBLE_ACTION_SET_ACTIVE
+        end
 
-                                            local useCollectibleCallback = function()
-                                                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(inventorySlot.collectibleId)
-                                                collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-                                            end
+        local useCollectibleCallback = function()
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(inventorySlot.collectibleId)
+            collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+        end
 
-                                            slotActions:AddSlotAction(textEnum, useCollectibleCallback, "primary", nil, {visibleWhenDead = false})
-                                        end,
+        slotActions:AddSlotAction(textEnum, useCollectibleCallback, "primary", nil, {visibleWhenDead = false})
+    end,
 }
 
 local function MarkAsPlayerLockedHelper(bag, index, isPlayerLocked)
@@ -1635,12 +1656,12 @@ local quickslotActions =
 local renameActions = 
 {
     [SLOT_TYPE_COLLECTIONS_INVENTORY] = function(slot, slotActions)
-                                                local collectibleId = slot.collectibleId
-                                                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-                                                if collectibleData and collectibleData:IsRenameable() then
-                                                    slotActions:AddSlotAction(SI_COLLECTIBLE_ACTION_RENAME, ZO_CollectionsBook.GetShowRenameDialogClosure(collectibleId), "keybind1")
-                                                end
-                                            end
+        local collectibleId = slot.collectibleId
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData and collectibleData:IsRenameable() then
+            slotActions:AddSlotAction(SI_COLLECTIBLE_ACTION_RENAME, ZO_CollectionsBook.GetShowRenameDialogClosure(collectibleId), "keybind1")
+        end
+    end
 }
 
 local actionHandlers =
@@ -1892,7 +1913,7 @@ local actionHandlers =
         slotActions:AddSlotAction(SI_TRADING_HOUSE_CANCEL_LISTING, function() TryCancellingTradingHouseListing(inventorySlot) end, "secondary")
     end,
 
-    ["convert_to_imperial_style"] =     function(inventorySlot, slotActions)
+    ["convert_to_imperial_style"] = function(inventorySlot, slotActions)
         local imperialStyleId = GetImperialStyleId()
         if CanConvertToStyle(inventorySlot, imperialStyleId) then
             local imperialStyleName = GetItemStyleName(imperialStyleId)
@@ -1980,7 +2001,7 @@ local actionHandlers =
         end
     end,
 
-    ["bind"] =  function(inventorySlot, slotActions)
+    ["bind"] = function(inventorySlot, slotActions)
         if not IsSlotLocked(inventorySlot) then
             local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
             if ZO_InventorySlot_WillItemBecomeBoundOnEquip(bagId, slotIndex) then
@@ -1989,7 +2010,7 @@ local actionHandlers =
         end
     end,
 
-     ["preview"] = function(inventorySlot, slotActions)
+    ["preview"] = function(inventorySlot, slotActions)
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
         local itemActorCategory = GetItemActorCategory(bag, index)
         -- Companion preview is not yet supported
@@ -2001,6 +2022,13 @@ local actionHandlers =
             slotActions:AddSlotAction(SI_ITEM_ACTION_PREVIEW, function() TryPreviewItem(bag, index) end, "keybind1")
         end
     end,
+
+    ["place_furniture"] = function(inventorySlot, slotActions)
+        local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if ZO_CanPlaceItemInCurrentHouse(bagId, slotIndex) then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_PLACE_FURNITURE, function() ZO_TryPlaceFurnitureFromInventorySlot(bagId, slotIndex) end)
+        end
+    end,
 }
 
 local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
@@ -2010,14 +2038,14 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 local potentialActionsForSlotType =
 {
     [SLOT_TYPE_QUEST_ITEM] =                           { "quickslot", "use", "link_to_chat" },
-    [SLOT_TYPE_ITEM] =                                 { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall", "start_skill_respec", "start_attribute_respec", "split_stack", "enchant", "preview", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_ITEM] =                                 { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "place_furniture", "equip", "use", "preview_dye_stamp", "show_map_keep_recall", "start_skill_respec", "start_attribute_respec", "split_stack", "enchant", "preview", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_EQUIPMENT] =                            { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                             { "trade_remove", "link_to_chat", "report_item" },
     [SLOT_TYPE_THEIR_TRADE] =                          NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_STORE_BUY] =                            { "buy", "buy_multiple", "link_to_chat", "report_item" },
     [SLOT_TYPE_STORE_BUYBACK] =                        { "buyback", "link_to_chat", "report_item" },
     [SLOT_TYPE_BUY_MULTIPLE] =                         NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_BANK_ITEM] =                            { "bank_withdraw", "split_stack", "mark_as_locked", "unmark_as_locked", "bind", "link_to_chat", "mark_as_junk", "unmark_as_junk", "report_item" },
+    [SLOT_TYPE_BANK_ITEM] =                            { "bank_withdraw", "place_furniture", "split_stack", "mark_as_locked", "unmark_as_locked", "bind", "link_to_chat", "mark_as_junk", "unmark_as_junk", "report_item" },
     [SLOT_TYPE_GUILD_BANK_ITEM] =                      { "guild_bank_withdraw", "link_to_chat", "report_item" },
     [SLOT_TYPE_MAIL_QUEUED_ATTACHMENT] =               { "mail_detach", "link_to_chat", "report_item" },
     [SLOT_TYPE_MAIL_ATTACHMENT] =                      NON_INTERACTABLE_ITEM_ACTIONS,
@@ -2037,7 +2065,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_SMITHING_BOOSTER] =                     NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_DYEABLE_EQUIPMENT] =                    NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_GUILD_SPECIFIC_ITEM] =                  { "buy_guild_specific_item", "link_to_chat" },
-    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =               { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "start_skill_respec", "start_attribute_respec", "show_map_keep_recall", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =               { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "place_furniture", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "start_skill_respec", "start_attribute_respec", "show_map_keep_recall", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =                { "quickslot", "use", "rename", "link_to_chat" },
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                       { "move_to_inventory", "use", "link_to_chat", "report_item" },
     [SLOT_TYPE_PENDING_RETRAIT_ITEM] =                 { "remove_from_craft", "link_to_chat", "report_item" },

@@ -1,9 +1,10 @@
-ZO_SceneFragment = ZO_CallbackObject:Subclass()
+-- Alias
+SCENE_FRAGMENT_SHOWING = ZO_STATE.SHOWING
+SCENE_FRAGMENT_SHOWN = ZO_STATE.SHOWN
+SCENE_FRAGMENT_HIDING = ZO_STATE.HIDING
+SCENE_FRAGMENT_HIDDEN = ZO_STATE.HIDDEN
 
-SCENE_FRAGMENT_SHOWN = "shown"
-SCENE_FRAGMENT_HIDDEN = "hidden"
-SCENE_FRAGMENT_SHOWING = "showing"
-SCENE_FRAGMENT_HIDING = "hiding"
+ZO_SceneFragment = ZO_CallbackObject:Subclass()
 
 function ZO_SceneFragment:New(...)
     local fragment = ZO_CallbackObject.New(self)

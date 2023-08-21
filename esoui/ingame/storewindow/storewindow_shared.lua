@@ -250,3 +250,7 @@ function ZO_StoreManager_DoPreviewAction(action, storeEntryIndex)
         return false
     end
 end
+
+function ZO_Store_IsShopping()
+    return GetInteractionType() == INTERACTION_VENDOR
+end
