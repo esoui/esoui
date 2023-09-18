@@ -1983,7 +1983,7 @@ SafeAddString(SI_GROUPFINDERACTIONRESULT9, "El tamaño del grupo actual supera o
 SafeAddString(SI_GROUPFINDERCATEGORY0, "Mazmorra", 2)
 SafeAddString(SI_GROUPFINDERCATEGORY1, "Arena", 1)
 SafeAddString(SI_GROUPFINDERCATEGORY2, "Prueba", 2)
-SafeAddString(SI_GROUPFINDERCATEGORY3, "Archivo infinito ", 2)
+SafeAddString(SI_GROUPFINDERCATEGORY3, "Archivo Infinito ", 2)
 SafeAddString(SI_GROUPFINDERCATEGORY4, "JcJ", 2)
 SafeAddString(SI_GROUPFINDERCATEGORY5, "Zona", 2)
 SafeAddString(SI_GROUPFINDERCATEGORY6, "Personalizado", 1)

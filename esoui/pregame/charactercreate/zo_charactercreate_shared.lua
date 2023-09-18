@@ -120,7 +120,10 @@ function ZO_CharacterCreate_Manager:Initialize()
     end
 
     local function OnChapterUpgraded()
-        if IsPregameCharacterConstructionReady() then
+        -- match the conditional in AttemptToFireCharacterConstructionReady which fires the "OnCharacterConstructionReady" callback
+        -- if we don't check that the character list has been received we can attempt to generate a random character
+        -- before the pregame cahracter manager is ready
+        if IsPregameCharacterConstructionReady() and ZO_PREGAME_CHARACTER_LIST_RECEIVED then
             OnCharacterConstructionReady()
         end
     end
