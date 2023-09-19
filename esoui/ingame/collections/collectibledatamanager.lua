@@ -417,7 +417,7 @@ function ZO_CollectibleData:IsFavoritable()
 end
 
 function ZO_CollectibleData:IsUserFlagSet(userFlag)
-    return ZO_MaskHasFlag(self:GetUserFlags(), userFlag)
+    return ZO_FlagHelpers.MaskHasFlag(self:GetUserFlags(), userFlag)
 end
 
 function ZO_CollectibleData:GetUserFlags()
@@ -651,9 +651,8 @@ function ZO_CollectibleData:Use(actorCategory)
             return
         end
         -- this combination might be acting as an "evolution" of a collectible into another collectible
-        -- like the indrik, so find the first non-fragment collectible and treat that as the base collectible
-        local baseCollectibleId = GetCombinationFirstNonFragmentCollectibleComponentId(self.referenceId)
-        if baseCollectibleId ~= 0 then
+        -- like the nascent indrik evolving into another type of indrik
+        if GetCombinationNumNonFragmentCollectibleComponents(self.referenceId) > 0 then
             local function AcceptCombinationCallback()
                 UseCollectible(self.collectibleId, actorCategory)
             end
@@ -661,8 +660,7 @@ function ZO_CollectibleData:Use(actorCategory)
             local function DeclineCombinationCallback()
             end
 
-            local unlockedCollectibleId = GetCombinationUnlockedCollectible(self.referenceId)
-            ZO_CombinationPromptManager_ShowEvolutionPrompt(baseCollectibleId, unlockedCollectibleId, AcceptCombinationCallback, DeclineCombinationCallback)
+            ZO_CombinationPromptManager_ShowAppropriateCombinationPrompt(self.referenceId, AcceptCombinationCallback, DeclineCombinationCallback)
             return
         end
     end

@@ -26,12 +26,17 @@ end
 
 function ZO_Smithing_IsSmithingStation(craftingType, craftingMode)
     craftingMode = craftingMode or GetCraftingInteractionMode()
-    return craftingMode == CRAFTING_INTERACTION_MODE_STANDARD_STATION and IsSmithingCraftingType(craftingType)
+    return (craftingMode == CRAFTING_INTERACTION_MODE_STANDARD_STATION or craftingMode == CRAFTING_INTERACTION_MODE_CONSOLIDATED_STATION) and IsSmithingCraftingType(craftingType)
 end
 
 function ZO_Smithing_IsUniversalDeconstructionCraftingMode(craftingMode)
     craftingMode = craftingMode or GetCraftingInteractionMode()
     return craftingMode == CRAFTING_INTERACTION_MODE_UNIVERSAL_DECONSTRUCTION
+end
+
+function ZO_Smithing_IsConsolidatedStationCraftingMode(craftingMode)
+    craftingMode = craftingMode or GetCraftingInteractionMode()
+    return craftingMode == CRAFTING_INTERACTION_MODE_CONSOLIDATED_STATION
 end
 
 --
@@ -84,6 +89,7 @@ function ZO_Smithing_Common:Initialize(control)
         self.shouldCraftForQuest = updatedQuestInfo.hasPatterns and (not updatedQuestInfo.hasItemToImproveForWrit)
         self.shouldImproveForQuest = updatedQuestInfo.hasItemToImproveForWrit
         self.usesProvisioningForQuest = updatedQuestInfo.hasRecipesForQuest
+        self.consolidatedItemSetIdForQuest = updatedQuestInfo.consolidatedItemSetId
         self:UpdateQuestPins()
     end
     CRAFT_ADVISOR_MANAGER:RegisterCallback("QuestInformationUpdated", OnQuestInformationUpdated)
@@ -100,6 +106,7 @@ SMITHING_MODE_DECONSTRUCTION = 3
 SMITHING_MODE_IMPROVEMENT = 4
 SMITHING_MODE_RESEARCH = 5
 SMITHING_MODE_RECIPES = 6
+SMITHING_MODE_CONSOLIDATED_SET_SELECTION = 7
 
 local g_craftingTypeModeTutorialMap =
 {

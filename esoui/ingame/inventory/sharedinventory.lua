@@ -26,6 +26,15 @@ function ZO_SharedInventoryManager:Initialize()
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_FENCE, function()
         self:RefreshInventory(BAG_BACKPACK)
         self:RefreshInventory(BAG_WORN)
+        self.backpackRefreshedWithFenceData = true
+    end)
+
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CLOSE_STORE, function()
+        if self.backpackRefreshedWithFenceData then
+            self:RefreshInventory(BAG_BACKPACK)
+            self:RefreshInventory(BAG_WORN)
+            self.backpackRefreshedWithFenceData = nil
+        end
     end)
 
     self.bagCache = {}
@@ -213,19 +222,30 @@ function ZO_SharedInventoryManager:Initialize()
     end
 
     local function OnEventTicketUpdated(eventCode, newEventTickets, difference, changeReason)
-        local isExcludedReason = changeReason == CURRENCY_CHANGE_REASON_PLAYER_INIT or
-                                 (changeReason == CURRENCY_CHANGE_REASON_VENDOR and difference < 0)
-
-        if not isExcludedReason then
             if changeReason == CURRENCY_CHANGE_REASON_LOOT and difference > 0 then
                 PlaySound(SOUNDS.EVENT_TICKET_ACQUIRE)
             end
         end
+
+    local function OnEndlessDungeonCurrencyUpdated(newAmount, oldAmount, changeReason)
+        if changeReason == CURRENCY_CHANGE_REASON_LOOT and newAmount > oldAmount then
+            PlaySound(SOUNDS.ENDLESS_DUNGEON_CURRENCY_ACQUIRE)
+        end
     end
+
+    local function OnCurrencyUpdated(_, currencyType, currencyLocation, newAmount, oldAmount, changeReason)
+        if currencyType == CURT_ENDLESS_DUNGEON then
+            OnEndlessDungeonCurrencyUpdated(newAmount, oldAmount, changeReason)
+        end
+        internalassert(CURT_MAX_VALUE == 12, "Check if new currency requires unique acquire sound hook or other behavior")
+        -- TODO: Consider moving other above function calls here to register for less functions, investigate if any issues would arise
+    end
+
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_MONEY_UPDATE, OnMoneyUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_TELVAR_STONE_UPDATE, OnTelvarStonesUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_EVENT_TICKET_UPDATE, OnEventTicketUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CURRENCY_UPDATE, OnCurrencyUpdated)
 
     local function OnSmithingTraitResearch()
         self:RefreshAllTraitInformation()
@@ -286,10 +306,8 @@ function ZO_SharedInventoryManager:RegisterForConfirmUseItemEvents(namespace)
         local onUseType = GetItemUseType(bag, slot)
         if onUseType == ITEM_USE_TYPE_COMBINATION then
             local combinationId = GetItemCombinationId(bag, slot)
-            local baseCollectibleId = GetCombinationFirstNonFragmentCollectibleComponentId(combinationId)
-            if baseCollectibleId ~= 0 then
-                local unlockedCollectibleId = GetCombinationUnlockedCollectible(combinationId)
-                ZO_CombinationPromptManager_ShowEvolutionPrompt(baseCollectibleId, unlockedCollectibleId, AcceptEvolutionCallback, DeclineEvolutionCallback)
+            if GetCombinationNumNonFragmentCollectibleComponents(combinationId) > 0 then
+                ZO_CombinationPromptManager_ShowAppropriateCombinationPrompt(baseCollectibleId, combinationId, AcceptEvolutionCallback, DeclineEvolutionCallback)
                 return
             end
         end
@@ -300,7 +318,7 @@ function ZO_SharedInventoryManager:RegisterForConfirmUseItemEvents(namespace)
     end
 
     local function OnCancelConfirmUseItem()
-        ZO_CombinationPromptManager_ClearEvolutionPrompt()
+        ZO_CombinationPromptManager_ClearAllCombinationPrompts()
     end
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_REQUEST_CONFIRM_USE_ITEM, OnRequestConfirmUseItem)

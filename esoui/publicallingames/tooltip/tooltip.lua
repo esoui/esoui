@@ -193,6 +193,16 @@ local function SetTooltipIconTexture(tooltipControl, texture)
     fadeRight:SetHidden(hidden)
 end
 
+function ZO_IconTooltip_Cleared(tooltipControl)
+    SetTooltipIconTexture(tooltipControl, nil)
+end
+
+function ZO_IconTooltip_OnAddGameData(tooltipControl, gameDataType, ...)
+    if gameDataType == TOOLTIP_GAME_DATA_ITEM_ICON then
+        SetTooltipIconTexture(tooltipControl, ...)
+    end
+end
+
 function ZO_ItemIconTooltip_Cleared(tooltipControl)
     ZO_ItemTooltip_Cleared(tooltipControl)
     SetTooltipIconTexture(tooltipControl, nil)

@@ -50,6 +50,10 @@ ZO_ID_REQUEST_TYPE_CHALLENGE_LEADERBOARD = "challengeLeaderboard"
 ZO_ID_REQUEST_TYPE_CHALLENGE_OF_THE_WEEK_LEADERBOARD = "challengeOfTheWeekLeaderboard"
 ZO_ID_REQUEST_TYPE_BATTLEGROUND_LEADERBOARD = "battlegroundLeaderboard"
 ZO_ID_REQUEST_TYPE_TRIBUTE_LEADERBOARD = "tributeLeaderboard"
+ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_SOLO_LEADERBOARD = "endlessDungeonSoloLeaderboard"
+ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_OF_THE_WEEK_SOLO_LEADERBOARD = "endlessDungeonSoloOfTheWeekLeaderboard"
+ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_DUO_LEADERBOARD = "endlessDungeonSoloLeaderboard"
+ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_OF_THE_WEEK_DUO_LEADERBOARD = "endlessDungeonDuoOfTheWeekLeaderboard"
 
 local CONSOLE_INFO_FUNCTIONS = 
 {
@@ -72,6 +76,10 @@ local CONSOLE_INFO_FUNCTIONS =
     [ZO_ID_REQUEST_TYPE_CHALLENGE_OF_THE_WEEK_LEADERBOARD] = GetConsoleInfoFromChallengeOfTheWeekLeaderboardEntry,
     [ZO_ID_REQUEST_TYPE_BATTLEGROUND_LEADERBOARD] = GetConsoleInfoFromBattlegroundLeaderboardEntry,
     [ZO_ID_REQUEST_TYPE_TRIBUTE_LEADERBOARD] = GetConsoleInfoFromTributeLeaderboardEntry,
+    [ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_SOLO_LEADERBOARD] = GetConsoleInfoFromEndlessDungeonSoloLeaderboardEntry,
+    [ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_OF_THE_WEEK_SOLO_LEADERBOARD] = GetConsoleInfoFromEndlessDungeonOfTheWeekSoloLeaderboardEntry,
+    [ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_DUO_LEADERBOARD] = GetConsoleInfoFromEndlessDungeonDuoLeaderboardEntry,
+    [ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_OF_THE_WEEK_DUO_LEADERBOARD] = GetConsoleInfoFromEndlessDungeonOfTheWeekDuoLeaderboardEntry,
 }
 
 function PlayerConsoleInfoRequestManager:RequestId(idRequestType, block, callback, ...)

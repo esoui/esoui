@@ -702,7 +702,7 @@ function ZO_Options_SetupDropdown(control)
         else
             optionString = tostring(data.valid[index])
         end
-        optionLine = ZO_ComboBox:CreateItemEntry(optionString, function() OptionsDropdown_SelectChoice(control, index) end)
+        optionLine = dropdown:CreateItemEntry(optionString, function() OptionsDropdown_SelectChoice(control, index) end)
         dropdown:AddItem(optionLine)
     end
 end

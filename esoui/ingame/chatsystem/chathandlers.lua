@@ -4,8 +4,13 @@ local DEFAULT_TARGET_CHANNEL = nil
 
 local g_pvpKillFeedDeathRecurrenceTracker = nil
 do
+    -- The PvP Kill Feed uses ZO_RecurrenceTracker to track whether any given
+    -- killer/victim message has been shown within the last 10 seconds from a
+    -- given source (local vs. kill location). Note that the instance count
+    -- tracked by ZO_RecurrenceTracker is irrelevant here for the purpose of
+    -- the kill feed.
     local EXPIRATION_MS = 10000 -- 10 seconds
-    local EXTENSION_MS = 0
+    local EXTENSION_MS = 10000 -- 10 seconds
     g_pvpKillFeedDeathRecurrenceTracker = ZO_RecurrenceTracker:New(EXPIRATION_MS, EXTENSION_MS)
 end
 
@@ -207,10 +212,33 @@ local BUILTIN_MESSAGE_FORMATTERS = {
         end
     end,
 
-    [EVENT_PVP_KILL_FEED_DEATH] = function(killLocation, killerDisplayName, killerCharacterName, killerAlliance, killerRank, victimDisplayName, victimCharacterName, victimAlliance, victimRank)
+    [EVENT_PVP_KILL_FEED_DEATH] = function(killLocation, killerDisplayName, killerCharacterName, killerAlliance, killerRank, victimDisplayName, victimCharacterName, victimAlliance, victimRank, isKillLocation)
         local showKillFeedNotifications = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_PVP_KILL_FEED_NOTIFICATIONS)
         if not showKillFeedNotifications then
             return nil
+        end
+
+        local messageKeySuffix = string.format("%s___%s", killerDisplayName, victimDisplayName)
+        local messageKeyLocal = "L" .. messageKeySuffix
+        local messageKeyKillLocation = "B" .. messageKeySuffix
+        if isKillLocation then
+            -- This message was kill location sourced.
+            if g_pvpKillFeedDeathRecurrenceTracker:RemoveValue(messageKeyLocal) ~= nil then
+                -- The same message was already shown as a result of a local message;
+                -- remove the original message from the tracker and suppress this message.
+                return nil
+            end
+            -- Track this kill location sourced message.
+            g_pvpKillFeedDeathRecurrenceTracker:AddValue(messageKeyKillLocation)
+        else
+            -- This message was locally sourced.
+            if g_pvpKillFeedDeathRecurrenceTracker:RemoveValue(messageKeyKillLocation) ~= nil then
+                -- The same message was already shown as a result of a kill location message;
+                -- remove the original message from the tracker and suppress this message.
+                return nil
+            end
+            -- Track this locally sourced message.
+            g_pvpKillFeedDeathRecurrenceTracker:AddValue(messageKeyLocal)
         end
 
         local isBattleground = IsActiveWorldBattleground()
@@ -253,14 +281,6 @@ local BUILTIN_MESSAGE_FORMATTERS = {
 
         local killerRankName = GetAvARankName(killerGender, killerRank)
         local victimRankName = GetAvARankName(victimGender, victimRank)
-
-        local messageKey = string.format("%s___%s", killerDisplayName, victimDisplayName)
-        local numOccurrences = g_pvpKillFeedDeathRecurrenceTracker:AddValue(messageKey)
-        if numOccurrences > 1 then
-            -- Suppress redundant notifications that would otherwise result
-            -- from duplicate client- and server-sourced death events.
-            return nil
-        end
 
         local hasLocation = killLocation and killLocation ~= ""
         local messageStringId = hasLocation and SI_PVP_KILL_FEED_DEATH_AND_LOCATION or SI_PVP_KILL_FEED_DEATH

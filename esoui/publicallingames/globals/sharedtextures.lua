@@ -89,23 +89,24 @@ do
     end
 end
 
--- Instance Display Type --
+-- Zone Display Type --
 do
-    local INSTANCE_DISPLAY_TYPE_ICONS =
+    local ZONE_DISPLAY_TYPE_ICONS =
     {
-        [INSTANCE_DISPLAY_TYPE_SOLO] = "EsoUI/Art/Icons/mapKey/mapKey_soloInstance.dds",
-        [INSTANCE_DISPLAY_TYPE_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_groupInstance.dds",
-        [INSTANCE_DISPLAY_TYPE_RAID] = "EsoUI/Art/Icons/mapKey/mapKey_raidDungeon.dds",
-        [INSTANCE_DISPLAY_TYPE_GROUP_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_groupDelve.dds",
-        [INSTANCE_DISPLAY_TYPE_GROUP_AREA] = "EsoUI/Art/Icons/mapKey/mapKey_groupArea.dds",
-        [INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_dungeon.dds",
-        [INSTANCE_DISPLAY_TYPE_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_delve.dds",
-        [INSTANCE_DISPLAY_TYPE_HOUSING] = "EsoUI/Art/Icons/mapKey/mapKey_housing.dds",
-        [INSTANCE_DISPLAY_TYPE_ZONE_STORY] = "EsoUI/Art/Icons/mapKey/mapKey_zoneStory.dds",
+        [ZONE_DISPLAY_TYPE_SOLO] = "EsoUI/Art/Icons/mapKey/mapKey_soloInstance.dds",
+        [ZONE_DISPLAY_TYPE_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_groupInstance.dds",
+        [ZONE_DISPLAY_TYPE_RAID] = "EsoUI/Art/Icons/mapKey/mapKey_raidDungeon.dds",
+        [ZONE_DISPLAY_TYPE_GROUP_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_groupDelve.dds",
+        [ZONE_DISPLAY_TYPE_GROUP_AREA] = "EsoUI/Art/Icons/mapKey/mapKey_groupArea.dds",
+        [ZONE_DISPLAY_TYPE_PUBLIC_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_dungeon.dds",
+        [ZONE_DISPLAY_TYPE_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_delve.dds",
+        [ZONE_DISPLAY_TYPE_HOUSING] = "EsoUI/Art/Icons/mapKey/mapKey_housing.dds",
+        [ZONE_DISPLAY_TYPE_ZONE_STORY] = "EsoUI/Art/Icons/mapKey/mapKey_zoneStory.dds",
+        [ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_endlessDungeon.dds",
     }
 
-    function ZO_GetInstanceDisplayTypeIcon(instanceType)
-        return INSTANCE_DISPLAY_TYPE_ICONS[instanceType]
+    function ZO_GetZoneDisplayTypeIcon(zoneDisplayType)
+        return ZONE_DISPLAY_TYPE_ICONS[zoneDisplayType]
     end
 end
 

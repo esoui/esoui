@@ -31,14 +31,14 @@
                 </Label>
                 <Label name="$(parent)Data" font="ZoFontGamepad34" verticalAlignment="BOTTOM" horizontalAlignment="RIGHT">
                     <Anchor point="TOPRIGHT"/>
-                    <Anchor point ="TOPLEFT" relativeTo="$(parent)Header" relativePoint="TOPRIGHT" offsetX="25"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetX="25"/>
                 </Label>
                 <Label name="$(parent)Bonus" inherits="ZO_GamepadStatsDataTemplate" hidden="true" >
                     <Anchor point="TOPRIGHT" offsetX="-100" />
                 </Label>
                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Header" offsetX="-10" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Data" offsetX="10" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Data" offsetX="10" offsetY="3"/>
                 </Backdrop>
             </Controls>
         </Control>
@@ -187,7 +187,7 @@
                                     <Anchor point ="BOTTOMLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetX="7" offsetY="-7" />
                                 </Control>
                                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true" >
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" offsetX="-10" offsetY="-10"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" offsetX="-10" offsetY="-15"/>
                                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icons" offsetX="10" offsetY="10"/>
                                 </Backdrop>
                             </Controls>

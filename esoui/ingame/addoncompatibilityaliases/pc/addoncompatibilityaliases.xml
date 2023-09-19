@@ -18,5 +18,33 @@
         <!-- EditBox default text has moved to the C++ control -->
         <EditBox name="ZO_EditDefaultText" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" virtual="true" />
         <EditBox name="ZO_EditDefaultText_Gamepad" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" virtual="true" />
+        <!-- Old way used in one place that isn't a good model anymore -->
+        <Control name="ZO_UnderlinedEditBackdrop_Keyboard" virtual="true">
+            <OnInitialized>
+                ZO_SingleLineEditContainerSize_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Login/Keyboard/Login_TextLineShadow.dds">
+                    <Dimensions x="512" y="64" />
+                    <Anchor point="TOPLEFT" offsetX="-2" offsetY="-10"/>
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_EditBox" inherits="ZO_UnderlinedEditBackdrop_Keyboard" virtual="true">
+            <Controls>
+                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
+
+                <Label name="$(parent)Empty" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" layer="BACKGROUND" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Edit"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Edit"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <!-- Combo box refactor, ZO_ComboBox can now be used in place of ZO_ScrollableComboBox -->
+        <Control name="ZO_ScrollableComboBoxItem" inherits="ZO_ComboBoxEntry" level="3" mouseEnabled="true" virtual="true" />
+        <Control name="ZO_ScrollableComboBox" mouseEnabled="true" inherits="ZO_ComboBox" virtual="true" />
     </Controls>
 </GuiXml>

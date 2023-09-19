@@ -11,21 +11,22 @@ local MINIMUM_TIME_TO_HOLD_LOADING_TIP_MS = 15000
 -- Instance type icons 
 ------------------------------
 
-local INSTANCE_DISPLAY_TYPE_ICONS =
+local ZONE_DISPLAY_TYPE_ICONS =
 {
-    [INSTANCE_DISPLAY_TYPE_SOLO] = "EsoUI/Art/loadingTips/loadingTip_soloInstance.dds",
-    [INSTANCE_DISPLAY_TYPE_DUNGEON] = "EsoUI/Art/loadingTips/loadingTip_groupInstance.dds",
-    [INSTANCE_DISPLAY_TYPE_RAID] = "EsoUI/Art/loadingTips/loadingTip_raidDungeon.dds",
-    [INSTANCE_DISPLAY_TYPE_GROUP_DELVE] = "EsoUI/Art/loadingTips/loadingTip_groupDelve.dds",
-    [INSTANCE_DISPLAY_TYPE_GROUP_AREA] = "EsoUI/Art/Icons/mapKey/mapKey_groupArea.dds",
-    [INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON] = "EsoUI/Art/loadingTips/loadingTip_dungeon.dds",
-    [INSTANCE_DISPLAY_TYPE_DELVE] = "EsoUI/Art/loadingTips/loadingTip_delve.dds",
-    [INSTANCE_DISPLAY_TYPE_HOUSING] = "EsoUI/Art/Icons/mapKey/mapKey_housing.dds",
-    [INSTANCE_DISPLAY_TYPE_ZONE_STORY] = "EsoUI/Art/Icons/mapKey/mapKey_zoneStory.dds",
+    [ZONE_DISPLAY_TYPE_SOLO] = "EsoUI/Art/loadingTips/loadingTip_soloInstance.dds",
+    [ZONE_DISPLAY_TYPE_DUNGEON] = "EsoUI/Art/loadingTips/loadingTip_groupInstance.dds",
+    [ZONE_DISPLAY_TYPE_RAID] = "EsoUI/Art/loadingTips/loadingTip_raidDungeon.dds",
+    [ZONE_DISPLAY_TYPE_GROUP_DELVE] = "EsoUI/Art/loadingTips/loadingTip_groupDelve.dds",
+    [ZONE_DISPLAY_TYPE_GROUP_AREA] = "EsoUI/Art/Icons/mapKey/mapKey_groupArea.dds",
+    [ZONE_DISPLAY_TYPE_PUBLIC_DUNGEON] = "EsoUI/Art/loadingTips/loadingTip_dungeon.dds",
+    [ZONE_DISPLAY_TYPE_DELVE] = "EsoUI/Art/loadingTips/loadingTip_delve.dds",
+    [ZONE_DISPLAY_TYPE_HOUSING] = "EsoUI/Art/Icons/mapKey/mapKey_housing.dds",
+    [ZONE_DISPLAY_TYPE_ZONE_STORY] = "EsoUI/Art/Icons/mapKey/mapKey_zoneStory.dds",
+    [ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_endlessDungeon.dds",
 }
 
-function ZO_GetInstanceDisplayTypeIcon(instanceDisplayType)
-    return INSTANCE_DISPLAY_TYPE_ICONS[instanceDisplayType]
+function ZO_GetZoneDisplayTypeIcon(zoneDisplayType)
+    return ZONE_DISPLAY_TYPE_ICONS[zoneDisplayType]
 end
 
 --Local implementation of object pool for key edge file
@@ -135,16 +136,16 @@ function LoadingScreen_Base:SizeLoadingTexture()
     end
 end
 
-function LoadingScreen_Base:OnAreaLoadStarted(evt, worldId, instanceNum, zoneName, zoneDescription, loadingTexture, instanceDisplayType)
+function LoadingScreen_Base:OnAreaLoadStarted(evt, worldId, instanceNum, zoneName, zoneDescription, loadingTexture, zoneDisplayType)
     self:Log(string.format("Load Screen - OnAreaLoadStarted - (%d) %s", worldId, zoneName == "" and "Unknown Zone" or zoneName))
-    self:UpdateBattlegroundId(instanceDisplayType)
-    self:Show(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
+    self:UpdateBattlegroundId(zoneDisplayType)
+    self:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType)
 end
 
-function LoadingScreen_Base:OnPrepareForJump(evt, zoneName, zoneDescription, loadingTexture, instanceDisplayType)
+function LoadingScreen_Base:OnPrepareForJump(evt, zoneName, zoneDescription, loadingTexture, zoneDisplayType)
     self:Log(string.format("Load Screen - OnPrepareForJump - %s", zoneName == "" and "Unknown Zone" or zoneName))
-    self:UpdateBattlegroundId(instanceDisplayType)
-    self:Show(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
+    self:UpdateBattlegroundId(zoneDisplayType)
+    self:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType)
 end
 
 function LoadingScreen_Base:OnJumpFailed()
@@ -164,7 +165,7 @@ end
 
 function LoadingScreen_Base:OnResumeFromSuspend(evt)
     self:Log("Load Screen - OnResumeFromSuspend")
-    self:Show("", "", "", INSTANCE_DISPLAY_TYPE_NONE)
+    self:Show("", "", "", ZONE_DISPLAY_TYPE_NONE)
 end
 
 local BATTLEGROUND_TEAM_TEXTURES =
@@ -181,7 +182,7 @@ local GAMEPAD_BATTLEGROUND_TEAM_TEXTURES =
     [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_green.dds",
 }
 
-function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
+function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType)
     if self:IsPreferredScreen() then
         self:Log("Load Screen - Show")
         self.lastUpdate = GetFrameTimeMilliseconds()
@@ -211,9 +212,9 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, inst
             self.descriptionBg:SetHidden(isDefaultTexture)
         end
 
-        local showInstanceDisplayType = instanceDisplayType ~= INSTANCE_DISPLAY_TYPE_NONE and instanceDisplayType ~= INSTANCE_DISPLAY_TYPE_BATTLEGROUND
-        self.instanceTypeIcon:SetHidden(not showInstanceDisplayType)
-        self.instanceType:SetHidden(not showInstanceDisplayType)
+        local showZoneDisplayType = zoneDisplayType ~= ZONE_DISPLAY_TYPE_NONE and zoneDisplayType ~= ZONE_DISPLAY_TYPE_BATTLEGROUND
+        self.instanceTypeIcon:SetHidden(not showZoneDisplayType)
+        self.instanceType:SetHidden(not showZoneDisplayType)
 
         if not isDefaultTexture then
             if self.battlegroundId ~= 0 then
@@ -254,24 +255,43 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, inst
                     self.instanceTypeIcon:SetHidden(false)
                 end
             else
-                if showInstanceDisplayType then
-                    self.instanceTypeIcon:SetTexture(ZO_GetInstanceDisplayTypeIcon(instanceDisplayType))
-                    local instanceTypeText = GetString("SI_INSTANCEDISPLAYTYPE", instanceDisplayType)
-                    --If the instance type text changed, mark narration dirty
+                local isEndlessDungeon = zoneDisplayType == ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON
+                if showZoneDisplayType then
+                    self.instanceTypeIcon:SetTexture(ZO_GetZoneDisplayTypeIcon(zoneDisplayType))
+                    local instanceTypeText = GetString("SI_ZONEDISPLAYTYPE", zoneDisplayType)
+                    --If the instance type text changed (changed type or new language chosen), mark narration dirty
                     if instanceTypeText ~= self.instanceTypeText then
                         self.instanceTypeText = instanceTypeText
                         self.isNarrationDirty = true
                     end
                     self.instanceType:SetText(self.instanceTypeText)
+
+                    if zoneDisplayType ~= self.zoneDisplayType then
+                        self.zoneDisplayType = zoneDisplayType
+                        -- Hacky stop gap solution to the Zone and the feature having the same name
+                        -- Design asked us to suppress the zone name and let the zone display type do the work
+                        if isEndlessDungeon then
+                            self.instanceTypeIcon:SetAnchor(LEFT)
+                        else
+                            self.instanceTypeIcon:SetAnchor(LEFT, self.zoneName, RIGHT, 60)
+                        end
+                    end
                 end
 
-                local zoneNameText = LocalizeString("<<C:1>>", zoneName)
-                --If the zone name text changed, mark narration dirty
-                if zoneNameText ~= self.zoneNameText then
-                    self.zoneNameText = zoneNameText
-                    self.isNarrationDirty = true
+                -- Hacky stop gap solution to the Zone and the feature having the same name
+                -- Design asked us to suppress the zone name and let the zone display type do the work
+                if isEndlessDungeon then
+                    self.zoneNameText = ""
+                    self.zoneName:SetHidden(true)
+                else
+                    local zoneNameText = LocalizeString("<<C:1>>", zoneName)
+                    --If the zone name text changed, mark narration dirty
+                    if zoneNameText ~= self.zoneNameText then
+                        self.zoneNameText = zoneNameText
+                        self.isNarrationDirty = true
+                    end
+                    self.zoneName:SetText(self.zoneNameText)
                 end
-                self.zoneName:SetText(self.zoneNameText)
 
                 --Only do this random roll once when the load screen is first brought up, not everytime the info changes
                 if wasAppGuiHidden then
@@ -409,8 +429,8 @@ function LoadingScreen_Base:SetZoneDescription(tip)
     ReleaseAllKeyEdgeFiles()
 end
 
-function LoadingScreen_Base:UpdateBattlegroundId(instanceDisplayType)
-    if instanceDisplayType == INSTANCE_DISPLAY_TYPE_BATTLEGROUND then
+function LoadingScreen_Base:UpdateBattlegroundId(zoneDisplayType)
+    if zoneDisplayType == ZONE_DISPLAY_TYPE_BATTLEGROUND then
         self.battlegroundId = GetActivityBattlegroundId(GetCurrentLFGActivityId())
     else
         self:ClearBattlegroundId()

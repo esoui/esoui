@@ -261,10 +261,10 @@ function ZO_ShowAntiquityContentUpgrade()
     local antiquarianGuildZoneCollectibleCategoryType = antiquarianGuildZoneCollectibleData:GetCategoryType()
 
     if antiquarianGuildZoneCollectibleCategoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-        ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_ZONE_STORIES)
+        ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_ANTIQUITY_JOURNAL)
     else
         local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, antiquarianGuildZoneCollectibleData:GetName())
-        ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_ZONE_STORIES)
+        ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_ANTIQUITY_JOURNAL)
     end
 end
 

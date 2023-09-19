@@ -93,14 +93,12 @@ function Login_Keyboard:Initialize(control)
     self.serverAlertImage = self.serverAlert:GetNamedChild("AlertImage")
     self.relaunchGameLabel = control:GetNamedChild("RelaunchGameLabel")
 
-    self.accountNameEdit = ZO_EditBox:New(self.accountName)
-    self.passwordEdit = ZO_EditBox:New(self.password)
-    self.accountNameEdit:SetEmptyText(GetString(SI_ACCOUNT_NAME))
-    self.passwordEdit:SetEmptyText(GetString(SI_PASSWORD))
+    self.accountNameEdit = self.accountName:GetNamedChild("Edit")
+    self.passwordEdit = self.password:GetNamedChild("Edit")
     self:InitializeCredentialEditBoxes()
 
-    self.passwordEdit:GetEditControl():SetHandler("OnTextChanged", function() self:UpdateLoginButtonState() end, "ZO_Login")
-    self.accountNameEdit:GetEditControl():SetHandler("OnTextChanged", function() self:UpdateLoginButtonState() end, "ZO_Login")
+    self.passwordEdit:SetHandler("OnTextChanged", function() self:UpdateLoginButtonState() end, "ZO_Login")
+    self.accountNameEdit:SetHandler("OnTextChanged", function() self:UpdateLoginButtonState() end, "ZO_Login")
     self:InitializeTrustedSettingsBar(self.trustedSettingsBar)
     self.capsLockWarning:SetHidden(not IsCapsLockOn())
 

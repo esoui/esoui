@@ -23,6 +23,7 @@ function HelpAskForHelp_Keyboard:Initialize(control)
     self.helpSubcategoryTitle = control:GetNamedChild("SubcategoryTitle")
     self.helpDetailsTitle = control:GetNamedChild("DetailsTitle")
     self.helpDescriptionTitle = control:GetNamedChild("DescriptionTitle")
+    self.helpDescriptionBody = self.control:GetNamedChild("DescriptionBody")
     self.helpDetailsTextControl = control:GetNamedChild("DetailsTextLine")
 
     self.helpCategoryContainer = control:GetNamedChild("CategoryContainer")
@@ -33,6 +34,9 @@ function HelpAskForHelp_Keyboard:Initialize(control)
     self.helpCategoryComboBoxControl = control:GetNamedChild("CategoryComboBox")
     self.helpSubcategoryComboBoxControl = control:GetNamedChild("SubcategoryComboBox")
 
+    self.externalInfoContainer = control:GetNamedChild("ExternalInfo")
+    self.externalInfoTitle = self.externalInfoContainer:GetNamedChild("Title")
+    self.instructionsText = control:GetNamedChild("Instructions")
     self.helpSubmitButton = control:GetNamedChild("SubmitButton")
 
     ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:RegisterCallback("CustomerServiceTicketSubmitted", function (...)
@@ -75,8 +79,7 @@ function HelpAskForHelp_Keyboard:InitializeComboBoxes()
     self.helpSubcategoryComboBox:SetEntryMouseOverCallbacks(OnComboBoxEntryMouseEnter, OnComboBoxEntryMouseExit)
 
     local function OnImpactChanged()
-        self:UpdateCategories()
-        self:UpdateDetailsComponents()
+        self:SetExternalInfo(nil)
         self:UpdateSubmitButton()
         ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:SetReportPlayerTicketSubmittedCallback(nil)
     end
@@ -84,7 +87,7 @@ function HelpAskForHelp_Keyboard:InitializeComboBoxes()
     local impactStringName = ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO.impactStringName
     local impacts = ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO.impacts
     for _, impactData in ipairs(impacts) do
-        local entry = ZO_ComboBox:CreateItemEntry(GetListEntryName(impactStringName, impactData), OnImpactChanged)
+        local entry = self.helpImpactComboBox:CreateItemEntry(GetListEntryName(impactStringName, impactData), OnImpactChanged)
         entry.data = impactData
         self.helpImpactComboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
@@ -93,15 +96,15 @@ function HelpAskForHelp_Keyboard:InitializeComboBoxes()
 end
 
 function HelpAskForHelp_Keyboard:InitializeTextBoxes()
-    self.details = self.control:GetNamedChild("DetailsTextLineField")
-    self.details:SetMaxInputChars(MAX_HELP_DETAILS_TEXT)
-    self.details:SetDefaultText(GetString(SI_CUSTOMER_SERVICE_ENTER_NAME))
+    self.detailsEditBox = self.control:GetNamedChild("DetailsTextLineField")
+    self.detailsEditBox:SetMaxInputChars(MAX_HELP_DETAILS_TEXT)
+    self.detailsEditBox:SetDefaultText(GetString(SI_CUSTOMER_SERVICE_ENTER_NAME))
 
     --Storing the text field and adding handlers to the visibility events so the Submit Button can be enabled/disabled when the player has typed something in
     --The Submit Button is disabled when the details text is empty (and the details text is visible)
-    self.details:SetHandler("OnTextChanged",function() self:UpdateSubmitButton() end)
+    self.detailsEditBox:SetHandler("OnTextChanged",function() self:UpdateSubmitButton() end)
 
-    self.description = self.control:GetNamedChild("DescriptionBodyField")
+    self.description = self.helpDescriptionBody:GetNamedChild("Field")
     self.description:SetMaxInputChars(MAX_HELP_DESCRIPTION_BODY)
     self.description:SetDefaultText(GetString(SI_CUSTOMER_SERVICE_DEFAULT_DESCRIPTION_TEXT_GENERIC))
 
@@ -109,7 +112,7 @@ function HelpAskForHelp_Keyboard:InitializeTextBoxes()
     self.description:SetHandler("OnTextChanged",function() self:UpdateSubmitButton() end)
 
     self.description:SetText("")
-    self.details:SetText("")
+    self.detailsEditBox:SetText("")
 end
 
 function HelpAskForHelp_Keyboard:InitializeDialogs()
@@ -136,12 +139,27 @@ function HelpAskForHelp_Keyboard:InitializeDialogs()
     })
 end
 
+function HelpAskForHelp_Keyboard:GetImpactData()
+    local selectedItemData = self.helpImpactComboBox:GetSelectedItemData()
+    return selectedItemData and selectedItemData.data
+end
+
+function HelpAskForHelp_Keyboard:GetCategoryData()
+    local selectedItemData = self.helpCategoryComboBox:GetSelectedItemData()
+    return selectedItemData and selectedItemData.data
+end
+
+function HelpAskForHelp_Keyboard:GetSubcategoryData()
+    local selectedItemData = self.helpSubcategoryComboBox:GetSelectedItemData()
+    return selectedItemData and selectedItemData.data
+end
+
 function HelpAskForHelp_Keyboard:UpdateCategories()
     self.helpCategoryComboBox:ClearItems()
 
-    local selectedItemData = self.helpImpactComboBox:GetSelectedItemData()
-    local impactData = selectedItemData and selectedItemData.data or nil
-    local categories = impactData and impactData.categories or nil
+    local impactData = self:GetImpactData()
+    local meetsExternalInfoRequirements = self:MeetsExternalInfoRequirements()
+    local categories = meetsExternalInfoRequirements and impactData and impactData.categories or nil
 
     if categories then
         local function OnCategoryChanged()
@@ -153,7 +171,7 @@ function HelpAskForHelp_Keyboard:UpdateCategories()
         local categoryStringName = impactData.categoryStringName
         local categoryDescriptionStringName = impactData.categoryDescriptionStringName
         for _, categoryData in ipairs(categories) do
-            local entry = ZO_ComboBox:CreateItemEntry(GetListEntryName(categoryStringName, categoryData), OnCategoryChanged)
+            local entry = self.helpCategoryComboBox:CreateItemEntry(GetListEntryName(categoryStringName, categoryData), OnCategoryChanged)
             entry.data = categoryData
             entry.descriptionStringName = categoryDescriptionStringName
             self.helpCategoryComboBox:AddItem(entry, ZO_COMBOBOX_UPDATE_NOW)
@@ -170,8 +188,7 @@ end
 function HelpAskForHelp_Keyboard:UpdateSubcategories()
     self.helpSubcategoryComboBox:ClearItems()
 
-    local selectedItemData = self.helpCategoryComboBox:GetSelectedItemData()
-    local categoryData = selectedItemData and selectedItemData.data or nil
+    local categoryData = self:GetCategoryData()
     local subcategories = categoryData and categoryData.subcategories or nil
 
     if subcategories then
@@ -183,7 +200,7 @@ function HelpAskForHelp_Keyboard:UpdateSubcategories()
         local subcategoryStringName = categoryData.subcategoryStringName
         local subcategoryDescriptionStringName = categoryData.subcategoryDescriptionStringName
         for _, subcategoryData in ipairs(subcategories) do
-            local entry = ZO_ComboBox:CreateItemEntry(GetListEntryName(subcategoryStringName, subcategoryData), OnCategoryChanged)
+            local entry = self.helpSubcategoryComboBox:CreateItemEntry(GetListEntryName(subcategoryStringName, subcategoryData), OnCategoryChanged)
             entry.data = subcategoryData
             entry.descriptionStringName = subcategoryDescriptionStringName
             self.helpSubcategoryComboBox:AddItem(entry, ZO_COMBOBOX_UPDATE_NOW)
@@ -195,19 +212,53 @@ function HelpAskForHelp_Keyboard:UpdateSubcategories()
     end
 end
 
-function HelpAskForHelp_Keyboard:UpdateDetailsComponents()
-    self.details:SetText("")
+function HelpAskForHelp_Keyboard:MeetsExternalInfoRequirements()
+    local impactData = self:GetImpactData()
+    local requiresExternalInfo = impactData and (impactData.externalInfoTitle ~= nil) or false
+    if requiresExternalInfo then
+        return self.externalInfo ~= nil
+    end
+    return true
+end
 
-    local selectedItemData = self.helpImpactComboBox:GetSelectedItemData()
-    local impactData = selectedItemData and selectedItemData.data or nil
-    local detailsTitle = impactData and impactData.detailsTitle or nil
-        
+function HelpAskForHelp_Keyboard:SetExternalInfo(externalInfo)
+    self.externalInfo = externalInfo
+    self.detailsEditBox:SetText("")
+    local impactData = self:GetImpactData()
+    local meetsExternalInfoRequirements = self:MeetsExternalInfoRequirements()
+    local failsExternalInfoRequirements = not meetsExternalInfoRequirements
+
+    -- Instructions
+    local instructions = failsExternalInfoRequirements and impactData.externalInfoInstructions
+    if instructions then
+        self.instructionsText:SetHidden(false)
+        self.instructionsText:SetText(instructions)
+    else
+        self.instructionsText:SetHidden(true)
+    end
+
+    -- Details
+    local detailsTitle = meetsExternalInfoRequirements and impactData.detailsTitle or nil
     if detailsTitle then
         self:SetDetailsContentHidden(false)
         self.helpDetailsTitle:SetText(detailsTitle)
     else
         self:SetDetailsContentHidden(true)
     end
+
+    -- Description
+    self.helpDescriptionTitle:SetHidden(failsExternalInfoRequirements)
+    self.helpDescriptionBody:SetHidden(failsExternalInfoRequirements)
+
+    -- External Info
+    if impactData and impactData.externalInfoTitle then
+        self.externalInfoContainer:SetHidden(failsExternalInfoRequirements)
+        self.externalInfoTitle:SetText(impactData.externalInfoTitle)
+    else
+        self.externalInfoContainer:SetHidden(true)
+    end
+    
+    self:UpdateCategories()
 end
 
 function HelpAskForHelp_Keyboard:SetCategoryContentHidden(shouldHide)
@@ -235,7 +286,7 @@ end
 function HelpAskForHelp_Keyboard:SetDetailsContentHidden(shouldHide)
     self.helpDetailsTextControl:SetHidden(shouldHide)
     self.helpDetailsTitle:SetHidden(shouldHide)
-    ZO_DefaultEdit_SetEnabled(self.details, not shouldHide)
+    ZO_DefaultEdit_SetEnabled(self.detailsEditBox, not shouldHide)
 
     local offsetY = 0
     if not shouldHide then
@@ -247,9 +298,9 @@ end
 function HelpAskForHelp_Keyboard:UpdateSubmitButton()
     local enableSubmitButton = true
 
-    if self.description:GetText() == ""  then
+    if not self.instructionsText:IsHidden() then
         enableSubmitButton = false
-    elseif not self.helpDetailsTextControl:IsHidden() and self.details:GetText() == "" then
+    elseif not self.helpDetailsTextControl:IsHidden() and self.detailsEditBox:GetText() == "" then
         enableSubmitButton = false
     elseif not self:GetSelectedTicketCategory() then
         enableSubmitButton = false
@@ -306,7 +357,7 @@ function HelpAskForHelp_Keyboard:SetDetailsText(text)
     self.details:SetText(text)
 end
 
-function HelpAskForHelp_Keyboard:OpenAskForHelp(impactId, categoryId, subcategoryId, details)
+function HelpAskForHelp_Keyboard:OpenAskForHelp(impactId, categoryId, subcategoryId, externalInfo)
     HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
     self:ClearFields()
 
@@ -322,27 +373,34 @@ function HelpAskForHelp_Keyboard:OpenAskForHelp(impactId, categoryId, subcategor
         end
     end
 
-    if details then
-        self:SetDetailsText(details)
-        ZO_DefaultEdit_SetEnabled(self.details, false)
+    if externalInfo then
+        local impactData = self:GetImpactData()
+        if impactData then
+            if impactData.externalInfoRegistrationFunction then
+                impactData.externalInfoRegistrationFunction(externalInfo)
+            end
+            if impactData.externalInfoTitle then
+                self:SetExternalInfo(externalInfo)
+            else
+                self.detailsEditBox:SetText(externalInfo)
+                ZO_DefaultEdit_SetEnabled(self.detailsEditBox, false)
+            end
+        end
     end
 end
 
 function HelpAskForHelp_Keyboard:GetSelectedTicketCategory()
-    local selectedItemData = self.helpImpactComboBox:GetSelectedItemData()
-    local impactData = selectedItemData and selectedItemData.data
+    local impactData = self:GetImpactData()
     if impactData then
         if impactData.ticketCategory then
             return impactData.ticketCategory
         else
-            selectedItemData = self.helpCategoryComboBox:GetSelectedItemData()
-            local categoryData = selectedItemData and selectedItemData.data
+            local categoryData = self:GetCategoryData()
             if categoryData then
                 if categoryData.ticketCategory then
                     return categoryData.ticketCategory
                 else
-                    selectedItemData = self.helpSubcategoryComboBox:GetSelectedItemData()
-                    local subcategoryData = selectedItemData and selectedItemData.data
+                    local subcategoryData = self:GetSubcategoryData()
                     if subcategoryData then
                         return subcategoryData.ticketCategory
                     end
@@ -353,20 +411,42 @@ function HelpAskForHelp_Keyboard:GetSelectedTicketCategory()
     return nil
 end
 
-function HelpAskForHelp_Keyboard:AttemptToSendTicket()
-    ResetCustomerServiceTicket()
+function HelpAskForHelp_Keyboard:OnExternalInfoMouseEnter()
+    local impactData = self:GetImpactData()
+    if impactData.externalInfoKeyboardTooltipFunction then
+        impactData.externalInfoKeyboardTooltipFunction()
+    end
+end
 
-    --Populate the ticket fields.  Impact data must be selected in order to get here.
+function HelpAskForHelp_Keyboard:OnExternalInfoMouseExit()
+    ClearTooltip(InformationTooltip)
+end
+
+function HelpAskForHelp_Keyboard:ShowGroupFinderListingTooltip()
+    InitializeTooltip(InformationTooltip, self.externalInfoContainer, RIGHT, -5, 0)
+    local externalInfo = self.externalInfo
+    local owner = ZO_WHITE:Colorize(ZO_GetPrimaryPlayerName(externalInfo.ownerDisplayName, externalInfo.ownerCharacterName))
+    local title = ZO_WHITE:Colorize(externalInfo.title)
+    local description = ZO_WHITE:Colorize(externalInfo.description)
+    local text = zo_strformat(SI_GROUP_FINDER_LISTING_ASK_FOR_HELP_KEYBOARD_TOOLTIP_FORMATTER, owner, title, description)
+    SetTooltipText(InformationTooltip, text)
+end
+
+function HelpAskForHelp_Keyboard:AttemptToSendTicket()
+    --Populate the ticket fields. Impact data must be selected in order to get here.
+    local impactData = self:GetImpactData()
+    local retainTargetInfo = impactData.externalInfoRegistrationFunction ~= nil
+    ResetCustomerServiceTicket(retainTargetInfo)
+
     SetCustomerServiceTicketCategory(self:GetSelectedTicketCategory())
 
-    local impactData = self.helpImpactComboBox:GetSelectedItemData().data
-    local detailsText = self.details:GetText()
+    local detailsText = self.detailsEditBox:GetText()
     if impactData.detailsRegistrationFunction then
-        local text = detailsText
-        if impactData.detailsFormatText then
-            text = impactData.detailsFormatText(text)
+        local formattedDetails = detailsText
+        if impactData.detailsRegistrationFormatText then
+            formattedDetails = impactData.detailsRegistrationFormatText(formattedDetails)
         end
-        impactData.detailsRegistrationFunction(text)
+        impactData.detailsRegistrationFunction(formattedDetails)
     end
 
     SetCustomerServiceTicketBody(self.description:GetText())
@@ -374,10 +454,13 @@ function HelpAskForHelp_Keyboard:AttemptToSendTicket()
     ZO_Dialogs_ShowDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
 
     if impactData.id == CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER then
+        -- details should always be a string in this case
         ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket(detailsText)
+    elseif impactData.id == CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GROUP_FINDER_LISTING then
+        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket(self.externalInfo.ownerDisplayName)
     end
 
-    ZO_DefaultEdit_SetEnabled(self.details, true)
+    ZO_DefaultEdit_SetEnabled(self.detailsEditBox, true)
 
     SubmitCustomerServiceTicket()
 end
@@ -392,10 +475,6 @@ end
 
 function ZO_HelpAskForHelp_Keyboard_OnInitialized(self)
     HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD = HelpAskForHelp_Keyboard:New(self)
-end
-
-function ZO_HelpAskForHelp_Keyboard_AttemptToSendTicket()
-    HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:AttemptToSendTicket()
 end
 
 function ZO_HelpAskForHelp_OnForumLinkClicked()

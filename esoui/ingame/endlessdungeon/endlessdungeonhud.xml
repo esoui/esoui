@@ -1,0 +1,42 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_EndlessDungeonHUD_AlphaAnimation">
+            <Animations>
+                <AlphaAnimation duration="250" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+
+                    <OnPlay>
+                        animatingControl.object:OnAlphaAnimationStarted()
+                    </OnPlay>
+
+                    <OnStop>
+                        animatingControl.object:OnAlphaAnimationStopped(self:GetTimeline():IsPlayingBackward())
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <TopLevelControl name="ZO_EndlessDungeonHUD_TopLevel" hidden="true">
+            <Anchor point="TOPLEFT" offsetX="15" offsetY="15" />
+            <Anchor point="BOTTOMRIGHT" offsetX="-15" offsetY="-15" />
+
+            <OnInitialized>
+                ZO_EndlessDungeonHUD.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)ReviveIcon" textureFile="EsoUI/Art/Trials/VitalityDepletion.dds" />
+
+                <Control name="$(parent)ReviveLabel" inherits="ZO_RollingMeterLabel" />
+
+                <Label name="$(parent)ScoreHeadingLabel" text="SI_REVIVE_COUNTER_SCORE" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+
+                <Control name="$(parent)ScoreLabel" inherits="ZO_RollingMeterLabel" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

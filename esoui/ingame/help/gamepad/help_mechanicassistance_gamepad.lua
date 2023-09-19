@@ -153,7 +153,7 @@ function ZO_Help_MechanicAssistance_Gamepad:SetupList(list)
         for _, enumValue in ipairs(mechanicCategoriesData.categoryEnumOrderedValues) do
             local name = GetString(mechanicCategoriesData.categoryEnumStringPrefix, enumValue)
             if name ~= nil then
-                local entry = ZO_ComboBox:CreateItemEntry(name, OnCategorySelectionChanged)
+                local entry = dropdown:CreateItemEntry(name, OnCategorySelectionChanged)
                 entry.categoryEnumValue = enumValue
                 dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
                 if savedCategoryValue == enumValue then

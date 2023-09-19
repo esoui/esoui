@@ -527,10 +527,15 @@ function Death:New(control)
     EVENT_MANAGER:RegisterForEvent("Death", EVENT_PLAYER_DEATH_INFO_UPDATE, UpdateDisplay)
     EVENT_MANAGER:RegisterForEvent("Death", EVENT_PLAYER_QUEUED_FOR_CYCLIC_RESPAWN, UpdateDisplay)
     EVENT_MANAGER:RegisterForEvent("Death", EVENT_RAID_REVIVE_COUNTER_UPDATE, function() 
-		if(self.currentType) then
+        if(self.currentType) then
             self.types[self.currentType]:UpdateDisplay()
         end
-	end)
+    end)
+    ENDLESS_DUNGEON_MANAGER:RegisterCallback("StateChanged", function(newState, oldState)
+        if self.currentType then
+            self:UpdateDisplay()
+        end
+    end)
     EVENT_MANAGER:RegisterForEvent("Death", EVENT_PLAYER_ACTIVATED, function()
         death:UpdateDisplay()
     end)

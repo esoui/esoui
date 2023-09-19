@@ -9,7 +9,10 @@
             <Anchor point="TOPLEFT" />
         </Label>
         
-        <TopLevelControl name="ZO_HelpOverview_Keyboard_Control" inherits="ZO_HelpCustomerService_Keyboard_ContentAnchors" hidden="true">
+        <TopLevelControl name="ZO_HelpOverview_Keyboard_Control" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_HelpCustomerService_Keyboard" offsetX="-10" offsetY="50" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_HelpCustomerService_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="40" />
+            
             <OnInitialized>
                 ZO_HelpOverview_Keyboard_OnInitialized(self)
             </OnInitialized>

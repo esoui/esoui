@@ -47,7 +47,7 @@ function ZO_ActivityFinderTemplate_Shared:RegisterEvents()
         self:RefreshFilters()
     end
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateLocationData", RefreshFilters)
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", function(status) self:OnActivityFinderStatusUpdate(status) end)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", function() self:OnActivityFinderStatusUpdate() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnHandleLFMPromptResponse", function() self:OnHandleLFMPromptResponse() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", RefreshFilters)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnCooldownsUpdate", function() self:OnCooldownsUpdate() end)
@@ -59,6 +59,11 @@ function ZO_ActivityFinderTemplate_Shared:RegisterEvents()
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnTributeClubRankDataChanged", function() self:OnTributeClubRankDataChanged() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnTributeCampaignDataChanged", function() self:OnTributeCampaignDataChanged() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnTributeLeaderboardRankChanged", function() self:OnTributeLeaderboardRankChanged() end)
+
+    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_APPLY_TO_GROUP_LISTING_RESULT, function() self:OnActivityFinderStatusUpdate() end)
+    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_RESOLVE_GROUP_LISTING_APPLICATION_RESULT, function() self:OnActivityFinderStatusUpdate() end)
+    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_CREATE_GROUP_LISTING_RESULT, function() self:OnActivityFinderStatusUpdate() end)
+    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_RESULT, function() self:OnActivityFinderStatusUpdate() end)
 end
 
 function ZO_ActivityFinderTemplate_Shared:InitializeSingularPanelControls(rewardsTemplate)
@@ -590,6 +595,7 @@ function ZO_ActivityFinderTemplate_Shared:GetGlobalLockInfo()
         isLockedByManager = self.dataManager:GetManagerLockInfo(),
         isLockedByNotLeader = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsLockedByNotLeader(),
         isActiveWorldBattleground = IsActiveWorldBattleground(),
+        isGroupFinderInUse = ZO_GroupFinder_IsGroupFinderInUse(),
     }
 
     for _, reason in pairs(globalLockReasons) do
@@ -610,6 +616,8 @@ function ZO_ActivityFinderTemplate_Shared:GetGlobalLockText()
             lockReasonText = GetString(SI_LFG_LOCK_REASON_IN_BATTLEGROUND)
         elseif globalLockReasons.isLockedByManager then
             lockReasonText = self.dataManager:GetManagerLockText()
+        elseif globalLockReasons.isGroupFinderInUse then
+            lockReasonText = GetString(SI_ACTIVITY_FINDER_LOCKED_BY_GROUP_FINDER_TEXT)
         elseif globalLockReasons.isLockedByNotLeader then
             lockReasonText = GetString(SI_ACTIVITY_FINDER_LOCKED_NOT_LEADER_TEXT)
         end

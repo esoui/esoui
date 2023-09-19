@@ -340,6 +340,30 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
                 return false
             end,
         },
+        -- Toggle Password
+        {
+                keybind = "UI_SHORTCUT_SECONDARY",
+                name = function()
+                    local data = self.mainList:GetTargetData()
+                    local editBoxControl = data.control.editBox
+
+                    local isPassword = editBoxControl:IsPassword()
+                    return isPassword and GetString(SI_EDIT_BOX_SHOW_PASSWORD) or GetString(SI_EDIT_BOX_HIDE_PASSWORD)
+                end,
+                callback = function()
+                    local data = self.mainList:GetTargetData()
+                    local editBoxControl = data.control.editBox
+
+                    local isPassword = editBoxControl:IsPassword()
+                    editBoxControl:SetAsPassword(not isPassword)
+
+                    KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
+                end,
+                visible = function()
+                    local data = self.mainList:GetTargetData()
+                    return data.isPassword
+                end,
+            },
         -- Change Profile
         {
             name = function()
@@ -490,11 +514,8 @@ function ZO_GameStartup_Gamepad:InitializeLists()
             end
 
             editBox:SetHandler("OnTextChanged", OnTextChanged)
-
             editBox:SetMaxInputChars(data.maxInputChars)
-
-            local textType = data.textType or TEXT_TYPE_ALL
-            editBox:SetTextType(textType)
+            editBox:SetAsPassword(data.isPassword)
 
             local initialText = data.initialTextFunction and data.initialTextFunction() or ""
             editBox:SetText(initialText)
@@ -537,7 +558,7 @@ function ZO_GameStartup_Gamepad:PopulateMainList()
             passwordEntryData.entryType = ENTRY_TYPE.EDIT_BOX
             passwordEntryData.initialTextFunction = function() return self.password end
             passwordEntryData.maxInputChars = MAX_PASSWORD_LENGTH
-            passwordEntryData.textType = TEXT_TYPE_PASSWORD
+            passwordEntryData.isPassword = true
             passwordEntryData.onTextChanged = function(control)
                 self.password = control:GetText()
             end

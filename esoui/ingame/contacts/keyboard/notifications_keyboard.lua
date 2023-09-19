@@ -31,6 +31,7 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GUILD_NEW_APPLICATIONS] = "EsoUI/Art/Notifications/notificationIcon_guild.dds",
     [NOTIFICATION_TYPE_PLAYER_APPLICATIONS] = "EsoUI/Art/Notifications/notificationIcon_guild.dds",
     [NOTIFICATION_TYPE_MARKET_PRODUCT_AVAILABLE] = "EsoUI/Art/Notifications/notificationIcon_crownStore.dds",
+    [NOTIFICATION_TYPE_EXPIRING_MARKET_CURRENCY] = GetCurrencyKeyboardIcon(CURT_CROWNS),
     [NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
     [NOTIFICATION_TYPE_DISABLED_ADDON] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/notificationIcon_tribute.dds",
@@ -130,32 +131,32 @@ function ZO_KeyboardAgentChatRequestProvider:CreateMessage()
     return GetString(SI_AGENT_CHAT_REQUEST_MESSAGE)
 end
 
--- Leaderboard Raid Provider
+-- Leaderboard Score Provider
 -------------------------
 
-ZO_KeyboardLeaderboardRaidProvider = ZO_LeaderboardRaidProvider:Subclass()
+ZO_KeyboardLeaderboardScoreProvider = ZO_LeaderboardScoreProvider:Subclass()
 
-function ZO_KeyboardLeaderboardRaidProvider:New(notificationManager)
+function ZO_KeyboardLeaderboardScoreProvider:New(notificationManager)
     -- Override leaderboard update callback to support audio
     local function notificationEventCallback(eventId)
-        if eventId == EVENT_RAID_SCORE_NOTIFICATION_ADDED and GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS) then
+        if eventId == EVENT_LEADERBOARD_SCORE_NOTIFICATION_ADDED and GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS) then
             PlaySound(SOUNDS.NEW_NOTIFICATION)
         end
     end
 
-    local provider = ZO_LeaderboardRaidProvider.New(self, notificationManager, notificationEventCallback)
+    local provider = ZO_LeaderboardScoreProvider.New(self, notificationManager, notificationEventCallback)
     return provider
 end
 
-function ZO_KeyboardLeaderboardRaidProvider:ShowMessageTooltip(data, control)
+function ZO_KeyboardLeaderboardScoreProvider:ShowMessageTooltip(data, control)
     InitializeTooltip(InformationTooltip, control, TOP, 0, 0)
 
-    local numMembers = GetNumRaidScoreNotificationMembers(data.notificationId)
+    local numMembers = data.numMembers
     local guildMembersSection = {}
     local friendsSection = {}
 
     for memberIndex = 1, numMembers do
-        local displayName, characterName, isFriend, isGuildMember, isPlayer = GetRaidScoreNotificationMemberInfo(data.notificationId, memberIndex)
+        local displayName, characterName, isFriend, isGuildMember, isPlayer = GetLeaderboardScoreNotificationMemberInfo(data.notificationId, memberIndex)
         
         if not isPlayer then
             if isFriend then
@@ -167,7 +168,7 @@ function ZO_KeyboardLeaderboardRaidProvider:ShowMessageTooltip(data, control)
     end
 
     if #friendsSection > 0 then
-        InformationTooltip:AddLine(zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_FRIENDS), #friendsSection))
+        InformationTooltip:AddLine(zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_SCORE_NOTIFICATION_HEADER_FRIENDS), #friendsSection))
         for _, friendName in ipairs(friendsSection) do
             InformationTooltip:AddVerticalPadding(-9)
             InformationTooltip:AddLine(friendName, "", ZO_NORMAL_TEXT:UnpackRGB())
@@ -175,7 +176,7 @@ function ZO_KeyboardLeaderboardRaidProvider:ShowMessageTooltip(data, control)
     end
     
     if #guildMembersSection > 0 then
-        InformationTooltip:AddLine(zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_GUILD_MEMBERS), #guildMembersSection))
+        InformationTooltip:AddLine(zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_SCORE_NOTIFICATION_HEADER_GUILD_MEMBERS), #guildMembersSection))
         for _, guildMemberName in ipairs(guildMembersSection) do
             InformationTooltip:AddVerticalPadding(-9)
             InformationTooltip:AddLine(guildMemberName, "", ZO_NORMAL_TEXT:UnpackRGB())
@@ -183,7 +184,7 @@ function ZO_KeyboardLeaderboardRaidProvider:ShowMessageTooltip(data, control)
     end
 end
 
-function ZO_KeyboardLeaderboardRaidProvider:HideMessageTooltip()
+function ZO_KeyboardLeaderboardScoreProvider:HideMessageTooltip()
     ClearTooltip(InformationTooltip)
 end
 
@@ -341,8 +342,8 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
 
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_REQUEST_DATA, "ZO_NotificationsRequestRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_YES_NO_DATA, "ZO_NotificationsYesNoRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_WAITING_DATA, "ZO_NotificationsWaitingRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, function(control, data) self:SetupWaiting(control, data) end)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LEADERBOARD_DATA, "ZO_NotificationsLeaderboardRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, function(control, data) self:SetupTwoButtonRow(control, data) end)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_WAITING_DATA, "ZO_NotificationsWaitingRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, function(...) self:SetupWaiting(...) end)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LEADERBOARD_DATA, "ZO_NotificationsLeaderboardRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, function(...) self:SetupTwoButtonRow(...) end)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ALERT_DATA, "ZO_NotificationsAlertRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_COLLECTIBLE_DATA, "ZO_NotificationsCollectibleRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequestWithMoreInfoRow)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_READY_CHECK_DATA, "ZO_NotificationsLFGReadyCheckRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
@@ -377,7 +378,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_KeyboardPointsResetProvider:New(self),
         ZO_PledgeOfMaraProvider:New(self),
         ZO_KeyboardAgentChatRequestProvider:New(self),
-        ZO_KeyboardLeaderboardRaidProvider:New(self),
+        ZO_KeyboardLeaderboardScoreProvider:New(self),
         ZO_KeyboardCollectionsUpdateProvider:New(self),
         ZO_LFGUpdateProvider:New(self),
         ZO_CraftBagAutoTransferProvider:New(self),
@@ -390,6 +391,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_KeyboardGuildNewApplicationsProvider:New(self),
         ZO_PlayerApplicationsProvider:New(self),
         ZO_KeyboardMarketProductUnlockedProvider:New(self),
+        ZO_ExpiringMarketCurrencyProvider:New(self),
         ZO_OutOfDateAddonsProvider:New(self),
         ZO_DisabledAddonsProvider:New(self),
         ZO_TributeInviteProvider:New(self),
@@ -560,9 +562,9 @@ function ZO_KeyboardNotificationManager:BuildEmptyList()
 end
 
 function ZO_KeyboardNotificationManager:SetupNote(control, data)
-    local note = GetControl(control, "Note")
+    local note = control:GetNamedChild("Note")
     if note then
-        if(data.note and data.note ~= "") then
+        if data.note and data.note ~= "" then
             note:SetHidden(false)
         else
             note:SetHidden(true)
@@ -578,16 +580,18 @@ function ZO_KeyboardNotificationManager:SetupBaseRow(control, data)
     control.notificationType = notificationType
     control.index = data.index
 
-    if data.acceptText then
-        control.acceptText = data.acceptText
+    if data.acceptText == nil then
+        data.acceptText = control.acceptText
     end
 
-    if data.declineText then
-        control.declineText = data.declineText
+    if data.declineText == nil then
+        data.declineText = control.declineText
     end
 
-    GetControl(control, "Icon"):SetTexture(ZO_KEYBOARD_NOTIFICATION_ICONS[notificationType])
-    GetControl(control, "Type"):SetText(zo_strformat(SI_NOTIFICATIONS_TYPE_FORMATTER, GetString("SI_NOTIFICATIONTYPE", notificationType)))
+    control.data = data
+
+    control:GetNamedChild("Icon"):SetTexture(ZO_KEYBOARD_NOTIFICATION_ICONS[notificationType])
+    control:GetNamedChild("Type"):SetText(zo_strformat(SI_NOTIFICATIONS_TYPE_FORMATTER, GetString("SI_NOTIFICATIONTYPE", notificationType)))
 end
 
 function ZO_KeyboardNotificationManager:SetupTwoButtonRow(control, data)
@@ -718,8 +722,30 @@ function ZO_NotificationsBaseRow_OnMouseExit(control)
     NOTIFICATIONS.sortFilterList:Row_OnMouseExit(control)
 end
 
+function ZO_NotificationsTwoButtonAccept_OnMouseEnter(control)
+    local rowControl = control:GetParent()
+    ZO_Tooltips_ShowTextTooltip(control, TOP, rowControl.data.acceptText)
+    ZO_NotificationsBaseRow_OnMouseEnter(rowControl)
+end
+
+function ZO_NotificationsTwoButtonAccept_OnMouseExit(control)
+    ZO_Tooltips_HideTextTooltip()
+    ZO_NotificationsBaseRow_OnMouseExit(control:GetParent())
+end
+
 function ZO_NotificationsTwoButtonAccept_OnClicked(control)
     NOTIFICATIONS:Accept_OnClicked(control)
+end
+
+function ZO_NotificationsTwoButtonDecline_OnMouseEnter(control)
+    local rowControl = control:GetParent()
+    ZO_Tooltips_ShowTextTooltip(control, TOP, rowControl.data.declineText)
+    ZO_NotificationsBaseRow_OnMouseEnter(rowControl)
+end
+
+function ZO_NotificationsTwoButtonDecline_OnMouseExit(control)
+    ZO_Tooltips_HideTextTooltip()
+    ZO_NotificationsBaseRow_OnMouseExit(control:GetParent())
 end
 
 function ZO_NotificationsTwoButtonDecline_OnClicked(control)

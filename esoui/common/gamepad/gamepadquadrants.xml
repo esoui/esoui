@@ -418,6 +418,25 @@
             </Controls>
         </TopLevelControl>
 
+        <!-- Allows for anchoring setups that relate to arbitrarily defined spacing between various quadrants.
+            e.g.: 1_Left_To_4_Left means "the area that ranges from the upper left of quadrant 1 to the lower left of quadrant 4,"
+            effectively meaning all of the space not covered by quadrant 4.
+            This is different from 1_2_3 because various aspect ratios can leave a sizable gap between where 1_2_3 ends and where 4 begins. -->
+        <TopLevelControl name="ZO_SharedGamepadNavQuadrantSpace" hidden="true">
+            <Controls>
+                <!-- All of the safe space minus quadrant 1 -->
+                <Control name="$(parent)_2_Left_To_4_Right">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_2_Background" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_4_Background" relativePoint="BOTTOMRIGHT" />
+                </Control>
+                <!-- All of the safe space minus quadrant 4 -->
+                <Control name="$(parent)_1_Left_To_4_Left">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_1_Background" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_4_Background" relativePoint="BOTTOMLEFT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
         <!-- Dialog -->
         <Control name="ZO_SharedGamepadDialog_Background_Template" inherits="ZO_Gamepad_Background_Screen_Center_Template" virtual="true">
             <Anchor point="TOPLEFT" offsetX="-ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="-ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>

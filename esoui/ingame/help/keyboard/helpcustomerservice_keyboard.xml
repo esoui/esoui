@@ -2,15 +2,15 @@
     <Controls>
         <Control name="ZO_HelpCustomerService_Type" inherits="ZO_IconChildlessHeader" virtual="true" />
         <Label name="ZO_HelpCustomerService_Keyboard_Title" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" horizontalAlignment="LEFT" virtual="true" />
-        <Control name="ZO_HelpCustomerService_Keyboard_ComboBox" inherits="ZO_ScrollableComboBox" virtual="true">
+        <Label name="ZO_HelpCustomerService_Keyboard_Details" font="ZoFontWinT1" maxLineCount="5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" virtual="true">
+            <Dimensions x="100%" />
+        </Label>
+  
+        <Control name="ZO_HelpCustomerService_Keyboard_ComboBox" inherits="ZO_ComboBox" virtual="true">
             <Dimensions x="322" />
             <OnInitialized name="Help">
                 self.m_comboBox:SetHeight(450)
             </OnInitialized>
-            
-            <Controls>
-                <Control name="$(parent)Dropdown" override="true" excludeFromResizeToFitExtents="true" />
-            </Controls>
         </Control>
 
         <Control name="ZO_HelpCustomerServiceDivider" virtual="true">
@@ -42,9 +42,8 @@
         </TopLevelControl>
 
         <Control name="ZO_HelpCustomerService_Keyboard_ContentAnchors" virtual="true">
-            <Anchor point="TOPRIGHT" relativeTo="ZO_HelpCustomerService_Keyboard" offsetX="-10" offsetY="50" />
+            <Anchor point="TOPRIGHT" relativeTo="ZO_HelpCustomerService_Keyboard" offsetX="-44" offsetY="50" />
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_HelpCustomerService_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="40" />
         </Control>
-        
     </Controls>
 </GuiXml>

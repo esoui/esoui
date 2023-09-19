@@ -477,6 +477,16 @@
                 <Down>FOCUSED_QUEST_TRACKER:AssistNext()</Down>
             </Action>
 
+            <Action name="TOGGLE_ENDLESS_DUNGEON_BUFF_TRACKER">
+                <Down>
+                    if ENDLESS_DUNGEON_SUMMARY:IsShowing() then
+                        SCENE_MANAGER:HideCurrentScene()
+                    else
+                        ZO_EndlessDungeonBuffTracker_Shared.ToggleVisibility()
+                    end
+                </Down>
+            </Action>
+
             <Action name="TOGGLE_FIRST_PERSON">
                 <Down>ToggleGameCameraFirstPerson()</Down>
             </Action>
@@ -530,10 +540,12 @@
             <AllowAction name="START_CHAT_SLASH"/>
             <AllowAction name="TOGGLE_HUD_UI"/>
             <AllowAction name="TOGGLE_SYSTEM"/>
+
             <AllowAction name="TOGGLE_GAME_CAMERA_UI_MODE"/>
             <AllowAction name="TAKE_SCREENSHOT"/>
             <AllowAction name="TOGGLE_GAMEPAD_MODE"/>
             <AllowAction name="CLEAR_ACTIVE_NARRATION"/>
+            <AllowAction name="TOGGLE_ENDLESS_DUNGEON_BUFF_TRACKER"/>
 
             <AllowAction name="TOGGLE_MARKET"/>
             <AllowAction name="TOGGLE_INVENTORY"/>
@@ -1170,6 +1182,10 @@
             </Action>
 
             <Action name="INTERCEPT_TOGGLE_HELP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_HELP">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_ENDLESS_DUNGEON_BUFF_TRACKER" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_ENDLESS_DUNGEON_BUFF_TRACKER">
                 <Down>return true</Down>
             </Action>
         </Category>

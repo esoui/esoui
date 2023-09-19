@@ -66,7 +66,7 @@ function ZO_RaidLeaderboardsManager_Gamepad:UpdateRaidScore()
     local eligible = not self.participating or self.credited
     local headerData = GAMEPAD_LEADERBOARD_LIST:GetContentHeaderData()
     headerData.data3HeaderText = GetString(SI_GAMEPAD_LEADERBOARDS_CURRENT_SCORE_LABEL)
-    headerData.data3Text = eligible and self.currentScoreData or zo_strformat(SI_GAMEPAD_RAID_LEADERBOARDS_CURRENT_SCORE_NOT_ELIGIBLE, self.currentScoreData)
+    headerData.data3Text = eligible and self.currentScoreData or zo_strformat(SI_GAMEPAD_LEADERBOARDS_CURRENT_SCORE_NOT_ELIGIBLE, self.currentScoreData)
 
     ZO_GamepadGenericHeader_RefreshData(GAMEPAD_LEADERBOARD_LIST.contentHeader, headerData)
 end

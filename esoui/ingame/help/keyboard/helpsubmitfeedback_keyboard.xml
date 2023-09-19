@@ -64,7 +64,7 @@
                                 </Label>
 
                                 <Backdrop name="$(parent)DescriptionBody" inherits="ZO_MultiLineEditBackdrop_Keyboard">
-                                    <Dimensions x="550" y="220"/>
+                                    <Dimensions x="100%" y="220"/>
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
                                     <Controls>
                                         <EditBox name="$(parent)Field" inherits="ZO_DefaultEditMultiLineForBackdrop"/>
@@ -77,19 +77,19 @@
                                         ZO_CheckButton_SetLabelText(self, GetString(SI_CUSTOMER_SERVICE_ATTACH_SCREENSHOT))
                                     </OnInitialized>
                                 </Button>
-
-                                <Button name="$(parent)SubmitButton" inherits="ZO_DefaultButton" text="SI_CUSTOMER_SERVICE_SUBMIT">
-                                    <Dimensions x="200" />
-                                    <Anchor point="TOP" relativeTo="$(parent)DescriptionBody" relativePoint="BOTTOM" offsetY="50" />
-                                    <OnClicked>
-                                        ZO_HelpSubmitFeedback_Keyboard_AttemptToSendFeedback()
-                                    </OnClicked>
-                                </Button>
                             </Controls>
                         </Control>
                     </Controls>
                 </Control>
+
+                <Button name="$(parent)SubmitButton" inherits="ZO_DefaultButton" text="SI_CUSTOMER_SERVICE_SUBMIT">
+                    <Dimensions x="200" />
+                    <Anchor point="BOTTOM" offsetY="-20" />
+                    <OnClicked>
+                        ZO_HelpSubmitFeedback_Keyboard_AttemptToSendFeedback()
+                    </OnClicked>
+                </Button>
             </Controls>
-        </TopLevelControl>      
+        </TopLevelControl>
     </Controls>
 </GuiXml>

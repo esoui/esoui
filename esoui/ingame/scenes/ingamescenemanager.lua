@@ -24,6 +24,7 @@ function ZO_IngameSceneManager:Initialize(...)
     self.hudUISceneName = "hudui"
     self.hudUISceneHidesAutomatically = true
     self.exitUIModeOnChatFocusLost = false
+    self.isLoadingScreenShown = true
 
     EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_NEW_MOVEMENT_IN_UI_MODE, function() self:OnNewMovementInUIMode() end)
     EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GAME_CAMERA_ACTIVATED, function() self:OnGameCameraActivated() end)
@@ -303,25 +304,41 @@ function ZO_IngameSceneManager:OnLoadingScreenDropped()
     self.hudSceneName = "hud"
     self.hudUISceneName = "hudui"
     self.hudUISceneHidesAutomatically = true
-    if IsGameCameraActive() then
-        if self:IsInUIMode() then
-            if not self:SetInUIMode(false) then
-                self:SetBaseScene("hudui")
+
+    if self.sceneQueuedForLoadingScreenDrop then
+        self:Show(self.sceneQueuedForLoadingScreenDrop)
+    else
+        if IsGameCameraActive() then
+            if self:IsInUIMode() then
+                if not self:SetInUIMode(false) then
+                    self:SetBaseScene("hudui")
+                    self:ShowBaseScene()
+                end
+            else
+                self:SetBaseScene("hud")
                 self:ShowBaseScene()
             end
         else
-            self:SetBaseScene("hud")
+            self:SetBaseScene("hudui")
             self:ShowBaseScene()
         end
-    else
-        self:SetBaseScene("hudui")
-        self:ShowBaseScene()
     end
+
+    self.isLoadingScreenShown = false
 end
 
 function ZO_IngameSceneManager:OnLoadingScreenShown()
+    self.isLoadingScreenShown = true
     if IsGameCameraActive() then
         self:SetInUIMode(true)
+    end
+end
+
+function ZO_IngameSceneManager:ShowSceneOrQueueForLoadingScreenDrop(sceneName)
+    if self.isLoadingScreenShown then
+        self.sceneQueuedForLoadingScreenDrop = sceneName
+    else
+        self:Show(sceneName)
     end
 end
 

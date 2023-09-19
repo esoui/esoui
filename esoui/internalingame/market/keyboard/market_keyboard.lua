@@ -139,6 +139,23 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
                         end,
         },
 
+        -- Expiring Currency Keybind
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            name =      GetString(SI_KEYBOARD_VIEW_EXPIRING_CROWNS_KEYBIND_LABEL),
+            keybind =   "UI_SHORTCUT_QUINARY",
+            visible =   function()
+                            if not HasExpiringMarketCurrency() then
+                                return false
+                            end
+                            local isPreviewing = self:GetPreviewState()
+                            return not isPreviewing and self.selectedMarketProduct == nil and DoesPlatformSupportCodeRedemption()
+                        end,
+            callback =  function()
+                            ZO_Dialogs_ShowDialog("KEYBOARD_EXPIRING_MARKET_CURRENCY_DIALOG")
+                        end,
+        },
+
         -- Order the keybinds from left to right: Purchase, Preview, Gift
 
         -- Purchase Keybind
@@ -354,7 +371,7 @@ function ZO_Market_Keyboard:InitializeCategories()
         if selected and not reselectingDuringRebuild then
             self:OnCategorySelected(data)
 
-            local categoryIndex, subcategoryIndex
+            local categoryIndex, subcategoryIndex, isFeaturedCategory
             -- faked category types don't have real category indices so keep them as nil
             if data.type == ZO_MARKET_CATEGORY_TYPE_NONE then
                 if data.parentData then
@@ -363,10 +380,12 @@ function ZO_Market_Keyboard:InitializeCategories()
                 else
                     categoryIndex = data.categoryIndex
                 end
+            elseif data.type == ZO_MARKET_CATEGORY_TYPE_FEATURED then
+                isFeaturedCategory = true
             end
 
             if not self:IsSearching() then
-                OnMarketCategorySelected(self:GetDisplayGroup(), categoryIndex, subcategoryIndex, self.suppressMarketCategoryTutorials)
+                OnMarketCategorySelected(self:GetDisplayGroup(), categoryIndex, subcategoryIndex, self.suppressMarketCategoryTutorials, isFeaturedCategory)
             end
         end
     end

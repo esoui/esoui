@@ -149,6 +149,16 @@ function ZO_GamepadStoreListComponent:CreateItemList(scene, storeMode, overrideT
         end
     end)
 
+    list:SetOnActivatedChangedFunction(function(currentList, activated)
+        ZO_GamepadOnDefaultScrollListActivatedChanged(currentList, activated)
+        if activated then
+            self:OnSelectedItemChanged(list:GetTargetData())
+        else
+            local NO_DATA = nil
+            self:OnSelectedItemChanged(NO_DATA)
+        end
+    end)
+
     local OnEffectivelyShown = function()
         list:Activate()
         self:OnSelectedItemChanged(list:GetTargetData())

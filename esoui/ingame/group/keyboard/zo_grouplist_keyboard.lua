@@ -73,11 +73,37 @@ function ZO_GroupList_Keyboard:Initialize(control)
     }
     GROUP_MENU_KEYBOARD:AddCategory(groupCategoryData)
 
+    local function OnCombatStateChanged()
+        if GROUP_LIST_FRAGMENT:IsShowing() then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end
+    control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, OnCombatStateChanged)
+
+    local function OnUpdateGroupStatus()
+        if GROUP_LIST_FRAGMENT:IsShowing() then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateGroupStatus", OnUpdateGroupStatus)
 end
 
 function ZO_GroupList_Keyboard:InitializeKeybindDescriptors()
     self.keybindStripDescriptor =
     {
+        -- Invite to Group
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            name = GetString(SI_GROUP_WINDOW_INVITE_PLAYER),
+            keybind = "UI_SHORTCUT_PRIMARY",
+            callback = function()
+                ZO_Dialogs_ShowDialog("GROUP_INVITE")
+            end,
+            visible = function()
+                local playerIsGrouped, playerIsLeader, groupSize = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetGroupStatus()
+                return IsGroupModificationAvailable() and (not playerIsGrouped or (playerIsLeader and groupSize < MAX_GROUP_SIZE_THRESHOLD))
+            end
+        },
         -- Whisper
         {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,

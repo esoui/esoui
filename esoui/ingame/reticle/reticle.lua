@@ -215,10 +215,16 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
             
             local interactContextString = interactableName
             if additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE then
-                local instanceType = context
-                if instanceType ~= INSTANCE_DISPLAY_TYPE_NONE then 
-                    local instanceTypeString = zo_iconTextFormat(ZO_GetInstanceDisplayTypeIcon(instanceType), 34, 34, GetString("SI_INSTANCEDISPLAYTYPE", instanceType))
-                    interactContextString = zo_strformat(SI_ZONE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, instanceTypeString)
+                local zoneDisplayType = context
+                if zoneDisplayType ~= ZONE_DISPLAY_TYPE_NONE then 
+                    local zoneDisplayTypeString = zo_iconTextFormat(ZO_GetZoneDisplayTypeIcon(zoneDisplayType), 34, 34, GetString("SI_ZONEDISPLAYTYPE", zoneDisplayType))
+                    if zoneDisplayType == ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON then
+                        -- Hacky stop gap solution to the Zone and the feature having the same name
+                        -- Design asked us to suppress the zone name and let the zone display type do the work
+                        interactContextString = zoneDisplayTypeString
+                    else
+                        interactContextString = zo_strformat(SI_ZONE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, zoneDisplayTypeString)
+                    end
                 end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_HOUSE_BANK then
                 --Don't attempt to add the collectible nickname to the prompt if it isn't our house bank
@@ -236,16 +242,16 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
                     end
                 end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_HOUSE_INSTANCE_DOOR then
-                local instanceType = INSTANCE_DISPLAY_TYPE_HOUSING
-                local instanceTypeString = zo_iconTextFormat(ZO_GetInstanceDisplayTypeIcon(instanceType), 34, 34, GetString("SI_INSTANCEDISPLAYTYPE", instanceType))
+                local zoneDisplayType = ZONE_DISPLAY_TYPE_HOUSING
+                local zoneDisplayTypeString = zo_iconTextFormat(ZO_GetZoneDisplayTypeIcon(zoneDisplayType), 34, 34, GetString("SI_ZONEDISPLAYTYPE", zoneDisplayType))
                 local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(context)
                 if collectibleData then
                     local nickname = collectibleData:GetNickname()
                     --Theoretically it should be impossible for the nickname to be blank, but guard against it just in case
                     if nickname ~= "" then
-                        interactContextString = zo_strformat(SI_HOUSE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, nickname, instanceTypeString)
+                        interactContextString = zo_strformat(SI_HOUSE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, nickname, zoneDisplayTypeString)
                     else
-                        interactContextString = zo_strformat(SI_ZONE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, instanceTypeString)
+                        interactContextString = zo_strformat(SI_ZONE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, zoneDisplayTypeString)
                     end
                 end
             end

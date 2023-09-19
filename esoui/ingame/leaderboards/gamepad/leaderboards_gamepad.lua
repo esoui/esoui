@@ -93,7 +93,6 @@ end
 function ZO_LeaderboardsManager_Gamepad:OnShowing()
     ZO_Gamepad_ParametricList_Screen.OnShowing(self)
     self:UpdateCategories()
-    self:RefreshCategoryList()
     self:TryAddLeaderboardObjectKeybind()
 end
 
@@ -186,9 +185,7 @@ function ZO_LeaderboardsManager_Gamepad:UpdateCategories()
         end
     end
 
-    if GAMEPAD_LEADERBOARDS_SCENE:IsShowing() then
-        self:RefreshCategoryList()
-    end
+    self:RefreshCategoryList()
 end
 
 function ZO_LeaderboardsManager_Gamepad:SetSelectedLeaderboardObject(leaderboardObject, subType)

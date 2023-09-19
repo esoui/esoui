@@ -548,11 +548,9 @@ function ZO_ScreenNarrationManager:RegisterGridList(gridList)
     end)
 
     gridList:RegisterCallback("OnActivated", function(selectedData)
-        if selectedData then
-            local NARRATE_HEADER = true
-            local NARRATE_SUB_HEADER = true
-            self:QueueGridListEntry(gridList, NARRATE_HEADER, NARRATE_SUB_HEADER)
-        end
+        local NARRATE_HEADER = true
+        local NARRATE_SUB_HEADER = true
+        self:QueueGridListEntry(gridList, NARRATE_HEADER, NARRATE_SUB_HEADER)
     end)
 
     CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", self.gridListAllDialogsHiddenCallback, gridList)
@@ -1082,13 +1080,13 @@ function ZO_ScreenNarrationManager:NarrateParametricListEntry(narrationInfo, lis
 end
 
 function ZO_ScreenNarrationManager:NarrateGridListEntry(gridList, narrateHeader, narrateSubHeader, narrationType)
+    local narrations = {}
+    if narrateHeader then
+        ZO_AppendNarration(narrations, gridList:GetHeaderNarration())
+    end
+
     local entryData = gridList:GetSelectedData()
     if entryData then
-        local narrations = {}
-        if narrateHeader then
-            ZO_AppendNarration(narrations, gridList:GetHeaderNarration())
-        end
-
         if narrateSubHeader then
             --The subheader information can be stored in either the gridHeaderName or gridHeaderData fields
             local entryHeaderData = entryData.gridHeaderName or entryData.gridHeaderData
@@ -1110,11 +1108,12 @@ function ZO_ScreenNarrationManager:NarrateGridListEntry(gridList, narrateHeader,
                 ZO_AppendNarration(narrations, self:CreateNarratableObject(entryData.narrationText))
             end
         end
-        ZO_AppendNarration(narrations, self:GetTooltipNarration())
-        ZO_AppendNarration(narrations, self:GetKeybindNarration())
-
-        self:NarrateText(narrations, narrationType)
     end
+
+    ZO_AppendNarration(narrations, self:GetTooltipNarration())
+    ZO_AppendNarration(narrations, self:GetKeybindNarration())
+
+    self:NarrateText(narrations, narrationType)
 end
 
 function ZO_ScreenNarrationManager:NarrateGamepadGridEntry(gamepadGrid, narrateHeader, narrationType)

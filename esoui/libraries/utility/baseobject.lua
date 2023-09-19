@@ -256,7 +256,7 @@ ZO_DeferredInitializingObject.__index = ZO_DeferredInitializingObject
 -- Override this initialization function to define how your object should be constructed. 
 -- You must create a fragment, scene, or scene group and call this base Initialize function, passing the fragment, scene, or scene group. example:
 --     function MyClass:Initialize(control, argument1, argument2)
---         ZO_DeferredInitializingObject:Initialize(self, ZO_FadeSceneFragment:New(control))
+--         ZO_DeferredInitializingObject.Initialize(self, ZO_FadeSceneFragment:New(control))
 --         self.myField = argument1
 --     end
 function ZO_DeferredInitializingObject:Initialize(sceneStateObject)

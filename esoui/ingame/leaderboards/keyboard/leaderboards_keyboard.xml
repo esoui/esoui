@@ -35,6 +35,7 @@
                 self.classIcon = GetControl(self, "Class")
                 self.nameLabel = GetControl(self, "Name")
                 self.allianceIcon = GetControl(self, "Alliance")
+                self.progressLabel = GetControl(self, "Progress")
                 self.pointsLabel = GetControl(self, "Points")
             </OnInitialized>
             <Dimensions y="30"/>
@@ -65,6 +66,8 @@
                         ZO_LeaderboardsRowClass_OnMouseExit(self)
                     </OnMouseExit>
                 </Texture>
+
+                <!-- Alliance and Progress are mutually exclusive, so both anchor to Class -->
                 
                 <Texture name="$(parent)Alliance" mouseEnabled="true" layer="OVERLAY">
                     <Dimensions x="32" y="32"/>
@@ -76,6 +79,10 @@
                         ZO_LeaderboardsRowAlliance_OnMouseExit(self)
                     </OnMouseExit>
                 </Texture>
+                
+                <Label name="$(parent)Progress" inherits="ZO_LeaderboardsRowLabel" font="ZoFontWinT1" mouseEnabled="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)Class" relativePoint="CENTER" offsetX="110" />
+                </Label>
                 
                 <Label name="$(parent)Points" inherits="ZO_LeaderboardsRowLabel" horizontalAlignment="RIGHT">
                     <Anchor point="RIGHT" offsetX="-10" />
@@ -163,9 +170,16 @@
                             <Dimensions x="100" />
                             <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="10" />
                         </Label>
+
+                        <!-- Alliance and Progress are mutually exclusive, so both anchor to Class -->
                         
                         <Label name="$(parent)Alliance" inherits="ZO_LeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_ALLIANCE" horizontalAlignment="CENTER">
                             <Dimensions x="100" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="10" />
+                        </Label>
+
+                        <Label name="$(parent)Progress" inherits="ZO_LeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_PROGRESS" horizontalAlignment="CENTER">
+                            <Dimensions x="102" />
                             <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="10" />
                         </Label>
 

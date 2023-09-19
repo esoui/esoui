@@ -117,7 +117,7 @@ function ZO_WorldMapQuestsData_Singleton:OnQuestAvailable(questIndex)
         local questType = GetJournalQuestType(questIndex)
         local name = GetJournalQuestName(questIndex)
         local level = GetJournalQuestLevel(questIndex)
-        local displayType = GetJournalQuestInstanceDisplayType(questIndex)
+        local displayType = GetJournalQuestZoneDisplayType(questIndex)
         table.insert(self.masterList, {
             questIndex = questIndex,
             name = name,

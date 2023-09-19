@@ -6,32 +6,26 @@
             <OnInitialized>
                 ZO_CampaignSelector_OnInitialized(self)
             </OnInitialized>
-            <Controls>
-                <Control name="$(parent)ComboBox" resizeToFitDescendents="true" mouseEnabled="true">
-                    <Anchor point="RIGHT"/>
-                    <OnInitialized>
-                        ZO_ComboBox:New(self)
-                    </OnInitialized>
 
-                    <OnMouseUp>
-                        ZO_ComboBox_DropdownClicked(self)
-                    </OnMouseUp>
+            <Controls>
+                <Control name="$(parent)ComboBox" inherits="ZO_ComboBox" resizeToFitDescendents="true" mouseEnabled="true">
+                    <Anchor point="RIGHT"/>
+                    <Dimensions x="0" y="0" />
 
                     <Controls>
-                        <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
-                            <Dimensions x="16" y="16" />
+                        <Backdrop name="$(parent)BG" override="true" hidden="true" />
+                        
+                        <Button name="$(parent)OpenDropdown" override="true">
                             <Anchor point="TOPRIGHT"/>
-                            <OnClicked>
-                                ZO_ComboBox_DropdownClicked(self:GetParent())
-                            </OnClicked>
                         </Button>
 
-                        <Label name="$(parent)SelectedItemText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                        <Label name="$(parent)SelectedItemText" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                             <Anchor point="RIGHT" relativeTo="$(parent)OpenDropdown" relativePoint="LEFT" offsetX="-3" />
                         </Label>
                     </Controls>
                 </Control>
             </Controls>
+
         </TopLevelControl>
     </Controls>
 </GuiXml>

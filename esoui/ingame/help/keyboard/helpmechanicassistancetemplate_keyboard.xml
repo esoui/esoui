@@ -25,8 +25,7 @@
                             <Anchor point="TOPLEFT" />
                         </Label>
 
-                        <Label name="$(grandparent)DetailsTextLine" font="ZoFontWinT1" maxLineCount="5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS">
-                            <Dimensions x="550" />
+                        <Label name="$(grandparent)DetailsTextLine" inherits="ZO_HelpCustomerService_Keyboard_Details">
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)DetailsTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
                         </Label>
                     </Controls>

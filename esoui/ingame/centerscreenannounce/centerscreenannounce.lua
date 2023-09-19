@@ -157,6 +157,23 @@ function ZO_CenterScreenMessageParams:GetScryingProgressData()
     return self.lastNumGoalsAchieved, self.numGoalsAchieved, self.numGoalsTotal
 end
 
+function ZO_CenterScreenMessageParams:SetRollingMeterProgressData(rollingMeterProgressData)
+    self.rollingMeterProgressData = rollingMeterProgressData
+end
+
+function ZO_CenterScreenMessageParams:GetRollingMeterProgressData()
+    return self.rollingMeterProgressData
+end
+
+function ZO_CenterScreenMessageParams:GetCustomAnimationTimeline()
+    return self.customAnimationTimeline, self.customAnimationSetupCallback
+end
+
+function ZO_CenterScreenMessageParams:SetCustomAnimationTimeline(timeline, setupCallback)
+    self.customAnimationTimeline = timeline
+    self.customAnimationSetupCallback = setupCallback
+end
+
 function ZO_CenterScreenMessageParams:SetExpiringCallback(callback)
     self.expiringCallback = callback
 end
@@ -187,6 +204,14 @@ end
 
 function ZO_CenterScreenMessageParams:GetLifespanMS()
     return self.lifespanMS
+end
+
+function ZO_CenterScreenMessageParams:SetOnDisplayCallback(callback)
+    self.onDisplayCallback = callback
+end
+
+function ZO_CenterScreenMessageParams:GetOnDisplayCallback()
+    return self.onDisplayCallback
 end
 
 function ZO_CenterScreenMessageParams:MarkShowBackground()
@@ -299,6 +324,22 @@ function ZO_CenterScreenMessageParams:GetNarrationText()
                 local progressionText = zo_strformat(SI_ANTIQUITIES_SCRYING_PROGRESS_NARRATION, goalsAchieved, goalsTotal)
                 ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(progressionText))
             end
+            return narrations
+        elseif category == CSA_CATEGORY_ROLLING_METER_PROGRESS_TEXT then
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetMainText()))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetSecondaryText()))
+            local progressData = self:GetRollingMeterProgressData()
+            if progressData then
+                for _, progressEntry in ipairs(progressData) do
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(progressEntry.narrationDescription))
+                end
+            end
+            return narrations
+        elseif category == CSA_CATEGORY_ANIMATED_CONTROL then
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetMainText()))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self:GetSecondaryText()))
             return narrations
         elseif category == CSA_CATEGORY_EXTERNAL_HANDLE then
             --External handles do not need to narrate anything
@@ -658,6 +699,18 @@ function ZO_CenterScreenAnnouncementLargeLine:Reset()
         self.scryingIcons = nil
     end
 
+    if self.rollingMeterProgressControls then
+        for _, progressControl in ipairs(self.rollingMeterProgressControls) do
+            self.rollingMeterProgressPool:ReleaseObject(progressControl.controlKey)
+        end
+        self.rollingMeterProgressControls = nil
+    end
+
+    if self.customAnimationTimeline then
+        self.customAnimationTimeline = nil
+        self.customAnimationSetupCallback = nil
+    end
+
     ZO_CenterScreenAnnouncementLine.Reset(self)
 end
 
@@ -735,6 +788,55 @@ function ZO_CenterScreenAnnouncementLargeLine:SetScryingUpdatedIconData(iconPool
     end
 end
 
+function ZO_CenterScreenAnnouncementLargeLine:SetRollingMeterProgressData(rollingMeterProgressPool, rollingMeterProgressData)
+    self.rollingMeterProgressPool = rollingMeterProgressPool
+    self.rollingMeterProgressControls = {}
+
+    local parentControl = self.control:GetNamedChild("TextRollingMeterProgressSection")
+    local previousControl = nil
+    local numAnimatedControls = 0
+    local ROLLING_METER_ANIMATION_BASE_DURATION_MS = 1000
+    local ROLLING_METER_ANIMATION_OFFSET_DURATION_MS = 125
+    for index, progressEntry in ipairs(rollingMeterProgressData) do
+        local progressControl, key = rollingMeterProgressPool:AcquireObject()
+        progressControl.controlKey = key
+        table.insert(self.rollingMeterProgressControls, progressControl)
+
+        progressControl:SetParent(parentControl)
+        if previousControl then
+            progressControl:SetAnchor(LEFT, previousControl, RIGHT, 14, 0)
+        else
+            progressControl:SetAnchor(LEFT, parentControl)
+        end
+        previousControl = progressControl
+
+        progressControl.icon:SetTexture(progressEntry.iconTexture)
+        progressControl.narrationDescription = progressEntry.narrationDescription
+        local initialValue = progressEntry.initialValue or 0
+        progressControl.finalValue = progressEntry.finalValue or 0
+        progressControl.labelTransitionManager:SetValueImmediately(initialValue)
+        progressControl.transitionTimeline:PlayInstantlyToStart()
+
+        if initialValue ~= progressControl.finalValue then
+            -- Guarantee that the final value always animates in
+            -- from the top regardless of which value is larger.
+            local animationDirection = initialValue < progressControl.finalValue and ZO_ROLLING_METER_LABEL_DIRECTION.DOWN or ZO_ROLLING_METER_LABEL_DIRECTION.UP
+            progressControl.label:SetAnimationIncrementDirection(animationDirection)
+
+            -- Order matters:
+            local animationDurationMS = ROLLING_METER_ANIMATION_BASE_DURATION_MS + (numAnimatedControls * ROLLING_METER_ANIMATION_OFFSET_DURATION_MS)
+            progressControl.transitionAnimation:SetDuration(animationDurationMS)
+            progressControl.transitionTimeline:PlayForward()
+            numAnimatedControls = numAnimatedControls + 1
+        end
+    end
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:SetCustomAnimationTimeline(timeline, setupCallback)
+    self.customAnimationTimeline = timeline
+    self.customAnimationSetupCallback = setupCallback
+end
+
 function ZO_CenterScreenAnnouncementLargeLine:ApplyPlatformStyle()
     ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_CenterScreenAnnounce_LargeTextContainer"))
     local isGamepad = IsInGamepadPreferredMode()
@@ -798,6 +900,13 @@ end
 
 function ZO_CenterScreenAnnouncementLargeLine:PlayWipeAnimation()
     self.wipeAnimationTimeline:PlayFromStart()
+
+    if self.customAnimationTimeline then
+        if self.customAnimationSetupCallback then
+            self.customAnimationSetupCallback(self.control:GetParent():GetNamedChild("SmallLineContainer"))
+        end
+        self.customAnimationTimeline:PlayFromStart()
+    end
 end
 
 function ZO_CenterScreenAnnouncementLargeLine:PlayWipeFadeAnimation()
@@ -1208,6 +1317,8 @@ function CenterScreenAnnounce:InitializeLinePools()
     }
 
     self.scryingUpdatedIconPool = ZO_ControlPool:New("ZO_CenterScreenAnnounce_ScryingUpdated_Icon", self.control, "ScryingIcon")
+
+    self.rollingMeterProgressPool = ZO_ControlPool:New("ZO_CenterScreenAnnounce_RollingMeterProgressTemplate", self.control, "CSARollingMeterProgress")
 end
 
 function CenterScreenAnnounce:CreateLinePool(controlName, controlTemplate, parentControl, lineType)
@@ -1285,9 +1396,19 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
     }
 
+    local DEFERRED_TYPES_WHILE_DEAD =
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ENDLESS_DUNGEON_ATTEMPTS_REMAINING_CHANGED] = true,
+    }
+
     function CenterScreenAnnounce:CanDisplayMessage(category, csaType)
         -- Early out if category is not of scrying category while showing scrying or map mode dig sites
         if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_DIG_SITES) and category ~= CSA_CATEGORY_SCRYING_PROGRESS_TEXT then
+            return false
+        end
+
+        -- Leave the CSA in the queue if the type should be deferred while the player is dead.
+        if DEFERRED_TYPES_WHILE_DEAD[csaType] and IsUnitDead("player") then
             return false
         end
 
@@ -1763,6 +1884,37 @@ local setupFunctions =
     [CSA_CATEGORY_EXTERNAL_HANDLE] = function(self, messageParams)
         return nil
     end,
+
+    [CSA_CATEGORY_ROLLING_METER_PROGRESS_TEXT] = function(self, messageParams)
+        local largeMessageLine, poolKey = self.largeLinePool:AcquireObject()
+        largeMessageLine:SetKey(poolKey)
+
+        largeMessageLine:SetLargeText(messageParams:GetMainText())
+        largeMessageLine:SetSmallCombinedText(messageParams:GetSecondaryText())
+        largeMessageLine:SetRollingMeterProgressData(self.rollingMeterProgressPool, messageParams:GetRollingMeterProgressData())
+        largeMessageLine:SetWipeTimelineLifespan(messageParams:GetLifespanMS())
+        largeMessageLine:PlayWipeAnimation()
+
+        self.isBeforeMessageExpiring = true
+        SCREEN_NARRATION_MANAGER:QueueCSA(messageParams)
+        return largeMessageLine
+    end,
+
+    [CSA_CATEGORY_ANIMATED_CONTROL] = function(self, messageParams)
+        local largeMessageLine, poolKey = self.largeLinePool:AcquireObject()
+        largeMessageLine:SetKey(poolKey)
+
+        -- Order matters:
+        largeMessageLine:SetLargeText(messageParams:GetMainText())
+        largeMessageLine:SetSmallCombinedText(messageParams:GetSecondaryText())
+        largeMessageLine:SetCustomAnimationTimeline(messageParams:GetCustomAnimationTimeline())
+        largeMessageLine:SetWipeTimelineLifespan(messageParams:GetLifespanMS())
+        largeMessageLine:PlayWipeAnimation()
+
+        self.isBeforeMessageExpiring = true
+        SCREEN_NARRATION_MANAGER:QueueCSA(messageParams)
+        return largeMessageLine
+    end,
 }
 
 function CenterScreenAnnounce:CallExpiringCallback(announcementLine)
@@ -1838,6 +1990,7 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_CRAFTING_RESULTS] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_CONSOLIDATED_STATION_SETS_UPDATED] = true,
     }
 
     -- Types that if they were to happen while scrying for an antiquity
@@ -2068,6 +2221,11 @@ function CenterScreenAnnounce:DisplayMessage(messageParams)
             end
         end
 
+        local onDisplayCallback = messageParams:GetOnDisplayCallback()
+        if onDisplayCallback then
+            onDisplayCallback(messageParams)
+        end
+
         if not displayLine then
             self.messageParamsPool:ReleaseObject(messageParams.key)
         end
@@ -2119,6 +2277,25 @@ function CenterScreenAnnounce:CanShowAvAEvent()
     return false
 end
 
+-- Gets or creates and returns the singleton animation timeline for Endless Dungeon buff acquisition CSAs.
+function CenterScreenAnnounce:GetEndlessDungeonBuffAddedAnimationTimeline()
+    if not self.endlessDungeonBuffAddedAnimationTimeline then
+        self.endlessDungeonBuffAddedAnimationTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CenterScreenEndDunBuffAddedAnimation", ZO_CenterScreenEndDunBuffAddedIcon)
+
+        self.endlessDungeonBuffAddedAnimationTimeline:SetHandler("OnPlay", function(timeline, completed)
+            local control = timeline:GetFirstAnimation():GetAnimatedControl()
+            control:SetHidden(false)
+        end)
+
+        self.endlessDungeonBuffAddedAnimationTimeline:SetHandler("OnStop", function(timeline, completed)
+            local control = timeline:GetFirstAnimation():GetAnimatedControl()
+            control:SetHidden(true)
+        end)
+    end
+
+    return self.endlessDungeonBuffAddedAnimationTimeline
+end
+
 -- Exposed so that external code can add custom events with appropriate priorities
 local nextAutoPriority = 1
 function ZO_CenterScreenAnnounce_SetPriority(csaType, priority)
@@ -2139,4 +2316,125 @@ end
 function ZO_CenterScreenAnnounce_ScryingUpdated_Icon_OnInitialized(iconTexture)
     iconTexture.fadeInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CenterScreenScryingUpdatedIconFadeIn", iconTexture)
     iconTexture.achievedIcon = iconTexture:GetNamedChild("AchievedIcon")
+end
+
+function ZO_CenterScreenAnnounce_RollingMeterProgress_OnInitialized(control)
+    control.icon = control:GetNamedChild("Icon")
+
+    control.label = control:GetNamedChild("Label")
+    -- The audio should always sound like the counter is rolling up even when
+    -- the digits are rolling back to "1" at the end of a cycle or arc.
+    control.label:SetAnimationSoundIds(SOUNDS.ENDLESS_DUNGEON_COUNTER_UP, SOUNDS.ENDLESS_DUNGEON_COUNTER_UP)
+    control.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+    control.label:SetFont("ZoFontWinH2")
+    control.label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+    control.label:SetResizeToFitLabels(true)
+
+    control.labelTransitionManager = control.label:GetOrCreateTransitionManager()
+    -- Guarantee that each transition will use no more than one rollover
+    -- animation and therefore execute in left-to-right order:
+    control.labelTransitionManager:SetMaxTransitionSteps(1)
+    control.labelTransitionManager:SetTransitionAccelerationFactor(0)
+    control.labelTransitionManager:SetTransitionSpeedFactor(1.5)
+
+    control.transitionTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CenterScreenRollingMeterProgressTransition", control)
+    control.transitionAnimation = control.transitionTimeline:GetAnimation(1)
+end
+
+function ZO_CenterScreenEndlessDungeonBuffAddedAnimation_OnUpdate(animation, progress)
+    local control = animation:GetAnimatedControl()
+    if control.targetControl then
+        local easedProgress = progress * progress * progress
+        local quinticEasedProgress = easedProgress * progress * progress
+        local progressInverse = 1 - progress
+        local easedProgressInverse = progressInverse * progressInverse * progressInverse
+        local currentX = zo_lerp(control.animationStartX, control.animationEndX, 1 - easedProgressInverse)
+        local currentY = zo_lerp(control.animationStartY, control.animationEndY, easedProgress)
+        -- Translate the icon from beneath the CSA to inside of the
+        -- Endless Dungeon HUD Tracker's keybind label.
+        control:SetAnchor(CENTER, GuiRoot, TOPLEFT, currentX, currentY)
+
+        -- Scale starts at double size; interpolates to half size
+        -- aggressively at the very end of the animation interval.
+        local scale = 2 - quinticEasedProgress * 1.5
+        control:SetScale(scale)
+
+        -- The arc tangent of the slope of the translation yields the
+        -- angular direction of the control animation's forward vector
+        -- in two dimensional space.
+        local blurTangentRadians = math.atan2(easedProgressInverse, easedProgress)
+        -- Offset the direction vector by the control origin in UV space.
+        local blurOriginX = 0.5 + zo_sin(blurTangentRadians) * 0.75
+        local blurOriginY = 0.5 - zo_cos(blurTangentRadians) * 0.75
+        local blurStrength = 1
+        if progress < 0.1 then
+            -- Ease into maximum blur strength over the first 10%
+            -- of the animation interval.
+            local segmentProgress = progress * 9
+            blurStrength = segmentProgress * segmentProgress
+        elseif progress >= 0.2 then
+            -- Ease out of maximum blur strength over the remaining
+            -- 90% of the animation interval.
+            local segmentProgress = (progress - 0.1) * 1.111
+            blurStrength = 1 - (segmentProgress * segmentProgress)
+        end
+        blurStrength = blurStrength * 0.1
+        local numSamples = blurStrength * control:GetWidth()
+        local BLUR_OFFSET_NORMALIZED = 0.0
+        control:SetShaderEffectType(SHADER_EFFECT_TYPE_RADIAL_BLUR)
+        control:SetRadialBlur(blurOriginX, blurOriginY, numSamples, blurStrength, BLUR_OFFSET_NORMALIZED)
+
+        if progress >= 0.4 and progress < 0.6 then
+            -- Eased scaling of the target control to enlarge during
+            -- the second quarter of the animation interval.
+            local segmentProgress = (progress - 0.4) * 5
+            local offsetY = ZO_BezierInEase(segmentProgress) * -20
+            control.targetControl:SetTransformOffsetY(offsetY)
+        elseif progress >= 0.8 then
+            -- Eased scaling of the target control to return to its
+            -- original scale during the last fifth of the animation
+            -- interval.
+            local segmentProgress = (progress - 0.8) * 5
+            local offsetY = ZO_BezierInEase(1 - segmentProgress) * -20
+            control.targetControl:SetTransformOffsetY(offsetY)
+        end
+    end
+end
+
+function ZO_CenterScreenEndlessDungeonBuffAdded_Setup(abilityId, startBeneathControl, endCenteredOnControl)
+    local control = ZO_CenterScreenEndDunBuffAddedIcon
+    local startVerticalOffset = 5 + control:GetHeight() * 2
+    if IsInGamepadPreferredMode() then
+        control:SetDimensions(ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ICON_DIMENSIONS_GAMEPAD_X, ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ICON_DIMENSIONS_GAMEPAD_Y)
+        startVerticalOffset = 5 + ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ICON_DIMENSIONS_GAMEPAD_Y * 2
+    else
+        control:SetDimensions(ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ICON_DIMENSIONS_KEYBOARD_X, ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ICON_DIMENSIONS_KEYBOARD_Y)
+        startVerticalOffset = 5 + ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ICON_DIMENSIONS_KEYBOARD_Y * 2
+    end
+    control:SetScale(2)
+    control:SetShaderEffectType(SHADER_EFFECT_TYPE_NONE)
+
+    local iconTextureFile = GetAbilityIcon(abilityId)
+    control:SetTexture(iconTextureFile)
+
+    local startX, startY = startBeneathControl:GetCenter()
+    -- Offset the vertical center to account for the animated control height.
+    startY = startY + startBeneathControl:GetHeight() * 0.5 + startVerticalOffset
+    control:SetAnchor(CENTER, GuiRoot, TOPLEFT, startX, startY)
+
+    local endX, endY = nil, nil
+    if endCenteredOnControl then
+        endX, endY = endCenteredOnControl:GetCenter()
+        -- Offset the horizontal center by one quarter of the control width
+        -- to account for the timed scaling of the target control.
+        local END_CONTROL_HORIZONTAL_OFFSET_PERCENT = 0.2
+        endX = endX - endCenteredOnControl:GetWidth() * END_CONTROL_HORIZONTAL_OFFSET_PERCENT
+    end
+
+    control.animationStartX = startX
+    control.animationStartY = startY
+    control.animationEndX = endX
+    control.animationEndY = endY
+    control.targetControl = endCenteredOnControl
+    control:SetHidden(false)
 end

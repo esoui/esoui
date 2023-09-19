@@ -107,6 +107,12 @@ do
             return false
         end
 
+        -- Currently, the only use for this function is to confirm whether we can merge existing loot stream entries (in ZO_FadingStationaryControlBuffer:TryConcatWithExistingEntry)
+        -- If ever this changes and this equality function is used elsewhere, please re-evaluate whether this early out is appropriate.
+        if data1.statusIcon ~= data2.statusIcon then
+            return false
+        end
+
         if data1EntryType == LOOT_ENTRY_TYPE_CURRENCY then
             return data1.currencyType == data2.currencyType
         elseif data1EntryType == LOOT_ENTRY_TYPE_ITEM then

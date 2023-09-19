@@ -547,6 +547,42 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_SpinnerEntry_Indented_Gamepad" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
+            <Controls>
+                <Control name="$(parent)Spinner" mouseEnabled="true" excludeFromResizeToFitExtents="true">
+                    <Anchor point="RIGHT"/>
+                    <Dimensions y="42"/>
+                    <Controls>
+                        <Button name="$(parent)Increase">
+                            <Dimensions x="32" y="35" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="5"/>
+                            <TextureCoords left="0" right="1" top="0.234" bottom="0.765625" />
+                            <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds"
+                                      disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"/>
+                        </Button>
+
+                        <Label name="$(parent)Display" inherits="ZO_GamepadStatsDataTemplate">
+                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" relativeTo="$(parent)Increase" offsetX="-8" offsetY="-5" />
+                        </Label>
+
+                        <Button name="$(parent)Decrease">
+                            <Dimensions x="32" y="35" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" relativeTo="$(parent)Display" offsetX="-10" offsetY="5" />
+                            <TextureCoords left="1" right="0" top="0.234" bottom="0.765625" />
+                            <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds"
+                                      disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"/>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate">
+                    <Dimensions x="180"/>
+                </Label>
+                <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate"/>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+            </Controls>
+        </Control>
+
         <Label name="ZO_GamepadFullWidthLabelTemplate" inherits="ZO_GamepadMenuEntryLabelTemplate" horizontalAlignment="CENTER" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" relativePoint="TOPLEFT"/>
             <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer" relativePoint="TOPRIGHT"/>

@@ -109,6 +109,9 @@ EsoUI\InternalIngame\CodeRedemption\Gamepad\CodeRedemption_Gamepad.xml
 EsoUI\InternalIngame\CodeRedemption\Keyboard\CodeRedemption_Keyboard.lua
 EsoUI\InternalIngame\CodeRedemption\Keyboard\CodeRedemption_Keyboard.xml
 
+EsoUI\InternalIngame\ExpiringMarketCurrency\Keyboard\ExpiringMarketCurrency_Keyboard.lua
+EsoUI\InternalIngame\ExpiringMarketCurrency\Keyboard\ExpiringMarketCurrency_Keyboard.xml
+
 EsoUI\InternalIngame\Scrying\ScryingHexAnimations.lua
 EsoUI\InternalIngame\Scrying\ScryingHexAnimations.xml
 EsoUI\InternalIngame\Scrying\Scrying.lua

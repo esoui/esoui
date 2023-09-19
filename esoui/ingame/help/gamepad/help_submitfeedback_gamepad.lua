@@ -99,7 +99,7 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
         end
 
         local function CreateEntry(enumValue)
-            local entry = ZO_ComboBox:CreateItemEntry(GetString(fieldData.enumStringPrefix, enumValue), OnDropdownSelectionChanged)
+            local entry = dropdown:CreateItemEntry(GetString(fieldData.enumStringPrefix, enumValue), OnDropdownSelectionChanged)
             entry.categoryEnumValue = enumValue
             entry.fieldType = fieldType
             return entry

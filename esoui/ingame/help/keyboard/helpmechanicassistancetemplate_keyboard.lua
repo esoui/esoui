@@ -49,7 +49,7 @@ function ZO_HelpMechanicAssistanceTemplate_Keyboard:InitializeComboBox()
     for _, enumValue in ipairs(mechanicCategoriesData.categoryEnumOrderedValues) do
         local name = GetString(mechanicCategoriesData.categoryEnumStringPrefix, enumValue)
         if name ~= nil then
-            local entry = ZO_ComboBox:CreateItemEntry(name, function() self:UpdateSubmitButton() end)
+            local entry = self.helpCategoryComboBox:CreateItemEntry(name, function() self:UpdateSubmitButton() end)
             entry.categoryEnumValue = enumValue
             self.helpCategoryComboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end

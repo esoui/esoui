@@ -134,10 +134,12 @@ local function ApplyPlatformStyleToHeader(control)
     end
     control:SetInheritAlpha(constants.HEADER_INHERIT_ALPHA)
 
-    if control.questType or control.instanceDisplayType then
+    -- control.instanceDisplayType is deprecated, included here for addon backwards compatibility
+    local displayType = control.displayType or control.instanceDisplayType
+    if control.questType or displayType then
         local icon = control.icon
         local questJournalObject = SYSTEMS:GetObject("questJournal")
-        local iconTexture = questJournalObject:GetIconTexture(control.questType, control.instanceDisplayType)
+        local iconTexture = questJournalObject:GetIconTexture(control.questType, displayType)
         icon:SetTexture(iconTexture)
     end
 
@@ -255,7 +257,9 @@ function ZO_Tracker:Initialize(trackerPanel, trackerControl)
                                     control.m_TreeNode = nil
                                     control.headerText = nil
                                     control.questType = nil
+                                    -- control.instanceDisplayType is deprecated, included here for addon backwards compatibility
                                     control.instanceDisplayType = nil
+                                    control.displayType = nil
                                 end
 
     trackerControl:GetParent().tracker = self
@@ -489,7 +493,7 @@ end
 -- Header Management
 --
 
-function ZO_Tracker:CreateQuestHeader(data, questName, questType, isComplete, instanceDisplayType)
+function ZO_Tracker:CreateQuestHeader(data, questName, questType, isComplete, zoneDisplayType)
     local questHeader, questHeaderKey = self.headerPool:AcquireObject()
     
     local treeNode = self.treeView:AddChild(nil, questHeader)
@@ -505,18 +509,18 @@ function ZO_Tracker:CreateQuestHeader(data, questName, questType, isComplete, in
                                                         -- no longer tracking this quest
     questHeader.m_StepDescriptionControls = {}
 
-    self:InitializeQuestHeader(questName, questType, questHeader, isComplete, instanceDisplayType)
+    self:InitializeQuestHeader(questName, questType, questHeader, isComplete, zoneDisplayType)
 
     return questHeader, treeNode
 end
 
-function ZO_Tracker:InitializeQuestHeader(questName, questType, questHeader, isComplete, instanceDisplayType)
+function ZO_Tracker:InitializeQuestHeader(questName, questType, questHeader, isComplete, zoneDisplayType)
     questHeader:SetColor(GetConColor(questHeader.m_Data.level))
     questHeader:SetText(questName)
     -- add icon here
     local icon = questHeader.icon
     local questJournalObject = SYSTEMS:GetObject("questJournal")
-    local iconTexture = questJournalObject:GetIconTexture(questType, instanceDisplayType)
+    local iconTexture = questJournalObject:GetIconTexture(questType, zoneDisplayType)
     if iconTexture then
         icon:SetTexture(iconTexture)
         icon:SetHidden(false)
@@ -529,7 +533,9 @@ function ZO_Tracker:InitializeQuestHeader(questName, questType, questHeader, isC
     --save the text and icon data off so it can be easily reset on the style changing
     questHeader.headerText = questName
     questHeader.questType = questType
-    questHeader.instanceDisplayType = instanceDisplayType
+    -- questHeader.instanceDisplayType is deprecated, included here for addon backwards compatibility
+    questHeader.instanceDisplayType = zoneDisplayType
+    questHeader.displayType = zoneDisplayType
 end
 
 function ZO_Tracker:InitializeQuestCondition(questCondition, parentQuestHeader, questConditionKey, treeNode)
@@ -788,8 +794,8 @@ function ZO_Tracker:OnQuestAdvanced(questIndex, questName, isPushed, isComplete,
         local questHeader = self:GetHeaderForIndex(TRACK_TYPE_QUEST, questIndex)
         if questHeader then
             local questType = GetJournalQuestType(questIndex)
-            local instanceDisplayType = GetJournalQuestInstanceDisplayType(questIndex)
-            self:InitializeQuestHeader(questName, questType, questHeader, isComplete, instanceDisplayType)
+            local zoneDisplayType = GetJournalQuestZoneDisplayType(questIndex)
+            self:InitializeQuestHeader(questName, questType, questHeader, isComplete, zoneDisplayType)
         end
         
         self:RebuildConditions(questIndex)
@@ -904,7 +910,7 @@ end
 
 function ZO_Tracker:AddQuest(data)
     local questIndex = data:GetJournalIndex()
-    local questName, _, _, stepType, stepTrackerText, isComplete, tracked, _, _, questType, instanceDisplayType = GetJournalQuestInfo(questIndex)
+    local questName, _, _, stepType, stepTrackerText, isComplete, tracked, _, _, questType, zoneDisplayType = GetJournalQuestInfo(questIndex)
     
     -- This line prevents quests from being tracked multiple times but allows quests to be properly tracked
     -- when the UI is reloaded.
@@ -912,7 +918,7 @@ function ZO_Tracker:AddQuest(data)
     --if this quest isnt on the c++ tracker or it isnt on the lua tracker then give up
     if((not tracked) or (not self:IsOnTracker(TRACK_TYPE_QUEST, questIndex))) then return end
     
-    local questHeader, treeNode = self:CreateQuestHeader(data, questName, questType, isComplete, instanceDisplayType)
+    local questHeader, treeNode = self:CreateQuestHeader(data, questName, questType, isComplete, zoneDisplayType)
 
     self:PopulateQuestConditions(questIndex, questName, stepType, stepTrackerText, isComplete, tracked, questHeader, treeNode)    
     

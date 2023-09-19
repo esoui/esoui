@@ -3,7 +3,7 @@
         <Label name="ZO_SearchingForGroup_StatusLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
 
         <TopLevelControl name="ZO_SearchingForGroup" hidden="true" level="2" resizeToFitDescendents="true">
-            <Anchor point="BOTTOM" relativeTo="ZO_GroupMenu_KeyboardCategories" offsetY="2" />
+            <Anchor point="BOTTOM" relativeTo="ZO_GroupMenu_KeyboardCategories" offsetY="90" />
             <OnInitialized>
                 ZO_SearchingForGroup_OnInitialized(self)
             </OnInitialized>

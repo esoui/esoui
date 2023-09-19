@@ -205,11 +205,11 @@ function ZO_HousingFurnitureRetrieval_Keyboard:RefreshFilters()
         filtersList:ClearAllSelections()
         for _, filterItem in ipairs(filtersList:GetItems()) do
             if filterItem.filterCategory == ZO_HOUSING_FURNITURE_FILTER_CATEGORY.BOUND then
-                if ZO_MaskHasFlag(boundFilters, filterItem.filterValue) then
+                if ZO_FlagHelpers.MaskHasFlag(boundFilters, filterItem.filterValue) then
                     filtersList:SelectItem(filterItem)
                 end
             elseif filterItem.filterCategory == ZO_HOUSING_FURNITURE_FILTER_CATEGORY.LIMIT then
-                if ZO_MaskHasFlag(limitFilters, filterItem.filterValue) then
+                if ZO_FlagHelpers.MaskHasFlag(limitFilters, filterItem.filterValue) then
                     filtersList:SelectItem(filterItem)
                 end
             end

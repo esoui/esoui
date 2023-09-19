@@ -1148,6 +1148,47 @@ local AlertHandlers =
         local stringId = HousingEditorIsPreviewInspectionEnabled() and SI_HOUSING_PREVIEW_INSPECTION_MODE_ENABLED or SI_HOUSING_PREVIEW_INSPECTION_MODE_DISABLED
         return ALERT, GetString(stringId)
     end,
+
+    [EVENT_GROUP_FINDER_LONG_SEARCH_WARNING] = function()
+        return ALERT, GetString(SI_GROUP_FINDER_LONG_SEARCH_WARNING), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_GROUP_FINDER_SEARCH_COMPLETE] = function(result, searchId)
+        if result ~= GROUP_FINDER_ACTION_RESULT_SUCCESS then
+            return ALERT, GetString("SI_GROUPFINDERACTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_GROUP_FINDER_MAX_SEARCHABLE] = function()
+        return ALERT, zo_strformat(SI_GROUP_FINDER_FILTERS_MAX_SEARCHABLE_ALERT_TEXT, GROUP_FINDER_MAX_SEARCHABLE_SELECTIONS), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_RESULT] = function(result)
+        if result ~= REMOVE_GROUP_LISTING_REASON_REMOVED_BY_LEADER then
+            return ALERT, GetString("SI_REMOVEGROUPLISTINGREASON", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_GROUP_FINDER_RESOLVE_GROUP_LISTING_APPLICATION_RESULT] = function(result)
+        return ALERT, GetString("SI_RESOLVEGROUPLISTINGAPPLICATIONRESPONSE", result), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_GROUP_FINDER_APPLY_TO_GROUP_LISTING_RESULT] = function(result)
+        --If we failed to apply, fire an alert
+        if result ~= GROUP_FINDER_ACTION_RESULT_SUCCESS then
+            return ALERT, GetString("SI_GROUPFINDERACTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_GROUP_FINDER_APPLICATION_RECEIVED] = function(applicantCharacterId)
+        local displayName, characterName = GetGroupListingApplicationInfoByCharacterId(applicantCharacterId)
+        local userFacingName = ZO_GetPrimaryPlayerName(displayName, characterName)
+        return ALERT, zo_strformat(SI_GROUP_FINDER_APPLICATION_RECEIVED_ALERT_TEXT, userFacingName)
+    end,
+
+    [EVENT_GROUP_FINDER_MEMBER_ALERT] = function(alert)
+        return ALERT, GetString("SI_GROUPFINDERMEMBERALERT", alert), SOUNDS.GENERAL_ALERT_ERROR
+    end,
 }
 
 ZO_AntiquityScryingResultsToAlert =

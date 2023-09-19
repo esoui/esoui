@@ -53,7 +53,7 @@ function ZO_RaidLeaderboardsManager_Keyboard:UpdateRaidScore()
     end
 
     local eligible = not self.participating or self.credited
-    local currentScoreTextFormat = GetString(eligible and SI_LEADERBOARDS_CURRENT_SCORE or SI_RAID_LEADERBOARDS_CURRENT_SCORE_NOT_ELIGIBLE)
+    local currentScoreTextFormat = GetString(eligible and SI_LEADERBOARDS_CURRENT_SCORE or SI_LEADERBOARDS_CURRENT_SCORE_NOT_ELIGIBLE)
     self.scoringInfoLabel:SetText(zo_strformat(currentScoreTextFormat, self.currentScoreData))
     self.scoringInfoHelpIcon:SetHidden(eligible)
 end
@@ -64,7 +64,7 @@ end
 
 function ZO_RaidLeaderboardsInformationArea_CurrentRankHelp_OnMouseEnter(control)
     InitializeTooltip(InformationTooltip, control, TOPLEFT, 5, 0)
-    SetTooltipText(InformationTooltip, GetString(SI_RAID_LEADERBOARDS_RANK_HELP_TOOLTIP))
+    SetTooltipText(InformationTooltip, GetString(SI_LEADERBOARDS_RANK_HELP_TOOLTIP))
 end
 
 function ZO_RaidLeaderboardsInformationArea_CurrentRankHelp_OnMouseExit(control)

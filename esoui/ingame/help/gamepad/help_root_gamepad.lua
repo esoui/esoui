@@ -151,7 +151,8 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckConfirmDialog()
         mainText = 
         {
             text = function()
-                local cost = zo_min(GetRecallCost(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
+                local currencyAmount = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) + GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_BANK)
+                local cost = zo_min(GetRecallCost(), currencyAmount)
                 local goldIcon = ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
                 local primaryButtonMarkup = ZO_WHITE:Colorize(ZO_Keybindings_GetHighestPriorityBindingStringFromAction("UI_SHORTCUT_PRIMARY", KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP))
 

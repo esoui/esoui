@@ -31,6 +31,10 @@ function ZO_ActivityFinderTemplate_Gamepad:Initialize(dataManager, categoryData,
     self.rewardsOffsetYTribute = 0
 end
 
+function ZO_ActivityFinderTemplate_Gamepad:GetSystemName()
+    return "ActivityFinder_Gamepad"
+end
+
 function ZO_ActivityFinderTemplate_Gamepad:InitializeControls()
     ZO_ActivityFinderTemplate_Shared.InitializeControls(self, "ZO_ActivityFinderTemplateRewardTemplate_Gamepad")
     self.headerControl = self.control:GetNamedChild("MaskContainerHeaderContainerHeader")
@@ -344,7 +348,8 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                 local anySelected = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsAnyLocationSelected()
                 local currentlySearching = IsCurrentlySearchingForGroup()
                 local playerCanToggleQueue = not ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsLockedByNotLeader()
-                return playerCanToggleQueue and (anySelected or currentlySearching)
+                local isGroupFinderInUse = ZO_GroupFinder_IsGroupFinderInUse()
+                return playerCanToggleQueue and (anySelected or currentlySearching) and not isGroupFinderInUse
             end,
         },
     }
@@ -610,6 +615,7 @@ end
 
 function ZO_ActivityFinderTemplate_Gamepad:OnActivityFinderStatusUpdate()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
     self:RefreshView()
 end
 

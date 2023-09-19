@@ -268,12 +268,26 @@ local g_sharedPregameStates =
         OnEnter = function()
             -- If you haven't played the videos, you can't skip them until they finish...
             local skipMode = ZO_Pregame_CanSkipVideos() and VIDEO_SKIP_MODE_ALLOW_SKIP or VIDEO_SKIP_MODE_NO_SKIP
+            ZO_PlayVideoAndAdvance(PlayVideo, "Video/Bethesda_logo.bk2", QUEUE_VIDEO, skipMode)
+        end,
 
-            -- TODO: Determine if these videos need localization or subtitles...
-            SetVideoCancelAllOnCancelAny(false)
+        GetStateTransitionData = function()
+            return "ShowZOSVideo"
+        end,
 
-            PlayVideo("Video/Bethesda_logo.bk2", QUEUE_VIDEO, skipMode)
+        OnExit = function()
+        end,
+    },
 
+    ["ShowZOSVideo"] =
+    {
+        ShouldAdvance = function()
+            return ZO_Pregame_ShouldSkipVideos()
+        end,
+
+        OnEnter = function()
+            -- If you haven't played the videos, you can't skip them until they finish...
+            local skipMode = ZO_Pregame_CanSkipVideos() and VIDEO_SKIP_MODE_ALLOW_SKIP or VIDEO_SKIP_MODE_NO_SKIP
             ZO_PlayVideoAndAdvance(PlayVideo, "Video/ZOS_logo.bk2", QUEUE_VIDEO, skipMode)
         end,
 

@@ -215,6 +215,11 @@ function ZO_ComboBox_Gamepad:ResetNarrationInfo()
     self.tooltipType = nil
 end
 
+function ZO_ComboBox_Gamepad:Reset()
+    self:ResetNarrationInfo()
+    -- TODO: Investigate anything else we may need to reset here.
+end
+
 function ZO_ComboBox_Gamepad:HighlightSelectedItem()
     self:SetHighlightedItem(self.m_highlightedIndex)
 end
@@ -240,6 +245,10 @@ function ZO_ComboBox_Gamepad:IsHighlightedItemEnabled()
         return self.m_currentData.enabled ~= false
     end
     return true
+end
+
+function ZO_ComboBox_Gamepad:GetSelectItemKeybindText()
+    return GetString(SI_GAMEPAD_SELECT_OPTION)
 end
 
 function ZO_ComboBox_Gamepad:SelectItemByIndex(index, ignoreCallback)
@@ -321,7 +330,9 @@ function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()
 
         {
             keybind = "UI_SHORTCUT_PRIMARY",
-            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            name = function()
+                return self:GetSelectItemKeybindText()
+            end,
             callback = function()
                 self:SelectHighlightedItem()
             end,
@@ -333,7 +344,9 @@ function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()
 
         {
             keybind = "DIALOG_PRIMARY",
-            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            name = function()
+                return self:GetSelectItemKeybindText()
+            end,
             callback = function()
                 self:SelectHighlightedItem()
             end,
@@ -517,6 +530,11 @@ function ZO_MultiSelection_ComboBox_Gamepad:Initialize(control)
 
     self.dropdownTemplate = ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_MULTISELECTION
     self.itemDataToControl = {}
+    self.m_maxNumSelections = nil
+
+    -- Set default strings.
+    self:SetMultiSelectionTextFormatter()
+    self:SetNoSelectionText()
 end
 
 -- Overridden function
@@ -566,24 +584,72 @@ function ZO_MultiSelection_ComboBox_Gamepad:SelectHighlightedItem()
 end
 
 -- Overridden function
+function ZO_MultiSelection_ComboBox_Gamepad:IsHighlightedItemEnabled()
+    local isItemSelected = self:IsHighlightedItemSelected()
+    if not isItemSelected and self.m_maxNumSelections ~= nil and self:GetNumSelectedEntries() >= self.m_maxNumSelections then
+        if not self.isSelectionBlockedCallback or (self.m_currentData and self.isSelectionBlockedCallback(self.m_currentData) ~= true) then
+            return false, self:GetSelectionBlockedErrorText()
+        end
+    end
+    return ZO_ComboBox_Gamepad.IsHighlightedItemEnabled(self)
+end
+
+-- Overridden function
+function ZO_MultiSelection_ComboBox_Gamepad:GetSelectItemKeybindText()
+    if self.m_maxNumSelections then
+        return zo_strformat(SI_COMBO_BOX_MAX_SELECTIONS_KEYBIND_FORMATTER, ZO_ComboBox_Gamepad.GetSelectItemKeybindText(self), self:GetNumSelectedEntries(), self.m_maxNumSelections)
+    else
+        return ZO_ComboBox_Gamepad.GetSelectItemKeybindText(self)
+    end
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:SetIsSelectionBlockedCallback(callback)
+    self.isSelectionBlockedCallback = callback
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:SetOnSelectionBlockedCallback(callback)
+    self.onSelectionBlockedCallback = callback
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:IsItemSelected(item)
+    return self.currentItemData:IsItemSelected(item)
+end
+
+-- Overridden function
 function ZO_MultiSelection_ComboBox_Gamepad:SelectItem(item, ignoreCallback)
     if item.enabled == false then
         return false
     end
 
-    self.currentItemData:ToggleItemSelected(item)
-    local newSelectedState = self.currentItemData:IsItemSelected(item)
+    local isItemSelected = self.currentItemData:IsItemSelected(item)
+
+    if self.m_maxNumSelections == nil or self:GetNumSelectedEntries() < self.m_maxNumSelections or isItemSelected then
+        self.currentItemData:ToggleItemSelected(item)
+    else
+        if not self.onSelectionBlockedCallback or self.onSelectionBlockedCallback(item) ~= true then
+            return false
+        end
+    end
+
+    isItemSelected = self.currentItemData:IsItemSelected(item)
     local control = self.itemDataToControl[item]
-    if self.currentItemData:IsItemSelected(item) then
+    if isItemSelected then
         ZO_CheckButton_SetChecked(control.checkBox)
     else
         ZO_CheckButton_SetUnchecked(control.checkBox)
     end
 
     if item.callback and not ignoreCallback then
-        item.callback(self, item.name, item, newSelectedState)
+        item.callback(self, item.name, item, isItemSelected)
     end
     self:RefreshSelectedItemText()
+
+    if self.m_maxNumSelections then
+        -- The combo box won't update the keybind text until we change which item is focused, so we need to
+        -- manually update it here.
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor, self.m_keybindState)
+    end
+
     SCREEN_NARRATION_MANAGER:QueueComboBox(self)
 
     return true
@@ -622,13 +688,37 @@ function ZO_MultiSelection_ComboBox_Gamepad:LoadData(data)
 end
 
 function ZO_MultiSelection_ComboBox_Gamepad:SetNoSelectionText(text)
-    self.noSelectionText = text
+    self.noSelectionText = text or SI_COMBO_BOX_DEFAULT_NO_SELECTION_TEXT
     self:RefreshSelectedItemText()
 end
 
 function ZO_MultiSelection_ComboBox_Gamepad:SetMultiSelectionTextFormatter(textFormatter)
-    self.multiSelectionTextFormatter = textFormatter
+    self.multiSelectionTextFormatter = textFormatter or SI_COMBO_BOX_DEFAULT_MULTISELECTION_TEXT_FORMATTER
     self:RefreshSelectedItemText()
+end
+
+-- a maxNumSelections of 0 or nil indicates no limit on selections
+function ZO_MultiSelection_ComboBox_Gamepad:SetMaxSelections(maxNumSelections)
+    if maxNumSelections == 0 then
+        maxNumSelections = nil
+    end
+    -- if the new limit is less than the current limit, clear all the selections
+    if maxNumSelections and (self.m_maxNumSelections == nil or maxNumSelections < self.m_maxNumSelections) and self.currentItemData then
+        self.currentItemData:ClearAllSelections()
+    end
+    self.m_maxNumSelections = maxNumSelections
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:SetMaxSelectionsErrorText(errorText)
+    self.m_overrideMaxSelectionsErrorText = errorText
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:GetSelectionBlockedErrorText()
+    if self.m_overrideMaxSelectionsErrorText then
+        return self.m_overrideMaxSelectionsErrorText
+    end
+
+    return GetString(SI_COMBO_BOX_MAX_SELECTIONS_REACHED_ALERT)
 end
 
 function ZO_MultiSelection_ComboBox_Gamepad:RefreshSelectedItemText()
@@ -650,12 +740,42 @@ function ZO_MultiSelection_ComboBox_Gamepad:GetNumSelectedEntries()
     return 0
 end
 
+function ZO_MultiSelection_ComboBox_Gamepad:ClearAllSelections()
+    self.currentItemData:ClearAllSelections()
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:SetItemIndexSelected(index)
+    local IS_SELECTED = true
+    self.currentItemData:SetItemIndexSelected(index, IS_SELECTED)
+end
+
 function ZO_MultiSelection_ComboBox_Gamepad:IsItemSelected(item)
     if self.currentItemData then
         return self.currentItemData:IsItemSelected(item)
     end
 
     return false
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:IsHighlightedItemSelected()
+    if self.currentItemData then
+        return self.currentItemData:IsItemSelected(self.m_currentData)
+    end
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:RefreshSelections()
+    self:UpdateItems()
+    self:RefreshSelectedItemText()
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:Reset()
+    ZO_ComboBox_Gamepad.Reset(self)
+    self.m_maxNumSelections = nil
+    self.m_overrideMaxSelectionsErrorText = nil
+
+    -- Set default strings.
+    self:SetMultiSelectionTextFormatter()
+    self:SetNoSelectionText()
 end
 
 -- ZO_MultiSelection_ComboBox_Data_Gamepad

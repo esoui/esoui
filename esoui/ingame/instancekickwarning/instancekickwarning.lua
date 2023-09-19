@@ -87,7 +87,7 @@ function ZO_InstanceKickWarning:OnInstanceKickTimeUpdate(timeRemaining, totalTim
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, GetString(SI_INSTANCE_KICK_WARNING_UNGROUPED))
             end
         else
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, GetString(SI_INSTANCE_KICK_WARNING_SHUTDOWN))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.INSTANCE_SHUTDOWN, GetString(SI_INSTANCE_KICK_WARNING_SHUTDOWN))
         end
     else
         self.timerCooldown:Stop()

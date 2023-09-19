@@ -67,8 +67,8 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeSortsAndFilters()
         self:RefreshVisible()
     end
 
-    self.allTypesFilterEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_OUTFIT_ALL_TYPES_FILTER), RefreshVisible)
-    self.newFilterEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_OUTFIT_NEW_FILTER), RefreshVisible)
+    self.allTypesFilterEntry = self.typeFilterDropDown:CreateItemEntry(GetString(SI_OUTFIT_ALL_TYPES_FILTER), RefreshVisible)
+    self.newFilterEntry = self.typeFilterDropDown:CreateItemEntry(GetString(SI_OUTFIT_NEW_FILTER), RefreshVisible)
 
     ZO_OUTFIT_MANAGER:RegisterCallback("ShowLockedChanged", function()
         ZO_CheckButton_SetCheckState(self.showLockedCheckBox, ZO_OUTFIT_MANAGER:GetShowLocked())
@@ -260,7 +260,7 @@ do
 
             for visualArmorType = VISUAL_ARMORTYPE_ITERATION_BEGIN, VISUAL_ARMORTYPE_ITERATION_END do
                 if FOUND_VISUAL_ARMOR_TYPES[visualArmorType] then
-                    local entry = ZO_ComboBox:CreateItemEntry(GetString("SI_VISUALARMORTYPE", visualArmorType), RefreshVisible)
+                    local entry = typeFilterDropDown:CreateItemEntry(GetString("SI_VISUALARMORTYPE", visualArmorType), RefreshVisible)
                     entry.visualArmorType = visualArmorType
                     typeFilterDropDown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
@@ -272,7 +272,7 @@ do
 
             for weaponModelType = WEAPON_MODEL_TYPE_ITERATION_BEGIN, WEAPON_MODEL_TYPE_ITERATION_END do
                 if FOUND_WEAPON_MODEL_TYPES[weaponModelType] then
-                    local entry = ZO_ComboBox:CreateItemEntry(GetString("SI_WEAPONMODELTYPE", weaponModelType), RefreshVisible)
+                    local entry = typeFilterDropDown:CreateItemEntry(GetString("SI_WEAPONMODELTYPE", weaponModelType), RefreshVisible)
                     entry.weaponModelType = weaponModelType
                     typeFilterDropDown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 

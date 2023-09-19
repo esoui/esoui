@@ -4,6 +4,7 @@ local GAMEPAD_SMITHING_CREATION_SCENE_NAME = "gamepad_smithing_creation"
 local GAMEPAD_SMITHING_DECONSTRUCT_SCENE_NAME = "gamepad_smithing_deconstruct"
 local GAMEPAD_SMITHING_IMPROVEMENT_SCENE_NAME = "gamepad_smithing_improvement"
 local GAMEPAD_SMITHING_RESEARCH_SCENE_NAME = "gamepad_smithing_research"
+local GAMEPAD_SMITHING_CONSOLIDATED_SET_SELECTION_SCENE_NAME = "gamepad_smithing_consolidatedSetSelection"
 
 local g_modeToSceneName =
 {
@@ -13,6 +14,7 @@ local g_modeToSceneName =
     [SMITHING_MODE_DECONSTRUCTION] = GAMEPAD_SMITHING_DECONSTRUCT_SCENE_NAME,
     [SMITHING_MODE_IMPROVEMENT] = GAMEPAD_SMITHING_IMPROVEMENT_SCENE_NAME,
     [SMITHING_MODE_RESEARCH] = GAMEPAD_SMITHING_RESEARCH_SCENE_NAME,
+    [SMITHING_MODE_CONSOLIDATED_SET_SELECTION] = GAMEPAD_SMITHING_CONSOLIDATED_SET_SELECTION_SCENE_NAME,
 }
 
 ZO_Smithing_Gamepad = ZO_Smithing_Common:Subclass()
@@ -50,6 +52,8 @@ function ZO_Smithing_Gamepad:Initialize(control)
     GAMEPAD_SMITHING_IMPROVEMENT_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
     GAMEPAD_SMITHING_RESEARCH_SCENE = MakeScene(GAMEPAD_SMITHING_RESEARCH_SCENE_NAME, SMITHING_MODE_RESEARCH)
     GAMEPAD_SMITHING_RESEARCH_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
+    GAMEPAD_SMITHING_CONSOLIDATED_SET_SELECTION_SCENE = MakeScene(GAMEPAD_SMITHING_CONSOLIDATED_SET_SELECTION_SCENE_NAME, SMITHING_MODE_CONSOLIDATED_SET_SELECTION)
+    GAMEPAD_SMITHING_CONSOLIDATED_SET_SELECTION_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
 
     --Scenes that we should hide if the crafting interaction is terminated.
     self.smithingRelatedSceneNames =
@@ -60,6 +64,7 @@ function ZO_Smithing_Gamepad:Initialize(control)
         GAMEPAD_SMITHING_DECONSTRUCT_SCENE_NAME,
         GAMEPAD_SMITHING_IMPROVEMENT_SCENE_NAME,
         GAMEPAD_SMITHING_RESEARCH_SCENE_NAME,
+        GAMEPAD_SMITHING_CONSOLIDATED_SET_SELECTION_SCENE_NAME,
         "gamepad_provisioner_root", --Recipe based smithing crafting
         "gamepad_provisioner_options",
     }
@@ -71,9 +76,10 @@ function ZO_Smithing_Gamepad:Initialize(control)
     self.improvementPanel = ZO_GamepadSmithingImprovement:New(maskControl:GetNamedChild("Improvement"), control:GetNamedChild("Improvement"), self, GAMEPAD_SMITHING_IMPROVEMENT_SCENE)
     self.deconstructionPanel = ZO_GamepadSmithingExtraction:New(maskControl:GetNamedChild("Deconstruction"), control:GetNamedChild("Deconstruction"), self, not REFINEMENT_ONLY, GAMEPAD_SMITHING_DECONSTRUCT_SCENE)
     self.researchPanel = ZO_GamepadSmithingResearch:New(maskControl:GetNamedChild("Research"), self, GAMEPAD_SMITHING_RESEARCH_SCENE)
+    CONSOLIDATED_SMITHING_SET_SELECTION_GAMEPAD:SetScene(GAMEPAD_SMITHING_CONSOLIDATED_SET_SELECTION_SCENE)
 
     --Whenever we leave a specific mode scene (either through back or pressing start) reset to the root mode
-    local specificModeSceneGroup = ZO_SceneGroup:New(GAMEPAD_SMITHING_REFINE_SCENE_NAME, GAMEPAD_SMITHING_CREATION_SCENE_NAME, GAMEPAD_SMITHING_DECONSTRUCT_SCENE_NAME, GAMEPAD_SMITHING_IMPROVEMENT_SCENE_NAME, GAMEPAD_SMITHING_RESEARCH_SCENE_NAME)
+    local specificModeSceneGroup = ZO_SceneGroup:New(GAMEPAD_SMITHING_REFINE_SCENE_NAME, GAMEPAD_SMITHING_CREATION_SCENE_NAME, GAMEPAD_SMITHING_DECONSTRUCT_SCENE_NAME, GAMEPAD_SMITHING_IMPROVEMENT_SCENE_NAME, GAMEPAD_SMITHING_RESEARCH_SCENE_NAME, GAMEPAD_SMITHING_CONSOLIDATED_SET_SELECTION_SCENE_NAME)
     specificModeSceneGroup:RegisterCallback("StateChange", function(_, newState)
         if newState == SCENE_GROUP_HIDDEN then
             self:ResetMode()
@@ -86,12 +92,29 @@ function ZO_Smithing_Gamepad:Initialize(control)
     -- We need to initialize with a tabbar because some modes will make use of it
     ZO_GamepadCraftingUtils_InitializeGenericHeader(self, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
+    self:InitializeSetSelector()
+
     GAMEPAD_SMITHING_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             local craftingType = GetCraftingInteractionType()
 
             self.creationPanel:PerformDeferredInitialization()
             self.researchPanel:PerformDeferredInitialization()
+
+            --The default index is different depending on whether or not we are at a consolidated station
+            if ZO_Smithing_IsConsolidatedStationCraftingMode() then
+                if HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() and CONSOLIDATED_SMITHING_SET_DATA_MANAGER:DoesPlayerHaveValidAttunableCraftingStationToConsume() then
+                    TriggerTutorial(TUTORIAL_TRIGGER_ADD_CONSOLIDATED_ITEM_SETS_SHOWN_GAMEPAD)
+                end
+
+                TriggerTutorial(TUTORIAL_TRIGGER_CONSOLIDATED_STATION_OPENED)
+
+                -- Don't select item sets by default
+                self.modeList:SetDefaultSelectedIndex(2)
+                GAMEPAD_CRAFTING_RESULTS:SetContextualAnimationControl(CRAFTING_PROCESS_CONTEXT_CONSUME_ATTUNABLE_STATIONS, self.control)
+            else
+                self.modeList:SetDefaultSelectedIndex(1)
+            end
 
             self:RefreshModeList(craftingType)
 
@@ -106,7 +129,10 @@ function ZO_Smithing_Gamepad:Initialize(control)
 
             self:ResetMode()
             if self.resetUIs then
-                self.modeList:SetSelectedIndexWithoutAnimation(SMITHING_MODE_REFINEMENT)
+                local DONT_ANIMATE = false
+                local ALLOW_EVEN_IF_DISABLED = true
+                self.modeList:SetDefaultIndexSelected(DONT_ANIMATE, ALLOW_EVEN_IF_DISABLED)
+                self:RefreshSetSelector()
             end
 
             self:SetEnableSkillBar(true)
@@ -116,7 +142,11 @@ function ZO_Smithing_Gamepad:Initialize(control)
 
             local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(craftingType)
 
-            ZO_GamepadCraftingUtils_SetupGenericHeader(self, titleString)
+            --Capacity and item sets in the header are mutually exclusive. We will only show one
+            local NO_TAB_BAR_ENTRIES = nil
+            local showCapacity = not ZO_Smithing_IsConsolidatedStationCraftingMode()
+            local showItemSets = ZO_Smithing_IsConsolidatedStationCraftingMode()
+            ZO_GamepadCraftingUtils_SetupGenericHeader(self, titleString, NO_TAB_BAR_ENTRIES, showCapacity, showItemSets)
             ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
 
             self.resetUIs = nil
@@ -124,10 +154,12 @@ function ZO_Smithing_Gamepad:Initialize(control)
             ZO_InventorySlot_RemoveMouseOverKeybinds()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             self.modeList:Deactivate()
+            self.setSelectorControl:SetHidden(true)
 
             self:DirtyAllPanels()
 
             self:SetEnableSkillBar(false)
+            GAMEPAD_CRAFTING_RESULTS:SetContextualAnimationControl(CRAFTING_PROCESS_CONTEXT_CONSUME_ATTUNABLE_STATIONS, nil)
         end
     end)
 
@@ -168,6 +200,15 @@ function ZO_Smithing_Gamepad:Initialize(control)
     self.control:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_STARTED, HandleDirtyEvent)
     self.control:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED, HandleDirtyEvent)
 
+    self.control:RegisterForEvent(EVENT_CONSOLIDATED_STATION_SETS_UPDATED, function()
+        --Refresh and re-narrate the header if the unlocked sets change
+        if GAMEPAD_SMITHING_ROOT_SCENE:IsShowing() and ZO_Smithing_IsConsolidatedStationCraftingMode() then
+            ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.modeList, NARRATE_HEADER)
+        end
+    end)
+
     ZO_WRIT_ADVISOR_GAMEPAD:RegisterCallback("CycleActiveQuest", function()
         if GAMEPAD_SMITHING_ROOT_SCENE:IsShowing() then
             SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.modeList)
@@ -178,24 +219,49 @@ end
 function ZO_Smithing_Gamepad:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
         -- Select mode
         {
             keybind = "UI_SHORTCUT_PRIMARY",
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
             name = function()
                 return GetString(SI_GAMEPAD_SELECT_OPTION)
             end,
-
             callback = function()
                 local targetData = self.modeList:GetTargetData()
                 self:SetMode(targetData.mode)
+            end,
+        },
+        -- Add Set
+        {
+            keybind = "UI_SHORTCUT_SECONDARY",
+            name = GetString(SI_SMITHING_CONSOLIDATED_STATION_ADD_ITEM_SET),
+            visible = function()
+                return ZO_Smithing_IsConsolidatedStationCraftingMode()
+            end,
+            enabled = function()
+                if ZO_CraftingUtils_IsPerformingCraftProcess() then
+                    return false
+                end
+
+                if not HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
+                    return false, GetString(SI_SMITHING_CONSOLIDATED_STATION_ADD_SET_ERROR_HOUSE_OWNERSHIP)
+                end
+
+                if not CONSOLIDATED_SMITHING_SET_DATA_MANAGER:DoesPlayerHaveValidAttunableCraftingStationToConsume() then
+                    return false, GetString(SI_SMITHING_CONSOLIDATED_STATION_ADD_SET_ERROR_NO_ITEM)
+                end
+
+                return true
+            end,
+            callback = function()
+                ZO_Dialogs_ShowGamepadDialog("CONSOLIDATED_SMITHING_ADD_SETS_GAMEPAD")
             end,
         },
     }
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.modeList)
+    ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
 end
 
 function ZO_Smithing_Gamepad:CreateModeEntry(name, mode, icon, shouldShowQuestPin)
@@ -214,6 +280,19 @@ function ZO_Smithing_Gamepad:InitializeModeList()
     self.modeList = ZO_GamepadVerticalItemParametricScrollList:New(self.control:GetNamedChild("MaskContainerList"))
     self.modeList:SetAlignToScreenCenter(true)
     self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    --This is an invisible entry in the list that is used to represent the set selector.
+    self.setSelectionModeEntry = ZO_GamepadEntryData:New("")
+    self.setSelectionModeEntry.mode = SMITHING_MODE_CONSOLIDATED_SET_SELECTION
+    self.setSelectionModeEntry.narrationText = function(entryData, entryControl)
+        local narrations = {}
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_SMITHING_CONSOLIDATED_STATION_ITEM_SET_HEADER)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.activeConsolidatedSetText))
+        --Include the quest pin in the narration if one is supposed to be showing
+        if not self.shouldImproveForQuest and self.consolidatedItemSetIdForQuest ~= nil then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_CRAFTING_QUEST_PIN_ICON_NARRATION)))
+        end
+        return narrations
+    end
 
     self.refinementModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_REFINEMENT, SMITHING_MODE_REFINEMENT, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_refine.dds", function() return self.shouldRefineForQuest end)
     self.creationModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_CREATION, SMITHING_MODE_CREATION, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_create.dds", function() return self.shouldCraftForQuest end)
@@ -234,6 +313,18 @@ function ZO_Smithing_Gamepad:InitializeModeList()
         end,
     }
     SCREEN_NARRATION_MANAGER:RegisterParametricList(self.modeList, narrationInfo)
+
+    self.modeList:SetOnSelectedDataChangedCallback(function(list)
+        if list:IsActive() then
+            self:RefreshSetSelector()
+        end
+    end)
+end
+
+function ZO_Smithing_Gamepad:InitializeSetSelector()
+    self.setSelectorControl = self.header:GetNamedChild("SetSelector")
+    self.setSelectorNameLabel = self.setSelectorControl:GetNamedChild("SetName")
+    self.setSelectorQuestPin = self.setSelectorControl:GetNamedChild("QuestPin")
 end
 
 function ZO_Smithing_Gamepad:GetFooterNarration()
@@ -244,8 +335,43 @@ function ZO_Smithing_Gamepad:GetFooterNarration()
     return narrations
 end
 
+function ZO_Smithing_Gamepad:RefreshSetSelector()
+    --Refresh the visual state of the set selector
+    if ZO_Smithing_IsConsolidatedStationCraftingMode() then
+        --If there is no active set id, assume we are using the default category
+        local activeSetId = GetActiveConsolidatedSmithingItemSetId()
+        local activeSetName = activeSetId ~= 0 and GetItemSetName(activeSetId) or GetString(SI_SMITHING_CONSOLIDATED_STATION_DEFAULT_CATEGORY_NAME)
+
+        --Store off the set text for narration to use
+        self.activeConsolidatedSetText = zo_strformat(SI_ITEM_SET_NAME_FORMATTER, activeSetName)
+        self.setSelectorNameLabel:SetText(self.activeConsolidatedSetText)
+
+        --Make it so the selector looks visibly selected or deselected base upon whether the invisible set selection entry is selected
+        local targetData = self.modeList:GetTargetData()
+        if targetData and targetData.mode == SMITHING_MODE_CONSOLIDATED_SET_SELECTION then
+            self.setSelectorNameLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+        else
+            self.setSelectorNameLabel:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+        end
+
+        --If we don't need to improve for the quest and we have a valid item set, show the quest pin on the selector
+        if not self.shouldImproveForQuest and self.consolidatedItemSetIdForQuest ~= nil then
+            self.setSelectorQuestPin:SetHidden(false)
+        else
+            self.setSelectorQuestPin:SetHidden(true)
+        end
+
+        self.setSelectorControl:SetHidden(false)
+    else
+        self.setSelectorControl:SetHidden(true)
+    end
+end
+
 function ZO_Smithing_Gamepad:RefreshModeList(craftingType)
     self.modeList:Clear()
+    if ZO_Smithing_IsConsolidatedStationCraftingMode() then
+        self:AddModeEntry(self.setSelectionModeEntry)
+    end
     self:AddModeEntry(self.refinementModeEntry)
     self:AddModeEntry(self.creationModeEntry)
     self:AddModeEntry(self.deconstructionModeEntry)
@@ -257,6 +383,9 @@ function ZO_Smithing_Gamepad:RefreshModeList(craftingType)
     local recipeModeEntry = self:CreateModeEntry(recipeCraftingSystemNameStringId, SMITHING_MODE_RECIPES, ZO_GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem), function() return self.usesProvisioningForQuest end)
     self:AddModeEntry(recipeModeEntry)
     self.modeList:Commit()
+
+    --Order matters: Do this after the mode list has been committed
+    self:RefreshSetSelector()
 end
 
 function ZO_Smithing_Gamepad:ResetMode()
@@ -303,4 +432,5 @@ function ZO_Smithing_Gamepad_Initialize(control)
     ZO_Smithing_AddScene(GAMEPAD_SMITHING_DECONSTRUCT_SCENE_NAME, SMITHING_GAMEPAD)
     ZO_Smithing_AddScene(GAMEPAD_SMITHING_IMPROVEMENT_SCENE_NAME, SMITHING_GAMEPAD)
     ZO_Smithing_AddScene(GAMEPAD_SMITHING_RESEARCH_SCENE_NAME, SMITHING_GAMEPAD)
+    ZO_Smithing_AddScene(GAMEPAD_SMITHING_CONSOLIDATED_SET_SELECTION_SCENE_NAME, SMITHING_GAMEPAD)
 end

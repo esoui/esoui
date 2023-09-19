@@ -1,0 +1,49 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_EndDunAvatarVisionParticle_Shared" blendMode="ADD" excludeFromResizeToFitExtents="true" hidden="true" level="2" pixelRoundingEnabled="true" shaderEffectType="WAVE" virtual="true">
+            <Anchor point="CENTER" />
+            <Wave angleRadians="0.74" frequency="7.3" speed="4" offset="0" />
+            <WaveBounds minX="0.125" maxX="0.125" minY="0.125" maxY="0.125" />
+
+            <OnInitialized name="EndlessDungeonBuffShared">
+                ZO_EndlessDungeonAvatarVisionParticle_Shared.Initialize(self)
+            </OnInitialized>
+
+            <OnUpdate name="EndlessDungeonBuffShared">
+                self:Update()
+            </OnUpdate>
+        </Texture>
+
+        <Control name="ZO_EndDunBuff_Shared" mouseEnabled="true" virtual="true">
+            <OnInitialized name="EndlessDungeonBuffShared">
+                ZO_EndlessDungeonBuff_Shared.Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" level="1" pixelRoundingEnabled="true">
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)Highlight" blendMode="ADD" excludeFromResizeToFitExtents="true" hidden="true" level="3" scale="1.75" shaderEffectType="RADIAL_BLUR">
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                    <RadialBlur originX="0.5" originY="1" numSamples="15" blurRadius="0.2" offsetRadius="0" />
+                    <TextureCoords left="-0.4" right="1.4" top="-0.4" bottom="1.4" />
+                    <TextureSampleProcessingWeight type="ALPHA_AS_RGB" weight="0.5" />
+                    <TextureSampleProcessingWeight type="RGB" weight="0.5" />
+
+                    <OnUpdate name="EndlessDungeonBuffShared">
+                        self:GetParent():UpdateHighlight()
+                    </OnUpdate>
+                </Texture>
+
+                <Label name="$(parent)StackCount" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT" />
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_EndDunBuffAvatarVisionParticles_Shared" clampedToScreen="true" layer="OVERLAY" hidden="true">
+            <OnInitialized>
+                ZO_EndlessDungeonAvatarVisionParticle_Shared.InitializeTopLevelWindow(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

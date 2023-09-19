@@ -84,7 +84,7 @@ function ZO_RestyleStation_Keyboard:OnShown()
         currentMode == RESTYLE_MODE_OUTFIT or
         currentMode == RESTYLE_MODE_COMPANION_EQUIPMENT or
         currentMode == RESTYLE_MODE_COMPANION_OUTFIT then
-        TriggerTutorial(TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN)
+        TriggerTutorial(TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN_POINTER_BOX)
     end
 
     if currentMode == RESTYLE_MODE_OUTFIT or currentMode == RESTYLE_MODE_COMPANION_OUTFIT then
@@ -461,8 +461,8 @@ function ZO_RestyleStation_Keyboard:OnPendingDyesChanged(restyleSlotData)
         end
     elseif restyleSlotData:IsOutfitSlot() then
         local outfitSlotManipulator = ZO_OUTFIT_MANAGER:GetOutfitSlotManipulatorFromRestyleSlotData(restyleSlotData)
-        local refreshImmediately = true
-        outfitSlotManipulator:UpdatePreview(refreshImmediately)
+        local DONT_REFRESH_IMMEDIATELY = false
+        outfitSlotManipulator:UpdatePreview(DONT_REFRESH_IMMEDIATELY)
     end
 end
 

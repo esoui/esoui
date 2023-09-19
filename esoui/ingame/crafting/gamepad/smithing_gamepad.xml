@@ -22,7 +22,38 @@
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Header" override="true">
+                            <Controls>
+                                <Control name="$(parent)SetSelector" hidden="true">
+                                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="75" />
+                                    <Anchor point="TOP" relativeTo="$(parent)Message" relativePoint="BOTTOM" offsetY="25" />
+                                    <Controls>
+                                        <Label name="$(parent)Title" text="SI_GAMEPAD_SMITHING_CONSOLIDATED_STATION_ITEM_SET_HEADER" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" />
+                                        </Label>
+
+                                        <Label name="$(parent)SetName" font="ZoFontGamepad34" wrapMode="ELLIPSIS" horizontalAlignment="CENTER">
+                                            <Anchor point="CENTER" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="25" />
+                                        </Label>
+
+                                        <Texture name="$(parent)OpenDropdown" textureFile="EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds">
+                                            <Dimensions x="24" y="24" />
+                                            <Anchor point="LEFT" relativeTo="$(parent)SetName" relativePoint="RIGHT" offsetX="10" offsetY="4"/>
+                                        </Texture>
+                                        
+                                        <Texture name="$(parent)QuestPin" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" textureFile="EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds" hidden="true">
+                                            <Dimensions x="32" y="32" />
+                                            <Anchor point="RIGHT" relativeTo="$(parent)SetName" relativePoint="LEFT" offsetX="-5" />
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
 
                 <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>

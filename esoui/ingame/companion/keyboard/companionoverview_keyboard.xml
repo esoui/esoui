@@ -21,7 +21,7 @@
                             <Anchor point="LEFT" />
                         </Label>
 
-                        <Control name="$(parent)Dropdown" inherits="ZO_ScrollableComboBox">
+                        <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
                             <Dimensions x="300" />
                             <Anchor point="RIGHT" />
                         </Control>

@@ -91,7 +91,7 @@ function ZO_GuildBrowser_Gamepad:SetupList(list)
         end
 
         for i = GUILD_FOCUS_ATTRIBUTE_VALUE_TRADING, GUILD_FOCUS_ATTRIBUTE_VALUE_ITERATION_END do
-            local entry = ZO_ComboBox:CreateItemEntry(GetString("SI_GUILDFOCUSATTRIBUTEVALUE", i), SelectFocus)
+            local entry = dropdown:CreateItemEntry(GetString("SI_GUILDFOCUSATTRIBUTEVALUE", i), SelectFocus)
             entry.focus = i
             dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end

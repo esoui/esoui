@@ -1,0 +1,31 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_EndDunBuffSelectorBuff_Gamepad" inherits="ZO_EndDunBuffSelectorBuff_Shared" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" offsetX="-8" offsetY="-8" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="8" offsetY="8" />
+                        </Backdrop>
+                    </Controls>
+                </Texture>
+                <Label name="$(parent)Name" override="true" font="ZoFontGamepad36" />
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_EndDunBuffSelector_Gamepad" inherits="ZO_EndDunBuffSelector_Shared">
+            <Anchor point="CENTER" relativeTo="ZO_SharedGamepadNavQuadrantSpace_1_Left_To_4_Left" />
+            
+            <OnInitialized>
+                ZO_EndlessDungeonBuffSelector_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)BG" override="true" inherits="ZO_DefaultBackdrop_Gamepad" />
+
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepadBold48" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

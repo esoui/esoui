@@ -101,28 +101,10 @@
     
     <Controls>
         <!-- Begin Mechanic Container Templates -->
-        
-        <Control name="ZO_TributeCard_MechanicContainer_Large_SingleDigit_Activation_Style" virtual="true">
+        <Control name="ZO_TributeCard_MechanicContainer_Large_SingleDigit_Base_Style" virtual="true">
             <Dimensions x="64" y="64" />
 
             <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_activation_large_single.dds" />
-
-                <Texture name="$(parent)TypeIcon">
-                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-14" />
-                </Texture>
-
-                <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" />
-            </Controls>
-        </Control>
-        
-        <Control name="ZO_TributeCard_MechanicContainer_Large_SingleDigit_Combo_Style" virtual="true">
-            <Dimensions x="64" y="64" />
-
-            <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_combo_large_single.dds" />
-
                 <Texture name="$(parent)TypeIcon">
                     <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
                     <Anchor point="CENTER" offsetX="-14" />
@@ -132,27 +114,10 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_TributeCard_MechanicContainer_Large_SingleDigit_Trigger_Style" virtual="true">
-            <Dimensions x="64" y="64" />
-
-            <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_trigger_large_single.dds" />
-
-                <Texture name="$(parent)TypeIcon">
-                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-14" />
-                </Texture>
-
-                <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" />
-            </Controls>
-        </Control>
-
-        <Control name="ZO_TributeCard_MechanicContainer_Large_DoubleDigit_Activation_Style" virtual="true">
+        <Control name="ZO_TributeCard_MechanicContainer_Large_DoubleDigit_Base_Style" virtual="true">
             <Dimensions x="128" y="64" />
 
             <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_activation_large_double.dds" />
-
                 <Texture name="$(parent)TypeIcon">
                     <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
                     <Anchor point="CENTER" offsetX="-22" />
@@ -162,42 +127,10 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_TributeCard_MechanicContainer_Large_DoubleDigit_Combo_Style" virtual="true">
-            <Dimensions x="128" y="64" />
-
-            <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_combo_large_double.dds" />
-
-                <Texture name="$(parent)TypeIcon">
-                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-23" />
-                </Texture>
-
-                <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" />
-            </Controls>
-        </Control>
-
-        <Control name="ZO_TributeCard_MechanicContainer_Large_DoubleDigit_Trigger_Style" virtual="true">
-            <Dimensions x="128" y="64" />
-
-            <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_trigger_large_double.dds" />
-
-                <Texture name="$(parent)TypeIcon">
-                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-22" />
-                </Texture>
-
-                <Label name="$(parent)Quantity" font="ZoFontTributeAntique30NoShadow" />
-            </Controls>
-        </Control>
-        
-        <Control name="ZO_TributeCard_MechanicContainer_Small_SingleDigit_Activation_Style" virtual="true">
+        <Control name="ZO_TributeCard_MechanicContainer_Small_SingleDigit_Base_Style" virtual="true">
             <Dimensions x="64" y="64" />
 
             <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_activation_small_single.dds" />
-
                 <Texture name="$(parent)TypeIcon">
                     <Dimensions x="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" />
                     <Anchor point="CENTER" offsetX="-10" />
@@ -207,57 +140,10 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_TributeCard_MechanicContainer_Small_SingleDigit_Combo_Style" virtual="true">
+        <Control name="ZO_TributeCard_MechanicContainer_Small_DoubleDigit_Base_Style" virtual="true">
             <Dimensions x="64" y="64" />
 
             <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_combo_small_single.dds" />
-
-                <Texture name="$(parent)TypeIcon">
-                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-10" />
-                </Texture>
-
-                <Label name="$(parent)Quantity" font="ZoFontTributeAntique20NoShadow" />
-            </Controls>
-        </Control>
-
-        <Control name="ZO_TributeCard_MechanicContainer_Small_SingleDigit_Trigger_Style" virtual="true">
-            <Dimensions x="64" y="64" />
-
-            <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_trigger_small_single.dds" />
-
-                <Texture name="$(parent)TypeIcon">
-                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-10" />
-                </Texture>
-
-                <Label name="$(parent)Quantity" font="ZoFontTributeAntique20NoShadow" />
-            </Controls>
-        </Control>
-
-        <Control name="ZO_TributeCard_MechanicContainer_Small_DoubleDigit_Activation_Style" virtual="true">
-            <Dimensions x="64" y="64" />
-
-            <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_activation_small_double.dds" />
-
-                <Texture name="$(parent)TypeIcon">
-                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-16" />
-                </Texture>
-                
-                <Label name="$(parent)Quantity" font="ZoFontTributeAntique20NoShadow" />
-            </Controls>
-        </Control>
-
-        <Control name="ZO_TributeCard_MechanicContainer_Small_DoubleDigit_Combo_Style" virtual="true">
-            <Dimensions x="64" y="64" />
-
-            <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_combo_small_double.dds" />
-
                 <Texture name="$(parent)TypeIcon">
                     <Dimensions x="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" />
                     <Anchor point="CENTER" offsetX="-16" />
@@ -267,21 +153,6 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_TributeCard_MechanicContainer_Small_DoubleDigit_Trigger_Style" virtual="true">
-            <Dimensions x="64" y="64" />
-
-            <Controls>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_trigger_small_double.dds" />
-
-                <Texture name="$(parent)TypeIcon">
-                    <Dimensions x="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" y="ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS" />
-                    <Anchor point="CENTER" offsetX="-16" />
-                </Texture>
-
-                <Label name="$(parent)Quantity" font="ZoFontTributeAntique20NoShadow" />
-            </Controls>
-        </Control>
-        
         <Control name="ZO_TributeCard_MechanicContainer_Template" level="110" virtual="true">
             <OnInitialized>
                 ZO_TributeCard_MechanicContainer_OnInitialized(self)

@@ -199,14 +199,26 @@ do
             end
         elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT then
             local combinationId = GetCollectibleReferenceId(collectibleId)
-            local baseCollectibleId = GetCombinationFirstNonFragmentCollectibleComponentId(combinationId)
-            if baseCollectibleId ~= 0 then
-                local baseCollectibleName = GetCollectibleName(baseCollectibleId)
-                if baseCollectibleName ~= "" then
-                    local text = zo_strformat(SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM, baseCollectibleName, GetCollectibleCategoryNameByCollectibleId(baseCollectibleId))
-                    local colorStyle = IsCollectibleUnlocked(baseCollectibleId) and self:GetStyle("succeeded") or self:GetStyle("failed")
-                    bodySection:AddLine(text, descriptionStyle, colorStyle)
+            local nonFragmentComponentCollectibleIds = { GetCombinationNonFragmentComponentCollectibleIds(combinationId) }
+            local formattedNonFragmentComponentCollectibleNames = {}
+            local hasUnlockedAllNonFragmentCollectibles = true
+            for i, nonFragmentCollectibleId in ipairs(nonFragmentComponentCollectibleIds) do
+                local nonFragmentCollectibleName = GetCollectibleName(nonFragmentCollectibleId)
+                if nonFragmentCollectibleName ~= "" then
+                    local categoryName = GetCollectibleCategoryNameByCollectibleId(nonFragmentCollectibleId)
+                    local formattedNonFragmentCollectibleName = string.format(GetString(SI_COLLECTIBLE_NAME_WITH_CATEGORY_NAME_C_STYLE_FORMATTER), nonFragmentCollectibleName, categoryName)
+                    table.insert(formattedNonFragmentComponentCollectibleNames, formattedNonFragmentCollectibleName)
+                    if not IsCollectibleUnlocked(nonFragmentCollectibleId) then
+                        hasUnlockedAllNonFragmentCollectibles = false
+                    end
                 end
+            end
+
+            if #formattedNonFragmentComponentCollectibleNames > 0 then
+                local nonFragmentCollectibleNameList = ZO_GenerateCommaSeparatedListWithAnd(formattedNonFragmentComponentCollectibleNames)
+                local text = zo_strformat(SI_COLLECTIBLES_REQUIRED_TO_PERFORM_COMBINATION, nonFragmentCollectibleNameList)
+                local colorStyle = hasUnlockedAllNonFragmentCollectibles and self:GetStyle("succeeded") or self:GetStyle("failed")
+                bodySection:AddLine(text, descriptionStyle, colorStyle)
             end
         elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE then
             local overrideType = GetCollectiblePlayerFxOverrideType(collectibleId)

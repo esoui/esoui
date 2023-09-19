@@ -132,8 +132,8 @@ function ZO_CampaignLeaderboardsManager_Gamepad:RefreshHeaderTimer()
         headerData.data3HeaderText = ""
         headerData.data3Text = ""
     end
-
-    --Raid uses 4 for its timer, and might have set it, so campaign will clear it just in case
+    
+    --Raid/Endless Archive uses 4 for its timer, and might have set it, so campaign will clear it just in case
     headerData.data4HeaderText = ""
     headerData.data4Text = ""
 

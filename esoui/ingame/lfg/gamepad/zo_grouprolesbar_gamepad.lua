@@ -66,10 +66,25 @@ function ZO_GroupRolesBar_Gamepad:Initialize(control)
     end
 
     local function OnPressed(buttonControl)
-        UpdateSelectedLFGRole(buttonControl.data.role)
-        ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
-        self:RefreshRoles()
-        SCREEN_NARRATION_MANAGER:QueueGamepadButtonTabBar(self)
+        local selectedRole = GetSelectedLFGRole()
+        -- Only handle the press if the player is changing to a new role
+        if buttonControl.data.role ~= selectedRole then
+            if DoesGroupFinderUserTypeGroupListingEnforceRoles(GROUP_FINDER_GROUP_LISTING_USER_TYPE_APPLIED_TO_GROUP_LISTING) then
+                local dialogData =
+                {
+                    title = GetString(SI_GROUP_FINDER_CHANGE_ROLE_WARNING_DIALOG_TITLE),
+                    mainText = GetString(SI_GROUP_FINDER_CHANGE_ROLE_WARNING_DIALOG_TEXT),
+                    onConfirmCallback = function()
+                        RequestResolveGroupListingApplication(RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_RESCIND)
+                        self:OnPressed(buttonControl)
+                    end,
+                }
+
+                ZO_Dialogs_ShowGamepadDialog("RADIO_BUTTON_GROUP_CHANGE_SELECTION_CONFIRMATION", dialogData)
+            else
+                self:OnPressed(buttonControl)
+            end
+        end
     end
 
     ZO_GamepadButtonTabBar.Initialize(self, control, OnSelected, OnUnselected, OnPressed)
@@ -109,6 +124,13 @@ function ZO_GroupRolesBar_Gamepad:InitializeEvents()
     end
     
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", OnActivityFinderStatusUpdate)
+end
+
+function ZO_GroupRolesBar_Gamepad:OnPressed(buttonControl)
+    UpdateSelectedLFGRole(buttonControl.data.role)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
+    self:RefreshRoles()
+    SCREEN_NARRATION_MANAGER:QueueGamepadButtonTabBar(self)
 end
 
 function ZO_GroupRolesBar_Gamepad:ToggleSelected()

@@ -96,15 +96,23 @@
 
             <Controls>
                 <Label name="$(parent)InLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <OnRectChanged>
-                        self:GetParent():OnLabelRectChanged()
-                    </OnRectChanged>
+                    <OnRectHeightChanged>
+                        self:GetParent():OnLabelRectChanged(self, newHeight, oldHeight)
+                    </OnRectHeightChanged>
+
+                    <OnRectWidthChanged>
+                        self:GetParent():OnLabelRectChanged(self, newWidth, oldWidth)
+                    </OnRectWidthChanged>
                 </Label>
 
                 <Label name="$(parent)OutLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <OnRectChanged>
-                        self:GetParent():OnLabelRectChanged()
-                    </OnRectChanged>
+                    <OnRectHeightChanged>
+                        self:GetParent():OnLabelRectChanged(self, newHeight, oldHeight)
+                    </OnRectHeightChanged>
+
+                    <OnRectWidthChanged>
+                        self:GetParent():OnLabelRectChanged(self, newWidth, oldWidth)
+                    </OnRectWidthChanged>
                 </Label>
             </Controls>
         </Control>

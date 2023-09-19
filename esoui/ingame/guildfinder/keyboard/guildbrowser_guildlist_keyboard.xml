@@ -197,26 +197,20 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)LanguageSelector" relativePoint="BOTTOMLEFT" offsetY="10"/>
                 </Label>
 
-                <Control name="$(parent)StartTimeSelector" inherits="ZO_ScrollableComboBox" layer="OVERLAY">
+                <Control name="$(parent)StartTimeSelector" inherits="ZO_ComboBox" layer="OVERLAY">
                     <Dimensions x="170" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TimeHeader" relativePoint="BOTTOMLEFT" offsetY="4" />
 
                     <Controls>
-                        <Control name="$(parent)Dropdown" override="true" excludeFromResizeToFitExtents="true" />
-
                         <Label name="$(parent)Dash" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_RECRUITMENT_TIME_ENTRIES_SEPARATOR">
                             <Anchor point="LEFT" relativePoint="RIGHT" offsetX="5" />
                         </Label>
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)EndTimeSelector" inherits="ZO_ScrollableComboBox" layer="OVERLAY">
+                <Control name="$(parent)EndTimeSelector" inherits="ZO_ComboBox" layer="OVERLAY">
                     <Dimensions x="170" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)StartTimeSelector" relativePoint="TOPRIGHT" offsetX="20" />
-
-                    <Controls>
-                        <Control name="$(parent)Dropdown" override="true" excludeFromResizeToFitExtents="true" />
-                    </Controls>
                 </Control>
 
                 <Label name="$(parent)CPHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >

@@ -862,8 +862,8 @@ function ZO_RestyleStation_Gamepad:UpdateDyeSortingDropdownOptions(dropdown)
         ZO_DYEING_MANAGER:SetSortStyle(style)
     end
 
-    dropdown:AddItem(ZO_ComboBox:CreateItemEntry(GetString(SI_DYEING_SORT_BY_RARITY), function() SelectNewSort(ZO_DYEING_SORT_STYLE_RARITY) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
-    dropdown:AddItem(ZO_ComboBox:CreateItemEntry(GetString(SI_DYEING_SORT_BY_HUE), function() SelectNewSort(ZO_DYEING_SORT_STYLE_HUE) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
+    dropdown:AddItem(dropdown:CreateItemEntry(GetString(SI_DYEING_SORT_BY_RARITY), function() SelectNewSort(ZO_DYEING_SORT_STYLE_RARITY) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
+    dropdown:AddItem(dropdown:CreateItemEntry(GetString(SI_DYEING_SORT_BY_HUE), function() SelectNewSort(ZO_DYEING_SORT_STYLE_HUE) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
 
     dropdown:UpdateItems()
 
@@ -1372,7 +1372,8 @@ function ZO_RestyleStation_Gamepad:OnPendingDyesChanged(restyleSlotData)
         end
     elseif restyleSlotData:IsOutfitSlot() then
         local slotManipulator = ZO_OUTFIT_MANAGER:GetOutfitSlotManipulatorFromRestyleSlotData(restyleSlotData)
-        slotManipulator:UpdatePreview()
+        local DONT_REFRESH_IMMEDIATELY = false
+        slotManipulator:UpdatePreview(DONT_REFRESH_IMMEDIATELY)
     end
     self:GetMainList():RefreshVisible()
     self:UpdateActiveFocusKeybinds()

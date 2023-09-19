@@ -4,9 +4,10 @@ ZO_HELP_TICKET_FIELD_TYPE =
     CATEGORY = 2,
     SUBCATEGORY = 3,
     DETAILS = 4,
-    DESCRIPTION = 5,
-    ATTACH_SCREENSHOT = 6,
-    SUBMIT = 7,
+    EXTERNAL_INFO = 5,
+    DESCRIPTION = 6,
+    ATTACH_SCREENSHOT = 7,
+    SUBMIT = 8,
 }
 
 ZO_HELP_SUBMIT_FEEDBACK_FIELD_DATA =
@@ -152,7 +153,7 @@ ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO =
             id = CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER,
             detailsTitle = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_PLAYER_NAME),
             detailsRegistrationFunction = SetCustomerServiceTicketPlayerTarget,
-            detailsFormatText = ZO_FormatManualNameEntry,
+            detailsRegistrationFormatText = ZO_FormatManualNameEntry,
             detailsGamepadDefaultText = zo_strformat(SI_GAMEPAD_HELP_TICKET_EDIT_REQUIRED_NAME_DISPLAY, ZO_GetPlatformAccountLabel()),
             categoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERCATEGORY",
             categories = 
@@ -253,7 +254,7 @@ ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO =
             id = CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GUILD,
             detailsTitle = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_GUILD_NAME),
             detailsRegistrationFunction = SetCustomerServiceTicketPlayerTarget,
-            detailsFormatText = ZO_FormatManualNameEntry,
+            detailsRegistrationFormatText = ZO_FormatManualNameEntry,
             detailsGamepadDefaultText = GetString(SI_GAMEPAD_HELP_TICKET_EDIT_REQUIRED_NAME_GUILD),
             categoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDCATEGORY",
             categoryDescriptionStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDCATEGORY_DESCRIPTION",
@@ -273,6 +274,30 @@ ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO =
                 {
                     id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_DECLINE,
                     ticketCategory = 1194,
+                },
+            },
+        },
+        {
+            id = CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GROUP_FINDER_LISTING,
+            externalInfoTitle = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_GROUP_FINDER_LISTING_DETAILS),
+            externalInfoInstructions = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_GROUP_FINDER_LISTING_INSTRUCTIONS),
+            externalInfoRegistrationFunction = ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER.SetCustomerServiceTicketGroupFinderListingTarget,
+            externalInfoKeyboardTooltipFunction = function(...) HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:ShowGroupFinderListingTooltip(...) end,
+            externalInfoGamepadTooltipFunction = function(...) HELP_CUSTOMER_SERVICE_GAMEPAD:ShowGroupFinderListingTooltip(...) end,
+            categoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTGROUPFINDERLISTINGCATEGORY",
+            categoryDescriptionStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTGROUPFINDERLISTINGCATEGORY_DESCRIPTION",
+            categories =
+            {
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GROUP_FINDER_LISTING_CATEGORY_NONE,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GROUP_FINDER_LISTING_CATEGORY_INAPPROPRIATE_TITLE,
+                    ticketCategory = 1315,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GROUP_FINDER_LISTING_CATEGORY_INAPPROPRIATE_DESCRIPTION,
+                    ticketCategory = 1314,
                 },
             },
         },

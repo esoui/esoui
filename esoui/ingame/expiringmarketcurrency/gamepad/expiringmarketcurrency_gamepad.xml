@@ -1,0 +1,69 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ExpiringMarketCurrencyRow_Gamepad" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="ZO_EXPIRING_MARKET_CURRENCY_ROW_GAMEPAD_HEIGHT"/>
+            <Controls>
+                <Label name="$(parent)Amount" font="ZoFontGamepad42" horizontalAlignment="LEFT">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-5"/>
+                    <Dimensions y="ZO_EXPIRING_MARKET_CURRENCY_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                </Label>
+                <Label name="$(parent)ExpiresAt" font="ZoFontGamepad42" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Amount" relativePoint="TOPRIGHT" offsetX="10" />
+                    <Anchor point="TOPRIGHT" />
+                    <Dimensions y="ZO_EXPIRING_MARKET_CURRENCY_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_ExpiringMarketCurrencyTopLevel_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_ExpiringMarketCurrency_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_ScrollContainer_Gamepad ZO_GamepadGrid_NavQuadrant_ContainerAnchors" >
+                    <Controls>
+                        <Texture name="$(parent)ScrollIndicator" override="true">
+                            <Anchor point="CENTER" relativePoint="RIGHT" relativeTo="$(grandparent)" offsetX="-1"/>
+                        </Texture>
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <Controls>
+                                <Label name="$(parent)Instructions" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" text="SI_EXPIRING_CROWNS_DESCRIPTION_TEXT" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT" offsetY="50" />
+                                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
+                                </Label>
+
+                                <Control name="$(parent)Headers">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMLEFT" offsetY="40" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMRIGHT" offsetY="40" />
+                                    <Dimensions y="ZO_EXPIRING_MARKET_CURRENCY_ROW_GAMEPAD_HEIGHT"/>
+                                    <Controls>
+                                        <Label name="$(parent)Amount" text="SI_EXPIRING_CROWNS_AMOUNT_HEADER" font="ZoFontGamepadBold34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" horizontalAlignment="LEFT" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                                            <Anchor point="TOPLEFT"/>
+                                            <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-5"/>
+                                            <Dimensions y="ZO_EXPIRING_MARKET_CURRENCY_ROW_GAMEPAD_HEIGHT" />
+                                        </Label>
+                                        <Label name="$(parent)ExpiresAt" text="SI_EXPIRING_CROWNS_EXPIRES_HEADER" font="ZoFontGamepadBold34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" horizontalAlignment="RIGHT" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Amount" relativePoint="TOPRIGHT" offsetX="10" />
+                                            <Anchor point="TOPRIGHT" />
+                                            <Dimensions y="ZO_EXPIRING_MARKET_CURRENCY_ROW_GAMEPAD_HEIGHT" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)List" resizeToFitDescendents="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                                </Control>
+
+                                <Label name="$(parent)EmptyText" text="SI_EXPIRING_CROWNS_EMPTY_TEXT" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" hidden="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="40" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Headers" relativePoint="BOTTOMRIGHT" offsetY="40" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

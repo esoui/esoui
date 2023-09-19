@@ -1,0 +1,11 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_CollectibleEvolutionTexture" virtual="true">
+            <Dimensions x="ZO_COLLECTIBLE_EVOLUTION_TEXTURE_SIZE" y="ZO_COLLECTIBLE_EVOLUTION_TEXTURE_SIZE"/>
+        </Texture>
+
+        <Texture name="ZO_CollectibleEvolutionArrow" textureFile="EsoUI/Art/Inventory/collectible_evolution_arrow.dds" virtual="true">
+            <Dimensions x="64" y="64"/>
+        </Texture>
+    </Controls>
+</GuiXml>

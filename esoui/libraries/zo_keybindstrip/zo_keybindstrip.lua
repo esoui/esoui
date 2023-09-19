@@ -674,9 +674,12 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
                 local keybindHandled = nil
                 if self:FilterSceneHiding(keybindButtonDescriptor) then
                     if keybindButtonDescriptor.callback then
-                        ClearMenu()
                         keybindHandled = keybindButtonDescriptor.callback(DOWN)
                         keybindButtonDescriptor.handledDown = true
+
+                        -- ClearMenu must come after the keybind callback because it clears the
+                        -- MouseOverRow for SortFilterLists on which the callback may be relying
+                        ClearMenu()
 
                         local sound = GetValueFromRawOrFunction(keybindButtonDescriptor, "sound")
                         if sound then

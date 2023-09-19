@@ -55,24 +55,50 @@
                         </Backdrop>
                     </Controls>
                 </Control>
-
-                <Label name="$(parent)DescriptionTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_DESCRIPTION">
+                
+                <Label name="$(parent)Instructions" inherits="ZO_HelpCustomerService_Keyboard_Details" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
+                </Label>
+                
+                <Label name="$(parent)DescriptionTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_ASK_FOR_HELP_ADDITIONAL_DETAILS">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
                 </Label>
 
                 <Backdrop name="$(parent)DescriptionBody" inherits="ZO_MultiLineEditBackdrop_Keyboard">
-                    <Dimensions x="550" y="200"/>
+                    <Dimensions x="100%" y="150"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
                     <Controls>
                         <EditBox name="$(parent)Field" inherits="ZO_DefaultEditMultiLineForBackdrop"/>
                     </Controls>
                 </Backdrop>
 
+                <Control name="$(parent)ExternalInfo" mouseEnabled="true" resizeToFitDescendents="true" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionBody" relativePoint="BOTTOMLEFT"/>
+                    <OnMouseEnter>
+                        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OnExternalInfoMouseEnter()
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OnExternalInfoMouseExit()
+                    </OnMouseExit>
+                    
+                    <Controls>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Help/help_tabIcon_tutorial_up.dds">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="64" y="64" />
+                        </Texture>
+                        
+                        <Label name="$(parent)Title" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SECOND_CONTRAST">
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
                 <Button name="$(parent)SubmitButton" inherits="ZO_DefaultButton" text="SI_CUSTOMER_SERVICE_SUBMIT">
                     <Dimensions x="200" />
-                    <Anchor point="TOP" relativeTo="$(parent)DescriptionBody" relativePoint="BOTTOM" offsetY="30" />
+                    <Anchor point="BOTTOM" offsetY="-20" />
                     <OnClicked>
-                        ZO_HelpAskForHelp_Keyboard_AttemptToSendTicket()
+                        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:AttemptToSendTicket()
                     </OnClicked>
                 </Button>
             </Controls>

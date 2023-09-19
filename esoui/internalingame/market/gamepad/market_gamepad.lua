@@ -660,7 +660,7 @@ function GamepadMarket:OnCategorySelected(data)
         end
 
         if not self.isLockedForCategoryRefresh then
-            local categoryIndex, subcategoryIndex
+            local categoryIndex, subcategoryIndex, isFeaturedCategory
             -- faked category types don't have real category indices so keep them as nil
             if data.type == ZO_MARKET_CATEGORY_TYPE_NONE then
                 if data.parentData then
@@ -669,9 +669,11 @@ function GamepadMarket:OnCategorySelected(data)
                 else
                     categoryIndex = data.categoryIndex
                 end
+            elseif data.type == ZO_MARKET_CATEGORY_TYPE_FEATURED then
+                isFeaturedCategory = true
             end
 
-            OnMarketCategorySelected(self:GetDisplayGroup(), categoryIndex, subcategoryIndex, self.suppressMarketCategoryTutorials)
+            OnMarketCategorySelected(self:GetDisplayGroup(), categoryIndex, subcategoryIndex, self.suppressMarketCategoryTutorials, isFeaturedCategory)
         end
 
         local queuedCategoryIndex, queuedSubcategoryIndex = self:GetQueuedCategoryIndices()

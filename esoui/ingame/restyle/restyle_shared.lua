@@ -315,7 +315,7 @@ function ZO_RestyleSlotData:SetPendingDyes(primaryDyeId, secondaryDyeId, accentD
         end
     end
     SetPendingSlotDyes(self.restyleMode, self.restyleSetIndex, self.restyleSlotType, unpack(desiredDyes))
-    ApplyChangesToPreviewCollectionShown()
+    ApplyChangesToPreviewCollectionShown(PREVIEW_OPTION_DONT_UNSHEATHE_IF_WIELDING)
 end
 
 function ZO_RestyleSlotData:CleanPendingDyes()

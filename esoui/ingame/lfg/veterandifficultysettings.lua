@@ -109,6 +109,7 @@ function ZO_VeteranDifficultySettings_OnInitialized(self)
         end
     end
 
+    self:RegisterForEvent(EVENT_VETERAN_DIFFICULTY_CHANGED, OnGroupVeteranDifficultyChanged)
     self:RegisterForEvent(EVENT_GROUP_VETERAN_DIFFICULTY_CHANGED, OnGroupVeteranDifficultyChanged)
     self:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, OnChampionPointsChanged)
     self:RegisterForEvent(EVENT_LEADER_UPDATE, OnLeaderUpdate)

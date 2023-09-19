@@ -1,13 +1,7 @@
 --------------------------------------
 --Preferred Roles Manager
 --------------------------------------
-local PreferredRolesManager = ZO_Object:Subclass()
-
-function PreferredRolesManager:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
+local PreferredRolesManager = ZO_InitializingCallbackObject:Subclass()
 
 function PreferredRolesManager:Initialize(control)
     self.control = control
@@ -17,7 +11,7 @@ function PreferredRolesManager:Initialize(control)
     local function OnActivityFinderStatusUpdate()
         self:RefreshRadioButtonGroupEnabledState()
     end
-    
+
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", OnActivityFinderStatusUpdate)
 end
 
@@ -34,6 +28,28 @@ function PreferredRolesManager:InitializeRoles()
         self.radioButtonGroup:Add(roleButton)
     end
 
+    local onClickHandler = function(control, buttonId, ignoreCallback)
+        local clickHandled = false
+        local selectedRole = GetSelectedLFGRole()
+        if selectedRole ~= control.role and DoesGroupFinderUserTypeGroupListingEnforceRoles(GROUP_FINDER_GROUP_LISTING_USER_TYPE_APPLIED_TO_GROUP_LISTING) then
+            local dialogData =
+            {
+                title = GetString(SI_GROUP_FINDER_CHANGE_ROLE_WARNING_DIALOG_TITLE),
+                mainText = GetString(SI_GROUP_FINDER_CHANGE_ROLE_WARNING_DIALOG_TEXT),
+                onConfirmCallback = function()
+                    RequestResolveGroupListingApplication(RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_RESCIND)
+                    self.radioButtonGroup:HandleClick(control, buttonId, ignoreCallback)
+                end,
+            }
+
+            ZO_Dialogs_ShowDialog("RADIO_BUTTON_GROUP_CHANGE_SELECTION_CONFIRMATION", dialogData)
+            clickHandled = true
+        end
+
+        return clickHandled
+    end
+
+    self.radioButtonGroup:SetCustomClickHandler(onClickHandler)
     self.radioButtonGroup:SetSelectionChangedCallback(function(_, ...) self:OnRoleButtonSelectionChanged(...) end)
 
     self:RefreshRoles()
@@ -47,13 +63,16 @@ function PreferredRolesManager:RefreshRoles()
 end
 
 function PreferredRolesManager:RefreshRadioButtonGroupEnabledState()
-    local canUpdateSelectedLFGRole = CanUpdateSelectedLFGRole()
+    local isGroupFinderInCreateEdit = GROUP_FINDER_KEYBOARD and GROUP_FINDER_KEYBOARD.mode == ZO_GROUP_FINDER_MODES.CREATE_EDIT or false
+    local canUpdateSelectedLFGRole = CanUpdateSelectedLFGRole() and not isGroupFinderInCreateEdit
     self.radioButtonGroup:SetEnabled(canUpdateSelectedLFGRole)
 end
 
 function PreferredRolesManager:OnRoleButtonSelectionChanged(newButton, previousButton)
     UpdateSelectedLFGRole(newButton.role)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
+    GROUP_FINDER_KEYBOARD.applicationsManagementContent:RefreshListing()
+    self:FireCallbacks("LFGRoleChanged")
 end
 
 ---- XML Callbacks ----

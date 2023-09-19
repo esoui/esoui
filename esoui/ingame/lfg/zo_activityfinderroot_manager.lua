@@ -1,11 +1,12 @@
 ZO_ACTIVITY_FINDER_SORT_PRIORITY =
 {
     GROUP = 0,
-    TIMED_ACTIVITIES = 100,
-    ZONE_STORIES = 200,
-    DUNGEONS = 300,
-    BATTLEGROUNDS = 400,
-    TRIBUTE = 500,
+    GROUP_FINDER = 100,
+    TIMED_ACTIVITIES = 200,
+    ZONE_STORIES = 300,
+    DUNGEONS = 400,
+    BATTLEGROUNDS = 500,
+    TRIBUTE = 600,
 }
 
 local function LFGSort(entry1, entry2)
@@ -400,6 +401,8 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                         location:SetCountsForAverageRoleTime(false)
                     elseif activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE and not HasActiveCampaignStarted() then
                         location:SetLockReasonText(SI_TRIBUTE_FINDER_LOCKED_NO_CAMPAIGN_TEXT)
+                    elseif ZO_GroupFinder_IsGroupFinderInUse() then
+                        location:SetLockReasonText(SI_ACTIVITY_FINDER_LOCKED_BY_GROUP_FINDER_TEXT)
                     elseif isGroupRelevant and not location:DoesGroupMeetLevelRequirements() then
                         location:SetLockReasonText(SI_LFG_LOCK_REASON_GROUP_LOCATION_LEVEL_REQUIREMENTS)
                     elseif isGroupRelevant and not isLeader then

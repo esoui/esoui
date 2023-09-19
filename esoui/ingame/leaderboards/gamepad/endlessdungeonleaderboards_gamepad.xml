@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_EndlessDungeonLeaderboardsInformationArea_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_EndlessDungeonLeaderboardsInformationArea_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

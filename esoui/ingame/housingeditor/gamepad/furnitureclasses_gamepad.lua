@@ -325,16 +325,16 @@ function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialog()
     local locationFilterTypesData = nil
     if locationFilterEnabled then
         local locationFilterEntries = {}
-        for filterValue in ZO_FlagIterator(HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_BEGIN * 2, HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_END) do
+        for filterValue in ZO_FlagHelpers.FlagIterator(HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_BEGIN * 2, HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_END) do
             local newEntry = ZO_ComboBox_Base:CreateItemEntry(GetString("SI_HOUSINGFURNITURELOCATIONFILTER", filterValue))
             newEntry.filterValue = filterValue
 
             newEntry.callback = function(control, name, item, isSelected)
                 local boundFiltersValue, locationFiltersValue, limitFiltersValue = optionsDialogLayoutInfo:getFiltersFunction()
                 if isSelected then
-                    locationFiltersValue = ZO_SetMaskFlag(locationFiltersValue, filterValue)
+                    locationFiltersValue = ZO_FlagHelpers.SetMaskFlag(locationFiltersValue, filterValue)
                 else
-                    locationFiltersValue = ZO_ClearMaskFlag(locationFiltersValue, filterValue)
+                    locationFiltersValue = ZO_FlagHelpers.ClearMaskFlag(locationFiltersValue, filterValue)
                 end
                 optionsDialogLayoutInfo.updateFiltersHandler(boundFiltersValue, locationFiltersValue, limitFiltersValue)
             end
@@ -365,9 +365,9 @@ function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialog()
             newEntry.callback = function(control, name, item, isSelected)
                 local boundFiltersValue, locationFiltersValue, limitFiltersValue = optionsDialogLayoutInfo:getFiltersFunction()
                 if isSelected then
-                    limitFiltersValue = ZO_SetMaskFlag(limitFiltersValue, filterValue)
+                    limitFiltersValue = ZO_FlagHelpers.SetMaskFlag(limitFiltersValue, filterValue)
                 else
-                    limitFiltersValue = ZO_ClearMaskFlag(limitFiltersValue, filterValue)
+                    limitFiltersValue = ZO_FlagHelpers.ClearMaskFlag(limitFiltersValue, filterValue)
                 end
                 optionsDialogLayoutInfo.updateFiltersHandler(boundFiltersValue, locationFiltersValue, limitFiltersValue)
             end
@@ -409,10 +409,10 @@ function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialog()
                     if isAllBoundSelected then
                         dropdown:SelectItemByIndex(1)
                     else
-                        if ZO_MaskHasFlag(boundFilterValue, HOUSING_FURNITURE_BOUND_FILTER_BOUND) then
+                        if ZO_FlagHelpers.MaskHasFlag(boundFilterValue, HOUSING_FURNITURE_BOUND_FILTER_BOUND) then
                             dropdown:SelectItemByIndex(2)
                         end
-                        if ZO_MaskHasFlag(boundFilterValue, HOUSING_FURNITURE_BOUND_FILTER_UNBOUND) then
+                        if ZO_FlagHelpers.MaskHasFlag(boundFilterValue, HOUSING_FURNITURE_BOUND_FILTER_UNBOUND) then
                             dropdown:SelectItemByIndex(3)
                         end
                     end
@@ -448,7 +448,7 @@ function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialog()
                     limitFilterTypesData:ClearAllSelections()
 
                     for _, entry in ipairs(entries) do
-                        local isSelected = ZO_MaskHasFlag(limitFilterValue, entry.filterValue)
+                        local isSelected = ZO_FlagHelpers.MaskHasFlag(limitFilterValue, entry.filterValue)
                         limitFilterTypesData:SetItemSelected(entry, isSelected)
                     end
 
@@ -492,7 +492,7 @@ function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialog()
                     locationFilterTypesData:ClearAllSelections()
 
                     for _, entry in ipairs(entries) do
-                        local isSelected = ZO_MaskHasFlag(locationFilterValue, entry.filterValue)
+                        local isSelected = ZO_FlagHelpers.MaskHasFlag(locationFilterValue, entry.filterValue)
                         locationFilterTypesData:SetItemSelected(entry, isSelected)
                     end
 

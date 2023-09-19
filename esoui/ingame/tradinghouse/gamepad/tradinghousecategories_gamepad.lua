@@ -64,7 +64,7 @@ do
 
             for _, header in ipairs(self.headers) do
                 local headerName = GetString("SI_TRADINGHOUSECATEGORYHEADER", header)
-                local entry = ZO_ComboBox:CreateItemEntry(headerName, OnHeaderChanged)
+                local entry = dropdown:CreateItemEntry(headerName, OnHeaderChanged)
                 entry.header = header
                 dropdown:AddItem(entry)
             end
@@ -110,7 +110,7 @@ do
             local categories = self.headerToCategoriesMap[self.selectedHeader]
             for _, categoryParams in ipairs(categories) do
                 local categoryName = categoryParams:GetFormattedName()
-                local entry = ZO_ComboBox:CreateItemEntry(categoryName, OnCategorySelected)
+                local entry = comboBox:CreateItemEntry(categoryName, OnCategorySelected)
                 entry.categoryParams = categoryParams
                 if categoryParams == self.selectedCategoryParams then
                     selectOld = true
@@ -167,7 +167,7 @@ do
                 local key = categoryParams:GetSubcategoryKey(subcategoryIndex)
                 local name = categoryParams:GetSubcategoryName(subcategoryIndex)
 
-                local entry = ZO_ComboBox:CreateItemEntry(name, OnSubcategorySelected)
+                local entry = dropdown:CreateItemEntry(name, OnSubcategorySelected)
                 entry.subcategoryKey = key
                 if key == self.selectedSubcategoryKey then
                     selectOld = true

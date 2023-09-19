@@ -190,7 +190,7 @@
             <Dimensions y="32"/>
         </Control>
         
-        <TopLevelControl name="ZO_HousingFurnitureSettingsPanel_KeyboardTopLevel" inherits="ZO_HousingFurnitureBrowserList_Keyboard" hidden="true">
+        <TopLevelControl name="ZO_HousingFurnitureSettingsPanel_Keyboard_TL" inherits="ZO_HousingFurnitureBrowserList_Keyboard" hidden="true">
             <Controls>
                 <Control name="$(parent)Contents" override="true">
                     <Controls>
@@ -431,7 +431,7 @@
 
                 <Label name="$(parent)HousesHeader" inherits="ZO_DialogContentAnchors" text="SI_DIALOG_COPY_HOUSING_PERMISSION_HEADER" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
 
-                <Control name="$(parent)HousesComboBox" inherits="ZO_ScrollableComboBox">
+                <Control name="$(parent)HousesComboBox" inherits="ZO_ComboBox">
                     <Dimensions y="36"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)HousesHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)HousesHeader" relativePoint="BOTTOMRIGHT" offsetY="10" />

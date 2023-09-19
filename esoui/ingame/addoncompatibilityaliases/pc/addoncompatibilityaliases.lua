@@ -138,8 +138,22 @@ GetJournalQuestRewardInfoInZone = function(zoneIndex, journalQuestIndex, rewardI
 EVENT_COLLECTIBLE_ON_COOLDOWN = EVENT_COLLECTIBLE_USE_RESULT
 EVENT_COLLECTIBLE_USE_BLOCKED = EVENT_COLLECTIBLE_USE_RESULT
 
---Renamed quest instance type function to match the others
-GetJournalInstanceDisplayType = GetJournalQuestInstanceDisplayType
+-- Renamed quest zone display type function to match the others
+-- Renamed InstanceDisplayType to ZoneDisplayType
+GetJournalInstanceDisplayType = GetJournalQuestZoneDisplayType
+GetJournalQuestInstanceDisplayType = GetJournalQuestZoneDisplayType
+INSTANCE_DISPLAY_TYPE_SOLO = ZONE_DISPLAY_TYPE_SOLO
+INSTANCE_DISPLAY_TYPE_DUNGEON = ZONE_DISPLAY_TYPE_DUNGEON
+INSTANCE_DISPLAY_TYPE_RAID = ZONE_DISPLAY_TYPE_RAID
+INSTANCE_DISPLAY_TYPE_GROUP_DELVE = ZONE_DISPLAY_TYPE_GROUP_DELVE
+INSTANCE_DISPLAY_TYPE_GROUP_AREA = ZONE_DISPLAY_TYPE_GROUP_AREA
+INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON = ZONE_DISPLAY_TYPE_PUBLIC_DUNGEON
+INSTANCE_DISPLAY_TYPE_DELVE = ZONE_DISPLAY_TYPE_DELVE
+INSTANCE_DISPLAY_TYPE_HOUSING = ZONE_DISPLAY_TYPE_HOUSING
+INSTANCE_DISPLAY_TYPE_BATTLEGROUND = ZONE_DISPLAY_TYPE_BATTLEGROUND
+INSTANCE_DISPLAY_TYPE_ZONE_STORY = ZONE_DISPLAY_TYPE_ZONE_STORY
+INSTANCE_DISPLAY_TYPE_COMPANION = ZONE_DISPLAY_TYPE_COMPANION
+ZO_ANY_INSTANCE_DISPLAY_TYPE = ZO_ANY_ZONE_DISPLAY_TYPE
 
 --Recipes can now have multiple tradeskill requirements
 GetItemLinkRecipeRankRequirement = function(itemLink)
@@ -1190,7 +1204,8 @@ GetCountdownBattlegroundAllianceSymbolIcon = ZO_GetCountdownBattlegroundAlliance
 GetLargeAllianceSymbolIcon = ZO_GetLargeAllianceSymbolIcon
 GetPlatformAllianceSymbolIcon = ZO_GetPlatformAllianceSymbolIcon
 GetAllianceKeepRewardIcon = ZO_GetAllianceKeepRewardIcon
-GetInstanceDisplayTypeIcon = ZO_GetInstanceDisplayTypeIcon
+GetInstanceDisplayTypeIcon = ZO_GetZoneDisplayTypeIcon
+ZO_GetInstanceDisplayTypeIcon = ZO_GetZoneDisplayTypeIcon
 GetSocketTexture = ZO_GetSocketTexture
 GetClassIcon = ZO_GetClassIcon
 GetGamepadClassIcon = ZO_GetGamepadClassIcon
@@ -1229,7 +1244,15 @@ function ZO_SharedFurnitureManager:InitializeFurnitureCaches()
     self:RebuildFurnitureCaches()
 end
 
-ZO_MaskIterator = ZO_FlagIterator
+ZO_MaskIterator = ZO_FlagHelpers.FlagIterator
+ZO_FlagIterator = ZO_FlagHelpers.FlagIterator
+ZO_MaskHasFlag = ZO_FlagHelpers.MaskHasFlag
+ZO_MaskHasFlagsIterator = ZO_FlagHelpers.MaskHasFlagsIterator
+ZO_ClearMaskFlag = ZO_FlagHelpers.ClearMaskFlag
+ZO_ClearMaskFlags = ZO_FlagHelpers.ClearMaskFlags
+ZO_SetMaskFlag = ZO_FlagHelpers.SetMaskFlag
+ZO_SetMaskFlags = ZO_FlagHelpers.SetMaskFlags
+ZO_CompareMaskFlags = ZO_FlagHelpers.CompareMaskFlags
 
 --Error Frame Refactor
 ZO_UIErrors_ToggleSupressDialog = ZO_UIErrors_ToggleSuppressDialog
@@ -1278,3 +1301,20 @@ GAMEPAD_GUILD_HOME_SCENE_NAME = "gamepad_guild_home"
 
 ClearGroupFinderSearch = ClearActivityFinderSearch
 StartGroupFinderSearch = StartActivityFinderSearch
+
+-- Collectible combination update
+function GetCombinationUnlockedCollectible(combinationId)
+    return GetCombinationUnlockedCollectibleId(combinationId, 1)
+end
+
+function GetCombinationFirstNonFragmentCollectibleComponentId(combinationId)
+    local firstCollectibleId = GetCombinationNonFragmentComponentCollectibleIds(combinationId)
+    return firstCollectibleId or 0
+end
+
+-- Combo box refactor
+ZO_SCROLLABLE_ENTRY_TEMPLATE_HEIGHT = ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT
+ZO_ScrollableComboBox = ZO_ComboBox
+
+-- rename of the toplevel for HousingFurnitureSettings_Keyboard
+ZO_HousingFurnitureSettingsPanel_KeyboardTopLevel = ZO_HousingFurnitureSettingsPanel_Keyboard_TL

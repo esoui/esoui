@@ -4,7 +4,7 @@
 
 -- Used for indexing into icon/tooltip tables if we don't care what the quest or instance display types are
 ZO_ANY_QUEST_TYPE = "all_quests"
-ZO_ANY_INSTANCE_DISPLAY_TYPE = "all_instances"
+ZO_ANY_ZONE_DISPLAY_TYPE = "all_instances"
 
 ZO_QuestJournal_Shared = ZO_CallbackObject:Subclass()
 
@@ -40,39 +40,39 @@ function ZO_QuestJournal_Shared:Initialize(control)
     control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
 end
 
-local function QuestJournal_Shared_RegisterDataInTable(table, questType, instanceDisplayType, data)
+local function QuestJournal_Shared_RegisterDataInTable(table, questType, zoneDisplayType, data)
     local questTableIndex = questType or ZO_ANY_QUEST_TYPE
     table[questTableIndex] = table[questTableIndex] or {}
 
-    table[questTableIndex][instanceDisplayType or ZO_ANY_INSTANCE_DISPLAY_TYPE] = data
+    table[questTableIndex][zoneDisplayType or ZO_ANY_ZONE_DISPLAY_TYPE] = data
 end
 
-local function QuestJournal_Shared_GetDataFromTable(table, questType, instanceDisplayType)
+local function QuestJournal_Shared_GetDataFromTable(table, questType, zoneDisplayType)
     local data
 
     -- Attempt to pull data specifically for this quest type first
     if table[questType] then
-        data = table[questType][instanceDisplayType] or table[questType][ZO_ANY_INSTANCE_DISPLAY_TYPE]
+        data = table[questType][zoneDisplayType] or table[questType][ZO_ANY_ZONE_DISPLAY_TYPE]
     end
 
     -- If we didn't find specific data for this quest type, try to fetch it for any quest type
     if data == nil and table[ZO_ANY_QUEST_TYPE] then
-        data = table[ZO_ANY_QUEST_TYPE][instanceDisplayType] or table[ZO_ANY_QUEST_TYPE][ZO_ANY_INSTANCE_DISPLAY_TYPE]
+        data = table[ZO_ANY_QUEST_TYPE][zoneDisplayType] or table[ZO_ANY_QUEST_TYPE][ZO_ANY_ZONE_DISPLAY_TYPE]
     end
 
     return data
 end
 
 --TODO: Get ride of this exstensibility.  The icon should only be controlled by the display type.
-function ZO_QuestJournal_Shared:RegisterIconTexture(questType, instanceDisplayType, texturePath)
-    QuestJournal_Shared_RegisterDataInTable(self.icons, questType, instanceDisplayType, texturePath)
+function ZO_QuestJournal_Shared:RegisterIconTexture(questType, zoneDisplayType, texturePath)
+    QuestJournal_Shared_RegisterDataInTable(self.icons, questType, zoneDisplayType, texturePath)
 end
 
-function ZO_QuestJournal_Shared:GetIconTexture(questType, instanceDisplayType)
-    return QuestJournal_Shared_GetDataFromTable(self.icons, questType, instanceDisplayType)
+function ZO_QuestJournal_Shared:GetIconTexture(questType, zoneDisplayType)
+    return QuestJournal_Shared_GetDataFromTable(self.icons, questType, zoneDisplayType)
 end
 
-function ZO_QuestJournal_Shared:RegisterTooltipText(questType, instanceDisplayType, stringIdOrText, paramsFunction)
+function ZO_QuestJournal_Shared:RegisterTooltipText(questType, zoneDisplayType, stringIdOrText, paramsFunction)
     local tooltipText = type(stringIdOrText) == "number" and GetString(stringIdOrText) or stringIdOrText
 
     local data = tooltipText
@@ -84,11 +84,11 @@ function ZO_QuestJournal_Shared:RegisterTooltipText(questType, instanceDisplayTy
         }
     end
 
-    QuestJournal_Shared_RegisterDataInTable(self.tooltips, questType, instanceDisplayType, data)
+    QuestJournal_Shared_RegisterDataInTable(self.tooltips, questType, zoneDisplayType, data)
 end
 
-function ZO_QuestJournal_Shared:GetTooltipText(questType, instanceDisplayType, questIndex)
-    local data = QuestJournal_Shared_GetDataFromTable(self.tooltips, questType, instanceDisplayType)
+function ZO_QuestJournal_Shared:GetTooltipText(questType, zoneDisplayType, questIndex)
+    local data = QuestJournal_Shared_GetDataFromTable(self.tooltips, questType, zoneDisplayType)
     local text = data
     if type(data) == "table" then
         text = zo_strformat(data.text, data.paramsFunction(questIndex))

@@ -648,7 +648,7 @@ function ZO_HousingSettingsFilters_SetupDropdown(dropdown, includeLocationFilter
         end
 
         local locationFilterEntries = {}
-        for filterValue in ZO_FlagIterator(HOUSING_FURNITURE_LOCATION_FILTER_ALL * 2, HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_END) do
+        for filterValue in ZO_FlagHelpers.FlagIterator(HOUSING_FURNITURE_LOCATION_FILTER_ALL * 2, HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_END) do
             local filterName = zo_strformat(SI_HOUSING_FURNITURE_FILTER_LIST_ITEM_FORMATTER, GetString("SI_HOUSINGFURNITURELOCATIONFILTER", filterValue))
             local entry = comboBox:CreateItemEntry(filterName)
             entry.filterValue = filterValue

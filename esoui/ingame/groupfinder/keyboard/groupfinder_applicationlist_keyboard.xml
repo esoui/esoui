@@ -1,0 +1,239 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GroupFinder_ApplicationsList_Header" inherits="ZO_SortHeader" virtual="true">
+            <Dimensions y="32" />
+        </Control>
+        
+        <Texture name="ZO_GroupFinder_ApplicationsListRole" virtual="true" mouseEnabled="true" layer="OVERLAY">
+            <Dimensions x="32" y="32"/>
+            <OnMouseUp>
+                ZO_PropagateHandler(self:GetParent():GetParent(), "OnMouseUp", button, upInside)
+            </OnMouseUp>
+
+            <OnMouseDoubleClick>
+                ZO_PropagateHandler(self:GetParent():GetParent(), "OnMouseDoubleClick", button)
+            </OnMouseDoubleClick>
+        </Texture>
+
+        <Control name="ZO_GroupFinder_ApplicationsListRow_Keyboard" mouseEnabled="true" virtual="true">
+            <Dimensions y="30"/>
+            <OnInitialized>
+                ZO_GroupFinder_ApplicationsListRow_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <OnMouseEnter>
+                self.object:EnterRow()
+            </OnMouseEnter>
+            
+            <OnMouseExit>
+                self.object:ExitRow()
+            </OnMouseExit>
+            
+            <OnMouseUp>
+                self.object:OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+
+            <OnMouseDoubleClick>
+                self.object:OnMouseDoubleClick(self, button)
+            </OnMouseDoubleClick>
+            
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                
+                <Label name="$(parent)CharacterName" inherits="ZO_GroupListRowLabel" mouseEnabled="true">
+                    <Dimensions x="ZO_KEYBOARD_GROUP_LIST_NAME_WIDTH" />
+                    <Anchor point="LEFT" />
+                    <OnMouseUp>
+                        ZO_PropagateHandler(self:GetParent(), "OnMouseUp", button, upInside)
+                    </OnMouseUp>
+
+                    <OnMouseDoubleClick>
+                        ZO_PropagateHandler(self:GetParent(), "OnMouseDoubleClick", button)
+                    </OnMouseDoubleClick>
+                </Label>
+                
+                <Control name="$(parent)Class">
+                    <Dimensions x="ZO_KEYBOARD_GROUP_LIST_CLASS_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)CharacterName" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon" mouseEnabled="true" layer="OVERLAY">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="CENTER" />
+                            <OnMouseUp>
+                                ZO_PropagateHandler(self:GetParent():GetParent(), "OnMouseUp", button, upInside)
+                            </OnMouseUp>
+
+                            <OnMouseDoubleClick>
+                                ZO_PropagateHandler(self:GetParent():GetParent(), "OnMouseDoubleClick", button)
+                            </OnMouseDoubleClick>
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Level" inherits="ZO_GroupListRowLabel" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                    <Dimensions x="ZO_KEYBOARD_GROUP_LIST_LEVEL_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X"/>
+                </Label>
+
+                <Texture name="$(parent)Champion" textureFile="EsoUI/Art/Champion/champion_icon_32.dds" layer="OVERLAY">
+                    <Dimensions x="22" y="22"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="5" />
+                </Texture>
+
+                <Control name="$(parent)Role">
+                    <Dimensions x="ZO_KEYBOARD_GROUP_LIST_ROLES_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Level" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X"/>
+                    <Controls>
+                        <Texture name="$(parent)Heal" inherits="ZO_GroupFinder_ApplicationsListRole" textureFile="EsoUI/Art/LFG/LFG_healer_down.dds">
+                            <Anchor point="CENTER" />
+                        </Texture>
+                        
+                        <Texture name="$(parent)DPS" inherits="ZO_GroupFinder_ApplicationsListRole" textureFile="EsoUI/Art/LFG/LFG_dps_down.dds">
+                            <Anchor point="LEFT" relativeTo="$(parent)Heal" relativePoint="RIGHT" />
+                        </Texture>
+                        
+                        <Texture name="$(parent)Tank" inherits="ZO_GroupFinder_ApplicationsListRole" textureFile="EsoUI/Art/LFG/LFG_tank_down.dds">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Heal" relativePoint="LEFT" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Expires" inherits="ZO_GroupListRowLabel" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                    <Dimensions x="ZO_KEYBOARD_GROUP_FINDER_APPLICATIONS_LIST_EXPIRES_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Role" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X" />
+                </Label>
+
+                <Button name="$(parent)Note">
+                    <Textures normal="EsoUI/Art/Contacts/social_note_up.dds"
+                              pressed="EsoUI/Art/Contacts/social_note_down.dds"
+                              mouseOver="EsoUI/Art/Contacts/social_note_over.dds" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Expires" relativePoint="RIGHT" offsetX="18"/>
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseUp>
+                        ZO_PropagateHandler(self:GetParent(), "OnMouseUp", button, upInside)
+                    </OnMouseUp>
+
+                    <OnMouseDoubleClick>
+                        ZO_PropagateHandler(self:GetParent(), "OnMouseDoubleClick", button)
+                    </OnMouseDoubleClick>
+                </Button>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GroupFinder_ApplicationsManagementList_Keyboard" virtual="true">
+            <Controls>
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                    <Dimensions y="32"/>
+                    <Controls>
+                        <Control name="$(parent)CharacterName" inherits="ZO_GroupFinder_ApplicationsList_Header">
+                            <Dimensions x="ZO_KEYBOARD_GROUP_LIST_NAME_WIDTH" />
+                            <Anchor point="LEFT" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GROUP_LIST_PANEL_NAME_HEADER), "GetCharacterName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Class" inherits="ZO_GroupFinder_ApplicationsList_Header">
+                            <Dimensions x="ZO_KEYBOARD_GROUP_LIST_CLASS_WIDTH" />
+                            <Anchor point="LEFT" relativeTo="$(parent)CharacterName" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GROUP_LIST_PANEL_CLASS_HEADER), "GetClassId", ZO_SORT_ORDER_UP, TEXT_ALIGN_CENTER, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Level" inherits="ZO_GroupFinder_ApplicationsList_Header">
+                            <Dimensions x="ZO_KEYBOARD_GROUP_LIST_LEVEL_WIDTH" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER), "GetLevel", ZO_SORT_ORDER_UP, TEXT_ALIGN_CENTER, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Role" inherits="ZO_GroupFinder_ApplicationsList_Header">
+                            <Dimensions x="ZO_KEYBOARD_GROUP_LIST_ROLES_WIDTH" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Level" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GROUP_LIST_PANEL_ROLES_HEADER), "GetRole", ZO_SORT_ORDER_UP, TEXT_ALIGN_CENTER, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                        </Control>
+                        
+                        <Control name="$(parent)Expires" inherits="ZO_GroupFinder_ApplicationsList_Header">
+                            <Dimensions x="ZO_KEYBOARD_GROUP_FINDER_APPLICATIONS_LIST_EXPIRES_WIDTH" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Role" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GROUP_FINDER_APPLICATIONS_SORT_HEADER_EXPIRATION), "GetEndTimeSeconds", ZO_SORT_ORDER_UP, TEXT_ALIGN_CENTER, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+
+                <Control name="$(parent)NoApplicationsRow" inherits="ZO_SortFilterListEmptyRow_Keyboard" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" />
+                    
+                    <Controls>
+                        <Label name="$(parent)Message" override="true" text="SI_GROUP_FINDER_APPLICATIONS_EMPTY_TEXT" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GroupFinder_ApplicationsManagementContent_Keyboard" virtual="true">
+            <Controls>
+                <Control name="$(parent)GroupListing" inherits="ZO_GroupFinder_GroupListing_Keyboard">
+                    <Anchor point="TOPLEFT" />
+                </Control>
+
+                <Control name="$(parent)Header" resizeToFitConstrains="Y">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)GroupListing" relativePoint="BOTTOMLEFT" offsetY="15"/>
+                    <Anchor point="RIGHT" constrains="X"/>
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_GROUP_FINDER_APPLICATIONS_HEADER">
+                            <Anchor point="TOP" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="RIGHT" constrains="X"/>
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_GroupFinder_ApplicationsManagementList_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" offsetY="-40" />
+                </Control>
+                
+                <Control name="$(parent)ButtonContainer" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOM"/>
+                    <Controls>
+                        <Button name="$(parent)EditGroupButton" inherits="ZO_DefaultButton" text="SI_GROUP_FINDER_EDIT_GROUP">
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="200" />
+
+                            <OnClicked>
+                                ZO_CreateEditGroupListingButton_OnClicked(self, button)
+                            </OnClicked>
+                        </Button>
+                        
+                        <Button name="$(parent)RemoveGroupButton" inherits="ZO_DefaultButton" text="SI_GROUP_FINDER_REMOVE_GROUP">
+                            <Anchor point="LEFT" relativeTo="$(parent)EditGroupButton" relativePoint="RIGHT" offsetX="50" />
+                            <Dimensions x="200" />
+
+                            <OnClicked>
+                                ZO_RemoveGroupListingButton_OnClicked(self, button)
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

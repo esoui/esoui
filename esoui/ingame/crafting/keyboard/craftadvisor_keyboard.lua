@@ -21,6 +21,16 @@ function ZO_CraftAdvisor_Keyboard:Initialize(control)
             self:OnHidden()
         end
     end)
+
+    CRAFT_ADVISOR_MANAGER:RegisterCallback("QuestMasterListUpdated", function()
+        self:RefreshTabs()
+    end)
+
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function()
+        if self.dirty then
+            self:RefreshTabs()
+        end
+    end)
 end
 
 function ZO_CraftAdvisor_Keyboard:SetupTabs()
@@ -106,6 +116,16 @@ function ZO_CraftAdvisor_Keyboard:SelectDefaultTab()
     end
 end
 
+function ZO_CraftAdvisor_Keyboard:RefreshTabs()
+    if CRAFT_ADVISOR_FRAGMENT:IsShowing() and not ZO_CraftingUtils_IsPerformingCraftProcess() then
+        self.tabs:UpdateButtons()
+        self:SelectDefaultTab()
+        self.dirty = false
+    else
+        self.dirty = true
+    end
+end
+
 function ZO_CraftAdvisor_Keyboard:OnShowing()
     --If this is the first time showing the craft advisor, we need to do a bit of extra setup
     if not self.initializedTabs then
@@ -113,8 +133,10 @@ function ZO_CraftAdvisor_Keyboard:OnShowing()
         self.tabs:Add(SI_CHARACTER_EQUIP_TITLE, { READ_ONLY_CHARACTER_WINDOW_FRAGMENT, THIN_LEFT_PANEL_BG_FRAGMENT}, self.equipmentData)
         self.initializedTabs = true
     end
-    self.tabs:UpdateButtons()
-    self:SelectDefaultTab()
+
+    if self.dirty then
+        self:RefreshTabs()
+    end
 end
 
 function ZO_CraftAdvisor_Keyboard:OnHidden()

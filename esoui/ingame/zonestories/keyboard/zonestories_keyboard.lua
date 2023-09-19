@@ -124,7 +124,7 @@ function ZO_ZoneStories_Keyboard:BuildZonesList()
     self.zoneSelectorComboBox:ClearItems()
 
     for _, zoneData in ZONE_STORIES_MANAGER:ZoneListIterator() do
-        local entry = ZO_ComboBox:CreateItemEntry(zoneData.name, OnSelectionChanged)
+        local entry = self.zoneSelectorComboBox:CreateItemEntry(zoneData.name, OnSelectionChanged)
         entry.data =
         {
             id = zoneData.id,

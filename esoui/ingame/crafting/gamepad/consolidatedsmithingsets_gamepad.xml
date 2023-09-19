@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ConsolidatedSmithingSetCategory_Gamepad_Template" inherits="ZO_GamepadMenuEntryWithBarTemplate" virtual="true">
+            <Controls>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_ConsolidatedSmithingSetSelection_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_ConsolidatedSmithingSetSelection_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

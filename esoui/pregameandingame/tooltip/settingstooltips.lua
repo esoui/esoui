@@ -20,8 +20,7 @@ function ZO_Tooltip:LayoutSettingAccountResendActivation(hasActivatedEmail, acco
 
         local bodySection = self:AcquireSection(self:GetStyle("bodySection"), self:GetStyle("bodyDescription"))
         local resendActivationOptionText = ZO_SELECTED_TEXT:Colorize(GetString(SI_INTERFACE_OPTIONS_ACCOUNT_RESEND_ACTIVATION))
-        local changeEmailOptionText = ZO_SELECTED_TEXT:Colorize(GetString(SI_INTERFACE_OPTIONS_ACCOUNT_CHANGE_EMAIL))
-        bodySection:AddLine(zo_strformat(SI_INTERFACE_OPTIONS_ACCOUNT_RESEND_ACTIVATION_TOOLTIP_TEXT, resendActivationOptionText, changeEmailOptionText))
+        bodySection:AddLine(zo_strformat(SI_INTERFACE_OPTIONS_ACCOUNT_RESEND_ACTIVATION_TOOLTIP_TEXT, resendActivationOptionText))
         self:AddSection(bodySection)
     end
 end

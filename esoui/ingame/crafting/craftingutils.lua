@@ -514,6 +514,21 @@ function ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(keybindStri
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", UpdateKeyBindDescriptorGroup)
 end
 
+function ZO_CraftingUtils_ConnectEditBoxToCraftingProcess(editBox)
+    local function OnCraftStarted()
+        if not editBox:IsHidden() then
+            editBox:SetEditEnabled(false)
+        end
+    end
+
+    local function OnCraftCompleted()
+        editBox:SetEditEnabled(true)
+    end
+
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", OnCraftStarted)
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", OnCraftCompleted)
+end
+
 local function ConnectStandardObjectToCraftingProcess(object)
     local function OnCraftStarted()
         if not object:GetControl():IsHidden() then
@@ -558,6 +573,29 @@ end
 
 function ZO_CraftingUtils_ConnectTreeToCraftingProcess(tree)
     ConnectStandardObjectToCraftingProcess(tree)
+end
+
+function ZO_CraftingUtils_ConnectButtonToCraftingProcess(button, overrideSetEnabled)
+    local function OnCraftStarted()
+        if not button:IsHidden() then
+            if overrideSetEnabled then
+                overrideSetEnabled(false)
+            else
+                button:SetEnabled(false)
+            end
+        end
+    end
+
+    local function OnCraftCompleted()
+        if overrideSetEnabled then
+            overrideSetEnabled(true)
+        else
+            button:SetEnabled(true)
+        end
+    end
+
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", OnCraftStarted)
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", OnCraftCompleted)
 end
 
 function ZO_CraftingUtils_GetSmithingTraitItemInfo()

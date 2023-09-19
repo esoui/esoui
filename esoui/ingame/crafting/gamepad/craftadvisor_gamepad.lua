@@ -26,6 +26,7 @@ function ZO_CraftAdvisor_Gamepad:Initialize(control)
 
     CRAFT_ADVISOR_MANAGER:RegisterCallback("QuestMasterListUpdated", function(updatedQuestList) 
         self.questMasterList = updatedQuestList
+        self.currentlyDisplayedQuestIndex = DEFAULT_DISPLAYED_QUEST_INDEX
         self:RefreshQuestList() 
     end)
 

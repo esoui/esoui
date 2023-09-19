@@ -22,7 +22,7 @@ function ZO_Armory_Gamepad:Initialize(control)
 
             -- Since always defaulting to the overview mode, refresh the list before getting the target data.
             local targetData = self.buildList:GetTargetData()
-            self:RefreshTargetTooltip(list, targetData)
+            self:RefreshTargetTooltip(self.buildList, targetData)
         elseif newState == SCENE_FRAGMENT_SHOWN then
             TriggerTutorial(TUTORIAL_TRIGGER_ARMORY_OPENED)
         elseif newState == SCENE_FRAGMENT_HIDDEN then
@@ -680,6 +680,7 @@ function ZO_Armory_Gamepad:InitializeBuildOptionsDialog()
                         targetControl.editBoxControl:TakeFocus()
                     end,
                     narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
+                    narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
                 },
             },
             {

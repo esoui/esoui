@@ -101,6 +101,7 @@ end
 
 function ZO_GamepadStoreBuyback:OnSelectedItemChanged(buyBackData)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     if buyBackData then
         GAMEPAD_TOOLTIPS:LayoutBuyBackItem(GAMEPAD_LEFT_TOOLTIP, buyBackData.slotIndex, buyBackData.icon)
         STORE_WINDOW_GAMEPAD:UpdateRightTooltip(self.list, ZO_MODE_STORE_BUY_BACK)

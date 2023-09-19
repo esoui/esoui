@@ -80,12 +80,10 @@
                 <Button name="$(parent)Accept" inherits="ZO_NotificationsRowButton">
                     <Anchor point="RIGHT" offsetX="-5"/>
                     <OnMouseEnter>
-                        ZO_Tooltips_ShowTextTooltip(self, TOP, self:GetParent().acceptText)
-                        ZO_NotificationsBaseRow_OnMouseEnter(self:GetParent())
+                        ZO_NotificationsTwoButtonAccept_OnMouseEnter(self)
                     </OnMouseEnter>
                     <OnMouseExit>
-                        ZO_Tooltips_HideTextTooltip()
-                        ZO_NotificationsBaseRow_OnMouseExit(self:GetParent())
+                        ZO_NotificationsTwoButtonAccept_OnMouseExit(self)
                     </OnMouseExit>
                     <OnClicked>
                         ZO_NotificationsTwoButtonAccept_OnClicked(self)
@@ -100,12 +98,10 @@
                 <Button name="$(parent)Decline" inherits="ZO_NotificationsRowButton">
                     <Anchor point="RIGHT" offsetX="-5"/>
                     <OnMouseEnter>
-                        ZO_Tooltips_ShowTextTooltip(self, TOP, self:GetParent().declineText)
-                        ZO_NotificationsBaseRow_OnMouseEnter(self:GetParent())
+                        ZO_NotificationsTwoButtonDecline_OnMouseEnter(self)
                     </OnMouseEnter>
                     <OnMouseExit>
-                        ZO_Tooltips_HideTextTooltip()
-                        ZO_NotificationsBaseRow_OnMouseExit(self:GetParent())
+                        ZO_NotificationsTwoButtonDecline_OnMouseExit(self)
                     </OnMouseExit>
                     <OnClicked>
                         ZO_NotificationsTwoButtonDecline_OnClicked(self)
@@ -119,12 +115,10 @@
                 <Button name="$(parent)Accept" inherits="ZO_NotificationsRowButton">
                     <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)Decline" offsetX="-10"/>
                     <OnMouseEnter>
-                        ZO_Tooltips_ShowTextTooltip(self, TOP, self:GetParent().acceptText)
-                        ZO_NotificationsBaseRow_OnMouseEnter(self:GetParent())
+                        ZO_NotificationsTwoButtonAccept_OnMouseEnter(self)
                     </OnMouseEnter>
                     <OnMouseExit>
-                        ZO_Tooltips_HideTextTooltip()
-                        ZO_NotificationsBaseRow_OnMouseExit(self:GetParent())
+                        ZO_NotificationsTwoButtonAccept_OnMouseExit(self)
                     </OnMouseExit>
                     <OnClicked>
                         ZO_NotificationsTwoButtonAccept_OnClicked(self)
@@ -199,12 +193,10 @@
                     />
                     <Anchor point="RIGHT" offsetX="-5"/>
                     <OnMouseEnter>
-                        ZO_Tooltips_ShowTextTooltip(self, TOP, self:GetParent().declineText)
-                        ZO_NotificationsBaseRow_OnMouseEnter(self:GetParent())
+                        ZO_NotificationsTwoButtonDecline_OnMouseEnter(self)
                     </OnMouseEnter>
                     <OnMouseExit>
-                        ZO_Tooltips_HideTextTooltip()
-                        ZO_NotificationsBaseRow_OnMouseExit(self:GetParent())
+                        ZO_NotificationsTwoButtonDecline_OnMouseExit(self)
                     </OnMouseExit>
                     <OnClicked>
                         ZO_NotificationsTwoButtonDecline_OnClicked(self)

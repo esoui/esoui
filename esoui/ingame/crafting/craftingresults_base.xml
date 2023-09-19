@@ -88,6 +88,20 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
+
+        <!-- Right now this is essentially just an animation that sits here and does nothing for a certain amount of time, but we can modify this down the line if design wants to add special visuals-->
+        <AnimationTimeline name="CraftingResultsConsumeStation_Animation">
+            <Animations>
+                <CustomAnimation duration="1350">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                    <OnStop>
+                        self:GetTimeline():Stop()
+                    </OnStop>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
     </Animations>
     
     <Controls>

@@ -94,16 +94,16 @@
             </Controls>
         </Tooltip>
 
-        <Tooltip name="ZO_ItemIconTooltip" inherits="ItemTooltipBase" virtual="true">
+        <Tooltip name="ZO_IconTooltip_Base" virtual="true">
             <Anchor point="BOTTOM" offsetY="-245"/>
             <ClampedToScreenInsets top="-32"/>
 
-            <OnCleared>
-                ZO_ItemIconTooltip_Cleared(self)
+            <OnCleared name="ZO_IconTooltip_Base">
+                ZO_IconTooltip_Cleared(self)
             </OnCleared>
 
-            <OnAddGameData>
-                ZO_ItemIconTooltip_OnAddGameData(...)
+            <OnAddGameData name="ZO_IconTooltip_Base">
+                ZO_IconTooltip_OnAddGameData(...)
             </OnAddGameData>
 
             <Controls>
@@ -125,6 +125,8 @@
             </Controls>
         </Tooltip>
 
+        <Tooltip name="ZO_ItemIconTooltip" inherits="ItemTooltipBase ZO_IconTooltip_Base" virtual="true" />
+
         <TopLevelControl name="TooltipTopLevel" virtual="true" tier="HIGH" level="ZO_HIGH_TIER_TOOLTIPS">
             <AnchorFill/>
         </TopLevelControl>
@@ -138,6 +140,15 @@
         <TopLevelControl name="AbilityTooltipTopLevel" inherits="TooltipTopLevel">
             <Controls>
                 <Tooltip name="AbilityTooltip" inherits="ZO_BaseTooltip">
+                    <ResizeToFitPadding width="32" height="40"/>
+                    <DimensionConstraints minX="384" maxX="384" />
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="AbilityIconTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="AbilityIconTooltip" inherits="ZO_BaseTooltip ZO_IconTooltip_Base" headerVerticalOffset="11">
                     <ResizeToFitPadding width="32" height="40"/>
                     <DimensionConstraints minX="384" maxX="384" />
                 </Tooltip>

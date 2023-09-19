@@ -1,42 +1,37 @@
-local PlayerStatusManager = ZO_Object:Subclass()
 local PLAYER_STATUS
 
-function PlayerStatusManager:New(control)
-    local manager = ZO_Object.New(self)
-    manager.control = control
+local PlayerStatusManager = ZO_InitializingObject:Subclass()
 
-    local comboBoxControl = GetControl(control, "Status")
-    manager.comboBox = ZO_ComboBox_ObjectFromContainer(comboBoxControl)
-    manager.comboBox:SetSortsItems(false)
-    manager.comboBox:SetDropdownFont("ZoFontHeader")
-    manager.comboBox:SetSpacing(8)
-    manager.selectedItem = GetControl(comboBoxControl, "SelectedItem")
+function PlayerStatusManager:Initialize(control)
+    self.control = control
 
-    manager.OnStatusChanged =   function(_, entryText, entry)
-                                    manager:SetSelectedStatus(entry.status)
-                                    SelectPlayerStatus(entry.status)
-                                end
+    local comboBoxControl = control:GetNamedChild("Status")
+    self.comboBox = ZO_ComboBox_ObjectFromContainer(comboBoxControl)
+    self.comboBox:SetSortsItems(false)
+    self.comboBox:SetDropdownFont("ZoFontHeader")
+    self.comboBox:SetSpacing(8)
+    self.selectedItem = comboBoxControl:GetNamedChild("SelectedItem")
 
-    manager:Initialize()
+    control:GetNamedChild("DisplayName"):SetText(GetDisplayName())
 
-    control:RegisterForEvent(EVENT_PLAYER_STATUS_CHANGED, function(_, oldStatus, newStatus) manager:OnPlayerStatusChanged(oldStatus, newStatus) end)
-        
+    self.OnStatusChanged = function(_, entryText, entry)
+        self:SetSelectedStatus(entry.status)
+        SelectPlayerStatus(entry.status)
+    end
 
-    return manager
-end
-
-function PlayerStatusManager:Initialize()
     for i = 1, GetNumPlayerStatuses() do
         local statusTexture = ZO_GetPlayerStatusIcon(i)
         local statusName = GetString("SI_PLAYERSTATUS", i)
         local entryText = zo_iconTextFormat(statusTexture, 32, 32, statusName)
         local entry = self.comboBox:CreateItemEntry(entryText, self.OnStatusChanged)
         entry.status = i
-		self.comboBox:AddItem(entry)
+        self.comboBox:AddItem(entry)
     end
 
     local status = GetPlayerStatus()
     self:SetSelectedStatus(status)
+
+    control:RegisterForEvent(EVENT_PLAYER_STATUS_CHANGED, function(_, oldStatus, newStatus) self:OnPlayerStatusChanged(oldStatus, newStatus) end)
 end
 
 function PlayerStatusManager:SetSelectedStatus(status)
@@ -71,7 +66,6 @@ function ZO_PlayerStatus_OnMouseExit(control)
     PLAYER_STATUS:Status_OnMouseExit()
 end
 
-function ZO_DisplayName_OnInitialized(self)
-    GetControl(self, "DisplayName"):SetText(GetDisplayName())
-    PLAYER_STATUS = PlayerStatusManager:New(self)
+function ZO_DisplayName_OnInitialized(control)
+    PLAYER_STATUS = PlayerStatusManager:New(control)
 end

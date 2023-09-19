@@ -118,7 +118,7 @@ function ZO_CompanionOverview_Keyboard:UpdateOutfitDropdownOutfits()
         end
     end
 
-    local unequippedOutfitEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), OnUnequipOutfitSelected)
+    local unequippedOutfitEntry = self.outfitDropdown:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), OnUnequipOutfitSelected)
     self.outfitDropdown:AddItem(unequippedOutfitEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
     local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
@@ -127,7 +127,7 @@ function ZO_CompanionOverview_Keyboard:UpdateOutfitDropdownOutfits()
     local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
     for outfitIndex = 1, numOutfits do
         local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(GAMEPLAY_ACTOR_CATEGORY_COMPANION, outfitIndex)
-        local entry = ZO_ComboBox:CreateItemEntry(outfitManipulator:GetOutfitName(), OnOutfitEntrySelected)
+        local entry = self.outfitDropdown:CreateItemEntry(outfitManipulator:GetOutfitName(), OnOutfitEntrySelected)
         entry.outfitIndex = outfitIndex
         self.outfitDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         if equippedOutfitIndex == outfitIndex then

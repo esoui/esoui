@@ -25,9 +25,11 @@ function ZO_RecurrenceTrackerValue:GetValue()
 end
 
 function ZO_RecurrenceTrackerValue:HasExpired()
-    return self.m_expirationTimeMS and self.m_expirationTimeMS <= GetFrameTimeMilliseconds() or false
+    return self.m_expirationMS and self.m_expirationMS <= GetFrameTimeMilliseconds() or false
 end
 
+-- Note: Expiration should only be set by the owning ZO_RecurrenceTracker
+-- instance to optimize the maintenance for value expiration and removal.
 function ZO_RecurrenceTrackerValue:SetExpirationMS(expirationMS)
     self.m_expirationMS = expirationMS
 end
@@ -52,7 +54,7 @@ function ZO_RecurrenceTracker:AddValue(value)
         return
     end
 
-    -- Performs clean up only when necessary.
+    -- Perform clean up only when necessary.
     self:RemoveExpiredValues()
 
     local currentTimeMS = GetFrameTimeMilliseconds()
@@ -83,21 +85,55 @@ function ZO_RecurrenceTracker:AddValue(value)
     return valueEntry:GetNumOccurrences()
 end
 
+-- Returns the number of unexpired occurrences for the specified value.
+function ZO_RecurrenceTracker:GetNumValueOccurrences(value)
+    local valueEntry = self:GetValue(value)
+    return valueEntry and valueEntry:GetNumOccurrences() or 0
+end
+
+-- Returns the number of unexpired values (not occurrences).
+function ZO_RecurrenceTracker:GetNumValues()
+    -- Perform clean up only when necessary.
+    self:RemoveExpiredValues()
+    return NonContiguousCount(self.m_values)
+end
+
+-- Returns a reference to the specified value entry object if the value
+-- exists and has not yet expired.
 function ZO_RecurrenceTracker:GetValue(value)
     local valueEntry = self.m_values[value]
     if valueEntry and valueEntry:HasExpired() then
-        -- This entry has already expired.
+        -- This entry has already expired; remove it and return nil.
         valueEntry = nil
         self.m_values[value] = nil
     end
     return valueEntry
 end
 
+-- Returns true if the specified value exists and has not yet expired.
+function ZO_RecurrenceTracker:HasValue(value)
+    local valueEntry = self:GetValue(value)
+    return valueEntry ~= nil
+end
+
+-- Removes and returns the specified value if it exists and has not yet expired.
+function ZO_RecurrenceTracker:RemoveValue(value)
+    local valueEntry = self:GetValue(value)
+    if valueEntry then
+        self.m_values[value] = nil
+    end
+    return valueEntry
+end
+
+-- Removes all values.
 function ZO_RecurrenceTracker:Reset()
     self.m_nextExpirationMS = nil
     self.m_values = {}
 end
 
+-- Performs internal maintenance for value expiration and removal.
+-- Note: It should not be necessary to call this externally; the
+-- tracker performs maintenance automatically when necessary.
 function ZO_RecurrenceTracker:RemoveExpiredValues()
     if not self.m_nextExpirationMS then
         -- There are no values pending expiration.
@@ -110,34 +146,20 @@ function ZO_RecurrenceTracker:RemoveExpiredValues()
         return
     end
 
-    local expiredValues = nil
+    -- Remove expired values and identify the next upcoming value expiration time.
     local nextExpirationMS = nil
     local values = self.m_values
-
-    -- Identify expired values.
     for value, valueEntry in pairs(values) do
         local expirationMS = valueEntry:GetExpirationMS()
         if expirationMS <= currentTimeMS then
-            if not expiredValues then
-                expiredValues = {}
-            end
-
-            -- Queue this value for removal.
-            table.insert(expiredValues, value)
-        else
-            if not nextExpirationMS or expirationMS < nextExpirationMS then
-                -- Track the next upcoming expiration time.
-                nextExpirationMS = expirationMS
-            end
-        end
-    end
-
-    if expiredValues then
-        -- Remove expired values.
-        for _, value in ipairs(expiredValues) do
+            -- Remove the expired value.
             values[value] = nil
+        elseif not nextExpirationMS or expirationMS < nextExpirationMS then
+            -- Track the next upcoming expiration time.
+            nextExpirationMS = expirationMS
         end
     end
 
+    -- Track the next upcoming value expiration to avoid unnecessary maintenance.
     self.m_nextExpirationMS = nextExpirationMS
 end
