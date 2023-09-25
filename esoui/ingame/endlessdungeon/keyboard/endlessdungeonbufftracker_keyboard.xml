@@ -58,22 +58,12 @@
                 <Control name="$(parent)List" inherits="ZO_GridScrollList_Keyboard">
                     <Anchor point="TOP" relativeTo="$(parent)Progress" relativePoint="BOTTOM" offsetX="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_X" offsetY="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_Y" />
                     <!-- The height of this list is adjusted dynamically by ZO_EndlessDungeonBuffTracker_Keyboard:UpdateGridListDimensions -->
-                    <Dimensions x="390" />
+                    <Dimensions x="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_WIDTH_KEYBOARD" />
                     <DimensionConstraints maxY="500" />
                 </Control>
 
-                <Control name="$(parent)KeybindContainer" excludeFromResizeToFitExtents="true" resizeToFitDescendents="true">
+                <Control name="$(parent)KeybindContainer" override="true">
                     <Anchor point="BOTTOM" offsetY="-15" />
-
-                    <Controls>
-                        <Control name="$(parent)SwitchToSummary" inherits="ZO_KeybindButton" hidden="true">
-                            <Anchor point="TOPLEFT" />
-                        </Control>
-
-                        <Control name="$(parent)Close" inherits="ZO_KeybindButton">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)SwitchToSummary" relativePoint="TOPRIGHT" offsetX="40" />
-                        </Control>
-                    </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>

@@ -7,6 +7,7 @@ ZO_EndlessDungeonBuffTracker_Shared = ZO_DeferredInitializingObject:Subclass()
 function ZO_EndlessDungeonBuffTracker_Shared:Initialize(control)
     self.control = control
     control.object = self
+    self.progressLabel = self.control:GetNamedChild("Progress")
     self.nextInstanceIntervalOffsetS = 0
 
     local scene = ZO_Scene:New(self:GetSceneName(), SCENE_MANAGER)
@@ -14,7 +15,6 @@ function ZO_EndlessDungeonBuffTracker_Shared:Initialize(control)
     self.fragment = ZO_FadeSceneFragment:New(control)
     scene:AddFragment(self.fragment)
 
-    self.progressLabel = self.control:GetNamedChild("Progress")
     -- AddOnLoaded is fired before DeferredInitialize will ever be called, so we have to do
     -- this here instead of in InitializeEvents.
     local function OnAddOnLoaded(_, name)
@@ -38,10 +38,15 @@ end
 function ZO_EndlessDungeonBuffTracker_Shared:InitializeControls()
     self.gridListControl = self.control:GetNamedChild("List")
     self.emptyLabel = self.control:GetNamedChild("Empty")
+    self.titleLabel = self.control:GetNamedChild("Title")
 
-    local keybindContainer = self.control:GetNamedChild("KeybindContainer")
-    self.switchToSummaryKeybindButton = keybindContainer:GetNamedChild("SwitchToSummary")
-    self.closeKeybindButton = keybindContainer:GetNamedChild("Close")
+    self.keybindContainer = self.control:GetNamedChild("KeybindContainer")
+    self.switchToSummaryKeybindButton = self.keybindContainer:GetNamedChild("SwitchToSummary")
+    self.closeKeybindButton = self.keybindContainer:GetNamedChild("Close")
+
+    self.keybindContainer:SetHandler("OnRectChanged", function()
+        self:UpdateWindowDimensions()
+    end)
 end
 
 function ZO_EndlessDungeonBuffTracker_Shared:InitializeGridList(gridScrollListTemplate, gridEntryTemplateName, gridHeaderTemplateName, gridSelectionTemplateName)
@@ -181,6 +186,8 @@ function ZO_EndlessDungeonBuffTracker_Shared:UpdateKeybinds()
     else
         self.closeKeybindButton:SetAnchor(TOPLEFT, self.switchToSummaryKeybindButton, TOPRIGHT, 40, 0)
     end
+
+    self:UpdateWindowDimensions()
 end
 
 function ZO_EndlessDungeonBuffTracker_Shared:UpdateProgress()
@@ -247,32 +254,54 @@ function ZO_EndlessDungeonBuffTracker_Shared:UpdateGridList()
     self.entryDataObjectPool:ReleaseAllObjects()
     local numVerseEntries = self:AddGridListBuffEntries(ENDLESS_DUNGEON_BUFF_TYPE_VERSE, GetString(SI_ENDLESS_DUNGEON_SUMMARY_VERSES_HEADER))
     local numVisionEntries = self:AddGridListBuffEntries(ENDLESS_DUNGEON_BUFF_TYPE_VISION, GetString(SI_ENDLESS_DUNGEON_SUMMARY_VISIONS_HEADER))
-    self:UpdateGridListDimensions(numVerseEntries, numVisionEntries)
     local isListEmpty = (numVerseEntries + numVisionEntries) == 0
     self.emptyLabel:SetHidden(not isListEmpty)
+    self:UpdateGridListDimensions(numVerseEntries, numVisionEntries)
     gridList:CommitGridList()
 end
 
-function ZO_EndlessDungeonBuffTracker_Shared:UpdateGridListDimensions(numVerseEntries, numVisionEntries, gridEntryWidth, gridEntryRowHeight, gridHeaderRowHeight, gridPaddingY)
-    local entriesPerRow = zo_floor(self.gridListControl:GetWidth() / gridEntryWidth)
+function ZO_EndlessDungeonBuffTracker_Shared:UpdateGridListDimensions(numVerseEntries, numVisionEntries, maxGridWidth, gridEntryWidth, gridEntryRowHeight, gridHeaderRowHeight, gridPaddingY)
+    local maxColumns = zo_floor(maxGridWidth / gridEntryWidth)
     local numRowsAvailable = ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_ENTRY_ROWS
 
     local versesHeight = 0
     if numVerseEntries > 0 then
-        local numVerseRows = zo_min(zo_ceil(numVerseEntries / entriesPerRow), numRowsAvailable)
+        local numVerseRows = zo_min(zo_ceil(numVerseEntries / maxColumns), numRowsAvailable)
         numRowsAvailable = numRowsAvailable - numVerseRows
         versesHeight = gridHeaderRowHeight + numVerseRows * gridEntryRowHeight
     end
 
     local visionsHeight = 0
     if numVisionEntries > 0 then
-        local numVisionRows = zo_min(zo_ceil(numVisionEntries / entriesPerRow), numRowsAvailable)
+        local numVisionRows = zo_min(zo_ceil(numVisionEntries / maxColumns), numRowsAvailable)
         visionsHeight = gridHeaderRowHeight + numVisionRows * gridEntryRowHeight
     end
 
     local sectionPadding = (versesHeight > 0 and visionsHeight > 0) and gridPaddingY or 0
     local totalHeight = versesHeight + visionsHeight + sectionPadding
     self.gridListControl:SetHeight(totalHeight)
+
+    local gridWidthMargin = maxGridWidth % gridEntryWidth
+    local maxBuffsByType = zo_max(numVerseEntries, numVisionEntries)
+    local numColumns = zo_min(maxBuffsByType, maxColumns)
+    local gridWidth = (gridWidthMargin * zo_min(numColumns, 1)) + (numColumns * gridEntryWidth)
+    self.gridListControl:SetWidth(gridWidth)
+
+    self:UpdateWindowDimensions()
+end
+
+function ZO_EndlessDungeonBuffTracker_Shared:UpdateWindowDimensions()
+    local minWidth = zo_max(self.progressLabel:GetWidth(), self.titleLabel:GetWidth())
+    minWidth = zo_max(minWidth, self.keybindContainer:GetWidth())
+    if self.emptyLabel:IsHidden() then
+        minWidth = zo_max(minWidth, self.gridListControl:GetWidth())
+    else
+        minWidth = zo_max(minWidth, self.emptyLabel:GetWidth())
+    end
+
+    local WINDOW_WIDTH_MARGIN = 50
+    local windowWidth = minWidth + WINDOW_WIDTH_MARGIN
+    self.control:SetWidth(windowWidth)
 end
 
 function ZO_EndlessDungeonBuffTracker_Shared:OnBuffStackCountChanged(buffType, abilityId, stackCount, previousStackCount)

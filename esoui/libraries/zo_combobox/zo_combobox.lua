@@ -10,8 +10,8 @@ local DEFAULT_FONT = "ZoFontGame"
 local DEFAULT_TEXT_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
 local DEFAULT_TEXT_HIGHLIGHT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_CONTEXT_HIGHLIGHT))
 
-local ENTRY_ID = 1
-local LAST_ENTRY_ID = 2
+local DEFAULT_ENTRY_ID = 1
+local DEFAULT_LAST_ENTRY_ID = 2
 ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT = 25
 ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING = 8
 ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y = 5
@@ -25,6 +25,9 @@ function ZO_ComboBox:Initialize(control)
     self.m_font = DEFAULT_FONT
     self.m_normalColor = DEFAULT_TEXT_COLOR
     self.m_highlightColor = DEFAULT_TEXT_HIGHLIGHT
+
+    self.m_customEntryTemplateInfos = nil
+    self.m_nextScrollTypeId = DEFAULT_LAST_ENTRY_ID + 1
 
     self.m_enableMultiSelect = false
     self.m_maxNumSelections = nil
@@ -41,16 +44,18 @@ function ZO_ComboBox:GetEntryTemplateHeightWithSpacing()
     return ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT + self:GetSpacing()
 end
 
-local function SetupScrollableEntry(control, data, list)
-    control.m_owner = data.m_owner
+function ZO_ComboBox:SetupEntryLabel(labelControl, text)
+    labelControl:SetText(text)
+    labelControl:SetFont(self.m_font)
+    labelControl:SetColor(self.m_normalColor:UnpackRGBA())
+    labelControl:SetHorizontalAlignment(self.horizontalAlignment)
+end
+
+function ZO_ComboBox:SetupEntryBase(control, data, list)
+    control.m_owner = self
     control.m_data = data
-    control.m_label = control:GetNamedChild("Label")
 
-    control.m_label:SetText(data.name)
-    control.m_label:SetFont(control.m_owner.m_font)
-    control.m_label:SetColor(control.m_owner.m_normalColor:UnpackRGBA())
-
-    if data.m_owner:IsItemSelected(data) then
+    if self:IsItemSelected(data) then
         if not control.m_selectionHighlight then
             control.m_selectionHighlight = CreateControlFromVirtual("$(parent)Selection", control, "ZO_ComboBoxEntry_SelectedHighlight")
         end
@@ -59,16 +64,49 @@ local function SetupScrollableEntry(control, data, list)
     elseif control.m_selectionHighlight then
         control.m_selectionHighlight:SetHidden(true)
     end
+end
 
+function ZO_ComboBox:SetupEntry(control, data, list)
+    self:SetupEntryBase(control, data, list)
+
+    control.m_label = control:GetNamedChild("Label")
+    self:SetupEntryLabel(control.m_label, data.name)
 end
 
 function ZO_ComboBox:SetupScrollList()
-    local entryHeight = self:GetEntryTemplateHeightWithSpacing()
+    local function SetupScrollableEntry(...)
+        self:SetupEntry(...)
+    end
+    local entryHeightWithSpacing = self:GetEntryTemplateHeightWithSpacing()
     -- To support spacing like regular combo boxes, a separate template needs to be stored for the last entry.
-    ZO_ScrollList_AddDataType(self.m_scroll, ENTRY_ID, "ZO_ComboBoxEntry", entryHeight, SetupScrollableEntry)
-    ZO_ScrollList_AddDataType(self.m_scroll, LAST_ENTRY_ID, "ZO_ComboBoxEntry", entryHeight, SetupScrollableEntry)
+    ZO_ScrollList_AddDataType(self.m_scroll, DEFAULT_ENTRY_ID, "ZO_ComboBoxEntry", entryHeightWithSpacing, SetupScrollableEntry)
+    ZO_ScrollList_AddDataType(self.m_scroll, DEFAULT_LAST_ENTRY_ID, "ZO_ComboBoxEntry", ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT, SetupScrollableEntry)
 
     ZO_ScrollList_EnableHighlight(self.m_scroll, "ZO_TallListHighlight")
+end
+
+function ZO_ComboBox:AddCustomEntryTemplate(entryTemplate, entryHeight, setupFunction)
+    if not self.m_customEntryTemplateInfos then
+        self.m_customEntryTemplateInfos = {}
+    end
+
+    local customEntryInfo =
+    {
+        typeId = self.m_nextScrollTypeId,
+        entryHeight = entryHeight,
+    }
+
+    self.m_customEntryTemplateInfos[entryTemplate] = customEntryInfo
+
+    local entryHeightWithSpacing = entryHeight + self:GetSpacing()
+    ZO_ScrollList_AddDataType(self.m_scroll, self.m_nextScrollTypeId, entryTemplate, entryHeightWithSpacing, setupFunction)
+    ZO_ScrollList_AddDataType(self.m_scroll, self.m_nextScrollTypeId + 1, entryTemplate, entryHeight, setupFunction)
+
+    self.m_nextScrollTypeId = self.m_nextScrollTypeId + 2
+end
+
+function ZO_ComboBox.SetItemEntryCustomTemplate(itemEntry, template)
+    itemEntry.customEntryTemplate = template
 end
 
 function ZO_ComboBox:OnGlobalMouseUp(eventCode, button)
@@ -87,11 +125,39 @@ function ZO_ComboBox:OnGlobalMouseUp(eventCode, button)
     end
 end
 
+function ZO_ComboBox:HighlightLabel(labelControl)
+    labelControl:SetColor(self.m_highlightColor:UnpackRGBA())
+end
+
+function ZO_ComboBox:UnhighlightLabel(labelControl)
+    labelControl:SetColor(self.m_normalColor:UnpackRGBA())
+end
+
+function ZO_ComboBox:OnMouseEnterEntryBase(control)
+    ZO_ScrollList_MouseEnter(self.m_scroll, control)
+    if self.onMouseEnterCallback then
+        self:onMouseEnterCallback(control)
+    end
+end
+
+function ZO_ComboBox:OnMouseExitEntryBase(control)
+    ZO_ScrollList_MouseExit(self.m_scroll, control)
+    if self.onMouseExitCallback then
+        self:onMouseExitCallback(control)
+    end
+end
+
 function ZO_ComboBox:SetSpacing(spacing)
     ZO_ComboBox_Base.SetSpacing(self, spacing)
 
     local newHeight = self:GetEntryTemplateHeightWithSpacing()
-    ZO_ScrollList_UpdateDataTypeHeight(self.m_scroll, ENTRY_ID, newHeight)
+    ZO_ScrollList_UpdateDataTypeHeight(self.m_scroll, DEFAULT_ENTRY_ID, newHeight)
+
+    if self.m_customEntryTemplateInfos then
+        for entryTemplate, entryInfo in pairs(self.m_customEntryTemplateInfos) do
+            ZO_ScrollList_UpdateDataTypeHeight(self.m_scroll, entryInfo.typeId, entryInfo.entryHeight + self:GetSpacing())
+        end
+    end
 end
 
 function ZO_ComboBox:SetHeight(height)
@@ -104,12 +170,10 @@ function ZO_ComboBox:IsDropdownVisible()
     return not self.m_dropdown:IsHidden()
 end
 
-local function CreateScrollableComboBoxEntry(self, item, index, isLast)
+local function CreateScrollableComboBoxEntry(self, item, index, entryType)
     item.m_index = index
     item.m_owner = self
-    local entryType = isLast and LAST_ENTRY_ID or ENTRY_ID
     local entry = ZO_ScrollList_CreateDataEntry(entryType, item)
-
     return entry
 end
 
@@ -120,10 +184,31 @@ function ZO_ComboBox:AddMenuItems()
     local dataList = ZO_ScrollList_GetDataList(self.m_scroll)
 
     local largestEntryWidth = 0
+    local allItemsHeight = 0
 
     for i = 1, numItems do
         local item = self.m_sortedItems[i]
-        local entry = CreateScrollableComboBoxEntry(self, item, i, i == numItems)
+
+        local isLastEntry = i == numItems
+        local entryHeight = ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT
+        local entryType = DEFAULT_ENTRY_ID
+        if self.m_customEntryTemplateInfos and item.customEntryTemplate then
+            local templateInfo = self.m_customEntryTemplateInfos[item.customEntryTemplate]
+            if templateInfo then
+                entryType = templateInfo.typeId
+                entryHeight = templateInfo.entryHeight
+            end
+        end
+
+        if isLastEntry then
+            entryType = entryType + 1
+        else
+            entryHeight = entryHeight + self:GetSpacing()
+        end
+
+        allItemsHeight = allItemsHeight + entryHeight
+
+        local entry = CreateScrollableComboBoxEntry(self, item, i, entryType)
         table.insert(dataList, entry)
 
         local fontObject = _G[self.m_font]
@@ -147,9 +232,8 @@ function ZO_ComboBox:AddMenuItems()
     end
 
     local maxHeight = self.m_height
-    -- get the height of all the entries we are going to show
-    -- the last entry uses a separate entry template that does not include the spacing in its height
-    local allItemsHeight = self:GetEntryTemplateHeightWithSpacing() * (numItems - 1) + ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT + (ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y * 2)
+
+    allItemsHeight = allItemsHeight + (ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y * 2)
 
     local desiredHeight = maxHeight
     if allItemsHeight < desiredHeight then
@@ -385,29 +469,26 @@ function ZO_ComboBox_DropdownClicked(control)
     ZO_ComboBox_OpenDropdown(control)
 end
 
-function ZO_ComboBox_Entry_OnMouseEnter(entry)
-    if entry.m_owner then
-        ZO_ScrollList_MouseEnter(entry.m_owner.m_scroll, entry)
-        entry.m_label:SetColor(entry.m_owner.m_highlightColor:UnpackRGBA())
-        if entry.m_owner.onMouseEnterCallback then
-            entry.m_owner:onMouseEnterCallback(entry)
-        end
+function ZO_ComboBox_Entry_OnMouseEnter(control)
+    local comboBox = control.m_owner
+    if comboBox then
+        comboBox:OnMouseEnterEntryBase(control)
+        comboBox:HighlightLabel(control.m_label)
     end
 end
 
-function ZO_ComboBox_Entry_OnMouseExit(entry)
-    if entry.m_owner then
-        ZO_ScrollList_MouseExit(entry.m_owner.m_scroll, entry)
-        entry.m_label:SetColor(entry.m_owner.m_normalColor:UnpackRGBA())
-        if entry.m_owner.onMouseExitCallback then
-            entry.m_owner:onMouseExitCallback(entry)
-        end
+function ZO_ComboBox_Entry_OnMouseExit(control)
+    local comboBox = control.m_owner
+    if comboBox then
+        comboBox:OnMouseExitEntryBase(control)
+        comboBox:UnhighlightLabel(control.m_label)
     end
 end
 
-function ZO_ComboBox_Entry_OnSelected(entry)
-    if entry.m_owner then
-        entry.m_owner:SetSelected(entry.m_data.m_index)
+function ZO_ComboBox_Entry_OnSelected(control)
+    local comboBox = control.m_owner
+    if comboBox then
+        comboBox:SetSelected(control.m_data.m_index)
     end
 end
 

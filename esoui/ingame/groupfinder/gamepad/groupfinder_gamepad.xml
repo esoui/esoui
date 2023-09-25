@@ -40,7 +40,7 @@
         <Control name="ZO_GroupFinder_GroupListing_Gamepad" inherits="ZO_GroupFinder_GroupListing" virtual="true">
             <Dimensions x="1200" y="ZO_GROUP_LISTING_GAMEPAD_HEIGHT" />
             <Controls>
-                <Backdrop name="$(parent)OverlayBorder" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" centerColor="FF000000">
+                <Backdrop name="$(parent)OverlayBorder" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" centerColor="FF000000">
                     <Anchor point="TOPLEFT" />
                     <Anchor point="BOTTOMRIGHT" />
                     <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />

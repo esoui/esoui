@@ -238,7 +238,7 @@ end
 
 function ZO_EndlessDungeonManager.GetProgressionText(stage, cycle, arc)
     local stageIcon, cycleIcon, arcIcon = ZO_EndlessDungeonManager.GetProgressionIconStrings()
-    local output = string.format("%s%d %s%d %s%d", stageIcon, stage, cycleIcon, cycle, arcIcon, arc)
+    local output = string.format("%s%d %s%d %s%d", arcIcon, arc, cycleIcon, cycle, stageIcon, stage)
     return output
 end
 
@@ -379,6 +379,7 @@ function ZO_EndlessDungeonManager:UpdateDungeonBuffs()
         end
     end
 
+    local state = self.state
     if state == ZO_ENDLESS_DUNGEON_STATES.INACTIVE then
         -- The local player is not in an Endless Dungeon
         -- or the instance has not started.

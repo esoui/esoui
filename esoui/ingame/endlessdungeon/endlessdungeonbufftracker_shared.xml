@@ -41,6 +41,18 @@
                 <Label name="$(parent)Empty" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_ENDLESS_DUNGEON_BUFF_TRACKER_EMPTY">
                     <Anchor point="TOP" relativeTo="$(parent)Progress" relativePoint="BOTTOM" offsetY="15" />
                 </Label>
+
+                <Control name="$(parent)KeybindContainer" excludeFromResizeToFitExtents="true" resizeToFitDescendents="true">
+                    <Controls>
+                        <Control name="$(parent)SwitchToSummary" inherits="ZO_KeybindButton" hidden="true">
+                            <Anchor point="TOPLEFT" />
+                        </Control>
+
+                        <Control name="$(parent)Close" inherits="ZO_KeybindButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SwitchToSummary" relativePoint="TOPRIGHT" offsetX="40" />
+                        </Control>
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

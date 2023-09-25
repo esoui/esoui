@@ -145,7 +145,7 @@ end
 function ZO_GroupFinder_Keyboard:RefreshAppliedToListing()
     if self.appliedToListingData:IsUserTypeActive() then
         self.searchContent.roleControlPool:ReleaseAllObjects()
-        ZO_GroupFinder_Shared.SetUpRoleControlsFromData(self.overviewAppliedToGroupListingControl, self.searchContent.roleControlPool, self.appliedToListingData, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING)
+        ZO_GroupFinder_Shared.SetUpGroupListingFromData(self.overviewAppliedToGroupListingControl, self.searchContent.roleControlPool, self.appliedToListingData, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING)
 
         self.overviewAppliedToGroupListingControl:SetHidden(false)
     else

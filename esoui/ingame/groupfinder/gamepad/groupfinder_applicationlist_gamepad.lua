@@ -144,7 +144,7 @@ end
 
 function ZO_GroupFinder_ApplicationListScreen_Gamepad:RefreshListing()
     self.roleControlPool:ReleaseAllObjects()
-    ZO_GroupFinder_Shared.SetUpRoleControlsFromData(self.myListingControl, self.roleControlPool, self.myListingData, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING_GAMEPAD)
+    ZO_GroupFinder_Shared.SetUpGroupListingFromData(self.myListingControl, self.roleControlPool, self.myListingData, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING_GAMEPAD)
 
     if self.myListingData:DoesGroupAutoAcceptRequests() then
         self.applicationList:SetEmptyText(GetString(SI_GROUP_FINDER_APPLICATIONS_AUTO_ACCEPT_EMPTY_TEXT))

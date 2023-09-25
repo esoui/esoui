@@ -58,7 +58,7 @@ function ZO_Tooltip:LayoutGroupFinderGroupListingTooltip(data)
 
     -- Title
     local titleTextSection = self:AcquireSection(self:GetStyle("title"))
-    titleTextSection:AddLine(title)
+    titleTextSection:AddLine(EscapeMarkup(title, ALLOW_MARKUP_TYPE_COLOR_ONLY))
     self:AddSection(titleTextSection)
 
     local ownerSection = self:AcquireSection(self:GetStyle("bodySection"))
@@ -93,7 +93,7 @@ function ZO_Tooltip:LayoutGroupFinderGroupListingTooltip(data)
     -- Description
     local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
     descriptionSection:AddLine(GetString(SI_GROUP_FINDER_TOOLTIP_DESCRIPTION_HEADER), self:GetStyle("bodyHeader"))
-    descriptionSection:AddLine(data:GetDescription(), self:GetStyle("bodyDescription"))
+    descriptionSection:AddLine(EscapeMarkup(data:GetDescription(), ALLOW_MARKUP_TYPE_COLOR_ONLY), self:GetStyle("bodyDescription"))
     self:AddSection(descriptionSection)
 
     -- Flags
@@ -212,11 +212,11 @@ function ZO_Tooltip:LayoutReportGroupFinderListingInfo(title, description, owner
 
     local titleSection = self:AcquireSection(self:GetStyle("bodySection"))
     titleSection:AddLine(GetString(SI_GROUP_FINDER_TOOLTIP_TITLE_HEADER), self:GetStyle("bodyHeader"))
-    titleSection:AddLine(title, self:GetStyle("bodyDescription"))
+    titleSection:AddLine(EscapeMarkup(title, ALLOW_MARKUP_TYPE_COLOR_ONLY), self:GetStyle("bodyDescription"))
     self:AddSection(titleSection)
 
     local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
     descriptionSection:AddLine(GetString(SI_GROUP_FINDER_TOOLTIP_DESCRIPTION_HEADER), self:GetStyle("bodyHeader"))
-    descriptionSection:AddLine(description, self:GetStyle("bodyDescription"))
+    descriptionSection:AddLine(EscapeMarkup(description, ALLOW_MARKUP_TYPE_COLOR_ONLY), self:GetStyle("bodyDescription"))
     self:AddSection(descriptionSection)
 end

@@ -38,7 +38,10 @@ function ZO_GroupFinder_Gamepad:InitializeControls()
             keybind = "UI_SHORTCUT_PRIMARY",
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             callback = function()
-                if self:IsCurrentList(self.categoryList) then
+                local entryData = self:GetCurrentList():GetTargetData()
+                if entryData.isRoleSelector then
+                    GAMEPAD_GROUP_ROLES_BAR:ToggleSelected()
+                elseif self:IsCurrentList(self.categoryList) then
                     local data = self.categoryList:GetTargetData()
                     if data.mode == ZO_GROUP_FINDER_MODES.CREATE_EDIT then
                         if HasGroupListingForUserType(GROUP_FINDER_GROUP_LISTING_USER_TYPE_APPLIED_TO_GROUP_LISTING) then
@@ -267,6 +270,25 @@ function ZO_GroupFinder_Gamepad:RefreshHeader()
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end
 
+function ZO_GroupFinder_Gamepad:SetupList(list)
+    ZO_Gamepad_ParametricList_Screen.SetupList(self, list)
+
+    local function OnSelectedEntry(_, selectedData)
+        if selectedData.isRoleSelector then
+            GAMEPAD_GROUP_ROLES_BAR:Activate()
+        else
+            GAMEPAD_GROUP_ROLES_BAR:Deactivate()
+        end
+
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+
+    GAMEPAD_GROUP_ROLES_BAR:SetupListAnchorsBelowGroupBar(list.control)
+
+    list:SetOnSelectedDataChangedCallback(OnSelectedEntry)
+    list:SetDefaultSelectedIndex(2) --Don't select roles by default
+end
+
 function ZO_GroupFinder_Gamepad:RefreshList(resetToTop)
     if self.mode == ZO_GROUP_FINDER_MODES.OVERVIEW then
         self:RefreshCategoryList(resetToTop)
@@ -282,6 +304,14 @@ function ZO_GroupFinder_Gamepad:RefreshCategoryList(resetToTop)
         return
     end
     list:Clear()
+
+    do
+        local entryData = ZO_GamepadEntryData:New("")
+        entryData.isRoleSelector = true
+
+        local list = self:GetMainList()
+        list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+    end
 
     if HasGroupListingForUserType(GROUP_FINDER_GROUP_LISTING_USER_TYPE_CREATED_GROUP_LISTING) then
         do
@@ -330,6 +360,13 @@ function ZO_GroupFinder_Gamepad:RefreshSubcategoryList(resetToTop)
     end
     list:Clear()
 
+    do
+        local entryData = ZO_GamepadEntryData:New("")
+        entryData.isRoleSelector = true
+
+        list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+    end
+
     local selectedIndex = 1
     if self.subcategoryData[self.mode] then
         local selectedCategory = GetGroupFinderFilterCategory()
@@ -351,7 +388,8 @@ function ZO_GroupFinder_Gamepad:RefreshSubcategoryList(resetToTop)
         end
     end
 
-    list:SetSelectedIndex(selectedIndex)
+    -- Add one to the index to skip the role position
+    list:SetSelectedIndex(selectedIndex + 1)
     list:Commit(resetToTop)
 end
 

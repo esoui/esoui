@@ -169,7 +169,7 @@ end
 function ZO_GroupFinder_SearchResultsList_Keyboard:SetupGroupListingEntry(control, data)
     ZO_SortFilterList.SetupRow(self, control, data)
     control.listingData = data
-    ZO_GroupFinder_Shared.SetUpRoleControlsFromData(control, self.roleControlPool, data, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING)
+    ZO_GroupFinder_Shared.SetUpGroupListingFromData(control, self.roleControlPool, data, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING)
     control.object:AttachToList(self)
 end
 
@@ -269,7 +269,9 @@ function ZO_GroupFinder_SearchResultsList_Keyboard:Row_OnMouseUp(control, button
                 local optionText = data:DoesGroupAutoAcceptRequests() and GetString(SI_GROUP_FINDER_JOIN_KEYBIND) or GetString(SI_GROUP_FINDER_APPLY_KEYBIND)
                 AddMenuItem(optionText, function() self:TryShowApplyDialog(data) end)
             end
-
+            if joinabilityResult == GROUP_FINDER_ACTION_RESULT_FAILED_ALREADY_JOINED_GROUP then
+                AddMenuItem(GetString(SI_GROUP_LEAVE), function()ZO_Dialogs_ShowDialog("GROUP_LEAVE_DIALOG") end)
+            end
             AddMenuItem(GetString(SI_FRIEND_MENU_IGNORE), function() AddIgnore(data:GetOwnerDisplayName()) end)
             AddMenuItem(GetString(SI_GROUP_FINDER_REPORT_GROUP_LISTING_KEYBIND), function() ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportGroupFinderListingTicketScene(data) end)
             self:ShowMenu(control)
@@ -609,7 +611,7 @@ end
 function ZO_GroupFinder_SearchPanel_Keyboard:RefreshAppliedToListing()
     if self.appliedToListingData:IsUserTypeActive() then
         self.roleControlPool:ReleaseAllObjects()
-        ZO_GroupFinder_Shared.SetUpRoleControlsFromData(self.appliedToListingControl, self.roleControlPool, self.appliedToListingData, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING)
+        ZO_GroupFinder_Shared.SetUpGroupListingFromData(self.appliedToListingControl, self.roleControlPool, self.appliedToListingData, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING)
 
         self.appliedToListingControl:SetHidden(false)
     else

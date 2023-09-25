@@ -343,7 +343,8 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
 
                 -- Currently, the group size enum has fewer entries than our max searchable selections, so we'll just
                 -- not set a maxSelectedItems on gamepad to avoid a potentially confusing (current/max) select keybind string.
-                internalassert(GROUP_FINDER_SIZE_MAX_VALUE <= GROUP_FINDER_MAX_SEARCHABLE_SELECTIONS, "Number of possible options exceeds max, please set a max number of selectable items for this dropdown")
+                -- Groupsize is a flag so the max searchable value is going to be two to the searchable size
+                internalassert(GROUP_FINDER_SIZE_MAX_VALUE <= math.pow(2, GROUP_FINDER_MAX_SEARCHABLE_SELECTIONS), "Number of possible options exceeds max, please set a max number of selectable items for this dropdown")
                 self.sizeDropdown.dropDownData = ZO_MultiSelection_ComboBox_Data_Gamepad:New()
                 self:PopulateSizeDropdown()
                 self.sizeDropdown:LoadData(self.sizeDropdown.dropDownData)
@@ -376,7 +377,8 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
 
                 -- Currently, the playstyle enum has fewer entries than our max searchable selections, so we'll just
                 -- not set a maxSelectedItems on gamepad to avoid a potentially confusing (current/max) select keybind string.
-                internalassert(GROUP_FINDER_PLAYSTYLE_MAX_VALUE <= GROUP_FINDER_MAX_SEARCHABLE_SELECTIONS, "Number of possible options exceeds max, please set a max number of selectable items for this dropdown")
+                -- Playstyle is a flag so the max searchable value is going to be two to the searchable size
+                internalassert(GROUP_FINDER_PLAYSTYLE_MAX_VALUE <= math.pow(2, GROUP_FINDER_MAX_SEARCHABLE_SELECTIONS), "Number of possible options exceeds max, please set a max number of selectable items for this dropdown")
                 self.playstyleDropdown.dropDownData = ZO_MultiSelection_ComboBox_Data_Gamepad:New()
                 self:PopulatePlaystyleDropdown()
                 self.playstyleDropdown:LoadData(self.playstyleDropdown.dropDownData)

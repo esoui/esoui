@@ -1062,7 +1062,13 @@ function ZO_MainMenuManager_Gamepad:SelectMenuEntryAndSubEntry(menuEntry, menuSu
     self:SelectMenuEntry(menuEntry)
     local entry = self.mainList:GetTargetData()
     self:RefreshSubList(entry)
-    self.subList:SetSelectedIndexWithoutAnimation(self.subMenuEntryToListIndex[menuSubEntry])
+
+    -- the given subeEntry may not be currently visible and not exist in subMenuEntryToListIndex
+    local subListIndex = self.subMenuEntryToListIndex[menuSubEntry]
+    if subListIndex then
+        self.subList:SetSelectedIndexWithoutAnimation(subListIndex)
+    end
+
     if sceneName then
         SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu", sceneName)
     else

@@ -134,9 +134,7 @@ function ZO_CraftAdvisor_Keyboard:OnShowing()
         self.initializedTabs = true
     end
 
-    if self.dirty then
-        self:RefreshTabs()
-    end
+    self:RefreshTabs()
 end
 
 function ZO_CraftAdvisor_Keyboard:OnHidden()

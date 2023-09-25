@@ -813,10 +813,10 @@ local function GetEndlessDungeonProgressMessageParams()
     local progressData =
     {
         {
-            iconTexture = stageIcon,
-            narrationDescription = stageNarration,
-            initialValue = previousStage,
-            finalValue = stage,
+            iconTexture = arcIcon,
+            narrationDescription = arcNarration,
+            initialValue = previousArc,
+            finalValue = arc,
         },
         {
             iconTexture = cycleIcon,
@@ -825,10 +825,10 @@ local function GetEndlessDungeonProgressMessageParams()
             finalValue = cycle,
         },
         {
-            iconTexture = arcIcon,
-            narrationDescription = arcNarration,
-            initialValue = previousArc,
-            finalValue = arc,
+            iconTexture = stageIcon,
+            narrationDescription = stageNarration,
+            initialValue = previousStage,
+            finalValue = stage,
         },
     }
     messageParams:SetRollingMeterProgressData(progressData)

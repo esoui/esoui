@@ -429,7 +429,7 @@ function HelpAskForHelp_Keyboard:ShowGroupFinderListingTooltip()
     local title = ZO_WHITE:Colorize(externalInfo.title)
     local description = ZO_WHITE:Colorize(externalInfo.description)
     local text = zo_strformat(SI_GROUP_FINDER_LISTING_ASK_FOR_HELP_KEYBOARD_TOOLTIP_FORMATTER, owner, title, description)
-    SetTooltipText(InformationTooltip, text)
+    SetTooltipText(InformationTooltip, EscapeMarkup(text, ALLOW_MARKUP_TYPE_COLOR_ONLY))
 end
 
 function HelpAskForHelp_Keyboard:AttemptToSendTicket()

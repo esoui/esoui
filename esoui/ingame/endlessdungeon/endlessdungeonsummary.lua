@@ -56,7 +56,10 @@ function ZO_EndlessDungeonSummary:InitializeKeybindStripDescriptor()
         ethereal = true,
         narrateEthereal = true,
         etherealNarrationOrder = 2,
-        -- Callback is in bindings.xml
+        callback = function()
+            -- For when the user clicks the button
+            SCENE_MANAGER:HideCurrentScene()
+        end
     }
 
     self.switchToBuffsKeybindButton:SetKeybindButtonDescriptor(switchToBuffsKeybindDescriptor)
@@ -70,7 +73,7 @@ function ZO_EndlessDungeonSummary:InitializeKeybindStripDescriptor()
     {
         -- Switch To Tracker
         switchToBuffsKeybindDescriptor,
-        -- Close
+        -- Close (For narration only)
         closeDescriptor,
         -- Back Button (Hidden)
         backKeybindDescriptor,
@@ -92,12 +95,12 @@ function ZO_EndlessDungeonSummary:InitializeNarrationInfo()
             -- Progress Header
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_ENDLESS_DUNGEON_SUMMARY_PROGRESS_HEADER)))
 
-            --Stage/Cyce/Arc
+            --Arc/Cycle/Stage
             local stageNarration, cycleNarration, arcNarration = endlessDungeonManager:GetCurrentProgressionNarrationDescriptions()
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_ENDLESS_DUNGEON_SUMMARY_STAGE_HEADER)))
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(stageNarration))
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(cycleNarration))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(arcNarration))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(cycleNarration))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(stageNarration))
 
             -- Score
             local scoreNarration = zo_strformat(SI_ENDLESS_DUNGEON_SUMMARY_STAT_VALUE_NARRATION, GetString(SI_ENDLESS_DUNGEON_SUMMARY_SCORE_HEADER), endlessDungeonManager:GetScore())

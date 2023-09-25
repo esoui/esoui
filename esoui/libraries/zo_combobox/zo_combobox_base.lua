@@ -42,6 +42,7 @@ function ZO_ComboBox_Base:Initialize(control)
     self.m_preshowDropdownFn = nil
     self.m_spacing = 0
     self.m_name = control:GetName()
+    self.horizontalAlignment = TEXT_ALIGN_LEFT
     control.m_comboBox = self
 end
 

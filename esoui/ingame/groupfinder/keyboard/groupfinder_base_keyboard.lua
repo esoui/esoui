@@ -89,7 +89,7 @@ function ZO_GroupFinderGroupListingTooltip_SetGroupFinderListing(tooltipControl,
         tooltipControl.titleLabel:SetAnchor(TOP, nil, nil, 0, 20)
     end
 
-    tooltipControl.titleLabel:SetText(data:GetTitle())
+    tooltipControl.titleLabel:SetText(EscapeMarkup(data:GetTitle(), ALLOW_MARKUP_TYPE_COLOR_ONLY))
 
     local category = data:GetCategory()
     local categoryString = GetString("SI_GROUPFINDERCATEGORY", category)
@@ -112,7 +112,7 @@ function ZO_GroupFinderGroupListingTooltip_SetGroupFinderListing(tooltipControl,
     tooltipControl.playerCountLabel:SetText(playerCountString)
     tooltipControl.roleListLabel:SetText(roleListString)
 
-    tooltipControl.descriptionLabel:SetText(data:GetDescription())
+    tooltipControl.descriptionLabel:SetText(EscapeMarkup(data:GetDescription(), ALLOW_MARKUP_TYPE_COLOR_ONLY))
 
     local requirementTextYes = GetString(SI_DIALOG_YES)
     local requirementTextNo = GetString(SI_DIALOG_NO)

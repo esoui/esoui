@@ -44,9 +44,13 @@
         
         <Control name="ZO_GroupFinder_GroupSearchContent_Keyboard" virtual="true">
             <Controls>
-                <Button name="$(parent)AdditionalFilters">
+                <Button name="$(parent)AdditionalFilters" inherits="ZO_MouseTooltipBehavior">
                     <Anchor point="TOPLEFT" offsetY="-60" />
                     <Dimensions x="48" y="48" />
+
+                    <OnInitialized>
+                        self:SetTooltipString(SI_GROUP_FINDER_ADDITIONAL_FILTERS_TOOLTIP)
+                    </OnInitialized>
 
                     <OnClicked>
                         ZO_GroupFinder_AdditionalFilters_OnClicked(self, button)

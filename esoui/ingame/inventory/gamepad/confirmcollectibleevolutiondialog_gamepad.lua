@@ -10,6 +10,7 @@ function ZO_ConfirmCollectibleEvolution_Gamepad_OnInitialized(control)
     ZO_Dialogs_RegisterCustomDialog("CONFIRM_COLLECTIBLE_EVOLUTION_PROMPT_GAMEPAD",
     {
         customControl = control,
+        canQueue = true,
         setup = function(dialog)
             local data = dialog.data
             local baseCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(data.baseCollectibleId)
@@ -69,6 +70,7 @@ function ZO_ConfirmAdvancedCombinationDialog_Gamepad_OnInitialized(control)
     ZO_Dialogs_RegisterCustomDialog("CONFIRM_COLLECTIBLE_ADVANCED_COMBINATION_PROMPT_GAMEPAD",
     {
         customControl = control,
+        canQueue = true,
         setup = function(dialog)
             local data = dialog.data
             local combinationId = data.combinationId

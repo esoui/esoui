@@ -873,11 +873,14 @@ function ZO_GroupFinder_SearchResultsList_Gamepad:SetupAppliedToListingFocusArea
     self:AddNextFocusArea(self.appliedToListingArea)
 end
 
-function ZO_GroupFinder_SearchResultsList_Gamepad:RefreshAppliedToListing()
+function ZO_GroupFinder_SearchResultsList_Gamepad:RefreshAppliedToListing(autoSelectApplication)
     self.appliedToListingRoleControlPool:ReleaseAllObjects()
     if self.appliedToListingData:IsUserTypeActive() then
-        ZO_GroupFinder_Shared.SetUpRoleControlsFromData(self.appliedToListingControl, self.appliedToListingRoleControlPool, self.appliedToListingData, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING_GAMEPAD)
+        ZO_GroupFinder_Shared.SetUpGroupListingFromData(self.appliedToListingControl, self.appliedToListingRoleControlPool, self.appliedToListingData, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING_GAMEPAD)
         self.appliedToListingControl:SetHidden(false)
+        if autoSelectApplication then
+            self:ActivateFocusArea(self.appliedToListingArea)
+        end
     else
         self.appliedToListingControl:SetHidden(true)
         if self:IsAppliedToListingFocused() and self.isActive then
@@ -927,7 +930,7 @@ function ZO_GroupFinder_SearchResultsList_Gamepad:RefreshSelectedTooltip()
 end
 
 function ZO_GroupFinder_SearchResultsList_Gamepad:SetupRow(control, data)
-    ZO_GroupFinder_Shared.SetUpRoleControlsFromData(control, self.roleControlPool, data, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING_GAMEPAD)
+    ZO_GroupFinder_Shared.SetUpGroupListingFromData(control, self.roleControlPool, data, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING_GAMEPAD)
 end
 
 function ZO_GroupFinder_SearchResultsList_Gamepad:ResetRow(control)
@@ -1161,6 +1164,7 @@ function ZO_GroupFinder_SearchResultsListScreen_Gamepad:RegisterForEvents()
     GROUP_FINDER_SEARCH_MANAGER:RegisterCallback("OnGroupFinderSearchResultsUpdated", function()
         if self.scene:IsShowing() then
             self.resultsList:RefreshVisible()
+            self.resultsList:RefreshAppliedToListing()
             self.resultsList:RefreshSelectedTooltip()
             self.resultsList:UpdateKeybinds()
         end
@@ -1174,15 +1178,21 @@ function ZO_GroupFinder_SearchResultsListScreen_Gamepad:RegisterForEvents()
         end
     end)
 
-    local function OnRefreshApplication()
+    local function OnRefreshApplication(autoSelectApplication)
         if self.scene:IsShowing() then
             self.resultsList:RefreshFilters()
-            self.resultsList:RefreshAppliedToListing()
+            self.resultsList:RefreshAppliedToListing(autoSelectApplication)
             self.resultsList:RefreshSelectedTooltip()
             self.resultsList:UpdateKeybinds()
         end
     end
-    EVENT_MANAGER:RegisterForEvent("GroupFinder_SearchResults_Gamepad", EVENT_GROUP_FINDER_APPLY_TO_GROUP_LISTING_RESULT, OnRefreshApplication)
+
+    local function OnRefreshNewApplication()
+        local AUTO_SELECT_APPLICATION = true
+        OnRefreshApplication(AUTO_SELECT_APPLICATION)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("GroupFinder_SearchResults_Gamepad", EVENT_GROUP_FINDER_APPLY_TO_GROUP_LISTING_RESULT, OnRefreshNewApplication)
     EVENT_MANAGER:RegisterForEvent("GroupFinder_SearchResults_Gamepad", EVENT_GROUP_FINDER_RESOLVE_GROUP_LISTING_APPLICATION_RESULT, OnRefreshApplication)
     EVENT_MANAGER:RegisterForEvent("GroupFinder_SearchResults_Gamepad", EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_APPLICATION, OnRefreshApplication)
 end

@@ -114,7 +114,7 @@ function ZO_GroupFinder_Shared:ApplyPendingMode()
     -- To be overridden
 end
 
-function ZO_GroupFinder_Shared.SetUpRoleControlsFromData(control, controlPool, data, horizontalPadding)
+function ZO_GroupFinder_Shared.SetUpGroupListingFromData(control, controlPool, data, horizontalPadding)
     horizontalPadding = horizontalPadding or 0
 
     local joinabilityResult = data:GetJoinabilityResult()
@@ -122,21 +122,24 @@ function ZO_GroupFinder_Shared.SetUpRoleControlsFromData(control, controlPool, d
         or joinabilityResult == GROUP_FINDER_ACTION_RESULT_FAILED_ENTITLEMENT_REQUIREMENT
         or joinabilityResult == GROUP_FINDER_ACTION_RESULT_FAILED_QUEUED
         or joinabilityResult == nil
+    local titleColor
     local labelColor
     if isListingJoinable then
-        labelColor = ZO_SELECTED_TEXT
+        titleColor = ZO_SELECTED_TEXT
+        labelColor = ZO_NORMAL_TEXT
     else
+        titleColor = ZO_DISABLED_TEXT
         labelColor = ZO_DISABLED_TEXT
     end
 
-    local titleText = data:GetTitle()
+    local titleText = EscapeMarkup(data:GetTitle(), ALLOW_MARKUP_TYPE_COLOR_ONLY)
     local statusIndicatorIcon = data:GetStatusIndicatorIcon()
     if statusIndicatorIcon then
         statusIndicatorIcon = zo_iconFormat(statusIndicatorIcon, "100%", "100%")
         titleText = string.format("%s%s", statusIndicatorIcon, titleText)
     end
     control.groupTitleLabel:SetText(titleText)
-    control.groupTitleLabel:SetColor(labelColor:UnpackRGBA())
+    control.groupTitleLabel:SetColor(titleColor:UnpackRGBA())
 
     local category = data:GetCategory()
     if category ~= GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON and category ~= GROUP_FINDER_CATEGORY_CUSTOM then

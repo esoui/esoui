@@ -123,13 +123,13 @@
                     </EasingFunction>
                 </AlphaAnimation>
 
-                <CustomAnimation duration="1000" delay="3500">
+                <CustomAnimation duration="1000" delay="2500">
                     <UpdateFunction>
                         ZO_CenterScreenEndlessDungeonBuffAddedAnimation_OnUpdate(self, progress)
                     </UpdateFunction>
                 </CustomAnimation>
 
-                <AlphaAnimation duration="1000" delay="3500" startAlpha="1" endAlpha="0">
+                <AlphaAnimation duration="1000" delay="2500" startAlpha="1" endAlpha="0">
                     <EasingFunction>
                         return ZO_EaseInQuintic(progress)
                     </EasingFunction>

@@ -64,7 +64,7 @@ end
 
 function ZO_GroupFinder_ApplicationsManagementPanel_Keyboard:RefreshListing()
     self.roleControlPool:ReleaseAllObjects()
-    ZO_GroupFinder_Shared.SetUpRoleControlsFromData(self.myListingControl, self.roleControlPool, self.myListingData, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING)
+    ZO_GroupFinder_Shared.SetUpGroupListingFromData(self.myListingControl, self.roleControlPool, self.myListingData, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING)
 
     if self.myListingData:DoesGroupAutoAcceptRequests() then
         self.list:SetNoApplicationsText(GetString(SI_GROUP_FINDER_APPLICATIONS_AUTO_ACCEPT_EMPTY_TEXT))
@@ -384,6 +384,10 @@ function ZO_GroupFinder_ApplicationsListRow:OnMouseUp(control, button, upInside)
     if button == MOUSE_BUTTON_INDEX_RIGHT and upInside then
         ClearMenu()
         if self.data then
+            if not self.data:IsInPendingState() then
+                AddMenuItem(GetString(SI_GROUP_FINDER_ACCEPT_APPLICATION), function() RequestResolveGroupListingApplication(RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_APPROVE, self.data:GetCharacterId()) end)
+                AddMenuItem(GetString(SI_GROUP_FINDER_REJECT_APPLICATION), function() RequestResolveGroupListingApplication(RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_REJECT, self.data:GetCharacterId()) end)
+            end
             if IsChatSystemAvailableForCurrentPlatform() then
                 AddMenuItem(GetString(SI_SOCIAL_LIST_SEND_MESSAGE), function() StartChatInput("", CHAT_CHANNEL_WHISPER, self.data:GetDisplayName()) end)
             end

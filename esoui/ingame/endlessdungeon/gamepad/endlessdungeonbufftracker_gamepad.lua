@@ -7,7 +7,8 @@ ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_PADDING_GAMEPAD_Y = 0
 ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ROW_HEIGHT_GAMEPAD = ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_DIMENSIONS_GAMEPAD_Y + ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_PADDING_GAMEPAD_Y
 ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_WIDTH_GAMEPAD = ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_DIMENSIONS_GAMEPAD_X + ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_PADDING_GAMEPAD_X
 ZO_ENDLESS_DUNGEON_BUFF_GRID_HEADER_ROW_HEIGHT_GAMEPAD = 50
-ZO_ENDLESS_DUNGEON_BUFF_GRID_SECTION_PADDING_GAMEPAD_Y = 15
+ZO_ENDLESS_DUNGEON_BUFF_GRID_SECTION_PADDING_GAMEPAD_Y = 20
+ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_WIDTH_GAMEPAD = 655
 
 ZO_EndlessDungeonBuffTracker_Gamepad = ZO_EndlessDungeonBuffTracker_Shared:Subclass()
 
@@ -99,7 +100,7 @@ function ZO_EndlessDungeonBuffTracker_Gamepad:OnGridEntrySelected(previousData, 
 end
 
 function ZO_EndlessDungeonBuffTracker_Gamepad:UpdateGridListDimensions(numVerseEntries, numVisionEntries)
-    ZO_EndlessDungeonBuffTracker_Shared.UpdateGridListDimensions(self, numVerseEntries, numVisionEntries, ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_WIDTH_GAMEPAD, ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ROW_HEIGHT_GAMEPAD, ZO_ENDLESS_DUNGEON_BUFF_GRID_HEADER_ROW_HEIGHT_GAMEPAD, ZO_ENDLESS_DUNGEON_BUFF_GRID_SECTION_PADDING_GAMEPAD_Y)
+    ZO_EndlessDungeonBuffTracker_Shared.UpdateGridListDimensions(self, numVerseEntries, numVisionEntries, ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_WIDTH_GAMEPAD, ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_WIDTH_GAMEPAD, ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ROW_HEIGHT_GAMEPAD, ZO_ENDLESS_DUNGEON_BUFF_GRID_HEADER_ROW_HEIGHT_GAMEPAD, ZO_ENDLESS_DUNGEON_BUFF_GRID_SECTION_PADDING_GAMEPAD_Y)
 end
 
 -- Overridden from base
@@ -107,7 +108,8 @@ function ZO_EndlessDungeonBuffTracker_Gamepad:UpdateProgress()
     ZO_EndlessDungeonBuffTracker_Shared.UpdateProgress(self)
 
     if ENDLESS_DUNGEON_MANAGER:IsEndlessDungeonStarted() then
-        self.progressionNarrationText = { ENDLESS_DUNGEON_MANAGER:GetCurrentProgressionNarrationDescriptions() }
+        local stageNarration, cycleNarration, arcNarration = ENDLESS_DUNGEON_MANAGER:GetCurrentProgressionNarrationDescriptions()
+        self.progressionNarrationText = { arcNarration, cycleNarration, stageNarration }
 
         if self:IsShowing() then
             local NARRATE_HEADER = true

@@ -192,6 +192,7 @@ function ZO_GroupFinder_CreateEditGroupListing_Keyboard:InitializeControls()
     {
         NAME_RULE_TOO_SHORT,
         NAME_RULE_CANNOT_START_WITH_SPACE,
+        NAME_RULE_MUST_END_WITH_LETTER,
         NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS,
         NAME_RULE_NO_ADJACENT_PUNCTUATION_CHARACTERS,
         NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS,
@@ -448,7 +449,10 @@ function ZO_CreateEditGroupListing_OnGroupTitleFocusLost()
 end
 
 function ZO_CreateEditGroupListing_OnDescriptionTextChanged(control)
-    GROUP_FINDER_KEYBOARD:OnDescriptionTextChanged(control)
+    -- GROUP_FINDER_KEYBOARD isn't yet defined when we initially set text on the group description
+    if GROUP_FINDER_KEYBOARD then
+        GROUP_FINDER_KEYBOARD:OnDescriptionTextChanged(control)
+    end
 end
 
 function ZO_CreateEditGroupListing_OnChampionPointsTextChanged(control)
