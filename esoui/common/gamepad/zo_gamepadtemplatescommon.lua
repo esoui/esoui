@@ -379,7 +379,7 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(STOLEN_ICON_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_STOLEN_ICON_NARRATION))
         end
 
-        if data.sellInformation == ITEM_SELL_INFORMATION_CANNOT_SELL and ZO_Store_IsShopping() then
+        if data.sellInformation == ITEM_SELL_INFORMATION_CANNOT_SELL and ZO_StoreManager_IsInventoryStoreMode(STORE_WINDOW_GAMEPAD:GetCurrentMode()) then
             statusIndicator:AddIcon(ZO_GetItemSellInformationIcon(data.sellInformation), NO_TINT, GetString(SI_SCREEN_NARRATION_CANNOT_SELL_ICON_NARRATION))
         end
 

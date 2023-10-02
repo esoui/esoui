@@ -3573,7 +3573,7 @@ SafeAddString(SI_LOGIN_HELP_TOOLTIP, "Это ID игрока, который в�
 SafeAddString(SI_LOGIN_QUEUE_CANCEL_TEXT, "Покинуть очередь", 0)
 SafeAddString(SI_LOGIN_QUEUE_TEXT, "Вы помещены в очередь на вход. Благодарим за ваше терпение.\n\nПримерное время ожидания: |cffffff<<1>>|r", 2)
 SafeAddString(SI_LOGIN_REQUESTED, "Попытка входа…", 1)
-SafeAddString(SI_LOGIN_TIME_OUT, "Время входа истекло", 0)
+SafeAddString(SI_LOGIN_TIME_OUT, "Превышено время ожидания.", 0)
 SafeAddString(SI_LOGOUTERROR2, "Чтобы играть в ESO, необходимо войти в учетную запись PlayStation™Network.", 2)
 SafeAddString(SI_LOGOUTERROR3, "Чтобы играть в ESO, необходимо войти в профиль Xbox.", 1)
 SafeAddString(SI_LOGOUTERROR4, "Не удалось соединиться с Xbox Network. Проверьте свое подключение к интернету.", 1)
