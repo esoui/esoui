@@ -205,46 +205,67 @@ end
 do
     local ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES =
     {
-        [ENDLESS_DUNGEON_COUNTER_TYPE_STAGE] = "EsoUI/Art/EndlessDungeon/icon_progression_stage.dds",
-        [ENDLESS_DUNGEON_COUNTER_TYPE_CYCLE] = "EsoUI/Art/EndlessDungeon/icon_progression_cycle.dds",
-        [ENDLESS_DUNGEON_COUNTER_TYPE_ARC] = "EsoUI/Art/EndlessDungeon/icon_progression_arc.dds",
+        THIN_OUTLINE =
+        {
+            [ENDLESS_DUNGEON_COUNTER_TYPE_STAGE] = "EsoUI/Art/EndlessDungeon/icon_progression_stage.dds",
+            [ENDLESS_DUNGEON_COUNTER_TYPE_CYCLE] = "EsoUI/Art/EndlessDungeon/icon_progression_cycle.dds",
+            [ENDLESS_DUNGEON_COUNTER_TYPE_ARC] = "EsoUI/Art/EndlessDungeon/icon_progression_arc.dds",
+        },
+        THICK_OUTLINE =
+        {
+            [ENDLESS_DUNGEON_COUNTER_TYPE_STAGE] = "EsoUI/Art/EndlessDungeon/thick_outline_icon_progression_stage.dds",
+            [ENDLESS_DUNGEON_COUNTER_TYPE_CYCLE] = "EsoUI/Art/EndlessDungeon/thick_outline_icon_progression_cycle.dds",
+            [ENDLESS_DUNGEON_COUNTER_TYPE_ARC] = "EsoUI/Art/EndlessDungeon/thick_outline_icon_progression_arc.dds",
+        },
     }
 
-    function ZO_EndlessDungeonManager.GetProgressionIcon(counterType)
-        local icon = ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES[counterType]
+    function ZO_EndlessDungeonManager.GetProgressionIcon(counterType, useThickOutlineIcons)
+        local icons = useThickOutlineIcons and ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES.THICK_OUTLINE or ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES.THIN_OUTLINE
+        local icon = icons[counterType]
         assert(icon, "Invalid counter type")
         return icon
     end
 
-    function ZO_EndlessDungeonManager.GetProgressionIcons()
-        local stageIcon = ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES[ENDLESS_DUNGEON_COUNTER_TYPE_STAGE]
-        local cycleIcon = ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES[ENDLESS_DUNGEON_COUNTER_TYPE_CYCLE]
-        local arcIcon = ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES[ENDLESS_DUNGEON_COUNTER_TYPE_ARC]
+    function ZO_EndlessDungeonManager.GetProgressionIcons(useThickOutlineIcons)
+        local icons = useThickOutlineIcons and ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES.THICK_OUTLINE or ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES.THIN_OUTLINE
+        local stageIcon = icons[ENDLESS_DUNGEON_COUNTER_TYPE_STAGE]
+        local cycleIcon = icons[ENDLESS_DUNGEON_COUNTER_TYPE_CYCLE]
+        local arcIcon = icons[ENDLESS_DUNGEON_COUNTER_TYPE_ARC]
         return stageIcon, cycleIcon, arcIcon
     end
 
     local ICON_SIZE = "80%"
     local ENDLESS_DUNGEON_PROGRESSION_ICON_STRINGS =
     {
-        zo_iconFormat(ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES[ENDLESS_DUNGEON_COUNTER_TYPE_STAGE], ICON_SIZE, ICON_SIZE),
-        zo_iconFormat(ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES[ENDLESS_DUNGEON_COUNTER_TYPE_CYCLE], ICON_SIZE, ICON_SIZE),
-        zo_iconFormat(ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES[ENDLESS_DUNGEON_COUNTER_TYPE_ARC], ICON_SIZE, ICON_SIZE),
+        THIN_OUTLINE =
+        {
+            zo_iconFormat(ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES.THIN_OUTLINE[ENDLESS_DUNGEON_COUNTER_TYPE_STAGE], ICON_SIZE, ICON_SIZE),
+            zo_iconFormat(ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES.THIN_OUTLINE[ENDLESS_DUNGEON_COUNTER_TYPE_CYCLE], ICON_SIZE, ICON_SIZE),
+            zo_iconFormat(ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES.THIN_OUTLINE[ENDLESS_DUNGEON_COUNTER_TYPE_ARC], ICON_SIZE, ICON_SIZE),
+        },
+        THICK_OUTLINE =
+        {
+            zo_iconFormat(ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES.THICK_OUTLINE[ENDLESS_DUNGEON_COUNTER_TYPE_STAGE], ICON_SIZE, ICON_SIZE),
+            zo_iconFormat(ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES.THICK_OUTLINE[ENDLESS_DUNGEON_COUNTER_TYPE_CYCLE], ICON_SIZE, ICON_SIZE),
+            zo_iconFormat(ENDLESS_DUNGEON_PROGRESSION_ICON_TEXTURES.THICK_OUTLINE[ENDLESS_DUNGEON_COUNTER_TYPE_ARC], ICON_SIZE, ICON_SIZE),
+        },
     }
 
-    function ZO_EndlessDungeonManager.GetProgressionIconStrings()
-        return unpack(ENDLESS_DUNGEON_PROGRESSION_ICON_STRINGS)
+    function ZO_EndlessDungeonManager.GetProgressionIconStrings(useThickOutlineIcons)
+        local icons = useThickOutlineIcons and ENDLESS_DUNGEON_PROGRESSION_ICON_STRINGS.THICK_OUTLINE or ENDLESS_DUNGEON_PROGRESSION_ICON_STRINGS.THIN_OUTLINE
+        return unpack(icons)
     end
 end
 
-function ZO_EndlessDungeonManager.GetProgressionText(stage, cycle, arc)
-    local stageIcon, cycleIcon, arcIcon = ZO_EndlessDungeonManager.GetProgressionIconStrings()
+function ZO_EndlessDungeonManager.GetProgressionText(stage, cycle, arc, useThickOutlineIcons)
+    local stageIcon, cycleIcon, arcIcon = ZO_EndlessDungeonManager.GetProgressionIconStrings(useThickOutlineIcons)
     local output = string.format("%s%d %s%d %s%d", arcIcon, arc, cycleIcon, cycle, stageIcon, stage)
     return output
 end
 
-function ZO_EndlessDungeonManager:GetCurrentProgressionText()
+function ZO_EndlessDungeonManager:GetCurrentProgressionText(useThickOutlineIcons)
     local stage, cycle, arc = self:GetProgression()
-    return ZO_EndlessDungeonManager.GetProgressionText(stage, cycle, arc)
+    return ZO_EndlessDungeonManager.GetProgressionText(stage, cycle, arc, useThickOutlineIcons)
 end
 
 function ZO_EndlessDungeonManager.GetProgressionNarrationDescriptions(stage, cycle, arc)

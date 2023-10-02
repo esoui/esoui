@@ -109,10 +109,18 @@
                 <Control name="$(parent)DifficultyContainer">
                     <Anchor point="LEFT" relativeTo="$(parent)Refresh" relativePoint="RIGHT" offsetX="20" />
                     <Dimensions x="64" y="32" />
+
+                    <OnInitialized>
+                        ZO_VeteranDifficultySettings_OnInitialized(self)
+                    </OnInitialized>
+
                     <Controls>
-                        <Button name="$(parent)NormalDifficulty">
+                        <Label name="$(parent)DifficultyLabel" hidden="true" />
+
+                        <Button name="$(parent)NormalDifficulty" inherits="ZO_VeteranDifficultyButton">
                             <Anchor point="TOPLEFT" />
                             <Dimensions x="32" y="32" />
+
                             <Textures
                                 normal="EsoUI/Art/LFG/LFG_normalDungeon_up.dds"
                                 pressed="EsoUI/Art/LFG/LFG_normalDungeon_down.dds"
@@ -120,9 +128,13 @@
                                 disabled="EsoUI/Art/LFG/LFG_normalDungeon_disabled.dds"
                                 disabledPressed="EsoUI/Art/LFG/LFG_normalDungeon_down_disabled.dds"
                             />
+
+                            <OnInitialized>
+                                self.dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL
+                            </OnInitialized>
                         </Button>
 
-                        <Button name="$(parent)VeteranDifficulty">
+                        <Button name="$(parent)VeteranDifficulty" inherits="ZO_VeteranDifficultyButton">
                             <Anchor point="LEFT" relativeTo="$(parent)NormalDifficulty" relativePoint="RIGHT" offsetX="5" />
                             <Dimensions x="32" y="32" />
                             <Textures
@@ -132,22 +144,26 @@
                                 disabled="EsoUI/Art/LFG/LFG_veteranDungeon_disabled.dds"
                                 disabledPressed="EsoUI/Art/LFG/LFG_veteranDungeon_down_disabled.dds"
                             />
+
+                            <OnInitialized>
+                                self.dungeonDifficulty = DUNGEON_DIFFICULTY_VETERAN
+                            </OnInitialized>
                         </Button>
                     </Controls>
                 </Control>
 
                 <Control name="$(parent)PrimaryFilterSelector" inherits="ZO_ComboBox">
                     <Anchor point="LEFT" relativeTo="$(parent)Refresh" relativePoint="RIGHT" offsetX="20" />
-                    <Dimensions x="170" />
+                    <Dimensions x="210" />
                 </Control>
 
                 <Control name="$(parent)PrimaryFilterSelectorSingleSelect" inherits="ZO_ComboBox">
                     <Anchor point="LEFT" relativeTo="$(parent)Refresh" relativePoint="RIGHT" offsetX="20" />
-                    <Dimensions x="170" />
+                    <Dimensions x="210" />
                 </Control>
 
                 <Control name="$(parent)SecondaryFilterSelector" inherits="ZO_ComboBox">
-                    <Dimensions x="170" />
+                    <Dimensions x="210" />
                 </Control>
 
                 <Control name="$(parent)List" inherits="ZO_GroupFinder_SearchResults_Keyboard">

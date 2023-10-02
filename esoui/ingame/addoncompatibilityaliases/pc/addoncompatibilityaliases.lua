@@ -142,6 +142,7 @@ EVENT_COLLECTIBLE_USE_BLOCKED = EVENT_COLLECTIBLE_USE_RESULT
 -- Renamed InstanceDisplayType to ZoneDisplayType
 GetJournalInstanceDisplayType = GetJournalQuestZoneDisplayType
 GetJournalQuestInstanceDisplayType = GetJournalQuestZoneDisplayType
+INSTANCE_DISPLAY_TYPE_NONE = ZONE_DISPLAY_TYPE_NONE
 INSTANCE_DISPLAY_TYPE_SOLO = ZONE_DISPLAY_TYPE_SOLO
 INSTANCE_DISPLAY_TYPE_DUNGEON = ZONE_DISPLAY_TYPE_DUNGEON
 INSTANCE_DISPLAY_TYPE_RAID = ZONE_DISPLAY_TYPE_RAID
@@ -1318,3 +1319,6 @@ ZO_ScrollableComboBox = ZO_ComboBox
 
 -- rename of the toplevel for HousingFurnitureSettings_Keyboard
 ZO_HousingFurnitureSettingsPanel_KeyboardTopLevel = ZO_HousingFurnitureSettingsPanel_Keyboard_TL
+
+-- Renaming 'Timed event' to 'Leaderboard event'
+COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_TIMED_EVENT = COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_LEADERBOARD_EVENT

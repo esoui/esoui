@@ -76,14 +76,21 @@
 
                         <Control name="$(parent)PrimaryDropdown" inherits="ZO_ComboBox">
                             <Anchor point="LEFT" relativeTo="$(parent)CategoryDropdown" relativePoint="RIGHT" offsetX="10" />
-                            <Dimensions x="170" />
+                            <Dimensions x="210" />
                         </Control>
 
                         <Control name="$(parent)DifficultyRadioContainer">
                             <Anchor point="LEFT" relativeTo="$(parent)CategoryDropdown" relativePoint="RIGHT" />
                             <Dimensions x="64" y="32" />
+
+                            <OnInitialized>
+                                ZO_VeteranDifficultySettings_OnInitialized(self)
+                            </OnInitialized>
+
                             <Controls>
-                                <Button name="$(parent)NormalDifficulty">
+                                <Label name="$(parent)DifficultyLabel" hidden="true" />
+
+                                <Button name="$(parent)NormalDifficulty" inherits="ZO_VeteranDifficultyButton">
                                     <Anchor point="TOPLEFT" />
                                     <Dimensions x="32" y="32" />
                                     <Textures
@@ -93,8 +100,12 @@
                                         disabled="EsoUI/Art/LFG/LFG_normalDungeon_disabled.dds"
                                         disabledPressed="EsoUI/Art/LFG/LFG_normalDungeon_down_disabled.dds"
                                     />
+
+                                    <OnInitialized>
+                                        self.dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL
+                                    </OnInitialized>
                                 </Button>
-                                <Button name="$(parent)VeteranDifficulty">
+                                <Button name="$(parent)VeteranDifficulty" inherits="ZO_VeteranDifficultyButton">
                                     <Anchor point="LEFT" relativeTo="$(parent)NormalDifficulty" relativePoint="RIGHT" />
                                     <Dimensions x="32" y="32" />
                                     <Textures
@@ -104,13 +115,17 @@
                                         disabled="EsoUI/Art/LFG/LFG_veteranDungeon_disabled.dds"
                                         disabledPressed="EsoUI/Art/LFG/LFG_veteranDungeon_down_disabled.dds"
                                     />
+
+                                    <OnInitialized>
+                                        self.dungeonDifficulty = DUNGEON_DIFFICULTY_VETERAN
+                                    </OnInitialized>
                                 </Button>
                             </Controls>
                         </Control>
 
                         <Control name="$(parent)SecondaryDropdown" inherits="ZO_ComboBox">
                             <Anchor point="LEFT" relativeTo="$(parent)PrimaryDropdown" relativePoint="RIGHT" offsetX="10" />
-                            <Dimensions x="170" />
+                            <Dimensions x="210" />
                         </Control>
 
                         <Control name="$(parent)SizeDropdown" inherits="ZO_ComboBox">

@@ -2052,6 +2052,7 @@ SafeAddString(SI_GROUPFINDERMEMBERALERT6, "Group Finder listing removed: leader 
 SafeAddString(SI_GROUPFINDERPLAYSTYLE1, "Standard", 1)
 SafeAddString(SI_GROUPFINDERPLAYSTYLE2, "Educational", 1)
 SafeAddString(SI_GROUPFINDERPLAYSTYLE4, "Speed", 0)
+SafeAddString(SI_GROUPFINDERPLAYSTYLE8, "Achievement", 0)
 SafeAddString(SI_GROUPINVITERESPONSE0, "Invite failed. Could not find a player named \"<<1>>\" on your selected server.", 2)
 SafeAddString(SI_GROUPINVITERESPONSE1, "<<1>> accepted your invitation.", 2)
 SafeAddString(SI_GROUPINVITERESPONSE10, "You have invited <<1>> to the group.", 0)

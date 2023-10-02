@@ -54,15 +54,17 @@
                     <Anchor point="RIGHT" offsetX="-40" />
                 </Label>
 
-                <Label name="$(parent)Title" font="ZoFontGamepad42" maxLineCount="1" wrapMode="ELLIPSIS" override="true">
-                    <Anchor point="TOPLEFT" offsetX="15" offsetY="10"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)RoleList" relativePoint="LEFT" offsetX="-20" constrains="X" />
-                </Label>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontGamepad42" maxLineCount="1" wrapMode="ELLIPSIS" override="true">
+                            <Anchor point="TOPLEFT" offsetX="15" />
+                        </Label>
 
-                <Label name="$(parent)Settings" font="ZoFontGamepad27" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" override="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)RoleList" relativePoint="LEFT" offsetX="-20" constrains="X" />
-                </Label>
+                        <Label name="$(parent)Settings" font="ZoFontGamepad27" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
 

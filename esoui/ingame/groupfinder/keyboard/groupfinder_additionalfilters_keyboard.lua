@@ -250,6 +250,7 @@ function ZO_GroupFinder_AdditionalFilters_Keyboard:Refresh()
             else
                 self.difficultyRadioButtonGroup:SetButtonIsValidOption(self.difficultyButtons[i], false)
             end
+            self.difficultyButtons[i]:SetHidden(false)
         end
         secondaryOptionAnchorParent = self.difficultyContainer
     else

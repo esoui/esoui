@@ -38,6 +38,11 @@ function ZO_ComboBox:Initialize(control)
 
     self:SetHeight(DEFAULT_HEIGHT)
     self:SetupScrollList()
+
+    local function OnEffectivelyHidden()
+        self:HideDropdown()
+    end
+    control:SetHandler("OnEffectivelyHidden", OnEffectivelyHidden)
 end
 
 function ZO_ComboBox:GetEntryTemplateHeightWithSpacing()

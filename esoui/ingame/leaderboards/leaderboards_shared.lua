@@ -386,7 +386,8 @@ function ZO_LeaderboardsManager_Shared:SetupLeaderboardPlayerEntry(control, data
 
     if isEndlessDungeonLeaderboardType then
         control.progressLabel:SetHidden(false)
-        local progressionString = ZO_EndlessDungeonManager.GetProgressionText(data.stage, data.cycle, data.arc)
+        local USE_THICK_OUTLINE = true
+        local progressionString = ZO_EndlessDungeonManager.GetProgressionText(data.stage, data.cycle, data.arc, USE_THICK_OUTLINE)
         control.progressLabel:SetText(progressionString)
     else
         control.progressLabel:SetHidden(true)

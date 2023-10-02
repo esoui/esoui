@@ -19,8 +19,14 @@
             <Controls>
                 <Control name="$(parent)RoleList" resizeToFitDescendents="true" />
                 <Label name="$(parent)DisabledLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED" text="SI_GROUP_FINDER_SEARCH_RESULTS_DELISTED"/>
-                <Label name="$(parent)Title" maxLineCount="1" wrapMode="ELLIPSIS" />
-                <Label name="$(parent)Settings" wrapMode="ELLIPSIS"/>
+                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)RoleList" relativePoint="LEFT" offsetX="-20" constrains="X" />
+                    <Controls>
+                        <Label name="$(parent)Title" maxLineCount="1" wrapMode="ELLIPSIS" />
+                        <Label name="$(parent)Settings" wrapMode="ELLIPSIS"/>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
     </Controls>

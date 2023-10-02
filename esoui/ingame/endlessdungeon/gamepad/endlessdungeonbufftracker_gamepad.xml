@@ -51,7 +51,7 @@
                     <Anchor point="TOP" relativeTo="$(parent)Progress" relativePoint="BOTTOM" offsetX="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_X" offsetY="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_Y" />
                     <!-- The height of this list is adjusted dynamically by ZO_EndlessDungeonBuffTracker_Gamepad:UpdateGridListDimensions -->
                     <Dimensions x="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_WIDTH_GAMEPAD" />
-                    <DimensionConstraints maxY="730" />
+                    <DimensionConstraints maxY="730" minY="1" />
                 </Control>
 
                 <Control name="$(parent)KeybindContainer" override="true">

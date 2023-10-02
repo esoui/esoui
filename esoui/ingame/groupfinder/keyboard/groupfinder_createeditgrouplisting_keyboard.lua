@@ -240,6 +240,7 @@ function ZO_GroupFinder_CreateEditGroupListing_Keyboard:PopulatePrimaryDropdown(
             else
                 self.difficultyRadioButtonGroup:SetButtonIsValidOption(self.difficultyButtons[i], false)
             end
+            self.difficultyButtons[i]:SetHidden(false)
         end
         self.difficultyRadioButtonGroup:SetEnabled(isUserTypeDraft)
         secondaryOptionAnchorParent = self.difficultyRadioContainer

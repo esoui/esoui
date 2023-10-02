@@ -740,7 +740,9 @@ RIGHT_PANEL_BG_FRAGMENT:AddInstantScene(CROWN_CRATE_KEYBOARD_SCENE)
 local inventoryScene = ZO_Scene:New("inventory", SCENE_MANAGER)
 inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED)
-inventoryScene:AddFragment(ZO_ItemPreviewOptionsFragment:New({paddingLeft = 570, paddingRight = 620, forcePreparePreview = false}))
+-- Dynamic framing consumed width/height match FURNITURE_BROWSER_ITEM_PREVIEW_OPTIONS_FRAGMENT
+-- because these constraints only apply to furniture previews.
+inventoryScene:AddFragment(ZO_ItemPreviewOptionsFragment:New({paddingLeft = 570, paddingRight = 620, dynamicFramingConsumedWidth = 950, dynamicFramingConsumedHeight = 80, forcePreparePreview = false}))
 inventoryScene:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
 inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
 inventoryScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)

@@ -163,7 +163,7 @@ function ZO_GroupFinder_Gamepad:InitializeGroupFinderCategories()
                 name = GetString(SI_GROUP_FINDER_EDIT_GROUP),
                 menuIcon = "EsoUI/Art/LFG/Gamepad/gp_LFG_groupFinder_editListing.dds",
                 enabled = function()
-                    return not HasPendingAcceptedApplication()
+                    return not HasPendingAcceptedGroupFinderApplication()
                 end,
                 selectCallback = function()
                     self.createEditDialogObject:ShowDialog()

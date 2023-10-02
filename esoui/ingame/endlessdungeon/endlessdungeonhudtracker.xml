@@ -8,12 +8,6 @@
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
-                        <Label name="$(parent)Header" override="true" text="SI_ENDLESS_DUNGEON_BUFF_TRACKER_TITLE" />
-
-                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/ZoneStories/completionTypeIcon_lorebooks.dds" excludeFromResizeToFitExtents="true" level="3">
-                            <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT" offsetX="-3" />
-                        </Texture>
-
                         <Control name="$(parent)ShowBuffTracker" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true" />
                     </Controls>
                 </Control>

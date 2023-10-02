@@ -162,7 +162,10 @@ end
 
 function ZO_GroupFinder_SearchResultsList_Keyboard:OnStateChange(oldState, newState)
     if newState == SCENE_FRAGMENT_SHOWN then
+        RequestSetGroupFinderExpectingUpdates(true)
         self:RefreshData()
+    elseif newState == SCENE_FRAGMENT_HIDDEN then
+        RequestSetGroupFinderExpectingUpdates(false)
     end
 end
 
@@ -429,6 +432,10 @@ function ZO_GroupFinder_SearchPanel_Keyboard:RegisterForEvents()
 
     local function OnRefreshApplication()
         if self:GetFragment():IsShowing() then
+            -- Cancel application if pending application was accepted and player is now grouped
+            if IsUnitGrouped("player") then
+                ZO_Dialogs_ReleaseDialog("GROUP_FINDER_APPLICATION_KEYBOARD")
+            end
             self.list:RefreshFilters()
             self:RefreshAppliedToListing()
             self:UpdateCreateEditButton()
@@ -441,6 +448,7 @@ function ZO_GroupFinder_SearchPanel_Keyboard:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("GroupFinder_SearchResults_Keyboard", EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_APPLICATION, OnRefreshApplication)
 
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", function() self:UpdateCreateEditButton() end)
+    GROUP_FINDER_SEARCH_MANAGER:RegisterCallback("OnGroupFinderSearchResultsUpdated", function() self:RefreshAppliedToListing() end)
 end
 
 function ZO_GroupFinder_SearchPanel_Keyboard:InitializeKeybindStripDescriptors()
@@ -564,6 +572,7 @@ function ZO_GroupFinder_SearchPanel_Keyboard:RefreshFilterOptions()
             else
                 self.difficultyRadioButtonGroup:SetButtonIsValidOption(self.difficultyButtons[i], false)
             end
+            self.difficultyButtons[i]:SetHidden(false)
         end
     elseif category == GROUP_FINDER_CATEGORY_PVP then
         self.difficultyContainer:SetHidden(true)

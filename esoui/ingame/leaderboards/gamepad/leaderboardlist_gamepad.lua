@@ -143,6 +143,14 @@ function LeaderboardList_Gamepad:GetNarrationText()
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_LEADERBOARDS_HEADER_ALLIANCE)))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_ALLIANCE", selectedData.alliance)))
         end
+        if selectedData.arc then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_LEADERBOARDS_HEADER_PROGRESS)))
+
+            local stageNarration, cycleNarration, arcNarration = ZO_EndlessDungeonManager.GetProgressionNarrationDescriptions(selectedData.stage, selectedData.cycle, selectedData.arc)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(arcNarration))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(cycleNarration))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(stageNarration))
+        end
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GAMEPAD_LEADERBOARDS.headerPointsText))
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.points))
     end

@@ -91,7 +91,7 @@ function DeathType:SelectOption(keybind)
 end
 
 function DeathType:UpdateDisplay()
-    
+
 end
 
 function DeathType:UpdateCyclicTimer()
@@ -155,10 +155,10 @@ function DeathType:AreButtonsDisabledDueToCyclicRespawn()
 end
 
 function DeathType:LayoutWayshrineButton(wayshrineButton)
-	if IsInImperialCity() then
-		wayshrineButton:SetText(GetString(SI_DEATH_PROMPT_RELEASE))
-	else
-		wayshrineButton:SetText(GetString(SI_DEATH_PROMPT_WAYSHRINE))
+    if IsInImperialCity() then
+        wayshrineButton:SetText(GetString(SI_DEATH_PROMPT_RELEASE))
+    else
+        wayshrineButton:SetText(GetString(SI_DEATH_PROMPT_WAYSHRINE))
     end
 end
 
@@ -381,9 +381,9 @@ function ReleaseOnlyDeath:New(control)
     local releaseOnly = DeathType.New(self, control)
     
     local button1 = releaseOnly:GetButton(1)
-    button1:SetCallback(Release)    
+    button1:SetCallback(Release)
     
-    return releaseOnly   
+    return releaseOnly
 end
 
 function ReleaseOnlyDeath:UpdateDisplay()
@@ -566,11 +566,11 @@ function Death:GetDeathType()
         if useCyclicRespawn and IsQueuedForCyclicRespawn() then
             deathType = DEATH_TYPE_CYCLIC_RESPAWN
         elseif IsInImperialCity() then -- Special snowflake scenario
-			if isReleaseOnly then
-				deathType = DEATH_TYPE_RELEASE_ONLY
-			else
-				deathType = isAVADeath and DEATH_TYPE_IMPERIAL_PVP or DEATH_TYPE_IMPERIAL_PVE
-			end
+            if isReleaseOnly then
+                deathType = DEATH_TYPE_RELEASE_ONLY
+            else
+                deathType = isAVADeath and DEATH_TYPE_IMPERIAL_PVP or DEATH_TYPE_IMPERIAL_PVE
+            end
         elseif isBattleGroundDeath then
             deathType = DEATH_TYPE_BATTLE_GROUND
         elseif isAVADeath then 
@@ -747,12 +747,12 @@ end
 
 function ZO_Death_OnEffectivelyHidden(self)
     if (DEATH) then
-        DEATH:UpdateBindingLayer()        
+        DEATH:UpdateBindingLayer()
     end
 end
 
 function ZO_Death_OnEffectivelyShown(self)
     if (DEATH) then
-        DEATH:UpdateBindingLayer()        
+        DEATH:UpdateBindingLayer()
     end
 end

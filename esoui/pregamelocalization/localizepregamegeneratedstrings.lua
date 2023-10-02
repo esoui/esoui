@@ -1373,7 +1373,7 @@ EsoStrings =
     "You can't use this collectible while joined by quest followers.", -- SI_COLLECTIBLEUSAGEBLOCKREASON29
     "This collectible has been temporarily disabled. Please try again later.", -- SI_COLLECTIBLEUSAGEBLOCKREASON30
     "This default collectible is already in use.", -- SI_COLLECTIBLEUSAGEBLOCKREASON31
-    "You can't use this collectible during a timed event.", -- SI_COLLECTIBLEUSAGEBLOCKREASON32
+    "You can't use this collectible during a leaderboard event.", -- SI_COLLECTIBLEUSAGEBLOCKREASON32
     "You have already equipped the maximum number of this type of collectible.", -- SI_COLLECTIBLEUSAGEBLOCKREASON33
     "Gender", -- SI_COLLECTIBLERESTRICTIONTYPE0
     "Race", -- SI_COLLECTIBLERESTRICTIONTYPE1
@@ -3728,7 +3728,7 @@ EsoStrings =
     "You have already unearthed that antiquity.", -- SI_STOREFAILURE32
     "This fragment combines into a collectible that you already own.", -- SI_STOREFAILURE33
     "This grants a fragment for a collectible that you already own.", -- SI_STOREFAILURE34
-    "[DEBUG] You need more Endless Dungeon Currency to buy that.", -- SI_STOREFAILURE35
+    "You need more Archival Fortunes to buy that.", -- SI_STOREFAILURE35
     "", -- Sync id for EsoGameDataEnums_Store last entry
     "", -- Sync id for EsoGameDataEnums_Services first entry
     "Email address format is invalid.", -- SI_ACCOUNTCREATELINKERROR2
@@ -11582,6 +11582,7 @@ SafeAddVersion(SI_SOCIALACTIONRESULT100, 1)
 SafeAddVersion(SI_COLLECTIBLEUSAGEBLOCKREASON1, 1)
 SafeAddVersion(SI_COLLECTIBLEUSAGEBLOCKREASON2, 1)
 SafeAddVersion(SI_COLLECTIBLEUSAGEBLOCKREASON4, 1)
+SafeAddVersion(SI_COLLECTIBLEUSAGEBLOCKREASON32, 1)
 SafeAddVersion(SI_COLLECTIBLECATEGORYTYPE3, 1)
 SafeAddVersion(SI_COLLECTIBLECATEGORYTYPE5, 1)
 SafeAddVersion(SI_COLLECTIBLECATEGORYTYPE15, 1)
@@ -12016,6 +12017,7 @@ SafeAddVersion(SI_TRADINGHOUSESORTFIELD3, 1)
 SafeAddVersion(SI_STOREFAILURE4, 1)
 SafeAddVersion(SI_STOREFAILURE8, 1)
 SafeAddVersion(SI_STOREFAILURE19, 1)
+SafeAddVersion(SI_STOREFAILURE35, 1)
 SafeAddVersion(SI_ACCOUNTCREATELINKERROR12004, 1)
 SafeAddVersion(SI_ACCOUNTCREATELINKERROR12102, 1)
 SafeAddVersion(SI_LOGINAUTHERROR3, 2)

@@ -1180,6 +1180,10 @@ function ZO_GroupFinder_SearchResultsListScreen_Gamepad:RegisterForEvents()
 
     local function OnRefreshApplication(autoSelectApplication)
         if self.scene:IsShowing() then
+            -- Cancel application if pending application was accepted and player is now grouped
+            if IsUnitGrouped("player") then
+                ZO_Dialogs_ReleaseDialog("GROUP_FINDER_APPLICATION_GAMEPAD")
+            end
             self.resultsList:RefreshFilters()
             self.resultsList:RefreshAppliedToListing(autoSelectApplication)
             self.resultsList:RefreshSelectedTooltip()

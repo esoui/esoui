@@ -24,15 +24,17 @@
                     <Anchor point="RIGHT" offsetX="-75" />
                 </Label>
 
-                <Label name="$(parent)Title" font="ZoFontWinH3" maxLineCount="1" wrapMode="ELLIPSIS" override="true">
-                    <Anchor point="TOPLEFT" offsetY="5"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)RoleList" relativePoint="LEFT" offsetX="-20" constrains="X" />
-                </Label>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontWinH3" maxLineCount="1" wrapMode="ELLIPSIS" override="true">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
 
-                <Label name="$(parent)Settings" font="ZoFontWinT1" wrapMode="ELLIPSIS" override="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="RIGHT" relativeTo="$(parent)RoleList" relativePoint="LEFT" offsetX="-20" constrains="X" />
-                </Label>
+                        <Label name="$(parent)Settings" font="ZoFontWinT1" wrapMode="ELLIPSIS" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
 

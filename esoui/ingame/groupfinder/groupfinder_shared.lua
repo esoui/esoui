@@ -678,7 +678,7 @@ end
 
 function ZO_GroupFinder_CanDoCreateEdit(userTypeData, groupTitleEditControl, isEditing)
     local statusResult = GetGroupFinderStatusReason()
-    if IsRoleChangeRequested() then
+    if IsGroupFinderRoleChangeRequested() then
         return false, GetString(SI_GROUP_FINDER_ROLE_CHANGING)
     elseif statusResult == GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION then
         return false, GetString("SI_GROUPFINDERACTIONRESULT", statusResult)
@@ -688,7 +688,7 @@ function ZO_GroupFinder_CanDoCreateEdit(userTypeData, groupTitleEditControl, isE
         return false, GetString(SI_GROUP_FINDER_CREATE_GROUP_DISABLED_NOT_LEADER)
     elseif userTypeData then
         if userTypeData:GetUserType() == GROUP_FINDER_GROUP_LISTING_USER_TYPE_CREATED_GROUP_LISTING then
-            if HasPendingAcceptedApplication() then
+            if HasPendingAcceptedGroupFinderApplication() then
                 return false, GetString("SI_GROUPFINDERACTIONRESULT", GROUP_FINDER_ACTION_RESULT_FAILED_APPLICATION_PENDING)
             elseif isEditing and not userTypeData:HasUserTypeChanged() then
                 return false, GetString(SI_GROUP_FINDER_EDIT_NO_CHANGES_TOOLTIP)
@@ -1016,8 +1016,8 @@ end
 -- Global XML
 
 function ZO_GroupFinder_GroupListing_OnInitialize(control)
-    control.groupTitleLabel = control:GetNamedChild("Title")
-    control.settingsLabel = control:GetNamedChild("Settings")
+    control.groupTitleLabel = control:GetNamedChild("ContainerTitle")
+    control.settingsLabel = control:GetNamedChild("ContainerSettings")
     control.roleList = control:GetNamedChild("RoleList")
     control.disabledLabel = control:GetNamedChild("DisabledLabel")
     control.roleControls = {}
