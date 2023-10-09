@@ -2302,7 +2302,7 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, currency
         self.carriedCurrencyLabel:SetHidden(false)
         self.bankedCurrencyLabel:SetHidden(false)
     else
-        local comboBox = ZO_ComboBox:New(currenciesComboBoxControl)
+        local comboBox = ZO_ComboBox_ObjectFromContainer(currenciesComboBoxControl)
         comboBox:SetSortsItems(false)
         comboBox:SetFont("ZoFontWinT1")
         comboBox:SetSpacing(15)

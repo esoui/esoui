@@ -17,7 +17,7 @@ end
 local function UpdateVeteranStateVisuals(self, isVeteranDifficulty)
     self.hasControlOfDifficulty, self.difficultyControlReason = CanPlayerChangeGroupDifficulty()
 
-    if self.hasControlOfDifficulty then
+    if self.hasControlOfDifficulty or self.isGroupFinder then
         self.normalModeButton:SetHidden(false)
         self.veteranModeButton:SetHidden(false)
         self.difficultyLabel:SetHidden(true)
@@ -63,10 +63,12 @@ function ZO_VeteranDifficultySettings_OnInitialized(self)
     self.difficultyLabel = self:GetNamedChild("DifficultyLabel")
 
     local function Refresh(unitTag)
-        if(unitTag == nil or unitTag == "player") then
+        if unitTag == nil or unitTag == "player" then
             UpdateVeteranState(self)
         end
     end
+
+    self.refreshFunction = Refresh
 
     -- NOTE: There appears to be a bug in the event manager code that is preventing the same function to be registered from the same control for different events...
     -- until that's fixed, split up the handlers.
@@ -120,6 +122,11 @@ function ZO_VeteranDifficultySettings_OnInitialized(self)
     self:RegisterForEvent(EVENT_ZONE_UPDATE, OnZoneUpdate)
 
     Refresh()
+end
+
+function ZO_VeteranDifficultySettings_GroupFinder_OnInitialized(self)
+    self.isGroupFinder = true
+    ZO_VeteranDifficultySettings_OnInitialized(self)
 end
 
 function ZO_VeteranDifficultyButton_OnMouseEnter(self)

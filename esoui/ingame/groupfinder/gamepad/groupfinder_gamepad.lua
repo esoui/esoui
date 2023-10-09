@@ -16,6 +16,8 @@ function ZO_GroupFinder_Gamepad:Initialize(control)
         titleText = function()
             if self.mode == ZO_GROUP_FINDER_MODES.MANAGE then
                 return GetString(SI_GROUP_FINDER_MY_GROUP_LISTING)
+            elseif self.mode == ZO_GROUP_FINDER_MODES.SEARCH then
+                return GetString(SI_GAMEPAD_GROUP_FINDER_FIND_GROUP)
             else
                 return GetString(SI_ACTIVITY_FINDER_CATEGORY_GROUP_FINDER)
             end
@@ -417,7 +419,8 @@ function ZO_GroupFinder_Gamepad:PerformUpdate()
 end
 
 function ZO_GroupFinder_Gamepad:OnShowing()
-    UpdateGroupFinderFilterOptions()
+    local RESET_DIFFICULTY = true
+    UpdateGroupFinderFilterOptions(RESET_DIFFICULTY)
 
     if self.pendingMode then
         self:SetMode(self.pendingMode)

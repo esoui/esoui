@@ -84,7 +84,7 @@
                             <Dimensions x="64" y="32" />
 
                             <OnInitialized>
-                                ZO_VeteranDifficultySettings_OnInitialized(self)
+                                ZO_VeteranDifficultySettings_GroupFinder_OnInitialized(self)
                             </OnInitialized>
 
                             <Controls>

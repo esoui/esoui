@@ -24,7 +24,10 @@
             </Controls>
         </Control>
 
-        <Backdrop name="ZO_ComboBoxEntry_SelectedHighlight" inherits="ZO_SelectionHighlight" hidden="true" virtual="true" />
+        <Backdrop name="ZO_ComboBoxEntry_SelectedHighlight" inherits="ZO_SelectionHighlight" hidden="true" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="4" />
+            <Anchor point="BOTTOMRIGHT" />
+        </Backdrop>
 
         <Control name="ZO_ComboBox" mouseEnabled="true" virtual="true">
             <Dimensions x="135" y="31" />

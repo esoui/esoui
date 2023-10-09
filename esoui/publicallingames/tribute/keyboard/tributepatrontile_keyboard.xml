@@ -72,6 +72,10 @@
                 ZO_TributePatronSelectionTile_Keyboard_OnInitialized(self)
             </OnInitialized>
             <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="TOP" />
+                </Texture>
+                
                 <Label name="$(parent)Title" override="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetX="30" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="-30" offsetY="-35" />
@@ -84,13 +88,13 @@
 
                 <Texture name="$(parent)Highlight" override="true" textureFile="EsoUI/Art/Tribute/tributePatronHighlight_Hover.dds" alpha="0">
                     <Dimensions x="ZO_TRIBUTE_PATRON_TILE_ICON_WIDE_DIMENSIONS_KEYBOARD" y="ZO_TRIBUTE_PATRON_TILE_ICON_WIDE_DIMENSIONS_KEYBOARD" />
-                    <Anchor point="TOP" offsetY="20" />
+                    <Anchor point="TOP" />
                     <TextureCoords left="0" right="1" top="0" bottom="1"/>
                 </Texture>
 
                 <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Tribute/tributePatronHighlight_Selected.dds" alpha="0">
                     <Dimensions x="ZO_TRIBUTE_PATRON_TILE_ICON_WIDE_DIMENSIONS_KEYBOARD" y="ZO_TRIBUTE_PATRON_TILE_ICON_WIDE_DIMENSIONS_KEYBOARD" />
-                    <Anchor point="TOP" offsetY="20" />
+                    <Anchor point="TOP" />
                 </Texture>
             </Controls>
         </Control>

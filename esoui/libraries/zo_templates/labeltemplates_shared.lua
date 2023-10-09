@@ -822,6 +822,7 @@ function ZO_RollingMeterLabelTransition:Reset()
     self.targetValue = 0
 
     self:SetTransitionAccelerationFactor(1)
+    self:SetTransitionAnimationStartedCallback(nil)
     self:SetTransitionCompleteCallback(nil)
     self:SetTransitionEasingFunction(nil)
     self:SetTransitionSpeedFactor(1)
@@ -833,6 +834,14 @@ end
 
 function ZO_RollingMeterLabelTransition:SetTransitionAccelerationFactor(factor)
     self.transitionAccelerationFactor = zo_max(factor, 0.1)
+end
+
+function ZO_RollingMeterLabelTransition:GetTransitionAnimationStartedCallback()
+    return self.transitionAnimationStartedCallback
+end
+
+function ZO_RollingMeterLabelTransition:SetTransitionAnimationStartedCallback(callbackFunction)
+    self.transitionAnimationStartedCallback = callbackFunction
 end
 
 function ZO_RollingMeterLabelTransition:GetMaxTransitionSteps()
@@ -965,8 +974,8 @@ function ZO_RollingMeterLabelTransition:Update()
     local isFinalStep = currentStep >= numSteps or zo_abs(self.targetValue - self.currentValue) <= 0.5
     if isFinalStep then
         -- End the transition if the target value has been reached or
-        -- if the interpolation was got us within less than one step
-        -- from the target value.
+        -- if we interpolated within less than one step from the target
+        -- value.
         self.currentValue = self.targetValue
         currentStep = numSteps + 1
         self.currentTransitionStep = currentStep
@@ -1003,4 +1012,8 @@ function ZO_RollingMeterLabelTransition:Update()
 
     -- Start the animation for this step.
     self.control:SetValue(self.currentValue, animationNormalizedIntervalOffset, animationOverrideEasingFunction)
+
+    if self.transitionAnimationStartedCallback then
+        self.transitionAnimationStartedCallback(self, self.currentTransitionStep, self.numTransitionSteps, self.currentValue, self.targetValue)
+    end
 end

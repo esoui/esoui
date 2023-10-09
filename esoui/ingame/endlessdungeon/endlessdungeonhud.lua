@@ -21,7 +21,6 @@ function ZO_EndlessDungeonHUD:InitializeControls()
     self.reviveIconTexture:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
 
     self.reviveLabel = control:GetNamedChild("ReviveLabel")
-    self.reviveLabel:SetAnimationSoundIds(SOUNDS.ENDLESS_DUNGEON_COUNTER_UP, SOUNDS.ENDLESS_DUNGEON_COUNTER_DOWN)
     self.reviveLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     self.reviveLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     self.reviveLabel:SetResizeToFitLabels(true)
@@ -36,7 +35,11 @@ function ZO_EndlessDungeonHUD:InitializeControls()
     self.scoreLabel:SetResizeToFitLabels(true)
     self.scoreLabelTransitionManager = self.scoreLabel:GetOrCreateTransitionManager()
     self.scoreLabelTransitionManager:SetMaxTransitionSteps(50)
-    self.scoreLabelTransitionManager:SetTransitionSpeedFactor(3.0)
+    self.scoreLabelTransitionManager:SetTransitionAnimationStartedCallback(function(rollingMeterLabel, currentStep, numSteps, currentValue, targetValue)
+        if currentValue == targetValue and not self.fragment:IsHidden() then
+            PlaySound(SOUNDS.ENDLESS_DUNGEON_SCORE_FINAL_FLIP)
+        end
+    end)
 
     self.fragment = ZO_HUDFadeSceneFragment:New(control)
     ENDLESS_DUNGEON_HUD_FRAGMENT = self.fragment
@@ -203,11 +206,6 @@ function ZO_EndlessDungeonHUD:OnDungeonScoreUpdated(score)
         if not self.fragment:IsHidden() then
             -- Play the calculation audio clip immediately.
             PlaySound(SOUNDS.ENDLESS_DUNGEON_SCORE_CALCULATE)
-
-            -- Defer the final flip audio clip to match the animation.
-            zo_callLater(function()
-                PlaySound(SOUNDS.ENDLESS_DUNGEON_SCORE_FINAL_FLIP)
-            end, 1500)
         end
     end, 1200)
 end

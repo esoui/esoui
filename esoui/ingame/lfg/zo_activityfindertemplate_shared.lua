@@ -62,6 +62,7 @@ function ZO_ActivityFinderTemplate_Shared:RegisterEvents()
 
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_APPLY_TO_GROUP_LISTING_RESULT, function() self:OnActivityFinderStatusUpdate() end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_RESOLVE_GROUP_LISTING_APPLICATION_RESULT, function() self:OnActivityFinderStatusUpdate() end)
+    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_APPLICATION, function() self:OnActivityFinderStatusUpdate() end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_CREATE_GROUP_LISTING_RESULT, function() self:OnActivityFinderStatusUpdate() end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_RESULT, function() self:OnActivityFinderStatusUpdate() end)
 end

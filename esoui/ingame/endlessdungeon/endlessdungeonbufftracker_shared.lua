@@ -317,6 +317,11 @@ end
 function ZO_EndlessDungeonBuffTracker_Shared:OnHiding()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     KEYBIND_STRIP:RestoreDefaultExit()
+    PlaySound(SOUNDS.ENDLESS_DUNGEON_BUFF_TRACKER_CLOSE)
+end
+
+function ZO_EndlessDungeonBuffTracker_Shared:OnShowing()
+    PlaySound(SOUNDS.ENDLESS_DUNGEON_BUFF_TRACKER_OPEN)
 end
 
 function ZO_EndlessDungeonBuffTracker_Shared:OnShown()

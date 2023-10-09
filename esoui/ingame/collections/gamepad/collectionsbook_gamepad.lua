@@ -74,6 +74,22 @@ function ZO_GamepadCollectionsBook:Initialize(control)
 
     SYSTEMS:RegisterGamepadObject(ZO_COLLECTIONS_SYSTEM_NAME, self)
 
+    self.OnGamepadDialogShowing = function()
+        if ZO_Dialogs_IsShowingDialogThatShouldShowTooltip() then
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        end
+    end
+
+    self.OnGamepadDialogHidden = function()
+        -- If we are showing a queued dialog, the hidden for the previously shown dialog could come
+        -- after the showing for the new dialog, so make sure we don't reshow any tooltips after hiding them
+        if self.currentList and not ZO_Dialogs_IsShowingDialogThatShouldShowTooltip() then
+            local listObject = self.currentList.list
+            local targetData = listObject:GetTargetData()
+            self:RefreshRightPanel(targetData)
+        end
+    end
+
     local function OnCollectibleUpdated()
         self:OnCollectibleUpdated()
     end
@@ -291,10 +307,16 @@ function ZO_GamepadCollectionsBook:OnShowing()
     
     self.savedOutfitStyleIndex = nil
     self.savedCollectibleData = nil
+
+    CALLBACK_MANAGER:RegisterCallback("OnGamepadDialogShowing", self.OnGamepadDialogShowing)
+    CALLBACK_MANAGER:RegisterCallback("OnGamepadDialogHidden", self.OnGamepadDialogHidden)
 end
 
 function ZO_GamepadCollectionsBook:OnHiding()
     self:HideAssignableUtilityWheel()
+
+    CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogShowing", self.OnGamepadDialogShowing)
+    CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogHidden", self.OnGamepadDialogHidden)
 end
 
 function ZO_GamepadCollectionsBook:OnHide()

@@ -562,6 +562,8 @@ function ZO_GroupFinder_SearchPanel_Keyboard:RefreshFilterOptions()
 
         local totalDifficulties = #self.difficultyButtons
         local availableDifficulties = GetGroupFinderFilterNumPrimaryOptions()
+        -- Clears selected button so that it is force reselected visually from data
+        self.difficultyRadioButtonGroup:UpdateFromData(function() return false end)
         for i = 1, totalDifficulties do
             if i <= availableDifficulties then
                 local _, isSet = GetGroupFinderFilterPrimaryOptionByIndex(i)

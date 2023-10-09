@@ -37,13 +37,8 @@ do
             self:OnInstanceKickTimeUpdate(timeRemaining, totalTime)
         end
 
-        local function OnInstanceKickTimeUpdate(event, timeRemaining, totalTime)
-            if not timeRemaining then
-                timeRemaining, totalTime = GetInstanceKickTime()
-            elseif not totalTime then
-                totalTime = timeRemaining
-            end
-
+        local function OnInstanceKickTimeUpdate(event, timeRemaining)
+            local totalTime = timeRemaining
             self:OnInstanceKickTimeUpdate(timeRemaining, totalTime)
         end
 
@@ -74,8 +69,10 @@ end
 
 function ZO_InstanceKickWarning:OnInstanceKickTimeUpdate(timeRemaining, totalTime)
     if timeRemaining and totalTime and timeRemaining > 0 and totalTime > 0 then
-        self.timerCooldown:Start(timeRemaining)
-        self.kickPending = true
+        if not self.kickPending then
+            self.timerCooldown:Start(timeRemaining)
+            self.kickPending = true
+        end
         self:UpdateVisibility()
         
         -- give an alert text to explain why being removed from the instance

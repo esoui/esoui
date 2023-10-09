@@ -1,9 +1,5 @@
 local HousingPreviewDialog_Keyboard = ZO_HousingPreviewDialog_Shared:Subclass()
 
-function HousingPreviewDialog_Keyboard:New(...)
-    return ZO_HousingPreviewDialog_Shared.New(self, ...)
-end
-
 function HousingPreviewDialog_Keyboard:Initialize(control)
     ZO_HousingPreviewDialog_Shared.Initialize(self, control, "HOUSE_PREVIEW_PURCHASE")
     self.returnToEntranceButton = control:GetNamedChild("GoToEntrance")
@@ -23,7 +19,7 @@ function HousingPreviewDialog_Keyboard:Initialize(control)
 end
 
 function HousingPreviewDialog_Keyboard:InitializeTemplateComboBox()
-    local comboBox = ZO_ComboBox:New(self.templateComboBoxControl)
+    local comboBox = ZO_ComboBox_ObjectFromContainer(self.templateComboBoxControl)
     comboBox:SetSortsItems(false)
     comboBox:SetFont("ZoFontWinT1")
     comboBox:SetSpacing(4)

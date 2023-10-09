@@ -52,7 +52,7 @@
 
                 <Control name="$(parent)SubHeader">
                     <Dimensions x="ZO_TRIBUTE_PATRON_SELECTION_KEYBOARD_HEADER_WIDTH" y="24"/>
-                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="40"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="20"/>
                     <Controls>
                         <Label name="$(parent)Text" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
                             <Anchor point="TOP" />

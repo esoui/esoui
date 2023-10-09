@@ -31,7 +31,7 @@ function ZO_GroupList_Keyboard:Initialize(control)
 
     control:SetHandler("OnEffectivelyHidden", function() self:OnEffectivelyHidden() end)
 
-    self.memberCount = GetControl(control, "GroupMembersCount")
+    self.difficultyControl = control:GetNamedChild("VeteranDifficultySettings")
 
     ZO_ScrollList_Initialize(self.list)
     ZO_ScrollList_AddDataType(self.list, GROUP_DATA, "ZO_GroupListRow", 30, function(control, data) self:SetupGroupEntry(control, data) end)
@@ -49,9 +49,14 @@ function ZO_GroupList_Keyboard:Initialize(control)
     GROUP_LIST_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+
+            if self.difficultyControl.refreshFunction then
+                self.difficultyControl.refreshFunction()
+            end
         elseif newState == SCENE_FRAGMENT_SHOWN then
             self:RefreshData()
             TriggerTutorial(TUTORIAL_TRIGGER_YOUR_GROUP_OPENED)
+            GROUP_LIST_FRAGMENT:FireCallbacks("OnGroupMenuShown")
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         end

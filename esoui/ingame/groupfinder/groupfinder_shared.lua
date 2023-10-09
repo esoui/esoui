@@ -65,12 +65,18 @@ function ZO_GroupFinder_Shared:Initialize(control)
     self:InitializeFragments()
     self:InitializeGroupFinderCategories()
 
+    function OnGroupVeteranDifficultyChanged()
+        ResetGroupFinderFilterAndDraftOptionsToDefault()
+    end
+
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_STATUS_UPDATED, function(_, ...) self:OnGroupFinderStatusUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_CREATE_GROUP_LISTING_RESULT, function(_, ...) self:OnGroupListingRequestCreateResult(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_UPDATE_GROUP_LISTING_RESULT, function(_, ...) self:OnGroupListingRequestEditResult(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_GROUP_LISTING_ATTAINED_ROLES_CHANGED, function(_, ...) self:OnGroupListingAttainedRolesChanged(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_RESULT, function(_, ...) self:OnGroupListingRemoved(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_APPLICATION_RECEIVED, function() ZO_SetGroupFinderIsNewApplication(true) end)
+    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_VETERAN_DIFFICULTY_CHANGED, OnGroupVeteranDifficultyChanged)
+    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_VETERAN_DIFFICULTY_CHANGED, OnGroupVeteranDifficultyChanged)
 end
 
 function ZO_GroupFinder_Shared:InitializeFragments()
@@ -271,6 +277,10 @@ end
 function ZO_GroupFinder_CreateEditGroupListing_Shared:OnPrimarySelection(dropdown, selectedDataName, selectedData, selectionChanged, oldData)
     if self.userTypeData:IsUserTypeActive() then
         self.userTypeData:SetPrimaryOption(selectedData.value)
+        local category = self.userTypeData:GetCategory()
+        if category == GROUP_FINDER_CATEGORY_DUNGEON or category == GROUP_FINDER_CATEGORY_ARENA or category == GROUP_FINDER_CATEGORY_TRIAL then
+            SetVeteranDifficulty(selectedData.value == DUNGEON_DIFFICULTY_VETERAN)
+        end
         self:PopulateSecondaryDropdown()
         self:PopulateSizeDropdown()
     end

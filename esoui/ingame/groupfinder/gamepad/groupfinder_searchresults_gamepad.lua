@@ -1199,6 +1199,7 @@ function ZO_GroupFinder_SearchResultsListScreen_Gamepad:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("GroupFinder_SearchResults_Gamepad", EVENT_GROUP_FINDER_APPLY_TO_GROUP_LISTING_RESULT, OnRefreshNewApplication)
     EVENT_MANAGER:RegisterForEvent("GroupFinder_SearchResults_Gamepad", EVENT_GROUP_FINDER_RESOLVE_GROUP_LISTING_APPLICATION_RESULT, OnRefreshApplication)
     EVENT_MANAGER:RegisterForEvent("GroupFinder_SearchResults_Gamepad", EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_APPLICATION, OnRefreshApplication)
+    EVENT_MANAGER:RegisterForEvent("GroupFinder_SearchResults_Gamepad", EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_APPLICATION, OnRefreshApplication)
 end
 
 function ZO_GroupFinder_SearchResultsListScreen_Gamepad:RefreshCategory()

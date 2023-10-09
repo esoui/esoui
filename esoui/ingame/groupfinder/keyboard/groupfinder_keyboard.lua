@@ -69,7 +69,8 @@ function ZO_GroupFinder_Keyboard:InitializeFragments()
     GROUP_FINDER_KEYBOARD_FRAGMENT = self.sceneFragment
     GROUP_FINDER_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
-            UpdateGroupFinderFilterOptions()
+            local RESET_DIFFICULTY = true
+            UpdateGroupFinderFilterOptions(RESET_DIFFICULTY)
             self:ApplyPendingMode()
             self:RefreshAppliedToListing()
             self.createGroupListingButton:SetEnabled(ZO_GroupFinder_CanDoCreateEdit())

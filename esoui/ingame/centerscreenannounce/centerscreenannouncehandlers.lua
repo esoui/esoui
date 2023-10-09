@@ -1762,11 +1762,13 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
                 titleText = GetString(SI_ENDLESS_DUNGEON_ATTEMPTS_REMAINING_INCREASED_ANNOUNCEMENT_TITLE)
             else
                 titleText = GetString(SI_ENDLESS_DUNGEON_ATTEMPTS_REMAINING_DECREASED_ANNOUNCEMENT_TITLE)
+                messageParams:SetSound(SOUNDS.ENDLESS_DUNGEON_ATTEMPTS_REMAINING_DECREMENT) -- Audio specifically for losing an attempt.
             end
             local subtitleText = zo_strformat(GetString(SI_ENDLESS_DUNGEON_ATTEMPTS_REMAINING_CHANGED_ANNOUNCEMENT_SUBTITLE), attemptsRemaining)
 
             messageParams:SetText(titleText, subtitleText)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ENDLESS_DUNGEON_ATTEMPTS_REMAINING_CHANGED)
+
             return messageParams
         end,
     },

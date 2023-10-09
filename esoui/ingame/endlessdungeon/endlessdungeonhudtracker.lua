@@ -100,6 +100,7 @@ function ZO_EndlessDungeonHUDTracker:ApplyPlatformStyle(style)
     self.headerLabel:SetText(GetString(SI_ENDLESS_DUNGEON_HUD_TRACKER_TITLE))
     self.showBuffTrackerKeybindButton:ClearAnchors()
     style.KEYBIND_ANCHOR:AddToControl(self.showBuffTrackerKeybindButton)
+    ApplyTemplateToControl(self.showBuffTrackerKeybindButton, style.KEYBIND_BUTTON_TEMPLATE)
 end
 
 function ZO_EndlessDungeonHUDTracker:GetPrimaryAnchor()

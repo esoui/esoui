@@ -819,7 +819,7 @@ end
 --@dataTypeSelectSound - An optional sound to play when a row of this data type is selected.
 --@resetControlCallback - An optional callback when the datatype control gets reset.
 function ZO_ScrollList_AddDataType(self, typeId, templateName, height, setupCallback, hideCallback, dataTypeSelectSound, resetControlCallback)
-    if not self.dataTypes[typeId] then
+    if internalassert(not self.dataTypes[typeId], "Data type already registered to scroll list") then
         local factoryFunction = function(objectPool) return ZO_ObjectPool_CreateNamedControl(string.format("%s%dRow", self:GetName(), typeId), templateName, objectPool, self.contents) end
         local pool = ZO_ObjectPool:New(factoryFunction, resetControlCallback or ZO_ObjectPool_DefaultResetControl)
         self.dataTypes[typeId] = 

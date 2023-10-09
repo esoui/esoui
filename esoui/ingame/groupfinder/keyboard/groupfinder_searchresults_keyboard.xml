@@ -111,7 +111,7 @@
                     <Dimensions x="64" y="32" />
 
                     <OnInitialized>
-                        ZO_VeteranDifficultySettings_OnInitialized(self)
+                        ZO_VeteranDifficultySettings_GroupFinder_OnInitialized(self)
                     </OnInitialized>
 
                     <Controls>
@@ -132,6 +132,10 @@
                             <OnInitialized>
                                 self.dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL
                             </OnInitialized>
+
+                            <OnClicked>
+                                <!-- override to do nothing, handled in lua -->
+                            </OnClicked>
                         </Button>
 
                         <Button name="$(parent)VeteranDifficulty" inherits="ZO_VeteranDifficultyButton">
@@ -148,6 +152,10 @@
                             <OnInitialized>
                                 self.dungeonDifficulty = DUNGEON_DIFFICULTY_VETERAN
                             </OnInitialized>
+
+                            <OnClicked>
+                                <!-- override to do nothing, handled in lua -->
+                            </OnClicked>
                         </Button>
                     </Controls>
                 </Control>

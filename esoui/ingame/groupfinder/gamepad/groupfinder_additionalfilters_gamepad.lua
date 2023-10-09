@@ -127,6 +127,8 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:Refresh()
         self.categoryDropdown:SelectItemByIndex(categoryIndex, IGNORE_CALLBACK)
     end
 
+    UpdateGroupFinderFilterOptions()
+
     -- We can't guarantee these will stay the same when we rebuild the list, so clear them out to avoid
     -- cross-contamination.
     self.categoryDropdown = nil
@@ -135,6 +137,11 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:Refresh()
     self.secondaryOptionDropdown = nil
     self.sizeDropdown = nil
     self.playstyleDropdown = nil
+    self.championCheckbox = nil
+    self.voipCheckbox = nil
+    self.inviteCodeCheckbox = nil
+    self.autoAcceptCheckbox = nil
+    self.ownRoleOnlyCheckbox = nil
 
     local dialog = ZO_Dialogs_FindDialog("GROUP_FINDER_ADDITIONAL_FILTERS_GAMEPAD")
     if dialog then
@@ -425,6 +432,9 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
             enabled = function(dialog)
                 return IsUnitChampion("player")
             end,
+            checked = function()
+                return DoesGroupFinderFilterRequireChampion()
+            end,
             narrationText = ZO_GetDefaultParametricListToggleNarrationText,
         },
     }
@@ -484,6 +494,9 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
                     SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                 end
             end,
+            checked = function()
+                return DoesGroupFinderFilterRequireVOIP()
+            end,
             narrationText = ZO_GetDefaultParametricListToggleNarrationText,
         },
     }
@@ -507,6 +520,9 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
                     SetGroupFinderFilterRequiresInviteCode(ZO_GamepadCheckBoxTemplate_IsChecked(targetControl))
                     SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                 end
+            end,
+            checked = function()
+                return DoesGroupFinderFilterRequireInviteCode()
             end,
             narrationText = ZO_GetDefaultParametricListToggleNarrationText,
         },
@@ -532,6 +548,9 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
                     SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                 end
             end,
+            checked = function()
+                return DoesGroupFinderFilterAutoAcceptRequests()
+            end,
             narrationText = ZO_GetDefaultParametricListToggleNarrationText,
         },
     }
@@ -555,6 +574,9 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
                     SetGroupFinderFilterEnforceRoles(ZO_GamepadCheckBoxTemplate_IsChecked(targetControl))
                     SCREEN_NARRATION_MANAGER:QueueDialog(dialog)
                 end
+            end,
+            checked = function()
+                return DoesGroupFinderFilterRequireEnforceRoles()
             end,
             narrationText = ZO_GetDefaultParametricListToggleNarrationText,
         },

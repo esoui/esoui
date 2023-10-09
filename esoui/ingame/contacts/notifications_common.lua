@@ -10,12 +10,10 @@ NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA = 9
 NOTIFICATIONS_GIFT_RECEIVED_DATA = 10
 NOTIFICATIONS_GIFT_RETURNED_DATA = 11
 NOTIFICATIONS_GIFT_CLAIMED_DATA = 12
-NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA = 13
-NOTIFICATIONS_GIFTING_UNLOCKED_DATA = 14
-NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA = 15
-NOTIFICATIONS_GUILD_NEW_APPLICATIONS = 16
-NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA = 17
-NOTIFICATIONS_POINTS_RESET_DATA = 18
+NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA = 13
+NOTIFICATIONS_GUILD_NEW_APPLICATIONS = 14
+NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA = 15
+NOTIFICATIONS_POINTS_RESET_DATA = 16
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
@@ -1293,115 +1291,6 @@ end
 
 function ZO_GiftInventoryProvider:Decline(entryData)
     entryData.gift:View()
-end
-
--- Gifting Grace Period Started Provider
--------------------------
-
-ZO_GiftingGracePeriodStartedProvider = ZO_NotificationProvider:Subclass()
-
-function ZO_GiftingGracePeriodStartedProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
-
-    provider:RegisterUpdateEvent(EVENT_GIFTING_GRACE_PERIOD_STARTED)
-    provider:RegisterUpdateEvent(EVENT_GIFTING_GRACE_PERIOD_STARTED_NOTIFICATION_CLEARED)
-
-    return provider
-end
-
-function ZO_GiftingGracePeriodStartedProvider:BuildNotificationList()
-    ZO_ClearNumericallyIndexedTable(self.list)
-
-    if HasGiftingGracePeriodStartedNotification() then
-        self:AddNotification()
-    end
-end
-
-function ZO_GiftingGracePeriodStartedProvider:AddNotification()
-    local timeLeftS = GetGiftingGracePeriodTime()
-    local timeLeftString
-    if timeLeftS >= ZO_ONE_DAY_IN_SECONDS then
-        timeLeftString = ZO_FormatTime(timeLeftS, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS)
-    else
-        timeLeftString = GetString(SI_NOTIFICATIONS_GIFTING_GRACE_PERIOD_ENDS_LESS_THAN_A_DAY)
-    end
-    local message = zo_strformat(GetString(SI_NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED), timeLeftString)
-
-    local helpCategoryIndex, helpIndex = GetGiftingGraceStartedHelpIndices()
-    local hasMoreInfo = helpCategoryIndex ~= nil
-    local newListEntry = {
-        notificationType = NOTIFICATION_TYPE_GIFT_GRACE_STARTED,
-        dataType = NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA,
-        shortDisplayText = GetString(SI_NOTIFICATIONS_GIFTING_GRACE_PERIOD_UNLOCK_PERIOD),
-        message = message,
-
-        moreInfo = hasMoreInfo,
-        helpCategoryIndex = helpCategoryIndex,
-        helpIndex = helpIndex,
-
-        --For sorting
-        secsSinceRequest = ZO_NormalizeSecondsSince(0),
-    }
-    table.insert(self.list, newListEntry)
-end
-
-function ZO_GiftingGracePeriodStartedProvider:Accept(entryData)
-    ShowMarketAndSearch("", MARKET_OPEN_OPERATION_NOTIFICATION)
-    ClearGiftingGracePeriodStartedNotification()
-end
-
-function ZO_GiftingGracePeriodStartedProvider:Decline(entryData)
-    ClearGiftingGracePeriodStartedNotification()
-end
-
--- Gifting Unlocked Provider
--------------------------
-
-ZO_GiftingUnlockedProvider = ZO_NotificationProvider:Subclass()
-
-function ZO_GiftingUnlockedProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
-
-    provider:RegisterUpdateEvent(EVENT_GIFTING_UNLOCKED_STATUS_CHANGED)
-    provider:RegisterUpdateEvent(EVENT_GIFTING_UNLOCKED_NOTIFICATION_CLEARED)
-
-    return provider
-end
-
-function ZO_GiftingUnlockedProvider:BuildNotificationList()
-    ZO_ClearNumericallyIndexedTable(self.list)
-
-    if HasGiftingUnlockedNotification() then
-        self:AddNotification()
-    end
-end
-
-function ZO_GiftingUnlockedProvider:AddNotification()
-    local helpCategoryIndex, helpIndex = GetGiftingUnlockedHelpIndices()
-    local hasMoreInfo = helpCategoryIndex ~= nil
-    local newListEntry = {
-        notificationType = NOTIFICATION_TYPE_GIFTING_UNLOCKED,
-        dataType = NOTIFICATIONS_GIFTING_UNLOCKED_DATA,
-        shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_GIFTING_UNLOCKED),
-        message = GetString(SI_NOTIFICATIONS_GIFTING_UNLOCKED_MESSAGE),
-
-        moreInfo = hasMoreInfo,
-        helpCategoryIndex = helpCategoryIndex,
-        helpIndex = helpIndex,
-
-        --For sorting
-        secsSinceRequest = ZO_NormalizeSecondsSince(0),
-    }
-    table.insert(self.list, newListEntry)
-end
-
-function ZO_GiftingUnlockedProvider:Accept(entryData)
-    ShowMarketAndSearch("", MARKET_OPEN_OPERATION_NOTIFICATION)
-    ClearGiftingUnlockedNotification()
-end
-
-function ZO_GiftingUnlockedProvider:Decline(entryData)
-    ClearGiftingUnlockedNotification()
 end
 
 -- Daily Login Rewards Claim Provider

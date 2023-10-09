@@ -103,6 +103,15 @@ function ZO_Dialogs_IsDialogHiding(nameOrDialog)
     return dialog and dialog.hiding
 end
 
+function ZO_Dialogs_IsShowingDialogThatShouldShowTooltip()
+    local displayedDialog = GetDisplayedDialog()
+    if not displayedDialog then
+        return false
+    end
+
+    return displayedDialog.shouldShowTooltip
+end
+
 local function HandleCallback(clickedButton)
     local dialog = GetDisplayedDialog()
     if dialog then

@@ -968,7 +968,7 @@ end
 
 function ZO_MarketPurchaseHouseTemplateSelectDialog_OnInitialized(control)
     control.templateComboBoxControl = control:GetNamedChild("ComboBox")
-    control.comboBox = ZO_ComboBox:New(control.templateComboBoxControl)
+    control.comboBox = ZO_ComboBox_ObjectFromContainer(control.templateComboBoxControl)
 
     control.balanceContainer = control:GetNamedChild("BalanceContainer")
     control.costContainer = control:GetNamedChild("CostContainer")

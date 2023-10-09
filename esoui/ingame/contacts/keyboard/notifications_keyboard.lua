@@ -22,8 +22,6 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/notificationIcon_duel.dds",
     [NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION] = "EsoUI/Art/Notifications/notificationIcon_ESO+.dds",
-    [NOTIFICATION_TYPE_GIFT_GRACE_STARTED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
-    [NOTIFICATION_TYPE_GIFTING_UNLOCKED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_RECEIVED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_CLAIMED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_RETURNED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
@@ -235,36 +233,6 @@ function ZO_KeyboardEsoPlusSubscriptionStatusProvider:ShowMoreInfo(entryData)
     end
 end
 
--- ZO_KeyboardGiftingGracePeriodStartedProvider
--------------------------
-
-ZO_KeyboardGiftingGracePeriodStartedProvider = ZO_GiftingGracePeriodStartedProvider:Subclass()
-
-function ZO_KeyboardGiftingGracePeriodStartedProvider:New(notificationManager)
-    return ZO_GiftingGracePeriodStartedProvider.New(self, notificationManager)
-end
-
-function ZO_KeyboardGiftingGracePeriodStartedProvider:ShowMoreInfo(entryData)
-    if entryData.moreInfo then
-        HELP:ShowSpecificHelp(entryData.helpCategoryIndex, entryData.helpIndex)
-    end
-end
-
--- ZO_KeyboardGiftingUnlockedProvider
--------------------------
-
-ZO_KeyboardGiftingUnlockedProvider = ZO_GiftingUnlockedProvider:Subclass()
-
-function ZO_KeyboardGiftingUnlockedProvider:New(notificationManager)
-    return ZO_GiftingUnlockedProvider.New(self, notificationManager)
-end
-
-function ZO_KeyboardGiftingUnlockedProvider:ShowMoreInfo(entryData)
-    if entryData.moreInfo then
-        HELP:ShowSpecificHelp(entryData.helpCategoryIndex, entryData.helpIndex)
-    end
-end
-
 -- ZO_KeyboardGuildNewApplicationsProvider
 -------------------------------------------
 
@@ -352,8 +320,6 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RECEIVED_DATA, "ZO_NotificationsGiftReceivedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RETURNED_DATA, "ZO_NotificationsGiftReturnedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_CLAIMED_DATA, "ZO_NotificationsGiftClaimedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA, "ZO_NotificationsOpenCrownStoreRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_UNLOCKED_DATA, "ZO_NotificationsOpenCrownStoreRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA, "ZO_NotificationsNewDailyLoginRewardRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GUILD_NEW_APPLICATIONS, "ZO_NotificationsGuildNewApplicationsRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA, "ZO_NotificationsMarketProductUnlockedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequestWithMoreInfoRow)
@@ -385,8 +351,6 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_DuelInviteProvider:New(self),
         ZO_KeyboardEsoPlusSubscriptionStatusProvider:New(self),
         ZO_GiftInventoryProvider:New(self),
-        ZO_KeyboardGiftingGracePeriodStartedProvider:New(self),
-        ZO_KeyboardGiftingUnlockedProvider:New(self),
         ZO_DailyLoginRewardsClaimProvider:New(self),
         ZO_KeyboardGuildNewApplicationsProvider:New(self),
         ZO_PlayerApplicationsProvider:New(self),
