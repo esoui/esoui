@@ -212,11 +212,12 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zone
             self.descriptionBg:SetHidden(isDefaultTexture)
         end
 
-        local showZoneDisplayType = zoneDisplayType ~= ZONE_DISPLAY_TYPE_NONE and zoneDisplayType ~= ZONE_DISPLAY_TYPE_BATTLEGROUND
+        local showZoneDisplayType = zoneDisplayType ~= ZONE_DISPLAY_TYPE_NONE and (zoneDisplayType ~= ZONE_DISPLAY_TYPE_BATTLEGROUND or self.battlegroundId ~= 0)
         self.instanceTypeIcon:SetHidden(not showZoneDisplayType)
         self.instanceType:SetHidden(not showZoneDisplayType)
 
         if not isDefaultTexture then
+            local shouldHideName = false
             if self.battlegroundId ~= 0 then
                 local gameType = GetBattlegroundGameType(self.battlegroundId)
                 local gameTypeString = GetString("SI_BATTLEGROUNDGAMETYPE", gameType)
@@ -250,12 +251,9 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zone
                         self.isNarrationDirty = true
                     end
                     self.instanceType:SetText(self.instanceTypeText)
-                    self.instanceType:SetHidden(false)
                     self.instanceTypeIcon:SetTexture(teamIcon)
-                    self.instanceTypeIcon:SetHidden(false)
                 end
             else
-                local isEndlessDungeon = zoneDisplayType == ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON
                 if showZoneDisplayType then
                     self.instanceTypeIcon:SetTexture(ZO_GetZoneDisplayTypeIcon(zoneDisplayType))
                     local instanceTypeText = GetString("SI_ZONEDISPLAYTYPE", zoneDisplayType)
@@ -266,24 +264,14 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zone
                     end
                     self.instanceType:SetText(self.instanceTypeText)
 
-                    if zoneDisplayType ~= self.zoneDisplayType then
-                        self.zoneDisplayType = zoneDisplayType
-                        -- Hacky stop gap solution to the Zone and the feature having the same name
-                        -- Design asked us to suppress the zone name and let the zone display type do the work
-                        if isEndlessDungeon then
-                            self.instanceTypeIcon:SetAnchor(LEFT)
-                        else
-                            self.instanceTypeIcon:SetAnchor(LEFT, self.zoneName, RIGHT, 60)
-                        end
-                    end
+                    -- Hacky stop gap solution to the Zone and the feature having the same name
+                    -- Design asked us to suppress the zone name and let the zone display type do the work
+                    shouldHideName = zoneDisplayType == ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON
                 end
 
                 -- Hacky stop gap solution to the Zone and the feature having the same name
                 -- Design asked us to suppress the zone name and let the zone display type do the work
-                if isEndlessDungeon then
-                    self.zoneNameText = ""
-                    self.zoneName:SetHidden(true)
-                else
+                if not shouldHideName then
                     local zoneNameText = LocalizeString("<<C:1>>", zoneName)
                     --If the zone name text changed, mark narration dirty
                     if zoneNameText ~= self.zoneNameText then
@@ -323,6 +311,16 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zone
                         self:SetZoneDescription(LocalizeString("<<1>>", zoneDescription))
                     end
                 end
+            end
+
+            if shouldHideName then
+                self.zoneNameText = ""
+                self.zoneName:SetHidden(true)
+                if showZoneDisplayType then
+                    self.instanceTypeIcon:SetAnchor(LEFT)
+                end
+            else
+                self.instanceTypeIcon:SetAnchor(LEFT, self.zoneName, RIGHT, 60)
             end
         end
 

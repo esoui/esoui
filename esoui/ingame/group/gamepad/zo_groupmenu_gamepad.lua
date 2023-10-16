@@ -356,7 +356,8 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
         entry.normalIcon = normalIcon
         entry.veteranIcon = veteranIcon
         entry.enabled = function()
-            return CanPlayerChangeGroupDifficulty()
+            local canChangeDifficulty, reason = CanPlayerChangeGroupDifficulty()
+            return canChangeDifficulty, GetString("SI_GROUPDIFFICULTYCHANGEREASON", reason)
         end
         entry.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
         return entry

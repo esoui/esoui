@@ -19,6 +19,10 @@
                 <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
                     <Anchor point="TOP" />
                     <Dimensions x="100%" />
+
+                    <OnRectHeightChanged>
+                        self:GetOwningWindow().object:ResizeGridListToFitHeaderLabelControl(self)
+                    </OnRectHeightChanged>
                 </Label>
             </Controls>
         </Control>

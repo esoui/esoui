@@ -25,6 +25,9 @@ local SMALL_TEXT_FONT_GAMEPAD = "ZoFontGamepad42"
 local COUNTDOWN_TEXT_FONT_KEYBOARD = "ZoFontCallout3"
 local COUNTDOWN_TEXT_FONT_GAMEPAD = "ZoFontGamepadBold54"
 
+local ROLLING_METER_TEXT_KEYBOARD = "ZoFontWinH2"
+local ROLLING_METER_TEXT_GAMEPAD = "ZoFontGamepad42"
+
 local SMALL_TEXT_SPACING_KEYBOARD = 0
 local SMALL_TEXT_SPACING_GAMEPAD = 10
 
@@ -804,9 +807,9 @@ function ZO_CenterScreenAnnouncementLargeLine:SetRollingMeterProgressData(rollin
 
         progressControl:SetParent(parentControl)
         if previousControl then
-            progressControl:SetAnchor(LEFT, previousControl, RIGHT, 14, 0)
+            progressControl:SetAnchor(TOPLEFT, previousControl, TOPRIGHT, 16, 0)
         else
-            progressControl:SetAnchor(LEFT, parentControl)
+            progressControl:SetAnchor(TOPLEFT, parentControl)
         end
         previousControl = progressControl
 
@@ -839,11 +842,11 @@ end
 
 function ZO_CenterScreenAnnouncementLargeLine:ApplyPlatformStyle()
     ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_CenterScreenAnnounce_LargeTextContainer"))
-    local isGamepad = IsInGamepadPreferredMode()
     if not self.smallCombinedIcon:IsHidden() then
         AnchorIconToLabelControl(self.smallCombinedIcon, self.smallCombinedText)
     end
 
+    local isGamepad = IsInGamepadPreferredMode()
     self.smallCombinedIconFrame:SetTexture(isGamepad and "EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame64.dds" or "EsoUI/Art/ActionBar/abilityFrame64_up.dds")
 end
 
@@ -1319,6 +1322,16 @@ function CenterScreenAnnounce:InitializeLinePools()
     self.scryingUpdatedIconPool = ZO_ControlPool:New("ZO_CenterScreenAnnounce_ScryingUpdated_Icon", self.control, "ScryingIcon")
 
     self.rollingMeterProgressPool = ZO_ControlPool:New("ZO_CenterScreenAnnounce_RollingMeterProgressTemplate", self.control, "CSARollingMeterProgress")
+
+    local function ApplyRollingMeterPlatformStyle()
+        local isGamepad = IsInGamepadPreferredMode()
+        local rollingMeterFont = isGamepad and ROLLING_METER_TEXT_GAMEPAD or ROLLING_METER_TEXT_KEYBOARD
+        for _, rollingMeterControl in self.rollingMeterProgressPool:ActiveAndFreeObjectIterator() do
+            rollingMeterControl:SetFont(rollingMeterFont)
+        end
+    end
+
+    self.rollingMeterPlatformStyle = ZO_PlatformStyle:New(ApplyRollingMeterPlatformStyle)
 end
 
 function CenterScreenAnnounce:CreateLinePool(controlName, controlTemplate, parentControl, lineType)
@@ -1624,9 +1637,9 @@ end
 function CenterScreenAnnounce:SetMajorLineContainerHeight(animationProgress)
     local allMajorLines = self.activeLines[CSA_LINE_TYPE_MAJOR]
     local numCurrentMajorLines = zo_clamp(#allMajorLines + #self.pendingMajorMessages, 0, MAX_MAJOR_TEXT_LINES)
-    local isGamepadMode = IsInGamepadPreferredMode()
-    local lineSpacing = isGamepadMode and SMALL_TEXT_SPACING_GAMEPAD or SMALL_TEXT_SPACING_KEYBOARD
-    local textHeight = isGamepadMode and self.MAJOR_LINE_HEIGHT_GAMEPAD or self.MAJOR_LINE_HEIGHT_KEYBOARD
+    local isGamepad = IsInGamepadPreferredMode()
+    local lineSpacing = isGamepad and SMALL_TEXT_SPACING_GAMEPAD or SMALL_TEXT_SPACING_KEYBOARD
+    local textHeight = isGamepad and self.MAJOR_LINE_HEIGHT_GAMEPAD or self.MAJOR_LINE_HEIGHT_KEYBOARD
 
     local calculatedContainerHeight = (lineSpacing + textHeight) * numCurrentMajorLines
 
@@ -1715,9 +1728,9 @@ local setupFunctions =
 
         announcementSmallLine:SetWipeOutLifespan(messageParams:GetLifespanMS())
 
-        local isGamepadMode = IsInGamepadPreferredMode()
-        local initialLineOffset = isGamepadMode and INITIAL_SMALL_LINE_OFFSET_GAMEPAD_Y or INITIAL_SMALL_LINE_OFFSET_KEYBOARD_Y
-        local lineSpacing = isGamepadMode and SMALL_TEXT_SPACING_GAMEPAD or SMALL_TEXT_SPACING_KEYBOARD
+        local isGamepad = IsInGamepadPreferredMode()
+        local initialLineOffset = isGamepad and INITIAL_SMALL_LINE_OFFSET_GAMEPAD_Y or INITIAL_SMALL_LINE_OFFSET_KEYBOARD_Y
+        local lineSpacing = isGamepad and SMALL_TEXT_SPACING_GAMEPAD or SMALL_TEXT_SPACING_KEYBOARD
 
         local mostRecentSmallLine = self:GetMostRecentLine(CSA_LINE_TYPE_SMALL)
         if mostRecentSmallLine then
@@ -1824,8 +1837,8 @@ local setupFunctions =
         local icon, iconBg = messageParams:GetIconData()
         announcementMajorLine:SetIcon(icon, iconBg, messageParams:GetSuppressIconFrame() == CSA_OPTION_SUPPRESS_ICON_FRAME)
 
-        local isGamepadMode = IsInGamepadPreferredMode()
-        local lineSpacing = isGamepadMode and MAJOR_TEXT_SPACING_GAMEPAD or MAJOR_TEXT_SPACING_KEYBOARD
+        local isGamepad = IsInGamepadPreferredMode()
+        local lineSpacing = isGamepad and MAJOR_TEXT_SPACING_GAMEPAD or MAJOR_TEXT_SPACING_KEYBOARD
 
         local textHeight = announcementMajorLine.iconControl:GetHeight()
         local allMajorLines = self.activeLines[CSA_LINE_TYPE_MAJOR]
@@ -2326,7 +2339,8 @@ function ZO_CenterScreenAnnounce_RollingMeterProgress_OnInitialized(control)
     -- the digits are rolling back to "1" at the end of a cycle or arc.
     control.label:SetAnimationSoundIds(SOUNDS.ENDLESS_DUNGEON_COUNTER_UP, SOUNDS.ENDLESS_DUNGEON_COUNTER_UP)
     control.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-    control.label:SetFont("ZoFontWinH2")
+    local isGamepad = IsInGamepadPreferredMode()
+    control.label:SetFont(isGamepad and ROLLING_METER_TEXT_GAMEPAD or ROLLING_METER_TEXT_KEYBOARD)
     control.label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     control.label:SetResizeToFitLabels(true)
 

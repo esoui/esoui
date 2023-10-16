@@ -260,32 +260,41 @@ function ZO_EndlessDungeonBuffTracker_Shared:UpdateGridList()
     gridList:CommitGridList()
 end
 
-function ZO_EndlessDungeonBuffTracker_Shared:UpdateGridListDimensions(numVerseEntries, numVisionEntries, maxGridWidth, gridEntryWidth, gridEntryRowHeight, gridHeaderRowHeight, gridPaddingY)
+function ZO_EndlessDungeonBuffTracker_Shared:UpdateGridListDimensions(numVerseEntries, numVisionEntries, maxGridWidth, gridHeaderFont, gridEntryWidth, gridEntryRowHeight, gridHeaderRowHeight, gridPaddingY)
     local maxColumns = zo_floor(maxGridWidth / gridEntryWidth)
     local numRowsAvailable = ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_ENTRY_ROWS
+    local minGridWidth = 0
+    local DEFAULT_SCALE = 1.0
 
     local versesHeight = 0
     if numVerseEntries > 0 then
         local numVerseRows = zo_min(zo_ceil(numVerseEntries / maxColumns), numRowsAvailable)
         numRowsAvailable = numRowsAvailable - numVerseRows
         versesHeight = gridHeaderRowHeight + numVerseRows * gridEntryRowHeight
+
+        local versesWidth = GetStringWidthScaled(gridHeaderFont, GetString(SI_ENDLESS_DUNGEON_SUMMARY_VERSES_HEADER), DEFAULT_SCALE, SPACE_INTERFACE)
+        minGridWidth = zo_max(minGridWidth, versesWidth + ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_X)
     end
 
     local visionsHeight = 0
     if numVisionEntries > 0 then
         local numVisionRows = zo_min(zo_ceil(numVisionEntries / maxColumns), numRowsAvailable)
         visionsHeight = gridHeaderRowHeight + numVisionRows * gridEntryRowHeight
+
+        local visionsWidth = GetStringWidthScaled(gridHeaderFont, GetString(SI_ENDLESS_DUNGEON_SUMMARY_VISIONS_HEADER), DEFAULT_SCALE, SPACE_INTERFACE)
+        minGridWidth = zo_max(minGridWidth, visionsWidth + ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_X)
     end
 
     local sectionPadding = (versesHeight > 0 and visionsHeight > 0) and gridPaddingY or 0
-    local totalHeight = versesHeight + visionsHeight + sectionPadding
+    local GRID_HEIGHT_PADDING = 5
+    local totalHeight = versesHeight + visionsHeight + sectionPadding + GRID_HEIGHT_PADDING
     self.gridListControl:SetHeight(totalHeight)
 
-    local gridWidthMargin = maxGridWidth % gridEntryWidth
     local maxBuffsByType = zo_max(numVerseEntries, numVisionEntries)
     local numColumns = zo_min(maxBuffsByType, maxColumns)
-    local gridWidth = (gridWidthMargin * zo_min(numColumns, 1)) + (numColumns * gridEntryWidth)
-    self.gridListControl:SetWidth(gridWidth)
+    local gridWidth = zo_clamp(numColumns * gridEntryWidth, minGridWidth, maxGridWidth)
+    local gridWidthMargin = numColumns > 0 and (maxGridWidth % gridEntryWidth) or 0
+    self.gridListControl:SetWidth(gridWidth + gridWidthMargin)
 
     self:UpdateWindowDimensions()
 end
@@ -302,6 +311,23 @@ function ZO_EndlessDungeonBuffTracker_Shared:UpdateWindowDimensions()
     local WINDOW_WIDTH_MARGIN = 50
     local windowWidth = minWidth + WINDOW_WIDTH_MARGIN
     self.control:SetWidth(windowWidth)
+end
+
+function ZO_EndlessDungeonBuffTracker_Shared:ResizeGridListToFitHeaderLabelControl(labelControl)
+    local numExcessLines = labelControl:GetNumLines() - 1
+    if numExcessLines < 1 then
+        -- The label control is not wrapping; no padding is necessary.
+        return
+    end
+
+    -- Expand the grid list width incrementally in order to accommodate
+    -- the full width of the specified label control.
+    local gridWidth = self.gridListControl:GetWidth()
+    local labelWidthPadding = numExcessLines * labelControl:GetWidth()
+    self.gridListControl:SetWidth(gridWidth + labelWidthPadding)
+
+    -- Resize the top level window accordingly.
+    self:UpdateWindowDimensions()
 end
 
 function ZO_EndlessDungeonBuffTracker_Shared:OnBuffStackCountChanged(buffType, abilityId, stackCount, previousStackCount)

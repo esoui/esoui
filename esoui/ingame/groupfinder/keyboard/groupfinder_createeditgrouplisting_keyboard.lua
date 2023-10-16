@@ -230,8 +230,7 @@ function ZO_GroupFinder_CreateEditGroupListing_Keyboard:PopulatePrimaryDropdown(
     if showDifficultyAsPrimaryOption then
         local totalDifficulties = #self.difficultyButtons
         local availableDifficulties = self.userTypeData:GetNumPrimaryOptions()
-        -- Clears selected button so that it is force reselected visually from data
-        self.difficultyRadioButtonGroup:UpdateFromData(function() return false end)
+        self.difficultyRadioButtonGroup:SetEnabled(isUserTypeDraft)
         for i = 1, totalDifficulties do
             if i <= availableDifficulties then
                 local _, isSet = self.userTypeData:GetPrimaryOptionByIndex(i)
@@ -244,7 +243,6 @@ function ZO_GroupFinder_CreateEditGroupListing_Keyboard:PopulatePrimaryDropdown(
             end
             self.difficultyButtons[i]:SetHidden(false)
         end
-        self.difficultyRadioButtonGroup:SetEnabled(isUserTypeDraft)
         secondaryOptionAnchorParent = self.difficultyRadioContainer
     else
         secondaryOptionAnchorParent = self.primaryOptionDropdownControl
