@@ -851,9 +851,10 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                     -- or try to show tutorials, however we want to clean up after ourselves in case we don't actually logout
                     self:ResetState()
                     -- Ensure that we don't try to return to Housing Editor Browse mode again when the scene hides:
+                    local isPreviewingMarketProductPlacement = self.isPreviewingMarketProductPlacement
                     self.isPreviewingMarketProductPlacement = nil
                     ZO_Market_Shared.GoToUseProductLocation(marketProductData)
-                    if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_PLACEMENT then
+                    if isPreviewingMarketProductPlacement and GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_PLACEMENT then
                         -- Manually return to Housing Editor Browse mode unless we are left in Placement mode;
                         -- this occurs when the relevant furnishing limit had already been reached or when this
                         -- purchase did not originate from in-house placement preview.
