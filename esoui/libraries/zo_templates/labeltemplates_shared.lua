@@ -419,6 +419,7 @@ function RollingMeterLabel:Initialize()
 
     self:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
     self:SetResizeToFitLabels(true)
+    self:SetLayoutDirty(true)
 end
 
 do
@@ -487,6 +488,15 @@ function RollingMeterLabel:GetAnimationProgress(frameTimeMs)
     return 1 -- Animation is complete.
 end
 
+function RollingMeterLabel:GetAnimationSoundIds()
+    return self.animationRollingDownSoundId, self.animationRollingUpSoundId
+end
+
+function RollingMeterLabel:SetAnimationSoundIds(rollingDownSoundId, rollingUpSoundId)
+    self.animationRollingDownSoundId = rollingDownSoundId
+    self.animationRollingUpSoundId = rollingUpSoundId
+end
+
 function RollingMeterLabel:GetIncomingValue()
     return self.incomingValue
 end
@@ -501,7 +511,7 @@ function RollingMeterLabel:SetHorizontalAlignment(horizontalAlignment)
     end
 
     self.horizontalAlignment = horizontalAlignment
-    self:UpdateLayout()
+    self:SetLayoutDirty(true)
 end
 
 function RollingMeterLabel:SetResizeToFitLabels(resizeToFitLabels)
@@ -510,7 +520,7 @@ function RollingMeterLabel:SetResizeToFitLabels(resizeToFitLabels)
     end
 
     self.resizeToFitLabels = resizeToFitLabels
-    self:UpdateLayout()
+    self:SetLayoutDirty(true)
 end
 
 function RollingMeterLabel:UpdateLayout()
@@ -541,11 +551,12 @@ function RollingMeterLabel:UpdateLayout()
     self:SetDimensionConstraints(widthConstraint, 0, widthConstraint, 0)
 
     -- Apply the horizontal alignment to the labels.
-    local horizontalAlignment = self.horizontalAlignment or TEXT_ALIGN_RIGHT
+    local horizontalAlignment = self.horizontalAlignment
     inLabel:SetHorizontalAlignment(horizontalAlignment)
     outLabel:SetHorizontalAlignment(horizontalAlignment)
 
     self.isUpdatingLayout = nil
+    self:SetLayoutDirty(false)
 end
 
 function RollingMeterLabel:UpdateLabelAnchors()
@@ -601,119 +612,142 @@ function RollingMeterLabel:GetOrCreateTransitionManager()
     return self.transitionManager
 end
 
-function RollingMeterLabel:OnLabelRectChanged()
-    self:UpdateLayout()
+function RollingMeterLabel:IsLayoutDirty()
+    return self.isLayoutDirty
 end
 
-do
-    function RollingMeterLabel:OnUpdate(frameTimeS)
-        if self.transitionManager then
-            self.transitionManager:Update()
+function RollingMeterLabel:SetLayoutDirty(dirty)
+    self.isLayoutDirty = dirty ~= false
+end
+
+function RollingMeterLabel:OnLabelRectChanged(labelControl, newSize, oldSize)
+    self:SetLayoutDirty(true)
+end
+
+function RollingMeterLabel:OnUpdate(frameTimeS)
+    if self.transitionManager then
+        self.transitionManager:Update()
+    end
+
+    if self:IsLayoutDirty() then
+        self:UpdateLayout()
+    end
+
+    local animationProgress = self:GetAnimationProgress()
+    if animationProgress == nil then
+        -- No animation is in progress.
+        return
+    end
+
+    if animationProgress < 1 then
+        if self.animationOverrideEasingFunction then
+            -- Apply the optional, one-time animation override easing function if any.
+            animationProgress = zo_max(self.animationOverrideEasingFunction(animationProgress), 0)
+        elseif self.animationEasingFunction then
+            -- Apply the standard animation override easing function if any.
+            animationProgress = zo_max(self.animationEasingFunction(animationProgress), 0)
         end
 
-        local animationProgress = self:GetAnimationProgress()
-        if animationProgress == nil then
-            -- No animation is in progress.
-            return
+        -- Animate the incoming and outgoing labels.
+        local inLabelOffsetCoefficient = 0
+        local outLabelOffsetCoefficient = 0
+        if self.animationDirection == ZO_ROLLING_METER_LABEL_DIRECTION.DOWN then
+            inLabelOffsetCoefficient = animationProgress - 1
+            outLabelOffsetCoefficient = animationProgress
+        else
+            inLabelOffsetCoefficient = -animationProgress + 1
+            outLabelOffsetCoefficient = -animationProgress
         end
 
-        if animationProgress < 1 then
-            if self.animationOverrideEasingFunction then
-                -- Apply the optional, one-time animation override easing function if any.
-                animationProgress = zo_max(self.animationOverrideEasingFunction(animationProgress), 0)
-            elseif self.animationEasingFunction then
-                -- Apply the standard animation override easing function if any.
-                animationProgress = zo_max(self.animationEasingFunction(animationProgress), 0)
-            end
+        local controlHeight = self:GetHeight()
+        self.inLabelOffsetY = inLabelOffsetCoefficient * controlHeight
+        self.outLabelOffsetY = outLabelOffsetCoefficient * controlHeight
+        self:UpdateLabelAnchorOffsets()
+    else
+        self:UpdateValue()
+    end
+end
 
-            -- Animate the incoming and outgoing labels.
-            local inLabelOffsetCoefficient = 0
-            local outLabelOffsetCoefficient = 0
+function RollingMeterLabel:UpdateValue()
+    if self.targetAnimationNormalizedIntervalOffset then
+        -- Promote the queued, one-time animation interval offset.
+        self.animationNormalizedIntervalOffset = self.targetAnimationNormalizedIntervalOffset
+        self.targetAnimationNormalizedIntervalOffset = nil
+    end
+
+    if self.targetAnimationOverrideEasingFunction then
+        -- Promote the queued, one-time animation override easing function.
+        self.animationOverrideEasingFunction = self.targetAnimationOverrideEasingFunction
+        self.targetAnimationOverrideEasingFunction = nil
+    end
+
+    local frameTimeMs = GetFrameTimeMilliseconds()
+    local intervalOffset = self.animationNormalizedIntervalOffset
+    local isFinalAnimation = self.incomingValue == self.targetValue
+    if isFinalAnimation then
+        -- There is no pending animation; clean up the animation state.
+        self.animationEndTimeMs = nil
+        self.animationStartTimeMs = nil
+
+        self.inLabelOffsetY = 0
+        self.outLabelOffsetY = 0
+        self.outLabel:SetHidden(true)
+        self:UpdateLabelAnchorOffsets()
+    else
+        -- An animation is pending; initialize the animation state.
+        self.outgoingValue = self.incomingValue
+        self.incomingValue = self.targetValue
+
+        if intervalOffset then
+            -- Optional animation timing offset provided via SetValue.
+            local animationOffsetMs = self.animationIntervalMs * intervalOffset
+            self.animationStartTimeMs = frameTimeMs - animationOffsetMs
+            self.animationEndTimeMs = frameTimeMs + self.animationIntervalMs - animationOffsetMs
+        else
+            -- Standard animation timing.
+            self.animationStartTimeMs = frameTimeMs
+            self.animationEndTimeMs = frameTimeMs + self.animationIntervalMs
+        end
+
+        -- Determine the animation direction based on the configured direction and
+        -- the incoming and outgoing values, if numeric, relative to one another.
+        local outgoingNumericValue = tonumber(self.outgoingValue)
+        local incomingNumericValue = tonumber(self.incomingValue)
+        local invertDirection = outgoingNumericValue and incomingNumericValue and outgoingNumericValue > incomingNumericValue
+        if invertDirection then
+            self.animationDirection = self.animationIncrementDirection == ZO_ROLLING_METER_LABEL_DIRECTION.DOWN and ZO_ROLLING_METER_LABEL_DIRECTION.UP or ZO_ROLLING_METER_LABEL_DIRECTION.DOWN
+        else
+            self.animationDirection = self.animationIncrementDirection
+        end
+
+        -- Update the animation visuals.
+        self.inLabel:SetText(self.incomingValue)
+        self.outLabel:SetText(self.outgoingValue)
+        self:OnUpdate()
+        self.outLabel:SetHidden(false)
+
+        if not self:IsHidden() then
+            -- Play the associated sound if any.
+            local soundId = nil
             if self.animationDirection == ZO_ROLLING_METER_LABEL_DIRECTION.DOWN then
-                inLabelOffsetCoefficient = animationProgress - 1
-                outLabelOffsetCoefficient = animationProgress
+                soundId = self.animationRollingDownSoundId
             else
-                inLabelOffsetCoefficient = -animationProgress + 1
-                outLabelOffsetCoefficient = -animationProgress
+                soundId = self.animationRollingUpSoundId
             end
-
-            local controlHeight = self:GetHeight()
-            self.inLabelOffsetY = inLabelOffsetCoefficient * controlHeight
-            self.outLabelOffsetY = outLabelOffsetCoefficient * controlHeight
-            self:UpdateLabelAnchorOffsets()
-        else
-            self:UpdateValue()
+            if soundId then
+                PlaySound(soundId)
+            end
         end
     end
 
-    function RollingMeterLabel:UpdateValue()
-        if self.targetAnimationNormalizedIntervalOffset then
-            -- Promote the queued, one-time animation interval offset.
-            self.animationNormalizedIntervalOffset = self.targetAnimationNormalizedIntervalOffset
-            self.targetAnimationNormalizedIntervalOffset = nil
-        end
+    -- Reset the one-time use animation offset if any was provided.
+    self.animationNormalizedIntervalOffset = nil
 
-        if self.targetAnimationOverrideEasingFunction then
-            -- Promote the queued, one-time animation override easing function.
-            self.animationOverrideEasingFunction = self.targetAnimationOverrideEasingFunction
-            self.targetAnimationOverrideEasingFunction = nil
-        end
-
-        local frameTimeMs = GetFrameTimeMilliseconds()
-        local intervalOffset = self.animationNormalizedIntervalOffset
-        local isFinalAnimation = self.incomingValue == self.targetValue
-        if isFinalAnimation then
-            -- There is no pending animation; clean up the animation state.
-            self.animationEndTimeMs = nil
-            self.animationStartTimeMs = nil
-
-            self.inLabelOffsetY = 0
-            self.outLabelOffsetY = 0
-            self.outLabel:SetHidden(true)
-            self:UpdateLabelAnchorOffsets()
-        else
-            -- An animation is pending; initialize the animation state.
-            self.outgoingValue = self.incomingValue
-            self.incomingValue = self.targetValue
-
-            if intervalOffset then
-                -- Optional animation timing offset provided via SetValue.
-                local animationOffsetMs = self.animationIntervalMs * intervalOffset
-                self.animationStartTimeMs = frameTimeMs - animationOffsetMs
-                self.animationEndTimeMs = frameTimeMs + self.animationIntervalMs - animationOffsetMs
-            else
-                -- Standard animation timing.
-                self.animationStartTimeMs = frameTimeMs
-                self.animationEndTimeMs = frameTimeMs + self.animationIntervalMs
-            end
-
-            -- Determine the animation direction based on the configured direction and
-            -- the incoming and outgoing values, if numeric, relative to one another.
-            local outgoingNumericValue = tonumber(self.outgoingValue)
-            local incomingNumericValue = tonumber(self.incomingValue)
-            local invertDirection = outgoingNumericValue and incomingNumericValue and outgoingNumericValue > incomingNumericValue
-            if invertDirection then
-                self.animationDirection = self.animationIncrementDirection == ZO_ROLLING_METER_LABEL_DIRECTION.DOWN and ZO_ROLLING_METER_LABEL_DIRECTION.UP or ZO_ROLLING_METER_LABEL_DIRECTION.DOWN
-            else
-                self.animationDirection = self.animationIncrementDirection
-            end
-
-            -- Update the animation visuals.
-            self.inLabel:SetText(self.incomingValue)
-            self.outLabel:SetText(self.outgoingValue)
-            self:OnUpdate()
-            self.outLabel:SetHidden(false)
-        end
-
-        -- Reset the one-time use animation offset if any was provided.
-        self.animationNormalizedIntervalOffset = nil
-
-        if self.valueUpdatedCallback then
-            self.valueUpdatedCallback(self, self.outgoingValue, self.incomingValue, self.targetValue)
-        end
-
-        return not isFinalAnimation
+    if self.valueUpdatedCallback then
+        self.valueUpdatedCallback(self, self.outgoingValue, self.incomingValue, self.targetValue)
     end
+
+    return not isFinalAnimation
 end
 
 function RollingMeterLabel:SetValue(text, animationNormalizedIntervalOffset, animationOverrideEasingFunction)
@@ -788,6 +822,7 @@ function ZO_RollingMeterLabelTransition:Reset()
     self.targetValue = 0
 
     self:SetTransitionAccelerationFactor(1)
+    self:SetTransitionAnimationStartedCallback(nil)
     self:SetTransitionCompleteCallback(nil)
     self:SetTransitionEasingFunction(nil)
     self:SetTransitionSpeedFactor(1)
@@ -799,6 +834,14 @@ end
 
 function ZO_RollingMeterLabelTransition:SetTransitionAccelerationFactor(factor)
     self.transitionAccelerationFactor = zo_max(factor, 0.1)
+end
+
+function ZO_RollingMeterLabelTransition:GetTransitionAnimationStartedCallback()
+    return self.transitionAnimationStartedCallback
+end
+
+function ZO_RollingMeterLabelTransition:SetTransitionAnimationStartedCallback(callbackFunction)
+    self.transitionAnimationStartedCallback = callbackFunction
 end
 
 function ZO_RollingMeterLabelTransition:GetMaxTransitionSteps()
@@ -931,8 +974,8 @@ function ZO_RollingMeterLabelTransition:Update()
     local isFinalStep = currentStep >= numSteps or zo_abs(self.targetValue - self.currentValue) <= 0.5
     if isFinalStep then
         -- End the transition if the target value has been reached or
-        -- if the interpolation was got us within less than one step
-        -- from the target value.
+        -- if we interpolated within less than one step from the target
+        -- value.
         self.currentValue = self.targetValue
         currentStep = numSteps + 1
         self.currentTransitionStep = currentStep
@@ -969,4 +1012,8 @@ function ZO_RollingMeterLabelTransition:Update()
 
     -- Start the animation for this step.
     self.control:SetValue(self.currentValue, animationNormalizedIntervalOffset, animationOverrideEasingFunction)
+
+    if self.transitionAnimationStartedCallback then
+        self.transitionAnimationStartedCallback(self, self.currentTransitionStep, self.numTransitionSteps, self.currentValue, self.targetValue)
+    end
 end

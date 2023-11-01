@@ -87,9 +87,21 @@
             </Animations>
         </AnimationTimeline>
 
+        <AnimationTimeline name="CenterScreenRollingMeterProgressTransition">
+            <Animations>
+                <CustomAnimation>
+                    <OnStop>
+                        if completedPlaying and not self:GetTimeline():IsPlayingBackward() then
+                            animatingControl.labelTransitionManager:SetValue(animatingControl.finalValue)
+                        end
+                    </OnStop>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
         <AnimationTimeline name="CenterScreenBackgroundFadeIn">
             <Animations>
-                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="0.9">
                     <EasingFunction>
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
@@ -99,12 +111,51 @@
 
         <AnimationTimeline name="CenterScreenBackgroundFadeOut">
             <Animations>
-                <AlphaAnimation duration="500" delay="250" startAlpha="1" endAlpha="0" />
+                <AlphaAnimation duration="200" startAlpha="0.9" endAlpha="0" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CenterScreenEndDunBuffAddedAnimation">
+            <Animations>
+                <AlphaAnimation duration="1000" delay="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+
+                <CustomAnimation duration="1000" delay="2500">
+                    <UpdateFunction>
+                        ZO_CenterScreenEndlessDungeonBuffAddedAnimation_OnUpdate(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+
+                <AlphaAnimation duration="1000" delay="2500" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseInQuintic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
     </Animations>
 
     <Controls>
+        <Control name="ZO_CenterScreenAnnounce_RollingMeterProgressTemplate" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                ZO_CenterScreenAnnounce_RollingMeterProgress_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Anchor point="TOPLEFT" offsetY="5" />
+                    <Dimensions x="40" y="40" />
+                </Texture>
+
+                <Control name="$(parent)Label" inherits="ZO_RollingMeterLabel">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="2" offsetY="-5" />
+                </Control>
+            </Controls>
+        </Control>
+
         <Control name="ZO_CenterScreenAnnounceCountdownTextTemplate" virtual="true">
             <Controls>
                 <Label name="$(parent)Countdown" horizontalAlignment="CENTER">
@@ -157,6 +208,8 @@
                         </Control>
 
                         <Control name="$(parent)ScryingUpdatedSection" resizeToFitDescendents="true" />
+
+                        <Control name="$(parent)RollingMeterProgressSection" resizeToFitDescendents="true" />
                     </Controls>
                 </Label>
             </Controls>
@@ -204,6 +257,10 @@
                         <Control name="$(parent)ScryingUpdatedSection">
                             <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="10" />
                         </Control>
+
+                        <Control name="$(parent)RollingMeterProgressSection" override="true">
+                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="10" />
+                        </Control>
                     </Controls>
                 </Label>
             </Controls>
@@ -249,6 +306,10 @@
                         </Control>
 
                         <Control name="$(parent)ScryingUpdatedSection">
+                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="20" />
+                        </Control>
+
+                        <Control name="$(parent)RollingMeterProgressSection" override="true">
                             <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="20" />
                         </Control>
                     </Controls>
@@ -318,6 +379,14 @@
                 </Control>
             </Controls>
         </Control>
+
+        <TopLevelControl name="ZO_CenterScreenEndDunBuffAdded" tier="HIGH" level="ZO_HIGH_TIER_CENTER_SCREEN_ANNOUNCE">
+            <Controls>
+                <Texture name="$(parent)Icon" alpha="0" hidden="true">
+                    <TextureCoords left="-0.25" right="1.25" top="-0.25" bottom="1.25" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
 
         <TopLevelControl name="ZO_CenterScreenAnnounce" tier="HIGH" level="ZO_HIGH_TIER_CENTER_SCREEN_ANNOUNCE">
             <Dimensions x="1160" />

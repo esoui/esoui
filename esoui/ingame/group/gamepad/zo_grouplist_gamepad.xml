@@ -110,7 +110,7 @@
                                     <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_LEVEL_WIDTH"/>
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)Class" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                                     <OnInitialized>
-                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER), "level", TEXT_ALIGN_CENTER)
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER), "level", TEXT_ALIGN_CENTER, GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_LEVEL))
                                     </OnInitialized>
                                 </Control>
 

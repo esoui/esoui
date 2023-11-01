@@ -185,8 +185,7 @@ function ZO_ItemSetsBook_Keyboard:InitializeControls()
 
         dropdown:ClearItems()
         dropdown:SetHideDropdownCallback(OnDropdownHidden)
-        dropdown:SetNoSelectionText(GetString(noSelectionStringId))
-        dropdown:SetMultiSelectionTextFormatter(multiSelectionFormatterStringId)
+        dropdown:EnableMultiSelect(multiSelectionFormatterStringId, GetString(noSelectionStringId))
 
         for _, equipmentFilterType in ipairs(equipmentFilterTypes) do
             local equipmentFilterTypeEntry = dropdown:CreateItemEntry(GetString("SI_EQUIPMENTFILTERTYPE", equipmentFilterType))

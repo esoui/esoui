@@ -1,15 +1,9 @@
-ZO_RadioButtonGroup = ZO_Object:Subclass()
-
-function ZO_RadioButtonGroup:New(...)
-    local group = ZO_Object.New(self)
-    group:Initialize(...)
-    return group
-end
+ZO_RadioButtonGroup = ZO_InitializingObject:Subclass()
 
 function ZO_RadioButtonGroup:Initialize()
     self.m_buttons = {}
     self.m_enabled = true
-    
+
     self:SetLabelColors(ZO_SELECTED_TEXT, ZO_DISABLED_TEXT)
 end
 
@@ -53,6 +47,10 @@ function ZO_RadioButtonGroup:HandleClick(control, buttonId, ignoreCallback)
         return
     end
 
+    if self.customClickHandler and self.customClickHandler(control, buttonId, ignoreCallback) then
+        return
+    end
+
     -- For now only the LMB will be allowed to click radio buttons.
     if buttonId == MOUSE_BUTTON_INDEX_LEFT then
         -- Set all buttons in the group to unpressed, and unlocked.
@@ -71,22 +69,22 @@ function ZO_RadioButtonGroup:HandleClick(control, buttonId, ignoreCallback)
             self:onSelectionChangedCallback(control, previousControl)
         end
     end
+
+    if controlData.originalHandler then
+        controlData.originalHandler(control, buttonId)
+    end
 end
 
-function ZO_RadioButtonGroup:Add(button)
+function ZO_RadioButtonGroup:Add(button, onClickHandler)
     if button then
         if self.m_buttons[button] == nil then
             -- Remember the original handler so that its call can be forced.
             local originalHandler = button:GetHandler("OnClicked")
             self.m_buttons[button] = { originalHandler = originalHandler, isValidOption = true } -- newly added buttons always start as valid options for now.
-            
-            -- This throws away return values from the original function, which is most likely ok in the case of a click handler.
-            local newHandler =  function(control, buttonId, ignoreCallback) 
-                self:HandleClick(control, buttonId, ignoreCallback)
 
-                if originalHandler then
-                    originalHandler(control, buttonId)
-                end
+            -- This throws away return values from the original function, which is most likely ok in the case of a click handler.
+            local newHandler = function(control, buttonId, ignoreCallback)
+                self:HandleClick(control, buttonId, ignoreCallback)
             end
 
             button:SetHandler("OnClicked", newHandler)
@@ -149,7 +147,7 @@ function ZO_RadioButtonGroup:SetClickedButton(button, ignoreCallback)
     local buttonData = self.m_buttons[button]
     if(buttonData and buttonData.isValidOption)
     then
-       button:GetHandler("OnClicked")(button, MOUSE_BUTTON_INDEX_LEFT, ignoreCallback)
+       self:HandleClick(button, MOUSE_BUTTON_INDEX_LEFT, ignoreCallback)
     end
 end
 
@@ -187,4 +185,8 @@ end
 function ZO_RadioButtonGroup:IterateButtons()
     -- key: button, value: buttonData
     return pairs(self.m_buttons)
+end
+
+function ZO_RadioButtonGroup:SetCustomClickHandler(customClickHandler)
+    self.customClickHandler = customClickHandler
 end

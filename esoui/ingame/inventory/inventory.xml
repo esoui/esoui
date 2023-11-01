@@ -201,6 +201,30 @@
             </Controls>
         </TopLevelControl>
 
+        <Control name="ZO_DepositWithdrawComboBoxEntry" level="3" mouseEnabled="true" virtual="true">
+            <Dimensions y="ZO_WITHDRAW_DEPOSIT_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT" />
+            <OnMouseEnter>
+                ZO_ComboBox_Entry_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_ComboBox_Entry_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+                    ZO_ComboBox_Entry_OnSelected(self)
+                end
+            </OnMouseUp>
+
+            <Controls>
+                <Label name="$(parent)Label" wrapMode="ELLIPSIS" minLineCount="2" maxLineCount="2">
+                    <Anchor point="LEFT" offsetX="ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
+                    <Anchor point="RIGHT" offsetX="-ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
+                </Label>
+            </Controls>
+        </Control>
+
         <TopLevelControl name="ZO_PlayerBankDepositWithdrawCurrency" inherits="ZO_CustomDialogBase" virtual="true">
             <Controls>
                 <Control name="$(parent)Container" resizeToFitDescendents="true">

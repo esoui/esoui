@@ -6,7 +6,7 @@
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)ZoneSelector" inherits="ZO_ScrollableComboBox">
+                <Control name="$(parent)ZoneSelector" inherits="ZO_ComboBox">
                     <Dimensions x="300" y="33" />
                     <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="2" offsetY="-7" />
                 </Control>

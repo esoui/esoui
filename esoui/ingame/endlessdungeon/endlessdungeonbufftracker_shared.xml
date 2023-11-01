@@ -1,0 +1,63 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_EndDunBuffTrackerGridEntry_Shared" inherits="ZO_EndDunBuff_Shared" mouseEnabled="true" virtual="true">
+            <OnInitialized name="EndlessDungeonBuffTrackerGridEntry">
+                ZO_EndlessDungeonBuffTracker_Shared.InitializeGridEntryControl(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                self.object:OnGridEntryMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.object:OnGridEntryMouseExit(self)
+            </OnMouseExit>
+        </Control>
+
+        <Control name="ZO_EndDunBuffTrackerGridHeader_Shared" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+                    <Anchor point="TOP" />
+                    <Dimensions x="100%" />
+
+                    <OnRectHeightChanged>
+                        self:GetOwningWindow().object:ResizeGridListToFitHeaderLabelControl(self)
+                    </OnRectHeightChanged>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_EndDunBuffTracker_Shared" clampedToScreen="true" hidden="true" layer="OVERLAY" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="-20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20" />
+                </Backdrop>
+
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ENDLESS_DUNGEON_BUFF_TRACKER_TITLE">
+                    <Anchor point="TOP" offsetY="15" />
+                </Label>
+
+                <Label name="$(parent)Progress" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="5" />
+                </Label>
+
+                <Label name="$(parent)Empty" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_ENDLESS_DUNGEON_BUFF_TRACKER_EMPTY">
+                    <Anchor point="TOP" relativeTo="$(parent)Progress" relativePoint="BOTTOM" offsetY="15" />
+                </Label>
+
+                <Control name="$(parent)KeybindContainer" excludeFromResizeToFitExtents="true" resizeToFitDescendents="true">
+                    <Controls>
+                        <Control name="$(parent)SwitchToSummary" inherits="ZO_KeybindButton" hidden="true">
+                            <Anchor point="TOPLEFT" />
+                        </Control>
+
+                        <Control name="$(parent)Close" inherits="ZO_KeybindButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SwitchToSummary" relativePoint="TOPRIGHT" offsetX="40" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

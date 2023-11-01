@@ -1,0 +1,184 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_EndDunSummary_Keyboard_Template" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_MinorMungeBackdrop_SemiTransparentBlack">
+                    <Anchor point="TOPLEFT" offsetX="-30" offsetY="-30"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="30" offsetY="30"/>
+                </Backdrop>
+
+                <Label name="$(parent)Title" font="ZoFontWinH1" />
+                
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template" />
+
+                <Label name="$(parent)ProgressHeader" font="ZoFontWinH2" />
+
+                <Label name="$(parent)StageHeader" font="ZoFontWinH3" />
+
+                <Label name="$(parent)StageValue" font="ZoFontWinH1" />
+
+                <Label name="$(parent)ScoreHeader" font="ZoFontWinH3" />
+
+                <Label name="$(parent)ScoreValue" font="ZoFontWinH1" />
+
+                <Label name="$(parent)BuffsHeader" font="ZoFontWinH2" />
+
+                <Label name="$(parent)VersesHeader" font="ZoFontWinH3" />
+
+                <Label name="$(parent)VersesValue" font="ZoFontWinH1" />
+
+                <Label name="$(parent)VisionsHeader" font="ZoFontWinH3" />
+
+                <Label name="$(parent)VisionsValue" font="ZoFontWinH1" />
+
+                <Label name="$(parent)AvatarVisionsHeader" font="ZoFontWinH3" />
+
+                <Label name="$(parent)AvatarVisionsValue" font="ZoFontWinH1" />
+
+                <Control name="$(parent)KeybindContainer">
+                    <Controls>
+                        <Control name="$(parent)SwitchToBuffs" inherits="ZO_KeybindButton_Keyboard_Template" />
+
+                        <Control name="$(parent)Close" inherits="ZO_KeybindButton_Keyboard_Template" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_EndDunSummary_Gamepad_Template" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop_Gamepad" alpha="1" edgeColor="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED" centerColor="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED">
+                    <Anchor point="TOPLEFT" offsetX="-30" offsetY="-30"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="30" offsetY="30"/>
+                </Backdrop>
+
+                <Label name="$(parent)Title" font="ZoFontGamepadBold48" />
+
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" />
+
+                <Label name="$(parent)ProgressHeader" font="ZoFontGamepadBold27" />
+
+                <Label name="$(parent)StageHeader" font="ZoFontGamepadBold27" />
+
+                <Label name="$(parent)StageValue" font="ZoFontGamepadBold34" />
+
+                <Label name="$(parent)ScoreHeader" font="ZoFontGamepadBold27" />
+
+                <Label name="$(parent)ScoreValue" font="ZoFontGamepadBold34" />
+
+                <Label name="$(parent)BuffsHeader" font="ZoFontGamepadBold27" />
+
+                <Label name="$(parent)VersesHeader" font="ZoFontGamepadBold27" />
+
+                <Label name="$(parent)VersesValue" font="ZoFontGamepadBold34" />
+
+                <Label name="$(parent)VisionsHeader" font="ZoFontGamepadBold27" />
+
+                <Label name="$(parent)VisionsValue" font="ZoFontGamepadBold34" />
+
+                <Label name="$(parent)AvatarVisionsHeader" font="ZoFontGamepadBold27" />
+
+                <Label name="$(parent)AvatarVisionsValue" font="ZoFontGamepadBold34" />
+
+                <Control name="$(parent)KeybindContainer">
+                    <Controls>
+                        <Control name="$(parent)SwitchToBuffs" inherits="ZO_KeybindButton_Gamepad_Template" />
+
+                        <Control name="$(parent)Close" inherits="ZO_KeybindButton_Gamepad_Template" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_EndDunSummary" resizeToFitDescendents="true" hidden="true">
+            <Anchor point="CENTER" offsetY="-10" />
+            <DimensionConstraints minX="600" maxX="1000" />
+            
+            <OnInitialized>
+                ZO_EndlessDungeonSummary.OnControlInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true" />
+
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ENDLESS_DUNGEON_SUMMARY_TITLE">
+                    <Anchor point="TOP" />
+                </Label>
+
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="20" />
+                    <Dimensions x="100%" />
+                </Control>
+
+                <Label name="$(parent)ProgressHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ENDLESS_DUNGEON_SUMMARY_PROGRESS_HEADER">
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="20" constrains="Y" />
+                    <Anchor point="LEFT" constrains="X" />
+                </Label>
+                
+                <Label name="$(parent)StageHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_ENDLESS_DUNGEON_SUMMARY_STAGE_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ProgressHeader" relativePoint="BOTTOMLEFT" offsetX="50" offsetY="10" />
+                </Label>
+
+                <Label name="$(parent)StageValue" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="1 2 3">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)StageHeader" constrains="Y" />
+                    <Anchor point="RIGHT" offsetX="-50" constrains="X" />
+                </Label>
+
+                <Label name="$(parent)ScoreHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_ENDLESS_DUNGEON_SUMMARY_SCORE_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)StageHeader" relativePoint="BOTTOMLEFT" offsetY="15" />
+                </Label>
+
+                <Label name="$(parent)ScoreValue" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="283746">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)ScoreHeader" constrains="Y" />
+                    <Anchor point="RIGHT" offsetX="-50" constrains="X" />
+                </Label>
+
+                <Label name="$(parent)BuffsHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ENDLESS_DUNGEON_SUMMARY_BUFFS_HEADER">
+                    <Anchor point="TOP" relativeTo="$(parent)ScoreHeader" relativePoint="BOTTOM" offsetY="30" constrains="Y" />
+                    <Anchor point="LEFT" constrains="X" />
+                </Label>
+
+                <Label name="$(parent)VersesHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_ENDLESS_DUNGEON_SUMMARY_VERSES_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BuffsHeader" relativePoint="BOTTOMLEFT" offsetX="50" offsetY="10" />
+                </Label>
+
+                <Label name="$(parent)VersesValue" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="283746">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)VersesHeader" constrains="Y" />
+                    <Anchor point="RIGHT" offsetX="-50" constrains="X" />
+                </Label>
+
+                <Label name="$(parent)VisionsHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_ENDLESS_DUNGEON_SUMMARY_VISIONS_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)VersesHeader" relativePoint="BOTTOMLEFT" offsetY="15" />
+                </Label>
+
+                <Label name="$(parent)VisionsValue" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="283746">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)VisionsHeader" constrains="Y" />
+                    <Anchor point="RIGHT" offsetX="-50" constrains="X" />
+                </Label>
+
+                <Label name="$(parent)AvatarVisionsHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_ENDLESS_DUNGEON_SUMMARY_AVATAR_VISIONS_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)VisionsHeader" relativePoint="BOTTOMLEFT" offsetY="15" />
+                </Label>
+
+                <Label name="$(parent)AvatarVisionsValue" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="283746">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)AvatarVisionsHeader" constrains="Y" />
+                    <Anchor point="RIGHT" offsetX="-50" constrains="X" />
+                </Label>
+
+                <Control name="$(parent)KeybindContainer" resizeToFitDescendents="true" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="100" />
+                    
+                    <Controls>
+                        <Control name="$(parent)SwitchToBuffs" inherits="ZO_KeybindButton">
+                            <Anchor point="LEFT" />
+                        </Control>
+                        
+                        <Control name="$(parent)Close" inherits="ZO_KeybindButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)SwitchToBuffs" relativePoint="RIGHT" offsetX="40" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

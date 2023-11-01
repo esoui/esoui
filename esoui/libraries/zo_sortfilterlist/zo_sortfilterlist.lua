@@ -194,7 +194,11 @@ function ZO_SortFilterList:UnlockSelection()
 
     local mouseOverRow = ZO_ScrollList_GetMouseOverControl(self.list)
     if mouseOverRow then
-        self:EnterRow(mouseOverRow)
+        --Check to make sure the mouse over row isn't getting its mouse over blocked by something else first
+        local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
+        if mouseOverControl and (mouseOverRow == mouseOverControl or mouseOverControl:IsChildOf(mouseOverRow)) then
+            self:EnterRow(mouseOverRow)
+        end
     end
 end
 
@@ -322,6 +326,7 @@ function ZO_SortFilterList:HasEntries()
 end
 
 function ZO_SortFilterList:SetKeybindStripDescriptor(keybindStripDescriptor)
+    self:RemoveKeybinds()
     self.keybindStripDescriptor = keybindStripDescriptor
 end
 

@@ -31,6 +31,19 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_LoginUnderlinedEditContainer_Keyboard" virtual="true">
+            <OnInitialized>
+                ZO_SingleLineEditContainerSize_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Login/Keyboard/Login_TextLineShadow.dds">
+                    <Dimensions x="512" y="64" />
+                    <Anchor point="TOPLEFT" offsetX="-2" offsetY="-10"/>
+                </Texture>
+            </Controls>
+        </Control>
+
         <TopLevelControl name="ZO_PregameBackground_Keyboard" layer="BACKGROUND" tier="LOW" hidden="true">
             <Anchor point="CENTER" relativeTo="GuiRoot" />
             <OnInitialized>
@@ -102,11 +115,11 @@
                             <Anchor point="TOPLEFT" />
                         </Texture>
 
-                        <Control name="$(parent)AccountName" inherits="ZO_EditBox">
+                        <Control name="$(parent)AccountName" inherits="ZO_LoginUnderlinedEditContainer_Keyboard">
                             <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH"/>
                             <Anchor point="TOPLEFT" offsetX="50" offsetY="70" />
                             <Controls>
-                                <EditBox name="$(parent)Edit" override="true" font="ZoFontWinH4" maxInputCharacters="MAX_EMAIL_LENGTH" >
+                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontWinH4" maxInputCharacters="MAX_EMAIL_LENGTH" defaultText="SI_ACCOUNT_NAME">
                                     <OnEnter>
                                         ZO_Login_PasswordEdit_TakeFocus()
                                     </OnEnter>
@@ -118,12 +131,11 @@
                             </Controls>
                         </Control>
 
-                        <Control name="$(parent)Password" inherits="ZO_EditBox">
-                            <Dimensions y="28"/>
+                        <Control name="$(parent)Password" inherits="ZO_LoginUnderlinedEditContainer_Keyboard">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)AccountName" relativePoint="BOTTOMLEFT" offsetY="40" />
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)AccountName" relativePoint="BOTTOMRIGHT" offsetY="40" />
                             <Controls>
-                                <EditBox name="$(parent)Edit" override="true" maxInputCharacters="MAX_PASSWORD_LENGTH" textType="PASSWORD">
+                                <EditBox name="$(parent)Edit" inherits="ZO_TogglePasswordEditBox" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontWinH4" maxInputCharacters="MAX_PASSWORD_LENGTH" defaultText="SI_PASSWORD">
                                     <OnEnter>
                                         ZO_Login_AttemptLoginFromPasswordEdit()
                                     </OnEnter>

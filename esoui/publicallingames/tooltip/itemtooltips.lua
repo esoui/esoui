@@ -551,6 +551,26 @@ function ZO_Tooltip:AddTrait(itemLink, extraData)
     end
 end
 
+function ZO_Tooltip:AddSetRestrictions(itemSetId)
+    local hasRestrictions, passesRestrictions, allowedNamesString = GetItemSetClassRestrictions(itemSetId)
+    if hasRestrictions then
+        local restrictionsSection = self:AcquireSection(self:GetStyle("collectionsRestrictionsSection"))
+        local statValuePair = restrictionsSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))
+        statValuePair:SetStat(GetString("SI_COLLECTIBLERESTRICTIONTYPE", COLLECTIBLE_RESTRICTION_TYPE_CLASS), self:GetStyle("statValuePairStat"))
+        if passesRestrictions then
+            statValuePair:SetValue(allowedNamesString, self:GetStyle("statValuePairValue"))
+        else
+            statValuePair:SetValue(allowedNamesString, self:GetStyle("failed"), self:GetStyle("statValuePairValue"))
+        end
+        restrictionsSection:AddStatValuePair(statValuePair)
+
+        if not passesRestrictions then
+            restrictionsSection:AddLine(GetString(SI_COLLECTIBLE_TOOLTIP_NOT_USABLE_BY_CHARACTER), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+        end
+        self:AddSection(restrictionsSection)
+    end
+end
+
 function ZO_Tooltip:AddSet(itemLink, equipped)
     local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = GetItemLinkSetInfo(itemLink)
     if hasSet then
@@ -572,6 +592,7 @@ function ZO_Tooltip:AddSet(itemLink, equipped)
             end
         end
         self:AddSection(setSection)
+        self:AddSetRestrictions(setId)
     end
 end
 
@@ -606,6 +627,7 @@ function ZO_Tooltip:AddContainerSets(itemLink)
                 end
             end
             self:AddSection(setSection)
+            self:AddSetRestrictions(setId)
         end
     end
 end
@@ -812,6 +834,10 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
     self:AddItemTags(itemLink)
     if isFurniture then
         self:LayoutFurnishingLimitType(itemLink)
+
+        if IsItemLinkConsolidatedSmithingStation(itemLink) then
+            self:LayoutConsolidatedStationUnlockProgress(itemLink)
+        end
     end
     self:LayoutTradeBoPInfo(tradeBoPData)
     self:AddItemSetCollectionText(itemLink)
@@ -2042,4 +2068,33 @@ function ZO_Tooltip:LayoutFurnishingLimitType(itemLink)
     furnishingLimitTypeSection:AddLine(furnishingLimitName, self:GetStyle("furnishingLimitTypeDescription"))
 
     self:AddSection(furnishingLimitTypeSection)
+end
+
+function ZO_Tooltip:LayoutConsolidatedStationUnlockProgress(itemLink)
+    local unlockProgressSection = self:AcquireSection(self:GetStyle("bodySection"))
+    local unlockProgressPair = self:AcquireStatValuePair(self:GetStyle("statValuePair"))
+    unlockProgressPair:SetStat(GetString(SI_GAMEPAD_SMITHING_CONSOLIDATED_STATION_TOOLTIP_UNLOCK_PROGRESS_LABEL), self:GetStyle("statValuePairStat"))
+
+    local numUnlockedSets = GetItemLinkNumConsolidatedSmithingStationUnlockedSets(itemLink)
+    local numTotalSets = GetNumConsolidatedSmithingSets()
+    local progressString = zo_strformat(SI_SMITHING_CONSOLIDATED_STATION_TOOLTIP_UNLOCK_PROGRESS_COUNT_FORMATTER, numUnlockedSets, numTotalSets)
+    unlockProgressPair:SetValue(progressString, self:GetStyle("statValuePairValue"))
+    unlockProgressSection:AddStatValuePair(unlockProgressPair)
+
+    self:AddSection(unlockProgressSection)
+end
+
+function ZO_Tooltip:LayoutGenericItemSet(itemSetId)
+    local hasSet, setName, numBonuses = GetItemSetInfo(itemSetId)
+    if hasSet then
+        local setSection = self:AcquireSection(self:GetStyle("bodySection"))
+        setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME_NO_COUNT, setName), self:GetStyle("bodyHeader"))
+
+        for bonusIndex = 1, numBonuses do
+            local _, bonusDescription = GetItemSetBonusInfo(itemSetId, bonusIndex)
+            setSection:AddLine(bonusDescription, self:GetStyle("activeBonus"), self:GetStyle("bodyDescription"))
+        end
+        self:AddSection(setSection)
+        self:AddSetRestrictions(itemSetId)
+    end
 end

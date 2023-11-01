@@ -21,15 +21,16 @@ function HelpSubmitFeedback_Keyboard:Initialize(control)
     self.helpCategoryTitle = self.helpScrollChild:GetNamedChild("CategoryTitle")
     self.helpSubcategoryTitle = self.helpScrollChild:GetNamedChild("SubcategoryTitle")
     self.helpDetailsTitle = self.helpScrollChild:GetNamedChild("DetailsTitle")
-    self.helpDescriptionTitle = self.helpScrollChild:GetNamedChild("DescriptionTitle")
-    self.helpSubmitButton = self.helpScrollChild:GetNamedChild("SubmitButton")
     self.helpDetailsTextControl = self.helpScrollChild:GetNamedChild("DetailsTextLine")
+    self.helpDescriptionTitle = self.helpScrollChild:GetNamedChild("DescriptionTitle")
 
     self.helpSubcategoryContainer = self.helpScrollChild:GetNamedChild("SubcategoryContainer")
     self.helpDetailsContainer = self.helpScrollChild:GetNamedChild("DetailsContainer")
 
     self.helpCategoryComboBoxControl = self.helpScrollChild:GetNamedChild("CategoryCB")
     self.helpSubcategoryComboBoxControl = self.helpScrollChild:GetNamedChild("SubcategoryCB")
+
+    self.helpSubmitButton = self.control:GetNamedChild("SubmitButton")
 
     ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:RegisterCallback("CustomerServiceFeedbackSubmitted", function (...) self:OnCustomerServiceFeedbackSubmitted(...) end)
 
@@ -66,14 +67,14 @@ function HelpSubmitFeedback_Keyboard:InitializeComboBoxes()
 
     local function SetupComboBox(comboBox, fieldData, callback)
         if fieldData.universallyAddEnum then
-            local entry = ZO_ComboBox:CreateItemEntry(GetString(fieldData.enumStringPrefix, fieldData.universallyAddEnum), callback)
+            local entry = comboBox:CreateItemEntry(GetString(fieldData.enumStringPrefix, fieldData.universallyAddEnum), callback)
             entry.index = fieldData.universallyAddEnum
             comboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
 
         local iterationEntries = {}
         for i = fieldData.iterationBegin, fieldData.iterationEnd do
-            local entry = ZO_ComboBox:CreateItemEntry(GetString(fieldData.enumStringPrefix, i), callback)
+            local entry = comboBox:CreateItemEntry(GetString(fieldData.enumStringPrefix, i), callback)
             entry.index = i
             table.insert(iterationEntries, entry)
         end
@@ -142,19 +143,19 @@ function HelpSubmitFeedback_Keyboard:UpdateSubcategories()
         end
 
         if subcategoryData.universallyAddEnum then
-            local defaultEntry = ZO_ComboBox:CreateItemEntry(GetString(enumStringPrefix, subcategoryData.universallyAddEnum), OnSubcategoryChanged)
+            local defaultEntry = self.helpSubcategoryComboBox:CreateItemEntry(GetString(enumStringPrefix, subcategoryData.universallyAddEnum), OnSubcategoryChanged)
             defaultEntry.index = subcategoryData.universallyAddEnum
             self.helpSubcategoryComboBox:AddItem(defaultEntry, ZO_COMBOBOX_UPDATE_NOW)
         end
 
         for i = self.subcategoryContextualData.iterationBegin, self.subcategoryContextualData.iterationEnd do
-            local entry = ZO_ComboBox:CreateItemEntry(GetString(enumStringPrefix, i), OnSubcategoryChanged)
+            local entry = self.helpSubcategoryComboBox:CreateItemEntry(GetString(enumStringPrefix, i), OnSubcategoryChanged)
             entry.index = i
             self.helpSubcategoryComboBox:AddItem(entry, ZO_COMBOBOX_UPDATE_NOW)
         end
 
         if subcategoryData.otherEnum then
-            local otherEntry = ZO_ComboBox:CreateItemEntry(GetString(enumStringPrefix, subcategoryData.otherEnum), OnSubcategoryChanged)
+            local otherEntry = self.helpSubcategoryComboBox:CreateItemEntry(GetString(enumStringPrefix, subcategoryData.otherEnum), OnSubcategoryChanged)
             otherEntry.index = subcategoryData.otherEnum
             self.helpSubcategoryComboBox:AddItem(otherEntry, ZO_COMBOBOX_UPDATE_NOW)
         end

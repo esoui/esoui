@@ -407,7 +407,7 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
                     for stepIndex, step in pairs(stepsTable) do
                         for conditionIndex, condition in pairs(step) do
                             if condition.teleportNPCId == chatterData.teleportNPCId and ZO_IsElementInNumericallyIndexedTable(chatterData.waypointIdTable, condition.waypointId) then
-                                if GetJournalQuestInstanceDisplayType(questIndex) == INSTANCE_DISPLAY_TYPE_ZONE_STORY then
+                                if GetJournalQuestZoneDisplayType(questIndex) == ZONE_DISPLAY_TYPE_ZONE_STORY then
                                     if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
                                         if #chatterData.iconFiles == previousIconCount then
                                             table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds")

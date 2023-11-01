@@ -494,6 +494,46 @@ do
         g_listDialog:SetFirstButtonEnabled(false)
         return g_listDialog
     end
+
+    local g_multiSelectListDialog
+    function ZO_InventorySlot_GetMultiSelectItemListDialog()
+        if not g_multiSelectListDialog then
+            local function SetupItemRow(rowControl, slotInfo)
+                local bag, index = slotInfo.bag, slotInfo.index
+
+                local icon, _, _, _, _, _, _, _, displayQuality = GetItemInfo(bag, index)
+
+                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
+                local nameControl = rowControl:GetNamedChild("Name")
+                nameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bag, index)))
+                nameControl:SetColor(r, g, b, 1)
+
+                local inventorySlot = rowControl:GetNamedChild("Button")
+                ZO_Inventory_BindSlot(inventorySlot, SLOT_TYPE_LIST_DIALOG_ITEM, index, bag)
+                ZO_Inventory_SetupSlot(inventorySlot, slotInfo.stack, icon)
+
+                rowControl:GetNamedChild("Selected"):SetHidden(not g_multiSelectListDialog:IsItemSelected(slotInfo))
+
+                local statusTextureControl = rowControl:GetNamedChild("StatusTexture")
+                if IsItemInArmory(bag, index) then
+                    statusTextureControl:SetTexture(ZO_IN_ARMORY_BUILD_ICON)
+                    statusTextureControl:SetHidden(false)
+                else
+                    statusTextureControl:SetHidden(true)
+                end
+
+                if #g_multiSelectListDialog:GetSelectedItems() > 0 then
+                    g_multiSelectListDialog:SetFirstButtonEnabled(true)
+                else
+                    g_multiSelectListDialog:SetFirstButtonEnabled(false)
+                end
+            end
+            g_multiSelectListDialog = ZO_MultiSelectListDialog:New("ZO_ListDialogInventorySlot", 52, SetupItemRow)
+        end
+
+        g_multiSelectListDialog:SetFirstButtonEnabled(false)
+        return g_multiSelectListDialog
+    end
 end
 
 local function CanEnchantItem(inventorySlot)

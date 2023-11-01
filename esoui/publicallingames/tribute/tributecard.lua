@@ -27,6 +27,8 @@ local MECHANIC_CONTAINER_SMALL_COMBO_HEIGHT = 41
 ZO_MECHANIC_TYPE_ICON_LARGE_DIMENSIONS = 32
 ZO_MECHANIC_TYPE_ICON_SMALL_DIMENSIONS = 24
 
+ZO_NEGATIVE_MECHANIC_QUANTITY_COLOR = ZO_ColorDef:New("8A0000")
+
 local TRIBUTE_CARD_STATE_EFFECT_LAYER_OVERLAY = 1
 local TRIBUTE_CARD_STATE_EFFECT_LAYER_UNDERLAY = 2
 local TRIBUTE_CARD_STATE_EFFECT_LAYERS =
@@ -106,6 +108,32 @@ function ZO_TributeCard_MechanicContainer:Initialize(control)
 end
 
 do
+    internalassert(TRIBUTE_MECHANIC_ITERATION_END == 17, "A new Tribute mechanic has been added. Does the new mechanic ever need to display as 'negative' in the UI?")
+    local NEGATIVE_TRIBUTE_MECHANICS =
+    {
+        [TRIBUTE_PLAYER_PERSPECTIVE_SELF] =
+        {
+            [TRIBUTE_MECHANIC_KO_AGENT] = true,
+            [TRIBUTE_MECHANIC_DISCARD_CARDS] = true,
+            [TRIBUTE_MECHANIC_LOSE_RESOURCES] = true,
+            [TRIBUTE_MECHANIC_CONFINE_CARDS] = true,
+        },
+        [TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT] =
+        {
+            [TRIBUTE_MECHANIC_GAIN_RESOURCES] = true,
+            [TRIBUTE_MECHANIC_DRAW_CARDS] = true,
+            [TRIBUTE_MECHANIC_HEAL_AGENT] = true,
+            [TRIBUTE_MECHANIC_REFRESH_CARDS] = true,
+        },
+    }
+    -- The remaining mechanics may be contextually positive or negative, but we will always show as positive
+
+    function ZO_IsTributeMechanicNegativeForPlayer(mechanicType, targetPlayer)
+        return NEGATIVE_TRIBUTE_MECHANICS[targetPlayer][mechanicType] == true
+    end
+end
+
+do
     internalassert(TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ITERATION_END == 1, "A new Tribute mechanic activation source has been added. Please add it to the MECHANIC_ACTIVATION_SOURCE_SUFFIX table")
     local MECHANIC_ACTIVATION_SOURCE_SUFFIX =
     {
@@ -113,7 +141,28 @@ do
         [TRIBUTE_MECHANIC_ACTIVATION_SOURCE_COMBO] = "Combo",
     }
 
-    internalassert(TRIBUTE_MECHANIC_ITERATION_END == 15, "A new Tribute mechanic has been added. Does the MECHANIC_PARAM_MODIFIERS need special modifiers for this mechanic?")
+    function ZO_GetTributeMechanicFrameInfo(isSmall, isSingleDigit, activationSource, isOnTrigger, isNegative)
+        local sizeSuffix = isSmall and "Small" or "Large"
+        local digitsSuffix = isSingleDigit and "Single" or "Double"
+        local activationSourceSuffix = isOnTrigger and "Trigger" or MECHANIC_ACTIVATION_SOURCE_SUFFIX[activationSource]
+
+        local containerTemplate = string.format("ZO_TributeCard_MechanicContainer_%s_%sDigit_Base_Style", sizeSuffix, digitsSuffix, activationSourceSuffix)
+
+        local baseFrameTextureName = string.format("EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_%s_%s_%s", activationSourceSuffix, sizeSuffix, digitsSuffix)
+        local frameTextureSuffix = ""
+        if isNegative then
+            frameTextureSuffix = "_negative"
+        end
+
+        local frameTextureName = string.format("%s%s.dds", baseFrameTextureName, frameTextureSuffix)
+        local frameGlowTextureName = string.format("%s_glow.dds", baseFrameTextureName)
+
+        return containerTemplate, frameTextureName, frameGlowTextureName
+    end
+end
+
+do
+    internalassert(TRIBUTE_MECHANIC_ITERATION_END == 17, "A new Tribute mechanic has been added. Does the MECHANIC_PARAM_MODIFIERS need special modifiers for this mechanic?")
     local MECHANIC_PARAM_MODIFIERS =
     {
         [TRIBUTE_MECHANIC_HEAL_AGENT] =
@@ -138,30 +187,41 @@ do
     local LARGE_PADDING_Y = 15
     local SMALL_PADDING_Y = 10
     local OVERSIZED_SCALE = 1.2
-    local OVERSIZED_PADDING_Y = 6
 
     function ZO_TributeCard_MechanicContainer:Setup(cardObject, activationSource, mechanicIndex)
         local control = self.control
         self.cardDefId = cardObject:GetCardDefId()
         self.activationSource = activationSource
         self.mechanicIndex = mechanicIndex
+
         local triggerId
-        self.tributeMechanicType, self.quantity, self.comboNum, self.param1, self.param2, self.param3, triggerId = cardObject:GetMechanicInfo(activationSource, mechanicIndex)
-        self.numSiblings = cardObject:GetNumMechanics(activationSource)
+        local targetPlayer
+        self.tributeMechanicType, self.quantity, self.comboNum, self.param1, self.param2, self.param3, triggerId, targetPlayer = cardObject:GetMechanicInfo(activationSource, mechanicIndex)
         local isOnActivation = activationSource == TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ACTIVATION
         local isOnCombo = activationSource == TRIBUTE_MECHANIC_ACTIVATION_SOURCE_COMBO
         local isOnTrigger = triggerId ~= 0
-        local chooseOneMechanic = isOnActivation and cardObject:DoesChooseOneMechanic()
+
+        self.numSiblings = cardObject:GetNumMechanics(activationSource)
         local isOversized = self.numSiblings <= 2
         local scale = isOversized and OVERSIZED_SCALE or 1
         control:SetScale(scale)
+
+        local chooseOneMechanic = isOnActivation and cardObject:DoesChooseOneMechanic()
         if chooseOneMechanic then
             -- Quick and dirty workaround. The choice display isn't actually a mechanic, it replaces all of the mechanics on the card as one unified concept
             -- TODO Tribute: If we want to change to let design control which mechanics require choice, or work with combos, this logic will be useless and will need to be reimplemented
             if mechanicIndex == 1 then
-                ApplyTemplateToControl(control, "ZO_TributeCard_MechanicContainer_Large_SingleDigit_Activation_Style")
+                local IS_LARGE = false
+                local IS_SINGLE_DIGIT = true
+                local NOT_ON_TRIGGER = false
+                local IS_POSITIVE = false
+                local controlTemplate, frameTexture = ZO_GetTributeMechanicFrameInfo(IS_LARGE, IS_SINGLE_DIGIT, activationSource, NOT_ON_TRIGGER, IS_POSITIVE)
+                ApplyTemplateToControl(control, controlTemplate)
+                self.frameTexture:SetTexture(frameTexture)
+
                 self.typeIconTexture:SetTexture("EsoUI/Art/Tribute/Mechanics/tributeMechanicCardDisplay_chooseOne.dds")
                 self.quantityLabel:SetText(self.numSiblings)
+                self.quantityLabel:SetColor(ZO_BLACK:UnpackRGB())
                 local offsetY = FIRST_TOP_OFFSET_Y + (MECHANIC_CONTAINER_LARGE_ACTIVATION_HEIGHT / 2 * OVERSIZED_SCALE)
                 control:SetAnchor(CENTER, nil, TOPLEFT, OFFSET_X, offsetY)
             else
@@ -170,9 +230,6 @@ do
             return
         end
 
-        local isSmallContainer = self.numSiblings >= 4
-        local activationSourceSuffix = isOnTrigger and "Trigger" or MECHANIC_ACTIVATION_SOURCE_SUFFIX[activationSource]
-        local sizeSuffix = isSmallContainer and "Small" or "Large"
         local quantityDisplayValue = self.quantity
         local paramModifiers = MECHANIC_PARAM_MODIFIERS[self.tributeMechanicType]
         if paramModifiers then
@@ -189,14 +246,21 @@ do
                 end
             end
         end
-        local isDoubleDigitContainer = quantityDisplayValue >= 10
-        local digitsSuffix = isDoubleDigitContainer and "Double" or "Single"
 
-        ApplyTemplateToControl(control, string.format("ZO_TributeCard_MechanicContainer_%s_%sDigit_%s_Style", sizeSuffix, digitsSuffix, activationSourceSuffix))
+        local isSmallContainer = self.numSiblings >= 4
+        local isSingleDigitContainer = quantityDisplayValue < 10
+        local isNegative = ZO_IsTributeMechanicNegativeForPlayer(self.tributeMechanicType, targetPlayer)
+        local controlTemplate, frameTextureName, frameGlowTextureName = ZO_GetTributeMechanicFrameInfo(isSmallContainer, isSingleDigitContainer, activationSource, isOnTrigger, isNegative)
+        ApplyTemplateToControl(control, controlTemplate)
+        self.frameTexture:SetTexture(frameTextureName)
+        self.frameGlowTextureFileName = frameGlowTextureName
+
         self.typeIconTexture:SetTexture(GetTributeMechanicIconPath(self.tributeMechanicType, self.param1, self.param2, self.param3))
+
         local quantityDisplayText = quantityDisplayValue == 0 and GetString(SI_TRIBUTE_MECHANIC_ANY_QUANTITY_SYMBOL) or quantityDisplayValue
         self.quantityLabel:SetText(quantityDisplayText)
-        self.frameGlowTextureFileName = string.format("EsoUI/Art/Tribute/Mechanics/tributeMechanicCardFrame_%s_%s_%s_glow.dds", activationSourceSuffix, sizeSuffix, digitsSuffix)
+        local quantityColor = isNegative and ZO_NEGATIVE_MECHANIC_QUANTITY_COLOR or ZO_BLACK
+        self.quantityLabel:SetColor(quantityColor:UnpackRGB())
 
         -- Add pips to combo hexes.
         -- Combo 2 has no pips. Combo 3 has 1 pip. Combo 4 has 2 pips...
@@ -223,7 +287,7 @@ do
             height = isOnActivation and MECHANIC_CONTAINER_LARGE_ACTIVATION_HEIGHT or MECHANIC_CONTAINER_LARGE_COMBO_HEIGHT
             height = height * scale
             paddingY = LARGE_PADDING_Y
-            if isDoubleDigitContainer then
+            if not isSingleDigitContainer then
                 offsetX = LARGE_DOUBLE_DIGIT_OFFSET_X
             end
         end
@@ -876,10 +940,10 @@ function ZO_TributeCard:GetEffectiveStateFlags(currentStateFlags)
             stateFlags = 0
         elseif isStacked and isTopOfStack then
             --Suppress playable and damageable for cards at the top of a stack
-            stateFlags = ZO_ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_DAMAGEABLE, TRIBUTE_CARD_STATE_FLAGS_PLAYABLE)
+            stateFlags = ZO_FlagHelpers.ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_DAMAGEABLE, TRIBUTE_CARD_STATE_FLAGS_PLAYABLE)
         elseif ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingBoard() then
             -- Don't allow the targetable and targeted state flags on world cards when viewing the board from the target viewer
-            stateFlags = ZO_ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_TARGETABLE, TRIBUTE_CARD_STATE_FLAGS_TARGETED)
+            stateFlags = ZO_FlagHelpers.ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_TARGETABLE, TRIBUTE_CARD_STATE_FLAGS_TARGETED)
         end
     else
         if self:GetPopupType() == ZO_TRIBUTE_CARD_POPUP_TYPE.MECHANIC then
@@ -888,10 +952,10 @@ function ZO_TributeCard:GetEffectiveStateFlags(currentStateFlags)
         else
             if self:GetPopupType() == ZO_TRIBUTE_CARD_POPUP_TYPE.CARD and ZO_TRIBUTE_TARGET_VIEWER_MANAGER:IsViewingBoard() then
                 -- Don't allow the targetable and targeted state flags on popup cards when viewing the board from the target viewer
-                stateFlags = ZO_ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_TARGETABLE, TRIBUTE_CARD_STATE_FLAGS_TARGETED)
+                stateFlags = ZO_FlagHelpers.ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_TARGETABLE, TRIBUTE_CARD_STATE_FLAGS_TARGETED)
             end
             -- Suppress stack-related flags for non-Mechanic popup cards.
-            stateFlags = ZO_ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_STACK_DAMAGEABLE, TRIBUTE_CARD_STATE_FLAGS_STACK_PLAYABLE)
+            stateFlags = ZO_FlagHelpers.ClearMaskFlags(stateFlags, TRIBUTE_CARD_STATE_FLAGS_STACK_DAMAGEABLE, TRIBUTE_CARD_STATE_FLAGS_STACK_PLAYABLE)
         end
     end
 
@@ -911,7 +975,7 @@ function ZO_TributeCard:OnStateFlagsChanged(stateFlags)
 
     self.stateFlags = stateFlags
     local effectiveStateFlags = self:GetEffectiveStateFlags(stateFlags)
-    local flagValueChangesTable = ZO_CompareMaskFlags(self.effectiveStateFlags, effectiveStateFlags)
+    local flagValueChangesTable = ZO_FlagHelpers.CompareMaskFlags(self.effectiveStateFlags, effectiveStateFlags)
     if not flagValueChangesTable then
         return
     end
@@ -1227,19 +1291,19 @@ function ZO_TributeCard:OnMouseUp(button, upInside)
 end
 
 function ZO_TributeCard:IsCardStateActive(cardState)
-    return ZO_MaskHasFlag(self.stateFlags, cardState)
+    return ZO_FlagHelpers.MaskHasFlag(self.stateFlags, cardState)
 end
 
 function ZO_TributeCard:IsPlayable()
-    return ZO_MaskHasFlag(self.stateFlags, TRIBUTE_CARD_STATE_FLAGS_PLAYABLE)
+    return ZO_FlagHelpers.MaskHasFlag(self.stateFlags, TRIBUTE_CARD_STATE_FLAGS_PLAYABLE)
 end
 
 function ZO_TributeCard:IsDamageable()
-    return ZO_MaskHasFlag(self.stateFlags, TRIBUTE_CARD_STATE_FLAGS_DAMAGEABLE)
+    return ZO_FlagHelpers.MaskHasFlag(self.stateFlags, TRIBUTE_CARD_STATE_FLAGS_DAMAGEABLE)
 end
 
 function ZO_TributeCard:IsTargeted()
-    return ZO_MaskHasFlag(self.stateFlags, TRIBUTE_CARD_STATE_FLAGS_TARGETED)
+    return ZO_FlagHelpers.MaskHasFlag(self.stateFlags, TRIBUTE_CARD_STATE_FLAGS_TARGETED)
 end
 
 function ZO_TributeCard:IsHidden()
@@ -1251,7 +1315,7 @@ function ZO_TributeCard:SetHidden(hidden)
 end
 
 function ZO_TributeCard:IsHighlighted()
-    return ZO_MaskHasFlag(self.stateFlags, TRIBUTE_CARD_STATE_FLAGS_HIGHLIGHTED)
+    return ZO_FlagHelpers.MaskHasFlag(self.stateFlags, TRIBUTE_CARD_STATE_FLAGS_HIGHLIGHTED)
 end
 
 function ZO_TributeCard:SetHighlighted(isHighlighted)

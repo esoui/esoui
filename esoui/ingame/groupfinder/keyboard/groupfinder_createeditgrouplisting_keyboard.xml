@@ -1,0 +1,279 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GroupFinder_RoleSpinner" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                ZO_GroupFinder_RoleSpinner_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" modifyTextType="UPPERCASE" maxLineCount="1">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="150" y="32"/>
+                </Label>
+
+                <Control name="$(parent)Spinner" inherits="ZO_SpinnerButtons" mouseEnabled="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Title" relativePoint="RIGHT" />
+                    <!-- These dimensions are good for up to 3 digits -->
+                    <Dimensions x="110" y="32" />
+                    <Controls>
+                        <Button name="$(parent)Decrease" override="true">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="TOPLEFT" />
+                            <Textures normal="EsoUI/Art/Buttons/pointsMinus_up.dds"
+                                      pressed="EsoUI/Art/Buttons/pointsMinus_down.dds"
+                                      mouseOver="EsoUI/Art/Buttons/pointsMinus_over.dds"
+                                      disabled="EsoUI/Art/Buttons/pointsMinus_disabled.dds"/>
+                        </Button>
+
+
+                        <Button name="$(parent)Increase" override="true">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="TOPRIGHT" />
+                            <Textures normal="EsoUI/Art/Buttons/pointsPlus_up.dds"
+                                      pressed="EsoUI/Art/Buttons/pointsPlus_down.dds"
+                                      mouseOver="EsoUI/Art/Buttons/pointsPlus_over.dds"
+                                      disabled="EsoUI/Art/Buttons/pointsPlus_disabled.dds"/>
+                        </Button>
+
+                        <Label name="$(parent)Display" font="ZoFontWinH2" modifyTextType="UPPERCASE" maxLineCount="1" horizontalAlignment="CENTER" >
+                            <Anchor point="LEFT" relativeTo="$(parent)Decrease" relativePoint="RIGHT" offsetX="2" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)Increase" relativePoint="LEFT" offsetX="-2" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GroupFinder_CreateGroupListingContent_Keyboard" virtual="true">
+            <Controls>
+                <Control name="$(parent)BackLabel" level="1" inherits="ZO_IconHeader">
+                    <Anchor point="TOPLEFT" offsetY="150" />
+                    <OnInitialized>
+                        ZO_IconHeader_OnInitialized(self)
+                        self.enabled = true
+                        self.allowIconScaling = false
+                        self.OnMouseUp = ZO_CancelCreateEditGroupListingButton_OnClicked
+                    </OnInitialized>
+
+                    <Controls>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Buttons/large_leftArrow_down.dds" override="true">
+                            <Controls>
+                                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Buttons/large_leftArrow_over.dds" override="true" />
+                            </Controls>
+                        </Texture>
+
+                        <Label name="$(parent)Text" text="SI_GROUP_FINDER_CREATE_EDIT_BACK" override="true" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Content">
+                    <Anchor point="TOPLEFT" offsetX="280" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <Controls>
+                        <Control name="$(parent)CategoryDropdown" inherits="ZO_ComboBox">
+                            <Anchor point="TOPLEFT" offsetX="25" offsetY="5" />
+                            <Dimensions x="170" />
+                        </Control>
+
+                        <Control name="$(parent)PrimaryDropdown" inherits="ZO_ComboBox">
+                            <Anchor point="LEFT" relativeTo="$(parent)CategoryDropdown" relativePoint="RIGHT" offsetX="10" />
+                            <Dimensions x="210" />
+                        </Control>
+
+                        <Control name="$(parent)DifficultyRadioContainer">
+                            <Anchor point="LEFT" relativeTo="$(parent)CategoryDropdown" relativePoint="RIGHT" />
+                            <Dimensions x="64" y="32" />
+
+                            <OnInitialized>
+                                ZO_VeteranDifficultySettings_GroupFinder_OnInitialized(self)
+                            </OnInitialized>
+
+                            <Controls>
+                                <Label name="$(parent)DifficultyLabel" hidden="true" />
+
+                                <Button name="$(parent)NormalDifficulty" inherits="ZO_VeteranDifficultyButton">
+                                    <Anchor point="TOPLEFT" />
+                                    <Dimensions x="32" y="32" />
+                                    <Textures
+                                        normal="EsoUI/Art/LFG/LFG_normalDungeon_up.dds"
+                                        pressed="EsoUI/Art/LFG/LFG_normalDungeon_down.dds"
+                                        mouseOver="EsoUI/Art/LFG/LFG_normalDungeon_over.dds"
+                                        disabled="EsoUI/Art/LFG/LFG_normalDungeon_disabled.dds"
+                                        disabledPressed="EsoUI/Art/LFG/LFG_normalDungeon_down_disabled.dds"
+                                    />
+
+                                    <OnInitialized>
+                                        self.dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL
+                                    </OnInitialized>
+                                </Button>
+                                <Button name="$(parent)VeteranDifficulty" inherits="ZO_VeteranDifficultyButton">
+                                    <Anchor point="LEFT" relativeTo="$(parent)NormalDifficulty" relativePoint="RIGHT" />
+                                    <Dimensions x="32" y="32" />
+                                    <Textures
+                                        normal="EsoUI/Art/LFG/LFG_veteranDungeon_up.dds"
+                                        pressed="EsoUI/Art/LFG/LFG_veteranDungeon_down.dds"
+                                        mouseOver="EsoUI/Art/LFG/LFG_veteranDungeon_over.dds"
+                                        disabled="EsoUI/Art/LFG/LFG_veteranDungeon_disabled.dds"
+                                        disabledPressed="EsoUI/Art/LFG/LFG_veteranDungeon_down_disabled.dds"
+                                    />
+
+                                    <OnInitialized>
+                                        self.dungeonDifficulty = DUNGEON_DIFFICULTY_VETERAN
+                                    </OnInitialized>
+                                </Button>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)SecondaryDropdown" inherits="ZO_ComboBox">
+                            <Anchor point="LEFT" relativeTo="$(parent)PrimaryDropdown" relativePoint="RIGHT" offsetX="10" />
+                            <Dimensions x="210" />
+                        </Control>
+
+                        <Control name="$(parent)SizeDropdown" inherits="ZO_ComboBox">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryDropdown" relativePoint="BOTTOMLEFT" offsetY="5" />
+                            <Dimensions x="170" />
+                        </Control>
+
+                        <Control name="$(parent)GroupTitle" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SizeDropdown" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="10" constrains="X" />
+                            <Controls>
+                                <Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                    <Dimensions y="36" />
+                                    <Controls>
+                                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="GROUP_FINDER_GROUP_LISTING_TITLE_MAX_LENGTH" defaultText="SI_GROUP_FINDER_CREATE_TITLE_DEFAULT_TEXT">
+                                            <OnTextChanged>
+                                                ZO_CreateEditGroupListing_OnGroupTitleTextChanged(self)
+                                            </OnTextChanged>
+                                            <OnFocusGained>
+                                                ZO_CreateEditGroupListing_OnGroupTitleFocusGained(self)
+                                            </OnFocusGained>
+                                            <OnFocusLost>
+                                                ZO_CreateEditGroupListing_OnGroupTitleFocusLost(self)
+                                            </OnFocusLost>
+                                        </EditBox>
+                                    </Controls>
+                                </Backdrop>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Instructions" inherits="ZO_TextInstructionsTemplate" tier="HIGH" excludeFromResizeToFitExtents="true" />
+
+                        <Backdrop name="$(parent)Description" inherits="ZO_MultiLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GroupTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="10" constrains="X" />
+                            <Dimensions y="180"/>
+                            <Controls>
+                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="GROUP_FINDER_GROUP_LISTING_DESCRIPTION_MAX_LENGTH" defaultText="SI_GROUP_FINDER_CREATE_DESCRIPTION_DEFAULT_TEXT">
+                                    <OnTextChanged>
+                                        ZO_CreateEditGroupListing_OnDescriptionTextChanged(self)
+                                    </OnTextChanged>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+
+                        <Label name="$(parent)PlaystyleLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontWinH4" text="SI_GROUP_FINDER_HEADER_LABEL_PLAYSTYLE">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                        </Label>
+
+                        <Control name="$(parent)PlaystyleDropdown" inherits="ZO_ComboBox">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PlaystyleLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Dimensions x="170" />
+                        </Control>
+
+                        <Button name="$(parent)ChampionCheckButton" inherits="ZO_CheckButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PlaystyleDropdown" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Button>
+
+                        <Control name="$(parent)ChampionPointsEditBox" resizeToFitDescendents="true">
+                            <Controls>
+                                <Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                                    <Anchor point="TOPLEFT" />
+                                    <Dimensions x="100" y="36" />
+                                    <Controls>
+                                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="GROUP_FINDER_GROUP_LISTING_CHAMPION_POINTS_MAX_DIGITS" textType="NUMERIC_UNSIGNED_INT">
+                                            <OnFocusLost>
+                                                ZO_CreateEditGroupListing_OnChampionPointsTextChanged(self)
+                                            </OnFocusLost>
+                                        </EditBox>
+                                    </Controls>
+                                </Backdrop>
+                            </Controls>
+                        </Control>
+
+                        <Button name="$(parent)VOIPCheckButton" inherits="ZO_CheckButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ChampionCheckButton" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Button>
+
+                        <Button name="$(parent)InviteCodeCheckButton" inherits="ZO_CheckButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)VOIPCheckButton" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Button>
+
+                        <Control name="$(parent)InviteCodeEditBox" resizeToFitDescendents="true">
+                            <Controls>
+                                <Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                                    <Anchor point="TOPLEFT" />
+                                    <Dimensions x="180" y="36" />
+                                    <Controls>
+                                        <EditBox name="$(parent)Edit" inherits="ZO_TogglePasswordEditBox" maxInputCharacters="GROUP_FINDER_GROUP_LISTING_INVITE_CODE_MAX_LENGTH" textType="NUMERIC_UNSIGNED_INT">
+                                            <OnFocusLost>
+                                                ZO_CreateEditGroupListing_OnInviteCodeTextChanged(self)
+                                            </OnFocusLost>
+                                        </EditBox>
+                                    </Controls>
+                                </Backdrop>
+                            </Controls>
+                        </Control>
+
+                        <Button name="$(parent)AutoAcceptCheckButton" inherits="ZO_CheckButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)InviteCodeCheckButton" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Button>
+
+                        <Button name="$(parent)EnforceRolesCheckButton" inherits="ZO_CheckButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AutoAcceptCheckButton" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Button>
+
+                        <Control name="$(parent)RoleContainer" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)EnforceRolesCheckButton" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="10" />
+                            <Controls>
+                                <Control name="$(parent)Tank" inherits="ZO_GroupFinder_RoleSpinner">
+                                    <Anchor point="TOPLEFT" />
+                                </Control>
+
+                                <Control name="$(parent)Heal" inherits="ZO_GroupFinder_RoleSpinner">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Tank" relativePoint="BOTTOMLEFT" />
+                                </Control>
+
+                                <Control name="$(parent)DPS" inherits="ZO_GroupFinder_RoleSpinner">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Heal" relativePoint="BOTTOMLEFT" />
+                                </Control>
+
+                                <Control name="$(parent)Any" inherits="ZO_GroupFinder_RoleSpinner">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)DPS" relativePoint="BOTTOMLEFT" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Button name="$(parent)CreateEditGroupButton" inherits="ZO_DefaultButton">
+                            <Anchor point="BOTTOM"/>
+                            <Dimensions x="200" />
+
+                            <OnClicked>
+                                GROUP_FINDER_KEYBOARD.createGroupListingContent:CreateEditButton_OnClicked(self)
+                            </OnClicked>
+
+                            <OnMouseEnter>
+                                GROUP_FINDER_KEYBOARD.createGroupListingContent:CreateEditButton_OnMouseEnter(self)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                GROUP_FINDER_KEYBOARD.createGroupListingContent:CreateEditButton_OnMouseExit(self)
+                            </OnMouseExit>
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

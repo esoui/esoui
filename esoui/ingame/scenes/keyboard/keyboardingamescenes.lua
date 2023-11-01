@@ -208,7 +208,6 @@ ENCHANTING_SCENE:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
 SMITHING_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 SMITHING_SCENE:AddFragment(SMITHING_FRAGMENT)
 SMITHING_SCENE:AddFragment(CRAFTING_RESULTS_FRAGMENT)
-SMITHING_SCENE:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
 SMITHING_SCENE:AddFragment(ZO_WindowSoundFragment:New(SOUNDS.SMITHING_OPENED, SOUNDS.SMITHING_CLOSED))
 SMITHING_SCENE:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
 SMITHING_SCENE:AddFragment(CRAFT_ADVISOR_FRAGMENT)
@@ -741,7 +740,9 @@ RIGHT_PANEL_BG_FRAGMENT:AddInstantScene(CROWN_CRATE_KEYBOARD_SCENE)
 local inventoryScene = ZO_Scene:New("inventory", SCENE_MANAGER)
 inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED)
-inventoryScene:AddFragment(ZO_ItemPreviewOptionsFragment:New({paddingLeft = 570, paddingRight = 620, forcePreparePreview = false}))
+-- Dynamic framing consumed width/height match FURNITURE_BROWSER_ITEM_PREVIEW_OPTIONS_FRAGMENT
+-- because these constraints only apply to furniture previews.
+inventoryScene:AddFragment(ZO_ItemPreviewOptionsFragment:New({paddingLeft = 570, paddingRight = 620, dynamicFramingConsumedWidth = 950, dynamicFramingConsumedHeight = 80, forcePreparePreview = false}))
 inventoryScene:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
 inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
 inventoryScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
@@ -1076,7 +1077,7 @@ do
 
     SCENE_MANAGER:AddSceneGroup("marketSceneGroup", ZO_SceneGroup:New("market", "endeavorSealStoreSceneKeyboard", "esoPlusOffersSceneKeyboard", "dailyLoginRewards", "giftInventoryKeyboard"))
     local NO_PREFERRED_SCENE_FUNCTION = nil
-    MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_MARKET, "marketSceneGroup", iconData, NO_PREFERRED_SCENE_FUNCTION, TUTORIAL_TRIGGER_CROWN_STORE_TABS_SHOWN)
+    MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_MARKET, "marketSceneGroup", iconData, NO_PREFERRED_SCENE_FUNCTION, TUTORIAL_TRIGGER_CROWN_STORE_TABS_SHOWN_POINTER_BOX)
 end
 
 --Inventory
@@ -1410,3 +1411,11 @@ do
     SCENE_MANAGER:AddSceneGroup("mailSceneGroup", ZO_SceneGroup:New("mailInbox", "mailSend"))
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_MAIL, "mailSceneGroup", iconData)
 end
+
+-------------------------------------
+--Endless Dungeon Buff Selector Scene
+-------------------------------------
+
+ENDLESS_DUNGEON_BUFF_SELECTOR_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+ENDLESS_DUNGEON_BUFF_SELECTOR_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
+ENDLESS_DUNGEON_BUFF_SELECTOR_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)

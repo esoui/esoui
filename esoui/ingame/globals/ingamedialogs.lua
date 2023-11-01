@@ -271,6 +271,40 @@ ESO_Dialogs["CONFIRM_DESTROY_ARMORY_ITEM_PROMPT"] =
     }
 }
 
+ESO_Dialogs["CONFIRM_ENDLESS_DUNGEON_COMPANION_SUMMONING"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_ENDLESS_DUNGEON_CONFIRM_COMPANION_SUMMONING_DIALOG_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_ENDLESS_DUNGEON_CONFIRM_COMPANION_SUMMONING_DIALOG_BODY,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text =      SI_DIALOG_CONFIRM,
+            callback =  function(dialog)
+                            -- Confirm Companion Summoning for this Endless Dungeon instance
+                            -- and attempt to use the companion collectible again.
+                            SetPlayerConfirmedEndlessDungeonCompanionSummoning(true)
+                            UseCollectible(dialog.data.collectibleId)
+                        end,
+        },
+        
+        [2] =
+        {
+            text =      SI_DIALOG_CANCEL,
+        }
+    }
+}
+
 ESO_Dialogs["KEEP_CLAIM_WRONG_ALLIANCE"] = 
 {
     mainText = 
@@ -4702,6 +4736,76 @@ ESO_Dialogs["CONFIRM_COMPLETE_QUEST_MAX_WARNINGS"] =
         },
         {
             text = SI_DIALOG_NO,
+        }
+    },
+}
+
+ESO_Dialogs["GROUP_FINDER_CREATE_EDIT_FAILED"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = function(dialog)
+            if dialog.data and dialog.data.isEdit then
+                return SI_GROUP_FINDER_EDIT_FAILED_TITLE
+            end
+            return SI_GROUP_FINDER_CREATE_FAILED_TITLE
+        end
+    },
+
+    mainText =
+    {
+        text = function(dialog)
+            return GetString("SI_GROUPFINDERACTIONRESULT", dialog.textParams.mainTextParams[1])
+        end,
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CLOSE,
+        },
+    },
+}
+
+ESO_Dialogs["GROUP_FINDER_CREATE_RESCIND_APPLICATION"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_GROUP_FINDER_CREATE_RESCIND_APPLICATION_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_GROUP_FINDER_CREATE_RESCIND_APPLICATION_DESCRIPTION,
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback = function(dialog)
+                RequestResolveGroupListingApplication(RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_RESCIND)
+                if IsInGamepadPreferredMode() then
+                    GROUP_FINDER_GAMEPAD.createEditDialogObject:ShowDialog()
+                else
+                    GROUP_FINDER_KEYBOARD:SetMode(ZO_GROUP_FINDER_MODES.CREATE_EDIT)
+                end
+            end,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
         }
     },
 }

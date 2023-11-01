@@ -244,6 +244,10 @@ SOUNDS =
     EVENT_TICKET_ACQUIRE            = "EventTicket_Acquire",
     EVENT_TICKET_TRANSACT           = "EventTicket_Transact",
 
+    -- Endless Dungeon currency sounds
+    ENDLESS_DUNGEON_CURRENCY_ACQUIRE            = "EndlessDungeonCurrency_Acquire",
+    ENDLESS_DUNGEON_CURRENCY_TRANSACT           = "EndlessDungeonCurrency_Transact",
+
     --Justice sounds
     JUSTICE_STATE_CHANGED           = "Justice_StateChanged",
     JUSTICE_NOW_KOS                 = "Justice_NowKOS",
@@ -683,6 +687,8 @@ SOUNDS =
     SMITHING_ITEM_TO_EXTRACT_PLACED         = "Smithing_Item_To_Extract_Placed",
     SMITHING_ITEM_TO_EXTRACT_REMOVED        = "Smithing_Item_To_Extract_Removed",
 
+    CONSOLIDATED_SMITHING_SET_ADDED         = "Consolidated_Smithing_Set_Added",
+
     BLACKSMITH_CREATE_TOOLTIP_GLOW          = "Blacksmith_Create_Tooltip_Glow",
     WOODWORKER_CREATE_TOOLTIP_GLOW          = "Woodworker_Create_Tooltip_Glow",
     CLOTHIER_CREATE_TOOLTIP_GLOW            = "Clothier_Create_Tooltip_Glow",
@@ -1027,4 +1033,30 @@ SOUNDS =
     TRIBUTE_SHOW_TARGET_VIEWER = "Tribute_ShowTargetViewer",
     TRIBUTE_INVITE_RECEIVED = "Tribute_InviteReceived",
     TRIBUTE_TURN_START_OPPONENT_PRESTIGE_VICTORY_NEAR = "Tribute_TurnStart_OpponentPrestigeVictoryNear",
+
+    -- Endless Dungeon
+    ENDLESS_DUNGEON_ATTEMPTS_REMAINING_DECREMENT = "UI_U40_EA_ThreadOfFate_Severed",
+    ENDLESS_DUNGEON_BUFF_ACQUIRE_AVATAR_VISION = "UI_U40_EA_AvatarVision_Acquired",
+    ENDLESS_DUNGEON_BUFF_ACQUIRE_VERSE = "UI_U40_EA_Verse_Acquired",
+    ENDLESS_DUNGEON_BUFF_ACQUIRE_VISION = "UI_U40_EA_Vision_Acquired",
+    ENDLESS_DUNGEON_BUFF_MOUSE_ENTER = "UI_U40_EA_BuffSelect_Mouseover",
+    ENDLESS_DUNGEON_BUFF_MOUSE_ENTER_AVATAR_VISION = "UI_U40_EA_BuffSelect_Avatar_Mouseover",
+    ENDLESS_DUNGEON_BUFF_SELECT_AVATAR_VISION = "UI_U40_EA_AvatarVision_Selection",
+    ENDLESS_DUNGEON_BUFF_SELECT_VERSE = "UI_U40_EA_Verse_Selection",
+    ENDLESS_DUNGEON_BUFF_SELECT_VISION = "UI_U40_EA_Vision_Selection",
+    ENDLESS_DUNGEON_BUFF_TRACKER_CLOSE = "UI_U40_EA_Tracker_Close",
+    ENDLESS_DUNGEON_BUFF_TRACKER_OPEN = "UI_U40_EA_Tracker_Open",
+    ENDLESS_DUNGEON_COUNTER_DOWN = "UI_U40_EA_CounterDown",
+    ENDLESS_DUNGEON_COUNTER_UP = "UI_U40_EA_CounterUp",
+    ENDLESS_DUNGEON_RUN_COMPLETE = "UI_U40_EA_RunComplete",
+    ENDLESS_DUNGEON_SCORE_CALCULATE = "UI_U40_EA_Score_Calculate",
+    ENDLESS_DUNGEON_SCORE_FINAL_FLIP = "UI_U40_EA_Score_FinalFlip",
+
+    -- Group Finder
+    GROUP_FINDER_REFRESH_SEARCH = "GroupFinder_RefreshSearch",
+    GROUP_FINDER_APPLICATION_NOTIFICATION = "GroupFinder_ApplicationNotification",
+    GROUP_FINDER_GROUP_LISTING_CREATE_EDIT = "GroupFinder_GroupListing_CreateEdit",
+
+    -- Instances
+    INSTANCE_SHUTDOWN = "Instance_Shutdown",
 }

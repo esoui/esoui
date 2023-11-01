@@ -228,3 +228,45 @@ ESO_Dialogs["GAMERCARD_UNAVAILABLE"] =
         }
     }
 }
+
+ESO_Dialogs["RADIO_BUTTON_GROUP_CHANGE_SELECTION_CONFIRMATION"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = function(dialog)
+            if dialog.data then
+                return dialog.data.title or ""
+            else
+                return ""
+            end
+        end,
+    },
+    mainText = 
+    {
+        text = function(dialog)
+            if dialog.data then
+                return dialog.data.mainText or ""
+            else
+                return ""
+            end
+        end,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback =  function(dialog)
+                if dialog.data and dialog.data.onConfirmCallback then
+                    dialog.data.onConfirmCallback()
+                end
+            end,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        }
+    }
+}

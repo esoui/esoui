@@ -26,11 +26,11 @@ function ZO_ComboBox_Base:OnItemAdded()
     -- this can optionally be overriden by a subclass and is called when a new entry is added to the combo box
 end
 
-function ZO_ComboBox_Base:Initialize(container)
-    self.m_container = container
-    self.m_selectedItemText = GetControl(container, "SelectedItemText")
-	self.m_selectedItemData = nil
-    self.m_openDropdown = GetControl(container, "OpenDropdown")
+function ZO_ComboBox_Base:Initialize(control)
+    self.m_container = control
+    self.m_selectedItemText = control:GetNamedChild("SelectedItemText")
+    self.m_selectedItemData = nil
+    self.m_openDropdown = control:GetNamedChild("OpenDropdown")
     self.m_selectedColor = { GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED) }
     self.m_disabledColor = ZO_ERROR_COLOR
     self.m_sortOrder = ZO_SORT_ORDER_UP
@@ -41,8 +41,9 @@ function ZO_ComboBox_Base:Initialize(container)
     self.m_font = nil
     self.m_preshowDropdownFn = nil
     self.m_spacing = 0
-    self.m_name = container:GetName()
-    container.m_comboBox = self
+    self.m_name = control:GetName()
+    self.horizontalAlignment = TEXT_ALIGN_LEFT
+    control.m_comboBox = self
 end
 
 function ZO_ComboBox_Base:GetContainer()
@@ -71,10 +72,14 @@ function ZO_ComboBox_Base:SetSpacing(spacing)
     self.m_spacing = spacing
 end
 
+function ZO_ComboBox_Base:GetSpacing()
+    return self.m_spacing
+end
+
 function ZO_ComboBox_Base:SetSelectedColor(color, colorG, colorB, colorA)
-	if type(color) == "table" then
+    if type(color) == "table" then
         color, colorG, colorB, colorA = color:UnpackRGBA()
-	end
+    end
 
     self.m_selectedColor = { color, colorG, colorB, colorA }
     self.m_selectedItemText:SetColor(color, colorG, colorB, colorA)
@@ -137,14 +142,14 @@ end
 function ZO_ComboBox_Base:AddItem(itemEntry, updateOptions)
     table.insert(self.m_sortedItems, itemEntry)
     
-    if(updateOptions ~= ZO_COMBOBOX_SUPPRESS_UPDATE) then
+    if updateOptions ~= ZO_COMBOBOX_SUPPRESS_UPDATE then
         self:UpdateItems()
     end
 
     self:OnItemAdded()
 end
 
-function ZO_ComboBox_Base:ShowDropdown()    
+function ZO_ComboBox_Base:ShowDropdown()
     -- Let the caller know that this is about to be shown...
     if self.m_preshowDropdownFn then
         self.m_preshowDropdownFn(self)
@@ -160,7 +165,7 @@ function ZO_ComboBox_Base:ClearItems()
     ZO_ComboBox_HideDropdown(self:GetContainer())
     ZO_ClearNumericallyIndexedTable(self.m_sortedItems)
     self:SetSelectedItemText("")
-	self.m_selectedItemData = nil
+    self.m_selectedItemData = nil
     self:OnClearItems()
 end
 
@@ -279,20 +284,14 @@ end
 
 function ZO_ComboBox_Base:EnumerateEntries(functor)
     for index, data in ipairs(self.m_sortedItems) do
-        if(functor(index, data)) then
+        if functor(index, data) then
             break -- once the enumeration is complete, returning true means stop enumerating
         end
     end
 end
 
-local OFFSET_Y = 0
-
-local function GlobalMenuClearCallback(comboBox)
-    comboBox:HideDropdown()
-end
-
 function ZO_ComboBox_Base:GetSelectedTextColor(enabledState)
-    if(enabledState) then
+    if enabledState then
         return unpack(self.m_selectedColor)
     else
         return GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED)
@@ -304,7 +303,7 @@ function ZO_ComboBox_Base:SetEnabled(enabled)
     self.m_openDropdown:SetEnabled(enabled)
     self.m_selectedItemText:SetColor(self:GetSelectedTextColor(enabled))
 
-    if(self:IsDropdownVisible()) then
+    if self:IsDropdownVisible() then
         self:HideDropdown()
     end
 end
@@ -339,17 +338,13 @@ end
     Utilities to obtain the combo box from the container.
 --]]
 
-local function GetComboBoxFromDropdownButton(button)
-    return button:GetParent().m_comboBox
-end
-
 function ZO_ComboBox_ObjectFromContainer(container)
     return container.m_comboBox
 end
 
 function ZO_ComboBox_OpenDropdown(container)
     local comboBox = ZO_ComboBox_ObjectFromContainer(container)
-    
+
     if not comboBox:IsDropdownVisible() then
         comboBox:ShowDropdown()
     end
@@ -357,8 +352,8 @@ end
 
 function ZO_ComboBox_HideDropdown(container)
     local comboBox = ZO_ComboBox_ObjectFromContainer(container)
-    
-    if(comboBox and comboBox:IsDropdownVisible()) then
+
+    if comboBox and comboBox:IsDropdownVisible() then
         comboBox:HideDropdown()
     end
 end

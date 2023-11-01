@@ -5,6 +5,16 @@
             <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
         </Control>
+
+        <Label name="ZO_ConsolidatedSmithingSetNavigationEntry" inherits="ZO_TreeStatusLabelSubCategory" virtual="true">
+            <OnMouseEnter>
+                ZO_ConsolidatedSmithingSetNavigationEntry_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_ConsolidatedSmithingSetNavigationEntry_OnMouseExit(self)
+            </OnMouseExit>
+        </Label>
         
         <TopLevelControl name="ZO_SmithingTopLevel" hidden="true">
             <AnchorFill />
@@ -18,9 +28,58 @@
                     <Anchor point="TOPLEFT" offsetX="12" offsetY="5" />
                 </Control>
 
-                <Control name="$(parent)ModeMenu" inherits="ZO_CraftingModeMenu">
+                <Control name="$(parent)SetContainer" inherits="ZO_RightPanelFootPrint" hidden="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" offsetX="9" offsetY="33" />
+                            <Dimensions x="240" />
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_COLLECTIONS_BOOK_SEARCH_EDIT_DEFAULT">
+                                    <OnTextChanged>
+                                        ZO_ConsolidatedSmithingSets_Keyboard_OnSearchTextChanged(self)
+                                    </OnTextChanged>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+
+                        <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_SEARCH_FILTER_BY">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT" />
+                        </Label>
+
+                        <Button name="$(parent)HideLocked" inherits="ZO_CheckButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)SearchLabel" relativePoint="RIGHT" offsetX="70" />
+                        </Button>
+                        
+                        <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                            <Dimensions x="353" />
+                            <Anchor point="TOPLEFT" offsetX="-28" offsetY="77" />
+                            <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-73" />
+                        </Control>
+
+                        <Button name="$(parent)AddSetButton" inherits="ZO_DefaultButton" text="SI_SMITHING_CONSOLIDATED_STATION_ADD_ITEM_SET">
+                            <Dimensions x="220" />
+                            <Anchor point="BOTTOMLEFT" offsetX="20" />
+                        </Button>
+
+                        <Control name="$(parent)UnlockedSetsRow" resizeToFitDescendents="true">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)AddSetButton" relativePoint="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)AddSetButton" relativePoint="TOPRIGHT" offsetY="-5" />
+                            <Controls>
+                                <Label name="$(parent)Value" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT">
+                                    <Anchor point="RIGHT" />
+                                </Label>
+
+                                <Label name="$(parent)Header" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_SMITHING_CONSOLIDATED_STATION_ITEM_SETS_UNLOCKED_HEADER">
+                                    <Anchor point="LEFT" />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ModeMenu" inherits="ZO_DynamicWidthCraftingModeMenu">
                     <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
-                    <Dimensions x="550"/>
                 </Control>
 
                 <Control name="$(parent)RefinementPanel" inherits="ZO_SmithingRefinementPanel ZO_SmithingPanelAnchors" hidden="true" />
@@ -28,6 +87,11 @@
                 <Control name="$(parent)ImprovementPanel" inherits="ZO_SmithingImprovementPanel ZO_SmithingPanelAnchors" hidden="true" />
                 <Control name="$(parent)DeconstructionPanel" inherits="ZO_SmithingExtractionPanel ZO_SmithingPanelAnchors" hidden="true" />
                 <Control name="$(parent)ResearchPanel" inherits="ZO_SmithingResearchPanel ZO_SmithingPanelAnchors" hidden="true" />
+
+                <!-- This control is added programmatically to the CONSOLIDATED_SMITHING_ADD_SETS dialog as a custom control -->
+                <Button name="$(parent)AddSetsDialogSelectAllButton" inherits="ZO_DefaultButton" text="SI_SMITHING_CONSOLIDATED_STATION_ADD_SET_DIALOG_SELECT_ALL" hidden="true" >
+                    <Dimensions x="220" />
+                </Button>
             </Controls>
         </TopLevelControl>
     </Controls>

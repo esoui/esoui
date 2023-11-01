@@ -616,6 +616,12 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_27)",
         widthPercent = 100,
     },
+    abilityStack =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+        fontSize = "$(GP_27)",
+        widthPercent = 100,
+    },
     abilityUpgrade =
     {
         fontColorField = GAMEPAD_TOOLTIP_COLOR_ABILITY_UPGRADE,
@@ -1341,6 +1347,11 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_42)",
         uppercase = false,
         fontColorField = GENERAL_COLOR_WHITE,
+    },
+    groupFinderStatusIndicator =
+    {
+        width = 64,
+        height = 64,
     },
     -- Gamepad Champion Screen
     championTitleSection =

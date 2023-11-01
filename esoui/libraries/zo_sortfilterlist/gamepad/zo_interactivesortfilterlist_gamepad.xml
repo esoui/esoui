@@ -67,7 +67,7 @@
                     </Controls>
                 </Control>
 
-                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/LFG/Gamepad/LFG_menuIcon_groupFinder.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_search_64.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
                     <Dimensions x="48" y="48"/>
                     <TextureCoords left="1" right="0" top="0" bottom="1"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Search" relativePoint="RIGHT" offsetX="10"/>

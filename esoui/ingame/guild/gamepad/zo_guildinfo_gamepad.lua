@@ -7,42 +7,33 @@ local GUILD_RESOURCE_ICONS =
     [RESOURCETYPE_FOOD] = "EsoUI/Art/Guild/Gamepad/gp_ownership_icon_farm.dds",
 }
 
-ZO_GamepadGuildInfo = ZO_InitializingObject:Subclass()
+ZO_GamepadGuildInfo = ZO_DeferredInitializingObject:Subclass()
 
 function ZO_GamepadGuildInfo:Initialize(control)
-    if not self.initialized then
-        self.initialized = true
+    self.control = control
 
-        self.control = control
-
-        GUILD_INFO_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(self.control, true)
-
-        GUILD_INFO_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-            if newState == SCENE_SHOWING then
-                self:PerformDeferredInitialization(control)
-
-                self:RefreshScreen()
-
-                local function OnProfanityFilterChange()
-                    self:RefreshScreen()
-                end
-
-                CALLBACK_MANAGER:RegisterCallback("ProfanityFilter_Off", OnProfanityFilterChange)
-                CALLBACK_MANAGER:RegisterCallback("ProfanityFilter_On", OnProfanityFilterChange)
-            elseif newState == SCENE_HIDING then
-                CALLBACK_MANAGER:UnregisterCallback("ProfanityFilter_Off")
-                CALLBACK_MANAGER:UnregisterCallback("ProfanityFilter_On")
-            end
-        end)
-    end
+    GUILD_INFO_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(self.control, true)
+    ZO_DeferredInitializingObject.Initialize(self, GUILD_INFO_GAMEPAD_FRAGMENT)
 end
 
-function ZO_GamepadGuildInfo:PerformDeferredInitialization()
-    if self.deferredInitialized then return end
-    self.deferredInitialized = true
+function ZO_GamepadGuildInfo:OnShowing()
+    self:RefreshScreen()
 
+    local function OnProfanityFilterChange()
+        self:RefreshScreen()
+    end
+
+    CALLBACK_MANAGER:RegisterCallback("ProfanityFilter_Off", OnProfanityFilterChange)
+    CALLBACK_MANAGER:RegisterCallback("ProfanityFilter_On", OnProfanityFilterChange)
+end
+
+function ZO_GamepadGuildInfo:OnHiding()
+    CALLBACK_MANAGER:UnregisterCallback("ProfanityFilter_Off")
+    CALLBACK_MANAGER:UnregisterCallback("ProfanityFilter_On")
+end
+
+function ZO_GamepadGuildInfo:OnDeferredInitialize()
     local container = self.control:GetNamedChild("Container")
-
     local headerContainer = container:GetNamedChild("HeaderContainer")
     self.header = headerContainer:GetNamedChild("Header")
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ZO_GAMEPAD_HEADER_LAYOUTS.CONTENT_HEADER_DATA_PAIRS_LINKED)
@@ -57,7 +48,7 @@ function ZO_GamepadGuildInfo:PerformDeferredInitialization()
     self.keepIcon = keep:GetNamedChild("Icon")
     self.keepName = keep:GetNamedChild("Name")
     self.campaignName = keep:GetNamedChild("NameExtra")
-    
+
     local trader = scrollChild:GetNamedChild("Trader")
     self.traderTitle = trader:GetNamedChild("Title")
     self.traderIcon = trader:GetNamedChild("Icon")
@@ -88,6 +79,10 @@ function ZO_GamepadGuildInfo:PerformDeferredInitialization()
 end
 
 function ZO_GamepadGuildInfo:RefreshScreen()
+    if not self.initialized then
+        return
+    end
+
     self.scrollControl:ResetToTop()
     self:RefreshKeepOwnership()
     self:RefreshTraderOwnership()

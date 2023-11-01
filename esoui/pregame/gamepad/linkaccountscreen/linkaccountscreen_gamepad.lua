@@ -150,11 +150,11 @@ function ZO_LinkAccount_Gamepad:SwitchToMainList()
     self.optionsControl:SetHidden(false)
 end
 
-function ZO_LinkAccount_Gamepad:AddTextEdit(text, textType, contents, selectedCallback, editedCallback)
+function ZO_LinkAccount_Gamepad:AddTextEdit(text, isPassword, contents, selectedCallback, editedCallback)
     local option = ZO_GamepadEntryData:New() -- No text to populate - it uses a header instead.
     option:SetHeader(text)
     option.contents = contents
-    option.textType = textType
+    option.isPassword = isPassword
     option.selectedCallback = selectedCallback
     option.contentsChangedCallback = editedCallback
     option:SetFontScaleOnSelection(true)
@@ -192,8 +192,10 @@ function ZO_LinkAccount_Gamepad:SetupOptionsList()
         self:ActivateEditbox(control.edit)
     end
 
-    self:AddTextEdit(GetString(SI_ACCOUNT_NAME), nil, function(data) return self.username end, ActivateEditBox, function(newText) self.username = newText end)
-    self:AddTextEdit(GetString(SI_PASSWORD), TEXT_TYPE_PASSWORD, function(data) return self.password end, ActivateEditBox, function(newText) self.password = newText end)
+    local IS_PASSWORD = true
+    local NOT_PASSWORD = false
+    self:AddTextEdit(GetString(SI_ACCOUNT_NAME), NOT_PASSWORD, function(data) return self.username end, ActivateEditBox, function(newText) self.username = newText end)
+    self:AddTextEdit(GetString(SI_PASSWORD), IS_PASSWORD, function(data) return self.password end, ActivateEditBox, function(newText) self.password = newText end)
     self:AddButton(GetString(SI_LOGIN), function(control, data)
             PlaySound(SOUNDS.POSITIVE_CLICK)
             self:LinkAccountSelected()

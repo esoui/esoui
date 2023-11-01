@@ -695,7 +695,7 @@ do
 
         control:RegisterForEvent(EVENT_TRIBUTE_PATRON_STATE_FLAGS_CHANGED, function(_, patronDraftId, stateFlags)
             local patronStallObject = self.patronStalls[patronDraftId]
-            local isUnderCursor = ZO_MaskHasFlag(stateFlags, TRIBUTE_PATRON_STATE_FLAGS_HIGHLIGHTED)
+            local isUnderCursor = ZO_FlagHelpers.MaskHasFlag(stateFlags, TRIBUTE_PATRON_STATE_FLAGS_HIGHLIGHTED)
             self.gamepadCursor:SetObjectUnderCursor(patronStallObject, ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.PATRON_STALL, isUnderCursor)
         end)
 

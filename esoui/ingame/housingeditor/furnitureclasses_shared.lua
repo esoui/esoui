@@ -276,8 +276,8 @@ end
 
 function ZO_PlaceableFurnitureItem:GetPassesFurnitureFilters(boundFilters, locationFilters, limitFilters)
     if boundFilters > HOUSING_FURNITURE_BOUND_FILTER_ALL then
-        local matchBound = ZO_MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_BOUND)
-        local matchUnbound = ZO_MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_UNBOUND)
+        local matchBound = ZO_FlagHelpers.MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_BOUND)
+        local matchUnbound = ZO_FlagHelpers.MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_UNBOUND)
         if not (matchBound and matchUnbound) then
             -- Verify that this item matches the specified bound state filter.
             if IsItemBound(self.bagId, self.slotIndex) then
@@ -295,8 +295,8 @@ function ZO_PlaceableFurnitureItem:GetPassesFurnitureFilters(boundFilters, locat
     if locationFilters > HOUSING_FURNITURE_LOCATION_FILTER_ALL then
         -- Verify that this item is in one of the specified bag filters.
         local matchFound = false
-        for locationFlag in ZO_FlagIterator(HOUSING_FURNITURE_LOCATION_FILTER_ALL * 2, HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_END) do
-            if ZO_MaskHasFlag(locationFilters, locationFlag) then
+        for locationFlag in ZO_FlagHelpers.FlagIterator(HOUSING_FURNITURE_LOCATION_FILTER_ALL * 2, HOUSING_FURNITURE_LOCATION_FILTER_ITERATION_END) do
+            if ZO_FlagHelpers.MaskHasFlag(locationFilters, locationFlag) then
                 local bagIds = ZO_HOUSING_FURNITURE_LOCATION_FILTER_BAGS[locationFlag]
                 if bagIds and bagIds[self.bagId] then
                     matchFound = true
@@ -313,7 +313,7 @@ function ZO_PlaceableFurnitureItem:GetPassesFurnitureFilters(boundFilters, locat
     if limitFilters > ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL then
         -- Verify that this item's limit type is one of the specified limit type filters.
         local limitTypeFilterValue = ZO_HOUSING_FURNITURE_LIMIT_FILTERS[self.limitType + 1]
-        if not ZO_MaskHasFlag(limitFilters, limitTypeFilterValue) then
+        if not ZO_FlagHelpers.MaskHasFlag(limitFilters, limitTypeFilterValue) then
             return false
         end
     end
@@ -385,14 +385,14 @@ function ZO_PlaceableFurnitureCollectible:GetPassesFurnitureFilters(boundFilters
         return false
     end
 
-    if locationFilters > HOUSING_FURNITURE_LOCATION_FILTER_ALL and not ZO_MaskHasFlag(locationFilters, HOUSING_FURNITURE_LOCATION_FILTER_COLLECTIBLES) then
+    if locationFilters > HOUSING_FURNITURE_LOCATION_FILTER_ALL and not ZO_FlagHelpers.MaskHasFlag(locationFilters, HOUSING_FURNITURE_LOCATION_FILTER_COLLECTIBLES) then
         -- Collectibles only match either the location filter "Collectibles" or "All".
         return false
     end
 
     if limitFilters > ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL then
         local limitTypeFilterValue = ZO_HOUSING_FURNITURE_LIMIT_FILTERS[self.limitType + 1]
-        if not ZO_MaskHasFlag(limitFilters, limitTypeFilterValue) then
+        if not ZO_FlagHelpers.MaskHasFlag(limitFilters, limitTypeFilterValue) then
             return false
         end
     end
@@ -536,8 +536,8 @@ end
 
 function ZO_RetrievableFurniture:GetPassesFurnitureFilters(boundFilters, locationFilters, limitFilters)
     if boundFilters > HOUSING_FURNITURE_BOUND_FILTER_ALL then
-        local matchBound = ZO_MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_BOUND)
-        local matchUnbound = ZO_MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_UNBOUND)
+        local matchBound = ZO_FlagHelpers.MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_BOUND)
+        local matchUnbound = ZO_FlagHelpers.MaskHasFlag(boundFilters, HOUSING_FURNITURE_BOUND_FILTER_UNBOUND)
         if matchBound and matchUnbound then
             -- All items meet this criteria.
             return true
@@ -553,7 +553,7 @@ function ZO_RetrievableFurniture:GetPassesFurnitureFilters(boundFilters, locatio
 
     if limitFilters > ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL then
         local limitTypeFilterValue = ZO_HOUSING_FURNITURE_LIMIT_FILTERS[self.limitType + 1]
-        if not ZO_MaskHasFlag(limitFilters, limitTypeFilterValue) then
+        if not ZO_FlagHelpers.MaskHasFlag(limitFilters, limitTypeFilterValue) then
             return false
         end
     end

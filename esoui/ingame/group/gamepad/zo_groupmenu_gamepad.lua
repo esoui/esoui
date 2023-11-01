@@ -79,6 +79,13 @@ function ZO_GroupMenu_Gamepad:InitializeKeybindDescriptors()
 
                 return true
             end,
+            enabled = function()
+                local data = self:GetMainList():GetTargetData()
+                if type(data.enabled) == "function" then
+                    return data.enabled()
+                end
+                return data.enabled
+            end,
             callback = function()
                 local data = self:GetMainList():GetTargetData()
                 local type = data.type
@@ -108,6 +115,18 @@ function ZO_GroupMenu_Gamepad:InitializeKeybindDescriptors()
                 elseif type == MENU_ENTRY_TYPE_LEAVE_INSTANCE then
                     ZO_Dialogs_ShowGamepadDialog("INSTANCE_LEAVE_DIALOG")
                 end
+            end,
+        },
+        --My Listing
+        {
+            name = GetString(SI_GROUP_FINDER_MY_GROUP_LISTING),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            visible = function()
+                return HasGroupListingForUserType(GROUP_FINDER_GROUP_LISTING_USER_TYPE_CREATED_GROUP_LISTING)
+            end,
+            callback = function()
+                GROUP_FINDER_GAMEPAD:SetMode(ZO_GROUP_FINDER_MODES.MANAGE)
+                ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(GROUP_FINDER_GAMEPAD:GetCategoryData())
             end,
         },
     }
@@ -190,6 +209,20 @@ function ZO_GroupMenu_Gamepad:InitializeEvents()
         end
     end
 
+    local function OnCombatStateChanged()
+        if not self.control:IsControlHidden() then
+            self:UpdateMenuList()
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end
+    
+    --If we removed our created group listing while in this list, we need to refresh the keybinds
+    local function OnGroupListingRemoved(result)
+        if not self.control:IsControlHidden() then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end
+
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, function(eventCode, ...) OnGroupMemberLeft(...) end)
     self.control:RegisterForEvent(EVENT_GROUP_UPDATE, OnGroupUpdate)
@@ -201,6 +234,8 @@ function ZO_GroupMenu_Gamepad:InitializeEvents()
     self.control:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, function(eventCode, ...) OnChampionPointsChanged(...) end)
 
     self.control:RegisterForEvent(EVENT_ZONE_UPDATE, function(eventCode, ...) OnZoneUpdate(...) end)
+    self.control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, OnCombatStateChanged)
+    self.control:RegisterForEvent(EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_RESULT, function(_, ...) OnGroupListingRemoved(...) end)
 end
 
 
@@ -320,6 +355,10 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
         local entry = CreateListEntry(textEnum, type, normalIcon)
         entry.normalIcon = normalIcon
         entry.veteranIcon = veteranIcon
+        entry.enabled = function()
+            local canChangeDifficulty, reason = CanPlayerChangeGroupDifficulty()
+            return canChangeDifficulty, GetString("SI_GROUPDIFFICULTYCHANGEREASON", reason)
+        end
         entry.narrationText = ZO_GetDefaultParametricListDropdownNarrationText
         return entry
     end
@@ -358,14 +397,14 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
         dropdown:SetDeactivatedCallback(OnDeactivatedDungeonDifficulty)
 
         dropdown:ClearItems()
-        local normalEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_GAMEPAD_GROUP_DUNGEON_MODE_NORMAL), OnSelectedDungeonDifficulty)
+        local normalEntry = dropdown:CreateItemEntry(GetString(SI_GAMEPAD_GROUP_DUNGEON_MODE_NORMAL), OnSelectedDungeonDifficulty)
         normalEntry.isVeteran = false
         dropdown:AddItem(normalEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
-        
-        local veteranEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_GAMEPAD_GROUP_DUNGEON_MODE_VETERAN), OnSelectedDungeonDifficulty)
+
+        local veteranEntry = dropdown:CreateItemEntry(GetString(SI_GAMEPAD_GROUP_DUNGEON_MODE_VETERAN), OnSelectedDungeonDifficulty)
         veteranEntry.isVeteran = true
         dropdown:AddItem(veteranEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
-        
+
         dropdown:UpdateItems()
 
         local selectedString = isVeteran and SI_GAMEPAD_GROUP_DUNGEON_MODE_VETERAN or SI_GAMEPAD_GROUP_DUNGEON_MODE_NORMAL

@@ -82,7 +82,12 @@ do
             local valueText = editControl:GetText()
             --Default to using the current value text of the edit box, and then fall back to the default text if necessary
             if valueText ~= "" then
-                narration:AddNarrationText(valueText)
+                --If this is a password field, narrate that instead of the actual value
+                if editControl:IsPassword() then
+                    narration:AddNarrationText(GetString(SI_SCREEN_NARRATION_EDIT_BOX_PASSWORD))
+                else
+                    narration:AddNarrationText(valueText)
+                end
             else
                 narration:AddNarrationText(editControl:GetDefaultText())
             end

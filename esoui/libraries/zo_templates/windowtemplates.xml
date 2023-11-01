@@ -103,6 +103,14 @@
             </Controls>
         </Backdrop>
 
+        <Backdrop name="ZO_FrameBackdrop" excludeFromResizeToFitExtents="true" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="-2" offsetY="-2" />
+            <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="2" />
+            <Edge file="EsoUI/Art/Miscellaneous/borderedInset_edgeFile.dds" edgeFileWidth="128" edgeFileHeight="16" />
+            <Center file="EsoUI/Art/Miscellaneous/borderedInset_center.dds" />
+            <Insets left="4" top="4" right="-4" bottom="-4" />
+        </Backdrop>
+
         <Backdrop name="ZO_InsetBackdrop" virtual="true">
             <Edge file="EsoUI/Art/Miscellaneous/inset_edgeFile.dds" edgeFileWidth="128" edgeFileHeight="16" />
             <Center file="EsoUI/Art/Miscellaneous/inset_center.dds" />

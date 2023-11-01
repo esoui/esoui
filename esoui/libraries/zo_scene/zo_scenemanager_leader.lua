@@ -228,6 +228,8 @@ function ZO_SceneManager_Leader:Show(sceneName, push, nextSceneClearsSceneStack,
     if numScenesNextScenePops == nil then
         numScenesNextScenePops = 0
     end
+    self.sceneQueuedForLoadingScreenDrop = nil
+
     --if a scene exists
     if currentScene then
         if self:WillNextSceneConfirmHide(bypassHideSceneConfirmationReason) then

@@ -59,7 +59,7 @@ function ZO_SkillsAdvisor_Keyboard:Initialize(control)
     do
     -- Skill Build Selection Tutorial Setup
         local tutorialAnchor = ZO_Anchor:New(LEFT, self.tabs, RIGHT, 40, 0)
-        TUTORIAL_SYSTEM:RegisterTriggerLayoutInfo(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_SKILL_BUILD_SELECTION, self.control, ZO_SKILLS_ADVISOR_WINDOW, tutorialAnchor)
+        TUTORIAL_SYSTEM:RegisterTriggerLayoutInfo(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_SKILL_BUILD_SELECTION_POINTER_BOX, self.control, ZO_SKILLS_ADVISOR_WINDOW, tutorialAnchor)
     end
 
     ZO_SKILLS_ADVISOR_SINGLETON:RegisterCallback("OnSelectedSkillBuildUpdated", OnDataUpdated)
@@ -125,7 +125,7 @@ end
 function ZO_SkillsAdvisor_Keyboard:OnShown()
     local level = GetUnitLevel("player")
     if level >= GetSkillBuildTutorialLevel() then
-        TriggerTutorial(TUTORIAL_TRIGGER_SKILL_BUILD_SELECTION)
+        TriggerTutorial(TUTORIAL_TRIGGER_SKILL_BUILD_SELECTION_POINTER_BOX)
     end
 end
 
@@ -135,7 +135,7 @@ function ZO_SkillsAdvisor_Keyboard:OnHidden()
 end
 
 function ZO_SkillsAdvisor_Keyboard:HandleTabChange()
-    TUTORIAL_SYSTEM:RemoveTutorialByTrigger(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_SKILL_BUILD_SELECTION)
+    TUTORIAL_SYSTEM:RemoveTutorialByTrigger(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_SKILL_BUILD_SELECTION_POINTER_BOX)
     SCENE_MANAGER:RemoveFragment(self.currentTabFragment)
     self.currentTabFragment = nil
     if ZO_MenuBar_GetSelectedDescriptor(self.tabs) == self.buildsData.descriptor then

@@ -105,12 +105,7 @@ function ZO_GamepadSkills:Initialize(control)
             end
 
             TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_SKILLS_OPENED)
-            
-            local level = GetUnitLevel("player")
-            if level >= GetSkillBuildTutorialLevel() then
-                TriggerTutorial(TUTORIAL_TRIGGER_SKILL_BUILD_SELECTION)
-            end
-            
+
             if self.showAttributeDialog then
                 --Defer dialog call in case we're entering the scene from the base scene. This is to
                 --ensure the dialog's keybind layer is added after the other layers, and not before.

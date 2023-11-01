@@ -77,14 +77,14 @@
                 <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
                     <Dimensions x="ZO_GROUP_MENU_KEYBOARD_TREE_WIDTH" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)RolesCategoriesDivider" relativePoint="BOTTOMLEFT" offsetX="-28" offsetY="10" />
-                    <Anchor point="BOTTOMLEFT" offsetX="-28" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-90"/>
                 </Control>
             </Controls>
         </TopLevelControl>
 
         <Control name="ZO_GroupMenuKeyboard_ContentAnchors" virtual="true">
             <Anchor point="TOPRIGHT" relativeTo="ZO_GroupMenu_KeyboardHeader" relativePoint="BOTTOMRIGHT" offsetX="-10" />
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_GroupMenu_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="10" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_GroupMenu_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="10" offsetY="90" />
         </Control>
     </Controls>
 </GuiXml>

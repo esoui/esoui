@@ -59,7 +59,8 @@ function ZO_SmithingCreation:Initialize(control, owner)
         self.resultTooltip:GetNamedChild("Icon"):SetHandler("OnMouseUp", OnTooltipMouseUp)
     end
 
-    self.multiCraftSpinner = ZO_MultiCraftSpinner:New(control:GetNamedChild("MultiCraftContainerSpinner"))
+    self.multiCraftContainer = control:GetNamedChild("MultiCraftContainer")
+    self.multiCraftSpinner = ZO_MultiCraftSpinner:New(self.multiCraftContainer:GetNamedChild("Spinner"))
     ZO_CraftingUtils_ConnectSpinnerToCraftingProcess(self.multiCraftSpinner)
 end
 
@@ -76,6 +77,20 @@ end
 function ZO_SmithingCreation:ChangeTypeFilter(filterData)
     ZO_SharedSmithingCreation.ChangeTypeFilter(self, filterData)
     self:ResetMultiCraftNumIterations()
+end
+
+function ZO_SmithingCreation:SetCraftingType(craftingType, oldCraftingType, isCraftingTypeDifferent)
+    ZO_SharedSmithingCreation.SetCraftingType(self, craftingType, oldCraftingType, isCraftingTypeDifferent)
+    self.resultTooltip:ClearAnchors()
+    self.multiCraftContainer:ClearAnchors()
+    if ZO_Smithing_IsConsolidatedStationCraftingMode() then
+        --Shift the tooltip and multi-craft container to the left to accomodate the wider background at consolidated stations
+        self.resultTooltip:SetAnchor(BOTTOM, GuiRoot, BOTTOM, -300, -335)
+        self.multiCraftContainer:SetAnchor(BOTTOM, GuiRoot, BOTTOM, -300, -100)
+    else
+        self.resultTooltip:SetAnchor(BOTTOM, GuiRoot, BOTTOM, 0, -335)
+        self.multiCraftContainer:SetAnchor(BOTTOM, GuiRoot, BOTTOM, 0, -100)
+    end
 end
 
 function ZO_SmithingCreation:InitializeFilterTypeBar()

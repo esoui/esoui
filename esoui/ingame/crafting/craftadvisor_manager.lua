@@ -11,11 +11,12 @@ function ZO_CraftAdvisorManager:Initialize()
     self.craftingInteractionType = CRAFTING_TYPE_INVALID
     self.questMasterList = {}
     self.selectedMasterListIndex = DEFAULT_SELECTED_QUEST_INDEX
-    EVENT_MANAGER:RegisterForEvent("ZO_CraftAdvisorManager", EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType, sameStation)
+    EVENT_MANAGER:RegisterForEvent("ZO_CraftAdvisorManager", EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType, sameStation, craftingMode)
         --If we are at a different type of crafting station, we need to update the list
         --Otherwise, if anything has changed, we will have already attempted to refresh via the quest events
         --We also need to refresh if the player goes to a new smithing station, since they might be changing to a new set station
-        if craftingType ~= self.craftingInteractionType or (not sameStation and IsSmithingCraftingType(craftingType)) then
+        --We always need to refresh the list if we are interacting with a consolidated station, as the available sets at the station could have changed
+        if craftingMode == CRAFTING_INTERACTION_MODE_CONSOLIDATED_STATION or craftingType ~= self.craftingInteractionType or (not sameStation and IsSmithingCraftingType(craftingType)) then
             self.craftingInteractionType = craftingType
             self:RefreshQuestMasterList()
         end
@@ -59,6 +60,15 @@ function ZO_CraftAdvisorManager:Initialize()
             self:FireCallbacks("SelectedQuestConditionsUpdated")
         end
     end)
+
+    --We need to rebuild when the active set changes since it will result in different patterns being available
+    EVENT_MANAGER:RegisterForEvent("ZO_CraftAdvisorManager", EVENT_CONSOLIDATED_STATION_ACTIVE_SET_UPDATED, function()
+        self:UpdateQuestConditionInfo()
+        self:FireCallbacks("SelectedQuestConditionsUpdated")
+    end)
+
+    --We need to rebuild the whole list when the unlocked consolidated sets change, as it could impact what quests are valid at this station
+    EVENT_MANAGER:RegisterForEvent("ZO_CraftAdvisorManager", EVENT_CONSOLIDATED_STATION_SETS_UPDATED, function() self:RefreshQuestMasterList() end)
 
     QUEST_JOURNAL_MANAGER:RegisterCallback("QuestListUpdated", function() self:RefreshQuestMasterList() end)
 end
@@ -223,13 +233,16 @@ function ZO_CraftAdvisorManager:UpdateQuestConditionInfo()
 
                 --If this is a master writ, we need different information from normal ones
                 if conditionInfo.isMasterWrit then
-                    local patternIndex, materialIndex, desiredItemId = GetSmithingPatternInfoForItemSet(conditionInfo.itemTemplateId, conditionInfo.itemSetId, conditionInfo.materialItemId, conditionInfo.itemTraitType)
-                    if patternIndex and materialIndex and curCount < maxCount then
-                        craftingQuestIndices.patternIndices[patternIndex] = true
-                        craftingQuestIndices.materialIndex = materialIndex
-                        craftingQuestIndices.traitId = conditionInfo.itemTraitType
-                        craftingQuestIndices.styleId = conditionInfo.itemStyleId
-                        craftingQuestIndices.hasPatterns = true
+                    if curCount < maxCount then
+                        local patternIndex, materialIndex, desiredItemId = GetSmithingPatternInfoForItemSet(conditionInfo.itemTemplateId, conditionInfo.itemSetId, conditionInfo.materialItemId, conditionInfo.itemTraitType)
+                        if patternIndex and materialIndex then
+                            craftingQuestIndices.patternIndices[patternIndex] = true
+                            craftingQuestIndices.materialIndex = materialIndex
+                            craftingQuestIndices.traitId = conditionInfo.itemTraitType
+                            craftingQuestIndices.styleId = conditionInfo.itemStyleId
+                            craftingQuestIndices.hasPatterns = true
+                        end
+
                         if desiredItemId and conditionInfo.itemFunctionalQuality and conditionInfo.materialItemId and conditionInfo.itemTraitType and conditionInfo.itemStyleId then
                             craftingQuestIndices.improvementInfo =
                             {
@@ -240,6 +253,10 @@ function ZO_CraftAdvisorManager:UpdateQuestConditionInfo()
                                 desiredStyle = conditionInfo.itemStyleId,
                             }
                             craftingQuestIndices.hasItemToImproveForWrit = HasItemToImproveForWrit(desiredItemId, conditionInfo.materialItemId, conditionInfo.itemTraitType, conditionInfo.itemStyleId, conditionInfo.itemFunctionalQuality)
+                        end
+
+                        if IsConsolidatedSmithingItemSetIdUnlocked(conditionInfo.itemSetId) then
+                            craftingQuestIndices.consolidatedItemSetId = conditionInfo.itemSetId
                         end
                     end
                 else

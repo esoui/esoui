@@ -39,14 +39,14 @@ function ZO_Spinner:Initialize(control, min, max, isGamepad, spinnerMode, accele
 
     self.normalColor = ZO_SELECTED_TEXT
     self.errorColor = ZO_ERROR_COLOR
-    
+
     if(isGamepad ~= true) then
         self:InitializeHandlers()
     end
 
     if spinnerMode == SPINNER_MODE_WRAP then
         self.constrainRangeFunc = WrapInt
-    else 
+    else
         self.constrainRangeFunc = ClampInt
     end
     self.spinnerMode = spinnerMode or SPINNER_MODE_CLAMP
@@ -64,14 +64,14 @@ local DIRECTION_INCREMENT = 1
 local DIRECTION_DECREMENT = -1
 
 function ZO_Spinner:InitializeHandlers()
-    local function Increment() 
-        self:OnButtonDown(DIRECTION_INCREMENT) 
+    local function Increment()
+        self:OnButtonDown(DIRECTION_INCREMENT)
     end
 
-    local function Decrement() 
+    local function Decrement()
         self:OnButtonDown(DIRECTION_DECREMENT)
     end
-    
+
     local function Release()
         self:OnButtonUp()
     end
@@ -254,7 +254,7 @@ function ZO_Spinner:UpdateButtons()
 
         self.increaseButton:SetEnabled(self:IsIncreaseEnabled())
         self.decreaseButton:SetEnabled(self:IsDecreaseEnabled())
-    end    
+    end
 
     if self.display then
         if self.display:GetType() == CT_EDITBOX then
@@ -309,7 +309,7 @@ function ZO_Spinner:SetValue(value, forceSet)
             end
             self:UpdateDisplay()
             self:UpdateButtons()
-            self:FireCallbacks("OnValueChanged", value)
+            self:FireCallbacks("OnValueChanged", value, self)
             return true
         end
     end

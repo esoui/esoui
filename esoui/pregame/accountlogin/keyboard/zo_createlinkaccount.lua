@@ -70,9 +70,6 @@ function CreateLinkAccount_Keyboard:Initialize(control)
     self.ageLabel:SetText(zo_strformat(SI_CREATEACCOUNT_AGE, MINIMUM_AGE))
     self.mode = SETUP_MODE_NONE
 
-    self.accountNameEdit:SetMaxInputChars(MAX_EMAIL_LENGTH)
-    self.passwordEdit:SetMaxInputChars(MAX_PASSWORD_LENGTH)
-
     self:HideCheckboxesIfNecessary()
 
     EVENT_MANAGER:RegisterForEvent("CreateLinkAccount", EVENT_SCREEN_RESIZED, function() self:ResizeControls() end)
@@ -128,7 +125,7 @@ function CreateLinkAccount_Keyboard:PopulateCountryDropdown()
         for i = 1, numCountries do
             local countryName, countryCode, megaServer = GetCountryEntry(i)
 
-            local entry = ZO_ComboBox:CreateItemEntry(countryName, function(...) self:OnCountrySelected(...) end)
+            local entry = self.countryComboBox:CreateItemEntry(countryName, function(...) self:OnCountrySelected(...) end)
             entry.index = i
             entry.countryName = countryName
             entry.countryCode = countryCode

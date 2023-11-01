@@ -240,7 +240,7 @@ function ZO_TributePatronStall:OnPatronDrafted(patronDefId)
 end
 
 function ZO_TributePatronStall:OnStateFlagsChanged(stateFlags)
-    local changedFlags = ZO_CompareMaskFlags(self.stateFlags or 0, stateFlags or 0)
+    local changedFlags = ZO_FlagHelpers.CompareMaskFlags(self.stateFlags or 0, stateFlags or 0)
     if not changedFlags then
         return
     end

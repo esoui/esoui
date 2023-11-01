@@ -23,13 +23,14 @@ local MENU_MAIN_ENTRIES = ZO_MENU_MAIN_ENTRIES
 
 local MENU_CROWN_STORE_ENTRIES =
 {
-    CROWN_STORE         = 1,
-    ENDEAVOR_SEAL_STORE = 2,
-    DAILY_LOGIN_REWARDS = 3,
-    CROWN_CRATES        = 4,
-    CHAPTERS            = 5,
-    GIFT_INVENTORY      = 6,
-    REDEEM_CODE         = 7,
+    CROWN_STORE                 = 1,
+    EXPIRING_MARKET_CURRENCY    = 2,
+    ENDEAVOR_SEAL_STORE         = 3,
+    DAILY_LOGIN_REWARDS         = 4,
+    CROWN_CRATES                = 5,
+    CHAPTERS                    = 6,
+    GIFT_INVENTORY              = 7,
+    REDEEM_CODE                 = 8,
 }
 
 ZO_MENU_CROWN_STORE_ENTRIES = MENU_CROWN_STORE_ENTRIES
@@ -95,6 +96,26 @@ local MENU_ENTRY_DATA =
                 sceneGroup = "gamepad_market_scenegroup",
                 name = GetString(SI_GAMEPAD_MAIN_MENU_CROWN_STORE_ENTRY),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_PlayerMenu_icon_store.dds",
+            },
+            [MENU_CROWN_STORE_ENTRIES.EXPIRING_MARKET_CURRENCY] =
+            {
+                name = GetString(SI_GAMEPAD_MAIN_MENU_EXPIRING_CROWNS),
+                icon = GetCurrencyGamepadIcon(CURT_CROWNS),
+                isVisibleCallback = HasExpiringMarketCurrency,
+                fragmentGroupCallback = function()
+                    return { ZO_EXPIRING_MARKET_CURRENCY_GAMEPAD:GetFragment(), GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT }
+                end,
+                shouldDisableFunction = function()
+                    return true
+                end,
+                narrationText = function(entryData, entryControl)
+                    local narrations = {}
+                    ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+                    ZO_AppendNarration(narrations, ZO_EXPIRING_MARKET_CURRENCY_GAMEPAD:GetNarrationText())
+                    return narrations
+                end,
+
             },
             [MENU_CROWN_STORE_ENTRIES.ENDEAVOR_SEAL_STORE] =
             {
@@ -430,6 +451,7 @@ local MENU_ENTRY_DATA =
         scene = ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME,
         name = GetString(SI_MAIN_MENU_ACTIVITY_FINDER),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_activityFinder.dds",
+        isNewCallback = function() return ZO_HasGroupFinderNewApplication() end,
     },
     [MENU_MAIN_ENTRIES.HELP] =
     {
@@ -491,6 +513,7 @@ local function CreateEntry(data)
     end
 
     entry.canLevel = data.canLevel
+    entry.narrationText = data.narrationText
     entry.subLabelsNarrationText = data.subLabelsNarrationText
 
     entry.data = data
@@ -1005,6 +1028,10 @@ function ZO_MainMenuManager_Gamepad:AttemptShowBaseScene()
     end
 end
 
+function ZO_MainMenuManager_Gamepad:ShowExpiringMarketCurrencyEntry()
+    self:SelectMenuEntryAndSubEntry(MENU_MAIN_ENTRIES.CROWN_STORE, MENU_CROWN_STORE_ENTRIES.EXPIRING_MARKET_CURRENCY)
+end
+
 function ZO_MainMenuManager_Gamepad:ShowDailyLoginRewardsEntry()
     self:SelectMenuEntryAndSubEntry(MENU_MAIN_ENTRIES.CROWN_STORE, MENU_CROWN_STORE_ENTRIES.DAILY_LOGIN_REWARDS)
 end
@@ -1023,6 +1050,10 @@ function ZO_MainMenuManager_Gamepad:ShowAntiquityInJournal(antiquityData)
     self:ShowAntiquityJournal()
 end
 
+function ZO_MainMenuManager_Gamepad:ShowGroupMenu()
+    self:SelectMenuEntryAndSubEntry(MENU_MAIN_ENTRIES.SOCIAL, MENU_SOCIAL_ENTRIES.GROUP, "gamepad_groupList")
+end
+
 function ZO_MainMenuManager_Gamepad:SelectMenuEntry(menuEntry)
     self.mainList:SetSelectedIndexWithoutAnimation(self.mainMenuEntryToListIndex[menuEntry])
 end
@@ -1031,7 +1062,13 @@ function ZO_MainMenuManager_Gamepad:SelectMenuEntryAndSubEntry(menuEntry, menuSu
     self:SelectMenuEntry(menuEntry)
     local entry = self.mainList:GetTargetData()
     self:RefreshSubList(entry)
-    self.subList:SetSelectedIndexWithoutAnimation(self.subMenuEntryToListIndex[menuSubEntry])
+
+    -- the given subeEntry may not be currently visible and not exist in subMenuEntryToListIndex
+    local subListIndex = self.subMenuEntryToListIndex[menuSubEntry]
+    if subListIndex then
+        self.subList:SetSelectedIndexWithoutAnimation(subListIndex)
+    end
+
     if sceneName then
         SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu", sceneName)
     else

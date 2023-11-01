@@ -455,16 +455,16 @@ do
                 local offsetX = 0
                 local offsetY = 0
                 local horizontalAlignment = TEXT_ALIGN_CENTER
-                if ZO_MaskHasFlag(anchorPosition, LEFT) then
+                if ZO_FlagHelpers.MaskHasFlag(anchorPosition, LEFT) then
                     offsetX = OVERRIDE_IMAGE_TITLE_PADDING
                     horizontalAlignment = TEXT_ALIGN_LEFT
-                elseif ZO_MaskHasFlag(anchorPosition, RIGHT) then
+                elseif ZO_FlagHelpers.MaskHasFlag(anchorPosition, RIGHT) then
                     offsetX = -OVERRIDE_IMAGE_TITLE_PADDING
                     horizontalAlignment = TEXT_ALIGN_RIGHT
                 end
-                if ZO_MaskHasFlag(anchorPosition, TOP) then
+                if ZO_FlagHelpers.MaskHasFlag(anchorPosition, TOP) then
                     offsetY = OVERRIDE_IMAGE_TITLE_PADDING
-                elseif ZO_MaskHasFlag(anchorPosition, BOTTOM) then
+                elseif ZO_FlagHelpers.MaskHasFlag(anchorPosition, BOTTOM) then
                     offsetY = -OVERRIDE_IMAGE_TITLE_PADDING
                 end
                 self.overrideImageTitle:ClearAnchors()

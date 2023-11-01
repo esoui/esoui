@@ -509,7 +509,7 @@ do
             ShowMarketAndSearch(GetString(SI_CROWN_STORE_SEARCH_ADDITIONAL_OUTFITS), MARKET_OPEN_OPERATION_UNLOCK_NEW_OUTFIT)
         end
 
-        local unequippedOutfitEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), OnUnequipOutfitSelected)
+        local unequippedOutfitEntry = dropdown:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), OnUnequipOutfitSelected)
         dropdown:AddItem(unequippedOutfitEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
         local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(self.actorCategory)
@@ -518,7 +518,7 @@ do
         local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits(self.actorCategory)
         for outfitIndex = 1, numOutfits do
             local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(self.actorCategory, outfitIndex)
-            local entry = ZO_ComboBox:CreateItemEntry(outfitManipulator:GetOutfitName(), OnOutfitEntrySelected)
+            local entry = dropdown:CreateItemEntry(outfitManipulator:GetOutfitName(), OnOutfitEntrySelected)
             entry.outfitIndex = outfitIndex
             dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
             if equippedOutfitIndex == outfitIndex then
@@ -527,7 +527,7 @@ do
         end
 
         if numOutfits < MAX_OUTFIT_UNLOCKS then
-            dropdown:AddItem(ZO_ComboBox:CreateItemEntry(GetString(SI_OUTFIT_PURCHASE_MORE_ENTRY), OnUnlockNewOutfitsSelected), ZO_COMBOBOX_SUPPRESS_UPDATE)
+            dropdown:AddItem(dropdown:CreateItemEntry(GetString(SI_OUTFIT_PURCHASE_MORE_ENTRY), OnUnlockNewOutfitsSelected), ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
 
         dropdown:UpdateItems()

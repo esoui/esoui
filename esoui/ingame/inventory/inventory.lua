@@ -2264,13 +2264,9 @@ end
 ------
 
 --Bank Deposit/Withdraw Dialog
-local ZO_BankGenericCurrencyDepositWithdrawDialog = ZO_Object:Subclass()
+ZO_WITHDRAW_DEPOSIT_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT = 50
 
-function ZO_BankGenericCurrencyDepositWithdrawDialog:New(...)
-    local obj = ZO_Object.New(self)
-    obj:Initialize(...)
-    return obj
-end
+local ZO_BankGenericCurrencyDepositWithdrawDialog = ZO_InitializingObject:Subclass()
 
 function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, currencyBankLocation, canWithdrawFunction)
     local control = CreateControlFromVirtual(prefix .. "CurrencyTransferDialog", GuiRoot, "ZO_PlayerBankDepositWithdrawCurrency")
@@ -2306,11 +2302,18 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, currency
         self.carriedCurrencyLabel:SetHidden(false)
         self.bankedCurrencyLabel:SetHidden(false)
     else
-        local comboBox = ZO_ComboBox:New(currenciesComboBoxControl)
+        local comboBox = ZO_ComboBox_ObjectFromContainer(currenciesComboBoxControl)
         comboBox:SetSortsItems(false)
         comboBox:SetFont("ZoFontWinT1")
         comboBox:SetSpacing(15)
         comboBox:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
+        comboBox:SetHeight(300)
+
+        local function SetupScrollableEntry(...)
+            comboBox:SetupEntry(...)
+        end
+        comboBox:AddCustomEntryTemplate("ZO_DepositWithdrawComboBoxEntry", ZO_WITHDRAW_DEPOSIT_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT, SetupScrollableEntry)
+
         self.currenciesComboBox = comboBox
         currenciesComboBoxControl:SetHidden(false)
     end
@@ -2430,6 +2433,7 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:UpdateMoneyInputAndDisplay(
                 local carriedText = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(carriedAmount, DONT_USE_SHORT_FORMAT, currencyType)
                 local combinedText = zo_strformat(SI_BANK_CURRENCY_TRANSFER_CURRENCY_PAIR_FORMAT, bankedText, carriedText)
                 local entry = comboBox:CreateItemEntry(combinedText, OnFilterChanged)
+                ZO_ComboBox.SetItemEntryCustomTemplate(entry, "ZO_DepositWithdrawComboBoxEntry")
                 entry.currencyType = currencyType
                 comboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
                 if currencyType == currentCurrencyType then

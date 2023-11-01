@@ -1,0 +1,131 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GroupFinder_RoleIconTemplate_Keyboard" inherits="ZO_GroupFinder_RoleIconTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontWinH5" override="true" />
+
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="32" y="32" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GroupFinder_GroupListing_Keyboard" inherits="ZO_GroupFinder_GroupListing" mouseEnabled="true" virtual="true">
+            <Dimensions x="612" y="ZO_GROUP_LISTING_KEYBOARD_HEIGHT" />
+
+            <Controls>
+                <Control name="$(parent)Backdrop" inherits="ZO_ListEntryBackdrop" />
+
+                <Control name="$(parent)RoleList" override="true">
+                    <Anchor point="RIGHT" offsetX="-75" />
+                </Control>
+
+                <Label name="$(parent)DisabledLabel" font="ZoFontWinH3" override="true">
+                    <Anchor point="RIGHT" offsetX="-75" />
+                </Label>
+
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontWinH3" maxLineCount="1" wrapMode="ELLIPSIS" override="true">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)Settings" font="ZoFontWinT1" wrapMode="ELLIPSIS" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- Keyboard Tooltip Control -->
+        <TopLevelControl name="GroupFinderGroupListingTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="GroupFinderGroupListingTooltip" inherits="ZO_BaseTooltip">
+                    <ResizeToFitPadding width="32" height="57"/>
+                    <DimensionConstraints minX="512" maxX="512" />
+                    <ClampedToScreenInsets top="-105" bottom="65" />
+                    <OnInitialized>
+                        ZO_GroupFinderGroupListingTooltip_Initialize(self)
+                    </OnInitialized>
+
+                    <OnCleared>
+                        ZO_GroupFinderGroupListingTooltip_Clear(self)
+                    </OnCleared>
+
+                    <Controls>
+                        <Texture name="$(parent)IndicatorIcon" hidden="true">
+                            <Anchor point="TOPLEFT" offsetX="10" offsetY="10" />
+                            <Dimensions x="32" y="32" />
+                        </Texture>
+
+                        <Label name="$(parent)IndicatorLabel" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)IndicatorIcon" relativePoint="BOTTOMLEFT" offsetY="5" />
+                        </Label>
+
+                        <Label name="$(parent)Title" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <DimensionConstraints maxX="500" />
+                        </Label>
+
+                        <Texture name="$(parent)Divider" inherits="ZO_BaseTooltipDivider" hidden="false">
+                            <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="8" />
+                        </Texture>
+
+                        <Control name="$(parent)OwnerSection" resizeToFitDescendents="true">
+                            <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="8" />
+                            <Controls>
+                                <Label name="$(parent)Label" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GROUP_FINDER_TOOLTIP_LISTING_OWNER_LABEL">
+                                    <Anchor point="LEFT" />
+                                </Label>
+                                <Label name="$(parent)OwnerName" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="5" />
+                                </Label>
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)Category" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOP" relativeTo="$(parent)OwnerSection" relativePoint="BOTTOM" offsetY="8" />
+                        </Label>
+
+                        <Control name="$(parent)PlayersSection" resizeToFitDescendents="true">
+                            <Anchor point="TOP" relativeTo="$(parent)Category" relativePoint ="BOTTOM" offsetY="8" />
+                            <Controls>
+                                <Label name="$(parent)PlayerCountTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GROUP_FINDER_TOOLTIP_PLAYER_LABEL">
+                                    <Anchor point="TOPLEFT" />
+                                </Label>
+                                <Label name="$(parent)PlayerCount" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="LEFT" relativeTo="$(parent)PlayerCountTitle" relativePoint="RIGHT" offsetX="8" />
+                                </Label>
+                                <Label name="$(parent)RoleList" font="ZoFontGameMedium">
+                                    <Anchor point="LEFT" relativeTo="$(parent)PlayerCount" relativePoint="RIGHT" offsetX="16" />
+                                </Label>
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)Description" font="ZoFontGameMedium" maxLineCount="10" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Anchor point="TOP" relativeTo="$(parent)PlayersSection" relativePoint="BOTTOM" offsetY="8" />
+                            <Dimensions x="480" />
+                        </Label>
+
+                        <Control name="$(parent)FlagsSection" resizeToFitConstrains="Y">
+                            <Anchor point="TOP" relativeTo="$(parent)Description" relativePoint="BOTTOM" offsetY="16" />
+                            <Dimensions x="480" />
+                            <Controls>
+                                <Label name="$(parent)Champion" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" />
+                                <Label name="$(parent)InviteCode" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" />
+                                <Label name="$(parent)Playstyle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" />
+                                <Label name="$(parent)AutoAccept" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" />
+                                <Label name="$(parent)VOIP" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" />
+                                <Label name="$(parent)LookingFor" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" />
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)WarningLabel" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED" horizontalAlignment="CENTER" hidden="true">
+                            <Anchor point="TOP" relativeTo="$(parent)FlagsSection" relativePoint="BOTTOM" offsetY="16" />
+                        </Label>
+                    </Controls>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

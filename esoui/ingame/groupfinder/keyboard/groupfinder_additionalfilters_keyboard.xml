@@ -1,0 +1,159 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GroupFinderAdditionalFiltersDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <DimensionConstraints minX="550" />
+            <OnInitialized>
+                ZO_GroupFinder_AdditionalFilters_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)SearchBox" resizeToFitDescendents="true">
+                    <Anchor point="LEFT" offsetX="25" offsetY="45" constrains="X"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="5" constrains="Y" />
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="180" y="36" />
+                            <Controls>
+                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="GROUP_FINDER_GROUP_LISTING_TITLE_MAX_LENGTH" defaultText="SI_GROUP_FINDER_FILTERS_SEARCH">
+                                    <OnFocusLost>
+                                        ZO_GroupFinder_AdditionalFilters_OnSearchEditControlFocusLost(self)
+                                    </OnFocusLost>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)CategorySelector" inherits="ZO_ComboBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchBox" relativePoint="BOTTOMLEFT" offsetY="4" />
+                    <Dimensions x="170" />
+                </Control>
+
+                <Control name="$(parent)DifficultyContainer">
+                    <Anchor point="LEFT" relativeTo="$(parent)CategorySelector" relativePoint="RIGHT" offsetX="5" />
+                    <Dimensions x="64" y="32" />
+
+                    <OnInitialized>
+                        ZO_VeteranDifficultySettings_GroupFinder_OnInitialized(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Label name="$(parent)DifficultyLabel" hidden="true" />
+
+                        <Button name="$(parent)NormalDifficulty" inherits="ZO_VeteranDifficultyButton">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="32" y="32" />
+                            <Textures
+                                normal="EsoUI/Art/LFG/LFG_normalDungeon_up.dds"
+                                pressed="EsoUI/Art/LFG/LFG_normalDungeon_down.dds"
+                                mouseOver="EsoUI/Art/LFG/LFG_normalDungeon_over.dds"
+                                disabled="EsoUI/Art/LFG/LFG_normalDungeon_disabled.dds"
+                                disabledPressed="EsoUI/Art/LFG/LFG_normalDungeon_down_disabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL
+                            </OnInitialized>
+
+                            <OnClicked>
+                                <!-- override to do nothing, handled in lua -->
+                            </OnClicked>
+                        </Button>
+                        <Button name="$(parent)VeteranDifficulty" inherits="ZO_VeteranDifficultyButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)NormalDifficulty" relativePoint="RIGHT" />
+                            <Dimensions x="32" y="32" />
+                            <Textures
+                                normal="EsoUI/Art/LFG/LFG_veteranDungeon_up.dds"
+                                pressed="EsoUI/Art/LFG/LFG_veteranDungeon_down.dds"
+                                mouseOver="EsoUI/Art/LFG/LFG_veteranDungeon_over.dds"
+                                disabled="EsoUI/Art/LFG/LFG_veteranDungeon_disabled.dds"
+                                disabledPressed="EsoUI/Art/LFG/LFG_veteranDungeon_down_disabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.dungeonDifficulty = DUNGEON_DIFFICULTY_VETERAN
+                            </OnInitialized>
+
+                            <OnClicked>
+                                <!-- override to do nothing, handled in lua -->
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)PrimaryFilterSelector" inherits="ZO_ComboBox">
+                    <Anchor point="LEFT" relativeTo="$(parent)CategorySelector" relativePoint="RIGHT" offsetX="5" />
+                    <Dimensions x="210" />
+                </Control>
+
+                <Control name="$(parent)PrimaryFilterSelectorSingleSelect" inherits="ZO_ComboBox">
+                    <Anchor point="LEFT" relativeTo="$(parent)CategorySelector" relativePoint="RIGHT" offsetX="5" />
+                    <Dimensions x="210" />
+                </Control>
+
+                <Control name="$(parent)SecondaryFilterSelector" inherits="ZO_ComboBox">
+                    <Anchor point="LEFT" relativeTo="$(parent)PrimaryFilterSelector" relativePoint="RIGHT" offsetX="5" />
+                    <Dimensions x="210" />
+                </Control>
+
+                <Control name="$(parent)SizeSelector" inherits="ZO_ComboBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CategorySelector" relativePoint="BOTTOMLEFT" offsetY="4" />
+                    <Dimensions x="170" />
+                </Control>
+
+                <Texture name="$(parent)SecondaryDivider" inherits="ZO_DialogDivider">
+                    <Anchor point="CENTER" relativeTo="$(parent)Title" constrains="X" />
+                    <Anchor point="TOP" relativeTo="$(parent)SizeSelector" relativePoint="BOTTOM" offsetY="5" constrains="Y" />
+                </Texture>
+
+                <Label name="$(parent)PlaystyleLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontWinH4" text="SI_GROUP_FINDER_HEADER_LABEL_PLAYSTYLE">
+                    <Anchor point="TOP" relativeTo="$(parent)SecondaryDivider" relativePoint="BOTTOM" offsetY="4" constrains="Y" />
+                    <Anchor point="LEFT" relativeTo="$(parent)SizeSelector" relativePoint="LEFT" offsetY="4" constrains="X" />
+                </Label>
+
+                <Control name="$(parent)PlaystyleSelector" inherits="ZO_ComboBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PlaystyleLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Dimensions x="170" />
+                </Control>
+
+                <Button name="$(parent)ChampionCheckButton" inherits="ZO_CheckButton" />
+
+                <Control name="$(parent)ChampionTextBox" resizeToFitDescendents="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="100" y="36" />
+                            <Controls>
+                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT">
+                                    <OnFocusLost>
+                                        ZO_GroupFinder_AdditionalFilters_OnChampionPointsFocusLost(self)
+                                    </OnFocusLost>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)VOIPCheckButton" inherits="ZO_CheckButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChampionCheckButton" relativePoint="BOTTOMLEFT" offsetY="10" />
+                </Button>
+
+                <Button name="$(parent)InviteCodeCheckButton" inherits="ZO_CheckButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)VOIPCheckButton" relativePoint="BOTTOMLEFT" offsetY="10" />
+                </Button>
+
+                <Button name="$(parent)AutoAcceptCheckButton" inherits="ZO_CheckButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)InviteCodeCheckButton" relativePoint="BOTTOMLEFT" offsetY="10" />
+                </Button>
+
+                <Button name="$(parent)OwnRoleOnlyCheckButton" inherits="ZO_CheckButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AutoAcceptCheckButton" relativePoint="BOTTOMLEFT" offsetY="10" />
+                </Button>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Reset" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -382,10 +382,14 @@ function ZO_SetTextureCellAnimation(control, numColumns, numRows, intervalSecond
     ZO_SetTextureCell(control, numColumns, numRows, cellIndex)
 end
 
+
+
+ZO_FlagHelpers = {}
+
 -- Iterator returns each sequential flag in the inclusive range defined by iterationBegin and iterationEnd.
 -- For example:
 --
---  for bitValue in ZO_FlagIterator(1, 4) do
+--  for bitValue in ZO_FlagHelpers.FlagIterator(1, 4) do
 --      d(bitValue)
 --  end
 --
@@ -396,10 +400,10 @@ end
 --
 -- The same output is also produced by:
 --
---  for bitValue in ZO_FlagIterator(4) do
+--  for bitValue in ZO_FlagHelpers.FlagIterator(4) do
 --      d(bitValue)
 --  end
-function ZO_FlagIterator(iterationBeginOrEnd, iterationEnd)
+function ZO_FlagHelpers.FlagIterator(iterationBeginOrEnd, iterationEnd)
     local iter = iterationBeginOrEnd
     if not iterationEnd then
         -- If iterationEnd is omitted then we can infer that:
@@ -419,15 +423,25 @@ function ZO_FlagIterator(iterationBeginOrEnd, iterationEnd)
     end
 end
 
-function ZO_MaskHasFlag(mask, flag)
+function ZO_FlagHelpers.MaskHasFlag(mask, flag)
     return BitAnd(mask, flag) == flag
+end
+
+function ZO_FlagHelpers.MaskHasAnyFlag(mask, ...)
+    for i = 1, select("#", ...) do
+        local flag = select(i, ...)
+        if BitAnd(mask, flag) == flag then
+            return true
+        end
+    end
+    return false
 end
 
 -- Iterator returns each flag set in the specified mask.
 -- For example:
 --
 --  local mask = 11 -- 1011 in binary
---  for flag in ZO_MaskHasFlagsIterator(mask) do
+--  for flag in ZO_FlagHelpers.MaskHasFlagsIterator(mask) do
 --      d(flag)
 --  end
 --
@@ -435,7 +449,7 @@ end
 --  1
 --  2
 --  8
-function ZO_MaskHasFlagsIterator(mask)
+function ZO_FlagHelpers.MaskHasFlagsIterator(mask)
     local iter = 1
     return function()
         while iter <= mask do
@@ -449,25 +463,25 @@ function ZO_MaskHasFlagsIterator(mask)
     end
 end
 
-function ZO_ClearMaskFlag(mask, flag)
+function ZO_FlagHelpers.ClearMaskFlag(mask, flag)
     local flagInverse = BitNot(flag, ZO_INTEGER_53_MAX_BITS)
     return BitAnd(mask, flagInverse)
 end
 
-function ZO_ClearMaskFlags(mask, ...)
+function ZO_FlagHelpers.ClearMaskFlags(mask, ...)
     local flags = {...}
     local flagsToClear = 0
     for _, flag in ipairs(flags) do
         flagsToClear = BitOr(flagsToClear, flag)
     end
-    return ZO_ClearMaskFlag(mask, flagsToClear)
+    return ZO_FlagHelpers.ClearMaskFlag(mask, flagsToClear)
 end
 
-function ZO_SetMaskFlag(mask, flag)
+function ZO_FlagHelpers.SetMaskFlag(mask, flag)
     return BitOr(mask, flag)
 end
 
-function ZO_SetMaskFlags(mask, ...)
+function ZO_FlagHelpers.SetMaskFlags(mask, ...)
     local flags = {...}
     for _, flag in ipairs(flags) do
         mask = BitOr(mask, flag)
@@ -478,7 +492,7 @@ end
 -- Returns nil if no flags have changed; otherwise,
 -- Returns a table whose keys and values are the flags that
 -- have changed and their new corresponding Boolean values.
-function ZO_CompareMaskFlags(flagsBefore, flagsAfter)
+function ZO_FlagHelpers.CompareMaskFlags(flagsBefore, flagsAfter)
     if flagsBefore == flagsAfter then
         -- No flags have changed.
         return
@@ -532,4 +546,12 @@ function ZO_GetCallstackFunctionNames(numTopmostFunctionsToExclude)
     end
 
     return functionNames
+end
+
+function ZO_GetCallbackForwardingFunction(object, receiverFunction)
+    return function(...) receiverFunction(object, ...) end
+end
+
+function ZO_GetEventForwardingFunction(object, receiverFunction)
+    return function(_, ...) receiverFunction(object, ...) end
 end

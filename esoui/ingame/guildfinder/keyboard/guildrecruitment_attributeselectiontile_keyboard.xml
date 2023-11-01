@@ -12,7 +12,7 @@
                     <Anchor point="TOPLEFT" />
                 </Label>
 
-                <Control name="$(parent)ComboBox" inherits="ZO_ScrollableComboBox">
+                <Control name="$(parent)ComboBox" inherits="ZO_ComboBox">
                     <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_COMBOBOX_WIDTH" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
                 </Control>

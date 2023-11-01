@@ -21,8 +21,6 @@ ZO_GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_duel.dds",
     [NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION] = "EsoUI/Art/Notifications/Gamepad/gp_notification_ESO+.dds",
-    [NOTIFICATION_TYPE_GIFT_GRACE_STARTED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
-    [NOTIFICATION_TYPE_GIFTING_UNLOCKED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_RECEIVED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_CLAIMED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_RETURNED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
@@ -30,6 +28,7 @@ ZO_GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GUILD_NEW_APPLICATIONS] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_guild.dds",
     [NOTIFICATION_TYPE_PLAYER_APPLICATIONS] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_guild.dds",
     [NOTIFICATION_TYPE_MARKET_PRODUCT_AVAILABLE] = "EsoUI/Art/Notifications/Gamepad/gp_notification_crownStore.dds",
+    [NOTIFICATION_TYPE_EXPIRING_MARKET_CURRENCY] = GetCurrencyGamepadIcon(CURT_CROWNS),
     [NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
     [NOTIFICATION_TYPE_DISABLED_ADDON] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_tribute.dds",
@@ -49,8 +48,6 @@ ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE =
     [NOTIFICATIONS_GIFT_RECEIVED_DATA] = "ZO_GamepadNotificationsGiftReceivedRow",
     [NOTIFICATIONS_GIFT_RETURNED_DATA] = "ZO_GamepadNotificationsGiftReturnedRow",
     [NOTIFICATIONS_GIFT_CLAIMED_DATA] = "ZO_GamepadNotificationsGiftClaimedRow",
-    [NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA] = "ZO_GamepadNotificationsOpenCrownStoreRow",
-    [NOTIFICATIONS_GIFTING_UNLOCKED_DATA] = "ZO_GamepadNotificationsOpenCrownStoreRow",
     [NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA] = "ZO_GamepadNotificationsNewDailyLoginRewardRow",
     [NOTIFICATIONS_GUILD_NEW_APPLICATIONS] = "ZO_GamepadNotificationsGuildNewApplicationsRow",
     [NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA] = "ZO_GamepadNotificationsMarketProductUnlockedRow",
@@ -248,35 +245,35 @@ function ZO_AgentChatRequestProvider:CreateMessage()
     return GetString(SI_GAMEPAD_NOTIFICATIONS_AGENT_CHAT_REQUEST_MESSAGE)
 end
 
--- Leaderboard Raid Provider
+-- Leaderboard Score Provider
 -------------------------
 
-ZO_GamepadLeaderboardRaidProvider = ZO_LeaderboardRaidProvider:Subclass()
+ZO_GamepadLeaderboardScoreProvider = ZO_LeaderboardScoreProvider:Subclass()
 
-function ZO_GamepadLeaderboardRaidProvider:New(notificationManager)
-    return ZO_LeaderboardRaidProvider.New(self, notificationManager)
+function ZO_GamepadLeaderboardScoreProvider:New(notificationManager)
+    return ZO_LeaderboardScoreProvider.New(self, notificationManager)
 end
 
-function ZO_GamepadLeaderboardRaidProvider:CreateMessage(raidName, raidScore, numMembers, hasFriend, hasGuildMember, notificationId)
-    local message = ZO_LeaderboardRaidProvider.CreateMessage(self, raidName, raidScore, numMembers, hasFriend, hasGuildMember)
+function ZO_GamepadLeaderboardScoreProvider:CreateMessage(contentName, score, numMembers, hasFriend, hasGuildMember, notificationId)
+    local message = ZO_LeaderboardScoreProvider.CreateMessage(self, contentName, score, numMembers, hasFriend, hasGuildMember)
 
-    return self:AppendRaidMembers(message, numMembers, notificationId)
+    return self:AppendMembers(message, numMembers, notificationId)
 end
 
-function ZO_GamepadLeaderboardRaidProvider:AppendRaidMemberHeaderText(messageText, headerText)
+function ZO_GamepadLeaderboardScoreProvider:AppendMemberHeaderText(messageText, headerText)
     return messageText.."\n\n"..headerText
 end
 
-function ZO_GamepadLeaderboardRaidProvider:AppendRaidMemberName(messageText, raidMemberName)
-    return messageText.."\n"..ZO_SELECTED_TEXT:Colorize(raidMemberName)
+function ZO_GamepadLeaderboardScoreProvider:AppendMemberName(messageText, memberName)
+    return messageText.."\n"..ZO_SELECTED_TEXT:Colorize(memberName)
 end
 
-function ZO_GamepadLeaderboardRaidProvider:AppendRaidMembers(messageText, numMembers, notificationId)
+function ZO_GamepadLeaderboardScoreProvider:AppendMembers(messageText, numMembers, notificationId)
     local guildMembersSection = {}
     local friendsSection = {}
 
     for memberIndex = 1, numMembers do
-        local displayName, characterName, isFriend, isGuildMember, isPlayer = GetRaidScoreNotificationMemberInfo(notificationId, memberIndex)
+        local displayName, characterName, isFriend, isGuildMember, isPlayer = GetLeaderboardScoreNotificationMemberInfo(notificationId, memberIndex)
         local userFacingName = ZO_GetPlatformUserFacingName(characterName, displayName)
 
         if not isPlayer then
@@ -289,18 +286,18 @@ function ZO_GamepadLeaderboardRaidProvider:AppendRaidMembers(messageText, numMem
     end
 
     if #friendsSection > 0 then
-        messageText = self:AppendRaidMemberHeaderText(messageText, zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_FRIENDS), #friendsSection))
+        messageText = self:AppendMemberHeaderText(messageText, zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_SCORE_NOTIFICATION_HEADER_FRIENDS), #friendsSection))
 
         for _, friendName in ipairs(friendsSection) do
-            messageText = self:AppendRaidMemberName(messageText, friendName)
+            messageText = self:AppendMemberName(messageText, friendName)
         end
     end
 
     if #guildMembersSection > 0 then
-        messageText = self:AppendRaidMemberHeaderText(messageText, zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_GUILD_MEMBERS), #guildMembersSection))
+        messageText = self:AppendMemberHeaderText(messageText, zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_SCORE_NOTIFICATION_HEADER_GUILD_MEMBERS), #guildMembersSection))
 
         for _, guildMemberName in ipairs(guildMembersSection) do
-            messageText = self:AppendRaidMemberName(messageText, guildMemberName)
+            messageText = self:AppendMemberName(messageText, guildMemberName)
         end
     end
 
@@ -411,36 +408,6 @@ function ZO_GamepadEsoPlusSubscriptionStatusProvider:New(notificationManager)
 end
 
 function ZO_GamepadEsoPlusSubscriptionStatusProvider:ShowMoreInfo(entryData)
-    if entryData.moreInfo then
-        HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(entryData.helpCategoryIndex, entryData.helpIndex)
-    end
-end
-
--- ZO_GamepadGiftingGracePeriodStartedProvider
--------------------------
-
-ZO_GamepadGiftingGracePeriodStartedProvider = ZO_GiftingGracePeriodStartedProvider:Subclass()
-
-function ZO_GamepadGiftingGracePeriodStartedProvider:New(notificationManager)
-    return ZO_GiftingGracePeriodStartedProvider.New(self, notificationManager)
-end
-
-function ZO_GamepadGiftingGracePeriodStartedProvider:ShowMoreInfo(entryData)
-    if entryData.moreInfo then
-        HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(entryData.helpCategoryIndex, entryData.helpIndex)
-    end
-end
-
--- ZO_GamepadGiftingUnlockedProvider
--------------------------
-
-ZO_GamepadGiftingUnlockedProvider = ZO_GiftingUnlockedProvider:Subclass()
-
-function ZO_GamepadGiftingUnlockedProvider:New(notificationManager)
-    return ZO_GiftingUnlockedProvider.New(self, notificationManager)
-end
-
-function ZO_GamepadGiftingUnlockedProvider:ShowMoreInfo(entryData)
     if entryData.moreInfo then
         HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(entryData.helpCategoryIndex, entryData.helpIndex)
     end
@@ -607,19 +574,18 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_GamepadPointsResetProvider:New(self),
         ZO_GamepadPledgeOfMaraProvider:New(self),
         ZO_GamepadAgentChatRequestProvider:New(self),
-        ZO_GamepadLeaderboardRaidProvider:New(self),
+        ZO_GamepadLeaderboardScoreProvider:New(self),
         ZO_GamepadCollectionsUpdateProvider:New(self),
         ZO_GamepadLFGUpdateProvider:New(self),
         ZO_CraftBagAutoTransferProvider:New(self),
         ZO_GamepadDuelInviteProvider:New(self),
         ZO_GamepadEsoPlusSubscriptionStatusProvider:New(self),
         ZO_GiftInventoryProvider:New(self),
-        ZO_GamepadGiftingGracePeriodStartedProvider:New(self),
-        ZO_GamepadGiftingUnlockedProvider:New(self),
         ZO_DailyLoginRewardsClaimProvider:New(self),
         ZO_GamepadGuildNewApplicationsProvider:New(self),
         ZO_PlayerApplicationsProvider:New(self),
         ZO_GamepadMarketProductUnlockedProvider:New(self),
+        ZO_ExpiringMarketCurrencyProvider:New(self),
         ZO_OutOfDateAddonsProvider:New(self),
         ZO_DisabledAddonsProvider:New(self),
         ZO_GamepadTributeInviteProvider:New(self),

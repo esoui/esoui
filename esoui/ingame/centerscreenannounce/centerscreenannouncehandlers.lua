@@ -173,9 +173,9 @@ end
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_QUEST_ADDED] = function(journalIndex, questName, objectiveName)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_ACCEPTED)
     local questType = GetJournalQuestType(journalIndex)
-    local instanceDisplayType = GetJournalQuestInstanceDisplayType(journalIndex)
+    local zoneDisplayType = GetJournalQuestZoneDisplayType(journalIndex)
     local questJournalObject = SYSTEMS:GetObject("questJournal")
-    local iconTexture = questJournalObject:GetIconTexture(questType, instanceDisplayType)
+    local iconTexture = questJournalObject:GetIconTexture(questType, zoneDisplayType)
     if iconTexture then
         messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_QUEST_ACCEPT_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName))
     else
@@ -185,11 +185,11 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_QUEST_ADDED] = function(journalIndex, questNa
     return messageParams
 end
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_QUEST_COMPLETE] = function(questName, level, previousExperience, currentExperience, championPoints, questType, instanceDisplayType)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_QUEST_COMPLETE] = function(questName, level, previousExperience, currentExperience, championPoints, questType, zoneDisplayType)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_COMPLETED)
 
     local questJournalObject = SYSTEMS:GetObject("questJournal")
-    local iconTexture = questJournalObject:GetIconTexture(questType, instanceDisplayType)
+    local iconTexture = questJournalObject:GetIconTexture(questType, zoneDisplayType)
     if iconTexture then
         messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_QUEST_COMPLETE_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName))
     else
@@ -797,10 +797,90 @@ end
 
 -- End Battleground Event Handlers --
 
+local g_previousEndlessDungeonProgression = {0, 0, 0} -- Stage, Cycle, Arc
+
+local function GetEndlessDungeonProgressMessageParams()
+    local stage, cycle, arc = ENDLESS_DUNGEON_MANAGER:GetProgression()
+    local previousStage, previousCycle, previousArc = unpack(g_previousEndlessDungeonProgression)
+    if stage == 1 and cycle == 1 and arc == 1 then
+        -- Force the initial CSA to roll over from all 0s to all 1s.
+        previousStage, previousCycle, previousArc = 0, 0, 0
+    end
+
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_ROLLING_METER_PROGRESS_TEXT)
+    local stageIcon, cycleIcon, arcIcon = ZO_EndlessDungeonManager.GetProgressionIcons()
+    local stageNarration, cycleNarration, arcNarration = ZO_EndlessDungeonManager.GetProgressionNarrationDescriptions(stage, cycle, arc)
+    local progressData =
+    {
+        {
+            iconTexture = arcIcon,
+            narrationDescription = arcNarration,
+            initialValue = previousArc,
+            finalValue = arc,
+        },
+        {
+            iconTexture = cycleIcon,
+            narrationDescription = cycleNarration,
+            initialValue = previousCycle,
+            finalValue = cycle,
+        },
+        {
+            iconTexture = stageIcon,
+            narrationDescription = stageNarration,
+            initialValue = previousStage,
+            finalValue = stage,
+        },
+    }
+    messageParams:SetRollingMeterProgressData(progressData)
+
+    -- Update the previous progression values.
+    g_previousEndlessDungeonProgression[1] = stage
+    g_previousEndlessDungeonProgression[2] = cycle
+    g_previousEndlessDungeonProgression[3] = arc
+
+    return messageParams
+end
+
+local function RefreshEndlessDungeonProgressionState()
+    local stage, cycle, arc = ENDLESS_DUNGEON_MANAGER:GetProgression()
+    g_previousEndlessDungeonProgression[1] = stage
+    g_previousEndlessDungeonProgression[2] = cycle
+    g_previousEndlessDungeonProgression[3] = arc
+end
+
+ENDLESS_DUNGEON_MANAGER:RegisterCallback("StateChanged", RefreshEndlessDungeonProgressionState)
+
+local function UpdateEndlessDungeonTrackers()
+    ENDLESS_DUNGEON_HUD_TRACKER:UpdateProgress()
+    ENDLESS_DUNGEON_BUFF_TRACKER_GAMEPAD:UpdateProgress()
+    if ENDLESS_DUNGEON_BUFF_TRACKER_KEYBOARD then
+        ENDLESS_DUNGEON_BUFF_TRACKER_KEYBOARD:UpdateProgress()
+    end
+end
+
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_DISPLAY_ANNOUNCEMENT] = function(primaryText, secondaryText, icon, soundId, lifespanMS, category)
     soundId = soundId == "" and SOUNDS.DISPLAY_ANNOUNCEMENT or soundId
-    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(category, soundId)
-    
+
+    local messageParams
+    if category == CSA_CATEGORY_ENDLESS_DUNGEON_STAGE_STARTED_TEXT then
+        -- Endless Dungeon Progression CSA special case
+        messageParams = GetEndlessDungeonProgressMessageParams()
+        if not messageParams then
+            -- The progression did not change; this should never happen.
+            return
+        end
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ENDLESS_DUNGEON_PROGRESS)
+        messageParams:SetOnDisplayCallback(UpdateEndlessDungeonTrackers)
+    else
+        -- Standard Display Announcement
+        messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(category, soundId)
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
+    end
+
+    if soundId then
+        messageParams:SetSound(soundId)
+    end
+
     if icon ~= ZO_NO_TEXTURE_FILE then
         messageParams:SetIconData(icon)
     end
@@ -809,7 +889,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_DISPLAY_ANNOUNCEMENT] = function(primaryText,
         messageParams:SetLifespanMS(lifespanMS)
     end
 
-    -- sanatize text
+    -- Sanitize text.
     if primaryText == "" then
         primaryText = nil
     end
@@ -818,8 +898,6 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_DISPLAY_ANNOUNCEMENT] = function(primaryText,
     end
 
     messageParams:SetText(primaryText, secondaryText)
-    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
-
     return messageParams
 end
 
@@ -1218,8 +1296,8 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_ACHIEVEMENTS_COMPLETED_ON_UPGRADE_TO_ACCOUNT_
     return messageParams
 end
 
+local TRIBUTE_GAME_FLOW_STATE_CHANGE_MESSAGE_LIFESPAN_MS = 3000
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE] = function(gameFlowState)
-    --TODO Tribute: Do we want CSAs for any other states?
     if gameFlowState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT then
         if not DoesTributeSkipPatronDrafting() then
             local firstPick, playerType = GetTributePlayerInfo(GetActiveTributePlayerPerspective())
@@ -1227,6 +1305,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE] = function(ga
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
             messageParams:SetText(GetString(SI_TRIBUTE_DRAFTING_PHASE_ANNOUNCEMENT_TITLE), ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_TRIBUTE_DRAFTING_PHASE_ANNOUNCEMENT_BODY, firstPick)))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+            messageParams:SetLifespanMS(TRIBUTE_GAME_FLOW_STATE_CHANGE_MESSAGE_LIFESPAN_MS)
             messageParams:MarkShowBackground()
             return messageParams
         end
@@ -1236,11 +1315,14 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE] = function(ga
         firstPlay = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(firstPlay) or firstPlay
         messageParams:SetText(GetString(SI_TRIBUTE_PLAYING_PHASE_ANNOUNCEMENT_TITLE), ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_TRIBUTE_PLAYING_PHASE_ANNOUNCEMENT_BODY, firstPlay)))
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+        messageParams:SetLifespanMS(TRIBUTE_GAME_FLOW_STATE_CHANGE_MESSAGE_LIFESPAN_MS)
         messageParams:MarkShowBackground()
         return messageParams
     end
 end
 
+local TRIBUTE_OPPONENT_PRESTIGE_MESSAGE_LIFESPAN_MS = 2000
+local TRIBUTE_TURN_STARTED_MESSAGE_LIFESPAN_MS = 1600
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_TRIBUTE_PLAYER_TURN_STARTED] = function(isLocalPlayer)
     if isLocalPlayer then
         local showBeginTurn = true
@@ -1254,6 +1336,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_TRIBUTE_PLAYER_TURN_STARTED] = function(isLoc
             prestigeMessageParams:SetText(messageTitle, ZO_NORMAL_TEXT:Colorize(GetString(SI_TRIBUTE_OPPONENT_PRESTIGE_ANNOUNCEMENT_BODY)))
             prestigeMessageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
             prestigeMessageParams:MarkShowBackground()
+            prestigeMessageParams:SetLifespanMS(TRIBUTE_OPPONENT_PRESTIGE_MESSAGE_LIFESPAN_MS)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(prestigeMessageParams)
             showBeginTurn = false
         end
@@ -1280,7 +1363,38 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_TRIBUTE_PLAYER_TURN_STARTED] = function(isLoc
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
             messageParams:SetText(GetString(SI_TRIBUTE_TURN_START_ANNOUNCEMENT_TITLE), messageSubheading)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+            messageParams:SetLifespanMS(TRIBUTE_TURN_STARTED_MESSAGE_LIFESPAN_MS)
             messageParams:MarkShowBackground()
+            return messageParams
+        end
+    end
+end
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_CONSOLIDATED_STATION_SETS_UPDATED] = function(craftingStationFurnitureId)
+    if HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
+        local function GetNextDirtyUnlockedSetIdIter(_, previousSetId)
+            return GetNextDirtyUnlockedConsolidatedSmithingItemSetId(previousSetId)
+        end
+
+        local unlockedSetIds = {}
+        for setId in GetNextDirtyUnlockedSetIdIter do
+            table.insert(unlockedSetIds, setId)
+        end
+
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CONSOLIDATED_SMITHING_SET_ADDED)
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CONSOLIDATED_STATION_SETS_UPDATED)
+        local stationIcon = select(2, GetPlacedHousingFurnitureInfo(craftingStationFurnitureId))
+        messageParams:SetIconData(stationIcon)
+        local messageTitle = GetString(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_ANNOUNCEMENT_TITLE)
+        local numUnlockedSetIds = #unlockedSetIds
+        if numUnlockedSetIds == 1 then
+            local setName = GetItemSetName(unlockedSetIds[1])
+            local messageSubheading = zo_strformat(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_SINGLE_SET_MESSAGE, setName)
+            messageParams:SetText(messageTitle, messageSubheading)
+            return messageParams
+        elseif numUnlockedSetIds > 1 then
+            local messageSubheading = zo_strformat(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_MULTI_SET_MESSAGE, numUnlockedSetIds)
+            messageParams:SetText(messageTitle, messageSubheading)
             return messageParams
         end
     end
@@ -1335,6 +1449,7 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_TRIBUTE_CARD_UPDATED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_CONSOLIDATED_STATION_SETS_UPDATED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_RIDING_SKILL_IMPROVEMENT)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_NEARING_VICTORY)
@@ -1347,6 +1462,9 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DUEL_NEAR_BOUNDARY)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DUEL_COUNTDOWN)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ENDLESS_DUNGEON_BUFF_ADDED)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ENDLESS_DUNGEON_ATTEMPTS_REMAINING_CHANGED)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ENDLESS_DUNGEON_PROGRESS)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_CRAFTING_RESULTS)
@@ -1525,6 +1643,7 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
             end
         end,
     },
+
     {
         callbackManager = COMPANION_SKILLS_DATA_MANAGER,
         callbackRegistration = "SkillLineAdded",
@@ -1625,6 +1744,68 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
                 end
                 return unpack(messageParamsObjects)
             end
+        end,
+    },
+
+    {
+        callbackManager = ENDLESS_DUNGEON_MANAGER,
+        callbackRegistration = "AttemptsRemainingChanged",
+        callbackFunction = function(attemptsRemaining, previousAttemptsRemaining)
+            if attemptsRemaining <= 0 or previousAttemptsRemaining <= 0 or attemptsRemaining == previousAttemptsRemaining then
+                -- Suppress the CSA when no attempts remain (as it is no longer relevant)
+                -- or when there were no attempts remaining previously (initialization).
+                return nil
+            end
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            local titleText
+            if attemptsRemaining > previousAttemptsRemaining then
+                titleText = GetString(SI_ENDLESS_DUNGEON_ATTEMPTS_REMAINING_INCREASED_ANNOUNCEMENT_TITLE)
+            else
+                titleText = GetString(SI_ENDLESS_DUNGEON_ATTEMPTS_REMAINING_DECREASED_ANNOUNCEMENT_TITLE)
+                messageParams:SetSound(SOUNDS.ENDLESS_DUNGEON_ATTEMPTS_REMAINING_DECREMENT) -- Audio specifically for losing an attempt.
+            end
+            local subtitleText = zo_strformat(GetString(SI_ENDLESS_DUNGEON_ATTEMPTS_REMAINING_CHANGED_ANNOUNCEMENT_SUBTITLE), attemptsRemaining)
+
+            messageParams:SetText(titleText, subtitleText)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ENDLESS_DUNGEON_ATTEMPTS_REMAINING_CHANGED)
+
+            return messageParams
+        end,
+    },
+
+    {
+        callbackManager = ENDLESS_DUNGEON_MANAGER,
+        callbackRegistration = "BuffStackCountChanged",
+        callbackFunction = function(buffType, abilityId, stackCount, previousStackCount, suppressCSA)
+            if suppressCSA or stackCount == 0 or previousStackCount > stackCount then
+                -- Suppress the CSA when buff stacks drop off.
+                return nil
+            end
+
+            local buffTypeString = GetString("SI_ENDLESSDUNGEONBUFFTYPE", buffType)
+            local titleText = ZO_CachedStrFormat(SI_ENDLESS_DUNGEON_BUFF_ADDED_ANNOUNCEMENT_TITLE_FORMATTER, buffTypeString)
+            local subtitleText = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(abilityId))
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_ANIMATED_CONTROL)
+            messageParams:SetText(titleText, subtitleText)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ENDLESS_DUNGEON_BUFF_ADDED)
+            messageParams:SetCustomAnimationTimeline(CENTER_SCREEN_ANNOUNCE:GetEndlessDungeonBuffAddedAnimationTimeline(), function(csaControl)
+                local startBeneathControl = csaControl
+                local endCenteredOnControl = not ZO_EndDunHUDTrackerContainerShowBuffTracker:IsHidden() and ZO_EndDunHUDTrackerContainerShowBuffTracker or nil
+                ZO_CenterScreenEndlessDungeonBuffAdded_Setup(abilityId, startBeneathControl, endCenteredOnControl)
+
+                -- Play the audio cue associated with this type of Endless Dungeon buff.
+                local abilityBuffType, isAvatarVision = GetAbilityEndlessDungeonBuffType(abilityId)
+                if abilityBuffType == ENDLESS_DUNGEON_BUFF_TYPE_VERSE then
+                    PlaySound(SOUNDS.ENDLESS_DUNGEON_BUFF_ACQUIRE_VERSE)
+                elseif abilityBuffType == ENDLESS_DUNGEON_BUFF_TYPE_VISION then
+                    if isAvatarVision then
+                        PlaySound(SOUNDS.ENDLESS_DUNGEON_BUFF_ACQUIRE_AVATAR_VISION)
+                    else
+                        PlaySound(SOUNDS.ENDLESS_DUNGEON_BUFF_ACQUIRE_VISION)
+                    end
+                end
+            end)
+            return messageParams
         end,
     },
 }

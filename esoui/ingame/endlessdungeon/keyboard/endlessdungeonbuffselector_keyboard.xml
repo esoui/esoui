@@ -1,0 +1,25 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_EndDunBuffSelectorBuff_Keyboard" inherits="ZO_EndDunBuffSelectorBuff_Shared" virtual="true">
+            <OnMouseDoubleClick>
+                self.manager:OnBuffDoubleClick(self)
+            </OnMouseDoubleClick>
+            
+            <Controls>
+                <Label name="$(parent)Name" override="true" font="ZoFontWinH2" />
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_EndDunBuffSelector_Keyboard" inherits="ZO_EndDunBuffSelector_Shared">
+            <OnInitialized>
+                ZO_EndlessDungeonBuffSelector_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)BG" override="true" inherits="ZO_MinorMungeBackdrop_SemiTransparentBlack" />
+
+                <Label name="$(parent)Title" override="true" font="ZoFontWinH1" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -21,6 +21,10 @@ function ZO_ActivityFinderTemplate_Keyboard:Initialize(dataManager, categoryData
     self.rewardsOffsetYTribute = -300
 end
 
+function ZO_ActivityFinderTemplate_Keyboard:GetSystemName()
+    return "ActivityFinder_Keyboard"
+end
+
 function ZO_ActivityFinderTemplate_Keyboard:InitializeControls()
     self.listSection = self.control:GetNamedChild("ListSection")
     self.lfmPromptSection = self.control:GetNamedChild("LFMPromptSection")
@@ -324,7 +328,7 @@ do
                     for _, location in ipairs(locationsData) do
                         if modes:IsEntryTypeVisible(location:GetEntryType()) and location:IsActive() and location:DoesPlayerMeetLevelRequirements() then
                             if location:ShouldForceFullPanelKeyboard() then
-                                local entry = ZO_ComboBox:CreateItemEntry(location:GetNameKeyboard(), OnFilterChanged)
+                                local entry = self.filterComboBox:CreateItemEntry(location:GetNameKeyboard(), OnFilterChanged)
                                 if activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE or activityType == LFG_ACTIVITY_TRIBUTE_CASUAL then
                                     location.isTribute = true
                                     if activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE then
@@ -350,7 +354,7 @@ do
 
         -- Add list view submenu entry
         if addListViewSubmenuEntry then
-            local entry = ZO_ComboBox:CreateItemEntry(modes:GetSpecificFilterName(), OnFilterChanged)
+            local entry = self.filterComboBox:CreateItemEntry(modes:GetSpecificFilterName(), OnFilterChanged)
             entry.data =
             {
                 singular = false,
@@ -393,7 +397,8 @@ do
     local optionalButtons = {}
     function ZO_ActivityFinderTemplate_Keyboard:RefreshButtons()
         local isAnyLocationSelected = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsAnyLocationSelected()
-        local isJoinButtonEnabled = isAnyLocationSelected and not ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetIsCurrentlyInQueue()
+        local isGroupFinderInUse = ZO_GroupFinder_IsGroupFinderInUse()
+        local isJoinButtonEnabled = isAnyLocationSelected and not ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetIsCurrentlyInQueue() and not isGroupFinderInUse
         self.joinQueueButton:SetEnabled(isJoinButtonEnabled)
 
         local acceptQuestButtonShown = not self.acceptQuestButton:IsControlHidden()

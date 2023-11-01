@@ -96,6 +96,12 @@ EsoUI\Ingame\Antiquities\AntiquityCategoryData.lua
 EsoUI\Ingame\Antiquities\AntiquitySetData.lua
 EsoUI\Ingame\Antiquities\AntiquityDataManager.lua
 
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonManager.lua
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUD.lua
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUD.xml
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonSummary.lua
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonSummary.xml
+
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.xml
@@ -149,6 +155,12 @@ EsoUI\Ingame\TopBar\TopBar.xml
 ; Load manager prior to other activity components in order to ensure proper initialization.
 EsoUI\Ingame\ZoneStories\ZoneStories_Manager.lua
 
+EsoUI\Ingame\GroupFinder\GroupFinderData.lua
+EsoUI\Ingame\GroupFinder\GroupFinder_ApplicationList_Manager.lua
+EsoUI\Ingame\GroupFinder\GroupFinder_Search_Manager.lua
+EsoUI\Ingame\GroupFinder\GroupFinder_Shared.lua
+EsoUI\Ingame\GroupFinder\GroupFinder_Shared.xml
+
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityQueueData_Gamepad.lua
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityQueueData_Gamepad.xml
 EsoUI\Ingame\Group\Gamepad\ZO_GroupList_Gamepad.lua
@@ -180,6 +192,21 @@ EsoUI\Ingame\LFG\Gamepad\ZO_ActivityTributeRankFooter_Gamepad.xml
 
 EsoUI\Ingame\LFG\SearchingForGroup.lua
 EsoUI\Ingame\LFG\SearchingForGroup.xml
+
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonBuff_Shared.lua
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonBuff_Shared.xml
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonBuffSelector_Shared.lua
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonBuffSelector_Shared.xml
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonBuffTracker_Shared.lua
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonBuffTracker_Shared.xml
+EsoUI\Ingame\EndlessDungeon\Keyboard\EndlessDungeonBuffSelector_Keyboard.lua
+EsoUI\Ingame\EndlessDungeon\Keyboard\EndlessDungeonBuffSelector_Keyboard.xml
+EsoUI\Ingame\EndlessDungeon\Keyboard\EndlessDungeonBuffTracker_Keyboard.lua
+EsoUI\Ingame\EndlessDungeon\Keyboard\EndlessDungeonBuffTracker_Keyboard.xml
+EsoUI\Ingame\EndlessDungeon\Gamepad\EndlessDungeonBuffSelector_Gamepad.lua
+EsoUI\Ingame\EndlessDungeon\Gamepad\EndlessDungeonBuffSelector_Gamepad.xml
+EsoUI\Ingame\EndlessDungeon\Gamepad\EndlessDungeonBuffTracker_Gamepad.lua
+EsoUI\Ingame\EndlessDungeon\Gamepad\EndlessDungeonBuffTracker_Gamepad.xml
 
 EsoUI\Ingame\MainMenu\Gamepad\ZO_Main_Menu_Helper_Panel_Gamepad.lua
 
@@ -228,6 +255,8 @@ EsoUI\Ingame\Inventory\ItemTransferDialog_Base.lua
 EsoUI\Ingame\Inventory\Keyboard\ItemTransferDialog_Keyboard.lua
 EsoUI\Ingame\Inventory\Keyboard\ItemTransferDialog_Keyboard.xml
 EsoUI\Ingame\Inventory\Gamepad\ItemTransferDialog_Gamepad.lua
+EsoUI\Ingame\Inventory\ConfirmCollectibleEvolutionDialog_Shared.lua
+EsoUI\Ingame\Inventory\ConfirmCollectibleEvolutionDialog_Shared.xml
 EsoUI\Ingame\Inventory\Keyboard\ConfirmCollectibleEvolutionDialog_Keyboard.lua
 EsoUI\Ingame\Inventory\Keyboard\ConfirmCollectibleEvolutionDialog_Keyboard.xml
 EsoUI\Ingame\Inventory\Gamepad\ConfirmCollectibleEvolutionDialog_Gamepad.lua
@@ -284,6 +313,9 @@ EsoUI\Ingame\Collections\CombinationPromptManager.lua
 
 EsoUI\Ingame\HUD\HUDTracker_Base.lua
 EsoUI\Ingame\HUD\HUDTracker_Base.xml
+
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUDTracker.lua
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUDTracker.xml
 
 EsoUI\Ingame\ZO_Quest\QuestTimer.lua
 EsoUI\Ingame\ZO_Quest\QuestTimer.xml
@@ -723,9 +755,9 @@ EsoUI\Ingame\TrialAccount\TrialAccount.lua
 EsoUI\Ingame\TrialAccount\TrialAccount.xml
 
 EsoUI\Ingame\Help\Help_Manager.lua
+EsoUI\Ingame\Help\Help_GenericTicketSubmission_Manager.lua
 EsoUI\Ingame\Help\HelpMechanicAssistanceData.lua
 EsoUI\Ingame\Help\HelpSubmitTicketData.lua
-EsoUI\Ingame\Help\Help_GenericTicketSubmission_Manager.lua
 EsoUI\Ingame\Help\Keyboard\HelpScreenTemplate_Keyboard.lua
 EsoUI\Ingame\Help\Keyboard\Help_Keyboard.lua
 EsoUI\Ingame\Help\Keyboard\Help_Keyboard.xml
@@ -852,6 +884,11 @@ EsoUI\Ingame\Crafting\Gamepad\SmithingExtraction_Gamepad.lua
 EsoUI\Ingame\Crafting\Gamepad\SmithingExtraction_Gamepad.xml
 EsoUI\Ingame\Crafting\Gamepad\UniversalDeconstructionPanel_Gamepad.lua
 EsoUI\Ingame\Crafting\Gamepad\UniversalDeconstructionPanel_Gamepad.xml
+
+EsoUI\Ingame\Crafting\ConsolidatedSmithingSetData_Manager.lua
+
+EsoUI\Ingame\Crafting\Gamepad\ConsolidatedSmithingSets_Gamepad.lua
+EsoUI\Ingame\Crafting\Gamepad\ConsolidatedSmithingSets_Gamepad.xml
 
 EsoUI\Ingame\Crafting\Smithing_Common.lua
 EsoUI\Ingame\Crafting\Smithing_Common.xml
@@ -1242,6 +1279,11 @@ EsoUI\Ingame\Leaderboards\Keyboard\TributeLeaderboards_Keyboard.lua
 EsoUI\Ingame\Leaderboards\Keyboard\TributeLeaderboards_Keyboard.xml
 EsoUI\Ingame\Leaderboards\Gamepad\TributeLeaderboards_Gamepad.lua
 EsoUI\Ingame\Leaderboards\Gamepad\TributeLeaderboards_Gamepad.xml
+EsoUI\Ingame\Leaderboards\EndlessDungeonLeaderboards_Shared.lua
+EsoUI\Ingame\Leaderboards\Keyboard\EndlessDungeonLeaderboards_Keyboard.lua
+EsoUI\Ingame\Leaderboards\Keyboard\EndlessDungeonLeaderboards_Keyboard.xml
+EsoUI\Ingame\Leaderboards\Gamepad\EndlessDungeonLeaderboards_Gamepad.lua
+EsoUI\Ingame\Leaderboards\Gamepad\EndlessDungeonLeaderboards_Gamepad.xml
 
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Dialogs_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Gamepad.lua
@@ -1462,6 +1504,9 @@ EsoUI\Ingame\ZoneStories\Gamepad\ZoneStories_Gamepad.xml
 EsoUI\Ingame\ScreenshotMode\Gamepad\ScreenshotMode_Gamepad.lua
 EsoUI\Ingame\ScreenshotMode\Gamepad\ScreenshotMode_Gamepad.xml
 
+EsoUI\Ingame\ExpiringMarketCurrency\Gamepad\ExpiringMarketCurrency_Gamepad.lua
+EsoUI\Ingame\ExpiringMarketCurrency\Gamepad\ExpiringMarketCurrency_Gamepad.xml
+
 ; Keeping these towards the bottom so that we can register to any callback objects we want
 
 EsoUI\Ingame\SlashCommands\SlashCommandAutoComplete.lua
@@ -1479,6 +1524,27 @@ EsoUI\Ingame\ChatSystem\Gamepad\ChatMenu_Gamepad.xml
 ; VoiceChatTranscript_Gamepad needs to initialize after InteractiveChatLog_Gamepad
 EsoUI\Ingame\VoiceChat\Console\VoiceChatTranscript_Gamepad.lua
 EsoUI\Ingame\VoiceChat\Console\VoiceChatTranscript_Gamepad.xml
+
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_Base_Keyboard.lua
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_Base_Keyboard.xml
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_CreateEditGroupListing_Keyboard.lua
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_CreateEditGroupListing_Keyboard.xml
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_AdditionalFilters_Keyboard.lua
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_AdditionalFilters_Keyboard.xml
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_ApplicationList_Keyboard.lua
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_ApplicationList_Keyboard.xml
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_SearchResults_Keyboard.lua
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_SearchResults_Keyboard.xml
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_Keyboard.lua
+EsoUI\Ingame\GroupFinder\Keyboard\GroupFinder_Keyboard.xml
+EsoUI\Ingame\GroupFinder\Gamepad\GroupFinder_Gamepad.lua
+EsoUI\Ingame\GroupFinder\Gamepad\GroupFinder_Gamepad.xml
+EsoUI\Ingame\GroupFinder\Gamepad\GroupFinder_CreateEditGroupListing_Gamepad.lua
+EsoUI\Ingame\GroupFinder\Gamepad\GroupFinder_AdditionalFilters_Gamepad.lua
+EsoUI\Ingame\GroupFinder\Gamepad\GroupFinder_ApplicationList_Gamepad.lua
+EsoUI\Ingame\GroupFinder\Gamepad\GroupFinder_ApplicationList_Gamepad.xml
+EsoUI\Ingame\GroupFinder\Gamepad\GroupFinder_SearchResults_Gamepad.lua
+EsoUI\Ingame\GroupFinder\Gamepad\GroupFinder_SearchResults_Gamepad.xml
 
 EsoUI\Ingame\SlashCommands\SlashCommands_Shared.lua
 EsoUI\Ingame\SlashCommands\PC\SlashCommands_PC.lua
@@ -1580,6 +1646,7 @@ EsoUI\Ingame\Profiler\ProfilerUtils.lua
 ; These should remain at the bottom, but above fragment/scene files to help mitigate breaking addons with API changes
 EsoUI\Ingame\AddonCompatibilityAliases\PC\AddonCompatibilityAliases.lua
 EsoUI\Ingame\AddonCompatibilityAliases\PC\AddonCompatibilityAliases.xml
+EsoUI\Ingame\AddonCompatibilityAliases\PC\ZO_DeprecatedEditBox.lua
 
 ; These should remain at the bottom of the file, to ensure functionality of fragments
 EsoUI\Ingame\Scenes\IngameFragments.lua

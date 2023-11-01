@@ -98,32 +98,19 @@ function ZO_GamepadInteractiveSortFilterList:Initialize(control)
         end
     end)
 
-    local function OnSortHeaderClicked(key, order)
-        SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, key)
-    end
-
-    local function OnSortHeaderSelected(key)
-        SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, key)
-    end
-    self.sortHeaderGroup:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
-    self.sortHeaderGroup:RegisterCallback("HeaderSelected", OnSortHeaderSelected)
-
-    --Re-narrate the current focus upon closing dialogs
-    CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", function()
-        if self:IsActivated() then
-            local NARRATE_HEADER = true
-            --Determine if we need to narrate the filter switcher, sort header group, or list entry
-            if self:IsCurrentFocusArea(self.filtersFocalArea) then
-                SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher, NARRATE_HEADER)
-            elseif self:IsCurrentFocusArea(self.headersFocalArea) then
-                if self.sortHeaderGroup then
-                    SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, self.sortHeaderGroup:GetKeyForCurrentSelectedIndex(), NARRATE_HEADER)
-                end
-            elseif self:IsCurrentFocusArea(self.panelFocalArea) then
-                SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, NARRATE_HEADER)
-            end
+    if self.sortHeaderGroup then
+        local function OnSortHeaderClicked(key, order)
+            SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, key)
         end
-    end)
+
+        local function OnSortHeaderSelected(key)
+            SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, key)
+        end
+        self.sortHeaderGroup:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
+        self.sortHeaderGroup:RegisterCallback("HeaderSelected", OnSortHeaderSelected)
+    end
+
+    CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", function() self:OnAllDialogsHidden() end)
 end
 
 function ZO_GamepadInteractiveSortFilterList:InitializeSortFilterList(control)
@@ -131,7 +118,7 @@ function ZO_GamepadInteractiveSortFilterList:InitializeSortFilterList(control)
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareSortEntries(listEntry1, listEntry2) end
 end
 
-function ZO_GamepadInteractiveSortFilterList:SetupFoci()
+function ZO_GamepadInteractiveSortFilterList:SetupFilterFocusArea()
     -- TODO: If we want to turn on filters and searching after initialization foci will have to be re-setup
     if not (self.contentHeader:IsControlHidden() or (self.filterControl:IsControlHidden() and self.searchControl:IsControlHidden())) then
         local function FiltersActivateCallback()
@@ -144,7 +131,9 @@ function ZO_GamepadInteractiveSortFilterList:SetupFoci()
         self.filtersFocalArea = GamepadInteractiveSortFilterFocus_Filters:New(self, FiltersActivateCallback, FiltersDeactivateCallback)
         self:AddNextFocusArea(self.filtersFocalArea)
     end
+end
 
+function ZO_GamepadInteractiveSortFilterList:SetupHeaderFocusArea()
     local function HeaderActivateCallback()
         if self.sortHeaderGroup then
             self.sortHeaderGroup:SetDirectionalInputEnabled(true)
@@ -158,9 +147,11 @@ function ZO_GamepadInteractiveSortFilterList:SetupFoci()
             self.sortHeaderGroup:EnableSelection(false)
         end
     end
-    self.headersFocalArea =  GamepadInteractiveSortFilterFocus_Headers:New(self, HeaderActivateCallback, HeaderDeactivateCallback)
+    self.headersFocalArea = GamepadInteractiveSortFilterFocus_Headers:New(self, HeaderActivateCallback, HeaderDeactivateCallback)
     self:AddNextFocusArea(self.headersFocalArea)
+end
 
+function ZO_GamepadInteractiveSortFilterList:SetupPanelFocusArea()
     local function PanelActivateCallback()
         local ANIMATE_INSTANTLY = true
         ZO_ScrollList_AutoSelectData(self.list, ANIMATE_INSTANTLY)
@@ -172,6 +163,12 @@ function ZO_GamepadInteractiveSortFilterList:SetupFoci()
     self.panelFocalArea = GamepadInteractiveSortFilterFocus_Panel:New(self, PanelActivateCallback, PanelDeactivateCallback)
 
     self:AddNextFocusArea(self.panelFocalArea)
+end
+
+function ZO_GamepadInteractiveSortFilterList:SetupFoci()
+    self:SetupFilterFocusArea()
+    self:SetupHeaderFocusArea()
+    self:SetupPanelFocusArea()
 end
 
 function ZO_GamepadInteractiveSortFilterList:InitializeHeader(headerData)
@@ -370,7 +367,11 @@ function ZO_GamepadInteractiveSortFilterList:InitializeKeybinds()
     if self.filtersFocalArea then
         self.filtersFocalArea:SetKeybindDescriptor(filterKeybindStripDescriptor)
     end
-    self.headersFocalArea:SetKeybindDescriptor(headerKeybindStripDescriptor)
+
+    if self.headersFocalArea then
+        self.headersFocalArea:SetKeybindDescriptor(headerKeybindStripDescriptor)
+    end
+
     self.panelFocalArea:SetKeybindDescriptor(self.keybindStripDescriptor)
 end
 
@@ -378,7 +379,10 @@ function ZO_GamepadInteractiveSortFilterList:AddUniversalKeybind(keybind)
     if self.filtersFocalArea then
         self.filtersFocalArea:AppendKeybind(keybind)
     end
-    self.headersFocalArea:AppendKeybind(keybind)
+
+    if self.headersFocalArea then
+        self.headersFocalArea:AppendKeybind(keybind)
+    end
     self.panelFocalArea:AppendKeybind(keybind)
 end
 
@@ -395,6 +399,22 @@ function ZO_GamepadInteractiveSortFilterList:SetupSort(sortKeys, initialKey, ini
 end
 
 --Events/Callbacks--
+function ZO_GamepadInteractiveSortFilterList:OnAllDialogsHidden()
+    --Re-narrate the current focus upon closing dialogs
+    if self:IsActivated() then
+        local NARRATE_HEADER = true
+        --Determine if we need to narrate the filter switcher, sort header group, or list entry
+        if self:IsCurrentFocusArea(self.filtersFocalArea) then
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher, NARRATE_HEADER)
+        elseif self:IsCurrentFocusArea(self.headersFocalArea) then
+            if self.sortHeaderGroup then
+                SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, self.sortHeaderGroup:GetKeyForCurrentSelectedIndex(), NARRATE_HEADER)
+            end
+        elseif self:IsCurrentFocusArea(self.panelFocalArea) then
+            SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, NARRATE_HEADER)
+        end
+    end
+end
 
 function ZO_GamepadInteractiveSortFilterList:OnShowing()
     --To be overriden
@@ -466,6 +486,10 @@ end
 
 function ZO_GamepadInteractiveSortFilterList:IsHeaderFocused()
     return self:IsCurrentFocusArea(self.headersFocalArea)
+end
+
+function ZO_GamepadInteractiveSortFilterList:AreFiltersFocused()
+    return self:IsCurrentFocusArea(self.filtersFocalArea)
 end
 
 function ZO_GamepadInteractiveSortFilterList:CanChangeSortKey()
@@ -553,7 +577,10 @@ function ZO_GamepadInteractiveSortFilterList:UpdateKeybinds()
     if self.filtersFocalArea then
         self.filtersFocalArea:UpdateKeybinds()
     end
-    self.headersFocalArea:UpdateKeybinds()
+
+    if self.headersFocalArea then
+        self.headersFocalArea:UpdateKeybinds()
+    end
     self.panelFocalArea:UpdateKeybinds()
 end
 
@@ -661,8 +688,8 @@ end
 
 --Global functions--
 
-function ZO_GamepadInteractiveSortFilterHeader_Initialize(control, text, sortKey, textAlignment)
-    ZO_SortHeader_Initialize(control, text, sortKey, ZO_SORT_ORDER_UP, textAlignment, nil, "ZO_GamepadInteractiveSortFilterHeaderHighlight")
+function ZO_GamepadInteractiveSortFilterHeader_Initialize(control, text, sortKey, textAlignment, narrationText)
+    ZO_SortHeader_Initialize(control, text, sortKey, ZO_SORT_ORDER_UP, textAlignment, nil, "ZO_GamepadInteractiveSortFilterHeaderHighlight", narrationText)
     if textAlignment == TEXT_ALIGN_RIGHT then
         local nameControl = control:GetNamedChild("Name")
         --Account for the arrow

@@ -58,7 +58,7 @@ function ZO_ValidTextInstructions:AddInstruction(instructionEnum)
     instruction:SetText(GetString(self:GetViolationPrefix(), instructionEnum))
     instruction.m_rule = instructionEnum
 
-    if(self.m_anchorTo) then
+    if self.m_anchorTo then
         instruction:SetAnchor(TOPLEFT, self.m_anchorTo, BOTTOMLEFT, 0, 15)
     else
         instruction:SetAnchor(TOP, self.m_control, TOP, 0, 10)
@@ -78,7 +78,7 @@ end
 
 function ZO_ValidTextInstructions:UpdateViolations(ruleViolations)
     for rule, instructionLine in pairs(self.m_ruleToControl) do
-        if(HasViolatedRule(rule, ruleViolations)) then
+        if HasViolatedRule(rule, ruleViolations) then
             instructionLine:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_FAILED))
         else
             instructionLine:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
@@ -91,7 +91,7 @@ function ZO_ValidTextInstructions:SetPreferredAnchor(point, relativeTo, relative
 end
 
 function ZO_ValidTextInstructions:Show(editControl, ruleViolations)
-    if(self.m_preferredAnchor) then
+    if self.m_preferredAnchor then
         self.m_preferredAnchor:Set(self.m_control)
     elseif editControl then
         self.m_control:ClearAnchors()
@@ -121,26 +121,28 @@ local NAME_RULES_TABLE = nil
 function ZO_ValidNameInstructions_GetViolationString(name, ruleViolations, hideUnviolatedRules, format)
     format = format or SI_INVALID_NAME_DIALOG_INSTRUCTION_FORMAT
 
-    if(NAME_RULES_TABLE == nil) then
-        NAME_RULES_TABLE = {}
-
-        table.insert(NAME_RULES_TABLE, NAME_RULE_TOO_SHORT)
-        table.insert(NAME_RULES_TABLE, NAME_RULE_CANNOT_START_WITH_SPACE)
-        table.insert(NAME_RULES_TABLE, NAME_RULE_MUST_END_WITH_LETTER)
-        table.insert(NAME_RULES_TABLE, NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS)
-        table.insert(NAME_RULES_TABLE, NAME_RULE_NO_NUMBERS)
-        table.insert(NAME_RULES_TABLE, NAME_RULE_NO_ADJACENT_PUNCTUATION_CHARACTERS)
-        table.insert(NAME_RULES_TABLE, NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS)
-        table.insert(NAME_RULES_TABLE, NAME_RULE_INVALID_CHARACTERS)
+    if NAME_RULES_TABLE == nil then
+        NAME_RULES_TABLE =
+        {
+            NAME_RULE_TOO_SHORT,
+            NAME_RULE_CANNOT_START_WITH_SPACE,
+            NAME_RULE_MUST_END_WITH_LETTER,
+            NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS,
+            NAME_RULE_NO_NUMBERS,
+            NAME_RULE_NO_ADJACENT_PUNCTUATION_CHARACTERS,
+            NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS,
+            NAME_RULE_INVALID_CHARACTERS,
+            NAME_RULE_TOO_FEW_ALPHA_CHARACTERS,
+        }
     end
 
     local invalidNameString = ""
 
     for i, instructionEnum in ipairs(NAME_RULES_TABLE) do
         local violatedRule = HasViolatedRule(instructionEnum, ruleViolations)
-        if(violatedRule or hideUnviolatedRules ~= true) then
+        if violatedRule or hideUnviolatedRules ~= true then
             local color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
-            if(violatedRule) then
+            if violatedRule then
                 color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_FAILED))
             end
 
@@ -161,7 +163,6 @@ ZO_ValidAccountNameInstructions = ZO_ValidTextInstructions:Subclass()
 function ZO_ValidAccountNameInstructions:GetViolationPrefix()
     return "SI_ACCOUNTNAMINGERROR"
 end
-
 
 function ZO_ValidAccountNameInstructions:AddInstructions(instructions)
     local shownInstructions = instructions or

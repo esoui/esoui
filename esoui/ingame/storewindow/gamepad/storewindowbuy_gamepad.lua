@@ -224,9 +224,9 @@ function ZO_GamepadStoreBuy:SetVendorBlurActive(shouldActivateVendorBlur)
 end
 
 function ZO_GamepadStoreBuy:UpdatePreview(selectedData)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
         if self:CanPreviewStoreEntry(selectedData) then
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
             local storeEntryIndex = ZO_Inventory_GetSlotIndex(selectedData)
             ZO_StoreManager_DoPreviewAction(ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE, storeEntryIndex)
         else
@@ -234,7 +234,7 @@ function ZO_GamepadStoreBuy:UpdatePreview(selectedData)
             ITEM_PREVIEW_GAMEPAD:SetInteractionCameraPreviewEnabled(false, FRAME_TARGET_STORE_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
             STORE_WINDOW_GAMEPAD:UpdateRightTooltip(self.list, ZO_MODE_STORE_BUY)
         end
-    else
+    elseif selectedData then
         STORE_WINDOW_GAMEPAD:UpdateRightTooltip(self.list, ZO_MODE_STORE_BUY)
     end
 end

@@ -14,14 +14,25 @@ function ZO_PagedListPlaySound(type)
     end
 end
 
-function ZO_PagedListSetupFooter(footerControl)
-    local footer = {}
-    footer.control = footerControl
-    footer.previousButton = footerControl:GetNamedChild("PreviousButton")
-    footer.nextButton = footerControl:GetNamedChild("NextButton")
-    footer.pageNumberLabel = footerControl:GetNamedChild("PageNumberText")
+ZO_PagedListFooter = ZO_InitializingObject:Subclass()
 
-    return footer
+function ZO_PagedListFooter:Initialize(control)
+    self.control = control
+    self.previousButton = control:GetNamedChild("PreviousButton")
+    self.nextButton = control:GetNamedChild("NextButton")
+    self.pageNumberLabel = control:GetNamedChild("PageNumberText")
+end
+
+function ZO_PagedListFooter:SetPageText(pageNumber)
+    self.pageNumberLabel:SetText(pageNumber)
+end
+
+function ZO_PagedListFooter:SetHidden(hidden)
+    self.control:SetHidden(hidden)
+end
+
+function ZO_PagedListSetupFooter(footerControl)
+    return ZO_PagedListFooter:New(footerControl)
 end
 
 ZO_PagedList = ZO_SortFilterListBase:Subclass()

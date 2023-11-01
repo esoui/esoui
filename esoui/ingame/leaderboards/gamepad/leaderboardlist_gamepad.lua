@@ -1,9 +1,10 @@
 --Layout consts, defining the widths of the list's columns as provided by design--
-ZO_GAMEPAD_LEADERBOARD_LIST_RANK_WIDTH = 116 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_LEADERBOARD_LIST_RANK_WIDTH = 96 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 ZO_GAMEPAD_LEADERBOARD_LIST_USER_FACING_NAME_WIDTH = 340 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 ZO_GAMEPAD_LEADERBOARD_LIST_CHARACTER_NAME_WIDTH = 340 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 ZO_GAMEPAD_LEADERBOARD_LIST_CLASS_WIDTH = 120 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 ZO_GAMEPAD_LEADERBOARD_LIST_ALLIANCE_WIDTH = 120 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_LEADERBOARD_LIST_PROGRESS_WIDTH = 190 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 ZO_GAMEPAD_LEADERBOARD_LIST_POINTS_WIDTH = 170 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 
 local LEADERBOARD_LIST_TEMPLATE = "ZO_LeaderboardsPlayerRow_Gamepad"
@@ -18,20 +19,43 @@ local LEADERBOARD_LIST_ENTRY_SORT_KEYS =
     ["characterName"]  = { },
     ["class"] = { tiebreaker = "rank" },
     ["alliance"] = { tiebreaker = "rank", isNumeric = true },
+    ["progress"] = { tiebreaker = "rank" },
     ["points"] = { tiebreaker = "rank", isNumeric = true},
 }
 
 local LEADERBOARD_TYPE_HIDDEN_COLUMNS =
 {
+    [LEADERBOARD_TYPE_OVERALL] = 
+    {
+        ["progress"] = true,
+    },
+    [LEADERBOARD_TYPE_CLASS] = 
+    {
+        ["progress"] = true,
+    },
+    [LEADERBOARD_TYPE_ALLIANCE] = 
+    {
+        ["progress"] = true,
+    },
     [LEADERBOARD_TYPE_BATTLEGROUND] = 
     {
         ["class"] = true,
         ["alliance"] = true,
+        ["progress"] = true,
     },
     [LEADERBOARD_TYPE_TRIBUTE] = 
     {
         ["characterName"] = true,
         ["class"] = true,
+        ["alliance"] = true,
+        ["progress"] = true,
+    },
+    [LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL] = 
+    {
+        ["alliance"] = true,
+    },
+    [LEADERBOARD_TYPE_ENDLESS_DUNGEON_CLASS] = 
+    {
         ["alliance"] = true,
     },
 }
@@ -119,6 +143,14 @@ function LeaderboardList_Gamepad:GetNarrationText()
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_LEADERBOARDS_HEADER_ALLIANCE)))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_ALLIANCE", selectedData.alliance)))
         end
+        if selectedData.arc then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_LEADERBOARDS_HEADER_PROGRESS)))
+
+            local stageNarration, cycleNarration, arcNarration = ZO_EndlessDungeonManager.GetProgressionNarrationDescriptions(selectedData.stage, selectedData.cycle, selectedData.arc)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(arcNarration))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(cycleNarration))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(stageNarration))
+        end
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GAMEPAD_LEADERBOARDS.headerPointsText))
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.points))
     end
@@ -167,6 +199,7 @@ function LeaderboardList_Gamepad:SetupLeaderboardPlayerEntry(control, data)
     control.rankLabel:SetColor(r, g, b, a)
     control.classIcon:SetColor(r, g, b, a)
     control.allianceIcon:SetColor(r, g, b, a)
+    control.progressLabel:SetColor(r, g, b, a)
     control.pointsLabel:SetColor(r, g, b, a)
 
     if not shouldHideCharacterLabel then

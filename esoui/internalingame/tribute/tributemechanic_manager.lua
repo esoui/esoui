@@ -302,21 +302,17 @@ function ZO_TributeMechanicCardTile:Setup(parentControl, cardInstanceId, mechani
     local patronData = cardData:GetPatronData()
     local unusedQuantity = nil
     self.mechanicType, unusedQuantity, self.comboNumber, self.param1, self.param2, self.param3, self.triggerId = cardData:GetMechanicInfo(self.mechanicActivationSource, self.mechanicIndex)
+    local isOnTrigger = self.triggerId ~= 0
 
-    local digitsSuffix = quantity >= 10 and "Double" or "Single"
-    local activationSourceSuffix
-    if mechanicActivationSource == TRIBUTE_MECHANIC_ACTIVATION_SOURCE_COMBO then
-        activationSourceSuffix = "Combo"
-    elseif self.triggerId ~= 0 then
-        activationSourceSuffix = "Trigger"
-    else
-        activationSourceSuffix = "Activation"
-    end
-    local mechanicControlTemplate = string.format("ZO_TributeCard_MechanicContainer_Small_%sDigit_%s_Style", digitsSuffix, activationSourceSuffix)
+    local IS_SMALL = true
+    local isSingleDigitContainer = quantity < 10
+    local IS_POSITIVE = false
+    local mechanicControlTemplate, mechanicFrameTextureName = ZO_GetTributeMechanicFrameInfo(IS_SMALL, isSingleDigitContainer, mechanicActivationSource, isOnTrigger, IS_POSITIVE)
     ApplyTemplateToControl(self.mechanicControl, mechanicControlTemplate)
+    self.mechanicFrameTexture:SetTexture(mechanicFrameTextureName)
     self.mechanicTypeIconTexture:SetTexture(self:GetIconTextureFile())
 
-    if self.triggerId ~= 0 then
+    if isOnTrigger then
         self.patronTexture:SetHidden(true)
     else
         local suitAtlasImage, suitAtlasGlowImage = patronData:GetSuitAtlas(cardData:GetCardType())
@@ -435,16 +431,14 @@ function ZO_TributeMechanicPatronTile:Setup(parentControl, patronDraftId, favorS
         self.triggerId = 0
     end
 
-    local digitsSuffix = quantity >= 10 and "Double" or "Single"
-    local activationSourceSuffix
-    if self.triggerId ~= 0 then
-        activationSourceSuffix = "Trigger"
-    else
-        activationSourceSuffix = "Activation"
-    end
     --Reuse the card mechanic templates since they look the same
-    local mechanicControlTemplate = string.format("ZO_TributeCard_MechanicContainer_Small_%sDigit_%s_Style", digitsSuffix, activationSourceSuffix)
+    local IS_SMALL = true
+    local isSingleDigitContainer = quantity < 10
+    local isOnTrigger = self.triggerId ~= 0
+    local IS_POSITIVE = false
+    local mechanicControlTemplate, mechanicFrameTextureName = ZO_GetTributeMechanicFrameInfo(IS_SMALL, isSingleDigitContainer, TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ACTIVATION, isOnTrigger, IS_POSITIVE)
     ApplyTemplateToControl(self.mechanicControl, mechanicControlTemplate)
+    self.mechanicFrameTexture:SetTexture(mechanicFrameTextureName)
     self.mechanicTypeIconTexture:SetTexture(self:GetIconTextureFile())
 
     local portraitImage = patronData:GetPatronSmallIcon()

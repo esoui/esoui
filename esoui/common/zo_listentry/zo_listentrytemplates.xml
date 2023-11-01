@@ -36,6 +36,16 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_ListEntryHighlight_Disabled" inherits="ZO_ListEntryBackdrop" alpha="0" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Texture name="$(parent)Top" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight_greyedout.dds" level="1"/>
+                <Texture name="$(parent)Bottom" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight_greyedout.dds" level="1"/>
+                <Texture name="$(parent)Middle" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight_greyedout.dds" level="1"/>
+            </Controls>
+        </Control>
+
         <Control name="ZO_ListEntry_BackdropAndHighlight_Template" virtual="true">
             <Controls>
                 <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">

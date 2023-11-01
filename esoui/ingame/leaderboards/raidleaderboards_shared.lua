@@ -251,6 +251,11 @@ function ZO_RaidLeaderboardsManager_Shared:SelectRaidById(raidId, selectOption, 
 
     local selectedNode
 
+    if #self.raidListNodes == 0 then
+        -- We've never opened the menu, so we need to populate the categories before we can select the right one
+        self.leaderboardSystem:UpdateCategories()
+    end
+
     for _, node in ipairs(self.raidListNodes) do
         local nodeData = node.GetData and node:GetData() or node
         if nodeData.raidId == raidId then

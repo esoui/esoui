@@ -18,6 +18,10 @@ function ZO_PregameGamepadTextEditTemplate_Setup(control, data, selected, select
         control.edit:SetTextType(data.textType)
     end
 
+    if data.isPassword ~= nil then
+        control.edit:SetAsPassword(data.isPassword)
+    end
+
     if data.contents then
         local contents = data.contents
         if type(contents) == "function" then

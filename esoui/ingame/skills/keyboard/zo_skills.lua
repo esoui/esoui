@@ -655,9 +655,9 @@ function ZO_SkillsManager:RegisterForEvents()
 
     --Weapon Swap Tutorial Setup
     local tutorialAnchor = ZO_Anchor:New(RIGHT, self.assignableActionBar:GetHotbarSwap():GetHotbarNameLabel(), LEFT, -10, 0)
-    TUTORIAL_SYSTEM:RegisterTriggerLayoutInfo(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK, control, SKILLS_FRAGMENT, tutorialAnchor)
+    TUTORIAL_SYSTEM:RegisterTriggerLayoutInfo(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK_POINTER_BOX, control, SKILLS_FRAGMENT, tutorialAnchor)
     control:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, function()
-        TUTORIAL_SYSTEM:RemoveTutorialByTrigger(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK)
+        TUTORIAL_SYSTEM:RemoveTutorialByTrigger(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK_POINTER_BOX)
     end)
 
     local function OnSkillPointAllocationModeChanged()
@@ -991,7 +991,7 @@ function ZO_SkillsManager:OnShown()
 
     local level = GetUnitLevel("player")
     if level >= GetWeaponSwapUnlockedLevel() then
-        TriggerTutorial(TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK)
+        TriggerTutorial(TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK_POINTER_BOX)
     end
 end
 

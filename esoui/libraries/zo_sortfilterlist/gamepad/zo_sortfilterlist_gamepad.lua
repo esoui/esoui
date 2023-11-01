@@ -66,6 +66,18 @@ function ZO_SortFilterList_Gamepad:MoveNext()
     end
 end
 
+function ZO_SortFilterList_Gamepad:ResetToTop(onScrollCompleteCallback, shouldAnimateInstantly)
+    if not ZO_ScrollList_AtTopOfList(self.list) then
+        if self.isActive then
+            ZO_ScrollList_TrySelectFirstData(self.list, onScrollCompleteCallback, shouldAnimateInstantly)
+            self:UpdateKeybinds()
+        else
+            ZO_ScrollList_ResetAutoSelectIndex(self.list, nil)
+            ZO_ScrollList_ScrollDataIntoView(self.list, 1, onScrollCompleteCallback, shouldAnimateInstantly)
+        end
+    end
+end
+
 function ZO_SortFilterList_Gamepad:UpdateDirectionalInput()
     local result = self.movementController:CheckMovement()
     if result == MOVEMENT_CONTROLLER_MOVE_NEXT then

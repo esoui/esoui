@@ -194,7 +194,7 @@ function ZO_QuestJournal_Manager:BuildQuestListData()
             end
 
             local level = GetJournalQuestLevel(i)
-            local instanceDisplayType = GetJournalQuestInstanceDisplayType(i)
+            local zoneDisplayType = GetJournalQuestZoneDisplayType(i)
             local repeatableType = GetJournalQuestRepeatType(i)
             local repeatable = repeatableType ~= QUEST_REPEAT_NOT_REPEATABLE
 
@@ -206,7 +206,7 @@ function ZO_QuestJournal_Manager:BuildQuestListData()
                     categoryName = categoryName,
                     categoryType = categoryType,
                     questType = questType,
-                    displayType = instanceDisplayType,
+                    displayType = zoneDisplayType,
                     repeatableType = repeatableType,
                     repeatable = repeatable,
                 }

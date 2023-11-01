@@ -45,7 +45,7 @@ function ZO_AddOnManager:Initialize(control, primaryKeybindDescriptor, secondary
     ZO_CheckButton_SetCheckState(self.advancedErrorCheck, GetCVar("UIErrorAdvancedView") == "1")
     ZO_CheckButton_SetLabelText(self.advancedErrorCheck, GetString(SI_ADDON_MANAGER_ADVANCED_UI_ERRORS))
 
-    self.characterDropdown = ZO_ComboBox:New(self.control:GetNamedChild("CharacterSelectDropdown"))
+    self.characterDropdown = ZO_ComboBox_ObjectFromContainer(self.control:GetNamedChild("CharacterSelectDropdown"))
     self.characterDropdown:SetSortsItems(false)
 
     local function OnAddOnEulaHidden()

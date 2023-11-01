@@ -1,0 +1,61 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ExpiringMarketCurrencyDialogRow_Keyboard" virtual="true">
+            <Dimensions y="ZO_EXPIRING_MARKET_CURRENCY_DIALOG_ROW_KEYBOARD_HEIGHT"/>
+            <Controls>
+                <Label name="$(parent)Amount" font="ZoFontGame" horizontalAlignment="LEFT">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-5"/>
+                    <Dimensions y="ZO_EXPIRING_MARKET_CURRENCY_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                </Label>
+                <Label name="$(parent)ExpiresAt" font="ZoFontGame" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Amount" relativePoint="TOPRIGHT" offsetX="10" />
+                    <Anchor point="TOPRIGHT" />
+                    <Dimensions y="ZO_EXPIRING_MARKET_CURRENCY_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_ExpiringMarketCurrencyDialogTopLevel_Keyboard" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_ExpiringMarketCurrencyDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" override="true">
+                    <Dimensions x="360"/>
+                </Label>
+                <Label name="$(parent)Instructions" inherits="ZO_DialogContentAnchors" text="SI_EXPIRING_CROWNS_DESCRIPTION_TEXT" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <Dimensions y="ZO_EXPIRING_MARKET_CURRENCY_DIALOG_ROW_KEYBOARD_HEIGHT"/>
+                    <Controls>
+                        <Label name="$(parent)Amount" text="SI_EXPIRING_CROWNS_AMOUNT_HEADER" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" horizontalAlignment="LEFT" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-5"/>
+                            <Dimensions y="ZO_EXPIRING_MARKET_CURRENCY_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                        </Label>
+                        <Label name="$(parent)ExpiresAt" text="SI_EXPIRING_CROWNS_EXPIRES_HEADER" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" horizontalAlignment="RIGHT" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Amount" relativePoint="TOPRIGHT" offsetX="10" />
+                            <Anchor point="TOPRIGHT" />
+                            <Dimensions y="ZO_EXPIRING_MARKET_CURRENCY_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Headers" relativePoint="BOTTOMRIGHT" offsetY="10" offsetX="ZO_SCROLL_BAR_WIDTH" />
+                    <Dimensions y="200"/>
+                </Control>
+
+                <Label name="$(parent)EmptyText" text="SI_EXPIRING_CROWNS_EMPTY_TEXT" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Headers" relativePoint="BOTTOMRIGHT" offsetY="20" offsetX="ZO_SCROLL_BAR_WIDTH" />
+                </Label>
+
+                <Control name="$(parent)Close" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

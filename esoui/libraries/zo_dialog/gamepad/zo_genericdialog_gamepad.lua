@@ -754,7 +754,7 @@ do
         -- Unregister all dropdown callbacks since the dialog control may be used for a different dialog
         local function ResetDropdownItem(control)
             control.dropdown:ClearCallbackRegistry()
-            control.dropdown:ResetNarrationInfo()
+            control.dropdown:Reset()
             --Re-register for narration after clearing the callback registry
             SCREEN_NARRATION_MANAGER:RegisterComboBox(control.dropdown)
         end

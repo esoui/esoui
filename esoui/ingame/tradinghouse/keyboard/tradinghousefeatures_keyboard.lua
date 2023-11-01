@@ -37,7 +37,7 @@ function ZO_TradingHouseDropDownFeature_Keyboard:AttachToControl(dropdownControl
 
     for choiceIndex = 1, self.featureParams:GetNumChoices() do
         local choiceDisplayName = self.featureParams:GetChoiceDisplayName(choiceIndex)
-        local entry = ZO_ComboBox:CreateItemEntry(choiceDisplayName, OnChoiceSelected)
+        local entry = dropdown:CreateItemEntry(choiceDisplayName, OnChoiceSelected)
         entry.choiceIndex = choiceIndex
         dropdown:AddItem(entry)
     end

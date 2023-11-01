@@ -97,12 +97,12 @@
                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT" />
                         </Label>
 
-                        <Control name="$(parent)ApparelFilterTypes" inherits="ZO_MultiselectComboBox">
+                        <Control name="$(parent)ApparelFilterTypes" inherits="ZO_ComboBox">
                             <Dimensions x="175" />
                             <Anchor point="LEFT" relativeTo="$(parent)Search" relativePoint="RIGHT" offsetX="20" />
                         </Control>
 
-                        <Control name="$(parent)WeaponFilterTypes" inherits="ZO_MultiselectComboBox">
+                        <Control name="$(parent)WeaponFilterTypes" inherits="ZO_ComboBox">
                             <Dimensions x="175" />
                             <Anchor point="LEFT" relativeTo="$(parent)ApparelFilterTypes" relativePoint="RIGHT" offsetX="20" />
                         </Control>
@@ -127,6 +127,10 @@
                         <StatusBar name="$(parent)CategoryProgress" inherits="ZO_ArrowProgressBarWithBG">
                             <Anchor point="TOPLEFT" offsetX="10" />
                             <Anchor point="TOPRIGHT" offsetX="-23" />
+                            <Controls>
+                                <Control name="$(parent)Overlay" override="true" tier="MEDIUM" />
+                                <Label name="$(parent)Progress" override="true" tier="MEDIUM" />
+                            </Controls>
                         </StatusBar>
 
                         <Label name="$(parent)SelectReconstructItemHeader" font="ZoFontHeader" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_ITEM_SETS_BOOK_SELECT_RECONSTRUCT_ITEM_HEADER" hidden="true">

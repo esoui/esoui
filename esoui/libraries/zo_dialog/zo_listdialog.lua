@@ -1,13 +1,12 @@
-ZO_ListDialog = ZO_Object:Subclass()
+
+-----------------
+-- ZO_ListDialog
+-----------------
+
+ZO_ListDialog = ZO_InitializingObject:Subclass()
 
 LIST_DIALOG_CUSTOM_CONTROL_LOCATION_TOP = 1
 LIST_DIALOG_CUSTOM_CONTROL_LOCATION_BOTTOM = 2
-
-function ZO_ListDialog:New(...)
-    local listDialog = ZO_Object.New(self)
-    listDialog:Initialize(...)
-    return listDialog
-end
 
 local SCROLL_TYPE_ITEM = 1
 
@@ -33,6 +32,10 @@ function ZO_ListDialog:Initialize(listTemplate, listItemHeight, listSetupFunctio
 
     self.customControls = {}
 
+    self:SetupList(listTemplate, listItemHeight, listSetupFunction)
+end
+
+function ZO_ListDialog:SetupList(listTemplate, listItemHeight, listSetupFunction)
     local function OnMouseUp(rowControl, button, upInside)
         if upInside then
             local data = ZO_ScrollList_GetData(rowControl)
@@ -57,8 +60,8 @@ function ZO_ListDialog:Initialize(listTemplate, listItemHeight, listSetupFunctio
             self.onSelectedCallback(selected)
         end
     end
-	    
-	ZO_ScrollList_EnableSelection(self.list, nil, OnListSelection)
+
+    ZO_ScrollList_EnableSelection(self.list, nil, OnListSelection)
 end
 
 function ZO_ListDialog:SetAboveText(text)
@@ -172,6 +175,85 @@ function ZO_ListDialog:OnHide()
     self.customControls[LIST_DIALOG_CUSTOM_CONTROL_LOCATION_BOTTOM] = ClearCustomControl(self.customControls[LIST_DIALOG_CUSTOM_CONTROL_LOCATION_BOTTOM])
 
     self:ClearList()
+end
+
+----------------------------
+-- ZO_MultiSelectListDialog
+----------------------------
+
+ZO_MultiSelectListDialog = ZO_ListDialog:Subclass()
+
+function ZO_MultiSelectListDialog:Initialize(listTemplate, listItemHeight, listSetupFunction)
+    ZO_ListDialog.Initialize(self, listTemplate, listItemHeight, listSetupFunction)
+    self.selectedItems = {}
+end
+
+function ZO_MultiSelectListDialog:SetupList(listTemplate, listItemHeight, listSetupFunction)
+    local function OnMouseUp(rowControl, button, upInside)
+        if upInside then
+            local data = ZO_ScrollList_GetData(rowControl)
+            self:SelectItem(data)
+        end
+    end
+
+    local function Setup(rowControl, ...)
+        rowControl:SetHandler("OnMouseUp", OnMouseUp)
+        listSetupFunction(rowControl, ...)
+    end
+    ZO_ScrollList_AddDataType(self.list, SCROLL_TYPE_ITEM, listTemplate, listItemHeight, Setup)
+    self.listItemHeight = listItemHeight
+
+    self.minVisibleItems = zo_max(zo_floor(220 / listItemHeight), 2)
+    self.maxVisibleItems = zo_max(zo_floor(300 / listItemHeight), self.minVisibleItems)
+end
+
+function ZO_MultiSelectListDialog:SelectItem(data)
+    local newSelectionStatus = not self:IsItemSelected(data)
+    if newSelectionStatus then
+        self:AddItemToSelected(data)
+    else
+        self:RemoveItemFromSelected(data)
+    end
+
+    if self.onSelectedCallback then
+        self.onSelectedCallback(data)
+    end
+
+    -- Refresh the data that was just selected so the selection highlight properly shows/hides
+    ZO_ScrollList_RefreshVisible(self.list, data)
+end
+
+function ZO_MultiSelectListDialog:AddItemToSelected(data)
+    table.insert(self.selectedItems, data)
+end
+
+function ZO_MultiSelectListDialog:RemoveItemFromSelected(data)
+    ZO_RemoveFirstElementFromNumericallyIndexedTable(self.selectedItems, data)
+end
+
+function ZO_MultiSelectListDialog:IsItemSelected(data)
+    return ZO_IsElementInNumericallyIndexedTable(self.selectedItems, data)
+end
+
+function ZO_MultiSelectListDialog:SelectAll()
+    ZO_ClearNumericallyIndexedTable(self.selectedItems)
+
+    local scrollData = ZO_ScrollList_GetDataList(self.list)
+    for i, dataEntry in ipairs(scrollData) do
+        local data = dataEntry.data
+        self:AddItemToSelected(data)
+    end
+
+    ZO_ScrollList_RefreshVisible(self.list)
+end
+
+function ZO_MultiSelectListDialog:GetSelectedItems()
+    return self.selectedItems
+end
+
+function ZO_MultiSelectListDialog:OnHide()
+    ZO_ListDialog.OnHide(self)
+    ZO_ClearNumericallyIndexedTable(self.selectedItems)
 end
 
 function ZO_ListDialog_OnHide(dialog)

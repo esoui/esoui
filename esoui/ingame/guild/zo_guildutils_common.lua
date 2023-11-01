@@ -36,11 +36,11 @@ local function GetGuildDialogFunction(playerGuildId, data, isGamepad)
 end
 
 function ZO_AddLeaveGuildMenuItem(playerGuildId)
-	AddMenuItem(GetString(SI_GUILD_LEAVE), GetGuildDialogFunction(playerGuildId))
+    AddMenuItem(GetString(SI_GUILD_LEAVE), GetGuildDialogFunction(playerGuildId))
 end
 
 function ZO_ShowLeaveGuildDialog(playerGuildId, data, isGamepad)
-	GetGuildDialogFunction(playerGuildId, data, isGamepad)()
+    GetGuildDialogFunction(playerGuildId, data, isGamepad)()
 end
 
 function ZO_CanPlayerCreateGuild()
@@ -73,7 +73,7 @@ function ZO_UpdateGuildStatusDropdown(dropdown)
     dropdown:ClearItems()
 
     ZO_UpdateGuildStatusDropdownSelection(dropdown)
-        
+
     for i = 1, GetNumPlayerStatuses() do
         local function GuildStatusSelect()
             SelectPlayerStatus(i)
@@ -81,7 +81,7 @@ function ZO_UpdateGuildStatusDropdown(dropdown)
 
         local statusTexture = ZO_GetPlayerStatusIcon(i)
         local text = zo_strformat(SI_GAMEPAD_GUILD_STATUS_SELECTOR_FORMAT, statusTexture, GetString("SI_PLAYERSTATUS", i))
-        local entry = ZO_ComboBox:CreateItemEntry(text, GuildStatusSelect)
+        local entry = dropdown:CreateItemEntry(text, GuildStatusSelect)
         dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
 

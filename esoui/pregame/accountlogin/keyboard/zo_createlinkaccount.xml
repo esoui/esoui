@@ -115,7 +115,7 @@
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameDescription" relativePoint="BOTTOMLEFT" offsetY="15" />
                                 </Label>
 
-                                <Control name="$(parent)CountryDropdown" inherits="ZO_ScrollableComboBox">
+                                <Control name="$(parent)CountryDropdown" inherits="ZO_ComboBox">
                                     <Dimensions x="300" />
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)CountryLabel" relatviePoint="BOTTOMLEFT" offsetY="25" />
 
@@ -206,7 +206,7 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameLabel" relativePoint="BOTTOMLEFT" />
 
                             <Controls>
-                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontWinH4">
+                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontWinH4" maxInputCharacters="MAX_EMAIL_LENGTH">
                                     <OnEnter>
                                         ZO_CreateLinkAccount_PasswordEdit_TakeFocus()
                                     </OnEnter>
@@ -226,12 +226,12 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)AccountName" relativePoint="BOTTOMLEFT" offsetY="15" />
                         </Label>
 
-                        <Backdrop name="$(parent)Password" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
+                        <Backdrop name="$(parent)Password" inherits="ZO_TogglePasswordEditBoxWithBackground" level="1">
                             <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)PasswordLabel" relativePoint="BOTTOMLEFT" />
 
                             <Controls>
-                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" textType="PASSWORD">
+                                <EditBox name="$(parent)Edit" override="true" font="ZoFontWinH4" maxInputCharacters="MAX_PASSWORD_LENGTH">
                                     <OnEnter>
                                         ZO_CreateLinkAccount_AttemptLinkAccount()
                                     </OnEnter>

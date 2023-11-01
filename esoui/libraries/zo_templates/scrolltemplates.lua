@@ -819,7 +819,7 @@ end
 --@dataTypeSelectSound - An optional sound to play when a row of this data type is selected.
 --@resetControlCallback - An optional callback when the datatype control gets reset.
 function ZO_ScrollList_AddDataType(self, typeId, templateName, height, setupCallback, hideCallback, dataTypeSelectSound, resetControlCallback)
-    if not self.dataTypes[typeId] then
+    if internalassert(not self.dataTypes[typeId], "Data type already registered to scroll list") then
         local factoryFunction = function(objectPool) return ZO_ObjectPool_CreateNamedControl(string.format("%s%dRow", self:GetName(), typeId), templateName, objectPool, self.contents) end
         local pool = ZO_ObjectPool:New(factoryFunction, resetControlCallback or ZO_ObjectPool_DefaultResetControl)
         self.dataTypes[typeId] = 
@@ -1118,7 +1118,7 @@ do
         elseif typeId == ZO_SCROLL_LIST_OPERATION_LINE_BREAK then
             return lineBreakOperation
         end
-    
+
         return self.dataTypes[typeId]
     end
 end
@@ -1193,17 +1193,17 @@ end
 function ZO_ScrollList_AddCategory(self, categoryId, parentId)
     if self.categories[categoryId] then
         return
-    end    
-    
+    end
+
     --if a parent id is given and it doesn't exist, give up
     local parent = nil
     if parentId then
         parent = self.categories[parentId]
         if not parent then
             return
-        end        
+        end
     end
-    
+
     local category = {id = categoryId, parent = parent, children = {}, hidden = false}
     self.categories[categoryId] = category
     if parent then
@@ -1246,7 +1246,7 @@ function ZO_ScrollList_AddOperation(self, operationId, data)
         typeId = operationId,
         data = data
     }
-    
+
     if data then
         data.dataEntry = operation -- Used in the comparison function
     end
@@ -1336,17 +1336,25 @@ local function RemoveAnimationOnControl(control, animationFieldName, animateInst
 end
 
 local function HighlightControl(self, control)
-    PlayAnimationOnControl(control, self.highlightTemplate, "HighlightAnimation", DONT_ANIMATE_INSTANTLY, self.overrideHighlightEndAlpha)
+    local highlightTemplate, animationFieldName
+    if type(self.highlightTemplateOrFunction) == "function" then
+        highlightTemplate, animationFieldName = self.highlightTemplateOrFunction(control)
+    else
+        highlightTemplate = self.highlightTemplateOrFunction
+    end
+    control.highlightAnimationFieldName = animationFieldName or "HighlightAnimation"
+    PlayAnimationOnControl(control, highlightTemplate, control.highlightAnimationFieldName, DONT_ANIMATE_INSTANTLY, self.overrideHighlightEndAlpha)
 
     self.highlightedControl = control
-    
+
     if self.highlightCallback then
         self.highlightCallback(control, true)
-    end   
+    end
 end
 
 local function UnhighlightControl(self, control) 
-    RemoveAnimationOnControl(control, "HighlightAnimation")
+    RemoveAnimationOnControl(control, control.highlightAnimationFieldName)
+    control.highlightAnimationFieldName = nil
 
     self.highlightedControl = nil
 
@@ -1369,12 +1377,12 @@ end
 
 --Allows you to lock the highlight in place. The highlight will automatically unlock if the list is recommitted.
 function ZO_ScrollList_SetLockHighlight(self, lock)
-    if not self.highlightTemplate or (self.highlightLocked == lock) then
+    if not self.highlightTemplateOrFunction or (self.highlightLocked == lock) then
         return
     end
-   
+
     self.highlightLocked = lock
-    
+
     if lock then
         self.pendingHighlightControl = self.highlightedControl
     else
@@ -1389,7 +1397,7 @@ end
 
 --Reinitializes the highlight (used mostly when a mouse enter would have been missed)
 local function RefreshHighlight(self)
-    if not self.highlightTemplate then
+    if not self.highlightTemplateOrFunction then
         return
     end
 
@@ -1397,7 +1405,7 @@ local function RefreshHighlight(self)
     if self.highlightedControl then
         UnhighlightControl(self, self.highlightedControl)
     end
-    
+
     --find the control to highlight if any
     for i = 0, #self.activeControls do
         local control = self.activeControls[i]
@@ -1409,29 +1417,29 @@ local function RefreshHighlight(self)
 end
 
 function ZO_ScrollList_MouseEnter(self, control)
-    if not self.highlightTemplate then
+    if not self.highlightTemplateOrFunction then
         return
     end
-    
+
     --allows us to place the highlight correctly when we unlock
     if self.highlightLocked then
         self.pendingHighlightControl = control
         return
     end
-    
+
     HighlightControl(self, control)
 end
 
 function ZO_ScrollList_MouseExit(self, control)
-    if not self.highlightTemplate then
+    if not self.highlightTemplateOrFunction then
         return
     end
-    
+
     if self.highlightLocked then
         self.pendingHighlightControl = nil
         return
     end
-    
+
     UnhighlightControl(self, control)
 end
 
@@ -1455,15 +1463,19 @@ function ZO_ScrollList_MouseClick(self, control)
     end
 end
 
-function ZO_ScrollList_EnableHighlight(self, highlightTemplate, highlightCallback, overrideEndAlpha)
-    if not self.highlightTemplate then
-        self.highlightTemplate = highlightTemplate
-        
+-- highlightTemplateOrFunction can be the name of a template control, or it can be a function that returns the name of a control.
+-- If a function, it can optionally have an additional return for an animation field name. Highlight templates and
+-- animation field names are one-to-one, so a unique animation field name is required if and only if the scroll list
+-- needs to display multiple different highlights.
+function ZO_ScrollList_EnableHighlight(self, highlightTemplateOrFunction, highlightCallback, overrideEndAlpha)
+    if not self.highlightTemplateOrFunction then
+        self.highlightTemplateOrFunction = highlightTemplateOrFunction
+
         self.highlightLocked = false
         self.pendingHighlightControl = nil
         self.highlightCallback = highlightCallback
         self.overrideHighlightEndAlpha = overrideEndAlpha
-        
+
         RefreshHighlight(self)
     end
 end
@@ -1652,7 +1664,7 @@ end
 
 local function OnContentsUpdate(self)
     local _, windowHeight = self:GetDimensions()
-    
+
     if windowHeight > 0 then
         self:SetHandler("OnUpdate", nil)
         ZO_ScrollList_SetHeight(self, windowHeight)
@@ -1664,8 +1676,8 @@ local function FreeActiveScrollListControl(self, i)
     local currentControl = self.activeControls[i]
     local currentDataEntry = currentControl.dataEntry
     local dataType = GetDataTypeInfo(self, currentDataEntry.typeId)
-    
-    if self.highlightTemplate then
+
+    if self.highlightTemplateOrFunction then
         if currentControl == self.highlightedControl then
             UnhighlightControl(self, currentControl)
             if self.highlightLocked then
@@ -1679,7 +1691,7 @@ local function FreeActiveScrollListControl(self, i)
     if currentControl == self.pendingHighlightControl then
         self.pendingHighlightControl = nil
     end
-    
+
     if AreSelectionsEnabled(self) then
         if currentControl == self.selectedControl then
             UnselectControl(self, currentControl, ANIMATE_INSTANTLY)
@@ -1687,14 +1699,14 @@ local function FreeActiveScrollListControl(self, i)
             RemoveAnimationOnControl(currentControl, "SelectionAnimation", ANIMATE_INSTANTLY)
         end
     end
-    
+
     local controlPool = dataType.pool
     local hideCallback = dataType.hideCallback
 
     if hideCallback then
         hideCallback(currentControl, currentControl.dataEntry.data)
     end
-    
+
     controlPool:ReleaseObject(currentControl.key)
     currentControl.key = nil
     currentControl.dataEntry = nil
@@ -1790,7 +1802,7 @@ local function AutoSelect(self, animateInstantly, scrollIntoView)
             return
         end
     end
-        
+
     ZO_ScrollList_SelectData(self, NO_SELECTED_DATA, NO_DATA_CONTROL, NOT_RESELECTING_DURING_REBUILD, animateInstantly)
 end
 

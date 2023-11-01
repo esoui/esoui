@@ -21,6 +21,7 @@ local INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED = 17
 local INTERACT_TYPE_CAMPAIGN_LOCK_PENDING = 18
 local INTERACT_TYPE_TRAVEL_TO_LEADER = 19
 local INTERACT_TYPE_TRIBUTE_INVITE = 20
+local INTERACT_TYPE_GROUP_FINDER_APPLICATION = 21
 
 local TIMED_PROMPTS =
 {
@@ -34,6 +35,12 @@ local TIMED_PROMPTS =
     -- Campaign Queue is the only timed prompt without a fixed expiration time; instead it's manually removed when the queue it's a part of pops.
     -- This means it does not define expiresAtS or expirationCallback, and it refreshes every second without necessarily needing to; it doesn't show a timer.
     [INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED] = true,
+}
+
+-- Prompts that are NOT in the TIMED_PROMPTS table but we still want to have flashing behavior on the task bar.
+local FLASHING_PROMPTS =
+{
+    [INTERACT_TYPE_GROUP_FINDER_APPLICATION] = true,
 }
 
 ZO_PlayerToPlayer = ZO_Object:Subclass()
@@ -123,7 +130,7 @@ do
             selectedNarrationFunction = function()
                 local narrations = {}
                 if not self.targetLabel:IsHidden() then
-                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.targetText))
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.targetTextNarration))
                 end
 
                 if not self.pendingResurrectInfo:IsHidden() then
@@ -703,6 +710,57 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
     end
 
+    local function CompareGroupFinderApplications(entry1, entry2)
+        --Sort by oldest to newest
+        return ZO_TableOrderingFunction(entry1, entry2, "GetEndTimeSeconds", GROUP_FINDER_APPLICATIONS_LIST_ENTRY_SORT_KEYS, ZO_SORT_ORDER_UP)
+    end
+
+    local function OnGroupFinderApplicationsUpdated()
+        self:RemoveAllFromIncomingQueue(INTERACT_TYPE_GROUP_FINDER_APPLICATION)
+        local applicationsData = GROUP_FINDER_APPLICATIONS_LIST_MANAGER:GetApplicationsData(CompareGroupFinderApplications)
+        if #applicationsData > 0 then
+            --Find the current oldest application and add that one to the queue
+            local oldestApplication = applicationsData[1]
+
+            local function AcceptCallback()
+                RequestResolveGroupListingApplication(RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_APPROVE, oldestApplication:GetCharacterId())
+            end
+
+            local function DeclineCallback()
+                RequestResolveGroupListingApplication(RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_REJECT, oldestApplication:GetCharacterId())
+            end
+
+            PlaySound(SOUNDS.GROUP_FINDER_APPLICATION_NOTIFICATION)
+
+            local characterName = oldestApplication:GetCharacterName()
+            local displayName = oldestApplication:GetDisplayName()
+
+            local NO_TARGET_LABEL = nil
+            local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_GROUP_FINDER_APPLICATION, characterName, displayName, NO_TARGET_LABEL, AcceptCallback, DeclineCallback)
+
+            local championPoints = oldestApplication:GetChampionPoints()
+            data.messageFormat = championPoints > 0 and SI_PLAYER_TO_PLAYER_INCOMING_GROUP_FINDER_APPLICATION_CHAMPION or SI_PLAYER_TO_PLAYER_INCOMING_GROUP_FINDER_APPLICATION
+
+            local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
+
+            local role = oldestApplication:GetRole()
+            local roleText = GetString("SI_LFGROLE", role)
+            local roleIconFormat = zo_iconFormat(ZO_GetRoleIcon(role), "100%", "100%")
+
+            local ICON_SIZE = 24
+            local level = oldestApplication:GetLevel()
+            local levelText = ZO_GetLevelOrChampionPointsString(level, championPoints, ICON_SIZE)
+            --Use a special string for narrating the level text, so it narrates the champion icon properly
+            local levelTextNarration = ZO_GetLevelOrChampionPointsNarrationString(level, championPoints)
+            data.messageParams = { userFacingName, levelText, roleIconFormat, roleText }
+
+            --The return value of this function will be narrated instead of the normal target text
+            data.targetTextNarrationFunction = function(incomingEntry)
+                return zo_strformat(incomingEntry.messageFormat, userFacingName, levelTextNarration, roleIconFormat, roleText)
+            end
+        end
+    end
+
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_RECEIVED, OnDuelInviteReceived)
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_REMOVED, OnDuelInviteRemoved)
     self.control:RegisterForEvent(EVENT_TRIBUTE_INVITE_RECEIVED, OnTributeInviteReceived)
@@ -736,6 +794,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
 
     GIFT_INVENTORY_MANAGER:RegisterCallback("GiftListsChanged", OnGiftsUpdated)
+    GROUP_FINDER_APPLICATIONS_LIST_MANAGER:RegisterCallback("ApplicationsListUpdated", OnGroupFinderApplicationsUpdated)
 
     --Find member replacement prompt on a member leaving
     local function OnGroupingToolsFindReplacementNotificationNew()
@@ -1638,6 +1697,8 @@ function ZO_PlayerToPlayer:RemoveEntryFromIncomingQueueTable(index)
     if TIMED_PROMPTS[incomingEntry.incomingType] then
         ZO_Dialogs_ReleaseAllDialogsOfName("PTP_TIMED_RESPONSE_PROMPT", function(dialogData) return dialogData == incomingEntry end)
         CancelTaskbarWindowFlash("PTP_TIMED_RESPONSE_PROMPT")
+    elseif FLASHING_PROMPTS[incomingEntry.incomingType] then
+        CancelTaskbarWindowFlash("PTP_FLASHING_PROMPT")
     end
 
     if index == 1 and (self.showingResponsePrompt or self.showingGamepadResponseMenu) then
@@ -1669,6 +1730,7 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel(unitTag)
             self.targetText = ZO_GetPrimaryPlayerNameWithSecondary(self.currentTargetDisplayName, self.currentTargetCharacterName)
             self.targetLabel:SetText(self.targetText)
         end
+        self.targetTextNarration = self.targetText
 
         self.isBeingResurrected = IsUnitBeingResurrected(unitTag)
         self.hasResurrectPending = DoesUnitHaveResurrectPending(unitTag)
@@ -1744,6 +1806,7 @@ function ZO_PlayerToPlayer:TryShowingStandardInteractLabel()
         self.actionKeybindButton:SetHidden(false)
         self.targetLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
         self.targetText = zo_strformat(interactLabel, ZO_GetPrimaryPlayerNameWithSecondary(self.currentTargetDisplayName, self.currentTargetCharacterName))
+        self.targetTextNarration = self.targetText
         self.targetLabel:SetText(self.targetText)
         self.actionKeybindButton:SetText(GetString(SI_PLAYER_TO_PLAYER_ACTION_MENU))
 
@@ -1793,6 +1856,12 @@ function ZO_PlayerToPlayer:TryShowingResponseLabel()
             local displayText = ZO_PlayerToPlayer_GetIncomingEntryDisplayText(incomingEntry)
             local font = IsInGamepadPreferredMode() and "ZoFontGamepad42" or "ZoInteractionPrompt"
             self.targetText = displayText
+            --If a target text narration function was defined, use the result for the target text narration, otherwise just set it to the regular target text
+            if incomingEntry.targetTextNarrationFunction then
+                self.targetTextNarration = incomingEntry.targetTextNarrationFunction(incomingEntry)
+            else
+                self.targetTextNarration = self.targetText
+            end
             self.targetLabel:SetText(self.targetText)
             self.targetLabel:SetFont(font)
             self.targetLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
@@ -1862,11 +1931,17 @@ function ZO_PlayerToPlayer:OnUpdate()
             incomingEntry.updateFn(incomingEntry, isActive)
         end
 
-        if TIMED_PROMPTS[incomingEntry.incomingType] and not incomingEntry.seen and SCENE_MANAGER:IsInUIMode() then
-            -- For time sensitive prompts, the player probably won't see them if they are currently in a UI menu. Let's throw up a dialog before it's too late to respond
-            ZO_Dialogs_ShowPlatformDialog("PTP_TIMED_RESPONSE_PROMPT", incomingEntry)
+        local isTimed = TIMED_PROMPTS[incomingEntry.incomingType]
+        local isFlashing = FLASHING_PROMPTS[incomingEntry.incomingType]
+        if (isTimed or isFlashing) and not incomingEntry.seen and SCENE_MANAGER:IsInUIMode() then
+            if isTimed then
+                -- For time sensitive prompts, the player probably won't see them if they are currently in a UI menu. Let's throw up a dialog before it's too late to respond
+                ZO_Dialogs_ShowPlatformDialog("PTP_TIMED_RESPONSE_PROMPT", incomingEntry)
+                FlashTaskbarWindow("PTP_TIMED_RESPONSE_PROMPT")
+            else
+                FlashTaskbarWindow("PTP_FLASHING_PROMPT")
+            end
             incomingEntry.seen = true
-            FlashTaskbarWindow("PTP_TIMED_RESPONSE_PROMPT")
         end
     end
 

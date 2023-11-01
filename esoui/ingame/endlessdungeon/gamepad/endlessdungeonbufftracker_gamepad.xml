@@ -1,0 +1,63 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_EndDunBuffTrackerEmptyGridEntry_Gamepad" virtual="true" />
+
+        <Control name="ZO_EndDunBuffTrackerGridEntry_Gamepad" inherits="ZO_EndDunBuffTrackerGridEntry_Shared" virtual="true">
+            <Dimensions x="ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_DIMENSIONS_GAMEPAD_X" y="ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_DIMENSIONS_GAMEPAD_Y" />
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ICON_DIMENSIONS_GAMEPAD_X" y="ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ICON_DIMENSIONS_GAMEPAD_Y" />
+                </Texture>
+
+                <Texture name="$(parent)Highlight" override="true">
+                    <Dimensions x="ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ICON_DIMENSIONS_GAMEPAD_X" y="ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_ICON_DIMENSIONS_GAMEPAD_Y" />
+                </Texture>
+
+                <Label name="$(parent)StackCount" override="true" font="ZoFontGamepad36">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="-10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_EndDunBuffTrackerGridHeader_Gamepad" inherits="ZO_EndDunBuffTrackerGridHeader_Shared" virtual="true">
+            <Dimensions y="ZO_ENDLESS_DUNGEON_BUFF_GRID_HEADER_ROW_HEIGHT_GAMEPAD" />
+
+            <Controls>
+                <Label name="$(parent)Header" override="true" font="ZoFontGamepad36" />
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_EndDunBuffTracker_Gamepad" inherits="ZO_EndDunBuffTracker_Shared" resizeToFitConstrains="Y">
+            <Anchor point="CENTER" offsetY="-100" />
+            <Dimensions x="605" />
+            <DimensionConstraints minY="60" />
+            <ResizeToFitPadding height="30" />
+
+            <OnInitialized>
+                ZO_EndlessDungeonBuffTracker_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)BG" override="true" inherits="ZO_DefaultBackdrop_Gamepad" alpha="1" edgeColor="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED" centerColor="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED" />
+
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepadBold48" />
+
+                <Label name="$(parent)Progress" override="true" font="ZoFontGamepadBold27" />
+
+                <Label name="$(parent)Empty" override="true" font="ZoFontGamepadBold27" />
+
+                <Control name="$(parent)List" inherits="ZO_GridScrollList_Gamepad">
+                    <Anchor point="TOP" relativeTo="$(parent)Progress" relativePoint="BOTTOM" offsetX="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_X" offsetY="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_Y" />
+                    <!-- The height of this list is adjusted dynamically by ZO_EndlessDungeonBuffTracker_Gamepad:UpdateGridListDimensions -->
+                    <Dimensions x="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_WIDTH_GAMEPAD" />
+                    <DimensionConstraints maxY="730" minY="1" />
+                </Control>
+
+                <Control name="$(parent)KeybindContainer" override="true">
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="20" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

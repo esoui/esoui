@@ -6,18 +6,15 @@
                 ZO_DisplayName_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Control name="$(parent)Status" mouseEnabled="true">
+                <Control name="$(parent)Status" inherits="ZO_ComboBox" mouseEnabled="true">
                     <Anchor point="TOPLEFT"/>
                     <Dimensions x="48" y="32"/>
-                    <OnInitialized>
-                        ZO_ComboBox:New(self)
-                    </OnInitialized>
-
-                    <OnMouseUp>
-                        ZO_ComboBox_DropdownClicked(self)
-                    </OnMouseUp>
 
                     <Controls>
+                        <Backdrop name="$(parent)BG" override="true" hidden="true" />
+
+                        <Label name="$(parent)SelectedItemText" override="true" hidden="true" />
+
                         <Button name="$(parent)SelectedItem" mouseOverBlendMode="ADD">
                             <Dimensions x="32" y="32"/>
                             <Anchor point="TOPLEFT"/>
@@ -33,8 +30,7 @@
                             </OnClicked>
                         </Button>
 
-                        <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
-                            <Dimensions x="16" y="16" />
+                        <Button name="$(parent)OpenDropdown" override="true">
                             <Anchor point="LEFT" relativeTo="$(parent)SelectedItem" relativePoint="RIGHT" offsetX="-4" />
                             <OnMouseEnter>
                                 ZO_PlayerStatus_OnMouseEnter(self:GetParent())

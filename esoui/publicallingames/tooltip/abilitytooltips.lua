@@ -115,8 +115,9 @@ do
         end
 
         --Cost
-        for flag in GetNextAbilityMechanicFlagIter(abilityId) do
-            local cost = GetAbilityCost(abilityId, flag, overrideActiveRank)
+        local costAbility = GetCurrentChainedAbility(abilityId)
+        for flag in GetNextAbilityMechanicFlagIter(costAbility) do
+            local cost = GetAbilityCost(costAbility, flag, overrideActiveRank, "player", true)
             if cost > 0 then
                 local costPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
                 costPair:SetStat(GetString(SI_ABILITY_TOOLTIP_RESOURCE_COST_LABEL), self:GetStyle("statValuePairStat"))
@@ -135,8 +136,8 @@ do
             end
         end
 
-        for flag in GetNextAbilityMechanicFlagIter(abilityId) do
-            local cost, chargeFrequencyMS = GetAbilityCostOverTime(abilityId, flag, overrideActiveRank)
+        for flag in GetNextAbilityMechanicFlagIter(costAbility) do
+            local cost, chargeFrequencyMS = GetAbilityCostOverTime(costAbility, flag, overrideActiveRank)
             if cost > 0 then
                 local costPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
                 costPair:SetStat(GetString(SI_ABILITY_TOOLTIP_RESOURCE_COST_LABEL), self:GetStyle("statValuePairStat"))
@@ -232,4 +233,34 @@ function ZO_Tooltip:LayoutSimpleAbility(abilityId)
         self:AddAbilityStats(abilityId)
     end
     self:AddAbilityDescription(abilityId)
+end
+
+function ZO_Tooltip:LayoutEndlessDungeonBuffAbility(buffAbilityId, includeLifetimeStacks, stackCount)
+    local buffType, isAvatarVision = GetAbilityEndlessDungeonBuffType(buffAbilityId)
+    local buffBucketType = GetAbilityEndlessDungeonBuffBucketType(buffAbilityId)
+    local showStacks = includeLifetimeStacks or ShouldAbilityShowStacks(buffAbilityId)
+    if not stackCount then
+        stackCount = showStacks and GetNumStacksForEndlessDungeonBuff(buffAbilityId, includeLifetimeStacks)
+    end
+
+    local headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
+    local buffBucketTypeText = ZO_CachedStrFormat(SI_ENDLESS_DUNGEON_BUFF_TYPE_FORMATTER, GetString("SI_ENDLESSDUNGEONBUFFBUCKETTYPE", buffBucketType))
+    headerSection:AddLine(buffBucketTypeText, self:GetStyle("abilityHeader"))
+    local buffTypeText = isAvatarVision and GetString("SI_ENDLESSDUNGEONBUFFTYPE_AVATAR", buffType) or GetString("SI_ENDLESSDUNGEONBUFFTYPE", buffType)
+    buffTypeText = ZO_CachedStrFormat(SI_ENDLESS_DUNGEON_BUFF_TYPE_FORMATTER, buffTypeText)
+    headerSection:AddLine(buffTypeText, self:GetStyle("abilityHeader"))
+    if showStacks then
+        headerSection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_moras_gift.dds", 20, 20, stackCount), self:GetStyle("abilityStack"))
+    end
+    self:AddSection(headerSection)
+
+    local abilityName = GetAbilityName(buffAbilityId)
+    local formattedAbilityName
+    if showStacks then
+        formattedAbilityName = zo_strformat(SI_ABILITY_NAME_WITH_QUANTITY, abilityName, stackCount)
+    else
+        formattedAbilityName = ZO_CachedStrFormat(SI_ABILITY_NAME, abilityName)
+    end
+    self:AddLine(formattedAbilityName, self:GetStyle("title"))
+    self:AddAbilityDescription(buffAbilityId)
 end

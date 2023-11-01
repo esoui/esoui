@@ -25,6 +25,7 @@ function ActivityFinderRoot_Gamepad:Initialize(control)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshCategories)
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, RefreshCategories)
+    self.control:RegisterForEvent(EVENT_GROUP_FINDER_STATUS_UPDATED, function(_, ...) self:RefreshList(...) end)
 end
 
 function ActivityFinderRoot_Gamepad:InitializeKeybindStripDescriptors()
@@ -100,11 +101,16 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
         enabled = enabled and not isLocked
         data.enabled = enabled
         data.iconUpdateFn = function()
+            local categoryData = data.data
             data:ClearIcons()
             if data.enabled then
                 data:AddIcon(data.data.menuIcon)
             else
                 data:AddIcon(data.data.disabledMenuIcon)
+            end
+
+            if categoryData.isGroupFinder and ZO_HasGroupFinderNewApplication() then
+                data:AddIcon(ZO_GAMEPAD_NEW_ICON_64)
             end
         end
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -143,20 +149,26 @@ function ActivityFinderRoot_Gamepad:PerformUpdate()
 end
 
 function ActivityFinderRoot_Gamepad:OnShowing()
-    local list = self:GetMainList()
-    --Make sure we aren't interacting with the roles bar when we get there
-    local targetData = list:GetTargetData()
-    if targetData and targetData.data.isRoleSelector then
-        local DONT_ANIMATE = false
-        local ALLOW_EVEN_IF_DISABLED = true
-        list:SetDefaultIndexSelected(DONT_ANIMATE, ALLOW_EVEN_IF_DISABLED)
-        targetData = list:GetTargetData()
-    else
-        GAMEPAD_GROUP_ROLES_BAR:Deactivate()
+    self:RefreshList()
+end
+
+function ActivityFinderRoot_Gamepad:RefreshList()
+    if self.scene:IsShowing() then
+        local list = self:GetMainList()
+        --Make sure we aren't interacting with the roles bar when we get there
+        local targetData = list:GetTargetData()
+        if targetData and targetData.data.isRoleSelector then
+            local DONT_ANIMATE = false
+            local ALLOW_EVEN_IF_DISABLED = true
+            list:SetDefaultIndexSelected(DONT_ANIMATE, ALLOW_EVEN_IF_DISABLED)
+            targetData = list:GetTargetData()
+        else
+            GAMEPAD_GROUP_ROLES_BAR:Deactivate()
+        end
+        list:RefreshVisible()
+        self:RefreshTooltip(targetData.data)
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
-    list:RefreshVisible()
-    self:RefreshTooltip(targetData.data)
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 do
@@ -186,6 +198,18 @@ do
                 local isLocked = ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil
                 if isLocked then
                     lockedText = zo_strformat(SI_ZONE_STORY_TOOLTIP_UNAVAILABLE_IN_ZONE, LOCK_TEXTURE)
+                end
+            end
+
+            if data.isGroupFinder then
+                local statusResult = GetGroupFinderStatusReason()
+                if statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION then
+                    if statusResult == GROUP_FINDER_ACTION_RESULT_FAILED_LEVEL_REQUIREMENT then
+                        local formatter = GetString("SI_GROUPFINDERACTIONRESULT", statusResult)
+                        lockedText = zo_strformat(formatter, LOCK_TEXTURE, GROUP_FINDER_UNLOCK_LEVEL)
+                    else
+                        lockedText = GetString("SI_GROUPFINDERACTIONRESULT", statusResult)
+                    end
                 end
             end
 
@@ -268,6 +292,9 @@ function ActivityFinderRoot_Gamepad:IsCategoryLocked(gamepadCategoryData)
         return activityFinderObject:GetLevelLockInfo() or activityFinderObject:GetNumLocations() == 0
     elseif gamepadCategoryData.isZoneStories then
         return ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil
+    elseif gamepadCategoryData.isGroupFinder then
+        local statusResult = GetGroupFinderStatusReason()
+        return statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION
     end
     return false
 end

@@ -11,6 +11,7 @@ function ZO_LeaderboardsManager_Keyboard:Initialize(control, leaderboardControl)
     self.pointsHeaderLabel = GetControl(control, "HeadersPoints")
     self.classHeaderLabel = GetControl(control, "HeadersClass")
     self.allianceHeaderLabel = GetControl(control, "HeadersAlliance")
+    self.progressHeaderLabel = GetControl(control, "HeadersProgress")
     self.emptyRow = GetControl(control, "EmptyRow")
     self.loadingIcon = self.control:GetNamedChild("LoadingIcon")
 
@@ -159,6 +160,11 @@ function ZO_LeaderboardsManager_Keyboard:UpdateCategories()
         raidLeaderboards:AddCategoriesToParentSystem()
     end
 
+    local endlessDungeonLeaderboards = SYSTEMS:GetKeyboardObject("endlessDungeonLeaderboards")
+    if endlessDungeonLeaderboards then
+        endlessDungeonLeaderboards:AddCategoriesToParentSystem()
+    end
+
     local battlegroundLeaderboards = SYSTEMS:GetKeyboardObject(ZO_BATTLEGROUND_LEADERBOARD_SYSTEM_NAME)
     if battlegroundLeaderboards then
         battlegroundLeaderboards:AddCategoriesToParentSystem()
@@ -175,9 +181,15 @@ end
 function ZO_LeaderboardsManager_Keyboard:RefreshLeaderboardType(leaderboardType)
     local isBattlegroundLeaderboard = leaderboardType == LEADERBOARD_TYPE_BATTLEGROUND
     local isTributeLeaderboard = leaderboardType == LEADERBOARD_TYPE_TRIBUTE
-    local shouldHideClassAndAlliance = isBattlegroundLeaderboard or isTributeLeaderboard
-    self.classHeaderLabel:SetHidden(shouldHideClassAndAlliance)
-    self.allianceHeaderLabel:SetHidden(shouldHideClassAndAlliance)
+    local isEndlessDungeonLeaderboard = leaderboardType == LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL or leaderboardType == LEADERBOARD_TYPE_ENDLESS_DUNGEON_CLASS
+
+    local shouldHideClass = isBattlegroundLeaderboard or isTributeLeaderboard
+    local shouldHideAlliance = isBattlegroundLeaderboard or isTributeLeaderboard or isEndlessDungeonLeaderboard
+    local shouldHideProgress = not isEndlessDungeonLeaderboard
+
+    self.classHeaderLabel:SetHidden(shouldHideClass)
+    self.allianceHeaderLabel:SetHidden(shouldHideAlliance)
+    self.progressHeaderLabel:SetHidden(shouldHideProgress)
 end
 
 function ZO_LeaderboardsManager_Keyboard:SetSelectedLeaderboardObject(leaderboardObject, subType)

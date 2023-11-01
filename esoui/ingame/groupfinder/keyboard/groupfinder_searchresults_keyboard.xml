@@ -1,0 +1,239 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GroupFinder_SearchResultsListRow_Keyboard" inherits="ZO_GroupFinder_GroupListing_Keyboard" virtual="true">
+            <OnInitialized name="SearchResultsRow">
+                ZO_GroupFinder_SearchResultsListRow_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                self.object:EnterRow()
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.object:ExitRow()
+            </OnMouseExit>
+
+            <OnMouseUp>
+                self.object:OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+
+            <OnMouseDoubleClick>
+                self.object:OnMouseDoubleClick(self, button)
+            </OnMouseDoubleClick>
+        </Control>
+        
+        <Control name="ZO_GroupFinder_SearchResults_Keyboard" virtual="true">
+            <Controls>
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <AnchorFill />
+                </Control>
+
+                <Label name="$(parent)EmptyText" font="ZoFontWinH4" text="SI_GROUP_FINDER_SEARCH_RESULTS_EMPTY_TEXT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOPLEFT" offsetY="60"/>
+                    <Anchor point="TOPRIGHT" offsetX="-30" offsetY="60"/>
+                </Label>
+
+                <Control name="$(parent)LoadingIcon" inherits="ZO_Loading">
+                    <Anchor point="TOP" relativeTo="$(parent)EmptyText" relativePoint="BOTTOM" />
+                    <OnInitialized>
+                        ZO_Loading_Initialize(self)
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GroupFinder_GroupSearchContent_Keyboard" virtual="true">
+            <Controls>
+                <Button name="$(parent)AdditionalFilters" inherits="ZO_MouseTooltipBehavior">
+                    <Anchor point="TOPLEFT" offsetY="-60" />
+                    <Dimensions x="48" y="48" />
+
+                    <OnInitialized>
+                        self:SetTooltipString(SI_GROUP_FINDER_ADDITIONAL_FILTERS_TOOLTIP)
+                    </OnInitialized>
+
+                    <OnClicked>
+                        ZO_GroupFinder_AdditionalFilters_OnClicked(self, button)
+                    </OnClicked>
+
+                    <Textures
+                        normal="EsoUI/Art/LFG/LFG_groupFinder_additionalFilters_up.dds"
+                        pressed="EsoUI/Art/LFG/LFG_groupFinder_additionalFilters_down.dds"
+                        mouseOver="EsoUI/Art/LFG/LFG_groupFinder_additionalFilters_over.dds"
+                    />
+                </Button>
+
+                <Button name="$(parent)Refresh" inherits="ZO_MouseTooltipBehavior">
+                    <Anchor point="LEFT" relativeTo="$(parent)AdditionalFilters" relativePoint="RIGHT" offsetX="5" />
+                    <Dimensions x="48" y="48" />
+
+                    <OnInitialized>
+                        self:SetTooltipString(SI_GROUP_FINDER_REFRESH_SEARCH_TOOLTIP)
+                    </OnInitialized>
+
+                    <OnClicked>
+                        ZO_GroupFinder_Refresh_OnClicked(self, button)
+                    </OnClicked>
+
+                    <Textures
+                        normal="EsoUI/Art/LFG/LFG_groupFinder_refreshSearch_up.dds"
+                        pressed="EsoUI/Art/LFG/LFG_groupFinder_refreshSearch_down.dds"
+                        mouseOver="EsoUI/Art/LFG/LFG_groupFinder_refreshSearch_over.dds"
+                    />
+                </Button>
+
+                <Control name="$(parent)AppliedTo" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AdditionalFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Controls>
+                        <Control name="$(parent)GroupListing" inherits="ZO_GroupFinder_GroupListing_Keyboard" hidden="true">
+                            <Anchor point="TOPLEFT" />
+                            <Controls>
+                                <Control name="$(parent)Highlight" inherits="ZO_ListEntryBackdrop">
+                                    <AnchorFill />
+
+                                    <Controls>
+                                        <Texture name="$(parent)Top" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight_gold.dds" level="1"/>
+                                        <Texture name="$(parent)Bottom" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight_gold.dds" level="1"/>
+                                        <Texture name="$(parent)Middle" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight_gold.dds" level="1"/>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)CurrentRoleLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AppliedTo" relativePoint="BOTTOMLEFT" offsetY="20" />
+                </Label>
+
+                <Control name="$(parent)DifficultyContainer">
+                    <Anchor point="LEFT" relativeTo="$(parent)Refresh" relativePoint="RIGHT" offsetX="20" />
+                    <Dimensions x="64" y="32" />
+
+                    <OnInitialized>
+                        ZO_VeteranDifficultySettings_GroupFinder_OnInitialized(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Label name="$(parent)DifficultyLabel" hidden="true" />
+
+                        <Button name="$(parent)NormalDifficulty" inherits="ZO_VeteranDifficultyButton">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="32" y="32" />
+
+                            <Textures
+                                normal="EsoUI/Art/LFG/LFG_normalDungeon_up.dds"
+                                pressed="EsoUI/Art/LFG/LFG_normalDungeon_down.dds"
+                                mouseOver="EsoUI/Art/LFG/LFG_normalDungeon_over.dds"
+                                disabled="EsoUI/Art/LFG/LFG_normalDungeon_disabled.dds"
+                                disabledPressed="EsoUI/Art/LFG/LFG_normalDungeon_down_disabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL
+                            </OnInitialized>
+
+                            <OnClicked>
+                                <!-- override to do nothing, handled in lua -->
+                            </OnClicked>
+                        </Button>
+
+                        <Button name="$(parent)VeteranDifficulty" inherits="ZO_VeteranDifficultyButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)NormalDifficulty" relativePoint="RIGHT" offsetX="5" />
+                            <Dimensions x="32" y="32" />
+                            <Textures
+                                normal="EsoUI/Art/LFG/LFG_veteranDungeon_up.dds"
+                                pressed="EsoUI/Art/LFG/LFG_veteranDungeon_down.dds"
+                                mouseOver="EsoUI/Art/LFG/LFG_veteranDungeon_over.dds"
+                                disabled="EsoUI/Art/LFG/LFG_veteranDungeon_disabled.dds"
+                                disabledPressed="EsoUI/Art/LFG/LFG_veteranDungeon_down_disabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.dungeonDifficulty = DUNGEON_DIFFICULTY_VETERAN
+                            </OnInitialized>
+
+                            <OnClicked>
+                                <!-- override to do nothing, handled in lua -->
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)PrimaryFilterSelector" inherits="ZO_ComboBox">
+                    <Anchor point="LEFT" relativeTo="$(parent)Refresh" relativePoint="RIGHT" offsetX="20" />
+                    <Dimensions x="210" />
+                </Control>
+
+                <Control name="$(parent)PrimaryFilterSelectorSingleSelect" inherits="ZO_ComboBox">
+                    <Anchor point="LEFT" relativeTo="$(parent)Refresh" relativePoint="RIGHT" offsetX="20" />
+                    <Dimensions x="210" />
+                </Control>
+
+                <Control name="$(parent)SecondaryFilterSelector" inherits="ZO_ComboBox">
+                    <Dimensions x="210" />
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_GroupFinder_SearchResults_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CurrentRoleLabel" relativePoint="BOTTOMLEFT" offsetY="15" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-40" />
+                </Control>
+
+                <Button name="$(parent)CreateGroupButton" inherits="ZO_DefaultButton" text="SI_GROUP_FINDER_CREATE_GROUP">
+                    <Anchor point="BOTTOM"/>
+                    <Dimensions x="200" />
+
+                    <OnMouseEnter>
+                        ZO_CreateEditGroupListingButton_OnMouseEnter(self, button)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_CreateEditGroupListingButton_OnMouseExit(self, button)
+                    </OnMouseExit>
+
+                    <OnClicked>
+                        ZO_CreateEditGroupListingButton_OnClicked(self, button)
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GroupFinder_Application_Dialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_GroupFinder_Application_Dialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" />
+
+                <Control name="$(parent)InviteCode" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Controls>
+                        <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" hidden="true">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+
+                        <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Dimensions x="340" />
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_TogglePasswordEditBox" textType="NUMERIC_UNSIGNED_INT" maxInputCharacters="GROUP_FINDER_GROUP_LISTING_INVITE_CODE_MAX_LENGTH" defaultText="SI_GROUP_FINDER_APPLY_JOIN_DIALOG_INVITE_CODE_DEFAULT_TEXT" />
+                            </Controls>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+
+                <Backdrop name="$(parent)OptionalMessage" inherits="ZO_MultiLineEditBackdrop_Keyboard" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)InviteCode" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Dimensions x="340" y="90"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="GROUP_FINDER_GROUP_LISTING_APPLICATION_MESSAGE_MAX_LENGTH" defaultText="SI_GROUP_FINDER_APPLY_DIALOG_OPTIONAL_MESSAGE_DEFAULT_TEXT" />
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

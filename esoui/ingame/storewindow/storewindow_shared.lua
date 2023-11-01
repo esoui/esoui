@@ -189,14 +189,15 @@ function ZO_StoreManager_IsInventoryStoreMode(mode)
     return DOES_STORE_MODE_REPRESENT_INVENTORY[mode]
 end
 
-internalassert(CURT_MAX_VALUE == 11, "Check if new currency requires unique transaction sound hook")
+internalassert(CURT_MAX_VALUE == 12, "Check if new currency requires unique transaction sound hook")
 local CURRENCY_TYPE_TO_SOUND_ID =
 {
     [CURT_TELVAR_STONES] = SOUNDS.TELVAR_TRANSACT,
     [CURT_ALLIANCE_POINTS] = SOUNDS.ALLIANCE_POINT_TRANSACT,
     [CURT_WRIT_VOUCHERS] = SOUNDS.WRIT_VOUCHER_TRANSACT,
     [CURT_UNDAUNTED_KEYS] = SOUNDS.UNDAUNTED_KEY_TRANSACT,
-    [CURT_EVENT_TICKETS] = SOUNDS.EVENT_TICKETS_TRANSACT,
+    [CURT_EVENT_TICKETS] = SOUNDS.EVENT_TICKET_TRANSACT,
+    [CURT_ENDLESS_DUNGEON] = SOUNDS.ENDLESS_DUNGEON_CURRENCY_TRANSACT,
 }
 
 local function PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurrencyType1, specialCurrencyType2)

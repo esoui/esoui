@@ -14,8 +14,6 @@ function GroupMenu_Keyboard:Initialize(control)
 
     local function OnStateChange(oldState, newState)
         if newState == SCENE_SHOWING  then
-            KEYBIND_STRIP:AddKeybindButton(self.keybindStripDescriptor)
-
             if self.currentCategoryFragment then
                 SCENE_MANAGER:AddFragment(self.currentCategoryFragment)
             end
@@ -28,8 +26,6 @@ function GroupMenu_Keyboard:Initialize(control)
             end
 
             self.categoriesRefreshGroup:TryClean()
-        elseif newState == SCENE_HIDING then
-            KEYBIND_STRIP:RemoveKeybindButton(self.keybindStripDescriptor)
         end
     end
 
@@ -37,19 +33,19 @@ function GroupMenu_Keyboard:Initialize(control)
     KEYBOARD_GROUP_MENU_SCENE:RegisterCallback("StateChange", OnStateChange)
 
     self:InitializeCategories()
-    self:InitializeKeybindDescriptors()
 
     local function RefreshCategories()
         self.categoriesRefreshGroup:MarkDirty("List")
     end
 
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateGroupStatus", function(...) self:OnUpdateGroupStatus(...) end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", RefreshCategories)
 
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshCategories)
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, RefreshCategories)
     self.control:RegisterForEvent(EVENT_QUEST_COMPLETE, RefreshCategories)
+    self.control:RegisterForEvent(EVENT_GROUP_FINDER_STATUS_UPDATED, RefreshCategories)
+    self.control:RegisterForEvent(EVENT_GROUP_FINDER_APPLICATION_RECEIVED, RefreshCategories)
 end
 
 function GroupMenu_Keyboard:InitializeCategories()
@@ -87,8 +83,18 @@ function GroupMenu_Keyboard:InitializeCategories()
 
         local disabled = false
         if categoryData then
+            local statusResult = GetGroupFinderStatusReason()
             disabled = categoryData.activityFinderObject and (categoryData.activityFinderObject:GetLevelLockInfo() or categoryData.activityFinderObject:GetNumLocations() == 0) or false
-            disabled = disabled or (categoryData.isZoneStories and ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil) or false
+            disabled = disabled or (categoryData.isZoneStories and ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil or false)
+            disabled = disabled or (categoryData.isGroupFinder and (statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION) or false)
+        end
+
+        if disabled and node:IsOpen() then
+            local tree = node:GetTree()
+            if tree:GetSelectedNode() and tree:GetSelectedNode():GetParent() == node then
+                tree:ClearSelectedNode()
+            end
+            node:SetOpen(false)
         end
 
         local selected = node.selected or open
@@ -98,8 +104,18 @@ function GroupMenu_Keyboard:InitializeCategories()
     local function SetupParentNode(node, control, categoryData, open, userRequested)
         SetupNode(node, control, categoryData, open)
 
-        if open and userRequested then
+        if node.enabled and open and userRequested then
             self.navigationTree:SelectFirstChild(node)
+        end
+
+        if categoryData.isGroupFinder then
+            control.statusIcon = control:GetNamedChild("StatusIcon")
+            if ZO_HasGroupFinderNewApplication() then
+                control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+                control.statusIcon:Show()
+            else
+                control.statusIcon:ClearIcons()
+            end
         end
     end
 
@@ -142,32 +158,6 @@ function GroupMenu_Keyboard:InitializeCategories()
     self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_Subcategory", SetupChildNode, OnNodeSelected)
     self.navigationTree:SetExclusive(true)
     self.navigationTree:SetOpenAnimation("ZO_TreeOpenAnimation")
-end
-
-function GroupMenu_Keyboard:InitializeKeybindDescriptors()
-    self.keybindStripDescriptor =
-    {
-        -- Invite to Group
-        alignment = KEYBIND_STRIP_ALIGN_CENTER,
-
-        name = GetString(SI_GROUP_WINDOW_INVITE_PLAYER),
-        keybind = "UI_SHORTCUT_PRIMARY",
-        
-        callback = function()
-            ZO_Dialogs_ShowDialog("GROUP_INVITE")
-        end,
-
-        visible = function()
-            local playerIsGrouped, playerIsLeader, groupSize = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetGroupStatus()
-            return IsGroupModificationAvailable() and (not playerIsGrouped or (playerIsLeader and groupSize < MAX_GROUP_SIZE_THRESHOLD))
-        end
-    }
-end
-
-function GroupMenu_Keyboard:OnUpdateGroupStatus()
-    if KEYBOARD_GROUP_MENU_SCENE:IsShowing() then
-        KEYBIND_STRIP:UpdateKeybindButton(self.keybindStripDescriptor)
-    end
 end
 
 function GroupMenu_Keyboard:SetCategoryOnShow(categoryFragment)
@@ -235,6 +225,26 @@ do
             end
         end
     end
+
+    function GroupMenu_Keyboard:OnGroupFinderCategoryMouseEnter(control, data)
+        ZO_IconHeader_OnMouseEnter(control)
+        if not control.enabled then
+            local lockedText
+            local statusResult = GetGroupFinderStatusReason()
+            if statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION then
+                if statusResult == GROUP_FINDER_ACTION_RESULT_FAILED_LEVEL_REQUIREMENT then
+                    local formatter = GetString("SI_GROUPFINDERACTIONRESULT", statusResult)
+                    lockedText = zo_strformat(formatter, LOCK_TEXTURE, GROUP_FINDER_UNLOCK_LEVEL)
+                else
+                    lockedText = GetString("SI_GROUPFINDERACTIONRESULT", statusResult)
+                end
+            end
+            if lockedText then
+                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
+                SetTooltipText(InformationTooltip, lockedText)
+            end
+        end
+    end
 end
 
 do
@@ -274,6 +284,8 @@ do
             node.control.OnMouseEnter = function(control) self:OnActivityCategoryMouseEnter(control, nodeData) end
         elseif nodeData.isZoneStories then
             node.control.OnMouseEnter = function(control) self:OnZoneStoriesCategoryMouseEnter(control, nodeData) end
+        elseif nodeData.isGroupFinder then
+            node.control.OnMouseEnter = function(control) self:OnGroupFinderCategoryMouseEnter(control, nodeData) end
         end
 
         return node
@@ -332,6 +344,10 @@ function GroupMenu_Keyboard:RebuildCategories()
     end
 
     self.navigationTree:Commit(nodeToSelect)
+end
+
+function GroupMenu_Keyboard:GetTree()
+    return self.navigationTree
 end
 
 function GroupMenu_Keyboard:HideTree()

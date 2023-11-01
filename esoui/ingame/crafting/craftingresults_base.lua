@@ -5,6 +5,11 @@ ZO_CRAFTING_RESULT_TYPE =
     KNOWLEDGE = 3,
 }
 
+local CONTEXTUAL_ANIMATION_NAME_BY_CONTEXT =
+{
+    [CRAFTING_PROCESS_CONTEXT_CONSUME_ATTUNABLE_STATIONS] = "CraftingResultsConsumeStation_Animation",
+}
+
 local g_forceCenterResultsText = false
 
 function ZO_CraftingResults_Base_PlayPulse(control)
@@ -56,6 +61,9 @@ function ZO_CraftingResults_Base:Initialize(control, showInGamepadPreferredModeO
     -- not the "primary" crafting tooltip (self.tooltipControl), but are being displayed alongside of it
     -- This allows us to have additional controls animate in-sync with the crafting tooltip
     self.secondaryTooltipAnimationPool = ZO_AnimationPool:New("CraftingResultTooltipAnimation_Base")
+
+    self.contextualAnimationControls = {}
+    self.contextualAnimations = {}
 end
 
 function ZO_CraftingResults_Base:SetCraftingTooltip(tooltipControl)
@@ -72,6 +80,18 @@ function ZO_CraftingResults_Base:SetCraftingTooltip(tooltipControl)
     if not tooltipControl then
         self:FadeAll()
         self:ClearSecondaryTooltipAnimationControls()
+    end
+end
+
+function ZO_CraftingResults_Base:SetContextualAnimationControl(context, control)
+    if CONTEXTUAL_ANIMATION_NAME_BY_CONTEXT[context] ~= nil then
+        if self.contextualAnimationControls[context] ~= control then
+            self.contextualAnimationControls[context] = control
+            self:ForceStop()
+            if self.contextualAnimationControls[context] then
+                self:AssociateContextualAnimations(context, self.contextualAnimationControls[context])
+            end
+        end
     end
 end
 
@@ -125,10 +145,40 @@ function ZO_CraftingResults_Base:AssociateAnimations(tooltip)
     self.resultTooltipAnimation:GetAnimation(1):SetHandler("OnStop", OnStop)
 end
 
+function ZO_CraftingResults_Base:AssociateContextualAnimations(context, control)
+    --Check to see if we have created an animation for this context yet
+    if not self.contextualAnimations[context] then
+        local animationName = CONTEXTUAL_ANIMATION_NAME_BY_CONTEXT[context]
+        if animationName then
+            self.contextualAnimations[context] = ANIMATION_MANAGER:CreateTimelineFromVirtual(animationName)
+        else
+            internalassert(false, "Context does not have a contextual animation")
+            return
+        end
+    end
+
+    self.contextualAnimations[context]:GetAnimation(1):SetAnimatedControl(control)
+    local function OnStop(animation)
+        self:OnContextualAnimationStopped(self.contextualAnimations[context].craftingType)
+    end
+
+    self.contextualAnimations[context]:GetAnimation(1):SetHandler("OnStop", OnStop)
+    self.contextualAnimations[context].forceStopHandler = function()
+        OnStop()
+    end
+end
+
 function ZO_CraftingResults_Base:ForceStop()
     if self.resultTooltipAnimation and self.resultTooltipAnimation:IsPlaying() then
         self.resultTooltipAnimation:Stop()
         self.forceStopHandler()
+    end
+
+    for _, animation in pairs(self.contextualAnimations) do
+        if animation and animation:IsPlaying() then
+            animation:Stop()
+            animation.forceStopHandler()
+        end
     end
 end
 
@@ -163,25 +213,37 @@ local function DoesCraftingTypeHaveSlotAnimations(craftingType)
     end
 end
 
-function ZO_CraftingResults_Base:StartCraftProcess(playStopTooltipAnimation)
-    self.tooltipAnimationCompleted = false
+function ZO_CraftingResults_Base:StartCraftProcess(playStopTooltipAnimation, context)
+    self.playContextualAnimation = CONTEXTUAL_ANIMATION_NAME_BY_CONTEXT[context] ~= nil
+
+    --The contextual and tooltip animations are mutually exclusive
+    if self.playContextualAnimation then
+        self.tooltipAnimationCompleted = true
+        self.contextualAnimationCompleted = false
+    else
+        self.tooltipAnimationCompleted = false
+        self.contextualAnimationCompleted = true
+    end
+
     self.craftingProcessCompleted = false
 
     --The result of DoesCraftingTypeHaveSlotAnimations for smithing depends on having an active smithing object. There is no such object if the smithing UI
     --is closed. This means that the result of the function can change between OnCraftStarted and OnCraftEnded if the smithing UI is closed during a crafting
     --operation. So store the results off here and don't call it later on.
-    self.playStopTooltipAnimation = playStopTooltipAnimation
-    self.playStartTooltipAnimation = not playStopTooltipAnimation
+    self.playStopTooltipAnimation = playStopTooltipAnimation and not self.playContextualAnimation
+    self.playStartTooltipAnimation = not playStopTooltipAnimation and not self.playContextualAnimation
 
-	-- Suppress item count-related messaging for Smithing Tradeskills' Improvement and Research actions.
-	if ZO_Smithing_IsSceneShowing() then
-		local mode = ZO_Smithing_GetActiveObject():GetMode()
-		self.craftingProcessProducesItems = not (mode == SMITHING_MODE_IMPROVEMENT or mode == SMITHING_MODE_RESEARCH)
-	elseif SCENE_MANAGER:GetCurrentSceneName() == "gamepad_smithing_research_confirm" then -- Separate case due to ancillary confirmation Scene
-		self.craftingProcessProducesItems = false
-	else
-		self.craftingProcessProducesItems = true
-	end
+    -- Suppress item count-related messaging for Smithing Tradeskills' Improvement and Research actions.
+    if ZO_Smithing_IsSceneShowing() then
+        local mode = ZO_Smithing_GetActiveObject():GetMode()
+        self.craftingProcessProducesItems = not (mode == SMITHING_MODE_IMPROVEMENT or mode == SMITHING_MODE_RESEARCH or mode == SMITHING_MODE_CONSOLIDATED_SET_SELECTION or mode == SMITHING_MODE_ROOT)
+    elseif SCENE_MANAGER:GetCurrentSceneName() == "gamepad_smithing_research_confirm" then -- Separate case due to ancillary confirmation Scene
+        self.craftingProcessProducesItems = false
+    else
+        self.craftingProcessProducesItems = true
+    end
+
+    self.craftingProcessProducesItems = self.craftingProcessProducesItems and context ~= CRAFTING_PROCESS_CONTEXT_CONSUME_ATTUNABLE_STATIONS
 
     if ZO_Enchanting_IsInCreationMode() then
         local potencySound, potencyLength, essenceSound, essenceLength, aspectSound, aspectLength = ZO_Enchanting_GetVisibleEnchanting():GetLastRunestoneSoundParams()
@@ -195,12 +257,14 @@ function ZO_CraftingResults_Base:StartCraftProcess(playStopTooltipAnimation)
 
     if self.playStartTooltipAnimation then
         self:PlayTooltipAnimation()
+    elseif self.playContextualAnimation then
+        self:PlayContextualAnimation(context)
     end
 end
 
-function ZO_CraftingResults_Base:OnCraftStarted(craftingType)
+function ZO_CraftingResults_Base:OnCraftStarted(craftingType, context)
     local playStopTooltipAnimation = DoesCraftingTypeHaveSlotAnimations(craftingType)
-    self:StartCraftProcess(playStopTooltipAnimation)
+    self:StartCraftProcess(playStopTooltipAnimation, context)
 end
 
 function ZO_CraftingResults_Base:OnRetraitStarted()
@@ -254,6 +318,17 @@ function ZO_CraftingResults_Base:PlayTooltipAnimation(isFailure, isExceptionalRe
     PlaySound(isFailure and self.tooltipAnimationFailureSound or self.tooltipAnimationSuccessSound)
 end
 
+function ZO_CraftingResults_Base:PlayContextualAnimation(context, craftingType)
+    if self.contextualAnimationControls[context] and not self.contextualAnimationControls[context]:IsHidden() then
+        self:ForceStop()
+        
+        self.contextualAnimations[context].craftingType = craftingType
+        self.contextualAnimations[context]:PlayFromStart()
+    else
+        self:OnContextualAnimationStopped(craftingType)
+    end
+end
+
 function ZO_CraftingResults_Base:CompleteCraftProcess(craftFailed, isExceptionalResult, craftingType)
     if not self.craftingProcessCompleted then
         if self.enchantSoundPlayer:IsPlaying() then
@@ -305,6 +380,13 @@ end
 function ZO_CraftingResults_Base:OnTooltipAnimationStopped(craftingType)
     if self.tooltipAnimationCompleted == false then
         self.tooltipAnimationCompleted = true
+        self:CheckCraftProcessCompleted(craftingType)
+    end
+end
+
+function ZO_CraftingResults_Base:OnContextualAnimationStopped(craftingType)
+    if self.contextualAnimationCompleted == false then
+        self.contextualAnimationCompleted = true
         self:CheckCraftProcessCompleted(craftingType)
     end
 end
@@ -381,7 +463,7 @@ do
     end
 
     function ZO_CraftingResults_Base:CheckCraftProcessCompleted(craftingType)
-        if self:IsActive() and self.craftingProcessCompleted and self.tooltipAnimationCompleted then
+        if self:IsActive() and self.craftingProcessCompleted and self.tooltipAnimationCompleted and self.contextualAnimationCompleted then
             if GetNumLastCraftingResultLearnedTraits() > 0 then
                 self:DisplayDiscoveredTraits()
             end
@@ -504,15 +586,16 @@ do
 end
 
 function ZO_CraftingResults_Base:ForceCompleteCraftProcess()
-    if not (self.craftingProcessCompleted and self.tooltipAnimationCompleted) then
+    if not (self.craftingProcessCompleted and self.tooltipAnimationCompleted and self.contextualAnimationCompleted) then
         self.craftingProcessCompleted = true
         self.tooltipAnimationCompleted = true
+        self.contextualAnimationCompleted = true
         CALLBACK_MANAGER:FireCallbacks("CraftingAnimationsStopped")
     end
 end
 
 function ZO_CraftingResults_Base:IsCraftInProgress()
-    return self.craftingProcessCompleted == false or self.tooltipAnimationCompleted == true
+    return self.craftingProcessCompleted == false or self.tooltipAnimationCompleted == false or self.contextualAnimationCompleted == false
 end
 
 function ZO_CraftingResults_Base:HasEntries()

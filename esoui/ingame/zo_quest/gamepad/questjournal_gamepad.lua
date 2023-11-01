@@ -95,11 +95,11 @@ function ZO_QuestJournal_Gamepad:Initialize(control)
         titleText = function()
             local questData = self:GetSelectedQuestData()
             if questData then
-                local questName, _, _, _, _, _, _, _, _, questType, instanceDisplayType = GetJournalQuestInfo(questData.questIndex)
+                local questName, _, _, _, _, _, _, _, _, questType, zoneDisplayType = GetJournalQuestInfo(questData.questIndex)
 
                 local conColorDef = ZO_ColorDef:New(GetConColor(questData.level))
                 questName = conColorDef:Colorize(questName)
-                local iconTexture = self:GetIconTexture(questType, instanceDisplayType)
+                local iconTexture = self:GetIconTexture(questType, zoneDisplayType)
 
                 if iconTexture then
                     local questIcon = zo_iconFormat(iconTexture, 48, 48)
@@ -129,16 +129,16 @@ function ZO_QuestJournal_Gamepad:Initialize(control)
         end,
 
         data2Text = function()
-            local repeatableText, instanceDisplayTypeText = self:GetQuestDataString()
-            return repeatableText or instanceDisplayTypeText
+            local repeatableText, zoneDisplayTypeText = self:GetQuestDataString()
+            return repeatableText or zoneDisplayTypeText
         end,
 
         data3Text = function()
-            local repeatableText, instanceDisplayTypeText = self:GetQuestDataString()
+            local repeatableText, zoneDisplayTypeText = self:GetQuestDataString()
             if repeatableText == nil then
                 return nil -- data2Text will already be showing the instance type info
             else
-                return instanceDisplayTypeText
+                return zoneDisplayTypeText
             end
         end,
     }
@@ -212,17 +212,20 @@ function ZO_QuestJournal_Gamepad:SwitchActiveList(listDescriptor)
     end
 end
 
+internalassert(ZONE_DISPLAY_TYPE_MAX_VALUE == 12, "A zone display type has been added. Please add it to RegisterIcons and RegisterTooltips")
+
 function ZO_QuestJournal_Gamepad:RegisterIcons()
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,             "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_instance.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,          "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDungeon.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,      "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDelve.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_AREA,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupArea.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,             "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_raid.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON,   "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_dungeon.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DELVE,            "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_delve.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_HOUSING,          "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_housing.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_ZONE_STORY,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_zoneStory.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_COMPANION,        "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_companion.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_SOLO,             "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_instance.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_DUNGEON,          "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDungeon.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_GROUP_DELVE,      "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDelve.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_GROUP_AREA,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupArea.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_RAID,             "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_raid.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_PUBLIC_DUNGEON,   "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_dungeon.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_DELVE,            "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_delve.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_HOUSING,          "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_housing.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ZONE_STORY,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_zoneStory.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_COMPANION,        "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_companion.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON,  "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_endlessDungeon.dds")
 end
 
 function ZO_QuestJournal_Gamepad:RegisterTooltips()
@@ -237,21 +240,23 @@ function ZO_QuestJournal_Gamepad:RegisterTooltips()
     local housingIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_housing.dds", ICON_SIZE, ICON_SIZE)
     local zoneStoryIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_zoneStory.dds", ICON_SIZE, ICON_SIZE)
     local companionIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_companion.dds", ICON_SIZE, ICON_SIZE)
+    local endlessDungeonIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_endlessDungeon.dds", ICON_SIZE, ICON_SIZE)
 
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,             zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_SOLO, soloIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,          zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_DUNGEON, dungeonIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,             zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_RAID, raidIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_AREA,       zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_GROUP_AREA, groupAreaIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,      zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_GROUP_AREA, groupDelveIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON,   zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_PUBLIC_DUNGEON, publicDungeonIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DELVE,            zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_DELVE, delveIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_HOUSING,          zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_HOUSING, housingIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_ZONE_STORY,       zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_ZONE_STORY, zoneStoryIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_COMPANION,        zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_COMPANION, companionIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_SOLO,             zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_SOLO, soloIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_DUNGEON,          zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_DUNGEON, dungeonIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_RAID,             zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_RAID, raidIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_GROUP_AREA,       zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_GROUP_AREA, groupAreaIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_GROUP_DELVE,      zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_GROUP_AREA, groupDelveIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_PUBLIC_DUNGEON,   zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_PUBLIC_DUNGEON, publicDungeonIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_DELVE,            zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_DELVE, delveIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_HOUSING,          zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_HOUSING, housingIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ZONE_STORY,       zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_ZONE_STORY, zoneStoryIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_COMPANION,        zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_COMPANION, companionIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON,  zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_ENDLESS_DUNGEON, endlessDungeonIcon))
 end
 
 function ZO_QuestJournal_Gamepad:GetQuestDataString()
-    local repeatableText, instanceDisplayTypeText
+    local repeatableText, zoneDisplayTypeText
     local questData = self:GetSelectedQuestData()
 
     if questData then
@@ -260,10 +265,10 @@ function ZO_QuestJournal_Gamepad:GetQuestDataString()
             repeatableText = GetString(SI_GAMEPAD_QUEST_JOURNAL_REPEATABLE_TEXT)
         end
 
-        instanceDisplayTypeText = self:GetTooltipText(questData.questType, questData.displayType, questData.questIndex)
+        zoneDisplayTypeText = self:GetTooltipText(questData.questType, questData.displayType, questData.questIndex)
     end
 
-    return repeatableText, instanceDisplayTypeText
+    return repeatableText, zoneDisplayTypeText
 end
 
 function ZO_QuestJournal_Gamepad:OnTargetChanged(...)

@@ -129,7 +129,6 @@ EsoUI\Libraries\ZO_Dialog\Gamepad\ZO_GenericDialog_Gamepad.xml
 EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.lua
 EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.xml
 
-EsoUI\Libraries\ZO_EditBoxes\ZO_EditBox.lua
 EsoUI\Libraries\ZO_EditBoxes\ZO_SavingEditBox.lua
 EsoUI\Libraries\ZO_EditBoxes\ZO_SavingEditBox.xml
 

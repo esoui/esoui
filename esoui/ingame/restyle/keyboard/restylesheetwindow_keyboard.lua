@@ -55,13 +55,13 @@ end
 
 function ZO_RestyleSheetWindow_Keyboard:InitializeModeSelector()
     local modeSelector = self.control:GetNamedChild("ModeSelector")
-    self.modeSelectorHeader= modeSelector:GetNamedChild("Header")
+    self.modeSelectorHeader = modeSelector:GetNamedChild("Header")
     self.modeSelectorDropdownControl = modeSelector:GetNamedChild("Dropdown")
     self.modeSelectorDropdown = ZO_ComboBox_ObjectFromContainer(self.modeSelectorDropdownControl)
     self.modeSelectorDropdown:SetSortsItems(false)
 
     self.modeSelectorDropdown:SetPreshowDropdownCallback(function()
-        TUTORIAL_SYSTEM:RemoveTutorialByTrigger(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN)
+        TUTORIAL_SYSTEM:RemoveTutorialByTrigger(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN_POINTER_BOX)
     end)
 
     local UNEQUIP_OUTFIT = nil
@@ -112,15 +112,15 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeModeSelector()
         end
     end
 
-    self.equipmentGearModeEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), TrySetEquipmentGearSelected)
+    self.equipmentGearModeEntry = self.modeSelectorDropdown:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), TrySetEquipmentGearSelected)
     self.equipmentGearModeEntry.selectFunction = self.setEquipmentGearSelectedFunction
-    self.collectiblesModeEntry = ZO_ComboBox:CreateItemEntry("", function()
+    self.collectiblesModeEntry = self.modeSelectorDropdown:CreateItemEntry("", function()
         self:DisplaySheet(self.collectiblesSheet)
     end)
 
-    self.companionEquipmentGearModeEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), TrySetCompanionEquipmentGearSelected)
+    self.companionEquipmentGearModeEntry = self.modeSelectorDropdown:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), TrySetCompanionEquipmentGearSelected)
     self.companionEquipmentGearModeEntry.selectFunction = self.setCompanionEquipmentGearSelectedFunction
-    self.companionCollectiblesModeEntry = ZO_ComboBox:CreateItemEntry("", function()
+    self.companionCollectiblesModeEntry = self.modeSelectorDropdown:CreateItemEntry("", function()
         self:DisplaySheet(self.companionCollectiblesSheet)
     end)
 
@@ -134,7 +134,7 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeModeSelector()
         self.modeSelectorDropdown:SelectItem(oldEntry, true)
     end
 
-    self.purchaseAdditionalOutfitsEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_OUTFIT_PURCHASE_MORE_ENTRY), OnPurchaseAdditionalOutfitsEntry)
+    self.purchaseAdditionalOutfitsEntry = self.modeSelectorDropdown:CreateItemEntry(GetString(SI_OUTFIT_PURCHASE_MORE_ENTRY), OnPurchaseAdditionalOutfitsEntry)
 end
 
 function ZO_RestyleSheetWindow_Keyboard:InitializeSheet(sheetClassTemplate, slotGridData)
@@ -265,7 +265,7 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeCompanionOutfitStylesSheet()
 end
 
 function ZO_RestyleSheetWindow_Keyboard:OnShowing()
-    TUTORIAL_SYSTEM:RegisterTriggerLayoutInfo(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN, self.control, ZO_RESTYLE_SHEET_WINDOW_FRAGMENT, self.outfitSelectorTutorialAnchor)
+    TUTORIAL_SYSTEM:RegisterTriggerLayoutInfo(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN_POINTER_BOX, self.control, ZO_RESTYLE_SHEET_WINDOW_FRAGMENT, self.outfitSelectorTutorialAnchor)
 end
 
 function ZO_RestyleSheetWindow_Keyboard:BeginRestyling()
@@ -343,7 +343,7 @@ do
         local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits(actorCategory)
         for outfitIndex = 1, numOutfits do
             local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, outfitIndex)
-            local entry = ZO_ComboBox:CreateItemEntry(outfitManipulator:GetOutfitName(), TrySetSelectedOutfit)
+            local entry = self.modeSelectorDropdown:CreateItemEntry(outfitManipulator:GetOutfitName(), TrySetSelectedOutfit)
             entry.outfitManipulator = outfitManipulator
             entry.selectFunction = SetSelectedOutfit
             self.modeSelectorDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
@@ -439,7 +439,7 @@ function ZO_RestyleSheetWindow_Keyboard:PopulateCompanionOutfitsModeDropdown()
     local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
     for outfitIndex = 1, numOutfits do
         local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, outfitIndex)
-        local entry = ZO_ComboBox:CreateItemEntry(outfitManipulator:GetOutfitName(), TrySetSelectedOutfit)
+        local entry = self.modeSelectorDropdown:CreateItemEntry(outfitManipulator:GetOutfitName(), TrySetSelectedOutfit)
         entry.outfitManipulator = outfitManipulator
         entry.selectFunction = SetSelectedOutfit
         self.modeSelectorDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)

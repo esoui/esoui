@@ -82,5 +82,19 @@
                 </Control>
             </Controls>
         </Control>
+
+        <Control name="ZO_DynamicWidthCraftingModeMenu" virtual="true">
+            <Dimensions y="ZO_SCENE_MENU_HEIGHT" />
+            <Controls>
+                <Control name="$(parent)Bar" inherits="ZO_CraftingModeTabs">
+                    <Anchor point="TOPRIGHT" />
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="BOTTOMLEFT" offsetX="15" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="4" />
+                </Control>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

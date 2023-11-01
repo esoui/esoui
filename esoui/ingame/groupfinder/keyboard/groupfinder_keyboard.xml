@@ -1,0 +1,69 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GroupFinder_Keyboard_TopLevel" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true">
+            <OnInitialized>
+                ZO_GroupFinder_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)SearchPanel" inherits="ZO_GroupFinder_GroupSearchContent_Keyboard" hidden="true">
+                    <AnchorFill />
+                </Control>
+
+                <Control name="$(parent)CreateGroupListingPanel" inherits="ZO_GroupFinder_CreateGroupListingContent_Keyboard" layer="TEXT" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="-280" offsetY="-65" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+
+                <Control name="$(parent)ApplicationsManagementPanel" inherits="ZO_GroupFinder_ApplicationsManagementContent_Keyboard" hidden="true">
+                    <AnchorFill />
+                </Control>
+
+                <Control name="$(parent)Overview" hidden="true">
+                    <AnchorFill />
+                    <Controls>
+                        <Control name="$(parent)AppliedTo" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" offsetY="-7" />
+                            <Controls>
+                                <Control name="$(parent)GroupListing" inherits="ZO_GroupFinder_GroupListing_Keyboard" hidden="true">
+                                    <Anchor point="TOPLEFT" />
+                                    <Controls>
+                                        <Control name="$(parent)Highlight" inherits="ZO_ListEntryBackdrop">
+                                            <AnchorFill />
+
+                                            <Controls>
+                                                <Texture name="$(parent)Top" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight_gold.dds" level="1"/>
+                                                <Texture name="$(parent)Bottom" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight_gold.dds" level="1"/>
+                                                <Texture name="$(parent)Middle" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight_gold.dds" level="1"/>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)Description" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" offsetY="60" />
+                            <Anchor point="TOPRIGHT" offsetX="-30" offsetY="70" />
+                        </Label>
+                        <Button name="$(parent)CreateGroupButton" inherits="ZO_DefaultButton" text="SI_GROUP_FINDER_CREATE_GROUP">
+                            <Anchor point="BOTTOM"/>
+                            <Dimensions x="200" />
+
+                            <OnMouseEnter>
+                                ZO_CreateEditGroupListingButton_OnMouseEnter(self, button)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_CreateEditGroupListingButton_OnMouseExit(self, button)
+                            </OnMouseExit>
+
+                            <OnClicked>
+                                ZO_CreateEditGroupListingButton_OnClicked(self, button)
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

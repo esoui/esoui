@@ -103,7 +103,7 @@ function ZO_GamepadCraftingUtils_InitializeGenericHeader(craftingObject, createT
     craftingObject.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, UpdateCapacity)
 end
 
-function ZO_GamepadCraftingUtils_SetupGenericHeader(craftingObject, titleString, tabBarEntries, showCapacity)
+function ZO_GamepadCraftingUtils_SetupGenericHeader(craftingObject, titleString, tabBarEntries, showCapacity, showItemSets)
     if tabBarEntries and #tabBarEntries == 1 then
         local tabBarFirstEntry = tabBarEntries[1]
         if tabBarFirstEntry.text then
@@ -118,9 +118,19 @@ function ZO_GamepadCraftingUtils_SetupGenericHeader(craftingObject, titleString,
         return zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
     end
 
+    local function GetUnlockedSets()
+        local totalSets = GetNumConsolidatedSmithingSets()
+        local unlockedSets = GetNumUnlockedConsolidatedSmithingSets()
+        return zo_strformat(SI_SMITHING_CONSOLIDATED_STATION_ITEM_SETS_UNLOCKED_VALUE_FORMATTER, unlockedSets, totalSets)
+    end
+
     craftingObject.headerData = { }
 
-    if showCapacity or showCapacity == nil then
+    --If showItemSets is true, we will display that *instead* of capacity
+    if showItemSets then
+        craftingObject.headerData.data1HeaderText = GetString(SI_SMITHING_CONSOLIDATED_STATION_ITEM_SETS_UNLOCKED_HEADER)
+        craftingObject.headerData.data1Text = GetUnlockedSets
+    elseif showCapacity or showCapacity == nil then
         craftingObject.headerData.data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY)
         craftingObject.headerData.data1Text = GetCapacity
     end

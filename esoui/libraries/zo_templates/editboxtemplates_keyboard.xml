@@ -78,26 +78,33 @@
             <Anchor point="BOTTOMRIGHT" offsetX="-ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_RIGHT" offsetY="-ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_BOTTOM"/>
         </EditBox>
 
-        <Control name="ZO_UnderlinedEditBackdrop_Keyboard" virtual="true">
-            <OnInitialized>
-                ZO_SingleLineEditContainerSize_Keyboard_OnInitialized(self)
-            </OnInitialized>
+        <Button name="ZO_TogglePasswordEditBoxButton" clickSound="Click" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="30" y="30" />
+            <Anchor point="LEFT" relativePoint="RIGHT" />
+
+            <OnClicked>
+                ZO_EditBoxKeyboard_TogglePassword(self:GetParent(), self)
+            </OnClicked>
+
+            <Textures
+                normal="EsoUI/Art/Miscellaneous/Keyboard/hidden_up.dds"
+                pressed="EsoUI/Art/Miscellaneous/Keyboard/hidden_down.dds"
+                mouseOver="EsoUI/Art/Miscellaneous/Keyboard/hidden_over.dds"
+            />
+        </Button>
+        
+        <EditBox name="ZO_TogglePasswordEditBox" inherits="ZO_DefaultEdit" isPassword="true" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_LEFT" offsetY="ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_TOP"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SINGLE_LINE_TOGGLE_PASSWORD_EDIT_CONTAINER_PADDING_RIGHT" offsetY="-ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_BOTTOM"/>
+
             <Controls>
-                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Login/Keyboard/Login_TextLineShadow.dds">
-                    <Dimensions x="512" y="64" />
-                    <Anchor point="TOPLEFT" offsetX="-2" offsetY="-10"/>
-                </Texture>
+                <Button name="$(parent)TogglePasswordButton" inherits="ZO_TogglePasswordEditBoxButton" />
             </Controls>
-        </Control>
+        </EditBox>
 
-        <Control name="ZO_EditBox" inherits="ZO_UnderlinedEditBackdrop_Keyboard" virtual="true">
+        <Control name="ZO_TogglePasswordEditBoxWithBackground" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
             <Controls>
-                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
-
-                <Label name="$(parent)Empty" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" layer="BACKGROUND" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Edit"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Edit"/>
-                </Label>
+                <EditBox name="$(parent)Edit" inherits="ZO_TogglePasswordEditBox" />
             </Controls>
         </Control>
     </Controls>

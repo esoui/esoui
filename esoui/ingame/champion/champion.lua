@@ -2433,6 +2433,9 @@ end
 
 function ChampionPerks:OnPlayerActivated()
     self.refreshGroup:MarkDirty("KeybindStrip")
+    if CHAMPION_DATA_MANAGER:HasAnySavedUnspentPoints() then
+        TriggerTutorial(TUTORIAL_TRIGGER_CHAMPION_POINTS_UNSPENT)
+    end
 end
 
 function ChampionPerks:OnPowerUpdate(eventCode, unitTag, powerIndex, powerType, value, max, effectiveMax)

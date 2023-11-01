@@ -263,23 +263,33 @@ function ZO_SortHeaderGroup:GetHeaderNameForKey(key)
     return name
 end
 
+function ZO_SortHeaderGroup:GetHeaderNarrationForKey(key)
+    local nameNarration = ""
+    local header = self:HeaderForKey(key)
+    if header then
+        --If narrationText is set, use that, otherwise just use the header name
+        nameNarration = header.narrationText or header.name
+    end
+    return nameNarration
+end
+
 function ZO_SortHeaderGroup:GetSortHeaderNarrationText(key)
     local narrationText = ""
     local header = self:HeaderForKey(key)
     if header then
-        local name = self:GetHeaderNameForKey(key)
+        local nameNarration = self:GetHeaderNarrationForKey(key)
         --If this header is the currently active sort, then include the direction
         if header == self.selectedSortHeader then
             local order = self.sortDirection == ZO_SORT_ORDER_DOWN and GetString(SI_SCREEN_NARRATION_SORT_ORDER_DOWN) or GetString(SI_SCREEN_NARRATION_SORT_ORDER_UP)
-            narrationText = zo_strformat(SI_SCREEN_NARRATION_SORT_HEADER, name, order)
+            narrationText = zo_strformat(SI_SCREEN_NARRATION_SORT_HEADER, nameNarration, order)
         else
-            narrationText = name
+            narrationText = nameNarration
         end
     end
     return SCREEN_NARRATION_MANAGER:CreateNarratableObject(narrationText)
 end
 
-function ZO_SortHeader_Initialize(control, name, key, initialDirection, alignment, font, highlightTemplate)
+function ZO_SortHeader_Initialize(control, name, key, initialDirection, alignment, font, highlightTemplate, narrationText)
     local nameControl = control:GetNamedChild("Name")
 
     if font then
@@ -293,6 +303,7 @@ function ZO_SortHeader_Initialize(control, name, key, initialDirection, alignmen
     control.usesArrow = true
     control.highlightTemplate = highlightTemplate
     control.name = name
+    control.narrationText = narrationText
 end
 
 function ZO_SortHeader_InitializeIconHeader(control, icon, sortUpIcon, sortDownIcon, mouseoverIcon, key, initialDirection)

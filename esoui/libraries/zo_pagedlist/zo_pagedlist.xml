@@ -25,5 +25,39 @@
                 </Label>
             </Controls>
         </Control>
+
+        <Control name="ZO_PagedListArrowsFooterBar_Keyboard" virtual="true">
+            <Dimensions y="64" />
+            <Controls>
+                <Label name="$(parent)PageNumberText" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER">
+                    <DimensionConstraints minX="32" />
+                    <Anchor point="CENTER" />
+                </Label>
+
+                <Button name="$(parent)PreviousButton">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)PageNumberText" relativePoint="LEFT" offsetX="-10" />
+
+                    <Textures
+                        normal="EsoUI/Art/Buttons/large_leftArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_leftArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_leftArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/large_leftArrow_disabled.dds"
+                    />
+                </Button>
+
+                <Button name="$(parent)NextButton">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="LEFT" relativeTo="$(parent)PageNumberText" relativePoint="RIGHT" offsetX="10" />
+
+                    <Textures
+                        normal="EsoUI/Art/Buttons/large_rightArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_rightArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/large_rightArrow_disabled.dds"
+                    />
+                </Button>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

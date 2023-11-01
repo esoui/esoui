@@ -417,7 +417,7 @@ function ZO_ChatMenu_Gamepad:RefreshChannelDropdown(reselectDuringRebuild)
             local r, g, b = ZO_ChatSystem_GetCategoryColorFromChannel(channelData.id)
             local itemColor = ZO_ColorDef:New(r, g, b)
             local coloredSwitchText = itemColor:Colorize(switch)
-            local entry = ZO_ComboBox:CreateItemEntry(coloredSwitchText, OnChannelSelected)
+            local entry = channelDropdown:CreateItemEntry(coloredSwitchText, OnChannelSelected)
             entry.data = channelData
             channelDropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
             local stringWidth = (self.selectedChannelFakeLabel:GetStringWidth(zo_strupper(switch)) / GetUIGlobalScale()) + 10 -- 10px of margin to avoid word wrapping

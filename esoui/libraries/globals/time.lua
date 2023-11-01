@@ -198,3 +198,32 @@ do
     end
 end
 
+-- Meant to format an expiration time that could have a long duration (longer than a month)
+-- Any time longer than a month will only show the number of days rounded to the nearest day
+-- Any time less than a minute will show as "<1m"
+-- All other times will use ZO_FormatTimeLargestTwo and display like "10d 5h"
+function ZO_FormatTimeLongDurationExpiration(seconds)
+    if seconds >= ZO_ONE_MONTH_IN_SECONDS then
+        local days = zo_round(seconds / ZO_ONE_DAY_IN_SECONDS)
+        return zo_strformat(SI_TIME_FORMAT_DAYS, days)
+    end
+
+    if seconds < ZO_ONE_MINUTE_IN_SECONDS then
+        return GetString(SI_STR_TIME_LESS_THAN_MINUTE_SHORT)
+    end
+
+    return ZO_FormatTimeLargestTwo(seconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+end
+
+function ZO_FormatTimeLongDurationExpirationNarration(seconds)
+    if seconds >= ZO_ONE_MONTH_IN_SECONDS then
+        local days = zo_round(seconds / ZO_ONE_DAY_IN_SECONDS)
+        return zo_strformat(SI_TIME_FORMAT_DAYS_DESC, days)
+    end
+
+    if seconds < ZO_ONE_MINUTE_IN_SECONDS then
+        return GetString(SI_STR_TIME_LESS_THAN_MINUTE_NARRATION)
+    end
+
+    return ZO_FormatTimeLargestTwo(seconds, TIME_FORMAT_STYLE_DESCRIPTIVE)
+end

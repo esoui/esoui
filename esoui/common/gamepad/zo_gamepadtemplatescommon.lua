@@ -856,6 +856,10 @@ function ZO_GetPlatformTemplate(baseTemplate)
     return IsInGamepadPreferredMode() and baseTemplate.."_Gamepad_Template" or baseTemplate.."_Keyboard_Template"
 end
 
+function ZO_ApplyPlatformTemplateToControl(control, templateName)
+    ApplyTemplateToControl(control, ZO_GetPlatformTemplate(templateName))
+end
+
 function ZO_GamepadDefaultHorizontalListEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, selectedFromParent)
     control:SetText(data.text)
     

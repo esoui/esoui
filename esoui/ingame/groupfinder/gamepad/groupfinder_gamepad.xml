@@ -1,0 +1,77 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GroupFinder_RoleIconTemplate_Gamepad" inherits="ZO_GroupFinder_RoleIconTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepadBold34" override="true" />
+
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="64" y="64" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_GroupFinder_Filter_Header_Gamepad" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">
+            <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-19" />
+            <Dimensions y="24" />
+        </Label>
+
+        <Control name="ZO_GroupFinder_ChampionPoint_EditBox_Gamepad" inherits="ZO_Gamepad_GenericDialog_Parametric_TextFieldItem" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)TextField" override="true">
+                    <Controls>
+                        <EditBox name="$(parent)Edit" maxInputCharacters="GROUP_FINDER_GROUP_LISTING_CHAMPION_POINTS_MAX_DIGITS" textType="NUMERIC_UNSIGNED_INT" override="true">
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GroupFinder_InviteCode_EditBox_Gamepad" inherits="ZO_Gamepad_GenericDialog_Parametric_TextFieldItem" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)TextField" override="true">
+                    <Controls>
+                        <EditBox name="$(parent)Edit" maxInputCharacters="GROUP_FINDER_GROUP_LISTING_INVITE_CODE_MAX_LENGTH" textType="NUMERIC_UNSIGNED_INT" defaultText="SI_GROUP_FINDER_APPLY_JOIN_DIALOG_INVITE_CODE_DEFAULT_TEXT" override="true">
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GroupFinder_GroupListing_Gamepad" inherits="ZO_GroupFinder_GroupListing" virtual="true">
+            <Dimensions x="1200" y="ZO_GROUP_LISTING_GAMEPAD_HEIGHT" />
+            <Controls>
+                <Backdrop name="$(parent)OverlayBorder" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" centerColor="FF000000">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                </Backdrop>
+
+                <Control name="$(parent)RoleList" override="true">
+                    <Anchor point="RIGHT" offsetX="-40" />
+                </Control>
+
+                <Label name="$(parent)DisabledLabel" font="ZoFontGamepad42" override="true">
+                    <Anchor point="RIGHT" offsetX="-40" />
+                </Label>
+
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontGamepad42" maxLineCount="1" wrapMode="ELLIPSIS" override="true">
+                            <Anchor point="TOPLEFT" offsetX="15" />
+                        </Label>
+
+                        <Label name="$(parent)Settings" font="ZoFontGamepad27" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GroupFinder_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_GroupFinder_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

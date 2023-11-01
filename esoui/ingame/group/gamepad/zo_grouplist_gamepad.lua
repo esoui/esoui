@@ -28,6 +28,34 @@ function GroupList_Gamepad:Initialize(control)
     ZO_GamepadSocialListPanel.Initialize(self, control, GROUP_LIST_MANAGER, "ZO_GroupListRow_Gamepad")
     self:SetEmptyText(GetString(SI_GROUP_LIST_PANEL_NO_GROUP_MESSAGE));
     self:SetupSort(SORT_KEYS, "displayName", ZO_SORT_ORDER_UP)
+
+    --If we removed our created group listing while in this list, we need to refresh the keybinds
+    local function OnGroupListingRemoved(_, result)
+        if self:IsActivated() then
+            self:UpdateKeybinds()
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("GroupList_Gamepad", EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_RESULT, OnGroupListingRemoved)
+end
+
+function GroupList_Gamepad:InitializeKeybinds()
+    ZO_GamepadSocialListPanel.InitializeKeybinds(self)
+
+    -- My Listing
+    local myGroupListingKeybind =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        name = GetString(SI_GROUP_FINDER_MY_GROUP_LISTING),
+        keybind = "UI_SHORTCUT_QUATERNARY",
+        visible = function()
+            return HasGroupListingForUserType(GROUP_FINDER_GROUP_LISTING_USER_TYPE_CREATED_GROUP_LISTING)
+        end,
+        callback = function()
+            GROUP_FINDER_GAMEPAD:SetMode(ZO_GROUP_FINDER_MODES.MANAGE)
+            ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(GROUP_FINDER_GAMEPAD:GetCategoryData())
+        end,
+    }
+    self:AddUniversalKeybind(myGroupListingKeybind)
 end
 
 function GroupList_Gamepad:GetBackKeybindCallback()

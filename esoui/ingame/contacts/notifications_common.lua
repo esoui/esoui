@@ -10,12 +10,10 @@ NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA = 9
 NOTIFICATIONS_GIFT_RECEIVED_DATA = 10
 NOTIFICATIONS_GIFT_RETURNED_DATA = 11
 NOTIFICATIONS_GIFT_CLAIMED_DATA = 12
-NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA = 13
-NOTIFICATIONS_GIFTING_UNLOCKED_DATA = 14
-NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA = 15
-NOTIFICATIONS_GUILD_NEW_APPLICATIONS = 16
-NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA = 17
-NOTIFICATIONS_POINTS_RESET_DATA = 18
+NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA = 13
+NOTIFICATIONS_GUILD_NEW_APPLICATIONS = 14
+NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA = 15
+NOTIFICATIONS_POINTS_RESET_DATA = 16
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
@@ -780,16 +778,20 @@ function ZO_AgentChatRequestProvider:Decline(data, button, openedFromKeybind)
     DeclineAgentChat()
 end
 
---Leaderboard Raid Provider
+--Leaderboard Score Provider
+
+--Leaderboard Score Provider
 -------------------------
 
-ZO_LeaderboardRaidProvider = ZO_NotificationProvider:Subclass()
+internalassert(LEADERBOARD_SCORE_NOTIFICATION_TYPE_MAX_VALUE == 1, "New Leaderboard Score Notification Type, please add to ZO_LeaderboardScoreProvider checks")
 
-function ZO_LeaderboardRaidProvider:New(notificationManager, notificationEventCallback)
+ZO_LeaderboardScoreProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_LeaderboardScoreProvider:New(notificationManager, notificationEventCallback)
     local provider = ZO_NotificationProvider.New(self, notificationManager, notificationEventCallback)
 
-    provider:RegisterUpdateEvent(EVENT_RAID_SCORE_NOTIFICATION_ADDED)
-    provider:RegisterUpdateEvent(EVENT_RAID_SCORE_NOTIFICATION_REMOVED)
+    provider:RegisterUpdateEvent(EVENT_LEADERBOARD_SCORE_NOTIFICATION_ADDED)
+    provider:RegisterUpdateEvent(EVENT_LEADERBOARD_SCORE_NOTIFICATION_REMOVED)
 
     local function ShowLeaderBoardNotifications_SettingsChanged()
         provider:PushUpdateToNotificationManager()
@@ -803,25 +805,27 @@ function ZO_LeaderboardRaidProvider:New(notificationManager, notificationEventCa
     return provider
 end
 
-function ZO_LeaderboardRaidProvider:BuildNotificationList()
+function ZO_LeaderboardScoreProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
     if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS) then
-        for notificationIndex = 1, GetNumRaidScoreNotifications() do
-            local notificationId = GetRaidScoreNotificationId(notificationIndex)
-            local raidId, raidScore, millisecondsSinceRequest = GetRaidScoreNotificationInfo(notificationId)
-            local numMembers = GetNumRaidScoreNotificationMembers(notificationId)
+        local notificationId = GetNextLeaderboardScoreNotificationId()
+        while notificationId do
+            local contentType, contentId, contentContextualInfo, score, millisecondsSinceRequest, numMembers = GetLeaderboardScoreNotificationInfo(notificationId)
             local numKnownMembers = 0
             local hasFriend = false
             local hasGuildMember = false
             local hasPlayer = false
             for memberIndex = 1, numMembers do
-                local displayName, characterName, isFriend, isGuildMember, isPlayer = GetRaidScoreNotificationMemberInfo(notificationId, memberIndex)
+                local displayName, characterName, isFriend, isGuildMember, isPlayer = GetLeaderboardScoreNotificationMemberInfo(notificationId, memberIndex)
 
                 hasFriend = hasFriend or isFriend
                 hasGuildMember = hasGuildMember or isGuildMember
                 hasPlayer = hasPlayer or isPlayer
 
-                if isFriend or isGuildMember then
+                if hasPlayer then
+                    -- We're going to decline anyway, see comment below
+                    break
+                elseif isFriend or isGuildMember then
                     numKnownMembers = numKnownMembers + 1
                 end
             end
@@ -830,43 +834,60 @@ function ZO_LeaderboardRaidProvider:BuildNotificationList()
                 -- Player just received a notification about themselves, so filter it out
                 self:Decline({ notificationId = notificationId, })
             elseif hasFriend or hasGuildMember then
-                local raidName = GetRaidName(raidId)
-
+                local contentName
+                if contentType == LEADERBOARD_SCORE_NOTIFICATION_TYPE_RAID then
+                    contentName = GetRaidName(contentId)
+                else -- LEADERBOARD_SCORE_NOTIFICATION_TYPE_ENDLESS_DUNGEON
+                    -- Since leaderboards only really assume 1 Endless Dungeon for now, we can just use the same name we use for the header there
+                    contentName = GetString(SI_ENDLESS_DUNGEON_LEADERBOARDS_CATEGORIES_HEADER)
+                end
                 table.insert(self.list,
                 {
                     dataType = NOTIFICATIONS_LEADERBOARD_DATA,
                     notificationId = notificationId,
-                    raidId = raidId,
+                    contentType = contentType,
+                    contentId = contentId,
+                    contentContextualInfo = contentContextualInfo,
+                    numMembers = numMembers,
                     notificationType = NOTIFICATION_TYPE_LEADERBOARD,
                     secsSinceRequest = ZO_NormalizeSecondsSince(millisecondsSinceRequest / 1000),
-                    message = self:CreateMessage(raidName, raidScore, numKnownMembers, hasFriend, hasGuildMember, notificationId),
-                    shortDisplayText = zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_SHORT_TEXT_FORMATTER, raidName),
+                    message = self:CreateMessage(contentName, score, numKnownMembers, hasFriend, hasGuildMember, notificationId),
+                    shortDisplayText = zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_SCORE_NOTIFICATION_SHORT_TEXT_FORMATTER, contentName),
                 })
             end
+            notificationId = GetNextLeaderboardScoreNotificationId(notificationId)
         end
     end
 end
 
-function ZO_LeaderboardRaidProvider:CreateMessage(raidName, raidScore, numMembers, hasFriend, hasGuildMember, notificationId)
+function ZO_LeaderboardScoreProvider:CreateMessage(contentName, score, numMembers, hasFriend, hasGuildMember, notificationId)
     if hasFriend and hasGuildMember and numMembers > 1 then
-        return zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_FRIENDS_AND_GUILD_MEMBERS, raidName, raidScore)
+        return zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_SCORE_MESSAGE_FRIENDS_AND_GUILD_MEMBERS, contentName, score)
     elseif hasFriend then
-        return zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_FRIENDS, raidName, raidScore, numMembers)
+        return zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_SCORE_MESSAGE_FRIENDS, contentName, score, numMembers)
     else
-        return zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_GUILD_MEMBERS, raidName, raidScore, numMembers)
+        return zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_SCORE_MESSAGE_GUILD_MEMBERS, contentName, score, numMembers)
     end
 end
 
-local OPEN_LEADERBOARDS = true
+do
+    local OPEN_LEADERBOARDS = true
 
-function ZO_LeaderboardRaidProvider:Accept(data)
-    local raidLeaderboardsObject = SYSTEMS:GetObject("raidLeaderboards")
-    raidLeaderboardsObject:SelectRaidById(data.raidId, ZO_RAID_LEADERBOARD_SELECT_OPTION_SKIP_WEEKLY, OPEN_LEADERBOARDS)
-    RemoveRaidScoreNotification(data.notificationId)
+    function ZO_LeaderboardScoreProvider:Accept(data)
+        if data.contentType == LEADERBOARD_SCORE_NOTIFICATION_TYPE_RAID then
+            local leaderboardsObject = SYSTEMS:GetObject("raidLeaderboards")
+            leaderboardsObject:SelectRaidById(data.contentId, ZO_RAID_LEADERBOARD_SELECT_OPTION_SKIP_WEEKLY, OPEN_LEADERBOARDS)
+        else -- LEADERBOARD_SCORE_NOTIFICATION_TYPE_ENDLESS_DUNGEON
+            local leaderboardsObject = SYSTEMS:GetObject("endlessDungeonLeaderboards")
+            local endlessDungeonGroupType = data.contentContextualInfo
+            leaderboardsObject:SelectEndlessDungeonById(data.contentId, endlessDungeonGroupType, ZO_ENDLESS_DUNGEON_LEADERBOARD_SELECT_OPTION.SKIP_WEEKLY, OPEN_LEADERBOARDS)
+        end
+        RemoveLeaderboardScoreNotification(data.notificationId)
+    end
 end
 
-function ZO_LeaderboardRaidProvider:Decline(data, button, openedFromKeybind)
-    RemoveRaidScoreNotification(data.notificationId)
+function ZO_LeaderboardScoreProvider:Decline(data, button, openedFromKeybind)
+    RemoveLeaderboardScoreNotification(data.notificationId)
 end
 
 --Collections Update Provider
@@ -1272,115 +1293,6 @@ function ZO_GiftInventoryProvider:Decline(entryData)
     entryData.gift:View()
 end
 
--- Gifting Grace Period Started Provider
--------------------------
-
-ZO_GiftingGracePeriodStartedProvider = ZO_NotificationProvider:Subclass()
-
-function ZO_GiftingGracePeriodStartedProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
-
-    provider:RegisterUpdateEvent(EVENT_GIFTING_GRACE_PERIOD_STARTED)
-    provider:RegisterUpdateEvent(EVENT_GIFTING_GRACE_PERIOD_STARTED_NOTIFICATION_CLEARED)
-
-    return provider
-end
-
-function ZO_GiftingGracePeriodStartedProvider:BuildNotificationList()
-    ZO_ClearNumericallyIndexedTable(self.list)
-
-    if HasGiftingGracePeriodStartedNotification() then
-        self:AddNotification()
-    end
-end
-
-function ZO_GiftingGracePeriodStartedProvider:AddNotification()
-    local timeLeftS = GetGiftingGracePeriodTime()
-    local timeLeftString
-    if timeLeftS >= ZO_ONE_DAY_IN_SECONDS then
-        timeLeftString = ZO_FormatTime(timeLeftS, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS)
-    else
-        timeLeftString = GetString(SI_NOTIFICATIONS_GIFTING_GRACE_PERIOD_ENDS_LESS_THAN_A_DAY)
-    end
-    local message = zo_strformat(GetString(SI_NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED), timeLeftString)
-
-    local helpCategoryIndex, helpIndex = GetGiftingGraceStartedHelpIndices()
-    local hasMoreInfo = helpCategoryIndex ~= nil
-    local newListEntry = {
-        notificationType = NOTIFICATION_TYPE_GIFT_GRACE_STARTED,
-        dataType = NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA,
-        shortDisplayText = GetString(SI_NOTIFICATIONS_GIFTING_GRACE_PERIOD_UNLOCK_PERIOD),
-        message = message,
-
-        moreInfo = hasMoreInfo,
-        helpCategoryIndex = helpCategoryIndex,
-        helpIndex = helpIndex,
-
-        --For sorting
-        secsSinceRequest = ZO_NormalizeSecondsSince(0),
-    }
-    table.insert(self.list, newListEntry)
-end
-
-function ZO_GiftingGracePeriodStartedProvider:Accept(entryData)
-    ShowMarketAndSearch("", MARKET_OPEN_OPERATION_NOTIFICATION)
-    ClearGiftingGracePeriodStartedNotification()
-end
-
-function ZO_GiftingGracePeriodStartedProvider:Decline(entryData)
-    ClearGiftingGracePeriodStartedNotification()
-end
-
--- Gifting Unlocked Provider
--------------------------
-
-ZO_GiftingUnlockedProvider = ZO_NotificationProvider:Subclass()
-
-function ZO_GiftingUnlockedProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
-
-    provider:RegisterUpdateEvent(EVENT_GIFTING_UNLOCKED_STATUS_CHANGED)
-    provider:RegisterUpdateEvent(EVENT_GIFTING_UNLOCKED_NOTIFICATION_CLEARED)
-
-    return provider
-end
-
-function ZO_GiftingUnlockedProvider:BuildNotificationList()
-    ZO_ClearNumericallyIndexedTable(self.list)
-
-    if HasGiftingUnlockedNotification() then
-        self:AddNotification()
-    end
-end
-
-function ZO_GiftingUnlockedProvider:AddNotification()
-    local helpCategoryIndex, helpIndex = GetGiftingUnlockedHelpIndices()
-    local hasMoreInfo = helpCategoryIndex ~= nil
-    local newListEntry = {
-        notificationType = NOTIFICATION_TYPE_GIFTING_UNLOCKED,
-        dataType = NOTIFICATIONS_GIFTING_UNLOCKED_DATA,
-        shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_GIFTING_UNLOCKED),
-        message = GetString(SI_NOTIFICATIONS_GIFTING_UNLOCKED_MESSAGE),
-
-        moreInfo = hasMoreInfo,
-        helpCategoryIndex = helpCategoryIndex,
-        helpIndex = helpIndex,
-
-        --For sorting
-        secsSinceRequest = ZO_NormalizeSecondsSince(0),
-    }
-    table.insert(self.list, newListEntry)
-end
-
-function ZO_GiftingUnlockedProvider:Accept(entryData)
-    ShowMarketAndSearch("", MARKET_OPEN_OPERATION_NOTIFICATION)
-    ClearGiftingUnlockedNotification()
-end
-
-function ZO_GiftingUnlockedProvider:Decline(entryData)
-    ClearGiftingUnlockedNotification()
-end
-
 -- Daily Login Rewards Claim Provider
 --------------------------------------
 
@@ -1619,6 +1531,52 @@ end
 
 function ZO_MarketProductUnlockedProvider:Decline(entryData)
     ClearMarketProductUnlockNotifications()
+end
+
+-- Expiring Market Currency Provider
+-------------------------
+
+ZO_ExpiringMarketCurrencyProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_ExpiringMarketCurrencyProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_EXPIRING_MARKET_CURRENCY_NOTIFICATION)
+    provider:RegisterUpdateEvent(EVENT_EXPIRING_MARKET_CURRENCY_NOTIFICATION_CLEARED)
+
+    return provider
+end
+
+function ZO_ExpiringMarketCurrencyProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    if HasExpiringMarketCurrencyNotification() then
+        table.insert(self.list,
+        {
+            notificationType = NOTIFICATION_TYPE_EXPIRING_MARKET_CURRENCY,
+            dataType = NOTIFICATIONS_YES_NO_DATA,
+            shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_EXPIRING_MARKET_CURRENCY),
+            message = GetString(SI_NOTIFICATIONS_EXPIRING_MARKET_CURRENCY_MESSAGE),
+            secsSinceRequest = ZO_NormalizeSecondsSince(0),
+            acceptText = GetString(SI_NOTIFICATIONS_EXPIRING_MARKET_CURRENCY_ACCEPT),
+            declineText = GetString(SI_NOTIFICATIONS_EXPIRING_MARKET_CURRENCY_DECLINE),
+        })
+    end
+end
+
+function ZO_ExpiringMarketCurrencyProvider:Accept(entryData)
+    if IsInGamepadPreferredMode() then
+        SYSTEMS:GetObject("mainMenu"):ShowExpiringMarketCurrencyEntry()
+    else
+        -- TODO show expiring market currency UI
+        ShowMarketAndSearch("", MARKET_OPEN_OPERATION_NOTIFICATION)
+    end
+
+    ClearExpiringMarketCurrencyNotification()
+end
+
+function ZO_ExpiringMarketCurrencyProvider:Decline(entryData)
+    ClearExpiringMarketCurrencyNotification()
 end
 
 -- Out of Date Addons Provider
