@@ -158,7 +158,9 @@ function ZO_ComboBox_Base:ShowDropdown()
 end
 
 function ZO_ComboBox_Base:HideDropdown()
-    self:HideDropdownInternal()
+    if self:IsDropdownVisible() then
+        self:HideDropdownInternal()
+    end
 end
 
 function ZO_ComboBox_Base:ClearItems()
@@ -303,9 +305,7 @@ function ZO_ComboBox_Base:SetEnabled(enabled)
     self.m_openDropdown:SetEnabled(enabled)
     self.m_selectedItemText:SetColor(self:GetSelectedTextColor(enabled))
 
-    if self:IsDropdownVisible() then
-        self:HideDropdown()
-    end
+    self:HideDropdown()
 end
 
 function ZO_ComboBox_Base:SetItemEnabled(item, enabled)
@@ -353,7 +353,7 @@ end
 function ZO_ComboBox_HideDropdown(container)
     local comboBox = ZO_ComboBox_ObjectFromContainer(container)
 
-    if comboBox and comboBox:IsDropdownVisible() then
+    if comboBox then
         comboBox:HideDropdown()
     end
 end

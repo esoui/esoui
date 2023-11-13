@@ -133,19 +133,19 @@ function ZO_GroupFinder_CreateEditGroupListing_Keyboard:InitializeControls()
     }
 
     local function GetRoleMin(spinner)
-        return self.userTypeData:GetAttainedRoleCount(spinner.roleType)
+        return self.userTypeData:GetAttainedRoleCountAtEdit(spinner.roleType)
     end
 
     local function GetRoleMax(spinner)
         if spinner.roleType == LFG_ROLE_INVALID then
             return self.userTypeData:GetNumRoles()
         else
-            return self.userTypeData:GetDesiredRoleCount(spinner.roleType) + self.userTypeData:GetDesiredRoleCount(LFG_ROLE_INVALID)
+            return self.userTypeData:GetDesiredRoleCountAtEdit(spinner.roleType) + self.userTypeData:GetDesiredRoleCountAtEdit(LFG_ROLE_INVALID)
         end
     end
 
     local function OnValueChanged(value, spinner)
-        self.userTypeData:SetDesiredRoleCount(spinner.roleType, value)
+        self.userTypeData:SetDesiredRoleCountAtEdit(spinner.roleType, value)
         self:UpdateRoles()
     end
 
@@ -265,7 +265,7 @@ end
 
 function ZO_GroupFinder_CreateEditGroupListing_Keyboard:UpdateRoles()
     for roleType, control in pairs(self.roleSpinnerTable) do
-        if not control.spinner:SetValue(self.userTypeData:GetDesiredRoleCount(roleType)) then
+        if not control.spinner:SetValue(self.userTypeData:GetDesiredRoleCountAtEdit(roleType)) then
             control.spinner:UpdateButtons()
         end
     end

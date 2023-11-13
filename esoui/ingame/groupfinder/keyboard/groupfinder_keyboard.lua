@@ -325,10 +325,21 @@ function ZO_GroupFinder_Keyboard:OnDescriptionTextChanged(control)
     self.createGroupListingContent:ChangeGroupListingDescription(control:GetText())
 end
 
-function ZO_GroupFinder_Keyboard:OnChampionPointsTextChanged(control)
-    local championPoints = control:GetText()
-    self.createGroupListingContent.userTypeData:SetChampionPoints(tonumber(championPoints))
-    self.createGroupListingContent:UpdateCreateEditButton()
+do
+    local MAX_CP_ALLOWED = GetMaxSpendableChampionPointsInAttribute() * GetNumChampionDisciplines()
+
+    function ZO_GroupFinder_Keyboard:OnChampionPointsTextChanged(control)
+        local championPointsText = control:GetText()
+        if championPointsText ~= "" then
+            local championPoints = tonumber(championPointsText)
+            if championPoints > MAX_CP_ALLOWED then
+                championPoints = MAX_CP_ALLOWED
+                control:SetText(championPoints)
+            end
+        end
+        self.createGroupListingContent.userTypeData:SetChampionPoints(championPoints)
+        self.createGroupListingContent:UpdateCreateEditButton()
+    end
 end
 
 function ZO_GroupFinder_Keyboard:OnInviteCodeTextChanged(control)

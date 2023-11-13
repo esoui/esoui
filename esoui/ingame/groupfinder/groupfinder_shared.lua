@@ -66,7 +66,7 @@ function ZO_GroupFinder_Shared:Initialize(control)
     self:InitializeGroupFinderCategories()
 
     function OnGroupVeteranDifficultyChanged()
-        ResetGroupFinderFilterAndDraftOptionsToDefault()
+        ResetGroupFinderFilterAndDraftDifficultyToDefault()
     end
 
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_STATUS_UPDATED, function(_, ...) self:OnGroupFinderStatusUpdated(...) end)
@@ -248,6 +248,11 @@ function ZO_GroupFinder_CreateEditGroupListing_Shared:UpdateUserType()
 
     if currentUserType == GROUP_FINDER_GROUP_LISTING_USER_TYPE_CREATED_GROUP_LISTING then
         self.userTypeData:SetEditableUserType(GROUP_FINDER_GROUP_LISTING_USER_TYPE_GROUP_LISTING_DRAFT)
+    end
+
+    for i, roleType in pairs(ZO_GROUP_FINDER_ROLES) do
+        self.userTypeData:UpdateDesiredRoleCountAtEdit(roleType)
+        self.userTypeData:UpdateAttainedRoleCountAtEdit(roleType)
     end
 end
 

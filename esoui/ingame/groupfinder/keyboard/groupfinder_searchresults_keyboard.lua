@@ -354,7 +354,11 @@ function ZO_GroupFinder_SearchPanel_Keyboard:InitializeControls()
     self.difficultyRadioButtonGroup:SetSelectionChangedCallback(OnDifficultySelection)
 
     local function OnDropdownHidden()
-        GROUP_FINDER_SEARCH_MANAGER:ExecuteSearch()
+        if self:GetFragment():IsShowing() then
+            GROUP_FINDER_SEARCH_MANAGER:ExecuteSearch()
+        else
+            self.isSearchDirty = true
+        end
     end
 
     self.primaryOptionDropdownControl = self.control:GetNamedChild("PrimaryFilterSelector")
@@ -479,6 +483,11 @@ function ZO_GroupFinder_SearchPanel_Keyboard:OnStateChange(oldState, newState)
         self:RefreshCurrentRoleLabel()
         self:RefreshAppliedToListing()
         self:UpdateCreateEditButton()
+
+        if self.isSearchDirty then
+            GROUP_FINDER_SEARCH_MANAGER:ExecuteSearch()
+            self.isSearchDirty = nil
+        end
     end
 end
 

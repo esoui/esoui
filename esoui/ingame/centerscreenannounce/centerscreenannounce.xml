@@ -139,7 +139,9 @@
     </Animations>
 
     <Controls>
-        <Control name="ZO_CenterScreenAnnounce_RollingMeterProgressTemplate" resizeToFitDescendents="true" virtual="true">
+        <Control name="ZO_CenterScreenAnnounce_RollingMeterProgressTemplate" resizeToFitDescendents="true" resizeToFitConstrains="X" virtual="true">
+            <Dimensions y="40" />
+
             <OnInitialized>
                 ZO_CenterScreenAnnounce_RollingMeterProgress_OnInitialized(self)
             </OnInitialized>
@@ -151,7 +153,8 @@
                 </Texture>
 
                 <Control name="$(parent)Label" inherits="ZO_RollingMeterLabel">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="2" offsetY="-5" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="2" />
+                    <Dimensions y="40" />
                 </Control>
             </Controls>
         </Control>

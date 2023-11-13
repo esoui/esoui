@@ -169,6 +169,8 @@ ZO_GroupListingUserTypeData = ZO_GroupListingData_Base:Subclass()
 function ZO_GroupListingUserTypeData:Initialize(userType, isEditable)
     self.userType = userType
     self.editableUserType = isEditable and userType or nil
+    self.attainedRolesAtEdit = {}
+    self.desiredRolesAtEdit = {}
 end
 
 function ZO_GroupListingUserTypeData:SetUserType(userType)
@@ -363,8 +365,37 @@ function ZO_GroupListingUserTypeData:GetDesiredRoleCount(roleType)
     return GetGroupFinderUserTypeGroupListingDesiredRoleCount(self:GetInternalUserType(), roleType)
 end
 
+function ZO_GroupListingUserTypeData:UpdateDesiredRoleCountAtEdit(roleType)
+    self.desiredRolesAtEdit[roleType] = self:GetDesiredRoleCount(roleType)
+end
+
+function ZO_GroupListingUserTypeData:SetDesiredRoleCountAtEdit(roleType, value)
+    self.desiredRolesAtEdit[roleType] = value
+    local currentNumDesiredRoles = 0
+    for iteratorRoleType, count in pairs(self.desiredRolesAtEdit) do
+        if iteratorRoleType ~= LFG_ROLE_INVALID then
+            self:SetDesiredRoleCount(iteratorRoleType, count)
+            currentNumDesiredRoles = currentNumDesiredRoles + count
+        end
+    end
+    self.desiredRolesAtEdit[LFG_ROLE_INVALID] = GetGroupFinderUserTypeGroupListingNumRoles(GetCurrentGroupFinderUserType()) - currentNumDesiredRoles
+    self:SetDesiredRoleCount(LFG_ROLE_INVALID, self.desiredRolesAtEdit[LFG_ROLE_INVALID])
+end
+
+function ZO_GroupListingUserTypeData:GetDesiredRoleCountAtEdit(roleType)
+    return self.desiredRolesAtEdit[roleType]
+end
+
 function ZO_GroupListingUserTypeData:GetAttainedRoleCount(roleType)
     return GetGroupFinderUserTypeGroupListingAttainedRoleCount(self:GetInternalUserType(), roleType)
+end
+
+function ZO_GroupListingUserTypeData:UpdateAttainedRoleCountAtEdit(roleType)
+    self.attainedRolesAtEdit[roleType] = self:GetAttainedRoleCount(roleType)
+end
+
+function ZO_GroupListingUserTypeData:GetAttainedRoleCountAtEdit(roleType)
+    return self.attainedRolesAtEdit[roleType]
 end
 
 function ZO_GroupListingUserTypeData:DoesDesiredRolesMatchAttainedRoles()

@@ -1327,7 +1327,7 @@ function CenterScreenAnnounce:InitializeLinePools()
         local isGamepad = IsInGamepadPreferredMode()
         local rollingMeterFont = isGamepad and ROLLING_METER_TEXT_GAMEPAD or ROLLING_METER_TEXT_KEYBOARD
         for _, rollingMeterControl in self.rollingMeterProgressPool:ActiveAndFreeObjectIterator() do
-            rollingMeterControl:SetFont(rollingMeterFont)
+            rollingMeterControl.label:SetFont(rollingMeterFont)
         end
     end
 
