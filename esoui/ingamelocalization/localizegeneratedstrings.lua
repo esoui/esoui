@@ -957,7 +957,7 @@ EsoStrings =
     "Battleground", -- SI_ZONEDISPLAYTYPE9
     "Zone Story", -- SI_ZONEDISPLAYTYPE10
     "Companion", -- SI_ZONEDISPLAYTYPE11
-    "Endless Archive", -- SI_ZONEDISPLAYTYPE12
+    "Infinite Archive", -- SI_ZONEDISPLAYTYPE12
     "Simple", -- SI_LOCKQUALITY1
     "Intermediate", -- SI_LOCKQUALITY2
     "Advanced", -- SI_LOCKQUALITY3
@@ -2449,7 +2449,7 @@ EsoStrings =
     "Any Trial", -- SI_GROUPFINDERCATEGORY_SINGLESELECTDEFAULT2
     "All Trial Groups", -- SI_GROUPFINDERCATEGORY_MULTISELECTDEFAULT2
     "<<1[$d Trial/$d Trials]>>", -- SI_GROUPFINDERCATEGORY_MULTISELECTSELECTIONS2
-    "Endless Archive ", -- SI_GROUPFINDERCATEGORY3
+    "Infinite Archive ", -- SI_GROUPFINDERCATEGORY3
     "PvP", -- SI_GROUPFINDERCATEGORY4
     "Zone", -- SI_GROUPFINDERCATEGORY5
     "Any Zone", -- SI_GROUPFINDERCATEGORY_SINGLESELECTDEFAULT5
@@ -5664,7 +5664,7 @@ EsoStrings =
     "This quest takes place in a player house", -- SI_QUEST_JOURNAL_HOUSING_TOOLTIP
     "This quest is part of the zone story for <<1>>", -- SI_QUEST_JOURNAL_ZONE_STORY_TOOLTIP
     "This quest is a Companion quest", -- SI_QUEST_JOURNAL_COMPANION_TOOLTIP
-    "This quest is located in Endless Archive and is meant to be completed solo or by a 2 player group", -- SI_QUEST_JOURNAL_ENDLESS_DUNGEON_TOOLTIP
+    "This quest is located in Infinite Archive and is meant to be completed solo or by a 2 player group", -- SI_QUEST_JOURNAL_ENDLESS_DUNGEON_TOOLTIP
     "This quest is repeatable", -- SI_QUEST_JOURNAL_REPEATABLE_TOOLTIP
     "Level <<1>>", -- SI_QUEST_JOURNAL_QUEST_LEVEL
     "Repeatable", -- SI_QUEST_JOURNAL_REPEATABLE_TEXT
@@ -6574,7 +6574,7 @@ EsoStrings =
     "Reigning For: |cffffff<<1>>|r", -- SI_CAMPAIGN_EMPEROR_REIGN_DURATION
     "Leaderboard rankings take some time to update and may not immediately reflect your current rank.", -- SI_LEADERBOARDS_RANK_HELP_TOOLTIP
     "You have joined a Trial already in progress and are not eligible to be placed in this leaderboard.", -- SI_RAID_LEADERBOARDS_PARTICIPATING_NOT_ELIGIBLE_HELP_TOOLTIP
-    "You have joined an Endless Archive already in progress and are not eligible to be placed in this leaderboard.", -- SI_ENDLESS_DUNGEON_LEADERBOARDS_PARTICIPATING_NOT_ELIGIBLE_HELP_TOOLTIP
+    "You have joined an Infinite Archive already in progress and are not eligible to be placed in this leaderboard.", -- SI_ENDLESS_DUNGEON_LEADERBOARDS_PARTICIPATING_NOT_ELIGIBLE_HELP_TOOLTIP
     "Campaign Duration Remaining:", -- SI_CAMPAIGN_SCORING_DURATION_REMAINING
     "Next Score Evaluation in:", -- SI_CAMPAIGN_SCORING_NEXT_SCORE_EVAL
     "Potential Points:", -- SI_CAMPAIGN_SCORING_POTENTIAL_POINTS_LABEL
@@ -7585,7 +7585,7 @@ EsoStrings =
     "<<X:1>>Housing", -- SI_GAMEPAD_QUEST_JOURNAL_HOUSING
     "<<X:1>>Zone Story", -- SI_GAMEPAD_QUEST_JOURNAL_ZONE_STORY
     "<<X:1>>Companion", -- SI_GAMEPAD_QUEST_JOURNAL_COMPANION
-    "<<X:1>>Endless Archive", -- SI_GAMEPAD_QUEST_JOURNAL_ENDLESS_DUNGEON
+    "<<X:1>>Infinite Archive", -- SI_GAMEPAD_QUEST_JOURNAL_ENDLESS_DUNGEON
     "<<X:1>>  <<X:2>>", -- SI_GAMEPAD_QUEST_JOURNAL_QUEST_NAME_FORMAT
     "    <<X:1>>", -- SI_GAMEPAD_QUEST_JOURNAL_QUEST_NAME_FORMAT_NO_ICON
     "<<X:1>>  <<X:2>>  <<X:3>>", -- SI_GAMEPAD_SELECTED_QUEST_JOURNAL_QUEST_NAME_FORMAT
@@ -8980,7 +8980,7 @@ EsoStrings =
     "Current Score: |cffffff<<1>> (Not Eligible)|r", -- SI_LEADERBOARDS_CURRENT_SCORE_NOT_ELIGIBLE
     "Battlegrounds", -- SI_BATTLEGROUND_LEADERBOARDS_CATEGORIES_HEADER
     "Tales of Tribute", -- SI_TRIBUTE_LEADERBOARDS_CATEGORIES_HEADER
-    "Endless Archive", -- SI_ENDLESS_DUNGEON_LEADERBOARDS_CATEGORIES_HEADER
+    "Infinite Archive", -- SI_ENDLESS_DUNGEON_LEADERBOARDS_CATEGORIES_HEADER
     "Your selected costume will not appear until you remove your current disguise.", -- SI_COSTUME_FAIL_WEARING_DISGUISE
     "Outfit Station", -- SI_RESTYLE_STATION_MENU_ROOT_TITLE
     "Apparel", -- SI_RESTYLE_SHEET_EQUIPMENT_APPAREL
@@ -9533,7 +9533,7 @@ EsoStrings =
     "Ability Bar Back Row", -- SI_INTERFACE_OPTIONS_ACTION_BAR_BACK_ROW
     "Displays timers for your inactive ability bar.", -- SI_INTERFACE_OPTIONS_ACTION_BAR_BACK_ROW_TOOLTIP
     "Group Revive Counter", -- SI_INTERFACE_OPTIONS_SHOW_RAID_LIVES
-    "Controls the display of the group revive counter in Trials as well as the remaining attempts counter in the Endless Archive. When automatic display is selected the revive counter only appears when a Trial group member revives or when an Endless Archive attempt fails.", -- SI_INTERFACE_OPTIONS_SHOW_RAID_LIVES_TOOLTIP
+    "Controls the display of the group revive counter in Trials as well as the remaining attempts counter in the Infinite Archive. When automatic display is selected the revive counter only appears when a Trial group member revives or when an Infinite Archive attempt fails.", -- SI_INTERFACE_OPTIONS_SHOW_RAID_LIVES_TOOLTIP
     "Display Name (Keyboard)", -- SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_KEYBOARD
     "Determines which name should be displayed most prominently when viewing other players. (Gamepad mode can be changed separately in Gamepad settings)", -- SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_TOOLTIP_KEYBOARD
     "Attribute Bars", -- SI_INTERFACE_OPTIONS_RESOURCE_BARS
@@ -10479,8 +10479,8 @@ EsoStrings =
     "<<1>>", -- SI_ENDLESS_DUNGEON_BUFF_TYPE_FORMATTER
     "Summoning a companion will change your leaderboard score from solo to duo.\n\nAre you sure you want to summon your companion?", -- SI_ENDLESS_DUNGEON_CONFIRM_COMPANION_SUMMONING_DIALOG_BODY
     "Summon Companion", -- SI_ENDLESS_DUNGEON_CONFIRM_COMPANION_SUMMONING_DIALOG_TITLE
-    "Endless Archive", -- SI_ENDLESS_DUNGEON_HUD_TRACKER_TITLE
-    "Completed: Endless Archive", -- SI_ENDLESS_DUNGEON_SUMMARY_TITLE
+    "Infinite Archive", -- SI_ENDLESS_DUNGEON_HUD_TRACKER_TITLE
+    "Completed: Infinite Archive", -- SI_ENDLESS_DUNGEON_SUMMARY_TITLE
     "Progress", -- SI_ENDLESS_DUNGEON_SUMMARY_PROGRESS_HEADER
     "Stage", -- SI_ENDLESS_DUNGEON_SUMMARY_STAGE_HEADER
     "Score", -- SI_ENDLESS_DUNGEON_SUMMARY_SCORE_HEADER
@@ -22037,6 +22037,7 @@ SafeAddVersion(SI_INSTANCETYPE1, 2)
 SafeAddVersion(SI_INSTANCETYPE2, 2)
 SafeAddVersion(SI_INSTANCETYPE3, 2)
 SafeAddVersion(SI_ZONEDISPLAYTYPE2, 1)
+SafeAddVersion(SI_ZONEDISPLAYTYPE12, 1)
 SafeAddVersion(SI_LOCKQUALITY1, 1)
 SafeAddVersion(SI_LOCKQUALITY2, 1)
 SafeAddVersion(SI_LOCKQUALITY3, 1)
@@ -22356,7 +22357,7 @@ SafeAddVersion(SI_GROUPFINDERCATEGORY1, 1)
 SafeAddVersion(SI_GROUPFINDERCATEGORY_MULTISELECTDEFAULT1, 1)
 SafeAddVersion(SI_GROUPFINDERCATEGORY2, 2)
 SafeAddVersion(SI_GROUPFINDERCATEGORY_MULTISELECTDEFAULT2, 1)
-SafeAddVersion(SI_GROUPFINDERCATEGORY3, 2)
+SafeAddVersion(SI_GROUPFINDERCATEGORY3, 3)
 SafeAddVersion(SI_GROUPFINDERCATEGORY4, 2)
 SafeAddVersion(SI_GROUPFINDERCATEGORY5, 2)
 SafeAddVersion(SI_GROUPFINDERCATEGORY_MULTISELECTDEFAULT5, 1)
@@ -22978,6 +22979,7 @@ SafeAddVersion(SI_GROUP_LIST_PANEL_REVIVE_COUNTER_TOOLTIP, 1)
 SafeAddVersion(SI_GROUP_LIST_PANEL_PREFERRED_ROLES_LABEL, 2)
 SafeAddVersion(SI_GROUP_LIST_PANEL_ROLES_HEADER, 1)
 SafeAddVersion(SI_QUEST_JOURNAL_GROUP_TOOLTIP, 1)
+SafeAddVersion(SI_QUEST_JOURNAL_ENDLESS_DUNGEON_TOOLTIP, 1)
 SafeAddVersion(SI_SOCIAL_MENU_GROUP, 1)
 SafeAddVersion(SI_STATS_AVAILABLE_POINTS, 1)
 SafeAddVersion(SI_STATS_EQUIPMENT_BONUS_TITLE_KEYBOARD, 1)
@@ -23178,6 +23180,7 @@ SafeAddVersion(SI_CAMPAIGN_BROWSER_TOOLTIP_GUILD_MEMBERS, 1)
 SafeAddVersion(SI_CAMPAIGN_BROWSER_TOOLTIP_NUM_FRIENDS, 1)
 SafeAddVersion(SI_CAMPAIGN_BROWSER_TOOLTIP_NUM_GUILD_MEMBERS, 1)
 SafeAddVersion(SI_RAID_LEADERBOARDS_PARTICIPATING_NOT_ELIGIBLE_HELP_TOOLTIP, 1)
+SafeAddVersion(SI_ENDLESS_DUNGEON_LEADERBOARDS_PARTICIPATING_NOT_ELIGIBLE_HELP_TOOLTIP, 1)
 SafeAddVersion(SI_CAMPAIGN_SCORING_POTENTIAL_POINTS, 1)
 SafeAddVersion(SI_FRIENDS_LIST_PANEL_NUM_ONLINE, 1)
 SafeAddVersion(SI_IGNORE_LIST_ADD_IGNORE, 1)
@@ -23316,6 +23319,7 @@ SafeAddVersion(SI_GAMEPAD_ACHIEVEMENTS_ITEM_LABEL, 2)
 SafeAddVersion(SI_GAMEPAD_QUEST_JOURNAL_REPEATABLE_TEXT, 1)
 SafeAddVersion(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_DUNGEON, 1)
 SafeAddVersion(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_GROUP_AREA, 1)
+SafeAddVersion(SI_GAMEPAD_QUEST_JOURNAL_ENDLESS_DUNGEON, 1)
 SafeAddVersion(SI_GAMEPAD_QUEST_JOURNAL_QUEST_NAME_FORMAT, 1)
 SafeAddVersion(SI_GAMEPAD_QUEST_JOURNAL_QUEST_NAME_FORMAT_NO_ICON, 1)
 SafeAddVersion(SI_GAMEPAD_SELECTED_QUEST_JOURNAL_QUEST_NAME_FORMAT, 1)
@@ -23534,7 +23538,7 @@ SafeAddVersion(SI_BANK_HOME_STORAGE_FULL_WITH_NICKNAME, 1)
 SafeAddVersion(SI_INVENTORY_ERROR_BANK_DEPOSIT_NOT_ALLOWED, 1)
 SafeAddVersion(SI_BANK_EMPTY, 1)
 SafeAddVersion(SI_CAMPAIGN_LEADERBOARDS_CURRENT_POINTS, 1)
-SafeAddVersion(SI_ENDLESS_DUNGEON_LEADERBOARDS_CATEGORIES_HEADER, 1)
+SafeAddVersion(SI_ENDLESS_DUNGEON_LEADERBOARDS_CATEGORIES_HEADER, 2)
 SafeAddVersion(SI_RESTYLE_STATION_MENU_ROOT_TITLE, 2)
 SafeAddVersion(SI_DYEING_COMMIT, 1)
 SafeAddVersion(SI_DYEING_RANDOMIZE, 1)
@@ -23650,7 +23654,7 @@ SafeAddVersion(SI_GAMEPLAY_OPTIONS_DEFAULT_SOUL_GEM_TOOLTIP, 1)
 SafeAddVersion(SI_INTERFACE_OPTIONS_SCT, 1)
 SafeAddVersion(SI_INTERFACE_OPTIONS_ACTION_BAR_BACK_ROW_TOOLTIP, 1)
 SafeAddVersion(SI_INTERFACE_OPTIONS_SHOW_RAID_LIVES, 1)
-SafeAddVersion(SI_INTERFACE_OPTIONS_SHOW_RAID_LIVES_TOOLTIP, 2)
+SafeAddVersion(SI_INTERFACE_OPTIONS_SHOW_RAID_LIVES_TOOLTIP, 3)
 SafeAddVersion(SI_MESSAGE_SPAM_WARNING_DIALOG_BODY, 1)
 SafeAddVersion(SI_TUTORIAL_USER_ID_PS4, 2)
 SafeAddVersion(SI_TUTORIAL_USER_ID_XBOX, 1)
@@ -23798,6 +23802,8 @@ SafeAddVersion(SI_GROUP_FINDER_SEARCH_RESULTS_CURRENT_ROLE_TEXT, 1)
 SafeAddVersion(SI_GROUP_FINDER_CREATE_GROUP_NO_INVITE_CODE, 2)
 SafeAddVersion(SI_BINDING_NAME_TOGGLE_ENDLESS_DUNGEON_BUFF_TRACKER, 1)
 SafeAddVersion(SI_ENDLESS_DUNGEON_BUFF_TRACKER_TITLE, 1)
+SafeAddVersion(SI_ENDLESS_DUNGEON_HUD_TRACKER_TITLE, 1)
+SafeAddVersion(SI_ENDLESS_DUNGEON_SUMMARY_TITLE, 1)
 SafeAddVersion(SI_ENDLESS_DUNGEON_SUMMARY_BUFFS_HEADER, 2)
 SafeAddVersion(SI_ENDLESS_DUNGEON_SUMMARY_SWITCH_TO_BUFFS_KEYBIND, 1)
 SafeAddVersion(SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE, 1)
