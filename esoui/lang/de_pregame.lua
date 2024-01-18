@@ -2579,7 +2579,7 @@ SafeAddString(SI_ITEMCOMBINATIONRESULT9, "Ihr könnt dies nicht tun, solange Ihr
 SafeAddString(SI_ITEMDISPLAYQUALITY0, "Abgenutzt", 0)
 SafeAddString(SI_ITEMDISPLAYQUALITY1, "Normal", 0)
 SafeAddString(SI_ITEMDISPLAYQUALITY2, "Erlesen", 0)
-SafeAddString(SI_ITEMDISPLAYQUALITY3, "Überlegen", 0)
+SafeAddString(SI_ITEMDISPLAYQUALITY3, "Überragend", 0)
 SafeAddString(SI_ITEMDISPLAYQUALITY4, "Episch", 0)
 SafeAddString(SI_ITEMDISPLAYQUALITY5, "Legendär", 0)
 SafeAddString(SI_ITEMDISPLAYQUALITY6, "Mythisch", 0)
