@@ -8,10 +8,9 @@ function ZO_EndlessDungeonLeaderboardsManager_Gamepad:Initialize(control)
     GAMEPAD_ENDLESS_DUNGEON_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
            self:UpdateAllInfo()
-           local NO_NAME = nil 
+           local NO_NAME = nil
            local NO_ICON = nil
            GAMEPAD_LEADERBOARDS:SetActiveCampaign(NO_NAME, NO_ICON)
-           self:SendLeaderboardQuery()
         end
     end)
 

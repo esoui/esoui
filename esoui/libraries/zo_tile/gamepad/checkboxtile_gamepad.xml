@@ -6,18 +6,18 @@
                 ZO_CheckboxTile_Gamepad_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Backdrop name="$(parent)SelectorBox" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" hidden="true" >
+                <Backdrop name="$(parent)SelectorBox" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" level="2" hidden="true">
                     <Anchor point="TOPLEFT" />
-                    <Dimensions x="35" y="37" />
+                    <Dimensions x="37" y="37" />
                 </Backdrop>
 
-                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds" tier="HIGH">
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds" tier="HIGH" level="1">
                     <Dimensions x="32" y="32"/>
-                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
                 </Texture>
 
                 <Label name="$(parent)Text" override="true" font="ZoFontGamepad34">
-                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Icon" offsetX="8" offsetY="-3"/>
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Icon" offsetX="8" offsetY="-5"/>
                 </Label>
             </Controls>
         </Control>

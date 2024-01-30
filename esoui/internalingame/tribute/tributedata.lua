@@ -141,6 +141,10 @@ function ZO_TributePileData.PatronCardCountListSortFunction(left, right)
 end
 
 function ZO_TributePileData:TryTriggerHandAndDocksTutorials()
+    if not GetSetting_Bool(SETTING_TYPE_TUTORIAL, TUTORIAL_ENABLED_SETTING_ID) then
+        return
+    end
+
     local cardList = self:GetCardList()
     local hasContractAgent = false
     local hasTaunt = false
@@ -150,6 +154,7 @@ function ZO_TributePileData:TryTriggerHandAndDocksTutorials()
     local hasTrigger = false
     local hasConfine = false
     local hasDonate = false
+    local hasSetback = false
 
     -- Loop through the cards in this pile and determine which tutorials we should try to trigger
     for _, cardData in ipairs(cardList) do
@@ -169,26 +174,32 @@ function ZO_TributePileData:TryTriggerHandAndDocksTutorials()
         end
 
         -- If the card has taunt
-        if DoesTributeCardTaunt(cardDefId) then
+        if not hasTaunt and DoesTributeCardTaunt(cardDefId) then
             hasTaunt = true
         end
 
         -- If the card is a choice card
-        if DoesTributeCardChooseOneMechanic(cardDefId) then
+        if not hasChoice and DoesTributeCardChooseOneMechanic(cardDefId) then
             hasChoice = true
         end
 
         -- If the card has a trigger mechanic
-        if DoesTributeCardHaveTriggerMechanic(cardDefId) then
+        if not hasTrigger and DoesTributeCardHaveTriggerMechanic(cardDefId) then
             hasTrigger = true
         end
 
-        --The confine mechanic is only on agents so we can skip the check if this card isn't an agent
-        if isAgent and DoesTributeCardHaveMechanicType(cardDefId, TRIBUTE_MECHANIC_CONFINE_CARDS) then
+        -- If the card has a setback mechanic
+        if not hasSetback and DoesTributeCardHaveSetbackMechanic(cardDefId) then
+            hasSetback = true
+        end
+
+        -- The confine mechanic is only on agents so we can skip the check if this card isn't an agent
+        if not hasConfine and isAgent and DoesTributeCardHaveMechanicType(cardDefId, TRIBUTE_MECHANIC_CONFINE_CARDS) then
             hasConfine = true
         end
 
-        if DoesTributeCardHaveMechanicType(cardDefId, TRIBUTE_MECHANIC_DONATE_CARDS) then
+        -- If the card has a donate mechanic
+        if not hasDonate and DoesTributeCardHaveMechanicType(cardDefId, TRIBUTE_MECHANIC_DONATE_CARDS) then
             hasDonate = true
         end
     end
@@ -225,9 +236,17 @@ function ZO_TributePileData:TryTriggerHandAndDocksTutorials()
     if hasDonate then
         TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_TRIBUTE_DONATE_CARD_SEEN)
     end
+
+    if hasSetback then
+        TUTORIAL_MANAGER:ShowTutorial(TUTORIAL_TRIGGER_TRIBUTE_SETBACK_CARD_SEEN)
+    end
 end
 
 function ZO_TributePileData:TryTriggerDeckAndCooldownTutorials()
+    if not GetSetting_Bool(SETTING_TYPE_TUTORIAL, TUTORIAL_ENABLED_SETTING_ID) then
+        return
+    end
+
     local cardList = self:GetCardList()
     local hasCurse = false
 

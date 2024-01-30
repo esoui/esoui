@@ -126,9 +126,20 @@ local function OnServerLocked()
 end
 
 local function OnInvalidCredentials(eventId, errorCode, accountPageURL)
-    local badLoginStringId = (GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_ZOS) and SI_BAD_LOGIN_ZOS or SI_BAD_LOGIN_FIRST_PARTY
-    local badLoginString = GetString(badLoginStringId)
-    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_GAMEPAD_GENERIC_LOGIN_ERROR), badLoginString)
+    local titleStringId, descriptionString
+    if errorCode == AUTHENTICATION_ERROR_ACCOUNT_BANNED then
+        titleStringId = SI_LOGIN_DIALOG_TITLE_ACCOUNT_BANNED
+        local url = GetURLTextByType(APPROVED_URL_ESO_HELP)
+        descriptionString = zo_strformat(GetString("SI_LOGINAUTHERROR", LOGIN_AUTH_ERROR_ACCOUNT_BANNED), url)
+    elseif errorCode == AUTHENTICATION_ERROR_ACCOUNT_SUSPENDED then
+        titleStringId = SI_LOGIN_DIALOG_TITLE_ACCOUNT_SUSPENDED
+        local url = GetURLTextByType(APPROVED_URL_ESO_HELP)
+        descriptionString = zo_strformat(GetString("SI_LOGINAUTHERROR", LOGIN_AUTH_ERROR_ACCOUNT_SUSPENDED), url)
+    else
+        titleStringId = SI_GAMEPAD_GENERIC_LOGIN_ERROR
+        descriptionString = GetString((GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_ZOS) and SI_BAD_LOGIN_ZOS or SI_BAD_LOGIN_FIRST_PARTY)
+    end
+    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(titleStringId), descriptionString)
 end
 
 local function OnBadClientVersion()
@@ -173,7 +184,13 @@ local function OnCreateLinkLoadingError(eventId, loginError, linkingError, debug
     end
 
     if loginError ~= LOGIN_AUTH_ERROR_NO_ERROR then
-        dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_LOGIN_FAILED)
+        if loginError == LOGIN_AUTH_ERROR_ACCOUNT_BANNED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_BANNED then
+            dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_ACCOUNT_BANNED)
+        elseif loginError == LOGIN_AUTH_ERROR_ACCOUNT_SUSPENDED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_SUSPENDED then
+            dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_ACCOUNT_SUSPENDED)
+        else
+            dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_LOGIN_FAILED)
+        end
         errorString = GetString("SI_LOGINAUTHERROR", loginError)
     elseif linkingError ~= ACCOUNT_CREATE_LINK_ERROR_NO_ERROR then
         dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_LINK_FAILED)
@@ -226,10 +243,6 @@ function ZO_CreateLinkLoading_Gamepad:RegisterEvents()
 
     self:RegisterForEvent(EVENT_LOGIN_QUEUED, function(...) self:OnQueued(...) end)
 
-    self:RegisterForEvent(EVENT_COUNTRY_DATA_LOADED, function()
-                                                        CREATE_ACCOUNT_GAMEPAD:PerformDeferredInitialize()
-                                                        PregameStateManager_AdvanceState()
-                                                     end)
     -- NOTE: Overflow is not handled here as, according to the console
     --   services guys, it is not supported on console.
 

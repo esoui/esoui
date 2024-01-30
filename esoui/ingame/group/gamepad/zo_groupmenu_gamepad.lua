@@ -208,13 +208,6 @@ function ZO_GroupMenu_Gamepad:InitializeEvents()
             end
         end
     end
-
-    local function OnCombatStateChanged()
-        if not self.control:IsControlHidden() then
-            self:UpdateMenuList()
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-        end
-    end
     
     --If we removed our created group listing while in this list, we need to refresh the keybinds
     local function OnGroupListingRemoved(result)
@@ -234,7 +227,6 @@ function ZO_GroupMenu_Gamepad:InitializeEvents()
     self.control:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, function(eventCode, ...) OnChampionPointsChanged(...) end)
 
     self.control:RegisterForEvent(EVENT_ZONE_UPDATE, function(eventCode, ...) OnZoneUpdate(...) end)
-    self.control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, OnCombatStateChanged)
     self.control:RegisterForEvent(EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_RESULT, function(_, ...) OnGroupListingRemoved(...) end)
 end
 

@@ -52,7 +52,7 @@ function CreateLinkAccount_Console:SetupOptions()
 
     self.optionsList:AddDataTemplate("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
-    self:AddOption(GetString(SI_CREATEACCOUNT_HEADER), "CreateAccountSetup")
+    self:AddOption(GetString(SI_CREATEACCOUNT_HEADER), "CreateAccount")
     self:AddOption(GetString(SI_CONSOLE_LINKACCOUNT_HEADER), "LinkAccountActivation")
 
     self.optionsList:Commit()

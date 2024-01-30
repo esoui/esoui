@@ -19,20 +19,29 @@ function ZO_Systems:GetSystem(systemName)
     return system
 end
 
+function ZO_Systems:RegisterSystemInternal(systemName, systemKey, objectOrScene)
+    local system = self:GetSystem(systemName)
+    if system[systemKey] then
+        internalassert(false, string.format("Duplicate registration of %s system %q", systemKey, systemName))
+    else
+        system[systemKey] = objectOrScene
+    end
+end
+
 function ZO_Systems:RegisterKeyboardObject(systemName, object)
-    self:GetSystem(systemName).keyboardObject = object
+    self:RegisterSystemInternal(systemName, "keyboardObject", object)
 end
 
 function ZO_Systems:RegisterGamepadObject(systemName, object)
-    self:GetSystem(systemName).gamepadObject = object
+    self:RegisterSystemInternal(systemName, "gamepadObject", object)
 end
 
 function ZO_Systems:RegisterKeyboardRootScene(systemName, scene)
-    self:GetSystem(systemName).keyboardRootScene = scene
+    self:RegisterSystemInternal(systemName, "keyboardRootScene", scene)
 end
 
 function ZO_Systems:RegisterGamepadRootScene(systemName, scene)
-    self:GetSystem(systemName).gamepadRootScene = scene
+    self:RegisterSystemInternal(systemName, "gamepadRootScene", scene)
 end
 
 function ZO_Systems:GetKeyboardObject(systemName)

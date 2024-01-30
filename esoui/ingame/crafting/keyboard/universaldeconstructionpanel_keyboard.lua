@@ -41,9 +41,8 @@ function ZO_UniversalDeconstructionPanel_Keyboard:InitializeFilters()
     -- Initialize the Crafting Types multiselect combobox.
     local dropdown = ZO_ComboBox_ObjectFromContainer(self.craftingTypeFilters)
     self.craftingTypeFiltersDropdown = dropdown
+    dropdown:EnableMultiSelect(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_DROPDOWN_TEXT, GetString(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_DROPDOWN_TEXT_DEFAULT))
     dropdown:SetHideDropdownCallback(OnFilterChanged)
-    dropdown:SetNoSelectionText(GetString(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_DROPDOWN_TEXT_DEFAULT))
-    dropdown:SetMultiSelectionTextFormatter(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_DROPDOWN_TEXT)
     dropdown:SetSortsItems(true)
 
     for _, craftingType in ipairs(ZO_UNIVERSAL_DECONSTRUCTION_CRAFTING_TYPES) do
@@ -71,11 +70,11 @@ function ZO_UniversalDeconstructionPanel_Keyboard:RefreshAccessibleCraftingTypeF
 
     if jewelryCraftingItem then
         if ZO_IsJewelryCraftingEnabled() then
-            self.craftingTypeFiltersDropdown:SetItemEnabled(jewelryCraftingItem, true)
-            self.craftingTypeFiltersDropdown:SetItemOnEnter(jewelryCraftingItem, nil)
-            self.craftingTypeFiltersDropdown:SetItemOnExit(jewelryCraftingItem, nil)
+            dropdown:SetItemEnabled(jewelryCraftingItem, true)
+            dropdown:SetItemOnEnter(jewelryCraftingItem, nil)
+            dropdown:SetItemOnExit(jewelryCraftingItem, nil)
         else
-            self.craftingTypeFiltersDropdown:SetItemEnabled(jewelryCraftingItem, false)
+            dropdown:SetItemEnabled(jewelryCraftingItem, false)
 
             local tooltipText = nil
             local jewelryCraftingCollectibleData = ZO_GetJewelryCraftingCollectibleData()
@@ -89,12 +88,12 @@ function ZO_UniversalDeconstructionPanel_Keyboard:RefreshAccessibleCraftingTypeF
                 InitializeTooltip(InformationTooltip, control, RIGHT, offsetX, 0, LEFT)
                 InformationTooltip:AddLine(tooltipText)
             end
-            self.craftingTypeFiltersDropdown:SetItemOnEnter(jewelryCraftingItem, OnCraftingTypeFilterDropdownEnter)
+            dropdown:SetItemOnEnter(jewelryCraftingItem, OnCraftingTypeFilterDropdownEnter)
 
             local function OnCraftingTypeFilterDropdownExit(control)
                 ClearTooltip(InformationTooltip)
             end
-            self.craftingTypeFiltersDropdown:SetItemOnExit(jewelryCraftingItem, OnCraftingTypeFilterDropdownExit)
+            dropdown:SetItemOnExit(jewelryCraftingItem, OnCraftingTypeFilterDropdownExit)
 
             local selectedCraftingTypeFilters = self:GetSavedCraftingTypeFilters()
             if selectedCraftingTypeFilters and selectedCraftingTypeFilters[CRAFTING_TYPE_JEWELRYCRAFTING] then
@@ -156,10 +155,10 @@ function ZO_UniversalDeconstructionPanel_Keyboard:OnShown()
 end
 
 function ZO_UniversalDeconstructionPanel_Keyboard:OnFilterChanged()
-	local includeBankedItemsChecked = ZO_CheckButton_IsChecked(self.includeBankedItemsCheckbox)
-	if self.savedVars.includeBankedItemsChecked ~= includeBankedItemsChecked then
-		self.savedVars.includeBankedItemsChecked = includeBankedItemsChecked
-	end
+    local includeBankedItemsChecked = ZO_CheckButton_IsChecked(self.includeBankedItemsCheckbox)
+    if self.savedVars.includeBankedItemsChecked ~= includeBankedItemsChecked then
+        self.savedVars.includeBankedItemsChecked = includeBankedItemsChecked
+    end
 
     local craftingTypeFilters = self:GetSelectedCraftingTypeFilters()
     self.savedVars.craftingTypeFilters = craftingTypeFilters

@@ -179,6 +179,13 @@ end
 function ZO_HousingFurnitureBrowser_Gamepad:OnShowing()
     ZO_Gamepad_ParametricList_Screen.OnShowing(self)
     ZO_HousingFurnitureBrowser_Base.OnShowing(self)
+
+    --Enter browsing mode if we aren't already
+    local currentMode = GetHousingEditorMode()
+    if currentMode ~= HOUSING_EDITOR_MODE_BROWSE then
+        HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_BROWSE)
+    end
+
     self:RefreshCategoryHeaderData()
     ZO_GamepadGenericHeader_Activate(self.header)
     self.settingsPanel:UpdateLists()

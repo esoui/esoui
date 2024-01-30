@@ -108,32 +108,6 @@ function ZO_TributeCard_MechanicContainer:Initialize(control)
 end
 
 do
-    internalassert(TRIBUTE_MECHANIC_ITERATION_END == 17, "A new Tribute mechanic has been added. Does the new mechanic ever need to display as 'negative' in the UI?")
-    local NEGATIVE_TRIBUTE_MECHANICS =
-    {
-        [TRIBUTE_PLAYER_PERSPECTIVE_SELF] =
-        {
-            [TRIBUTE_MECHANIC_KO_AGENT] = true,
-            [TRIBUTE_MECHANIC_DISCARD_CARDS] = true,
-            [TRIBUTE_MECHANIC_LOSE_RESOURCES] = true,
-            [TRIBUTE_MECHANIC_CONFINE_CARDS] = true,
-        },
-        [TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT] =
-        {
-            [TRIBUTE_MECHANIC_GAIN_RESOURCES] = true,
-            [TRIBUTE_MECHANIC_DRAW_CARDS] = true,
-            [TRIBUTE_MECHANIC_HEAL_AGENT] = true,
-            [TRIBUTE_MECHANIC_REFRESH_CARDS] = true,
-        },
-    }
-    -- The remaining mechanics may be contextually positive or negative, but we will always show as positive
-
-    function ZO_IsTributeMechanicNegativeForPlayer(mechanicType, targetPlayer)
-        return NEGATIVE_TRIBUTE_MECHANICS[targetPlayer][mechanicType] == true
-    end
-end
-
-do
     internalassert(TRIBUTE_MECHANIC_ACTIVATION_SOURCE_ITERATION_END == 1, "A new Tribute mechanic activation source has been added. Please add it to the MECHANIC_ACTIVATION_SOURCE_SUFFIX table")
     local MECHANIC_ACTIVATION_SOURCE_SUFFIX =
     {
@@ -249,7 +223,7 @@ do
 
         local isSmallContainer = self.numSiblings >= 4
         local isSingleDigitContainer = quantityDisplayValue < 10
-        local isNegative = ZO_IsTributeMechanicNegativeForPlayer(self.tributeMechanicType, targetPlayer)
+        local isNegative = GetTributeMechanicSetbackTypeForPlayer(self.tributeMechanicType, targetPlayer) ~= TRIBUTE_MECHANIC_SETBACK_TYPE_NONE
         local controlTemplate, frameTextureName, frameGlowTextureName = ZO_GetTributeMechanicFrameInfo(isSmallContainer, isSingleDigitContainer, activationSource, isOnTrigger, isNegative)
         ApplyTemplateToControl(control, controlTemplate)
         self.frameTexture:SetTexture(frameTextureName)

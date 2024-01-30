@@ -1,0 +1,128 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_BaseBackgroundAnimation_Persistent" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <CustomAnimation duration="600000">
+                    <OnPlay>
+                        ZO_GetControlOwnerObject(animatingControl):OnPersistentAnimationPlay(self, completed)
+                    </OnPlay>
+
+                    <OnStop>
+                        ZO_GetControlOwnerObject(animatingControl):OnPersistentAnimationStop(self, completed)
+                    </OnStop>
+
+                    <UpdateFunction>
+                        ZO_GetControlOwnerObject(self:GetAnimatedControl()):OnPersistentAnimationUpdate(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_BaseBackgroundAnimation_Intro">
+            <Animations>
+                <CustomAnimation delay="1500" duration="2000">
+                    <OnPlay>
+                        ZO_GetControlOwnerObject(animatingControl):OnIntroAnimationPlay(self, completed)
+                    </OnPlay>
+
+                    <OnStop>
+                        ZO_GetControlOwnerObject(animatingControl):OnIntroAnimationStop(self, completed)
+                    </OnStop>
+
+                    <UpdateFunction>
+                        ZO_GetControlOwnerObject(self:GetAnimatedControl()):OnIntroAnimationUpdate(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_BaseBackgroundAnimation_Loop" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <CustomAnimation duration="600000">
+                    <OnPlay>
+                        ZO_GetControlOwnerObject(animatingControl):OnLoopAnimationPlay(self, completed)
+                    </OnPlay>
+
+                    <OnStop>
+                        ZO_GetControlOwnerObject(animatingControl):OnLoopAnimationStop(self, completed)
+                    </OnStop>
+
+                    <UpdateFunction>
+                        ZO_GetControlOwnerObject(self:GetAnimatedControl()):OnLoopAnimationUpdate(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <!--
+            All statically anchored textures should inherit from this template either directly or indirectly.
+            These textures are scaled and reanchored automatically while maintaining the proper aspect ratio
+            and animations are deferred until all registered texture controls finish loading.
+        -->
+        <Texture name="ZO_BaseBackgroundStaticTexture" alpha="0" color="ffffff" pixelRoundingEnabled="false" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" maskTextureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" virtual="true">
+            <OnInitialized>
+                local HAS_STATIC_ANCHORS = true
+                ZO_BaseBackground_RegisterTextureControl(self, HAS_STATIC_ANCHORS)
+            </OnInitialized>
+        </Texture>
+
+        <!--
+            All manually sized, statically anchored textures should inherit from this template either directly or indirectly.
+            These textures are scaled and reanchored automatically while maintaining the proper aspect ratio
+            and animations are deferred until all registered texture controls finish loading.
+        -->
+        <Texture name="ZO_BaseBackgroundStaticManuallySizedTexture" alpha="0" color="ffffff" pixelRoundingEnabled="false" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" maskTextureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" virtual="true">
+            <OnInitialized>
+                local HAS_STATIC_ANCHORS = true
+                local IS_SIZED_MANUALLY = true
+                ZO_BaseBackground_RegisterTextureControl(self, HAS_STATIC_ANCHORS, IS_SIZED_MANUALLY)
+            </OnInitialized>
+        </Texture>
+
+        <!--
+            All dynamically anchored textures should inherit from this template either directly or indirectly.
+            These textures are scaled automatically while maintaining the proper aspect ratio
+            and animations are deferred until all registered texture controls finish loading.
+        -->
+        <Texture name="ZO_BaseBackgroundDynamicTexture" alpha="0" color="ffffff" pixelRoundingEnabled="false" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" maskTextureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" virtual="true">
+            <OnInitialized>
+                ZO_BaseBackground_RegisterTextureControl(self)
+            </OnInitialized>
+        </Texture>
+
+        <!--
+            All manually sized, dynamically anchored textures should inherit from this template either directly or indirectly.
+            These textures are scaled automatically while maintaining the proper aspect ratio
+            and animations are deferred until all registered texture controls finish loading.
+        -->
+        <Texture name="ZO_BaseBackgroundDynamicManuallySizedTexture" alpha="0" color="ffffff" pixelRoundingEnabled="false" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" maskTextureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" virtual="true">
+            <OnInitialized>
+                local HAS_DYNAMIC_ANCHORS = false
+                local IS_SIZED_MANUALLY = true
+                ZO_BaseBackground_RegisterTextureControl(self, HAS_DYNAMIC_ANCHORS, IS_SIZED_MANUALLY)
+            </OnInitialized>
+        </Texture>
+
+        <TopLevelControl name="ZO_BaseBackgroundTopLevel" hidden="true" layer="BACKGROUND" level="1" tier="LOW" virtual="true">
+            <AnchorFill />
+
+            <OnUpdate>
+                self.owner:OnUpdate()
+            </OnUpdate>
+
+            <Controls>
+                <Texture name="$(parent)BlackOut" color="000000">
+                    <AnchorFill />
+                </Texture>
+
+                <Texture name="$(parent)Background" inherits="ZO_BaseBackgroundStaticTexture" level="10" />
+
+                <Texture name="$(parent)Ouroboros" inherits="ZO_BaseBackgroundStaticTexture" level="1000" />
+
+                <Texture name="$(parent)Title" inherits="ZO_BaseBackgroundStaticManuallySizedTexture" level="2000" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

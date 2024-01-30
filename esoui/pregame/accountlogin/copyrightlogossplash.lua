@@ -13,10 +13,13 @@ do
     end
 
     function ZO_CopyrightLogosSplashFragment:ApplyPlatformStyle(style)
-        ApplyTemplateToControl(self.control:GetNamedChild("CopyrightInfo"), style.copyrightInfo)
+        ApplyTemplateToControl(self.copyrightInfoLabel, style.copyrightInfo)
     end
 
     function ZO_CopyrightLogosSplashFragment:Show()
+        self.copyrightInfoLabel = self.control:GetNamedChild("CopyrightInfo")
+        local COPYRIGHT_END_YEAR = 2024
+        self.copyrightInfoLabel:SetText(zo_strformat(SI_SPLASH_SCREEN_COPYRIGHT, COPYRIGHT_END_YEAR))
         ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
 
         self.autoFadeTime = GetFrameTimeMilliseconds() + 5000

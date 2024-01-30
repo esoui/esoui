@@ -48,28 +48,39 @@ function ZO_Tooltip:LayoutGuildApplicationDetails(applicationData)
     self:AddSection(bodySection)
 end
 
-do
-    local TEXTURE_SCALE_PERCENT = 100
-    function ZO_Tooltip:LayoutGuildLink(link)
-        local guildName, color, linkType = ZO_LinkHandler_ParseLink(link)
+function ZO_Tooltip:LayoutGuildLink(link)
+    local guildName = ZO_LinkHandler_ParseLink(link)
 
-        local headerSection = self:AcquireSection(self:GetStyle("topSection"))
-        headerSection:AddLine(guildName, self:GetStyle("title"))
-        self:AddSection(headerSection)
+    local headerSection = self:AcquireSection(self:GetStyle("topSection"))
+    headerSection:AddLine(guildName, self:GetStyle("title"))
+    self:AddSection(headerSection)
 
-        local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
-        local params = {
-            "UI_SHORTCUT_SECONDARY",
-            ZO_WHITE:Colorize(guildName),
-        }
-        local KEYBIND_INDEX = 1
-        bodySection:AddParameterizedKeybindLine(SI_GAMEPAD_GUILD_LINK_TOOLTIP_DESCRIPTION, params, KEYBIND_INDEX, self:GetStyle("flavorText"))
-        self:AddSection(bodySection)
-    end
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    local params = 
+    {
+        "UI_SHORTCUT_SECONDARY",
+        ZO_WHITE:Colorize(guildName),
+    }
+    local KEYBIND_INDEX = 1
+    bodySection:AddParameterizedKeybindLine(SI_GAMEPAD_GUILD_LINK_TOOLTIP_DESCRIPTION, params, KEYBIND_INDEX, self:GetStyle("flavorText"))
+    self:AddSection(bodySection)
 end
 
 function ZO_Tooltip:LayoutGuildAlert(text)
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
     bodySection:AddLine(text, self:GetStyle("failed"), self:GetStyle("flavorText"))
     self:AddSection(bodySection)
+end
+
+function ZO_Tooltip:LayoutGuildHistoryEvent(eventData)
+    local section = self:AcquireSection(self:GetStyle("bodySection"))
+
+    local function GetEventNarration()
+        return eventData:GetNarrationText()
+    end
+
+    local IS_GAMEPAD = true
+    section:AddLineWithCustomNarration(eventData:GetText(IS_GAMEPAD), GetEventNarration, self:GetStyle("bodyDescription"))
+    section:AddLine(eventData:GetFormattedTime(), self:GetStyle("bodyDescription"), self:GetStyle("whiteFontColor"))
+    self:AddSection(section)
 end

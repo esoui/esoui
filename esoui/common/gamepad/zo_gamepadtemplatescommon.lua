@@ -17,6 +17,8 @@ local SELECTED_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped
 local TRACKED_ANTIQUITY_TEXTURE = "EsoUI/Art/Antiquities/Gamepad/gp_trackedAntiquityIcon.dds"
 local CRAFTING_QUEST_PIN_TEXTURE = "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"
 local CRAFTING_QUEST_DISABLED_PIN_TEXTURE = "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon_disabled.dds"
+local FAVORITED_TEXTURE = "EsoUI/Art/Collections/Favorite_StarOnly.dds"
+local PRIMARY_RESIDENCE_TEXTURE = "EsoUI/Art/Collections/PrimaryHouse.dds"
 
 local NORMAL_FONT_SELECTED = "ZoFontGamepad42"
 local NORMAL_FONT_UNSELECTED = "ZoFontGamepad34"
@@ -447,11 +449,11 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         end
 
         if data.isFavorite then
-            statusIndicator:AddIcon("EsoUI/Art/Collections/Favorite_StarOnly.dds", NO_TINT)
+            statusIndicator:AddIcon(FAVORITED_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_FAVORITE_ICON_NARRATION))
         end
 
         if data.isPrimaryResidence then
-            statusIndicator:AddIcon("EsoUI/Art/Collections/PrimaryHouse.dds", NO_TINT)
+            statusIndicator:AddIcon(PRIMARY_RESIDENCE_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_PRIMARY_RESIDENCE_ICON_NARRATION))
         end
 
         statusIndicator:Show()

@@ -214,6 +214,9 @@ function ZO_GroupFinder_Gamepad:OnGroupListingRemoved(result)
     if self:IsShowing() then
         --If the group listing was removed while we were in manage mode, we need to switch back to overview
         if self.mode == ZO_GROUP_FINDER_MODES.MANAGE then
+            if GROUP_FINDER_APPLICATION_LIST_SCREEN_GAMEPAD:HasActiveFocus() then
+                self:ExitApplicationList()
+            end
             self:SetMode(ZO_GROUP_FINDER_MODES.OVERVIEW)
         else
             self:RefreshList()

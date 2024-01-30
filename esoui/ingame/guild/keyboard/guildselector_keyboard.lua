@@ -62,7 +62,7 @@ function GuildSelector:Initialize(control)
         GUILD_HOME,
         GUILD_ROSTER_MANAGER,
         GUILD_RANKS,
-        GUILD_HISTORY,
+        GUILD_HISTORY_KEYBOARD,
         GUILD_SHARED_INFO,
         GUILD_HERALDRY,
         GUILD_RECRUITMENT_KEYBOARD,

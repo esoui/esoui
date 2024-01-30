@@ -295,7 +295,7 @@ function MarketProduct_Keyboard:OnClicked(button)
                 AddMenuItem(GetString(SI_MARKET_BUNDLE_DETAILS_KEYBIND_TEXT), PreviewFunction)
             elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
                 AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), PreviewFunction)
-            elseif IsCharacterPreviewingAvailable() then -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
+            elseif self.productData and CanPreviewMarketProduct(self.productData.marketProductId) and IsCharacterPreviewingAvailable() then -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
                 AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), PreviewFunction)
             end
         end

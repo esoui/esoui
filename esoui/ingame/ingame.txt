@@ -1003,10 +1003,13 @@ EsoUI\Ingame\Contacts\FriendsOnline.xml
 EsoUI\Ingame\GuildFinder\GuildFinder_Manager.lua
 EsoUI\Ingame\GuildFinder\GuildBrowser_Manager.lua
 EsoUI\Ingame\GuildFinder\GuildRecruitment_Manager.lua
+EsoUI\Ingame\GuildHistory\GuildHistory_Data.lua
+EsoUI\Ingame\GuildHistory\GuildHistory_Manager.lua
 
 EsoUI\Ingame\Guild\GuildHeraldry_Shared.lua
 EsoUI\Ingame\Guild\GuildRoster_Shared.lua
-EsoUI\Ingame\Guild\GuildHistory_Shared.lua
+EsoUI\Ingame\GuildHistory\GuildHistory_Shared.lua
+EsoUI\Ingame\GuildHistory\GuildHistory_Shared.xml
 
 EsoUI\Ingame\Guild\GuildRanks_Manager.lua
 EsoUI\Ingame\Guild\ZO_GuildUtils_Common.lua
@@ -1021,8 +1024,8 @@ EsoUI\Ingame\Guild\Keyboard\GuildRoster_Keyboard.lua
 EsoUI\Ingame\Guild\Keyboard\GuildRoster_Keyboard.xml
 EsoUI\Ingame\Guild\Keyboard\GuildCreate_Keyboard.lua
 EsoUI\Ingame\Guild\Keyboard\GuildCreate_Keyboard.xml
-EsoUI\Ingame\Guild\Keyboard\GuildHistory_Keyboard.lua
-EsoUI\Ingame\Guild\Keyboard\GuildHistory_Keyboard.xml
+EsoUI\Ingame\GuildHistory\Keyboard\GuildHistory_Keyboard.lua
+EsoUI\Ingame\GuildHistory\Keyboard\GuildHistory_Keyboard.xml
 EsoUI\Ingame\Guild\GuildSharedInfo.lua
 EsoUI\Ingame\Guild\GuildSharedInfo.xml
 EsoUI\Ingame\Guild\Keyboard\GuildHeraldry_Keyboard.lua
@@ -1114,8 +1117,8 @@ EsoUI\Ingame\Guild\Gamepad\GuildHeraldry_Gamepad.lua
 EsoUI\Ingame\Guild\Gamepad\GuildHeraldry_Gamepad.xml
 EsoUI\Ingame\Guild\Gamepad\GuildRoster_Gamepad.lua
 EsoUI\Ingame\Guild\Gamepad\GuildRoster_Gamepad.xml
-EsoUI\Ingame\Guild\Gamepad\GuildHistory_Gamepad.lua
-EsoUI\Ingame\Guild\Gamepad\GuildHistory_Gamepad.xml
+EsoUI\Ingame\GuildHistory\Gamepad\GuildHistory_Gamepad.lua
+EsoUI\Ingame\GuildHistory\Gamepad\GuildHistory_Gamepad.xml
 EsoUI\Ingame\Guild\Gamepad\GuildWeeklyBids_Gamepad.lua
 EsoUI\Ingame\Guild\Gamepad\GuildWeeklyBids_Gamepad.xml
 

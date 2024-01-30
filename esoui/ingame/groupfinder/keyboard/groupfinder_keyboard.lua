@@ -336,9 +336,10 @@ do
                 championPoints = MAX_CP_ALLOWED
                 control:SetText(championPoints)
             end
+
+            self.createGroupListingContent.userTypeData:SetChampionPoints(championPoints)
+            self.createGroupListingContent:UpdateCreateEditButton()
         end
-        self.createGroupListingContent.userTypeData:SetChampionPoints(championPoints)
-        self.createGroupListingContent:UpdateCreateEditButton()
     end
 end
 

@@ -1,8 +1,5 @@
 local GAMEPAD_CREATE_ACCOUNT_ERROR_DIALOG = "GAMEPAD_CREATE_ACCOUNT_ERROR_DIALOG"
 
--- Configuration Options
-local MINIMUM_AGE = 13
-
 -- Main class.
 local ZO_CreateAccount_Gamepad = ZO_InitializingObject:Subclass()
 
@@ -17,17 +14,18 @@ function ZO_CreateAccount_Gamepad:Initialize(control)
     CREATE_ACCOUNT_GAMEPAD_SCENE:AddFragment(createAccount_Gamepad_Fragment)
 
     CREATE_ACCOUNT_GAMEPAD_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-                if newState == SCENE_SHOWING then
-                    self:ResetMainList()
-                    KEYBIND_STRIP:RemoveDefaultExit()
-                    self:SwitchToMainList()
+        if newState == SCENE_SHOWING then
+            self:PerformDeferredInitialize()
 
-                elseif newState == SCENE_HIDDEN then
-                    self:ResetScreen()
-                    self:SwitchToKeybind(nil)
-                    KEYBIND_STRIP:RestoreDefaultExit()
-                end
-            end)
+            self:ResetMainList()
+            KEYBIND_STRIP:RemoveDefaultExit()
+            self:SwitchToMainList()
+        elseif newState == SCENE_HIDDEN then
+            self:ResetScreen()
+            self:SwitchToKeybind(nil)
+            KEYBIND_STRIP:RestoreDefaultExit()
+        end
+    end)
 end
 
 function ZO_CreateAccount_Gamepad:ResetScreen()
@@ -45,10 +43,9 @@ function ZO_CreateAccount_Gamepad:ResetAccountData()
     self.enteredAccountName = ""
     self.selectedCountry = ""
     self.enteredEmail = ""
-    self.ageValid = false
     self.emailSignup = false
     self.lastErrorMessage = ""
-    self.secondaryEntriesAdded = false
+    self.secondaryEntriesDirty = true
     self.creatingAccount = false
 end
 
@@ -117,8 +114,6 @@ function ZO_CreateAccount_Gamepad:CreateAccountSelected()
         self:ShowError(GetString(SI_CONSOLE_CREATEACCOUNT_NOREGION))
     elseif self.enteredEmail == nil or self.enteredEmail == "" then
         self:ShowError(GetString(SI_CONSOLE_CREATEACCOUNT_NOEMAIL))
-    elseif self.ageValid ~= true then
-        self:ShowError(zo_strformat(SI_CONSOLE_CREATEACCOUNT_BADAGE, MINIMUM_AGE))
     elseif not self.creatingAccount then
         self:ClearError()
         PregameStateManager_AdvanceState()
@@ -219,20 +214,30 @@ function ZO_CreateAccount_Gamepad:AddTextEdit(text, contents, selectedCallback, 
 end
 
 function ZO_CreateAccount_Gamepad:AddCheckbox(text, checked, callback)
+    local option = self:CreateCheckboxData(text, checked, callback)
+    self.optionsList:AddEntry("ZO_CheckBoxTemplate_Pregame_Gamepad", option)
+end
+
+function ZO_CreateAccount_Gamepad:CreateCheckboxData(text, checked, callback)
     local option = ZO_GamepadEntryData:New(text)
     option.checked = checked
     option.setChecked = callback
     option.selectedCallback = ZO_GamepadCheckBoxTemplate_OnClicked
     option:SetFontScaleOnSelection(true)
     option.list = self.optionsList
-    self.optionsList:AddEntry("ZO_CheckBoxTemplate_Pregame_Gamepad", option)
+    return option
 end
 
 function ZO_CreateAccount_Gamepad:AddButton(text, callback)
+    local option = self:CreateButtonData(text, callback)
+    self.optionsList:AddEntry("ZO_PregameGamepadButtonWithTextTemplate", option)
+end
+
+function ZO_CreateAccount_Gamepad:CreateButtonData(text, callback)
     local option = ZO_GamepadEntryData:New(text)
     option.selectedCallback = callback
     option:SetFontScaleOnSelection(true)
-    self.optionsList:AddEntry("ZO_PregameGamepadButtonWithTextTemplate", option)
+    return option
 end
 
 function ZO_CreateAccount_Gamepad:ActivateEditbox(edit, isEmailBox)
@@ -294,16 +299,39 @@ function ZO_CreateAccount_Gamepad:ResetMainList()
 end
 
 function ZO_CreateAccount_Gamepad:AddSecondaryListEntries()
-    if not self.secondaryEntriesAdded and self.selectedCountry ~= "" then
-        self:AddCheckbox(zo_strformat(SI_CREATEACCOUNT_AGE, MINIMUM_AGE), function(data) return self.ageValid end, function(data, checked) self.ageValid = checked end)
-        self:AddCheckbox(GetString(SI_CREATEACCOUNT_EMAIL_SIGNUP), function(data) return self.emailSignup end, function(data, checked) self.emailSignup = checked end)
-        self:AddButton(GetString(SI_CREATEACCOUNT_CREATE_ACCOUNT_BUTTON), function(control, data)
-                    PlaySound(SOUNDS.POSITIVE_CLICK)
-                    self:CreateAccountSelected()
-                end)
+    if self.selectedCountry ~= "" and self.secondaryEntriesDirty then
+        if self.emailSignupOptionData then
+            self.optionsList:RemoveEntry("ZO_CheckBoxTemplate_Pregame_Gamepad", self.emailSignupOptionData)
+        end
+        if self.createButtonOptionData then
+            self.optionsList:RemoveEntry("ZO_PregameGamepadButtonWithTextTemplate", self.createButtonOptionData)
+        end
+
+        if not self.autoEmailSubscribe then
+            if not self.emailSignupOptionData then
+                local function IsChecked(data)
+                    return self.emailSignup
+                end
+                local function SetCheckedCallback(data, checked)
+                    self.emailSignup = checked
+                end
+                self.emailSignupOptionData = self:CreateCheckboxData(GetString(SI_CREATEACCOUNT_EMAIL_SIGNUP), IsChecked, SetCheckedCallback)
+            end
+            self.optionsList:AddEntry("ZO_CheckBoxTemplate_Pregame_Gamepad", self.emailSignupOptionData)
+        end
+
+        if not self.createButtonOptionData then
+            local function ButtonSelectedCallback(control, data)
+                PlaySound(SOUNDS.POSITIVE_CLICK)
+                self:CreateAccountSelected()
+            end
+            self.createButtonOptionData = self:CreateButtonData(GetString(SI_CREATEACCOUNT_CREATE_ACCOUNT_BUTTON), ButtonSelectedCallback)
+        end
+        self.optionsList:AddEntry("ZO_PregameGamepadButtonWithTextTemplate", self.createButtonOptionData)
+
+        self.secondaryEntriesDirty = false
 
         self.optionsList:Commit()
-        self.secondaryEntriesAdded = true
     end
 end
 
@@ -314,20 +342,25 @@ function ZO_CreateAccount_Gamepad:PopulateCountriesDropdownList()
         -- Populate the combobox list.
         self.countriesList:ClearItems()
 
-        local numCountries = GetNumberCountries() 
+        local numCountries = GetNumCountries()
 
         local function OnCountrySelected(comboBox, entryText, entry)
             self.selectedCountry = entryText 
             self.countryCode = entry.countryCode
-            self.emailSignup = entry.megaServer == MEGASERVER_NA
+            if self.autoEmailSubscribe ~= entry.autoEmailSubscribe then
+                self.autoEmailSubscribe = entry.autoEmailSubscribe
+                self.secondaryEntriesDirty = true
+            end
         end
 
         for i = 1, numCountries do
-            local countryName, countryCode, megaServer = GetCountryEntry(i)
-            local option = self.countriesList:CreateItemEntry(countryName, OnCountrySelected) 
-            option.megaServer = megaServer
-            option.countryCode = countryCode
-            self.countriesList:AddItem(option)
+            local countryName, countryCode, _, isAllowedInAccountCreation, autoEmailSubscribe = GetCountryDataForIndex(i)
+            if isAllowedInAccountCreation then
+                local option = self.countriesList:CreateItemEntry(countryName, OnCountrySelected)
+                option.countryCode = countryCode
+                option.autoEmailSubscribe = autoEmailSubscribe
+                self.countriesList:AddItem(option)
+            end
         end
 
         self.countriesList:HighlightSelectedItem()
@@ -337,10 +370,6 @@ end
 
 function ZO_CreateAccount_Gamepad:GetEnteredEmail()
     return self.enteredEmail
-end
-
-function ZO_CreateAccount_Gamepad:IsAgeValid()
-    return self.ageValid
 end
 
 function ZO_CreateAccount_Gamepad:ShouldReceiveNewsEmail()

@@ -11,7 +11,6 @@ function ZO_RaidLeaderboardsManager_Gamepad:Initialize(control)
            local NO_NAME = nil 
            local NO_ICON = nil
            GAMEPAD_LEADERBOARDS:SetActiveCampaign(NO_NAME, NO_ICON)
-           self:SendLeaderboardQuery()
         end
     end)
 

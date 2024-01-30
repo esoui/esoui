@@ -46,5 +46,41 @@
         <!-- Combo box refactor, ZO_ComboBox can now be used in place of ZO_ScrollableComboBox -->
         <Control name="ZO_ScrollableComboBoxItem" inherits="ZO_ComboBoxEntry" level="3" mouseEnabled="true" virtual="true" />
         <Control name="ZO_ScrollableComboBox" mouseEnabled="true" inherits="ZO_ComboBox" virtual="true" />
+
+        <Control name="ZO_MultiselectComboBox" mouseEnabled="true" virtual="true">
+            <Dimensions x="135" y="31" />
+            <OnInitialized>
+                ZO_MultiSelectComboBox:New(self)
+            </OnInitialized>
+
+            <OnMouseUp>
+                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+                ZO_ComboBox_DropdownClicked(self)
+                PlaySound(SOUNDS.COMBO_CLICK)
+                end
+            </OnMouseUp>
+
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <AnchorFill />
+                </Backdrop>
+
+                <Label name="$(parent)SelectedItemText" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" offsetX="8" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" />
+                </Label>
+
+                <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="RIGHT" offsetX="-3" />
+
+                    <OnClicked>
+                        if button == MOUSE_BUTTON_INDEX_LEFT then
+                        ZO_ComboBox_DropdownClicked(self:GetParent())
+                        end
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

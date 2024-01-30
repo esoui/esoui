@@ -613,7 +613,7 @@ function ZO_CollectibleData:GetOutfitStyleFreeConversionCollectible()
 end
 
 function ZO_CollectibleData:IsBlocked(actorCategory)
-    return IsCollectibleBlocked(self.collectibleId)
+    return IsCollectibleBlocked(self.collectibleId, actorCategory)
 end
 
 function ZO_CollectibleData:IsCollectibleAvailableToActorCategory(aActorCategory)

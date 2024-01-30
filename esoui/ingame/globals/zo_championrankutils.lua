@@ -1,5 +1,5 @@
 do
-    local CHAMPION_CAP = GetMaxSpendableChampionPointsInAttribute() * 3
+    local CHAMPION_CAP = GetMaxSpendableChampionPointsInAttribute() * GetNumChampionDisciplines()
     function ZO_GetLevelOrChampionPointsStringNoIcon(level, championPoints)
         if championPoints and championPoints > 0 then
             if championPoints > CHAMPION_CAP then

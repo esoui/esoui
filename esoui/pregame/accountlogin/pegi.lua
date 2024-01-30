@@ -53,7 +53,7 @@ function ZO_PEGIAgreement:PopulateCountries()
         local scrollData = ZO_ScrollList_GetDataList(self.list)
 
         for i = 1, numCountries do
-            local countryName, ratingsBoard = GetCountryDataForIndex(i)
+            local countryName, _, ratingsBoard = GetCountryDataForIndex(i)
             self.countryToRatingsBoard[countryName] = ratingsBoard
             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(SCROLL_TYPE_PEGI, { countryName = countryName or "", countryNameLower = zo_strlower(countryName or "") })
         end	

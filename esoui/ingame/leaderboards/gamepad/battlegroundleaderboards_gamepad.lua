@@ -8,8 +8,7 @@ function ZO_BattlegroundLeaderboardsManager_Gamepad:Initialize(control)
     GAMEPAD_BATTLEGROUND_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
            self:UpdatePlayerInfo()
-           self:SendLeaderboardQuery()
-           local NO_NAME = nil 
+           local NO_NAME = nil
            local NO_ICON = nil
            GAMEPAD_LEADERBOARDS:SetActiveCampaign(NO_NAME, NO_ICON)
         end

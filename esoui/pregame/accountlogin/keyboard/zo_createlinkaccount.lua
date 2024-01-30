@@ -3,8 +3,6 @@ local SETUP_MODE_NEW = 1
 local SETUP_MODE_LINK = 2
 local SETUP_MODE_ACTIVATE = 3
 
-local MINIMUM_AGE = 13      -- TODO: We should fetch this from the client instead...
-
 local CreateLinkAccount_Keyboard = ZO_LoginBase_Keyboard:Subclass()
 
 function CreateLinkAccount_Keyboard:New(...)
@@ -34,12 +32,8 @@ function CreateLinkAccount_Keyboard:Initialize(control)
     self.emailLabel = newAccountScrollChild:GetNamedChild("EmailLabel")
     self.emailEntry = newAccountScrollChild:GetNamedChild("EmailEntry")
     self.emailEntryEdit = self.emailEntry:GetNamedChild("Edit")
-    self.ageCheckbox = newAccountScrollChild:GetNamedChild("Age")
-    self.ageLabel = self.ageCheckbox:GetNamedChild("Label")
     self.subscribeCheckbox = newAccountScrollChild:GetNamedChild("Subscribe")
     self.createAccountButton = newAccountScrollChild:GetNamedChild("CreateAccount")
-
-    ZO_CheckButton_SetToggleFunction(self.ageCheckbox, function() self:UpdateCreateAccountButton() end)
 
     self.countryComboBox = ZO_ComboBox_ObjectFromContainer(self.countryDropdown)
     self.countryComboBox:SetSortsItems(false)
@@ -67,10 +61,9 @@ function CreateLinkAccount_Keyboard:Initialize(control)
     local activationLink = ZO_URL_LINK_COLOR:Colorize(ZO_LinkHandler_CreateURLLink(activationURLText, activationURLText))
     self.activateAccountInstructionsLabel:SetText(zo_strformat(SI_LINKACCOUNT_ACTIVATION_MESSAGE, activationLink))
 
-    self.ageLabel:SetText(zo_strformat(SI_CREATEACCOUNT_AGE, MINIMUM_AGE))
     self.mode = SETUP_MODE_NONE
 
-    self:HideCheckboxesIfNecessary()
+    self:RefreshCheckboxHiddenStates()
 
     EVENT_MANAGER:RegisterForEvent("CreateLinkAccount", EVENT_SCREEN_RESIZED, function() self:ResizeControls() end)
 
@@ -87,16 +80,15 @@ function CreateLinkAccount_Keyboard:Initialize(control)
     CREATE_LINK_ACCOUNT_FRAGMENT = ZO_FadeSceneFragment:New(control)
     CREATE_LINK_ACCOUNT_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
+            if IsUsingLinkedLogin() then
+                self:PopulateCountryDropdown()
+            end
+
             if self.mode == SETUP_MODE_ACTIVATE then
                 LOGIN_MANAGER_KEYBOARD:RequestAccountActivationCode()
             end
         end
     end)
-
-    if IsUsingLinkedLogin() then
-        LoadCountryData()
-        self.control:RegisterForEvent(EVENT_COUNTRY_DATA_LOADED, function() self:PopulateCountryDropdown() end)
-    end
 
      local function OnActivationCodeReceived(eventId, activationCode)
         self.activationCode = activationCode
@@ -120,17 +112,18 @@ end
 
 function CreateLinkAccount_Keyboard:PopulateCountryDropdown()
     if not self.hasPopulatedCountryDropdown then
-        local numCountries = GetNumberCountries()
+        local numCountries = GetNumCountries()
 
         for i = 1, numCountries do
-            local countryName, countryCode, megaServer = GetCountryEntry(i)
+            local countryName, countryCode, _, isAllowedInAccountCreation, autoEmailSubscribe = GetCountryDataForIndex(i)
 
-            local entry = self.countryComboBox:CreateItemEntry(countryName, function(...) self:OnCountrySelected(...) end)
-            entry.index = i
-            entry.countryName = countryName
-            entry.countryCode = countryCode
-            entry.megaServer = megaServer
-            self.countryComboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
+            if isAllowedInAccountCreation then
+                local entry = self.countryComboBox:CreateItemEntry(countryName, function(...) self:OnCountrySelected(...) end)
+                entry.countryName = countryName
+                entry.countryCode = countryCode
+                entry.autoEmailSubscribe = autoEmailSubscribe
+                self.countryComboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
+            end
         end
 
         if numCountries == 1 then
@@ -147,6 +140,7 @@ end
 function CreateLinkAccount_Keyboard:OnCountrySelected(comboBox, entryText, entry)
     self.selectedCountry = entry
     self.countryDropdownDefaultText:SetHidden(true)
+    self:RefreshCheckboxHiddenStates()
     self:UpdateCreateAccountButton()
 end
 
@@ -176,7 +170,7 @@ function CreateLinkAccount_Keyboard:IsRequestedAccountNameValid()
 end
 
 function CreateLinkAccount_Keyboard:CanCreateAccount()
-    return self.emailEntryEdit:GetText() ~= "" and ZO_CheckButton_IsChecked(self.ageCheckbox) and self.selectedCountry ~= nil and self:IsRequestedAccountNameValid()
+    return self.emailEntryEdit:GetText() ~= "" and self.selectedCountry ~= nil and self:IsRequestedAccountNameValid()
 end
 
 function CreateLinkAccount_Keyboard:CanLinkAccount()
@@ -186,12 +180,11 @@ end
 function CreateLinkAccount_Keyboard:AttemptCreateAccount()
     if self:CanCreateAccount() then
         local email = self.emailEntryEdit:GetText()
-        local ageValid = ZO_CheckButton_IsChecked(self.ageCheckbox)
         local emailSignup = ZO_CheckButton_IsChecked(self.subscribeCheckbox)
         local country = self.selectedCountry.countryCode
         local requestedAccountName = self.accountNameEntryEdit:GetText()
 
-        LOGIN_MANAGER_KEYBOARD:AttemptCreateAccount(email, ageValid, emailSignup, country, requestedAccountName)
+        LOGIN_MANAGER_KEYBOARD:AttemptCreateAccount(email, emailSignup, country, requestedAccountName)
     end
 end
 
@@ -230,30 +223,30 @@ function CreateLinkAccount_Keyboard:GetEmailEntryEdit()
     return self.emailEntryEdit
 end
 
-function CreateLinkAccount_Keyboard:HideCheckboxesIfNecessary()
-    -- To ensure a consistent layout, hide the age checkbox first if necessary
-
-    if not DoesPlatformRequireAgeVerification() then
-        -- We don't need age verification, so check and remove the age checkbox
-        ZO_CheckButton_SetChecked(self.ageCheckbox)
-        self:HideAgeVerificationCheckbox()
-    end
-
-    if not DoesPlatformAllowForEmailSubscription() then
-        -- Email subscription isn't allowed on the client, so remove the checkbox
-        ZO_CheckButton_SetUnchecked(self.subscribeCheckbox)
-        self:HideEmailSubscriptionCheckbox()
+function CreateLinkAccount_Keyboard:RefreshCheckboxHiddenStates()
+    local platformDisablesSubscription = not DoesPlatformAllowForEmailSubscription()
+    local noRegionOrAutoSubscription = not self.selectedCountry or self.selectedCountry.autoEmailSubscribe
+    local subscriptionShouldBeHidden = platformDisablesSubscription or noRegionOrAutoSubscription
+    if subscriptionShouldBeHidden ~= self.subscribeCheckbox:IsControlHidden() then
+        if subscriptionShouldBeHidden then
+            -- Email subscription isn't allowed, so remove the checkbox
+            ZO_CheckButton_SetUnchecked(self.subscribeCheckbox)
+            self:HideEmailSubscriptionCheckbox()
+        else
+            self:ShowEmailSubscriptionCheckbox()
+        end
     end
 end
 
-function CreateLinkAccount_Keyboard:HideAgeVerificationCheckbox()
-    -- Hide the age verification checkbox and tranfer the age checkbox anchor to the subscribe checkbox
-    self.ageCheckbox:SetHidden(true)
+function CreateLinkAccount_Keyboard:ShowEmailSubscriptionCheckbox()
+    -- Show the email subscription checkbox, and reanchor the Create Account button
+    self.subscribeCheckbox:SetHidden(false)
 
-    local _, point, relTo, relPoint, offsetX, offsetY = self.ageCheckbox:GetAnchor(0)
+    -- use the Create Account button's current anchors, but use the subscribe checkbox as the relative point
+    local _, point, _, relPoint, offsetX, offsetY = self.createAccountButton:GetAnchor(0)
 
-    self.subscribeCheckbox:ClearAnchors()
-    self.subscribeCheckbox:SetAnchor(point, relTo, relPoint, offsetX, offsetY)
+    self.createAccountButton:ClearAnchors()
+    self.createAccountButton:SetAnchor(point, self.subscribeCheckbox, relPoint, offsetX, offsetY)
 end
 
 function CreateLinkAccount_Keyboard:HideEmailSubscriptionCheckbox()

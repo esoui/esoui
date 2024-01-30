@@ -169,7 +169,8 @@ do
         end
 
         -- Create a relay method that will forward the invocation of this method to
-        -- the supporting target objects and return the first non-nil return value.
+        -- the supporting target objects and return the first return value of each
+        -- forwarded call in the order in which the methods are invoked.
         return function(...)
             local returnValues = {}
             for index, targetObject in ipairs(objectsWithImplementations) do

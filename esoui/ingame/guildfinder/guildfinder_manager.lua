@@ -132,7 +132,7 @@ function ZO_GuildFinder_Manager.GetRoleIconsText(roles)
 end
 
 do
-    local MAX_CP_ALLOWED = GetMaxSpendableChampionPointsInAttribute() * GetNumAttributes()
+    local MAX_CP_ALLOWED = GetMaxSpendableChampionPointsInAttribute() * GetNumChampionDisciplines()
 
     function ZO_GuildFinder_Manager.GetMaxCPAllowedForInput()
         return MAX_CP_ALLOWED

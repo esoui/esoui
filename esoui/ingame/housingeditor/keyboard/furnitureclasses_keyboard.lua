@@ -615,13 +615,16 @@ end
 
 function ZO_HousingSettingsFilters_SetupDropdown(dropdown, includeLocationFilters, callback)
     local comboBox = ZO_ComboBox_ObjectFromContainer(dropdown)
-    -- Subcategory options are disabled but we do not want them to have the disabled visuals.
-    comboBox:SetDisabledColor(ZO_DEFAULT_ENABLED_COLOR)
     comboBox:SetFont("ZoFontWinT1")
     comboBox:SetSortsItems(false)
     comboBox:SetSpacing(4)
-    comboBox:SetNoSelectionText(zo_strformat(SI_HOUSING_FURNITURE_FILTER_DROPDOWN_TEXT, 0))
-    comboBox:SetMultiSelectionTextFormatter(SI_HOUSING_FURNITURE_FILTER_DROPDOWN_TEXT)
+    comboBox:SetHeight(450)
+    comboBox:EnableMultiSelect(SI_HOUSING_FURNITURE_FILTER_DROPDOWN_TEXT, zo_strformat(SI_HOUSING_FURNITURE_FILTER_DROPDOWN_TEXT, 0))
+
+    local function SetupScrollableEntry(control, data, ...)
+        data.m_dropdownObject:SetupEntry(control, data, ...)
+    end
+    comboBox:AddCustomEntryTemplate("ZO_HousingFurnitureBrowserFilters_ComboBoxHeaderEntry", ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT, SetupScrollableEntry)
 
     local onDropdownHidden = function()
         callback(comboBox)
@@ -629,21 +632,13 @@ function ZO_HousingSettingsFilters_SetupDropdown(dropdown, includeLocationFilter
 
     comboBox:SetHideDropdownCallback(onDropdownHidden)
 
-    local function DisableHighlightOnMouseEnter(control)
-        -- Suppress the highlight for subcategory entries.
-        ZO_Menu_UnselectItem(control)
-    end
-
-    local DISABLED = false
-    local NO_CALLBACK = nil
-
     -- Add Location filters starting with the subcategory entry.
     if includeLocationFilters then
         do
             local subcategoryName = GetString(SI_HOUSING_FURNITURE_LOCATION_FILTER_DROPDOWN_LABEL)
-            local entry = comboBox:CreateItemEntry(subcategoryName, NO_CALLBACK, DISABLED)
-            entry.highlightColor = ZO_DEFAULT_ENABLED_COLOR
-            entry.onEnter = DisableHighlightOnMouseEnter
+            local entry = comboBox:CreateItemEntry(subcategoryName)
+            ZO_ComboBox.SetItemEntryCustomTemplate(entry, "ZO_HousingFurnitureBrowserFilters_ComboBoxHeaderEntry")
+            entry.m_normalColor = ZO_SELECTED_TEXT
             comboBox:AddItem(entry)
         end
 
@@ -668,9 +663,9 @@ function ZO_HousingSettingsFilters_SetupDropdown(dropdown, includeLocationFilter
 
     -- Add Bound State filters starting with the subcategory entry.
     do
-        local entry = comboBox:CreateItemEntry(GetString(SI_HOUSING_FURNITURE_BOUND_FILTER_DROPDOWN_LABEL), NO_CALLBACK, DISABLED)
-        entry.highlightColor = ZO_DEFAULT_ENABLED_COLOR
-        entry.onEnter = DisableHighlightOnMouseEnter
+        local entry = comboBox:CreateItemEntry(GetString(SI_HOUSING_FURNITURE_BOUND_FILTER_DROPDOWN_LABEL))
+        ZO_ComboBox.SetItemEntryCustomTemplate(entry, "ZO_HousingFurnitureBrowserFilters_ComboBoxHeaderEntry")
+        entry.m_normalColor = ZO_SELECTED_TEXT
         comboBox:AddItem(entry)
     end
 
@@ -684,9 +679,9 @@ function ZO_HousingSettingsFilters_SetupDropdown(dropdown, includeLocationFilter
 
     -- Add Limit Type filters starting with the subcategory entry.
     do
-        local entry = comboBox:CreateItemEntry(GetString(SI_TOOLTIP_FURNISHING_LIMIT_TYPE), NO_CALLBACK, DISABLED)
-        entry.highlightColor = ZO_DEFAULT_ENABLED_COLOR
-        entry.onEnter = DisableHighlightOnMouseEnter
+        local entry = comboBox:CreateItemEntry(GetString(SI_TOOLTIP_FURNISHING_LIMIT_TYPE))
+        ZO_ComboBox.SetItemEntryCustomTemplate(entry, "ZO_HousingFurnitureBrowserFilters_ComboBoxHeaderEntry")
+        entry.m_normalColor = ZO_SELECTED_TEXT
         comboBox:AddItem(entry)
     end
 

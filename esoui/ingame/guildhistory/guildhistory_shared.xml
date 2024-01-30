@@ -1,0 +1,16 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildHistoryRow_Shared" virtual="true" mouseEnabled="true">
+            <OnInitialized>
+                self.descriptionLabel = self:GetNamedChild("Description")
+                self.timeLabel = self:GetNamedChild("Time")
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Description" wrapMode="ELLIPSIS" />
+
+                <Label name="$(parent)Time" horizontalAlignment="RIGHT" wrapMode="ELLIPSIS" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -132,6 +132,7 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_UI,
     settingId = UI_SETTING_USE_CUSTOM_SCALE,
     header = SI_VIDEO_OPTIONS_INTERFACE,
+    template = "ZO_Options_Checkbox_DynamicWarning",
 })
 
 panelBuilder:AddSetting({
@@ -140,6 +141,7 @@ panelBuilder:AddSetting({
     settingId = UI_SETTING_CUSTOM_SCALE,
     header = SI_VIDEO_OPTIONS_INTERFACE,
     indentLevel = 1,
+    template = "ZO_Options_Video_Slider_DynamicWarning",
 })
 
 ------------------------

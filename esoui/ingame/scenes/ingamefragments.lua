@@ -450,6 +450,24 @@ function ZO_UICombatOverlayFragment:Hide()
     self:OnHidden()
 end
 
+------------------------------------
+--Housing Editor Enabled Fragment
+------------------------------------
+local ZO_HousingEditorEnabledFragment = ZO_SceneFragment:Subclass()
+
+function ZO_HousingEditorEnabledFragment:New()
+    local fragment = ZO_SceneFragment.New(self)
+    return fragment
+end
+
+function ZO_HousingEditorEnabledFragment:Hide()
+    --Disable the housing editor if it isn't already
+    if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_DISABLED then
+        HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
+    end
+    self:OnHidden()
+end
+
 ----------------------------------------
 --Character Window Fragment
 ----------------------------------------
@@ -857,6 +875,8 @@ INVENTORY_FRAGMENT:AddDependencies(
 CLEAR_CURSOR_FRAGMENT = ZO_ClearCursorFragment:New()
 UI_COMBAT_OVERLAY_FRAGMENT = ZO_UICombatOverlayFragment:New()
 
+HOUSING_EDITOR_ENABLED_FRAGMENT = ZO_HousingEditorEnabledFragment:New()
+
 KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_KeybindStripMungeBackground)
 KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT:AddInstantScene(CROWN_CRATE_KEYBOARD_SCENE)
 
@@ -946,7 +966,7 @@ GUILD_SELECTOR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildSelector)
 GUILD_HOME_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildHome)
 -- GUILD_ROSTER_FRAGMENT defined in GuildRoster_Keyboard.lua
 GUILD_RANKS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildRanks)
-GUILD_HISTORY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildHistory)
+-- GUILD_HISTORY_KEYBOARD_FRAGMENT defined in GuildHistory_Keyboard.lua
 GUILD_CREATE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildCreate)
 GUILD_SHARED_INFO_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildSharedInfo)
 GUILD_HERALDRY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildHeraldry)

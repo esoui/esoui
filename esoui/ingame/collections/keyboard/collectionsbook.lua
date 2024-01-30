@@ -29,6 +29,15 @@ function ZO_CollectionsBook:Initialize(control)
     self:InitializeCategories()
     self:InitializeFilters()
     self:InitializeGridListPanel()
+    self:InitializeKeybindStripDescriptors()
+
+    local function OnRefreshActionsCallback()
+        local categoryData = self.categoryTree:GetSelectedData()
+        if categoryData then
+            self:UpdateUtilityWheel(categoryData)
+        end
+        self:UpdateKeybinds()
+    end
 
     self.control:SetHandler("OnUpdate", function() self.refreshGroups:UpdateRefreshGroups() end)
 
@@ -36,8 +45,9 @@ function ZO_CollectionsBook:Initialize(control)
     self.scene:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self.refreshGroups:UpdateRefreshGroups() --In case we need to rebuild the categories
+            ITEM_PREVIEW_KEYBOARD:RegisterCallback("RefreshActions", OnRefreshActionsCallback)
             self:UpdateCollectionVisualLayer()
-            if self.hotbarCategory then
+            if self.hotbarCategory and not IsCurrentlyPreviewing() then
                 self.wheelContainer:SetHidden(false)
                 self.wheel:Activate()
             else
@@ -46,12 +56,19 @@ function ZO_CollectionsBook:Initialize(control)
             COLLECTIONS_BOOK_SINGLETON:SetSearchString(self.contentSearchEditBox:GetText())
             COLLECTIONS_BOOK_SINGLETON:SetSearchCategorySpecializationFilters(COLLECTIBLE_CATEGORY_SPECIALIZATION_NONE)
             COLLECTIONS_BOOK_SINGLETON:SetSearchChecksHidden(true)
+            self:AddKeybinds()
+        elseif newState == SCENE_HIDING then
+            if IsCurrentlyPreviewing() then
+                ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
+            end
         elseif newState == SCENE_HIDDEN then
+            ITEM_PREVIEW_KEYBOARD:UnregisterCallback("RefreshActions", OnRefreshActionsCallback)
             self.gridListPanelList:ResetToTop()
             self.wheelContainer:SetHidden(true)
             if self.hotbarCategory then
                 self.wheel:Deactivate()
             end
+            self:RemoveKeybinds()
         end
     end)
 
@@ -113,7 +130,7 @@ function ZO_CollectionsBook:InitializeEvents()
 end
 
 do
-    local FILTER_DATA = 
+    local FILTER_DATA =
     {
         SI_COLLECTIONS_BOOK_FILTER_SHOW_ALL,
         SI_COLLECTIONS_BOOK_FILTER_SHOW_NEW,
@@ -171,7 +188,7 @@ do
         local function TreeHeaderSetup_Child(node, control, categoryData, open, userRequested)
             BaseTreeHeaderSetup(node, control, categoryData, open)
 
-            if(open and userRequested) then
+            if open and userRequested then
                 self.categoryTree:SelectFirstChild(node)
             end
         end
@@ -181,12 +198,16 @@ do
         end
 
         local function TreeEntryOnSelected(control, categoryData, selected, reselectingDuringRebuild)
+            ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
+
             control:SetSelected(selected)
 
             if selected then
                 self:UpdateUtilityWheel(categoryData)
                 self:BuildContentList(categoryData)
             end
+
+            self:UpdateKeybinds()
         end
 
         local function TreeEntryOnSelected_Childless(control, categoryData, selected, reselectingDuringRebuild)
@@ -223,6 +244,49 @@ function ZO_CollectionsBook:InitializeGridListPanel()
     self.gridListPanelList:SetAutoFillEntryTemplate("ZO_CollectibleTile_Keyboard_Control")
     self.gridListPanelList:AddHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
     self.gridListPanelList:SetHeaderPrePadding(COLLECTIBLE_TILE_GRID_PADDING * 3)
+end
+
+function ZO_CollectionsBook:InitializeKeybindStripDescriptors()
+    self.keybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+        -- Cancel Any Previews
+        {
+            name = GetString(SI_COLLECTIBLE_ACTION_END_PREVIEW),
+            keybind = "UI_SHORTCUT_NEGATIVE",
+            visible = function()
+                return IsCurrentlyPreviewing()
+            end,
+            callback = function()
+                ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
+                local categoryData = self.categoryTree:GetSelectedData()
+                if categoryData then
+                    self:UpdateUtilityWheel(categoryData)
+                end
+                self:UpdateKeybinds()
+            end,
+        },
+    }
+end
+
+function ZO_CollectionsBook:AddKeybinds()
+    if self.keybindStripDescriptor then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+end
+
+function ZO_CollectionsBook:RemoveKeybinds()
+    if self.keybindStripDescriptor then
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+end
+
+
+function ZO_CollectionsBook:UpdateKeybinds()
+    if self.keybindStripDescriptor and self.scene:IsShowing() then
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    end
 end
 
 --[[ Refresh ]]--
@@ -357,25 +421,26 @@ function ZO_CollectionsBook:UpdateCategoryStatusIcon(categoryNode)
 end
 
 function ZO_CollectionsBook:UpdateUtilityWheel(categoryData)
-    local hotbarCategory = GetHotbarForCollectibleCategoryId(categoryData.categoryId)
-    if hotbarCategory ~= self.hotbarCategory then
+    if self.scene:IsShowing() then
+        local hotbarCategory = GetHotbarForCollectibleCategoryId(categoryData.categoryId)
         if hotbarCategory then
             local hotbarCategories = {hotbarCategory, HOTBAR_CATEGORY_QUICKSLOT_WHEEL}
-            self.wheel:SetHotbarCategories(hotbarCategories)
+            if hotbarCategory ~= self.hotbarCategory then
+                self.wheel:SetHotbarCategories(hotbarCategories)
+                self.hotbarCategory = hotbarCategory
+            end
             --If the wheel is currently not showing, we need to show and activate it
-            if not self.hotbarCategory and self.scene:IsShowing() then
+            if IsCurrentlyPreviewing() then
+                self.wheelContainer:SetHidden(true)
+                self.wheel:Deactivate()
+            else
                 self.wheelContainer:SetHidden(false)
                 self.wheel:Activate()
             end
         else
-            --If the wheel is currently showing, we need to deactivate and hide it
-            if self.scene:IsShowing() then
-                self.wheelContainer:SetHidden(true)
-                self.wheel:Deactivate()
-            end
+            self.wheelContainer:SetHidden(true)
+            self.wheel:Deactivate()
         end
-
-        self.hotbarCategory = hotbarCategory
     end
 end
 

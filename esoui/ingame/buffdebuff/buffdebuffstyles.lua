@@ -102,7 +102,7 @@ function ZO_BuffDebuffStyleObject:UpdateContainer(containerObject)
         end
 
         for i = 1, GetNumBuffs(unitTag) do
-            local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, _, castByPlayer = GetUnitBuffInfo(unitTag, i)
+            local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, deprecatedBuffType, effectType, abilityType, statusEffectType, abilityId, _, castByPlayer = GetUnitBuffInfo(unitTag, i)
             local duration = timeEnding - timeStarted
             local permanent = duration == 0
 
@@ -115,7 +115,7 @@ function ZO_BuffDebuffStyleObject:UpdateContainer(containerObject)
                     buffSlot = buffSlot,
                     stackCount = stackCount,
                     iconFilename = iconFilename,
-                    buffType = buffType,
+                    buffType = deprecatedBuffType,
                     effectType = effectType,
                     abilityType = abilityType,
                     statusEffectType = statusEffectType,

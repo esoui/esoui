@@ -108,12 +108,12 @@
                     />
                 </Button>
 
-                <Control name="$(parent)Personalities" inherits="ZO_MultiselectComboBox">
+                <Control name="$(parent)Personalities" inherits="ZO_ComboBox">
                     <Dimensions x="160" />
                     <Anchor point="RIGHT" relativeTo="$(parent)AdditionalFilters" relativePoint="LEFT" offsetX="-5" />
                 </Control>
 
-                <Control name="$(parent)Activites" inherits="ZO_MultiselectComboBox">
+                <Control name="$(parent)Activites" inherits="ZO_ComboBox">
                     <Dimensions x="175" />
                     <Anchor point="RIGHT" relativeTo="$(parent)Personalities" relativePoint="LEFT" offsetX="-5" />
                 </Control>
@@ -177,7 +177,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceButtons" relativePoint="BOTTOMLEFT" offsetY="5"/>
                 </Label>
                 
-                <Control name="$(parent)LanguageSelector" inherits="ZO_MultiselectComboBox">
+                <Control name="$(parent)LanguageSelector" inherits="ZO_ComboBox">
                     <Dimensions x="170" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)LanguageHeader" relativePoint="BOTTOMLEFT" offsetY="4" />
                 </Control>
@@ -187,7 +187,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)LanguageHeader" relativePoint="TOPRIGHT" offsetX="10"/>
                 </Label>
                 
-                <Control name="$(parent)SizeSelector" inherits="ZO_MultiselectComboBox">
+                <Control name="$(parent)SizeSelector" inherits="ZO_ComboBox">
                     <Dimensions x="170" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SizeHeader" relativePoint="BOTTOMLEFT" offsetY="4" />
                 </Control>

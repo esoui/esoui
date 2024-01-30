@@ -29,18 +29,24 @@ function ZO_Quickslot_Gamepad:Initialize(control)
             if self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE then
                 --If we are trying to assign a collectible, treat it like one in the narration
                 ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_COLLECTIBLE_ASSIGN_INSTRUCTIONS)))
-                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(pendingData.actionId)
-                if collectibleData then
-                    ZO_AppendNarration(narrations, collectibleData:GetFormattedName())
+                if pendingData then
+                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(pendingData.actionId)
+                    if collectibleData then
+                        ZO_AppendNarration(narrations, collectibleData:GetFormattedName())
+                    end
                 end
             elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_QUEST_ITEM then
                 --If we are trying to assign a quest item, treat it like one in the narration
                 ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_INVENTORY_ASSIGN_INSTRUCTIONS_NARRATION)))
-                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetQuestItemName(pendingData.actionId))))
+                if pendingData then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetQuestItemName(pendingData.actionId))))
+                end
             elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_ITEM then
                 --If we are trying to assign an item, treat it like one in the narration
                 ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_INVENTORY_ASSIGN_INSTRUCTIONS_NARRATION)))
-                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(pendingData.bagId, pendingData.itemSlotIndex))))
+                if pendingData then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(pendingData.bagId, pendingData.itemSlotIndex))))
+                end
             else
                 internalassert(false, "Attempting to narrate unknown quickslot assignment type")
             end

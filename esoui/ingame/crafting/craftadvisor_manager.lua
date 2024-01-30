@@ -77,92 +77,101 @@ function ZO_CraftAdvisorManager:HasActiveWrits()
     return self.questMasterList and #self.questMasterList > 0
 end
 
-function ZO_CraftAdvisorManager:RefreshQuestMasterList()
-    --Grab the current quest information from the journal
-    local quests = QUEST_JOURNAL_MANAGER:GetQuestList()
+do
+    --Only bother with quest types that might have crafting quests in them
+    local QUEST_TYPES_WITH_CRAFTING_QUESTS =
+    {
+        [QUEST_TYPE_CRAFTING] = true,
+        [QUEST_TYPE_HOLIDAY_EVENT] = true,
+    }
 
-    --Clear out the current quest pin data
-    self:FireCallbacks("QuestInformationUpdated", {patternIndices = {}, materialIndex = nil, traitId = nil, styleId = nil, recipeItemIds = {}, runeIds = {}, alchemyInfo = {}, improvementInfo = {}})
-    self.selectedMasterListIndex = DEFAULT_SELECTED_QUEST_INDEX 
-    ZO_ClearTable(self.questMasterList)
+    function ZO_CraftAdvisorManager:RefreshQuestMasterList()
+        --Grab the current quest information from the journal
+        local quests = QUEST_JOURNAL_MANAGER:GetQuestList()
 
-    --Filter out any non-crafting quests from the list
-    for i, questInfo in ipairs(quests) do
-        if questInfo.questType == QUEST_TYPE_CRAFTING then
-            local conditionCount = select(5, GetJournalQuestStepInfo(questInfo.questIndex, QUEST_MAIN_STEP_INDEX))
-            local conditionInfo = {}
-            for conditionIndex = 1, conditionCount do
-                local conditionType = select(8, GetJournalQuestConditionInfo(questInfo.questIndex, QUEST_MAIN_STEP_INDEX, conditionIndex))
+        --Clear out the current quest pin data
+        self:FireCallbacks("QuestInformationUpdated", {patternIndices = {}, materialIndex = nil, traitId = nil, styleId = nil, recipeItemIds = {}, runeIds = {}, alchemyInfo = {}, improvementInfo = {}})
+        self.selectedMasterListIndex = DEFAULT_SELECTED_QUEST_INDEX 
+        ZO_ClearTable(self.questMasterList)
 
-                if conditionType == QUEST_CONDITION_TYPE_GATHER_ITEM then
-                    local itemId, materialItemId, craftingType, itemFunctionalQuality = GetQuestConditionItemInfo(questInfo.questIndex, QUEST_MAIN_STEP_INDEX, conditionIndex)
-                    --If any of the condition crafting types match the current interaction type, we want to include this quest
-                    local shouldShowQuest = (craftingType == self.craftingInteractionType)
+        --Filter out any non-crafting quests from the list
+        for i, questInfo in ipairs(quests) do
+            if QUEST_TYPES_WITH_CRAFTING_QUESTS[questInfo.questType] then
+                local conditionCount = select(5, GetJournalQuestStepInfo(questInfo.questIndex, QUEST_MAIN_STEP_INDEX))
+                local conditionInfo = {}
+                for conditionIndex = 1, conditionCount do
+                    local conditionType = select(8, GetJournalQuestConditionInfo(questInfo.questIndex, QUEST_MAIN_STEP_INDEX, conditionIndex))
 
-                    --Provisioning is special in that in can be done at any crafting station type, so we need to do a slightly different check for it
-                    if craftingType == CRAFTING_TYPE_PROVISIONING then
-                        local craftingStationType = GetRecipeInfoFromItemId(itemId)
-                        shouldShowQuest = (craftingStationType == self.craftingInteractionType)
-                    end
+                    if conditionType == QUEST_CONDITION_TYPE_GATHER_ITEM or conditionType == QUEST_CONDITION_TYPE_CRAFT_ITEM then
+                        local itemId, materialItemId, craftingType, itemFunctionalQuality = GetQuestConditionItemInfo(questInfo.questIndex, QUEST_MAIN_STEP_INDEX, conditionIndex)
+                        --If any of the condition crafting types match the current interaction type, we want to include this quest
+                        local shouldShowQuest = (craftingType == self.craftingInteractionType)
 
-                    if shouldShowQuest then
-                        local data = 
-                        {
-                            conditionIndex = conditionIndex,
-                            itemId = itemId,
-                            materialItemId = materialItemId,
-                            craftingType = craftingType,
-                            itemFunctionalQuality = itemFunctionalQuality,
-                            isMasterWrit = false,
-                        }
-                        table.insert(conditionInfo, data)
-                    end
-                elseif conditionType == QUEST_CONDITION_TYPE_CRAFT_RANDOM_WRIT_ITEM then
-                    local itemId, materialItemId, craftingType, itemFunctionalQuality, itemTemplateId, itemSetId, itemTraitType, itemStyleId, encodedAlchemyTraits = GetQuestConditionMasterWritInfo(questInfo.questIndex, QUEST_MAIN_STEP_INDEX, conditionIndex)
-                    --If any of the condition crafting types match the current interaction type, we want to include this quest
-                    local shouldShowQuest = (craftingType == self.craftingInteractionType)
+                        --Provisioning is special in that in can be done at any crafting station type, so we need to do a slightly different check for it
+                        if craftingType == CRAFTING_TYPE_PROVISIONING then
+                            local craftingStationType = GetRecipeInfoFromItemId(itemId)
+                            shouldShowQuest = (craftingStationType == self.craftingInteractionType)
+                        end
 
-                    --Provisioning is special in that in can be done at any crafting station type, so we need to do a slightly different check for it
-                    if craftingType == CRAFTING_TYPE_PROVISIONING then
-                        local craftingStationType = GetRecipeInfoFromItemId(itemId)
-                        shouldShowQuest = (craftingStationType == self.craftingInteractionType)
-                    end
+                        if shouldShowQuest then
+                            local data = 
+                            {
+                                conditionIndex = conditionIndex,
+                                itemId = itemId,
+                                materialItemId = materialItemId,
+                                craftingType = craftingType,
+                                itemFunctionalQuality = itemFunctionalQuality,
+                                isMasterWrit = false,
+                            }
+                            table.insert(conditionInfo, data)
+                        end
+                    elseif conditionType == QUEST_CONDITION_TYPE_CRAFT_RANDOM_WRIT_ITEM then
+                        local itemId, materialItemId, craftingType, itemFunctionalQuality, itemTemplateId, itemSetId, itemTraitType, itemStyleId, encodedAlchemyTraits = GetQuestConditionMasterWritInfo(questInfo.questIndex, QUEST_MAIN_STEP_INDEX, conditionIndex)
+                        --If any of the condition crafting types match the current interaction type, we want to include this quest
+                        local shouldShowQuest = (craftingType == self.craftingInteractionType)
 
-                    if shouldShowQuest then
-                        local data = 
-                        {
-                            conditionIndex = conditionIndex,
-                            itemId = itemId,
-                            materialItemId = materialItemId,
-                            craftingType = craftingType,
-                            itemFunctionalQuality = itemFunctionalQuality,
-                            itemTemplateId = itemTemplateId,
-                            itemSetId = itemSetId,
-                            itemTraitType = itemTraitType,
-                            itemStyleId = itemStyleId,
-                            encodedAlchemyTraits = encodedAlchemyTraits,
-                            isMasterWrit = true,
-                        }
+                        --Provisioning is special in that in can be done at any crafting station type, so we need to do a slightly different check for it
+                        if craftingType == CRAFTING_TYPE_PROVISIONING then
+                            local craftingStationType = GetRecipeInfoFromItemId(itemId)
+                            shouldShowQuest = (craftingStationType == self.craftingInteractionType)
+                        end
 
-                        --Smithing master writs should only show up at their specific set station
-                        if IsSmithingCraftingType(craftingType) then
-                            if CanSpecificSmithingItemSetPatternBeCraftedHere(itemSetId) then
+                        if shouldShowQuest then
+                            local data = 
+                            {
+                                conditionIndex = conditionIndex,
+                                itemId = itemId,
+                                materialItemId = materialItemId,
+                                craftingType = craftingType,
+                                itemFunctionalQuality = itemFunctionalQuality,
+                                itemTemplateId = itemTemplateId,
+                                itemSetId = itemSetId,
+                                itemTraitType = itemTraitType,
+                                itemStyleId = itemStyleId,
+                                encodedAlchemyTraits = encodedAlchemyTraits,
+                                isMasterWrit = true,
+                            }
+
+                            --Smithing master writs should only show up at their specific set station
+                            if IsSmithingCraftingType(craftingType) then
+                                if CanSpecificSmithingItemSetPatternBeCraftedHere(itemSetId) then
+                                    table.insert(conditionInfo, data)
+                                end
+                            else
                                 table.insert(conditionInfo, data)
                             end
-                        else
-                            table.insert(conditionInfo, data)
                         end
                     end
                 end
-            end
 
-            if #conditionInfo > 0 then
-                questInfo.conditionData = conditionInfo
-                table.insert(self.questMasterList, questInfo)
+                if #conditionInfo > 0 then
+                    questInfo.conditionData = conditionInfo
+                    table.insert(self.questMasterList, questInfo)
+                end
             end
         end
+        self:FireCallbacks("QuestMasterListUpdated", self.questMasterList)
     end
-    self:FireCallbacks("QuestMasterListUpdated", self.questMasterList)
 end
 
 function ZO_CraftAdvisorManager:GetMissingMessage(conditionInfo, currentCount, maxCount)

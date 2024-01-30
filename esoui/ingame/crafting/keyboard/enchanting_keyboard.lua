@@ -48,6 +48,16 @@ function ZO_Enchanting:InitializeEnchantingScenes()
             SCENE_MANAGER:RemoveFragmentGroup(WRIT_ADVISOR_KEYBOARD_FRAGMENT_GROUP)
         end
     end)
+
+    CRAFT_ADVISOR_MANAGER:RegisterCallback("QuestMasterListUpdated", function()
+        if ENCHANTING_SCENE:IsShowing() then
+            if CRAFT_ADVISOR_MANAGER:HasActiveWrits() then
+                SCENE_MANAGER:AddFragmentGroup(WRIT_ADVISOR_KEYBOARD_FRAGMENT_GROUP)
+            else
+                SCENE_MANAGER:RemoveFragmentGroup(WRIT_ADVISOR_KEYBOARD_FRAGMENT_GROUP)
+            end
+        end
+    end)
 end
 
 function ZO_Enchanting:InitializeModes()

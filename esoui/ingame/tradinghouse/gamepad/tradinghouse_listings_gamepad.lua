@@ -272,7 +272,8 @@ function ZO_GamepadTradingHouse_Listings:GetTradingHouseMode()
     return ZO_TRADING_HOUSE_MODE_LISTINGS
 end
 
-function ZO_GamepadTradingHouse_Listings:OnShowing()
+--Wait until the screen is fully shown before updating, since self.control will still be hidden before this
+function ZO_GamepadTradingHouse_Listings:OnShown()
     self:RequestListUpdate()
 end
 

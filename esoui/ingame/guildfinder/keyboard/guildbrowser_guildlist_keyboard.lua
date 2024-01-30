@@ -34,10 +34,13 @@ function ZO_GuildBrowser_GuildList_Keyboard:Initialize(control)
 
     self.activitiesControl = control:GetNamedChild("Activites")
     self.activitiesDropdown = ZO_ComboBox_ObjectFromContainer(self.activitiesControl)
+    self.activitiesDropdown:EnableMultiSelect(SI_GUILD_BROWSER_GUILD_LIST_ACTIVITIES_DROPDOWN_TEXT, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ACTIVITIES))
     self.activitiesDropdown:SetSortsItems(false)
+    self.activitiesDropdown:SetHeight(300)
 
     self.personalitiesControl = control:GetNamedChild("Personalities")
     self.personalitiesDropdown = ZO_ComboBox_ObjectFromContainer(self.personalitiesControl)
+    self.personalitiesDropdown:EnableMultiSelect(SI_GUILD_BROWSER_GUILD_LIST_PERSONALITIES_DROPDOWN_TEXT, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_PERSONALITIES))
     self.personalitiesDropdown:SetSortsItems(false)
 
     self.additionalFiltersButton = control:GetNamedChild("AdditionalFilters")
@@ -70,8 +73,6 @@ function ZO_GuildBrowser_GuildList_Keyboard:BuildActivitiesDropdown()
 
     self.activitiesDropdown:ClearItems()
     self.activitiesDropdown:SetHideDropdownCallback(OnActivitiesDropdownHidden)
-    self.activitiesDropdown:SetNoSelectionText(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ACTIVITIES))
-    self.activitiesDropdown:SetMultiSelectionTextFormatter(SI_GUILD_BROWSER_GUILD_LIST_ACTIVITIES_DROPDOWN_TEXT)
 
     for i = GUILD_ACTIVITY_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_ACTIVITY_ATTRIBUTE_VALUE_ITERATION_END do
         local activityEntry = self.activitiesDropdown:CreateItemEntry(ZO_CachedStrFormat(SI_GUILD_FINDER_ATTRIBUTE_VALUE_FORMATTER, GetString("SI_GUILDACTIVITYATTRIBUTEVALUE", i)))
@@ -88,8 +89,6 @@ function ZO_GuildBrowser_GuildList_Keyboard:BuildPersonalitiesDropdown()
 
     self.personalitiesDropdown:ClearItems()
     self.personalitiesDropdown:SetHideDropdownCallback(OnPersonalitiesDropdownHidden)
-    self.personalitiesDropdown:SetNoSelectionText(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_PERSONALITIES))
-    self.personalitiesDropdown:SetMultiSelectionTextFormatter(SI_GUILD_BROWSER_GUILD_LIST_PERSONALITIES_DROPDOWN_TEXT)
 
     for i = GUILD_PERSONALITY_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_PERSONALITY_ATTRIBUTE_VALUE_ITERATION_END do
         local personalityEntry = self.personalitiesDropdown:CreateItemEntry(ZO_CachedStrFormat(SI_GUILD_FINDER_ATTRIBUTE_VALUE_FORMATTER, GetString("SI_GUILDPERSONALITYATTRIBUTEVALUE", i)))
@@ -457,11 +456,8 @@ do
     end
 end
 
-local function SetupLanguageFiltersComboBox(comboBox, iterBegin, iterEnd, extraValues, stringBase, defaultText, multiSelectText)
+local function SetupLanguageFiltersComboBox(comboBox, iterBegin, iterEnd, extraValues, stringBase)
     comboBox:ClearItems()
-
-    comboBox:SetNoSelectionText(defaultText)
-    comboBox:SetMultiSelectionTextFormatter(multiSelectText)
 
     local function AddEntry(value)
         local entry = comboBox:CreateItemEntry(ZO_CachedStrFormat(SI_GUILD_FINDER_ATTRIBUTE_VALUE_FORMATTER, GetString(stringBase, value)))
@@ -483,9 +479,6 @@ end
 
 local function SetupSizeFilterComboBox(comboBox)
     comboBox:ClearItems()
-
-    comboBox:SetNoSelectionText(GetString(SI_GUILD_BROWSER_GUILD_LIST_FILTERS_DEFAULT_SIZE))
-    comboBox:SetMultiSelectionTextFormatter(SI_GUILD_BROWSER_GUILD_LIST_SIZE_DROPDOWN_TEXT)
 
     for i = GUILD_SIZE_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_SIZE_ATTRIBUTE_VALUE_ITERATION_END do
         local min, max = GetGuildSizeAttributeRangeValues(i)
@@ -581,11 +574,13 @@ function ZO_GuildFinderAdditionalFiltersDialog_OnInitialized(self)
     end
 
     self.languagesComboBox = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("LanguageSelector"))
+    self.languagesComboBox:EnableMultiSelect(SI_GUILD_BROWSER_GUILD_LIST_LANGUAGES_DROPDOWN_TEXT, GetString(SI_GUILD_BROWSER_GUILD_LIST_FILTERS_DEFAULT_LANGUAGE))
     self.languagesComboBox:SetSortsItems(false)
     self.languagesComboBox:SetHideDropdownCallback(OnComboboxSelectionChanged)
-    SetupLanguageFiltersComboBox(self.languagesComboBox, GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_END, { GUILD_LANGUAGE_ATTRIBUTE_VALUE_OTHER }, "SI_GUILDLANGUAGEATTRIBUTEVALUE", GetString(SI_GUILD_BROWSER_GUILD_LIST_FILTERS_DEFAULT_LANGUAGE), SI_GUILD_BROWSER_GUILD_LIST_LANGUAGES_DROPDOWN_TEXT)
+    SetupLanguageFiltersComboBox(self.languagesComboBox, GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_END, { GUILD_LANGUAGE_ATTRIBUTE_VALUE_OTHER }, "SI_GUILDLANGUAGEATTRIBUTEVALUE")
 
     self.sizeComboBox = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SizeSelector"))
+    self.sizeComboBox:EnableMultiSelect(SI_GUILD_BROWSER_GUILD_LIST_SIZE_DROPDOWN_TEXT, GetString(SI_GUILD_BROWSER_GUILD_LIST_FILTERS_DEFAULT_SIZE))
     self.sizeComboBox:SetSortsItems(false)
     self.sizeComboBox:SetHideDropdownCallback(OnComboboxSelectionChanged)
     SetupSizeFilterComboBox(self.sizeComboBox)

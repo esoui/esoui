@@ -317,6 +317,8 @@ function ZO_GamepadCollectionsBook:OnHiding()
 
     CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogShowing", self.OnGamepadDialogShowing)
     CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogHidden", self.OnGamepadDialogHidden)
+
+    self.shouldFrameRight = nil
 end
 
 function ZO_GamepadCollectionsBook:OnHide()
@@ -570,7 +572,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     elseif remainingMs > 0 then
                         return false, GetString(SI_COLLECTIONS_COOLDOWN_ERROR)
                     elseif collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
-                        local blockReason = GetCollectibleBlockReason(collectibleData:GetId())
+                        local blockReason = GetCollectibleBlockReason(collectibleData:GetId(), GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                         return false, zo_strformat(GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", blockReason))
                     else
                         return true
@@ -671,6 +673,40 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 return false
             end,
         },
+        -- Preview
+        {
+            name = GetString(SI_COLLECTIBLE_ACTION_PREVIEW),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            callback = function()
+                local collectibleData = self:GetCurrentTargetData()
+                ITEM_PREVIEW_GAMEPAD:PreviewCollectible(collectibleData:GetId())
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.collectionKeybindStripDescriptor)
+            end,
+            visible = function()
+                local collectibleData = self:GetCurrentTargetData()
+                if collectibleData and collectibleData:IsInstanceOf(ZO_CollectibleData) then
+                    -- TODO: Temporarily disable mementos until time can be scheduled to audit mementos that don't preview correctly
+                    if collectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
+                        return false
+                    end
+                    local collectibleId = collectibleData:GetId()
+                    return CanCollectibleBePreviewed(collectibleId) and not ITEM_PREVIEW_GAMEPAD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId)
+                end
+                return false
+            end,
+        },
+        -- End Preview
+        {
+            name = GetString(SI_COLLECTIBLE_ACTION_END_PREVIEW),
+            keybind = "UI_SHORTCUT_LEFT_STICK",
+            callback = function()
+                ITEM_PREVIEW_GAMEPAD:EndCurrentPreview()
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.collectionKeybindStripDescriptor)
+            end,
+            visible = function()
+                return IsCurrentlyPreviewing()
+            end,
+        },
         --Subscribe
         {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
@@ -700,6 +736,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
         else
             self:ShowList(self.subcategoryList)
         end
+        ITEM_PREVIEW_GAMEPAD:EndCurrentPreview()
     end
     ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.collectionKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnCollectionListBack )
     
@@ -1414,16 +1451,29 @@ function ZO_GamepadCollectionsBook:RefreshRandomMountTooltip(collectibleData)
     GAMEPAD_TOOLTIPS:LayoutImitationCollectibleFromData(GAMEPAD_LEFT_TOOLTIP, collectibleData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
 end
 
-
 function ZO_GamepadCollectionsBook:UpdateGridPanelVisibility(categoryData)
+    local shouldFrameRight = false
     if categoryData and categoryData:IsOutfitStylesCategory() and categoryData:GetNumCollectibles() > 0 then
         self:RefreshGridListPanel(categoryData)
 
         SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         SCENE_MANAGER:AddFragment(GAMEPAD_COLLECTIONS_BOOK_GRID_LIST_PANEL_FRAGMENT)
+
+        shouldFrameRight = true
     else
         SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_GRID_LIST_PANEL_FRAGMENT)
+    end
+
+    if shouldFrameRight ~= self.shouldFrameRight then
+        self.shouldFrameRight = shouldFrameRight
+        if shouldFrameRight then
+            SCENE_MANAGER:RemoveFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_OPTIONS)
+            SCENE_MANAGER:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_RIGHT_FURTHER_AWAY)
+        else
+            SCENE_MANAGER:RemoveFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_RIGHT_FURTHER_AWAY)
+            SCENE_MANAGER:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_OPTIONS)
+        end
     end
 end
 

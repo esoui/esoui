@@ -252,7 +252,6 @@
                 <Texture name="$(parent)AssignmentIcon" layer="OVERLAY" hidden="true"/>
                 <Texture name="$(parent)ElectionIcon" layer="OVERLAY" hidden="true">
                     <Dimensions x="32" y="32" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="5" />
                 </Texture>
             </Controls>
         </Control>
@@ -399,7 +398,7 @@
                 <Label name="$(parent)Status" inherits="ZO_UnitFrameBarText_Gamepad_Template" />
                 <Texture name="$(parent)ElectionIcon">
                     <Dimensions x="32" y="32" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" />
+                    <Anchor point="RIGHT" offsetX="-2" />
                 </Texture>
             </Controls>
         </Control>

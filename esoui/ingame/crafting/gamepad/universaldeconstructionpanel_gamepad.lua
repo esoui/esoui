@@ -230,7 +230,7 @@ end
 function ZO_UniversalDeconstructionPanel_Gamepad:SetFilterType(filterType, filterData)
     local visible = not self.control:IsHidden()
     if visible then
-        GAMEPAD_TOOLTIPS:Clear(GAMEPAD_LEFT_TOOLTIP)
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     end
 
     self.currentFilterData = filterData

@@ -31,6 +31,10 @@ function ZO_PagedListFooter:SetHidden(hidden)
     self.control:SetHidden(hidden)
 end
 
+function ZO_PagedListFooter:IsHidden()
+    return self.control:IsHidden()
+end
+
 function ZO_PagedListSetupFooter(footerControl)
     return ZO_PagedListFooter:New(footerControl)
 end
@@ -78,11 +82,11 @@ function ZO_PagedList:Initialize(control, movementController)
     self.focus = ZO_GamepadFocus:New(self.listControl, movementController)
     
     self.selectionChangedCallback = nil
-    local selectionChangeCallback = function(control)
+    local selectionChangeCallback = function(entryControl)
         if self.selectionChangedCallback then
             local data = nil
-            if control then
-                data = control.data.data
+            if entryControl then
+                data = entryControl.data.data
             end
             self.selectionChangedCallback(data)
         end
@@ -98,7 +102,7 @@ function ZO_PagedList:Initialize(control, movementController)
     self.rememberSpot = false
 
     local headerContainer = control:GetNamedChild("Headers")
-    if(headerContainer) then
+    if headerContainer then
         local showArrows = true
         self.sortHeaderGroup = ZO_SortHeaderGroup:New(headerContainer, showArrows)
         self.sortHeaderGroup:SetColors(ZO_SELECTED_TEXT, ZO_NORMAL_TEXT, ZO_SELECTED_TEXT, ZO_DISABLED_TEXT)
@@ -107,8 +111,9 @@ function ZO_PagedList:Initialize(control, movementController)
     end
 
     local footerControl = control:GetNamedChild("Footer")
-    if(footerControl) then
-        self.footer = {
+    if footerControl then
+        self.footer = 
+        {
             control = footerControl,
             previousButton = footerControl:GetNamedChild("PreviousButton"),
             nextButton = footerControl:GetNamedChild("NextButton"),
@@ -117,12 +122,12 @@ function ZO_PagedList:Initialize(control, movementController)
     end
 
 
-    self.onEnterRow = function(control, data)
-        self:OnEnterRow(control, data.data)   
+    self.onEnterRow = function(rowControl, data)
+        self:OnEnterRow(rowControl, data.data)   
     end
 
-    self.onLeaveRow = function(control, data)
-        self:OnLeaveRow(control, data.data)   
+    self.onLeaveRow = function(rowControl, data)
+        self:OnLeaveRow(rowControl, data.data)   
     end
 
     self.onPlaySoundFunction = ZO_PagedListPlaySound
@@ -238,7 +243,6 @@ function ZO_PagedList:RefreshVisible()
         return 
     end
     local lastIndex = (page.startIndex + page.count - 1)
-    local previousControl
     for i = page.startIndex, lastIndex do
         local data = self.dataList[i]
         local control = data.control
@@ -258,7 +262,8 @@ end
 
 function ZO_PagedList:AddDataTemplate(templateName, height, setupCallback, controlPoolPrefix)
     if not self.dataTypes[templateName] then
-        local dataTypeInfo = {
+        local dataTypeInfo =
+        {
             pool = ZO_ControlPool:New(templateName, self.listControl, controlPoolPrefix or templateName),
             height = height,
             setupCallback = setupCallback
@@ -356,12 +361,12 @@ function ZO_PagedList:BuildPages()
     local currPageHeight = 0
     local currPageNum = 1
 
-    local pageWidth, pageHeight = self.listControl:GetDimensions()
+    local _, pageHeight = self.listControl:GetDimensions()
     
 
     self.pages[currPageNum] = {startIndex = 1, count = 0}
 
-    for i,data in ipairs(self.dataList) do
+    for i, data in ipairs(self.dataList) do
         local templateName = data.templateName
 
         local height = self.dataTypes[templateName].height
@@ -375,7 +380,7 @@ function ZO_PagedList:BuildPages()
         self.pages[currPageNum].count = self.pages[currPageNum].count + 1
     end
 
-    if(self.emptyRow) then
+    if self.emptyRow then
         self.emptyRow:SetHidden(#self.dataList > 0)
     end
 
@@ -402,13 +407,13 @@ function ZO_PagedList:BuildPage(pageNum)
     local lastIndex = (page.startIndex + page.count - 1)
     local previousControl
     for i = page.startIndex, lastIndex do
-        
         local data = self.dataList[i]
         local control = self:AcquireControl(i, previousControl)
         data.control = control
         local selected = self:IsSelected(data.data)
         self.dataTypes[control.templateName].setupCallback(control, data.data, selected)
-        local entry = {
+        local entry =
+        {
             control = control,
             highlight = control:GetNamedChild("Highlight"),
             data = data,
@@ -419,9 +424,9 @@ function ZO_PagedList:BuildPage(pageNum)
 
         previousControl = control
 
-        if(self.alternateRowBackgrounds) then
-            local rowBackground = GetControl(control, "BG")
-            if(rowBackground) then
+        if self.alternateRowBackgrounds then
+            local rowBackground = control:GetNamedChild("BG")
+            if rowBackground then
                 local hidden = (i % 2) == 0
                 rowBackground:SetHidden(hidden)
             end
@@ -462,11 +467,13 @@ function ZO_PagedList:SetEmptyText(emptyText, template)
     if not self.emptyRow then
         self.emptyRow = CreateControlFromVirtual("$(parent)EmptyRow", self.focus.control, template)
     end
-    GetControl(self.emptyRow, "Message"):SetText(emptyText)
+    self.emptyRow:GetNamedChild("Message"):SetText(emptyText)
 end
 
 function ZO_PagedList:RefreshFooter()
-    if not self.footer then return end
+    if not self.footer then 
+        return
+    end
 
     local enablePrevious = self.currPageNum > 1
     self.footer.previousButton:SetEnabled(enablePrevious)

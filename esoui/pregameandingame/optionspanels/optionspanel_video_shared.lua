@@ -69,11 +69,34 @@ function ZO_OptionsPanel_Video_SetCustomScale(self, formattedValueString)
     ApplySettings()
 end
 
-function ZO_OptionsPanel_Video_CustomScale_RefreshEnabled(control)
-    if ZO_GameMenu_PreGame or GetSetting(SETTING_TYPE_UI, UI_SETTING_USE_CUSTOM_SCALE) == "0" then
+function ZO_OptionsPanel_Video_UseCustomScale_RefreshEnabled(control)
+    if GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE) then
         ZO_Options_SetOptionInactive(control)
+        ZO_Options_SetWarningText(control, SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING)
+        ZO_Options_SetWarningTexture(control, ACCESSIBILITY_MODE_ICON_PATH)
+    elseif ZO_GameMenu_PreGame or tonumber(GetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE)) == INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD then
+        ZO_Options_SetOptionInactive(control)
+        ZO_Options_HideAssociatedWarning(control)
     else
         ZO_Options_SetOptionActive(control)
+        ZO_Options_HideAssociatedWarning(control)
+    end
+end
+
+function ZO_OptionsPanel_Video_CustomScale_RefreshEnabled(control)
+    if GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE) then
+        ZO_Options_SetOptionInactive(control)
+        ZO_Options_SetWarningText(control, SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING)
+        ZO_Options_SetWarningTexture(control, ACCESSIBILITY_MODE_ICON_PATH)
+    elseif ZO_GameMenu_PreGame
+        or GetSetting(SETTING_TYPE_UI, UI_SETTING_USE_CUSTOM_SCALE) == "0"
+        or tonumber(GetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE)) == INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD then
+        
+        ZO_Options_SetOptionInactive(control)
+        ZO_Options_HideAssociatedWarning(control)
+    else
+        ZO_Options_SetOptionActive(control)
+        ZO_Options_HideAssociatedWarning(control)
     end
 end
 
@@ -746,6 +769,14 @@ local ZO_OptionsPanel_Video_ControlData =
                 [true] = "UseCustomScaleToggled",
                 [false] = "UseCustomScaleToggled",
             },
+            eventCallbacks =
+            {
+                ["OnAccessibilityModeEnabled"] = ZO_OptionsPanel_Video_UseCustomScale_RefreshEnabled,
+                ["OnAccessibilityModeDisabled"] = ZO_OptionsPanel_Video_UseCustomScale_RefreshEnabled,
+                ["OnInputPreferredModeKeyboard"] = ZO_OptionsPanel_Video_UseCustomScale_RefreshEnabled,
+                ["OnInputPreferredModeGamepad"] = ZO_OptionsPanel_Video_UseCustomScale_RefreshEnabled,
+                ["OnInputPreferredModeAutomatic"] = ZO_OptionsPanel_Video_UseCustomScale_RefreshEnabled,
+            }
         },
         --Options_Video_CustomScale
         [UI_SETTING_CUSTOM_SCALE] =
@@ -764,6 +795,11 @@ local ZO_OptionsPanel_Video_ControlData =
             eventCallbacks =
             {
                 ["UseCustomScaleToggled"] = ZO_OptionsPanel_Video_CustomScale_RefreshEnabled,
+                ["OnAccessibilityModeEnabled"] = ZO_OptionsPanel_Video_CustomScale_RefreshEnabled,
+                ["OnAccessibilityModeDisabled"] = ZO_OptionsPanel_Video_CustomScale_RefreshEnabled,
+                ["OnInputPreferredModeKeyboard"] = ZO_OptionsPanel_Video_CustomScale_RefreshEnabled,
+                ["OnInputPreferredModeGamepad"] = ZO_OptionsPanel_Video_CustomScale_RefreshEnabled,
+                ["OnInputPreferredModeAutomatic"] = ZO_OptionsPanel_Video_CustomScale_RefreshEnabled,
             }
         },
         [UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE] =
@@ -773,7 +809,7 @@ local ZO_OptionsPanel_Video_ControlData =
             settingId = UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE,
             panel = SETTING_PANEL_VIDEO,
             text = SI_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE,
-            tooltipText = SI_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP,
+            tooltipText = SI_GAMEPAD_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP,
             exists = ZO_IsIngameUI,
         },
         [UI_SETTING_GAMEPAD_CUSTOM_SCALE] =
@@ -783,7 +819,7 @@ local ZO_OptionsPanel_Video_ControlData =
             settingId = UI_SETTING_GAMEPAD_CUSTOM_SCALE,
             panel = SETTING_PANEL_VIDEO,
             text = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE,
-            tooltipText = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP,
+            tooltipText = SI_GAMEPAD_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP,
             exists = ZO_IsIngameUI,
             valueFormat = "%.6f",
             minValue = GAMEPAD_CUSTOM_UI_SCALE_LOWER_BOUND,

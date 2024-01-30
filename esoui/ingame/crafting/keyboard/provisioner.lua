@@ -116,6 +116,16 @@ function ZO_Provisioner:Initialize(control)
         end
     end)
 
+    CRAFT_ADVISOR_MANAGER:RegisterCallback("QuestMasterListUpdated", function()
+        if PROVISIONER_SCENE:IsShowing() then
+            if CRAFT_ADVISOR_MANAGER:HasActiveWrits() then
+                SCENE_MANAGER:AddFragmentGroup(WRIT_ADVISOR_KEYBOARD_FRAGMENT_GROUP)
+            else
+                SCENE_MANAGER:RemoveFragmentGroup(WRIT_ADVISOR_KEYBOARD_FRAGMENT_GROUP)
+            end
+        end
+    end)
+
     self.skillInfoHeader = self.control:GetNamedChild("SkillInfo")
     ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.skillInfoHeader, CRAFTING_TYPE_PROVISIONING)
 end

@@ -220,12 +220,12 @@
 
                 <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
                     <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="70" offsetY="26" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="65" offsetY="26" />
                 </Button>
 
                 <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
-                    <Dimensions x="250" />
-                    <Anchor point="LEFT" offsetX="100" />
+                    <Dimensions x="245" />
+                    <Anchor point="LEFT" offsetX="105" />
                 </Label>
 
                 <Texture name="$(parent)StatusTexture" hidden="true">
