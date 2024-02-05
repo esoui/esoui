@@ -244,6 +244,8 @@ SafeAddString(SI_APPLYOUTFITCHANGESRESULT2, "Vous ne pouvez pas effectuer de ret
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT3, "Vous ne pouvez pas vous permettre d'appliquer ces changements.", 2)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT4, "Vous ne pouvez pas appliquer un objet de collection verrouillé à une tenue.", 0)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT5, "Vous ne pouvez pas appliquer un objet de collection temporairement désactivé à une tenue.", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT6, "Vous ne pouvez pas appliquer un objet de collection bloqué pour ce personnage, à une tenue.", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT7, "Vous ne pouvez pas appliquer un objet de collection inutilisable par les compagnons à leurs tenues.", 0)
 SafeAddString(SI_APPROVEDURLTYPE0, "http://www.elderscrollsonline.com", 0)
 SafeAddString(SI_APPROVEDURLTYPE1, "https://account.elderscrollsonline.com", 0)
 SafeAddString(SI_APPROVEDURLTYPE2, "https://account.elderscrollsonline.com/store?utm_source=ESO%20in-game%20Crown%20Store&utm_campaign=Buy%20Crowns&utm_content=In-Game%20Buy%20Crowns", 1)

@@ -5232,7 +5232,7 @@ SafeAddString(SI_TRIBUTEMATCHEVENT54, "Algo ha salido mal. No has podido rendirt
 SafeAddString(SI_TRIBUTEMATCHEVENT55, "El jugador objetivo ha dejado de responder y se ha rendido involuntariamente.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT56, "En preparación para invitar al objetivo a una partida de Historias de homenaje.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT57, "El objetivo se está preparando para participar en una partida de Historias de homenaje.", 0)
-SafeAddString(SI_TRIBUTEMATCHEVENT58, "No se ha podido iniciar la partida de Historias de homenaje. Espera un momento y vuelve a intentarlo.", 0)
+SafeAddString(SI_TRIBUTEMATCHEVENT58, "No se ha podido iniciar la partida de Historias de homenaje. Espera un momento e inténtalo otra vez.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT59, "No has desbloqueado Historias de homenaje.", 1)
 SafeAddString(SI_TRIBUTEMATCHEVENT6, "No puedes invitar a Historias de homenaje a otro jugador mientras respondes el desafío de <<1>>.", 0)
 SafeAddString(SI_TRIBUTEMATCHEVENT60, "|cffffff<<X:1>>|r no ha desbloqueado Historias de homenaje.", 1)

@@ -244,6 +244,8 @@ SafeAddString(SI_APPLYOUTFITCHANGESRESULT2, "Ihr könnt Eure Montur derzeit nich
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT3, "Ihr könnt Euch diese Änderungen nicht leisten.", 2)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT4, "Gesperrte Sammlungsstücke können nicht auf Monturen angewendet werden.", 0)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT5, "Ihr könnt ein derzeit nicht verfügbares Sammlungsstück nicht auf eine Montur anwenden.", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT6, "Ihr könnt ein Sammlungsstück, welches für diesen Charakter nicht zur Verfügung steht, nicht zu einer Montur hinzufügen.", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT7, "Ihr könnt ein Sammlungsstück, welches nicht für Gefährten zur Verfügung steht, nicht zu einer Montur für Gefährten hinzufügen.", 0)
 SafeAddString(SI_APPROVEDURLTYPE0, "http://www.elderscrollsonline.com/de", 0)
 SafeAddString(SI_APPROVEDURLTYPE1, "https://account.elderscrollsonline.com", 0)
 SafeAddString(SI_APPROVEDURLTYPE2, "https://account.elderscrollsonline.com/store?utm_source=ESO%20in-game%20Crown%20Store&utm_campaign=Buy%20Crowns&utm_content=In-Game%20Buy%20Crowns", 1)

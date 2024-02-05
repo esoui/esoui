@@ -12,7 +12,7 @@
             <Controls>
                 <Texture name="$(parent)Icon" override="true">
                     <Controls>
-                        <Label name="$(parent)Count" override="true" font="ZoFontGamepad36ThickOutline" />
+                        <Label name="$(parent)Count" override="true" font="ZoFontGamepad36ThickOutlineLatin" />
                     </Controls>
                 </Texture>
 

@@ -463,6 +463,8 @@ SafeAddString(SI_APPLYOUTFITCHANGESRESULT2, "You can't alter outfits right now."
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT3, "You can't afford to apply these changes.", 2)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT4, "You can't apply a locked collectible to an outfit.", 0)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT5, "You can't apply a temporarily disabled collectible to an outfit.", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT6, "You cannot apply a collectible blocked for this character to an outfit.", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT7, "You cannot apply a collectible unusable by companions to a companion's outfit.", 0)
 SafeAddString(SI_APPROVEDURLTYPE0, "http://www.elderscrollsonline.com", 0)
 SafeAddString(SI_APPROVEDURLTYPE1, "https://account.elderscrollsonline.com", 0)
 SafeAddString(SI_APPROVEDURLTYPE2, "https://account.elderscrollsonline.com/store?utm_source=ESO%20in-game%20Crown%20Store&utm_campaign=Buy%20Crowns&utm_content=In-Game%20Buy%20Crowns", 1)

@@ -40,6 +40,7 @@ function ZO_CollectibleTile_Keyboard:StartPreview(collectibleId)
         end
         ITEM_PREVIEW_KEYBOARD:PreviewCollectible(collectibleId)
         if self:IsMousedOver() then
+            WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
             self:UpdateKeybinds()
         end
     end
@@ -243,7 +244,7 @@ function ZO_CollectibleTile_Keyboard:AddMenuOptions()
     end
 
     -- Preview
-    if self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
+    if IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
         AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_PREVIEW), function() self:StartPreview(collectibleId) end)
     end
 
@@ -498,7 +499,7 @@ end
 function ZO_CollectibleTile_Keyboard:OnMouseEnter()
     ZO_ContextualActionsTile_Keyboard.OnMouseEnter(self)
 
-    if self:CanPreview() then
+    if IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, self.collectibleData:GetId()) then
         WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
     end
 end
@@ -513,6 +514,11 @@ function ZO_CollectibleTile_Keyboard:OnMouseUp(button, upInside)
     if upInside then
         if button == MOUSE_BUTTON_INDEX_RIGHT then
             self:ShowMenu()
+        elseif button == MOUSE_BUTTON_INDEX_LEFT then
+            local collectibleId = self.collectibleData:GetId()
+            if IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
+                self:StartPreview(collectibleId)
+            end
         end
     end
 end

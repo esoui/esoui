@@ -27,6 +27,10 @@
     <BackupFont originalFont="$(GAMEPAD_MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug"/>
     <BackupFont originalFont="$(GAMEPAD_MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
 
+    <!-- Split out from GAMEPAD_MEDIUM_FONT so we don't have to generate outlines for large CJK fonts. 
+    This currently saves about 100 MB of memory, but is only useful as long as we only use outlines with latin characters (usually numbers). -->
+    <String name="GAMEPAD_MEDIUM_FONT_LATIN" value="EsoUI/Common/Fonts/FTN57.slug" />
+
     <String name="GAMEPAD_BOLD_FONT" value="EsoUI/Common/Fonts/FTN87.slug" />
     <BackupFont originalFont="$(GAMEPAD_BOLD_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug"/>
     <BackupFont originalFont="$(GAMEPAD_BOLD_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>

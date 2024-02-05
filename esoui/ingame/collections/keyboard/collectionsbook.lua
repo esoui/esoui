@@ -427,7 +427,6 @@ function ZO_CollectionsBook:UpdateUtilityWheel(categoryData)
             local hotbarCategories = {hotbarCategory, HOTBAR_CATEGORY_QUICKSLOT_WHEEL}
             if hotbarCategory ~= self.hotbarCategory then
                 self.wheel:SetHotbarCategories(hotbarCategories)
-                self.hotbarCategory = hotbarCategory
             end
             --If the wheel is currently not showing, we need to show and activate it
             if IsCurrentlyPreviewing() then
@@ -441,6 +440,8 @@ function ZO_CollectionsBook:UpdateUtilityWheel(categoryData)
             self.wheelContainer:SetHidden(true)
             self.wheel:Deactivate()
         end
+
+        self.hotbarCategory = hotbarCategory
     end
 end
 

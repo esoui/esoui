@@ -664,15 +664,14 @@ function ZO_HousingFurnitureList_Gamepad:OnHiding()
 end
 
 function ZO_HousingFurnitureList_Gamepad:UpdateLists()
+    self:BuildCategoryList()
+
     if self.currentList then
         local success = self.currentList.buildListFunction()
         --if the list was empty with the new data then switch back to the top level category list
         if not success then
-            self:BuildCategoryList()
             self:SwitchActiveList(self.categoryList)
         end
-    else
-        self:BuildCategoryList()
     end
 
     self:UpdateCurrentKeybinds()
@@ -686,8 +685,12 @@ end
 
 function ZO_HousingFurnitureList_Gamepad:RefreshCurrentCategoryData()
     local entryData = self.categoryList.list:GetTargetData()
-    local categoryTreeData = self:GetCategoryTreeDataRoot()
-    self.currentCategoryData = categoryTreeData:GetSubcategory(entryData.categoryId)
+    if entryData ~= nil then
+        local categoryTreeData = self:GetCategoryTreeDataRoot()
+        self.currentCategoryData = categoryTreeData:GetSubcategory(entryData.categoryId)
+    else
+        self.currentCategoryData = nil
+    end
 end
 
 function ZO_HousingFurnitureList_Gamepad:UpdateFurnitureListSavedPosition()
@@ -698,6 +701,13 @@ function ZO_HousingFurnitureList_Gamepad:UpdateFurnitureListSavedPosition()
     local currentCategoryId = self.currentCategoryData:GetCategoryId()
     local currentSelectedIndex = self.furnitureList.list:GetSelectedIndex()
     local currentSelectedData = self.furnitureList.list:GetSelectedData()
+    if not currentSelectedData then
+        if currentCategoryId ~= nil then
+            self.savedCategoryListPositions[currentCategoryId] = nil
+        end
+        return
+    end
+
     local categoryId, subcategoryId = currentSelectedData.furnitureObject:GetCategoryInfo()
 
     local savedListPositionData = self.savedCategoryListPositions[currentCategoryId]
@@ -954,6 +964,10 @@ function ZO_HousingFurnitureList_Gamepad:BuildFurnitureList()
 
     local currentSelectedIndex = self.furnitureList.list:GetSelectedIndex()
     local currentSelectedData = self.furnitureList.list:GetSelectedData()
+    if not currentSelectedData then
+        return true
+    end
+
     local currentSelectedCategoryId, currentSelectedSubcategoryId = currentSelectedData.furnitureObject:GetCategoryInfo()
     -- check to see if we are no longer in the same category as we were before
     if savedListPositionData and (savedListPositionData.categoryId ~= currentSelectedCategoryId or savedListPositionData.subcategoryId ~= currentSelectedSubcategoryId) then
