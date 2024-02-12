@@ -435,8 +435,16 @@ function ZO_CampaignBrowser_Gamepad:RefreshContentHeader()
             headerData.data1Text = function(control)
                 if DoesCampaignHaveEmperor(targetData.id) then
                     local alliance, characterName, displayName = GetCampaignEmperorInfo(targetData.id)
-                    local userFacingName = ZO_GetPlatformUserFacingName(characterName, displayName)
-                    return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_EMPEROR_HEADER_NAME), ZO_GetLargeAllianceSymbolIcon(alliance), userFacingName)
+                    if alliance ~= nil and characterName ~= nil and displayName ~= nil then
+                        local userFacingName = ZO_GetPlatformUserFacingName(characterName, displayName)
+                        if userFacingName ~= nil and userFacingName ~= "" then
+                            return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_EMPEROR_HEADER_NAME), ZO_GetLargeAllianceSymbolIcon(alliance), userFacingName)
+                        else
+                            return GetString(SI_CAMPAIGN_UNKNOWN_EMPEROR)
+                        end
+                    else
+                        return GetString(SI_CAMPAIGN_UNKNOWN_EMPEROR)
+                    end
                 else
                     return GetString(SI_CAMPAIGN_NO_EMPEROR)
                 end

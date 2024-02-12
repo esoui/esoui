@@ -1138,6 +1138,7 @@ SafeAddString(SI_CAMPAIGN_SCORING_UNDERDOG_TOOLTIP, "This bonus applies to an al
 SafeAddString(SI_CAMPAIGN_SCORING_UNDERDOG_TOOLTIP_TITLE, "Low Score Bonus", 0)
 SafeAddString(SI_CAMPAIGN_SCORING_UNDERPOP_TOOLTIP, "This bonus is applied when an alliance continually has significantly fewer participants than competing Alliances.", 0)
 SafeAddString(SI_CAMPAIGN_SCORING_UNDERPOP_TOOLTIP_TITLE, "Low Population Bonus", 0)
+SafeAddString(SI_CAMPAIGN_UNKNOWN_EMPEROR, "Unknown Emperor", 0)
 SafeAddString(SI_CANCEL, "Cancel", 0)
 SafeAddString(SI_CANNOT_CRAFT_WHILE_WEREWOLF, "Your paws are too clumsy.", 0)
 SafeAddString(SI_CANNOT_CROUCH_WHILE_CARRYING_ARTIFACT, "<<1>> prevents you from sneaking.", 0)

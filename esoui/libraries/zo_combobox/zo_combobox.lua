@@ -71,6 +71,11 @@ function ZO_ComboBox:SetDropdownObject(dropdownObject)
             self.m_dropdownObject:AddCustomEntryTemplate(entryInfo.entryTemplate, entryInfo.entryHeight, entryInfo.setupFunction)
         end
     end
+
+    -- Adding these members for backwards compatibility, since a lot of old addons referenced them directly, 
+    -- though we don't need them anymore
+    self.m_dropdown = dropdownObject.control
+    self.m_scroll = dropdownObject.scrollControl
 end
 
 function ZO_ComboBox:OnGlobalMouseUp(eventCode, button)
@@ -466,7 +471,7 @@ function ZO_ComboBoxDropdown_Keyboard:Refresh(item)
     ZO_ScrollList_RefreshVisible(self.scrollControl, entryData)
 end
 
-local function CreateScrollableComboBoxEntry(self, item, index, entryType)
+function ZO_ComboBoxDropdown_Keyboard:CreateScrollableEntry(item, index, entryType)
     local entryData = ZO_EntryData:New(item)
     entryData.m_index = index
     entryData.m_owner = self.owner
@@ -514,7 +519,7 @@ function ZO_ComboBoxDropdown_Keyboard:Show(comboBox, itemTable, minWidth, maxHei
 
         allItemsHeight = allItemsHeight + entryHeight
 
-        local entry = CreateScrollableComboBoxEntry(self, item, i, entryType)
+        local entry = self:CreateScrollableEntry(item, i, entryType)
         table.insert(dataList, entry)
 
         local fontObject = self.owner:GetDropdownFontObject()

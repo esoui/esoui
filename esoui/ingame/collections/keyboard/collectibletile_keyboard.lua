@@ -35,9 +35,6 @@ end
 
 function ZO_CollectibleTile_Keyboard:StartPreview(collectibleId)
     if self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
-        if not ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() then
-            ITEM_PREVIEW_KEYBOARD:ToggleInteractionCameraPreview(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, RIGHT_BG_EMPTY_WORLD_ITEM_PREVIEW_OPTIONS_FRAGMENT)
-        end
         ITEM_PREVIEW_KEYBOARD:PreviewCollectible(collectibleId)
         if self:IsMousedOver() then
             WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
@@ -515,9 +512,11 @@ function ZO_CollectibleTile_Keyboard:OnMouseUp(button, upInside)
         if button == MOUSE_BUTTON_INDEX_RIGHT then
             self:ShowMenu()
         elseif button == MOUSE_BUTTON_INDEX_LEFT then
-            local collectibleId = self.collectibleData:GetId()
-            if IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
-                self:StartPreview(collectibleId)
+            if self.collectibleData ~= nil then
+                local collectibleId = self.collectibleData:GetId()
+                if IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
+                    self:StartPreview(collectibleId)
+                end
             end
         end
     end

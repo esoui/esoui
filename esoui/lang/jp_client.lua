@@ -463,6 +463,8 @@ SafeAddString(SI_APPLYOUTFITCHANGESRESULT2, "現在、スタイルの変更は�
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT3, "不足していて変更できません。", 2)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT4, "ロックされたコレクションのスタイルは使用できません。", 0)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT5, "一時的に無効としたコレクションをスタイルに使うことはできません。", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT6, "このキャラクターにブロックされたコレクションのスタイルは使用できません", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT7, "コンパニオンが使用できないコレクションはコンパニオンのスタイルに使用できません。", 0)
 SafeAddString(SI_APPROVEDURLTYPE0, "http://eso.dmm.com", 0)
 SafeAddString(SI_APPROVEDURLTYPE1, "http://eso.dmm.com/store", 0)
 SafeAddString(SI_APPROVEDURLTYPE2, "http://eso.dmm.com/store", 1)
