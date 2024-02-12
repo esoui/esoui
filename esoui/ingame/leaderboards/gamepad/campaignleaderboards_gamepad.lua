@@ -86,7 +86,6 @@ function ZO_CampaignLeaderboardsManager_Gamepad:Initialize(control)
         if newState == SCENE_FRAGMENT_SHOWING then
             self.selector.dataRegistration:Refresh()
             self:SetActiveCampaign()
-            self:SendLeaderboardQuery()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             self.selector.dataRegistration:Refresh()
         end

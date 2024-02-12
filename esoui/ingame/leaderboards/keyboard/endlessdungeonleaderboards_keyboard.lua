@@ -19,7 +19,6 @@ function ZO_EndlessDungeonLeaderboardsManager_Keyboard:Initialize(control)
     ENDLESS_DUNGEON_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:UpdateAllInfo()
-            self:SendLeaderboardQuery()
         end
     end)
 
