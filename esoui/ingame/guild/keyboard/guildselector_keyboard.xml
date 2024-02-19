@@ -25,10 +25,7 @@
                             <Anchor point="TOPLEFT"/>
 
                             <OnMouseUp>
-                                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
-                                    ZO_ComboBox_DropdownClicked(self:GetParent())
-                                    PlaySound(SOUNDS.COMBO_CLICK)
-                                end
+                                ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, upInside)
                             </OnMouseUp>
                         </Label>
 

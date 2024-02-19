@@ -373,7 +373,8 @@ function ZO_CreateAccount_Gamepad:GetEnteredEmail()
 end
 
 function ZO_CreateAccount_Gamepad:ShouldReceiveNewsEmail()
-    return self.emailSignup
+    -- Auto subscribe never sees an option
+    return self.autoEmailSubscribe or self.emailSignup
 end
 
 function ZO_CreateAccount_Gamepad:GetCountryCode()

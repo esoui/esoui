@@ -1488,6 +1488,11 @@ function ZO_MultiSelectComboBox:ClearAllSelections()
     self:RefreshSelectedItemText()
 end
 
+ZO_ComboBox_DropdownClicked = ZO_ComboBoxDropdown_Keyboard.OnClicked
+ZO_ComboBox_Entry_OnMouseEnter = ZO_ComboBoxDropdown_Keyboard.OnEntryMouseEnter
+ZO_ComboBox_Entry_OnMouseExit = ZO_ComboBoxDropdown_Keyboard.OnEntryMouseExit
+ZO_ComboBox_Entry_OnSelected = ZO_ComboBoxDropdown_Keyboard.OnEntryMouseUp
+
 IsTributeMechanicSetbackForPlayer = function(...)
     return GetTributeMechanicSetbackTypeForPlayer(...) ~= TRIBUTE_MECHANIC_SETBACK_TYPE_NONE 
 end

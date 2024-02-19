@@ -607,34 +607,37 @@ function ZO_ComboBoxDropdown_Keyboard:OnEntrySelected(control)
     end
 end
 
-function ZO_ComboBoxDropdown_Keyboard.InitializeFromControl(control)
-    local dropdownObject = ZO_ComboBoxDropdown_Keyboard:New(control)
-    control.object = dropdownObject
+function ZO_ComboBoxDropdown_Keyboard.OnClicked(control, button, upInside)
+    if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+        ZO_ComboBox_OpenDropdown(control)
+        PlaySound(SOUNDS.COMBO_CLICK)
+    end
 end
 
--- Global XML handlers
-
-function ZO_ComboBox_DropdownClicked(control)
-    ZO_ComboBox_OpenDropdown(control)
-end
-
-function ZO_ComboBox_Entry_OnMouseEnter(control)
+function ZO_ComboBoxDropdown_Keyboard.OnEntryMouseEnter(control)
     local dropdown = control.m_dropdownObject
     if dropdown then
         dropdown:OnMouseEnterEntry(control)
     end
 end
 
-function ZO_ComboBox_Entry_OnMouseExit(control)
+function ZO_ComboBoxDropdown_Keyboard.OnEntryMouseExit(control)
     local dropdown = control.m_dropdownObject
     if dropdown then
         dropdown:OnMouseExitEntry(control)
     end
 end
 
-function ZO_ComboBox_Entry_OnSelected(control)
-    local dropdown = control.m_dropdownObject
-    if dropdown then
-        dropdown:OnEntrySelected(control)
+function ZO_ComboBoxDropdown_Keyboard.OnEntryMouseUp(control, button, upInside)
+    if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+        local dropdown = control.m_dropdownObject
+        if dropdown then
+            dropdown:OnEntrySelected(control)
+        end
     end
+end
+
+function ZO_ComboBoxDropdown_Keyboard.InitializeFromControl(control)
+    local dropdownObject = ZO_ComboBoxDropdown_Keyboard:New(control)
+    control.object = dropdownObject
 end

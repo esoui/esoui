@@ -96,6 +96,11 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
             control:SetAlpha(1)
             ZO_SetDefaultIconSilhouette(control.icon, not data.clearAction and data:IsLocked())
             control.highlight:SetDesaturation(data.iconDesaturation)
+            if data:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+                if control.icon ~= nil then
+                    control.icon:SetDesaturation(1)
+                end
+            end
             local isCurrent = false
             local isPending = false
             if self.restyleSlotData then
@@ -521,7 +526,7 @@ end
 function ZO_OutfitStylesPanel_Keyboard:OnRestyleOutfitStyleEntrySelected(entryData, initialContextMenuRefCount)
     local collectibleData = entryData.data
     if collectibleData then
-        if collectibleData.isEmptyCell then
+        if collectibleData.isEmptyCell or collectibleData:IsBlocked() then
             return
         end
 
@@ -565,7 +570,7 @@ function ZO_OutfitStylesPanel_Keyboard:OnOutfitStyleEntryRightClick(entryData)
     if collectibleData and not collectibleData.isEmptyCell then
         ClearMenu()
         
-        if IsCharacterPreviewingAvailable() then
+        if IsCharacterPreviewingAvailable() and not collectibleData:IsBlocked() then
             AddMenuItem(GetString(SI_OUTFIT_STYLE_EQUIP_BIND), function() self:OnRestyleOutfitStyleEntrySelected(entryData) end)
         end
 
@@ -630,7 +635,7 @@ do
             self.mouseOverEntryData = control.dataEntry
         end
 
-        if not ZO_RestyleCanApplyChanges() and collectibleData and not collectibleData.isEmptyCell and IsCharacterPreviewingAvailable() then
+        if not ZO_RestyleCanApplyChanges() and collectibleData and not collectibleData.isEmptyCell and not collectibleData:IsBlocked() and IsCharacterPreviewingAvailable() then
             WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
         end
 

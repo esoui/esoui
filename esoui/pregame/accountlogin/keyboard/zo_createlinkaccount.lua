@@ -180,7 +180,8 @@ end
 function CreateLinkAccount_Keyboard:AttemptCreateAccount()
     if self:CanCreateAccount() then
         local email = self.emailEntryEdit:GetText()
-        local emailSignup = ZO_CheckButton_IsChecked(self.subscribeCheckbox)
+        -- Auto subscribe never sees an option
+        local emailSignup = self.selectedCountry.autoEmailSubscribe or ZO_CheckButton_IsChecked(self.subscribeCheckbox)
         local country = self.selectedCountry.countryCode
         local requestedAccountName = self.accountNameEntryEdit:GetText()
 

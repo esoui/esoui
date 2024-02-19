@@ -3,17 +3,15 @@
         <Control name="ZO_ComboBoxEntry" level="3" mouseEnabled="true" virtual="true">
             <Dimensions y="ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT" />
             <OnMouseEnter>
-                ZO_ComboBox_Entry_OnMouseEnter(self)
+                ZO_ComboBoxDropdown_Keyboard.OnEntryMouseEnter(self)
             </OnMouseEnter>
 
             <OnMouseExit>
-                ZO_ComboBox_Entry_OnMouseExit(self)
+                ZO_ComboBoxDropdown_Keyboard.OnEntryMouseExit(self)
             </OnMouseExit>
 
             <OnMouseUp>
-                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
-                    ZO_ComboBox_Entry_OnSelected(self)
-                end
+                ZO_ComboBoxDropdown_Keyboard.OnEntryMouseUp(self, button, upInside)
             </OnMouseUp>
             
             <Controls>
@@ -36,10 +34,7 @@
             </OnInitialized>
 
             <OnMouseUp>
-                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
-                    ZO_ComboBox_DropdownClicked(self)
-                    PlaySound(SOUNDS.COMBO_CLICK)
-                end
+                ZO_ComboBoxDropdown_Keyboard.OnClicked(self, button, upInside)
             </OnMouseUp>
 
             <Controls>
@@ -57,9 +52,7 @@
                     <Anchor point="RIGHT" offsetX="-3" />
 
                     <OnClicked>
-                        if button == MOUSE_BUTTON_INDEX_LEFT then
-                            ZO_ComboBox_DropdownClicked(self:GetParent())
-                        end
+                        ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, upInside)
                     </OnClicked>
                 </Button>
             </Controls>

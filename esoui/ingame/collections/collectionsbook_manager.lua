@@ -213,7 +213,9 @@ end
 
 function ZO_UpdateCollectibleEntryDataIconVisuals(entryData, actorCategory)
     local locked = entryData:IsLocked()
-    if locked or entryData:IsBlocked(actorCategory) then
+    if locked then
+        entryData:SetIconDesaturation(1)
+    elseif entryData:IsBlocked(actorCategory) then
         entryData:SetIconDesaturation(1)
     else
         entryData:SetIconDesaturation(0)

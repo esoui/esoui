@@ -217,6 +217,11 @@ function ZO_GamepadCollectionsBook:InitializeGridListPanel()
 
         if data.isEmptyCell then
             control:SetAlpha(0.4)
+        elseif data:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER) and not data:IsLocked() then
+            control:SetAlpha(1)
+            if control.icon then
+                control.icon:SetDesaturation(1)
+            end
         else
             control:SetAlpha(1)
             if control.icon then
@@ -480,6 +485,10 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 end
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
+            enabled = function()
+                local collectibleData = self.gridListPanelList:GetSelectedData()
+                return not collectibleData.IsBlocked or not collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+            end,
             callback = function()
                 self:TogglePreviewSelectedOutfitStyle()
             end,
