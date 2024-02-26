@@ -58,7 +58,7 @@ do
     function ZO_GamepadBankInventoryList:OnRefreshList(shouldTriggerRefreshListCallback)
         --Getting the slot data can trigger a full inventory update callback which will try to refresh the list in the middle of refreshing the list which duplicates the entries. isRebuildingList protects against this.
         if not self.isRebuildingList then
-            if self.control:IsHidden() then
+            if self.control:IsHidden() or TEXT_SEARCH_MANAGER:IsSearchDirty(self.searchContext) then
                 self.isDirty = true
                 return
             end

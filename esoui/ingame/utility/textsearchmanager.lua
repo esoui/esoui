@@ -160,6 +160,15 @@ function ZO_TextSearchManager:MarkDirtyByFilterTargetAndPrimaryKey(filterTarget,
     end
 end
 
+function ZO_TextSearchManager:IsSearchDirty(context)
+    local contextSearch = self.contextSearches[context]
+    if not contextSearch then
+        return false
+    end
+
+    return contextSearch.isDirty
+end
+
 function ZO_TextSearchManager:CleanSearch(context, shouldSuppressSearchUpdate)
     local contextSearch = self.contextSearches[context]
     if not contextSearch then

@@ -147,7 +147,17 @@ function ZO_GuildHistory_Shared:OnCategoryUpdated(categoryData, flags)
         elseif ZO_FlagHelpers.MaskHasFlag(flags, GUILD_HISTORY_CATEGORY_UPDATE_FLAG_NEW_INFO) then
             -- New events came in, so we'll retain our page and scroll and move everything down as needed
             self.refreshGroup:MarkDirty("ListData")
+        elseif ZO_FlagHelpers.MaskHasFlag(flags, GUILD_HISTORY_CATEGORY_UPDATE_FLAG_RESPONSE_RECEIVED) then
+            local request = self:GetRequestForSelection()
+            if not request:IsComplete() and self:IsShowing() then
+                --We got a response to a manual request, but had no new events, so make another request
+                local QUEUE_IF_ON_COOLDOWN = true
+                local readyState = request:RequestMoreEvents(QUEUE_IF_ON_COOLDOWN)
+            end
+            self.refreshGroup:MarkDirty("ListFilters")
         end
+
+        self:UpdateKeybinds()
     end
 end
 
@@ -263,7 +273,12 @@ end
 function ZO_GuildHistory_Shared:CanShowMore()
     if self.selectedEventCategory and not self.hasNextPage then
         local request = self:GetRequestForSelection()
-        return not request:IsComplete()
+        --If the request is already queued or pending, do not display the "Show More" keybind
+        if request:IsRequestQueued() or request:IsRequestResponsePending() then
+            return false
+        else
+            return not request:IsComplete()
+        end
     end
     return false
 end

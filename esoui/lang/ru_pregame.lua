@@ -244,6 +244,8 @@ SafeAddString(SI_APPLYOUTFITCHANGESRESULT2, "В данный момент вы �
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT3, "Вы не можете позволить себе применить эти изменения.", 2)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT4, "Вы не можете использовать неоткрытый коллекционный предмет в качестве элемента наряда.", 0)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT5, "Вы не можете использовать временно отключенный коллекционный предмет в качестве элемента наряда.", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT6, "Вы не можете использовать в качестве элемента наряда коллекционный предмет, недоступный для этого персонажа.", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT7, "Вы не можете использовать в качестве элемента наряда спутника коллекционный предмет, которым не может воспользоваться спутник.", 0)
 SafeAddString(SI_APPROVEDURLTYPE0, "https://www.elderscrollsonline.com/ru", 0)
 SafeAddString(SI_APPROVEDURLTYPE1, "https://account.elderscrollsonline.com", 0)
 SafeAddString(SI_APPROVEDURLTYPE2, "https://account.elderscrollsonline.com/store?utm_source=ESO%20in-game%20Crown%20Store&utm_campaign=Buy%20Crowns&utm_content=In-Game%20Buy%20Crowns", 1)

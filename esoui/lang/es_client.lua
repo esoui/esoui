@@ -463,6 +463,8 @@ SafeAddString(SI_APPLYOUTFITCHANGESRESULT2, "No puedes modificar atuendos en est
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT3, "No puedes permitirte aplicar estos cambios.", 2)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT4, "No puedes aplicar un coleccionable bloqueado a un atuendo.", 0)
 SafeAddString(SI_APPLYOUTFITCHANGESRESULT5, "No puedes aplicar un coleccionable desactivado temporalmente a un atuendo.", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT6, "No puedes aplicar a un atuendo un coleccionable bloqueado para este personaje.", 0)
+SafeAddString(SI_APPLYOUTFITCHANGESRESULT7, "No es posible aplicar al atuendo de un compañero un coleccionable que no pueda utilizar.", 0)
 SafeAddString(SI_APPROVEDURLTYPE0, "http://www.elderscrollsonline.com", 0)
 SafeAddString(SI_APPROVEDURLTYPE1, "https://account.elderscrollsonline.com", 0)
 SafeAddString(SI_APPROVEDURLTYPE2, "https://account.elderscrollsonline.com/store?utm_source=ESO%20in-game%20Crown%20Store&utm_campaign=Buy%20Crowns&utm_content=In-Game%20Buy%20Crowns", 1)

@@ -52,7 +52,7 @@
                     <Anchor point="RIGHT" offsetX="-3" />
 
                     <OnClicked>
-                        ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, upInside)
+                        ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, true)
                     </OnClicked>
                 </Button>
             </Controls>
