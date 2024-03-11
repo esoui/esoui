@@ -49,6 +49,8 @@ end
 -- Event Data Base --
 ---------------------
 
+local REDACTED_TEXT = "--"
+
 local function GetContrastTextColor(isGamepad)
     return isGamepad and ZO_SELECTED_TEXT or ZO_SECOND_CONTRAST_TEXT
 end
@@ -91,12 +93,20 @@ function ZO_GuildHistoryEventData_Base:GetEventInfo()
     return self.eventInfo
 end
 
+function ZO_GuildHistoryEventData_Base:GetEventId()
+    return self:GetEventInfo().eventId
+end
+
 function ZO_GuildHistoryEventData_Base:GetEventType()
     return self:GetEventInfo().eventType
 end
 
 function ZO_GuildHistoryEventData_Base:GetEventTimestampS()
     return self:GetEventInfo().timestampS
+end
+
+function ZO_GuildHistoryEventData_Base:IsRedacted()
+    return self:GetEventInfo().isRedacted
 end
 
 function ZO_GuildHistoryEventData_Base:GetGuildId()
@@ -118,6 +128,10 @@ function ZO_GuildHistoryEventData_Base:GetUISubcategoryIndex()
 end
 
 function ZO_GuildHistoryEventData_Base:GetText(isGamepad)
+    local eventInfo = self:GetEventInfo()
+    if eventInfo.isRedacted then
+        return REDACTED_TEXT
+    end
     if isGamepad == nil then
         isGamepad = IsInGamepadPreferredMode()
     end
@@ -145,6 +159,10 @@ do
     function ZO_GuildHistoryEventData_Base:InternalRefreshText(isGamepad, enumPrefix, ...)
         internalassert(enumPrefix, "InternalRefreshText must be overriden to pass appropriate string args")
         local eventInfo = self:GetEventInfo()
+        if eventInfo.isRedacted then
+            self.platformText[isGamepad] = REDACTED_TEXT
+            return
+        end
         local formatString = GetString(enumPrefix, eventInfo.eventType)
         local numArgs = select('#', ...)
         if numArgs > 0 then
@@ -177,7 +195,7 @@ ZO_GuildHistoryRosterEventData = ZO_GuildHistoryEventData_Base:Subclass()
 function ZO_GuildHistoryRosterEventData:InternalRefreshEventInfo()
     local eventInfo = self.eventInfo
     local guildId = self:GetGuildId()
-    eventInfo.eventId, eventInfo.timestampS, eventInfo.eventType, eventInfo.actingDisplayName, eventInfo.targetDisplayName, eventInfo.rankId = GetGuildHistoryRosterEventInfo(guildId, self.eventIndex)
+    eventInfo.eventId, eventInfo.timestampS, eventInfo.isRedacted, eventInfo.eventType, eventInfo.actingDisplayName, eventInfo.targetDisplayName, eventInfo.rankId = GetGuildHistoryRosterEventInfo(guildId, self.eventIndex)
     if eventInfo.rankId then
         eventInfo.rankIndex = GetGuildRankIndex(guildId, eventInfo.rankId)
         if eventInfo.rankIndex then
@@ -201,7 +219,7 @@ ZO_GuildHistoryBankedItemEventData = ZO_GuildHistoryEventData_Base:Subclass()
 
 function ZO_GuildHistoryBankedItemEventData:InternalRefreshEventInfo()
     local eventInfo = self.eventInfo
-    eventInfo.eventId, eventInfo.timestampS, eventInfo.eventType, eventInfo.displayName, eventInfo.itemLink, eventInfo.quantity = GetGuildHistoryBankedItemEventInfo(self:GetGuildId(), self.eventIndex)
+    eventInfo.eventId, eventInfo.timestampS, eventInfo.isRedacted, eventInfo.eventType, eventInfo.displayName, eventInfo.itemLink, eventInfo.quantity = GetGuildHistoryBankedItemEventInfo(self:GetGuildId(), self.eventIndex)
 end
 
 function ZO_GuildHistoryBankedItemEventData:InternalRefreshText(isGamepad)
@@ -215,7 +233,7 @@ ZO_GuildHistoryBankedCurrencyEventData = ZO_GuildHistoryEventData_Base:Subclass(
 
 function ZO_GuildHistoryBankedCurrencyEventData:InternalRefreshEventInfo()
     local eventInfo = self.eventInfo
-    eventInfo.eventId, eventInfo.timestampS, eventInfo.eventType, eventInfo.displayName, eventInfo.currencyType, eventInfo.amount, eventInfo.kioskName = GetGuildHistoryBankedCurrencyEventInfo(self:GetGuildId(), self.eventIndex)
+    eventInfo.eventId, eventInfo.timestampS, eventInfo.isRedacted, eventInfo.eventType, eventInfo.displayName, eventInfo.currencyType, eventInfo.amount, eventInfo.kioskName = GetGuildHistoryBankedCurrencyEventInfo(self:GetGuildId(), self.eventIndex)
 end
 
 function ZO_GuildHistoryBankedCurrencyEventData:InternalRefreshText(isGamepad)
@@ -238,7 +256,7 @@ ZO_GuildHistoryTraderEventData = ZO_GuildHistoryEventData_Base:Subclass()
 
 function ZO_GuildHistoryTraderEventData:InternalRefreshEventInfo()
     local eventInfo = self.eventInfo
-    eventInfo.eventId, eventInfo.timestampS, eventInfo.eventType, eventInfo.sellerDisplayName, eventInfo.buyerDisplayName, eventInfo.itemLink, eventInfo.quantity, eventInfo.price, eventInfo.tax = GetGuildHistoryTraderEventInfo(self:GetGuildId(), self.eventIndex)
+    eventInfo.eventId, eventInfo.timestampS, eventInfo.isRedacted, eventInfo.eventType, eventInfo.sellerDisplayName, eventInfo.buyerDisplayName, eventInfo.itemLink, eventInfo.quantity, eventInfo.price, eventInfo.tax = GetGuildHistoryTraderEventInfo(self:GetGuildId(), self.eventIndex)
 end
 
 function ZO_GuildHistoryTraderEventData:InternalRefreshText(isGamepad)
@@ -263,7 +281,7 @@ ZO_GuildHistoryMilestoneEventData = ZO_GuildHistoryEventData_Base:Subclass()
 
 function ZO_GuildHistoryMilestoneEventData:InternalRefreshEventInfo()
     local eventInfo = self.eventInfo
-    eventInfo.eventId, eventInfo.timestampS, eventInfo.eventType = GetGuildHistoryMilestoneEventInfo(self:GetGuildId(), self.eventIndex)
+    eventInfo.eventId, eventInfo.timestampS, eventInfo.isRedacted, eventInfo.eventType = GetGuildHistoryMilestoneEventInfo(self:GetGuildId(), self.eventIndex)
 end
 
 function ZO_GuildHistoryMilestoneEventData:InternalRefreshText(isGamepad)
@@ -276,7 +294,7 @@ ZO_GuildHistoryActivityEventData = ZO_GuildHistoryEventData_Base:Subclass()
 
 function ZO_GuildHistoryActivityEventData:InternalRefreshEventInfo()
     local eventInfo = self.eventInfo
-    eventInfo.eventId, eventInfo.timestampS, eventInfo.eventType, eventInfo.displayName = GetGuildHistoryActivityEventInfo(self:GetGuildId(), self.eventIndex)
+    eventInfo.eventId, eventInfo.timestampS, eventInfo.isRedacted, eventInfo.eventType, eventInfo.displayName = GetGuildHistoryActivityEventInfo(self:GetGuildId(), self.eventIndex)
 end
 
 function ZO_GuildHistoryActivityEventData:InternalRefreshText(isGamepad)
@@ -290,7 +308,7 @@ ZO_GuildHistoryAvAActivityEventData = ZO_GuildHistoryEventData_Base:Subclass()
 
 function ZO_GuildHistoryAvAActivityEventData:InternalRefreshEventInfo()
     local eventInfo = self.eventInfo
-    eventInfo.eventId, eventInfo.timestampS, eventInfo.eventType, eventInfo.displayName, eventInfo.keepId, eventInfo.campaignId = GetGuildHistoryAvAActivityEventInfo(self:GetGuildId(), self.eventIndex)
+    eventInfo.eventId, eventInfo.timestampS, eventInfo.isRedacted, eventInfo.eventType, eventInfo.displayName, eventInfo.keepId, eventInfo.campaignId = GetGuildHistoryAvAActivityEventInfo(self:GetGuildId(), self.eventIndex)
 end
 
 function ZO_GuildHistoryAvAActivityEventData:InternalRefreshText(isGamepad)
@@ -367,8 +385,23 @@ function ZO_GuildHistoryEventCategoryData:GetEvents()
     return self.events:GetActiveObjects()
 end
 
+function ZO_GuildHistoryEventCategoryData:GetEvent(eventIndex)
+    if eventIndex > 0 and eventIndex <= self:GetNumEvents() then
+        return self.events:AcquireObject(eventIndex)
+    end
+    return nil
+end
+
 function ZO_GuildHistoryEventCategoryData:GetOldestEventIndexForUpToDateEventsWithoutGaps()
     return GetOldestGuildHistoryEventIndexForUpToDateEventsWithoutGaps(self.guildData:GetId(), self.eventCategory)
+end
+
+function ZO_GuildHistoryEventCategoryData:GetOldestEventForUpToDateEventsWithoutGaps()
+    local eventIndex = self:GetOldestEventIndexForUpToDateEventsWithoutGaps()
+    if eventIndex then
+        return self:GetEvent(eventIndex)
+    end
+    return nil
 end
 
 function ZO_GuildHistoryEventCategoryData:GetEventsInTimeRange(newestTimeS, oldestTimeS)

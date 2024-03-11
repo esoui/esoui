@@ -17684,29 +17684,47 @@ h2. Game API
 * GetGuildHistoryEventRangeInfo(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *luaindex* _rangeIndex_)
 ** _Returns:_ *integer53* _newestTimeS_, *integer53* _oldestTimeS_, *integer53* _newestEventId_, *integer53* _oldestEventId_
 
+* GetGuildHistoryEventRangeIndexForEventId(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *integer53* _eventId_)
+** _Returns:_ *luaindex:nilable* _rangeIndex_
+
+* GetGuildHistoryEventCategoryAndIndex(*integer* _guildId_, *integer53* _eventId_)
+** _Returns:_ *[GuildHistoryEventCategory|#GuildHistoryEventCategory]:nilable* _category_, *luaindex:nilable* _eventIndex_
+
+* GetGuildHistoryEventIndex(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *integer53* _eventId_)
+** _Returns:_ *luaindex:nilable* _eventIndex_
+
 * GetGuildHistoryEventId(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *luaindex* _eventIndex_)
 ** _Returns:_ *integer53* _eventId_
 
+* GetGuildHistoryEventTimestamp(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *luaindex* _eventIndex_)
+** _Returns:_ *integer53* _timestamp_
+
+* IsGuildHistoryEventRedacted(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *luaindex* _eventIndex_)
+** _Returns:_ *bool* _isRedacted_
+
+* GetGuildHistoryEventBasicInfo(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *luaindex* _eventIndex_)
+** _Returns:_ *integer53* _eventId_, *integer53* _timestamp_, *bool* _isRedacted_
+
 * GetGuildHistoryRosterEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
-** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryRosterEvent|#GuildHistoryRosterEvent]* _eventType_, *string* _actingDisplayName_, *string* _targetDisplayName_, *integer:nilable* _rankId_
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *bool* _isRedacted_, *[GuildHistoryRosterEvent|#GuildHistoryRosterEvent]* _eventType_, *string* _actingDisplayName_, *string* _targetDisplayName_, *integer:nilable* _rankId_
 
 * GetGuildHistoryBankedItemEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
-** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryBankedItemEvent|#GuildHistoryBankedItemEvent]* _eventType_, *string* _displayName_, *string* _itemLink_, *integer* _quantity_
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *bool* _isRedacted_, *[GuildHistoryBankedItemEvent|#GuildHistoryBankedItemEvent]* _eventType_, *string* _displayName_, *string* _itemLink_, *integer* _quantity_
 
 * GetGuildHistoryBankedCurrencyEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
-** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryBankedCurrencyEvent|#GuildHistoryBankedCurrencyEvent]* _eventType_, *string* _displayName_, *[CurrencyType|#CurrencyType]* _currencyType_, *integer* _amount_, *string* _kioskName_
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *bool* _isRedacted_, *[GuildHistoryBankedCurrencyEvent|#GuildHistoryBankedCurrencyEvent]* _eventType_, *string* _displayName_, *[CurrencyType|#CurrencyType]* _currencyType_, *integer* _amount_, *string* _kioskName_
 
 * GetGuildHistoryTraderEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
-** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryTraderEvent|#GuildHistoryTraderEvent]* _eventType_, *string* _sellerDisplayName_, *string* _buyerDisplayName_, *string* _itemLink_, *integer* _quantity_, *integer* _price_, *integer* _tax_
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *bool* _isRedacted_, *[GuildHistoryTraderEvent|#GuildHistoryTraderEvent]* _eventType_, *string* _sellerDisplayName_, *string* _buyerDisplayName_, *string* _itemLink_, *integer* _quantity_, *integer* _price_, *integer* _tax_
 
 * GetGuildHistoryMilestoneEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
-** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryMilestoneEvent|#GuildHistoryMilestoneEvent]* _eventType_
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *bool* _isRedacted_, *[GuildHistoryMilestoneEvent|#GuildHistoryMilestoneEvent]* _eventType_
 
 * GetGuildHistoryActivityEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
-** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryActivityEvent|#GuildHistoryActivityEvent]* _eventType_, *string* _displayName_
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *bool* _isRedacted_, *[GuildHistoryActivityEvent|#GuildHistoryActivityEvent]* _eventType_, *string* _displayName_
 
 * GetGuildHistoryAvAActivityEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
-** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryAvAActivityEvent|#GuildHistoryAvAActivityEvent]* _eventType_, *string* _displayName_, *integer* _keepId_, *integer* _campaignId_
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *bool* _isRedacted_, *[GuildHistoryAvAActivityEvent|#GuildHistoryAvAActivityEvent]* _eventType_, *string* _displayName_, *integer* _keepId_, *integer* _campaignId_
 
 * GetGuildHistoryRequestMinCooldownMs()
 ** _Returns:_ *integer* _minCooldownMs_

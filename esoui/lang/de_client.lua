@@ -4708,7 +4708,7 @@ SafeAddString(SI_GUILDHISTORYROSTEREVENT6, "<<C:1>> hat <<2>> aus der Gilde gewo
 SafeAddString(SI_GUILDHISTORYROSTEREVENT7, "<<C:1>> hat <<2>> auf die Ausschlussliste gesetzt.", 0)
 SafeAddString(SI_GUILDHISTORYROSTEREVENT8, "<<C:1>> hat <<2>> von der Ausschlussliste entfernt.", 0)
 SafeAddString(SI_GUILDHISTORYROSTEREVENT9, "<<C:1>> hat die Ausschlussnachricht für <<2>> angepasst.", 0)
-SafeAddString(SI_GUILDHISTORYTRADEREVENT0, "<<C:2>> hat <<3*4>> von <<1>> für <<X:5>> (<<X:6>> als Steuern) gekauft.", 0)
+SafeAddString(SI_GUILDHISTORYTRADEREVENT0, "<<C:2>> hat <<3>>-mal <<4>> von <<1>> für <<X:5>> (<<X:6>> als Steuern) gekauft.", 0)
 SafeAddString(SI_GUILDKEEPNOTICESSETTINGCHOICE0, "Nicht anzeigen", 0)
 SafeAddString(SI_GUILDKEEPNOTICESSETTINGCHOICE1, "Chatnachricht", 0)
 SafeAddString(SI_GUILDKEEPNOTICESSETTINGCHOICE2, "Anzeige oben rechts", 0)

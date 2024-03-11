@@ -224,7 +224,7 @@ function ZO_GuildHistory_Shared:FilterScrollList()
 
     for i = startIndex, #self.masterList do
         local data = self.masterList[i]
-        if self.selectedSubcategoryIndex == data:GetUISubcategoryIndex() then
+        if not data:IsRedacted() and self.selectedSubcategoryIndex == data:GetUISubcategoryIndex() then
             if numEventsSkipped == numEventsToSkip then
                 if #scrollData == ENTRIES_PER_PAGE then
                     self.hasNextPage = true
