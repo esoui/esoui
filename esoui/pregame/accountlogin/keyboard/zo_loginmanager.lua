@@ -92,10 +92,10 @@ function LoginManager_Keyboard:AttemptLinkedLogin()
     PregameBeginLinkedLogin()
 end
 
-function LoginManager_Keyboard:AttemptCreateAccount(email, ageValid, emailSignup, country, requestedAccountName)
+function LoginManager_Keyboard:AttemptCreateAccount(email, emailSignup, country, requestedAccountName)
     self.isLinking = nil
     ZO_Dialogs_ShowDialog("CREATING_ACCOUNT_KEYBOARD")
-    PregameSetAccountCreationInfo(email, ageValid, emailSignup, country, requestedAccountName)
+    PregameSetAccountCreationInfo(email, emailSignup, country, requestedAccountName)
     PregameCreateAccount()
 end
 
@@ -149,10 +149,20 @@ function LoginManager_Keyboard:OnCreateLinkLoadingError(loginError, linkingError
                 -- If the issue was with the token, kinda have to restart, since that's supplied from the launcher
                 self.mustRelaunch = true
                 LOGIN_KEYBOARD:ShowRelaunchGameLabel()
-             elseif loginError == LOGIN_AUTH_ERROR_ACCOUNT_NOT_VERIFIED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_NOT_VERIFIED then
+            elseif loginError == LOGIN_AUTH_ERROR_ACCOUNT_NOT_VERIFIED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_NOT_VERIFIED then
                 dialogData =
                 {
                     showResendVerificationEmail = true,
+                }
+            elseif loginError == LOGIN_AUTH_ERROR_ACCOUNT_BANNED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_BANNED then
+                dialogData =
+                {
+                    titleStringId = SI_LOGIN_DIALOG_TITLE_ACCOUNT_BANNED,
+                }
+            elseif loginError == LOGIN_AUTH_ERROR_ACCOUNT_SUSPENDED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_SUSPENDED then
+                dialogData =
+                {
+                    titleStringId = SI_LOGIN_DIALOG_TITLE_ACCOUNT_SUSPENDED,
                 }
             end
 
@@ -264,9 +274,13 @@ function LoginManager_Keyboard:OnBadLogin(errorCode, accountPageURL)
     ZO_Dialogs_ReleaseDialog("LOGIN_REQUESTED")
 
     if errorCode == AUTHENTICATION_ERROR_PAYMENT_EXPIRED then
-        ZO_Dialogs_ShowDialog("BAD_LOGIN_PAYMENT_EXPIRED", {accountPageURL = accountPageURL})
+        ZO_Dialogs_ShowDialog("BAD_LOGIN_PAYMENT_EXPIRED", { accountPageURL = accountPageURL })
+    elseif errorCode == AUTHENTICATION_ERROR_ACCOUNT_BANNED then
+        ZO_Dialogs_ShowDialog("BAD_LOGIN_ACCOUNT_BANNED")
+    elseif errorCode == AUTHENTICATION_ERROR_ACCOUNT_SUSPENDED then
+        ZO_Dialogs_ShowDialog("BAD_LOGIN_ACCOUNT_SUSPENDED")
     else
-        ZO_Dialogs_ShowDialog("BAD_LOGIN", {accountPageURL = accountPageURL})
+        ZO_Dialogs_ShowDialog("BAD_LOGIN", { accountPageURL = accountPageURL })
     end
 end
 

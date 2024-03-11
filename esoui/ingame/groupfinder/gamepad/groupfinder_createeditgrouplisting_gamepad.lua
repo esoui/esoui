@@ -193,6 +193,11 @@ do
                     local dialog = data.dialog
                     self.categoryDropdown = control.dropdown
                     table.insert(dialog.dropdowns, self.categoryDropdown)
+
+                    self.categoryDropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                    self.categoryDropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                    self.categoryDropdown:SetSelectedItemTextColor(selected)
+
                     self:PopulateCategoryDropdown()
                     SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(dialog, self.categoryDropdown)
                 end,
@@ -219,6 +224,11 @@ do
                     local dialog = data.dialog
                     self.primaryOptionDropdown = control.dropdown
                     table.insert(dialog.dropdowns, self.primaryOptionDropdown)
+
+                    self.primaryOptionDropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                    self.primaryOptionDropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                    self.primaryOptionDropdown:SetSelectedItemTextColor(selected)
+
                     self:PopulatePrimaryDropdown()
                     SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(dialog, self.primaryOptionDropdown)
                 end,
@@ -248,6 +258,11 @@ do
                     local dialog = data.dialog
                     self.secondaryOptionDropdown = control.dropdown
                     table.insert(dialog.dropdowns, self.secondaryOptionDropdown)
+
+                    self.secondaryOptionDropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                    self.secondaryOptionDropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                    self.secondaryOptionDropdown:SetSelectedItemTextColor(selected)
+
                     self:PopulateSecondaryDropdown()
                     SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(dialog, self.secondaryOptionDropdown)
                 end,
@@ -277,6 +292,11 @@ do
                     local dialog = data.dialog
                     self.sizeDropdown = control.dropdown
                     table.insert(dialog.dropdowns, self.sizeDropdown)
+
+                    self.sizeDropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                    self.sizeDropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                    self.sizeDropdown:SetSelectedItemTextColor(selected)
+
                     self:PopulateSizeDropdown()
                     SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(dialog, self.sizeDropdown)
                 end,
@@ -373,6 +393,11 @@ do
                     local dialog = data.dialog
                     self.playstyleDropdown = control.dropdown
                     table.insert(dialog.dropdowns, self.playstyleDropdown)
+
+                    self.playstyleDropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                    self.playstyleDropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                    self.playstyleDropdown:SetSelectedItemTextColor(selected)
+
                     self:PopulatePlaystyleDropdown()
                     SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(dialog, self.playstyleDropdown)
                 end,

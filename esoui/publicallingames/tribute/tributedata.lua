@@ -606,6 +606,10 @@ function ZO_TributeCardData:DoesHaveTriggerMechanic()
     return DoesTributeCardHaveTriggerMechanic(self.cardDefId)
 end
 
+function ZO_TributeCardData:DoesHaveSetbackMechanic()
+    return DoesTributeCardHaveSetbackMechanic(self.cardDefId)
+end
+
 function ZO_TributeCardData:GetDefeatCost()
     return GetTributeCardDefeatCost(self.cardDefId)
 end

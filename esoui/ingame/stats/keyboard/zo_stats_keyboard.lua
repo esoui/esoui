@@ -873,7 +873,7 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
             end
 
             for i = 1, GetNumBuffs("player") do
-                local buffName, startTime, endTime, buffSlot, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType = GetUnitBuffInfo("player", i)
+                local buffName, startTime, endTime, buffSlot, stackCount, iconFile, deprecatedBuffType, effectType, abilityType, statusEffectType = GetUnitBuffInfo("player", i)
 
                 if buffSlot > 0 and buffName ~= "" then
                     local effectsRow = effectsRowPool:AcquireObject()

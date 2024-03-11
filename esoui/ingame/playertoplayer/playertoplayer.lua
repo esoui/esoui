@@ -395,7 +395,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         PlaySound(SOUNDS.QUEST_SHARED)
         local questName, characterName, _, displayName = GetOfferedQuestShareInfo(questId)
         local name = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
-        local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_QUEST_SHARE, characterName, displayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_QUEST_SHARE, ZO_SELECTED_TEXT:Colorize(name), questName),
+        local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_QUEST_SHARE, characterName, displayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_QUEST_SHARE, ZO_SELECTED_TEXT:Colorize(name), ZO_SELECTED_TEXT:Colorize(questName)),
             function()
                 AcceptSharedQuest(questId)
             end,

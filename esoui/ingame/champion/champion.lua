@@ -2529,13 +2529,8 @@ function ZO_ChampionConstellationCursor_Gamepad:UpdateDirectionalInput()
 
     local constellation = CHAMPION_PERKS:GetChosenConstellation()
 
-    local mouseOverControl
-    if WINDOW_MANAGER:AreCustomCursorsEnabled() then
-        WINDOW_MANAGER:UpdateCursorPosition(self.cursorId, self.x, self.y)
-        mouseOverControl = WINDOW_MANAGER:GetControlAtCursor(self.cursorId) 
-    else
-        mouseOverControl = WINDOW_MANAGER:GetControlAtPoint(self.x, self.y)
-    end
+    WINDOW_MANAGER:UpdateCursorPosition(self.cursorId, self.x, self.y)
+    local mouseOverControl = WINDOW_MANAGER:GetControlAtCursor(self.cursorId) 
     self.mouseOverControl = mouseOverControl
     
     local targetSensitivity
@@ -2563,16 +2558,14 @@ function ZO_ChampionConstellationCursor_Gamepad:UpdateVisibility()
 
     self.control:SetHidden(not show)
 
-    if WINDOW_MANAGER:AreCustomCursorsEnabled() then
-        if show then
-            if not self.cursorId then
-                self.cursorId = WINDOW_MANAGER:CreateCursor(self.x, self.y)
-            end
-        else
-            if self.cursorId then
-                WINDOW_MANAGER:DestroyCursor(self.cursorId)
-                self.cursorId = nil
-            end
+    if show then
+        if not self.cursorId then
+            self.cursorId = WINDOW_MANAGER:CreateCursor(self.x, self.y)
+        end
+    else
+        if self.cursorId then
+            WINDOW_MANAGER:DestroyCursor(self.cursorId)
+            self.cursorId = nil
         end
     end
 

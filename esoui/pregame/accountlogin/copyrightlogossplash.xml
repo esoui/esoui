@@ -32,7 +32,7 @@
                     <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
                 </Texture>
 
-                <Label name="$(parent)CopyrightInfo" text="SI_SPLASH_SCREEN_COPYRIGHT"/>
+                <Label name="$(parent)CopyrightInfo" />
 
                 <Texture name="$(parent)ZOSLogo" textureFile="EsoUI/Art/Login/zos_logo.dds">
                     <Dimensions x="256" y="75" />

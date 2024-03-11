@@ -237,10 +237,21 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_Options_Video_Slider_IncludeMaxParticleSystemsWarning" virtual="true" inherits="ZO_Options_Slider">
+        <Control name="ZO_Options_Video_Slider_DynamicWarning" virtual="true" inherits="ZO_Options_Slider">
             <Controls>
                 <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon">
                     <Anchor point="RIGHT" relativeTo="$(parent)Slider" relativePoint="LEFT" offsetX="-5" />
+                    <OnInitialized>
+                        -- Set using ZO_Options_SetWarningText, ZO_Options_ShowOrHideAssociatedWarning, etc.
+                        self.data = { tooltipText = "" }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Video_Slider_IncludeMaxParticleSystemsWarning" virtual="true" inherits="ZO_Options_Video_Slider_DynamicWarning">
+            <Controls>
+                <Texture name="$(parent)WarningIcon" override="true">
                     <OnInitialized>
                         self.data = { tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_MAXIMUM_PARTICLE_SYSTEMS_RESTRICTION }
                     </OnInitialized>

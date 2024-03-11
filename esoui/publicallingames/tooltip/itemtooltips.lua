@@ -577,19 +577,31 @@ function ZO_Tooltip:AddSet(itemLink, equipped)
         local totalEquipped = zo_min(numNormalEquipped + numPerfectedEquipped, maxEquipped)
         local isPerfectedSet = GetItemSetUnperfectedSetId(setId) > 0
         local setSection = self:AcquireSection(self:GetStyle("bodySection"))
+        local setSectionStyle = "bodyHeader"
+        local bonusSectionStyle = "activeBonus"
+        local itemSetSuppressionType, refId = GetItemSetSuppressionInfo(setId)
+        local suppressionName = GetItemSetSuppressionName(setId)
+        if setId ~= refId and itemSetSuppressionType ~= ITEM_SET_SUPPRESSION_TYPE_NONE then
+            setSectionStyle = "itemSetSuppressedSection"
+            bonusSectionStyle = "itemSetSuppressedDescription"
+        end
         if isPerfectedSet then
-            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_PERFECTED_SET_NAME, setName, totalEquipped, maxEquipped, numPerfectedEquipped), self:GetStyle("bodyHeader"))
+            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_PERFECTED_SET_NAME, setName, totalEquipped, maxEquipped, numPerfectedEquipped), self:GetStyle(setSectionStyle))
         else
-            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, totalEquipped, maxEquipped), self:GetStyle("bodyHeader"))
+            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, totalEquipped, maxEquipped), self:GetStyle(setSectionStyle))
         end
         for bonusIndex = 1, numBonuses do
             local numRequired, bonusDescription, isPerfectedBonus = GetItemLinkSetBonusInfo(itemLink, equipped, bonusIndex)
             local numRelevantEquipped = isPerfectedBonus and numPerfectedEquipped or totalEquipped
             if numRelevantEquipped >= numRequired then
-                setSection:AddLine(bonusDescription, self:GetStyle("activeBonus"), self:GetStyle("bodyDescription"))
+                setSection:AddLine(bonusDescription, self:GetStyle(bonusSectionStyle), self:GetStyle("bodyDescription"))
             else
                 setSection:AddLine(bonusDescription, self:GetStyle("inactiveBonus"), self:GetStyle("bodyDescription"))
             end
+        end
+
+        if setId ~= refId and itemSetSuppressionType ~= ITEM_SET_SUPPRESSION_TYPE_NONE then
+            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_DISABLED_BY, suppressionName), self:GetStyle(setSectionStyle))
         end
         self:AddSection(setSection)
         self:AddSetRestrictions(setId)

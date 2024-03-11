@@ -151,22 +151,8 @@
                                     </Controls>
                                 </Backdrop>
 
-                                <Button name="$(parent)Age" inherits="ZO_CheckButton">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)EmailEntry" relativePoint="BOTTOMLEFT" offsetY="20" />
-
-                                    <Controls>
-                                        <Label name="$(parent)Label" inherits="ZO_LoginMenuInfoLabel" mouseEnabled="true">
-                                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" offsetX="10" offsetY="5" />
-
-                                            <OnMouseDown>
-                                                ZO_CreateLinkAccount_ToggleCheckButtonFromLabel(self)
-                                            </OnMouseDown>
-                                        </Label>
-                                    </Controls>
-                                </Button>
-
                                 <Button name="$(parent)Subscribe" inherits="ZO_CheckButton">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Age" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)EmailEntry" relativePoint="BOTTOMLEFT" offsetY="20" />
 
                                     <Controls>
                                         <Label name="$(parent)Label" inherits="ZO_LoginMenuInfoLabel" text="SI_CREATEACCOUNT_EMAIL_SIGNUP" mouseEnabled="true">

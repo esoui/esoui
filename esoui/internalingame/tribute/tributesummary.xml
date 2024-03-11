@@ -681,7 +681,7 @@
                         </Texture>
                     </Controls>
                 </StatusBar>
-                <StatusBar name="$(parent)PlacementBarPrevious">
+                <Control name="$(parent)PlacementBarPrevious">
                     <Controls>
                         <Texture name="$(parent)CurrentRankIcon">
                             <Controls>
@@ -695,12 +695,12 @@
                             </Controls>
                         </Texture>
                     </Controls>
-                </StatusBar>
-                <StatusBar name="$(parent)PlacementBarNew">
+                </Control>
+                <Control name="$(parent)PlacementBarNew">
                     <Controls>
                         <Label name="$(parent)MatchRecordText" font="ZoFontGamepad27" />
                     </Controls>
-                </StatusBar>
+                </Control>
                 <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" />
             </Controls>
         </Control>

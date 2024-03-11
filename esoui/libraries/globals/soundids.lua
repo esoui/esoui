@@ -245,8 +245,8 @@ SOUNDS =
     EVENT_TICKET_TRANSACT           = "EventTicket_Transact",
 
     -- Endless Dungeon currency sounds
-    ENDLESS_DUNGEON_CURRENCY_ACQUIRE            = "EndlessDungeonCurrency_Acquire",
-    ENDLESS_DUNGEON_CURRENCY_TRANSACT           = "EndlessDungeonCurrency_Transact",
+    ARCHIVAL_FORTUNES_ACQUIRE            = "EndlessDungeonCurrency_Acquire",
+    ARCHIVAL_FORTUNES_TRANSACT           = "EndlessDungeonCurrency_Transact",
 
     --Justice sounds
     JUSTICE_STATE_CHANGED           = "Justice_StateChanged",

@@ -88,7 +88,7 @@ local TAB_DATA =
         HasIcon                 = true,
         HasTabMouseOver         = true,
     },
-    
+
     FancyBottomEdge =
     {
         UnpressedImage              = "EsoUI/Art/Tabs/bottom_tab_inactive.dds",
@@ -97,14 +97,14 @@ local TAB_DATA =
         LeftCoords                  = { left = 0, right = 0.203, top = 0, bottom = 0.58 },      -- NOTE: Assumes that the left and right slices match for pressed/unpressed
         RightCoords                 = { left = 0.75, right = 1, top = 0, bottom = 0.58 },
         CenterCoords                = { left = 0.203, right = 0.75, top = 0, bottom = 0.58 },
-        SideSize                    = 13,      
+        SideSize                    = 13,
         Height                      = 37,
         PressedTextColor            = ZO_ColorDef:New(0.811764, 0.862745, 0.741176, 1.0),
         UnpressedTextColor          = ZO_ColorDef:New(0.498039, 0.643137, 0.769531, 1.0),
         HasTabMouseOver             = true,
-        TooltipPosition				= BOTTOM,
+        TooltipPosition             = BOTTOM,
     },
-    
+
     FancyBottomEdgeImage =
     {
         UnpressedImage              = "EsoUI/Art/Tabs/bottom_tab_inactive.dds",
@@ -116,7 +116,7 @@ local TAB_DATA =
         SideSize                    = 13,
         HasIcon                     = true,
         HasTabMouseOver             = true,
-        TooltipPosition			    = BOTTOM,
+        TooltipPosition             = BOTTOM,
     },
 
     FancyTopEdgeImage =
@@ -124,14 +124,14 @@ local TAB_DATA =
         UnpressedImage              = "EsoUI/Art/Tabs/tab_top_inactive.dds",
         PressedImage                = "EsoUI/Art/Tabs/tab_top_active.dds",
         UnpressedMouseOverImage     = "EsoUI/Art/Tabs/tab_top_inactive_mouseOver.dds",
-        DisabledImage				= "EsoUI/Art/Tabs/tab_top_inactive_disabled.dds",
+        DisabledImage               = "EsoUI/Art/Tabs/tab_top_inactive_disabled.dds",
         LeftCoords                  = { left = 0, right = 0.2344, top = 0, bottom = 1 },      -- NOTE: Assumes that the left and right slices match for pressed/unpressed
         RightCoords                 = { left = 0.75, right = 1, top = 0, bottom = 1 },
         CenterCoords                = { left = 0.2344, right = 0.75, top = 0, bottom = 1 },
         SideSize                    = 16,
         HasIcon                     = true,
         HasTabMouseOver             = true,
-        TooltipPosition			    = TOP,
+        TooltipPosition             = TOP,
     },
 
     SimpleText =
@@ -152,7 +152,7 @@ local TAB_DATA =
         SideSize                    = 5,
         Height                      = 32,
         MinFixedWidth               = 0,
-		MaxFixedWidth               = 300,
+        MaxFixedWidth               = 300,
         PressedTextColor            = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)),
         UnpressedTextColor          = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_CONTRAST)),
         UnpressedMouseOverTextColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT)),
@@ -162,113 +162,128 @@ local TAB_DATA =
     },
 }
 
-local function ZO_TabButton_HandleClickEvent(self, callback, callbackOptions)
-    if(not self.tabType) then return end    -- Early out.
-    
-    local tabData = TAB_DATA[self.tabType]
-    
-    if(tabData.HasIcon) then
-        local icon = GetControl(self,"Icon")      
-        if(self.state == UNPRESSED) then
-            icon:SetTexture(self.unpressedIcon)            
+local function ZO_TabButton_HandleClickEvent(control, callback, callbackOptions)
+    -- Early out.
+    if not control.tabType then 
+        return
+    end
+
+    local tabData = TAB_DATA[control.tabType]
+
+    if tabData.HasIcon then
+        local icon = control:GetNamedChild("Icon")
+        if control.state == UNPRESSED then
+            icon:SetTexture(control.unpressedIcon)
         else
-            icon:SetTexture(self.pressedIcon)            
+            icon:SetTexture(control.pressedIcon)
         end
     end
-    
-    if(self.state == UNPRESSED) then
-        self:SetDrawLevel(DL_BELOW)
-        if self.allowLabelColorChanges and tabData.UnpressedTextColor then
-            local text = GetControl(self,"Text")
+
+    if control.state == UNPRESSED then
+        control:SetDrawLevel(DL_BELOW)
+        if control.allowLabelColorChanges and tabData.UnpressedTextColor then
+            local text = control:GetNamedChild("Text")
             if text then
                 text:SetColor(tabData.UnpressedTextColor:UnpackRGBA()) 
             end
         end
     else
-        self:SetDrawLevel(DL_ABOVE)
-        if self.allowLabelColorChanges and tabData.PressedTextColor then
-            local text = GetControl(self,"Text")
+        control:SetDrawLevel(DL_ABOVE)
+        if control.allowLabelColorChanges and tabData.PressedTextColor then
+            local text = control:GetNamedChild("Text")
             if text then
                 text:SetColor(tabData.PressedTextColor:UnpackRGBA()) 
             end
         end
     end
-    
-    if(tabData.PressedImage and tabData.UnpressedImage) then
-        local left      = GetControl(self, "Left")
-        local center    = GetControl(self, "Center")
-        local right     = GetControl(self, "Right")
-    
-        local image         = (self.state == PRESSED) and tabData.PressedImage or tabData.UnpressedImage
-        local leftCoords    = tabData.LeftCoords
-        local rightCoords   = tabData.RightCoords
-        local centerCoords  = tabData.CenterCoords
+
+    if tabData.PressedImage and tabData.UnpressedImage then
+        local left = control:GetNamedChild("Left")
+        local center = control:GetNamedChild("Center")
+        local right = control:GetNamedChild("Right")
+
+        local image = control.state == PRESSED and tabData.PressedImage or tabData.UnpressedImage
+        local leftCoords = tabData.LeftCoords
+        local rightCoords = tabData.RightCoords
+        local centerCoords = tabData.CenterCoords
 
         left:SetTexture(image)
         left:SetTextureCoords(leftCoords.left, leftCoords.right, leftCoords.top, leftCoords.bottom)
-    
+
         center:SetTexture(image)
         center:SetTextureCoords(centerCoords.left, centerCoords.right, centerCoords.top, centerCoords.bottom)
-    
+
         right:SetTexture(image)
         right:SetTextureCoords(rightCoords.left, rightCoords.right, rightCoords.top, rightCoords.bottom)
     end
     
-    if((callbackOptions ~= "preventcall") and (type(callback) == "function"))
-    then
-        callback(self)
+    if callbackOptions ~= "preventcall" and type(callback) == "function" then
+        callback(control)
     end
 end
 
-local function SizeButtonToFitText(self)
-    local tab = self:GetParent()
-    if(not tab.tabType or not TAB_DATA[tab.tabType]) then return end    -- Early out.
+local function SizeButtonToFitText(label)
+    local tab = label:GetParent()
+    -- Early out.
+    if not tab.tabType or not TAB_DATA[tab.tabType] then
+        return 
+    end
 
-    local textWidth, textHeight = self:GetTextDimensions()
+    local textWidth, textHeight = label:GetTextDimensions()
     local tabData = TAB_DATA[tab.tabType]
     local width = textWidth + tabData.SideSize * 2
 
-	if tabData.MaxFixedWidth and width > tabData.MaxFixedWidth then
-		--Text is too long, resize and continue after the label redraws
-		GetControl(tab, "Text"):SetWidth(tabData.MaxFixedWidth - tabData.SideSize * 2)
-	else
-		width = zo_max(width, tabData.MinFixedWidth or 0)
+    if tabData.MaxFixedWidth and width > tabData.MaxFixedWidth then
+        --Text is too long, resize and continue after the label redraws
+        tab:GetNamedChild("Text"):SetWidth(tabData.MaxFixedWidth - tabData.SideSize * 2)
+    else
+        width = zo_max(width, tabData.MinFixedWidth or 0)
 
-		tab:SetDimensions(width, tabData.Height)
+        tab:SetDimensions(width, tabData.Height)
 
-		self:SetAnchor(TOP, tab, TOP, 0, (tabData.Height - textHeight) / 2 + (tabData.OffsetY or 0))
-    
-		if tabData.HasHighlight then
-			GetControl(tab, "Highlight"):SetTextureCoords(0, 1, 0, 1)
-		end
+        label:SetAnchor(TOP, tab, TOP, 0, (tabData.Height - textHeight) / 2 + (tabData.OffsetY or 0))
 
-		if tab.tabSizeChangedCallback then
-			tab.tabSizeChangedCallback(tab, width, tabData.Height)
-		end
-	end
+        if tabData.HasHighlight then
+            tab:GetNamedChild("Highlight"):SetTextureCoords(0, 1, 0, 1)
+        end
+
+        if tab.tabSizeChangedCallback then
+            tab.tabSizeChangedCallback(tab, width, tabData.Height)
+        end
+    end
 end
 
-local function SetTabTextures(self, tabTexture, iconTexture, hasHighlight)
+local function SetTabTextures(control, tabTexture, iconTexture, hasHighlight)
     if tabTexture then
-        local center = GetControl(self,"Center")
-        local left = GetControl(self, "Left")
-        local right = GetControl(self, "Right")
+        local center = control:GetNamedChild("Center")
+        local left = control:GetNamedChild("Left")
+        local right = control:GetNamedChild("Right")
 
-        if center then center:SetTexture(tabTexture) end
-        if left then left:SetTexture(tabTexture) end
-        if right then right:SetTexture(tabTexture) end
+        if center then 
+            center:SetTexture(tabTexture)
+        end
+
+        if left then
+            left:SetTexture(tabTexture)
+        end
+
+        if right then
+            right:SetTexture(tabTexture)
+        end
     end
 
     if iconTexture then
-        local highlight = GetControl(self, "Highlight")
+        local highlight = control:GetNamedChild("Highlight")
         if hasHighlight then
             if highlight then
                 highlight:SetHidden(false)
                 highlight:SetTexture(iconTexture)
             end
         else
-            local icon = GetControl(self, "Icon")
-            if icon then icon:SetTexture(iconTexture) end
+            local icon = control:GetNamedChild("Icon")
+            if icon then
+                icon:SetTexture(iconTexture)
+            end
             if highlight then
                 highlight:SetHidden(true)
             end
@@ -276,142 +291,156 @@ local function SetTabTextures(self, tabTexture, iconTexture, hasHighlight)
     end
 end
 
-function ZO_TabButton_Select(self, callbackOptions)
-    if(self.state == DISABLED) then return end
-    
-    self.state = PRESSED
-    ZO_TabButton_HandleClickEvent(self, self.pressedCallback, callbackOptions)
+function ZO_TabButton_Select(tabButton, callbackOptions)
+    if tabButton.state == DISABLED then
+        return
+    end
+
+    tabButton.state = PRESSED
+    ZO_TabButton_HandleClickEvent(tabButton, tabButton.pressedCallback, callbackOptions)
 end
 
-function ZO_TabButton_Unselect(self, callbackOptions)
-    if(self.state == DISABLED) then return end
-    
-    self.state = UNPRESSED
-    ZO_TabButton_HandleClickEvent(self, self.unpressedCallback, callbackOptions)    
+function ZO_TabButton_Unselect(tabButton, callbackOptions)
+    if tabButton.state == DISABLED then
+        return
+    end
+
+    tabButton.state = UNPRESSED
+    ZO_TabButton_HandleClickEvent(tabButton, tabButton.unpressedCallback, callbackOptions)
 end
 
-local function SharedTabInit(self, tabType, pressedCallback, unpressedCallback)
-    self.tabType = tabType
-    self.pressedCallback = pressedCallback
-    self.unpressedCallback = unpressedCallback
-    
+local function SharedTabInit(tabButton, tabType, pressedCallback, unpressedCallback)
+    tabButton.tabType = tabType
+    tabButton.pressedCallback = pressedCallback
+    tabButton.unpressedCallback = unpressedCallback
+
     -- These nil fields are added here for clarity.
-    self.state = nil
-    self.tabGroup = nil
-    
+    tabButton.state = nil
+    tabButton.tabGroup = nil
+
     -- Start tab buttons in the unpressed state, it's still not a member of a tab group
-    ZO_TabButton_Unselect(self, "preventcall")
+    ZO_TabButton_Unselect(tabButton, "preventcall")
 end
 
-function ZO_TabButton_Text_SetFont(self, font)
-	local label = GetControl(self,"Text")
+function ZO_TabButton_Text_SetFont(tabButton, font)
+    local label = tabButton:GetNamedChild("Text")
     label:SetFont(font)
-	label:SetWidth(0)
+    label:SetWidth(0)
 end
 
-function ZO_TabButton_Text_Initialize(self, tabType, initialText, pressedCallback, unpressedCallback, tabSizeChangedCallback)
-    if(not tabType or not TAB_DATA[tabType]) then 
-        return 
+function ZO_TabButton_Text_Initialize(control, tabType, initialText, pressedCallback, unpressedCallback, tabSizeChangedCallback)
+    if not tabType or not TAB_DATA[tabType] then
+        return
     end
     
-	local tabData = TAB_DATA[tabType]
-    local center = GetControl(self, "Center")
-    local left = GetControl(self, "Left")
-    local right = GetControl(self, "Right")
-	local label = GetControl(self, "Text")
-    self.allowLabelColorChanges = true
+    local tabData = TAB_DATA[tabType]
+    local center = control:GetNamedChild("Center")
+    local left = control:GetNamedChild("Left")
+    local right = control:GetNamedChild("Right")
+    local label = control:GetNamedChild("Text")
+    control.allowLabelColorChanges = true
     
     local sideSize = tabData.SideSize or 8
     local height = tabData.Height or 24
     if left then
         left:SetDimensions(sideSize, height)
     end
+
     if right then
         right:SetDimensions(sideSize, height)
     end
+
     if center then
         center:SetHeight(height)
     end
 
-    if(not tabData.PressedImage or not tabData.UnpressedImage) then
+    if not tabData.PressedImage or not tabData.UnpressedImage then
         if left then
             left:SetHidden(true)
         end
+
         if right then
             right:SetHidden(true)
         end
+
         if center then
             center:SetHidden(true)
         end
     end
 
-	if tabData.MaxFixedWidth then
-		label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-	end
-
-    if(tabData.Font) then
-        ZO_TabButton_Text_SetFont(self, tabData.Font)
+    if tabData.MaxFixedWidth then
+        label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
     end
 
-    SharedTabInit(self, tabType, pressedCallback, unpressedCallback) 
+    if tabData.Font then
+        ZO_TabButton_Text_SetFont(control, tabData.Font)
+    end
 
-	self.tabSizeChangedCallback = tabSizeChangedCallback
-    
-    initialText = initialText or ""    
-    ZO_TabButton_Text_SetText(self, initialText)
+    SharedTabInit(control, tabType, pressedCallback, unpressedCallback) 
+    control.tabSizeChangedCallback = tabSizeChangedCallback
+    initialText = initialText or ""
+    ZO_TabButton_Text_SetText(control, initialText)
 end
 
-local ICON_SIZE = 32
-function ZO_TabButtonOverrideIconSizeConstant(overrideValue)
-    ICON_SIZE = overrideValue
+do
+    local ICON_SIZE = 32
+    function ZO_TabButtonOverrideIconSizeConstant(overrideValue)
+        ICON_SIZE = overrideValue
+    end
+
+    function ZO_TabButtonResetIconSizeConstant()
+        ICON_SIZE = 32
+    end
+
+    -- Utility to create uniform tab icons that have normal padding and size.
+    function ZO_CreateUniformIconTabData(sharedDataTable, icon, width, height, pressedIcon, unpressedIcon, mouseoverIcon, disabledIcon)
+        width = width or 32
+        height = height or 32
+
+        local verticalPadding = (ICON_SIZE - height) / 2
+        sharedDataTable.pressedIcon = icon or pressedIcon
+        sharedDataTable.unpressedIcon = icon or unpressedIcon
+        sharedDataTable.mouseoverIcon = mouseoverIcon
+        sharedDataTable.disabledIcon = disabledIcon
+        sharedDataTable.width = width
+        sharedDataTable.height = height
+        sharedDataTable.lowerPadding = verticalPadding
+        sharedDataTable.upperPadding = verticalPadding
+
+        return sharedDataTable
+    end
 end
 
-function ZO_TabButtonResetIconSizeConstant()
-    ICON_SIZE = 32
-end
+function ZO_TabButton_Icon_Initialize(tabButton, tabType, visualData, pressedCallback, unpressedCallback)   
+    tabButton.pressedIcon = visualData.pressedIcon
+    tabButton.unpressedIcon = visualData.unpressedIcon
+    tabButton.disabledIcon = visualData.disabledIcon
+    tabButton.mouseoverIcon = visualData.mouseoverIcon
+    tabButton.allowLabelColorChanges = true
 
--- Utility to create uniform tab icons that have normal padding and size.
-function ZO_CreateUniformIconTabData(sharedDataTable, icon, width, height, pressedIcon, unpressedIcon, mouseoverIcon, disabledIcon)
-	width = width or 32
-	height = height or 32
+    local icon = tabButton:GetNamedChild("Icon")
+    local highlight = tabButton:GetNamedChild("Highlight")
+    local center = tabButton:GetNamedChild("Center")
+    local left = tabButton:GetNamedChild("Left")
+    local right = tabButton:GetNamedChild("Right")
 
-	local verticalPadding = (ICON_SIZE - height) / 2
-	sharedDataTable.pressedIcon = icon or pressedIcon
-	sharedDataTable.unpressedIcon = icon or unpressedIcon
-    sharedDataTable.mouseoverIcon = mouseoverIcon
-    sharedDataTable.disabledIcon = disabledIcon
-	sharedDataTable.width = width
-	sharedDataTable.height = height
-	sharedDataTable.lowerPadding = verticalPadding
-	sharedDataTable.upperPadding = verticalPadding
-	
-	return sharedDataTable
-end
-
-function ZO_TabButton_Icon_Initialize(self, tabType, visualData, pressedCallback, unpressedCallback)   
-    self.pressedIcon = visualData.pressedIcon
-    self.unpressedIcon = visualData.unpressedIcon
-    self.disabledIcon = visualData.disabledIcon
-    self.mouseoverIcon = visualData.mouseoverIcon
-    self.allowLabelColorChanges = true
-
-    local icon = GetControl(self, "Icon")
-    local highlight = GetControl(self, "Highlight")
-    local center = GetControl(self, "Center")
-    local left = GetControl(self, "Left")
-    local right = GetControl(self, "Right")
-       
-    local lowerPadding = visualData.lowerPadding or 0    
+    local lowerPadding = visualData.lowerPadding or 0
     local upperPadding = visualData.upperPadding or 0
     local width = visualData.width or 32
     local height = visualData.height or 32
     local sideSize = TAB_DATA[tabType].SideSize or 16
 
-    if(icon) then    
-        icon:SetTextureCoords(visualData.textureLeft or 0, visualData.textureRight or 1, visualData.textureTop or 0, visualData.textureBottom or 1)
+    if icon then
+        local leftCoord = visualData.textureLeft or 0
+        local rightCoord = visualData.textureRight or 1
+        local topCoord = visualData.textureTop or 0
+        local bottomCoord = visualData.textureBottom or 1
+
+        icon:SetTextureCoords(leftCoord, rightCoord, topCoord, bottomCoord)
         icon:SetDimensions(width, height)
         icon:ClearAnchors()
-        icon:SetAnchor(BOTTOM, center, BOTTOM, 0, -lowerPadding) -- If center is nil, this will just use icon's parent
+        --If center is nil, this will just use icon's parent
+        icon:SetAnchor(BOTTOM, center, BOTTOM, 0, -lowerPadding)
 
         if highlight then
             highlight:SetAnchorFill(icon)
@@ -420,18 +449,25 @@ function ZO_TabButton_Icon_Initialize(self, tabType, visualData, pressedCallback
     
     local tabHeight = height + lowerPadding + upperPadding
 
-    if center then center:SetHeight(tabHeight) end
-    if left then left:SetDimensions(sideSize, tabHeight) end
-    if right then right:SetDimensions(sideSize, tabHeight) end
-    
-    self:SetDimensions(width + (sideSize * 2), tabHeight)
-    
-    SharedTabInit(self, tabType, pressedCallback, unpressedCallback)
+    if center then
+        center:SetHeight(tabHeight)
+    end
+
+    if left then
+        left:SetDimensions(sideSize, tabHeight)
+    end
+
+    if right then
+        right:SetDimensions(sideSize, tabHeight)
+    end
+
+    tabButton:SetDimensions(width + (sideSize * 2), tabHeight)
+    SharedTabInit(tabButton, tabType, pressedCallback, unpressedCallback)
 end
 
 function ZO_TabButton_SetTooltipText(tabButton, text, position)
-	tabButton.tooltipText = text
-	tabButton.tooltipPosition = position
+    tabButton.tooltipText = text
+    tabButton.tooltipPosition = position
 end
 
 function ZO_TabButton_SetMouseEnterHandler(tabButton, mouseEnterHandler)
@@ -442,146 +478,150 @@ function ZO_TabButton_SetMouseExitHandler(tabButton, mouseExitHandler)
     ZO_PreHookHandler(tabButton, "OnMouseExit", mouseExitHandler)
 end
 
-function ZO_TabButton_OnMouseEnter(self)
-    if(self.state == DISABLED) then return end
+function ZO_TabButton_OnMouseEnter(tabButton)
+    if tabButton.state == DISABLED or not tabButton.tabType then 
+        return 
+    end
 
-    local tabData = TAB_DATA[self.tabType]
-    
-    if(tabData.HasHighlight) then
-        GetControl(self, "Highlight"):SetHidden(false)
+    local tabData = TAB_DATA[tabButton.tabType]
+
+    if tabData.HasHighlight then
+        tabButton:GetNamedChild("Highlight"):SetHidden(false)
     end
-    
-    if(self.tooltipText) then
-        local tooltipPos = self.tooltipPosition or tabData.TooltipPosition
-    	if(tooltipPos == TOP) then
-            InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -2)   
-		else
-            InitializeTooltip(InformationTooltip, self, TOP, 0, 2)   
-		end   
-        
-		SetTooltipText(InformationTooltip, self.tooltipText)
+
+    if tabButton.tooltipText then
+        local tooltipPos = tabButton.tooltipPosition or tabData.TooltipPosition
+        if tooltipPos == TOP then
+            InitializeTooltip(InformationTooltip, tabButton, BOTTOM, 0, -2)
+        else
+            InitializeTooltip(InformationTooltip, tabButton, TOP, 0, 2)
+        end
+        SetTooltipText(InformationTooltip, tabButton.tooltipText)
     end
-    
-    --only unpressed tabs get mouse over effects
-    if(self.state == UNPRESSED) then
-        if(tabData.HasTabMouseOver) then
-            SetTabTextures(self, tabData.UnpressedMouseOverImage, self.mouseoverIcon, tabData.HasHighlight)
+
+    --Only unpressed tabs get mouse over effects
+    if tabButton.state == UNPRESSED then
+        if tabData.HasTabMouseOver then
+            SetTabTextures(tabButton, tabData.UnpressedMouseOverImage, tabButton.mouseoverIcon, tabData.HasHighlight)
         end
 
-        if(self.allowLabelColorChanges and tabData.UnpressedMouseOverTextColor) then
-            GetControl(self, "Text"):SetColor(tabData.UnpressedMouseOverTextColor:UnpackRGBA())
-        end
-    end
-end
-
-function ZO_TabButton_OnMouseExit(self)
-    if(self.state == DISABLED) then return end
-    
-    if(not self.tabType) then return end    -- Early out.    
-    local tabData = TAB_DATA[self.tabType]
-    
-    if(tabData.HasHighlight) then
-        GetControl(self, "Highlight"):SetHidden(true)
-    end
-    
-    if(self.tooltipText) then
-		SetTooltipText(InformationTooltip)
-    end
-    
-    --only unpressed tabs get mouse over effects
-    if(self.state == UNPRESSED) then
-        if(tabData.HasTabMouseOver) then       
-            SetTabTextures(self, tabData.UnpressedImage, self.unpressedIcon)
-        end
-
-        if(self.allowLabelColorChanges and tabData.UnpressedMouseOverTextColor) then
-            GetControl(self, "Text"):SetColor(tabData.UnpressedTextColor:UnpackRGBA())
+        if tabButton.allowLabelColorChanges and tabData.UnpressedMouseOverTextColor then
+            tabButton:GetNamedChild("Text"):SetColor(tabData.UnpressedMouseOverTextColor:UnpackRGBA())
         end
     end
 end
 
-function ZO_TabButton_IsDisabled(self)
-	return self.state == DISABLED
-end
-
-function ZO_TabButton_SetDisabled(self, disabled)
-    if(not self.tabType) then return end    -- Early out.    
-    local tabData = TAB_DATA[self.tabType]
-
-    if ZO_TabButton_IsDisabled(self) == disabled then
+function ZO_TabButton_OnMouseExit(tabButton)
+    if tabButton.state == DISABLED or not tabButton.tabType then
         return
     end
-    
-    if(disabled)
-    then
-        -- NOTE: For now it is the caller's responsibility to make sure that any unpressedCallback gets called as a result of setting this to the disabled state.
-        self.state = DISABLED
-        
-        if(tabData.HasHighlight) then
-            GetControl(self, "Highlight"):SetHidden(true)
-        end
-        
-        if(tabData.HasIcon and self.disabledIcon) then
-			local icon = GetControl(self,"Icon")
-			icon:SetTexture(self.disabledIcon)
-        end
-        
-        SetTabTextures(self, tabData.DisabledImage)
 
-        if(self.allowLabelColorChanges and tabData.DisabledTextColor) then
-            GetControl(self, "Text"):SetColor(tabData.DisabledTextColor:UnpackRGBA())
-        end
-    else
-        self.state = UNPRESSED -- always revert back to unpressed
-        
-        if(tabData.HasIcon and self.unpressedIcon) then
-			local icon = GetControl(self,"Icon")
-			icon:SetTexture(self.unpressedIcon)
-        end
-        
-        SetTabTextures(self, tabData.UnpressedImage)
+    local tabData = TAB_DATA[tabButton.tabType]
 
-        if(self.allowLabelColorChanges and tabData.UnpressedTextColor) then
-            GetControl(self, "Text"):SetColor(tabData.UnpressedTextColor:UnpackRGBA())
+    if tabData.HasHighlight then
+        tabButton:GetNamedChild("Highlight"):SetHidden(true)
+    end
+
+    if tabButton.tooltipText then
+        SetTooltipText(InformationTooltip)
+    end
+
+    --Only unpressed tabs get mouse over effects
+    if tabButton.state == UNPRESSED then
+        if tabData.HasTabMouseOver then
+            SetTabTextures(tabButton, tabData.UnpressedImage, tabButton.unpressedIcon)
         end
-        
-        if(MouseIsOver(self))
-        then
-            ZO_TabButton_OnMouseEnter(self)
-        else
-            ZO_TabButton_OnMouseExit(self)    
+
+        if tabButton.allowLabelColorChanges and tabData.UnpressedMouseOverTextColor then
+            tabButton:GetNamedChild("Text"):SetColor(tabData.UnpressedTextColor:UnpackRGBA())
         end
     end
 end
 
-function ZO_TabButton_Text_SetText(self, text)
-	local label = GetControl(self, "Text")
-	label:SetWidth(0)
+function ZO_TabButton_IsDisabled(tabButton)
+    return tabButton.state == DISABLED
+end
+
+function ZO_TabButton_SetDisabled(tabButton, disabled)
+    -- Early out. 
+    if not tabButton.tabType then
+        return
+    end
+
+    if ZO_TabButton_IsDisabled(tabButton) == disabled then
+        return
+    end
+
+    local tabData = TAB_DATA[tabButton.tabType]
+    if disabled then
+        -- NOTE: For now it is the caller's responsibility to make sure that any unpressedCallback gets called as a result of setting this to the disabled state.
+        tabButton.state = DISABLED
+
+        if tabData.HasHighlight then
+            tabButton:GetNamedChild("Highlight"):SetHidden(true)
+        end
+
+        if tabData.HasIcon and tabButton.disabledIcon then
+            local icon = tabButton:GetNamedChild("Icon")
+            icon:SetTexture(tabButton.disabledIcon)
+        end
+
+        SetTabTextures(tabButton, tabData.DisabledImage)
+
+        if tabButton.allowLabelColorChanges and tabData.DisabledTextColor then
+            tabButton:GetNamedChild("Text"):SetColor(tabData.DisabledTextColor:UnpackRGBA())
+        end
+    else
+        --Always revert back to unpressed
+        tabButton.state = UNPRESSED
+
+        if tabData.HasIcon and tabButton.unpressedIcon then
+            local icon = tabButton:GetNamedChild("Icon")
+            icon:SetTexture(tabButton.unpressedIcon)
+        end
+
+        SetTabTextures(tabButton, tabData.UnpressedImage)
+
+        if tabButton.allowLabelColorChanges and tabData.UnpressedTextColor then
+            tabButton:GetNamedChild("Text"):SetColor(tabData.UnpressedTextColor:UnpackRGBA())
+        end
+        
+        if MouseIsOver(tabButton) then
+            ZO_TabButton_OnMouseEnter(tabButton)
+        else
+            ZO_TabButton_OnMouseExit(tabButton)
+        end
+    end
+end
+
+function ZO_TabButton_Text_SetText(control, text)
+    local label = control:GetNamedChild("Text")
+    label:SetWidth(0)
     label:SetText(text)
     SizeButtonToFitText(label)
 end
 
-function ZO_TabButton_Text_GetText(self)
-    return GetControl(self, "Text"):GetText()
+function ZO_TabButton_Text_GetText(control)
+    return control:GetNamedChild("Text"):GetText()
 end
 
-function ZO_TabButton_Text_SetTextColor(self, color)
-    if(self.allowLabelColorChanges) then
-	    local label = GetControl(self, "Text")
+function ZO_TabButton_Text_SetTextColor(control, color)
+    if control.allowLabelColorChanges then
+        local label = control:GetNamedChild("Text")
         label:SetColor(color:UnpackRGBA())
     end
 end
 
-function ZO_TabButton_Text_AllowColorChanges(self, allow)
-    self.allowLabelColorChanges = allow
+function ZO_TabButton_Text_AllowColorChanges(control, allow)
+    control.allowLabelColorChanges = allow
 end
 
-function ZO_TabButton_Text_RestoreDefaultColors(self)
-    local tabData = TAB_DATA[self.tabType]
-	local label = GetControl(self, "Text")
-    self.allowLabelColorChanges = true
+function ZO_TabButton_Text_RestoreDefaultColors(control)
+    local tabData = TAB_DATA[control.tabType]
+    local label = control:GetNamedChild("Text")
+    control.allowLabelColorChanges = true
 
-    if(self.state == UNPRESSED) then
+    if control.state == UNPRESSED then
         label:SetColor(tabData.UnpressedTextColor:UnpackRGBA())
     else
         label:SetColor(tabData.PressedTextColor:UnpackRGBA())
@@ -597,64 +637,52 @@ end
     This will probably continue to be reworked.
 --]]
 
-ZO_TabButtonGroup = ZO_Object:Subclass()
+ZO_TabButtonGroup = ZO_InitializingObject:Subclass()
 
-function ZO_TabButtonGroup:New()
-    local group = ZO_Object.New(self)
-    
-    group.m_Buttons = {} -- m_Buttons will be keyed by a tabButton control, and the stored value is either a handler function, or the same as the key.
-    
-    return group    
+function ZO_TabButtonGroup:Initialize()
+    --m_Buttons will be keyed by a tabButton control, and the stored value is either a handler function, or the same as the key.
+    self.m_Buttons = {}
 end
 
 function ZO_TabButtonGroup:HandleMouseDown(tabButton, buttonId)
     -- Left mouse press will select a tab (if it's not pressed)
     -- Right mouse press will be given the chance to open a context menu (coming soon...)
-    if(buttonId == 1)
-    then
-        if(tabButton.state == PRESSED or tabButton.state == DISABLED)
-        then
-            return -- early out, the button was already pressed
-        end 
-        
+    if buttonId == 1 then
+        if tabButton.state == PRESSED or tabButton.state == DISABLED then
+            --Early out, the button was already pressed
+            return
+        end
+
         -- Set all buttons in the group to unpressed, and unlocked.
-        for currentTabButton, mouseDownHandler in pairs(self.m_Buttons)
-        do
+        for currentTabButton, mouseDownHandler in pairs(self.m_Buttons) do
             -- Only unpress the button that was pressed, and call its callback.
             -- Do not do anything with buttons that were already unpressed.
-            if(currentTabButton.state == PRESSED)
-            then
+            if currentTabButton.state == PRESSED then
                 ZO_TabButton_Unselect(currentTabButton)
             end
         end
-        
+
         -- Select the new tab button
         ZO_TabButton_Select(tabButton)
     end
 end
 
 function ZO_TabButtonGroup:Add(tabButton)
-    if(tabButton)
-    then
-        if(self.m_Buttons[tabButton] == nil)
-        then
+    if tabButton then
+        if self.m_Buttons[tabButton] == nil then
             -- Remember the original handler so that its call can be forced.
             -- NOTE: The TabButton template will generally take action on mouse down, not on a full click.
             -- This has to do with the fact that it's currently implemented as a label.
             local originalHandler = tabButton:GetHandler("OnMouseDown")
             self.m_Buttons[tabButton] = originalHandler or tabButton
-            
             -- This throws away return values from the original function, which is most likely ok in the case of a click handler.
-            local newHandler =  function(b, id)
-                                    if(originalHandler)
-                                    then
-                                        originalHandler(b, id)
-                                    end
-                                    
-                                    self:HandleMouseDown(b, id)
-                                end
-                                
-            tabButton:SetHandler("OnMouseDown", newHandler)
+            local function NewHandler(button, id)
+                if originalHandler then
+                    originalHandler(button, id)
+                end
+                self:HandleMouseDown(button, id)
+            end
+            tabButton:SetHandler("OnMouseDown", NewHandler)
         end
     end
 end
@@ -662,9 +690,8 @@ end
 function ZO_TabButtonGroup:Remove(tabButton)
     if self.m_Buttons[tabButton] then 
         ZO_TabButton_Unselect(tabButton, "preventcall")
-                
+
         local originalHandler = self.m_Buttons[tabButton]
-        
         if type(originalHandler) == "function" then
             tabButton:SetHandler("OnMouseDown", originalHandler)
         else
@@ -672,29 +699,28 @@ function ZO_TabButtonGroup:Remove(tabButton)
             -- adding this tab to another group will call two tab group handlers
             tabButton:SetHandler("OnMouseDown", nil)
         end
-        
+
         self.m_Buttons[tabButton] = nil
     end
 end
 
 function ZO_TabButtonGroup:Clear()
     for tabButton in pairs(self.m_Buttons) do
-        self:Remove(tabButton)      
+        self:Remove(tabButton)
     end
 end
 
 function ZO_TabButtonGroup:SetClickedButton(tabButton)
-    if(self.m_Buttons[tabButton])
-    then
+    if self.m_Buttons[tabButton] then
        tabButton:GetHandler("OnMouseDown")(tabButton, 1)
     end
 end
 
 function ZO_TabButtonGroup:GetClickedButton()
     for currentTabButton, mouseDownHandler in pairs(self.m_Buttons) do
-        if(currentTabButton.state == PRESSED) then
+        if currentTabButton.state == PRESSED then
             return currentTabButton
         end
-	end
-	return nil
+    end
+    return nil
 end

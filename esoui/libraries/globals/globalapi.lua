@@ -24,6 +24,8 @@ zo_plainstrfind     = PlainStringFind
 zo_strsplit         = SplitString
 zo_loadstring       = LoadString
 
+zo_deg              = math.deg
+zo_rad              = math.rad
 zo_floor            = math.floor
 zo_ceil             = math.ceil
 zo_mod              = math.fmod
@@ -338,8 +340,8 @@ end
 
 -- Rotate 2D coordinates about the origin by the specified angle.
 function ZO_Rotate2D(angle, x, y)
-    local cosine = math.cos(angle)
-    local sine = math.sin(angle)
+    local cosine = zo_cos(angle)
+    local sine = zo_sin(angle)
     return x * cosine - y * sine, y * cosine + x * sine
 end
 
@@ -362,6 +364,49 @@ function ZO_ScaleAndRotateTextureCoords(control, angle, originX, originY, scaleX
     control:SetVertexUV(VERTEX_POINTS_TOPRIGHT, originX + topRightX, originY + topRightY)
     control:SetVertexUV(VERTEX_POINTS_BOTTOMLEFT, originX + bottomLeftX, originY + bottomLeftY)
     control:SetVertexUV(VERTEX_POINTS_BOTTOMRIGHT, originX + bottomRightX, originY + bottomRightY)
+end
+
+-- Rotates the vertex UV coordinates of a texture control to simulate 3D rotation.
+-- Returns the normalized x- and y-axis scale pair.
+function ZO_RotateTexture3D(textureControl, xRotationRadians, yRotationRadians, zRotationRadians, scaleFactor, normalizedOriginX, normalizedOriginY)
+    scaleFactor = scaleFactor or 1
+    normalizedOriginX, normalizedOriginY = normalizedOriginX or 0.5, normalizedOriginY or 0.5
+
+    local scaleX, scaleY = zo_cos(xRotationRadians), zo_cos(yRotationRadians)
+    local absX, absY = zo_abs(scaleX), zo_abs(scaleY)
+    local signX, signY = zo_sign(scaleX), zo_sign(scaleY)
+    -- Apply easing to minimize visual distortion when both the x- and y- rotations
+    -- converge on right angles concurrently.
+    local normalizedScaleX = zo_lerp(0.15, 1, ZO_EaseInOutCubic(absY)) * signY
+    local normalizedScaleY = zo_lerp(0.15, 1, ZO_EaseInOutCubic(absX)) * signX
+    ZO_ScaleAndRotateTextureCoords(textureControl, zRotationRadians, normalizedOriginX, normalizedOriginY, normalizedScaleX * scaleFactor, normalizedScaleY * scaleFactor)
+
+    return normalizedScaleX, normalizedScaleY
+end
+
+-- Returns the normalized camera facing [-1, 1] given a normalized x- and y-axis scale pair.
+--[[ Example:
+
+    local pitch = zo_rad(0)
+    local yaw = zo_rad(45)
+    local roll = zo_rad(60)
+    local scaleX, scaleY = ZO_RotateTexture3D(myTextureControl, pitch, yaw, roll)
+    local cameraFacingDirection = ZO_GetNormalizedCameraFacingDirectionFromNormalizedAxisScales(scaleX, scaleY)
+    ZO_SetTextureLighting(myTextureControl, cameraFacingDirection)
+]]
+function ZO_GetNormalizedCameraFacingDirectionFromNormalizedAxisScales(normalizedScaleX, normalizedScaleY)
+    local normalizedCameraFacing = ZO_EaseInQuadratic(zo_abs(normalizedScaleX) * zo_abs(normalizedScaleY))
+    return normalizedCameraFacing
+end
+
+-- Applies basic shading to a texture control in proportion to how directly the control is facing the light source.
+function ZO_SetTextureLighting(textureControl, normalizedLightSourceFacingDirection, minBrightness, maxBrightness)
+    normalizedLightSourceFacingDirection = normalizedLightSourceFacingDirection or textureControl:GetNormalizedCameraFacing()
+    minBrightness, maxBrightness = minBrightness or 0.1, maxBrightness or 1
+
+    -- Apply lighting.
+    local brightness = zo_lerp(minBrightness, maxBrightness, normalizedLightSourceFacingDirection)
+    textureControl:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, brightness)
 end
 
 -- Updates the control's texture coordinates to show a single cell of a texture atlas that is composed of uniformly sized cells.
@@ -435,6 +480,10 @@ function ZO_FlagHelpers.MaskHasAnyFlag(mask, ...)
         end
     end
     return false
+end
+
+function ZO_FlagHelpers.MasksShareAnyFlag(mask1, mask2)
+    return BitAnd(mask1, mask2) ~= 0
 end
 
 -- Iterator returns each flag set in the specified mask.
@@ -526,26 +575,57 @@ function ZO_FlagHelpers.CompareMaskFlags(flagsBefore, flagsAfter)
     return changedFlags
 end
 
+-- Returns an iterator for which the keys are the names of the functions in
+-- the callstack ordered from the top to the bottom of the callstack.
+function ZO_GetCallstackFunctionNamesIterator()
+    local stackTrace = debug.traceback()
+    return zo_strgmatch(stackTrace, "in function '(%S*)'")
+end
+
 -- Returns a numerically indexed table containing the names of the functions
--- in the callstack, in order from the top to the bottom of the callstack.
+-- in the callstack ordered from the top to the bottom of the callstack.
 -- Specify an optional 'numTopmostFunctionsToExclude' to exclude one or more
 -- function names starting from the top of the callstack (default is 0).
 function ZO_GetCallstackFunctionNames(numTopmostFunctionsToExclude)
     local minFunctionIndex = (numTopmostFunctionsToExclude or 0) + 1
-    local stackTrace = debug.traceback()
     local functionNames = {}
     local functionIndex = 0
-
-    for functionName in zo_strgmatch(stackTrace, "in function '(%S*)'") do
-        if functionName ~= "ZO_GetCallstackFunctionNames" then
+    for functionName in ZO_GetCallstackFunctionNamesIterator() do
+        if functionName ~= "ZO_GetCallstackFunctionNames" and functionName ~= "ZO_GetCallstackFunctionNamesIterator" then
             functionIndex = functionIndex + 1
             if functionIndex >= minFunctionIndex then
                 table.insert(functionNames, functionName)
             end
         end
     end
-
     return functionNames
+end
+
+-- Returns the name of the function at the specified index in the callstack.
+-- Note that index 1 is the name of the caller function, index 2 is the name
+-- of the function that called the caller function, and so on.
+function ZO_GetCallstackFunctionName(callstackIndex)
+    -- Skip this function and ZO_GetCallstackFunctionNamesIterator.
+    local numFunctionsToSkip = callstackIndex + 1
+    for functionName in ZO_GetCallstackFunctionNamesIterator() do
+        if numFunctionsToSkip > 0 then
+            numFunctionsToSkip = numFunctionsToSkip - 1
+        else
+            return functionName
+        end
+    end
+end
+
+-- Returns the name of the current function that is executing.
+function ZO_GetCurrentFunctionName()
+    -- Skip this function.
+    return ZO_GetCallstackFunctionName(1)
+end
+
+-- Returns the name of the function that called the current function that is executing.
+function ZO_GetCallerFunctionName()
+    -- Skip this function and the caller function.
+    return ZO_GetCallstackFunctionName(2)
 end
 
 function ZO_GetCallbackForwardingFunction(object, receiverFunction)
@@ -554,4 +634,15 @@ end
 
 function ZO_GetEventForwardingFunction(object, receiverFunction)
     return function(_, ...) receiverFunction(object, ...) end
+end
+
+-- Returns a reference to the "owner" object instance associated
+-- with the specified control if such an owner exists.
+function ZO_GetControlOwnerObject(control)
+    local owner = control.owner or control.object or nil
+    if not owner and control:GetType() ~= CT_TOPLEVELCONTROL then
+        local topLevelControl = control:GetOwningWindow()
+        owner = topLevelControl.owner or topLevelControl.object or nil
+    end
+    return owner
 end

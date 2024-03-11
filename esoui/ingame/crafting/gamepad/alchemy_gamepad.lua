@@ -57,6 +57,8 @@ function ZO_GamepadAlchemy:InitializeScenes()
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(self.tooltip)
             GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_SUCCESS, SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_FAIL)
             self:UpdateTooltip()
+            ZO_GamepadCraftingUtils_SetupGenericHeader(self, GetString(SI_ALCHEMY_CREATION))
+            ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
             self.mode = ZO_ALCHEMY_MODE_CREATION
         elseif newState == SCENE_HIDDEN then
             self.inventory:Deactivate()

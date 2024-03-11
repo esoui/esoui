@@ -1057,8 +1057,10 @@ do
             data.displayMode = GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
 
             data.onValueChangedCallback = function()
-                -- Renarrate the list entry when points are added or removed
-                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
+                if self:IsShowing() then
+                    -- Renarrate the list entry when points are added or removed
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
+                end
             end
 
             data.narrationText = function(entryData, entryControl)
@@ -1217,7 +1219,7 @@ do
         local hasActiveEffects = numBuffs > 0
         if hasActiveEffects then
             for i = 1, numBuffs do
-                local buffName, startTime, endTime, buffSlot, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff = GetUnitBuffInfo("player", i)
+                local buffName, startTime, endTime, buffSlot, stackCount, iconFile, deprecatedBuffType, effectType, abilityType, statusEffectType, abilityId, canClickOff = GetUnitBuffInfo("player", i)
 
                 if buffSlot > 0 and buffName ~= "" then
                     local data = ZO_GamepadEntryData:New(zo_strformat(SI_ABILITY_TOOLTIP_NAME, buffName), iconFile)

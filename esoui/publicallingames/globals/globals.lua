@@ -1,5 +1,5 @@
 -- This allows us to make the same function in InGames and Pregame while changing exactly what it calls,
--- so shared code doesn't need to know which state its in
+-- so shared code doesn't need to know which state it's in
 function ZO_Disconnect()
     Disconnect()
 end
@@ -14,7 +14,8 @@ function ZO_GetMarketProductDisplayState(marketProductId)
     end
 
     local expectedClaimResult = CouldAcquireMarketProduct(marketProductId)
-    if expectedClaimResult == MARKET_PURCHASE_RESULT_FAIL_INSTANT_UNLOCK_REQ_LIST then
+    if expectedClaimResult == MARKET_PURCHASE_RESULT_FAIL_INSTANT_UNLOCK_REQ_LIST
+        or expectedClaimResult == MARKET_PURCHASE_RESULT_TEMPORARY_HOTBAR_PROHIBITION then
         return MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE
     end
 

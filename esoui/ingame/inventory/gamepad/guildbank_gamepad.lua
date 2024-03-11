@@ -38,6 +38,10 @@ do
     end
 
     function ZO_GamepadGuildBankInventoryList:OnRefreshList(shouldTriggerRefreshListCallback)
+        if TEXT_SEARCH_MANAGER:IsSearchDirty(self.searchContext) then
+            return
+        end
+
         local guildId = GetSelectedGuildBankId()
         local shouldShowList = false
 

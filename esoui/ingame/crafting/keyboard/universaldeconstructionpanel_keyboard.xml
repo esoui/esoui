@@ -21,7 +21,7 @@
                             </OnMouseExit>
                         </Button>
 
-                        <Control name="$(parent)CraftingTypes" inherits="ZO_MultiselectComboBox">
+                        <Control name="$(parent)CraftingTypes" inherits="ZO_ComboBox">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="2" />
                             <Dimensions x="200" />
 

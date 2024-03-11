@@ -54,8 +54,8 @@ end
 function ZO_OutfitSlotManipulator:SetPendingCollectibleId(collectibleId, suppressCallbacks)
     if collectibleId then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-        if collectibleData and collectibleData:IsBlacklisted() then
-            ZO_AlertEvent(EVENT_COLLECTIBLE_USE_RESULT, COLLECTIBLE_USAGE_BLOCK_REASON_BLACKLISTED, true)
+        if collectibleData and collectibleData:IsBlocked(self.owner:GetActorCategory()) then
+            ZO_AlertEvent(EVENT_COLLECTIBLE_USE_RESULT, GetCollectibleBlockReason(collectibleId, self.owner:GetActorCategory()), true)
             return
         end
     end
@@ -97,8 +97,8 @@ end
 function ZO_OutfitSlotManipulator:SetPendingCollectibleIdAndItemMaterialIndex(collectibleId, itemMaterialIndex, suppressCallbacks)
     if collectibleId then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-        if collectibleData and collectibleData:IsBlacklisted() then
-            ZO_AlertEvent(EVENT_COLLECTIBLE_USE_RESULT, COLLECTIBLE_USAGE_BLOCK_REASON_BLACKLISTED, true)
+        if collectibleData and collectibleData:IsBlocked(self.owner:GetActorCategory()) then
+            ZO_AlertEvent(EVENT_COLLECTIBLE_USE_RESULT, GetCollectibleBlockReason(collectibleId, self.owner:GetActorCategory()), true)
             return
         end
     end

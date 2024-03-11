@@ -229,12 +229,12 @@ function ZO_SharedInventoryManager:Initialize()
 
     local function OnEndlessDungeonCurrencyUpdated(newAmount, oldAmount, changeReason)
         if changeReason == CURRENCY_CHANGE_REASON_LOOT and newAmount > oldAmount then
-            PlaySound(SOUNDS.ENDLESS_DUNGEON_CURRENCY_ACQUIRE)
+            PlaySound(SOUNDS.ARCHIVAL_FORTUNES_ACQUIRE)
         end
     end
 
     local function OnCurrencyUpdated(_, currencyType, currencyLocation, newAmount, oldAmount, changeReason)
-        if currencyType == CURT_ENDLESS_DUNGEON then
+        if currencyType == CURT_ARCHIVAL_FORTUNES then
             OnEndlessDungeonCurrencyUpdated(newAmount, oldAmount, changeReason)
         end
         internalassert(CURT_MAX_VALUE == 12, "Check if new currency requires unique acquire sound hook or other behavior")

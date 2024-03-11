@@ -24,6 +24,10 @@
 
         <Control name="ZO_GamepadMenuEntryTemplateWithArrow" inherits="ZO_GamepadNewMenuEntryTemplate" virtual="true">
             <Controls>
+                <Label name="$(parent)Label" override="true">
+                    <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WITH_ARROW_WIDTH_AFTER_INDENT" />
+                </Label>
+                
                 <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Buttons/Gamepad/gp_menu_rightArrow.dds" excludeFromResizeToFitExtents="true">
                     <Dimensions x="32" y="32" />
                     <Anchor point="RIGHT" />

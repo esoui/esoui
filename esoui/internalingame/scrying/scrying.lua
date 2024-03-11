@@ -421,7 +421,7 @@ end
 
 do
     local KEYBOARD_VALUE_FONT =  "ZoFontKeyboard18ThickOutline"
-    local GAMEPAD_VALUE_FONT = "ZoFontGamepad36ThickOutline" 
+    local GAMEPAD_VALUE_FONT = "ZoFontGamepad36ThickOutlineLatin" 
     function ZO_ScryingNormalActionsMeter:UpdatePlatformStyle()
         self.valueText:SetFont(IsInGamepadPreferredMode() and GAMEPAD_VALUE_FONT or KEYBOARD_VALUE_FONT)
     end

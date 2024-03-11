@@ -10,14 +10,14 @@ end
 
 function ZO_SiegeHUDFragment:Show()
     TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, false, TUTORIAL_SUPPRESSED_BY_SCENE)
-    SHARED_INFORMATION_AREA:SetSupressed(false)
+    SHARED_INFORMATION_AREA:SetSupressed(false, "HUDFragment")
 
     self:OnShown()
 end
 
 function ZO_SiegeHUDFragment:Hide()
     TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, true, TUTORIAL_SUPPRESSED_BY_SCENE)
-    SHARED_INFORMATION_AREA:SetSupressed(true)
+    SHARED_INFORMATION_AREA:SetSupressed(true, "HUDFragment")
 
     self:OnHidden()
 end

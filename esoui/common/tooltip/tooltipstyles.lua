@@ -1582,6 +1582,17 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         horizontalAlignment = TEXT_ALIGN_CENTER
     },
+    itemSetSuppressedDescription =
+    {
+        fontColorField = GENERAL_COLOR_RED
+    },
+    itemSetSuppressedSection =
+    {
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_27)",
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_RED,
+    },
     redeemCodeBodySection =
     {
         -- really push this body section towards the center of the screen

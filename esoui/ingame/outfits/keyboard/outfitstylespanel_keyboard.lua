@@ -96,6 +96,12 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
             control:SetAlpha(1)
             ZO_SetDefaultIconSilhouette(control.icon, not data.clearAction and data:IsLocked())
             control.highlight:SetDesaturation(data.iconDesaturation)
+            local actorCategory = self:GetActorCategory()
+            if data.IsBlocked and data:IsBlocked(actorCategory) then
+                if control.icon ~= nil then
+                    control.icon:SetDesaturation(1)
+                end
+            end
             local isCurrent = false
             local isPending = false
             if self.restyleSlotData then
@@ -408,7 +414,7 @@ function ZO_OutfitStylesPanel_Keyboard:RefreshVisible(retainScrollPosition)
             local entryData = self.entryDataObjectPool:AcquireObject()
             entryData:SetDataSource(collectibleData)
             if not collectibleData.clearAction then
-                local actorCategory = self.restyleSlotData and ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleSlotData.restyleMode) or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+                local actorCategory = self:GetActorCategory()
                 ZO_UpdateCollectibleEntryDataIconVisuals(entryData, actorCategory)
             end
             gridListPanelList:AddEntry(entryData)
@@ -497,7 +503,7 @@ function ZO_OutfitStylesPanel_Keyboard:TogglePreviewOutfitStyle(collectibleData,
             local slotManipulator = self.currentOutfitManipulator:GetSlotManipulator(preferredOutfitSlot)
             primaryDyeId, secondaryDyeId, accentDyeId = slotManipulator:GetPendingDyeData()
         else
-            local actorCategory = self.restyleSlotData and ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleSlotData.restyleMode) or GAMEPLAY_ACTOR_CATEGORY_PLAYER
+            local actorCategory = self:GetActorCategory()
             local equipSlot = GetEquipSlotForOutfitSlot(preferredOutfitSlot)
             if CanEquippedItemBeShownInOutfitSlot(actorCategory, equipSlot, preferredOutfitSlot) then
                 primaryDyeId, secondaryDyeId, accentDyeId = GetPendingSlotDyes(RESTYLE_MODE_EQUIPMENT, ZO_RESTYLE_DEFAULT_SET_INDEX, equipSlot)
@@ -521,7 +527,8 @@ end
 function ZO_OutfitStylesPanel_Keyboard:OnRestyleOutfitStyleEntrySelected(entryData, initialContextMenuRefCount)
     local collectibleData = entryData.data
     if collectibleData then
-        if collectibleData.isEmptyCell then
+        local actorCategory = self:GetActorCategory()
+        if collectibleData.isEmptyCell or (collectibleData.IsBlocked and collectibleData:IsBlocked(actorCategory)) then
             return
         end
 
@@ -564,8 +571,9 @@ function ZO_OutfitStylesPanel_Keyboard:OnOutfitStyleEntryRightClick(entryData)
     local collectibleData = entryData.data
     if collectibleData and not collectibleData.isEmptyCell then
         ClearMenu()
-        
-        if IsCharacterPreviewingAvailable() then
+
+        local actorCategory = self:GetActorCategory()
+        if IsCharacterPreviewingAvailable() and not (collectibleData.IsBlocked and collectibleData:IsBlocked(actorCategory)) then
             AddMenuItem(GetString(SI_OUTFIT_STYLE_EQUIP_BIND), function() self:OnRestyleOutfitStyleEntrySelected(entryData) end)
         end
 
@@ -608,11 +616,14 @@ do
         control.highlightAnimation:PlayForward()
 
         ZO_GridEntry_SetIconScaledUp(control, true)
-        
+
         local collectibleData = control.dataEntry.data
         if not collectibleData.isEmptyCell then
             local offsetX = control:GetParent():GetLeft() - control:GetLeft() - 5
             InitializeTooltip(ItemTooltip, control, RIGHT, offsetX, 0, LEFT)
+
+            local actorCategory = self:GetActorCategory()
+
             if collectibleData.clearAction then
                 ItemTooltip:AddLine(GetString(SI_OUTFIT_CLEAR_OPTION_TITLE), "ZoFontWinH2", ZO_SELECTED_TEXT:UnpackRGB())
                 ZO_Tooltip_AddDivider(ItemTooltip)
@@ -624,14 +635,14 @@ do
                 local formattedApplyCost = zo_strformat(SI_TOOLTIP_COLLECTIBLE_OUTFIT_STYLE_APPLICATION_COST_KEYBOARD_NO_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, applyCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
                 ItemTooltip:AddLine(formattedApplyCost, "ZoFontWinH4", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
             else
-                local actorCategory = self.restyleSlotData and ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleSlotData.restyleMode) or GAMEPLAY_ACTOR_CATEGORY_PLAYER
                 ItemTooltip:SetCollectible(collectibleData.collectibleId, SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON, actorCategory)
             end
-            self.mouseOverEntryData = control.dataEntry
-        end
 
-        if not ZO_RestyleCanApplyChanges() and collectibleData and not collectibleData.isEmptyCell and IsCharacterPreviewingAvailable() then
-            WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
+            if not ZO_RestyleCanApplyChanges() and not (collectibleData.IsBlocked and collectibleData:IsBlocked(actorCategory)) and IsCharacterPreviewingAvailable() then
+                WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
+            end
+
+            self.mouseOverEntryData = control.dataEntry
         end
 
         self:FireCallbacks("MouseTargetChanged")
@@ -690,6 +701,11 @@ end
 
 function ZO_OutfitStylesPanel_Keyboard:OnProgressBarMouseExit()
     ClearTooltip(InformationTooltip)
+end
+
+
+function ZO_OutfitStylesPanel_Keyboard:GetActorCategory()
+    return self.restyleSlotData and ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleSlotData.restyleMode) or GAMEPLAY_ACTOR_CATEGORY_PLAYER
 end
 
 ------------------------------

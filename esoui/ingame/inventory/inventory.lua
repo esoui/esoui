@@ -2309,8 +2309,8 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, currency
         comboBox:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
         comboBox:SetHeight(300)
 
-        local function SetupScrollableEntry(...)
-            comboBox:SetupEntry(...)
+        local function SetupScrollableEntry(control, data, ...)
+            data.m_dropdownObject:SetupEntry(control, data, ...)
         end
         comboBox:AddCustomEntryTemplate("ZO_DepositWithdrawComboBoxEntry", ZO_WITHDRAW_DEPOSIT_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT, SetupScrollableEntry)
 

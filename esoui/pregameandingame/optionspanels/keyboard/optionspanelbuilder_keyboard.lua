@@ -23,6 +23,7 @@ do
         ["ZO_Options_Video_Dropdown_IncludeApplyScreenWarning"] = 10,
         ["ZO_Options_Dropdown_DynamicWarning"] = 10,
         ["ZO_Options_Slider"] = 4,
+        ["ZO_Options_Video_Slider_DynamicWarning"] = 4,
         ["ZO_Options_Video_Slider_IncludeMaxParticleSystemsWarning"] = 4,
         ["ZO_Options_Slider_VerticalLabel"] = 4,
         ["ZO_Options_Checkbox"] = 6,

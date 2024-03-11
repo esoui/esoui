@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_GroupFinder_Gamepad_SearchResults_Filter" virtual="true">
-            <Dimensions x="350" y="48"/>
+            <Dimensions x="400" y="48"/>
             <Controls>
                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadInteractiveFilterHighlight" hidden="true" />
 

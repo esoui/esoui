@@ -256,7 +256,7 @@ function ZO_AssignableUtilityWheel_Shared:InitializeKeybindStripDescriptors()
             name = GetString(SI_UTILITY_WHEEL_CYCLE_WHEEL),
             keybind = "UI_SHORTCUT_QUATERNARY",
             visible = function()
-                return self.numHotbars > 1
+                return self.numHotbars > 1 and not IsCurrentlyPreviewing()
             end,
             callback = function()
                 ClearCursor()

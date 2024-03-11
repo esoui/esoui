@@ -47,6 +47,10 @@ do
                 local expectedClaimResult = CouldAcquireMarketProduct(productId)
                 if expectedClaimResult == MARKET_PURCHASE_RESULT_FAIL_INSTANT_UNLOCK_REQ_LIST then
                     self:AddInstantUnlockEligibilityFailures(GetMarketProductEligibilityErrorStringIds(productId))
+                elseif expectedClaimResult == MARKET_PURCHASE_RESULT_TEMPORARY_HOTBAR_PROHIBITION then
+                    local ineligibilitySection = self:AcquireSection(self:GetStyle("instantUnlockIneligibilitySection"))
+                    ineligibilitySection:AddLine(GetString("SI_MARKETPURCHASABLERESULT", MARKET_PURCHASE_RESULT_TEMPORARY_HOTBAR_PROHIBITION), self:GetStyle("instantUnlockIneligibilityLine"))
+                    self:AddSection(ineligibilitySection)
                 end
             end
         else

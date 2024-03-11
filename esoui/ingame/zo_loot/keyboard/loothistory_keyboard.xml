@@ -15,7 +15,7 @@
                 </Texture>
 
                 <Label name="$(parent)Label" font="ZoFontGameShadow"  verticalAlignment="CENTER" wrapMode="ELLIPSIS" maxLineCount="2">
-                    <Dimensions x="240"/>
+                    <Dimensions x="230"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
                 </Label>
               

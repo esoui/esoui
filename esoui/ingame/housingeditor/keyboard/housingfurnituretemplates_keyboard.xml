@@ -163,11 +163,22 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_HousingFurnitureBrowserFilters_ComboBoxHeaderEntry" level="3" virtual="true">
+            <Dimensions y="ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT" />
+
+            <Controls>
+                <Label name="$(parent)Label" wrapMode="ELLIPSIS" maxLineCount="1">
+                    <Anchor point="LEFT" offsetX="ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
+                    <Anchor point="RIGHT" offsetX="-ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
+                </Label>
+            </Controls>
+        </Control>
+
         <Control name="ZO_HousingFurnitureBrowserListWithSearchAndBoundFilters_Keyboard" inherits="ZO_HousingFurnitureBrowserListWithSearch_Keyboard" virtual="true">
             <Controls>
                 <Control name="$(parent)Contents" override="true">
                     <Controls>
-                        <Control name="$(parent)FiltersDropdown" inherits="ZO_MultiselectComboBox">
+                        <Control name="$(parent)FiltersDropdown" inherits="ZO_ComboBox">
                             <Dimensions x="200" />
                             <Anchor point="TOPRIGHT" offsetX="-9" offsetY="32" />
                         </Control>
@@ -193,7 +204,7 @@
             <Controls>
                 <Control name="$(parent)Contents" override="true">
                     <Controls>
-                        <Control name="$(parent)FiltersDropdown" inherits="ZO_MultiselectComboBox">
+                        <Control name="$(parent)FiltersDropdown" inherits="ZO_ComboBox">
                             <Dimensions x="200" />
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)ThemeDropdown" relativePoint="TOPLEFT" offsetX="-9" />
                         </Control>

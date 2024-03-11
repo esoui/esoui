@@ -64,6 +64,14 @@ function ZO_ComboBox_Base:SetDropdownFont(font)
     self.m_font = font
 end
 
+function ZO_ComboBox_Base:GetDropdownFont()
+    return self.m_font
+end
+
+function ZO_ComboBox_Base:GetDropdownFontObject()
+    return _G[self.m_font]
+end
+
 function ZO_ComboBox_Base:SetSelectedItemFont(font)
     self.m_selectedItemText:SetFont(font)
 end
@@ -298,6 +306,20 @@ function ZO_ComboBox_Base:GetSelectedTextColor(enabledState)
     else
         return GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED)
     end
+end
+
+function ZO_ComboBox_Base:GetItemNormalColor(item)
+    if item.enabled == false then
+        return item.m_disabledColor or self.m_disabledColor
+    end
+    return item.m_normalColor or self.m_normalColor
+end
+
+function ZO_ComboBox_Base:GetItemHighlightColor(item)
+    if item.enabled == false then
+        return item.m_disabledColor or self.m_disabledColor
+    end
+    return item.m_highlightColor or self.m_highlightColor
 end
 
 function ZO_ComboBox_Base:SetEnabled(enabled)

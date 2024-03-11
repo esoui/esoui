@@ -914,7 +914,9 @@ local UNITFRAME_LAYOUT_DATA =
 
             statusData = { anchor1 = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 36, 42), anchor2 = ZO_Anchor:New(TOPRIGHT, nil, TOPRIGHT, -140, 42), height = 0, },
 
-            leaderIconData = {width = 16, height = 16, offsetX = 5, offsetY = 5}
+            leaderIconData = { width = 16, height = 16, offsetX = 5, offsetY = 5 },
+
+            electionIconData = { offsetX = -45, offsetY = 6 },
         },
 
         gamepad =
@@ -931,7 +933,9 @@ local UNITFRAME_LAYOUT_DATA =
             -- Indented constraints are base constraints minus the width of the leader icon.
             indentedMinX = 125,
             indentedMaxX = 190,
-            leaderIconData = {width = 25, height = 25, offsetX = 0, offsetY = 12}
+            leaderIconData = { width = 25, height = 25, offsetX = 0, offsetY = 12 },
+
+            electionIconData = { offsetX = 27, offsetY = -13 },
         },
     },
 
@@ -970,6 +974,7 @@ local UNITFRAME_LAYOUT_DATA =
             nameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 40,
             indentedNameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 20, 3),
             indentedNameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 52 - 2,
+            anchorNameToRight = true,
 
             leaderIconData = {width = 18, height = 18, offsetX = 2, offsetY = 7}
         },
@@ -1095,6 +1100,15 @@ local function LayoutUnitFrameName(nameLabel, layoutData, indented)
             layoutData.nameAnchor:Set(nameLabel)
         elseif layoutData.indentedNameAnchor and indented then
             layoutData.indentedNameAnchor:Set(nameLabel)
+        end
+
+        local electionIconControl = nameLabel:GetParent():GetNamedChild("ElectionIcon")
+        if electionIconControl then
+            if layoutData.anchorNameToRight then
+                nameLabel:SetAnchor(RIGHT, electionIconControl, LEFT, 0, 0, ANCHOR_CONSTRAINS_X)
+            elseif layoutData.electionIconData then
+                electionIconControl:SetAnchor(RIGHT, nil, RIGHT, layoutData.electionIconData.offsetX, layoutData.electionIconData.offsetY)
+            end
         end
 
         nameLabel:SetWrapMode(layoutData.nameWrapMode or TEXT_WRAP_MODE_TRUNCATE)

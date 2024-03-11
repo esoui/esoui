@@ -388,6 +388,7 @@ ESO_Dialogs["LOGIN_REQUESTED"] =
         text = SI_LOGIN_REQUESTED,
         align = TEXT_ALIGN_CENTER,
     },
+    mustChoose = true,
     buttons =
     {
         [1] =
@@ -464,7 +465,6 @@ ESO_Dialogs["BAD_LOGIN"] =
     },
     buttons =
     {
-        [1] =
         {
             text = SI_DIALOG_BUTTON_VIEW_ACCOUNT_PAGE,
             keybind = "DIALOG_TERTIARY",
@@ -474,16 +474,18 @@ ESO_Dialogs["BAD_LOGIN"] =
                             PregameStateManager_ReenterLoginState()
                         end
         },
-        [2] =
         {
             text =      SI_DIALOG_EXIT,
             keybind =   "DIALOG_NEGATIVE",
             clickSound = SOUNDS.DIALOG_ACCEPT,
-            callback =  function(dialog)
+            callback =  function()
                             PregameStateManager_ReenterLoginState()
                         end
         }
-    }
+    },
+    noChoiceCallback = function()
+        PregameStateManager_ReenterLoginState()
+    end,
 }
 
 ESO_Dialogs["BAD_LOGIN_PAYMENT_EXPIRED"] =
@@ -499,7 +501,6 @@ ESO_Dialogs["BAD_LOGIN_PAYMENT_EXPIRED"] =
     },
     buttons =
     {
-        [1] =
         {
             text = SI_DIALOG_BUTTON_VIEW_ACCOUNT_PAGE,
             keybind = "DIALOG_TERTIARY",
@@ -509,16 +510,90 @@ ESO_Dialogs["BAD_LOGIN_PAYMENT_EXPIRED"] =
                             PregameStateManager_ReenterLoginState()
                         end
         },
-        [2] =
         {
             text = SI_DIALOG_EXIT,
             keybind = "DIALOG_NEGATIVE",
             clickSound = SOUNDS.DIALOG_ACCEPT,
-            callback =  function(dialog)
+            callback =  function()
                             PregameStateManager_ReenterLoginState()
                         end
         },
-    }
+    },
+    noChoiceCallback = function()
+        PregameStateManager_ReenterLoginState()
+    end,
+}
+
+ESO_Dialogs["BAD_LOGIN_ACCOUNT_BANNED"] =
+{
+    title =
+    {
+        text = SI_LOGIN_DIALOG_TITLE_ACCOUNT_BANNED,
+    },
+    mainText = 
+    {
+        text = zo_strformat(GetString("SI_LOGINAUTHERROR", LOGIN_AUTH_ERROR_ACCOUNT_BANNED), GetURLTextByType(APPROVED_URL_ESO_HELP)),
+        align = TEXT_ALIGN_LEFT,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_BUTTON_VIEW_HELP_PAGE,
+            keybind = "DIALOG_TERTIARY",
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+            callback =  function()
+                ConfirmOpenURL(GetURLTextByType(APPROVED_URL_ESO_HELP))
+                PregameStateManager_ReenterLoginState()
+            end
+        },
+        {
+            text = SI_DIALOG_EXIT,
+            keybind = "DIALOG_NEGATIVE",
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+            callback =  function()
+                PregameStateManager_ReenterLoginState()
+            end
+        },
+    },
+    noChoiceCallback = function()
+        PregameStateManager_ReenterLoginState()
+    end,
+}
+
+ESO_Dialogs["BAD_LOGIN_ACCOUNT_SUSPENDED"] =
+{
+    title =
+    {
+        text = SI_LOGIN_DIALOG_TITLE_ACCOUNT_SUSPENDED,
+    },
+    mainText = 
+    {
+        text = zo_strformat(GetString("SI_LOGINAUTHERROR", LOGIN_AUTH_ERROR_ACCOUNT_SUSPENDED), GetURLTextByType(APPROVED_URL_ESO_HELP)),
+        align = TEXT_ALIGN_LEFT,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_BUTTON_VIEW_HELP_PAGE,
+            keybind = "DIALOG_TERTIARY",
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+            callback =  function()
+                ConfirmOpenURL(GetURLTextByType(APPROVED_URL_ESO_HELP))
+                PregameStateManager_ReenterLoginState()
+            end
+        },
+        {
+            text = SI_DIALOG_EXIT,
+            keybind = "DIALOG_NEGATIVE",
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+            callback =  function()
+                PregameStateManager_ReenterLoginState()
+            end
+        },
+    },
+    noChoiceCallback = function()
+        PregameStateManager_ReenterLoginState()
+    end,
 }
 
 ESO_Dialogs["HANDLE_ERROR"] = 
@@ -874,7 +949,13 @@ ESO_Dialogs["LINKED_LOGIN_ERROR_KEYBOARD"] =
     canQueue = true,
     title =
     {
-        text = SI_DIALOG_TITLE_LOGIN_ERROR,
+        text = function(dialog)
+            if dialog.data and dialog.data.titleStringId then
+                return GetString(dialog.data.titleStringId)
+            else
+                return GetString(SI_DIALOG_TITLE_LOGIN_ERROR)
+            end
+        end,
     },
     mainText=
     {
@@ -886,11 +967,10 @@ ESO_Dialogs["LINKED_LOGIN_ERROR_KEYBOARD"] =
             keybind = "DIALOG_TERTIARY",
             text = GetString(SI_CONSOLE_RESEND_VERIFY_EMAIL_KEYBIND),
             visible = function(dialog)
-                local dialogData = dialog.data
-                if dialogData == nil then
-                    return false
+                if dialog.data then
+                    return dialog.data.showResendVerificationEmail
                 end
-                return dialogData.showResendVerificationEmail
+                return false
             end,
             callback = function(dialog)
                 PregameAttemptResendVerificationEmail()

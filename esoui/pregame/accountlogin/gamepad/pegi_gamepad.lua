@@ -103,7 +103,7 @@ do
                     dropdown:AddItem(entries[0])
                 end
                 for i = 1, GetNumCountries() do
-                    local countryName, ratingsBoard = GetCountryDataForIndex(i)
+                    local countryName, _, ratingsBoard = GetCountryDataForIndex(i)
                     local function OnItemSelected()
                         self.currentSelectedCountry = countryName
                         self.currentSelectedIndex = i

@@ -141,6 +141,7 @@ function MagmaBackground:Initialize(control)
     control.owner = self
 
     self:InitializeControls()
+    self:InitializeSceneStates()
     self:UpdateLayout()
 
     PREGAME_ANIMATED_BACKGROUND_FRAGMENT = ZO_SimpleSceneFragment:New(control)
@@ -386,7 +387,6 @@ end
 function MagmaBackground:Start()
     zo_randomseed(GetTimeStamp32())
 
-    self:InitializeSceneStates()
     self:InitializeParticleStates()
 
     self.startFrameTimeSeconds = GetFrameTimeSeconds()

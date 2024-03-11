@@ -246,7 +246,7 @@ do
         local restrictionsSection = self:AcquireSection(self:GetStyle("collectionsRestrictionsSection"))
 
         for restrictionType = COLLECTIBLE_RESTRICTION_TYPE_ITERATION_BEGIN, COLLECTIBLE_RESTRICTION_TYPE_ITERATION_END do
-            local hasRestrictions, passesRestrictions, allowedNamesString = GetCollectibleRestrictionsByType(collectibleId, restrictionType)
+            local hasRestrictions, passesRestrictions, allowedNamesString = GetCollectibleRestrictionsByType(collectibleId, restrictionType, actorCategory)
             if hasRestrictions then
                 local statValuePair = restrictionsSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))
                 statValuePair:SetStat(GetString("SI_COLLECTIBLERESTRICTIONTYPE", restrictionType), self:GetStyle("statValuePairStat"))
@@ -310,7 +310,7 @@ do
         if failsRestriction then
             bodySection:AddLine(GetString(SI_COLLECTIBLE_TOOLTIP_NOT_USABLE_BY_CHARACTER), descriptionStyle, self:GetStyle("failed"))
         elseif params.showBlockReason then
-            local usageBlockReason = GetCollectibleBlockReason(collectibleId)
+            local usageBlockReason = GetCollectibleBlockReason(collectibleId, actorCategory)
             if usageBlockReason ~= COLLECTIBLE_USAGE_BLOCK_REASON_NOT_BLOCKED then
                 local formattedBlockReason = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", usageBlockReason))
                 bodySection:AddLine(formattedBlockReason, descriptionStyle, self:GetStyle("failed"))

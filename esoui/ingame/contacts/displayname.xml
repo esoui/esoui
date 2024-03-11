@@ -26,7 +26,7 @@
                                 ZO_PlayerStatus_OnMouseExit(self:GetParent())
                             </OnMouseExit>
                             <OnClicked>
-                                ZO_ComboBox_DropdownClicked(self:GetParent())
+                                ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, upInside)
                             </OnClicked>
                         </Button>
 
@@ -39,7 +39,7 @@
                                 ZO_PlayerStatus_OnMouseExit(self:GetParent())
                             </OnMouseExit>
                             <OnClicked>
-                                ZO_ComboBox_DropdownClicked(self:GetParent())
+                                ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, upInside)
                             </OnClicked>
                         </Button>
                     </Controls>

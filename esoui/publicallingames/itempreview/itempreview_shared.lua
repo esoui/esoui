@@ -358,6 +358,34 @@ function ZO_ItemPreviewType_InventoryItem:GetVariationName(variationIndex)
     return GetInventoryItemPreviewVariationDisplayName(self.bag, self.slot, variationIndex)
 end
 
+-- Collectible
+
+ZO_ItemPreviewType_Collectible = ZO_ItemPreviewType:Subclass()
+
+function ZO_ItemPreviewType_Collectible:SetStaticParameters(collectibleId)
+    self.collectibleId = collectibleId
+end
+
+function ZO_ItemPreviewType_Collectible:ResetStaticParameters()
+    self.collectibleId = 0
+end
+
+function ZO_ItemPreviewType_Collectible:HasStaticParameters(collectibleId)
+    return self.collectibleId == collectibleId
+end
+
+function ZO_ItemPreviewType_Collectible:Apply(variationIndex)
+    PreviewCollectible(self.collectibleId, variationIndex)
+end
+
+function ZO_ItemPreviewType_Collectible:GetNumVariations()
+    return GetNumCollectiblePreviewVariations(self.collectibleId)
+end
+
+function ZO_ItemPreviewType_Collectible:GetVariationName(variationIndex)
+    return GetCollectiblePreviewVariationDisplayName(self.collectibleId, variationIndex)
+end
+
 --
 --[[ Item Preview]]--
 --
@@ -372,6 +400,7 @@ ZO_ITEM_PREVIEW_STORE_ENTRY = 7
 ZO_ITEM_PREVIEW_OUTFIT = 8
 ZO_ITEM_PREVIEW_REWARD = 9
 ZO_ITEM_PREVIEW_INVENTORY_ITEM = 10
+ZO_ITEM_PREVIEW_COLLECTIBLE = 11
 
 ZO_ITEM_PREVIEW_WAIT_TIME_MS = 500
 
@@ -400,6 +429,7 @@ function ZO_ItemPreview_Shared:Initialize(control)
         [ZO_ITEM_PREVIEW_OUTFIT] = ZO_ItemPreviewType_Outfit:New(),
         [ZO_ITEM_PREVIEW_REWARD] = ZO_ItemPreviewType_Reward:New(),
         [ZO_ITEM_PREVIEW_INVENTORY_ITEM] = ZO_ItemPreviewType_InventoryItem:New(),
+        [ZO_ITEM_PREVIEW_COLLECTIBLE] = ZO_ItemPreviewType_Collectible:New(),
     }
 
     self.forcePreparePreview = true
@@ -652,6 +682,10 @@ function ZO_ItemPreview_Shared:PreviewOutfit(actorCategory, outfitIndex)
     self:SharedPreviewSetup(ZO_ITEM_PREVIEW_OUTFIT, actorCategory, outfitIndex)
 end
 
+function ZO_ItemPreview_Shared:PreviewCollectible(collectibleId)
+    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId)
+end
+
 do
     local UNEQUIPPED_OUTFIT_INDEX = nil
 
@@ -802,7 +836,7 @@ function ZO_ItemPreview_Shared:SetInteractionCameraPreviewEnabled(enabled, frami
             SCENE_MANAGER:RemoveFragment(previewOptionsFragment)
             SCENE_MANAGER:RemoveFragmentImmediately(framingFragment)
             SCENE_MANAGER:RemoveFragment(framingTargetFragment)
-            
+
             SetInteractionUsingInteractCamera(true)
         end
     end
@@ -833,13 +867,13 @@ function ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink)
         return IsItemLinkFurnitureRecipe(itemLink)
     end
 
-	local collectibleId = GetCollectibleIdFromLink(itemLink)
-	if collectibleId and collectibleId > 0 then
-		local furnitureDataId = GetCollectibleFurnitureDataIdForPreview(collectibleId)
-		if furnitureDataId > 0 then
-			return true
-		end
-	end
+    local collectibleId = GetCollectibleIdFromLink(itemLink)
+    if collectibleId and collectibleId > 0 then
+        local furnitureDataId = GetCollectibleFurnitureDataIdForPreview(collectibleId)
+        if furnitureDataId > 0 then
+            return true
+        end
+    end
 
     return false
 end

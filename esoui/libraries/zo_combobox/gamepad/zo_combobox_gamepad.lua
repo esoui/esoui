@@ -73,17 +73,11 @@ function ZO_ComboBox_Gamepad:OnItemAdded()
 end
 
 function ZO_ComboBox_Gamepad:GetNormalColor(item)
-    if item.enabled == false then
-        return item.m_disabledColor or self.m_disabledColor
-    end
-    return item.m_normalColor or self.m_normalColor
+    return self:GetItemNormalColor(item)
 end
 
 function ZO_ComboBox_Gamepad:GetHighlightColor(item)
-    if item.enabled == false then
-        return item.m_disabledColor or self.m_disabledColor
-    end
-    return item.m_highlightColor or self.m_highlightColor
+    return self:GetItemHighlightColor(item)
 end
 
 function ZO_ComboBox_Gamepad:GetHeight()
@@ -688,7 +682,7 @@ function ZO_MultiSelection_ComboBox_Gamepad:LoadData(data)
 end
 
 function ZO_MultiSelection_ComboBox_Gamepad:SetNoSelectionText(text)
-    self.noSelectionText = text or SI_COMBO_BOX_DEFAULT_NO_SELECTION_TEXT
+    self.noSelectionText = text or GetString(SI_COMBO_BOX_DEFAULT_NO_SELECTION_TEXT)
     self:RefreshSelectedItemText()
 end
 

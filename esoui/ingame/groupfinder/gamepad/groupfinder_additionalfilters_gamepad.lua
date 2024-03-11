@@ -199,6 +199,10 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
                 self.categoryDropdown = control.dropdown
                 table.insert(dialog.dropdowns, self.categoryDropdown)
 
+                self.categoryDropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                self.categoryDropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                self.categoryDropdown:SetSelectedItemTextColor(selected)
+
                 self:PopulateCategoryDropdown()
 
                 SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(dialog, self.categoryDropdown)
@@ -225,6 +229,10 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
                 local dialog = data.dialog
                 self.primaryOptionDropdownSingleSelect = control.dropdown
                 table.insert(dialog.dropdowns, self.primaryOptionDropdownSingleSelect)
+
+                self.primaryOptionDropdownSingleSelect:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                self.primaryOptionDropdownSingleSelect:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                self.primaryOptionDropdownSingleSelect:SetSelectedItemTextColor(selected)
 
                 self:PopulatePrimaryDropdownSingleSelect()
 
@@ -259,6 +267,9 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
 
                 self.primaryOptionDropdown:SetSortsItems(false)
                 self.primaryOptionDropdown:SetMaxSelections(GROUP_FINDER_MAX_SEARCHABLE_SELECTIONS)
+                self.primaryOptionDropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                self.primaryOptionDropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                self.primaryOptionDropdown:SetSelectedItemTextColor(selected)
 
                 self.primaryOptionDropdown.dropDownData = ZO_MultiSelection_ComboBox_Data_Gamepad:New()
                 self:PopulatePrimaryDropdown()
@@ -295,6 +306,9 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
 
                 self.secondaryOptionDropdown:SetSortsItems(false)
                 self.secondaryOptionDropdown:SetMaxSelections(GROUP_FINDER_MAX_SEARCHABLE_SELECTIONS)
+                self.secondaryOptionDropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                self.secondaryOptionDropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                self.secondaryOptionDropdown:SetSelectedItemTextColor(selected)
 
                 self.secondaryOptionDropdown.dropDownData = ZO_MultiSelection_ComboBox_Data_Gamepad:New()
                 self:PopulateSecondaryDropdown()
@@ -348,6 +362,10 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
                 self.sizeDropdown = control.dropdown
                 table.insert(dialog.dropdowns, self.sizeDropdown)
 
+                self.sizeDropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                self.sizeDropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                self.sizeDropdown:SetSelectedItemTextColor(selected)
+
                 -- Currently, the group size enum has fewer entries than our max searchable selections, so we'll just
                 -- not set a maxSelectedItems on gamepad to avoid a potentially confusing (current/max) select keybind string.
                 -- Groupsize is a flag so the max searchable value is going to be two to the searchable size
@@ -382,10 +400,12 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
                 self.playstyleDropdown = control.dropdown
                 table.insert(dialog.dropdowns, self.playstyleDropdown)
 
-                -- Currently, the playstyle enum has fewer entries than our max searchable selections, so we'll just
-                -- not set a maxSelectedItems on gamepad to avoid a potentially confusing (current/max) select keybind string.
-                -- Playstyle is a flag so the max searchable value is going to be two to the searchable size
-                internalassert(GROUP_FINDER_PLAYSTYLE_MAX_VALUE <= math.pow(2, GROUP_FINDER_MAX_SEARCHABLE_SELECTIONS), "Number of possible options exceeds max, please set a max number of selectable items for this dropdown")
+                self.playstyleDropdown:SetSortsItems(false)
+                self.playstyleDropdown:SetMaxSelections(GROUP_FINDER_MAX_SEARCHABLE_SELECTIONS)
+                self.playstyleDropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                self.playstyleDropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                self.playstyleDropdown:SetSelectedItemTextColor(selected)
+
                 self.playstyleDropdown.dropDownData = ZO_MultiSelection_ComboBox_Data_Gamepad:New()
                 self:PopulatePlaystyleDropdown()
                 self.playstyleDropdown:LoadData(self.playstyleDropdown.dropDownData)

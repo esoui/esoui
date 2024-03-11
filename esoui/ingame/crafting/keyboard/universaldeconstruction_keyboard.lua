@@ -34,6 +34,9 @@ function ZO_UniversalDeconstruction_Keyboard:Initialize(control)
             CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.UNIVERSAL_DECONSTRUCTION_SUCCESS, SOUNDS.UNIVERSAL_DECONSTRUCTION_FAIL)
             TriggerTutorial(TUTORIAL_TRIGGER_UNIVERSAL_DECONSTRUCTION_OPENED)
         elseif newState == SCENE_SHOWING then
+            -- Set the smithing manager to the same mode as the universal deconstructor so that it doesn't
+            -- try to update the last mode used in the smithing station without it being active
+            SMITHING:SetMode(self.mode)
             ZO_MultipleCraftingSkillsXpBar_TieSkillInfoHeaderToCraftingTypes(self.skillInfoControl, self.craftingTypes)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 

@@ -27,6 +27,7 @@
 
                         <Label name="$(grandparent)DetailsTextLine" inherits="ZO_HelpCustomerService_Keyboard_Details">
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)DetailsTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Dimensions x="550" />
                         </Label>
                     </Controls>
                 </Control>

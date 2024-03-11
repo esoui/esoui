@@ -1322,3 +1322,177 @@ ZO_HousingFurnitureSettingsPanel_KeyboardTopLevel = ZO_HousingFurnitureSettingsP
 
 -- Renaming 'Timed event' to 'Leaderboard event'
 COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_TIMED_EVENT = COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_LEADERBOARD_EVENT
+
+-- Enum update renaming Endless Dungeon Currency to Archival Fortunes
+CURT_ENDLESS_DUNGEON = CURT_ARCHIVAL_FORTUNES
+STORE_FAILURE_NOT_ENOUGH_ENDLESS_DUNGEON_CURRENCY = STORE_FAILURE_NOT_ENOUGH_ARCHIVAL_FORTUNES
+LOOT_TYPE_ENDLESS_DUNGEON_CURRENCY = LOOT_TYPE_ARCHIVAL_FORTUNES
+TUTORIAL_TRIGGER_CURRENCY_GAINED_ENDLESS_DUNGEON = TUTORIAL_TRIGGER_CURRENCY_GAINED_ARCHIVAL_FORTUNES
+
+--[[
+    multiselect combo box ui widget for keyboard screens.
+    Uses a custom control definition with the box border, selected item label, and a dropdown button.
+    The actual combobox menu is implemented using a ZO_ContextMenu. The anchoring of the menu is managed
+    by the combo box, allows for multiple entries to be selected at the same time.
+--]]
+
+ZO_MultiSelectComboBox = ZO_ComboBox_Base:Subclass()
+
+function ZO_MultiSelectComboBox:Initialize(container)
+    ZO_ComboBox_Base.Initialize(self, container)
+
+    self.m_selectedItemData = {}
+
+    -- Set text to default values. Order matters; self.m_selectedItemData must exist before we call these.
+    self:SetMultiSelectionTextFormatter()
+    self:SetNoSelectionText()
+end
+
+do
+    --Padding is handled using SetSpacing
+    local NO_PADDING_Y = 0
+
+    -- Overridden function
+    function ZO_MultiSelectComboBox:AddMenuItems()
+        for i, item in ipairs(self.m_sortedItems) do
+            local function OnMenuItemSelected()
+                self:SelectItem(item)
+            end
+
+            local needsHighlight = self:IsItemSelected(item)
+            local normalColor
+            local highlightColor
+            if item.enabled == false then
+                normalColor = item.disabledColor or self.m_disabledColor
+                highlightColor = item.disabledColor or self.m_disabledColor
+            else
+                normalColor = item.normalColor or self.m_normalColor
+                highlightColor = item.highlightColor or self.m_highlightColor
+            end
+
+            AddMenuItem(item.name, OnMenuItemSelected, MENU_ADD_OPTION_LABEL, self.m_font, normalColor, highlightColor, NO_PADDING_Y, self.horizontalAlignment, needsHighlight, item.onEnter, item.onExit, item.enabled)
+        end
+    end
+end
+
+local function GlobalMenuClearCallback(comboBox)
+    comboBox:HideDropdown()
+end
+
+function ZO_MultiSelectComboBox:ShowDropdownInternal()
+    ZO_Menu_SetUseUnderlay(true)
+    -- Just stealing the menu from anything else that's using it.  That should be correct.
+    ClearMenu()
+    SetMenuMinimumWidth(self.m_container:GetWidth() - GetMenuPadding() * 2)
+    SetMenuSpacing(self.m_spacing)
+
+    self:AddMenuItems()
+    SetMenuHiddenCallback(function() GlobalMenuClearCallback(self) end)
+    ShowMenu(self.m_container, nil, self:GetMenuType())
+    local OFFSET_Y = 0
+    AnchorMenu(self.m_container, OFFSET_Y)
+    self:SetVisible(true)
+end
+
+function ZO_MultiSelectComboBox:HideDropdownInternal()
+    ZO_Menu_SetUseUnderlay(false)
+    ClearMenu()
+    self:SetVisible(false)
+    if self.onHideDropdownCallback then
+        self.onHideDropdownCallback()
+    end
+end
+
+function ZO_MultiSelectComboBox:SetHideDropdownCallback(callback)
+    self.onHideDropdownCallback = callback
+end
+
+function ZO_MultiSelectComboBox:SetNoSelectionText(text)
+    self.noSelectionText = text or SI_COMBO_BOX_DEFAULT_NO_SELECTION_TEXT
+    self:RefreshSelectedItemText()
+end
+
+function ZO_MultiSelectComboBox:SetMultiSelectionTextFormatter(textFormatter)
+    self.multiSelectionTextFormatter = textFormatter or SI_COMBO_BOX_DEFAULT_MULTISELECTION_TEXT_FORMATTER
+    self:RefreshSelectedItemText()
+end
+
+function ZO_MultiSelectComboBox:RefreshSelectedItemText()
+    local numSelectedEntries = self:GetNumSelectedEntries()
+    if numSelectedEntries > 0 then
+        self:SetSelectedItemText(zo_strformat(self.multiSelectionTextFormatter, numSelectedEntries))
+    else
+        self:SetSelectedItemText(self.noSelectionText)
+    end
+end
+
+function ZO_MultiSelectComboBox:GetNumSelectedEntries()
+    return #self.m_selectedItemData
+end
+
+function ZO_MultiSelectComboBox:GetMenuType()
+    return MENU_TYPE_MULTISELECT_COMBO_BOX
+end
+
+-- Overridden function
+function ZO_MultiSelectComboBox:ClearItems()
+    ZO_ComboBox_Base.ClearItems(self)
+    self.m_selectedItemData = {}
+end
+
+-- Overridden function
+function ZO_MultiSelectComboBox:SelectItem(item, ignoreCallback)
+    if item.enabled == false then
+        return
+    end
+
+    local newSelectionStatus = not self:IsItemSelected(item)
+    if newSelectionStatus then
+        self:AddItemToSelected(item)
+    else
+        self:RemoveItemFromSelected(item)
+    end
+    PlaySound(SOUNDS.COMBO_CLICK)
+
+    if item.callback and not ignoreCallback then
+        item.callback(self, item.name, item)
+    end
+    self:RefreshSelectedItemText()
+end
+
+function ZO_MultiSelectComboBox:AddItemToSelected(item)
+    table.insert(self.m_selectedItemData, item)
+end
+
+function ZO_MultiSelectComboBox:RemoveItemFromSelected(item)
+    for i, itemData in ipairs(self.m_selectedItemData) do
+        if itemData == item then
+            table.remove(self.m_selectedItemData, i)
+            return
+        end
+    end
+end
+
+function ZO_MultiSelectComboBox:IsItemSelected(item)
+    for i, itemData in ipairs(self.m_selectedItemData) do
+        if itemData == item then
+            return true
+        end
+    end
+
+    return false
+end
+
+function ZO_MultiSelectComboBox:ClearAllSelections()
+    self.m_selectedItemData = {}
+    self:RefreshSelectedItemText()
+end
+
+ZO_ComboBox_DropdownClicked = ZO_ComboBoxDropdown_Keyboard.OnClicked
+ZO_ComboBox_Entry_OnMouseEnter = ZO_ComboBoxDropdown_Keyboard.OnEntryMouseEnter
+ZO_ComboBox_Entry_OnMouseExit = ZO_ComboBoxDropdown_Keyboard.OnEntryMouseExit
+ZO_ComboBox_Entry_OnSelected = ZO_ComboBoxDropdown_Keyboard.OnEntryMouseUp
+
+IsTributeMechanicSetbackForPlayer = function(...)
+    return GetTributeMechanicSetbackTypeForPlayer(...) ~= TRIBUTE_MECHANIC_SETBACK_TYPE_NONE 
+end

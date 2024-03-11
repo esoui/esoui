@@ -33,7 +33,6 @@ function ZO_CompanionCollectionBook_Gamepad:Initialize(control)
     end
 
     self.control:RegisterForEvent(EVENT_VISUAL_LAYER_CHANGED, OnVisualLayerChanged)
-    SYSTEMS:RegisterGamepadObject(ZO_COLLECTIONS_SYSTEM_NAME, self)
 
     local function OnCollectibleUpdated()
         self:OnCollectibleUpdated()

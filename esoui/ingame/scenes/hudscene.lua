@@ -32,7 +32,7 @@ function ZO_HUDFragment:UpdateVisibility()
 
     OBJECTIVE_CAPTURE_METER:SetHiddenForReason("hudScene", hiddenOrDead)
     SetFloatingMarkerGlobalAlpha(hiddenOrDead and 0 or 1)
-    SHARED_INFORMATION_AREA:SetSupressed(hiddenOrDead)
+    SHARED_INFORMATION_AREA:SetSupressed(hiddenOrDead, "HUDFragment")
     RETICLE:RequestHidden(hiddenOrDead)
     HUD_INFAMY_METER:RequestHidden(hiddenOrDead)
     HUD_TELVAR_METER:SetHiddenForReason("hudScene", hiddenOrDead)

@@ -49,6 +49,11 @@ function ZO_OutfitStylesBook_Keyboard:InitializeKeybindStripDescriptors()
                     return GetString(SI_OUTFIT_STYLES_BOOK_PREVIEW_KEYBIND)
                 end
             end,
+            
+            enabled = function()
+                local collectibleData = ZO_OUTFIT_STYLES_PANEL_KEYBOARD:GetMouseOverEntryData().data
+                return not collectibleData.IsBlocked or not collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+            end,
 
             keybind = "UI_SHORTCUT_PRIMARY",
 

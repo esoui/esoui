@@ -1,0 +1,134 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_PeninsulaBackgroundAnimation_TitleFadeIn">
+            <Animations>
+                <CustomAnimation delay="1000" duration="4000">
+                    <OnPlay>
+                        ZO_GetControlOwnerObject(animatingControl):OnTitleFadeInPlay(self, completed)
+                    </OnPlay>
+
+                    <OnStop>
+                        ZO_GetControlOwnerObject(animatingControl):OnTitleFadeInStop(self, completed)
+                    </OnStop>
+
+                    <UpdateFunction>
+                        ZO_GetControlOwnerObject(self:GetAnimatedControl()):OnTitleFadeInUpdate(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_PeninsulaBackgroundAnimation_SunRaysFadeIn">
+            <Animations>
+                <CustomAnimation delay="1000" duration="5000">
+                    <OnPlay>
+                        ZO_GetControlOwnerObject(animatingControl):OnSunRaysFadeInPlay(self, completed)
+                    </OnPlay>
+
+                    <UpdateFunction>
+                        ZO_GetControlOwnerObject(self:GetAnimatedControl()):OnSunRaysFadeInUpdate(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Texture name="ZO_PeninsulaBackgroundLeaf" inherits="ZO_BaseBackgroundDynamicTexture" layer="BACKGROUND" tier="LOW" level="100" pixelRoundingEnabled="true" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/maple_leaf.dds" virtual="true">
+            <Dimensions x="32" y="32" />
+        </Texture>
+
+        <TopLevelControl name="ZO_PeninsulaBackgroundTopLevel" inherits="ZO_BaseBackgroundTopLevel" mouseEnabled="true">
+            <AnchorFill />
+
+            <OnMouseDown>
+                self.owner:OnTopLevelMouseDown(self, button, ctrl, alt, shift)
+            </OnMouseDown>
+
+            <OnMouseUp>
+                self.owner:OnTopLevelMouseUp(self, button, upInside, ctrl, alt, shift)
+            </OnMouseUp>
+
+            <OnInitialized>
+                ZO_PeninsulaBackground:New(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Background" override="true" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/background.dds" maskTextureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/background_mask.dds" maskThresholdNormalizedThickness="1">
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)Ouroboros" override="true" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/ouroboros.dds">
+                    <Anchor point="CENTER" offsetX="-35" offsetY="167" />
+                </Texture>
+
+                <Texture name="$(parent)Title" override="true" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/title.dds" shaderEffectType="RADIAL_BLUR">
+                    <Anchor point="CENTER" offsetY="-260" />
+                    <Dimensions x="584" y="128" />
+                    <RadialBlur originX="0.31" originY="0.8" numSamples="19" blurRadius="0.05" />
+                    <TextureCoords top="0" left="0.05" bottom="1" right="0.6203125" />
+                </Texture>
+
+                <Texture name="$(parent)TreesLeftSilhouette" inherits="ZO_BaseBackgroundStaticTexture" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/trees_left.dds" color="000000" level="199">
+                    <Anchor point="RIGHT" relativePoint="CENTER" />
+                    <TextureCoords top="0" left="0" bottom="ZO_BACKGROUND_TEXTURE_COORD_BOTTOM" right="ZO_BACKGROUND_TEXTURE_COORD_RIGHT" />
+                    <TextureSampleProcessingWeight type="ALPHA_AS_RGB" weight="1" />
+                    <TextureSampleProcessingWeight type="RGB" weight="0" />
+                </Texture>
+
+                <Texture name="$(parent)TreesLeft" inherits="ZO_BaseBackgroundStaticTexture" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/trees_left.dds" level="200" maskTextureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/trees_left_mask.dds">
+                    <Anchor point="RIGHT" relativePoint="CENTER" />
+                    <TextureCoords top="0" left="0" bottom="ZO_BACKGROUND_TEXTURE_COORD_BOTTOM" right="ZO_BACKGROUND_TEXTURE_COORD_RIGHT" />
+                </Texture>
+
+                <Texture name="$(parent)TreesBackRightSilhouette" inherits="ZO_BaseBackgroundStaticTexture" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/trees_back_right.dds" color="000000" level="240">
+                    <Anchor point="LEFT" relativePoint="CENTER" />
+                    <TextureCoords top="0" left="0" bottom="ZO_BACKGROUND_TEXTURE_COORD_BOTTOM" right="ZO_BACKGROUND_TEXTURE_COORD_RIGHT" />
+                    <TextureSampleProcessingWeight type="ALPHA_AS_RGB" weight="1" />
+                    <TextureSampleProcessingWeight type="RGB" weight="0" />
+                </Texture>
+
+                <Texture name="$(parent)TreesRightSilhouette" inherits="ZO_BaseBackgroundStaticTexture" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/trees_right.dds" color="000000" level="241">
+                    <Anchor point="LEFT" relativePoint="CENTER" />
+                    <TextureCoords top="0" left="0" bottom="ZO_BACKGROUND_TEXTURE_COORD_BOTTOM" right="ZO_BACKGROUND_TEXTURE_COORD_RIGHT" />
+                    <TextureSampleProcessingWeight type="ALPHA_AS_RGB" weight="1" />
+                    <TextureSampleProcessingWeight type="RGB" weight="0" />
+                </Texture>
+
+                <Texture name="$(parent)TreesBackRight" inherits="ZO_BaseBackgroundStaticTexture" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/trees_back_right.dds" level="249" maskTextureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/trees_right_mask.dds">
+                    <Anchor point="LEFT" relativePoint="CENTER" />
+                    <TextureCoords top="0" left="0" bottom="ZO_BACKGROUND_TEXTURE_COORD_BOTTOM" right="ZO_BACKGROUND_TEXTURE_COORD_RIGHT" />
+                </Texture>
+
+                <Texture name="$(parent)TreesMidRight" inherits="ZO_BaseBackgroundStaticTexture" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/trees_mid_right.dds" level="250" maskTextureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/trees_right_mask.dds">
+                    <Anchor point="LEFT" relativePoint="CENTER" />
+                    <TextureCoords top="0" left="0" bottom="ZO_BACKGROUND_TEXTURE_COORD_BOTTOM" right="ZO_BACKGROUND_TEXTURE_COORD_RIGHT" />
+                </Texture>
+
+                <Texture name="$(parent)TreesRight" inherits="ZO_BaseBackgroundStaticTexture" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/trees_right.dds" level="300" maskTextureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/trees_right_mask.dds">
+                    <Anchor point="LEFT" relativePoint="CENTER" />
+                    <TextureCoords top="0" left="0" bottom="ZO_BACKGROUND_TEXTURE_COORD_BOTTOM" right="ZO_BACKGROUND_TEXTURE_COORD_RIGHT" />
+                </Texture>
+
+                <Texture name="$(parent)TerrainSilhouette" inherits="ZO_BaseBackgroundStaticTexture" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/terrain.dds" color="000000" level="349">
+                    <Anchor point="CENTER" />
+                    <TextureSampleProcessingWeight type="ALPHA_AS_RGB" weight="1" />
+                    <TextureSampleProcessingWeight type="RGB" weight="0" />
+                </Texture>
+
+                <Texture name="$(parent)Terrain" inherits="ZO_BaseBackgroundStaticTexture" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/terrain.dds" level="350" maskTextureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/background_mask.dds">
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)SunRays" inherits="ZO_BaseBackgroundStaticTexture" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/sun_rays_add.dds" blendMode="ADD" level="3000">
+                    <Anchor point="CENTER" />
+                    <TextureSampleProcessingWeight type="RGB" weight="1" />
+                </Texture>
+
+                <Texture name="$(parent)OuroborosGlow" inherits="ZO_BaseBackgroundStaticTexture" color="ffffff" textureFile="EsoUI/Art/PregameAnimatedBackground/Peninsula/ouroboros_glow.dds" blendMode="ADD" level="1020">
+                    <Anchor point="CENTER" offsetX="-35" offsetY="167" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

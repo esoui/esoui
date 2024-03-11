@@ -103,16 +103,14 @@ function ZO_TributeCursor_Gamepad:SetActive(active)
         DIRECTIONAL_INPUT:Deactivate(self)
     end
 
-    if WINDOW_MANAGER:AreCustomCursorsEnabled() then
-        if active then
-            if not self.cursorId then
-                self.cursorId = WINDOW_MANAGER:CreateCursor(self.x, self.y)
-            end
-        else
-            if self.cursorId then
-                WINDOW_MANAGER:DestroyCursor(self.cursorId)
-                self.cursorId = nil
-            end
+    if active then
+        if not self.cursorId then
+            self.cursorId = WINDOW_MANAGER:CreateCursor(self.x, self.y)
+        end
+    else
+        if self.cursorId then
+            WINDOW_MANAGER:DestroyCursor(self.cursorId)
+            self.cursorId = nil
         end
     end
 
@@ -137,13 +135,8 @@ function ZO_TributeCursor_Gamepad:RefreshObjectUnderCursor()
     end
 
     -- TODO Tribute: Evaluate whether a more efficient solution is needed.
-    local targetControl
-    if WINDOW_MANAGER:AreCustomCursorsEnabled() then
-        WINDOW_MANAGER:UpdateCursorPosition(self.cursorId, self.x, self.y)
-        targetControl = WINDOW_MANAGER:GetControlAtCursor(self.cursorId) 
-    else
-        targetControl = WINDOW_MANAGER:GetControlAtPoint(self.x, self.y)
-    end
+    WINDOW_MANAGER:UpdateCursorPosition(self.cursorId, self.x, self.y)
+    local targetControl = WINDOW_MANAGER:GetControlAtCursor(self.cursorId) 
 
     local targetObject = targetControl and targetControl.object
     local objectType = ZO_TRIBUTE_GAMEPAD_CURSOR_TARGET_TYPES.NONE

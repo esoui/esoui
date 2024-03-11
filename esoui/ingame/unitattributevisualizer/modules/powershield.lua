@@ -1,14 +1,18 @@
+ZO_ATTRIBUTE_BAR_POWER_SHIELD_NO_HEALING_LEVEL = 1000
 ZO_ATTRIBUTE_BAR_POWER_SHIELD_LEVEL = 2000
 ZO_ATTRIBUTE_BAR_POWER_SHIELD_TRAUMA_LEVEL = 3000
 ZO_ATTRIBUTE_BAR_POWER_SHIELD_TRAUMA_GLOSS_LEVEL = 3001
 ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_LEVEL = 4000
 ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_GLOSS_LEVEL = 4001
+ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_NO_HEALING_OUTER_LEVEL = 5000
+ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_NO_HEALING_INNER_LEVEL = 5001
 
 local RELEVANT_VISUAL_TYPES =
 {
     ATTRIBUTE_VISUAL_POWER_SHIELDING,
-    ATTRIBUTE_VISUAL_TRAUMA
-} 
+    ATTRIBUTE_VISUAL_TRAUMA,
+    ATTRIBUTE_VISUAL_NO_HEALING,
+}
 
 ZO_UnitVisualizer_PowerShieldModule = ZO_UnitAttributeVisualizerModuleBase:Subclass()
 
@@ -117,9 +121,11 @@ end
 function ZO_UnitVisualizer_PowerShieldModule:OnUnitAttributeVisualAdded(visualType, stat, attribute, powerType, value, maxValue)
     local barInfo = self.attributeInfo[attribute]
     local info = barInfo.visualInfo[visualType]
+    local barControl = self.attributeBarControls[attribute]
     info.value = info.value + value
     info.maxValue = info.maxValue + maxValue
-    self:OnValueChanged(self.attributeBarControls[attribute], barInfo, visualType)
+    self:OnValueChanged(barControl, barInfo, visualType)
+    barControl:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnValueChanged(barControl, barInfo, visualType) end)
 end
 
 function ZO_UnitVisualizer_PowerShieldModule:OnUnitAttributeVisualUpdated(visualType, stat, attribute, powerType, oldValue, newValue, oldMaxValue, newMaxValue)
@@ -133,9 +139,11 @@ end
 function ZO_UnitVisualizer_PowerShieldModule:OnUnitAttributeVisualRemoved(visualType, stat, attribute, powerType, value, maxValue)
     local barInfo = self.attributeInfo[attribute]
     local info = barInfo.visualInfo[visualType]
+    local barControl = self.attributeBarControls[attribute]
     info.value = info.value - value
     info.maxValue = info.maxValue - maxValue
-    self:OnValueChanged(self.attributeBarControls[attribute], barInfo, visualType)
+    self:OnValueChanged(barControl, barInfo, visualType)
+    barControl:UnregisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED)
 end
 
 local function ApplyPlatformStyleToShield(left, right, leftOverlay, rightOverlay)
@@ -146,6 +154,8 @@ end
 local LEFT_BAR, RIGHT_BAR = 1, 2
 local SHIELD_COLOR_GRADIENT = { ZO_ColorDef:New(.5, .5, 1, .3), ZO_ColorDef:New(.25, .25, .5, .5) }
 local TRAUMA_COLOR_GRADIENT = { ZO_ColorDef:New("ab1c6473"), ZO_ColorDef:New("ab76bcc3") }
+local NO_HEALING_FILL_COLOR_GRADIENT = { ZO_ColorDef:New("1a0909"), ZO_ColorDef:New("1a0909") }
+local NO_HEALING_BORDER_COLOR_GRADIENT = { ZO_ColorDef:New("da3030"), ZO_ColorDef:New("722323") }
 function ZO_UnitVisualizer_PowerShieldModule:ShowOverlay(attributeBar, info)
     if not info.overlayControls then
         local leftStatusBar, rightStatusBar = unpack(attributeBar.barControls)
@@ -159,6 +169,10 @@ function ZO_UnitVisualizer_PowerShieldModule:ShowOverlay(attributeBar, info)
             ZO_StatusBar_SetGradientColor(overlay, SHIELD_COLOR_GRADIENT)
             ZO_StatusBar_SetGradientColor(overlay.traumaBar, TRAUMA_COLOR_GRADIENT)
             ZO_StatusBar_SetGradientColor(overlay.fakeHealthBar, ZO_POWER_BAR_GRADIENT_COLORS[COMBAT_MECHANIC_FLAGS_HEALTH])
+            ZO_StatusBar_SetGradientColor(overlay.noHealingInner, NO_HEALING_FILL_COLOR_GRADIENT)
+            ZO_StatusBar_SetGradientColor(overlay.noHealingOuter, NO_HEALING_BORDER_COLOR_GRADIENT)
+            ZO_StatusBar_SetGradientColor(overlay.fakeNoHealingInner, NO_HEALING_FILL_COLOR_GRADIENT)
+            ZO_StatusBar_SetGradientColor(overlay.fakeNoHealingOuter, NO_HEALING_BORDER_COLOR_GRADIENT)
             overlay:SetValue(1)
         end
 
@@ -206,7 +220,8 @@ function ZO_UnitVisualizer_PowerShieldModule:ApplyValueToBar(attributeBar, barIn
     local leftAttributeBar, rightAttributeBar = unpack(attributeBar.barControls)
     local halfWidth = leftAttributeBar:GetWidth()
     local leftOffsetX = halfWidth * (1 - percentOfBarRequested)
-    local rightOffsetX = leftOffsetX + halfWidth * percentOfBarRequested
+    -- Add an extra 0.5 to resolve pixel rounding issues in gamepad UI.
+    local rightOffsetX = leftOffsetX + halfWidth * percentOfBarRequested + 0.5
 
     leftControl:ClearAnchors()
     leftControl:SetAnchor(LEFT, leftAttributeBar, LEFT, leftOffsetX, 0)
@@ -218,7 +233,7 @@ function ZO_UnitVisualizer_PowerShieldModule:ApplyValueToBar(attributeBar, barIn
 end
 
 function ZO_UnitVisualizer_PowerShieldModule:OnStatusBarValueChanged(attributeBar, barInfo)
-    local shieldInfo, traumaInfo = barInfo.visualInfo[ATTRIBUTE_VISUAL_POWER_SHIELDING], barInfo.visualInfo[ATTRIBUTE_VISUAL_TRAUMA]
+    local shieldInfo, traumaInfo, noHealingInfo = barInfo.visualInfo[ATTRIBUTE_VISUAL_POWER_SHIELDING], barInfo.visualInfo[ATTRIBUTE_VISUAL_TRAUMA], barInfo.visualInfo[ATTRIBUTE_VISUAL_NO_HEALING]
     local leftOverlay, rightOverlay = unpack(barInfo.overlayControls)
     if not self:ShouldHideBar(barInfo) then
         -- This math just establishes the relationships between each bar: the clamping and scaling to turn these into actual control positions happens in ApplyValueToBar().
@@ -226,9 +241,11 @@ function ZO_UnitVisualizer_PowerShieldModule:OnStatusBarValueChanged(attributeBa
 
         -- These are the source values: we work a half-scale because we apply one half of the value's magnitude on each side of the total bar.
         -- We don't do this for health because the parent attribute bar provides us with half-values.
+        -- The anti-healing status is binary; if its value is positive, the overlay is on, otherwise it's off.
         local health = barInfo.attributeValue
         local shield = shieldInfo.value * .5
         local trauma = traumaInfo.value * .5
+        local noHealing = noHealingInfo.value
 
         -- Shields add to your original health bar, so they grow out of that value.
         -- When that amount extends beyond your max health we need shrink your fakehealth to compensate, which we carry over as shieldOverflow
@@ -245,6 +262,15 @@ function ZO_UnitVisualizer_PowerShieldModule:OnStatusBarValueChanged(attributeBa
         -- Sometimes trauma and shield overflow will be 0, in which case this value is the same as your actual health, otherwise it shrinks to fit each effect.
         local fakeHealthSize = traumaBarSize - trauma
         self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.fakeHealthBar, rightOverlay.fakeHealthBar, fakeHealthSize)
+
+        -- The anti-healing overlay always matches the current health value if it's on.
+        local noHealingSize = noHealing > 0 and health or 0
+        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.noHealingInner, rightOverlay.noHealingInner, noHealingSize)
+        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.noHealingOuter, rightOverlay.noHealingOuter, noHealingSize)
+
+        local fakeNoHealingSize = noHealing > 0 and fakeHealthSize or 0
+        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.fakeNoHealingInner, rightOverlay.fakeNoHealingInner, fakeNoHealingSize)
+        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.fakeNoHealingOuter, rightOverlay.fakeNoHealingOuter, fakeNoHealingSize)
     else
         leftOverlay:SetHidden(true)
         rightOverlay:SetHidden(true)
@@ -260,13 +286,15 @@ end
 local STATE_GAINED_SOUND_FOR_VISUAL_TYPE =
 {
     [ATTRIBUTE_VISUAL_POWER_SHIELDING] = STAT_STATE_SHIELD_GAINED,
-    [ATTRIBUTE_VISUAL_TRAUMA] = STAT_STATE_TRAUMA_GAINED
+    [ATTRIBUTE_VISUAL_TRAUMA] = STAT_STATE_TRAUMA_GAINED,
+    --TODO AntiHealing: Add sound for anti-healing?
 }
 
 local STATE_LOST_SOUND_FOR_VISUAL_TYPE =
 {
     [ATTRIBUTE_VISUAL_POWER_SHIELDING] = STAT_STATE_SHIELD_LOST,
-    [ATTRIBUTE_VISUAL_TRAUMA] = STAT_STATE_TRAUMA_LOST
+    [ATTRIBUTE_VISUAL_TRAUMA] = STAT_STATE_TRAUMA_LOST,
+    --TODO AntiHealing: Add sound for anti-healing?
 }
 
 function ZO_UnitVisualizer_PowerShieldModule:OnValueChanged(attributeBar, barInfo, visualType)

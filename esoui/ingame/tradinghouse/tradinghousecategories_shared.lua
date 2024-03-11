@@ -781,7 +781,7 @@ do
         AddAllSubcategory(categoryParams)
     end
 
-    internalassert(CRAFTING_TYPE_MAX_VALUE == 7, "Add new tradeskill to trading house")
+    internalassert(CRAFTING_TYPE_MAX_VALUE == 8, "Add new tradeskill to trading house")
     local ICONS_FOR_TRADESKILL_ITEM_TYPES =
     {
         [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] = ZO_ItemFilterUtils.GetItemTypeFilterIcons(ITEMTYPE_BLACKSMITHING_RAW_MATERIAL),

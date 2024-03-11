@@ -300,3 +300,8 @@ EsoUI\Libraries\ZO_ProgressBar\ZO_MultiSegmentProgressBar.lua
 EsoUI\Libraries\ZO_GamepadLinks\ZO_GamepadLinks.lua
 
 EsoUI\Libraries\ZO_RecurrenceTracker\ZO_RecurrenceTracker.lua
+
+EsoUI\Libraries\ZO_VectorRange\ZO_VectorRange.lua
+
+EsoUI\Libraries\ZO_VisualEffects\ZO_BaseVisualEffect.lua
+EsoUI\Libraries\ZO_VisualEffects\ZO_FlickerEffect.lua

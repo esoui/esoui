@@ -3,17 +3,15 @@
         <Control name="ZO_ComboBoxEntry" level="3" mouseEnabled="true" virtual="true">
             <Dimensions y="ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT" />
             <OnMouseEnter>
-                ZO_ComboBox_Entry_OnMouseEnter(self)
+                ZO_ComboBoxDropdown_Keyboard.OnEntryMouseEnter(self)
             </OnMouseEnter>
 
             <OnMouseExit>
-                ZO_ComboBox_Entry_OnMouseExit(self)
+                ZO_ComboBoxDropdown_Keyboard.OnEntryMouseExit(self)
             </OnMouseExit>
 
             <OnMouseUp>
-                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
-                    ZO_ComboBox_Entry_OnSelected(self)
-                end
+                ZO_ComboBoxDropdown_Keyboard.OnEntryMouseUp(self, button, upInside)
             </OnMouseUp>
             
             <Controls>
@@ -36,10 +34,7 @@
             </OnInitialized>
 
             <OnMouseUp>
-                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
-                    ZO_ComboBox_DropdownClicked(self)
-                    PlaySound(SOUNDS.COMBO_CLICK)
-                end
+                ZO_ComboBoxDropdown_Keyboard.OnClicked(self, button, upInside)
             </OnMouseUp>
 
             <Controls>
@@ -57,65 +52,37 @@
                     <Anchor point="RIGHT" offsetX="-3" />
 
                     <OnClicked>
-                        if button == MOUSE_BUTTON_INDEX_LEFT then
-                            ZO_ComboBox_DropdownClicked(self:GetParent())
-                        end
+                        ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, true)
                     </OnClicked>
                 </Button>
-
-                <Control name="$(parent)Dropdown" mouseEnabled="true" tier="HIGH" hidden="true" clampedToScreen="true" excludeFromResizeToFitExtents="true">
-                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
-                    <!-- Width will be set programmatically -->
-
-                    <Controls>
-                        <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
-                            <AnchorFill />
-                        </Backdrop>
-
-                        <Control name="$(parent)Scroll" inherits="ZO_ScrollList">
-                            <Anchor point="TOPLEFT" offsetY="ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y" />
-                            <Anchor point="BOTTOMRIGHT" offsetY="-ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y" />
-                        </Control>
-                    </Controls>
-                </Control>
             </Controls>
         </Control>
 
-        <Control name="ZO_MultiselectComboBox" mouseEnabled="true" virtual="true">
-            <Dimensions x="135" y="31" />
+        <TopLevelControl name="ZO_ComboBoxDropdown_Keyboard_Template" hidden="true" virtual="true" tier="HIGH" level="ZO_HIGH_TIER_KEYBOARD_COMBO_BOX_DROPDOWN" mouseEnabled="true" clampedToScreen="true">
+            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
+            <!-- Width will be set programmatically -->
+
             <OnInitialized>
-                ZO_MultiSelectComboBox:New(self)
+                ZO_ComboBoxDropdown_Keyboard.InitializeFromControl(self)
             </OnInitialized>
 
-            <OnMouseUp>
-                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
-                    ZO_ComboBox_DropdownClicked(self)
-                    PlaySound(SOUNDS.COMBO_CLICK)
-                end
-            </OnMouseUp>
-
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
                     <AnchorFill />
                 </Backdrop>
 
-                <Label name="$(parent)SelectedItemText" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
-                    <Anchor point="TOPLEFT" offsetX="8" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-20" />
-                </Label>
-
-                <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
-                    <Dimensions x="16" y="16" />
-                    <Anchor point="RIGHT" offsetX="-3" />
-
-                    <OnClicked>
-                        if button == MOUSE_BUTTON_INDEX_LEFT then
-                            ZO_ComboBox_DropdownClicked(self:GetParent())
-                        end
-                    </OnClicked>
-                </Button>
+                <Control name="$(parent)Scroll" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" offsetY="ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y" />
+                </Control>
             </Controls>
-        </Control>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_ComboBoxDropdown_Singleton_Keyboard" inherits="ZO_ComboBoxDropdown_Keyboard_Template">
+            <OnInitialized name="ComboBoxSingleton">
+                ZO_COMBO_BOX_DROPDOWN_KEYBOARD = self.object
+            </OnInitialized>
+        </TopLevelControl>
 
     </Controls>
 </GuiXml>

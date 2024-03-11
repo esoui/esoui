@@ -324,22 +324,23 @@ function ZO_HousingEditorHUDFragment:New(control)
 end
 
 function ZO_HousingEditorHUDFragment:Show()
-    self:UpdateVisibility()
     ZO_SceneFragment.Show(self)
+
+    TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, false, TUTORIAL_SUPPRESSED_BY_SCENE)
+    RETICLE:RequestHidden(false)
+    -- Unsuppress the "All" category but suppress categories that have their own keybinds.
+    SHARED_INFORMATION_AREA:SetSupressed(false, "HUDFragment")
+    SHARED_INFORMATION_AREA:SetCategoriesSuppressed(true, ZO_SHARED_INFORMATION_AREA_SUPPRESSION_CATEGORIES.HAS_KEYBINDS, "HUDFragment")
 end
 
 function ZO_HousingEditorHUDFragment:Hide()
-    self:UpdateVisibility()
     ZO_SceneFragment.Hide(self)
-end
 
-function ZO_HousingEditorHUDFragment:UpdateVisibility()
-    local fragmentHidden = not self:IsShowing()
-    local playerDead = IsUnitDead("player")
-    local hiddenOrDead = fragmentHidden or playerDead
-    RETICLE:RequestHidden(hiddenOrDead)
-    TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, fragmentHidden, TUTORIAL_SUPPRESSED_BY_SCENE)
-    SHARED_INFORMATION_AREA:SetSupressed(hiddenOrDead)
+    TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, true, TUTORIAL_SUPPRESSED_BY_SCENE)
+    RETICLE:RequestHidden(true)
+    -- Unsuppress categories that have their own keybinds but suppress the "All" category.
+    SHARED_INFORMATION_AREA:SetCategoriesSuppressed(false, ZO_SHARED_INFORMATION_AREA_SUPPRESSION_CATEGORIES.HAS_KEYBINDS, "HUDFragment")
+    SHARED_INFORMATION_AREA:SetSupressed(true, "HUDFragment")
 end
 
 --------------------
@@ -630,8 +631,10 @@ function ZO_HousingEditorHud:Initialize(control)
                 -- This is to prevent duplicate keybind registration that would result from Selection
                 -- and UI mode both sharing the housing editor's tertiary action keybind.
                 KEYBIND_STRIP:RemoveDefaultExit()
+                -- When opening UI mode, there is no push/pull controls so unregister whatever was active before.
+             --   KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
+              --  KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullVisibleKeybindGroup)
                 KEYBIND_STRIP:AddKeybindButtonGroup(self.UIModeKeybindStripDescriptor)
-                KEYBIND_STRIP:AddKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
                 KEYBIND_STRIP:AddKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             end
             self:UnregisterDragMouseAxis()
@@ -845,7 +848,7 @@ function ZO_HousingEditorHud:OnHousingModeDisabled(oldMode)
     OnMarketClose()
 
     if oldMode == HOUSING_EDITOR_MODE_PATH then
-        if SCENE_MANAGER:GetCurrentScene() ~= nil then
+        if HOUSING_EDITOR_ENABLED_FRAGMENT:IsShowing() then
             SCENE_MANAGER:ShowBaseScene()
         end
     end

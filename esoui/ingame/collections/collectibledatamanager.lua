@@ -16,6 +16,9 @@ ZO_COLLECTION_UPDATE_TYPE =
     RANDOM_MOUNT_SETTING_CHANGED = 6,
 }
 
+BLOCKED_ARMOR_OR_WEAPON_CATEGORY = 99 -- 0=None; 1,2,3 = light,medium,heavy; ... Undaunted, Signature; and this is well above those values.
+assert(BLOCKED_ARMOR_OR_WEAPON_CATEGORY > VISUAL_ARMORTYPE_MAX_VALUE and BLOCKED_ARMOR_OR_WEAPON_CATEGORY > WEAPON_MODEL_TYPE_MAX_VALUE)
+
 ----------------------------------
 -- Set Default Collectible Data --
 ----------------------------------
@@ -273,7 +276,10 @@ function ZO_CollectibleData:SetOutfitStyleData()
         -- Since a lot of oufit style checks look at "if armor else ..." we'll cache isArmorStyle when it's armor as a perf improvement
         -- and not cache isArmorStyle or isWeaponStyle when it's not armor as a memory improvement
         self.isArmorStyle = IsOutfitStyleArmor(self.referenceId) or nil
-        if self.isArmorStyle then
+        
+        if self:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+            self.gridHeaderName = GetString(SI_OUTFIT_STYLE_INCOMPATIBLE)
+        elseif self.isArmorStyle then
             self.gridHeaderName = GetString("SI_VISUALARMORTYPE", self:GetVisualArmorType())
         else
             self.gridHeaderName = GetString("SI_WEAPONMODELTYPE", self:GetWeaponModelType())
@@ -613,7 +619,7 @@ function ZO_CollectibleData:GetOutfitStyleFreeConversionCollectible()
 end
 
 function ZO_CollectibleData:IsBlocked(actorCategory)
-    return IsCollectibleBlocked(self.collectibleId)
+    return IsCollectibleBlocked(self.collectibleId, actorCategory)
 end
 
 function ZO_CollectibleData:IsCollectibleAvailableToActorCategory(aActorCategory)
@@ -965,6 +971,12 @@ end
 
 function ZO_SpecializedSortedOutfitStyleTypes:InsertCollectible(collectibleData)
     local type = collectibleData:GetOutfitGearType()
+    if collectibleData.IsBlocked and collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then -- or (collectibleData.IsValidForPlayer and not collectibleData:IsValidForPlayer()) then
+        -- Put blocked items into their own category so that 
+        -- process functions ZO_GamepadCollectionsBook:RefreshGridListPanel or ZO_OutfitStylesPanel_Keyboard:RefreshVisible 
+        -- can present them in their own category.
+        type = BLOCKED_ARMOR_OR_WEAPON_CATEGORY
+    end
     if type then
         local styles = self.sortedCollectibles[type] 
         if not styles then
@@ -1050,6 +1062,12 @@ function ZO_SpecializedSortedOutfitStyles:RefreshSort()
             local rightIsUnlocked = right:IsUnlocked()
             if leftIsUnlocked ~= rightIsUnlocked then
                 return leftIsUnlocked
+            end
+
+            local leftIsUnblocked = GetCollectibleBlockReason(left:GetId(), GAMEPLAY_ACTOR_CATEGORY_PLAYER) == 0
+            local rightIsUnblocked = GetCollectibleBlockReason(right:GetId(), GAMEPLAY_ACTOR_CATEGORY_PLAYER) == 0
+            if leftIsUnblocked ~= rightIsUnblocked then
+                return leftIsUnblocked
             end
 
             local leftOutfitStyleItemStyleId = left:GetOutfitStyleItemStyleId()

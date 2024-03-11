@@ -52,6 +52,36 @@ function ZO_ColorDef:SetAlpha(a)
     self.a = a
 end
 
+-- Returns the RGB linearly interpolated from this color to the specified color.
+function ZO_ColorDef:GetLerpRGB(colorToLerpTo, normalizedPercent)
+    return self.LerpRGB(self, colorToLerpTo, normalizedPercent)
+end
+
+-- Returns the RGBA linearly interpolated from this color to the specified color.
+function ZO_ColorDef:GetLerpRGBA(colorToLerpTo, normalizedPercent)
+    return self.LerpRGBA(self, colorToLerpTo, normalizedPercent)
+end
+
+-- Sets the RGB for this color to the linear interpolation between the two specified colors.
+function ZO_ColorDef:SetLerpRGB(colorToLerpFrom, colorToLerpTo, normalizedPercent)
+    self.r, self.g, self.b = self.LerpRGB(colorToLerpFrom, colorToLerpTo, normalizedPercent)
+end
+
+-- Sets the RGBA for this color to the linear interpolation between the two specified colors.
+function ZO_ColorDef:SetLerpRGBA(colorToLerpFrom, colorToLerpTo, normalizedPercent)
+    self.r, self.g, self.b, self.a = self.LerpRGBA(colorToLerpFrom, colorToLerpTo, normalizedPercent)
+end
+
+-- Returns a new color that is the linear interpolation between this color and the specified color.
+function ZO_ColorDef:Lerp(colorToLerpTorwards, amount)
+	return ZO_ColorDef:New(
+        zo_lerp(self.r, colorToLerpTorwards.r, amount),
+        zo_lerp(self.g, colorToLerpTorwards.g, amount),
+        zo_lerp(self.b, colorToLerpTorwards.b, amount),
+        zo_lerp(self.a, colorToLerpTorwards.a, amount)
+    )
+end
+
 function ZO_ColorDef:IsEqual(other)
     return self.r == other.r
        and self.g == other.g
@@ -74,15 +104,6 @@ end
 function ZO_ColorDef:Colorize(text)
 	local combineTable = { "|c", self:ToHex(), tostring(text), "|r" }
 	return table.concat(combineTable)
-end
-
-function ZO_ColorDef:Lerp(colorToLerpTorwards, amount)
-	return ZO_ColorDef:New(
-        zo_lerp(self.r, colorToLerpTorwards.r, amount),
-        zo_lerp(self.g, colorToLerpTorwards.g, amount),
-        zo_lerp(self.b, colorToLerpTorwards.b, amount),
-        zo_lerp(self.a, colorToLerpTorwards.a, amount)
-    )
 end
 
 function ZO_ColorDef:ToHSL()
@@ -189,4 +210,21 @@ do
             return g_colorDef.RGBAToFloats(r, g, b, a)
         end
     end
+end
+
+-- Returns the linearly interpolated RGB between the two specified colors.
+function ZO_ColorDef.LerpRGB(colorToLerpFrom, colorToLerpTo, normalizedPercent)
+    local r = zo_lerp(colorToLerpFrom.r, colorToLerpTo.r, normalizedPercent)
+    local g = zo_lerp(colorToLerpFrom.g, colorToLerpTo.g, normalizedPercent)
+    local b = zo_lerp(colorToLerpFrom.b, colorToLerpTo.b, normalizedPercent)
+    return r, g, b
+end
+
+-- Returns the linearly interpolated RGBA between the two specified colors.
+function ZO_ColorDef.LerpRGBA(colorToLerpFrom, colorToLerpTo, normalizedPercent)
+    local r = zo_lerp(colorToLerpFrom.r, colorToLerpTo.r, normalizedPercent)
+    local g = zo_lerp(colorToLerpFrom.g, colorToLerpTo.g, normalizedPercent)
+    local b = zo_lerp(colorToLerpFrom.b, colorToLerpTo.b, normalizedPercent)
+    local a = zo_lerp(colorToLerpFrom.a, colorToLerpTo.a, normalizedPercent)
+    return r, g, b, a
 end

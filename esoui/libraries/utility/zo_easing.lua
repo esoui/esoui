@@ -65,6 +65,13 @@ function ZO_EaseInOutZeroToOneToZero(progress)
     return math.sin(ZO_PI * progress)
 end
 
+function ZO_EaseOutInZeroToOneToZero(progress)
+    if progress <= 0.5 then
+        return 1 - math.sin(ZO_PI * (0.5 - progress))
+    end
+    return 1 - math.sin(ZO_PI * (progress - 0.5))
+end
+
 function ZO_ExponentialEaseInOut(progress, exponent)
     if progress < 0.5 then
         return ((progress * 2) ^ exponent) * 0.5

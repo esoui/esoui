@@ -27,10 +27,20 @@ function ZO_CollectibleTile_Keyboard:InitializePlatform()
     self.isCooldownActive = false
     self.cooldownDuration = 0
     self.cooldownStartTime = 0
-    
+
     self.onUpdateCooldownsCallback = function() self:OnUpdateCooldowns() end
     self:GetControl():SetHandler("OnUpdate", function() self:OnUpdate() end)
     self:GetControl():SetHandler("OnDragStart", function(_, ...) self:OnDragStart(...) end)
+end
+
+function ZO_CollectibleTile_Keyboard:StartPreview(collectibleId)
+    if self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
+        ITEM_PREVIEW_KEYBOARD:PreviewCollectible(collectibleId)
+        if self:IsMousedOver() then
+            WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+            self:UpdateKeybinds()
+        end
+    end
 end
 
 function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
@@ -57,6 +67,9 @@ function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
             local collectibleData = self.collectibleData
             if collectibleData then
                 if collectibleData:IsUsable(self:GetActorCategory()) and self:GetPrimaryInteractionStringId() ~= nil then
+                    if IsCurrentlyPreviewing() then
+                        ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
+                    end
                     collectibleData:Use(self:GetActorCategory())
                 elseif collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse() then
                     COLLECTIONS_BOOK_SINGLETON.TryPlaceCollectibleFurniture(collectibleData)
@@ -108,6 +121,21 @@ function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
 
         visible = function()
             return self.collectibleData and self.collectibleData:IsUnlocked() and self.collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE)
+        end,
+    })
+
+    table.insert(self.keybindStripDescriptor,
+    {
+        keybind = "UI_SHORTCUT_QUINARY",
+
+        name = GetString(SI_COLLECTIBLE_ACTION_PREVIEW),
+
+        callback = function()
+            self:StartPreview(self.collectibleData:GetId())
+        end,
+
+        visible = function()
+            return IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, self.collectibleData:GetId())
         end,
     })
 
@@ -185,7 +213,13 @@ function ZO_CollectibleTile_Keyboard:AddMenuOptions()
     if collectibleData:IsUsable(self:GetActorCategory()) then
         local stringId = self:GetPrimaryInteractionStringId()
         if stringId then
-            AddMenuItem(GetString(stringId), function() collectibleData:Use(self:GetActorCategory()) end)
+            local function UseCollectible()
+                if IsCurrentlyPreviewing() then
+                    ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
+                end
+                collectibleData:Use(self:GetActorCategory())
+            end
+            AddMenuItem(GetString(stringId), UseCollectible)
         end
     end
 
@@ -204,6 +238,11 @@ function ZO_CollectibleTile_Keyboard:AddMenuOptions()
     --Rename
     if collectibleData:IsRenameable() then
         AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_RENAME), ZO_CollectionsBook.GetShowRenameDialogClosure(collectibleId))
+    end
+
+    -- Preview
+    if IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
+        AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_PREVIEW), function() self:StartPreview(collectibleId) end)
     end
 
     --Assign and Remove
@@ -443,9 +482,43 @@ function ZO_CollectibleTile_Keyboard:LayoutPlatform(data)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnUpdateCooldowns", self.onUpdateCooldownsCallback)
 end
 
+function ZO_CollectibleTile_Keyboard:CanPreview()
+    if self.collectibleData then
+        -- TODO: Temporarily disable mementos until time can be scheduled to audit mementos that don't preview correctly
+        if self.collectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
+            return false
+        end
+        return CanCollectibleBePreviewed(self.collectibleData:GetId())
+    end
+    return false
+end
+
+function ZO_CollectibleTile_Keyboard:OnMouseEnter()
+    ZO_ContextualActionsTile_Keyboard.OnMouseEnter(self)
+
+    if IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, self.collectibleData:GetId()) then
+        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
+    end
+end
+
+function ZO_CollectibleTile_Keyboard:OnMouseExit()
+    ZO_ContextualActionsTile_Keyboard.OnMouseExit(self)
+
+    WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+end
+
 function ZO_CollectibleTile_Keyboard:OnMouseUp(button, upInside)
-    if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
-        self:ShowMenu()
+    if upInside then
+        if button == MOUSE_BUTTON_INDEX_RIGHT then
+            self:ShowMenu()
+        elseif button == MOUSE_BUTTON_INDEX_LEFT then
+            if self.collectibleData ~= nil then
+                local collectibleId = self.collectibleData:GetId()
+                if IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
+                    self:StartPreview(collectibleId)
+                end
+            end
+        end
     end
 end
 
@@ -453,6 +526,9 @@ function ZO_CollectibleTile_Keyboard:OnMouseDoubleClick(button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         local collectibleData = self.collectibleData
         if collectibleData and collectibleData:IsUsable(self:GetActorCategory()) then
+            if IsCurrentlyPreviewing() then
+                ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
+            end
             collectibleData:Use(self:GetActorCategory())
         end
     end

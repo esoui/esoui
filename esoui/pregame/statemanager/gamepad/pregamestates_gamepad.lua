@@ -231,24 +231,6 @@ local pregameStates =
         end,
     },
 
-    ["CreateAccountSetup"] =
-    {
-        ShouldAdvance = function()
-            return false
-        end,
-
-        OnEnter = function()
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("CreateLinkAccount", LoadCountryData, GetString(SI_GAMEPAD_PREGAME_LOADING))
-        end,
-
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            return "CreateAccount"
-        end,
-    },
-
     ["CreateAccount"] =
     {
         ShouldAdvance = function()
@@ -264,11 +246,10 @@ local pregameStates =
 
         GetStateTransitionData = function()
             local enteredEmail = CREATE_ACCOUNT_GAMEPAD:GetEnteredEmail()
-            local isAgeValid = CREATE_ACCOUNT_GAMEPAD:IsAgeValid()
             local shouldRevieveNews = CREATE_ACCOUNT_GAMEPAD:ShouldReceiveNewsEmail()
             local countryCode = CREATE_ACCOUNT_GAMEPAD:GetCountryCode()
             local enteredAccountName = CREATE_ACCOUNT_GAMEPAD:GetEnteredAccountName()
-            return "CreateAccountLoading", enteredEmail, isAgeValid, shouldRevieveNews, countryCode, enteredAccountName
+            return "CreateAccountLoading", enteredEmail, shouldRevieveNews, countryCode, enteredAccountName
         end,
     },
 
@@ -278,9 +259,9 @@ local pregameStates =
             return false
         end,
 
-        OnEnter = function(email, ageValid, emailSignup, country, requestedAccountName)
+        OnEnter = function(email, emailSignup, country, requestedAccountName)
             local function CreateAccount()
-                PregameSetAccountCreationInfo(email, ageValid, emailSignup, country, requestedAccountName)
+                PregameSetAccountCreationInfo(email, emailSignup, country, requestedAccountName)
                 PregameCreateAccount()
             end
 
