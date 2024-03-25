@@ -69,6 +69,7 @@ do
             requestsByGuild[eventCategory] = requestForEventCategory
         end
 
+        TryCleanExistingGuildHistoryRequestParameters(guildId, eventCategory)
         return requestForEventCategory
     end
 
