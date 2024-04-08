@@ -277,7 +277,7 @@ function ZO_CollectibleData:SetOutfitStyleData()
         -- and not cache isArmorStyle or isWeaponStyle when it's not armor as a memory improvement
         self.isArmorStyle = IsOutfitStyleArmor(self.referenceId) or nil
         
-        if self:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+        if not self:IsValidForPlayer(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
             self.gridHeaderName = GetString(SI_OUTFIT_STYLE_INCOMPATIBLE)
         elseif self.isArmorStyle then
             self.gridHeaderName = GetString("SI_VISUALARMORTYPE", self:GetVisualArmorType())
@@ -971,7 +971,7 @@ end
 
 function ZO_SpecializedSortedOutfitStyleTypes:InsertCollectible(collectibleData)
     local type = collectibleData:GetOutfitGearType()
-    if collectibleData.IsBlocked and collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then -- or (collectibleData.IsValidForPlayer and not collectibleData:IsValidForPlayer()) then
+    if not collectibleData:IsValidForPlayer(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
         -- Put blocked items into their own category so that 
         -- process functions ZO_GamepadCollectionsBook:RefreshGridListPanel or ZO_OutfitStylesPanel_Keyboard:RefreshVisible 
         -- can present them in their own category.
@@ -1064,10 +1064,10 @@ function ZO_SpecializedSortedOutfitStyles:RefreshSort()
                 return leftIsUnlocked
             end
 
-            local leftIsUnblocked = GetCollectibleBlockReason(left:GetId(), GAMEPLAY_ACTOR_CATEGORY_PLAYER) == 0
-            local rightIsUnblocked = GetCollectibleBlockReason(right:GetId(), GAMEPLAY_ACTOR_CATEGORY_PLAYER) == 0
-            if leftIsUnblocked ~= rightIsUnblocked then
-                return leftIsUnblocked
+            local leftIsValidForCharacter = IsCollectibleValidForPlayer(left:GetId())
+            local rightIsValidForCharacter = IsCollectibleValidForPlayer(right:GetId())
+            if leftIsValidForCharacter ~= rightIsValidForCharacter then
+                return leftIsValidForCharacter
             end
 
             local leftOutfitStyleItemStyleId = left:GetOutfitStyleItemStyleId()

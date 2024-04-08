@@ -78,7 +78,11 @@ function ZO_GuildHistory_Keyboard:InitializeCategoryTree()
         BaseTreeHeaderSetup(control, data, open)
     end
 
-    self.categoryTree:AddTemplate("ZO_IconChildlessHeader", CategoryHeaderSetup_Childless, TreeEntrySelected_Childless, NO_EQUALITY_FUNCTION, DEFAULT_CHILD_INDENT, CHILD_SPACING)
+    local function EqualityFunc(left, right)
+        return left.eventCategory == right.eventCategory and left.subcategoryIndex == right.subcategoryIndex
+    end
+
+    self.categoryTree:AddTemplate("ZO_IconChildlessHeader", CategoryHeaderSetup_Childless, TreeEntrySelected_Childless, EqualityFunc, DEFAULT_CHILD_INDENT, CHILD_SPACING)
 
     -- Parent Category Header
     local function CategoryHeaderSetup_Parent(node, control, data, open, userRequested)
@@ -89,7 +93,7 @@ function ZO_GuildHistory_Keyboard:InitializeCategoryTree()
         end
     end
 
-    self.categoryTree:AddTemplate("ZO_IconHeader", CategoryHeaderSetup_Parent, NO_SELECTION_FUNCTION, NO_EQUALITY_FUNCTION, DEFAULT_CHILD_INDENT, CHILD_SPACING)
+    self.categoryTree:AddTemplate("ZO_IconHeader", CategoryHeaderSetup_Parent, NO_SELECTION_FUNCTION, EqualityFunc, DEFAULT_CHILD_INDENT, CHILD_SPACING)
 
     --Subcategory Entry
     local function SubcategoryEntrySetup(node, control, data, open)
@@ -97,7 +101,7 @@ function ZO_GuildHistory_Keyboard:InitializeCategoryTree()
         control:SetText(data.name)
     end
 
-    self.categoryTree:AddTemplate("ZO_GuildHistorySubcategoryEntry", SubcategoryEntrySetup, TreeEntrySelected)
+    self.categoryTree:AddTemplate("ZO_GuildHistorySubcategoryEntry", SubcategoryEntrySetup, TreeEntrySelected, EqualityFunc)
 
     --Build Tree
     for eventCategory = GUILD_HISTORY_EVENT_CATEGORY_ITERATION_BEGIN, GUILD_HISTORY_EVENT_CATEGORY_ITERATION_END do
@@ -151,6 +155,29 @@ function ZO_GuildHistory_Keyboard:OnShowing()
     self:AddKeybinds()
 end
 
+function ZO_GuildHistory_Keyboard:SelectNodeForEventCategory(eventCategory, subcategoryIndex, suppressAutoRequest)
+    local node = self.categoryTree:GetTreeNodeByData({ eventCategory = eventCategory, subcategoryIndex = subcategoryIndex or 1 })
+    if node then
+        local wasAutoRequestEnabled = self.autoRequestEnabled
+        self.autoRequestEnabled = self.autoRequestEnabled and not suppressAutoRequest
+
+        self.categoryTree:SelectNode(node)
+
+        self.autoRequestEnabled = wasAutoRequestEnabled
+    end
+end
+
+-- Helper function to allow switching to a guild without triggering an auto request
+function ZO_GuildHistory_Keyboard:SwapToGuildIndexWithoutAutoRequest(guildIndex)
+    local wasAutoRequestEnabled = self.autoRequestEnabled
+    self.autoRequestEnabled = false
+
+    GUILD_SELECTOR:SelectGuildByIndex(guildIndex)
+
+    self.autoRequestEnabled = wasAutoRequestEnabled
+end
+
+-- Called from the GUILD_SELECTOR that controls which guild is currently selected for all guild screens
 function ZO_GuildHistory_Keyboard:SetGuildId(guildId)
     if ZO_GuildHistory_Shared.SetGuildId(self, guildId) then
         self:UpdateKeybinds()

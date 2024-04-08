@@ -25,6 +25,8 @@ function ZO_GuildHistory_Shared:OnDeferredInitialize()
 
     self.entryDataPool = ZO_ObjectPool:New(ZO_EntryData, ZO_ObjectPool_DefaultResetObject)
     self.cachedEventIndicesByPage = {}
+    self.autoRequestEnabled = true
+
     self:InitializeControls()
     self:InitializeKeybindDescriptors()
 
@@ -149,11 +151,13 @@ function ZO_GuildHistory_Shared:OnCategoryUpdated(categoryData, flags)
             -- New events came in, so we'll retain our page and scroll and move everything down as needed
             self.refreshGroup:MarkDirty("ListData")
         elseif ZO_FlagHelpers.MaskHasFlag(flags, GUILD_HISTORY_CATEGORY_UPDATE_FLAG_RESPONSE_RECEIVED) then
-            local request = self:GetRequestForSelection()
-            if not request:IsComplete() and self:IsShowing() then
-                --We got a response to a manual request, but had no new events, so make another request
-                local QUEUE_IF_ON_COOLDOWN = true
-                local readyState = request:RequestMoreEvents(QUEUE_IF_ON_COOLDOWN)
+            if self.autoRequestEnabled then
+                local request = self:GetRequestForSelection()
+                if not request:IsComplete() and self:IsShowing() then
+                    --We got a response to a manual request, but had no new events, so make another request
+                    local QUEUE_IF_ON_COOLDOWN = true
+                    local readyState = request:RequestMoreEvents(QUEUE_IF_ON_COOLDOWN)
+                end
             end
             self.refreshGroup:MarkDirty("ListFilters")
         end
@@ -178,7 +182,7 @@ function ZO_GuildHistory_Shared:BuildMasterList()
 
         local request = self:GetRequestForSelection()
         --Make a request for more info if we dont have enough to fill the first page
-        if #self.masterList < ENTRIES_PER_PAGE and not request:IsComplete() then
+        if self.autoRequestEnabled and #self.masterList < ENTRIES_PER_PAGE and not request:IsComplete() then
             -- Need to make a request,
             -- which will come back into BuildMasterList when the response comes.
             local QUEUE_IF_ON_COOLDOWN = true
